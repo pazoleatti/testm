@@ -110,7 +110,6 @@ public class UploadDataRowsHandler extends
                         } catch (ServiceException e) {
                         }
                         result.setLock(false);
-                        logger.info(String.format(ReportType.CREATE_TASK, formDataService.getTaskName(reportType, action.getFormData().getId(), userInfo)));
                         result.setUuid(logEntryService.save(logger.getEntries()));
                         return result;
                     }
@@ -139,14 +138,14 @@ public class UploadDataRowsHandler extends
                 }
             }
             result.setSave(false);
-
+            LockData lockData;
             if (!action.isCancelTask() && formDataService.checkExistTask(action.getFormData().getId(), action.getFormData().isManual(), reportType, logger, userInfo)) {
                 result.setLockTask(true);
-            } else if (lockDataService.lock(keyTask,
+            } else if ((lockData = lockDataService.lock(keyTask,
                     userInfo.getUser().getId(),
                     formDataService.getFormDataFullName(action.getFormData().getId(), null, reportType),
                     LockData.State.IN_QUEUE.getText(),
-                    lockDataService.getLockTimeout(LockData.LockObjects.FORM_DATA)) == null) {
+                    lockDataService.getLockTimeout(LockData.LockObjects.FORM_DATA))) == null) {
                 try {
                     formDataService.interruptTask(action.getFormData().getId(), action.getFormData().isManual(), userInfo.getUser().getId(), reportType);
                     Map<String, Object> params = new HashMap<String, Object>();
@@ -155,7 +154,7 @@ public class UploadDataRowsHandler extends
                     params.put("uuid", action.getUuid());
                     params.put(AsyncTask.RequiredParams.USER_ID.name(), userInfo.getUser().getId());
                     params.put(AsyncTask.RequiredParams.LOCKED_OBJECT.name(), keyTask);
-                    LockData lockData = lockDataService.getLock(keyTask);
+                    lockData = lockDataService.getLock(keyTask);
                     params.put(AsyncTask.RequiredParams.LOCK_DATE.name(), lockData.getDateLock());
                     lockDataService.addUserWaitingForLock(keyTask, userInfo.getUser().getId());
                     BalancingVariants balancingVariant = asyncManager.executeAsync(reportType.getAsyncTaskTypeId(PropertyLoader.isProductionMode()), params);
@@ -170,7 +169,17 @@ public class UploadDataRowsHandler extends
                     throw new ActionException(e);
                 }
             } else {
-                throw new ActionException("Не удалось запустить расчет. Попробуйте выполнить операцию позже");
+                try {
+                    lockDataService.addUserWaitingForLock(keyTask, userInfo.getUser().getId());
+                    logger.info(String.format(LockData.LOCK_INFO_MSG,
+                            formDataService.getTaskName(reportType, action.getFormData().getId(), userInfo),
+                            sdf.format(lockData.getDateLock()),
+                            userService.getUser(lockData.getUserId()).getName()));
+                } catch (ServiceException e) {
+                }
+                result.setLock(false);
+                result.setUuid(logEntryService.save(logger.getEntries()));
+                return result;
             }
         } else {
             throw new ActionException("Форма не заблокирована текущим пользователем");

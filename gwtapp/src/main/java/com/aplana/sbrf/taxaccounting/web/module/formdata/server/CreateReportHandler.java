@@ -90,26 +90,6 @@ public class CreateReportHandler extends AbstractActionHandler<CreateReportActio
                         result.setRestartMsg(restartMsg);
                         return result;
                     }
-                } else if (lockDataTask != null) {
-                    try {
-                        Map<String, Object> params = new HashMap<String, Object>();
-                        params.put("formDataId", action.getFormDataId());
-                        params.put("isShowChecked", action.isShowChecked());
-                        params.put("manual", action.isManual());
-                        params.put("saved", action.isSaved());
-                        params.put(AsyncTask.RequiredParams.USER_ID.name(), userInfo.getUser().getId());
-                        params.put(AsyncTask.RequiredParams.LOCKED_OBJECT.name(), key);
-                        lockDataService.addUserWaitingForLock(key, userInfo.getUser().getId());
-                        logger.info(String.format(LockData.LOCK_INFO_MSG,
-                                String.format(reportType.getDescription(), action.isManual() ? "версия ручного ввода" : "автоматическая версия"),
-                                sdf.format(lockDataTask.getDateLock()),
-                                userService.getUser(lockDataTask.getUserId()).getName()));
-                    } catch (ServiceException e) {
-                    }
-                    result.setLock(false);
-                    logger.info(String.format(ReportType.CREATE_TASK, reportType.getDescription()), action.isManual() ? "версия ручного ввода" : "автоматическая версия");
-                    result.setUuid(logEntryService.save(logger.getEntries()));
-                    return result;
                 }
                 LockData lockData;
                 if ((lockData = lockDataService.lock(key, userInfo.getUser().getId(),
@@ -139,13 +119,17 @@ public class CreateReportHandler extends AbstractActionHandler<CreateReportActio
                         throw new ActionException(e);
                     }
                 } else {
-                    if (lockData.getUserId() != userInfo.getUser().getId()) {
-                        try {
-                            lockDataService.addUserWaitingForLock(key, userInfo.getUser().getId());
-                        } catch (ServiceException e) {
-                        }
+                    try {
+                        lockDataService.addUserWaitingForLock(key, userInfo.getUser().getId());
+                        logger.info(String.format(LockData.LOCK_INFO_MSG,
+                                String.format(reportType.getDescription(), action.isManual() ? "версия ручного ввода" : "автоматическая версия"),
+                                sdf.format(lockData.getDateLock()),
+                                userService.getUser(lockData.getUserId()).getName()));
+                    } catch (ServiceException e) {
                     }
-                    logger.info(String.format(ReportType.CREATE_TASK, formDataService.getTaskName(reportType, action.getFormDataId(), userInfo)), action.isManual() ? "версия ручного ввода" : "автоматическая версия");
+                    result.setLock(false);
+                    result.setUuid(logEntryService.save(logger.getEntries()));
+                    return result;
                 }
             } else {
                 formDataService.locked(action.getFormDataId(), reportType, lockType, logger);

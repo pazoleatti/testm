@@ -110,7 +110,6 @@ public class CheckFormDataHandler extends AbstractActionHandler<CheckFormDataAct
                     } catch (ServiceException e) {
                     }
                     result.setLock(false);
-                    logger.info(String.format(ReportType.CREATE_TASK, formDataService.getTaskName(reportType, action.getFormData().getId(), userInfo)));
                     result.setUuid(logEntryService.save(logger.getEntries()));
                     return result;
                 }
@@ -138,11 +137,11 @@ public class CheckFormDataHandler extends AbstractActionHandler<CheckFormDataAct
             }
             result.setSave(false);
 
-            if (lockDataService.lock(keyTask,
+            if ((lockData = lockDataService.lock(keyTask,
                     userInfo.getUser().getId(),
                     formDataService.getFormDataFullName(action.getFormData().getId(), null, reportType),
                     LockData.State.IN_QUEUE.getText(),
-                    lockDataService.getLockTimeout(LockData.LockObjects.FORM_DATA)) == null) {
+                    lockDataService.getLockTimeout(LockData.LockObjects.FORM_DATA))) == null) {
                 try {
                     Map<String, Object> params = new HashMap<String, Object>();
                     params.put("formDataId", action.getFormData().getId());
@@ -164,7 +163,17 @@ public class CheckFormDataHandler extends AbstractActionHandler<CheckFormDataAct
                     throw new ActionException(e);
                 }
             } else {
-                throw new ActionException("Не удалось запустить расчет. Попробуйте выполнить операцию позже");
+                try {
+                    lockDataService.addUserWaitingForLock(keyTask, userInfo.getUser().getId());
+                    logger.info(String.format(LockData.LOCK_INFO_MSG,
+                            formDataService.getTaskName(reportType, action.getFormData().getId(), userInfo),
+                            sdf.format(lockData.getDateLock()),
+                            userService.getUser(lockData.getUserId()).getName()));
+                } catch (ServiceException e) {
+                }
+                result.setLock(false);
+                result.setUuid(logEntryService.save(logger.getEntries()));
+                return result;
             }
         } else {
             throw new ActionException("Форма не заблокирована текущим пользователем");

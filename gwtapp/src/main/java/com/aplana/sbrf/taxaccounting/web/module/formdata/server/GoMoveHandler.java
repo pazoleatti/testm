@@ -103,16 +103,15 @@ public class GoMoveHandler extends AbstractActionHandler<GoMoveAction, GoMoveRes
                         } catch (ServiceException e) {
                         }
                         result.setLock(false);
-                        logger.info(String.format(ReportType.CREATE_TASK, formDataService.getTaskName(reportType, action.getFormDataId(), userInfo)));
                         result.setUuid(logEntryService.save(logger.getEntries()));
                         return result;
                     }
                     if (!action.isCancelTask() && formDataService.checkExistTask(action.getFormDataId(), false, reportType, logger, userInfo)) {
                         result.setLockTask(true);
-                    } else if (lockDataService.lock(keyTask, userInfo.getUser().getId(),
+                    } else if ((lockDataTask = lockDataService.lock(keyTask, userInfo.getUser().getId(),
                             formDataService.getFormDataFullName(action.getFormDataId(), action.getMove().isReasonToMoveShouldBeSpecified() ? String.format("Возврат налоговой формы в \"%s\"", action.getMove().getToState().getName()) : String.format("%s налоговой формы", action.getMove().getToState().getActionName()), reportType),
                             LockData.State.IN_QUEUE.getText(),
-                            lockDataService.getLockTimeout(LockData.LockObjects.FORM_DATA)) == null) {
+                            lockDataService.getLockTimeout(LockData.LockObjects.FORM_DATA))) == null) {
                         try {
                             formDataService.interruptTask(action.getFormDataId(), false, userInfo.getUser().getId(), reportType);
                             Map<String, Object> params = new HashMap<String, Object>();
@@ -136,7 +135,17 @@ public class GoMoveHandler extends AbstractActionHandler<GoMoveAction, GoMoveRes
                             throw new ActionException(e);
                         }
                     } else {
-                        throw new ActionException("Не удалось выполнить переход между этапами. Попробуйте выполнить операцию позже");
+                        try {
+                            lockDataService.addUserWaitingForLock(keyTask, userInfo.getUser().getId());
+                            logger.info(String.format(LockData.LOCK_INFO_MSG,
+                                    formDataService.getTaskName(reportType, action.getFormDataId(), userInfo),
+                                    sdf.format(lockDataTask.getDateLock()),
+                                    userService.getUser(lockDataTask.getUserId()).getName()));
+                        } catch (ServiceException e) {
+                        }
+                        result.setLock(false);
+                        result.setUuid(logEntryService.save(logger.getEntries()));
+                        return result;
                     }
                     break;
                 default:

@@ -87,24 +87,11 @@ public class CheckDeclarationDataHandler extends AbstractActionHandler<CheckDecl
                         result.setRestartMsg(restartMsg);
                         return result;
                     }
-                } else if (lockDataReportTask != null) {
-                    try {
-                        lockDataService.addUserWaitingForLock(key, userInfo.getUser().getId());
-                        logger.info(String.format(LockData.LOCK_INFO_MSG,
-                                String.format(ReportType.CHECK_DEC.getDescription(), action.getTaxType().getDeclarationShortName()),
-                                sdf.format(lockDataReportTask.getDateLock()),
-                                userService.getUser(lockDataReportTask.getUserId()).getName()));
-                    } catch (ServiceException e) {
-                    }
-                    result.setStatus(CreateAsyncTaskStatus.CREATE);
-                    logger.info(String.format(ReportType.CREATE_TASK, reportType.getDescription()), action.getTaxType().getDeclarationShortName());
-                    result.setUuid(logEntryService.save(logger.getEntries()));
-                    return result;
                 }
-                if (lockDataService.lock(key, userInfo.getUser().getId(),
+                if ((lockDataReportTask = lockDataService.lock(key, userInfo.getUser().getId(),
                         declarationDataService.getDeclarationFullName(action.getDeclarationId(), reportType),
                         LockData.State.IN_QUEUE.getText(),
-                        lockDataService.getLockTimeout(LockData.LockObjects.DECLARATION_DATA)) == null) {
+                        lockDataService.getLockTimeout(LockData.LockObjects.DECLARATION_DATA))) == null) {
                     try {
                         params.put("declarationDataId", action.getDeclarationId());
                         params.put(AsyncTask.RequiredParams.USER_ID.name(), userInfo.getUser().getId());
@@ -125,7 +112,17 @@ public class CheckDeclarationDataHandler extends AbstractActionHandler<CheckDecl
                         throw new ActionException(e);
                     }
                 } else {
-                    throw new ActionException("Не удалось запустить проверку. Попробуйте выполнить операцию позже");
+                    try {
+                        lockDataService.addUserWaitingForLock(key, userInfo.getUser().getId());
+                        logger.info(String.format(LockData.LOCK_INFO_MSG,
+                                String.format(ReportType.CHECK_DEC.getDescription(), action.getTaxType().getDeclarationShortName()),
+                                sdf.format(lockDataReportTask.getDateLock()),
+                                userService.getUser(lockDataReportTask.getUserId()).getName()));
+                    } catch (ServiceException e) {
+                    }
+                    result.setStatus(CreateAsyncTaskStatus.CREATE);
+                    result.setUuid(logEntryService.save(logger.getEntries()));
+                    return result;
                 }
             } else {
                 result.setStatus(CreateAsyncTaskStatus.NOT_EXIST_XML);
