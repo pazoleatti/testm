@@ -23,7 +23,7 @@ import java.util.*;
 @Transactional
 public class SourceServiceImpl implements SourceService {
 
-    private static final String CHECK_EXISTENCE_MSG = "Невозможно назначить источники / приемники: Форма \"%s\" не назначена подразделению %s";
+    private static final String CHECK_EXISTENCE_MSG = "Невозможно назначить источники / приемники: %s \"%s\" не назначена подразделению \"%s\"";
     private static final String FATAL_SAVE_MSG = "Назначение источников-приёмников не выполнено";
     private static final String FATAL_DELETE_MSG = "Удаление назначения источников-приёмников не выполнено";
     private static final String SOURCES_LIST_IS_EMPTY_MSG = "Все назначения были исключены в результате проверок. Продолжение операции невозможно.";
@@ -300,8 +300,9 @@ public class SourceServiceImpl implements SourceService {
                 if (sourceDao.checkDDTExistence(Arrays.asList(sourcePairs.get(0).getDestination())).isEmpty()) {
                     /** Если единственное назначение было удалено, то продолжать нет смысла */
                     logger.error(String.format(CHECK_EXISTENCE_MSG,
+                            "Декларация",
                             sourcePairs.get(0).getDestinationType(),
-                            sourceDepartmentName));
+                            destinationDepartmentName));
                     throw new ServiceLoggerException(FATAL_SAVE_MSG,
                             logEntryService.save(logger.getEntries()));
                 }
@@ -313,6 +314,7 @@ public class SourceServiceImpl implements SourceService {
                 if (sourceDao.checkDFTExistence(Arrays.asList(sourcePairs.get(0).getSource())).isEmpty()) {
                     /** Если единственное назначение было удалено, то продолжать нет смысла */
                     logger.error(String.format(CHECK_EXISTENCE_MSG,
+                            "Форма",
                             sourcePairs.get(0).getSourceKind() + ": " + sourcePairs.get(0).getSourceType(),
                             sourceDepartmentName));
                     throw new ServiceLoggerException(FATAL_SAVE_MSG,
@@ -326,7 +328,7 @@ public class SourceServiceImpl implements SourceService {
             rightPart = unionSourcePairs(sourcePairs);
         }
 
-        List<Long> notExisting;
+        final List<Long> notExisting;
         if (isDeclaration && mode == SourceMode.DESTINATIONS) {
             notExisting = (List<Long>) CollectionUtils.subtract(rightPart, sourceDao.checkDDTExistence(rightPart));
         } else {
@@ -343,9 +345,11 @@ public class SourceServiceImpl implements SourceService {
                 new MessageBuilder() {
                     @Override
                     public List<String> getMessage(SourcePair sourcePair) {
+                        boolean isSource = notExisting.contains(sourcePair.getSource());
                         return Arrays.asList(String.format(CHECK_EXISTENCE_MSG,
-                                sourcePair.getSourceKind() + ": " + sourcePair.getSourceType(),
-                                sourceDepartmentName));
+                                (!isSource && isDeclaration) ? "Декларация" : "Форма",
+                                isSource ? (sourcePair.getSourceKind() + ": " + sourcePair.getSourceType()) : (sourcePair.getDestinationKind() + ": " + sourcePair.getDestinationType()),
+                                isSource ? sourceDepartmentName : destinationDepartmentName));
                     }
                 });
     }
