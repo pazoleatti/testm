@@ -77,7 +77,6 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     private final static SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
 
     @Override
-    @Cacheable(value = "PermanentData", key = "'RefBook_'+#refBookId.toString()")
     public RefBook get(Long refBookId) {
         try {
             return getJdbcTemplate().queryForObject(

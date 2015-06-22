@@ -142,14 +142,17 @@ comment on column async_task_type.task_limit is 'Ограничение на в�
 alter table async_task_type add limit_kind varchar2(400);
 comment on column async_task_type.limit_kind is 'Вид ограничения';
 
-ALTER TABLE async_task_type ADD dev_mode NUMBER(1) DEFAULT 0 NOT NULL;
-ALTER TABLE async_task_type ADD CONSTRAINT async_task_type_chk_dev_mode CHECK (dev_mode in (0, 1));
-COMMENT ON COLUMN async_task_type.dev_mode IS 'Признак задачи для dev-мода';
+alter table async_task_type add dev_mode number(1) default 0 not null;
+alter table async_task_type add constraint async_task_type_chk_dev_mode check (dev_mode in (0, 1));
+comment on column async_task_type.dev_mode IS 'Признак задачи для dev-мода';
+
+--http://jira.aplana.com/browse/SBRFACCTAX-11812
+alter table async_task_type modify name varchar2(300);
 
 INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id, table_name, is_versioned) VALUES (401, 'Настройки асинхронных задач', 0, 0, 0, null, 'ASYNC_TASK_TYPE', 0);
 
 INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (4101, 401, '№', 'ID', 2, 1, null, null, 1, 0, 10, 1, 1, 1, null, 0, 18);
-INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (4102, 401, 'Название типа задачи', 'NAME', 1, 2, null, null, 1, null, 10, 1, 0, null, null, 0, 100);
+INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (4102, 401, 'Название типа задачи', 'NAME', 1, 2, null, null, 1, null, 10, 1, 0, null, null, 0, 300);
 INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (4103, 401, 'JNDI имя класса-обработчика', 'HANDLER_JNDI', 1, 3, null, null, 1, null, 10, 1, 0, null, null, 0, 500);
 INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (4104, 401, 'Ограничение на выполнение задачи в очереди быстрых задач', 'SHORT_QUEUE_LIMIT', 2, 4, null, null, 1, 0, 10, 1, 0, null, null, 0, 18);
 INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (4105, 401, 'Ограничение на выполнение задачи', 'TASK_LIMIT', 2, 5, null, null, 1, 0, 10, 1, 0, null, null, 0, 18);

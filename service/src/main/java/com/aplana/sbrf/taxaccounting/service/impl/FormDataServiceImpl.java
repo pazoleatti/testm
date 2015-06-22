@@ -687,12 +687,13 @@ public class FormDataServiceImpl implements FormDataService {
 	@Transactional
 	public void deleteFormData(Logger logger, TAUserInfo userInfo, long formDataId, boolean manual) {
         ReportType reportType = ReportType.DELETE_FD;
-        LockData lockData = lockService.getLock(generateTaskKey(formDataId, ReportType.EDIT_FD));
-        if (!manual && lockData != null) {
-            locked(formDataId, ReportType.DELETE_FD, new Pair<ReportType, LockData>(ReportType.EDIT_FD, lockData), logger);
+        LockData lockDataCheck = lockService.getLock(generateTaskKey(formDataId, ReportType.CHECK_FD));
+        Pair<ReportType, LockData> lockType = getLockTaskType(formDataId);
+        if (!manual && (lockDataCheck != null || lockType != null)) {
+            locked(formDataId, ReportType.DELETE_FD, lockType != null ? lockType : new Pair<ReportType, LockData>(ReportType.CHECK_FD, lockDataCheck), logger);
         } else if (manual) {
             // Форма не должна быть заблокирована для редактирования другим пользователем
-            checkLockedMe(lockData, userInfo.getUser());
+            checkLockedMe(lockService.getLock(generateTaskKey(formDataId, ReportType.EDIT_FD)), userInfo.getUser());
         }
 
         String keyTask = generateTaskKey(formDataId, reportType);
@@ -711,7 +712,6 @@ public class FormDataServiceImpl implements FormDataService {
                     formDataDao.delete(formDataId);
                     formDataDao.deleteFormDataNnn(formData.getFormTemplateId(), formDataId);
                     interruptTask(formDataId, false, userInfo.getUser().getId(), reportType);
-                    deleteReport(formDataId, null, userInfo.getUser().getId());
                     auditService.add(FormDataEvent.DELETE, userInfo, formData.getDepartmentId(), formData.getReportPeriodId(),
                             null, formData.getFormType().getName(), formData.getKind().getId(), "Форма удалена", null);
                 }
@@ -1792,7 +1792,7 @@ public class FormDataServiceImpl implements FormDataService {
                 msg = "";
                 break;
             case DELETE_FD:
-                msg = String.format("Выполнение операции \"%s\" невозможно, т.к. для текущего экземпляра налоговой формы запущена операция изменения данных", getTaskName(reportType, formDataId, userInfo));
+                msg = String.format("Выполнение операции \"%s\" невозможно, т.к. для текущего экземпляра налоговой формы выполняется операция, блокирующая ее удаление", getTaskName(reportType, formDataId, userInfo));
                 break;
         }
         throw new ServiceLoggerException(msg, logEntryService.save(logger.getEntries()));
@@ -1883,7 +1883,7 @@ public class FormDataServiceImpl implements FormDataService {
             case MOVE_FD:
                 return new ReportType[]{ReportType.CHECK_FD, ReportType.EXCEL, ReportType.CSV};
             case DELETE_FD:
-                return new ReportType[]{ReportType.MOVE_FD, ReportType.CHECK_FD, ReportType.CALCULATE_FD, ReportType.CONSOLIDATE_FD};// excel, csv прерывается при удалении отчета
+                return new ReportType[]{ReportType.EXCEL, ReportType.CSV};
             case CHECK_FD:
             default:
                 return null;
