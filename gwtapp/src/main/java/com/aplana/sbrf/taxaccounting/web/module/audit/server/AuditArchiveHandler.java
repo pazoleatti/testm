@@ -88,7 +88,7 @@ public class AuditArchiveHandler extends AbstractActionHandler<AuditArchiveActio
         params.put(AuditService.AsyncNames.LOG_FILTER.name(), action.getLogSystemFilter());
         params.put(AuditService.AsyncNames.LOG_COUNT.name(), recordsCount);
         if ((lockData = lockDataService.lock(key, userInfo.getUser().getId(),
-                String.format(LockData.DescriptionTemplate.LOG_SYSTEM_BACKUP.getText(), SDF.format(action.getLogSystemFilter().getToSearchDate())),
+                String.format(LockData.DescriptionTemplate.LOG_SYSTEM_BACKUP.getText(), SDF.format(action.getLogSystemFilter().getFromSearchDate()), SDF.format(action.getLogSystemFilter().getToSearchDate())),
                 LockData.State.IN_QUEUE.getText(),
                 lockDataService.getLockTimeout(LockData.LockObjects.LOG_SYSTEM_BACKUP))) == null) {
             try {

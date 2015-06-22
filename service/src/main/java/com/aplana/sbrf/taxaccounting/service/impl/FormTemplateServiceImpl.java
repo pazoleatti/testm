@@ -264,12 +264,15 @@ public class FormTemplateServiceImpl implements FormTemplateService {
     @Override
 	public boolean lock(int formTemplateId, TAUserInfo userInfo){
         FormTemplate formTemplate = get(formTemplateId);
+        Date endVersion = getFTEndDate(formTemplateId);
         LockData objectLock = lockDataService.lock(LockData.LockObjects.FORM_TEMPLATE.name() + "_" + formTemplateId,
                 userInfo.getUser().getId(),
                 String.format(
                         LockData.DescriptionTemplate.FORM_TEMPLATE.getText(),
-                        formTemplate.getName(),
-                        SIMPLE_DATE_FORMAT.format(formTemplate.getVersion())
+                        formTemplate.getType().getName(),
+                        formTemplate.getType().getTaxType().getName(),
+                        SIMPLE_DATE_FORMAT.format(formTemplate.getVersion()),
+                        endVersion != null ? SIMPLE_DATE_FORMAT.format(endVersion) : "-"
                 ),
                 lockDataService.getLockTimeout(LockData.LockObjects.FORM_TEMPLATE));
         return !(objectLock != null && objectLock.getUserId() != userInfo.getUser().getId());

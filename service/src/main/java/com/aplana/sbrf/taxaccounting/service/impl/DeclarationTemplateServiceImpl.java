@@ -259,11 +259,14 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
     @Override
 	public boolean lock(int declarationTemplateId, TAUserInfo userInfo){
         DeclarationTemplate declarationTemplate = get(declarationTemplateId);
+        Date endVersion = getDTEndDate(declarationTemplateId);
         LockData objectLock = lockDataService.lock(LockData.LockObjects.DECLARATION_TEMPLATE.name() + "_" + declarationTemplateId, userInfo.getUser().getId(),
                 String.format(
                         LockData.DescriptionTemplate.DECLARATION_TEMPLATE.getText(),
                         declarationTemplate.getName(),
-                        SDF_DD_MM_YYYY.format(declarationTemplate.getVersion())
+                        declarationTemplate.getType().getTaxType().getName(),
+                        SDF_DD_MM_YYYY.format(declarationTemplate.getVersion()),
+                        endVersion != null ? SDF_DD_MM_YYYY.format(endVersion) : "-"
                 ),
                 lockDataService.getLockTimeout(LockData.LockObjects.DECLARATION_TEMPLATE));
         return !(objectLock != null && objectLock.getUserId() != userInfo.getUser().getId());

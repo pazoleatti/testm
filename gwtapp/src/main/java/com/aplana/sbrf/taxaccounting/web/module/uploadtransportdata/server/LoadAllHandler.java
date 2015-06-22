@@ -34,9 +34,6 @@ import java.util.UUID;
 public class LoadAllHandler extends AbstractActionHandler<LoadAllAction, LoadAllResult> {
 
     @Autowired
-    private LoadFormDataService loadFormDataService;
-
-    @Autowired
     LoadRefBookDataService loadRefBookDataService;
 
     @Autowired

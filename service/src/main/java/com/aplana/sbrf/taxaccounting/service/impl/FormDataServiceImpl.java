@@ -1281,6 +1281,8 @@ public class FormDataServiceImpl implements FormDataService {
                 case CONSOLIDATE_FD:
                 case CALCULATE_FD:
                 case CHECK_FD:
+                case EDIT_FD:
+                case DELETE_FD:
                     name = String.format(LockData.DescriptionTemplate.FORM_DATA_TASK.getText(),
                             String.format(reportType.getDescription(), formData.getFormType().getTaxType().getTaxText()),
                             reportPeriod.getReportPeriod().getName() + " " + reportPeriod.getReportPeriod().getTaxPeriod().getYear(),
@@ -1345,10 +1347,10 @@ public class FormDataServiceImpl implements FormDataService {
 
     @Override
 	@Transactional
-	public void lock(long formDataId, TAUserInfo userInfo) {
+	public void lock(long formDataId, TAUserInfo userInfo) {// используется для редактирования и миграции
         checkLockAnotherUser(lockService.lock(generateTaskKey(formDataId, ReportType.EDIT_FD),
                 userInfo.getUser().getId(),
-                getFormDataFullName(formDataId, null, null),
+                getFormDataFullName(formDataId, null, ReportType.EDIT_FD), // FIXME для миграции не совсем верно
                 lockService.getLockTimeout(LockData.LockObjects.FORM_DATA)), null, userInfo.getUser());
 	}
 
