@@ -337,6 +337,8 @@ public interface FormDataService {
     FormData getPreviousFormDataCorrection(FormData formData, List<DepartmentReportPeriod> departmentReportPeriodList,
                                           DepartmentReportPeriod departmentReportPeriod);
 
+    List<String> generateReportKeys(ReportType reportType, long formDataId, Boolean manual);
+
     /**
      * Удаление отчетов и блокировок на задачи формирования отчетов связанных с НФ
      * @param formDataId идентификатор налоговой формы

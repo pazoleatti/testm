@@ -51,6 +51,7 @@ public class LogAreaPresenter extends
 
     protected final DispatchAsync dispatcher;
 
+    private boolean show;
     private String uuid;
 
     @Inject
@@ -98,7 +99,12 @@ public class LogAreaPresenter extends
 
     @Override
     public void hide() {
+        show = false;
         LogShowEvent.fire(this, false);
+    }
+
+    public String getUuid() {
+        return show ? uuid : null;
     }
 
     public void onRangeChange(final int start, int length) {
@@ -121,6 +127,7 @@ public class LogAreaPresenter extends
                     hide();
                     return;
                 }
+                show = true;
                 getView().getLogEntriesView().setLogEntries(start, logEntries.getTotalCount(), logEntries);
                 getView().setLogEntriesCount(result.getLogEntriesCount());
                 LogShowEvent.fire(LogAreaPresenter.this, true);
