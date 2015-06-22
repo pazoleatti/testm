@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationversionlist.server;
 
 import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
+import com.aplana.sbrf.taxaccounting.model.DeclarationType;
 import com.aplana.sbrf.taxaccounting.model.VersionedObjectStatus;
 import com.aplana.sbrf.taxaccounting.service.DeclarationTemplateService;
 import com.aplana.sbrf.taxaccounting.service.DeclarationTypeService;
@@ -41,7 +42,9 @@ public class GetDTVersionListHandler extends AbstractActionHandler<GetDTVersionL
     @Override
     public GetDTVersionListResult execute(GetDTVersionListAction action, ExecutionContext context) throws ActionException {
         GetDTVersionListResult result = new GetDTVersionListResult();
-        result.setDtTypeName(declarationTypeService.get(action.getDeclarationFormTypeId()).getName());
+        DeclarationType dType = declarationTypeService.get(action.getDeclarationFormTypeId());
+        result.setDtTypeName(dType.getName());
+        result.setTaxType(dType.getTaxType());
 
 
         List<DeclarationTemplate> declarationTemplateList = declarationTemplateService.getDecTemplateVersionsByStatus(action.getDeclarationFormTypeId());

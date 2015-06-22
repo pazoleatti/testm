@@ -11,6 +11,12 @@
             white-space: nowrap;
         }
 
+        .labelKind {
+            font-size: 14px !important;
+            color:  #636460;
+            margin-left: 10px;
+        }
+
         .titleText div {
             font-size: 14px !important;
         }
@@ -55,6 +61,13 @@
                         <g:Label ui:field="versionLabel"/>
                     </fm:Resizable>
                 </fm:resizable>
+                <fm:right>
+                    <fm:Right>
+                        <style:LeftBar childValign="middle" height="100%">
+                            <g:Label ui:field="versionKind" addStyleNames="{style.labelKind}"/>
+                        </style:LeftBar>
+                    </fm:Right>
+                </fm:right>
             </fm:HeaderContainer>
         </fm:header>
         <fm:body>

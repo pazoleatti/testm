@@ -94,6 +94,7 @@ public class DeclarationVersionListPresenter extends Presenter<DeclarationVersio
         DeclarationTemplateVersion getSelectedElement();
         void setLabelName(String labelName);
         void resetSelectedLine();
+        void setKindLabel(String kindLabel);
     }
 
     @Title("Версии макетов деклараций")
@@ -115,6 +116,7 @@ public class DeclarationVersionListPresenter extends Presenter<DeclarationVersio
                     public void onSuccess(GetDTVersionListResult result) {
                         getView().setDTVersionTable(result.getTemplateVersions());
                         getView().setLabelName(result.getDtTypeName());
+                        getView().setKindLabel(result.getTaxType().getName());
                     }
                 }, this)
         );

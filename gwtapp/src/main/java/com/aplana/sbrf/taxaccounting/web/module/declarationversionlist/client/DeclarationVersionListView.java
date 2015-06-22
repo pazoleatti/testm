@@ -48,6 +48,9 @@ public class DeclarationVersionListView extends ViewWithUiHandlers<DTVersionList
     @UiField
     LinkButton deleteVersion;
 
+    @UiField
+    Label versionKind;
+
     private ListDataProvider<DeclarationTemplateVersion> dataProvider = new ListDataProvider<DeclarationTemplateVersion>();
     private ColumnSortEvent.ListHandler<DeclarationTemplateVersion> dataSortHandler;
 
@@ -162,6 +165,11 @@ public class DeclarationVersionListView extends ViewWithUiHandlers<DTVersionList
     @Override
     public void resetSelectedLine() {
         selectionModel.clear();
+    }
+
+    @Override
+    public void setKindLabel(String kindLabel) {
+        versionKind.setText(kindLabel);
     }
 
     @UiHandler("createVersion")
