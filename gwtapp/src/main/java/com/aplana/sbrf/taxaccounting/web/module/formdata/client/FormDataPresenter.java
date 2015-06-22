@@ -13,6 +13,7 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogShowEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.shared.dispatch.TaActionException;
+import com.aplana.sbrf.taxaccounting.web.main.page.client.MainPagePresenter;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.client.event.SetFocus;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.client.search.FormSearchPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.client.signers.SignersPresenter;
@@ -23,6 +24,7 @@ import com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.FormDataList
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.shared.CreateManualFormData;
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.shared.CreateManualFormDataResult;
 import com.aplana.sbrf.taxaccounting.web.widget.history.client.HistoryPresenter;
+import com.aplana.sbrf.taxaccounting.web.widget.logarea.client.LogAreaPresenter;
 import com.aplana.sbrf.taxaccounting.web.widget.menu.client.ManualMenuPresenter;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
@@ -52,7 +54,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
     private static final DateTimeFormat DATE_TIME_FORMAT = DateTimeFormat.getFormat("dd.MM.yyyy");
 
     private final ManualMenuPresenter manualMenuPresenter;
-
+    private final LogAreaPresenter logAreaPresenter;
     private Date lastSendingTime;
 
     private static final int EXTEND_LOCKTIME_LIMIT_IN_MINUTES = 5;
@@ -74,9 +76,10 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
 	public FormDataPresenter(EventBus eventBus, MyView view, MyProxy proxy,
 			PlaceManager placeManager, DispatchAsync dispatcher,
 			SignersPresenter signersPresenter, DialogPresenter dialogPresenter, HistoryPresenter historyPresenter, FormSearchPresenter searchPresenter,
-            SourcesPresenter sourcesPresenter, ManualMenuPresenter manualMenuPresenter) {
+            SourcesPresenter sourcesPresenter, ManualMenuPresenter manualMenuPresenter, LogAreaPresenter logAreaPresenter) {
 		super(eventBus, view, proxy, placeManager, dispatcher, signersPresenter, dialogPresenter, historyPresenter, searchPresenter, sourcesPresenter);
 		this.manualMenuPresenter = manualMenuPresenter;
+        this.logAreaPresenter = logAreaPresenter;
         getView().setUiHandlers(this);
 		getView().assignDataProvider(getView().getPageSize());
         timer = new Timer() {
@@ -118,14 +121,13 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
 			action.setFormDataTemplateId(formData.getFormTemplateId());
             action.setCorrectionDiff(!absoluteView);
             action.setFree(free);
-            action.setInnerLogUuid(innerLogUuid);
+            action.setInnerLogUuid(logAreaPresenter.getUuid());
             dispatcher.execute(action, CallbackUtils
 					.defaultCallback(new AbstractCallback<GetRowsDataResult>() {
 						@Override
 						public void onSuccess(GetRowsDataResult result) {
                             if (result != null) {
                                 LogAddEvent.fire(FormDataPresenter.this, result.getUuid());
-                                innerLogUuid = null;
                             }
                             if (result == null || result.getDataRows().getTotalCount() == 0) {
                                 getView().setRowsData(start, 0, new ArrayList<DataRow<Cell>>());
@@ -427,7 +429,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
 				@Override
 				public void onSuccess(DataRowResult result) {
 					modifiedRows.clear();
-                    innerLogUuid = result.getUuid();
+                    LogAddEvent.fire(FormDataPresenter.this, result.getUuid());
 					getView().updateData();
 					getView().setSelectedRow(result.getCurrentRow(), true);
 				}
@@ -435,7 +437,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
 				@Override
 				public void onFailure(Throwable caught) {
                     if (caught instanceof TaActionException) {
-                        innerLogUuid = ((TaActionException) caught).getUuid();
+                        LogAddEvent.fire(FormDataPresenter.this, ((TaActionException) caught).getUuid());
                     }
                     modifiedRows.clear();
                     getView().updateData();
@@ -522,9 +524,8 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
         AbstractCallback<TaskFormDataResult> callback = new AbstractCallback<TaskFormDataResult>() {
             @Override
             public void onSuccess(TaskFormDataResult result) {
-                innerLogUuid = result.getUuid();
+                LogAddEvent.fire(FormDataPresenter.this, result.getUuid());
                 if (result.isLock()) {
-                    LogAddEvent.fire(FormDataPresenter.this, result.getUuid());
                     Dialog.confirmMessage(result.getRestartMsg(), new DialogHandler() {
                         @Override
                         public void yes() {
@@ -537,7 +538,6 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                     });
                 } else if (result.isSave()) {
                     modifiedRows.clear();
-                    LogAddEvent.fire(FormDataPresenter.this, result.getUuid());
                     Dialog.confirmMessage("Запуск операции приведет к сохранению изменений, сделанных в таблице налоговой формы. Продолжить?", new DialogHandler() {
                         @Override
                         public void yes() {
@@ -550,7 +550,6 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                     });
                 } else if (result.isLockTask()) {
                     modifiedRows.clear();
-                    LogAddEvent.fire(FormDataPresenter.this, result.getUuid());
                     Dialog.confirmMessage(LockData.RESTART_LINKED_TASKS_MSG, new DialogHandler() {
                         @Override
                         public void yes() {
@@ -574,7 +573,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
             @Override
             public void onFailure(Throwable caught) {
                 if (caught instanceof TaActionException) {
-                    innerLogUuid = ((TaActionException) caught).getUuid();
+                    LogAddEvent.fire(FormDataPresenter.this, ((TaActionException) caught).getUuid());
                 }
                 modifiedRows.clear();
                 getView().updateData();
@@ -689,7 +688,6 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
             @Override
             public void onSuccess(ConsolidateResult result) {
                 LogAddEvent.fire(FormDataPresenter.this, result.getUuid());
-                innerLogUuid = result.getUuid();
                 if (result.isLock()) {
                     Dialog.confirmMessage(result.getRestartMsg(), new DialogHandler() {
                         @Override
@@ -809,7 +807,6 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                                 }
                             });
                         } else {
-                            innerLogUuid = result.getUuid();
                             timerType = ReportType.MOVE_FD;
                             timer.run();
                         }
@@ -902,7 +899,6 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                                                         : "Редактирование налоговой формы",
                                                 formData.getFormType()
                                                         .getName());
-                                innerLogUuid = result.getUuid();
 
                                 getView().updatePageSize(result.getFormData().getFormType().getTaxType());
                                 getView().showConsolidation(
@@ -962,7 +958,6 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
             @Override
             public void onSuccess(UploadFormDataResult result) {
                 LogAddEvent.fire(FormDataPresenter.this, result.getUuid());
-                innerLogUuid = result.getUuid();
                 if (result.isLock()) {
                     Dialog.confirmMessage(LockData.RESTART_LINKED_TASKS_MSG, new DialogHandler() {
                         @Override
@@ -999,7 +994,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
             @Override
             public void onFailure(Throwable caught) {
                 if (caught instanceof TaActionException) {
-                    innerLogUuid = ((TaActionException) caught).getUuid();
+                    LogAddEvent.fire(FormDataPresenter.this, ((TaActionException) caught).getUuid());
                 }
                 modifiedRows.clear();
                 getView().updateData();
@@ -1047,7 +1042,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                                         // задача завершена, обновляем таблицу с данными
                                         switch (oldType) {
                                             case MOVE_FD:
-                                                revealFormData(true, formData.isManual(), !absoluteView, null);
+                                                revealFormData(true, formData.isManual(), !absoluteView, logAreaPresenter.getUuid());
                                                 break;
                                             default:
                                                 getView().updateData();
@@ -1058,7 +1053,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                                         isUpdate = true;
                                         switch (oldType) {
                                             case MOVE_FD:
-                                                revealFormData(true, formData.isManual(), !absoluteView, null);
+                                                revealFormData(true, formData.isManual(), !absoluteView, logAreaPresenter.getUuid());
                                                 break;
                                             default:
                                                 getView().updateData();

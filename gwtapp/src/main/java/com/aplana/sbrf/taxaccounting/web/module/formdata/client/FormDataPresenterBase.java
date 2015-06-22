@@ -167,9 +167,6 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
     // Признак отображения вида для форм в корректирующих периодах, true - обычный режим, false - режим отображения изенений
     protected boolean absoluteView = true;
 
-    /** Идентификатор сообщений в лог. Используется в случаях, когда не нужна перезагрузка страницы */
-    protected String innerLogUuid;
-
 	protected Set<DataRow<Cell>> modifiedRows = new HashSet<DataRow<Cell>>();
 
 	public FormDataPresenterBase(EventBus eventBus,
