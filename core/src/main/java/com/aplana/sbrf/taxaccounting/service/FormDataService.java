@@ -279,8 +279,9 @@ public interface FormDataService {
      *  @param formData экземпляр НФ, для которой необходимо обновить
      * @param logger   логгер для регистрации ошибок
      * @param save
+     * @param useZero признак того, что при пересчете начать с 0
      */
-    void updatePreviousRowNumber(FormData formData, Logger logger, TAUserInfo user, boolean isSave);
+    void updatePreviousRowNumber(FormData formData, Logger logger, TAUserInfo user, boolean isSave, boolean useZero);
 
     /**
      * Обновить Номер последней строки предыдущей НФ
@@ -288,8 +289,9 @@ public interface FormDataService {
      * @param formTemplate макет НФ
      * @param logger       логгер для регистрации ошибок
      * @param save
+     * @param useZero признак того, что при пересчете начать с 0
      */
-    void updatePreviousRowNumber(FormData formData, FormTemplate formTemplate, Logger logger, TAUserInfo user, boolean isSave);
+    void updatePreviousRowNumber(FormData formData, FormTemplate formTemplate, Logger logger, TAUserInfo user, boolean isSave, boolean useZero);
 
     /**
      * Получить налоговые формы которые имеют признак ручного ввода
