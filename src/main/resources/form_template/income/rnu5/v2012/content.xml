@@ -1,21 +1,22 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <formTemplateContent>
     <fixedRows>false</fixedRows>
-    <name>(РНУ-5) Простой регистр налогового учёта «расходы»</name>
-    <fullName>(РНУ-5) Простой регистр налогового учёта «расходы»</fullName>
-    <code>РНУ-5</code>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+    <name>(РНУ-5) Простой регистр налогового учета &quot;расходы&quot;</name>
+    <fullName>(РНУ-5) Простой регистр налогового учета &quot;расходы&quot;</fullName>
+    <header>852-5</header>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="autoNumerationColumn">
         <alias>rowNumber</alias>
         <checking>false</checking>
+        <columnType>AUTO</columnType>
         <name>№ пп</name>
         <order>1</order>
         <width>5</width>
-        <maxLength>15</maxLength>
-        <precision>0</precision>
+        <numerationType>CROSS</numerationType>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>fix</alias>
         <checking>false</checking>
+        <columnType>STRING</columnType>
         <name>1</name>
         <order>2</order>
         <width>0</width>
@@ -25,6 +26,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="referenceColumn">
         <alias>code</alias>
         <checking>false</checking>
+        <columnType>REFERENCE</columnType>
         <name>Код налогового учёта</name>
         <order>3</order>
         <width>10</width>
@@ -34,16 +36,19 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
         <alias>number</alias>
         <checking>false</checking>
+        <columnType>REFBOOK</columnType>
         <name>Балансовый счёт. Номер</name>
         <order>4</order>
         <width>10</width>
         <hierarchical>false</hierarchical>
         <nameAttributeId>360</nameAttributeId>
         <refBookAttributeId>360</refBookAttributeId>
+        <searchEnabled>true</searchEnabled>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="referenceColumn">
         <alias>name</alias>
         <checking>false</checking>
+        <columnType>REFERENCE</columnType>
         <name>Балансовый счёт. Наименование</name>
         <order>5</order>
         <width>20</width>
@@ -53,6 +58,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>sum</alias>
         <checking>false</checking>
+        <columnType>NUMBER</columnType>
         <name>Сумма расхода за отчётный квартал</name>
         <order>6</order>
         <width>15</width>
@@ -74,16 +80,9 @@
         <italic>false</italic>
     </styles>
     <styles>
-        <alias>Корректировка-добавлено</alias>
-        <backColor>PALE_GREEN</backColor>
-        <bold>false</bold>
-        <fontColor>BLACK</fontColor>
-        <italic>false</italic>
-    </styles>
-    <styles>
-        <alias>Корректировка-удалено</alias>
-        <backColor>LIGHT_CORAL</backColor>
-        <bold>false</bold>
+        <alias>Контрольные суммы</alias>
+        <backColor>LIGHT_BROWN</backColor>
+        <bold>true</bold>
         <fontColor>BLACK</fontColor>
         <italic>false</italic>
     </styles>
@@ -95,9 +94,16 @@
         <italic>false</italic>
     </styles>
     <styles>
-        <alias>Контрольные суммы</alias>
-        <backColor>LIGHT_BROWN</backColor>
-        <bold>true</bold>
+        <alias>Корректировка-добавлено</alias>
+        <backColor>PALE_GREEN</backColor>
+        <bold>false</bold>
+        <fontColor>BLACK</fontColor>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Корректировка-удалено</alias>
+        <backColor>LIGHT_CORAL</backColor>
+        <bold>false</bold>
         <fontColor>BLACK</fontColor>
         <italic>false</italic>
     </styles>

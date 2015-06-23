@@ -806,8 +806,7 @@ public class FormDataServiceImpl implements FormDataService {
     private void checkConsolidateFromSources(FormData formData, Logger logger){
         //Проверка на неактуальные консолидированные данные
         if (sourceService.isFDConsolidationTopical(formData.getId())){
-            logger.error(CONSOLIDATION_NOT_TOPICAL);
-            throw new ServiceLoggerException("", logEntryService.save(logger.getEntries()));
+            logger.warn(CONSOLIDATION_NOT_TOPICAL);
         }
         //Проверка выполнена ли консолидация из всех принятых источников текущего экземпляра
         ReportPeriod reportPeriod = reportPeriodService.getReportPeriod(formData.getReportPeriodId());

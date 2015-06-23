@@ -13,7 +13,6 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogShowEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.shared.dispatch.TaActionException;
-import com.aplana.sbrf.taxaccounting.web.main.page.client.MainPagePresenter;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.client.event.SetFocus;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.client.search.FormSearchPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.client.signers.SignersPresenter;
@@ -1004,8 +1003,41 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
 
     @Override
     public void onOpenSearchDialog() {
-        formSearchPresenter.open();
-        addToPopupSlot(formSearchPresenter);
+        LogCleanEvent.fire(FormDataPresenter.this);
+        if (!modifiedRows.isEmpty()) {
+            Dialog.confirmMessage("Запуск операции приведет к сохранению изменений, сделанных в таблице налоговой формы. Продолжить?", new DialogHandler() {
+                @Override
+                public void yes() {
+                    PreSearchAction preSearchAction = new PreSearchAction();
+                    preSearchAction.setFormData(formData);
+                    preSearchAction.setModifiedRows(new ArrayList<DataRow<Cell>>(modifiedRows));
+                    dispatcher.execute(preSearchAction, CallbackUtils.defaultCallback(new AbstractCallback<DataRowResult>() {
+                        @Override
+                        public void onSuccess(DataRowResult result) {
+                            modifiedRows.clear();
+                            LogAddEvent.fire(FormDataPresenter.this, result.getUuid());
+                            getView().updateData();
+                            getView().setSelectedRow(result.getCurrentRow(), true);
+                            formSearchPresenter.open();
+                            addToPopupSlot(formSearchPresenter);
+                        }
+
+                        @Override
+                        public void onFailure(Throwable caught) {
+                            if (caught instanceof TaActionException) {
+                                LogAddEvent.fire(FormDataPresenter.this, ((TaActionException) caught).getUuid());
+                            }
+                            modifiedRows.clear();
+                            getView().updateData();
+                        }
+
+                    }, FormDataPresenter.this));
+                }
+            });
+        } else {
+            formSearchPresenter.open();
+            addToPopupSlot(formSearchPresenter);
+        }
     }
 
     @Override
