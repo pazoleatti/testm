@@ -112,43 +112,53 @@ public class GetFormDataHandler extends AbstractActionHandler<GetFormDataAction,
 		GetFormDataResult result = new GetFormDataResult();
 		Logger logger = new Logger();
 
-        if (!action.isReadOnly()) {
-            FormData formData = formDataService.getFormData(userInfo, action.getFormDataId(), action.isManual(), logger);
-            dataRowService.createTemporary(formData);
-        }
-
-		fillLockData(action, userInfo, result);
-		fillFormAndTemplateData(action, userInfo, logger, result);
-		fillFormDataAccessParams(action, userInfo, result);
-
-        FormData formData = result.getFormData();
-        FormTemplate formTemplate = formTemplateService.getFullFormTemplate(formData.getFormTemplateId());
-        //Проверка статуса макета НФ при открытиии налоговой формы.
-        if (formTemplate.getStatus() == VersionedObjectStatus.DRAFT) {
-            logger.error("Форма выведена из действия!");
-        }
-
-        // Форма открывается для чтения если так и запросили или нет прав или период закрыт
-        result.setReadOnly(action.isReadOnly() || !result.getFormDataAccessParams().isCanEdit()
-                || !result.getDepartmentReportPeriod().isActive());
-
-        if (result.isReadOnly() != action.isReadOnly()) {
-            // Запросили на редактирование, а вернули на чтение
-            if (result.getLockedByUser() != null && !result.getLockedByUser().isEmpty())                         {
-                throw new ActionException("Форма заблокирована и не может быть изменена. Попробуйте выполнить операцию позже.");
+        try {
+            if (!action.isReadOnly()) {
+                FormData formData = formDataService.getFormData(userInfo, action.getFormDataId(), action.isManual(), logger);
+                dataRowService.createTemporary(formData);
             }
-            String msg = result.getFormDataAccessParams().isCanEdit() ? CLOSED_PERIOD_MESSAGE : RESTRICT_EDIT_MESSAGE;
-            throw new ActionException("Нельзя открыть налоговую форму в режиме редактирования. " + msg);
-        }
 
-        if (action.getUuid() != null) {
-            result.setUuid(logEntryService.update(logger.getEntries(), action.getUuid()));
-        } else {
-            result.setUuid(logEntryService.save(logger.getEntries()));
-        }
+            fillLockData(action, userInfo, result);
+            fillFormAndTemplateData(action, userInfo, logger, result);
+            fillFormDataAccessParams(action, userInfo, result);
 
-        result.getFormData().initFormTemplateParams(formTemplate);
-		return result;
+            FormData formData = result.getFormData();
+            FormTemplate formTemplate = formTemplateService.getFullFormTemplate(formData.getFormTemplateId());
+            //Проверка статуса макета НФ при открытиии налоговой формы.
+            if (formTemplate.getStatus() == VersionedObjectStatus.DRAFT) {
+                logger.error("Форма выведена из действия!");
+            }
+
+            // Форма открывается для чтения если так и запросили или нет прав или период закрыт
+            result.setReadOnly(action.isReadOnly() || !result.getFormDataAccessParams().isCanEdit()
+                    || !result.getDepartmentReportPeriod().isActive());
+
+            if (result.isReadOnly() != action.isReadOnly()) {
+                // Запросили на редактирование, а вернули на чтение
+                if (result.getLockedByUser() != null && !result.getLockedByUser().isEmpty()) {
+                    throw new ActionException("Форма заблокирована и не может быть изменена. Попробуйте выполнить операцию позже.");
+                }
+                String msg = result.getFormDataAccessParams().isCanEdit() ? CLOSED_PERIOD_MESSAGE : RESTRICT_EDIT_MESSAGE;
+                throw new ActionException("Нельзя открыть налоговую форму в режиме редактирования. " + msg);
+            }
+
+            if (action.getUuid() != null) {
+                result.setUuid(logEntryService.update(logger.getEntries(), action.getUuid()));
+            } else {
+                result.setUuid(logEntryService.save(logger.getEntries()));
+            }
+
+            result.getFormData().initFormTemplateParams(formTemplate);
+            return result;
+        } catch (Exception e) {
+            if (!action.isReadOnly()) {
+                //
+                formDataService.unlock(action.getFormDataId(), userInfo);
+            }
+            if (e instanceof ActionException)
+                throw (ActionException)e;
+            throw new ActionException(e);
+        }
 	}
 
     /**
