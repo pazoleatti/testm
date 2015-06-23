@@ -14,6 +14,7 @@ public class ConstTransportHeaderBuilder extends AbstractHeaderOrFooterBuilder i
 
     boolean needCheckedRow = true;
 
+    private CheckBoxHeader checkBoxHeader = new CheckBoxHeader();
 
     @Override
     public boolean isNeedCheckedRow() {
@@ -28,12 +29,9 @@ public class ConstTransportHeaderBuilder extends AbstractHeaderOrFooterBuilder i
     @Override
     protected boolean buildHeaderOrFooterImpl() {
 
-
         TableRowBuilder tr = startRow();
         if (needCheckedRow) {
-            CheckBoxHeader cbh = new CheckBoxHeader();
-
-            buildHeader(tr, cbh, 0, 2, true);
+            buildHeader(tr, checkBoxHeader, 0, 2, true);
         }
 
         buildHeader(tr, new TextHeader("Параметры декларации"), 2, 0, true);
@@ -100,5 +98,10 @@ public class ConstTransportHeaderBuilder extends AbstractHeaderOrFooterBuilder i
         renderHeader(th, context, header);
 
         th.endTH();
+    }
+
+    @Override
+    public CheckBoxHeader getCheckBoxHeader() {
+        return checkBoxHeader;
     }
 }

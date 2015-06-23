@@ -729,7 +729,7 @@ public class FormDataServiceImpl implements FormDataService {
      * @param workflowMove переход
      */
     @Override
-    public void doMove(long formDataId, boolean manual, TAUserInfo userInfo, WorkflowMove workflowMove, String note, Logger logger, boolean isAsync) {
+    public void doMove(long formDataId, boolean manual, TAUserInfo userInfo, WorkflowMove workflowMove, String note, Logger logger, boolean isAsync, LockStateLogger stateLogger) {
         formDataAccessService.checkDestinations(formDataId);
         List<WorkflowMove> availableMoves = formDataAccessService.getAvailableMoves(userInfo, formDataId);
         if (!availableMoves.contains(workflowMove)) {
@@ -746,9 +746,10 @@ public class FormDataServiceImpl implements FormDataService {
             case PREPARED_TO_APPROVED:
                 lockForm(logger, formData);
                 //Проверяем что записи справочников, на которые есть ссылки в нф все еще существуют в периоде формы
+                stateLogger.updateState("Проверка ссылок на справочники");
                 checkReferenceValues(logger, formData, false);
                 //Делаем переход
-                moveProcess(formData, userInfo, workflowMove, note, logger, isAsync);
+                moveProcess(formData, userInfo, workflowMove, note, logger, isAsync, stateLogger);
                 break;
             case CREATED_TO_PREPARED:
             case APPROVED_TO_ACCEPTED:
@@ -756,6 +757,7 @@ public class FormDataServiceImpl implements FormDataService {
             case CREATED_TO_ACCEPTED:
                 lockForm(logger, formData);
                 //Проверяем что записи справочников, на которые есть ссылки в нф все еще существуют в периоде формы
+                stateLogger.updateState("Проверка ссылок на справочники");
                 checkReferenceValues(logger, formData, false);
                 checkConsolidateFromSources(formData, logger);
                 if (WorkflowState.ACCEPTED.equals(workflowMove.getToState())) {
@@ -769,18 +771,18 @@ public class FormDataServiceImpl implements FormDataService {
                     logger.info("Выполнена сортировка строк налоговой формы.");
                 }
                 //Делаем переход
-                moveProcess(formData, userInfo, workflowMove, note, logger, isAsync);
+                moveProcess(formData, userInfo, workflowMove, note, logger, isAsync, stateLogger);
                 break;
             case APPROVED_TO_CREATED:
             case ACCEPTED_TO_APPROVED:
             case ACCEPTED_TO_PREPARED:
             case ACCEPTED_TO_CREATED:
                 sourceService.updateFDDDConsolidation(formDataId);
-                moveProcess(formData, userInfo, workflowMove, note, logger, isAsync);
+                moveProcess(formData, userInfo, workflowMove, note, logger, isAsync, stateLogger);
                 break;
             default:
                 //Делаем переход
-                moveProcess(formData, userInfo, workflowMove, note, logger, isAsync);
+                moveProcess(formData, userInfo, workflowMove, note, logger, isAsync, stateLogger);
         }
     }
 
@@ -940,7 +942,8 @@ public class FormDataServiceImpl implements FormDataService {
         }
     }
 
-    private void moveProcess(FormData formData, TAUserInfo userInfo, WorkflowMove workflowMove, String note, Logger logger, boolean isAsync) {
+    private void moveProcess(FormData formData, TAUserInfo userInfo, WorkflowMove workflowMove, String note, Logger logger, boolean isAsync, LockStateLogger stateLogger) {
+        stateLogger.updateState("Проверка данных налоговой формы");
         formDataScriptingService.executeScript(userInfo, formData, workflowMove.getEvent(), logger, null);
 
         if (WorkflowMove.CREATED_TO_ACCEPTED.equals(workflowMove) ||
@@ -948,6 +951,7 @@ public class FormDataServiceImpl implements FormDataService {
                 WorkflowMove.CREATED_TO_PREPARED.equals(workflowMove) ||
                 WorkflowMove.PREPARED_TO_APPROVED.equals(workflowMove) ||
                 WorkflowMove.PREPARED_TO_ACCEPTED.equals(workflowMove)) {
+            stateLogger.updateState("Проверка заполнения параметров печатной формы");
             checkPerformer(logger, formData);
         }
 
@@ -967,6 +971,7 @@ public class FormDataServiceImpl implements FormDataService {
             }
         }
 
+        stateLogger.updateState("Изменение состояния формы");
         eventHandlerLauncher.process(userInfo, formData, workflowMove.getEvent(), logger, null);
 
         if (workflowMove.getAfterEvent() != null) {
@@ -986,12 +991,14 @@ public class FormDataServiceImpl implements FormDataService {
             logger.info("Форма \"" + formData.getFormType().getName() + "\" переведена в статус \"" + workflowMove.getToState().getName() + "\"");
 
         //Считаем что при наличие версии ручного ввода движение о жц невозможно
+        stateLogger.updateState("Удаление отчетов формы");
         deleteReport(formData.getId(), null, userInfo.getUser().getId());
 
         logBusinessService.add(formData.getId(), null, userInfo, workflowMove.getEvent(), note);
         auditService.add(workflowMove.getEvent(), userInfo, formData.getDepartmentId(), formData.getReportPeriodId(),
                 null, formData.getFormType().getName(), formData.getKind().getId(), workflowMove.getEvent().getTitle(), null, formData.getFormType().getId());
 
+        stateLogger.updateState("Обновление сквозной нумерации");
         updatePreviousRowNumberAttr(formData, workflowMove, logger, userInfo);
     }
 

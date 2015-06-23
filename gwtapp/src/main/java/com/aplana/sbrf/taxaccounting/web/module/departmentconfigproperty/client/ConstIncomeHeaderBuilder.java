@@ -14,6 +14,7 @@ public class ConstIncomeHeaderBuilder extends AbstractHeaderOrFooterBuilder impl
 
     boolean needCheckedRow = true;
 
+    private CheckBoxHeader checkBoxHeader = new CheckBoxHeader();
 
     @Override
     public boolean isNeedCheckedRow() {
@@ -28,12 +29,9 @@ public class ConstIncomeHeaderBuilder extends AbstractHeaderOrFooterBuilder impl
     @Override
     protected boolean buildHeaderOrFooterImpl() {
 
-
         TableRowBuilder tr = startRow();
         if (needCheckedRow) {
-            CheckBoxHeader cbh = new CheckBoxHeader();
-
-            buildHeader(tr, cbh, 0, 2, true);
+            buildHeader(tr, checkBoxHeader, 0, 2, true);
         }
 
         buildHeader(tr, new TextHeader("Параметры декларации"), 2, 0, true);
@@ -110,5 +108,10 @@ public class ConstIncomeHeaderBuilder extends AbstractHeaderOrFooterBuilder impl
         renderHeader(th, context, header);
 
         th.endTH();
+    }
+
+    @Override
+    public CheckBoxHeader getCheckBoxHeader() {
+        return checkBoxHeader;
     }
 }

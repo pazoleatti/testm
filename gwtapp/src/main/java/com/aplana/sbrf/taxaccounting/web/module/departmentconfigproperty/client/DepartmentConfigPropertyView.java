@@ -5,7 +5,6 @@ import com.aplana.gwt.client.TextBox;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
-import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.web.module.departmentconfigproperty.shared.TableCell;
 import com.aplana.sbrf.taxaccounting.web.widget.datarow.DataRowColumn;
 import com.aplana.sbrf.taxaccounting.web.widget.datarow.DataRowColumnFactory;
@@ -62,7 +61,7 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
 
     }
 
-    private TABLE_HEADER[]  TABLE_HEADER_PROPERTY = new TABLE_HEADER[] {
+    private TABLE_HEADER[] TABLE_HEADER_PROPERTY = new TABLE_HEADER[]{
             new TABLE_HEADER("TAX_ORGAN_CODE"),
             new TABLE_HEADER("KPP"),
             new TABLE_HEADER("TAX_PLACE_TYPE_CODE"),
@@ -80,7 +79,7 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
             new TABLE_HEADER("APPROVE_ORG_NAME")
     };
 
-    private TABLE_HEADER[]  TABLE_HEADER_TRANSPORT = new TABLE_HEADER[] {
+    private TABLE_HEADER[] TABLE_HEADER_TRANSPORT = new TABLE_HEADER[]{
             new TABLE_HEADER("TAX_ORGAN_CODE"),
             new TABLE_HEADER("KPP"),
             new TABLE_HEADER("TAX_PLACE_TYPE_CODE"),
@@ -99,7 +98,7 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
             new TABLE_HEADER("APPROVE_ORG_NAME")
     };
 
-    private TABLE_HEADER[]  TABLE_HEADER_INCOME = new TABLE_HEADER[] {
+    private TABLE_HEADER[] TABLE_HEADER_INCOME = new TABLE_HEADER[]{
             new TABLE_HEADER("TAX_ORGAN_CODE"),
             new TABLE_HEADER("KPP"),
             new TABLE_HEADER("TAX_PLACE_TYPE_CODE"),
@@ -210,21 +209,21 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
     @UiConstructor
     public DepartmentConfigPropertyView(final Binder uiBinder) {
         initWidget(uiBinder.createAndBindUi(this));
-        ValueChangeHandler<String> valueChangeHandler =  new ValueChangeHandler<String>() {
+        ValueChangeHandler<String> valueChangeHandler = new ValueChangeHandler<String>() {
             @Override
             public void onValueChange(ValueChangeEvent<String> event) {
                 isFieldsModified = true;
             }
         };
 
-        ValueChangeHandler<Double> valueChangeHandlerDouble =  new ValueChangeHandler<Double>() {
+        ValueChangeHandler<Double> valueChangeHandlerDouble = new ValueChangeHandler<Double>() {
             @Override
             public void onValueChange(ValueChangeEvent<Double> event) {
                 isFieldsModified = true;
             }
         };
 
-        ValueChangeHandler<Long> valueChangeHandlerLong =  new ValueChangeHandler<Long>() {
+        ValueChangeHandler<Long> valueChangeHandlerLong = new ValueChangeHandler<Long>() {
             @Override
             public void onValueChange(ValueChangeEvent<Long> event) {
                 isFieldsModified = true;
@@ -301,6 +300,23 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
         }
         table.setSelectionModel(selectionModel);
 
+        if (table.getHeaderBuilder() instanceof TableWithCheckedColumn) {
+            ((TableWithCheckedColumn) table.getHeaderBuilder()).getCheckBoxHeader().addValueChangeHandler(new ValueChangeHandler<Boolean>() {
+                @Override
+                public void onValueChange(ValueChangeEvent<Boolean> event) {
+                    if (event.getValue()) {
+                        for (DataRow<Cell> object : table.getVisibleItems()) {
+                            selectionModel.setSelected(object, true);
+                            checkedRows.add(object);
+                        }
+                    } else {
+                        selectionModel.clear();
+                        checkedRows.clear();
+                    }
+                }
+            });
+        }
+
         model = new ListDataProvider<DataRow<Cell>>();
         model.addDataDisplay(table);
     }
@@ -316,7 +332,7 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
     public TABLE_HEADER[] getCurrentTableHeaders() {
         if (taxType == TaxType.PROPERTY) {
             return TABLE_HEADER_PROPERTY;
-        } else if(taxType == TaxType.TRANSPORT) {
+        } else if (taxType == TaxType.TRANSPORT) {
             return TABLE_HEADER_TRANSPORT;
         } else if (taxType == TaxType.INCOME) {
             return TABLE_HEADER_INCOME;
@@ -346,6 +362,7 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
                 } else {
                     checkedRows.remove(object);
                 }
+                updateCheckBoxHeader(checkedRows.size() == table.getRowCount());
             }
         });
 
@@ -496,8 +513,8 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
         } else if (taxType == TaxType.INCOME) {
             Number value = itemList.get("TAX_RATE").getNumberValue();
             taxRate.setValue(itemList.get("TAX_RATE").getNumberValue() == null
-                                    ? null
-                                    : itemList.get("TAX_RATE").getNumberValue().doubleValue());
+                    ? null
+                    : itemList.get("TAX_RATE").getNumberValue().doubleValue());
         }
     }
 
@@ -537,8 +554,15 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
     @UiHandler("addLink")
     public void onAddRow(ClickEvent event) {
         model.getList().add(createDataRow());
-        table.redraw();
+        updateCheckBoxHeader(false);
         setIsFormModified(true);
+    }
+
+    private void updateCheckBoxHeader(boolean value) {
+        if (table.getHeaderBuilder() instanceof TableWithCheckedColumn) {
+            ((TableWithCheckedColumn) table.getHeaderBuilder()).getCheckBoxHeader().setValue(value);
+        }
+        table.redraw();
     }
 
     private DataRow<Cell> createDataRow() {
@@ -660,7 +684,7 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
             } else {
                 table.insertColumn(0, checkColumn);
             }
-            ((TableWithCheckedColumn)table.getHeaderBuilder()).setNeedCheckedRow(isEditable);
+            ((TableWithCheckedColumn) table.getHeaderBuilder()).setNeedCheckedRow(isEditable);
             table.getHeaderBuilder().buildHeader();
         }
         table.redraw();
@@ -683,6 +707,7 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
             getUiHandlers().onSave();
         }
     }
+
     @UiHandler("findButton")
     public void onFind(ClickEvent event) {
         if (getUiHandlers() != null) {
@@ -790,6 +815,7 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
 
     /**
      * Вручную выставляем многоточние в конце, если текст занимает больше 2х строк
+     *
      * @param enabled
      */
     private void ellipsizeDepartmentPickerLabel(boolean enabled) {
@@ -797,7 +823,7 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
             String text = departmentPicker.getText();
             Element el = departmentPicker.getLabel().getElement();
             el.setInnerText(text);
-            for(;el.getScrollHeight() > 32;) {
+            for (; el.getScrollHeight() > 32; ) {
                 if (text.length() > 0) {
                     text = text.substring(0, text.length() - 1);
                     el.setInnerText(text + "…");

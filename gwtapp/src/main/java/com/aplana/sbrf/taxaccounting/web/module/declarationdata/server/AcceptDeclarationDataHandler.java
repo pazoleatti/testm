@@ -100,16 +100,15 @@ public class AcceptDeclarationDataHandler extends AbstractActionHandler<AcceptDe
                         } catch (ServiceException e) {
                         }
                         result.setStatus(CreateAsyncTaskStatus.CREATE);
-                        logger.info(String.format(ReportType.CREATE_TASK, reportType.getDescription()), action.getTaxType().getDeclarationShortName());
                         result.setUuid(logEntryService.save(logger.getEntries()));
                         return result;
                     }
                     if (!action.isCancelTask() && declarationDataService.checkExistTask(action.getDeclarationId(), reportType, logger)) {
                         result.setStatus(CreateAsyncTaskStatus.EXIST_TASK);
-                    } else if (lockDataService.lock(key, userInfo.getUser().getId(),
+                    } else if ((lockDataReportTask = lockDataService.lock(key, userInfo.getUser().getId(),
                             declarationDataService.getDeclarationFullName(action.getDeclarationId(), reportType),
                             LockData.State.IN_QUEUE.getText(),
-                            lockDataService.getLockTimeout(LockData.LockObjects.DECLARATION_DATA)) == null) {
+                            lockDataService.getLockTimeout(LockData.LockObjects.DECLARATION_DATA))) == null) {
                         try {
                             declarationDataService.interruptTask(action.getDeclarationId(), userInfo.getUser().getId(), reportType);
                             params.put("declarationDataId", action.getDeclarationId());
@@ -131,7 +130,17 @@ public class AcceptDeclarationDataHandler extends AbstractActionHandler<AcceptDe
                             throw new ActionException(e);
                         }
                     } else {
-                        throw new ActionException("Не удалось запустить принятие. Попробуйте выполнить операцию позже");
+                        try {
+                            lockDataService.addUserWaitingForLock(key, userInfo.getUser().getId());
+                            logger.info(String.format(LockData.LOCK_INFO_MSG,
+                                    String.format(ReportType.ACCEPT_DEC.getDescription(), action.getTaxType().getDeclarationShortName()),
+                                    sdf.format(lockDataReportTask.getDateLock()),
+                                    userService.getUser(lockDataReportTask.getUserId()).getName()));
+                        } catch (ServiceException e) {
+                        }
+                        result.setStatus(CreateAsyncTaskStatus.CREATE);
+                        result.setUuid(logEntryService.save(logger.getEntries()));
+                        return result;
                     }
                 } else {
                     result.setStatus(CreateAsyncTaskStatus.EXIST);
