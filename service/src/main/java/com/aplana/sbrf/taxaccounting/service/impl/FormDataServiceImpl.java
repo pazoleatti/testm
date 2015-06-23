@@ -746,6 +746,7 @@ public class FormDataServiceImpl implements FormDataService {
             case PREPARED_TO_APPROVED:
                 lockForm(logger, formData);
                 //Проверяем что записи справочников, на которые есть ссылки в нф все еще существуют в периоде формы
+                stateLogger.updateState("Проверка ссылок на справочники");
                 checkReferenceValues(logger, formData, false);
                 //Делаем переход
                 moveProcess(formData, userInfo, workflowMove, note, logger, isAsync, stateLogger);
@@ -756,6 +757,7 @@ public class FormDataServiceImpl implements FormDataService {
             case CREATED_TO_ACCEPTED:
                 lockForm(logger, formData);
                 //Проверяем что записи справочников, на которые есть ссылки в нф все еще существуют в периоде формы
+                stateLogger.updateState("Проверка ссылок на справочники");
                 checkReferenceValues(logger, formData, false);
                 checkConsolidateFromSources(formData, logger);
                 if (WorkflowState.ACCEPTED.equals(workflowMove.getToState())) {
