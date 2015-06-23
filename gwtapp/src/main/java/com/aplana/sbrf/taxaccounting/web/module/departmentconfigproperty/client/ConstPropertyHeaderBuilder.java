@@ -1,10 +1,10 @@
 package com.aplana.sbrf.taxaccounting.web.module.departmentconfigproperty.client;
 
 import com.aplana.sbrf.taxaccounting.web.widget.style.table.CheckBoxHeader;
+import com.google.gwt.cell.client.Cell.Context;
 import com.google.gwt.dom.builder.shared.TableCellBuilder;
 import com.google.gwt.dom.builder.shared.TableRowBuilder;
 import com.google.gwt.user.cellview.client.*;
-import com.google.gwt.cell.client.Cell.Context;
 
 public class ConstPropertyHeaderBuilder extends AbstractHeaderOrFooterBuilder implements TableWithCheckedColumn {
 
@@ -14,6 +14,7 @@ public class ConstPropertyHeaderBuilder extends AbstractHeaderOrFooterBuilder im
 
     boolean needCheckedRow = true;
 
+    private CheckBoxHeader checkBoxHeader = new CheckBoxHeader();
 
     @Override
     public boolean isNeedCheckedRow() {
@@ -28,12 +29,9 @@ public class ConstPropertyHeaderBuilder extends AbstractHeaderOrFooterBuilder im
     @Override
     protected boolean buildHeaderOrFooterImpl() {
 
-
         TableRowBuilder tr = startRow();
         if (needCheckedRow) {
-            CheckBoxHeader cbh = new CheckBoxHeader();
-
-            buildHeader(tr, cbh, 0, 2, true);
+            buildHeader(tr, checkBoxHeader, 0, 2, true);
         }
 
         buildHeader(tr, new TextHeader("Параметры декларации"), 2, 0, true);
@@ -98,5 +96,10 @@ public class ConstPropertyHeaderBuilder extends AbstractHeaderOrFooterBuilder im
         renderHeader(th, context, header);
 
         th.endTH();
+    }
+
+    @Override
+    public CheckBoxHeader getCheckBoxHeader() {
+        return checkBoxHeader;
     }
 }
