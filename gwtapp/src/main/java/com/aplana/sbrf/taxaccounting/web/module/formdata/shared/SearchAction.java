@@ -15,6 +15,8 @@ public class SearchAction extends UnsecuredActionImpl<SearchResult> implements A
     private int from;
     private int to;
     private boolean caseSensitive;
+    private boolean readOnlyMode;
+    private boolean manual;
     private Integer formTemplateId;
 
     public Integer getFormTemplateId() {
@@ -68,5 +70,21 @@ public class SearchAction extends UnsecuredActionImpl<SearchResult> implements A
     @Override
     public String getName() {
         return "SearchAction";
+    }
+
+    public boolean isReadOnlyMode() {
+        return readOnlyMode;
+    }
+
+    public void setReadOnlyMode(boolean readOnlyMode) {
+        this.readOnlyMode = readOnlyMode;
+    }
+
+    public boolean isManual() {
+        return manual;
+    }
+
+    public void setManual(boolean manual) {
+        this.manual = manual;
     }
 }

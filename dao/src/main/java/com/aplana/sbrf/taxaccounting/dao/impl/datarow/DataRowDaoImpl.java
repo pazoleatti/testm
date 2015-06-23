@@ -46,8 +46,8 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 	private FormDataDao formDataDao;
 
 	@Override
-	public PagingResult<FormDataSearchResult> searchByKey(Long formDataId, Integer formTemplateId, DataRowRange range, String key, boolean isCaseSensitive) {
-		Pair<String, Map<String, Object>> sql = getSearchQuery(formDataId, formTemplateId, key, isCaseSensitive);
+	public PagingResult<FormDataSearchResult> searchByKey(Long formDataId, Integer formTemplateId, DataRowRange range, String key, boolean isCaseSensitive, boolean temporary, boolean manual) {
+		Pair<String, Map<String, Object>> sql = getSearchQuery(formDataId, formTemplateId, key, isCaseSensitive, temporary, manual);
 		// get query and params
 		String query = sql.getFirst();
 		Map<String, Object> params = sql.getSecond();
@@ -87,7 +87,7 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 	 *
 	 * @return
 	 */
-	private Pair<String, Map<String, Object>> getSearchQuery(Long formDataId, Integer formTemplateId, String key, boolean isCaseSensitive) {
+	private Pair<String, Map<String, Object>> getSearchQuery(Long formDataId, Integer formTemplateId, String key, boolean isCaseSensitive, boolean temporary, boolean manual) {
 
 		String generateSubSqlQuery = "select listagg(row_query, ' ' ) WITHIN GROUP (ORDER BY pos) as query from \n" +
 				"(\n" +
@@ -110,6 +110,8 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 		params.put("fdId", formDataId);
 		params.put("ftId", formTemplateId);
 		params.put("key", "%" + key + "%");
+		params.put("temporary", temporary);
+		params.put("manual", manual);
 
 		String subSql = getNamedParameterJdbcTemplate().queryForObject(generateSubSqlQuery, params, String.class);
 
@@ -119,7 +121,7 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 						"  SELECT row_index, fc.ord AS column_index, coalesce(raw_value, d.string_value, o.string_value, z.string_value) AS true_val\n" +
 						"  FROM (\n" +
 						"    WITH t AS (\n" +
-						"        SELECT * FROM form_data_" + formTemplateId + " fd WHERE fd.form_data_id = :fdId and fd.temporary = 0)\n" +
+						"        SELECT * FROM form_data_" + formTemplateId + " fd WHERE fd.form_data_id = :fdId and fd.temporary = :temporary and fd.manual = :manual)\n" +
 						subSql +
 						"        ) hell\n" +
 						"  INNER JOIN form_column fc ON fc.id = hell.column_id\n" +

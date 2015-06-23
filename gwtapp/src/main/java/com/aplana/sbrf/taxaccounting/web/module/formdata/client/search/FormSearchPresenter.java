@@ -23,6 +23,8 @@ public class FormSearchPresenter extends PresenterWidget<FormSearchPresenter.MyV
     public interface MyView extends PopupView, HasUiHandlers<FormSearchUiHandlers> {
         String getSearchKey();
         void setSearchKey(String searchKey);
+        void setReadOnlyMode(boolean readOnlyMode);
+        void setManual(boolean manual);
         void setTableData(int start, List<FormDataSearchResult> resultList, int size);
         void updateData();
         void updatePageSize();
@@ -31,6 +33,8 @@ public class FormSearchPresenter extends PresenterWidget<FormSearchPresenter.MyV
         void clearSearchInput();
 
         boolean isCaseSensitive();
+        boolean isReadOnlyMode();
+        boolean isManual();
     }
 
     private final DispatchAsync dispatcher;
@@ -56,11 +60,13 @@ public class FormSearchPresenter extends PresenterWidget<FormSearchPresenter.MyV
     }
 
     @Override
-    public void open() {
+    public void open(boolean readOnlyMode, boolean manual) {
         String searchKey = getView().getSearchKey();
         if (searchKey == null || searchKey.isEmpty()) {
             getView().setSearchKey(Cookies.getCookie(formDataId.toString()));
         }
+        getView().setReadOnlyMode(readOnlyMode);
+        getView().setManual(manual);
         getView().clearTableData();
     }
 
@@ -73,6 +79,8 @@ public class FormSearchPresenter extends PresenterWidget<FormSearchPresenter.MyV
         action.setFormDataId(formDataId);
         action.setFormTemplateId(formTemplateId);
         action.setCaseSensitive(getView().isCaseSensitive());
+        action.setReadOnlyMode(getView().isReadOnlyMode());
+        action.setManual(getView().isManual());
         dispatcher.execute(action, CallbackUtils.defaultCallback(new AbstractCallback<SearchResult>() {
             @Override
             public void onSuccess(SearchResult result) {

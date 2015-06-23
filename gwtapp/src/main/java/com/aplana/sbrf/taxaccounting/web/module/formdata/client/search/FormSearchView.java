@@ -53,6 +53,8 @@ public class FormSearchView extends PopupViewWithUiHandlers<FormSearchUiHandlers
     };
 
     private SingleSelectionModel<FormDataSearchResult> selectionModel;
+    private boolean readOnlyMode;
+    private boolean manual;
 
     @UiField
     DataGrid<FormDataSearchResult> searchResultTable;
@@ -204,6 +206,16 @@ public class FormSearchView extends PopupViewWithUiHandlers<FormSearchUiHandlers
     }
 
     @Override
+    public void setReadOnlyMode(boolean readOnlyMode) {
+        this.readOnlyMode = readOnlyMode;
+    }
+
+    @Override
+    public void setManual(boolean manual) {
+        this.manual = manual;
+    }
+
+    @Override
     public void setTableData(int start, List<FormDataSearchResult> resultList, int size) {
         searchResultTable.setRowData(start, resultList);
         searchResultTable.setRowCount(size, true);
@@ -244,5 +256,15 @@ public class FormSearchView extends PopupViewWithUiHandlers<FormSearchUiHandlers
     @Override
     public boolean isCaseSensitive(){
         return caseSensitive.getValue();
+    }
+
+    @Override
+    public boolean isReadOnlyMode() {
+        return readOnlyMode;
+    }
+
+    @Override
+    public boolean isManual() {
+        return manual;
     }
 }

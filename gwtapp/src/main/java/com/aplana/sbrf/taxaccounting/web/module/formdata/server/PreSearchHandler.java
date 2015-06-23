@@ -39,9 +39,6 @@ import java.util.Map;
 public class PreSearchHandler extends AbstractActionHandler<PreSearchAction, DataRowResult> {
 
 	@Autowired
-	private FormDataService formDataService;
-
-	@Autowired
 	private SecurityService securityService;
 
 	@Autowired
@@ -50,9 +47,6 @@ public class PreSearchHandler extends AbstractActionHandler<PreSearchAction, Dat
     @Autowired
     private RefBookHelper refBookHelper;
 
-    @Autowired
-    private LogEntryService logEntryService;
-
 	public PreSearchHandler() {
 		super(PreSearchAction.class);
 	}
@@ -60,20 +54,12 @@ public class PreSearchHandler extends AbstractActionHandler<PreSearchAction, Dat
 	@Override
 	public DataRowResult execute(PreSearchAction action,
 			ExecutionContext context) throws ActionException {
-        DataRowResult result = new DataRowResult();
-        Logger logger = new Logger();
         FormData formData = action.getFormData();
-        formDataService.checkLockedByTask(formData.getId(), logger, securityService.currentUserInfo(), "Сохранение НФ", true);
         if (!action.getModifiedRows().isEmpty()) {
             refBookHelper.dataRowsCheck(action.getModifiedRows(), formData.getFormColumns());
             dataRowService.update(securityService.currentUserInfo(), formData.getId(), action.getModifiedRows(), formData.isManual());
         }
-        formDataService.saveFormData(logger, securityService.currentUserInfo(), formData);
-        dataRowService.createTemporary(formData); // восстанавливаем временный срез, чтобы продолжить редактирование
-
-        logger.info("Данные успешно записаны");
-        result.setUuid(logEntryService.save(logger.getEntries()));
-        return result;
+        return new DataRowResult();
 	}
 
 	@Override
