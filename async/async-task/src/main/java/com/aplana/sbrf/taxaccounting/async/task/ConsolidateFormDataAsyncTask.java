@@ -41,7 +41,7 @@ public abstract class ConsolidateFormDataAsyncTask extends AbstractAsyncTask {
 
     @Override
     protected ReportType getReportType() {
-        return ReportType.EXCEL;
+        return ReportType.CONSOLIDATE_FD;
     }
 
     @Override
