@@ -195,7 +195,7 @@ public class FormTemplateImpexServiceImpl implements
             if (file.isDirectory()){
                 dirTempDelete(file);
                 if (!file.delete())
-                    logger.warn("Faild to delete file " + file);
+                    logger.warn("Faild to delete directory " + file);
             } else {
                 if (!file.delete())
                     logger.warn("Faild to delete file " + file);
@@ -203,7 +203,7 @@ public class FormTemplateImpexServiceImpl implements
         }
         if (directory.listFiles() == null || directory.listFiles().length==0){
             if (!directory.delete())
-                logger.warn("Faild to delete file " + directory);
+                logger.warn("Faild to delete directory " + directory);
         }
     }
 
