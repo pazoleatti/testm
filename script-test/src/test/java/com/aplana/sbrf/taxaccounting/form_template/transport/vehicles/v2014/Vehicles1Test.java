@@ -178,6 +178,7 @@ public class Vehicles1Test extends ScriptTestBase {
 
     @Test
     public void importTransportFileTest() {
+        when(testHelper.getFormDataService().getFormTemplate(anyInt(), anyInt())).thenReturn(testHelper.getFormTemplate());
         testHelper.setImportFileInputStream(getImportRnuInputStream());
         testHelper.execute(FormDataEvent.IMPORT_TRANSPORT_FILE);
         Assert.assertEquals(4, testHelper.getDataRowHelper().getAll().size());

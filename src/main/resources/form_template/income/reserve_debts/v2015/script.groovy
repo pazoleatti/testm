@@ -688,7 +688,7 @@ void deleteNotFixedRows(def dataRows) {
     }
 }
 
-void sortFormDataRows() {
+void sortFormDataRows(def saveInDB = true) {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
 
@@ -705,88 +705,77 @@ void sortFormDataRows() {
 
         sortRowsSimple(sectionRows)
     }
-    dataRowHelper.saveSort()
+    if (saveInDB) {
+        dataRowHelper.saveSort()
+    } else {
+        updateIndexes(dataRows);
+    }
 }
 
 void importTransportData() {
+    checkBeforeGetXml(ImportInputStream, UploadFileName)
+    if (!UploadFileName.endsWith(".rnu")) {
+        logger.error(WRONG_RNU_FORMAT)
+    }
     int COLUMN_COUNT = 14
-    int ROW_MAX = 1000
     def DEFAULT_CHARSET = "cp866"
     char SEPARATOR = '|'
     char QUOTE = '\0'
 
-    checkBeforeGetXml(ImportInputStream, UploadFileName)
-
-    if (!UploadFileName.endsWith(".rnu")) {
-        logger.error(WRONG_RNU_FORMAT)
-    }
-
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.allCached
-    deleteNotFixedRows(dataRows)
-    dataRowHelper.save(dataRows)
-
-    InputStreamReader isr = new InputStreamReader(ImportInputStream, DEFAULT_CHARSET)
-    CSVReader reader = new CSVReader(isr, SEPARATOR, QUOTE)
-
     String[] rowCells
-    int countEmptyRow = 0	// количество пустых строк
     int fileRowIndex = 0    // номер строки в файле
     int rowIndex = 0        // номер строки в НФ
     def totalTF = null		// итоговая строка со значениями из тф для добавления
     def mapRows = [:]
 
-    while ((rowCells = reader.readNext()) != null) {
-        fileRowIndex++
+    InputStreamReader isr = new InputStreamReader(ImportInputStream, DEFAULT_CHARSET)
+    CSVReader reader = new CSVReader(isr, SEPARATOR, QUOTE)
 
-        def isEmptyRow = (rowCells.length == 1 && rowCells[0].length() < 1)
-        if (isEmptyRow) {
-            if (countEmptyRow > 0) {
-                // если встретилась вторая пустая строка, то дальше только строки итогов и ЦП
+    try {
+        // пропускаем заголовок
+        rowCells = reader.readNext()
+        if (isEmptyCells(rowCells)) {
+            logger.error('Первой строкой должен идти заголовок, а не пустая строка')
+        }
+        // пропускаем пустую строку
+        rowCells = reader.readNext()
+        if (!isEmptyCells(rowCells)) {
+            logger.error('Вторая строка должна быть пустой')
+        }
+        // грузим основные данные
+        while ((rowCells = reader.readNext()) != null) {
+            fileRowIndex++
+            rowIndex++
+            if (isEmptyCells(rowCells)) { // проверка окончания блока данных, пустая строка
                 // итоговая строка тф
                 rowCells = reader.readNext()
-                isEmptyRow = (rowCells.length == 1 && rowCells[0].length() < 1)
-                totalTF = (isEmptyRow ? null : getNewRow(rowCells, COLUMN_COUNT, ++fileRowIndex, ++rowIndex))
+                if (rowCells != null) {
+                    totalTF = getNewRow(rowCells, COLUMN_COUNT, ++fileRowIndex, rowIndex)
+                }
                 break
             }
-            countEmptyRow++
-            continue
-        }
 
-        // если еще не было пустых строк, то это первая строка - заголовок (пропускается)
-        // обычная строка
-        if (countEmptyRow != 0 && !addRow(mapRows, rowCells, COLUMN_COUNT, fileRowIndex, ++rowIndex)) {
-            break
-        }
+            def newRow = getNewRow(rowCells, COLUMN_COUNT, fileRowIndex, rowIndex)
+            if (rowCells.length < 15 || newRow == null) {
+                continue
+            }
+            // определить раздел по техническому полю и добавить строку в нужный раздел
+            def sectionIndex = pure(rowCells[15])
+            if (mapRows[sectionIndex] == null) {
+                mapRows[sectionIndex] = []
+            }
 
-        // периодически сбрасываем строки
-        if (getNewRowCount(mapRows) > ROW_MAX) {
-            insertRows(dataRowHelper, mapRows)
-            mapRows.clear()
+            mapRows[sectionIndex].add(newRow)
         }
-    }
-    reader.close()
-
-    if (getNewRowCount(mapRows) != 0) {
-        insertRows(dataRowHelper, mapRows)
+    } finally {
+        reader.close()
     }
 
-    // очистить значения в итоговых строках
-    def total1Row = getDataRow(dataRows, 'total')
-    def totalARow = getDataRow(dataRows, 'totalA')
-    def totalBRow = getDataRow(dataRows, 'totalB')
-
-    // очистить старые значения
-    totalColumnsAll.each { alias ->
-        [total1Row, totalARow, totalBRow].each { row ->
-            row[alias] = null
-        }
+    def newRows = (mapRows.values().sum { it } ?: [])
+    showMessages(newRows, logger)
+    if (logger.containsLevel(LogLevel.ERROR) || newRows == null || newRows.isEmpty()) {
+        return
     }
-
-    // расчет строки всего
-    def totalRow = getDataRow(dataRows, 'totalAll')
-    calcTotalSum(dataRows, totalRow, totalColumnsAll)
-    dataRowHelper.update([total1Row, totalARow, totalBRow, totalRow])
 
     // сравнение итогов
     if (totalTF) {
@@ -804,39 +793,74 @@ void importTransportData() {
                 'useReserve'            : 14
         ]
 
+        // итоговая строка для сверки сумм
+        def totalTmp = formData.createStoreMessagingDataRow()
+        totalColumnsIndexMap.keySet().asList().each { alias ->
+            totalTmp.getCell(alias).setValue(BigDecimal.ZERO, null)
+        }
+
+        // подсчет итогов
+        for (def row : newRows) {
+            if (row.getAlias()) {
+                continue
+            }
+            totalColumnsIndexMap.keySet().asList().each { alias ->
+                def value1 = totalTmp.getCell(alias).value
+                def value2 = (row.getCell(alias).value ?: BigDecimal.ZERO)
+                totalTmp.getCell(alias).setValue(value1 + value2, null)
+            }
+        }
+
         // сравнение контрольных сумм
         def colOffset = 1
         for (def alias : totalColumnsIndexMap.keySet().asList()) {
             def v1 = totalTF.getCell(alias).value
-            def v2 = totalRow.getCell(alias).value
+            def v2 = totalTmp.getCell(alias).value
             if (v1 == null && v2 == null) {
                 continue
             }
             if (v1 == null || v1 != null && v1 != v2) {
-                logger.warn(TRANSPORT_FILE_SUM_ERROR, totalColumnsIndexMap[alias] + colOffset, fileRowIndex)
+                logger.warn(TRANSPORT_FILE_SUM_ERROR + " Из файла: $v1, рассчитано: $v2", totalColumnsIndexMap[alias] + colOffset, fileRowIndex)
             }
         }
-    }
-}
-
-/** Добавляет строку в текущий буфер строк. */
-boolean addRow(def mapRows, String[] rowCells, def columnCount, def fileRowIndex, def rowIndex) {
-    if (rowCells == null) {
-        return true
-    }
-    def newRow = getNewRow(rowCells, columnCount, fileRowIndex, rowIndex)
-    if (newRow == null) {
-        return false
+    } else {
+        logger.warn("В транспортном файле не найдена итоговая строка")
     }
 
-    // определить раздел по техническому полю и добавить строку в нужный раздел
-    sectionIndex = pure(rowCells[columnCount + 1])
-    if (mapRows[sectionIndex] == null) {
-        mapRows[sectionIndex] = []
-    }
-    mapRows[sectionIndex].add(newRow)
+    // получить строки из шаблона
+    def formTemplate = formDataService.getFormTemplate(formData.formType.id, formData.reportPeriodId)
+    def templateRows = formTemplate.rows
 
-    return true
+    def rows = []
+    ['', 'A', 'B'].each { section ->
+        def firstRow = section.isEmpty() ? null : getDataRow(templateRows, section)
+        def lastRow = getDataRow(templateRows, "total$section")
+        def copyRows = mapRows[section]
+
+        if (firstRow != null) {
+            rows.add(firstRow)
+        }
+        if (copyRows != null && !copyRows.isEmpty()) {
+            rows.addAll(copyRows)
+
+            def totalColumns
+            // расчет итогов
+            switch (section) {
+                case "" : totalColumns = totalColumns1
+                    break
+                case "A" :
+                case "B" : totalColumns = totalColumnsAB
+                    break
+            }
+            calcTotalSum(copyRows, lastRow, totalColumns)
+        }
+        rows.add(lastRow)
+    }
+    def totalAll = getDataRow(templateRows, "totalAll")
+    calcTotalSum(newRows, totalAll, totalColumnsAll)
+    rows.add(totalAll)
+    updateIndexes(rows)
+    formDataService.getDataRowHelper(formData).allCached = rows
 }
 
 /**
@@ -855,8 +879,8 @@ def getNewRow(String[] rowCells, def columnCount, def fileRowIndex, def rowIndex
     newRow.setImportIndex(fileRowIndex)
 
     if (rowCells.length != columnCount + 2) {
-        rowError(logger, newRow, String.format(ROW_FILE_WRONG, fileRowIndex))
-        return null
+        rowError(logger, newRow, String.format(ROW_FILE_WRONG + "Ошибка при подсчете количества граф '${rowCells.length}' вместо '${columnCount + 2}", fileRowIndex))
+        return newRow
     }
 
     def int colOffset = 1
@@ -900,20 +924,6 @@ String pure(String cell) {
     return StringUtils.cleanString(cell).intern()
 }
 
-/** Получить количество новых строк в мапе во всех разделах. */
-def getNewRowCount(def mapRows) {
-    return mapRows.entrySet().sum { entry -> entry.value.size() }
-}
-
-/** Вставить данные в нф по разделам. */
-def insertRows(def dataRowHelper, def mapRows) {
-    mapRows.keySet().each { sectionKey ->
-        def copyRows = mapRows[sectionKey]
-        if (copyRows != null && !copyRows.isEmpty()) {
-            def dataRows = dataRowHelper.allCached
-            def insertIndex = getDataRow(dataRows, getTotalRowAlias(sectionKey)).getIndex()
-            dataRowHelper.insert(copyRows, insertIndex)
-            updateIndexes(dataRows)
-        }
-    }
+boolean isEmptyCells(def rowCells) {
+    return rowCells.length == 1 && rowCells[0] == ''
 }
