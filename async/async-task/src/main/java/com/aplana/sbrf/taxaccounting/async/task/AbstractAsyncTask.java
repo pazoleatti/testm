@@ -44,6 +44,7 @@ public abstract class AbstractAsyncTask implements AsyncTask {
     private AsyncTaskTypeDao asyncTaskTypeDao;
 
     private static final SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
+    protected static final SimpleDateFormat SDF_DD_MM_YYYY = new SimpleDateFormat("dd.MM.yyyy");
 
     /**
      * Выполнение бизнес логики задачи
