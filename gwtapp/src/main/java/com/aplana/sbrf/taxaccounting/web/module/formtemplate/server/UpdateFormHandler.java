@@ -2,8 +2,6 @@ package com.aplana.sbrf.taxaccounting.web.module.formtemplate.server;
 
 import com.aplana.sbrf.taxaccounting.model.FormTemplate;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
-import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.FormTemplateService;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
@@ -54,10 +52,6 @@ public class UpdateFormHandler extends AbstractActionHandler<UpdateFormAction, U
 		UpdateFormResult result = new UpdateFormResult();
 
         makeDates(action);
-        formTemplateService.validateFormTemplate(action.getForm(), logger);
-        if (logger.containsLevel(LogLevel.ERROR)){
-            throw new ServiceLoggerException("Ошибки при валидации.", logEntryService.save(logger.getEntries()));
-        }
         int formTemplateId =
                 mainOperatingService.edit(action.getForm(), action.getVersionEndDate(), logger, securityService.currentUserInfo());
 

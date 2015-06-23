@@ -3,8 +3,6 @@ package com.aplana.sbrf.taxaccounting.web.module.formtemplate.server;
 import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
 import com.aplana.sbrf.taxaccounting.model.FormTemplate;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
-import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.FormTemplateService;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
@@ -54,10 +52,6 @@ public class CreateNewTypeHandler extends AbstractActionHandler<CreateNewTypeAct
         FormTemplate formTemplate = action.getForm();
         CreateNewTypeResult result = new CreateNewTypeResult();
         makeDates(action);
-        formTemplateService.validateFormTemplate(action.getForm(), logger);
-        if (logger.containsLevel(LogLevel.ERROR)){
-            throw new ServiceLoggerException("Ошибки при валидации.", logEntryService.save(logger.getEntries()));
-        }
         int formTemplateId = mainOperatingService.createNewType(formTemplate, action.getVersionEndDate(), logger, securityService.currentUserInfo());
         try {
             formTemplateDao.createFDTable(formTemplateId);

@@ -54,6 +54,8 @@ public class MainOperatingFTServiceImpl implements MainOperatingService {
     @Override
     public <T> int edit(T template, Date templateActualEndDate, Logger logger, TAUserInfo user) {
         FormTemplate formTemplate = (FormTemplate)template;
+        formTemplateService.validateFormTemplate(formTemplate, logger);
+        checkError(logger, SAVE_MESSAGE);
         FormTemplate oldFormTemplate = formTemplateService.get(formTemplate.getId());
         Date dbVersionBeginDate = oldFormTemplate.getVersion();
         Date dbVersionEndDate = formTemplateService.getFTEndDate(formTemplate.getId());
@@ -146,6 +148,8 @@ public class MainOperatingFTServiceImpl implements MainOperatingService {
     @Override
     public <T> int createNewType(T template, Date templateActualEndDate, Logger logger, TAUserInfo user) {
         FormTemplate formTemplate = (FormTemplate)template;
+        formTemplateService.validateFormTemplate(formTemplate, logger);
+        checkError(logger, SAVE_MESSAGE);
         FormType type = formTemplate.getType();
         type.setStatus(VersionedObjectStatus.NORMAL);
         type.setName(formTemplate.getName() != null ? formTemplate.getName() : "");
@@ -166,6 +170,8 @@ public class MainOperatingFTServiceImpl implements MainOperatingService {
     @Override
     public <T> int createNewTemplateVersion(T template, Date templateActualEndDate, Logger logger, TAUserInfo user) {
         FormTemplate formTemplate = (FormTemplate)template;
+        formTemplateService.validateFormTemplate(formTemplate, logger);
+        checkError(logger, SAVE_MESSAGE);
         versionOperatingService.isIntersectionVersion(0, formTemplate.getType().getId(), VersionedObjectStatus.DRAFT,
                 formTemplate.getVersion(), templateActualEndDate, logger);
         checkError(logger, SAVE_MESSAGE);
