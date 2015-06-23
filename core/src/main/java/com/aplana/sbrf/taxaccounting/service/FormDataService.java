@@ -133,7 +133,7 @@ public interface FormDataService {
 	 * @param note Причина возврата (перехода) по ЖЦ в Системе
 	 * @throws com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 	 */
-	void doMove(long formDataId, boolean manual, TAUserInfo userInfo, WorkflowMove move, String note, Logger logger, boolean isAsync);
+	void doMove(long formDataId, boolean manual, TAUserInfo userInfo, WorkflowMove move, String note, Logger logger, boolean isAsync, LockStateLogger stateLogger);
 
     /**
      * Создаёт налоговую форму без проверок прав доступа

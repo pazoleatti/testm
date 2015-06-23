@@ -577,7 +577,11 @@ public class FormDataServiceTest {
         when(lockDataService.lock(formDataService.generateTaskKey(formData.getId(), ReportType.EDIT_FD), userInfo.getUser().getId(), "FORM_DATA", 1000)).
                 thenReturn(lockData);
 
-        formDataService.doMove(formData.getId(), false, userInfo, WorkflowMove.APPROVED_TO_ACCEPTED, "", logger, false);
+        formDataService.doMove(formData.getId(), false, userInfo, WorkflowMove.APPROVED_TO_ACCEPTED, "", logger, false, new LockStateLogger() {
+            @Override
+            public void updateState(String state) {
+            }
+        });
 
         assertEquals(0, logger.getEntries().size());
     }

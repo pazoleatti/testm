@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.web.module.formdata.server;
 import com.aplana.sbrf.taxaccounting.async.manager.AsyncManager;
 import com.aplana.sbrf.taxaccounting.async.task.AsyncTask;
 import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
+import com.aplana.sbrf.taxaccounting.core.api.LockStateLogger;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
@@ -155,7 +156,11 @@ public class GoMoveHandler extends AbstractActionHandler<GoMoveAction, GoMoveRes
                             lockDataService.getLockTimeout(LockData.LockObjects.FORM_DATA)) == null) {
                         try {
                             formDataService.doMove(action.getFormDataId(), false, securityService.currentUserInfo(),
-                                    action.getMove(), action.getReasonToWorkflowMove(), logger, false);
+                                    action.getMove(), action.getReasonToWorkflowMove(), logger, false, new LockStateLogger() {
+                                        @Override
+                                        public void updateState(String state) {
+                                        }
+                                    });
                         } finally {
                             lockDataService.unlock(keyTask, userInfo.getUser().getId());
                         }
