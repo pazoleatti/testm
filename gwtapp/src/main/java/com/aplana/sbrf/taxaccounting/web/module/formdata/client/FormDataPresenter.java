@@ -1005,37 +1005,32 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
     public void onOpenSearchDialog() {
         LogCleanEvent.fire(FormDataPresenter.this);
         if (!modifiedRows.isEmpty()) {
-            Dialog.confirmMessage("Запуск операции приведет к сохранению изменений, сделанных в таблице налоговой формы. Продолжить?", new DialogHandler() {
+            PreSearchAction preSearchAction = new PreSearchAction();
+            preSearchAction.setFormData(formData);
+            preSearchAction.setModifiedRows(new ArrayList<DataRow<Cell>>(modifiedRows));
+            dispatcher.execute(preSearchAction, CallbackUtils.defaultCallback(new AbstractCallback<DataRowResult>() {
                 @Override
-                public void yes() {
-                    PreSearchAction preSearchAction = new PreSearchAction();
-                    preSearchAction.setFormData(formData);
-                    preSearchAction.setModifiedRows(new ArrayList<DataRow<Cell>>(modifiedRows));
-                    dispatcher.execute(preSearchAction, CallbackUtils.defaultCallback(new AbstractCallback<DataRowResult>() {
-                        @Override
-                        public void onSuccess(DataRowResult result) {
-                            modifiedRows.clear();
-                            LogAddEvent.fire(FormDataPresenter.this, result.getUuid());
-                            getView().updateData();
-                            getView().setSelectedRow(result.getCurrentRow(), true);
-                            formSearchPresenter.open();
-                            addToPopupSlot(formSearchPresenter);
-                        }
-
-                        @Override
-                        public void onFailure(Throwable caught) {
-                            if (caught instanceof TaActionException) {
-                                LogAddEvent.fire(FormDataPresenter.this, ((TaActionException) caught).getUuid());
-                            }
-                            modifiedRows.clear();
-                            getView().updateData();
-                        }
-
-                    }, FormDataPresenter.this));
+                public void onSuccess(DataRowResult result) {
+                    modifiedRows.clear();
+                    LogAddEvent.fire(FormDataPresenter.this, result.getUuid());
+                    getView().updateData();
+                    getView().setSelectedRow(result.getCurrentRow(), true);
+                    formSearchPresenter.open(readOnlyMode, formData.isManual());
+                    addToPopupSlot(formSearchPresenter);
                 }
-            });
+
+                @Override
+                public void onFailure(Throwable caught) {
+                    if (caught instanceof TaActionException) {
+                        LogAddEvent.fire(FormDataPresenter.this, ((TaActionException) caught).getUuid());
+                    }
+                    modifiedRows.clear();
+                    getView().updateData();
+                }
+
+            }, FormDataPresenter.this));
         } else {
-            formSearchPresenter.open();
+            formSearchPresenter.open(readOnlyMode, formData.isManual());
             addToPopupSlot(formSearchPresenter);
         }
     }

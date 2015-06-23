@@ -68,8 +68,8 @@ public class DataRowServiceImpl implements DataRowService {
     }
 
     @Override
-    public PagingResult<FormDataSearchResult> searchByKey(Long formDataId, Integer formTemplateId, DataRowRange range, String key, boolean isCaseSensitive) {
-        return dataRowDao.searchByKey(formDataId, formTemplateId, range, key, isCaseSensitive);
+    public PagingResult<FormDataSearchResult> searchByKey(Long formDataId, Integer formTemplateId, DataRowRange range, String key, boolean isCaseSensitive, boolean temporary, boolean manual) {
+        return dataRowDao.searchByKey(formDataId, formTemplateId, range, key, isCaseSensitive, temporary, manual);
     }
 
     @Override
