@@ -203,8 +203,12 @@ public class GetMainMenuActionHandler extends
                 || currentUser.hasRole(TARole.ROLE_CONF)) {
 
             MenuItem adminMenuItem = new MenuItem("Администрирование");
-            adminMenuItem.getSubMenu().add(new MenuItem("Список блокировок", NUMBER_SIGN
-                    + LockTokens.lockList));
+            if (currentUser.hasRole(TARole.ROLE_ADMIN) || currentUser.hasRole(TARole.ROLE_OPER) ||
+                    currentUser.hasRole(TARole.ROLE_CONTROL) || currentUser.hasRole(TARole.ROLE_CONTROL_NS) ||
+                    currentUser.hasRole(TARole.ROLE_CONTROL_UNP)) {
+                adminMenuItem.getSubMenu().add(new MenuItem("Список блокировок", NUMBER_SIGN
+                        + LockTokens.lockList));
+            }
 
             if (currentUser.hasRole(TARole.ROLE_OPER) || currentUser.hasRole(TARole.ROLE_CONTROL)) {
                 adminMenuItem.getSubMenu().add(new MenuItem("Журнал аудита", NUMBER_SIGN + AuditToken.AUDIT));
