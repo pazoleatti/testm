@@ -237,6 +237,8 @@ void logicCheck() {
         return
     }
 
+    boolean wasError = false
+
     for (row in dataRows) {
         if (row.getAlias() != null) {
             continue
@@ -266,6 +268,10 @@ void logicCheck() {
                     }
                 }
             }
+        }
+
+        if (row.kpp && checkPattern(logger, row, 'kpp', row.kpp, KPP_PATTERN, wasError ? null : KPP_MEANING, true)) {
+            wasError = true
         }
     }
 

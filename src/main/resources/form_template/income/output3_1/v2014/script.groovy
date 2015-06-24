@@ -162,6 +162,10 @@ def logicCheck() {
     for (def row in dataRows) {
         // 1. Проверка на заполнение поля
         checkNonEmptyColumns(row, row.getIndex(), nonEmptyColumns, logger, true)
+        // Проверка диапазона дат
+        if (row.dateOfPayment) {
+            checkDateValid(logger, row, 'dateOfPayment', row.dateOfPayment, true)
+        }
     }
 }
 

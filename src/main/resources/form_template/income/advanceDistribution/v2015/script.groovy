@@ -574,6 +574,8 @@ void logicalCheckBeforeCalc() {
 void logicalCheckAfterCalc() {
     def dataRows = formDataService.getDataRowHelper(formData).allCached
 
+    boolean wasError = false
+
     for (def row : dataRows) {
         if (isFixedRow(row)) {
             continue
@@ -586,6 +588,10 @@ void logicalCheckAfterCalc() {
         // 2. Проверка значения в графе «Доля налоговой базы (№)»
         if (row.baseTaxOf != null && !checkFormat(row.baseTaxOf, baseTaxOfPattern)) {
             logger.error("Строка $index: Графа «%s» заполнена неверно! Ожидаемый тип поля: Число/18.15/ (3 знака до запятой, 15 после запятой).", getColumnName(row,'baseTaxOf'))
+        }
+        // 3. Проверка на соответствие паттерну
+        if (row.kpp && !checkPattern(logger, row, 'kpp', row.kpp, KPP_PATTERN, wasError ? null : KPP_MEANING, true)) {
+            wasError = true
         }
     }
 }

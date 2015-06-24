@@ -62,6 +62,10 @@ void logicCheck() {
                 checkNonEmptyColumns(row, index, nonEmptyColumns, logger, true)
             }
         }
+        // Проверка диапазона дат
+        if (row.date) {
+            checkDateValid(logger, row, 'date', row.date, true)
+        }
     }
 }
 

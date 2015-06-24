@@ -161,11 +161,32 @@ def logicCheck() {
     // TODO (Ramil Timerbaev) в чтз пока не описано
     def dataRows = formDataService.getDataRowHelper(formData)?.allCached
 
+    def wasError = [false, false]
+
     for (def row in dataRows) {
         def index = row.getIndex()
 
         // . Проверка обязательных полей
         checkNonEmptyColumns(row, index, nonEmptyColumns, logger, true)
+
+        // Проверка паттернов
+        if (row.emitentInn && checkPattern(logger, row, 'emitentInn', row.emitentInn, INN_JUR_PATTERN, wasError[1] ? null : INN_JUR_MEANING, true)) {
+            checkControlSumInn(logger, row, 'emitentInn', row.emitentInn, true)
+        } else if (row.emitentInn){
+            wasError[1] = true
+        }
+        if (row.innRF && checkPattern(logger, row, 'inn', row.innRF, INN_JUR_PATTERN, wasError[1] ? null : INN_JUR_MEANING, true)) {
+            checkControlSumInn(logger, row, 'inn', row.inn, true)
+        } else if (row.innRF){
+            wasError[1] = true
+        }
+        if (row.kpp && !checkPattern(logger, row, 'kpp', row.kpp, KPP_PATTERN, wasError[2] ? null : KPP_MEANING, true)) {
+            wasError[2] = true
+        }
+        // Проверка формата дат
+        if (row.date) {
+            checkDateValid(logger, row, 'date', row.date, true)
+        }
     }
 }
 

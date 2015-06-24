@@ -233,6 +233,8 @@ void logicCheck() {
     // Для хранения правильных значении и сравнения с имеющимися при арифметических проверках
     def needValue = [:]
 
+    boolean wasError = false
+
     for (row in dataRows) {
         if (row.getAlias() != null) {
             continue
@@ -307,8 +309,10 @@ void logicCheck() {
         checkCalc(row, arithmeticCheckAlias, needValue, logger, true)
 
         // 29. Проверка на соответствие паттерну
-        if (checkPattern(logger, row, 'innRF', row.innRF, INN_IND_PATTERN, null, true)) {
+        if (row.innRF && checkPattern(logger, row, 'innRF', row.innRF, INN_IND_PATTERN, wasError ? null : INN_IND_MEANING, true)) {
             checkControlSumInn(logger, row, 'innRF', row.innRF, true)
+        } else if (row.innRF) {
+            wasError = true
         }
     }
 }

@@ -134,6 +134,8 @@ void calc() {
 void logicCheck() {
     def dataRows = formDataService.getDataRowHelper(formData).allCached
 
+    def wasError = [false, false]
+
     for (row in dataRows) {
         def rowNum = row.getIndex()
         def recType = (String) row.recType;
@@ -146,6 +148,19 @@ void logicCheck() {
         // Проверка допустимых значений «Графы 6» (диапазон 00...99)
         if (!recType?.matches("[0-9]{2}")) {
             logger.error("Строка ${rowNum}: Графа «Получатель. Тип» заполнена неверно!")
+        }
+        // Проверки паттернов
+        if (row.inn && checkPattern(logger, row, 'inn', row.inn, INN_JUR_PATTERN, wasError[1] ? null : INN_JUR_MEANING, true)) {
+            checkControlSumInn(logger, row, 'inn', row.inn, true)
+        } else if (row.inn){
+            wasError[1] = true
+        }
+        if (row.kpp && !checkPattern(logger, row, 'kpp', row.kpp, KPP_PATTERN, wasError[2] ? null : KPP_MEANING, true)) {
+            wasError[2] = true
+        }
+        // Проверка формата дат
+        if (row.dividendDate) {
+            checkDateValid(logger, row, 'dividendDate', row.dividendDate, true)
         }
     }
 }

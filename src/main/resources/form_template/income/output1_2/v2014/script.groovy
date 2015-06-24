@@ -210,6 +210,12 @@ void logicCheck() {
         if (row.dividendRussianTotal != calc10(row)) {
             warnMessage9or10(row, 'dividendRussianTotal', '«Графа 10» = «Графа 11» + «Графа 12» + «Графа 13» + «Графа 14»')
         }
+        // 10. Проверка паттернов
+        if (row.inn && checkPattern(logger, row, 'inn', row.inn, INN_JUR_PATTERN, wasError ? null : INN_JUR_MEANING, true)) {
+            checkControlSumInn(logger, row, 'inn', row.inn, true)
+        } else if (row.inn){
+            wasError = true
+        }
     }
 }
 
