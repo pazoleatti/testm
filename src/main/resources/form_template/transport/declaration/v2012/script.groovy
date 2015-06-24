@@ -10,8 +10,6 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue
 import groovy.transform.Field
 import groovy.xml.MarkupBuilder
 
-import java.text.SimpleDateFormat
-
 /**
  * Формирование XML для декларации по транспортному налогу.
  *
@@ -49,8 +47,6 @@ def providerCache = [:]
 def refBookCache = [:]
 @Field
 def recordCache = [:]
-@Field
-def sdf = new SimpleDateFormat('dd.MM.yyyy')
 
 // Дата окончания отчетного периода
 @Field
@@ -426,7 +422,7 @@ def getRecord(def refBookId, def filter, Date date) {
     if (refBookId == null) {
         return null
     }
-    String dateStr = sdf.format(date)
+    String dateStr = date?.format('dd.MM.yyyy')
     if (recordCache.containsKey(refBookId)) {
         Long recordId = recordCache.get(refBookId).get(dateStr + filter)
         if (recordId != null) {

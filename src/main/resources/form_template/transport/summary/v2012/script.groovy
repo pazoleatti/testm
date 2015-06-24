@@ -10,8 +10,6 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue
 import groovy.transform.Field
 
-import java.text.SimpleDateFormat
-
 /**
  * Расчет суммы налога по каждому транспортному средству
  * formTemplateId=200
@@ -100,9 +98,6 @@ def nonEmptyColumns = ['okato', 'tsTypeCode', 'vi', 'model', 'regNumber', 'taxBa
 def monthCountInPeriod
 
 @Field
-def sdf = new SimpleDateFormat('dd.MM.yyyy')
-
-@Field
 def reportDay = null
 
 // Надо ли выполнять проверку графы 14 в логических проверка
@@ -149,7 +144,7 @@ def getRecord(def refBookId, def filter, Date date) {
     if (refBookId == null) {
         return null
     }
-    String dateStr = sdf.format(date)
+    String dateStr = date?.format('dd.MM.yyyy')
     if (recordCache.containsKey(refBookId)) {
         Long recordId = recordCache.get(refBookId).get(dateStr + filter)
         if (recordId != null) {

@@ -9,7 +9,6 @@ import groovy.transform.Field
 import groovy.xml.MarkupBuilder
 
 import javax.xml.namespace.QName
-import java.text.SimpleDateFormat
 
 /**
  * Декларация по НДС (раздел 8.1)
@@ -132,7 +131,7 @@ void generateXML() {
             taxOrganCode + "_" +
             taxOrganCode + "_" +
             inn + "" + kpp + "_" +
-            (new SimpleDateFormat("yyyyMMdd")).format(Calendar.getInstance().getTime()) + "_" +
+            Calendar.getInstance().getTime().format('yyyyMMdd') + "_" +
             UUID.randomUUID().toString().toUpperCase()
     def index = "0000081"
     def corrNumber = reportPeriodService.getCorrectionNumber(declarationData.departmentReportPeriodId) ?: 0

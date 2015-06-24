@@ -11,7 +11,6 @@ import groovy.transform.Field
 import groovy.xml.MarkupBuilder
 
 import java.math.RoundingMode
-import java.text.SimpleDateFormat
 
 /**
  * Формирование XML для декларации по транспортному налогу.
@@ -50,7 +49,7 @@ def refBookCache = [:]
 @Field
 def recordCache = [:]
 @Field
-def sdf = new SimpleDateFormat('dd.MM.yyyy')
+def String dateFormat = 'dd.MM.yyyy'
 
 // значение подразделения из справочника 31
 @Field
@@ -131,7 +130,7 @@ def buildXml(def departmentParamTransport, def departmentParamTransportRow, def 
     def builder = new MarkupBuilder(xml)
     if (!declarationData.isAccepted()) {
         def reportPeriod = reportPeriodService.get(declarationData.reportPeriodId)
-        Date yearStartDate = new SimpleDateFormat('dd.MM.yyyy').parse("01.01.${reportPeriod.taxPeriod.year}")
+        Date yearStartDate = Date.parse(dateFormat,"01.01.${reportPeriod.taxPeriod.year}")
         def reportPeriods = reportPeriodService.getReportPeriodsByDate(TaxType.TRANSPORT, yearStartDate, getReportPeriodEndDate())
         builder.Файл(
                 ИдФайл: declarationService.generateXmlFileId(1, declarationData.departmentReportPeriodId, declarationData.taxOrganCode, declarationData.kpp),
@@ -406,7 +405,7 @@ def getRecord(def refBookId, def filter, Date date) {
     if (refBookId == null) {
         return null
     }
-    String dateStr = sdf.format(date)
+    String dateStr = date?.format(dateFormat)
     if (recordCache.containsKey(refBookId)) {
         Long recordId = recordCache.get(refBookId).get(dateStr + filter)
         if (recordId != null) {

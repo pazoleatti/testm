@@ -10,8 +10,6 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
 import com.aplana.sbrf.taxaccounting.model.util.StringUtils
 import groovy.transform.Field
 
-import java.text.SimpleDateFormat
-
 /**
  * (РНУ-7) Справка бухгалтера для отражения расходов, учитываемых в РНУ-5,
  *                                  учёт которых требует применения метода начисления
@@ -278,7 +276,6 @@ void logicCheck() {
 
     List<Map<Integer, Object>> docs = new ArrayList<>()
     Map<Map<Integer, Object>, List<Integer>> uniq456 = [:]
-    SimpleDateFormat dateFormat = new SimpleDateFormat('dd.MM.yyyy')
 
     // алиасы графов для арифметической проверки
     def arithmeticCheckAlias = ['rateOfTheBankOfRussia', 'taxAccountingRuble', 'ruble']
@@ -388,7 +385,7 @@ void logicCheck() {
         // 12. Проверка значения суммы дохода в налоговом учете, для первичного документа, указанного для суммы дохода в бухгалтерском учёте
         if (row.ruble && row.docDate != null) {
             def Date date = row.docDate
-            def Date from = new SimpleDateFormat('dd.MM.yyyy').parse('01.01.' + (Integer.valueOf(new SimpleDateFormat('yyyy').format(date)) - 3))
+            def Date from = Date.parse('dd.MM.yyyy','01.01.' + (Integer.valueOf(date?.format('yyyy')) - 3))
             def reportPeriods = reportPeriodService.getReportPeriodsByDate(TaxType.INCOME, from, date)
 
             isFind = false

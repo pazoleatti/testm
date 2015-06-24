@@ -5,8 +5,6 @@ import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
 import groovy.transform.Field
 
-import java.text.SimpleDateFormat
-
 /**
  * (РНУ-59) Регистр налогового учёта закрытых сделок РЕПО с обязательством продажи по 2-й части
  * formTypeId=350
@@ -584,9 +582,8 @@ def inPeriod(def date, def from, to) {
     if (date == null) {
         return false
     }
-    SimpleDateFormat format = new SimpleDateFormat('dd.MM.yyyy')
-    def dateFrom = format.parse(from)
-    def dateTo = format.parse(to)
+    def dateFrom = Date.parse('dd.MM.yyyy', from)
+    def dateTo = Date.parse('dd.MM.yyyy', to)
     return (dateFrom < date && date <= dateTo)
 }
 
@@ -696,7 +693,6 @@ def addData(def xml, def fileName) {
     data.clear()
     def cache = [:]
     def date = getReportPeriodEndDate()
-    SimpleDateFormat format = new SimpleDateFormat('dd.MM.yyyy')
     def newRows = []
 
     def records
@@ -749,19 +745,19 @@ def addData(def xml, def fileName) {
             index++
 
             // графа 5
-            newRow.part1REPODate = getDate(getCellValue(row, index, type), format)
+            newRow.part1REPODate = getDate(getCellValue(row, index, type))
             index++
 
             // графа 6
-            newRow.part2REPODate = getDate(getCellValue(row, index, type), format)
+            newRow.part2REPODate = getDate(getCellValue(row, index, type))
             index++
         } else {
             // графа 5
-            newRow.part1REPODate = getDate(getCellValue(row, index, type), format)
+            newRow.part1REPODate = getDate(getCellValue(row, index, type))
             index++
 
             // графа 6
-            newRow.part2REPODate = getDate(getCellValue(row, index, type), format)
+            newRow.part2REPODate = getDate(getCellValue(row, index, type))
             index++
 
             // графа 7
@@ -890,12 +886,12 @@ def getNumber(def value) {
 /**
  * Получить дату по строковому представлению (формата дд.ММ.гггг)
  */
-def getDate(def value, def format) {
+def getDate(def String value, def String format = 'dd.MM.yyyy') {
     if (isEmpty(value)) {
         return null
     }
     try {
-        return format.parse(value)
+        return  Date.parse(format, value)
     } catch (Exception e) {
         throw new Exception("Значение \"$value\" не может быть преобразовано в дату. " + e.message)
     }

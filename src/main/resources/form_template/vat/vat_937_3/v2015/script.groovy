@@ -7,7 +7,6 @@ import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.model.util.StringUtils
 
-import java.text.SimpleDateFormat
 import groovy.transform.Field
 
 /**

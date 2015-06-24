@@ -8,8 +8,6 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
 import groovy.transform.Field
 import groovy.xml.MarkupBuilder
 
-import java.text.SimpleDateFormat
-
 /**
  * Декларация по НДС (раздел 11)
  *
@@ -131,7 +129,7 @@ void generateXML() {
             taxOrganCode + "_" +
             taxOrganCode + "_" +
             inn + "" + kpp + "_" +
-            (new SimpleDateFormat("yyyyMMdd")).format(Calendar.getInstance().getTime()) + "_" +
+            Calendar.getInstance().getTime().format('yyyyMMdd') + "_" +
             UUID.randomUUID().toString().toUpperCase()
     def index = "0000110"
     def corrNumber = reportPeriodService.getCorrectionNumber(declarationData.departmentReportPeriodId) ?: 0

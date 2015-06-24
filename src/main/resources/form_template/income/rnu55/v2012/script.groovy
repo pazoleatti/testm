@@ -6,7 +6,6 @@ import com.aplana.sbrf.taxaccounting.model.TaxType
 import groovy.transform.Field
 
 import java.math.RoundingMode
-import java.text.SimpleDateFormat
 
 /**
  * Форма "(РНУ-55) Регистр налогового учёта процентного дохода по процентным векселям сторонних эмитентов".
@@ -391,10 +390,9 @@ def getCountDaysInYear(def date) {
     if (date == null) {
         return 0
     }
-    SimpleDateFormat format = new SimpleDateFormat('dd.MM.yyyy')
     def year = date.format('yyyy')
-    def end = format.parse("31.12.$year")
-    def begin = format.parse("01.01.$year")
+    def end = Date.parse('dd.MM.yyyy', "31.12.$year")
+    def begin = Date.parse('dd.MM.yyyy', "31.12.$year")
     return end - begin + 1
 }
 

@@ -7,8 +7,6 @@ import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.model.script.range.ColumnRange
 import groovy.transform.Field
 
-import java.text.SimpleDateFormat
-
 /**
  * Форма "(РНУ-54) Регистр налогового учёта открытых сделок РЕПО с обязательством покупки по 2-й части".
  * formTemplateId=347
@@ -185,8 +183,7 @@ void calc() {
         def reportDate = getReportDate()
 
         /** Дата нужная при подсчете графы 12. */
-        SimpleDateFormat format = new SimpleDateFormat('dd.MM.yyyy')
-        def someDate = getDate('01.11.2009', format)
+        def someDate = getDate('01.11.2009')
 
         /** Количество дней в году. */
         def daysInYear = getCountDaysInYaer(getReportPeriodEndDate())
@@ -292,8 +289,7 @@ def logicalCheck() {
         def reportDate = getReportDate()
 
         /** Дата нужная при подсчете графы 12. */
-        SimpleDateFormat format = new SimpleDateFormat('dd.MM.yyyy')
-        def someDate = getDate('01.11.2009', format)
+        def someDate = getDate('01.11.2009')
 
         /** Количество дней в году. */
         def daysInYear = getCountDaysInYaer(getReportPeriodEndDate())
@@ -577,25 +573,24 @@ def isEmpty(def value) {
 /**
  * Проверить попадает ли указанная дата в период
  */
-def inPeriod(def date, def from, to) {
+def inPeriod(def date, def String from, def String to) {
     if (date == null) {
         return false
     }
-    SimpleDateFormat format = new SimpleDateFormat('dd.MM.yyyy')
-    def dateFrom = format.parse(from)
-    def dateTo = format.parse(to)
+    def dateFrom = Date.parse('dd.MM.yyyy', from)
+    def dateTo = Date.parse('dd.MM.yyyy', to)
     return (dateFrom < date && date <= dateTo)
 }
 
 /**
  * Получить дату по строковому представлению (формата дд.ММ.гггг)
  */
-def getDate(def value, format) {
+def getDate(def String value, def String format = 'dd.MM.yyyy') {
     if (isEmpty(value)) {
         return null
     }
     try {
-        return format.parse(value)
+        return  Date.parse(format, value)
     } catch (Exception e) {
         throw new Exception("Значение \"$value\" не может быть преобразовано в дату. " + e.message)
     }
@@ -704,10 +699,9 @@ def getCountDaysInYaer(def date) {
     if (date == null) {
         return 0
     }
-    SimpleDateFormat format = new SimpleDateFormat('dd.MM.yyyy')
     def year = date.format('yyyy')
-    def end = format.parse("31.12.$year")
-    def begin = format.parse("01.01.$year")
+    def end = Date.parse('dd.MM.yyyy', "31.12.$year")
+    def begin = Date.parse('dd.MM.yyyy', "01.01.$year")
     return end - begin + 1
 }
 
@@ -911,7 +905,6 @@ def addData(def xml, def fileName) {
     def tmp
     def index
     def date = getReportPeriodEndDate()
-    SimpleDateFormat format = new SimpleDateFormat('dd.MM.yyyy')
     def data = getData(formData)
     data.clear()
     def cache = [:]
@@ -974,11 +967,11 @@ def addData(def xml, def fileName) {
             index++
         }
         // графа 7
-        newRow.part1REPODate = getDate(getCellValue(row, index, type), format)
+        newRow.part1REPODate = getDate(getCellValue(row, index, type))
         index++
 
         // графа 8
-        newRow.part2REPODate = getDate(getCellValue(row, index, type), format)
+        newRow.part2REPODate = getDate(getCellValue(row, index, type))
         index++
 
         if (formDataEvent == FormDataEvent.MIGRATION) {
