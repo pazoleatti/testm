@@ -145,11 +145,14 @@ class DBReport {
 
                                     boolean dataRowsEqual = true
                                     Diff diff
-                                    if (tmp1?.data_rows != null && tmp2?.data_rows != null) {
+                                    if (tmp1?.data_rows != null && tmp2?.data_rows != null) { // оба не null - сравниваем
                                         diff = XMLUnit.compareXML(tmp1.data_rows, tmp2.data_rows)
                                         dataRowsEqual = diff.similar()
-                                    } else if (tmp1?.data_rows != null || tmp2?.data_rows != null) {
-                                        dataRowsEqual = false
+                                    } else if (tmp1?.data_rows != null || tmp2?.data_rows != null) { //один не null, другой null - проверяем не пустой ли
+                                        def emptyDataRows = "<?xml version=\"1.0\" encoding=\"utf-8\"?><rows/>"
+                                        if (tmp1?.data_rows?.trim() != emptyDataRows && tmp2?.data_rows?.trim() != emptyDataRows) { // один null, другой не пустой
+                                            dataRowsEqual = false
+                                        }
                                     }
 
                                     // Признак сравнения
@@ -347,16 +350,9 @@ class DBReport {
                                             def title = 'См. БД'
                                             def tdClass = 'td_error'
                                             if (tmp1?.data_rows == null && tmp2?.data_rows != null || tmp1?.data_rows != null && tmp2?.data_rows == null) {
-                                                def emptyDataRows = "<?xml version=\"1.0\" encoding=\"utf-8\"?><rows/>"
                                                 title = "Нет в ${tmp1?.data_rows == null ? prefix1 : prefix2}"
-                                                if (tmp1?.data_rows?.trim() == emptyDataRows || tmp2?.data_rows?.trim() == emptyDataRows) {
-                                                    tdClass = 'td_gr'
-                                                    datarowsC = '+/—'
-                                                    title = "$title, но оба пустые"
-                                                } else {
-                                                    // TODO Детальное сравнение
-                                                }
                                             }
+                                            // TODO Детальное сравнение
                                             td(class: tdClass, title: title, datarowsC)
                                         }
 
