@@ -270,14 +270,6 @@ void logicCheck() {
         if (row.corrInvCorrNumDate && !row.corrInvCorrNumDate.matches(pattern3Date)) {
             loggerError(row, String.format(ONE_FMT_ERROR_MSG, index, getColumnName(row,'corrInvCorrNumDate'), "<Номер: тип поля «Число/3/»> <Дата: тип поля «Дата», формат «ДД.ММ.ГГГГ»>"))
         }
-        // графа 8
-        if (row.buyerInnKpp && !row.buyerInnKpp.matches(/^(\S{12}|\S{10}\/\S{9})$/)) {
-            loggerError(row, String.format(TWO_FMT_ERROR_MSG, index, getColumnName(row,'buyerInnKpp'), "ХХХХХХХХХХ/ХХХХХХХХХ (организация) или ХХХХХХХХХХХХ (ИП)"))
-        }
-        // графа 10
-        if (row.mediatorInnKpp && !row.mediatorInnKpp.matches(/^(\S{12}|\S{10}\/\S{9})$/)) {
-            loggerError(row, String.format(TWO_FMT_ERROR_MSG, index, getColumnName(row,'mediatorInnKpp'), "ХХХХХХХХХХ/ХХХХХХХХХ (организация) или ХХХХХХХХХХХХ (ИП)"))
-        }
         // графа 11
         if (row.paymentDocNumDate && !row.paymentDocNumDate.matches(pattern256Date)) {
             loggerError(row, String.format(ONE_FMT_ERROR_MSG, index, getColumnName(row,'paymentDocNumDate'), "<Номер: тип поля «Строка/256/»> <Дата: тип поля «Дата», формат «ДД.ММ.ГГГГ»>"))
@@ -292,7 +284,9 @@ void logicCheck() {
         }
         def innKppPatterns = [/([0-9]{1}[1-9]{1}|[1-9]{1}[0-9]{1})[0-9]{8}\/([0-9]{1}[1-9]{1}|[1-9]{1}[0-9]{1})([0-9]{2})([0-9A-Z]{2})([0-9]{3})/, /([0-9]{1}[1-9]{1}|[1-9]{1}[0-9]{1})[0-9]{10}/]
         ['buyerInnKpp', 'mediatorInnKpp'].each { alias ->
-            if (checkPattern(logger, row, alias, row[alias], innKppPatterns, null, !isBalancePeriod())) {
+            if (row[alias] && !row[alias].matches(/^(\S{12}|\S{10}\/\S{9})$/)) {
+                loggerError(row, String.format(TWO_FMT_ERROR_MSG, index, getColumnName(row, alias), "ХХХХХХХХХХ/ХХХХХХХХХ (организация) или ХХХХХХХХХХХХ (ИП)"))
+            } else if (checkPattern(logger, row, alias, row[alias], innKppPatterns, null, !isBalancePeriod())) {
                 checkControlSumInn(logger, row, alias, row[alias].split("/")[0], !isBalancePeriod())
             } else if (row[alias]) {
                 if (!wasError) {
