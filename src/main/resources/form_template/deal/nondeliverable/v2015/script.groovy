@@ -206,6 +206,17 @@ void logicCheck() {
         if (outcomeSumCell.value != null && outcomeSumCell.value <= 0) {
             rowError(logger, row, "Строка $rowNum: Значение графы «$msgOut» должно быть больше «0»!")
         }
+
+        // Проверка диапазона дат
+        if (row.contractDate) {
+            checkDateValid(logger, row, 'contractDate', row.contractDate, true)
+        }
+        if (row.transactionDate) {
+            checkDateValid(logger, row, 'transactionDate', row.transactionDate, true)
+        }
+        if (row.transactionDeliveryDate) {
+            checkDateValid(logger, row, 'transactionDeliveryDate', row.transactionDeliveryDate, true)
+        }
     }
 
     if (formData.kind == FormDataKind.CONSOLIDATED) {

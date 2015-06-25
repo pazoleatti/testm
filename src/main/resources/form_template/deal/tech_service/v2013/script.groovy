@@ -210,6 +210,14 @@ void logicCheck() {
         if (row.count == 0) {
             rowError(logger, row, "Строка $rowNum: Графа «$countName» не может содержать значение 0.")
         }
+
+        // Проверка диапазона дат
+        if (row.contractDate) {
+            checkDateValid(logger, row, 'contractDate', row.contractDate, true)
+        }
+        if (row.transactionDate) {
+            checkDateValid(logger, row, 'transactionDate', row.transactionDate, true)
+        }
     }
 }
 

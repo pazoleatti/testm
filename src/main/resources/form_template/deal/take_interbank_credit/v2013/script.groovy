@@ -200,6 +200,17 @@ void logicCheck() {
             def countName = getColumnName(row, 'count')
             rowError(logger, row, "Строка $rowNum: Значение графы «$countName» не может содержать значение 0.")
         }
+
+        // Проверка диапазона дат
+        if (row.docDate) {
+            checkDateValid(logger, row, 'docDate', row.docDate, true)
+        }
+        if (row.dealDate) {
+            checkDateValid(logger, row, 'dealDate', row.dealDate, true)
+        }
+        if (row.dealDoneDate) {
+            checkDateValid(logger, row, 'dealDoneDate', row.dealDoneDate, true)
+        }
     }
 }
 

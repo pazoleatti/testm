@@ -168,6 +168,14 @@ void logicCheck() {
             def countName = getColumnName(row, 'count')
             rowError(logger, row, "Строка $rowNum: Значение графы «$countName» не может содержать значение 0.")
         }
+
+        // Проверка диапазона дат
+        if (row.contractDate) {
+            checkDateValid(logger, row, 'contractDate', row.contractDate, true)
+        }
+        if (row.transactionDate) {
+            checkDateValid(logger, row, 'transactionDate', row.transactionDate, true)
+        }
     }
 }
 

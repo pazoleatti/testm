@@ -182,6 +182,14 @@ void logicCheck() {
             def msg2 = row.getCell('contractDate').column.name
             rowError(logger, row, "Строка $rowNum: Значение графы «$msg1» должно быть не меньше значения графы «$msg2»!")
         }
+
+        // Проверка диапазона дат
+        if (row.contractDate) {
+            checkDateValid(logger, row, 'contractDate', row.contractDate, true)
+        }
+        if (row.transactionDate) {
+            checkDateValid(logger, row, 'transactionDate', row.transactionDate, true)
+        }
     }
 }
 

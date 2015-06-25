@@ -175,6 +175,14 @@ void logicCheck() {
             def msg2 = docDateCell.column.name
             rowError(logger, row, "Строка $rowNum: Значение графы «$msg1» должно быть не меньше значения графы «$msg2»!")
         }
+
+        // Проверка диапазона дат
+        if (row.docDate) {
+            checkDateValid(logger, row, 'docDate', row.docDate, true)
+        }
+        if (row.dealDate) {
+            checkDateValid(logger, row, 'dealDate', row.dealDate, true)
+        }
     }
 }
 

@@ -186,6 +186,14 @@ void logicCheck() {
             def msg = row.getCell('count').column.name
             rowError(logger, row, "Строка $rowNum: Значение графы «$msg» может быть только «1»!")
         }
+
+        // Проверка диапазона дат
+        if (row.docDate) {
+            checkDateValid(logger, row, 'docDate', row.docDate, true)
+        }
+        if (row.dealDate) {
+            checkDateValid(logger, row, 'dealDate', row.dealDate, true)
+        }
     }
 }
 

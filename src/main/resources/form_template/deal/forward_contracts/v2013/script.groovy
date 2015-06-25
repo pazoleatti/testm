@@ -191,6 +191,17 @@ void logicCheck() {
             def msg1 = row.getCell('total').column.name
             rowWarning(logger, row, "Строка $rowNum: Значение графы «$msg1» должно быть равно значению графы «$msgPrice»!")
         }
+
+        // Проверка диапазона дат
+        if (row.docDate) {
+            checkDateValid(logger, row, 'docDate', row.docDate, true)
+        }
+        if (row.dealDate) {
+            checkDateValid(logger, row, 'dealDate', row.dealDate, true)
+        }
+        if (row.dealDoneDate) {
+            checkDateValid(logger, row, 'dealDoneDate', row.dealDoneDate, true)
+        }
     }
 
     if (formData.kind == FormDataKind.CONSOLIDATED) {

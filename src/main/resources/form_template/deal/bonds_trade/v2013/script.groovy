@@ -182,6 +182,17 @@ void logicCheck() {
             def msg3 = row.getCell('bondCount').column.name
             rowError(logger, row, "Строка $rowNum: Значение графы «$msg1» должно быть равно отношению значений граф «$msg2» и «$msg3»!")
         }
+
+        // Проверка диапазона дат
+        if (row.contractDate) {
+            checkDateValid(logger, row, 'contractDate', row.contractDate, true)
+        }
+        if (row.transactionDate) {
+            checkDateValid(logger, row, 'transactionDate', row.transactionDate, true)
+        }
+        if (row.transactionDeliveryDate) {
+            checkDateValid(logger, row, 'transactionDeliveryDate', row.transactionDeliveryDate, true)
+        }
     }
 }
 

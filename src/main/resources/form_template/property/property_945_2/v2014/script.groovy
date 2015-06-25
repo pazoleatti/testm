@@ -378,6 +378,13 @@ void logicCheck() {
                     rowWarning(logger, row, errorMsg + "Текущие параметры представления декларации (Код субъекта, Код НО, КПП, Код ОКТМО) не предусмотрены (в справочнике «Параметры представления деклараций по налогу на имущество» отсутствует такая запись)!")
                 }
             }
+            // Проверка диапазона дат
+            if (row.propertyRightBeginDate) {
+                checkDateValid(logger, row, 'propertyRightBeginDate', row.propertyRightBeginDate, !isBalancePeriod())
+            }
+            if (row.propertyRightEndDate) {
+                checkDateValid(logger, row, 'propertyRightEndDate', row.propertyRightEndDate, !isBalancePeriod())
+            }
         } else {
             // Проверка итоговых значений
             if (row.getAlias() != 'total' && row.getAlias().indexOf('total') != -1) {
