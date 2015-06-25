@@ -691,9 +691,6 @@ public class FormDataServiceImpl implements FormDataService {
         Pair<ReportType, LockData> lockType = getLockTaskType(formDataId);
         if (!manual && (lockDataCheck != null || lockType != null)) {
             locked(formDataId, ReportType.DELETE_FD, lockType != null ? lockType : new Pair<ReportType, LockData>(ReportType.CHECK_FD, lockDataCheck), logger);
-        } else if (manual) {
-            // Форма не должна быть заблокирована для редактирования другим пользователем
-            checkLockedMe(lockService.getLock(generateTaskKey(formDataId, ReportType.EDIT_FD)), userInfo.getUser());
         }
 
         String keyTask = generateTaskKey(formDataId, reportType);
@@ -777,6 +774,10 @@ public class FormDataServiceImpl implements FormDataService {
             case ACCEPTED_TO_APPROVED:
             case ACCEPTED_TO_PREPARED:
             case ACCEPTED_TO_CREATED:
+                if (workflowMove.getFromState().equals(WorkflowState.ACCEPTED)) {
+                    // удаляем версию ручного ввода
+                    deleteFormData(logger, userInfo, formDataId, true);
+                }
                 sourceService.updateFDDDConsolidation(formDataId);
                 moveProcess(formData, userInfo, workflowMove, note, logger, isAsync, stateLogger);
                 break;

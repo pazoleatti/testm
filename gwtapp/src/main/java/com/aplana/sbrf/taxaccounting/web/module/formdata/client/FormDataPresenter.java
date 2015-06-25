@@ -731,6 +731,8 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
         Dialog.confirmMessage("Подтверждение", "Удалить версию ручного ввода и выполнить переход в статус \""+wfMove.getToState().getName()+"\"?", new DialogHandler() {
             @Override
             public void yes() {
+                commonMoveLogic(wfMove);
+/*
                 LogCleanEvent.fire(FormDataPresenter.this);
                 LogShowEvent.fire(FormDataPresenter.this, false);
                 DeleteFormDataAction action = new DeleteFormDataAction();
@@ -745,7 +747,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                                 formData.setManual(false);
                                 commonMoveLogic(wfMove);
                             }
-                        }, FormDataPresenter.this));
+                        }, FormDataPresenter.this));*/
                 Dialog.hideMessage();
             }
 
