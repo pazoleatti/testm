@@ -82,6 +82,9 @@ public class CheckFormDataHandler extends AbstractActionHandler<CheckFormDataAct
             String keyTask = formDataService.generateTaskKey(action.getFormData().getId(), reportType);
             Pair<ReportType, LockData> lockType = formDataService.getLockTaskType(action.getFormData().getId());
             LockData lockData = lockDataService.getLock(keyTask);
+            if (!action.isEditMode() && lockDataEdit != null) {
+                formDataService.locked(action.getFormData().getId(), reportType, new Pair<ReportType, LockData>(ReportType.EDIT_FD, lockDataEdit), logger);
+            }
             if (lockType != null && !lockType.getFirst().equals(ReportType.EDIT_FD)) {
                 formDataService.locked(action.getFormData().getId(), reportType, lockType, logger);
             }
