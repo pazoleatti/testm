@@ -1780,7 +1780,7 @@ void addData(def xml, int headRowCount) {
             emptyRow = true
         }
 
-        if (row.cell[0].text() == null || row.cell[0].text() == "") {
+        if (row.cell[0].text().isEmpty() && row.cell.findAll{!it.text().isEmpty()}.size() == 0) {
             continue
         }
 

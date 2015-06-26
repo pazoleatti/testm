@@ -271,9 +271,6 @@ void addData(def xml, int headRowCount) {
 
         def int xmlIndexCol = 0
 
-        // графа 1
-        newRow.rowNum = xmlIndexRow - headRowCount
-
         // графа 2
         newRow.name = getRecordIdImport(9, 'NAME', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, true)
         def map = getRefBookValue(9, newRow.name)
