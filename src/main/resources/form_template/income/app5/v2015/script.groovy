@@ -56,7 +56,7 @@ switch (formDataEvent) {
     case FormDataEvent.MOVE_PREPARED_TO_APPROVED: // Утвердить из "Подготовлена"
         logicCheck()
         break
-    case FormDataEvent.COMPOSE :
+    case FormDataEvent.COMPOSE:
         formDataService.consolidationTotal(formData, logger, ['total'])
         calc()
         logicCheck()
@@ -591,6 +591,9 @@ void importData() {
 
     // проверка шапки
     checkHeaderXls(headerValues, COLUMN_COUNT, HEADER_ROW_COUNT, tmpRow)
+    if (logger.containsLevel(LogLevel.ERROR)) {
+        return;
+    }
     // освобождение ресурсов для экономии памяти
     headerValues.clear()
     headerValues = null
@@ -667,7 +670,7 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
     (2..10).each { index ->
         headerMapping.put((headerRows[2][index]), index.toString())
     }
-    checkHeaderEquals(headerMapping)
+    checkHeaderEquals(headerMapping, logger)
 }
 
 /**

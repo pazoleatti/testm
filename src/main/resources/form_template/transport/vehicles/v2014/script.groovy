@@ -826,7 +826,10 @@ void importData() {
     (2..25).each { index ->
         headerMapping.put((xml.row[2].cell[index]), index.toString())
     }
-    checkHeaderEquals(headerMapping)
+    checkHeaderEquals(headerMapping, logger)
+    if (logger.containsLevel(LogLevel.ERROR)) {
+        return;
+    }
 
     addData(xml, 2)
 }

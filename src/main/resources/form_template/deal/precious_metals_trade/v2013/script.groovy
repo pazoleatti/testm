@@ -543,7 +543,10 @@ void importData() {
             (xml.row[1].cell[30]): 'гр. 21'
     ]
 
-    checkHeaderEquals(headerMapping)
+    checkHeaderEquals(headerMapping, logger)
+    if (logger.containsLevel(LogLevel.ERROR)) {
+        return;
+    }
 
     addData(xml, 1)
 }

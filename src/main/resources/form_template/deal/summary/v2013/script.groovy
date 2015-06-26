@@ -1744,7 +1744,10 @@ void importData() {
             (xml.row[1].cell[36]): getColumnName(tmpRow, 'city2'),
             (xml.row[1].cell[37]): getColumnName(tmpRow, 'locality2')
     ]
-    checkHeaderEquals(headerMapping)
+    checkHeaderEquals(headerMapping, logger)
+    if (logger.containsLevel(LogLevel.ERROR)) {
+        return;
+    }
 
     addData(xml, 1)
 }

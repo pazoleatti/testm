@@ -74,6 +74,9 @@ switch (formDataEvent) {
         calc()
         formDataService.saveCachedDataRows(formData, logger)
         break
+    case FormDataEvent.IMPORT:
+        noImport(logger)
+        break
 }
 
 @Field

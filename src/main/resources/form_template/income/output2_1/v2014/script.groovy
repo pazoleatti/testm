@@ -286,7 +286,10 @@ void importData() {
         headerMapping.put((xml.row[2].cell[index]), (index + 1).toString())
     }
 
-    checkHeaderEquals(headerMapping)
+    checkHeaderEquals(headerMapping, logger)
+    if (logger.containsLevel(LogLevel.ERROR)) {
+        return;
+    }
 
     // добавить данные в форму
     addData(xml, 3)

@@ -263,7 +263,10 @@ void importData() {
         headerMapping.put(xml.row[1].cell[it], 'гр. ' + (it + 1))
     }
 
-    checkHeaderEquals(headerMapping)
+    checkHeaderEquals(headerMapping, logger)
+    if (logger.containsLevel(LogLevel.ERROR)) {
+        return;
+    }
 
     addData(xml, 1)
 }

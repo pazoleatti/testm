@@ -470,6 +470,9 @@ void importData() {
 
     // проверка шапки
     checkHeaderXls(headerValues, COLUMN_COUNT, HEADER_ROW_COUNT, tmpRow)
+    if (logger.containsLevel(LogLevel.ERROR)) {
+        return;
+    }
     // освобождение ресурсов для экономии памяти
     headerValues.clear()
     headerValues = null
@@ -530,7 +533,7 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
         headerMapping.put((headerRows[1][index]), (index + 1).toString())
         index++
     }
-    checkHeaderEquals(headerMapping)
+    checkHeaderEquals(headerMapping, logger)
 }
 
 /**
