@@ -11,12 +11,6 @@ import groovy.transform.Field
  * 2409 — Сводный отчет
  *
  * formTemplateId = 2409
- *
- * TODO:
- *      - признак ручного ввода или автоматического выставляется в 0.5.1 неправильно, в 0.5.1 нельзя править ядро,
- *      поэтому для правильной загрузки файла в ручном вводе formData.setManual(true) сделан в скрипте. Убрать это
- *      когда поправят в FormDataServiceImpl.loadFormData (FormData fd = formDataDao.get(formDataId, isManual);)
- *
  */
 
 // 1.	dealNum1	п. 010 "Порядковый номер сделки по уведомлению"
@@ -108,7 +102,6 @@ switch (formDataEvent) {
         }
         break
     case FormDataEvent.IMPORT:
-        formData.setManual(true) // TODO (Ramil Timerbaev) потом убрать
         importData()
         if (!logger.containsLevel(LogLevel.ERROR)) {
             calc()
