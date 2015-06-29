@@ -509,7 +509,7 @@ void importData() {
             break
         }
         // Пропуск итоговых строк
-        if (rowValues[INDEX_FOR_SKIP]) {
+        if (rowValues[INDEX_FOR_SKIP] == "Итого за текущий отчетный (налоговый) период" || rowValues[INDEX_FOR_SKIP].contains("Итого за текущий квартал")) {
             allValues.remove(rowValues)
             rowValues.clear()
             continue

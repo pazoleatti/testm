@@ -458,7 +458,7 @@ void importData() {
     int HEADER_ROW_COUNT = 3
     String TABLE_START_VALUE = '№ пп'
     String TABLE_END_VALUE = null
-    int INDEX_FOR_SKIP = 0
+    int INDEX_FOR_SKIP = 1
 
     def allValues = []      // значения формы
     def headerValues = []   // значения шапки
@@ -495,7 +495,7 @@ void importData() {
             break
         }
         // Пропуск итоговых строк
-        if (!rowValues[INDEX_FOR_SKIP]) {
+        if (rowValues[INDEX_FOR_SKIP] && (rowValues[INDEX_FOR_SKIP] == "Итого" || rowValues[INDEX_FOR_SKIP].contains("Итого по КНУ "))) {
             allValues.remove(rowValues)
             rowValues.clear()
             continue
