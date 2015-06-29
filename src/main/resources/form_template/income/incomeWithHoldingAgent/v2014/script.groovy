@@ -183,10 +183,6 @@ def logicCheck() {
         if (row.kpp && !checkPattern(logger, row, 'kpp', row.kpp, KPP_PATTERN, wasError[2] ? null : KPP_MEANING, true)) {
             wasError[2] = true
         }
-        // Проверка формата дат
-        if (row.date) {
-            checkDateValid(logger, row, 'date', row.date, true)
-        }
     }
 }
 
