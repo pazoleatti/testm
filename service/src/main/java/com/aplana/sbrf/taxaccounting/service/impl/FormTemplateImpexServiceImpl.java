@@ -25,7 +25,15 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -73,7 +81,7 @@ public class FormTemplateImpexServiceImpl implements
 	@Override
 	public void exportFormTemplate(Integer id, OutputStream os) {
 		try {
-			FormTemplate ft = formTemplateService.getFullFormTemplate(id, new Logger());
+			FormTemplate ft = formTemplateService.get(id, new Logger());
 			ZipOutputStream zos = new ZipOutputStream(os);
 
 			// Version
@@ -96,7 +104,7 @@ public class FormTemplateImpexServiceImpl implements
 			ze = new ZipEntry(SCRIPT_FILE);
 			zos.putNextEntry(ze);
 
-            String ftScript = formTemplateDao.getFormTemplateScript(id);
+            String ftScript = ft.getScript();
 			if (ftScript != null) {
 				zos.write(ftScript.getBytes(ENCODING));
             }
@@ -141,7 +149,7 @@ public class FormTemplateImpexServiceImpl implements
 			}
 
             if ("1.0".equals(version)) {
-				FormTemplate ft = formTemplateService.getFullFormTemplate(id);
+				FormTemplate ft = formTemplateService.get(id);
 				if (files.get(CONTENT_FILE).length != 0) {
 					FormTemplateContent ftc;
 					JAXBContext jaxbContext = JAXBContext.newInstance(FormTemplateContent.class);
@@ -347,7 +355,7 @@ public class FormTemplateImpexServiceImpl implements
                 tempFile.close();
                 //
                 tempFile =  new FileOutputStream(new File(folderTemplate.getAbsolutePath() + File.separator + SCRIPT_FILE));
-                String ftScript = formTemplateDao.getFormTemplateScript(template.getId());
+                String ftScript = template.getScript();
                 if (ftScript != null) {
                     tempFile.write(ftScript.getBytes(ENCODING));
                 }
@@ -355,7 +363,7 @@ public class FormTemplateImpexServiceImpl implements
                 //
                 tempFile = new FileOutputStream(new File(folderTemplate.getAbsolutePath() + File.separator + ROWS_FILE));
                 try {
-                    tempFile.write(xmlSerializationUtils.serialize(formTemplateDao.getDataCells(template)).getBytes(ENCODING));
+                    tempFile.write(xmlSerializationUtils.serialize(template.getRows()).getBytes(ENCODING));
                 } catch (DaoException ignore){
 
                 }
@@ -363,7 +371,7 @@ public class FormTemplateImpexServiceImpl implements
                 //
                 tempFile = new FileOutputStream(new File(folderTemplate.getAbsolutePath() + File.separator + HEADERS_FILE));
                 try {
-                    tempFile.write(xmlSerializationUtils.serialize(formTemplateDao.getHeaderCells(template)).getBytes(ENCODING));
+                    tempFile.write(xmlSerializationUtils.serialize(template.getHeaders()).getBytes(ENCODING));
                 } catch (DaoException ignore){
 
                 }

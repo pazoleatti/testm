@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
 import com.aplana.sbrf.taxaccounting.log.impl.ScriptMessageDecorator;
 import com.aplana.sbrf.taxaccounting.model.FormData;
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
+import com.aplana.sbrf.taxaccounting.model.FormTemplate;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
@@ -11,6 +12,7 @@ import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.FormDataScriptingService;
 import com.aplana.sbrf.taxaccounting.service.shared.ScriptComponentContextHolder;
 import com.aplana.sbrf.taxaccounting.util.ScriptExposed;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationContextAware;
@@ -45,8 +47,9 @@ public class FormDataScriptingServiceImpl extends TAAbstractScriptingServiceImpl
                               Map<String, Object> additionalParameters) {
 
         // Если скрипт отсутствует, то ничего не делаем
-        String script = formTemplateDao.getFormTemplateScript(formData.getFormTemplateId());
-        if (script == null || script.trim().isEmpty()) {
+		FormTemplate formTemplate = formTemplateDao.get(formData.getFormTemplateId());
+        String script = formTemplate.getScript();
+		if (StringUtils.isBlank(script)) {
             return;
         }
 

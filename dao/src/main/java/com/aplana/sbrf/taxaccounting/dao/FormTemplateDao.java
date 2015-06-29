@@ -1,7 +1,9 @@
 package com.aplana.sbrf.taxaccounting.dao;
 
-import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.model.formdata.HeaderCell;
+import com.aplana.sbrf.taxaccounting.model.FormTemplate;
+import com.aplana.sbrf.taxaccounting.model.TemplateFilter;
+import com.aplana.sbrf.taxaccounting.model.VersionSegment;
+import com.aplana.sbrf.taxaccounting.model.VersionedObjectStatus;
 
 import java.util.Collection;
 import java.util.Date;
@@ -21,8 +23,7 @@ public interface FormTemplateDao {
 	 */
 	List<FormTemplate> listAll();
 	/**
-	 * Получить макет налоговой формы (без {@link DataRow}). Для получения строк {@link #getDataCells(com.aplana.sbrf.taxaccounting.model.FormTemplate)}
-     * {@link #getHeaderCells(com.aplana.sbrf.taxaccounting.model.FormTemplate)}
+	 * Получить макет налоговой формы.
 	 * @param formTemplateId идентификатор макета
 	 * @return объект, представляющий описание налоговой формы
 	 */
@@ -51,26 +52,6 @@ public interface FormTemplateDao {
 	 * 	или если обнаружено несколько действуюших описаний по данному виду формы
 	 */
 	int getActiveFormTemplateId(int formTypeId, int reportPeriodId);
-
-    /**
-     * Получает тело скрипта. Необходим для lazy-инициализации.
-     * @return тело скрипта
-     */
-    String getFormTemplateScript(int formTemplateId);
-
-    /**
-     * Получаем набор начальных строк из шаблона.
-     * @param formTemplate - шаблон
-     * @return начальные строки
-     */
-    List<DataRow<Cell>> getDataCells(FormTemplate formTemplate);
-
-    /**
-     * Получаем заголовки для столбцов
-     * @param formTemplate - шаблон
-     * @return заголовки столбцов
-     */
-    List<DataRow<HeaderCell>> getHeaderCells(FormTemplate formTemplate);
 
     /**
      * Получить список идентификаторов макетов налоговых форм по фильтру

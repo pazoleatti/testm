@@ -4,8 +4,10 @@ package com.aplana.sbrf.taxaccounting.model;
  * @author Fail Mukhametdinov
  */
 public enum NumerationType {
+	/** Последовательная */
     SERIAL(0, "Последовательная"),
-    CROSS(1, "Сквозная");
+    /** Сквозная */
+	CROSS(1, "Сквозная");
 
     private int id;
     private String title;
