@@ -155,6 +155,8 @@ void calc() {
 void logicCheck() {
     def dataRows = formDataService.getDataRowHelper(formData).allCached
 
+    boolean wasError = false
+
     for (def row in dataRows) {
         def rowNum = row.getIndex()
         def errorMsg = "Строка $rowNum: "
