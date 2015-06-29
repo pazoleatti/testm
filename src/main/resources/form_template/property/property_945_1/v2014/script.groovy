@@ -4,6 +4,8 @@ import com.aplana.sbrf.taxaccounting.model.FormData
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.FormToFormRelation
 import com.aplana.sbrf.taxaccounting.model.Formats
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
+import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
 import au.com.bytecode.opencsv.CSVReader
 import com.aplana.sbrf.taxaccounting.model.util.StringUtils
@@ -798,90 +800,6 @@ def String getTitle(def int typeNum) {
     return aliasNums.find { key, value -> value == typeNum }.key
 }
 
-void importData() {
-    def tempRow = formData.createDataRow()
-    def xml = getXML(ImportInputStream, importService, UploadFileName, getColumnName(tempRow, 'name'), null)
-
-    checkHeaderSize(xml.row[0].cell.size(), xml.row.size(), 7, 2)
-
-    def headerMapping = [
-            (xml.row[0].cell[0]): getColumnName(tempRow, 'name'),
-            (xml.row[0].cell[1]): 'Налоговая база (в руб. коп.)',
-            (xml.row[1].cell[1]): '60401, 60410, 60411',
-            (xml.row[1].cell[2]): '60601',
-            (xml.row[1].cell[3]): '60804',
-            (xml.row[1].cell[4]): '60805',
-            (xml.row[1].cell[5]): '91211',
-            (xml.row[1].cell[6]): 'Сумма'
-    ]
-    (1..7).each { index ->
-        headerMapping.put((xml.row[2].cell[index - 1]), index.toString())
-    }
-    checkHeaderEquals(headerMapping, logger)
-    if (logger.containsLevel(LogLevel.ERROR)) {
-        return;
-    }
-
-    addData(xml, 2)
-}
-
-void addData(def xml, int headRowCount) {
-    def xmlIndexRow = -1
-    def int rowOffset = xml.infoXLS.rowOffset[0].cell[0].text().toInteger()
-    def int colOffset = xml.infoXLS.colOffset[0].cell[0].text().toInteger()
-
-    def rows = []
-    def int rowIndex = 1
-
-    for (def row : xml.row) {
-        xmlIndexRow++
-        def int xlsIndexRow = xmlIndexRow + rowOffset
-
-        /* Пропуск строк шапок */
-        if (xmlIndexRow <= headRowCount) {
-            continue
-        }
-
-        if ((row.cell.find { it.text() != "" }.toString()) == "") {
-            break
-        }
-
-        def newRow = formData.createStoreMessagingDataRow()
-        newRow.setIndex(rowIndex++)
-        newRow.setImportIndex(xlsIndexRow)
-        editableColumns.each {
-            newRow.getCell(it).editable = true
-            newRow.getCell(it).setStyleAlias('Редактируемая')
-        }
-        autoFillColumns.each {
-            newRow.getCell(it).setStyleAlias('Автозаполняемая')
-        }
-
-        // графа 1
-        newRow.name = row.cell[0].text()
-        // графа 2
-        newRow.taxBase1 = parseNumber(row.cell[1].text(), xlsIndexRow, 1 + colOffset, logger, true)
-        // графа 3
-        newRow.taxBase2 = parseNumber(row.cell[2].text(), xlsIndexRow, 2 + colOffset, logger, true)
-        // графа 4
-        newRow.taxBase3 = parseNumber(row.cell[3].text(), xlsIndexRow, 3 + colOffset, logger, true)
-        // графа 5
-        newRow.taxBase4 = parseNumber(row.cell[4].text(), xlsIndexRow, 4 + colOffset, logger, true)
-        // графа 6
-        newRow.taxBase5 = parseNumber(row.cell[5].text(), xlsIndexRow, 5 + colOffset, logger, true)
-        // графа 7
-        newRow.taxBaseSum = parseNumber(row.cell[6].text(), xlsIndexRow, 6 + colOffset, logger, true)
-
-        rows.add(newRow)
-    }
-
-    showMessages(rows, logger)
-    if (!logger.containsLevel(LogLevel.ERROR)) {
-        updateIndexes(rows)
-        formDataService.getDataRowHelper(formData).allCached = rows
-    }
-}
-
 void importTransportData() {
     checkBeforeGetXml(ImportInputStream, UploadFileName)
     if (!UploadFileName.endsWith(".rnu")) {
@@ -1232,4 +1150,125 @@ def getFormToFormRelation(def tmpFormData, def departmentFormType, def isSource,
         formToFormRelation.created = false
     }
     return formToFormRelation
+}
+
+void importData() {
+    def tmpRow = formData.createDataRow()
+    int COLUMN_COUNT = 7
+    int HEADER_ROW_COUNT = 3
+    String TABLE_START_VALUE = getColumnName(tmpRow, 'name')
+    String TABLE_END_VALUE = null
+
+    def allValues = []      // значения формы
+    def headerValues = []   // значения шапки
+    def paramsMap = ['rowOffset' : 0, 'colOffset' : 0]  // мапа с параметрами (отступы сверху и слева)
+
+    checkAndReadFile(ImportInputStream, UploadFileName, allValues, headerValues, TABLE_START_VALUE, TABLE_END_VALUE, HEADER_ROW_COUNT, paramsMap)
+
+    // проверка шапки
+    checkHeaderXls(headerValues, COLUMN_COUNT, HEADER_ROW_COUNT, tmpRow)
+    if (logger.containsLevel(LogLevel.ERROR)) {
+        return;
+    }
+    // освобождение ресурсов для экономии памяти
+    headerValues.clear()
+    headerValues = null
+
+    def fileRowIndex = paramsMap.rowOffset
+    def colOffset = paramsMap.colOffset
+    paramsMap.clear()
+    paramsMap = null
+
+    def rowIndex = 0
+    def rows = []
+    def allValuesCount = allValues.size()
+
+    // формирвание строк нф
+    for (def i = 0; i < allValuesCount; i++) {
+        rowValues = allValues[0]
+        fileRowIndex++
+        // все строки пустые - выход
+        if (!rowValues) {
+            allValues.remove(rowValues)
+            rowValues.clear()
+            break
+        }
+        // простая строка
+        rowIndex++
+        def newRow = getNewRowFromXls(rowValues, colOffset, fileRowIndex, rowIndex)
+        rows.add(newRow)
+        // освободить ненужные данные - иначе не хватит памяти
+        allValues.remove(rowValues)
+        rowValues.clear()
+    }
+
+    showMessages(rows, logger)
+    if (!logger.containsLevel(LogLevel.ERROR)) {
+        updateIndexes(rows)
+        formDataService.getDataRowHelper(formData).allCached = rows
+    }
+}
+
+/**
+ * Проверить шапку таблицы
+ *
+ * @param headerRows строки шапки
+ * @param colCount количество колонок в таблице
+ * @param rowCount количество строк в таблице
+ * @param tmpRow вспомогательная строка для получения названии графов
+ */
+void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
+    if (headerRows.isEmpty()) {
+        throw new ServiceException(WRONG_HEADER_ROW_SIZE)
+    }
+    checkHeaderSize(headerRows[headerRows.size() - 1].size(), headerRows.size(), colCount, rowCount)
+
+    def headerMapping = [
+            (headerRows[0][0]): getColumnName(tmpRow, 'name'),
+            (headerRows[0][1]): 'Налоговая база (в руб. коп.)',
+            (headerRows[1][1]): '60401, 60410, 60411',
+            (headerRows[1][2]): '60601',
+            (headerRows[1][3]): '60804',
+            (headerRows[1][4]): '60805',
+            (headerRows[1][5]): '91211',
+            (headerRows[1][6]): 'Сумма'
+    ]
+    (1..7).each { index ->
+        headerMapping.put((headerRows[2][index - 1]), index.toString())
+    }
+
+    checkHeaderEquals(headerMapping, logger)
+}
+
+/**
+ * Получить новую строку нф по значениям из экселя.
+ *
+ * @param values список строк со значениями
+ * @param colOffset отступ в колонках
+ * @param fileRowIndex номер строки в тф
+ * @param rowIndex строка в нф
+ */
+def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) {
+    def newRow = formData.createStoreMessagingDataRow()
+    editableColumns.each {
+        newRow.getCell(it).editable = true
+        newRow.getCell(it).setStyleAlias('Редактируемая')
+    }
+    autoFillColumns.each {
+        newRow.getCell(it).setStyleAlias('Автозаполняемая')
+    }
+    newRow.setIndex(rowIndex)
+    newRow.setImportIndex(fileRowIndex)
+
+    // графа 1
+    colIndex = 0
+    newRow.name = values[colIndex]
+
+    // графа 2..7
+    ['taxBase1', 'taxBase2', 'taxBase3', 'taxBase4', 'taxBase5', 'taxBaseSum'].each { alias ->
+        colIndex++
+        newRow[alias] = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
+    }
+
+    return newRow
 }
