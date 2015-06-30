@@ -439,7 +439,8 @@ public class RefBookUniversal implements RefBookDataProvider {
                         throw new ServiceException(CROSS_ERROR_MSG);
                     }
                 }
-                List<String> usagesResult = refBookDao.isVersionUsed(refBookId, Arrays.asList(result.getRecordId()), versionFrom, versionTo, false, null);
+                //Ищем все ссылки на запись справочника в новом периоде
+                List<String> usagesResult = refBookDao.isVersionUsed(refBookId, Arrays.asList(result.getRecordId()), versionFrom, versionTo, true, null);
                 if (usagesResult != null && !usagesResult.isEmpty()) {
                     for (String error: usagesResult) {
                         if (logger != null) {
@@ -588,33 +589,19 @@ public class RefBookUniversal implements RefBookDataProvider {
 
             /** Проверяем изменились ли значения атрибутов */
             boolean isValuesChanged = checkValuesChanged(uniqueRecordId, records);
-
-            //Проверка использования
-            if (refBook.isHierarchic()) {
-                //Поиск среди дочерних элементов
-                List<Date> childrenVersions = refBookDao.isVersionUsedLikeParent(refBookId, uniqueRecordId, versionFrom);
-                if (childrenVersions != null && !childrenVersions.isEmpty()) {
-                    for (Date version : childrenVersions) {
-                        if (logger != null) {
-                            logger.error(String.format("Существует дочерняя запись, действует с %s", formatter.get().format(version)));
-                        }
-                    }
-                    throw new ServiceException("Изменение невозможно, обнаружено использование элемента справочника!");
-                }
-            }
-            List<String> usagesResult = refBookDao.isVersionUsed(refBookId, Arrays.asList(uniqueRecordId), versionFrom, versionTo, isValuesChanged,
-                    RefBookTableRef.getTablesIdByRefBook(refBookId) == null ?
-                            Collections.<Long>emptyList() :
-                            Arrays.asList(ArrayUtils.toObject(RefBookTableRef.getTablesIdByRefBook(refBookId))));
-            if (usagesResult != null && !usagesResult.isEmpty()) {
-                for (String error: usagesResult) {
-                    logger.error(error);
-                }
-                throw new ServiceException("Изменение невозможно, обнаружено использование элемента справочника!");
+            
+            if (isValuesChanged) {
+                //Если значения атрибутов изменились, то проверяем все использования записи, без учета периода
+                checkUsages(refBook, uniqueRecordId, versionFrom, versionTo, null, logger);
             }
 
             //Обновление периода актуальности
             if (isRelevancePeriodChanged) {
+                if (!isValuesChanged) {
+                    //Если изменился только период актуальности, то ищем все ссылки не пересекающиеся с новым периодом
+                    checkUsages(refBook, uniqueRecordId, versionFrom, versionTo, false, logger);
+                }
+
                 List<Long> uniqueIdAsList = Arrays.asList(uniqueRecordId);
                 if (previousVersion != null && (previousVersion.isVersionEndFake() && SimpleDateUtils.addDayToDate(previousVersion.getVersionEnd(), 1).equals(versionFrom))) {
                     //Если установлена дата окончания, которая совпадает с существующей фиктивной версией - то она удаляется
@@ -664,6 +651,32 @@ public class RefBookUniversal implements RefBookDataProvider {
             } else {
                 throw new ServiceException("Запись не сохранена, обнаружены фатальные ошибки!");
             }
+        }
+    }
+    
+    private void checkUsages(RefBook refBook, Long uniqueRecordId, Date versionFrom, Date versionTo, Boolean restrictPeriod, Logger logger) {
+        //Проверка использования
+        if (refBook.isHierarchic()) {
+            //Поиск среди дочерних элементов
+            List<Date> childrenVersions = refBookDao.isVersionUsedLikeParent(refBookId, uniqueRecordId, versionFrom);
+            if (childrenVersions != null && !childrenVersions.isEmpty()) {
+                for (Date version : childrenVersions) {
+                    if (logger != null) {
+                        logger.error(String.format("Существует дочерняя запись, действует с %s", formatter.get().format(version)));
+                    }
+                }
+                throw new ServiceException("Изменение невозможно, обнаружено использование элемента справочника!");
+            }
+        }
+        List<String> usagesResult = refBookDao.isVersionUsed(refBookId, Arrays.asList(uniqueRecordId), versionFrom, versionTo, restrictPeriod,
+                RefBookTableRef.getTablesIdByRefBook(refBookId) == null ?
+                        Collections.<Long>emptyList() :
+                        Arrays.asList(ArrayUtils.toObject(RefBookTableRef.getTablesIdByRefBook(refBookId))));
+        if (usagesResult != null && !usagesResult.isEmpty()) {
+            for (String error: usagesResult) {
+                logger.error(error);
+            }
+            throw new ServiceException("Изменение невозможно, обнаружено использование элемента справочника!");
         }
     }
 
@@ -835,7 +848,8 @@ public class RefBookUniversal implements RefBookDataProvider {
             if (refBook.isHierarchic()) {
                 checkChildren(uniqueRecordIds);
             }
-            List<String> usagesResult = refBookDao.isVersionUsed(refBookId, uniqueRecordIds, null, null, true,
+            //Ищем все ссылки на запись справочника без учета периода
+            List<String> usagesResult = refBookDao.isVersionUsed(refBookId, uniqueRecordIds, null, null, null,
                     RefBookTableRef.getTablesIdByRefBook(refBookId) == null ?
                             Collections.<Long>emptyList() :
                             Arrays.asList(ArrayUtils.toObject(RefBookTableRef.getTablesIdByRefBook(refBookId))));
@@ -927,7 +941,8 @@ public class RefBookUniversal implements RefBookDataProvider {
             if (refBook.isHierarchic()) {
                 checkChildren(uniqueRecordIds);
             }
-            List<String> usagesResult = refBookDao.isVersionUsed(refBookId, uniqueRecordIds, null, null, true,
+            //Ищем все ссылки на запись справочника без учета периода
+            List<String> usagesResult = refBookDao.isVersionUsed(refBookId, uniqueRecordIds, null, null, null,
                     RefBookTableRef.getTablesIdByRefBook(refBookId) == null ?
                             Collections.<Long>emptyList() :
                             Arrays.asList(ArrayUtils.toObject(RefBookTableRef.getTablesIdByRefBook(refBookId))));
