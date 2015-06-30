@@ -512,7 +512,9 @@ void importData() {
             break
         }
         // Пропуск итоговых строк
-        if (rowValues[INDEX_FOR_SKIP] && rowValues[INDEX_FOR_SKIP].contains("Итого по НО ")) {
+        logger.info("rowValues[INDEX_FOR_SKIP] = "+rowValues[INDEX_FOR_SKIP])
+        if (rowValues[INDEX_FOR_SKIP] && (rowValues[INDEX_FOR_SKIP].contains("Итого по НО ") || rowValues[INDEX_FOR_SKIP] == "Общий итог")) {
+            logger.info("continue")
             allValues.remove(rowValues)
             rowValues.clear()
             continue
