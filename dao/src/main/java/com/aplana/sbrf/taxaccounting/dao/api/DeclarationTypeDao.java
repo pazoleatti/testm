@@ -38,8 +38,7 @@ public interface DeclarationTypeDao {
 
     /**
      * Обновить DeclarationTypeName
-     * @param declarationTypeId идентификатор вида декларации
-     * @param newName новое имя вида декларации
+     * @param type вид декларации
      */
     void updateDT(DeclarationType type);
 
