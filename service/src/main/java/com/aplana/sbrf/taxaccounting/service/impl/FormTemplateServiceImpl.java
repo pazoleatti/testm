@@ -3,12 +3,24 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentReportPeriodDao;
-import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.AutoNumerationColumn;
+import com.aplana.sbrf.taxaccounting.model.Cell;
+import com.aplana.sbrf.taxaccounting.model.Column;
+import com.aplana.sbrf.taxaccounting.model.ColumnType;
+import com.aplana.sbrf.taxaccounting.model.DataRow;
+import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod;
+import com.aplana.sbrf.taxaccounting.model.FormStyle;
+import com.aplana.sbrf.taxaccounting.model.FormTemplate;
+import com.aplana.sbrf.taxaccounting.model.LockData;
+import com.aplana.sbrf.taxaccounting.model.NumerationType;
+import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.model.TemplateFilter;
+import com.aplana.sbrf.taxaccounting.model.VersionSegment;
+import com.aplana.sbrf.taxaccounting.model.VersionedObjectStatus;
 import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
-import com.aplana.sbrf.taxaccounting.model.util.FormDataUtils;
 import com.aplana.sbrf.taxaccounting.service.FormDataService;
 import com.aplana.sbrf.taxaccounting.service.FormTemplateService;
 import com.aplana.sbrf.taxaccounting.util.TransactionHelper;
@@ -23,7 +35,14 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Реализация сервиса для работы с шаблонами налоговых форм
@@ -65,6 +84,17 @@ public class FormTemplateServiceImpl implements FormTemplateService {
         }catch (DaoException e){
             throw new ServiceException("Обновление статуса версии.", e);
         }
+	}
+
+	@Override
+	public FormTemplate get(int formTemplateId, Logger logger) {
+		try {
+			return formTemplateDao.get(formTemplateId);
+		} catch (DaoException e){
+			this.logger.error("Ошибка при получении версии макета НФ.", e);
+			logger.error("Ошибка при получении версии макета НФ. %s", e.getMessage());
+		}
+		return null;
 	}
 
     @Transactional(readOnly = false)
@@ -113,56 +143,6 @@ public class FormTemplateServiceImpl implements FormTemplateService {
             public void execute() {
             }
         });
-    }
-
-    @Override
-    public String getFormTemplateScript(int formTemplateId, Logger logger) {
-        try {
-            return formTemplateDao.getFormTemplateScript(formTemplateId);
-        } catch (DaoException e){
-            this.logger.error("Ошибка получение НФ.", e);
-            logger.error("Ошибка получение НФ.", e.getLocalizedMessage());
-            return "";
-        }
-    }
-
-    @Override
-    public FormTemplate getFullFormTemplate(int formTemplateId) {
-        try {
-            FormTemplate formTemplate = formTemplateDao.get(formTemplateId);
-            formTemplate.getRows().clear();
-            formTemplate.getRows().addAll(formTemplateDao.getDataCells(formTemplate));
-            formTemplate.getHeaders().clear();
-            formTemplate.getHeaders().addAll(formTemplateDao.getHeaderCells(formTemplate));
-            FormDataUtils.setValueOwners(formTemplate.getHeaders());
-            return formTemplate;
-        } catch (DaoException e){
-            logger.error("Ошибка при получении шаблона НФ.", e);
-            throw new ServiceException("Ошибка при получении шаблона НФ.", e);
-        }
-    }
-
-    @Override
-    public FormTemplate getFullFormTemplate(int formTemplateId, Logger logger) {
-        FormTemplate formTemplate = formTemplateDao.get(formTemplateId);
-        if(formTemplate.getRows().isEmpty()){
-            try {
-                formTemplate.getRows().addAll(formTemplateDao.getDataCells(formTemplate));
-            } catch (DaoException e){
-                this.logger.error("Ошибка при получении начальных данных шаблона НФ.", e);
-                logger.error("Ошибка при получении графы \"Начальные данные\" шаблона НФ. %s", e.getMessage());
-            }
-        }
-        if (formTemplate.getHeaders().isEmpty()){
-            try {
-                formTemplate.getHeaders().addAll(formTemplateDao.getHeaderCells(formTemplate));
-                FormDataUtils.setValueOwners(formTemplate.getHeaders());
-            } catch (DaoException e){
-                this.logger.error("Ошибка при получении заголовков шаблона НФ.", e);
-                logger.error("Ошибка при получении графы \"Заголовки\" шаблона НФ. %s", e.getMessage());
-            }
-        }
-        return formTemplate;
     }
 
     @Override
@@ -379,35 +359,39 @@ public class FormTemplateServiceImpl implements FormTemplateService {
 
     @Override
     public void validateFormAutoNumerationColumn(FormTemplate formTemplate, Logger logger, TAUserInfo user) {
-        // Если есть хоть одна автонумеруемая графа
-        if (isAnyAutoNumerationColumn(formTemplate, NumerationType.CROSS)) {
-            Integer formTemplateId = formTemplate.getId();
-            // Проверяем наличие в версии макета до редактирования хотя бы одной автонумеруемой графы, у которой "Тип нумерации строк" != "Сквозная".
-            FormTemplate fullFormTemplate = getFullFormTemplate(formTemplateId);
-            // TODO Левыкин: Возможно обратный переход тоже нужно запретить http://conf.aplana.com/pages/viewpage.action?pageId=11377661&focusedCommentId=14818097#comment-14818097
-            if (isAnyAutoNumerationColumn(fullFormTemplate, NumerationType.SERIAL)) {
-                List<DepartmentReportPeriod> departmentReportPeriodList = departmentReportPeriodDao.getClosedForFormTemplate(formTemplateId);
+		boolean newCross = isAnyAutoNumerationColumn(formTemplate, NumerationType.CROSS);
+		boolean newSerial = isAnyAutoNumerationColumn(formTemplate, NumerationType.SERIAL);
 
-                if (departmentReportPeriodList.size() != 0) {
-                    StringBuilder stringBuilder = new StringBuilder();
-                    for (int i = 0; i < departmentReportPeriodList.size(); i++) {
-                        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodList.get(i);
-                        stringBuilder.append(departmentReportPeriod.getReportPeriod().getName()).append(" ");
-                        stringBuilder.append(departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear());
-                        if (departmentReportPeriod.getCorrectionDate() != null) {
-                            stringBuilder.append(", корр. (").append(SIMPLE_DATE_FORMAT.format(departmentReportPeriod.getCorrectionDate())).append(")");
-                        }
-                        if (i < departmentReportPeriodList.size() - 1) {
-                            stringBuilder.append(", ");
-                        }
-                    }
-                    logger.error("Следующие периоды налоговых форм данной версии макета закрыты: " +
-                            stringBuilder.toString() + ". " +
-                            "Для добавления в макет автонумеруемой графы с типом сквозной нумерации строк необходимо открыть перечисленные периоды!");
-                } else {
-                    formDataService.batchUpdatePreviousNumberRow(formTemplate, user);
-                }
-            }
+		Integer formTemplateId = formTemplate.getId();
+		FormTemplate formTemplateOld = get(formTemplateId);
+		boolean oldCross = isAnyAutoNumerationColumn(formTemplateOld, NumerationType.CROSS);
+		boolean oldSerial = isAnyAutoNumerationColumn(formTemplateOld, NumerationType.SERIAL);
+
+		// если есть автонумеруемые графы и их тип поменялся
+		// http://conf.aplana.com/pages/viewpage.action?pageId=11377661&focusedCommentId=14818097#comment-14818097
+		if ((oldCross && newSerial) || (oldSerial && newCross)) { //9А
+			List<DepartmentReportPeriod> departmentReportPeriodList = departmentReportPeriodDao.getClosedForFormTemplate(formTemplateId);
+
+			if (departmentReportPeriodList.size() != 0) {
+				//9А.1.А
+				StringBuilder stringBuilder = new StringBuilder();
+				for (int i = 0; i < departmentReportPeriodList.size(); i++) {
+					DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodList.get(i);
+					stringBuilder.append(departmentReportPeriod.getReportPeriod().getName()).append(" ");
+					stringBuilder.append(departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear());
+					if (departmentReportPeriod.getCorrectionDate() != null) {
+						stringBuilder.append(", корр. (").append(SIMPLE_DATE_FORMAT.format(departmentReportPeriod.getCorrectionDate())).append(")");
+					}
+					if (i < departmentReportPeriodList.size() - 1) {
+						stringBuilder.append(", ");
+					}
+				}
+				logger.error("Следующие периоды налоговых форм данной версии макета закрыты: " +
+						stringBuilder.toString() + ". " +
+						"Для добавления в макет автонумеруемой графы с типом сквозной нумерации строк необходимо открыть перечисленные периоды!");
+			} else if (oldSerial && newCross) { // 9А.1.1
+				formDataService.batchUpdatePreviousNumberRow(formTemplate, user);
+			}
         }
     }
 

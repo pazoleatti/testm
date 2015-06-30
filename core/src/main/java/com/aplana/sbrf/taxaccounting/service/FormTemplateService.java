@@ -1,6 +1,12 @@
 package com.aplana.sbrf.taxaccounting.service;
 
-import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.FormTemplate;
+import com.aplana.sbrf.taxaccounting.model.LockData;
+import com.aplana.sbrf.taxaccounting.model.NumerationType;
+import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.model.TemplateFilter;
+import com.aplana.sbrf.taxaccounting.model.VersionSegment;
+import com.aplana.sbrf.taxaccounting.model.VersionedObjectStatus;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 
 import javax.validation.constraints.NotNull;
@@ -27,6 +33,14 @@ public interface FormTemplateService {
 	 * @return объект, представляющий описание налоговой формы
 	 */
 	FormTemplate get(int formTemplateId);
+
+	/**
+	 * Аналогично методу get, но без выкидывания исплючительных ситуаций. Ошибки бд выводятся в панель уведомлений
+	 * @param formTemplateId
+	 * @param logger
+	 * @return
+	 */
+	FormTemplate get(int formTemplateId, Logger logger);
 	/**
 	 * Валидировать модель данных для описания налоговой формы
 	 * @param formTemplate объект, содержащий описание налоговой формы
@@ -81,27 +95,6 @@ public interface FormTemplateService {
      * @return информацию о блокировке объекта
      */
     LockData getObjectLock(final Integer formTemplateId, final TAUserInfo userInfo);
-
-    /**
-     * Получение скрипта для {@link FormTemplate}.
-     * @param formTemplateId - идентификатор налоговой формы
-     * @return тело скрипта
-     */
-    String getFormTemplateScript(int formTemplateId, Logger logger);
-
-    /**
-     * Получить макет налоговой формы.
-     * @param formTemplateId идентификатор макета
-     * @return объект, представляющий полное описание налоговой формы
-     */
-    FormTemplate getFullFormTemplate(int formTemplateId);
-
-    /**
-     * Получить макет налоговой формы. Без выбаасывания ошибки на клиенте, а с выводом в логпанель.
-     * @param formTemplateId идентификатор макета
-     * @return объект, представляющий полное описание налоговой формы
-     */
-    FormTemplate getFullFormTemplate(int formTemplateId, Logger logger);
 
     /**
      * Получить макеты налоговых форм по фильтру

@@ -223,7 +223,11 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 		MyView view = getView();
 		view.showSaveCancelPanel(false, readOnlyMode);
         view.showAddRemoveRowsBlock(false);
-        view.showConsolidation(false);
+        view.showConsolidation(!lockInfo.isEditMode() && WorkflowState.ACCEPTED != formData.getState()
+                &&
+                (FormDataKind.CONSOLIDATED == formData.getKind() || FormDataKind.SUMMARY == formData.getKind())
+                &&
+                readOnlyMode);
 		view.showRecalculateButton(false);
 		view.showOriginalVersionButton(false);
 		view.showPrintAnchor(true);
