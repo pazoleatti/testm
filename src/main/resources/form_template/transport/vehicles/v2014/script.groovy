@@ -530,7 +530,7 @@ def String checkPrevPeriod(def reportPeriod) {
 // Также получение данных из старых форм "Сведения о транспортных средствах, по которым уплачивается транспортный налог"
 // и "Сведения о льготируемых транспортных средствах, по которым уплачивается транспортный налог"
 def copyData() {
-    def dataRows = []
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
 
     def reportPeriod = getReportPeriod()
     def prevReportPeriod = reportPeriodService.getPrevReportPeriod(formData.reportPeriodId)
@@ -552,7 +552,7 @@ def copyData() {
     }
 
     if (dataRows.size() > 3) {
-        updateIndexes(rows)
+        updateIndexes(dataRows)
         formDataService.getDataRowHelper(formData).allCached = dataRows
     }
 }
