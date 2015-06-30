@@ -83,6 +83,8 @@ public class Vehicles1Test extends ScriptTestBase {
                         return result;
                     }
                 });
+
+        when(testHelper.getFormDataService().getFormTemplate(anyInt(), anyInt())).thenReturn(testHelper.getFormTemplate());
     }
 
     @Test

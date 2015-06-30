@@ -1243,7 +1243,7 @@ void importData() {
         fileRowIndex++
 
         // все строки пустые - выход
-        if (!rowValues) {
+        if (!rowValues || rowValues.isEmpty() || !rowValues.find { it }) {
             allValues.remove(rowValues)
             rowValues.clear()
             break
@@ -1266,6 +1266,8 @@ void importData() {
             // простая строка
             rowIndex++
             def newRow = getNewRowFromXls(rowValues, colOffset, fileRowIndex, rowIndex)
+            System.out.println("$rowIndex rowValues >>>> " + rowValues) // TODO (Ramil Timerbaev)
+            System.out.println("$rowIndex newRow >>>> " + newRow) // TODO (Ramil Timerbaev)
             mapRows[sectionAlias].add(newRow)
         }
         // освободить ненужные данные - иначе не хватит памяти
