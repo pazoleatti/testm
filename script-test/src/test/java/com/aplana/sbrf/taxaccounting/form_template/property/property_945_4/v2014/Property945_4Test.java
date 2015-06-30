@@ -144,6 +144,6 @@ public class Property945_4Test extends ScriptTestBase {
 
         // Консолидация
         testHelper.execute(FormDataEvent.COMPOSE);
-        Assert.assertEquals(3, testHelper.getDataRowHelper().getAll().size());
+        Assert.assertEquals(5, testHelper.getDataRowHelper().getAll().size());
     }
 }
