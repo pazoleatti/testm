@@ -1250,7 +1250,7 @@ void importData() {
         }
         // если это начало раздела, то запомнить его название и обрабатывать следующую строку
         def title = rowValues[INDEX_FOR_SKIP]
-        if (title != null && title != '') {
+        if (title != null && (title == 'Наземные транспортные средства' || title == 'Водные транспортные средства' || title == 'Воздушные транспортные средства')) {
             sectionAlias = sections[sectionNumber]
             sectionNumber++
             mapRows.put(sectionAlias, [])
