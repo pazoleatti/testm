@@ -5,6 +5,7 @@ import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.FormDataKind
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
+import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import groovy.transform.Field
 
 /**
@@ -327,169 +328,60 @@ String getValuesByGroupColumn(DataRow row) {
 // Получение импортируемых данных
 void importData() {
     def tmpRow = formData.createDataRow()
-    def xml = getXML('Общие сведения о контрагенте - юридическом лице', null)
+    int COLUMN_COUNT = 19
+    int HEADER_ROW_COUNT = 3
+    String TABLE_START_VALUE = 'Общие сведения о контрагенте - юридическом лице'
+    String TABLE_END_VALUE = null
+    int INDEX_FOR_SKIP = 1
 
-    checkHeaderSize(xml.row[0].cell.size(), xml.row.size(), 17, 3)
+    def allValues = []      // значения формы
+    def headerValues = []   // значения шапки
+    def paramsMap = ['rowOffset' : 0, 'colOffset' : 0]  // мапа с параметрами (отступы сверху и слева)
 
-    def headerMapping = [
-            (xml.row[1].cell[3]): getColumnName(tmpRow, 'inn'),
-            (xml.row[1].cell[4]): getColumnName(tmpRow, 'countryName'),
-            (xml.row[1].cell[5]): getColumnName(tmpRow, 'countryCode'),
-            (xml.row[1].cell[6]): getColumnName(tmpRow, 'docNumber'),
-            (xml.row[1].cell[7]): getColumnName(tmpRow, 'docDate'),
-            (xml.row[1].cell[8]): getColumnName(tmpRow, 'dealNumber'),
-            (xml.row[1].cell[9]): getColumnName(tmpRow, 'dealDate'),
-            (xml.row[1].cell[10]): getColumnName(tmpRow, 'dealType'),
-            (xml.row[1].cell[11]): getColumnName(tmpRow, 'currencyCode'),
-            (xml.row[1].cell[12]): getColumnName(tmpRow, 'countryDealCode'),
-            (xml.row[1].cell[13]): getColumnName(tmpRow, 'incomeSum'),
-            (xml.row[1].cell[14]): getColumnName(tmpRow, 'outcomeSum'),
-            (xml.row[1].cell[15]): getColumnName(tmpRow, 'price'),
-            (xml.row[1].cell[16]): getColumnName(tmpRow, 'total'),
-            (xml.row[1].cell[18]): getColumnName(tmpRow, 'dealDoneDate'),
-            (xml.row[2].cell[0]): 'гр. 1',
-            (xml.row[2].cell[2]): 'гр. 2',
-            (xml.row[2].cell[3]): 'гр. 3',
-            (xml.row[2].cell[4]): 'гр. 4.1',
-            (xml.row[2].cell[5]): 'гр. 4.2',
-            (xml.row[2].cell[18]): 'гр. 16'
-    ]
-    (6..16).each{
-        headerMapping.put(xml.row[2].cell[it], 'гр. ' + (it-1))
-    }
-    checkHeaderEquals(headerMapping, logger)
+    checkAndReadFile(ImportInputStream, UploadFileName, allValues, headerValues, TABLE_START_VALUE, TABLE_END_VALUE, HEADER_ROW_COUNT, paramsMap)
+
+    // проверка шапки
+    checkHeaderXls(headerValues, COLUMN_COUNT, HEADER_ROW_COUNT, tmpRow)
     if (logger.containsLevel(LogLevel.ERROR)) {
         return;
     }
+    // освобождение ресурсов для экономии памяти
+    headerValues.clear()
+    headerValues = null
 
-    addData(xml, 2)
-}
+    def fileRowIndex = paramsMap.rowOffset
+    def colOffset = paramsMap.colOffset
+    paramsMap.clear()
+    paramsMap = null
 
-// Заполнить форму данными
-void addData(def xml, int headRowCount) {
+    def rowIndex = 0
+    def rows = []
+    def allValuesCount = allValues.size()
     reportPeriodEndDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
 
-    def xmlIndexRow = -1
-    def int rowOffset = xml.infoXLS.rowOffset[0].cell[0].text().toInteger()
-    def int colOffset = xml.infoXLS.colOffset[0].cell[0].text().toInteger()
-
-    def rows = []
-    def int rowIndex = 1
-
-    for (def row : xml.row) {
-        xmlIndexRow++
-        def int xlsIndexRow = xmlIndexRow + rowOffset
-
-        // пропустить шапку таблицы
-        if (xmlIndexRow <= headRowCount) {
-            continue
-        }
-
-        if ((row.cell.find { it.text() != "" }.toString()) == "") {
+    // формирвание строк нф
+    for (def i = 0; i < allValuesCount; i++) {
+        rowValues = allValues[0]
+        fileRowIndex++
+        // все строки пустые - выход
+        if (!rowValues || rowValues.isEmpty() || !rowValues.find { it }) {
+            allValues.remove(rowValues)
+            rowValues.clear()
             break
         }
-
         // Пропуск итоговых строк
-        if (row.cell[1].text() == "Подитог:") {
+        if (rowValues[INDEX_FOR_SKIP] == "Подитог:") {
+            allValues.remove(rowValues)
+            rowValues.clear()
             continue
         }
-
-        def newRow = formData.createStoreMessagingDataRow()
-        newRow.setIndex(rowIndex++)
-        newRow.setImportIndex(xlsIndexRow)
-        editableColumns.each {
-            newRow.getCell(it).editable = true
-            newRow.getCell(it).setStyleAlias('Редактируемая')
-        }
-        autoFillColumns.each {
-            newRow.getCell(it).setStyleAlias('Автозаполняемая')
-        }
-
-        def int xmlIndexCol = 0
-
-        // графа 1
-        xmlIndexCol++
-
-        // графа fix
-        xmlIndexCol++
-
-        // графа 2
-        newRow.fullName = getRecordIdImport(9, 'NAME', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, true)
-        def map = getRefBookValue(9, newRow.fullName)
-        xmlIndexCol++
-
-        // графа 3
-        if (map != null) {
-            formDataService.checkReferenceValue(9, row.cell[xmlIndexCol].text(), map.INN_KIO?.stringValue, xlsIndexRow, xmlIndexCol + colOffset, logger, true)
-        }
-        xmlIndexCol++
-
-        // графа 4.1
-        if (map != null) {
-            map = getRefBookValue(10, map.COUNTRY?.referenceValue)
-            if (map != null) {
-                formDataService.checkReferenceValue(10, row.cell[xmlIndexCol].text(), map.NAME?.stringValue, xlsIndexRow, xmlIndexCol + colOffset, logger, true)
-            }
-        }
-        xmlIndexCol++
-
-        // графа 4.2
-        if (map != null) {
-            formDataService.checkReferenceValue(10, row.cell[xmlIndexCol].text(), map.CODE?.stringValue, xlsIndexRow, xmlIndexCol + colOffset, logger, true)
-        }
-        xmlIndexCol++
-
-        // графа 5
-        newRow.docNumber = row.cell[xmlIndexCol].text()
-        xmlIndexCol++
-
-        // графа 6
-        newRow.docDate = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, true)
-        xmlIndexCol++
-
-        // графа 7
-        newRow.dealNumber = row.cell[xmlIndexCol].text()
-        xmlIndexCol++
-
-        // графа 8
-        newRow.dealDate = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, true)
-        xmlIndexCol++
-
-        // графа 9
-        newRow.dealType = row.cell[xmlIndexCol].text()//getRecordId(14, 'MODE', row.cell[indexCell].text(), date, cache, indexRow, indexCell)
-        xmlIndexCol++
-
-        // графа 10
-        newRow.currencyCode = getRecordIdImport(15, 'CODE_2', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, true)
-        xmlIndexCol++
-
-        // графа 11
-        newRow.countryDealCode = getRecordIdImport(10, 'CODE_2', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, true)
-        xmlIndexCol++
-
-        // графа 12
-        newRow.incomeSum = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
-        xmlIndexCol++
-
-        // графа 13
-        newRow.outcomeSum = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
-        xmlIndexCol++
-
-        // графа 14
-        newRow.price = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
-        xmlIndexCol++
-
-        // графа 15
-        newRow.total = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
-        xmlIndexCol++
-
-        // графа fix
-        xmlIndexCol++
-
-        // графа 16
-        newRow.dealDoneDate = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, true)
-
+        // простая строка
+        rowIndex++
+        def newRow = getNewRowFromXls(rowValues, colOffset, fileRowIndex, rowIndex)
         rows.add(newRow)
+        // освободить ненужные данные - иначе не хватит памяти
+        allValues.remove(rowValues)
+        rowValues.clear()
     }
 
     showMessages(rows, logger)
@@ -497,6 +389,146 @@ void addData(def xml, int headRowCount) {
         updateIndexes(rows)
         formDataService.getDataRowHelper(formData).allCached = rows
     }
+}
+
+/**
+ * Проверить шапку таблицы
+ *
+ * @param headerRows строки шапки
+ * @param colCount количество колонок в таблице
+ * @param rowCount количество строк в таблице
+ * @param tmpRow вспомогательная строка для получения названии графов
+ */
+void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
+    if (headerRows.isEmpty()) {
+        throw new ServiceException(WRONG_HEADER_ROW_SIZE)
+    }
+    checkHeaderSize(headerRows[headerRows.size() - 1].size(), headerRows.size(), colCount, rowCount)
+
+    def headerMapping = [
+            (headerRows[1][3]) : getColumnName(tmpRow, 'inn'),
+            (headerRows[1][4]) : getColumnName(tmpRow, 'countryName'),
+            (headerRows[1][5]) : getColumnName(tmpRow, 'countryCode'),
+            (headerRows[1][6]) : getColumnName(tmpRow, 'docNumber'),
+            (headerRows[1][7]) : getColumnName(tmpRow, 'docDate'),
+            (headerRows[1][8]) : getColumnName(tmpRow, 'dealNumber'),
+            (headerRows[1][9]) : getColumnName(tmpRow, 'dealDate'),
+            (headerRows[1][10]): getColumnName(tmpRow, 'dealType'),
+            (headerRows[1][11]): getColumnName(tmpRow, 'currencyCode'),
+            (headerRows[1][12]): getColumnName(tmpRow, 'countryDealCode'),
+            (headerRows[1][13]): getColumnName(tmpRow, 'incomeSum'),
+            (headerRows[1][14]): getColumnName(tmpRow, 'outcomeSum'),
+            (headerRows[1][15]): getColumnName(tmpRow, 'price'),
+            (headerRows[1][16]): getColumnName(tmpRow, 'total'),
+            (headerRows[1][18]): getColumnName(tmpRow, 'dealDoneDate'),
+            (headerRows[2][0]) : 'гр. 1',
+            (headerRows[2][2]) : 'гр. 2',
+            (headerRows[2][3]) : 'гр. 3',
+            (headerRows[2][4]) : 'гр. 4.1',
+            (headerRows[2][5]) : 'гр. 4.2',
+            (headerRows[2][18]): 'гр. 16'
+    ]
+    (6..16).each{
+        headerMapping.put(headerRows[2][it], 'гр. ' + (it - 1))
+    }
+    checkHeaderEquals(headerMapping, logger)
+}
+
+/**
+ * Получить новую строку нф по значениям из экселя.
+ *
+ * @param values список строк со значениями
+ * @param colOffset отступ в колонках
+ * @param fileRowIndex номер строки в тф
+ * @param rowIndex строка в нф
+ */
+def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) {
+    def newRow = formData.createStoreMessagingDataRow()
+    newRow.setIndex(rowIndex)
+    newRow.setImportIndex(fileRowIndex)
+    editableColumns.each {
+        newRow.getCell(it).editable = true
+        newRow.getCell(it).setStyleAlias('Редактируемая')
+    }
+    autoFillColumns.each {
+        newRow.getCell(it).setStyleAlias('Автозаполняемая')
+    }
+
+    def int colIndex = 0
+
+    // графа 1
+    colIndex++
+
+    // графа fix
+    colIndex++
+
+    // графа 2
+    newRow.fullName = getRecordIdImport(9, 'NAME', values[colIndex], fileRowIndex, colIndex + colOffset, true)
+    def map = getRefBookValue(9, newRow.fullName)
+    colIndex++
+
+    // графа 3
+    if (map != null) {
+        formDataService.checkReferenceValue(9, values[colIndex], map.INN_KIO?.stringValue, fileRowIndex, colIndex + colOffset, logger, true)
+    }
+    colIndex++
+
+    // графа 4.1
+    if (map != null) {
+        map = getRefBookValue(10, map.COUNTRY?.referenceValue)
+        if (map != null) {
+            formDataService.checkReferenceValue(10, values[colIndex], map.NAME?.stringValue, fileRowIndex, colIndex + colOffset, logger, true)
+        }
+    }
+    colIndex++
+
+    // графа 4.2
+    if (map != null) {
+        formDataService.checkReferenceValue(10, values[colIndex], map.CODE?.stringValue, fileRowIndex, colIndex + colOffset, logger, true)
+    }
+    colIndex++
+
+    // графа 5
+    newRow.docNumber = values[colIndex]
+    colIndex++
+
+    // графа 6
+    newRow.docDate = parseDate(values[colIndex], "dd.MM.yyyy", fileRowIndex, colIndex + colOffset, logger, true)
+    colIndex++
+
+    // графа 7
+    newRow.dealNumber = values[colIndex]
+    colIndex++
+
+    // графа 8
+    newRow.dealDate = parseDate(values[colIndex], "dd.MM.yyyy", fileRowIndex, colIndex + colOffset, logger, true)
+    colIndex++
+
+    // графа 9
+    newRow.dealType = values[colIndex] //getRecordId(14, 'MODE', row.cell[indexCell].text(), date, cache, indexRow, indexCell)
+    colIndex++
+
+    // графа 10
+    newRow.currencyCode = getRecordIdImport(15, 'CODE_2', values[colIndex], fileRowIndex, colIndex + colOffset, true)
+    colIndex++
+
+    // графа 11
+    newRow.countryDealCode = getRecordIdImport(10, 'CODE_2', values[colIndex], fileRowIndex, colIndex + colOffset, true)
+    colIndex++
+
+    // графа 12..15
+    ['incomeSum', 'outcomeSum', 'price', 'total'].each { alias ->
+        newRow[alias] = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
+        colIndex++
+    }
+
+    // графа fix
+    colIndex++
+
+    // графа 16
+    newRow.dealDoneDate = parseDate(values[colIndex], "dd.MM.yyyy", fileRowIndex, colIndex + colOffset, logger, true)
+
+    return newRow
 }
 
 // Сортировка групп и строк
