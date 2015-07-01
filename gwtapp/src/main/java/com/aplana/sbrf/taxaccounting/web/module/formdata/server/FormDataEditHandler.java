@@ -43,7 +43,9 @@ public class FormDataEditHandler extends AbstractActionHandler<FormDataEditActio
 		TAUserInfo userInfo = securityService.currentUserInfo();
 		FormData formData = action.getFormData();
         Logger logger = new Logger();
-        formDataService.checkLockedByTask(formData.getId(), logger, userInfo, "Редактирование НФ", true);
+        Pair<ReportType, LockData> lockType = formDataService.getLockTaskType(formData.getId());
+        if (lockType != null)
+            formDataService.locked(formData.getId(), ReportType.EDIT_FD, lockType, logger);
 
         // http://conf.aplana.com/pages/viewpage.action?pageId=19664668 (2A.1)
         LockData lockDataCheck = lockDataService.getLock(formDataService.generateTaskKey(action.getFormData().getId(), ReportType.CHECK_FD));

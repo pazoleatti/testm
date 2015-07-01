@@ -33,8 +33,12 @@ public class ExceptionHandlerAspect {
 
     private static final Log LOG = LogFactory.getLog(ExceptionHandlerAspect.class);
 
-    private String getErrorMessage(String errName) {
-        return String.format(ERROR_MESSAGE, errName.isEmpty() ? "" : " \"" + errName + "\"");
+    private String getErrorMessage(String errName, String msg) {
+        if (msg == null || msg.isEmpty()) {
+            return String.format(ERROR_MESSAGE, errName.isEmpty() ? "" : " \"" + errName + "\"");
+        } else {
+            return msg;
+        }
     }
 
     @AfterThrowing(pointcut = "target(com.gwtplatform.dispatch.server.actionhandler.ActionHandler) && args(action,..)", throwing = "e")
@@ -50,24 +54,24 @@ public class ExceptionHandlerAspect {
         if (e instanceof TaActionException) {
             throw (TaActionException)e;
         } else if (e instanceof ServiceLoggerException) {
-            TaActionException tae = new TaActionException(getErrorMessage(actionName) + (e.getLocalizedMessage() != null ? e.getLocalizedMessage() : ""));
+            TaActionException tae = new TaActionException(getErrorMessage(actionName, e.getLocalizedMessage()));
             tae.setUuid(((ServiceLoggerException) e).getUuid());
             //Сделал на случай если все таки надо будет отображать стек трейс
             tae.setNeedStackTrace(false);
             throw tae;
         } else if (e instanceof AccessDeniedException) {
-            throw new TaActionException(getErrorMessage(actionName) + (e.getLocalizedMessage() != null ? e.getLocalizedMessage() : ""));
+            throw new TaActionException(getErrorMessage(actionName, e.getLocalizedMessage()));
         } else if (e instanceof org.springframework.security.access.AccessDeniedException) {
-            throw new TaActionException(getErrorMessage(actionName) + "Доступ запрещен");
+            throw new TaActionException(getErrorMessage(actionName, "Доступ запрещен"));
         } else if (e instanceof DaoException) {
             Throwable rootCause = ExceptionUtils.getRootCause(e);
             if (rootCause instanceof java.sql.SQLSyntaxErrorException && rootCause.getLocalizedMessage().contains("ORA-02049")) {
                 throw new TaActionException(LockData.STANDARD_LOCK_MSG, formatException(e));
             } else {
-                throw new TaActionException(getErrorMessage(actionName), formatException(e));
+                throw new TaActionException(getErrorMessage(actionName, null), formatException(e));
             }
         } else {
-            throw new TaActionException(getErrorMessage(actionName) + (e.getLocalizedMessage() != null ? e.getLocalizedMessage() : ""), formatException(e));
+            throw new TaActionException(getErrorMessage(actionName, e.getLocalizedMessage()), formatException(e));
         }
     }
 

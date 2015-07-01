@@ -1852,6 +1852,9 @@ public class FormDataServiceImpl implements FormDataService {
             case DELETE_FD:
                 msg = String.format("Выполнение операции \"%s\" невозможно, т.к. для текущего экземпляра налоговой формы выполняется операция, блокирующая ее удаление", getTaskName(reportType, formDataId, userInfo));
                 break;
+            case EDIT_FD:
+                msg = String.format("Выполнение операции \"%s\" невозможно, т.к. для текущего экземпляра налоговой формы запущена операция изменения данных", getTaskName(reportType, formDataId, userInfo));
+                break;
         }
         throw new ServiceLoggerException(msg, logEntryService.save(logger.getEntries()));
     }
