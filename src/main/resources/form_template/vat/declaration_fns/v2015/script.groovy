@@ -327,8 +327,8 @@ void generateXML() {
         def totalRow7ndsDealSum = getDataRowSum(rows724_1, 'total_7', 'ndsDealSum')
         def totalRow7ndsBookSum = getDataRowSum(rows724_1, 'total_7', 'ndsBookSum')
 
-        nalBaza010 = totalRow1baseSum + totalRow7baseSum
-        sumNal010 = totalRow1ndsSum + totalRow7ndsBookSum
+        nalBaza010 = round(totalRow1baseSum + totalRow7baseSum)
+        sumNal010 = round(totalRow1ndsSum + totalRow7ndsBookSum)
 
         nalBaza020 = totalRow2baseSum
         sumNal020 = totalRow2ndsSum
