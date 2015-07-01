@@ -36,10 +36,6 @@ public enum ReportType {
     LOAD_ALL_TF(1, "LoadAllTF", "", 13L, 113L);
 
 
-    public static final String CREATE_TASK = "Операция \"%s\" поставлена в очередь на исполнение";
-    public static final String CHECK_TASK = "Выполнение операции \"%s\" невозможно, т.к. %s";
-    public static final String CANCEL_TASK = "Пользователем \"%s\" отменена операция \"%s\"";
-
     private int id;
     private String name;
     private String description;

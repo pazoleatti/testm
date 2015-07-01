@@ -84,7 +84,7 @@ public abstract class AbstractAsyncTask implements AsyncTask {
         if (taskTypeData.getTaskLimit() != 0 && taskTypeData.getTaskLimit() < value) {
             Logger logger = new Logger();
             logger.error("Критерии возможности выполнения задач задаются в конфигурационных параметрах (параметры асинхронных заданий). За разъяснениями обратитесь к Администратору");
-            throw new AsyncTaskException(new ServiceLoggerException(ReportType.CHECK_TASK,
+            throw new AsyncTaskException(new ServiceLoggerException(LockData.CHECK_TASK,
                     logEntryService.save(logger.getEntries()),
                     taskName,
                     String.format(msg, taskTypeData.getTaskLimit())));

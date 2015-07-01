@@ -89,7 +89,8 @@ public class CalculateIfrsDataHandler extends AbstractActionHandler<CalculateIfr
                     for(Integer userId: userIds) {
                         lockDataService.addUserWaitingForLock(key, userId);
                     }
-                    BalancingVariants balancingVariant = asyncManager.executeAsync(ReportType.ZIP_IFRS.getAsyncTaskTypeId(PropertyLoader.isProductionMode()), params);
+                    BalancingVariants balancingVariant = asyncManager.checkCreate(ReportType.ZIP_IFRS.getAsyncTaskTypeId(PropertyLoader.isProductionMode()), params);
+                    asyncManager.executeAsync(ReportType.ZIP_IFRS.getAsyncTaskTypeId(PropertyLoader.isProductionMode()), params, balancingVariant);
                     lockDataService.updateQueue(key, lockData.getDateLock(), balancingVariant);
                 } catch (AsyncTaskException e) {
                     lockDataService.unlock(key, userInfo.getUser().getId());

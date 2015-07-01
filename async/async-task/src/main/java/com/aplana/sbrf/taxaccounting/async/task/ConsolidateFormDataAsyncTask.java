@@ -59,7 +59,7 @@ public abstract class ConsolidateFormDataAsyncTask extends AbstractAsyncTask {
         try {
             formDataService.checkCompose(formData, userInfo, logger);
         } catch (ServiceException e) {
-            String errorMsg = String.format(ReportType.CHECK_TASK,
+            String errorMsg = String.format(LockData.CHECK_TASK,
                     String.format(ReportType.CONSOLIDATE_FD.getDescription(), formData.getFormType().getTaxType().getTaxText()),
                     e.getMessage());
             throw new AsyncTaskException(new ServiceLoggerException(errorMsg,
@@ -87,7 +87,7 @@ public abstract class ConsolidateFormDataAsyncTask extends AbstractAsyncTask {
         try {
             formDataService.checkCompose(formData, userInfo, logger);
         } catch (ServiceException e) {
-            String errorMsg = String.format(ReportType.CHECK_TASK,
+            String errorMsg = String.format(LockData.CHECK_TASK,
                     String.format(ReportType.CONSOLIDATE_FD.getDescription(), formData.getFormType().getTaxType().getTaxText()),
                     e.getMessage());
             throw new ServiceException(errorMsg);

@@ -46,7 +46,19 @@ public class AsyncManagerBean implements AsyncManager {
     private AsyncTaskPersistenceServiceLocal persistenceService;
 
     @Override
-    public BalancingVariants executeAsync(long taskTypeId, Map<String, Object> params) throws AsyncTaskException, ServiceLoggerException {
+    public BalancingVariants checkCreate(long taskTypeId, Map<String, Object> params) throws AsyncTaskException {
+        // Проверка данных задачи
+        try {
+            AsyncTask task = checkTaskData(taskTypeId);
+            return task.checkTaskLimit(params);
+        } catch (Exception e) {
+            log.error("Async task creation has been failed!", e);
+            throw new AsyncTaskException(e);
+        }
+    }
+
+    @Override
+    public void executeAsync(long taskTypeId, Map<String, Object> params, BalancingVariants balancingVariant) throws AsyncTaskException, ServiceLoggerException {
         log.debug("Async task creation has been started");
         ConnectionFactory connectionFactory;
         Queue queue;
@@ -56,8 +68,7 @@ public class AsyncManagerBean implements AsyncManager {
             // Проверка параметров
             checkParams(params);
             // Проверка данных задачи
-            AsyncTask task = checkTaskData(taskTypeId);
-            BalancingVariants balancingVariant = task.checkTaskLimit(params);
+            checkTaskData(taskTypeId);
             if (balancingVariant == BalancingVariants.SHORT) {
                 connectionFactory = shortAsyncConnectionFactory;
                 queue = shortAsyncQueue;
@@ -80,7 +91,6 @@ public class AsyncManagerBean implements AsyncManager {
             messageProducer.send(objectMessage);
             log.info(String.format("Задача с ключом %s помещена в очередь %s", params.get(LOCKED_OBJECT.name()), balancingVariant.name()));
             log.debug("Async task creation has been finished successfully");
-            return balancingVariant;
         } catch (Exception e) {
             log.error("Async task creation has been failed!", e);
             throw new AsyncTaskException(e);

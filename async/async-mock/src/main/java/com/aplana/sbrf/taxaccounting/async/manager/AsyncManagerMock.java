@@ -35,7 +35,32 @@ public class AsyncManagerMock implements AsyncManager {
     private ApplicationContext applicationContext;
 
     @Override
-    public BalancingVariants executeAsync(long taskTypeId, Map<String, Object> params) throws AsyncTaskException, ServiceLoggerException {
+    public BalancingVariants checkCreate(long taskTypeId, Map<String, Object> params) throws AsyncTaskException {
+        try {
+            AsyncTaskType asyncTaskType = getJdbcTemplate().queryForObject("select id, name, handler_jndi from async_task_type where id = ?", new RowMapper<AsyncTaskType>() {
+                @Override
+                public AsyncTaskType mapRow(ResultSet rs, int rowNum) throws SQLException {
+                    AsyncTaskType result = new AsyncTaskType();
+                    result.setId(rs.getLong("id"));
+                    result.setName(rs.getString("name"));
+                    result.setHandlerJndi(rs.getString("handler_jndi"));
+                    return result;
+                }
+            }, taskTypeId);
+
+            if (asyncTaskType.getHandlerJndi().startsWith("ejb")) {
+                throw new AsyncTaskException("Некорректный формат JNDI-имени для класса-исполнителя. В дев-моде это имя должно ссылаться на спринговый бин!");
+            }
+
+            AsyncTask task = applicationContext.getBean(asyncTaskType.getHandlerJndi(), AsyncTask.class);
+            return task.checkTaskLimit(params);
+        } catch (Exception e) {
+            throw new AsyncTaskException(e);
+        }
+    }
+
+    @Override
+    public void executeAsync(long taskTypeId, Map<String, Object> params, BalancingVariants balancingVariant) throws AsyncTaskException, ServiceLoggerException {
         try {
             AsyncTaskType asyncTaskType = getJdbcTemplate().queryForObject("select id, name, handler_jndi from async_task_type where id = ?", new RowMapper<AsyncTaskType>() {
                 @Override
@@ -54,9 +79,7 @@ public class AsyncManagerMock implements AsyncManager {
 
             checkParams(params);
             AsyncTask task = applicationContext.getBean(asyncTaskType.getHandlerJndi(), AsyncTask.class);
-            if (task.checkTaskLimit(params) != null)
-                task.execute(params);
-            return BalancingVariants.SHORT;
+            task.execute(params);
         } catch (EmptyResultDataAccessException e) {
             throw new AsyncTaskPersistenceException("Не найден тип задачи с идентификатором = " + taskTypeId);
         } catch (ServiceLoggerException e) {
