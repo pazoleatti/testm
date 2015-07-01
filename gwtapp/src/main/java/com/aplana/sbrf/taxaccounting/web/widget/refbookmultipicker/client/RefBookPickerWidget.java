@@ -199,6 +199,7 @@ public class RefBookPickerWidget extends DoubleStateComposite implements RefBook
                 }
             });
         } else {
+            state.setSearchPattern(text);
             refBookView.find(text);
         }
     }
