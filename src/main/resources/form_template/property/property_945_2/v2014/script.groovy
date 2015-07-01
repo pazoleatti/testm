@@ -204,6 +204,9 @@ void addPrevDataRows() {
         def totalRow = getDataRow(dataRows, 'total')
         deleteAllAliased(prevDataRows)
         addFixedRows(prevDataRows, totalRow)
+
+        updateIndexes(prevDataRows)
+        formDataService.getDataRowHelper(formData).allCached = prevDataRows
     }
 }
 
