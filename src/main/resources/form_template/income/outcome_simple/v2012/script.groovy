@@ -556,7 +556,7 @@ def getSumForColumn7(def form, def dataRows, def value1, def value2) {
                 def reportPeriods = reportPeriodService.getReportPeriodsByDate(TaxType.INCOME, dateFrom, row.docDate)
                 reportPeriods.each { reportPeriod ->
                     // в каждой форме относящейся к этим периодам ищем соответствующие строки и суммируем по 10 графе
-                    def FormData f = formDataService.getLast(form.getFormType().getId(), FormDataKind.PRIMARY, form.getDepartmentId(), reportPeriod.getId(), form.periodOrder)
+                    def FormData f = formDataService.getLast(form.getFormType().getId(), form.kind, form.getDepartmentId(), reportPeriod.getId(), form.periodOrder)
                     if (f != null) {
                         def d = formDataService.getDataRowHelper(f)
                         if (d != null) {
