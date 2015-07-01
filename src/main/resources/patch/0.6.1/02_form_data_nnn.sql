@@ -19,5 +19,25 @@ end loop;
 END;
 /
 
+--http://jira.aplana.com/browse/SBRFACCTAX-11938: Поменять тип столбцов в сводном отчете (R->S)
+
+declare query_stmt varchar2(4000) := '';
+begin
+	execute immediate 'LOCK TABLE FORM_DATA_2409 IN EXCLUSIVE MODE';
+	select 'alter table form_data_2409 modify ('||listagg('c'||id||' varchar2(4000)', ', ') within group (order by ord)||')' into query_stmt
+		from form_column 
+		where form_template_id = 2409 and alias in ('organRegNum', 'taxpayerCode', 'address');
+	
+	execute immediate query_stmt;
+	
+	for x in (select * from form_column where form_template_id = 2409 and alias in ('organRegNum', 'taxpayerCode', 'address') and type='R') loop
+		query_stmt := 'update form_data_2409 set c'||x.id||' = (select string_value from ref_book_value where attribute_id = '||x.attribute_id||' and record_id = c'||x.parent_column_id||')';
+		execute immediate query_stmt;
+	end loop;	
+end;
+/
+--update form_column set type = 'S', max_length=2000, parent_column_id = null, attribute_id = null where form_template_id = 2409 and alias in ('organRegNum', 'taxpayerCode', 'address') and type='R';
+commit;
+
 COMMIT;
 EXIT;
