@@ -1113,7 +1113,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 		if (resultSet.getObject(columnName) != null) {
 			switch (attribute.getAttributeType()) {
 				case STRING: {
-					return resultSet.getString(columnName);
+					return StringUtils.cleanString(resultSet.getString(columnName));
 				}
 				case NUMBER: {
 					return resultSet.getBigDecimal(columnName).setScale(attribute.getPrecision(), BigDecimal.ROUND_HALF_UP);
@@ -1815,13 +1815,13 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 
     @Override
     public List<String> isVersionUsed(Long refBookId, List<Long> uniqueRecordIds, Date versionFrom, Date versionTo,
-                                      boolean isValuesChanged, List<Long> excludedRefBooks) {
+                                      Boolean restrictPeriod, List<Long> excludedRefBooks) {
         Set<String> results = new HashSet<String>();
         String in;
         String sql;
         Map<String, Object> params = new HashMap<String, Object>();
         //Проверка использования в справочниках
-        results.addAll(isVersionUsedInRefBooks(refBookId, uniqueRecordIds, versionFrom, versionTo, isValuesChanged, excludedRefBooks));
+        results.addAll(isVersionUsedInRefBooks(refBookId, uniqueRecordIds, versionFrom, versionTo, restrictPeriod, excludedRefBooks));
 
         try {
             //Проверка использования в налоговых формах
@@ -1829,10 +1829,20 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             sql = String.format(CHECK_USAGES_IN_FORMS, in);
             params.clear();
             params.put("refBookId", refBookId);
-            if (!isValuesChanged) {
-                /** Если атрибуты не были изменены то дополнительно фильтруем по периоду актуальности */
-                sql += "\nwhere (rp.calendar_start_date >= :versionFrom or (rp.calendar_start_date < :versionFrom and rp.end_date >= :versionFrom))";
-                params.put("versionFrom", versionFrom);
+            if (restrictPeriod != null) {
+                if (restrictPeriod) {
+                    //Отбираем только ссылки пересекающиеся с указанным периодом
+                    sql  += " WHERE ((rp.calendar_start_date >= :versionFrom and (rp.end_date is null or :versionTo is null or rp.end_date <= :versionTo)) or " +
+                            "(rp.calendar_start_date <= :versionFrom and (rp.end_date is null or rp.end_date >= :versionFrom)))";
+                    params.put("versionFrom", versionFrom);
+                    params.put("versionTo", versionTo);
+                } else {
+                    //Отбираем только ссылки НЕ попадающие в указанный период
+                    sql  += " WHERE ((:versionTo is not null and :versionTo < rp.calendar_start_date) or " +
+                            "(rp.end_date is not null and rp.end_date < :versionFrom))";
+                    params.put("versionFrom", versionFrom);
+                    params.put("versionTo", versionTo);
+                }
             }
             results.addAll(getNamedParameterJdbcTemplate().query(sql, params, new RowMapper<String>() {
                 @Override
@@ -1859,10 +1869,20 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             in = transformToSqlInStatement("r.id", uniqueRecordIds);
             sql = String.format(CHECK_USAGES_IN_DEPARTMENT_CONFIG, in);
             params.clear();
-            if (!isValuesChanged) {
-                /** Если атрибуты не были изменены то дополнительно фильтруем по периоду актуальности */
-                sql += "\n and (periodStart >= :versionFrom or (periodStart < :versionFrom and periodEnd >= :versionFrom))";
-                params.put("versionFrom", versionFrom);
+            if (restrictPeriod != null) {
+                if (restrictPeriod) {
+                    //Отбираем только ссылки пересекающиеся с указанным периодом
+                    sql  += " and ((periodStart >= :versionFrom and (periodEnd is null or :versionTo is null or periodEnd <= :versionTo)) or " +
+                            "(periodStart <= :versionFrom and (periodEnd is null or periodEnd >= :versionFrom)))";
+                    params.put("versionFrom", versionFrom);
+                    params.put("versionTo", versionTo);
+                } else {
+                    //Отбираем только ссылки НЕ попадающие в указанный период
+                    sql  += " and ((:versionTo is not null and :versionTo < periodStart) or " +
+                            "(periodEnd is not null and periodEnd < :versionFrom))";
+                    params.put("versionFrom", versionFrom);
+                    params.put("versionTo", versionTo);
+                }
             }
             results.addAll(getNamedParameterJdbcTemplate().query(sql, params, new RowMapper<String>() {
                 @Override
@@ -1904,11 +1924,10 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             "      JOIN ref_book_value v ON v.record_id = r.id AND %s\n" +
             "      JOIN ref_book_attribute a ON r.ref_book_id = a.ref_book_id AND a.id = v.attribute_id AND a.reference_id = :refBookId)\n" +
             "  JOIN ref_book_attribute a ON a.ref_book_id = b.id\n" +
-            "  JOIN ref_book_value v ON r.id = v.record_id AND a.id = v.attribute_id %s)\n" +
-            "WHERE (versionStart >= :versionFrom or (versionStart < :versionFrom and (versionEnd is null or versionEnd >= :versionFrom)))";
+            "  JOIN ref_book_value v ON r.id = v.record_id AND a.id = v.attribute_id %s)\n";
 
     public List<String> isVersionUsedInRefBooks(Long refBookId, List<Long> uniqueRecordIds, Date versionFrom, Date versionTo,
-                                                boolean isValuesChanged, List<Long> excludedRefBooks) {
+                                                Boolean restrictPeriod, List<Long> excludedRefBooks) {
 
         List<String> results = new ArrayList<String>();
         String in = transformToSqlInStatement("v.reference_value", uniqueRecordIds);
@@ -1920,14 +1939,28 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         Map<String, Object> params = new HashMap<String, Object>();
         //Проверка использования в справочниках
         try {
-            if (isValuesChanged) {
+            if (restrictPeriod == null) {
+                //Без ограничений по периоду
                 sql = String.format(CHECK_USAGES_IN_REFBOOK, in, inExcludeRefBook);
                 params.put("refBookId", refBookId);
-            } else {
-                /** Если атрибуты не были изменены то дополнительно фильтруем по периоду актуальности */
-                sql = String.format(CHECK_USAGES_IN_REFBOOK_WITH_PERIOD_RESTRICTION, in, inExcludeRefBook);
+            } else if (restrictPeriod) {
+                //Отбираем только ссылки пересекающиеся с указанным периодом
+                String query = CHECK_USAGES_IN_REFBOOK_WITH_PERIOD_RESTRICTION +
+                        " WHERE ((versionStart >= :versionFrom and (versionEnd is null or :versionTo is null or versionEnd <= :versionTo)) or " +
+                        "(versionStart <= :versionFrom and (versionEnd is null or versionEnd >= :versionFrom)))";
+                sql = String.format(query, in, inExcludeRefBook);
                 params.put("refBookId", refBookId);
                 params.put("versionFrom", versionFrom);
+                params.put("versionTo", versionTo);
+            } else {
+                //Отбираем только ссылки НЕ попадающие в указанный период
+                String query = CHECK_USAGES_IN_REFBOOK_WITH_PERIOD_RESTRICTION +
+                        " WHERE ((:versionTo is not null and :versionTo < versionStart) or " +
+                        "(versionEnd is not null and versionEnd < :versionFrom))";
+                sql = String.format(query, in, inExcludeRefBook);
+                params.put("refBookId", refBookId);
+                params.put("versionFrom", versionFrom);
+                params.put("versionTo", versionTo);
             }
 
             final Map<Integer, Map<String, String>> records = new HashMap<Integer, Map<String, String>>();

@@ -73,7 +73,8 @@ public class LoadAllHandler extends AbstractActionHandler<LoadAllAction, LoadAll
                 params.put(AsyncTask.RequiredParams.LOCK_DATE.name(), lockData.getDateLock());
                 try {
                     lockDataService.addUserWaitingForLock(key, userId);
-                    BalancingVariants balancingVariant = asyncManager.executeAsync(ReportType.LOAD_ALL_TF.getAsyncTaskTypeId(PropertyLoader.isProductionMode()), params);
+                    BalancingVariants balancingVariant = asyncManager.checkCreate(ReportType.LOAD_ALL_TF.getAsyncTaskTypeId(PropertyLoader.isProductionMode()), params);
+                    asyncManager.executeAsync(ReportType.LOAD_ALL_TF.getAsyncTaskTypeId(PropertyLoader.isProductionMode()), params, balancingVariant);
                     lockDataService.updateQueue(key, lockData.getDateLock(), balancingVariant);
                     logger.info("Задача загрузки ТФ запущена");
                 } catch (AsyncTaskException e) {

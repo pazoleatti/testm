@@ -30,7 +30,7 @@ public class RefBookValueSerializable implements Serializable {
 	}
 
 	public void setStringValue(String stringValue) {
-		this.stringValue = StringUtils.cleanString(stringValue);
+		this.stringValue = stringValue;
 	}
 
 	public Number getNumberValue() {

@@ -47,7 +47,7 @@ public class DeclarationTypeDaoTest {
 	@Test
 	public void testListByTaxType() {
 		List<DeclarationType> list = declarationTypeDao.listAllByTaxType(TaxType.TRANSPORT);
-		assertEquals(2, list.size());
+		assertEquals(1, list.size());
 		
 		for (DeclarationType dt: list) {
 			assertEquals(TaxType.TRANSPORT, dt.getTaxType());

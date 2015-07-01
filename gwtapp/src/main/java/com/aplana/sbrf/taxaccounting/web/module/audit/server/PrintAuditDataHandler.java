@@ -83,7 +83,8 @@ public class PrintAuditDataHandler extends AbstractActionHandler<PrintAuditDataA
                 lockData = lockDataService.getLock(key);
                 params.put(AsyncTask.RequiredParams.LOCK_DATE.name(), lockData.getDateLock());
                 lockDataService.addUserWaitingForLock(key, userInfo.getUser().getId());
-                BalancingVariants balancingVariant = asyncManager.executeAsync(ReportType.CSV_AUDIT.getAsyncTaskTypeId(PropertyLoader.isProductionMode()), params);
+                BalancingVariants balancingVariant = asyncManager.checkCreate(ReportType.CSV_AUDIT.getAsyncTaskTypeId(PropertyLoader.isProductionMode()), params);
+                asyncManager.executeAsync(ReportType.CSV_AUDIT.getAsyncTaskTypeId(PropertyLoader.isProductionMode()), params, balancingVariant);
                 lockDataService.updateQueue(key, lockData.getDateLock(), balancingVariant);
             } else {
                 if (lockData.getUserId() != userInfo.getUser().getId()) {

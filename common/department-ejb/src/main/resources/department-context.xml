@@ -10,6 +10,12 @@
     <import resource="classpath:com/aplana/sbrf/taxaccounting/datasource.xml"/>
 
     <jee:local-slsb
+            id="asyncTaskManager"
+            jndi-name="ejblocal:${releaseName}/async-core.jar/AsyncManagerBean#com.aplana.sbrf.taxaccounting.async.manager.AsyncManagerLocal"
+            business-interface="com.aplana.sbrf.taxaccounting.async.manager.AsyncManager"
+            lookup-home-on-startup="true"
+            />
+    <jee:local-slsb
             id="asyncInterruptionManager"
             jndi-name="ejblocal:${releaseName}/async-core.jar/AsyncInterruptionManagerSingleton#com.aplana.sbrf.taxaccounting.async.manager.AsyncInterruptionManagerLocal"
             business-interface="com.aplana.sbrf.taxaccounting.async.manager.AsyncInterruptionManager"
