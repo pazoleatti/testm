@@ -204,6 +204,9 @@ void addPrevDataRows() {
         def totalRow = getDataRow(dataRows, 'total')
         deleteAllAliased(prevDataRows)
         addFixedRows(prevDataRows, totalRow)
+
+        updateIndexes(prevDataRows)
+        formDataService.getDataRowHelper(formData).allCached = prevDataRows
     }
 }
 
@@ -512,7 +515,7 @@ void importData() {
             break
         }
         // Пропуск итоговых строк
-        if (rowValues[INDEX_FOR_SKIP]) {
+        if (rowValues[INDEX_FOR_SKIP] && (rowValues[INDEX_FOR_SKIP].contains("Итого по НО ") || rowValues[INDEX_FOR_SKIP] == "Общий итог")) {
             allValues.remove(rowValues)
             rowValues.clear()
             continue

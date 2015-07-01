@@ -574,12 +574,14 @@ def consolidation() {
     }
 
     // копирование данных по разделам
+    def int insertIndex = 1
     groups.each { section ->
         def copyRows = dataRowsMap[section]
         if (copyRows != null && !copyRows.isEmpty()) {
-            def insertIndex = getDataRow(dataRows, "$section").getIndex()
             dataRows.addAll(insertIndex, copyRows)
+            insertIndex += copyRows.size()
         }
+        insertIndex += 2
     }
 
     updateIndexes(dataRows)

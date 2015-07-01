@@ -128,7 +128,7 @@ def getDepartmentParam() {
         def departmentId = declarationData.departmentId
         def departmentParamList = getProvider(RefBook.DEPARTMENT_CONFIG_VAT).getRecords(getEndDate() - 1, null, "DEPARTMENT_ID = $departmentId", null)
         if (departmentParamList == null || departmentParamList.size() == 0 || departmentParamList.get(0) == null) {
-            throw new Exception("Ошибка при получении настроек обособленного подразделения")
+            throw new Exception("Ошибка при получении настроек обособленного подразделения. Настройки подразделения заполнены не полностью")
         }
         departmentParam = departmentParamList?.get(0)
     }
@@ -327,8 +327,8 @@ void generateXML() {
         def totalRow7ndsDealSum = getDataRowSum(rows724_1, 'total_7', 'ndsDealSum')
         def totalRow7ndsBookSum = getDataRowSum(rows724_1, 'total_7', 'ndsBookSum')
 
-        nalBaza010 = totalRow1baseSum + totalRow7baseSum
-        sumNal010 = totalRow1ndsSum + totalRow7ndsBookSum
+        nalBaza010 = round(totalRow1baseSum + totalRow7baseSum)
+        sumNal010 = round(totalRow1ndsSum + totalRow7ndsBookSum)
 
         nalBaza020 = totalRow2baseSum
         sumNal020 = totalRow2ndsSum
@@ -670,7 +670,6 @@ void logicCheck() {
                 : [getXmlValue(exist11) as BigDecimal, isDeclarationExist(declarations().declaration11[0])],
                 'Признак наличия сведений из счетов-фактур, выставленных лицами, указанными в пункте 5 статьи 173 Налогового кодекса Российской Федерации'
                 : [getXmlValue(exist12) as BigDecimal, 0]
-
         ]
         checkMap.each { key, value ->
             if (value[0] != value[1]) {

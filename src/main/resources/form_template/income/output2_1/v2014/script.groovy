@@ -187,7 +187,7 @@ void consolidation() {
                 def sourceHelper = formDataService.getDataRowHelper(sourceFormData)
                 sourceHelper.allSaved.each { sourceRow ->
                     // «Графа 17» = «RUS» и «Графа 16» = 1 и «Графа 22» = «0» или «9»
-                    if ('RUS'.equals(sourceRow.status) && sourceRow.type == 1 && (sourceRow.rate == 0 || sourceRow.rate == 9)) {
+                    if (sourceRow.status == 1 && sourceRow.type == 1 && (sourceRow.rate == 0 || sourceRow.rate == 9 || sourceRow.rate == 13)) {
                         def newRow = formNewRow(sourceRow)
                         rows.add(newRow)
                     }

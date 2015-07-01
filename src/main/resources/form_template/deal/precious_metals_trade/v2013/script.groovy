@@ -5,6 +5,7 @@ import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.FormDataKind
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
+import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import groovy.transform.Field
 
 /**
@@ -476,255 +477,62 @@ String getValuesByGroupColumn(DataRow row) {
     return retVal.substring(0, retVal.length() - 2)
 }
 
-// Получение импортируемых данных.
+// Получение импортируемых данных
 void importData() {
     def tmpRow = formData.createDataRow()
-    def xml = getXML(getColumnName(tmpRow, 'rowNum'), null)
+    int COLUMN_COUNT = 31
+    int HEADER_ROW_COUNT = 2
+    String TABLE_START_VALUE = getColumnName(tmpRow, 'rowNum')
+    String TABLE_END_VALUE = null
+    int INDEX_FOR_SKIP = 1
 
-    checkHeaderSize(xml.row[0].cell.size(), xml.row.size(), 28, 3)
+    def allValues = []      // значения формы
+    def headerValues = []   // значения шапки
+    def paramsMap = ['rowOffset' : 0, 'colOffset' : 0]  // мапа с параметрами (отступы сверху и слева)
 
-    def headerMapping = [
-            (xml.row[0].cell[0]): getColumnName(tmpRow, 'rowNum'),
-            (xml.row[0].cell[2]): getColumnName(tmpRow, 'fullName'),
-            (xml.row[0].cell[3]): getColumnName(tmpRow, 'interdependence'),
-            (xml.row[0].cell[4]): getColumnName(tmpRow, 'inn'),
-            (xml.row[0].cell[5]): getColumnName(tmpRow, 'countryName'),
-            (xml.row[0].cell[6]): getColumnName(tmpRow, 'countryCode'),
-            (xml.row[0].cell[7]): getColumnName(tmpRow, 'docNumber'),
-            (xml.row[0].cell[8]): getColumnName(tmpRow, 'docDate'),
-            (xml.row[0].cell[9]): getColumnName(tmpRow, 'dealNumber'),
-            (xml.row[0].cell[10]): getColumnName(tmpRow, 'dealDate'),
-            (xml.row[0].cell[11]): getColumnName(tmpRow, 'dealFocus'),
-            (xml.row[0].cell[12]): getColumnName(tmpRow, 'deliverySign'),
-            (xml.row[0].cell[13]): getColumnName(tmpRow, 'metalName'),
-            (xml.row[0].cell[14]): getColumnName(tmpRow, 'foreignDeal'),
-            (xml.row[0].cell[15]): getColumnName(tmpRow, 'countryCodeNumeric'),
-            (xml.row[0].cell[16]): getColumnName(tmpRow, 'regionCode'),
-            (xml.row[0].cell[17]): getColumnName(tmpRow, 'city'),
-            (xml.row[0].cell[18]): getColumnName(tmpRow, 'locality'),
-            (xml.row[0].cell[19]): getColumnName(tmpRow, 'countryCodeNumeric2'),
-            (xml.row[0].cell[20]): getColumnName(tmpRow, 'region2'),
-            (xml.row[0].cell[21]): getColumnName(tmpRow, 'city2'),
-            (xml.row[0].cell[22]): getColumnName(tmpRow, 'locality2'),
-            (xml.row[0].cell[23]): getColumnName(tmpRow, 'deliveryCode'),
-            (xml.row[0].cell[24]): getColumnName(tmpRow, 'count'),
-            (xml.row[0].cell[25]): getColumnName(tmpRow, 'incomeSum'),
-            (xml.row[0].cell[26]): getColumnName(tmpRow, 'outcomeSum'),
-            (xml.row[0].cell[27]): getColumnName(tmpRow, 'price'),
-            (xml.row[0].cell[28]): getColumnName(tmpRow, 'total'),
-            (xml.row[0].cell[30]): getColumnName(tmpRow, 'dealDoneDate'),
-            (xml.row[1].cell[2]): 'гр. 2.1',
-            (xml.row[1].cell[3]): 'гр. 2.2',
-            (xml.row[1].cell[4]): 'гр. 3',
-            (xml.row[1].cell[5]): 'гр. 4.1',
-            (xml.row[1].cell[6]): 'гр. 4.2',
-            (xml.row[1].cell[7]): 'гр. 5',
-            (xml.row[1].cell[8]): 'гр. 6',
-            (xml.row[1].cell[9]): 'гр. 7',
-            (xml.row[1].cell[10]): 'гр. 8',
-            (xml.row[1].cell[11]): 'гр. 9',
-            (xml.row[1].cell[12]): 'гр. 10',
-            (xml.row[1].cell[13]): 'гр. 11',
-            (xml.row[1].cell[14]): 'гр. 12',
-            (xml.row[1].cell[15]): 'гр. 13.1',
-            (xml.row[1].cell[16]): 'гр. 13.2',
-            (xml.row[1].cell[17]): 'гр. 13.3',
-            (xml.row[1].cell[18]): 'гр. 13.4',
-            (xml.row[1].cell[19]): 'гр. 14.1',
-            (xml.row[1].cell[20]): 'гр. 14.2',
-            (xml.row[1].cell[21]): 'гр. 14.3',
-            (xml.row[1].cell[22]): 'гр. 14.4',
-            (xml.row[1].cell[23]): 'гр. 15',
-            (xml.row[1].cell[24]): 'гр. 16',
-            (xml.row[1].cell[25]): 'гр. 17',
-            (xml.row[1].cell[26]): 'гр. 18',
-            (xml.row[1].cell[27]): 'гр. 19',
-            (xml.row[1].cell[28]): 'гр. 20',
-            (xml.row[1].cell[30]): 'гр. 21'
-    ]
+    checkAndReadFile(ImportInputStream, UploadFileName, allValues, headerValues, TABLE_START_VALUE, TABLE_END_VALUE, HEADER_ROW_COUNT, paramsMap)
 
-    checkHeaderEquals(headerMapping, logger)
+    // проверка шапки
+    checkHeaderXls(headerValues, COLUMN_COUNT, HEADER_ROW_COUNT, tmpRow)
     if (logger.containsLevel(LogLevel.ERROR)) {
         return;
     }
+    // освобождение ресурсов для экономии памяти
+    headerValues.clear()
+    headerValues = null
 
-    addData(xml, 1)
-}
+    def fileRowIndex = paramsMap.rowOffset
+    def colOffset = paramsMap.colOffset
+    paramsMap.clear()
+    paramsMap = null
 
-// Заполнить форму данными
-void addData(def xml, int headRowCount) {
-    def int xmlIndexRow = -1
-    def int rowOffset = xml.infoXLS.rowOffset[0].cell[0].text().toInteger()
-    def int colOffset = xml.infoXLS.colOffset[0].cell[0].text().toInteger()
-
+    def rowIndex = 0
     def rows = []
-    def int rowIndex = 1
+    def allValuesCount = allValues.size()
 
-    for (def row : xml.row) {
-        xmlIndexRow++
-        def int xlsIndexRow = xmlIndexRow + rowOffset
-
-        // пропустить шапку таблицы
-        if (xmlIndexRow <= headRowCount) {
-            continue
-        }
-
-        if ((row.cell.find { it.text() != "" }.toString()) == "") {
+    // формирвание строк нф
+    for (def i = 0; i < allValuesCount; i++) {
+        rowValues = allValues[0]
+        fileRowIndex++
+        // все строки пустые - выход
+        if (!rowValues || rowValues.isEmpty() || !rowValues.find { it }) {
+            allValues.remove(rowValues)
+            rowValues.clear()
             break
         }
-
         // Пропуск итоговых строк
-        if (row.cell[1].text() == "Подитог:") {
+        if (rowValues[INDEX_FOR_SKIP] == "Подитог:") {
+            allValues.remove(rowValues)
+            rowValues.clear()
             continue
         }
-
-        def newRow = formData.createStoreMessagingDataRow()
-        newRow.setIndex(rowIndex++)
-        newRow.setImportIndex(xlsIndexRow)
-        editableColumns.each {
-            newRow.getCell(it).editable = true
-            newRow.getCell(it).setStyleAlias('Редактируемая')
-        }
-        autoFillColumns.each {
-            newRow.getCell(it).setStyleAlias('Автозаполняемая')
-        }
-
-        def int xmlIndexCol = 0
-
-        // графа 1
-        xmlIndexCol++
-
-        // графа fix
-        xmlIndexCol++
-
-        // графа 2.1
-        newRow.fullName = getRecordIdImport(9, 'NAME', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, true)
-        def map = getRefBookValue(9, newRow.fullName)
-        xmlIndexCol++
-
-        // графа 2.2
-        newRow.interdependence = getRecordIdImport(38, 'VALUE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, true)
-        xmlIndexCol++
-
-        // графа 3
-        if (map != null) {
-            formDataService.checkReferenceValue(9, row.cell[xmlIndexCol].text(), map.INN_KIO?.stringValue, xlsIndexRow, xmlIndexCol + colOffset, logger, true)
-        }
-        xmlIndexCol++
-
-        // графа 4.1
-        if (map != null) {
-            map = getRefBookValue(10, map.COUNTRY?.referenceValue)
-            if (map != null) {
-                formDataService.checkReferenceValue(10, row.cell[xmlIndexCol].text(), map.NAME?.stringValue, xlsIndexRow, xmlIndexCol + colOffset, logger, true)
-            }
-        }
-        xmlIndexCol++
-
-        // графа 4.2
-        if (map != null) {
-            formDataService.checkReferenceValue(10, row.cell[xmlIndexCol].text(), map.CODE?.stringValue, xlsIndexRow, xmlIndexCol + colOffset, logger, true)
-        }
-        xmlIndexCol++
-
-        // графа 5
-        newRow.docNumber = row.cell[xmlIndexCol].text()
-        xmlIndexCol++
-
-        // графа 6
-        newRow.docDate = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, true)
-        xmlIndexCol++
-
-        // графа 7
-        newRow.dealNumber = row.cell[xmlIndexCol].text()
-        xmlIndexCol++
-
-        // графа 8
-        newRow.dealDate = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, true)
-        xmlIndexCol++
-
-        // графа 9
-        newRow.dealFocus = getRecordIdImport(20, 'DIRECTION', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, true)
-        xmlIndexCol++
-
-        // графа 10
-        newRow.deliverySign = getRecordIdImport(18, 'SIGN', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, true)
-        xmlIndexCol++
-
-        // графа 11
-        newRow.metalName = getRecordIdImport(17, 'INNER_CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, true)
-        xmlIndexCol++
-
-        // графа 12
-        newRow.foreignDeal = getRecordIdImport(38, 'VALUE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, true)
-        xmlIndexCol++
-
-        // графа 13.1
-        newRow.countryCodeNumeric = getRecordIdImport(10, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, true)
-        xmlIndexCol++
-
-        // графа 13.2
-        String code = row.cell[xmlIndexCol].text()
-        if (code.length() == 1) {    //для кодов 1, 2, 3...9
-            code = "0".concat(code)
-        }
-        newRow.regionCode = getRecordIdImport(4, 'CODE', code, xlsIndexRow, xmlIndexCol + colOffset, true)
-        xmlIndexCol++
-
-        // графа 13.3
-        newRow.city = row.cell[xmlIndexCol].text()
-        xmlIndexCol++
-
-        // графа 13.4
-        newRow.locality = row.cell[xmlIndexCol].text()
-        xmlIndexCol++
-
-        // графа 14.1
-        newRow.countryCodeNumeric2 = getRecordIdImport(10, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, true)
-        xmlIndexCol++
-
-        // графа 14.2
-        code = row.cell[xmlIndexCol].text()
-        if (code.length() == 1) {    //для кодов 1, 2, 3...9
-            code = "0".concat(code)
-        }
-        newRow.region2 = getRecordIdImport(4, 'CODE', code, xlsIndexRow, xmlIndexCol + colOffset, true)
-        xmlIndexCol++
-
-        // графа 14.3
-        newRow.city2 = row.cell[xmlIndexCol].text()
-        xmlIndexCol++
-
-        // графа 14.4
-        newRow.locality2 = row.cell[xmlIndexCol].text()
-        xmlIndexCol++
-
-        // графа 15
-        newRow.deliveryCode = getRecordIdImport(63, 'STRCODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, true)
-        xmlIndexCol++
-
-        // графа 16
-        xmlIndexCol++
-
-        // графа 17
-        newRow.incomeSum = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
-        xmlIndexCol++
-
-        // графа 18
-        newRow.outcomeSum = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
-        xmlIndexCol++
-
-        // графа 19
-        xmlIndexCol++
-        // графа 20
-        xmlIndexCol++
-        // графа fix
-        xmlIndexCol++
-
-        // графа 21
-        newRow.dealDoneDate = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, true)
-
+        // простая строка
+        rowIndex++
+        def newRow = getNewRowFromXls(rowValues, colOffset, fileRowIndex, rowIndex)
         rows.add(newRow)
+        // освободить ненужные данные - иначе не хватит памяти
+        allValues.remove(rowValues)
+        rowValues.clear()
     }
 
     showMessages(rows, logger)
@@ -732,6 +540,240 @@ void addData(def xml, int headRowCount) {
         updateIndexes(rows)
         formDataService.getDataRowHelper(formData).allCached = rows
     }
+}
+
+/**
+ * Проверить шапку таблицы
+ *
+ * @param headerRows строки шапки
+ * @param colCount количество колонок в таблице
+ * @param rowCount количество строк в таблице
+ * @param tmpRow вспомогательная строка для получения названии графов
+ */
+void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
+    if (headerRows.isEmpty()) {
+        throw new ServiceException(WRONG_HEADER_ROW_SIZE)
+    }
+    checkHeaderSize(headerRows[headerRows.size() - 1].size(), headerRows.size(), colCount, rowCount)
+
+    def headerMapping = [
+            (headerRows[0][0]) : getColumnName(tmpRow, 'rowNum'),
+            (headerRows[0][2]) : getColumnName(tmpRow, 'fullName'),
+            (headerRows[0][3]) : getColumnName(tmpRow, 'interdependence'),
+            (headerRows[0][4]) : getColumnName(tmpRow, 'inn'),
+            (headerRows[0][5]) : getColumnName(tmpRow, 'countryName'),
+            (headerRows[0][6]) : getColumnName(tmpRow, 'countryCode'),
+            (headerRows[0][7]) : getColumnName(tmpRow, 'docNumber'),
+            (headerRows[0][8]) : getColumnName(tmpRow, 'docDate'),
+            (headerRows[0][9]) : getColumnName(tmpRow, 'dealNumber'),
+            (headerRows[0][10]): getColumnName(tmpRow, 'dealDate'),
+            (headerRows[0][11]): getColumnName(tmpRow, 'dealFocus'),
+            (headerRows[0][12]): getColumnName(tmpRow, 'deliverySign'),
+            (headerRows[0][13]): getColumnName(tmpRow, 'metalName'),
+            (headerRows[0][14]): getColumnName(tmpRow, 'foreignDeal'),
+            (headerRows[0][15]): getColumnName(tmpRow, 'countryCodeNumeric'),
+            (headerRows[0][16]): getColumnName(tmpRow, 'regionCode'),
+            (headerRows[0][17]): getColumnName(tmpRow, 'city'),
+            (headerRows[0][18]): getColumnName(tmpRow, 'locality'),
+            (headerRows[0][19]): getColumnName(tmpRow, 'countryCodeNumeric2'),
+            (headerRows[0][20]): getColumnName(tmpRow, 'region2'),
+            (headerRows[0][21]): getColumnName(tmpRow, 'city2'),
+            (headerRows[0][22]): getColumnName(tmpRow, 'locality2'),
+            (headerRows[0][23]): getColumnName(tmpRow, 'deliveryCode'),
+            (headerRows[0][24]): getColumnName(tmpRow, 'count'),
+            (headerRows[0][25]): getColumnName(tmpRow, 'incomeSum'),
+            (headerRows[0][26]): getColumnName(tmpRow, 'outcomeSum'),
+            (headerRows[0][27]): getColumnName(tmpRow, 'price'),
+            (headerRows[0][28]): getColumnName(tmpRow, 'total'),
+            (headerRows[0][30]): getColumnName(tmpRow, 'dealDoneDate'),
+            (headerRows[1][2]) : 'гр. 2.1',
+            (headerRows[1][3]) : 'гр. 2.2',
+            (headerRows[1][4]) : 'гр. 3',
+            (headerRows[1][5]) : 'гр. 4.1',
+            (headerRows[1][6]) : 'гр. 4.2',
+            (headerRows[1][7]) : 'гр. 5',
+            (headerRows[1][8]) : 'гр. 6',
+            (headerRows[1][9]) : 'гр. 7',
+            (headerRows[1][10]): 'гр. 8',
+            (headerRows[1][11]): 'гр. 9',
+            (headerRows[1][12]): 'гр. 10',
+            (headerRows[1][13]): 'гр. 11',
+            (headerRows[1][14]): 'гр. 12',
+            (headerRows[1][15]): 'гр. 13.1',
+            (headerRows[1][16]): 'гр. 13.2',
+            (headerRows[1][17]): 'гр. 13.3',
+            (headerRows[1][18]): 'гр. 13.4',
+            (headerRows[1][19]): 'гр. 14.1',
+            (headerRows[1][20]): 'гр. 14.2',
+            (headerRows[1][21]): 'гр. 14.3',
+            (headerRows[1][22]): 'гр. 14.4',
+            (headerRows[1][23]): 'гр. 15',
+            (headerRows[1][24]): 'гр. 16',
+            (headerRows[1][25]): 'гр. 17',
+            (headerRows[1][26]): 'гр. 18',
+            (headerRows[1][27]): 'гр. 19',
+            (headerRows[1][28]): 'гр. 20',
+            (headerRows[1][30]): 'гр. 21'
+    ]
+    checkHeaderEquals(headerMapping, logger)
+}
+
+/**
+ * Получить новую строку нф по значениям из экселя.
+ *
+ * @param values список строк со значениями
+ * @param colOffset отступ в колонках
+ * @param fileRowIndex номер строки в тф
+ * @param rowIndex строка в нф
+ */
+def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) {
+    def newRow = formData.createStoreMessagingDataRow()
+    newRow.setIndex(rowIndex)
+    newRow.setImportIndex(fileRowIndex)
+    editableColumns.each {
+        newRow.getCell(it).editable = true
+        newRow.getCell(it).setStyleAlias('Редактируемая')
+    }
+    autoFillColumns.each {
+        newRow.getCell(it).setStyleAlias('Автозаполняемая')
+    }
+
+    def int colIndex = 0
+
+    // графа 1
+    colIndex++
+
+    // графа fix
+    colIndex++
+
+    // графа 2.1
+    newRow.fullName = getRecordIdImport(9, 'NAME', values[colIndex], fileRowIndex, colIndex + colOffset, true)
+    def map = getRefBookValue(9, newRow.fullName)
+    colIndex++
+
+    // графа 2.2
+    newRow.interdependence = getRecordIdImport(38, 'VALUE', values[colIndex], fileRowIndex, colIndex + colOffset, true)
+    colIndex++
+
+    // графа 3
+    if (map != null) {
+        formDataService.checkReferenceValue(9, values[colIndex], map.INN_KIO?.stringValue, fileRowIndex, colIndex + colOffset, logger, true)
+    }
+    colIndex++
+
+    // графа 4.1
+    if (map != null) {
+        map = getRefBookValue(10, map.COUNTRY?.referenceValue)
+        if (map != null) {
+            formDataService.checkReferenceValue(10, values[colIndex], map.NAME?.stringValue, fileRowIndex, colIndex + colOffset, logger, true)
+        }
+    }
+    colIndex++
+
+    // графа 4.2
+    if (map != null) {
+        formDataService.checkReferenceValue(10, values[colIndex], map.CODE?.stringValue, fileRowIndex, colIndex + colOffset, logger, true)
+    }
+    colIndex++
+
+    // графа 5
+    newRow.docNumber = values[colIndex]
+    colIndex++
+
+    // графа 6
+    newRow.docDate = parseDate(values[colIndex], "dd.MM.yyyy", fileRowIndex, colIndex + colOffset, logger, true)
+    colIndex++
+
+    // графа 7
+    newRow.dealNumber = values[colIndex]
+    colIndex++
+
+    // графа 8
+    newRow.dealDate = parseDate(values[colIndex], "dd.MM.yyyy", fileRowIndex, colIndex + colOffset, logger, true)
+    colIndex++
+
+    // графа 9
+    newRow.dealFocus = getRecordIdImport(20, 'DIRECTION', values[colIndex], fileRowIndex, colIndex + colOffset, true)
+    colIndex++
+
+    // графа 10
+    newRow.deliverySign = getRecordIdImport(18, 'SIGN', values[colIndex], fileRowIndex, colIndex + colOffset, true)
+    colIndex++
+
+    // графа 11
+    newRow.metalName = getRecordIdImport(17, 'INNER_CODE', values[colIndex], fileRowIndex, colIndex + colOffset, true)
+    colIndex++
+
+    // графа 12
+    newRow.foreignDeal = getRecordIdImport(38, 'VALUE', values[colIndex], fileRowIndex, colIndex + colOffset, true)
+    colIndex++
+
+    // графа 13.1
+    newRow.countryCodeNumeric = getRecordIdImport(10, 'CODE', values[colIndex], fileRowIndex, colIndex + colOffset, true)
+    colIndex++
+
+    // графа 13.2
+    String code = values[colIndex]
+    if (code.length() == 1) {    //для кодов 1, 2, 3...9
+        code = "0".concat(code)
+    }
+    newRow.regionCode = getRecordIdImport(4, 'CODE', code, fileRowIndex, colIndex + colOffset, true)
+    colIndex++
+
+    // графа 13.3
+    newRow.city = values[colIndex]
+    colIndex++
+
+    // графа 13.4
+    newRow.locality = values[colIndex]
+    colIndex++
+
+    // графа 14.1
+    newRow.countryCodeNumeric2 = getRecordIdImport(10, 'CODE', values[colIndex], fileRowIndex, colIndex + colOffset, true)
+    colIndex++
+
+    // графа 14.2
+    code = values[colIndex]
+    if (code.length() == 1) {    //для кодов 1, 2, 3...9
+        code = "0".concat(code)
+    }
+    newRow.region2 = getRecordIdImport(4, 'CODE', code, fileRowIndex, colIndex + colOffset, true)
+    colIndex++
+
+    // графа 14.3
+    newRow.city2 = values[colIndex]
+    colIndex++
+
+    // графа 14.4
+    newRow.locality2 = values[colIndex]
+    colIndex++
+
+    // графа 15
+    newRow.deliveryCode = getRecordIdImport(63, 'STRCODE', values[colIndex], fileRowIndex, colIndex + colOffset, true)
+    colIndex++
+
+    // графа 16
+    colIndex++
+
+    // графа 17
+    newRow.incomeSum = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
+    colIndex++
+
+    // графа 18
+    newRow.outcomeSum = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
+    colIndex++
+
+    // графа 19
+    colIndex++
+    // графа 20
+    colIndex++
+    // графа fix
+    colIndex++
+
+    // графа 21
+    newRow.dealDoneDate = parseDate(values[colIndex], "dd.MM.yyyy", fileRowIndex, colIndex + colOffset, logger, true)
+
+    return newRow
 }
 
 def getReportPeriodEndDate() {

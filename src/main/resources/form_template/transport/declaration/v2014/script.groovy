@@ -81,11 +81,19 @@ void checkDepartmentParams(LogLevel logLevel) {
     // Проверки подразделения
     def List<String> errorList = getErrorDepartment(departmentParamTransportRow)
     for (String error : errorList) {
-        logger.log(logLevel, String.format("Для данного подразделения на форме настроек подразделений отсутствует значение атрибута %s!", error))
+        logger.log(logLevel, String.format("Для параметров текущего экземпляра декларации на форме настроек подразделений отсутствует значение атрибута %s!", error))
+    }
+    errorList = getErrorTaxPlaceTypeCode(departmentParamTransportRow)
+    for (String error : errorList) {
+        logger.log(logLevel, String.format("Для параметров текущего экземпляра декларации неверно указано значение атрибута %s на форме настроек подразделений!", error))
     }
     errorList = getErrorVersion(departmentParam)
     for (String error : errorList) {
         logger.log(logLevel, String.format("Неверно указано значение атрибута %s на форме настроек подразделений!", error))
+    }
+    errorList = getErrorINN(departmentParam)
+    for (String error : errorList) {
+        logger.log(logLevel, String.format("Для данного подразделения на форме настроек подразделений отсутствует значение атрибута %s!", error))
     }
 
     // Справочник "Параметры представления деклараций по налогу на имущество"
@@ -506,7 +514,13 @@ List<String> getErrorDepartment(def record) {
             errorList.add("«Наименование документа, подтверждающего полномочия представителя»")
         }
     }
-    if (record.TAX_PLACE_TYPE_CODE?.referenceValue == null) {
+    errorList
+}
+
+List<String> getErrorTaxPlaceTypeCode(def record) {
+    List<String> errorList = new ArrayList<String>()
+    def code = record.TAX_PLACE_TYPE_CODE?.referenceValue
+    if (code == null || !(getRefBookValue(2, code)?.CODE?.stringValue in ['213', '216', '260'])) {
         errorList.add("«Код места, по которому представляется документ»")
     }
     errorList
@@ -517,6 +531,11 @@ List<String> getErrorVersion(record) {
     if (record.FORMAT_VERSION == null || record.FORMAT_VERSION.stringValue == null || !record.FORMAT_VERSION.stringValue.equals('5.03')) {
         errorList.add("«Версия формата»")
     }
+    errorList
+}
+
+List<String> getErrorINN(record) {
+    List<String> errorList = new ArrayList<String>()
     if (record.INN == null || record.INN.stringValue == null || record.INN.stringValue.isEmpty()) {
         errorList.add("«ИНН»")
     }
@@ -561,7 +580,7 @@ def getDepartmentParam() {
         def departmentId = declarationData.departmentId
         def departmentParamList = getProvider(31).getRecords(getReportPeriodEndDate() - 1, null, "DEPARTMENT_ID = $departmentId", null)
         if (departmentParamList == null || departmentParamList.size() == 0 || departmentParamList.get(0) == null) {
-            throw new Exception("Ошибка при получении настроек обособленного подразделения")
+            throw new Exception("Ошибка при получении настроек обособленного подразделения. Настройки подразделения заполнены не полностью")
         }
         departmentParam = departmentParamList?.get(0)
     }
@@ -574,7 +593,7 @@ def getDepartmentParamTable(def departmentParamId) {
         def filter = "LINK = $departmentParamId and TAX_ORGAN_CODE ='${declarationData.taxOrganCode}' and KPP ='${declarationData.kpp}'"
         def departmentParamTableList = getProvider(310).getRecords(getReportPeriodEndDate() - 1, null, filter, null)
         if (departmentParamTableList == null || departmentParamTableList.size() == 0 || departmentParamTableList.get(0) == null) {
-            throw new Exception("Ошибка при получении настроек обособленного подразделения")
+            throw new Exception("Ошибка при получении настроек обособленного подразделения. Настройки подразделения заполнены не полностью")
         }
         departmentParamTable = departmentParamTableList.get(0)
     }
