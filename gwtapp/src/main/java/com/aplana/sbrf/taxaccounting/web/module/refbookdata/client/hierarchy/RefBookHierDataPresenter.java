@@ -2,34 +2,29 @@ package com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.hierarchy;
 
 import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.gwt.client.dialog.DialogHandler;
-import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
-import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.FormMode;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.RefBookDataModule;
-import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.RefBookDataTokens;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.EditFormPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.event.RollbackTableRowSelection;
-import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.event.SetFormMode;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.event.UpdateForm;
+import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.event.AddItemEvent;
+import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.event.DeleteItemEvent;
+import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.event.SearchButtonEvent;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.versionform.RefBookVersionPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.*;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.model.RefBookTreeItem;
 import com.aplana.sbrf.taxaccounting.web.widget.utils.WidgetUtils;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
+import com.google.web.bindery.event.shared.HandlerRegistration;
 import com.gwtplatform.dispatch.shared.DispatchAsync;
 import com.gwtplatform.mvp.client.HasUiHandlers;
-import com.gwtplatform.mvp.client.Presenter;
+import com.gwtplatform.mvp.client.PresenterWidget;
 import com.gwtplatform.mvp.client.View;
-import com.gwtplatform.mvp.client.annotations.NameToken;
-import com.gwtplatform.mvp.client.annotations.ProxyCodeSplit;
-import com.gwtplatform.mvp.client.proxy.Place;
-import com.gwtplatform.mvp.client.proxy.PlaceManager;
-import com.gwtplatform.mvp.client.proxy.PlaceRequest;
-import com.gwtplatform.mvp.client.proxy.ProxyPlace;
+import com.gwtplatform.mvp.client.annotations.ProxyEvent;
 
 import java.util.Arrays;
 import java.util.Date;
@@ -39,30 +34,59 @@ import java.util.Date;
  *
  * @author aivanov
  */
-public class RefBookHierDataPresenter extends Presenter<RefBookHierDataPresenter.MyView,
-        RefBookHierDataPresenter.MyProxy> implements RefBookHierDataUiHandlers,
-        UpdateForm.UpdateFormHandler, SetFormMode.SetFormModeHandler, RollbackTableRowSelection.RollbackTableRowSelectionHandler{
-
-    @ProxyCodeSplit
-    @NameToken(RefBookDataTokens.refBookHierData)
-    public interface MyProxy extends ProxyPlace<RefBookHierDataPresenter>, Place {
-    }
-
-    static final Object TYPE_editFormPresenter = new Object();
-
-    private Long refBookDataId;
+public class RefBookHierDataPresenter extends PresenterWidget<RefBookHierDataPresenter.MyView> implements RefBookHierDataUiHandlers,
+        RollbackTableRowSelection.RollbackTableRowSelectionHandler, IHierRefBookData,
+        AddItemEvent.AddItemHandler, DeleteItemEvent.DeleteItemHandler, SearchButtonEvent.SearchHandler, UpdateForm.UpdateFormHandler {
 
     private Long recordId;
-
-    private FormMode mode;
-
     boolean canVersion = true;
+    private Long refBookDataId;
+    private RecordChanges recordChanges;
+    private Date relevanceDate;
 
     EditFormPresenter editFormPresenter;
     RefBookVersionPresenter versionPresenter;
-    private PlaceManager placeManager;
+    private final HandlerRegistration[] registrations = new HandlerRegistration[1];
 
     private final DispatchAsync dispatcher;
+
+    @ProxyEvent
+    @Override
+    public void onAddItem(AddItemEvent event) {
+        onAddRowClicked();
+    }
+
+    @ProxyEvent
+    @Override
+    public void onDeleteItem(DeleteItemEvent event) {
+        onDeleteRowClicked();
+    }
+
+    @ProxyEvent
+    @Override
+    public void onSearch(SearchButtonEvent event) {
+        getView().setPickerState(event.getRelevanceDate(), event.getSearchPattern());
+        searchButtonClicked();
+    }
+
+    @ProxyEvent
+    @Override
+    public void onUpdateForm(UpdateForm event) {
+        if (event.isSuccess()) {
+            getView().clearFilterInputBox();
+                    /*refBookHierDataPresenter.clearFilterInputBox();*/
+            RecordChanges rc = event.getRecordChanges();
+            setRecordItem(rc);
+            if (canVersion && !WidgetUtils.isInLimitPeriod(rc.getStart(), rc.getEnd(), relevanceDate)) {
+                        /*refBookHierDataPresenter.setRecordItem(rc);
+                        refBookHierDataPresenter.deleteItem();*/
+                getView().deleteItem(rc.getId());
+            } else {
+                updateTree();
+            }
+            /*getView().setSelected(rc.getId());*/
+        }
+    }
 
     public interface MyView extends View, HasUiHandlers<RefBookHierDataUiHandlers> {
 
@@ -78,8 +102,6 @@ public class RefBookHierDataPresenter extends Presenter<RefBookHierDataPresenter
 
         void reload();
 
-        void setRefBookNameDesc(String desc);
-
         Long getSelectedId();
 
         RefBookTreeItem getSelectedItem();
@@ -90,75 +112,56 @@ public class RefBookHierDataPresenter extends Presenter<RefBookHierDataPresenter
 
         void updateItem(Long id, Long newParentId, String newName);
 
-        Date getRelevanceDate();
-
         void setAttributeId(Long attrId);
+
+        void setPickerState(Date relevanceDate, String searchPattern);
 
         /** Обновление вьюшки для определенного состояния */
         void updateMode(FormMode mode);
         /** Очистить */
         void clearFilterInputBox();
 
-        //Показывает/скрывает поля, которые необходимы только для версионирования
-        void setVersionedFields(boolean isVisible);
+        void searchButtonClicked();
     }
 
     @Inject
-    public RefBookHierDataPresenter(final EventBus eventBus, final MyView view, EditFormPresenter editFormPresenter, PlaceManager placeManager,
-                                    RefBookVersionPresenter versionPresenter, final MyProxy proxy, DispatchAsync dispatcher) {
-        super(eventBus, view, proxy, RevealContentTypeHolder.getMainContent());
+    public RefBookHierDataPresenter(final EventBus eventBus, final MyView view, EditFormPresenter editFormPresenter,
+                                    RefBookVersionPresenter versionPresenter, DispatchAsync dispatcher) {
+        super(eventBus, view);
         this.dispatcher = dispatcher;
         this.editFormPresenter = editFormPresenter;
         this.versionPresenter = versionPresenter;
-        this.placeManager = placeManager;
-        this.mode = FormMode.VIEW;
         getView().setUiHandlers(this);
     }
 
     @Override
     public void onBind() {
-        addRegisteredHandler(UpdateForm.getType(), this);
-        addRegisteredHandler(RollbackTableRowSelection.getType(), this);
-        addRegisteredHandler(SetFormMode.getType(), this);
+        addVisibleHandler(UpdateForm.getType(), this);
+        addVisibleHandler(AddItemEvent.getType(), this);
+        addVisibleHandler(DeleteItemEvent.getType(), this);
+        addVisibleHandler(SearchButtonEvent.getType(), this);
+    }
+
+    @Override
+    protected void onUnbind() {
+        super.onUnbind();
+        for (HandlerRegistration han : registrations){
+            han.removeHandler();
+        }
     }
 
     @Override
     protected void onReveal() {
         super.onReveal();
-        setInSlot(TYPE_editFormPresenter, editFormPresenter);
+        /*setInSlot(TYPE_editFormPresenter, editFormPresenter);*/
+        canVersion = !Arrays.asList(RefBookDataModule.NOT_VERSIONED_REF_BOOK_IDS).contains(refBookDataId);
+        /*if (canVersion) checkRecord();*/
     }
 
     @Override
     protected void onHide() {
         super.onHide();
-        clearSlot(TYPE_editFormPresenter);
-    }
-
-    @Override
-    public void onUpdateForm(UpdateForm event) {
-        if (event.isSuccess() && this.isVisible()) {
-            getView().clearFilterInputBox();
-            RecordChanges rc = event.getRecordChanges();
-            RefBookTreeItem selectedItem = getView().getSelectedItem();
-            if (canVersion && !WidgetUtils.isInLimitPeriod(rc.getStart(), rc.getEnd(), getView().getRelevanceDate())) {
-                getView().deleteItem(rc.getId());
-            } else {
-                if (selectedItem != null) {
-                    String sName = selectedItem.getDereferenceValue();
-                    Long sParentId = selectedItem.getParent() != null ? selectedItem.getParent().getId() : null;
-
-                    if (WidgetUtils.isWasChange(sName, rc.getName()) ||
-                            WidgetUtils.isWasChange(sParentId, rc.getParentId())) {
-                        // обновляем если только есть изменения
-                        getView().updateItem(rc.getId(), rc.getParentId(), rc.getName());
-                    }
-                } else {
-                    // добавление записи rc.getId() ==null
-                    getView().updateItem(rc.getId(), rc.getParentId(), rc.getName());
-                }
-            }
-            //getView().setSelected(rc.getId());
-        }
+        /*clearSlot(TYPE_editFormPresenter);*/
     }
 
     @Override
@@ -167,16 +170,12 @@ public class RefBookHierDataPresenter extends Presenter<RefBookHierDataPresenter
         getView().setSelection(parentRefBookItem);
     }
 
-    @Override
-    public void onAddRowClicked() {
-        getView().updateMode(FormMode.CREATE);
-        editFormPresenter.setMode(FormMode.CREATE);
+    private void onAddRowClicked() {
         editFormPresenter.show(null, getView().getSelectedItem());
         getView().clearSelected();
     }
 
-    @Override
-    public void onDeleteRowClicked() {
+    private void onDeleteRowClicked() {
         LogCleanEvent.fire(RefBookHierDataPresenter.this);
         if (canVersion){
             DeleteRefBookRowAction action = new DeleteRefBookRowAction();
@@ -269,6 +268,10 @@ public class RefBookHierDataPresenter extends Presenter<RefBookHierDataPresenter
         }
     }
 
+    public Long getSelectedId(){
+        return getView().getSelectedId();
+    }
+
     @Override
     public void onRelevanceDateChanged() {
         editFormPresenter.show(null);
@@ -277,94 +280,77 @@ public class RefBookHierDataPresenter extends Presenter<RefBookHierDataPresenter
     }
 
     @Override
-    public void prepareFromRequest(final PlaceRequest request) {
-        super.prepareFromRequest(request);
-        refBookDataId = Long.parseLong(request.getParameter(RefBookDataTokens.REFBOOK_DATA_ID, null));
+    public void updateTree() {
+        RefBookTreeItem selectedItem = getView().getSelectedItem();
+        if (selectedItem != null) {
+            String sName = selectedItem.getDereferenceValue();
+            Long sParentId = selectedItem.getParent() != null ? selectedItem.getParent().getId() : null;
 
-        CheckHierAction checkHierAction = new CheckHierAction();
-        checkHierAction.setRefBookId(refBookDataId);
-        dispatcher.execute(checkHierAction, CallbackUtils.defaultCallback(new AbstractCallback<CheckHierResult>() {
-            @Override
-            public void onSuccess(CheckHierResult result) {
-                CheckRefBookAction checkAction = new CheckRefBookAction();
-                checkAction.setRefBookId(refBookDataId);
-                dispatcher.execute(checkAction, CallbackUtils.defaultCallback(
-                        new AbstractCallback<CheckRefBookResult>() {
-                            @Override
-                            public void onSuccess(CheckRefBookResult result) {
-                                if (result.isAvailable()) {
-                                    editFormPresenter.setVersionMode(false);
-                                    editFormPresenter.setCurrentUniqueRecordId(null);
-                                    editFormPresenter.setRecordId(null);
-
-
-                                    GetRefBookAttributesAction action = new GetRefBookAttributesAction(refBookDataId);
-                                    dispatcher.execute(action, CallbackUtils.defaultCallback(
-                                            new AbstractCallback<GetRefBookAttributesResult>() {
-                                                @Override
-                                                public void onSuccess(GetRefBookAttributesResult result) {
-                                                    Long attrId = null;
-                                                    for (RefBookColumn refBookColumn : result.getColumns()) {
-                                                        if (refBookColumn.getAlias().toLowerCase().equals("name")) {
-                                                            attrId = refBookColumn.getId();
-                                                        }
-                                                    }
-                                                    getView().setAttributeId(attrId);
-                                                    editFormPresenter.init(refBookDataId, result.getColumns());
-
-                                                    /** Очищаем поле поиска если перешли со страницы списка справочников */
-                                                    if (request.getParameterNames().contains(RefBookDataTokens.REFBOOK_RECORD_ID)) {
-                                                        recordId = Long.parseLong(request.getParameter(RefBookDataTokens.REFBOOK_RECORD_ID, null));
-                                                        if (result.isReadOnly()) {
-                                                            mode = FormMode.READ;
-                                                            //updateMode();
-                                                        } else if (mode == null) {
-                                                            mode = FormMode.VIEW;
-                                                        }
-                                                        setMode(mode);
-                                                        if (canVersion)checkRecord();
-                                                    } else {
-                                                        recordId = null;
-                                                        getView().clearFilterInputBox();
-                                                        if (result.isReadOnly()) {
-                                                            mode = FormMode.READ;
-                                                        } else {
-                                                            mode = FormMode.VIEW;
-                                                        }
-                                                        setMode(mode);
-                                                        getView().clearSelected();
-                                                        //getView().load();
-                                                        getView().loadAndSelect();
-                                                    }
-                                                    getProxy().manualReveal(RefBookHierDataPresenter.this);
-                                                    updateMode();
-                                                }
-                                            }, RefBookHierDataPresenter.this));
-
-                                    dispatcher.execute(new GetNameAction(refBookDataId), CallbackUtils.defaultCallback(
-                                            new AbstractCallback<GetNameResult>() {
-                                                @Override
-                                                public void onSuccess(GetNameResult result) {
-                                                    getView().setRefBookNameDesc(result.getName());
-                                                }
-                                            }, RefBookHierDataPresenter.this));
-                                    canVersion = !Arrays.asList(RefBookDataModule.NOT_VERSIONED_REF_BOOK_IDS).contains(refBookDataId);
-                                    getView().setVersionedFields(canVersion);
-                                    editFormPresenter.setCanVersion(canVersion);
-                                    versionPresenter.setHierarchy(true);
-                                } else {
-                                    getProxy().manualReveal(RefBookHierDataPresenter.this);
-                                    Dialog.errorMessage("Доступ к справочнику запрещен!");
-                                }
-                            }
-                        }, RefBookHierDataPresenter.this));
+            if (WidgetUtils.isWasChange(sName, recordChanges.getName()) ||
+                    WidgetUtils.isWasChange(sParentId, recordChanges.getParentId())) {
+                // обновляем если только есть изменения
+                getView().updateItem(recordChanges.getId(), recordChanges.getParentId(), recordChanges.getName());
             }
+        } else {
+            // добавление записи rc.getId() ==null
+            getView().updateItem(recordChanges.getId(), recordChanges.getParentId(), recordChanges.getName());
+        }
+    }
 
-            @Override
-            public void onFailure(Throwable caught) {
-                placeManager.unlock();
-            }
-        }, RefBookHierDataPresenter.this));
+    @Override
+    public void setMode(FormMode mode){
+        getView().updateMode(mode);
+    }
+
+    @Override
+    public void setRecordItem(RecordChanges recordChanges) {
+        this.recordChanges = recordChanges;
+    }
+
+    @Override
+    public void setAttributeId(Long attrId) {
+        getView().setAttributeId(attrId);
+    }
+
+    public void initPickerState(Date relevanceDate, String searchPattern) {
+        this.relevanceDate = relevanceDate;
+        getView().setPickerState(relevanceDate, searchPattern);
+    }
+
+    @Override
+    public void onCleanEditForm() {
+        editFormPresenter.cleanFields();
+        editFormPresenter.setCurrentUniqueRecordId(null);
+        editFormPresenter.setAllVersionVisible(false);
+    }
+
+    @Override
+    public void setRefBookId(Long refBookId){
+        this.refBookDataId = refBookId;
+    }
+
+    @Override
+    public void clearAll() {
+        getView().clearFilterInputBox();
+        getView().clearSelected();
+    }
+
+    @Override
+    public void clearFilter() {
+        getView().clearFilterInputBox();
+    }
+
+    @Override
+    public void loadAndSelect() {
+        getView().loadAndSelect();
+    }
+
+    public void clearFilterInputBox() {
+        getView().clearFilterInputBox();
+    }
+
+    private void searchButtonClicked(){
+        getView().searchButtonClicked();
     }
 
     private void checkRecord() {
@@ -386,51 +372,5 @@ public class RefBookHierDataPresenter extends Presenter<RefBookHierDataPresenter
                         }
                     }
                 }, this));
-    }
-
-    @Override
-    public boolean useManualReveal() {
-        return true;
-    }
-
-
-    private void updateMode(){
-        getView().updateMode(mode);
-        editFormPresenter.setMode(mode);
-        versionPresenter.setMode(mode);
-    }
-
-    @Override
-    public void setMode(FormMode mode){
-        this.mode = mode;
-        updateMode();
-    }
-
-    @Override
-    public void saveChanges() {
-        editFormPresenter.onSaveClicked(true);
-    }
-
-    @Override
-    public void cancelChanges() {
-        editFormPresenter.setIsFormModified(false);
-        editFormPresenter.onCancelClicked();
-    }
-
-    @Override
-    public boolean isFormModified() {
-        return editFormPresenter.isFormModified();
-    }
-
-    @Override
-    public void onCleanEditForm() {
-        editFormPresenter.cleanFields();
-        editFormPresenter.setCurrentUniqueRecordId(null);
-        editFormPresenter.setAllVersionVisible(false);
-    }
-
-    @Override
-    public void onSetFormMode(SetFormMode event) {
-        setMode(event.getFormMode());
     }
 }

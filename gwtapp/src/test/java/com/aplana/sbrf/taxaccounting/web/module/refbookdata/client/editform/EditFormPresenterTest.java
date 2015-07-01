@@ -1,7 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform;
 
 import com.aplana.gwt.client.testutils.DispatchAsyncStub;
-import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.FormMode;
+import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.FormMode;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.*;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Inject;

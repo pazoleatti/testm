@@ -1,6 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.event;
 
-import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.FormMode;
+import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.FormMode;
 import com.google.gwt.event.shared.EventHandler;
 import com.google.gwt.event.shared.GwtEvent;
 import com.google.gwt.event.shared.HasHandlers;

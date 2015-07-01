@@ -9,10 +9,8 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallba
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
-import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.FormMode;
-import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.event.RollbackTableRowSelection;
-import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.event.SetFormMode;
-import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.event.UpdateForm;
+import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.FormMode;
+import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.event.*;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.exception.BadValueException;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.renamedialog.ConfirmButtonClickHandler;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.renamedialog.RenameDialogPresenter;
@@ -21,9 +19,12 @@ import com.aplana.sbrf.taxaccounting.web.widget.logarea.shared.SaveLogEntriesAct
 import com.aplana.sbrf.taxaccounting.web.widget.logarea.shared.SaveLogEntriesResult;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.model.RefBookTreeItem;
 import com.aplana.sbrf.taxaccounting.web.widget.utils.WidgetUtils;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.HasClickHandlers;
 import com.google.gwt.user.client.ui.HasValue;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
+import com.google.web.bindery.event.shared.HandlerRegistration;
 import com.gwtplatform.dispatch.shared.DispatchAsync;
 import com.gwtplatform.mvp.client.HasUiHandlers;
 import com.gwtplatform.mvp.client.PresenterWidget;
@@ -32,7 +33,8 @@ import com.gwtplatform.mvp.client.proxy.PlaceManager;
 
 import java.util.*;
 
-public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView> implements EditFormUiHandlers {
+public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
+        implements EditFormUiHandlers, HasUpdateRefBookHandlers, HasSetFormModeHandlers{
 	private final PlaceManager placeManager;
 	private final DispatchAsync dispatchAsync;
 	private boolean isFormModified = false;
@@ -59,6 +61,20 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
         getView().setNeedToReload(true);
     }
 
+    @Override
+    public HandlerRegistration addUpdateRefBookHandler(UpdateForm.UpdateFormHandler handler) {
+        return addHandler(UpdateForm.getType(), handler);
+    }
+
+    @Override
+    public HandlerRegistration addSetFormModeRefBookHandler(SetFormMode.SetFormModeHandler handler) {
+        return addHandler(SetFormMode.getType(), handler);
+    }
+
+    public HandlerRegistration addClickHandlerForAllVersions(ClickHandler clickHandler){
+        return getView().getClickAllVersion().addClickHandler(clickHandler);
+    }
+
     public interface MyView extends View, HasUiHandlers<EditFormUiHandlers> {
 		Map<RefBookColumn, HasValue> createInputFields(List<RefBookColumn> attributes);
 		void fillInputFields(Map<String, RefBookValueSerializable> record);
@@ -80,6 +96,7 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
         void cleanFields();
         void cleanErrorFields();
         boolean checkChanges();
+        HasClickHandlers getClickAllVersion();
 
         /**
          * Метод обновляет переменную, которая используется при проверке измения полей.
@@ -397,7 +414,6 @@ public class EditFormPresenter extends PresenterWidget<EditFormPresenter.MyView>
 	@Override
 	public void onCancelClicked() {
         if (isFormModified) {
-            //TODO: Считаю лучше бы на клиента перенести это сообщение
             Dialog.confirmMessage("Сохранение изменений", "Сохранить изменения?", new DialogHandler() {
                 @Override
                 public void yes() {

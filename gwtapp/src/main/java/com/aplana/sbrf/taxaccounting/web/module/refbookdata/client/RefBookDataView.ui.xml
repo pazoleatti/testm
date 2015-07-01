@@ -34,36 +34,12 @@
             border-top: 1px solid #aeaeac;
         }
 
-        .table{
-            position: absolute !important;
-            bottom: 30px;
-            right: 0;
-            left: 10px;
-            top: 0;
-        }
-
-        .pager {
-            position: absolute;
-            bottom: 0;
-            right: 0;
-        }
-
         .marginRight5{
             margin-right: 5px;
         }
 
         .marginRight2{
             margin-right: 2px;
-        }
-
-        .marginLeft5{
-            margin-right: 5px;
-        }
-
-        .horSep {
-            height: 0;
-            margin-top: 2px;
-            border-top: 1px solid #aeaeac;
         }
 
         .verSep {
@@ -82,6 +58,8 @@
                         <style:LeftBar marginRight="5" childValign="middle" height="100%">
                             <style:LinkAnchor ui:field="backAnchor" title="Перейти к списку справочников" text="Справочники" disableImage="true"
                                               addStyleNames="{style.titleText}, {style.marginRight5}"/>
+                            <style:LinkButton ui:field="backToRefBookAnchor" title="Перейти к справочнику" text="Справочники" disableImage="true"
+                                              addStyleNames="{style.titleText}, {style.marginRight5}" visible="false"/>
                             <g:Label text="—" addStyleNames="{style.titleText}"/>
                         </style:LeftBar>
                     </fm:Left>
@@ -119,7 +97,7 @@
 
                     <g:cell width="99%">
                         <g:HorizontalPanel verticalAlignment="middle" addStyleNames="{style.marginRight5}">
-                            <g:HTML addStyleNames="{style.verSep}"/>
+                            <g:HTML ui:field="separator1" addStyleNames="{style.verSep}"/>
                             <g:TextBox width="210px" ui:field="filterText" addStyleNames="{style.marginRight5}"/>
                             <g:Button title="Поиск" width="70px" text="Поиск" ui:field="search"/>
                         </g:HorizontalPanel>
@@ -139,14 +117,7 @@
 
                 <g:SplitLayoutPanel addStyleNames="{style.splitter}">
                     <g:center>
-                        <g:HTMLPanel>
-                            <g:ResizeLayoutPanel addStyleNames="{style.table}">
-                                <style:GenericDataGrid ui:field="refBookDataTable" width="100%" height="100%" enabled="true"/>
-                            </g:ResizeLayoutPanel>
-                            <pager:FlexiblePager ui:field="pager" location="CENTER" addStyleNames="{style.pager}"
-                                                 showFastForwardButton="false" fastForwardRows="0"
-                                                 showLastPageButton="true" type="refBookData"/>
-                        </g:HTMLPanel>
+                        <g:SimplePanel ui:field="mainPanel"/>
                     </g:center>
                     <g:east size="500">
                         <g:SimplePanel ui:field="contentPanel"/>

@@ -83,7 +83,7 @@
                     </g:HorizontalPanel>
                 </g:cell>
                 <g:cell>
-                    <style:LinkAnchor ui:field="allVersion" visible="false" disableImage="true"
+                    <style:LinkButton ui:field="allVersion" visible="false" disableImage="true"
                                       title="Посмотреть все версии"/>
                 </g:cell>
                 <g:cell>

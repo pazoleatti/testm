@@ -1,27 +1,21 @@
 package com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.hierarchy;
 
 import com.aplana.gwt.client.dialog.Dialog;
-import com.aplana.gwt.client.dialog.DialogHandler;
-import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.FormMode;
-import com.aplana.sbrf.taxaccounting.web.widget.datepicker.DateMaskBoxPicker;
+import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.FormMode;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client.RefBookTreePickerView;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client.event.CheckValuesCountHandler;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.model.PickerState;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.model.RefBookTreeItem;
-import com.aplana.sbrf.taxaccounting.web.widget.style.LinkButton;
-import com.google.gwt.event.dom.client.*;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.uibinder.client.UiBinder;
+import com.google.gwt.uibinder.client.UiConstructor;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.uibinder.client.UiHandler;
-import com.google.gwt.user.client.ui.*;
+import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
 import java.util.*;
-
-import static com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.FormMode.*;
 
 /**
  * Представление формы редактирования иерархического справочника
@@ -36,56 +30,13 @@ public class RefBookHierDataView extends ViewWithUiHandlers<RefBookHierDataUiHan
     @UiField
     RefBookTreePickerView refbookDataTree;
 
-    @UiField
-    Panel contentPanel;
-    @UiField
-    Label titleDesc;
-    @UiField
-    Label relevanceDateLabel;
-    @UiField
-    DateMaskBoxPicker relevanceDate;
-
-    @UiField
-    LinkButton
-            addRow,
-            deleteRow;
-
-    @UiField
-    LinkButton edit;
-    @UiField
-    Button cancelEdit;
-    @UiField
-    HTML separator;
-    @UiField
-    HTML separatorVersion;
-    @UiField
-    Button search;
-    @UiField
-    TextBox filterText;
-
     private PickerState pickerState = new PickerState();
 
     @Inject
+    @UiConstructor
     public RefBookHierDataView(final Binder uiBinder) {
         initWidget(uiBinder.createAndBindUi(this));
-        relevanceDate.setValue(new Date());
-
-        pickerState.setVersionDate(relevanceDate.getValue());
         pickerState.setMultiSelect(false);
-
-        relevanceDate.addValueChangeHandler(new ValueChangeHandler<Date>() {
-            @Override
-            public void onValueChange(ValueChangeEvent<Date> event) {
-                if(event.getValue()==null){
-                    relevanceDate.setValue(new Date());
-                } else {
-                    if (getUiHandlers() != null) {
-                        pickerState.setVersionDate(getRelevanceDate());
-                        getUiHandlers().onRelevanceDateChanged();
-                    }
-                }
-            }
-        });
 
         refbookDataTree.addValueChangeHandler(new ValueChangeHandler<Set<Long>>() {
             @Override
@@ -94,33 +45,6 @@ public class RefBookHierDataView extends ViewWithUiHandlers<RefBookHierDataUiHan
             }
         });
 
-        filterText.addKeyPressHandler(new HandlesAllKeyEvents() {
-            @Override
-            public void onKeyDown(KeyDownEvent event) {}
-
-            @Override
-            public void onKeyPress(KeyPressEvent event) {
-                if (event.getUnicodeCharCode() == KeyCodes.KEY_ENTER){
-                    search.click();
-                }
-            }
-
-            @Override
-            public void onKeyUp(KeyUpEvent event) {}
-        });
-
-    }
-
-    @Override
-    public void setInSlot(Object slot, IsWidget content) {
-        if (slot == RefBookHierDataPresenter.TYPE_editFormPresenter) {
-            contentPanel.clear();
-            if (content != null) {
-                contentPanel.add(content);
-            }
-        } else {
-            super.setInSlot(slot, content);
-        }
     }
 
     @Override
@@ -137,11 +61,6 @@ public class RefBookHierDataView extends ViewWithUiHandlers<RefBookHierDataUiHan
     @Override
     public void reload() {
         refbookDataTree.reload();
-    }
-
-    @Override
-    public void setRefBookNameDesc(String desc) {
-        titleDesc.setText(desc);
     }
 
     @Override
@@ -195,29 +114,21 @@ public class RefBookHierDataView extends ViewWithUiHandlers<RefBookHierDataUiHan
     }
 
     @Override
-    public Date getRelevanceDate() {
-        return relevanceDate.getValue();
-    }
-
-    @Override
     public void setAttributeId(Long attrId) {
         pickerState.setRefBookAttrId(attrId);
     }
 
-    @UiHandler("addRow")
-    void addRowButtonClicked(ClickEvent event) {
-        if (getUiHandlers() != null) {
-            getUiHandlers().onAddRowClicked();
-        }
+    @Override
+    public void setPickerState(Date relevanceDate, String searchPattern) {
+        pickerState.setVersionDate(relevanceDate);
+        pickerState.setSearchPattern(searchPattern);
     }
 
-    @UiHandler("search")
-    void searchButtonClicked(ClickEvent event) {
+    public void searchButtonClicked() {
         if (getUiHandlers() != null) {
-            pickerState.setSearchPattern(filterText.getValue());
-            if (filterText.getValue()!= null && !filterText.getValue().isEmpty()){
+            if (pickerState.getSearchPattern()!= null && !pickerState.getSearchPattern().isEmpty()){
                 pickerState.setNeedReload(false);
-                refbookDataTree.checkCount(filterText.getValue().trim(), new CheckValuesCountHandler() {
+                refbookDataTree.checkCount(pickerState.getSearchPattern().trim(), new CheckValuesCountHandler() {
                     @Override
                     public void onGetValuesCount(Integer count) {
                         if (count != null && count < 100 && count>0) {
@@ -225,7 +136,6 @@ public class RefBookHierDataView extends ViewWithUiHandlers<RefBookHierDataUiHan
                         } else if (count != null && count == 0){
                             pickerState.setSetIds(new ArrayList<Long>(0));
                             refbookDataTree.cleanValues();
-                            deleteRow.setVisible(false);
                             getUiHandlers().onCleanEditForm();
                         } else {
                             Dialog.warningMessage("Уточните параметры поиска: найдено слишком много значений.");
@@ -241,120 +151,14 @@ public class RefBookHierDataView extends ViewWithUiHandlers<RefBookHierDataUiHan
         }
     }
 
-    @UiHandler("deleteRow")
-    void deleteRowButtonClicked(ClickEvent event) {
-        if (getSelectedId() == null) {
-            return;
-        }
-        Dialog.confirmMessage("Подтверждение", "Удалить выбранную запись справочника?",
-                new DialogHandler() {
-                    @Override
-                    public void yes() {
-                        if (getUiHandlers() != null) {
-                            getUiHandlers().onDeleteRowClicked();
-                        }
-                        Dialog.hideMessage();
-                    }
-
-                    @Override
-                    public void no() {
-                        Dialog.hideMessage();
-                    }
-
-                    @Override
-                    public void close() {
-                        no();
-                    }
-                });
-    }
-
-    @UiHandler("cancelEdit")
-    void cancelEditButtonClicked(ClickEvent event) {
-        if (getUiHandlers().isFormModified()) {
-            Dialog.confirmMessage("Подтверждение изменений", "Строка была изменена. Сохранить изменения?", new DialogHandler() {
-                @Override
-                public void yes() {
-                    getUiHandlers().saveChanges();
-                }
-
-                @Override
-                public void no() {
-                    getUiHandlers().cancelChanges();
-                    getUiHandlers().setMode(VIEW);
-                }
-            });
-        } else {
-            getUiHandlers().setMode(VIEW);
-        }
-    }
-
-    @UiHandler("edit")
-    void editButtonClicked(ClickEvent event) {
-        getUiHandlers().setMode(EDIT);
-    }
-
     @Override
     public void updateMode(FormMode mode) {
-        switch (mode){
-            case EDIT:
-                addRow.setVisible(true);
-                deleteRow.setVisible(true);
-                separator.setVisible(true);
-                edit.setVisible(false);
-                cancelEdit.setVisible(true);
-                search.setEnabled(true);
-                filterText.setEnabled(true);
-                refbookDataTree.setEnabled(true);
-                relevanceDate.setEnabled(true);
-                break;
-            case READ:
-                addRow.setVisible(false);
-                deleteRow.setVisible(false);
-                separator.setVisible(false);
-                edit.setVisible(false);
-                cancelEdit.setVisible(false);
-                search.setEnabled(true);
-                filterText.setEnabled(true);
-                refbookDataTree.setEnabled(true);
-                relevanceDate.setEnabled(true);
-                break;
-            case VIEW:
-                edit.setVisible(true);
-                cancelEdit.setVisible(false);
-                addRow.setVisible(false);
-                deleteRow.setVisible(false);
-                separator.setVisible(false);
-                search.setEnabled(true);
-                filterText.setEnabled(true);
-                refbookDataTree.setEnabled(true);
-                relevanceDate.setEnabled(true);
-                break;
-            case CREATE:
-                addRow.setVisible(false);
-                deleteRow.setVisible(false);
-                cancelEdit.setVisible(false);
-                search.setEnabled(false);
-                filterText.setEnabled(false);
-                separator.setVisible(false);
-                refbookDataTree.setEnabled(false);
-                relevanceDate.setEnabled(false);
-                break;
-        }
+        refbookDataTree.setEnabled(mode != FormMode.CREATE);
     }
 
     @Override
     public void clearFilterInputBox() {
-        if (!filterText.getText().equals("")) {
-            pickerState.setSearchPattern("");
-            filterText.setValue("");
-            refbookDataTree.load(pickerState);
-        }
-    }
-
-    @Override
-    public void setVersionedFields(boolean isVisible) {
-        separatorVersion.setVisible(isVisible);
-        relevanceDate.setVisible(isVisible);
-        relevanceDateLabel.setVisible(isVisible);
+        pickerState.setSearchPattern("");
+        /*refbookDataTree.load(pickerState);*/
     }
 }

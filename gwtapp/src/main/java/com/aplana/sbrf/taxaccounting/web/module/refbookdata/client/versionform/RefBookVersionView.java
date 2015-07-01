@@ -3,25 +3,22 @@ package com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.versionform;
 import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.gwt.client.dialog.DialogHandler;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
-import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.FormMode;
+import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.FormMode;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.HorizontalAlignment;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.RefBookColumn;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.RefBookDataRow;
 import com.aplana.sbrf.taxaccounting.web.widget.pager.FlexiblePager;
 import com.aplana.sbrf.taxaccounting.web.widget.style.GenericDataGrid;
-import com.aplana.sbrf.taxaccounting.web.widget.style.LinkAnchor;
-import com.aplana.sbrf.taxaccounting.web.widget.style.LinkButton;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.safehtml.client.SafeHtmlTemplates;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.cellview.client.HasKeyboardSelectionPolicy;
 import com.google.gwt.user.cellview.client.TextColumn;
-import com.google.gwt.user.client.ui.*;
+import com.google.gwt.user.client.ui.HasHorizontalAlignment;
+import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.AbstractDataProvider;
 import com.google.gwt.view.client.Range;
 import com.google.gwt.view.client.SelectionChangeEvent;
@@ -38,19 +35,9 @@ public class RefBookVersionView extends ViewWithUiHandlers<RefBookVersionUiHandl
 	}
 
 	@UiField
-	GenericDataGrid<RefBookDataRow> refbookDataTable;
+	GenericDataGrid<RefBookDataRow> refBookDataTable;
 	@UiField
 	FlexiblePager pager;
-	@UiField
-	Panel contentPanel;
-    @UiField
-    Label titleDetails;
-    @UiField
-    LinkAnchor backAction;
-    @UiField
-    LinkButton addRow;
-    @UiField
-    LinkButton deleteRow;
 
     interface UrlTemplates extends SafeHtmlTemplates {
         @Template("#{0};id={1};{2}={3}")
@@ -63,29 +50,16 @@ public class RefBookVersionView extends ViewWithUiHandlers<RefBookVersionUiHandl
 	@Inject
 	public RefBookVersionView(final Binder uiBinder) {
 		initWidget(uiBinder.createAndBindUi(this));
-		refbookDataTable.setSelectionModel(selectionModel);
+		refBookDataTable.setSelectionModel(selectionModel);
 		selectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
 			@Override
 			public void onSelectionChange(SelectionChangeEvent event) {
 				getUiHandlers().onSelectionChanged();
 			}
 		});
-        refbookDataTable.setPageSize(pager.getPageSize());
-        refbookDataTable.setKeyboardSelectionPolicy(HasKeyboardSelectionPolicy.KeyboardSelectionPolicy.DISABLED);
-		pager.setDisplay(refbookDataTable);
-	}
-
-	@Override
-	public void setInSlot(Object slot, IsWidget content) {
-		if (slot == RefBookVersionPresenter.TYPE_editFormPresenter) {
-			contentPanel.clear();
-			if (content!=null){
-				contentPanel.add(content);
-			}
-		}
-		else {
-			super.setInSlot(slot, content);
-		}
+        refBookDataTable.setPageSize(pager.getPageSize());
+        refBookDataTable.setKeyboardSelectionPolicy(HasKeyboardSelectionPolicy.KeyboardSelectionPolicy.DISABLED);
+		pager.setDisplay(refBookDataTable);
 	}
 
 	@Override
@@ -96,8 +70,8 @@ public class RefBookVersionView extends ViewWithUiHandlers<RefBookVersionUiHandl
                 return object.getValues().get(RefBook.RECORD_VERSION_FROM_ALIAS);
             }
         };
-        refbookDataTable.addResizableColumn(versionFromColumn, RefBook.REF_BOOK_VERSION_FROM_TITLE);
-        refbookDataTable.setColumnWidth(versionFromColumn, RefBook.REF_BOOK_VERSION_FROM_WIDTH, Style.Unit.EM);
+        refBookDataTable.addResizableColumn(versionFromColumn, RefBook.REF_BOOK_VERSION_FROM_TITLE);
+        refBookDataTable.setColumnWidth(versionFromColumn, RefBook.REF_BOOK_VERSION_FROM_WIDTH, Style.Unit.EM);
 
         TextColumn<RefBookDataRow> versionToColumn = new TextColumn<RefBookDataRow>() {
             @Override
@@ -105,8 +79,8 @@ public class RefBookVersionView extends ViewWithUiHandlers<RefBookVersionUiHandl
                 return object.getValues().get(RefBook.RECORD_VERSION_TO_ALIAS);
             }
         };
-        refbookDataTable.addResizableColumn(versionToColumn, RefBook.REF_BOOK_VERSION_TO_TITLE);
-        refbookDataTable.setColumnWidth(versionToColumn, RefBook.REF_BOOK_VERSION_TO_WIDTH, Style.Unit.EM);
+        refBookDataTable.addResizableColumn(versionToColumn, RefBook.REF_BOOK_VERSION_TO_TITLE);
+        refBookDataTable.setColumnWidth(versionToColumn, RefBook.REF_BOOK_VERSION_TO_WIDTH, Style.Unit.EM);
 
 		for (final RefBookColumn header : columns) {
 			TextColumn<RefBookDataRow> column = new TextColumn<RefBookDataRow>() {
@@ -116,15 +90,15 @@ public class RefBookVersionView extends ViewWithUiHandlers<RefBookVersionUiHandl
 				}
 			};
 			column.setHorizontalAlignment(convertAlignment(header.getAlignment()));
-			refbookDataTable.addResizableColumn(column, header.getName());
-			refbookDataTable.setColumnWidth(column, header.getWidth(), Style.Unit.EM);
+			refBookDataTable.addResizableColumn(column, header.getName());
+			refBookDataTable.setColumnWidth(column, header.getWidth(), Style.Unit.EM);
 		}
 	}
 
 	@Override
 	public void assignDataProvider(int pageSize, AbstractDataProvider<RefBookDataRow> data) {
-		refbookDataTable.setPageSize(pageSize);
-		data.addDataDisplay(refbookDataTable);
+		refBookDataTable.setPageSize(pageSize);
+		data.addDataDisplay(refBookDataTable);
 	}
 
     @Override
@@ -134,29 +108,29 @@ public class RefBookVersionView extends ViewWithUiHandlers<RefBookVersionUiHandl
 
     @Override
 	public void setRange(Range range) {
-		refbookDataTable.setVisibleRangeAndClearData(range, true);
+		refBookDataTable.setVisibleRangeAndClearData(range, true);
 	}
 
 	@Override
 	public void updateTable() {
         selectionModel.clear();
 		Range range = new Range(pager.getPageStart(), pager.getPageSize());
-		refbookDataTable.setVisibleRangeAndClearData(range, true);
+		refBookDataTable.setVisibleRangeAndClearData(range, true);
 	}
 
 	@Override
 	public void setRefBookNameDesc(String desc) {
-        backAction.setText(desc);
+//        backAction.setText(desc);
 	}
 
 	@Override
 	public void setTableData(int start, int totalCount, List<RefBookDataRow> dataRows) {
 		if (dataRows == null) {
-			refbookDataTable.setRowCount(0);
-			refbookDataTable.setRowData(new ArrayList<RefBookDataRow>());
+			refBookDataTable.setRowCount(0);
+			refBookDataTable.setRowData(new ArrayList<RefBookDataRow>());
 		} else {
-			refbookDataTable.setRowCount(totalCount);
-			refbookDataTable.setRowData(start, dataRows);
+			refBookDataTable.setRowCount(totalCount);
+			refBookDataTable.setRowData(start, dataRows);
 		}
 	}
 
@@ -164,11 +138,11 @@ public class RefBookVersionView extends ViewWithUiHandlers<RefBookVersionUiHandl
 	public void setSelected(Long recordId) {
 		selectionModel.clear();
 		int i = 0;
-		for (RefBookDataRow row : refbookDataTable.getVisibleItems()) {
+		for (RefBookDataRow row : refBookDataTable.getVisibleItems()) {
 
 			if (row.getRefBookRowId().equals(recordId)) {
 				selectionModel.setSelected(row, true);
-				refbookDataTable.setKeyboardSelectedRow(i, true);
+				refBookDataTable.setKeyboardSelectedRow(i, true);
 				return;
 			}
 			i++;
@@ -178,8 +152,8 @@ public class RefBookVersionView extends ViewWithUiHandlers<RefBookVersionUiHandl
 	@Override
     public void resetRefBookElements() {
         int i;
-        while ((i = refbookDataTable.getColumnCount()) != 0) {
-            refbookDataTable.removeColumn(i - 1);
+        while ((i = refBookDataTable.getColumnCount()) != 0) {
+            refBookDataTable.removeColumn(i - 1);
         }
     }
 
@@ -190,33 +164,31 @@ public class RefBookVersionView extends ViewWithUiHandlers<RefBookVersionUiHandl
 
     @Override
     public void setTitleDetails(String uniqueAttrValues) {
-        titleDetails.setText("Все значения записи " + uniqueAttrValues);
+//        titleDetails.setText("Все значения записи " + uniqueAttrValues);
     }
 
     @Override
     public void setBackAction(String refBookType, long refBookId, String record, long recordId) {
-        backAction.setHref(backUrlTemplates.getBackAction(refBookType, refBookId, record, recordId).asString());
+//        backAction.setHref(backUrlTemplates.getBackAction(refBookType, refBookId, record, recordId).asString());
     }
 
-    @UiHandler("addRow")
+    /*@UiHandler("addRow")
 	void addRowButtonClicked(ClickEvent event) {
         //selectionModel.clear();
 		if (getUiHandlers() != null) {
 			getUiHandlers().onAddRowClicked();
 		}
-	}
+	}*/
 
-	@UiHandler("deleteRow")
-	void deleteRowButtonClicked(ClickEvent event) {
+    @Override
+	public void deleteRowButtonClicked() {
 		if (selectionModel.getSelectedObject() == null) {
 			return;
 		}
         Dialog.confirmMessage("Удаление версии элемента справочника", "Удалить выбранную версию элемента справочника?", new DialogHandler() {
             @Override
             public void yes() {
-                if (getUiHandlers() != null) {
-                    getUiHandlers().onDeleteRowClicked();
-                }
+                getUiHandlers().onDeleteRowClicked();
                 Dialog.hideMessage();
             }
 
@@ -234,28 +206,12 @@ public class RefBookVersionView extends ViewWithUiHandlers<RefBookVersionUiHandl
 
     @Override
     public void updateMode(FormMode mode) {
-        switch (mode){
-            case EDIT:
-                addRow.setVisible(true);
-                deleteRow.setVisible(true);
-                refbookDataTable.setEnabled(true);
-                break;
-            case READ:
-            case VIEW:
-                addRow.setVisible(false);
-                deleteRow.setVisible(false);
-                break;
-            case CREATE:
-                addRow.setVisible(false);
-                deleteRow.setVisible(false);
-                refbookDataTable.setEnabled(false);
-                break;
-        }
+        refBookDataTable.setEnabled(mode != FormMode.CREATE);
     }
 
     @Override
     public Integer getSelectedRowIndex() {
-        List<RefBookDataRow> visibleItems = refbookDataTable.getVisibleItems();
+        List<RefBookDataRow> visibleItems = refBookDataTable.getVisibleItems();
         RefBookDataRow selectedItem = selectionModel.getSelectedObject();
         for(int i = 0; i < visibleItems.size(); i++) {
             if (visibleItems.get(i) == selectedItem)

@@ -1,6 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform;
 
-import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.FormMode;
+import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.FormMode;
 import com.gwtplatform.mvp.client.UiHandlers;
 
 public interface EditFormUiHandlers extends UiHandlers {

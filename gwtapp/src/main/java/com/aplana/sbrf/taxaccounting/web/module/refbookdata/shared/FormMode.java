@@ -1,4 +1,4 @@
-package com.aplana.sbrf.taxaccounting.web.module.refbookdata.client;
+package com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared;
 
 /**
  *
