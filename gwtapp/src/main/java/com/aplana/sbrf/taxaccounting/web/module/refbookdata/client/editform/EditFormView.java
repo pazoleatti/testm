@@ -5,17 +5,17 @@ import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.sbrf.taxaccounting.model.Formats;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
 import com.aplana.sbrf.taxaccounting.model.util.StringUtils;
-import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.FormMode;
-import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.RefBookDataTokens;
+import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.FormMode;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.exception.BadValueException;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.RefBookColumn;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.RefBookRecordVersionData;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.RefBookValueSerializable;
 import com.aplana.sbrf.taxaccounting.web.widget.datepicker.DateMaskBoxPicker;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client.RefBookPickerWidget;
-import com.aplana.sbrf.taxaccounting.web.widget.style.LinkAnchor;
+import com.aplana.sbrf.taxaccounting.web.widget.style.LinkButton;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.HasClickHandlers;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
@@ -56,7 +56,7 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
     @UiField
     DateMaskBoxPicker versionEnd;
     @UiField
-    LinkAnchor allVersion;
+    LinkButton allVersion;
     @UiField
     HorizontalPanel buttonBlock;
     @UiField
@@ -411,6 +411,11 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
     }
 
     @Override
+    public HasClickHandlers getClickAllVersion() {
+        return allVersion;
+    }
+
+    @Override
     public void updateInputFields() {
         try {
             inputRecord = getFieldsValues(false);
@@ -548,16 +553,16 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
         versionEnd.setValue(versionData.getVersionEnd());
         allVersion.setVisible(!isVersionMode && canVersion);
         allVersion.setText("Все версии ("+versionData.getVersionCount()+")");
-        allVersion.setHref("#"
+        /*allVersion.setHref("#"
                 + RefBookDataTokens.refBookVersion
                 + ";" + RefBookDataTokens.REFBOOK_DATA_ID  + "=" + refBookId
-                + ";" + RefBookDataTokens.REFBOOK_RECORD_ID + "=" + refBookRecordId);
+                + ";" + RefBookDataTokens.REFBOOK_RECORD_ID + "=" + refBookRecordId);*/
     }
 
     @Override
     public void setVersionMode(boolean versionMode) {
         isVersionMode = versionMode;
-        allVersion.setVisible(false);
+        allVersion.setVisible(!versionMode);
     }
 
     @Override
@@ -582,9 +587,6 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
 
     @Override
     public void updateMode(FormMode mode) {
-        if (mode == null) {
-            mode = FormMode.VIEW;
-        }
         switch (mode){
             case CREATE:
                 save.setEnabled(true);
@@ -592,7 +594,7 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
                 updateWidgetsVisibility(true);
                 versionStart.setEnabled(true);
                 versionEnd.setEnabled(true);
-                allVersion.setVisible(false);
+                /*allVersion.setVisible(false);*/
                 break;
             case EDIT:
                 save.setEnabled(true);
@@ -600,7 +602,7 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
                 updateWidgetsVisibility(true);
                 versionStart.setEnabled(true);
                 versionEnd.setEnabled(true);
-                allVersion.setVisible(true);
+                /*allVersion.setVisible(true);*/
                 break;
             case READ:
             case VIEW:
@@ -609,7 +611,7 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers> impleme
                 versionStart.setEnabled(false);
                 versionEnd.setEnabled(false);
                 updateWidgetsVisibility(false);
-                allVersion.setVisible(true);
+                /*allVersion.setVisible(true);*/
                 break;
         }
     }

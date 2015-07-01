@@ -1,128 +1,20 @@
 <ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
              xmlns:g='urn:import:com.google.gwt.user.client.ui'
-             xmlns:style='urn:import:com.aplana.sbrf.taxaccounting.web.widget.style'
-             xmlns:fm="urn:import:com.aplana.gwt.client.form"
-             xmlns:d="urn:import:com.aplana.sbrf.taxaccounting.web.widget.datepicker"
              xmlns:rb="urn:import:com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client"
         >
     <ui:style>
-        .titleText {
-            font-size: 14px !important;
-            color: #636460;
-            white-space: nowrap;
-        }
 
         .titleText div {
             font-size: 14px !important;
         }
 
-        .btnPanel {
-            height: 30px;
-            padding-left: 10px;
-        }
-
         .btnPanel td {
             vertical-align: middle !important;
-        }
-
-        .splitter {
-            position: absolute !important;
-            bottom: 0;
-            right: 0;
-            left: 0;
-            top: 34px;
-            border-top: 1px solid #aeaeac;
-        }
-
-        .marginRight5 {
-            margin-right: 5px;
-        }
-
-        .marginRight2{
-            margin-right: 2px;
-        }
-
-        .horSep {
-            height: 0;
-            margin-top: 2px;
-            border-top: 1px solid #aeaeac;
-        }
-
-        .verSep {
-            height: 22px;
-            margin: 0 9px;
-            border-right: 1px solid #aeaeac;
         }
     </ui:style>
 
 
-    <fm:MainContainer>
-        <fm:header>
-            <fm:HeaderContainer>
-                <fm:left>
-                    <fm:Left>
-                        <style:LeftBar marginRight="5" childValign="middle" height="100%">
-                            <style:LinkAnchor title="Перейти к списку справочников" text="Справочники"
-                                              href="#!refbooklist" disableImage="true"
-                                              addStyleNames="{style.titleText}, {style.marginRight5}"/>
-                            <g:Label text="—" addStyleNames="{style.titleText}"/>
-                        </style:LeftBar>
-                    </fm:Left>
-                </fm:left>
-                <fm:resizable>
-                    <fm:Resizable>
-                        <g:Label ui:field="titleDesc"/>
-                    </fm:Resizable>
-                </fm:resizable>
-            </fm:HeaderContainer>
-        </fm:header>
-        <fm:body>
-            <fm:BodyContainer>
-
-                <g:HorizontalPanel verticalAlignment="middle" width="100%" addStyleNames="{style.btnPanel}">
-                    <g:HorizontalPanel verticalAlignment="middle">
-                        <style:LinkButton title="Добавить запись" text="Добавить запись" ui:field="addRow"
-                                          img="resources/img/row-add.png" addStyleNames="{style.marginRight5}"/>
-                        <style:LinkButton title="Удалить запись" text="Удалить запись" ui:field="deleteRow"
-                                          img="resources/img/row-delete.png" addStyleNames="{style.marginRight5}"/>
-                        <g:HTML ui:field="separator" addStyleNames="{style.verSep}"/>
-                    </g:HorizontalPanel>
-
-                    <g:HorizontalPanel verticalAlignment="middle">
-                        <g:Label wordWrap="false" text="Дата актуальности: " addStyleNames="{style.marginRight2}"
-                                 ui:field="relevanceDateLabel"/>
-                        <d:DateMaskBoxPicker ui:field="relevanceDate" width="110px"/>
-                    </g:HorizontalPanel>
-
-                    <g:cell width="99%">
-                        <g:HorizontalPanel verticalAlignment="middle" addStyleNames="{style.marginRight5}">
-                            <g:HTML ui:field="separatorVersion" addStyleNames="{style.verSep}"/>
-                            <g:TextBox width="210px" ui:field="filterText" addStyleNames="{style.marginRight5}"/>
-                            <g:Button title="Поиск" width="70px" text="Поиск" ui:field="search"/>
-                        </g:HorizontalPanel>
-                    </g:cell>
-
-                    <g:HorizontalPanel verticalAlignment="middle" addStyleNames="{style.marginRight5}">
-                        <g:Button title="Завершить редактирование" text="Завершить редактирование"
-                                  ui:field="cancelEdit"/>
-                        <style:LinkButton title="Редактировать" text="Редактировать" ui:field="edit"/>
-                    </g:HorizontalPanel>
-
-                </g:HorizontalPanel>
-
-                <g:SplitLayoutPanel addStyleNames="{style.splitter}">
-                    <g:center>
-                        <g:ResizeLayoutPanel width="100%" height="100%">
-                            <rb:RefBookTreePickerView ui:field="refbookDataTree"/>
-                        </g:ResizeLayoutPanel>
-                    </g:center>
-                    <g:east size="500">
-                        <g:SimplePanel ui:field="contentPanel"/>
-                    </g:east>
-                </g:SplitLayoutPanel>
-
-
-            </fm:BodyContainer>
-        </fm:body>
-    </fm:MainContainer>
+    <g:ResizeLayoutPanel width="100%" height="100%">
+        <rb:RefBookTreePickerView ui:field="refbookDataTree"/>
+    </g:ResizeLayoutPanel>
 </ui:UiBinder>

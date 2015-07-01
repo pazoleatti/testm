@@ -2,12 +2,14 @@
              xmlns:g='urn:import:com.google.gwt.user.client.ui'
              xmlns:style='urn:import:com.aplana.sbrf.taxaccounting.web.widget.style'
              xmlns:pager='urn:import:com.aplana.sbrf.taxaccounting.web.widget.pager'
-             xmlns:fm="urn:import:com.aplana.gwt.client.form"
-             xmlns:d="urn:import:com.aplana.sbrf.taxaccounting.web.widget.datepicker"
         >
     <ui:style>
 
-        .table{
+        .titleText div {
+            font-size: 14px !important;
+        }
+
+        .table {
             position: absolute !important;
             bottom: 30px;
             right: 0;

@@ -2,52 +2,33 @@ package com.aplana.sbrf.taxaccounting.web.module.refbookdata.client;
 
 import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.gwt.client.dialog.DialogHandler;
-import com.aplana.sbrf.taxaccounting.model.Formats;
+import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.FormMode;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.HorizontalAlignment;
-import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.RefBookColumn;
-import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.RefBookDataRow;
 import com.aplana.sbrf.taxaccounting.web.widget.datepicker.DateMaskBoxPicker;
-import com.aplana.sbrf.taxaccounting.web.widget.pager.FlexiblePager;
-import com.aplana.sbrf.taxaccounting.web.widget.style.GenericDataGrid;
 import com.aplana.sbrf.taxaccounting.web.widget.style.LinkAnchor;
 import com.aplana.sbrf.taxaccounting.web.widget.style.LinkButton;
-import com.aplana.sbrf.taxaccounting.web.widget.utils.WidgetUtils;
-import com.google.gwt.cell.client.AbstractCell;
-import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.*;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
-import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
-import com.google.gwt.user.cellview.client.Column;
-import com.google.gwt.user.cellview.client.ColumnSortEvent;
-import com.google.gwt.user.cellview.client.HasKeyboardSelectionPolicy;
-import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.ui.*;
-import com.google.gwt.view.client.AbstractDataProvider;
-import com.google.gwt.view.client.Range;
-import com.google.gwt.view.client.SelectionChangeEvent;
-import com.google.gwt.view.client.SingleSelectionModel;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 
 public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> implements RefBookDataPresenter.MyView {
 
 	interface Binder extends UiBinder<Widget, RefBookDataView> {
 	}
 
-	@UiField
-	GenericDataGrid<RefBookDataRow> refBookDataTable;
-	@UiField
-	FlexiblePager pager;
+
 	@UiField
 	Panel contentPanel;
+    @UiField
+    Panel mainPanel;
 	@UiField
 	Label titleDesc;
 	@UiField
@@ -59,13 +40,15 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
     @UiField
     LinkAnchor backAnchor;
     @UiField
+    LinkButton backToRefBookAnchor;
+    @UiField
     Button search;
     @UiField
     LinkButton edit;
     @UiField
     Button cancelEdit;
     @UiField
-    HTML separator;
+    HTML separator, separator1;
     @UiField
     Label editModeLabel;
     @UiField
@@ -75,9 +58,7 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
     @UiField
     LinkButton sendQuery;
 
-    private String searchPattern;
-
-    SingleSelectionModel<RefBookDataRow> selectionModel = new SingleSelectionModel<RefBookDataRow>();
+    private boolean isVersion;
 
 	@Inject
 	public RefBookDataView(final Binder uiBinder) {
@@ -96,18 +77,6 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
                 }
 			}
 		});
-		refBookDataTable.setSelectionModel(selectionModel);
-		selectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
-			@Override
-			public void onSelectionChange(SelectionChangeEvent event) {
-				getUiHandlers().onSelectionChanged();
-			}
-		});
-        refBookDataTable.setPageSize(pager.getPageSize());
-        refBookDataTable.setKeyboardSelectionPolicy(HasKeyboardSelectionPolicy.KeyboardSelectionPolicy.DISABLED);
-        refBookDataTable.addColumnSortHandler(new ColumnSortEvent.AsyncHandler(refBookDataTable));
-        refBookDataTable.getColumnSortList().setLimit(1);
-        pager.setDisplay(refBookDataTable);
         filterText.addKeyPressHandler(new HandlesAllKeyEvents() {
             @Override
             public void onKeyDown(KeyDownEvent event) {}
@@ -132,77 +101,15 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
 			if (content!=null){
 				contentPanel.add(content);
 			}
-		}
+		} else if(slot == RefBookDataPresenter.TYPE_mainFormPresenter){
+            mainPanel.clear();
+            if (content!=null){
+                mainPanel.add(content);
+            }
+        }
 		else {
 			super.setInSlot(slot, content);
 		}
-	}
-
-	@Override
-	public void setTableColumns(final List<RefBookColumn> columns) {
-		for (final RefBookColumn header : columns) {
-            Column column;
-            if (Formats.BOOLEAN.equals(header.getFormat())) {
-                column = new Column<RefBookDataRow, Boolean>(new AbstractCell<Boolean>() {
-                    @Override
-                    public void render(Context context, Boolean value, SafeHtmlBuilder sb) {
-                        sb.append(value != null && value ? WidgetUtils.UNCHECKABLE_TRUE : WidgetUtils.UNCHECKABLE_FALSE);
-                    }
-                }) {
-                    @Override
-                    public Boolean getValue(RefBookDataRow object) {
-                        String s = object.getValues().get(header.getAlias());
-                        if (s != null && !s.trim().isEmpty()) {
-                            try {
-                                long l = Long.parseLong(s.trim());
-                                return l > 0;
-                            } catch (NumberFormatException e) {
-                                return false;
-                            }
-
-                        } else {
-                            return false;
-                        }
-                    }
-                };
-                column.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
-            } else {
-                column = new TextColumn<RefBookDataRow>() {
-                    @Override
-                    public String getValue(RefBookDataRow object) {
-                        return object.getValues().get(header.getAlias());
-                    }
-                };
-
-                column.setHorizontalAlignment(convertAlignment(header.getAlignment()));
-            }
-            column.setSortable(true);
-			refBookDataTable.addResizableColumn(column, header.getName());
-			refBookDataTable.setColumnWidth(column, header.getWidth(), Style.Unit.EM);
-		}
-	}
-
-	@Override
-	public void assignDataProvider(int pageSize, AbstractDataProvider<RefBookDataRow> data) {
-		refBookDataTable.setPageSize(pageSize);
-		data.addDataDisplay(refBookDataTable);
-	}
-
-    @Override
-    public int getPageSize() {
-        return pager.getPageSize();
-    }
-
-    @Override
-	public void setRange(Range range) {
-		refBookDataTable.setVisibleRangeAndClearData(range, true);
-	}
-
-	@Override
-	public void updateTable() {
-        selectionModel.clear();
-		Range range = new Range(pager.getPageStart(), pager.getPageSize());
-		refBookDataTable.setVisibleRangeAndClearData(range, true);
 	}
 
 	@Override
@@ -211,62 +118,9 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
 	}
 
 	@Override
-	public void setTableData(int start, int totalCount, List<RefBookDataRow> dataRows) {
-		if (dataRows == null) {
-			refBookDataTable.setRowCount(0);
-			refBookDataTable.setRowData(new ArrayList<RefBookDataRow>());
-		} else {
-            if (totalCount == 0) {
-                start = 0;
-                pager.setPage(0);
-            }
-			refBookDataTable.setRowCount(totalCount);
-			refBookDataTable.setRowData(start, dataRows);
-		}
-	}
-
-	@Override
-	public void setSelected(Long recordId) {
-        selectionModel.clear();
-		int i = 0;
-		for (RefBookDataRow row : refBookDataTable.getVisibleItems()) {
-
-			if (row.getRefBookRowId().equals(recordId)) {
-				selectionModel.setSelected(row, true);
-				refBookDataTable.setKeyboardSelectedRow(i, true);
-				return;
-			}
-			i++;
-		}
-	}
-
-	@Override
-    public void resetRefBookElements() {
-        int i;
-        while ((i = refBookDataTable.getColumnCount()) != 0) {
-            refBookDataTable.removeColumn(i - 1);
-        }
-    }
-
-	@Override
-	public RefBookDataRow getSelectedRow() {
-		return selectionModel.getSelectedObject();
-	}
-
-	@Override
 	public Date getRelevanceDate() {
 		return relevanceDate.getValue();
 	}
-
-    @Override
-    public int getPage(){
-        return pager.getPage();
-    }
-
-    @Override
-    public void setPage(int page){
-        pager.setPage(page);
-    }
 
     @UiHandler("addRow")
 	void addRowButtonClicked(ClickEvent event) {
@@ -298,8 +152,7 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
 
     @UiHandler("search")
     void searchButtonClicked(ClickEvent event) {
-        searchPattern = filterText.getText();
-        updateTable();
+        getUiHandlers().onSearchClick();
     }
 
     @UiHandler("edit")
@@ -314,29 +167,15 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
 
 	@UiHandler("deleteRow")
 	void deleteRowButtonClicked(ClickEvent event) {
-		if (selectionModel.getSelectedObject() == null) {
-			return;
-		}
-        Dialog.confirmMessage("Удаление элемента справочника", "Вы подтверждаете удаление всех версий элемента?", new DialogHandler() {
-            @Override
-            public void yes() {
-                if (getUiHandlers() != null) {
-                    getUiHandlers().onDeleteRowClicked();
-                }
-                Dialog.hideMessage();
-            }
-
-            @Override
-            public void no() {
-                Dialog.hideMessage();
-            }
-
-            @Override
-            public void close() {
-                no();
-            }
-        });
+        getUiHandlers().onDeleteRowClicked();
 	}
+
+    @UiHandler("backToRefBookAnchor")
+    void onBackToRefBookAnchorClicked(ClickEvent event){
+        if (getUiHandlers() != null){
+            getUiHandlers().onBackToRefBookAnchorClicked();
+        }
+    }
 
     @UiHandler("backAnchor")
     void onPrintButtonClicked(ClickEvent event){
@@ -366,10 +205,8 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
                 deleteRow.setVisible(true);
                 separator.setVisible(true);
                 edit.setVisible(false);
-                cancelEdit.setVisible(true);
                 search.setEnabled(true);
                 filterText.setEnabled(true);
-                refBookDataTable.setEnabled(true);
                 relevanceDate.setEnabled(true);
                 break;
             case READ:
@@ -377,34 +214,29 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
                 deleteRow.setVisible(false);
                 separator.setVisible(false);
                 edit.setVisible(false);
-                cancelEdit.setVisible(false);
                 search.setEnabled(true);
                 filterText.setEnabled(true);
-                refBookDataTable.setEnabled(true);
                 relevanceDate.setEnabled(true);
                 break;
             case VIEW:
                 edit.setVisible(true);
-                cancelEdit.setVisible(false);
                 addRow.setVisible(false);
                 deleteRow.setVisible(false);
                 separator.setVisible(false);
                 search.setEnabled(true);
                 filterText.setEnabled(true);
-                refBookDataTable.setEnabled(true);
                 relevanceDate.setEnabled(true);
                 break;
             case CREATE:
                 addRow.setVisible(false);
                 deleteRow.setVisible(false);
-                cancelEdit.setVisible(false);
                 search.setEnabled(false);
                 filterText.setEnabled(false);
                 separator.setVisible(false);
-                refBookDataTable.setEnabled(false);
                 relevanceDate.setEnabled(false);
                 break;
         }
+        cancelEdit.setVisible(!isVersion&&mode==FormMode.EDIT);
     }
 
     @Override
@@ -420,42 +252,34 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
     }
 
     @Override
-    public int getSortColumnIndex() {
-        if (refBookDataTable.getColumnSortList().size() == 0) {
-            return 0;
-        }
-        return refBookDataTable.getColumnIndex((Column<RefBookDataRow,?>) refBookDataTable.getColumnSortList().get(0).getColumn());
-    }
-
-    @Override
-    public boolean isAscSorting() {
-        return refBookDataTable.getColumnSortList().size() == 0 || refBookDataTable.getColumnSortList().get(0).isAscending();
-    }
-
-    @Override
     public void setDeleteButtonVisible(boolean isVisible) {
         deleteRow.setVisible(isVisible);
     }
 
     @Override
-    public String getSearchPattern() {
-        return searchPattern;
+    public void setVersionView(boolean isVersion) {
+        this.isVersion = isVersion;
+        edit.setVisible(!isVersion);
+        filterText.setEnabled(!isVersion);
+        filterText.setVisible(!isVersion);
+        backAnchor.setVisible(!isVersion);
+        backToRefBookAnchor.setVisible(isVersion);
+        backToRefBookAnchor.setText(titleDesc.getText());
+        relevanceDate.setVisible(!isVersion);
+        relevanceDateLabel.setVisible(!isVersion);
+        separator.setVisible(!isVersion);
+        search.setVisible(!isVersion);
+        separator1.setVisible(!isVersion);
+        cancelEdit.setVisible(!isVersion);
     }
 
     @Override
-    public Integer getSelectedRowIndex() {
-        List<RefBookDataRow> visibleItems = refBookDataTable.getVisibleItems();
-        RefBookDataRow selectedItem = selectionModel.getSelectedObject();
-        for(int i = 0; i < visibleItems.size(); i++) {
-            if (visibleItems.get(i) == selectedItem)
-                return i;
-        }
-        return null;
+    public String getSearchPattern() {
+        return filterText.getText();
     }
 
     @Override
     public void resetSearchInputBox() {
         filterText.setValue("");
-        searchPattern = "";
     }
 }
