@@ -1673,292 +1673,65 @@ def getXML(def String startStr, def String endStr) {
 // Получение импортируемых данных
 void importData() {
     def tmpRow = formData.createDataRow()
-    def xml = getXML(ImportInputStream, importService, UploadFileName, 'Взаимозависимость', null)
+    int COLUMN_COUNT = 54
+    int HEADER_ROW_COUNT = 2
+    String TABLE_START_VALUE = 'Взаимозависимость'
+    String TABLE_END_VALUE = null
 
-    checkHeaderSize(xml.row[0].cell.size(), xml.row.size(), 54, 2)
+    def allValues = []      // значения формы
+    def headerValues = []   // значения шапки
+    def paramsMap = ['rowOffset' : 0, 'colOffset' : 0]  // мапа с параметрами (отступы сверху и слева)
 
-    def headerMapping = [
-            (xml.row[0].cell[1]) : 'Основания для признания сделки контролируемой согласно статье 105.14 НК РФ',
-            (xml.row[0].cell[5]) : 'Особенности отнесения сделки к контролируемой при ее совершении с российским взаимозависимым лицом',
-            (xml.row[0].cell[10]): getColumnName(tmpRow, 'similarDealGroup'),
-            (xml.row[0].cell[11]): getColumnName(tmpRow, 'dealNameCode'),
-            (xml.row[0].cell[12]): getColumnName(tmpRow, 'taxpayerSideCode'),
-            (xml.row[0].cell[13]): getColumnName(tmpRow, 'dealPriceSign'),
-            (xml.row[0].cell[14]): getColumnName(tmpRow, 'dealPriceCode'),
-            (xml.row[0].cell[15]): getColumnName(tmpRow, 'dealMemberCount'),
-            (xml.row[0].cell[16]): getColumnName(tmpRow, 'income'),
-            (xml.row[0].cell[17]): getColumnName(tmpRow, 'incomeIncludingRegulation'),
-            (xml.row[0].cell[18]): getColumnName(tmpRow, 'outcome'),
-            (xml.row[0].cell[19]): getColumnName(tmpRow, 'outcomeIncludingRegulation'),
-            (xml.row[0].cell[20]): getColumnName(tmpRow, 'dealNum2'),
-            (xml.row[0].cell[21]): getColumnName(tmpRow, 'dealType'),
-            (xml.row[0].cell[22]): getColumnName(tmpRow, 'dealSubjectName'),
-            (xml.row[0].cell[23]): getColumnName(tmpRow, 'dealSubjectCode1'),
-            (xml.row[0].cell[24]): getColumnName(tmpRow, 'dealSubjectCode2'),
-            (xml.row[0].cell[25]): getColumnName(tmpRow, 'dealSubjectCode3'),
-            (xml.row[0].cell[26]): getColumnName(tmpRow, 'otherNum'),
-            (xml.row[0].cell[27]): getColumnName(tmpRow, 'contractNum'),
-            (xml.row[0].cell[28]): getColumnName(tmpRow, 'contractDate'),
-            (xml.row[0].cell[29]): getColumnName(tmpRow, 'countryCode'),
-            (xml.row[0].cell[30]): 'п. 080 Место отправки (погрузки) товара в соответствии с товаросопроводительными документами (заполняется только для товаров)',
-            (xml.row[0].cell[34]): 'п. 090 "Место совершения сделки (адрес места доставки (разгрузки товара), оказания услуги, работы, совершения сделки с иными объектами гражданских прав)"',
-            (xml.row[0].cell[38]): getColumnName(tmpRow, 'deliveryCode'),
-            (xml.row[0].cell[39]): getColumnName(tmpRow, 'okeiCode'),
-            (xml.row[0].cell[40]): getColumnName(tmpRow, 'count'),
-            (xml.row[0].cell[41]): getColumnName(tmpRow, 'price'),
-            (xml.row[0].cell[42]): getColumnName(tmpRow, 'total'),
-            (xml.row[0].cell[43]): getColumnName(tmpRow, 'dealDoneDate'),
-            (xml.row[0].cell[44]): getColumnName(tmpRow, 'dealNum3'),
-            (xml.row[0].cell[45]): getColumnName(tmpRow, 'dealMemberNum'),
-            (xml.row[0].cell[46]): getColumnName(tmpRow, 'organInfo'),
-            (xml.row[0].cell[47]): getColumnName(tmpRow, 'countryCode3'),
-            (xml.row[0].cell[48]): getColumnName(tmpRow, 'organName'),
-            (xml.row[0].cell[49]): getColumnName(tmpRow, 'organINN'),
-            (xml.row[0].cell[50]): getColumnName(tmpRow, 'organKPP'),
-            (xml.row[0].cell[51]): getColumnName(tmpRow, 'organRegNum'),
-            (xml.row[0].cell[52]): getColumnName(tmpRow, 'taxpayerCode'),
-            (xml.row[0].cell[53]): getColumnName(tmpRow, 'address'),
-            (xml.row[1].cell[0]) : getColumnName(tmpRow, 'interdependenceSing'),
-            (xml.row[1].cell[1]) : getColumnName(tmpRow, 'f121'),
-            (xml.row[1].cell[2]) : getColumnName(tmpRow, 'f122'),
-            (xml.row[1].cell[3]) : getColumnName(tmpRow, 'f123'),
-            (xml.row[1].cell[4]) : getColumnName(tmpRow, 'f124'),
-            (xml.row[1].cell[5]) : getColumnName(tmpRow, 'f131'),
-            (xml.row[1].cell[6]) : getColumnName(tmpRow, 'f132'),
-            (xml.row[1].cell[7]) : getColumnName(tmpRow, 'f133'),
-            (xml.row[1].cell[8]) : getColumnName(tmpRow, 'f134'),
-            (xml.row[1].cell[9]) : getColumnName(tmpRow, 'f135'),
-            (xml.row[1].cell[30]): getColumnName(tmpRow, 'countryCode1'),
-            (xml.row[1].cell[31]): getColumnName(tmpRow, 'region1'),
-            (xml.row[1].cell[32]): getColumnName(tmpRow, 'city1'),
-            (xml.row[1].cell[33]): getColumnName(tmpRow, 'locality1'),
-            (xml.row[1].cell[34]): getColumnName(tmpRow, 'countryCode2'),
-            (xml.row[1].cell[35]): getColumnName(tmpRow, 'region2'),
-            (xml.row[1].cell[36]): getColumnName(tmpRow, 'city2'),
-            (xml.row[1].cell[37]): getColumnName(tmpRow, 'locality2')
-    ]
-    checkHeaderEquals(headerMapping, logger)
+    checkAndReadFile(ImportInputStream, UploadFileName, allValues, headerValues, TABLE_START_VALUE, TABLE_END_VALUE, HEADER_ROW_COUNT, paramsMap)
+
+    // проверка шапки
+    checkHeaderXls(headerValues, COLUMN_COUNT, HEADER_ROW_COUNT, tmpRow)
     if (logger.containsLevel(LogLevel.ERROR)) {
         return;
     }
+    // освобождение ресурсов для экономии памяти
+    headerValues.clear()
+    headerValues = null
 
-    addData(xml, 1)
-}
+    def fileRowIndex = paramsMap.rowOffset
+    def colOffset = paramsMap.colOffset
+    paramsMap.clear()
+    paramsMap = null
 
-void addData(def xml, int headRowCount) {
-    reportPeriodEndDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
-
-    def xmlIndexRow = -1
-    def int rowOffset = xml.infoXLS.rowOffset[0].cell[0].text().toInteger()
-    def int colOffset = xml.infoXLS.colOffset[0].cell[0].text().toInteger()
-
+    def rowIndex = 0
     def rows = []
-    def int rowIndex = 1
-
+    def allValuesCount = allValues.size()
+    reportPeriodEndDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
     def boolean emptyRow = false
 
-    for (def row : xml.row) {
-        xmlIndexRow++
-        def int xlsIndexRow = xmlIndexRow + rowOffset
-
-        // пропустить шапку таблицы
-        if (xmlIndexRow <= headRowCount) {
-            continue
-        }
-
-        if ((row.cell.find { it.text() != "" }.toString()) == "") {
+    // формирвание строк нф
+    for (def i = 0; i < allValuesCount; i++) {
+        rowValues = allValues[0]
+        fileRowIndex++
+        // все строки пустые - выход
+        if ((rowValues.find { it != "" }.toString()) == "") {
             if (emptyRow) {
+                allValues.remove(rowValues)
+                rowValues.clear()
                 break
             }
             emptyRow = true
         }
-
-        if (row.cell[0].text().isEmpty() && row.cell.findAll{!it.text().isEmpty()}.size() == 0) {
+        // все строки пустые
+        if (!rowValues || rowValues.isEmpty() || !rowValues.find { it }) {
+            allValues.remove(rowValues)
+            rowValues.clear()
             continue
         }
-
         emptyRow = false
 
-        def newRow = formData.createStoreMessagingDataRow()
-        newRow.setIndex(rowIndex++)
-
-        // 2. п. 100
-        def xmlIndexCol = 0
-        newRow.interdependenceSing = getRecordIdImport(69, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
-        // 3. п. 121
-        xmlIndexCol = 1
-        newRow.f121 = getYesNoByNumber(parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false))
-        // 4. п. 122
-        xmlIndexCol = 2
-        newRow.f122 = getYesNoByNumber(parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false))
-        // 5. п. 123
-        xmlIndexCol = 3
-        newRow.f123 = getYesNoByNumber(parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false))
-        // 6. п. 124
-        xmlIndexCol = 4
-        newRow.f124 = getYesNoByNumber(parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false))
-        // 7. п. 131
-        xmlIndexCol = 5
-        newRow.f131 = getYesNoByNumber(parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false))
-        // 8. п. 132
-        xmlIndexCol = 6
-        newRow.f132 = getYesNoByNumber(parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false))
-        // 9. п. 133
-        xmlIndexCol = 7
-        newRow.f133 = getYesNoByNumber(parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false))
-        // 10. п. 134
-        xmlIndexCol = 8
-        newRow.f134 = getYesNoByNumber(parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false))
-        // 11. п. 135 (до 2014 г. / после 2014 г.)
-        xmlIndexCol = 9
-        newRow.f135 = getYesNoByNumber(parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false))
-        // 12. п. 200 "Группа однородных сделок"
-        xmlIndexCol = 10
-        newRow.similarDealGroup = getYesNoByNumber(parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false))
-        // 13. п. 210 "Код наименования сделки"
-        xmlIndexCol = 11
-        newRow.dealNameCode = getRecordIdImport(67, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
-        // 14. п. 211 "Код стороны сделки, которой является налогоплательщик"
-        xmlIndexCol = 12
-        newRow.taxpayerSideCode = getRecordIdImport(65, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
-        // 15. п. 220 "Признак определения цены сделки с учетом особенностей, предусмотренных статьей 105.4 НК РФ (регулируемые цены)"
-        xmlIndexCol = 13
-        newRow.dealPriceSign = getYesNoByNumber(parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false))
-        // 16. п. 230 "Код определения цены сделки"
-        xmlIndexCol = 14
-        newRow.dealPriceCode = getRecordIdImport(66, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
-        // 17. п. 260 "Количество участников сделки"
-        xmlIndexCol = 15
-        newRow.dealMemberCount = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
-        // 18. п. 300 "Сумма доходов налогоплательщика по контролируемой сделке (группе однородных сделок) в рублях"
-        xmlIndexCol = 16
-        newRow.income = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
-        // 19. п. 301 "в том числе сумма доходов по сделкам, цены которых подлежат регулированию"
-        xmlIndexCol = 17
-        newRow.incomeIncludingRegulation = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
-        // 20. п. 310 "Сумма расходов налогоплательщика по контролируемой сделке (группе однородных сделок) в рублях"
-        xmlIndexCol = 18
-        newRow.outcome = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
-        // 21.	п. 311 "в том числе сумма расходов по сделкам, цены которых подлежат регулированию"
-        xmlIndexCol = 19
-        newRow.outcomeIncludingRegulation = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
-        // 23. п. 020 "Тип предмета сделки"
-        xmlIndexCol = 21
-        newRow.dealType = getRecordIdImport(64, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
-        // 24. п. 030 "Наименование предмета сделки"
-        xmlIndexCol = 22
-        newRow.dealSubjectName = row.cell[xmlIndexCol].text()
-        // 25. п. 040 "Код предмета сделки (код по ТН ВЭД)"
-        xmlIndexCol = 23
-        newRow.dealSubjectCode1 = getRecordIdImport(73, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
-        // 26. п. 043 "Код предмета сделки (код по ОКП)"
-        xmlIndexCol = 24
-        newRow.dealSubjectCode2 = getRecordIdImport(68, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
-        // 27.	п. 045 "Код предмета сделки (код по ОКВЭД)"
-        xmlIndexCol = 25
-        newRow.dealSubjectCode3 = getRecordIdImport(34, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
-        // 28. п. 050 "Номер другого участника сделки"
-        xmlIndexCol = 26
-        newRow.otherNum = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
-        // 29. п. 060 "Номер договора"
-        xmlIndexCol = 27
-        newRow.contractNum = row.cell[xmlIndexCol].text()
-        // 30. п. 065 "Дата договора"
-        xmlIndexCol = 28
-        newRow.contractDate = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, false)
-        // 31. п. 070 "Код страны происхождения предмета сделки по классификатору ОКСМ (цифровой)"
-        xmlIndexCol = 29
-        newRow.countryCode = getRecordIdImport(10, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
-        // 32. Код страны по классификатору ОКСМ (цифровой)
-        xmlIndexCol = 30
-        newRow.countryCode1 = getRecordIdImport(10, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
-        // 33. Регион (код)
-        xmlIndexCol = 31
-        newRow.region1 = getRecordIdImport(4, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
-        // 34. Город
-        xmlIndexCol = 32
-        newRow.city1 = row.cell[xmlIndexCol].text()
-        // 35. Населенный пункт (село, поселок и т.д.)
-        xmlIndexCol = 33
-        newRow.locality1 = row.cell[xmlIndexCol].text()
-        // 36. Код страны по классификатору ОКСМ (цифровой)
-        xmlIndexCol = 34
-        newRow.countryCode2 = getRecordIdImport(10, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
-        // 37. Регион (код)
-        xmlIndexCol = 35
-        newRow.region2 = getRecordIdImport(4, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
-        // 38. Город
-        xmlIndexCol = 36
-        newRow.city2 = row.cell[xmlIndexCol].text()
-        // 39. Населенный пункт (село, поселок и т.д.)
-        xmlIndexCol = 37
-        newRow.locality2 = row.cell[xmlIndexCol].text()
-        // 40. п. 100 "Код условия поставки (заполняется только для товаров)"
-        xmlIndexCol = 38
-        newRow.deliveryCode = getRecordIdImport(63, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
-        // 41. п. 110 "Код единицы измерения по ОКЕИ"
-        xmlIndexCol = 39
-        newRow.okeiCode = getRecordIdImport(12, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
-        // 42. п. 120 "Количество"
-        xmlIndexCol = 40
-        newRow.count = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
-        // 43. п. 130 "Цена (тариф) за единицу измерения без учета НДС, акцизов и пошлины, руб."
-        xmlIndexCol = 41
-        newRow.price = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
-        // 44. п. 140 "Итого стоимость без учета НДС, акцизов и пошлины, руб."
-        xmlIndexCol = 42
-        newRow.total = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
-        // 45. п. 150 "Дата совершения сделки (цифрами день, месяц, год)"
-        xmlIndexCol = 43
-        newRow.dealDoneDate = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, false)
-        // 47. п. 015 "Порядковый номер участника сделки (из раздела 1Б)"
-        xmlIndexCol = 45
-        newRow.dealMemberNum = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, false)
-        // 49. п. 030 "Код страны по классификатору ОКСМ"
-        xmlIndexCol = 47
-        newRow.countryCode3 = getRecordIdImport(10, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
-        // 50. п. 040 "Наименование организации"
-        xmlIndexCol = 48
-        newRow.organName = getRecordIdImport(9, 'NAME', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
-        def map = getRefBookValue(9, newRow.organName)
-        if (map != null) {
-            // 48. п. 020 "Сведения об организации"
-            xmlIndexCol = 46
-            def map2 = getRefBookValue(70, map.ORGANIZATION?.referenceValue)
-            formDataService.checkReferenceValue(9, row.cell[xmlIndexCol].text(), map2.VALUE?.stringValue, xlsIndexRow, xmlIndexCol + colOffset, logger, false)
-
-            // 51. п. 050 "ИНН организации"
-            xmlIndexCol = 49
-            formDataService.checkReferenceValue(9, row.cell[xmlIndexCol].text(), map.INN_KIO?.stringValue, xlsIndexRow, xmlIndexCol + colOffset, logger, false)
-
-            // 52. п. 060 "КПП организации"
-            xmlIndexCol = 50
-            formDataService.checkReferenceValue(9, row.cell[xmlIndexCol].text(), map.KPP?.stringValue, xlsIndexRow, xmlIndexCol + colOffset, logger, false)
-
-            // 53. п. 070 "Регистрационный номер организации в стране ее регистрации (инкорпорации)"
-            xmlIndexCol = 51
-            formDataService.checkReferenceValue(9, row.cell[xmlIndexCol].text(), map.REG_NUM?.stringValue, xlsIndexRow, xmlIndexCol + colOffset, logger, false)
-
-            // 54. п. 080 "Код налогоплательщика в стране регистрации (инкорпорации) или его аналог (если имеется)"
-            xmlIndexCol = 52
-            formDataService.checkReferenceValue(9, row.cell[xmlIndexCol].text(), map.TAXPAYER_CODE?.stringValue, xlsIndexRow, xmlIndexCol + colOffset, logger, false)
-
-            // 55. п. 090 "Адрес"
-            xmlIndexCol = 53
-            formDataService.checkReferenceValue(9, row.cell[xmlIndexCol].text(), map.ADDRESS?.stringValue, xlsIndexRow, xmlIndexCol + colOffset, logger, false)
-
-            // Графа 53, 54, 55 - сменили тип для наглядности: что было видно какие данные попадут в уведомление
-            // 53. п. 070 "Регистрационный номер организации в стране ее регистрации (инкорпорации)"
-            newRow.organRegNum = map.REG_NUM?.stringValue
-
-            // 54. п. 080 "Код налогоплательщика в стране регистрации (инкорпорации) или его аналог (если имеется)"
-            newRow.taxpayerCode = map.TAXPAYER_CODE?.stringValue
-
-            // 55. п. 090 "Адрес"
-            newRow.address = map.ADDRESS?.stringValue
-        }
-
+        // простая строка
+        rowIndex++
+        def newRow = getNewRowFromXls(rowValues, colOffset, fileRowIndex, rowIndex)
         rows.add(newRow)
+        // освободить ненужные данные - иначе не хватит памяти
+        allValues.remove(rowValues)
+        rowValues.clear()
     }
 
     showMessages(rows, logger)
@@ -1966,6 +1739,275 @@ void addData(def xml, int headRowCount) {
         updateIndexes(rows)
         formDataService.getDataRowHelper(formData).allCached = rows
     }
+}
+
+/**
+ * Проверить шапку таблицы
+ *
+ * @param headerRows строки шапки
+ * @param colCount количество колонок в таблице
+ * @param rowCount количество строк в таблице
+ * @param tmpRow вспомогательная строка для получения названии графов
+ */
+void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
+    if (headerRows.isEmpty()) {
+        throw new ServiceException(WRONG_HEADER_ROW_SIZE)
+    }
+    checkHeaderSize(headerRows[headerRows.size() - 1].size(), headerRows.size(), colCount, rowCount)
+
+    def headerMapping = [
+            (headerRows[0][1]) : 'Основания для признания сделки контролируемой согласно статье 105.14 НК РФ',
+            (headerRows[0][5]) : 'Особенности отнесения сделки к контролируемой при ее совершении с российским взаимозависимым лицом',
+            (headerRows[0][10]): getColumnName(tmpRow, 'similarDealGroup'),
+            (headerRows[0][11]): getColumnName(tmpRow, 'dealNameCode'),
+            (headerRows[0][12]): getColumnName(tmpRow, 'taxpayerSideCode'),
+            (headerRows[0][13]): getColumnName(tmpRow, 'dealPriceSign'),
+            (headerRows[0][14]): getColumnName(tmpRow, 'dealPriceCode'),
+            (headerRows[0][15]): getColumnName(tmpRow, 'dealMemberCount'),
+            (headerRows[0][16]): getColumnName(tmpRow, 'income'),
+            (headerRows[0][17]): getColumnName(tmpRow, 'incomeIncludingRegulation'),
+            (headerRows[0][18]): getColumnName(tmpRow, 'outcome'),
+            (headerRows[0][19]): getColumnName(tmpRow, 'outcomeIncludingRegulation'),
+            (headerRows[0][20]): getColumnName(tmpRow, 'dealNum2'),
+            (headerRows[0][21]): getColumnName(tmpRow, 'dealType'),
+            (headerRows[0][22]): getColumnName(tmpRow, 'dealSubjectName'),
+            (headerRows[0][23]): getColumnName(tmpRow, 'dealSubjectCode1'),
+            (headerRows[0][24]): getColumnName(tmpRow, 'dealSubjectCode2'),
+            (headerRows[0][25]): getColumnName(tmpRow, 'dealSubjectCode3'),
+            (headerRows[0][26]): getColumnName(tmpRow, 'otherNum'),
+            (headerRows[0][27]): getColumnName(tmpRow, 'contractNum'),
+            (headerRows[0][28]): getColumnName(tmpRow, 'contractDate'),
+            (headerRows[0][29]): getColumnName(tmpRow, 'countryCode'),
+            (headerRows[0][30]): 'п. 080 Место отправки (погрузки) товара в соответствии с товаросопроводительными документами (заполняется только для товаров)',
+            (headerRows[0][34]): 'п. 090 "Место совершения сделки (адрес места доставки (разгрузки товара), оказания услуги, работы, совершения сделки с иными объектами гражданских прав)"',
+            (headerRows[0][38]): getColumnName(tmpRow, 'deliveryCode'),
+            (headerRows[0][39]): getColumnName(tmpRow, 'okeiCode'),
+            (headerRows[0][40]): getColumnName(tmpRow, 'count'),
+            (headerRows[0][41]): getColumnName(tmpRow, 'price'),
+            (headerRows[0][42]): getColumnName(tmpRow, 'total'),
+            (headerRows[0][43]): getColumnName(tmpRow, 'dealDoneDate'),
+            (headerRows[0][44]): getColumnName(tmpRow, 'dealNum3'),
+            (headerRows[0][45]): getColumnName(tmpRow, 'dealMemberNum'),
+            (headerRows[0][46]): getColumnName(tmpRow, 'organInfo'),
+            (headerRows[0][47]): getColumnName(tmpRow, 'countryCode3'),
+            (headerRows[0][48]): getColumnName(tmpRow, 'organName'),
+            (headerRows[0][49]): getColumnName(tmpRow, 'organINN'),
+            (headerRows[0][50]): getColumnName(tmpRow, 'organKPP'),
+            (headerRows[0][51]): getColumnName(tmpRow, 'organRegNum'),
+            (headerRows[0][52]): getColumnName(tmpRow, 'taxpayerCode'),
+            (headerRows[0][53]): getColumnName(tmpRow, 'address'),
+            (headerRows[1][0]) : getColumnName(tmpRow, 'interdependenceSing'),
+            (headerRows[1][1]) : getColumnName(tmpRow, 'f121'),
+            (headerRows[1][2]) : getColumnName(tmpRow, 'f122'),
+            (headerRows[1][3]) : getColumnName(tmpRow, 'f123'),
+            (headerRows[1][4]) : getColumnName(tmpRow, 'f124'),
+            (headerRows[1][5]) : getColumnName(tmpRow, 'f131'),
+            (headerRows[1][6]) : getColumnName(tmpRow, 'f132'),
+            (headerRows[1][7]) : getColumnName(tmpRow, 'f133'),
+            (headerRows[1][8]) : getColumnName(tmpRow, 'f134'),
+            (headerRows[1][9]) : getColumnName(tmpRow, 'f135'),
+            (headerRows[1][30]): getColumnName(tmpRow, 'countryCode1'),
+            (headerRows[1][31]): getColumnName(tmpRow, 'region1'),
+            (headerRows[1][32]): getColumnName(tmpRow, 'city1'),
+            (headerRows[1][33]): getColumnName(tmpRow, 'locality1'),
+            (headerRows[1][34]): getColumnName(tmpRow, 'countryCode2'),
+            (headerRows[1][35]): getColumnName(tmpRow, 'region2'),
+            (headerRows[1][36]): getColumnName(tmpRow, 'city2'),
+            (headerRows[1][37]): getColumnName(tmpRow, 'locality2')
+    ]
+    checkHeaderEquals(headerMapping, logger)
+}
+
+/**
+ * Получить новую строку нф по значениям из экселя.
+ *
+ * @param values список строк со значениями
+ * @param colOffset отступ в колонках
+ * @param fileRowIndex номер строки в тф
+ * @param rowIndex строка в нф
+ */
+def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) {
+    def newRow = formData.createStoreMessagingDataRow()
+    newRow.setIndex(rowIndex)
+    newRow.setImportIndex(fileRowIndex)
+
+    // 2. п. 100
+    def colIndex = 0
+    newRow.interdependenceSing = getRecordIdImport(69, 'CODE', values[colIndex], fileRowIndex, colIndex + colOffset)
+    // 3. п. 121
+    colIndex = 1
+    newRow.f121 = getYesNoByNumber(parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, false))
+    // 4. п. 122
+    colIndex = 2
+    newRow.f122 = getYesNoByNumber(parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, false))
+    // 5. п. 123
+    colIndex = 3
+    newRow.f123 = getYesNoByNumber(parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, false))
+    // 6. п. 124
+    colIndex = 4
+    newRow.f124 = getYesNoByNumber(parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, false))
+    // 7. п. 131
+    colIndex = 5
+    newRow.f131 = getYesNoByNumber(parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, false))
+    // 8. п. 132
+    colIndex = 6
+    newRow.f132 = getYesNoByNumber(parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, false))
+    // 9. п. 133
+    colIndex = 7
+    newRow.f133 = getYesNoByNumber(parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, false))
+    // 10. п. 134
+    colIndex = 8
+    newRow.f134 = getYesNoByNumber(parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, false))
+    // 11. п. 135 (до 2014 г. / после 2014 г.)
+    colIndex = 9
+    newRow.f135 = getYesNoByNumber(parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, false))
+    // 12. п. 200 "Группа однородных сделок"
+    colIndex = 10
+    newRow.similarDealGroup = getYesNoByNumber(parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, false))
+    // 13. п. 210 "Код наименования сделки"
+    colIndex = 11
+    newRow.dealNameCode = getRecordIdImport(67, 'CODE', values[colIndex], fileRowIndex, colIndex + colOffset)
+    // 14. п. 211 "Код стороны сделки, которой является налогоплательщик"
+    colIndex = 12
+    newRow.taxpayerSideCode = getRecordIdImport(65, 'CODE', values[colIndex], fileRowIndex, colIndex + colOffset)
+    // 15. п. 220 "Признак определения цены сделки с учетом особенностей, предусмотренных статьей 105.4 НК РФ (регулируемые цены)"
+    colIndex = 13
+    newRow.dealPriceSign = getYesNoByNumber(parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, false))
+    // 16. п. 230 "Код определения цены сделки"
+    colIndex = 14
+    newRow.dealPriceCode = getRecordIdImport(66, 'CODE', values[colIndex], fileRowIndex, colIndex + colOffset)
+    // 17. п. 260 "Количество участников сделки"
+    colIndex = 15
+    newRow.dealMemberCount = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, false)
+    // 18. п. 300 "Сумма доходов налогоплательщика по контролируемой сделке (группе однородных сделок) в рублях"
+    colIndex = 16
+    newRow.income = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, false)
+    // 19. п. 301 "в том числе сумма доходов по сделкам, цены которых подлежат регулированию"
+    colIndex = 17
+    newRow.incomeIncludingRegulation = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, false)
+    // 20. п. 310 "Сумма расходов налогоплательщика по контролируемой сделке (группе однородных сделок) в рублях"
+    colIndex = 18
+    newRow.outcome = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, false)
+    // 21.	п. 311 "в том числе сумма расходов по сделкам, цены которых подлежат регулированию"
+    colIndex = 19
+    newRow.outcomeIncludingRegulation = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, false)
+    // 23. п. 020 "Тип предмета сделки"
+    colIndex = 21
+    newRow.dealType = getRecordIdImport(64, 'CODE', values[colIndex], fileRowIndex, colIndex + colOffset)
+    // 24. п. 030 "Наименование предмета сделки"
+    colIndex = 22
+    newRow.dealSubjectName = values[colIndex]
+    // 25. п. 040 "Код предмета сделки (код по ТН ВЭД)"
+    colIndex = 23
+    newRow.dealSubjectCode1 = getRecordIdImport(73, 'CODE', values[colIndex], fileRowIndex, colIndex + colOffset)
+    // 26. п. 043 "Код предмета сделки (код по ОКП)"
+    colIndex = 24
+    newRow.dealSubjectCode2 = getRecordIdImport(68, 'CODE', values[colIndex], fileRowIndex, colIndex + colOffset)
+    // 27.	п. 045 "Код предмета сделки (код по ОКВЭД)"
+    colIndex = 25
+    newRow.dealSubjectCode3 = getRecordIdImport(34, 'CODE', values[colIndex], fileRowIndex, colIndex + colOffset)
+    // 28. п. 050 "Номер другого участника сделки"
+    colIndex = 26
+    newRow.otherNum = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, false)
+    // 29. п. 060 "Номер договора"
+    colIndex = 27
+    newRow.contractNum = values[colIndex]
+    // 30. п. 065 "Дата договора"
+    colIndex = 28
+    newRow.contractDate = parseDate(values[colIndex], "dd.MM.yyyy", fileRowIndex, colIndex + colOffset, logger, false)
+    // 31. п. 070 "Код страны происхождения предмета сделки по классификатору ОКСМ (цифровой)"
+    colIndex = 29
+    newRow.countryCode = getRecordIdImport(10, 'CODE', values[colIndex], fileRowIndex, colIndex + colOffset)
+    // 32. Код страны по классификатору ОКСМ (цифровой)
+    colIndex = 30
+    newRow.countryCode1 = getRecordIdImport(10, 'CODE', values[colIndex], fileRowIndex, colIndex + colOffset)
+    // 33. Регион (код)
+    colIndex = 31
+    newRow.region1 = getRecordIdImport(4, 'CODE', values[colIndex], fileRowIndex, colIndex + colOffset)
+    // 34. Город
+    colIndex = 32
+    newRow.city1 = values[colIndex]
+    // 35. Населенный пункт (село, поселок и т.д.)
+    colIndex = 33
+    newRow.locality1 = values[colIndex]
+    // 36. Код страны по классификатору ОКСМ (цифровой)
+    colIndex = 34
+    newRow.countryCode2 = getRecordIdImport(10, 'CODE', values[colIndex], fileRowIndex, colIndex + colOffset)
+    // 37. Регион (код)
+    colIndex = 35
+    newRow.region2 = getRecordIdImport(4, 'CODE', values[colIndex], fileRowIndex, colIndex + colOffset)
+    // 38. Город
+    colIndex = 36
+    newRow.city2 = values[colIndex]
+    // 39. Населенный пункт (село, поселок и т.д.)
+    colIndex = 37
+    newRow.locality2 = values[colIndex]
+    // 40. п. 100 "Код условия поставки (заполняется только для товаров)"
+    colIndex = 38
+    newRow.deliveryCode = getRecordIdImport(63, 'CODE', values[colIndex], fileRowIndex, colIndex + colOffset)
+    // 41. п. 110 "Код единицы измерения по ОКЕИ"
+    colIndex = 39
+    newRow.okeiCode = getRecordIdImport(12, 'CODE', values[colIndex], fileRowIndex, colIndex + colOffset)
+    // 42. п. 120 "Количество"
+    colIndex = 40
+    newRow.count = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, false)
+    // 43. п. 130 "Цена (тариф) за единицу измерения без учета НДС, акцизов и пошлины, руб."
+    colIndex = 41
+    newRow.price = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, false)
+    // 44. п. 140 "Итого стоимость без учета НДС, акцизов и пошлины, руб."
+    colIndex = 42
+    newRow.total = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, false)
+    // 45. п. 150 "Дата совершения сделки (цифрами день, месяц, год)"
+    colIndex = 43
+    newRow.dealDoneDate = parseDate(values[colIndex], "dd.MM.yyyy", fileRowIndex, colIndex + colOffset, logger, false)
+    // 47. п. 015 "Порядковый номер участника сделки (из раздела 1Б)"
+    colIndex = 45
+    newRow.dealMemberNum = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, false)
+    // 49. п. 030 "Код страны по классификатору ОКСМ"
+    colIndex = 47
+    newRow.countryCode3 = getRecordIdImport(10, 'CODE', values[colIndex], fileRowIndex, colIndex + colOffset)
+    // 50. п. 040 "Наименование организации"
+    colIndex = 48
+    newRow.organName = getRecordIdImport(9, 'NAME', values[colIndex], fileRowIndex, colIndex + colOffset)
+    def map = getRefBookValue(9, newRow.organName)
+    if (map != null) {
+        // 48. п. 020 "Сведения об организации"
+        colIndex = 46
+        def map2 = getRefBookValue(70, map.ORGANIZATION?.referenceValue)
+        formDataService.checkReferenceValue(9, values[colIndex], map2.VALUE?.stringValue, fileRowIndex, colIndex + colOffset, logger, false)
+
+        // 51. п. 050 "ИНН организации"
+        colIndex = 49
+        formDataService.checkReferenceValue(9, values[colIndex], map.INN_KIO?.stringValue, fileRowIndex, colIndex + colOffset, logger, false)
+
+        // 52. п. 060 "КПП организации"
+        colIndex = 50
+        formDataService.checkReferenceValue(9, values[colIndex], map.KPP?.stringValue, fileRowIndex, colIndex + colOffset, logger, false)
+
+        // 53. п. 070 "Регистрационный номер организации в стране ее регистрации (инкорпорации)"
+        colIndex = 51
+        formDataService.checkReferenceValue(9, values[colIndex], map.REG_NUM?.stringValue, fileRowIndex, colIndex + colOffset, logger, false)
+
+        // 54. п. 080 "Код налогоплательщика в стране регистрации (инкорпорации) или его аналог (если имеется)"
+        colIndex = 52
+        formDataService.checkReferenceValue(9, values[colIndex], map.TAXPAYER_CODE?.stringValue, fileRowIndex, colIndex + colOffset, logger, false)
+
+        // 55. п. 090 "Адрес"
+        colIndex = 53
+        formDataService.checkReferenceValue(9, values[colIndex], map.ADDRESS?.stringValue, fileRowIndex, colIndex + colOffset, logger, false)
+
+        // Графа 53, 54, 55 - сменили тип для наглядности: что было видно какие данные попадут в уведомление
+        // 53. п. 070 "Регистрационный номер организации в стране ее регистрации (инкорпорации)"
+        newRow.organRegNum = map.REG_NUM?.stringValue
+
+        // 54. п. 080 "Код налогоплательщика в стране регистрации (инкорпорации) или его аналог (если имеется)"
+        newRow.taxpayerCode = map.TAXPAYER_CODE?.stringValue
+
+        // 55. п. 090 "Адрес"
+        newRow.address = map.ADDRESS?.stringValue
+    }
+
+    return newRow
 }
 
 def getYesNoByNumber(def number) {
