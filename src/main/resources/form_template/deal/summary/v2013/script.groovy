@@ -292,7 +292,7 @@ void consolidation() {
         summaryRows.add(getRow(mapForSummary, typeMap))
     }
 
-    updateIndexes(rows)
+    updateIndexes(summaryRows)
     formDataService.getDataRowHelper(formData).allCached = summaryRows
 }
 
