@@ -5,6 +5,7 @@ import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
 import groovy.transform.Field
 
 /**
@@ -124,6 +125,10 @@ def endDate = null
 
 @Field
 def isBalancePeriod
+
+// для хранения информации о справочниках
+@Field
+def refBooks = [:]
 
 // Признак периода ввода остатков для отчетного периода подразделения
 def isBalancePeriod() {
@@ -628,16 +633,29 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
     newRow.benefitBasis = values[15]
     // графа 14
     // TODO может как-то попроще
-    String filter = "CODE = '" + values[14] + "'"
-    def records202 = refBookFactory.getDataProvider(202).getRecords(getReportPeriodEndDate(), null, filter, null)
-    for (def record202 : records202) {
-        filter = "DECLARATION_REGION_ID = " + formDataDepartment.regionId?.toString() + " and REGION_ID = " + newRow.subject?.toString() + " and TAX_BENEFIT_ID = " + record202.record_id.value + " and PARAM_DESTINATION = 2"
-        def records = refBookFactory.getDataProvider(203).getRecords(getReportPeriodEndDate(), null, filter, null)
-        def taxRecordId = records.find { calcBasis(it?.record_id?.value) == newRow.benefitBasis }?.record_id?.value
+    def record202Id = getRecordIdImport(202, 'CODE', values[14], fileRowIndex, 14 + colOffset)
+    if (record202Id) {
+        def declarationRegionId = formDataDepartment.regionId?.toString()
+        def regionId = newRow.subject?.toString()
+        def taxBenefinId = record202Id
+        filter = "DECLARATION_REGION_ID = $declarationRegionId and REGION_ID = $regionId and TAX_BENEFIT_ID = $taxBenefinId and PARAM_DESTINATION = 2"
+        def provider = formDataService.getRefBookProvider(refBookFactory, 203, providerCache)
+        def records = provider.getRecords(getReportPeriodEndDate(), null, filter, null)
+        def taxRecordId = records?.find { calcBasis(it?.record_id?.value) == newRow.benefitBasis }?.record_id?.value
         if (taxRecordId) {
             newRow.taxBenefitCode = taxRecordId
+        } else {
+            RefBook rb = getRefBook(203)
+            logger.error(REF_BOOK_NOT_FOUND_IMPORT_ERROR, fileRowIndex, getXLSColumnName(14 + colOffset), rb.getName(), rb.getAttribute('TAX_BENEFIT_ID').getName(), values[14], getReportPeriodEndDate().format('dd.MM.yyyy'))
         }
     }
 
     return newRow
+}
+
+def getRefBook(def id) {
+    if (refBooks[id] == null) {
+        refBooks[id] = refBookFactory.get(id)
+    }
+    return refBooks[id]
 }
