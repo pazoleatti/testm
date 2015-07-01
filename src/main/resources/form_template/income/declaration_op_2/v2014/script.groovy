@@ -823,7 +823,7 @@ def getDepartmentParam() {
         def departmentId = declarationData.departmentId
         def departmentParamList = getProvider(33).getRecords(getEndDate() - 1, null, "DEPARTMENT_ID = $departmentId", null)
         if (departmentParamList == null || departmentParamList.size() == 0 || departmentParamList.get(0) == null) {
-            throw new Exception("Ошибка при получении настроек обособленного подразделения")
+            throw new Exception("Ошибка при получении настроек обособленного подразделения. Настройки подразделения заполнены не полностью")
         }
         departmentParam = departmentParamList?.get(0)
     }
@@ -836,7 +836,7 @@ def getDepartmentParamTable(def departmentParamId) {
         def filter = "LINK = $departmentParamId and KPP ='${declarationData.kpp}'"
         def departmentParamTableList = getProvider(330).getRecords(getEndDate() - 1, null, filter, null)
         if (departmentParamTableList == null || departmentParamTableList.size() == 0 || departmentParamTableList.get(0) == null) {
-            throw new Exception("Ошибка при получении настроек обособленного подразделения")
+            throw new Exception("Ошибка при получении настроек обособленного подразделения. Настройки подразделения заполнены не полностью")
         }
         departmentParamTable = departmentParamTableList.get(0)
     }

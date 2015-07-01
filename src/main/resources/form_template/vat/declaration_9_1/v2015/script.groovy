@@ -93,7 +93,7 @@ def getDepartmentParam() {
         def departmentId = declarationData.departmentId
         def departmentParamList = getProvider(RefBook.DEPARTMENT_CONFIG_VAT).getRecords(getEndDate() - 1, null, "DEPARTMENT_ID = $departmentId", null)
         if (departmentParamList == null || departmentParamList.size() == 0 || departmentParamList.get(0) == null) {
-            throw new Exception("Ошибка при получении настроек обособленного подразделения")
+            throw new Exception("Ошибка при получении настроек обособленного подразделения. Настройки подразделения заполнены не полностью")
         }
         departmentParam = departmentParamList?.get(0)
     }
