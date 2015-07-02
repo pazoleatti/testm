@@ -23,6 +23,9 @@ public class DepartmentFormType implements Serializable {
     private Date periodStart;
     private Date periodEnd;
     private Integer performerId;
+
+    /** Месяц. Не заполняется в дао */
+    private Integer periodOrder;
 	
 	/**
 	 * Получить идентификатор записи
@@ -112,6 +115,14 @@ public class DepartmentFormType implements Serializable {
         this.performerId = performerId;
     }
 
+    public Integer getPeriodOrder() {
+        return periodOrder;
+    }
+
+    public void setPeriodOrder(Integer periodOrder) {
+        this.periodOrder = periodOrder;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -121,10 +132,11 @@ public class DepartmentFormType implements Serializable {
 
         if (departmentId != that.departmentId) return false;
         if (formTypeId != that.formTypeId) return false;
-        if (performerId != that.performerId) return false;
         if (id != null ? !id.equals(that.id) : that.id != null) return false;
         if (kind != that.kind) return false;
+        if (performerId != null ? !performerId.equals(that.performerId) : that.performerId != null) return false;
         if (periodEnd != null ? !periodEnd.equals(that.periodEnd) : that.periodEnd != null) return false;
+        if (periodOrder != null ? !periodOrder.equals(that.periodOrder) : that.periodOrder != null) return false;
         if (periodStart != null ? !periodStart.equals(that.periodStart) : that.periodStart != null) return false;
 
         return true;
@@ -138,7 +150,8 @@ public class DepartmentFormType implements Serializable {
         result = 31 * result + (kind != null ? kind.hashCode() : 0);
         result = 31 * result + (periodStart != null ? periodStart.hashCode() : 0);
         result = 31 * result + (periodEnd != null ? periodEnd.hashCode() : 0);
-        result = 31 * result + performerId;
+        result = 31 * result + (performerId != null ? performerId.hashCode() : 0);
+        result = 31 * result + (periodOrder != null ? periodOrder.hashCode() : 0);
         return result;
     }
 
@@ -152,6 +165,7 @@ public class DepartmentFormType implements Serializable {
                 ", periodStart=" + periodStart +
                 ", periodEnd=" + periodEnd +
                 ", performerId=" + performerId +
+                ", periodOrder=" + periodOrder +
                 '}';
     }
 }

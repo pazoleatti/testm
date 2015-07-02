@@ -422,7 +422,7 @@ public interface FormDataService {
      * @param reportType
      * @return
      */
-    Long getValueForCheckLimit(TAUserInfo userInfo, FormData formData, ReportType reportType, String uuid);
+    Long getValueForCheckLimit(TAUserInfo userInfo, FormData formData, ReportType reportType, String uuid, Logger logger);
 
     /**
      * Формирует название операции

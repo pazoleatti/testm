@@ -38,19 +38,18 @@ public abstract class MoveFormDataAsyncTask extends AbstractAsyncTask {
     }
 
     @Override
-    public BalancingVariants checkTaskLimit(Map<String, Object> params) throws AsyncTaskException {
+    public BalancingVariants checkTaskLimit(Map<String, Object> params, Logger logger) throws AsyncTaskException {
         int userId = (Integer)params.get(USER_ID.name());
         long formDataId = (Long)params.get("formDataId");
         TAUserInfo userInfo = new TAUserInfo();
         userInfo.setUser(userService.getUser(userId));
-        Logger logger = new Logger();
         FormData formData = formDataService.getFormData(
                 userInfo,
                 formDataId,
                 false,
                 logger);
 
-        Long value = formDataService.getValueForCheckLimit(userInfo, formData, getReportType(), null);
+        Long value = formDataService.getValueForCheckLimit(userInfo, formData, getReportType(), null, logger);
         String msg = String.format("количество ячеек таблицы формы(%s) превышает максимально допустимое(%s)!", value, "%s");
         return checkTask(getReportType(), value, formDataService.getTaskName(getReportType(), formDataId, userInfo), msg);
     }

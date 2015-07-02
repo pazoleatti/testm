@@ -41,7 +41,7 @@ public abstract class CsvAuditGeneratorAsyncTask extends AbstractAsyncTask {
     }
 
     @Override
-    public BalancingVariants checkTaskLimit(Map<String, Object> params) {
+    public BalancingVariants checkTaskLimit(Map<String, Object> params, Logger logger) {
         return BalancingVariants.LONG;
     }
 
