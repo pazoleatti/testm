@@ -121,9 +121,8 @@ def editableColumns = ['emitentName', 'emitentInn', 'all', 'rateZero', 'distribu
 
 // обязательные (графа 1..17, 23..25, 27)
 @Field
-def nonEmptyColumns = ['emitentName', 'emitentInn', 'distributionSum', 'decisionNumber',
-                       'decisionDate', 'year', 'firstMonth', 'lastMonth', 'allSum', 'addresseeName', 'inn',
-                       'status', 'dividends', 'sum', 'date', 'withheldSum']
+def nonEmptyColumns = ['emitentName', 'emitentInn', 'distributionSum', 'decisionNumber', 'decisionDate', 'year', 'firstMonth',
+                       'lastMonth', 'allSum', 'addresseeName', 'type', 'status', 'dividends', 'sum', 'date', 'withheldSum']
 
 // сортировка (графа 7, 8)
 @Field
