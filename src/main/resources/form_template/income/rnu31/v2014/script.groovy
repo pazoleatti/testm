@@ -211,10 +211,11 @@ void importTransportData() {
 }
 
 void addTransportData(def xml) {
-    def dataRows = formDataService.getDataRowHelper(formData).allCached
     def int rnuIndexRow = 3
     def int colOffset = 1
-    def row = getDataRow(dataRows, 'total')
+    def formTemplate = formDataService.getFormTemplate(formData.formType.id, formData.reportPeriodId)
+    def templateRows = formTemplate.rows
+    def row = getDataRow(templateRows, 'total')
     row.keySet().each { row.getCell(it).setCheckMode(true) }
 
     def xmlRow = xml.row[0]
@@ -240,7 +241,12 @@ void addTransportData(def xml) {
     // графа 12
     row.corporateBonds = getNumber(xmlRow.cell[12].text(), rnuIndexRow, 12 + colOffset)
 
-    showMessages(dataRows, logger)
+    row.number = formData.periodOrder
+
+    showMessages([row], logger)
+    if (!logger.containsLevel(LogLevel.ERROR)) {
+        formDataService.getDataRowHelper(formData).allCached = [row]
+    }
 }
 
 // Получить строку за прошлый месяц
@@ -252,7 +258,7 @@ def getPrevMonthTotalRow() {
     def prevFormData = formDataService.getFormDataPrev(formData)
     if (prevFormData != null) {
         def prevDataRows = formDataService.getDataRowHelper(prevFormData)?.allSaved
-        return getDataRow(prevDataRows, 'total')
+        return prevDataRows?.find{ 'total'.equals(it.getAlias()) }
     }
     return null
 }
@@ -295,7 +301,8 @@ void importData() {
     def rows = []
     def allValuesCount = allValues.size()
 
-    def dataRows = formDataService.getDataRowHelper(formData).allCached
+    def formTemplate = formDataService.getFormTemplate(formData.formType.id, formData.reportPeriodId)
+    def dataRows = formTemplate.rows
 
     // формирвание строк нф
     for (def i = 0; i < allValuesCount; i++) {
@@ -321,7 +328,13 @@ void importData() {
         allValues.remove(rowValues)
         rowValues.clear()
     }
+    if (rowIndex < dataRows.size()) {
+        logger.error("Структура файла не соответствует макету налоговой формы.")
+    }
     showMessages(dataRows, logger)
+    if (!logger.containsLevel(LogLevel.ERROR)) {
+        formDataService.getDataRowHelper(formData).allCached = dataRows
+    }
 }
 
 /**
