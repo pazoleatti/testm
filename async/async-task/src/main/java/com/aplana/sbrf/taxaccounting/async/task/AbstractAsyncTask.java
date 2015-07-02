@@ -200,6 +200,20 @@ public abstract class AbstractAsyncTask implements AsyncTask {
         log.info(String.format("Для задачи с ключом %s завершено выполнение", lock));
     }
 
+    @Override
+    public BalancingVariants checkTaskLimit(Map<String, Object> params) throws AsyncTaskException {
+        Logger logger = new Logger();
+        BalancingVariants result = checkTaskLimit(params, logger);
+        if (logger.containsLevel(LogLevel.ERROR)) {
+            throw new ServiceLoggerException(
+                    "Произошла ошибка при проверке ограничений асинхронной задачи \"" + getAsyncTaskName() + "\"",
+                    logEntryService.save(logger.getEntries()));
+        }
+        return result;
+    }
+
+    protected abstract BalancingVariants checkTaskLimit(Map<String, Object> params, Logger logger) throws AsyncTaskException;
+
     /**
      * Выполнение работ после завершения основной задачи и отправки уведомлений
      * Действия выполняются в отдельной транзакции

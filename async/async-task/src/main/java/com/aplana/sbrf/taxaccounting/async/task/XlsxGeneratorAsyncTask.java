@@ -49,7 +49,7 @@ public abstract class XlsxGeneratorAsyncTask extends AbstractAsyncTask {
     }
 
     @Override
-    public BalancingVariants checkTaskLimit(Map<String, Object> params) throws AsyncTaskException {
+    public BalancingVariants checkTaskLimit(Map<String, Object> params, Logger logger) throws AsyncTaskException {
         long declarationDataId = (Long)params.get("declarationDataId");
         int userId = (Integer)params.get(USER_ID.name());
         TAUserInfo userInfo = new TAUserInfo();

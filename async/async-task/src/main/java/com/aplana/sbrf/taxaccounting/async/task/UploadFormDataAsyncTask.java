@@ -46,7 +46,7 @@ public abstract class UploadFormDataAsyncTask extends AbstractAsyncTask {
     }
 
     @Override
-    public BalancingVariants checkTaskLimit(Map<String, Object> params) throws AsyncTaskException {
+    public BalancingVariants checkTaskLimit(Map<String, Object> params, Logger logger) throws AsyncTaskException {
         int userId = (Integer)params.get(USER_ID.name());
         long formDataId = (Long)params.get("formDataId");
         boolean manual = (Boolean)params.get("manual");
@@ -54,14 +54,13 @@ public abstract class UploadFormDataAsyncTask extends AbstractAsyncTask {
 
         TAUserInfo userInfo = new TAUserInfo();
         userInfo.setUser(userService.getUser(userId));
-        Logger logger = new Logger();
         FormData formData = formDataService.getFormData(
                 userInfo,
                 formDataId,
                 manual,
                 logger);
 
-        Long value = formDataService.getValueForCheckLimit(userInfo, formData, getReportType(), uuid);
+        Long value = formDataService.getValueForCheckLimit(userInfo, formData, getReportType(), uuid, logger);
         String msg = String.format("выбранный файл имеет слишком большой размер (%s Кбайт)!",  value);
         return checkTask(getReportType(), value, formDataService.getTaskName(getReportType(), formDataId, userInfo), msg);
     }

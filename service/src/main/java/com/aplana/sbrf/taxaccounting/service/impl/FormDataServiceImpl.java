@@ -522,18 +522,13 @@ public class FormDataServiceImpl implements FormDataService {
                 }
             }
             //Система проверяет статус консолидации из форм-источников.
-            List<DepartmentFormType> dftSources = departmentFormTypeDao.getFormSources(
-                    formData.getDepartmentId(),
-                    formData.getFormType().getId(),
-                    formData.getKind(),
-                    reportPeriod.getCalendarStartDate(),
-                    reportPeriod.getEndDate());
+            List<DepartmentFormType> dftSources = getFormSources(formData, logger, userInfo, reportPeriod);
             for (DepartmentFormType dftSource : dftSources){
                 DepartmentReportPeriod sourceDepartmentReportPeriod =
                         departmentReportPeriodService.getLast(dftSource.getDepartmentId(), formData.getReportPeriodId());
                 FormData sourceFormData =
                         findFormData(dftSource.getFormTypeId(), dftSource.getKind(),
-								sourceDepartmentReportPeriod.getId(), formData.getPeriodOrder());
+								sourceDepartmentReportPeriod.getId(), dftSource.getPeriodOrder());
                 ReportPeriod rp = reportPeriodService.getReportPeriod(formData.getReportPeriodId());
                 if (sourceFormData == null){
                     DepartmentReportPeriod drp = departmentReportPeriodService.get(formData.getDepartmentReportPeriodId());
@@ -756,7 +751,7 @@ public class FormDataServiceImpl implements FormDataService {
                 //Проверяем что записи справочников, на которые есть ссылки в нф все еще существуют в периоде формы
                 stateLogger.updateState("Проверка ссылок на справочники");
                 checkReferenceValues(logger, formData, false);
-                checkConsolidateFromSources(formData, logger);
+                checkConsolidateFromSources(formData, logger, userInfo);
                 if (WorkflowState.ACCEPTED.equals(workflowMove.getToState())) {
                     // Отработка скриптом события сортировки
                     formDataScriptingService.executeScript(userInfo, formData,
@@ -804,26 +799,59 @@ public class FormDataServiceImpl implements FormDataService {
         }
     }
 
-    private void checkConsolidateFromSources(FormData formData, Logger logger){
+    private List<DepartmentFormType> getFormSources(FormData formData, Logger logger, TAUserInfo userInfo, ReportPeriod reportPeriod){
+        List<DepartmentFormType> sourceList = new ArrayList<DepartmentFormType>();
+        /** Проверяем в скрипте источники-приемники для особенных форм */
+        Map<String, Object> params = new HashMap<String, Object>();
+        FormSources sources = new FormSources();
+        sources.setSourceList(new ArrayList<FormToFormRelation>());
+        sources.setSourcesProcessedByScript(false);
+        params.put("sources", sources);
+        formDataScriptingService.executeScript(userInfo, formData, FormDataEvent.GET_SOURCES, logger, params);
+
+        if (sources.isSourcesProcessedByScript()) {
+            //Скрипт возвращает все необходимые источники-приемники
+            if (sources.getSourceList() != null) {
+                for (FormToFormRelation relation : sources.getSourceList()) {
+                    if (relation.isSource() && relation.isCreated() && relation.getFormType() != null) {
+                        //TODO: Заполняем DepartmentFormType не полностью!
+                        DepartmentFormType source = new DepartmentFormType();
+                        source.setDepartmentId(formData.getDepartmentId());
+                        source.setFormTypeId(relation.getFormType().getId());
+                        source.setKind(relation.getFormDataKind());
+                        source.setPeriodOrder(relation.getPeriodOrder());
+                        sourceList.add(source);
+                    }
+                }
+            }
+        } else {
+            //Получаем источники-приемники стандартными методами ядра
+            //Номер месяца для источников получаемых обычным способом не указан. Такие случаи должны обрабатываться в скриптах
+            sourceList = departmentFormTypeDao.getFormSources(
+                    formData.getDepartmentId(),
+                    formData.getFormType().getId(),
+                    formData.getKind(),
+                    reportPeriod.getCalendarStartDate(),
+                    reportPeriod.getEndDate());
+        }
+        return sourceList;
+    }
+
+    private void checkConsolidateFromSources(FormData formData, Logger logger, TAUserInfo userInfo){
         //Проверка на неактуальные консолидированные данные
         if (sourceService.isFDConsolidationTopical(formData.getId())){
             logger.warn(CONSOLIDATION_NOT_TOPICAL);
         }
         //Проверка выполнена ли консолидация из всех принятых источников текущего экземпляра
         ReportPeriod reportPeriod = reportPeriodService.getReportPeriod(formData.getReportPeriodId());
-        List<DepartmentFormType> departmentFormTypesSources = departmentFormTypeDao.getFormSources(
-                formData.getDepartmentId(),
-                formData.getFormType().getId(),
-                formData.getKind(),
-                reportPeriod.getCalendarStartDate(),
-                reportPeriod.getEndDate());
+        List<DepartmentFormType> departmentFormTypesSources = getFormSources(formData, logger, userInfo, reportPeriod);
         ArrayList<FormData> notAcceptedFDSources = new ArrayList<FormData>();
         ArrayList<FormData> notConsolidatedFDSources = new ArrayList<FormData>();
         for (DepartmentFormType sourceDFT : departmentFormTypesSources) {
             DepartmentReportPeriod sourceDepartmentReportPeriod =
                     departmentReportPeriodService.getLast(sourceDFT.getDepartmentId(), formData.getReportPeriodId());
             FormData sourceForm = findFormData(sourceDFT.getFormTypeId(), sourceDFT.getKind(),
-                    sourceDepartmentReportPeriod.getId(), formData.getPeriodOrder());
+                    sourceDepartmentReportPeriod.getId(), sourceDFT.getPeriodOrder());
             if (
                     sourceForm != null && sourceForm.getState() == WorkflowState.ACCEPTED
                     &&
@@ -1030,12 +1058,7 @@ public class FormDataServiceImpl implements FormDataService {
         DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.get(formData.getDepartmentReportPeriodId());
         ReportPeriod reportPeriod = reportPeriodService.getReportPeriod(formData.getReportPeriodId());
 
-        List<DepartmentFormType> departmentFormTypesSources = departmentFormTypeDao.getFormSources(
-                formData.getDepartmentId(),
-                formData.getFormType().getId(),
-                formData.getKind(),
-                reportPeriod.getCalendarStartDate(),
-                reportPeriod.getEndDate());
+        List<DepartmentFormType> departmentFormTypesSources = getFormSources(formData, logger, userInfo, reportPeriod);
 
         HashSet<Long> srcAcceptedIds = new HashSet<Long>();
         ArrayList<String> msgPull = new ArrayList<String>(0);
@@ -1049,7 +1072,7 @@ public class FormDataServiceImpl implements FormDataService {
                 continue;
             }
             FormData sourceForm = findFormData(sourceDFT.getFormTypeId(), sourceDFT.getKind(),
-                    sourceDepartmentReportPeriod.getId(), formData.getPeriodOrder());
+                    sourceDepartmentReportPeriod.getId(), sourceDFT.getPeriodOrder());
             if (sourceForm == null){
                 continue;
             }
@@ -1205,12 +1228,7 @@ public class FormDataServiceImpl implements FormDataService {
         }
 
         //1Д. Не существует ни одной назначенной формы-источника.
-        List<DepartmentFormType> departmentFormTypesSources = departmentFormTypeDao.getFormSources(
-                formData.getDepartmentId(),
-                formData.getFormType().getId(),
-                formData.getKind(),
-                reportPeriod.getCalendarStartDate(),
-                reportPeriod.getEndDate());
+        List<DepartmentFormType> departmentFormTypesSources = getFormSources(formData, logger, userInfo, reportPeriod);
         if (departmentFormTypesSources.isEmpty()){
             //Очищаем устаревшие данные, оставшиеся после старой консолидации
             tx.executeInNewTransaction(new TransactionLogic() {
@@ -1807,7 +1825,7 @@ public class FormDataServiceImpl implements FormDataService {
     }
 
     @Override
-    public Long getValueForCheckLimit(TAUserInfo userInfo, FormData formData, ReportType reportType, String uuid) {
+    public Long getValueForCheckLimit(TAUserInfo userInfo, FormData formData, ReportType reportType, String uuid, Logger logger) {
         switch (reportType) {
             case CHECK_FD:
             case MOVE_FD:
@@ -1819,12 +1837,7 @@ public class FormDataServiceImpl implements FormDataService {
                 return Long.valueOf(rowCountReport * columnCountReport);
             case CONSOLIDATE_FD:
                 ReportPeriod reportPeriod = reportPeriodService.getReportPeriod(formData.getReportPeriodId());
-                List<DepartmentFormType> departmentFormTypesSources = departmentFormTypeDao.getFormSources(
-                        formData.getDepartmentId(),
-                        formData.getFormType().getId(),
-                        formData.getKind(),
-                        reportPeriod.getCalendarStartDate(),
-                        reportPeriod.getEndDate());
+                List<DepartmentFormType> departmentFormTypesSources = getFormSources(formData, logger, userInfo, reportPeriod);
                 long cellCountSource = 0;
                 for (DepartmentFormType sourceDFT : departmentFormTypesSources){
                     // Последний отчетный период подразделения
@@ -1834,7 +1847,7 @@ public class FormDataServiceImpl implements FormDataService {
                         continue;
                     }
                     FormData sourceForm = findFormData(sourceDFT.getFormTypeId(), sourceDFT.getKind(),
-                            sourceDepartmentReportPeriod.getId(), formData.getPeriodOrder());
+                            sourceDepartmentReportPeriod.getId(), sourceDFT.getPeriodOrder());
                     if (sourceForm == null){
                         continue;
                     }
