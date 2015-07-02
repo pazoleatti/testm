@@ -181,9 +181,9 @@ def getRefBookValue(def long refBookId, def Long recordId) {
 
 // Проверка при создании формы
 void checkCreation() {
-    def findForm = formDataService.getLast(formData.formType.id, formData.kind, formData.departmentId, formData.reportPeriodId, formData.periodOrder)
+    def findForm = formDataService.find(formData.formType.id, formData.kind, formData.getDepartmentReportPeriodId().intValue(), formData.periodOrder);
     if (findForm != null) {
-        logger.error('Формирование сводного отчета невозможно, т.к. отчет с указанными параметрами уже сформирован!')
+        logger.error('Отчет с указанными параметрами уже сформирован!')
     }
 }
 
@@ -529,7 +529,7 @@ def buildRow(def srcRow, def matrixRow, def typeMap) {
         case 384: // 9
             if (srcRow.transactionMode != null) {
                 def val16Rec = getRefBookValue(14, srcRow.transactionMode)
-                if (val16Rec.ID != 2) {
+                if (val16Rec.ID.value != 2) {
                     val16 = 2
                 }
             }
@@ -678,7 +678,7 @@ def buildRow(def srcRow, def matrixRow, def typeMap) {
             break
     }
     if (val25and26 != null && val23 == 1) {
-        metal = getRefBookValue(17, val25and26)
+        def metal = getRefBookValue(17, val25and26)
 
         // Графа 25
         row.dealSubjectCode1 = metal.TN_VED_CODE.referenceValue
@@ -1717,8 +1717,14 @@ void importData() {
             }
             emptyRow = true
         }
-        // все строки пустые
-        if (!rowValues || rowValues.isEmpty() || !rowValues.find { it }) {
+        // строка пустая
+        if (!rowValues) {
+            allValues.remove(rowValues)
+            rowValues.clear()
+            break
+        }
+        // все значения строки пустые
+        if (rowValues.isEmpty() || !rowValues.find { it }) {
             allValues.remove(rowValues)
             rowValues.clear()
             continue
