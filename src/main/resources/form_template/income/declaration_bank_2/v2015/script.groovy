@@ -151,8 +151,7 @@ void logicCheck() {
                     nalIschislFB = getXmlDecimal(reader, "НалИсчислФБ")
                     nalVipl311Sub = getXmlDecimal(reader, "НалВыпл311Суб")
                     nalIschislSub = getXmlDecimal(reader, "НалИсчислСуб")
-                }
-                if (!dohVnerealFound && isCurrentNode(['Документ', 'Прибыль', 'РасчНал', 'ДохРеалВнеРеал', 'ДохВнеРеал'], elements)) {
+                } else if (!dohVnerealFound && isCurrentNode(['Документ', 'Прибыль', 'РасчНал', 'ДохРеалВнеРеал', 'ДохВнеРеал'], elements)) {
                     dohVnerealFound = true
                     vneRealDohSt = getXmlDecimal(reader, "ВнеРеалДохСт")
                     vneRealDohBezv = getXmlDecimal(reader, "ВнеРеалДохБезв")
@@ -161,18 +160,14 @@ void logicCheck() {
                     vneRealDohRinCBDD = getXmlDecimal(reader, "ВнеРеалДохРынЦБДД")
                     vneRealDohCor = getXmlDecimal(reader, "ВнеРеалДохКор")
                     vneRealDohVs = getXmlDecimal(reader, "ВнеРеалДохВс")
-                }
-
-                if (!rashRealFound && isCurrentNode(['Документ', 'Прибыль', 'РасчНал', 'РасхРеалВнеРеал', 'РасхРеал'], elements)) {
+                } else if (!rashRealFound && isCurrentNode(['Документ', 'Прибыль', 'РасчНал', 'РасхРеалВнеРеал', 'РасхРеал'], elements)) {
                     rashRealFound = true
                     cosvRashVs = getXmlDecimal(reader, "КосвРасхВс")
                     nalogi = getXmlDecimal(reader, "Налоги")
                     rashCapVl10 = getXmlDecimal(reader, "РасхКапВл10")
                     rashCapVl30 = getXmlDecimal(reader, "РасхКапВл30")
                     rashZemUchVs = getXmlDecimal(reader, "РасхЗемУчВс")
-                }
-
-                if (!rashVneRealFound && isCurrentNode(['Документ', 'Прибыль', 'РасчНал', 'РасхРеалВнеРеал', 'РасхВнеРеал'], elements)) {
+                } else if (!rashVneRealFound && isCurrentNode(['Документ', 'Прибыль', 'РасчНал', 'РасхРеалВнеРеал', 'РасхВнеРеал'], elements)) {
                     rashVneRealFound = true
                     rashVnerealPrDO = getXmlDecimal(reader, "РасхВнереалПрДО")
                     ubitRealPravTr = getXmlDecimal(reader, "УбытРеалПравТр")
@@ -180,17 +175,13 @@ void logicCheck() {
                     rashShtraf = getXmlDecimal(reader, "РасхШтраф")
                     rashRinCBDD = getXmlDecimal(reader, "РасхРынЦБДД")
                     rashVnerealVs = getXmlDecimal(reader, "РасхВнеРеалВс")
-                }
-
-                if (!stoimRealPTFound && isCurrentNode(['Документ', 'Прибыль', 'РасчНал', 'РасчРасхОпер', 'СтоимРеалПТ'], elements)) {
+                } else if (!stoimRealPTFound && isCurrentNode(['Документ', 'Прибыль', 'РасчНал', 'РасчРасхОпер', 'СтоимРеалПТ'], elements)) {
                     stoimRealPTFound = true
                     stoimRealPTDoSr = getXmlDecimal(reader, "СтоимРеалПТДоСр")
-                }
-                if (!viruchRealPTFound && isCurrentNode(['Документ', 'Прибыль', 'РасчНал', 'РасчРасхОпер', 'ВыручРеалПТ'], elements)) {
+                } else if (!viruchRealPTFound && isCurrentNode(['Документ', 'Прибыль', 'РасчНал', 'РасчРасхОпер', 'ВыручРеалПТ'], elements)) {
                     viruchRealPTFound = true
                     viruchRealPTDoSr = getXmlDecimal(reader, "ВыручРеалПТДоСр")
-                }
-                if (!ubitRealPT1Found && isCurrentNode(['Документ', 'Прибыль', 'РасчНал', 'РасчРасхОпер', 'УбытРеалПТ1'], elements)) {
+                } else if (!ubitRealPT1Found && isCurrentNode(['Документ', 'Прибыль', 'РасчНал', 'РасчРасхОпер', 'УбытРеалПТ1'], elements)) {
                     ubitRealPT1Found = true
                     ubit1Prev269 = getXmlDecimal(reader, "Убыт1Прев269")
                     ubit1Soot269 = getXmlDecimal(reader, "Убыт1Соот269")
@@ -334,7 +325,6 @@ void generateXML() {
     if (readerOld != null) {
         def elements = [:]
         def raschNalFound = false
-        def nalDohStavFound = false
         try {
             while(readerOld.hasNext()) {
                 if (readerOld.startElement){
@@ -348,9 +338,7 @@ void generateXML() {
                         avPlatMesSubOld = getXmlDecimal(readerOld, "АвПлатМесСуб") ?: 0
                         avNachislSubOld = getXmlDecimal(readerOld, "АвНачислСуб") ?: 0
                         avPlatMesFBOld = getXmlDecimal(readerOld, "АвПлатМесФБ") ?: 0
-                    }
-                    if (!nalDohStavFound && isCurrentNode(['Документ', 'Прибыль', 'НалДохСтав'], elements)) {
-                        nalDohStavFound = true
+                    } else if (isCurrentNode(['Документ', 'Прибыль', 'НалДохСтав'], elements)) {
                         int vidDohod = getXmlDecimal(readerOld, "ВидДоход")?.intValue() ?: 0
                         nalDivNeRFPredOldMap[vidDohod] = getXmlDecimal(readerOld, 'НалДивНеРФПред') ?: 0
                         nalDivNeRFOldMap[vidDohod] = getXmlDecimal(readerOld, 'НалДивНеРФ') ?: 0
@@ -360,7 +348,6 @@ void generateXML() {
                 }
                 if (readerOld.endElement){
                     elements[readerOld.name.localPart] = false
-                    nalDohStavFound = false // сбрасываем, потому что их несколько
                 }
                 readerOld.next()
             }
@@ -1486,7 +1473,7 @@ void generateXML() {
 boolean isCurrentNode(List<String> nodeNames, Map<String, Boolean> elements) {
     nodeNames.add('Файл')
     def enteredNodes = elements.findAll { it.value }.keySet() // узлы в которые вошли, но не вышли еще
-    enteredNodes.containsAll(nodeNames) && enteredNodes.size() == nodeNames.size()
+    return enteredNodes.containsAll(nodeNames) && enteredNodes.size() == nodeNames.size()
 }
 
 // Получить округленное, целочисленное значение.
