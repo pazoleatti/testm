@@ -1413,7 +1413,7 @@ def getFormToFormRelation(def tmpFormData, def departmentFormType, def isSource,
         formToFormRelation.state = tmpFormData.state
         formToFormRelation.formDataId = tmpFormData.id
         formToFormRelation.correctionDate = departmentReportPeriodService.get(tmpFormData.departmentReportPeriodId)?.correctionDate
-        formToFormRelation.periodOrder = tmpFormData.periodOrder
+        // TODO добавить в 0.7: formToFormRelation.periodOrder = tmpFormData.periodOrder
     } else {
         formToFormRelation.formType = getFormTypeById(departmentFormType.formTypeId)
         formToFormRelation.created = false
