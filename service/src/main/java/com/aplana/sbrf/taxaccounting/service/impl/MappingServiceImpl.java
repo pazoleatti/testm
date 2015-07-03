@@ -143,7 +143,7 @@ public class MappingServiceImpl implements MappingService {
                         false);
 
                 // Вызов скрипта
-                formDataService.lock(formDataId, userInfo);
+                formDataService.lock(formDataId, false, userInfo);
                 try {
                     formDataService.migrationFormData(logger, userInfo, formDataId, inputStream, filename);
 

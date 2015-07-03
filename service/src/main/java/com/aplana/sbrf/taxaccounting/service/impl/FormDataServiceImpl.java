@@ -713,7 +713,7 @@ public class FormDataServiceImpl implements FormDataService {
 
         String keyTask = generateTaskKey(formDataId, reportType);
         if (lockService.lock(keyTask, userInfo.getUser().getId(),
-                getFormDataFullName(formDataId, null, reportType),
+                getFormDataFullName(formDataId, false, null, reportType),
                 lockService.getLockTimeout(LockData.LockObjects.FORM_DATA)) == null) {
             try {
                 FormData formData = formDataDao.get(formDataId, manual);
@@ -1280,9 +1280,9 @@ public class FormDataServiceImpl implements FormDataService {
     }
 
     @Override
-    public String getFormDataFullName(long formDataId, String str, ReportType reportType) {
+    public String getFormDataFullName(long formDataId, boolean manual, String str, ReportType reportType) {
         //TODO: можно оптимизировать и сделать в 1 запрос
-        FormData formData = formDataDao.get(formDataId, false);
+        FormData formData = formDataDao.get(formDataId, manual);
         Department department = departmentService.getDepartment(formData.getDepartmentId());
         DepartmentReportPeriod reportPeriod = departmentReportPeriodService.get(formData.getDepartmentReportPeriodId());
         String name;
@@ -1394,10 +1394,10 @@ public class FormDataServiceImpl implements FormDataService {
 
     @Override
 	@Transactional
-	public void lock(long formDataId, TAUserInfo userInfo) {// используется для редактирования и миграции
+	public void lock(long formDataId, boolean manual, TAUserInfo userInfo) {// используется для редактирования и миграции
         checkLockAnotherUser(lockService.lock(generateTaskKey(formDataId, ReportType.EDIT_FD),
                 userInfo.getUser().getId(),
-                getFormDataFullName(formDataId, null, ReportType.EDIT_FD), // FIXME для миграции не совсем верно
+                getFormDataFullName(formDataId, manual, null, ReportType.EDIT_FD), // FIXME для миграции не совсем верно
                 lockService.getLockTimeout(LockData.LockObjects.FORM_DATA)), null, userInfo.getUser());
 	}
 

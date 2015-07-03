@@ -481,7 +481,7 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
         // Блокировка
         LockData lockData = lockDataService.lock(formDataService.generateTaskKey(formData.getId(), ReportType.IMPORT_TF_FD),
                 userInfo.getUser().getId(),
-                formDataService.getFormDataFullName(formData.getId(), currentFile.getName(), ReportType.IMPORT_TF_FD),
+                formDataService.getFormDataFullName(formData.getId(), false, currentFile.getName(), ReportType.IMPORT_TF_FD),
                 lockDataService.getLockTimeout(LockData.LockObjects.FORM_DATA_IMPORT));
         if (lockData != null)
             throw new ServiceException(String.format(
