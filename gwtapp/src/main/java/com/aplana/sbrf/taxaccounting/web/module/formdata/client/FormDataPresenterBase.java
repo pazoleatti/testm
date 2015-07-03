@@ -249,6 +249,8 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 
         view.setTableLockMode(true);
         view.setColumnsData(formData.getFormColumns(), true, forceEditMode);
+
+        placeManager.setOnLeaveConfirmation(null);
     }
 
     /**
