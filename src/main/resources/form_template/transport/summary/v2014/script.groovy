@@ -379,6 +379,9 @@ def calc() {
 }
 
 void fillTaKpp(def row, def errorMsg) {
+    if (formDataDepartment.regionId == null || row.okato == null) {
+        return
+    }
     String filter = "DECLARATION_REGION_ID = " + formDataDepartment.regionId?.toString() + " and OKTMO = " + row.okato?.toString()
     def records = getProvider(210L).getRecords(getReportPeriodEndDate(), null, filter, null)
     if (records.size() == 0) {
@@ -391,6 +394,9 @@ void fillTaKpp(def row, def errorMsg) {
 }
 
 def checkTaKpp(def row, def errorMsg) {
+    if (formDataDepartment.regionId == null || row.okato == null || row.taxAuthority == null || row.kpp == null) {
+        return
+    }
     def String filter = String.format("DECLARATION_REGION_ID = ${formDataDepartment.regionId?.toString()}" +
             " and OKTMO = ${row.okato?.toString()}" +
             " and LOWER(TAX_ORGAN_CODE) = LOWER('${row.taxAuthority?.toString()}') " +
@@ -699,6 +705,10 @@ int calc21(DataRow sRow, Date reportPeriodStartDate, Date reportPeriodEndDate) {
     // Срока нахождения в угоне (Мугон)
     int stealingMonths
 
+    if (sRow.regDate == null) {
+        return 0
+    }
+
     /*
      * Если  [«графа 14»(источника) заполнена И «графа 14»(источника)< «Дата начала периода»]
      * ИЛИ [«графа 13»>«Дата окончания периода»], то
@@ -774,7 +784,7 @@ int calc21(DataRow sRow, Date reportPeriodStartDate, Date reportPeriodEndDate) {
          * Иначе
          *  Дпостановки = «графа 13»(источника)
          */
-        if (sRow.regDate.compareTo(reportPeriodStartDate) < 0) {
+        if (sRow.regDate != null && sRow.regDate.compareTo(reportPeriodStartDate) < 0) {
             deliveryDate = reportPeriodStartDate
         } else {
             deliveryDate = sRow.regDate
