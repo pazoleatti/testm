@@ -10,7 +10,7 @@ merge into form_template tgt
 using (
   select ft.id, '('||t.code||') '||ft.name as name, '('||t.code||') '||ft.fullname as fullname from form_template ft 
   join form_type t on t.id = ft.type_id
-  where tax_type = 'V' and (code like '724%' or code like '937%') and ft.name not like '('||t.code||')%') src
+  where tax_type = 'V' and (code like '724%' or code like '937%') and ft.name not like '('||t.code||')%' and ft.status <> 2) src
 on (tgt.id = src.id)
 when matched then
      update set tgt.name = src.name, tgt.fullname = src.fullname;  
