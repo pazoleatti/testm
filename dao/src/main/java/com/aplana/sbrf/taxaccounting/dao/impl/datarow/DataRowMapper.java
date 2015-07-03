@@ -58,7 +58,14 @@ class DataRowMapper implements RowMapper<DataRow<Cell>> {
 		sql.append("CASE WHEN (alias IS NULL OR alias LIKE '%").append(ALIASED_WITH_AUTO_NUMERATION_AFFIX).append("') THEN\n")
 			.append("ROW_NUMBER() OVER (PARTITION BY CASE WHEN (alias IS NULL OR alias LIKE '%")
 			.append(ALIASED_WITH_AUTO_NUMERATION_AFFIX).append("') THEN 1 ELSE 0 END ORDER BY ord)\n")
-			.append("ELSE NULL END numeration");
+			.append("ELSE NULL END ");
+        if (range != null) {
+            sql.append("+ (SELECT count(*) from form_data_").append(formData.getFormTemplateId())
+                .append(" WHERE (alias IS NULL OR alias LIKE '%").append(ALIASED_WITH_AUTO_NUMERATION_AFFIX).append("') AND")
+                .append(" form_data_id = :formDataId AND temporary = :temporary AND manual = :manual")
+                .append(" AND ord < :from)");
+        }
+        sql.append(" numeration");
 		getColumnNamesString(formData, sql);
 		sql.append("\nFROM form_data_").append(formData.getFormTemplateId());
 		sql.append("\nWHERE form_data_id = :formDataId AND temporary = :temporary AND manual = :manual");

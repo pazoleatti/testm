@@ -133,7 +133,7 @@ public class GetFormDataHandler extends AbstractActionHandler<GetFormDataAction,
                 // Защита от перехода в режим редактирования если нф заблокирована какой-либо операцией
 //                LockData lockImport = lockDataService.getLock(LockData.LockObjects.FORM_DATA_IMPORT.name() + "_" + action.getFormDataId());
                 if (lockType == null || ReportType.EDIT_FD.equals(lockType.getFirst())) {
-                    formDataService.lock(action.getFormDataId(), userInfo);
+                    formDataService.lock(action.getFormDataId(), action.isManual(), userInfo);
                 }
 			} catch (Exception e){
 				//

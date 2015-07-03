@@ -181,7 +181,7 @@ public interface FormDataService {
 	 * @param userInfo информация о пользователе
 	 * true - если удалось заблокировать налоговую форму, иначе - false
 	 * */
-	void lock(long formDataId, TAUserInfo userInfo);
+	void lock(long formDataId, boolean manual, TAUserInfo userInfo);
 	
 	/**
 	 * Снять блокировку с FormData.
@@ -372,7 +372,7 @@ public interface FormDataService {
      * @param reportType тип отчета. Может быть null
      * @return название
      */
-    String getFormDataFullName(long formDataId, String str, ReportType reportType);
+    String getFormDataFullName(long formDataId, boolean manual, String str, ReportType reportType);
 
     /**
      * Генерация ключа блокировки для задачи c типом reportType
