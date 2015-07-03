@@ -27,7 +27,7 @@ public abstract class TestAsyncTask extends AbstractAsyncTask {
     }
 
     @Override
-    public BalancingVariants checkTaskLimit(Map<String, Object> params) {
+    public BalancingVariants checkTaskLimit(Map<String, Object> params, Logger logger) {
         return BalancingVariants.SHORT;
     }
 

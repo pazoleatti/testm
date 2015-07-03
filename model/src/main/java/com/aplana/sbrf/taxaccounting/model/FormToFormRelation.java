@@ -50,6 +50,15 @@ public class FormToFormRelation implements Serializable {
     private int year;
     /** Название периода */
     private String periodName;
+    private Integer periodOrder;
+
+    public Integer getPeriodOrder() {
+        return periodOrder;
+    }
+
+    public void setPeriodOrder(Integer periodOrder) {
+        this.periodOrder = periodOrder;
+    }
 
     public String getMonth() {
         return month;
