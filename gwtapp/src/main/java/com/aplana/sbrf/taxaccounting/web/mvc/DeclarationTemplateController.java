@@ -128,7 +128,7 @@ public class DeclarationTemplateController {
         try {
             if (file.getSize() == 0)
                 throw new ServiceException("Файл jrxml пустой.");
-            if (file.getOriginalFilename().endsWith(".jrxml"))
+            if (!file.getOriginalFilename().endsWith(".jrxml"))
                 throw new ServiceException("Формат файла должен быть *.jrxml");
             inputStream = file.getInputStream();
             Date endDate = declarationTemplateService.getDTEndDate(declarationTemplateId);
