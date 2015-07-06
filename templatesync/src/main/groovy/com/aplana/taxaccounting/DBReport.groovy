@@ -3,12 +3,14 @@ package com.aplana.taxaccounting
 import groovy.sql.Sql
 import org.custommonkey.xmlunit.Diff
 import org.custommonkey.xmlunit.XMLUnit
+import org.apache.commons.io.IOUtils
+import org.xml.sax.SAXException;
 
 /**
  * Отчет сравнения Git и БД
  */
 class DBReport {
-    // Сравненение шаблонов в БД
+    // Сравнение шаблонов в БД
     def static void compareDBFormTemplate(def prefix1, def prefix2) {
         // Запросы на получение макетов
         def sqlTemplate1 = "SELECT ft1.id " +
@@ -37,7 +39,7 @@ class DBReport {
         def sqlStyles1 = "select alias, form_template_id, font_color, back_color, italic, bold from form_style where form_template_id in (select distinct id from form_template where status not in (-1, 2)) order by alias"
         def sqlStyles2 = sqlStyles1
 
-        // Перечень всех всерсий в БД (заполняется в getTemplates)
+        // Перечень всех версий в БД (заполняется в getTemplates)
         def allVersions = [:]
 
         // Макеты
@@ -118,7 +120,7 @@ class DBReport {
 
                         // Сравнение
                         sorted.each { folderName, type_id ->
-                            if (type_id != -1) {
+                            if (type_id > 0) {
                                 allVersions[type_id].each { version ->
                                     // Макеты
                                     def tmp1 = templates1.templateMap[type_id]?.get(version)
@@ -640,5 +642,222 @@ class DBReport {
                 }
             }
         }
+    }
+
+    // Сравнение шаблонов деклараций в БД
+    def static void compareDBDeclarationTemplate(def prefix1, def prefix2) {
+        // Запросы на получение макетов
+        def sqlTemplate1 = "select dt1.id," +
+                " dt1.declaration_type_id as type_id," +
+                " dt1.name," +
+                " to_char(dt1.version, 'RRRR') AS version," +
+                " (select to_char(MIN(dt2.version) - INTERVAL '1' day, 'RRRR') from declaration_template dt2 where dt1.declaration_type_id = dt2.declaration_type_id AND TRUNC(dt2.version, 'DD') > dt1.version AND dt2.STATUS IN (0,1,2) group by dt2.declaration_type_id) AS versionEnd," +
+                " dt1.status," +
+                " dt1.create_script as script, " +
+                " (select data from blob_data where id = dt1.xsd) As xsd, " +
+                " (select data from blob_data where id = dt1.jrxml) As jrxml " +
+                "from declaration_template dt1 " +
+                "where" +
+                " dt1.status not in (-1,2)"
+        def sqlTemplate2 = sqlTemplate1
+
+        // Перечень всех версий в БД (заполняется в getDeclarationTemplates)
+        def allVersions = [:]
+
+        // Макеты
+        def templates1 = getDeclarationTemplates(prefix1, sqlTemplate1, allVersions)
+        def templates2 = getDeclarationTemplates(prefix2, sqlTemplate2, allVersions)
+
+        // Построение отчета
+        def report = new File(Main.REPORT_DECL_DB_NAME)
+        if (report.exists()) {
+            report.delete()
+        }
+        def writer = new FileWriter(new File(Main.REPORT_DECL_DB_NAME))
+        def builder = new groovy.xml.MarkupBuilder(writer)
+        builder.html {
+            head {
+                meta(charset: 'windows-1251')
+                title "Сравнение макетов деклараций в $prefix1 и $prefix2"
+                style(type: "text/css", Main.HTML_STYLE)
+                script('', type: 'text/javascript', src: 'http://code.jquery.com/jquery-1.9.1.min.js')
+                script('', type: 'text/javascript', src: 'http://code.jquery.com/ui/1.10.3/jquery-ui.min.js')
+                link('', rel: 'stylesheet', href: 'http://code.jquery.com/ui/1.10.3/themes/black-tie/jquery-ui.css')
+            }
+            body {
+                p "Сравнение макетов деклараций в БД $prefix1 и $prefix2:"
+                table(class: 'rt') {
+                    Main.TAX_FOLDERS.keySet().each { taxName ->
+                        tr {
+                            td(colspan: 11, class: 'hdr', Main.TAX_FOLDERS[taxName])
+                        }
+                        tr {
+                            th(rowspan: 2, 'type_id')
+                            th(rowspan: 2, 'Название')
+                            th(rowspan: 2, 'Версия')
+                            th(rowspan: 2, "$prefix1 id")
+                            th(rowspan: 2, "$prefix2 id")
+                            th(colspan: 6, 'Результат сравнения')
+                        }
+                        tr {
+                            th 'name'
+                            th 'endversion'
+                            th 'status'
+                            th 'script'
+                            th 'xsd'
+                            th 'jrxml'
+                        }
+
+                        // Сортировка
+                        def sorted = Main.TEMPLATE_NAME_TO_TYPE_ID[taxName].sort(){a, b -> -(a.value) <=> -(b.value)}
+
+                        // Сравнение
+                        sorted.each { folderName, temp_type_id ->
+                            if (temp_type_id < 0) {
+                                def type_id = -temp_type_id
+                                allVersions[type_id].each{ version ->
+                                    // Макеты
+                                    def tmp1 = templates1.templateMap[type_id]?.get(version)
+                                    def tmp2 = templates2.templateMap[type_id]?.get(version)
+
+                                    // Имя из первого макета, а при его отсутствии — из второго
+                                    def name = tmp1?.name
+                                    if (name == null) {
+                                        name = tmp2?.name
+                                    }
+
+                                    XMLUnit.setIgnoreWhitespace(true)
+                                    XMLUnit.setIgnoreComments(true)
+                                    XMLUnit.setIgnoreDiffBetweenTextAndCDATA(true)
+                                    XMLUnit.setNormalizeWhitespace(true)
+
+                                    boolean xsdEquals = true
+                                    Diff diff
+                                    if (tmp1?.xsd != null && tmp2?.xsd != null) {
+                                        diff = XMLUnit.compareXML(tmp1.xsd, tmp2.xsd)
+                                        xsdEquals = diff.similar()
+                                    } else if (tmp1?.xsd != null || tmp2?.xsd != null) {
+                                        xsdEquals = false
+                                    }
+                                    boolean jrxmlEquals = true
+                                    if (tmp1?.jrxml != null && tmp2?.jrxml != null) {
+                                        diff = XMLUnit.compareXML(tmp1.jrxml, tmp2.jrxml)
+                                        jrxmlEquals = diff.similar()
+                                    } else if (tmp1?.jrxml != null || tmp2?.jrxml != null) {
+                                        jrxmlEquals = false
+                                    }
+
+                                    // Признак сравнения
+                                    def nameC = tmp1?.name == tmp2?.name ? '+' : '—'
+                                    def versionEndC = tmp1?.versionEnd == tmp2?.versionEnd ? '+' : '—'
+                                    def statusC = tmp1?.status == tmp2?.status ? '+' : '—'
+                                    def scriptC = tmp1?.script == tmp2?.script ? '+' : '—'
+                                    def xsdC = xsdEquals ? '+' : '—'
+                                    def jrxmlC = jrxmlEquals ? '+' : '—'
+
+                                    tr(class: ((tmp1?.id != null && tmp2?.id != null) ? 'nr' : 'er')) {
+                                        td type_id
+                                        td name
+                                        td version
+                                        td tmp1?.id
+                                        td tmp2?.id
+
+                                        if (nameC == '+') {
+                                            td(class: 'td_ok', nameC)
+                                        } else {
+                                            td(class: 'td_error', title: "$prefix1 = ${tmp1?.name}, $prefix2 = ${tmp2?.name}", nameC)
+                                        }
+
+                                        if (versionEndC == '+') {
+                                            td(class: 'td_ok', versionEndC)
+                                        } else {
+                                            td(class: 'td_error', title: "$prefix1 = ${tmp1?.versionEnd}, $prefix2 = ${tmp2?.versionEnd}", versionEndC)
+                                        }
+
+                                        if (statusC == '+') {
+                                            td(class: 'td_ok', statusC)
+                                        } else {
+                                            td(class: 'td_error', title: "$prefix1 = ${tmp1?.status}, $prefix2 = ${tmp2?.status}", statusC)
+                                        }
+
+                                        if (scriptC == '+') {
+                                            td(class: 'td_ok', scriptC)
+                                        } else {
+                                            td(class: 'td_error', title: 'См. БД', scriptC)
+                                        }
+
+                                        if (xsdC == '+') {
+                                            td(class: 'td_ok', xsdC)
+                                        } else {
+                                            td(class: 'td_error', title: 'См. БД', xsdC)
+                                        }
+                                        if (jrxmlC == '+') {
+                                            td(class: 'td_ok', jrxmlC)
+                                        } else {
+                                            td(class: 'td_error', title: 'См. БД', jrxmlC)
+                                        }
+                                    }
+                                }
+                            }
+
+                        }
+                    }
+                }
+            }
+        }
+        writer.close()
+        println("See ${Main.REPORT_DECL_DB_NAME} for details")
+    }
+
+    def private static getDeclarationTemplates(def prefix, def sqlTemplate, def allVersions) {
+        println("DBMS connect: $prefix")
+        def retVal = new Expando()
+
+        def templateMap = [:]
+
+        def sql = Sql.newInstance(Main.DB_URL, prefix, Main.DB_PASSWORD, "oracle.jdbc.OracleDriver")
+
+        try {
+            sql.eachRow(sqlTemplate) {
+                def type_id = it.type_id as Integer
+                if (templateMap[type_id] == null) {
+                    templateMap.put((Integer) it.type_id, [:])
+                }
+                // Версия макета
+                def version = new Expando()
+                version.id = it.id as Integer
+                version.type_id = it.type_id as Integer
+                version.name = it.name
+                version.version = it.version
+                version.versionEnd = it.versionEnd
+                version.status = it.status
+                version.script = it.script?.characterStream?.text?.trim()?.replaceAll("\r", "")
+                if (it.xsd) {
+                    try {
+                        version.xsd = XMLUnit.buildControlDocument(IOUtils.toString(it.xsd.binaryStream))
+                    } catch (SAXException e) {
+                        println("Ошибка при разборе XSD декларации id = ${it.id} \"${version.name}\"")
+                    }
+                }
+                if (it.jrxml) {
+                    try {
+                        version.jrxml = XMLUnit.buildControlDocument(IOUtils.toString(it.jrxml.binaryStream, "UTF-8"))
+                    } catch (SAXException e) {
+                        println("Ошибка при разборе JRXML декларации id = ${it.id} \"${version.name}\"")
+                    }
+                }
+                templateMap[type_id].put(it.version, version)
+                if (!allVersions.containsKey(type_id)) {
+                    allVersions.put(type_id, [] as Set)
+                }
+                allVersions[type_id].add(version.version)
+            }
+        } finally {
+            sql.close()
+        }
+        println("Load DB declaration_template from $prefix OK")
+        retVal.templateMap = templateMap
+        return retVal
+
     }
 }

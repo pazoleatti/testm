@@ -16,7 +16,7 @@ package com.aplana.taxaccounting
 class Main {
     // Параметры подключения к БД
     def static DB_URL = 'jdbc:oracle:thin:@//172.16.127.16:1521/ORCL.APLANA.LOCAL'
-    def static DB_USER = 'TAX_0_5'
+    def static DB_USER = 'TAX_0_6'
     def static DB_PASSWORD = 'TAX'
 
     // Схема для сравнения макетов, null если сравнение не требуется
@@ -32,7 +32,9 @@ class Main {
 
     // Названия файлов отчетов
     def static REPORT_GIT_NAME = 'report_git_db_compare.html'
+    def static REPORT_DECL_GIT_NAME = 'report_decl_git_db_compare.html'
     def static REPORT_DB_NAME = 'report_db_compare.html'
+    def static REPORT_DECL_DB_NAME = 'report_decl_db_compare.html'
 
     // Общие стили отчетов
     def static HTML_STYLE = '''
@@ -88,6 +90,7 @@ class Main {
 
     // Имя папки → FORM_TYPE.ID
     // Нужно перечислить все папки, иначе будет ошибка
+    // Для деклараций id указаны с минусом
     def static TEMPLATE_NAME_TO_TYPE_ID = [
             'deal'     : [
                     'auctions_property'      : 380, // Приобретение услуг по организации и проведению торгов по реализации имущества
@@ -104,7 +107,7 @@ class Main {
                     'interbank_credits'      : 389, // Предоставление межбанковских кредитов
                     'letter_of_credit'       : 386, // Предоставление инструментов торгового финансирования и непокрытых аккредитивов
                     'nondeliverable'         : 392, // Беспоставочные срочные сделки
-                    'notification'           : -1,
+                    'notification'           : -6,
                     'precious_metals_deliver': 393, // Поставочные срочные сделки с драгоценными металлами
                     'precious_metals_trade'  : 394, // Купля-продажа драгоценных металлов
                     'rent_provision'         : 376, // Предоставление нежилых помещений в аренду
@@ -124,12 +127,12 @@ class Main {
                     'app2'                  : 415, // Сведения о доходах физического лица, выплаченных ему налоговым агентом, от операций с ценными бумагами, операций с финансовыми инструментами срочных сделок, а также при осуществлении выплат по ценным бумагам российских эмитентов
                     'app2_src_1'            : 418, // Сведения о доходах физического лица, выплаченных ему налоговым агентом, от операций с ценными бумагами, операций с финансовыми инструментами срочных сделок, а также при осуществлении выплат по ценным бумагам российских эмитентов (ЦФО НДФЛ)
                     'app5'                  : 372, // (Приложение 5) Сведения для расчета налога на прибыль
-                    'declaration_bank'      : -1,
-                    'declaration_bank_1'    : -1,
-                    'declaration_bank_2'    : -1,
-                    'declaration_op'        : -1,
-                    'declaration_op_1'      : -1,
-                    'declaration_op_2'      : -1,
+                    'declaration_bank'      : -2,
+                    'declaration_bank_1'    : -9,
+                    'declaration_bank_2'    : -11,
+                    'declaration_op'        : -5,
+                    'declaration_op_1'      : -10,
+                    'declaration_op_2'      : -19,
                     'f7_8'                  : 362, // (Ф 7.8) Реестр совершенных операций с ценными бумагами по продаже и погашению, а также по открытию-закрытию короткой позиции
                     'income_complex'        : 302, // Сводная форма начисленных доходов (доходы сложные)
                     'income_simple'         : 301, // Расшифровка видов доходов, учитываемых в простых РНУ (доходы простые)
@@ -204,17 +207,17 @@ class Main {
                     'rnu75'                 : 366  // (РНУ-75) Регистр налогового учета доходов по операциям депозитария
             ],
             'vat'      : [
-                    'declaration_8'        : -1,
-                    'declaration_8_1'      : -1,
-                    'declaration_8_sources': -1,
-                    'declaration_9'        : -1,
-                    'declaration_9_sources': -1,
-                    'declaration_9_1'      : -1,
-                    'declaration_10'       : -1,
-                    'declaration_11'       : -1,
-                    'declaration_audit'    : -1,
-                    'declaration_fns'      : -1,
-                    'declaration_short'    : -1,
+                    'declaration_fns'      : -4,
+                    'declaration_audit'    : -7,
+                    'declaration_short'    : -20,
+                    'declaration_8'        : -12,
+                    'declaration_8_1'      : -13,
+                    'declaration_8_sources': -18,
+                    'declaration_9'        : -14,
+                    'declaration_9_1'      : -15,
+                    'declaration_9_sources': -21,
+                    'declaration_10'       : -16,
+                    'declaration_11'       : -17,
                     'vat_724_1'            : 600, // Отчет о суммах начисленного НДС по операциям Банка
                     'vat_724_2_1'          : 601, // Операции, не подлежащие налогообложению (освобождаемые от налогообложения), операции, не признаваемые объектом налогообложения, операции по реализации товаров (работ, услуг), местом реализации которых не признается территория Российской Федерации, а также суммы оплаты, частичной оплаты в счет предстоящих поставок (выполнения работ, оказания услуг), длительность производственного цикла изготовления которых составляет свыше шести месяцев
                     'vat_724_2_2'          : 602, // Расчет суммы налога по операциям по реализации товаров (работ, услуг), обоснованность применения налоговой ставки 0 процентов по которым документально подтверждена
@@ -239,8 +242,8 @@ class Main {
                     'vehicles'        : 201  // Сведения о транспортных средствах, по которым уплачивается транспортный налог
             ],
             'property' : [
-                    'declaration'   : -1,
-                    'prepayment'    : -1,
+                    'declaration'   : -3,
+                    'prepayment'    : -8,
                     'property_945_1': 610, // Данные бухгалтерского учета для расчета налога на имущество
                     'property_945_2': 611, // Данные о кадастровой стоимости объектов недвижимости для расчета налога на имущество
                     'property_945_3': 613, // Расчет налога на имущество по средней/среднегодовой стоимости
@@ -254,24 +257,35 @@ class Main {
         println("Compare local and $DB_USER scripts...")
 
         // Удаление старых отчетов, если такие есть
-        def reportGit = new File(REPORT_GIT_NAME)
-        if (reportGit.exists()) {
-            reportGit.delete()
+        def report = new File(REPORT_GIT_NAME)
+        if (report.exists()) {
+            report.delete()
         }
-        def reportDb = new File(REPORT_DB_NAME)
-        if (reportDb.exists()) {
-            reportDb.delete()
+        report = new File(REPORT_DB_NAME)
+        if (report.exists()) {
+            report.delete()
+        }
+        report = new File(REPORT_DECL_GIT_NAME)
+        if (report.exists()) {
+            report.delete()
+        }
+        report = new File(REPORT_DECL_DB_NAME)
+        if (report.exists()) {
+            report.delete()
         }
 
         // Построение отчета сравнения Git и БД
         // checkOnly, true — только сравнение, false — сравнение и обновление Git → БД
         GitReport.updateScripts(GitReport.getDBVersions(), true)
-        println("See $REPORT_GIT_NAME for details")
+        GitReport.updateDeclarationScripts(GitReport.getDeclarationDBVersions(), true)
+        println("See $REPORT_GIT_NAME and $REPORT_DECL_GIT_NAME for details")
 
         // Сравнение схем в БД
         if (DB_USER_COMPARE != null) {
             println("Compare $DB_USER and $DB_USER_COMPARE form templates...")
             DBReport.compareDBFormTemplate(DB_USER, DB_USER_COMPARE)
+            println("Compare $DB_USER and $DB_USER_COMPARE declaration templates...")
+            DBReport.compareDBDeclarationTemplate(DB_USER, DB_USER_COMPARE)
         }
     }
 }
