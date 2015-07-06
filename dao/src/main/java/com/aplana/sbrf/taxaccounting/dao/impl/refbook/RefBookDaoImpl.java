@@ -126,6 +126,17 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         }
     }
 
+    @Override
+    public RefBook getByRecord(@NotNull Long uniqueRecordId) {
+        try {
+            return get(getJdbcTemplate().queryForLong(
+                    "SELECT b.id FROM ref_book b JOIN ref_book_record r ON r.ref_book_id = b.id WHERE r.id = ?",
+                    new Object[]{uniqueRecordId}, new int[]{Types.NUMERIC}));
+        } catch (EmptyResultDataAccessException e) {
+            throw new DaoException(String.format("Не найдена запись справочника с id = %d", uniqueRecordId));
+        }
+    }
+
     /**
      * Настройка маппинга для справочника
      */
