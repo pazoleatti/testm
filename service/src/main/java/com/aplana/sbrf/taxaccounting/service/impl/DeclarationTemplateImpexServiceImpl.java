@@ -12,13 +12,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.nio.charset.Charset;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
@@ -47,9 +42,9 @@ public class DeclarationTemplateImpexServiceImpl implements
 			
 			// Version
 			ZipEntry ze = new ZipEntry(VERSION_FILE);
-			zos.putNextEntry(ze);
+			/*zos.putNextEntry(ze);
 			zos.write("1.0".getBytes());
-			zos.closeEntry();
+			zos.closeEntry();*/
 			
 			// Script
 			ze = new ZipEntry(SCRIPT_FILE);
@@ -89,21 +84,28 @@ public class DeclarationTemplateImpexServiceImpl implements
 		try {
 			ZipInputStream zis = new ZipInputStream(is);
 			ZipEntry entry;
-			String version = null;
-			Map<String, byte[]> files = new HashMap<String, byte[]>();
+            DeclarationTemplate dt = declarationTemplateService.get(id);
             while((entry = zis.getNextEntry())!=null){
-            	if (VERSION_FILE.equals(entry.getName())){
-            		ByteArrayOutputStream baos = new ByteArrayOutputStream(); 
-            		IOUtils.copy(zis, baos);
-            		version = new String(baos.toByteArray());
-            	} else {
-            		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            		IOUtils.copy(zis, baos);
-            		files.put(entry.getName(), baos.toByteArray());
-            	}
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                if (entry.getSize() == 0){
+                    throw new ServiceException("Файл " + entry.getName() + " не должен быть пустой");
+                }
+                if (entry.getName().endsWith(".groovy")) {
+                    IOUtils.copy(zis, baos);
+                    dt.setCreateScript(new String(baos.toByteArray(), 0, baos.toByteArray().length, Charset.forName("UTF-8")));
+                } else if (entry.getName().endsWith(".jrxml")){
+                    IOUtils.copy(zis, baos);
+                    String uuid = blobDataService.create(new ByteArrayInputStream(baos.toByteArray()), entry.getName());
+                    dt.setJrxmlBlobId(uuid);
+                }else if (entry.getName().endsWith(".xsd")){
+                    IOUtils.copy(zis, baos);
+                    String uuid = blobDataService.create(new ByteArrayInputStream(baos.toByteArray()), entry.getName());
+                    dt.setXsdId(uuid);
+                }
             }
+            return dt;
 			
-            if ("1.0".equals(version)){
+            /*if ("1.0".equals(version)){
             	DeclarationTemplate dt = declarationTemplateService.get(id);
 
 				if (files.get("script.groovy").length != 0) {
@@ -117,9 +119,9 @@ public class DeclarationTemplateImpexServiceImpl implements
                 return dt;
             } else {
             	throw new ServiceException("Версия файла для импорта не поддерживается: " + version);
-            }
-		} catch (Exception e) {
-			throw new ServiceException("Не удалось импортировать шаблон", e);
-		}
-	}
+            }*/
+		} catch (IOException e) {
+            throw new ServiceException("Не удалось импортировать шаблон", e);
+        }
+    }
 }
