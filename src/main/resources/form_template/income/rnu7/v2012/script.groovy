@@ -564,7 +564,7 @@ void addData(def xml, int headRowCount) {
         xmlIndexCol++
 
         // графа 4
-        String filter = "LOWER(CODE) = LOWER('" + row.cell[2].text() + "') and LOWER(NUMBER) = LOWER('" + row.cell[xmlIndexCol].text() + "')"
+        String filter = "LOWER(CODE) = LOWER('" + row.cell[2].text() + "') and LOWER(NUMBER) = LOWER('" + row.cell[xmlIndexCol].text().replaceAll(/\./, "") + "')"
         def records = refBookFactory.getDataProvider(27).getRecords(reportPeriodEndDate, null, filter, null)
         if (checkImportRecordsCount(records, refBookFactory.get(27), 'CODE', row.cell[2].text(), reportPeriodEndDate, xlsIndexRow, 2, logger, true)) {
             newRow.code = records.get(0).get(RefBook.RECORD_ID_ALIAS).numberValue
