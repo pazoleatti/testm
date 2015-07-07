@@ -20,10 +20,11 @@ class Main {
     def static DB_PASSWORD = 'TAX'
 
     // Схема для сравнения макетов, null если сравнение не требуется
-    def static DB_USER_COMPARE = 'TAX_NEXT'
+    def static DB_USER_COMPARE = 'TAX_0_7'
 
     // Путь к папке с шаблонами
     def static SRC_FOLDER_PATH = '../src/main/resources/form_template'
+    def static SRC_REFBOOK_PATH = '../src/main/resources/refbook'
     def static TAX_FOLDERS = ['deal'     : 'МУКС',
                               'income'   : 'Налог на прибыль',
                               'vat'      : 'НДС',
@@ -33,8 +34,10 @@ class Main {
     // Названия файлов отчетов
     def static REPORT_GIT_NAME = 'report_git_db_compare.html'
     def static REPORT_DECL_GIT_NAME = 'report_decl_git_db_compare.html'
+    def static REPORT_REFBOOK_GIT_NAME = 'report_refbook_git_db_compare.html'
     def static REPORT_DB_NAME = 'report_db_compare.html'
     def static REPORT_DECL_DB_NAME = 'report_decl_db_compare.html'
+    def static REPORT_REFBOOK_DB_NAME = 'report_refbook_db_compare.html'
 
     // Общие стили отчетов
     def static HTML_STYLE = '''
@@ -252,6 +255,30 @@ class Main {
             ]
     ]
 
+    // Имя папки -> REF_BOOK.ID
+    def static REFBOOK_FOLDER_NAME_TO_ID = [
+            'account_plan' : 101,
+            'bond' : 84,
+            'classificator_code_724_2_1' : 102,
+            'classificator_country' : 10,
+            'classificator_eco_activities' : 34,
+            'classificator_income' : 28,
+            'classificator_outcome' : 27,
+            'currency_rate' : 22,
+            'declaration_params_property' : 200,
+            'declaration_params_transport' : 210,
+            'department' : 30,
+            'emitent' : 100,
+            'metal_rate' : 90,
+            'okato' : 3,
+            'okei' : 12,
+            'organization' : 9,
+            'region' : 4,
+            'tax_benefits_property' : 203,
+            'tax_benefits_transport' : 7,
+            'vehicles_average_cost' : 208
+    ]
+
     static void main(String[] args) {
         println("RDBMS url=$DB_URL")
         println("Compare local and $DB_USER scripts...")
@@ -276,16 +303,19 @@ class Main {
 
         // Построение отчета сравнения Git и БД
         // checkOnly, true — только сравнение, false — сравнение и обновление Git → БД
-        GitReport.updateScripts(GitReport.getDBVersions(), true)
-        GitReport.updateDeclarationScripts(GitReport.getDeclarationDBVersions(), true)
-        println("See $REPORT_GIT_NAME and $REPORT_DECL_GIT_NAME for details")
+//        GitReport.updateScripts(GitReport.getDBVersions(), true)
+//        GitReport.updateDeclarationScripts(GitReport.getDeclarationDBVersions(), true)
+        GitReport.checkRefBooks(GitReport.getRefBookScripts())
+        println("See $REPORT_GIT_NAME, $REPORT_DECL_GIT_NAME and $REPORT_REFBOOK_GIT_NAME for details")
 
         // Сравнение схем в БД
         if (DB_USER_COMPARE != null) {
             println("Compare $DB_USER and $DB_USER_COMPARE form templates...")
-            DBReport.compareDBFormTemplate(DB_USER, DB_USER_COMPARE)
+//            DBReport.compareDBFormTemplate(DB_USER, DB_USER_COMPARE)
             println("Compare $DB_USER and $DB_USER_COMPARE declaration templates...")
-            DBReport.compareDBDeclarationTemplate(DB_USER, DB_USER_COMPARE)
+//            DBReport.compareDBDeclarationTemplate(DB_USER, DB_USER_COMPARE)
+            println("Compare $DB_USER and $DB_USER_COMPARE refbook scripts...")
+            DBReport.compareDBRefbookScript(DB_USER, DB_USER_COMPARE)
         }
     }
 }

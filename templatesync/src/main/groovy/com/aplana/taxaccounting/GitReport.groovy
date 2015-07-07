@@ -92,11 +92,11 @@ class GitReport {
                     Main.TAX_FOLDERS.keySet().each { folderName ->
                         def scanResult
                         try {
-                            scanResult = scanDeclarationSrcFolderAndUpdateDb(versionsMap, folderName, checkOnly ? null : sql)//TODO
+                            scanResult = scanDeclarationSrcFolderAndUpdateDb(versionsMap, folderName, checkOnly ? null : sql)
                         } finally {
                             sql.close()
                         }
-                        if (!scanResult.isEmpty()) {
+                        if (scanResult && !scanResult.isEmpty()) {
                             tr {
                                 td(colspan: 8, class: 'hdr', Main.TAX_FOLDERS[folderName])
                             }
@@ -140,19 +140,52 @@ class GitReport {
         println("$action DB declaration_template OK")
     }
 
+    static void checkRefBooks(def refbooks) {
+        def writer = new FileWriter(new File(Main.REPORT_REFBOOK_GIT_NAME))
+        def builder = new groovy.xml.MarkupBuilder(writer)
+        builder.html {
+            head {
+                meta(charset: 'windows-1251')
+                title "Сравнение скриптов справочников git и БД ${Main.DB_USER}"
+                style(type: "text/css", Main.HTML_STYLE)
+            }
+            body {
+                p "Сравнение скриптов справочников в БД ${Main.DB_USER} и git:"
+                table(class: 'rt') {
+                    def scanResult = scanRefbookFolder(refbooks)
+                    scanResult.sort { it.name }
+                    if (scanResult && !scanResult.isEmpty()) {
+                        tr {
+                            th 'id'
+                            th 'Папка'
+                            th 'Название'
+                            th 'Сравнение скриптов'
+                        }
+                        scanResult.each { result ->
+                            tr {
+                                td result.id
+                                td {
+                                    a(href: result.folderFull, result.folder)
+                                }
+                                td result.name
+                                td(class: (result.error ? 'td_error' : 'td_ok'), result.check)
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     // Сравнение git-версии с версией в БД и загрузка в случае отличий
     def static scanSrcFolderAndUpdateDb(def versionsMap, def folderName, def sql) {
-        def map = [:]
         def scanResult = []
 
         def folderFile = new File("${Main.SRC_FOLDER_PATH}/$folderName")
-        map.put(folderFile, [:])
         // По видам НФ
         folderFile.eachDir { templateFolder ->
             // Id типа формы
             def Integer id = Main.TEMPLATE_NAME_TO_TYPE_ID[folderName][templateFolder.name]
-            // Новый тип в результат
-            map[folderFile].put(templateFolder.name, [:])
 
             if (id != null) { // Id типа определен
                 if (id > 0) { // Id типа формы, которую нужно пропустить
@@ -324,7 +357,6 @@ class GitReport {
 
     // Сравнение git-версии декларации с версией в БД и загрузка в случае отличий
     def static scanDeclarationSrcFolderAndUpdateDb(def versionsMap, def folderName, def sql) {
-        def map = [:]
         def scanResult = []
 
         XMLUnit.setIgnoreWhitespace(true)
@@ -333,13 +365,10 @@ class GitReport {
         XMLUnit.setNormalizeWhitespace(true)
 
         def folderFile = new File("${Main.SRC_FOLDER_PATH}/$folderName")
-        map.put(folderFile, [:])
         // По видам НФ
         folderFile.eachDir { templateFolder ->
             // Id типа формы
             def Integer temp_id = Main.TEMPLATE_NAME_TO_TYPE_ID[folderName][templateFolder.name]
-            // Новый тип в результат
-            map[folderFile].put(templateFolder.name, [:])
 
             if (temp_id != null) { // Id типа определен
                 if (temp_id < 0) { // Id типа формы, которую нужно пропустить
@@ -498,6 +527,63 @@ class GitReport {
         return scanResult
     }
 
+    def static scanRefbookFolder(def refbooks) {
+        def scanResult = []
+        def missedRefbooks = refbooks.clone()
+
+        def folderFile = new File("${Main.SRC_REFBOOK_PATH}")
+        // По справочникам
+        folderFile.eachDir { refbookFolder ->
+            // Id справочника
+            def Integer id = Main.REFBOOK_FOLDER_NAME_TO_ID[refbookFolder.name]
+
+            if (id != null) {
+                // Справочник из БД
+                def refbook = refbooks.find { it.id == id }
+
+                def result = new Expando()
+                result.folder = refbookFolder.name
+                result.folderFull = refbookFolder.absolutePath
+                result.id = id
+                scanResult.add(result)
+
+                if (refbook == null) { // Скрипт есть в git, но нет в БД
+                    result.check = "В БД не найден скрипт справочника для папки «${refbookFolder.absolutePath}» c ref_book.id = $id"
+                    result.error = true
+                } else {
+                    result.name = refbook.name
+
+                    // Сравнение скриптов
+                    def scriptFile = new File("$refbookFolder/script.groovy")
+                    if (!scriptFile.exists()) {
+                        result.check = "Скрипт не найден в «${scriptFile.absolutePath}»"
+                        result.error = true
+                    } else {
+                        def dbScript = refbook.script?.trim()?.replaceAll("\r", "")
+                        def gitScript = scriptFile.text?.trim()?.replaceAll("\r", "")
+                        if (dbScript == gitScript) {
+                            result.check = "Ok"
+                        } else {
+                            result.error = true
+                            result.check = "Скрипты отличаются"
+                        }
+                    }
+                }
+                missedRefbooks.remove(refbook)
+            }
+        }
+        // Проверка скриптов справочников которых нет в git
+        missedRefbooks.each { refbook ->
+            def result = new Expando()
+            result.id = refbook.id
+            result.name = refbook.name
+            result.check = "Нет в git! (id=${refbook.id})"
+            result.error = true
+            scanResult.add(result)
+        }
+        return scanResult
+    }
+
     // FORM_TYPE.ID → Версия макета
     def static getDBVersions() {
         println("DBMS connect: ${Main.DB_USER}")
@@ -586,11 +672,34 @@ class GitReport {
                 }
                 map[type_id].put(it.version, version)
             }
-
         } finally {
             sql.close()
         }
         println("Load DB declaration_template OK")
         return map
     }
+
+    // REF_BOOK.ID → Скрипт справочника
+    def static getRefBookScripts() {
+        println("DBMS connect: ${Main.DB_USER}")
+        def refbooks = []
+
+        def sql = Sql.newInstance(Main.DB_URL, Main.DB_USER, Main.DB_PASSWORD, "oracle.jdbc.OracleDriver")
+        try {
+            sql.eachRow("select rb.id, rb.name, (select data from blob_data where id = rb.script_id) as script from ref_book rb where rb.visible = 1 and rb.script_id is not null") {
+                def refbook = new Expando()
+                refbook.id = it.id as Integer
+                refbook.name = it.name
+                if (it.script) {
+                    refbook.script = IOUtils.toString(it.script.binaryStream, "UTF-8")
+                }
+                refbooks.add(refbook)
+            }
+        } finally {
+            sql.close()
+        }
+        println("Load DB ref_book OK")
+        return refbooks
+    }
+
 }

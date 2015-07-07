@@ -809,6 +809,80 @@ class DBReport {
         println("See ${Main.REPORT_DECL_DB_NAME} for details")
     }
 
+    // Сравнение скриптов справочников в БД
+    def static void compareDBRefbookScript(def prefix1, def prefix2) {
+        // Запросы на получение справочников
+        def sqlTemplate1 = "select rb.id, rb.name, (select data from blob_data where id = rb.script_id) as script from ref_book rb where rb.visible = 1"
+        def sqlTemplate2 = sqlTemplate1
+
+        def refbooks1 = getRefbooks(prefix1, sqlTemplate1)
+        def refbooks2 = getRefbooks(prefix2, sqlTemplate2)
+
+        // Построение отчета
+        def report = new File(Main.REPORT_REFBOOK_DB_NAME)
+        if (report.exists()) {
+            report.delete()
+        }
+        def writer = new FileWriter(new File(Main.REPORT_REFBOOK_DB_NAME))
+        def builder = new groovy.xml.MarkupBuilder(writer)
+        builder.html {
+            head {
+                meta(charset: 'windows-1251')
+                title "Сравнение скриптов справочников в $prefix1 и $prefix2"
+                style(type: "text/css", Main.HTML_STYLE)
+                script('', type: 'text/javascript', src: 'http://code.jquery.com/jquery-1.9.1.min.js')
+                script('', type: 'text/javascript', src: 'http://code.jquery.com/ui/1.10.3/jquery-ui.min.js')
+                link('', rel: 'stylesheet', href: 'http://code.jquery.com/ui/1.10.3/themes/black-tie/jquery-ui.css')
+            }
+            body {
+                p "Сравнение скриптов справочников в БД $prefix1 и $prefix2:"
+                table(class: 'rt') {
+                    tr {
+                        th 'id'
+                        th 'Название'
+                        th 'Результат сравнения'
+                    }
+                    tr {
+                        th 'id'
+                        th 'name'
+                        th 'script'
+                    }
+
+                    // Сортировка
+                    def sorted = Main.REFBOOK_FOLDER_NAME_TO_ID.sort(){a, b -> a.value <=> b.value}
+
+                    // Сравнение
+                    sorted.each { folderName, id ->
+                        // Макеты
+                        def tmp1 = refbooks1.find { it.id == id }
+                        def tmp2 = refbooks2.find { it.id == id }
+
+                        def name = tmp1?.name
+                        if (name == null) {
+                            name = tmp2?.name
+                        }
+
+                        // Признак сравнения
+                        def scriptC = tmp1?.script == tmp2?.script ? '+' : '—'
+
+                        tr(class: ((tmp1?.id != null && tmp2?.id != null) ? 'nr' : 'er')) {
+                            td id
+                            td name
+
+                            if (scriptC == '+') {
+                                td(class: 'td_ok', scriptC)
+                            } else {
+                                td(class: 'td_error', title: 'См. БД', scriptC)
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        writer.close()
+        println("See ${Main.REPORT_REFBOOK_DB_NAME} for details")
+    }
+
     def private static getDeclarationTemplates(def prefix, def sqlTemplate, def allVersions) {
         println("DBMS connect: $prefix")
         def retVal = new Expando()
@@ -858,6 +932,29 @@ class DBReport {
         println("Load DB declaration_template from $prefix OK")
         retVal.templateMap = templateMap
         return retVal
+
+    }
+    def private static getRefbooks(def prefix, def sqlTemplate) {
+        println("DBMS connect: $prefix")
+        def refbooks = []
+
+        def sql = Sql.newInstance(Main.DB_URL, prefix, Main.DB_PASSWORD, "oracle.jdbc.OracleDriver")
+
+        try {
+            sql.eachRow(sqlTemplate) {
+                def refbook = new Expando()
+                refbook.id = it.id as Integer
+                refbook.name = it.name
+                if (it.script) {
+                    refbook.script = IOUtils.toString(it.script.binaryStream, "UTF-8")?.trim()?.replaceAll("\r", "")
+                }
+                refbooks.add(refbook)
+            }
+        } finally {
+            sql.close()
+        }
+        println("Load DB ref_book from $prefix OK")
+        return refbooks
 
     }
 }
