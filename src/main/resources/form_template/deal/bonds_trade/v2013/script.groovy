@@ -216,9 +216,9 @@ void calc() {
 // Получение импортируемых данных
 void importData() {
     def tmpRow = formData.createDataRow()
-    int COLUMN_COUNT = 17
-    int HEADER_ROW_COUNT = 3
-    String TABLE_START_VALUE = 'Данные для расчета сумм доходов по сделкам'
+    int COLUMN_COUNT = 18
+    int HEADER_ROW_COUNT = 6
+    String TABLE_START_VALUE = 'Полная форма'
     String TABLE_END_VALUE = null
 
     def allValues = []      // значения формы
@@ -287,37 +287,47 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
     checkHeaderSize(headerRows[headerRows.size() - 1].size(), headerRows.size(), colCount, rowCount)
 
     def headerMapping = [
-            (headerRows[1][0]) : getColumnName(tmpRow, 'transactionDeliveryDate'),
-            (headerRows[1][1]) : getColumnName(tmpRow, 'contraName'),
-            (headerRows[1][2]) : getColumnName(tmpRow, 'transactionMode'),
-            (headerRows[1][3]) : getColumnName(tmpRow, 'innKio'),
-            (headerRows[1][4]) : getColumnName(tmpRow, 'contraCountry'),
-            (headerRows[1][5]) : getColumnName(tmpRow, 'contraCountryCode'),
-            (headerRows[1][6]) : getColumnName(tmpRow, 'transactionSumCurrency'),
-            (headerRows[1][7]) : getColumnName(tmpRow, 'currency'),
-            (headerRows[1][8]) : getColumnName(tmpRow, 'courseCB'),
-            (headerRows[1][9]) : getColumnName(tmpRow, 'transactionSumRub'),
-            (headerRows[1][10]): getColumnName(tmpRow, 'contractNum'),
-            (headerRows[1][11]): getColumnName(tmpRow, 'contractDate'),
-            (headerRows[1][12]): getColumnName(tmpRow, 'transactionDate'),
-            (headerRows[1][13]): getColumnName(tmpRow, 'bondRegCode'),
-            (headerRows[1][14]): getColumnName(tmpRow, 'bondCount'),
-            (headerRows[1][15]): getColumnName(tmpRow, 'priceOne'),
-            (headerRows[1][16]): getColumnName(tmpRow, 'transactionType'),
-            (headerRows[2][0]): 'гр. 2',
-            (headerRows[2][1]): 'гр. 3',
-            (headerRows[2][2]): 'гр. 4',
-            (headerRows[2][3]): 'гр. 5',
-            (headerRows[2][4]): 'гр. 6.1',
-            (headerRows[2][5]): 'гр. 6.2',
-            (headerRows[2][6]): 'гр. 7.1',
-            (headerRows[2][7]): 'гр. 7.2',
-            (headerRows[2][8]): 'гр. 7.3',
-            (headerRows[2][9]): 'гр. 7.4'
+            (headerRows[0][0]) : 'Полная форма',
+            (headerRows[1][0]) : 'Данные для заполнения Уведомления о сделках с ценными бумагами, признаваемых Контролируемыми сделками (заполняются по итогам года)',
+            (headerRows[2][0]) : getColumnName(tmpRow, 'rowNum'),
+            (headerRows[2][1]) : 'Сокращенная форма',
+            (headerRows[3][1]) : 'Данные для расчета сумм доходов по сделкам',
+            (headerRows[4][1]) : getColumnName(tmpRow, 'transactionDeliveryDate'),
+            (headerRows[4][2]) : getColumnName(tmpRow, 'contraName'),
+            (headerRows[4][3]) : getColumnName(tmpRow, 'transactionMode'),
+            (headerRows[4][4]) : getColumnName(tmpRow, 'innKio'),
+            (headerRows[4][5]) : getColumnName(tmpRow, 'contraCountry'),
+            (headerRows[4][6]) : getColumnName(tmpRow, 'contraCountryCode'),
+            (headerRows[4][7]) : getColumnName(tmpRow, 'transactionSumCurrency'),
+            (headerRows[4][8]) : getColumnName(tmpRow, 'currency'),
+            (headerRows[4][9]) : getColumnName(tmpRow, 'courseCB'),
+            (headerRows[4][10]): getColumnName(tmpRow, 'transactionSumRub'),
+            (headerRows[4][11]): getColumnName(tmpRow, 'contractNum'),
+            (headerRows[4][12]): getColumnName(tmpRow, 'contractDate'),
+            (headerRows[4][13]): getColumnName(tmpRow, 'transactionDate'),
+            (headerRows[4][14]): getColumnName(tmpRow, 'bondRegCode'),
+            (headerRows[4][15]): getColumnName(tmpRow, 'bondCount'),
+            (headerRows[4][16]): getColumnName(tmpRow, 'priceOne'),
+            (headerRows[4][17]): getColumnName(tmpRow, 'transactionType'),
+            (headerRows[5][0]) : 'гр. 1',
+            (headerRows[5][1]) : 'гр. 2',
+            (headerRows[5][2]) : 'гр. 3',
+            (headerRows[5][3]) : 'гр. 4',
+            (headerRows[5][4]) : 'гр. 5',
+            (headerRows[5][5]) : 'гр. 6.1',
+            (headerRows[5][6]) : 'гр. 6.2',
+            (headerRows[5][7]) : 'гр. 7.1',
+            (headerRows[5][8]) : 'гр. 7.2',
+            (headerRows[5][9]) : 'гр. 7.3',
+            (headerRows[5][10]): 'гр. 7.4',
+            (headerRows[5][11]): 'гр. 8',
+            (headerRows[5][12]): 'гр. 9',
+            (headerRows[5][13]): 'гр. 10',
+            (headerRows[5][14]): 'гр. 11',
+            (headerRows[5][15]): 'гр. 12',
+            (headerRows[5][16]): 'гр. 13',
+            (headerRows[5][17]): 'гр. 14'
     ]
-    (10..16).each{
-        headerMapping.put(headerRows[2][it], 'гр. ' + (it - 2))
-    }
     checkHeaderEquals(headerMapping, logger)
 }
 
@@ -341,7 +351,7 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
         newRow.getCell(it).setStyleAlias('Автозаполняемая')
     }
 
-    def int colIndex = 0
+    def int colIndex = 1
 
     // графа 2
     newRow.transactionDeliveryDate = parseDate(values[colIndex], "dd.MM.yyyy", fileRowIndex, colIndex + colOffset, logger, true)

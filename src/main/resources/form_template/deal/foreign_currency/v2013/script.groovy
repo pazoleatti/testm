@@ -414,6 +414,10 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
     checkHeaderSize(headerRows[headerRows.size() - 1].size(), headerRows.size(), colCount, rowCount)
 
     def headerMapping = [
+            (headerRows[0][0]) : 'Общие сведения о контрагенте - юридическом лице',
+            (headerRows[0][6]) : 'Сведения о сделке',
+            (headerRows[1][0]) : getColumnName(tmpRow, 'rowNumber'),
+            (headerRows[1][2]) : getColumnName(tmpRow, 'fullName'),
             (headerRows[1][3]) : getColumnName(tmpRow, 'inn'),
             (headerRows[1][4]) : getColumnName(tmpRow, 'countryName'),
             (headerRows[1][5]) : getColumnName(tmpRow, 'countryCode'),
@@ -428,6 +432,8 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
             (headerRows[1][14]): getColumnName(tmpRow, 'price'),
             (headerRows[1][15]): getColumnName(tmpRow, 'total'),
             (headerRows[1][17]): getColumnName(tmpRow, 'dealDoneDate'),
+            (headerRows[2][0]) : 'гр. 1',
+            (headerRows[2][2]) : 'гр. 2',
             (headerRows[2][3]) : 'гр. 3',
             (headerRows[2][4]) : 'гр. 4.1',
             (headerRows[2][5]) : 'гр. 4.2',

@@ -406,6 +406,10 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
     checkHeaderSize(headerRows[headerRows.size() - 1].size(), headerRows.size(), colCount, rowCount)
 
     def headerMapping = [
+            (headerRows[0][0]) : 'Общие сведения о контрагенте - юридическом лице',
+            (headerRows[0][6]) : 'Сведения о сделке',
+            (headerRows[1][0]) : getColumnName(tmpRow, 'rowNumber'),
+            (headerRows[1][3]) : getColumnName(tmpRow, 'fullName'),
             (headerRows[1][3]) : getColumnName(tmpRow, 'inn'),
             (headerRows[1][4]) : getColumnName(tmpRow, 'countryName'),
             (headerRows[1][5]) : getColumnName(tmpRow, 'countryCode'),
