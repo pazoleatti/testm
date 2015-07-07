@@ -18,6 +18,7 @@ import javax.script.ScriptException;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Unmarshaller;
 import java.io.*;
+import java.nio.charset.Charset;
 
 /**
  * Хэлпер для работы со скриптами НФ в тестовом режиме
@@ -277,7 +278,7 @@ public class TestScriptHelper {
             for (LogEntry logEntry : logger.getEntries()) {
                 // Перекодирование для исправления кодировки при выводе в Idea
                 System.out.println(logEntry.getLevel() + " "
-                        + new String(logEntry.getMessage().getBytes("utf8"), "cp1251"));
+                        + new String(logEntry.getMessage().getBytes("utf8"), Charset.defaultCharset().name()));
             }
         } catch (UnsupportedEncodingException e) {
             // Ignore
