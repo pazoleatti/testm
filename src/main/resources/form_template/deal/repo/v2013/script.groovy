@@ -217,9 +217,9 @@ void calc() {
 // Получение импортируемых данных
 void importData() {
     def tmpRow = formData.createDataRow()
-    int COLUMN_COUNT = 18
-    int HEADER_ROW_COUNT = 2
-    String TABLE_START_VALUE = getColumnName(tmpRow, 'jurName')
+    int COLUMN_COUNT = 19
+    int HEADER_ROW_COUNT = 3
+    String TABLE_START_VALUE = 'Общая информация о контрагенте - юридическом лице'
     String TABLE_END_VALUE = null
 
     def allValues = []      // значения формы
@@ -288,41 +288,46 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
     checkHeaderSize(headerRows[headerRows.size() - 1].size(), headerRows.size(), colCount, rowCount)
 
     def headerMapping = [
-            (headerRows[0][1]) : getColumnName(tmpRow, 'innKio'),
-            (headerRows[0][2]) : getColumnName(tmpRow, 'country'),
-            (headerRows[0][3]) : getColumnName(tmpRow, 'countryCode'),
-            (headerRows[0][4]) : getColumnName(tmpRow, 'contractNum'),
-            (headerRows[0][5]) : getColumnName(tmpRow, 'contractDate'),
-            (headerRows[0][6]) : getColumnName(tmpRow, 'transactionNum'),
-            (headerRows[0][7]) : getColumnName(tmpRow, 'transactionDeliveryDate'),
-            (headerRows[0][8]) : getColumnName(tmpRow, 'dealsMode'),
-            (headerRows[0][9]) : getColumnName(tmpRow, 'date1'),
-            (headerRows[0][10]): getColumnName(tmpRow, 'date2'),
-            (headerRows[0][11]): getColumnName(tmpRow, 'percentIncomeSum'),
-            (headerRows[0][12]): getColumnName(tmpRow, 'percentConsumptionSum'),
-            (headerRows[0][13]): getColumnName(tmpRow, 'priceFirstCurrency'),
-            (headerRows[0][14]): getColumnName(tmpRow, 'currencyCode'),
-            (headerRows[0][16]): getColumnName(tmpRow, 'priceFirstRub'),
-            (headerRows[0][17]): getColumnName(tmpRow, 'transactionDate'),
-            (headerRows[0][15]): getColumnName(tmpRow, 'courseCB'),
-            (headerRows[1][0]) : 'Гр. 2',
-            (headerRows[1][1]) : 'Гр. 3',
-            (headerRows[1][2]) : 'Гр. 4.1',
-            (headerRows[1][3]) : 'Гр. 4.2',
-            (headerRows[1][4]) : 'Гр. 5',
-            (headerRows[1][5]) : 'Гр. 6',
-            (headerRows[1][6]) : 'Гр. 7',
-            (headerRows[1][7]) : 'Гр. 8',
-            (headerRows[1][8]) : 'Гр. 9',
-            (headerRows[1][9]) : 'Гр. 10.1',
-            (headerRows[1][10]): 'Гр. 10.2',
-            (headerRows[1][11]): 'Гр. 11.1',
-            (headerRows[1][12]): 'Гр. 11.2',
-            (headerRows[1][13]): 'Гр. 12',
-            (headerRows[1][14]): 'Гр. 13',
-            (headerRows[1][15]): 'Гр. 14',
-            (headerRows[1][16]): 'Гр. 15',
-            (headerRows[1][17]): 'Гр. 16'
+            (headerRows[0][0]) : 'Общая информация о контрагенте - юридическом лице',
+            (headerRows[0][5]) : 'Сведения о сделке',
+            (headerRows[1][0]) : getColumnName(tmpRow, 'rowNum'),
+            (headerRows[1][1]) : getColumnName(tmpRow, 'jurName'),
+            (headerRows[1][2]) : getColumnName(tmpRow, 'innKio'),
+            (headerRows[1][3]) : getColumnName(tmpRow, 'country'),
+            (headerRows[1][4]) : getColumnName(tmpRow, 'countryCode'),
+            (headerRows[1][5]) : getColumnName(tmpRow, 'contractNum'),
+            (headerRows[1][6]) : getColumnName(tmpRow, 'contractDate'),
+            (headerRows[1][7]) : getColumnName(tmpRow, 'transactionNum'),
+            (headerRows[1][8]) : getColumnName(tmpRow, 'transactionDeliveryDate'),
+            (headerRows[1][9]) : getColumnName(tmpRow, 'dealsMode'),
+            (headerRows[1][10]): getColumnName(tmpRow, 'date1'),
+            (headerRows[1][11]): getColumnName(tmpRow, 'date2'),
+            (headerRows[1][12]): getColumnName(tmpRow, 'percentIncomeSum'),
+            (headerRows[1][13]): getColumnName(tmpRow, 'percentConsumptionSum'),
+            (headerRows[1][14]): getColumnName(tmpRow, 'priceFirstCurrency'),
+            (headerRows[1][15]): getColumnName(tmpRow, 'currencyCode'),
+            (headerRows[1][16]): getColumnName(tmpRow, 'courseCB'),
+            (headerRows[1][17]): getColumnName(tmpRow, 'priceFirstRub'),
+            (headerRows[1][18]): getColumnName(tmpRow, 'transactionDate'),
+            (headerRows[2][0]) : 'Гр. 1',
+            (headerRows[2][1]) : 'Гр. 2',
+            (headerRows[2][2]) : 'Гр. 3',
+            (headerRows[2][3]) : 'Гр. 4.1',
+            (headerRows[2][4]) : 'Гр. 4.2',
+            (headerRows[2][5]) : 'Гр. 5',
+            (headerRows[2][6]) : 'Гр. 6',
+            (headerRows[2][7]) : 'Гр. 7',
+            (headerRows[2][8]) : 'Гр. 8',
+            (headerRows[2][9]) : 'Гр. 9',
+            (headerRows[2][10]): 'Гр. 10.1',
+            (headerRows[2][11]): 'Гр. 10.2',
+            (headerRows[2][12]): 'Гр. 11.1',
+            (headerRows[2][13]): 'Гр. 11.2',
+            (headerRows[2][14]): 'Гр. 12',
+            (headerRows[2][15]): 'Гр. 13',
+            (headerRows[2][16]): 'Гр. 14',
+            (headerRows[2][17]): 'Гр. 15',
+            (headerRows[2][18]): 'Гр. 16'
     ]
     checkHeaderEquals(headerMapping, logger)
 }
@@ -347,7 +352,7 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
         newRow.getCell(it).setStyleAlias('Автозаполняемая')
     }
 
-    def int colIndex = 0
+    def int colIndex = 1
 
     // графа 2
     newRow.jurName = getRecordIdImport(9, 'NAME', values[colIndex], fileRowIndex, colIndex + colOffset, true)

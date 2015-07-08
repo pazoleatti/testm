@@ -261,9 +261,9 @@ def BigDecimal calc13(def row, def bankSum) {
 // Получение импортируемых данных
 void importData() {
     def tmpRow = formData.createDataRow()
-    int COLUMN_COUNT = 15
-    int HEADER_ROW_COUNT = 3
-    String TABLE_START_VALUE = getColumnName(tmpRow, 'jurName')
+    int COLUMN_COUNT = 16
+    int HEADER_ROW_COUNT = 4
+    String TABLE_START_VALUE = 'Общая информация'
     String TABLE_END_VALUE = null
 
     def allValues = []      // значения формы
@@ -332,36 +332,41 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
     checkHeaderSize(headerRows[headerRows.size() - 1].size(), headerRows.size(), colCount, rowCount)
 
     def headerMapping = [
-            (headerRows[0][1]) : getColumnName(tmpRow, 'innKio'),
-            (headerRows[0][2]) : getColumnName(tmpRow, 'countryCode'),
-            (headerRows[0][3]) : getColumnName(tmpRow, 'incomeBankSum'),
-            (headerRows[0][4]) : getColumnName(tmpRow, 'outcomeBankSum'),
-            (headerRows[0][5]) : getColumnName(tmpRow, 'contractNum'),
-            (headerRows[0][6]) : getColumnName(tmpRow, 'contractDate'),
-            (headerRows[0][7]) : 'Адрес местонахождения объекта недвижимости',
-            (headerRows[0][11]): getColumnName(tmpRow, 'count'),
-            (headerRows[0][12]): getColumnName(tmpRow, 'price'),
-            (headerRows[0][13]): getColumnName(tmpRow, 'cost'),
-            (headerRows[0][14]): getColumnName(tmpRow, 'transactionDate'),
-            (headerRows[1][7]) : getColumnName(tmpRow, 'country'),
-            (headerRows[1][8]) : getColumnName(tmpRow, 'region'),
-            (headerRows[1][9]) : getColumnName(tmpRow, 'city'),
-            (headerRows[1][10] ): getColumnName(tmpRow, 'settlement'),
-            (headerRows[2][0]) : 'гр. 2',
-            (headerRows[2][1]) : 'гр. 3',
-            (headerRows[2][2]) : 'гр. 4',
-            (headerRows[2][3]) : 'гр. 5.1',
-            (headerRows[2][4]) : 'гр. 5.2',
-            (headerRows[2][5]) : 'гр. 6',
-            (headerRows[2][6]) : 'гр. 7',
-            (headerRows[2][7]) : 'гр. 8',
-            (headerRows[2][8]) : 'гр. 9',
-            (headerRows[2][9]) : 'гр. 10',
-            (headerRows[2][10]): 'гр. 11',
-            (headerRows[2][11]): 'гр. 12',
-            (headerRows[2][12]): 'гр. 13',
-            (headerRows[2][13]): 'гр. 14',
-            (headerRows[2][14]): 'гр. 15'
+            (headerRows[0][0]) : 'Общая информация',
+            (headerRows[0][4]) : 'Сведения о сделке',
+            (headerRows[1][0]) : getColumnName(tmpRow, 'rowNum'),
+            (headerRows[1][1]) : getColumnName(tmpRow, 'jurName'),
+            (headerRows[1][2]) : getColumnName(tmpRow, 'innKio'),
+            (headerRows[1][3]) : getColumnName(tmpRow, 'countryCode'),
+            (headerRows[1][4]) : getColumnName(tmpRow, 'incomeBankSum'),
+            (headerRows[1][5]) : getColumnName(tmpRow, 'outcomeBankSum'),
+            (headerRows[1][6]) : getColumnName(tmpRow, 'contractNum'),
+            (headerRows[1][7]) : getColumnName(tmpRow, 'contractDate'),
+            (headerRows[1][8]) : 'Адрес местонахождения объекта недвижимости',
+            (headerRows[1][12]): getColumnName(tmpRow, 'count'),
+            (headerRows[1][13]): getColumnName(tmpRow, 'price'),
+            (headerRows[1][14]): getColumnName(tmpRow, 'cost'),
+            (headerRows[1][15]): getColumnName(tmpRow, 'transactionDate'),
+            (headerRows[2][8]) : getColumnName(tmpRow, 'country'),
+            (headerRows[2][9]) : getColumnName(tmpRow, 'region'),
+            (headerRows[2][10]): getColumnName(tmpRow, 'city'),
+            (headerRows[2][11] ): getColumnName(tmpRow, 'settlement'),
+            (headerRows[3][0]) : 'гр. 1',
+            (headerRows[3][1]) : 'гр. 2',
+            (headerRows[3][2]) : 'гр. 3',
+            (headerRows[3][3]) : 'гр. 4',
+            (headerRows[3][4]) : 'гр. 5.1',
+            (headerRows[3][5]) : 'гр. 5.2',
+            (headerRows[3][6]) : 'гр. 6',
+            (headerRows[3][7]) : 'гр. 7',
+            (headerRows[3][8]) : 'гр. 8',
+            (headerRows[3][9]) : 'гр. 9',
+            (headerRows[3][10]): 'гр. 10',
+            (headerRows[3][11]): 'гр. 11',
+            (headerRows[3][12]): 'гр. 12',
+            (headerRows[3][13]): 'гр. 13',
+            (headerRows[3][14]): 'гр. 14',
+            (headerRows[3][15]): 'гр. 15'
     ]
     checkHeaderEquals(headerMapping, logger)
 }
@@ -386,7 +391,7 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
         newRow.getCell(it).setStyleAlias('Автозаполняемая')
     }
 
-    def int colIndex = 0
+    def int colIndex = 1
 
     // графа 2
     newRow.jurName = getRecordIdImport(9, 'NAME', values[colIndex], fileRowIndex, colIndex + colOffset, true)

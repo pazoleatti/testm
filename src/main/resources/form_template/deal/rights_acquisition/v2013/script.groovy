@@ -198,9 +198,9 @@ void calc() {
 // Получение импортируемых данных
 void importData() {
     def tmpRow = formData.createDataRow()
-    int COLUMN_COUNT = 10
-    int HEADER_ROW_COUNT = 2
-    String TABLE_START_VALUE = getColumnName(tmpRow, 'name')
+    int COLUMN_COUNT = 11
+    int HEADER_ROW_COUNT = 3
+    String TABLE_START_VALUE = 'Общая информация о контрагенте - юридическом лице'
     String TABLE_END_VALUE = null
 
     def allValues = []      // значения формы
@@ -269,20 +269,22 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
     checkHeaderSize(headerRows[headerRows.size() - 1].size(), headerRows.size(), colCount, rowCount)
 
     def headerMapping = [
-            (headerRows[0][0]): getColumnName(tmpRow, 'name'),
-            (headerRows[0][1]): getColumnName(tmpRow, 'innKio'),
-            (headerRows[0][2]): getColumnName(tmpRow, 'country'),
-            (headerRows[0][3]): getColumnName(tmpRow, 'contractNum'),
-            (headerRows[0][4]): getColumnName(tmpRow, 'contractDate'),
-            (headerRows[0][5]): getColumnName(tmpRow, 'okeiCode'),
-            (headerRows[0][6]): getColumnName(tmpRow, 'count'),
-            (headerRows[0][7]): getColumnName(tmpRow, 'price'),
-            (headerRows[0][8]): getColumnName(tmpRow, 'totalCost'),
-            (headerRows[0][9]): getColumnName(tmpRow, 'transactionDate')
+            (headerRows[0][0]) : 'Общая информация о контрагенте - юридическом лице',
+            (headerRows[0][6]) : 'Сведения о сделке',
+            (headerRows[1][0]) : getColumnName(tmpRow, 'rowNum'),
+            (headerRows[1][1]) : getColumnName(tmpRow, 'name'),
+            (headerRows[1][2]) : getColumnName(tmpRow, 'innKio'),
+            (headerRows[1][3]) : getColumnName(tmpRow, 'country'),
+            (headerRows[1][4]) : getColumnName(tmpRow, 'contractNum'),
+            (headerRows[1][5]) : getColumnName(tmpRow, 'contractDate'),
+            (headerRows[1][6]) : getColumnName(tmpRow, 'okeiCode'),
+            (headerRows[1][7]) : getColumnName(tmpRow, 'count'),
+            (headerRows[1][8]) : getColumnName(tmpRow, 'price'),
+            (headerRows[1][9]) : getColumnName(tmpRow, 'totalCost'),
+            (headerRows[1][10]): getColumnName(tmpRow, 'transactionDate')
     ]
-
-    (0..9).each {
-        headerMapping.put(headerRows[1][it], 'гр. ' + (it + 2))
+    (0..10).each {
+        headerMapping.put(headerRows[2][it], 'гр. ' + (it + 1))
     }
     checkHeaderEquals(headerMapping, logger)
 }
@@ -307,7 +309,7 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
         newRow.getCell(it).setStyleAlias('Автозаполняемая')
     }
 
-    def int colIndex = 0
+    def int colIndex = 1
 
     // графа 2
     newRow.name = getRecordIdImport(9, 'NAME', values[colIndex], fileRowIndex, colIndex + colOffset, true)
