@@ -1,7 +1,5 @@
 package form_template.deal.trademark.v2013
 
-import com.aplana.sbrf.taxaccounting.model.Cell
-import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
@@ -203,9 +201,9 @@ void calc() {
 // Получение импортируемых данных
 void importData() {
     def tmpRow = formData.createDataRow()
-    int COLUMN_COUNT = 9
-    int HEADER_ROW_COUNT = 2
-    String TABLE_START_VALUE = getColumnName(tmpRow, 'fullNamePerson')
+    int COLUMN_COUNT = 10
+    int HEADER_ROW_COUNT = 3
+    String TABLE_START_VALUE = 'Общая информация'
     String TABLE_END_VALUE = null
 
     def allValues = []      // значения формы
@@ -274,17 +272,21 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
     checkHeaderSize(headerRows[headerRows.size() - 1].size(), headerRows.size(), colCount, rowCount)
 
     def headerMapping = [
-            (headerRows[0][1]): getColumnName(tmpRow, 'inn'),
-            (headerRows[0][2]): getColumnName(tmpRow, 'countryCode'),
-            (headerRows[0][3]): getColumnName(tmpRow, 'sum'),
-            (headerRows[0][4]): getColumnName(tmpRow, 'docNumber'),
-            (headerRows[0][5]): getColumnName(tmpRow, 'docDate'),
-            (headerRows[0][6]): getColumnName(tmpRow, 'price'),
-            (headerRows[0][7]): getColumnName(tmpRow, 'cost'),
-            (headerRows[0][8]): getColumnName(tmpRow, 'dealDate'),
+            (headerRows[0][0]): 'Общая информация',
+            (headerRows[0][4]): 'Сведения о сделке',
+            (headerRows[1][0]): getColumnName(tmpRow, 'rowNumber'),
+            (headerRows[1][1]): getColumnName(tmpRow, 'fullNamePerson'),
+            (headerRows[1][2]): getColumnName(tmpRow, 'inn'),
+            (headerRows[1][3]): getColumnName(tmpRow, 'countryCode'),
+            (headerRows[1][4]): getColumnName(tmpRow, 'sum'),
+            (headerRows[1][5]): getColumnName(tmpRow, 'docNumber'),
+            (headerRows[1][6]): getColumnName(tmpRow, 'docDate'),
+            (headerRows[1][7]): getColumnName(tmpRow, 'price'),
+            (headerRows[1][8]): getColumnName(tmpRow, 'cost'),
+            (headerRows[1][9]): getColumnName(tmpRow, 'dealDate'),
     ]
-    (0..8).each{
-        headerMapping.put((headerRows[1][it]), 'гр. ' + (it + 2))
+    (0..9).each{
+        headerMapping.put((headerRows[2][it]), 'гр. ' + (it + 1))
     }
     checkHeaderEquals(headerMapping, logger)
 }
@@ -309,7 +311,7 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
         newRow.getCell(it).setStyleAlias('Автозаполняемая')
     }
 
-    def int colIndex = 0
+    def int colIndex = 1
 
     // графа 2
     newRow.fullNamePerson = getRecordIdImport(9, 'NAME', values[colIndex], fileRowIndex, colIndex + colOffset)
