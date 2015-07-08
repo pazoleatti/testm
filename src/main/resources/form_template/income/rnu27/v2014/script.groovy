@@ -352,8 +352,7 @@ def logicCheck() {
 
             for (column in totalColumns) {
                 if (row.get(column) != srow.get(column)) {
-                    def tmpRow = getPrevRowWithoutAlias(dataRows, row)
-                    def regNumber = tmpRow.regNumber
+                    def regNumber = getRegNumberOrIssuer(dataRows, row, 'regNumber')
                     loggerError(null, "Итоговые значения по «$regNumber» рассчитаны неверно в графе «${getColumnName(row, column)}»!")
                 }
             }
@@ -365,8 +364,7 @@ def logicCheck() {
 
             for (column in totalColumns) {
                 if (row.get(column) != srow.get(column)) {
-                    def tmpRow = getPrevRowWithoutAlias(dataRows, row)
-                    def issuer = tmpRow.issuer
+                    def issuer = getRegNumberOrIssuer(dataRows, row, 'issuer')
                     loggerError(null, "Итоговые значения для «$issuer» рассчитаны неверно в графе «${getColumnName(row, column)}»!")
                 }
             }
@@ -429,6 +427,29 @@ def getSign(def row) {
 
 def isRubleCurrency(def currencyCode) {
     return currencyCode != null ? (getRefBookValue(15, currencyCode)?.CODE?.stringValue in ['810', '643']) : false
+}
+
+/**
+ * Получить значение группировки подитоговой строки.
+ *
+ * @param dataRows строки
+ * @param row подитоговая строка
+ * @param alias алиас графы значение которой используется для группировки
+ */
+def getRegNumberOrIssuer(def dataRows, DataRow row, def alias) {
+    int pos = dataRows.indexOf(row)
+    def tmpRow = null
+    for (int i = pos; i >= 0; i--) {
+        if (getRow(dataRows, i).getAlias() == null) {
+            tmpRow = row
+            break
+        }
+    }
+    if (tmpRow != null) {
+        return tmpRow[alias]
+    } else {
+        return row.fix[0..(row.fix.size() - ' Итог'.size() - 1)]
+    }
 }
 
 /**

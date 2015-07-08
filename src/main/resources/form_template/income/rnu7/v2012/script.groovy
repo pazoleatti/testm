@@ -599,22 +599,13 @@ def getNewRow(String[] rowCells, def columnCount, def fileRowIndex, def rowIndex
         newRow.code = records.get(0).get(RefBook.RECORD_ID_ALIAS).numberValue
     }
 
-    // графа 5
-    newRow.docNumber = pure(rowCells[5])
-    // графа 6
-    newRow.docDate = parseDate(pure(rowCells[6]), "dd.MM.yyyy", fileRowIndex, 6 + colOffset, logger, true)
-    // графа 7
-    newRow.currencyCode = getRecordIdImport(15, 'CODE', pure(rowCells[7]), fileRowIndex, 7 + colOffset, false)
-    // графа 8
-    newRow.rateOfTheBankOfRussia =  parseNumber(pure(rowCells[8]), fileRowIndex, 8 + colOffset, logger, true)
-    // графа 9
-    newRow.taxAccountingCurrency = parseNumber(pure(rowCells[9]), fileRowIndex, 9 + colOffset, logger, true)
-    // графа 10
-    newRow.taxAccountingRuble  =  parseNumber(pure(rowCells[10]), fileRowIndex, 10 + colOffset, logger, true)
-    // графа 11
-    newRow.accountingCurrency = parseNumber(pure(rowCells[11]), fileRowIndex, 11 + colOffset, logger, true)
-    // графа 12
-    newRow.ruble  =  parseNumber(pure(rowCells[12]), fileRowIndex, 12 + colOffset, logger, true)
+        // графа 4
+        String filter = "LOWER(CODE) = LOWER('" + row.cell[2].text() + "') and LOWER(NUMBER) = LOWER('" + row.cell[xmlIndexCol].text() + "')"
+        def records = refBookFactory.getDataProvider(27).getRecords(reportPeriodEndDate, null, filter, null)
+        if (checkImportRecordsCount(records, refBookFactory.get(27), 'CODE', row.cell[2].text(), reportPeriodEndDate, xlsIndexRow, 2, logger, true)) {
+            newRow.code = records.get(0).get(RefBook.RECORD_ID_ALIAS).numberValue
+        }
+        xmlIndexCol++
 
     return newRow
 }
