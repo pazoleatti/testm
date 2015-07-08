@@ -440,8 +440,9 @@ def getRegNumberOrIssuer(def dataRows, DataRow row, def alias) {
     int pos = dataRows.indexOf(row)
     def tmpRow = null
     for (int i = pos; i >= 0; i--) {
-        if (getRow(dataRows, i).getAlias() == null) {
-            tmpRow = row
+        def iRow = getRow(dataRows, i)
+        if (iRow.getAlias() == null) {
+            tmpRow = iRow
             break
         }
     }
