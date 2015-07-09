@@ -1,10 +1,8 @@
 package form_template.income.advanceDistribution.v2015
 
-import com.aplana.sbrf.taxaccounting.model.Department
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.FormDataKind
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType
@@ -144,8 +142,8 @@ def formDataCache = [:]
 def helperCache = [:]
 
 @Field
-def summaryMap = [301 : "Доходы, учитываемые в простых РНУ", 302 : "Сводная форма начисленных доходов",
-                  303 : "Сводная форма начисленных расходов", 304 : "Расходы, учитываемые в простых РНУ"]
+def summaryMap = [[301, 305] : "Доходы, учитываемые в простых РНУ", [302] : "Сводная форма начисленных доходов", //максимум два вида источников с одним именем
+                  [303] : "Сводная форма начисленных расходов", [304] : "Расходы, учитываемые в простых РНУ"]
 
 @Field
 def baseTaxOfPattern = "[0-9]{1,3}(\\.[0-9]{0,15})?"
@@ -562,12 +560,23 @@ void logicalCheckBeforeCalc() {
         }
     }
     if (formDataEvent != FormDataEvent.COMPOSE) {
-        summaryMap.each { key, value ->
-            def formDataSummary = getFormDataSummary(key)
-            if (formDataSummary == null) {
-                logger.error("Сводная налоговая форма «$value» в подразделении «${formDataDepartment.name}» не создана!")
-            } else if (getData(formDataSummary) == null) {
+        summaryMap.each { keys, value ->
+            def foundFormsMap = getFormDataSummaryMap(keys)
+            // Ищем принятые формы
+            def acceptedFormsMap = [:]
+            keys.each { key ->
+                if (foundFormsMap[key] != null && getData(foundFormsMap[key]) != null) {
+                    acceptedFormsMap[key] = foundFormsMap[key]
+                }
+            }
+
+            if (acceptedFormsMap.size() > 1) {
+                logger.warn("Неверно настроены источники сводной! Одновременно созданы в качестве источников налоговые формы: «%s», «%s». Расчет произведен из «%s».",
+                        formTypeService.get(keys[1]).name, formTypeService.get(keys[0])?.name, formTypeService.get(keys[1])?.name)
+            }else if (acceptedFormsMap.size() == 0) {
                 logger.error("Сводная налоговая форма «$value» в подразделении «${formDataDepartment.name}» не находится в статусе «Принята»!")
+            } else if (foundFormsMap.size() == 0) {
+                logger.error("Сводная налоговая форма «$value» в подразделении «${formDataDepartment.name}» не создана!")
             }
         }
     }
@@ -712,11 +721,13 @@ def getSumAll(def dataRows, def columnAlias) {
 }
 
 // Получить данные сводной
-def getFormDataSummary(def id) {
-    if (!formDataCache[id]) {
-        formDataCache[id] = formDataService.getLast(id, FormDataKind.SUMMARY, formDataDepartment.id, formData.reportPeriodId, formData.periodOrder)
+def getFormDataSummaryMap(def ids) {
+    ids.each{ id ->
+        if (!formDataCache[id]) {
+            formDataCache[id] = formDataService.getLast(id, com.aplana.sbrf.taxaccounting.model.FormDataKind.SUMMARY, formDataDepartment.id, formData.reportPeriodId, formData.periodOrder)
+        }
     }
-    return formDataCache[id]
+    return ids.collect { it : formDataCache[it] }.findAll { it.value != null}
 }
 
 def getData(def formData) {
@@ -751,16 +762,19 @@ def getTaxBaseAsDeclaration() {
     // Данные налоговых форм.
 
     /** Доходы сложные уровня Банка "Сводная форма начисленных доходов". */
-    def dataRowsComplexIncome = getData(getFormDataSummary(302))?.allCached
+    def dataRowsComplexIncome = getData(getFormDataSummaryMap([302])[302])?.allCached
 
     /** Доходы простые уровня Банка "Расшифровка видов доходов, учитываемых в простых РНУ". */
-    def dataRowsSimpleIncome = getData(getFormDataSummary(301))?.allCached
+    def dataRowsSimpleIncome = getData(getFormDataSummaryMap([305])[305])?.allCached
+    if (dataRowsSimpleIncome == null) {
+        dataRowsSimpleIncome = getData(getFormDataSummaryMap([301])[301])?.allCached
+    }
 
     /** Расходы сложные уровня Банка "Сводная форма начисленных расходов". */
-    def dataRowsComplexConsumption = getData(getFormDataSummary(303))?.allCached
+    def dataRowsComplexConsumption = getData(getFormDataSummaryMap([303])[303])?.allCached
 
     /** Расходы простые уровня Банка "Расшифровка видов расходов, учитываемых в простых РНУ". */
-    def dataRowsSimpleConsumption = getData(getFormDataSummary(304))?.allCached
+    def dataRowsSimpleConsumption = getData(getFormDataSummaryMap(304)[304])?.allCached
 
     /** Сведения о суммах налога на прибыль, уплаченного Банком за рубежом */
     //    def dataRowsSum = getData(getFormDataSummary(421))?.allCached
@@ -1125,7 +1139,7 @@ def getLong(def value) {
 def getTaxBase() {
     def result = 0
     // расходы сложные
-    def dataOutcomeComplex = getData(getFormDataSummary(303))
+    def dataOutcomeComplex = getData(getFormDataSummaryMap([303])[303])
 
     // Расходы сложные
     if (dataOutcomeComplex != null) {
