@@ -88,7 +88,21 @@ def resetColumns = ['rnu6Field10Sum', 'rnu6Field12Accepted', 'rnu6Field12PrevTax
         'logicalCheck', 'opuSumByEnclosure2', 'opuSumByTableD', 'opuSumTotal', 'difference']
 
 @Field
-def (head1Alias, first1Alias, last1Alias, total1Alias, head2Alias, first2Alias, last2Alias, total2Alias) = ['R1', 'R2', 'R57', 'R58', 'R59', 'R60', 'R162', 'R163']
+head1Alias = 'R1'
+@Field
+first1Alias = 'R2'
+@Field
+last1Alias = 'R57'
+@Field
+total1Alias = 'R58'
+@Field
+head2Alias = 'R59'
+@Field
+first2Alias = 'R60'
+@Field
+last2Alias = 'R162'
+@Field
+total2Alias = 'R163'
 
 @Field
 def rowsNotCalc = [head1Alias, total1Alias, head2Alias, total2Alias]
