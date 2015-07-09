@@ -1148,7 +1148,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 		if (resultSet.getObject(columnName) != null) {
 			switch (attribute.getAttributeType()) {
 				case STRING: {
-					return resultSet.getString(columnName);
+					return StringUtils.cleanString(resultSet.getString(columnName));
 				}
 				case NUMBER: {
 					return resultSet.getBigDecimal(columnName).setScale(attribute.getPrecision(), BigDecimal.ROUND_HALF_UP);
