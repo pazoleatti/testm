@@ -1,8 +1,11 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.api.DeclarationTypeDao;
+import com.aplana.sbrf.taxaccounting.model.DeclarationType;
+import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
+import com.aplana.sbrf.taxaccounting.model.TaxType;
+import com.aplana.sbrf.taxaccounting.model.TemplateFilter;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
-import com.aplana.sbrf.taxaccounting.model.*;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -47,7 +50,7 @@ public class DeclarationTypeDaoTest {
 	@Test
 	public void testListByTaxType() {
 		List<DeclarationType> list = declarationTypeDao.listAllByTaxType(TaxType.TRANSPORT);
-		assertEquals(2, list.size());
+		assertEquals(1, list.size());
 		
 		for (DeclarationType dt: list) {
 			assertEquals(TaxType.TRANSPORT, dt.getTaxType());

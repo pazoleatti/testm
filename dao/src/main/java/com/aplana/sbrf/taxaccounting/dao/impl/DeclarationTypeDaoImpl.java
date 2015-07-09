@@ -1,9 +1,13 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.api.DeclarationTypeDao;
-import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
-import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.DeclarationType;
+import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
+import com.aplana.sbrf.taxaccounting.model.TaxType;
+import com.aplana.sbrf.taxaccounting.model.TemplateFilter;
+import com.aplana.sbrf.taxaccounting.model.VersionedObjectStatus;
+import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.dao.DataAccessException;
@@ -61,9 +65,9 @@ public class DeclarationTypeDaoImpl extends AbstractDao implements DeclarationTy
 	@Override
 	public List<DeclarationType> listAllByTaxType(TaxType taxType){
 		return getJdbcTemplate().query(
-				"select * from declaration_type dt where dt.tax_type = ?",
-				new Object[]{String.valueOf(taxType.getCode())},
-				new int[]{Types.VARCHAR},
+				"SELECT * FROM declaration_type dt WHERE dt.tax_type = ? AND status = ?",
+				new Object[]{String.valueOf(taxType.getCode()), 0},
+				new int[]{Types.VARCHAR, Types.INTEGER},
 				new DeclarationTypeRowMapper()
 		);
 	}
