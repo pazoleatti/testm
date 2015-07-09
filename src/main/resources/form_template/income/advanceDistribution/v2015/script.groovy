@@ -722,12 +722,15 @@ def getSumAll(def dataRows, def columnAlias) {
 
 // Получить данные сводной
 def getFormDataSummaryMap(def ids) {
+    def map = [:]
     ids.each{ id ->
         if (!formDataCache[id]) {
             formDataCache[id] = formDataService.getLast(id, com.aplana.sbrf.taxaccounting.model.FormDataKind.SUMMARY, formDataDepartment.id, formData.reportPeriodId, formData.periodOrder)
         }
+        if (!formDataCache[id]) {
+            map[id] = formDataCache[id]
+        }
     }
-    return ids.collect { it : formDataCache[it] }.findAll { it.value != null}
 }
 
 def getData(def formData) {
