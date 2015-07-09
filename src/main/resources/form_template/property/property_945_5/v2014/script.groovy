@@ -304,6 +304,7 @@ void calc() {
         calcTotalSum(categoryRows, row2, totalColumns)
     }
 
+    updateIndexes(newDataRows)
     infoMessagesRowMap.keySet().each { key ->
         def row = infoMessagesRowMap[key]
 
