@@ -914,6 +914,7 @@
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
         <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1"
               stringValue="Доходы от оказания услуг операционного сопровождения по договорам возмездного оказания услуг, заключенным с ДЗО"/>
+        <cell alias="accountNo" colSpan="1" rowSpan="1" stringValue="70601.16306.05"/>
         <cell alias="rnu6Field10Sum" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
         <cell alias="rnu6Field12Accepted" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
         <cell alias="rnu6Field12PrevTaxPeriod" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>

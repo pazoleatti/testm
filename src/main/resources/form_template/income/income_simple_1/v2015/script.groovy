@@ -2,6 +2,7 @@ package form_template.income.income_simple_1.v2015
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.FormDataKind
+import com.aplana.sbrf.taxaccounting.model.ReportPeriod
 import com.aplana.sbrf.taxaccounting.model.TaxType
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
@@ -415,22 +416,34 @@ def consolidationFromPrimary(def dataRows, def formSources) {
 
     // Предыдущий отчётный период
     def formDataOld = formDataService.getFormDataPrev(formData)
+    if (formDataOld == null) {
+        ReportPeriod prevReportPeriod = reportPeriodService.getPrevReportPeriod(formData.getReportPeriodId());
+        if (prevReportPeriod != null) {
+            // Последний экземпляр
+            formDataOld = formDataService.getLast(301, formData.getKind(), formData.getDepartmentId(), prevReportPeriod.getId(), null);
+        }
+    }
     if (formDataOld != null && reportPeriod.order != 1) {
         def dataRowsOld = formDataService.getDataRowHelper(formDataOld)?.getAll()
         rows567.each { rowNum ->
             def row = getDataRow(dataRows, "R$rowNum")
             //«графа 5» +=«графа 5» формы предыдущего отчётного периода (не учитывается при расчете в первом отчётном периоде)
-            def rowOld = getDataRow(dataRowsOld, "R$rowNum")
-            row.rnu6Field10Sum = rowOld.rnu6Field10Sum
-            //«графа 6» +=«графа 6» формы предыдущего отчётного периода (не учитывается при расчете в первом отчётном периоде)
-            row.rnu6Field12Accepted = rowOld.rnu6Field12Accepted
-            //«графа 7» +=«графа 7» формы предыдущего отчётного периода (не учитывается при расчете в первом отчётном периоде)
-            row.rnu6Field12PrevTaxPeriod = rowOld.rnu6Field12PrevTaxPeriod
+            def rowOld = dataRowsOld.find { row.incomeTypeId == it.incomeTypeId && row.accountNo == it.accountNo }
+            if (rowOld) {
+                row.rnu6Field10Sum = rowOld.rnu6Field10Sum
+                //«графа 6» +=«графа 6» формы предыдущего отчётного периода (не учитывается при расчете в первом отчётном периоде)
+                row.rnu6Field12Accepted = rowOld.rnu6Field12Accepted
+                //«графа 7» +=«графа 7» формы предыдущего отчётного периода (не учитывается при расчете в первом отчётном периоде)
+                row.rnu6Field12PrevTaxPeriod = rowOld.rnu6Field12PrevTaxPeriod
+            }
         }
         rows8.each { rowNum ->
             def row = getDataRow(dataRows, "R$rowNum")
             //«графа 8» +=«графа 8» формы предыдущего отчётного периода (не учитывается при расчете в первом отчётном периоде)
-            row.rnu4Field5Accepted = getDataRow(dataRowsOld, "R$rowNum").rnu4Field5Accepted
+            def rowOld = dataRowsOld.find { row.incomeTypeId == it.incomeTypeId && row.accountNo == it.accountNo }
+            if (rowOld) {
+                row.rnu4Field5Accepted = rowOld.rnu4Field5Accepted
+            }
         }
     }
 
