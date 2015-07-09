@@ -1,5 +1,6 @@
 package form_template.income.advanceDistribution.v2015
 
+import com.aplana.sbrf.taxaccounting.model.FormData
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.FormDataKind
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
@@ -727,10 +728,11 @@ def getFormDataSummaryMap(def ids) {
         if (!formDataCache[id]) {
             formDataCache[id] = formDataService.getLast(id, com.aplana.sbrf.taxaccounting.model.FormDataKind.SUMMARY, formDataDepartment.id, formData.reportPeriodId, formData.periodOrder)
         }
-        if (!formDataCache[id]) {
+        if (formDataCache[id]) {
             map[id] = formDataCache[id]
         }
     }
+    return map
 }
 
 def getData(def formData) {
