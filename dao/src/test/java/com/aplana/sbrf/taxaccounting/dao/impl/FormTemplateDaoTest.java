@@ -3,7 +3,14 @@ package com.aplana.sbrf.taxaccounting.dao.impl;
 import com.aplana.sbrf.taxaccounting.dao.ColumnDao;
 import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.cache.CacheConstants;
-import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.Cell;
+import com.aplana.sbrf.taxaccounting.model.DataRow;
+import com.aplana.sbrf.taxaccounting.model.FormTemplate;
+import com.aplana.sbrf.taxaccounting.model.FormType;
+import com.aplana.sbrf.taxaccounting.model.NumericColumn;
+import com.aplana.sbrf.taxaccounting.model.TaxType;
+import com.aplana.sbrf.taxaccounting.model.TemplateFilter;
+import com.aplana.sbrf.taxaccounting.model.VersionedObjectStatus;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.formdata.HeaderCell;
 import com.aplana.sbrf.taxaccounting.model.util.FormDataUtils;
@@ -21,7 +28,12 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 
@@ -151,7 +163,7 @@ public class FormTemplateDaoTest {
 		
 	}
 
-    //@Test
+    /*@Test
     public void testGetTextScript() {
         FormTemplate formTemplate = formTemplateDao.get(1);
         formTemplate.setFixedRows(false);
@@ -162,9 +174,9 @@ public class FormTemplateDaoTest {
         formTemplateDao.save(formTemplate);
         String scriptText = formTemplateDao.getFormTemplateScript(1);
         Assert.assertEquals("test_script", scriptText);
-    }
+    }*/
 
-    //@Test
+    /*@Test
     public void testGetDataCells() {
         FormTemplate formTemplate = formTemplateDao.get(1);
         formTemplate.setFixedRows(false);
@@ -177,7 +189,7 @@ public class FormTemplateDaoTest {
         formTemplate.getRows().add(rows);
         formTemplateDao.save(formTemplate);
         Assert.assertEquals(1, formTemplate.getRows().size());
-    }
+    }*/
 
     //@Test
     public void testGetHeaderCells() {

@@ -8,7 +8,16 @@ import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.cache.CacheConstants;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.XmlSerializationUtils;
-import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.Cell;
+import com.aplana.sbrf.taxaccounting.model.Column;
+import com.aplana.sbrf.taxaccounting.model.ColumnKeyEnum;
+import com.aplana.sbrf.taxaccounting.model.DataRow;
+import com.aplana.sbrf.taxaccounting.model.FormTemplate;
+import com.aplana.sbrf.taxaccounting.model.NumericColumn;
+import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
+import com.aplana.sbrf.taxaccounting.model.TemplateFilter;
+import com.aplana.sbrf.taxaccounting.model.VersionSegment;
+import com.aplana.sbrf.taxaccounting.model.VersionedObjectStatus;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.formdata.HeaderCell;
 import com.aplana.sbrf.taxaccounting.model.util.FormDataUtils;
@@ -21,12 +30,25 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataRetrievalFailureException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
-import org.springframework.jdbc.core.*;
+import org.springframework.jdbc.core.BatchPreparedStatementSetter;
+import org.springframework.jdbc.core.CallableStatementCreator;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.core.SqlParameter;
 import org.springframework.stereotype.Repository;
 
-import java.sql.*;
-import java.util.*;
+import java.sql.CallableStatement;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Types;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Repository
 public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao {
@@ -43,11 +65,6 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
 	private final XmlSerializationUtils xmlSerializationUtils = XmlSerializationUtils.getInstance();
 
 	private class FormTemplateMapper implements RowMapper<FormTemplate> {
-		private boolean deepFetch;
-
-		public FormTemplateMapper(boolean deepFetch) {
-			this.deepFetch = deepFetch;
-		}
 
 		@Override
 		public FormTemplate mapRow(ResultSet rs, int index) throws SQLException {
@@ -61,10 +78,25 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
             formTemplate.setHeader(rs.getString("header"));
             formTemplate.setStatus(VersionedObjectStatus.getStatusById(SqlUtils.getInteger(rs,"status")));
             formTemplate.setMonthly(rs.getBoolean("monthly"));
-            formTemplate.getStyles().addAll(formStyleDao.getFormStyles(formTemplate.getId()));
-
-			if (deepFetch) {
-				formTemplate.getColumns().addAll(columnDao.getFormColumns(formTemplate.getId()));
+			formTemplate.setScript(rs.getString("script"));
+			// стили и графы
+			formTemplate.getStyles().addAll(formStyleDao.getFormStyles(formTemplate.getId()));
+			formTemplate.getColumns().addAll(columnDao.getFormColumns(formTemplate.getId()));
+			// фиксированные строки
+			String dataRowXml = rs.getString("data_rows");
+			if (dataRowXml != null && !dataRowXml.trim().isEmpty()) {
+				List<DataRow<Cell>> fixedRows =
+					xmlSerializationUtils.deserialize(dataRowXml, formTemplate.getColumns(), formTemplate.getStyles(), Cell.class);
+				FormDataUtils.setValueOwners(fixedRows);
+				formTemplate.getRows().addAll(fixedRows);
+			}
+			// шапка
+			String headerDataXml = rs.getString("data_headers");
+			if (headerDataXml != null && !headerDataXml.trim().isEmpty()) {
+				List<DataRow<HeaderCell>> headerRows =
+					xmlSerializationUtils.deserialize(headerDataXml, formTemplate.getColumns(), formTemplate.getStyles(), HeaderCell.class);
+				FormDataUtils.setValueOwners(headerRows);
+				formTemplate.getHeaders().addAll(headerRows);
 			}
 			return formTemplate;
 		}
@@ -79,11 +111,11 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
 		JdbcTemplate jt = getJdbcTemplate();
 		try {
 			return jt.queryForObject(
-					"select id, version, name, fullname, type_id, fixed_rows, header, script, status, monthly " +
+					"select id, type_id, data_rows, fixed_rows, name, fullname, script, data_headers, version, status, monthly, header " +
                             "from form_template where id = ?",
 					new Object[]{formId},
 					new int[]{Types.NUMERIC},
-					new FormTemplateMapper(true)
+					new FormTemplateMapper()
 			);
 		} catch (EmptyResultDataAccessException e) {
             logger.error("Не удалось найти описание налоговой формы с id = " + formId, e);
@@ -197,8 +229,8 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
 
 	@Override
 	public List<FormTemplate> listAll() {
-		return getJdbcTemplate().query("select id, version, name, fullname, type_id, fixed_rows, header, status, monthly" +
-                " from form_template where status in (0,1)", new FormTemplateMapper(true));
+		return getJdbcTemplate().query("select id, type_id, data_rows, fixed_rows, name, fullname, script, data_headers, version, status, monthly, header " +
+                " from form_template where status in (0,1)", new FormTemplateMapper());
 	}
 
     private String getActiveVersionSql(){
@@ -226,55 +258,6 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
                     formTypeId, formTypeDao.get(formTypeId).getName(), reportPeriod.getName());
 		}
 	}
-
-    @Cacheable(value = CacheConstants.FORM_TEMPLATE, key = "#formTemplateId + new String(\"_script\")")
-    @Override
-    public String getFormTemplateScript(int formTemplateId) {
-        try {
-            return getJdbcTemplate().queryForObject("select script from form_template where id = ?",
-                    new Object[]{formTemplateId},
-                    new int[]{Types.INTEGER},
-                    String.class);
-        } catch (DataAccessException e){
-            throw new DaoException("Не удалось получить текст скрипта.", e);
-        }
-    }
-
-    @Override
-    public List<DataRow<Cell>> getDataCells(FormTemplate formTemplate) {
-        try {
-            String dataRowXml = getJdbcTemplate().queryForObject("select data_rows from form_template where id = ?",
-                    new Object[]{formTemplate.getId()},
-                    new int[]{Types.INTEGER},
-                    String.class);
-            return dataRowXml != null ? xmlSerializationUtils.deserialize(dataRowXml, formTemplate.getColumns(), formTemplate.getStyles(), Cell.class):
-                    new ArrayList<DataRow<Cell>>();
-        } catch (IllegalArgumentException e){
-            logger.error(String.format("Шаблон %s версия %s", formTemplate.getType().getName(), formTemplate.getId()), e);
-            throw new DaoException(e.getLocalizedMessage());
-        } catch (DataAccessException e){
-            logger.error(String.format("Ошибка при получении строк шаблона %s НФ.", formTemplate.getType().getName()), e);
-            throw new DaoException("Ошибка при получении строк шаблона НФ.", e);
-        }
-    }
-
-    @Override
-    public List<DataRow<HeaderCell>> getHeaderCells(FormTemplate formTemplate) {
-        try {
-            String headerDataXml = getJdbcTemplate().queryForObject("select data_headers from form_template where id = ?",
-                    new Object[]{formTemplate.getId()},
-                    new int[]{Types.INTEGER},
-                    String.class);
-            return headerDataXml != null ? xmlSerializationUtils.deserialize(headerDataXml, formTemplate.getColumns(), formTemplate.getStyles(), HeaderCell.class):
-                    new ArrayList<DataRow<HeaderCell>>();
-        }  catch (IllegalArgumentException e){
-            logger.error(String.format("Шаблон %s версия %s", formTemplate.getType().getName(), formTemplate.getId()), e);
-            throw new DaoException(e.getLocalizedMessage());
-        } catch (DataAccessException e){
-            logger.error(String.format("Ошибка при получении заголовка шаблона %s НФ.", formTemplate.getType().getName()), e);
-            throw new DaoException("Ошибка при получении заголовка шаблона НФ.", e);
-        }
-    }
 
     @Override
     public List<Integer> getByFilter(TemplateFilter filter) {
@@ -619,11 +602,11 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
     private void modifyTables(FormTemplate formTemplate, final Map<ColumnKeyEnum, Collection<Long>> columns){
         //Получаем макет ради колонок, чтобы потом сравнить тип
         FormTemplate dbT = getJdbcTemplate().queryForObject(
-                "select id, version, name, fullname, type_id, fixed_rows, header, script, status, monthly " +
+                "select id, type_id, data_rows, fixed_rows, name, fullname, script, data_headers, version, status, monthly, header " +
                         "from form_template where id = ?",
                 new Object[]{formTemplate.getId()},
                 new int[]{Types.NUMERIC},
-                new FormTemplateMapper(true)
+                new FormTemplateMapper()
         );
 
         /*if (columns.get(ColumnDao.KEYS.DELETED) != null){
