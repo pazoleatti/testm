@@ -171,7 +171,7 @@ def getRefBookRecordId(Long refBookId, String alias, String value, Date recordDa
         return null
     }
     def record = formDataService.getRefBookRecord(refBookId, recordCache, providerCache, refBookCache,
-            alias, value, recordDate)
+            alias, value, getReportPeriodEndDate(), -1, null, logger, true)
     return record?.record_id?.value
 }
 
