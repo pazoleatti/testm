@@ -133,7 +133,7 @@ def groupColumns = ['issuer', 'regNumber', 'tradeNumber']
 
 // Проверяемые на пустые значения атрибуты (графа 1..5, 8, 13..17)
 @Field
-def nonEmptyColumns = ['issuer', 'regNumber', 'tradeNumber', 'currency', 'reserveCalcValuePrev',
+def nonEmptyColumns = ['issuer', /*'regNumber',*/ 'tradeNumber', 'currency', 'reserveCalcValuePrev',
                        'costOnMarketQuotation', 'reserveCalcValue', 'reserveCreation', 'recovery']
 
 // Атрибуты итоговых строк для которых вычисляются суммы (графа 6..9, 14..17)
@@ -306,13 +306,15 @@ def logicCheck() {
             if (!isConsolidated && formPrev != null) {
                 for (DataRow rowPrev in dataPrevRows) {
                     if (rowPrev.getAlias() == null && row.tradeNumber == rowPrev.tradeNumber && row.reserveCalcValuePrev != rowPrev.reserveCalcValue) {
-                        loggerError(row, errorMsg + "РНУ сформирован некорректно! Не выполняется условие: «Графа 8» (${rowPrev.reserveCalcValuePrev}) текущей строки РНУ-27 за текущий период= «Графе 15» (${row.reserveCalcValue}) строки РНУ-27 за предыдущий период, значение «Графы 4» которой соответствует значению «Графы 4» РНУ-27 за текущий период.")
+                        rowWarning(logger, row, errorMsg + "РНУ сформирован некорректно! Не выполняется условие: «Графа 8» (${rowPrev.reserveCalcValuePrev}) текущей строки РНУ-27 за текущий период= «Графе 15» (${row.reserveCalcValue}) строки РНУ-27 за предыдущий период, значение «Графы 4» которой соответствует значению «Графы 4» РНУ-27 за текущий период.")
                     }
                 }
             }
 
             // 1. Проверка на заполнение поля «<Наименование поля>»
             checkNonEmptyColumns(row, index, nonEmptyColumns, logger, !isBalancePeriod())
+            // графа 3 - сделали необязательной, но сообщение о незаполненности выводить нефатальным сообщением
+            checkNonEmptyColumns(row, index, ['regNumber'], logger, false)
 
             if (isRubleCurrency(row.currency)) {
                 // 17. Проверка графы 11
@@ -372,11 +374,11 @@ def logicCheck() {
         def itogo = getDataRow(dataRows, 'total')
         // 13.
         if (itogo != null && itogoPrev != null && itogo.prev != itogoPrev.current) {
-            loggerError(null, "РНУ сформирован некорректно! Не выполняется условие: «Итого» по графе 6 (${itogo.prev}) = «Итого» по графе 7 (${itogoPrev.current}) формы РНУ-27 за предыдущий отчётный период")
+            rowWarning(logger, null, "РНУ сформирован некорректно! Не выполняется условие: «Итого» по графе 6 (${itogo.prev}) = «Итого» по графе 7 (${itogoPrev.current}) формы РНУ-27 за предыдущий отчётный период")
         }
         // 14.
         if (itogo != null && itogoPrev != null && itogo.reserveCalcValuePrev != itogoPrev.reserveCalcValue) {
-            loggerError(null, "РНУ сформирован некорректно! Не выполняется условие: «Итого» по графе 8 (${itogo.reserveCalcValuePrev}) = «Итого» по графе 15 (${itogoPrev.reserveCalcValue}) формы РНУ-27 за предыдущий отчётный период")
+            rowWarning(logger, null, "РНУ сформирован некорректно! Не выполняется условие: «Итого» по графе 8 (${itogo.reserveCalcValuePrev}) = «Итого» по графе 15 (${itogoPrev.reserveCalcValue}) формы РНУ-27 за предыдущий отчётный период")
         }
     }
 
@@ -410,7 +412,7 @@ def logicCheck() {
             logger.warn("Отсутствуют строки с номерами сделок: ${notFound.join(', ')}")
         }
         if (!foundMany.isEmpty()) {
-            logger.warn("Существует несколько строк с номерами сделок: \${foundMany.join(', ')}")
+            logger.warn("Существует несколько строк с номерами сделок: ${foundMany.join(', ')}")
         }
     }
 }
