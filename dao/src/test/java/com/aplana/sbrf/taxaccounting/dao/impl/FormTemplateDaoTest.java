@@ -2,7 +2,6 @@ package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.ColumnDao;
 import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
-import com.aplana.sbrf.taxaccounting.dao.impl.cache.CacheConstants;
 import com.aplana.sbrf.taxaccounting.model.Cell;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.FormTemplate;
@@ -18,8 +17,6 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Caching;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -53,8 +50,8 @@ public class FormTemplateDaoTest {
     @Autowired
     ColumnDao columnDao;
 
-    @Caching(evict = {@CacheEvict(value = CacheConstants.FORM_TEMPLATE, key = "1", beforeInvocation = true),
-            @CacheEvict(value = CacheConstants.FORM_TEMPLATE, key = "2", beforeInvocation = true)})
+    //@Caching(evict = {@CacheEvict(value = CacheConstants.FORM_TEMPLATE, key = "1", beforeInvocation = true),
+    //        @CacheEvict(value = CacheConstants.FORM_TEMPLATE, key = "2", beforeInvocation = true)})
 	@Test
 	public void testGet(){
 		FormTemplate ft1 = formTemplateDao.get(1);

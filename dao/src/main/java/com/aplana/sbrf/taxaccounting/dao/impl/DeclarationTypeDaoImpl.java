@@ -8,8 +8,6 @@ import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.model.TemplateFilter;
 import com.aplana.sbrf.taxaccounting.model.VersionedObjectStatus;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.RowMapper;
@@ -43,7 +41,7 @@ public class DeclarationTypeDaoImpl extends AbstractDao implements DeclarationTy
 	}
 	
 	@Override
-	@Cacheable("DeclarationType")
+	//@Cacheable("DeclarationType")
 	public DeclarationType get(int declarationTypeId) {
 		try {
 			return getJdbcTemplate().queryForObject(
@@ -90,7 +88,7 @@ public class DeclarationTypeDaoImpl extends AbstractDao implements DeclarationTy
         }
     }
 
-    @CacheEvict(value = "DeclarationType", beforeInvocation = true ,key = "#type.id")
+    //@CacheEvict(value = "DeclarationType", beforeInvocation = true ,key = "#type.id")
     @Override
     public void updateDT(DeclarationType type) {
         try {
@@ -103,7 +101,7 @@ public class DeclarationTypeDaoImpl extends AbstractDao implements DeclarationTy
         }
     }
 
-    @CacheEvict("DeclarationType")
+    //@CacheEvict("DeclarationType")
     @Override
     public void delete(int typeId) {
         try {

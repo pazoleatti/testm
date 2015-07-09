@@ -1,11 +1,14 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.api.FormTypeDao;
-import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
-import com.aplana.sbrf.taxaccounting.model.*;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
+import com.aplana.sbrf.taxaccounting.model.FormDataKind;
+import com.aplana.sbrf.taxaccounting.model.FormType;
+import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
+import com.aplana.sbrf.taxaccounting.model.TaxType;
+import com.aplana.sbrf.taxaccounting.model.TemplateFilter;
+import com.aplana.sbrf.taxaccounting.model.VersionedObjectStatus;
+import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.RowMapper;
@@ -38,7 +41,7 @@ public class FormTypeDaoImpl extends AbstractDao implements FormTypeDao {
 	}
 
 	@Override
-	@Cacheable("FormType")
+	//@Cacheable("FormType")
 	public FormType get(int typeId) {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Fetching FormType with id = " + typeId);	
@@ -109,7 +112,7 @@ public class FormTypeDaoImpl extends AbstractDao implements FormTypeDao {
         }
     }
 
-    @CacheEvict(value = "FormType", beforeInvocation = true ,key = "#formTypeId")
+    //@CacheEvict(value = "FormType", beforeInvocation = true ,key = "#formTypeId")
     @Override
     public void updateFormType(int formTypeId, String newName, String code, Boolean isIfrs, String ifrsName) {
         try {
@@ -125,7 +128,7 @@ public class FormTypeDaoImpl extends AbstractDao implements FormTypeDao {
         }
     }
 
-    @CacheEvict("FormType")
+    //@CacheEvict("FormType")
     @Override
     public void delete(int formTypeId) {
         try {
