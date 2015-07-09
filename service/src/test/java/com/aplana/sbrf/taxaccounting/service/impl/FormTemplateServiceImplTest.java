@@ -2,8 +2,17 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentReportPeriodDao;
-import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
-import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.AutoNumerationColumn;
+import com.aplana.sbrf.taxaccounting.model.Column;
+import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod;
+import com.aplana.sbrf.taxaccounting.model.FormTemplate;
+import com.aplana.sbrf.taxaccounting.model.NumerationType;
+import com.aplana.sbrf.taxaccounting.model.NumericColumn;
+import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
+import com.aplana.sbrf.taxaccounting.model.StringColumn;
+import com.aplana.sbrf.taxaccounting.model.TAUser;
+import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.model.TaxPeriod;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.FormDataService;
 import com.aplana.sbrf.taxaccounting.service.FormTemplateService;
@@ -16,7 +25,11 @@ import org.springframework.test.util.ReflectionTestUtils;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  * @author Fail Mukhametdinov
@@ -112,25 +125,25 @@ public class FormTemplateServiceImplTest extends Assert {
     }
 
     /**
-     * В данной версии макета до редактирования не было ни одной автонумеруемой графы,
+     * В данной версии макета до редактирования не было ни одной автонумеруемой графы
      * у которой "Тип нумерации строк" = "Сквозная".
      *
      * Отчетный период всех экземпляров НФ данной версии макета открыт.
      */
     @Test
     public void validateFormAutoNumerationColumn_cross1() {
-            AutoNumerationColumn autoNumerationColumn = (AutoNumerationColumn) formTemplateEdited.getColumn(1);
+        AutoNumerationColumn autoNumerationColumn = (AutoNumerationColumn) formTemplateEdited.getColumn(FORM_TEMPLATE_ID);
         autoNumerationColumn.setNumerationType(NumerationType.CROSS);
 
         when(departmentReportPeriodDao.getClosedForFormTemplate(FORM_TEMPLATE_ID)).thenReturn(new ArrayList<DepartmentReportPeriod>(0));
         formTemplateService.validateFormAutoNumerationColumn(formTemplateEdited, logger, userInfo);
 
-        verify(formDataService, times(1)).batchUpdatePreviousNumberRow(any(FormTemplate.class), any(TAUserInfo.class));
+        verify(formDataService).batchUpdatePreviousNumberRow(any(FormTemplate.class), any(TAUserInfo.class));
         assertTrue(logger.getEntries().size() == 0);
     }
 
     /**
-     * В данной версии макета до редактирования не было ни одной автонумеруемой графы,
+     * В данной версии макета до редактирования не было ни одной автонумеруемой графы
      * у которой "Тип нумерации строк" = "Сквозная".
      *
      * Отчетный период хотя бы части экземпляров НФ данной версии макета закрыт.
@@ -138,7 +151,7 @@ public class FormTemplateServiceImplTest extends Assert {
     @Test
     public void validateFormAutoNumerationColumn_cross2() {
         // Редактируемый макет
-        AutoNumerationColumn autoNumerationColumn = (AutoNumerationColumn) formTemplateEdited.getColumn(1);
+        AutoNumerationColumn autoNumerationColumn = (AutoNumerationColumn) formTemplateEdited.getColumn(FORM_TEMPLATE_ID);
         autoNumerationColumn.setNumerationType(NumerationType.CROSS);
 
         when(departmentReportPeriodDao.getClosedForFormTemplate(FORM_TEMPLATE_ID)).thenReturn(departmentReportPeriodList);
@@ -151,7 +164,7 @@ public class FormTemplateServiceImplTest extends Assert {
     }
 
     /**
-     * В данной версии макета до редактирования была хотя бы одна автонумеруемая графа,
+     * В данной версии макета до редактирования была хотя бы одна автонумеруемая графа
      * у которой "Тип нумерации строк" = "Сквозная".
      */
     @Test

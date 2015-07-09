@@ -59,9 +59,9 @@ public class GetFormHandler extends AbstractActionHandler<GetFormAction, GetForm
         GetFormResult result = new GetFormResult();
         fillLockData(action, userInfo, result);
         FormTemplateExt formTemplateExt = new FormTemplateExt();
-		FormTemplate formTemplate = formTemplateService.getFullFormTemplate(action.getId(), logger);
+		FormTemplate formTemplate = formTemplateService.get(action.getId(), logger);
         formTemplateExt.setActualEndVersionDate(formTemplateService.getFTEndDate(formTemplate.getId()));
-        formTemplate.setScript(formTemplateService.getFormTemplateScript(action.getId(), logger));
+        formTemplate.setScript(formTemplate.getScript());
         formTemplateExt.setFormTemplate(formTemplate);
         result.setForm(formTemplateExt);
         List<RefBook> refBookList = refBookFactory.getAll(false);

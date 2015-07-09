@@ -83,7 +83,11 @@ public class FormTemplate extends IdentityObject<Integer> {
 	}
 
 	public void setScript(String script) {
-		this.script = script;
+		if (script == null || script.trim().isEmpty()) {
+			this.script = null;
+		} else {
+			this.script = script;
+		}
 	}
 
 	private List<DataRow<Cell>> rows = new ArrayList<DataRow<Cell>>();
@@ -205,6 +209,10 @@ public class FormTemplate extends IdentityObject<Integer> {
 		this.version = version;
 	}
 
+	/**
+	 * Фиксированные строки
+	 * @return
+	 */
 	public List<DataRow<Cell>> getRows() {
 		return rows;
 	}
