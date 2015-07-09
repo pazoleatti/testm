@@ -489,6 +489,11 @@ public class FormDataServiceImpl implements FormDataService {
 
         checkPerformer(logger, formData);
 
+        //Проверка на неактуальные консолидированные данные
+        if (sourceService.isFDConsolidationTopical(formData.getId())){
+            logger.warn(CONSOLIDATION_NOT_TOPICAL);
+        }
+
         if (logger.containsLevel(LogLevel.ERROR)) {
             throw new ServiceLoggerException(
                     "Найдены ошибки при выполнении проверки формы", logEntryService.save(logger.getEntries()));
