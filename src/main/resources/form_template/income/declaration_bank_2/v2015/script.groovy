@@ -310,6 +310,15 @@ void generateXML() {
     /** Расходы простые уровня Банка "Расшифровка видов расходов, учитываемых в простых РНУ". */
     def dataRowsSimpleConsumption = getDataRows(formDataCollection, 304)
 
+    /** Доходы простые уровня Банка "Расшифровка видов доходов, учитываемых в простых РНУ". */
+    def dataRowsSimpleConsumption_old = getDataRows(formDataCollection, 310)
+    if (dataRowsSimpleConsumption == null) {
+        dataRowsSimpleConsumption = dataRowsSimpleConsumption_old
+    } else if (dataRowsSimpleConsumption_old != null) {
+        logger.warn("Неверно настроены источники декларации Банка! Одновременно созданы в качестве источников налоговые формы: «%s», «%s». Консолидация произведена из «%s».",
+                formTypeService.get(310).name, formTypeService.get(304)?.name, formTypeService.get(310)?.name)
+    }
+
     /** Сводная налоговая формы Банка «Расчёт распределения авансовых платежей и налога на прибыль по обособленным подразделениям организации». */
     def dataRowsAdvance = getDataRows(formDataCollection, 500)
 

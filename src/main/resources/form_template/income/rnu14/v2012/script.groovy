@@ -223,7 +223,14 @@ def getTotalRowFromRNU(def knu, def dataRowsOutcome) {
 
 // Получить данные формы "расходы простые" (id = 304)
 def getFormDataOutcomeSimple() {
-    return formDataService.getLast(304, FormDataKind.SUMMARY, formDataDepartment.id, formData.reportPeriodId, formData.periodOrder)
+    def tmp = formDataService.getLast(310, FormDataKind.SUMMARY, formDataDepartment.id, formData.reportPeriodId, formData.periodOrder)
+    if (tmp == null) {
+        tmp = formDataService.getLast(304, FormDataKind.SUMMARY, formDataDepartment.id, formData.reportPeriodId, formData.periodOrder)
+    } else if (formDataService.getLast(304, FormDataKind.SUMMARY, formDataDepartment.id, formData.reportPeriodId, formData.periodOrder) != null) {
+        logger.warn("Неверно настроены источники формы УНП! Одновременно созданы в качестве источников налоговые формы: «%s», «%s». Расчет произведен из «%s».",
+                formTypeService.get(310).name, formTypeService.get(304)?.name, formTypeService.get(310)?.name)
+    }
+    return tmp
 }
 
 // Получить данные формы "доходы сложные" (id = 302)
