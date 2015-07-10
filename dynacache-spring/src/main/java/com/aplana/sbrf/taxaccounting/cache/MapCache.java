@@ -96,7 +96,7 @@ public class MapCache implements Cache {
 	 * @return the value to return to the user
 	 */
 	protected Object fromStoreValue(Object storeValue) {
-		if (NULL_HOLDER.equals(storeValue)) {
+		if (storeValue == null || storeValue instanceof NullHolder) {
 			return null;
 		}
 		return storeValue;
