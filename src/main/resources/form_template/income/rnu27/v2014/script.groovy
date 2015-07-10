@@ -555,7 +555,7 @@ def calcItogRegNumber(int i) {
         }
     }
 
-    newRow.fix = (tRegNumber != null ?: 'ГРН не задан') + ' Итог'
+    newRow.fix = (tRegNumber != null ? tRegNumber : 'ГРН не задан') + ' Итог'
 
     for (column in totalColumns) {
         newRow.getCell(column).setValue(new BigDecimal(0), null)

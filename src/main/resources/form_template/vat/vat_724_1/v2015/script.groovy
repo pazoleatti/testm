@@ -394,18 +394,26 @@ void copyRows(def sourceDataRows, def destinationDataRows, def fromAlias, def to
     }
     def copyRows = sourceDataRows.subList(from, to)
 
-    def headRow = getFixedRow(department.name, "sub_head_${department.id}", true)
-    destinationDataRows.add(getDataRow(destinationDataRows, toAlias).getIndex() - 1, headRow)
-    updateIndexes(destinationDataRows)
+    if (isBank()) {
+        def headRow = getFixedRow(department.name, "sub_head_${department.id}", true)
+        destinationDataRows.add(getDataRow(destinationDataRows, toAlias).getIndex() - 1, headRow)
+        updateIndexes(destinationDataRows)
+    }
 
     destinationDataRows.addAll(getDataRow(destinationDataRows, toAlias).getIndex() - 1, copyRows)
     updateIndexes(destinationDataRows)
 
-    def subTotalRow = getFixedRow("Итого по ${department.name}", "sub_total_${department.id}", false)
-    def columns = (isSection7 ? (totalColumns + 'ndsDealSum') : totalColumns)
-    calcTotalSum(copyRows, subTotalRow, columns)
-    destinationDataRows.add(getDataRow(destinationDataRows, toAlias).getIndex() - 1, subTotalRow)
-    updateIndexes(destinationDataRows)
+    if (isBank()) {
+        def subTotalRow = getFixedRow("Итого по ${department.name}", "sub_total_${department.id}", false)
+        def columns = (isSection7 ? (totalColumns + 'ndsDealSum') : totalColumns)
+        calcTotalSum(copyRows, subTotalRow, columns)
+        destinationDataRows.add(getDataRow(destinationDataRows, toAlias).getIndex() - 1, subTotalRow)
+        updateIndexes(destinationDataRows)
+    }
+}
+
+def isBank() {
+    return formData.departmentId == 1
 }
 
 def calc5(def section) {
