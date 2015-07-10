@@ -66,7 +66,6 @@ switch (formDataEvent) {
     case FormDataEvent.IMPORT:
         importData()
         calc()
-        logicCheck()
         break
     case FormDataEvent.IMPORT_TRANSPORT_FILE:
         importTransportData()
@@ -145,7 +144,7 @@ void calc() {
             row.setIndex(index + 1)
         }
 
-        if (!isBalancePeriod()) {
+        if (!isBalancePeriod() && formDataEvent != FormDataEvent.IMPORT) {
             for (row in dataRows) {
                 row.rateOfTheBankOfRussia = calc8(row)
                 row.taxAccountingRuble = calc10(row)
