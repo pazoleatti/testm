@@ -849,7 +849,13 @@ def getSumOutcomeSimple(def knuCodes) {
     if (reportPeriodPrevIncome?.id == null) {
         return 0
     }
-    def formDataSimple = getFormDataSimple(reportPeriodPrevIncome.id)
+    def formDataSimple = getFormDataSimple(310, reportPeriodPrevIncome.id)
+    if (formDataSimple == null) {
+        formDataSimple = getFormDataSimple(304, reportPeriodPrevIncome.id)
+    } else if (getFormDataSimple(304, reportPeriodPrevIncome.id) != null) {
+        logger.warn("Неверно настроены источники декларации! Одновременно созданы в качестве источников налоговые формы: «%s», «%s». Консолидация произведена из «%s».",
+                formTypeService.get(310).name, formTypeService.get(304)?.name, formTypeService.get(310)?.name)
+    }
     def dataRowsSimple = (formDataSimple ? formDataService.getDataRowHelper(formDataSimple)?.allSaved : null)
     for (def row : dataRowsSimple) {
         if (row.consumptionTypeId in knuCodes) {
@@ -860,10 +866,10 @@ def getSumOutcomeSimple(def knuCodes) {
 }
 
 /**
- * Получить данные формы "расходы простые" (id = 304)
+ * Получить данные формы "расходы простые" (id = 310/304)
  */
-def getFormDataSimple(def reportPeriodId) {
-    return formDataService.getLast(304, FormDataKind.SUMMARY, declarationData.departmentId, reportPeriodId, null)
+def getFormDataSimple(def id, def reportPeriodId) {
+    return formDataService.getLast(id, FormDataKind.SUMMARY, declarationData.departmentId, reportPeriodId, null)
 }
 
 def getOkato(def id) {

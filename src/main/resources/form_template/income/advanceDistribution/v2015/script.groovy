@@ -146,7 +146,7 @@ def helperCache = [:]
 
 @Field
 def summaryMap = [[301, 305] : "Доходы, учитываемые в простых РНУ", [302] : "Сводная форма начисленных доходов", //максимум два вида источников с одним именем
-                  [303] : "Сводная форма начисленных расходов", [304] : "Расходы, учитываемые в простых РНУ"]
+                  [303] : "Сводная форма начисленных расходов", [304, 310] : "Расходы, учитываемые в простых РНУ"]
 
 @Field
 def baseTaxOfPattern = "[0-9]{1,3}(\\.[0-9]{0,15})?"
@@ -783,7 +783,10 @@ def getTaxBaseAsDeclaration() {
     def dataRowsComplexConsumption = getData(getFormDataSummaryMap([303])[303])?.allSaved
 
     /** Расходы простые уровня Банка "Расшифровка видов расходов, учитываемых в простых РНУ". */
-    def dataRowsSimpleConsumption = getData(getFormDataSummaryMap(304)[304])?.allSaved
+    def dataRowsSimpleConsumption = getData(getFormDataSummaryMap(304)[304])?.allCached
+    if (dataRowsSimpleConsumption == null) {
+        dataRowsSimpleConsumption = getData(getFormDataSummaryMap([310])[310])?.allCached
+    }
 
     /** Сведения о суммах налога на прибыль, уплаченного Банком за рубежом */
     //    def dataRowsSum = getData(getFormDataSummary(421))?.allSaved
