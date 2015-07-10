@@ -15,6 +15,7 @@ import org.aspectj.lang.annotation.AfterThrowing;
 import org.aspectj.lang.annotation.Aspect;
 import org.springframework.stereotype.Component;
 
+import javax.ejb.EJBException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
@@ -70,6 +71,8 @@ public class ExceptionHandlerAspect {
             } else {
                 throw new TaActionException(getErrorMessage(actionName, null), formatException(e));
             }
+        } if (e instanceof EJBException) {
+            throw new TaActionException(getErrorMessage(actionName, e.getCause().getLocalizedMessage()), formatException(e));
         } else {
             throw new TaActionException(getErrorMessage(actionName, e.getLocalizedMessage()), formatException(e));
         }

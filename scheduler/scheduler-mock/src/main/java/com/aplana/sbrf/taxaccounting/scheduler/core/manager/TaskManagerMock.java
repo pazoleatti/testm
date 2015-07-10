@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.scheduler.core.manager;
 
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.scheduler.api.entity.*;
 import com.aplana.sbrf.taxaccounting.scheduler.api.form.*;
 import com.aplana.sbrf.taxaccounting.scheduler.api.exception.TaskSchedulingException;
@@ -37,7 +38,7 @@ public class TaskManagerMock implements TaskManager {
         TaskData task2 = new TaskData();
         task2.setTaskId(1L);
         task2.setTaskName("Test2");
-        task2.setTaskState(TaskState.SCHEDULED);
+        task2.setTaskState(TaskState.RUNNING);
         task2.setSchedule("5 * * * *");
         task2.setNumberOfRepeats(-1);
         task2.setRepeatsLeft(1);
@@ -132,6 +133,9 @@ public class TaskManagerMock implements TaskManager {
     @Override
     public void updateTask(Long taskId, TaskContext taskContext) throws TaskSchedulingException {
         LOG.info(String.format("Mock: Task updating has been started. Task id: %s", taskId));
+        if (getTaskData(taskId).getTaskState() == TaskState.RUNNING) {
+            throw new ServiceException("Сохранение изменений невозможно! Задача выполняется в данный момент.");
+        }
     }
 
     @Override

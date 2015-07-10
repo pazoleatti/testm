@@ -29,7 +29,14 @@ public class SimpleUserTask extends AbstractUserTask {
 
     @Override
     public void executeBusinessLogic(Map<String, TaskParam> params, int userId) throws TaskExecutionException {
-        log.info("SimpleUserTask started");
+        for (int i = 0; i<10; i++) {
+            log.info("SimpleUserTask started: " + i);
+            try {
+                Thread.sleep(60*1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     @Override

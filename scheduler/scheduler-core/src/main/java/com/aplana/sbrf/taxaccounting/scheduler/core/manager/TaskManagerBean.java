@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.scheduler.core.manager;
 
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.scheduler.api.entity.*;
 import com.aplana.sbrf.taxaccounting.scheduler.api.exception.TaskSchedulingException;
 import com.aplana.sbrf.taxaccounting.scheduler.api.manager.TaskManager;
@@ -14,6 +15,7 @@ import com.aplana.sbrf.taxaccounting.scheduler.core.service.TaskServiceLocal;
 import com.aplana.sbrf.taxaccounting.scheduler.core.task.TaskExecutorRemoteHome;
 import com.aplana.sbrf.taxaccounting.scheduler.core.utils.TaskUtils;
 import com.ibm.websphere.scheduler.*;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -112,6 +114,7 @@ public class TaskManagerBean implements TaskManager {
             scheduler.cancel(taskId.toString(), true);
             persistenceService.deleteContextByTaskId(taskId);
         } catch (Exception e) {
+            checkRunningTask(e);
             LOG.error(e.getLocalizedMessage(), e);
             throw new TaskSchedulingException("Не удалось выполнить удаление задачи", e);
         }
@@ -129,6 +132,7 @@ public class TaskManagerBean implements TaskManager {
         try {
             scheduler.suspend(taskId.toString());
         } catch (Exception e) {
+            checkRunningTask(e);
             LOG.error(e.getLocalizedMessage(), e);
             throw new TaskSchedulingException("Не удалось выполнить остановку задачи", e);
         }
@@ -140,6 +144,7 @@ public class TaskManagerBean implements TaskManager {
         try {
             scheduler.resume(taskId.toString());
         } catch (Exception e) {
+            checkRunningTask(e);
             LOG.error(e.getLocalizedMessage(), e);
             throw new TaskSchedulingException("Не удалось выполнить возобновление задачи", e);
         }
@@ -184,6 +189,7 @@ public class TaskManagerBean implements TaskManager {
             createTask(taskContext, false);
             scheduler.cancel(taskId.toString(), true);
         } catch (Exception e) {
+            checkRunningTask(e);
             LOG.error(e.getLocalizedMessage(), e);
             throw new TaskSchedulingException(e);
         }
@@ -262,6 +268,14 @@ public class TaskManagerBean implements TaskManager {
         }
 
         return true;
+    }
+
+    private void checkRunningTask(Exception e) {
+        Throwable rootCause = ExceptionUtils.getRootCause(e);
+        //Иначе определить информацию не получается, т.к вебсфера не меняет статус задачи
+        if (rootCause instanceof java.sql.SQLSyntaxErrorException && rootCause.getLocalizedMessage().contains("ORA-02049")) {
+            throw new ServiceException("Сохранение изменений невозможно! Задача выполняется в данный момент.");
+        }
     }
 
     /**
