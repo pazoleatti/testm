@@ -616,7 +616,13 @@ def getIncome102Data(def row) {
 
 // Расчет контрольных граф Сводной формы начисленных доходов (№ строки 4-5)
 void calc4to5(def dataRows) {
-    final incomeSimpleDataRows = getIncomeSimpleDataRows()
+    def incomeSimpleDataRows = getIncomeSimpleDataRows(305)
+    if (incomeSimpleDataRows == null) {
+        incomeSimpleDataRows = getIncomeSimpleDataRows(301)
+    } else if (getIncomeSimpleDataRows(301) != null) {
+        logger.warn("Неверно настроены источники сводной! Одновременно созданы в качестве источников налоговые формы: «%s», «%s». Расчет произведен из «%s».",
+                formTypeService.get(305).name, formTypeService.get(301)?.name, formTypeService.get(305)?.name)
+    }
 
     rowsAliasesFor4to5.each { rowAlias ->
         def row = getDataRow(dataRows, rowAlias)
@@ -666,8 +672,7 @@ def getOpuSumByTableDFor4to5(def row, def incomeSimpleDataRows) {
 }
 
 // Получить строки формы «Сводная форма "Доходы, учитываемые в простых РНУ" уровня обособленного подразделения»
-def getIncomeSimpleDataRows() {
-    def formId = 301
+def getIncomeSimpleDataRows(def formId) {
     def formDataKind = FormDataKind.SUMMARY
     def departmentId = formData.departmentId
     def reportPeriodId = formData.reportPeriodId

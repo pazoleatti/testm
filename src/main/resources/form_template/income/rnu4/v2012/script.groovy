@@ -58,7 +58,6 @@ switch (formDataEvent) {
         importData()
         if (!logger.containsLevel(LogLevel.ERROR)) {
             calc()
-            logicCheck()
             formDataService.saveCachedDataRows(formData, logger)
         }
         break

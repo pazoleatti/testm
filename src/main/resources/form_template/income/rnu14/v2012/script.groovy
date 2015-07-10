@@ -237,9 +237,16 @@ def getFormDataComplex() {
     return formDataService.getLast(302, FormDataKind.SUMMARY, formDataDepartment.id, formData.reportPeriodId, formData.periodOrder)
 }
 
-// Получить данные формы "доходы простые" (id = 301)
+// Получить данные формы "доходы простые" (id = 305/301)
 def getFormDataSimple() {
-    return formDataService.getLast(301, FormDataKind.SUMMARY, formDataDepartment.id, formData.reportPeriodId, formData.periodOrder)
+    def tmp = formDataService.getLast(305, FormDataKind.SUMMARY, formDataDepartment.id, formData.reportPeriodId, formData.periodOrder)
+    if (tmp == null) {
+        tmp = formDataService.getLast(301, FormDataKind.SUMMARY, formDataDepartment.id, formData.reportPeriodId, formData.periodOrder)
+    } else if (formDataService.getLast(301, FormDataKind.SUMMARY, formDataDepartment.id, formData.reportPeriodId, formData.periodOrder) != null) {
+        logger.warn("Неверно настроены источники формы УНП! Одновременно созданы в качестве источников налоговые формы: «%s», «%s». Расчет произведен из «%s».",
+                formTypeService.get(305).name, formTypeService.get(301)?.name, formTypeService.get(305)?.name)
+    }
+    return tmp
 }
 
 void importTransportData() {

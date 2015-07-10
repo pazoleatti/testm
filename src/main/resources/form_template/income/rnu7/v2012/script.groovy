@@ -73,7 +73,6 @@ switch (formDataEvent) {
         importData()
         if (!logger.containsLevel(LogLevel.ERROR)) {
             calc()
-            logicCheck()
             formDataService.saveCachedDataRows(formData, logger)
         }
         break
@@ -154,7 +153,7 @@ void calc() {
             row.setIndex(index + 1)
         }
 
-        if (!isBalancePeriod()) {
+        if (!isBalancePeriod() && formDataEvent != FormDataEvent.IMPORT) {
             for (row in dataRows) {
                 row.rateOfTheBankOfRussia = calc8(row)
                 row.taxAccountingRuble = calc10(row)

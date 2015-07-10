@@ -407,7 +407,16 @@ void generateXML() {
     def dataRowsComplexIncome = getDataRows(formDataCollection, 302)
 
     /** Доходы простые уровня Банка "Расшифровка видов доходов, учитываемых в простых РНУ". */
-    def dataRowsSimpleIncome = getDataRows(formDataCollection, 301)
+    def dataRowsSimpleIncome = getDataRows(formDataCollection, 305)
+
+    /** Доходы простые уровня Банка "Расшифровка видов доходов, учитываемых в простых РНУ". */
+    def dataRowsSimpleIncome_old = getDataRows(formDataCollection, 301)
+    if (dataRowsSimpleIncome == null) {
+        dataRowsSimpleIncome = dataRowsSimpleIncome_old
+    } else if (dataRowsSimpleIncome_old != null) {
+        logger.warn("Неверно настроены источники декларации Банка! Одновременно созданы в качестве источников налоговые формы: «%s», «%s». Консолидация произведена из «%s».",
+                formTypeService.get(305).name, formTypeService.get(301)?.name, formTypeService.get(305)?.name)
+    }
 
     /** Расходы сложные уровня Банка "Сводная форма начисленных расходов". */
     def dataRowsComplexConsumption = getDataRows(formDataCollection, 303)

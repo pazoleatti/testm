@@ -72,9 +72,9 @@ switch (formDataEvent) {
         importData()
         if (!logger.containsLevel(LogLevel.ERROR)) {
             calc()
-            logicCheck()
             formDataService.saveCachedDataRows(formData, logger)
         }
+        calc()
         break
     case FormDataEvent.IMPORT_TRANSPORT_FILE:
         importTransportData()
@@ -156,8 +156,7 @@ void calc() {
         dataRows.eachWithIndex { row, index ->
             row.setIndex(index + 1)
         }
-
-        if (!isBalancePeriod()) {
+        if (!isBalancePeriod() && formDataEvent != FormDataEvent.IMPORT) {
             for (row in dataRows) {
                 row.rateOfTheBankOfRussia = calc8(row)
                 row.taxAccountingRuble = calc10(row)
@@ -340,7 +339,7 @@ void logicCheck() {
                         }
                     }
                     if (c10 < c12) {
-                        loggerError(row, errorMsg + "Сумма данных бухгалтерского учёта превышает сумму начисленных платежей"
+                        rowWarning(logger, row, errorMsg + "Сумма данных бухгалтерского учёта превышает сумму начисленных платежей"
                                 + " для документа " + row.docNumber + " от " + dateFormat.format(row.docDate) + "!")
                     }
                 }
