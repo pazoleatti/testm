@@ -601,17 +601,23 @@ void addAllStatic(def dataRows) {
         def nextRegNum = nextRow?.regNumber
         if (row.getAlias() == null && nextRow == null || regNum != nextRegNum) {
             def itogRegNumberRow = calcItogRegNumber(i)
-            dataRows.add(i + 1, itogRegNumberRow)
             j++
+            dataRows.add(i + j, itogRegNumberRow)
         }
 
         // графа 2 - эмитент - issuer
         def issuer = row.issuer
         def nextIssuer = nextRow?.issuer
         if (row.getAlias() == null && nextRow == null || issuer != nextIssuer) {
+            // если все значения ГРН пустые, то подитог по ГРН не добавится, поэтому перед добавлением подитога по эмитенту, нужно добавить подитого с незадавнным ГРН
+            if (j == 0) {
+                def itogRegNumberRow = calcItogRegNumber(i)
+                j++
+                dataRows.add(i + j, itogRegNumberRow)
+            }
             def itogIssuerRow = calcItogIssuer(i)
-            dataRows.add(i + 2, itogIssuerRow)
             j++
+            dataRows.add(i + j, itogIssuerRow)
         }
         i += j  // Обязательно чтобы избежать зацикливания в простановке
     }
@@ -677,7 +683,7 @@ def calcItogRegNumber(int i) {
         }
     }
 
-    newRow.fix = tRegNumber + ' Итог'
+    newRow.fix = (tRegNumber != null ?: 'ГРН не задан') + ' Итог'
 
     for (column in totalColumns) {
         newRow.getCell(column).setValue(new BigDecimal(0), null)
@@ -1134,14 +1140,16 @@ void sortFormDataRows() {
     dataRows.clear()
 
     // сортируем и добавляем все строки
-    rowsMap.sort{ it.key.fix }
-    rowsMap.each { row, subMap ->
-        subMap.sort { it.key.fix }
-        subMap.each { subTotalRow, dataRowsList ->
+    def tmpSortedRows = rowsMap.keySet().sort { it.fix }
+    tmpSortedRows.each { keyRow ->
+        def subMap = rowsMap[keyRow]
+        def tmpSortedRows2 =  subMap.keySet().sort { it.fix }
+        tmpSortedRows2.each { keySubTotalRow ->
+            def dataRowsList = subMap[keySubTotalRow]
             sortAddRows(dataRowsList, dataRows)
-            dataRows.add(subTotalRow)
+            dataRows.add(keySubTotalRow)
         }
-        dataRows.add(row)
+        dataRows.add(keyRow)
     }
     // если остались данные вне иерархии, добавляем их перед итогами
     sortAddRows(rowList, dataRows)
