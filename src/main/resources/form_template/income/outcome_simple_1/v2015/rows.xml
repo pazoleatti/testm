@@ -710,7 +710,7 @@
         <cell alias="consumptionTypeId" colSpan="1" rowSpan="1" stringValue="20490"/>
         <cell alias="consumptionGroup" colSpan="1" rowSpan="1" stringValue=""/>
         <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1"
-              stringValue="Начисленная премия списочного состава по итогам работы за месяц, квартал, учитываемая для целей налогообложения"/>
+              stringValue="Расходы по выплате единовременных (разовых) премий и вознаграждений, учитывамые для целей налогообложения"/>
         <cell alias="consumptionAccountNumber" colSpan="1" rowSpan="1" stringValue="70606.26101.07"/>
         <cell alias="rnu7Field10Sum" colSpan="1" editable="true" rowSpan="1"
               styleAlias="Редактирование (светло-голубой)"/>
