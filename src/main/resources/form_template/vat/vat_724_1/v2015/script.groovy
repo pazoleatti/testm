@@ -472,19 +472,50 @@ void sortFormDataRows(def saveInDB = true) {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
 
-    if (dataRows.find { it.getAlias() != null && it.getAlias().startsWith("sub_head_") } == null) {
-        for (def section : sections) {
-            def firstRow = getDataRow(dataRows, getFirstRowAlias(section))
-            def lastRow = getDataRow(dataRows, getLastRowAlias(section))
-            def from = firstRow.getIndex()
-            def to = lastRow.getIndex() - 1
-            def sectionsRows = (from < to ? dataRows[from..(to - 1)] : [])
+    boolean isGroups = dataRows.find { it.getAlias() != null && it.getAlias().startsWith("sub_head_") } != null
+    for (def section : sections) {
+        def firstRow = getDataRow(dataRows, getFirstRowAlias(section))
+        def lastRow = getDataRow(dataRows, getLastRowAlias(section))
+        def from = firstRow.getIndex()
+        def to = lastRow.getIndex() - 1
+        def sectionsRows = (from < to ? dataRows[from..(to - 1)] : [])
 
+        if (!isGroups) {
             // Массовое разыменование строк НФ
-            def columnList = firstRow.keySet().collect{firstRow.getCell(it).getColumn()}
+            def columnList = firstRow.keySet().collect { firstRow.getCell(it).getColumn() }
             refBookService.dataRowsDereference(logger, sectionsRows, columnList)
-
             sortRows(sectionsRows, sortColumns)
+        } else {
+            def headMap = [:]
+            def totalMap = [:]
+            // находим строки начала и конца для каждого подразделения
+            sectionsRows.each { row ->
+                String alias = row.getAlias()
+                if (alias != null) {
+                    if (alias.startsWith("sub_head_")) {
+                        headMap[alias.replace("sub_head_","")] = row
+                    }
+                    if (alias.startsWith("sub_total_")) {
+                        totalMap[alias.replace("sub_total_","")] = row
+                    }
+                }
+            }
+            // по подразделениям
+            headMap.keySet().each { key ->
+                def headRow = headMap[key]
+                def totalRow = totalMap[key]
+                if (headRow && totalRow) {
+                    def groupFrom = headRow.getIndex()
+                    def groupTo = totalRow.getIndex() - 1
+                    def rows = (groupFrom < groupTo ? dataRows[groupFrom..(groupTo - 1)] : [])
+                    // Массовое разыменование строк НФ
+                    def columnList = headRow.keySet().collect { headRow.getCell(it).getColumn() }
+                    refBookService.dataRowsDereference(logger, rows, columnList)
+                    sortRows(rows, sortColumns)
+                } else {
+                    logger.warn("Ошибка при сортировке. Нарушена структура налоговой формы. Отсутствуют строки заголовоков/итогов по подразделениям.")
+                }
+            }
         }
 
         if (saveInDB) {
