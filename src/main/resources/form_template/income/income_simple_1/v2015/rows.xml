@@ -863,7 +863,7 @@
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
         <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1"
               stringValue="Комиссия от оказания консультационных и информационных услуг"/>
-        <cell alias="accountNo" colSpan="1" rowSpan="1" stringValue="70601.12406.16"/>
+        <cell alias="accountNo" colSpan="1" rowSpan="1" stringValue="70601.16203.16"/>
         <cell alias="rnu6Field10Sum" colSpan="1" rowSpan="1"/>
         <cell alias="rnu6Field12Accepted" colSpan="1" rowSpan="1"/>
         <cell alias="rnu6Field12PrevTaxPeriod" colSpan="1" rowSpan="1"/>
@@ -880,7 +880,7 @@
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
         <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1"
               stringValue="Комиссия от оказания консультационных и информационных услуг"/>
-        <cell alias="accountNo" colSpan="1" rowSpan="1" stringValue="70601.12406.27"/>
+        <cell alias="accountNo" colSpan="1" rowSpan="1" stringValue="70601.16203.27"/>
         <cell alias="rnu6Field10Sum" colSpan="1" rowSpan="1"/>
         <cell alias="rnu6Field12Accepted" colSpan="1" rowSpan="1"/>
         <cell alias="rnu6Field12PrevTaxPeriod" colSpan="1" rowSpan="1"/>
@@ -897,7 +897,7 @@
         <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
         <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1"
               stringValue="Комиссия от оказания консультационных и информационных услуг"/>
-        <cell alias="accountNo" colSpan="1" rowSpan="1" stringValue="70601.12406.28"/>
+        <cell alias="accountNo" colSpan="1" rowSpan="1" stringValue="70601.16203.28"/>
         <cell alias="rnu6Field10Sum" colSpan="1" rowSpan="1"/>
         <cell alias="rnu6Field12Accepted" colSpan="1" rowSpan="1"/>
         <cell alias="rnu6Field12PrevTaxPeriod" colSpan="1" rowSpan="1"/>
