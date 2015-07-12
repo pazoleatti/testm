@@ -252,11 +252,6 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
     }
 
     @Override
-    public void setDeleteButtonVisible(boolean isVisible) {
-        deleteRow.setVisible(isVisible);
-    }
-
-    @Override
     public void setVersionView(boolean isVersion) {
         this.isVersion = isVersion;
         edit.setVisible(!isVersion);

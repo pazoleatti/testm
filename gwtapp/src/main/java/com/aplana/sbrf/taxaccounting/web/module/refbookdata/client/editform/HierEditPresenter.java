@@ -1,11 +1,9 @@
 package com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform;
 
 import com.aplana.gwt.client.dialog.Dialog;
-import com.aplana.gwt.client.dialog.DialogHandler;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
-import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.event.RollbackTableRowSelection;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.event.SetFormMode;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.event.UpdateForm;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.exception.BadValueException;
@@ -22,31 +20,28 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-public class EditFormPresenter extends AbstractEditPresenter<EditFormPresenter.MyView>{
+/**
+ * User: avanteev
+ */
+public class HierEditPresenter extends AbstractEditPresenter<HierEditPresenter.MyView> {
 
-    @ProxyEvent
+    @Inject
+    public HierEditPresenter(EventBus eventBus, MyView view, DispatchAsync dispatchAsync, PlaceManager placeManager) {
+        super(eventBus, view, dispatchAsync, placeManager);
+    }
+
     @Override
-    public void onShowItem(ShowItemEvent event) {
-        super.show(event.getRecordId());
-    }
+    void showRecord(final Long refBookRecordId) {
+        if (refBookRecordId == null) {
+            currentUniqueRecordId = null;
+            getView().fillInputFields(null);
 
-    public interface MyView extends AbstractEditPresenter.MyView {
-        void setVersionFrom(Date value);
-        void setVersionTo(Date value);
-        Date getVersionFrom();
-        Date getVersionTo();
-        void fillVersionData(RefBookRecordVersionData versionData);
-    }
-
-	@Inject
-	public EditFormPresenter(final EventBus eventBus, final MyView view, final DispatchAsync dispatchAsync,
-                             PlaceManager placeManager) {
-		super(eventBus, view, dispatchAsync, placeManager);
-	}
-
-    public void clearRecordId() {
-        currentUniqueRecordId = null;
-        previousURId = null;
+            getView().updateRefBookPickerPeriod();
+            getView().cleanFields();
+            setNeedToReload();
+            return;
+        }
+        super.showRecord(refBookRecordId);
     }
 
     @Override
@@ -74,13 +69,13 @@ public class EditFormPresenter extends AbstractEditPresenter<EditFormPresenter.M
                                     Dialog.errorMessage(title, msg);
                                     return;
                                 }
-                                LogAddEvent.fire(EditFormPresenter.this, result.getUuid());
-                                UpdateForm.fire(EditFormPresenter.this, !result.isException(), recordChanges);
+                                LogAddEvent.fire(HierEditPresenter.this, result.getUuid());
+                                UpdateForm.fire(HierEditPresenter.this, !result.isException(), recordChanges);
                                 if (result.isException()) {
                                     Dialog.errorMessage("Запись не сохранена", "Обнаружены фатальные ошибки!");
                                 } else {
                                     setIsFormModified(false);
-                                    SetFormMode.fire(EditFormPresenter.this, FormMode.EDIT);
+                                    SetFormMode.fire(HierEditPresenter.this, FormMode.EDIT);
                                     getView().updateInputFields();
                                 }
                             }
@@ -120,7 +115,7 @@ public class EditFormPresenter extends AbstractEditPresenter<EditFormPresenter.M
                                     Dialog.errorMessage(title, msg);
                                     return;
                                 }
-                                LogAddEvent.fire(EditFormPresenter.this, result.getUuid());
+                                LogAddEvent.fire(HierEditPresenter.this, result.getUuid());
                                 setIsFormModified(false);
                                 Long newId = result.getNewIds() != null && !result.getNewIds().isEmpty() ? result.getNewIds().get(0) : null;
                                 recordChanges.setId(newId);
@@ -131,8 +126,8 @@ public class EditFormPresenter extends AbstractEditPresenter<EditFormPresenter.M
                                 data.setVersionCount(1);
                                 getView().cleanErrorFields();
                                 getView().fillVersionData(data);
-                                UpdateForm.fire(EditFormPresenter.this, true, recordChanges);
-                                SetFormMode.fire(EditFormPresenter.this, FormMode.EDIT);
+                                UpdateForm.fire(HierEditPresenter.this, true, recordChanges);
+                                SetFormMode.fire(HierEditPresenter.this, FormMode.EDIT);
                                 getView().updateInputFields();
                             }
                         }, this));
@@ -148,69 +143,30 @@ public class EditFormPresenter extends AbstractEditPresenter<EditFormPresenter.M
     public void clean() {
         currentUniqueRecordId = null;
         getView().fillInputFields(null);
-
-            /*if (!isVersionMode && mode == FormMode.EDIT) {
-                setMode(FormMode.CREATE);
-            } else if(!isVersionMode && mode == FormMode.CREATE){
-                setMode(FormMode.EDIT);
-            } else {
-                setMode(mode);
-            } */
-        getView().setVersionFrom(null);
-        getView().setVersionTo(null);
-        //getView().updateRefBookPickerPeriod();
+        /*getView().setVersionFrom(null);
+        getView().setVersionTo(null);*/
+        getView().updateRefBookPickerPeriod();
+        getView().cleanFields();
+        setNeedToReload();
     }
 
+    @ProxyEvent
     @Override
-    void showRecord(final Long refBookRecordId) {
-        if (refBookRecordId == null) {
-            currentUniqueRecordId = null;
-            getView().fillInputFields(null);
-
-            /*if (!isVersionMode && mode == FormMode.EDIT) {
-                setMode(FormMode.CREATE);
-            } else if(!isVersionMode && mode == FormMode.CREATE){
-                setMode(FormMode.EDIT);
-            } else {
-                setMode(mode);
-            } */
-            /*getView().setVersionFrom(null);
-            getView().setVersionTo(null);*/
-            getView().updateRefBookPickerPeriod();
-            getView().cleanFields();
-            return;
-        }
-
-        if (isFormModified) {
-            Dialog.confirmMessage(DIALOG_MESSAGE, new DialogHandler() {
-                @Override
-                public void yes() {
-                    setIsFormModified(false);
-                    showRecord(refBookRecordId);
-                    getView().cleanErrorFields();
-                    SetFormMode.fire(EditFormPresenter.this, mode);
-                }
-
-                @Override
-                public void no() {
-                    super.no();
-                    RollbackTableRowSelection.fire(EditFormPresenter.this, currentUniqueRecordId);
-                    SetFormMode.fire(EditFormPresenter.this, FormMode.EDIT);
-                }
-
-                @Override
-                public void cancel() {
-                    no();
-                }
-
-                @Override
-                public void close() {
-                    no();
-                }
-
-            });
+    public void onShowItem(ShowItemEvent event) {
+        if (event.getDereferenceValue()!=null){
+            super.show(event.getDereferenceValue(), event.getRecordId());
         } else {
-            super.showRecord(refBookRecordId);
+            super.show(event.getRecordId());
         }
     }
+
+    public interface MyView extends AbstractEditPresenter.MyView {
+        void setVersionFrom(Date value);
+        void setVersionTo(Date value);
+        Date getVersionFrom();
+        Date getVersionTo();
+        void fillVersionData(RefBookRecordVersionData versionData);
+    }
+
+
 }

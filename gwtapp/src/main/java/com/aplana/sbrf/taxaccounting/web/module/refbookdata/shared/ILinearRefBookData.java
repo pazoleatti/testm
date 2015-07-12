@@ -15,7 +15,6 @@ public interface ILinearRefBookData {
     void setTableColumns(final List<RefBookColumn> columns);
     void setRange(Range range);
     int getPageSize();
-    void blockDataView(FormMode mode);
     void setMode(FormMode mode);
     void setRefBookId(Long refBookId);
 }
