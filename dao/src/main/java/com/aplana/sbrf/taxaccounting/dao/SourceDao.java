@@ -111,7 +111,7 @@ public interface SourceDao {
      * @param declaration признак того, что экземпляры-приемники надо искать только среди деклараций
      * @return
      */
-    List<ConsolidatedInstance> findConsolidatedInstances(Long source, Date periodStart, Date periodEnd, boolean declaration);
+    List<ConsolidatedInstance> findConsolidatedInstances(long source, long destination, Date periodStart, Date periodEnd, boolean declaration);
 
 
     /**
