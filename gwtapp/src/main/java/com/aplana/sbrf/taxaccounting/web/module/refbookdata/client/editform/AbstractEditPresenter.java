@@ -75,9 +75,6 @@ public abstract class AbstractEditPresenter<V extends AbstractEditPresenter.MyVi
          * Обновляет поля презентера
          */
         void updateRefBookPickerPeriod();
-        void setVisibleFields(boolean isVisible);
-        // Устанавливает видимость для поля "Все версии"
-        void setAllVersionField(boolean isVisible);
         void cleanFields();
         void cleanErrorFields();
         boolean checkChanges();
@@ -143,7 +140,35 @@ public abstract class AbstractEditPresenter<V extends AbstractEditPresenter.MyVi
         if (mode.equals(FormMode.EDIT) && currentUniqueRecordId != null && getView().checkChanges()) {
             setIsFormModified(true);
         }
-        showRecord(refBookRecordId);
+        if (isFormModified) {
+            Dialog.confirmMessage(DIALOG_MESSAGE, new DialogHandler() {
+                @Override
+                public void yes() {
+                    setIsFormModified(false);
+                    showRecord(refBookRecordId);
+                }
+
+                @Override
+                public void no() {
+                    super.no();
+                    RollbackTableRowSelection.fire(AbstractEditPresenter.this, currentUniqueRecordId);
+                    SetFormMode.fire(AbstractEditPresenter.this, FormMode.EDIT);
+                }
+
+                @Override
+                public void cancel() {
+                    no();
+                }
+
+                @Override
+                public void close() {
+                    no();
+                }
+
+            });
+        } else {
+            showRecord(refBookRecordId);
+        }
     }
 
     public void show(final String dereferenceValue, final long recordId){
@@ -316,10 +341,6 @@ public abstract class AbstractEditPresenter<V extends AbstractEditPresenter.MyVi
     public void setVersionMode(boolean versionMode) {
         isVersionMode = versionMode;
         getView().setVersionMode(versionMode);
-    }
-
-    public void cleanFields(){
-        getView().cleanFields();
     }
 
     @Override

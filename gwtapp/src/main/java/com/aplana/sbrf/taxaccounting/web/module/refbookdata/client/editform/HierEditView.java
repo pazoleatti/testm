@@ -131,20 +131,6 @@ public class HierEditView extends AbstractEditView implements HierEditPresenter.
     }
 
     @Override
-    public void setVisibleFields(boolean isVisible) {
-        versionStart.setVisible(isVisible);
-        versionEnd.setVisible(isVisible);
-        startVersionDateLabel.setVisible(isVisible);
-        endVersionDateLabel.setVisible(isVisible);
-        allVersion.setVisible(isVisible);
-    }
-
-    @Override
-    public void setAllVersionField(boolean isVisible) {
-        allVersion.setVisible(isVisible);
-    }
-
-    @Override
     Panel getRootFieldsPanel() {
         return editPanel;
     }
