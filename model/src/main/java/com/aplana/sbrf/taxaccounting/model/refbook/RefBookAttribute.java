@@ -280,68 +280,53 @@ public class RefBookAttribute implements Serializable {
     }
 
     @Override
-	public boolean equals(Object o) {
-		if (this == o) {
-			return true;
-		}
-		if (o == null || getClass() != o.getClass()) {
-			return false;
-		}
-		RefBookAttribute that = (RefBookAttribute) o;
-		if (precision != that.precision) {
-			return false;
-		}
-		if (visible != that.visible) {
-			return false;
-		}
-		if (width != that.width) {
-			return false;
-		}
-		if (alias != null ? !alias.equals(that.alias) : that.alias != null) {
-			return false;
-		}
-		if (attributeType != that.attributeType) {
-			return false;
-		}
-		if (id != null ? !id.equals(that.id) : that.id != null) {
-			return false;
-		}
-		if (name != null ? !name.equals(that.name) : that.name != null) {
-			return false;
-		}
-		if (refBookAttributeId != null ? !refBookAttributeId.equals(that.refBookAttributeId) : that.refBookAttributeId != null) {
-			return false;
-		}
-		if (refBookId != null ? !refBookId.equals(that.refBookId) : that.refBookId != null) {
-			return false;
-		}
-        if (required != that.required){
-            return false;
-        }
-        if (readOnly != that.readOnly){
-            return false;
-        }
-        if (unique != that.unique){
-            return false;
-        }
-		if (sortOrder != null ? !sortOrder.equals(that.sortOrder) : that.sortOrder != null) {
-			return false;
-		}
-        if (format != null ? format.equals(that.format) : that.format != null){
-            return false;
-        }
-        if (maxLength != that.maxLength){
-            return false;
-        }
-		return true;
-	}
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
 
-	@Override
-	public int hashCode() {
-		return id != null ? id.hashCode() : 0;
-	}
+        RefBookAttribute attribute = (RefBookAttribute) o;
 
-	@Override
+        if (readOnly != attribute.readOnly) return false;
+        if (required != attribute.required) return false;
+        if (unique != attribute.unique) return false;
+        if (visible != attribute.visible) return false;
+        if (width != attribute.width) return false;
+        if (alias != null ? !alias.equals(attribute.alias) : attribute.alias != null) return false;
+        if (attributeType != attribute.attributeType) return false;
+        if (format != attribute.format) return false;
+        if (id != null ? !id.equals(attribute.id) : attribute.id != null) return false;
+        if (maxLength != null ? !maxLength.equals(attribute.maxLength) : attribute.maxLength != null) return false;
+        if (name != null ? !name.equals(attribute.name) : attribute.name != null) return false;
+        if (precision != null ? !precision.equals(attribute.precision) : attribute.precision != null) return false;
+        if (refBookAttributeId != null ? !refBookAttributeId.equals(attribute.refBookAttributeId) : attribute.refBookAttributeId != null)
+            return false;
+        if (refBookId != null ? !refBookId.equals(attribute.refBookId) : attribute.refBookId != null) return false;
+        if (sortOrder != null ? !sortOrder.equals(attribute.sortOrder) : attribute.sortOrder != null) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = id != null ? id.hashCode() : 0;
+        result = 31 * result + (name != null ? name.hashCode() : 0);
+        result = 31 * result + (alias != null ? alias.hashCode() : 0);
+        result = 31 * result + (attributeType != null ? attributeType.hashCode() : 0);
+        result = 31 * result + (required ? 1 : 0);
+        result = 31 * result + (refBookId != null ? refBookId.hashCode() : 0);
+        result = 31 * result + (refBookAttributeId != null ? refBookAttributeId.hashCode() : 0);
+        result = 31 * result + (visible ? 1 : 0);
+        result = 31 * result + (precision != null ? precision.hashCode() : 0);
+        result = 31 * result + width;
+        result = 31 * result + unique;
+        result = 31 * result + (sortOrder != null ? sortOrder.hashCode() : 0);
+        result = 31 * result + (format != null ? format.hashCode() : 0);
+        result = 31 * result + (readOnly ? 1 : 0);
+        result = 31 * result + (maxLength != null ? maxLength.hashCode() : 0);
+        return result;
+    }
+
+    @Override
 	public String toString() {
 		final StringBuilder sb = new StringBuilder("RefBookAttribute{");
 		sb.append("alias='").append(alias).append('\'');

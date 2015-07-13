@@ -142,7 +142,7 @@ def groupColumns = ['issuer', 'regNumber', 'tradeNumber']
 
 // Проверяемые на пустые значения атрибуты (графа 1..5, 8, 13..17)
 @Field
-def nonEmptyColumns = ['issuer', 'regNumber', 'tradeNumber', 'currency', 'reserveCalcValuePrev',
+def nonEmptyColumns = ['issuer', /*'regNumber',*/ 'tradeNumber', 'currency', 'reserveCalcValuePrev',
                        'costOnMarketQuotation', 'reserveCalcValue', 'reserveCreation', 'recovery']
 
 // Атрибуты итоговых строк для которых вычисляются суммы (графа 6..9, 14..17)
@@ -311,13 +311,15 @@ def logicCheck() {
             if (!isConsolidated && formPrev != null) {
                 for (DataRow rowPrev in dataPrevRows) {
                     if (rowPrev.getAlias() == null && row.tradeNumber == rowPrev.tradeNumber && row.reserveCalcValuePrev != rowPrev.reserveCalcValue) {
-                        loggerError(row, errorMsg + "РНУ сформирован некорректно! Не выполняется условие: «Графа 8» (${rowPrev.reserveCalcValuePrev}) текущей строки РНУ-27 за текущий период= «Графе 15» (${row.reserveCalcValue}) строки РНУ-27 за предыдущий период, значение «Графы 4» которой соответствует значению «Графы 4» РНУ-27 за текущий период.")
+                        rowWarning(logger, row, errorMsg + "РНУ сформирован некорректно! Не выполняется условие: «Графа 8» (${rowPrev.reserveCalcValuePrev}) текущей строки РНУ-27 за текущий период= «Графе 15» (${row.reserveCalcValue}) строки РНУ-27 за предыдущий период, значение «Графы 4» которой соответствует значению «Графы 4» РНУ-27 за текущий период.")
                     }
                 }
             }
 
             // 1. Проверка на заполнение поля «<Наименование поля>»
             checkNonEmptyColumns(row, index, nonEmptyColumns, logger, !isBalancePeriod())
+            // графа 3 - сделали необязательной, но сообщение о незаполненности выводить нефатальным сообщением
+            checkNonEmptyColumns(row, index, ['regNumber'], logger, false)
 
             if (isRubleCurrency(row.currency)) {
                 // 17. Проверка графы 11
@@ -352,8 +354,7 @@ def logicCheck() {
 
             for (column in totalColumns) {
                 if (row.get(column) != srow.get(column)) {
-                    def tmpRow = getPrevRowWithoutAlias(dataRows, row)
-                    def regNumber = tmpRow.regNumber
+                    def regNumber = getRegNumberOrIssuer(dataRows, row, 'regNumber')
                     loggerError(null, "Итоговые значения по «$regNumber» рассчитаны неверно в графе «${getColumnName(row, column)}»!")
                 }
             }
@@ -365,8 +366,7 @@ def logicCheck() {
 
             for (column in totalColumns) {
                 if (row.get(column) != srow.get(column)) {
-                    def tmpRow = getPrevRowWithoutAlias(dataRows, row)
-                    def issuer = tmpRow.issuer
+                    def issuer = getRegNumberOrIssuer(dataRows, row, 'issuer')
                     loggerError(null, "Итоговые значения для «$issuer» рассчитаны неверно в графе «${getColumnName(row, column)}»!")
                 }
             }
@@ -379,11 +379,11 @@ def logicCheck() {
         def itogo = getDataRow(dataRows, 'total')
         // 13.
         if (itogo != null && itogoPrev != null && itogo.prev != itogoPrev.current) {
-            loggerError(null, "РНУ сформирован некорректно! Не выполняется условие: «Итого» по графе 6 (${itogo.prev}) = «Итого» по графе 7 (${itogoPrev.current}) формы РНУ-27 за предыдущий отчётный период")
+            rowWarning(logger, null, "РНУ сформирован некорректно! Не выполняется условие: «Итого» по графе 6 (${itogo.prev}) = «Итого» по графе 7 (${itogoPrev.current}) формы РНУ-27 за предыдущий отчётный период")
         }
         // 14.
         if (itogo != null && itogoPrev != null && itogo.reserveCalcValuePrev != itogoPrev.reserveCalcValue) {
-            loggerError(null, "РНУ сформирован некорректно! Не выполняется условие: «Итого» по графе 8 (${itogo.reserveCalcValuePrev}) = «Итого» по графе 15 (${itogoPrev.reserveCalcValue}) формы РНУ-27 за предыдущий отчётный период")
+            rowWarning(logger, null, "РНУ сформирован некорректно! Не выполняется условие: «Итого» по графе 8 (${itogo.reserveCalcValuePrev}) = «Итого» по графе 15 (${itogoPrev.reserveCalcValue}) формы РНУ-27 за предыдущий отчётный период")
         }
     }
 
@@ -417,7 +417,7 @@ def logicCheck() {
             logger.warn("Отсутствуют строки с номерами сделок: ${notFound.join(', ')}")
         }
         if (!foundMany.isEmpty()) {
-            logger.warn("Существует несколько строк с номерами сделок: \${foundMany.join(', ')}")
+            logger.warn("Существует несколько строк с номерами сделок: ${foundMany.join(', ')}")
         }
     }
 }
@@ -429,6 +429,30 @@ def getSign(def row) {
 
 def isRubleCurrency(def currencyCode) {
     return currencyCode != null ? (getRefBookValue(15, currencyCode)?.CODE?.stringValue in ['810', '643']) : false
+}
+
+/**
+ * Получить значение группировки подитоговой строки.
+ *
+ * @param dataRows строки
+ * @param row подитоговая строка
+ * @param alias алиас графы значение которой используется для группировки
+ */
+def getRegNumberOrIssuer(def dataRows, DataRow row, def alias) {
+    int pos = dataRows.indexOf(row)
+    def tmpRow = null
+    for (int i = pos; i >= 0; i--) {
+        def iRow = getRow(dataRows, i)
+        if (iRow.getAlias() == null) {
+            tmpRow = iRow
+            break
+        }
+    }
+    if (tmpRow != null) {
+        return tmpRow[alias]
+    } else {
+        return row.fix[0..(row.fix.size() - ' Итог'.size() - 1)]
+    }
 }
 
 /**
@@ -449,17 +473,23 @@ void addAllStatic(def dataRows) {
         def nextRegNum = nextRow?.regNumber
         if (row.getAlias() == null && nextRow == null || regNum != nextRegNum) {
             def itogRegNumberRow = calcItogRegNumber(i)
-            dataRows.add(i + 1, itogRegNumberRow)
             j++
+            dataRows.add(i + j, itogRegNumberRow)
         }
 
         // графа 2 - эмитент - issuer
         def issuer = row.issuer
         def nextIssuer = nextRow?.issuer
         if (row.getAlias() == null && nextRow == null || issuer != nextIssuer) {
+            // если все значения ГРН пустые, то подитог по ГРН не добавится, поэтому перед добавлением подитога по эмитенту, нужно добавить подитого с незадавнным ГРН
+            if (j == 0) {
+                def itogRegNumberRow = calcItogRegNumber(i)
+                j++
+                dataRows.add(i + j, itogRegNumberRow)
+            }
             def itogIssuerRow = calcItogIssuer(i)
-            dataRows.add(i + 2, itogIssuerRow)
             j++
+            dataRows.add(i + j, itogIssuerRow)
         }
         i += j  // Обязательно чтобы избежать зацикливания в простановке
     }
@@ -525,7 +555,7 @@ def calcItogRegNumber(int i) {
         }
     }
 
-    newRow.fix = tRegNumber + ' Итог'
+    newRow.fix = (tRegNumber != null ? tRegNumber : 'ГРН не задан') + ' Итог'
 
     for (column in totalColumns) {
         newRow.getCell(column).setValue(new BigDecimal(0), null)
@@ -932,14 +962,16 @@ void sortFormDataRows(def saveInDB = true) {
     dataRows.clear()
 
     // сортируем и добавляем все строки
-    rowsMap.sort{ it.key.fix }
-    rowsMap.each { row, subMap ->
-        subMap.sort { it.key.fix }
-        subMap.each { subTotalRow, dataRowsList ->
+    def tmpSortedRows = rowsMap.keySet().sort { it.fix }
+    tmpSortedRows.each { keyRow ->
+        def subMap = rowsMap[keyRow]
+        def tmpSortedRows2 =  subMap.keySet().sort { it.fix }
+        tmpSortedRows2.each { keySubTotalRow ->
+            def dataRowsList = subMap[keySubTotalRow]
             sortAddRows(dataRowsList, dataRows)
-            dataRows.add(subTotalRow)
+            dataRows.add(keySubTotalRow)
         }
-        dataRows.add(row)
+        dataRows.add(keyRow)
     }
     // если остались данные вне иерархии, добавляем их перед итогами
     sortAddRows(rowList, dataRows)
@@ -980,6 +1012,9 @@ void importData() {
 
     // проверка шапки
     checkHeaderXls(headerValues, COLUMN_COUNT, HEADER_ROW_COUNT, tmpRow)
+    if (logger.containsLevel(LogLevel.ERROR)) {
+        return;
+    }
     // освобождение ресурсов для экономии памяти
     headerValues.clear()
     headerValues = null
@@ -1004,7 +1039,7 @@ void importData() {
             break
         }
         // Пропуск итоговых строк
-        if (rowValues[INDEX_FOR_SKIP]) {
+        if (rowValues[INDEX_FOR_SKIP] && (rowValues[INDEX_FOR_SKIP] in ["Общий итог", "ГРН не задан"] || rowValues[INDEX_FOR_SKIP].contains(" Итог"))) {
             allValues.remove(rowValues)
             rowValues.clear()
             continue
@@ -1061,7 +1096,7 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
     (2..17).each { index ->
         headerMapping.put((headerRows[1][index]), index.toString())
     }
-    checkHeaderEquals(headerMapping)
+    checkHeaderEquals(headerMapping, logger)
 }
 
 /**

@@ -2,12 +2,14 @@ package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.TAUserDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
-import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.MembersFilterData;
+import com.aplana.sbrf.taxaccounting.model.PagingResult;
+import com.aplana.sbrf.taxaccounting.model.TARole;
+import com.aplana.sbrf.taxaccounting.model.TAUser;
+import com.aplana.sbrf.taxaccounting.model.TAUserView;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
@@ -17,7 +19,11 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -70,7 +76,7 @@ public class TAUserDaoImpl extends AbstractDao implements TAUserDao {
     };
 
 	@Override
-	@Cacheable(value = "User", key = "#userId")
+	//@Cacheable(value = "User", key = "#userId")
 	public TAUser getUser(int userId) {
 		TAUser user;
 		try {
@@ -89,7 +95,7 @@ public class TAUserDaoImpl extends AbstractDao implements TAUserDao {
 	}
 	
 	@Override
-    @Cacheable(value = "User", key = "'login_'+#login")
+    //@Cacheable(value = "User", key = "'login_'+#login")
 	public int getUserIdByLogin(String login) {
 		try {
 			return getJdbcTemplate().queryForInt("select id from sec_user where lower(login) = ?", login.toLowerCase());
@@ -160,7 +166,7 @@ public class TAUserDaoImpl extends AbstractDao implements TAUserDao {
 	}
 
 	@Override
-	@CacheEvict(value="User", key="#userId", beforeInvocation=true)
+	//@CacheEvict(value="User", key="#userId", beforeInvocation=true)
 	public void setUserIsActive(int userId, int isActive) {
 		int rows = getJdbcTemplate().update("update sec_user set is_active=? where id = ?", 
 				new Object[]{isActive, userId},
@@ -170,7 +176,7 @@ public class TAUserDaoImpl extends AbstractDao implements TAUserDao {
 	}
 
 	@Override
-	@CacheEvict(value="User", key="#user.id", beforeInvocation=true)
+	//@CacheEvict(value="User", key="#user.id", beforeInvocation=true)
 	public void updateUser(final TAUser user) {
 		try {
 			List<Object> array = new ArrayList<Object>();

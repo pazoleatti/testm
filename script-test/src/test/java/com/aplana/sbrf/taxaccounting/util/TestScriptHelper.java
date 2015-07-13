@@ -6,6 +6,7 @@ import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.formdata.HeaderCell;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.model.util.StringUtils;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
@@ -18,6 +19,8 @@ import javax.script.ScriptException;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Unmarshaller;
 import java.io.*;
+import java.nio.charset.Charset;
+import java.util.Map;
 
 /**
  * Хэлпер для работы со скриптами НФ в тестовом режиме
@@ -277,7 +280,7 @@ public class TestScriptHelper {
             for (LogEntry logEntry : logger.getEntries()) {
                 // Перекодирование для исправления кодировки при выводе в Idea
                 System.out.println(logEntry.getLevel() + " "
-                        + new String(logEntry.getMessage().getBytes("utf8"), "cp1251"));
+                        + new String(logEntry.getMessage().getBytes("utf8"), Charset.defaultCharset().name()));
             }
         } catch (UnsupportedEncodingException e) {
             // Ignore
@@ -363,5 +366,14 @@ public class TestScriptHelper {
 
     public DepartmentReportPeriodService getDepartmentReportPeriodService() {
         return departmentReportPeriodService;
+    }
+
+    /**
+     * Получить все записи справочника.
+     *
+     * @param refBookId идентификатор справочника
+     */
+    public Map<Long, Map<String, RefBookValue>> getRefBookAllRecords(Long refBookId) {
+        return mockHelper.getRefBookAllRecords(refBookId);
     }
 }

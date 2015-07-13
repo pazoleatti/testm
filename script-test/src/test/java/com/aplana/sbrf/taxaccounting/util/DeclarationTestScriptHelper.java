@@ -5,6 +5,7 @@ import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.impl.DeclarationDataScriptParams;
@@ -16,6 +17,7 @@ import javax.script.Bindings;
 import javax.script.ScriptException;
 import java.io.*;
 import java.util.Calendar;
+import java.util.Map;
 
 /**
  * Хэлпер для работы со скриптами декларации в тестовом режиме
@@ -264,5 +266,14 @@ public class DeclarationTestScriptHelper {
      */
     public StringWriter getXmlStringWriter() {
         return xmlStringWriter;
+    }
+
+    /**
+     * Получить все записи справочника.
+     *
+     * @param refBookId идентификатор справочника
+     */
+    public Map<Long, Map<String, RefBookValue>> getRefBookAllRecords(Long refBookId) {
+        return mockHelper.getRefBookAllRecords(refBookId);
     }
 }

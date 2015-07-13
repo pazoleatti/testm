@@ -1,7 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared;
 
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
-import com.aplana.sbrf.taxaccounting.model.util.StringUtils;
 
 import java.io.Serializable;
 import java.util.Date;

@@ -216,14 +216,6 @@ void logicCheck() {
         if (row.documentPay && !row.documentPay.matches(pattern256Date)) {
             loggerLog(row, String.format(ONE_FMT_ERROR_MSG, index, getColumnName(row,'documentPay'), "<Номер: тип поля «Строка/256/»> <Дата: тип поля «Дата» формат, «ДД.ММ.ГГГГ»>"))
         }
-        // графа 10
-        if (row.salesmanInnKpp && !row.salesmanInnKpp.matches("^(\\d{12}|\\d{10}/\\d{9})\$")) {
-            loggerLog(row, String.format(TWO_FMT_ERROR_MSG, index, getColumnName(row,'salesmanInnKpp'), "ХХХХХХХХХХ/ХХХХХХХХХ (организация) или ХХХХХХХХХХХХ (ИП)"))
-        }
-        // графа 12
-        if (row.agentInnKpp && !row.agentInnKpp.matches("^(\\d{12}|\\d{10}/\\d{9})\$")) {
-            loggerLog(row, String.format(TWO_FMT_ERROR_MSG, index, getColumnName(row,'agentInnKpp'), "ХХХХХХХХХХ/ХХХХХХХХХ (организация) или ХХХХХХХХХХХХ (ИП)"))
-        }
         // графа 14
         if (row.currency && !row.currency.matches("^\\S.{0,254} \\S{3}\$")) {
             loggerLog(row, String.format(ONE_FMT_ERROR_MSG, index, getColumnName(row,'currency'), "<Наименование: тип поля «Строка/255/»> <Код: тип поля «Строка/3/», формат «ХХХ»>"))
@@ -234,13 +226,15 @@ void logicCheck() {
         }
         def innKppPatterns = [/([0-9]{1}[1-9]{1}|[1-9]{1}[0-9]{1})[0-9]{8}\/([0-9]{1}[1-9]{1}|[1-9]{1}[0-9]{1})([0-9]{2})([0-9A-Z]{2})([0-9]{3})/, /([0-9]{1}[1-9]{1}|[1-9]{1}[0-9]{1})[0-9]{10}/]
         ['salesmanInnKpp', 'agentInnKpp'].each { alias ->
-            if (checkPattern(logger, row, alias, row[alias], innKppPatterns, null, !isBalancePeriod())) {
+            if (row[alias] && !row[alias].matches(/^(\S{12}|\S{10}\/\S{9})$/)) {
+                loggerLog(row, String.format(TWO_FMT_ERROR_MSG, index, getColumnName(row, alias), "ХХХХХХХХХХ/ХХХХХХХХХ (организация) или ХХХХХХХХХХХХ (ИП)"))
+            } else if (checkPattern(logger, row, alias, row[alias], innKppPatterns, null, !isBalancePeriod())) {
                 checkControlSumInn(logger, row, alias, row[alias].split("/")[0], !isBalancePeriod())
             } else if (row[alias]) {
                 if (!wasError) {
-                    loggerError(row, String.format("Строка %s: Расшифровка паттерна «%s»: %s.", index, INN_JUR_PATTERN, INN_JUR_MEANING))
-                    loggerError(row, String.format("Строка %s: Расшифровка паттерна «%s»: %s.", index, KPP_PATTERN, KPP_MEANING))
-                    loggerError(row, String.format("Строка %s: Расшифровка паттерна «%s»: %s.", index, INN_IND_PATTERN, INN_IND_MEANING))
+                    loggerLog(row, String.format("Строка %s: Расшифровка паттерна «%s»: %s.", index, INN_JUR_PATTERN, INN_JUR_MEANING))
+                    loggerLog(row, String.format("Строка %s: Расшифровка паттерна «%s»: %s.", index, KPP_PATTERN, KPP_MEANING))
+                    loggerLog(row, String.format("Строка %s: Расшифровка паттерна «%s»: %s.", index, INN_IND_PATTERN, INN_IND_MEANING))
                 }
                 wasError = true
             }
@@ -300,20 +294,49 @@ void sortFormDataRows(def saveInDB = true) {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
 
-    // не производим сортировку в консолидированных формах
-    if (dataRows[0].getAlias() == null) {
+    boolean isGroups = dataRows.find { it.getAlias() != null && it.getAlias().startsWith("head_") } != null
+    if (!isGroups) {
         def totalRow = getDataRow(dataRows, 'total')
         dataRows.remove(totalRow)
-
         sortRows(dataRows, sortColumns)
-
         dataRows.add(totalRow)
-
-        if (saveInDB) {
-            dataRowHelper.saveSort()
-        } else {
-            updateIndexes(dataRows);
+    } else {
+        def headMap = [:]
+        def totalMap = [:]
+        // находим строки начала и конца для каждого подразделения
+        dataRows.each { row ->
+            String alias = row.getAlias()
+            if (alias != null) {
+                if (alias.startsWith("head_")) {
+                    headMap[alias.replace("head_","")] = row
+                }
+                if (alias.startsWith("total_")) {
+                    totalMap[alias.replace("total_","")] = row
+                }
+            }
         }
+        // по подразделениям
+        headMap.keySet().each { key ->
+            def headRow = headMap[key]
+            def totalRow = totalMap[key]
+            if (headRow && totalRow) {
+                def groupFrom = headRow.getIndex()
+                def groupTo = totalRow.getIndex() - 1
+                def rows = (groupFrom < groupTo ? dataRows[groupFrom..(groupTo - 1)] : [])
+                // Массовое разыменование строк НФ
+                def columnList = headRow.keySet().collect { headRow.getCell(it).getColumn() }
+                refBookService.dataRowsDereference(logger, rows, columnList)
+                sortRows(rows, sortColumns)
+            } else {
+                logger.warn("Ошибка при сортировке. Нарушена структура налоговой формы. Отсутствуют строки заголовоков/итогов по подразделениям.")
+            }
+        }
+    }
+
+    if (saveInDB) {
+        dataRowHelper.saveSort()
+    } else {
+        updateIndexes(dataRows);
     }
 }
 
@@ -656,12 +679,4 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
     }
 
     return newRow
-}
-
-def loggerError(def row, def msg) {
-    if (isBalancePeriod()) {
-        rowWarning(logger, row, msg)
-    } else {
-        rowError(logger, row, msg)
-    }
 }

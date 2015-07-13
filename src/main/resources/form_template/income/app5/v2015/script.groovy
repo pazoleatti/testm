@@ -56,7 +56,7 @@ switch (formDataEvent) {
     case FormDataEvent.MOVE_PREPARED_TO_APPROVED: // Утвердить из "Подготовлена"
         logicCheck()
         break
-    case FormDataEvent.COMPOSE :
+    case FormDataEvent.COMPOSE:
         formDataService.consolidationTotal(formData, logger, ['total'])
         calc()
         logicCheck()
@@ -237,6 +237,8 @@ void logicCheck() {
         return
     }
 
+    boolean wasError = false
+
     for (row in dataRows) {
         if (row.getAlias() != null) {
             continue
@@ -266,6 +268,10 @@ void logicCheck() {
                     }
                 }
             }
+        }
+
+        if (row.kpp && checkPattern(logger, row, 'kpp', row.kpp, KPP_PATTERN, wasError ? null : KPP_MEANING, true)) {
+            wasError = true
         }
     }
 
@@ -585,6 +591,9 @@ void importData() {
 
     // проверка шапки
     checkHeaderXls(headerValues, COLUMN_COUNT, HEADER_ROW_COUNT, tmpRow)
+    if (logger.containsLevel(LogLevel.ERROR)) {
+        return;
+    }
     // освобождение ресурсов для экономии памяти
     headerValues.clear()
     headerValues = null
@@ -609,7 +618,7 @@ void importData() {
             break
         }
         // Пропуск итоговых строк
-        if (rowValues[INDEX_FOR_SKIP]) {
+        if (rowValues[INDEX_FOR_SKIP] == "Итого") {
             allValues.remove(rowValues)
             rowValues.clear()
             continue
@@ -661,7 +670,7 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
     (2..10).each { index ->
         headerMapping.put((headerRows[2][index]), index.toString())
     }
-    checkHeaderEquals(headerMapping)
+    checkHeaderEquals(headerMapping, logger)
 }
 
 /**
