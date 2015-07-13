@@ -2,12 +2,10 @@
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
              xmlns:g="urn:import:com.google.gwt.user.client.ui"
              xmlns:style="urn:import:com.aplana.sbrf.taxaccounting.web.widget.style"
-             xmlns:dep="urn:import:com.aplana.sbrf.taxaccounting.web.widget.refbookpicker.client"
-             xmlns:rep="urn:import:com.aplana.sbrf.taxaccounting.web.widget.periodpicker.client"
              xmlns:dw="urn:import:com.aplana.gwt.client"
              xmlns:a="urn:import:com.aplana.sbrf.taxaccounting.web.widget.departmentpicker"
              xmlns:r='urn:import:com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client'
-             xmlns:d="urn:import:com.aplana.sbrf.taxaccounting.web.widget.datepicker">
+        >
     <ui:style>
         .content {
             margin: 20px;

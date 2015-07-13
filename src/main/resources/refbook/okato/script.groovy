@@ -82,10 +82,10 @@ void importFromXML() {
                         recordValueMap.NAME = refBookValue
                     } else if ('KOD'.equals(name)) {
                         def pattern = /[0-9]{11}/
-                        if (attributeValue ==~ pattern){
+                        if (attributeValue && attributeValue ==~ pattern){
                             def refBookValue = new RefBookValue(RefBookAttributeType.STRING, attributeValue)
                             recordValueMap.OKATO = refBookValue
-                        } else {
+                        } else if (attributeValue) {
                             logger.error("Атрибут \"%s\" заполнен неверно (%s)! Ожидаемый паттерн: \"%s\"", "Код ОКАТО", attributeValue, pattern)
                         }
                     } else if ('TYPEAKT'.equals(name)) {

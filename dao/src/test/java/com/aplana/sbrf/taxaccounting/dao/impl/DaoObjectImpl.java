@@ -1,8 +1,6 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.DaoObject;
-import com.aplana.sbrf.taxaccounting.dao.impl.cache.CacheConstants;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Repository;
 
 import java.util.Random;
@@ -12,7 +10,7 @@ import java.util.Random;
  */
 @Repository
 public class DaoObjectImpl implements DaoObject {
-    @Cacheable(value = CacheConstants.FORM_TEMPLATE)
+    //@Cacheable(value = CacheConstants.FORM_TEMPLATE)
     public int getRandomInt(){
         return new Random().nextInt();
     }
@@ -22,7 +20,7 @@ public class DaoObjectImpl implements DaoObject {
         return getRandomInt();
     }
 
-    @Cacheable(value = CacheConstants.FORM_TEMPLATE, key = "#key")
+    //@Cacheable(value = CacheConstants.FORM_TEMPLATE, key = "#key")
     private int privateGetRandomInt(String key){
         return new Random().nextInt();
     }

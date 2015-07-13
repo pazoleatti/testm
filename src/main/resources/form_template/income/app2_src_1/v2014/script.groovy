@@ -165,9 +165,9 @@ def autoFillColumns = ['income', 'deduction', 'taxBase']
 @Field
 def editableColumns = allColumns - autoFillColumns
 
-// Проверяемые на пустые значения атрибуты (графа 3, 4, 6, 22, 23, 25, 26)
+// Проверяемые на пустые значения атрибуты (графа 3, 4, 6-10, 12, 22, 23, 25, 26)
 @Field
-def nonEmptyColumns = ['surname', 'name', 'status', 'taxRate', 'income', 'taxBase', 'calculated']
+def nonEmptyColumns = ['surname', 'name', 'status', 'birthday', 'citizenship', 'code', 'series', 'region', 'taxRate', 'income', 'taxBase', 'calculated']
 
 @Field
 def tmpMap = [:]
@@ -233,12 +233,15 @@ void logicCheck() {
     // Для хранения правильных значении и сравнения с имеющимися при арифметических проверках
     def needValue = [:]
 
+    boolean wasError = false
+
     for (row in dataRows) {
         if (row.getAlias() != null) {
             continue
         }
         def index = row.getIndex()
         def errorMsg = "Строка $index: "
+        def citizenshipCode = getRefBookValue(10L, row.citizenship)?.CODE?.value
 
         // 1-7. Проверка на заполнение поля «<Наименование поля>»
         checkNonEmptyColumns(row, row.getIndex(), nonEmptyColumns, logger, true)
@@ -272,7 +275,7 @@ void logicCheck() {
         }
 
         // 20. Проверка правильности заполнения графы «ИНН в стране гражданства»
-        if (row.inn && row.citizenship && getRefBookValue(10L, row.citizenship)?.CODE?.value == '643') {
+        if (row.inn && row.citizenship && citizenshipCode == '643') {
             def nameInn = getColumnName(row, 'inn')
             def nameCitizenship = getColumnName(row, 'citizenship')
             logger.error(errorMsg + "Графа «$nameInn» не должно быть заполнено, если графа «$nameCitizenship» равна «643»")
@@ -307,8 +310,18 @@ void logicCheck() {
         checkCalc(row, arithmeticCheckAlias, needValue, logger, true)
 
         // 29. Проверка на соответствие паттерну
-        if (checkPattern(logger, row, 'innRF', row.innRF, INN_IND_PATTERN, null, true)) {
+        if (row.innRF && checkPattern(logger, row, 'innRF', row.innRF, INN_IND_PATTERN, wasError ? null : INN_IND_MEANING, true)) {
             checkControlSumInn(logger, row, 'innRF', row.innRF, true)
+        } else if (row.innRF) {
+            wasError = true
+        }
+
+        // 30. Проверка заполнения поля 21
+        if (citizenshipCode != '643' && !row.postcode &&!row.address) {
+            def nameCitizenship = getColumnName(row, 'citizenship')
+            def namePostcode = getColumnName(row, 'postcode')
+            def nameAddress = getColumnName(row, 'address')
+            logger.error(errorMsg + "В случае если графа «$nameCitizenship» не равна «643» и графа «$namePostcode» не заполнена, то графа «$nameAddress» должна быть заполнена!")
         }
     }
 }
@@ -868,6 +881,9 @@ void importData() {
 
     // проверка шапки
     checkHeaderXls(headerValues, COLUMN_COUNT, HEADER_ROW_COUNT, tmpRow)
+    if (logger.containsLevel(LogLevel.ERROR)) {
+        return;
+    }
     // освобождение ресурсов для экономии памяти
     headerValues.clear()
     headerValues = null
@@ -927,7 +943,7 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
         headerMapping.put((headerRows[1][index]), (index + 1).toString())
         index++
     }
-    checkHeaderEquals(headerMapping)
+    checkHeaderEquals(headerMapping, logger)
 }
 
 /**
