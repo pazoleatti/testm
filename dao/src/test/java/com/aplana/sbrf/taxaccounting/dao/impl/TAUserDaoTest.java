@@ -9,13 +9,16 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration({"TAUserDaoTest.xml"})
@@ -94,7 +97,7 @@ public class TAUserDaoTest {
 		Assert.assertFalse(userDB.isActive());
 	}
 
-    @CacheEvict(value = "User", allEntries = true)
+    //@CacheEvict(value = "User", allEntries = true)
 	@Test
 	public void testUpdateUser(){
 		TAUser user = new TAUser();

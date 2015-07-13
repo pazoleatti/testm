@@ -56,7 +56,7 @@ public class Vehicles1Test extends ScriptTestBase {
     }
 
     @Before
-    public void mockRefBookDataProvider() {
+    public void mock() {
         // Для работы логических проверок
         when(testHelper.getRefBookDataProvider().getRecords(any(Date.class), any(PagingParams.class), anyString(),
                 any(RefBookAttribute.class))).thenAnswer(
@@ -83,6 +83,8 @@ public class Vehicles1Test extends ScriptTestBase {
                         return result;
                     }
                 });
+
+        when(testHelper.getFormDataService().getFormTemplate(anyInt(), anyInt())).thenReturn(testHelper.getFormTemplate());
     }
 
     @Test

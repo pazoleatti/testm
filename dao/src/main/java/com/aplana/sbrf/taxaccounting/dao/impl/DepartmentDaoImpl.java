@@ -1,14 +1,11 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
-import com.aplana.sbrf.taxaccounting.dao.impl.cache.CacheConstants;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.DepartmentType;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.RowMapper;
@@ -18,13 +15,17 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Repository
 @Transactional(readOnly = true)
 public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
 	@Override
-	@Cacheable(CacheConstants.DEPARTMENT)
+	//@Cacheable(CacheConstants.DEPARTMENT)
 	public Department getDepartment(int id) {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Fetching department with id = " + id  + " from database");
@@ -494,7 +495,7 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
 
     @Override
     @Transactional(readOnly = false)
-    @CacheEvict(value = CacheConstants.DEPARTMENT,key = "#depId", beforeInvocation = true)
+    //@CacheEvict(value = CacheConstants.DEPARTMENT,key = "#depId", beforeInvocation = true)
     public void setUsedByGarant(int depId, boolean used) {
         if (logger.isDebugEnabled()) {
             logger.debug("Updating usage department by Garant with id = " + depId + " to value = " + used);

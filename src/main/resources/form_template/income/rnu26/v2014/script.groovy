@@ -125,7 +125,7 @@ def autoFillColumns = allColumns - editableColumns
 
 // Проверяемые на пустые значения атрибуты (графа 1..3, 5..9, 13, 14)
 @Field
-def nonEmptyColumns = ['issuer', 'shareType', 'currency', 'lotSizePrev', 'lotSizeCurrent', 'reserveCalcValuePrev', 'cost',
+def nonEmptyColumns = ['issuer', 'currency', 'lotSizePrev', 'lotSizeCurrent', 'reserveCalcValuePrev', 'cost',
         'signSecurity', 'marketQuotationInRub', 'costOnMarketQuotation']
 
 // Атрибуты итоговых строк для которых вычисляются суммы (графа 6..9, 14..17)
@@ -927,6 +927,9 @@ void importData() {
 
     // проверка шапки
     checkHeaderXls(headerValues, COLUMN_COUNT, HEADER_ROW_COUNT, tmpRow)
+    if (logger.containsLevel(LogLevel.ERROR)) {
+        return;
+    }
     // освобождение ресурсов для экономии памяти
     headerValues.clear()
     headerValues = null
@@ -951,7 +954,7 @@ void importData() {
             break
         }
         // Пропуск итоговых строк
-        if (rowValues[INDEX_FOR_SKIP]) {
+        if (rowValues[INDEX_FOR_SKIP] && (rowValues[INDEX_FOR_SKIP] == "Общий итог" || rowValues[INDEX_FOR_SKIP].contains(" итог"))) {
             allValues.remove(rowValues)
             rowValues.clear()
             continue
@@ -1008,7 +1011,7 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
     (2..17).each { index ->
         headerMapping.put((headerRows[1][index]), index.toString())
     }
-    checkHeaderEquals(headerMapping)
+    checkHeaderEquals(headerMapping, logger)
 }
 
 /**

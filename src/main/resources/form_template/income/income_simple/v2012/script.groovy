@@ -453,7 +453,7 @@ def consolidationFromPrimary(def dataRows, def formSources) {
                                         def dateFrom = Date.parse('dd.MM.yyyy', '01.01.' + (Integer.valueOf(rowRNU6.date?.format('yyyy')) - 3))
                                         def reportPeriodList = reportPeriodService.getReportPeriodsByDate(TaxType.INCOME, dateFrom, rowRNU6.date)
                                         reportPeriodList.each { period ->
-                                            def primaryRNU6 = formDataService.getLast(child.formType.id, FormDataKind.PRIMARY, child.departmentId, period.getId(), null) // TODO не реализовано получение по всем подразделениям.
+                                            def primaryRNU6 = formDataService.getLast(child.formType.id, child.kind, child.departmentId, period.getId(), null) // TODO не реализовано получение по всем подразделениям.
                                             if (primaryRNU6 != null) {
                                                 def dataPrimary = formDataService.getDataRowHelper(primaryRNU6)
                                                 dataPrimary.allSaved.each { rowPrimary ->
@@ -585,6 +585,9 @@ void importData() {
 
     // проверка шапки
     checkHeaderXls(headerValues)
+    if (logger.containsLevel(LogLevel.ERROR)) {
+        return;
+    }
     // освобождение ресурсов для экономии памяти
     headerValues.clear()
     headerValues = null
@@ -662,7 +665,7 @@ void checkHeaderXls(def headerRows) {
     (0..7).each { index ->
         headerMapping.put((headerRows[2][index]), (index + 1).toString())
     }
-    checkHeaderEquals(headerMapping)
+    checkHeaderEquals(headerMapping, logger)
 }
 
 /**

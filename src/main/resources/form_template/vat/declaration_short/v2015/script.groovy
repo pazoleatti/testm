@@ -128,7 +128,7 @@ def getDepartmentParam() {
         def departmentId = declarationData.departmentId
         def departmentParamList = getProvider(RefBook.DEPARTMENT_CONFIG_VAT).getRecords(getEndDate() - 1, null, "DEPARTMENT_ID = $departmentId", null)
         if (departmentParamList == null || departmentParamList.size() == 0 || departmentParamList.get(0) == null) {
-            throw new Exception("Ошибка при получении настроек обособленного подразделения")
+            throw new Exception("Ошибка при получении настроек обособленного подразделения. Настройки подразделения заполнены не полностью")
         }
         departmentParam = departmentParamList?.get(0)
     }
@@ -311,8 +311,8 @@ void generateXML() {
     /** НалИсчПрод. Код строки 170 Графа 3. */
     def nalIschProd = empty
     if (rows724_1) {
-        def totalRow1baseSum = getDataRowSum(rows724_1, 'total_1', 'baseSum')
-        def totalRow1ndsSum = getDataRowSum(rows724_1, 'total_1', 'ndsSum')
+        def totalRow1baseSum = getDataRowSum(rows724_1, 'total_1', 'baseSum', false)
+        def totalRow1ndsSum = getDataRowSum(rows724_1, 'total_1', 'ndsSum', false)
         def totalRow2baseSum = getDataRowSum(rows724_1, 'total_2', 'baseSum')
         def totalRow2ndsSum = getDataRowSum(rows724_1, 'total_2', 'ndsSum')
         def totalRow3baseSum = getDataRowSum(rows724_1, 'total_3', 'baseSum', false)
@@ -323,12 +323,12 @@ void generateXML() {
         def totalRow5ndsSum = getDataRowSum(rows724_1, 'total_5', 'ndsSum')
         def totalRow6baseSum = getDataRowSum(rows724_1, 'total_6', 'baseSum', false)
         def totalRow6ndsSum  = getDataRowSum(rows724_1, 'total_6', 'ndsSum', false)
-        def totalRow7baseSum = getDataRowSum(rows724_1, 'total_7', 'baseSum')
+        def totalRow7baseSum = getDataRowSum(rows724_1, 'total_7', 'baseSum', false)
         def totalRow7ndsDealSum = getDataRowSum(rows724_1, 'total_7', 'ndsDealSum')
-        def totalRow7ndsBookSum = getDataRowSum(rows724_1, 'total_7', 'ndsBookSum')
+        def totalRow7ndsBookSum = getDataRowSum(rows724_1, 'total_7', 'ndsBookSum', false)
 
-        nalBaza010 = totalRow1baseSum + totalRow7baseSum
-        sumNal010 = totalRow1ndsSum + totalRow7ndsBookSum
+        nalBaza010 = round(totalRow1baseSum + totalRow7baseSum)
+        sumNal010 = round(totalRow1ndsSum + totalRow7ndsBookSum)
 
         nalBaza020 = totalRow2baseSum
         sumNal020 = totalRow2ndsSum
@@ -849,7 +849,13 @@ def getSumOutcomeSimple(def knuCodes) {
     if (reportPeriodPrevIncome?.id == null) {
         return 0
     }
-    def formDataSimple = getFormDataSimple(reportPeriodPrevIncome.id)
+    def formDataSimple = getFormDataSimple(310, reportPeriodPrevIncome.id)
+    if (formDataSimple == null) {
+        formDataSimple = getFormDataSimple(304, reportPeriodPrevIncome.id)
+    } else if (getFormDataSimple(304, reportPeriodPrevIncome.id) != null) {
+        logger.warn("Неверно настроены источники декларации! Одновременно созданы в качестве источников налоговые формы: «%s», «%s». Консолидация произведена из «%s».",
+                formTypeService.get(310).name, formTypeService.get(304)?.name, formTypeService.get(310)?.name)
+    }
     def dataRowsSimple = (formDataSimple ? formDataService.getDataRowHelper(formDataSimple)?.allSaved : null)
     for (def row : dataRowsSimple) {
         if (row.consumptionTypeId in knuCodes) {
@@ -860,10 +866,10 @@ def getSumOutcomeSimple(def knuCodes) {
 }
 
 /**
- * Получить данные формы "расходы простые" (id = 304)
+ * Получить данные формы "расходы простые" (id = 310/304)
  */
-def getFormDataSimple(def reportPeriodId) {
-    return formDataService.getLast(304, FormDataKind.SUMMARY, declarationData.departmentId, reportPeriodId, null)
+def getFormDataSimple(def id, def reportPeriodId) {
+    return formDataService.getLast(id, FormDataKind.SUMMARY, declarationData.departmentId, reportPeriodId, null)
 }
 
 def getOkato(def id) {

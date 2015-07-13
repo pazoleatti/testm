@@ -72,9 +72,9 @@ switch (formDataEvent) {
         importData()
         if (!logger.containsLevel(LogLevel.ERROR)) {
             calc()
-            logicCheck()
             formDataService.saveCachedDataRows(formData, logger)
         }
+        calc()
         break
     case FormDataEvent.IMPORT_TRANSPORT_FILE:
         importTransportData()
@@ -156,8 +156,7 @@ void calc() {
         dataRows.eachWithIndex { row, index ->
             row.setIndex(index + 1)
         }
-
-        if (!isBalancePeriod()) {
+        if (!isBalancePeriod() && formDataEvent != FormDataEvent.IMPORT) {
             for (row in dataRows) {
                 row.rateOfTheBankOfRussia = calc8(row)
                 row.taxAccountingRuble = calc10(row)
@@ -340,7 +339,7 @@ void logicCheck() {
                         }
                     }
                     if (c10 < c12) {
-                        loggerError(row, errorMsg + "Сумма данных бухгалтерского учёта превышает сумму начисленных платежей"
+                        rowWarning(logger, row, errorMsg + "Сумма данных бухгалтерского учёта превышает сумму начисленных платежей"
                                 + " для документа " + row.docNumber + " от " + dateFormat.format(row.docDate) + "!")
                     }
                 }
@@ -645,6 +644,9 @@ void importData() {
 
     // проверка шапки
     checkHeaderXls(headerValues, COLUMN_COUNT, HEADER_ROW_COUNT)
+    if (logger.containsLevel(LogLevel.ERROR)) {
+        return;
+    }
     // освобождение ресурсов для экономии памяти
     headerValues.clear()
     headerValues = null
@@ -669,7 +671,7 @@ void importData() {
             break
         }
         // Пропуск итоговых строк
-        if (rowValues[INDEX_FOR_SKIP]) {
+        if (rowValues[INDEX_FOR_SKIP] && (rowValues[INDEX_FOR_SKIP] == "Итого" || rowValues[INDEX_FOR_SKIP].contains("Итого по КНУ "))) {
             allValues.remove(rowValues)
             rowValues.clear()
             continue
@@ -722,7 +724,7 @@ void checkHeaderXls(def headerRows, def colCount, rowCount) {
     (2..12).each { index ->
         headerMapping.put((headerRows[2][index]), index.toString())
     }
-    checkHeaderEquals(headerMapping)
+    checkHeaderEquals(headerMapping, logger)
 }
 
 /**
