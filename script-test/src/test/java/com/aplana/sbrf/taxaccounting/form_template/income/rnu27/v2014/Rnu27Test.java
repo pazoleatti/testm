@@ -1,22 +1,28 @@
-package com.aplana.sbrf.taxaccounting.form_template.income.incomeWithHoldingAgent.v2014;
+package com.aplana.sbrf.taxaccounting.form_template.income.rnu27.v2014;
 
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.util.ScriptTestBase;
 import com.aplana.sbrf.taxaccounting.util.TestScriptHelper;
 import com.aplana.sbrf.taxaccounting.util.mock.ScriptTestMockHelper;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 
 import java.math.BigDecimal;
 import java.util.List;
 
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.when;
+
 /**
- * Расчет налога на прибыль организаций с доходов, удерживаемого налоговым агентом (источником выплаты доходов).
+ * РНУ-27.
  *
  * @author Ramil Timerbaev
  */
-public class IncomeWithHoldingAgentTest extends ScriptTestBase {
-    private static final int TYPE_ID = 10070;
+public class Rnu27Test extends ScriptTestBase {
+    private static final int TYPE_ID = 326;
     private static final int DEPARTMENT_ID = 1;
     private static final int REPORT_PERIOD_ID = 1;
     private static final int DEPARTMENT_PERIOD_ID = 1;
@@ -40,7 +46,20 @@ public class IncomeWithHoldingAgentTest extends ScriptTestBase {
 
     @Override
     protected ScriptTestMockHelper getMockHelper() {
-        return getDefaultScriptTestMockHelper(IncomeWithHoldingAgentTest.class);
+        return getDefaultScriptTestMockHelper(Rnu27Test.class);
+    }
+
+    @Before
+    public void mockFormDataService() {
+        when(testHelper.getDepartmentReportPeriodService().get(any(Integer.class))).thenAnswer(
+                new Answer<DepartmentReportPeriod>() {
+                    @Override
+                    public DepartmentReportPeriod answer(InvocationOnMock invocation) throws Throwable {
+                        DepartmentReportPeriod result = new DepartmentReportPeriod();
+                        result.setBalance(true);
+                        return result;
+                    }
+                });
     }
 
     @Test
@@ -106,18 +125,8 @@ public class IncomeWithHoldingAgentTest extends ScriptTestBase {
     }
 
     @Test
-    public void importTransportFileTest() {
-        int expected = 2; // в файле 2 строки
-        testHelper.setImportFileInputStream(getImportRnuInputStream());
-        testHelper.execute(FormDataEvent.IMPORT_TRANSPORT_FILE);
-        Assert.assertEquals(expected, testHelper.getDataRowHelper().getAll().size());
-        checkLoadData(testHelper.getDataRowHelper().getAll());
-        checkLogger();
-    }
-
-    @Test
     public void importExcelTest() {
-        int expected = 2; // в файле 2 строки
+        int expected = 2 + 2 * 2 + 1; // в файле 2 строки + 2 подитога на каждую строку + 1 итоговая строка
         testHelper.setImportFileInputStream(getImportXlsInputStream());
         testHelper.execute(FormDataEvent.IMPORT);
         Assert.assertEquals(expected, testHelper.getDataRowHelper().getAll().size());
@@ -126,24 +135,30 @@ public class IncomeWithHoldingAgentTest extends ScriptTestBase {
         checkLogger();
     }
 
+    @Test
+    public void importTransportFileTest() {
+        int expected = 2 + 1; // в файле 2 строки + 1 итоговая
+        testHelper.setImportFileInputStream(getImportRnuInputStream());
+        testHelper.execute(FormDataEvent.IMPORT_TRANSPORT_FILE);
+        Assert.assertEquals(expected, testHelper.getDataRowHelper().getAll().size());
+        checkLoadData(testHelper.getDataRowHelper().getAll());
+        checkLogger();
+    }
+
     /** Проверить загруженные данные. */
     void checkLoadData(List<DataRow<Cell>> dataRows) {
         long index = 1;
+        int precision = 6;
 
-        // графа 2, 3, 7, 13, 14, 15, 21, 26, 29, 30, 32..42
-        String [] strColumns = { "emitentName", "emitentInn", "decisionNumber", "addresseeName", "inn", "kpp",
-                "series", "number", "withheldNumber", "postcode", "district", "city", "locality", "street",
-                "house", "housing", "apartment", "surname", "name", "patronymic", "phone" };
+        // графа 2..4
+        String [] strColumns = { "issuer", "regNumber", "tradeNumber" };
 
-        // графа 4, 5, 6, 10, 11, 12, 16, 17, 22, 23, 24, 27
-        String [] numColumns = { "all", "rateZero", "distributionSum", "firstMonth", "lastMonth", "allSum", "type",
-                "status", "rate", "dividends", "sum", "withheldSum" };
+        // графа 6..9
+        String [] numColumns = { "prev", "current", "reserveCalcValuePrev", "cost", "marketQuotation", "rubCourse",
+                "marketQuotationInRub", "costOnMarketQuotation", "reserveCalcValue", "reserveCreation", "recovery" };
 
-        // графа 19, 20, 31
-        String [] refbookColumns = { "citizenship", "kind", "region" };
-
-        // графа 8, 9, 18, 25, 28
-        String [] dateColumns = { "decisionDate", "year", "birthday", "date", "withheldDate" };
+        // графа 5, 10
+        String [] refbookColumns = { "currency", "signSecurity" };
 
         String MSG = "row.%s[%d]";
         for (DataRow<Cell> row : dataRows) {
@@ -154,13 +169,17 @@ public class IncomeWithHoldingAgentTest extends ScriptTestBase {
             String expectedString = "test" + index;
             for (String alias : strColumns) {
                 String msg = String.format(MSG, alias, row.getIndex());
-                Assert.assertEquals(msg, expectedString, row.getCell(alias).getStringValue());
+                if ("regNumber".equals(alias) && index > 1) {
+                    Assert.assertEquals(msg, "", row.getCell(alias).getStringValue());
+                } else {
+                    Assert.assertEquals(msg, expectedString, row.getCell(alias).getStringValue());
+                }
             }
 
-            BigDecimal expectedNum = roundValue(index, 0);
+            BigDecimal expectedNum = roundValue(index, precision);
             for (String alias : numColumns) {
                 String msg = String.format(MSG, alias, row.getIndex());
-                BigDecimal actualNum = row.getCell(alias).getNumericValue().setScale(0, BigDecimal.ROUND_HALF_UP);
+                BigDecimal actualNum = row.getCell(alias).getNumericValue().setScale(precision, BigDecimal.ROUND_HALF_UP);
                 Assert.assertEquals(msg, expectedNum, actualNum);
             }
 
@@ -168,11 +187,6 @@ public class IncomeWithHoldingAgentTest extends ScriptTestBase {
             for (String alias : refbookColumns) {
                 String msg = String.format(MSG, alias, row.getIndex());
                 Assert.assertEquals(msg, expectedRefbook, row.getCell(alias).getNumericValue());
-            }
-
-            for (String alias : dateColumns) {
-                String msg = String.format(MSG, alias, row.getIndex());
-                Assert.assertNotNull(msg, row.getCell(alias).getDateValue());
             }
 
             index++;
