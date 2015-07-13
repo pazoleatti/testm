@@ -397,18 +397,49 @@ void sortFormDataRows(def saveInDB = true) {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
 
-    // не производим сортировку в консолидированных формах
-    if (dataRows[0].getAlias() == null) {
+    boolean isGroups = dataRows.find { it.getAlias() != null && it.getAlias().startsWith("head_") } != null
+    if (!isGroups) {
         def totalRow = getDataRow(dataRows, 'total')
         dataRows.remove(totalRow)
         sortRows(dataRows, sortColumns)
         dataRows.add(totalRow)
-
-        if (saveInDB) {
-            dataRowHelper.saveSort()
-        } else {
-            updateIndexes(dataRows);
+    } else {
+        def headMap = [:]
+        def totalMap = [:]
+        // находим строки начала и конца для каждого подразделения
+        dataRows.each { row ->
+            String alias = row.getAlias()
+            if (alias != null) {
+                if (alias.startsWith("head_")) {
+                    headMap[alias.replace("head_","")] = row
+                }
+                if (alias.startsWith("total_")) {
+                    totalMap[alias.replace("total_","")] = row
+                }
+            }
         }
+        // по подразделениям
+        headMap.keySet().each { key ->
+            def headRow = headMap[key]
+            def totalRow = totalMap[key]
+            if (headRow && totalRow) {
+                def groupFrom = headRow.getIndex()
+                def groupTo = totalRow.getIndex() - 1
+                def rows = (groupFrom < groupTo ? dataRows[groupFrom..(groupTo - 1)] : [])
+                // Массовое разыменование строк НФ
+                def columnList = headRow.keySet().collect { headRow.getCell(it).getColumn() }
+                refBookService.dataRowsDereference(logger, rows, columnList)
+                sortRows(rows, sortColumns)
+            } else {
+                logger.warn("Ошибка при сортировке. Нарушена структура налоговой формы. Отсутствуют строки заголовоков/итогов по подразделениям.")
+            }
+        }
+    }
+
+    if (saveInDB) {
+        dataRowHelper.saveSort()
+    } else {
+        updateIndexes(dataRows);
     }
 }
 

@@ -125,7 +125,7 @@ def autoFillColumns = allColumns - editableColumns
 
 // Проверяемые на пустые значения атрибуты (графа 1..3, 5..9, 13, 14)
 @Field
-def nonEmptyColumns = ['issuer', 'shareType', 'currency', 'lotSizePrev', 'lotSizeCurrent', 'reserveCalcValuePrev', 'cost',
+def nonEmptyColumns = ['issuer', 'currency', 'lotSizePrev', 'lotSizeCurrent', 'reserveCalcValuePrev', 'cost',
         'signSecurity', 'marketQuotationInRub', 'costOnMarketQuotation']
 
 // Атрибуты итоговых строк для которых вычисляются суммы (графа 6..9, 14..17)
