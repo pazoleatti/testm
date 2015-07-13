@@ -1039,7 +1039,7 @@ void importData() {
             break
         }
         // Пропуск итоговых строк
-        if (rowValues[INDEX_FOR_SKIP] && (rowValues[INDEX_FOR_SKIP] == "Общий итог" || rowValues[INDEX_FOR_SKIP].contains(" итог"))) {
+        if (rowValues[INDEX_FOR_SKIP] && (rowValues[INDEX_FOR_SKIP] in ["Общий итог", "ГРН не задан"] || rowValues[INDEX_FOR_SKIP].contains(" Итог"))) {
             allValues.remove(rowValues)
             rowValues.clear()
             continue
