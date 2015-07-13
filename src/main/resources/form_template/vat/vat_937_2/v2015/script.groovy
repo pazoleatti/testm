@@ -323,6 +323,9 @@ void consolidation() {
 
     def totalRow = getFixedRow('Всего','total')
     dataRows.add(totalRow)
+    dataRows.eachWithIndex { row, i ->
+        row.setIndex(i + 1)
+    }
     save(dataRows)
     dataRows = null
 }
