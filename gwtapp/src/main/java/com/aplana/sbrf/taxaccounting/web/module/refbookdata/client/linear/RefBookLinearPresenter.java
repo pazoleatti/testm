@@ -6,11 +6,10 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallba
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
+import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.event.RollbackTableRowSelection;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.event.DeleteItemEvent;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.event.SearchButtonEvent;
-import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.FormMode;
-import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.EditFormPresenter;
-import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.event.RollbackTableRowSelection;
+import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.event.ShowItemEvent;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.*;
 import com.google.gwt.view.client.AbstractDataProvider;
 import com.google.gwt.view.client.AsyncDataProvider;
@@ -37,17 +36,14 @@ public class RefBookLinearPresenter extends PresenterWidget<RefBookLinearPresent
 
     DispatchAsync dispatchAsync;
 
-    EditFormPresenter editFormPresenter;
-
     private final TableDataProvider dataProvider = new TableDataProvider();
     private Long refBookDataId;
     private Long recordId;
 
     @Inject
-    public RefBookLinearPresenter(EventBus eventBus, MyView view, DispatchAsync dispatchAsync, EditFormPresenter editFormPresenter) {
+    public RefBookLinearPresenter(EventBus eventBus, MyView view, DispatchAsync dispatchAsync) {
         super(eventBus, view);
         this.dispatchAsync = dispatchAsync;
-        this.editFormPresenter = editFormPresenter;
         getView().assignDataProvider(getView().getPageSize(), dataProvider);
         getView().setUiHandlers(this);
     }
@@ -56,10 +52,12 @@ public class RefBookLinearPresenter extends PresenterWidget<RefBookLinearPresent
     public void onSelectionChanged() {
         if (getView().getSelectedRow() != null) {
             recordId = getView().getSelectedRow().getRefBookRowId();
-            editFormPresenter.setRecordId(recordId);
-            editFormPresenter.show(recordId);
+            ShowItemEvent.fire(this, null, getView().getSelectedRow().getRefBookRowId());
+            /*editPresenter.setRecordId(recordId);
+            editPresenter.show(recordId);*/
         } else {
-            editFormPresenter.setRecordId(null);
+            ShowItemEvent.fire(this, null, null);
+            //editPresenter.setRecordId(null);
         }
     }
 
@@ -87,8 +85,8 @@ public class RefBookLinearPresenter extends PresenterWidget<RefBookLinearPresent
                                 if (result.isException()) {
                                     Dialog.errorMessage("Удаление всех версий элемента справочника", "Обнаружены фатальные ошибки!");
                                 }
-                                /*editFormPresenter.setMode(mode);*/
-                                editFormPresenter.show(null);
+                                /*editPresenter.setMode(mode);*/
+                                ShowItemEvent.fire(RefBookLinearPresenter.this, null, null);
                                 getView().updateTable();
                             }
                         }, this));
@@ -179,11 +177,6 @@ public class RefBookLinearPresenter extends PresenterWidget<RefBookLinearPresent
     }
 
     @Override
-    public void blockDataView(FormMode mode) {
-        getView().updateMode(mode);
-    }
-
-    @Override
     protected void onReveal() {
         super.onReveal();
     }
@@ -223,8 +216,9 @@ public class RefBookLinearPresenter extends PresenterWidget<RefBookLinearPresent
                                     if (!result.getDataRows().isEmpty()) {
                                         getView().setSelected(result.getDataRows().get(0).getRefBookRowId());
                                     } else {
-                                        editFormPresenter.cleanFields();
-                                        editFormPresenter.clearRecordId();
+                                        ShowItemEvent.fire(RefBookLinearPresenter.this, null, null);
+                                        /*editPresenter.cleanFields();
+                                        editPresenter.clean();*/
                                         getView().setSelected(recordId);
                                     }
                                     // http://jira.aplana.com/browse/SBRFACCTAX-5759
@@ -237,9 +231,9 @@ public class RefBookLinearPresenter extends PresenterWidget<RefBookLinearPresent
                                         getView().setSelected(result.getDataRows().get(selectedRowIndex).getRefBookRowId());
                                     }
                                     selectedRowIndex = null;*/
-                                    if (result.getDataRows().size() == 0) {
-                                        editFormPresenter.setAllVersionVisible(false);
-                                    }
+                                    /*if (result.getDataRows().size() == 0) {
+                                        editPresenter.setCanVersion(false);
+                                    }*/
                                 }
                             }, RefBookLinearPresenter.this));
         }

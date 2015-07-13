@@ -26,14 +26,14 @@ public class EditFormPresenterTest {
 
     @Test
     public void testOnCancelClickedWhenDepartments(EditFormPresenter.MyView myView) {
-        presenter.init(REF_BOOK_DEPARTMENTS_ID, new ArrayList<RefBookColumn>());
+        presenter.init(REF_BOOK_DEPARTMENTS_ID);
         presenter.onCancelClicked();
         verify(myView, never()).updateMode(FormMode.EDIT);
     }
 
     @Test
     public void testOnCancelClickedWhenNotDepartments(EditFormPresenter.MyView myView) {
-        presenter.init(REF_BOOK_DEPARTMENTS_ID, new ArrayList<RefBookColumn>());
+        presenter.init(REF_BOOK_DEPARTMENTS_ID);
         presenter.onCancelClicked();
         verify(myView, never()).updateMode(FormMode.EDIT);
     }
@@ -47,7 +47,7 @@ public class EditFormPresenterTest {
     @Test
     @SuppressWarnings("unchecked")
     public void testOnSaveClickedWhenCreateAndDepartments(DispatchAsync dispatchAsync, EditFormPresenter.MyView myView) throws ActionException {
-        presenter.init(REF_BOOK_DEPARTMENTS_ID, new ArrayList<RefBookColumn>());
+        presenter.init(REF_BOOK_DEPARTMENTS_ID);
         ArrayList<Long> ids = new ArrayList<Long>();
         ids.add(1000L);
 
@@ -75,7 +75,7 @@ public class EditFormPresenterTest {
     @Test
     @SuppressWarnings("unchecked")
     public void testOnSaveClickedWhenCreateAndNotDepartments(DispatchAsync dispatchAsync, EditFormPresenter.MyView myView) throws ActionException {
-        presenter.init(REF_BOOK_DEPARTMENTS_ID, new ArrayList<RefBookColumn>());
+        presenter.init(REF_BOOK_DEPARTMENTS_ID);
         ArrayList<Long> ids = new ArrayList<Long>();
         ids.add(1000L);
 
@@ -102,7 +102,7 @@ public class EditFormPresenterTest {
     @Test
     @SuppressWarnings("unchecked")
     public void testOnSaveClickedWhenUpdate(DispatchAsync dispatchAsync) {
-        presenter.init(REF_BOOK_DEPARTMENTS_ID, new ArrayList<RefBookColumn>());
+        presenter.init(REF_BOOK_DEPARTMENTS_ID);
         presenter.setCurrentUniqueRecordId(null);
         presenter.onSaveClicked(false);
         verify(dispatchAsync, atLeastOnce()).execute((SaveRefBookRowVersionAction) any(), (AsyncCallback<SaveRefBookRowVersionResult>) any());
