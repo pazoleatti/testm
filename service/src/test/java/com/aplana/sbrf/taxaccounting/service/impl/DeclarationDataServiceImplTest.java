@@ -281,7 +281,11 @@ public class DeclarationDataServiceImplTest {
         departmentFormTypes.add(dft2);
         departmentFormTypes.add(dft2);
         DepartmentReportPeriod drp1 = new DepartmentReportPeriod();
+        drp1.setId(1);
         drp1.setCorrectionDate(new Date(0));
+        DepartmentReportPeriod drp2 = new DepartmentReportPeriod();
+        drp2.setId(2);
+        drp2.setCorrectionDate(new Date(0));
 
         when(departmentFormTypeDao.getDeclarationSources(
                 declarationData.getDepartmentId(),
@@ -295,13 +299,17 @@ public class DeclarationDataServiceImplTest {
         when(reportService.getDec(Matchers.<TAUserInfo>any(), anyLong(), Matchers.<ReportType>anyObject())).thenReturn(UUID.randomUUID().toString());
         when(declarationTemplateService.get(declarationData.getDeclarationTemplateId())).thenReturn(declarationTemplate);
         when(periodService.getReportPeriod(declarationData.getReportPeriodId())).thenReturn(reportPeriod);
-        when(formDataService.findFormData(dft1.getFormTypeId(), dft1.getKind(), declarationData.getDepartmentReportPeriodId(), null)).
+        when(formDataService.findFormData(dft1.getFormTypeId(), dft1.getKind(), drp1.getId(), null)).
                 thenReturn(formData);
-        when(formDataService.findFormData(dft2.getFormTypeId(), dft2.getKind(), declarationData.getDepartmentReportPeriodId(), null)).
+        when(formDataService.findFormData(dft2.getFormTypeId(), dft2.getKind(), drp2.getId(), null)).
                 thenReturn(null);
         when(formTypeService.get(dft2.getFormTypeId())).thenReturn(formType);
 
         when(departmentReportPeriodService.get(declarationData.getDepartmentReportPeriodId())).thenReturn(drp1);
+
+        when(departmentReportPeriodService.getLast(1, 1)).thenReturn(drp1);
+
+        when(departmentReportPeriodService.getLast(2, 1)).thenReturn(drp2);
 
         try{
             declarationDataService.check(logger, 1l, userInfo, new LockStateLogger() {
