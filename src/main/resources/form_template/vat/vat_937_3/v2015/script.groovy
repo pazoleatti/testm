@@ -162,12 +162,11 @@ void calc() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
 
-    calc1AndChangeDateFormat(dataRows)
+    calcChangeDateFormat(dataRows)
     calcTotal(dataRows)
 
-    dataRowHelper.save(dataRows)
-
     sortFormDataRows()
+    dataRowHelper.save(dataRows)
 }
 
 void logicCheck() {
@@ -536,22 +535,59 @@ void sortFormDataRows() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
 
-    if (dataRows.find { it.getAlias() != null && it.getAlias().startsWith("head_") } == null) {
-        for (def section : sections) {
-            def firstRow = getDataRow(dataRows, 'part_' + section)
-            def lastRow = getDataRow(dataRows, 'total_' + section)
-            def from = firstRow.getIndex()
-            def to = lastRow.getIndex() - 1
-            def sectionRows = (from < to ? dataRows[from..(to - 1)] : [])
+    def sortColumns = allColumns - ['rowNumber', 'fix']
+    boolean isGroups = dataRows.find { it.getAlias() != null && it.getAlias().startsWith("head_") } != null
+    for (def section : sections) {
+        def firstRow = getDataRow(dataRows, 'part_' + section)
+        def lastRow = getDataRow(dataRows, 'total_' + section)
+        def from = firstRow.getIndex()
+        def to = lastRow.getIndex() - 1
+        def sectionsRows = (from < to ? dataRows[from..(to - 1)] : [])
 
-            // Массовое разыменовывание граф НФ
-            def columnNameList = firstRow.keySet().collect{firstRow.getCell(it).getColumn()}
-            refBookService.dataRowsDereference(logger, sectionRows, columnNameList)
-
-            sortRowsSimple(sectionRows)
+        if (!isGroups) {
+            // Массовое разыменование строк НФ
+            def columnList = firstRow.keySet().collect { firstRow.getCell(it).getColumn() }
+            refBookService.dataRowsDereference(logger, sectionsRows, columnList)
+            sortRows(sectionsRows, sortColumns)
+        } else {
+            def headMap = [:]
+            def totalMap = [:]
+            // находим строки начала и конца для каждого подразделения
+            sectionsRows.each { row ->
+                String alias = row.getAlias()
+                if (alias != null) {
+                    if (alias.startsWith("head_")) {
+                        headMap[alias.replace("head_","")] = row
+                    }
+                    if (alias.startsWith("sub_total_")) {
+                        totalMap[alias.replace("sub_total_","")] = row
+                    }
+                }
+            }
+            // по подразделениям
+            headMap.keySet().each { key ->
+                def headRow = headMap[key]
+                def totalRow = totalMap[key]
+                if (headRow && totalRow) {
+                    def groupFrom = headRow.getIndex()
+                    def groupTo = totalRow.getIndex() - 1
+                    def rows = (groupFrom < groupTo ? dataRows[groupFrom..(groupTo - 1)] : [])
+                    // Массовое разыменование строк НФ
+                    def columnList = headRow.keySet().collect { headRow.getCell(it).getColumn() }
+                    refBookService.dataRowsDereference(logger, rows, columnList)
+                    sortRows(rows, sortColumns)
+                } else {
+                    logger.warn("Ошибка при сортировке. Нарушена структура налоговой формы. Отсутствуют строки заголовоков/итогов по подразделениям.")
+                }
+            }
         }
-        dataRowHelper.saveSort()
     }
+    calc1(dataRows)
+    if (formDataEvent == FormDataEvent.SORT_ROWS) {
+        dataRowHelper.save(dataRows)
+    }
+
+    dataRowHelper.saveSort()
 }
 
 def loggerError(def row, def msg) {
@@ -705,7 +741,7 @@ def getSum(def dataRows, def columnAlias, def rowStart, def rowEnd) {
 }
 
 /** Рассчитать нумерацию строк. Для каждой части нф нумерация начинается с 1. */
-void calc1AndChangeDateFormat(def dataRows) {
+void calc1(def dataRows) {
     def index1 = 0
     def index2 = 0
     def isFirstSection = null
@@ -722,27 +758,43 @@ void calc1AndChangeDateFormat(def dataRows) {
 
         // графа 1
         row.rowNumber = (isFirstSection ? ++index1 : ++index2)
+    }
+}
 
-        if (formDataEvent == FormDataEvent.IMPORT) {
-            if (row.invoiceNumDate != null && row.invoiceNumDate.matches(pattern1000DateImport)) {
-                row.invoiceNumDate = row.invoiceNumDate?.replaceFirst(pattern1000DateImport, replaceDatePattern)
+void calcChangeDateFormat(def dataRows) {
+    if (formDataEvent != FormDataEvent.IMPORT) {
+        return
+    }
+    def isFirstSection = null
+    for (def row : dataRows) {
+        if (row.getAlias() != null) {
+            if (row.getAlias() == 'part_1') {
+                isFirstSection = true
             }
+            if (row.getAlias() == 'part_2') {
+                isFirstSection = false
+            }
+            continue
+        }
 
-            if (isFirstSection && row.mediatorNumDate != null && row.mediatorNumDate.matches(pattern1000DateImport)) {
-                row.mediatorNumDate = row.mediatorNumDate?.replaceFirst(pattern1000DateImport, replaceDatePattern)
-            }
+        if (row.invoiceNumDate != null && row.invoiceNumDate.matches(pattern1000DateImport)) {
+            row.invoiceNumDate = row.invoiceNumDate?.replaceFirst(pattern1000DateImport, replaceDatePattern)
+        }
 
-            if (row.invoiceCorrNumDate != null && row.invoiceCorrNumDate.matches(pattern3DateImport)) {
-                row.invoiceCorrNumDate = row.invoiceCorrNumDate?.replaceFirst(pattern3DateImport, replaceDatePattern)
-            }
+        if (isFirstSection && row.mediatorNumDate != null && row.mediatorNumDate.matches(pattern1000DateImport)) {
+            row.mediatorNumDate = row.mediatorNumDate?.replaceFirst(pattern1000DateImport, replaceDatePattern)
+        }
 
-            if (row.corrInvCorrNumDate != null && row.corrInvCorrNumDate.matches(pattern3DateImport)) {
-                row.corrInvCorrNumDate = row.corrInvCorrNumDate.replaceFirst(pattern3DateImport, replaceDatePattern)
-            }
+        if (row.invoiceCorrNumDate != null && row.invoiceCorrNumDate.matches(pattern3DateImport)) {
+            row.invoiceCorrNumDate = row.invoiceCorrNumDate?.replaceFirst(pattern3DateImport, replaceDatePattern)
+        }
 
-            if (row.corrInvoiceNumDate != null && row.corrInvoiceNumDate.matches(pattern256DateImport)) {
-                row.corrInvoiceNumDate = row.corrInvoiceNumDate.replaceFirst(pattern256DateImport, replaceDatePattern)
-            }
+        if (row.corrInvCorrNumDate != null && row.corrInvCorrNumDate.matches(pattern3DateImport)) {
+            row.corrInvCorrNumDate = row.corrInvCorrNumDate.replaceFirst(pattern3DateImport, replaceDatePattern)
+        }
+
+        if (row.corrInvoiceNumDate != null && row.corrInvoiceNumDate.matches(pattern256DateImport)) {
+            row.corrInvoiceNumDate = row.corrInvoiceNumDate.replaceFirst(pattern256DateImport, replaceDatePattern)
         }
     }
 }
