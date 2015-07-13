@@ -1058,10 +1058,10 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 rp.getStartDate(),
                 rp.getEndDate());
         for (DepartmentFormType sourceDFT : sourceDDs){
+            DepartmentReportPeriod drp = departmentReportPeriodService.getLast(sourceDFT.getDepartmentId(), dd.getReportPeriodId());
             FormData sourceFD =
-                    formDataService.findFormData(sourceDFT.getFormTypeId(), sourceDFT.getKind(), dd.getDepartmentReportPeriodId(), null);
+                    formDataService.findFormData(sourceDFT.getFormTypeId(), sourceDFT.getKind(), drp.getId(), null);
             if (sourceFD==null){
-                DepartmentReportPeriod drp = departmentReportPeriodService.get(dd.getDepartmentReportPeriodId());
                 logger.warn(
                         NOT_EXIST_SOURCE_DECLARATION_WARNING,
                         departmentService.getDepartment(sourceDFT.getDepartmentId()).getName(),
