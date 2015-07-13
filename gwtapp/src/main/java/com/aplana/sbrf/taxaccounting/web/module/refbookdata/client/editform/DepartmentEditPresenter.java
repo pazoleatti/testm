@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform;
 
 import com.aplana.gwt.client.dialog.Dialog;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
@@ -11,7 +12,6 @@ import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.rena
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.renamedialog.RenameDialogPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.event.ShowItemEvent;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.*;
-import com.aplana.sbrf.taxaccounting.web.widget.utils.WidgetUtils;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.dispatch.shared.DispatchAsync;
@@ -51,7 +51,7 @@ public class DepartmentEditPresenter extends AbstractEditPresenter<DepartmentEdi
     }
 
     @Override
-    void showRecord(Long refBookRecordId) {
+    void showRecord(final Long refBookRecordId) {
         if (refBookRecordId == null) {
             setNeedToReload();
             getView().cleanFields();
@@ -60,12 +60,31 @@ public class DepartmentEditPresenter extends AbstractEditPresenter<DepartmentEdi
             getView().updateRefBookPickerPeriod();
             return;
         }
-        super.showRecord(refBookRecordId);
+        previousURId = refBookRecordId;
+        GetRefBookRecordAction action = new GetRefBookRecordAction();
+        action.setRefBookId(currentRefBookId);
+        action.setRefBookRecordId(refBookRecordId);
+        dispatchAsync.execute(action,
+                CallbackUtils.defaultCallback(
+                        new AbstractCallback<GetRefBookRecordResult>() {
+                            @Override
+                            public void onSuccess(GetRefBookRecordResult result) {
+                                currentUniqueRecordId = refBookRecordId;
+                                //recordId = refBookRecordId;
+                                updateView(result);
+                                if (result.getRecord().containsKey("TYPE")) {
+                                    RefBookValueSerializable v = result.getRecord().get("TYPE");
+                                    if (v.getAttributeType() == RefBookAttributeType.REFERENCE) {
+                                        depType = v.getReferenceValue();
+                                    }
+                                }
+                            }
+                        }, this));
     }
 
     @Override
     void save() throws BadValueException {
-        Map<String, RefBookValueSerializable> map = getView().getFieldsValues();
+        final Map<String, RefBookValueSerializable> map = getView().getFieldsValues();
 
         final SaveRefBookRowVersionAction action = new SaveRefBookRowVersionAction();
         action.setRefBookId(currentRefBookId);
@@ -79,39 +98,6 @@ public class DepartmentEditPresenter extends AbstractEditPresenter<DepartmentEdi
             newDepType = map.get("TYPE").getReferenceValue();
         } else {
             newDepType = 0L;
-        }
-        //Проверяем изменилось ли имя либо тип подразделения с типа ТБ
-        if(modifiedFields.containsKey("NAME") || (modifiedFields.containsKey("TYPE") && depType == 2)){
-            renameDialogPresenter.open(new ConfirmButtonClickHandler() {
-                @Override
-                public void onClick(Date dateFrom, Date dateTo) {
-                                /*// тут дальнейшая обработка по сценаарию постановки
-                                Dialog.infoMessage("Переименовываем с " + WidgetUtils.getDateString(dateFrom) +
-                                        " по " + WidgetUtils.getDateString(dateTo) + "на имя \"" + modifiedFields.get("NAME") + "\"")*/
-                    action.setVersionFrom(WidgetUtils.getDateWithOutTime(dateFrom));
-                    action.setVersionTo(WidgetUtils.getDateWithOutTime(dateTo));
-                    renameDialogPresenter.getView().cleanDates();
-
-                    dispatchAsync.execute(action,
-                            CallbackUtils.defaultCallback(
-                                    new AbstractCallback<SaveRefBookRowVersionResult>() {
-                                        @Override
-                                        public void onSuccess(SaveRefBookRowVersionResult result) {
-                                            LogAddEvent.fire(DepartmentEditPresenter.this, result.getUuid());
-                                            UpdateForm.fire(DepartmentEditPresenter.this, !result.isException(), recordChanges);
-                                            if (result.isException()) {
-                                                Dialog.errorMessage("Редактирование подразделения", "Обнаружены фатальные ошибки!");
-                                            } else {
-                                                depType = newDepType;
-                                                setIsFormModified(false);
-                                                SetFormMode.fire(DepartmentEditPresenter.this, FormMode.EDIT);
-                                                getView().updateInputFields();
-                                            }
-                                        }
-                                    }, DepartmentEditPresenter.this));
-                }
-            });
-            return;
         }
 
         dispatchAsync.execute(action,
@@ -130,11 +116,42 @@ public class DepartmentEditPresenter extends AbstractEditPresenter<DepartmentEdi
                                 if (result.isException()) {
                                     Dialog.errorMessage("Запись не сохранена", "Обнаружены фатальные ошибки!");
                                 } else {
-                                    depType = newDepType;
                                     setIsFormModified(false);
                                     SetFormMode.fire(DepartmentEditPresenter.this, FormMode.EDIT);
                                     getView().updateInputFields();
+
+                                    //Проверяем изменилось ли имя либо тип подразделения с типа ТБ
+                                    if(modifiedFields.containsKey("NAME") || (modifiedFields.containsKey("TYPE") && depType == 2)){
+                                        renameDialogPresenter.open(new ConfirmButtonClickHandler() {
+                                            @Override
+                                            public void onClick(Date dateFrom, Date dateTo) {
+                                /*// тут дальнейшая обработка по сценаарию постановки
+                                Dialog.infoMessage("Переименовываем с " + WidgetUtils.getDateString(dateFrom) +
+                                        " по " + WidgetUtils.getDateString(dateTo) + "на имя \"" + modifiedFields.get("NAME") + "\"")*/
+                                                EditPrintFDAction fdAction = new EditPrintFDAction();
+                                                fdAction.setChangeType(modifiedFields.containsKey("TYPE"));
+                                                fdAction.setDepName(map.get("NAME").toString());
+                                                fdAction.setVersionFrom(dateFrom);
+                                                fdAction.setVersionTo(dateTo);
+                                                fdAction.setDepId(currentUniqueRecordId.intValue());
+                                                renameDialogPresenter.getView().cleanDates();
+
+                                                dispatchAsync.execute(fdAction,
+                                                        CallbackUtils.defaultCallback(
+                                                                new AbstractCallback<EditPrintFDResult>() {
+                                                                    @Override
+                                                                    public void onSuccess(EditPrintFDResult result) {
+                                                                        depType = newDepType;
+                                                                        Dialog.infoMessage(
+                                                                                "Редактирование подразделения",
+                                                                                "Изменено наименования подразделения в печатных представлениях налоговых форм");
+                                                                    }
+                                                                }, DepartmentEditPresenter.this));
+                                            }
+                                        });
+                                    }
                                 }
+
                             }
                         }, this));
     }
@@ -196,6 +213,5 @@ public class DepartmentEditPresenter extends AbstractEditPresenter<DepartmentEdi
         getView().fillInputFields(null);
         getView().updateRefBookPickerPeriod();
     }
-
 
 }

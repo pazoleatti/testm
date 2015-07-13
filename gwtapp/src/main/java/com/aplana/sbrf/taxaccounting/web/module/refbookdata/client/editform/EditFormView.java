@@ -108,20 +108,6 @@ public class EditFormView extends AbstractEditView implements EditFormPresenter.
     }
 
     @Override
-    public void setVisibleFields(boolean canVersion) {
-        versionStart.setVisible(canVersion);
-        versionEnd.setVisible(canVersion);
-        startVersionDateLabel.setVisible(canVersion);
-        endVersionDateLabel.setVisible(canVersion);
-        allVersion.setVisible(canVersion);
-    }
-
-    @Override
-    public void setAllVersionField(boolean isVisible) {
-        allVersion.setVisible(isVisible);
-    }
-
-    @Override
     Panel getRootFieldsPanel() {
         return editPanel;
     }

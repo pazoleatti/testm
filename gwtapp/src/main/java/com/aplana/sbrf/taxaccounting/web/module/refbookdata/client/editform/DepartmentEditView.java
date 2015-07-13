@@ -38,14 +38,6 @@ public class DepartmentEditView extends AbstractEditView implements DepartmentEd
     }
 
     @Override
-    public void setVisibleFields(boolean isVisible) {
-    }
-
-    @Override
-    public void setAllVersionField(boolean isVisible) {
-    }
-
-    @Override
     Panel getRootFieldsPanel() {
         return editPanel;
     }
