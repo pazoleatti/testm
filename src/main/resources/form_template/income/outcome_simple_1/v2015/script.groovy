@@ -375,6 +375,12 @@ void consolidationFromPrimary(def dataRows, def formSources) {
         def prevReportPeriod = reportPeriodService.getPrevReportPeriod(formData.reportPeriodId)
         if (prevReportPeriod != null) {
             def formDataOld = formDataService.getLast(formData.getFormType().getId(), formData.getKind(), formDataDepartment.id, prevReportPeriod.getId(), formData.periodOrder)
+            if (formDataOld == null) {
+                if (prevReportPeriod != null) {
+                    // Последний экземпляр
+                    formDataOld = formDataService.getLast(304, formData.getKind(), formData.getDepartmentId(), prevReportPeriod.getId(), null);
+                }
+            }
             dataRowsOld = (formDataOld ? formDataService.getDataRowHelper(formDataOld)?.allSaved : null)
             if (dataRowsOld != null) {
                 // данные за предыдущий отчетный период рну-7
@@ -383,20 +389,24 @@ void consolidationFromPrimary(def dataRows, def formSources) {
                     def alias = 'R' + it
                     def row = getDataRow(dataRows, alias)
                     def rowOld = dataRowsOld.find { row.consumptionTypeId == it.consumptionTypeId && row.consumptionAccountNumber == it.consumptionAccountNumber }
-                    // графа 5
-                    row.rnu7Field10Sum = rowOld.rnu7Field10Sum
-                    // графа 6
-                    row.rnu7Field12Accepted = rowOld.rnu7Field12Accepted
-                    // графа 7
-                    row.rnu7Field12PrevTaxPeriod = rowOld.rnu7Field12PrevTaxPeriod
+                    if (rowOld) {
+                        // графа 5
+                        row.rnu7Field10Sum = rowOld.rnu7Field10Sum
+                        // графа 6
+                        row.rnu7Field12Accepted = rowOld.rnu7Field12Accepted
+                        // графа 7
+                        row.rnu7Field12PrevTaxPeriod = rowOld.rnu7Field12PrevTaxPeriod
+                    }
                 }
                 // данные за предыдущий отчетный период рну-5
                 ((2..110) + (113..217)).each {
                     def alias = 'R' + it
                     def row = getDataRow(dataRows, alias)
                     def rowOld = dataRowsOld.find { row.consumptionTypeId == it.consumptionTypeId && row.consumptionAccountNumber == it.consumptionAccountNumber }
-                    // графа 8
-                    row.rnu5Field5Accepted = rowOld.rnu5Field5Accepted
+                    if (rowOld) {
+                        // графа 8
+                        row.rnu5Field5Accepted = rowOld.rnu5Field5Accepted
+                    }
                 }
             }
         }
