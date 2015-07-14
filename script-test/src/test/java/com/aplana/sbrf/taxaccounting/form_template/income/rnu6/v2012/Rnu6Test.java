@@ -157,6 +157,7 @@ public class Rnu6Test extends ScriptTestBase {
     /** Проверить загруженные данные. */
     void checkLoadData(List<DataRow<Cell>> dataRows) {
         long index = 1;
+        int precision = 4;
 
         // графа 5
         String [] strColumns = { "docNumber" };
@@ -182,10 +183,10 @@ public class Rnu6Test extends ScriptTestBase {
                 Assert.assertEquals(msg, expectedString, row.getCell(alias).getStringValue());
             }
 
-            BigDecimal expectedNum = roundValue(index, 0);
+            BigDecimal expectedNum = roundValue(index, precision);
             for (String alias : numColumns) {
                 String msg = String.format(MSG, alias, row.getIndex());
-                BigDecimal actualNum = row.getCell(alias).getNumericValue().setScale(0, BigDecimal.ROUND_HALF_UP);
+                BigDecimal actualNum = row.getCell(alias).getNumericValue().setScale(precision, BigDecimal.ROUND_HALF_UP);
                 Assert.assertEquals(msg, expectedNum, actualNum);
             }
 

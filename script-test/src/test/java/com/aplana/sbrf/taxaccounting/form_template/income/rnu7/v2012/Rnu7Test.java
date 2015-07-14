@@ -1,12 +1,10 @@
-package com.aplana.sbrf.taxaccounting.form_template.income.rnu5.v2012;
+package com.aplana.sbrf.taxaccounting.form_template.income.rnu7.v2012;
 
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.refbook.impl.RefBookUniversal;
-import com.aplana.sbrf.taxaccounting.service.script.api.DataRowHelper;
-import com.aplana.sbrf.taxaccounting.util.DataRowHelperStub;
 import com.aplana.sbrf.taxaccounting.util.ScriptTestBase;
 import com.aplana.sbrf.taxaccounting.util.TestScriptHelper;
 import com.aplana.sbrf.taxaccounting.util.mock.ScriptTestMockHelper;
@@ -26,10 +24,10 @@ import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.when;
 
 /**
- * РНУ-5.
+ * РНУ-7.
  */
-public class Rnu5Test extends ScriptTestBase {
-    private static final int TYPE_ID = 317;
+public class Rnu7Test extends ScriptTestBase {
+    private static final int TYPE_ID = 311;
     private static final int DEPARTMENT_ID = 1;
     private static final int REPORT_PERIOD_ID = 1;
     private static final int DEPARTMENT_PERIOD_ID = 1;
@@ -53,7 +51,7 @@ public class Rnu5Test extends ScriptTestBase {
 
     @Override
     protected ScriptTestMockHelper getMockHelper() {
-        return getDefaultScriptTestMockHelper(Rnu5Test.class);
+        return getDefaultScriptTestMockHelper(Rnu7Test.class);
     }
 
     @Before
@@ -103,6 +101,17 @@ public class Rnu5Test extends ScriptTestBase {
         attribute.setName("Код налогового учёта ");
         refBook.setAttributes(Arrays.asList(attribute));
         when(testHelper.getRefBookFactory().get(refbookId)).thenReturn(refBook);
+
+        // период ввода остатков
+        when(testHelper.getDepartmentReportPeriodService().get(any(Integer.class))).thenAnswer(
+                new Answer<DepartmentReportPeriod>() {
+                    @Override
+                    public DepartmentReportPeriod answer(InvocationOnMock invocation) throws Throwable {
+                        DepartmentReportPeriod result = new DepartmentReportPeriod();
+                        result.setBalance(true);
+                        return result;
+                    }
+                });
     }
 
     @After
@@ -171,7 +180,7 @@ public class Rnu5Test extends ScriptTestBase {
 
     @Test
     public void importTransportFileTest() {
-        int expected = 2 + 1; // в файле 2 строки + 1 итоговая строка
+        int expected = 2 + 2 + 1; // в источнике 2 строки (без итогов и подитогов) + по 1 подитогу на строку + 1 итоговая строка
         testHelper.setImportFileInputStream(getImportRnuInputStream());
         testHelper.execute(FormDataEvent.IMPORT_TRANSPORT_FILE);
         Assert.assertEquals(expected, testHelper.getDataRowHelper().getAll().size());
@@ -181,7 +190,7 @@ public class Rnu5Test extends ScriptTestBase {
 
     @Test
     public void importExcelTest() {
-        int expected = 2 + 2 + 1; // в файле 2 строки + по 1 подитогу на строку + 1 итоговая строка
+        int expected = 2 + 2 + 1; // в источнике 2 строки (без итогов и подитогов) + по 1 подитогу на строку + 1 итоговая строка
         testHelper.setImportFileInputStream(getImportXlsInputStream());
         testHelper.execute(FormDataEvent.IMPORT);
         Assert.assertEquals(expected, testHelper.getDataRowHelper().getAll().size());
@@ -192,57 +201,57 @@ public class Rnu5Test extends ScriptTestBase {
     // Консолидация
     @Test
     public void composeTest() {
-        // Назначен один тип формы
-        DepartmentFormType departmentFormType = new DepartmentFormType();
-        departmentFormType.setKind(KIND);
-        departmentFormType.setDepartmentId(DEPARTMENT_ID);
-        departmentFormType.setFormTypeId(TYPE_ID);
-        departmentFormType.setId(1);
-        when(testHelper.getDepartmentFormTypeService().getFormSources(anyInt(), anyInt(), any(FormDataKind.class),
-                any(Date.class), any(Date.class))).thenReturn(Arrays.asList(departmentFormType));
-
-        // Один экземпляр-источник
-        FormData sourceFormData = new FormData();
-        sourceFormData.initFormTemplateParams(testHelper.getFormTemplate());
-        sourceFormData.setId(2L);
-        sourceFormData.setState(WorkflowState.ACCEPTED);
-        when(testHelper.getFormDataService().getLast(eq(departmentFormType.getFormTypeId()), eq(KIND), eq(DEPARTMENT_ID),
-                anyInt(), any(Integer.class))).thenReturn(sourceFormData);
-
-        // DataRowHelper НФ-источника
-        DataRowHelper sourceDataRowHelper = new DataRowHelperStub();
-        when(testHelper.getFormDataService().getDataRowHelper(sourceFormData)).thenReturn(sourceDataRowHelper);
-
-        // Данные НФ-источника, формируются импортом
-        testHelper.setImportFileInputStream(getImportXlsInputStream());
-        testHelper.execute(FormDataEvent.IMPORT);
-        sourceDataRowHelper.save(testHelper.getDataRowHelper().getAll());
-        testHelper.initRowData();
-
-        // Консолидация
+        // Кроме простого выполнения события других проверок нет, т.к. для формы консолидация выполняется сервисом
         testHelper.execute(FormDataEvent.COMPOSE);
-        int expected = 2 + 2 + 1; // в источнике 2 строки (без итогов и подитогов) + по 1 подитогу на строку + 1 итоговая строка
-        Assert.assertEquals(expected, testHelper.getDataRowHelper().getAll().size());
-
         checkLogger();
     }
 
     /** Проверить загруженные данные. */
     void checkLoadData(List<DataRow<Cell>> dataRows) {
         long index = 1;
+        int precision = 4;
 
+        // графа 5
+        String [] strColumns = { "docNumber" };
+
+        // графа 8..12
+        String [] numColumns = { "rateOfTheBankOfRussia", "taxAccountingCurrency", "taxAccountingRuble", "accountingCurrency", "ruble" };
+
+        // графа 2, 7
+        String [] refbookColumns = { "code", "currencyCode" };
+
+        // графа 3, 6
+        String [] dateColumns = { "date", "docDate" };
+
+        String MSG = "row.%s[%d]";
         for (DataRow<Cell> row : dataRows) {
             if (row.getAlias() != null) {
                 continue;
             }
-            // графа 2
-            BigDecimal expectedRefbook = new BigDecimal(index);
-            Assert.assertEquals("row.number[" + row.getIndex() + "]", expectedRefbook, row.getCell("number").getNumericValue());
 
-            // графа 5
-            BigDecimal expectedNum = roundValue(index, 2);
-            BigDecimal actualNum = row.getCell("sum").getNumericValue().setScale(2, BigDecimal.ROUND_HALF_UP);
-            Assert.assertEquals("row.sum[" + row.getIndex() + "]", expectedNum, actualNum);
+            String expectedString = "test" + index;
+            for (String alias : strColumns) {
+                String msg = String.format(MSG, alias, row.getIndex());
+                Assert.assertEquals(msg, expectedString, row.getCell(alias).getStringValue());
+            }
+
+            BigDecimal expectedNum = roundValue(index, precision);
+            for (String alias : numColumns) {
+                String msg = String.format(MSG, alias, row.getIndex());
+                BigDecimal actualNum = row.getCell(alias).getNumericValue().setScale(precision, BigDecimal.ROUND_HALF_UP);
+                Assert.assertEquals(msg, expectedNum, actualNum);
+            }
+
+            BigDecimal expectedRefbook = new BigDecimal(index);
+            for (String alias : refbookColumns) {
+                String msg = String.format(MSG, alias, row.getIndex());
+                Assert.assertEquals(msg, expectedRefbook, row.getCell(alias).getNumericValue());
+            }
+
+            for (String alias : dateColumns) {
+                String msg = String.format(MSG, alias, row.getIndex());
+                Assert.assertNotNull(msg, row.getCell(alias).getDateValue());
+            }
 
             index++;
         }
