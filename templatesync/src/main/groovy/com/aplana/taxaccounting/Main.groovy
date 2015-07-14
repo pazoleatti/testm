@@ -38,6 +38,7 @@ class Main {
     def static REPORT_DB_NAME = 'report_db_compare.html'
     def static REPORT_DECL_DB_NAME = 'report_decl_db_compare.html'
     def static REPORT_REFBOOK_DB_NAME = 'report_refbook_db_compare.html'
+    def static REPORT_TYPE_DB_NAME = 'report_form_decl_type_db_compare.html'
 
     // Общие стили отчетов
     def static HTML_STYLE = '''
@@ -290,6 +291,10 @@ class Main {
         if (report.exists()) {
             report.delete()
         }
+        report = new File(REPORT_REFBOOK_GIT_NAME)
+        if (report.exists()) {
+            report.delete()
+        }
         report = new File(REPORT_DB_NAME)
         if (report.exists()) {
             report.delete()
@@ -302,20 +307,30 @@ class Main {
         if (report.exists()) {
             report.delete()
         }
+        report = new File(REPORT_REFBOOK_DB_NAME)
+        if (report.exists()) {
+            report.delete()
+        }
+        report = new File(REPORT_TYPE_DB_NAME)
+        if (report.exists()) {
+            report.delete()
+        }
 
         // Построение отчета сравнения Git и БД
         // checkOnly, true — только сравнение, false — сравнение и обновление Git → БД
-//        GitReport.updateScripts(GitReport.getDBVersions(), true)
-//        GitReport.updateDeclarationScripts(GitReport.getDeclarationDBVersions(), true)
+        GitReport.updateScripts(GitReport.getDBVersions(), true)
+        GitReport.updateDeclarationScripts(GitReport.getDeclarationDBVersions(), true)
         GitReport.checkRefBooks(GitReport.getRefBookScripts())
         println("See $REPORT_GIT_NAME, $REPORT_DECL_GIT_NAME and $REPORT_REFBOOK_GIT_NAME for details")
 
         // Сравнение схем в БД
         if (DB_USER_COMPARE != null) {
+            println("Compare $DB_USER and $DB_USER_COMPARE form/declaration types...")
+            DBReport.compareDBTypes(DB_USER, DB_USER_COMPARE)
             println("Compare $DB_USER and $DB_USER_COMPARE form templates...")
-//            DBReport.compareDBFormTemplate(DB_USER, DB_USER_COMPARE)
+            DBReport.compareDBFormTemplate(DB_USER, DB_USER_COMPARE)
             println("Compare $DB_USER and $DB_USER_COMPARE declaration templates...")
-//            DBReport.compareDBDeclarationTemplate(DB_USER, DB_USER_COMPARE)
+            DBReport.compareDBDeclarationTemplate(DB_USER, DB_USER_COMPARE)
             println("Compare $DB_USER and $DB_USER_COMPARE refbook scripts...")
             DBReport.compareDBRefbookScript(DB_USER, DB_USER_COMPARE)
         }
