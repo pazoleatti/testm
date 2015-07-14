@@ -783,13 +783,11 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
     colIndex++
     newRow.currencyCode = getRecordIdImport(15, 'CODE', values[colIndex], fileRowIndex, colIndex + colOffset)
 
-    // графа 9
-    colIndex = 9
-    newRow.taxAccountingCurrency = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
-
-    // графа 11
-    colIndex = 11
-    newRow.accountingCurrency = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
+    // графа 8..12
+    ['rateOfTheBankOfRussia', 'taxAccountingCurrency', 'taxAccountingRuble', 'accountingCurrency', 'ruble'].each { alias ->
+        colIndex++
+        newRow[alias] =  parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
+    }
 
     return newRow
 }
