@@ -373,8 +373,9 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
                     BigDecimal bd = (BigDecimal) obj;
                     cellStyle = getCellStyle(dataRow.getCell(column.getAlias()), CellType.BIGDECIMAL, column.getAlias());
                     cell.setCellStyle(cellStyle);
+                    cell.setCellType(Cell.CELL_TYPE_NUMERIC);
 
-                    cell.setCellValue(bd != null ? String.valueOf(bd) : "");
+                    cell.setCellValue(bd != null ? bd.intValue() : 0);
                 } else if (ColumnType.AUTO.equals(column.getColumnType())) {
                     Long bd = (Long) obj;
                     cellStyle = getCellStyle(dataRow.getCell(column.getAlias()), CellType.NUMERATION, column.getAlias());
