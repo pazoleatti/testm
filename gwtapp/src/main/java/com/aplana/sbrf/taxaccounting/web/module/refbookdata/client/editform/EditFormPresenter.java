@@ -62,6 +62,7 @@ public class EditFormPresenter extends AbstractEditPresenter<EditFormPresenter.M
         action.setVersionTo(getView().getVersionTo());
 
         final RecordChanges recordChanges = fillRecordChanges(currentUniqueRecordId, map, action.getVersionFrom(), action.getVersionTo());
+        recordChanges.setCreate(false);
 
         dispatchAsync.execute(action,
                 CallbackUtils.defaultCallback(
@@ -106,6 +107,7 @@ public class EditFormPresenter extends AbstractEditPresenter<EditFormPresenter.M
         action.setVersionTo(getView().getVersionTo());
 
         final RecordChanges recordChanges = fillRecordChanges(recordId, map, action.getVersionFrom(), action.getVersionTo());
+        recordChanges.setCreate(true);
 
         dispatchAsync.execute(action,
                 CallbackUtils.defaultCallback(
@@ -124,7 +126,11 @@ public class EditFormPresenter extends AbstractEditPresenter<EditFormPresenter.M
                                 setIsFormModified(false);
                                 Long newId = result.getNewIds() != null && !result.getNewIds().isEmpty() ? result.getNewIds().get(0) : null;
                                 recordChanges.setId(newId);
-                                currentUniqueRecordId = newId;
+                                if (isVersionMode) {
+                                    setCurrentUniqueRecordId(newId);
+                                } else {
+                                    setRecordId(newId);
+                                }
                                 RefBookRecordVersionData data = new RefBookRecordVersionData();
                                 data.setVersionStart(getView().getVersionFrom());
                                 data.setVersionEnd(getView().getVersionTo());

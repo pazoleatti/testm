@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.HashMap;
 
 /**
  * Модель для информации об изменении записи
@@ -14,6 +15,23 @@ public class RecordChanges implements Serializable {
     private String name;
     private Date start;
     private Date end;
+    private HashMap<String, String> info = new HashMap<String, String>();
+    /**
+     * Показывает создалась отредактирвоана старая или новая запись
+     */
+    private boolean isCreate;
+
+    public boolean isCreate() {
+        return isCreate;
+    }
+
+    public void setCreate(boolean isCreate) {
+        this.isCreate = isCreate;
+    }
+
+    public HashMap<String, String> getInfo() {
+        return info;
+    }
 
     public RecordChanges() {
     }

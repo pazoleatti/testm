@@ -9,9 +9,9 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.AbstractEditPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.EditFormPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.event.SetFormMode;
-import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.event.UpdateForm;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.event.DeleteItemEvent;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.event.SearchButtonEvent;
+import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.event.ShowItemEvent;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.linear.RefBookLinearPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.sendquerydialog.DialogPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.versionform.RefBookVersionPresenter;
@@ -38,7 +38,7 @@ import java.util.Arrays;
 import java.util.Date;
 
 public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
-		RefBookDataPresenter.MyProxy> implements RefBookDataUiHandlers, UpdateForm.UpdateFormHandler, SetFormMode.SetFormModeHandler {
+		RefBookDataPresenter.MyProxy> implements RefBookDataUiHandlers, SetFormMode.SetFormModeHandler {
 
     @Override
     public void onSetFormMode(SetFormMode event) {
@@ -46,14 +46,14 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
         dataInterface.setMode(event.getFormMode());
     }
 
-    @Override
+    /*@Override
     public void onUpdateForm(UpdateForm event) {
         if (event.isSuccess()) {
             getView().resetSearchInputBox();
             recordId = event.getRecordChanges().getId();
-            dataInterface.updateData();
+            *//*dataInterface.updateData();*//*
         }
-    }
+    }*/
 
     @ProxyCodeSplit
     @NameToken(RefBookDataTokens.refBookData)
@@ -182,11 +182,6 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
                                                         @Override
                                                         public void onSuccess(GetNameResult result) {
                                                             getView().setRefBookNameDesc("Все значения записи " + result.getUniqueAttributeValues());
-                                                            /*refBookType = RefBookType.get(result.getRefBookType());
-                                                            getView().setBackAction(
-                                                                    refBookType.equals(RefBookType.LINEAR) ?
-                                                                            RefBookDataTokens.refBookData :
-                                                                            RefBookDataTokens.refBookHierData, refBookId, RefBookDataTokens.REFBOOK_RECORD_ID, uniqueRecordId);*/
                                                             commonEditPresenter.setRecordId(result.getRecordId());
                                                         }
                                                     }, RefBookDataPresenter.this));
@@ -312,7 +307,6 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
     @Override
     public void onBind(){
         super.onBind();
-        addVisibleHandler(UpdateForm.getType(), this);
         addVisibleHandler(SetFormMode.getType(), this);
     }
 
@@ -373,7 +367,8 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
         getView().setVersionView(false);
         getView().setRefBookNameDesc(refBookName);
         setMode(mode);
-        editFormPresenter.setVersionMode(false);
+        commonEditPresenter.setVersionMode(false);
+        ShowItemEvent.fire(RefBookDataPresenter.this, null, recordId);
     }
 
     @Override

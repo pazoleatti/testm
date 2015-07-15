@@ -103,6 +103,32 @@ public abstract class AbstractEditPresenter<V extends AbstractEditPresenter.MyVi
         recordChanges.setName(name);
         recordChanges.setStart(start);
         recordChanges.setEnd(end);
+        for (Map.Entry<String, RefBookValueSerializable> entry : map.entrySet()){
+            switch (entry.getValue().getAttributeType()) {
+                case NUMBER:
+                    if (entry.getValue().getNumberValue() != null){
+                        recordChanges.getInfo().put(entry.getKey(), entry.getValue().getNumberValue().toString());
+                    }
+                    break;
+                case DATE:
+                    if (entry.getValue().getDateValue() != null){
+                        recordChanges.getInfo().put(entry.getKey(), entry.getValue().getDateValue().toString());
+                    }
+                    break;
+                case STRING:
+                    if (entry.getValue().getStringValue() != null){
+                        recordChanges.getInfo().put(entry.getKey(), entry.getValue().getStringValue());
+                    }
+                    break;
+                case REFERENCE:
+                    if (entry.getValue().getReferenceValue() != null){
+                        recordChanges.getInfo().put(entry.getKey(), entry.getValue().getDereferenceValue());
+                    }
+                    break;
+                default:
+                    break;
+            }
+        }
         return recordChanges;
     }
 

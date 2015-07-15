@@ -9,7 +9,6 @@ import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.Abst
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.DepartmentEditPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.HierEditPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.event.SetFormMode;
-import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.event.UpdateForm;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.event.AddItemEvent;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.event.DeleteItemEvent;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.event.SearchButtonEvent;
@@ -40,7 +39,7 @@ import java.util.Date;
  * User: avanteev
  */
 public class RefBookHierPresenter extends Presenter<RefBookHierPresenter.MyView, RefBookHierPresenter.MyProxy>
-        implements RefBookHierUIHandlers, UpdateForm.UpdateFormHandler, SetFormMode.SetFormModeHandler {
+        implements RefBookHierUIHandlers, SetFormMode.SetFormModeHandler {
 
     private final DispatchAsync dispatcher;
     private PlaceManager placeManager;
@@ -142,12 +141,12 @@ public class RefBookHierPresenter extends Presenter<RefBookHierPresenter.MyView,
         getView().updateView(event.getFormMode());
     }
 
-    @Override
+    /*@Override
     public void onUpdateForm(UpdateForm event) {
         if (event.isSuccess()) {
             getView().clearFilterInputBox();
         }
-    }
+    }*/
 
     @ProxyCodeSplit
     @NameToken(RefBookDataTokens.refBookHierData)
@@ -172,7 +171,6 @@ public class RefBookHierPresenter extends Presenter<RefBookHierPresenter.MyView,
     @Override
     protected void onBind() {
         super.onBind();
-        addVisibleHandler(UpdateForm.getType(), this);
         addVisibleHandler(SetFormMode.getType(), this);
 
     }

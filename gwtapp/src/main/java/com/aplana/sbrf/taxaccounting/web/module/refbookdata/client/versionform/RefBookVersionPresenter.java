@@ -2,7 +2,6 @@ package com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.versionform;
 
 import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookType;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
@@ -51,19 +50,11 @@ public class RefBookVersionPresenter extends PresenterWidget<RefBookVersionPrese
 	private final DispatchAsync dispatcher;
 	private final PlaceManager placeManager;
 
-    private RefBookType refBookType;
-
     @Override
     public void updateTable() {
         getView().updateTable();
     }
 
-    @Override
-    public RefBookDataRow getSelectedRow() {
-        return getView().getSelectedRow();
-    }
-
-    @Override
     public Integer getSelectedRowIndex() {
         return getView().getSelectedRowIndex();
     }
@@ -72,16 +63,6 @@ public class RefBookVersionPresenter extends PresenterWidget<RefBookVersionPrese
     public void setTableColumns(List<RefBookColumn> columns) {
         getView().resetRefBookElements();
         getView().setTableColumns(columns);
-    }
-
-    @Override
-    public void setRange(Range range) {
-        getView().setRange(range);
-    }
-
-    @Override
-    public int getPageSize() {
-        return getView().getPageSize();
     }
 
     @ProxyEvent
@@ -157,7 +138,7 @@ public class RefBookVersionPresenter extends PresenterWidget<RefBookVersionPrese
 	}
 
 	private void onAddRowClicked() {
-        getView().updateMode(FormMode.CREATE);
+        //getView().updateMode(FormMode.CREATE);
         //editPresenter.setMode(FormMode.CREATE);
         if (isHierarchy){
             //http://jira.aplana.com/browse/SBRFACCTAX-10062
