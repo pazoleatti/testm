@@ -93,13 +93,13 @@ head1Alias = 'R1'
 @Field
 first1Alias = 'R2'
 @Field
-last1Alias = 'R57'
+last1Alias = 'R56'
 @Field
-total1Alias = 'R58'
+total1Alias = 'R57'
 @Field
-head2Alias = 'R59'
+head2Alias = 'R58'
 @Field
-first2Alias = 'R60'
+first2Alias = 'R59'
 @Field
 last2Alias = 'R162'
 @Field
@@ -118,10 +118,10 @@ def formTypeId_RNU6 = 318
 def formTypeId_RNU4 = 316
 
 @Field
-def rows567 = ([2, 3] + (5..11) + (17..20) + [22, 24] + (28..30) + [48, 49] + (54..57) + (70..75) + [145] + (149..158) + (160..162))
+def rows567 = ([2, 3] + (5..11) + (17..20) + [22, 24] + (28..30) + [48, 49] + (54..56) + (70..75) + [145] + (149..158) + (160..162))
 
 @Field
-def rows8 = ((2..57) + (60..162))
+def rows8 = ((2..56) + (59..162))
 
 @Field
 def chRows = ['R123', 'R124', 'R146', 'R147', 'R148']
@@ -202,7 +202,7 @@ void calc() {
 
     // Лог. проверка
     dataRows.each { row ->
-        if (([2, 3] + (5..11) + (17..20) + [22, 24, 28, 29, 30] + [48, 49] + (54..57) + (70..75) + [145] + (148..158) + (160..162))
+        if (([2, 3] + (5..11) + (17..20) + [22, 24, 28, 29, 30] + [48, 49] + (54..56) + (70..75) + [145] + (148..158) + (160..162))
                 .collect { "R$it" }.contains(row.getAlias())) {
             def BigDecimal summ = ((BigDecimal) ((row.rnu6Field10Sum ?: 0) - (row.rnu6Field12Accepted ?: 0)
                     + (row.rnu6Field12PrevTaxPeriod ?: 0))).setScale(2, BigDecimal.ROUND_HALF_UP)
@@ -448,7 +448,7 @@ def consolidationFromPrimary(def dataRows, def formSources) {
     }
 
     // Прошел по строкам и получил список кну
-    def knuList = ((2..57) + (60..162)).collect {
+    def knuList = ((2..56) + (59..162)).collect {
         def row = getDataRow(dataRows, 'R' + it)
         return row.incomeTypeId
     }
