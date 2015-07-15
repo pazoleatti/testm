@@ -583,6 +583,7 @@ void addData(def xml, int headRowCount) {
         xmlIndexCol++
 
         // графа 8
+        newRow.rateOfTheBankOfRussia = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
         xmlIndexCol++
 
         // графа 9
@@ -590,10 +591,15 @@ void addData(def xml, int headRowCount) {
         xmlIndexCol++
 
         // графа 10
+        newRow.taxAccountingRuble = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
         xmlIndexCol++
 
         // графа 11
         newRow.accountingCurrency = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
+        xmlIndexCol++
+
+        // графа 12
+        newRow.ruble = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
 
         rows.add(newRow)
     }
