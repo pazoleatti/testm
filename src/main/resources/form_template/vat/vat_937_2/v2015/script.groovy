@@ -320,7 +320,7 @@ void logicCheck() {
         }
     }
 
-    checkTotalSum(dataRows, totalSumColumns, logger, !isBalancePeriod())
+    checkTotalSum(dataRows, totalSumColumns, logger, false)
 }
 
 // получить кусок текста
