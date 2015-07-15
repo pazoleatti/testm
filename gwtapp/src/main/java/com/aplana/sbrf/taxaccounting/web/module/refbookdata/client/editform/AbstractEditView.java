@@ -371,7 +371,7 @@ public abstract class AbstractEditView extends ViewWithUiHandlers<EditFormUiHand
                             throw badValueException;
                         }
                         value.setAttributeType(RefBookAttributeType.STRING);
-                        value.setStringValue(StringUtils.cleanString(string));
+                        value.setStringValue(string);
                         break;
                     case DATE:
                         Date date = field.getValue().getValue() == null ? null : (Date)field.getValue().getValue();
@@ -433,7 +433,7 @@ public abstract class AbstractEditView extends ViewWithUiHandlers<EditFormUiHand
     }
 
     private boolean equalsCleanStrings(String first, String second) {
-        return StringUtils.cleanString(first).equals(StringUtils.cleanString(second));
+        return first.equals(second);
     }
 
     @Override
