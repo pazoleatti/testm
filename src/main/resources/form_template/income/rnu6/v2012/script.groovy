@@ -750,13 +750,13 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
 
     // графа 4 - поиск записи идет по графе 2
     def colIndex = 2
-    newRow.code = getRecordIdImport(28, 'CODE', values[colIndex], fileRowIndex, colIndex + colOffset)
+    newRow.code = getRecordIdImport(28, 'CODE', values[colIndex], fileRowIndex, colIndex + colOffset, false)
     def map = getRefBookValue(28, newRow.code)
 
     // графа 4 проверка
     if (map != null) {
         colIndex = 4
-        formDataService.checkReferenceValue(28, values[colIndex], map.NUMBER?.stringValue, fileRowIndex, colIndex + colOffset, logger, true)
+        formDataService.checkReferenceValue(28, values[colIndex], map.NUMBER?.stringValue, fileRowIndex, colIndex + colOffset, logger, false)
     }
 
     // графа 3
@@ -773,7 +773,7 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
 
     // графа 7
     colIndex++
-    newRow.currencyCode = getRecordIdImport(15, 'CODE', values[colIndex], fileRowIndex, colIndex + colOffset)
+    newRow.currencyCode = getRecordIdImport(15, 'CODE', values[colIndex], fileRowIndex, colIndex + colOffset, false)
 
     // графа 8..12
     ['rateOfTheBankOfRussia', 'taxAccountingCurrency', 'taxAccountingRuble', 'accountingCurrency', 'ruble'].each { alias ->

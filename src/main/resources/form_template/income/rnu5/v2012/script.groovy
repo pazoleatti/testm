@@ -560,7 +560,7 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
     String filter = "LOWER(CODE) = LOWER('" + values[2] + "') and LOWER(NUMBER) = LOWER('" + values[3] + "')"
     def records = refBookFactory.getDataProvider(27).getRecords(getReportPeriodEndDate(), null, filter, null)
     def colIndex = 2
-    if (checkImportRecordsCount(records, refBookFactory.get(27), 'CODE', values[colIndex], getReportPeriodEndDate(), fileRowIndex, colOffset + colIndex, logger, true)) {
+    if (checkImportRecordsCount(records, refBookFactory.get(27), 'CODE', values[colIndex], getReportPeriodEndDate(), fileRowIndex, colOffset + colIndex, logger, false)) {
         // графа 2
         newRow.number = records.get(0).get(RefBook.RECORD_ID_ALIAS).numberValue
     }

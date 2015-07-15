@@ -767,7 +767,7 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
     String filter = "LOWER(CODE) = LOWER('" + values[2] + "') and LOWER(NUMBER) = LOWER('" + values[4].replaceAll(/\./, "") + "')"
     def records = refBookFactory.getDataProvider(27).getRecords(reportPeriodEndDate, null, filter, null)
     colIndex = 2
-    if (checkImportRecordsCount(records, refBookFactory.get(27), 'CODE', values[colIndex], reportPeriodEndDate, fileRowIndex, colIndex + colOffset, logger, true)) {
+    if (checkImportRecordsCount(records, refBookFactory.get(27), 'CODE', values[colIndex], reportPeriodEndDate, fileRowIndex, colIndex + colOffset, logger, false)) {
         newRow.code = records.get(0).get(RefBook.RECORD_ID_ALIAS).numberValue
     }
 
@@ -781,7 +781,7 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
 
     // графа 7
     colIndex++
-    newRow.currencyCode = getRecordIdImport(15, 'CODE', values[colIndex], fileRowIndex, colIndex + colOffset)
+    newRow.currencyCode = getRecordIdImport(15, 'CODE', values[colIndex], fileRowIndex, colIndex + colOffset, false)
 
     // графа 8..12
     ['rateOfTheBankOfRussia', 'taxAccountingCurrency', 'taxAccountingRuble', 'accountingCurrency', 'ruble'].each { alias ->

@@ -564,13 +564,13 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
 
     // графа 3
     def colIndex = 2
-    newRow.balance = getRecordIdImport(28, 'CODE', values[colIndex], fileRowIndex, colIndex + colOffset)
+    newRow.balance = getRecordIdImport(28, 'CODE', values[colIndex], fileRowIndex, colIndex + colOffset, false)
     def map = getRefBookValue(28, newRow.balance)
 
     // графа 2
     if (map != null) {
         colIndex = 3
-        formDataService.checkReferenceValue(28, values[colIndex], map.NUMBER?.stringValue, fileRowIndex, colIndex + colOffset, logger, true)
+        formDataService.checkReferenceValue(28, values[colIndex], map.NUMBER?.stringValue, fileRowIndex, colIndex + colOffset, logger, false)
     }
 
     // графа 4
@@ -579,7 +579,7 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
         def String text = values[colIndex].replaceAll("  ", " ")
         def String text2 = map.TYPE_INCOME?.stringValue
         text2 = text2.replaceAll("  ", " ")
-        formDataService.checkReferenceValue(28, text, text2, fileRowIndex, colIndex + colOffset, logger, true)
+        formDataService.checkReferenceValue(28, text, text2, fileRowIndex, colIndex + colOffset, logger, false)
     }
 
     // графа 5
