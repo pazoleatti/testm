@@ -34,7 +34,7 @@
     </row>
     <row alias="R3">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="10006"/>
-        <cell alias="incomeGroup" colSpan="1" rowSpan="1" stringValue=""/>
+        <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
         <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Вознаграждение за расчётное и кассовое обслуживание, в т.ч. комиссия по операциям инкассации для юридических (в т.ч. кредитных организаций) и физических лиц "/>
         <cell alias="accountNo" colSpan="1" rowSpan="1" stringValue="70601.12102"/>
         <cell alias="rnu6Field10Sum" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
@@ -50,7 +50,7 @@
     </row>
     <row alias="R4">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="10041"/>
-        <cell alias="incomeGroup" colSpan="1" rowSpan="1" stringValue=""/>
+        <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
         <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Комиссия по операциям с расчётными чеками "/>
         <cell alias="accountNo" colSpan="1" rowSpan="1" stringValue="70601.16203.01"/>
         <cell alias="rnu6Field10Sum" colSpan="1" rowSpan="1"/>
@@ -66,7 +66,7 @@
     </row>
     <row alias="R5">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="10300"/>
-        <cell alias="incomeGroup" colSpan="1" rowSpan="1" stringValue=""/>
+        <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
         <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Комиссия за выплату грантов, премий и иных аналогичных выплат  "/>
         <cell alias="accountNo" colSpan="1" rowSpan="1" stringValue="70601.16202.01"/>
         <cell alias="rnu6Field10Sum" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
@@ -82,7 +82,7 @@
     </row>
     <row alias="R6">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="10310"/>
-        <cell alias="incomeGroup" colSpan="1" rowSpan="1" stringValue=""/>
+        <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
         <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Комиссия за предоставление агентских услуг по банковским картам"/>
         <cell alias="accountNo" colSpan="1" rowSpan="1" stringValue="70601.16202.04"/>
         <cell alias="rnu6Field10Sum" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
@@ -354,7 +354,7 @@
     </row>
     <row alias="R23">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="10600"/>
-        <cell alias="incomeGroup" colSpan="1" rowSpan="1" stringValue=""/>
+        <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
         <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Комиссия, полученная от физических лиц по  операциям кредитования, по которым весь фактический объем работ выполнен на дату оплаты"/>
         <cell alias="accountNo" colSpan="1" rowSpan="1" stringValue="70601.16203.17"/>
         <cell alias="rnu6Field10Sum" colSpan="1" rowSpan="1"/>
@@ -402,7 +402,7 @@
     </row>
     <row alias="R26">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="10631"/>
-        <cell alias="incomeGroup" colSpan="1" rowSpan="2" stringValue=""/>
+        <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
         <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Наличная часть сделки по операциям СВОП, не признаваемым производными финансовыми инструментами"/>
         <cell alias="accountNo" colSpan="1" rowSpan="1" stringValue="70601.12403.09"/>
         <cell alias="rnu6Field10Sum" colSpan="1" rowSpan="1"/>
@@ -418,7 +418,7 @@
     </row>
     <row alias="R27">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="10632"/>
-        <cell alias="incomeGroup" colSpan="1" rowSpan="1" stringValue=""/>
+        <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
         <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Срочная часть сделки по операциям СВОП, не признаваемым производными финансовыми инструментами"/>
         <cell alias="accountNo" colSpan="1" rowSpan="1" stringValue="70601.12403.10"/>
         <cell alias="rnu6Field10Sum" colSpan="1" rowSpan="1"/>
@@ -674,7 +674,7 @@
     </row>
     <row alias="R43">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="11170"/>
-        <cell alias="incomeGroup" colSpan="1" rowSpan="1" stringValue=""/>
+        <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
         <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Комиссия, полученная от юридических лиц, а также органов государственной исполнительской власти, органов местного самоуправления, за оказание услуг по организации выпуска и размещения ценных бумаг "/>
         <cell alias="accountNo" colSpan="1" rowSpan="1" stringValue="70601.16202.09"/>
         <cell alias="rnu6Field10Sum" colSpan="1" rowSpan="1"/>
@@ -809,7 +809,7 @@
         <cell alias="rnu6Field12Accepted" colSpan="1" rowSpan="1"/>
         <cell alias="rnu6Field12PrevTaxPeriod" colSpan="1" rowSpan="1"/>
         <cell alias="rnu4Field5Accepted" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
-        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1" stringValue=""/>
         <cell alias="accountingRecords" colSpan="1" rowSpan="1" stringValue="16203.26"/>
         <cell alias="opuSumByEnclosure2" colSpan="1" rowSpan="1"/>
         <cell alias="opuSumByTableD" colSpan="1" rowSpan="1"/>
@@ -2514,7 +2514,7 @@
     </row>
     <row alias="R158">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="14110"/>
-        <cell alias="incomeGroup" colSpan="1" rowSpan="1" stringValue=""/>
+        <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
         <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Доходы, поступившие от возмещения расходов по охране здания, коммунальных платежей от арендующих организаций (оплата коммунальных платежей отдельно от арендной платы)"/>
         <cell alias="accountNo" colSpan="1" rowSpan="1" stringValue="70601.17302.03"/>
         <cell alias="rnu6Field10Sum" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
