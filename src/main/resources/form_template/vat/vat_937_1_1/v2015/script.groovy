@@ -472,7 +472,6 @@ void importTransportData() {
 
     showMessages(newRows, logger)
     if (!logger.containsLevel(LogLevel.ERROR)) {
-        logger.info("newRows "+newRows.size())
         updateIndexes(newRows)
         formDataService.getDataRowHelper(formData).allCached = newRows
     }
