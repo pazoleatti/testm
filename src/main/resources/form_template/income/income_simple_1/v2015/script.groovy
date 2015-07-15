@@ -203,7 +203,7 @@ void calc() {
     // Лог. проверка
     dataRows.each { row ->
         if (([2, 3] + (5..11) + (17..20) + [22, 24, 28, 29, 30] + [48, 49] + (54..56) + (70..75) + [145] + (148..158) + (160..162))
-                .collect { "R$it" }.contains(row.getAlias())) {
+                .collect { "R$it" as String }.contains(row.getAlias())) {
             def BigDecimal summ = ((BigDecimal) ((row.rnu6Field10Sum ?: 0) - (row.rnu6Field12Accepted ?: 0)
                     + (row.rnu6Field12PrevTaxPeriod ?: 0))).setScale(2, BigDecimal.ROUND_HALF_UP)
             row.logicalCheck = summ < 0 ? "Требуется объяснение" : summ.toString()
