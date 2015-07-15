@@ -86,7 +86,7 @@ def editableColumns = allColumns - 'rowNum'
 
 // Проверяемые на пустые значения атрибуты (графа )
 @Field
-def nonEmptyColumns = ['typeCode', 'invoice']
+def nonEmptyColumns = ['typeCode', 'invoice', 'cost', 'nds']
 
 // Атрибуты итоговых строк для которых вычисляются суммы (графа )
 @Field
