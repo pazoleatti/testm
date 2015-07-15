@@ -204,7 +204,8 @@ void importTransportData() {
     char QUOTE = '\0'
 
     String[] rowCells
-    int fileRowIndex = 0    // номер строки в файле
+    int fileRowIndex = 2    // номер строки в файле (1, 2..). Начинается с 2, потому что первые две строки - заголовок и пустая строка
+    int rowIndex = 0
     def totalTF = null        // итоговая строка со значениями из тф для добавления
 
     InputStreamReader isr = new InputStreamReader(ImportInputStream, DEFAULT_CHARSET)
@@ -226,6 +227,7 @@ void importTransportData() {
         // грузим основные данные
         while ((rowCells = reader.readNext()) != null) {
             fileRowIndex++
+            rowIndex++
             if (isEmptyCells(rowCells)) { // проверка окончания блока данных, пустая строка
                 // итоговая строка тф
                 rowCells = reader.readNext()
@@ -235,7 +237,7 @@ void importTransportData() {
                 }
                 break
             }
-            setValues(dataRows, rowCells, COLUMN_COUNT, fileRowIndex)
+            setValues(dataRows, rowCells, COLUMN_COUNT, fileRowIndex, rowIndex)
         }
     } finally {
         reader.close()
@@ -270,7 +272,7 @@ void importTransportData() {
 }
 
 /** Устанавливает значения из тф в строку нф. */
-def setValues(def dataRows, String[] rowCells, def columnCount, def rowIndex) {
+def setValues(def dataRows, String[] rowCells, def columnCount, def fileRowIndex, def rowIndex) {
     if (rowCells == null) {
         return true
     }
@@ -280,7 +282,7 @@ def setValues(def dataRows, String[] rowCells, def columnCount, def rowIndex) {
     // найти нужную строку нф
     def dataRow = dataRows.get(rowIndex - 1)
     // заполнить строку нф значениями из тф
-    return fillRow(dataRow, rowCells, columnCount, rowIndex, true)
+    return fillRow(dataRow, rowCells, columnCount, fileRowIndex, true)
 }
 
 /**
