@@ -690,7 +690,7 @@
     </row>
     <row alias="R44">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="11320"/>
-        <cell alias="incomeGroup" colSpan="1" rowSpan="14" stringValue="Другие доходы, связанные с банковской деятельностью"/>
+        <cell alias="incomeGroup" colSpan="1" rowSpan="13" stringValue="Другие доходы, связанные с банковской деятельностью"/>
         <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Комиссия за работу с паями паевых инвестиционных фондов"/>
         <cell alias="accountNo" colSpan="1" rowSpan="1" stringValue="70601.16202.10"/>
         <cell alias="rnu6Field10Sum" colSpan="1" rowSpan="1"/>
@@ -897,22 +897,6 @@
         <cell alias="difference" colSpan="1" rowSpan="1"/>
     </row>
     <row alias="R57">
-        <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="11380"/>
-        <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
-        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Доходы от проведения других операций по купле-продаже иностранной валюте"/>
-        <cell alias="accountNo" colSpan="1" rowSpan="1" stringValue="70601.12201.99"/>
-        <cell alias="rnu6Field10Sum" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
-        <cell alias="rnu6Field12Accepted" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
-        <cell alias="rnu6Field12PrevTaxPeriod" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
-        <cell alias="rnu4Field5Accepted" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
-        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
-        <cell alias="accountingRecords" colSpan="1" rowSpan="1" stringValue="12201.99"/>
-        <cell alias="opuSumByEnclosure2" colSpan="1" rowSpan="1"/>
-        <cell alias="opuSumByTableD" colSpan="1" rowSpan="1"/>
-        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
-        <cell alias="difference" colSpan="1" rowSpan="1"/>
-    </row>
-    <row alias="R58">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="40001" styleAlias="Контрольные суммы"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1" stringValue="Контрольная сумма" styleAlias="Контрольные суммы"/>
         <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
@@ -928,7 +912,7 @@
         <cell alias="opuSumTotal" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
         <cell alias="difference" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
     </row>
-    <row alias="R59">
+    <row alias="R58">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" styleAlias="Раздел 1 уровня"/>
         <cell alias="incomeGroup" colSpan="1" rowSpan="1" stringValue="Внереализационные доходы" styleAlias="Раздел 1 уровня"/>
         <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="" styleAlias="Раздел 1 уровня"/>
@@ -944,9 +928,25 @@
         <cell alias="opuSumTotal" colSpan="1" rowSpan="1" styleAlias="Раздел 1 уровня"/>
         <cell alias="difference" colSpan="1" rowSpan="1" styleAlias="Раздел 1 уровня"/>
     </row>
+    <row alias="R59">
+        <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="11380"/>
+        <cell alias="incomeGroup" colSpan="1" rowSpan="11" stringValue="Доходы от проведения операций с иностранной валютой, осуществляемых в наличной и безналичной формах, включая комиссионные сборы (вознаграждения) при операциях по покупке или продаже иностранной валюты, в том числе за счёт и по поручению клиента, от операций с валютными ценностями, включая комиссионные сборы (вознаграждения) при проведении операций с валютными ценностями"/>
+        <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Доходы от проведения других операций по купле-продаже иностранной валюте"/>
+        <cell alias="accountNo" colSpan="1" rowSpan="1" stringValue="70601.12201.99"/>
+        <cell alias="rnu6Field10Sum" colSpan="1" rowSpan="1"/>
+        <cell alias="rnu6Field12Accepted" colSpan="1" rowSpan="1"/>
+        <cell alias="rnu6Field12PrevTaxPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="rnu4Field5Accepted" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
+        <cell alias="logicalCheck" colSpan="1" rowSpan="1"/>
+        <cell alias="accountingRecords" colSpan="1" rowSpan="1" stringValue="12201.99"/>
+        <cell alias="opuSumByEnclosure2" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumByTableD" colSpan="1" rowSpan="1"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1"/>
+        <cell alias="difference" colSpan="1" rowSpan="1"/>
+    </row>
     <row alias="R60">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="11380"/>
-        <cell alias="incomeGroup" colSpan="1" rowSpan="1" stringValue="Доходы от проведения операций с иностранной валютой, осуществляемых в наличной и безналичной формах, включая комиссионные сборы (вознаграждения) "/>
+        <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
         <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Доходы от купли-продажи иностранной валюты в наличной и безналичной формах от проведения наличных (кассовых) сделок с юридическими лицами "/>
         <cell alias="accountNo" colSpan="1" rowSpan="1" stringValue="70601.12201.01"/>
         <cell alias="rnu6Field10Sum" colSpan="1" rowSpan="1"/>
@@ -962,7 +962,7 @@
     </row>
     <row alias="R61">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="11385"/>
-        <cell alias="incomeGroup" colSpan="1" rowSpan="9" stringValue="при операциях по покупке или продаже иностранной валюты, в том числе за счёт и по поручению клиента, от операций с валютными ценностями, включая комиссионные сборы (вознаграждения) при проведении операций с валютными ценностями"/>
+        <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
         <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Доходы от купли-продажи иностранной валюты в наличной и безналичной формах от проведения наличных (кассовых) сделок с физическими лицами "/>
         <cell alias="accountNo" colSpan="1" rowSpan="1" stringValue="70601.12201.02"/>
         <cell alias="rnu6Field10Sum" colSpan="1" rowSpan="1"/>
