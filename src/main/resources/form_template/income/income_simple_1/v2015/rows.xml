@@ -2098,7 +2098,7 @@
     </row>
     <row alias="R132">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="13290"/>
-        <cell alias="incomeGroup" colSpan="1" rowSpan="4" stringValue="Доходы в виде сумм, полученных по возвращенным кредитам (ссудам), убытки от списания которых были ранее учтены в составе расходов, уменьшивших налоговую "/>
+        <cell alias="incomeGroup" colSpan="1" rowSpan="4" stringValue="Доходы в виде сумм, полученных по возвращенным кредитам (ссудам), убытки от списания которых были ранее учтены в составе расходов, уменьшивших налоговую базу, либо списанных за счёт созданных резервов, отчисления на создание которых ранее уменьшали налоговую базу"/>
         <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Доходы, полученные в отчетном году  по кредитным операциям прошлых лет (по основному долгу) с кредитными организациями"/>
         <cell alias="accountNo" colSpan="1" rowSpan="1" stringValue="70601.17201.01"/>
         <cell alias="rnu6Field10Sum" colSpan="1" rowSpan="1"/>
@@ -2114,7 +2114,7 @@
     </row>
     <row alias="R133">
         <cell alias="incomeTypeId" colSpan="1" rowSpan="1" stringValue="13300"/>
-        <cell alias="incomeGroup" colSpan="1" rowSpan="1" stringValue="базу, либо списанных за счёт созданных резервов, отчисления на создание которых ранее уменьшали налоговую базу"/>
+        <cell alias="incomeGroup" colSpan="1" rowSpan="1"/>
         <cell alias="incomeTypeByOperation" colSpan="1" rowSpan="1" stringValue="Доходы, полученные в отчетном году  по кредитным операциям прошлых лет (по основному долгу) с другими клиентами"/>
         <cell alias="accountNo" colSpan="1" rowSpan="1" stringValue="70601.17201.02"/>
         <cell alias="rnu6Field10Sum" colSpan="1" rowSpan="1"/>
