@@ -366,12 +366,12 @@ void addData(def xml, int headRowCount) {
         }
 
         // графа 3
-        newRow.balance = getRecordIdImport(28, 'CODE', row.cell[2].text(), xlsIndexRow, 2 + colOffset)
+        newRow.balance = getRecordIdImport(28, 'CODE', row.cell[2].text(), xlsIndexRow, 2 + colOffset, false)
         def map = getRefBookValue(28, newRow.balance)
 
         // графа 2
         if (map != null) {
-            formDataService.checkReferenceValue(28, row.cell[3].text(), map.NUMBER?.stringValue, xlsIndexRow, 3 + colOffset, logger, true)
+            formDataService.checkReferenceValue(28, row.cell[3].text(), map.NUMBER?.stringValue, xlsIndexRow, 3 + colOffset, logger, false)
         }
 
         // графа 4
@@ -379,7 +379,7 @@ void addData(def xml, int headRowCount) {
             def String text = row.cell[4].text().replaceAll("  ", " ")
             def String text2 = map.TYPE_INCOME?.stringValue
             text2 = text2.replaceAll("  ", " ")
-            formDataService.checkReferenceValue(28, text, text2, xlsIndexRow, 4 + colOffset, logger, true)
+            formDataService.checkReferenceValue(28, text, text2, xlsIndexRow, 4 + colOffset, logger, false)
         }
 
         // графа 5
