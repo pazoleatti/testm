@@ -1,5 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.client;
 
+import com.aplana.gwt.client.dialog.Dialog;
+import com.aplana.gwt.client.dialog.DialogHandler;
 import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.shared.DeclarationTypeTemplate;
 import com.aplana.sbrf.taxaccounting.web.widget.style.GenericCellTable;
 import com.aplana.sbrf.taxaccounting.web.widget.style.table.ComparatorWithNull;
@@ -181,8 +183,12 @@ public class DeclarationTemplateListView extends ViewWithUiHandlers<DeclarationT
 
     @UiHandler("delete")
     void onDeleteTemplate(ClickEvent event){
-        if (getUiHandlers() != null)
-            getUiHandlers().onDeleteClicked();
+        Dialog.confirmMessage("Удаление макета", "Вы подтверждаете удаление всех версий макета?", new DialogHandler() {
+            @Override
+            public void yes() {
+                getUiHandlers().onDeleteClicked();
+            }
+        });
     }
 
     @UiHandler("create")
