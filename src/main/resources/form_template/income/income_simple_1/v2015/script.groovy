@@ -476,9 +476,9 @@ def consolidationFromPrimary(def dataRows, def formSources) {
                                 //«графа 4» (столбец «Балансовый счёт (номер)») формы источника = «графе 4» (столбец «Балансовый счёт по учёту дохода»)
                                 if (row.incomeTypeId != null && row.accountNo != null && recordId == rowRNU6.code && isEqualNum(row.accountNo, rowRNU6.code)) {
                                     //«графа 5» =  сумма значений по «графе 10» (столбец «Сумма дохода в налоговом учёте. Рубли») всех форм источников вида «(РНУ-6)
-                                    sum5 += rowRNU6.taxAccountingRuble ?: 0
+                                    sum5 += (rowRNU6.taxAccountingRuble ?: 0)
                                     //«графа 6» =  сумма значений по «графе 12» (столбец «Сумма дохода в бухгалтерском учёте. Рубли») всех форм источников вида «(РНУ-6)
-                                    sum6 += rowRNU6.ruble ?: 0
+                                    sum6 += (rowRNU6.ruble ?: 0)
                                     //графа 7
                                     if (rowRNU6.ruble != null && rowRNU6.ruble != 0) {
                                         def dateFrom = format.parse('01.01.' + (Integer.valueOf(formatY.format(rowRNU6.date)) - 3))
@@ -491,7 +491,7 @@ def consolidationFromPrimary(def dataRows, def formSources) {
                                                     if (rowPrimary.code != null && rowPrimary.code == rowRNU6.code &&
                                                             rowPrimary.docNumber != null && rowPrimary.docNumber == rowRNU6.docNumber &&
                                                             rowPrimary.docDate != null && rowPrimary.docDate == rowRNU6.docDate) {
-                                                        sum7 += rowPrimary.taxAccountingRuble
+                                                        sum7 += (rowPrimary.taxAccountingRuble ?: 0)
                                                     }
                                                 }
                                             }
@@ -500,9 +500,9 @@ def consolidationFromPrimary(def dataRows, def formSources) {
                                 }
                             }
                         }
-                        row.rnu6Field10Sum += sum5
-                        row.rnu6Field12Accepted += sum6
-                        row.rnu6Field12PrevTaxPeriod += sum7
+                        row.rnu6Field10Sum = (row.rnu6Field10Sum ?: 0) + (sum5 ?: 0)
+                        row.rnu6Field12Accepted = (row.rnu6Field12Accepted ?: 0) + (sum6 ?: 0)
+                        row.rnu6Field12PrevTaxPeriod = (row.rnu6Field12PrevTaxPeriod ?: 0) + (sum7 ?: 0)
                     }
                     break
             // рну 4
@@ -517,11 +517,11 @@ def consolidationFromPrimary(def dataRows, def formSources) {
                             if (rowRNU4.getAlias() == null) {
                                 if (row.incomeTypeId != null && row.accountNo != null && recordId == rowRNU4.balance && isEqualNum(row.accountNo, rowRNU4.balance)) {
                                     //«графа 8» =  сумма значений по «графе 5» (столбец «Сумма дохода за отчётный квартал») всех форм источников вида «(РНУ-4)
-                                    sum8 += rowRNU4.sum
+                                    sum8 += (rowRNU4.sum ?: 0)
                                 }
                             }
                         }
-                        row.rnu4Field5Accepted += sum8
+                        row.rnu4Field5Accepted = (row.rnu4Field5Accepted ?: 0) + (sum8 ?: 0)
                     }
                     break
             }
