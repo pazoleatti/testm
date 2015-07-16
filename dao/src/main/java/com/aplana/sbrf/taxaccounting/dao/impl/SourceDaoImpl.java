@@ -351,7 +351,7 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
             "join department td on td.id = tdrp.department_id\n" +
             "join report_period trp on trp.id = tdrp.report_period_id\n" +
             "join tax_period ttp on ttp.id = trp.tax_period_id\n" +
-            "join department_form_type tdft on (tft.form_type_id = tfmt.id and tdft.department_id = td.id and tdft.kind = tfd.kind)\n" +
+            "join department_form_type tdft on (tdft.form_type_id = tfmt.id and tdft.department_id = td.id and tdft.kind = tfd.kind)\n" +
             "where dft.id = :source and tdft = :destination and (\n" +
             "(:periodStart <= trp.calendar_start_date and (:periodEnd is null or :periodEnd >= trp.calendar_start_date)) or\n" +
             "(:periodStart >= trp.calendar_start_date and :periodStart <= trp.end_date)\n" +
