@@ -2033,7 +2033,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 
                 public void concatAttrs(ResultSet rs, StringBuilder attr) throws SQLException {
                     attr.append(rs.getString(STRING_VALUE_COLUMN_ALIAS) != null ? rs.getString(STRING_VALUE_COLUMN_ALIAS) + ", " : "");
-                    attr.append(rs.getString(NUMBER_VALUE_COLUMN_ALIAS) != null ? rs.getFloat(NUMBER_VALUE_COLUMN_ALIAS) + ", " : "");
+                    attr.append(rs.getString(NUMBER_VALUE_COLUMN_ALIAS) != null ? rs.getLong(NUMBER_VALUE_COLUMN_ALIAS) + ", " : "");
                     attr.append(rs.getDate(DATE_VALUE_COLUMN_ALIAS) != null ? rs.getDate(DATE_VALUE_COLUMN_ALIAS) + ", " : "");
                     // TODO - разыменовать и добавить значение аттрибута ссылки
                     attr.append(rs.getString(REFERENCE_VALUE_COLUMN_ALIAS) != null ? rs.getInt(REFERENCE_VALUE_COLUMN_ALIAS) + ", " : "");
