@@ -430,7 +430,7 @@ void sortFormDataRows(def saveInDB = true) {
     calc1(dataRows)
 
     if (saveInDB) {
-        dataRowHelper.saveSort()
+        formDataService.saveCachedDataRows(formData, logger)
     } else {
         updateIndexes(dataRows);
     }
