@@ -1288,7 +1288,7 @@ public class FormDataServiceImpl implements FormDataService {
         List<DepartmentFormType> departmentFormTypesSources = getFormSources(formData, logger, userInfo, reportPeriod);
         if (departmentFormTypesSources.isEmpty()){
             //Очищаем устаревшие данные, оставшиеся после старой консолидации
-            tx.executeInNewTransaction(new TransactionLogic() {
+            /*tx.executeInNewTransaction(new TransactionLogic() {
                 @Override
                 public void execute() {
                     clearDataRows(formData, userInfo);
@@ -1298,7 +1298,7 @@ public class FormDataServiceImpl implements FormDataService {
                 public Object executeWithReturn() {
                     return null;
                 }
-            });
+            });  */
             throw new ServiceException("для текущей формы не назначено ни одного источника");
         }
     }
