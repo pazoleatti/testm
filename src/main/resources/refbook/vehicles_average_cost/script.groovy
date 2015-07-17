@@ -42,7 +42,7 @@ void importFromXls() {
     try {
         def xmlString = importService.getData(inputStream, ".xlsx", 'windows-1251', 'Средняя стоимость', null)
     } catch (Exception e) {
-        logger.error("Неверный формат загружаемого файла")
+        logger.error("Неверная структура загружаемого файла")
         return
     }
     if (xmlString == null || xmlString.isEmpty()) {

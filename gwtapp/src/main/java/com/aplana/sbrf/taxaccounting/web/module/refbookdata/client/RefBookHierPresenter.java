@@ -161,6 +161,7 @@ public class RefBookHierPresenter extends Presenter<RefBookHierPresenter.MyView,
         //Показывает/скрывает поля, которые необходимы только для версионирования
         void setVersionedFields(boolean isVisible);
         void setRefBookNameDesc(String desc);
+        void setRefBookNameDesc(String verCount, Date relDate);
         /**
          * Устанавливает версионный вид справочника.
          * @param isVersion true - если переходим в версионное представление
@@ -295,14 +296,8 @@ public class RefBookHierPresenter extends Presenter<RefBookHierPresenter.MyView,
                                                             refBookLinearPresenter.setTableColumns(result.getColumns());*/
                                         getView().setVersionView(true);
                                         versionPresenter.setTableColumns(result.getColumns());
-                                        //commonEditPresenter.init(refBookId, result.getColumns());
                                         commonEditPresenter.setMode(mode);
-                                        /*hierEditFormPresenter.show(recordId);*/
                                         dataInterface.updateData();
-                                                            /*refBookLinearPresenter.updateTable();*/
-                                                            /*if (result.isReadOnly()){
-                                                                setMode(FormMode.READ);
-                                                            }*/
                                         //hierEditFormPresenter.init(refBookId);
                                                             /*getProxy().manualReveal(RefBookDataPresenter.this);*/
                                     }
@@ -316,7 +311,7 @@ public class RefBookHierPresenter extends Presenter<RefBookHierPresenter.MyView,
                                 new AbstractCallback<GetNameResult>() {
                                     @Override
                                     public void onSuccess(GetNameResult result) {
-                                        getView().setRefBookNameDesc("Все значения записи " + result.getUniqueAttributeValues());
+                                        getView().setRefBookNameDesc(result.getUniqueAttributeValues(), getView().getRelevanceDate());
                                         commonEditPresenter.setRecordId(result.getRecordId());
                                     }
                                 }, RefBookHierPresenter.this));

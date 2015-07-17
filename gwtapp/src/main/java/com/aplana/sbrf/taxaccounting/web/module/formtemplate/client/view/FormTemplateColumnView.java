@@ -374,6 +374,9 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
 
 	@UiHandler("numericMaxLengthBox")
 	public void onNumericMaxLengthBox(KeyUpEvent event) {
+        if (numericMaxLengthBox.getValue().compareTo(NumericColumn.MAX_LENGTH) > 0){
+            numericMaxLengthBox.setValue(NumericColumn.MAX_LENGTH);
+        }
 		((NumericColumn) columns.get(columnListBox.getSelectedIndex())).setMaxLength(numericMaxLengthBox.getValue());
 	}
 

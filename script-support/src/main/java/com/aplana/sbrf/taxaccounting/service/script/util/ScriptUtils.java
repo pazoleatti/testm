@@ -15,6 +15,7 @@ import com.aplana.sbrf.taxaccounting.service.script.ImportService;
 import com.aplana.sbrf.taxaccounting.service.script.RefBookService;
 import groovy.util.XmlSlurper;
 import groovy.util.slurpersupport.GPathResult;
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.openxml4j.exceptions.OpenXML4JException;
 import org.apache.poi.openxml4j.opc.OPCPackage;
 import org.apache.poi.ss.usermodel.*;
@@ -94,6 +95,7 @@ public final class ScriptUtils {
 
     private static final String EMPTY_FILE_NAME = "Имя файла не должно быть пустым!";
     private static final String EMPTY_INPUT_STREAM = "Поток данных пуст!";
+    private static final String WRONG_FORMAT_FILE = "Неверная структура загружаемого файла! ";
 
     private static final String WRONG_XLS_FORMAT = "Выбранный файл не соответствует формату xls/xlsx/xlsm!";
     private static final String WRONG_RNU_FORMAT = "Выбранный файл не соответствует формату rnu!";
@@ -1593,32 +1595,48 @@ public final class ScriptUtils {
         if (!fileName.endsWith(".xls") && !fileName.endsWith(".xlsx") && !fileName.endsWith(".xlsm")) {
             throw new ServiceException(WRONG_XLS_FORMAT);
         }
+        OPCPackage pkg = null;
+        XSSFReader r = null;
+        StylesTable styles = null;
+        SharedStringsTable sst = null;
+        XMLReader parser = null;
+        ContentHandler handler = null;
+        InputStream sheet1 = null;
+        InputSource sheetSource = null;
 
-        // получение строк из файла (из первого листа)
-        OPCPackage pkg = OPCPackage.open(inputStream);
-        XSSFReader r = new XSSFReader(pkg);
-        StylesTable styles = r.getStylesTable();
-        SharedStringsTable sst = r.getSharedStringsTable();
-        XMLReader parser = XMLReaderFactory.createXMLReader();
-        // обработчик
-        ContentHandler handler = new SheetHandler(sst, styles, allValues, headerValues, tableStartValue, tableEndValue, headerRowCount, paramsMap);
-        parser.setContentHandler(handler);
-        // обработать первый лист в книге
-        InputStream sheet1 = r.getSheet("rId1");
-        InputSource sheetSource = new InputSource(sheet1);
-        parser.parse(sheetSource);
-
-        // освобождение ресурсов для экономии памяти
-        sheet1.close();
-        sheet1 = null;
-        sheetSource = null;
-        parser = null;
-        handler = null;
-        sst = null;
-        styles = null;
-        r = null;
-        pkg.close();
-        pkg = null;
+        try {
+            // получение строк из файла (из первого листа)
+            pkg = OPCPackage.open(inputStream);
+            r = new XSSFReader(pkg);
+            styles = r.getStylesTable();
+            sst = r.getSharedStringsTable();
+            parser = XMLReaderFactory.createXMLReader();
+            // обработчик
+            handler = new SheetHandler(sst, styles, allValues, headerValues, tableStartValue, tableEndValue, headerRowCount, paramsMap);
+            parser.setContentHandler(handler);
+            // обработать первый лист в книге
+            sheet1 = r.getSheet("rId1");
+            sheetSource = new InputSource(sheet1);
+            parser.parse(sheetSource);
+        } catch (InvalidFormatException e) {
+            throw new ServiceException(WRONG_FORMAT_FILE + e.getMessage());
+        } finally {
+            // освобождение ресурсов для экономии памяти
+            if (sheet1 != null) {
+                sheet1.close();
+            }
+            sheet1 = null;
+            sheetSource = null;
+            parser = null;
+            handler = null;
+            sst = null;
+            styles = null;
+            r = null;
+            if (pkg != null) {
+                pkg.close();
+            }
+            pkg = null;
+        }
     }
 
     static class SheetHandler extends DefaultHandler {
