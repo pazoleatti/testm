@@ -55,15 +55,14 @@ public class CheckFormDataHandler extends AbstractActionHandler<CheckFormDataAct
 	}
 
 	@Override
-	public TaskFormDataResult execute(final CheckFormDataAction action,
-			ExecutionContext context) throws ActionException {
+	public TaskFormDataResult execute(final CheckFormDataAction action, ExecutionContext context) throws ActionException {
         final ReportType reportType = ReportType.CHECK_FD;
         TaskFormDataResult result = new TaskFormDataResult();
         TAUserInfo userInfo = securityService.currentUserInfo();
         Logger logger = new Logger();
         FormData formData = action.getFormData();
         LockData lockDataEdit = formDataService.getObjectLock(action.getFormData().getId(), userInfo);
-        if (!action.isEditMode() || action.isEditMode() && lockDataEdit != null && lockDataEdit.getUserId() == userInfo.getUser().getId()) {
+        if (!action.isEditMode() || lockDataEdit != null && lockDataEdit.getUserId() == userInfo.getUser().getId()) {
             String keyTask = formDataService.generateTaskKey(action.getFormData().getId(), reportType);
             Pair<ReportType, LockData> lockType = formDataService.getLockTaskType(action.getFormData().getId());
             if (!action.isEditMode() && lockDataEdit != null) {
@@ -80,24 +79,10 @@ public class CheckFormDataHandler extends AbstractActionHandler<CheckFormDataAct
                 result.setLock(false);
             } else {
                 result.setLock(false);
-                if (action.isEditMode()) {
-                    if (!action.getModifiedRows().isEmpty()) {
+				// Если на текущей странице есть измененные строки, то перед "Проверить" надо их синхронизировать с бд.
+                if (action.isEditMode() && !action.getModifiedRows().isEmpty()) {
                         refBookHelper.dataRowsCheck(action.getModifiedRows(), formData.getFormColumns());
                         dataRowService.update(userInfo, formData.getId(), action.getModifiedRows(), formData.isManual());
-                    }
-                    // проверка наличия не сохраненных изменений
-                    if (!dataRowService.compareRows(formData)) {
-                        if (action.isSave()) {
-                            // сохраняем данные при нажантии "Да"
-                            formDataService.saveFormData(logger, securityService.currentUserInfo(), formData);
-                            dataRowService.createTemporary(formData);
-                        } else {
-                            lockDataService.unlock(keyTask, userInfo.getUser().getId());
-                            // Вызов диалога, для подтверждения сохранения данных
-                            result.setSave(true);
-                            return result;
-                        }
-                    }
                 }
                 result.setSave(false);
 

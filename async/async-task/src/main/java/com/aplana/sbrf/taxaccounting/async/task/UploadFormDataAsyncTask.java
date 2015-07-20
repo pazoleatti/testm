@@ -4,9 +4,7 @@ import com.aplana.sbrf.taxaccounting.async.exception.AsyncTaskException;
 import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.core.api.LockStateLogger;
 import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
-import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -77,15 +75,8 @@ public abstract class UploadFormDataAsyncTask extends AbstractAsyncTask {
         TAUserInfo userInfo = new TAUserInfo();
         userInfo.setUser(userService.getUser(userId));
 
-        FormData formData = formDataService.getFormData(
-                userInfo,
-                formDataId,
-                manual,
-                logger);
+        FormData formData = formDataService.getFormData(userInfo, formDataId, manual, logger);
         BlobData blobData = blobDataService.get(uuid);
-
-        //Создание временного среза для нф
-        dataRowService.createTemporary(formData);
         logger.info("Загрузка данных из файла: \"" + blobData.getName() + "\"");
         //Парсит загруженный в фаловое хранилище xls-файл
         formDataService.importFormData(logger, userInfo,
@@ -97,8 +88,6 @@ public abstract class UploadFormDataAsyncTask extends AbstractAsyncTask {
                 });
         // сохраняем данные в основном срезе
         formDataService.saveFormData(logger, userInfo, formData);
-        // восстанавливаем временный срез, чтобы продолжить редактирование
-        dataRowService.createTemporary(formData);
     }
 
     @Override

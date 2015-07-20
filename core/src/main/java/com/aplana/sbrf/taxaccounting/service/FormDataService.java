@@ -96,6 +96,15 @@ public interface FormDataService {
 	 */
 	long saveFormData(Logger logger, TAUserInfo userInfo, FormData formData);
 
+	/**
+	 * Удаляет точку восстановления, сделанную перед редактированием данных
+	 *
+	 * @param userInfo информация о пользователея, выполняющего операцию
+	 * @param formData объект с данными налоговой формы
+	 * @return идентификатор сохранённой записи
+	 */
+	void removeCheckPoint(Logger logger, TAUserInfo userInfo, FormData formData);
+
     /**
      * Сохранить данные исполнителей и подписантов для налоговой формы
      * @param logger
@@ -393,7 +402,7 @@ public interface FormDataService {
      * Удаление блокировок для задач(отмена задачи)
      * @param formDataId
      * @param userInfo
-     * @param lockKeys
+     * @param reportTypes
      */
     void interruptTask(long formDataId, TAUserInfo userInfo, List<ReportType> reportTypes);
 

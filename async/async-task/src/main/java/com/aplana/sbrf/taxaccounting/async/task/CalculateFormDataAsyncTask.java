@@ -3,9 +3,7 @@ package com.aplana.sbrf.taxaccounting.async.task;
 import com.aplana.sbrf.taxaccounting.async.exception.AsyncTaskException;
 import com.aplana.sbrf.taxaccounting.model.BalancingVariants;
 import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
-import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -69,13 +67,9 @@ public abstract class CalculateFormDataAsyncTask extends AbstractAsyncTask {
                 formDataId,
                 manual,
                 logger);
-        //Создание временного среза для нф
-        dataRowService.createTemporary(formData);
         formDataService.doCalc(logger, userInfo, formData);
         // сохраняем данные в основном срезе
         formDataService.saveFormData(logger, userInfo, formData);
-        // восстанавливаем временный срез, чтобы продолжить редактирование
-        dataRowService.createTemporary(formData);
     }
 
     @Override

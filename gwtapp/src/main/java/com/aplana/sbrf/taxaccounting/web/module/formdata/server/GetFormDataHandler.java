@@ -150,7 +150,8 @@ public class GetFormDataHandler extends AbstractActionHandler<GetFormDataAction,
         try {
             if (!action.isReadOnly()) {
                 FormData formData = formDataService.getFormData(userInfo, action.getFormDataId(), action.isManual(), logger);
-                dataRowService.createTemporary(formData);
+				// Когда пользователь входит в режим редактирования, то создаем контрольную точку восстановления
+                dataRowService.createCheckPoint(formData);
             }
 
             fillLockData(action, userInfo, result);

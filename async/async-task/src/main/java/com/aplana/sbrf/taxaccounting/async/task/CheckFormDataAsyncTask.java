@@ -4,7 +4,6 @@ import com.aplana.sbrf.taxaccounting.async.exception.AsyncTaskException;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceRollbackException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
-import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.util.TransactionHelper;
 import com.aplana.sbrf.taxaccounting.util.TransactionLogic;
@@ -68,20 +67,13 @@ public abstract class CheckFormDataAsyncTask extends AbstractAsyncTask {
         final TAUserInfo userInfo = new TAUserInfo();
         userInfo.setUser(userService.getUser(userId));
 
-        final FormData formData = formDataService.getFormData(
-                userInfo,
-                formDataId,
-                manual,
-                logger);
+        final FormData formData = formDataService.getFormData(userInfo, formDataId, manual, logger);
         try {
             tx.executeInNewTransaction(new TransactionLogic() {
                 @Override
                 public void execute() {
-                    //Создание временного среза для нф
-                    dataRowService.createTemporary(formData);
                     formDataService.doCheck(logger, userInfo, formData, false);
                 }
-
                 @Override
                 public Object executeWithReturn() {
                     return null;

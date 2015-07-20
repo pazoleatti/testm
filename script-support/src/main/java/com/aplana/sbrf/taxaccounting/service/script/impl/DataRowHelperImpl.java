@@ -62,20 +62,14 @@ public class DataRowHelperImpl implements DataRowHelper, ScriptComponentContextH
 	@Override
 	public List<DataRow<Cell>> getAll() {
         List<DataRow<Cell>> rows;
-        if (fd.getState() == WorkflowState.ACCEPTED) {
-            //Если нф принята, то в любом случае у нее есть только постоянный срез
-            rows = dataRowDao.getSavedRows(fd, null);
-        } else {
-            //Иначе берем временный. Предварительно он должен быть создан из постоянного с помощью метода com.aplana.sbrf.taxaccounting.service.impl.DataRowServiceImpl.createTemporary()
-            rows = dataRowDao.getTempRows(fd, null);
-        }
+        rows = dataRowDao.getSavedRows(fd, null);
 		FormDataUtils.setValueOwners(rows);
 		return rows;
 	}
 
 	@Override
 	public int getCount() {
-		return dataRowDao.getTempSize(fd);
+		return dataRowDao.getSavedSize(fd);
 	}
 
     /**
@@ -132,12 +126,12 @@ public class DataRowHelperImpl implements DataRowHelper, ScriptComponentContextH
 
 	@Override
 	public void commit() {
-		dataRowDao.commit(fd);
+		dataRowDao.removeCheckPoint(fd);
 	}
 
 	@Override
 	public void rollback() {
-		dataRowDao.rollback(fd);
+		dataRowDao.restoreCheckPoint(fd);
 	}
 
 	@Override

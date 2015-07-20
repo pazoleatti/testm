@@ -78,22 +78,10 @@ public class RecalculateFormDataHandler extends AbstractActionHandler<Recalculat
                 result.setLock(false);
             } else {
                 result.setLock(false);
+				// Если на текущей странице есть измененные строки, то перед "Проверить" надо их синхронизировать с бд.
                 if (!action.getModifiedRows().isEmpty()) {
                     refBookHelper.dataRowsCheck(action.getModifiedRows(), formData.getFormColumns());
                     dataRowService.update(userInfo, formData.getId(), action.getModifiedRows(), formData.isManual());
-                }
-                // проверка наличия не сохраненных изменений
-                if (!dataRowService.compareRows(formData)) {
-                    if (action.isSave()) {
-                        // сохраняем данные при нажантии "Да"
-                        formDataService.saveFormData(logger, securityService.currentUserInfo(), formData);
-                        dataRowService.createTemporary(formData);
-                    } else {
-                        lockDataService.unlock(keyTask, userInfo.getUser().getId());
-                        // Вызов диалога, для подтверждения сохранения данных
-                        result.setSave(true);
-                        return result;
-                    }
                 }
                 result.setSave(false);
 

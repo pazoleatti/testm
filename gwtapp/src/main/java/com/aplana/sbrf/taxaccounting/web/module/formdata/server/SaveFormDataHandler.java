@@ -46,7 +46,8 @@ public class SaveFormDataHandler extends
 		    dataRowService.update(securityService.currentUserInfo(), formData.getId(), action.getModifiedRows(), formData.isManual());
 		}
 		formDataService.saveFormData(logger, securityService.currentUserInfo(), formData);
-		dataRowService.createTemporary(formData); // восстанавливаем временный срез, чтобы продолжить редактирование
+		// Удаляем контрольную точку восстановления
+		formDataService.removeCheckPoint(logger, securityService.currentUserInfo(), formData);
 
 		logger.info("Данные успешно записаны");
 		DataRowResult result = new DataRowResult();

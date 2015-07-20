@@ -79,7 +79,6 @@ public class FormSearchPresenter extends PresenterWidget<FormSearchPresenter.MyV
         action.setFormDataId(formDataId);
         action.setFormTemplateId(formTemplateId);
         action.setCaseSensitive(getView().isCaseSensitive());
-        action.setReadOnlyMode(getView().isReadOnlyMode());
         action.setManual(getView().isManual());
         dispatcher.execute(action, CallbackUtils.defaultCallback(new AbstractCallback<SearchResult>() {
             @Override

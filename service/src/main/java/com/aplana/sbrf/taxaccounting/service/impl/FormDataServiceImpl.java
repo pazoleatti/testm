@@ -252,18 +252,18 @@ public class FormDataServiceImpl implements FormDataService {
         formDataAccessService.canEdit(userInfo, formDataId, isManual);
 
         File dataFile = null;
-        OutputStream dataFileOutputStream = null;
-        InputStream dataFileInputStream = null;
-
         try {
             log.info(String.format("Создание временного файла: %s", key));
             if (stateLogger != null) {
                 stateLogger.updateState("Создание временного файла");
             }
             dataFile = File.createTempFile("dataFile", ".original");
-            dataFileOutputStream = new BufferedOutputStream(new FileOutputStream(dataFile));
-            IOUtils.copy(inputStream, dataFileOutputStream);
-            IOUtils.closeQuietly(dataFileOutputStream);
+			OutputStream dataFileOutputStream = new BufferedOutputStream(new FileOutputStream(dataFile));
+			try {
+				IOUtils.copy(inputStream, dataFileOutputStream);
+			} finally {
+				IOUtils.closeQuietly(dataFileOutputStream);
+			}
 
             String ext = getFileExtention(fileName);
 
@@ -296,18 +296,20 @@ public class FormDataServiceImpl implements FormDataService {
             FormData fd = formDataDao.get(formDataId, isManual);
 
             if (check) {
-                dataFileInputStream = new BufferedInputStream(new FileInputStream(dataFile));
-                Map<String, Object> additionalParameters = new HashMap<String, Object>();
-                additionalParameters.put("ImportInputStream", dataFileInputStream);
-                additionalParameters.put("UploadFileName", fileName);
-                if (stateLogger != null) {
-                    stateLogger.updateState("Импорт XLSM-файла");
-                }
-                log.info(String.format("Выполнение скрипта: %s", key));
-                dataRowDao.createTemporary(fd);
-                formDataScriptingService.executeScript(userInfo, fd, formDataEvent, logger, additionalParameters);
-                IOUtils.closeQuietly(dataFileInputStream);
-            }
+				InputStream dataFileInputStream = new BufferedInputStream(new FileInputStream(dataFile));
+				try {
+					Map<String, Object> additionalParameters = new HashMap<String, Object>();
+					additionalParameters.put("ImportInputStream", dataFileInputStream);
+					additionalParameters.put("UploadFileName", fileName);
+					if (stateLogger != null) {
+						stateLogger.updateState("Импорт XLSM-файла");
+					}
+					log.info(String.format("Выполнение скрипта: %s", key));
+					formDataScriptingService.executeScript(userInfo, fd, formDataEvent, logger, additionalParameters);
+				} finally {
+					IOUtils.closeQuietly(dataFileInputStream);
+				}
+			}
 
             if (logger.containsLevel(LogLevel.ERROR)) {
                 if (stateLogger != null) {
@@ -326,8 +328,6 @@ public class FormDataServiceImpl implements FormDataService {
         } catch (IOException e) {
             throw new ServiceException(e.getLocalizedMessage(), e);
         } finally {
-            IOUtils.closeQuietly(dataFileOutputStream);
-            IOUtils.closeQuietly(dataFileInputStream);
             if (dataFile != null) {
                 dataFile.delete();
             }
@@ -407,9 +407,6 @@ public class FormDataServiceImpl implements FormDataService {
                     "Произошли ошибки в скрипте после создания налоговой формы",
                     logEntryService.save(logger.getEntries()));
         }
-
-		dataRowDao.commit(formData);
-
         updatePreviousRowNumber(formData, userInfo);
         return formData.getId();
 	}
@@ -670,44 +667,35 @@ public class FormDataServiceImpl implements FormDataService {
 	@Transactional
 	public long saveFormData(Logger logger, TAUserInfo userInfo, FormData formData) {
 		formDataAccessService.canEdit(userInfo, formData.getId(), formData.isManual());
-
         // Отработка скриптом события сохранения
-        // dataRowDao.createTemporary(formData); не вызываем, т.к это должно быть сделано до этого, в вызывающих операциях
-		formDataScriptingService.executeScript(userInfo, formData,
-                FormDataEvent.SAVE, logger, null);
-
+		formDataScriptingService.executeScript(userInfo, formData, FormDataEvent.SAVE, logger, null);
         if (logger.containsLevel(LogLevel.ERROR)) {
             throw new ServiceLoggerException(SAVE_ERROR, logEntryService.save(logger.getEntries()));
         }
-
         // Обновление для сквозной нумерации
         updatePreviousRowNumberAttr(formData, logger, userInfo);
-
         formDataDao.save(formData);
-
-		dataRowDao.commit(formData);
-
         deleteReport(formData.getId(), formData.isManual(), userInfo.getUser().getId());
-
         // ЖА и история изменений
 		logBusinessService.add(formData.getId(), null, userInfo, FormDataEvent.SAVE, null);
 		auditService.add(FormDataEvent.SAVE, userInfo, formData.getDepartmentId(), formData.getReportPeriodId(),
 				null, formData.getFormType().getName(), formData.getKind().getId(), "Форма сохранена", null, formData.getFormType().getId());
-
 		return formData.getId();
 	}
 
-    /**
+	@Override
+	public void removeCheckPoint(Logger logger, TAUserInfo userInfo, FormData formData) {
+		dataRowDao.removeCheckPoint(formData);
+	}
+
+	/**
 	 * Получить данные по налоговой форме
 	 *
 	 *
-     * @param userInfo
-     *            информация о пользователе, выполняющего операцию
-     * @param formDataId
-     *            идентификатор записи, которую необходимо считать
+     * @param userInfo информация о пользователе, выполняющего операцию
+     * @param formDataId идентификатор записи, которую необходимо считать
      * @param manual
-     *@param logger
-     *            логгер-объект для фиксации диагностических сообщений  @return объект с данными по налоговой форме
+     *@param logger логгер-объект для фиксации диагностических сообщений  @return объект с данными по налоговой форме
 	 * @throws com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException
 	 *             если у пользователя нет прав просматривать налоговую форму с
 	 *             такими параметрами
@@ -716,12 +704,8 @@ public class FormDataServiceImpl implements FormDataService {
 	@Transactional
 	public FormData getFormData(TAUserInfo userInfo, long formDataId, boolean manual, Logger logger) {
 		formDataAccessService.canRead(userInfo, formDataId);
-
 		FormData formData = formDataDao.get(formDataId, manual);
-
-		formDataScriptingService.executeScript(userInfo,
-				formData, FormDataEvent.AFTER_LOAD, logger, null);
-
+		formDataScriptingService.executeScript(userInfo, formData, FormDataEvent.AFTER_LOAD, logger, null);
 		return formData;
 	}
 
@@ -790,7 +774,6 @@ public class FormDataServiceImpl implements FormDataService {
         }
 
         FormData formData = formDataDao.get(formDataId, manual);
-        dataRowDao.createTemporary(formData);
         switch (workflowMove){
             case PREPARED_TO_APPROVED:
                 lockForm(logger, formData);
@@ -974,11 +957,7 @@ public class FormDataServiceImpl implements FormDataService {
         Map<Long, List<Long>> recordsToCheck = new HashMap<Long, List<Long>>();
         Map<Long, List<ReferenceInfo>> referenceInfoMap = new HashMap<Long, List<ReferenceInfo>>();
         List<DataRow<Cell>> rows;
-        if (!needCheckTemp) {
-            rows = dataRowDao.getSavedRows(formData, null);
-        } else {
-            rows = dataRowDao.getTempRows(formData, null);
-        }
+		rows = dataRowDao.getSavedRows(formData, null);
         if (rows.size() > 0) {
             for (Column column : formData.getFormColumns()) {
                 if (ColumnType.REFBOOK.equals(column.getColumnType())) {
@@ -1069,8 +1048,6 @@ public class FormDataServiceImpl implements FormDataService {
                         logEntryService.save(logger.getEntries()));
             }
         }
-
-        dataRowDao.commit(formData);
 
         if (!isAsync)
             logger.info("Форма \"" + formData.getFormType().getName() + "\" переведена в статус \"" + workflowMove.getToState().getName() + "\"");
@@ -1308,7 +1285,6 @@ public class FormDataServiceImpl implements FormDataService {
         List<DataRow<Cell>> fixRows = formTemplateService.get(formData.getFormTemplateId()).getRows();
         if (dataRowDao.getSavedSize(formData) > fixRows.size()) {
             dataRowDao.saveRows(formData, fixRows);
-            dataRowDao.commit(formData);
             updatePreviousRowNumber(formData, userInfo);
         }
     }

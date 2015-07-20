@@ -1,11 +1,9 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdata.shared;
 
-import com.aplana.sbrf.taxaccounting.model.Cell;
-import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.gwtplatform.dispatch.shared.Result;
 
 /**
- * Результат выполнения действий, которые моифицируют форму каким-либо образом.
+ * Результат выполнения действий, которые модифицируют форму каким-либо образом.
  *
  * @author Eugene Stetsenko
  */
