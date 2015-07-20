@@ -69,8 +69,6 @@ public class RefBookDepartment implements RefBookDataProvider {
     @Autowired
     private TAUserService taUserService;
     @Autowired
-    private FormDataService formDataService;
-    @Autowired
     private SourceService sourceService;
     @Autowired
     private DeclarationDataSearchService declarationDataSearchService;
@@ -287,7 +285,7 @@ public class RefBookDepartment implements RefBookDataProvider {
                         null, null, null, null,
                         String.format("Создано подразделение %s, значения атрибутов: %s",
                                 refBookValueMap.get(DEPARTMENT_NAME_ATTRIBUTE).toString(),
-                                assembleMessage(refBookValueMap)), null, depId);
+                                assembleMessage(refBookValueMap)), null);
                 return Arrays.asList((long)depId);
             } finally {
                 for (String lock : lockedObjects) {
@@ -435,8 +433,8 @@ public class RefBookDepartment implements RefBookDataProvider {
                     throw new ServiceLoggerException(ERROR_MESSAGE,
                             logEntryService.save(logger.getEntries()));
 
-                //7
-                if (versionFrom != null){
+                //7 Перенесен в отдельный хендлер
+                /*if (versionFrom != null){
                     if (oldType != TERR_BANK){
                         //Обновляем имена подразделений в печатных формах
                         formDataService.updateFDDepartmentNames(dep.getId(), records.get(DEPARTMENT_NAME_ATTRIBUTE).getStringValue(), versionFrom, versionTo, logger.getTaUserInfo());
@@ -444,7 +442,7 @@ public class RefBookDepartment implements RefBookDataProvider {
                         //Обновляем имена ТБ в печатных формах
                         formDataService.updateFDTBNames(dep.getId(), records.get(DEPARTMENT_NAME_ATTRIBUTE).getStringValue(), versionFrom, versionTo, oldType == TERR_BANK && isChangeType, logger.getTaUserInfo());
                     }
-                }
+                }*/
 
                 //9 шаг. Проверка зацикливания
                 if (dep.getType() != DepartmentType.ROOT_BANK && dep.getParentId() != null && dep.getParentId() != (parentDep != null ? parentDep.getId() : 0)){
@@ -461,7 +459,7 @@ public class RefBookDepartment implements RefBookDataProvider {
                         null, null, null, null,
                         String.format("Изменены значения атрибутов подразделения %s, новые значения атрибутов: %s",
                                 departmentService.getDepartment(uniqueRecordId.intValue()).getName(),
-                                assembleMessage(records)), null, dep.getId());
+                                assembleMessage(records)), null);
             } finally {
                 for (String lock : lockedObjects) {
                     lockService.unlock(lock, userId);
@@ -632,7 +630,7 @@ public class RefBookDepartment implements RefBookDataProvider {
                 deleteDRPs(depId);
 
                 auditService.add(FormDataEvent.DELETE_DEPARTMENT, logger.getTaUserInfo(), 0, null, null, null, null,
-                        String.format("Удалено подразделение %s", departmentService.getParentsHierarchy(depId)), null, depId);
+                        String.format("Удалено подразделение %s", departmentService.getParentsHierarchy(depId)), null);
                 refBookDepartmentDao.remove(depId);
                 logger.info("Подразделение удалено!");
             } finally {

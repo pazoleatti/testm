@@ -84,7 +84,7 @@ public class GoMoveHandler extends AbstractActionHandler<GoMoveAction, GoMoveRes
                             @Override
                             public LockData createLock(String keyTask, ReportType reportType, TAUserInfo userInfo) {
                                 return lockDataService.lock(keyTask, userInfo.getUser().getId(),
-                                        formDataService.getFormDataFullName(action.getFormDataId(), action.getMove().isReasonToMoveShouldBeSpecified() ? String.format("Возврат налоговой формы в \"%s\"", action.getMove().getToState().getName()) : String.format("%s налоговой формы", action.getMove().getToState().getActionName()), reportType),
+                                        formDataService.getFormDataFullName(action.getFormDataId(), false, action.getMove().isReasonToMoveShouldBeSpecified() ? String.format("Возврат налоговой формы в \"%s\"", action.getMove().getToState().getName()) : String.format("%s налоговой формы", action.getMove().getToState().getActionName()), reportType),
                                         LockData.State.IN_QUEUE.getText(),
                                         lockDataService.getLockTimeout(LockData.LockObjects.FORM_DATA));
                             }
@@ -114,7 +114,7 @@ public class GoMoveHandler extends AbstractActionHandler<GoMoveAction, GoMoveRes
                 default:
                     if (lockDataService.lock(keyTask,
                             userInfo.getUser().getId(),
-                            formDataService.getFormDataFullName(action.getFormDataId(), action.getMove().isReasonToMoveShouldBeSpecified() ? String.format("Возврат налоговой формы в \"%s\"", action.getMove().getToState().getName()) : String.format("\"%s\" налоговой формы", action.getMove().getToState().getActionName()), reportType),
+                            formDataService.getFormDataFullName(action.getFormDataId(), false, action.getMove().isReasonToMoveShouldBeSpecified() ? String.format("Возврат налоговой формы в \"%s\"", action.getMove().getToState().getName()) : String.format("\"%s\" налоговой формы", action.getMove().getToState().getActionName()), reportType),
                             lockDataService.getLockTimeout(LockData.LockObjects.FORM_DATA)) == null) {
                         try {
                             formDataService.doMove(action.getFormDataId(), false, securityService.currentUserInfo(),

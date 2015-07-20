@@ -351,7 +351,8 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
             "join department td on td.id = tdrp.department_id\n" +
             "join report_period trp on trp.id = tdrp.report_period_id\n" +
             "join tax_period ttp on ttp.id = trp.tax_period_id\n" +
-            "where dft.id = :source and (\n" +
+            "join department_form_type tdft on (tdft.form_type_id = tfmt.id and tdft.department_id = td.id and tdft.kind = tfd.kind)\n" +
+            "where dft.id = :source and tdft.id = :destination and (\n" +
             "(:periodStart <= trp.calendar_start_date and (:periodEnd is null or :periodEnd >= trp.calendar_start_date)) or\n" +
             "(:periodStart >= trp.calendar_start_date and :periodStart <= trp.end_date)\n" +
             ")";
@@ -370,15 +371,17 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
             "join department td on td.id = tdrp.department_id\n" +
             "join report_period trp on trp.id = tdrp.report_period_id\n" +
             "join tax_period ttp on ttp.id = trp.tax_period_id\n" +
-            "where dft.id = :source and (\n" +
+            "join department_declaration_type tddt on (tddt.declaration_type_id = dt.id and tddt.department_id = td.id)\n" +
+            "where dft.id = :source and tddt.id = :destination and (\n" +
             "(:periodStart <= trp.calendar_start_date and (:periodEnd is null or :periodEnd >= trp.calendar_start_date)) or\n" +
             "(:periodStart >= trp.calendar_start_date and :periodStart <= trp.end_date)\n" +
             ")";
 
     @Override
-    public List<ConsolidatedInstance> findConsolidatedInstances(Long source, Date periodStart, Date periodEnd, boolean declaration) {
+    public List<ConsolidatedInstance> findConsolidatedInstances(long source, long destination, Date periodStart, Date periodEnd, boolean declaration) {
         Map<String, Object> params = new HashMap<String, Object>();
         params.put("source", source);
+        params.put("destination", destination);
         params.put("periodStart", periodStart);
         params.put("periodEnd", periodEnd);
         List<ConsolidatedInstance> formsAndDeclarations = new ArrayList<ConsolidatedInstance>();

@@ -10,31 +10,16 @@ import java.util.Map;
 
 public class MapCache implements Cache {
 
-	final Log log = LogFactory.getLog(getClass());
-
+	private static final Log LOG = LogFactory.getLog(MapCache.class);
 	private static final Object NULL_HOLDER = new NullHolder();
-
 	private final String name;
-
 	private final Map<Object, Object> store;
 
-	private final boolean allowNullValues;
-
-	@SuppressWarnings("unchecked")
-	public MapCache(String name, Object store,
-			boolean allowNullValues, boolean needClear) {
+	public MapCache(String name, Object store) {
 		this.name = name;
 		this.store = (Map<Object, Object>) store;
-		this.allowNullValues = allowNullValues;
-		if (needClear) {
-			this.store.clear();
-		}
-		log.info("Cache '" + name + "' is created, store: " + this.store.getClass()
-				+ ", store size: " + this.store.size());
-	}
-
-	public MapCache(String name, Object store) {
-		this(name, store, true, true);
+		this.store.clear();
+		LOG.info("Cache '" + name + "' is created, store: " + this.store.getClass());
 	}
 
 	@Override
@@ -52,15 +37,11 @@ public class MapCache implements Cache {
 		return store;
 	}
 
-	public boolean isAllowNullValues() {
-		return allowNullValues;
-	}
-
 	@Override
     public ValueWrapper get(Object key) {
-		Object value = store.get(new KeyWrapper(name, key));
-		if (log.isDebugEnabled()) {
-			log.debug("Get element with key = " + key + " from cache '" + name
+		Object value = store.get(key);
+		if (LOG.isDebugEnabled()) {
+			LOG.debug("Get element with key = " + key + " from cache '" + name
 					+ "'. Value present: " + (value != null));
 		}
 		return (value != null ? new SimpleValueWrapper(fromStoreValue(value))
@@ -69,24 +50,22 @@ public class MapCache implements Cache {
 
 /*    @Override
     public <T> T get(Object key, Class<T> type) {
-        return (T) fromStoreValue(store.get(new KeyWrapper(name, key)));
+        return (T) fromStoreValue(store.get(key));
     }*/
 
     @Override
     public void put(Object key, Object value) {
-		if (log.isDebugEnabled()) {
-			log.debug("Put element with key = " + key + " to cache '" + name
-					+ "'");
+		if (LOG.isDebugEnabled()) {
+			LOG.debug("Put element with key = " + key + " to cache '" + name + "'");
 		}
-		store.put(new KeyWrapper(name, key), toStoreValue(value));
+		store.put(key, toStoreValue(value));
 	}
 
 /*    @Override
     public ValueWrapper putIfAbsent(Object key, Object value) {
-		KeyWrapper wKey = new KeyWrapper(name, key);
-		Object existingValue = fromStoreValue(store.get(wKey));
+		Object existingValue = fromStoreValue(store.get(key));
 		if (existingValue == null) {
-			store.put(wKey, toStoreValue(value));
+			store.put(key, toStoreValue(value));
 			return null;
 		} else {
 			return new SimpleValueWrapper(existingValue);
@@ -95,17 +74,16 @@ public class MapCache implements Cache {
 
     @Override
 	public void evict(Object key) {
-		if (log.isDebugEnabled()) {
-			log.debug("Remove element with key = " + key + " from cache '"
-					+ name + "'");
+		if (LOG.isDebugEnabled()) {
+			LOG.debug("Remove element with key = " + key + " from cache '" + name + "'");
 		}
-		this.store.remove(new KeyWrapper(this.name, key));
+		this.store.remove(key);
 	}
 
 	@Override
 	public void clear() {
-		if (log.isDebugEnabled()) {
-			log.debug("Clear cache '" + name + "'");
+		if (LOG.isDebugEnabled()) {
+			LOG.debug("Clear cache '" + name + "'");
 		}
 		this.store.clear();
 	}
@@ -118,14 +96,14 @@ public class MapCache implements Cache {
 	 * @return the value to return to the user
 	 */
 	protected Object fromStoreValue(Object storeValue) {
-		if (allowNullValues && NULL_HOLDER.equals(storeValue)) {
+		if (storeValue == null || storeValue instanceof NullHolder) {
 			return null;
 		}
 		return storeValue;
 	}
 
 	protected Object toStoreValue(Object userValue) {
-		if (allowNullValues && userValue == null) {
+		if (userValue == null) {
 			return NULL_HOLDER;
 		}
 		return userValue;

@@ -177,15 +177,13 @@ public class DeclarationTemplateControllerTest {
         data.setName("привет.xsd");
         String s = "<name>HELLO!</nme>";
         String key = "Content-Disposition";
-        String value = "attachment; filename=\"" + URLEncoder.encode(data.getName(), "UTF-8") + "\"";
+        String value = "attachment;filename=\"" + URLEncoder.encode(data.getName(), "UTF-8").replaceAll("\\+", "%20") + "\"";
         data.setInputStream(new ByteArrayInputStream(s.getBytes()));
 
         String uuid = UUID.randomUUID().toString();
         when(blobDataService.get(uuid)).thenReturn(data);
-        MediaType expectedMT = new MediaType("text", "xml");
-        mockMvc.perform(get(String.format("/downloadByUuid/%s", uuid)))
+        mockMvc.perform(get(String.format("/downloadByUuid/%s", uuid)).header("User-Agent", "msie"))
                 .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(MockMvcResultMatchers.content().contentType(expectedMT))
                 .andExpect(MockMvcResultMatchers.content().string(s))
                 .andExpect(MockMvcResultMatchers.header().string(key, value));
     }

@@ -2,6 +2,7 @@ package form_template.deal.rights_acquisition.v2013
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
+import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import groovy.transform.Field
 
 /**
@@ -168,6 +169,14 @@ void logicCheck() {
             def countName = getColumnName(row, 'count')
             rowError(logger, row, "Строка $rowNum: Значение графы «$countName» не может содержать значение 0.")
         }
+
+        // Проверка диапазона дат
+        if (row.contractDate) {
+            checkDateValid(logger, row, 'contractDate', row.contractDate, true)
+        }
+        if (row.transactionDate) {
+            checkDateValid(logger, row, 'transactionDate', row.transactionDate, true)
+        }
     }
 }
 
@@ -189,114 +198,53 @@ void calc() {
 // Получение импортируемых данных
 void importData() {
     def tmpRow = formData.createDataRow()
-    def xml = getXML(getColumnName(tmpRow, 'name'), null)
+    int COLUMN_COUNT = 11
+    int HEADER_ROW_COUNT = 3
+    String TABLE_START_VALUE = 'Общая информация о контрагенте - юридическом лице'
+    String TABLE_END_VALUE = null
 
-    checkHeaderSize(xml.row[0].cell.size(), xml.row.size(), 8, 3)
+    def allValues = []      // значения формы
+    def headerValues = []   // значения шапки
+    def paramsMap = ['rowOffset' : 0, 'colOffset' : 0]  // мапа с параметрами (отступы сверху и слева)
 
-    def headerMapping = [
-            (xml.row[0].cell[1]): getColumnName(tmpRow, 'innKio'),
-            (xml.row[0].cell[2]): getColumnName(tmpRow, 'country'),
-            (xml.row[0].cell[3]): getColumnName(tmpRow, 'contractNum'),
-            (xml.row[0].cell[4]): getColumnName(tmpRow, 'contractDate'),
-            (xml.row[0].cell[5]): getColumnName(tmpRow, 'okeiCode'),
-            (xml.row[0].cell[6]): getColumnName(tmpRow, 'count'),
-            (xml.row[0].cell[7]): getColumnName(tmpRow, 'price'),
-            (xml.row[0].cell[8]): getColumnName(tmpRow, 'totalCost'),
-            (xml.row[0].cell[9]): getColumnName(tmpRow, 'transactionDate')
-    ]
+    checkAndReadFile(ImportInputStream, UploadFileName, allValues, headerValues, TABLE_START_VALUE, TABLE_END_VALUE, HEADER_ROW_COUNT, paramsMap)
 
-    (0..9).each {
-        headerMapping.put(xml.row[1].cell[it], 'гр. ' + (it + 2))
+    // проверка шапки
+    checkHeaderXls(headerValues, COLUMN_COUNT, HEADER_ROW_COUNT, tmpRow)
+    if (logger.containsLevel(LogLevel.ERROR)) {
+        return;
     }
+    // освобождение ресурсов для экономии памяти
+    headerValues.clear()
+    headerValues = null
 
-    checkHeaderEquals(headerMapping)
+    def fileRowIndex = paramsMap.rowOffset
+    def colOffset = paramsMap.colOffset
+    paramsMap.clear()
+    paramsMap = null
 
-    addData(xml, 1)
-}
-
-// Заполнить форму данными
-void addData(def xml, int headRowCount) {
+    def rowIndex = 0
+    def rows = []
+    def allValuesCount = allValues.size()
     reportPeriodEndDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
 
-    def int xmlIndexRow = -1
-    def int rowOffset = xml.infoXLS.rowOffset[0].cell[0].text().toInteger()
-    def int colOffset = xml.infoXLS.colOffset[0].cell[0].text().toInteger()
-
-    def rows = []
-    def int rowIndex = 1
-
-    for (def row : xml.row) {
-        xmlIndexRow++
-        def int xlsIndexRow = xmlIndexRow + rowOffset
-
-        // пропустить шапку таблицы
-        if (xmlIndexRow <= headRowCount) {
-            continue
-        }
-
-        if ((row.cell.find { it.text() != "" }.toString()) == "") {
+    // формирвание строк нф
+    for (def i = 0; i < allValuesCount; i++) {
+        rowValues = allValues[0]
+        fileRowIndex++
+        // все строки пустые - выход
+        if (!rowValues || rowValues.isEmpty() || !rowValues.find { it }) {
+            allValues.remove(rowValues)
+            rowValues.clear()
             break
         }
-
-        def newRow = formData.createStoreMessagingDataRow()
-        newRow.setIndex(rowIndex++)
-        newRow.setImportIndex(xlsIndexRow)
-        editableColumns.each {
-            newRow.getCell(it).editable = true
-            newRow.getCell(it).setStyleAlias('Редактируемая')
-        }
-        autoFillColumns.each {
-            newRow.getCell(it).setStyleAlias('Автозаполняемая')
-        }
-
-        def int xmlIndexCol = 0
-
-        // графа 2
-        newRow.name = getRecordIdImport(9, 'NAME', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, true)
-        def map = getRefBookValue(9, newRow.name)
-        xmlIndexCol++
-
-        // графа 3
-        if (map != null) {
-            formDataService.checkReferenceValue(9, row.cell[xmlIndexCol].text(), map.INN_KIO?.stringValue, xlsIndexRow, xmlIndexCol + colOffset, logger, true)
-        }
-        xmlIndexCol++
-
-        // графа 4
-        if (map != null) {
-            map = refBookService.getRecordData(10, map.COUNTRY?.referenceValue)
-            if (map != null) {
-                formDataService.checkReferenceValue(10, row.cell[xmlIndexCol].text(), map.NAME?.stringValue, xlsIndexRow, xmlIndexCol + colOffset, logger, true)
-            }
-        }
-        xmlIndexCol++
-
-        // графа 5
-        newRow.contractNum = row.cell[xmlIndexCol].text()
-        xmlIndexCol++
-
-        // графа 6
-        newRow.contractDate = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, true)
-        xmlIndexCol++
-
-        // графа 7
-        newRow.okeiCode = getRecordIdImport(12, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, true)
-        xmlIndexCol++
-
-        // графа 8
-        xmlIndexCol++
-
-        // графа 9
-        newRow.price = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
-        xmlIndexCol++
-
-        // графа 10
-        xmlIndexCol++
-
-        // графа 11
-        newRow.transactionDate = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, true)
-
+        // простая строка
+        rowIndex++
+        def newRow = getNewRowFromXls(rowValues, colOffset, fileRowIndex, rowIndex)
         rows.add(newRow)
+        // освободить ненужные данные - иначе не хватит памяти
+        allValues.remove(rowValues)
+        rowValues.clear()
     }
 
     showMessages(rows, logger)
@@ -304,6 +252,111 @@ void addData(def xml, int headRowCount) {
         updateIndexes(rows)
         formDataService.getDataRowHelper(formData).allCached = rows
     }
+}
+
+/**
+ * Проверить шапку таблицы
+ *
+ * @param headerRows строки шапки
+ * @param colCount количество колонок в таблице
+ * @param rowCount количество строк в таблице
+ * @param tmpRow вспомогательная строка для получения названии графов
+ */
+void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
+    if (headerRows.isEmpty()) {
+        throw new ServiceException(WRONG_HEADER_ROW_SIZE)
+    }
+    checkHeaderSize(headerRows[headerRows.size() - 1].size(), headerRows.size(), colCount, rowCount)
+
+    def headerMapping = [
+            (headerRows[0][0]) : 'Общая информация о контрагенте - юридическом лице',
+            (headerRows[0][6]) : 'Сведения о сделке',
+            (headerRows[1][0]) : getColumnName(tmpRow, 'rowNum'),
+            (headerRows[1][1]) : getColumnName(tmpRow, 'name'),
+            (headerRows[1][2]) : getColumnName(tmpRow, 'innKio'),
+            (headerRows[1][3]) : getColumnName(tmpRow, 'country'),
+            (headerRows[1][4]) : getColumnName(tmpRow, 'contractNum'),
+            (headerRows[1][5]) : getColumnName(tmpRow, 'contractDate'),
+            (headerRows[1][6]) : getColumnName(tmpRow, 'okeiCode'),
+            (headerRows[1][7]) : getColumnName(tmpRow, 'count'),
+            (headerRows[1][8]) : getColumnName(tmpRow, 'price'),
+            (headerRows[1][9]) : getColumnName(tmpRow, 'totalCost'),
+            (headerRows[1][10]): getColumnName(tmpRow, 'transactionDate')
+    ]
+    (0..10).each {
+        headerMapping.put(headerRows[2][it], 'гр. ' + (it + 1))
+    }
+    checkHeaderEquals(headerMapping, logger)
+}
+
+/**
+ * Получить новую строку нф по значениям из экселя.
+ *
+ * @param values список строк со значениями
+ * @param colOffset отступ в колонках
+ * @param fileRowIndex номер строки в тф
+ * @param rowIndex строка в нф
+ */
+def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) {
+    def newRow = formData.createStoreMessagingDataRow()
+    newRow.setIndex(rowIndex)
+    newRow.setImportIndex(fileRowIndex)
+    editableColumns.each {
+        newRow.getCell(it).editable = true
+        newRow.getCell(it).setStyleAlias('Редактируемая')
+    }
+    autoFillColumns.each {
+        newRow.getCell(it).setStyleAlias('Автозаполняемая')
+    }
+
+    def int colIndex = 1
+
+    // графа 2
+    newRow.name = getRecordIdImport(9, 'NAME', values[colIndex], fileRowIndex, colIndex + colOffset, true)
+    def map = getRefBookValue(9, newRow.name)
+    colIndex++
+
+    // графа 3
+    if (map != null) {
+        formDataService.checkReferenceValue(9, values[colIndex], map.INN_KIO?.stringValue, fileRowIndex, colIndex + colOffset, logger, true)
+    }
+    colIndex++
+
+    // графа 4
+    if (map != null) {
+        map = refBookService.getRecordData(10, map.COUNTRY?.referenceValue)
+        if (map != null) {
+            formDataService.checkReferenceValue(10, values[colIndex], map.NAME?.stringValue, fileRowIndex, colIndex + colOffset, logger, true)
+        }
+    }
+    colIndex++
+
+    // графа 5
+    newRow.contractNum = values[colIndex]
+    colIndex++
+
+    // графа 6
+    newRow.contractDate = parseDate(values[colIndex], "dd.MM.yyyy", fileRowIndex, colIndex + colOffset, logger, true)
+    colIndex++
+
+    // графа 7
+    newRow.okeiCode = getRecordIdImport(12, 'CODE', values[colIndex], fileRowIndex, colIndex + colOffset, true)
+    colIndex++
+
+    // графа 8
+    colIndex++
+
+    // графа 9
+    newRow.price = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
+    colIndex++
+
+    // графа 10
+    colIndex++
+
+    // графа 11
+    newRow.transactionDate = parseDate(values[colIndex], "dd.MM.yyyy", fileRowIndex, colIndex + colOffset, logger, true)
+
+    return newRow
 }
 
 // Сортировка групп и строк

@@ -25,7 +25,6 @@ public class SourceServiceImpl implements SourceService {
 
     private static final String CHECK_EXISTENCE_MSG = "Невозможно назначить источники / приемники: %s \"%s\" не назначена подразделению \"%s\"";
     private static final String FATAL_SAVE_MSG = "Назначение источников-приёмников не выполнено";
-    private static final String FATAL_DELETE_MSG = "Удаление назначения источников-приёмников не выполнено";
     private static final String SOURCES_LIST_IS_EMPTY_MSG = "Все назначения были исключены в результате проверок. Продолжение операции невозможно.";
     private static final String EMPTY_END_PERIOD_INFO = "дата окончания периода не задана";
     private static final String INTERSECTION_PART = "\"%s\" в качестве %s для \"%s\" в периоде %s";
@@ -375,8 +374,9 @@ public class SourceServiceImpl implements SourceService {
             List<ConsolidatedInstance> consolidatedInstances = new ArrayList<ConsolidatedInstance>();
             if (!emptyPeriods.isEmpty()) {
                 for (SourceObject empty : emptyPeriods) {
-                    /** Получаем источники, имеющие принятые экземпляры в промежуточных периодах */
-                    consolidatedInstances.addAll(sourceDao.findConsolidatedInstances(empty.getSourcePair().getSource(),
+                    /** Получаем принятые экземпляры приемника в промежуточных периодах */
+                    consolidatedInstances.addAll(sourceDao.findConsolidatedInstances(
+                            empty.getSourcePair().getSource(), empty.getSourcePair().getDestination(),
                             empty.getPeriodStart(), empty.getPeriodEnd(), declaration));
                     if (destIds != null) {
                         destIds.addAll(sourceDao.findConsolidatedInstanceIds(empty.getSourcePair().getSource(),
@@ -388,8 +388,9 @@ public class SourceServiceImpl implements SourceService {
                     }
                 }
             } else {
-                /** Получаем источники, имеющие принятые экземпляры в создаваемом новом периоде */
-                consolidatedInstances.addAll(sourceDao.findConsolidatedInstances(sourcePair.getSource(),
+                /** Получаем принятые экземпляры приемника в новом периоде */
+                consolidatedInstances.addAll(sourceDao.findConsolidatedInstances(
+                        sourcePair.getSource(), sourcePair.getDestination(),
                         newPeriodStart, newPeriodEnd, declaration));
                 if (destIds != null) {
                     destIds.addAll(sourceDao.findConsolidatedInstanceIds(sourcePair.getSource(),
@@ -733,14 +734,14 @@ public class SourceServiceImpl implements SourceService {
             HashSet<Long> sourceIds = new HashSet<Long>();
             HashSet<Long> destIds = new HashSet<Long>();
 
-            /** Получаем источники, имеющие принятые экземпляры в удаляемых периодах */
+            /** Получаем принятые экземпляры приемника в удаляемых периодах */
             List<ConsolidatedInstance> consolidatedInstances = new ArrayList<ConsolidatedInstance>();
             Set<Long> processedSources = new HashSet<Long>();
             for (SourceObject sourceObject: sourceObjects) {
                 final Long source = sourceObject.getSourcePair().getSource();
                 if (!processedSources.contains(source)) {
-                    /** Получаем источники, имеющие принятые экземпляры в промежуточных периодах */
-                    consolidatedInstances.addAll(sourceDao.findConsolidatedInstances(source,
+                    consolidatedInstances.addAll(sourceDao.findConsolidatedInstances(
+                            source, sourceObject.getSourcePair().getDestination(),
                             sourceObject.getPeriodStart(), sourceObject.getPeriodEnd(), sourceClientData.isDeclaration()));
                     destIds.addAll(sourceDao.findConsolidatedInstanceIds(
                             source,

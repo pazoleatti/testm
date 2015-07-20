@@ -57,11 +57,12 @@ public class RefBookLinearView extends ViewWithUiHandlers<RefBookDataLinearUiHan
                 getUiHandlers().onSelectionChanged();
             }
         });
+        pager.setDisplay(refBookDataTable);
+        pager.setPageSize(500);
         refBookDataTable.setPageSize(pager.getPageSize());
         refBookDataTable.setKeyboardSelectionPolicy(HasKeyboardSelectionPolicy.KeyboardSelectionPolicy.DISABLED);
         refBookDataTable.addColumnSortHandler(new ColumnSortEvent.AsyncHandler(refBookDataTable));
         refBookDataTable.getColumnSortList().setLimit(1);
-        pager.setDisplay(refBookDataTable);
     }
 
     @Override
@@ -72,6 +73,11 @@ public class RefBookLinearView extends ViewWithUiHandlers<RefBookDataLinearUiHan
     @Override
     public int getPage() {
         return pager.getPage();
+    }
+
+    @Override
+    public int getPageStart() {
+        return pager.getPageStart();
     }
 
     @Override

@@ -83,7 +83,7 @@ public class GetRefBookDataRowHandler extends AbstractActionHandler<GetRefBookTa
                     refBook.getAttributes().get(0), true);
             result.setRowNum(rowNum);
 
-            if (rowNum != null) {
+            /*if (rowNum != null) {
                 rowNum = rowNum--;
                 int countOfRecords = action.getPagingParams().getCount();
                 int startIndex = action.getPagingParams().getStartIndex();
@@ -91,7 +91,7 @@ public class GetRefBookDataRowHandler extends AbstractActionHandler<GetRefBookTa
                 if ((startIndex / countOfRecords) != page) {
                     return result;
                 }
-            }
+            }*/
         }
         if (action.getSortColumnIndex() < 0) {
             action.setSortColumnIndex(0);

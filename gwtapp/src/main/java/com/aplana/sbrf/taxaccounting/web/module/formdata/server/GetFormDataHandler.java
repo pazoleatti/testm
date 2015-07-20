@@ -41,6 +41,8 @@ import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GetFormDataResul
 import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -57,6 +59,8 @@ import java.util.Map;
 @Service
 @PreAuthorize("hasAnyRole('ROLE_OPER', 'ROLE_CONTROL', 'ROLE_CONTROL_UNP', 'ROLE_CONTROL_NS')")
 public class GetFormDataHandler extends AbstractActionHandler<GetFormDataAction, GetFormDataResult> {
+
+	private static final Log LOG = LogFactory.getLog(GetFormDataHandler.class);
 
 	@Autowired
 	private FormDataAccessService accessService;
@@ -133,7 +137,7 @@ public class GetFormDataHandler extends AbstractActionHandler<GetFormDataAction,
                 // Защита от перехода в режим редактирования если нф заблокирована какой-либо операцией
 //                LockData lockImport = lockDataService.getLock(LockData.LockObjects.FORM_DATA_IMPORT.name() + "_" + action.getFormDataId());
                 if (lockType == null || ReportType.EDIT_FD.equals(lockType.getFirst())) {
-                    formDataService.lock(action.getFormDataId(), userInfo);
+                    formDataService.lock(action.getFormDataId(), action.isManual(), userInfo);
                 }
 			} catch (Exception e){
 				//
@@ -182,6 +186,7 @@ public class GetFormDataHandler extends AbstractActionHandler<GetFormDataAction,
             result.getFormData().initFormTemplateParams(formTemplate);
             return result;
         } catch (Exception e) {
+			LOG.error(e.getMessage(), e);
             if (!action.isReadOnly()) {
                 //
                 formDataService.unlock(action.getFormDataId(), userInfo);

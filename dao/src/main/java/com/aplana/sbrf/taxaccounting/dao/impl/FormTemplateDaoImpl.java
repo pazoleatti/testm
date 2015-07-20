@@ -5,7 +5,6 @@ import com.aplana.sbrf.taxaccounting.dao.FormStyleDao;
 import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.api.FormTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
-import com.aplana.sbrf.taxaccounting.dao.impl.cache.CacheConstants;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.XmlSerializationUtils;
 import com.aplana.sbrf.taxaccounting.model.Cell;
@@ -23,9 +22,6 @@ import com.aplana.sbrf.taxaccounting.model.formdata.HeaderCell;
 import com.aplana.sbrf.taxaccounting.model.util.FormDataUtils;
 import com.aplana.sbrf.taxaccounting.model.util.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
-import org.springframework.cache.annotation.Caching;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataRetrievalFailureException;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -102,7 +98,7 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
 		}
 	}
 
-	@Cacheable(CacheConstants.FORM_TEMPLATE)
+	//@Cacheable(CacheConstants.FORM_TEMPLATE)
 	@Override
 	public FormTemplate get(int formId) {
 		if (logger.isDebugEnabled()) {
@@ -132,8 +128,8 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
 	 * Кэш инфалидируется перед вызовом. Т.е. несмотря на результат выполнения, кэш будет сброшен.
 	 * Иначе, если версии не совпадают кэш продолжает возвращать старую версию.
 	 */
-    @Caching(evict = {@CacheEvict(value = CacheConstants.FORM_TEMPLATE, key = "#formTemplate.id", beforeInvocation = true),
-            @CacheEvict(value = CacheConstants.FORM_TEMPLATE, key = "#formTemplate.id + new String(\"_script\")", beforeInvocation = true)})
+    //@Caching(evict = {@CacheEvict(value = CacheConstants.FORM_TEMPLATE, key = "#formTemplate.id", beforeInvocation = true),
+    //        @CacheEvict(value = CacheConstants.FORM_TEMPLATE, key = "#formTemplate.id + new String(\"_script\")", beforeInvocation = true)})
 	@Override
 	public int save(final FormTemplate formTemplate) {
         try {
@@ -203,7 +199,7 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
         }
 	}
 
-    @CacheEvict(value = CacheConstants.FORM_TEMPLATE, allEntries = true)
+    //@CacheEvict(value = CacheConstants.FORM_TEMPLATE, allEntries = true)
     @Override
     public int[] update(final List<FormTemplate> formTemplates) {
         try {
@@ -386,7 +382,7 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
     }
 
     @Override
-    @CacheEvict(value = CacheConstants.FORM_TEMPLATE, beforeInvocation = true)
+    //@CacheEvict(value = CacheConstants.FORM_TEMPLATE, beforeInvocation = true)
     public int delete(int formTemplateId) {
         try {
             getJdbcTemplate().update("delete from form_template where id = ?", new Object[]{formTemplateId}, new int[]{Types.INTEGER});
@@ -398,7 +394,7 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
     }
 
     @Override
-    @CacheEvict(value = CacheConstants.FORM_TEMPLATE, beforeInvocation = true, allEntries = true)
+    //@CacheEvict(value = CacheConstants.FORM_TEMPLATE, beforeInvocation = true, allEntries = true)
     public void delete(final Collection<Integer> formTemplateIds) {
         try {
             getNamedParameterJdbcTemplate().update("delete from form_template where " + SqlUtils.transformToSqlInStatement("id", formTemplateIds),
@@ -488,7 +484,7 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
     }
 
     @Override
-    @CacheEvict(value = CacheConstants.FORM_TEMPLATE, beforeInvocation = true, key = "#formTemplateId")
+    //@CacheEvict(value = CacheConstants.FORM_TEMPLATE, beforeInvocation = true, key = "#formTemplateId")
     public int updateVersionStatus(VersionedObjectStatus versionStatus, int formTemplateId) {
         try {
             return getJdbcTemplate().update("update form_template set status=? where id = ?", versionStatus.getId(), formTemplateId);

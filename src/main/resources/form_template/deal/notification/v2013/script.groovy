@@ -64,7 +64,7 @@ void checkDeparmentParams(LogLevel logLevel) {
     def departmentParamList = getProvider(37).getRecords(getReportPeriodEndDate() - 1, null, "DEPARTMENT_ID = $departmentId", null)
 
     if (departmentParamList == null || departmentParamList.size() == 0 || departmentParamList.get(0) == null) {
-        throw new Exception("Ошибка при получении настроек обособленного подразделения")
+        throw new Exception("Ошибка при получении настроек обособленного подразделения. Настройки подразделения заполнены не полностью")
     }
 
     def departmentParam = departmentParamList?.get(0)

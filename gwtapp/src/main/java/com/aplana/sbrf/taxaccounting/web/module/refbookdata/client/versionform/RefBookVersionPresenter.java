@@ -2,19 +2,17 @@ package com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.versionform;
 
 import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookType;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.RefBookDataTokens;
-import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.EditFormPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.event.RollbackTableRowSelection;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.event.UpdateForm;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.event.AddItemEvent;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.event.DeleteItemEvent;
+import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.event.ShowItemEvent;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.*;
-import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.model.RefBookTreeItem;
 import com.google.gwt.view.client.AbstractDataProvider;
 import com.google.gwt.view.client.AsyncDataProvider;
 import com.google.gwt.view.client.HasData;
@@ -49,24 +47,14 @@ public class RefBookVersionPresenter extends PresenterWidget<RefBookVersionPrese
         isHierarchy = hierarchy;
     }
 
-    EditFormPresenter editFormPresenter;
-
 	private final DispatchAsync dispatcher;
 	private final PlaceManager placeManager;
-
-    private RefBookType refBookType;
 
     @Override
     public void updateTable() {
         getView().updateTable();
     }
 
-    @Override
-    public RefBookDataRow getSelectedRow() {
-        return getView().getSelectedRow();
-    }
-
-    @Override
     public Integer getSelectedRowIndex() {
         return getView().getSelectedRowIndex();
     }
@@ -75,21 +63,6 @@ public class RefBookVersionPresenter extends PresenterWidget<RefBookVersionPrese
     public void setTableColumns(List<RefBookColumn> columns) {
         getView().resetRefBookElements();
         getView().setTableColumns(columns);
-    }
-
-    @Override
-    public void setRange(Range range) {
-        getView().setRange(range);
-    }
-
-    @Override
-    public int getPageSize() {
-        return getView().getPageSize();
-    }
-
-    @Override
-    public void blockDataView(FormMode mode) {
-        getView().updateMode(mode);
     }
 
     @ProxyEvent
@@ -118,17 +91,9 @@ public class RefBookVersionPresenter extends PresenterWidget<RefBookVersionPrese
         int getPageSize();
 		void setRange(Range range);
 		void updateTable();
-		void setRefBookNameDesc(String desc);
         void resetRefBookElements();
 		RefBookDataRow getSelectedRow();
-        void setTitleDetails(String uniqueAttrValues);
 
-        /**
-         * Ссылка для возвращения на форму справочников
-         * @param refBookType тип !refbookhier или !refbook
-         * @param record RefBookDataTokens.REFBOOK_RECORD_ID, но вдруг поменяется
-         */
-        void setBackAction(String refBookType, long refBookId, String record, long recordId);
         void updateMode(FormMode mode);
         // позиция выделенной строки в таблице
         Integer getSelectedRowIndex();
@@ -146,12 +111,11 @@ public class RefBookVersionPresenter extends PresenterWidget<RefBookVersionPrese
     }
 
     @Inject
-	public RefBookVersionPresenter(final EventBus eventBus, final MyView view, EditFormPresenter editFormPresenter,
+	public RefBookVersionPresenter(final EventBus eventBus, final MyView view,
                                    PlaceManager placeManager, DispatchAsync dispatcher) {
 		super(eventBus, view);
 		this.dispatcher = dispatcher;
 		this.placeManager = placeManager;
-		this.editFormPresenter = editFormPresenter;
 		getView().setUiHandlers(this);
         TableDataProvider dataProvider = new TableDataProvider();
         getView().assignDataProvider(getView().getPageSize(), dataProvider);
@@ -174,8 +138,8 @@ public class RefBookVersionPresenter extends PresenterWidget<RefBookVersionPrese
 	}
 
 	private void onAddRowClicked() {
-        getView().updateMode(FormMode.CREATE);
-        editFormPresenter.setMode(FormMode.CREATE);
+        //getView().updateMode(FormMode.CREATE);
+        //editPresenter.setMode(FormMode.CREATE);
         if (isHierarchy){
             //http://jira.aplana.com/browse/SBRFACCTAX-10062
             GetLastVersionHierarchyAction action
@@ -185,15 +149,14 @@ public class RefBookVersionPresenter extends PresenterWidget<RefBookVersionPrese
             dispatcher.execute(action, CallbackUtils.defaultCallback(new AbstractCallback<GetLastVersionHierarchyResult>() {
                 @Override
                 public void onSuccess(GetLastVersionHierarchyResult result) {
-                    editFormPresenter.show(null, new RefBookTreeItem(
-                            result.getDataRow().getRefBookRowId(),
-                            result.getDataRow().getValues().get("PARENT_ID"))
-                    );
+                    ShowItemEvent.fire(RefBookVersionPresenter.this, result.getDataRow().getValues().get("PARENT_ID"),result.getDataRow().getRefBookRowId());
+                    //editPresenter.show(result.getDataRow().getRefBookRowId());
                 }
             }, this));
         }
         else{
-            editFormPresenter.show(null);
+            ShowItemEvent.fire(RefBookVersionPresenter.this, null, null);
+            //editPresenter.clean();
         }
 	}
 
@@ -220,14 +183,10 @@ public class RefBookVersionPresenter extends PresenterWidget<RefBookVersionPrese
                                 }
                                 LogCleanEvent.fire(RefBookVersionPresenter.this);
                                 LogAddEvent.fire(RefBookVersionPresenter.this, result.getUuid());
-                                editFormPresenter.show(null);
+                                ShowItemEvent.fire(RefBookVersionPresenter.this, null, null);
+                                //editPresenter.clean();
                                 if (result.getNextVersion() != null) {
                                     getView().updateTable();
-
-                                    getView().setBackAction(
-                                            refBookType.equals(RefBookType.LINEAR) ?
-                                                    RefBookDataTokens.refBookData :
-                                                    RefBookDataTokens.refBookHierData, refBookId, RefBookDataTokens.REFBOOK_RECORD_ID, result.getNextVersion());
                                 } else {
                                     placeManager
                                             .revealPlace(new PlaceRequest.Builder().nameToken(isHierarchy ? RefBookDataTokens.refBookHierData : RefBookDataTokens.refBookData)
@@ -241,7 +200,8 @@ public class RefBookVersionPresenter extends PresenterWidget<RefBookVersionPrese
 	@Override
 	public void onSelectionChanged() {
 		if (getView().getSelectedRow() != null) {
-            editFormPresenter.show(getView().getSelectedRow().getRefBookRowId());
+            ShowItemEvent.fire(this, null, getView().getSelectedRow().getRefBookRowId());
+            //editPresenter.show(getView().getSelectedRow().getRefBookRowId());
         }
 	}
 

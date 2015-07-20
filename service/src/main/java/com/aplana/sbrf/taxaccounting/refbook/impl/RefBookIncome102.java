@@ -2,19 +2,33 @@ package com.aplana.sbrf.taxaccounting.refbook.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookIncome102Dao;
-import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.PagingParams;
+import com.aplana.sbrf.taxaccounting.model.PagingResult;
+import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
-import com.aplana.sbrf.taxaccounting.model.refbook.*;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributePair;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookRecord;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookRecordVersion;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.config.ConfigurableBeanFactory;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.validation.constraints.NotNull;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Провайдер для справочника "Отчет о прибылях и убытках (Форма 0409102-СБ)"
@@ -237,8 +251,8 @@ public class RefBookIncome102 implements RefBookDataProvider {
         Set<String> matchedRecords = new HashSet<String>();
         Collections.sort(records, new AliasComparator());
 
-        Iterator<Map<String, RefBookValue>> iterator = records.iterator();
-
+        //TODO очень странный код. По сути он должен проверять, что в новых записях нет повторений по коду ОПУ и отчетному периоду
+		Iterator<Map<String, RefBookValue>> iterator = records.iterator();
         if (iterator.hasNext()) {
             Map<String, RefBookValue> previous = iterator.next();
             while (iterator.hasNext()) {
@@ -248,11 +262,10 @@ public class RefBookIncome102 implements RefBookDataProvider {
                 }
             }
         }
-
         if (matchedRecords.size() != 0) {
             return new ArrayList<String>(matchedRecords);
         }
-
+		// проверяем что новые записи не пересекаются с теми, что хранятся в бд
         return refBookDao.getMatchedRecordsByUniqueAttributesIncome102(attributes, records, accountPeriodId);
     }
 

@@ -1,5 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.view;
 
+import com.aplana.gwt.client.dialog.Dialog;
+import com.aplana.gwt.client.dialog.DialogHandler;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.AdminConstants;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.presenter.AdminPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.presenter.AdminUIHandlers;
@@ -199,8 +201,12 @@ public class AdminView extends ViewWithUiHandlers<AdminUIHandlers> implements Ad
 
     @UiHandler("delete")
     void onDeleteTemplate(ClickEvent event){
-        if (getUiHandlers() != null)
-            getUiHandlers().onDeleteClick();
+        Dialog.confirmMessage("Удаление макета", "Вы подтверждаете удаление всех версий макета?", new DialogHandler() {
+            @Override
+            public void yes() {
+                getUiHandlers().onDeleteClick();
+            }
+        });
     }
 
     @UiHandler("create")

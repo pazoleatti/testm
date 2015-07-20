@@ -5,6 +5,8 @@ import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import groovy.transform.Field
 import groovy.xml.MarkupBuilder
 
+import javax.xml.stream.XMLStreamReader
+
 /**
  * Декларация по налогу на прибыль (ОП) (год 2014)
  * Формирование XML для декларации налога на прибыль уровня обособленного подразделения.
@@ -31,8 +33,8 @@ switch (formDataEvent) {
         break
     case FormDataEvent.CALCULATE:
         checkDepartmentParams(LogLevel.WARNING)
-        def xmlBankData = checkDeclarationBank()
-        generateXML(xmlBankData)
+        def readerBank = checkDeclarationBank(false)
+        generateXML(readerBank)
         break
     default:
         return
@@ -91,7 +93,7 @@ void checkDepartmentParams(LogLevel logLevel) {
 }
 
 // Провека декларации банка.
-def checkDeclarationBank() {
+def checkDeclarationBank(boolean onlyCheck = true) {
     /** Отчётный период. */
     def reportPeriod = reportPeriodService.get(declarationData.reportPeriodId)
 
@@ -103,54 +105,122 @@ def checkDeclarationBank() {
     def bankDeclarationData = declarationService.getLast(declarationTypeId, departmentBankId, reportPeriod.id)
     if (bankDeclarationData == null || !bankDeclarationData.accepted) {
         logger.error('Декларация Банка по прибыли за указанный период не сформирована или не находится в статусе "Принята".')
-        return
+        return null
     }
 
-    /** XML декларации за предыдущий отчетный период. */
-    def xmlBankData = null
+    /** XMLStreamReader декларации за предыдущий отчетный период. */
+    def readerBank = null
 
     if (bankDeclarationData.id != null) {
-        def xmlString = declarationService.getXmlData(bankDeclarationData.id)
-        xmlString = xmlString?.replace('<?xml version="1.0" encoding="windows-1251"?>', '')
-        if (!xmlString) {
+        readerBank = declarationService.getXmlStreamReader(bankDeclarationData.id)
+        if (!readerBank) {
             logger.error('Данные декларации Банка не заполнены.')
-            return
+            return null
         }
-        xmlBankData = new XmlSlurper().parseText(xmlString)
     }
-    if (xmlBankData == null) {
+    if (readerBank == null) {
         logger.error('Не удалось получить данные декларации Банка.')
     }
-    return xmlBankData
+    if (onlyCheck) {
+        readerBank.close()
+        return null
+    }
+    return readerBank
 }
 
 // Логические проверки.
 void logicCheck() {
     // получение данных из xml'ки
-    def xmlData = getXmlData(declarationData.reportPeriodId, declarationData.departmentId, false, false)
-    if(xmlData == null){
+    def reader = getXmlStreamReader(declarationData.reportPeriodId, declarationData.departmentId, false, false)
+    if(reader == null){
         return
     }
     def empty = 0
+    def elements = [:]
+
+    def nalVipl311, nalIschisl, nalVipl311FB, nalIschislFB, nalVipl311Sub, nalIschislSub, raschNalFound = false
+    def vneRealDohSt, vneRealDohBezv, vneRealDohIzl, vneRealDohVRash, vneRealDohRinCBDD, vneRealDohCor, vneRealDohVs, dohVnerealFound = false
+    def cosvRashVs, nalogi, rashCapVl10, rashCapVl30, rashZemUchVs, rashRealFound = false
+    def rashVnerealPrDO, ubitRealPravTr, rashLikvOS, rashShtraf, rashRinCBDD, rashVnerealVs, rashVneRealFound = false
+    def stoimRealPTDoSr, stoimRealPTPosSr, stoimRealPTFound = false
+    def viruchRealPTDoSr, viruchRealPTPosSr, viruchRealPTFound = false
+    def ubit1Prev269, ubit1Soot269, ubitRealPT1Found = false
+    def ubit2RealPT, ubitRealPT2Found = false
+
+    try{
+        while(reader.hasNext()) {
+            if (reader.startElement) {
+                elements[reader.name.localPart] = true
+                if (!raschNalFound && isCurrentNode(['Документ', 'Прибыль', 'РасчНал'], elements)) {
+                    raschNalFound = true
+                    nalVipl311 = getXmlDecimal(reader, "НалВыпл311")
+                    nalIschisl = getXmlDecimal(reader, "НалИсчисл")
+                    nalVipl311FB = getXmlDecimal(reader, "НалВыпл311ФБ")
+                    nalIschislFB = getXmlDecimal(reader, "НалИсчислФБ")
+                    nalVipl311Sub = getXmlDecimal(reader, "НалВыпл311Суб")
+                    nalIschislSub = getXmlDecimal(reader, "НалИсчислСуб")
+                } else if (!dohVnerealFound && isCurrentNode(['Документ', 'Прибыль', 'РасчНал', 'ДохРеалВнеРеал', 'ДохВнеРеал'], elements)) {
+                    dohVnerealFound = true
+                    vneRealDohSt = getXmlDecimal(reader, "ВнеРеалДохСт")
+                    vneRealDohBezv = getXmlDecimal(reader, "ВнеРеалДохБезв")
+                    vneRealDohIzl = getXmlDecimal(reader, "ВнеРеалДохИзл")
+                    vneRealDohVRash = getXmlDecimal(reader, "ВнеРеалДохВРасх")
+                    vneRealDohRinCBDD = getXmlDecimal(reader, "ВнеРеалДохРынЦБДД")
+                    vneRealDohCor = getXmlDecimal(reader, "ВнеРеалДохКор")
+                    vneRealDohVs = getXmlDecimal(reader, "ВнеРеалДохВс")
+                } else if (!rashRealFound && isCurrentNode(['Документ', 'Прибыль', 'РасчНал', 'РасхРеалВнеРеал', 'РасхРеал'], elements)) {
+                    rashRealFound = true
+                    cosvRashVs = getXmlDecimal(reader, "КосвРасхВс")
+                    nalogi = getXmlDecimal(reader, "Налоги")
+                    rashCapVl10 = getXmlDecimal(reader, "РасхКапВл10")
+                    rashCapVl30 = getXmlDecimal(reader, "РасхКапВл30")
+                    rashZemUchVs = getXmlDecimal(reader, "РасхЗемУчВс")
+                } else if (!rashVneRealFound && isCurrentNode(['Документ', 'Прибыль', 'РасчНал', 'РасхРеалВнеРеал', 'РасхВнеРеал'], elements)) {
+                    rashVneRealFound = true
+                    rashVnerealPrDO = getXmlDecimal(reader, "РасхВнереалПрДО")
+                    ubitRealPravTr = getXmlDecimal(reader, "УбытРеалПравТр")
+                    rashLikvOS = getXmlDecimal(reader, "РасхЛиквОС")
+                    rashShtraf = getXmlDecimal(reader, "РасхШтраф")
+                    rashRinCBDD = getXmlDecimal(reader, "РасхРынЦБДД")
+                    rashVnerealVs = getXmlDecimal(reader, "РасхВнеРеалВс")
+                } else if (!stoimRealPTFound && isCurrentNode(['Документ', 'Прибыль', 'РасчНал', 'РасчРасхОпер', 'СтоимРеалПТ'], elements)) {
+                    stoimRealPTFound = true
+                    stoimRealPTDoSr = getXmlDecimal(reader, "СтоимРеалПТДоСр")
+                    stoimRealPTPosSr = getXmlDecimal(reader, "СтоимРеалПТПосСр")
+                } else if (!viruchRealPTFound && isCurrentNode(['Документ', 'Прибыль', 'РасчНал', 'РасчРасхОпер', 'ВыручРеалПТ'], elements)) {
+                    viruchRealPTFound = true
+                    viruchRealPTDoSr = getXmlDecimal(reader, "ВыручРеалПТДоСр")
+                    viruchRealPTPosSr = getXmlDecimal(reader, "ВыручРеалПТПосСр")
+                } else if (!ubitRealPT1Found && isCurrentNode(['Документ', 'Прибыль', 'РасчНал', 'РасчРасхОпер', 'УбытРеалПТ1'], elements)) {
+                    ubitRealPT1Found = true
+                    ubit1Prev269 = getXmlDecimal(reader, "Убыт1Прев269")
+                    ubit1Soot269 = getXmlDecimal(reader, "Убыт1Соот269")
+                } else if (!ubitRealPT2Found && isCurrentNode(['Документ', 'Прибыль', 'РасчНал', 'РасчРасхОпер', 'УбытРеалПТ2'], elements)) {
+                    ubitRealPT2Found = true
+                    ubit2RealPT = getXmlDecimal(reader, "Убыт2РеалПТ")
+                }
+            }
+            if (reader.endElement) {
+                elements[reader.name.localPart] = false
+            }
+            reader.next()
+        }
+    } finally {
+        reader.close()
+    }
 
     // Проверки Листа 02 - Превышение суммы налога, выплаченного за пределами РФ (всего)
-    def nalVipl311 = getXmlValue(xmlData.Документ.Прибыль.РасчНал.@НалВыпл311.text())
-    def nalIschisl = getXmlValue(xmlData.Документ.Прибыль.РасчНал.@НалИсчисл.text())
     if (nalVipl311 != null && nalIschisl != null && nalVipl311 > nalIschisl) {
         logger.error('Сумма налога, выплаченная за пределами РФ (всего) превышает сумму исчисленного налога на прибыль (всего)!')
     }
 
     // Проверки Листа 02 - Превышение суммы налога, выплаченного за пределами РФ (в федеральный бюджет)
-    def nalVipl311FB = getXmlValue(xmlData.Документ.Прибыль.РасчНал.@НалВыпл311ФБ.text())
-    def nalIschislFB = getXmlValue(xmlData.Документ.Прибыль.РасчНал.@НалИсчислФБ.text())
     if (nalVipl311FB != null && nalIschislFB != null &&
             nalVipl311FB > nalIschislFB) {
         logger.error('Сумма налога, выплаченная за пределами РФ (в федеральный бюджет) превышает сумму исчисленного налога на прибыль (в федеральный бюджет)!')
     }
 
     // Проверки Листа 02 - Превышение суммы налога, выплаченного за пределами РФ (в бюджет субъекта РФ)
-    def nalVipl311Sub = getXmlValue(xmlData.Документ.Прибыль.РасчНал.@НалВыпл311Суб.text())
-    def nalIschislSub = getXmlValue(xmlData.Документ.Прибыль.РасчНал.@НалИсчислСуб.text())
     if (nalVipl311Sub != null && nalIschislSub != null &&
             nalVipl311Sub > nalIschislSub) {
         logger.error('Сумма налога, выплаченная за пределами РФ (в бюджет субъекта РФ) превышает сумму исчисленного налога на прибыль (в бюджет субъекта РФ)!')
@@ -158,13 +228,6 @@ void logicCheck() {
 
     // Проверки Приложения № 1 к Листу 02 - Превышение суммы составляющих над общим показателем («Внереализационные доходы (всего)»)
     // (ВнеРеалДохПр + ВнеРеалДохСт + ВнеРеалДохБезв + ВнеРеалДохИзл + ВнеРеалДохВРасх + ВнеРеалДохРынЦБДД + ВнеРеалДохКор) < ВнеРеалДохВс
-    def vneRealDohSt = getXmlValue(xmlData.Документ.Прибыль.РасчНал.ДохРеалВнеРеал.ДохВнеРеал.@ВнеРеалДохСт.text())
-    def vneRealDohBezv = getXmlValue(xmlData.Документ.Прибыль.РасчНал.ДохРеалВнеРеал.ДохВнеРеал.@ВнеРеалДохБезв.text())
-    def vneRealDohIzl = getXmlValue(xmlData.Документ.Прибыль.РасчНал.ДохРеалВнеРеал.ДохВнеРеал.@ВнеРеалДохИзл.text())
-    def vneRealDohVRash = getXmlValue(xmlData.Документ.Прибыль.РасчНал.ДохРеалВнеРеал.ДохВнеРеал.@ВнеРеалДохВРасх.text())
-    def vneRealDohRinCBDD = getXmlValue(xmlData.Документ.Прибыль.РасчНал.ДохРеалВнеРеал.ДохВнеРеал.@ВнеРеалДохРынЦБДД.text())
-    def vneRealDohCor = getXmlValue(xmlData.Документ.Прибыль.РасчНал.ДохРеалВнеРеал.ДохВнеРеал.@ВнеРеалДохКор.text())
-    def vneRealDohVs = getXmlValue(xmlData.Документ.Прибыль.РасчНал.ДохРеалВнеРеал.ДохВнеРеал.@ВнеРеалДохВс.text())
     if (vneRealDohSt != null && vneRealDohBezv != null && vneRealDohIzl != null && vneRealDohVRash != null &&
             vneRealDohRinCBDD != null && vneRealDohCor != null && vneRealDohVs != null &&
             (empty + vneRealDohSt + vneRealDohBezv +
@@ -175,11 +238,6 @@ void logicCheck() {
 
     // Проверки Приложения № 2 к Листу 02 - Превышение суммы составляющих над общим показателем («Косвенные расходы (всего)»)
     // КосвРасхВс < (Налоги + РасхКапВл10 + РасхКапВл30 + РасхТрудИнв + РасхОргИнв + РасхЗемУчВс + НИОКР)
-    def cosvRashVs = getXmlValue(xmlData.Документ.Прибыль.РасчНал.РасхРеалВнеРеал.РасхРеал.@КосвРасхВс.text())
-    def nalogi = getXmlValue(xmlData.Документ.Прибыль.РасчНал.РасхРеалВнеРеал.РасхРеал.@Налоги.text())
-    def rashCapVl10 = getXmlValue(xmlData.Документ.Прибыль.РасчНал.РасхРеалВнеРеал.РасхРеал.@РасхКапВл10.text())
-    def rashCapVl30 = getXmlValue(xmlData.Документ.Прибыль.РасчНал.РасхРеалВнеРеал.РасхРеал.@РасхКапВл30.text())
-    def rashZemUchVs = getXmlValue(xmlData.Документ.Прибыль.РасчНал.РасхРеалВнеРеал.РасхРеал.@РасхЗемУчВс.text())
     if (cosvRashVs != null && nalogi != null && rashCapVl10 != null && rashCapVl30 != null && rashZemUchVs != null &&
             cosvRashVs < (nalogi + rashCapVl10 + rashCapVl30 +
             empty + empty + rashZemUchVs + empty)) {
@@ -188,12 +246,6 @@ void logicCheck() {
 
     // Проверки Приложения № 2 к Листу 02 - Превышение суммы составляющих над общим показателем («Внереализационные расходы (всего)»)
     // (РасхВнереалПрДО + РасхВнереалРзрв + УбытРеалПравТр + РасхЛиквОС + РасхШтраф + РасхРынЦБДД) > РасхВнеРеалВс
-    def rashVnerealPrDO = getXmlValue(xmlData.Документ.Прибыль.РасчНал.РасхРеалВнеРеал.РасхВнеРеал.@РасхВнереалПрДО.text())
-    def ubitRealPravTr = getXmlValue(xmlData.Документ.Прибыль.РасчНал.РасхРеалВнеРеал.РасхВнеРеал.@УбытРеалПравТр.text())
-    def rashLikvOS = getXmlValue(xmlData.Документ.Прибыль.РасчНал.РасхРеалВнеРеал.РасхВнеРеал.@РасхЛиквОС.text())
-    def rashShtraf = getXmlValue(xmlData.Документ.Прибыль.РасчНал.РасхРеалВнеРеал.РасхВнеРеал.@РасхШтраф.text())
-    def rashRinCBDD = getXmlValue(xmlData.Документ.Прибыль.РасчНал.РасхРеалВнеРеал.РасхВнеРеал.@РасхРынЦБДД.text())
-    def rashVnerealVs = getXmlValue(xmlData.Документ.Прибыль.РасчНал.РасхРеалВнеРеал.РасхВнеРеал.@РасхВнеРеалВс.text())
     if (rashVnerealPrDO != null && ubitRealPravTr != null && rashLikvOS != null &&
             rashShtraf != null && rashRinCBDD != null && rashVnerealVs != null &&
             (rashVnerealPrDO + empty + ubitRealPravTr + rashLikvOS + rashShtraf + rashRinCBDD) > rashVnerealVs) {
@@ -206,10 +258,6 @@ void logicCheck() {
     // строка 120 = СтоимРеалПТДоСр = stoimRealPTDoSr
     // строка 140 = Убыт1Соот269	= ubit1Soot269
     // строка 150 = Убыт1Прев269	= ubit1Prev269
-    def stoimRealPTDoSr = getXmlValue(xmlData.Документ.Прибыль.РасчНал.РасчРасхОпер.СтоимРеалПТ.@СтоимРеалПТДоСр.text())
-    def viruchRealPTDoSr = getXmlValue(xmlData.Документ.Прибыль.РасчНал.РасчРасхОпер.ВыручРеалПТ.@ВыручРеалПТДоСр.text())
-    def ubit1Prev269 = getXmlValue(xmlData.Документ.Прибыль.РасчНал.РасчРасхОпер.УбытРеалПТ1.@Убыт1Прев269.text())
-    def ubit1Soot269 = getXmlValue(xmlData.Документ.Прибыль.РасчНал.РасчРасхОпер.УбытРеалПТ1.@Убыт1Соот269.text())
     if (stoimRealPTDoSr != null && viruchRealPTDoSr != null && ubit1Prev269 != null && ubit1Soot269 != null &&
             (stoimRealPTDoSr > viruchRealPTDoSr ?
                     (ubit1Prev269 != stoimRealPTDoSr - viruchRealPTDoSr - ubit1Soot269)
@@ -224,9 +272,6 @@ void logicCheck() {
     // строка 160 = Убыт2РеалПТ		 = ubit2RealPT
     def reportPeriod = reportPeriodService.get(declarationData.reportPeriodId)
     if (reportPeriod.order == 4 && reportPeriod.taxPeriod.year == 2014) {
-        def stoimRealPTPosSr = getXmlValue(xmlData.Документ.Прибыль.РасчНал.РасчРасхОпер.СтоимРеалПТ.@СтоимРеалПТПосСр.text())
-        def viruchRealPTPosSr = getXmlValue(xmlData.Документ.Прибыль.РасчНал.РасчРасхОпер.ВыручРеалПТ.@ВыручРеалПТПосСр.text())
-        def ubit2RealPT = getXmlValue(xmlData.Документ.Прибыль.РасчНал.РасчРасхОпер.УбытРеалПТ2.@Убыт2РеалПТ.text())
         if (stoimRealPTPosSr != null && viruchRealPTPosSr != null && ubit2RealPT != null &&
                 (stoimRealPTPosSr > viruchRealPTPosSr ?
                         (ubit2RealPT != stoimRealPTPosSr - viruchRealPTPosSr)
@@ -237,7 +282,7 @@ void logicCheck() {
 }
 
 // Запуск генерации XML.
-void generateXML(def xmlBankData) {
+void generateXML(XMLStreamReader readerBank) {
 
     def empty = 0
     def knd = '1151006'
@@ -251,7 +296,7 @@ void generateXML(def xmlBankData) {
     def incomeParams = getDepartmentParam()
     def incomeParamsTable = getDepartmentParamTable(incomeParams.record_id.value)
 
-    if (!xmlBankData)
+    if (!readerBank)
         return
     def reorgFormCode = getRefBookValue(5, incomeParamsTable?.REORG_FORM_CODE?.value)?.CODE?.value
     def taxOrganCode = incomeParamsTable?.TAX_ORGAN_CODE?.value
@@ -281,51 +326,91 @@ void generateXML(def xmlBankData) {
     /** Признак налоговый ли это период. */
     def isTaxPeriod = (reportPeriod != null && reportPeriod.order == 4)
 
+    // Приложение № 5 к Листу 02
+    /** ОбРасч. Столбец «Признак расчёта». */
+    def obRasch
+    /** НаимОП. Столбец «Подразделение территориального банка». */
+    def naimOP
+    /** КППОП. Столбец «КПП». */
+    def kppop
+    /** ОбязУплНалОП. Столбец «Обязанность по уплате налога». */
+    def obazUplNalOP
+    /** ДоляНалБаз. Столбец «Доля налоговой базы (%)». */
+    def dolaNalBaz
+    /** НалБазаДоля. Столбец «Налоговая база исходя из доли (руб.)». */
+    def nalBazaDola
+    /** СтавНалСубРФ. Столбец «Ставка налога % в бюджет субъекта (%)». */
+    def stavNalSubRF
+    /** СумНал. Столбец «Сумма налога». */
+    def sumNal
+    /** НалНачислСубРФ. Столбец «Начислено налога в бюджет субъекта (руб.)». */
+    def nalNachislSubRF
+    /** СумНалП. Столбец «Сумма налога к доплате». */
+    def sumNalP
+    /** НалВыплВнеРФ. Столбец «Сумма налога, выплаченная за пределами России и засчитываемая в уплату налога». */
+    def nalViplVneRF
+    /** МесАвПлат. Столбец «Ежемесячные авансовые платежи в квартале, следующем за отчётным периодом (текущий отчёт)». */
+    def mesAvPlat
+    /** МесАвПлат1КвСлед. Столбец «Ежемесячные авансовые платежи на I квартал следующего налогового периода». */
+    def mesAvPlat1CvSled
+    /** НалБазаОрг. */
+    def nalBazaOrg
+
     // провека наличия в декларации банка данных для данного подразделения
     def findCurrentDepo = false
     /** Данные Приложения № 5 к Листу 02 из декларации Банка для данного подразделения. */
-    def appl5 = null
-    for (def item : xmlBankData.Документ.Прибыль.РасчНал.РаспрНалСубРФ) {
-        if (item.@КППОП == kpp) {
-            findCurrentDepo = true
-            appl5 = item
-            break
+    try {
+        def elements = [:]
+        while(readerBank.hasNext()) {
+            if (readerBank.startElement){
+                elements[readerBank.name.localPart] = true
+                if (isCurrentNode(['Документ', 'Прибыль', 'РасчНал', 'РаспрНалСубРФ'], elements)) {
+                    /** КППОП. Столбец «КПП». */
+                    kppop = getXmlValue(readerBank, "КППОП")
+                    if (kpp != null && kpp.equals(kppop)) {
+                        findCurrentDepo = true
+                        /** ОбРасч. Столбец «Признак расчёта». */
+                        obRasch = getXmlValue(readerBank, "ОбРасч")
+                        /** НаимОП. Столбец «Подразделение территориального банка». */
+                        naimOP = getXmlValue(readerBank, "НаимОП")
+                        /** ОбязУплНалОП. Столбец «Обязанность по уплате налога». */
+                        obazUplNalOP = getXmlValue(readerBank, "ОбязУплНалОП")
+                        /** ДоляНалБаз. Столбец «Доля налоговой базы (%)». */
+                        dolaNalBaz = getXmlValue(readerBank, "ДоляНалБаз")
+                        /** НалБазаДоля. Столбец «Налоговая база исходя из доли (руб.)». */
+                        nalBazaDola = getXmlValue(readerBank, "НалБазаДоля")
+                        /** СтавНалСубРФ. Столбец «Ставка налога % в бюджет субъекта (%)». */
+                        stavNalSubRF = getXmlValue(readerBank, "СтавНалСубРФ")
+                        /** СумНал. Столбец «Сумма налога». */
+                        sumNal = getXmlValue(readerBank, "СумНал")
+                        /** НалНачислСубРФ. Столбец «Начислено налога в бюджет субъекта (руб.)». */
+                        nalNachislSubRF = getXmlValue(readerBank, "НалНачислСубРФ")
+                        /** СумНалП. Столбец «Сумма налога к доплате». */
+                        sumNalP = getXmlValue(readerBank, "СумНалП")
+                        /** НалВыплВнеРФ. Столбец «Сумма налога, выплаченная за пределами России и засчитываемая в уплату налога». */
+                        nalViplVneRF = getXmlValue(readerBank, "НалВыплВнеРФ")
+                        /** МесАвПлат. Столбец «Ежемесячные авансовые платежи в квартале, следующем за отчётным периодом (текущий отчёт)». */
+                        mesAvPlat = getXmlValue(readerBank, "МесАвПлат")
+                        /** МесАвПлат1КвСлед. Столбец «Ежемесячные авансовые платежи на I квартал следующего налогового периода». */
+                        mesAvPlat1CvSled = getXmlValue(readerBank, "МесАвПлат1КвСлед")
+                        /** НалБазаОрг. */
+                        nalBazaOrg = getXmlValue(readerBank, "НалБазаОрг")
+                        break
+                    }
+                }
+            }
+            if (readerBank.endElement){
+                elements[readerBank.name.localPart] = false
+            }
+            readerBank.next()
         }
+    } finally {
+        readerBank.close()
     }
     if (!findCurrentDepo) {
         logger.error("В декларации Банка отсутствуют данные для подразделения: $name (в приложении № 5 к Листу 02).")
         return
     }
-
-    // Приложение № 5 к Листу 02
-    /** ОбРасч. Столбец «Признак расчёта». */
-    def obRasch = appl5.@ОбРасч.text()
-    /** НаимОП. Столбец «Подразделение территориального банка». */
-    def naimOP = appl5.@НаимОП.text()
-    /** КППОП. Столбец «КПП». */
-    def kppop = appl5.@КППОП.text()
-    /** ОбязУплНалОП. Столбец «Обязанность по уплате налога». */
-    def obazUplNalOP = appl5.@ОбязУплНалОП.text()
-    /** ДоляНалБаз. Столбец «Доля налоговой базы (%)». */
-    def dolaNalBaz = appl5.@ДоляНалБаз.text()
-    /** НалБазаДоля. Столбец «Налоговая база исходя из доли (руб.)». */
-    def nalBazaDola = appl5.@НалБазаДоля.text()
-    /** СтавНалСубРФ. Столбец «Ставка налога % в бюджет субъекта (%)». */
-    def stavNalSubRF = appl5.@СтавНалСубРФ.text()
-    /** СумНал. Столбец «Сумма налога». */
-    def sumNal = appl5.@СумНал.text()
-    /** НалНачислСубРФ. Столбец «Начислено налога в бюджет субъекта (руб.)». */
-    def nalNachislSubRF = appl5.@НалНачислСубРФ.text()
-    /** СумНалП. Столбец «Сумма налога к доплате». */
-    def sumNalP = appl5.@СумНалП.text()
-    /** НалВыплВнеРФ. Столбец «Сумма налога, выплаченная за пределами России и засчитываемая в уплату налога». */
-    def nalViplVneRF = appl5.@НалВыплВнеРФ.text()
-    /** МесАвПлат. Столбец «Ежемесячные авансовые платежи в квартале, следующем за отчётным периодом (текущий отчёт)». */
-    def mesAvPlat = appl5.@МесАвПлат.text()
-    /** МесАвПлат1КвСлед. Столбец «Ежемесячные авансовые платежи на I квартал следующего налогового периода». */
-    def mesAvPlat1CvSled = appl5.@МесАвПлат1КвСлед.text()
-    /** НалБазаОрг. */
-    def nalBazaOrg = appl5.@НалБазаОрг.text()
 
     // Данные налоговых форм.
 
@@ -477,6 +562,18 @@ void generateXML(def xmlBankData) {
     }
 }
 
+/**
+ * Ищет точное ли совпадение узлов дерева xml c текущими незакрытыми элементами
+ * @param nodeNames ожидаемые элементы xml
+ * @param elements незакрытые элементы
+ * @return
+ */
+boolean isCurrentNode(List<String> nodeNames, Map<String, Boolean> elements) {
+    nodeNames.add('Файл')
+    def enteredNodes = elements.findAll { it.value }.keySet() // узлы в которые вошли, но не вышли еще
+    return enteredNodes.containsAll(nodeNames) && enteredNodes.size() == nodeNames.size()
+}
+
 // Получить округленное, целочисленное значение.
 def getLong(def value) {
     if (value == null) {
@@ -570,31 +667,29 @@ def getCalculatedSimpleConsumption(def dataRowsSimple, def codes) {
  * @param reportPeriodId
  * @param departmentId
  */
-def getXmlData(def reportPeriodId, def departmentId, def acceptedOnly, def anyPrevDeclaration) {
+def getXmlStreamReader(def reportPeriodId, def departmentId, def acceptedOnly, def anyPrevDeclaration) {
     if (reportPeriodId != null) {
         // вид декларации 11 - декларация банка
         def declarationTypeId = 11
-        def xml = getExistedXmlData(declarationTypeId, departmentId, reportPeriodId, acceptedOnly)
+        def xml = getStreamReader(declarationTypeId, departmentId, reportPeriodId, acceptedOnly)
         if (xml != null) {
             return xml
         }
         // для новой декларации можно поискать в прошлом периоде другую декларацию (обычную Банка)
         if (anyPrevDeclaration) {
             declarationTypeId = 2
-            return getExistedXmlData(declarationTypeId, departmentId, reportPeriodId, acceptedOnly)
+            return getStreamReader(declarationTypeId, departmentId, reportPeriodId, acceptedOnly)
         }
     }
     return null
 }
 
-def getExistedXmlData(def declarationTypeId, def departmentId, def reportPeriodId, def acceptedOnly) {
+def getStreamReader(def declarationTypeId, def departmentId, def reportPeriodId, def acceptedOnly) {
     def declarationData = declarationService.getLast(declarationTypeId, departmentId, reportPeriodId)
     if (declarationData != null && declarationData.id != null && (!acceptedOnly || declarationData.accepted)) {
-        def xmlString = declarationService.getXmlData(declarationData.id)
-        if (xmlString == null) return null
-        xmlString = xmlString.replace('<?xml version="1.0" encoding="windows-1251"?>', '')
-        return new XmlSlurper().parseText(xmlString)
+        return declarationService.getXmlStreamReader(declarationData.id)
     }
+    return null
 }
 
 /**
@@ -683,12 +778,16 @@ def getProvider(def long providerId) {
     return providerCache.get(providerId)
 }
 
-/** Получить числовое значение из xml'ки. */
-def getXmlValue(def value) {
+BigDecimal getXmlDecimal(def reader, String attrName) {
+    def value = reader?.getAttributeValue(null, attrName)
     if (!value) {
         return null
     }
     return new BigDecimal(value)
+}
+
+String getXmlValue(XMLStreamReader reader, String attrName) {
+    return reader?.getAttributeValue(null, attrName)
 }
 
 /** Получить строки формы. */
@@ -707,7 +806,7 @@ def getDepartmentParam() {
         def departmentId = declarationData.departmentId
         def departmentParamList = getProvider(33).getRecords(getEndDate() - 1, null, "DEPARTMENT_ID = $departmentId", null)
         if (departmentParamList == null || departmentParamList.size() == 0 || departmentParamList.get(0) == null) {
-            throw new Exception("Ошибка при получении настроек обособленного подразделения")
+            throw new Exception("Ошибка при получении настроек обособленного подразделения. Настройки подразделения заполнены не полностью")
         }
         departmentParam = departmentParamList?.get(0)
     }
@@ -720,7 +819,7 @@ def getDepartmentParamTable(def departmentParamId) {
         def filter = "LINK = $departmentParamId and KPP ='${declarationData.kpp}'"
         def departmentParamTableList = getProvider(330).getRecords(getEndDate() - 1, null, filter, null)
         if (departmentParamTableList == null || departmentParamTableList.size() == 0 || departmentParamTableList.get(0) == null) {
-            throw new Exception("Ошибка при получении настроек обособленного подразделения")
+            throw new Exception("Ошибка при получении настроек обособленного подразделения. Настройки подразделения заполнены не полностью")
         }
         departmentParamTable = departmentParamTableList.get(0)
     }

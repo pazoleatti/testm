@@ -141,8 +141,8 @@ public class DeclarationCreationView extends PopupViewWithUiHandlers<Declaration
         // "Подразделение" недоступно если не выбран отчетный период
         departmentPicker.setEnabled(periodSelected);
         declarationTypeId.setEnabled(departmentSelected);
-        taxOrganCode.setEnabled(refBookEnabled && departmentSelected);
-        taxOrganKpp.setEnabled(refBookEnabled && (codePanel.isVisible() ? taxOrganCodeSelected : declarationTypeIdSelected));
+        taxOrganCode.setEnabled(departmentSelected);
+        taxOrganKpp.setEnabled((codePanel.isVisible() ? taxOrganCodeSelected : declarationTypeIdSelected));
         // дата корректировки
         correctionPanel.setVisible(departmentSelected && correctionDateSelected);
     }

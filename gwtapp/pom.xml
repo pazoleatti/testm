@@ -326,6 +326,11 @@
                     <artifactId>async-mock</artifactId>
                     <version>${project.version}</version>
                 </dependency>
+                <dependency>
+                    <groupId>javax</groupId>
+                    <artifactId>javaee-api</artifactId>
+                    <scope>test</scope>
+                </dependency>
             </dependencies>
 		</profile>
 		<profile>
@@ -338,6 +343,11 @@
                     <groupId>com.aplana.taxaccounting</groupId>
                     <artifactId>scheduler-mock</artifactId>
                     <version>${project.version}</version>
+                </dependency>
+                <dependency>
+                    <groupId>javax</groupId>
+                    <artifactId>javaee-api</artifactId>
+                    <scope>provided</scope>
                 </dependency>
             </dependencies>
 			<build>

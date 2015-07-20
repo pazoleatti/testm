@@ -13,15 +13,15 @@ public enum TaskState {
     INVALID(-1, "Некорректный"),
     UNKNOWN(-2, "Неизвестный");
 
-    private Integer id;
+    private int id;
     private String name;
 
-    private TaskState(Integer id, String name) {
+    private TaskState(int id, String name) {
         this.id = id;
         this.name = name;
     }
 
-    public Integer getId() {
+    public int getId() {
         return id;
     }
 
@@ -29,9 +29,9 @@ public enum TaskState {
         return name;
     }
 
-    public static TaskState getStateById(Integer id) {
+    public static TaskState getStateById(int id) {
         for (TaskState state : TaskState.values()) {
-            if (state.getId().equals(id)) {
+            if (state.getId() == id) {
                 return state;
             }
         }

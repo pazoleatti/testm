@@ -286,4 +286,9 @@ public class DefaultScriptTestMockHelper implements ScriptTestMockHelper {
         DeclarationService declarationService = mock(DeclarationService.class);
         return declarationService;
     }
+
+    @Override
+    public Map<Long, Map<String, RefBookValue>> getRefBookAllRecords(Long refBookId) {
+        return refBookMap.get(refBookId);
+    }
 }

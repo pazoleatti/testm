@@ -7,19 +7,17 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.RefBookDataModule;
-import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.EditFormPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.event.RollbackTableRowSelection;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.event.UpdateForm;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.event.AddItemEvent;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.event.DeleteItemEvent;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.event.SearchButtonEvent;
-import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.versionform.RefBookVersionPresenter;
+import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.event.ShowItemEvent;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.*;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.model.RefBookTreeItem;
 import com.aplana.sbrf.taxaccounting.web.widget.utils.WidgetUtils;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
-import com.google.web.bindery.event.shared.HandlerRegistration;
 import com.gwtplatform.dispatch.shared.DispatchAsync;
 import com.gwtplatform.mvp.client.HasUiHandlers;
 import com.gwtplatform.mvp.client.PresenterWidget;
@@ -30,7 +28,7 @@ import java.util.Arrays;
 import java.util.Date;
 
 /**
- * Презентор формы редактирования иерархического справочника
+ * Презентор-виджет формы иерархического справочника
  *
  * @author aivanov
  */
@@ -43,10 +41,6 @@ public class RefBookHierDataPresenter extends PresenterWidget<RefBookHierDataPre
     private Long refBookDataId;
     private RecordChanges recordChanges;
     private Date relevanceDate;
-
-    EditFormPresenter editFormPresenter;
-    RefBookVersionPresenter versionPresenter;
-    private final HandlerRegistration[] registrations = new HandlerRegistration[1];
 
     private final DispatchAsync dispatcher;
 
@@ -125,12 +119,10 @@ public class RefBookHierDataPresenter extends PresenterWidget<RefBookHierDataPre
     }
 
     @Inject
-    public RefBookHierDataPresenter(final EventBus eventBus, final MyView view, EditFormPresenter editFormPresenter,
-                                    RefBookVersionPresenter versionPresenter, DispatchAsync dispatcher) {
+    public RefBookHierDataPresenter(final EventBus eventBus, final MyView view,
+                                    DispatchAsync dispatcher) {
         super(eventBus, view);
         this.dispatcher = dispatcher;
-        this.editFormPresenter = editFormPresenter;
-        this.versionPresenter = versionPresenter;
         getView().setUiHandlers(this);
     }
 
@@ -145,15 +137,12 @@ public class RefBookHierDataPresenter extends PresenterWidget<RefBookHierDataPre
     @Override
     protected void onUnbind() {
         super.onUnbind();
-        for (HandlerRegistration han : registrations){
-            han.removeHandler();
-        }
     }
 
     @Override
     protected void onReveal() {
         super.onReveal();
-        /*setInSlot(TYPE_editFormPresenter, editFormPresenter);*/
+        /*setInSlot(TYPE_editFormPresenter, editPresenter);*/
         canVersion = !Arrays.asList(RefBookDataModule.NOT_VERSIONED_REF_BOOK_IDS).contains(refBookDataId);
         /*if (canVersion) checkRecord();*/
     }
@@ -171,7 +160,9 @@ public class RefBookHierDataPresenter extends PresenterWidget<RefBookHierDataPre
     }
 
     private void onAddRowClicked() {
-        editFormPresenter.show(null, getView().getSelectedItem());
+        RefBookTreeItem item = getView().getSelectedItem();
+        ShowItemEvent.fire(this, item.getDereferenceValue(), item.getId());
+        //editPresenter.show(item.getDereferenceValue(), item.getId());
         getView().clearSelected();
     }
 
@@ -199,9 +190,10 @@ public class RefBookHierDataPresenter extends PresenterWidget<RefBookHierDataPre
                                 Dialog.errorMessage("Удаление всех версий элемента справочника",
                                         "Обнаружены фатальные ошибки!");
                             } else {
-                                //editFormPresenter.show(null);
-                                editFormPresenter.clearRecordId();
-                                editFormPresenter.setNeedToReload();
+                                //editPresenter.show(null);
+                                ShowItemEvent.fire(RefBookHierDataPresenter.this, null, null);
+                                /*editPresenter.clean();
+                                editPresenter.setNeedToReload();*/
                                 getView().deleteItem(selected);
                                 getView().setSelection(parentRefBookItem);
                             }
@@ -231,9 +223,10 @@ public class RefBookHierDataPresenter extends PresenterWidget<RefBookHierDataPre
                                     @Override
                                     public void onSuccess(DeleteNonVersionRefBookRowResult result) {
                                         LogAddEvent.fire(RefBookHierDataPresenter.this, result.getUuid());
-                                        //editFormPresenter.show(null);
-                                        editFormPresenter.clearRecordId();
-                                        editFormPresenter.setNeedToReload();
+                                        //editPresenter.show(null);
+                                        ShowItemEvent.fire(RefBookHierDataPresenter.this, null, null);
+                                        /*editPresenter.clean();
+                                        editPresenter.setNeedToReload();*/
                                         getView().deleteItem(selected);
                                         getView().setSelection(parentRefBookItem);
                                     }
@@ -247,9 +240,10 @@ public class RefBookHierDataPresenter extends PresenterWidget<RefBookHierDataPre
                         });
                     } else {
                         LogAddEvent.fire(RefBookHierDataPresenter.this, result.getUuid());
-                        //editFormPresenter.show(null);
-                        editFormPresenter.clearRecordId();
-                        editFormPresenter.setNeedToReload();
+                        //editPresenter.show(null);
+                        ShowItemEvent.fire(RefBookHierDataPresenter.this, null, null);
+                        /*editPresenter.clean();
+                        editPresenter.setNeedToReload();*/
                         getView().deleteItem(selected);
                         getView().setSelection(parentRefBookItem);
                     }
@@ -263,8 +257,9 @@ public class RefBookHierDataPresenter extends PresenterWidget<RefBookHierDataPre
     public void onSelectionChanged() {
         if (getView().getSelectedId() != null) {
             recordId = getView().getSelectedId();
-            editFormPresenter.show(recordId);
-            editFormPresenter.setRecordId(recordId);
+            ShowItemEvent.fire(RefBookHierDataPresenter.this, null, recordId);
+            /*editPresenter.show(recordId);
+            editPresenter.setRecordId(recordId);*/
         }
     }
 
@@ -274,8 +269,9 @@ public class RefBookHierDataPresenter extends PresenterWidget<RefBookHierDataPre
 
     @Override
     public void onRelevanceDateChanged() {
-        editFormPresenter.show(null);
-        editFormPresenter.setNeedToReload();
+        ShowItemEvent.fire(RefBookHierDataPresenter.this, null, null);
+        /*editPresenter.clean();
+        editPresenter.setNeedToReload();*/
         getView().load();
     }
 
@@ -302,8 +298,7 @@ public class RefBookHierDataPresenter extends PresenterWidget<RefBookHierDataPre
         getView().updateMode(mode);
     }
 
-    @Override
-    public void setRecordItem(RecordChanges recordChanges) {
+    private void setRecordItem(RecordChanges recordChanges) {
         this.recordChanges = recordChanges;
     }
 
@@ -319,9 +314,10 @@ public class RefBookHierDataPresenter extends PresenterWidget<RefBookHierDataPre
 
     @Override
     public void onCleanEditForm() {
-        editFormPresenter.cleanFields();
-        editFormPresenter.setCurrentUniqueRecordId(null);
-        editFormPresenter.setAllVersionVisible(false);
+        ShowItemEvent.fire(RefBookHierDataPresenter.this, null, null);
+       /* editPresenter.cleanFields();
+        editPresenter.setCurrentUniqueRecordId(null);*/
+        //editPresenter.setAllVersionVisible(false);
     }
 
     @Override
@@ -329,24 +325,13 @@ public class RefBookHierDataPresenter extends PresenterWidget<RefBookHierDataPre
         this.refBookDataId = refBookId;
     }
 
-    @Override
     public void clearAll() {
         getView().clearFilterInputBox();
         getView().clearSelected();
     }
 
-    @Override
-    public void clearFilter() {
-        getView().clearFilterInputBox();
-    }
-
-    @Override
     public void loadAndSelect() {
         getView().loadAndSelect();
-    }
-
-    public void clearFilterInputBox() {
-        getView().clearFilterInputBox();
     }
 
     private void searchButtonClicked(){
@@ -368,7 +353,8 @@ public class RefBookHierDataPresenter extends PresenterWidget<RefBookHierDataPre
                         } else {
                             getView().reload();
                             getView().setSelected(recordId);
-                            editFormPresenter.show(recordId);
+                            ShowItemEvent.fire(RefBookHierDataPresenter.this, null, recordId);
+                            //editPresenter.show(recordId);
                         }
                     }
                 }, this));

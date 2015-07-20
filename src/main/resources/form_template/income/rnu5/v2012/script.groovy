@@ -61,7 +61,6 @@ switch (formDataEvent) {
         importData()
         if (!logger.containsLevel(LogLevel.ERROR)) {
             calc()
-            logicCheck()
             formDataService.saveCachedDataRows(formData, logger)
         }
         break
@@ -451,7 +450,7 @@ void importData() {
     int HEADER_ROW_COUNT = 3
     String TABLE_START_VALUE = '№ пп'
     String TABLE_END_VALUE = null
-    int INDEX_FOR_SKIP = 0
+    int INDEX_FOR_SKIP = 1
 
     def allValues = []      // значения формы
     def headerValues = []   // значения шапки
@@ -461,6 +460,9 @@ void importData() {
 
     // проверка шапки
     checkHeaderXls(headerValues, COLUMN_COUNT, HEADER_ROW_COUNT)
+    if (logger.containsLevel(LogLevel.ERROR)) {
+        return;
+    }
     // освобождение ресурсов для экономии памяти
     headerValues.clear()
     headerValues = null
@@ -485,7 +487,7 @@ void importData() {
             break
         }
         // Пропуск итоговых строк
-        if (!rowValues[INDEX_FOR_SKIP]) {
+        if (rowValues[INDEX_FOR_SKIP] && (rowValues[INDEX_FOR_SKIP] == "Итого" || rowValues[INDEX_FOR_SKIP].contains("Итого по КНУ "))) {
             allValues.remove(rowValues)
             rowValues.clear()
             continue
@@ -530,7 +532,7 @@ void checkHeaderXls(def headerRows, def colCount, rowCount) {
             (headerRows[2][4]): '4',
             (headerRows[2][5]): '5'
     ]
-    checkHeaderEquals(headerMapping)
+    checkHeaderEquals(headerMapping, logger)
 }
 
 /**

@@ -24,10 +24,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.BufferedOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.net.URLEncoder;
 import java.util.Date;
 
@@ -36,6 +33,7 @@ import java.util.Date;
 public class DeclarationTemplateController {
 
 	private static final Log logger = LogFactory.getLog(DeclarationTemplateController.class);
+    private static final String ENCODING = "UTF-8";
 
 	@Autowired
 	SecurityService securityService;
@@ -128,7 +126,7 @@ public class DeclarationTemplateController {
         try {
             if (file.getSize() == 0)
                 throw new ServiceException("Файл jrxml пустой.");
-            if (file.getOriginalFilename().endsWith(".jrxml"))
+            if (!file.getOriginalFilename().endsWith(".jrxml"))
                 throw new ServiceException("Формат файла должен быть *.jrxml");
             inputStream = file.getInputStream();
             Date endDate = declarationTemplateService.getDTEndDate(declarationTemplateId);
@@ -201,14 +199,7 @@ public class DeclarationTemplateController {
 	public void processDownload(@PathVariable String uuid, HttpServletRequest req, HttpServletResponse resp)
 			throws IOException {
         BlobData blobData = blobDataService.get(uuid);
-
-        OutputStream respOut = new BufferedOutputStream(resp.getOutputStream());
-        resp.setContentType("text/xml");
-        resp.setHeader("Content-Disposition", "attachment; filename=\"" + URLEncoder.encode(blobData.getName(), "UTF-8") + "\"");
-        resp.setCharacterEncoding("UTF-8");
-        int size = IOUtils.copy(blobData.getInputStream(), respOut);
-        resp.setBufferSize(size);
-        IOUtils.closeQuietly(respOut);
+        createResponse(req, resp, blobData);
     }
 
     @ExceptionHandler(ServiceLoggerException.class)
@@ -252,5 +243,33 @@ public class DeclarationTemplateController {
         if (!logger.getEntries().isEmpty()){
            throw new ServiceLoggerException("", logEntryService.save(logger.getEntries()));
         }
+    }
+
+    private void createResponse(final HttpServletRequest req, final HttpServletResponse response, final BlobData blobData) throws IOException{
+        String fileName = blobData.getName();
+        setCorrectFileName(req, response, fileName);
+
+        DataInputStream in = new DataInputStream(blobData.getInputStream());
+        OutputStream out = response.getOutputStream();
+        int count = 0;
+        try {
+            count = IOUtils.copy(in, out);
+        } finally {
+            in.close();
+            out.close();
+        }
+        response.setContentLength(count);
+    }
+
+    private void setCorrectFileName(HttpServletRequest request, HttpServletResponse response, String originalFileName) throws UnsupportedEncodingException {
+        String userAgent = request.getHeader("User-Agent").toLowerCase();
+        String fileName = URLEncoder.encode(originalFileName, ENCODING).replaceAll("\\+", "%20");
+        String fileNameAttr = "filename=";
+        if (userAgent.contains("msie") || userAgent.contains("webkit")) {
+            fileName = "\"" + fileName + "\"";
+        } else {
+            fileNameAttr = fileNameAttr.replace("=", "*=") + ENCODING + "''";
+        }
+        response.setHeader("Content-Disposition", "attachment;" + fileNameAttr + fileName);
     }
 }

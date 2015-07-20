@@ -6,9 +6,13 @@ import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.FormMode;
 import com.aplana.sbrf.taxaccounting.web.widget.datepicker.DateMaskBoxPicker;
 import com.aplana.sbrf.taxaccounting.web.widget.style.LinkAnchor;
 import com.aplana.sbrf.taxaccounting.web.widget.style.LinkButton;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.*;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.i18n.client.DateTimeFormat;
+import com.google.gwt.safehtml.client.SafeHtmlTemplates;
+import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
@@ -25,6 +29,13 @@ import static com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.FormMo
  * User: avanteev
  */
 public class RefBookHierView extends ViewWithUiHandlers<RefBookHierUIHandlers> implements RefBookHierPresenter.MyView {
+
+    interface UrlTemplates extends SafeHtmlTemplates {
+        @Template("Все значения записи {0} (дата актуальности {1})")
+        SafeHtml getName(String versionCount, String actualDate);
+    }
+    private static final UrlTemplates urlTemplates = GWT.create(UrlTemplates.class);
+    DateTimeFormat dtf = DateTimeFormat.getFormat("dd.MM.yyyy");
 
     @UiField
     Panel contentPanel;
@@ -256,6 +267,11 @@ public class RefBookHierView extends ViewWithUiHandlers<RefBookHierUIHandlers> i
     @Override
     public void setRefBookNameDesc(String desc) {
         titleDesc.setText(desc);
+    }
+
+    @Override
+    public void setRefBookNameDesc(String verCount, Date relDate) {
+        titleDesc.setText(urlTemplates.getName(verCount, dtf.format(relDate)).asString());
     }
 
     @Override

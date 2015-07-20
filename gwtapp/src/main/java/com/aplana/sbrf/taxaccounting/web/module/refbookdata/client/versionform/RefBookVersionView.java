@@ -1,7 +1,5 @@
 package com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.versionform;
 
-import com.aplana.gwt.client.dialog.Dialog;
-import com.aplana.gwt.client.dialog.DialogHandler;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.FormMode;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.HorizontalAlignment;
@@ -119,11 +117,6 @@ public class RefBookVersionView extends ViewWithUiHandlers<RefBookVersionUiHandl
 	}
 
 	@Override
-	public void setRefBookNameDesc(String desc) {
-//        backAction.setText(desc);
-	}
-
-	@Override
 	public void setTableData(int start, int totalCount, List<RefBookDataRow> dataRows) {
 		if (dataRows == null) {
 			refBookDataTable.setRowCount(0);
@@ -163,29 +156,12 @@ public class RefBookVersionView extends ViewWithUiHandlers<RefBookVersionUiHandl
 	}
 
     @Override
-    public void setTitleDetails(String uniqueAttrValues) {
-//        titleDetails.setText("Все значения записи " + uniqueAttrValues);
-    }
-
-    @Override
-    public void setBackAction(String refBookType, long refBookId, String record, long recordId) {
-//        backAction.setHref(backUrlTemplates.getBackAction(refBookType, refBookId, record, recordId).asString());
-    }
-
-    /*@UiHandler("addRow")
-	void addRowButtonClicked(ClickEvent event) {
-        //selectionModel.clear();
-		if (getUiHandlers() != null) {
-			getUiHandlers().onAddRowClicked();
-		}
-	}*/
-
-    @Override
 	public void deleteRowButtonClicked() {
 		if (selectionModel.getSelectedObject() == null) {
 			return;
 		}
-        Dialog.confirmMessage("Удаление версии элемента справочника", "Удалить выбранную версию элемента справочника?", new DialogHandler() {
+        getUiHandlers().onDeleteRowClicked();
+        /*Dialog.confirmMessage("Удаление версии элемента справочника", "Удалить выбранную версию элемента справочника?", new DialogHandler() {
             @Override
             public void yes() {
                 getUiHandlers().onDeleteRowClicked();
@@ -201,7 +177,7 @@ public class RefBookVersionView extends ViewWithUiHandlers<RefBookVersionUiHandl
             public void close() {
                 no();
             }
-        });
+        });*/
 	}
 
     @Override

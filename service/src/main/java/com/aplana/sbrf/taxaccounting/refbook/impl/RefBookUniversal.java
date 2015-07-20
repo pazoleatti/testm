@@ -753,13 +753,14 @@ public class RefBookUniversal implements RefBookDataProvider {
                     refBookDao.deleteRecordVersions(REF_BOOK_RECORD_TABLE_NAME, relatedVersions);
                 }
                 Long recordId = refBookDao.getRecordId(uniqueRecordId);
+                RefBook refBook = refBookDao.getByRecord(uniqueRecordId);
                 //Проверяем следующую версию после даты окочания
                 RefBookRecordVersion oldVersionPeriod = refBookDao.getRecordVersionInfo(uniqueRecordId);
-                RefBookRecordVersion nextVersion = refBookDao.getNextVersion(refBookId, recordId, oldVersionPeriod.getVersionStart());
+                RefBookRecordVersion nextVersion = refBookDao.getNextVersion(refBook.getId(), recordId, oldVersionPeriod.getVersionStart());
                 if (versionEnd != null && nextVersion != null && versionEnd.after(nextVersion.getVersionStart())) {
                     throw new ServiceException(CROSS_ERROR_MSG);
                 }
-                refBookDao.createFakeRecordVersion(refBookId, recordId, SimpleDateUtils.addDayToDate(versionEnd, 1));
+                refBookDao.createFakeRecordVersion(refBook.getId(), recordId, SimpleDateUtils.addDayToDate(versionEnd, 1));
             }
         } catch (Exception e) {
             if (logger != null) {

@@ -19,12 +19,14 @@ void save() {
         def String taxOrganCode = it.TAX_ORGAN_CODE?.stringValue
         def String kpp = it.KPP?.stringValue
         // Проверка поля «Код налогового органа» на корректность формата введенных данных
-        if (!checkFormat(taxOrganCode, "[0-9]{4}")) {
-            logger.error("Поле «Код налогового органа» должно быть заполнено согласно формату «[0-9]{4}»")
+        if (taxOrganCode && !(taxOrganCode ==~ TAX_ORGAN_PATTERN)) {
+            logger.error("Атрибут \"%s\" заполнен неверно (%s)! Ожидаемый паттерн: \"%s\"", "Код налогового органа", kpp, TAX_ORGAN_PATTERN)
+            logger.error("Расшифровка паттерна «%s»: %s.", TAX_ORGAN_PATTERN, TAX_ORGAN_MEANING)
         }
         // Проверка поля «КПП» на корректность формата введенных данных
-        if (!checkFormat(kpp, "([0-9]{1}[1-9]{1}|[1-9]{1}[0-9]{1})([0-9]{2})([0-9A-Z]{2})([0-9]{3})")) {
-            logger.error("Поле «КПП» должно быть заполнено согласно формату «([0-9]{1}[1-9]{1}|[1-9]{1}[0-9]{1})([0-9]{2})([0-9A-Z]{2})([0-9]{3})»")
+        if (kpp && !(kpp ==~ KPP_PATTERN)) {
+            logger.error("Атрибут \"%s\" заполнен неверно (%s)! Ожидаемый паттерн: \"%s\"", "КПП", kpp, KPP_PATTERN)
+            logger.error("Расшифровка паттерна «%s»: %s.", KPP_PATTERN, KPP_MEANING)
         }
     }
 }

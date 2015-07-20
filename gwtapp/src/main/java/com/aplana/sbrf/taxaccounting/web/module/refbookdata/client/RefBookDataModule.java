@@ -1,7 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.refbookdata.client;
 
-import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.EditFormPresenter;
-import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.EditFormView;
+import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.*;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.renamedialog.RenameDialogPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.renamedialog.RenameDialogView;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.hierarchy.RefBookHierDataPresenter;
@@ -34,10 +33,13 @@ public class RefBookDataModule extends AbstractPresenterModule {
         // общие виджеты
         bindSingletonPresenterWidget(RefBookVersionPresenter.class, RefBookVersionPresenter.MyView.class, RefBookVersionView.class);
         bindSingletonPresenterWidget(RefBookLinearPresenter.class, RefBookLinearPresenter.MyView.class, RefBookLinearView.class);
-        bindSingletonPresenterWidget(EditFormPresenter.class, EditFormPresenter.MyView.class, EditFormView.class);
         bindPresenterWidget(RenameDialogPresenter.class, RenameDialogPresenter.MyView.class, RenameDialogView.class);
         bindSingletonPresenterWidget(DialogPresenter.class, DialogPresenter.MyView.class, DialogView.class);
         bindSingletonPresenterWidget(RefBookHierDataPresenter.class, RefBookHierDataPresenter.MyView.class, RefBookHierDataView.class);
+
+        bindSingletonPresenterWidget(EditFormPresenter.class, EditFormPresenter.MyView.class, EditFormView.class);
+        bindSingletonPresenterWidget(DepartmentEditPresenter.class, DepartmentEditPresenter.MyView.class, DepartmentEditView.class);
+        bindSingletonPresenterWidget(HierEditPresenter.class, HierEditPresenter.MyView.class, HierEditView.class);
 
         // Для скрипта
         bindPresenter(RefBookScriptPresenter.class, RefBookScriptPresenter.MyView.class,

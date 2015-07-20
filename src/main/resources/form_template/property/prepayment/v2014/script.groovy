@@ -69,14 +69,14 @@ void checkDepartmentParams(LogLevel logLevel) {
     // Параметры подразделения
     def departmentParam = getProvider(99).getRecords(getEndDate() - 1, null, "DEPARTMENT_ID = $departmentId", null)
     if (departmentParam == null ||  departmentParam.size() ==0 || departmentParam.get(0) == null) {
-        throw new Exception("Ошибка при получении настроек обособленного подразделения!")
+        throw new Exception("Ошибка при получении настроек обособленного подразделения. Настройки подразделения заполнены не полностью")
     }
     departmentParam = departmentParam.get(0)
 
     // Параметры подразделения (таблица)
     def departmentParamAdd = getProvider(206).getRecords(getEndDate() - 1, null, "LINK = ${departmentParam.record_id.value} AND LOWER(TAX_ORGAN_CODE) = LOWER('${declarationData.taxOrganCode}') AND LOWER(KPP) = LOWER('${declarationData.kpp}')", null)
     if (departmentParamAdd == null ||  departmentParamAdd.size() ==0 || departmentParamAdd.get(0) == null) {
-        throw new Exception("Ошибка при получении настроек обособленного подразделения!")
+        throw new Exception("Ошибка при получении настроек обособленного подразделения. Настройки подразделения заполнены не полностью")
     }
     departmentParamAdd = departmentParamAdd.get(0)
 
@@ -114,7 +114,7 @@ void generateXML() {
 
     def incomeParams = getProvider(99).getRecords(getEndDate() - 1, null, "DEPARTMENT_ID = $departmentId", null)?.get(0)
     if (incomeParams == null) {
-        throw new Exception('Ошибка при получении настроек обособленного подразделения!')
+        throw new Exception('Ошибка при получении настроек обособленного подразделения. Настройки подразделения заполнены не полностью')
     }
 
     def incomeParamsAdd = getProvider(206).getRecords(getEndDate() - 1, null, "LINK = ${incomeParams.record_id.value} AND LOWER(TAX_ORGAN_CODE) = LOWER('${declarationData.taxOrganCode}') AND LOWER(KPP) = LOWER('${declarationData.kpp}')", null)?.get(0)

@@ -59,13 +59,21 @@ public interface RefBookDao {
 	 */
 	List<RefBook> getAllVisible(Integer typeId);
 
-	/**
-	 * Ищет справочник по коду атрибута
-	 * @param attributeId код атрибута, входящего в справочник
-	 * @throws com.aplana.sbrf.taxaccounting.model.exception.DaoException если справочник не найден
-	 * @return
-	 */
-	RefBook getByAttribute(@NotNull Long attributeId);
+    /**
+     * Ищет справочник по коду атрибута
+     * @param attributeId код атрибута, входящего в справочник
+     * @throws com.aplana.sbrf.taxaccounting.model.exception.DaoException если справочник не найден
+     * @return
+     */
+    RefBook getByAttribute(@NotNull Long attributeId);
+
+    /**
+     * Ищет справочник по его записи
+     * @param uniqueRecordId уникальный идентификатор версии записи справочника
+     * @throws com.aplana.sbrf.taxaccounting.model.exception.DaoException если справочник не найден
+     * @return
+     */
+    RefBook getByRecord(@NotNull Long uniqueRecordId);
 
 	/**
 	 * Загружает данные справочника на определенную дату актуальности

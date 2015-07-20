@@ -169,7 +169,13 @@ void calc() {
     def message = 'ТРЕБУЕТСЯ ОБЪЯСНЕНИЕ'
     def tmp
     def value
-    def formDataSimple = getFormDataSimple()
+    def formDataSimple = getFormDataSimple(310)
+    if (formDataSimple == null) {
+        formDataSimple = getFormDataSimple(304)
+    } else if (getFormDataSimple(304) != null) {
+        logger.warn("Неверно настроены источники сводной! Одновременно созданы в качестве источников налоговые формы: «%s», «%s». Расчет произведен из «%s».",
+                formTypeService.get(310).name, formTypeService.get(304)?.name, formTypeService.get(310)?.name)
+    }
     def income102NotFound = []
     def dataRows = formDataService.getDataRowHelper(formData).allCached
     for (def row : dataRows) {
@@ -688,8 +694,8 @@ def calcColumn6(def dataRows, def aliasRows) {
 /**
  * Получить данные формы "расходы простые" (id = 304)
  */
-def getFormDataSimple() {
-    return formDataService.getLast(304, formData.kind, formDataDepartment.id, formData.reportPeriodId, formData.periodOrder)
+def getFormDataSimple(def id) {
+    return formDataService.getLast(id, formData.kind, formDataDepartment.id, formData.reportPeriodId, formData.periodOrder)
 }
 
 /**
@@ -845,6 +851,9 @@ void importData() {
 
     // проверка шапки
     checkHeaderXls(headerValues)
+    if (logger.containsLevel(LogLevel.ERROR)) {
+        return;
+    }
     // освобождение ресурсов для экономии памяти
     headerValues.clear()
     headerValues = null
@@ -914,7 +923,7 @@ void checkHeaderXls(def headerRows) {
     (0..9).each { index ->
         headerMapping.put((headerRows[2][index]), (index + 1).toString())
     }
-    checkHeaderEquals(headerMapping)
+    checkHeaderEquals(headerMapping, logger)
 }
 
 /**

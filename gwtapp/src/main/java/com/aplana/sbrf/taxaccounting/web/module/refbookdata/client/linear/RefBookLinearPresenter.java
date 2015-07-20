@@ -6,16 +6,13 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallba
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
+import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.event.RollbackTableRowSelection;
+import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.event.UpdateForm;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.event.DeleteItemEvent;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.event.SearchButtonEvent;
-import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.FormMode;
-import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.EditFormPresenter;
-import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.event.RollbackTableRowSelection;
+import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.event.ShowItemEvent;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.*;
-import com.google.gwt.view.client.AbstractDataProvider;
-import com.google.gwt.view.client.AsyncDataProvider;
-import com.google.gwt.view.client.HasData;
-import com.google.gwt.view.client.Range;
+import com.google.gwt.view.client.*;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.dispatch.shared.DispatchAsync;
@@ -24,30 +21,26 @@ import com.gwtplatform.mvp.client.PresenterWidget;
 import com.gwtplatform.mvp.client.View;
 import com.gwtplatform.mvp.client.annotations.ProxyEvent;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 /**
  * User: avanteev
  */
 public class RefBookLinearPresenter extends PresenterWidget<RefBookLinearPresenter.MyView>
         implements RefBookDataLinearUiHandlers, ILinearRefBookData,
-        RollbackTableRowSelection.RollbackTableRowSelectionHandler, DeleteItemEvent.DeleteItemHandler, SearchButtonEvent.SearchHandler {
+        RollbackTableRowSelection.RollbackTableRowSelectionHandler,
+        DeleteItemEvent.DeleteItemHandler, SearchButtonEvent.SearchHandler, UpdateForm.UpdateFormHandler {
 
     DispatchAsync dispatchAsync;
-
-    EditFormPresenter editFormPresenter;
 
     private final TableDataProvider dataProvider = new TableDataProvider();
     private Long refBookDataId;
     private Long recordId;
 
     @Inject
-    public RefBookLinearPresenter(EventBus eventBus, MyView view, DispatchAsync dispatchAsync, EditFormPresenter editFormPresenter) {
+    public RefBookLinearPresenter(EventBus eventBus, MyView view, DispatchAsync dispatchAsync) {
         super(eventBus, view);
         this.dispatchAsync = dispatchAsync;
-        this.editFormPresenter = editFormPresenter;
         getView().assignDataProvider(getView().getPageSize(), dataProvider);
         getView().setUiHandlers(this);
     }
@@ -56,10 +49,12 @@ public class RefBookLinearPresenter extends PresenterWidget<RefBookLinearPresent
     public void onSelectionChanged() {
         if (getView().getSelectedRow() != null) {
             recordId = getView().getSelectedRow().getRefBookRowId();
-            editFormPresenter.setRecordId(recordId);
-            editFormPresenter.show(recordId);
+            ShowItemEvent.fire(this, null, getView().getSelectedRow().getRefBookRowId());
+            /*editPresenter.setRecordId(recordId);
+            editPresenter.show(recordId);*/
         } else {
-            editFormPresenter.setRecordId(null);
+            ShowItemEvent.fire(this, null, null);
+            //editPresenter.setRecordId(null);
         }
     }
 
@@ -87,9 +82,13 @@ public class RefBookLinearPresenter extends PresenterWidget<RefBookLinearPresent
                                 if (result.isException()) {
                                     Dialog.errorMessage("Удаление всех версий элемента справочника", "Обнаружены фатальные ошибки!");
                                 }
-                                /*editFormPresenter.setMode(mode);*/
-                                editFormPresenter.show(null);
-                                getView().updateTable();
+                                /*editPresenter.setMode(mode);*/
+                                ShowItemEvent.fire(RefBookLinearPresenter.this, null, null);
+                                /*getView().updateTable();*/
+                                dataProvider.remove(getSelectedRow());
+                                if (dataProvider.visibleData.size()!=0) {
+                                    getView().setSelected(dataProvider.visibleData.get(dataProvider.visibleData.size() - 1).getRefBookRowId());
+                                }
                             }
                         }, this));
     }
@@ -113,6 +112,21 @@ public class RefBookLinearPresenter extends PresenterWidget<RefBookLinearPresent
         getView().updateTable();
     }
 
+    @ProxyEvent
+    @Override
+    public void onUpdateForm(UpdateForm event) {
+        RefBookDataRow row = new RefBookDataRow();
+        row.setValues(event.getRecordChanges().getInfo());
+        row.setRefBookRowId(event.getRecordChanges().getId());
+        if (event.getRecordChanges().isCreate()){
+            dataProvider.add(row);
+            getView().setSelected(row.getRefBookRowId());
+        } else {
+            dataProvider.modify(row);
+        }
+
+    }
+
     public interface MyView extends View, HasUiHandlers<RefBookDataLinearUiHandlers> {
         void setTableColumns(final List<RefBookColumn> columns);
         void setTableData(int start, int totalCount, List<RefBookDataRow> dataRows);
@@ -124,6 +138,7 @@ public class RefBookLinearPresenter extends PresenterWidget<RefBookLinearPresent
         void resetRefBookElements();
         RefBookDataRow getSelectedRow();
         int getPage();
+        int getPageStart();
         void setPage(int page);
         /** Обновление вьюшки для определенного состояния */
         void updateMode(FormMode mode);
@@ -152,12 +167,10 @@ public class RefBookLinearPresenter extends PresenterWidget<RefBookLinearPresent
         /*getView().updateTable();*/
     }
 
-    @Override
     public RefBookDataRow getSelectedRow() {
         return getView().getSelectedRow();
     }
 
-    @Override
     public Integer getSelectedRowIndex() {
         return getView().getSelectedRowIndex();
     }
@@ -166,21 +179,6 @@ public class RefBookLinearPresenter extends PresenterWidget<RefBookLinearPresent
     public void setTableColumns(List<RefBookColumn> columns) {
         getView().resetRefBookElements();
         getView().setTableColumns(columns);
-    }
-
-    @Override
-    public void setRange(Range range) {
-        getView().setRange(range);
-    }
-
-    @Override
-    public int getPageSize() {
-        return getView().getPageSize();
-    }
-
-    @Override
-    public void blockDataView(FormMode mode) {
-        getView().updateMode(mode);
     }
 
     @Override
@@ -193,6 +191,8 @@ public class RefBookLinearPresenter extends PresenterWidget<RefBookLinearPresent
         Date relevanceDate;
         String searchPattern;
 
+        private List<RefBookDataRow> visibleData = new LinkedList<RefBookDataRow>();
+
         @Override
         protected void onRangeChanged(HasData<RefBookDataRow> display) {
             if (refBookDataId == null) return;
@@ -200,7 +200,7 @@ public class RefBookLinearPresenter extends PresenterWidget<RefBookLinearPresent
             GetRefBookTableDataAction action = new GetRefBookTableDataAction();
             action.setRecordId(recordId);
             action.setRefBookId(refBookDataId);
-            action.setPagingParams(new PagingParams(range.getStart() + 1, range.getLength()));
+            action.setPagingParams(new PagingParams(range.getStart()+1, range.getLength()));
             action.setRelevanceDate(relevanceDate);
             action.setSearchPattern(searchPattern);
             action.setSortColumnIndex(getView().getSortColumnIndex());
@@ -210,21 +210,24 @@ public class RefBookLinearPresenter extends PresenterWidget<RefBookLinearPresent
                             new AbstractCallback<GetRefBookTableDataResult>() {
                                 @Override
                                 public void onSuccess(GetRefBookTableDataResult result) {
-                                    if (result.getRowNum() != null) {
+                                    /*if (result.getRowNum() != null) {
                                         int page = (int) ((result.getRowNum() - 1) / range.getLength());
                                         if (page != getView().getPage()) {
                                             getView().setPage(page);
                                             return;
                                         }
-                                    }
+                                    }*/
+                                    visibleData.clear();
+                                    visibleData.addAll(result.getDataRows());
                                     getView().setTableData(range.getStart(),
                                             result.getTotalCount(), result.getDataRows());
                                     // http://jira.aplana.com/browse/SBRFACCTAX-5684 автофокус на первую строку
                                     if (!result.getDataRows().isEmpty()) {
                                         getView().setSelected(result.getDataRows().get(0).getRefBookRowId());
                                     } else {
-                                        editFormPresenter.cleanFields();
-                                        editFormPresenter.clearRecordId();
+                                        ShowItemEvent.fire(RefBookLinearPresenter.this, null, null);
+                                        /*editPresenter.cleanFields();
+                                        editPresenter.clean();*/
                                         getView().setSelected(recordId);
                                     }
                                     // http://jira.aplana.com/browse/SBRFACCTAX-5759
@@ -237,11 +240,28 @@ public class RefBookLinearPresenter extends PresenterWidget<RefBookLinearPresent
                                         getView().setSelected(result.getDataRows().get(selectedRowIndex).getRefBookRowId());
                                     }
                                     selectedRowIndex = null;*/
-                                    if (result.getDataRows().size() == 0) {
-                                        editFormPresenter.setAllVersionVisible(false);
-                                    }
+                                    /*if (result.getDataRows().size() == 0) {
+                                        editPresenter.setCanVersion(false);
+                                    }*/
                                 }
                             }, RefBookLinearPresenter.this));
+        }
+
+        public void remove(RefBookDataRow row) {
+            visibleData.remove(row);
+            getView().setTableData(getView().getPageStart(), visibleData.size(), visibleData);
+        }
+
+        public void add(RefBookDataRow row){
+            visibleData.add(row);
+            getView().setTableData(getView().getPageStart(), visibleData.size(), visibleData);
+        }
+
+        public void modify(RefBookDataRow row){
+            int index = visibleData.indexOf(row);
+            visibleData.remove(index);
+            visibleData.add(index, row);
+            getView().setTableData(getView().getPageStart(), visibleData.size(), visibleData);
         }
     }
 
@@ -256,5 +276,6 @@ public class RefBookLinearPresenter extends PresenterWidget<RefBookLinearPresent
         addRegisteredHandler(RollbackTableRowSelection.getType(), this);
         addVisibleHandler(DeleteItemEvent.getType(), this);
         addVisibleHandler(SearchButtonEvent.getType(), this);
+        addVisibleHandler(UpdateForm.getType(), this);
     }
 }

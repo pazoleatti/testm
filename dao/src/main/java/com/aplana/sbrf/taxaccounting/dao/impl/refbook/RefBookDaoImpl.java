@@ -7,12 +7,27 @@ import com.aplana.sbrf.taxaccounting.dao.impl.refbook.filter.UniversalFilterTree
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.dao.mapper.RefBookValueMapper;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
-import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.FormDataKind;
+import com.aplana.sbrf.taxaccounting.model.Formats;
+import com.aplana.sbrf.taxaccounting.model.PagingParams;
+import com.aplana.sbrf.taxaccounting.model.PagingResult;
+import com.aplana.sbrf.taxaccounting.model.PreparedStatementData;
+import com.aplana.sbrf.taxaccounting.model.RefBookTableRef;
+import com.aplana.sbrf.taxaccounting.model.TaxTypeCase;
+import com.aplana.sbrf.taxaccounting.model.VersionedObjectStatus;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
-import com.aplana.sbrf.taxaccounting.model.refbook.*;
+import com.aplana.sbrf.taxaccounting.model.refbook.CheckCrossVersionsResult;
+import com.aplana.sbrf.taxaccounting.model.refbook.CrossResult;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributePair;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookRecord;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookRecordVersion;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.model.util.StringUtils;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
@@ -23,8 +38,6 @@ import org.apache.commons.lang3.SerializationUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.ApplicationContext;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -42,7 +55,18 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import static com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils.transformToSqlInStatement;
 
@@ -77,6 +101,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     private final static SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
 
     @Override
+    //@Cacheable(value = "PermanentData", key = "'RefBook_'+#refBookId.toString()")
     public RefBook get(Long refBookId) {
         try {
             return getJdbcTemplate().queryForObject(
@@ -114,7 +139,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     }
 
     @Override
-    @Cacheable(value = "PermanentData", key = "'RefBook_attribute_'+#attributeId.toString()")
+    //@Cacheable(value = "PermanentData", key = "'RefBook_attribute_'+#attributeId.toString()")
     public RefBook getByAttribute(Long attributeId) {
         try {
             return get(getJdbcTemplate().queryForLong(
@@ -122,6 +147,17 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
                     new Object[]{attributeId}, new int[]{Types.NUMERIC}));
         } catch (EmptyResultDataAccessException e) {
             throw new DaoException(String.format("Не найден атрибут справочника с id = %d", attributeId));
+        }
+    }
+
+    @Override
+    public RefBook getByRecord(@NotNull Long uniqueRecordId) {
+        try {
+            return get(getJdbcTemplate().queryForLong(
+                    "SELECT b.id FROM ref_book b JOIN ref_book_record r ON r.ref_book_id = b.id WHERE r.id = ?",
+                    new Object[]{uniqueRecordId}, new int[]{Types.NUMERIC}));
+        } catch (EmptyResultDataAccessException e) {
+            throw new DaoException(String.format("Не найдена запись справочника с id = %d", uniqueRecordId));
         }
     }
 
@@ -151,7 +187,6 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     }
 
     @Override
-    @Cacheable(value = "PermanentData", key = "'RefBook_attributes_'+#refBookId.toString()")
     public List<RefBookAttribute> getAttributes(Long refBookId) {
         try {
             return getJdbcTemplate().query(
@@ -1113,7 +1148,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 		if (resultSet.getObject(columnName) != null) {
 			switch (attribute.getAttributeType()) {
 				case STRING: {
-					return StringUtils.cleanString(resultSet.getString(columnName));
+					return resultSet.getString(columnName);
 				}
 				case NUMBER: {
 					return resultSet.getBigDecimal(columnName).setScale(attribute.getPrecision(), BigDecimal.ROUND_HALF_UP);
@@ -1311,7 +1346,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     }
 
     @Override
-    @CacheEvict(value = "PermanentData", key = "'RefBook_'+#refBookId.toString()")
+    //@CacheEvict(value = "PermanentData", key = "'RefBook_'+#refBookId.toString()")
     public void setScriptId(Long refBookId, String scriptId) {
         getJdbcTemplate().update("update ref_book set script_id = ? where id = ?", scriptId, refBookId);
     }
@@ -1849,8 +1884,8 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
                 public String mapRow(ResultSet rs, int rowNum) throws SQLException {
                     StringBuilder result = new StringBuilder();
                     result.append("Существует экземпляр налоговой формы \"");
-                    result.append(FormDataKind.fromId(SqlUtils.getInteger(rs, "formKind")).getName()).append("\" типа \"");
-                    result.append(rs.getString("formType")).append("\" в подразделении \"");
+                    result.append(rs.getString("formType")).append("\" типа \"");
+                    result.append(FormDataKind.fromId(SqlUtils.getInteger(rs, "formKind")).getName()).append("\" в подразделении \"");
                     if (SqlUtils.getInteger(rs, "departmentType") != 1) {
                         result.append(rs.getString("departmentPath").substring(rs.getString("departmentPath").indexOf("/") + 1)).append("\" в периоде \"");
                     } else {
@@ -1998,7 +2033,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 
                 public void concatAttrs(ResultSet rs, StringBuilder attr) throws SQLException {
                     attr.append(rs.getString(STRING_VALUE_COLUMN_ALIAS) != null ? rs.getString(STRING_VALUE_COLUMN_ALIAS) + ", " : "");
-                    attr.append(rs.getString(NUMBER_VALUE_COLUMN_ALIAS) != null ? rs.getFloat(NUMBER_VALUE_COLUMN_ALIAS) + ", " : "");
+                    attr.append(rs.getString(NUMBER_VALUE_COLUMN_ALIAS) != null ? rs.getLong(NUMBER_VALUE_COLUMN_ALIAS) + ", " : "");
                     attr.append(rs.getDate(DATE_VALUE_COLUMN_ALIAS) != null ? rs.getDate(DATE_VALUE_COLUMN_ALIAS) + ", " : "");
                     // TODO - разыменовать и добавить значение аттрибута ссылки
                     attr.append(rs.getString(REFERENCE_VALUE_COLUMN_ALIAS) != null ? rs.getInt(REFERENCE_VALUE_COLUMN_ALIAS) + ", " : "");

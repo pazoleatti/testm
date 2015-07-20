@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <formTemplateContent>
     <fixedRows>false</fixedRows>
-    <name>Отчет о суммах начисленного НДС по операциям Банка</name>
-    <fullName>Отчет о суммах начисленного НДС по операциям Банка</fullName>
+    <name>(724.1) Отчет о суммах начисленного НДС по операциям Банка</name>
+    <fullName>(724.1) Отчет о суммах начисленного НДС по операциям Банка</fullName>
     <header>724.1</header>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="autoNumerationColumn">
         <alias>rowNum</alias>
@@ -11,7 +11,7 @@
         <name>№ пп</name>
         <order>1</order>
         <width>5</width>
-        <numerationType>SERIAL</numerationType>
+        <numerationType>CROSS</numerationType>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>fix</alias>

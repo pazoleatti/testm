@@ -304,6 +304,7 @@ void calc() {
         calcTotalSum(categoryRows, row2, totalColumns)
     }
 
+    updateIndexes(newDataRows)
     infoMessagesRowMap.keySet().each { key ->
         def row = infoMessagesRowMap[key]
 
@@ -659,7 +660,7 @@ def getRefBookRecordId(Long refBookId, String alias, String value) {
         return null
     }
     def record = formDataService.getRefBookRecord(refBookId, recordCache, providerCache, refBookCache,
-            alias, value, getReportPeriodEndDate())
+            alias, value, getReportPeriodEndDate(), 0, null, logger, true)
     return record?.record_id?.value
 }
 
@@ -1413,6 +1414,7 @@ def getFormToFormRelation(def tmpFormData, def departmentFormType, def isSource,
         formToFormRelation.state = tmpFormData.state
         formToFormRelation.formDataId = tmpFormData.id
         formToFormRelation.correctionDate = departmentReportPeriodService.get(tmpFormData.departmentReportPeriodId)?.correctionDate
+        formToFormRelation.periodOrder = tmpFormData.periodOrder
     } else {
         formToFormRelation.formType = getFormTypeById(departmentFormType.formTypeId)
         formToFormRelation.created = false

@@ -9,7 +9,36 @@ import com.aplana.sbrf.taxaccounting.dao.api.ConfigurationDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DataRowDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentFormTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
-import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.Cell;
+import com.aplana.sbrf.taxaccounting.model.Column;
+import com.aplana.sbrf.taxaccounting.model.ColumnType;
+import com.aplana.sbrf.taxaccounting.model.ConfigurationParam;
+import com.aplana.sbrf.taxaccounting.model.DataRow;
+import com.aplana.sbrf.taxaccounting.model.Department;
+import com.aplana.sbrf.taxaccounting.model.DepartmentFormType;
+import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod;
+import com.aplana.sbrf.taxaccounting.model.FormData;
+import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
+import com.aplana.sbrf.taxaccounting.model.FormDataKind;
+import com.aplana.sbrf.taxaccounting.model.FormDataPerformer;
+import com.aplana.sbrf.taxaccounting.model.FormDataSigner;
+import com.aplana.sbrf.taxaccounting.model.FormSources;
+import com.aplana.sbrf.taxaccounting.model.FormTemplate;
+import com.aplana.sbrf.taxaccounting.model.FormToFormRelation;
+import com.aplana.sbrf.taxaccounting.model.Formats;
+import com.aplana.sbrf.taxaccounting.model.IfrsData;
+import com.aplana.sbrf.taxaccounting.model.LockData;
+import com.aplana.sbrf.taxaccounting.model.Months;
+import com.aplana.sbrf.taxaccounting.model.NumerationType;
+import com.aplana.sbrf.taxaccounting.model.RefBookColumn;
+import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
+import com.aplana.sbrf.taxaccounting.model.ReportType;
+import com.aplana.sbrf.taxaccounting.model.TAUser;
+import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.model.TaxPeriod;
+import com.aplana.sbrf.taxaccounting.model.TaxType;
+import com.aplana.sbrf.taxaccounting.model.WorkflowMove;
+import com.aplana.sbrf.taxaccounting.model.WorkflowState;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceRollbackException;
@@ -512,6 +541,11 @@ public class FormDataServiceImpl implements FormDataService {
 
         checkPerformer(logger, formData);
 
+        //Проверка на неактуальные консолидированные данные
+        if (sourceService.isFDConsolidationTopical(formData.getId())){
+            logger.warn(CONSOLIDATION_NOT_TOPICAL);
+        }
+
         if (logger.containsLevel(LogLevel.ERROR)) {
             throw new ServiceLoggerException(
                     "Найдены ошибки при выполнении проверки формы", logEntryService.save(logger.getEntries()));
@@ -526,11 +560,11 @@ public class FormDataServiceImpl implements FormDataService {
                         reportPeriod.getStartDate(),
                         reportPeriod.getEndDate());
                 for (DepartmentFormType dftTarget : destinationsDFT) {
+                    DepartmentReportPeriod drp = departmentReportPeriodService.getLast(dftTarget.getDepartmentId(), formData.getReportPeriodId());
                     FormData destinationFD =
-                            findFormData(dftTarget.getFormTypeId(), dftTarget.getKind(), formData.getDepartmentReportPeriodId(), formData.getPeriodOrder());
+                            findFormData(dftTarget.getFormTypeId(), dftTarget.getKind(), drp.getId(), formData.getPeriodOrder());
                     if (destinationFD != null && !sourceService.isFDSourceConsolidated(destinationFD.getId(), formData.getId())){
                         ReportPeriod rp = reportPeriodService.getReportPeriod(destinationFD.getReportPeriodId());
-                        DepartmentReportPeriod drp = departmentReportPeriodService.get(destinationFD.getDepartmentReportPeriodId());
                         logger.warn(
                                 NOT_CONSOLIDATE_DESTINATION_FORM_WARNING,
                                 departmentService.getDepartment(destinationFD.getDepartmentId()).getName(),
@@ -713,7 +747,7 @@ public class FormDataServiceImpl implements FormDataService {
 
         String keyTask = generateTaskKey(formDataId, reportType);
         if (lockService.lock(keyTask, userInfo.getUser().getId(),
-                getFormDataFullName(formDataId, null, reportType),
+                getFormDataFullName(formDataId, false, null, reportType),
                 lockService.getLockTimeout(LockData.LockObjects.FORM_DATA)) == null) {
             try {
                 FormData formData = formDataDao.get(formDataId, manual);
@@ -1254,7 +1288,7 @@ public class FormDataServiceImpl implements FormDataService {
         List<DepartmentFormType> departmentFormTypesSources = getFormSources(formData, logger, userInfo, reportPeriod);
         if (departmentFormTypesSources.isEmpty()){
             //Очищаем устаревшие данные, оставшиеся после старой консолидации
-            tx.executeInNewTransaction(new TransactionLogic() {
+            /*tx.executeInNewTransaction(new TransactionLogic() {
                 @Override
                 public void execute() {
                     clearDataRows(formData, userInfo);
@@ -1264,7 +1298,7 @@ public class FormDataServiceImpl implements FormDataService {
                 public Object executeWithReturn() {
                     return null;
                 }
-            });
+            });  */
             throw new ServiceException("для текущей формы не назначено ни одного источника");
         }
     }
@@ -1280,9 +1314,9 @@ public class FormDataServiceImpl implements FormDataService {
     }
 
     @Override
-    public String getFormDataFullName(long formDataId, String str, ReportType reportType) {
+    public String getFormDataFullName(long formDataId, boolean manual, String str, ReportType reportType) {
         //TODO: можно оптимизировать и сделать в 1 запрос
-        FormData formData = formDataDao.get(formDataId, false);
+        FormData formData = formDataDao.get(formDataId, manual);
         Department department = departmentService.getDepartment(formData.getDepartmentId());
         DepartmentReportPeriod reportPeriod = departmentReportPeriodService.get(formData.getDepartmentReportPeriodId());
         String name;
@@ -1394,10 +1428,10 @@ public class FormDataServiceImpl implements FormDataService {
 
     @Override
 	@Transactional
-	public void lock(long formDataId, TAUserInfo userInfo) {// используется для редактирования и миграции
+	public void lock(long formDataId, boolean manual, TAUserInfo userInfo) {// используется для редактирования и миграции
         checkLockAnotherUser(lockService.lock(generateTaskKey(formDataId, ReportType.EDIT_FD),
                 userInfo.getUser().getId(),
-                getFormDataFullName(formDataId, null, ReportType.EDIT_FD), // FIXME для миграции не совсем верно
+                getFormDataFullName(formDataId, manual, null, ReportType.EDIT_FD), // FIXME для миграции не совсем верно
                 lockService.getLockTimeout(LockData.LockObjects.FORM_DATA)), null, userInfo.getUser());
 	}
 
