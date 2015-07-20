@@ -144,6 +144,7 @@ alter table form_data add constraint form_data_chk_state check(state in (1,2,3,4
 alter table form_data add constraint form_data_chk_return_sign check(return_sign in (0,1));
 alter table form_data add constraint form_data_chk_period_order check(period_order in (1,2,3,4,5,6,7,8,9,10,11,12));
 alter table form_data add constraint form_data_chk_manual check (manual in (0, 1));
+alter table form_data add constraint form_data_chk_sorted check (sorted in (0, 1));
 
 alter table form_data_signer add constraint form_data_signer_pk primary key (id);
 alter table form_data_signer add constraint form_data_signer_fk_formdata foreign key (form_data_id) references form_data(id) on delete cascade;
