@@ -1,6 +1,8 @@
 package form_template.income.rnu12.v2012
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
+import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
 import groovy.transform.Field
 
@@ -12,6 +14,7 @@ import java.math.RoundingMode
  * formTemplateId=364
  *
  * графа 1  - rowNumber
+ * графа    - fix
  * графа 2  - code
  * графа 3  - numberFirstRecord
  * графа 4  - opy
@@ -299,129 +302,6 @@ def getReportPeriodEndDate() {
     return endDate
 }
 
-// Получение импортируемых данных
-void importData() {
-    def xml = getXML(ImportInputStream, importService, UploadFileName, '№ пп', null)
-
-    checkHeaderSize(xml.row[0].cell.size(), xml.row.size(), 5, 2)
-
-    def headerMapping = [
-            (xml.row[0].cell[0]): '№ пп',
-            (xml.row[0].cell[2]): 'Код налогового учёта',
-            (xml.row[0].cell[3]): 'Номер первой записи',
-            (xml.row[0].cell[4]): 'Символ ОПУ (номер)',
-            (xml.row[0].cell[5]): 'Дата совершения операции',
-            (xml.row[0].cell[6]): 'Наименование операции',
-            (xml.row[0].cell[7]): 'Первичный документ',
-            (xml.row[0].cell[9]): 'Количество кварталов при авансовых платежах',
-            (xml.row[0].cell[10]): 'Сумма авансового платежа',
-            (xml.row[0].cell[11]): 'Сумма расхода в налоговом учёте',
-            (xml.row[0].cell[12]): 'Сумма расхода в бухгалтерском учёте',
-            (xml.row[1].cell[7]): 'Номер',
-            (xml.row[1].cell[8]): 'Дата',
-            (xml.row[2].cell[0]): '1',
-            (xml.row[2].cell[2]): '2',
-            (xml.row[2].cell[3]): '3',
-            (xml.row[2].cell[4]): '4',
-            (xml.row[2].cell[5]): '5',
-            (xml.row[2].cell[6]): '6',
-            (xml.row[2].cell[7]): '7',
-            (xml.row[2].cell[8]): '8',
-            (xml.row[2].cell[9]): '9',
-            (xml.row[2].cell[10]): '10',
-            (xml.row[2].cell[11]): '11',
-            (xml.row[2].cell[12]): '12'
-    ]
-
-    checkHeaderEquals(headerMapping)
-
-    addData(xml, 2)
-}
-
-// Заполнить форму данными
-void addData(def xml, int headRowCount) {
-    reportPeriodEndDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-
-    def xmlIndexRow = -1 // Строки xml, от 0
-    def int rowOffset = xml.infoXLS.rowOffset[0].cell[0].text().toInteger()
-    def int colOffset = xml.infoXLS.colOffset[0].cell[0].text().toInteger()
-
-    def rows = []
-    def int rowIndex = 1  // Строки НФ, от 1
-
-    for (def row : xml.row) {
-        xmlIndexRow++
-        def int xlsIndexRow = xmlIndexRow + rowOffset
-
-        // Пропуск строк шапки
-        if (xmlIndexRow <= headRowCount) {
-            continue
-        }
-
-        if ((row.cell.find { it.text() != "" }.toString()) == "") {
-            break
-        }
-
-        // Пропуск итоговых строк
-        if (row.cell[1].text() != null && row.cell[1].text() != "") {
-            continue
-        }
-
-        def newRow = formData.createDataRow()
-        newRow.setIndex(rowIndex++)
-        newRow.setImportIndex(xlsIndexRow)
-        editableColumns.each {
-            newRow.getCell(it).editable = true
-            newRow.getCell(it).setStyleAlias('Редактируемая')
-        }
-        autoFillColumns.each {
-            newRow.getCell(it).setStyleAlias('Автозаполняемая')
-        }
-
-        // графа 1
-
-        // графа 2
-
-        // графа 3
-        newRow.numberFirstRecord = row.cell[3].text()
-
-        // графа 4
-        String filter = "LOWER(CODE) = LOWER('" + row.cell[2].text() + "') and LOWER(OPU) = LOWER('" + row.cell[4].text() + "')"
-        def records = refBookFactory.getDataProvider(27).getRecords(reportPeriodEndDate, null, filter, null)
-        if (checkImportRecordsCount(records, refBookFactory.get(27), 'CODE', row.cell[2].text(), reportPeriodEndDate, xlsIndexRow, 2, logger, true)) {
-            newRow.opy = records.get(0).get(RefBook.RECORD_ID_ALIAS).numberValue
-        }
-
-        // графа 5
-        newRow.operationDate = parseDate(row.cell[5].text(), "dd.MM.yyyy", xlsIndexRow, 5 + colOffset, logger, true)
-
-        // графа 6
-        newRow.name = row.cell[6].text()
-
-        // графа 7
-        newRow.documentNumber = row.cell[7].text()
-
-        // графа 8
-        newRow.date = parseDate(row.cell[8].text(), "dd.MM.yyyy", xlsIndexRow, 8 + colOffset, logger, true)
-
-        // графа 9
-        newRow.periodCounts = parseNumber(row.cell[9].text(), xlsIndexRow, 9 + colOffset, logger, true)
-
-        // графа 10
-        newRow.advancePayment = parseNumber(row.cell[10].text(), xlsIndexRow, 10 + colOffset, logger, true)
-
-        // графа 11
-        newRow.outcomeInNalog = parseNumber(row.cell[11].text(), xlsIndexRow, 11 + colOffset, logger, true)
-
-        // графа 12
-        newRow.outcomeInBuh = parseNumber(row.cell[12].text(), xlsIndexRow, 12 + colOffset, logger, true)
-
-        rows.add(newRow)
-    }
-    dataRowHelper.save(rows)
-}
-
 void importTransportData() {
     def xml = getTransportXML(ImportInputStream, importService, UploadFileName, 12, 1)
     addTransportData(xml)
@@ -532,4 +412,161 @@ void sortFormDataRows() {
 // Получение подитоговых строк
 def getSubTotalRows(def dataRows) {
     return dataRows.findAll { it.getAlias() != null && !'total'.equals(it.getAlias()) }
+}
+
+void importData() {
+    def tmpRow = formData.createDataRow()
+    int COLUMN_COUNT = 13
+    int HEADER_ROW_COUNT = 3
+    String TABLE_START_VALUE = getColumnName(tmpRow, 'rowNumber')
+    String TABLE_END_VALUE = null
+    int INDEX_FOR_SKIP = 1
+
+    def allValues = []      // значения формы
+    def headerValues = []   // значения шапки
+    def paramsMap = ['rowOffset' : 0, 'colOffset' : 0]  // мапа с параметрами (отступы сверху и слева)
+
+    checkAndReadFile(ImportInputStream, UploadFileName, allValues, headerValues, TABLE_START_VALUE, TABLE_END_VALUE, HEADER_ROW_COUNT, paramsMap)
+
+    // проверка шапки
+    checkHeaderXls(headerValues, COLUMN_COUNT, HEADER_ROW_COUNT, tmpRow)
+    if (logger.containsLevel(LogLevel.ERROR)) {
+        return
+    }
+    // освобождение ресурсов для экономии памяти
+    headerValues.clear()
+    headerValues = null
+
+    def fileRowIndex = paramsMap.rowOffset
+    def colOffset = paramsMap.colOffset
+    paramsMap.clear()
+    paramsMap = null
+
+    def rowIndex = 0
+    def rows = []
+    def allValuesCount = allValues.size()
+
+    // формирвание строк нф
+    for (def i = 0; i < allValuesCount; i++) {
+        rowValues = allValues[0]
+        fileRowIndex++
+        // все строки пустые - выход
+        if (!rowValues) {
+            allValues.remove(rowValues)
+            rowValues.clear()
+            break
+        }
+        // Пропуск итоговых строк
+        if (rowValues[INDEX_FOR_SKIP] && (rowValues[INDEX_FOR_SKIP] == "Итого" || rowValues[INDEX_FOR_SKIP].contains("Итого по КНУ "))) {
+            allValues.remove(rowValues)
+            rowValues.clear()
+            continue
+        }
+        // простая строка
+        rowIndex++
+        def newRow = getNewRowFromXls(rowValues, colOffset, fileRowIndex, rowIndex)
+        rows.add(newRow)
+        // освободить ненужные данные - иначе не хватит памяти
+        allValues.remove(rowValues)
+        rowValues.clear()
+    }
+
+    showMessages(rows, logger)
+    if (!logger.containsLevel(LogLevel.ERROR)) {
+        updateIndexes(rows)
+        formDataService.getDataRowHelper(formData).allCached = rows
+    }
+}
+
+/**
+ * Проверить шапку таблицы
+ *
+ * @param headerRows строки шапки
+ * @param colCount количество колонок в таблице
+ * @param rowCount количество строк в таблице
+ * @param tmpRow вспомогательная строка для получения названии графов
+ */
+void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
+    if (headerRows.isEmpty()) {
+        throw new ServiceException(WRONG_HEADER_ROW_SIZE)
+    }
+    checkHeaderSize(headerRows[headerRows.size() - 1].size(), headerRows.size(), colCount, rowCount)
+
+    def headerMapping = [
+            (headerRows[0][0]) : getColumnName(tmpRow, 'rowNumber'),
+            (headerRows[0][2]) : getColumnName(tmpRow, 'code'),
+            (headerRows[0][3]) : getColumnName(tmpRow, 'numberFirstRecord'),
+            (headerRows[0][4]) : getColumnName(tmpRow, 'opy'),
+            (headerRows[0][5]) : getColumnName(tmpRow, 'operationDate'),
+            (headerRows[0][6]) : getColumnName(tmpRow, 'name'),
+            (headerRows[0][7]) : 'Первичный документ',
+            (headerRows[1][7]) : getColumnName(tmpRow, 'documentNumber'),
+            (headerRows[1][8]) : getColumnName(tmpRow, 'date'),
+            (headerRows[0][9]) : getColumnName(tmpRow, 'periodCounts'),
+            (headerRows[0][10]): getColumnName(tmpRow, 'advancePayment'),
+            (headerRows[0][11]): getColumnName(tmpRow, 'outcomeInNalog'),
+            (headerRows[0][12]): getColumnName(tmpRow, 'outcomeInBuh'),
+            (headerRows[2][0]) : '1'
+    ]
+    (2..12).each { index ->
+        headerMapping.put((headerRows[2][index]), index.toString())
+    }
+    checkHeaderEquals(headerMapping, logger)
+}
+
+/**
+ * Получить новую строку нф по значениям из экселя.
+ *
+ * @param values список строк со значениями
+ * @param colOffset отступ в колонках
+ * @param fileRowIndex номер строки в тф
+ * @param rowIndex строка в нф
+ */
+def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) {
+    def newRow = formData.createStoreMessagingDataRow()
+    newRow.setIndex(rowIndex)
+    newRow.setImportIndex(fileRowIndex)
+    autoFillColumns.each {
+        newRow.getCell(it).setStyleAlias('Автозаполняемая')
+    }
+    editableColumns.each {
+        newRow.getCell(it).editable = true
+        newRow.getCell(it).setStyleAlias('Редактируемая')
+    }
+
+    // графа 3
+    def colIndex = 3
+    newRow.numberFirstRecord = values[colIndex]
+
+    // графа 4 - поиск записи идет по графе 2
+    colIndex = 2
+    String filter = "LOWER(CODE) = LOWER('" + values[colIndex] + "') and LOWER(OPU) = LOWER('" + values[4] + "')"
+    def records = refBookFactory.getDataProvider(27).getRecords(reportPeriodEndDate, null, filter, null)
+    if (checkImportRecordsCount(records, refBookFactory.get(27), 'CODE', values[colIndex], reportPeriodEndDate, fileRowIndex, colIndex, logger, true)) {
+        newRow.opy = records.get(0).get(RefBook.RECORD_ID_ALIAS).numberValue
+    }
+
+    // графа 5
+    colIndex = 5
+    newRow.operationDate = parseDate(values[colIndex], "dd.MM.yyyy", fileRowIndex, colIndex + colOffset, logger, true)
+
+    // графа 6
+    colIndex++
+    newRow.name = values[colIndex]
+
+    // графа 7
+    colIndex++
+    newRow.documentNumber = values[colIndex]
+
+    // графа 8
+    colIndex++
+    newRow.date = parseDate(values[colIndex], "dd.MM.yyyy", fileRowIndex, colIndex + colOffset, logger, true)
+
+    // графа 9..12
+    ['periodCounts', 'advancePayment', 'outcomeInNalog', 'outcomeInBuh'].each { alias ->
+        colIndex++
+        newRow[alias] = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
+    }
+
+    return newRow
 }

@@ -82,6 +82,7 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
     private final TaPlaceManager placeManager;
 
     public interface MyView extends View, HasUiHandlers<RefBookDataUiHandlers> {
+        void setRefBookNameDesc(String verCount, Date relDate);
         void setRefBookNameDesc(String desc);
         Date getRelevanceDate();
         /** Метод для получения строки с поля фильтрации*/
@@ -181,7 +182,7 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
                                                     new AbstractCallback<GetNameResult>() {
                                                         @Override
                                                         public void onSuccess(GetNameResult result) {
-                                                            getView().setRefBookNameDesc("Все значения записи " + result.getUniqueAttributeValues());
+                                                            getView().setRefBookNameDesc(result.getUniqueAttributeValues(), getView().getRelevanceDate());
                                                             commonEditPresenter.setRecordId(result.getRecordId());
                                                         }
                                                     }, RefBookDataPresenter.this));

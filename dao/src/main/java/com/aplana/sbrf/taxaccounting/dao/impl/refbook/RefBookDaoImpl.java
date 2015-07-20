@@ -1884,8 +1884,8 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
                 public String mapRow(ResultSet rs, int rowNum) throws SQLException {
                     StringBuilder result = new StringBuilder();
                     result.append("Существует экземпляр налоговой формы \"");
-                    result.append(FormDataKind.fromId(SqlUtils.getInteger(rs, "formKind")).getName()).append("\" типа \"");
-                    result.append(rs.getString("formType")).append("\" в подразделении \"");
+                    result.append(rs.getString("formType")).append("\" типа \"");
+                    result.append(FormDataKind.fromId(SqlUtils.getInteger(rs, "formKind")).getName()).append("\" в подразделении \"");
                     if (SqlUtils.getInteger(rs, "departmentType") != 1) {
                         result.append(rs.getString("departmentPath").substring(rs.getString("departmentPath").indexOf("/") + 1)).append("\" в периоде \"");
                     } else {
