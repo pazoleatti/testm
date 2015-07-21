@@ -25,7 +25,7 @@ public interface DataRowDao {
 	void cleanValue(Collection<Integer> columnIdList);
 
 	/**
-	 * Удаляет точку восстановления, сделанную перед редактированием данных
+	 * Удаляет точку восстановления, сделанную перед редактированием данных (бывший commit)
 	 *
 	 * @param formData
 	 */
@@ -49,6 +49,8 @@ public interface DataRowDao {
 
 	/**
 	 * Создает точку восстановления при ручном редактировании. Работает как с обычной, так и с версией ручного ввода.
+	 * (бывший createTemporary)
+	 *
 	 * @param formData
 	 */
 	void createCheckPoint(FormData formData);
@@ -65,10 +67,10 @@ public interface DataRowDao {
 	int getSavedSize(FormData formData);
 
     /**
-     * Метод получает количество строк редактируемого среза без учета итоговых
+     * Метод получает количество строк без учета итоговых
      */
 	//TODO детально изучить метод
-    int getSizeWithoutTotal(FormData formData, boolean isTemp);
+    int getSizeWithoutTotal(FormData formData);
 
 	/**
 	 * Вставляет строки начиная с указанного индекса. Выставленные в rows значения id и index игнорируются и
@@ -112,7 +114,7 @@ public interface DataRowDao {
 
 	/**
 	 * Удаляет строки в диапазоне индексов.
-	 * *
+	 *
 	 * @param formData экземпляр НФ для которой выполняется удаление строк
 	 * @param range диапазон удаляемых строк, индекс начинается с 1
 	 */

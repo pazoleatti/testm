@@ -7,7 +7,6 @@ import com.aplana.sbrf.taxaccounting.dao.api.DataRowDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentFormTypeDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceRollbackException;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.*;
@@ -1037,22 +1036,18 @@ public class FormDataServiceTest {
         formData.setDepartmentReportPeriodId(departmentReportPeriod.getId());
 
         when(departmentReportPeriodService.getLast(anyInt(), anyInt())).thenReturn(departmentReportPeriod);
-
-        try{
-            formDataService.doCheck(logger, userInfo, formData, false);
-        }catch (ServiceRollbackException e){
-            assertEquals(
-                    "Не выполнена консолидация данных в форму \"Тестовое подразделение\", \"РНУ\", \"Первичная\", \"1 квартал 2015\"",
-                    logger.getEntries().get(0).getMessage()
-            );
-            assertEquals(
-                    "Не выполнена консолидация данных из формы \"Тестовое подразделение\", \"РНУ\", \"Выходная\", \"1 квартал 2015 с датой сдачи корректировки 01.01.1970\" - экземпляр формы не создан",
-                    logger.getEntries().get(1).getMessage()
-            );
-            assertEquals(
-                    "Не выполнена консолидация данных из формы \"Тестовое подразделение\", \"РНУ\", \"Первичная\", \"1 квартал 2015 с датой сдачи корректировки 01.01.1970\" в статусе \"Принята\"",
-                    logger.getEntries().get(2).getMessage()
-            );
-        }
+		formDataService.doCheck(logger, userInfo, formData, false);
+		assertEquals(
+				"Не выполнена консолидация данных в форму \"Тестовое подразделение\", \"РНУ\", \"Первичная\", \"1 квартал 2015\"",
+				logger.getEntries().get(0).getMessage()
+		);
+		assertEquals(
+				"Не выполнена консолидация данных из формы \"Тестовое подразделение\", \"РНУ\", \"Выходная\", \"1 квартал 2015 с датой сдачи корректировки 01.01.1970\" - экземпляр формы не создан",
+				logger.getEntries().get(1).getMessage()
+		);
+		assertEquals(
+				"Не выполнена консолидация данных из формы \"Тестовое подразделение\", \"РНУ\", \"Первичная\", \"1 квартал 2015 с датой сдачи корректировки 01.01.1970\" в статусе \"Принята\"",
+				logger.getEntries().get(2).getMessage()
+		);
     }
 }

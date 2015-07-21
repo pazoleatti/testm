@@ -2,12 +2,12 @@ package com.aplana.sbrf.taxaccounting.async.task;
 
 import com.aplana.sbrf.taxaccounting.async.exception.AsyncTaskException;
 import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceRollbackException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.util.TransactionHelper;
 import com.aplana.sbrf.taxaccounting.util.TransactionLogic;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.TransactionStatus;
 
 import java.util.Map;
 
@@ -66,23 +66,9 @@ public abstract class CheckFormDataAsyncTask extends AbstractAsyncTask {
         boolean manual = (Boolean)params.get("manual");
         final TAUserInfo userInfo = new TAUserInfo();
         userInfo.setUser(userService.getUser(userId));
-
-        final FormData formData = formDataService.getFormData(userInfo, formDataId, manual, logger);
-        try {
-            tx.executeInNewTransaction(new TransactionLogic() {
-                @Override
-                public void execute() {
-                    formDataService.doCheck(logger, userInfo, formData, false);
-                }
-                @Override
-                public Object executeWithReturn() {
-                    return null;
-                }
-            });
-        } catch (ServiceRollbackException e) {
-            // считаем, что проверка прошла успешно
-        }
-    }
+        FormData formData = formDataService.getFormData(userInfo, formDataId, manual, logger);
+		formDataService.doCheck(logger, userInfo, formData, false);
+	}
 
     @Override
     protected String getAsyncTaskName() {

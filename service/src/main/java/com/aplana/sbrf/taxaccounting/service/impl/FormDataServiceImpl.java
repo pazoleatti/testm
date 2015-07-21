@@ -41,7 +41,6 @@ import com.aplana.sbrf.taxaccounting.model.WorkflowMove;
 import com.aplana.sbrf.taxaccounting.model.WorkflowState;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceRollbackException;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
@@ -77,6 +76,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -265,7 +265,7 @@ public class FormDataServiceImpl implements FormDataService {
 				IOUtils.closeQuietly(dataFileOutputStream);
 			}
 
-            String ext = getFileExtention(fileName);
+            String ext = getFileExtension(fileName);
 
             // Проверка ЭЦП
             // Если флаг проверки отсутствует или не равен «1», то файл считается проверенным
@@ -321,7 +321,7 @@ public class FormDataServiceImpl implements FormDataService {
             } else if (isInner) {
                 logger.info("Данные загружены");
             }
-
+			dataRowDao.refreshRefBookLinks(fd);
             logBusinessService.add(formDataId, null, userInfo, formDataEvent, null);
             auditService.add(formDataEvent, userInfo, fd.getDepartmentId(), fd.getReportPeriodId(),
                     null, fd.getFormType().getName(), fd.getKind().getId(), fileName, null, fd.getFormType().getId());
@@ -334,7 +334,7 @@ public class FormDataServiceImpl implements FormDataService {
         }
     }
 
-    private static String getFileExtention(String filename){
+    private static String getFileExtension(String filename){
         int dotPos = filename.lastIndexOf('.') + 1;
         return filename.substring(dotPos);
     }
@@ -397,7 +397,6 @@ public class FormDataServiceImpl implements FormDataService {
                     null, formData.getFormType().getName(), formData.getKind().getId(), "Форма создана", null);
         }
 
-        // Заполняем начальные строки (но не сохраняем)
 		dataRowDao.saveRows(formData, formTemplate.getRows());
 
         // Execute scripts for the form event AFTER_CREATE
@@ -407,6 +406,7 @@ public class FormDataServiceImpl implements FormDataService {
                     "Произошли ошибки в скрипте после создания налоговой формы",
                     logEntryService.save(logger.getEntries()));
         }
+		dataRowDao.refreshRefBookLinks(formData);
         updatePreviousRowNumber(formData, userInfo);
         return formData.getId();
 	}
@@ -468,13 +468,11 @@ public class FormDataServiceImpl implements FormDataService {
 
 		Map<String, Object> additionalParameters = new HashMap<String, Object>();
 		additionalParameters.put("currentDataRow", currentDataRow);
-		formDataScriptingService.executeScript(userInfo, formData,
-                FormDataEvent.ADD_ROW, logger, additionalParameters);
+		formDataScriptingService.executeScript(userInfo, formData, FormDataEvent.ADD_ROW, logger, additionalParameters);
 		if (logger.containsLevel(LogLevel.ERROR)) {
-			throw new ServiceLoggerException(
-					"Произошли ошибки в скрипте добавления новой строки",
-                    logEntryService.save(logger.getEntries()));
+			throw new ServiceLoggerException("Произошли ошибки в скрипте добавления новой строки", logEntryService.save(logger.getEntries()));
 		}
+		dataRowDao.refreshRefBookLinks(formData);
 	}
 	
 	@Override
@@ -494,111 +492,100 @@ public class FormDataServiceImpl implements FormDataService {
 		
 		Map<String, Object> additionalParameters = new HashMap<String, Object>();
 		additionalParameters.put("currentDataRow", currentDataRow);
-		formDataScriptingService.executeScript(userInfo, formData,
-                FormDataEvent.DELETE_ROW, logger, additionalParameters);
+		formDataScriptingService.executeScript(userInfo, formData, FormDataEvent.DELETE_ROW, logger, additionalParameters);
 		if (logger.containsLevel(LogLevel.ERROR)) {
-			throw new ServiceLoggerException(
-					"Произошли ошибки в скрипте удаления строки",
-                    logEntryService.save(logger.getEntries()));
+			throw new ServiceLoggerException("Произошли ошибки в скрипте удаления строки", logEntryService.save(logger.getEntries()));
 		}
+		dataRowDao.refreshRefBookLinks(formData);
 	}
 
 	/**
 	 * Выполнить расчёты по налоговой форме
 	 *
-	 * @param logger
-	 *            логгер-объект для фиксации диагностических сообщений
-	 * @param userInfo
-	 *            информация о пользователе, запросившего операцию
-	 * @param formData
-	 *            объект с данными по налоговой форме
+	 * @param logger логгер-объект для фиксации диагностических сообщений
+	 * @param userInfo информация о пользователе, запросившего операцию
+	 * @param formData объект с данными по налоговой форме
 	 */
 	@Override
 	public void doCalc(Logger logger, TAUserInfo userInfo, FormData formData) {
 		formDataAccessService.canEdit(userInfo, formData.getId(), formData.isManual());
-
-		formDataScriptingService.executeScript(userInfo, formData,
-                FormDataEvent.CALCULATE, logger, null);
-
+		formDataScriptingService.executeScript(userInfo, formData, FormDataEvent.CALCULATE, logger, null);
         if (logger.containsLevel(LogLevel.ERROR)) {
 			throw new ServiceException("Найдены ошибки при выполнении расчета формы");
 		} else {
 			logger.info("Расчет завершен, фатальных ошибок не обнаружено");
 		}
+		dataRowDao.refreshRefBookLinks(formData);
 	}
 
 	@Override
     @Transactional
 	public void doCheck(Logger logger, TAUserInfo userInfo, FormData formData, boolean editMode) {
-        formDataAccessService.canRead(userInfo, formData.getId());
+		TransactionStatus transaction = tx.startTransaction();
+		try {
+			formDataAccessService.canRead(userInfo, formData.getId());
+			formDataScriptingService.executeScript(userInfo, formData, FormDataEvent.CHECK, logger, null);
+			checkPerformer(logger, formData);
+			if (logger.containsLevel(LogLevel.ERROR)) {
+				throw new ServiceLoggerException("Найдены ошибки при выполнении проверки формы", logEntryService.save(logger.getEntries()));
+			}
+			//Проверка на неактуальные консолидированные данные
+			if (sourceService.isFDConsolidationTopical(formData.getId())){
+				logger.warn(CONSOLIDATION_NOT_TOPICAL);
+			}
 
-		formDataAccessService.canRead(userInfo, formData.getId());
-
-		formDataScriptingService.executeScript(userInfo, formData, FormDataEvent.CHECK, logger, null);
-
-        checkPerformer(logger, formData);
-
-        //Проверка на неактуальные консолидированные данные
-        if (sourceService.isFDConsolidationTopical(formData.getId())){
-            logger.warn(CONSOLIDATION_NOT_TOPICAL);
-        }
-
-        if (logger.containsLevel(LogLevel.ERROR)) {
-            throw new ServiceLoggerException(
-                    "Найдены ошибки при выполнении проверки формы", logEntryService.save(logger.getEntries()));
-        } else {
-            ReportPeriod reportPeriod = reportPeriodService.getReportPeriod(formData.getReportPeriodId());
-            if (formData.getState() == WorkflowState.ACCEPTED) {
-                // Система проверяет, существует ли экземпляр формы-приёмника, консолидация в который не была выполнена.
-                List<DepartmentFormType> destinationsDFT = departmentFormTypeDao.getFormDestinations(
-                        formData.getDepartmentId(),
-                        formData.getFormType().getId(),
-                        formData.getKind(),
-                        reportPeriod.getStartDate(),
-                        reportPeriod.getEndDate());
-                for (DepartmentFormType dftTarget : destinationsDFT) {
-                    DepartmentReportPeriod drp = departmentReportPeriodService.getLast(dftTarget.getDepartmentId(), formData.getReportPeriodId());
-                    FormData destinationFD =
-                            findFormData(dftTarget.getFormTypeId(), dftTarget.getKind(), drp.getId(), formData.getPeriodOrder());
-                    if (destinationFD != null && !sourceService.isFDSourceConsolidated(destinationFD.getId(), formData.getId())){
-                        ReportPeriod rp = reportPeriodService.getReportPeriod(destinationFD.getReportPeriodId());
-                        logger.warn(
-                                NOT_CONSOLIDATE_DESTINATION_FORM_WARNING,
-                                departmentService.getDepartment(destinationFD.getDepartmentId()).getName(),
-                                destinationFD.getFormType().getName(),
-                                destinationFD.getKind().getName(),
-                                rp.getName() + (destinationFD.getPeriodOrder() != null?" " + Months.fromId(destinationFD.getPeriodOrder()).getTitle():""),
-                                rp.getTaxPeriod().getYear(),
-                                drp.getCorrectionDate() != null ? String.format("с датой сдачи корректировки %s",
-                                        SDF_DD_MM_YYYY.format(drp.getCorrectionDate())) : ""
-                        );
-                    }
-                }
-            }
-            //Система проверяет статус консолидации из форм-источников.
-            List<DepartmentFormType> dftSources = getFormSources(formData, logger, userInfo, reportPeriod);
-            for (DepartmentFormType dftSource : dftSources){
-                DepartmentReportPeriod sourceDepartmentReportPeriod =
-                        departmentReportPeriodService.getLast(dftSource.getDepartmentId(), formData.getReportPeriodId());
-                FormData sourceFormData =
-                        findFormData(dftSource.getFormTypeId(), dftSource.getKind(),
+			ReportPeriod reportPeriod = reportPeriodService.getReportPeriod(formData.getReportPeriodId());
+			if (formData.getState() == WorkflowState.ACCEPTED) {
+				// Система проверяет, существует ли экземпляр формы-приёмника, консолидация в который не была выполнена.
+				List<DepartmentFormType> destinationsDFT = departmentFormTypeDao.getFormDestinations(
+						formData.getDepartmentId(),
+						formData.getFormType().getId(),
+						formData.getKind(),
+						reportPeriod.getStartDate(),
+						reportPeriod.getEndDate());
+				for (DepartmentFormType dftTarget : destinationsDFT) {
+					DepartmentReportPeriod drp = departmentReportPeriodService.getLast(dftTarget.getDepartmentId(), formData.getReportPeriodId());
+					FormData destinationFD =
+							findFormData(dftTarget.getFormTypeId(), dftTarget.getKind(), drp.getId(), formData.getPeriodOrder());
+					if (destinationFD != null && !sourceService.isFDSourceConsolidated(destinationFD.getId(), formData.getId())){
+						ReportPeriod rp = reportPeriodService.getReportPeriod(destinationFD.getReportPeriodId());
+						logger.warn(
+								NOT_CONSOLIDATE_DESTINATION_FORM_WARNING,
+								departmentService.getDepartment(destinationFD.getDepartmentId()).getName(),
+								destinationFD.getFormType().getName(),
+								destinationFD.getKind().getName(),
+								rp.getName() + (destinationFD.getPeriodOrder() != null?" " + Months.fromId(destinationFD.getPeriodOrder()).getTitle():""),
+								rp.getTaxPeriod().getYear(),
+								drp.getCorrectionDate() != null ? String.format("с датой сдачи корректировки %s",
+										SDF_DD_MM_YYYY.format(drp.getCorrectionDate())) : ""
+						);
+					}
+				}
+			}
+			//Система проверяет статус консолидации из форм-источников.
+			List<DepartmentFormType> dftSources = getFormSources(formData, logger, userInfo, reportPeriod);
+			for (DepartmentFormType dftSource : dftSources){
+				DepartmentReportPeriod sourceDepartmentReportPeriod =
+						departmentReportPeriodService.getLast(dftSource.getDepartmentId(), formData.getReportPeriodId());
+				FormData sourceFormData =
+						findFormData(dftSource.getFormTypeId(), dftSource.getKind(),
 								sourceDepartmentReportPeriod.getId(), dftSource.getPeriodOrder());
-                ReportPeriod rp = reportPeriodService.getReportPeriod(formData.getReportPeriodId());
-                if (sourceFormData == null){
-                    DepartmentReportPeriod drp = departmentReportPeriodService.get(formData.getDepartmentReportPeriodId());
-                    logger.warn(
-                            NOT_EXIST_SOURCE_FORM_WARNING,
-                            departmentService.getDepartment(dftSource.getDepartmentId()).getName(),
-                            formTypeService.get(dftSource.getFormTypeId()).getName(),
-                            dftSource.getKind().getName(),
-                            rp.getName(),
-                            rp.getTaxPeriod().getYear(),
-                            drp.getCorrectionDate() != null ? String.format(" с датой сдачи корректировки %s",
-                                    SDF_DD_MM_YYYY.format(drp.getCorrectionDate())) : ""
-                    );
-                } else if (!sourceService.isFDSourceConsolidated(formData.getId(), sourceFormData.getId())){
-                    DepartmentReportPeriod drp = departmentReportPeriodService.get(formData.getDepartmentReportPeriodId());
-                    logger.warn(
+				ReportPeriod rp = reportPeriodService.getReportPeriod(formData.getReportPeriodId());
+				if (sourceFormData == null){
+					DepartmentReportPeriod drp = departmentReportPeriodService.get(formData.getDepartmentReportPeriodId());
+					logger.warn(
+							NOT_EXIST_SOURCE_FORM_WARNING,
+							departmentService.getDepartment(dftSource.getDepartmentId()).getName(),
+							formTypeService.get(dftSource.getFormTypeId()).getName(),
+							dftSource.getKind().getName(),
+							rp.getName(),
+							rp.getTaxPeriod().getYear(),
+							drp.getCorrectionDate() != null ? String.format(" с датой сдачи корректировки %s",
+									SDF_DD_MM_YYYY.format(drp.getCorrectionDate())) : ""
+					);
+				} else if (!sourceService.isFDSourceConsolidated(formData.getId(), sourceFormData.getId())){
+					DepartmentReportPeriod drp = departmentReportPeriodService.get(formData.getDepartmentReportPeriodId());
+					logger.warn(
 							NOT_CONSOLIDATE_SOURCE_FORM_WARNING,
 							departmentService.getDepartment(sourceFormData.getDepartmentId()).getName(),
 							sourceFormData.getFormType().getName(),
@@ -609,15 +596,15 @@ public class FormDataServiceImpl implements FormDataService {
 									SDF_DD_MM_YYYY.format(drp.getCorrectionDate())) : "",
 							sourceFormData.getState().getName()
 					);
-                }
-            }
-            if (!dftSources.isEmpty() && !logger.containsLevel(LogLevel.WARNING)){
-                logger.info("Консолидация выполнена из всех форм-источников");
-            }
-            // Ошибка для отката транзакции
-            logger.info("Проверка завершена, фатальных ошибок не обнаружено");
-            throw new ServiceRollbackException("Ошибок не обнаружено");
-        }
+				}
+			}
+			if (!dftSources.isEmpty() && !logger.containsLevel(LogLevel.WARNING)){
+				logger.info("Консолидация выполнена из всех форм-источников");
+			}
+			logger.info("Проверка завершена, фатальных ошибок не обнаружено");
+		} finally {
+			tx.rollback(transaction);
+		}
     }
 
     private void checkPerformer(Logger logger, FormData formData) {
@@ -653,10 +640,8 @@ public class FormDataServiceImpl implements FormDataService {
     /**
 	 * Сохранить данные по налоговой форме
 	 *
-	 * @param userInfo
-	 *            информация о пользователе, выполняющего операцию
-	 * @param formData
-	 *            объект с данными налоговой формы
+	 * @param userInfo информация о пользователе, выполняющего операцию
+	 * @param formData объект с данными налоговой формы
 	 * @return идентификатор сохранённой записи
 	 * @throws com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException
 	 *             если у пользователя нет прав редактировать налоговую форму с
@@ -675,6 +660,7 @@ public class FormDataServiceImpl implements FormDataService {
         // Обновление для сквозной нумерации
         updatePreviousRowNumberAttr(formData, logger, userInfo);
         formDataDao.save(formData);
+		dataRowDao.refreshRefBookLinks(formData);
         deleteReport(formData.getId(), formData.isManual(), userInfo.getUser().getId());
         // ЖА и история изменений
 		logBusinessService.add(formData.getId(), null, userInfo, FormDataEvent.SAVE, null);
@@ -695,7 +681,8 @@ public class FormDataServiceImpl implements FormDataService {
      * @param userInfo информация о пользователе, выполняющего операцию
      * @param formDataId идентификатор записи, которую необходимо считать
      * @param manual
-     *@param logger логгер-объект для фиксации диагностических сообщений  @return объект с данными по налоговой форме
+     * @param logger логгер-объект для фиксации диагностических сообщений
+	 * @return объект с данными по налоговой форме
 	 * @throws com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException
 	 *             если у пользователя нет прав просматривать налоговую форму с
 	 *             такими параметрами
@@ -706,6 +693,7 @@ public class FormDataServiceImpl implements FormDataService {
 		formDataAccessService.canRead(userInfo, formDataId);
 		FormData formData = formDataDao.get(formDataId, manual);
 		formDataScriptingService.executeScript(userInfo, formData, FormDataEvent.AFTER_LOAD, logger, null);
+		dataRowDao.refreshRefBookLinks(formData);
 		return formData;
 	}
 
@@ -794,9 +782,7 @@ public class FormDataServiceImpl implements FormDataService {
                 checkConsolidateFromSources(formData, logger, userInfo);
                 if (WorkflowState.ACCEPTED.equals(workflowMove.getToState())) {
                     // Отработка скриптом события сортировки
-                    formDataScriptingService.executeScript(userInfo, formData,
-                            FormDataEvent.SORT_ROWS, logger, null);
-
+                    formDataScriptingService.executeScript(userInfo, formData, FormDataEvent.SORT_ROWS, logger, null);
                     if (logger.containsLevel(LogLevel.ERROR)) {
                         throw new ServiceLoggerException(SORT_ERROR, logEntryService.save(logger.getEntries()));
                     }
@@ -839,42 +825,49 @@ public class FormDataServiceImpl implements FormDataService {
         }
     }
 
-    private List<DepartmentFormType> getFormSources(FormData formData, Logger logger, TAUserInfo userInfo, ReportPeriod reportPeriod){
-        List<DepartmentFormType> sourceList = new ArrayList<DepartmentFormType>();
-        /** Проверяем в скрипте источники-приемники для особенных форм */
-        Map<String, Object> params = new HashMap<String, Object>();
-        FormSources sources = new FormSources();
-        sources.setSourceList(new ArrayList<FormToFormRelation>());
-        sources.setSourcesProcessedByScript(false);
-        params.put("sources", sources);
-        formDataScriptingService.executeScript(userInfo, formData, FormDataEvent.GET_SOURCES, logger, params);
+    private List<DepartmentFormType> getFormSources(final FormData formData, final Logger logger, final TAUserInfo userInfo, ReportPeriod reportPeriod){
+		TransactionStatus transaction = tx.startTransaction();
+		try {
+			List<DepartmentFormType> sourceList = new ArrayList<DepartmentFormType>();
+			/** Проверяем в скрипте источники-приемники для особенных форм */
+			final Map<String, Object> params = new HashMap<String, Object>();
+			FormSources sources = new FormSources();
+			sources.setSourceList(new ArrayList<FormToFormRelation>());
+			sources.setSourcesProcessedByScript(false);
+			params.put("sources", sources);
 
-        if (sources.isSourcesProcessedByScript()) {
-            //Скрипт возвращает все необходимые источники-приемники
-            if (sources.getSourceList() != null) {
-                for (FormToFormRelation relation : sources.getSourceList()) {
-                    if (relation.isSource() && relation.isCreated() && relation.getFormType() != null) {
-                        //TODO: Заполняем DepartmentFormType не полностью!
-                        DepartmentFormType source = new DepartmentFormType();
-                        source.setDepartmentId(formData.getDepartmentId());
-                        source.setFormTypeId(relation.getFormType().getId());
-                        source.setKind(relation.getFormDataKind());
-                        source.setPeriodOrder(relation.getPeriodOrder());
-                        sourceList.add(source);
-                    }
-                }
-            }
-        } else {
-            //Получаем источники-приемники стандартными методами ядра
-            //Номер месяца для источников получаемых обычным способом не указан. Такие случаи должны обрабатываться в скриптах
-            sourceList = departmentFormTypeDao.getFormSources(
-                    formData.getDepartmentId(),
-                    formData.getFormType().getId(),
-                    formData.getKind(),
-                    reportPeriod.getCalendarStartDate(),
-                    reportPeriod.getEndDate());
-        }
-        return sourceList;
+			formDataScriptingService.executeScript(userInfo, formData, FormDataEvent.GET_SOURCES, logger, params);
+
+			if (sources.isSourcesProcessedByScript()) {
+				//Скрипт возвращает все необходимые источники-приемники
+				if (sources.getSourceList() != null) {
+					for (FormToFormRelation relation : sources.getSourceList()) {
+						if (relation.isSource() && relation.isCreated() && relation.getFormType() != null) {
+							//TODO: Заполняем DepartmentFormType не полностью!
+							DepartmentFormType source = new DepartmentFormType();
+							source.setDepartmentId(formData.getDepartmentId());
+							source.setFormTypeId(relation.getFormType().getId());
+							source.setKind(relation.getFormDataKind());
+							source.setPeriodOrder(relation.getPeriodOrder());
+							sourceList.add(source);
+						}
+					}
+				}
+			} else {
+				//Получаем источники-приемники стандартными методами ядра
+				//Номер месяца для источников получаемых обычным способом не указан. Такие случаи должны обрабатываться в скриптах
+				sourceList = departmentFormTypeDao.getFormSources(
+						formData.getDepartmentId(),
+						formData.getFormType().getId(),
+						formData.getKind(),
+						reportPeriod.getCalendarStartDate(),
+						reportPeriod.getEndDate());
+			}
+			dataRowDao.refreshRefBookLinks(formData);
+			return sourceList;
+		} finally {
+			tx.rollback(transaction);
+		}
     }
 
     private void checkConsolidateFromSources(FormData formData, Logger logger, TAUserInfo userInfo){
@@ -1039,15 +1032,14 @@ public class FormDataServiceImpl implements FormDataService {
         eventHandlerLauncher.process(userInfo, formData, workflowMove.getEvent(), logger, null);
 
         if (workflowMove.getAfterEvent() != null) {
-            formDataScriptingService.executeScript(
-                    userInfo, formData,
-                    workflowMove.getAfterEvent(), logger, null);
+            formDataScriptingService.executeScript(userInfo, formData, workflowMove.getAfterEvent(), logger, null);
             if (logger.containsLevel(LogLevel.ERROR)) {
                 throw new ServiceLoggerException(
                         "Произошли ошибки в скрипте, который выполняется после перехода",
                         logEntryService.save(logger.getEntries()));
             }
         }
+		dataRowDao.refreshRefBookLinks(formData);
 
         if (!isAsync)
             logger.info("Форма \"" + formData.getFormType().getName() + "\" переведена в статус \"" + workflowMove.getToState().getName() + "\"");
@@ -1280,13 +1272,12 @@ public class FormDataServiceImpl implements FormDataService {
         }
     }
 
-    // очищаем данные в нф (кроме фиксированных строк)
+    // очищаем данные в нф, приводим их к исходному состоянию (только фиксированные)
     private void clearDataRows(FormData formData, TAUserInfo userInfo){
         List<DataRow<Cell>> fixRows = formTemplateService.get(formData.getFormTemplateId()).getRows();
-        if (dataRowDao.getSavedSize(formData) > fixRows.size()) {
-            dataRowDao.saveRows(formData, fixRows);
-            updatePreviousRowNumber(formData, userInfo);
-        }
+		dataRowDao.saveRows(formData, fixRows);
+		dataRowDao.refreshRefBookLinks(formData);
+		updatePreviousRowNumber(formData, userInfo);
     }
 
     @Override
@@ -1525,7 +1516,7 @@ public class FormDataServiceImpl implements FormDataService {
         if (formDataList.size() > 0) {
             for (FormData aFormData : formDataList) {
                 if (beInOnAutoNumeration(aFormData.getState(), departmentReportPeriod)) {
-                    previousRowNumber += dataRowDao.getSizeWithoutTotal(aFormData, savingFormData != null && (aFormData.getId().equals(savingFormData.getId())));
+                    previousRowNumber += dataRowDao.getSizeWithoutTotal(aFormData);
                 }
                 if (aFormData.getId().equals(formData.getId())) {
                     return previousRowNumber;
