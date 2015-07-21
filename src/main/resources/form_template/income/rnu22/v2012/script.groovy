@@ -51,6 +51,7 @@ switch (formDataEvent) {
         prevPeriodCheck()
         calc()
         logicCheck()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.CHECK:
         prevPeriodCheck()
@@ -78,17 +79,15 @@ switch (formDataEvent) {
         formDataService.consolidationSimple(formData, logger)
         calc()
         logicCheck()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.IMPORT:
         importData()
-        if (!logger.containsLevel(LogLevel.ERROR)) {
-            calc()
-            logicCheck()
-            formDataService.saveCachedDataRows(formData, logger)
-        }
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.IMPORT_TRANSPORT_FILE:
         importTransportData()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.SORT_ROWS:
         sortFormDataRows()
@@ -100,43 +99,42 @@ switch (formDataEvent) {
 // Все аттрибуты
 @Field
 def allColumns = ['rowNumber', 'fix', 'contractNumber', 'contractData', 'base', 'transactionDate',
-        'course', 'interestRate', 'basisForCalc', 'calcPeriodAccountingBeginDate', 'calcPeriodAccountingEndDate',
-        'calcPeriodBeginDate', 'calcPeriodEndDate', 'accruedCommisCurrency', 'accruedCommisRub',
-        'commisInAccountingCurrency', 'commisInAccountingRub', 'accrualPrevCurrency', 'accrualPrevRub',
-        'reportPeriodCurrency', 'reportPeriodRub']
+                  'course', 'interestRate', 'basisForCalc', 'calcPeriodAccountingBeginDate', 'calcPeriodAccountingEndDate',
+                  'calcPeriodBeginDate', 'calcPeriodEndDate', 'accruedCommisCurrency', 'accruedCommisRub',
+                  'commisInAccountingCurrency', 'commisInAccountingRub', 'accrualPrevCurrency', 'accrualPrevRub',
+                  'reportPeriodCurrency', 'reportPeriodRub']
 
 // Поля, для которых подсчитываются итоговые значения
 @Field
 def totalColumns = ['accruedCommisCurrency', 'accruedCommisRub',
-        'commisInAccountingCurrency', 'commisInAccountingRub', 'accrualPrevCurrency',
-        'accrualPrevRub', 'reportPeriodCurrency', 'reportPeriodRub']
+                    'commisInAccountingCurrency', 'commisInAccountingRub', 'accrualPrevCurrency',
+                    'accrualPrevRub', 'reportPeriodCurrency', 'reportPeriodRub']
 
 // Редактируемые атрибуты
 @Field
 def editableColumns = ['contractNumber', 'contractData', 'base', 'transactionDate', 'course',
-        'interestRate', 'basisForCalc', 'calcPeriodAccountingBeginDate',
-        'calcPeriodAccountingEndDate', 'calcPeriodBeginDate', 'calcPeriodEndDate']
+                       'interestRate', 'basisForCalc', 'calcPeriodAccountingBeginDate',
+                       'calcPeriodAccountingEndDate', 'calcPeriodBeginDate', 'calcPeriodEndDate']
 
 // Обязательно заполняемые атрибуты
 @Field
 def nonEmptyColumns = ['contractNumber', 'contractData', 'base',
-        'transactionDate', 'course', 'interestRate', 'basisForCalc']
+                       'transactionDate', 'course', 'interestRate', 'basisForCalc']
 
 @Field
 def sortColumns = ["transactionDate", "contractData", "contractNumber"]
 
 @Field
 def arithmeticCheckAlias = ['accruedCommisCurrency', 'accruedCommisRub',
-        'commisInAccountingCurrency', 'commisInAccountingRub', 'accrualPrevCurrency', 'accrualPrevRub',
-        'reportPeriodCurrency', 'reportPeriodRub']
+                            'commisInAccountingCurrency', 'commisInAccountingRub', 'accrualPrevCurrency', 'accrualPrevRub',
+                            'reportPeriodCurrency', 'reportPeriodRub']
 
 /** Признак периода ввода остатков. */
 @Field
 def isBalancePeriod = null
 
 void logicCheck() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.allCached
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
     def dataRowsOld = null
     if (formData.kind == FormDataKind.PRIMARY) {
         dataRowsOld = getPrevDataRows()
@@ -165,8 +163,8 @@ void logicCheck() {
         // 2. Проверка на нулевые значения (графа 13..20)
         def allNull = true
         def allNullCheck = ['accruedCommisCurrency', 'accruedCommisRub', 'commisInAccountingCurrency',
-                'commisInAccountingRub', 'accrualPrevCurrency', 'accrualPrevRub',
-                'reportPeriodCurrency', 'reportPeriodRub']
+                            'commisInAccountingRub', 'accrualPrevCurrency', 'accrualPrevRub',
+                            'reportPeriodCurrency', 'reportPeriodRub']
         for (alias in allNullCheck) {
             tmp = row[alias]
             if (tmp != null && tmp != 0) {
@@ -242,8 +240,7 @@ void logicCheck() {
 }
 
 void calc() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.allCached
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
     def dataRowsOld = null
     if (formData.kind == FormDataKind.PRIMARY) {
         dataRowsOld = getPrevDataRows()
@@ -291,9 +288,8 @@ void calc() {
     // добавить строку "итого"
     def DataRow totalRow = getTotalRow(dataRows)
     dataRows.add(totalRow)
-    dataRowHelper.save(dataRows)
 
-    sortFormDataRows()
+    sortFormDataRows(false)
 }
 
 BigDecimal getGraph13_15(def DataRow row) {
@@ -359,7 +355,7 @@ def getPrevDataRows() {
         return null
     }
     def prevFormData = formDataService.getFormDataPrev(formData)
-    return (prevFormData != null ? formDataService.getDataRowHelper(prevFormData)?.allCached : null)
+    return (prevFormData != null ? formDataService.getDataRowHelper(prevFormData)?.allSaved : null)
 }
 
 /** Вывести сообщение. В периоде ввода остатков сообщения должны быть только НЕфатальными. */
@@ -386,7 +382,6 @@ void importTransportData() {
 }
 
 void addTransportData(def xml) {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
     def int rnuIndexRow = 2
     def int colOffset = 1
 
@@ -398,7 +393,7 @@ void addTransportData(def xml) {
         def rnuIndexCol
         def newRow = getNewRow()
 
-         // графа 1
+        // графа 1
         rnuIndexCol = 1
         newRow.rowNumber = parseNumber(row.cell[rnuIndexCol].text(), rnuIndexRow, rnuIndexCol + colOffset, logger, true)
 
@@ -523,9 +518,9 @@ void addTransportData(def xml) {
         rnuIndexCol = 20
         total.reportPeriodRub = parseNumber(row.cell[rnuIndexCol].text(), rnuIndexRow, rnuIndexCol + colOffset, logger, true)
 
-        def colIndexMap = ['accruedCommisCurrency' : 13, 'accruedCommisRub' : 14, 'commisInAccountingCurrency' : 15,
-                'commisInAccountingRub' : 16, 'accrualPrevCurrency' : 17, 'accrualPrevRub' : 18,
-                'reportPeriodCurrency' : 19, 'reportPeriodRub' : 20]
+        def colIndexMap = ['accruedCommisCurrency': 13, 'accruedCommisRub': 14, 'commisInAccountingCurrency': 15,
+                           'commisInAccountingRub': 16, 'accrualPrevCurrency': 17, 'accrualPrevRub': 18,
+                           'reportPeriodCurrency' : 19, 'reportPeriodRub': 20]
         for (def alias : totalColumns) {
             def v1 = total.getCell(alias).value
             def v2 = totalRow.getCell(alias).value
@@ -538,7 +533,10 @@ void addTransportData(def xml) {
         }
     }
 
-    dataRowHelper.save(rows)
+    if (!logger.containsLevel(LogLevel.ERROR)) {
+        updateIndexes(rows)
+        formDataService.getDataRowHelper(formData).allCached = rows
+    }
 }
 
 def getNewRow() {
@@ -564,11 +562,15 @@ def getTotalRow(def dataRows) {
 }
 
 // Сортировка групп и строк
-void sortFormDataRows() {
+void sortFormDataRows(def saveInDB = true) {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
     sortRows(refBookService, logger, dataRows, null, getDataRow(dataRows, 'total'), null)
-    dataRowHelper.saveSort()
+    if (saveInDB) {
+        dataRowHelper.saveSort()
+    } else {
+        updateIndexes(dataRows)
+    }
 }
 
 void importData() {
@@ -581,7 +583,7 @@ void importData() {
 
     def allValues = []      // значения формы
     def headerValues = []   // значения шапки
-    def paramsMap = ['rowOffset' : 0, 'colOffset' : 0]  // мапа с параметрами (отступы сверху и слева)
+    def paramsMap = ['rowOffset': 0, 'colOffset': 0]  // мапа с параметрами (отступы сверху и слева)
 
     checkAndReadFile(ImportInputStream, UploadFileName, allValues, headerValues, TABLE_START_VALUE, TABLE_END_VALUE, HEADER_ROW_COUNT, paramsMap)
 
@@ -672,8 +674,8 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
             (headerRows[1][15]): 'валюта',
             (headerRows[1][16]): 'рубли',
             (headerRows[0][17]): 'Сумма доначисления',
-            (headerRows[1][17]): 'предыдущий квартал\t',
-            (headerRows[1][19]): 'отчётный квартал\t',
+            (headerRows[1][17]): 'предыдущий квартал',
+            (headerRows[1][19]): 'отчётный квартал',
             (headerRows[2][17]): 'валюта',
             (headerRows[2][18]): 'рубли',
             (headerRows[2][19]): 'валюта',
@@ -733,7 +735,7 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
 
     // графа 13..20
     ['accruedCommisCurrency', 'accruedCommisRub', 'commisInAccountingCurrency', 'commisInAccountingRub',
-            'accrualPrevCurrency', 'accrualPrevRub', 'reportPeriodCurrency', 'reportPeriodRub'].each { alias ->
+     'accrualPrevCurrency', 'accrualPrevRub', 'reportPeriodCurrency', 'reportPeriodRub'].each { alias ->
         colIndex++
         newRow[alias] = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
     }

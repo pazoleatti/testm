@@ -37,6 +37,7 @@ switch (formDataEvent) {
     case FormDataEvent.CALCULATE:
         calc()
         logicCheck()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.CHECK:
         logicCheck()
@@ -61,14 +62,15 @@ switch (formDataEvent) {
         formDataService.consolidationSimple(formData, logger)
         calc()
         logicCheck()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.IMPORT:
         importData()
-        calc()
-        logicCheck()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.IMPORT_TRANSPORT_FILE:
         importTransportData()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.SORT_ROWS:
         sortFormDataRows()
@@ -86,7 +88,7 @@ def refBookCache = [:]
 // Редактируемые атрибуты
 @Field
 def editableColumns = ['numberFirstRecord', 'opy', 'operationDate', 'name', 'documentNumber', 'date',
-        'periodCounts', 'advancePayment', 'outcomeInBuh']
+                       'periodCounts', 'advancePayment', 'outcomeInBuh']
 
 // Автозаполняемые атрибуты
 @Field
@@ -95,7 +97,7 @@ def autoFillColumns = ['rowNumber', 'code']
 // Проверяемые на пустые значения атрибуты
 @Field
 def nonEmptyColumns = ['numberFirstRecord', 'opy', 'operationDate', 'name', 'documentNumber',
-        'date', 'periodCounts', 'advancePayment', 'outcomeInBuh']
+                       'date', 'periodCounts', 'advancePayment', 'outcomeInBuh']
 
 // Сумируемые колонки в фиксированной с троке
 @Field
@@ -118,8 +120,7 @@ def getRefBookValue(def long refBookId, def Long recordId) {
 
 // Алгоритмы заполнения полей формы
 void calc() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.getAllCached()
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
 
     if (!dataRows.isEmpty()) {
         // Удаление подитогов
@@ -137,9 +138,8 @@ void calc() {
     }
 
     dataRows.add(calcTotalRow(dataRows))
-    dataRowHelper.save(dataRows)
 
-    sortFormDataRows()
+    sortFormDataRows(false)
 }
 
 void calcSubTotal(def dataRows) {
@@ -212,8 +212,7 @@ def getTotalRow(def alias, def title) {
     newRow.fix = title
     newRow.getCell('fix').colSpan = 9
     ['rowNumber', 'fix', 'code', 'numberFirstRecord', 'numberFirstRecord', 'opy', 'operationDate',
-            'name', 'documentNumber', 'date', 'periodCounts',
-            'advancePayment', 'outcomeInNalog', 'outcomeInBuh'].each {
+     'name', 'documentNumber', 'date', 'periodCounts', 'advancePayment', 'outcomeInNalog', 'outcomeInBuh'].each {
         newRow.getCell(it).setStyleAlias('Контрольные суммы')
     }
     return newRow
@@ -228,7 +227,7 @@ def BigDecimal calc11(def row) {
 
 // Логические проверки
 void logicCheck() {
-    def dataRows = formDataService.getDataRowHelper(formData).getAllCached()
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
     if (dataRows.isEmpty()) {
         return
     }
@@ -308,7 +307,6 @@ void importTransportData() {
 }
 
 void addTransportData(def xml) {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
     def int rnuIndexRow = 2
     def int colOffset = 1
     def rows = []
@@ -386,7 +384,7 @@ void addTransportData(def xml) {
         // графа 12
         total.outcomeInBuh = parseNumber(row.cell[12].text(), rnuIndexRow, 12 + colOffset, logger, true)
 
-        def colIndexMap = ['advancePayment' : 10, 'outcomeInNalog' : 11, 'outcomeInBuh' : 12]
+        def colIndexMap = ['advancePayment': 10, 'outcomeInNalog': 11, 'outcomeInBuh': 12]
         for (def alias : totalColumns) {
             def v1 = total[alias]
             def v2 = totalRow[alias]
@@ -398,15 +396,23 @@ void addTransportData(def xml) {
             }
         }
     }
-    dataRowHelper.save(rows)
+
+    if (!logger.containsLevel(LogLevel.ERROR)) {
+        updateIndexes(rows)
+        formDataService.getDataRowHelper(formData).allCached = rows
+    }
 }
 
 // Сортировка групп и строк
-void sortFormDataRows() {
+void sortFormDataRows(def saveInDB = true) {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
     sortRows(refBookService, logger, dataRows, getSubTotalRows(dataRows), getDataRow(dataRows, 'total'), true)
-    dataRowHelper.saveSort()
+    if (saveInDB) {
+        dataRowHelper.saveSort()
+    } else {
+        updateIndexes(dataRows)
+    }
 }
 
 // Получение подитоговых строк
@@ -424,7 +430,7 @@ void importData() {
 
     def allValues = []      // значения формы
     def headerValues = []   // значения шапки
-    def paramsMap = ['rowOffset' : 0, 'colOffset' : 0]  // мапа с параметрами (отступы сверху и слева)
+    def paramsMap = ['rowOffset': 0, 'colOffset': 0]  // мапа с параметрами (отступы сверху и слева)
 
     checkAndReadFile(ImportInputStream, UploadFileName, allValues, headerValues, TABLE_START_VALUE, TABLE_END_VALUE, HEADER_ROW_COUNT, paramsMap)
 
@@ -542,7 +548,7 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
     colIndex = 2
     String filter = "LOWER(CODE) = LOWER('" + values[colIndex] + "') and LOWER(OPU) = LOWER('" + values[4] + "')"
     def records = refBookFactory.getDataProvider(27).getRecords(reportPeriodEndDate, null, filter, null)
-    if (checkImportRecordsCount(records, refBookFactory.get(27), 'CODE', values[colIndex], reportPeriodEndDate, fileRowIndex, colIndex, logger, true)) {
+    if (checkImportRecordsCount(records, refBookFactory.get(27), 'CODE', values[colIndex], reportPeriodEndDate, fileRowIndex, colIndex, logger, false)) {
         newRow.opy = records.get(0).get(RefBook.RECORD_ID_ALIAS).numberValue
     }
 

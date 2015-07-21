@@ -47,6 +47,7 @@ switch (formDataEvent) {
         prevPeriodCheck()
         calc()
         logicCheck()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.ADD_ROW:
         def cols = (isBalancePeriod() ? balanceEditableColumns : editableColumns)
@@ -70,17 +71,15 @@ switch (formDataEvent) {
         formDataService.consolidationTotal(formData, logger, ['total'])
         calc()
         logicCheck()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.IMPORT:
         importData()
-        if (!logger.containsLevel(LogLevel.ERROR)) {
-            calc()
-            logicCheck()
-            formDataService.saveCachedDataRows(formData, logger)
-        }
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.IMPORT_TRANSPORT_FILE:
         importTransportData()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.SORT_ROWS:
         sortFormDataRows()
@@ -157,7 +156,7 @@ def getRefBookRecord(
 
 // Разыменование записи справочника
 def getRefBookValue(def long refBookId, def Long recordId) {
-    return formDataService.getRefBookValue(refBookId, recordId, refBookCache);
+    return formDataService.getRefBookValue(refBookId, recordId, refBookCache)
 }
 
 // Получение числа из строки при импорте
@@ -166,8 +165,7 @@ def getNumber(def value, def indexRow, def indexCol) {
 }
 
 void calc() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.allCached
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
 
     // РНУ-23 предыдущего периода
     def totalRowOld
@@ -213,14 +211,12 @@ void calc() {
     // Итого
     calcTotalSum(dataRows, totalRow, totalSumColumns)
     dataRows.add(totalRow)
-    dataRowHelper.save(dataRows)
 
-    sortFormDataRows()
+    sortFormDataRows(false)
 }
 
 void logicCheck() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.allCached
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
 
     // алиасы графов для арифметической проверки (графа 13..20)
     def arithmeticCheckAlias = ['incomeCurrency', 'incomeRuble', 'accountingCurrency', 'accountingRuble',
@@ -262,7 +258,7 @@ void logicCheck() {
         // 2. Проверка на нулевые значения (графа 13..20)
         def hasNull = true
         ['incomeCurrency', 'incomeRuble', 'accountingCurrency', 'accountingRuble',
-                'preChargeCurrency', 'preChargeRuble', 'taxPeriodCurrency', 'taxPeriodRuble'].each { alias ->
+         'preChargeCurrency', 'preChargeRuble', 'taxPeriodCurrency', 'taxPeriodRuble'].each { alias ->
             tmp = row.getCell(alias).getValue()
             if (tmp != null && tmp != 0) {
                 hasNull = false
@@ -414,7 +410,7 @@ def calc20(def row) {
 def getPrevDataRows() {
     def prevFormData = formDataService.getFormDataPrev(formData)
     if (prevFormData != null) {
-        return formDataService.getDataRowHelper(prevFormData)?.allCached
+        return formDataService.getDataRowHelper(prevFormData)?.allSaved
     }
     return null
 }
@@ -472,8 +468,7 @@ void importTransportData() {
 }
 
 void addTransportData(def xml) {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper?.allCached
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
     def int rnuIndexRow = 2
     def int colOffset = 1
 
@@ -615,9 +610,9 @@ void addTransportData(def xml) {
         rnuIndexCol = 20
         total.taxPeriodRuble = parseNumber(row.cell[rnuIndexCol].text(), rnuIndexRow, rnuIndexCol + colOffset, logger, true)
 
-        def colIndexMap = ['incomeCurrency' : 13, 'incomeRuble' : 14, 'accountingCurrency' : 15,
-                'accountingRuble' : 16, 'preChargeCurrency' : 17, 'preChargeRuble' : 18,
-                'taxPeriodCurrency' : 19, 'taxPeriodRuble' : 20]
+        def colIndexMap = ['incomeCurrency'   : 13, 'incomeRuble': 14, 'accountingCurrency': 15,
+                           'accountingRuble'  : 16, 'preChargeCurrency': 17, 'preChargeRuble': 18,
+                           'taxPeriodCurrency': 19, 'taxPeriodRuble': 20]
         for (def alias : totalSumColumns) {
             def v1 = total.getCell(alias).value
             def v2 = totalRow.getCell(alias).value
@@ -630,7 +625,10 @@ void addTransportData(def xml) {
         }
     }
 
-    dataRowHelper.save(rows)
+    if (!logger.containsLevel(LogLevel.ERROR)) {
+        updateIndexes(rows)
+        formDataService.getDataRowHelper(formData).allCached = rows
+    }
 }
 
 def getNewRow() {
@@ -647,11 +645,15 @@ def getNewRow() {
 }
 
 // Сортировка групп и строк
-void sortFormDataRows() {
+void sortFormDataRows(def saveInDB = true) {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
     sortRows(refBookService, logger, dataRows, null, getDataRow(dataRows, 'total'), null)
-    dataRowHelper.saveSort()
+    if (saveInDB) {
+        dataRowHelper.saveSort()
+    } else {
+        updateIndexes(dataRows)
+    }
 }
 
 void importData() {
@@ -664,7 +666,7 @@ void importData() {
 
     def allValues = []      // значения формы
     def headerValues = []   // значения шапки
-    def paramsMap = ['rowOffset' : 0, 'colOffset' : 0]  // мапа с параметрами (отступы сверху и слева)
+    def paramsMap = ['rowOffset': 0, 'colOffset': 0]  // мапа с параметрами (отступы сверху и слева)
 
     checkAndReadFile(ImportInputStream, UploadFileName, allValues, headerValues, TABLE_START_VALUE, TABLE_END_VALUE, HEADER_ROW_COUNT, paramsMap)
 
@@ -813,7 +815,7 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
 
     // графа 13..20
     ['incomeCurrency', 'incomeRuble', 'accountingCurrency', 'accountingRuble', 'preChargeCurrency',
-            'preChargeRuble', 'taxPeriodCurrency', 'taxPeriodRuble'].each { alias ->
+     'preChargeRuble', 'taxPeriodCurrency', 'taxPeriodRuble'].each { alias ->
         colIndex++
         newRow[alias] = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
     }

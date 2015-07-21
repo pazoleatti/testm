@@ -27,6 +27,7 @@ switch (formDataEvent) {
     case FormDataEvent.CALCULATE:
         calc()
         logicCheck()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.CHECK:
         logicCheck()
@@ -51,17 +52,15 @@ switch (formDataEvent) {
         formDataService.consolidationSimple(formData, logger)
         calc()
         logicCheck()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.IMPORT:
         importData()
-        if (!logger.containsLevel(LogLevel.ERROR)) {
-            calc()
-            logicCheck()
-            formDataService.saveCachedDataRows(formData, logger)
-        }
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.IMPORT_TRANSPORT_FILE:
         importTransportData()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.SORT_ROWS:
         sortFormDataRows()
@@ -103,8 +102,7 @@ def getRefBookValue(def long refBookId, def Long recordId) {
 
 // Алгоритмы заполнения полей формы
 void calc() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.getAllCached()
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
 
     if (!dataRows.isEmpty()) {
 
@@ -116,9 +114,8 @@ void calc() {
     }
 
     dataRows.add(calcTotalRow(dataRows))
-    dataRowHelper.save(dataRows)
 
-    sortFormDataRows()
+    sortFormDataRows(false)
 }
 
 
@@ -136,7 +133,7 @@ def calcTotalRow(def dataRows) {
 
 // Логические проверки
 void logicCheck() {
-    def dataRows = formDataService.getDataRowHelper(formData).getAllCached()
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
     if (dataRows.isEmpty()) {
         return
     }
@@ -164,8 +161,7 @@ void importTransportData() {
 }
 
 void addTransportData(def xml) {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.allCached
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
     def int rnuIndexRow = 2
     def int colOffset = 1
     def rows = []
@@ -223,7 +219,11 @@ void addTransportData(def xml) {
             }
         }
     }
-    dataRowHelper.save(rows)
+
+    if (!logger.containsLevel(LogLevel.ERROR)) {
+        updateIndexes(rows)
+        formDataService.getDataRowHelper(formData).allCached = rows
+    }
 }
 
 def getReportPeriodEndDate() {
@@ -234,11 +234,15 @@ def getReportPeriodEndDate() {
 }
 
 // Сортировка групп и строк
-void sortFormDataRows() {
+void sortFormDataRows(def saveInDB = true) {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
     sortRows(refBookService, logger, dataRows, null, getDataRow(dataRows, 'total'), null)
-    dataRowHelper.saveSort()
+    if (saveInDB) {
+        dataRowHelper.saveSort()
+    } else {
+        updateIndexes(dataRows)
+    }
 }
 
 void importData() {

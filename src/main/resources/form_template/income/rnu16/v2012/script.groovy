@@ -26,6 +26,7 @@ switch (formDataEvent) {
     case FormDataEvent.CALCULATE:
         calc()
         logicCheck()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.CHECK:
         logicCheck()
@@ -50,17 +51,15 @@ switch (formDataEvent) {
         formDataService.consolidationSimple(formData, logger)
         calc()
         logicCheck()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.IMPORT:
         importData()
-        if (!logger.containsLevel(LogLevel.ERROR)) {
-            calc()
-            logicCheck()
-            formDataService.saveCachedDataRows(formData, logger)
-        }
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.IMPORT_TRANSPORT_FILE:
         importTransportData()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.SORT_ROWS:
         sortFormDataRows()
@@ -112,8 +111,7 @@ def getRecordIdImport(def Long refBookId, def String alias, def String value, de
 
 // Алгоритмы заполнения полей формы
 void calc() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.getAllCached()
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
 
     if (!dataRows.isEmpty()) {
 
@@ -125,9 +123,8 @@ void calc() {
     }
 
     dataRows.add(calcTotalRow(dataRows))
-    dataRowHelper.save(dataRows)
 
-    sortFormDataRows()
+    sortFormDataRows(false)
 }
 
 
@@ -145,7 +142,7 @@ def calcTotalRow(def dataRows) {
 
 // Логические проверки
 void logicCheck() {
-    def dataRows = formDataService.getDataRowHelper(formData).getAllCached()
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
     if (dataRows.isEmpty()) {
         return
     }
@@ -172,8 +169,7 @@ void importTransportData() {
 }
 
 void addTransportData(def xml) {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.allCached
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
     def int rnuIndexRow = 2
     def int colOffset = 1
     def rows = []
@@ -194,7 +190,7 @@ void addTransportData(def xml) {
         }
 
         // графа 4 - поиск записи по графе 2
-        newRow.incomeType = getRecordIdImport(28, 'CODE', row.cell[2].text(), rnuIndexRow, 2 + colOffset)
+        newRow.incomeType = getRecordIdImport(28, 'CODE', row.cell[2].text(), rnuIndexRow, 2 + colOffset, false)
         def map = getRefBookValue(28, newRow.incomeType)
 
         // проверка графы 3
@@ -221,7 +217,7 @@ void addTransportData(def xml) {
         // графа 4
         total.sum = parseNumber(row.cell[4].text(), rnuIndexRow, 4 + colOffset, logger, true)
 
-        def colIndexMap = ['sum' : 4]
+        def colIndexMap = ['sum': 4]
         for (def alias : totalColumns) {
             def v1 = total[alias]
             def v2 = totalRow[alias]
@@ -233,7 +229,11 @@ void addTransportData(def xml) {
             }
         }
     }
-    dataRowHelper.save(rows)
+
+    if (!logger.containsLevel(LogLevel.ERROR)) {
+        updateIndexes(rows)
+        formDataService.getDataRowHelper(formData).allCached = rows
+    }
 }
 
 def getReportPeriodEndDate() {
@@ -244,11 +244,15 @@ def getReportPeriodEndDate() {
 }
 
 // Сортировка групп и строк
-void sortFormDataRows() {
+void sortFormDataRows(def saveInDB = true) {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
     sortRows(refBookService, logger, dataRows, null, getDataRow(dataRows, 'total'), null)
-    dataRowHelper.saveSort()
+    if (saveInDB) {
+        dataRowHelper.saveSort()
+    } else {
+        updateIndexes(dataRows)
+    }
 }
 
 void importData() {
@@ -261,7 +265,7 @@ void importData() {
 
     def allValues = []      // значения формы
     def headerValues = []   // значения шапки
-    def paramsMap = ['rowOffset' : 0, 'colOffset' : 0]  // мапа с параметрами (отступы сверху и слева)
+    def paramsMap = ['rowOffset': 0, 'colOffset': 0]  // мапа с параметрами (отступы сверху и слева)
 
     checkAndReadFile(ImportInputStream, UploadFileName, allValues, headerValues, TABLE_START_VALUE, TABLE_END_VALUE, HEADER_ROW_COUNT, paramsMap)
 

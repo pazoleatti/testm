@@ -55,6 +55,7 @@ switch (formDataEvent) {
         prevPeriodCheck()
         calc()
         logicCheck()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.ADD_ROW:
         def columns = (isMonthBalance() ? allColumns - 'rowNumber' : editableColumns)
@@ -78,17 +79,15 @@ switch (formDataEvent) {
         formDataService.consolidationTotal(formData, logger, ['month', 'total'])
         calc()
         logicCheck()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.IMPORT:
         importData()
-        if (!logger.containsLevel(LogLevel.ERROR)) {
-            calc()
-            logicCheck()
-            formDataService.saveCachedDataRows(formData, logger)
-        }
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.IMPORT_TRANSPORT_FILE:
         importTransportData()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.SORT_ROWS:
         sortFormDataRows()
@@ -171,7 +170,7 @@ def getRefBookValue(def long refBookId, def Long recordId) {
     if (recordId == null) {
         return null
     }
-    return formDataService.getRefBookValue(refBookId, recordId, refBookCache);
+    return formDataService.getRefBookValue(refBookId, recordId, refBookCache)
 }
 
 // Поиск записи в справочнике по значению (для импорта)
@@ -195,8 +194,7 @@ def getDate(def value, def indexRow, def indexCol) {
 }
 
 void calc() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.allCached
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
 
     // отсортировать/группировать
     sort(dataRows)
@@ -240,10 +238,8 @@ void calc() {
     // посчитать строку "Итого за текущий отчётный (налоговый) период"
     calcTotalRow(monthRow, totalRow)
 
-    dataRowHelper.save(dataRows)
-
     // Сортировка групп и строк
-    sortFormDataRows()
+    sortFormDataRows(false)
 }
 
 void logicCheck() {
@@ -302,7 +298,7 @@ void logicCheck() {
         if (!isMonthBalance()) {
             // алиасы графов для арифметической проверки
             def arithmeticCheckAlias = ['taxPrice', 'marketPricePercent', 'marketPriceRuble', 'exercisePriceRetirement',
-                    'allCost', 'tenureSkvitovannymiBonds', 'interestEarned', 'profitLoss', 'excessOfTheSellingPrice']
+                                        'allCost', 'tenureSkvitovannymiBonds', 'interestEarned', 'profitLoss', 'excessOfTheSellingPrice']
             def needValue = [:]
             needValue['taxPrice'] = calc12(row)
             needValue['marketPricePercent'] = calc16(row)
@@ -404,7 +400,7 @@ void calcTotalRow(def currentMonthRow, def currentTotalRow) {
             if (it.formTypeId == formData.formType.id) {
                 def source = formDataService.getLast(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId, formData.periodOrder)
                 if (source != null && source.state == WorkflowState.ACCEPTED) {
-                    formDataService.getDataRowHelper(source).allCached.each { row ->
+                    formDataService.getDataRowHelper(source).allSaved.each { row ->
                         if (row.getAlias() == 'total') {
                             totalSumColumns.each { alias ->
                                 // суммировать только итоговые значения за налоговый период (alias == total)
@@ -508,7 +504,7 @@ def getPrevTotalRow() {
     }
     def formDataOld = formDataService.getFormDataPrev(formData)
     if (formDataOld != null) {
-        def dataRowsOld = formDataService.getDataRowHelper(formDataOld)?.allCached
+        def dataRowsOld = formDataService.getDataRowHelper(formDataOld)?.allSaved
         return (dataRowsOld ? getDataRow(dataRowsOld, 'total') : null)
     }
     return null
@@ -518,7 +514,7 @@ def getPrevTotalRow() {
 def getRnuRowsById(def id) {
     def formDataRNU = formDataService.getLast(id, formData.kind, formDataDepartment.id, formData.reportPeriodId, formData.periodOrder)
     if (formDataRNU != null) {
-        return formDataService.getDataRowHelper(formDataRNU)?.allCached
+        return formDataService.getDataRowHelper(formDataRNU)?.allSaved
     }
     return null
 }
@@ -549,8 +545,7 @@ void importTransportData() {
 }
 
 void addTransportData(def xml) {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper?.allCached
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
     def int rnuIndexRow = 2
     def int colOffset = 1
     def rows = []
@@ -594,89 +589,15 @@ void addTransportData(def xml) {
         xmlIndexCol = 6
         newRow.implementationDate = getDate(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
 
-        // графа 7
-        xmlIndexCol = 7
-        newRow.bondsCount = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
-
-        // графа 8
-        xmlIndexCol = 8
-        newRow.purchaseCost = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
-
-        // графа 9
-        xmlIndexCol = 9
-        newRow.costs = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
-
-        // графа 10
-        xmlIndexCol = 10
-        newRow.marketPriceOnDateAcquisitionInPerc = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
-
-        // графа 11
-        xmlIndexCol = 11
-        newRow.marketPriceOnDateAcquisitionInRub = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
-
-        // графа 12
-        xmlIndexCol = 12
-        newRow.taxPrice = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
-
-        // графа 13
-        xmlIndexCol = 13
-        newRow.redemptionVal = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
-
-        // графа 14
-        xmlIndexCol = 14
-        newRow.exercisePrice = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
-
-        // графа 15
-        xmlIndexCol = 15
-        newRow.exerciseRuble = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
-
-        // графа 16
-        xmlIndexCol = 16
-        newRow.marketPricePercent = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
-
-        // графа 17
-        xmlIndexCol = 17
-        newRow.marketPriceRuble = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
-
-        // графа 18
-        xmlIndexCol = 18
-        newRow.exercisePriceRetirement = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
-
-        // графа 19
-        xmlIndexCol = 19
-        newRow.costsRetirement = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
-
-        // графа 20
-        xmlIndexCol = 20
-        newRow.allCost = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
-
-        // графа 21
-        xmlIndexCol = 21
-        newRow.parPaper = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
-
-        // графа 22
-        xmlIndexCol = 22
-        newRow.averageWeightedPricePaper = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
-
-        // графа 23
-        xmlIndexCol = 23
-        newRow.issueDays = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
-
-        // графа 24
-        xmlIndexCol = 24
-        newRow.tenureSkvitovannymiBonds = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
-
-        // графа 25
-        xmlIndexCol = 25
-        newRow.interestEarned = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
-
-        // графа 26
-        xmlIndexCol = 26
-        newRow.profitLoss = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
-
-        // графа 27
-        xmlIndexCol = 27
-        newRow.excessOfTheSellingPrice = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+        // графа 7..27
+        ['bondsCount', 'purchaseCost', 'costs', 'marketPriceOnDateAcquisitionInPerc',
+         'marketPriceOnDateAcquisitionInRub', 'taxPrice', 'redemptionVal', 'exercisePrice',
+         'exerciseRuble', 'marketPricePercent', 'marketPriceRuble', 'exercisePriceRetirement',
+         'costsRetirement', 'allCost', 'parPaper', 'averageWeightedPricePaper', 'issueDays',
+         'tenureSkvitovannymiBonds', 'interestEarned', 'profitLoss', 'excessOfTheSellingPrice'].each { alias ->
+            xmlIndexCol++
+            newRow[alias] = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+        }
 
         rows.add(newRow)
     }
@@ -739,10 +660,10 @@ void addTransportData(def xml) {
         xmlIndexCol = 27
         total.excessOfTheSellingPrice = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
 
-        def colIndexMap = ['bondsCount' : 7, 'purchaseCost' : 8, 'costs' : 9, 'redemptionVal' : 13,
-                        'exerciseRuble' : 15, 'marketPriceRuble' : 17, 'exercisePriceRetirement' : 18,
-                        'costsRetirement' : 19, 'allCost' : 20, 'interestEarned' : 25, 'profitLoss' : 26,
-                        'excessOfTheSellingPrice' : 27]
+        def colIndexMap = ['bondsCount'             : 7, 'purchaseCost': 8, 'costs': 9, 'redemptionVal': 13,
+                           'exerciseRuble'          : 15, 'marketPriceRuble': 17, 'exercisePriceRetirement': 18,
+                           'costsRetirement'        : 19, 'allCost': 20, 'interestEarned': 25, 'profitLoss': 26,
+                           'excessOfTheSellingPrice': 27]
         for (def alias : totalSumColumns) {
             def v1 = total[alias]
             def v2 = totalRow[alias]
@@ -759,13 +680,9 @@ void addTransportData(def xml) {
     rows.add(monthRow)
     calcTotalRow(monthRow, totalRow)
 
-    dataRowHelper.save(rows)
-}
-
-/** Поправить индексы. */
-void updateIndexes(def dataRows) {
-    dataRows.eachWithIndex { row, i ->
-        row.setIndex(i + 1)
+    if (!logger.containsLevel(LogLevel.ERROR)) {
+        updateIndexes(rows)
+        formDataService.getDataRowHelper(formData).allCached = rows
     }
 }
 
@@ -785,11 +702,15 @@ void loggerError(def row, def msg) {
 }
 
 // Сортировка групп и строк
-void sortFormDataRows() {
+void sortFormDataRows(def saveInDB = true) {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
     sortRows(refBookService, logger, dataRows, [getDataRow(dataRows, 'month')], getDataRow(dataRows, 'total'), true)
-    dataRowHelper.saveSort()
+    if (saveInDB) {
+        dataRowHelper.saveSort()
+    } else {
+        updateIndexes(dataRows)
+    }
 }
 
 void importData() {
@@ -802,7 +723,7 @@ void importData() {
 
     def allValues = []      // значения формы
     def headerValues = []   // значения шапки
-    def paramsMap = ['rowOffset' : 0, 'colOffset' : 0]  // мапа с параметрами (отступы сверху и слева)
+    def paramsMap = ['rowOffset': 0, 'colOffset': 0]  // мапа с параметрами (отступы сверху и слева)
 
     checkAndReadFile(ImportInputStream, UploadFileName, allValues, headerValues, TABLE_START_VALUE, TABLE_END_VALUE, HEADER_ROW_COUNT, paramsMap)
 
@@ -877,38 +798,38 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
     checkHeaderSize(headerRows[headerRows.size() - 1].size(), headerRows.size(), colCount, rowCount)
 
     def headerMapping = [
-            (headerRows[0][0])  : getColumnName(tmpRow, 'rowNumber'),
-            (headerRows[0][2])  : getColumnName(tmpRow, 'code'),
-            (headerRows[0][3])  : getColumnName(tmpRow, 'valuablePaper'),
-            (headerRows[0][4])  : getColumnName(tmpRow, 'issue'),
-            (headerRows[0][5])  : getColumnName(tmpRow, 'purchaseDate'),
-            (headerRows[0][6])  : getColumnName(tmpRow, 'implementationDate'),
-            (headerRows[0][7])  : getColumnName(tmpRow, 'bondsCount'),
-            (headerRows[0][8])  : getColumnName(tmpRow, 'purchaseCost'),
-            (headerRows[0][9])  : getColumnName(tmpRow, 'costs'),
-            (headerRows[0][10]) : 'Рыночная цена на дату приобретения',
-            (headerRows[1][10]) : '% к номиналу',
-            (headerRows[1][11]) : 'руб.коп.',
-            (headerRows[0][12]) : getColumnName(tmpRow, 'taxPrice'),
-            (headerRows[0][13]) : getColumnName(tmpRow, 'redemptionVal'),
-            (headerRows[0][14]) : 'Цена реализации',
-            (headerRows[1][14]) : '% к номиналу',
-            (headerRows[1][15]) : 'руб.коп.',
-            (headerRows[0][16]) : 'Рыночная цена',
-            (headerRows[1][16]) : '% к номиналу',
-            (headerRows[1][17]) : 'руб.коп.',
-            (headerRows[0][18]) : getColumnName(tmpRow, 'exercisePriceRetirement'),
-            (headerRows[0][19]) : getColumnName(tmpRow, 'costsRetirement'),
-            (headerRows[0][20]) : getColumnName(tmpRow, 'allCost'),
-            (headerRows[0][21]) : 'Показатели для расчёта поцентного дохода за время владения сквитованными облигациями',
-            (headerRows[1][21]) : 'Номинал одной бумаги, руб.коп.',
-            (headerRows[1][22]) : 'Средневзвешенная цена одной бумаги на дату размещения, руб.коп.',
-            (headerRows[1][23]) : 'Срок обращения согласно условиям выпуска, дней',
-            (headerRows[1][24]) : 'Срок владения сквитованными облигациями, дней',
-            (headerRows[0][25]) : getColumnName(tmpRow, 'interestEarned'),
-            (headerRows[0][26]) : getColumnName(tmpRow, 'profitLoss'),
-            (headerRows[0][27]) : getColumnName(tmpRow, 'excessOfTheSellingPrice'),
-            (headerRows[2][0])  : '1'
+            (headerRows[0][0]) : getColumnName(tmpRow, 'rowNumber'),
+            (headerRows[0][2]) : getColumnName(tmpRow, 'code'),
+            (headerRows[0][3]) : getColumnName(tmpRow, 'valuablePaper'),
+            (headerRows[0][4]) : getColumnName(tmpRow, 'issue'),
+            (headerRows[0][5]) : getColumnName(tmpRow, 'purchaseDate'),
+            (headerRows[0][6]) : getColumnName(tmpRow, 'implementationDate'),
+            (headerRows[0][7]) : getColumnName(tmpRow, 'bondsCount'),
+            (headerRows[0][8]) : getColumnName(tmpRow, 'purchaseCost'),
+            (headerRows[0][9]) : getColumnName(tmpRow, 'costs'),
+            (headerRows[0][10]): 'Рыночная цена на дату приобретения',
+            (headerRows[1][10]): '% к номиналу',
+            (headerRows[1][11]): 'руб.коп.',
+            (headerRows[0][12]): getColumnName(tmpRow, 'taxPrice'),
+            (headerRows[0][13]): getColumnName(tmpRow, 'redemptionVal'),
+            (headerRows[0][14]): 'Цена реализации',
+            (headerRows[1][14]): '% к номиналу',
+            (headerRows[1][15]): 'руб.коп.',
+            (headerRows[0][16]): 'Рыночная цена',
+            (headerRows[1][16]): '% к номиналу',
+            (headerRows[1][17]): 'руб.коп.',
+            (headerRows[0][18]): getColumnName(tmpRow, 'exercisePriceRetirement'),
+            (headerRows[0][19]): getColumnName(tmpRow, 'costsRetirement'),
+            (headerRows[0][20]): getColumnName(tmpRow, 'allCost'),
+            (headerRows[0][21]): 'Показатели для расчёта поцентного дохода за время владения сквитованными облигациями',
+            (headerRows[1][21]): 'Номинал одной бумаги, руб.коп.',
+            (headerRows[1][22]): 'Средневзвешенная цена одной бумаги на дату размещения, руб.коп.',
+            (headerRows[1][23]): 'Срок обращения согласно условиям выпуска, дней',
+            (headerRows[1][24]): 'Срок владения сквитованными облигациями, дней',
+            (headerRows[0][25]): getColumnName(tmpRow, 'interestEarned'),
+            (headerRows[0][26]): getColumnName(tmpRow, 'profitLoss'),
+            (headerRows[0][27]): getColumnName(tmpRow, 'excessOfTheSellingPrice'),
+            (headerRows[2][0]) : '1'
     ]
     (2..27).each { index ->
         headerMapping.put((headerRows[2][index]), index.toString())
@@ -959,10 +880,10 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
 
     // графа 7..27
     ['bondsCount', 'purchaseCost', 'costs', 'marketPriceOnDateAcquisitionInPerc',
-            'marketPriceOnDateAcquisitionInRub', 'taxPrice', 'redemptionVal', 'exercisePrice',
-            'exerciseRuble', 'marketPricePercent', 'marketPriceRuble', 'exercisePriceRetirement',
-            'costsRetirement', 'allCost', 'parPaper', 'averageWeightedPricePaper', 'issueDays',
-            'tenureSkvitovannymiBonds', 'interestEarned', 'profitLoss', 'excessOfTheSellingPrice'].each { alias ->
+     'marketPriceOnDateAcquisitionInRub', 'taxPrice', 'redemptionVal', 'exercisePrice',
+     'exerciseRuble', 'marketPricePercent', 'marketPriceRuble', 'exercisePriceRetirement',
+     'costsRetirement', 'allCost', 'parPaper', 'averageWeightedPricePaper', 'issueDays',
+     'tenureSkvitovannymiBonds', 'interestEarned', 'profitLoss', 'excessOfTheSellingPrice'].each { alias ->
         colIndex++
         newRow[alias] = getNumber(values[colIndex], fileRowIndex, colIndex + colOffset)
     }
