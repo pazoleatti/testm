@@ -5,5 +5,5 @@ import com.gwtplatform.dispatch.shared.Result;
 /**
  * User: avanteev
  */
-public class EditPrintFDResult implements Result {
+public class UnitEditingResult implements Result {
 }

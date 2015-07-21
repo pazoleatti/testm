@@ -1,0 +1,150 @@
+package com.aplana.sbrf.taxaccounting.web.module.refbookdata.server;
+
+import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
+import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
+import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDepartmentDao;
+import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
+import com.aplana.sbrf.taxaccounting.model.LockData;
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
+import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
+import com.aplana.sbrf.taxaccounting.service.AuditService;
+import com.aplana.sbrf.taxaccounting.service.FormDataService;
+import com.aplana.sbrf.taxaccounting.service.LogEntryService;
+import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
+import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.RefBookValueSerializable;
+import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.UnitEditingAction;
+import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.UnitEditingResult;
+import com.gwtplatform.dispatch.server.ExecutionContext;
+import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
+import com.gwtplatform.dispatch.shared.ActionException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+/**
+ * Обновление имени подразделения в печатных формах
+ * User: avanteev
+ */
+@Service
+@PreAuthorize("hasAnyRole('ROLE_CONTROL_UNP', 'ROLE_CONTROL_NS')")
+public class UnitEditingHandler extends AbstractActionHandler<UnitEditingAction, UnitEditingResult> {
+
+    @Autowired
+    FormDataService formDataService;
+    @Autowired
+    SecurityService securityService;
+    @Autowired
+    private RefBookDepartmentDao refBookDepartmentDao;
+    @Autowired
+    AuditService auditService;
+    @Autowired
+    RefBookDao refBookDao;
+    @Autowired
+    private LockDataService lockService;
+    @Autowired
+    private LogEntryService logEntryService;
+
+    String LOCK_MESSAGE = "Справочник «%s» заблокирован, попробуйте выполнить операцию позже!";
+
+
+    public UnitEditingHandler() {
+        super(UnitEditingAction.class);
+    }
+
+    @Override
+    public UnitEditingResult execute(UnitEditingAction action, ExecutionContext executionContext) throws ActionException {
+        List<String> lockedObjects = new ArrayList<String>();
+        Logger logger = new Logger();
+        int userId = securityService.currentUserInfo().getUser().getId();
+        String lockKey = LockData.LockObjects.REF_BOOK.name() + "_" + RefBookDepartmentDao.REF_BOOK_ID;
+        RefBook refBook = refBookDao.get(RefBookDepartmentDao.REF_BOOK_ID);
+        LockData lockData = lockService.lock(lockKey, userId,
+                String.format(LockData.DescriptionTemplate.REF_BOOK.getText(), refBook.getName()),
+                lockService.getLockTimeout(LockData.LockObjects.REF_BOOK));
+        if (lockData == null) {
+            try {
+                //Блокировка установлена
+                lockedObjects.add(lockKey);
+                //Блокируем связанные справочники
+                List<RefBookAttribute> attributes = refBook.getAttributes();
+                for (RefBookAttribute attribute : attributes) {
+                    if (attribute.getAttributeType().equals(RefBookAttributeType.REFERENCE)) {
+                        RefBook attributeRefBook = refBookDao.get(attribute.getRefBookId());
+                        String referenceLockKey = LockData.LockObjects.REF_BOOK.name() + "_" + attributeRefBook.getId();
+                        if (!lockedObjects.contains(referenceLockKey)) {
+                            LockData referenceLockData = lockService.lock(referenceLockKey, userId,
+                                    String.format(LockData.DescriptionTemplate.REF_BOOK.getText(), attributeRefBook.getName()),
+                                    lockService.getLockTimeout(LockData.LockObjects.REF_BOOK));
+                            if (referenceLockData == null) {
+                                //Блокировка установлена
+                                lockedObjects.add(referenceLockKey);
+                            } else {
+                                throw new ServiceLoggerException(String.format(LOCK_MESSAGE, attributeRefBook.getName()),
+                                        logEntryService.save(logger.getEntries()));
+                            }
+                        }
+                    }
+
+                    Map<String, RefBookValue> valueToSave = new HashMap<String, RefBookValue>();
+                    for(Map.Entry<String, RefBookValueSerializable> v : action.getValueToSave().entrySet()) {
+                        RefBookValue value = new RefBookValue(v.getValue().getAttributeType(), v.getValue().getValue());
+                        valueToSave.put(v.getKey(), value);
+                    }
+
+                    refBookDepartmentDao.update(action.getDepId(), valueToSave, refBook.getAttributes());
+                    logger.info("Подразделение сохранено");
+
+                    auditService.add(FormDataEvent.UPDATE_DEPARTMENT, securityService.currentUserInfo(), action.getDepId(),
+                            null, null, null, null,
+                            String.format("Изменены значения атрибутов подразделения %s, новые значения атрибутов: %s",
+                                    action.getDepName(),
+                                    assembleMessage(valueToSave)), null);
+                    if (action.getVersionFrom()!= null){
+                        if (!action.isChangeType()){
+                            //Обновляем имена подразделений в печатных формах
+                            formDataService.
+                                    updateFDDepartmentNames(action.getDepId(), action.getDepName(), action.getVersionFrom(), action.getVersionTo(), securityService.currentUserInfo());
+                        }else {
+                            //Обновляем имена ТБ в печатных формах
+                            formDataService.
+                                    updateFDTBNames(action.getDepId(), action.getDepName(), action.getVersionFrom(), action.getVersionTo(), action.isChangeType(), securityService.currentUserInfo());
+                        }
+                    }
+                }
+            } finally {
+                for (String lock : lockedObjects) {
+                    lockService.unlock(lock, userId);
+                }
+            }
+
+        } else {
+            throw new ServiceException(String.format(LOCK_MESSAGE, refBook.getName()));
+        }
+        return new UnitEditingResult();
+    }
+
+    @Override
+    public void undo(UnitEditingAction formDataPrintAction, UnitEditingResult checkCorrectessFDResult, ExecutionContext executionContext) throws ActionException {
+        //Nothing
+    }
+
+    private String assembleMessage(Map<String, RefBookValue> records){
+        StringBuilder sb = new StringBuilder();
+        for (Map.Entry<String, RefBookValue> record : records.entrySet()){
+            if (!record.getKey().equals("NAME"))
+                sb.append(String.format(" %s- %s ", record.getKey(), record.getValue().toString()));
+        }
+
+        return sb.toString();
+    }
+}
