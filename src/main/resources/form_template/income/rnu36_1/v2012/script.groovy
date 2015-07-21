@@ -33,6 +33,7 @@ switch (formDataEvent) {
     case FormDataEvent.CALCULATE:
         calc()
         logicCheck()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.ADD_ROW:
         addRow()
@@ -54,14 +55,15 @@ switch (formDataEvent) {
         consolidation()
         calc()
         logicCheck()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.IMPORT:
         importData()
-        calc()
-        logicCheck()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.IMPORT_TRANSPORT_FILE:
         importTransportData()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.SORT_ROWS:
         sortFormDataRows()
@@ -151,8 +153,7 @@ def addRow() {
 }
 
 void calc() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.allCached
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
 
     // последний день отчетного месяца
     def lastDay = getReportPeriodEndDate()
@@ -167,9 +168,7 @@ void calc() {
     // расчет итогов
     calcTotalRows(dataRows)
 
-    dataRowHelper.save(dataRows)
-
-    sortFormDataRows()
+    sortFormDataRows(false)
 }
 
 void logicCheck() {
@@ -232,8 +231,7 @@ void logicCheck() {
 }
 
 void consolidation() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.allCached
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
 
     // удалить нефиксированные строки
     def deleteRows = []
@@ -254,13 +252,12 @@ void consolidation() {
         if (it.formTypeId == formData.formType.id) {
             def source = formDataService.getLast(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId, formData.periodOrder)
             if (source != null && source.state == WorkflowState.ACCEPTED) {
-                def sourceDataRows = formDataService.getDataRowHelper(source).allCached
+                def sourceDataRows = formDataService.getDataRowHelper(source).allSaved
                 copyRows(sourceDataRows, dataRows, 'A', 'totalA')
                 copyRows(sourceDataRows, dataRows, 'B', 'totalB')
             }
         }
     }
-    dataRowHelper.save(dataRows)
 }
 
 // Посчитать значение графы 8
@@ -344,8 +341,6 @@ def getSum(def dataRows, def labelRow, def totalRow, def alias) {
 
 void importTransportData() {
     def xml = getTransportXML(ImportInputStream, importService, UploadFileName, 8, 1)
-
-    // загрузить данные
     addTransportData(xml)
 }
 
@@ -411,8 +406,7 @@ void addTransportData(def xml) {
         }
     }
 
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.allCached
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
     dataRows = dataRows.grep { row -> row.getAlias() != null }
     updateIndexes(dataRows)
 
@@ -453,7 +447,6 @@ void addTransportData(def xml) {
 
     }
     calcTotalRows(dataRows)
-    dataRowHelper.save(dataRows)
 }
 
 // Расчет итогов
@@ -472,7 +465,7 @@ void calcTotalRows(def dataRows) {
 }
 
 
-void sortFormDataRows() {
+void sortFormDataRows(def saveInDB = true) {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
 
@@ -489,7 +482,12 @@ void sortFormDataRows() {
 
         sortRowsSimple(sectionRows)
     }
-    dataRowHelper.saveSort()
+
+    if (saveInDB) {
+        dataRowHelper.saveSort()
+    } else {
+        updateIndexes(dataRows)
+    }
 }
 
 void importData() {
@@ -509,7 +507,7 @@ void importData() {
     // проверка шапки
     checkHeaderXls(headerValues, COLUMN_COUNT, HEADER_ROW_COUNT, tmpRow)
     if (logger.containsLevel(LogLevel.ERROR)) {
-        return;
+        return
     }
     // освобождение ресурсов для экономии памяти
     headerValues.clear()

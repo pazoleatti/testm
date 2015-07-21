@@ -44,6 +44,7 @@ switch (formDataEvent) {
     case FormDataEvent.CALCULATE:
         calc()
         logicCheck()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.ADD_ROW:
         addRow()
@@ -63,17 +64,17 @@ switch (formDataEvent) {
         break
     case FormDataEvent.COMPOSE:
         consolidation()
+        calc()
+        logicCheck()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.IMPORT:
         importData()
-        if (!logger.containsLevel(LogLevel.ERROR)) {
-            calc()
-            logicCheck()
-            formDataService.saveCachedDataRows(formData, logger)
-        }
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.IMPORT_TRANSPORT_FILE:
         importTransportData()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.SORT_ROWS:
         sortFormDataRows()
@@ -91,14 +92,14 @@ def refBookCache = [:]
 // все атрибуты
 @Field
 def allColumns = ['fix', 'number', 'name', 'code', 'issuer', 'regNumber', 'shortPositionData', 'faceValue',
-        'countsBonds', 'averageWeightedPrice', 'termBondsIssued', 'maturityDate', 'currentPeriod', 'currentCouponRate',
-        'incomeCurrentCoupon', 'incomePrev', 'incomeShortPosition', 'percIncome', 'totalPercIncome']
+                  'countsBonds', 'averageWeightedPrice', 'termBondsIssued', 'maturityDate', 'currentPeriod', 'currentCouponRate',
+                  'incomeCurrentCoupon', 'incomePrev', 'incomeShortPosition', 'percIncome', 'totalPercIncome']
 
 // Редактируемые атрибуты (графа 2, 5..14)
 @Field
 def editableColumns = ['name', 'regNumber', 'shortPositionData', 'faceValue',
-            'countsBonds', 'averageWeightedPrice', 'termBondsIssued', 'maturityDate',
-            'currentPeriod', 'currentCouponRate', 'incomeCurrentCoupon']
+                       'countsBonds', 'averageWeightedPrice', 'termBondsIssued', 'maturityDate',
+                       'currentPeriod', 'currentCouponRate', 'incomeCurrentCoupon']
 
 // Автозаполняемые атрибуты
 @Field
@@ -107,8 +108,8 @@ def autoFillColumns = allColumns - editableColumns
 // Проверяемые на пустые значения атрибуты (графа 2..8, 10..14, 17, 18)
 @Field
 def nonEmptyColumns = ['name', /*'issuer',*/ 'regNumber', 'shortPositionData',
-        'faceValue', 'countsBonds', 'termBondsIssued', 'maturityDate', 'currentPeriod',
-        'currentCouponRate', 'incomeCurrentCoupon', 'percIncome', 'totalPercIncome']
+                       'faceValue', 'countsBonds', 'termBondsIssued', 'maturityDate', 'currentPeriod',
+                       'currentCouponRate', 'incomeCurrentCoupon', 'percIncome', 'totalPercIncome']
 
 // Атрибуты итоговых строк для которых вычисляются суммы (графа 8, 15..18)
 @Field
@@ -116,7 +117,7 @@ def totalSumColumns = ['countsBonds', 'incomePrev', 'incomeShortPosition', 'perc
 
 // список алиасов подразделов
 @Field
-sections = ['1', '2', '3', '4', '5', '6', '7', '8']
+        sections = ['1', '2', '3', '4', '5', '6', '7', '8']
 
 @Field
 def taxPeriod = null
@@ -142,8 +143,9 @@ def getReportPeriodEndDate() {
 }
 
 // Поиск записи в справочнике по значению (для расчетов) + по дате
-def getRefBookRecord(def Long refBookId, def String alias, def String value, def Date day, def int rowIndex, def String cellName,
-                     boolean required) {
+def getRefBookRecord(
+        def Long refBookId, def String alias, def String value, def Date day, def int rowIndex, def String cellName,
+        boolean required) {
     if (value == null) {
         return null
     }
@@ -156,7 +158,7 @@ def getRefBookValue(def long refBookId, def Long recordId) {
     if (recordId == null) {
         return null
     }
-    return formDataService.getRefBookValue(refBookId, recordId, refBookCache);
+    return formDataService.getRefBookValue(refBookId, recordId, refBookCache)
 }
 
 // Поиск записи в справочнике по значению (для импорта)
@@ -209,8 +211,7 @@ def addRow() {
 }
 
 void calc() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.allCached
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
 
     def lastDay = getReportPeriodEndDate()
     for (def row : dataRows) {
@@ -231,9 +232,8 @@ void calc() {
     updateIndexes(dataRows)
 
     calcTotal(dataRows)
-    dataRowHelper.save(dataRows)
 
-    sortFormDataRows()
+    sortFormDataRows(false)
 }
 
 void calcTotal(def dataRows) {
@@ -288,8 +288,7 @@ void logicCheck() {
 }
 
 void consolidation() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.allCached
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
 
     // удалить нефиксированные строки
     deleteNotFixedRows(dataRows)
@@ -300,7 +299,7 @@ void consolidation() {
         if (it.formTypeId == formData.formType.id) {
             def source = formDataService.getLast(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId, formData.periodOrder)
             if (source != null && source.state == WorkflowState.ACCEPTED) {
-                def sourceDataRows = formDataService.getDataRowHelper(source).allCached
+                def sourceDataRows = formDataService.getDataRowHelper(source).allSaved
                 // копирование данных по разделам
                 sections.each { section ->
                     copyRows(sourceDataRows, dataRows, section, 'total' + section)
@@ -309,7 +308,8 @@ void consolidation() {
         }
     }
     calcTotal(dataRows)
-    dataRowHelper.save(dataRows)
+
+    updateIndexes(dataRows)
 }
 
 // Отсорировать данные (по графе 1, 2).
@@ -545,8 +545,7 @@ void importTransportData() {
 }
 
 void addTransportData(def xml) {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper?.allCached
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
     def int rnuIndexRow = 2
     def int colOffset = 1
 
@@ -612,7 +611,7 @@ void addTransportData(def xml) {
 
         // графа 12..18
         ['currentPeriod', 'currentCouponRate', 'incomeCurrentCoupon', 'incomePrev', 'incomeShortPosition',
-                'percIncome', 'totalPercIncome'].each { alias ->
+         'percIncome', 'totalPercIncome'].each { alias ->
             xmlIndexCol++
             newRow[alias] = parseNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, logger, true)
         }
@@ -648,11 +647,9 @@ void addTransportData(def xml) {
     }
 
     calcTotal(dataRows)
-
-    dataRowHelper.save(dataRows)
 }
 
-void sortFormDataRows() {
+void sortFormDataRows(def saveInDB = true) {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
 
@@ -664,12 +661,17 @@ void sortFormDataRows() {
         def sectionRows = (from < to ? dataRows[from..(to - 1)] : [])
 
         // Массовое разыменовывание граф НФ
-        def columnNameList = firstRow.keySet().collect{firstRow.getCell(it).getColumn()}
+        def columnNameList = firstRow.keySet().collect { firstRow.getCell(it).getColumn() }
         refBookService.dataRowsDereference(logger, sectionRows, columnNameList)
 
         sortRowsSimple(sectionRows)
     }
-    dataRowHelper.saveSort()
+
+    if (saveInDB) {
+        dataRowHelper.saveSort()
+    } else {
+        updateIndexes(dataRows)
+    }
 }
 
 void importData() {
@@ -682,14 +684,14 @@ void importData() {
 
     def allValues = []      // значения формы
     def headerValues = []   // значения шапки
-    def paramsMap = ['rowOffset' : 0, 'colOffset' : 0]  // мапа с параметрами (отступы сверху и слева)
+    def paramsMap = ['rowOffset': 0, 'colOffset': 0]  // мапа с параметрами (отступы сверху и слева)
 
     checkAndReadFile(ImportInputStream, UploadFileName, allValues, headerValues, TABLE_START_VALUE, TABLE_END_VALUE, HEADER_ROW_COUNT, paramsMap)
 
     // проверка шапки
     checkHeaderXls(headerValues, COLUMN_COUNT, HEADER_ROW_COUNT, tmpRow)
     if (logger.containsLevel(LogLevel.ERROR)) {
-        return;
+        return
     }
     // освобождение ресурсов для экономии памяти
     headerValues.clear()
@@ -848,7 +850,7 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
 
     // графа 4 - зависит от графы 5 - атрибут 809 - ISSUER - «Эмитент», справочник 84 «Ценные бумаги»
     colIndex = 4
-    def record100 = getRecordImport(100, 'FULL_NAME', values[colIndex], fileRowIndex, colIndex + colOffset)
+    def record100 = getRecordImport(100, 'FULL_NAME', values[colIndex], fileRowIndex, colIndex + colOffset, false)
     if (record84 != null && record100 != null) {
         def value1 = record100?.record_id?.value?.toString()
         def value2 = record84?.ISSUER?.value?.toString()
@@ -871,7 +873,7 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
 
     // графа 12..18
     ['currentPeriod', 'currentCouponRate', 'incomeCurrentCoupon', 'incomePrev', 'incomeShortPosition',
-            'percIncome', 'totalPercIncome'].each { alias ->
+     'percIncome', 'totalPercIncome'].each { alias ->
         colIndex++
         newRow[alias] = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
     }
