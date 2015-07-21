@@ -176,7 +176,7 @@
     </row>
     <row alias="5">
         <cell alias="fix" colSpan="19" rowSpan="1"
-              stringValue="5. Ипотечные облигации, выпущенные после 1 января 2007 года " styleAlias="Раздел 2 уровня"/>
+              stringValue="5. Ипотечные облигации, выпущенные после 1 января 2007 года" styleAlias="Раздел 2 уровня"/>
         <cell alias="number" colSpan="1" rowSpan="1"/>
         <cell alias="name" colSpan="1" rowSpan="1" styleAlias="Раздел 2 уровня"/>
         <cell alias="code" colSpan="1" rowSpan="1"/>
