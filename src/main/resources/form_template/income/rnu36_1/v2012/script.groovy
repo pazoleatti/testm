@@ -386,7 +386,7 @@ void addTransportData(def xml) {
 
         // графа 6..8
         ['averageWeightedPrice', 'termBondsIssued', 'percIncome'].each { alias ->
-            colIndex++
+            rnuIndexCol++
             newRow[alias] = parseNumber(row.cell[rnuIndexCol].text(), rnuIndexRow, rnuIndexCol + colOffset, logger, true)
         }
 
