@@ -91,7 +91,7 @@
     </styles>
     <styles>
         <alias>Редактируемая</alias>
-        <backColor>BLUE</backColor>
+        <backColor>LIGHT_BLUE</backColor>
         <bold>false</bold>
         <fontColor>BLACK</fontColor>
         <italic>false</italic>
