@@ -213,6 +213,13 @@ public interface DeclarationDataService {
     Long getValueForCheckLimit(TAUserInfo userInfo, long declarationDataId, ReportType reportType);
 
     /**
+     * Формирование списка НФ-источников
+     * @param declarationData
+     * @return
+     */
+    List<DepartmentFormType> getFormDataSources(DeclarationData declarationData, Logger logger);
+
+    /**
      * Возвращает полное название декларации с указанием подразделения, периода и прочего
      * @param declarationId идентификатор декларации
      * @param reportType тип отчета. Может быть null

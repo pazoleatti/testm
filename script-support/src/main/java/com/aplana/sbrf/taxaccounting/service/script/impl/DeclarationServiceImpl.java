@@ -198,8 +198,7 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
 
 		// Формирование списка НФ-источников в статусе "Принята"
 		DeclarationTemplate declarationTemplate = declarationTemplateDao.get(declarationTemplateId);
-		List<DepartmentFormType> sourcesInfo = departmentFormTypeDao.getDeclarationSources(departmentId, declarationTemplate.getType().getId(),
-                reportPeriod.getCalendarStartDate(), reportPeriod.getEndDate());
+		List<DepartmentFormType> sourcesInfo = declarationDataService.getFormDataSources(declarationData, new Logger());
 		List<FormData> records = new ArrayList<FormData>();
 
         DepartmentReportPeriodFilter filter = new DepartmentReportPeriodFilter();
@@ -222,8 +221,7 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
         });
 
 		for (DepartmentFormType dft : sourcesInfo) {
-            // Ежемесячные формы не являются источниками для декларация, поэтому periodOrder = null
-			FormData formData = formDataDao.getLast(dft.getFormTypeId(), dft.getKind(), dft.getDepartmentId(), reportPeriodId, null);
+			FormData formData = formDataDao.getLast(dft.getFormTypeId(), dft.getKind(), dft.getDepartmentId(), reportPeriodId, dft.getPeriodOrder());
 			if (formData != null) {
 				if (formData.getState() != WorkflowState.ACCEPTED) {
                     //TODO возможно перенести initFormTemplateParams внутрь функции

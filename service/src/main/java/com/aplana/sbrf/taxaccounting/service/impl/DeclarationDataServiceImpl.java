@@ -246,18 +246,12 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         setDeclarationBlobs(logger, declarationData, docDate, userInfo, stateLogger);
 
         //3. обновляет записи о консолидации
-        ReportPeriod reportPeriod = reportPeriodService.getReportPeriod(declarationData.getReportPeriodId());
-        DeclarationTemplate template = declarationTemplateService.get(declarationData.getDeclarationTemplateId());
-        List<DepartmentFormType> dftSources = departmentFormTypeDao.getDeclarationSources(
-                declarationData.getDepartmentId(),
-                template.getType().getId(),
-                reportPeriod.getCalendarStartDate(),
-                reportPeriod.getEndDate());
+        List<DepartmentFormType> dftSources = getFormDataSources(declarationData, logger);
         ArrayList<Long> formDataIds = new ArrayList<Long>();
         for (DepartmentFormType dftSource : dftSources){
             DepartmentReportPeriod sourceDepartmentReportPeriod = departmentReportPeriodService.getLast(dftSource.getDepartmentId(), declarationData.getReportPeriodId());
             FormData formData =
-                    formDataService.findFormData(dftSource.getFormTypeId(), dftSource.getKind(), sourceDepartmentReportPeriod.getId(), null);
+                    formDataService.getLast(dftSource.getFormTypeId(), dftSource.getKind(), declarationData.getDepartmentId(), declarationData.getReportPeriodId(), dftSource.getPeriodOrder());
             if (formData != null && formData.getState() == WorkflowState.ACCEPTED) {
                 formDataIds.add(formData.getId());
             }
@@ -1022,17 +1016,11 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             case XML_DEC:
                 long cellCountSource = 0;
                 DeclarationData declarationData = get(declarationDataId, userInfo);
-                DeclarationTemplate declarationTemplate = declarationTemplateService.get(declarationData.getDeclarationTemplateId());
-                ReportPeriod reportPeriod = reportPeriodService.getReportPeriod(declarationData.getReportPeriodId());
-                List<DepartmentFormType> dftSources = departmentFormTypeDao.getDeclarationSources(
-                        declarationData.getDepartmentId(),
-                        declarationTemplate.getType().getId(),
-                        reportPeriod.getCalendarStartDate(),
-                        reportPeriod.getEndDate());
+                List<DepartmentFormType> dftSources = getFormDataSources(declarationData, new Logger());
                 for (DepartmentFormType dftSource : dftSources){
                     DepartmentReportPeriod sourceDepartmentReportPeriod = departmentReportPeriodService.getLast(dftSource.getDepartmentId(), declarationData.getReportPeriodId());
                     FormData formData =
-                            formDataService.findFormData(dftSource.getFormTypeId(), dftSource.getKind(), sourceDepartmentReportPeriod.getId(), null);
+                            formDataService.findFormData(dftSource.getFormTypeId(), dftSource.getKind(), sourceDepartmentReportPeriod.getId(), dftSource.getPeriodOrder());
                     if (formData != null && formData.getState() == WorkflowState.ACCEPTED) {
                         int rowCountSource = dataRowDao.getSavedSize(formData);
                         int columnCountSource = formTemplateService.get(formData.getFormTemplateId()).getColumns().size();
@@ -1045,6 +1033,63 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         }
     }
 
+    @Override
+    public List<DepartmentFormType> getFormDataSources(DeclarationData declarationData, Logger logger) {
+        List<DepartmentFormType> sourceList = new ArrayList<DepartmentFormType>();
+        Map<String, Object> params = new HashMap<String, Object>();
+        FormSources sources = new FormSources();
+        sources.setSourceList(new ArrayList<FormToFormRelation>());
+        sources.setSourcesProcessedByScript(false);
+        params.put("sources", sources);
+        declarationDataScriptingService.executeScript(null, declarationData, FormDataEvent.GET_SOURCES, logger, params);
+        if (sources.isSourcesProcessedByScript()) {
+            //Скрипт возвращает все необходимые источники-приемники
+            if (sources.getSourceList() != null) {
+                for (FormToFormRelation relation : sources.getSourceList()) {
+                    if (relation.isSource() && relation.isCreated() && relation.getFormType() != null) {
+                        //TODO: Заполняем DepartmentFormType не полностью!
+                        DepartmentFormType source = new DepartmentFormType();
+                        source.setDepartmentId(declarationData.getDepartmentId());
+                        source.setFormTypeId(relation.getFormType().getId());
+                        source.setKind(relation.getFormDataKind());
+                        source.setPeriodOrder(relation.getPeriodOrder());
+                        sourceList.add(source);
+                    }
+                }
+            }
+        } else {
+            DeclarationTemplate declarationTemplate = declarationTemplateService.get(declarationData.getDeclarationTemplateId());
+            int reportPeriodId = declarationData.getReportPeriodId();
+            ReportPeriod reportPeriod = reportPeriodService.getReportPeriod(reportPeriodId);
+
+            List<DepartmentFormType> dftSources = departmentFormTypeDao.getDeclarationSources(
+                    declarationData.getDepartmentId(),
+                    declarationTemplate.getType().getId(),
+                    reportPeriod.getCalendarStartDate(),
+                    reportPeriod.getEndDate());
+            for (DepartmentFormType dft : dftSources) {
+                if (formTemplateService.existFormTemplate(dft.getFormTypeId(), reportPeriodId)) {
+                    FormTemplate formTemplate = formTemplateService.get(formTemplateService.getActiveFormTemplateId(dft.getFormTypeId(), reportPeriodId));
+                    if (formTemplate.isMonthly()) {
+                        for (Months month : reportPeriodService.getAvailableMonthList(reportPeriodId)) {
+                            if (month != null) {
+                                DepartmentFormType source = new DepartmentFormType();
+                                source.setDepartmentId(dft.getDepartmentId());
+                                source.setFormTypeId(dft.getFormTypeId());
+                                source.setKind(dft.getKind());
+                                source.setPeriodOrder(month.getId());
+                                sourceList.add(source);
+                            }
+                        }
+                    } else {
+                        sourceList.add(dft);
+                    }
+                }
+            }
+        }
+        return sourceList;
+    }
+
     private void checkSources(DeclarationData dd, Logger logger){
         //Проверка на неактуальные консолидированные данные
         if (!sourceService.isDDConsolidationTopical(dd.getId())){
@@ -1052,15 +1097,11 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             /*throw new ServiceLoggerException("", logEntryService.save(logger.getEntries()));*/
         }
         ReportPeriod rp = reportPeriodService.getReportPeriod(dd.getReportPeriodId());
-        List<DepartmentFormType> sourceDDs = departmentFormTypeDao.getDeclarationSources(
-                dd.getDepartmentId(),
-                declarationTemplateService.get(dd.getDeclarationTemplateId()).getType().getId(),
-                rp.getStartDate(),
-                rp.getEndDate());
+        List<DepartmentFormType> sourceDDs = getFormDataSources(dd, logger);
         for (DepartmentFormType sourceDFT : sourceDDs){
             DepartmentReportPeriod drp = departmentReportPeriodService.getLast(sourceDFT.getDepartmentId(), dd.getReportPeriodId());
             FormData sourceFD =
-                    formDataService.findFormData(sourceDFT.getFormTypeId(), sourceDFT.getKind(), drp.getId(), null);
+                    formDataService.findFormData(sourceDFT.getFormTypeId(), sourceDFT.getKind(), drp.getId(), sourceDFT.getPeriodOrder());
             if (sourceFD==null){
                 logger.warn(
                         NOT_EXIST_SOURCE_DECLARATION_WARNING,
