@@ -58,29 +58,30 @@ switch (formDataEvent) {
     case FormDataEvent.CREATE:
         formDataService.checkUnique(formData, logger)
         break
-    case FormDataEvent.CHECK :
+    case FormDataEvent.CHECK:
         checkRNU()
         logicCheck()
         break
-    case FormDataEvent.CALCULATE :
+    case FormDataEvent.CALCULATE:
         checkRNU()
         calc()
         logicCheck()
+        formDataService.saveCachedDataRows(formData, logger)
         break
-    case FormDataEvent.ADD_ROW :
+    case FormDataEvent.ADD_ROW:
         formDataService.addRow(formData, currentDataRow, editableColumns, autoFillColumns)
         break
-    case FormDataEvent.DELETE_ROW :
+    case FormDataEvent.DELETE_ROW:
         if (currentDataRow != null && currentDataRow.getAlias() == null) {
             formDataService.getDataRowHelper(formData).delete(currentDataRow)
         }
         break
-    case FormDataEvent.MOVE_CREATED_TO_APPROVED :  // Утвердить из "Создана"
-    case FormDataEvent.MOVE_APPROVED_TO_ACCEPTED : // Принять из "Утверждена"
-    case FormDataEvent.MOVE_CREATED_TO_ACCEPTED :  // Принять из "Создана"
-    case FormDataEvent.MOVE_CREATED_TO_PREPARED :  // Подготовить из "Создана"
-    case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED : // Принять из "Подготовлена"
-    case FormDataEvent.MOVE_PREPARED_TO_APPROVED : // Утвердить из "Подготовлена"
+    case FormDataEvent.MOVE_CREATED_TO_APPROVED:  // Утвердить из "Создана"
+    case FormDataEvent.MOVE_APPROVED_TO_ACCEPTED: // Принять из "Утверждена"
+    case FormDataEvent.MOVE_CREATED_TO_ACCEPTED:  // Принять из "Создана"
+    case FormDataEvent.MOVE_CREATED_TO_PREPARED:  // Подготовить из "Создана"
+    case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED: // Принять из "Подготовлена"
+    case FormDataEvent.MOVE_PREPARED_TO_APPROVED: // Утвердить из "Подготовлена"
         checkRNU()
         logicCheck()
         break
@@ -88,6 +89,7 @@ switch (formDataEvent) {
         formDataService.consolidationTotal(formData, logger, ['total'])
         calc()
         logicCheck()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.IMPORT:
         importData()
@@ -95,6 +97,7 @@ switch (formDataEvent) {
         break
     case FormDataEvent.IMPORT_TRANSPORT_FILE:
         importTransportData()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.SORT_ROWS:
         sortFormDataRows()
@@ -147,8 +150,7 @@ String rnu49TotalAIndex = 'totalA'
 
 // заполняем ячейки, вычисляемые автоматически
 def calc() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.getAllCached()
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
 
     def rnu49FormData = getRnu49FormData()
     def rnu49Rows = rnu49FormData?.getAllCached()
@@ -177,9 +179,8 @@ def calc() {
     // добавить строку "итого"
     calcTotalSum(dataRows, totalRow, totalSumColumns)
     dataRows.add(totalRow)
-    dataRowHelper.save(dataRows)
 
-    sortFormDataRows()
+    sortFormDataRows(false)
 }
 
 /**
@@ -204,7 +205,7 @@ def getRnu49Row(def rnu49Rows, def dataRow) {
     def indexRow = (startToSearchIndex..endToSearchIndex).find { index ->
         rnu49Rows[index].invNumber == dataRow.inventoryNumber
     }
-    return indexRow?rnu49Rows[indexRow]:[:]
+    return indexRow ? rnu49Rows[indexRow] : [:]
 }
 
 /**
@@ -214,10 +215,10 @@ def getValues(def rnu49Row) {
     def values = [:]
 
     values.with {
-        /*2*/   operationDate = getOperationDate(rnu49Row)
-        /*5*/   baseNumber = getBaseNumber(rnu49Row)
-        /*6*/   baseDate = getBaseDate(rnu49Row)
-        /*7*/   summ = getSumm(rnu49Row)
+        /*2*/ operationDate = getOperationDate(rnu49Row)
+        /*5*/ baseNumber = getBaseNumber(rnu49Row)
+        /*6*/ baseDate = getBaseDate(rnu49Row)
+        /*7*/ summ = getSumm(rnu49Row)
     }
 
     return values
@@ -227,11 +228,11 @@ def getOperationDate(def rnu49Row) {
     return rnu49Row.operationDate
 }
 
-def getBaseNumber(rnu49Row){
+def getBaseNumber(rnu49Row) {
     return rnu49Row.reasonNumber
 }
 
-def getBaseDate(rnu49Row){
+def getBaseDate(rnu49Row) {
     return rnu49Row.reasonDate
 }
 
@@ -242,11 +243,10 @@ def getSumm(rnu49Row) {
 /**
  * проверяем все данные формы на обязательное и корректное заполнение
  */
-boolean logicCheck(){
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.getAllCached()
+boolean logicCheck() {
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
 
-    def rnu49Rows = getRnu49FormData()?.getAllCached()
+    def rnu49Rows = getRnu49FormData()?.allSaved
     if (rnu49Rows == null) return
 
     for (def row : dataRows) {
@@ -260,7 +260,7 @@ boolean logicCheck(){
         checkNonEmptyColumns(row, index, nonEmptyColumns, logger, true)
 
         // 1. Проверка уникальности значий в графе «Номер ссудного счета»
-        def find = dataRows.find{it->
+        def find = dataRows.find { it ->
             (row != it && row.inventoryNumber == it.inventoryNumber)
         }
         if (find != null) {
@@ -277,7 +277,7 @@ boolean logicCheck(){
         for (def colName : otherCheckAlias) {
             if (row[colName] != calcValues[colName]) {
                 String msg = getColumnName(row, colName)
-                rowError(logger, row, errorMsg+"Неверно рассчитана графа «$msg»!")
+                rowError(logger, row, errorMsg + "Неверно рассчитана графа «$msg»!")
             }
         }
     }
@@ -291,8 +291,7 @@ void importTransportData() {
 }
 
 void addTransportData(def xml) {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.allCached
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
     def int rnuIndexRow = 2
     def int colOffset = 1
     def rows = []
@@ -351,7 +350,7 @@ void addTransportData(def xml) {
         xmlIndexCol = 7
         total.summ = parseNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, logger, true)
 
-        def colIndexMap = ['summ' : 7]
+        def colIndexMap = ['summ': 7]
         for (def alias : totalSumColumns) {
             def v1 = total[alias]
             def v2 = totalRow[alias]
@@ -363,9 +362,12 @@ void addTransportData(def xml) {
             }
         }
     }
-    dataRowHelper.save(rows)
-}
 
+    if (!logger.containsLevel(LogLevel.ERROR)) {
+        updateIndexes(rows)
+        formDataService.getDataRowHelper(formData).allCached = rows
+    }
+}
 
 // проверить наличие рну 49
 void checkRNU() {
@@ -374,11 +376,15 @@ void checkRNU() {
     }
 }
 
-void sortFormDataRows() {
+void sortFormDataRows(def saveInDB = true) {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
     sortRows(refBookService, logger, dataRows, null, getDataRow(dataRows, 'total'), null)
-    dataRowHelper.saveSort()
+    if (saveInDB) {
+        dataRowHelper.saveSort()
+    } else {
+        updateIndexes(dataRows)
+    }
 }
 
 void importData() {
