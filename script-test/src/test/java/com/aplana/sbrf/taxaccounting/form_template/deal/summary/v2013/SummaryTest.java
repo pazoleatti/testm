@@ -279,6 +279,7 @@ public class SummaryTest extends ScriptTestBase {
         int expected = testHelper.getDataRowHelper().getAll().size() + 9; // 9 = 6 (строк из файла) + 3 (заголовки групп - названия организации)
         testHelper.setImportFileInputStream(getImportXlsInputStream());
         testHelper.execute(FormDataEvent.IMPORT);
+        testHelper.execute(FormDataEvent.CALCULATE);
         Assert.assertEquals(expected, testHelper.getDataRowHelper().getAll().size());
         checkLogger();
     }
