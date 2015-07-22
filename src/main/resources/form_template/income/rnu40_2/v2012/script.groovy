@@ -26,31 +26,33 @@ def isConsolidated
 isConsolidated = formData.kind == FormDataKind.CONSOLIDATED
 
 switch (formDataEvent) {
-    case FormDataEvent.CREATE :
+    case FormDataEvent.CREATE:
         formDataService.checkUnique(formData, logger)
         break
-    case FormDataEvent.CHECK :
+    case FormDataEvent.CHECK:
         checkSourceAccepted()
         logicCheck()
         break
-    case FormDataEvent.CALCULATE :
+    case FormDataEvent.CALCULATE:
         checkSourceAccepted()
         calc()
         logicCheck()
+        formDataService.saveCachedDataRows(formData, logger)
         break
-    case FormDataEvent.MOVE_CREATED_TO_APPROVED :  // Утвердить из "Создана"
-    case FormDataEvent.MOVE_APPROVED_TO_ACCEPTED : // Принять из "Утверждена"
-    case FormDataEvent.MOVE_CREATED_TO_ACCEPTED :  // Принять из "Создана"
-    case FormDataEvent.MOVE_CREATED_TO_PREPARED :  // Подготовить из "Создана"
-    case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED : // Принять из "Подготовлена"
-    case FormDataEvent.MOVE_PREPARED_TO_APPROVED : // Утвердить из "Подготовлена"
+    case FormDataEvent.MOVE_CREATED_TO_APPROVED:  // Утвердить из "Создана"
+    case FormDataEvent.MOVE_APPROVED_TO_ACCEPTED: // Принять из "Утверждена"
+    case FormDataEvent.MOVE_CREATED_TO_ACCEPTED:  // Принять из "Создана"
+    case FormDataEvent.MOVE_CREATED_TO_PREPARED:  // Подготовить из "Создана"
+    case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED: // Принять из "Подготовлена"
+    case FormDataEvent.MOVE_PREPARED_TO_APPROVED: // Утвердить из "Подготовлена"
         checkSourceAccepted()
         logicCheck()
         break
-    case FormDataEvent.COMPOSE :
+    case FormDataEvent.COMPOSE:
         consolidation()
         calc()
         logicCheck()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.IMPORT:
         noImport(logger)
@@ -108,13 +110,11 @@ def getRefBookValue(def long refBookId, def Long recordId) {
 }
 
 void calc() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.allCached
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
 
     if (isConsolidated) {
         sort(dataRows)
         calcTotal(dataRows)
-        dataRowHelper.save(dataRows)
         return
     }
 
@@ -144,10 +144,9 @@ void calc() {
 
     // посчитать итоги по разделам
     calcTotal(dataRows)
-    dataRowHelper.save(dataRows)
 
     // Сортировка групп и строк
-    sortFormDataRows()
+    sortFormDataRows(false)
 }
 
 void calcTotal(def dataRows) {
@@ -199,7 +198,7 @@ void logicCheck() {
         // сравнить значения строк
         for (def row : rows40_2) {
             def tmpRow = getCalcRowFromRNU_40_1(row.name, row.code, rows40_1)
-            for (def alias: arithmeticCheckAlias) {
+            for (def alias : arithmeticCheckAlias) {
                 def value1 = row.getCell(alias).value
                 def value2 = tmpRow?.getCell(alias)?.value
                 if (value1 != value2) {
@@ -226,8 +225,7 @@ void logicCheck() {
 }
 
 void consolidation() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.allCached
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
 
     // удалить нефиксированные строки
     deleteRows(dataRows)
@@ -237,7 +235,7 @@ void consolidation() {
             getReportPeriodStartDate(), getReportPeriodEndDate()).each {
         def source = formDataService.getLast(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId, formData.periodOrder)
         if (source != null && source.state == WorkflowState.ACCEPTED) {
-            def sourceDataRows = formDataService.getDataRowHelper(source).allCached
+            def sourceDataRows = formDataService.getDataRowHelper(source).allSaved
             if (it.formTypeId == formData.formType.id) {
                 // копирование данных по разделам
                 sections.each { section ->
@@ -246,7 +244,7 @@ void consolidation() {
             }
         }
     }
-    dataRowHelper.save(dataRows)
+    updateIndexes(dataRows)
 }
 
 /**
@@ -321,13 +319,6 @@ void deleteRows(def dataRows) {
     }
     dataRows.removeAll(deleteRows)
     updateIndexes(dataRows)
-}
-
-/** Поправить индексы, потому что они после вставки не пересчитываются. */
-void updateIndexes(def dataRows) {
-    dataRows.eachWithIndex { row, i ->
-        row.setIndex(i + 1)
-    }
 }
 
 /**
@@ -432,13 +423,13 @@ void checkSourceAccepted() {
 def getDataRowsFromSource() {
     def formDataSource = getFormDataSource()
     if (formDataSource != null) {
-        return formDataService.getDataRowHelper(formDataSource)?.allCached
+        return formDataService.getDataRowHelper(formDataSource)?.allSaved
     }
     return null
 }
 
 // Сортировка групп и строк
-void sortFormDataRows() {
+void sortFormDataRows(def saveInDB = true) {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
 
@@ -450,11 +441,15 @@ void sortFormDataRows() {
         def sectionsRows = (from < to ? dataRows[from..(to - 1)] : [])
 
         // Массовое разыменование строк НФ
-        def columnList = firstRow.keySet().collect{firstRow.getCell(it).getColumn()}
+        def columnList = firstRow.keySet().collect { firstRow.getCell(it).getColumn() }
         refBookService.dataRowsDereference(logger, sectionsRows, columnList)
 
         sortRowsSimple(sectionsRows)
     }
 
-    dataRowHelper.saveSort()
+    if (saveInDB) {
+        dataRowHelper.saveSort()
+    } else {
+        updateIndexes(dataRows)
+    }
 }

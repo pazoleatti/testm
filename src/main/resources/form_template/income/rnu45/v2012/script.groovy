@@ -37,6 +37,7 @@ switch (formDataEvent) {
         prevPeriodCheck()
         calc()
         logicCheck()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.CHECK:
         prevPeriodCheck()
@@ -65,6 +66,7 @@ switch (formDataEvent) {
         formDataService.consolidationTotal(formData, logger, ['total'])
         calc()
         logicCheck()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.IMPORT:
         importData()
@@ -72,6 +74,7 @@ switch (formDataEvent) {
         break
     case FormDataEvent.IMPORT_TRANSPORT_FILE:
         importTransportData()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.SORT_ROWS:
         sortFormDataRows()
@@ -96,7 +99,7 @@ def balanceEditableColumns = ['inventoryNumber', 'name', 'buyDate', 'usefulLife'
 // Проверяемые на пустые значения атрибуты
 @Field
 def nonEmptyColumns = ['inventoryNumber', 'name', 'buyDate', 'usefulLife', 'expirationDate', 'startCost',
-        'depreciationRate', 'amortizationMonth', 'amortizationSinceYear', 'amortizationSinceUsed']
+                       'depreciationRate', 'amortizationMonth', 'amortizationSinceYear', 'amortizationSinceUsed']
 
 // Сумируемые колонки в фиксированной с троке
 @Field
@@ -175,8 +178,7 @@ def getDataRowHelperPrev() {
 
 // Алгоритмы заполнения полей формы
 void calc() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.getAllCached()
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
 
     // получить строку "итого"
     def totalRow = getDataRow(dataRows, 'total')
@@ -215,9 +217,8 @@ void calc() {
     // добавить строку "итого"
     calcTotalSum(dataRows, totalRow, totalColumns)
     dataRows.add(totalRow)
-    dataRowHelper.save(dataRows)
 
-    sortFormDataRows()
+    sortFormDataRows(false)
 }
 
 // Ресчет графы 8
@@ -263,8 +264,7 @@ Calendar calc10and11(def row) {
 }
 
 def logicCheck() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.getAllCached()
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
 
     if (!dataRows.isEmpty()) {
         // Инвентарные номера
@@ -274,7 +274,7 @@ def logicCheck() {
         if (formData.kind == FormDataKind.PRIMARY && !isMonthBalance()) {
             dataRowHelperOld = getFormDataPrev() != null ? getDataRowHelperPrev() : null
             if (dataRowHelperOld) {
-                dataRowHelperOld.allCached.each { row ->
+                dataRowHelperOld.allSaved.each { row ->
                     inventoryNumbersOld.add(row.inventoryNumber)
                 }
             }
@@ -340,7 +340,7 @@ def logicCheck() {
 // Получить значение за предыдущий отчетный период для графы 10 и 11
 def getPrev10and11(def dataOld, def row) {
     if (dataOld != null)
-        for (def rowOld : dataOld.getAllCached()) {
+        for (def rowOld : dataOld.allSaved) {
             if (rowOld.inventoryNumber == row.inventoryNumber) {
                 return [rowOld.amortizationSinceYear, rowOld.amortizationSinceUsed]
             }
@@ -354,8 +354,7 @@ void importTransportData() {
 }
 
 void addTransportData(def xml) {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.allCached
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
     def int rnuIndexRow = 2
     def int colOffset = 1
     def rows = []
@@ -436,7 +435,7 @@ void addTransportData(def xml) {
         xmlIndexCol = 11
         total.amortizationSinceUsed = parseNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, logger, true)
 
-        def colIndexMap = ['startCost' : 7, 'amortizationMonth' : 9, 'amortizationSinceYear' : 10, 'amortizationSinceUsed' : 11]
+        def colIndexMap = ['startCost': 7, 'amortizationMonth': 9, 'amortizationSinceYear': 10, 'amortizationSinceUsed': 11]
         for (def alias : totalColumns) {
             def v1 = total[alias]
             def v2 = totalRow[alias]
@@ -448,7 +447,11 @@ void addTransportData(def xml) {
             }
         }
     }
-    dataRowHelper.save(rows)
+
+    if (!logger.containsLevel(LogLevel.ERROR)) {
+        updateIndexes(rows)
+        formDataService.getDataRowHelper(formData).allCached = rows
+    }
 }
 
 def getMonthStartDate() {
@@ -473,11 +476,15 @@ def loggerError(def row, def msg) {
     }
 }
 
-void sortFormDataRows() {
+void sortFormDataRows(def saveInDB = true) {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
     sortRows(refBookService, logger, dataRows, null, getDataRow(dataRows, 'total'), null)
-    dataRowHelper.saveSort()
+    if (saveInDB) {
+        dataRowHelper.saveSort()
+    } else {
+        updateIndexes(dataRows)
+    }
 }
 
 void importData() {
@@ -627,7 +634,7 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
     // графа 7..11
     ['startCost', 'depreciationRate', 'amortizationMonth', 'amortizationSinceYear', 'amortizationSinceUsed'].each { alias ->
         colIndex++
-        newRow[alias] = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, false)
+        newRow[alias] = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
     }
 
     return newRow

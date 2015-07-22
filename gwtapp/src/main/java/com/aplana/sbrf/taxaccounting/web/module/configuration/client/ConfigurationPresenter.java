@@ -71,6 +71,8 @@ public class ConfigurationPresenter extends Presenter<ConfigurationPresenter.MyV
         void clearSelection();
 
         StringColumn getAsyncTypeIdColumn();
+
+        void initView();
     }
 
     private final DispatchAsync dispatcher;
@@ -90,6 +92,7 @@ public class ConfigurationPresenter extends Presenter<ConfigurationPresenter.MyV
     public void prepareFromRequest(PlaceRequest request) {
         LogCleanEvent.fire(this);
         LogShowEvent.fire(this, false);
+        getView().initView();
         GetConfigurationAction action = new GetConfigurationAction();
         dispatcher.execute(action,
                 CallbackUtils.defaultCallback(
