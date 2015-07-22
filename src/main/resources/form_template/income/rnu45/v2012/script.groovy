@@ -627,7 +627,7 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
     // графа 7..11
     ['startCost', 'depreciationRate', 'amortizationMonth', 'amortizationSinceYear', 'amortizationSinceUsed'].each { alias ->
         colIndex++
-        newRow[alias] = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, false)
+        newRow[alias] = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
     }
 
     return newRow
