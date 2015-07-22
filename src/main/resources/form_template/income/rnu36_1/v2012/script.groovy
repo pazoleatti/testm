@@ -127,8 +127,7 @@ def getReportPeriodEndDate() {
 }
 
 def addRow() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.allCached
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
     def index
 
     if (currentDataRow == null || currentDataRow.getIndex() == -1) {
@@ -149,7 +148,8 @@ def addRow() {
                 break
         }
     }
-    dataRowHelper.insert(getNewRow(), index)
+    dataRows.add(index + 1, getNewRow())
+    formDataService.saveCachedDataRows(formData, logger)
 }
 
 void calc() {

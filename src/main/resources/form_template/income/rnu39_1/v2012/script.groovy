@@ -43,12 +43,13 @@ switch (formDataEvent) {
     case FormDataEvent.CALCULATE:
         calc()
         logicCheck()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.CHECK:
         logicCheck()
         break
     case FormDataEvent.ADD_ROW:
-        addNewRow()
+        addRow()
         break
     case FormDataEvent.DELETE_ROW:
         if (currentDataRow?.getAlias() == null) {
@@ -67,6 +68,7 @@ switch (formDataEvent) {
         consolidation()
         calc()
         logicCheck()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.IMPORT:
         importData()
@@ -74,6 +76,7 @@ switch (formDataEvent) {
         break
     case FormDataEvent.IMPORT_TRANSPORT_FILE:
         importTransportData()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.SORT_ROWS:
         sortFormDataRows()
@@ -95,13 +98,13 @@ def totalColumns = ["amount", "cost", "pkdSumOpen", "pkdSumClose", "couponIncome
 // Редактируемые атрибуты (графа 3..13)
 @Field
 def editableColumns = ['regNumber', 'amount', 'cost', 'shortPositionOpen', 'shortPositionClose', 'pkdSumOpen',
-        'pkdSumClose', 'maturityDatePrev', 'maturityDateCurrent', 'currentCouponRate', 'incomeCurrentCoupon']
+                       'pkdSumClose', 'maturityDatePrev', 'maturityDateCurrent', 'currentCouponRate', 'incomeCurrentCoupon']
 
 // Обязательно заполняемые атрибуты (графа 3..13 - 7 графа необязательная для раздела А)
 @Field
 def nonEmptyColumns = ["regNumber", "amount", "cost", "shortPositionOpen",
-        "shortPositionClose", "pkdSumOpen", "pkdSumClose", "maturityDatePrev", "maturityDateCurrent",
-        "currentCouponRate", "incomeCurrentCoupon"]
+                       "shortPositionClose", "pkdSumOpen", "pkdSumClose", "maturityDatePrev", "maturityDateCurrent",
+                       "currentCouponRate", "incomeCurrentCoupon"]
 
 @Field
 def autoFillColumns = ["couponIncome", "totalPercIncome"]
@@ -155,7 +158,7 @@ def getDate(def value, def indexRow, def indexCol) {
 }
 
 void logicCheck() {
-    def dataRows = formDataService.getDataRowHelper(formData)?.allCached
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
 
     def dFrom = getReportPeriodStartDate()
     def dTo = getReportPeriodEndDate()
@@ -210,8 +213,7 @@ void logicCheck() {
 }
 
 void calc() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.allCached
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
 
     // отсортировать/группировать
     sort(dataRows)
@@ -230,16 +232,12 @@ void calc() {
     // расчет итогов
     calcTotalRows(dataRows)
 
-    dataRowHelper.save(dataRows)
-
     // Сортировка групп и строк
-    sortFormDataRows()
+    sortFormDataRows(false)
 }
 
-void addNewRow() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.allCached
-    DataRow<Cell> newRow = getNewRow()
+void addRow() {
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
 
     def index
     if (currentDataRow == null || currentDataRow.getIndex() == -1) {
@@ -253,8 +251,8 @@ void addNewRow() {
         def row = getDataRow(dataRows, totalAlias)
         index = dataRows.indexOf(row)
     }
-
-    dataRowHelper.insert(newRow, index + 1)
+    dataRows.add(index + 2, getNewRow())
+    formDataService.saveCachedDataRows(formData, logger)
 }
 
 def getNewRow() {
@@ -270,13 +268,9 @@ def getNewRow() {
 }
 
 void consolidation() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.allCached
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
 
     deleteNotFixedRows(dataRows)
-
-    // Налоговый период
-    def taxPeriod = reportPeriodService.get(formData.reportPeriodId).taxPeriod
 
     // собрать из источников строки и разместить соответствующим разделам
     departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind(),
@@ -292,7 +286,6 @@ void consolidation() {
             }
         }
     }
-    dataRowHelper.save(dataRows)
 }
 
 // Копировать заданный диапозон строк из источника в приемник
@@ -346,7 +339,7 @@ BigDecimal calc15(def dataRows, def row) {
     if (isInASector(dataRows, row)) {
         tmp = row.couponIncome
     } else if (row.pkdSumClose != null && row.couponIncome != null && row.pkdSumOpen != null) {
-        tmp =  row.pkdSumClose + row.couponIncome - row.pkdSumOpen
+        tmp = row.pkdSumClose + row.couponIncome - row.pkdSumOpen
     }
     return roundValue(tmp)
 }
@@ -368,7 +361,7 @@ def BigDecimal getSum(def rows, def columnAlias, def rowStart, def rowEnd) {
     if (from > to) {
         return 0
     }
-    return roundValue((BigDecimal)summ(formData, rows, new ColumnRange(columnAlias, from, to)), 4)
+    return roundValue((BigDecimal) summ(formData, rows, new ColumnRange(columnAlias, from, to)), 4)
 }
 
 void sort(def dataRows) {
@@ -437,8 +430,6 @@ def getRate(def row, def Date date) {
 
 void importTransportData() {
     def xml = getTransportXML(ImportInputStream, importService, UploadFileName, 15 + 1, 1)
-
-    // загрузить данные
     addTransportData(xml)
 }
 
@@ -548,8 +539,7 @@ void addTransportData(def xml) {
         }
     }
 
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.allCached
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
     deleteNotFixedRows(dataRows)
 
     groups.each { section ->
@@ -591,7 +581,7 @@ void addTransportData(def xml) {
         rnuIndexCol = 15
         total.totalPercIncome = getNumber(row.cell[rnuIndexCol].text(), rnuIndexRow, rnuIndexCol + colOffset)
 
-        def colIndexMap = ["amount" : 4, "cost" : 5, "pkdSumOpen" : 8, "pkdSumClose" : 9, "couponIncome" : 14, "totalPercIncome" : 15]
+        def colIndexMap = ["amount": 4, "cost": 5, "pkdSumOpen": 8, "pkdSumClose": 9, "couponIncome": 14, "totalPercIncome": 15]
 
         for (def alias : totalColumns) {
             def v1 = total.getCell(alias).value
@@ -606,7 +596,6 @@ void addTransportData(def xml) {
 
     }
     calcTotalRows(dataRows)
-    dataRowHelper.save(dataRows)
 }
 
 // расчет итогов
@@ -621,7 +610,7 @@ void calcTotalRows(def dataRows) {
 }
 
 // Сортировка групп и строк
-void sortFormDataRows() {
+void sortFormDataRows(def saveInDB = true) {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
 
@@ -633,13 +622,17 @@ void sortFormDataRows() {
         def sectionsRows = (from < to ? dataRows[from..(to - 1)] : [])
 
         // Массовое разыменование строк НФ
-        def columnList = firstRow.keySet().collect{firstRow.getCell(it).getColumn()}
+        def columnList = firstRow.keySet().collect { firstRow.getCell(it).getColumn() }
         refBookService.dataRowsDereference(logger, sectionsRows, columnList)
 
         sortRowsSimple(sectionsRows)
     }
 
-    dataRowHelper.saveSort()
+    if (saveInDB) {
+        dataRowHelper.saveSort()
+    } else {
+        updateIndexes(dataRows)
+    }
 }
 
 void importData() {
@@ -652,7 +645,7 @@ void importData() {
 
     def allValues = []      // значения формы
     def headerValues = []   // значения шапки
-    def paramsMap = ['rowOffset' : 0, 'colOffset' : 0]  // мапа с параметрами (отступы сверху и слева)
+    def paramsMap = ['rowOffset': 0, 'colOffset': 0]  // мапа с параметрами (отступы сверху и слева)
 
     checkAndReadFile(ImportInputStream, UploadFileName, allValues, headerValues, TABLE_START_VALUE, TABLE_END_VALUE, HEADER_ROW_COUNT, paramsMap)
 
@@ -680,8 +673,8 @@ void importData() {
     def headerBRow = getDataRow(rows, 'B')
     // мапа для хранения алиаса раздела (получить алиас раздела по заголовку раздела)
     def groupsMap = [
-            (headerARow.fix) : 'A',
-            (headerBRow.fix) : 'B'
+            (headerARow.fix): 'A',
+            (headerBRow.fix): 'B'
     ]
     // мапа для хранения алиаса подраздела (получить алиас подраздела по заголовку подраздела)
     def subGroupsMap = [:]

@@ -43,6 +43,7 @@ switch (formDataEvent) {
     case FormDataEvent.CALCULATE:
         calc()
         logicCheck()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.ADD_ROW:
         addRow()
@@ -64,6 +65,7 @@ switch (formDataEvent) {
         consolidation()
         calc()
         logicCheck()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.IMPORT:
         importData()
@@ -71,6 +73,7 @@ switch (formDataEvent) {
         break
     case FormDataEvent.IMPORT_TRANSPORT_FILE:
         importTransportData()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.SORT_ROWS:
         sortFormDataRows()
@@ -88,13 +91,13 @@ def refBookCache = [:]
 // Все атрибуты
 @Field
 def allColumns = ['currencyCode', 'issuer', 'regNumber', 'amount', 'cost', 'shortPositionOpen', 'shortPositionClose',
-        'pkdSumOpen', 'pkdSumClose', 'maturityDatePrev', 'maturityDateCurrent', 'currentCouponRate',
-        'incomeCurrentCoupon', 'couponIncome', 'totalPercIncome']
+                  'pkdSumOpen', 'pkdSumClose', 'maturityDatePrev', 'maturityDateCurrent', 'currentCouponRate',
+                  'incomeCurrentCoupon', 'couponIncome', 'totalPercIncome']
 
 // Редактируемые атрибуты (графа 3..13)
 @Field
 def editableColumns = ['regNumber', 'amount', 'cost', 'shortPositionOpen', 'shortPositionClose', 'pkdSumOpen',
-        'pkdSumClose', 'maturityDatePrev', 'maturityDateCurrent', 'currentCouponRate', 'incomeCurrentCoupon']
+                       'pkdSumClose', 'maturityDatePrev', 'maturityDateCurrent', 'currentCouponRate', 'incomeCurrentCoupon']
 
 // Автозаполняемые атрибуты
 @Field
@@ -103,8 +106,8 @@ def autoFillColumns = allColumns - editableColumns
 // Обязательно заполняемые атрибуты (графа 3..13 - 7 графа необязательная для раздела А)
 @Field
 def nonEmptyColumns = ["regNumber", "amount", "cost", "shortPositionOpen",
-        "shortPositionClose", "pkdSumOpen", "pkdSumClose", "maturityDatePrev", "maturityDateCurrent",
-        "currentCouponRate", "incomeCurrentCoupon"]
+                       "shortPositionClose", "pkdSumOpen", "pkdSumClose", "maturityDatePrev", "maturityDateCurrent",
+                       "currentCouponRate", "incomeCurrentCoupon"]
 
 // Атрибуты итоговых строк для которых вычисляются суммы (графа 4, 5, 8, 9, 14, 15)
 @Field
@@ -180,12 +183,12 @@ def addRow() {
             index = getDataRow(dataRows, 'total' + alias).getIndex()
         }
     }
-    dataRowHelper.insert(getNewRow(), index)
+    dataRows.add(index + 1, getNewRow())
+    formDataService.saveCachedDataRows(formData, logger)
 }
 
 void calc() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.allCached
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
 
     // отсортировать/группировать
     sort(dataRows)
@@ -208,10 +211,8 @@ void calc() {
     // посчитать итоги по разделам
     calcTotalRows(dataRows)
 
-    dataRowHelper.save(dataRows)
-
     // Сортировка групп и строк
-    sortFormDataRows()
+    sortFormDataRows(false)
 }
 
 void logicCheck() {
@@ -275,14 +276,10 @@ void logicCheck() {
 }
 
 void consolidation() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.allCached
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
 
     // удалить нефиксированные строки
     deleteNotFixedRows(dataRows)
-
-    // Налоговый период
-    def taxPeriod = reportPeriodService.get(formData.reportPeriodId).taxPeriod
 
     // собрать из источников строки и разместить соответствующим разделам
     departmentFormTypeService.getFormSources(formDataDepartment.id, formData.formType.id, formData.kind,
@@ -298,7 +295,6 @@ void consolidation() {
             }
         }
     }
-    dataRowHelper.save(dataRows)
 }
 
 /** Проверка принадлежит ли строка разделу A. */
@@ -588,8 +584,7 @@ void addTransportData(def xml) {
         }
     }
 
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.allCached
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
     deleteNotFixedRows(dataRows)
 
     sections.each { section ->
@@ -631,7 +626,7 @@ void addTransportData(def xml) {
         rnuIndexCol = 15
         total.totalPercIncome = getNumber(row.cell[rnuIndexCol].text(), rnuIndexRow, rnuIndexCol + colOffset)
 
-        def colIndexMap = ["amount" : 4, "cost" : 5, "pkdSumOpen" : 8, "pkdSumClose" : 9, "couponIncome" : 14, "totalPercIncome" : 15]
+        def colIndexMap = ["amount": 4, "cost": 5, "pkdSumOpen": 8, "pkdSumClose": 9, "couponIncome": 14, "totalPercIncome": 15]
 
         for (def alias : totalColumns) {
             def v1 = total.getCell(alias).value
@@ -646,7 +641,6 @@ void addTransportData(def xml) {
 
     }
     calcTotalRows(dataRows)
-    dataRowHelper.save(dataRows)
 }
 
 // расчет итогов
@@ -661,7 +655,7 @@ void calcTotalRows(def dataRows) {
 }
 
 // Сортировка групп и строк
-void sortFormDataRows() {
+void sortFormDataRows(def saveInDB = true) {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
 
@@ -673,13 +667,17 @@ void sortFormDataRows() {
         def sectionsRows = (from < to ? dataRows[from..(to - 1)] : [])
 
         // Массовое разыменование строк НФ
-        def columnList = firstRow.keySet().collect{firstRow.getCell(it).getColumn()}
+        def columnList = firstRow.keySet().collect { firstRow.getCell(it).getColumn() }
         refBookService.dataRowsDereference(logger, sectionsRows, columnList)
 
         sortRowsSimple(sectionsRows)
     }
 
-    dataRowHelper.saveSort()
+    if (saveInDB) {
+        dataRowHelper.saveSort()
+    } else {
+        updateIndexes(dataRows)
+    }
 }
 
 void importData() {
@@ -692,7 +690,7 @@ void importData() {
 
     def allValues = []      // значения формы
     def headerValues = []   // значения шапки
-    def paramsMap = ['rowOffset' : 0, 'colOffset' : 0]  // мапа с параметрами (отступы сверху и слева)
+    def paramsMap = ['rowOffset': 0, 'colOffset': 0]  // мапа с параметрами (отступы сверху и слева)
 
     checkAndReadFile(ImportInputStream, UploadFileName, allValues, headerValues, TABLE_START_VALUE, TABLE_END_VALUE, HEADER_ROW_COUNT, paramsMap)
 
@@ -720,8 +718,8 @@ void importData() {
     def headerBRow = getDataRow(rows, 'B')
     // мапа для хранения алиаса раздела (получить алиас раздела по заголовку раздела)
     def groupsMap = [
-            (headerARow.fix) : 'A',
-            (headerBRow.fix) : 'B'
+            (headerARow.fix): 'A',
+            (headerBRow.fix): 'B'
     ]
     // мапа для хранения алиаса подраздела (получить алиас подраздела по заголовку подраздела)
     def subGroupsMap = [:]

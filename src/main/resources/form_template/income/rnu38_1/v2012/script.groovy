@@ -40,30 +40,29 @@ switch (formDataEvent) {
     case FormDataEvent.CALCULATE:
         calc()
         logicCheck()
+        formDataService.saveCachedDataRows(formData, logger)
         break
-    case FormDataEvent.MOVE_CREATED_TO_APPROVED :  // Утвердить из "Создана"
-    case FormDataEvent.MOVE_APPROVED_TO_ACCEPTED : // Принять из "Утверждена"
-    case FormDataEvent.MOVE_CREATED_TO_ACCEPTED :  // Принять из "Создана"
-    case FormDataEvent.MOVE_CREATED_TO_PREPARED :  // Подготовить из "Создана"
-    case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED : // Принять из "Подготовлена"
-    case FormDataEvent.MOVE_PREPARED_TO_APPROVED : // Утвердить из "Подготовлена"
+    case FormDataEvent.MOVE_CREATED_TO_APPROVED:  // Утвердить из "Создана"
+    case FormDataEvent.MOVE_APPROVED_TO_ACCEPTED: // Принять из "Утверждена"
+    case FormDataEvent.MOVE_CREATED_TO_ACCEPTED:  // Принять из "Создана"
+    case FormDataEvent.MOVE_CREATED_TO_PREPARED:  // Подготовить из "Создана"
+    case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED: // Принять из "Подготовлена"
+    case FormDataEvent.MOVE_PREPARED_TO_APPROVED: // Утвердить из "Подготовлена"
         logicCheck()
         break
     case FormDataEvent.COMPOSE:
         formDataService.consolidationSimple(formData, logger)
         calc()
         logicCheck()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.IMPORT:
         importData()
-        if (!logger.containsLevel(LogLevel.ERROR)) {
-            calc()
-            logicCheck()
-            formDataService.saveCachedDataRows(formData, logger)
-        }
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.IMPORT_TRANSPORT_FILE:
         importTransportData()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.SORT_ROWS:
         sortFormDataRows()
@@ -109,7 +108,7 @@ def getDate(def value, def indexRow, def indexCol) {
 }
 
 void logicCheck() {
-    def dataRows = formDataService.getDataRowHelper(formData)?.allCached
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
 
     // алиасы графов для арифметической проверки (графа 7..9)
     def arithmeticCheckAlias = ['incomePrev', 'incomeShortPosition', 'totalPercIncome']
@@ -152,8 +151,7 @@ void logicCheck() {
 }
 
 void calc() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.allCached
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
 
     // удалить строку "итого"
     deleteAllAliased(dataRows)
@@ -174,10 +172,9 @@ void calc() {
     // добавить строки "итого"
     def totalRow = getTotalRow(dataRows)
     dataRows.add(totalRow)
-    dataRowHelper.save(dataRows)
 
     // Сортировка групп и строк
-    sortFormDataRows()
+    sortFormDataRows(false)
 }
 
 /**
@@ -256,13 +253,10 @@ def getMonthEndDate() {
 
 void importTransportData() {
     def xml = getTransportXML(ImportInputStream, importService, UploadFileName, 9, 1)
-
-    // загрузить данные
     addTransportData(xml)
 }
 
 void addTransportData(def xml) {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = []
 
     def int rnuIndexRow = 2
@@ -307,7 +301,6 @@ void addTransportData(def xml) {
         def row = xml.rowTotal[0]
         def total = formData.createDataRow()
 
-
         // графа 2
         def rnuIndexCol = 2
         total.amount = getNumber(row.cell[rnuIndexCol].text(), rnuIndexRow, rnuIndexCol + colOffset)
@@ -321,7 +314,7 @@ void addTransportData(def xml) {
         rnuIndexCol = 9
         total.totalPercIncome = getNumber(row.cell[rnuIndexCol].text(), rnuIndexRow, rnuIndexCol + colOffset)
 
-        def colIndexMap = ['amount' : 2, 'incomePrev' : 7, 'incomeShortPosition' : 8, 'totalPercIncome' : 9]
+        def colIndexMap = ['amount': 2, 'incomePrev': 7, 'incomeShortPosition': 8, 'totalPercIncome': 9]
         for (def alias : totalColumns) {
             def v1 = total.getCell(alias).value
             def v2 = totalRow.getCell(alias).value
@@ -334,15 +327,23 @@ void addTransportData(def xml) {
         }
 
     }
-    dataRowHelper.save(dataRows)
+
+    if (!logger.containsLevel(LogLevel.ERROR)) {
+        updateIndexes(rows)
+        formDataService.getDataRowHelper(formData).allCached = rows
+    }
 }
 
 // Сортировка групп и строк
-void sortFormDataRows() {
+void sortFormDataRows(def saveInDB = true) {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
     sortRows(refBookService, logger, dataRows, null, getDataRow(dataRows, 'total'), null)
-    dataRowHelper.saveSort()
+    if (saveInDB) {
+        dataRowHelper.saveSort()
+    } else {
+        updateIndexes(dataRows)
+    }
 }
 
 void importData() {
@@ -355,7 +356,7 @@ void importData() {
 
     def allValues = []      // значения формы
     def headerValues = []   // значения шапки
-    def paramsMap = ['rowOffset' : 0, 'colOffset' : 0]  // мапа с параметрами (отступы сверху и слева)
+    def paramsMap = ['rowOffset': 0, 'colOffset': 0]  // мапа с параметрами (отступы сверху и слева)
 
     checkAndReadFile(ImportInputStream, UploadFileName, allValues, headerValues, TABLE_START_VALUE, TABLE_END_VALUE, HEADER_ROW_COUNT, paramsMap)
 
@@ -424,15 +425,15 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
     checkHeaderSize(headerRows[headerRows.size() - 1].size(), headerRows.size(), colCount, rowCount)
 
     def headerMapping = [
-            (headerRows[0][0]) : getColumnName(tmpRow, 'series'),
-            (headerRows[0][1]) : getColumnName(tmpRow, 'amount'),
-            (headerRows[0][2]) : getColumnName(tmpRow, 'shortPositionDate'),
-            (headerRows[0][3]) : getColumnName(tmpRow, 'maturityDate'),
-            (headerRows[0][4]) : getColumnName(tmpRow, 'incomeCurrentCoupon'),
-            (headerRows[0][5]) : getColumnName(tmpRow, 'currentPeriod'),
-            (headerRows[0][6]) : getColumnName(tmpRow, 'incomePrev'),
-            (headerRows[0][7]) : getColumnName(tmpRow, 'incomeShortPosition'),
-            (headerRows[0][8]) : getColumnName(tmpRow, 'totalPercIncome'),
+            (headerRows[0][0]): getColumnName(tmpRow, 'series'),
+            (headerRows[0][1]): getColumnName(tmpRow, 'amount'),
+            (headerRows[0][2]): getColumnName(tmpRow, 'shortPositionDate'),
+            (headerRows[0][3]): getColumnName(tmpRow, 'maturityDate'),
+            (headerRows[0][4]): getColumnName(tmpRow, 'incomeCurrentCoupon'),
+            (headerRows[0][5]): getColumnName(tmpRow, 'currentPeriod'),
+            (headerRows[0][6]): getColumnName(tmpRow, 'incomePrev'),
+            (headerRows[0][7]): getColumnName(tmpRow, 'incomeShortPosition'),
+            (headerRows[0][8]): getColumnName(tmpRow, 'totalPercIncome'),
     ]
 
     (1..9).each { index ->

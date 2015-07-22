@@ -192,8 +192,7 @@ def getRecordId(def Long refBookId, def String alias, def String value, def int 
 }
 
 def addRow() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.allCached
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
     def index
     if (currentDataRow == null || currentDataRow.getIndex() == -1) {
         index = getDataRow(dataRows, 'total1').getIndex()
@@ -207,7 +206,8 @@ def addRow() {
             index = getDataRow(dataRows, 'total' + alias).getIndex()
         }
     }
-    dataRowHelper.insert(getNewRow(), index)
+    dataRows.add(index + 1, getNewRow())
+    formDataService.saveCachedDataRows(formData, logger)
 }
 
 void calc() {
