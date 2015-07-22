@@ -431,7 +431,9 @@ create table form_data (
   period_order number(2),
   number_previous_row number (9),
   department_report_period_id number(18) not null,
-  manual number(1) default 0 not null
+  manual number(1) default 0 not null,
+  sorted number(1) default 0 not null,
+  number_current_row number(9)
 );
 comment on table form_data is 'Данные по налоговым формам';
 comment on column form_data.id is 'Первичный ключ';
@@ -443,6 +445,8 @@ comment on column form_data.period_order is 'Указывает на очере�
 comment on column form_data.number_previous_row is 'Номер последней строки предыдущей НФ';
 comment on column form_data.department_report_period_id is 'Идентификатор отчетного периода подразделения';
 comment on column form_data.manual is 'Режим ввода данных (0 - не содержит версию ручного ввода; 1 - содержит)';
+comment on column form_data.sorted is 'Признак актуальности сортировки';
+comment on column form_data.number_current_row is 'Количество пронумерованных строк текущей НФ';
 
 create sequence seq_form_data start with 10000;
 ---------------------------------------------------------------------------------------------------

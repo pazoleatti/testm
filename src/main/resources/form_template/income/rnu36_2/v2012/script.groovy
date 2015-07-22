@@ -31,6 +31,7 @@ switch (formDataEvent) {
         checkSourceAccepted()
         if (!isConsolidated) {
             calc()
+            formDataService.saveCachedDataRows(formData, logger)
         }
         logicCheck()
         break
@@ -47,6 +48,7 @@ switch (formDataEvent) {
         consolidation()
         // расчет после консолидации не нужен
         logicCheck()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.IMPORT:
         noImport(logger)
@@ -83,8 +85,7 @@ def getReportPeriodEndDate() {
 }
 
 void calc() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.allCached
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
 
     def currentFixedRowsMap = getFixedRows(dataRows)
     def totalRowA = currentFixedRowsMap['totalA']
@@ -101,7 +102,6 @@ void calc() {
     // получение данных из первичной рну-36.1
     def dataRowsFromSource = getDataRowsFromSource()
     if (!dataRowsFromSource) {
-        dataRowHelper.save(dataRows)
         return
     }
 
@@ -120,8 +120,6 @@ void calc() {
 
     // Итоги
     totalRow.percIncome = totalRowSource.percIncome
-
-    dataRowHelper.save(dataRows)
 }
 
 void logicCheck() {
@@ -186,8 +184,7 @@ def checkValues(def totalRow, totalRowSource, def columnAliases) {
 }
 
 void consolidation() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.allCached
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
 
     def currentFixedRowsMap = getFixedRows(dataRows)
     def totalRowA = currentFixedRowsMap['totalA']
@@ -205,7 +202,7 @@ void consolidation() {
             getReportPeriodStartDate(), getReportPeriodEndDate()).each {
         def source = formDataService.getLast(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId, formData.periodOrder)
         if (source != null && source.state == WorkflowState.ACCEPTED) {
-            def dataRowsFromSource = formDataService.getDataRowHelper(source).allCached
+            def dataRowsFromSource = formDataService.getDataRowHelper(source).allSaved
 
             def sourceFixedRowsMap = getFixedRows(dataRowsFromSource)
             def totalRowASource = sourceFixedRowsMap['totalA']
@@ -224,7 +221,7 @@ void consolidation() {
             totalRow.percIncome += totalRowSource.percIncome
         }
     }
-    dataRowHelper.save(dataRows)
+    updateIndexes(dataRows)
 }
 
 def getTaxPeriod() {
@@ -252,7 +249,7 @@ void checkSourceAccepted() {
 def getDataRowsFromSource() {
     def formDataSource = getFormDataSource()
     if (formDataSource != null) {
-        return formDataService.getDataRowHelper(formDataSource)?.allCached
+        return formDataService.getDataRowHelper(formDataSource)?.allSaved
     }
     return null
 }

@@ -3,7 +3,7 @@
              xmlns:style='urn:import:com.aplana.sbrf.taxaccounting.web.widget.style'
              xmlns:fm="urn:import:com.aplana.gwt.client.form"
              xmlns:d="urn:import:com.aplana.sbrf.taxaccounting.web.widget.datepicker"
-             xmlns:rb="urn:import:com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client">
+        >
     <ui:style>
         .titleText {
             font-size: 14px !important;
@@ -72,7 +72,6 @@
         </fm:header>
         <fm:body>
             <fm:BodyContainer>
-
                 <g:HorizontalPanel verticalAlignment="middle" width="100%" addStyleNames="{style.btnPanel}">
                     <g:HorizontalPanel verticalAlignment="middle">
                         <style:LinkButton title="Добавить запись" text="Добавить запись" ui:field="addRow"
@@ -98,7 +97,7 @@
 
                     <g:HorizontalPanel verticalAlignment="middle" addStyleNames="{style.marginRight5}">
                         <g:Button title="Завершить редактирование" text="Завершить редактирование"
-                                  ui:field="cancelEdit"/>
+                                  ui:field="cancelEdit" visible="false"/>
                         <style:LinkButton title="Редактировать" text="Редактировать" ui:field="edit"/>
                     </g:HorizontalPanel>
 

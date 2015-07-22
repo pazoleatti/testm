@@ -42,10 +42,7 @@ import com.gwtplatform.mvp.client.proxy.PlaceManager;
 import com.gwtplatform.mvp.client.proxy.PlaceRequest;
 import com.gwtplatform.mvp.client.proxy.ProxyPlace;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.MyProxy> implements
         FormDataUiHandlers, SetFocus.SetFocusHandler {
@@ -61,6 +58,8 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
     private ReportType timerType;
     private TimerTaskResult.FormMode formMode;
     private boolean lockEditMode;
+
+    private Map<ReportType, TimerReportResult.StatusReport> reportTimerStatus;
 
     /**
 	 * {@link com.aplana.sbrf.taxaccounting.web.module.formdata.client.FormDataPresenterBase}
@@ -81,6 +80,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
         this.logAreaPresenter = logAreaPresenter;
         getView().setUiHandlers(this);
 		getView().assignDataProvider(getView().getPageSize());
+        reportTimerStatus = new HashMap<ReportType, TimerReportResult.StatusReport>();
         timer = new Timer() {
             @Override
             public void run() {
@@ -105,6 +105,8 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
         action.setUuid(request.getParameter(UUID, null));
         action.setCorrectionDiff(Boolean.parseBoolean(request.getParameter(CORRECTION, "false")));
         free = Boolean.parseBoolean(request.getParameter(FREE, "false"));
+        getView().startTimerReport(ReportType.EXCEL);
+        getView().startTimerReport(ReportType.CSV);
         getFormData(action);
 	}
 
@@ -332,8 +334,8 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                                 }
                             });
                         } else {
-                            getView().updatePrintReportButtonName(reportType, false);
-                            getView().startTimerReport(reportType);
+                            //getView().updatePrintReportButtonName(reportType, false);
+                            onTimerReport(reportType, false);
                         }
                     }
                 }, this));
@@ -351,18 +353,18 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                 .simpleCallback(new AbstractCallback<TimerReportResult>() {
                     @Override
                     public void onSuccess(TimerReportResult result) {
+                        if (isTimer && result.getExistReport().equals(reportTimerStatus.get(reportType))) {
+                            return;
+                        }
                         if (result.getExistReport().equals(TimerReportResult.StatusReport.EXIST)) {
                             getView().updatePrintReportButtonName(reportType, true);
                             manualMenuPresenter.updateNotificationCount();
-                        } else if (result.getExistReport().equals(TimerReportResult.StatusReport.NOT_EXIST)) { // если файл не файл существует и блокировки нет(т.е. задачу отменили или ошибка при формировании)
-                            getView().stopTimerReport(reportType);
-                            if (!isTimer) {
-                                getView().updatePrintReportButtonName(reportType, false);
-                            }
-                        } else if (!isTimer) {
+                        } else if (result.getExistReport().equals(TimerReportResult.StatusReport.NOT_EXIST)) { // если файл не существует и блокировки нет(т.е. задачу отменили или ошибка при формировании)
                             getView().updatePrintReportButtonName(reportType, false);
-                            getView().startTimerReport(reportType);
+                        } else {
+                            getView().updatePrintReportButtonName(reportType, false);
                         }
+                        reportTimerStatus.put(reportType, result.getExistReport());
                     }
                 }));
     }
@@ -399,8 +401,8 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                                 }
                             });
                         } else {
-                            getView().updatePrintReportButtonName(reportType, false);
-                            getView().startTimerReport(reportType);
+//                            getView().updatePrintReportButtonName(reportType, false);
+                            onTimerReport(reportType, false);
                         }
                     }
                 }, this));

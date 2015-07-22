@@ -103,11 +103,7 @@ switch (formDataEvent) {
         break
     case FormDataEvent.IMPORT:
         importData()
-        if (!logger.containsLevel(LogLevel.ERROR)) {
-            calc()
-            logicCheck()
-            formDataService.saveCachedDataRows(formData, logger)
-        }
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.SORT_ROWS:
         sortFormDataRows()
@@ -1687,7 +1683,7 @@ void importData() {
     // проверка шапки
     checkHeaderXls(headerValues, COLUMN_COUNT, HEADER_ROW_COUNT, tmpRow)
     if (logger.containsLevel(LogLevel.ERROR)) {
-        return;
+        return
     }
     // освобождение ресурсов для экономии памяти
     headerValues.clear()
@@ -1853,34 +1849,34 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
     newRow.interdependenceSing = getRecordIdImport(69, 'CODE', values[colIndex], fileRowIndex, colIndex + colOffset)
     // 3. п. 121
     colIndex++
-    newRow.f121 = getYesNoByNumber(parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, false))
+    newRow.f121 = getYesNoByNumber(parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true))
     // 4. п. 122
     colIndex++
-    newRow.f122 = getYesNoByNumber(parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, false))
+    newRow.f122 = getYesNoByNumber(parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true))
     // 5. п. 123
     colIndex++
-    newRow.f123 = getYesNoByNumber(parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, false))
+    newRow.f123 = getYesNoByNumber(parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true))
     // 6. п. 124
     colIndex++
-    newRow.f124 = getYesNoByNumber(parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, false))
+    newRow.f124 = getYesNoByNumber(parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true))
     // 7. п. 131
     colIndex++
-    newRow.f131 = getYesNoByNumber(parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, false))
+    newRow.f131 = getYesNoByNumber(parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true))
     // 8. п. 132
     colIndex++
-    newRow.f132 = getYesNoByNumber(parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, false))
+    newRow.f132 = getYesNoByNumber(parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true))
     // 9. п. 133
     colIndex++
-    newRow.f133 = getYesNoByNumber(parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, false))
+    newRow.f133 = getYesNoByNumber(parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true))
     // 10. п. 134
     colIndex++
-    newRow.f134 = getYesNoByNumber(parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, false))
+    newRow.f134 = getYesNoByNumber(parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true))
     // 11. п. 135 (до 2014 г. / после 2014 г.)
     colIndex++
-    newRow.f135 = getYesNoByNumber(parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, false))
+    newRow.f135 = getYesNoByNumber(parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true))
     // 12. п. 200 "Группа однородных сделок"
     colIndex++
-    newRow.similarDealGroup = getYesNoByNumber(parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, false))
+    newRow.similarDealGroup = getYesNoByNumber(parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true))
     // 13. п. 210 "Код наименования сделки"
     colIndex++
     newRow.dealNameCode = getRecordIdImport(67, 'CODE', values[colIndex], fileRowIndex, colIndex + colOffset)
@@ -1889,25 +1885,25 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
     newRow.taxpayerSideCode = getRecordIdImport(65, 'CODE', values[colIndex], fileRowIndex, colIndex + colOffset)
     // 15. п. 220 "Признак определения цены сделки с учетом особенностей, предусмотренных статьей 105.4 НК РФ (регулируемые цены)"
     colIndex++
-    newRow.dealPriceSign = getYesNoByNumber(parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, false))
+    newRow.dealPriceSign = getYesNoByNumber(parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true))
     // 16. п. 230 "Код определения цены сделки"
     colIndex++
     newRow.dealPriceCode = getRecordIdImport(66, 'CODE', values[colIndex], fileRowIndex, colIndex + colOffset)
     // 17. п. 260 "Количество участников сделки"
     colIndex++
-    newRow.dealMemberCount = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, false)
+    newRow.dealMemberCount = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
     // 18. п. 300 "Сумма доходов налогоплательщика по контролируемой сделке (группе однородных сделок) в рублях"
     colIndex++
-    newRow.income = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, false)
+    newRow.income = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
     // 19. п. 301 "в том числе сумма доходов по сделкам, цены которых подлежат регулированию"
     colIndex++
-    newRow.incomeIncludingRegulation = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, false)
+    newRow.incomeIncludingRegulation = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
     // 20. п. 310 "Сумма расходов налогоплательщика по контролируемой сделке (группе однородных сделок) в рублях"
     colIndex++
-    newRow.outcome = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, false)
+    newRow.outcome = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
     // 21.	п. 311 "в том числе сумма расходов по сделкам, цены которых подлежат регулированию"
     colIndex++
-    newRow.outcomeIncludingRegulation = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, false)
+    newRow.outcomeIncludingRegulation = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
     // 22.
     colIndex++
     // 23. п. 020 "Тип предмета сделки"
@@ -1927,13 +1923,13 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
     newRow.dealSubjectCode3 = getRecordIdImport(34, 'CODE', values[colIndex], fileRowIndex, colIndex + colOffset)
     // 28. п. 050 "Номер другого участника сделки"
     colIndex++
-    newRow.otherNum = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, false)
+    newRow.otherNum = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
     // 29. п. 060 "Номер договора"
     colIndex++
     newRow.contractNum = values[colIndex]
     // 30. п. 065 "Дата договора"
     colIndex++
-    newRow.contractDate = parseDate(values[colIndex], "dd.MM.yyyy", fileRowIndex, colIndex + colOffset, logger, false)
+    newRow.contractDate = parseDate(values[colIndex], "dd.MM.yyyy", fileRowIndex, colIndex + colOffset, logger, true)
     // 31. п. 070 "Код страны происхождения предмета сделки по классификатору ОКСМ (цифровой)"
     colIndex++
     newRow.countryCode = getRecordIdImport(10, 'CODE', values[colIndex], fileRowIndex, colIndex + colOffset)
@@ -1969,21 +1965,21 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
     newRow.okeiCode = getRecordIdImport(12, 'CODE', values[colIndex], fileRowIndex, colIndex + colOffset)
     // 42. п. 120 "Количество"
     colIndex++
-    newRow.count = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, false)
+    newRow.count = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
     // 43. п. 130 "Цена (тариф) за единицу измерения без учета НДС, акцизов и пошлины, руб."
     colIndex++
-    newRow.price = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, false)
+    newRow.price = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
     // 44. п. 140 "Итого стоимость без учета НДС, акцизов и пошлины, руб."
     colIndex++
-    newRow.total = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, false)
+    newRow.total = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
     // 45. п. 150 "Дата совершения сделки (цифрами день, месяц, год)"
     colIndex++
-    newRow.dealDoneDate = parseDate(values[colIndex], "dd.MM.yyyy", fileRowIndex, colIndex + colOffset, logger, false)
+    newRow.dealDoneDate = parseDate(values[colIndex], "dd.MM.yyyy", fileRowIndex, colIndex + colOffset, logger, true)
     // 46.
     colIndex++
     // 47. п. 015 "Порядковый номер участника сделки (из раздела 1Б)"
     colIndex++
-    newRow.dealMemberNum = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, false)
+    newRow.dealMemberNum = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
     // 48
     colIndex++
     // 49. п. 030 "Код страны по классификатору ОКСМ"

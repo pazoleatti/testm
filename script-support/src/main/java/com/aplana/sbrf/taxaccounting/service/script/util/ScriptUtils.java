@@ -1862,7 +1862,7 @@ public final class ScriptUtils {
                     value = formatter.formatRawCellContents(Double.parseDouble(value), this.formatIndex, this.formatString);
                 }
             }
-            return value.trim();
+            return com.aplana.sbrf.taxaccounting.model.util.StringUtils.cleanString(value);
         }
     }
 

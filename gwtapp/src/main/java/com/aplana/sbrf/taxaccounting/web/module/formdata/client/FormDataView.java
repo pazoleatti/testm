@@ -281,14 +281,12 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
         if (ReportType.EXCEL.equals(reportType)) {
             if (isLoad) {
                 printToExcel.setText("Выгрузить в XLSM");
-                timerExcel.cancel();
             } else {
                 printToExcel.setText("Сформировать XLSM");
             }
         } else {
             if (isLoad) {
                 printToCSV.setText("Выгрузить в CSV");
-                timerCSV.cancel();
             } else {
                 printToCSV.setText("Сформировать CSV");
             }

@@ -780,6 +780,8 @@ public class FormDataServiceImpl implements FormDataService {
                 stateLogger.updateState("Проверка ссылок на справочники");
                 checkReferenceValues(logger, formData, false);
                 checkConsolidateFromSources(formData, logger, userInfo);
+                //Делаем переход
+                moveProcess(formData, userInfo, workflowMove, note, logger, isAsync, stateLogger);
                 if (WorkflowState.ACCEPTED.equals(workflowMove.getToState())) {
                     // Отработка скриптом события сортировки
                     formDataScriptingService.executeScript(userInfo, formData, FormDataEvent.SORT_ROWS, logger, null);
@@ -788,8 +790,6 @@ public class FormDataServiceImpl implements FormDataService {
                     }
                     logger.info("Выполнена сортировка строк налоговой формы.");
                 }
-                //Делаем переход
-                moveProcess(formData, userInfo, workflowMove, note, logger, isAsync, stateLogger);
                 break;
             case APPROVED_TO_CREATED:
             case ACCEPTED_TO_APPROVED:
@@ -1014,7 +1014,7 @@ public class FormDataServiceImpl implements FormDataService {
 
         if (logger.containsLevel(LogLevel.ERROR)) {
             throw new ServiceLoggerException(
-                    "Произошли ошибки в скрипте, который выполняется перед переходом",
+                    "",
                     logEntryService.save(logger.getEntries()));
         }
 

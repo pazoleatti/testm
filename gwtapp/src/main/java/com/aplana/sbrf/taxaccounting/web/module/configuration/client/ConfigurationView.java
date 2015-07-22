@@ -6,7 +6,8 @@ import com.aplana.sbrf.taxaccounting.web.widget.datarow.DataRowColumn;
 import com.aplana.sbrf.taxaccounting.web.widget.datarow.DataRowColumnFactory;
 import com.aplana.sbrf.taxaccounting.web.widget.datarow.events.CellModifiedEvent;
 import com.aplana.sbrf.taxaccounting.web.widget.datarow.events.CellModifiedEventHandler;
-import com.aplana.sbrf.taxaccounting.web.widget.style.LinkAnchor;
+import com.aplana.sbrf.taxaccounting.web.widget.style.GenericDataGrid;
+import com.aplana.sbrf.taxaccounting.web.widget.style.LinkButton;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -19,6 +20,7 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.Range;
+import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SingleSelectionModel;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
@@ -27,22 +29,22 @@ import java.util.*;
 
 public class ConfigurationView extends ViewWithUiHandlers<ConfigurationUiHandlers> implements MyView {
     @UiField
-    DataGrid<DataRow<Cell>> commonTable, formTable, emailTable, asyncTable;
+    GenericDataGrid<DataRow<Cell>> commonTable, formTable, emailTable, asyncTable;
 
     @UiField
     Label titleLabel;
 
     @UiField
-    LinkAnchor commonLink, formLink, emailLink, asyncLink;
+    LinkButton commonLink, formLink, emailLink, asyncLink;
 
     @UiField
     Widget commonPanel, formPanel, emailPanel, asyncPanel;
 
     @UiField
-    LinkAnchor addLink;
+    LinkButton addLink;
 
     @UiField
-    LinkAnchor delLink;
+    LinkButton delLink;
 
     @UiField
     Button checkButton;
@@ -84,11 +86,6 @@ public class ConfigurationView extends ViewWithUiHandlers<ConfigurationUiHandler
     @Inject
     public ConfigurationView(final Binder binder) {
         initWidget(binder.createAndBindUi(this));
-        initCommonTable();
-        initFormTable();
-        initEmailTable();
-        initAsyncTable();
-
         initMaps();
     }
 
@@ -131,8 +128,16 @@ public class ConfigurationView extends ViewWithUiHandlers<ConfigurationUiHandler
         commonTable.setMinimumTableWidth(40, Style.Unit.EM);
 
         commonTable.setKeyboardSelectionPolicy(HasKeyboardSelectionPolicy.KeyboardSelectionPolicy.ENABLED);
-        SingleSelectionModel<DataRow<Cell>> singleSelectionModel = new SingleSelectionModel<DataRow<Cell>>();
+        final SingleSelectionModel<DataRow<Cell>> singleSelectionModel = new SingleSelectionModel<DataRow<Cell>>();
         commonTable.setSelectionModel(singleSelectionModel);
+        singleSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
+            @Override
+            public void onSelectionChange(SelectionChangeEvent event) {
+                if (commonPanel.isVisible()){
+                    enableButtons(singleSelectionModel.getSelectedObject() != null);
+                }
+            }
+        });
 
         // Обновляем таблицу после обновления модели
         ((DataRowColumn<?>) paramColumnUI).addCellModifiedEventHandler(new CellModifiedEventHandler() {
@@ -176,8 +181,16 @@ public class ConfigurationView extends ViewWithUiHandlers<ConfigurationUiHandler
         formTable.setMinimumTableWidth(70, Style.Unit.EM);
 
         formTable.setKeyboardSelectionPolicy(HasKeyboardSelectionPolicy.KeyboardSelectionPolicy.ENABLED);
-        SingleSelectionModel<DataRow<Cell>> singleSelectionModel = new SingleSelectionModel<DataRow<Cell>>();
+        final SingleSelectionModel<DataRow<Cell>> singleSelectionModel = new SingleSelectionModel<DataRow<Cell>>();
         formTable.setSelectionModel(singleSelectionModel);
+        singleSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
+            @Override
+            public void onSelectionChange(SelectionChangeEvent event) {
+                if (formPanel.isVisible()){
+                    enableButtons(singleSelectionModel.getSelectedObject() != null);
+                }
+            }
+        });
 
         // Обновляем таблицу после обновления модели
         ((DataRowColumn<?>) departmentColumnUI).addCellModifiedEventHandler(new CellModifiedEventHandler() {
@@ -356,11 +369,13 @@ public class ConfigurationView extends ViewWithUiHandlers<ConfigurationUiHandler
     @UiHandler("commonLink")
     void onCommonLinkClick(ClickEvent event) {
         showTab(ConfigurationParamGroup.COMMON);
+        enableButtons(((SingleSelectionModel)commonTable.getSelectionModel()).getSelectedObject() != null);
     }
 
     @UiHandler("formLink")
     void onFormLinkClick(ClickEvent event) {
         showTab(ConfigurationParamGroup.FORM);
+        enableButtons(((SingleSelectionModel) formTable.getSelectionModel()).getSelectedObject() != null);
     }
 
     @UiHandler("emailLink")
@@ -540,5 +555,19 @@ public class ConfigurationView extends ViewWithUiHandlers<ConfigurationUiHandler
     @Override
     public StringColumn getAsyncTypeIdColumn() {
         return asyncTypeIdColumn;
+    }
+
+    @Override
+    public void initView() {
+        enableButtons(false);
+        initCommonTable();
+        initFormTable();
+        initEmailTable();
+        initAsyncTable();
+    }
+
+    private void enableButtons(boolean isEnable){
+        delLink.setEnabled(isEnable);
+        checkButton.setEnabled(isEnable);
     }
 }

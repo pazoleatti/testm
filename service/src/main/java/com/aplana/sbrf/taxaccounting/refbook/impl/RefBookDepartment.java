@@ -309,6 +309,8 @@ public class RefBookDepartment implements RefBookDataProvider {
     }
 
     //http://conf.aplana.com/pages/viewpage.action?pageId=11378355
+    //После изменения в 0.7 метод для подразеделений делает ТОЛЬКО проверку, без сохранения
+    //Сохранение происходит в UnitEditingHandler
     @SuppressWarnings("unchecked")
     @Override
     public void updateRecordVersion(Logger logger, final Long uniqueRecordId, Date versionFrom, Date versionTo, Map<String, RefBookValue> records) {
@@ -318,74 +320,50 @@ public class RefBookDepartment implements RefBookDataProvider {
         if (logger.getTaUserInfo() == null) {
             throw new ServiceException("Текущий пользователь не установлен!");
         }
-        List<String> lockedObjects = new ArrayList<String>();
-        int userId = logger.getTaUserInfo().getUser().getId();
+
         String lockKey = LockData.LockObjects.REF_BOOK.name() + "_" + REF_BOOK_ID;
         RefBook refBook = refBookDao.get(REF_BOOK_ID);
-        LockData lockData = lockService.lock(lockKey, userId,
-                String.format(LockData.DescriptionTemplate.REF_BOOK.getText(), refBook.getName()),
-                lockService.getLockTimeout(LockData.LockObjects.REF_BOOK));
+        LockData lockData = lockService.getLock(lockKey);
+
         if (lockData == null) {
-            try {
-                //Блокировка установлена
-                lockedObjects.add(lockKey);
-                //Блокируем связанные справочники
-                List<RefBookAttribute> attributes = refBook.getAttributes();
-                for (RefBookAttribute attribute : attributes) {
-                    if (attribute.getAttributeType().equals(RefBookAttributeType.REFERENCE)) {
-                        RefBook attributeRefBook = refBookDao.get(attribute.getRefBookId());
-                        String referenceLockKey = LockData.LockObjects.REF_BOOK.name() + "_" + attributeRefBook.getId();
-                        if (!lockedObjects.contains(referenceLockKey)) {
-                            LockData referenceLockData = lockService.lock(referenceLockKey, userId,
-                                    String.format(LockData.DescriptionTemplate.REF_BOOK.getText(), attributeRefBook.getName()),
-                                    lockService.getLockTimeout(LockData.LockObjects.REF_BOOK));
-                            if (referenceLockData == null) {
-                                //Блокировка установлена
-                                lockedObjects.add(referenceLockKey);
-                            } else {
-                                throw new ServiceLoggerException(String.format(LOCK_MESSAGE, attributeRefBook.getName()),
-                                        logEntryService.save(logger.getEntries()));
-                            }
-                        }
-                    }
-                }
-                final Department dep = departmentService.getDepartment(uniqueRecordId.intValue());
-                // проверка использования подразделения в модуле гарантий
+            List<RefBookAttribute> attributes = refBook.getAttributes();
+            final Department dep = departmentService.getDepartment(uniqueRecordId.intValue());
+            // проверка использования подразделения в модуле гарантий
                 /*if (dep.isGarantUse()) {
                     logger.error("Подразделение используется в АС \"Гарантии\"");
                     throw new ServiceLoggerException("Подразделение не может быть отредактировано!",
                             logEntryService.save(logger.getEntries()));
                 }*/
-                Department parentDep = records.get(DEPARTMENT_PARENT_ATTRIBUTE).getReferenceValue() != null ?
-                        departmentService.getDepartment(records.get(DEPARTMENT_PARENT_ATTRIBUTE).getReferenceValue().intValue())
-                        : null;
-                DepartmentType oldType = dep.getType();
-                DepartmentType newType = fromCode(records.get(DEPARTMENT_TYPE_ATTRIBUTE).getReferenceValue().intValue());
-                boolean isChangeType = oldType != newType;
+            Department parentDep = records.get(DEPARTMENT_PARENT_ATTRIBUTE).getReferenceValue() != null ?
+                    departmentService.getDepartment(records.get(DEPARTMENT_PARENT_ATTRIBUTE).getReferenceValue().intValue())
+                    : null;
+            DepartmentType oldType = dep.getType();
+            DepartmentType newType = fromCode(records.get(DEPARTMENT_TYPE_ATTRIBUTE).getReferenceValue().intValue());
+            boolean isChangeType = oldType != newType;
 
-                Department oldTb = departmentService.getParentTB(uniqueRecordId.intValue());
-                int oldTBId = oldTb != null ? oldTb.getId() : 0;
-                Department newTb =
-                        records.get(DEPARTMENT_PARENT_ATTRIBUTE).getReferenceValue() != null ?
-                                departmentService.getParentTB(records.get(DEPARTMENT_PARENT_ATTRIBUTE).getReferenceValue().intValue()) :
-                                departmentService.getBankDepartment();
-                int newTBId = newTb != null ? newTb.getId() : uniqueRecordId.intValue();
-                boolean isChangeTB = oldTBId != 0 && oldTBId != newTBId;
+            Department oldTb = departmentService.getParentTB(uniqueRecordId.intValue());
+            int oldTBId = oldTb != null ? oldTb.getId() : 0;
+            Department newTb =
+                    records.get(DEPARTMENT_PARENT_ATTRIBUTE).getReferenceValue() != null ?
+                            departmentService.getParentTB(records.get(DEPARTMENT_PARENT_ATTRIBUTE).getReferenceValue().intValue()) :
+                            departmentService.getBankDepartment();
+            int newTBId = newTb != null ? newTb.getId() : uniqueRecordId.intValue();
+            boolean isChangeTB = oldTBId != 0 && oldTBId != newTBId;
 
-                if (isChangeTB)
-                    throw new ServiceLoggerException(
-                            "Подразделение не может быть отредактировано, так как невозможно его переместить в состав другого территориального банка!",
-                            logEntryService.save(logger.getEntries()));
+            if (isChangeTB)
+                throw new ServiceLoggerException(
+                        "Подразделение не может быть отредактировано, так как невозможно его переместить в состав другого территориального банка!",
+                        logEntryService.save(logger.getEntries()));
 
-                if (isChangeType){
-                    switch (oldType){
-                        //3 шаг
-                        case ROOT_BANK :
-                            throw new ServiceLoggerException(
-                                    "Подразделение не может быть отредактировано, так как для него нельзя изменить тип \"Банк\"!\"",
-                                    logEntryService.save(logger.getEntries()));
-                            //4 шаг
-                        case TERR_BANK:
+            if (isChangeType){
+                switch (oldType){
+                    //3 шаг
+                    case ROOT_BANK :
+                        throw new ServiceLoggerException(
+                                "Подразделение не может быть отредактировано, так как для него нельзя изменить тип \"Банк\"!\"",
+                                logEntryService.save(logger.getEntries()));
+                        //4 шаг
+                        /*case TERR_BANK:
                             List<ReportPeriod> openReportPeriods = new ArrayList<ReportPeriod>(0);
                             openReportPeriods.addAll(periodService.getOpenPeriodsByTaxTypeAndDepartments(TaxType.TRANSPORT, Arrays.asList(uniqueRecordId.intValue()), true, true));
                             openReportPeriods.addAll(periodService.getOpenPeriodsByTaxTypeAndDepartments(TaxType.PROPERTY, Arrays.asList(uniqueRecordId.intValue()), true, true));
@@ -401,39 +379,39 @@ public class RefBookDepartment implements RefBookDataProvider {
                                         "Подразделение не может быть отредактировано, так как для него нельзя изменить тип \"ТБ\", если для него существует период!",
                                         logEntryService.save(logger.getEntries()));
                             }
-                            break;
+                            break;*/
                         //5 шаг
-                        case CSKO_PCP:
-                        case MANAGEMENT:
-                            if (newType.equals(CSKO_PCP) || newType.equals(MANAGEMENT))
-                                break;
-                            List<TAUserView> users = taUserService.getUsersByFilter(new MembersFilterData() {{
-                                setDepartmentIds(new HashSet<Integer>(Arrays.asList(uniqueRecordId.intValue())));
-                            }});
-                            if (!users.isEmpty()){
-                                for (TAUserView user : users)
-                                    logger.error("Пользователь %s назначен подразделению %s", user.getName(), dep.getName());
-                                throw new ServiceLoggerException(
-                                        "Подразделение не может быть отредактировано, так как для него нельзя изменить тип \"Управление\", если ему назначены пользователи!",
-                                        logEntryService.save(logger.getEntries())
-                                );
-                            }
+                    case CSKO_PCP:
+                    case MANAGEMENT:
+                        if (newType.equals(CSKO_PCP) || newType.equals(MANAGEMENT))
                             break;
-                    }
+                        List<TAUserView> users = taUserService.getUsersByFilter(new MembersFilterData() {{
+                            setDepartmentIds(new HashSet<Integer>(Arrays.asList(uniqueRecordId.intValue())));
+                        }});
+                        if (!users.isEmpty()){
+                            for (TAUserView user : users)
+                                logger.error("Пользователь %s назначен подразделению %s", user.getName(), dep.getName());
+                            throw new ServiceLoggerException(
+                                    "Подразделение не может быть отредактировано, так как для него нельзя изменить тип \"Управление\", если ему назначены пользователи!",
+                                    logEntryService.save(logger.getEntries())
+                            );
+                        }
+                        break;
                 }
+            }
 
-                RefBookRecord refBookRecord = new RefBookRecord();
-                refBookRecord.setUniqueRecordId(uniqueRecordId);
-                refBookRecord.setValues(records);
+            RefBookRecord refBookRecord = new RefBookRecord();
+            refBookRecord.setUniqueRecordId(uniqueRecordId);
+            refBookRecord.setValues(records);
 
-                //Проверка корректности
-                //6 шаг
-                checkCorrectness(logger, uniqueRecordId, attributes, Arrays.asList(refBookRecord));
-                if (logger.containsLevel(LogLevel.ERROR))
-                    throw new ServiceLoggerException(ERROR_MESSAGE,
-                            logEntryService.save(logger.getEntries()));
+            //Проверка корректности
+            //6 шаг
+            checkCorrectness(logger, uniqueRecordId, attributes, Arrays.asList(refBookRecord));
+            if (logger.containsLevel(LogLevel.ERROR))
+                throw new ServiceLoggerException(ERROR_MESSAGE,
+                        logEntryService.save(logger.getEntries()));
 
-                //7 Перенесен в отдельный хендлер
+            //7 Перенесен в отдельный хендлер
                 /*if (versionFrom != null){
                     if (oldType != TERR_BANK){
                         //Обновляем имена подразделений в печатных формах
@@ -444,27 +422,22 @@ public class RefBookDepartment implements RefBookDataProvider {
                     }
                 }*/
 
-                //9 шаг. Проверка зацикливания
-                if (dep.getType() != DepartmentType.ROOT_BANK && dep.getParentId() != null && dep.getParentId() != (parentDep != null ? parentDep.getId() : 0)){
-                    checkCycle(dep, parentDep, logger);
-                    if (logger.containsLevel(LogLevel.ERROR))
-                        throw new ServiceLoggerException(ERROR_MESSAGE, logEntryService.save(logger.getEntries()));
-                }
+            //9 шаг. Проверка зацикливания
+            if (dep.getType() != DepartmentType.ROOT_BANK && dep.getParentId() != null && dep.getParentId() != (parentDep != null ? parentDep.getId() : 0)){
+                checkCycle(dep, parentDep, logger);
+                if (logger.containsLevel(LogLevel.ERROR))
+                    throw new ServiceLoggerException(ERROR_MESSAGE, logEntryService.save(logger.getEntries()));
+            }
 
-                //Сохранение
-                refBookDepartmentDao.update(uniqueRecordId.intValue(), records, refBook.getAttributes());
+            //Сохранение - пренесли в EditPrintFDHandler из-за http://jira.aplana.com/browse/SBRFACCTAX-11960
+                /*refBookDepartmentDao.update(uniqueRecordId.intValue(), records, refBook.getAttributes());
                 logger.info("Подразделение сохранено");
 
                 auditService.add(FormDataEvent.UPDATE_DEPARTMENT, logger.getTaUserInfo(), uniqueRecordId.intValue(),
                         null, null, null, null,
                         String.format("Изменены значения атрибутов подразделения %s, новые значения атрибутов: %s",
                                 departmentService.getDepartment(uniqueRecordId.intValue()).getName(),
-                                assembleMessage(records)), null);
-            } finally {
-                for (String lock : lockedObjects) {
-                    lockService.unlock(lock, userId);
-                }
-            }
+                                assembleMessage(records)), null);*/
         } else {
             throw new ServiceLoggerException(String.format(LOCK_MESSAGE, refBook.getName()),
                     logEntryService.save(logger.getEntries()));
