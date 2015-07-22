@@ -235,19 +235,15 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 
 	@Override
 	public boolean isDataRowsCountChanged(FormData formData) {
-		// считаем кол-во строк в постоянном срезе - кол-во строк во временном срезе.
-		StringBuilder sql = new StringBuilder("SELECT\n");
-		sql.append("(SELECT COUNT(*) FROM form_data_");
+		// сравниваем кол-во реальных строк с числом, хранящимся в form_data.number_current_row
+		StringBuilder sql = new StringBuilder("SELECT (SELECT COUNT(*) FROM form_data_\n");
 		sql.append(formData.getFormTemplateId());
-		sql.append(" WHERE form_data_id = :form_data_id AND manual = 0 AND temporary = :temporary_temp)\n");
-		sql.append("-(SELECT COUNT(*) FROM form_data_");
-		sql.append(formData.getFormTemplateId());
-		sql.append(" WHERE form_data_id = :form_data_id AND manual = 0 AND temporary = :temporary_saved) \nFROM DUAL");
+		sql.append(" WHERE form_data_id = :form_data_id AND alias IS NULL OR alias LIKE '%)\n");
+		sql.append(DataRowMapper.ALIASED_WITH_AUTO_NUMERATION_AFFIX).append("%')");
+		sql.append(" - (SELECT number_current_row FROM form_data WHERE id = :form_data_id) FROM DUAL");
 
 		Map<String, Object> params = new HashMap<String, Object>();
 		params.put("form_data_id", formData.getId());
-		params.put("temporary_temp", DataRowType.TEMP.getCode());
-		params.put("temporary_saved", DataRowType.SAVED.getCode());
 
 		if (log.isTraceEnabled()) {
 			log.trace(params);
@@ -528,8 +524,7 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 	public int getSizeWithoutTotal(FormData formData) {
 		StringBuilder sql = new StringBuilder("SELECT COUNT(*) FROM form_data_");
 		sql.append(formData.getFormTemplateId());
-		sql.append(" WHERE form_data_id = :form_data_id AND temporary = :temporary AND manual = :manual AND (alias IS NULL");
-		sql.append(" OR alias = '").append(DataRowMapper.ALIASED_WITH_AUTO_NUMERATION_AFFIX).append("')");
+		sql.append(" WHERE form_data_id = :form_data_id AND temporary = :temporary AND manual = :manual AND alias IS NULL");
 
 		Map<String, Object> params = new HashMap<String, Object>();
 		params.put("form_data_id", formData.getId());

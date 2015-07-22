@@ -74,7 +74,7 @@ public class PrintingServiceImpl implements PrintingService {
     private static final String REF_BOOK_VALUE_NAME = "CODE";
 
 	@Override
-	public String generateExcel(TAUserInfo userInfo, long formDataId, boolean manual, boolean isShowChecked, boolean saved, LockStateLogger stateLogger) {
+	public String generateExcel(TAUserInfo userInfo, long formDataId, boolean manual, boolean isShowChecked, LockStateLogger stateLogger) {
         String filePath = null;
         try {
             formDataAccessService.canRead(userInfo, formDataId);
@@ -123,7 +123,7 @@ public class PrintingServiceImpl implements PrintingService {
 	}
 
     @Override
-    public String generateCSV(TAUserInfo userInfo, long formDataId, boolean manual, boolean isShowChecked, boolean saved, LockStateLogger stateLogger) {
+    public String generateCSV(TAUserInfo userInfo, long formDataId, boolean manual, boolean isShowChecked, LockStateLogger stateLogger) {
         String reportPath = null;
         try {
             formDataAccessService.canRead(userInfo, formDataId);

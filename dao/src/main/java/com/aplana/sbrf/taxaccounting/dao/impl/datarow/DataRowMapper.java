@@ -54,13 +54,13 @@ class DataRowMapper implements RowMapper<DataRow<Cell>> {
 
 		StringBuilder sql = new StringBuilder("SELECT id, ord, alias,\n");
 		// автонумерация (считаются все строки где нет алиасов, либо алиас = ALIASED_WITH_AUTO_NUMERATION_AFFIX)
-		sql.append("CASE WHEN (alias IS NULL OR alias LIKE '%").append(ALIASED_WITH_AUTO_NUMERATION_AFFIX).append("') THEN\n")
-			.append("ROW_NUMBER() OVER (PARTITION BY CASE WHEN (alias IS NULL OR alias = '")
-			.append(ALIASED_WITH_AUTO_NUMERATION_AFFIX).append("') THEN 1 ELSE 0 END ORDER BY ord)\n")
+		sql.append("CASE WHEN (alias IS NULL OR alias LIKE '%").append(ALIASED_WITH_AUTO_NUMERATION_AFFIX).append("%') THEN\n")
+			.append("ROW_NUMBER() OVER (PARTITION BY CASE WHEN (alias IS NULL OR alias LIKE '%")
+			.append(ALIASED_WITH_AUTO_NUMERATION_AFFIX).append("%') THEN 1 ELSE 0 END ORDER BY ord)\n")
 			.append("ELSE NULL END ");
         if (range != null) {
             sql.append("+ (SELECT count(*) from form_data_").append(formData.getFormTemplateId())
-                .append(" WHERE (alias IS NULL OR alias LIKE '%").append(ALIASED_WITH_AUTO_NUMERATION_AFFIX).append("') AND")
+                .append(" WHERE (alias IS NULL OR alias LIKE '%").append(ALIASED_WITH_AUTO_NUMERATION_AFFIX).append("%') AND")
                 .append(" form_data_id = :formDataId AND temporary = :temporary AND manual = :manual")
                 .append(" AND ord < :from)");
         }

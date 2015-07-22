@@ -69,7 +69,6 @@ public interface DataRowDao {
     /**
      * Метод получает количество строк без учета итоговых
      */
-	//TODO детально изучить метод
     int getSizeWithoutTotal(FormData formData);
 
 	/**
@@ -88,7 +87,6 @@ public interface DataRowDao {
 	 * @param formData экземпляр НФ
 	 * @return true - изменилось, false - не изменилось
 	 */
-	//TODO детально изучить метод
 	boolean isDataRowsCountChanged(FormData formData);
 
 	/**
