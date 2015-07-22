@@ -9,7 +9,7 @@ import groovy.transform.Field
 
 /**
  * Расчет налога на прибыль организаций с доходов, удерживаемого налоговым агентом (источником выплаты доходов).
- * formTemplateId=10070
+ * formTemplateId=10070 (у нас 419)
  *
  * TODO:
  *      - логические проверки в чтз пока не описаны
@@ -114,15 +114,16 @@ def refBookCache = [:]
 // редактируемые (графа 2..42)
 @Field
 def editableColumns = ['emitentName', 'emitentInn', 'all', 'rateZero', 'distributionSum', 'decisionNumber',
-                       'decisionDate', 'year', 'firstMonth', 'lastMonth', 'allSum', 'addresseeName', 'inn', 'kpp', 'type',
-                       'status', 'birthday','citizenship', 'kind', 'series', 'rate', 'dividends', 'sum', 'date', 'number',
-                       'withheldSum', 'withheldDate', 'withheldNumber', 'postcode', 'region', 'district', 'city', 'locality',
-                       'street', 'house', 'housing', 'apartment', 'surname', 'name', 'patronymic', 'phone']
+        'decisionDate', 'year', 'firstMonth', 'lastMonth', 'allSum', 'addresseeName', 'inn', 'kpp', 'type',
+        'status', 'birthday','citizenship', 'kind', 'series', 'rate', 'dividends', 'sum', 'date', 'number',
+        'withheldSum', 'withheldDate', 'withheldNumber', 'postcode', 'region', 'district', 'city', 'locality',
+        'street', 'house', 'housing', 'apartment', 'surname', 'name', 'patronymic', 'phone']
 
 // обязательные (графа 1..17, 23..25, 27)
 @Field
-def nonEmptyColumns = ['emitentName', 'emitentInn', 'distributionSum', 'decisionNumber', 'decisionDate', 'year', 'firstMonth',
-                       'lastMonth', 'allSum', 'addresseeName', 'type', 'status', 'dividends', 'sum', 'date', 'withheldSum']
+def nonEmptyColumns = ['emitentName', 'emitentInn', 'all', 'rateZero', 'distributionSum', 'decisionNumber',
+        'decisionDate', 'year', 'firstMonth', 'lastMonth', 'allSum', 'addresseeName', 'inn', 'kpp', 'type',
+        'status', 'dividends', 'sum', 'date', 'withheldSum']
 
 // сортировка (графа 7, 8)
 @Field
@@ -157,6 +158,7 @@ void calc() {
 }
 
 def logicCheck() {
+    // TODO (Ramil Timerbaev) в чтз пока не описано
     def dataRows = formDataService.getDataRowHelper(formData)?.allCached
 
     def wasError = [false, false]
@@ -164,14 +166,8 @@ def logicCheck() {
     for (def row in dataRows) {
         def index = row.getIndex()
 
-        // Проверка обязательных полей
+        // . Проверка обязательных полей
         checkNonEmptyColumns(row, index, nonEmptyColumns, logger, true)
-
-        // «Графа 14» и «Графа 15» обязательны для заполнения, если значение «Графы 16» = «1»
-        if (row.type == 1 && (row.inn == null || row.kpp == null)) {
-            logger.error("Строка ${index}: В случае если атрибут «%s» заполнен значением «1» должен быть заполнен атрибут «%s» и атрибут «%s»!",
-                    getColumnName(row, 'type'), getColumnName(row, 'inn'), getColumnName(row, 'kpp'))
-        }
 
         // Проверка паттернов
         if (row.emitentInn && checkPattern(logger, row, 'emitentInn', row.emitentInn, INN_JUR_PATTERN, wasError[1] ? null : INN_JUR_MEANING, true)) {
@@ -186,12 +182,6 @@ def logicCheck() {
         }
         if (row.kpp && !checkPattern(logger, row, 'kpp', row.kpp, KPP_PATTERN, wasError[2] ? null : KPP_MEANING, true)) {
             wasError[2] = true
-        }
-
-        // «Графа 17» принимает значения «1» или «2»
-        if (row.status && row.status != 1 && row.status != 2) {
-            logger.error("Строка ${index}: Атрибут «%s» заполнен неверно («%s»)! Возможные значения: может принимать значение «1» или «2»!",
-                    getColumnName(row, 'status'), row.status)
         }
     }
 }
@@ -381,7 +371,7 @@ def getNewRow(String[] rowCells, def columnCount, def fileRowIndex, def rowIndex
 
     // графа 17
     colIndex++
-    newRow.status =  parseNumber(pure(rowCells[colIndex]), fileRowIndex, colIndex + colOffset, logger, required)
+    newRow.status = pure(rowCells[colIndex])
 
     // графа 18
     colIndex++
@@ -732,7 +722,7 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
 
     // графа 17
     colIndex++
-    newRow.status = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, required)
+    newRow.status = values[colIndex]
 
     // графа 18
     colIndex++
