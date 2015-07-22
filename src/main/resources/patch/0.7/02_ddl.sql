@@ -5,3 +5,9 @@ comment on column form_data.sorted is 'Признак актуальности �
 
 alter table form_data add number_current_row number(9);
 comment on column form_data.number_current_row is 'Количество пронумерованных строк текущей НФ';
+
+
+-- http://jira.aplana.com/browse/SBRFACCTAX-12103: Ограничения на form_data_ref_book
+alter table form_data_ref_book add constraint form_data_ref_book_fk_refbook foreign key (ref_book_id) references ref_book(id) on delete cascade;
+
+
