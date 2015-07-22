@@ -335,7 +335,7 @@ void copyRows(def sourceDataRows, def destinationDataRows, def fromAlias, def to
 
 /** Получить новую стролу с заданными стилями. */
 def getNewRow() {
-    def newRow = formData.createDataRow()
+    def newRow = (formDataEvent in [FormDataEvent.IMPORT, FormDataEvent.IMPORT_TRANSPORT_FILE]) ? formData.createStoreMessagingDataRow() : formData.createDataRow()
     editableColumns.each {
         newRow.getCell(it).editable = true
         newRow.getCell(it).styleAlias = 'Редактируемая'

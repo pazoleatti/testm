@@ -256,7 +256,7 @@ void addRow() {
 }
 
 def getNewRow() {
-    newRow = formData.createDataRow()
+    def newRow = (formDataEvent in [FormDataEvent.IMPORT, FormDataEvent.IMPORT_TRANSPORT_FILE]) ? formData.createStoreMessagingDataRow() : formData.createDataRow()
     newRow.keySet().each {
         newRow.getCell(it).setStyleAlias('Автозаполняемая')
     }
