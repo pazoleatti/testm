@@ -526,7 +526,7 @@ def isMonthBalance() {
         if (!departmentReportPeriod.isBalance() || formData.periodOrder == null) {
             isBalance = false
         } else {
-            isBalance = formData.periodOrder - 1 % 3 == 0
+            isBalance = (formData.periodOrder - 1) % 3 == 0
         }
     }
     return isBalance
