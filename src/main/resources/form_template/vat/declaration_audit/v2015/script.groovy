@@ -1,11 +1,18 @@
 package form_template.vat.declaration_audit.v2015
 
-import com.aplana.sbrf.taxaccounting.model.*
+import com.aplana.sbrf.taxaccounting.model.Cell
+import com.aplana.sbrf.taxaccounting.model.DataRow
+import com.aplana.sbrf.taxaccounting.model.FormDataEvent
+import com.aplana.sbrf.taxaccounting.model.FormDataKind
+import com.aplana.sbrf.taxaccounting.model.ReportPeriod
+import com.aplana.sbrf.taxaccounting.model.TaxType
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
 import groovy.transform.Field
 import groovy.xml.MarkupBuilder
 import org.apache.commons.collections.map.HashedMap
+
+import javax.xml.namespace.QName
 
 /**
  * Декларация по НДС (аудит, раздел 1-7)
@@ -79,27 +86,7 @@ def getProvider(def long providerId) {
     return providerCache.get(providerId)
 }
 
-BigDecimal getXmlDecimal(def reader, String attrName) {
-    def value = reader?.getAttributeValue(null, attrName)
-    if (!value) {
-        return null
-    }
-    return new BigDecimal(value)
-}
-
-/**
- * Ищет точное ли совпадение узлов дерева xml c текущими незакрытыми элементами
- * @param nodeNames ожидаемые элементы xml
- * @param elements незакрытые элементы
- * @return
- */
-boolean isCurrentNode(List<String> nodeNames, Map<String, Boolean> elements) {
-    nodeNames.add('Файл')
-    def enteredNodes = elements.findAll { it.value }.keySet() // узлы в которые вошли, но не вышли еще
-    enteredNodes.containsAll(nodeNames) && enteredNodes.size() == nodeNames.size()
-}
-
-// Мапа соответсвтия id и наименований типов деклараций 8-11
+// Мапа соответсвтия id и наименований деклараций 8-11
 def declarations() {
     [
             declaration8 : [12, 'Декларация по НДС (раздел 8)'],
@@ -205,7 +192,7 @@ List<String> getErrorVersion(record) {
     errorList
 }
 
-def getDataRowSum(def dataRows, def String rowAlias, def String cellAlias, def useRound = true) {
+def getDataRowSum(def dataRows, def String rowAlias, def String cellAlias, def useRound = true){
     def sum = empty
     for (DataRow<Cell> row : dataRows) {
         if (rowAlias.equals(row.getAlias())) {
@@ -254,9 +241,9 @@ void generateXML() {
     def sign11 = isDeclarationExist(declarations().declaration11[0])
     def sign12 = 0
 
-    def nameDecl8 = getDeclarationFileName(has8 ? declarations().declaration8[0] : declarations().declaration8n[0])
+    def nameDecl8 =  getDeclarationFileName(has8 ? declarations().declaration8[0] : declarations().declaration8n[0])
     def nameDecl81 = getDeclarationFileName(declarations().declaration81[0])
-    def nameDecl9 = getDeclarationFileName(has9 ? declarations().declaration9[0] : declarations().declaration9n[0])
+    def nameDecl9 =  getDeclarationFileName(has9 ? declarations().declaration9[0] : declarations().declaration9n[0])
     def nameDecl91 = getDeclarationFileName(declarations().declaration91[0])
     def nameDecl10 = getDeclarationFileName(declarations().declaration10[0])
     def nameDecl11 = getDeclarationFileName(declarations().declaration11[0])
@@ -275,10 +262,10 @@ void generateXML() {
     // Список данных форм-источников
     def formDataList = declarationService.getAcceptedFormDataSources(declarationData).getRecords()
     // Тип формы > Строки формы
-    def Map<Integer, List> dataRowsMap = [:]
+    def Map<Integer,List> dataRowsMap = [:]
     for (def formData : formDataList) {
         def dataRows = formDataService.getDataRowHelper(formData)?.getAll()
-        if (dataRowsMap.containsKey(formData.formType.id)) {
+        if(dataRowsMap.containsKey(formData.formType.id)){
             dataRowsMap.get(formData.formType.id).addAll(dataRows)
         } else {
             dataRowsMap.put(formData.formType.id, dataRows)
@@ -335,7 +322,7 @@ void generateXML() {
         def totalRow5baseSum = getDataRowSum(rows724_1, 'total_5', 'baseSum')
         def totalRow5ndsSum = getDataRowSum(rows724_1, 'total_5', 'ndsSum')
         def totalRow6baseSum = getDataRowSum(rows724_1, 'total_6', 'baseSum', false)
-        def totalRow6ndsSum = getDataRowSum(rows724_1, 'total_6', 'ndsSum', false)
+        def totalRow6ndsSum  = getDataRowSum(rows724_1, 'total_6', 'ndsSum', false)
         def totalRow7baseSum = getDataRowSum(rows724_1, 'total_7', 'baseSum', false)
         def totalRow7ndsDealSum = getDataRowSum(rows724_1, 'total_7', 'ndsDealSum')
         def totalRow7ndsBookSum = getDataRowSum(rows724_1, 'total_7', 'ndsBookSum', false)
@@ -583,8 +570,8 @@ void generateXML() {
                             code = dataRowsMap[601].find { row -> row.getAlias() == it }.code
                             СумОпер7(
                                     КодОпер: code,
-                                    СтРеалТов: getDataRowSum(dataRowsMap[601], it, 'realizeCost'),
-                                    СтПриобТов: getDataRowSum(dataRowsMap[601], it, 'obtainCost'),
+                                    СтРеалТов: getDataRowSum(dataRowsMap[601], it,'realizeCost'),
+                                    СтПриобТов: getDataRowSum(dataRowsMap[601], it,'obtainCost'),
                                     НалНеВыч: round(getNalNeVich(code))
                             )
                         }
@@ -604,94 +591,32 @@ void generateXML() {
 
 // Логические проверки
 void logicCheck() {
+    def exist8_12
+    def exist8
+    def exist81
+    def exist9
+    def exist91
+    def exist10
+    def exist11
+    def exist12
+
     def reader = declarationService.getXmlStreamReader(declarationData.id)
     if (reader == null) {
         return
     }
-
-    def has8 = (isDeclarationExist(declarations().declaration8[0]) == 1)
-    def has8n = (isDeclarationExist(declarations().declaration8n[0]) == 1)
-    def has9 = (isDeclarationExist(declarations().declaration9[0]) == 1)
-    def has9n = (isDeclarationExist(declarations().declaration9n[0]) == 1)
-
-    def elements = [:]
-
-    def exist8_12, exist8, exist81, exist9, exist91, exist10, exist11, exist12, existFound = false
-
-    // Раздел 1
-    def r1str050
-    // Раздел 2
-    def r2str060sum = 0
-    // Раздел 3
-    def r3g3str010, r3g3str020, r3g3str030, r3g3str040, r3g3str120, r3g3str150, r3g3str160
-    def r3g3str170, r3g5str010, r3g5str020, r3g5str030, r3g5str040
-    def r3g5str110, r3g3str190, r3g3str180
-    // Раздел 7
-    def r7g2sum = 0, r7g4sum = 0
-
-    // Раздел 8
-    def r8str190
-    def r8str180sum = 0
-    // Приложение 1 к Разделу  8
-    def r81str190, r81str005
-    def r81str180sum = 0
-
-    // Раздел 9
-    def r9str260, r9str270, r9str250
-    def r9str200sum = 0, r9str210sum = 0, r9str190sum = 0
-    // Приложение 1 к Разделу 9
-    def r91str340, r91str350, r91str050, r91str060, r91str020, r91str310, r91str320, r91str330
-    def r91str280sum = 0, r91str290sum = 0, r91str250sum = 0, r91str270sum = 0
-
-    try { // ищем пока есть элементы и есть что искать
+    try {
         while (reader.hasNext()) {
-            if (reader.startElement) {
-                elements[reader.name.localPart] = true
-                if (!existFound && isCurrentNode([], elements)) {
-                    existFound = true
-                    exist8_12 = reader.getAttributeValue(null, "ПризнНал8-12")
-                    exist8 = reader.getAttributeValue(null, "ПризнНал8")
-                    exist81 = reader.getAttributeValue(null, "ПризнНал81")
-                    exist9 = reader.getAttributeValue(null, "ПризнНал9")
-                    exist91 = reader.getAttributeValue(null, "ПризнНал91")
-                    exist10 = reader.getAttributeValue(null, "ПризнНал10")
-                    exist11 = reader.getAttributeValue(null, "ПризнНал11")
-                    exist12 = reader.getAttributeValue(null, "ПризнНал12")
-                } else if (isCurrentNode(['Документ', 'НДС', 'СумУплНП'], elements)) {
-                    r1str050 = getXmlDecimal(reader, "СумПУ_173.1") ?: 0
-                } else if (isCurrentNode(['Документ', 'НДС', 'СумУплНА'], elements)) {
-                    r2str060sum += getXmlDecimal(reader, "СумИсчисл") ?: 0
-                } else if (!r3g3str010 && isCurrentNode(['Документ', 'НДС', 'СумУпл164', 'СумНалОб'], elements)) {
-                    r3g5str110 = getXmlDecimal(reader, "НалВосстОбщ") ?: 0
-                } else if (!r3g3str010 && isCurrentNode(['Документ', 'НДС', 'СумУпл164', 'СумНалОб', 'РеалТов18'], elements)) {
-                    r3g3str010 = getXmlDecimal(reader, "НалБаза") ?: 0
-                    r3g5str010 = getXmlDecimal(reader, "СумНал") ?: 0
-                } else if (!r3g3str020 && isCurrentNode(['Документ', 'НДС', 'СумУпл164', 'СумНалОб', 'РеалТов10'], elements)) {
-                    r3g3str020 = getXmlDecimal(reader, "НалБаза") ?: 0
-                    r3g5str020 = getXmlDecimal(reader, "СумНал") ?: 0
-                } else if (!r3g3str030 && isCurrentNode(['Документ', 'НДС', 'СумУпл164', 'СумНалОб', 'РеалТов118'], elements)) {
-                    r3g3str030 = getXmlDecimal(reader, "НалБаза") ?: 0
-                    r3g5str030 = getXmlDecimal(reader, "СумНал") ?: 0
-                } else if (!r3g3str040 && isCurrentNode(['Документ', 'НДС', 'СумУпл164', 'СумНалОб', 'РеалТов110'], elements)) {
-                    r3g3str040 = getXmlDecimal(reader, "НалБаза") ?: 0
-                    r3g5str040 = getXmlDecimal(reader, "СумНал") ?: 0
-                } else if (!r3g3str120 && isCurrentNode(['Документ', 'НДС', 'СумУпл164', 'СумНалВыч'], elements)) {
-                    r3g3str120 = getXmlDecimal(reader, "НалПредНППриоб") ?: 0
-                    r3g3str150 = getXmlDecimal(reader, "НалУплТамож") ?: 0
-                    r3g3str160 = getXmlDecimal(reader, "НалУпл10ТовТС") ?: 0
-                    r3g3str170 = getXmlDecimal(reader, "НалИсчПрод") ?: 0
-                    r3g3str180 = getXmlDecimal(reader, "НалУплПокНА") ?: 0
-                    r3g3str190 = getXmlDecimal(reader, "НалВычОбщ") ?: 0
-                } else if (isCurrentNode(['Документ', 'НДС', 'ОперНеНал', 'СумОпер7'], elements)) {
-                    codeOper = reader.getAttributeValue(null, "КодОпер")
-                    if (codeOper.matches("10108([0,1][0-9]|20|21)")) {
-                        r7g2sum += getXmlDecimal(reader, "СтРеалТов") ?: 0
-                        r7g4sum += getXmlDecimal(reader, "НалНеВыч") ?: 0
-                    }
-                }
-            }
-            if (reader.endElement) {
-                elements[reader.name.localPart] = false
+            if (reader.startElement && QName.valueOf('Файл').equals(reader.name)) {
+                // Атрибуты записи
+                exist8_12 = reader.getAttributeValue(null, "ПризнНал8-12")
+                exist8 = reader.getAttributeValue(null, "ПризнНал8")
+                exist81 = reader.getAttributeValue(null, "ПризнНал81")
+                exist9 = reader.getAttributeValue(null, "ПризнНал9")
+                exist91 = reader.getAttributeValue(null, "ПризнНал91")
+                exist10 = reader.getAttributeValue(null, "ПризнНал10")
+                exist11 = reader.getAttributeValue(null, "ПризнНал11")
+                exist12 = reader.getAttributeValue(null, "ПризнНал12")
+                break
             }
             reader.next()
         }
@@ -699,165 +624,21 @@ void logicCheck() {
         reader.close()
     }
 
-    def reader8
-    if (has8) {
-        logger.info("" + getParts().get(declarations().declaration8[0]))
-        reader8 = declarationService.getXmlStreamReader(getParts().get(declarations().declaration8[0]).id)
-    } else if (has8n) {
-        reader8 = declarationService.getXmlStreamReader(getParts().get(declarations().declaration8n[0]).id)
-    }
-    def reader81
-    if (isDeclarationExist(declarations().declaration81[0]) == 1) {
-        reader81 = declarationService.getXmlStreamReader(getParts().get(declarations().declaration81[0]).id)
-    }
-    def reader9
-    if (has9) {
-        reader9 = declarationService.getXmlStreamReader(getParts().get(declarations().declaration9[0]).id)
-    } else if (has9n) {
-        reader9 = declarationService.getXmlStreamReader(getParts().get(declarations().declaration9n[0]).id)
-    }
-    def reader91
-    if (isDeclarationExist(declarations().declaration91[0]) == 1) {
-        reader91 = declarationService.getXmlStreamReader(getParts().get(declarations().declaration91[0]).id)
-    }
-
-    if (reader8 != null) {
-        logger.info("" + reader8)
-        try {
-            while (reader8.hasNext()) {
-                if (reader8.startElement) {
-                    elements[reader8.name.localPart] = true
-                    if ("КодВидОпер".equals(reader9.name.localPart)) {
-                        if ('06'.equals(reader9.getElementText())) {
-                            r8str180sum += r8str180sumTmp
-                        }
-                    }
-                    if (!r8str190 && isCurrentNode(['Документ', 'КнигаПокуп'], elements)) {
-                        r8str190 = getXmlDecimal(reader8, "СумНДСВсКПк") ?: 0
-                    }
-                    if (isCurrentNode(['Документ', 'КнигаПокуп', 'КнПокСтр'], elements)) {
-                        r8str180sumTmp = getXmlDecimal(reader8, "СумНДСВыч") ?: 0
-                    }
-                }
-                if (reader8.endElement) {
-                    elements[reader8.name.localPart] = false
-                }
-                reader8.next()
-            }
-        } finally {
-            reader8.close()
-        }
-    }
-
-    if (reader81 != null) {
-        try {
-            while (reader81.hasNext()) {
-                if (reader81.startElement) {
-                    elements[reader81.name.localPart] = true
-                    if ("КодВидОпер".equals(reader9.name.localPart)) {
-                        if ('06'.equals(reader9.getElementText())) {
-                            r81str180sum += r81str180sumTmp
-                        }
-                    }
-                    if (!r81str190 && isCurrentNode(['Документ', 'КнигаПокупДЛ'], elements)) {
-                        r81str190 = getXmlDecimal(reader81, "СумНДСИтП1Р8") ?: 0
-                        r81str005 = getXmlDecimal(reader81, "СумНДСИтКПк") ?: 0
-                    }
-                    if (isCurrentNode(['Документ', 'КнигаПокупДЛ', 'КнПокДЛСтр'], elements)) {
-                        r81str180sumTmp = getXmlDecimal(reader81, "СумНДС") ?: 0
-                    }
-                }
-                if (reader81.endElement) {
-                    elements[reader81.name.localPart] = false
-                }
-                reader81.next()
-            }
-        } finally {
-            reader81.close()
-        }
-    }
-
-    if (reader9 != null) {
-        try {
-            while (reader9.hasNext()) {
-                if (reader9.startElement) {
-                    elements[reader9.name.localPart] = true
-                    if ("КодВидОпер".equals(reader9.name.localPart)) {
-                        if ('06'.equals(reader9.getElementText())) {
-                            r9str200sum += r9str200sumTmp
-                            r9str210sum += r9str210sumTmp
-                        }
-                    }
-                    if (!r9str260 && isCurrentNode(['Документ', 'КнигаПрод'], elements)) {
-                        r9str260 = getXmlDecimal(reader9, "СумНДСВсКПр18") ?: 0
-                        r9str270 = getXmlDecimal(reader9, "СумНДСВсКПр10") ?: 0
-                        r9str250 = getXmlDecimal(reader9, "СтПродБезНДС0") ?: 0
-                    }
-                    if (isCurrentNode(['Документ', 'КнигаПрод', 'КнПродСтр'], elements)) {
-                        r9str200sumTmp = getXmlDecimal(reader9, "СумНДССФ18") ?: 0
-                        r9str210sumTmp = getXmlDecimal(reader9, "СумНДССФ10") ?: 0
-                        r9str190sum += getXmlDecimal(reader9, "СтоимПродСФ0") ?: 0
-                    }
-                }
-                if (reader9.endElement) {
-                    elements[reader9.name.localPart] = false
-                }
-                reader9.next()
-            }
-        } finally {
-            reader9.close()
-        }
-    }
-
-    if (reader91 != null) {
-        try {
-            while (reader91.hasNext()) {
-                if (reader91.startElement) {
-                    elements[reader91.name.localPart] = true
-                    if ("КодВидОпер".equals(reader9.name.localPart)) {
-                        if ('06'.equals(reader9.getElementText())) {
-                            r91str280sum += r91str280sumTmp
-                            r91str290sum += r91str290sumTmp
-                        }
-                    }
-                    if (!r91str340 && isCurrentNode(['Документ', 'КнигаПродДЛ'], elements)) {
-                        r91str340 = getXmlDecimal(reader91, "СумНДСВсП1Р9_18") ?: 0
-                        r91str350 = getXmlDecimal(reader91, "СумНДСВсП1Р9_10") ?: 0
-                        r91str050 = getXmlDecimal(reader91, "СумНДСИтКПр18") ?: 0
-                        r91str060 = getXmlDecimal(reader91, "СумНДСИтКПр10") ?: 0
-                        r91str020 = getXmlDecimal(reader91, "ИтСтПродКПр18") ?: 0
-                        r91str310 = getXmlDecimal(reader91, "СтПродВсП1Р9_18") ?: 0
-                        r91str320 = getXmlDecimal(reader91, "СтПродВсП1Р9_10") ?: 0
-                        r91str330 = getXmlDecimal(reader91, "СтПродВсП1Р9_0") ?: 0
-                    }
-                    if (isCurrentNode(['Документ', 'КнигаПродДЛ', 'КнПродДЛСтр'], elements)) {
-                        r91str280sumTmp = getXmlDecimal(reader91, "СумНДССФ18") ?: 0
-                        r91str290sumTmp = getXmlDecimal(reader91, "СумНДССФ10") ?: 0
-                        r91str250sum += getXmlDecimal(reader91, "СтоимПродСФ18") ?: 0
-                        r91str270sum += getXmlDecimal(reader91, "СтоимПродСФ0") ?: 0
-                    }
-                }
-                if (reader91.endElement) {
-                    elements[reader91.name.localPart] = false
-                }
-                reader91.next()
-            }
-        } finally {
-            reader91.close()
-        }
-    }
-
     // 1. Не создан ни один из экземпляров декларации по НДС (раздел 8), (раздел 8 без консолид. формы) текущего периода и подразделения
     // ИЛИ
     // Создан только один из экземпляров декларации по НДС (раздел 8), (раздел 8 без консолид. формы) текущего периода и подразделения.
-    if (has8 && has8n) {
+    def has8 = (isDeclarationExist(declarations().declaration8[0]) == 1)
+    def has8n = (isDeclarationExist(declarations().declaration8n[0]) == 1)
+    if(has8 && has8n){
         logger.error("Созданы два экземпляра декларации раздела 8 (раздел 8 и раздел 8 без консолид. формы) текущего периода и подразделения! Один из экземпляров декларации раздела 8 необходимо удалить!")
     }
 
     // 1. Не создан ни один из экземпляров декларации по НДС (раздел 9), (раздел 9 без консолид. формы) текущего периода и подразделения
     // ИЛИ
     // Создан только один из экземпляров декларации по НДС (раздел 9), (раздел 9 без консолид. формы) текущего периода и подразделения.
-    if (has9 && has9n) {
+    def has9 = (isDeclarationExist(declarations().declaration9[0]) == 1)
+    def has9n = (isDeclarationExist(declarations().declaration9n[0]) == 1)
+    if(has9 && has9n){
         logger.error("Созданы два экземпляра декларации раздела 9 (раздел 9 и раздел 9 без консолид. формы) текущего периода и подразделения! Один из экземпляров декларации раздела 9 необходимо удалить!")
     }
 
@@ -896,105 +677,6 @@ void logicCheck() {
             }
         }
     }
-
-    // Проверки контрольных соотношений
-    // 1.4
-    def sum010_040 = r3g3str010 + r3g3str020 + r3g3str030 + r3g3str040
-    def sum120_160 = r3g3str120 + r3g3str150 + r3g3str160
-    def denom1 = sum010_040 + r7g2sum
-    def denom2 = sum120_160 + r7g4sum
-    //logger.info("(" + r3g3str010 + "+" + r3g3str020 + "+" + r3g3str030  + "+" + r3g3str040 + ")/(" + sum010_040 + "+" + r7g2sum + ") == (" + r3g3str120 + "+" +r3g3str150 + "+" + r3g3str160  + ")/(" + sum120_160+ "+" + r7g4sum  + ")")
-    if (denom1 == 0 || denom2 == 0) {
-        logger.warn("КС 1.4. Выполнение проверки невозможно, так как в результате расчета получен нулевой знаменатель (деление на ноль невозможно). " +
-                "Алгоритм проверки: Раздел 3, гр. 3: («Строка 010» + «Строка 020» + «Строка 030» + «Строка 040») / Раздел 3, гр. 3: («Строка 010» + «Строка 020» + «Строка 030» + «Строка 040») + (Раздел 7: «Сумма по гр. 2»)) = (Раздел 3, гр. 3: «Строка 120» + «Строка 150» + «Строка 160») / ((Раздел 3, гр. 3: «Строка 120» + «Строка 150» + «Строка 160») + (Раздел 7: «Сумма по гр. 4»))")
-    } else if (sum010_040 / denom1 != sum120_160 / denom2) {
-        logger.warn("КС 1.4. Возможно нарушение ст. 149, 170 п.4 возможно необоснованное применение налоговых вычетов.")
-    }
-    // 1.11
-    if (r3g3str170 > r3g5str010 + r3g5str020 + r3g5str030 + r3g5str040) {
-        logger.warn("КС 1.11. Возможно нарушение ст. 171, п. 8, НК РФ ст. 172, п. 6, либо НК РФ ст. 146, п. 1 налоговые " +
-                "вычеты не обоснованы, либо налоговая база занижена, так как суммы отработанных авансов не включены в реализацию.")
-    }
-    // 1.25 (8, 8.1, 9, 9.1)
-    if (checkReader('1.25', [(has8n ? declarations().declaration8n[0] : declarations().declaration8[0]), declarations().declaration81[0], (has9n ? declarations().declaration9n[0] : declarations().declaration9[0]), declarations().declaration91[0]])) {
-        def sum25 = r8str190 + (r81str190 - r81str005) - (r9str260 + r9str270) - (r9str200sum + r9str210sum) + (r91str340 + r91str350 - r91str050 - r91str060) - (r91str280sum + r91str290sum)
-        if (r1str050 > 0 && sum25 <= 0) {
-            logger.warn("КС 1.25. Возможно нарушение ст. 173 завышение суммы НДС, подлежащей возмещению за онп.")
-        }
-    }
-    // 1.26 (9, 9.1)
-    if (checkReader('1.26', [(has9n ? declarations().declaration9n[0] : declarations().declaration9[0]), declarations().declaration91[0]])) {
-        if (r2str060sum < r9str200sum + r9str210sum + r91str280sum + r91str290sum) {
-            logger.warn("КС 1.26. Возможно нарушение ст. 161, п. 4 ст. 173 занижение суммы НДС, подлежащей уплате в бюджет.")
-        }
-    }
-    // 1.27 (9, 9.1)
-    if (checkReader('1.27', [(has9n ? declarations().declaration9n[0] : declarations().declaration9[0]), declarations().declaration91[0]])) {
-        if (r3g5str110 + r2str060sum < r9str260 + r9str270 + r91str340 + r91str350 - r91str050 - r91str060) {
-            logger.warn("КС 1.27. Возможно нарушение РФ ст. 153, 161, 164, 165, 166, 167, 173 занижение суммы НДС, исчисленного к уплате в бюджет.")
-        }
-    }
-    // 1.28 (8, 8.1)
-    if (checkReader('1.28', [(has8n ? declarations().declaration8n[0] : declarations().declaration8[0]), declarations().declaration81[0]])) {
-        if (r3g3str190 > r8str190 + r81str190 - r81str005) {
-            logger.warn("КС 1.28. Возможно нарушение ст. 171, 172 завышение суммы НДС, подлежащей вычету.")
-        }
-    }
-    // 1.31 (8, 8.1)
-    if (checkReader('1.31', [(has8n ? declarations().declaration8n[0] : declarations().declaration8[0]), declarations().declaration81[0]])) {
-        if (r3g3str180 > r8str180sum + r81str180sum) {
-            logger.warn("КС 1.31. Возможно нарушение ст. 161, 171, 172 завышение суммы НДС, подлежащей вычету.")
-        }
-    }
-    // 1.33 (8.1)
-    if (checkReader('1.33', [declarations().declaration81[0]])) {
-        if (r81str005 + r81str180sum < r81str190) {
-            logger.warn("КС 1.33. Возможно нарушение ст. 171, 172 возможно завышение суммы НДС, подлежащей вычету.")
-        }
-    }
-    // 1.36 (9)
-    if (checkReader('1.36', [has9n ? declarations().declaration9n[0] : declarations().declaration9[0]])) {
-        //logger.info(""+r9str190sum + " >= " +r9str250)
-        if (r9str250 > r9str190sum) {
-            logger.warn("КС 1.36. Возможно нарушение ст. 164, 165, 167, 173 возможно занижение исчисленной суммы НДС вследствие " +
-                    "неполного отражения НБ либо неверное применение ставки по НДС (при условии, что соотношение 1.37 выполняется).")
-        }
-    }
-    // 1.39 (9.1)
-    if (checkReader('1.39', [declarations().declaration91[0]])) {
-        if (r91str020 + r91str250sum > r91str310) {
-            logger.warn("КС 1.39. Возможно нарушение ст. 153, 173, п. 3 Раздела IV Приложения 5 к Постановлению N 1137 возможно " +
-                    "занижение суммы НДС, исчисленного к уплате в бюджет (при условии, что соотношение 1.32 и 1.49 выполняются)")
-        }
-    }
-    // 1.40 (9.1)
-    if (checkReader('1.40', [declarations().declaration91[0]])) {
-        if (r91str020 + r91str260sum > r91str320) {
-            logger.warn("КС 1.40. Возможно нарушение ст. 153, 173, п. 3 Раздела IV Приложения 5 к Постановлению N 1137 " +
-                    "возможно занижение суммы НДС, исчисленного к уплате в бюджет")
-        }
-    }
-    // 1.41  (9.1)
-    if (checkReader('1.41', [declarations().declaration91[0]])) {
-        if (r91str020 + r91str270sum > r91str330) {
-            logger.warn("КС 1.41. Возможно нарушение ст. 164, 165, 167, 173 возможно занижение исчисленной суммы НДС, " +
-                    "вследствие неполного отражения НБ либо неверное применение ставки по НДС")
-        }
-    }
-    // 1.42 (9.1)
-    if (checkReader('1.42', [declarations().declaration91[0]])) {
-        if (r91str020 + r91str280sum > r91str340) {
-            logger.warn("КС 1.42. Возможно нарушение ст. 153, 173, п. 3 Раздела IV Приложения 5 к Постановлению N 1137 " +
-                    "возможно занижение суммы НДС, исчисленного к уплате в бюджет (при условии, что соотношение 1.32 выполняется)")
-        }
-    }
-    // 1.43 (9.1)
-    if (checkReader('1.43', [declarations().declaration91[0]])) {
-        if (r91str020 + r91str290sum > r91str350) {
-            logger.warn("КС 1.43. Возможно нарушение ст. 153, 173, п. 3 Раздела IV Приложения 5 к Постановлению N 1137 " +
-                    "возможно занижение суммы НДС, исчисленного к уплате в бюджет")
-        }
-    }
 }
 
 def getXmlValue(def value) {
@@ -1016,7 +698,7 @@ def Map<Long, Expando> getParts() {
             def declarationData = declarationService.getLast(id, declarationData.departmentId, reportPeriod.id)
 
             def result = new Expando()
-            result.id = (declarationData?.id)
+            result.id = id
             result.name = declaration.value[1]
             result.exist = (declarationData != null)
             result.accepted = (declarationData?.accepted)
@@ -1030,23 +712,12 @@ def Map<Long, Expando> getParts() {
     return declarationParts
 }
 
-def String getDeclarationFileName(def declarationTypeId) {
-    return getParts().get(declarationTypeId)?.fileName ?: empty
+def String getDeclarationFileName(def declarationId) {
+    return getParts().get(declarationId)?.fileName ?: empty
 }
 
-def BigDecimal isDeclarationExist(def declarationTypeId) {
-    return getParts().get(declarationTypeId)?.exist ? 1 : 0
-}
-
-def boolean checkReader(String number, List<Integer> ids) {
-    boolean exist = true
-    ids.each {
-        if (!isDeclarationExist(it)) {
-            logger.warn("%s. Экземпляр декларации вида «%s» не создан. Проверка контрольного соотношения невозможна.", number, getParts().get(it).name)
-            exist = false
-        }
-    }
-    return exist
+def BigDecimal isDeclarationExist(def declarationId) {
+    return getParts().get(declarationId)?.exist ? 1 : 0
 }
 
 def BigDecimal hasOneOrMoreDeclaration() {
@@ -1195,7 +866,7 @@ def getSumOutcomeSimple(def knuCodes) {
 }
 
 /**
- * Получить данные формы "расходы простые" (id = 310/304)
+ * Получить данные формы "расходы простые" (id = 301/304)
  */
 def getFormDataSimple(def id, def reportPeriodId) {
     return formDataService.getLast(id, FormDataKind.SUMMARY, declarationData.departmentId, reportPeriodId, null)
