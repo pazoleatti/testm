@@ -474,6 +474,9 @@ void consolidation() {
         }
     }
 
+    rows.eachWithIndex { row, index ->
+        row.refNum = index + 1
+    }
     updateIndexes(rows)
     formDataService.getDataRowHelper(formData).allCached = rows
 }
