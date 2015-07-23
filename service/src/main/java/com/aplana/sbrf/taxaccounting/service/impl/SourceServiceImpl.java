@@ -110,6 +110,12 @@ public class SourceServiceImpl implements SourceService {
     @Autowired
     private DeclarationTemplateDao declarationTemplateDao;
 
+    @Autowired
+    private DeclarationDataService declarationDataService;
+
+    @Autowired
+    private FormDataService formDataService;
+
     @Override
     public List<DepartmentFormType> getDFTSourcesByDFT(int departmentId, int formTypeId, FormDataKind kind, Date periodStart,
                                                        Date periodEnd) {
@@ -1197,15 +1203,19 @@ public class SourceServiceImpl implements SourceService {
     }
 
     @Override
-    public List<FormToFormRelation> getRelations(int departmentId, int formTypeId, FormDataKind kind,
-                                                 int departmentReportPeriodId, Integer periodOrder) {
+    public List<FormToFormRelation> getRelations(FormData formData, Logger logger, TAUserInfo userInfo) {
+        int departmentId = formData.getDepartmentId();
+        int formTypeId = formData.getFormType().getId();
+        FormDataKind kind = formData.getKind();
+        int departmentReportPeriodId = formData.getDepartmentReportPeriodId();
+        Integer periodOrder = formData.getPeriodOrder();
+
         DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.get(departmentReportPeriodId);
         ReportPeriod reportPeriod = departmentReportPeriod.getReportPeriod();
 
         List<FormToFormRelation> formToFormRelations = new LinkedList<FormToFormRelation>();
         // Источники
-        List<DepartmentFormType> sourcesForm = getDFTSourcesByDFT(departmentId, formTypeId, kind,
-                reportPeriod.getCalendarStartDate(), reportPeriod.getEndDate());
+        List<DepartmentFormType> sourcesForm = formDataService.getFormSources(formData, logger, userInfo, reportPeriod);
         formToFormRelations.addAll(createFormToFormRelationModel(sourcesForm, departmentReportPeriod,
                 periodOrder, true));
         // Приемники
@@ -1224,16 +1234,10 @@ public class SourceServiceImpl implements SourceService {
     @Override
     public List<FormToFormRelation> getRelations(DeclarationData declaration) {
         List<FormToFormRelation> formToFormRelations = new LinkedList<FormToFormRelation>();
-        DeclarationType declarationType = declarationTemplateDao.get(declaration.getDeclarationTemplateId()).getType();
         DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.get(declaration.getDepartmentReportPeriodId());
 
-        //Получаем источники-приемники стандартными методами ядра
-        List<DepartmentFormType> sourcesForm = getDFTSourceByDDT(
-                declaration.getDepartmentId(),
-                declarationType.getId(),
-                departmentReportPeriod.getReportPeriod().getCalendarStartDate(),
-                departmentReportPeriod.getReportPeriod().getEndDate()
-        );
+        //Получаем источники-приемники
+        List<DepartmentFormType> sourcesForm = declarationDataService.getFormDataSources(declaration, new Logger());
         formToFormRelations.addAll(createFormToFormRelationModel(sourcesForm, departmentReportPeriod,
                 null, true));
         return formToFormRelations;
@@ -1306,7 +1310,7 @@ public class SourceServiceImpl implements SourceService {
         for (DepartmentFormType departmentFormType : departmentFormTypes) {
             if (isSource) {
                 formToFormRelations.addAll(getSourceList(departmentFormType, departmentReportPeriod,
-                        periodOrder));
+                        periodOrder==null?departmentFormType.getPeriodOrder():null));
             } else {
                 formToFormRelations.addAll(getDestinationList(departmentFormType, departmentReportPeriod,
                         periodOrder));
@@ -1441,29 +1445,18 @@ public class SourceServiceImpl implements SourceService {
         if (!formTemplateService.existFormTemplate(departmentFormType.getFormTypeId(), departmentReportPeriod.getReportPeriod().getId()))
             return relations;
 
-        List<Integer> periodOrders = new ArrayList<Integer>();
-        int formTemplateId = formTemplateService.getActiveFormTemplateId(departmentFormType.getFormTypeId(), departmentReportPeriod.getReportPeriod().getId());
-        if (formTemplateService.get(formTemplateId).isMonthly() && periodOrder == null) {
-            for(Months month: reportPeriodService.getAvailableMonthList(departmentReportPeriod.getReportPeriod().getId())) {
-                if (month != null) periodOrders.add(month.getId());
-            }
-        } else {
-            periodOrders.add(periodOrder);
+        FormData formData = formDataDao.getLastByDate(departmentFormType.getFormTypeId(), departmentFormType.getKind(),
+                departmentFormType.getDepartmentId(), departmentReportPeriod.getReportPeriod().getId(),
+                periodOrder, departmentReportPeriod.getCorrectionDate());
+        DepartmentReportPeriod formDepartmentReportPeriod = null;
+        if (formData != null) {
+            formDepartmentReportPeriod = departmentReportPeriodDao.get(formData.getDepartmentReportPeriodId());
         }
-
-        for(Integer periodOrderForm: periodOrders) {
-            FormData formData = formDataDao.getLastByDate(departmentFormType.getFormTypeId(), departmentFormType.getKind(),
-                    departmentFormType.getDepartmentId(), departmentReportPeriod.getReportPeriod().getId(),
-                    periodOrderForm, departmentReportPeriod.getCorrectionDate());
-            DepartmentReportPeriod formDepartmentReportPeriod = null;
-            if (formData != null) {
-                formDepartmentReportPeriod = departmentReportPeriodDao.get(formData.getDepartmentReportPeriodId());
-            }
-            FormToFormRelation formToFormRelation = performFormDataRelation(formData,
-                    getRelationCommon(true, departmentFormType, formDepartmentReportPeriod, periodOrderForm), departmentFormType,
-                    departmentReportPeriod);
-            if (formToFormRelation != null) relations.add(formToFormRelation);
-        }
+        FormToFormRelation formToFormRelation = performFormDataRelation(formData,
+                getRelationCommon(true, departmentFormType, formDepartmentReportPeriod, periodOrder), departmentFormType,
+                departmentReportPeriod);
+        if (formToFormRelation != null) relations.add(formToFormRelation);
+        //}
         return relations;
     }
 

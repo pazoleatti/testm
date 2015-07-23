@@ -57,13 +57,7 @@ public class SourcesHandler extends AbstractActionHandler<SourcesAction, Sources
             }
         } else {
             //Получаем источники-приемники стандартными методами ядра
-            relationList = sourceService.getRelations(
-                    formData.getDepartmentId(),
-                    formData.getFormType().getId(),
-                    formData.getKind(),
-                    formData.getDepartmentReportPeriodId(),
-                    formData.getPeriodOrder()
-            );
+            relationList = sourceService.getRelations(formData, logger, userInfo);
         }
 
         Collections.sort(relationList, new Comparator<FormToFormRelation>() {

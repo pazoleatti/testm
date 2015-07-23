@@ -192,12 +192,9 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
     @Override
 	public FormDataCollection getAcceptedFormDataSources(DeclarationData declarationData) {
 		int departmentId = declarationData.getDepartmentId();
-		int declarationTemplateId = declarationData.getDeclarationTemplateId();
 		int reportPeriodId = declarationData.getReportPeriodId();
-        ReportPeriod reportPeriod = periodService.getReportPeriod(reportPeriodId);
 
 		// Формирование списка НФ-источников в статусе "Принята"
-		DeclarationTemplate declarationTemplate = declarationTemplateDao.get(declarationTemplateId);
 		List<DepartmentFormType> sourcesInfo = declarationDataService.getFormDataSources(declarationData, new Logger());
 		List<FormData> records = new ArrayList<FormData>();
 

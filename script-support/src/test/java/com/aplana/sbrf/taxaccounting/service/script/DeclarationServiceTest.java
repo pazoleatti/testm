@@ -2,15 +2,18 @@ package com.aplana.sbrf.taxaccounting.service.script;
 
 import com.aplana.sbrf.taxaccounting.dao.DeclarationDataDao;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationTemplateDao;
+import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DeclarationTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentFormTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.model.util.DepartmentReportPeriodFilter;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
+import com.aplana.sbrf.taxaccounting.service.DeclarationDataService;
 import com.aplana.sbrf.taxaccounting.service.PeriodService;
 import com.aplana.sbrf.taxaccounting.service.script.impl.DeclarationServiceImpl;
 import org.junit.BeforeClass;
@@ -43,6 +46,7 @@ public class DeclarationServiceTest {
         DeclarationTypeDao declarationTypeDao = mock(DeclarationTypeDao.class);
         DeclarationTemplateDao declarationTemplateDao = mock(DeclarationTemplateDao.class);
         DepartmentFormTypeDao departmentFormTypeDao = mock(DepartmentFormTypeDao.class);
+        DeclarationDataService declarationDataService = mock(DeclarationDataService.class);
 
         declarationType.setId(1);
         declarationType.setName("name");
@@ -69,11 +73,13 @@ public class DeclarationServiceTest {
         when(declarationTypeDao.get(2)).thenReturn(declarationType);
         when(declarationTemplateDao.get(1)).thenReturn(declarationTemplate);
         when(departmentFormTypeDao.getDeclarationSources(eq(1), eq(1), any(Date.class), any(Date.class))).thenReturn(sourcesInfo);
+        when(declarationDataService.getFormDataSources(any(DeclarationData.class), any(Logger.class))).thenReturn(sourcesInfo);
 
         ReflectionTestUtils.setField(service, "declarationDataDao", declarationDataDao);
         ReflectionTestUtils.setField(service, "declarationTypeDao", declarationTypeDao);
         ReflectionTestUtils.setField(service, "departmentFormTypeDao", departmentFormTypeDao);
         ReflectionTestUtils.setField(service, "declarationTemplateDao", declarationTemplateDao);
+        ReflectionTestUtils.setField(service, "declarationDataService", declarationDataService);
 
         PeriodService periodService = mock(PeriodService.class);
         when(periodService.getReportPeriod(any(Integer.class))).thenReturn(mock(ReportPeriod.class));
@@ -134,8 +140,11 @@ public class DeclarationServiceTest {
         when(departmentReportPeriodDao.getListByFilter(filter)).thenReturn(Arrays.asList(departmentReportPeriod));
         when(departmentReportPeriodDao.get(1)).thenReturn(departmentReportPeriod);
 
+        FormDataDao formDataDao = mock(FormDataDao.class);
+
+        ReflectionTestUtils.setField(service, "formDataDao", formDataDao);
         ReflectionTestUtils.setField(service, "departmentReportPeriodDao", departmentReportPeriodDao);
-        //assertTrue(service.getAcceptedFormDataSources(declarationData) != null);
+        assertTrue(service.getAcceptedFormDataSources(declarationData) != null);
     }
 
     @Test
