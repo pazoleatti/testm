@@ -5,6 +5,7 @@ import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
 import com.aplana.sbrf.taxaccounting.model.util.StringUtils
 import groovy.transform.Field
 
@@ -156,13 +157,13 @@ void calc() {
     def totalRows = [:]
 
     def sum = 0
-    def prevBalance = null
+    def prevCode = null
     dataRows.eachWithIndex { row, i ->
         def code = getKnu(row.balance)
         if (code != null) { // Строки без кода не образуют группы
             // Если код поменялся, то создать новую строку итого с предыдущей суммой
-            if (prevBalance != null && prevBalance != row.balance) {
-                totalRows.put(i, getNewRow(getKnu(prevBalance), sum))
+            if (prevCode != null && prevCode != code) {
+                totalRows.put(i, getNewRow(prevCode, sum))
                 sum = 0
             }
             // Если строка последняя то тоже создать строку итого с предудущей суммой + слагаемое из текущей строки
@@ -173,7 +174,7 @@ void calc() {
             }
             sum += row.sum ?: 0
         }
-        prevBalance = row.balance
+        prevCode = code
     }
 
     // добавить "итого по коду" в таблицу
@@ -433,9 +434,15 @@ def getNewRow(String[] rowCells, def columnCount, def fileRowIndex, def rowIndex
     def int colOffset = 1
     def int colIndex
 
-    // графа 2
+    // графа 3
     colIndex = 2
-    newRow.balance = getRecordIdImport(28, 'CODE', pure(rowCells[colIndex]), fileRowIndex, colIndex + colOffset, false)
+    def map
+    String filter = "LOWER(CODE) = LOWER('" + pure(rowCells[colIndex]) + "') and LOWER(NUMBER) = LOWER('" + pure(rowCells[3]) + "')"
+    def records = refBookFactory.getDataProvider(28).getRecords(reportPeriodEndDate, null, filter, null)
+    if (checkImportRecordsCount(records, refBookFactory.get(28), 'CODE', pure(rowCells[colIndex]), getReportPeriodEndDate(), fileRowIndex, colIndex + colOffset, logger, false)) {
+        map = records.get(0)
+        newRow.balance = map.get(RefBook.RECORD_ID_ALIAS).numberValue
+    }
 
     // графа 5
     colIndex = 5
@@ -564,8 +571,13 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
 
     // графа 3
     def colIndex = 2
-    newRow.balance = getRecordIdImport(28, 'CODE', values[colIndex], fileRowIndex, colIndex + colOffset, false)
-    def map = getRefBookValue(28, newRow.balance)
+    def map
+    String filter = "LOWER(CODE) = LOWER('" + values[colIndex] + "') and LOWER(NUMBER) = LOWER('" + values[3] + "')"
+    def records = refBookFactory.getDataProvider(28).getRecords(getReportPeriodEndDate(), null, filter, null)
+    if (checkImportRecordsCount(records, refBookFactory.get(28), 'CODE', values[colIndex], getReportPeriodEndDate(), fileRowIndex, colIndex + colOffset, logger, false)) {
+        map = records.get(0)
+        newRow.balance = map.get(RefBook.RECORD_ID_ALIAS).numberValue
+    }
 
     // графа 2
     if (map != null) {
