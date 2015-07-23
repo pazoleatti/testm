@@ -234,7 +234,7 @@ void logicCheck() {
                 || (!'1'.equals(row.status))
                 || (!'643'.equals(citizenshipCode)))
                 && row.region == null) {
-            rowError(logger, row, errorMsg + String.format("Строка <Номер строки>: Графа  «%s» не заполнена! " +
+            rowError(logger, row, errorMsg + String.format("Графа  «%s» не заполнена! " +
                     "Данная графа обязательна для заполнения, если выполняется хотя бы одно из следующих условий: " +
                     "1. Заполнена хотя бы одна из граф по адресу места жительства в РФ (графы 12, 14-20). " +
                     "2. Не заполнены графы по адресу места жительства за пределами РФ (графы 21 и 22). " +
@@ -302,7 +302,7 @@ void logicCheck() {
         }
 
         // 13. Проверка заполнения графы 21, 22
-        if (citizenshipCode != '643' && (address + "region").find { row[it] } == null) {
+        if ((citizenshipCode != '643') && ((address + "region").find { row[it] } == null)) {
             ["country", "address"].each { alias ->
                 if (!row[alias]) {
                     rowError(logger, row, errorMsg + String.format("Графа «%s» не заполнена! " +
