@@ -554,7 +554,9 @@ def getBalanceValue(def value) {
 }
 
 boolean isEqualNum(String accNum, def balance) {
-    return accNum.replace('.', '') == getBalanceValue(balance).replace('.', '')
+    def a = accNum?.replace('.', '')
+    def b = (balance ? getBalanceValue(balance)?.replace('.', '') : null)
+    return a == b
 }
 
 // Проверить заполненость обязательных полей
