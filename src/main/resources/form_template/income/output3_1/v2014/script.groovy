@@ -211,15 +211,27 @@ void consolidation() {
 
 def formNewRows03(def rows) {
     def newRows = []
+    def dataRowsMap = [:]
     rows.each { row ->
+        sum = row.withheldSum
+        if (sum != null && sum != 0) {
+            if (dataRowsMap.containsKey(row.withheldDate)) {
+                sum += dataRowsMap.get(row.withheldDate)
+                dataRowsMap.remove(row.withheldDate)
+            }
+            dataRowsMap.put(row.withheldDate, sum)
+        }
+    }
+
+    dataRowsMap.each { date, sum ->
         def newRow = formData.createDataRow()
         newRow.paymentType = getRecordId(24, 'CODE', '1', getReportPeriodEndDate())
         newRow.okatoCode = '45397000'
         newRow.budgetClassificationCode = '18210101040011000110'
         // 28-я графа
-        newRow.dateOfPayment = row.withheldDate
+        newRow.dateOfPayment = date
         // 27-я графа
-        newRow.sumTax = row.withheldSum
+        newRow.sumTax = sum
         newRows.add(newRow)
     }
     return newRows
@@ -227,18 +239,29 @@ def formNewRows03(def rows) {
 
 def formNewRowsGCB(def rows) {
     def newRows = []
-    for (row in rows) {
-        if (!(row.getAlias() in ['R3', 'R4', 'R5'])) {
-            continue
+    def dataRowsMap = [:]
+    rows.each { row ->
+        if (row.getAlias() in ['R3', 'R4', 'R5']) {
+            sum = row.sum
+            if (sum != null && sum != 0) {
+                if (dataRowsMap.containsKey(row.date)) {
+                    sum += dataRowsMap.get(row.date)
+                    dataRowsMap.remove(row.date)
+                }
+                dataRowsMap.put(row.date, sum)
+            }
         }
+    }
+
+    dataRowsMap.each { date, sum ->
         def newRow = formData.createDataRow()
         newRow.paymentType = getRecordId(24, 'CODE', '3', getReportPeriodEndDate())
         newRow.okatoCode = '45397000'
         newRow.budgetClassificationCode = '18210101070011000110'
         // есть графа 3 источника
-        newRow.dateOfPayment = row.date
+        newRow.dateOfPayment = date
         // есть графа 4 источника
-        newRow.sumTax = row.sum
+        newRow.sumTax = sum
         newRows.add(newRow)
     }
     return newRows
@@ -247,15 +270,17 @@ def formNewRowsGCB(def rows) {
 def formNewRowsFRN(def rows) {
     def newRows = []
     def row = getDataRow(rows, 'SUM_DIVIDENDS')
-    def newRow = formData.createDataRow()
-    newRow.paymentType = getRecordId(24, 'CODE', '4', getReportPeriodEndDate())
-    newRow.okatoCode = '45397000'
-    newRow.budgetClassificationCode = '18210101060011000110'
-    // есть графа 3 источника
-    newRow.dateOfPayment = row.dealDate
-    // есть графа 4 источника
-    newRow.sumTax = row.taxSum
-    newRows.add(newRow)
+    if(row.taxSum != null && row.taxSum != 0) {
+        def newRow = formData.createDataRow()
+        newRow.paymentType = getRecordId(24, 'CODE', '4', getReportPeriodEndDate())
+        newRow.okatoCode = '45397000'
+        newRow.budgetClassificationCode = '18210101060011000110'
+        // есть графа 3 источника
+        newRow.dateOfPayment = row.dealDate
+        // есть графа 4 источника
+        newRow.sumTax = row.taxSum
+        newRows.add(newRow)
+    }
     return newRows
 }
 
