@@ -61,7 +61,7 @@
 		<field name="СумПУ_173.5" class="java.lang.String">
 			<fieldDescription><![CDATA[@СумПУ_173.5]]></fieldDescription>
 		</field>
-		<field name="СумПУ_173.1" class="java.lang.Integer">
+		<field name="СумПУ_173.1" class="java.lang.Long">
 			<fieldDescription><![CDATA[@СумПУ_173.1]]></fieldDescription>
 		</field>
 		<field name="НомДогИТ" class="java.lang.String">
@@ -95,7 +95,7 @@
 			<variableExpression><![CDATA["-------------------------"]]></variableExpression>
 			<initialValueExpression><![CDATA["-------------------------"]]></initialValueExpression>
 		</variable>
-		<variable name="СумПУ_173.1" class="java.lang.Integer">
+		<variable name="СумПУ_173.1" class="java.lang.Long">
 			<variableExpression><![CDATA[$F{СумПУ_173.1} >=0 ? $F{СумПУ_173.1} : 0-$F{СумПУ_173.1}]]></variableExpression>
 			<initialValueExpression><![CDATA[]]></initialValueExpression>
 		</variable>
