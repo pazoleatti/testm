@@ -80,9 +80,6 @@ public class DeclarationTemplateController {
         declarationTemplateService.lock(declarationTemplateId, userInfo);
 
         try {
-            DeclarationTemplate declarationTemplateOld = declarationTemplateService.get(declarationTemplateId);
-            String jrxmBlobIdOld = declarationTemplateOld.getJrxmlBlobId();
-            String xsdUuidOld = declarationTemplateOld.getXsdId();
             req.setCharacterEncoding("UTF-8");
 
             if (file.getSize() == 0)
@@ -94,7 +91,6 @@ public class DeclarationTemplateController {
             mainOperatingService.edit(declarationTemplate, endDate, customLog, securityService.currentUserInfo());
             IOUtils.closeQuietly(file.getInputStream());
 
-            deleteBlobs(customLog, jrxmBlobIdOld, xsdUuidOld);
             checkErrors(customLog);
             JSONObject resultUuid = new JSONObject();
             resultUuid.put(UuidEnum.SUCCESS_UUID.toString(), logEntryService.save(customLog.getEntries()));
@@ -133,14 +129,12 @@ public class DeclarationTemplateController {
             Logger customLog = new Logger();
             DeclarationTemplate declarationTemplate = declarationTemplateService.get(declarationTemplateId);
 
-            String jrxmBlobIdOld = declarationTemplate.getJrxmlBlobId();
             String jrxmBlobId = blobDataService.create(inputStream, file.getOriginalFilename());
             resultUuid.put(UuidEnum.UUID.toString(), jrxmBlobId);
             declarationTemplate.setJrxmlBlobId(jrxmBlobId);
             declarationTemplate.setCreateScript(declarationTemplateService.getDeclarationTemplateScript(declarationTemplateId));
             mainOperatingService.edit(declarationTemplate, endDate, customLog, securityService.currentUserInfo());
 
-            deleteBlobs(customLog, jrxmBlobIdOld);
             checkErrors(customLog);
             resultUuid.put(UuidEnum.SUCCESS_UUID.toString(), logEntryService.save(customLog.getEntries()));
             resp.getWriter().printf(resultUuid.toString());
@@ -177,13 +171,11 @@ public class DeclarationTemplateController {
 
             Logger customLog = new Logger();
             DeclarationTemplate declarationTemplate = declarationTemplateService.get(declarationTemplateId);
-            String xsdBlobIdOld = declarationTemplate.getXsdId();
             String xsdBlobId = blobDataService.create(file.getInputStream(), file.getOriginalFilename());
             declarationTemplate.setXsdId(xsdBlobId);
             resultUuid.put(UuidEnum.UUID.toString(), xsdBlobId);
             declarationTemplateService.save(declarationTemplate);
 
-            deleteBlobs(customLog, xsdBlobIdOld);
             checkErrors(customLog);
             resultUuid.put(UuidEnum.SUCCESS_UUID.toString(), logEntryService.save(customLog.getEntries()));
             resp.getWriter().printf(resultUuid.toString());
@@ -224,20 +216,6 @@ public class DeclarationTemplateController {
 			logger.error(ioException.getMessage(), ioException);
 		}
 	}
-
-
-    private void deleteBlobs(Logger log, String... uuds){
-        for (String uuid : uuds){
-            if (uuid != null && !uuid.isEmpty()) {
-                try {
-                    blobDataService.delete(uuid);
-                } catch (ServiceException e){
-                    //Если вдруг не удалось удалить старую запись
-                    log.warn(e.getMessage());
-                }
-            }
-        }
-    }
 
     private void checkErrors(Logger logger) throws IOException {
         if (!logger.getEntries().isEmpty()){

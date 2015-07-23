@@ -77,6 +77,8 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
         int savedId = declarationTemplateDao.save(declarationTemplate);
         if (declarationTemplate.getXsdId() != null && !declarationTemplate.getXsdId().equals(declarationTemplateBase.getXsdId()))
             blobDataService.delete(declarationTemplateBase.getXsdId());
+        if (declarationTemplate.getJrxmlBlobId() != null && !declarationTemplate.getJrxmlBlobId().equals(declarationTemplateBase.getJrxmlBlobId()))
+            blobDataService.delete(declarationTemplateBase.getJrxmlBlobId());
         return savedId;
 	}
 
