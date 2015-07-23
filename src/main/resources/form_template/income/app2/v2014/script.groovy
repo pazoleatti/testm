@@ -294,19 +294,11 @@ void logicCheck() {
         def arithmeticCheckAlias = needValue.keySet().asList()
         checkCalc(row, arithmeticCheckAlias, needValue, logger, true)
 
-        // 11. Проверка на соответствие паттерну
+        // 11, 12. Проверка на соответствие паттерну
         if (row.innRF && checkPattern(logger, row, 'innRF', row.innRF, INN_IND_PATTERN, wasError ? null : INN_IND_MEANING, true)) {
             checkControlSumInn(logger, row, 'innRF', row.innRF, true)
         } else if (row.innRF) {
             wasError = true
-        }
-
-        // 12. Проверка заполнения поля 22
-        if (citizenshipCode != '643' && !row.postcode &&!row.address) {
-            def nameCitizenship = getColumnName(row, 'citizenship')
-            def namePostcode = getColumnName(row, 'postcode')
-            def nameAddress = getColumnName(row, 'address')
-            rowError(logger, row, errorMsg + "В случае если графа «$nameCitizenship» не равна «643» и графа «$namePostcode» не заполнена, то графа «$nameAddress» должна быть заполнена!")
         }
 
         // 13. Проверка заполнения графы 21, 22
