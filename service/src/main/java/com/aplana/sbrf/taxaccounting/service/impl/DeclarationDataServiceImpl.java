@@ -249,7 +249,6 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         List<DepartmentFormType> dftSources = getFormDataSources(declarationData, logger);
         ArrayList<Long> formDataIds = new ArrayList<Long>();
         for (DepartmentFormType dftSource : dftSources){
-            DepartmentReportPeriod sourceDepartmentReportPeriod = departmentReportPeriodService.getLast(dftSource.getDepartmentId(), declarationData.getReportPeriodId());
             FormData formData =
                     formDataService.getLast(dftSource.getFormTypeId(), dftSource.getKind(), declarationData.getDepartmentId(), declarationData.getReportPeriodId(), dftSource.getPeriodOrder());
             if (formData != null && formData.getState() == WorkflowState.ACCEPTED) {
@@ -1108,7 +1107,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                         departmentService.getDepartment(sourceDFT.getDepartmentId()).getName(),
                         formTypeService.get(sourceDFT.getFormTypeId()).getName(),
                         sourceDFT.getKind().getName(),
-                        rp.getName(),
+                        rp.getName() + (sourceDFT.getPeriodOrder() != null ? " " + Months.fromId(sourceDFT.getPeriodOrder()).getTitle() : ""),
                         rp.getTaxPeriod().getYear(),
                         drp.getCorrectionDate() != null ? String.format(" с датой сдачи корректировки %s",
                                 formatter.format(drp.getCorrectionDate())) : "");
