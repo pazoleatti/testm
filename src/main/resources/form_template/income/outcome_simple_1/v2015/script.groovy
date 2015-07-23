@@ -137,10 +137,13 @@ def getReportPeriodEndDate() {
     return endDate
 }
 
-// Получение Id записи с использованием кэширования
-def getRecordId(def ref_id, String alias, String value, Date date) {
-    String filter = "LOWER($alias) = LOWER('$value')"
-    if (value == '') filter = "$alias is null"
+// Получение Id записи из справочника 27 с использованием кэширования
+def getRecordId(String knu, String accountNo, Date date) {
+    def ref_id = 27
+    String filter = getFilterForRefbook27(knu, accountNo)
+    if (knu == '') {
+        filter = "CODE is null"
+    }
     if (recordCache[ref_id] != null) {
         if (recordCache[ref_id][filter] != null) {
             return recordCache[ref_id][filter]
@@ -156,20 +159,32 @@ def getRecordId(def ref_id, String alias, String value, Date date) {
     return null
 }
 
-// Метод заполняющий в кэш все записи для разыменывавания
-void fillRecordsMap(def ref_id, String alias, List<String> values, Date date) {
+// Метод заполняющий в кэш все записи для разыменывавания из справочника 27
+void fillRecordsMap(List<String> values, Date date) {
+    def ref_id = 27
     def filterList = values.collect {
-        "LOWER($alias) = LOWER('$it')"
+        "LOWER(CODE) = LOWER('$it')"
     }
     def filter = filterList.join(" OR ")
     def records = refBookFactory.getDataProvider(ref_id).getRecords(date, null, filter, null)
     records.each { record ->
-        filter = "LOWER($alias) = LOWER('${record[alias]}')"
+        filter = getFilterForRefbook27(record['CODE'].value, record['NUMBER'].value)
         if (recordCache[ref_id] == null) {
             recordCache[ref_id] = [:]
         }
         recordCache[ref_id][filter] = record.get(RefBook.RECORD_ID_ALIAS).numberValue
     }
+}
+
+/**
+ * Получить фильтр для поиска в справочнике 27.
+ *
+ * @param knu код налогового учета (графа 1 сводной)
+ * @param number балансовый счёт по учёту дохода (графа 4 сводной)
+ */
+def getFilterForRefbook27(def knu, def number) {
+    def tmpNumber = number.replace('.', '')
+    return "LOWER(CODE) = LOWER('$knu') and LOWER(NUMBER) = LOWER('$tmpNumber')"
 }
 
 void calc() {
@@ -417,7 +432,7 @@ void consolidationFromPrimary(def dataRows, def formSources) {
         def row = getDataRow(dataRows, 'R' + it)
         return row.consumptionTypeId
     }
-    fillRecordsMap(27, 'CODE', knuList, getReportPeriodEndDate())
+    fillRecordsMap(knuList, getReportPeriodEndDate())
 
     // получить консолидированные формы в дочерних подразделениях в текущем налоговом периоде
     formSources.each {
@@ -432,7 +447,7 @@ void consolidationFromPrimary(def dataRows, def formSources) {
                         def alias = 'R' + it
                         def row = getDataRow(dataRows, alias)
 
-                        def recordId = getRecordId(27, 'CODE', row.consumptionTypeId, getReportPeriodEndDate())
+                        def recordId = getRecordId(row.consumptionTypeId, row.consumptionAccountNumber, getReportPeriodEndDate())
 
                         // сумма графы 10 рну-7
                         def sum10 = 0
@@ -460,7 +475,7 @@ void consolidationFromPrimary(def dataRows, def formSources) {
                     ((2..110) + (113..217)).each {
                         def alias = 'R' + it
                         def row = getDataRow(dataRows, alias)
-                        def recordId = getRecordId(27, 'CODE', row.consumptionTypeId, getReportPeriodEndDate())
+                        def recordId = getRecordId(row.consumptionTypeId, row.consumptionAccountNumber, getReportPeriodEndDate())
 
                         // сумма графы 5 рну-5
                         def sum5 = 0
@@ -606,7 +621,9 @@ def getBalanceValue(def value) {
 }
 
 boolean isEqualNum(String accNum, def balance) {
-    return accNum.replace('.', '') == getBalanceValue(balance).replace('.', '')
+    def a = accNum?.replace('.', '')
+    def b = (balance ? getBalanceValue(balance)?.replace('.', '') : null)
+    return a == b
 }
 
 /** Проверить заполненость обязательных полей. */
