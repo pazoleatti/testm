@@ -122,7 +122,7 @@ def editableColumns = ['emitentName', 'emitentInn', 'all', 'rateZero', 'distribu
 // обязательные (графа 1..17, 23..25, 27)
 @Field
 def nonEmptyColumns = ['emitentName', 'emitentInn', 'distributionSum', 'decisionNumber',
-                       'decisionDate', 'year', 'firstMonth', 'lastMonth', 'allSum', 'addresseeName', 'inn',
+                       'decisionDate', 'year', 'firstMonth', 'lastMonth', 'allSum', 'addresseeName', 'type',
                        'status', 'dividends', 'sum', 'date', 'withheldSum']
 
 // сортировка (графа 7, 8)
@@ -168,10 +168,10 @@ def logicCheck() {
         // Проверка обязательных полей
         checkNonEmptyColumns(row, index, nonEmptyColumns, logger, true)
 
-        // «Графа 14» и «Графа 15» обязательны для заполнения, если значение «Графы 16» = «1»
-        if (row.type == 1 && (row.inn == null || row.kpp == null)) {
-            logger.error("Строка ${index}: В случае если атрибут «%s» заполнен значением «1» должен быть заполнен атрибут «%s» и атрибут «%s»!",
-                    getColumnName(row, 'type'), getColumnName(row, 'inn'), getColumnName(row, 'kpp'))
+        // «Графа 14» и «Графа 15» обязательны для заполнения, если значение «Графы 16» и «Графы 17» = «1»
+        if (row.type == 1 && row.status == 1 && (row.inn == null || row.kpp == null)) {
+            logger.error("Строка ${index}: В случае если графы «%s» и «%s» равны значению «1», должна быть заполнена графа  «%s» и «%s»!",
+                    getColumnName(row, 'type'), getColumnName(row, 'status'), getColumnName(row, 'inn'), getColumnName(row, 'kpp'))
         }
 
         // Проверка паттернов
