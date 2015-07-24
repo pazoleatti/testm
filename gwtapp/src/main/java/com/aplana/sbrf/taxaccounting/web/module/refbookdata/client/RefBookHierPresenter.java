@@ -297,7 +297,7 @@ public class RefBookHierPresenter extends Presenter<RefBookHierPresenter.MyView,
                                         getView().setVersionView(true);
                                         versionPresenter.setTableColumns(result.getColumns());
                                         commonEditPresenter.setMode(mode);
-                                        dataInterface.updateData();
+                                        versionPresenter.updateTable();
                                         //hierEditFormPresenter.init(refBookId);
                                                             /*getProxy().manualReveal(RefBookDataPresenter.this);*/
                                     }

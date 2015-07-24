@@ -36,6 +36,8 @@ import java.util.Date;
 public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplatePresenter.MyView, DeclarationTemplatePresenter.MyProxy>
 		implements DeclarationTemplateUiHandlers, CreateNewDTVersionEvent.MyHandler, DTCreateNewTypeEvent.MyHandler {
 
+    private static final String ERROR_MSG = "Не удалось загрузить макет";
+    private static final String SUCCESS_MSG = "Файл загружен";
 
     @Override
     @ProxyEvent
@@ -87,10 +89,6 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
 	}
 
 	public interface MyView extends View, HasUiHandlers<DeclarationTemplateUiHandlers> {
-        String ERROR_RESP = "erroruuid ";
-        String SUCCESS_RESP = "uuid ";
-        String ERROR = "error ";
-
         void setDeclarationTemplate(DeclarationTemplateExt declaration);
         HandlerRegistration addValueChangeHandlerJrxml(ValueChangeHandler<String> valueChangeHandler);
         HandlerRegistration addValueChangeHandlerXsd(ValueChangeHandler<String> valueChangeHandler);
@@ -319,7 +317,7 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
         ValueChangeHandler<String> vchJrxml = new ValueChangeHandler<String>() {
             @Override
             public void onValueChange(ValueChangeEvent<String> event) {
-                Dialog.infoMessage("Файл загружен");
+                Dialog.infoMessage(SUCCESS_MSG);
                 declarationTemplateExt.getDeclarationTemplate().setJrxmlBlobId(event.getValue());
                 getView().setDeclarationTemplate(declarationTemplateExt);
             }
@@ -327,7 +325,7 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
         ValueChangeHandler<String> vchXsd = new ValueChangeHandler<String>() {
             @Override
             public void onValueChange(ValueChangeEvent<String> event) {
-                Dialog.infoMessage("Файл загружен");
+                Dialog.infoMessage(SUCCESS_MSG);
                 declarationTemplateExt.getDeclarationTemplate().setXsdId(event.getValue());
                 getView().setDeclarationTemplate(declarationTemplateExt);
             }
@@ -335,14 +333,14 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
         ValueChangeHandler<String> vchDect = new ValueChangeHandler<String>() {
             @Override
             public void onValueChange(ValueChangeEvent<String> event) {
-                Dialog.infoMessage("Файл загружен");
+                Dialog.infoMessage(SUCCESS_MSG);
             }
         };
         EndLoadFileEvent.EndLoadFileHandler loadFileHandlerXsd = new EndLoadFileEvent.EndLoadFileHandler() {
             @Override
             public void onEndLoad(EndLoadFileEvent event) {
                 if (event.isHasError()){
-                    Dialog.errorMessage("Не удалось импортировать шаблон");
+                    Dialog.errorMessage(ERROR_MSG);
                 }
                 LogAddEvent.fire(DeclarationTemplatePresenter.this, event.getUuid());
             }
@@ -351,7 +349,7 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
             @Override
             public void onEndLoad(EndLoadFileEvent event) {
                 if (event.isHasError()){
-                    Dialog.errorMessage("Не удалось импортировать шаблон");
+                    Dialog.errorMessage(ERROR_MSG);
                 }
                 LogAddEvent.fire(DeclarationTemplatePresenter.this, event.getUuid());
             }
@@ -360,7 +358,7 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
             @Override
             public void onEndLoad(EndLoadFileEvent event) {
                 if (event.isHasError()){
-                    Dialog.errorMessage("Не удалось импортировать макет");
+                    Dialog.errorMessage(ERROR_MSG);
                 } else if (event.getUuid() == null || event.getUuid().isEmpty()){// TODO проверить условие
                     reset();
                     Dialog.infoMessage("Макет успешно обновлен");

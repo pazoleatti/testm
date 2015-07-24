@@ -12,13 +12,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
@@ -333,42 +331,9 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
      * @param taxType тип налога
      * @param queryParams параметры пейджинга, сортировки
      */
-    private QueryData getAssignedFormsQueryData(List<Long> departmentIds, char taxType, QueryParams<TaxNominationColumnEnum> queryParams){
-        boolean paging = queryParams != null && queryParams.getCount() != 0;
 
-        MapSqlParameterSource parameters = new MapSqlParameterSource()
-                .addValue("taxType", String.valueOf(taxType));
-
-        // order
-        StringBuffer order = new StringBuffer("");
-        if (queryParams != null && queryParams.getSearchOrdering() != null) {
-            String asc = queryParams.isAscending()?"":" DESC";
-            Set<Enum<TaxNominationColumnEnum>> set = new LinkedHashSet<Enum<TaxNominationColumnEnum>>();
-            set.add(queryParams.getSearchOrdering());
-            set.add(TaxNominationColumnEnum.DEPARTMENT_FULL_NAME);
-            set.add(TaxNominationColumnEnum.FORM_KIND);
-            set.add(TaxNominationColumnEnum.FORM_TYPE);
-
-            boolean first = true;
-            for(Enum<TaxNominationColumnEnum> column: set) {
-                if (first)
-                    order.append("ORDER BY ");
-                else
-                    order.append(", ");
-                order.append(column.name() + asc);
-                first = false;
-            }
-        }
-
-        // departments
-        String departmentClause = "";
-        if (departmentIds != null && !departmentIds.isEmpty()){
-            departmentClause = "AND " + SqlUtils.transformToSqlInStatement("dft.department_id", departmentIds) + "\n";
-            parameters.addValue("params", departmentIds);
-        }
-
-        String query =
-                "SELECT "+
+    private static final String QUERY =
+            "SELECT "+
                     "id," +
                     "kind," +
                     "name," +
@@ -397,55 +362,91 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
                     "performer_is_active, \n" +
                     "performer_code \n" +
                     // пейджинг
-                    (paging ? ", rownum as row_number_over \n":"") +
+                    "%s\n" +
                     "FROM (\n"+
-                        "SELECT dft.ID as id,\n" +
-                        "  dft.KIND,\n" +
-                        "  ft.NAME,\n" +
-                        "  ft.ID AS type_id,\n" +
-                        "  -- Для подразделения\n" +
-                        "  d.ID         AS department_id,\n" +
-                        "  d.NAME       AS department_name,\n" +
-                        "  d.PARENT_ID  AS department_parent_id,\n" +
-                        "  d.TYPE       AS department_type,\n" +
-                        "  d.SHORTNAME  AS department_short_name,\n" +
-                        "  d.TB_INDEX   AS department_tb_index,\n" +
-                        "  d.SBRF_CODE  AS department_sbrf_code,\n" +
-                        "  d.REGION_ID  AS department_region_id,\n" +
-                        "  d.IS_ACTIVE  AS department_is_active,\n" +
-                        "  d.CODE       AS department_code,\n" +
-                        "  d.GARANT_USE AS department_garant_use,\n" +
-                        "  -- Для исполнителя\n" +
-                        "  dp.ID        AS performer_id,\n" +
-                        "  dp.NAME      AS performer_name,\n" +
-                        "  dp.PARENT_ID AS performer_parent_id,\n" +
-                        "  dp.TYPE      AS performer_type,\n" +
-                        "  dp.SHORTNAME AS performer_short_name,\n" +
-                        "  dp.TB_INDEX  AS performer_tb_index,\n" +
-                        "  dp.SBRF_CODE AS performer_sbrf_code,\n" +
-                        "  dp.REGION_ID AS performer_region_id,\n" +
-                        "  dp.IS_ACTIVE AS performer_is_active,\n" +
-                        "  dp.CODE      AS performer_code,\n" +
-                        "  -- Для сортировки\n" +
-                        "  ft.NAME  AS form_type,\n" +
-                        "  dft.KIND AS form_kind,\n" +
-                        "  d.NAME   AS department,\n" +
-                        "  dp.NAME  AS performer, \n"+
-                        "  d.FULL_NAME AS department_full_name, \n" +
-                        "  p.FULL_NAME AS performer_full_name \n" +
-                        "FROM department_form_type dft\n" +
-                        "JOIN form_type ft\n" +
-                        "ON ft.ID = dft.FORM_TYPE_ID\n" +
-                        "JOIN (SELECT d.*, LTRIM(SYS_CONNECT_BY_PATH(name, '/'), '/') as full_name FROM department d START with parent_id = 0 CONNECT BY PRIOR id = parent_id) d \n" +
-                        "ON d.ID = dft.DEPARTMENT_ID\n" +
-                        "LEFT OUTER JOIN department dp\n" +
-                        "ON dp.ID = dft.PERFORMER_DEP_ID\n" +
-                        "LEFT OUTER JOIN (SELECT d.*, LTRIM(SYS_CONNECT_BY_PATH(name, '/'), '/') as full_name FROM department d START with parent_id = 0 CONNECT BY PRIOR id = parent_id) p \n" +
-                        "ON p.ID = dft.PERFORMER_DEP_ID\n" +
-                        "WHERE ft.tax_type = :taxType\n" +
-                        departmentClause +
-                        order.toString() +
+                    "SELECT dft.ID as id,\n" +
+                    "  dft.KIND,\n" +
+                    "  ft.NAME,\n" +
+                    "  ft.ID AS type_id,\n" +
+                    "  -- Для подразделения\n" +
+                    "  d.ID         AS department_id,\n" +
+                    "  d.NAME       AS department_name,\n" +
+                    "  d.PARENT_ID  AS department_parent_id,\n" +
+                    "  d.TYPE       AS department_type,\n" +
+                    "  d.SHORTNAME  AS department_short_name,\n" +
+                    "  d.TB_INDEX   AS department_tb_index,\n" +
+                    "  d.SBRF_CODE  AS department_sbrf_code,\n" +
+                    "  d.REGION_ID  AS department_region_id,\n" +
+                    "  d.IS_ACTIVE  AS department_is_active,\n" +
+                    "  d.CODE       AS department_code,\n" +
+                    "  d.GARANT_USE AS department_garant_use,\n" +
+                    "  -- Для исполнителя\n" +
+                    "  dp.ID        AS performer_id,\n" +
+                    "  dp.NAME      AS performer_name,\n" +
+                    "  dp.PARENT_ID AS performer_parent_id,\n" +
+                    "  dp.TYPE      AS performer_type,\n" +
+                    "  dp.SHORTNAME AS performer_short_name,\n" +
+                    "  dp.TB_INDEX  AS performer_tb_index,\n" +
+                    "  dp.SBRF_CODE AS performer_sbrf_code,\n" +
+                    "  dp.REGION_ID AS performer_region_id,\n" +
+                    "  dp.IS_ACTIVE AS performer_is_active,\n" +
+                    "  dp.CODE      AS performer_code,\n" +
+                    "  -- Для сортировки\n" +
+                    "  ft.NAME  AS form_type,\n" +
+                    "  dft.KIND AS form_kind,\n" +
+                    "  d.NAME   AS department,\n" +
+                    "  dp.NAME  AS performer, \n"+
+                    "  d.FULL_NAME AS department_full_name, \n" +
+                    "  p.FULL_NAME AS performer_full_name \n" +
+                    "FROM department_form_type dft\n" +
+                    "JOIN form_type ft\n" +
+                    "ON ft.ID = dft.FORM_TYPE_ID\n" +
+                    "JOIN (SELECT d.*, LTRIM(SYS_CONNECT_BY_PATH(name, '/'), '/') as full_name FROM department d START with parent_id is null CONNECT BY PRIOR id = parent_id) d \n" +
+                    "ON d.ID = dft.DEPARTMENT_ID\n" +
+                    "LEFT OUTER JOIN department dp\n" +
+                    "ON dp.ID = dft.PERFORMER_DEP_ID\n" +
+                    "LEFT OUTER JOIN (SELECT d.*, LTRIM(SYS_CONNECT_BY_PATH(name, '/'), '/') as full_name FROM department d START with parent_id is null CONNECT BY PRIOR id = parent_id) p \n" +
+                    "ON p.ID = dft.PERFORMER_DEP_ID\n" +
+                    "WHERE ft.tax_type = :taxType\n" +
+                    "%s\n" +
+                    "%s\n" +
                     ")";
+
+    private QueryData getAssignedFormsQueryData(List<Long> departmentIds, char taxType, QueryParams<TaxNominationColumnEnum> queryParams){
+        boolean paging = queryParams != null && queryParams.getCount() != 0;
+
+        MapSqlParameterSource parameters = new MapSqlParameterSource()
+                .addValue("taxType", String.valueOf(taxType));
+
+        // order
+        StringBuilder order = new StringBuilder("");
+        if (queryParams != null && queryParams.getSearchOrdering() != null) {
+            String asc = queryParams.isAscending()?"":" DESC";
+            Set<Enum<TaxNominationColumnEnum>> set = new LinkedHashSet<Enum<TaxNominationColumnEnum>>();
+            set.add(queryParams.getSearchOrdering());
+            set.add(TaxNominationColumnEnum.DEPARTMENT_FULL_NAME);
+            set.add(TaxNominationColumnEnum.FORM_KIND);
+            set.add(TaxNominationColumnEnum.FORM_TYPE);
+
+            boolean first = true;
+            for(Enum<TaxNominationColumnEnum> column: set) {
+                if (first)
+                    order.append("ORDER BY ");
+                else
+                    order.append(", ");
+                order.append(column.name()).append(asc);
+                first = false;
+            }
+        }
+
+        // departments
+        String departmentClause = "";
+        if (departmentIds != null && !departmentIds.isEmpty()){
+            departmentClause = "AND " + SqlUtils.transformToSqlInStatement("dft.department_id", departmentIds) + "\n";
+            parameters.addValue("params", departmentIds);
+        }
+
+        String query =String.format(QUERY, paging ? ", rownum as row_number_over \n":"", departmentClause, order.toString());
 
         // Limit
         if (paging){
@@ -837,7 +838,7 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
 
         String query = "SELECT count(*) FROM ( " + assignedFormsQueryData.getQuery() + " )";
 
-        return getNamedParameterJdbcTemplate().queryForInt(query, assignedFormsQueryData.getParameterSource());
+        return getNamedParameterJdbcTemplate().queryForObject(query, assignedFormsQueryData.getParameterSource(), Integer.class);
     }
 
     @Override

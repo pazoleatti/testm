@@ -6,6 +6,7 @@ import com.aplana.sbrf.taxaccounting.dao.api.DepartmentFormTypeDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
+import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.*;
 import org.junit.Test;
@@ -53,6 +54,8 @@ public class DeclarationDataServiceImplTest {
     DepartmentFormTypeDao departmentFormTypeDao;
     @Autowired
     FormTypeService formTypeService;
+    @Autowired
+    FormTemplateService formTemplateService;
 
     private static final SimpleDateFormat SDF = new SimpleDateFormat("dd.MM.yyyy");
 
@@ -235,6 +238,11 @@ public class DeclarationDataServiceImplTest {
         declarationData.setId(1l);
         declarationData.setDepartmentReportPeriodId(1);
 
+        FormTemplate formTemplate1 = new FormTemplate();
+        formTemplate1.setMonthly(false);
+        FormTemplate formTemplate2 = new FormTemplate();
+        formTemplate2.setMonthly(false);
+
         FormData formData = new FormData();
         formData.setId(1l);
         formData.setReportPeriodId(2);
@@ -310,6 +318,13 @@ public class DeclarationDataServiceImplTest {
         when(departmentReportPeriodService.getLast(1, 1)).thenReturn(drp1);
 
         when(departmentReportPeriodService.getLast(2, 1)).thenReturn(drp2);
+
+        when(formTemplateService.existFormTemplate(1, 1)).thenReturn(true);
+        when(formTemplateService.existFormTemplate(2, 1)).thenReturn(true);
+        when(formTemplateService.getActiveFormTemplateId(1, 1)).thenReturn(1);
+        when(formTemplateService.getActiveFormTemplateId(2, 1)).thenReturn(2);
+        when(formTemplateService.get(1)).thenReturn(formTemplate1);
+        when(formTemplateService.get(2)).thenReturn(formTemplate2);
 
         try{
             declarationDataService.check(logger, 1l, userInfo, new LockStateLogger() {

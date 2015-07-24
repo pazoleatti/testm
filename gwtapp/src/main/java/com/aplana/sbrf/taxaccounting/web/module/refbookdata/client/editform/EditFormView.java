@@ -164,7 +164,7 @@ public class EditFormView extends AbstractEditView implements EditFormPresenter.
                 updateWidgetsVisibility(true);
                 versionStart.setEnabled(true);
                 versionEnd.setEnabled(true);
-                /*allVersion.setVisible(false);*/
+                allVersion.setVisible(false);
                 break;
             case EDIT:
                 save.setEnabled(true);
@@ -172,7 +172,7 @@ public class EditFormView extends AbstractEditView implements EditFormPresenter.
                 updateWidgetsVisibility(true);
                 versionStart.setEnabled(true);
                 versionEnd.setEnabled(true);
-                /*allVersion.setVisible(true);*/
+                allVersion.setVisible(true);
                 break;
             case READ:
             case VIEW:
@@ -181,7 +181,7 @@ public class EditFormView extends AbstractEditView implements EditFormPresenter.
                 versionStart.setEnabled(false);
                 versionEnd.setEnabled(false);
                 updateWidgetsVisibility(false);
-                /*allVersion.setVisible(true);*/
+                allVersion.setVisible(true);
                 break;
         }
     }

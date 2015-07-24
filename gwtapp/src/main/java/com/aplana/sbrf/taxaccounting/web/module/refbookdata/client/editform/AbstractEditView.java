@@ -425,9 +425,6 @@ public abstract class AbstractEditView extends ViewWithUiHandlers<EditFormUiHand
     }
 
     @Override
-    abstract public void updateMode(FormMode mode);
-
-    @Override
     public void setNeedToReload(boolean b) {
         isNeedToReload = b;
     }

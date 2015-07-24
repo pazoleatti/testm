@@ -41,7 +41,7 @@ public class DeclarationTemplateImpexServiceImpl implements
             DeclarationTemplate dt = declarationTemplateService.get(id);
 			
 			// Version
-			ZipEntry ze = new ZipEntry(VERSION_FILE);
+			ZipEntry ze/* = new ZipEntry(VERSION_FILE)*/;
 			/*zos.putNextEntry(ze);
 			zos.write("1.0".getBytes());
 			zos.closeEntry();*/
@@ -85,6 +85,9 @@ public class DeclarationTemplateImpexServiceImpl implements
 			ZipInputStream zis = new ZipInputStream(is);
 			ZipEntry entry;
             DeclarationTemplate dt = declarationTemplateService.get(id);
+            dt.setXsdId(null);
+            dt.setJrxmlBlobId(null);
+            dt.setCreateScript("");
             while((entry = zis.getNextEntry())!=null){
                 ByteArrayOutputStream baos = new ByteArrayOutputStream();
                 if (entry.getSize() == 0){

@@ -12,11 +12,6 @@ public class HierRefBookExecutor implements IRefBookExecutor {
     }
 
     @Override
-    public void updateData() {
-        hierRefBookData.updateTree();
-    }
-
-    @Override
     public void setMode(FormMode mode) {
         hierRefBookData.setMode(mode);
     }

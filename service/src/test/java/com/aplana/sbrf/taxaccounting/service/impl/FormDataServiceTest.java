@@ -125,6 +125,11 @@ public class FormDataServiceTest {
         formData.setManual(false);
         formData.setState(WorkflowState.CREATED);
 
+        FormTemplate formTemplate1 = new FormTemplate();
+        formTemplate1.setMonthly(false);
+        FormTemplate formTemplate2 = new FormTemplate();
+        formTemplate2.setMonthly(false);
+
         TAUserInfo userInfo = new TAUserInfo();
         TAUser user = new TAUser();
         user.setId(1);
@@ -239,11 +244,18 @@ public class FormDataServiceTest {
         formDataDest.setState(WorkflowState.ACCEPTED);
         formDataDest.setDepartmentReportPeriodId(3);
         formDataDest.setFormType(formType1);
-        when(formDataDao.find(dft1.getFormTypeId(), dft1.getKind(), formData.getDepartmentReportPeriodId(), null)).thenReturn(formDataDest);
-        when(formDataDao.find(dft2.getFormTypeId(), dft2.getKind(), formData.getDepartmentReportPeriodId(), null)).thenReturn(formDataDest);
+        when(formDataDao.getLast(dft1.getFormTypeId(), dft1.getKind(), formData.getDepartmentId(), 2, null)).thenReturn(formDataDest);
+        when(formDataDao.getLast(dft2.getFormTypeId(), dft2.getKind(), formData.getDepartmentId(), 2, null)).thenReturn(formDataDest);
         when(formTypeService.get(dft1.getFormTypeId())).thenReturn(formType1);
         when(formTypeService.get(dft2.getFormTypeId())).thenReturn(formType1);
         when(formDataDao.get(formData.getId(), false)).thenReturn(formData);
+
+        when(formTemplateService.existFormTemplate(1, 2)).thenReturn(true);
+        when(formTemplateService.existFormTemplate(2, 2)).thenReturn(true);
+        when(formTemplateService.getActiveFormTemplateId(1, 2)).thenReturn(1);
+        when(formTemplateService.getActiveFormTemplateId(2, 2)).thenReturn(2);
+        when(formTemplateService.get(1)).thenReturn(formTemplate1);
+        when(formTemplateService.get(2)).thenReturn(formTemplate2);
 
         formDataService.compose(formData, userInfo, logger, new LockStateLogger() {
             @Override
@@ -933,6 +945,11 @@ public class FormDataServiceTest {
 
     @Test
     public void doCheckTest() {
+        FormTemplate formTemplate1 = new FormTemplate();
+        formTemplate1.setMonthly(false);
+        FormTemplate formTemplate2 = new FormTemplate();
+        formTemplate2.setMonthly(false);
+
         FormData formData = new FormData();
         formData.setId(1l);
         formData.setReportPeriodId(2);
@@ -1035,6 +1052,13 @@ public class FormDataServiceTest {
         departmentReportPeriod.setBalance(false);
         departmentReportPeriod.setActive(true);
         formData.setDepartmentReportPeriodId(departmentReportPeriod.getId());
+
+        when(formTemplateService.existFormTemplate(1, 2)).thenReturn(true);
+        when(formTemplateService.existFormTemplate(2, 2)).thenReturn(true);
+        when(formTemplateService.getActiveFormTemplateId(1, 2)).thenReturn(1);
+        when(formTemplateService.getActiveFormTemplateId(2, 2)).thenReturn(2);
+        when(formTemplateService.get(1)).thenReturn(formTemplate1);
+        when(formTemplateService.get(2)).thenReturn(formTemplate2);
 
         when(departmentReportPeriodService.getLast(anyInt(), anyInt())).thenReturn(departmentReportPeriod);
 

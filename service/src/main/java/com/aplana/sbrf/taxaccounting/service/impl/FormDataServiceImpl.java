@@ -594,7 +594,7 @@ public class FormDataServiceImpl implements FormDataService {
                             departmentService.getDepartment(dftSource.getDepartmentId()).getName(),
                             formTypeService.get(dftSource.getFormTypeId()).getName(),
                             dftSource.getKind().getName(),
-                            rp.getName(),
+                            rp.getName() + (dftSource.getPeriodOrder() != null ? " " + Months.fromId(dftSource.getPeriodOrder()).getTitle() : ""),
                             rp.getTaxPeriod().getYear(),
                             drp.getCorrectionDate() != null ? String.format(" с датой сдачи корректировки %s",
                                     SDF_DD_MM_YYYY.format(drp.getCorrectionDate())) : ""
@@ -856,7 +856,8 @@ public class FormDataServiceImpl implements FormDataService {
         }
     }
 
-    private List<DepartmentFormType> getFormSources(FormData formData, Logger logger, TAUserInfo userInfo, ReportPeriod reportPeriod){
+    @Override
+    public List<DepartmentFormType> getFormSources(FormData formData, Logger logger, TAUserInfo userInfo, ReportPeriod reportPeriod){
         List<DepartmentFormType> sourceList = new ArrayList<DepartmentFormType>();
         /** Проверяем в скрипте источники-приемники для особенных форм */
         Map<String, Object> params = new HashMap<String, Object>();
@@ -884,12 +885,32 @@ public class FormDataServiceImpl implements FormDataService {
         } else {
             //Получаем источники-приемники стандартными методами ядра
             //Номер месяца для источников получаемых обычным способом не указан. Такие случаи должны обрабатываться в скриптах
-            sourceList = departmentFormTypeDao.getFormSources(
+            List<DepartmentFormType> dftSources = departmentFormTypeDao.getFormSources(
                     formData.getDepartmentId(),
                     formData.getFormType().getId(),
                     formData.getKind(),
                     reportPeriod.getCalendarStartDate(),
                     reportPeriod.getEndDate());
+            for (DepartmentFormType dft : dftSources) {
+                if (formTemplateService.existFormTemplate(dft.getFormTypeId(), reportPeriod.getId())) {
+                    FormTemplate formTemplate = formTemplateService.get(formTemplateService.getActiveFormTemplateId(dft.getFormTypeId(), reportPeriod.getId()));
+                    if (formTemplate.isMonthly()) {
+                        for (Months month : reportPeriodService.getAvailableMonthList(reportPeriod.getId())) {
+                            if (month != null) {
+                                DepartmentFormType source = new DepartmentFormType();
+                                source.setDepartmentId(dft.getDepartmentId());
+                                source.setFormTypeId(dft.getFormTypeId());
+                                source.setKind(dft.getKind());
+                                source.setPeriodOrder(month.getId());
+                                sourceList.add(source);
+                            }
+                        }
+                    } else {
+                        sourceList.add(dft);
+                    }
+                }
+            }
+
         }
         return sourceList;
     }
@@ -1128,8 +1149,7 @@ public class FormDataServiceImpl implements FormDataService {
             if (sourceDepartmentReportPeriod == null) {
                 continue;
             }
-            FormData sourceForm = findFormData(sourceDFT.getFormTypeId(), sourceDFT.getKind(),
-                    sourceDepartmentReportPeriod.getId(), sourceDFT.getPeriodOrder());
+            FormData sourceForm = getLast(sourceDFT.getFormTypeId(), sourceDFT.getKind(), sourceDFT.getDepartmentId(), formData.getReportPeriodId(), sourceDFT.getPeriodOrder());
             if (sourceForm == null){
                 continue;
             }

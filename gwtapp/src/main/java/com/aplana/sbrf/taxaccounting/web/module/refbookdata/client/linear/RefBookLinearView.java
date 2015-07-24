@@ -152,6 +152,11 @@ public class RefBookLinearView extends ViewWithUiHandlers<RefBookDataLinearUiHan
     }
 
     @Override
+    public int getTotalCount() {
+        return refBookDataTable.getRowCount();
+    }
+
+    @Override
     public void setTableColumns(List<RefBookColumn> columns) {
         for (final RefBookColumn header : columns) {
             Column column;
@@ -222,6 +227,10 @@ public class RefBookLinearView extends ViewWithUiHandlers<RefBookDataLinearUiHan
                 return;
             }
             i++;
+        }
+        //Значит, что в справочнике запись добавилась на другую страницу
+        if (selectionModel.getSelectedObject()==null && !refBookDataTable.getVisibleItems().isEmpty()){
+            setSelected(refBookDataTable.getVisibleItems().get(0).getRefBookRowId());
         }
     }
 
