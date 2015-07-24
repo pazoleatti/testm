@@ -531,7 +531,7 @@ void consolidationFromPrimary(def dataRows, def formSources) {
                         if (recordId != null) {
                             sum5 = dataRowsChild.sum { rowRNU5 ->
                                 return (rowRNU5.getAlias() == null && recordId == rowRNU5.number &&
-                                        isEqualNum(rowRNU5.consumptionAccountNumber, rowRNU5.number) && rowRNU5.sum) ? rowRNU5.sum : 0
+                                        isEqualNum(row.consumptionAccountNumber, rowRNU5.number) && rowRNU5.sum) ? rowRNU5.sum : 0
                             }
 
                         }
