@@ -377,7 +377,7 @@ void addTransportData(def xml) {
 
 void importData() {
     def tmpRow = formData.createDataRow()
-    int COLUMN_COUNT = 3
+    int COLUMN_COUNT = 6
     int HEADER_ROW_COUNT = 3
     String TABLE_START_VALUE = getColumnName(tmpRow, 'rowNumber')
     String TABLE_END_VALUE = null
