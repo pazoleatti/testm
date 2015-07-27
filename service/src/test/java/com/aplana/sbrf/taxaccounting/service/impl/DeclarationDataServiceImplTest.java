@@ -3,11 +3,37 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 import com.aplana.sbrf.taxaccounting.core.api.LockStateLogger;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationDataDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentFormTypeDao;
-import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.BlobData;
+import com.aplana.sbrf.taxaccounting.model.DeclarationData;
+import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
+import com.aplana.sbrf.taxaccounting.model.DeclarationType;
+import com.aplana.sbrf.taxaccounting.model.Department;
+import com.aplana.sbrf.taxaccounting.model.DepartmentFormType;
+import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod;
+import com.aplana.sbrf.taxaccounting.model.FormData;
+import com.aplana.sbrf.taxaccounting.model.FormDataKind;
+import com.aplana.sbrf.taxaccounting.model.FormType;
+import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
+import com.aplana.sbrf.taxaccounting.model.ReportType;
+import com.aplana.sbrf.taxaccounting.model.TARole;
+import com.aplana.sbrf.taxaccounting.model.TAUser;
+import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.model.TaxPeriod;
+import com.aplana.sbrf.taxaccounting.model.TaxType;
+import com.aplana.sbrf.taxaccounting.model.WorkflowState;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
-import com.aplana.sbrf.taxaccounting.service.*;
+import com.aplana.sbrf.taxaccounting.service.BlobDataService;
+import com.aplana.sbrf.taxaccounting.service.DeclarationDataAccessService;
+import com.aplana.sbrf.taxaccounting.service.DeclarationTemplateService;
+import com.aplana.sbrf.taxaccounting.service.DepartmentReportPeriodService;
+import com.aplana.sbrf.taxaccounting.service.DepartmentService;
+import com.aplana.sbrf.taxaccounting.service.FormDataService;
+import com.aplana.sbrf.taxaccounting.service.FormTypeService;
+import com.aplana.sbrf.taxaccounting.service.PeriodService;
+import com.aplana.sbrf.taxaccounting.service.ReportService;
+import com.aplana.sbrf.taxaccounting.service.SourceService;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Matchers;
@@ -18,12 +44,18 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.UUID;
 
 import static com.aplana.sbrf.taxaccounting.test.UserMockUtils.mockUser;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.anyLong;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration("DeclarationDataServiceTest.xml")
@@ -281,7 +313,11 @@ public class DeclarationDataServiceImplTest {
         departmentFormTypes.add(dft2);
         departmentFormTypes.add(dft2);
         DepartmentReportPeriod drp1 = new DepartmentReportPeriod();
+        drp1.setId(1);
         drp1.setCorrectionDate(new Date(0));
+        DepartmentReportPeriod drp2 = new DepartmentReportPeriod();
+        drp2.setId(2);
+        drp2.setCorrectionDate(new Date(0));
 
         when(departmentFormTypeDao.getDeclarationSources(
                 declarationData.getDepartmentId(),
@@ -295,13 +331,17 @@ public class DeclarationDataServiceImplTest {
         when(reportService.getDec(Matchers.<TAUserInfo>any(), anyLong(), Matchers.<ReportType>anyObject())).thenReturn(UUID.randomUUID().toString());
         when(declarationTemplateService.get(declarationData.getDeclarationTemplateId())).thenReturn(declarationTemplate);
         when(periodService.getReportPeriod(declarationData.getReportPeriodId())).thenReturn(reportPeriod);
-        when(formDataService.findFormData(dft1.getFormTypeId(), dft1.getKind(), declarationData.getDepartmentReportPeriodId(), null)).
+        when(formDataService.findFormData(dft1.getFormTypeId(), dft1.getKind(), drp1.getId(), null)).
                 thenReturn(formData);
-        when(formDataService.findFormData(dft2.getFormTypeId(), dft2.getKind(), declarationData.getDepartmentReportPeriodId(), null)).
+        when(formDataService.findFormData(dft2.getFormTypeId(), dft2.getKind(), drp2.getId(), null)).
                 thenReturn(null);
         when(formTypeService.get(dft2.getFormTypeId())).thenReturn(formType);
 
         when(departmentReportPeriodService.get(declarationData.getDepartmentReportPeriodId())).thenReturn(drp1);
+
+        when(departmentReportPeriodService.getLast(1, 1)).thenReturn(drp1);
+
+        when(departmentReportPeriodService.getLast(2, 1)).thenReturn(drp2);
 
         try{
             declarationDataService.check(logger, 1l, userInfo, new LockStateLogger() {

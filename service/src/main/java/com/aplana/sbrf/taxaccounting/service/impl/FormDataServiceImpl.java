@@ -560,11 +560,11 @@ public class FormDataServiceImpl implements FormDataService {
                         reportPeriod.getStartDate(),
                         reportPeriod.getEndDate());
                 for (DepartmentFormType dftTarget : destinationsDFT) {
+                    DepartmentReportPeriod drp = departmentReportPeriodService.getLast(dftTarget.getDepartmentId(), formData.getReportPeriodId());
                     FormData destinationFD =
-                            findFormData(dftTarget.getFormTypeId(), dftTarget.getKind(), formData.getDepartmentReportPeriodId(), formData.getPeriodOrder());
+                            findFormData(dftTarget.getFormTypeId(), dftTarget.getKind(), drp.getId(), formData.getPeriodOrder());
                     if (destinationFD != null && !sourceService.isFDSourceConsolidated(destinationFD.getId(), formData.getId())){
                         ReportPeriod rp = reportPeriodService.getReportPeriod(destinationFD.getReportPeriodId());
-                        DepartmentReportPeriod drp = departmentReportPeriodService.get(destinationFD.getDepartmentReportPeriodId());
                         logger.warn(
                                 NOT_CONSOLIDATE_DESTINATION_FORM_WARNING,
                                 departmentService.getDepartment(destinationFD.getDepartmentId()).getName(),

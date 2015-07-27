@@ -269,14 +269,15 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
     @Override
     public FormData find(int formTypeId, FormDataKind kind, int departmentReportPeriodId, Integer periodOrder) {
         try {
-            return getJdbcTemplate().queryForObject("select fd.id, fd.form_template_id, fd.state, fd.kind, " +
+            String sql = "select fd.id, fd.form_template_id, fd.state, fd.kind, " +
                     "fd.return_sign, fd.period_order, fd.manual, fd.number_previous_row, fd.department_report_period_id, " +
                     "drp.report_period_id, drp.department_id, " +
                     "(SELECT type_id FROM form_template ft WHERE ft.id = fd.form_template_id) type_id " +
                     "from department_report_period drp, form_data fd " +
                     "where drp.id = fd.department_report_period_id " +
                     "and exists (select 1 from form_template ft where fd.form_template_id = ft.id and ft.type_id = ?) " +
-                    "and fd.kind = ? and drp.id = ? and (? is null or fd.period_order = ?) ",
+                    "and fd.kind = ? and drp.id = ? and (? is null or fd.period_order = ?) ";
+            return getJdbcTemplate().queryForObject(sql,
                     new Object[]{
                             formTypeId,
                             kind.getId(),
