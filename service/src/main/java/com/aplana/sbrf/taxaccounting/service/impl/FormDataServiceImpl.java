@@ -1118,7 +1118,7 @@ public class FormDataServiceImpl implements FormDataService {
                         departmentService.getDepartment(sourceDFT.getDepartmentId()).getName(),
                         sourceDFT.getKind().getName(),
                         formTypeService.get(sourceDFT.getFormTypeId()).getName(),
-                        reportPeriodService.getReportPeriod(formData.getReportPeriodId()).getName(),
+                        reportPeriodService.getReportPeriod(formData.getReportPeriodId()).getName() + (sourceForm.getPeriodOrder() != null ? " " + Months.fromId(sourceForm.getPeriodOrder()).getTitle() : ""),
                         (sourceDepartmentReportPeriod.getCorrectionDate() != null ?
                                 String.format(CORRECTION_PATTERN, SDF_DD_MM_YYYY.format(sourceDepartmentReportPeriod.getCorrectionDate()))
                                 :
