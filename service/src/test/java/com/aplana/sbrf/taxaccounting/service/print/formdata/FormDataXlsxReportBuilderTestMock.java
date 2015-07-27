@@ -45,12 +45,14 @@ public class FormDataXlsxReportBuilderTestMock {
 		Column colNum3 = new StringColumn();
 		Column colNum4 = new StringColumn();
 		Column colNum5 = new NumericColumn();
-		Column colNum6 = new StringColumn();
+		Column colNum6 = new NumericColumn();
+        ((NumericColumn)colNum6).setPrecision(2);
 		Column colNum7 = new StringColumn();
 		Column colNum8 = new DateColumn();
 		
 		Column colStr9 = new StringColumn();
 		Column colStr10 = new NumericColumn();
+        ((NumericColumn)colStr10).setPrecision(2);
 		Column colStr11 = new NumericColumn();
         Column colDate12 = new StringColumn();
         Column colDate13 = new StringColumn();

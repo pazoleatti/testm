@@ -39,7 +39,7 @@ public final class XlsxReportMetadata {
 		DEFAULT {
 			@Override
 			public String pattern() {
-				return "# ##,0.00";
+				return "# ##,0";
 			}
 		},
 		UNUM {
