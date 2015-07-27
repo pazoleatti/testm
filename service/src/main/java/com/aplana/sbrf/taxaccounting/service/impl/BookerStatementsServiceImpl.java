@@ -5,6 +5,7 @@ import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookIncome101Dao;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookIncome102Dao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
@@ -13,10 +14,7 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBookRecord;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
-import com.aplana.sbrf.taxaccounting.service.AuditService;
-import com.aplana.sbrf.taxaccounting.service.BookerStatementsService;
-import com.aplana.sbrf.taxaccounting.service.DepartmentService;
-import com.aplana.sbrf.taxaccounting.service.PeriodService;
+import com.aplana.sbrf.taxaccounting.service.*;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
@@ -98,6 +96,9 @@ public class BookerStatementsServiceImpl implements BookerStatementsService {
     @Autowired
     private DepartmentService departmentService;
 
+    @Autowired
+    private LogEntryService logEntryService;
+
     @Override
     public void importXML(String realFileName, InputStream stream, Integer accountPeriodId, int typeId, Integer departmentId, TAUserInfo userInfo) {
 
@@ -165,7 +166,10 @@ public class BookerStatementsServiceImpl implements BookerStatementsService {
                             codeOpu.append(", ");
                         }
                     }
-                    throw new ServiceException("Код ОПУ " + codeOpu + " указан в форме более одного раза! Файл не может быть загружен.");
+                    Logger logger = new Logger();
+                    logger.error("Следующие коды ОПУ указаны в форме более одного раза:");
+                    logger.error(codeOpu.toString());
+                    throw new ServiceLoggerException("Нарушена уникальность кодов ОПУ. Файл не может быть загружен.", logEntryService.save(logger.getEntries()));
                 }
 
                 provider.updateRecords(userInfo, getStartDate(), records);
