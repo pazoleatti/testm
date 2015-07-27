@@ -5,6 +5,7 @@ import com.aplana.sbrf.taxaccounting.core.api.LockStateLogger;
 import com.aplana.sbrf.taxaccounting.dao.IfrsDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
+import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.*;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
@@ -78,7 +79,6 @@ public class IfrsDataServiceImpl implements IfrsDataService {
 
         List<Integer> formTypeList = formTypeService.getIfrsFormTypes();
         List<Integer> declarationTypeList = declarationTypeService.getIfrsDeclarationTypes();
-
         if (formTypeList.isEmpty() && declarationTypeList.isEmpty()) {
             logger.error("Отсутствуют макеты налоговых форм/деклараций с признаком \"Отчетность для МСФО\"");
             return false;
@@ -87,26 +87,35 @@ public class IfrsDataServiceImpl implements IfrsDataService {
         List<FormData> formDataList = formDataService.getIfrsForm(reportPeriodId);
         List<DeclarationData> declarationDataList = declarationDataSearchService.getIfrs(reportPeriodId);
 
-
         List<FormData> notAcceptedFormDataList = new ArrayList<FormData>();
         List<DeclarationData> notAcceptedDeclarationDataList = new ArrayList<DeclarationData>();
+
+        List<FormData> notReportFormDataList = new ArrayList<FormData>();
+        List<DeclarationData> notReportDeclarationDataList = new ArrayList<DeclarationData>();
 
         for(FormData formData: formDataList) {
             if (!formData.getState().equals(WorkflowState.ACCEPTED)) {
                 notAcceptedFormDataList.add(formData);
-            }
-            if (formTypeList.contains(formData.getFormType().getId())) {
-                formTypeList.remove(Integer.valueOf(formData.getFormType().getId()));
+            } else {
+                if (formTypeList.contains(formData.getFormType().getId())) {
+                    formTypeList.remove(Integer.valueOf(formData.getFormType().getId()));
+                }
+                if (reportService.get(userService.getSystemUserInfo(), formData.getId(), ReportType.EXCEL, true, formData.isManual(), true) == null)
+                    notReportFormDataList.add(formData);
             }
         }
 
         for(DeclarationData declarationData: declarationDataList) {
             if (!declarationData.isAccepted()) {
                 notAcceptedDeclarationDataList.add(declarationData);
-            }
-            DeclarationTemplate declarationTemplate = declarationTemplateService.get(declarationData.getDeclarationTemplateId());
-            if (declarationTypeList.contains(declarationTemplate.getType().getId())) {
-                declarationTypeList.remove(Integer.valueOf(declarationTemplate.getType().getId()));
+            } else {
+                DeclarationTemplate declarationTemplate = declarationTemplateService.get(declarationData.getDeclarationTemplateId());
+                if (declarationTypeList.contains(declarationTemplate.getType().getId())) {
+                    declarationTypeList.remove(Integer.valueOf(declarationTemplate.getType().getId()));
+                }
+                if (reportService.getDec(userService.getSystemUserInfo(), declarationData.getId(), ReportType.EXCEL_DEC) == null) {
+                    notReportDeclarationDataList.add(declarationData);
+                }
             }
         }
 
@@ -132,30 +141,37 @@ public class IfrsDataServiceImpl implements IfrsDataService {
             }
             return false;
         }
+        if (!notReportFormDataList.isEmpty() || !notReportDeclarationDataList.isEmpty()) {
+            logger.error("Для следующих форм за %s %s, еще не созданы отчетные формы, включаемые в архив с отчетностью для МСФО:", reportPeriod.getName(), reportPeriod.getTaxPeriod().getYear());
+            for(FormData formData: notReportFormDataList) {
+                logger.error("Налоговая форма: Подразделение: \"%s\", Тип: \"%s\", Вид: \"%s\".", departmentService.getParentsHierarchy(formData.getDepartmentId()), formData.getKind().getName(), formData.getFormType().getName());
+            }
+            for(DeclarationData declarationData: notReportDeclarationDataList) {
+                DeclarationTemplate declarationTemplate = declarationTemplateService.get(declarationData.getDeclarationTemplateId());
+                logger.error("Декларация: Подразделение: \"%s\", Вид: \"%s\".", departmentService.getParentsHierarchy(declarationData.getDepartmentId()), declarationTemplate.getName());
+            }
+            return false;
+        }
+
         return true;
     }
 
     @Override
     public void calculate(Logger logger, Integer reportPeriodId, LockStateLogger stateLogger) {
+        if (!check(logger, reportPeriodId)) {
+            throw new ServiceException("");
+        }
         ReportPeriod reportPeriod = periodService.getReportPeriod(reportPeriodId);
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         ZipArchiveOutputStream zos = new ZipArchiveOutputStream(os);
         zos.setEncoding("cp866");
         try {
             ZipArchiveEntry ze;
-            List<Integer> formTypeList = formTypeService.getIfrsFormTypes();
-            List<Integer> declarationTypeList = declarationTypeService.getIfrsDeclarationTypes();
-            if (formTypeList.isEmpty() && declarationTypeList.isEmpty()) {
-                throw new ServiceException("Отсутствуют макеты налоговых форм/деклараций с признаком \"Отчетность для МСФО\"");
-            }
 
             stateLogger.updateState("Получение налоговых форм для архива");
             List<FormData> formDataList = formDataService.getIfrsForm(reportPeriodId);
             stateLogger.updateState("Получение деклараций для архива");
             List<DeclarationData> declarationDataList = declarationDataSearchService.getIfrs(reportPeriodId);
-            if (formDataList.isEmpty() && declarationDataList.isEmpty()) {
-                throw new ServiceException("Нет созданных НФ/декларациии");
-            }
 
             List<Department> departments = departmentService.getAllChildren(0);
             Map<Integer, Department> departmentsMap = new HashMap<Integer, Department>();
@@ -165,34 +181,7 @@ public class IfrsDataServiceImpl implements IfrsDataService {
 
             stateLogger.updateState("Добавление налоговых форм в архив");
             for(FormData formData: formDataList) {
-                boolean flag = true;
-                List<DepartmentFormType> departmentImpFormTypes = sourceService.getFormDestinations(formData.getDepartmentId(), formData.getFormType().getId(), formData.getKind(), reportPeriodId);
-                for(DepartmentFormType departmentFormType: departmentImpFormTypes) {
-                    if (formTypeList.contains(departmentFormType.getFormTypeId())) {
-                        flag = false;
-                        break;
-                    }
-                }
-
-                if (!flag)
-                    continue;
-
-                List<DepartmentDeclarationType> departmentDeclarationTypes = sourceService.getDeclarationDestinations(formData.getDepartmentId(), formData.getFormType().getId(), formData.getKind(), reportPeriodId);
-                for(DepartmentDeclarationType departmentDeclarationType: departmentDeclarationTypes) {
-                    if (declarationTypeList.contains(departmentDeclarationType.getDeclarationTypeId())) {
-                        flag = false;
-                        break;
-                    }
-                }
-
-                if (!flag)
-                    continue;
-
-                String uuid = reportService.get(userService.getSystemUserInfo(), formData.getId(), ReportType.EXCEL, false, formData.isManual(), false);
-                if (uuid == null) {
-                    uuid = printingService.generateExcel(userService.getSystemUserInfo(), formData.getId(), formData.isManual(), false, false, null);
-                }
-
+                String uuid = reportService.get(userService.getSystemUserInfo(), formData.getId(), ReportType.EXCEL, true, formData.isManual(), true);
                 BlobData blobData = blobDataService.get(uuid);
                 FormTemplate formTemplate = formTemplateService.get(formData.getFormTemplateId());
                 Department department = departmentsMap.get(formData.getDepartmentId());
@@ -205,21 +194,9 @@ public class IfrsDataServiceImpl implements IfrsDataService {
 
             stateLogger.updateState("Добавление деклараций в архив");
             for(DeclarationData declarationData: declarationDataList) {
-                BlobData blobData;
                 DeclarationTemplate declarationTemplate = declarationTemplateService.get(declarationData.getDeclarationTemplateId());
                 String uuid = reportService.getDec(userService.getSystemUserInfo(), declarationData.getId(), ReportType.EXCEL_DEC);
-                if (uuid == null) {
-                    String xmlUuid = reportService.getDec(userService.getSystemUserInfo(), declarationData.getId(), ReportType.XML_DEC);
-                    if (xmlUuid != null) {
-                        blobData = new BlobData();
-                        blobData.setInputStream(new ByteArrayInputStream(declarationDataService.getXlsxData(declarationData.getId(), userService.getSystemUserInfo(), stateLogger)));
-                    } else {
-                        throw new ServiceException("Для декларации \"%s\" не произведен расчёт", declarationTemplate.getName());
-                    }
-                } else {
-                    blobData = blobDataService.get(uuid);
-                }
-
+                BlobData blobData = blobDataService.get(uuid);
                 String name = String.format("%s_%s_%s.xlsx", declarationTemplate.getType().getIfrsName(), reportPeriod.getName(), reportPeriod.getTaxPeriod().getYear());
                 ze = new ZipArchiveEntry(name);
                 zos.putArchiveEntry(ze);
@@ -233,7 +210,6 @@ public class IfrsDataServiceImpl implements IfrsDataService {
         } finally {
             IOUtils.closeQuietly(zos);
             IOUtils.closeQuietly(os);
-
         }
 
         ifrsDao.update(reportPeriodId, blobDataService.create(new ByteArrayInputStream(os.toByteArray()), String.format("Отчетность для МСФО %s %s.zip", reportPeriod.getName(), reportPeriod.getTaxPeriod().getYear())));

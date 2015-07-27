@@ -9,36 +9,7 @@ import com.aplana.sbrf.taxaccounting.dao.api.ConfigurationDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DataRowDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentFormTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
-import com.aplana.sbrf.taxaccounting.model.Cell;
-import com.aplana.sbrf.taxaccounting.model.Column;
-import com.aplana.sbrf.taxaccounting.model.ColumnType;
-import com.aplana.sbrf.taxaccounting.model.ConfigurationParam;
-import com.aplana.sbrf.taxaccounting.model.DataRow;
-import com.aplana.sbrf.taxaccounting.model.Department;
-import com.aplana.sbrf.taxaccounting.model.DepartmentFormType;
-import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod;
-import com.aplana.sbrf.taxaccounting.model.FormData;
-import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
-import com.aplana.sbrf.taxaccounting.model.FormDataKind;
-import com.aplana.sbrf.taxaccounting.model.FormDataPerformer;
-import com.aplana.sbrf.taxaccounting.model.FormDataSigner;
-import com.aplana.sbrf.taxaccounting.model.FormSources;
-import com.aplana.sbrf.taxaccounting.model.FormTemplate;
-import com.aplana.sbrf.taxaccounting.model.FormToFormRelation;
-import com.aplana.sbrf.taxaccounting.model.Formats;
-import com.aplana.sbrf.taxaccounting.model.IfrsData;
-import com.aplana.sbrf.taxaccounting.model.LockData;
-import com.aplana.sbrf.taxaccounting.model.Months;
-import com.aplana.sbrf.taxaccounting.model.NumerationType;
-import com.aplana.sbrf.taxaccounting.model.RefBookColumn;
-import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
-import com.aplana.sbrf.taxaccounting.model.ReportType;
-import com.aplana.sbrf.taxaccounting.model.TAUser;
-import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
-import com.aplana.sbrf.taxaccounting.model.TaxPeriod;
-import com.aplana.sbrf.taxaccounting.model.TaxType;
-import com.aplana.sbrf.taxaccounting.model.WorkflowMove;
-import com.aplana.sbrf.taxaccounting.model.WorkflowState;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceRollbackException;
@@ -49,23 +20,7 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
-import com.aplana.sbrf.taxaccounting.service.AuditService;
-import com.aplana.sbrf.taxaccounting.service.BlobDataService;
-import com.aplana.sbrf.taxaccounting.service.DepartmentReportPeriodService;
-import com.aplana.sbrf.taxaccounting.service.DepartmentService;
-import com.aplana.sbrf.taxaccounting.service.FormDataAccessService;
-import com.aplana.sbrf.taxaccounting.service.FormDataScriptingService;
-import com.aplana.sbrf.taxaccounting.service.FormDataService;
-import com.aplana.sbrf.taxaccounting.service.FormTemplateService;
-import com.aplana.sbrf.taxaccounting.service.FormTypeService;
-import com.aplana.sbrf.taxaccounting.service.IfrsDataService;
-import com.aplana.sbrf.taxaccounting.service.LogBusinessService;
-import com.aplana.sbrf.taxaccounting.service.LogEntryService;
-import com.aplana.sbrf.taxaccounting.service.PeriodService;
-import com.aplana.sbrf.taxaccounting.service.ReportService;
-import com.aplana.sbrf.taxaccounting.service.SignService;
-import com.aplana.sbrf.taxaccounting.service.SourceService;
-import com.aplana.sbrf.taxaccounting.service.TAUserService;
+import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.service.impl.eventhandler.EventLauncher;
 import com.aplana.sbrf.taxaccounting.service.shared.FormDataCompositionService;
 import com.aplana.sbrf.taxaccounting.service.shared.ScriptComponentContextHolder;
@@ -211,6 +166,8 @@ public class FormDataServiceImpl implements FormDataService {
     private SourceService sourceService;
     @Autowired
     private AsyncTaskTypeDao asyncTaskTypeDao;
+    @Autowired
+    private DeclarationTypeService declarationTypeService;
     @Autowired
     private BlobDataService blobDataService;
 
@@ -1161,7 +1118,7 @@ public class FormDataServiceImpl implements FormDataService {
                         departmentService.getDepartment(sourceDFT.getDepartmentId()).getName(),
                         sourceDFT.getKind().getName(),
                         formTypeService.get(sourceDFT.getFormTypeId()).getName(),
-                        reportPeriodService.getReportPeriod(formData.getReportPeriodId()).getName(),
+                        reportPeriodService.getReportPeriod(formData.getReportPeriodId()).getName() + (sourceForm.getPeriodOrder() != null ? " " + Months.fromId(sourceForm.getPeriodOrder()).getTitle() : ""),
                         (sourceDepartmentReportPeriod.getCorrectionDate() != null ?
                                 String.format(CORRECTION_PATTERN, SDF_DD_MM_YYYY.format(sourceDepartmentReportPeriod.getCorrectionDate()))
                                 :
@@ -1503,7 +1460,23 @@ public class FormDataServiceImpl implements FormDataService {
 
     @Override
     public List<FormData> getIfrsForm(int reportPeriodId) {
-        return formDataDao.getIfrsForm(reportPeriodId);
+        List<FormData> ifrsFormList = new ArrayList<FormData>();
+        List<FormData> formDataList = formDataDao.getIfrsForm(reportPeriodId);
+        List<Integer> formTypeList = formTypeService.getIfrsFormTypes();
+        for(FormData formData: formDataList) {
+            boolean flag = true;
+            List<DepartmentFormType> departmentImpFormTypes = sourceService.getFormDestinations(formData.getDepartmentId(), formData.getFormType().getId(), formData.getKind(), reportPeriodId);
+            for (DepartmentFormType departmentFormType : departmentImpFormTypes) {
+                if (formTypeList.contains(departmentFormType.getFormTypeId())) {
+                    flag = false;
+                    break;
+                }
+            }
+
+            if (flag)
+                ifrsFormList.add(formData);
+        }
+        return ifrsFormList;
     }
 
     @Override
