@@ -560,9 +560,7 @@ void importData() {
         rowValues.clear()
     }
 
-    // получить строки из шаблона
-    def formTemplate = formDataService.getFormTemplate(formData.formType.id, formData.reportPeriodId)
-    def totalRow = getDataRow(formTemplate.rows, 'total')
+    def totalRow = calcTotalRow(rows)
     rows.add(totalRow)
 
     showMessages(rows, logger)
