@@ -495,10 +495,15 @@ void generateXML(XMLStreamReader readerBank) {
                                 КБК: kbk,
                                 НалПУ: empty)
 
+                        def appl5List02Row070 = empty
+                        if (dataRowsAdvance != null) {
+                            def rowForAvPlat = dataRowsAdvance.find { row -> declarationData.kpp.equals(row.kpp) }
+                            appl5List02Row070 = (rowForAvPlat != null && (rowForAvPlat.taxSumToPay || rowForAvPlat.taxSumToReduction)) ? (rowForAvPlat.taxSumToPay ?: -rowForAvPlat.taxSumToReduction) : 0
+                        }
                         // 0..1
                         СубБдж(
                                 КБК: kbk2,
-                                НалПУ: empty)
+                                НалПУ: appl5List02Row070)
                     }
                     // Раздел 1. Подраздел 1.1 - конец
 
@@ -518,8 +523,8 @@ void generateXML(XMLStreamReader readerBank) {
                             def avPlat2 = empty
                             def avPlat3 = empty
                             if (!isTaxPeriod && dataRowsAdvance != null) {
-                                // получение строки подразделения "ЦА", затем значение столбца «Ежемесячные авансовые платежи в квартале, следующем за отчётным периодом (текущий отчёт)»
-                                def rowForAvPlat = getDataRow(dataRowsAdvance, 'ca')
+                                // получение строки подразделения, затем значение столбца «Ежемесячные авансовые платежи в квартале, следующем за отчётным периодом (текущий отчёт)»
+                                def rowForAvPlat = dataRowsAdvance.find { row -> declarationData.kpp.equals(row.kpp) }
                                 def appl5List02Row120 = (rowForAvPlat != null && rowForAvPlat.everyMontherPaymentAfterPeriod != null ? rowForAvPlat.everyMontherPaymentAfterPeriod : 0)
                                 avPlat1 = (long) appl5List02Row120 / 3
                                 avPlat2 = avPlat1
