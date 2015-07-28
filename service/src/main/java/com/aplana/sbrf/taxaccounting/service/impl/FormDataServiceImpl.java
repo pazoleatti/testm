@@ -658,7 +658,8 @@ public class FormDataServiceImpl implements FormDataService {
             throw new ServiceLoggerException(SAVE_ERROR, logEntryService.save(logger.getEntries()));
         }
         // Обновление для сквозной нумерации
-        updatePreviousRowNumberAttr(formData, logger, userInfo);
+        updateAutoNumeration(formData, logger, userInfo);
+		// Обновление
         formDataDao.save(formData);
 		dataRowDao.refreshRefBookLinks(formData);
         deleteReport(formData.getId(), formData.isManual(), userInfo.getUser().getId());
@@ -950,7 +951,7 @@ public class FormDataServiceImpl implements FormDataService {
         Map<Long, List<Long>> recordsToCheck = new HashMap<Long, List<Long>>();
         Map<Long, List<ReferenceInfo>> referenceInfoMap = new HashMap<Long, List<ReferenceInfo>>();
         List<DataRow<Cell>> rows;
-		rows = dataRowDao.getSavedRows(formData, null);
+		rows = dataRowDao.getRows(formData, null);
         if (rows.size() > 0) {
             for (Column column : formData.getFormColumns()) {
                 if (ColumnType.REFBOOK.equals(column.getColumnType())) {
@@ -1516,7 +1517,7 @@ public class FormDataServiceImpl implements FormDataService {
         if (formDataList.size() > 0) {
             for (FormData aFormData : formDataList) {
                 if (beInOnAutoNumeration(aFormData.getState(), departmentReportPeriod)) {
-                    previousRowNumber += dataRowDao.getSizeWithoutTotal(aFormData);
+                    previousRowNumber += dataRowDao.getAutoNumerationRowCount(aFormData);
                 }
                 if (aFormData.getId().equals(formData.getId())) {
                     return previousRowNumber;
@@ -1528,17 +1529,23 @@ public class FormDataServiceImpl implements FormDataService {
     }
 
     /**
-     * Обновление значений атрибута "Номер последней строки предыдущей НФ" при сохранении
+     * Обновление связанных со сквозной автонумерацией атрибутов
      *
      * @param logger   логгер для регистрации ошибок
      * @param formData редактируемый экземпляр НФ
      */
-    void updatePreviousRowNumberAttr(FormData formData, Logger logger, TAUserInfo user) {
+    void updateAutoNumeration(FormData formData, Logger logger, TAUserInfo user) {
+		// Обновление значений атрибута "Номер последней строки предыдущей НФ" при сохранении
         DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.get(formData.getDepartmentReportPeriodId());
         if (!formData.isManual() && beInOnAutoNumeration(formData.getState(), departmentReportPeriod)
                 && dataRowDao.isDataRowsCountChanged(formData)) {
             updatePreviousRowNumber(formData, logger, user, true, false);
         }
+		// Пересчет текущего кол-ва нумеруемых граф
+		FormTemplate template = formTemplateService.get(formData.getFormTemplateId());
+		if (formTemplateService.isAnyAutoNumerationColumn(template, NumerationType.CROSS)) {
+			formDataDao.updateCurrentRowNumber(formData);
+		}
     }
 
     /**
@@ -1577,14 +1584,14 @@ public class FormDataServiceImpl implements FormDataService {
 
             // Устанавливаем значение для текущего экземпляра НФ
             Integer previousRowNumber = (useZero ? 0 : getPreviousRowNumber(formData, null));
-            formDataDao.updatePreviousRowNumber(formData.getId(), previousRowNumber);
+            formDataDao.updatePreviousRowNumber(formData, previousRowNumber);
 
             StringBuilder stringBuilder = new StringBuilder();
             // Обновляем последующие периоды
             int size = formDataList.size();
 
             for (FormData data : formDataList) {
-                formDataDao.updatePreviousRowNumber(data.getId(), getPreviousRowNumber(data, isSave ? formData : null));
+                formDataDao.updatePreviousRowNumber(data, getPreviousRowNumber(data, isSave ? formData : null));
                 deleteReport(data.getId(), null, user.getUser().getId());
                 ReportPeriod reportPeriod = reportPeriodService.getReportPeriod(data.getReportPeriodId());
                 stringBuilder.append(reportPeriod.getName()).append(" ").append(reportPeriod.getTaxPeriod().getYear());
@@ -1859,7 +1866,7 @@ public class FormDataServiceImpl implements FormDataService {
             case CALCULATE_FD:
             case EXCEL:
             case CSV:
-                int rowCountReport = dataRowDao.getSavedSize(formData);
+                int rowCountReport = dataRowDao.getRowCount(formData);
                 int columnCountReport = formTemplateService.get(formData.getFormTemplateId()).getColumns().size();
                 return Long.valueOf(rowCountReport * columnCountReport);
             case CONSOLIDATE_FD:
@@ -1881,7 +1888,7 @@ public class FormDataServiceImpl implements FormDataService {
                     //Запись на будущее, чтобы второго цикла не делать
                     //1E.
                     if (sourceForm.getState() == WorkflowState.ACCEPTED){
-                        int rowCountSource = dataRowDao.getSavedSize(sourceForm);
+                        int rowCountSource = dataRowDao.getRowCount(sourceForm);
                         int columnCountSource = formTemplateService.get(sourceForm.getFormTemplateId()).getColumns().size();
                         cellCountSource += rowCountSource * columnCountSource;
                     }

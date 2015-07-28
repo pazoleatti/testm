@@ -65,5 +65,5 @@ INSERT INTO form_data_329(id, form_data_id, temporary, manual, ord, alias, c3291
   SELECT 6, 329, 0, 1, 1, null, null, 1000, null, null FROM DUAL UNION
 
   SELECT 7, 3291, 1, 0, 1, null, trim('qwerty'), 666, null, null FROM DUAL UNION
-  SELECT 8, 3291, 1, 0, 2, trim('some alias'), null, null, null, null FROM DUAL UNION
+  SELECT 8, 3291, 1, 0, 2, trim('some alias{wan}'), null, null, null, null FROM DUAL UNION
   SELECT 9, 3291, 1, 0, 3, trim('total'), trim('sum'), 50, null, null FROM DUAL;

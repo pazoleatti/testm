@@ -392,8 +392,8 @@ public class FormDataServiceTest {
 
         when(formDataDao.getPrevFormDataList(any(FormData.class), any(TaxPeriod.class)))
                 .thenReturn(formDataList);
-        when(dataRowDao.getSizeWithoutTotal(formData, false)).thenReturn(3);
-        when(dataRowDao.getSizeWithoutTotal(formData1, false)).thenReturn(5);
+        when(dataRowDao.getAutoNumerationRowCount(formData, false)).thenReturn(3);
+        when(dataRowDao.getAutoNumerationRowCount(formData1, false)).thenReturn(5);
         DepartmentReportPeriod departmentReportPeriod = new DepartmentReportPeriod();
         ReportPeriod reportPeriod = new ReportPeriod();
         reportPeriod.setTaxPeriod(new TaxPeriod());
@@ -440,8 +440,8 @@ public class FormDataServiceTest {
 
         when(formDataDao.getPrevFormDataList(any(FormData.class), any(TaxPeriod.class)))
                 .thenReturn(formDataList);
-        when(dataRowDao.getSizeWithoutTotal(formData, false)).thenReturn(3);
-        when(dataRowDao.getSizeWithoutTotal(formData1, false)).thenReturn(5);
+        when(dataRowDao.getAutoNumerationRowCount(formData, false)).thenReturn(3);
+        when(dataRowDao.getAutoNumerationRowCount(formData1, false)).thenReturn(5);
 
         DepartmentReportPeriod departmentReportPeriod = new DepartmentReportPeriod();
         ReportPeriod reportPeriod = new ReportPeriod();
@@ -466,7 +466,7 @@ public class FormDataServiceTest {
         doReturn(false).when(dataService).beInOnAutoNumeration(any(WorkflowState.class), any(DepartmentReportPeriod.class));
         doReturn(false).when(dataRowDao).isDataRowsCountChanged((FormData) anyObject());
 
-        dataService.updatePreviousRowNumberAttr(formData, eq(any(Logger.class)), any(TAUserInfo.class));
+        dataService.updateAutoNumeration(formData, eq(any(Logger.class)), any(TAUserInfo.class));
         verify(dataService, never()).updatePreviousRowNumber(any(FormData.class), any(Logger.class), any(TAUserInfo.class), eq(true), anyBoolean());
     }
 
@@ -484,7 +484,7 @@ public class FormDataServiceTest {
         doReturn(false).when(dataRowDao).isDataRowsCountChanged((FormData) anyObject());
         doReturn(1L).when(formData).getId();
 
-        dataService.updatePreviousRowNumberAttr(formData, eq(any(Logger.class)), any(TAUserInfo.class));
+        dataService.updateAutoNumeration(formData, eq(any(Logger.class)), any(TAUserInfo.class));
         verify(dataService, never()).updatePreviousRowNumber(any(FormData.class), any(Logger.class), any(TAUserInfo.class), eq(true), anyBoolean());
     }
 
@@ -502,7 +502,7 @@ public class FormDataServiceTest {
         doReturn(1L).when(formData).getId();
         doReturn(WorkflowState.CREATED).when(formData).getState();
 
-        dataService.updatePreviousRowNumberAttr(formData, eq(any(Logger.class)), any(TAUserInfo.class));
+        dataService.updateAutoNumeration(formData, eq(any(Logger.class)), any(TAUserInfo.class));
         verify(dataService, times(1)).updatePreviousRowNumber(any(FormData.class), any(Logger.class), any(TAUserInfo.class), eq(true), anyBoolean());
     }
 
@@ -614,7 +614,7 @@ public class FormDataServiceTest {
 
         InOrder inOrder = inOrder(dataService, formDataDao);
 
-        inOrder.verify(dataService, times(1)).updatePreviousRowNumberAttr(formData, logger, userInfo);
+        inOrder.verify(dataService, times(1)).updateAutoNumeration(formData, logger, userInfo);
         inOrder.verify(formDataDao, times(1)).save(formData);
     }
 

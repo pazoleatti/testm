@@ -264,7 +264,7 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 
 	@Override
 	public void insertRows(FormData formData, int index, List<DataRow<Cell>> rows) {
-		int size = getSavedSize(formData);
+		int size = getRowCount(formData);
 		if (index < 1 || index > size + 1) {
 			throw new IllegalArgumentException(String.format("Вставка записей допустима только в диапазоне индексов [1; %s]. index = %s", size + 1, index));
 		}
@@ -511,20 +511,21 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 	}
 
 	@Override
-	public List<DataRow<Cell>> getSavedRows(FormData fd, DataRowRange range) {
+	public List<DataRow<Cell>> getRows(FormData fd, DataRowRange range) {
 		return getRowsInternal(fd, range);
 	}
 
 	@Override
-	public int getSavedSize(FormData formData) {
+	public int getRowCount(FormData formData) {
 		return getSizeInternal(formData);
 	}
 
 	@Override
-	public int getSizeWithoutTotal(FormData formData) {
+	public int getAutoNumerationRowCount(FormData formData) {
 		StringBuilder sql = new StringBuilder("SELECT COUNT(*) FROM form_data_");
 		sql.append(formData.getFormTemplateId());
-		sql.append(" WHERE form_data_id = :form_data_id AND temporary = :temporary AND manual = :manual AND alias IS NULL");
+		sql.append(" WHERE form_data_id = :form_data_id AND temporary = :temporary AND manual = :manual AND (alias IS NULL");
+		sql.append(" OR alias LIKE '%").append(DataRowMapper.ALIASED_WITH_AUTO_NUMERATION_AFFIX).append("%'");
 
 		Map<String, Object> params = new HashMap<String, Object>();
 		params.put("form_data_id", formData.getId());

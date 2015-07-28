@@ -4,7 +4,6 @@ import com.aplana.sbrf.taxaccounting.dao.api.DataRowDao;
 import com.aplana.sbrf.taxaccounting.model.Cell;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.FormData;
-import com.aplana.sbrf.taxaccounting.model.WorkflowState;
 import com.aplana.sbrf.taxaccounting.model.util.FormDataUtils;
 import com.aplana.sbrf.taxaccounting.service.script.api.DataRowHelper;
 import com.aplana.sbrf.taxaccounting.service.shared.ScriptComponentContext;
@@ -49,27 +48,27 @@ public class DataRowHelperImpl implements DataRowHelper, ScriptComponentContextH
 
 	@Override
 	public List<DataRow<Cell>> getAllSaved() {
-		List<DataRow<Cell>> rows = dataRowDao.getSavedRows(fd, null);
+		List<DataRow<Cell>> rows = dataRowDao.getRows(fd, null);
 		FormDataUtils.setValueOwners(rows);
 		return  rows;
 	}
 
 	@Override
 	public int getSavedCount() {
-		return dataRowDao.getSavedSize(fd);
+		return dataRowDao.getRowCount(fd);
 	}
 
 	@Override
 	public List<DataRow<Cell>> getAll() {
         List<DataRow<Cell>> rows;
-        rows = dataRowDao.getSavedRows(fd, null);
+        rows = dataRowDao.getRows(fd, null);
 		FormDataUtils.setValueOwners(rows);
 		return rows;
 	}
 
 	@Override
 	public int getCount() {
-		return dataRowDao.getSavedSize(fd);
+		return dataRowDao.getRowCount(fd);
 	}
 
     /**

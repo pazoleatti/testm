@@ -56,20 +56,20 @@ public interface DataRowDao {
 	void createCheckPoint(FormData formData);
 
 	/**
-	 * Метод получает строки сохраненного среза строк НФ.
+	 * Метод возвращает строки сохраненного среза строк НФ.
 	 *
 	 */
-	List<DataRow<Cell>> getSavedRows(FormData formData, DataRowRange range);
+	List<DataRow<Cell>> getRows(FormData formData, DataRowRange range);
 
 	/**
-	 * Метод получает количество строк сохранненого среза
+	 * Метод возвращает количество строк НФ
 	 */
-	int getSavedSize(FormData formData);
+	int getRowCount(FormData formData);
 
     /**
-     * Метод получает количество строк без учета итоговых
+     * Метод возвращает количество автонумеруемых строк
      */
-    int getSizeWithoutTotal(FormData formData);
+    int getAutoNumerationRowCount(FormData formData);
 
 	/**
 	 * Вставляет строки начиная с указанного индекса. Выставленные в rows значения id и index игнорируются и
