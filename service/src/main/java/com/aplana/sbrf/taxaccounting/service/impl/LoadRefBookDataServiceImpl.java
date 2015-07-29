@@ -288,11 +288,12 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
                                             load = true;
                                             if (move) {
                                                 // Перемещение в каталог архива
+                                                int positionLogger = logger.getEntries().size();
                                                 boolean result = moveToArchiveDirectory(userInfo, getRefBookArchivePath(userInfo,
                                                         logger, lockId), currentFile, logger, lockId);
                                                 if (result) {
                                                     success++;
-                                                    logger.getEntries().addAll(localLoggerList.get(i).getEntries());
+                                                    logger.getEntries().addAll(positionLogger, localLoggerList.get(i).getEntries());
                                                     log(userInfo, LogData.L20, logger, lockId, currentFile.getName());
                                                 } else {
                                                     fail++;
@@ -308,13 +309,6 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
                                             break;
                                         case SKIP:
                                             skip++;
-                                            if (skip == matchList.size()) {
-                                                // В случае неуспешного импорта в общий лог попадает вывод всех скриптов
-                                                logger.getEntries().addAll(getEntries(localLoggerList));
-                                                // Файл пропущен всеми справочниками — неправильный формат
-                                                log(userInfo, LogData.L4, logger, lockId, fileName, path);
-                                                fail++;
-                                            }
                                             break;
                                     }
                                 } finally {
@@ -339,9 +333,13 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
                                         getEntries(localLoggerList), logger, lockId);
                             }
                         }
-                        if (!load) {
-                            log(userInfo, LogData.L38, logger, lockId, refBookName);
-                        }
+                    }
+                    if (skip == matchList.size()) {
+                        // В случае неуспешного импорта в общий лог попадает вывод всех скриптов
+                        logger.getEntries().addAll(getEntries(localLoggerList));
+                        // Файл пропущен всеми справочниками — неправильный формат
+                        log(userInfo, LogData.L38, logger, lockId, refBookName);
+                        fail++;
                     }
                 } finally {
                     //Снимаем блокировки
