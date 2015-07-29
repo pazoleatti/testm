@@ -69,6 +69,7 @@ switch (formDataEvent) {
     case FormDataEvent.CALCULATE:
         calc()
         logicCheck()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.ADD_ROW:
         addNewRow()
@@ -91,6 +92,7 @@ switch (formDataEvent) {
         consolidation()
         calc()
         logicCheck()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.IMPORT:
         importData()
@@ -98,6 +100,7 @@ switch (formDataEvent) {
         break
     case FormDataEvent.IMPORT_TRANSPORT_FILE:
         importTransportData()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.SORT_ROWS:
         sortFormDataRows()
@@ -229,8 +232,7 @@ def getDataRowHelperPrev() {
 }
 
 void calc() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.allCached
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
     def sortRows = []
 
     groups.each { section ->
@@ -284,25 +286,23 @@ void calc() {
     calcOrCheckTotalForMonth(dataRows, false)
     calcOrCheckTotalForTaxPeriod(dataRows, false)
 
-    dataRowHelper.save(dataRows)
-
     // Сортировка групп и строк
-    sortFormDataRows()
+    sortFormDataRows(false)
 }
 
 void addNewRow() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.allCached
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
     DataRow<Cell> newRow = formData.createDataRow()
     editableColumns.each {
         newRow.getCell(it).editable = true
         newRow.getCell(it).setStyleAlias('Редактируемая')
     }
+    def index
     if (currentDataRow == null || currentDataRow.getIndex() == -1) {
         def row = getDataRow(dataRows, 'R1-total')
-        dataRowHelper.insert(newRow, dataRows.indexOf(row) + 1)
+        index = dataRows.indexOf(row) + 1
     } else if (currentDataRow.getAlias() == null) {
-        dataRowHelper.insert(newRow, currentDataRow.getIndex() + 1)
+        index =  currentDataRow.getIndex() + 1
     } else {
         def alias = currentDataRow.getAlias()
         if (alias in ['R10', 'R11']) {
@@ -310,13 +310,14 @@ void addNewRow() {
         }
         def totalAlias = alias.contains('total') ? alias : "$alias-total"
         def row = getDataRow(dataRows, totalAlias)
-        dataRowHelper.insert(newRow, dataRows.indexOf(row) + 1)
+        index =  dataRows.indexOf(row) + 1
     }
+    dataRows.add(index + 1, newRow)
+    formDataService.saveCachedDataRows(formData, logger)
 }
 
 void consolidation() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.allCached
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
 
     // удалить нефиксированные строки
     deleteNotFixedRows(dataRows)
@@ -327,7 +328,7 @@ void consolidation() {
         if (it.formTypeId == formData.formType.getId()) {
             def source = formDataService.getLast(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId, formData.periodOrder)
             if (source != null && source.state == WorkflowState.ACCEPTED) {
-                def sourceRows = formDataService.getDataRowHelper(source).getAll()
+                def sourceRows = formDataService.getDataRowHelper(source).allSaved
                 // подразделы
                 groups.each { section ->
                     copyRows(sourceRows, dataRows, section, "$section-total")
@@ -335,7 +336,6 @@ void consolidation() {
             }
         }
     }
-    dataRowHelper.save(dataRows)
 }
 
 // Копировать заданный диапозон строк из источника в приемник
@@ -353,8 +353,7 @@ void copyRows(def sourceRows, def destinationRows, def fromAlias, def toAlias) {
 }
 
 void logicCheck() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.allCached
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
     def dataProvider29 = refBookFactory.getDataProvider(29)
 
     // 5.
@@ -450,7 +449,7 @@ void calcOrCheckTotalForMonth(def dataRows, def check) {
 // рассчитываем значения для строки "Всего за текущий налоговый период" или проверяем значения
 void calcOrCheckTotalForTaxPeriod(def dataRows, def check) {
     def prevDataRowHelper = getDataRowHelperPrev()
-    def prevDataRows = prevDataRowHelper?.allCached
+    def prevDataRows = prevDataRowHelper?.allSaved
     def rowPrev
     if (prevDataRows != null) {
         rowPrev = getDataRow(prevDataRows, 'R10')
@@ -687,8 +686,7 @@ void importTransportData() {
 }
 
 void addTransportData(def xml) {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper?.allCached
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
     def int rnuIndexRow = 2
     def int colOffset = 1
 
@@ -899,7 +897,6 @@ void addTransportData(def xml) {
             }
         }
     }
-    dataRowHelper.save(dataRows)
 }
 
 // Получить курс валюты по id записи из справочнкиа ценной бумаги (84)
@@ -917,7 +914,7 @@ def getRate(def row, def Date date) {
 }
 
 // Сортировка групп и строк
-void sortFormDataRows() {
+void sortFormDataRows(def saveInDB = true) {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
 
@@ -935,7 +932,11 @@ void sortFormDataRows() {
         sortRowsSimple(sectionsRows)
     }
 
-    dataRowHelper.saveSort()
+    if (saveInDB) {
+        dataRowHelper.saveSort()
+    } else {
+        updateIndexes(dataRows)
+    }
 }
 
 void importData() {
