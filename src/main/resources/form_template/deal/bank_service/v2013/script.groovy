@@ -246,8 +246,6 @@ void importData() {
         rowValues.clear()
     }
 
-    logger.info("rows = "+rows)
-
     showMessages(rows, logger)
     if (!logger.containsLevel(LogLevel.ERROR)) {
         updateIndexes(rows)
