@@ -158,7 +158,8 @@ public class Rnu4Test extends ScriptTestBase {
     public void importExcelTest() {
         testHelper.setImportFileInputStream(getImportXlsInputStream());
         testHelper.execute(FormDataEvent.IMPORT);
-        Assert.assertEquals(6, testHelper.getDataRowHelper().getAll().size());
+        Assert.assertEquals(3, testHelper.getDataRowHelper().getAll().size());
+        testHelper.execute(FormDataEvent.CALCULATE);
         // Проверка расчетных данных
         List<DataRow<Cell>> dataRows = testHelper.getDataRowHelper().getAll();
         Assert.assertEquals(200, dataRows.get(2).getCell("sum").getNumericValue().intValue());

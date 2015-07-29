@@ -182,6 +182,7 @@ public class Property945_2Test extends ScriptTestBase {
     public void importExcelTest() {
         testHelper.setImportFileInputStream(getImportXlsInputStream());
         testHelper.execute(FormDataEvent.IMPORT);
+        testHelper.execute(FormDataEvent.CALCULATE);
         Assert.assertEquals(5, testHelper.getDataRowHelper().getAll().size());
         // Проверка расчетных данных
         List<DataRow<Cell>> dataRows = testHelper.getDataRowHelper().getAll();

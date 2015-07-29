@@ -911,7 +911,7 @@ def getNewRow(String[] rowCells, def columnCount, def fileRowIndex, def rowIndex
     // графа 2..7
     ['taxBase1', 'taxBase2', 'taxBase3', 'taxBase4', 'taxBase5', 'taxBaseSum'].each { alias ->
         colIndex++
-        newRow[alias] = parseNumber(pure(rowCells[2]), fileRowIndex, colIndex + colOffset, logger, true)
+        newRow[alias] = parseNumber(pure(rowCells[colIndex]), fileRowIndex, colIndex + colOffset, logger, true)
     }
 
     return newRow
