@@ -84,15 +84,10 @@ switch (formDataEvent) {
     case FormDataEvent.IMPORT:
         if (UploadFileName.endsWith(".rnu")) {
             importTransportData()
-            formDataService.saveCachedDataRows(formData, logger)
         } else {
             importData()
-            if (!logger.containsLevel(LogLevel.ERROR)) {
-                calc()
-                logicCheck()
-                formDataService.saveCachedDataRows(formData, logger)
-            }
         }
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.IMPORT_TRANSPORT_FILE:
         importTransportData()
@@ -162,7 +157,7 @@ def getRecordImport(def Long refBookId, def String alias, def String value, def 
 
 // Поиск записи в справочнике по значению (для импорта)
 def getRecordIdImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
-                      def boolean required = true) {
+                      def boolean required = false) {
     if (value == null || value.trim().isEmpty()) {
         return null
     }
@@ -928,7 +923,7 @@ void importData() {
     // проверка шапки
     checkHeaderXls(headerValues, COLUMN_COUNT, HEADER_ROW_COUNT, tmpRow)
     if (logger.containsLevel(LogLevel.ERROR)) {
-        return;
+        return
     }
     // освобождение ресурсов для экономии памяти
     headerValues.clear()

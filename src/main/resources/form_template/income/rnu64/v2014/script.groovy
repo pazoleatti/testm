@@ -1,9 +1,9 @@
 package form_template.income.rnu64.v2014
 
+import au.com.bytecode.opencsv.CSVReader
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.FormDataKind
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
-import au.com.bytecode.opencsv.CSVReader
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.model.util.StringUtils
@@ -67,11 +67,7 @@ switch (formDataEvent) {
         break
     case FormDataEvent.IMPORT:
         importData()
-        if (!logger.containsLevel(LogLevel.ERROR)) {
-            calc()
-            logicCheck()
-            formDataService.saveCachedDataRows(formData, logger)
-        }
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.IMPORT_TRANSPORT_FILE:
         importTransportData()
@@ -134,7 +130,7 @@ def getReportPeriodEndDate() {
 
 // Поиск записи в справочнике по значению (для импорта)
 def getRecordIdImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
-                      def boolean required = true) {
+                      def boolean required = false) {
     if (value == null || value.trim().isEmpty()) {
         return null
     }
@@ -310,7 +306,7 @@ void importTransportData() {
     String[] rowCells
     int fileRowIndex = 0    // номер строки в файле
     int rowIndex = 0        // номер строки в НФ
-    def total = null		// итоговая строка со значениями из тф для добавления
+    def total = null        // итоговая строка со значениями из тф для добавления
     def newRows = []
 
     InputStreamReader isr = new InputStreamReader(ImportInputStream, DEFAULT_CHARSET)
@@ -363,7 +359,7 @@ void importTransportData() {
     // сравнение итогов
     if (total) {
         // мапа с алиасами граф и номерами колонокв в xml (алиас -> номер колонки)
-        def totalColumnsIndexMap = [ 'costs' : 5 ]
+        def totalColumnsIndexMap = ['costs': 5]
 
         // итоговая строка для сверки сумм
         def totalTmp = formData.createDataRow()
@@ -476,14 +472,14 @@ void importData() {
 
     def allValues = []      // значения формы
     def headerValues = []   // значения шапки
-    def paramsMap = ['rowOffset' : 0, 'colOffset' : 0]  // мапа с параметрами (отступы сверху и слева)
+    def paramsMap = ['rowOffset': 0, 'colOffset': 0]  // мапа с параметрами (отступы сверху и слева)
 
     checkAndReadFile(ImportInputStream, UploadFileName, allValues, headerValues, TABLE_START_VALUE, TABLE_END_VALUE, HEADER_ROW_COUNT, paramsMap)
 
     // проверка шапки
     checkHeaderXls(headerValues, COLUMN_COUNT, HEADER_ROW_COUNT, tmpRow)
     if (logger.containsLevel(LogLevel.ERROR)) {
-        return;
+        return
     }
     // освобождение ресурсов для экономии памяти
     headerValues.clear()
@@ -509,7 +505,8 @@ void importData() {
             break
         }
         // Пропуск итоговых строк
-        if (rowValues[INDEX_FOR_SKIP] == "Итого за текущий отчетный (налоговый) период" || rowValues[INDEX_FOR_SKIP].contains("Итого за текущий квартал")) {
+        if (rowValues[INDEX_FOR_SKIP] &&
+                (rowValues[INDEX_FOR_SKIP] == "Итого за текущий отчетный (налоговый) период" || rowValues[INDEX_FOR_SKIP].contains("Итого за текущий квартал"))) {
             allValues.remove(rowValues)
             rowValues.clear()
             continue
