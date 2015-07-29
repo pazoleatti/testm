@@ -451,10 +451,10 @@ def logicCheck() {
             // 3 квартал
             str += checkPrevPeriod(prevReportPeriod)
             // 2 квартал
-            prevReportPeriod = reportPeriodService.getPrevReportPeriod(prevReportPeriod.id)
+            prevReportPeriod = (prevReportPeriod ? reportPeriodService.getPrevReportPeriod(prevReportPeriod.id) : null)
             str += checkPrevPeriod(prevReportPeriod)
             // 1 квартал
-            prevReportPeriod = reportPeriodService.getPrevReportPeriod(prevReportPeriod.id)
+            prevReportPeriod = (prevReportPeriod ? reportPeriodService.getPrevReportPeriod(prevReportPeriod.id) : null)
             str += checkPrevPeriod(prevReportPeriod)
         } else {
             str = checkPrevPeriod(prevReportPeriod)
