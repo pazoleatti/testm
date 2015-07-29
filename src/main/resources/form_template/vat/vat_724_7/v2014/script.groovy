@@ -60,10 +60,7 @@ switch (formDataEvent) {
         break
     case FormDataEvent.IMPORT:
         importData()
-        if (!logger.containsLevel(LogLevel.ERROR)) {
-            calc()
-            formDataService.saveCachedDataRows(formData, logger)
-        }
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.IMPORT_TRANSPORT_FILE:
         importTransportData()
@@ -477,7 +474,7 @@ void importData() {
     // проверка шапки
     checkHeaderXls(headerValues, COLUMN_COUNT, HEADER_ROW_COUNT, tmpRow)
     if (logger.containsLevel(LogLevel.ERROR)) {
-        return;
+        return
     }
     // освобождение ресурсов для экономии памяти
     headerValues.clear()
