@@ -25,6 +25,7 @@ switch (formDataEvent) {
         prevPeriodCheck()
         calc()
         logicCheck()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.CHECK:
         prevPeriodCheck()
@@ -53,6 +54,7 @@ switch (formDataEvent) {
         formDataService.consolidationTotal(formData, logger, ['total'])
         calc()
         logicCheck()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.IMPORT:
         importData()
@@ -60,6 +62,7 @@ switch (formDataEvent) {
         break
     case FormDataEvent.IMPORT_TRANSPORT_FILE:
         importTransportData()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.SORT_ROWS:
         sortFormDataRows()
@@ -140,8 +143,7 @@ void prevPeriodCheck() {
 
 // Алгоритмы заполнения полей формы
 void calc() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.getAllCached()
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
 
     def totalRow = getDataRow(dataRows, 'total')
     totalColumns.each {
@@ -176,9 +178,8 @@ void calc() {
     // добавить строку "итого"
     calcTotalSum(dataRows, totalRow, totalColumns)
     dataRows.add(totalRow)
-    dataRowHelper.save(dataRows)
 
-    sortFormDataRows()
+    sortFormDataRows(false)
 }
 
 // Ресчет графы 9
@@ -239,8 +240,7 @@ def BigDecimal calc11(def row, def endDate, def startDate) {
 
 // Логические проверки
 void logicCheck() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.getAllCached()
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
 
     if (dataRows.isEmpty()) {
         return
@@ -263,7 +263,7 @@ void logicCheck() {
     // Векселя
     def List<String> billsList = new ArrayList<String>()
 
-    for (def row in dataRowHelper.getAllCached()) {
+    for (def row in dataRows) {
         if (row.getAlias() != null) {
             continue
         }
@@ -306,7 +306,7 @@ void logicCheck() {
                         reportPeriod.id, null)
                 if (findFormData != null) {
                     isFind = false
-                    for (findRow in formDataService.getDataRowHelper(findFormData).getAllCached()) {
+                    for (findRow in formDataService.getDataRowHelper(findFormData).getAllSaved()) {
                         if (findRow.bill == row.bill) {
                             isFind = true
                             // лп 8
@@ -367,7 +367,7 @@ def BigDecimal getCalcPrevColumn10(def row, def sumColumnName, def startDate) {
                     reportPeriod.id, null)
             if (findFormData != null) {
                 isFind = false
-                for (findRow in formDataService.getDataRowHelper(findFormData).getAllCached()) {
+                for (findRow in formDataService.getDataRowHelper(findFormData).allSaved) {
                     if (findRow.bill == row.bill && findRow.buyDate == row.buyDate) {
                         sum += findRow.getCell(sumColumnName).getValue() != null ? findRow.getCell(sumColumnName).getValue() : 0
                     }
@@ -440,13 +440,12 @@ void importTransportData() {
     addTransportData(xml)
 
     // TODO (Ramil Timerbaev) возможно надо поменять на общее сообщение TRANSPORT_FILE_SUM_ERROR
-    def dataRows = formDataService.getDataRowHelper(formData)?.allCached
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
     checkTotalSum(dataRows, totalColumns, logger, false)
 }
 
 void addTransportData(def xml) {
     reportPeriodEndDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
     def int rnuIndexRow = 2
     def int colOffset = 1
     def rows = []
@@ -494,18 +493,11 @@ void addTransportData(def xml) {
         xmlIndexCol++
         // графа 7
         newRow.implementationDate = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", rnuIndexRow, xmlIndexCol + colOffset, logger, true)
-        xmlIndexCol++
-        // графа 8
-        newRow.percentInCurrency = parseNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, logger, true)
-        xmlIndexCol++
-        // графа 9
-        newRow.percentInRuble = parseNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, logger, true)
-        xmlIndexCol++
-        // графа 10
-        newRow.sumIncomeinCurrency = parseNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, logger, true)
-        xmlIndexCol++
-        // графа 11
-        newRow.sumIncomeinRuble = parseNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, logger, true)
+        // графа 8..11
+        ['percentInCurrency', 'percentInRuble', 'sumIncomeinCurrency', 'sumIncomeinRuble'].each { alias ->
+            xmlIndexCol++
+            newRow[alias] = parseNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, logger, true)
+        }
 
         rows.add(newRow)
     }
@@ -515,7 +507,7 @@ void addTransportData(def xml) {
 
         def row = xml.rowTotal[0]
 
-        def total = getDataRow(dataRowHelper.getAllCached(), 'total')
+        def total = getDataRow(formDataService.getDataRowHelper(formData).allCached, 'total')
 
         // графа 9
         total.percentInRuble = parseNumber(row.cell[9].text(), rnuIndexRow, 9 + colOffset, logger, true)
@@ -524,14 +516,22 @@ void addTransportData(def xml) {
 
         rows.add(total)
     }
-    dataRowHelper.save(rows)
+
+    if (!logger.containsLevel(LogLevel.ERROR)) {
+        updateIndexes(rows)
+        formDataService.getDataRowHelper(formData).allCached = rows
+    }
 }
 
-void sortFormDataRows() {
+void sortFormDataRows(def saveInDB = true) {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
     sortRows(refBookService, logger, dataRows, null, getDataRow(dataRows, 'total'), null)
-    dataRowHelper.saveSort()
+    if (saveInDB) {
+        dataRowHelper.saveSort()
+    } else {
+        updateIndexes(dataRows)
+    }
 }
 
 void importData() {
@@ -577,7 +577,7 @@ void importData() {
             break
         }
         // Пропуск итоговых строк
-        if (rowValues[INDEX_FOR_SKIP] && rowValues[INDEX_FOR_SKIP] == "Итого") {
+        if (rowValues[INDEX_FOR_SKIP] == "Итого") {
             allValues.remove(rowValues)
             rowValues.clear()
             continue

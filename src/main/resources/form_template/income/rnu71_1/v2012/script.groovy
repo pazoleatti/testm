@@ -46,6 +46,7 @@ switch (formDataEvent) {
         prevPeriodCheck()
         calc()
         logicCheck()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.CHECK:
         prevPeriodCheck()
@@ -73,6 +74,7 @@ switch (formDataEvent) {
         formDataService.consolidationSimple(formData, logger)
         calc()
         logicCheck()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.IMPORT:
         prevPeriodCheck()
@@ -81,6 +83,7 @@ switch (formDataEvent) {
         break
     case FormDataEvent.IMPORT_TRANSPORT_FILE:
         importTransportData()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.SORT_ROWS:
         sortFormDataRows()
@@ -90,8 +93,8 @@ switch (formDataEvent) {
 // Все поля
 @Field
 def allColumns = ['rowNumber', 'fix', 'contragent', 'inn', 'assignContractNumber', 'assignContractDate',
-        'amount', 'amountForReserve', 'repaymentDate', 'dateOfAssignment', 'income',
-        'result', 'part2Date', 'lossThisQuarter', 'lossNextQuarter', 'lossThisTaxPeriod']
+                  'amount', 'amountForReserve', 'repaymentDate', 'dateOfAssignment', 'income',
+                  'result', 'part2Date', 'lossThisQuarter', 'lossNextQuarter', 'lossThisTaxPeriod']
 
 // Поля, для которых подсчитываются подитоговые значения (графа 10, 11, 13..15)
 @Field
@@ -104,7 +107,7 @@ def totalColumns = ['amount', 'amountForReserve', 'income', 'result', 'lossThisQ
 // Редактируемые атрибуты (графа 2..10)
 @Field
 def editableColumns = ['contragent', 'inn', 'assignContractNumber', 'assignContractDate',
-        'amount', 'amountForReserve', 'repaymentDate', 'dateOfAssignment', 'income']
+                       'amount', 'amountForReserve', 'repaymentDate', 'dateOfAssignment', 'income']
 
 // Автозаполняемые атрибуты
 @Field
@@ -212,7 +215,7 @@ void logicCheck() {
             checkCalc(row, arithmeticCheckAlias, values, logger, !isBalancePeriod())
 
             // арифметическая проверка графы 12 - сравнение дат отдельно, потому что checkCalc не подходит для нечисловых значений
-            if (row.part2Date != values.part2Date){
+            if (row.part2Date != values.part2Date) {
                 loggerError(row, errorMsg + "Неверное значение графы «${getColumnName(row, 'part2Date')}»!")
             }
         }
@@ -252,8 +255,7 @@ void logicCheck() {
 }
 
 void calc() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.allCached
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
 
     // Удаление подитогов
     deleteAllAliased(dataRows)
@@ -296,10 +298,8 @@ void calc() {
     def totalRow = getTotalRow(dataRows)
     dataRows.add(totalRow)
 
-    dataRowHelper.save(dataRows)
-
     // Сортировка групп и строк
-    sortFormDataRows()
+    sortFormDataRows(false)
 }
 
 /** Сформировать итоговую строку с суммами. */
@@ -355,7 +355,7 @@ def getRowPrev(def dataRowsPrev, def row) {
 def getDataRowsPrev() {
     if (dataRowsOld == null) {
         def formDataPrev = formDataService.getFormDataPrev(formData)
-        dataRowsOld = (formDataPrev ? formDataService.getDataRowHelper(formDataPrev)?.allCached : null)
+        dataRowsOld = (formDataPrev ? formDataService.getDataRowHelper(formDataPrev)?.allSaved : null)
     }
     return dataRowsOld
 }
@@ -419,7 +419,7 @@ def getCalc11_15(def row, def rowPrev, def startDate, def endDate) {
     // графа 11
     def tmp = null
     if (values.income != null && values.amount != null && values.amountForReserve != null) {
-         tmp = (values.income - (values.amount - values.amountForReserve))
+        tmp = (values.income - (values.amount - values.amountForReserve))
     }
     values.result = tmp?.setScale(2, RoundingMode.HALF_UP)
 
@@ -468,12 +468,11 @@ void importTransportData() {
     addTransportData(xml)
 
     // TODO (Ramil Timerbaev) возможно надо поменять на общее сообщение TRANSPORT_FILE_SUM_ERROR
-    def dataRows = formDataService.getDataRowHelper(formData)?.allCached
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
     checkTotalSum(dataRows, totalColumns, logger, false)
 }
 
 void addTransportData(def xml) {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
     def int rnuIndexRow = 2
     def int colOffset = 1
     def rows = []
@@ -581,20 +580,27 @@ void addTransportData(def xml) {
         rows.add(total)
     }
 
-    dataRowHelper.save(rows)
+    if (!logger.containsLevel(LogLevel.ERROR)) {
+        updateIndexes(rows)
+        formDataService.getDataRowHelper(formData).allCached = rows
+    }
 }
 
 // Сортировка групп и строк
-void sortFormDataRows() {
+void sortFormDataRows(def saveInDB = true) {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
     sortRows(refBookService, logger, dataRows, getSubTotalRows(dataRows), getDataRow(dataRows, 'itg'), true)
-    dataRowHelper.saveSort()
+    if (saveInDB) {
+        dataRowHelper.saveSort()
+    } else {
+        updateIndexes(dataRows)
+    }
 }
 
 // Получение подитоговых строк
 def getSubTotalRows(def dataRows) {
-    return dataRows.findAll { it.getAlias() != null && !'itg'.equals(it.getAlias())}
+    return dataRows.findAll { it.getAlias() != null && !'itg'.equals(it.getAlias()) }
 }
 
 void importData() {

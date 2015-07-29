@@ -1,9 +1,9 @@
 package form_template.income.rnu46.v2012
 
+import au.com.bytecode.opencsv.CSVReader
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.FormDataKind
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
-import au.com.bytecode.opencsv.CSVReader
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.model.util.StringUtils
@@ -53,11 +53,12 @@ switch (formDataEvent) {
         prevPeriodCheck()
         calc()
         logicCheck()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.ADD_ROW:
         formDataService.addRow(formData, currentDataRow,
                 isMonthBalance() ? balanceColumns : editableColumns,
-                isMonthBalance() ? ['rowNumber', 'usefulLife'] : autoFillColumns )
+                isMonthBalance() ? ['rowNumber', 'usefulLife'] : autoFillColumns)
         break
     case FormDataEvent.DELETE_ROW:
         formDataService.getDataRowHelper(formData).delete(currentDataRow)
@@ -75,6 +76,7 @@ switch (formDataEvent) {
         formDataService.consolidationSimple(formData, logger)
         calc()
         logicCheck()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.IMPORT:
         importData()
@@ -82,6 +84,7 @@ switch (formDataEvent) {
         break
     case FormDataEvent.IMPORT_TRANSPORT_FILE:
         importTransportData()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.SORT_ROWS:
         sortFormDataRows()
@@ -99,23 +102,23 @@ def refBookCache = [:]
 // Редактируемые атрибуты
 @Field
 def editableColumns = ['invNumber', 'name', 'cost', 'amortGroup', 'monthsUsed', 'usefulLifeWithUsed',
-        'specCoef', 'exploitationStart', 'rentEnd']
+                       'specCoef', 'exploitationStart', 'rentEnd']
 
 @Field
 def balanceColumns = ['invNumber', 'name', 'cost', 'amortGroup', 'monthsUsed', 'usefulLifeWithUsed',
-        'specCoef', 'cost10perMonth', 'cost10perTaxPeriod', 'cost10perExploitation', 'amortNorm', 'amortMonth',
-        'amortTaxPeriod', 'amortExploitation', 'exploitationStart', 'usefullLifeEnd', 'rentEnd']
+                      'specCoef', 'cost10perMonth', 'cost10perTaxPeriod', 'cost10perExploitation', 'amortNorm', 'amortMonth',
+                      'amortTaxPeriod', 'amortExploitation', 'exploitationStart', 'usefullLifeEnd', 'rentEnd']
 
 // Проверяемые на пустые значения атрибуты
 @Field
 def nonEmptyColumns = ['invNumber', 'name', 'cost', 'amortGroup', 'monthsUsed',
-        'usefulLifeWithUsed', 'specCoef', 'cost10perMonth', 'cost10perTaxPeriod', 'cost10perExploitation',
-        'amortNorm', 'amortMonth', 'amortTaxPeriod', 'amortExploitation', 'exploitationStart', 'usefullLifeEnd']
+                       'usefulLifeWithUsed', 'specCoef', 'cost10perMonth', 'cost10perTaxPeriod', 'cost10perExploitation',
+                       'amortNorm', 'amortMonth', 'amortTaxPeriod', 'amortExploitation', 'exploitationStart', 'usefullLifeEnd']
 
 // Автозаполняемые атрибуты
 @Field
 def autoFillColumns = ['rowNumber', 'cost10perMonth', 'cost10perTaxPeriod', 'cost10perExploitation',
-        'amortNorm', 'amortMonth', 'usefulLife', 'amortTaxPeriod', 'amortExploitation', 'usefullLifeEnd']
+                       'amortNorm', 'amortMonth', 'usefulLife', 'amortTaxPeriod', 'amortExploitation', 'usefullLifeEnd']
 
 //// Обертки методов
 
@@ -187,9 +190,7 @@ def isMonthBalance() {
 
 // Алгоритмы заполнения полей формы
 void calc() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.getAllCached()
-
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
     if (dataRows.isEmpty()) {
         return
     }
@@ -236,13 +237,14 @@ void calc() {
         // графа 13
         row.amortNorm = calc13(row)
     }
-    dataRowHelper.update(dataRows);
+
+    sortFormDataRows(false)
 }
 
 // Получить строки за предыдущий отчетный период./
 def getPrevDataRows() {
     def prevFormData = formDataService.getFormDataPrev(formData)
-    return (prevFormData != null ? formDataService.getDataRowHelper(prevFormData)?.allCached : null)
+    return (prevFormData != null ? formDataService.getDataRowHelper(prevFormData)?.allSaved : null)
 }
 
 // Группирует данные по графе invNumber с сохранением одной из ссылок на соответствующую строку
@@ -344,8 +346,8 @@ BigDecimal calc14(def row, def prevRow) {
         return 0 as BigDecimal
     }
     if (row.usefullLifeEnd > lastDay2001) {
-        def date1 = Long.valueOf(row.usefullLifeEnd.format("MM")) +  Long.valueOf(row.usefullLifeEnd.format("yyyy"))*12
-        def date2 = Long.valueOf(endDate.format("MM")) +  Long.valueOf(endDate.format("yyyy"))*12
+        def date1 = Long.valueOf(row.usefullLifeEnd.format("MM")) + Long.valueOf(row.usefullLifeEnd.format("yyyy")) * 12
+        def date2 = Long.valueOf(endDate.format("MM")) + Long.valueOf(endDate.format("yyyy")) * 12
         if ((date1 - date2) == 0) {
             return 0 as BigDecimal
         }
@@ -368,11 +370,11 @@ Date calc18(def row) {
 
 // Логические проверки
 void logicCheck() {
-    def dataRows = formDataService.getDataRowHelper(formData).getAllCached()
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
 
     // Алиасы граф для арифметической проверки
     def arithmeticCheckAlias = ['usefulLifeWithUsed', 'cost10perMonth', 'cost10perTaxPeriod', 'amortTaxPeriod',
-            'amortExploitation', 'cost10perExploitation', 'amortNorm', 'amortMonth']
+                                'amortExploitation', 'cost10perExploitation', 'amortNorm', 'amortMonth']
 
     // Для хранения правильных значении и сравнения с имеющимися при арифметических проверках
     def needValue = [:]
@@ -392,7 +394,7 @@ void logicCheck() {
         def prevFormData = formDataService.getLast(formData.formType.id, formData.kind, formData.departmentId,
                 formData.reportPeriodId, month)
         if (prevFormData != null && prevFormData.state == WorkflowState.ACCEPTED) {
-            def prevDataRows = formDataService.getDataRowHelper(prevFormData).allCached
+            def prevDataRows = formDataService.getDataRowHelper(prevFormData).allSaved
             monthsRowMap[month] = getInvNumberObjectMap(prevDataRows)
         } else {
             monthsRowMap[month] = [:]
@@ -577,13 +579,13 @@ void importTransportData() {
     if (totalTF) {
         // мапа с алиасами граф и номерами колонокв в xml (алиас -> номер колонки)
         def totalColumnsIndexMap = [
-                'cost' : 4,
-                'specCoef' : 9,
-                'cost10perMonth' : 10,
-                'cost10perTaxPeriod' : 11,
-                'cost10perExploitation' : 12,
-                'amortTaxPeriod' : 15,
-                'amortExploitation' : 16,
+                'cost'                 : 4,
+                'specCoef'             : 9,
+                'cost10perMonth'       : 10,
+                'cost10perTaxPeriod'   : 11,
+                'cost10perExploitation': 12,
+                'amortTaxPeriod'       : 15,
+                'amortExploitation'    : 16,
         ]
         // итоговая строка для сверки сумм
         def totalTmp = formData.createDataRow()
@@ -616,6 +618,11 @@ void importTransportData() {
             }
         }
     }
+
+    if (!logger.containsLevel(LogLevel.ERROR)) {
+        updateIndexes(newRows)
+        formDataService.getDataRowHelper(formData).allCached = newRows
+    }
 }
 
 /** Добавляет строку в текущий буфер строк. */
@@ -645,14 +652,14 @@ def getNewRow(String[] rowCells, def columnCount, def fileRowIndex, def rowIndex
     def newRow = formData.createDataRow()
     newRow.setIndex(rowIndex)
     newRow.setImportIndex(fileRowIndex)
-    if (isMonthBalance()){
+    if (isMonthBalance()) {
         balanceColumns.each {
             newRow.getCell(it).editable = true
             newRow.getCell(it).setStyleAlias('Редактируемая')
         }
         newRow.getCell('rowNumber').setStyleAlias('Автозаполняемая')
         newRow.getCell('usefulLife').setStyleAlias('Автозаполняемая')
-    }else{
+    } else {
         editableColumns.each {
             newRow.getCell(it).editable = true
             newRow.getCell(it).setStyleAlias('Редактируемая')
@@ -691,7 +698,7 @@ def getNewRow(String[] rowCells, def columnCount, def fileRowIndex, def rowIndex
     }
     // графа 7..16
     ['monthsUsed', 'usefulLifeWithUsed', 'specCoef', 'cost10perMonth', 'cost10perTaxPeriod',
-            'cost10perExploitation', 'amortNorm', 'amortMonth', 'amortTaxPeriod', 'amortExploitation'].each { alias ->
+     'cost10perExploitation', 'amortNorm', 'amortMonth', 'amortTaxPeriod', 'amortExploitation'].each { alias ->
         colIndex++
         newRow[alias] = parseNumber(pure(rowCells[colIndex]), fileRowIndex, colIndex + colOffset, logger, true)
     }
@@ -739,11 +746,15 @@ void prevPeriodCheck() {
     }
 }
 
-void sortFormDataRows() {
+void sortFormDataRows(def saveInDB = true) {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
     sortRows(refBookService, logger, dataRows, null, null, null)
-    dataRowHelper.saveSort()
+    if (saveInDB) {
+        dataRowHelper.saveSort()
+    } else {
+        updateIndexes(dataRows)
+    }
 }
 
 void importData() {
@@ -818,17 +829,17 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
     checkHeaderSize(headerRows[headerRows.size() - 1].size(), headerRows.size(), colCount, rowCount)
 
     def headerMapping = [
-            (headerRows[0][0]): getColumnName(tmpRow, 'rowNumber'),
-            (headerRows[0][1]): getColumnName(tmpRow, 'invNumber'),
-            (headerRows[0][2]): getColumnName(tmpRow, 'name'),
-            (headerRows[0][3]): getColumnName(tmpRow, 'cost'),
-            (headerRows[0][4]): getColumnName(tmpRow, 'amortGroup'),
-            (headerRows[0][5]): getColumnName(tmpRow, 'usefulLife'),
-            (headerRows[0][6]): getColumnName(tmpRow, 'monthsUsed'),
-            (headerRows[0][7]): getColumnName(tmpRow, 'usefulLifeWithUsed'),
-            (headerRows[0][8]): getColumnName(tmpRow, 'specCoef'),
-            (headerRows[0][9]): '10% (30%) от первоначальной стоимости, включаемые в расходы',
-            (headerRows[1][9]): 'За месяц',
+            (headerRows[0][0]) : getColumnName(tmpRow, 'rowNumber'),
+            (headerRows[0][1]) : getColumnName(tmpRow, 'invNumber'),
+            (headerRows[0][2]) : getColumnName(tmpRow, 'name'),
+            (headerRows[0][3]) : getColumnName(tmpRow, 'cost'),
+            (headerRows[0][4]) : getColumnName(tmpRow, 'amortGroup'),
+            (headerRows[0][5]) : getColumnName(tmpRow, 'usefulLife'),
+            (headerRows[0][6]) : getColumnName(tmpRow, 'monthsUsed'),
+            (headerRows[0][7]) : getColumnName(tmpRow, 'usefulLifeWithUsed'),
+            (headerRows[0][8]) : getColumnName(tmpRow, 'specCoef'),
+            (headerRows[0][9]) : '10% (30%) от первоначальной стоимости, включаемые в расходы',
+            (headerRows[1][9]) : 'За месяц',
             (headerRows[1][10]): 'с начала налогового периода',
             (headerRows[1][11]): 'с даты ввода в эксплуатацию',
             (headerRows[0][12]): getColumnName(tmpRow, 'amortNorm'),
@@ -865,7 +876,7 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
         }
         newRow.getCell('rowNumber').setStyleAlias('Автозаполняемая')
         newRow.getCell('usefulLife').setStyleAlias('Автозаполняемая')
-    }else{
+    } else {
         editableColumns.each {
             newRow.getCell(it).editable = true
             newRow.getCell(it).setStyleAlias('Редактируемая')
@@ -901,7 +912,7 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
 
     // графа 7..16
     ['monthsUsed', 'usefulLifeWithUsed', 'specCoef', 'cost10perMonth', 'cost10perTaxPeriod',
-            'cost10perExploitation', 'amortNorm', 'amortMonth', 'amortTaxPeriod', 'amortExploitation'].each { alias ->
+     'cost10perExploitation', 'amortNorm', 'amortMonth', 'amortTaxPeriod', 'amortExploitation'].each { alias ->
         colIndex++
         newRow[alias] = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
     }

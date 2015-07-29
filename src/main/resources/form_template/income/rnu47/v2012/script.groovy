@@ -1,10 +1,6 @@
 package form_template.income.rnu47.v2012
 
-import com.aplana.sbrf.taxaccounting.model.DataRow
-import com.aplana.sbrf.taxaccounting.model.FormData
-import com.aplana.sbrf.taxaccounting.model.FormDataEvent
-import com.aplana.sbrf.taxaccounting.model.FormDataKind
-import com.aplana.sbrf.taxaccounting.model.WorkflowState
+import com.aplana.sbrf.taxaccounting.model.*
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.model.util.StringUtils
@@ -33,11 +29,13 @@ switch (formDataEvent) {
         break
     case FormDataEvent.AFTER_CREATE:
         afterCreate()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.CALCULATE:
         checkRNU()
         calc()
         logicCheck()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.CHECK:
         checkRNU()
@@ -60,6 +58,7 @@ switch (formDataEvent) {
         consolidation()
         calc()
         logicCheck()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.IMPORT:
         importData()
@@ -67,6 +66,7 @@ switch (formDataEvent) {
         break
     case FormDataEvent.IMPORT_TRANSPORT_FILE:
         importTransportData()
+        formDataService.saveCachedDataRows(formData, logger)
         break
 }
 
@@ -136,8 +136,7 @@ def getRnu46DataRowHelper() {
 
 /** Расчет значений ячеек, заполняющихся автоматически */
 void calc() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.allCached
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
 
     if (!isMonthBalance()) {
         // расчет для первых 11 строк
@@ -159,12 +158,11 @@ void calc() {
             row.sumTaxPeriodTotal = totalValues[index].sumTaxPeriodTotal
         }
     }
-    dataRowHelper.save(dataRows)
 }
 
 /** Расчет строк 1-11 */
 def calcRows1_11() {
-    def rnu46Rows = getRnu46DataRowHelper()?.allCached
+    def rnu46Rows = getRnu46DataRowHelper()?.allSaved
     def groupList = 0..10
     def value = [:]
     groupList.each { group ->
@@ -195,9 +193,9 @@ def getTotalValues(def dataRows) {
 def calc3_6(def rows, def group) {
     def value = [
             sumCurrentPeriodTotal: BigDecimal.ZERO,
-            sumTaxPeriodTotal: BigDecimal.ZERO,
-            amortPeriod: BigDecimal.ZERO,
-            amortTaxPeriod: BigDecimal.ZERO
+            sumTaxPeriodTotal    : BigDecimal.ZERO,
+            amortPeriod          : BigDecimal.ZERO,
+            amortTaxPeriod       : BigDecimal.ZERO
     ]
     rows.each { row ->
         def amortGroup = refBookService.getNumberValue(71, row.amortGroup, 'GROUP')
@@ -213,8 +211,7 @@ def calc3_6(def rows, def group) {
 
 /** Логические проверки (таблица 149) */
 void logicCheck() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.allCached
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
     if (formData.kind == FormDataKind.PRIMARY) {
         if (!isMonthBalance()) {
             def hasData = false
@@ -233,7 +230,7 @@ void logicCheck() {
         def groupRowsAliases = ['R0', 'R1', 'R2', 'R3', 'R4', 'R5', 'R6', 'R7', 'R8', 'R9', 'R10']
         //вынес сюда проверку на первый месяц
         def formDataOld = formData.periodOrder != 1 ? formDataService.getFormDataPrev(formData) : null
-        def dataRowsOld = formDataOld != null ? formDataService.getDataRowHelper(formDataOld)?.allCached : null
+        def dataRowsOld = formDataOld != null ? formDataService.getDataRowHelper(formDataOld)?.allSaved : null
         // значения для первых 11 строк
         def row1_11 = calcRows1_11()
 
@@ -333,7 +330,7 @@ void logicCheck() {
     def totalValues = getTotalValues(dataRows)
     for (row in dataRows) {
         def index = dataRows.indexOf(row)
-        def errorMsg = "Строка ${index+1}: "
+        def errorMsg = "Строка ${index + 1}: "
         if (index == 11 || index == 12) {
             for (def col in ['sumCurrentPeriodTotal', 'sumTaxPeriodTotal']) {
                 if (row[col] != totalValues[index][col]) {
@@ -356,7 +353,7 @@ def getFieldFromPreviousMonth(def dataRows, def alias, def field) {
     if (dataRows != null) {
         def row = getDataRow(dataRows, alias)
         if (row != null) {
-            return row[field]?:BigDecimal.ZERO
+            return row[field] ?: BigDecimal.ZERO
         }
     }
     return BigDecimal.ZERO
@@ -367,7 +364,7 @@ def getFieldSumForAllPeriods(def alias, def field) {
     def sum = 0
     for (def periodOrder = 1; periodOrder <= formData.periodOrder; periodOrder++) {
         def formDataPeriod = getFormDataPeriod(formData.reportPeriodId, periodOrder)
-        def dataRows = formDataPeriod != null ? formDataService.getDataRowHelper(formDataPeriod)?.allCached : null
+        def dataRows = formDataPeriod != null ? formDataService.getDataRowHelper(formDataPeriod)?.allSaved : null
         def DataRow row = dataRows != null ? getDataRow(dataRows, alias) : null
         def value = row?.getCell(field)?.getValue()
         if (value != null) {
@@ -382,7 +379,7 @@ def getFieldInvalidPeriods(def alias, def field) {
     def periods = []
     for (def periodOrder = 1; periodOrder <= formData.periodOrder; periodOrder++) {
         def formDataPeriod = getFormDataPeriod(formData.reportPeriodId, periodOrder)
-        def dataRows = formDataPeriod != null ? formDataService.getDataRowHelper(formDataPeriod)?.allCached : null
+        def dataRows = formDataPeriod != null ? formDataService.getDataRowHelper(formDataPeriod)?.allSaved : null
         def DataRow row = dataRows != null ? getDataRow(dataRows, alias) : null
         if (row?.getCell(field)?.getValue() == null) {
             periods += periodOrder
@@ -392,9 +389,8 @@ def getFieldInvalidPeriods(def alias, def field) {
 }
 
 void consolidation() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
     // удалить все строки и собрать из источников их строки
-    def dataRows = dataRowHelper.allCached
     dataRows.each { row ->
         arithmeticCheckAlias.each { column ->
             row[column] = null
@@ -410,7 +406,6 @@ void consolidation() {
             }
         }
     }
-    dataRowHelper.save(dataRows)
 }
 
 void addRowsToRows(def rows, def addRows) {
@@ -447,10 +442,9 @@ void importTransportData() {
 }
 
 void addTransportData(def xml) {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
     def int rnuIndexRow = 2
     def int colOffset = 1
-    def dataRows = dataRowHelper.allCached
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
 
     for (int i = 0; i < 17; i++) {
         rnuIndexRow++
@@ -473,8 +467,6 @@ void addTransportData(def xml) {
         xmlIndexCol = 6
         dataRows[i].amortTaxPeriod = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol)
     }
-
-    dataRowHelper.update(dataRows)
 }
 
 void checkRNU() {
@@ -490,8 +482,7 @@ void checkRNU() {
 def afterCreate() {
     // для периода ввода остатков сделать редактируемыми ячейки, в которых могут быть данные.
     if (isMonthBalance()) {
-        def dataRowHelper = formDataService.getDataRowHelper(formData)
-        def dataRows = dataRowHelper.allCached
+        def dataRows = formDataService.getDataRowHelper(formData).allCached
         for (def row : dataRows) {
             def columns = arithmeticCheckAlias
             def isTotal = row.number == 12 || row.number == 13
@@ -507,7 +498,6 @@ def afterCreate() {
                 }
             }
         }
-        dataRowHelper.save(dataRows)
     }
 }
 
@@ -520,7 +510,7 @@ void importData() {
 
     def allValues = []      // значения формы
     def headerValues = []   // значения шапки
-    def paramsMap = ['rowOffset' : 0, 'colOffset' : 0]  // мапа с параметрами (отступы сверху и слева)
+    def paramsMap = ['rowOffset': 0, 'colOffset': 0]  // мапа с параметрами (отступы сверху и слева)
 
     checkAndReadFile(ImportInputStream, UploadFileName, allValues, headerValues, TABLE_START_VALUE, TABLE_END_VALUE, HEADER_ROW_COUNT, paramsMap)
 
@@ -590,14 +580,14 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
     checkHeaderSize(headerRows[headerRows.size() - 1].size(), headerRows.size(), colCount, rowCount)
 
     def headerMapping = [
-            (headerRows[0][0]) : getColumnName(tmpRow, 'number'),
-            (headerRows[0][1]) : getColumnName(tmpRow, 'amortGroup'),
-            (headerRows[0][2]) : 'Сумма расходов в виде капитальных вложений, предусмотренных п. 9 ст. 258 НК РФ',
-            (headerRows[1][2]) : 'За отчётный месяц',
-            (headerRows[1][3]) : 'С начала налогового периода',
-            (headerRows[0][4]) : 'Сумма начисленной амортизации',
-            (headerRows[1][4]) : 'За отчётный месяц',
-            (headerRows[1][5]) : 'С начала налогового периода'
+            (headerRows[0][0]): getColumnName(tmpRow, 'number'),
+            (headerRows[0][1]): getColumnName(tmpRow, 'amortGroup'),
+            (headerRows[0][2]): 'Сумма расходов в виде капитальных вложений, предусмотренных п. 9 ст. 258 НК РФ',
+            (headerRows[1][2]): 'За отчётный месяц',
+            (headerRows[1][3]): 'С начала налогового периода',
+            (headerRows[0][4]): 'Сумма начисленной амортизации',
+            (headerRows[1][4]): 'За отчётный месяц',
+            (headerRows[1][5]): 'С начала налогового периода'
     ]
     (1..6).each { index ->
         headerMapping.put((headerRows[2][index - 1]), index.toString())
