@@ -70,11 +70,7 @@ switch (formDataEvent) {
     case FormDataEvent.IMPORT:
         checkRegionId()
         importData()
-        if (!logger.containsLevel(LogLevel.ERROR)) {
-            calc()
-            logicCheck()
-            formDataService.saveCachedDataRows(formData, logger)
-        }
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.SORT_ROWS:
         sortFormDataRows()
@@ -141,7 +137,7 @@ def isBalancePeriod() {
 
 // Поиск записи в справочнике по значению (для импорта)
 def getRecordIdImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
-                      def boolean required = true) {
+                      def boolean required = false) {
     if (value == null || value.trim().isEmpty()) {
         return null
     }
@@ -494,7 +490,7 @@ void importData() {
     // проверка шапки
     checkHeaderXls(headerValues, COLUMN_COUNT, HEADER_ROW_COUNT, tmpRow)
     if (logger.containsLevel(LogLevel.ERROR)) {
-        return;
+        return
     }
     // освобождение ресурсов для экономии памяти
     headerValues.clear()
@@ -646,7 +642,7 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
             newRow.taxBenefitCode = taxRecordId
         } else {
             RefBook rb = getRefBook(203)
-            logger.error(REF_BOOK_NOT_FOUND_IMPORT_ERROR, fileRowIndex, getXLSColumnName(14 + colOffset), rb.getName(), rb.getAttribute('TAX_BENEFIT_ID').getName(), values[14], getReportPeriodEndDate().format('dd.MM.yyyy'))
+            logger.warn(REF_BOOK_NOT_FOUND_IMPORT_ERROR, fileRowIndex, getXLSColumnName(14 + colOffset), rb.getName(), rb.getAttribute('TAX_BENEFIT_ID').getName(), values[14], getReportPeriodEndDate().format('dd.MM.yyyy'))
         }
     }
 

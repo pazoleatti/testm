@@ -60,11 +60,7 @@ switch (formDataEvent) {
     case FormDataEvent.IMPORT:
         checkRegionId()
         importData()
-        if (!logger.containsLevel(LogLevel.ERROR)) {
-            calc()
-            logicCheck()
-            formDataService.saveCachedDataRows(formData, logger)
-        }
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.IMPORT_TRANSPORT_FILE:
         importTransportData()
@@ -908,21 +904,15 @@ def getNewRow(String[] rowCells, def columnCount, def fileRowIndex, def rowIndex
     }
 
     def int colOffset = 1
+    def int colIndex = 1
 
     // графа 1
-    newRow.name = pure(rowCells[1])
-    // графа 2
-    newRow.taxBase1 = parseNumber(pure(rowCells[2]), fileRowIndex, 2 + colOffset, logger, true)
-    // графа 3
-    newRow.taxBase2 = parseNumber(pure(rowCells[3]), fileRowIndex, 3 + colOffset, logger, true)
-    // графа 4
-    newRow.taxBase3 = parseNumber(pure(rowCells[4]), fileRowIndex, 4 + colOffset, logger, true)
-    // графа 5
-    newRow.taxBase4 = parseNumber(pure(rowCells[5]), fileRowIndex, 5 + colOffset, logger, true)
-    // графа 6
-    newRow.taxBase5 = parseNumber(pure(rowCells[6]), fileRowIndex, 6 + colOffset, logger, true)
-    // графа 7
-    newRow.taxBaseSum = parseNumber(pure(rowCells[7]), fileRowIndex, 7 + colOffset, logger, true)
+    newRow.name = pure(rowCells[colIndex])
+    // графа 2..7
+    ['taxBase1', 'taxBase2', 'taxBase3', 'taxBase4', 'taxBase5', 'taxBaseSum'].each { alias ->
+        colIndex++
+        newRow[alias] = parseNumber(pure(rowCells[2]), fileRowIndex, colIndex + colOffset, logger, true)
+    }
 
     return newRow
 }
@@ -1169,7 +1159,7 @@ void importData() {
     // проверка шапки
     checkHeaderXls(headerValues, COLUMN_COUNT, HEADER_ROW_COUNT, tmpRow)
     if (logger.containsLevel(LogLevel.ERROR)) {
-        return;
+        return
     }
     // освобождение ресурсов для экономии памяти
     headerValues.clear()

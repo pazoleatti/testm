@@ -96,11 +96,7 @@ switch (formDataEvent) {
     case FormDataEvent.IMPORT:
         checkRegionId()
         importData()
-        if (!logger.containsLevel(LogLevel.ERROR)) {
-            calc()
-            logicCheck()
-            formDataService.saveCachedDataRows(formData, logger)
-        }
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.IMPORT_TRANSPORT_FILE:
         checkRegionId()
@@ -1219,7 +1215,7 @@ void importData() {
     // проверка шапки
     checkHeaderXls(headerValues, COLUMN_COUNT, HEADER_ROW_COUNT, tmpRow)
     if (logger.containsLevel(LogLevel.ERROR)) {
-        return;
+        return
     }
     // освобождение ресурсов для экономии памяти
     headerValues.clear()
@@ -1250,7 +1246,7 @@ void importData() {
         }
         // если это начало раздела, то запомнить его название и обрабатывать следующую строку
         def title = rowValues[INDEX_FOR_SKIP]
-        if (title != null && (title == 'Наземные транспортные средства' || title == 'Водные транспортные средства' || title == 'Воздушные транспортные средства')) {
+        if (title == 'Наземные транспортные средства' || title == 'Водные транспортные средства' || title == 'Воздушные транспортные средства') {
             sectionAlias = sections[sectionNumber]
             sectionNumber++
             mapRows.put(sectionAlias, [])
@@ -1266,8 +1262,6 @@ void importData() {
             // простая строка
             rowIndex++
             def newRow = getNewRowFromXls(rowValues, colOffset, fileRowIndex, rowIndex)
-            System.out.println("$rowIndex rowValues >>>> " + rowValues) // TODO (Ramil Timerbaev)
-            System.out.println("$rowIndex newRow >>>> " + newRow) // TODO (Ramil Timerbaev)
             mapRows[sectionAlias].add(newRow)
         }
         // освободить ненужные данные - иначе не хватит памяти
@@ -1369,7 +1363,7 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
 
     // графа 2 - атрибут 840 - CODE - «Код», справочник 96 «Общероссийский классификатор территорий муниципальных образований»
     colIndex++
-    def record = getRecordImport(96, 'CODE', values[colIndex], fileRowIndex, colIndex + colOffset)
+    def record = getRecordImport(96, 'CODE', values[colIndex], fileRowIndex, colIndex + colOffset, false)
     newRow.codeOKATO = record?.record_id?.value
 
     // графа 3 - зависит от графы 2 - атрибут 841 - NAME - «Наименование», справочник 96 «Общероссийский классификатор территорий муниципальных образований»
@@ -1381,7 +1375,7 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
     // графа 4 - атрибут 422 - CODE - «Код вида ТС», справочник 42 «Коды видов транспортных средств»
     // http://jira.aplana.com/browse/SBRFACCTAX-8572 исправить загрузку Кода Вида ТС (убираю пробелы)
     colIndex++
-    record = getRecordImport(42, 'CODE', values[colIndex].replace(' ', ''), fileRowIndex, colIndex + colOffset, true)
+    record = getRecordImport(42, 'CODE', values[colIndex].replace(' ', ''), fileRowIndex, colIndex + colOffset, false)
     newRow.tsTypeCode = record?.record_id?.value
 
     // графа 5 - зависит от графы 4 - атрибут 423 - NAME - «Наименование вида транспортного средства», справочник 42 «Коды видов транспортных средств»
