@@ -3,6 +3,8 @@ package com.aplana.sbrf.taxaccounting.service;
 import com.aplana.sbrf.taxaccounting.model.ReportType;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 
+import java.util.Collection;
+
 /**
  * Интерфейс для работы с таблицей отчетов
  * @author lhaziev
@@ -76,6 +78,8 @@ public interface ReportService {
      * @param declarationDataId
      */
     void deleteDec(long declarationDataId);
+
+    void deleteDec(Collection<Long> declarationDataId);
 
     /**
      * Удаление отчета по uuid

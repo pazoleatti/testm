@@ -166,4 +166,8 @@ public interface DeclarationTemplateDao {
      * @return
      */
     boolean existDeclarationTemplate(int declarationTypeId, int reportPeriodId);
+
+    void deleteXsd(int dtId);
+
+    void deleteJrxml(int dtId);
 }

@@ -9,6 +9,7 @@ import com.aplana.sbrf.taxaccounting.web.widget.codemirror.client.CodeMirror;
 import com.aplana.sbrf.taxaccounting.web.widget.fileupload.FileUploadWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.fileupload.event.EndLoadFileEvent;
 import com.aplana.sbrf.taxaccounting.web.widget.style.LinkAnchor;
+import com.aplana.sbrf.taxaccounting.web.widget.style.LinkButton;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.FormElement;
 import com.google.gwt.dom.client.Style;
@@ -124,6 +125,10 @@ public class DeclarationTemplateView extends ViewWithUiHandlers<DeclarationTempl
 
     @UiField
     LinkAnchor returnAnchor;
+    @UiField
+    LinkButton deleteXsd;
+    @UiField
+    LinkButton deleteJrxml;
 
     @Inject
 	@UiConstructor
@@ -148,7 +153,9 @@ public class DeclarationTemplateView extends ViewWithUiHandlers<DeclarationTempl
         driver.edit(declarationTemplateExt);
         setEnabled(template.getId() != null);
         downloadJrxmlButton.setEnabled(template.getJrxmlBlobId() != null);
-        downloadXsd.setEnabled(template.getXsdId()!=null);
+        deleteJrxml.setEnabled(template.getJrxmlBlobId() != null);
+        downloadXsd.setEnabled(template.getXsdId() != null);
+        deleteXsd.setEnabled(template.getXsdId() != null);
         if (template.getId() != null){
             setHref(template);
         }
@@ -192,8 +199,8 @@ public class DeclarationTemplateView extends ViewWithUiHandlers<DeclarationTempl
     }
 
     private void setHref(DeclarationTemplate dt){
-        downloadJrxmlButton.setHref(urlTemplates.getDownloadUrl(dt.getJrxmlBlobId()!=null?dt.getJrxmlBlobId():"").asString());
-        downloadXsd.setHref(urlTemplates.getDownloadUrl(dt.getXsdId()!= null? dt.getXsdId():"").asString());
+        downloadJrxmlButton.setHref(urlTemplates.getDownloadUrl(dt.getJrxmlBlobId() != null ? dt.getJrxmlBlobId() : "").asString());
+        downloadXsd.setHref(urlTemplates.getDownloadUrl(dt.getXsdId() != null ? dt.getXsdId() : "").asString());
         downloadDectButton.setHref(urlTemplates.getDownloadDTUrl(dt.getId()).asString());
     }
 
@@ -282,9 +289,32 @@ public class DeclarationTemplateView extends ViewWithUiHandlers<DeclarationTempl
 
     @UiHandler("historyVersion")
     void onHistoryClick(ClickEvent event){
-        if (getUiHandlers() != null){
-            getUiHandlers().onHistoryClicked();
-        }
+        Dialog.confirmMessage("Удаление xsd файла", "Вы действительно хотите удалить xsd файл?", new DialogHandler() {
+            @Override
+            public void yes() {
+                getUiHandlers().onDeleteXsd();
+            }
+        });
+    }
+
+    @UiHandler("deleteXsd")
+    void onDeleteXsd(ClickEvent event){
+        Dialog.confirmMessage("Удаление xsd файла", "Вы действительно хотите удалить xsd-файл?", new DialogHandler() {
+            @Override
+            public void yes() {
+                getUiHandlers().onDeleteXsd();
+            }
+        });
+    }
+
+    @UiHandler("deleteJrxml")
+    void onDeleteJrxml(ClickEvent event){
+        Dialog.confirmMessage("Удаление jrxml файла", "Вы действительно хотите удалить jrxml файл?", new DialogHandler() {
+            @Override
+            public void yes() {
+                getUiHandlers().onCheckBeforeDeleteJrxml();
+            }
+        });
     }
 
 }

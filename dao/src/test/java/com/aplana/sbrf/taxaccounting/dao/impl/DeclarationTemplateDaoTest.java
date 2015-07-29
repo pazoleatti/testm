@@ -162,7 +162,7 @@ public class DeclarationTemplateDaoTest {
         declarationTemplate2.setType(declarationTypeDao.get(2));
 
 		int[] updateIds = declarationTemplateDao.update(Arrays.asList(declarationTemplate1, declarationTemplate2));
-        Assert.assertArrayEquals(new int[]{1,1}, updateIds);
+        Assert.assertArrayEquals(new int[]{1, 1}, updateIds);
 	}
 
 	@Test
@@ -253,7 +253,7 @@ public class DeclarationTemplateDaoTest {
 
     @Test
     public void testVersionTemplateCountByType(){
-        List<Map<String, Object>> list = declarationTemplateDao.versionTemplateCountByType(Arrays.asList(1,2));
+        List<Map<String, Object>> list = declarationTemplateDao.versionTemplateCountByType(Arrays.asList(1, 2));
         Assert.assertEquals(new BigDecimal(1), list.get(0).get("type_id"));
         Assert.assertEquals((long) 2, list.get(0).get("version_count"));
     }
@@ -286,6 +286,16 @@ public class DeclarationTemplateDaoTest {
 
     @Test
     public void testDeleteList(){
-        declarationTemplateDao.delete(Arrays.asList(1,2));
+        declarationTemplateDao.delete(Arrays.asList(1, 2));
+    }
+
+    @Test
+    public void testDeleteXsd(){
+        declarationTemplateDao.deleteXsd(1);
+    }
+
+    @Test
+    public void testDeleteJrxml(){
+        declarationTemplateDao.deleteJrxml(1);
     }
 }

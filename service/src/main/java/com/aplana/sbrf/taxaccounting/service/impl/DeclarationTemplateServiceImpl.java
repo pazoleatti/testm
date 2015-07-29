@@ -259,6 +259,28 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
     }
 
     @Override
+    public void deleteXsd(int dtId) {
+        try {
+            DeclarationTemplate template = get(dtId);
+            declarationTemplateDao.deleteXsd(dtId);
+            blobDataService.delete(template.getXsdId());
+        } catch (DaoException e){
+            throw new ServiceException("Ошибка при удалении xsd", e);
+        }
+    }
+
+    @Override
+    public void deleteJrxml(int dtId) {
+        try {
+            DeclarationTemplate template = get(dtId);
+            declarationTemplateDao.deleteJrxml(dtId);
+            blobDataService.delete(template.getJrxmlBlobId());
+        } catch (DaoException e){
+            throw new ServiceException("Ошибка при удалении jrxml", e);
+        }
+    }
+
+    @Override
 	public boolean lock(int declarationTemplateId, TAUserInfo userInfo){
         DeclarationTemplate declarationTemplate = get(declarationTemplateId);
         Date endVersion = getDTEndDate(declarationTemplateId);
