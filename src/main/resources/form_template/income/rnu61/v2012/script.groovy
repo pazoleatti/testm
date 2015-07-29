@@ -42,6 +42,7 @@ switch (formDataEvent) {
     case FormDataEvent.CALCULATE:
         calc()
         logicCheck()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.CHECK:
         logicCheck()
@@ -68,6 +69,7 @@ switch (formDataEvent) {
         formDataService.consolidationTotal(formData, logger, ['total'])
         calc()
         logicCheck()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.IMPORT:
         importData()
@@ -75,6 +77,7 @@ switch (formDataEvent) {
         break
     case FormDataEvent.IMPORT_TRANSPORT_FILE:
         importTransportData()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.SORT_ROWS:
         sortFormDataRows()
@@ -92,7 +95,7 @@ def refBookCache = [:]
 // Редактируемые атрибуты
 @Field
 def editableColumns = ['billNumber', 'creationDate', 'nominal', 'currencyCode', 'paymentStart', 'paymentEnd',
-        'interestRate', 'operationDate', 'sum70606']
+                       'interestRate', 'operationDate', 'sum70606']
 
 // Автозаполняемые атрибуты
 @Field
@@ -101,13 +104,13 @@ def autoFillColumns = ['rowNumber', 'rateBRBill', 'rateBROperation', 'sumLimit',
 // Проверяемые на пустые значения атрибуты
 @Field
 def nonEmptyColumns = ['billNumber', 'creationDate', 'nominal', 'currencyCode', 'rateBRBill',
-        'rateBROperation', 'paymentStart', 'paymentEnd', 'interestRate', 'operationDate',
-        'percAdjustment']
+                       'rateBROperation', 'paymentStart', 'paymentEnd', 'interestRate', 'operationDate',
+                       'percAdjustment']
 
 @Field
 def allColumns = ['rowNumber', 'fix', 'billNumber', 'creationDate', 'nominal', 'currencyCode', 'rateBRBill',
-        'rateBROperation', 'paymentStart', 'paymentEnd', 'interestRate', 'operationDate', 'sum70606', 'sumLimit',
-        'percAdjustment']
+                  'rateBROperation', 'paymentStart', 'paymentEnd', 'interestRate', 'operationDate', 'sum70606', 'sumLimit',
+                  'percAdjustment']
 
 // Сумируемые колонки в фиксированной с троке
 @Field
@@ -148,8 +151,7 @@ def getRefBookValue(def long refBookId, def Long recordId) {
 
 // Алгоритмы заполнения полей формы
 def calc() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.getAllCached()
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
 
     // Начальная дата отчетного периода
     def reportDateStart = reportPeriodService.getStartDate(formData.reportPeriodId).time
@@ -173,9 +175,7 @@ def calc() {
     // Добавление итогов
     dataRows.add(getTotalRow(dataRows))
 
-    dataRowHelper.save(dataRows)
-
-    sortFormDataRows()
+    sortFormDataRows(false)
 }
 
 // Расчет итоговой строки
@@ -301,7 +301,7 @@ def BigDecimal calc14(def row) {
 }
 // Логические проверки
 void logicCheck() {
-    def dataRows = formDataService.getDataRowHelper(formData).getAllCached()
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
     if (dataRows.isEmpty()) {
         return
     }
@@ -409,13 +409,12 @@ void importTransportData() {
     addTransportData(xml)
 
     // TODO (Ramil Timerbaev) возможно надо поменять на общее сообщение TRANSPORT_FILE_SUM_ERROR
-    def dataRows = formDataService.getDataRowHelper(formData)?.allCached
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
     checkTotalSum(dataRows, totalColumns, logger, false)
 }
 
 void addTransportData(def xml) {
     reportPeriodEndDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
     def int rnuIndexRow = 2
     def int colOffset = 1
     def rows = []
@@ -489,14 +488,21 @@ void addTransportData(def xml) {
         rows.add(total)
     }
 
-    dataRowHelper.save(rows)
+    if (!logger.containsLevel(LogLevel.ERROR)) {
+        updateIndexes(rows)
+        formDataService.getDataRowHelper(formData).allCached = rows
+    }
 }
 
-void sortFormDataRows() {
+void sortFormDataRows(def saveInDB = true) {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
     sortRows(refBookService, logger, dataRows, null, getDataRow(dataRows, 'total'), null)
-    dataRowHelper.saveSort()
+    if (saveInDB) {
+        dataRowHelper.saveSort()
+    } else {
+        updateIndexes(dataRows)
+    }
 }
 
 void importData() {
@@ -542,7 +548,7 @@ void importData() {
             break
         }
         // Пропуск итоговых строк
-        if (rowValues[INDEX_FOR_SKIP] && rowValues[INDEX_FOR_SKIP] == "Итого") {
+        if (rowValues[INDEX_FOR_SKIP] == "Итого") {
             allValues.remove(rowValues)
             rowValues.clear()
             continue

@@ -48,6 +48,7 @@ switch (formDataEvent) {
     case FormDataEvent.CHECK:
         prevPeriodCheck()
         logicCheck()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.ADD_ROW:
         def columns = (isBalancePeriod() ? allColumns - 'rowNumber' : editableColumns)
@@ -71,6 +72,7 @@ switch (formDataEvent) {
         formDataService.consolidationTotal(formData, logger, ['itg'])
         calc()
         logicCheck()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.IMPORT:
         importData()
@@ -78,6 +80,7 @@ switch (formDataEvent) {
         break
     case FormDataEvent.IMPORT_TRANSPORT_FILE:
         importTransportData()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.SORT_ROWS:
         sortFormDataRows()
@@ -95,10 +98,10 @@ def refBookCache = [:]
 //Все аттрибуты
 @Field
 def allColumns = ['rowNumber', 'fix', 'billNumber', 'creationDate', 'nominal', 'sellingPrice',
-        'currencyCode', 'rateBRBillDate', 'rateBROperationDate',
-        'paymentTermStart', 'paymentTermEnd', 'interestRate',
-        'operationDate', 'rateWithDiscCoef', 'sumStartInCurrency',
-        'sumStartInRub', 'sumEndInCurrency', 'sumEndInRub', 'sum']
+                  'currencyCode', 'rateBRBillDate', 'rateBROperationDate',
+                  'paymentTermStart', 'paymentTermEnd', 'interestRate',
+                  'operationDate', 'rateWithDiscCoef', 'sumStartInCurrency',
+                  'sumStartInRub', 'sumEndInCurrency', 'sumEndInRub', 'sum']
 
 // Поля, для которых подсчитываются итоговые значения (графа 18)
 @Field
@@ -107,7 +110,7 @@ def totalColumns = ['sum']
 // Редактируемые атрибуты (графа 2..13)
 @Field
 def editableColumns = ['billNumber', 'creationDate', 'nominal', 'sellingPrice', 'currencyCode',
-        'paymentTermStart', 'paymentTermEnd', 'interestRate', 'operationDate', 'rateWithDiscCoef']
+                       'paymentTermStart', 'paymentTermEnd', 'interestRate', 'operationDate', 'rateWithDiscCoef']
 
 // Автозаполняемые атрибуты
 @Field
@@ -261,8 +264,7 @@ void logicCheck() {
 }
 
 void calc() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.allCached
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
 
     if (formDataEvent != FormDataEvent.IMPORT) {
         sortRows(dataRows, sortColumns)
@@ -295,9 +297,7 @@ void calc() {
     // Добавление итогов
     dataRows.add(getTotalRow(dataRows))
 
-    dataRowHelper.save(dataRows)
-
-    sortFormDataRows()
+    sortFormDataRows(false)
 }
 
 // Расчет итоговой строки
@@ -438,7 +438,7 @@ def getDataRowsPrev() {
     if (formDataPrev == null) {
         logger.error("Не найдены экземпляры РНУ-62 за прошлый отчетный период!")
     } else {
-        return formDataService.getDataRowHelper(formDataPrev)?.allCached
+        return formDataService.getDataRowHelper(formDataPrev)?.allSaved
     }
     return null
 }
@@ -491,12 +491,11 @@ void importTransportData() {
     addTransportData(xml)
 
     // TODO (Ramil Timerbaev) возможно надо поменять на общее сообщение TRANSPORT_FILE_SUM_ERROR
-    def dataRows = formDataService.getDataRowHelper(formData)?.allCached
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
     checkTotalSum(dataRows, totalColumns, logger, false)
 }
 
 void addTransportData(def xml) {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
     def int rnuIndexRow = 2
     def int colOffset = 1
     def rows = []
@@ -580,14 +579,22 @@ void addTransportData(def xml) {
 
         rows.add(total)
     }
-    dataRowHelper.save(rows)
+
+    if (!logger.containsLevel(LogLevel.ERROR)) {
+        updateIndexes(rows)
+        formDataService.getDataRowHelper(formData).allCached = rows
+    }
 }
 
-void sortFormDataRows() {
+void sortFormDataRows(def saveInDB = true) {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
     sortRows(refBookService, logger, dataRows, null, getDataRow(dataRows, 'itg'), null)
-    dataRowHelper.saveSort()
+    if (saveInDB) {
+        dataRowHelper.saveSort()
+    } else {
+        updateIndexes(dataRows)
+    }
 }
 
 void importData() {

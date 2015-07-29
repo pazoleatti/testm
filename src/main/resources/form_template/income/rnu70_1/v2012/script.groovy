@@ -46,6 +46,7 @@ switch (formDataEvent) {
     case FormDataEvent.CALCULATE:
         calc()
         logicCheck()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.ADD_ROW:
         formDataService.addRow(formData, currentDataRow, editableColumns, autoFillColumns)
@@ -67,6 +68,7 @@ switch (formDataEvent) {
         formDataService.consolidationSimple(formData, logger)
         calc()
         logicCheck()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.IMPORT:
         importData()
@@ -74,6 +76,7 @@ switch (formDataEvent) {
         break
     case FormDataEvent.IMPORT_TRANSPORT_FILE:
         importTransportData()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.SORT_ROWS:
         sortFormDataRows()
@@ -113,7 +116,7 @@ def arithmeticCheckAlias = ['financialResult1', 'perc', 'loss']
 
 // Группируемые атрибуты
 @Field
-def groupColums = ['name', 'number', 'date']
+def groupColumns = ['name', 'number', 'date']
 
 // Атрибуты для итогов
 @Field
@@ -157,9 +160,7 @@ def getRefBookValue(def long refBookId, def Long recordId) {
  * Алгоритмы заполнения полей формы
  */
 void calc() {
-    //расчет
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.getAllCached()
+    def dataRows = formDataService.getDataRowHelper(formData).getAllCached()
 
     reportDate = getReportDate()
     startDate = reportPeriodService.getStartDate(formData.reportPeriodId).getTime()
@@ -168,7 +169,7 @@ void calc() {
     deleteAllAliased(dataRows)
 
     // сортировка
-    sortRows(dataRows, groupColums)
+    sortRows(dataRows, groupColumns)
 
     for (def row : dataRows) {
         row.financialResult1 = getFinancialResult1(row)
@@ -188,19 +189,16 @@ void calc() {
     // добавить строку "итого"
     def totalRow = getTotalRow(dataRows)
     dataRows.add(totalRow)
-    // используется save() т.к. есть сортировка
-    dataRowHelper.save(dataRows)
 
     // Сортировка групп и строк
-    sortFormDataRows()
+    sortFormDataRows(false)
 }
 
 /**
  * Логические проверки
  */
 void logicCheck() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.getAllCached()
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
 
     reportDate = getReportDate()
     startDate = reportPeriodService.getStartDate(formData.reportPeriodId).getTime()
@@ -493,12 +491,11 @@ void importTransportData() {
     addTransportData(xml)
 
     // TODO (Ramil Timerbaev) возможно надо поменять на общее сообщение TRANSPORT_FILE_SUM_ERROR
-    def dataRows = formDataService.getDataRowHelper(formData)?.allCached
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
     checkTotalSum(dataRows, totalColumns, logger, false)
 }
 
 void addTransportData(def xml) {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
     def int rnuIndexRow = 2
     def int colOffset = 1
     def rows = []
@@ -582,15 +579,22 @@ void addTransportData(def xml) {
         rows.add(total)
     }
 
-    dataRowHelper.save(rows)
+    if (!logger.containsLevel(LogLevel.ERROR)) {
+        updateIndexes(rows)
+        formDataService.getDataRowHelper(formData).allCached = rows
+    }
 }
 
 // Сортировка групп и строк
-void sortFormDataRows() {
+void sortFormDataRows(def saveInDB = true) {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
     sortRows(refBookService, logger, dataRows, getSubTotalRows(dataRows), getDataRow(dataRows, 'total'), true)
-    dataRowHelper.saveSort()
+    if (saveInDB) {
+        dataRowHelper.saveSort()
+    } else {
+        updateIndexes(dataRows)
+    }
 }
 
 // Получение подитоговых строк
@@ -648,7 +652,7 @@ void importData() {
             break
         }
         // Пропуск итоговых строк
-        if (rowValues[INDEX_FOR_SKIP] && (rowValues[INDEX_FOR_SKIP] == "Всего" || rowValues[INDEX_FOR_SKIP].contains("Итого по "))) {
+        if (rowValues[INDEX_FOR_SKIP] == "Всего" || rowValues[INDEX_FOR_SKIP].contains("Итого по ")) {
             allValues.remove(rowValues)
             rowValues.clear()
             continue

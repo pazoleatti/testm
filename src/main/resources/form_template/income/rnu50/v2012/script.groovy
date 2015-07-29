@@ -38,6 +38,7 @@ switch (formDataEvent) {
         checkSourceAccepted()
         calc()
         logicCheck()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.MOVE_CREATED_TO_APPROVED:  // Утвердить из "Создана"
     case FormDataEvent.MOVE_APPROVED_TO_ACCEPTED: // Принять из "Утверждена"
@@ -52,6 +53,7 @@ switch (formDataEvent) {
         formDataService.consolidationSimple(formData, logger)
         calc()
         logicCheck()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.IMPORT:
         importData()
@@ -59,6 +61,7 @@ switch (formDataEvent) {
         break
     case FormDataEvent.IMPORT_TRANSPORT_FILE:
         importTransportData()
+        formDataService.saveCachedDataRows(formData, logger)
         break
 }
 
@@ -90,8 +93,7 @@ def reportPeriodEndDate = null
 def sourceFormData = null
 
 void calc() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.allCached
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
 
     if (!isConsolidated && formDataEvent != FormDataEvent.IMPORT) {
         // удалить все строки
@@ -114,12 +116,10 @@ void calc() {
     // итоги
     def totalRow = getTotalRow(dataRows)
     dataRows.add(totalRow)
-
-    dataRowHelper.save(dataRows)
 }
 
 void logicCheck() {
-    def dataRows = formDataService.getDataRowHelper(formData)?.allCached
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
     for (def row : dataRows) {
         if (row.getAlias() != null) {
             continue
@@ -236,7 +236,7 @@ void checkSourceAccepted() {
 def getDataRowsFromSource() {
     def formDataSource = getFormDataSource()
     if (formDataSource != null) {
-        return formDataService.getDataRowHelper(formDataSource)?.allCached
+        return formDataService.getDataRowHelper(formDataSource)?.allSaved
     }
     return null
 }
@@ -372,7 +372,10 @@ void addTransportData(def xml) {
         rows.add(total)
     }
 
-    dataRowHelper.save(rows)
+    if (!logger.containsLevel(LogLevel.ERROR)) {
+        updateIndexes(rows)
+        formDataService.getDataRowHelper(formData).allCached = rows
+    }
 }
 
 void importData() {
@@ -418,7 +421,7 @@ void importData() {
             break
         }
         // Пропуск итоговых строк
-        if (rowValues[INDEX_FOR_SKIP] && rowValues[INDEX_FOR_SKIP] == "Итого") {
+        if (rowValues[INDEX_FOR_SKIP] == "Итого") {
             allValues.remove(rowValues)
             rowValues.clear()
             continue

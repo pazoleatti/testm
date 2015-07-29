@@ -41,6 +41,7 @@ switch (formDataEvent) {
         checkRNU()
         calc()
         logicCheck()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.CHECK:
         checkRNU()
@@ -69,6 +70,7 @@ switch (formDataEvent) {
         checkRNU()
         calc()
         logicCheck()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.IMPORT:
         importData()
@@ -76,6 +78,7 @@ switch (formDataEvent) {
         break
     case FormDataEvent.IMPORT_TRANSPORT_FILE:
         importTransportData()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.SORT_ROWS:
         sortFormDataRows()
@@ -137,7 +140,7 @@ void checkRNU() {
 // Алгоритмы заполнения полей формы
 void calc() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.getAllCached()
+    def dataRows = dataRowHelper.allCached
 
     if (!dataRows.isEmpty()) {
         // Удаление итогов
@@ -171,8 +174,7 @@ void calc() {
         }
     }
 
-    dataRowHelper.insert(calcTotalRow(dataRows), dataRows.size() + 1)
-    dataRowHelper.save(dataRows)
+    dataRows.add(dataRows.size() + 2, calcTotalRow(dataRows))
 
     sortFormDataRows()
 }
@@ -181,7 +183,7 @@ def getRNU(def id) {
     def sourceFormData = formDataService.getLast(id, formData.kind, formDataDepartment.id, formData.reportPeriodId, formData.periodOrder)
     if (sourceFormData == null)
         return null
-    return formDataService.getDataRowHelper(sourceFormData).getAllCached()
+    return formDataService.getDataRowHelper(sourceFormData).allSaved
 }
 
 def getRnuSourceRow(def rnuSourceDataRows, DataRow row) {
@@ -324,7 +326,7 @@ def isRubleCurrency(def currencyCode) {
 
 // Логические проверки
 boolean logicCheck() {
-    def dataRows = formDataService.getDataRowHelper(formData).getAllCached()
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
     if (dataRows.isEmpty()) {
         return
     }
@@ -405,12 +407,11 @@ void importTransportData() {
     addTransportData(xml)
 
     // TODO (Ramil Timerbaev) возможно надо поменять на общее сообщение TRANSPORT_FILE_SUM_ERROR
-    def dataRows = formDataService.getDataRowHelper(formData)?.allCached
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
     checkTotalSum(dataRows, totalColumns, logger, false)
 }
 
 void addTransportData(def xml) {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
     def int rnuIndexRow = 2
     def int colOffset = 1
     def rows = []
@@ -493,14 +494,21 @@ void addTransportData(def xml) {
         rows.add(total)
     }
 
-    dataRowHelper.save(rows)
+    if (!logger.containsLevel(LogLevel.ERROR)) {
+        updateIndexes(rows)
+        formDataService.getDataRowHelper(formData).allCached = rows
+    }
 }
 
-void sortFormDataRows() {
+void sortFormDataRows(def saveInDB = true) {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
     sortRows(refBookService, logger, dataRows, null, getDataRow(dataRows, 'total'), null)
-    dataRowHelper.saveSort()
+    if (saveInDB) {
+        dataRowHelper.saveSort()
+    } else {
+        updateIndexes(dataRows)
+    }
 }
 
 void importData() {
@@ -546,7 +554,7 @@ void importData() {
             break
         }
         // Пропуск итоговых строк
-        if (rowValues[INDEX_FOR_SKIP] && rowValues[INDEX_FOR_SKIP] == "Итого") {
+        if (rowValues[INDEX_FOR_SKIP] == "Итого") {
             allValues.remove(rowValues)
             rowValues.clear()
             continue

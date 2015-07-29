@@ -1,16 +1,12 @@
 package form_template.income.rnu49.v2012
 
-import com.aplana.sbrf.taxaccounting.model.DataRow
-import com.aplana.sbrf.taxaccounting.model.FormData
-import com.aplana.sbrf.taxaccounting.model.FormDataEvent
-import com.aplana.sbrf.taxaccounting.model.FormDataKind
-import com.aplana.sbrf.taxaccounting.model.ReportPeriod
-import com.aplana.sbrf.taxaccounting.model.WorkflowState
+import com.aplana.sbrf.taxaccounting.model.*
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.model.script.range.ColumnRange
-import java.math.RoundingMode
 import groovy.transform.Field
+
+import java.math.RoundingMode
 
 /**
  * Форма "(РНУ-49) Регистр налогового учёта «ведомость определения результатов от реализации (выбытия) имущества»".
@@ -44,39 +40,41 @@ import groovy.transform.Field
 // графа 22 - saleCode              - атрибут 806 - CODE - «Шифр вида реализации (выбытия)», справочник 83 «Шифры видов реализации (выбытия)»
 
 switch (formDataEvent) {
-    case FormDataEvent.CREATE :
+    case FormDataEvent.CREATE:
         formDataService.checkUnique(formData, logger)
         break
-    case FormDataEvent.CHECK :
+    case FormDataEvent.CHECK:
         checkRNU()
         logicCheck()
         break
-    case FormDataEvent.CALCULATE :
+    case FormDataEvent.CALCULATE:
         checkRNU()
         calc()
         logicCheck()
+        formDataService.saveCachedDataRows(formData, logger)
         break
-    case FormDataEvent.ADD_ROW :
+    case FormDataEvent.ADD_ROW:
         addNewRow()
         break
-    case FormDataEvent.DELETE_ROW :
+    case FormDataEvent.DELETE_ROW:
         if (currentDataRow != null && currentDataRow.getAlias() == null) {
             formDataService.getDataRowHelper(formData).delete(currentDataRow)
         }
         break
-    case FormDataEvent.MOVE_CREATED_TO_APPROVED :  // Утвердить из "Создана"
-    case FormDataEvent.MOVE_APPROVED_TO_ACCEPTED : // Принять из "Утверждена"
-    case FormDataEvent.MOVE_CREATED_TO_ACCEPTED :  // Принять из "Создана"
-    case FormDataEvent.MOVE_CREATED_TO_PREPARED :  // Подготовить из "Создана"
-    case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED : // Принять из "Подготовлена"
-    case FormDataEvent.MOVE_PREPARED_TO_APPROVED : // Утвердить из "Подготовлена"
+    case FormDataEvent.MOVE_CREATED_TO_APPROVED:  // Утвердить из "Создана"
+    case FormDataEvent.MOVE_APPROVED_TO_ACCEPTED: // Принять из "Утверждена"
+    case FormDataEvent.MOVE_CREATED_TO_ACCEPTED:  // Принять из "Создана"
+    case FormDataEvent.MOVE_CREATED_TO_PREPARED:  // Подготовить из "Создана"
+    case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED: // Принять из "Подготовлена"
+    case FormDataEvent.MOVE_PREPARED_TO_APPROVED: // Утвердить из "Подготовлена"
         checkRNU()
         logicCheck()
         break
-    case FormDataEvent.COMPOSE :
+    case FormDataEvent.COMPOSE:
         consolidation()
         calc()
         logicCheck()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.IMPORT:
         importData()
@@ -84,6 +82,7 @@ switch (formDataEvent) {
         break
     case FormDataEvent.IMPORT_TRANSPORT_FILE:
         importTransportData()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.SORT_ROWS:
         sortFormDataRows()
@@ -101,24 +100,24 @@ def refBookCache = [:]
 // Поля, для которых подсчитываются итоговые значения (графа 9..13, 15..17, 20)
 @Field
 def totalColumns = ['amort', 'expensesOnSale', 'sum', 'sumInFact', 'costProperty', 'sumIncProfit',
-        'profit', 'loss', 'expensesSum']
+                    'profit', 'loss', 'expensesSum']
 
 // Редактируемые атрибуты (графа 2..14, 18, 19, 21..22)
 @Field
 def editableColumns = ['firstRecordNumber', 'operationDate', 'reasonNumber', 'reasonDate',
-        'invNumber', 'name', 'price', 'amort', 'expensesOnSale', 'sum',
-        'sumInFact', 'costProperty', 'marketPrice', 'saledPropertyCode', 'saleCode']
+                       'invNumber', 'name', 'price', 'amort', 'expensesOnSale', 'sum',
+                       'sumInFact', 'costProperty', 'marketPrice', 'saledPropertyCode', 'saleCode']
 
 // Обязательно заполняемые атрибуты
 @Field
 def nonEmptyColumns = ['firstRecordNumber', 'operationDate', 'reasonNumber',
-        'reasonDate', 'invNumber', 'name', 'price', 'amort', 'expensesOnSale',
-        'sum', 'sumInFact', 'costProperty', 'marketPrice', 'sumIncProfit',
-        'profit', 'loss', 'saledPropertyCode', 'saleCode']
+                       'reasonDate', 'invNumber', 'name', 'price', 'amort', 'expensesOnSale',
+                       'sum', 'sumInFact', 'costProperty', 'marketPrice', 'sumIncProfit',
+                       'profit', 'loss', 'saledPropertyCode', 'saleCode']
 
 @Field
 def autoFillColumns = ["price", "amort", "sumIncProfit", "profit", "loss",
-        "expensesSum"]
+                       "expensesSum"]
 
 // подразделы
 @Field
@@ -176,18 +175,20 @@ def getDate(def value, def indexRow, def indexCol) {
     return parseDate(value, 'dd.MM.yyyy', indexRow, indexCol + 1, logger, true)
 }
 
-def addNewRow() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.allCached
-    def newRow = formData.createDataRow()
-    newRow.keySet().each {
-        newRow.getCell(it).setStyleAlias('Автозаполняемая')
-    }
+def getNewRow() {
+    def newRow = (formDataEvent in [FormDataEvent.IMPORT, FormDataEvent.IMPORT_TRANSPORT_FILE]) ? formData.createStoreMessagingDataRow() : formData.createDataRow()
     editableColumns.each {
         newRow.getCell(it).editable = true
         newRow.getCell(it).styleAlias = 'Редактируемая'
     }
+    autoFillColumns.each {
+        newRow.getCell(it).styleAlias = 'Автозаполняемая'
+    }
+    return newRow
+}
 
+def addNewRow() {
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
     def index
     if (currentDataRow == null || currentDataRow.getIndex() == -1) {
         index = getDataRow(dataRows, 'totalA').getIndex()
@@ -197,12 +198,12 @@ def addNewRow() {
         def alias = currentDataRow.getAlias()
         index = getDataRow(dataRows, alias.contains('total') ? alias : 'total' + alias).getIndex()
     }
-    dataRowHelper.insert(newRow, index)
+    dataRows.add(index + 1, getNewRow())
+    formDataService.saveCachedDataRows(formData, logger)
 }
 
 void calc() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.allCached
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
     if (formData.kind != FormDataKind.CONSOLIDATED) {
         sort(dataRows)
         calc(dataRows)
@@ -211,9 +212,8 @@ void calc() {
         sort(dataRows)
         calcTotal(dataRows)
     }
-    dataRowHelper.save(dataRows)
 
-    sortFormDataRows()
+    sortFormDataRows(false)
 }
 
 void calc(def dataRows) {
@@ -258,7 +258,7 @@ void sort(def dataRows) {
     def sortRows = []
     groups.each { section ->
         def from = getDataRow(dataRows, section).getIndex()
-        def to = getDataRow(dataRows, 'total'+section).getIndex() - 2
+        def to = getDataRow(dataRows, 'total' + section).getIndex() - 2
         if (from <= to) {
             sortRows.add(dataRows[from..to])
         }
@@ -270,7 +270,7 @@ void sort(def dataRows) {
 }
 
 void logicCheck() {
-    def dataRows = formDataService.getDataRowHelper(formData)?.allCached
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
 
     def start = getReportPeriodStartDate()
     def end = getReportPeriodEndDate()
@@ -285,7 +285,7 @@ void logicCheck() {
             if (!findFormData) {
                 continue
             }
-            def findRows = formDataService.getDataRowHelper(findFormData)?.allCached
+            def findRows = formDataService.getDataRowHelper(findFormData)?.allSaved
             for (row in findRows) {
                 numbers += row.invNumber
             }
@@ -415,8 +415,7 @@ void logicCheck() {
 }
 
 void consolidation() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.allCached
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
     // удалить нефиксированные строки
     deleteNotFixedRows(dataRows)
 
@@ -426,14 +425,13 @@ void consolidation() {
         if (it.formTypeId == formData.formType.id) {
             def source = formDataService.getLast(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId, formData.periodOrder)
             if (source != null && source.state == WorkflowState.ACCEPTED) {
-                def sourceDataRows = formDataService.getDataRowHelper(source).allCached
+                def sourceDataRows = formDataService.getDataRowHelper(source).allSaved
                 groups.each { section ->
                     copyRows(sourceDataRows, dataRows, section, 'total' + section)
                 }
             }
         }
     }
-    dataRowHelper.save(dataRows)
 }
 
 def getSum(def dataRows, def columnAlias, def rowStart, def rowEnd) {
@@ -492,7 +490,7 @@ BigDecimal getGraph9(def DataRow row49, def DataRow row46, def DataRow row45) {
             tmp = (row46.cost10perExploitation ?: 0) + (row46.amortExploitation ?: 0)
         } else if (row45 != null && saledPropertyCode == 2) {
             tmp = row45.amortizationSinceUsed
-        } else if (saledPropertyCode in [3,5,6,7]) {
+        } else if (saledPropertyCode in [3, 5, 6, 7]) {
             tmp = BigDecimal.ZERO
         } else if (saledPropertyCode == 4) {
             tmp = row49.amort
@@ -606,7 +604,7 @@ def getDataRowsByFormTemplateId(def formTemplateId, def reportPeriod, def start,
     def dataRows = []
     for (def form in formDataList) {
         if (form != null && form.id != null) {
-            def cached = formDataService.getDataRowHelper(form)?.allCached
+            def cached = formDataService.getDataRowHelper(form)?.allSaved
             if (cached != null) {
                 dataRows += cached
             }
@@ -615,7 +613,7 @@ def getDataRowsByFormTemplateId(def formTemplateId, def reportPeriod, def start,
     return dataRows
 }
 
-def List<FormData> getFormDataList(def formTemplateId, def reportPeriod, def start, def end){
+def List<FormData> getFormDataList(def formTemplateId, def reportPeriod, def start, def end) {
     def formList = []
     for (def periodOrder = start[Calendar.MONTH] + 1; periodOrder <= end[Calendar.MONTH] + 1; periodOrder++) {
         formList += formDataService.getLast(formTemplateId, formData.kind, formDataDepartment.id, reportPeriod.taxPeriod.id, periodOrder)
@@ -643,8 +641,7 @@ void importTransportData() {
 }
 
 void addTransportData(def xml) {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper?.allCached
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
     def int rnuIndexRow = 2
     def int colOffset = 1
 
@@ -656,14 +653,7 @@ void addTransportData(def xml) {
         if ((row.cell.find { it.text() != "" }.toString()) == "") {
             break
         }
-        def newRow = formData.createDataRow()
-        editableColumns.each {
-            newRow.getCell(it).editable = true
-            newRow.getCell(it).setStyleAlias('Редактируемая')
-        }
-        autoFillColumns.each {
-            newRow.getCell(it).setStyleAlias('Автозаполняемая')
-        }
+        def newRow = getNewRow()
         // графа 2
         def xmlIndexCol = 2
         newRow.firstRecordNumber = row.cell[xmlIndexCol].text()
@@ -682,36 +672,11 @@ void addTransportData(def xml) {
         // графа 7
         xmlIndexCol = 7
         newRow.name = row.cell[xmlIndexCol].text()
-        // графа 8
-        xmlIndexCol = 8
-        newRow.price = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
-        // графа 9
-        xmlIndexCol = 9
-        newRow.amort = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
-        // графа 10
-        xmlIndexCol = 10
-        newRow.expensesOnSale = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
-        // графа 11
-        xmlIndexCol = 11
-        newRow.sum = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
-        // графа 12
-        xmlIndexCol = 12
-        newRow.sumInFact = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
-        // графа 13
-        xmlIndexCol = 13
-        newRow.costProperty = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
-        // графа 14
-        xmlIndexCol = 14
-        newRow.marketPrice = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
-        // графа 15
-        xmlIndexCol = 15
-        newRow.sumIncProfit = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
-        // графа 16
-        xmlIndexCol = 16
-        newRow.profit = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
-        // графа 17
-        xmlIndexCol = 17
-        newRow.loss = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+        // графа 8..17
+        ['price', 'amort', 'expensesOnSale', 'sum', 'sumInFact', 'costProperty', 'marketPrice', 'sumIncProfit', 'profit', 'loss'].each { alias ->
+            xmlIndexCol++
+            newRow[alias] = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+        }
         // графа 18
         xmlIndexCol = 18
         newRow.usefullLifeEnd = getDate(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
@@ -759,7 +724,6 @@ void addTransportData(def xml) {
     }
 
     calcTotal(dataRows)
-    dataRowHelper.save(dataRows)
 }
 
 def roundValue(def value, int precision) {
@@ -780,7 +744,7 @@ void checkRNU() {
     }
 }
 
-void sortFormDataRows() {
+void sortFormDataRows(def saveInDB = true) {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
 
@@ -797,7 +761,11 @@ void sortFormDataRows() {
 
         sortRowsSimple(sectionRows)
     }
-    dataRowHelper.saveSort()
+    if (saveInDB) {
+        dataRowHelper.saveSort()
+    } else {
+        updateIndexes(dataRows)
+    }
 }
 
 void importData() {
@@ -952,16 +920,9 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
  * @param rowIndex строка в нф
  */
 def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) {
-    def newRow = formData.createStoreMessagingDataRow()
+    def newRow = getNewRow()
     newRow.setIndex(rowIndex)
     newRow.setImportIndex(fileRowIndex)
-    editableColumns.each {
-        newRow.getCell(it).editable = true
-        newRow.getCell(it).setStyleAlias('Редактируемая')
-    }
-    autoFillColumns.each {
-        newRow.getCell(it).setStyleAlias('Автозаполняемая')
-    }
 
     // графа 2
     def colIndex = 2
