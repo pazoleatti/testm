@@ -164,7 +164,7 @@ public class FormDataListPresenter extends FormDataListPresenterBase<FormDataLis
 				FormDataFilter filter = filterPresenter.getFilterData();
 				getView().updateTitle(filter.getTaxType().getName());
 				// TODO Нужно переделать
-				if (filter.getTaxType() == TaxType.DEAL) {
+				if (TaxType.DEAL.equals(filter.getTaxType()) || TaxType.ETR.equals(filter.getTaxType())) {
 					getView().updateHeader("Список форм");
 				} else {
 					getView().updateHeader("Список налоговых форм");

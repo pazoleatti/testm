@@ -572,6 +572,7 @@ public class PeriodServiceImpl implements PeriodService {
 				case INCOME:
 				case VAT:
 				case DEAL:
+                case ETR: //TODO
 					switch (operation) {
 						case FIND:
 							List<Integer> dep = new ArrayList<Integer>();
@@ -604,7 +605,8 @@ public class PeriodServiceImpl implements PeriodService {
 				case INCOME:
 				case VAT:
 				case DEAL:
-					switch (operation) {
+                case ETR: //TODO
+                    switch (operation) {
 						case FIND:
 							return departmentService.getTBDepartmentIds(user);
 						case EDIT_DEADLINE:

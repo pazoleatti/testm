@@ -23,7 +23,11 @@ public enum TaxType {
 	/**
 	 * УКС
 	 */
-	DEAL('D', "Учет контролируемых сделок", "UT_UVKNRSD");
+	DEAL('D', "Учет контролируемых сделок", "UT_UVKNRSD"),
+    /**
+     * ЭНС
+     */
+    ETR('E', "Эффективная налоговая ставка", "");
 
 	private final char code;
 	private final String name;
@@ -80,7 +84,7 @@ public enum TaxType {
     }
 
     public String getTaxText() {
-        if (this.equals(DEAL)) {
+        if (this.equals(DEAL) || this.equals(ETR)) {
             return "";
         } else {
             return "налоговой ";

@@ -26,12 +26,13 @@ public class GetFieldNamesHandler extends AbstractActionHandler<GetFieldsNames, 
 		Map<FormDataElementName, String> names = new HashMap<FormDataElementName, String>();
 		switch (getFieldsNames.getTaxType()) {
 			case DEAL:
+            case ETR:
 				names.put(FormDataElementName.HEADER, "Список форм");
 				names.put(FormDataElementName.FORM_KIND, "Тип формы");
 				names.put(FormDataElementName.FORM_TYPE, "Вид формы");
 				names.put(FormDataElementName.REPORT_PERIOD, "Период");
 				break;
-			case INCOME:
+            case INCOME:
 			case PROPERTY:
 			case TRANSPORT:
 			case VAT:

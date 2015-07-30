@@ -89,10 +89,12 @@ public class GetMainMenuActionHandler extends
                 taxMenu.getSubMenu().add(new MenuItem(TaxType.PROPERTY.getName(), "", TaxType.PROPERTY.name()));
                 taxMenu.getSubMenu().add(new MenuItem(TaxType.TRANSPORT.getName(), "", TaxType.TRANSPORT.name()));
                 taxMenu.getSubMenu().add(new MenuItem("Учет КС", "", TaxType.DEAL.name()));
+                taxMenu.getSubMenu().add(new MenuItem("ЭНС", "", TaxType.ETR.name()));
 
                 for (MenuItem menu : taxMenu.getSubMenu()) {
                     boolean isDeal = menu.getMeta().equals(TaxType.DEAL.name());
-                    String formItemName = isDeal ? "Список форм" : "Налоговые формы";
+                    boolean isETR = menu.getMeta().equals(TaxType.ETR.name());
+                    String formItemName = (isDeal || isETR) ? "Список форм" : "Налоговые формы";
                     String declarationItemName = isDeal ? "Уведомления" : "Декларации";
 
                     // налоговые формы
@@ -100,9 +102,9 @@ public class GetMainMenuActionHandler extends
                             + ";" + TYPE + "=" + menu.getMeta()));
 
                     // декларации
-                    if (currentUser.hasRole(TARole.ROLE_CONTROL)
+                    if (!isETR && (currentUser.hasRole(TARole.ROLE_CONTROL)
                             || currentUser.hasRole(TARole.ROLE_CONTROL_NS)
-                            || currentUser.hasRole(TARole.ROLE_CONTROL_UNP)) {
+                            || currentUser.hasRole(TARole.ROLE_CONTROL_UNP))) {
                         menu.getSubMenu().add(new MenuItem(declarationItemName, NUMBER_SIGN
                                 + DeclarationListNameTokens.DECLARATION_LIST + ";"
                                 + TYPE + "=" + menu.getMeta()));
@@ -121,9 +123,9 @@ public class GetMainMenuActionHandler extends
                     }
 
                     // настройки подразделений
-                    if (currentUser.hasRole(TARole.ROLE_CONTROL)
+                    if (!isETR && (currentUser.hasRole(TARole.ROLE_CONTROL)
                             || currentUser.hasRole(TARole.ROLE_CONTROL_NS)
-                            || currentUser.hasRole(TARole.ROLE_CONTROL_UNP)) {
+                            || currentUser.hasRole(TARole.ROLE_CONTROL_UNP))) {
                         if (!TaxType.PROPERTY.toString().equals(menu.getMeta())
                                 && !TaxType.TRANSPORT.toString().equals(menu.getMeta())
                                 && !TaxType.INCOME.toString().equals(menu.getMeta())
@@ -142,6 +144,12 @@ public class GetMainMenuActionHandler extends
                         if (isDeal) {
                             menu.getSubMenu().add(
                                     new MenuItem("Назначение форм и уведомлений",
+                                            NUMBER_SIGN + TaxFormNominationToken.taxFormNomination + ";"
+                                                    + TYPE + "=" + menu.getMeta() + ";"
+                                                    + TaxFormNominationToken.isForm + "=" + true));
+                        } else if (isETR) {
+                            menu.getSubMenu().add(
+                                    new MenuItem("Назначение форм",
                                             NUMBER_SIGN + TaxFormNominationToken.taxFormNomination + ";"
                                                     + TYPE + "=" + menu.getMeta() + ";"
                                                     + TaxFormNominationToken.isForm + "=" + true));

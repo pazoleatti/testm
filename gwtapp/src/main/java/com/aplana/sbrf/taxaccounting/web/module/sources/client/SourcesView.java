@@ -130,6 +130,9 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers> implement
     @UiField
     HTMLPanel panel, leftPanel, rightPanel;
 
+    @UiField
+    HTML verSep;
+
     private GenericDataGrid.DataGridResizableHeader
             leftFormKindHeader,
             leftNameTypeHeader;
@@ -163,6 +166,7 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers> implement
 
     private boolean isForm = true;
     private boolean isTaxTypeDeal = false;
+    private boolean isTaxTypeETR = false;
 
     private SingleSelectionModel<DepartmentAssign> leftSM;
     private MultiSelectionModel<DepartmentAssign> rightSM;
@@ -621,6 +625,7 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers> implement
                      boolean isForm) {
         this.isForm = isForm;
         this.isTaxTypeDeal = taxType.equals(TaxType.DEAL);
+        this.isTaxTypeETR = taxType.equals(TaxType.ETR);
 
         taxTypeLabel.setText(taxType.getName());
 
@@ -646,7 +651,7 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers> implement
         cancelButton.setEnabled(false);
         editButton.setEnabled(false);
 
-        setupView(isForm, isTaxTypeDeal, AppointmentType.SOURCES.equals(type));
+        setupView(isForm, isTaxTypeDeal, isTaxTypeETR, AppointmentType.SOURCES.equals(type));
     }
 
     /**
@@ -656,19 +661,26 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers> implement
      * @param isTaxTypeDeal true - тип налога "Учет КС", иначе все остальные
      * @param isSources     true - назанчение источников, иначе назанчение приемников
      */
-    private void setupView(boolean isForm, boolean isTaxTypeDeal, boolean isSources) {
+    private void setupView(boolean isForm, boolean isTaxTypeDeal, boolean isTaxTypeETR, boolean isSources) {
 
         leftLabel.setText(isSources ? "Приемник" : "Источник");
         rightLabel.setText(isSources ? "Источники" : "Приемники");
         downLabel.setText("Указанные " + (isSources ? "источники" : "приемники"));
 
-        formDecAnchor.setText(isForm ?
-                (isTaxTypeDeal ? TITLE_DEC_DEAL : TITLE_DEC) :
-                (isTaxTypeDeal ? TITLE_FORM_DEAL : TITLE_FORM));
+        if (isTaxTypeETR) {
+            verSep.setVisible(false);
+            formDecAnchor.setVisible(false);
+        } else {
+            verSep.setVisible(true);
+            formDecAnchor.setVisible(true);
+            formDecAnchor.setText(isForm ?
+                    (isTaxTypeDeal ? TITLE_DEC_DEAL : TITLE_DEC) :
+                    (isTaxTypeDeal ? TITLE_FORM_DEAL : TITLE_FORM));
+        }
 
         formDecLabel.setText(!isForm ?
                 (isTaxTypeDeal ? TITLE_DEC_DEAL : TITLE_DEC) :
-                (isTaxTypeDeal ? TITLE_FORM_DEAL : TITLE_FORM));
+                (isTaxTypeDeal || isTaxTypeETR ? TITLE_FORM_DEAL : TITLE_FORM));
 
         clearLeftTable();
         clearRightTable();
@@ -678,7 +690,7 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers> implement
         rightTable.removeAllColumns();
         downTable.removeAllColumns();
 
-        formKindColumnTitle = isTaxTypeDeal ? "Тип формы" : "Тип налоговой формы";
+        formKindColumnTitle = isTaxTypeDeal || isTaxTypeETR ? "Тип формы" : "Тип налоговой формы";
         leftFormKindHeader.setTitle(formKindColumnTitle);
         rightFormKindHeader.setTitle(formKindColumnTitle);
         downFormKindHeader.setTitle(formKindColumnTitle);
@@ -872,7 +884,7 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers> implement
     public void changeView(ClickEvent event) {
         this.isForm = !this.isForm;
         appointmentTypePicker.setValue(AppointmentType.SOURCES);
-        setupView(isForm, isTaxTypeDeal, isSource());
+        setupView(isForm, isTaxTypeDeal, isTaxTypeETR, isSource());
     }
 
     @UiHandler("assignButton")
@@ -928,7 +940,7 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers> implement
 
     @UiHandler("appointmentTypePicker")
     public void change(ValueChangeEvent<AppointmentType> event) {
-        setupView(isForm, isTaxTypeDeal, isSource());
+        setupView(isForm, isTaxTypeDeal, isTaxTypeETR, isSource());
     }
 
     /**
@@ -1055,7 +1067,7 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers> implement
 
     private String getNameTypeHeaderTitle(boolean isForm) {
         return isForm ?
-                (isTaxTypeDeal ? "Вид формы" : "Вид налоговой формы") :
+                (isTaxTypeDeal || isTaxTypeETR ? "Вид формы" : "Вид налоговой формы") :
                 (isTaxTypeDeal ? "Вид уведомления" : "Вид декларации");
     }
 }

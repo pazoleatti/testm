@@ -29,6 +29,7 @@ public class HistoryView extends PopupViewWithUiHandlers<AplanaUiHandlers> imple
 
     public static final String MODAL_WINDOW_TITLE = "Информация по налоговой форме/декларации";
     public static final String MODAL_WINDOW_TITLE_D = "Информация по форме/уведомлению";
+    public static final String MODAL_WINDOW_TITLE_E = "Информация по форме";
     private static final DateTimeFormat format = DateTimeFormat.getFormat("dd.MM.yyyy HH:mm:ss");
     private static final String DECLARATION_SAVE_EVENT = "Обновление";
     @UiField
@@ -63,10 +64,12 @@ public class HistoryView extends PopupViewWithUiHandlers<AplanaUiHandlers> imple
 
     @Override
     public void updateTitle(TaxType taxType) {
-        if (!taxType.equals(TaxType.DEAL)) {
-            modalWindowTitle.setText(MODAL_WINDOW_TITLE);
-        } else {
+        if (taxType.equals(TaxType.DEAL)) {
             modalWindowTitle.setText(MODAL_WINDOW_TITLE_D);
+        } else if (taxType.equals(TaxType.ETR)) {
+            modalWindowTitle.setText(MODAL_WINDOW_TITLE_E);
+        } else {
+            modalWindowTitle.setText(MODAL_WINDOW_TITLE);
         }
     }
 

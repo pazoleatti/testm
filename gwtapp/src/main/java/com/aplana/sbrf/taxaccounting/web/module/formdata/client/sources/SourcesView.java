@@ -64,6 +64,8 @@ public class SourcesView extends PopupViewWithUiHandlers<SourcesUiHandlers> impl
     CheckBox destination;
     @UiField
     CheckBox uncreated;
+    @UiField
+    HTML verSep;
 
     private boolean isForm;
     private ListDataProvider<FormToFormRelation> dataProvider = new ListDataProvider<FormToFormRelation>();
@@ -312,13 +314,21 @@ public class SourcesView extends PopupViewWithUiHandlers<SourcesUiHandlers> impl
 
     private void updateSwitchMode() {
         boolean isTaxTypeDeal = TaxType.DEAL.equals(getUiHandlers().getTaxType());
-        formDecAnchor.setText(isForm ?
-                (isTaxTypeDeal ? TITLE_DEC_DEAL : TITLE_DEC) :
-                (isTaxTypeDeal ? TITLE_FORM : TITLE_FORM));
+        boolean isTaxTypeETR = TaxType.ETR.equals(getUiHandlers().getTaxType());
 
+        if (isTaxTypeETR) {
+            verSep.setVisible(false);
+            formDecAnchor.setVisible(false);
+        } else {
+            verSep.setVisible(true);
+            formDecAnchor.setVisible(true);
+            formDecAnchor.setText(isForm ?
+                    (isTaxTypeDeal ? TITLE_DEC_DEAL : TITLE_DEC) :
+                    (isTaxTypeDeal ? TITLE_FORM : TITLE_FORM));
+        }
         formDecLabel.setText(!isForm ?
                 (isTaxTypeDeal ? TITLE_DEC_DEAL : TITLE_DEC) :
-                (isTaxTypeDeal ? TITLE_FORM : TITLE_FORM));
+                (isTaxTypeDeal || isTaxTypeETR ? TITLE_FORM : TITLE_FORM));
 
         source.setVisible(isForm);
     }
