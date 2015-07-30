@@ -61,7 +61,7 @@
 		<field name="СумПУ_173.5" class="java.lang.String">
 			<fieldDescription><![CDATA[@СумПУ_173.5]]></fieldDescription>
 		</field>
-		<field name="СумПУ_173.1" class="java.lang.Integer">
+		<field name="СумПУ_173.1" class="java.lang.Long">
 			<fieldDescription><![CDATA[@СумПУ_173.1]]></fieldDescription>
 		</field>
 		<field name="НомДогИТ" class="java.lang.String">
@@ -95,7 +95,7 @@
 			<variableExpression><![CDATA["-------------------------"]]></variableExpression>
 			<initialValueExpression><![CDATA["-------------------------"]]></initialValueExpression>
 		</variable>
-		<variable name="СумПУ_173.1" class="java.lang.Integer">
+		<variable name="СумПУ_173.1" class="java.lang.Long">
 			<variableExpression><![CDATA[$F{СумПУ_173.1} >=0 ? $F{СумПУ_173.1} : 0-$F{СумПУ_173.1}]]></variableExpression>
 			<initialValueExpression><![CDATA[]]></initialValueExpression>
 		</variable>
@@ -10572,7 +10572,7 @@ $F{Раздел3_стр230-240_НалПУ164} : 0]]></variableExpression>
 							<textElement verticalAlignment="Top">
 								<font fontName="Arial" size="7" isItalic="true"/>
 							</textElement>
-							<text><![CDATA[(величина разницы суммы строк 230 раздела 3, 130 раздела 4, 160
+							<text><![CDATA[(величина разницы суммы строк 200 раздела 3, 130 раздела 4, 160
 раздела 6 и суммы строк 210 раздела 3, 120 раздела 4, 080
 раздела 5, 090 раздела 5, 170 раздела 6 >=0)]]></text>
 						</staticText>
@@ -10591,7 +10591,7 @@ $F{Раздел3_стр230-240_НалПУ164} : 0]]></variableExpression>
 							<textElement verticalAlignment="Top">
 								<font fontName="Arial" size="7" isItalic="true"/>
 							</textElement>
-							<text><![CDATA[(величина разницы суммы строк 230 раздела 3, 130 раздела 4, 160
+							<text><![CDATA[(величина разницы суммы строк 200 раздела 3, 130 раздела 4, 160
 раздела 6 и суммы строк 210 раздела 3, 120 раздела 4, 080
 раздела 5, 090 раздела 5, 170 раздела 6 <0)]]></text>
 						</staticText>

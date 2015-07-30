@@ -121,8 +121,9 @@ def editableColumns = ['emitentName', 'emitentInn', 'all', 'rateZero', 'distribu
 
 // обязательные (графа 1..17, 23..25, 27)
 @Field
-def nonEmptyColumns = ['emitentName', 'emitentInn', 'distributionSum', 'decisionNumber', 'decisionDate', 'year', 'firstMonth',
-                       'lastMonth', 'allSum', 'addresseeName', 'type', 'status', 'dividends', 'sum', 'date', 'withheldSum']
+def nonEmptyColumns = ['emitentName', 'emitentInn', 'distributionSum', 'decisionNumber',
+                       'decisionDate', 'year', 'firstMonth', 'lastMonth', 'allSum', 'addresseeName', 'type',
+                       'status', 'dividends', 'sum', 'date', 'withheldSum']
 
 // сортировка (графа 7, 8)
 @Field
@@ -167,10 +168,10 @@ def logicCheck() {
         // Проверка обязательных полей
         checkNonEmptyColumns(row, index, nonEmptyColumns, logger, true)
 
-        // «Графа 14» и «Графа 15» обязательны для заполнения, если значение «Графы 16» = «1»
-        if (row.type == 1 && (row.inn == null || row.kpp == null)) {
-            logger.error("Строка ${index}: В случае если атрибут «%s» заполнен значением «1» должен быть заполнен атрибут «%s» и атрибут «%s»!",
-                    getColumnName(row, 'type'), getColumnName(row, 'inn'), getColumnName(row, 'kpp'))
+        // «Графа 14» и «Графа 15» обязательны для заполнения, если значение «Графы 16» и «Графы 17» = «1»
+        if (row.type == 1 && row.status == 1 && (row.inn == null || row.kpp == null)) {
+            logger.error("Строка ${index}: В случае если графы «%s» и «%s» равны значению «1», должна быть заполнена графа  «%s» и «%s»!",
+                    getColumnName(row, 'type'), getColumnName(row, 'status'), getColumnName(row, 'inn'), getColumnName(row, 'kpp'))
         }
 
         // Проверка паттернов
@@ -179,13 +180,15 @@ def logicCheck() {
         } else if (row.emitentInn){
             wasError[1] = true
         }
-        if (row.inn && checkPattern(logger, row, 'inn', row.inn, INN_JUR_PATTERN, wasError[1] ? null : INN_JUR_MEANING, true)) {
-            checkControlSumInn(logger, row, 'inn', row.inn, true)
-        } else if (row.inn){
-            wasError[1] = true
-        }
-        if (row.kpp && !checkPattern(logger, row, 'kpp', row.kpp, KPP_PATTERN, wasError[2] ? null : KPP_MEANING, true)) {
-            wasError[2] = true
+        if (row.type != 2 && row.status != 2) { // если хотя бы одна графа из 16-й и 17-й равна 2. то не проверять 14-ю и 15-ю
+            if (row.inn && checkPattern(logger, row, 'inn', row.inn, INN_JUR_PATTERN, wasError[1] ? null : INN_JUR_MEANING, true)) {
+                checkControlSumInn(logger, row, 'inn', row.inn, true)
+            } else if (row.inn){
+                wasError[1] = true
+            }
+            if (row.kpp && !checkPattern(logger, row, 'kpp', row.kpp, KPP_PATTERN, wasError[2] ? null : KPP_MEANING, true)) {
+                wasError[2] = true
+            }
         }
 
         // «Графа 17» принимает значения «1» или «2»
@@ -211,7 +214,7 @@ void importTransportData() {
     char QUOTE = '\0'
 
     String[] rowCells
-    int fileRowIndex = 0    // номер строки в файле
+    int fileRowIndex = 2    // номер строки в файле (1, 2..). Начинается с 2, потому что первые две строки - заголовок и пустая строка
     int rowIndex = 0        // номер строки в НФ
     def totalTF = null		// итоговая строка со значениями из тф для добавления
     def newRows = []

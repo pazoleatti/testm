@@ -442,6 +442,10 @@ String pure(String cell) {
     return StringUtils.cleanString(cell)?.intern()
 }
 
+boolean isEmptyCells(def rowCells) {
+    return rowCells.length == 1 && rowCells[0] == ''
+}
+
 void importData() {
     int COLUMN_COUNT = 5
     int HEADER_ROW_COUNT = 3

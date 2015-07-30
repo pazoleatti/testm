@@ -447,10 +447,10 @@ def logicCheck() {
             // 3 квартал
             str += checkPrevPeriod(prevReportPeriod)
             // 2 квартал
-            prevReportPeriod = reportPeriodService.getPrevReportPeriod(prevReportPeriod.id)
+            prevReportPeriod = (prevReportPeriod ? reportPeriodService.getPrevReportPeriod(prevReportPeriod.id) : null)
             str += checkPrevPeriod(prevReportPeriod)
             // 1 квартал
-            prevReportPeriod = reportPeriodService.getPrevReportPeriod(prevReportPeriod.id)
+            prevReportPeriod = (prevReportPeriod ? reportPeriodService.getPrevReportPeriod(prevReportPeriod.id) : null)
             str += checkPrevPeriod(prevReportPeriod)
         } else {
             str = checkPrevPeriod(prevReportPeriod)
@@ -792,7 +792,7 @@ void importTransportData() {
     char QUOTE = '\0'
 
     String[] rowCells
-    int fileRowIndex = 0    // номер строки в файле
+    int fileRowIndex = 2    // номер строки в файле (1, 2..). Начинается с 2, потому что первые две строки - заголовок и пустая строка
     int rowIndex = 0        // номер строки в НФ
     def totalTF = null		// итоговая строка со значениями из тф для добавления
     def mapRows = [:]

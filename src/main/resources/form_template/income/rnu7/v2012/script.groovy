@@ -489,7 +489,7 @@ void importTransportData() {
     char QUOTE = '\0'
 
     String[] rowCells
-    int fileRowIndex = 0    // номер строки в файле (1, 2, ..)
+    int fileRowIndex = 2    // номер строки в файле (1, 2..). Начинается с 2, потому что первые две строки - заголовок и пустая строка
     int rowIndex = 0        // номер строки в НФ (1, 2, ..)
     def totalTF = null      // итоговая строка со значениями из тф для добавления
     def newRows = []
@@ -775,15 +775,13 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
 
     // графа 7
     colIndex++
-    newRow.currencyCode = getRecordIdImport(15, 'CODE', values[colIndex], fileRowIndex, colIndex + colOffset)
+    newRow.currencyCode = getRecordIdImport(15, 'CODE', values[colIndex], fileRowIndex, colIndex + colOffset, false)
 
-    // графа 9
-    colIndex = 9
-    newRow.taxAccountingCurrency = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
-
-    // графа 11
-    colIndex = 11
-    newRow.accountingCurrency = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
+    // графа 8..12
+    ['rateOfTheBankOfRussia', 'taxAccountingCurrency', 'taxAccountingRuble', 'accountingCurrency', 'ruble'].each { alias ->
+        colIndex++
+        newRow[alias] =  parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
+    }
 
     return newRow
 }

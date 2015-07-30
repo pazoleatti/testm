@@ -118,6 +118,19 @@ def endDate = null
 @Field
 def Boolean isBalancePeriod = null
 
+@Field
+def periodsMap = [:]
+
+@Field
+def formDataMap = [:]
+
+// значения графы 10 за последение 3 года (ключ: идентификатор формы, графа 4, 5, 6)
+@Field
+def last3YearsValuesMap = [:]
+
+@Field
+def useFormMap = [:]
+
 //// Обертки методов
 
 // Поиск записи в справочнике по значению (для импорта)
@@ -367,24 +380,34 @@ void logicCheck() {
         // 12. Проверка значения суммы дохода в налоговом учете, для первичного документа, указанного для суммы дохода в бухгалтерском учёте
         if (row.ruble && row.docDate != null) {
             def Date date = row.docDate
-            def Date from = new SimpleDateFormat('dd.MM.yyyy').parse('01.01.' + (Integer.valueOf(new SimpleDateFormat('yyyy').format(date)) - 3))
-            def reportPeriods = reportPeriodService.getReportPeriodsByDate(TaxType.INCOME, from, date)
+            def Date from = Date.parse('dd.MM.yyyy', '01.01.' + (Integer.valueOf(date.format('yyyy')) - 3))
+            def reportPeriods = getPeriods(from, date)
 
             isFind = false
-            def sum = 0 // сумма 12-х граф
+            def sum = 0 // сумма 10-х граф
             def periods = []
 
+            // обход периодов за последние 3 года
             for (reportPeriod in reportPeriods) {
-                def findFormData = formDataService.getLast(formData.formType.id, formData.kind, formData.departmentId, reportPeriod.id, formData.periodOrder)
+                def findFormData = getFormData(reportPeriod.id)
                 if (findFormData != null) {
-                    for (findRow in formDataService.getDataRowHelper(findFormData).allSaved) {
-                        // SBRFACCTAX-3531 исключать строку из той же самой формы не надо
-                        if (findRow.getAlias() == null && findRow.code == row.code && findRow.docNumber == row.docNumber
-                                && findRow.docDate == row.docDate && findRow.taxAccountingRuble > 0) {
-                            isFind = true
-                            sum += findRow.taxAccountingRuble
-                            periods += (reportPeriod.name + " " + reportPeriod.taxPeriod.year)
+                    // если форма не использовалась, то пройтись по ней и собрать данные в мапу
+                    if (useFormMap[findFormData.id] == null) {
+                        for (findRow in formDataService.getDataRowHelper(findFormData).allSaved) {
+                            def key = getLast3YearsKey(findFormData.id, findRow.code, findRow.docNumber, findRow.docDate)
+                            // SBRFACCTAX-3531 исключать строку из той же самой формы не надо
+                            if (findRow.getAlias() == null && findRow.taxAccountingRuble > 0) {
+                                last3YearsValuesMap[key] = (last3YearsValuesMap[key] ?: 0) + findRow.taxAccountingRuble
+                            }
                         }
+                        useFormMap[findFormData.id] = true
+                    }
+                    // среди собранных данных проверить наличие подходящей строки
+                    def key = getLast3YearsKey(findFormData.id, row.code, row.docNumber, row.docDate)
+                    if (last3YearsValuesMap[key] != null) {
+                        isFind = true
+                        sum += last3YearsValuesMap[key]
+                        periods += (reportPeriod.name + " " + reportPeriod.taxPeriod.year)
                     }
                 }
             }
@@ -414,6 +437,34 @@ void logicCheck() {
 
     // 10. Арифметические проверки расчета строки общих итогов
     checkTotalSum(dataRows, totalColumns, logger, !isBalancePeriod())
+}
+
+def getPeriods(def date1, date2) {
+    def key = "$date1#$date2"
+    if (periodsMap[key] == null) {
+        periodsMap[key] = reportPeriodService.getReportPeriodsByDate(TaxType.INCOME, date1, date2)
+    }
+    return periodsMap[key]
+}
+
+def getFormData(reportPeriodId) {
+    String key = "$reportPeriodId"
+    if (formDataMap[key] != -1 && formDataMap[key] == null) { // чтобы повторно не искал несуществующие формы
+        formDataMap[key] = (formDataService.getLast(formData.formType.id, formData.kind, formData.departmentId, reportPeriodId, formData.periodOrder) ?: -1)
+    }
+    return (formDataMap[key] != -1) ? formDataMap[key] : null
+}
+
+/**
+ * Получить ключ для мапы в которой хранятся занчения за последние 3 года.
+ *
+ * @param findFormDataId идентификатор формы
+ * @param code графа 4
+ * @param docNumber графа 5
+ * @param docDate графа 6
+ */
+def getLast3YearsKey(def findFormDataId, def code, def  docNumber, def docDate) {
+    return "$findFormDataId#$code#$docNumber#$docDate"
 }
 
 def String getKnu(def code) {
@@ -746,7 +797,7 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
 
     // графа 4 - поиск записи идет по графе 2
     def colIndex = 2
-    newRow.code = getRecordIdImport(28, 'CODE', values[colIndex], fileRowIndex, colIndex + colOffset)
+    newRow.code = getRecordIdImport(28, 'CODE', values[colIndex], fileRowIndex, colIndex + colOffset, false)
     def map = getRefBookValue(28, newRow.code)
 
     // графа 4 проверка
@@ -769,7 +820,7 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
 
     // графа 7
     colIndex++
-    newRow.currencyCode = getRecordIdImport(15, 'CODE', values[colIndex], fileRowIndex, colIndex + colOffset)
+    newRow.currencyCode = getRecordIdImport(15, 'CODE', values[colIndex], fileRowIndex, colIndex + colOffset, false)
 
     // графа 8..12
     ['rateOfTheBankOfRussia', 'taxAccountingCurrency', 'taxAccountingRuble', 'accountingCurrency', 'ruble'].each { alias ->
