@@ -129,6 +129,7 @@ public class Rnu27Test extends ScriptTestBase {
         int expected = 2 + 2 * 2 + 1; // в файле 2 строки + 2 подитога на каждую строку + 1 итоговая строка
         testHelper.setImportFileInputStream(getImportXlsInputStream());
         testHelper.execute(FormDataEvent.IMPORT);
+        testHelper.execute(FormDataEvent.CALCULATE);
         Assert.assertEquals(expected, testHelper.getDataRowHelper().getAll().size());
         // Проверка расчетных данных
         checkLoadData(testHelper.getDataRowHelper().getAll());
