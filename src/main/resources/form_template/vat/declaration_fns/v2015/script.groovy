@@ -66,11 +66,21 @@ def departmentParam = null
 @Field
 def reportPeriodEndDate = null
 
+@Field
+def prevReportPeriodEndDate = null
+
 def getEndDate() {
     if (reportPeriodEndDate == null) {
         reportPeriodEndDate = reportPeriodService.getEndDate(declarationData.reportPeriodId)?.time
     }
     return reportPeriodEndDate
+}
+
+def getPrevEndDate() {
+    if (prevReportPeriodEndDate == null) {
+        prevReportPeriodEndDate = reportPeriodService.getEndDate(reportPeriodService.getPrevReportPeriod(declarationData.reportPeriodId)?.id)?.time
+    }
+    return prevReportPeriodEndDate
 }
 
 // Разыменование с использованием кеширования
@@ -359,7 +369,7 @@ void generateXML() {
     /** НалВычОбщ. Код строки 190 Графа 5. */
     def nalVichObsh = round(nalPredNPPriob + nalIschProd + nalUplPokNA)
     /** НалПУ164. Код строки 200 и код строки 210.*/
-    def nalPU164 = (nalVosstObsh - nalVichObsh).abs().intValue()
+    def nalPU164 = (nalVosstObsh - nalVichObsh).longValue()
 
     def builder = new MarkupBuilder(xml)
     builder.Файл(
@@ -788,9 +798,6 @@ def specialCode = '1010276'
 @Field
 def opuCodes = ['26411.01']
 
-@Field
-def knuCodes = ['20860', '20870']
-
 /**
  * Получить значение для НалНеВыч.
  *
@@ -800,14 +807,13 @@ def getNalNeVich(def code) {
     def order = reportPeriodService.get(declarationData.reportPeriodId)?.order
     if (code == specialCode) {
         // сумма кодов ОПУ из отчета 102
-        def sumOpu = getSumByOpuCodes(opuCodes)
+        def sumOpu = getSumByOpuCodes(opuCodes, getEndDate())
         if (order == 1) {
             return sumOpu
         } else {
-            // сумма из расходов простых
-            def sumOutcome = getSumOutcomeSimple(knuCodes)
+            def sumOpuPrev = getSumByOpuCodes(opuCodes, getPrevEndDate())
             // разность сумм
-            return sumOpu - sumOutcome
+            return sumOpu - sumOpuPrev
         }
     } else {
         return empty
@@ -817,10 +823,10 @@ def getNalNeVich(def code) {
 /**
  * Посчитать сумму по кодам ОПУ.
  */
-def getSumByOpuCodes(def opuCodes) {
+def getSumByOpuCodes(def opuCodes, def date) {
     def tmp = BigDecimal.ZERO
     // берутся данные за текущий период
-    for (def income102Row : getIncome102Data(getEndDate())) {
+    for (def income102Row : getIncome102Data(date)) {
         if (income102Row?.OPU_CODE?.value in opuCodes) {
             tmp += (income102Row?.TOTAL_SUM?.value ?: 0)
         }
@@ -835,41 +841,6 @@ def getIncome102Data(def date) {
         income102DataCache.put(date, records)
     }
     return income102DataCache.get(date)
-}
-
-def getSumOutcomeSimple(def knuCodes) {
-    def tmp = 0
-    // получаем период из прибыли соотвествующий текущему периоду НДС
-    def List<ReportPeriod> periodList = reportPeriodService.getReportPeriodsByDate(TaxType.INCOME, getEndDate(), getEndDate())
-    if (periodList.isEmpty()) {
-        return 0
-    }
-    // получаем предыдущий период по прибыли
-    def reportPeriodPrevIncome = reportPeriodService.getPrevReportPeriod(periodList.get(0).id)
-    if (reportPeriodPrevIncome?.id == null) {
-        return 0
-    }
-    def formDataSimple = getFormDataSimple(310, reportPeriodPrevIncome.id)
-    if (formDataSimple == null) {
-        formDataSimple = getFormDataSimple(304, reportPeriodPrevIncome.id)
-    } else if (getFormDataSimple(304, reportPeriodPrevIncome.id) != null) {
-        logger.warn("Неверно настроены источники декларации! Одновременно созданы в качестве источников налоговые формы: «%s», «%s». Консолидация произведена из «%s».",
-                formTypeService.get(310).name, formTypeService.get(304)?.name, formTypeService.get(310)?.name)
-    }
-    def dataRowsSimple = (formDataSimple ? formDataService.getDataRowHelper(formDataSimple)?.allSaved : null)
-    for (def row : dataRowsSimple) {
-        if (row.consumptionTypeId in knuCodes) {
-            tmp += row.rnu5Field5Accepted
-        }
-    }
-    return tmp
-}
-
-/**
- * Получить данные формы "расходы простые" (id = 301/304)
- */
-def getFormDataSimple(def id, def reportPeriodId) {
-    return formDataService.getLast(id, FormDataKind.SUMMARY, declarationData.departmentId, reportPeriodId, null)
 }
 
 def getOkato(def id) {

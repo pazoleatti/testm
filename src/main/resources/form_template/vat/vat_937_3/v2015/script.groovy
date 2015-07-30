@@ -426,7 +426,7 @@ void sortFormDataRows(def saveInDB = true) {
     calc1(dataRows)
 
     if (saveInDB) {
-        dataRowHelper.saveSort()
+        formDataService.saveCachedDataRows(formData, logger)
     } else {
         updateIndexes(dataRows);
     }
@@ -658,7 +658,7 @@ void importTransportData() {
     char QUOTE = '\0'
 
     String[] rowCells
-    int fileRowIndex = 0    // номер строки в файле
+    int fileRowIndex = 2    // номер строки в файле (1, 2..). Начинается с 2, потому что первые две строки - заголовок и пустая строка
     int rowIndex = 0        // номер строки в НФ
     def total = null		// итоговая строка со значениями из тф для добавления
     def mapRows = [:]

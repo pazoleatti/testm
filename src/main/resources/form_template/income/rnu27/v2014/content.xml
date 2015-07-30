@@ -7,16 +7,15 @@
     <fullName>(РНУ-27) Регистр налогового учёта расчёта резерва под возможное обеспечение субфедеральных и муниципальных
         облигаций, ОВГВЗ, Еврооблигаций РФ и прочих облигаций в целях налогообложения
     </fullName>
-    <code>РНУ-27</code>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+    <header>1111-27</header>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="autoNumerationColumn">
         <alias>number</alias>
         <checking>false</checking>
         <columnType>AUTO</columnType>
         <name>№ пп</name>
         <order>1</order>
         <width>5</width>
-        <maxLength>15</maxLength>
-        <precision>0</precision>
+        <numerationType>CROSS</numerationType>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>fix</alias>
@@ -31,7 +30,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>issuer</alias>
         <checking>false</checking>
-        <columnType>REFERENCE</columnType>
+        <columnType>STRING</columnType>
         <name>Эмитент</name>
         <order>3</order>
         <width>20</width>
@@ -41,7 +40,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>regNumber</alias>
         <checking>false</checking>
-        <columnType>REFBOOK</columnType>
+        <columnType>STRING</columnType>
         <name>Государственный регистрационный номер</name>
         <order>4</order>
         <width>8</width>
@@ -61,13 +60,14 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
         <alias>currency</alias>
         <checking>false</checking>
-        <columnType>REFERENCE</columnType>
+        <columnType>REFBOOK</columnType>
         <name>Валюта выпуска облигации</name>
         <order>6</order>
         <width>5</width>
         <hierarchical>false</hierarchical>
         <nameAttributeId>66</nameAttributeId>
         <refBookAttributeId>65</refBookAttributeId>
+        <searchEnabled>true</searchEnabled>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>prev</alias>
@@ -112,13 +112,14 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
         <alias>signSecurity</alias>
         <checking>false</checking>
-        <columnType>REFERENCE</columnType>
+        <columnType>REFBOOK</columnType>
         <name>Признак ценной бумаги на текущую отчётную дату</name>
         <order>11</order>
         <width>7</width>
         <hierarchical>false</hierarchical>
         <nameAttributeId>622</nameAttributeId>
         <refBookAttributeId>621</refBookAttributeId>
+        <searchEnabled>true</searchEnabled>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>marketQuotation</alias>
@@ -191,16 +192,23 @@
         <precision>2</precision>
     </columns>
     <styles>
-        <alias>Контрольные суммы</alias>
-        <backColor>LIGHT_BROWN</backColor>
+        <alias>Корректировка-изменено</alias>
+        <backColor>WHITE</backColor>
         <bold>true</bold>
-        <fontColor>BLACK</fontColor>
+        <fontColor>RED</fontColor>
         <italic>false</italic>
     </styles>
     <styles>
         <alias>Редактируемая</alias>
         <backColor>LIGHT_BLUE</backColor>
         <bold>false</bold>
+        <fontColor>BLACK</fontColor>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Контрольные суммы</alias>
+        <backColor>LIGHT_BROWN</backColor>
+        <bold>true</bold>
         <fontColor>BLACK</fontColor>
         <italic>false</italic>
     </styles>
@@ -212,22 +220,15 @@
         <italic>false</italic>
     </styles>
     <styles>
-        <alias>Корректировка-изменено</alias>
-        <backColor>WHITE</backColor>
-        <bold>true</bold>
-        <fontColor>RED</fontColor>
-        <italic>false</italic>
-    </styles>
-    <styles>
-        <alias>Корректировка-без изменений</alias>
-        <backColor>GREY</backColor>
+        <alias>Корректировка-добавлено</alias>
+        <backColor>PALE_GREEN</backColor>
         <bold>false</bold>
         <fontColor>BLACK</fontColor>
         <italic>false</italic>
     </styles>
     <styles>
-        <alias>Корректировка-добавлено</alias>
-        <backColor>PALE_GREEN</backColor>
+        <alias>Корректировка-без изменений</alias>
+        <backColor>GREY</backColor>
         <bold>false</bold>
         <fontColor>BLACK</fontColor>
         <italic>false</italic>

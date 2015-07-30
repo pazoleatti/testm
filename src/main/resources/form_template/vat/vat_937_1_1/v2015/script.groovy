@@ -88,7 +88,7 @@ def editableColumns = allColumns - 'rowNum'
 
 // Проверяемые на пустые значения атрибуты (графа )
 @Field
-def nonEmptyColumns = ['typeCode', 'invoice']
+def nonEmptyColumns = ['typeCode', 'invoice', 'cost', 'nds']
 
 // Атрибуты итоговых строк для которых вычисляются суммы (графа )
 @Field
@@ -406,7 +406,7 @@ void importTransportData() {
     char QUOTE = '\0'
 
     String[] rowCells
-    int fileRowIndex = 0    // номер строки в файле
+    int fileRowIndex = 2    // номер строки в файле (1, 2..). Начинается с 2, потому что первые две строки - заголовок и пустая строка
     int rowIndex = 0        // номер строки в НФ
     def total = null		// итоговая строка со значениями из тф для добавления
     def newRows = []
@@ -469,7 +469,6 @@ void importTransportData() {
 
     showMessages(newRows, logger)
     if (!logger.containsLevel(LogLevel.ERROR)) {
-        logger.info("newRows "+newRows.size())
         updateIndexes(newRows)
         formDataService.getDataRowHelper(formData).allCached = newRows
     }

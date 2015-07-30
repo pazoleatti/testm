@@ -578,10 +578,10 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 File zipOutFile = null;
                 try {
                     zipOutFile = new File(String.format(FILE_NAME_IN_TEMP_PATTERN, decName, "zip"));
-                    FileOutputStream fileOutputStream = new FileOutputStream(zipOutFile);
-                    ZipOutputStream zos = new ZipOutputStream(fileOutputStream);
-                    ZipEntry zipEntry = new ZipEntry(decName+".xml");
-                    zos.putNextEntry(zipEntry);
+					FileOutputStream fileOutputStream = new FileOutputStream(zipOutFile);
+					ZipOutputStream zos = new ZipOutputStream(fileOutputStream);
+					ZipEntry zipEntry = new ZipEntry(decName+".xml");
+					zos.putNextEntry(zipEntry);
                     FileInputStream fi = new FileInputStream(renameToFile);
 
                     try {
