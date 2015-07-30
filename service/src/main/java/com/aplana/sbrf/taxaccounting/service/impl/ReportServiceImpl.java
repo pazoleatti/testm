@@ -5,7 +5,6 @@ import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
 import com.aplana.sbrf.taxaccounting.model.ReportType;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
-import com.aplana.sbrf.taxaccounting.service.BlobDataService;
 import com.aplana.sbrf.taxaccounting.service.DeclarationDataAccessService;
 import com.aplana.sbrf.taxaccounting.service.FormDataAccessService;
 import com.aplana.sbrf.taxaccounting.service.ReportService;
@@ -13,15 +12,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collection;
+
 @Service
 @Transactional
 public class ReportServiceImpl implements ReportService {
 
     @Autowired
     private ReportDao reportDao;
-
-    @Autowired
-    private BlobDataService blobDataService;
 
     @Autowired
     private FormDataAccessService formDataAccessService;
@@ -76,6 +74,11 @@ public class ReportServiceImpl implements ReportService {
     @Override
     public void deleteDec(long formDataId) {
         reportDao.deleteDec(formDataId);
+    }
+
+    @Override
+    public void deleteDec(Collection<Long> declarationDataId) {
+        reportDao.deleteDec(declarationDataId);
     }
 
     @Override

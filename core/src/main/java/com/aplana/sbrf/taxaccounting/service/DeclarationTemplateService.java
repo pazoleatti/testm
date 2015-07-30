@@ -180,4 +180,8 @@ public interface DeclarationTemplateService {
      */
     int updateVersionStatus(VersionedObjectStatus versionStatus, int declarationTemplateId);
 
+    void deleteXsd(int dtId);
+
+    void deleteJrxml(int dtId);
+
 }

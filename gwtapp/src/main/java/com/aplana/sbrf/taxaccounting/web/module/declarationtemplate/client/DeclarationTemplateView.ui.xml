@@ -176,6 +176,16 @@
                                                   title="Скачать jrxml файл" addStyleNames="{style.marginLeft}"/>
                             </g:cell>
                         </g:VerticalPanel>
+                        <g:VerticalPanel addStyleNames="{style.upload}" height="30px">
+                            <g:cell>
+                                <style:LinkButton text="Удалить xsd" ui:field="deleteXsd" img="resources/img/row-delete.png"
+                                                  addStyleNames="{style.marginLeft}" title="Скачать xsd"/>
+                            </g:cell>
+                            <g:cell>
+                                <style:LinkButton text="Удалить jrxml" ui:field="deleteJrxml" img="resources/img/row-delete.png"
+                                                  title="Скачать jrxml файл" addStyleNames="{style.marginLeft}"/>
+                            </g:cell>
+                        </g:VerticalPanel>
                     </g:HorizontalPanel>
                 </g:HorizontalPanel>
 

@@ -12,6 +12,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.*;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -157,6 +158,16 @@ public class ReportDaoImpl extends AbstractDao implements ReportDao {
         }
     }
 
+    @Override
+    public void deleteDec(final Collection<Long> declarationDataIds) {
+        try{
+            getNamedParameterJdbcTemplate().update("DELETE FROM DECLARATION_REPORT WHERE DECLARATION_DATA_ID in :declarationDataIds",
+                    new HashMap<String, Object>(1){{put("declarationDataIds", declarationDataIds);}});
+        } catch (DataAccessException e){
+            throw new DaoException("Не удалось удалить записи", e);
+        }
+    }
+
 
     @Override
     public void deleteDec(String uuid) {
@@ -165,7 +176,7 @@ public class ReportDaoImpl extends AbstractDao implements ReportDao {
                     new Object[]{uuid},
                     new int[]{Types.VARCHAR});
         } catch (DataAccessException e){
-            throw new DaoException(String.format("Не удалось удалить записи с BLOB_DATA_ID = %d", uuid), e);
+            throw new DaoException(String.format("Не удалось удалить записи с BLOB_DATA_ID = %s", uuid), e);
         }
     }
 

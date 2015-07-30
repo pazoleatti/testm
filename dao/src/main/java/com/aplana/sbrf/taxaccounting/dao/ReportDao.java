@@ -2,6 +2,8 @@ package com.aplana.sbrf.taxaccounting.dao;
 
 import com.aplana.sbrf.taxaccounting.model.ReportType;
 
+import java.util.Collection;
+
 /**
  * DAO-Интерфейс для работы с таблицей отчетов
  */
@@ -73,6 +75,8 @@ public interface ReportDao {
      * @param declarationDataId
      */
     void deleteDec(long declarationDataId);
+
+    void deleteDec(Collection<Long> declarationDataIds);
 
     /**
      * Удаление отчета по uuid

@@ -137,7 +137,7 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
 	@Override
 	public void onHide() {
 		super.onHide();
-        unlockForm(declarationTemplate.getId() != null?declarationTemplate.getId():0);
+        unlockForm(declarationTemplate.getId() != null ? declarationTemplate.getId() : 0);
 		if (closeDeclarationTemplateHandlerRegistration != null)
             closeDeclarationTemplateHandlerRegistration.removeHandler();
 	}
@@ -307,6 +307,66 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
             return;
         versionHistoryPresenter.init(id);
         addToPopupSlot(versionHistoryPresenter);
+    }
+
+    @Override
+    public void onDeleteXsd() {
+        DeleteXsdAction action = new DeleteXsdAction();
+        action.setDtId(declarationTemplate.getId());
+        dispatcher.execute(action, CallbackUtils.defaultCallback(new AbstractCallback<DeleteXsdResult>() {
+            @Override
+            public void onSuccess(DeleteXsdResult result) {
+                declarationTemplate.setXsdId(null);
+                getView().setDeclarationTemplate(declarationTemplateExt);
+            }
+        }, this));
+    }
+
+    @Override
+    public void onCheckBeforeDeleteJrxml() {
+        final CheckJrxmlAction action = new CheckJrxmlAction();
+        action.setDtId(declarationTemplate.getId());
+        dispatcher.execute(action, CallbackUtils.defaultCallback(new AbstractCallback<CheckJrxmlResult>() {
+            @Override
+            public void onSuccess(final CheckJrxmlResult result) {
+                if (result.isCanDelete()){
+                    DeleteJrxmlAction jrxmlAction = new DeleteJrxmlAction();
+                    jrxmlAction.setDtId(declarationTemplate.getId());
+                    jrxmlAction.setLockIds(result.getLockIds());
+                    jrxmlAction.setIds(result.getIds());
+                    dispatcher.execute(jrxmlAction, CallbackUtils.defaultCallback(new AbstractCallback<DeleteJrxmlResult>() {
+                        @Override
+                        public void onSuccess(DeleteJrxmlResult result) {
+                            LogCleanEvent.fire(DeclarationTemplatePresenter.this);
+                            declarationTemplate.setJrxmlBlobId(null);
+                            getView().setDeclarationTemplate(declarationTemplateExt);
+                        }
+                    }, DeclarationTemplatePresenter.this));
+                } else {
+                    LogCleanEvent.fire(DeclarationTemplatePresenter.this);
+                    LogAddEvent.fire(DeclarationTemplatePresenter.this, result.getUuid());
+                    Dialog.confirmMessage("Удаление jrxml файла",
+                            "Удаление jrxml файла приведет к удалению уже сформированных pdf, xlsx отчетов и отмене ранее запущенных операций формирования pdf, xlsx отчетов экземпляров деклараций данной версии макета. Продолжить?",
+                            new DialogHandler() {
+                                @Override
+                                public void yes() {
+                                    DeleteJrxmlAction jrxmlAction = new DeleteJrxmlAction();
+                                    jrxmlAction.setDtId(declarationTemplate.getId());
+                                    jrxmlAction.setLockIds(result.getLockIds());
+                                    jrxmlAction.setIds(result.getIds());
+                                    dispatcher.execute(jrxmlAction, CallbackUtils.defaultCallback(new AbstractCallback<DeleteJrxmlResult>() {
+                                        @Override
+                                        public void onSuccess(DeleteJrxmlResult result) {
+                                            LogCleanEvent.fire(DeclarationTemplatePresenter.this);
+                                            declarationTemplate.setJrxmlBlobId(null);
+                                            getView().setDeclarationTemplate(declarationTemplateExt);
+                                        }
+                                    }, DeclarationTemplatePresenter.this));
+                                }
+                            });
+                }
+            }
+        }, this));
     }
 
     private HandlerRegistration[] handlerRegistrations = new HandlerRegistration[6];
