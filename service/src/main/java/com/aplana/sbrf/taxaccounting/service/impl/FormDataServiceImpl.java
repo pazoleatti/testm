@@ -670,11 +670,6 @@ public class FormDataServiceImpl implements FormDataService {
 		return formData.getId();
 	}
 
-	@Override
-	public void removeCheckPoint(Logger logger, TAUserInfo userInfo, FormData formData) {
-		dataRowDao.removeCheckPoint(formData);
-	}
-
 	/**
 	 * Получить данные по налоговой форме
 	 *

@@ -236,14 +236,17 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 	@Override
 	public boolean isDataRowsCountChanged(FormData formData) {
 		// сравниваем кол-во реальных строк с числом, хранящимся в form_data.number_current_row
-		StringBuilder sql = new StringBuilder("SELECT (SELECT COUNT(*) FROM form_data_\n");
+		StringBuilder sql = new StringBuilder("SELECT (SELECT COUNT(*) FROM form_data_");
 		sql.append(formData.getFormTemplateId());
-		sql.append(" WHERE form_data_id = :form_data_id AND alias IS NULL OR alias LIKE '%)\n");
+		sql.append(" WHERE form_data_id = :form_data_id AND (alias IS NULL OR alias LIKE '%)\n");
 		sql.append(DataRowMapper.ALIASED_WITH_AUTO_NUMERATION_AFFIX).append("%')");
-		sql.append(" - (SELECT number_current_row FROM form_data WHERE id = :form_data_id) FROM DUAL");
+		sql.append(" AND temporary = :temporary AND manual = :manual");
+		sql.append(") - (SELECT number_current_row FROM form_data WHERE id = :form_data_id) FROM DUAL");
 
 		Map<String, Object> params = new HashMap<String, Object>();
 		params.put("form_data_id", formData.getId());
+		params.put("temporary", DataRowType.SAVED.getCode());
+		params.put("manual", DataRowType.AUTO.getCode());
 
 		if (log.isTraceEnabled()) {
 			log.trace(params);
@@ -254,19 +257,13 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 	}
 
 	@Override
-	public void cleanValue(final Collection<Integer> columnIdList) {
-		//TODO SBRFACCTAX-11384 написать новый запрос
-		/*if (columnIdList == null || columnIdList.isEmpty()) {
-            return;
-        }
-        getJdbcTemplate().update("DELETE FROM data_cell WHERE " + SqlUtils.transformToSqlInStatement("column_id", columnIdList));*/
-	}
-
-	@Override
 	public void insertRows(FormData formData, int index, List<DataRow<Cell>> rows) {
 		int size = getRowCount(formData);
 		if (index < 1 || index > size + 1) {
 			throw new IllegalArgumentException(String.format("Вставка записей допустима только в диапазоне индексов [1; %s]. index = %s", size + 1, index));
+		}
+		if (rows == null) {
+			throw new NullPointerException("Аргумент \"rows\" должен быть задан");
 		}
 		// сдвигаем строки
 		shiftRows(formData, new DataRowRange(index, rows.size()));
@@ -428,8 +425,6 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 	public void removeCheckPoint(FormData formData) {
 		// удаляем точку восстановления (временный срез)
 		removeRowsInternal(formData, DataRowType.TEMP);
-		// актуализируем ссылки на справочники
-		refreshRefBookLinks(formData);
 	}
 
 	@Override
@@ -451,6 +446,7 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 			log.trace(sql.toString());
 		}
 		getNamedParameterJdbcTemplate().update(sql.toString().intern(), params);
+		refreshRefBookLinks(formData);
 	}
 
 	@Override
@@ -500,7 +496,7 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 
 		Map<String, Object> params = new HashMap<String, Object>();
 		params.put("form_data_id", formData.getId());
-		params.put("temporary", DataRowType.SAVED.getCode());
+		params.put("temporary", DataRowType.TEMP.getCode());
 		params.put("manual", formData.isManual() ? DataRowType.MANUAL.getCode() : DataRowType.AUTO.getCode());
 
 		if (log.isTraceEnabled()) {
@@ -525,7 +521,7 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 		StringBuilder sql = new StringBuilder("SELECT COUNT(*) FROM form_data_");
 		sql.append(formData.getFormTemplateId());
 		sql.append(" WHERE form_data_id = :form_data_id AND temporary = :temporary AND manual = :manual AND (alias IS NULL");
-		sql.append(" OR alias LIKE '%").append(DataRowMapper.ALIASED_WITH_AUTO_NUMERATION_AFFIX).append("%'");
+		sql.append(" OR alias LIKE '%").append(DataRowMapper.ALIASED_WITH_AUTO_NUMERATION_AFFIX).append("%')");
 
 		Map<String, Object> params = new HashMap<String, Object>();
 		params.put("form_data_id", formData.getId());

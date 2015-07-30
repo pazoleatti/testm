@@ -35,7 +35,7 @@ import static org.mockito.Mockito.*;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration("FormDataServiceTest.xml")
-public class FormDataServiceTest {
+public class FormDataServiceTest extends Assert{
 
     private FormTemplate formTemplate;
     @Autowired
@@ -251,7 +251,7 @@ public class FormDataServiceTest {
             }
         });
         // проверяем что источник удален
-        Assert.assertTrue(list.size() == 1);
+        assertTrue(list.size() == 1);
     }
 
     @Test
@@ -319,7 +319,7 @@ public class FormDataServiceTest {
 
         when(departmentService.getDepartment(1)).thenReturn(department);
 
-        Assert.assertTrue(formDataService.existFormData(1, FormDataKind.SUMMARY, 1, logger));
+        assertTrue(formDataService.existFormData(1, FormDataKind.SUMMARY, 1, logger));
         assertEquals(
                 "Существует экземпляр налоговой формы \"Тестовый тип НФ\" типа \"Сводная\" в подразделении \"Тестовое подразделение\" в периоде \"Тестовый период 2014\"",
                 logger.getEntries().get(0).getMessage()
@@ -353,7 +353,7 @@ public class FormDataServiceTest {
         departmentReportPeriod.setReportPeriod(reportPeriod);
         when(departmentReportPeriodService.get(1)).thenReturn(departmentReportPeriod);
 
-        Assert.assertTrue("\"Номер последней строки предыдущей НФ\" должен быть равен 0",
+        assertTrue("\"Номер последней строки предыдущей НФ\" должен быть равен 0",
                 formDataService.getPreviousRowNumber(newFormData, null).equals(0));
     }
 
@@ -392,16 +392,15 @@ public class FormDataServiceTest {
 
         when(formDataDao.getPrevFormDataList(any(FormData.class), any(TaxPeriod.class)))
                 .thenReturn(formDataList);
-        when(dataRowDao.getAutoNumerationRowCount(formData, false)).thenReturn(3);
-        when(dataRowDao.getAutoNumerationRowCount(formData1, false)).thenReturn(5);
+        when(dataRowDao.getAutoNumerationRowCount(formData)).thenReturn(3);
+        when(dataRowDao.getAutoNumerationRowCount(formData1)).thenReturn(5);
         DepartmentReportPeriod departmentReportPeriod = new DepartmentReportPeriod();
         ReportPeriod reportPeriod = new ReportPeriod();
         reportPeriod.setTaxPeriod(new TaxPeriod());
         departmentReportPeriod.setReportPeriod(reportPeriod);
         when(departmentReportPeriodService.get(1)).thenReturn(departmentReportPeriod);
         when(periodService.getReportPeriod(3)).thenReturn(new ReportPeriod());
-        Assert.assertTrue("\"Номер последней строки предыдущей НФ\" должен быть равен 8",
-                formDataService.getPreviousRowNumber(newFormData, null).equals(8));
+        assertEquals(Integer.valueOf(8), formDataService.getPreviousRowNumber(newFormData, null));
     }
 
     /**
@@ -440,8 +439,8 @@ public class FormDataServiceTest {
 
         when(formDataDao.getPrevFormDataList(any(FormData.class), any(TaxPeriod.class)))
                 .thenReturn(formDataList);
-        when(dataRowDao.getAutoNumerationRowCount(formData, false)).thenReturn(3);
-        when(dataRowDao.getAutoNumerationRowCount(formData1, false)).thenReturn(5);
+        when(dataRowDao.getAutoNumerationRowCount(formData)).thenReturn(3);
+        when(dataRowDao.getAutoNumerationRowCount(formData1)).thenReturn(5);
 
         DepartmentReportPeriod departmentReportPeriod = new DepartmentReportPeriod();
         ReportPeriod reportPeriod = new ReportPeriod();
@@ -449,7 +448,7 @@ public class FormDataServiceTest {
         departmentReportPeriod.setReportPeriod(reportPeriod);
         when(departmentReportPeriodService.get(1)).thenReturn(departmentReportPeriod);
         when(periodService.getReportPeriod(3)).thenReturn(new ReportPeriod());
-        Assert.assertTrue("\"Номер последней строки предыдущей НФ\" должен быть равен 3",
+        assertTrue("\"Номер последней строки предыдущей НФ\" должен быть равен 3",
                 formDataService.getPreviousRowNumber(newFormData, null).equals(3));
     }
 
@@ -626,19 +625,19 @@ public class FormDataServiceTest {
      */
     @Test
     public void testCanUpdateAutoNumerationWhenDoMove() {
-        Assert.assertTrue(formDataService.canUpdatePreviousRowNumberWhenDoMove(WorkflowMove.CREATED_TO_PREPARED));
-        Assert.assertTrue(formDataService.canUpdatePreviousRowNumberWhenDoMove(WorkflowMove.CREATED_TO_ACCEPTED));
-        Assert.assertTrue(formDataService.canUpdatePreviousRowNumberWhenDoMove(WorkflowMove.CREATED_TO_APPROVED));
-        Assert.assertTrue(formDataService.canUpdatePreviousRowNumberWhenDoMove(WorkflowMove.PREPARED_TO_CREATED));
-        Assert.assertTrue(formDataService.canUpdatePreviousRowNumberWhenDoMove(WorkflowMove.ACCEPTED_TO_CREATED));
-        Assert.assertTrue(formDataService.canUpdatePreviousRowNumberWhenDoMove(WorkflowMove.APPROVED_TO_CREATED));
+        assertTrue(formDataService.canUpdatePreviousRowNumberWhenDoMove(WorkflowMove.CREATED_TO_PREPARED));
+        assertTrue(formDataService.canUpdatePreviousRowNumberWhenDoMove(WorkflowMove.CREATED_TO_ACCEPTED));
+        assertTrue(formDataService.canUpdatePreviousRowNumberWhenDoMove(WorkflowMove.CREATED_TO_APPROVED));
+        assertTrue(formDataService.canUpdatePreviousRowNumberWhenDoMove(WorkflowMove.PREPARED_TO_CREATED));
+        assertTrue(formDataService.canUpdatePreviousRowNumberWhenDoMove(WorkflowMove.ACCEPTED_TO_CREATED));
+        assertTrue(formDataService.canUpdatePreviousRowNumberWhenDoMove(WorkflowMove.APPROVED_TO_CREATED));
 
-        Assert.assertFalse(formDataService.canUpdatePreviousRowNumberWhenDoMove(WorkflowMove.PREPARED_TO_ACCEPTED));
-        Assert.assertFalse(formDataService.canUpdatePreviousRowNumberWhenDoMove(WorkflowMove.PREPARED_TO_APPROVED));
-        Assert.assertFalse(formDataService.canUpdatePreviousRowNumberWhenDoMove(WorkflowMove.ACCEPTED_TO_APPROVED));
-        Assert.assertFalse(formDataService.canUpdatePreviousRowNumberWhenDoMove(WorkflowMove.ACCEPTED_TO_PREPARED));
-        Assert.assertFalse(formDataService.canUpdatePreviousRowNumberWhenDoMove(WorkflowMove.APPROVED_TO_ACCEPTED));
-        Assert.assertFalse(formDataService.canUpdatePreviousRowNumberWhenDoMove(WorkflowMove.APPROVED_TO_PREPARED));
+        assertFalse(formDataService.canUpdatePreviousRowNumberWhenDoMove(WorkflowMove.PREPARED_TO_ACCEPTED));
+        assertFalse(formDataService.canUpdatePreviousRowNumberWhenDoMove(WorkflowMove.PREPARED_TO_APPROVED));
+        assertFalse(formDataService.canUpdatePreviousRowNumberWhenDoMove(WorkflowMove.ACCEPTED_TO_APPROVED));
+        assertFalse(formDataService.canUpdatePreviousRowNumberWhenDoMove(WorkflowMove.ACCEPTED_TO_PREPARED));
+        assertFalse(formDataService.canUpdatePreviousRowNumberWhenDoMove(WorkflowMove.APPROVED_TO_ACCEPTED));
+        assertFalse(formDataService.canUpdatePreviousRowNumberWhenDoMove(WorkflowMove.APPROVED_TO_PREPARED));
     }
 
     /**
@@ -650,25 +649,25 @@ public class FormDataServiceTest {
 
         FormData formData = new FormData();
         formData.setState(WorkflowState.CREATED);
-        Assert.assertFalse("Не должен участвовать в сквозной нумерации", formDataService.beInOnAutoNumeration(formData.getState(), departmentReportPeriod));
+        assertFalse("Не должен участвовать в сквозной нумерации", formDataService.beInOnAutoNumeration(formData.getState(), departmentReportPeriod));
 
         formData = new FormData();
         departmentReportPeriod.setCorrectionDate(new Date());
         formData.setState(WorkflowState.ACCEPTED);
-        Assert.assertFalse("Не должен участвовать в сквозной нумерации", formDataService.beInOnAutoNumeration(formData.getState(), departmentReportPeriod));
+        assertFalse("Не должен участвовать в сквозной нумерации", formDataService.beInOnAutoNumeration(formData.getState(), departmentReportPeriod));
 
         formData = new FormData();
         departmentReportPeriod.setCorrectionDate(null);
         formData.setState(WorkflowState.ACCEPTED);
-        Assert.assertTrue("Должен участвовать в сквозной нумерации", formDataService.beInOnAutoNumeration(formData.getState(), departmentReportPeriod));
+        assertTrue("Должен участвовать в сквозной нумерации", formDataService.beInOnAutoNumeration(formData.getState(), departmentReportPeriod));
 
         formData = new FormData();
         formData.setState(WorkflowState.APPROVED);
-        Assert.assertTrue("Должен участвовать в сквозной нумерации", formDataService.beInOnAutoNumeration(formData.getState(), departmentReportPeriod));
+        assertTrue("Должен участвовать в сквозной нумерации", formDataService.beInOnAutoNumeration(formData.getState(), departmentReportPeriod));
 
         formData = new FormData();
         formData.setState(WorkflowState.PREPARED);
-        Assert.assertTrue("Должен участвовать в сквозной нумерации", formDataService.beInOnAutoNumeration(formData.getState(), departmentReportPeriod));
+        assertTrue("Должен участвовать в сквозной нумерации", formDataService.beInOnAutoNumeration(formData.getState(), departmentReportPeriod));
     }
 
     @Test
@@ -733,15 +732,15 @@ public class FormDataServiceTest {
         });
         // 1
         FormData prevFormData = formDataService.getPreviousFormDataCorrection(formData1, periodList, departmentReportPeriod1);
-        Assert.assertNotNull(prevFormData);
+        assertNotNull(prevFormData);
         assertEquals(2, prevFormData.getId().intValue());
         // 2
         prevFormData = formDataService.getPreviousFormDataCorrection(formData1, periodList, departmentReportPeriod2);
-        Assert.assertNotNull(prevFormData);
+        assertNotNull(prevFormData);
         assertEquals(3, prevFormData.getId().intValue());
         // 3
         prevFormData = formDataService.getPreviousFormDataCorrection(formData1, periodList, departmentReportPeriod3);
-        Assert.assertNull(prevFormData);
+        assertNull(prevFormData);
     }
 
     @Test

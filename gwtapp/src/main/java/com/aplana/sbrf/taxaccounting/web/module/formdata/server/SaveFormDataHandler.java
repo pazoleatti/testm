@@ -47,7 +47,7 @@ public class SaveFormDataHandler extends
 		}
 		formDataService.saveFormData(logger, securityService.currentUserInfo(), formData);
 		// Удаляем контрольную точку восстановления
-		formDataService.removeCheckPoint(logger, securityService.currentUserInfo(), formData);
+		dataRowService.removeCheckPoint(formData);
 
 		logger.info("Данные успешно записаны");
 		DataRowResult result = new DataRowResult();

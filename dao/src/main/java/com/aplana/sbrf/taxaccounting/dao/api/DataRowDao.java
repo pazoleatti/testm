@@ -19,12 +19,6 @@ import java.util.List;
 public interface DataRowDao {
 
 	/**
-	 * Удаление значений неактуальных граф. Метод используется настройщиком при смене типов граф
-	 * @param columnIdList Список Id измененных/удаленных граф
-	 */
-	void cleanValue(Collection<Integer> columnIdList);
-
-	/**
 	 * Удаляет точку восстановления, сделанную перед редактированием данных (бывший commit)
 	 *
 	 * @param formData

@@ -10,6 +10,7 @@ import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.springframework.test.util.ReflectionTestUtils;
+import org.springframework.transaction.TransactionStatus;
 
 import java.util.Date;
 
@@ -50,7 +51,20 @@ public class LockDataServiceImplTest {
             public <T> T returnInNewTransaction(TransactionLogic<T> logic) {
                 return logic.executeWithReturn();
             }
-        };
+
+			@Override
+			public void commit(TransactionStatus status) {
+			}
+
+			@Override
+			public void rollback(TransactionStatus status) {
+			}
+
+			@Override
+			public TransactionStatus startTransaction() {
+				return null;
+			}
+		};
         ReflectionTestUtils.setField(service, "tx", tx);
 	}
 

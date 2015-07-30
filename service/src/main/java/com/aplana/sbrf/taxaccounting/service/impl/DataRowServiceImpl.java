@@ -82,7 +82,17 @@ public class DataRowServiceImpl implements DataRowService {
         dataRowDao.createCheckPoint(formData);
     }
 
-    private void checkLockedMe(LockData lockData, TAUser user){
+	@Override
+	public void removeCheckPoint(FormData formData) {
+		dataRowDao.removeCheckPoint(formData);
+	}
+
+	@Override
+	public void restoreCheckPoint(FormData formData) {
+		dataRowDao.restoreCheckPoint(formData);
+	}
+
+	private void checkLockedMe(LockData lockData, TAUser user){
         if (lockData == null || lockData.getUserId() != user.getId()) {
             throw new ServiceException("Объект не заблокирован текущим пользователем");
         }

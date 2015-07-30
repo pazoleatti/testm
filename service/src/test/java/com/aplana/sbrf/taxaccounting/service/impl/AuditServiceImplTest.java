@@ -10,6 +10,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.test.util.ReflectionTestUtils;
+import org.springframework.transaction.TransactionStatus;
 
 import java.util.ArrayList;
 
@@ -56,6 +57,19 @@ public class AuditServiceImplTest {
             public <T> T returnInNewTransaction(TransactionLogic<T> logic) {
                 return null;
             }
+
+			@Override
+			public void commit(TransactionStatus status) {
+			}
+
+			@Override
+			public void rollback(TransactionStatus status) {
+			}
+
+			@Override
+			public TransactionStatus startTransaction() {
+				return null;
+			}
         };
         ReflectionTestUtils.setField(auditService, "tx", tx);
 

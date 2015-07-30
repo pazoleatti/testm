@@ -62,4 +62,18 @@ public interface DataRowService {
      */
     void createCheckPoint(FormData formData);
 
+	/**
+	 * Удаляет точку восстановления, сделанную перед редактированием данных (бывший commit)
+	 *
+	 * @param formData
+	 */
+	void removeCheckPoint(FormData formData);
+
+	/**
+	 * Откатывает все изменения и восстанавливает данные из контрольной точки
+	 *
+	 * @param formData
+	 */
+	void restoreCheckPoint(FormData formData);
+
 }
