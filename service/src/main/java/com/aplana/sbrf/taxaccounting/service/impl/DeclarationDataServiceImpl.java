@@ -654,13 +654,12 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 if (!validateXMLService.validate(declarationData, userInfo, logger, isErrorFatal, xmlFile) && logger.containsLevel(LogLevel.ERROR)){
                     throw new ServiceLoggerException(VALIDATION_ERR_MSG, logEntryService.save(logger.getEntries()));
                 }
-            } catch (ServiceException e) {
-                //log.error(VALIDATION_ERR_MSG, e);
-                logger.error(e);
-                /*if (!(e instanceof ServiceException))
-                    logger.error(e);*/
+            } catch (Exception e) {
+                log.error(VALIDATION_ERR_MSG, e);
+                if (!(e instanceof ServiceException))
+                    logger.error(e);
                 throw new ServiceException(VALIDATION_ERR_MSG);
-            } finally {
+            }finally {
                 Locale.setDefault(oldLocale);
             }
         }
