@@ -472,11 +472,22 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
     }
 
     @Override
-    public void updatePreviousRowNumber(Long formDataId, Integer previousRowNumber) {
-        getJdbcTemplate().update("UPDATE form_data SET number_previous_row =? WHERE id=?", previousRowNumber, formDataId);
+    public void updatePreviousRowNumber(FormData formData, Integer previousRowNumber) {
+		Map<String, Object> params = new HashMap<String, Object>();
+		params.put("count", previousRowNumber);
+		params.put("form_data_id", formData.getId());
+		getNamedParameterJdbcTemplate().update("UPDATE form_data SET number_previous_row = :count WHERE id = :form_data_id", params);
     }
 
-    private static final String GET_MANUAL_UNPUTS_FORMS = "select fd.*, drp.report_period_id, drp.department_id, ft.type_id, fd.manual from form_data fd \n" +
+	@Override
+	public void updateCurrentRowNumber(FormData formData) {
+		Map<String, Object> params = new HashMap<String, Object>();
+		params.put("count", dataRowDao.getAutoNumerationRowCount(formData));
+		params.put("form_data_id", formData.getId());
+		getNamedParameterJdbcTemplate().update("UPDATE form_data SET number_current_row = :count WHERE id = :form_data_id", params);
+	}
+
+	private static final String GET_MANUAL_UNPUTS_FORMS = "select fd.*, drp.report_period_id, drp.department_id, ft.type_id, fd.manual from form_data fd \n" +
             "join department_form_type dft on dft.kind = fd.kind \n" +
             "join form_template ft on ft.id = fd.form_template_id and ft.type_id = dft.form_type_id \n" +
             "join form_type t on t.id = ft.type_id \n" +

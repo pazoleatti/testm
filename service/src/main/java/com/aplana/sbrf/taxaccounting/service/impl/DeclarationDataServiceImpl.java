@@ -1029,7 +1029,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                     FormData formData =
                             formDataService.findFormData(dftSource.getFormTypeId(), dftSource.getKind(), sourceDepartmentReportPeriod.getId(), dftSource.getPeriodOrder());
                     if (formData != null && formData.getState() == WorkflowState.ACCEPTED) {
-                        int rowCountSource = dataRowDao.getSavedSize(formData);
+                        int rowCountSource = dataRowDao.getRowCount(formData);
                         int columnCountSource = formTemplateService.get(formData.getFormTemplateId()).getColumns().size();
                         cellCountSource += rowCountSource * columnCountSource;
                     }

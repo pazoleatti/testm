@@ -43,25 +43,24 @@ class DataRowMapper implements RowMapper<DataRow<Cell>> {
 	 * Формирует sql-запрос для извлечения данных НФ
 	 *
 	 * @param range параметры пейджинга, может быть null
-	 * @param isTemporary временный срез?
 	 * @return пара "sql-запрос"-"параметры" для извлечения данных НФ
 	 */
-	public Pair<String, Map<String, Object>> createSql(DataRowRange range, DataRowType isTemporary) {
+	public Pair<String, Map<String, Object>> createSql(DataRowRange range) {
 		DataRowType isManual = formData.isManual() ? DataRowType.MANUAL : DataRowType.AUTO;
 		Map<String, Object> params = new HashMap<String, Object>();
 		params.put("formDataId", formData.getId());
-		params.put("temporary", isTemporary.getCode());
+		params.put("temporary", DataRowType.SAVED.getCode());
 		params.put("manual", isManual.getCode());
 
 		StringBuilder sql = new StringBuilder("SELECT id, ord, alias,\n");
 		// автонумерация (считаются все строки где нет алиасов, либо алиас = ALIASED_WITH_AUTO_NUMERATION_AFFIX)
-		sql.append("CASE WHEN (alias IS NULL OR alias LIKE '%").append(ALIASED_WITH_AUTO_NUMERATION_AFFIX).append("') THEN\n")
+		sql.append("CASE WHEN (alias IS NULL OR alias LIKE '%").append(ALIASED_WITH_AUTO_NUMERATION_AFFIX).append("%') THEN\n")
 			.append("ROW_NUMBER() OVER (PARTITION BY CASE WHEN (alias IS NULL OR alias LIKE '%")
-			.append(ALIASED_WITH_AUTO_NUMERATION_AFFIX).append("') THEN 1 ELSE 0 END ORDER BY ord)\n")
+			.append(ALIASED_WITH_AUTO_NUMERATION_AFFIX).append("%') THEN 1 ELSE 0 END ORDER BY ord)\n")
 			.append("ELSE NULL END ");
         if (range != null) {
             sql.append("+ (SELECT count(*) from form_data_").append(formData.getFormTemplateId())
-                .append(" WHERE (alias IS NULL OR alias LIKE '%").append(ALIASED_WITH_AUTO_NUMERATION_AFFIX).append("') AND")
+                .append(" WHERE (alias IS NULL OR alias LIKE '%").append(ALIASED_WITH_AUTO_NUMERATION_AFFIX).append("%') AND")
                 .append(" form_data_id = :formDataId AND temporary = :temporary AND manual = :manual")
                 .append(" AND ord < :from)");
         }

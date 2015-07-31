@@ -41,11 +41,10 @@ public interface DataRowService {
      * @param range информация о выборке данных, с какой строки и сколько строк выбрать
      * @param key ключ для поиска
      * @param isCaseSensitive чувствительность к регистру
-     * @param temporary временный срез
      * @param manual ручной ввод
      * @return Set<FormDataSearchResult> - Набор из номера столбца, строки, и самой найденной подстроки
      */
-    PagingResult<FormDataSearchResult> searchByKey(Long formDataId, Integer formTemplateId,DataRowRange range, String key, boolean isCaseSensitive, boolean temporary, boolean manual);
+    PagingResult<FormDataSearchResult> searchByKey(Long formDataId, Integer formTemplateId, DataRowRange range, String key, boolean isCaseSensitive, boolean manual);
 
     /**
      * Копирование строк из сохраненного среза НФ-источника во временный срез НФ-приемника.
@@ -58,16 +57,23 @@ public interface DataRowService {
     void copyRows(long formDataSourceId, long formDataDestinationId);
 
     /**
-     * Создает временный срез, предварительно удалив из него старые данные. Работает как с обычной, так и с версией
-     * ручного ввода.
+     * Создает точку восстановления при ручном редактировании. Работает как с обычной, так и с версией ручного ввода.
      * @param formData
      */
-    void createTemporary(FormData formData);
+    void createCheckPoint(FormData formData);
 
-    /**
-     * Сравнивает строки во временном срезе и основном
-     * @param formData
-     * @return true - изменении нету, иначе false
-     */
-    boolean compareRows(FormData formData);
+	/**
+	 * Удаляет точку восстановления, сделанную перед редактированием данных (бывший commit)
+	 *
+	 * @param formData
+	 */
+	void removeCheckPoint(FormData formData);
+
+	/**
+	 * Откатывает все изменения и восстанавливает данные из контрольной точки
+	 *
+	 * @param formData
+	 */
+	void restoreCheckPoint(FormData formData);
+
 }

@@ -6,7 +6,6 @@ import com.aplana.sbrf.taxaccounting.dao.api.DataRowDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.datarow.DataRowRange;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
-import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.DataRowService;
 import com.aplana.sbrf.taxaccounting.service.FormDataService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,20 +34,20 @@ public class DataRowServiceImpl implements DataRowService {
 	public PagingResult<DataRow<Cell>> getDataRows(long formDataId, DataRowRange range, boolean saved, boolean manual) {
 		PagingResult<DataRow<Cell>> result = new PagingResult<DataRow<Cell>>();
 		FormData formData = formDataDao.get(formDataId, manual);
-        result.addAll(saved ? dataRowDao.getSavedRows(formData, range) : dataRowDao.getTempRows(formData, range));
-        result.setTotalCount(saved ? dataRowDao.getSavedSize(formData) : dataRowDao.getTempSize(formData));
+        result.addAll(dataRowDao.getRows(formData, range));
+        result.setTotalCount(dataRowDao.getRowCount(formData));
 		return result;
 	}
 
     @Override
     public List<DataRow<Cell>> getSavedRows(FormData formData) {
-        return dataRowDao.getSavedRows(formData, null);
+        return dataRowDao.getRows(formData, null);
     }
 
     @Override
 	public int getRowCount(long formDataId, boolean saved, boolean manual) {
 		FormData fd = formDataDao.get(formDataId, manual);
-		return saved ? dataRowDao.getSavedSize(fd) : dataRowDao.getTempSize(fd);
+		return dataRowDao.getRowCount(fd);
 	}
 
 	@Override
@@ -68,8 +67,8 @@ public class DataRowServiceImpl implements DataRowService {
     }
 
     @Override
-    public PagingResult<FormDataSearchResult> searchByKey(Long formDataId, Integer formTemplateId, DataRowRange range, String key, boolean isCaseSensitive, boolean temporary, boolean manual) {
-        return dataRowDao.searchByKey(formDataId, formTemplateId, range, key, isCaseSensitive, temporary, manual);
+    public PagingResult<FormDataSearchResult> searchByKey(Long formDataId, Integer formTemplateId, DataRowRange range, String key, boolean isCaseSensitive, boolean manual) {
+        return dataRowDao.searchByKey(formDataId, formTemplateId, range, key, isCaseSensitive, manual);
     }
 
     @Override
@@ -79,16 +78,21 @@ public class DataRowServiceImpl implements DataRowService {
     }
 
     @Override
-    public void createTemporary(FormData formData) {
-        dataRowDao.createTemporary(formData);
+    public void createCheckPoint(FormData formData) {
+        dataRowDao.createCheckPoint(formData);
     }
 
-    @Override
-    public boolean compareRows(FormData formData) {
-        return dataRowDao.compareRows(formData);
-    }
+	@Override
+	public void removeCheckPoint(FormData formData) {
+		dataRowDao.removeCheckPoint(formData);
+	}
 
-    private void checkLockedMe(LockData lockData, TAUser user){
+	@Override
+	public void restoreCheckPoint(FormData formData) {
+		dataRowDao.restoreCheckPoint(formData);
+	}
+
+	private void checkLockedMe(LockData lockData, TAUser user){
         if (lockData == null || lockData.getUserId() != user.getId()) {
             throw new ServiceException("Объект не заблокирован текущим пользователем");
         }

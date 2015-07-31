@@ -29,15 +29,13 @@ public class SearchHandler extends AbstractActionHandler<SearchAction, SearchRes
 
     @Override
     public SearchResult execute(SearchAction searchAction, ExecutionContext executionContext) throws ActionException {
-
         DataRowRange range = new DataRowRange();
         range.setCount(searchAction.getTo());
         range.setOffset(searchAction.getFrom());
 
         SearchResult searchResult = new SearchResult();
         PagingResult<FormDataSearchResult> result = dataRowService.searchByKey(searchAction.getFormDataId(),
-                searchAction.getFormTemplateId(), range, searchAction.getKey(), searchAction.isCaseSensitive(),
-                !searchAction.isReadOnlyMode(), searchAction.isManual());
+                searchAction.getFormTemplateId(), range, searchAction.getKey(), searchAction.isCaseSensitive(), searchAction.isManual());
         searchResult.setResults(result);
         searchResult.setSize(result.getTotalCount());
 
@@ -46,6 +44,6 @@ public class SearchHandler extends AbstractActionHandler<SearchAction, SearchRes
 
     @Override
     public void undo(SearchAction searchAction, SearchResult searchResult, ExecutionContext executionContext) throws ActionException {
-
     }
+
 }

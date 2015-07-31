@@ -181,12 +181,17 @@ public interface FormDataDao {
     List<FormData> getNextFormDataList(FormData formData, TaxPeriod taxPeriod);
 
     /**
-     * TODO - возможно лучше сделать batchUpdate
      * Обновить значение атрибута "Номер последней строки предыдущей НФ"
-     * @param formDataId идентификатор налоговой формы
+     * @param formData налоговая форма
      * @param previousRowNumber номер последней строки предыдущей НФ
      */
-    void updatePreviousRowNumber(Long formDataId, Integer previousRowNumber);
+    void updatePreviousRowNumber(FormData formData, Integer previousRowNumber);
+
+	/**
+	 * Обновить значение атрибута "Количество пронумерованных строк текущей НФ"
+	 * @param formData налоговая форма
+	 */
+	void updateCurrentRowNumber(FormData formData);
 
     /**
      * Получить налоговые формы которые имеют признак ручного ввода

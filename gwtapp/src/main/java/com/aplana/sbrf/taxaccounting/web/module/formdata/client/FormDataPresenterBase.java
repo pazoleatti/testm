@@ -294,7 +294,7 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
     }
 
     /**
-     * Форма находиться в режиме редактирования, при этом запущена операция изменения данных
+     * Форма находится в режиме редактирования, при этом запущена операция изменения данных
      * @param lockInfo
      */
     protected void setLowEditLockedMode(LockInfo lockInfo){

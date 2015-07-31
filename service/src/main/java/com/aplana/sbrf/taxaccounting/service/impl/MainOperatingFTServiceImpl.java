@@ -109,13 +109,13 @@ public class MainOperatingFTServiceImpl implements MainOperatingService {
         return id;
     }
 
-    /**
+    /*
      * Удаление устаревших данных НФ, при смене типа хранения графы
      * http://jira.aplana.com/browse/SBRFACCTAX-8467
      *
      * @param oldTemplate
      * @param newTemplate
-     */
+     *
     private void cleanData(FormTemplate oldTemplate, FormTemplate newTemplate) {
         if (oldTemplate.getColumns() == null || oldTemplate.getColumns().isEmpty()
                 || newTemplate.getColumns() == null || newTemplate.getColumns().isEmpty()) {
@@ -143,7 +143,7 @@ public class MainOperatingFTServiceImpl implements MainOperatingService {
             return;
         }
         dataRowDao.cleanValue(cleanColumnList);
-    }
+    }*/
 
     @Override
     public <T> int createNewType(T template, Date templateActualEndDate, Logger logger, TAUserInfo user) {

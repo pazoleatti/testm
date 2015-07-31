@@ -74,7 +74,7 @@ public class PrintingServiceImpl implements PrintingService {
     private static final String REF_BOOK_VALUE_NAME = "CODE";
 
 	@Override
-	public String generateExcel(TAUserInfo userInfo, long formDataId, boolean manual, boolean isShowChecked, boolean saved, LockStateLogger stateLogger) {
+	public String generateExcel(TAUserInfo userInfo, long formDataId, boolean manual, boolean isShowChecked, LockStateLogger stateLogger) {
         String filePath = null;
         try {
             formDataAccessService.canRead(userInfo, formDataId);
@@ -95,7 +95,7 @@ public class PrintingServiceImpl implements PrintingService {
             data.setReportPeriod(reportPeriod);
             data.setAcceptanceDate(logBusinessDao.getFormAcceptanceDate(formDataId));
             data.setCreationDate(logBusinessDao.getFormCreationDate(formDataId));
-            List<DataRow<Cell>> dataRows = (saved ? dataRowDao.getSavedRows(formData, null) : dataRowDao.getTempRows(formData, null));
+            List<DataRow<Cell>> dataRows = dataRowDao.getRows(formData, null);
             Logger log = new Logger();
             refBookHelper.dataRowsDereference(log, dataRows, formTemplate.getColumns());
 
@@ -123,7 +123,7 @@ public class PrintingServiceImpl implements PrintingService {
 	}
 
     @Override
-    public String generateCSV(TAUserInfo userInfo, long formDataId, boolean manual, boolean isShowChecked, boolean saved, LockStateLogger stateLogger) {
+    public String generateCSV(TAUserInfo userInfo, long formDataId, boolean manual, boolean isShowChecked, LockStateLogger stateLogger) {
         String reportPath = null;
         try {
             formDataAccessService.canRead(userInfo, formDataId);
@@ -144,7 +144,7 @@ public class PrintingServiceImpl implements PrintingService {
             data.setReportPeriod(reportPeriod);
             data.setAcceptanceDate(logBusinessDao.getFormAcceptanceDate(formDataId));
             data.setCreationDate(logBusinessDao.getFormCreationDate(formDataId));
-            List<DataRow<Cell>> dataRows = (saved ? dataRowDao.getSavedRows(formData, null) : dataRowDao.getTempRows(formData, null));
+            List<DataRow<Cell>> dataRows = dataRowDao.getRows(formData, null);
             Logger log = new Logger();
             refBookHelper.dataRowsDereference(log, dataRows, formTemplate.getColumns());
 

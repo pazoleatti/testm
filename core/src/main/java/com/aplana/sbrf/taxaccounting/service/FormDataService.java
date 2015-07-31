@@ -403,7 +403,7 @@ public interface FormDataService {
      * Удаление блокировок для задач(отмена задачи)
      * @param formDataId
      * @param userInfo
-     * @param lockKeys
+     * @param reportTypes
      */
     void interruptTask(long formDataId, TAUserInfo userInfo, List<ReportType> reportTypes);
 

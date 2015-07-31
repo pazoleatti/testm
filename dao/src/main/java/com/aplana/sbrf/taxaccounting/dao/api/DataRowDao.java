@@ -11,38 +11,23 @@ import java.util.Collection;
 import java.util.List;
 
 /**
- * DAO для работы со строкам НФ. При редактировании состояние формы делится на 2
- * среза - Сохранненый (Saved) - Редактируемый (Edited)
- * 
- * Все действия по изменению строк НФ происходят с редактируемым срезом. После
- * сохранения сохраненный срез удаляется, а редактируемый становится сохраненным
- * При отмене редактируемый срез удаляется
- * 
- * Если форма в данный момент никем не редактируется (после save или cancel
- * изменений небыло) значит редактируемое и сохраненное состояние совпадают.
- * 
+ * DAO для работы со строкам НФ.
+ *
  * @author sgoryachkin
  * 
  */
 public interface DataRowDao {
 
 	/**
-	 * Удаление значений неактуальных граф. Метод используется настройщиком при смене типов граф
-	 * @param columnIdList Список Id измененных/удаленных граф
-	 */
-	void cleanValue(Collection<Integer> columnIdList);
-
-	/**
-	 * Делает временный срез строк формы постоянным.
+	 * Удаляет точку восстановления, сделанную перед редактированием данных (бывший commit)
 	 *
 	 * @param formData
 	 */
-	void commit(FormData formData);
+	void removeCheckPoint(FormData formData);
 
 	/**
-	 * Копирование строк из сохраненного среза НФ-источника во временный срез НФ-приемника.
-	 * Временный срез приемника предварительно очищается.Не копирует версию ручного ввода! Макеты источника и приемника
-	 * должны быть одинаковыми
+	 * Копирование строк из НФ-источника в НФ-приемник.
+	 * Не копирует версию ручного ввода! Макеты источника и приемника должны быть одинаковыми
 	 *
 	 * @param formDataSourceId НФ источник
 	 * @param formDataDestinationId НФ приемник
@@ -51,44 +36,34 @@ public interface DataRowDao {
 
 	/**
 	 * Создает версию ручного ввода, предварительно удалив из нее старые данные. Новые данные извлекаются из
-	 * автоматической версии из постоянного среза.
+	 * автоматической версии постоянного среза.
 	 * @param formData
 	 */
 	public void createManual(FormData formData);
 
 	/**
-	 * Создает временный срез, предварительно удалив из него старые данные. Работает как с обычной, так и с версией
-	 * ручного ввода.
+	 * Создает точку восстановления при ручном редактировании. Работает как с обычной, так и с версией ручного ввода.
+	 * (бывший createTemporary)
+	 *
 	 * @param formData
 	 */
-	void createTemporary(FormData formData);
+	void createCheckPoint(FormData formData);
 
 	/**
-	 * Метод получает строки редактируемого в данный момент среза строк НФ.
+	 * Метод возвращает строки сохраненного среза строк НФ.
 	 *
 	 */
-	List<DataRow<Cell>> getTempRows(FormData formData, DataRowRange range);
+	List<DataRow<Cell>> getRows(FormData formData, DataRowRange range);
 
 	/**
-	 * Метод получает строки сохраненного среза строк НФ.
-	 *
+	 * Метод возвращает количество строк НФ
 	 */
-	List<DataRow<Cell>> getSavedRows(FormData formData, DataRowRange range);
-
-	/**
-	 * Метод получает количество строк сохранненого среза
-	 */
-	int getSavedSize(FormData formData);
-
-	/**
-	 * Метод получает количество строк редактируемого среза
-	 */
-	int getTempSize(FormData formData);
+	int getRowCount(FormData formData);
 
     /**
-     * Метод получает количество строк редактируемого среза без учета итоговых
+     * Метод возвращает количество автонумеруемых строк
      */
-    int getSizeWithoutTotal(FormData formData, boolean isTemp);
+    int getAutoNumerationRowCount(FormData formData);
 
 	/**
 	 * Вставляет строки начиная с указанного индекса. Выставленные в rows значения id и index игнорируются и
@@ -109,29 +84,36 @@ public interface DataRowDao {
 	boolean isDataRowsCountChanged(FormData formData);
 
 	/**
-	 * Удаляем все строки из временного среза
+	 * Актуализирует список ссылок НФ на элементы справочника. Ссылки выставляются только для строк постоянного среза
+	 * (автоматическая или версия ручного ввода)
+	 * @param formData экземпляр НФ, ссылки которого требуется актуализировать
+	 */
+	void refreshRefBookLinks(FormData formData);
+
+	/**
+	 * Удаляем все строки
 	 *
 	 * @param formData экземпляр НФ для которой выполняется удаление строк
 	 */
 	void removeRows(FormData formData);
 
 	/**
-	 * Удаляем все строки ручной версии как из постоянного, так и из временного срезов
+	 * Удаляем все строки ручной версии
 	 *
 	 * @param formData экземпляр НФ для которой выполняется удаление строк
 	 */
 	void removeAllManualRows(FormData formData);
 
 	/**
-	 * Удаляет строки из временного среза в диапазоне индексов.
-	 * *
+	 * Удаляет строки в диапазоне индексов.
+	 *
 	 * @param formData экземпляр НФ для которой выполняется удаление строк
 	 * @param range диапазон удаляемых строк, индекс начинается с 1
 	 */
 	void removeRows(FormData formData, DataRowRange range);
 
 	/**
-	 * Удаляет строки во временном срезе.
+	 * Удаляет указанные строки
 	 *
 	 * @param formData
 	 * @param rows
@@ -145,14 +127,14 @@ public interface DataRowDao {
 	void reorderRows(FormData formData, List<DataRow<Cell>> rows);
 
 	/**
-	 * Откатывает временный срез формы к постоянному. Удаляет все данные из временных срезов.
+	 * Откатывает все изменения и восстанавливает данные из контрольной точки
 	 *
 	 * @param formData
 	 */
-	void rollback(FormData formData);
+	void restoreCheckPoint(FormData formData);
 
 	/**
-	 * Сохраняет все строки во временном срезе формы, при этом удаляются все существующие строки.
+	 * Заменяет существующие строки в БД на те, которые указаны в аргументе rows. Старые данные удаляются.
 	 * Поля DataRow.index и DataRow.id не принимаются во внимание. Порядок следования выставляется согласно
 	 * последовательности строк в rows. Id выставляется новый из последовательности "seq_form_data_nnn"
 	 * 
@@ -162,30 +144,21 @@ public interface DataRowDao {
 	void saveRows(FormData formData, List<DataRow<Cell>> rows);
 
     /**
-     * Поиск по налоговой форме,
-     * ищутся совпадения и выдается номер строки и столбца
-     * на форме
+     * Полнотекстовый поиск по данным налоговой формы
      *
-     * @param formDataId модель формы
-     * @param formTemplateId идентификатор шаблона формы
+     * @param formDataId идентификатор НФ
+     * @param formTemplateId идентификатор шаблона НФ
      * @param range информация о выборке данных, с какой строки и сколько строк выбрать
      * @param key ключ для поиска
      * @param isCaseSensitive чувствительность к регистру
-     * @param temporary временный срез
      * @param manual ручной ввод
      * @return Set<FormDataSearchResult> - Набор из номера столбца, строки, и самой найденной подстроки
      */
-    PagingResult<FormDataSearchResult> searchByKey(Long formDataId, Integer formTemplateId, DataRowRange range, String key, boolean isCaseSensitive, boolean temporary, boolean manual);
+    PagingResult<FormDataSearchResult> searchByKey(Long formDataId, Integer formTemplateId, DataRowRange range, String key, boolean isCaseSensitive, boolean manual);
 
 	/**
-	 * Обновляет существующие строки НФ во временном срезе.
+	 * Обновляет существующие строки НФ
 	 */
 	void updateRows(FormData formData, Collection<DataRow<Cell>> rows);
 
-    /**
-     * Сравнивает строки во временном срезе и основном
-     * @param formData
-     * @return true - изменении нету, иначе false
-     */
-    boolean compareRows(FormData formData);
 }
