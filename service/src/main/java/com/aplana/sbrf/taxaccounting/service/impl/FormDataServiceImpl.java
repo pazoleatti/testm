@@ -837,49 +837,47 @@ public class FormDataServiceImpl implements FormDataService {
 			params.put("sources", sources);
 			formDataScriptingService.executeScript(userInfo, formData, FormDataEvent.GET_SOURCES, logger, params);
 
-			if (sources.isSourcesProcessedByScript()) {
-				//Скрипт возвращает все необходимые источники-приемники
-				if (sources.getSourceList() != null) {
-					for (FormToFormRelation relation : sources.getSourceList()) {
-						if (relation.isSource() && relation.isCreated() && relation.getFormType() != null) {
-							//TODO: Заполняем DepartmentFormType не полностью!
-							DepartmentFormType source = new DepartmentFormType();
-							source.setDepartmentId(formData.getDepartmentId());
-							source.setFormTypeId(relation.getFormType().getId());
-							source.setKind(relation.getFormDataKind());
-							source.setPeriodOrder(relation.getPeriodOrder());
-							sourceList.add(source);
-						}
-					}
-				}
-			} else {
-				//Получаем источники-приемники стандартными методами ядра
-				//Номер месяца для источников получаемых обычным способом не указан. Такие случаи должны обрабатываться в скриптах
-				List<DepartmentFormType> dftSources = departmentFormTypeDao.getFormSources(
-						formData.getDepartmentId(),
-						formData.getFormType().getId(),
-						formData.getKind(),
-						reportPeriod.getCalendarStartDate(),
-						reportPeriod.getEndDate());
-				for (DepartmentFormType dft : dftSources) {
-					if (formTemplateService.existFormTemplate(dft.getFormTypeId(), reportPeriod.getId())) {
-						FormTemplate formTemplate = formTemplateService.get(formTemplateService.getActiveFormTemplateId(dft.getFormTypeId(), reportPeriod.getId()));
-						if (formTemplate.isMonthly()) {
-							for (Months month : reportPeriodService.getAvailableMonthList(reportPeriod.getId())) {
-								if (month != null) {
-									DepartmentFormType source = new DepartmentFormType();
-									source.setDepartmentId(dft.getDepartmentId());
-									source.setFormTypeId(dft.getFormTypeId());
-									source.setKind(dft.getKind());
-									source.setPeriodOrder(month.getId());
-									sourceList.add(source);
-								}
-							}
-						} else {
-							sourceList.add(dft);
-						}
-					}
-				}
+        if (sources.isSourcesProcessedByScript()) {
+            //Скрипт возвращает все необходимые источники-приемники
+            if (sources.getSourceList() != null) {
+                for (FormToFormRelation relation : sources.getSourceList()) {
+                    if (relation.isSource() && relation.isCreated() && relation.getFormType() != null) {
+                        //TODO: Заполняем DepartmentFormType не полностью!
+                        DepartmentFormType source = new DepartmentFormType();
+                        source.setDepartmentId(formData.getDepartmentId());
+                        source.setFormTypeId(relation.getFormType().getId());
+                        source.setKind(relation.getFormDataKind());
+                        source.setPeriodOrder(relation.getPeriodOrder());
+                        sourceList.add(source);
+                    }
+                }
+            }
+        } else {
+            //Получаем источники-приемники стандартными методами ядра
+            //Номер месяца для источников получаемых обычным способом не указан. Такие случаи должны обрабатываться в скриптах
+            List<DepartmentFormType> dftSources = departmentFormTypeDao.getFormSources(
+                    formData.getDepartmentId(),
+                    formData.getFormType().getId(),
+                    formData.getKind(),
+                    reportPeriod.getCalendarStartDate(),
+                    reportPeriod.getEndDate());
+            for (DepartmentFormType dft : dftSources) {
+                FormTemplate formTemplate = formTemplateService.get(formTemplateService.getActiveFormTemplateId(dft.getFormTypeId(), reportPeriod.getId()));
+                if (formTemplate.isMonthly()) {
+                    for (Months month : reportPeriodService.getAvailableMonthList(reportPeriod.getId())) {
+                        if (month != null) {
+                            DepartmentFormType source = new DepartmentFormType();
+                            source.setDepartmentId(dft.getDepartmentId());
+                            source.setFormTypeId(dft.getFormTypeId());
+                            source.setKind(dft.getKind());
+                            source.setPeriodOrder(month.getId());
+                            sourceList.add(source);
+                        }
+                    }
+                } else {
+                    sourceList.add(dft);
+                }
+            }
 
 			}
 			dataRowDao.refreshRefBookLinks(formData);

@@ -54,6 +54,16 @@ public interface FormTemplateDao {
 	int getActiveFormTemplateId(int formTypeId, int reportPeriodId);
 
     /**
+     * Возвращает идентификатор {@link FormTemplate описания налоговой формы} по виду налоговой формы
+     * Такое описание для каждого вида формы в любой момент времени может быть только одно
+     * @param formTypeId идентификатор вида налоговой формы
+     * @param startDate дата начала периода
+     * @param endDate дата окончания периода
+     * @return идентификатор описания налоговой формы
+     */
+    int getFormTemplateIdByFTAndReportPeriod(int formTypeId, Date startDate, Date endDate);
+
+    /**
      * Получить список идентификаторов макетов налоговых форм по фильтру
      * @param filter фильтр
      * @return список отфильтрованых идентификаторов

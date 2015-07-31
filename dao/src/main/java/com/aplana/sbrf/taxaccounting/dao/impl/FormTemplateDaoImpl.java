@@ -39,6 +39,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -57,6 +58,8 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
 
     @Autowired
     private ReportPeriodDao reportPeriodDao;
+
+    private static final SimpleDateFormat SDF = new SimpleDateFormat("dd.MM.yyyy");
 
 	private final XmlSerializationUtils xmlSerializationUtils = XmlSerializationUtils.getInstance();
 
@@ -243,10 +246,11 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
 		JdbcTemplate jt = getJdbcTemplate();
         ReportPeriod reportPeriod = reportPeriodDao.get(reportPeriodId);
 		try {
-            return jt.queryForInt(
+            return jt.queryForObject(
                     getActiveVersionSql(),
                     new Object[]{formTypeId, reportPeriod.getStartDate(), reportPeriod.getEndDate(), reportPeriod.getStartDate()},
-                    new int[]{Types.NUMERIC, Types.DATE, Types.DATE, Types.DATE});
+                    new int[]{Types.NUMERIC, Types.DATE, Types.DATE, Types.DATE},
+                    Integer.class);
 		} catch (EmptyResultDataAccessException e) {
 			throw new DaoException("Для данного вида налоговой формы %d - %s не найдено активного шаблона налоговой формы.",formTypeId, formTypeDao.get(formTypeId).getName());
 		}catch(IncorrectResultSizeDataAccessException e){
@@ -254,6 +258,43 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
                     formTypeId, formTypeDao.get(formTypeId).getName(), reportPeriod.getName());
 		}
 	}
+
+    private static final String GET_FORM_TEMPLATE_BY_FT_AND_RP =
+            "WITH templatesByVersion AS (SELECT\n" +
+                    "                              ID,\n" +
+                    "                              TYPE_ID,\n" +
+                    "                              STATUS,\n" +
+                    "                              VERSION,\n" +
+                    "                              row_number() over(partition by TYPE_ID order by version) rn\n" +
+                    "                            FROM FORM_TEMPLATE\n" +
+                    "                            WHERE TYPE_ID = :formTypeId AND status IN (0, 1, 2))\n" +
+                    "SELECT ID\n" +
+                    "FROM (SELECT\n" +
+                    "        rv.ID       ID,\n" +
+                    "        rv.STATUS,\n" +
+                    "        rv.TYPE_ID  RECORD_ID,\n" +
+                    "        rv.VERSION  versionFrom,\n" +
+                    "        rv2.version versionTo\n" +
+                    "      FROM templatesByVersion rv\n" +
+                    "        LEFT OUTER JOIN templatesByVersion rv2 ON rv.TYPE_ID = rv2.TYPE_ID AND rv.rn + 1 = rv2.rn)\n" +
+                    "WHERE STATUS in (0,1) AND ((TRUNC(versionFrom, 'DD') <= :startDate AND TRUNC(versionTo, 'DD') >= :endDate) OR\n" +
+                    "                      (TRUNC(versionFrom, 'DD') <= :startDate AND versionTo IS NULL))";
+
+    @Override
+    public int getFormTemplateIdByFTAndReportPeriod(int formTypeId, Date startDate, Date endDate) {
+        try{
+            HashMap<String, Object> params = new HashMap<String, Object>(3);
+            params.put("formTypeId", formTypeId);
+            params.put("startDate", startDate);
+            params.put("endDate", endDate);
+            return getNamedParameterJdbcTemplate().queryForObject(GET_FORM_TEMPLATE_BY_FT_AND_RP, params, Integer.class);
+        } catch (EmptyResultDataAccessException e){
+            throw new DaoException("Для данного вида налоговой формы %d - %s не найдено макета налоговой формы.",formTypeId, formTypeDao.get(formTypeId).getName());
+        } catch(IncorrectResultSizeDataAccessException e){
+            throw new DaoException("Для данного вида налоговой формы %d - %s найдено несколько макетов налоговой формы в одном отчетном периоде %s-%s.",
+                    formTypeId, formTypeDao.get(formTypeId).getName(), SDF.format(startDate), SDF.format(endDate));
+        }
+    }
 
     @Override
     public List<Integer> getByFilter(TemplateFilter filter) {
@@ -372,8 +413,11 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
             if (actualBeginVersion == null)
                 throw new DataRetrievalFailureException("Дата начала актуальности версии не должна быть null");
 
-            return getNamedParameterJdbcTemplate().queryForInt("select * from (select id from form_template where type_id = :typeId" +
-                    " and TRUNC(version, 'DD') > :actualBeginVersion and status in (:statusList) order by version) where rownum = 1", valueMap);
+            return getNamedParameterJdbcTemplate().queryForObject(
+                    "select * from (select id from form_template where type_id = :typeId" +
+                            " and TRUNC(version, 'DD') > :actualBeginVersion and status in (:statusList) order by version) where rownum = 1",
+                    valueMap,
+                    Integer.class);
         } catch(EmptyResultDataAccessException e){
             return 0;
         } catch (DataAccessException e){
@@ -462,7 +506,7 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
         if (!statusList.isEmpty())
             builder.append(" and status in (:statusList)");
         try {
-            return getNamedParameterJdbcTemplate().queryForInt(builder.toString(), valueMap);
+            return getNamedParameterJdbcTemplate().queryForObject(builder.toString(), valueMap, Integer.class);
         } catch (DataAccessException e){
             logger.error("Ошибка при получении числа версий.", e);
             throw new DaoException("Ошибка при получении числа версий. %s", e.getMessage());
@@ -499,10 +543,11 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
         JdbcTemplate jt = getJdbcTemplate();
         ReportPeriod reportPeriod = reportPeriodDao.get(reportPeriodId);
         try {
-            return jt.queryForInt(
+            return jt.queryForObject(
                     getActiveVersionSql(),
                     new Object[]{formTypeId, reportPeriod.getStartDate(), reportPeriod.getEndDate(), reportPeriod.getStartDate()},
-                    new int[]{Types.NUMERIC, Types.DATE, Types.DATE, Types.DATE}) > 0;
+                    new int[]{Types.NUMERIC, Types.DATE, Types.DATE, Types.DATE},
+                    Integer.class) > 0;
         } catch (EmptyResultDataAccessException e) {
             return false;
         }catch(IncorrectResultSizeDataAccessException e){
@@ -679,12 +724,11 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
 
 	@Override
 	public boolean checkExistLargeString(Integer formTemplateId, Integer columnId, int maxLength) {
-		StringBuilder sql = new StringBuilder("SELECT COUNT(*) FROM form_data_");
-		sql.append(formTemplateId);
-		sql.append(" WHERE length(c");
-		sql.append(columnId);
-		sql.append(") > ?");
-		return getJdbcTemplate().queryForInt(sql.toString().intern(), new Object[]{maxLength}, new int[]{Types.INTEGER}) > 0;
+        return getJdbcTemplate().queryForObject(
+                ("SELECT COUNT(*) FROM form_data_" + formTemplateId + " WHERE length(c" + columnId + ") > ?").intern(),
+                new Object[]{maxLength},
+                new int[]{Types.INTEGER},
+                Integer.class) > 0;
 	}
 
     @Override

@@ -52,6 +52,19 @@ public class FormToFormRelation implements Serializable {
     private String periodName;
     private Integer periodOrder;
 
+    /**
+     * Введена/выведена в/из действие(-ия)
+     */
+    private boolean status;
+
+    public boolean isStatus() {
+        return status;
+    }
+
+    public void setStatus(boolean status) {
+        this.status = status;
+    }
+
     public Integer getPeriodOrder() {
         return periodOrder;
     }
