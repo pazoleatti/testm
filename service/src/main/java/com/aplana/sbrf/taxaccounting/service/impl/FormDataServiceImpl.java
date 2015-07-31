@@ -50,6 +50,7 @@ import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.AuditService;
 import com.aplana.sbrf.taxaccounting.service.BlobDataService;
+import com.aplana.sbrf.taxaccounting.service.DeclarationTypeService;
 import com.aplana.sbrf.taxaccounting.service.DepartmentReportPeriodService;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.FormDataAccessService;
@@ -823,17 +824,17 @@ public class FormDataServiceImpl implements FormDataService {
         }
     }
 
-    private List<DepartmentFormType> getFormSources(final FormData formData, final Logger logger, final TAUserInfo userInfo, ReportPeriod reportPeriod){
+	@Override
+	public List<DepartmentFormType> getFormSources(final FormData formData, final Logger logger, final TAUserInfo userInfo, ReportPeriod reportPeriod){
 		TransactionStatus transaction = tx.startTransaction();
 		try {
 			List<DepartmentFormType> sourceList = new ArrayList<DepartmentFormType>();
 			/** Проверяем в скрипте источники-приемники для особенных форм */
-			final Map<String, Object> params = new HashMap<String, Object>();
+			Map<String, Object> params = new HashMap<String, Object>();
 			FormSources sources = new FormSources();
 			sources.setSourceList(new ArrayList<FormToFormRelation>());
 			sources.setSourcesProcessedByScript(false);
 			params.put("sources", sources);
-
 			formDataScriptingService.executeScript(userInfo, formData, FormDataEvent.GET_SOURCES, logger, params);
 
 			if (sources.isSourcesProcessedByScript()) {
@@ -854,19 +855,39 @@ public class FormDataServiceImpl implements FormDataService {
 			} else {
 				//Получаем источники-приемники стандартными методами ядра
 				//Номер месяца для источников получаемых обычным способом не указан. Такие случаи должны обрабатываться в скриптах
-				sourceList = departmentFormTypeDao.getFormSources(
+				List<DepartmentFormType> dftSources = departmentFormTypeDao.getFormSources(
 						formData.getDepartmentId(),
 						formData.getFormType().getId(),
 						formData.getKind(),
 						reportPeriod.getCalendarStartDate(),
 						reportPeriod.getEndDate());
+				for (DepartmentFormType dft : dftSources) {
+					if (formTemplateService.existFormTemplate(dft.getFormTypeId(), reportPeriod.getId())) {
+						FormTemplate formTemplate = formTemplateService.get(formTemplateService.getActiveFormTemplateId(dft.getFormTypeId(), reportPeriod.getId()));
+						if (formTemplate.isMonthly()) {
+							for (Months month : reportPeriodService.getAvailableMonthList(reportPeriod.getId())) {
+								if (month != null) {
+									DepartmentFormType source = new DepartmentFormType();
+									source.setDepartmentId(dft.getDepartmentId());
+									source.setFormTypeId(dft.getFormTypeId());
+									source.setKind(dft.getKind());
+									source.setPeriodOrder(month.getId());
+									sourceList.add(source);
+								}
+							}
+						} else {
+							sourceList.add(dft);
+						}
+					}
+				}
+
 			}
 			dataRowDao.refreshRefBookLinks(formData);
 			return sourceList;
 		} finally {
 			tx.rollback(transaction);
 		}
-    }
+	}
 
     private void checkConsolidateFromSources(FormData formData, Logger logger, TAUserInfo userInfo){
         //Проверка на неактуальные консолидированные данные
