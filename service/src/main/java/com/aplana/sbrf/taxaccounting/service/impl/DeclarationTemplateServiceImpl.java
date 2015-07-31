@@ -281,6 +281,11 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
     }
 
     @Override
+    public boolean existDeclarationTemplate(int declarationTypeId, int reportPeriodId) {
+        return declarationTemplateDao.existDeclarationTemplate(declarationTypeId, reportPeriodId);
+    }
+
+    @Override
 	public boolean lock(int declarationTemplateId, TAUserInfo userInfo){
         DeclarationTemplate declarationTemplate = get(declarationTemplateId);
         Date endVersion = getDTEndDate(declarationTemplateId);

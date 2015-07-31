@@ -66,6 +66,17 @@ public interface FormTemplateService {
      */
     int getActiveFormTemplateId(int formTypeId, int reportPeriodId);
 
+    /**
+     * Возвращает идентификатор {@link FormTemplate описания налоговой формы} по виду налоговой формы
+     * Такое описание для каждого вида формы в аанном отчетном пеииоде может быть только одно
+     * @param formTypeId идентификатор вида налоговой формы
+     * @param reportPeriodId идентификатор отчетного периода
+     * @return идентификатор описания налоговой формы
+     * @throws DaoException если не удалось найти активное описание налоговой формы по заданному типу,
+     * 	или если обнаружено несколько действуюшие описаний по данному виду формы
+     */
+    int getFormTemplateIdByFTAndReportPeriod(int formTypeId, int reportPeriodId);
+
 	/**
 	 * Снять блокировку с formTemplate.
 	 * @param formTemplateId - идентификатор шаблона налоговой формы

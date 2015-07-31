@@ -184,4 +184,15 @@ public interface DeclarationTemplateService {
 
     void deleteJrxml(int dtId);
 
+    /**
+     * Проверка существования активного шаблона декларации
+     * с типом declarationTypeId и датой актуальности которой является период включающий
+     * reportPeriodId
+     *
+     * @param declarationTypeId вид шаблона
+     * @param reportPeriodId отчетный период
+     * @return true-если существует
+     */
+    boolean existDeclarationTemplate(int declarationTypeId, int reportPeriodId);
+
 }

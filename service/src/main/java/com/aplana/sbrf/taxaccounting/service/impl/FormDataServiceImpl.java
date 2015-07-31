@@ -849,22 +849,20 @@ public class FormDataServiceImpl implements FormDataService {
                     reportPeriod.getCalendarStartDate(),
                     reportPeriod.getEndDate());
             for (DepartmentFormType dft : dftSources) {
-                if (formTemplateService.existFormTemplate(dft.getFormTypeId(), reportPeriod.getId())) {
-                    FormTemplate formTemplate = formTemplateService.get(formTemplateService.getActiveFormTemplateId(dft.getFormTypeId(), reportPeriod.getId()));
-                    if (formTemplate.isMonthly()) {
-                        for (Months month : reportPeriodService.getAvailableMonthList(reportPeriod.getId())) {
-                            if (month != null) {
-                                DepartmentFormType source = new DepartmentFormType();
-                                source.setDepartmentId(dft.getDepartmentId());
-                                source.setFormTypeId(dft.getFormTypeId());
-                                source.setKind(dft.getKind());
-                                source.setPeriodOrder(month.getId());
-                                sourceList.add(source);
-                            }
+                FormTemplate formTemplate = formTemplateService.get(formTemplateService.getActiveFormTemplateId(dft.getFormTypeId(), reportPeriod.getId()));
+                if (formTemplate.isMonthly()) {
+                    for (Months month : reportPeriodService.getAvailableMonthList(reportPeriod.getId())) {
+                        if (month != null) {
+                            DepartmentFormType source = new DepartmentFormType();
+                            source.setDepartmentId(dft.getDepartmentId());
+                            source.setFormTypeId(dft.getFormTypeId());
+                            source.setKind(dft.getKind());
+                            source.setPeriodOrder(month.getId());
+                            sourceList.add(source);
                         }
-                    } else {
-                        sourceList.add(dft);
                     }
+                } else {
+                    sourceList.add(dft);
                 }
             }
 
@@ -1887,7 +1885,7 @@ public class FormDataServiceImpl implements FormDataService {
             case CSV:
                 int rowCountReport = dataRowDao.getSavedSize(formData);
                 int columnCountReport = formTemplateService.get(formData.getFormTemplateId()).getColumns().size();
-                return Long.valueOf(rowCountReport * columnCountReport);
+                return (long) (rowCountReport * columnCountReport);
             case CONSOLIDATE_FD:
                 ReportPeriod reportPeriod = reportPeriodService.getReportPeriod(formData.getReportPeriodId());
                 List<DepartmentFormType> departmentFormTypesSources = getFormSources(formData, logger, userInfo, reportPeriod);
