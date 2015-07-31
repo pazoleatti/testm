@@ -339,6 +339,11 @@
                     <artifactId>scheduler-mock</artifactId>
                     <version>${project.version}</version>
                 </dependency>
+                <dependency>
+                    <groupId>javax</groupId>
+                    <artifactId>javaee-api</artifactId>
+                    <scope>provided</scope>
+                </dependency>
             </dependencies>
 			<build>
                 <resources>
