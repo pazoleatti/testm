@@ -12,8 +12,6 @@ import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.FormDataScriptingService;
 import com.aplana.sbrf.taxaccounting.service.shared.ScriptComponentContextHolder;
 import com.aplana.sbrf.taxaccounting.util.ScriptExposed;
-import com.aplana.sbrf.taxaccounting.util.TransactionHelper;
-import com.aplana.sbrf.taxaccounting.util.TransactionLogic;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -42,8 +40,6 @@ public class FormDataScriptingServiceImpl extends TAAbstractScriptingServiceImpl
     @Autowired
     @Qualifier("versionInfoProperties")
     private Properties versionInfoProperties;
-	@Autowired
-	private TransactionHelper tx;
 
     @Override
     public void executeScript(TAUserInfo userInfo, FormData formData,

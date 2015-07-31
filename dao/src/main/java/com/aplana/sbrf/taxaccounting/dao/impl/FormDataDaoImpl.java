@@ -476,7 +476,7 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 		Map<String, Object> params = new HashMap<String, Object>();
 		params.put("count", previousRowNumber);
 		params.put("form_data_id", formData.getId());
-        getJdbcTemplate().update("UPDATE form_data SET number_previous_row = :count WHERE id = :form_data_id", params);
+		getNamedParameterJdbcTemplate().update("UPDATE form_data SET number_previous_row = :count WHERE id = :form_data_id", params);
     }
 
 	@Override
@@ -484,7 +484,7 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 		Map<String, Object> params = new HashMap<String, Object>();
 		params.put("count", dataRowDao.getAutoNumerationRowCount(formData));
 		params.put("form_data_id", formData.getId());
-		getJdbcTemplate().update("UPDATE form_data SET number_current_row = :count WHERE id = :form_data_id", params);
+		getNamedParameterJdbcTemplate().update("UPDATE form_data SET number_current_row = :count WHERE id = :form_data_id", params);
 	}
 
 	private static final String GET_MANUAL_UNPUTS_FORMS = "select fd.*, drp.report_period_id, drp.department_id, ft.type_id, fd.manual from form_data fd \n" +
