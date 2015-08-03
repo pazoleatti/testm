@@ -7,6 +7,7 @@ import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
 import com.aplana.sbrf.taxaccounting.model.FormTemplate;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.FormDataScriptingService;
@@ -158,7 +159,8 @@ public class FormDataScriptingServiceImpl extends TAAbstractScriptingServiceImpl
         } catch (ScriptException e) {
             logScriptException(e, logger);
         } catch (Exception e) {
-            logger.error(e.getMessage());
+            //TODO: Добавить вывод номера строки в скрипте
+            logger.error(new ServiceException("Обнаружены ошибки в скрипте!", e));
         }
     }
 

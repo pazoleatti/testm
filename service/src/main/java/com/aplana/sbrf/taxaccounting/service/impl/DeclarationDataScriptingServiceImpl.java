@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationTemplateDao;
 import com.aplana.sbrf.taxaccounting.log.impl.ScriptMessageDecorator;
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
@@ -130,7 +131,8 @@ public class DeclarationDataScriptingServiceImpl extends TAAbstractScriptingServ
 			logScriptException(e, logger);
 			return false;
 		} catch (Exception e) {
-			logger.error(e);
+            //TODO: Добавить вывод номера строки в скрипте
+			logger.error(new ServiceException("Обнаружены ошибки в скрипте!", e));
 			return false;
 		}
 	}
