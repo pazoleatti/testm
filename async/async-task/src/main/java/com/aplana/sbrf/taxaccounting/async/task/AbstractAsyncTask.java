@@ -103,7 +103,7 @@ public abstract class AbstractAsyncTask implements AsyncTask {
         lockService.updateState(lock, lockDate, LockData.State.STARTED.getText());
         transactionHelper.executeInNewTransaction(new TransactionLogic() {
             @Override
-            public void execute() {
+            public Object execute() {
                 try {
                     if (lockService.isLockExists(lock, lockDate)) {
                         log.info(String.format("Для задачи с ключом %s запущено выполнение бизнес-логики", lock));
@@ -118,7 +118,7 @@ public abstract class AbstractAsyncTask implements AsyncTask {
 
                         transactionHelper.executeInNewTransaction(new TransactionLogic() {
                             @Override
-                            public void execute() {
+                            public Object execute() {
                                 try {
                                     log.info(String.format("Для задачи с ключом %s выполняется сохранение сообщений", lock));
                                     lockService.updateState(lock, lockDate, LockData.State.SAVING_MSGS.getText());
@@ -131,11 +131,7 @@ public abstract class AbstractAsyncTask implements AsyncTask {
                                 } catch (Exception e) {
                                     log.error("Произошла ошибка при рассылке сообщений", e);
                                 }
-                            }
-
-                            @Override
-                            public Object executeWithReturn() {
-                                return null;
+								return null;
                             }
                         });
                     } else {
@@ -148,7 +144,7 @@ public abstract class AbstractAsyncTask implements AsyncTask {
                         try {
                             transactionHelper.executeInNewTransaction(new TransactionLogic() {
                                 @Override
-                                public void execute() {
+                                public Object execute() {
                                     log.info(String.format("Для задачи с ключом %s выполняется рассылка уведомлений об ошибке", lock));
                                     lockService.updateState(lock, lockDate, LockData.State.SENDING_ERROR_MSGS.getText());
                                     String msg = getErrorMsg(params);
@@ -162,11 +158,7 @@ public abstract class AbstractAsyncTask implements AsyncTask {
                                         if (e.getMessage() != null && !e.getMessage().isEmpty()) logger.error(e);
                                         sendNotifications(lock, msg, logEntryService.save(logger.getEntries()));
                                     }
-                                }
-
-                                @Override
-                                public Object executeWithReturn() {
-                                    return null;
+									return null;
                                 }
                             });
                         } finally {
@@ -181,11 +173,7 @@ public abstract class AbstractAsyncTask implements AsyncTask {
                         throw new RuntimeException("Не удалось выполнить асинхронную задачу", e);
                     }
                 }
-            }
-
-            @Override
-            public Object executeWithReturn() {
-                return null;
+				return null;
             }
         });
 

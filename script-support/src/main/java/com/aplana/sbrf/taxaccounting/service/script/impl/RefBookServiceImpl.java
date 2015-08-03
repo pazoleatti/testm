@@ -73,7 +73,7 @@ public class RefBookServiceImpl implements RefBookService {
 
     @Override
     public <T> T returnInNewTransaction(TransactionLogic<T> logic) {
-        return transactionHelper.returnInNewTransaction(logic);
+        return transactionHelper.executeInNewTransaction(logic);
     }
 
     private RefBookValue getValue(Long refBookId, Long recordId, String alias) {

@@ -52,33 +52,30 @@ public class LockDataServiceImpl implements LockDataService {
 
 	@Override
 	public LockData lock(final String key, final int userId, final String description, final long age) {
-        return tx.returnInNewTransaction(new TransactionLogic<LockData>() {
+        return tx.executeInNewTransaction(new TransactionLogic<LockData>() {
             @Override
-            public LockData executeWithReturn() {
-                try {
-                    synchronized(LockDataServiceImpl.class) {
-                        LockData lock = validateLock(dao.get(key, false));
-                        if (lock != null) {
-                            return lock;
-                        }
-                        internalLock(key, userId, age, description, null);
-                    }
-                    return null;
-                } catch (Exception e) {
-                    throw new ServiceException("Не удалось установить блокировку объекта", e);
-                }
-            }
-
-            @Override
-            public void execute() {}
+            public LockData execute() {
+				try {
+					synchronized(LockDataServiceImpl.class) {
+						LockData lock = validateLock(dao.get(key, false));
+						if (lock != null) {
+							return lock;
+						}
+						internalLock(key, userId, age, description, null);
+					}
+					return null;
+				} catch (Exception e) {
+					throw new ServiceException("Не удалось установить блокировку объекта", e);
+				}
+			}
         });
 	}
 
     @Override
     public LockData lock(final String key, final int userId, final String description, final String state, final long age) {
-        return tx.returnInNewTransaction(new TransactionLogic<LockData>() {
+        return tx.executeInNewTransaction(new TransactionLogic<LockData>() {
             @Override
-            public LockData executeWithReturn() {
+            public LockData execute() {
                 try {
                     synchronized(LockDataServiceImpl.class) {
                         LockData lock = validateLock(dao.get(key, false));
@@ -92,9 +89,6 @@ public class LockDataServiceImpl implements LockDataService {
                     throw new ServiceException("Не удалось установить блокировку объекта", e);
                 }
             }
-
-            @Override
-            public void execute() {}
         });
     }
 
@@ -109,7 +103,7 @@ public class LockDataServiceImpl implements LockDataService {
 	public void lockWait(final String key, final int userId, final long age, final String description, final long timeout) {
         tx.executeInNewTransaction(new TransactionLogic() {
             @Override
-            public void execute() {
+            public Object execute() {
                 long startTime = new Date().getTime();
                 while (lock(key, userId, description, age) != null) {
                     try {
@@ -120,11 +114,7 @@ public class LockDataServiceImpl implements LockDataService {
                         throw new ServiceException(String.format("Время ожидания (%s мс) для установки блокировки истекло", timeout));
                     }
                 }
-            }
-
-            @Override
-            public Object executeWithReturn() {
-                return null;
+				return null;
             }
         });
 	}
@@ -138,7 +128,7 @@ public class LockDataServiceImpl implements LockDataService {
     public void unlock(final String key, final int userId, final boolean force) {
         tx.executeInNewTransaction(new TransactionLogic() {
             @Override
-            public void execute() {
+            public Object execute() {
                 try {
                     synchronized(LockDataServiceImpl.class) {
                         LockData lock = validateLock(dao.get(key, false));
@@ -158,11 +148,7 @@ public class LockDataServiceImpl implements LockDataService {
                 } catch (Exception e) {
                     throw new ServiceException("Не удалось снять блокировку с объекта", e);
                 }
-            }
-
-            @Override
-            public Object executeWithReturn() {
-                return null;
+				return null;
             }
         });
 	}
@@ -171,7 +157,7 @@ public class LockDataServiceImpl implements LockDataService {
 	public void extend(final String key, final int userId, final long age) {
         tx.executeInNewTransaction(new TransactionLogic() {
             @Override
-            public void execute() {
+            public Object execute() {
                 try {
                     synchronized(LockDataServiceImpl.class) {
                         LockData lock = dao.get(key, false);
@@ -195,11 +181,7 @@ public class LockDataServiceImpl implements LockDataService {
                 } catch (Exception e) {
                     throw new ServiceException("Не удалось продлить блокировку объекта", e);
                 }
-            }
-
-            @Override
-            public Object executeWithReturn() {
-                return null;
+				return null;
             }
         });
 	}
@@ -237,7 +219,7 @@ public class LockDataServiceImpl implements LockDataService {
     public void addUserWaitingForLock(final String key, final int userId) {
         tx.executeInNewTransaction(new TransactionLogic() {
             @Override
-            public void execute() {
+            public Object execute() {
                 try {
                     synchronized(LockDataServiceImpl.class) {
                         LockData lock = validateLock(dao.get(key, false));
@@ -252,11 +234,7 @@ public class LockDataServiceImpl implements LockDataService {
                 } catch (Exception e) {
                     throw new ServiceException("Не удалось добавить пользователя в список ожидающих объект блокировки", e);
                 }
-            }
-
-            @Override
-            public Object executeWithReturn() {
-                return null;
+				return null;
             }
         });
     }
@@ -300,7 +278,7 @@ public class LockDataServiceImpl implements LockDataService {
     public void updateState(final String key, final Date lockDate, final String state) {
         tx.executeInNewTransaction(new TransactionLogic() {
             @Override
-            public void execute() {
+            public Object execute() {
                 try {
                     synchronized (LockDataServiceImpl.class) {
                         dao.updateState(key, lockDate, state);
@@ -310,11 +288,7 @@ public class LockDataServiceImpl implements LockDataService {
                 } catch (Exception e) {
                     throw new ServiceException("Не удалось обновить статус блокировки объекта", e);
                 }
-            }
-
-            @Override
-            public Object executeWithReturn() {
-                return null;
+				return null;
             }
         });
     }
@@ -323,7 +297,7 @@ public class LockDataServiceImpl implements LockDataService {
     public void updateQueue(final String key, final Date lockDate, final BalancingVariants queue) {
         tx.executeInNewTransaction(new TransactionLogic() {
             @Override
-            public void execute() {
+            public Object execute() {
                 try {
                     synchronized (LockDataServiceImpl.class) {
                         dao.updateQueue(key, lockDate, queue);
@@ -333,11 +307,7 @@ public class LockDataServiceImpl implements LockDataService {
                 } catch (Exception e) {
                     throw new ServiceException("Не удалось обновить статус блокировки объекта", e);
                 }
-            }
-
-            @Override
-            public Object executeWithReturn() {
-                return null;
+				return null;
             }
         });
     }
@@ -369,36 +339,32 @@ public class LockDataServiceImpl implements LockDataService {
         if (lockData != null) {
             log.info(String.format("Останавливается асинхронная задача с ключом %s", lockData.getKey()));
             tx.executeInNewTransaction(new TransactionLogic() {
-                                           @Override
-                                           public void execute() {
-                                               try {
-                                                   TAUser user = userDao.getUser(userId);
-                                                   List<Integer> waitingUsers = getUsersWaitingForLock(lockData.getKey());
-                                                   unlock(lockData.getKey(), userId, force);
-                                                   //asyncInterruptionManager.interruptAll(Arrays.asList(lockData.getKey()));
-                                                   String msg = String.format(LockData.CANCEL_TASK, user.getName(), lockData.getDescription());
-                                                   List<Notification> notifications = new ArrayList<Notification>();
-                                                   //Создаем оповещение для каждого пользователя из списка
-                                                   if (!waitingUsers.isEmpty()) {
-                                                       for (Integer waitingUser : waitingUsers) {
-                                                           Notification notification = new Notification();
-                                                           notification.setUserId(waitingUser);
-                                                           notification.setCreateDate(new Date());
-                                                           notification.setText(msg);
-                                                           notifications.add(notification);
-                                                       }
-                                                       notificationService.saveList(notifications);
-                                                   }
-                                               } catch (Exception e) {
-                                                   throw new ServiceException("Не удалось прервать задачу", e);
-                                               }
-                                           }
-
-                                           @Override
-                                           public Object executeWithReturn() {
-                                               return null;
-                                           }
-                                       }
+				   @Override
+				   public Object execute() {
+					   try {
+						   TAUser user = userDao.getUser(userId);
+						   List<Integer> waitingUsers = getUsersWaitingForLock(lockData.getKey());
+						   unlock(lockData.getKey(), userId, force);
+						   //asyncInterruptionManager.interruptAll(Arrays.asList(lockData.getKey()));
+						   String msg = String.format(LockData.CANCEL_TASK, user.getName(), lockData.getDescription());
+						   List<Notification> notifications = new ArrayList<Notification>();
+						   //Создаем оповещение для каждого пользователя из списка
+						   if (!waitingUsers.isEmpty()) {
+							   for (Integer waitingUser : waitingUsers) {
+								   Notification notification = new Notification();
+								   notification.setUserId(waitingUser);
+								   notification.setCreateDate(new Date());
+								   notification.setText(msg);
+								   notifications.add(notification);
+							   }
+							   notificationService.saveList(notifications);
+						   }
+					   } catch (Exception e) {
+						   throw new ServiceException("Не удалось прервать задачу", e);
+					   }
+					   return null;
+				   }
+			   }
             );
         }
     }

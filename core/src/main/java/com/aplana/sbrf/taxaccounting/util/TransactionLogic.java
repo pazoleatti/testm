@@ -5,6 +5,5 @@ package com.aplana.sbrf.taxaccounting.util;
  * @author dloshkarev
  */
 public interface TransactionLogic<T> {
-    void execute();
-    T executeWithReturn();
+    T execute();
 }
