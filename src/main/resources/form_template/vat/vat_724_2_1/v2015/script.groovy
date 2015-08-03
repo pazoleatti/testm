@@ -377,6 +377,7 @@ void importData() {
     def allValuesCount = allValues.size()
 
     def dataRows = formDataService.getDataRowHelper(formData).allCached
+    def totalRow = getDataRow(dataRows, 'itog')
 
     // формирвание строк нф
     for (def i = 0; i < allValuesCount; i++) {
@@ -388,14 +389,16 @@ void importData() {
             rowValues.clear()
             break
         }
-        // Пропуск итоговых строк
+        rowIndex++
+        // итоговая строка
         if (rowValues[INDEX_FOR_SKIP] == 'Итого') {
+            fillTotalFromXls(totalRow, rowValues, fileRowIndex, rowIndex, colOffset)
+
             allValues.remove(rowValues)
             rowValues.clear()
             break
         }
         // простая строка
-        rowIndex++
         if (rowIndex > dataRows.size()) {
             break
         }
@@ -408,6 +411,16 @@ void importData() {
         allValues.remove(rowValues)
         rowValues.clear()
     }
+
+    // сравнение итогов
+    def totalRowTmp = formData.createStoreMessagingDataRow()
+    // подсчитанные итоговые значения для сравнения
+    def itogValues = calcItog(dataRows)
+    totalColumns.each { alias ->
+        totalRowTmp[alias] = itogValues[alias]
+    }
+    compareTotalValues(totalRow, totalRowTmp, totalColumns, logger, false)
+
     showMessages(dataRows, logger)
 }
 
@@ -481,4 +494,26 @@ def fillRowFromXls(def dataRow, def values, int fileRowIndex, int rowIndex, int 
         colIndex++
         dataRow.obtainCost = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
     }
+}
+
+/**
+ * Заполняет итоговую строку нф значениями из экселя.
+ *
+ * @param dataRow итоговая строка нф
+ * @param values список строк со значениями
+ * @param fileRowIndex номер строки в тф
+ * @param rowIndex номер строки в нф
+ * @param colOffset отступ по столбцам
+ */
+void fillTotalFromXls(def dataRow, def values, int fileRowIndex, int rowIndex, int colOffset) {
+    dataRow.setImportIndex(fileRowIndex)
+    dataRow.setIndex(rowIndex)
+
+    // графа 4
+    def colIndex = 3
+    dataRow.realizeCost = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
+
+    // графа 5
+    colIndex = 4
+    dataRow.obtainCost = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
 }

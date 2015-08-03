@@ -60,7 +60,7 @@ switch (formDataEvent) {
         break
     case FormDataEvent.IMPORT:
         importData()
-         formDataService.saveCachedDataRows(formData, logger)
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.IMPORT_TRANSPORT_FILE:
         importTransportData()
@@ -472,6 +472,7 @@ void importData() {
     def rowIndex = 0
     def rows = []
     def allValuesCount = allValues.size()
+    def totalRowFromFile = null
 
     // формирвание строк нф
     for (def i = 0; i < allValuesCount; i++) {
@@ -484,7 +485,11 @@ void importData() {
             break
         }
         // Пропуск итоговых строк
-        if (rowValues[INDEX_FOR_SKIP] == 'Итого') {
+        if (rowValues[INDEX_FOR_SKIP]) {
+            if (rowValues[INDEX_FOR_SKIP] == 'Итого' && totalRowFromFile == null) {
+                rowIndex++
+                totalRowFromFile = getNewRowFromXls(rowValues, colOffset, fileRowIndex, rowIndex)
+            }
             allValues.remove(rowValues)
             rowValues.clear()
             continue
@@ -500,12 +505,13 @@ void importData() {
 
     // Добавляем итоговые строки
     def totalRow = getFixedRow('Итого', 'total', true)
-    calcTotalSum(rows, totalRow, totalColumns)
     rows.add(totalRow)
+    updateIndexes(rows)
+    // сравнение итогов
+    compareSimpleTotalValues(totalRow, totalRowFromFile, rows, totalColumns, formData, logger, false)
 
     showMessages(rows, logger)
     if (!logger.containsLevel(LogLevel.ERROR)) {
-        updateIndexes(rows)
         formDataService.getDataRowHelper(formData).allCached = rows
     }
 }

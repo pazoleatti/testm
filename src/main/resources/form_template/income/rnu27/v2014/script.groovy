@@ -345,7 +345,7 @@ def logicCheck() {
 
         // LC 20
         if (row.getAlias() != null && row.getAlias().indexOf('itogoRegNumber') != -1) {
-            srow = calcItogRegNumber(dataRows.indexOf(row))
+            srow = calcItogRegNumber(dataRows.indexOf(row), dataRows)
 
             for (column in totalColumns) {
                 if (row.get(column) != srow.get(column)) {
@@ -357,7 +357,7 @@ def logicCheck() {
 
         // LC 21
         if (row.getAlias() != null && row.getAlias().indexOf('itogoIssuer') != -1) {
-            srow = calcItogIssuer(dataRows.indexOf(row))
+            srow = calcItogIssuer(dataRows.indexOf(row), dataRows)
 
             for (column in totalColumns) {
                 if (row.get(column) != srow.get(column)) {
@@ -467,7 +467,7 @@ void addAllStatic(def dataRows) {
         def regNum = row?.regNumber
         def nextRegNum = nextRow?.regNumber
         if (row.getAlias() == null && nextRow == null || regNum != nextRegNum) {
-            def itogRegNumberRow = calcItogRegNumber(i)
+            def itogRegNumberRow = calcItogRegNumber(i, dataRows)
             j++
             dataRows.add(i + j, itogRegNumberRow)
         }
@@ -478,11 +478,11 @@ void addAllStatic(def dataRows) {
         if (row.getAlias() == null && nextRow == null || issuer != nextIssuer) {
             // если все значения ГРН пустые, то подитог по ГРН не добавится, поэтому перед добавлением подитога по эмитенту, нужно добавить подитого с незадавнным ГРН
             if (j == 0) {
-                def itogRegNumberRow = calcItogRegNumber(i)
+                def itogRegNumberRow = calcItogRegNumber(i, dataRows)
                 j++
                 dataRows.add(i + j, itogRegNumberRow)
             }
-            def itogIssuerRow = calcItogIssuer(i)
+            def itogIssuerRow = calcItogIssuer(i, dataRows)
             j++
             dataRows.add(i + j, itogIssuerRow)
         }
@@ -490,18 +490,21 @@ void addAllStatic(def dataRows) {
     }
 }
 
-/** Расчет итога Эмитента. */
-def calcItogIssuer(int i) {
+/** Расчет итога Эмитента (группировка). */
+def calcItogIssuer(int i, def dataRows) {
     def newRow = (formDataEvent in [FormDataEvent.IMPORT, FormDataEvent.IMPORT_TRANSPORT_FILE]) ? formData.createStoreMessagingDataRow() : formData.createDataRow()
     newRow.getCell('fix').colSpan = 3
     newRow.setAlias('itogoIssuer#'.concat(i ? i.toString() : ""))
     setTotalStyle(newRow)
 
+    def emptyGroup = false
     String tIssuer = 'Эмитент'
-    def dataRows = formDataService.getDataRowHelper(formData)?.allCached
     for (int j = i; j >= 0; j--) {
         if (getRow(dataRows, j).getAlias() == null) {
             tIssuer = getRow(dataRows, j).issuer
+            break
+        } else if (i - j > 0) {
+            emptyGroup = true
             break
         }
     }
@@ -510,6 +513,10 @@ def calcItogIssuer(int i) {
 
     for (column in totalColumns) {
         newRow.getCell(column).setValue(new BigDecimal(0), null)
+    }
+
+    if (emptyGroup) {
+        return newRow
     }
 
     for (int j = i; j >= 0; j--) {
@@ -528,13 +535,12 @@ def calcItogIssuer(int i) {
                 }
             }
         }
-
     }
     return newRow
 }
 
-/** Расчет итога ГРН. */
-def calcItogRegNumber(int i) {
+/** Расчет итога ГРН (группировка внутри группы по эмитенту). */
+def calcItogRegNumber(int i, def dataRows) {
     // создаем итоговую строку ГРН
     def newRow = (formDataEvent in [FormDataEvent.IMPORT, FormDataEvent.IMPORT_TRANSPORT_FILE]) ? formData.createStoreMessagingDataRow() : formData.createDataRow()
     newRow.getCell('fix').colSpan = 3
@@ -542,10 +548,11 @@ def calcItogRegNumber(int i) {
     setTotalStyle(newRow)
 
     String tRegNumber = 'ГРН'
-    def dataRows = formDataService.getDataRowHelper(formData)?.allCached
     for (int j = i; j >= 0; j--) {
         if (getRow(dataRows, j).getAlias() == null) {
             tRegNumber = getRow(dataRows, j).regNumber
+            break
+        } else if (i - j > 0) {
             break
         }
     }
@@ -559,17 +566,13 @@ def calcItogRegNumber(int i) {
     // идем от текущей позиции вверх и ищем нужные строки
     for (int j = i; j >= 0; j--) {
         def srow = getRow(dataRows, j)
-
-        if (srow.getAlias() == null) {
-            if (srow.regNumber != tRegNumber) {
-                break
-            }
-
-            for (column in totalColumns) {
-                if (srow[column] != null) {
-                    def value = newRow.getCell(column).value + (BigDecimal) srow.getCell(column).value
-                    newRow.getCell(column).setValue(value, null)
-                }
+        if (srow.getAlias() != null || srow.regNumber != tRegNumber) {
+            break
+        }
+        for (column in totalColumns) {
+            if (srow[column] != null) {
+                def value = newRow.getCell(column).value + (BigDecimal) srow.getCell(column).value
+                newRow.getCell(column).setValue(value, null)
             }
         }
     }
@@ -1022,6 +1025,9 @@ void importData() {
     def rowIndex = 0
     def rows = []
     def allValuesCount = allValues.size()
+    def totalRowFromFileMap = [:]           // мапа для хранения строк итогов/подитогов со значениями из файла (стили простых строк)
+    def totalRowMap = [:]                   // мапа для хранения строк итогов/подитогов нф с посчитанными значениями и со стилями
+    def prevRowIsSimple = false             // признако того что предыдущая строка была подитоговая (для определения подитога по грн или по эмитенту)
 
     // формирвание строк нф
     for (def i = 0; i < allValuesCount; i++) {
@@ -1033,13 +1039,33 @@ void importData() {
             rowValues.clear()
             break
         }
-        // Пропуск итоговых строк
-        if (rowValues[INDEX_FOR_SKIP] && (rowValues[INDEX_FOR_SKIP] in ["Общий итог", "ГРН не задан"] || rowValues[INDEX_FOR_SKIP].contains(" Итог"))) {
+        // пропуск итоговой строки
+        if (rowValues[INDEX_FOR_SKIP] == "Общий итог") {
+            // получить значения итоговой строки из файла
+            rowIndex++
+            totalRowFromFileMap[rowIndex] = getNewRowFromXls(rowValues, colOffset, fileRowIndex, rowIndex, true)
+
+            allValues.remove(rowValues)
+            rowValues.clear()
+            break
+        }
+        // пропуск подитоговых строк
+        if (rowValues[INDEX_FOR_SKIP] == "ГРН не задан" || rowValues[INDEX_FOR_SKIP].contains(" Итог")) {
+            // сформировать и подсчитать подитоги
+            def subTotalRow = (prevRowIsSimple ? calcItogRegNumber(rowIndex - 1, rows) : calcItogIssuer(rowIndex - 1, rows))
+            rows.add(subTotalRow)
+            prevRowIsSimple = false
+            // получить значения подитоговой строки из файла
+            rowIndex++
+            totalRowFromFileMap[rowIndex] = getNewRowFromXls(rowValues, colOffset, fileRowIndex, rowIndex, true)
+            totalRowMap[rowIndex] = subTotalRow
+
             allValues.remove(rowValues)
             rowValues.clear()
             continue
         }
         // простая строка
+        prevRowIsSimple = true
         rowIndex++
         def newRow = getNewRowFromXls(rowValues, colOffset, fileRowIndex, rowIndex)
         rows.add(newRow)
@@ -1048,9 +1074,29 @@ void importData() {
         rowValues.clear()
     }
 
+    // итоговая строка
+    def totalRow = getCalcTotalRow(rows)
+    rows.add(totalRow)
+    totalRowMap[rowIndex] = totalRow
+    updateIndexes(rows)
+
+    // сравнение итогов
+    if (!totalRowFromFileMap.isEmpty()) {
+        // сравнение
+        totalRowFromFileMap.keySet().toArray().each { index ->
+            def totalFromFile = totalRowFromFileMap[index]
+            def total = totalRowMap[index]
+            compareTotalValues(totalFromFile, total, totalColumns, logger, false)
+            // задание значении итоговой строке нф из итоговой строки файла (потому что в строках из файла стили для простых строк)
+            total.setImportIndex(totalFromFile.getImportIndex())
+            (totalColumns + 'fix').each { alias ->
+                total[alias] = totalFromFile[alias]
+            }
+        }
+    }
+
     showMessages(rows, logger)
     if (!logger.containsLevel(LogLevel.ERROR)) {
-        updateIndexes(rows)
         formDataService.getDataRowHelper(formData).allCached = rows
     }
 }
@@ -1101,8 +1147,9 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
  * @param colOffset отступ в колонках
  * @param fileRowIndex номер строки в тф
  * @param rowIndex строка в нф
+ * @param isTotal признак итоговой/подитоговой строки (для них надо еще получить значение из скрытого столбца)
  */
-def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) {
+def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex, def isTotal = false) {
     def newRow = formData.createStoreMessagingDataRow()
     newRow.setIndex(rowIndex)
     newRow.setImportIndex(fileRowIndex)
@@ -1116,7 +1163,11 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
         newRow.getCell(it).setStyleAlias('Редактируемая')
     }
 
+    // графа 1
     def colIndex = 1
+    if (isTotal) {
+        newRow.fix = values[colIndex]
+    }
 
     // графа 2..4
     ['issuer', 'regNumber', 'tradeNumber'].each { alias ->
