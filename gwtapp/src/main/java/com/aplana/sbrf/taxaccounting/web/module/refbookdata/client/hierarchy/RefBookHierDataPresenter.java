@@ -132,6 +132,7 @@ public class RefBookHierDataPresenter extends PresenterWidget<RefBookHierDataPre
         addVisibleHandler(AddItemEvent.getType(), this);
         addVisibleHandler(DeleteItemEvent.getType(), this);
         addVisibleHandler(SearchButtonEvent.getType(), this);
+        addVisibleHandler(RollbackTableRowSelection.getType(), this);
     }
 
     @Override
@@ -359,4 +360,6 @@ public class RefBookHierDataPresenter extends PresenterWidget<RefBookHierDataPre
                     }
                 }, this));
     }
+
+
 }
