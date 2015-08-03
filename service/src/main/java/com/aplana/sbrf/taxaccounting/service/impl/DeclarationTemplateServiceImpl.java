@@ -153,14 +153,10 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
     public LockData getObjectLock(final Integer declarationTemplateId, final TAUserInfo userInfo) {
-        return tx.returnInNewTransaction(new TransactionLogic<LockData>() {
+        return tx.executeInNewTransaction(new TransactionLogic<LockData>() {
             @Override
-            public LockData executeWithReturn() {
+            public LockData execute() {
                 return lockDataService.getLock(LockData.LockObjects.DECLARATION_TEMPLATE.name() + "_" + declarationTemplateId);
-            }
-
-            @Override
-            public void execute() {
             }
         });
     }

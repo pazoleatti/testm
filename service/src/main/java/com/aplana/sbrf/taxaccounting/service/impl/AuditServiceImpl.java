@@ -52,7 +52,7 @@ public class AuditServiceImpl implements AuditService {
                     final String declarationTypeName, final String formTypeName, final Integer formKindId, final String note, final String blobDataId) {
         tx.executeInNewTransaction(new TransactionLogic() {
             @Override
-            public void execute() {
+            public Object execute() {
                 LogSystem log = new LogSystem();
                 log.setIp(userInfo.getIp());
                 log.setEventId(event.getCode());
@@ -94,11 +94,7 @@ public class AuditServiceImpl implements AuditService {
                 log.setBlobDataId(blobDataId);
 
                 auditDao.add(log);
-            }
-
-            @Override
-            public Object executeWithReturn() {
-                return null;
+				return null;
             }
         });
     }
@@ -109,7 +105,7 @@ public class AuditServiceImpl implements AuditService {
         tx.executeInNewTransaction(new TransactionLogic() {
 
             @Override
-            public void execute() {
+            public Object execute() {
                 LogSystem log = new LogSystem();
                 log.setIp(userInfo.getIp());
                 log.setEventId(event.getCode());
@@ -143,11 +139,7 @@ public class AuditServiceImpl implements AuditService {
                 log.setBlobDataId(blobDataId);
 
                 auditDao.add(log);
-            }
-
-            @Override
-            public Object executeWithReturn() {
-                return null;
+				return null;
             }
         });
     }

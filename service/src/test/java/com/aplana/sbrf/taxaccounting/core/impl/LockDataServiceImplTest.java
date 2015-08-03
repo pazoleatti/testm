@@ -43,26 +43,13 @@ public class LockDataServiceImplTest {
 
         TransactionHelper tx = new TransactionHelper() {
             @Override
-            public void executeInNewTransaction(TransactionLogic logic) {
-                logic.execute();
-            }
-
-            @Override
-            public <T> T returnInNewTransaction(TransactionLogic<T> logic) {
-                return logic.executeWithReturn();
+            public <T> T executeInNewTransaction(TransactionLogic<T> logic) {
+                return logic.execute();
             }
 
 			@Override
-			public void commit(TransactionStatus status) {
-			}
-
-			@Override
-			public void rollback(TransactionStatus status) {
-			}
-
-			@Override
-			public TransactionStatus startTransaction() {
-				return null;
+			public <T> T executeInNewReadOnlyTransaction(TransactionLogic<T> logic) {
+				return logic.execute();
 			}
 		};
         ReflectionTestUtils.setField(service, "tx", tx);
