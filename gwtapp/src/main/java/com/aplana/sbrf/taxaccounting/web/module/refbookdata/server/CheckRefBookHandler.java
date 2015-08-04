@@ -27,6 +27,7 @@ public class CheckRefBookHandler extends AbstractActionHandler<CheckRefBookActio
         RefBook refBook = refBookFactory.get(action.getRefBookId());
         CheckRefBookResult result = new CheckRefBookResult();
         result.setAvailable(refBook.isVisible());
+        result.setVersioned(refBook.isVersioned());
         return result;
     }
 

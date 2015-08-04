@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.dao.refbook;
 
+import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
@@ -19,7 +20,7 @@ import java.util.Map;
  */
 public interface RefBookDepartmentDao {
 
-	Long REF_BOOK_ID = 30L;
+	Long REF_BOOK_ID = Department.REF_BOOK_ID;
 
     static final String UNIQUE_ATTRIBUTES_ALIAS = "uniqueAttributes";
     static final String STRING_VALUE_COLUMN_ALIAS = "string_value";

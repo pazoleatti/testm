@@ -33,6 +33,7 @@ public class InitRefBookMultiHandler extends AbstractActionHandler<InitRefBookMu
         RefBook refBook = refBookFactory.getByAttribute(action.getRefBookAttrId());
         result.setRefBookId(refBook.getId());
         result.setAttributes(refBook.getAttributes());
+        result.setVersioned(refBook.isVersioned());
         return result;
     }
 

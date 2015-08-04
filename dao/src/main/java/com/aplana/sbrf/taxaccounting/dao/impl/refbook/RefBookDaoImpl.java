@@ -105,7 +105,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     public RefBook get(Long refBookId) {
         try {
             return getJdbcTemplate().queryForObject(
-                    "select id, name, script_id, visible, type, read_only, region_attribute_id, table_name from ref_book where id = ?",
+                    "select id, name, script_id, visible, type, read_only, is_versioned, region_attribute_id, table_name from ref_book where id = ?",
                     new Object[]{refBookId}, new int[]{Types.NUMERIC},
                     new RefBookRowMapper());
         } catch (EmptyResultDataAccessException e) {
@@ -176,6 +176,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 			result.setType(SqlUtils.getInteger(rs,"type"));
 			result.setReadOnly(rs.getBoolean("read_only"));
             result.setTableName(rs.getString("table_name"));
+            result.setVersioned(rs.getBoolean("is_versioned"));
             BigDecimal regionAttributeId = (BigDecimal) rs.getObject("REGION_ATTRIBUTE_ID");
             if (regionAttributeId == null) {
                 result.setRegionAttribute(null);

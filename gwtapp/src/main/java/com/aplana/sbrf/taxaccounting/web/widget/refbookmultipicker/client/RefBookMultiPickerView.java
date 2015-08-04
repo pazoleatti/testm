@@ -65,6 +65,7 @@ public class RefBookMultiPickerView extends ViewWithUiHandlers<RefBookMultiPicke
     private Map<RefBookItemTextColumn, Integer> sortColumns = new HashMap<RefBookItemTextColumn, Integer>();
     private String filterText;
     private String singleColumn = null;
+    private RefBookPicker mainWidget;
 
     private SetSelectionModel<RefBookItem> selectionModel;
     private AsyncDataProvider<RefBookItem> dataProvider =
@@ -88,8 +89,9 @@ public class RefBookMultiPickerView extends ViewWithUiHandlers<RefBookMultiPicke
                 }
             });
 
-    public RefBookMultiPickerView() {
+    public RefBookMultiPickerView(boolean b, RefBookPicker refBookPicker) {
         this(false);
+        this.mainWidget = refBookPicker;
     }
 
     public RefBookMultiPickerView(final Boolean multiSelect) {
@@ -352,6 +354,11 @@ public class RefBookMultiPickerView extends ViewWithUiHandlers<RefBookMultiPicke
             // потому как при открытии все равно будет происходит загрузка силой
             cellTable.setRowCount(0);
         }
+    }
+
+    @Override
+    public void showVersionDate(boolean versioned) {
+        mainWidget.showVersionDate(versioned);
     }
 
     @Override

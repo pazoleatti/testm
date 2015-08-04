@@ -104,6 +104,9 @@ public class RefBook implements Serializable {
 	/** Редактируемый (0 - редактирование недоступно пользователю, 1 - редактирование доступно пользователю) */
 	private boolean readOnly;
 
+    /** Версионируемый (0 - не версионируемый, 1 - версионируемый) */
+    private boolean versioned;
+
     /** Название таблицы справочника, заполняется в случае если справочник не универсальный */
     private String tableName;
 
@@ -325,19 +328,26 @@ public class RefBook implements Serializable {
     }
 
     @Override
-	public String toString() {
-		final StringBuilder sb = new StringBuilder("RefBook{");
-		sb.append("attributes=").append(attributes);
-		sb.append(", id=").append(id);
-		sb.append(", name='").append(name).append('\'');
-		sb.append(", scriptId='").append(scriptId).append('\'');
-		sb.append(", visible=").append(visible);
-		sb.append(", type=").append(type);
-		sb.append(", readOnly=").append(readOnly);
-		sb.append(", tableName=").append(tableName);
-		sb.append('}');
-		return sb.toString();
-	}
+    public String toString() {
+        return "RefBook{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", scriptId='" + scriptId + '\'' +
+                ", visible=" + visible +
+                ", type=" + type +
+                ", readOnly=" + readOnly +
+                ", versioned=" + versioned +
+                ", tableName='" + tableName + '\'' +
+                '}';
+    }
+
+    public boolean isVersioned() {
+        return versioned;
+    }
+
+    public void setVersioned(boolean versioned) {
+        this.versioned = versioned;
+    }
 
     public String getTableName() {
         return tableName;

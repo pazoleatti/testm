@@ -6,6 +6,7 @@ public class CheckRefBookResult implements Result {
     private static final long serialVersionUID = 6657849317878384244L;
 
     private boolean available;
+    private boolean versioned;
 
     public boolean isAvailable() {
         return available;
@@ -13,5 +14,13 @@ public class CheckRefBookResult implements Result {
 
     public void setAvailable(boolean available) {
         this.available = available;
+    }
+
+    public void setVersioned(boolean versioned) {
+        this.versioned = versioned;
+    }
+
+    public boolean isVersioned() {
+        return versioned;
     }
 }
