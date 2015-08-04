@@ -259,15 +259,8 @@ void addFixedRows(def dataRows, totalRow) {
 
 // Расчет подитогового значения
 DataRow<Cell> calcItog(def int i, def List<DataRow<Cell>> dataRows) {
-    def newRow = formData.createDataRow()
-
-    newRow.getCell('fix').colSpan = 5
     def row = dataRows.get(i)
-    newRow.fix = 'Итого по НО ' + row.taxAuthority + ' и КПП ' + row.kpp
-    newRow.setAlias('total#'.concat(i.toString()))
-    allColumns.each {
-        newRow.getCell(it).setStyleAlias('Контрольные суммы')
-    }
+    def newRow = getSubTotal(i, row.taxAuthority, row.kpp, null)
 
     totalColumns.each {
         newRow[it] = 0
@@ -277,6 +270,17 @@ DataRow<Cell> calcItog(def int i, def List<DataRow<Cell>> dataRows) {
         totalColumns.each {
             newRow[it] += (row[it] ?: 0)
         }
+    }
+    return newRow
+}
+
+DataRow<Cell> getSubTotal(def int i, def taxAuthority, def kpp, String title) {
+    def newRow = (formDataEvent in [FormDataEvent.IMPORT, FormDataEvent.IMPORT_TRANSPORT_FILE]) ? formData.createStoreMessagingDataRow() : formData.createDataRow()
+    newRow.getCell('fix').colSpan = 5
+    newRow.fix = (title != null ? newRow.fix = title : 'Итого по НО ' + taxAuthority + ' и КПП ' + kpp)
+    newRow.setAlias('total#'.concat(i.toString()))
+    allColumns.each {
+        newRow.getCell(it).setStyleAlias('Контрольные суммы')
     }
     return newRow
 }
@@ -504,6 +508,8 @@ void importData() {
     def rowIndex = 0
     def rows = []
     def allValuesCount = allValues.size()
+    def totalRowFromFile = null
+    def subTotalRows = [:]
 
     // формирвание строк нф
     for (def i = 0; i < allValuesCount; i++) {
@@ -516,7 +522,19 @@ void importData() {
             break
         }
         // Пропуск итоговых строк
-        if (rowValues[INDEX_FOR_SKIP] && (rowValues[INDEX_FOR_SKIP].contains("Итого по НО ") || rowValues[INDEX_FOR_SKIP] == "Общий итог")) {
+        if (rowValues[INDEX_FOR_SKIP].contains("Итого по НО ")) {
+            rowIndex++
+            def subTotal = getNewSubTotalRowFromXls(rowValues, colOffset, fileRowIndex, rowIndex)
+            rows.add(subTotal)
+            subTotalRows[subTotal.fix] = subTotal
+
+            allValues.remove(rowValues)
+            rowValues.clear()
+            continue
+        } else if (rowValues[INDEX_FOR_SKIP] == "Общий итог") {
+            rowIndex++
+            totalRowFromFile = getNewRowFromXls(rowValues, colOffset, fileRowIndex, rowIndex)
+
             allValues.remove(rowValues)
             rowValues.clear()
             continue
@@ -530,12 +548,28 @@ void importData() {
         rowValues.clear()
     }
 
+    // итоговая строка из макета
+    def formTemplate = formDataService.getFormTemplate(formData.formType.id, formData.reportPeriodId)
+    def templateRows = formTemplate.rows
+    def totalRow = getDataRow(templateRows, 'total')
+
+    // сравнение подитогов
+    def onlySimpleRows = rows.findAll { it.getAlias() == null }
+    addFixedRows(onlySimpleRows, totalRow)
+    def onlySubTotalTmpRows = onlySimpleRows.findAll { it.getAlias() != null }
+    onlySubTotalTmpRows.each { subTotalTmpRow ->
+        def key = subTotalTmpRow.fix
+        def subTotalRow = subTotalRows[key]
+        compareTotalValues(subTotalRow, subTotalTmpRow, totalColumns, logger, false)
+    }
+
+    // сравнение итога
+    rows.add(totalRow)
+    updateIndexes(rows)
+    compareSimpleTotalValues(totalRow, totalRowFromFile, rows, totalColumns, formData, logger, false)
+
     showMessages(rows, logger)
     if (!logger.containsLevel(LogLevel.ERROR)) {
-        def formTemplate = formDataService.getFormTemplate(formData.formType.id, formData.reportPeriodId)
-        def templateRows = formTemplate.rows
-        rows.add(getDataRow(templateRows, 'total'))
-
         updateIndexes(rows)
         formDataService.getDataRowHelper(formData).allCached = rows
     }
@@ -654,4 +688,28 @@ def getRefBook(def id) {
         refBooks[id] = refBookFactory.get(id)
     }
     return refBooks[id]
+}
+
+/**
+ * Получить новую подитоговую строку из файла.
+ *
+ * @param values список строк со значениями
+ * @param colOffset отступ в колонках
+ * @param fileRowIndex номер строки в тф
+ * @param rowIndex строка в нф
+ */
+def getNewSubTotalRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) {
+    // графа fix
+    def title = values[1]
+
+    def newRow = getSubTotal(rowIndex - 1, null, null, title)
+    newRow.setIndex(rowIndex)
+    newRow.setImportIndex(fileRowIndex)
+
+    // графа 10
+    newRow.cadastrePriceJanuary = parseNumber(values[10], fileRowIndex, 10 + colOffset, logger, true)
+    // графа 11
+    newRow.cadastrePriceTaxFree = parseNumber(values[11], fileRowIndex, 11 + colOffset, logger, true)
+
+    return newRow
 }

@@ -2043,8 +2043,7 @@ public final class ScriptUtils {
     public static void compareSimpleTotalValues(DataRow<Cell> totalRow, DataRow<Cell> totalRowFromFile,
                                           List<DataRow<Cell>> rows, List<String> columns,
                                           FormData formData, Logger logger, boolean required) {
-        if (totalRow == null || totalRowFromFile == null || rows == null || rows.isEmpty()
-                || columns == null || columns.isEmpty()) {
+        if (totalRow == null || totalRowFromFile == null || rows == null || columns == null || columns.isEmpty()) {
             return;
         }
         // подсчитанная итоговая строка для сравнения
