@@ -38,6 +38,11 @@ public class DepartmentEditView extends AbstractEditView implements DepartmentEd
     }
 
     @Override
+    public void showVersioned(boolean versioned) {
+
+    }
+
+    @Override
     Panel getRootFieldsPanel() {
         return editPanel;
     }

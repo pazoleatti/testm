@@ -88,6 +88,11 @@ public abstract class AbstractEditPresenter<V extends AbstractEditPresenter.MyVi
          */
         void updateInputFields();
         void setVersionMode(boolean versionMode);
+        void showVersioned(boolean versioned);
+    }
+
+    public void setVersioned(boolean versioned) {
+        getView().showVersioned(versioned);
     }
 
     RecordChanges fillRecordChanges(Long recordId, Map<String, RefBookValueSerializable> map, Date start, Date end) {

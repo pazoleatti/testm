@@ -299,7 +299,7 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
                                                         }
                                                     }, RefBookDataPresenter.this));
                                     getView().setVersionedFields(versioned);
-                                    //editFormPresenter.setCanVersion(!Arrays.asList(RefBookDataModule.NOT_VERSIONED_REF_BOOK_IDS).contains(refBookId));
+                                    commonEditPresenter.setVersioned(versioned);
                                     versionPresenter.setHierarchy(false);
                                 } else {
                                     getProxy().manualReveal(RefBookDataPresenter.this);
