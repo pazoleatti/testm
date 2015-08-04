@@ -45,7 +45,9 @@ public abstract class AbstractEditPresenter<V extends AbstractEditPresenter.MyVi
     /** Идентификатор записи справочника без учета версий */
     Long recordId;
     /** Признак того, что форма используется для работы с версиями записей справочника */
-    boolean isVersionMode = false, canVersion = true;
+    boolean isVersionMode = false;
+    /** Признак того, что справочник версионируемый */
+    boolean versioned;
     boolean isFormModified = false;
     Map<String, Object> modifiedFields = new HashMap<String, Object>();
     FormMode mode;
@@ -335,7 +337,7 @@ public abstract class AbstractEditPresenter<V extends AbstractEditPresenter.MyVi
     }
 
     public HandlerRegistration addClickHandlerForAllVersions(ClickHandler clickHandler){
-        if (canVersion)
+        if (versioned)
             return getView().getClickAllVersion().addClickHandler(clickHandler);
         else
             return new HandlerRegistration() {
@@ -346,9 +348,9 @@ public abstract class AbstractEditPresenter<V extends AbstractEditPresenter.MyVi
             };
     }
 
-    public void init(final Long refbookId) {
+    public void init(final Long refbookId, boolean versioned) {
         currentRefBookId = refbookId;
-        canVersion = !Arrays.asList(RefBookDataModule.NOT_VERSIONED_REF_BOOK_IDS).contains(refbookId);
+        this.versioned = versioned;
         setIsFormModified(false);
     }
 

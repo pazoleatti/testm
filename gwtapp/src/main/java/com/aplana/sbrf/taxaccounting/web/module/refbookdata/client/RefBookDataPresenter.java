@@ -69,6 +69,8 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
     private FormMode mode;
     private String refBookName;
     private IRefBookExecutor dataInterface;
+    /** Признак того, что справочник версионируемый */
+    private boolean versioned;
 
     EditFormPresenter editFormPresenter;
     AbstractEditPresenter commonEditPresenter;
@@ -144,6 +146,7 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
                         new AbstractCallback<CheckRefBookResult>() {
                             @Override
                             public void onSuccess(CheckRefBookResult result) {
+                                versioned = result.isVersioned();
                                 recordId = refBookLinearPresenter.getSelectedRow().getRefBookRowId();
                                 if (result.isAvailable()) {
                                     getView().setVersionView(true);
@@ -241,7 +244,6 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
         refBookLinearPresenter.setRefBookId(refBookId);
         versionPresenter.setRefBookId(refBookId);
         commonEditPresenter = editFormPresenter;
-        commonEditPresenter.init(refBookId);
         CheckRefBookAction checkAction = new CheckRefBookAction();
         checkAction.setRefBookId(refBookId);
 
@@ -250,6 +252,8 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
                         new AbstractCallback<CheckRefBookResult>() {
                             @Override
                             public void onSuccess(CheckRefBookResult result) {
+                                versioned = result.isVersioned();
+                                commonEditPresenter.init(refBookId, result.isVersioned());
                                 if (result.isAvailable()) {
                                     getView().resetSearchInputBox();
                                     commonEditPresenter.setVersionMode(false);
@@ -294,7 +298,7 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
                                                             getView().setRefBookNameDesc(result.getName());
                                                         }
                                                     }, RefBookDataPresenter.this));
-                                    getView().setVersionedFields(!Arrays.asList(RefBookDataModule.NOT_VERSIONED_REF_BOOK_IDS).contains(refBookId));
+                                    getView().setVersionedFields(versioned);
                                     //editFormPresenter.setCanVersion(!Arrays.asList(RefBookDataModule.NOT_VERSIONED_REF_BOOK_IDS).contains(refBookId));
                                     versionPresenter.setHierarchy(false);
                                 } else {

@@ -6,7 +6,6 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallba
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
-import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.RefBookDataModule;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.event.RollbackTableRowSelection;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.event.UpdateForm;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.event.AddItemEvent;
@@ -38,9 +37,11 @@ public class RefBookHierDataPresenter extends PresenterWidget<RefBookHierDataPre
 
     private Long recordId;
     boolean canVersion = true;
-    private Long refBookDataId;
+    private Long refBookId;
     private RecordChanges recordChanges;
     private Date relevanceDate;
+    /** Признак того, что справочник версионируемый */
+    private boolean versioned;
 
     private final DispatchAsync dispatcher;
 
@@ -142,9 +143,18 @@ public class RefBookHierDataPresenter extends PresenterWidget<RefBookHierDataPre
     @Override
     protected void onReveal() {
         super.onReveal();
-        /*setInSlot(TYPE_editFormPresenter, editPresenter);*/
-        canVersion = !Arrays.asList(RefBookDataModule.NOT_VERSIONED_REF_BOOK_IDS).contains(refBookDataId);
-        /*if (canVersion) checkRecord();*/
+        CheckRefBookAction checkAction = new CheckRefBookAction();
+        checkAction.setRefBookId(refBookId);
+        dispatcher.execute(checkAction, CallbackUtils.defaultCallback(
+                new AbstractCallback<CheckRefBookResult>() {
+                    @Override
+                    public void onSuccess(CheckRefBookResult result) {
+                        versioned = result.isVersioned();
+                        if (!result.isAvailable()) {
+                            Dialog.errorMessage("Доступ к справочнику запрещен!");
+                        }
+                    }
+                }, this));
     }
 
     @Override
@@ -170,7 +180,7 @@ public class RefBookHierDataPresenter extends PresenterWidget<RefBookHierDataPre
         LogCleanEvent.fire(RefBookHierDataPresenter.this);
         if (canVersion){
             DeleteRefBookRowAction action = new DeleteRefBookRowAction();
-            action.setRefBookId(refBookDataId);
+            action.setRefBookId(refBookId);
             final Long selected = getView().getSelectedId();
             action.setRecordsId(Arrays.asList(selected));
             action.setDeleteVersion(false);
@@ -204,7 +214,7 @@ public class RefBookHierDataPresenter extends PresenterWidget<RefBookHierDataPre
             final Long selected = getView().getSelectedId();
             action.setRecordsId(Arrays.asList(selected));
             action.setOkDelete(false);
-            action.setRefBookId(refBookDataId);
+            action.setRefBookId(refBookId);
             final RefBookTreeItem parentRefBookItem = getView().getSelectedItem().getParent();
             dispatcher.execute(action, CallbackUtils.defaultCallback(new AbstractCallback<DeleteNonVersionRefBookRowResult>() {
                 @Override
@@ -218,7 +228,7 @@ public class RefBookHierDataPresenter extends PresenterWidget<RefBookHierDataPre
                                 final Long selected = getView().getSelectedId();
                                 action.setRecordsId(Arrays.asList(selected));
                                 action.setOkDelete(true);
-                                action.setRefBookId(refBookDataId);
+                                action.setRefBookId(refBookId);
                                 dispatcher.execute(action, CallbackUtils.defaultCallback(new AbstractCallback<DeleteNonVersionRefBookRowResult>() {
                                     @Override
                                     public void onSuccess(DeleteNonVersionRefBookRowResult result) {
@@ -322,7 +332,7 @@ public class RefBookHierDataPresenter extends PresenterWidget<RefBookHierDataPre
 
     @Override
     public void setRefBookId(Long refBookId){
-        this.refBookDataId = refBookId;
+        this.refBookId = refBookId;
     }
 
     public void clearAll() {
@@ -340,7 +350,7 @@ public class RefBookHierDataPresenter extends PresenterWidget<RefBookHierDataPre
 
     private void checkRecord() {
         CheckRecordExistenceAction action = new CheckRecordExistenceAction();
-        action.setRefBookId(refBookDataId);
+        action.setRefBookId(refBookId);
         action.setRecordId(recordId);
         dispatcher.execute(action, CallbackUtils.defaultCallback(
                 new AbstractCallback<CheckRecordExistenceResult>() {

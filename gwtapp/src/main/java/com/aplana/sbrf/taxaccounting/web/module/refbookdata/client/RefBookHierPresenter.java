@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.refbookdata.client;
 
 import com.aplana.gwt.client.dialog.Dialog;
+import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
@@ -57,7 +58,8 @@ public class RefBookHierPresenter extends Presenter<RefBookHierPresenter.MyView,
     private FormMode mode;
     private Long attrId, recordId, refBookId;
     private String refBookName;
-    private boolean canVersion;
+    /** Признак того, что справочник версионируемый */
+    private boolean versioned;
 
     @Inject
     public RefBookHierPresenter(EventBus eventBus, MyView view, MyProxy proxy,
@@ -187,9 +189,7 @@ public class RefBookHierPresenter extends Presenter<RefBookHierPresenter.MyView,
     @Override
     public void prepareFromRequest(final PlaceRequest request) {
         refBookId = Long.parseLong(request.getParameter(RefBookDataTokens.REFBOOK_DATA_ID, null));
-        canVersion = !Arrays.asList(RefBookDataModule.NOT_VERSIONED_REF_BOOK_IDS).contains(refBookId);
-        commonEditPresenter = canVersion ? hierEditFormPresenter : departmentEditPresenter;
-        commonEditPresenter.init(refBookId);
+        commonEditPresenter = Department.REF_BOOK_ID.equals(refBookId) ? departmentEditPresenter : hierEditFormPresenter;
         CheckHierAction checkHierAction = new CheckHierAction();
         checkHierAction.setRefBookId(refBookId);
         refBookHierDataPresenter.setRefBookId(refBookId);
@@ -204,6 +204,8 @@ public class RefBookHierPresenter extends Presenter<RefBookHierPresenter.MyView,
                         new AbstractCallback<CheckRefBookResult>() {
                             @Override
                             public void onSuccess(CheckRefBookResult result) {
+                                versioned = result.isVersioned();
+                                commonEditPresenter.init(refBookId, result.isVersioned());
                                 if (result.isAvailable()) {
                                     commonEditPresenter.setVersionMode(false);
                                     commonEditPresenter.setCurrentUniqueRecordId(null);
@@ -247,7 +249,7 @@ public class RefBookHierPresenter extends Presenter<RefBookHierPresenter.MyView,
                                                     getView().setRefBookNameDesc(refBookName);
                                                 }
                                             }, RefBookHierPresenter.this));
-                                    getView().setVersionedFields(canVersion);
+                                    getView().setVersionedFields(versioned);
                                     //hierEditFormPresenter.setCanVersion(canVersion);
                                     versionPresenter.setHierarchy(true);
                                 } else {
@@ -269,7 +271,7 @@ public class RefBookHierPresenter extends Presenter<RefBookHierPresenter.MyView,
     protected void onReveal() {
         super.onReveal();
         LogCleanEvent.fire(this);
-        setInSlot(TYPE_editFormPresenter, canVersion ? hierEditFormPresenter : departmentEditPresenter);
+        setInSlot(TYPE_editFormPresenter, Department.REF_BOOK_ID.equals(refBookId) ? departmentEditPresenter : hierEditFormPresenter);
         setInSlot(TYPE_mainFormPresenter, refBookHierDataPresenter);
 
         registrations[0] = commonEditPresenter.addClickHandlerForAllVersions(new ClickHandler() {
