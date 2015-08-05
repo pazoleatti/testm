@@ -619,6 +619,7 @@ void importData() {
     def rowIndex = 0
     def rows = []
     def allValuesCount = allValues.size()
+    def totalRowFromFile = null
 
     // формирвание строк нф
     for (def i = 0; i < allValuesCount; i++) {
@@ -632,6 +633,9 @@ void importData() {
         }
         // Пропуск итоговых строк
         if (!rowValues[INDEX_FOR_SKIP]) {
+            // последняя итоговая строка - ВСЕГО
+            totalRowFromFile = getNewRowFromXls(rowValues, colOffset, fileRowIndex, rowIndex)
+
             allValues.remove(rowValues)
             rowValues.clear()
             continue
@@ -646,12 +650,13 @@ void importData() {
     }
 
     def totalRow = getFixedRow('Всего', 'total')
-    calcTotalSum(rows, totalRow, totalSumColumns)
     rows.add(totalRow)
+    updateIndexes(rows)
+    // сравнение итогов
+    compareSimpleTotalValues(totalRow, totalRowFromFile, rows, totalSumColumns, formData, logger, false)
 
     showMessages(rows, logger)
     if (!logger.containsLevel(LogLevel.ERROR)) {
-        updateIndexes(rows)
         formDataService.getDataRowHelper(formData).allCached = rows
     }
 }

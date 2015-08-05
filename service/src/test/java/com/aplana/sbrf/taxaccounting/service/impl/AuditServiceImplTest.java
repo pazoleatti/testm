@@ -49,25 +49,12 @@ public class AuditServiceImplTest {
 
         TransactionHelper tx = new TransactionHelper() {
             @Override
-            public void executeInNewTransaction(TransactionLogic logic) {
-                logic.execute();
-            }
-
-            @Override
-            public <T> T returnInNewTransaction(TransactionLogic<T> logic) {
-                return null;
+            public <T> T executeInNewTransaction(TransactionLogic<T> logic) {
+                return logic.execute();
             }
 
 			@Override
-			public void commit(TransactionStatus status) {
-			}
-
-			@Override
-			public void rollback(TransactionStatus status) {
-			}
-
-			@Override
-			public TransactionStatus startTransaction() {
+			public <T> T executeInNewReadOnlyTransaction(TransactionLogic<T> logic) {
 				return null;
 			}
         };

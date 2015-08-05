@@ -12,6 +12,8 @@ import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.service.script.impl.FormDataCompositionServiceImpl;
 import com.aplana.sbrf.taxaccounting.service.shared.FormDataCompositionService;
+import com.aplana.sbrf.taxaccounting.util.TransactionHelper;
+import com.aplana.sbrf.taxaccounting.util.TransactionLogic;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -102,6 +104,19 @@ public class FormDataServiceTest extends Assert{
         userInfo.setUser(user);
         when(userService.getUser(666)).thenReturn(user);
 		ReflectionTestUtils.setField(formDataService, "userService", userService);
+
+		TransactionHelper tx = new TransactionHelper() {
+			@Override
+			public <T> T executeInNewTransaction(TransactionLogic<T> logic) {
+				return logic.execute();
+			}
+
+			@Override
+			public <T> T executeInNewReadOnlyTransaction(TransactionLogic<T> logic) {
+				return logic.execute();
+			}
+		};
+		ReflectionTestUtils.setField(formDataService, "tx", tx);
     }
     /**
      * Тест удаления приемника при распринятии последнего источника
@@ -175,8 +190,8 @@ public class FormDataServiceTest extends Assert{
                 return null;
             }
         }).when(sourceService).addFormDataConsolidationInfo(
-                anyLong(),
-                anyCollectionOf(Long.class));
+				anyLong(),
+				anyCollectionOf(Long.class));
 
         DepartmentReportPeriod departmentReportPeriod = new DepartmentReportPeriod();
         departmentReportPeriod.setId(1);
@@ -366,7 +381,7 @@ public class FormDataServiceTest extends Assert{
         when(departmentReportPeriodService.get(1)).thenReturn(departmentReportPeriod);
 
         assertTrue("\"Номер последней строки предыдущей НФ\" должен быть равен 0",
-                formDataService.getPreviousRowNumber(newFormData, null).equals(0));
+				formDataService.getPreviousRowNumber(newFormData, null).equals(0));
     }
 
     /**
@@ -461,7 +476,7 @@ public class FormDataServiceTest extends Assert{
         when(departmentReportPeriodService.get(1)).thenReturn(departmentReportPeriod);
         when(periodService.getReportPeriod(3)).thenReturn(new ReportPeriod());
         assertTrue("\"Номер последней строки предыдущей НФ\" должен быть равен 3",
-                formDataService.getPreviousRowNumber(newFormData, null).equals(3));
+				formDataService.getPreviousRowNumber(newFormData, null).equals(3));
     }
 
     /**

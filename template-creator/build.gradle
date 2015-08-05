@@ -1,0 +1,20 @@
+apply plugin: 'groovy'
+apply plugin: 'idea'
+apply plugin: 'application'
+
+compileJava.options.encoding = 'UTF-8'
+
+repositories {
+    mavenCentral()
+    mavenLocal()
+}
+
+dependencies {
+    compile 'org.codehaus.groovy:groovy-all:2.1.9',
+            'commons-io:commons-io:1.3.2',
+            'com.aplana.taxaccounting:model:0.6.2'
+
+}
+
+mainClassName = "com.aplana.sbrf.taxaccounting.FormTemplateCreator"
+sourceCompatibility = 1.6

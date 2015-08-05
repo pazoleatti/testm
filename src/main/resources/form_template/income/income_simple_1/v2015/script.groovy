@@ -205,7 +205,7 @@ def getFilterForRefbook28(def knu, def number) {
 }
 
 void calc() {
-    def dataRows = formDataService.getDataRowHelper(formData).getAllCached()
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
 
     def row40001 = getDataRow(dataRows, total1Alias)
     def row40002 = getDataRow(dataRows, total2Alias)
@@ -298,7 +298,7 @@ def getIncome102Data(def row) {
 }
 
 void logicCheck() {
-    def dataRows = formDataService.getDataRowHelper(formData).getAllCached()
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
 
     def rowIndexes101 = []
     def rowIndexes102 = []
@@ -630,7 +630,7 @@ void importData() {
     // проверка шапки
     checkHeaderXls(headerValues)
     if (logger.containsLevel(LogLevel.ERROR)) {
-        return;
+        return
     }
     // освобождение ресурсов для экономии памяти
     headerValues.clear()
@@ -674,7 +674,6 @@ void importData() {
     showMessages(dataRows, logger)
     if (!logger.containsLevel(LogLevel.ERROR)) {
         updateIndexes(dataRows)
-        formDataService.getDataRowHelper(formData).allCached = dataRows
     }
 }
 

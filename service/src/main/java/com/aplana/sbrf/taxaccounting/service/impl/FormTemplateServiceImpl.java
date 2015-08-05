@@ -134,14 +134,10 @@ public class FormTemplateServiceImpl implements FormTemplateService {
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
     public LockData getObjectLock(final Integer formTemplateId, final TAUserInfo userInfo) {
-        return tx.returnInNewTransaction(new TransactionLogic<LockData>() {
+        return tx.executeInNewTransaction(new TransactionLogic<LockData>() {
             @Override
-            public LockData executeWithReturn() {
+            public LockData execute() {
                 return lockDataService.getLock(LockData.LockObjects.FORM_TEMPLATE.name() + "_" + formTemplateId);
-            }
-
-            @Override
-            public void execute() {
             }
         });
     }

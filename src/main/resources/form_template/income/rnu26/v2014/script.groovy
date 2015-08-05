@@ -937,6 +937,8 @@ void importData() {
     def rowIndex = 0
     def rows = []
     def allValuesCount = allValues.size()
+    def totalRowFromFile = null
+    def totalRowFromFileMap = [:]           // мапа для хранения строк подитогов со значениями из файла (стили простых строк)
 
     // формирвание строк нф
     for (def i = 0; i < allValuesCount; i++) {
@@ -948,14 +950,27 @@ void importData() {
             rowValues.clear()
             break
         }
+        rowIndex++
         // Пропуск итоговых строк
-        if (rowValues[INDEX_FOR_SKIP] && (rowValues[INDEX_FOR_SKIP] == "Общий итог" || rowValues[INDEX_FOR_SKIP].contains(" итог"))) {
+        if (rowValues[INDEX_FOR_SKIP] == "Общий итог") {
+            totalRowFromFile = getNewRowFromXls(rowValues, colOffset, fileRowIndex, rowIndex)
+
+            allValues.remove(rowValues)
+            rowValues.clear()
+            continue
+        } else if (rowValues[INDEX_FOR_SKIP].contains(" итог")) {
+            def subTotalRow = getNewRowFromXls(rowValues, colOffset, fileRowIndex, rowIndex, true)
+            def index = (subTotalRow.fix ? subTotalRow.fix.indexOf(" итог") : 0)
+            def key = (index > 0 ? subTotalRow.fix.substring(0, index) : null)
+            if (key) {
+                totalRowFromFileMap[key] = subTotalRow
+            }
+
             allValues.remove(rowValues)
             rowValues.clear()
             continue
         }
         // простая строка
-        rowIndex++
         def newRow = getNewRowFromXls(rowValues, colOffset, fileRowIndex, rowIndex)
         rows.add(newRow)
         // освободить ненужные данные - иначе не хватит памяти
@@ -963,9 +978,46 @@ void importData() {
         rowValues.clear()
     }
 
+    // сравнение подитогов
+    updateIndexes(rows)
+    if (!totalRowFromFileMap.isEmpty()) {
+        // итоговые значения по ГРН
+        def tmpLastIndex = 0
+        def i = 0
+        def index = 1
+        totalRowFromFileMap.each { issuer, subTotalRowFromFile ->
+            // получить строки группы
+            def groupRows = getGroupRows(rows, index)
+            // получить алиас для подитоговой строки по ГРН
+            def totalRowAlias = 'total' + index
+            // сформировать подитоговую строку ГРН с суммами
+            def subTotalRow = getCalcSubtotalsRow(groupRows, index, totalRowAlias)
+            // получить индекс последней строки в группе
+            def lastRowIndex = (groupRows.isEmpty() ? tmpLastIndex: groupRows[groupRows.size() - 1].getIndex() + i)
+            // вставить строку с итогами по ГРН
+            rows.add(lastRowIndex, subTotalRow)
+            i++
+            index++
+
+            subTotalRow.setIndex(lastRowIndex + 1)
+            tmpLastIndex = subTotalRow.getIndex()
+            if (subTotalRow.fix == ' итог') {
+                subTotalRow.fix = issuer + subTotalRow.fix
+            }
+            compareSimpleTotalValues(subTotalRow, subTotalRowFromFile, groupRows, totalColumns, formData, logger, false)
+        }
+    }
+
+    // сравнение итогов
+    def totalRow = getCalcTotalRow(rows)
+    rows.add(totalRow)
+    updateIndexes(rows)
+    if (totalRowFromFile) {
+        compareSimpleTotalValues(totalRow, totalRowFromFile, rows, totalColumns, formData, logger, false)
+    }
+
     showMessages(rows, logger)
     if (!logger.containsLevel(LogLevel.ERROR)) {
-        updateIndexes(rows)
         formDataService.getDataRowHelper(formData).allCached = rows
     }
 }
@@ -1016,8 +1068,9 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
  * @param colOffset отступ в колонках
  * @param fileRowIndex номер строки в тф
  * @param rowIndex строка в нф
+ * @param isSubTotal подитоговая строка
  */
-def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) {
+def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex, def isSubTotal = false) {
     def newRow = formData.createStoreMessagingDataRow()
     newRow.setIndex(rowIndex)
     newRow.setImportIndex(fileRowIndex)
@@ -1029,8 +1082,11 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
         newRow.getCell(it).setStyleAlias('Автозаполняемая')
     }
 
-    def colIndex
-
+    // графа fix
+    def colIndex = 1
+    if (isSubTotal) {
+        newRow.fix = values[colIndex]
+    }
     // графа 2
     colIndex = 2
     newRow.issuer = values[colIndex]

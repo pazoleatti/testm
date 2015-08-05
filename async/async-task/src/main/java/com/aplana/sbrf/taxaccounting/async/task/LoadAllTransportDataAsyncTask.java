@@ -70,10 +70,10 @@ public abstract class LoadAllTransportDataAsyncTask extends AbstractAsyncTask {
                 lockDataService.getLockTimeout(LockData.LockObjects.CONFIGURATION_PARAMS));
         try {
             // Справочники
-            loadRefBookDataService.checkImportRefBookTransportData(userInfo, logger, lock, lockDate);
+            loadRefBookDataService.checkImportRefBookTransportData(userInfo, logger, lock, lockDate, true);
             // НФ
             lockService.updateState(lock, lockDate, "Импорт налоговых форм");
-            loadFormDataService.importFormData(userInfo, loadFormDataService.getTB(userInfo, logger), null, logger, lock);
+            loadFormDataService.importFormData(userInfo, loadFormDataService.getTB(userInfo, logger), null, logger, lock, true);
         } finally {
             lockDataService.unlock(key, userInfo.getUser().getId());
         }

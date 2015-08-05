@@ -55,9 +55,9 @@ public class LogEntryServiceImpl implements LogEntryService {
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
     public String save(final List<LogEntry> logEntry) {
-        return tx.returnInNewTransaction(new TransactionLogic<String>() {
+        return tx.executeInNewTransaction(new TransactionLogic<String>() {
             @Override
-            public String executeWithReturn() {
+            public String execute() {
                 if (logEntry == null || logEntry.isEmpty()) {
                     return null;
                 }
@@ -65,9 +65,6 @@ public class LogEntryServiceImpl implements LogEntryService {
                 logEntryDao.save(logEntry, uuid);
                 return uuid;
             }
-
-            @Override
-            public void execute() {}
         });
     }
 

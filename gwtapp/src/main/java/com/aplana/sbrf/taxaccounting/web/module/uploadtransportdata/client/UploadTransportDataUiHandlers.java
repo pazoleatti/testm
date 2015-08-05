@@ -13,7 +13,7 @@ public interface UploadTransportDataUiHandlers extends UiHandlers {
     String ACTION_URL = "upload/transportData/upload/";
     void onStartLoad(StartLoadFileEvent event);
     void onEndLoad(EndLoadFileEvent event);
-    void onLoadAll();
+    void onLoadAll(boolean force);
     void onSuccess();
     void onFailure();
 }
