@@ -700,7 +700,7 @@ public class RefBookUniversal implements RefBookDataProvider {
                         String msg = "Существует дочерняя запись";
                         if (refBook.isVersioned()) {
                             msg = msg + ", действует с " + formatter.get().format(versions.getFirst()) +
-                                    " по " + formatter.get().format(versions.getSecond());
+                                    (versions.getSecond() != null ? " по " + formatter.get().format(versions.getSecond()) : "-");
                         }
                         logger.error(msg);
                     }

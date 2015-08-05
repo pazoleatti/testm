@@ -2051,7 +2051,8 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
                         attributes.getRefbookName(),
                         attributes.getUniqueAttributes(),
                         attributes.isRefbookVersioned() ?
-                                ", действует с " + SDF_DD_MM_YYYY.format(attributes.getVersionStart()) + " по " + SDF_DD_MM_YYYY.format(attributes.getVersionEnd())
+                                ", действует с " + SDF_DD_MM_YYYY.format(attributes.getVersionStart()) +
+                                        " по " + (attributes.getVersionEnd() != null ? SDF_DD_MM_YYYY.format(attributes.getVersionEnd()) : "-")
                                 : ""
                 ));
             }
