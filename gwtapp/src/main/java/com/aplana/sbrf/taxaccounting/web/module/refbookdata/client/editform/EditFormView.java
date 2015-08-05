@@ -68,6 +68,7 @@ public class EditFormView extends AbstractEditView implements EditFormPresenter.
                 } else {
                     save.setEnabled(true);
                     cancel.setEnabled(true);
+                    updateRefBookPeriod(event.getValue(), versionEnd.getValue());
                 }
             }
         });
@@ -87,11 +88,12 @@ public class EditFormView extends AbstractEditView implements EditFormPresenter.
                 } else {
                     save.setEnabled(true);
                     cancel.setEnabled(true);
+                    updateRefBookPeriod(versionStart.getValue(), event.getValue());
                 }
             }
         });
-        versionStart.setCanBeEmpty(true);
-        versionStart.setCanBeEmpty(true);
+        versionStart.setCanBeEmpty(false);
+        versionEnd.setCanBeEmpty(true);
 	}
 
     @Override

@@ -348,6 +348,15 @@ public abstract class AbstractEditView extends ViewWithUiHandlers<EditFormUiHand
         return number;
     }
 
+    protected void updateRefBookPeriod(Date versionStart, Date versionEnd) {
+        for (Map.Entry<RefBookColumn, HasValue> field : widgets.entrySet()) {
+            if (field.getKey().getAttributeType() == RefBookAttributeType.REFERENCE) {
+                RefBookPickerWidget widget = (RefBookPickerWidget) field.getValue();
+                widget.setPeriodDates(versionStart, versionEnd);
+            }
+        }
+    }
+
     @SuppressWarnings("unchecked")
     private Map<String, RefBookValueSerializable> getFieldsValues(boolean checkRequired) throws BadValueException {
         Map<String, RefBookValueSerializable> fieldsValues = new HashMap<String, RefBookValueSerializable>();
