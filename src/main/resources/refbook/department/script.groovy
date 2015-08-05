@@ -91,10 +91,7 @@ void save() {
         if (recordId) {
             Department currDepartment = departmentService.get(recordId)
             boolean isChangeActive = saveRecord.IS_ACTIVE?.value != (currDepartment.isActive() ? 1 : 0)
-            if (!isChangeActive) {
-                continue
-            }
-            if (saveRecord.IS_ACTIVE?.value == 0) {
+            if (isChangeActive && saveRecord.IS_ACTIVE?.value == 0) {
                 List<Department> childIds = departmentService.getAllChildren(recordId)
                 for (Department child : childIds) {
                     if (recordId != child.getId() && child.isActive()) {
