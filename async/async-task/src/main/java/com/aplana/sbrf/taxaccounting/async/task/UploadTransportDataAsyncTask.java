@@ -82,11 +82,11 @@ public abstract class UploadTransportDataAsyncTask extends AbstractAsyncTask {
             if (!uploadResult.getDiasoftFileNameList().isEmpty()) {
                 // Diasoft
                 lockService.updateState(lock, lockDate, "Импорт справочников \"Diasoft\"");
-                loadRefBookDataService.importRefBookDiasoft(userInfo, uploadResult.getDiasoftFileNameList(), logger, lock);
+                loadRefBookDataService.importRefBookDiasoft(userInfo, uploadResult.getDiasoftFileNameList(), logger, lock, true);
             }
             if (!uploadResult.getAvgCostFileNameList().isEmpty()) {
                 lockService.updateState(lock, lockDate, "Импорт справочника \"Средняя стоимость транспортных средств\"");
-                loadRefBookDataService.importRefBookAvgCost(userInfo, uploadResult.getAvgCostFileNameList(), logger, lock);
+                loadRefBookDataService.importRefBookAvgCost(userInfo, uploadResult.getAvgCostFileNameList(), logger, lock, true);
             }
 
             if (!uploadResult.getFormDataFileNameList().isEmpty()) {
@@ -96,7 +96,7 @@ public abstract class UploadTransportDataAsyncTask extends AbstractAsyncTask {
                         loadFormDataService.getTB(userInfo, logger), uploadResult.getFormDataDepartmentList()));
 
                 lockService.updateState(lock, lockDate, "Импорт налоговых форм");
-                loadFormDataService.importFormData(userInfo, departmentList, uploadResult.getFormDataFileNameList(), logger, lock);
+                loadFormDataService.importFormData(userInfo, departmentList, uploadResult.getFormDataFileNameList(), logger, lock, true);
             }
         } catch (IOException e) {
             throw new ServiceException("Ошибка при работе с файлом", e);

@@ -1,5 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.uploadtransportdata.client;
 
+import com.aplana.gwt.client.dialog.Dialog;
+import com.aplana.gwt.client.dialog.DialogHandler;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
@@ -61,13 +63,25 @@ public class UploadTransportDataPresenter extends Presenter<UploadTransportDataP
     }
 
     @Override
-    public void onLoadAll() {
+    public void onLoadAll(final boolean force) {
         LogCleanEvent.fire(this);
         LoadAllAction action = new LoadAllAction();
+        action.setForce(force);
         dispatcher.execute(action, CallbackUtils.defaultCallback(new AbstractCallback<LoadAllResult>() {
             @Override
             public void onSuccess(LoadAllResult result) {
                 LogAddEvent.fire(UploadTransportDataPresenter.this, result.getUuid());
+                if (result.isFileSizeLimit()) {
+                    Dialog.confirmMessage("Обработка ТФ налоговых форм/справочников", result.getDialogMsg(), new DialogHandler() {
+                        @Override
+                        public void yes() {
+                            onLoadAll(true);
+                            super.yes();
+                        }
+                    });
+                } else if (false) {
+                    Dialog.errorMessage(result.getDialogMsg());
+                }
             }
         }, this));
     }
