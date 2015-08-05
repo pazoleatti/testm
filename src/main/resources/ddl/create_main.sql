@@ -435,7 +435,9 @@ create table form_data (
   department_report_period_id number(18) not null,
   manual number(1) default 0 not null,
   sorted number(1) default 0 not null,
-  number_current_row number(9)
+  number_current_row number(9),
+  comparative_dep_rep_per_id number(18), 
+  accruing number(1))
 );
 comment on table form_data is 'Данные по налоговым формам';
 comment on column form_data.id is 'Первичный ключ';
@@ -449,6 +451,8 @@ comment on column form_data.department_report_period_id is 'Идентифика
 comment on column form_data.manual is 'Режим ввода данных (0 - не содержит версию ручного ввода; 1 - содержит)';
 comment on column form_data.sorted is 'Признак актуальности сортировки';
 comment on column form_data.number_current_row is 'Количество пронумерованных строк текущей НФ';
+comment on column form_data.comparative_dep_rep_per_id is 'Период сравнения';
+comment on column form_data.accruing is 'Признак расчета значений нарастающим итогом (0 - не нарастающим итогом, 1 - нарастающим итогом, пустое - форма без периода сравнения)';
 
 create sequence seq_form_data start with 10000;
 ---------------------------------------------------------------------------------------------------
