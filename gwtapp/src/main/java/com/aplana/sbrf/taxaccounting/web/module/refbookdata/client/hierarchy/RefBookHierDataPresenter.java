@@ -197,7 +197,7 @@ public class RefBookHierDataPresenter extends PresenterWidget<RefBookHierDataPre
                             }
                             LogAddEvent.fire(RefBookHierDataPresenter.this, result.getUuid());
                             if (result.isException()) {
-                                Dialog.errorMessage("Удаление всех версий элемента справочника",
+                                Dialog.errorMessage("Удаление записи справочника",
                                         "Обнаружены фатальные ошибки!");
                             } else {
                                 //editPresenter.show(null);

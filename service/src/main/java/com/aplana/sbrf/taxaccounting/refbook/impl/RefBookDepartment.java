@@ -749,7 +749,7 @@ public class RefBookDepartment implements RefBookDataProvider {
 
         //3 точка запроса
         for (String result : refBookDao.isVersionUsedInRefBooks(
-                REF_BOOK_ID, Arrays.asList((long) department.getId()), null, null, false, Arrays.asList(31l, 33l, 37l, 98l, 99l))) {
+                REF_BOOK_ID, Arrays.asList((long) department.getId()), null, null, null, Arrays.asList(31l, 33l, 37l, 98l, 99l))) {
             logger.error(result);
         }
 
