@@ -437,7 +437,7 @@ create table form_data (
   sorted number(1) default 0 not null,
   number_current_row number(9),
   comparative_dep_rep_per_id number(18), 
-  accruing number(1))
+  accruing number(1)
 );
 comment on table form_data is 'Данные по налоговым формам';
 comment on column form_data.id is 'Первичный ключ';
