@@ -80,7 +80,8 @@ create table form_template (
   data_headers clob,
   status number(1) default 0 not null,
   monthly number(1) default 0 not null,
-  header varchar2(1000)
+  header varchar2(1000),
+  comparative number(1)
 );
 comment on table form_template IS 'Описания шаблонов налоговых форм';
 comment on column form_template.data_rows is 'Предопределённые строки формы в формате XML';
@@ -95,6 +96,7 @@ comment on column form_template.data_headers is 'Описание заголов
 comment on column form_template.status is 'Статус версии (0 - действующая версия; -1 - удаленная версия, 1 - черновик версии, 2 - фиктивная версия)';
 comment on column form_template.monthly is 'Признак ежемесячной формы (0 - не ежемесячная, 1 - ежемесячная)';
 comment on column form_template.header is 'Верхний колонтитул печатной формы';
+comment on column form_template.comparative is '"Признак использования периода сравнения (0 - не используется, 1 - используется)';
 
 create sequence seq_form_template start with 10000;
 ---------------------------------------------------------------------------------------------------
