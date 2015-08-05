@@ -331,9 +331,9 @@ public interface RefBookDao {
      * @param refBookId идентификатор справочника
      * @param recordId уникальный идентификатор записи
      * @param versionFrom дата начала актуальности новой версии
-     * @return список дат начала периода актуальности обнаруженных дочерних записей
+     * @return список пар <дата начала - дата окончания> периода актуальности обнаруженных дочерних записей
      */
-    List<Date> isVersionUsedLikeParent(@NotNull Long refBookId, @NotNull Long recordId, @NotNull Date versionFrom);
+    List<Pair<Date, Date>> isVersionUsedLikeParent(@NotNull Long refBookId, @NotNull Long recordId, @NotNull Date versionFrom);
 
     /**
      * Проверяет есть ли ссылки на версию в каких либо точках запроса

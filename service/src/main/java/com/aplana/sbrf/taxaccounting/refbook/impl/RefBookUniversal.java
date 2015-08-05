@@ -454,11 +454,12 @@ public class RefBookUniversal implements RefBookDataProvider {
             if (result.getResult() == CrossResult.NEED_CHECK_USAGES) {
                 if (refBook.isHierarchic()) {
                     //Поиск среди дочерних элементов
-                    List<Date> childrenVersions = refBookDao.isVersionUsedLikeParent(refBookId, result.getRecordId(), versionFrom);
+                    List<Pair<Date, Date>> childrenVersions = refBookDao.isVersionUsedLikeParent(refBookId, result.getRecordId(), versionFrom);
                     if (childrenVersions != null && !childrenVersions.isEmpty()) {
-                        for (Date version : childrenVersions) {
+                        for (Pair<Date, Date> versions : childrenVersions) {
                             if (logger != null) {
-                                logger.error(String.format("Существует дочерняя запись, действует с %s", formatter.get().format(version)));
+                                logger.error(String.format("Существует дочерняя запись, действует с %s по %s",
+                                        formatter.get().format(versions.getFirst()), formatter.get().format(versions.getSecond())));
                             }
                         }
                         throw new ServiceException(CROSS_ERROR_MSG);
@@ -692,13 +693,14 @@ public class RefBookUniversal implements RefBookDataProvider {
         //Проверка использования
         if (refBook.isHierarchic()) {
             //Поиск среди дочерних элементов
-            List<Date> childrenVersions = refBookDao.isVersionUsedLikeParent(refBookId, uniqueRecordId, versionFrom);
+            List<Pair<Date, Date>> childrenVersions = refBookDao.isVersionUsedLikeParent(refBookId, uniqueRecordId, versionFrom);
             if (childrenVersions != null && !childrenVersions.isEmpty()) {
-                for (Date version : childrenVersions) {
+                for (Pair<Date, Date> versions : childrenVersions) {
                     if (logger != null) {
                         String msg = "Существует дочерняя запись";
                         if (refBook.isVersioned()) {
-                            msg = msg + ", действует с " + formatter.get().format(version);
+                            msg = msg + ", действует с " + formatter.get().format(versions.getFirst()) +
+                                    " по " + formatter.get().format(versions.getSecond());
                         }
                         logger.error(msg);
                     }

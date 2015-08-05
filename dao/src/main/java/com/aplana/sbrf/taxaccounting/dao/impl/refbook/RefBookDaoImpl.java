@@ -1795,13 +1795,16 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     }
 
     @Override
-    public List<Date> isVersionUsedLikeParent(Long refBookId, Long recordId, Date versionFrom) {
-        return getJdbcTemplate().query("select r.version as version from ref_book_record r, ref_book_value v " +
+    public List<Pair<Date, Date>> isVersionUsedLikeParent(Long refBookId, Long recordId, Date versionFrom) {
+        return getJdbcTemplate().query("select r.version as version, \n" +
+                        "  (SELECT\n" +
+                        "  min(version) - interval '1' DAY FROM ref_book_record rn WHERE rn.ref_book_id = r.ref_book_id AND rn.record_id = r.record_id AND rn.version > r.version) AS versionEnd\n" +
+                        "from ref_book_record r, ref_book_value v " +
                         "where r.id=v.record_id and v.attribute_id in (select id from ref_book_attribute where reference_id=?) " +
-                        "and r.version >= ? and v.REFERENCE_VALUE=?", new RowMapper<Date>() {
+                        "and r.version >= ? and v.REFERENCE_VALUE=?", new RowMapper<Pair<Date, Date>>() {
                     @Override
-                    public Date mapRow(ResultSet rs, int rowNum) throws SQLException {
-                        return rs.getDate("version");
+                    public Pair<Date, Date> mapRow(ResultSet rs, int rowNum) throws SQLException {
+                        return new Pair<Date, Date>(rs.getDate("version"), rs.getDate("versionEnd"));
                     }
                 },
                 refBookId, versionFrom, recordId);
@@ -1943,7 +1946,9 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     }
 
     private static final String CHECK_USAGES_IN_REFBOOK =
-            "SELECT r.id, b.name AS refbookName, b.is_versioned as versioned, r.version AS versionStart, v.string_value, v.number_value, v.date_value, v.reference_value \n" +
+            "SELECT r.id, b.name AS refbookName, b.is_versioned as versioned, r.version AS versionStart, v.string_value, v.number_value, v.date_value, v.reference_value, \n" +
+                    "  (SELECT\n" +
+                    "  min(version) - interval '1' DAY FROM ref_book_record rn WHERE rn.ref_book_id = r.ref_book_id AND rn.record_id = r.record_id AND rn.version > r.version) AS versionEnd\n" +
             "FROM ref_book b\n" +
             "  JOIN ref_book_record r ON b.id = r.ref_book_id AND r.id IN (\n" +
             "    SELECT r.id\n" +
@@ -2017,6 +2022,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
                         attributeValues.setRefbookName(rs.getString("refbookName"));
                         attributeValues.setRefbookVersioned(rs.getBoolean("versioned"));
                         attributeValues.setVersionStart(rs.getDate("versionStart"));
+                        attributeValues.setVersionEnd(rs.getDate("versionEnd"));
                         records.put(uniqueRecordId, attributeValues);
                     }
                     //Заполняем значения уникальных атрибутов
@@ -2045,7 +2051,8 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
                         attributes.getRefbookName(),
                         attributes.getUniqueAttributes(),
                         attributes.isRefbookVersioned() ?
-                                ", действует с \"" + SDF_DD_MM_YYYY.format(attributes.getVersionStart()) + "\"" : ""
+                                ", действует с " + SDF_DD_MM_YYYY.format(attributes.getVersionStart()) + " по " + SDF_DD_MM_YYYY.format(attributes.getVersionEnd())
+                                : ""
                 ));
             }
             return msgs;
@@ -2069,6 +2076,8 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         private String uniqueAttributes;
         /** Дата начала действия записи */
         private Date versionStart;
+        /** Дата окончания действия записи */
+        private Date versionEnd;
 
         public String getRefbookName() {
             return refbookName;
@@ -2100,6 +2109,14 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 
         public void setVersionStart(Date versionStart) {
             this.versionStart = versionStart;
+        }
+
+        public Date getVersionEnd() {
+            return versionEnd;
+        }
+
+        public void setVersionEnd(Date versionEnd) {
+            this.versionEnd = versionEnd;
         }
     }
 
