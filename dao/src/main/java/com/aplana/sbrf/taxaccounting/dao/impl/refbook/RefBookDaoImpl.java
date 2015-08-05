@@ -1629,7 +1629,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             }
         });
 
-        return aggregateUniqueAttributeNamesByRecords(result);
+        return !result.isEmpty() ? aggregateUniqueAttributeNamesByRecords(result) : result;
     }
 
     @Override
@@ -1952,7 +1952,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             "      JOIN ref_book_attribute a ON r.ref_book_id = a.ref_book_id AND a.id = v.attribute_id AND a.reference_id = :refBookId)\n" +
             "  JOIN ref_book_attribute a ON a.ref_book_id = b.id\n" +
             "  JOIN ref_book_value v ON r.id = v.record_id AND a.id = v.attribute_id \n" +
-                    "where a.is_unique = 1 %s";
+                    "where a.is_unique > 0 %s";
 
     private static final String CHECK_USAGES_IN_REFBOOK_WITH_PERIOD_RESTRICTION =
             "SELECT * FROM (\n" +
@@ -1967,7 +1967,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             "      JOIN ref_book_attribute a ON r.ref_book_id = a.ref_book_id AND a.id = v.attribute_id AND a.reference_id = :refBookId)\n" +
             "  JOIN ref_book_attribute a ON a.ref_book_id = b.id\n" +
             "  JOIN ref_book_value v ON r.id = v.record_id AND a.id = v.attribute_id \n" +
-                    "where a.is_unique = 1 %s) %s";
+                    "where a.is_unique > 0 %s) %s";
 
     public List<String> isVersionUsedInRefBooks(Long refBookId, List<Long> uniqueRecordIds, Date versionFrom, Date versionTo,
                                                 Boolean restrictPeriod, List<Long> excludedRefBooks) {
@@ -2020,10 +2020,11 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
                         records.put(uniqueRecordId, attributeValues);
                     }
                     //Заполняем значения уникальных атрибутов
-                    concatAttrs(rs, attributeValues.getUniqueAttributes());
+                    attributeValues.setUniqueAttributes(concatAttrs(rs, attributeValues.getUniqueAttributes()));
                 }
 
                 public String concatAttrs(ResultSet rs, String attrValues) throws SQLException {
+                    // TODO возможно тут стоит предусмотреть объединение по группе уникальности
                     StringBuilder attr = new StringBuilder();
                     if (attrValues != null) {
                         attr.append(attrValues);
