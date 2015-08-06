@@ -94,8 +94,8 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 		void setSelectedRow(DataRow<Cell> item, boolean selected);
 
 		void enableRemoveRowButton(boolean enable);
-		
-		boolean getCheckedColumnsClicked();
+
+        boolean getCheckedColumnsClicked();
 
 		void assignDataProvider(int pageSize);
 
@@ -121,6 +121,8 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
         void startTimerReport(ReportType reportType);
 
         void stopTimerReport(ReportType reportType);
+
+        void updateTableTopPosition(int position);
 
         void updatePrintReportButtonName(ReportType reportType, boolean isLoad);
 

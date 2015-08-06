@@ -188,9 +188,17 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 
     private Timer timerExcel, timerCSV;
 
-    private final static int DEFAULT_TABLE_TOP_POSITION = 104;
+    public final static int DEFAULT_TABLE_TOP_POSITION = 104;
     private final static int DEFAULT_REPORT_PERIOD_LABEL_WIDTH = 150;
     private final static int LOCK_INFO_BLOCK_HEIGHT = 25;
+
+    /** Положение таблицы по высоте в данный момент времени */
+    private int tableTopPosition = DEFAULT_TABLE_TOP_POSITION;
+
+    @Override
+    public void updateTableTopPosition(int position) {
+        tableTopPosition = position;
+    }
 
     @Inject
     public FormDataView(final Binder binder) {
@@ -776,7 +784,7 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
         if (isLockInfoVisible){
             downShift = LOCK_INFO_BLOCK_HEIGHT;
         }
-        formDataTableStyle.setProperty("top", DEFAULT_TABLE_TOP_POSITION + downShift, Style.Unit.PX);
+        formDataTableStyle.setProperty("top", tableTopPosition + downShift, Style.Unit.PX);
     }
 
     /**
