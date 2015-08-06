@@ -597,7 +597,7 @@ void addTransportData(def xml) {
     }
 
     // сравнение итогов
-    if (xml.rowTotal.size() == 1) {
+    if (!logger.containsLevel(LogLevel.ERROR) && xml.rowTotal.size() == 1) {
         rnuIndexRow = rnuIndexRow + 2
         def row = xml.rowTotal[0]
         def total = formData.createDataRow()
