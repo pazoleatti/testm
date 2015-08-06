@@ -174,8 +174,10 @@ void importTransportData() {
     addTransportData(xml)
 
     // TODO (Ramil Timerbaev) возможно надо поменять на общее сообщение TRANSPORT_FILE_SUM_ERROR
-    def dataRows = formDataService.getDataRowHelper(formData).allCached
-    checkTotalSum(dataRows, totalColumns, logger, false)
+    if (!logger.containsLevel(LogLevel.ERROR)) {
+        def dataRows = formDataService.getDataRowHelper(formData).allCached
+        checkTotalSum(dataRows, totalColumns, logger, false)
+    }
 }
 
 void addTransportData(def xml) {
@@ -217,7 +219,7 @@ void addTransportData(def xml) {
         rows.add(newRow)
     }
 
-    if (xml.rowTotal.size() == 1) {
+    if (!logger.containsLevel(LogLevel.ERROR) && xml.rowTotal.size() == 1) {
         rnuIndexRow = rnuIndexRow + 2
 
         def row = xml.rowTotal[0]

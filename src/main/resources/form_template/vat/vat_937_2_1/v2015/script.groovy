@@ -475,7 +475,7 @@ void importTransportData() {
     }
 
     // сравнение итогов
-    if (total) {
+    if (!logger.containsLevel(LogLevel.ERROR) && total) {
         // мапа с алиасами граф и номерами колонокв в xml (алиас -> номер колонки)
         def totalColumnsIndexMap = ['saleCostB18' : 14, 'saleCostB10' : 15, 'saleCostB0' : 16, 'vatSum18' : 17, 'vatSum10' : 18, 'bonifSalesSum' : 19]
         // подсчет итогов

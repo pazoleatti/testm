@@ -357,7 +357,7 @@ void importTransportData() {
     newRows.add(totalRow)
 
     // сравнение итогов
-    if (total) {
+    if (!logger.containsLevel(LogLevel.ERROR) && total) {
         // мапа с алиасами граф и номерами колонокв в xml (алиас -> номер колонки)
         def totalColumnsIndexMap = ['costs': 5]
 

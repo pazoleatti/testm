@@ -818,7 +818,7 @@ void importTransportData() {
     showMessages(newRows, logger)
 
     // сравнение итогов
-    if (totalTF) {
+    if (!logger.containsLevel(LogLevel.ERROR) && totalTF) {
         // мапа с алиасами граф и номерами колонокв в xml (алиас -> номер колонки)
         def totalColumnsIndexMap = [ 'prev' : 6, 'current' : 7, 'reserveCalcValuePrev' : 8, 'cost' : 9,
                 'costOnMarketQuotation' : 14, 'reserveCalcValue' : 15, 'reserveCreation' : 16, 'recovery' : 17 ]
