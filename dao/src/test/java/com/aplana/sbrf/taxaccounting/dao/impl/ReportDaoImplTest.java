@@ -13,6 +13,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.ByteArrayInputStream;
+import java.util.Arrays;
 import java.util.UUID;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -36,5 +37,11 @@ public class ReportDaoImplTest {
         blobData.setInputStream(new ByteArrayInputStream(new byte[]{'a'}));
         blobDataDao.create(blobData);
         reportDao.createAudit(1, uuid, ReportType.CSV);
+    }
+
+    @Test
+    @Transactional(readOnly = false)
+    public void deleteDecTest(){
+        reportDao.deleteDec(Arrays.asList(1l, 2l));
     }
 }

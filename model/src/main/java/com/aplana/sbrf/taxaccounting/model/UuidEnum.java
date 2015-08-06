@@ -25,6 +25,6 @@ public enum  UuidEnum {
     /**
      * uuid записи логгера в случае успешной обработки
      */
-    SUCCESS_UUID
-
+    SUCCESS_UUID,
+    UPLOADED_FILE
 }

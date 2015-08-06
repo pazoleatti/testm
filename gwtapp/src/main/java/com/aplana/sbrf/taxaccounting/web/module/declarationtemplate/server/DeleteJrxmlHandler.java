@@ -35,8 +35,8 @@ public class DeleteJrxmlHandler extends AbstractActionHandler<DeleteJrxmlAction,
     @Override
     public DeleteJrxmlResult execute(DeleteJrxmlAction action, ExecutionContext context) throws ActionException {
         //Система удаляет все найденные pdf и xlsx отчеты.
-        declarationDataService.cleanBlobs(action.getIds());
-        for (Long id : action.getLockIds()){
+        declarationDataService.cleanBlobs(declarationTemplateService.getDataIdsThatUseJrxml(action.getDtId(), securityService.currentUserInfo()));
+        for (Long id : declarationTemplateService.getLockDataIdsThatUseJrxml(action.getDtId())){
             String keyPDF = declarationDataService.generateAsyncTaskKey(id, ReportType.PDF_DEC);
             String keyEXEL = declarationDataService.generateAsyncTaskKey(id, ReportType.EXCEL_DEC);
             LockData pdfLock = lockDataService.getLock(keyPDF);

@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.service;
 
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.model.VersionedObjectStatus;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 
 import java.util.Date;
@@ -10,7 +11,7 @@ import java.util.Date;
  * Основные операции над макетами
  */
 public interface MainOperatingService {
-    static final String SAVE_MESSAGE = "Версия макета не сохранена, обнаружены фатальные ошибки!";
+    String SAVE_MESSAGE = "Версия макета не сохранена, обнаружены фатальные ошибки!";
 
     <T> int edit(T template, Date templateActualEndDate, Logger logger, TAUserInfo user);
     <T> int createNewType(T template, Date templateActualEndDate, Logger logger, TAUserInfo user);
@@ -18,4 +19,9 @@ public interface MainOperatingService {
     void deleteTemplate(int typeId, Logger logger, TAUserInfo user);
     boolean deleteVersionTemplate(int templateId, Logger logger, TAUserInfo user);
     boolean setStatusTemplate(int templateId, Logger logger, TAUserInfo user, boolean force);
+
+    /**
+     * Просто делегирует к другому методу
+     */
+    void isInUsed(int templateId, int typeId, VersionedObjectStatus status, Date versionActualDateStart, Date versionActualDateEnd, Logger logger);
 }
