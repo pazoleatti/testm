@@ -687,6 +687,7 @@ void importData() {
     def rowIndex = 0
     def rows = []
     def allValuesCount = allValues.size()
+    def totalRowFromFile = null
 
     // формирвание строк нф
     for (def i = 0; i < allValuesCount; i++) {
@@ -699,7 +700,9 @@ void importData() {
             break
         }
         // Пропуск итоговых строк
-        if (rowValues[INDEX_FOR_SKIP] && (rowValues[INDEX_FOR_SKIP] == "Итого" || rowValues[INDEX_FOR_SKIP].contains("Итого по КНУ "))) {
+        if (rowValues[INDEX_FOR_SKIP] == "Итого") {
+            totalRowFromFile = getNewRowFromXls(rowValues, colOffset, fileRowIndex, rowIndex)
+
             allValues.remove(rowValues)
             rowValues.clear()
             continue
@@ -713,7 +716,15 @@ void importData() {
         rowValues.clear()
     }
 
-    rows.add(getTotalRow())
+    // итоговая строка
+    def formTemplate = formDataService.getFormTemplate(formData.formType.id, formData.reportPeriodId)
+    def templateRows = formTemplate.rows
+    def totalRow = getDataRow(templateRows, 'total')
+    rows.add(totalRow)
+    updateIndexes(rows)
+    // сравнение итогов
+    compareSimpleTotalValues(totalRow, totalRowFromFile, rows, totalSumColumns, formData, logger, false)
+
     showMessages(rows, logger)
     if (!logger.containsLevel(LogLevel.ERROR)) {
         updateIndexes(rows)
@@ -821,15 +832,4 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
     }
 
     return newRow
-}
-
-def getTotalRow() {
-    def DataRow totalRow = formData.createDataRow()
-    totalRow.setAlias('total')
-    totalRow.fix = 'Итого'
-    totalRow.getCell('fix').colSpan = 2
-    (allColumns + 'fix').each {
-        totalRow.getCell(it).setStyleAlias('Контрольные суммы')
-    }
-    return totalRow
 }
