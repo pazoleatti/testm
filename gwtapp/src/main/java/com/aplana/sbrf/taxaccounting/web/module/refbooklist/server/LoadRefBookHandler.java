@@ -92,9 +92,9 @@ public class LoadRefBookHandler extends AbstractActionHandler<LoadRefBookAction,
             String key = LockData.LockObjects.CONFIGURATION_PARAMS.name() + "_" + UUID.randomUUID().toString().toLowerCase();
             lockDataService.lock(key, userInfo.getUser().getId(),
                     LockData.DescriptionTemplate.CONFIGURATION_PARAMS.getText(),
-                    lockDataService.getLockTimeout(LockData.LockObjects.CONFIGURATION_PARAMS));;
+                    lockDataService.getLockTimeout(LockData.LockObjects.CONFIGURATION_PARAMS));
             try {
-                loadRefBookDataService.checkImportRefBooks(securityService.currentUserInfo(), logger, UUID.randomUUID().toString().toLowerCase());
+                loadRefBookDataService.checkImportRefBooks(securityService.currentUserInfo(), logger, UUID.randomUUID().toString().toLowerCase(), false);
             } finally {
                 lockDataService.unlock(key, userInfo.getUser().getId());
             }

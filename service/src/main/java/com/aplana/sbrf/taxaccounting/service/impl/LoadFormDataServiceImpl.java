@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
+import com.aplana.sbrf.taxaccounting.dao.AsyncTaskTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
 import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
 import com.aplana.sbrf.taxaccounting.dao.api.ConfigurationDao;
@@ -72,10 +73,12 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
     private LogBusinessService logBusinessService;
     @Autowired
     private AuditService auditService;
+    @Autowired
+    private AsyncTaskTypeDao asyncTaskTypeDao;
 
     @Override
     public ImportCounter importFormData(TAUserInfo userInfo, List<Integer> departmentIdList,
-                                        List<String> loadedFileNameList, Logger logger, String lockId) {
+                                        List<String> loadedFileNameList, Logger logger, String lockId, boolean isAsync) {
         log(userInfo, LogData.L1, logger, lockId);
         ImportCounter importCounter = new ImportCounter();
         if (departmentIdList != null) {
@@ -85,7 +88,7 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
                 int departmentId = (Integer) departmentIdObj;
                 try {
                     importCounter.add(importDataFromFolder(userInfo, ConfigurationParam.FORM_UPLOAD_DIRECTORY, departmentId,
-                            loadedFileNameList, logger, lockId));
+                            loadedFileNameList, logger, lockId, isAsync));
                 } catch (Exception e) {
                     e.printStackTrace();
                     logger.error("Ошибка при загрузке транспортных файлов подразделения «%s». %s", departmentService.getDepartment(departmentId).getName(), e.getMessage());
@@ -94,6 +97,26 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
         }
         log(userInfo, LogData.L2, logger, lockId, importCounter.getSuccessCounter(), importCounter.getFailCounter());
         return importCounter;
+    }
+
+    @Override
+    public List<TransportFileInfo> getFormDataFiles(TAUserInfo userInfo, List<Integer> departmentIdList,
+                                        List<String> loadedFileNameList, Logger logger) {
+        List<TransportFileInfo> fileList = new ArrayList<TransportFileInfo>();
+        if (departmentIdList != null) {
+            // По каталогам загрузки ТБ
+            List<Integer> tbList = departmentDao.getDepartmentIdsByType(DepartmentType.TERR_BANK.getCode());
+            for (Object departmentIdObj : CollectionUtils.intersection(departmentIdList, tbList)) {
+                int departmentId = (Integer) departmentIdObj;
+                try {
+                    fileList.addAll(getFormDataTBFiles(userInfo, ConfigurationParam.FORM_UPLOAD_DIRECTORY, departmentId,
+                            loadedFileNameList, logger, ""));
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return fileList;
     }
 
     @Override
@@ -136,15 +159,15 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
     }
 
     @Override
-    public ImportCounter importFormData(TAUserInfo userInfo, Logger logger, String lock) {
-        return importFormData(userInfo, departmentDao.getDepartmentIdsByType(DepartmentType.TERR_BANK.getCode()), null, logger, lock);
+    public ImportCounter importFormData(TAUserInfo userInfo, Logger logger, String lock, boolean isAsync) {
+        return importFormData(userInfo, departmentDao.getDepartmentIdsByType(DepartmentType.TERR_BANK.getCode()), null, logger, lock, isAsync);
     }
 
     /**
      * Загрузка всех ТФ НФ из указанного каталога загрузки
      */
     private ImportCounter importDataFromFolder(TAUserInfo userInfo, ConfigurationParam param, Integer departmentId,
-                                               List<String> loadedFileNameList, Logger logger, String lockId) {
+                                               List<String> loadedFileNameList, Logger logger, String lockId, boolean isAsync) {
         String path = getUploadPath(userInfo, param, departmentId, logger, lockId);
         if (path == null) {
             // Ошибка получения пути
@@ -182,11 +205,22 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
             return wrongImportCounter;
         }
 
+        long maxFileSize = 0;
+        if (isAsync) {
+            maxFileSize = asyncTaskTypeDao.get(ReportType.LOAD_ALL_TF.getAsyncTaskTypeId(true)).getTaskLimit();
+        }
         // Обработка всех подходящих файлов, с получением списка на каждой итерации
         for (String fileName : workFilesList) {
             ignoreFileSet.add(fileName);
             FileWrapper currentFile = ResourceUtils.getSharedResource(path + "/" + fileName);
 
+            if (currentFile.length() / 1024 > maxFileSize) {
+                log(userInfo, LogData.L47, logger, lockId, fileName, currentFile.length() / 1024, path, maxFileSize);
+                moveToErrorDirectory(userInfo, getFormDataErrorPath(userInfo, departmentId, logger, lockId), currentFile,
+                        Arrays.asList(new LogEntry(LogLevel.ERROR, String.format(LogData.L4.getText(), lockId, fileName, path))), logger, lockId);
+                fail++;
+                continue;
+            }
             // Блокировка файла
             LockData fileLock = lockDataService.lock(LockData.LockObjects.FILE.name() + "_" + fileName,
                     userInfo.getUser().getId(),
@@ -401,6 +435,38 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
         }
 
         return new ImportCounter(success, fail + wrongImportCounter.getFailCounter());
+    }
+
+    private List<TransportFileInfo> getFormDataTBFiles(TAUserInfo userInfo, ConfigurationParam param, Integer departmentId,
+                                               List<String> loadedFileNameList, Logger logger, String lockId) {
+        List<TransportFileInfo> fileList = new ArrayList<TransportFileInfo>();
+        String path = getUploadPath(userInfo, param, departmentId, logger, lockId);
+        if (path == null) {
+            // Ошибка получения пути
+            return fileList;
+        }
+
+        // Проверка каталогов, указанных в параметрах "Путь к каталогу загрузки", "Путь к каталогу архива" и "Путь к каталогу ошибок" для ТБ, на наличие доступа
+        String archivePath = getFormDataArchivePath(userInfo, departmentId, logger, lockId);
+        String errorPath = getFormDataErrorPath(userInfo, departmentId, logger, lockId);
+        if (!checkPath(path) || !checkPath(archivePath) || !checkPath(errorPath)) {
+            return fileList;
+        }
+
+
+        // Если изначально нет подходящих файлов то выдаем отдельную ошибку
+        List<String> workFilesList = getWorkTransportFiles(userInfo, path, new HashSet<String>(), loadedFileNameList, logger, new ImportCounter(), lockId);
+        if (workFilesList.isEmpty()) {
+            return fileList;
+        }
+
+        // Обработка всех подходящих файлов, с получением списка на каждой итерации
+        for (String fileName : workFilesList) {
+            FileWrapper currentFile = ResourceUtils.getSharedResource(path + "/" + fileName);
+            fileList.add(new TransportFileInfo(currentFile.getName(), path, currentFile.length() / 1024));
+        }
+
+        return fileList;
     }
 
     private boolean checkPath(String path) {

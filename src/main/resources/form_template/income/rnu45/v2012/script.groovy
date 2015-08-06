@@ -415,7 +415,7 @@ void addTransportData(def xml) {
     calcTotalSum(rows, totalRow, totalColumns)
     rows.add(totalRow)
 
-    if (xml.rowTotal.size() == 1) {
+    if (!logger.containsLevel(LogLevel.ERROR) && xml.rowTotal.size() == 1) {
         rnuIndexRow += 2
 
         def row = xml.rowTotal[0]

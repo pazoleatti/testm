@@ -21,6 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 import static java.util.Arrays.asList;
@@ -29,6 +30,7 @@ import static java.util.Arrays.asList;
 public class FormDataAccessServiceImpl implements FormDataAccessService {
 
     private static final Log logger = LogFactory.getLog(FormDataAccessServiceImpl.class);
+    private static final SimpleDateFormat SDF = new SimpleDateFormat("dd.MM.yyyy");
 
     public static final String LOG_EVENT_AVAILABLE_MOVES = "LOG_EVENT_AVAILABLE_MOVES";
     public static final String LOG_EVENT_READ = "READ";
@@ -55,6 +57,7 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
     private static final String FORM_DATA_DEPARTMENT_ACCESS_DENIED_LOG = "Selected department (%d) not available in report period (%d)!";
     private static final String FORM_DATA_DEPARTMENT_ACCESS_DENIED = "Выбранное подразделение недоступно для пользователя!";
     private static final String FORM_DATA_EDIT_ERROR = "Нельзя редактировать форму \"%s\" в состоянии \"%s\"";
+    private static final String ACCEPTED_DESTINATION_MSG = "Приёмник формы - \"%s\" для подразделения \"%s\" в периоде \"%s%s%s\" - находится в статусе \"Принят\"!";
 
     @Autowired
     private FormDataDao formDataDao;
@@ -241,10 +244,13 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
         List<Pair<String, String>> destinations = sourceService.existAcceptedDestinations(formData.getDepartmentId(), formData.getFormType().getId(),
                 formData.getKind(), formData.getReportPeriodId(), null, null);
         if (!destinations.isEmpty()) {
-            ReportPeriod period = reportPeriodService.getReportPeriod(formData.getReportPeriodId());
             for (Pair<String, String> destination : destinations) {
-                logger.error("Приёмник формы - " + destination.getFirst() + " для подразделения " + destination.getSecond() +
-                        " в периоде " + period.getTaxPeriod().getYear() + " " + period.getName() + " - находится в статусе \"Принят\"!");
+                logger.error(String.format(ACCEPTED_DESTINATION_MSG,
+                        destination.getFirst(), destination.getSecond(),
+                        departmentReportPeriod.getReportPeriod().getName() + " " + departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear(),
+                        formData.getPeriodOrder() != null ? ", Месяц: " + Months.fromId(formData.getPeriodOrder()).getTitle() : "",
+                        departmentReportPeriod.getCorrectionDate() != null ? ", Дата сдачи корректировки: " + SDF.format(departmentReportPeriod.getCorrectionDate()) : ""
+                ));
             }
         }
 

@@ -173,7 +173,14 @@ void calc() {
             }
         }
 
-        calcSubTotal(dataRows)
+        // посчитать "итого по коду"
+        def totalRows = calcSubTotalRows(dataRows)
+
+        // добавить "итого по коду" в таблицу
+        def i = 0
+        totalRows.each { index, row ->
+            dataRows.add(index + i++, row)
+        }
     }
 
     dataRows.add(calcTotalRow(dataRows))
@@ -181,12 +188,14 @@ void calc() {
     sortFormDataRows(false)
 }
 
-void calcSubTotal(def dataRows) {
+def calcSubTotalRows(def dataRows) {
     // посчитать "итого по коду"
     def totalRows = [:]
     def code = null
     def sum = 0, sum2 = 0
-    dataRows.eachWithIndex { row, i ->
+    def rows = dataRows.findAll { it.getAlias() == null }
+
+    rows.eachWithIndex { row, i ->
         if (code == null) {
             code = getKnu(row.code)
         }
@@ -198,7 +207,7 @@ void calcSubTotal(def dataRows) {
             code = getKnu(row.code)
         }
         // если строка последняя то сделать для ее кода расхода новую строку "итого по коду"
-        if (i == dataRows.size() - 1) {
+        if (i == rows.size() - 1) {
             sum += (row.taxAccountingRuble ?: 0)
             sum2 += (row.ruble ?: 0)
             def totalRowCode = getNewRow(code, sum, sum2)
@@ -210,11 +219,7 @@ void calcSubTotal(def dataRows) {
         sum2 += (row.ruble ?: 0)
     }
 
-    // добавить "итого по коду" в таблицу
-    def i = 0
-    totalRows.each { index, row ->
-        dataRows.add(index + i++, row)
-    }
+    return totalRows
 }
 
 def BigDecimal calc8(DataRow row) {
@@ -550,14 +555,20 @@ void importTransportData() {
         reader.close()
     }
 
-    calcSubTotal(newRows)
+    // посчитать "итого по коду"
+    def totalRows = calcSubTotalRows(newRows)
+    def i = 0
+    totalRows.each { index, row ->
+        newRows.add(index + i++, row)
+    }
+
     def totalRow = calcTotalRow(newRows)
     newRows.add(totalRow)
 
     showMessages(newRows, logger)
 
     // сравнение итогов
-    if (totalTF) {
+    if (!logger.containsLevel(LogLevel.ERROR) && totalTF) {
         // мапа с алиасами граф и номерами колонокв в xml (алиас -> номер колонки)
         def totalColumnsIndexMap = ['taxAccountingRuble' : 10, 'ruble' : 12]
         def colOffset = 1
@@ -706,6 +717,8 @@ void importData() {
     def rowIndex = 0
     def rows = []
     def allValuesCount = allValues.size()
+    def totalRowFromFile = null
+    def totalRowFromFileMap = [:]           // мапа для хранения строк подитогов со значениями из файла (стили простых строк)
 
     // формирвание строк нф
     for (def i = 0; i < allValuesCount; i++) {
@@ -717,19 +730,65 @@ void importData() {
             rowValues.clear()
             break
         }
+        rowIndex++
         // Пропуск итоговых строк
-        if (rowValues[INDEX_FOR_SKIP] && (rowValues[INDEX_FOR_SKIP] == "Итого" || rowValues[INDEX_FOR_SKIP].contains("Итого по КНУ "))) {
+        if (rowValues[INDEX_FOR_SKIP] == "Итого") {
+            totalRowFromFile = getNewRowFromXls(rowValues, colOffset, fileRowIndex, rowIndex)
+
+            allValues.remove(rowValues)
+            rowValues.clear()
+            continue
+        } else if (rowValues[INDEX_FOR_SKIP].contains("Итого по КНУ ")) {
+            def subTotalRow = getNewSubTotalRowFromXls(rowValues, colOffset, fileRowIndex, rowIndex)
+            if (totalRowFromFileMap[subTotalRow.helper] == null) {
+                totalRowFromFileMap[subTotalRow.helper] = []
+            }
+            totalRowFromFileMap[subTotalRow.helper].add(subTotalRow)
+            rows.add(subTotalRow)
+
             allValues.remove(rowValues)
             rowValues.clear()
             continue
         }
         // простая строка
-        rowIndex++
         def newRow = getNewRowFromXls(rowValues, colOffset, fileRowIndex, rowIndex)
         rows.add(newRow)
         // освободить ненужные данные - иначе не хватит памяти
         allValues.remove(rowValues)
         rowValues.clear()
+    }
+
+    // сравнение подитогов
+    if (!totalRowFromFileMap.isEmpty()) {
+        def totalRowsMap = calcSubTotalRows(rows)
+        totalRowsMap.values().toArray().each { tmpRow ->
+            def totalRows = totalRowFromFileMap[tmpRow.helper]
+            if (totalRows) {
+                totalRows.each { totalRow ->
+                    compareTotalValues(totalRow, tmpRow, totalColumns, logger, false)
+                }
+                totalRowFromFileMap.remove(tmpRow.helper)
+            }
+        }
+        if (!totalRowFromFileMap.isEmpty()) {
+            // для этих подитогов из файла нет групп
+            totalRowFromFileMap.each { key, totalRows ->
+                totalRows.each { totalRow ->
+                    totalColumns.each { alias ->
+                        def msg = String.format(COMPARE_TOTAL_VALUES, totalRow.getIndex(), getColumnName(totalRow, alias), totalRow[alias], BigDecimal.ZERO)
+                        rowWarning(logger, totalRow, msg)
+                    }
+                }
+            }
+        }
+    }
+
+    // сравнение итогов
+    def totalRow = calcTotalRow(rows)
+    rows.add(totalRow)
+    updateIndexes(rows)
+    if (totalRowFromFile) {
+        compareSimpleTotalValues(totalRow, totalRowFromFile, rows, totalColumns, formData, logger, false)
     }
 
     showMessages(rows, logger)
@@ -827,6 +886,34 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
         colIndex++
         newRow[alias] = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
     }
+
+    return newRow
+}
+
+/**
+ * Получить новую подитоговую строку нф по значениям из экселя.
+ *
+ * @param values список строк со значениями
+ * @param colOffset отступ в колонках
+ * @param fileRowIndex номер строки в тф
+ * @param rowIndex строка в нф
+ */
+def getNewSubTotalRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) {
+    // графа helper
+    def title = values[1]
+    def alias = title.substring("Итого по КНУ ".size())?.trim()
+
+    def newRow = getNewRow(alias, 0, 0)
+    newRow.setIndex(rowIndex)
+    newRow.setImportIndex(fileRowIndex)
+
+    // графа 10
+    colIndex = 10
+    newRow.taxAccountingRuble = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
+
+    // графа 12
+    colIndex = 12
+    newRow.ruble = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
 
     return newRow
 }

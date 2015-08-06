@@ -19,15 +19,15 @@ import javax.xml.bind.Unmarshaller
 
 static void main(String[] args) {
     String resourcePath = "./src/main/resources/com/aplana/sbrf/taxaccounting/"
-    String templatePath = "../src/main/resources/form_template/income/rnu46/v2012/"
+    String templatePath = "../src/main/resources/form_template/etr/etr_4_1/v2015/"
     def map = [ // TODO заполнить
                 // заполняем вручную
-                "%1%" : '666', // id типа НФ
-                "%2%" : 'testTypeName', // имя типа НФ
-                "%3%" : 'TaxType.INCOME', // вид налога
+                "%1%" : '700', // id типа НФ
+                "%2%" : 'Абсолютная величина налоговых платежей', // имя типа НФ
+                "%3%" : 'TaxType.ETR', // вид налога
                 "%4%" : 'false', // isIFRS
-                "%5%" : 'testIfrsName', // имя ИФРС
-                "%6%" : '666', // id версии макета НФ
+                "%5%" : '', // имя ИФРС
+                "%6%" : '700', // id версии макета НФ
                 "%10%" : '01.01.2015', // версия в формате 01.01.2015
                 "%11%" : 'false'] // ежемесячность
 

@@ -195,7 +195,7 @@ void importTransportData() {
     }
 
     // сравнение итогов
-    if (totalTF) {
+    if (!logger.containsLevel(LogLevel.ERROR) && totalTF) {
         // сравнение контрольных сумм
         def colOffset = 1
         for (def alias : totalColumnsIndexMap.keySet().asList()) {

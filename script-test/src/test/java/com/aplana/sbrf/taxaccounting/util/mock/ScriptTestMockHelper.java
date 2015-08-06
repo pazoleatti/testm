@@ -18,6 +18,7 @@ public interface ScriptTestMockHelper {
     FormDataService mockFormDataService();
     ReportPeriodService mockReportPeriodService();
     DepartmentService mockDepartmentService();
+    BookerStatementService mockBookerStatementService();
     ImportService mockImportService();
     RefBookService mockRefBookService();
     DepartmentFormTypeService mockDepartmentFormTypeService();

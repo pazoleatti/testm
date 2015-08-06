@@ -51,7 +51,7 @@ public class LoadRefBookNsiTask extends AbstractUserTask {
                 LockData.DescriptionTemplate.CONFIGURATION_PARAMS.getText(),
                 lockDataService.getLockTimeout(LockData.LockObjects.CONFIGURATION_PARAMS));
         try {
-            loadRefBookDataService.importRefBookNsi(userService.getSystemUserInfo(), new Logger(), lockId);
+            loadRefBookDataService.importRefBookNsi(userService.getSystemUserInfo(), new Logger(), lockId, false);
         } finally {
             lockDataService.unlock(key, userId);
         }

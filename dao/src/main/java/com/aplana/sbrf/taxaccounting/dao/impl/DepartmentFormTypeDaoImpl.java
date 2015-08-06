@@ -741,18 +741,18 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
             "join department_declaration_type ddt on (ddt.department_id = d.id and ddt.declaration_type_id = dtype.id)\n" +
             "join declaration_source ds on ds.department_declaration_type_id = ddt.id\n" +
             "join department_form_type dft on dft.id = ds.src_department_form_type_id\n" +
-            "where dft.department_id = :sourceDepartmentId and dft.kind = :sourceKind and dft.form_type_id = :sourceFormTypeId and drp.report_period_id = :reportPeriodId and dd.is_accepted = 1\n" +
+            "where dft.department_id = :sourceDepartmentId and dft.kind = :sourceKind and dft.form_type_id = :sourceFormTypeId and drp.id = :departmentReportPeriodId and dd.is_accepted = 1\n" +
             "and (:periodStart is null or ((ds.period_end >= :periodStart or ds.period_end is null) and (:periodEnd is null or ds.period_start <= :periodEnd)))";
 
     @Override
     public List<Pair<String, String>> existAcceptedDestinations(int sourceDepartmentId, int sourceFormTypeId,
-                                                                FormDataKind sourceKind, Integer reportPeriodId,
+                                                                FormDataKind sourceKind, Integer departmentReportPeriodId,
                                                                 Date periodStart, Date periodEnd) {
         Map<String, Object> params = new HashMap<String, Object>();
         params.put("sourceDepartmentId", sourceDepartmentId);
         params.put("sourceKind", sourceKind.getId());
         params.put("sourceFormTypeId", sourceFormTypeId);
-        params.put("reportPeriodId", reportPeriodId);
+        params.put("departmentReportPeriodId", departmentReportPeriodId);
         params.put("periodStart", periodStart);
         params.put("periodEnd", periodEnd);
         return getNamedParameterJdbcTemplate().query(EXIST_ACCEPTED_DESTINATIONS, params,

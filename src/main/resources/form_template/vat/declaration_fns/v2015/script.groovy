@@ -671,7 +671,7 @@ void logicCheck() {
                     r1str050 = getXmlDecimal(reader, "СумПУ_173.1") ?: 0
                 } else if (isCurrentNode(['Документ', 'НДС', 'СумУплНА'], elements)) {
                     r2str060sum += getXmlDecimal(reader, "СумИсчисл") ?: 0
-                } else if (!r3g3str010 && isCurrentNode(['Документ', 'НДС', 'СумУпл164', 'СумНалОб'], elements)) {
+                } else if (!r3g5str110 && isCurrentNode(['Документ', 'НДС', 'СумУпл164', 'СумНалОб'], elements)) {
                     r3g5str110 = getXmlDecimal(reader, "НалВосстОбщ") ?: 0
                 } else if (!r3g3str010 && isCurrentNode(['Документ', 'НДС', 'СумУпл164', 'СумНалОб', 'РеалТов18'], elements)) {
                     r3g3str010 = getXmlDecimal(reader, "НалБаза") ?: 0
@@ -711,7 +711,6 @@ void logicCheck() {
 
     def reader8
     if (has8) {
-        logger.info("" + getParts().get(declarations().declaration8[0]))
         reader8 = declarationService.getXmlStreamReader(getParts().get(declarations().declaration8[0]).id)
     } else if (has8n) {
         reader8 = declarationService.getXmlStreamReader(getParts().get(declarations().declaration8n[0]).id)
@@ -732,26 +731,26 @@ void logicCheck() {
     }
 
     if (reader8 != null) {
-        logger.info("" + reader8)
+        //elements = [:]
         try {
             while (reader8.hasNext()) {
                 if (reader8.startElement) {
-                    elements[reader8.name.localPart] = true
-                    if ("КодВидОпер".equals(reader9.name.localPart)) {
-                        if ('06'.equals(reader9.getElementText())) {
+                    //elements[reader8.name.localPart] = true
+                    if ("КодВидОпер".equals(reader8.name.localPart)) {
+                        if ('06'.equals(reader8.getElementText())) {
                             r8str180sum += r8str180sumTmp
                         }
                     }
-                    if (!r8str190 && isCurrentNode(['Документ', 'КнигаПокуп'], elements)) {
+                    if (!r8str190 && "КнигаПокуп".equals(reader8.name.localPart)) {
                         r8str190 = getXmlDecimal(reader8, "СумНДСВсКПк") ?: 0
                     }
-                    if (isCurrentNode(['Документ', 'КнигаПокуп', 'КнПокСтр'], elements)) {
+                    else if ("КнПокСтр".equals(reader8.name.localPart)) {
                         r8str180sumTmp = getXmlDecimal(reader8, "СумНДСВыч") ?: 0
                     }
                 }
-                if (reader8.endElement) {
+                /*if (reader8.endElement) {
                     elements[reader8.name.localPart] = false
-                }
+                } */
                 reader8.next()
             }
         } finally {
@@ -760,12 +759,13 @@ void logicCheck() {
     }
 
     if (reader81 != null) {
+        elements = [:]
         try {
             while (reader81.hasNext()) {
                 if (reader81.startElement) {
                     elements[reader81.name.localPart] = true
-                    if ("КодВидОпер".equals(reader9.name.localPart)) {
-                        if ('06'.equals(reader9.getElementText())) {
+                    if ("КодВидОпер".equals(reader81.name.localPart)) {
+                        if ('06'.equals(reader81.getElementText())) {
                             r81str180sum += r81str180sumTmp
                         }
                     }
@@ -788,30 +788,31 @@ void logicCheck() {
     }
 
     if (reader9 != null) {
+        //elements = [:]
         try {
             while (reader9.hasNext()) {
                 if (reader9.startElement) {
-                    elements[reader9.name.localPart] = true
+                    //elements[reader9.name.localPart] = true
                     if ("КодВидОпер".equals(reader9.name.localPart)) {
                         if ('06'.equals(reader9.getElementText())) {
                             r9str200sum += r9str200sumTmp
                             r9str210sum += r9str210sumTmp
                         }
                     }
-                    if (!r9str260 && isCurrentNode(['Документ', 'КнигаПрод'], elements)) {
+                    if (!r9str260 && "КнигаПрод".equals(reader9.name.localPart)) {
                         r9str260 = getXmlDecimal(reader9, "СумНДСВсКПр18") ?: 0
                         r9str270 = getXmlDecimal(reader9, "СумНДСВсКПр10") ?: 0
                         r9str250 = getXmlDecimal(reader9, "СтПродБезНДС0") ?: 0
                     }
-                    if (isCurrentNode(['Документ', 'КнигаПрод', 'КнПродСтр'], elements)) {
+                    if ("КнПродСтр".equals(reader9.name.localPart)) {
                         r9str200sumTmp = getXmlDecimal(reader9, "СумНДССФ18") ?: 0
                         r9str210sumTmp = getXmlDecimal(reader9, "СумНДССФ10") ?: 0
                         r9str190sum += getXmlDecimal(reader9, "СтоимПродСФ0") ?: 0
                     }
                 }
-                if (reader9.endElement) {
+                /*if (reader9.endElement) {
                     elements[reader9.name.localPart] = false
-                }
+                }*/
                 reader9.next()
             }
         } finally {
@@ -820,12 +821,13 @@ void logicCheck() {
     }
 
     if (reader91 != null) {
+        elements = [:]
         try {
             while (reader91.hasNext()) {
                 if (reader91.startElement) {
                     elements[reader91.name.localPart] = true
-                    if ("КодВидОпер".equals(reader9.name.localPart)) {
-                        if ('06'.equals(reader9.getElementText())) {
+                    if ("КодВидОпер".equals(reader91.name.localPart)) {
+                        if ('06'.equals(reader91.getElementText())) {
                             r91str280sum += r91str280sumTmp
                             r91str290sum += r91str290sumTmp
                         }
@@ -909,8 +911,8 @@ void logicCheck() {
 
     // Проверки контрольных соотношений
     // 1.4
-    def sum010_040 = r3g3str010 + r3g3str020 + r3g3str030 + r3g3str040
-    def sum120_160 = r3g3str120 + r3g3str150 + r3g3str160
+    def sum010_040 = r3g3str010 ?: 0 + r3g3str020 ?: 0 + r3g3str030 ?: 0 + r3g3str040 ?: 0
+    def sum120_160 = r3g3str120 ?: 0 + r3g3str150 ?: 0 + r3g3str160 ?: 0
     def denom1 = sum010_040 + r7g2sum
     def denom2 = sum120_160 + r7g4sum
     //logger.info("(" + r3g3str010 + "+" + r3g3str020 + "+" + r3g3str030  + "+" + r3g3str040 + ")/(" + sum010_040 + "+" + r7g2sum + ") == (" + r3g3str120 + "+" +r3g3str150 + "+" + r3g3str160  + ")/(" + sum120_160+ "+" + r7g4sum  + ")")
@@ -921,7 +923,7 @@ void logicCheck() {
         logger.warn("КС 1.4. Возможно нарушение ст. 149, 170 п.4 возможно необоснованное применение налоговых вычетов.")
     }
     // 1.11
-    if (r3g3str170 > r3g5str010 + r3g5str020 + r3g5str030 + r3g5str040) {
+    if (r3g3str170 ?: 0 > r3g5str010 ?: 0 + r3g5str020 ?: 0 + r3g5str030 ?: 0 + r3g5str040 ?: 0) {
         logger.warn("КС 1.11. Возможно нарушение ст. 171, п. 8, НК РФ ст. 172, п. 6, либо НК РФ ст. 146, п. 1 налоговые " +
                 "вычеты не обоснованы, либо налоговая база занижена, так как суммы отработанных авансов не включены в реализацию.")
     }

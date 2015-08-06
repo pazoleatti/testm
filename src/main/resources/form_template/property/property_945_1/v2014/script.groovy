@@ -847,7 +847,7 @@ void importTransportData() {
     showMessages(newRows, logger)
 
     // сравнение итогов
-    if (totalTF) {
+    if (!logger.containsLevel(LogLevel.ERROR) && totalTF) {
         // мапа с алиасами граф и номерами колонокв в xml (алиас -> номер колонки в xml)
         def totalColumnsIndexMap = [ 'taxBase1' : 2, 'taxBase2' : 3, 'taxBase3' : 4, 'taxBase4' : 5, 'taxBase5' : 6, 'taxBaseSum' : 7]
 

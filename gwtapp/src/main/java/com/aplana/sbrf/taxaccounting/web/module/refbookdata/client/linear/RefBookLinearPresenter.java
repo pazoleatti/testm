@@ -86,7 +86,7 @@ public class RefBookLinearPresenter extends PresenterWidget<RefBookLinearPresent
                                 }
                                 LogAddEvent.fire(RefBookLinearPresenter.this, result.getUuid());
                                 if (result.isException()) {
-                                    Dialog.errorMessage("Удаление всех версий элемента справочника", "Обнаружены фатальные ошибки!");
+                                    Dialog.errorMessage("Удаление записи справочника", "Обнаружены фатальные ошибки!");
                                 }
                                 /*editPresenter.setMode(mode);*/
                                 ShowItemEvent.fire(RefBookLinearPresenter.this, null, null);

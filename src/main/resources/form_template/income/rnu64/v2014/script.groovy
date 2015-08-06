@@ -357,7 +357,7 @@ void importTransportData() {
     newRows.add(totalRow)
 
     // сравнение итогов
-    if (total) {
+    if (!logger.containsLevel(LogLevel.ERROR) && total) {
         // мапа с алиасами граф и номерами колонокв в xml (алиас -> номер колонки)
         def totalColumnsIndexMap = ['costs': 5]
 
@@ -493,6 +493,8 @@ void importData() {
     def rowIndex = 0
     def rows = []
     def allValuesCount = allValues.size()
+    def totalQuarterRowFromFile = null
+    def totalRowFromFile = null
 
     // формирвание строк нф
     for (def i = 0; i < allValuesCount; i++) {
@@ -505,8 +507,15 @@ void importData() {
             break
         }
         // Пропуск итоговых строк
-        if (rowValues[INDEX_FOR_SKIP] &&
-                (rowValues[INDEX_FOR_SKIP] == "Итого за текущий отчетный (налоговый) период" || rowValues[INDEX_FOR_SKIP].contains("Итого за текущий квартал"))) {
+        if (rowValues[INDEX_FOR_SKIP]) {
+            if (rowValues[INDEX_FOR_SKIP].contains("Итого за текущий квартал")) {
+                rowIndex++
+                totalQuarterRowFromFile = getNewRowFromXls(rowValues, colOffset, fileRowIndex, rowIndex)
+            } else if (rowValues[INDEX_FOR_SKIP] == "Итого за текущий отчетный (налоговый) период") {
+                rowIndex++
+                totalRowFromFile = getNewRowFromXls(rowValues, colOffset, fileRowIndex, rowIndex)
+            }
+
             allValues.remove(rowValues)
             rowValues.clear()
             continue
@@ -520,11 +529,26 @@ void importData() {
         rowValues.clear()
     }
 
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.allSaved
-    // итоговые строки
-    rows.add(getDataRow(dataRows, 'totalQuarter'))
-    rows.add(getDataRow(dataRows, 'total'))
+    // получить строки из шаблона
+    def formTemplate = formDataService.getFormTemplate(formData.formType.id, formData.reportPeriodId)
+    def templateRows = formTemplate.rows
+
+    def totalQuarterRow = getDataRow(templateRows, 'totalQuarter')
+    def totalRow = getDataRow(templateRows, 'total')
+    rows.add(totalQuarterRow)
+    rows.add(totalRow)
+    updateIndexes(rows)
+
+    // сравнение итогов
+    if (totalQuarterRowFromFile) {
+        compareSimpleTotalValues(totalQuarterRow, totalQuarterRowFromFile, rows, totalColumns, formData, logger, false)
+    }
+    if (totalRowFromFile && formData.kind == FormDataKind.PRIMARY) {
+        // строка Итого за текущий отчетный (налоговый) период
+        def dataRowsPrev = getDataRowsPrev()
+        totalRow.costs = getTotalValue(rows, dataRowsPrev)
+        compareSimpleTotalValues(totalRow, totalRowFromFile, rows, totalColumns, formData, logger, false)
+    }
 
     showMessages(rows, logger)
     if (!logger.containsLevel(LogLevel.ERROR)) {

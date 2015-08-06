@@ -21,6 +21,8 @@ public class Department implements Serializable {
     @Deprecated
 	public static final int ROOT_BANK_ID = 1;
 
+    public static final Long REF_BOOK_ID = 30L;
+
 	private int id;
 	private String name;
 	private String shortName;

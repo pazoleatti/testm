@@ -105,7 +105,7 @@ public class RefBookPickerWidget extends DoubleStateComposite implements RefBook
 
         initWidget(binder.createAndBindUi(this));
         WidgetUtils.setMouseBehavior(clearIconButton, textBox, pickImageButton);
-        refBookView = isHierarchical ? new RefBookTreePickerView(multiSelect != null && multiSelect) : new RefBookMultiPickerView(multiSelect != null && multiSelect);
+        refBookView = isHierarchical ? new RefBookTreePickerView(multiSelect != null && multiSelect, this) : new RefBookMultiPickerView(multiSelect != null && multiSelect, this);
 
         widgetWrapper.add(refBookView);
 
@@ -505,6 +505,11 @@ public class RefBookPickerWidget extends DoubleStateComposite implements RefBook
     @Override
     public void setSingleColumn(String columnAlias) {
         refBookView.setSingleColumn(columnAlias);
+    }
+
+    @Override
+    public void showVersionDate(boolean versioned) {
+        versionPanel.setVisible(versioned);
     }
 
     @Override

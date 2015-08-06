@@ -53,6 +53,7 @@ public class RefBookTreePickerView extends ViewWithUiHandlers<RefBookTreePickerU
 
     private Boolean isEnabledFireChangeEvent = true;
     private Boolean multiSelect = false;
+    private RefBookPicker mainWidget;
 
     /* флаг что идет операция последовательного открывания веток */
     private boolean isOpeningOperation = false;
@@ -60,11 +61,12 @@ public class RefBookTreePickerView extends ViewWithUiHandlers<RefBookTreePickerU
     private Iterator<Long> iterator;
 
     public RefBookTreePickerView() {
-        this(null);
+        this(null, null);
     }
 
-    public RefBookTreePickerView(final Boolean multiSelect) {
+    public RefBookTreePickerView(final Boolean multiSelect, RefBookPicker refBookPicker) {
         this.multiSelect = multiSelect;
+        this.mainWidget = refBookPicker;
 
         tree = new LazyTree<RefBookUiTreeItem>(multiSelect, RefBookPickerUtils.TREE_KEY_PROVIDER);
 

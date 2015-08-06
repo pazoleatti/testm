@@ -87,7 +87,7 @@
                                       title="Посмотреть все версии"/>
                 </g:cell>
                 <g:cell>
-                    <g:Label addStyleNames="{style.horSep}"/>
+                    <g:Label ui:field="separator" addStyleNames="{style.horSep}"/>
                 </g:cell>
                 <g:cell height="100%">
                     <g:VerticalPanel spacing="10" ui:field="editPanel" width="100%" styleName="formPanel"/>

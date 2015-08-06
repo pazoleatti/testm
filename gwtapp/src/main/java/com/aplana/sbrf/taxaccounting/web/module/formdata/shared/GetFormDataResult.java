@@ -23,7 +23,8 @@ public class GetFormDataResult implements Result {
 		EDIT // Открыта для редактирования
 	}
 
-    DepartmentReportPeriod departmentReportPeriod;
+    private DepartmentReportPeriod departmentReportPeriod;
+    private DepartmentReportPeriod comparativPeriod;
 	
 	private FormData formData;
 	
@@ -189,5 +190,13 @@ public class GetFormDataResult implements Result {
 
     public void setReadOnly(boolean readOnly) {
         this.readOnly = readOnly;
+    }
+
+    public DepartmentReportPeriod getComparativPeriod() {
+        return comparativPeriod;
+    }
+
+    public void setComparativPeriod(DepartmentReportPeriod comparativPeriod) {
+        this.comparativPeriod = comparativPeriod;
     }
 }

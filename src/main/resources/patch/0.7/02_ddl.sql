@@ -25,6 +25,18 @@ COMMIT;
 -- http://jira.aplana.com/browse/SBRFACCTAX-12103: Ограничения на form_data_ref_book
 alter table form_data_ref_book add constraint form_data_ref_book_fk_refbook foreign key (ref_book_id) references ref_book(id) on delete cascade;
 
+-- http://jira.aplana.com/browse/SBRFACCTAX-12214
+alter table form_template add comparative number(1);
+comment on column form_template.comparative is '"Признак использования периода сравнения (0 - не используется, 1 - используется)';
+alter table form_template add constraint form_template_chk_comparative check (comparative in (0, 1));
+
+-- http://jira.aplana.com/browse/SBRFACCTAX-12216
+alter table form_data add (comparative_dep_rep_per_id number(18), accruing number(1));
+comment on column form_data.comparative_dep_rep_per_id is 'Период сравнения';
+comment on column form_data.accruing is 'Признак расчета значений нарастающим итогом (0 - не нарастающим итогом, 1 - нарастающим итогом, пустое - форма без периода сравнения)';
+alter table form_data add constraint form_data_fk_co_dep_rep_per_id foreign key (comparative_dep_rep_per_id) references department_report_period (id);
+alter table form_data add constraint form_data_chk_accruing check (accruing in (0, 1));
+
 COMMIT;
 EXIT;
 

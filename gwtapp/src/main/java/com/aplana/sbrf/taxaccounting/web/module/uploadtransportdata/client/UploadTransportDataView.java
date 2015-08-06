@@ -92,6 +92,6 @@ public class UploadTransportDataView extends ViewWithUiHandlers<UploadTransportD
 
     @UiHandler("loadButton")
     void onLoadClick(ClickEvent event) {
-        getUiHandlers().onLoadAll();
+        getUiHandlers().onLoadAll(false);
     }
 }

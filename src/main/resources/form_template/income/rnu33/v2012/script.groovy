@@ -605,7 +605,7 @@ void addTransportData(def xml) {
     def totalRow = getTotalMonthRow(rows)
     rows.add(totalRow)
 
-    if (xml.rowTotal.size() == 1) {
+    if (!logger.containsLevel(LogLevel.ERROR) && xml.rowTotal.size() == 1) {
         rnuIndexRow += 2
 
         def row = xml.rowTotal[0]

@@ -131,6 +131,10 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 	Label departmentIdLabel;
 	@UiField
 	Label reportPeriodLabel;
+    @UiField
+    Label comparativPeriodTitle;
+    @UiField
+    Label comparativPeriodLabel;
 	@UiField
 	Label stateLabel;
 	@UiField
@@ -583,7 +587,7 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 
 	@Override
 	public void setAdditionalFormInfo(
-			String formType, TaxType taxType, String formKind, String departmentId, String reportPeriod, String state,
+			String formType, TaxType taxType, String formKind, String departmentId, String reportPeriod, String comparativPeriod, String state,
             Date startDate, Date endDate, Long formDataId, boolean correctionPeriod, boolean correctionDiff, boolean readOnly) {
         returnAnchor.setText(taxType.getName());
         title.setText(formType);
@@ -599,6 +603,14 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
             formKindTitle.setText(FORM_DATA_KIND_TITLE);
         } else {
             formKindTitle.setText(FORM_DATA_KIND_TITLE_D);
+        }
+        if (comparativPeriod != null && !comparativPeriod.isEmpty()) {
+            comparativPeriodLabel.setVisible(true);
+            comparativPeriodTitle.setVisible(true);
+            comparativPeriodLabel.setText(comparativPeriod);
+        } else {
+            comparativPeriodLabel.setVisible(false);
+            comparativPeriodTitle.setVisible(false);
         }
         factory.setFormDataId(formDataId);
         // Признак корректирующего периода

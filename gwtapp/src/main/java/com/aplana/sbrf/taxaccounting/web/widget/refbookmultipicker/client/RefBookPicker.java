@@ -110,4 +110,10 @@ public interface RefBookPicker extends HasValue<List<Long>>, LeafValueEditor<Lis
      * @param columnAlias алиас колонки
      */
     void setSingleColumn(String columnAlias);
+
+    /**
+     * Скрыть/показать поле для выбора даты (версии)
+     * @param versioned справочник версионируемый?
+     */
+    void showVersionDate(boolean versioned);
 }

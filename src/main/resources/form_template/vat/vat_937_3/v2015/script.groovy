@@ -704,7 +704,7 @@ void importTransportData() {
 
     int rowCount = 0
     // сравнение итогов
-    if (total) {
+    if (!logger.containsLevel(LogLevel.ERROR) && total) {
         // мапа с алиасами граф и номерами колонокв в xml (алиас -> номер колонки)
         def totalColumnsIndexMap = ['cost' : 14, 'vatSum' : 15, 'diffDec' : 16, 'diffInc' : 17, 'diffVatDec' : 18, 'diffVatInc' : 19]
         // итоговая строка для сверки сумм

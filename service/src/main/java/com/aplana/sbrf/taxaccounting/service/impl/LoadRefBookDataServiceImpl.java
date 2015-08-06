@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
+import com.aplana.sbrf.taxaccounting.dao.AsyncTaskTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.api.ConfigurationDao;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
 import com.aplana.sbrf.taxaccounting.model.*;
@@ -28,6 +29,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.io.BufferedInputStream;
 import java.io.InputStream;
 import java.util.*;
+import java.util.concurrent.ExecutionException;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -49,6 +51,8 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
     private LockDataService lockService;
     @Autowired
     private RefBookDao refBookDao;
+    @Autowired
+    private AsyncTaskTypeDao asyncTaskTypeDao;
 
     // ЦАС НСИ
     private static final long REF_BOOK_OKATO = 3L; // Коды ОКАТО
@@ -126,7 +130,7 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
     @Transactional(propagation = Propagation.SUPPORTS)
     private ImportCounter importRefBook(TAUserInfo userInfo, Logger logger, ConfigurationParam refBookDirectoryParam,
                                         Map<String, List<Pair<Boolean, Long>>> mappingMap, String refBookName, boolean move,
-                                        List<String> loadedFileNameList, String lockId) {
+                                        List<String> loadedFileNameList, String lockId, boolean isAsync) {
         // Получение пути к каталогу загрузки ТФ
         ConfigurationParamModel model = configurationDao.getByDepartment(0);
         List<String> refBookDirectoryList = model.get(refBookDirectoryParam, 0);
@@ -138,6 +142,11 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
         // Счетчики
         int success = 0;
         int fail = 0;
+
+        long maxFileSize = 0;
+        if (isAsync) {
+            maxFileSize = asyncTaskTypeDao.get(ReportType.LOAD_ALL_TF.getAsyncTaskTypeId(true)).getTaskLimit();
+        }
 
         ImportCounter wrongImportCounter = new ImportCounter();
         // Каталогов может быть несколько, хоть сейчас в ConfigurationParam и ограничено одним значением для всех справочников
@@ -175,6 +184,14 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
                 ignoreFileSet.add(fileName);
                 FileWrapper currentFile = ResourceUtils.getSharedResource(path + "/" + fileName);
 
+                if (maxFileSize != 0 && currentFile.length() / 1024 > maxFileSize) {
+                    log(userInfo, LogData.L47, logger, lockId, fileName, currentFile.length() / 1024, path, maxFileSize);
+                    if (move) {
+                        moveToErrorDirectory(userInfo, getRefBookErrorPath(userInfo, logger, lockId), currentFile, null, logger, lockId);
+                    }
+                    fail++;
+                    continue;
+                }
                 // Блокировка файла
                 LockData fileLock = lockService.lock(LockData.LockObjects.FILE.name() + "_" + fileName,
                         userInfo.getUser().getId(),
@@ -351,6 +368,47 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
     }
 
     /**
+     * Импорт справочников из каталога
+     *
+     * @param userInfo              Пользователь
+     * @param logger                Логгер
+     * @param refBookDirectoryParam Путь к директории
+     * @param mappingMap            Маппинг имен: Регулярка → Пара(Признак архива, Id справочника)
+     * @param loadedFileNameList    Список файлов, если необходимо загружать определенные файлы
+     */
+    @Transactional(propagation = Propagation.SUPPORTS)
+    private void getRefBookFiles(List<TransportFileInfo> fileList, TAUserInfo userInfo, Logger logger, ConfigurationParam refBookDirectoryParam,
+                                        Map<String, List<Pair<Boolean, Long>>> mappingMap,
+                                        List<String> loadedFileNameList, String lockId) {
+        // Получение пути к каталогу загрузки ТФ
+        ConfigurationParamModel model = configurationDao.getByDepartment(0);
+        List<String> refBookDirectoryList = model.get(refBookDirectoryParam, 0);
+        if (refBookDirectoryList == null || refBookDirectoryList.isEmpty()) {
+            return;
+        }
+
+        // Каталогов может быть несколько, хоть сейчас в ConfigurationParam и ограничено одним значением для всех справочников
+        for (String path : refBookDirectoryList) {
+            if (!checkPath(path)) {
+                continue;
+            }
+            // Если изначально нет подходящих файлов то выдаем отдельную ошибку
+            List<String> workFilesList = getWorkTransportFiles(userInfo, path, new HashSet<String>(), mappingMap.keySet(),
+                    loadedFileNameList, new ArrayList<String>(), logger, new ImportCounter(), lockId);
+
+            if (workFilesList.isEmpty()) {
+                return;
+            }
+            // Обработка всех подходящих файлов, с получением списка на каждой итерации
+            for (String fileName : workFilesList) {
+                FileWrapper currentFile = ResourceUtils.getSharedResource(path + "/" + fileName);
+                fileList.add(new TransportFileInfo(currentFile.getName(), path, currentFile.length() / 1024));
+            }
+        }
+        return;
+    }
+
+    /**
      * Список сущностей из объединенных логов
      */
     private List<LogEntry> getEntries(List<Logger> loggerList) {
@@ -362,8 +420,8 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
     }
 
     @Override
-    public ImportCounter importRefBookNsi(TAUserInfo userInfo, Logger logger, String lock) {
-        return importRefBookNsi(userInfo, null, logger, lock);
+    public ImportCounter importRefBookNsi(TAUserInfo userInfo, Logger logger, String lock, boolean isAsync) {
+        return importRefBookNsi(userInfo, null, logger, lock, isAsync);
     }
 
     @Override
@@ -408,18 +466,18 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
     }
 
     @Override
-    public ImportCounter importRefBookNsi(TAUserInfo userInfo, List<String> loadedFileNameList, Logger logger, String lockId) {
+    public ImportCounter importRefBookNsi(TAUserInfo userInfo, List<String> loadedFileNameList, Logger logger, String lockId, boolean isAsync) {
         ImportCounter importCounter = new ImportCounter();
         try {
             // ОКАТО
             importCounter.add(importRefBook(userInfo, logger, ConfigurationParam.OKATO_UPLOAD_DIRECTORY,
-                    nsiOkatoMappingMap, OKATO_NAME, false, loadedFileNameList, lockId));
+                    nsiOkatoMappingMap, OKATO_NAME, false, loadedFileNameList, lockId, isAsync));
             // Субъекты РФ
             importCounter.add(importRefBook(userInfo, logger, ConfigurationParam.REGION_UPLOAD_DIRECTORY,
-                    nsiRegionMappingMap, REGION_NAME, false, loadedFileNameList, lockId));
+                    nsiRegionMappingMap, REGION_NAME, false, loadedFileNameList, lockId, isAsync));
             // План счетов
             importCounter.add(importRefBook(userInfo, logger, ConfigurationParam.ACCOUNT_PLAN_UPLOAD_DIRECTORY,
-                    nsiAccountPlanMappingMap, ACCOUNT_PLAN_NAME, false, loadedFileNameList, lockId));
+                    nsiAccountPlanMappingMap, ACCOUNT_PLAN_NAME, false, loadedFileNameList, lockId, isAsync));
         } catch (Exception e) {
             // Сюда должны попадать только при общих ошибках при импорте справочников, ошибки конкретного справочника перехватываются в сервисе
             logger.error(IMPORT_REF_BOOK_ERROR, NSI_NAME, e.getMessage());
@@ -430,16 +488,16 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
     }
 
     @Override
-    public ImportCounter importRefBookDiasoft(TAUserInfo userInfo, Logger logger, String lock) {
-        return importRefBookDiasoft(userInfo, null, logger, lock);
+    public ImportCounter importRefBookDiasoft(TAUserInfo userInfo, Logger logger, String lock, boolean isAsync) {
+        return importRefBookDiasoft(userInfo, null, logger, lock, isAsync);
     }
 
     @Override
-    public ImportCounter importRefBookDiasoft(TAUserInfo userInfo, List<String> loadedFileNameList, Logger logger, String lockId) {
+    public ImportCounter importRefBookDiasoft(TAUserInfo userInfo, List<String> loadedFileNameList, Logger logger, String lockId, boolean isAsync) {
         ImportCounter importCounter = new ImportCounter();
         try {
             importCounter = importRefBook(userInfo, logger, ConfigurationParam.DIASOFT_UPLOAD_DIRECTORY,
-                    diasoftMappingMap, DIASOFT_NAME, true, loadedFileNameList, lockId);
+                    diasoftMappingMap, DIASOFT_NAME, true, loadedFileNameList, lockId, isAsync);
         } catch (Exception e) {
             // Сюда должны попадать только при общих ошибках при импорте справочников, ошибки конкретного справочника перехватываются в сервисе
             logger.error(IMPORT_REF_BOOK_ERROR, DIASOFT_NAME, e.getMessage());
@@ -449,17 +507,34 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
         return importCounter;
     }
 
-    @Override
-    public ImportCounter importRefBookAvgCost(TAUserInfo userInfo, Logger logger, String lock) {
-        return importRefBookAvgCost(userInfo, null, logger, lock);
+
+    public void getRefBookDiasoftFiles(List<TransportFileInfo> files, TAUserInfo userInfo, Logger logger, String lock) {
+        try {
+            getRefBookFiles(files, userInfo, logger, ConfigurationParam.DIASOFT_UPLOAD_DIRECTORY,
+                    diasoftMappingMap, null, lock);
+        } catch (Exception e) {
+        }
+    }
+
+    public void getRefBookAvgCostFiles(List<TransportFileInfo> files, TAUserInfo userInfo, Logger logger, String lock) {
+        try {
+            getRefBookFiles(files, userInfo, logger, ConfigurationParam.AVG_COST_UPLOAD_DIRECTORY,
+                    avgCostMappingMap, null, lock);
+        } catch (Exception e) {
+        }
     }
 
     @Override
-    public ImportCounter importRefBookAvgCost(TAUserInfo userInfo, List<String> loadedFileNameList, Logger logger, String lockId) {
+    public ImportCounter importRefBookAvgCost(TAUserInfo userInfo, Logger logger, String lock, boolean isAsync) {
+        return importRefBookAvgCost(userInfo, null, logger, lock, isAsync);
+    }
+
+    @Override
+    public ImportCounter importRefBookAvgCost(TAUserInfo userInfo, List<String> loadedFileNameList, Logger logger, String lockId, boolean isAsync) {
         ImportCounter importCounter = new ImportCounter();
         try {
             importCounter = importRefBook(userInfo, logger, ConfigurationParam.AVG_COST_UPLOAD_DIRECTORY,
-                    avgCostMappingMap, AVG_COST_NAME, true, loadedFileNameList, lockId);
+                    avgCostMappingMap, AVG_COST_NAME, true, loadedFileNameList, lockId, isAsync);
         } catch (Exception e) {
             // Сюда должны попадать только при общих ошибках при импорте справочников, ошибки конкретного справочника перехватываются в сервисе
             logger.error(IMPORT_REF_BOOK_ERROR, AVG_COST_NAME, e.getMessage());
@@ -482,28 +557,40 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
     }
 
     @Override
-    public void checkImportRefBookTransportData(TAUserInfo userInfo, Logger logger, String lockId, Date lockDate) {
+    public void checkImportRefBookTransportData(TAUserInfo userInfo, Logger logger, String lockId, Date lockDate, boolean isAsync) {
         log(userInfo, LogData.L23, logger, lockId);
         if (checkPathArchiveError(userInfo, logger, lockId)){
             // Diasoft
             lockService.updateState(lockId, lockDate, "Импорт справочников \"Diasoft\"");
-            importRefBookDiasoft(userInfo, logger, lockId);
+            importRefBookDiasoft(userInfo, logger, lockId, isAsync);
             // Средняя стоимость транспортных средств
             lockService.updateState(lockId, lockDate, "Импорт справочника \"Средняя стоимость транспортных средств\"");
-            importRefBookAvgCost(userInfo, logger, lockId);
+            importRefBookAvgCost(userInfo, logger, lockId, isAsync);
         }
     }
 
     @Override
-    public void checkImportRefBooks(TAUserInfo userInfo, Logger logger, String uuid) {
+    public List<TransportFileInfo> getRefBookTransportDataFiles(TAUserInfo userInfo, Logger logger) {
+        List<TransportFileInfo> files = new ArrayList<TransportFileInfo>();
+        if (checkPathArchiveError(userInfo, logger, "")){
+            // Diasoft
+            getRefBookDiasoftFiles(files, userInfo, logger, "");
+            // Средняя стоимость транспортных средств
+            getRefBookAvgCostFiles(files, userInfo, logger, "");
+        }
+        return files;
+    }
+
+    @Override
+    public void checkImportRefBooks(TAUserInfo userInfo, Logger logger, String uuid, boolean isAsync) {
         log(userInfo, LogData.L23, logger, uuid);
         if (checkPathArchiveError(userInfo, logger, uuid)){
             // Импорт справочников из ЦАС НСИ
-            importRefBookNsi(userInfo, logger, uuid);
+            importRefBookNsi(userInfo, logger, uuid, isAsync);
             // Импорт справочников из Diasoft Custody
-            importRefBookDiasoft(userInfo, logger, uuid);
+            importRefBookDiasoft(userInfo, logger, uuid, isAsync);
             // Импорт справочников в справочник "Средняя стоимость транспортных средств"
-            importRefBookAvgCost(userInfo, logger, uuid);
+            importRefBookAvgCost(userInfo, logger, uuid, isAsync);
         }
     }
 

@@ -24,6 +24,7 @@ alter table form_template add constraint form_template_fk_type_id foreign key (t
 alter table form_template add constraint form_template_chk_fixed_rows check(fixed_rows in (0, 1));
 alter table form_template add constraint form_template_check_status check (status in (-1, 0, 1, 2));
 alter table form_template add constraint form_template_chk_monthly check (monthly in (0, 1));
+alter table form_template add constraint form_template_chk_comparative check (comparative in (0, 1));
 
 alter table form_style add constraint form_style_pk primary key (id);
 alter table form_style add constraint form_style_fk_form_template_id foreign key (form_template_id) references form_template(id) on delete cascade;
@@ -139,12 +140,14 @@ alter table declaration_data add constraint declaration_data_uniq_template uniqu
 alter table form_data add constraint form_data_pk primary key (id);
 alter table form_data add constraint form_data_fk_form_templ_id foreign key (form_template_id) references form_template(id);
 alter table form_data add constraint form_data_fk_dep_rep_per_id foreign key (department_report_period_id) references department_report_period (id);
+alter table form_data add constraint form_data_fk_co_dep_rep_per_id foreign key (comparative_dep_rep_per_id) references department_report_period (id);
 alter table form_data add constraint form_data_fk_kind foreign key (kind) references form_kind(id);
 alter table form_data add constraint form_data_chk_state check(state in (1,2,3,4));
 alter table form_data add constraint form_data_chk_return_sign check(return_sign in (0,1));
 alter table form_data add constraint form_data_chk_period_order check(period_order in (1,2,3,4,5,6,7,8,9,10,11,12));
 alter table form_data add constraint form_data_chk_manual check (manual in (0, 1));
 alter table form_data add constraint form_data_chk_sorted check (sorted in (0, 1));
+alter table form_data add constraint form_data_chk_accruing check (accruing in (0, 1));
 
 alter table form_data_ref_book add constraint form_data_ref_book_fk_formdata foreign key (form_data_id) references form_data(id) on delete cascade;
 alter table form_data_ref_book add constraint form_data_ref_book_fk_refbook foreign key (ref_book_id) references ref_book(id) on delete cascade;
