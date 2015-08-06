@@ -16,11 +16,11 @@ package com.aplana.taxaccounting
 class Main {
     // Параметры подключения к БД
     def static DB_URL = 'jdbc:oracle:thin:@//172.16.127.16:1521/ORCL.APLANA.LOCAL'
-    def static DB_USER = 'TAX_0_6'
+    def static DB_USER = 'TAX_0_7'
     def static DB_PASSWORD = 'TAX'
 
     // Схема для сравнения макетов, null если сравнение не требуется
-    def static DB_USER_COMPARE = 'TAX_0_7'
+    def static DB_USER_COMPARE = null
 
     // Путь к папке с шаблонами
     def static SRC_FOLDER_PATH = '../src/main/resources/form_template'
@@ -29,7 +29,8 @@ class Main {
                               'income'   : 'Налог на прибыль',
                               'vat'      : 'НДС',
                               'transport': 'Транспортный налог',
-                              'property' : 'Налог на имущество']
+                              'property' : 'Налог на имущество',
+                              'etr' : 'Эффективная налоговая ставка']
 
     // Названия файлов отчетов
     def static REPORT_GIT_NAME = 'report_git_db_compare.html'
@@ -255,6 +256,9 @@ class Main {
                     'property_945_3': 613, // Расчет налога на имущество по средней/среднегодовой стоимости
                     'property_945_4': 612, // Расчет налога на имущество по кадастровой стоимости
                     'property_945_5': 615  // Сводная форма данных бухгалтерского учета для расчета налога на имущество
+            ],
+            'etr' : [
+                    'etr_4_1' : 700 // Приложение 4-1. Абсолютная величина налоговых платежей
             ]
     ]
 

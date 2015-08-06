@@ -5,6 +5,7 @@ import org.custommonkey.xmlunit.Diff
 import org.custommonkey.xmlunit.XMLUnit
 import org.apache.commons.io.IOUtils
 import org.xml.sax.SAXException;
+import com.aplana.sbrf.taxaccounting.model.Color
 
 /**
  * Отчет сравнения Git и БД
@@ -512,8 +513,8 @@ class DBReport {
             }
             def style = new Expando()
             style.alias = it.alias
-            style.font_color = StyleColor.getById(it.font_color as Integer)
-            style.back_color = StyleColor.getById(it.back_color as Integer)
+            style.font_color = Color.getById(it.font_color as Integer)
+            style.back_color = Color.getById(it.back_color as Integer)
             style.italic = it.italic == 1
             style.bold = it.bold == 1
             stylesMap[form_template_id].add(style)

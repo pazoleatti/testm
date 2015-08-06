@@ -5,7 +5,7 @@ import org.apache.commons.io.IOUtils
 import org.custommonkey.xmlunit.Diff
 import org.custommonkey.xmlunit.XMLUnit
 import org.xml.sax.SAXException
-
+import com.aplana.sbrf.taxaccounting.model.Color
 /**
  * Отчет сравнения Git и БД
  */
@@ -269,8 +269,8 @@ class GitReport {
                                     for (def styleXml : xml.styles) {
                                         def style = new Expando()
                                         style.alias = styleXml.alias.text()
-                                        style.back_color = StyleColor[styleXml.backColor.text()]
-                                        style.font_color = StyleColor[styleXml.fontColor.text()]
+                                        style.back_color = Color[styleXml.backColor.text()]
+                                        style.font_color = Color[styleXml.fontColor.text()]
                                         style.bold = Boolean.parseBoolean(styleXml.bold.text())
                                         style.italic = Boolean.parseBoolean(styleXml.italic.text())
                                         mapStylesXml.put(styleXml.alias.text(), style)
@@ -617,8 +617,8 @@ class GitReport {
             // Стиль версии макета
             def style = new Expando()
             style.alias = it.alias
-            style.font_color = StyleColor.getById(it.font_color as Integer)
-            style.back_color = StyleColor.getById(it.back_color as Integer)
+            style.font_color = Color.getById(it.font_color as Integer)
+            style.back_color = Color.getById(it.back_color as Integer)
             style.italic = it.italic == 1
             style.bold = it.bold == 1
             map[type_id][version].styles.put(it.alias, style)
