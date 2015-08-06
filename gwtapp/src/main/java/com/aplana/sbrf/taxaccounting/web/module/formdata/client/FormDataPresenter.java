@@ -873,12 +873,15 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                                 manageDeleteRowButtonEnabled();
 
                                 absoluteView = !result.isCorrectionDiff();
+                                DepartmentReportPeriod drp = result.getDepartmentReportPeriod();
+                                DepartmentReportPeriod cdrp = result.getComparativPeriod();
                                 getView().setAdditionalFormInfo(
                                         result.getTemplateFormName(),
                                         result.getFormData().getFormType().getTaxType(),
                                         result.getFormData().getKind().getName(),
                                         result.getDepartmentFullName(),
-                                        buildPeriodName(result),
+                                        buildPeriodName(drp.getReportPeriod().getName(), drp.getReportPeriod().getTaxPeriod().getYear(), formData.getPeriodOrder(), drp.getCorrectionDate()),
+                                        cdrp != null ? buildPeriodName(cdrp.getReportPeriod().getName(), cdrp.getReportPeriod().getTaxPeriod().getYear(), formData.getPeriodOrder(), cdrp.getCorrectionDate()) : null,
                                         result.getFormData().getState().getName(),
 		                                result.getDepartmentReportPeriod().getReportPeriod().getCalendarStartDate(),
                                         result.getDepartmentReportPeriod().getReportPeriod().getEndDate(),
@@ -920,16 +923,15 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                         TaManualRevealCallback.create(this, placeManager)));
     }
 
-    private String buildPeriodName(GetFormDataResult retFormDataResult) {
+    private String buildPeriodName(String reportPeriodName, int year, Integer periodOrder, Date correctionDate) {
         StringBuilder builder = new StringBuilder();
-        builder.append(retFormDataResult.getDepartmentReportPeriod().getReportPeriod().getTaxPeriod().getYear()).append(", ");
-        builder.append(retFormDataResult.getDepartmentReportPeriod().getReportPeriod().getName());
-        Integer periodOrder = retFormDataResult.getFormData().getPeriodOrder();
+        builder.append(year).append(", ");
+        builder.append(reportPeriodName);
         if (periodOrder != null) {
-            builder.append(", ").append(Formats.getRussianMonthNameWithTier(retFormDataResult.getFormData().getPeriodOrder()));
+            builder.append(", ").append(Formats.getRussianMonthNameWithTier(periodOrder));
         }
-        if (retFormDataResult.getDepartmentReportPeriod().getCorrectionDate() != null) {
-            builder.append(", корр. (").append(DATE_TIME_FORMAT.format(retFormDataResult.getDepartmentReportPeriod().getCorrectionDate())).append(")");
+        if (correctionDate != null) {
+            builder.append(", корр. (").append(DATE_TIME_FORMAT.format(correctionDate)).append(")");
         }
         return builder.toString();
     }

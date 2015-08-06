@@ -238,6 +238,8 @@ public class GetFormDataHandler extends AbstractActionHandler<GetFormDataAction,
             departmentReportPeriod.getReportPeriod().setName(ReportPeriodSpecificName.fromId(code).getName());
         }
         result.setDepartmentReportPeriod(departmentReportPeriod);
+        result.setComparativPeriod(formData.getComparativPeriodId() != null ? departmentReportPeriodService.get(
+                formData.getComparativPeriodId()) : null);
 		result.setDepartmentName(departmentService.getDepartment(formData.getDepartmentId()).getName());
         result.setDepartmentFullName(departmentService.getParentsHierarchy(formData.getDepartmentId()));
 		result.setAllStyles(formTemplate.getStyles());

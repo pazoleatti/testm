@@ -54,7 +54,7 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 		void addCustomTableStyles(List<FormStyle> allStyles);
 
 		void setAdditionalFormInfo(String formType, TaxType taxType, String formKind, String departmentId,
-                                   String reportPeriod, String state, Date startDate, Date endDate, Long formDataId,
+                                   String comparativPeriod, String reportPeriod, String state, Date startDate, Date endDate, Long formDataId,
                                    boolean correctionPeriod, boolean correctionDiff, boolean readOnly);
 
 		void setWorkflowButtons(List<WorkflowMove> moves);
