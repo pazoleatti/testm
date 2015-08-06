@@ -6,8 +6,8 @@ import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
-import com.aplana.sbrf.taxaccounting.service.BlobDataService;
-import com.aplana.sbrf.taxaccounting.service.DeclarationTemplateService;
+import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.util.TransactionHelper;
 import com.aplana.sbrf.taxaccounting.util.TransactionLogic;
 import net.sf.jasperreports.engine.JRException;
@@ -42,6 +42,8 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
     private final static String ENCODING = "UTF-8";
     private static final String JRXML_NOT_FOUND = "Не удалось получить jrxml-шаблон декларации!";
     private static final SimpleDateFormat SDF_DD_MM_YYYY = new SimpleDateFormat("dd.MM.yyyy");
+    private static final String DEC_DATA_EXIST_IN_TASK =
+            "%s в подразделении \"%s\" в периоде \"%s %d%s\", налоговый орган %s, КПП %s";
 
 	@Autowired
 	DeclarationTemplateDao declarationTemplateDao;
@@ -53,6 +55,16 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
     TransactionHelper tx;
     @Autowired
     LockDataService lockDataService;
+    @Autowired
+    DepartmentService departmentService;
+    @Autowired
+    DeclarationDataService declarationDataService;
+    @Autowired
+    PeriodService periodService;
+    @Autowired
+    ReportService reportService;
+    @Autowired
+    DepartmentReportPeriodService departmentReportPeriodService;
 
     @Override
 	public List<DeclarationTemplate> listAll() {
@@ -279,6 +291,96 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
     @Override
     public boolean existDeclarationTemplate(int declarationTypeId, int reportPeriodId) {
         return declarationTemplateDao.existDeclarationTemplate(declarationTypeId, reportPeriodId);
+    }
+
+    @Override
+    public boolean checkExistingDataJrxml(int dtId, Logger logger) {
+        boolean isExist = false;
+        DeclarationTemplate template = declarationTemplateDao.get(dtId);
+        TAUserInfo currUser = logger.getTaUserInfo();
+        ArrayList<String> existDec = new ArrayList<String>();
+        ArrayList<String> existInLockDec = new ArrayList<String>();
+
+        for (Long dataId : declarationDataService.getFormDataListInActualPeriodByTemplate(template.getId(), template.getVersion())){
+            DeclarationData data = declarationDataService.get(dataId, currUser);
+            String decKeyPDF = declarationDataService.generateAsyncTaskKey(dataId, ReportType.PDF_DEC);
+            String decKeyXLSM = declarationDataService.generateAsyncTaskKey(dataId, ReportType.EXCEL_DEC);
+            ReportPeriod rp = periodService.getReportPeriod(data.getReportPeriodId());
+            DepartmentReportPeriod drp = departmentReportPeriodService.get(data.getDepartmentReportPeriodId());
+            if (
+                    reportService.getDec(currUser, dataId, ReportType.PDF_DEC) != null
+                            ||
+                            reportService.getDec(currUser, dataId, ReportType.EXCEL_DEC) != null) {
+                existDec.add(String.format(
+                        DEC_DATA_EXIST_IN_TASK,
+                        template.getName(),
+                        departmentService.getDepartment(data.getDepartmentId()).getName(),
+                        rp.getName(),
+                        rp.getTaxPeriod().getYear(),
+                        drp.getCorrectionDate() != null ? String.format("с датой сдачи корректировки %s",
+                                SDF_DD_MM_YYYY.format(drp.getCorrectionDate())) : "",
+                        data.getTaxOrganCode(),
+                        data.getKpp()));
+
+            }  else if(lockDataService.isLockExists(decKeyPDF, false) || lockDataService.isLockExists(decKeyXLSM, false)){
+                existInLockDec.add(String.format(
+                        DEC_DATA_EXIST_IN_TASK,
+                        template.getName(),
+                        departmentService.getDepartment(data.getDepartmentId()).getName(),
+                        rp.getName(),
+                        rp.getTaxPeriod().getYear(),
+                        drp.getCorrectionDate() != null ? String.format("с датой сдачи корректировки %s",
+                                SDF_DD_MM_YYYY.format(drp.getCorrectionDate())) : "",
+                        data.getTaxOrganCode(),
+                        data.getKpp()));
+            }
+        }
+        if(!existInLockDec.isEmpty()){
+            isExist = true;
+            logger.warn("По следующим экземплярам деклараций запущена операция формирования pdf/xlsx отчета:");
+            for (String s : existInLockDec){
+                logger.warn(s);
+            }
+        }
+        if(!existDec.isEmpty()){
+            isExist = true;
+            logger.warn("По следующим экземплярам деклараций сформирован pdf/xlsx отчет:");
+            for (String s : existDec){
+                logger.warn(s);
+            }
+        }
+
+        return isExist;
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.SUPPORTS)
+    public Collection<Long> getDataIdsThatUseJrxml(int dtId, TAUserInfo userInfo) {
+        HashSet<Long> dataIds = new HashSet<Long>();
+        DeclarationTemplate template = declarationTemplateDao.get(dtId);
+        for (Long dataId : declarationDataService.getFormDataListInActualPeriodByTemplate(template.getId(), template.getVersion())){
+            if(reportService.getDec(userInfo, dataId, ReportType.PDF_DEC) != null
+                    ||
+                    reportService.getDec(userInfo, dataId, ReportType.EXCEL_DEC) != null){
+                dataIds.add(dataId);
+            }
+        }
+        return Collections.unmodifiableCollection(dataIds);
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.SUPPORTS)
+    public Collection<Long> getLockDataIdsThatUseJrxml(int dtId) {
+        HashSet<Long> lockDataIds = new HashSet<Long>();
+        DeclarationTemplate template = declarationTemplateDao.get(dtId);
+        for (Long dataId : declarationDataService.getFormDataListInActualPeriodByTemplate(template.getId(), template.getVersion())){
+            String decKeyPDF = declarationDataService.generateAsyncTaskKey(dataId, ReportType.PDF_DEC);
+            String decKeyXLSM = declarationDataService.generateAsyncTaskKey(dataId, ReportType.EXCEL_DEC);
+            if (lockDataService.isLockExists(decKeyPDF, false) || lockDataService.isLockExists(decKeyXLSM, false)) {
+                lockDataIds.add(dataId);
+            }
+        }
+        return Collections.unmodifiableCollection(lockDataIds);
     }
 
     @Override

@@ -64,19 +64,20 @@ try {
     formStyleDaoImpl.saveFormStyles(formTemplate)
     logger.info("К версии макета добавлены стили")
 
-    String longString
-
-    %15%
+    String longString = ''
+%15%
 
     addLongText(form_template_id, longString, 'DATA_ROWS')
     logger.info("К версии макета добавлены фиксированные строки")
 
-    %16%
+    longString = ''
+%16%
 
     addLongText(form_template_id, longString, 'DATA_HEADERS')
     logger.info("К версии макета добавлен заголовок")
 
-    %17%
+    longString = ''
+%17%
 
     addLongText(form_template_id, longString, 'SCRIPT')
     logger.info("К версии макета добавлен скрипт")
@@ -115,11 +116,11 @@ def void addLongText (def form_template_id, String longString, String alias) {
     final int MAX_LENGTH = 3000
     namedParameterJdbcTemplate.update("UPDATE FORM_TEMPLATE SET $alias = null where id = $form_template_id", [:])
     int start = 0
+    longString = new String(longString.decodeBase64(), "UTF-8")
     while (start < longString.length()) {
         int end = (start + MAX_LENGTH) < longString.length() ? (start + MAX_LENGTH) : longString.length()
         String text = longString.substring(start, end)
-       namedParameterJdbcTemplate.update("UPDATE FORM_TEMPLATE SET $alias = $alias || '" +text + "' where id = $form_template_id", [:])
+       namedParameterJdbcTemplate.update('UPDATE FORM_TEMPLATE SET ' + alias + ' = ' + alias + ' || :text where id = ' +form_template_id, ['text' : text])
         start += MAX_LENGTH
     }
-    namedParameterJdbcTemplate.update("UPDATE FORM_TEMPLATE SET $alias = base64decode($alias) where id = $form_template_id", [:])
 }

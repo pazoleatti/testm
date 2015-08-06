@@ -8,14 +8,6 @@ public class EndLoadFileEvent extends GwtEvent<EndLoadFileEvent.EndLoadFileHandl
 
     private static final Type<EndLoadFileHandler> TYPE = new Type<EndLoadFileHandler>();
 
-    public static void fire(HasHandlers source, String uuid) {
-        source.fireEvent(new EndLoadFileEvent(uuid));
-    }
-
-    public static void fire(HasHandlers source, Boolean isHasError) {
-        source.fireEvent(new EndLoadFileEvent(isHasError));
-    }
-
     public static void fire(HasHandlers source, String uuid, Boolean isHasError) {
         source.fireEvent(new EndLoadFileEvent(uuid, isHasError));
     }
@@ -55,7 +47,6 @@ public class EndLoadFileEvent extends GwtEvent<EndLoadFileEvent.EndLoadFileHandl
         this.uuid = uuid;
         this.isHasError = isHasError;
     }
-
     @Override
     public Type<EndLoadFileHandler> getAssociatedType() {
         return getType();
@@ -76,9 +67,5 @@ public class EndLoadFileEvent extends GwtEvent<EndLoadFileEvent.EndLoadFileHandl
 
     public Boolean isHasError() {
         return isHasError;
-    }
-
-    public void setIsHasError(Boolean isHasError) {
-        this.isHasError = isHasError;
     }
 }

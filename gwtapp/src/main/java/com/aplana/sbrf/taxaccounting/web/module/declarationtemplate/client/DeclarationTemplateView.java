@@ -8,6 +8,7 @@ import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.shared.Decla
 import com.aplana.sbrf.taxaccounting.web.widget.codemirror.client.CodeMirror;
 import com.aplana.sbrf.taxaccounting.web.widget.fileupload.FileUploadWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.fileupload.event.EndLoadFileEvent;
+import com.aplana.sbrf.taxaccounting.web.widget.fileupload.event.JrxmlFileExistEvent;
 import com.aplana.sbrf.taxaccounting.web.widget.style.LinkAnchor;
 import com.aplana.sbrf.taxaccounting.web.widget.style.LinkButton;
 import com.google.gwt.core.client.GWT;
@@ -69,11 +70,7 @@ public class DeclarationTemplateView extends ViewWithUiHandlers<DeclarationTempl
 	
 	@UiField
 	@Editor.Ignore
-	FileUploadWidget uploadJrxmlFile;
-
-    @UiField
-    @Editor.Ignore
-    FileUploadWidget uploadDectFile;
+	FileUploadWidget uploadJrxmlFile, uploadDectFile, uploadXsdFile;
 
 	@UiField
 	@Editor.Ignore
@@ -94,10 +91,6 @@ public class DeclarationTemplateView extends ViewWithUiHandlers<DeclarationTempl
 	@UiField
     @Path("declarationTemplate.createScript")
 	CodeMirror createScript;
-
-    @UiField
-    @Editor.Ignore
-    FileUploadWidget uploadXsdFile;
 
     @UiField
     @Editor.Ignore
@@ -126,9 +119,7 @@ public class DeclarationTemplateView extends ViewWithUiHandlers<DeclarationTempl
     @UiField
     LinkAnchor returnAnchor;
     @UiField
-    LinkButton deleteXsd;
-    @UiField
-    LinkButton deleteJrxml;
+    LinkButton deleteXsd, deleteJrxml;
 
     @Inject
 	@UiConstructor
@@ -172,23 +163,33 @@ public class DeclarationTemplateView extends ViewWithUiHandlers<DeclarationTempl
     }
 
     @Override
-    public HandlerRegistration addChangeHandlerHandlerDect(ValueChangeHandler<String> valueChangeHandler) {
+    public HandlerRegistration addChangeHandlerDect(ValueChangeHandler<String> valueChangeHandler) {
         return uploadDectFile.addValueChangeHandler(valueChangeHandler);
     }
 
     @Override
-    public HandlerRegistration addEndLoadHandlerHandlerXsd(EndLoadFileEvent.EndLoadFileHandler handler) {
+    public HandlerRegistration addEndLoadHandlerXsd(EndLoadFileEvent.EndLoadFileHandler handler) {
         return uploadXsdFile.addEndLoadHandler(handler);
     }
 
     @Override
-    public HandlerRegistration addEndLoadHandlerHandlerJrxml(EndLoadFileEvent.EndLoadFileHandler handler) {
+    public HandlerRegistration addEndLoadHandlerJrxml(EndLoadFileEvent.EndLoadFileHandler handler) {
         return uploadJrxmlFile.addEndLoadHandler(handler);
     }
 
     @Override
-    public HandlerRegistration addEndLoadHandlerHandlerDect(EndLoadFileEvent.EndLoadFileHandler handler) {
+    public HandlerRegistration addEndLoadHandlerDect(EndLoadFileEvent.EndLoadFileHandler handler) {
         return uploadDectFile.addEndLoadHandler(handler);
+    }
+
+    @Override
+    public HandlerRegistration addJrxmlLoadHandlerDect(JrxmlFileExistEvent.JrxmlFileExistHandler handler) {
+        return uploadDectFile.addJrxmlLoadHandler(handler);
+    }
+
+    @Override
+    public HandlerRegistration addJrxmlLoadHandler(JrxmlFileExistEvent.JrxmlFileExistHandler handler) {
+        return uploadJrxmlFile.addJrxmlLoadHandler(handler);
     }
 
     private void setEnabled(boolean isEnable){

@@ -261,6 +261,11 @@ public class MainOperatingFTServiceImpl implements MainOperatingService {
         return true;
     }
 
+    @Override
+    public void isInUsed(int templateId, int typeId, VersionedObjectStatus status, Date versionActualDateStart, Date versionActualDateEnd, Logger logger) {
+        versionOperatingService.isUsedVersion(templateId, typeId, status, versionActualDateStart, versionActualDateEnd, logger);
+    }
+
     private void checkError(Logger logger, String errorMsg){
         if (logger.containsLevel(LogLevel.ERROR))
             throw new ServiceLoggerException(errorMsg, logEntryService.save(logger.getEntries()));

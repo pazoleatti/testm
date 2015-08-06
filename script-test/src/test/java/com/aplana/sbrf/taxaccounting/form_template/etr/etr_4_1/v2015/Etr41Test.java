@@ -6,9 +6,13 @@ import com.aplana.sbrf.taxaccounting.util.ScriptTestBase;
 import com.aplana.sbrf.taxaccounting.util.TestScriptHelper;
 import com.aplana.sbrf.taxaccounting.util.mock.ScriptTestMockHelper;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.util.List;
+
+import static org.mockito.Matchers.*;
+import static org.mockito.Mockito.when;
 
 /**
  * Приложение 4-1. Абсолютная величина налоговых платежей
@@ -42,7 +46,13 @@ public class Etr41Test extends ScriptTestBase {
         return getDefaultScriptTestMockHelper(Etr41Test.class);
     }
 
-    ///@Test
+    @Before
+    public void mockServices() {
+        when(testHelper.getFormDataService().getFormTemplate(anyInt(), anyInt())).thenReturn(testHelper.getFormTemplate());
+
+    }
+
+    @Test
     public void create() {
         testHelper.execute(FormDataEvent.CREATE);
         Assert.assertEquals(testHelper.getFormTemplate().getRows().size(), testHelper.getDataRowHelper().getAll().size());
@@ -64,7 +74,7 @@ public class Etr41Test extends ScriptTestBase {
     }
 
     //TODO
-    //@Test
+    @Test
     public void importExcelTest() {
         int expected = 7; // в файле 7 строк
         testHelper.setImportFileInputStream(getImportXlsInputStream());

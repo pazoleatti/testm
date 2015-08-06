@@ -15,6 +15,7 @@ import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.client.event
 import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.shared.*;
 import com.aplana.sbrf.taxaccounting.web.module.declarationversionlist.client.event.CreateNewDTVersionEvent;
 import com.aplana.sbrf.taxaccounting.web.widget.fileupload.event.EndLoadFileEvent;
+import com.aplana.sbrf.taxaccounting.web.widget.fileupload.event.JrxmlFileExistEvent;
 import com.aplana.sbrf.taxaccounting.web.widget.historytemplatechanges.client.DeclarationVersionHistoryPresenter;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
@@ -38,6 +39,8 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
 
     private static final String ERROR_MSG = "Не удалось загрузить макет";
     private static final String SUCCESS_MSG = "Файл загружен";
+    private static final String JRXML_INFO_MES =
+            "Загрузка нового jrxml файла приведет к удалению уже сформированных pdf, xlsx отчетов и отмене ранее запущенных операций формирования pdf, xlsx отчетов экземпляров деклараций данной версии макета. Продолжить?";
 
     @Override
     @ProxyEvent
@@ -92,10 +95,12 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
         void setDeclarationTemplate(DeclarationTemplateExt declaration);
         HandlerRegistration addValueChangeHandlerJrxml(ValueChangeHandler<String> valueChangeHandler);
         HandlerRegistration addValueChangeHandlerXsd(ValueChangeHandler<String> valueChangeHandler);
-        HandlerRegistration addChangeHandlerHandlerDect(ValueChangeHandler<String> valueChangeHandler);
-        HandlerRegistration addEndLoadHandlerHandlerXsd(EndLoadFileEvent.EndLoadFileHandler handler);
-        HandlerRegistration addEndLoadHandlerHandlerJrxml(EndLoadFileEvent.EndLoadFileHandler handler);
-        HandlerRegistration addEndLoadHandlerHandlerDect(EndLoadFileEvent.EndLoadFileHandler handler);
+        HandlerRegistration addChangeHandlerDect(ValueChangeHandler<String> valueChangeHandler);
+        HandlerRegistration addEndLoadHandlerXsd(EndLoadFileEvent.EndLoadFileHandler handler);
+        HandlerRegistration addEndLoadHandlerJrxml(EndLoadFileEvent.EndLoadFileHandler handler);
+        HandlerRegistration addEndLoadHandlerDect(EndLoadFileEvent.EndLoadFileHandler handler);
+        HandlerRegistration addJrxmlLoadHandlerDect(JrxmlFileExistEvent.JrxmlFileExistHandler handler);
+        HandlerRegistration addJrxmlLoadHandler(JrxmlFileExistEvent.JrxmlFileExistHandler handler);
         void activateButtonName(String name);
         void activateButton(boolean isVisible);
         void setLockInformation(boolean isVisible, String lockDate, String lockedBy);
@@ -332,8 +337,6 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
                 if (result.isCanDelete()){
                     DeleteJrxmlAction jrxmlAction = new DeleteJrxmlAction();
                     jrxmlAction.setDtId(declarationTemplate.getId());
-                    jrxmlAction.setLockIds(result.getLockIds());
-                    jrxmlAction.setIds(result.getIds());
                     dispatcher.execute(jrxmlAction, CallbackUtils.defaultCallback(new AbstractCallback<DeleteJrxmlResult>() {
                         @Override
                         public void onSuccess(DeleteJrxmlResult result) {
@@ -352,8 +355,6 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
                                 public void yes() {
                                     DeleteJrxmlAction jrxmlAction = new DeleteJrxmlAction();
                                     jrxmlAction.setDtId(declarationTemplate.getId());
-                                    jrxmlAction.setLockIds(result.getLockIds());
-                                    jrxmlAction.setIds(result.getIds());
                                     dispatcher.execute(jrxmlAction, CallbackUtils.defaultCallback(new AbstractCallback<DeleteJrxmlResult>() {
                                         @Override
                                         public void onSuccess(DeleteJrxmlResult result) {
@@ -369,7 +370,7 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
         }, this));
     }
 
-    private HandlerRegistration[] handlerRegistrations = new HandlerRegistration[6];
+    private HandlerRegistration[] handlerRegistrations = new HandlerRegistration[8];
     @Override
     protected void onBind() {
         super.onBind();
@@ -429,10 +430,47 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
 
         handlerRegistrations[0] = getView().addValueChangeHandlerJrxml(vchJrxml);
         handlerRegistrations[1] = getView().addValueChangeHandlerXsd(vchXsd);
-        handlerRegistrations[2] = getView().addChangeHandlerHandlerDect(vchDect);
-        handlerRegistrations[3] = getView().addEndLoadHandlerHandlerXsd(loadFileHandlerXsd);
-        handlerRegistrations[4] = getView().addEndLoadHandlerHandlerJrxml(loadFileHandlerJrxml);
-        handlerRegistrations[5] = getView().addEndLoadHandlerHandlerDect(loadFileHandlerDect);
+        handlerRegistrations[2] = getView().addChangeHandlerDect(vchDect);
+        handlerRegistrations[3] = getView().addEndLoadHandlerXsd(loadFileHandlerXsd);
+        handlerRegistrations[4] = getView().addEndLoadHandlerJrxml(loadFileHandlerJrxml);
+        handlerRegistrations[5] = getView().addEndLoadHandlerDect(loadFileHandlerDect);
+        handlerRegistrations[6] = getView().addJrxmlLoadHandlerDect(getJrxmlFileExistHandler(true));
+        handlerRegistrations[7] = getView().addJrxmlLoadHandler(getJrxmlFileExistHandler(false));
+    }
+
+    private JrxmlFileExistEvent.JrxmlFileExistHandler getJrxmlFileExistHandler(final boolean isArchive){
+        return new JrxmlFileExistEvent.JrxmlFileExistHandler() {
+            @Override
+            public void onJrxmlExist(final JrxmlFileExistEvent event) {
+                LogAddEvent.fire(DeclarationTemplatePresenter.this, event.getErrorUuid());
+                Dialog.confirmMessage("Загрузка jrxml файла", JRXML_INFO_MES,
+                        new DialogHandler() {
+                            @Override
+                            public void yes() {
+                                super.yes();
+                                DeleteJrxmlAction deleteJrxmlAction = new DeleteJrxmlAction();
+                                deleteJrxmlAction.setDtId(getDeclarationId());
+                                dispatcher.execute(deleteJrxmlAction, CallbackUtils.defaultCallback(new AbstractCallback<DeleteJrxmlResult>() {
+                                    @Override
+                                    public void onSuccess(DeleteJrxmlResult result) {
+                                        ResidualSaveAction action = new ResidualSaveAction();
+                                        action.setDtId(getDeclarationId());
+                                        action.setUploadUuid(event.getUploadUuid());
+                                        action.setIsArchive(isArchive);
+                                        dispatcher.execute(action, CallbackUtils.defaultCallback(new AbstractCallback<ResidualSaveResult>() {
+                                            @Override
+                                            public void onSuccess(ResidualSaveResult result) {
+                                                Dialog.infoMessage("Макет успешно обновлен");
+                                                LogCleanEvent.fire(DeclarationTemplatePresenter.this);
+                                                LogAddEvent.fire(DeclarationTemplatePresenter.this, result.getSuccessUuid(), true);
+                                            }
+                                        }, DeclarationTemplatePresenter.this));
+                                    }
+                                }, DeclarationTemplatePresenter.this));
+                            }
+                        });
+            }
+        };
     }
 
     @Override
