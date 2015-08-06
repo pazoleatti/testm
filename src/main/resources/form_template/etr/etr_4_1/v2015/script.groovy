@@ -1,4 +1,4 @@
-﻿package form_template.etr.etr_4_1.v2015
+package form_template.etr.etr_4_1.v2015
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
@@ -10,7 +10,7 @@ import groovy.transform.Field
  * formTemplateId = 700
  *
  * @author bkinzyabulatov
- * TODO определение уровня банка, признак расчета нарастающим итогом, период сравнения
+ * TODO определение уровня банка
  *
  * графа 1 - rowNum         - № строки
  * графа 2 - taxName        - Наименование налога
@@ -101,14 +101,14 @@ def getPrevReportPeriodEndDate() {
 
 def getComparePeriodEndDate() {
     if (compareEndDate == null) {
-        compareEndDate = reportPeriodService.getEndDate(formData.reportPeriodId).time // TODO compareReportPeriodId
+        compareEndDate = reportPeriodService.getEndDate(formData.comparativPeriodId).time
     }
     return compareEndDate
 }
 
 def getPrevComparePeriodEndDate() {
     if (prevCompareEndDate == null) {
-        prevCompareEndDate = reportPeriodService.getEndDate(reportPeriodService.getPrevReportPeriod(formData.reportPeriodId)?.id).time // TODO compareReportPeriodId
+        prevCompareEndDate = reportPeriodService.getEndDate(reportPeriodService.getPrevReportPeriod(formData.comparativPeriodId)?.id).time
     }
     return prevCompareEndDate
 }
@@ -146,8 +146,8 @@ void calcValues(def dataRows, def sourceRows) {
             row.currentPeriod = rowSource.currentPeriod
             continue
         }
-        row.comparePeriod = get102Sum(rowSource, getReportPeriodEndDate()) - (getSign() ? 0 : get102Sum(rowSource, getPrevReportPeriodEndDate()))
-        row.currentPeriod = get102Sum(rowSource, getComparePeriodEndDate()) - (getSign() ? 0 : get102Sum(rowSource, getPrevComparePeriodEndDate()))
+        row.comparePeriod = get102Sum(rowSource, getReportPeriodEndDate()) - (formData.accruing ? 0 : get102Sum(rowSource, getPrevReportPeriodEndDate()))
+        row.currentPeriod = get102Sum(rowSource, getComparePeriodEndDate()) - (formData.accruing ? 0 : get102Sum(rowSource, getPrevComparePeriodEndDate()))
     }
     def row2 = getDataRow(dataRows, "R2")
     def row4 = getDataRow(dataRows, "R4")
@@ -174,7 +174,7 @@ void calcValues(def dataRows, def sourceRows) {
 
 // Возвращает данные из Формы 102 БО за период
 def get102Sum(def row, def date) {
-    if (opuMap[row.getAlias()] != null) {
+    if (opuMap[row.getAlias()] != null && date != null) {
         def opuCodes = opuMap[row.getAlias()].join("' OR OPU_CODE = '")
         // справочник "Отчет о прибылях и убытках (Форма 0409102-СБ)"
         def records = bookerStatementService.getRecords(52L, formData.departmentId, date, "OPU_CODE = '${opuCodes}'")
@@ -184,10 +184,6 @@ def get102Sum(def row, def date) {
 }
 
 boolean isBank() {
-    return formData.departmentId == 1 // TODO
-}
-
-boolean getSign() {
     return formData.departmentId == 1 // TODO
 }
 
@@ -264,8 +260,6 @@ void importData() {
         }
         // заполнить строку нф значениями из эксель
         fillRowFromXls(dataRow, rowValues, fileRowIndex, rowIndex, colOffset)
-        logger.info("%s", dataRow)
-        logger.info("%s", rowValues)
     }
     if (rowIndex < dataRows.size()) {
         logger.error("Структура файла не соответствует макету налоговой формы.")
