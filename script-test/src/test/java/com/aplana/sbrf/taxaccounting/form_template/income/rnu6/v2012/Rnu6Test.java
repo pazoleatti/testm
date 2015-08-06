@@ -1,6 +1,10 @@
 package com.aplana.sbrf.taxaccounting.form_template.income.rnu6.v2012;
 
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
+import com.aplana.sbrf.taxaccounting.refbook.impl.RefBookUniversal;
 import com.aplana.sbrf.taxaccounting.util.ScriptTestBase;
 import com.aplana.sbrf.taxaccounting.util.TestScriptHelper;
 import com.aplana.sbrf.taxaccounting.util.mock.ScriptTestMockHelper;
@@ -15,6 +19,7 @@ import java.math.BigDecimal;
 import java.util.*;
 
 import static org.mockito.Matchers.*;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.when;
 
@@ -60,6 +65,52 @@ public class Rnu6Test extends ScriptTestBase {
                         return result;
                     }
                 });
+
+        // настройка справочников
+        final long refbookId = 28L;
+
+        // провайдер для справочника
+        RefBookUniversal provider = mock(RefBookUniversal.class);
+        provider.setRefBookId(refbookId);
+        when(testHelper.getRefBookFactory().getDataProvider(refbookId)).thenReturn(provider);
+
+        // записи для справочника
+        when(provider.getRecords(any(Date.class), any(PagingParams.class), anyString(),
+                any(RefBookAttribute.class))).thenAnswer(new Answer<Object>() {
+            @Override
+            public Object answer(InvocationOnMock invocation) throws Throwable {
+                // ищет среди записей справочника запись соответствующую коду из фильтра
+                // в фильтре: LOWER(CODE) = LOWER('codeA') and LOWER(NUMBER) = LOWER('numberA')
+                String filter = (String) invocation.getArguments()[2];
+                String before = "LOWER(CODE) = LOWER('";
+                String after = "') and LOWER(NUMBER)";
+                int beforeIndex = filter.indexOf(before) + before.length();
+                int afterIndex = filter.indexOf(after);
+                String findValue = filter.substring(beforeIndex, afterIndex);
+                if (findValue == null) {
+                    return new PagingResult<Map<String, RefBookValue>>();
+                }
+                final Map<Long, Map<String, RefBookValue>> records = testHelper.getRefBookAllRecords(refbookId);
+                for (Map<String, RefBookValue> row : records.values()) {
+                    if (findValue.equals(row.get("CODE").getStringValue())) {
+                        List<Map<String, RefBookValue>> tmpRecords = Arrays.asList(row);
+                        return new PagingResult<Map<String, RefBookValue>>(tmpRecords);
+                    }
+                }
+                return new PagingResult<Map<String, RefBookValue>>();
+            }
+        });
+
+        // справочник
+        RefBook refBook = new RefBook();
+        refBook.setId(refbookId);
+        refBook.setName("Классификатор доходов Сбербанка России для целей налогового учёта");
+        // атрибут справочника
+        RefBookAttribute attribute = new RefBookAttribute();
+        attribute.setAlias("CODE");
+        attribute.setName("Код налогового учёта ");
+        refBook.setAttributes(Arrays.asList(attribute));
+        when(testHelper.getRefBookFactory().get(refbookId)).thenReturn(refBook);
     }
 
     @After
