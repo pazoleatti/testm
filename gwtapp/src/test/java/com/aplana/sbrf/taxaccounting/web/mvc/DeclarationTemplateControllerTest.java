@@ -1,11 +1,10 @@
 package com.aplana.sbrf.taxaccounting.web.mvc;
 
-import com.aplana.sbrf.taxaccounting.model.BlobData;
-import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
-import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
-import com.aplana.sbrf.taxaccounting.model.UuidEnum;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
+import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.BlobDataService;
+import com.aplana.sbrf.taxaccounting.service.DeclarationTemplateImpexService;
 import com.aplana.sbrf.taxaccounting.service.DeclarationTemplateService;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
@@ -32,7 +31,7 @@ import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.UUID;
 
-import static org.mockito.Matchers.anyListOf;
+import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.fileUpload;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -55,6 +54,8 @@ public class DeclarationTemplateControllerTest {
     LogEntryService logEntryService;
     @Autowired
     BlobDataService blobDataService;
+    @Autowired
+    DeclarationTemplateImpexService declarationTemplateImpexService;
 
     @Before
     public void setup() {
@@ -67,7 +68,10 @@ public class DeclarationTemplateControllerTest {
     @Test
     public void uploadDectTest() throws Exception {
         DeclarationTemplate dt = new DeclarationTemplate();
+        dt.setStatus(VersionedObjectStatus.DRAFT);
         when(declarationTemplateService.get(1)).thenReturn(dt);
+        when(declarationTemplateImpexService.importDeclarationTemplate(any(TAUserInfo.class), anyInt(), any(FileInputStream.class)))
+                .thenReturn(dt);
 
         File cf = File.createTempFile("dt_controller", ".tmp");
         FileWriter outputStream = new FileWriter(cf);
@@ -120,6 +124,51 @@ public class DeclarationTemplateControllerTest {
             MediaType mediaType = new MediaType("multipart", "form-data", contentTypeParams);
             JSONObject expectedJson = new JSONObject();
             expectedJson.put(UuidEnum.ERROR_UUID.toString(), uuid);
+
+            mockMvc.perform(fileUpload("/declarationTemplate/uploadDect/1").file(multipartFile)
+                            .contentType(mediaType)
+                            .param("description", "description")
+                            .param("title", "title")
+            )
+                    .andExpect(MockMvcResultMatchers.status().isOk())
+                    .andExpect(MockMvcResultMatchers.content().string(expectedJson.toString()));
+        } finally {
+            if (!cf.delete())
+                System.out.println("Can't delete");
+        }
+
+    }
+
+    @Test
+    public void uploadDectIfJrxmlExistTest() throws Exception {
+        DeclarationTemplate dt = new DeclarationTemplate();
+        dt.setId(1);
+        dt.setStatus(VersionedObjectStatus.DRAFT);
+        dt.setJrxmlBlobId(UUID.randomUUID().toString());
+        when(declarationTemplateImpexService.importDeclarationTemplate(any(TAUserInfo.class), anyInt(), any(FileInputStream.class)))
+                .thenReturn(dt);
+        when(declarationTemplateService.checkExistingDataJrxml(anyInt(), any(Logger.class)))
+                .thenReturn(true);
+
+        File cf = File.createTempFile("dt_controller", ".tmp");
+        FileWriter outputStream = new FileWriter(cf);
+        outputStream.write("a");
+        outputStream.close();
+
+        String uuid = UUID.randomUUID().toString();
+        when(logEntryService.save(anyListOf(LogEntry.class))).thenReturn(uuid);
+        when(blobDataService.create(any(FileInputStream.class), anyString())).thenReturn(uuid);
+
+        try{
+            FileInputStream fis = new FileInputStream(cf);
+            MockMultipartFile multipartFile = new MockMultipartFile("uploader", "filename.txt", "text/plain", fis);
+
+            HashMap<String, String> contentTypeParams = new HashMap<String, String>();
+            contentTypeParams.put("boundary", "265001916915724");
+            MediaType mediaType = new MediaType("multipart", "form-data", contentTypeParams);
+            JSONObject expectedJson = new JSONObject();
+            expectedJson.put(UuidEnum.ERROR_UUID.toString(), uuid);
+            expectedJson.put(UuidEnum.UPLOADED_FILE.toString(), uuid);
 
             mockMvc.perform(fileUpload("/declarationTemplate/uploadDect/1").file(multipartFile)
                             .contentType(mediaType)

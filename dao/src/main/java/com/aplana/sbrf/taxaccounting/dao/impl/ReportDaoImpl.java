@@ -161,7 +161,7 @@ public class ReportDaoImpl extends AbstractDao implements ReportDao {
     @Override
     public void deleteDec(final Collection<Long> declarationDataIds) {
         try{
-            getNamedParameterJdbcTemplate().update("DELETE FROM DECLARATION_REPORT WHERE DECLARATION_DATA_ID in :declarationDataIds",
+            getNamedParameterJdbcTemplate().update("DELETE FROM DECLARATION_REPORT WHERE DECLARATION_DATA_ID in (:declarationDataIds)",
                     new HashMap<String, Object>(1){{put("declarationDataIds", declarationDataIds);}});
         } catch (DataAccessException e){
             throw new DaoException("Не удалось удалить записи", e);
