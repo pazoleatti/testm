@@ -699,7 +699,7 @@ void importData() {
 
     // получить строки из шаблона
     def formTemplate = formDataService.getFormTemplate(formData.formType.id, formData.reportPeriodId)
-    def rows = formTemplate.rows
+    def templateRows = formTemplate.rows
 
     def fileRowIndex = paramsMap.rowOffset
     def colOffset = paramsMap.colOffset
@@ -708,9 +708,9 @@ void importData() {
 
     def rowIndex = 0
     def allValuesCount = allValues.size()
-
     def sectionIndex = null
     def mapRows = [:]
+    def totalRowFromFileMap = [:]
 
     // формирвание строк нф
     for (def i = 0; i < allValuesCount; i++) {
@@ -727,7 +727,7 @@ void importData() {
         def firstValue = rowValues[INDEX_FOR_SKIP]
         if (firstValue != null && firstValue != '' && firstValue != 'Итого:') {
             sectionIndex = firstValue[0]
-            if (!(sectionIndex in sections) || getDataRow(rows, sectionIndex)?.fix != firstValue) {
+            if (!(sectionIndex in sections) || getDataRow(templateRows, sectionIndex)?.fix != firstValue) {
                 logger.error("Строка %d: Структура файла не соответствует макету налоговой формы", fileRowIndex)
             }
             mapRows.put(sectionIndex, [])
@@ -735,6 +735,9 @@ void importData() {
             rowValues.clear()
             continue
         } else if (firstValue == 'Итого:') {
+            rowIndex++
+            totalRowFromFileMap[sectionIndex] = getNewRowFromXls(rowValues, colOffset, fileRowIndex, rowIndex)
+
             // Пропуск итоговых строк
             allValues.remove(rowValues)
             rowValues.clear()
@@ -750,16 +753,23 @@ void importData() {
     }
 
     // копирование данных по разделам
-    updateIndexes(rows)
+    def rows = []
     sections.each { section ->
+        def headRow = getDataRow(templateRows, section)
+        def totalRow = getDataRow(templateRows, 'total' + section)
+        rows.add(headRow)
         def copyRows = mapRows[section]
         if (copyRows != null && !copyRows.isEmpty()) {
-            def insertIndex = getDataRow(rows, 'total' + section).getIndex() - 1
-            rows.addAll(insertIndex, copyRows)
-            // поправить индексы, потому что они после вставки не пересчитываются
-            updateIndexes(rows)
+            rows.addAll(copyRows)
         }
+        rows.add(totalRow)
+
+        // сравнение итогов
+        updateIndexes(rows)
+        def totalRowFromFile = totalRowFromFileMap[section]
+        compareSimpleTotalValues(totalRow, totalRowFromFile, copyRows, totalSumColumns, formData, logger, false)
     }
+    updateIndexes(rows)
 
     showMessages(rows, logger)
     if (!logger.containsLevel(LogLevel.ERROR)) {

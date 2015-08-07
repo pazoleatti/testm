@@ -515,12 +515,12 @@ void importData() {
 
     // получить строки из шаблона
     def formTemplate = formDataService.getFormTemplate(formData.formType.id, formData.reportPeriodId)
-    def rows = formTemplate.rows
-    def headerARow = getDataRow(rows, 'A')
-    def totalARow = getDataRow(rows, 'totalA')
-    def headerBRow = getDataRow(rows, 'B')
-    def totalBRow = getDataRow(rows, 'totalB')
-    def totalRow = getDataRow(rows, 'total')
+    def templateRows = formTemplate.rows
+    def headerARow = getDataRow(templateRows, 'A')
+    def totalARow = getDataRow(templateRows, 'totalA')
+    def headerBRow = getDataRow(templateRows, 'B')
+    def totalBRow = getDataRow(templateRows, 'totalB')
+    def totalRow = getDataRow(templateRows, 'total')
 
     def fileRowIndex = paramsMap.rowOffset
     def colOffset = paramsMap.colOffset
@@ -534,6 +534,7 @@ void importData() {
     def mapRows = [:]
     def sectionAEnd = false
     def sectionBEnd = false
+    def totalRowFromFileMap = [:]
 
     // формирвание строк нф
     for (def i = 0; i < allValuesCount; i++) {
@@ -561,7 +562,7 @@ void importData() {
             continue
         } else if (firstValue in [totalARow.series, totalBRow.series, totalRow.series]) {
             // проверка итогов разделов
-            if (sectionAlias && !sectionBEnd && firstValue != getDataRow(rows, "total$sectionAlias").series) {
+            if (sectionAlias && !sectionBEnd && firstValue != getDataRow(templateRows, "total$sectionAlias").series) {
                 logger.error("Строка %d: Структура файла не соответствует макету налоговой формы", fileRowIndex)
             }
             if (sectionBEnd && firstValue != totalRow.series) {
@@ -573,7 +574,9 @@ void importData() {
             if (!sectionBEnd && firstValue == totalBRow.series) {
                 sectionBEnd = true
             }
-            // Пропуск итоговых строк
+            rowIndex++
+            totalRowFromFileMap[firstValue] = getNewRowFromXls(rowValues, colOffset, fileRowIndex, rowIndex)
+
             allValues.remove(rowValues)
             rowValues.clear()
             continue
@@ -588,15 +591,35 @@ void importData() {
     }
 
     // копирование данных по разделам
-    updateIndexes(rows)
+    totalRow.percIncome = (totalARow.percIncome ?: 0) - (totalBRow.percIncome ?: 0)
+    updateIndexes(templateRows)
+    def rows = []
     [headerARow.getAlias(), headerBRow.getAlias()].each { section ->
+        def headRow = getDataRow(templateRows, section)
+        def total = getDataRow(templateRows, 'total' + section)
         def copyRows = mapRows[section]
+
+        rows.add(headRow)
         if (copyRows != null && !copyRows.isEmpty()) {
-            def insertIndex = getDataRow(rows, 'total' + section).getIndex() - 1
-            rows.addAll(insertIndex, copyRows)
-            // поправить индексы, потому что они после вставки не пересчитываются
-            updateIndexes(rows)
+            rows.addAll(copyRows)
         }
+        rows.add(total)
+
+        // сравнение итогов
+        updateIndexes(rows)
+        def totalRowFromFile = totalRowFromFileMap[total.series]
+        compareSimpleTotalValues(total, totalRowFromFile, copyRows, totalColumns, formData, logger, false)
+    }
+
+    // сравнение итога
+    rows.add(totalRow)
+    if (totalRowFromFileMap[totalRow.series]) {
+        def totalRowFromFile = totalRowFromFileMap[totalRow.series]
+        totalRow.setIndex(rows.size())
+        compareTotalValues(totalRow, totalRowFromFile, ['percIncome'], logger, false)
+        // задание значении итоговой строке нф из итоговой строки файла (потому что в строках из файла стили для простых строк)
+        totalRow.setImportIndex(totalRowFromFile.getImportIndex())
+        totalRow.percIncome = totalRowFromFile.percIncome
     }
 
     showMessages(rows, logger)
