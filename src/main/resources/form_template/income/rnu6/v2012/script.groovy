@@ -6,6 +6,7 @@ import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.TaxType
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
 import com.aplana.sbrf.taxaccounting.model.util.StringUtils
 import groovy.transform.Field
 
@@ -545,7 +546,7 @@ void importTransportData() {
                 // итоговая строка тф
                 rowCells = reader.readNext()
                 if (rowCells != null) {
-                    totalTF = getNewRow(rowCells, COLUMN_COUNT, ++fileRowIndex, rowIndex)
+                    totalTF = getNewRow(rowCells, COLUMN_COUNT, ++fileRowIndex, rowIndex, true)
                 }
                 break
             }
@@ -616,10 +617,11 @@ def getSubTotalRows(def dataRows) {
  * @param columnCount количество колонок
  * @param fileRowIndex номер строки в тф
  * @param rowIndex строка в нф
+ * @param isTotal признак итоговой строки (для пропуска получения справочных значении)
  *
  * @return вернет строку нф или null, если количество значений в строке тф меньше
  */
-def getNewRow(String[] rowCells, def columnCount, def fileRowIndex, def rowIndex) {
+def getNewRow(String[] rowCells, def columnCount, def fileRowIndex, def rowIndex, def isTotal = false) {
     def newRow = formData.createStoreMessagingDataRow()
     newRow.setIndex(rowIndex)
     newRow.setImportIndex(fileRowIndex)
@@ -641,14 +643,13 @@ def getNewRow(String[] rowCells, def columnCount, def fileRowIndex, def rowIndex
     def int colIndex
 
     // графа 4 - поиск записи идет по графе 2
-    colIndex = 2
-    newRow.code = getRecordIdImport(28, 'CODE', pure(rowCells[colIndex]), fileRowIndex, colIndex + colOffset, false)
-    def map = getRefBookValue(28, newRow.code)
-
-    // графа 4 проверка
-    if (map != null) {
-        colIndex = 4
-        formDataService.checkReferenceValue(28, pure(rowCells[colIndex]), map.NUMBER?.stringValue, fileRowIndex, colIndex + colOffset, logger, false)
+    if (!isTotal) {
+        String filter = "LOWER(CODE) = LOWER('" + pure(rowCells[2]) + "') and LOWER(NUMBER) = LOWER('" + pure(rowCells[4]).replaceAll(/\./, "") + "')"
+        def records = refBookFactory.getDataProvider(28).getRecords(getReportPeriodEndDate(), null, filter, null)
+        colIndex = 2
+        if (checkImportRecordsCount(records, refBookFactory.get(28), 'CODE', pure(rowCells[colIndex]), getReportPeriodEndDate(), fileRowIndex, colIndex + colOffset, logger, false)) {
+            newRow.code = records.get(0).get(RefBook.RECORD_ID_ALIAS).numberValue
+        }
     }
 
     // графа 3
@@ -733,7 +734,7 @@ void importData() {
         rowIndex++
         // Пропуск итоговых строк
         if (rowValues[INDEX_FOR_SKIP] == "Итого") {
-            totalRowFromFile = getNewRowFromXls(rowValues, colOffset, fileRowIndex, rowIndex)
+            totalRowFromFile = getNewRowFromXls(rowValues, colOffset, fileRowIndex, rowIndex, true)
 
             allValues.remove(rowValues)
             rowValues.clear()
@@ -840,8 +841,9 @@ void checkHeaderXls(def headerRows, def colCount, rowCount) {
  * @param colOffset отступ в колонках
  * @param fileRowIndex номер строки в тф
  * @param rowIndex строка в нф
+ * @param isTotal признак итоговой строки (для пропуска получения справочных значении)
  */
-def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) {
+def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex, def isTotal = false) {
     def newRow = formData.createStoreMessagingDataRow()
     newRow.setIndex(rowIndex)
     newRow.setImportIndex(fileRowIndex)
@@ -855,14 +857,13 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
     }
 
     // графа 4 - поиск записи идет по графе 2
-    def colIndex = 2
-    newRow.code = getRecordIdImport(28, 'CODE', values[colIndex], fileRowIndex, colIndex + colOffset, false)
-    def map = getRefBookValue(28, newRow.code)
-
-    // графа 4 проверка
-    if (map != null) {
-        colIndex = 4
-        formDataService.checkReferenceValue(28, values[colIndex], map.NUMBER?.stringValue, fileRowIndex, colIndex + colOffset, logger, false)
+    if (!isTotal) {
+        String filter = "LOWER(CODE) = LOWER('" + values[2] + "') and LOWER(NUMBER) = LOWER('" + values[4].replaceAll(/\./, "") + "')"
+        def records = refBookFactory.getDataProvider(28).getRecords(getReportPeriodEndDate(), null, filter, null)
+        colIndex = 2
+        if (checkImportRecordsCount(records, refBookFactory.get(28), 'CODE', values[colIndex], getReportPeriodEndDate(), fileRowIndex, colIndex + colOffset, logger, false)) {
+            newRow.code = records.get(0).get(RefBook.RECORD_ID_ALIAS).numberValue
+        }
     }
 
     // графа 3

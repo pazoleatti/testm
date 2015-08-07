@@ -835,6 +835,8 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                                 formSearchPresenter.setFormDataId(formData.getId());
                                 formSearchPresenter.setFormTemplateId(formData.getFormTemplateId());
 
+                                getView().updateTableTopPosition(formData.getComparativPeriodId() != null ? FormDataView.DEFAULT_TABLE_TOP_POSITION + 20 : FormDataView.DEFAULT_TABLE_TOP_POSITION);
+
                                 /**
                                  * Передаем призентору поиска по форме, данные о скрытых колонках
                                  */
@@ -880,8 +882,10 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                                         result.getFormData().getFormType().getTaxType(),
                                         result.getFormData().getKind().getName(),
                                         result.getDepartmentFullName(),
-                                        buildPeriodName(drp.getReportPeriod().getName(), drp.getReportPeriod().getTaxPeriod().getYear(), formData.getPeriodOrder(), drp.getCorrectionDate()),
-                                        cdrp != null ? buildPeriodName(cdrp.getReportPeriod().getName(), cdrp.getReportPeriod().getTaxPeriod().getYear(), formData.getPeriodOrder(), cdrp.getCorrectionDate()) : null,
+                                        buildPeriodName(formData.isAccruing() ? drp.getReportPeriod().getAccName() : drp.getReportPeriod().getName(),
+                                                drp.getReportPeriod().getTaxPeriod().getYear(), formData.getPeriodOrder(), drp.getCorrectionDate()),
+                                        cdrp != null ? buildPeriodName(formData.isAccruing() ? cdrp.getReportPeriod().getAccName() : cdrp.getReportPeriod().getName(),
+                                                cdrp.getReportPeriod().getTaxPeriod().getYear(), formData.getPeriodOrder(), cdrp.getCorrectionDate()) : null,
                                         result.getFormData().getState().getName(),
 		                                result.getDepartmentReportPeriod().getReportPeriod().getCalendarStartDate(),
                                         result.getDepartmentReportPeriod().getReportPeriod().getEndDate(),
@@ -927,6 +931,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
         StringBuilder builder = new StringBuilder();
         builder.append(year).append(", ");
         builder.append(reportPeriodName);
+
         if (periodOrder != null) {
             builder.append(", ").append(Formats.getRussianMonthNameWithTier(periodOrder));
         }
