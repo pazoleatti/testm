@@ -575,12 +575,13 @@ void importData() {
 
     // получить строки из шаблона
     def formTemplate = formDataService.getFormTemplate(formData.formType.id, formData.reportPeriodId)
-    def rows = formTemplate.rows
+    def templateRows = formTemplate.rows
 
     def rowIndex = 0
     def allValuesCount = allValues.size()
     def sectionIndex = null
     def mapRows = [:]
+    def totalRowFromFileMap = [:]
 
     // формирвание строк нф
     for (def i = 0; i < allValuesCount; i++) {
@@ -603,6 +604,9 @@ void importData() {
             rowValues.clear()
             continue
         } else if (firstValue == 'Всего') {
+            rowIndex++
+            totalRowFromFileMap[sectionIndex] = getNewRowFromXls(rowValues, colOffset, fileRowIndex, rowIndex)
+
             allValues.remove(rowValues)
             rowValues.clear()
             continue
@@ -618,14 +622,22 @@ void importData() {
     }
 
     // копирование данных по разделам
-    updateIndexes(rows)
+    updateIndexes(templateRows)
+    def rows = []
     sections.each { section ->
+        def headRow = getDataRow(templateRows, section)
+        def totalRow = getDataRow(templateRows, 'total' + section)
+        rows.add(headRow)
         def copyRows = mapRows[section]
         if (copyRows != null && !copyRows.isEmpty()) {
-            def insertIndex = getDataRow(rows, 'total' + section).getIndex() - 1
-            rows.addAll(insertIndex, copyRows)
-            updateIndexes(rows)
+            rows.addAll(copyRows)
         }
+        rows.add(totalRow)
+
+        // сравнение итогов
+        updateIndexes(rows)
+        def totalRowFromFile = totalRowFromFileMap[section]
+        compareSimpleTotalValues(totalRow, totalRowFromFile, copyRows, totalSumColumns, formData, logger, false)
     }
 
     showMessages(rows, logger)

@@ -668,9 +668,9 @@ void importData() {
 
     // получить строки из шаблона
     def formTemplate = formDataService.getFormTemplate(formData.formType.id, formData.reportPeriodId)
-    def rows = formTemplate.rows
-    def headerARow = getDataRow(rows, 'A')
-    def headerBRow = getDataRow(rows, 'B')
+    def templateRows = formTemplate.rows
+    def headerARow = getDataRow(templateRows, 'A')
+    def headerBRow = getDataRow(templateRows, 'B')
     // мапа для хранения алиаса раздела (получить алиас раздела по заголовку раздела)
     def groupsMap = [
             (headerARow.fix): 'A',
@@ -679,13 +679,14 @@ void importData() {
     // мапа для хранения алиаса подраздела (получить алиас подраздела по заголовку подраздела)
     def subGroupsMap = [:]
     (1..4).each { index ->
-        def row = getDataRow(rows, 'A' + index)
+        def row = getDataRow(templateRows, 'A' + index)
         subGroupsMap[row.fix] = index
     }
 
     def group = null
     def sectionIndex = null
     def sectionRowsMap = [:]
+    def totalRowFromFileMap = [:]
 
     // формирвание строк нф
     for (def i = 0; i < allValuesCount; i++) {
@@ -700,6 +701,7 @@ void importData() {
         }
         // если это начало раздела, то запомнить его название и обрабатывать следующую строку
         def firstValue = rowValues[INDEX_FOR_SKIP]
+        // определение группы
         if (groupsMap[firstValue] != null) {
             group = groupsMap[firstValue]
 
@@ -707,6 +709,7 @@ void importData() {
             rowValues.clear()
             continue
         }
+        // определение подгруппы
         if (subGroupsMap.get(firstValue) != null) {
             sectionIndex = group + subGroupsMap[firstValue]
             sectionRowsMap[sectionIndex] = []
@@ -715,14 +718,16 @@ void importData() {
             rowValues.clear()
             continue
         }
+        rowIndex++
         // Пропуск итоговых строк
-        if (rowValues[INDEX_FOR_SKIP] && rowValues[INDEX_FOR_SKIP] == "Итого") {
+        if (rowValues[INDEX_FOR_SKIP] == "Итого") {
+            totalRowFromFileMap[sectionIndex] = getNewRowFromXls(rowValues, colOffset, fileRowIndex, rowIndex)
+
             allValues.remove(rowValues)
             rowValues.clear()
             continue
         }
         // простая строка
-        rowIndex++
         def newRow = getNewRowFromXls(rowValues, colOffset, fileRowIndex, rowIndex)
         sectionRowsMap[sectionIndex].add(newRow)
 
@@ -732,14 +737,22 @@ void importData() {
     }
 
     // копирование данных по разделам
-    updateIndexes(rows)
+    updateIndexes(templateRows)
+    def rows = []
     groups.each { section ->
+        def headRow = getDataRow(templateRows, section)
+        def totalRow = getDataRow(templateRows, 'total' + section)
+        rows.add(headRow)
         def copyRows = sectionRowsMap[section]
-        if (copyRows) {
-            def insertIndex = getDataRow(rows, 'total' + section).getIndex() - 1
-            rows.addAll(insertIndex, copyRows)
-            updateIndexes(rows)
+        if (copyRows != null && !copyRows.isEmpty()) {
+            rows.addAll(copyRows)
         }
+        rows.add(totalRow)
+
+        // сравнение итогов
+        updateIndexes(rows)
+        def totalRowFromFile = totalRowFromFileMap[section]
+        compareSimpleTotalValues(totalRow, totalRowFromFile, copyRows, totalColumns, formData, logger, false)
     }
 
     showMessages(rows, logger)

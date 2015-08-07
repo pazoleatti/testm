@@ -718,7 +718,7 @@ void importData() {
     int COLUMN_COUNT = 28
     int HEADER_ROW_COUNT = 3
     String TABLE_START_VALUE = getColumnName(tmpRow, 'rowNumber')
-    String TABLE_END_VALUE = 'Итого за текущий месяц'
+    String TABLE_END_VALUE = null
     int INDEX_FOR_SKIP = 1
 
     def allValues = []      // значения формы
@@ -744,6 +744,8 @@ void importData() {
     def rowIndex = 0
     def rows = []
     def allValuesCount = allValues.size()
+    def totalMonthRowFromFile = null
+    def totalRowFromFile = null
 
     // формирвание строк нф
     for (def i = 0; i < allValuesCount; i++) {
@@ -756,7 +758,15 @@ void importData() {
             break
         }
         // Пропуск итоговых строк
-        if (rowValues[INDEX_FOR_SKIP] && rowValues[INDEX_FOR_SKIP] == "Итого") {
+        if (rowValues[INDEX_FOR_SKIP]) {
+            if (rowValues[INDEX_FOR_SKIP] == 'Итого за текущий месяц') {
+                rowIndex++
+                totalMonthRowFromFile = getNewRowFromXls(rowValues, colOffset, fileRowIndex, rowIndex)
+            } else if (rowValues[INDEX_FOR_SKIP] == 'Итого за текущий отчётный (налоговый) период') {
+                rowIndex++
+                totalRowFromFile = getNewRowFromXls(rowValues, colOffset, fileRowIndex, rowIndex)
+            }
+
             allValues.remove(rowValues)
             rowValues.clear()
             continue
@@ -773,8 +783,21 @@ void importData() {
     // получить строки из шаблона
     def formTemplate = formDataService.getFormTemplate(formData.formType.id, formData.reportPeriodId)
     def formTemplateRows = formTemplate.rows
-    rows.add(getDataRow(formTemplateRows, 'month'))
-    rows.add(getDataRow(formTemplateRows, 'total'))
+    def totalMonthRow = getDataRow(formTemplateRows, 'month')
+    def totalRow = getDataRow(formTemplateRows, 'total')
+    rows.add(totalMonthRow)
+    rows.add(totalRow)
+    updateIndexes(rows)
+
+    // сравнение итогов
+    if (totalMonthRowFromFile) {
+        compareSimpleTotalValues(totalMonthRow, totalMonthRowFromFile, rows, totalSumColumns, formData, logger, false)
+    }
+    if (totalRowFromFile) {
+        // посчитать строку "Итого за текущий отчётный (налоговый) период"
+        calcTotalRow(totalMonthRow, totalRow)
+        compareSimpleTotalValues(totalRow, totalRowFromFile, rows, totalSumColumns, formData, logger, false)
+    }
 
     showMessages(rows, logger)
     if (!logger.containsLevel(LogLevel.ERROR)) {
