@@ -25,11 +25,11 @@
     </ui:style>
 
     <dw:ModalWindow iconUrl="resources/img/add.png" title="Создание налоговой формы" ui:field="title">
-        <g:VerticalPanel height="100%" width="400px" addStyleNames="aplana-ModalWindow-contentBackWhite">
+        <g:VerticalPanel height="100%" width="440px" addStyleNames="aplana-ModalWindow-contentBackWhite">
 
             <g:HorizontalPanel spacing="6" verticalAlignment="middle" addStyleNames="{style.content}">
                 <g:cell horizontalAlignment="right">
-                    <g:Label width="140px" wordWrap="false" text="Период:"/>
+                    <g:Label width="180px" wordWrap="false" text="Период:"/>
                 </g:cell>
                 <g:cell width="100%">
                     <rep:PeriodPickerPopupWidget width="100%" ui:field="reportPeriodIds" multiselect="false"/>
@@ -38,7 +38,7 @@
 
             <g:HorizontalPanel spacing="6"  verticalAlignment="middle" addStyleNames="{style.content}">
                 <g:cell horizontalAlignment="right">
-                    <g:Label width="140px" wordWrap="false" text="Подразделение:"/>
+                    <g:Label width="180px" wordWrap="false" text="Подразделение:"/>
                 </g:cell>
                 <g:cell width="100%">
                     <dep:DepartmentPickerPopupWidget ui:field="departmentPicker" multiselection="false" width="100%"/>
@@ -47,7 +47,7 @@
 
             <g:HorizontalPanel spacing="6"  verticalAlignment="middle" addStyleNames="{style.content}">
                 <g:cell horizontalAlignment="right">
-                    <g:Label width="140px" wordWrap="false" text="Тип налоговой формы:" ui:field="formDataKindLabel"/>
+                    <g:Label width="180px" wordWrap="false" text="Тип налоговой формы:" ui:field="formDataKindLabel"/>
                 </g:cell>
                 <g:cell width="100%">
                     <r:RefBookPickerWidget ui:field="formDataKind" attributeIdInt="837" searchEnabled="false" versionEnabled="false"
@@ -57,7 +57,7 @@
 
             <g:HorizontalPanel spacing="6"  verticalAlignment="middle" addStyleNames="{style.content}">
                 <g:cell horizontalAlignment="right">
-                    <g:Label width="140px" wordWrap="false" text="Вид налоговой формы:" ui:field="formTypeIdLabel"/>
+                    <g:Label width="180px" wordWrap="false" text="Вид налоговой формы:" ui:field="formTypeIdLabel"/>
                 </g:cell>
                 <g:cell width="100%">
                     <r:RefBookPickerWidget ui:field="formTypeId" attributeIdInt="835" isHierarchical="false"  versionEnabled="false"
@@ -67,7 +67,7 @@
 
             <g:HorizontalPanel spacing="6"  verticalAlignment="middle" addStyleNames="{style.content}" ui:field="monthPanel">
                 <g:cell horizontalAlignment="right">
-                    <g:Label width="140px" wordWrap="false" text="Месяц:"/>
+                    <g:Label width="180px" wordWrap="false" text="Месяц:"/>
                 </g:cell>
                 <g:cell width="100%">
                     <dw:ValueListBox width="100%" ui:field="formMonth"/>
@@ -77,6 +77,24 @@
             <g:HorizontalPanel spacing="6" verticalAlignment="middle" addStyleNames="{style.content}" ui:field="correctionPanel">
                 <g:cell horizontalAlignment="left">
                     <g:Label width="100%" ui:field="correctionDate"/>
+                </g:cell>
+            </g:HorizontalPanel>
+
+            <g:HorizontalPanel spacing="6" verticalAlignment="middle" addStyleNames="{style.content}"  ui:field="comparativPeriodPanel">
+                <g:cell horizontalAlignment="right">
+                    <g:Label width="180px" wordWrap="false" text="Период сравнения:"/>
+                </g:cell>
+                <g:cell width="100%">
+                    <rep:PeriodPickerPopupWidget width="100%" ui:field="comparativPeriodId" multiselect="false"/>
+                </g:cell>
+            </g:HorizontalPanel>
+
+            <g:HorizontalPanel spacing="6" verticalAlignment="middle" addStyleNames="{style.content}" ui:field="accruingPanel">
+                <g:cell horizontalAlignment="right">
+                    <g:Label width="180px" wordWrap="false" text="Расчет нарастающим итогом:"/>
+                </g:cell>
+                <g:cell width="100%">
+                    <g:CheckBox ui:field="accruing" text=""/>
                 </g:cell>
             </g:HorizontalPanel>
 

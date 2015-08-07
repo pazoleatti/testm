@@ -14,6 +14,8 @@ public class CreateFormData extends UnsecuredActionImpl<CreateFormDataResult> im
     private Integer formDataKindId;
 
     private Integer monthId;
+    private Integer comparativPeriodId;
+    private boolean accruing;
 
     public Integer getFormDataTypeId() {
         return formDataTypeId;
@@ -65,5 +67,21 @@ public class CreateFormData extends UnsecuredActionImpl<CreateFormDataResult> im
     @Override
     public String getName() {
         return "Создание налоговой формы";
+    }
+
+    public void setComparativPeriodId(Integer comparativPeriodId) {
+        this.comparativPeriodId = comparativPeriodId;
+    }
+
+    public Integer getComparativPeriodId() {
+        return comparativPeriodId;
+    }
+
+    public void setAccruing(boolean accruing) {
+        this.accruing = accruing;
+    }
+
+    public boolean isAccruing() {
+        return accruing;
     }
 }

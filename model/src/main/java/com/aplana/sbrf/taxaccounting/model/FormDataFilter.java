@@ -47,6 +47,10 @@ public class FormDataFilter implements Serializable{
     // месяцы
     private Months formMonth;
 
+    private List<Integer> comparativPeriodId;
+
+    private boolean accruing;
+
 	public List<Integer> getDepartmentIds() {
 		return departmentIds;
 	}
@@ -169,5 +173,21 @@ public class FormDataFilter implements Serializable{
      */
     public void setCorrectionDate(Date correctionDate) {
         this.correctionDate = correctionDate;
+    }
+
+    public List<Integer> getComparativPeriodId() {
+        return comparativPeriodId;
+    }
+
+    public void setComparativPeriodId(List<Integer> comparativPeriodId) {
+        this.comparativPeriodId = comparativPeriodId;
+    }
+
+    public boolean isAccruing() {
+        return accruing;
+    }
+
+    public void setAccruing(boolean accruing) {
+        this.accruing = accruing;
     }
 }

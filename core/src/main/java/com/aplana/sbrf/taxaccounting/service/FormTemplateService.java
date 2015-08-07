@@ -186,10 +186,17 @@ public interface FormTemplateService {
 
     /**
      * Является ли форма ежемесячной.
-     * @param formId идентификатор формы
+     * @param formTemplateId идентификатор макета
      * @return
      */
-    boolean isMonthly(int formId);
+    boolean isMonthly(int formTemplateId);
+
+    /**
+     * Есть ли у макета признак периода сравнения
+     * @param formTemplateId идентификатор макета
+     * @return
+     */
+    boolean isComparative(Integer formTemplateId);
 
     /**
      * Обновление статуса декларации

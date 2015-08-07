@@ -44,7 +44,10 @@ public class CreateFormDataView extends PopupViewWithUiHandlers<CreateFormDataUi
 
     private final MyDriver driver;
 
+    /** Признак ежемесячной формы */
     private boolean isMonthly = false;
+    /** признак формы с периодом сравнения */
+    private boolean comparative = false;
 
     @UiField
     @Ignore
@@ -72,10 +75,7 @@ public class CreateFormDataView extends PopupViewWithUiHandlers<CreateFormDataUi
     RefBookPickerWidget formTypeId;
 
     @UiField
-    HorizontalPanel monthPanel;
-
-    @UiField
-    HorizontalPanel correctionPanel;
+    HorizontalPanel monthPanel, correctionPanel, comparativPeriodPanel, accruingPanel;
 
     @UiField
     @Ignore
@@ -89,6 +89,12 @@ public class CreateFormDataView extends PopupViewWithUiHandlers<CreateFormDataUi
 
     @UiField
     Button cancelButton;
+
+    @UiField
+    PeriodPickerPopupWidget comparativPeriodId;
+
+    @UiField
+    CheckBox accruing;
 
     @Inject
     public CreateFormDataView(Binder uiBinder, final MyDriver driver, EventBus eventBus) {
@@ -133,8 +139,17 @@ public class CreateFormDataView extends PopupViewWithUiHandlers<CreateFormDataUi
         // дата корректировки
         correctionPanel.setVisible(departmentPicker.getValue() != null && !departmentPicker.getValue().isEmpty() &&
                 correctionDate.getText() != null && !correctionDate.getText().isEmpty());
+        // Период сравнения и признак нарастающих итогов доступен только для вида формы с признаком использования двух периодов
+        comparativPeriodPanel.setVisible(formTypeId.getValue() != null && !formTypeId.getValue().isEmpty() && comparative);
+        accruingPanel.setVisible(formTypeId.getValue() != null && !formTypeId.getValue().isEmpty() && comparative);
         // Кнопка "Создать" недоступна пока все не заполнено
-        continueButton.setEnabled(formMonth.getValue() != null);
+        continueButton.setEnabled(
+                formMonth.getValue() != null && (
+                        //Если нф с периодом сравнения, то он должен быть заполнен
+                        !comparative || (
+                                comparativPeriodId.getValue() != null && !comparativPeriodId.getValue().isEmpty())
+                        )
+        );
     }
 
 
@@ -171,7 +186,7 @@ public class CreateFormDataView extends PopupViewWithUiHandlers<CreateFormDataUi
     public void onFormTypeIdChange(ValueChangeEvent<List<Long>> event) {
         formMonth.setValue(null);
         if (getUiHandlers() != null && formTypeId.getValue() != null && !formTypeId.getValue().isEmpty() && reportPeriodIds.getValue() != null && !reportPeriodIds.getValue().isEmpty()) {
-            getUiHandlers().isMonthly(formTypeId.getValue().get(0).intValue(), reportPeriodIds.getValue().get(0));
+            getUiHandlers().checkFormType(formTypeId.getValue().get(0).intValue(), reportPeriodIds.getValue().get(0));
         }
 
         updateEnabled();
@@ -180,6 +195,12 @@ public class CreateFormDataView extends PopupViewWithUiHandlers<CreateFormDataUi
     @UiHandler("continueButton")
     public void onSave(ClickEvent event) {
         if (getUiHandlers() != null) {
+            if (isMonthly && formMonth.getValue() == null) {
+                Dialog.errorMessage("Ошибка", "Не задан месяц!");
+            }
+            if (comparative && comparativPeriodId.getValue() == null) {
+                Dialog.errorMessage("Ошибка", "Не задан период сравнения!");
+            }
             getUiHandlers().onConfirm();
         }
     }
@@ -203,6 +224,11 @@ public class CreateFormDataView extends PopupViewWithUiHandlers<CreateFormDataUi
     @Override
     public void setAcceptableReportPeriods(List<ReportPeriod> reportPeriods) {
         reportPeriodIds.setPeriods(reportPeriods);
+    }
+
+    @Override
+    public void setAcceptableComparativPeriods(List<ReportPeriod> comparativPeriods) {
+        comparativPeriodId.setPeriods(comparativPeriods);
     }
 
     @Override
@@ -289,6 +315,13 @@ public class CreateFormDataView extends PopupViewWithUiHandlers<CreateFormDataUi
         } else {
             continueButton.setEnabled(true);
         }
+    }
+
+    @Override
+    public void setComparative(boolean comparative) {
+        this.comparative = comparative;
+        comparativPeriodPanel.setVisible(comparative);
+        accruingPanel.setVisible(comparative);
     }
 
     @Override

@@ -77,6 +77,13 @@ public class CreateFormDataHandler extends AbstractActionHandler<CreateFormData,
         // Подставляется последний отчетный период подразделения
         DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.getLast(action.getDepartmentId(),
                 action.getReportPeriodId());
+        // Получаем DepartmentReportPeriod для периода сравнения (может быть null)
+        Integer comparativDrpId = null;
+        if (action.getComparativPeriodId() != null) {
+            DepartmentReportPeriod comparativDrp = departmentReportPeriodService.getLast(action.getDepartmentId(),
+                    action.getComparativPeriodId());
+            comparativDrpId = comparativDrp.getId();
+        }
         if (departmentReportPeriod == null) {
             throw new ServiceException(ERROR_DEPARTMENT_REPORT_PERIOD_NOT_FOUND);
         }
@@ -127,6 +134,7 @@ public class CreateFormDataHandler extends AbstractActionHandler<CreateFormData,
 
                 int templateId = formTemplateService.getActiveFormTemplateId(formDataTypeId, departmentReportPeriod.getReportPeriod().getId());
                 long formDataId = formDataService.createFormData(logger, userInfo, templateId, departmentReportPeriod.getId(),
+                        comparativDrpId, action.isAccruing(),
                         kind, action.getMonthId(), false);
 
                 // Если декларация является приемником и есть форма ручного ввода в корректируемом периоде

@@ -218,9 +218,9 @@ public class FormDataServiceImpl implements FormDataService {
     private BlobDataService blobDataService;
 
     @Override
-    public long createFormData(Logger logger, TAUserInfo userInfo, int formTemplateId, int departmentReportPeriodId, FormDataKind kind, Integer periodOrder, boolean importFormData) {
+    public long createFormData(Logger logger, TAUserInfo userInfo, int formTemplateId, int departmentReportPeriodId, Integer comparativPeriodId, boolean accruing, FormDataKind kind, Integer periodOrder, boolean importFormData) {
         formDataAccessService.canCreate(userInfo, formTemplateId, kind, departmentReportPeriodId);
-        return createFormDataWithoutCheck(logger, userInfo, formTemplateId, departmentReportPeriodId, kind, periodOrder, importFormData);
+        return createFormDataWithoutCheck(logger, userInfo, formTemplateId, departmentReportPeriodId, comparativPeriodId, accruing, kind, periodOrder, importFormData);
     }
 
     @Override
@@ -345,6 +345,7 @@ public class FormDataServiceImpl implements FormDataService {
 
     @Override
 	public long createFormDataWithoutCheck(Logger logger, TAUserInfo userInfo, int formTemplateId, int departmentReportPeriodId,
+                                           Integer comparativPeriodId, boolean accruing,
                                            FormDataKind kind, Integer periodOrder, boolean importFormData) {
 		FormTemplate formTemplate = formTemplateService.get(formTemplateId);
         FormData formData = new FormData(formTemplate);
@@ -361,6 +362,8 @@ public class FormDataServiceImpl implements FormDataService {
         formData.setKind(kind);
         formData.setPeriodOrder(periodOrder);
         formData.setManual(false);
+        formData.setComparativPeriodId(comparativPeriodId);
+        formData.setAccruing(accruing);
 
         FormDataPerformer performer = null;
         FormData formDataOld = getPrevPeriodFormData(formTemplate, departmentReportPeriod, kind, periodOrder);

@@ -221,7 +221,7 @@ public class LoadFormDataServiceTest {
 
     private void mockFormDataService() {
         when(formDataService.createFormData(any(Logger.class), any(TAUserInfo.class), eq(1), eq(147),
-                eq(FormDataKind.PRIMARY), any(Integer.class), eq(true))).thenReturn(1L);
+                any(Integer.class), any(Boolean.class), eq(FormDataKind.PRIMARY), any(Integer.class), eq(true))).thenReturn(1L);
     }
 
     private void mockAuditService() {
@@ -372,7 +372,7 @@ public class LoadFormDataServiceTest {
 
         FormDataService formDataService = mock(FormDataService.class);
         when(formDataService.createFormData(any(Logger.class), any(TAUserInfo.class), eq(1), eq(147),
-                eq(FormDataKind.PRIMARY), any(Integer.class), eq(true))).thenReturn(1L);
+                any(Integer.class), any(Boolean.class), eq(FormDataKind.PRIMARY), any(Integer.class), eq(true))).thenReturn(1L);
 
         doThrow(new RuntimeException("Test RuntimeException")).when(formDataService).importFormData(any(Logger.class), any(TAUserInfo.class),
                 any(Long.class), any(Boolean.class), any(InputStream.class), anyString(), any(FormDataEvent.class));

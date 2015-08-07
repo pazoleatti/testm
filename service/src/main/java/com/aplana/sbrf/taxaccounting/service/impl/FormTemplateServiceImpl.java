@@ -349,9 +349,15 @@ public class FormTemplateServiceImpl implements FormTemplateService {
     }
 
     @Override
-    public boolean isMonthly(int formId) {
-        FormTemplate formTemplate = formTemplateDao.get(formId);
+    public boolean isMonthly(int formTemplateId) {
+        FormTemplate formTemplate = formTemplateDao.get(formTemplateId);
         return formTemplate.isMonthly();
+    }
+
+    @Override
+    public boolean isComparative(Integer formTemplateId) {
+        FormTemplate formTemplate = formTemplateDao.get(formTemplateId);
+        return formTemplate.isComparative();
     }
 
     @Override

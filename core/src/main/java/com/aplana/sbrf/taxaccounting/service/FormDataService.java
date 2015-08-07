@@ -21,12 +21,15 @@ public interface FormDataService {
      * @param userInfo Пользователь-инициатор операции
      * @param formTemplateId Макет
      * @param departmentReportPeriodId Отчетный период подразделения
+     * @param comparativPeriodId период сравнения
+     * @param accruing признак нарастающего итога
      * @param kind Тип НФ
      * @param periodOrder Номер месяца для ежемесячных форм (для остальных параметр отсутствует)
      * @param importFormData флаг создания при загрузке
      * @return Id НФ
      */
     long createFormData(Logger logger, TAUserInfo userInfo, int formTemplateId, int departmentReportPeriodId,
+                        Integer comparativPeriodId, boolean accruing,
                         FormDataKind kind, Integer periodOrder, boolean importFormData);
 
     /**
@@ -152,12 +155,15 @@ public interface FormDataService {
      * @param userInfo информация о пользователе, выполняющего операцию
      * @param formTemplateId идентификатор шаблона формы
      * @param departmentReportPeriodId Отчетный период подразделения
+     * @param comparativPeriodId период сравнения
+     * @param accruing признак нарастающего итога
      * @param kind тип налоговой формы
      * @param periodOrder номер месяца для ежемесячных форм (для остальных параметр отсутствует)
      * @param importFormData признак импорта
      * @return созданный объект FormData (еще не сохранённый в БД)
      */
 	long createFormDataWithoutCheck(Logger logger, TAUserInfo userInfo, int formTemplateId, int departmentReportPeriodId,
+                                    Integer comparativPeriodId, boolean accruing,
                                     FormDataKind kind, Integer periodOrder, boolean importFormData);
 
 	/**

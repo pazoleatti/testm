@@ -138,6 +138,8 @@ public class MappingServiceImpl implements MappingService {
                         userInfo,
                         formTemplateId,
                         departmentReportPeriod.getId(),
+                        null,
+                        false,
                         FormDataKind.PRIMARY,
                         periodOrder,
                         false);

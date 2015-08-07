@@ -504,7 +504,7 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
             int formTemplateId = formTemplateService.getActiveFormTemplateId(formType.getId(),
                     departmentReportPeriod.getReportPeriod().getId());
             long formDataId = formDataService.createFormData(localLogger, userInfo, formTemplateId,
-                    departmentReportPeriod.getId(), formDataKind, month, true);
+                    departmentReportPeriod.getId(), null, false, formDataKind, month, true);
             formData = formDataDao.get(formDataId, false);
         } else {
             // 17А.2Б

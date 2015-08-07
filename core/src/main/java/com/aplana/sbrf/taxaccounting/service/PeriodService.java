@@ -233,6 +233,15 @@ public interface PeriodService {
     List<ReportPeriod> getCorrectPeriods(TaxType taxType, int departmentId);
 
     /**
+     * Получить периоды сравнени - выборка 50
+     * http://conf.aplana.com/pages/viewpage.action?pageId=20386707
+     * @param taxType тип налога
+     * @param departmentId идентификатор подразделения
+     * @return список корректирующих периодов
+     */
+    List<ReportPeriod> getComparativPeriods(TaxType taxType, int departmentId);
+
+    /**
      * Открыть корректирующий период
      * @param taxType тип налога
      * @param reportPeriod отчетный период

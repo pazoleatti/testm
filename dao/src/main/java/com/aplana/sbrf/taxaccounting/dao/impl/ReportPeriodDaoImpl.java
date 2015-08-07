@@ -210,6 +210,25 @@ public class ReportPeriodDaoImpl extends AbstractDao implements ReportPeriodDao 
     }
 
     @Override
+    public List<ReportPeriod> getComparativPeriods(TaxType taxType, int departmentId) {
+        try {
+            return getJdbcTemplate().query(
+                    "select * from REPORT_PERIOD rp " +
+                            "left join TAX_PERIOD tp on rp.TAX_PERIOD_ID=tp.ID " +
+                            "left join DEPARTMENT_REPORT_PERIOD drp on rp.ID=drp.REPORT_PERIOD_ID  " +
+                            "where tp.TAX_TYPE = ? and drp.DEPARTMENT_ID= ? " +
+                            "and CORRECTION_DATE is null " +
+                            "order by year",
+                    new Object[]{String.valueOf(taxType.getCode()), departmentId},
+                    new int[] { Types.VARCHAR, Types.NUMERIC},
+                    new ReportPeriodMapper()
+            );
+        } catch (EmptyResultDataAccessException e) {
+            return Collections.emptyList();
+        }
+    }
+
+    @Override
     public ReportPeriod getByTaxPeriodAndDict(int taxPeriodId, int dictTaxPeriodId) {
         try {
             return getJdbcTemplate().queryForObject(

@@ -744,6 +744,11 @@ public class PeriodServiceImpl implements PeriodService {
     }
 
     @Override
+    public List<ReportPeriod> getComparativPeriods(TaxType taxType, int departmentId) {
+        return reportPeriodDao.getComparativPeriods(taxType, departmentId);
+    }
+
+    @Override
     public void openCorrectionPeriod(TaxType taxType, ReportPeriod reportPeriod, int departmentId, Date term, TAUserInfo user, List<LogEntry> logs) {
         for (Integer depId : getAvailableDepartments(taxType, user.getUser(), Operation.OPEN, departmentId)) {
             DepartmentReportPeriod drp = new DepartmentReportPeriod();
