@@ -30,6 +30,10 @@ public enum FormDataSearchOrdering {
 	 */
 	REPORT_PERIOD_NAME,
     /**
+     * По наименованию периода сравнения
+     */
+    COMPARATIV_PERIOD_NAME,
+    /**
      * По наименованию месяца отчётного периода
      */
     REPORT_PERIOD_MONTH_NAME,

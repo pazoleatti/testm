@@ -12,7 +12,7 @@ public class FormDataSearchResultItem implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
-	public FormDataSearchResultItem() {
+    public FormDataSearchResultItem() {
 	}
 
 	// Идентификатор записи с данными налоговой формы
@@ -53,6 +53,12 @@ public class FormDataSearchResultItem implements Serializable {
     private int count;
     //Иерархические имена
     private String hierarchicalDepName;
+    //Название периода сравнения
+    private Integer comparativPeriodId;
+    //Название периода сравнения
+    private String comparativPeriodName;
+    /** Признак расчета значений нф нарастающим итогом (false - не нарастающим итогом, true - нарастающим итогом, пустое - форма без периода сравнения) */
+    private boolean accruing;
 
     public String getHierarchicalDepName() {
         return hierarchicalDepName;
@@ -175,5 +181,29 @@ public class FormDataSearchResultItem implements Serializable {
 
     public void setCorrectionDate(Date correctionDate) {
         this.correctionDate = correctionDate;
+    }
+
+    public Integer getComparativPeriodId() {
+        return comparativPeriodId;
+    }
+
+    public void setComparativPeriodId(Integer comparativPeriodId) {
+        this.comparativPeriodId = comparativPeriodId;
+    }
+
+    public String getComparativPeriodName() {
+        return comparativPeriodName;
+    }
+
+    public void setComparativPeriodName(String comparativPeriodName) {
+        this.comparativPeriodName = comparativPeriodName;
+    }
+
+    public boolean isAccruing() {
+        return accruing;
+    }
+
+    public void setAccruing(boolean accruing) {
+        this.accruing = accruing;
     }
 }

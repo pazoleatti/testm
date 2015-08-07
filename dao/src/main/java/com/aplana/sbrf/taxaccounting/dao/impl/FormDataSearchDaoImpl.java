@@ -28,9 +28,17 @@ public class FormDataSearchDaoImpl extends AbstractDao implements FormDataSearch
     private final static SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
 
     private void appendFromClause(StringBuilder sql){
-        sql.append(" FROM form_data fd, department_report_period drp, form_type ft, department dp, report_period rp, tax_period tp, log_business lb")
-                .append(" WHERE EXISTS (SELECT 1 FROM FORM_TEMPLATE t WHERE t.id = fd.form_template_id AND t.type_id = ft.id)")
-                .append(" AND drp.id = fd.department_report_period_id and dp.id = drp.department_id AND rp.id = drp.report_period_id AND tp.id=rp.tax_period_id AND lb.form_data_id = fd.id AND lb.event_id = 1");
+        sql.append(" FROM form_data fd \n")
+                .append("join department_report_period drp on drp.id = fd.department_report_period_id\n")
+                .append("join form_template t on t.id = fd.form_template_id\n")
+                .append("join form_type ft on ft.id = t.type_id\n")
+                .append("join department dp on dp.id = drp.department_id \n")
+                .append("join report_period rp on rp.id = drp.report_period_id\n")
+                .append("join tax_period tp on tp.id=rp.tax_period_id\n")
+                .append("join log_business lb on lb.form_data_id = fd.id\n")
+                .append("left join department_report_period cdrp on (cdrp.id = fd.COMPARATIVE_DEP_REP_PER_ID and dp.id = cdrp.department_id)\n")
+                .append("left join report_period crp on crp.id = cdrp.report_period_id \n")
+                .append("where lb.event_id = 1 ");
     }
 
 	private void appendWhereClause(StringBuilder sql, FormDataDaoFilter filter) {
@@ -80,11 +88,11 @@ public class FormDataSearchDaoImpl extends AbstractDao implements FormDataSearch
 	}
 
 	private void appendSelectClause(StringBuilder sql) {
-		sql.append("SELECT fd.ID as form_data_id, fd.department_report_period_id, fd.form_template_id, fd.return_sign, " +
-                "fd.KIND as form_data_kind_id, fd.STATE, fd.PERIOD_ORDER as period_order, tp.year,")
-			.append(" ft.ID as form_type_id, ft.NAME as form_type_name, ft.TAX_TYPE,")
-			.append(" dp.ID as department_id, dp.NAME as department_name, dp.TYPE as department_type,")
-			.append(" rp.ID as report_period_id, rp.NAME as report_period_name, drp.correction_date ");
+		sql.append("SELECT fd.ID as form_data_id, fd.department_report_period_id, fd.form_template_id, fd.return_sign, \n" +
+                "fd.KIND as form_data_kind_id, fd.STATE, fd.PERIOD_ORDER as period_order, tp.year,\n")
+			.append(" ft.ID as form_type_id, ft.NAME as form_type_name, ft.TAX_TYPE,\n")
+			.append(" dp.ID as department_id, dp.NAME as department_name, dp.TYPE as department_type,  drp.correction_date, \n")
+			.append(" rp.ID as report_period_id, rp.NAME as report_period_name, fd.COMPARATIVE_DEP_REP_PER_ID, fd.ACCRUING \n");
 	}
 
 	@Override
@@ -142,6 +150,9 @@ public class FormDataSearchDaoImpl extends AbstractDao implements FormDataSearch
 		case REPORT_PERIOD_NAME:
 			column = "(100*extract(month from rp.calendar_start_date)+extract(day from rp.calendar_start_date))";
 			break;
+        case COMPARATIV_PERIOD_NAME:
+            column = "(100*extract(month from crp.calendar_start_date)+extract(day from crp.calendar_start_date))";
+            break;
         case REPORT_PERIOD_MONTH_NAME:
             column = "fd.period_order";
             break;
@@ -201,13 +212,15 @@ public class FormDataSearchDaoImpl extends AbstractDao implements FormDataSearch
             "fd.department_report_period_id, fd.STATE, " +
             "fd.PERIOD_ORDER as period_order, tp.year, ft.ID as form_type_id, ft.NAME as form_type_name, ft.TAX_TYPE, " +
             "dp.ID as department_id, dp.NAME as department_name, dp.TYPE as department_type, rp.ID as report_period_id, " +
-            "rp.NAME as report_period_name %s, drp.correction_date " +
+            "rp.NAME as report_period_name %s, drp.correction_date, fd.COMPARATIVE_DEP_REP_PER_ID, fd.ACCRUING " +
             "FROM form_data fd " +
             "join department_report_period drp on drp.id = fd.department_report_period_id " +
             "JOIN FORM_TEMPLATE t on t.id = fd.form_template_id " +
             "JOIN form_type ft on t.type_id = ft.id " +
             "JOIN department dp on dp.id = drp.department_id " +
             "JOIN report_period rp on rp.id = drp.report_period_id " +
+            "LEFT JOIN department_report_period cdrp on (fd.COMPARATIVE_DEP_REP_PER_ID = cdrp.id and cdrp.department_id = dp.id) " +
+            "LEFT JOIN report_period crp on rp.id = cdrp.report_period_id " +
             "JOIN tax_period tp on tp.id=rp.tax_period_id " +
             "JOIN log_business lb on lb.form_data_id = fd.id " +
             "%s" +
@@ -254,6 +267,8 @@ public class FormDataSearchDaoImpl extends AbstractDao implements FormDataSearch
                         result.setFormTypeName(rs.getString("form_type_name"));
                         result.setReportPeriodId(SqlUtils.getInteger(rs,"report_period_id"));
                         result.setReportPeriodName(rs.getString("report_period_name"));
+                        result.setComparativPeriodId(SqlUtils.getInteger(rs,"COMPARATIVE_DEP_REP_PER_ID"));
+                        result.setAccruing(rs.getBoolean("ACCRUING"));
                         result.setState(WorkflowState.fromId(SqlUtils.getInteger(rs,"state")));
                         result.setTaxType(TaxType.fromCode(rs.getString("tax_type").charAt(0)));
                         result.setCorrectionDate(rs.getDate("correction_date"));
