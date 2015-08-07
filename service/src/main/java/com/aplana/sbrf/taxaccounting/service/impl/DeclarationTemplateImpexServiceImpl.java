@@ -39,6 +39,7 @@ public class DeclarationTemplateImpexServiceImpl implements
 		try {
 			ZipOutputStream zos = new ZipOutputStream(os);
             DeclarationTemplate dt = declarationTemplateService.get(id);
+            dt.setCreateScript(declarationTemplateService.getDeclarationTemplateScript(id));
 			
 			// Version
 			ZipEntry ze/* = new ZipEntry(VERSION_FILE)*/;
@@ -47,12 +48,13 @@ public class DeclarationTemplateImpexServiceImpl implements
 			zos.closeEntry();*/
 			
 			// Script
-			ze = new ZipEntry(SCRIPT_FILE);
-			zos.putNextEntry(ze);
             String dtScript = dt.getCreateScript();
-            if (dtScript != null)
-			    zos.write(dtScript.getBytes(ENCODING));
-			zos.closeEntry();
+            if (dtScript != null){
+                ze = new ZipEntry(SCRIPT_FILE);
+                zos.putNextEntry(ze);
+                zos.write(dtScript.getBytes(ENCODING));
+                zos.closeEntry();
+            }
 			
 			// JasperTemplate
             BlobData jrxml = blobDataService.get(dt.getJrxmlBlobId());
