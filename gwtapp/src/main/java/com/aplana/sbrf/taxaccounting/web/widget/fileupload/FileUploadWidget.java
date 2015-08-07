@@ -51,6 +51,8 @@ public class FileUploadWidget extends Composite implements HasHandlers, HasValue
         }
     };
 
+    private HandlerRegistration uploadReg;
+
     @Override
     public boolean isEnabled() {
         return uploadButton.isEnabled();
@@ -153,6 +155,29 @@ public class FileUploadWidget extends Composite implements HasHandlers, HasValue
                 uploadData.submit();
             }
         });
+
+        uploadReg = uploadData.addSubmitCompleteHandler(new FormPanel.SubmitCompleteHandler() {
+            @Override
+            public void onSubmitComplete(FormPanel.SubmitCompleteEvent event) {
+                String result = event.getResults().replaceAll(respPattern, "");
+                LogCleanEvent.fire(FileUploadWidget.this);
+                JSONObject answer = JSONParser.parseLenient(result).isObject();
+                if (answer.get(UuidEnum.UUID.toString()) != null) {
+                    setValue(answer.get(UuidEnum.UUID.toString()).isString().stringValue(), true);
+                }
+                String uuid = null;
+                boolean isErrors = false;
+                if (answer.get(UuidEnum.SUCCESS_UUID.toString()) != null) {
+                    uuid = answer.get(UuidEnum.SUCCESS_UUID.toString()).isString().stringValue();
+                } else if (answer.get(UuidEnum.ERROR_UUID.toString()) != null) {
+                    uuid = answer.get(UuidEnum.ERROR_UUID.toString()).isString().stringValue();
+                    isErrors = true;
+                }
+                uploadData.reset();
+
+                EndLoadFileEvent.fire(FileUploadWidget.this, uuid, isErrors);
+            }
+        });
     }
 
     @UiHandler(value = {"uploadButton"})
@@ -193,8 +218,9 @@ public class FileUploadWidget extends Composite implements HasHandlers, HasValue
      * @param isJrxml будет ли загружаться jrxml
      */
     public void setIsJrxml(boolean isJrxml) {
-        if (isJrxml){
-            uploadData.addSubmitCompleteHandler(new FormPanel.SubmitCompleteHandler() {
+        if (isJrxml && uploadReg != null){
+            uploadReg.removeHandler();
+            uploadReg = uploadData.addSubmitCompleteHandler(new FormPanel.SubmitCompleteHandler() {
                 @Override
                 public void onSubmitComplete(FormPanel.SubmitCompleteEvent event) {
                     String result = event.getResults().replaceAll(respPattern, "");
@@ -206,7 +232,7 @@ public class FileUploadWidget extends Composite implements HasHandlers, HasValue
                     String uuid;
                     if (answer.get(UuidEnum.SUCCESS_UUID.toString()) != null) {
                         uuid = answer.get(UuidEnum.SUCCESS_UUID.toString()).isString().stringValue();
-                        EndLoadFileEvent.fire(FileUploadWidget.this, uuid, true);
+                        EndLoadFileEvent.fire(FileUploadWidget.this, uuid, false);
                     } else if (answer.get(UuidEnum.UPLOADED_FILE.toString()) != null) {
                         JrxmlFileExistEvent.fire(
                                 FileUploadWidget.this,
@@ -216,31 +242,10 @@ public class FileUploadWidget extends Composite implements HasHandlers, HasValue
                     } else if (answer.get(UuidEnum.ERROR_UUID.toString()) != null) {
                         uuid = answer.get(UuidEnum.ERROR_UUID.toString()).isString().stringValue();
                         EndLoadFileEvent.fire(FileUploadWidget.this, uuid, true);
+                    } else {
+                        EndLoadFileEvent.fire(FileUploadWidget.this, null, false);
                     }
                     uploadData.reset();
-                }
-            });
-        } else {
-            uploadData.addSubmitCompleteHandler(new FormPanel.SubmitCompleteHandler() {
-                @Override
-                public void onSubmitComplete(FormPanel.SubmitCompleteEvent event) {
-                    String result = event.getResults().replaceAll(respPattern, "");
-                    LogCleanEvent.fire(FileUploadWidget.this);
-                    JSONObject answer = JSONParser.parseLenient(result).isObject();
-                    if (answer.get(UuidEnum.UUID.toString()) != null) {
-                        setValue(answer.get(UuidEnum.UUID.toString()).isString().stringValue(), true);
-                    }
-                    String uuid = null;
-                    boolean isErrors = false;
-                    if (answer.get(UuidEnum.SUCCESS_UUID.toString()) != null) {
-                        uuid = answer.get(UuidEnum.SUCCESS_UUID.toString()).isString().stringValue();
-                    } else if (answer.get(UuidEnum.ERROR_UUID.toString()) != null) {
-                        uuid = answer.get(UuidEnum.ERROR_UUID.toString()).isString().stringValue();
-                        isErrors = true;
-                    }
-                    uploadData.reset();
-
-                    EndLoadFileEvent.fire(FileUploadWidget.this, uuid, isErrors);
                 }
             });
         }
