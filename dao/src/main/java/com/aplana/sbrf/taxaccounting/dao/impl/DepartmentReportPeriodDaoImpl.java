@@ -316,14 +316,10 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
     public Integer getCorrectionNumber(int id) {
         try {
             return getJdbcTemplate().queryForInt(
-                    "select num from " +
-                            "(select rownum-1 as num, drp1.id as id1, drp2.id as id2 " +
-                            "from department_report_period drp1, department_report_period drp2 " +
-                            "where drp1.department_id = drp2.department_id " +
-                            "and drp1.report_period_id = drp2.report_period_id " +
-                            "and drp2.id = ? " +
-                            "order by  drp1.department_id,  drp1.report_period_id, drp1.correction_date nulls first) " +
-                            "where id1 = id2",
+                    "select num from (\n" +
+                            "select id, correction_date as corr_date,\n" +
+                            "row_number() over(partition by report_period_id, department_id order by correction_date nulls first) - 1 as num\n" +
+                            "from department_report_period drp) where id = ?",
                     new Object[]{id},
                     new int[]{Types.NUMERIC}
             );
