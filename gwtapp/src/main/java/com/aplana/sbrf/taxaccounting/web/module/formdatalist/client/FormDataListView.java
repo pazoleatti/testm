@@ -191,7 +191,7 @@ public class FormDataListView extends ViewWithUiHandlers<FormDataListUiHandlers>
 		formDataTable.addResizableColumn(reportPeriodColumn, FormDataListUtils.REPORT_PERIOD_TITLE);
         formDataTable.setColumnWidth(reportPeriodColumn, 7, Style.Unit.EM);
 
-        comparativPeriodHeader = formDataTable.createResizableHeader(FormDataListUtils.REPORT_PERIOD_TITLE, periodMonthColumn);
+        comparativPeriodHeader = formDataTable.createResizableHeader(FormDataListUtils.REPORT_PERIOD_TITLE, comparativPeriodColumn);
         formDataTable.addColumn(comparativPeriodColumn, comparativPeriodHeader);
         formDataTable.setColumnWidth(comparativPeriodColumn, 7, Style.Unit.EM);
 
