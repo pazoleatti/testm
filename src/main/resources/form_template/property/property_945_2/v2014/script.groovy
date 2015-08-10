@@ -277,7 +277,7 @@ DataRow<Cell> calcItog(def int i, def List<DataRow<Cell>> dataRows) {
 DataRow<Cell> getSubTotal(def int i, def taxAuthority, def kpp, String title) {
     def newRow = (formDataEvent in [FormDataEvent.IMPORT, FormDataEvent.IMPORT_TRANSPORT_FILE]) ? formData.createStoreMessagingDataRow() : formData.createDataRow()
     newRow.getCell('fix').colSpan = 5
-    newRow.fix = (title != null ? newRow.fix = title : 'Итого по НО ' + taxAuthority + ' и КПП ' + kpp)
+    newRow.fix = (title != null ? title : 'Итого по НО ' + taxAuthority + ' и КПП ' + kpp)
     newRow.setAlias('total#'.concat(i.toString()))
     allColumns.each {
         newRow.getCell(it).setStyleAlias('Контрольные суммы')

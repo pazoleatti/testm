@@ -1,5 +1,6 @@
 package form_template.income.rnu71_2.v2012
 
+import com.aplana.sbrf.taxaccounting.model.Cell
 import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.FormDataKind
@@ -334,14 +335,7 @@ def getTotalRow(def dataRows) {
 
 // Расчет подитогового значения
 DataRow<Cell> calcItog(def int i, def List<DataRow<Cell>> dataRows) {
-    def newRow = formData.createDataRow()
-
-    newRow.getCell('fix').colSpan = 6
-    newRow.fix = 'Итого по ' + (dataRows.get(i).contragent ?: '')
-    newRow.setAlias('itg#'.concat(i.toString()))
-    allColumns.each {
-        newRow.getCell(it).setStyleAlias('Контрольные суммы')
-    }
+    def newRow = getSubTotal(i, 'Итого по ' + (dataRows.get(i).contragent ?: ''))
 
     // Расчеты подитоговых значений
     subTotalColumns.each {
@@ -355,6 +349,17 @@ DataRow<Cell> calcItog(def int i, def List<DataRow<Cell>> dataRows) {
         }
     }
 
+    return newRow
+}
+
+DataRow<Cell> getSubTotal(def int i, def title) {
+    def newRow = (formDataEvent in [FormDataEvent.IMPORT, FormDataEvent.IMPORT_TRANSPORT_FILE]) ? formData.createStoreMessagingDataRow() : formData.createDataRow()
+    newRow.getCell('fix').colSpan = 6
+    newRow.fix = title
+    newRow.setAlias('itg#'.concat(i.toString()))
+    allColumns.each {
+        newRow.getCell(it).setStyleAlias('Контрольные суммы')
+    }
     return newRow
 }
 
@@ -701,6 +706,8 @@ void importData() {
     def rowIndex = 0
     def rows = []
     def allValuesCount = allValues.size()
+    def totalRowFromFile = null
+    def subTotalRows = [:]
 
     // формирвание строк нф
     for (def i = 0; i < allValuesCount; i++) {
@@ -713,7 +720,19 @@ void importData() {
             break
         }
         // Пропуск итоговых строк
-        if (rowValues[INDEX_FOR_SKIP] == "Всего" || rowValues[INDEX_FOR_SKIP].contains("Итого по ")) {
+        if (rowValues[INDEX_FOR_SKIP] == "Всего") {
+            rowIndex++
+            totalRowFromFile = getNewRowFromXls(rowValues, colOffset, fileRowIndex, rowIndex)
+
+            allValues.remove(rowValues)
+            rowValues.clear()
+            continue
+        } else if (rowValues[INDEX_FOR_SKIP].contains("Итого по ")) {
+            rowIndex++
+            def subTotal = getNewSubTotalRowFromXls(rowValues, colOffset, fileRowIndex, rowIndex)
+            rows.add(subTotal)
+            subTotalRows[subTotal.fix] = subTotal
+
             allValues.remove(rowValues)
             rowValues.clear()
             continue
@@ -727,8 +746,27 @@ void importData() {
         rowValues.clear()
     }
 
+    // сравнение подитогов
+    def onlySimpleRows = rows.findAll { it.getAlias() == null }
+    // Добавить строки подитогов
+    addAllAliased(onlySimpleRows, new CalcAliasRow() {
+        @Override
+        DataRow<Cell> calc(int i, List<DataRow<Cell>> tmpRows) {
+            return calcItog(i, tmpRows)
+        }
+    }, groupColumns)
+    def onlySubTotalTmpRows = onlySimpleRows.findAll { it.getAlias() != null }
+    onlySubTotalTmpRows.each { subTotalTmpRow ->
+        def key = subTotalTmpRow.fix
+        def subTotalRow = subTotalRows[key]
+        compareTotalValues(subTotalRow, subTotalTmpRow, subTotalColumns, logger, false)
+    }
+
+    // сравнение итога
     def totalRow = getTotalRow(rows)
     rows.add(totalRow)
+    updateIndexes(rows)
+    compareSimpleTotalValues(totalRow, totalRowFromFile, rows, totalColumns, formData, logger, false)
 
     showMessages(rows, logger)
     if (!logger.containsLevel(LogLevel.ERROR)) {
@@ -847,6 +885,47 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
     // графа 13..20
     ['lossThisQuarter', 'lossNextQuarter', 'lossThisTaxPeriod', 'taxClaimPrice', 'finResult', 'correctThisPrev',
             'correctThisThis', 'correctThisNext'].each { alias ->
+        colIndex++
+        newRow[alias] = getNumber(values[colIndex], fileRowIndex, colIndex + colOffset)
+    }
+
+    return newRow
+}
+
+/**
+ * Получить новую подитоговую строку из файла.
+ *
+ * @param values список строк со значениями
+ * @param colOffset отступ в колонках
+ * @param fileRowIndex номер строки в тф
+ * @param rowIndex строка в нф
+ */
+def getNewSubTotalRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) {
+    // графа fix
+    def title = values[1]
+
+    def newRow = getSubTotal(rowIndex - 1, title)
+    newRow.setIndex(rowIndex)
+    newRow.setImportIndex(fileRowIndex)
+
+    // графа 10
+    def colIndex = 10
+    newRow.income = getNumber(values[colIndex], fileRowIndex, colIndex + colOffset)
+
+    // графа 11
+    colIndex = 11
+    newRow.result = getNumber(values[colIndex], fileRowIndex, colIndex + colOffset)
+
+    // графа 13..15
+    colIndex = 12
+    ['lossThisQuarter', 'lossNextQuarter', 'lossThisTaxPeriod'].each { alias ->
+        colIndex++
+        newRow[alias] = getNumber(values[colIndex], fileRowIndex, colIndex + colOffset)
+    }
+
+    // графа 18..20
+    colIndex = 17
+    ['correctThisPrev', 'correctThisThis', 'correctThisNext'].each { alias ->
         colIndex++
         newRow[alias] = getNumber(values[colIndex], fileRowIndex, colIndex + colOffset)
     }
