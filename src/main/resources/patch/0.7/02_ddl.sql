@@ -17,6 +17,10 @@ end loop;
 end;
 /
 
+--http://jira.aplana.com/browse/SBRFACCTAX-12250: Наименование узла кластера, на котором выполняется связанная асинхронная задача
+alter table lock_data add SERVER_NODE varchar2(100);
+comment on column lock_data.server_node is 'Наименование узла кластера, на котором выполняется связанная асинхронная задача';
+
 -- http://jira.aplana.com/browse/SBRFACCTAX-12090: Добавить в FORM_DATA признак актуальности сортировки и счетчик количества пронумерованных строк текущей НФ
 alter table form_data add sorted number(1) default 0 not null;
 alter table form_data add constraint form_data_chk_sorted check (sorted in (0, 1));

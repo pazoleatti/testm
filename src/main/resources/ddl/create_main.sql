@@ -743,7 +743,8 @@ create table lock_data
   state varchar2(500),
   state_date date,
   description varchar2(4000),
-  queue number(9) default 0 not null
+  queue number(9) default 0 not null,
+  server_node varchar2(100)
 );
 
 comment on table lock_data is 'Информация о блокировках';
@@ -755,6 +756,7 @@ comment on column lock_data.state is 'Статус выполнения асин
 comment on column lock_data.state_date is 'Дата последнего изменения статуса';
 comment on column lock_data.description is 'Описание блокировки';
 comment on column lock_data.queue is 'Очередь, в которой находится связанная асинхронная задача';
+comment on column lock_data.server_node is 'Наименование узла кластера, на котором выполняется связанная асинхронная задача';
 --------------------------------------------------------------------------------------------------------
 create table department_type
 (
