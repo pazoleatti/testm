@@ -30,6 +30,7 @@ try {
     formTemplate.setVersion(Date.parse('dd.MM.yyyy', '%10%'))
     formTemplate.setMonthly(%11%)
     formTemplate.setHeader('%12%')
+    formTemplate.setComparative(%18%)
 
     def form_type_id = formType.id
     def form_template_id = formTemplate.id
