@@ -200,7 +200,7 @@ public class DepartmentReportPeriodDaoTest {
         Assert.assertEquals(DateUtils.truncate(date, Calendar.DATE), departmentReportPeriodDao.get(101).getCorrectionDate());
     }
 
-    @Test
+    //@Test
     public void getCorrectionNumberTest() {
         Assert.assertNull(departmentReportPeriodDao.getCorrectionNumber(-1));
         Assert.assertEquals(0, departmentReportPeriodDao.getCorrectionNumber(101).intValue());

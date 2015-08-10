@@ -1,3 +1,26 @@
+-- Удаление ошибочно существующих невалидных PL/SQL-объектов, относящихся к TAX_RNU
+set serveroutput on size 30000;
+
+declare query_str varchar2(1024) := '';
+begin
+for x in (select * from user_objects where object_name like 'APL%' or object_name like 'NSI%' and object_type in ('PROCEDURE', 'FUNCTION')) loop
+	if x.status = 'VALID' then --Better safe than sorry
+		dbms_output.put_line('Valid object '||x.object_name||' ('||x.object_type||') will not be deleted.');
+	end if;
+	if x.status = 'INVALID' then
+		query_str := 'DROP '||x.object_type||' '||x.object_name;
+		dbms_output.put_line(query_str||'.');
+		commit;
+		execute immediate query_str;
+	end if;
+end loop;
+end;
+/
+
+--http://jira.aplana.com/browse/SBRFACCTAX-12250: Наименование узла кластера, на котором выполняется связанная асинхронная задача
+alter table lock_data add SERVER_NODE varchar2(100);
+comment on column lock_data.server_node is 'Наименование узла кластера, на котором выполняется связанная асинхронная задача';
+
 -- http://jira.aplana.com/browse/SBRFACCTAX-12090: Добавить в FORM_DATA признак актуальности сортировки и счетчик количества пронумерованных строк текущей НФ
 alter table form_data add sorted number(1) default 0 not null;
 alter table form_data add constraint form_data_chk_sorted check (sorted in (0, 1));
@@ -36,6 +59,8 @@ comment on column form_data.comparative_dep_rep_per_id is 'Период срав
 comment on column form_data.accruing is 'Признак расчета значений нарастающим итогом (0 - не нарастающим итогом, 1 - нарастающим итогом, пустое - форма без периода сравнения)';
 alter table form_data add constraint form_data_fk_co_dep_rep_per_id foreign key (comparative_dep_rep_per_id) references department_report_period (id);
 alter table form_data add constraint form_data_chk_accruing check (accruing in (0, 1));
+
+
 
 COMMIT;
 EXIT;
