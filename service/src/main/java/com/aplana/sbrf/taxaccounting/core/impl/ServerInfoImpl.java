@@ -1,7 +1,7 @@
 package com.aplana.sbrf.taxaccounting.core.impl;
 
 import com.aplana.sbrf.taxaccounting.core.api.ServerInfo;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.lang.reflect.Method;
 
@@ -11,7 +11,8 @@ import java.lang.reflect.Method;
  * @author <a href="mailto:Marat.Fayzullin@aplana.com">Файзуллин Марат</a>
  * @since 07.08.15 21:05
  */
-@Component
+
+@Service
 public class ServerInfoImpl implements ServerInfo {
 
 	@Override
