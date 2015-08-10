@@ -225,6 +225,7 @@ void importData() {
     // получить строки из шаблона
     def formTemplate = formDataService.getFormTemplate(formData.formType.id, formData.reportPeriodId)
     def templateRows = formTemplate.rows
+    def totalRow = getDataRow(dataRows, 'total')
 
     // формирвание строк нф
     for (def i = 0; i < allValuesCount; i++) {
@@ -236,14 +237,18 @@ void importData() {
             rowValues.clear()
             break
         }
+        rowIndex++
         // Пропуск итоговых строк
         if (rowValues[INDEX_FOR_SKIP] == "Итого") {
+            def templateTotalRow = getDataRow(templateRows, 'total')
+
+            fillRowFromXls(templateTotalRow, totalRow, rowValues, fileRowIndex, rowIndex, colOffset)
+
             allValues.remove(rowValues)
             rowValues.clear()
             continue
         }
         // простая строка
-        rowIndex++
         if (rowIndex > dataRows.size()) {
             break
         }
@@ -257,6 +262,12 @@ void importData() {
         allValues.remove(rowValues)
         rowValues.clear()
     }
+    // сравнение итогов
+    def totalRowTmp = formData.createStoreMessagingDataRow()
+    // подсчитанные итоговые значения для сравнения
+    totalRowTmp.summ = calcTotal(dataRows)
+    compareTotalValues(totalRow, totalRowTmp, ['summ'], logger, false)
+
     showMessages(dataRows, logger)
 }
 
@@ -303,6 +314,10 @@ void fillRowFromXls(def templateRow, def dataRow, def values, int fileRowIndex, 
     // графа 1
     def colIndex = 0
     tmpValues.number = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
+
+    // графа fix
+    colIndex = 1
+    tmpValues.fix = values[colIndex]
 
     // графа 2
     colIndex = 2

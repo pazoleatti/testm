@@ -798,13 +798,14 @@ void importData() {
 
     // получить строки из шаблона
     def formTemplate = formDataService.getFormTemplate(formData.formType.id, formData.reportPeriodId)
-    def rows = formTemplate.rows
+    def templateRows = formTemplate.rows
 
     def rowIndex = 0
     def allValuesCount = allValues.size()
 
     def section = null // название секции на английском
     def sectionRowsMap = [:]
+    def totalRowFromFileMap = [:]
 
     // формирвание строк нф
     for (def i = 0; i < allValuesCount; i++) {
@@ -829,6 +830,9 @@ void importData() {
             rowValues.clear()
             continue
         } else if (hiddenValue == 'Итого') {
+            rowIndex++
+            totalRowFromFileMap[section] = getNewRowFromXls(rowValues, colOffset, fileRowIndex, rowIndex)
+
             allValues.remove(rowValues)
             rowValues.clear()
             continue
@@ -848,15 +852,22 @@ void importData() {
     }
 
     // копирование данных по разделам
-    updateIndexes(rows)
+    updateIndexes(templateRows)
+    def rows = []
     sectionRowsMap.keySet().each { sectionKey ->
-        def copyRows = sectionRowsMap.get(sectionKey)
+        def headRow = getDataRow(templateRows, sectionKey)
+        def totalRow = getDataRow(templateRows, 'total' + sectionKey)
+        rows.add(headRow)
+        def copyRows = sectionRowsMap[sectionKey]
         if (copyRows != null && !copyRows.isEmpty()) {
-            def insertIndex = getDataRow(rows, sectionKey).getIndex()
-            rows.addAll(insertIndex, copyRows)
-            // поправить индексы, потому что они после вставки не пересчитываются
-            updateIndexes(rows)
+            rows.addAll(copyRows)
         }
+        rows.add(totalRow)
+
+        // сравнение итогов
+        updateIndexes(rows)
+        def totalRowFromFile = totalRowFromFileMap[sectionKey]
+        compareSimpleTotalValues(totalRow, totalRowFromFile, copyRows, totalColumns, formData, logger, false)
     }
 
     showMessages(rows, logger)
