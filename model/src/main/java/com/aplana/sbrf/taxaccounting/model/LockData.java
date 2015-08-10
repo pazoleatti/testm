@@ -28,6 +28,8 @@ public final class LockData {
     private LockQueues queue;
     /* Положение задачи в очереди */
     private int queuePosition;
+    /* Наименование узла кластера, на котором выполняется связанная асинхронная задача */
+    private String serverNode;
 
     public enum LockObjects {
         REF_BOOK,
@@ -215,6 +217,14 @@ public final class LockData {
         this.queuePosition = queuePosition;
     }
 
+    public String getServerNode() {
+        return serverNode;
+    }
+
+    public void setServerNode(String serverNode) {
+        this.serverNode = serverNode;
+    }
+
     @Override
     public String toString() {
         return "LockData{" +
@@ -227,6 +237,7 @@ public final class LockData {
                 ", description='" + description + '\'' +
                 ", queue=" + queue +
                 ", queuePosition=" + queuePosition +
+                ", serverNode='" + serverNode + '\'' +
                 '}';
     }
 }
