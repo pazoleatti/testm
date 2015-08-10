@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.core.impl;
 
+import com.aplana.sbrf.taxaccounting.core.api.ServerInfo;
 import com.aplana.sbrf.taxaccounting.model.BalancingVariants;
 import com.aplana.sbrf.taxaccounting.async.manager.AsyncInterruptionManager;
 import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
@@ -49,6 +50,9 @@ public class LockDataServiceImpl implements LockDataService {
 
     @Autowired
     private TransactionHelper tx;
+
+    @Autowired
+    private ServerInfo serverInfo;
 
 	@Override
 	public LockData lock(final String key, final int userId, final String description, final long age) {
@@ -281,7 +285,7 @@ public class LockDataServiceImpl implements LockDataService {
             public Object execute() {
                 try {
                     synchronized (LockDataServiceImpl.class) {
-                        dao.updateState(key, lockDate, state);
+                        dao.updateState(key, lockDate, state, serverInfo.getServerName());
                     }
                 } catch (ServiceException e) {
                     throw e;

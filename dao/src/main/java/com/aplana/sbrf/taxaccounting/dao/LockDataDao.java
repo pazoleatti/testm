@@ -118,8 +118,9 @@ public interface LockDataDao {
      * @param key код блокировки
      * @param lockDate дата начала действия блокировки
      * @param state новый статус
+     * @param serverNode Наименование узла кластера, на котором выполняется связанная асинхронная задача
      */
-    void updateState(String key, Date lockDate, String state);
+    void updateState(String key, Date lockDate, String state, String serverNode);
 
     /**
      * Обновляет очередь, к которой относится асинхронная задача, связанная с указанной блокировкой

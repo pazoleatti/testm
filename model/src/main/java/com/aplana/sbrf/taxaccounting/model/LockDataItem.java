@@ -29,6 +29,8 @@ public class LockDataItem implements Serializable {
     private String queue;
     /* Положение задачи в очереди */
     private int queuePosition;
+    /* Наименование узла сервера, на котором выполняется асинхронная задача */
+    private String serverNode;
 
     public String getKey() {
         return key;
@@ -108,5 +110,13 @@ public class LockDataItem implements Serializable {
 
     public void setUserId(int userId) {
         this.userId = userId;
+    }
+
+    public String getServerNode() {
+        return serverNode;
+    }
+
+    public void setServerNode(String serverNode) {
+        this.serverNode = serverNode;
     }
 }

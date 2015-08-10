@@ -43,6 +43,7 @@ public class LockListView extends ViewWithUiHandlers<LockListUiHandlers>
     public static final String STATE_DATE_TITLE = "Дата изменения состояния";
     public static final String DATE_LOCK_BEFORE = "Дата истечения блокировки";
     public static final String DATE_LOCK = "Дата установки блокировки";
+    public static final String SERVER_NODE_TITLE = "Сервер";
 
     @UiField
     Button extendButton;
@@ -121,6 +122,12 @@ public class LockListView extends ViewWithUiHandlers<LockListUiHandlers>
                 return taskItem.getKey();
             }
         };
+        TextColumn<LockDataItem> serverNodeColumn = new TextColumn<LockDataItem>() {
+            @Override
+            public String getValue(LockDataItem taskItem) {
+                return taskItem.getServerNode();
+            }
+        };
 
         TextColumn<LockDataItem> userColumn = new TextColumn<LockDataItem>() {
             @Override
@@ -168,6 +175,7 @@ public class LockListView extends ViewWithUiHandlers<LockListUiHandlers>
         lockDataTable.setColumnWidth(stateColumn, 100, Style.Unit.PX);
         lockDataTable.setColumnWidth(stateDateColumn, 120, Style.Unit.PX);
         lockDataTable.setColumnWidth(keyColumn, 200, Style.Unit.PX);
+        lockDataTable.setColumnWidth(serverNodeColumn, 100, Style.Unit.PX);
         lockDataTable.setColumnWidth(descriptionColumn, 250, Style.Unit.PX);
         lockDataTable.setColumnWidth(queueColumn, 100, Style.Unit.PX);
 
@@ -175,6 +183,7 @@ public class LockListView extends ViewWithUiHandlers<LockListUiHandlers>
         lockDataTable.addResizableColumn(dateLockColumn, DATE_LOCK);
         lockDataTable.addResizableColumn(dateBeforeColumn, DATE_LOCK_BEFORE);
         lockDataTable.addColumn(keyColumn, KEY_TITLE);
+        lockDataTable.addColumn(serverNodeColumn, SERVER_NODE_TITLE);
         lockDataTable.addColumn(descriptionColumn, DESCRIPTION_TITLE);
         lockDataTable.addColumn(userColumn, USER_TITLE);
         lockDataTable.addColumn(queueColumn, QUEUE_TITLE);
