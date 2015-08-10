@@ -217,7 +217,7 @@ public class LockDataDaoImpl extends AbstractDao implements LockDataDao {
                     + "join sec_user u on u.id = ld.user_id \n" +
                     "where " + queueSql + " \n"
                     + (filter != null && !filter.isEmpty() ?
-                    "and lower(ld.key) like :filter or lower(ld.description) like :filter or lower(ld.state) like :filter or lower(u.login) like :filter or lower(u.name) like :filter "
+                    "and (lower(ld.key) like :filter or lower(ld.description) like :filter or lower(ld.state) like :filter or lower(u.login) like :filter or lower(u.name) like :filter or lower(ld.server_node) like :filter) "
                     : "")
                     + "order by queue desc, queue_position) \n";
 
