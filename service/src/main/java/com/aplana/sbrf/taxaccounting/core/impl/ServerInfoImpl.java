@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.core.impl;
 
 import com.aplana.sbrf.taxaccounting.core.api.ServerInfo;
+import org.springframework.stereotype.Service;
 
 import java.lang.reflect.Method;
 
@@ -11,6 +12,7 @@ import java.lang.reflect.Method;
  * @since 07.08.15 21:05
  */
 
+@Service
 public class ServerInfoImpl implements ServerInfo {
 
 	@Override
