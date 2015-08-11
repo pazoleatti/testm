@@ -200,7 +200,7 @@ void logicCheckBeforeCalc() {
 
         // Определение условий для проверок 2, 3, 4
         def depParam = getDepParam(departmentParam, index)
-        def depId = depParam.get(RefBook.RECORD_ID_ALIAS).numberValue as int ?: -1
+        def depId = depParam.get(RefBook.RECORD_ID_ALIAS).numberValue as long ?: -1
         def departmentName = depParam?.NAME?.stringValue ?: "Не задано"
         def incomeParam = getProvider(33).getRecords(getReportPeriodEndDate() - 1, null, "DEPARTMENT_ID = $depId", null)
         def incomeParamTable = getIncomeParamTable(depParam)
@@ -426,7 +426,7 @@ def getIncomeParamTable(def depParam) {
     if (depParam == null) {
         return null
     }
-    def depId = depParam.get(RefBook.RECORD_ID_ALIAS).numberValue as int
+    def depId = depParam.get(RefBook.RECORD_ID_ALIAS).numberValue as long
     def incomeParam = getProvider(33).getRecords(getReportPeriodEndDate() - 1, null, "DEPARTMENT_ID = $depId", null)
     if (incomeParam != null && !incomeParam.isEmpty()) {
         def link = incomeParam.get(0).record_id.value
