@@ -909,11 +909,11 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
     @Override
     @Transactional(readOnly = false)
-    public void cleanBlobs(Collection<Long> ids) {
+    public void cleanBlobs(Collection<Long> ids, List<ReportType> reportTypes) {
         if (ids.isEmpty()){
             return;
         }
-        reportService.deleteDec(ids);
+        reportService.deleteDec(ids, reportTypes);
     }
 
     @Override

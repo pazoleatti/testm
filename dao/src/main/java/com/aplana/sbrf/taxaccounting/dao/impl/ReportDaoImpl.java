@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.ReportDao;
+import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.model.PreparedStatementData;
 import com.aplana.sbrf.taxaccounting.model.ReportType;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
@@ -12,9 +13,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.*;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 @Repository
 @Transactional(readOnly=true)
@@ -160,9 +159,27 @@ public class ReportDaoImpl extends AbstractDao implements ReportDao {
 
     @Override
     public void deleteDec(final Collection<Long> declarationDataIds) {
+        try {
+            String sql = String.format("DELETE FROM DECLARATION_REPORT WHERE %s", SqlUtils.transformToSqlInStatement("DECLARATION_DATA_ID", declarationDataIds));
+            Map<String, Object> params = new HashMap<String, Object>();
+            getNamedParameterJdbcTemplate().update(sql, params);
+        } catch (DataAccessException e){
+            throw new DaoException("Не удалось удалить записи", e);
+        }
+    }
+
+    @Override
+    public void deleteDec(Collection<Long> declarationDataIds, List<ReportType> reportTypes) {
         try{
-            getNamedParameterJdbcTemplate().update("DELETE FROM DECLARATION_REPORT WHERE DECLARATION_DATA_ID in (:declarationDataIds)",
-                    new HashMap<String, Object>(1){{put("declarationDataIds", declarationDataIds);}});
+            List<Integer> types = new ArrayList<Integer>();
+            for (ReportType type : reportTypes) {
+                types.add(type.getId());
+            }
+            String sql = String.format("DELETE FROM DECLARATION_REPORT WHERE %s and %s",
+                    SqlUtils.transformToSqlInStatement("DECLARATION_DATA_ID", declarationDataIds),
+                    SqlUtils.transformToSqlInStatement("TYPE", types));
+            Map<String, Object> params = new HashMap<String, Object>();
+            getNamedParameterJdbcTemplate().update(sql, params);
         } catch (DataAccessException e){
             throw new DaoException("Не удалось удалить записи", e);
         }

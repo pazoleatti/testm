@@ -247,6 +247,7 @@ public interface DeclarationDataService {
      * Метод для очитски blob-ов у деклараций.
      * Применяется в случае удаления jrxml макета декларации.
      * @param ids идентификаторы деклараций
+     * @param reportTypes типы отчетов, которые надо удалить
      */
-    void cleanBlobs(Collection<Long> ids);
+    void cleanBlobs(Collection<Long> ids, List<ReportType> reportTypes);
 }
