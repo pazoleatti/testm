@@ -58,6 +58,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
     private ReportType timerType;
     private TimerTaskResult.FormMode formMode;
     private boolean lockEditMode;
+    private String taskName;
 
     private Map<ReportType, TimerReportResult.StatusReport> reportTimerStatus;
 
@@ -93,7 +94,8 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
 
 	@Override
 	public void prepareFromRequest(PlaceRequest request) {
-		super.prepareFromRequest(request);
+        modifiedRows.clear();
+        super.prepareFromRequest(request);
         LogCleanEvent.fire(FormDataPresenter.this);
 		GetFormDataAction action = new GetFormDataAction();
 		if ( formData!=null ){
@@ -421,7 +423,39 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
 
 	@Override
 	public void onCancelClicked() {
-		revealFormData(true, formData.isManual(), !absoluteView, null);
+        String msg;
+        if (formMode.equals(TimerTaskResult.FormMode.LOCKED_EDIT) && !readOnlyMode) {
+            msg = "Сохранить изменения без отмены операции \"" + taskName + "\", выйти из режима редактирования? \n\"Да\" - выйти с сохранением без отмены операции. \"Нет\" - выйти без сохранения с отменой операции.";
+        } else {
+            msg = "Сохранить изменения, выйти из режима редактирования? \n\"Да\" - выйти с сохранением. \"Нет\" - выйти без сохранения.";
+        }
+
+        Dialog.confirmMessage("Подтверждение выхода из режима редактирования", msg, new DialogHandler() {
+            @Override
+            public void yes() {
+                ExitAndSaveFormDataAction action = new ExitAndSaveFormDataAction();
+                action.setFormData(formData);
+                dispatcher.execute(action, CallbackUtils.defaultCallback(new AsyncCallback<DataRowResult>() {
+                    @Override
+                    public void onSuccess(DataRowResult result) {
+                        placeManager.setOnLeaveConfirmation(null);
+                        modifiedRows.clear();
+                        revealFormData(true, formData.isManual(), !absoluteView, null);
+                    }
+
+                    @Override
+                    public void onFailure(Throwable caught) {
+
+                    }
+                }, FormDataPresenter.this));
+            }
+
+            @Override
+            public void no() {
+                placeManager.setOnLeaveConfirmation(null);
+                revealFormData(true, formData.isManual(), !absoluteView, null);
+            }
+        });
 	}
 	
 	private AsyncCallback<DataRowResult> createDataRowResultCallback(final boolean showMsg){
@@ -450,15 +484,14 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
 	}
 
 	@Override
-	public void onCheckClicked(final boolean force, final boolean save) {
+	public void onCheckClicked(final boolean force) {
         LogCleanEvent.fire(this);
         CheckFormDataAction checkAction = new CheckFormDataAction();
         checkAction.setFormData(formData);
         checkAction.setEditMode(!readOnlyMode);
         checkAction.setModifiedRows(new ArrayList<DataRow<Cell>>(modifiedRows));
         checkAction.setForce(force);
-        checkAction.setSave(save);
-        dispatcher.execute(checkAction, createDataRowResultCallback(force, save, false, ReportType.CHECK_FD));
+        dispatcher.execute(checkAction, createDataRowResultCallback(force, false, ReportType.CHECK_FD));
 	}  	
 	
 	/* (non-Javadoc)
@@ -471,6 +504,11 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
 		action.setModifiedRows(new ArrayList<DataRow<Cell>>(modifiedRows));
 		dispatcher.execute(action, createDataRowResultCallback(true));
 	}
+
+    @Override
+    public void onExitAndSaveClicked() {
+
+    }
 
 	/* (non-Javadoc)
 	 * @see com.aplana.sbrf.taxaccounting.web.module.formdata.client.FormDataUiHandlers#onAddRowClicked()
@@ -511,17 +549,16 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
      * @see com.aplana.sbrf.taxaccounting.web.module.formdata.client.FormDataUiHandlers#onRecalculateClicked()
      */
 	@Override
-	public void onRecalculateClicked(final boolean force, final boolean save, final boolean cancelTask) {
+	public void onRecalculateClicked(final boolean force, final boolean cancelTask) {
 		RecalculateDataRowsAction action = new RecalculateDataRowsAction();
 		action.setFormData(formData);
 		action.setModifiedRows(new ArrayList<DataRow<Cell>>(modifiedRows));
         action.setForce(force);
-        action.setSave(save);
         action.setCancelTask(cancelTask);
-		dispatcher.execute(action, createDataRowResultCallback(force, save, cancelTask, ReportType.CALCULATE_FD));
+		dispatcher.execute(action, createDataRowResultCallback(force, cancelTask, ReportType.CALCULATE_FD));
 	}
 
-    private AsyncCallback<TaskFormDataResult> createDataRowResultCallback(final boolean force, final boolean save, final boolean cancelTask, final ReportType reportType){
+    private AsyncCallback<TaskFormDataResult> createDataRowResultCallback(final boolean force, final boolean cancelTask, final ReportType reportType){
         AbstractCallback<TaskFormDataResult> callback = new AbstractCallback<TaskFormDataResult>() {
             @Override
             public void onSuccess(TaskFormDataResult result) {
@@ -531,21 +568,9 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                         @Override
                         public void yes() {
                             if (ReportType.CALCULATE_FD.equals(reportType)) {
-                                onRecalculateClicked(true, false, cancelTask);
+                                onRecalculateClicked(true, cancelTask);
                             } else if (ReportType.CHECK_FD.equals(reportType)) {
-                                onCheckClicked(true, false);
-                            }
-                        }
-                    });
-                } else if (result.isSave()) {
-                    modifiedRows.clear();
-                    Dialog.confirmMessage("Запуск операции приведет к сохранению изменений, сделанных в таблице налоговой формы. Продолжить?", new DialogHandler() {
-                        @Override
-                        public void yes() {
-                            if (ReportType.CALCULATE_FD.equals(reportType)) {
-                                onRecalculateClicked(force, true, cancelTask);
-                            } else if (ReportType.CHECK_FD.equals(reportType)) {
-                                onCheckClicked(force, true);
+                                onCheckClicked(true);
                             }
                         }
                     });
@@ -555,9 +580,9 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                         @Override
                         public void yes() {
                             if (ReportType.CALCULATE_FD.equals(reportType)) {
-                                onRecalculateClicked(force, save, true);
+                                onRecalculateClicked(force, true);
                             } else if (ReportType.CHECK_FD.equals(reportType)) {
-                                onCheckClicked(force, save);
+                                onCheckClicked(force);
                             }
                         }
                     });
@@ -947,7 +972,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
         ValueChangeHandler<String> valueChangeHandler = new ValueChangeHandler<String>() {
             @Override
             public void onValueChange(ValueChangeEvent<String> event) {
-                onUploadTF(false, false, false, event.getValue());
+                onUploadTF(false, false, event.getValue());
             }
         };
 
@@ -955,13 +980,12 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
         addRegisteredHandler(SetFocus.getType(), this);
     }
 
-    private void onUploadTF(final boolean force, final boolean save, final boolean cancelTask, final String uuid) {
+    private void onUploadTF(final boolean force, final boolean cancelTask, final String uuid) {
         final ReportType reportType = ReportType.IMPORT_FD;
         final UploadDataRowsAction action = new UploadDataRowsAction();
         action.setFormData(formData);
         action.setModifiedRows(new ArrayList<DataRow<Cell>>(modifiedRows));
         action.setForce(force);
-        action.setSave(save);
         action.setUuid(uuid);
         action.setCancelTask(cancelTask);
         dispatcher.execute(action, CallbackUtils.defaultCallback(new AbstractCallback<UploadFormDataResult>() {
@@ -972,15 +996,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                     Dialog.confirmMessage(LockData.RESTART_LINKED_TASKS_MSG, new DialogHandler() {
                         @Override
                         public void yes() {
-                            onUploadTF(true, false, cancelTask, uuid);
-                        }
-                    });
-                } else if (result.isSave()) {
-                    modifiedRows.clear();
-                    Dialog.confirmMessage("Запуск операции приведет к сохранению изменений, сделанных в таблице налоговой формы. Продолжить?", new DialogHandler() {
-                        @Override
-                        public void yes() {
-                            onUploadTF(force, true, cancelTask, uuid);
+                            onUploadTF(true, cancelTask, uuid);
                         }
                     });
                 } else if (result.isLockTask()) {
@@ -989,7 +1005,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                     Dialog.confirmMessage(LockData.RESTART_LINKED_TASKS_MSG, new DialogHandler() {
                         @Override
                         public void yes() {
-                            onUploadTF(force, save, true, uuid);
+                            onUploadTF(force, true, uuid);
 
                         }
                     });
@@ -1112,7 +1128,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                                         manualMenuPresenter.updateNotificationCount();
                                     }
                                 }
-                                if (isForce || isUpdate || !result.getFormMode().equals(formMode) || result.getLockInfo().isEditMode() != lockEditMode)
+                                if (isForce || isUpdate || !result.getFormMode().equals(formMode) || result.getLockInfo().isEditMode() != lockEditMode || (taskName != null && !taskName.equals(result.getTaskName()) || taskName == null && result.getTaskName() != null))
                                     switch (result.getFormMode()) {
                                         case EDIT:
                                             if (readOnlyMode) {
@@ -1133,7 +1149,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                                                 onTimerReport(ReportType.EXCEL, false);
                                                 onTimerReport(ReportType.CSV, false);
                                             } else {
-                                                setLowEditLockedMode(result.getLockInfo());
+                                                setLowEditLockedMode(result.getLockInfo(), result.getTaskName());
                                             }
                                             break;
                                         case LOCKED:
@@ -1147,6 +1163,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                                             onTimerReport(ReportType.CSV, false);
                                             break;
                                     }
+                                taskName = result.getTaskName();
                                 formMode = result.getFormMode();
                                 lockEditMode = result.getLockInfo().isEditMode();
                             }

@@ -14,6 +14,8 @@ public interface FormDataUiHandlers extends UiHandlers{
 
 	void onSaveClicked();
 
+    void onExitAndSaveClicked();
+
 	void onAddRowClicked();
 
 	void onRemoveRowClicked();
@@ -28,9 +30,9 @@ public interface FormDataUiHandlers extends UiHandlers{
 
 	void onOriginalVersionClicked();
 
-	void onRecalculateClicked(boolean force, boolean save, boolean cancelTask);
+	void onRecalculateClicked(boolean force, boolean cancelTask);
 
-	void onCheckClicked(boolean force, boolean save);
+	void onCheckClicked(boolean force);
 
 	void onPrintExcelClicked(boolean force);
 

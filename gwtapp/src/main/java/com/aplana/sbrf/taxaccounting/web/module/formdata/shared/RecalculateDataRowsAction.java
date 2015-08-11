@@ -17,7 +17,6 @@ import java.util.List;
 public class RecalculateDataRowsAction extends UnsecuredActionImpl<TaskFormDataResult> implements ActionName {
 
     private boolean force;
-    private boolean save;
     private boolean cancelTask;
 
     private List<DataRow<Cell>> modifiedRows;
@@ -29,14 +28,6 @@ public class RecalculateDataRowsAction extends UnsecuredActionImpl<TaskFormDataR
 
     public void setForce(boolean force) {
         this.force = force;
-    }
-
-    public boolean isSave() {
-        return save;
-    }
-
-    public void setSave(boolean save) {
-        this.save = save;
     }
 
     public List<DataRow<Cell>> getModifiedRows() {

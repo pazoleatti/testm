@@ -37,9 +37,6 @@ public abstract class AbstractAsyncTask implements AsyncTask {
             "Сформирован %s отчет";
     protected static final String ERROR_FORM =
             "Произошла непредвиденная ошибка при формировании %s отчета";
-    protected static final String COMPLETE_DEC = "Сформирован %s отчет декларации";
-    protected static final String ERROR_DEC =
-            "Произошла непредвиденная ошибка при формировании %s отчета декларации";
 
     @Autowired
     private LockDataService lockService;

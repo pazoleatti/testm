@@ -12,7 +12,6 @@ public class TaskFormDataResult implements Result {
 
     private String uuid;
     private boolean lock;
-    private boolean save;
     private boolean lockTask;
     private String restartMsg;
 
@@ -30,14 +29,6 @@ public class TaskFormDataResult implements Result {
 
     public void setLock(boolean lock) {
         this.lock = lock;
-    }
-
-    public boolean isSave() {
-        return save;
-    }
-
-    public void setSave(boolean save) {
-        this.save = save;
     }
 
     public boolean isLockTask() {

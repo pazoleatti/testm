@@ -299,7 +299,7 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
      * Форма находится в режиме редактирования, при этом запущена операция изменения данных
      * @param lockInfo
      */
-    protected void setLowEditLockedMode(LockInfo lockInfo){
+    protected void setLowEditLockedMode(LockInfo lockInfo, String taskName){
         readOnlyMode = false;
 
         MyView view = getView();
@@ -333,7 +333,11 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
         view.setTableLockMode(true);
         view.setColumnsData(formData.getFormColumns(), readOnlyMode, forceEditMode);
 
-        placeManager.setOnLeaveConfirmation("Вы уверены, что хотите прекратить редактирование данных налоговой формы?");
+        if (taskName == null) {
+            placeManager.setOnLeaveConfirmation("Вы уверены, что хотите прекратить редактирование данных налоговой формы? В случае выхода все несохраненные изменения будут утеряны.");
+        } else {
+            placeManager.setOnLeaveConfirmation("Вы уверены, что хотите прекратить редактирование данных налоговой формы? В случае выхода все несохраненные изменения будут утеряны и будет отменена операция \""+taskName+"\".");
+        }
         closeFormDataHandlerRegistration = Window.addCloseHandler(new CloseHandler<Window>() {
             @Override
             public void onClose(CloseEvent<Window> event) {
@@ -409,8 +413,8 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
         view.setTableLockMode(false);
         view.setColumnsData(formData.getFormColumns(), readOnlyMode, forceEditMode);
 
-		placeManager.setOnLeaveConfirmation("Вы уверены, что хотите прекратить редактирование данных налоговой формы?");
-		closeFormDataHandlerRegistration = Window.addCloseHandler(new CloseHandler<Window>() {
+        placeManager.setOnLeaveConfirmation("Вы уверены, что хотите прекратить редактирование данных налоговой формы? В случае выхода все несохраненные изменения будут утеряны.");
+        closeFormDataHandlerRegistration = Window.addCloseHandler(new CloseHandler<Window>() {
 			@Override
 			public void onClose(CloseEvent<Window> event) {
 				closeFormDataHandlerRegistration.removeHandler();
@@ -445,6 +449,7 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 	protected void unlockForm(Long formId){
 		UnlockFormData action = new UnlockFormData();
 		action.setFormId(formId);
+        action.setManual(formData.isManual());
 		dispatcher.execute(action, CallbackUtils.emptyCallback());
 	}
 }
