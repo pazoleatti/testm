@@ -116,15 +116,22 @@ public class GetFormDataHandler extends AbstractActionHandler<GetFormDataAction,
 
 	@Override
 	public GetFormDataResult execute(GetFormDataAction action, ExecutionContext context) throws ActionException {
-
         TAUserInfo userInfo = securityService.currentUserInfo();
+        GetFormDataResult result = new GetFormDataResult();
+        Logger logger = new Logger();
 
         actionCheck(action);
 		
 		// UNLOCK: Попытка разблокировать ту форму которая была открыта ранее
 		try {
 			if (action.getOldFormDataId() != null) {
-				formDataService.unlock(action.getOldFormDataId(), userInfo);
+                LockData lockDataEdit = formDataService.getObjectLock(action.getOldFormDataId(), userInfo);
+                if (lockDataEdit != null && lockDataEdit.getUserId() == userInfo.getUser().getId()) {
+                    // Если есть блокировка, то удаляем задачи и откатываем изменения
+                    formDataService.unlock(action.getOldFormDataId(), userInfo);
+                    formDataService.interruptTask(action.getOldFormDataId(), userInfo, Arrays.asList(ReportType.CALCULATE_FD, ReportType.IMPORT_FD, ReportType.CHECK_FD));
+                    dataRowService.restoreCheckPoint(formDataService.getFormData(userInfo, action.getOldFormDataId(), action.isManual(), new Logger()));
+                }
 			}
 		} catch (Exception e){
 			//
@@ -143,9 +150,6 @@ public class GetFormDataHandler extends AbstractActionHandler<GetFormDataAction,
 				//
 			}
 		}
-
-		GetFormDataResult result = new GetFormDataResult();
-		Logger logger = new Logger();
 
         try {
             if (!action.isReadOnly()) {
@@ -189,7 +193,10 @@ public class GetFormDataHandler extends AbstractActionHandler<GetFormDataAction,
         } catch (Exception e) {
 			LOG.error(e.getMessage(), e);
             if (!action.isReadOnly()) {
-                //
+                // Удаляем контрольную точку восстановления
+                FormData formData = formDataService.getFormData(userInfo, action.getFormDataId(), action.isManual(), logger);
+                dataRowService.removeCheckPoint(formData);
+                // Удаляем блокировку
                 formDataService.unlock(action.getFormDataId(), userInfo);
             }
             if (e instanceof ActionException)

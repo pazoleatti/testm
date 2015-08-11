@@ -46,8 +46,8 @@ public class SaveFormDataHandler extends
 		    dataRowService.update(securityService.currentUserInfo(), formData.getId(), action.getModifiedRows(), formData.isManual());
 		}
 		formDataService.saveFormData(logger, securityService.currentUserInfo(), formData);
-		// Удаляем контрольную точку восстановления
-		dataRowService.removeCheckPoint(formData);
+		// Создаем контрольную точку восстановления
+		dataRowService.createCheckPoint(formData);
 
 		logger.info("Данные успешно записаны");
 		DataRowResult result = new DataRowResult();

@@ -15,7 +15,6 @@ public class UploadDataRowsAction extends UnsecuredActionImpl<UploadFormDataResu
 
     private String uuid;
     private boolean force;
-    private boolean save;
     private boolean cancelTask;
 
     private List<DataRow<Cell>> modifiedRows;
@@ -27,14 +26,6 @@ public class UploadDataRowsAction extends UnsecuredActionImpl<UploadFormDataResu
 
     public void setForce(boolean force) {
         this.force = force;
-    }
-
-    public boolean isSave() {
-        return save;
-    }
-
-    public void setSave(boolean save) {
-        this.save = save;
     }
 
     public List<DataRow<Cell>> getModifiedRows() {
