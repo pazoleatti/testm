@@ -1,14 +1,11 @@
 package com.aplana.sbrf.taxaccounting.async.task;
 
 import com.aplana.sbrf.taxaccounting.async.exception.AsyncTaskException;
-import com.aplana.sbrf.taxaccounting.model.BalancingVariants;
 import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.core.api.LockStateLogger;
 import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
-import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -16,9 +13,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.aplana.sbrf.taxaccounting.async.task.AsyncTask.RequiredParams.LOCKED_OBJECT;
-import static com.aplana.sbrf.taxaccounting.async.task.AsyncTask.RequiredParams.LOCK_DATE;
-import static com.aplana.sbrf.taxaccounting.async.task.AsyncTask.RequiredParams.USER_ID;
+import static com.aplana.sbrf.taxaccounting.async.task.AsyncTask.RequiredParams.*;
 
 public abstract class PdfGeneratorAsyncTask extends AbstractAsyncTask {
 
@@ -122,9 +117,11 @@ public abstract class PdfGeneratorAsyncTask extends AbstractAsyncTask {
         if (reportPeriod.getCorrectionDate() != null) {
             strCorrPeriod = ", с датой сдачи корректировки " + SDF_DD_MM_YYYY.format(reportPeriod.getCorrectionDate());
         }
-        return String.format("Сформирован %s отчет декларации: Период: \"%s, %s%s\", Подразделение: \"%s\", Вид: \"%s\"%s",
-                getReportType().getName(), reportPeriod.getReportPeriod().getTaxPeriod().getYear(), reportPeriod.getReportPeriod().getName(), strCorrPeriod, department.getName(),
-                declarationTemplate.getType().getName(), str);
+        return MessageGenerator.getInfoDecMsg(
+                String.format(COMPLETE_DEC, getReportType().getName()), reportPeriod,
+                department.getName(),
+                declarationTemplate.getType().getName(),
+                declaration.getTaxOrganCode(), declaration.getKpp());
     }
 
     @Override
@@ -147,8 +144,10 @@ public abstract class PdfGeneratorAsyncTask extends AbstractAsyncTask {
         if (reportPeriod.getCorrectionDate() != null) {
             strCorrPeriod = ", с датой сдачи корректировки " + SDF_DD_MM_YYYY.format(reportPeriod.getCorrectionDate());
         }
-        return String.format("Произошла непредвиденная ошибка при формировании %s отчета декларации: Период: \"%s, %s%s\", Подразделение: \"%s\", Вид: \"%s\"%s Для запуска процедуры формирования необходимо повторно инициировать формирование данного отчета",
-                getReportType().getName(), reportPeriod.getReportPeriod().getTaxPeriod().getYear(), reportPeriod.getReportPeriod().getName(), strCorrPeriod, department.getName(),
-                declarationTemplate.getType().getName(), str);
+        return MessageGenerator.getInfoDecMsg(
+                String.format(ERROR_DEC, getReportType().getName()), reportPeriod,
+                department.getName(),
+                declarationTemplate.getType().getName(),
+                declaration.getTaxOrganCode(), declaration.getKpp());
     }
 }

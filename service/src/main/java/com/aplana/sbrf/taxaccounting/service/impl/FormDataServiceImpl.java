@@ -9,36 +9,7 @@ import com.aplana.sbrf.taxaccounting.dao.api.ConfigurationDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DataRowDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentFormTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
-import com.aplana.sbrf.taxaccounting.model.Cell;
-import com.aplana.sbrf.taxaccounting.model.Column;
-import com.aplana.sbrf.taxaccounting.model.ColumnType;
-import com.aplana.sbrf.taxaccounting.model.ConfigurationParam;
-import com.aplana.sbrf.taxaccounting.model.DataRow;
-import com.aplana.sbrf.taxaccounting.model.Department;
-import com.aplana.sbrf.taxaccounting.model.DepartmentFormType;
-import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod;
-import com.aplana.sbrf.taxaccounting.model.FormData;
-import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
-import com.aplana.sbrf.taxaccounting.model.FormDataKind;
-import com.aplana.sbrf.taxaccounting.model.FormDataPerformer;
-import com.aplana.sbrf.taxaccounting.model.FormDataSigner;
-import com.aplana.sbrf.taxaccounting.model.FormSources;
-import com.aplana.sbrf.taxaccounting.model.FormTemplate;
-import com.aplana.sbrf.taxaccounting.model.FormToFormRelation;
-import com.aplana.sbrf.taxaccounting.model.Formats;
-import com.aplana.sbrf.taxaccounting.model.IfrsData;
-import com.aplana.sbrf.taxaccounting.model.LockData;
-import com.aplana.sbrf.taxaccounting.model.Months;
-import com.aplana.sbrf.taxaccounting.model.NumerationType;
-import com.aplana.sbrf.taxaccounting.model.RefBookColumn;
-import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
-import com.aplana.sbrf.taxaccounting.model.ReportType;
-import com.aplana.sbrf.taxaccounting.model.TAUser;
-import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
-import com.aplana.sbrf.taxaccounting.model.TaxPeriod;
-import com.aplana.sbrf.taxaccounting.model.TaxType;
-import com.aplana.sbrf.taxaccounting.model.WorkflowMove;
-import com.aplana.sbrf.taxaccounting.model.WorkflowState;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
@@ -48,24 +19,7 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
-import com.aplana.sbrf.taxaccounting.service.AuditService;
-import com.aplana.sbrf.taxaccounting.service.BlobDataService;
-import com.aplana.sbrf.taxaccounting.service.DeclarationTypeService;
-import com.aplana.sbrf.taxaccounting.service.DepartmentReportPeriodService;
-import com.aplana.sbrf.taxaccounting.service.DepartmentService;
-import com.aplana.sbrf.taxaccounting.service.FormDataAccessService;
-import com.aplana.sbrf.taxaccounting.service.FormDataScriptingService;
-import com.aplana.sbrf.taxaccounting.service.FormDataService;
-import com.aplana.sbrf.taxaccounting.service.FormTemplateService;
-import com.aplana.sbrf.taxaccounting.service.FormTypeService;
-import com.aplana.sbrf.taxaccounting.service.IfrsDataService;
-import com.aplana.sbrf.taxaccounting.service.LogBusinessService;
-import com.aplana.sbrf.taxaccounting.service.LogEntryService;
-import com.aplana.sbrf.taxaccounting.service.PeriodService;
-import com.aplana.sbrf.taxaccounting.service.ReportService;
-import com.aplana.sbrf.taxaccounting.service.SignService;
-import com.aplana.sbrf.taxaccounting.service.SourceService;
-import com.aplana.sbrf.taxaccounting.service.TAUserService;
+import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.service.impl.eventhandler.EventLauncher;
 import com.aplana.sbrf.taxaccounting.service.shared.FormDataCompositionService;
 import com.aplana.sbrf.taxaccounting.service.shared.ScriptComponentContextHolder;
@@ -77,27 +31,12 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Сервис для работы с {@link FormData данными по налоговым формам}.
@@ -465,7 +404,7 @@ public class FormDataServiceImpl implements FormDataService {
         checkLockedByTask(formData.getId(), logger, userInfo, "Добавление строки", true);
 
 		FormTemplate formTemplate = formTemplateService.get(formData.getFormTemplateId());
-		
+
 		if (formTemplate.isFixedRows()) {
 			throw new ServiceException("Нельзя добавить строку в НФ с фиксированным количеством строк");
 		}
@@ -480,7 +419,7 @@ public class FormDataServiceImpl implements FormDataService {
 		}
 		dataRowDao.refreshRefBookLinks(formData);
 	}
-	
+
 	@Override
 	public void deleteRow(Logger logger, TAUserInfo userInfo, FormData formData, DataRow<Cell> currentDataRow) {
 		// Форма должна быть заблокирована текущим пользователем для редактирования
@@ -489,13 +428,13 @@ public class FormDataServiceImpl implements FormDataService {
         checkLockedByTask(formData.getId(), logger, userInfo, "Удаление строки", true);
 
 		FormTemplate formTemplate = formTemplateService.get(formData.getFormTemplateId());
-		
+
 		if (formTemplate.isFixedRows()) {
 			throw new ServiceException("Нельзя удалить строку в НФ с фиксированным количеством строк");
 		}
 
 		formDataAccessService.canEdit(userInfo, formData.getId(), formData.isManual());
-		
+
 		Map<String, Object> additionalParameters = new HashMap<String, Object>();
 		additionalParameters.put("currentDataRow", currentDataRow);
 		formDataScriptingService.executeScript(userInfo, formData, FormDataEvent.DELETE_ROW, logger, additionalParameters);
@@ -1302,6 +1241,9 @@ public class FormDataServiceImpl implements FormDataService {
         FormData formData = formDataDao.get(formDataId, manual);
         Department department = departmentService.getDepartment(formData.getDepartmentId());
         DepartmentReportPeriod reportPeriod = departmentReportPeriodService.get(formData.getDepartmentReportPeriodId());
+        DepartmentReportPeriod rpComparison =
+                formData.getComparativPeriodId() != null ?
+                        departmentReportPeriodService.get(formData.getComparativPeriodId()) : null;
         String name;
         if (reportType != null) {
             switch (reportType) {
@@ -1309,93 +1251,64 @@ public class FormDataServiceImpl implements FormDataService {
                 case EXCEL:
                 case IMPORT_FD:
                 case IMPORT_TF_FD:
-                    name = String.format(LockData.DescriptionTemplate.FORM_DATA_TASK.getText(),
-                            reportType.getDescription(),
-                            reportPeriod.getReportPeriod().getName() + " " + reportPeriod.getReportPeriod().getTaxPeriod().getYear(),
-                            formData.getPeriodOrder() != null
-                                    ? " " + Formats.getRussianMonthNameWithTier(formData.getPeriodOrder())
-                                    : "",
-                            reportPeriod.getCorrectionDate() != null
-                                    ? " с датой сдачи корректировки " + SDF_DD_MM_YYYY.format(reportPeriod.getCorrectionDate())
-                                    : "",
-                            department.getName(),
+                    name = MessageGenerator.getInfoFDMsg(reportType.getDescription(),
                             formData.getFormType().getName(),
                             formData.getKind().getName(),
-                            reportPeriod.getCorrectionDate() != null
-                                    ? "Корректировка"
-                                    : (formData.isManual() ? "Ручного ввода" : "Автоматическая"));
+                            department.getName(),
+                            null,
+                            formData.getComparativPeriodId(),
+                            manual,
+                            reportPeriod,
+                            rpComparison);
+
                     break;
                 case MOVE_FD:
-                    name = String.format(LockData.DescriptionTemplate.FORM_DATA_TASK.getText(),
-                            str,
-                            reportPeriod.getReportPeriod().getName() + " " + reportPeriod.getReportPeriod().getTaxPeriod().getYear(),
-                            formData.getPeriodOrder() != null
-                                    ? " " + Formats.getRussianMonthNameWithTier(formData.getPeriodOrder())
-                                    : "",
-                            reportPeriod.getCorrectionDate() != null
-                                    ? " с датой сдачи корректировки " + SDF_DD_MM_YYYY.format(reportPeriod.getCorrectionDate())
-                                    : "",
-                            department.getName(),
+                    name = MessageGenerator.getInfoFDMsg(str,
                             formData.getFormType().getName(),
                             formData.getKind().getName(),
-                            reportPeriod.getCorrectionDate() != null
-                                    ? "Корректировка"
-                                    : (formData.isManual() ? "Ручного ввода" : "Автоматическая"));
+                            department.getName(),
+                            null,
+                            formData.getComparativPeriodId(),
+                            manual,
+                            reportPeriod,
+                            rpComparison);
                     break;
                 case CONSOLIDATE_FD:
                 case CALCULATE_FD:
                 case CHECK_FD:
                 case EDIT_FD:
                 case DELETE_FD:
-                    name = String.format(LockData.DescriptionTemplate.FORM_DATA_TASK.getText(),
-                            String.format(reportType.getDescription(), formData.getFormType().getTaxType().getTaxText()),
-                            reportPeriod.getReportPeriod().getName() + " " + reportPeriod.getReportPeriod().getTaxPeriod().getYear(),
-                            formData.getPeriodOrder() != null
-                                    ? " " + Formats.getRussianMonthNameWithTier(formData.getPeriodOrder())
-                                    : "",
-                            reportPeriod.getCorrectionDate() != null
-                                    ? " с датой сдачи корректировки " + SDF_DD_MM_YYYY.format(reportPeriod.getCorrectionDate())
-                                    : "",
-                            department.getName(),
+                    name = MessageGenerator.getInfoFDMsg(String.format(reportType.getDescription(), formData.getFormType().getTaxType().getTaxText()),
                             formData.getFormType().getName(),
                             formData.getKind().getName(),
-                            reportPeriod.getCorrectionDate() != null
-                                    ? "Корректировка"
-                                    : (formData.isManual() ? "Ручного ввода" : "Автоматическая"));
+                            department.getName(),
+                            null,
+                            formData.getComparativPeriodId(),
+                            manual,
+                            reportPeriod,
+                            rpComparison);
                     break;
                 default:
-                    name = String.format(LockData.DescriptionTemplate.FORM_DATA_TASK.getText(),
-                            "Налоговая форма",
-                            reportPeriod.getReportPeriod().getName() + " " + reportPeriod.getReportPeriod().getTaxPeriod().getYear(),
-                            formData.getPeriodOrder() != null
-                                    ? " " + Formats.getRussianMonthNameWithTier(formData.getPeriodOrder())
-                                    : "",
-                            reportPeriod.getCorrectionDate() != null
-                                    ? " с датой сдачи корректировки " + SDF_DD_MM_YYYY.format(reportPeriod.getCorrectionDate())
-                                    : "",
-                            department.getName(),
+                    name = MessageGenerator.getInfoFDMsg("Налоговая форма",
                             formData.getFormType().getName(),
                             formData.getKind().getName(),
-                            reportPeriod.getCorrectionDate() != null
-                                    ? "Корректировка"
-                                    : (formData.isManual() ? "Ручного ввода" : "Автоматическая"));
+                            department.getName(),
+                            null,
+                            formData.getComparativPeriodId(),
+                            manual,
+                            reportPeriod,
+                            rpComparison);
             }
         } else {
-            name = String.format(LockData.DescriptionTemplate.FORM_DATA_TASK.getText(),
-                    "Налоговая форма",
-                    reportPeriod.getReportPeriod().getName() + " " + reportPeriod.getReportPeriod().getTaxPeriod().getYear(),
-                    formData.getPeriodOrder() != null
-                            ? " " + Formats.getRussianMonthNameWithTier(formData.getPeriodOrder())
-                            : "",
-                    reportPeriod.getCorrectionDate() != null
-                            ? " с датой сдачи корректировки " + SDF_DD_MM_YYYY.format(reportPeriod.getCorrectionDate())
-                            : "",
-                    department.getName(),
+            name = MessageGenerator.getInfoFDMsg("Налоговая форма",
                     formData.getFormType().getName(),
                     formData.getKind().getName(),
-                    reportPeriod.getCorrectionDate() != null
-                            ? "Корректировка"
-                            : (formData.isManual() ? "Ручного ввода" : "Автоматическая"));
+                    department.getName(),
+                    null,
+                    formData.getComparativPeriodId(),
+                    manual,
+                    reportPeriod,
+                    rpComparison);
         }
         return name;
     }
