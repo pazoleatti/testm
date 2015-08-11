@@ -248,7 +248,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         ArrayList<Long> formDataIds = new ArrayList<Long>();
         for (DepartmentFormType dftSource : dftSources){
             FormData formData =
-                    formDataService.getLast(dftSource.getFormTypeId(), dftSource.getKind(), declarationData.getDepartmentId(), declarationData.getReportPeriodId(), dftSource.getPeriodOrder());
+                    formDataService.getLast(dftSource.getFormTypeId(), dftSource.getKind(), dftSource.getDepartmentId(), declarationData.getReportPeriodId(), dftSource.getPeriodOrder());
             if (formData != null && formData.getState() == WorkflowState.ACCEPTED) {
                 formDataIds.add(formData.getId());
             }
