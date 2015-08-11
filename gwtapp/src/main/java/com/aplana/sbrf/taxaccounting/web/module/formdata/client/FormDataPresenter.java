@@ -588,10 +588,8 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                     });
                 } else {
                     modifiedRows.clear();
-                    if (ReportType.CALCULATE_FD.equals(reportType)) {
-                        timerType = reportType;
-                        timer.run();
-                    }
+                    timerType = reportType;
+                    timer.run();
                     getView().setSelectedRow(null, true);
                 }
             }

@@ -14,23 +14,25 @@ import javax.xml.bind.Unmarshaller
 
 /**
  * Утилита создания скрипта для создания макета через scriptExecution
- * Создает FormType, FormTemplate, FormColumn, FormStyle, строки и заголовки макета
+ * Запускать через gradle installApp run
+ * создает в папке template-creator текст скрипта scripExecution-test.txt
+ * после его выполнения необходимо запустить create_form_data_nnn.txt c <a href="http://conf.aplana.com/pages/viewpage.action?pageId=20384703">страницы</a>
  */
 
 static void main(String[] args) {
     String resourcePath = "./src/main/resources/com/aplana/sbrf/taxaccounting/"
-    String templatePath = "../src/main/resources/form_template/income/income_simple_1/v2015/"
+    String templatePath = "../src/main/resources/form_template/etr/etr_4_2/v2015/"
     def map = [ // TODO заполнить
                 // заполняем вручную
-                "%1%" : '666', // id типа НФ
-                "%2%" : 'test', // имя типа НФ
-                "%3%" : 'TaxType.INCOME', // вид налога
-                "%4%" : 'true', // isIFRS
-                "%5%" : 'test', // имя ИФРС
-                "%6%" : '666', // id версии макета НФ
+                "%1%" : '702', // id типа НФ
+                "%2%" : 'Приложение 4-2. Отношение налогов, уплаченных из прибыли к балансовой прибыли', // имя типа НФ
+                "%3%" : 'TaxType.ETR', // вид налога
+                "%4%" : 'false', // isIFRS
+                "%5%" : '', // имя ИФРС
+                "%6%" : '702', // id версии макета НФ
                 "%10%" : '01.01.2015', // версия в формате 01.01.2015
                 "%11%" : 'false', // ежемесячность
-                "%18%" : 'false'] // использование периода сравнения
+                "%18%" : 'true'] // использование периода сравнения
 
     def writer
     try {

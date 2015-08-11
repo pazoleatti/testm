@@ -666,15 +666,31 @@ void importData() {
             continue
         }
         // заполнить строку нф значениями из эксель
-        fillRowFromXls(dataRow, rowValues, fileRowIndex, rowIndex, colOffset)
+        if (alias in [total1Alias, total2Alias]) {
+            // итоги
+            fillTotalRowFromXls(dataRow, rowValues, fileRowIndex, rowIndex, colOffset)
+        } else {
+            // остальные строки
+            fillRowFromXls(dataRow, rowValues, fileRowIndex, rowIndex, colOffset)
+        }
     }
     if (rowIndex < dataRows.size()) {
         logger.error("Структура файла не соответствует макету налоговой формы.")
     }
-    showMessages(dataRows, logger)
-    if (!logger.containsLevel(LogLevel.ERROR)) {
-        updateIndexes(dataRows)
+
+    // сравнение итогов
+    def row40001Tmp = formData.createStoreMessagingDataRow()
+    def row40002Tmp = formData.createStoreMessagingDataRow()
+    totalColumns.each { alias ->
+        row40001Tmp[alias] = getSum(dataRows, alias, first1Alias, last1Alias)
+        row40002Tmp[alias] = getSum(dataRows, alias, first2Alias, last2Alias)
     }
+    def row40001 = getDataRow(dataRows, total1Alias)
+    def row40002 = getDataRow(dataRows, total2Alias)
+    compareTotalValues(row40001, row40001Tmp, totalColumns, logger, false)
+    compareTotalValues(row40002, row40002Tmp, totalColumns, logger, false)
+
+    showMessages(dataRows, logger)
 }
 
 /**
@@ -761,4 +777,25 @@ def fillRowFromXls(def dataRow, def values, int fileRowIndex, int rowIndex, int 
     // графа 8
     colIndex++
     dataRow.rnu4Field5Accepted = parseNumber(normalize(values[colIndex]), fileRowIndex, colIndex + colOffset, logger, true)
+}
+
+/**
+ * Заполняет итоговую строку нф значениями из экселя.
+ *
+ * @param dataRow строка нф
+ * @param values список строк со значениями
+ * @param fileRowIndex номер строки в тф
+ * @param rowIndex номер строки в нф
+ * @param colOffset отступ по столбцам
+ */
+def fillTotalRowFromXls(def dataRow, def values, int fileRowIndex, int rowIndex, int colOffset) {
+    dataRow.setImportIndex(fileRowIndex)
+    dataRow.setIndex(rowIndex)
+
+    // графа 5..8
+    def colIndex = 3
+    ['rnu6Field10Sum', 'rnu6Field12Accepted', 'rnu6Field12PrevTaxPeriod', 'rnu4Field5Accepted'].each { alias ->
+        colIndex++
+        dataRow[alias] = parseNumber(normalize(values[colIndex]), fileRowIndex, colIndex + colOffset, logger, true)
+    }
 }

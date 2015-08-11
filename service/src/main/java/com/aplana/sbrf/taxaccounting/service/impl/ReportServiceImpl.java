@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collection;
+import java.util.List;
 
 @Service
 @Transactional
@@ -79,6 +80,13 @@ public class ReportServiceImpl implements ReportService {
     @Override
     public void deleteDec(Collection<Long> declarationDataId) {
         reportDao.deleteDec(declarationDataId);
+    }
+
+    @Override
+    public void deleteDec(Collection<Long> declarationDataId, List<ReportType> reportTypes) {
+        if (reportTypes != null && !reportTypes.isEmpty()) {
+            reportDao.deleteDec(declarationDataId, reportTypes);
+        }
     }
 
     @Override

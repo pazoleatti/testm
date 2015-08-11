@@ -15,6 +15,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
+import java.util.Arrays;
+
 @Service
 @PreAuthorize("hasRole('ROLE_CONF')")
 public class DeleteJrxmlHandler extends AbstractActionHandler<DeleteJrxmlAction, DeleteJrxmlResult> {
@@ -35,7 +37,9 @@ public class DeleteJrxmlHandler extends AbstractActionHandler<DeleteJrxmlAction,
     @Override
     public DeleteJrxmlResult execute(DeleteJrxmlAction action, ExecutionContext context) throws ActionException {
         //Система удаляет все найденные pdf и xlsx отчеты.
-        declarationDataService.cleanBlobs(declarationTemplateService.getDataIdsThatUseJrxml(action.getDtId(), securityService.currentUserInfo()));
+        declarationDataService.cleanBlobs(
+                declarationTemplateService.getDataIdsThatUseJrxml(action.getDtId(), securityService.currentUserInfo()),
+                Arrays.asList(ReportType.EXCEL_DEC, ReportType.PDF_DEC));
         for (Long id : declarationTemplateService.getLockDataIdsThatUseJrxml(action.getDtId())){
             String keyPDF = declarationDataService.generateAsyncTaskKey(id, ReportType.PDF_DEC);
             String keyEXEL = declarationDataService.generateAsyncTaskKey(id, ReportType.EXCEL_DEC);
