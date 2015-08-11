@@ -94,10 +94,10 @@ public class CreateFormDataHandler extends AbstractActionHandler<CreateFormData,
         FormType formType = formTypeService.get(formDataTypeId);
 
         if (lockDataService.lock(key, userInfo.getUser().getId(),
-                MessageGenerator.getInfoFDMsg("Создание налоговой формы",
+                MessageGenerator.getFDMsg("Создание налоговой формы",
                         formType.getName(),
                         kind.getName(),
-                        department.getName(), action.getMonthId(), action.getComparativPeriodId(), true, departmentReportPeriod, comparativDrp),
+                        department.getName(), action.getMonthId(), true, departmentReportPeriod, comparativDrp),
                 lockDataService.getLockTimeout(LockData.LockObjects.FORM_DATA_CREATE)) == null) {
             //Если блокировка успешно установлена
             try {

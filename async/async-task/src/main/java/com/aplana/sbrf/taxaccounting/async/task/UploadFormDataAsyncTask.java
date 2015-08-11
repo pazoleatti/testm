@@ -109,12 +109,11 @@ public abstract class UploadFormDataAsyncTask extends AbstractAsyncTask {
         DepartmentReportPeriod rpCompare = formData.getComparativPeriodId() != null ?
                 departmentReportPeriodService.get(formData.getComparativPeriodId()) : null;
 
-        return MessageGenerator.getInfoFDMsg(
+        return MessageGenerator.getFDMsg(
                 String.format("Выполнен импорт данных из %s файла в экземпляр налоговой формы", getReportType().getName()),
                 formData.getFormType().getName(),
                 formData.getKind().getName(),
                 department.getName(),
-                formData.getComparativPeriodId(),
                 formData.getPeriodOrder(), false, reportPeriod, rpCompare);
     }
 
@@ -132,7 +131,11 @@ public abstract class UploadFormDataAsyncTask extends AbstractAsyncTask {
         DepartmentReportPeriod rpCompare = formData.getComparativPeriodId() != null ?
                 departmentReportPeriodService.get(formData.getComparativPeriodId()) : null;
 
-        return MessageGenerator.getErrorFDMsg(
-                String.format("Не выполнен импорт данных из %s файла в экземпляр налоговой формы", getReportType()), formData, false, department.getName(), reportPeriod, rpCompare);
+        return MessageGenerator.getFDMsg(
+                "Не выполнен импорт данных из %s файла в экземпляр налоговой формы",
+                formData.getFormType().getName(),
+                formData.getKind().getName(),
+                department.getName(), formData.getPeriodOrder(),
+                false, reportPeriod, rpCompare);
     }
 }

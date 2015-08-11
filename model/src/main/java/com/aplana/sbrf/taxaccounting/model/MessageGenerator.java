@@ -6,8 +6,8 @@ import java.text.SimpleDateFormat;
  * User: avanteev
  */
 public class MessageGenerator {
-    public static String getInfoFDMsg(String mainStr, String formTypeName, String kindName, String departmentName, Integer periodOrder, Integer rpCompareId, boolean manual, DepartmentReportPeriod reportPeriod, DepartmentReportPeriod rpComparison){
-        if (rpCompareId == null) {
+    public static String getFDMsg(String mainStr, String formTypeName, String kindName, String departmentName, Integer periodOrder, boolean manual, DepartmentReportPeriod reportPeriod, DepartmentReportPeriod rpComparison){
+        if (rpComparison == null) {
             return String.format(COMPLETE_FORM,
                     mainStr,
                     formTypeName,
@@ -34,29 +34,29 @@ public class MessageGenerator {
         }
     }
 
-    public static String getErrorFDMsg(String mainStr, FormData formData, boolean manual, String departmentName, DepartmentReportPeriod reportPeriod, DepartmentReportPeriod rpComparison){
-        if (formData.getComparativPeriodId() == null) {
+    public static String getErrorFDMsg(String mainStr, String formTypeName, String kindName, boolean manual, String departmentName, Integer periodOrder, DepartmentReportPeriod reportPeriod, DepartmentReportPeriod rpComparison){
+        if (rpComparison == null) {
             return String.format(ERROR_FORM,
                     mainStr,
-                    formData.getFormType().getName(),
-                    formData.getKind().getName(),
+                    formTypeName,
+                    kindName,
                     departmentName,
                     reportPeriod.getReportPeriod().getName(),
                     reportPeriod.getReportPeriod().getTaxPeriod().getYear(),
-                    formData.getPeriodOrder() != null ? String.format(MONTH,  Formats.getRussianMonthNameWithTier(formData.getPeriodOrder())): "",
+                    periodOrder != null ? String.format(MONTH,  Formats.getRussianMonthNameWithTier(periodOrder)): "",
                     reportPeriod.getCorrectionDate() != null ? String.format(CORRECTION_DATE, SDF_DD_MM_YYYY.format(reportPeriod.getCorrectionDate())) : "",
                     manual ? "ручного ввода" : "автоматическая");
         } else {
             return String.format(ERROR_FORM_WITH_RP_COMPARISON,
                     mainStr,
-                    formData.getFormType().getName(),
-                    formData.getKind().getName(),
+                    formTypeName,
+                    kindName,
                     departmentName,
                     reportPeriod.getReportPeriod().getName(),
                     reportPeriod.getReportPeriod().getTaxPeriod().getYear(),
                     rpComparison.getReportPeriod().getName(),
                     rpComparison.getReportPeriod().getTaxPeriod().getYear(),
-                    formData.getPeriodOrder() != null ? String.format(MONTH,  Formats.getRussianMonthNameWithTier(formData.getPeriodOrder())): "",
+                    periodOrder != null ? String.format(MONTH,  Formats.getRussianMonthNameWithTier(periodOrder)): "",
                     reportPeriod.getCorrectionDate() != null ? String.format(CORRECTION_DATE, SDF_DD_MM_YYYY.format(reportPeriod.getCorrectionDate())) : "",
                     manual ? "ручного ввода" : "автоматическая");
         }
