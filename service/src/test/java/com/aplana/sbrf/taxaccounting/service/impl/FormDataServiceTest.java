@@ -32,7 +32,6 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.*;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -293,6 +292,7 @@ public class FormDataServiceTest extends Assert{
         FormTemplate formTemplate = new FormTemplate();
         formTemplate.setType(formType);
         formTemplate.setId(1);
+        formTemplate.setName("тестовый");
 
         FormData formData = new FormData(formTemplate);
         formData.setState(WorkflowState.CREATED);
@@ -301,6 +301,7 @@ public class FormDataServiceTest extends Assert{
         formData.setReportPeriodId(1);
         formData.setId(1l);
         formData.setDepartmentReportPeriodId(1);
+        formData.setComparativPeriodId(1);
 
         FormData formData1 = new FormData(formTemplate);
         formData1.setState(WorkflowState.CREATED);
@@ -332,14 +333,17 @@ public class FormDataServiceTest extends Assert{
         }};
 
         DepartmentReportPeriod drp = new DepartmentReportPeriod();
+        drp.setReportPeriod(reportPeriod);
         when(departmentReportPeriodService.get(formData.getDepartmentReportPeriodId())).thenReturn(drp);
         DepartmentReportPeriod drp1 = new DepartmentReportPeriod();
+        drp1.setReportPeriod(reportPeriod1);
         drp1.setCorrectionDate(SIMPLE_DATE_FORMAT.parse("01.01.2014"));
         when(departmentReportPeriodService.get(formData1.getDepartmentReportPeriodId())).thenReturn(drp1);
 
         when(formDataDao.getFormDataIds(1, FormDataKind.SUMMARY, 1)).thenReturn(list);
         when(formDataDao.getWithoutRows(1)).thenReturn(formData);
         when(formDataDao.getWithoutRows(2)).thenReturn(formData1);
+        when(formTemplateService.get(formTemplate.getId())).thenReturn(formTemplate);
 
         when(periodService.getReportPeriod(1)).thenReturn(reportPeriod);
         when(periodService.getReportPeriod(2)).thenReturn(reportPeriod1);
@@ -348,11 +352,11 @@ public class FormDataServiceTest extends Assert{
 
         assertTrue(formDataService.existFormData(1, FormDataKind.SUMMARY, 1, logger));
         assertEquals(
-                "Существует экземпляр налоговой формы \"Тестовый тип НФ\" типа \"Сводная\" в подразделении \"Тестовое подразделение\" в периоде \"Тестовый период 2014\"",
+                "Существует экземпляр налоговых форм: Тип: \"тестовый\", Вид: \"Сводная\", Подразделение: \"Тестовое подразделение\", Период: \"Тестовый период 2014\", Период сравнения: Тестовый период 2014, Версия: \"автоматическая\"",
                 logger.getEntries().get(0).getMessage()
         );
         assertEquals(
-                "Существует экземпляр налоговой формы \"Тестовый тип НФ\" типа \"Сводная\" в подразделении \"Тестовое подразделение\" в периоде \"Второй тестовый период 2014\" с датой сдачи корректировки 01.01.2014",
+                "Существует экземпляр налоговых форм: Тип: \"тестовый\", Вид: \"Сводная\", Подразделение: \"Тестовое подразделение\", Период: \"Второй тестовый период 2014\", Дата сдачи корректировки: 01.01.2014, Версия: \"автоматическая\"",
                 logger.getEntries().get(1).getMessage()
         );
     }

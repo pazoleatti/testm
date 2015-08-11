@@ -32,6 +32,8 @@ public class FormDestinationsPresenter extends PresenterWidget<FormDestinationsP
 
     private final DispatchAsync dispatchAsync;
 
+    private TaxType taxType;
+
     public interface MyView extends PopupView, HasUiHandlers<FormDestinationsUiHandlers> {
         void setElementNames(Map<FormDataElementName, String> names);
 
@@ -105,10 +107,14 @@ public class FormDestinationsPresenter extends PresenterWidget<FormDestinationsP
                         if (result.isIssetRelations()){
                             LogAddEvent.fire(FormDestinationsPresenter.this, result.getUuid());
                             // показать сообщение
-                            Dialog.warningMessage("Предупреждение", "Часть назначений налоговых форм подразделениям была выполнена ранее.");
+                            Dialog.warningMessage(
+                                    "Предупреждение",
+                                    "Часть назначений " + (taxType == TaxType.DEAL || taxType == TaxType.ETR ? "форм" : "налоговых форм") +" подразделениям была выполнена ранее.");
                         } else {
                             // Если в БД не было найдено ни одного сочетания, которое пытался создать пользователь (то есть ни разу не был выполнен сценарий 5А), Система выводит Диалог - сообщение:
-                            Dialog.infoMessage("Сообщение", "Назначения налоговых форм подразделениям выполнены успешно.");
+                            Dialog.infoMessage(
+                                    "Сообщение",
+                                    "Назначения " + (taxType == TaxType.DEAL || taxType == TaxType.ETR ? "форм" : "налоговых форм") + " подразделениям выполнены успешно.");
                         }
                         getView().hide();
                         UpdateTable.fire(FormDestinationsPresenter.this, getView().getDepartments());
