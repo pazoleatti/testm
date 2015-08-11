@@ -81,39 +81,49 @@ public abstract class CalculateFormDataAsyncTask extends AbstractAsyncTask {
     protected String getNotificationMsg(Map<String, Object> params) {
         int userId = (Integer)params.get(USER_ID.name());
         long formDataId = (Long)params.get("formDataId");
+        boolean manual = false;
         TAUserInfo userInfo = new TAUserInfo();
         userInfo.setUser(userService.getUser(userId));
 
         Logger logger = new Logger();
-        FormData formData = formDataService.getFormData(userInfo, formDataId, false, logger);
+        FormData formData = formDataService.getFormData(userInfo, formDataId, manual, logger);
         Department department = departmentService.getDepartment(formData.getDepartmentId());
         DepartmentReportPeriod reportPeriod = departmentReportPeriodService.get(formData.getDepartmentReportPeriodId());
-        DepartmentReportPeriod rpCompare = formData.getComparativPeriodId() != null ?
-                departmentReportPeriodService.get(formData.getComparativPeriodId()) : null;
-
-        return MessageGenerator.getInfoFDMsg(
-                String.format(COMPLETE_FORM, getReportType().getName()),
-                formData.getFormType().getName(),
-                formData.getKind().getName(),
-                department.getName(),
-                formData.getComparativPeriodId(),
-                formData.getPeriodOrder(), false, reportPeriod, rpCompare);
+        Integer periodOrder = formData.getPeriodOrder();
+        String strCorrPeriod = "";
+        if (reportPeriod.getCorrectionDate() != null) {
+            strCorrPeriod = ", с датой сдачи корректировки " + SDF_DD_MM_YYYY.format(reportPeriod.getCorrectionDate());
+        }
+        if (periodOrder == null){
+            return String.format("Успешно выполнен расчет налоговой формы: Период: \"%s, %s%s\", Подразделение: \"%s\", Тип: \"%s\", Вид: \"%s\", Версия: \"%s\"", reportPeriod.getReportPeriod().getTaxPeriod().getYear(), reportPeriod.getReportPeriod().getName(), strCorrPeriod, department.getName(), formData.getKind().getName(), formData.getFormType().getName(), manual ? "ручного ввода" : "автоматическая");
+        } else {
+            return String.format("Успешно выполнен расчет налоговой формы: Период: \"%s, %s%s\", Месяц: \"%s\", Подразделение: \"%s\", Тип: \"%s\", Вид: \"%s\", Версия: \"%s\"", reportPeriod.getReportPeriod().getTaxPeriod().getYear(), reportPeriod.getReportPeriod().getName(), strCorrPeriod, Formats.getRussianMonthNameWithTier(formData.getPeriodOrder()), department.getName(), formData.getKind().getName(), formData.getFormType().getName(), manual ? "ручного ввода" : "автоматическая");
+        }
     }
 
     @Override
     protected String getErrorMsg(Map<String, Object> params) {
         int userId = (Integer)params.get(USER_ID.name());
         long formDataId = (Long)params.get("formDataId");
+        boolean manual = false;
         TAUserInfo userInfo = new TAUserInfo();
         userInfo.setUser(userService.getUser(userId));
 
         Logger logger = new Logger();
-        FormData formData = formDataService.getFormData(userInfo, formDataId, false, logger);
+        FormData formData = formDataService.getFormData(userInfo, formDataId, manual, logger);
         Department department = departmentService.getDepartment(formData.getDepartmentId());
         DepartmentReportPeriod reportPeriod = departmentReportPeriodService.get(formData.getDepartmentReportPeriodId());
-        DepartmentReportPeriod rpCompare = formData.getComparativPeriodId() != null ?
-                departmentReportPeriodService.get(formData.getComparativPeriodId()) : null;
-
-        return MessageGenerator.getErrorFDMsg(String.format(ERROR_FORM, getReportType()), formData, false, department.getName(), reportPeriod, rpCompare);
+        Integer periodOrder = formData.getPeriodOrder();
+        String strCorrPeriod = "";
+        if (reportPeriod.getCorrectionDate() != null) {
+            strCorrPeriod = ", с датой сдачи корректировки " + SDF_DD_MM_YYYY.format(reportPeriod.getCorrectionDate());
+        }
+        if (periodOrder == null){
+            return String.format("Не удалось выполнить расчет налоговой формы: Период: \"%s, %s%s\", Подразделение: \"%s\", Тип: \"%s\", Вид: \"%s\", Версия: \"%s\". Найдены фатальные ошибки.",
+                    reportPeriod.getReportPeriod().getTaxPeriod().getYear(), reportPeriod.getReportPeriod().getName(), strCorrPeriod, department.getName(), formData.getKind().getName(), formData.getFormType().getName(), manual ? "ручного ввода" : "автоматическая");
+        } else {
+            return String.format("Не удалось выполнить расчет налоговой формы: Период: \"%s, %s%s\", Месяц: \"%s\", Подразделение: \"%s\", Тип: \"%s\", Вид: \"%s\", Версия: \"%s\". Найдены фатальные ошибки.",
+                    reportPeriod.getReportPeriod().getTaxPeriod().getYear(), reportPeriod.getReportPeriod().getName(), strCorrPeriod, Formats.getRussianMonthNameWithTier(formData.getPeriodOrder()), department.getName(), formData.getKind().getName(), formData.getFormType().getName(), manual ? "ручного ввода" : "автоматическая");
+        }
     }
 }

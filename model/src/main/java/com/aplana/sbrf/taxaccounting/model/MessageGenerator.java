@@ -62,17 +62,6 @@ public class MessageGenerator {
         }
     }
 
-    public static String getInfoDecMsg(String mainStr, DepartmentReportPeriod reportPeriod, String departmentName, String decTypeName, String taxCode, String kpp){
-        return String.format(COMPLETE_DECLATATION,
-                mainStr,
-                reportPeriod.getReportPeriod().getName(),
-                reportPeriod.getReportPeriod().getTaxPeriod().getYear(),
-                departmentName,
-                decTypeName,
-                taxCode,
-                kpp);
-    }
-
     private static final String COMPLETE_FORM =
             "%s: Тип: \"%s\", Вид: \"%s\", Подразделение: \"%s\", Период: \"%s %d\",%s%s Версия: \"%s\"";
     private static final String COMPLETE_FORM_WITH_RP_COMPARISON =
