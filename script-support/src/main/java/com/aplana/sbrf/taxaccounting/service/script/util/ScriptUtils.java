@@ -1569,9 +1569,9 @@ public final class ScriptUtils {
         if (value.abs().compareTo(overpower) != -1) {
             String columnName = getColumnName(row, alias);
             if (algorithm == null || algorithm.isEmpty()) {
-                throw new ServiceException(CHECK_OVERFLOW_MESSAGE_SHORT, index, columnName, size, columnName, algorithm);
+                throw new ServiceException(CHECK_OVERFLOW_MESSAGE_SHORT, index, columnName, size);
             } else {
-                throw new ServiceException(CHECK_OVERFLOW_MESSAGE, index, columnName, size);
+                throw new ServiceException(CHECK_OVERFLOW_MESSAGE, index, columnName, size, columnName, algorithm);
             }
         }
     }
