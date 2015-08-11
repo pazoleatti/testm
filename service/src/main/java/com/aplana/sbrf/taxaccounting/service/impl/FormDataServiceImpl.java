@@ -1064,14 +1064,15 @@ public class FormDataServiceImpl implements FormDataService {
             //Запись на будущее, чтобы второго цикла не делать
             //1E.
             if (sourceForm.getState() == WorkflowState.ACCEPTED){
+                DepartmentReportPeriod formDepartmentReportPeriod = departmentReportPeriodService.get(sourceForm.getDepartmentReportPeriodId());
                 srcAcceptedIds.add(sourceForm.getId());
                 msgPull.add(String.format(FORM_DATA_INFO_MSG,
                         departmentService.getDepartment(sourceDFT.getDepartmentId()).getName(),
                         sourceDFT.getKind().getName(),
                         formTypeService.get(sourceDFT.getFormTypeId()).getName(),
-                        reportPeriodService.getReportPeriod(formData.getReportPeriodId()).getName() + (sourceForm.getPeriodOrder() != null ? " " + Months.fromId(sourceForm.getPeriodOrder()).getTitle() : ""),
-                        (sourceDepartmentReportPeriod.getCorrectionDate() != null ?
-                                String.format(CORRECTION_PATTERN, SDF_DD_MM_YYYY.format(sourceDepartmentReportPeriod.getCorrectionDate()))
+                        formDepartmentReportPeriod.getReportPeriod().getName() + (sourceForm.getPeriodOrder() != null ? " " + Months.fromId(sourceForm.getPeriodOrder()).getTitle() : ""),
+                        (formDepartmentReportPeriod.getCorrectionDate() != null ?
+                                String.format(CORRECTION_PATTERN, SDF_DD_MM_YYYY.format(formDepartmentReportPeriod.getCorrectionDate()))
                                 :
                                 "")
                 ));
