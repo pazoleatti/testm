@@ -13,4 +13,7 @@ public interface DeclarationTemplateUiHandlers extends UiHandlers {
     void onHistoryClicked();
     void onDeleteXsd();
     void onCheckBeforeDeleteJrxml();
+    void downloadJrxml();
+    void downloadXsd();
+    void downloadDect();
 }
