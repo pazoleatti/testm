@@ -1,4 +1,4 @@
-package form_template.etr.etr_4_1.v2015
+package form_template.etr.etr_4_2.v2015
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.FormDataKind
@@ -9,8 +9,8 @@ import com.aplana.sbrf.taxaccounting.model.util.StringUtils
 import groovy.transform.Field
 
 /**
- * Приложение 4-1. Абсолютная величина налоговых платежей
- * formTemplateId = 701
+ * Приложение 4-2. Отношение налогов, уплаченных из прибыли к балансовой прибыли
+ * formTemplateId = 702
  *
  * @author bkinzyabulatov
  *
@@ -18,7 +18,7 @@ import groovy.transform.Field
  * графа 2 - taxName        - Наименование налога
  * графа 3 - symbol102      - символ формы 102
  * графа 4 - comparePeriod  - Период сравнения
- * графа 5 - currentPeriod  - Текущий отчетный период
+ * графа 5 - currentPeriod  - Текущий период
  * графа 6 - deltaRub       - Изменение за период (гр.5-гр.4), тыс.руб.
  * графа 7 - deltaPercent   - Изменение за период (гр.6/гр.4*100),%
  */
@@ -78,11 +78,8 @@ def checkCalcColumns = ['deltaRub', 'deltaPercent']
 def nonEmptyColumns = calcColumns
 
 @Field
-def opuMap = ['R3' : ['28101'],
-           'R5' : ['26411.01', '26411.02'],
-           'R6' : ['26411.03'],
-           'R7' : ['26102' ,'26410.09'],
-           'R8' : ['26411.12', '26411.13']]
+def opuMap = ['R2' : ['28101'],
+           'R3' : ['01000']]
 
 @Field
 def startDateMap = [:]
@@ -107,7 +104,7 @@ def getEndDate(int reportPeriodId) {
 void preCalcCheck() {
     def tmpRow = formData.createDataRow()
     // собираем коды ОПУ
-    def final opuCodes = opuMap.findAll { key, value -> !("R3".equals(key)) || isBank() }.values().sum()
+    def final opuCodes = opuMap.findAll { key, value -> !("R2".equals(key)) || isBank() }.values().sum()
     // находим записи для текущего периода и периода сравнения
     ['comparePeriod': getComparativePeriodId(), 'currentPeriod':formData.reportPeriodId].each { key, value ->
         if (value != null) {
@@ -179,7 +176,7 @@ void logicCheck() {
         def row = dataRows[i]
         def tempRow = tempRows[i]
         // делаем проверку БО только для первичных НФ
-        if (opuMap.keySet().contains(row.getAlias()) && (!"R3".equals(row.getAlias()) || isBank())) {
+        if (opuMap.keySet().contains(row.getAlias()) && (!"R2".equals(row.getAlias()) || isBank())) {
             if (formData.kind == FormDataKind.PRIMARY) {
                 check102(row, check102Columns, tempRow, logger, true)
             }
@@ -194,7 +191,7 @@ void calcValues(def dataRows, def sourceRows) {
     for (alias in opuMap.keySet()) {
         def row = getDataRow(dataRows, alias)
         def rowSource = getDataRow(sourceRows, alias)
-        if ("R3".equals(alias) && !isBank()) {
+        if ("R2".equals(alias) && !isBank()) {
             row.comparePeriod = getSourceValue(getComparativePeriodId(), row, 'comparePeriod')
             row.currentPeriod = getSourceValue(formData.reportPeriodId, row, 'currentPeriod')
             continue
@@ -203,21 +200,18 @@ void calcValues(def dataRows, def sourceRows) {
         row.comparePeriod = calcBO(rowSource, getComparativePeriodId(), 'comparePeriod')
         row.currentPeriod = calcBO(rowSource, formData.reportPeriodId, 'currentPeriod')
     }
-    def row2 = getDataRow(dataRows, "R2")
     def row4 = getDataRow(dataRows, "R4")
+    def row2Source = getDataRow(sourceRows, "R2")
     def row3Source = getDataRow(sourceRows, "R3")
-    def row4Source = getDataRow(sourceRows, "R4")
-    def row5Source = getDataRow(sourceRows, "R5")
-    def row6Source = getDataRow(sourceRows, "R6")
-    def row7Source = getDataRow(sourceRows, "R7")
-    def row8Source = getDataRow(sourceRows, "R8")
     ['comparePeriod', 'currentPeriod'].each {
-        def smallSum = (row5Source[it] ?: 0) + (row6Source[it] ?: 0) + (row7Source[it] ?: 0) + (row8Source[it] ?: 0)
-        checkOverflow(smallSum, row4, it, row4.getIndex() ?: 0, 18, null)
-        row4[it] = smallSum
-        def largeSum = (row3Source[it] ?: 0) + (row4Source[it] ?: 0)
-        checkOverflow(largeSum, row2, it, row2.getIndex() ?: 0, 18, null)
-        row2[it] = largeSum
+        if (row3Source[it]) {
+            def div = (row2Source[it] ?: 0) / row3Source[it] * 100
+            checkOverflow(div, row4, it, row4.getIndex() ?: 0, 18, null)
+            row4[it] = div
+        } else if (dataRows == sourceRows) { // выводить только при расчете
+            rowWarning(logger, row4, String.format("Строка %s: Графа «%s» не может быть заполнена. Выполнение расчета невозможно, так как в результате проверки получен нулевой знаменатель (деление на ноль невозможно)",
+                    row4.getIndex(), getColumnName(row4, it)))
+        }
     }
     for(int i = 0; i < dataRows.size(); i++){
         def row = dataRows[i]
@@ -227,8 +221,8 @@ void calcValues(def dataRows, def sourceRows) {
         if (rowSource.comparePeriod) {
             row.deltaPercent = ((rowSource.deltaRub ?: BigDecimal.ZERO) as BigDecimal) / rowSource.comparePeriod * 100
         } else if (dataRows == sourceRows) { // выводить только при расчете
-            rowWarning(logger, row, String.format("Строка %s: Графа «%s» не может быть заполнена. Выполнение расчета невозможно, так как в результате проверки получен нулевой знаменатель (деление на ноль невозможно)",
-                    row.getIndex(), getColumnName(row, 'deltaPercent')))
+            rowWarning(logger, rowSource, String.format("Строка %s: Графа «%s» не может быть заполнена. Выполнение расчета невозможно, так как в результате проверки получен нулевой знаменатель (деление на ноль невозможно)",
+                    rowSource.getIndex(), getColumnName(rowSource, 'deltaPercent')))
         }
     }
 }
@@ -278,7 +272,7 @@ def calcBO(def rowSource, def periodId, def alias) {
     return periodSum
 }
 
-// Возвращает данные из Формы 102 БО за период + флаг ошибки
+// Возвращает данные из Формы 102 БО за период + флаг корректности
 def get102Sum(def row, def periodId) {
     if (opuMap[row.getAlias()] != null && periodId != null) {
         def opuCodes = opuMap[row.getAlias()].join("' OR OPU_CODE = '")
