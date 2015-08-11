@@ -5,6 +5,7 @@ import com.aplana.gwt.client.dialog.DialogHandler;
 import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
 import com.aplana.sbrf.taxaccounting.model.DeclarationType;
 import com.aplana.sbrf.taxaccounting.model.VersionedObjectStatus;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.DownloadUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
@@ -17,6 +18,7 @@ import com.aplana.sbrf.taxaccounting.web.module.declarationversionlist.client.ev
 import com.aplana.sbrf.taxaccounting.web.widget.fileupload.event.EndLoadFileEvent;
 import com.aplana.sbrf.taxaccounting.web.widget.fileupload.event.JrxmlFileExistEvent;
 import com.aplana.sbrf.taxaccounting.web.widget.historytemplatechanges.client.DeclarationVersionHistoryPresenter;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
@@ -123,7 +125,25 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
         this.versionHistoryPresenter = versionHistoryPresenter;
 	}
 
-	/**
+    @Override
+    public void downloadJrxml() {
+        DownloadUtils.openInIframe(
+                GWT.getHostPageBaseURL() + "download/uploadJrxml/" + (declarationTemplate.getJrxmlBlobId() != null ? declarationTemplate.getJrxmlBlobId() : ""));
+    }
+
+    @Override
+    public void downloadXsd() {
+        DownloadUtils.openInIframe(
+                GWT.getHostPageBaseURL() + "download/uploadXsd/" + (declarationTemplate.getXsdId() != null ? declarationTemplate.getXsdId() : ""));
+    }
+
+    @Override
+    public void downloadDect() {
+        DownloadUtils.openInIframe(
+                GWT.getHostPageBaseURL() + "download/declarationTemplate/downloadDect/" + declarationTemplate.getId());
+    }
+
+    /**
 	 * Здесь происходит подготовка декларации администрирования.
 	 *
 	 * @param request запрос

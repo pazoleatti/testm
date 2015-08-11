@@ -200,9 +200,11 @@ public class DeclarationTemplateView extends ViewWithUiHandlers<DeclarationTempl
     }
 
     private void setHref(DeclarationTemplate dt){
+        /*
         downloadJrxmlButton.setHref(urlTemplates.getDownloadUrl(dt.getJrxmlBlobId() != null ? dt.getJrxmlBlobId() : "").asString());
         downloadXsd.setHref(urlTemplates.getDownloadUrl(dt.getXsdId() != null ? dt.getXsdId() : "").asString());
         downloadDectButton.setHref(urlTemplates.getDownloadDTUrl(dt.getId()).asString());
+        */
     }
 
     @Override
@@ -239,6 +241,28 @@ public class DeclarationTemplateView extends ViewWithUiHandlers<DeclarationTempl
         }
         formDataTableStyle.setProperty("top", DEFAULT_TABLE_TOP_POSITION + downShift, Style.Unit.PX);
     }
+
+    @UiHandler("downloadJrxmlButton")
+    void onDownloadJrxmlButtonClicked(ClickEvent event) {
+        if (getUiHandlers() != null) {
+            getUiHandlers().downloadJrxml();
+        }
+    }
+
+    @UiHandler("downloadXsd")
+    void onDownloadXsdClicked(ClickEvent event) {
+        if (getUiHandlers() != null) {
+            getUiHandlers().downloadXsd();
+        }
+    }
+
+    @UiHandler("downloadDectButton")
+    void onDownloadDectButtonClicked(ClickEvent event) {
+        if (getUiHandlers() != null) {
+            getUiHandlers().downloadDect();
+        }
+    }
+
 
     @UiHandler("saveButton")
 	public void onSave(ClickEvent event){
