@@ -16,6 +16,7 @@ public class TimerTaskResult implements Result {
     private ReportType taskType;
     private FormMode formMode;
     private LockInfo lockInfo;
+    private String taskName;
 
     public ReportType getTaskType() {
         return taskType;
@@ -39,5 +40,13 @@ public class TimerTaskResult implements Result {
 
     public void setLockInfo(LockInfo lockInfo) {
         this.lockInfo = lockInfo;
+    }
+
+    public String getTaskName() {
+        return taskName;
+    }
+
+    public void setTaskName(String taskName) {
+        this.taskName = taskName;
     }
 }

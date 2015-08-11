@@ -227,8 +227,8 @@ void calcValues(def dataRows, def sourceRows) {
         if (rowSource.comparePeriod) {
             row.deltaPercent = ((rowSource.deltaRub ?: BigDecimal.ZERO) as BigDecimal) / rowSource.comparePeriod * 100
         } else if (dataRows == sourceRows) { // выводить только при расчете
-            rowWarning(logger, rowSource, String.format("Строка %s: Графа «%s» не может быть заполнена. Выполнение расчета невозможно, так как в результате проверки получен нулевой знаменатель (деление на ноль невозможно)",
-                    rowSource.getIndex(), getColumnName(rowSource, 'deltaPercent')))
+            rowWarning(logger, row, String.format("Строка %s: Графа «%s» не может быть заполнена. Выполнение расчета невозможно, так как в результате проверки получен нулевой знаменатель (деление на ноль невозможно)",
+                    row.getIndex(), getColumnName(row, 'deltaPercent')))
         }
     }
 }
@@ -285,13 +285,13 @@ def get102Sum(def row, def periodId) {
         // справочник "Отчет о прибылях и убытках (Форма 0409102-СБ)"
         def records = bookerStatementService.getRecords(52L, formData.departmentId, getEndDate(periodId), "OPU_CODE = '${opuCodes}'")
         if ((records == null || records.isEmpty())) {
-            return [0, true]
+            return [0, false]
         }
-        return [records.sum { it.TOTAL_SUM.numberValue }, false]
+        return [records.sum { it.TOTAL_SUM.numberValue }, true]
     } else if (periodId == null) {
-        return [0, true]
+        return [0, false]
     }
-    return [0, false]
+    return [0, true]
 }
 
 boolean isBank() {

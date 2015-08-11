@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.model.ReportType;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 
 import java.util.Collection;
+import java.util.List;
 
 /**
  * Интерфейс для работы с таблицей отчетов
@@ -80,6 +81,8 @@ public interface ReportService {
     void deleteDec(long declarationDataId);
 
     void deleteDec(Collection<Long> declarationDataId);
+
+    void deleteDec(Collection<Long> declarationDataId, List<ReportType> reportTypes);
 
     /**
      * Удаление отчета по uuid

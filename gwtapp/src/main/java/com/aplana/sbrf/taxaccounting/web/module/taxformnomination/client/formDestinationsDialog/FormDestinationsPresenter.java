@@ -9,6 +9,9 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallba
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
+import com.aplana.sbrf.taxaccounting.web.module.formdatalist.shared.FormDataElementName;
+import com.aplana.sbrf.taxaccounting.web.module.formdatalist.shared.GetFieldsNames;
+import com.aplana.sbrf.taxaccounting.web.module.formdatalist.shared.GetFieldsNamesResult;
 import com.aplana.sbrf.taxaccounting.web.module.taxformnomination.client.event.UpdateTable;
 import com.aplana.sbrf.taxaccounting.web.module.taxformnomination.shared.*;
 import com.google.inject.Inject;
@@ -21,6 +24,7 @@ import com.gwtplatform.mvp.client.PresenterWidget;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 
@@ -29,6 +33,8 @@ public class FormDestinationsPresenter extends PresenterWidget<FormDestinationsP
     private final DispatchAsync dispatchAsync;
 
     public interface MyView extends PopupView, HasUiHandlers<FormDestinationsUiHandlers> {
+        void setElementNames(Map<FormDataElementName, String> names);
+
         // установка данных в поле "подразделения"
         void setDepartments(List<Department> departments, Set<Integer> availableDepartment);
         // установка данных в поле "исполнители"
@@ -127,7 +133,7 @@ public class FormDestinationsPresenter extends PresenterWidget<FormDestinationsP
                 }, this));
     }
 
-    public void initAndShowDialog(final HasPopupSlot slotForMe, TaxType taxType) {
+    public void initAndShowDialog(final HasPopupSlot slotForMe, final TaxType taxType) {
         FillFormTypesAction action = new FillFormTypesAction();
         action.setTaxType(taxType);
         dispatchAsync.execute(action, CallbackUtils.defaultCallback(
@@ -139,14 +145,29 @@ public class FormDestinationsPresenter extends PresenterWidget<FormDestinationsP
                         getView().prepareFormDataKind(dataKinds);
                         getView().prepareCreationForm();
                         getView().updateLabel(result.getTaxType());
+                        changeFilterElementNames(taxType);
                         slotForMe.addToPopupSlot(FormDestinationsPresenter.this);
                     }
                 }, this));
     }
 
-    public void initAndShowEditDialog(final HasPopupSlot slotForMe, List<FormTypeKind> formTypeKinds){
+    public void initAndShowEditDialog(final HasPopupSlot slotForMe, List<FormTypeKind> formTypeKinds, TaxType taxType){
         getView().prepareEditForm(formTypeKinds);
         slotForMe.addToPopupSlot(FormDestinationsPresenter.this);
+        changeFilterElementNames(taxType);
+    }
+
+    public void changeFilterElementNames(TaxType taxType) {
+        GetFieldsNames action = new GetFieldsNames();
+        action.setTaxType(taxType);
+        dispatchAsync.execute(action, CallbackUtils
+                        .defaultCallback(new AbstractCallback<GetFieldsNamesResult>() {
+                            @Override
+                            public void onSuccess(GetFieldsNamesResult result) {
+                                getView().setElementNames(result.getFieldNames());
+                            }
+                        }, this)
+        );
     }
 
 }

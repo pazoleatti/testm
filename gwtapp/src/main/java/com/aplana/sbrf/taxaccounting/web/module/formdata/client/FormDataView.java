@@ -113,6 +113,8 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 
 	@UiField
 	Button cancelButton;
+    @UiField
+    Button exitAndSaveButton;
 	@UiField
 	Button saveButton;
 
@@ -460,6 +462,13 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 		}
 	}
 
+    @UiHandler("exitAndSaveButton")
+    void onExitAndSaveButtonClicked(ClickEvent event) {
+        if (getUiHandlers() != null) {
+            getUiHandlers().onExitAndSaveClicked();
+        }
+    }
+
 	@UiHandler("saveButton")
 	void onSaveButtonClicked(ClickEvent event) {
 		if (getUiHandlers() != null) {
@@ -538,14 +547,14 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 	@UiHandler("recalculateButton")
 	void onRecalculateButtonClicked(ClickEvent event) {
 		if (getUiHandlers() != null) {
-			getUiHandlers().onRecalculateClicked(false, false, false);
+			getUiHandlers().onRecalculateClicked(false, false);
 		}
 	}
 
 	@UiHandler("checkButton")
 	void onCheckButtonClicked(ClickEvent event) {
 		if (getUiHandlers() != null) {
-			getUiHandlers().onCheckClicked(false, false);
+			getUiHandlers().onCheckClicked(false);
 		}
 	}
 

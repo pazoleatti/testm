@@ -60,11 +60,7 @@ switch (formDataEvent) {
         break
     case FormDataEvent.IMPORT:
         importData()
-        if (!logger.containsLevel(LogLevel.ERROR)) {
-            calc()
-            logicCheck()
-            formDataService.saveCachedDataRows(formData, logger)
-        }
+        formDataService.saveCachedDataRows(formData, logger)
         break
 }
 
@@ -882,18 +878,33 @@ void importData() {
             break
         }
         // найти нужную строку нф
-        def dataRow = getDataRow(dataRows, "R" + rowIndex)
+        def alias = "R" + rowIndex
+        def dataRow = getDataRow(dataRows, alias)
         // заполнить строку нф значениями из эксель
-        fillRowFromXls(dataRow, rowValues, fileRowIndex, rowIndex, colOffset)
+        if (alias in ['R67', 'R90']) {
+            // итоги
+            fillTotalRowFromXls(dataRow, rowValues, fileRowIndex, rowIndex, colOffset)
+        } else {
+            // остальные строки
+            fillRowFromXls(dataRow, rowValues, fileRowIndex, rowIndex, colOffset)
+        }
     }
     if (rowIndex < dataRows.size()) {
         logger.error("Структура файла не соответствует макету налоговой формы.")
     }
+
+    // сравнение итогов
+    def totalRow1Tmp = formData.createStoreMessagingDataRow()
+    def totalRow2Tmp = formData.createStoreMessagingDataRow()
+    totalRow1Tmp[totalColumn] = getSum(dataRows, totalColumn, 'R2', 'R66')
+    totalRow2Tmp[totalColumn] = getSum(dataRows, totalColumn, 'R69', 'R89')
+
+    def totalRow1 = getDataRow(dataRows, 'R67')
+    def totalRow2 = getDataRow(dataRows, 'R90')
+    compareTotalValues(totalRow1, totalRow1Tmp, [totalColumn], logger, false)
+    compareTotalValues(totalRow2, totalRow2Tmp, [totalColumn], logger, false)
+
     showMessages(dataRows, logger)
-    if (!logger.containsLevel(LogLevel.ERROR)) {
-        updateIndexes(dataRows)
-        formDataService.getDataRowHelper(formData).allCached = dataRows
-    }
 }
 
 /**
@@ -991,4 +1002,22 @@ def fillRowFromXls(def dataRow, def values, int fileRowIndex, int rowIndex, int 
     if (!notImportSum.contains(dataRow.getAlias())) {
         dataRow.consumptionTaxSumS = parseNumber(values[colIndex].trim(), fileRowIndex, colIndex + colOffset, logger, true)
     }
+}
+
+/**
+ * Заполняет итоговую строку нф значениями из экселя.
+ *
+ * @param dataRow строка нф
+ * @param values список строк со значениями
+ * @param fileRowIndex номер строки в тф
+ * @param rowIndex номер строки в нф
+ * @param colOffset отступ по столбцам
+ */
+def fillTotalRowFromXls(def dataRow, def values, int fileRowIndex, int rowIndex, int colOffset) {
+    dataRow.setImportIndex(fileRowIndex)
+    dataRow.setIndex(rowIndex)
+
+    // графа 9
+    def colIndex = 8
+    dataRow.consumptionTaxSumS = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
 }

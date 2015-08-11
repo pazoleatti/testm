@@ -15,13 +15,14 @@ import com.aplana.sbrf.taxaccounting.util.TransactionLogic;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import static com.aplana.sbrf.taxaccounting.async.task.AsyncTask.RequiredParams.*;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+
+import static com.aplana.sbrf.taxaccounting.async.task.AsyncTask.RequiredParams.*;
 
 /**
  * Абстрактная реализация асинхронной задачи.
@@ -31,6 +32,11 @@ import java.util.Map;
 public abstract class AbstractAsyncTask implements AsyncTask {
 
     protected static final Log log = LogFactory.getLog(AbstractAsyncTask.class);
+
+    protected static final String COMPLETE_FORM =
+            "Сформирован %s отчет";
+    protected static final String ERROR_FORM =
+            "Произошла непредвиденная ошибка при формировании %s отчета";
 
     @Autowired
     private LockDataService lockService;

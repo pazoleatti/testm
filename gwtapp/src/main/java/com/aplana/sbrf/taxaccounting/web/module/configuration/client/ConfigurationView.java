@@ -109,6 +109,9 @@ public class ConfigurationView extends ViewWithUiHandlers<ConfigurationUiHandler
      * Подготовка таблицы общих параметров
      */
     private void initCommonTable() {
+        while (commonTable.getColumnCount() > 0) {
+            commonTable.removeColumn(0);
+        }
         paramColumn.setId(1);
         paramColumn.setRefBookAttributeId(1041L);
         // Допустимые значения
@@ -154,6 +157,9 @@ public class ConfigurationView extends ViewWithUiHandlers<ConfigurationUiHandler
      * Подготовка таблицы параметров загрузки НФ
      */
     private void initFormTable() {
+        while (formTable.getColumnCount() > 0) {
+            formTable.removeColumn(0);
+        }
         departmentColumn.setId(1);
         departmentColumn.setNameAttributeId(161L);
         departmentColumn.setRefBookAttributeId(161L);
@@ -207,6 +213,9 @@ public class ConfigurationView extends ViewWithUiHandlers<ConfigurationUiHandler
      * Подготовка таблицы параметров электронной почты
      */
     private void initEmailTable() {
+        while (emailTable.getColumnCount() > 0) {
+            emailTable.removeColumn(0);
+        }
         emailNameColumn.setAlias("emailNameColumn");
         emailNameColumn.setName("Параметр");
         Column<DataRow<Cell>, ?> emailParamColumnUI = factory.createTableColumn(emailNameColumn, emailTable);
@@ -245,6 +254,9 @@ public class ConfigurationView extends ViewWithUiHandlers<ConfigurationUiHandler
      * Подготовка таблицы параметров электронной почты
      */
     private void initAsyncTable() {
+        while (asyncTable.getColumnCount() > 0) {
+            asyncTable.removeColumn(0);
+        }
         asyncTypeIdColumn.setAlias("asyncTypeIdColumn");
         asyncTypeIdColumn.setName("");
         Column<DataRow<Cell>, ?> asyncParamColumnUI = factory.createTableColumn(asyncTypeIdColumn, asyncTable);

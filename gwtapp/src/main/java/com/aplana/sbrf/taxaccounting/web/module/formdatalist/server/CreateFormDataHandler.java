@@ -79,8 +79,9 @@ public class CreateFormDataHandler extends AbstractActionHandler<CreateFormData,
                 action.getReportPeriodId());
         // Получаем DepartmentReportPeriod для периода сравнения (может быть null)
         Integer comparativDrpId = null;
+        DepartmentReportPeriod comparativDrp = null;
         if (action.getComparativPeriodId() != null) {
-            DepartmentReportPeriod comparativDrp = departmentReportPeriodService.getLast(action.getDepartmentId(),
+            comparativDrp = departmentReportPeriodService.getLast(action.getDepartmentId(),
                     action.getComparativPeriodId());
             comparativDrpId = comparativDrp.getId();
         }
@@ -93,21 +94,10 @@ public class CreateFormDataHandler extends AbstractActionHandler<CreateFormData,
         FormType formType = formTypeService.get(formDataTypeId);
 
         if (lockDataService.lock(key, userInfo.getUser().getId(),
-                String.format(LockData.DescriptionTemplate.FORM_DATA_TASK.getText(),
-                        "Создание налоговой формы",
-                        departmentReportPeriod.getReportPeriod().getName() + " " + departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear(),
-                        action.getMonthId() != null
-                                ? " " + Formats.getRussianMonthNameWithTier(action.getMonthId())
-                                : "",
-                        departmentReportPeriod.getCorrectionDate() != null
-                                ? " с датой сдачи корректировки " + SDF_DD_MM_YYYY.format(departmentReportPeriod.getCorrectionDate())
-                                : "",
-                        department.getName(),
+                MessageGenerator.getInfoFDMsg("Создание налоговой формы",
                         formType.getName(),
                         kind.getName(),
-                        departmentReportPeriod.getCorrectionDate() != null
-                                ? "Корректировка"
-                                : "Абсолютные значения"),
+                        department.getName(), action.getMonthId(), action.getComparativPeriodId(), true, departmentReportPeriod, comparativDrp),
                 lockDataService.getLockTimeout(LockData.LockObjects.FORM_DATA_CREATE)) == null) {
             //Если блокировка успешно установлена
             try {

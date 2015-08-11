@@ -248,7 +248,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         ArrayList<Long> formDataIds = new ArrayList<Long>();
         for (DepartmentFormType dftSource : dftSources){
             FormData formData =
-                    formDataService.getLast(dftSource.getFormTypeId(), dftSource.getKind(), declarationData.getDepartmentId(), declarationData.getReportPeriodId(), dftSource.getPeriodOrder());
+                    formDataService.getLast(dftSource.getFormTypeId(), dftSource.getKind(), dftSource.getDepartmentId(), declarationData.getReportPeriodId(), dftSource.getPeriodOrder());
             if (formData != null && formData.getState() == WorkflowState.ACCEPTED) {
                 formDataIds.add(formData.getId());
             }
@@ -909,11 +909,11 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
     @Override
     @Transactional(readOnly = false)
-    public void cleanBlobs(Collection<Long> ids) {
+    public void cleanBlobs(Collection<Long> ids, List<ReportType> reportTypes) {
         if (ids.isEmpty()){
             return;
         }
-        reportService.deleteDec(ids);
+        reportService.deleteDec(ids, reportTypes);
     }
 
     @Override

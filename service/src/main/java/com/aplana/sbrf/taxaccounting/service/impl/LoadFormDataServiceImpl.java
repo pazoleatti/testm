@@ -214,7 +214,7 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
             ignoreFileSet.add(fileName);
             FileWrapper currentFile = ResourceUtils.getSharedResource(path + "/" + fileName);
 
-            if (currentFile.length() / 1024 > maxFileSize) {
+            if (maxFileSize != 0 && currentFile.length() / 1024 > maxFileSize) {
                 log(userInfo, LogData.L47, logger, lockId, fileName, currentFile.length() / 1024, path, maxFileSize);
                 moveToErrorDirectory(userInfo, getFormDataErrorPath(userInfo, departmentId, logger, lockId), currentFile,
                         Arrays.asList(new LogEntry(LogLevel.ERROR, String.format(LogData.L4.getText(), lockId, fileName, path))), logger, lockId);

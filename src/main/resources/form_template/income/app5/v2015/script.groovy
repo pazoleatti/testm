@@ -200,7 +200,7 @@ void logicCheckBeforeCalc() {
 
         // Определение условий для проверок 2, 3, 4
         def depParam = getDepParam(departmentParam, index)
-        def depId = depParam.get(RefBook.RECORD_ID_ALIAS).numberValue as int ?: -1
+        def depId = depParam.get(RefBook.RECORD_ID_ALIAS).numberValue as long ?: -1
         def departmentName = depParam?.NAME?.stringValue ?: "Не задано"
         def incomeParam = getProvider(33).getRecords(getReportPeriodEndDate() - 1, null, "DEPARTMENT_ID = $depId", null)
         def incomeParamTable = getIncomeParamTable(depParam)
@@ -426,7 +426,7 @@ def getIncomeParamTable(def depParam) {
     if (depParam == null) {
         return null
     }
-    def depId = depParam.get(RefBook.RECORD_ID_ALIAS).numberValue as int
+    def depId = depParam.get(RefBook.RECORD_ID_ALIAS).numberValue as long
     def incomeParam = getProvider(33).getRecords(getReportPeriodEndDate() - 1, null, "DEPARTMENT_ID = $depId", null)
     if (incomeParam != null && !incomeParam.isEmpty()) {
         def link = incomeParam.get(0).record_id.value
@@ -603,6 +603,7 @@ void importData() {
     def rowIndex = 0
     def rows = []
     def allValuesCount = allValues.size()
+    def totalRowFromFile = null
 
     // формирвание строк нф
     for (def i = 0; i < allValuesCount; i++) {
@@ -614,14 +615,16 @@ void importData() {
             rowValues.clear()
             break
         }
+        rowIndex++
         // Пропуск итоговых строк
         if (rowValues[INDEX_FOR_SKIP] == "Итого") {
+            totalRowFromFile = getNewRowFromXls(rowValues, colOffset, fileRowIndex, rowIndex)
+
             allValues.remove(rowValues)
             rowValues.clear()
             continue
         }
         // простая строка
-        rowIndex++
         def newRow = getNewRowFromXls(rowValues, colOffset, fileRowIndex, rowIndex)
         rows.add(newRow)
         // освободить ненужные данные - иначе не хватит памяти
@@ -629,9 +632,14 @@ void importData() {
         rowValues.clear()
     }
 
+    def totalRow = getTotalRow(rows)
+    rows.add(totalRow)
+    updateIndexes(rows)
+    // сравнение итогов
+    compareSimpleTotalValues(totalRow, totalRowFromFile, rows, totalColumns, formData, logger, false)
+
     showMessages(rows, logger)
     if (!logger.containsLevel(LogLevel.ERROR)) {
-        updateIndexes(rows)
         formDataService.getDataRowHelper(formData).allCached = rows
     }
 }

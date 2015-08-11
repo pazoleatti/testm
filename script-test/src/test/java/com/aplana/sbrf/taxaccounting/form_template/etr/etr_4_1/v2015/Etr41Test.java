@@ -18,7 +18,7 @@ import static org.mockito.Mockito.when;
  * Приложение 4-1. Абсолютная величина налоговых платежей
  */
 public class Etr41Test extends ScriptTestBase {
-    private static final int TYPE_ID = 700;
+    private static final int TYPE_ID = 701;
     private static final int DEPARTMENT_ID = 1;
     private static final int REPORT_PERIOD_ID = 1;
     private static final int DEPARTMENT_PERIOD_ID = 1;

@@ -174,6 +174,7 @@ public class FormDataXlsxReportBuilderTestMock {
         reportPeriod = new ReportPeriod();
         reportPeriod.setName("1 квартал");
         reportPeriod.setTaxPeriod(taxPeriod);
+
         formTemplate.getStyles().addAll(formStyles);
 		formTemplate.setHeader("Таблица 1\\2\\3 | Приложение 1 | Приложение 2");
         formTemplate.getColumns().addAll(columns);
@@ -226,12 +227,15 @@ public class FormDataXlsxReportBuilderTestMock {
         formData.setState(WorkflowState.CREATED);
         formData.setPerformer(formDataperformer);
         formData.setSigners(formDataSigners);
+        formData.setAccruing(true);
+        formData.setComparativPeriodId(1);
 
 		data.setData(formData);
 		data.setReportPeriod(reportPeriod);
 		data.setFormTemplate(formTemplate);
         data.setAcceptanceDate(null);
         data.setCreationDate(new Date(324234));
+        data.setRpCompare(reportPeriod);
 	}
 
 	@Test
