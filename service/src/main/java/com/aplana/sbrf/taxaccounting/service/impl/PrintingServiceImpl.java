@@ -16,6 +16,7 @@ import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookHelper;
 import com.aplana.sbrf.taxaccounting.service.BlobDataService;
+import com.aplana.sbrf.taxaccounting.service.DepartmentReportPeriodService;
 import com.aplana.sbrf.taxaccounting.service.FormDataAccessService;
 import com.aplana.sbrf.taxaccounting.service.PrintingService;
 import com.aplana.sbrf.taxaccounting.service.impl.print.formdata.FormDataCSVReportBuilder;
@@ -70,6 +71,9 @@ public class PrintingServiceImpl implements PrintingService {
     @Autowired
     private BlobDataService blobDataService;
 
+    @Autowired
+    DepartmentReportPeriodService departmentReportPeriodService;
+
     private static final long REF_BOOK_ID = 8L;
     private static final String REF_BOOK_VALUE_NAME = "CODE";
 
@@ -95,6 +99,7 @@ public class PrintingServiceImpl implements PrintingService {
             data.setReportPeriod(reportPeriod);
             data.setAcceptanceDate(logBusinessDao.getFormAcceptanceDate(formDataId));
             data.setCreationDate(logBusinessDao.getFormCreationDate(formDataId));
+            data.setRpCompare(formData.getComparativPeriodId() != null ? reportPeriodDao.get(formData.getComparativPeriodId()) : null);
             List<DataRow<Cell>> dataRows = dataRowDao.getRows(formData, null);
             Logger log = new Logger();
             refBookHelper.dataRowsDereference(log, dataRows, formTemplate.getColumns());
@@ -141,7 +146,6 @@ public class PrintingServiceImpl implements PrintingService {
             }
             data.setData(formData);
             data.setFormTemplate(formTemplate);
-            data.setReportPeriod(reportPeriod);
             data.setAcceptanceDate(logBusinessDao.getFormAcceptanceDate(formDataId));
             data.setCreationDate(logBusinessDao.getFormCreationDate(formDataId));
             List<DataRow<Cell>> dataRows = dataRowDao.getRows(formData, null);

@@ -144,7 +144,7 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
     private RefBookValue refBookValue;
 	private List<DataRow<com.aplana.sbrf.taxaccounting.model.Cell>> dataRows;
 	private FormTemplate formTemplate;
-	private ReportPeriod reportPeriod;
+	private ReportPeriod reportPeriod,rpCompare;
 	private Date acceptanceDate;
 	private Date creationDate;
 
@@ -174,6 +174,7 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
 		creationDate = data.getCreationDate();
         this.refBookValue = refBookValue;
         cellStyleBuilder = new CellStyleBuilder();
+        this.rpCompare = data.getRpCompare();
         if (!isShowChecked) {
             Iterator<Column> iterator = data.getFormTemplate().getColumns().iterator();
             while (iterator.hasNext()) {
@@ -287,13 +288,18 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
         //Fill period
         if (data.getPeriodOrder() != null) {
             sbPeriodName.append(Months.fromId(data.getPeriodOrder()).getTitle().toLowerCase(new Locale("ru", "RU")));
-        } else {
-            sbPeriodName.append("за ");
-            if (!refBookValue.getStringValue().equals("34") ) {
-                sbPeriodName.append(reportPeriod.getName());
-            }
+        } else if(data.getComparativPeriodId() != null){
+            String rpName =  !refBookValue.getStringValue().equals("34") ? reportPeriod.getName() : "";
+            String rpCompareName =  !refBookValue.getStringValue().equals("34") ? rpCompare.getName() : "";
+            sbPeriodName.append(String.format(
+                    XlsxReportMetadata.REPORT_PERIOD,
+                    rpName,
+                    reportPeriod.getTaxPeriod().getYear(),
+                    rpCompareName,
+                    rpCompare.getTaxPeriod().getYear(),
+                    data.isAccruing() ? "(нарастающим итогом)" : ""));
         }
-        sb.append(String.format(XlsxReportMetadata.REPORT_PERIOD, sbPeriodName.toString(), String.valueOf(reportPeriod.getTaxPeriod().getYear())));
+        sb.append(sbPeriodName.toString());
         createCellByRange(XlsxReportMetadata.RANGE_REPORT_PERIOD, sb.toString(), 0, formTemplate.getColumns().size()/2);
     }
 
