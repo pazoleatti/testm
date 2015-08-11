@@ -208,23 +208,23 @@ public class TaxFormNominationPresenter
 		DeleteDeclarationSourcesAction action = new DeleteDeclarationSourcesAction();
 		action.setKind(getView().getSelectedItemsOnDeclarationGrid());
 		dispatcher.execute(action,
-				CallbackUtils.defaultCallback(
-						new AbstractCallback<DeleteDeclarationSourcesResult>() {
-							@Override
-							public void onSuccess(DeleteDeclarationSourcesResult result) {
-								reloadDeclarationTableData();
-								if ((result.getUuid() != null ) && !result.getUuid().isEmpty()) {
+                CallbackUtils.defaultCallback(
+                        new AbstractCallback<DeleteDeclarationSourcesResult>() {
+                            @Override
+                            public void onSuccess(DeleteDeclarationSourcesResult result) {
+                                reloadDeclarationTableData();
+                                if ((result.getUuid() != null) && !result.getUuid().isEmpty()) {
                                     if (result.isExistDeclaration()) {
                                         Dialog.errorMessage("Невозможно отменить назначение, т.к. созданы экземпляры декларации");
                                     } else {
                                         Dialog.errorMessage("Невозможно снять назначение декларации, т.к. назначение декларации является приемником данных");
                                         // TODO удаление связей
                                     }
-									LogAddEvent.fire(TaxFormNominationPresenter.this, result.getUuid());
-								}
+                                    LogAddEvent.fire(TaxFormNominationPresenter.this, result.getUuid());
+                                }
 
-							}
-						}, this));
+                            }
+                        }, this));
 	}
 
 	@Override
@@ -253,7 +253,9 @@ public class TaxFormNominationPresenter
                                 LogAddEvent.fire(TaxFormNominationPresenter.this, result.getUuid());
                                 if (result.getUuid() != null){
                                     if (result.isExistFormData()) {
-                                        Dialog.errorMessage("Ошибка", "Невозможно отменить назначение, т. к. созданы экземпляры налоговых форм");
+                                        Dialog.errorMessage(
+                                                "Ошибка",
+                                                "Невозможно отменить назначение, т. к. созданы экземпляры " + mesPart());
                                     } else {
                                         Dialog.errorMessage("Ошибка", "Невозможно снять назначение налоговой формы, т. к. назначение является приемником данных / назначение является источником данных");
                                         // TODO удаление источников-приемников
@@ -311,5 +313,9 @@ public class TaxFormNominationPresenter
                         getView().updateButtonsEnabled();
                     }
                 }, this));
+    }
+
+    private String  mesPart(){
+        return taxType == TaxType.DEAL || taxType == TaxType.ETR ? "форм" : "налоговых форм";
     }
 }

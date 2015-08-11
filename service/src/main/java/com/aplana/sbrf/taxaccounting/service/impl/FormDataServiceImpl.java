@@ -64,7 +64,7 @@ public class FormDataServiceImpl implements FormDataService {
     private static final String XLSX_EXT = "xlsx";
     private static final String XLS_EXT = "xls";
     private static final String XLSM_EXT = "xlsm";
-    public static final String MSG_IS_EXIST_FORM = "Существует экземпляр налоговой формы \"%s\" типа \"%s\" в подразделении \"%s\" в периоде \"%s\"%s";
+    public static final String MSG_IS_EXIST_FORM = "Существует экземпляр %s";
     final static String LOCK_MESSAGE = "Форма заблокирована и не может быть изменена. Попробуйте выполнить операцию позже.";
     final static String LOCK_MESSAGE_TASK = "Выполнение операции \"%s\" невозможно, т.к. для текущего экземпляра налоговой формы запущена операция изменения данных";
     final static String LOCK_REFBOOK_MESSAGE = "Справочник \"%s\" заблокирован и не может быть использован для заполнения атрибутов формы. Попробуйте выполнить операцию позже.";
@@ -1252,24 +1252,22 @@ public class FormDataServiceImpl implements FormDataService {
                 case EXCEL:
                 case IMPORT_FD:
                 case IMPORT_TF_FD:
-                    name = MessageGenerator.getInfoFDMsg(reportType.getDescription(),
+                    name = MessageGenerator.getFDMsg(reportType.getDescription(),
                             formData.getFormType().getName(),
                             formData.getKind().getName(),
                             department.getName(),
                             null,
-                            formData.getComparativPeriodId(),
                             manual,
                             reportPeriod,
                             rpComparison);
 
                     break;
                 case MOVE_FD:
-                    name = MessageGenerator.getInfoFDMsg(str,
+                    name = MessageGenerator.getFDMsg(str,
                             formData.getFormType().getName(),
                             formData.getKind().getName(),
                             department.getName(),
                             null,
-                            formData.getComparativPeriodId(),
                             manual,
                             reportPeriod,
                             rpComparison);
@@ -1279,34 +1277,31 @@ public class FormDataServiceImpl implements FormDataService {
                 case CHECK_FD:
                 case EDIT_FD:
                 case DELETE_FD:
-                    name = MessageGenerator.getInfoFDMsg(String.format(reportType.getDescription(), formData.getFormType().getTaxType().getTaxText()),
+                    name = MessageGenerator.getFDMsg(String.format(reportType.getDescription(), formData.getFormType().getTaxType().getTaxText()),
                             formData.getFormType().getName(),
                             formData.getKind().getName(),
                             department.getName(),
                             null,
-                            formData.getComparativPeriodId(),
                             manual,
                             reportPeriod,
                             rpComparison);
                     break;
                 default:
-                    name = MessageGenerator.getInfoFDMsg("Налоговая форма",
+                    name = MessageGenerator.getFDMsg("Налоговая форма",
                             formData.getFormType().getName(),
                             formData.getKind().getName(),
                             department.getName(),
                             null,
-                            formData.getComparativPeriodId(),
                             manual,
                             reportPeriod,
                             rpComparison);
             }
         } else {
-            name = MessageGenerator.getInfoFDMsg("Налоговая форма",
+            name = MessageGenerator.getFDMsg("Налоговая форма",
                     formData.getFormType().getName(),
                     formData.getKind().getName(),
                     department.getName(),
                     null,
-                    formData.getComparativPeriodId(),
                     manual,
                     reportPeriod,
                     rpComparison);
@@ -1398,15 +1393,23 @@ public class FormDataServiceImpl implements FormDataService {
         if (logger != null) {
             for (long formDataId : formDataIds) {
                 FormData formData = formDataDao.getWithoutRows(formDataId);
-                ReportPeriod period = reportPeriodService.getReportPeriod(formData.getReportPeriodId());
+                //ReportPeriod period = reportPeriodService.getReportPeriod(formData.getReportPeriodId());
                 DepartmentReportPeriod drp = departmentReportPeriodService.get(formData.getDepartmentReportPeriodId());
+                DepartmentReportPeriod drpCompare = formData.getComparativPeriodId() != null ? departmentReportPeriodService.get(formData.getComparativPeriodId()) : null;
+                FormTemplate ft = formTemplateService.get(formData.getFormTemplateId());
 
-                logger.error(MSG_IS_EXIST_FORM,
-                        formData.getFormType().getName(),
-                        kind.getName(),
-                        departmentService.getDepartment(departmentId).getName(),
-                        period.getName() + (formData.getPeriodOrder() != null ? (" - " + Months.fromId(formData.getPeriodOrder()).getTitle()) : "") + " " + period.getTaxPeriod().getYear(),
-                        (drp.getCorrectionDate() != null ? (" с датой сдачи корректировки " + SDF_DD_MM_YYYY.format(drp.getCorrectionDate())) : ""));
+                logger.error(
+                        MessageGenerator.getFDMsg(
+                                String.format(MSG_IS_EXIST_FORM,
+                                        ft.getType().getTaxType() == TaxType.ETR || ft.getType().getTaxType() == TaxType.DEAL ? "оррм" : "налоговых форм"),
+                                ft.getName(),
+                                kind.getName(),
+                                departmentService.getDepartment(departmentId).getName(),
+                                formData.getPeriodOrder(),
+                                formData.isManual(),
+                                drp,
+                                drpCompare)
+                );
             }
         }
         return !formDataIds.isEmpty();

@@ -104,12 +104,11 @@ public abstract class XlsmGeneratorAsyncTask extends AbstractAsyncTask {
         DepartmentReportPeriod rpCompare = formData.getComparativPeriodId() != null ?
                 departmentReportPeriodService.get(formData.getComparativPeriodId()) : null;
 
-        return MessageGenerator.getInfoFDMsg(
+        return MessageGenerator.getFDMsg(
                 String.format(COMPLETE_FORM, getReportType().getName()),
                 formData.getFormType().getName(),
                 formData.getKind().getName(),
                 department.getName(),
-                formData.getComparativPeriodId(),
                 formData.getPeriodOrder(), manual, reportPeriod, rpCompare);
     }
 
@@ -128,6 +127,10 @@ public abstract class XlsmGeneratorAsyncTask extends AbstractAsyncTask {
         DepartmentReportPeriod rpCompare = formData.getComparativPeriodId() != null ?
                 departmentReportPeriodService.get(formData.getComparativPeriodId()) : null;
 
-        return MessageGenerator.getErrorFDMsg(String.format(ERROR_FORM, getReportType()), formData, manual, department.getName(), reportPeriod, rpCompare);
+        return MessageGenerator.getFDMsg(String.format(ERROR_FORM, getReportType()),
+                formData.getFormType().getName(),
+                formData.getKind().getName(),
+                department.getName(), formData.getPeriodOrder(),
+                manual, reportPeriod, rpCompare);
     }
 }
