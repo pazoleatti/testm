@@ -123,6 +123,7 @@ public final class ScriptUtils {
     // разделитель между идентификаторами в ключе для кеширования записей справочника
     private static final String SEPARATOR = "_";
     public static final String CHECK_OVERFLOW_MESSAGE = "Строка %d: Значение графы «%s» превышает допустимую разрядность (%d знаков). Графа «%s» рассчитывается как «%s»!";
+    public static final String CHECK_OVERFLOW_MESSAGE_SHORT = "Строка %d: Значение графы «%s» превышает допустимую разрядность (%d знаков).";
 
     // для проверки итогов при загрузе экселя (посчитанные и ожижаемые значения как %s потому что %f теряет точность)
     public static final String COMPARE_TOTAL_VALUES = "Строка формы %d: Итоговая сумма по графе «%s» (%s) некорректна (ожидаемое значение %s).";
@@ -1567,7 +1568,11 @@ public final class ScriptUtils {
 
         if (value.abs().compareTo(overpower) != -1) {
             String columnName = getColumnName(row, alias);
-            throw new ServiceException(CHECK_OVERFLOW_MESSAGE, index, columnName, size, columnName, algorithm);
+            if (algorithm == null || algorithm.isEmpty()) {
+                throw new ServiceException(CHECK_OVERFLOW_MESSAGE_SHORT, index, columnName, size);
+            } else {
+                throw new ServiceException(CHECK_OVERFLOW_MESSAGE, index, columnName, size, columnName, algorithm);
+            }
         }
     }
 

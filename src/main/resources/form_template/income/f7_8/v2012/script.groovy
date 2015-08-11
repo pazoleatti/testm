@@ -7,6 +7,7 @@ import com.aplana.sbrf.taxaccounting.model.WorkflowState
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
+import com.aplana.sbrf.taxaccounting.model.util.StringUtils
 import groovy.transform.Field
 
 import java.math.RoundingMode
@@ -964,7 +965,7 @@ void importData() {
 
     // получить строки из шаблона
     def formTemplate = formDataService.getFormTemplate(formData.formType.id, formData.reportPeriodId)
-    def rows = formTemplate.rows
+    def templateRows = formTemplate.rows
 
     def fileRowIndex = paramsMap.rowOffset
     def colOffset = paramsMap.colOffset
@@ -976,6 +977,9 @@ void importData() {
 
     def mapRows = [:]
     def sectionIndex = null
+    def totalRowFromFileMap = [:]
+    def totalMonthRowFromFile = null
+    def totalRowFromFile = null
 
     // формирвание строк нф
     for (def i = 0; i < allValuesCount; i++) {
@@ -992,17 +996,28 @@ void importData() {
         // если это начало раздела, то запомнить его название и обрабатывать следующую строку
         def firstValue = rowValues[INDEX_FOR_SKIP]
         if (firstValue == 'Итого') {
+            rowIndex++
+            totalRowFromFileMap[sectionIndex] = getNewRowFromXls(rowValues, colOffset, fileRowIndex, rowIndex, true)
+
             // Пропуск итоговых строк
             allValues.remove(rowValues)
             rowValues.clear()
             continue
-        } else if (firstValue == 'Всего за текущий месяц' || firstValue == 'Всего за текущий налоговый период') {
+        } else if (firstValue == 'Всего за текущий месяц') {
+            totalMonthRowFromFile = getNewRowFromXls(rowValues, colOffset, fileRowIndex, rowIndex, true)
+
+            allValues.remove(rowValues)
+            rowValues.clear()
+            continue
+        } else if (firstValue == 'Всего за текущий налоговый период') {
+            totalRowFromFile = getNewRowFromXls(rowValues, colOffset, fileRowIndex, rowIndex, true)
+
             allValues.remove(rowValues)
             rowValues.clear()
             break
         } else if (firstValue != null && firstValue != '' && firstValue != 'Итого') {
             sectionIndex = 'R' + firstValue[0]
-            if (!(sectionIndex in groups) || getDataRow(rows, sectionIndex)?.fix != firstValue) {
+            if (!(sectionIndex in groups) || StringUtils.cleanString(getDataRow(templateRows, sectionIndex)?.fix) != firstValue) {
                 logger.error("Строка %d: Структура файла не соответствует макету налоговой формы", fileRowIndex)
             }
             mapRows.put(sectionIndex, [])
@@ -1021,14 +1036,55 @@ void importData() {
     }
 
     // копирование данных по разделам
-    updateIndexes(rows)
+    updateIndexes(templateRows)
     groups.each { section ->
         def copyRows = mapRows[section]
         if (copyRows != null && !copyRows.isEmpty()) {
-            def insertIndex = getDataRow(rows, section + '-total').getIndex() - 1
-            rows.addAll(insertIndex, copyRows)
+            def insertIndex = getDataRow(templateRows, section + '-total').getIndex() - 1
+            templateRows.addAll(insertIndex, copyRows)
             // поправить индексы, потому что они после вставки не пересчитываются
-            updateIndexes(rows)
+            updateIndexes(templateRows)
+        }
+    }
+
+    // копирование данных по разделам
+    updateIndexes(templateRows)
+    def rows = []
+    groups.each { section ->
+        def headRow = getDataRow(templateRows, section)
+        def groupTotalRow = getDataRow(templateRows, section + '-total')
+        rows.add(headRow)
+        def copyRows = mapRows[section]
+        if (copyRows != null && !copyRows.isEmpty()) {
+            rows.addAll(copyRows)
+        }
+        rows.add(groupTotalRow)
+
+        // сравнение итогов
+        updateIndexes(rows)
+        def groupTotalRowFromFile = totalRowFromFileMap[section]
+        compareSimpleTotalValues(groupTotalRow, groupTotalRowFromFile, copyRows, totalColumns, formData, logger, false)
+    }
+
+    // итоговая строка
+    def totalMonthRow = getDataRow(templateRows, 'R10')
+    rows.add(totalMonthRow)
+    totalMonthRow.setIndex(rows.size())
+    // сравнение итогов
+    compareSimpleTotalValues(totalMonthRow, totalMonthRowFromFile, rows, totalColumns, formData, logger, false)
+
+    // итоговая строка
+    def totalRow = getDataRow(templateRows, 'R11')
+    rows.add(totalRow)
+    totalRow.setIndex(rows.size())
+    if (totalRowFromFile) {
+        calcOrCheckTotalForTaxPeriod(rows, false)
+        // сравнение итогов
+        compareTotalValues(totalRow, totalRowFromFile, totalColumns, logger, false)
+        // задание значении итоговой строке нф из итоговой строки файла (потому что в строках из файла стили для простых строк)
+        totalRow.setImportIndex(totalRowFromFile.getImportIndex())
+        totalColumns.each { alias ->
+            totalRow[alias] = totalRowFromFile[alias]
         }
     }
 
@@ -1060,7 +1116,7 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
             (headerRows[0][5]) : getColumnName(tmpRow, 'securityName'),
             (headerRows[0][6]) : getColumnName(tmpRow, 'series'),
             (headerRows[0][7]) : getColumnName(tmpRow, 'securityKind'),
-            (headerRows[0][8]) : getColumnName(tmpRow, 'signSecurity'),
+            (headerRows[0][8]) : StringUtils.cleanString(getColumnName(tmpRow, 'signSecurity')),
             (headerRows[0][9]) : getColumnName(tmpRow, 'currencyCode'),
             (headerRows[0][10]): getColumnName(tmpRow, 'currencyName'),
             (headerRows[0][11]): getColumnName(tmpRow, 'nominal'),
@@ -1107,8 +1163,9 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
  * @param colOffset отступ в колонках
  * @param fileRowIndex номер строки в тф
  * @param rowIndex строка в нф
+ * @param isTotal признак итоговой строки (для пропуска получения справочных значении)
  */
-def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) {
+def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex, def isTotal = false) {
     def newRow = formData.createStoreMessagingDataRow()
     newRow.setIndex(rowIndex)
     newRow.setImportIndex(fileRowIndex)
@@ -1137,7 +1194,7 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
     colIndex++
     def record100 = getRecordImport(100, 'NAME', values[colIndex], fileRowIndex, colIndex + colOffset)
 
-    if (record100 != null) {
+    if (record100 != null && !isTotal) {
         // поиск записи по эмитенту и серии (графам 5 и 6)
         String filter = "ISSUER = " + (record100?.record_id?.value?.toString() ?: 0) + " and LOWER(SHORTNAME) = LOWER('" + (values[6] ?: '') + "')"
         def records = refBookFactory.getDataProvider(84).getRecords(getReportPeriodEndDate(), null, filter, null)
@@ -1192,7 +1249,7 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
                 formDataService.checkReferenceValue(84, value1, value2, fileRowIndex, colIndex + colOffset, logger, false)
             }
         }
-    } else {
+    } else if (!isTotal) {
         def refBookName = refBookFactory.get(100).getName()
         logger.error("Проверка файла: Строка $fileRowIndex содержит значение, отсутствующее в справочнике «$refBookName»!")
     }

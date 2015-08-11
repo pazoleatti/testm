@@ -1,16 +1,18 @@
 package form_template.etr.etr_4_1.v2015
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
+import com.aplana.sbrf.taxaccounting.model.FormDataKind
+import com.aplana.sbrf.taxaccounting.model.WorkflowState
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
+import com.aplana.sbrf.taxaccounting.model.util.StringUtils
 import groovy.transform.Field
 
 /**
  * Приложение 4-1. Абсолютная величина налоговых платежей
- * formTemplateId = 700
+ * formTemplateId = 701
  *
  * @author bkinzyabulatov
- * TODO определение уровня банка
  *
  * графа 1 - rowNum         - № строки
  * графа 2 - taxName        - Наименование налога
@@ -26,6 +28,7 @@ switch (formDataEvent) {
         formDataService.checkUnique(formData, logger)
         break
     case FormDataEvent.CALCULATE:
+        preCalcCheck()
         calc()
         logicCheck()
         formDataService.saveCachedDataRows(formData, logger)
@@ -45,7 +48,19 @@ switch (formDataEvent) {
         importData()
         formDataService.saveCachedDataRows(formData, logger)
         break
+    case FormDataEvent.COMPOSE:
+        consolidation()
+        calc()
+        logicCheck()
+        formDataService.saveCachedDataRows(formData, logger)
+        break
 }
+
+@Field
+def providerCache = [:]
+
+@Field
+int sourceFormTypeId = 700
 
 @Field
 def allColumns = ['rowNum', 'taxName', 'symbol102', 'comparePeriod', 'currentPeriod', 'deltaRub', 'deltaPercent']
@@ -62,10 +77,6 @@ def checkCalcColumns = ['deltaRub', 'deltaPercent']
 @Field
 def nonEmptyColumns = calcColumns
 
-//Аттрибуты, очищаемые перед импортом формы
-@Field
-def resetColumns = calcColumns
-
 @Field
 def opuMap = ['R3' : ['28101'],
            'R5' : ['26411.01', '26411.02'],
@@ -74,43 +85,80 @@ def opuMap = ['R3' : ['28101'],
            'R8' : ['26411.12', '26411.13']]
 
 @Field
-def endDate = null
+def startDateMap = [:]
 
-@Field
-def prevEndDate = null
-
-@Field
-def compareEndDate = null
-
-@Field
-def prevCompareEndDate = null
-
-def getReportPeriodEndDate() {
-    if (endDate == null) {
-        endDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
+def getStartDate(int reportPeriodId) {
+    if (startDateMap[reportPeriodId] == null) {
+        startDateMap[reportPeriodId] = reportPeriodService.getStartDate(reportPeriodId)?.time
     }
-    return endDate
+    return startDateMap[reportPeriodId]
 }
 
-def getPrevReportPeriodEndDate() {
-    if (prevEndDate == null) {
-        prevEndDate = reportPeriodService.getEndDate(reportPeriodService.getPrevReportPeriod(formData.reportPeriodId)?.id).time
+@Field
+def endDateMap = [:]
+
+def getEndDate(int reportPeriodId) {
+    if (endDateMap[reportPeriodId] == null) {
+        endDateMap[reportPeriodId] = reportPeriodService.getEndDate(reportPeriodId)?.time
     }
-    return prevEndDate
+    return endDateMap[reportPeriodId]
 }
 
-def getComparePeriodEndDate() {
-    if (compareEndDate == null) {
-        compareEndDate = reportPeriodService.getEndDate(formData.comparativPeriodId).time
+void preCalcCheck() {
+    def tmpRow = formData.createDataRow()
+    // собираем коды ОПУ
+    def final opuCodes = opuMap.findAll { key, value -> !("R3".equals(key)) || isBank() }.values().sum()
+    // находим записи для текущего периода и периода сравнения
+    ['comparePeriod': getComparativePeriodId(), 'currentPeriod':formData.reportPeriodId].each { key, value ->
+        if (value != null) {
+            def reportPeriod = reportPeriodService.get(value)
+            if (formData.accruing && reportPeriod.order != 1) {
+                def prevPeriodId = value ? reportPeriodService.getPrevReportPeriod(value)?.id : null
+                checkOpuCodes(key, prevPeriodId, opuCodes, tmpRow)
+            }
+        }
+        checkOpuCodes(key, value, opuCodes, tmpRow)
     }
-    return compareEndDate
 }
 
-def getPrevComparePeriodEndDate() {
-    if (prevCompareEndDate == null) {
-        prevCompareEndDate = reportPeriodService.getEndDate(reportPeriodService.getPrevReportPeriod(formData.comparativPeriodId)?.id).time
+def getComparativePeriodId() {
+    if (formData.comparativPeriodId != null) {
+        return departmentReportPeriodService.get(formData.comparativPeriodId)?.reportPeriod?.id
+    } else {
+        return null
     }
-    return prevCompareEndDate
+}
+
+void checkOpuCodes(def alias, def periodId, def opuCodes, def tmpRow) {
+    if (periodId == null) {
+        logger.warn("Форма 102 бухгалтерской отчетности: Подразделение: \"%s\". Отсутствует отчетный период, соответствующий значениям НФ! При заполнении графы \"%s\" формы значения будут приняты за нулевые.",
+                formDataDepartment.name, getColumnName(tmpRow, alias))
+        return
+    }
+    boolean foundBO = true
+    def accountPeriodId = bookerStatementService.getAccountPeriodId(formData.departmentId, getEndDate(periodId))
+    if (accountPeriodId == null) {
+        foundBO = false
+    } else {
+        def ids = formDataService.getRefBookProvider(refBookFactory, 52L, providerCache).getUniqueRecordIds(new Date(), "ACCOUNT_PERIOD_ID = " + bookerStatementService.getAccountPeriodId(formData.departmentId, getEndDate(periodId)))
+        if (ids == null || ids.isEmpty()) {
+            foundBO = false
+        }
+    }
+    def reportPeriod = reportPeriodService.get(periodId)
+    if (!foundBO) {
+        logger.warn("Не найдена форма 102 бухгалтерской отчетности: Период: \"%s %s\", Подразделение: \"%s\". Ячейки по графе \"%s\", заполняемые из данной формы, будут заполнены нулевым значением.",
+                reportPeriod?.getName() ?: "Период не задан", reportPeriod?.getTaxPeriod()?.getYear() ?: "Год не задан", formDataDepartment.name, getColumnName(tmpRow, alias))
+    } else {
+        // справочник "Отчет о прибылях и убытках (Форма 0409102-СБ)"
+        def records = bookerStatementService.getRecords(52L, formData.departmentId, getEndDate(periodId), "OPU_CODE = '${opuCodes.join("' OR OPU_CODE = '")}'")
+        def recordOpuCodes = records?.collect { it.OPU_CODE.stringValue }?.unique() ?: []
+        def missedCodes = opuCodes.findAll { !recordOpuCodes.contains(it) }
+        if (!missedCodes.isEmpty()) {
+            logger.warn("Форма 102 бухгалтерской отчетности: Период: \"%s %s\", Подразделение: \"%s\". Отсутствуют значения по следующим символам: '%s'! При заполнении графы \"%s\" формы значения по данным символам будут приняты за нулевые.",
+                    reportPeriod?.getName() ?: "Период не задан", reportPeriod?.getTaxPeriod()?.getYear() ?: "Год не задан", formDataDepartment.name, missedCodes.join("', '"), getColumnName(tmpRow, alias))
+        }
+    }
 }
 
 void calc() {
@@ -121,7 +169,7 @@ void calc() {
 void logicCheck() {
     def dataRows = formDataService.getDataRowHelper(formData).allCached
     for(int i = 0; i < dataRows.size(); i++){
-        checkNonEmptyColumns(dataRows[i], dataRows[i].rowNum as Integer, nonEmptyColumns, logger, true)
+        checkNonEmptyColumns(dataRows[i], dataRows[i].getIndex(), nonEmptyColumns, logger, true)
     }
     // получить строки из шаблона
     def formTemplate = formDataService.getFormTemplate(formData.formType.id, formData.reportPeriodId)
@@ -130,8 +178,13 @@ void logicCheck() {
     for(int i = 0; i < dataRows.size(); i++){
         def row = dataRows[i]
         def tempRow = tempRows[i]
+        // делаем проверку БО только для первичных НФ
         if (opuMap.keySet().contains(row.getAlias()) && (!"R3".equals(row.getAlias()) || isBank())) {
-            check102(row, check102Columns, tempRow, logger, true)
+            if (formData.kind == FormDataKind.PRIMARY) {
+                check102(row, check102Columns, tempRow, logger, true)
+            }
+        } else {
+            checkCalc(row, check102Columns, tempRow, logger, true)
         }
         checkCalc(row, checkCalcColumns, tempRow, logger, true)
     }
@@ -142,12 +195,13 @@ void calcValues(def dataRows, def sourceRows) {
         def row = getDataRow(dataRows, alias)
         def rowSource = getDataRow(sourceRows, alias)
         if ("R3".equals(alias) && !isBank()) {
-            row.comparePeriod = rowSource.comparePeriod
-            row.currentPeriod = rowSource.currentPeriod
+            row.comparePeriod = getSourceValue(getComparativePeriodId(), row, 'comparePeriod')
+            row.currentPeriod = getSourceValue(formData.reportPeriodId, row, 'currentPeriod')
             continue
         }
-        row.comparePeriod = get102Sum(rowSource, getReportPeriodEndDate()) - (formData.accruing ? 0 : get102Sum(rowSource, getPrevReportPeriodEndDate()))
-        row.currentPeriod = get102Sum(rowSource, getComparePeriodEndDate()) - (formData.accruing ? 0 : get102Sum(rowSource, getPrevComparePeriodEndDate()))
+
+        row.comparePeriod = calcBO(rowSource, getComparativePeriodId(), 'comparePeriod')
+        row.currentPeriod = calcBO(rowSource, formData.reportPeriodId, 'currentPeriod')
     }
     def row2 = getDataRow(dataRows, "R2")
     def row4 = getDataRow(dataRows, "R4")
@@ -158,8 +212,12 @@ void calcValues(def dataRows, def sourceRows) {
     def row7Source = getDataRow(sourceRows, "R7")
     def row8Source = getDataRow(sourceRows, "R8")
     ['comparePeriod', 'currentPeriod'].each {
-        row4[it] = (row5Source[it] ?: 0) + (row6Source[it] ?: 0) + (row7Source[it] ?: 0) + (row8Source[it] ?: 0)
-        row2[it] = (row3Source[it] ?: 0) + (row4Source[it] ?: 0)
+        def smallSum = (row5Source[it] ?: 0) + (row6Source[it] ?: 0) + (row7Source[it] ?: 0) + (row8Source[it] ?: 0)
+        checkOverflow(smallSum, row4, it, row4.getIndex() ?: 0, 18, null)
+        row4[it] = smallSum
+        def largeSum = (row3Source[it] ?: 0) + (row4Source[it] ?: 0)
+        checkOverflow(largeSum, row2, it, row2.getIndex() ?: 0, 18, null)
+        row2[it] = largeSum
     }
     for(int i = 0; i < dataRows.size(); i++){
         def row = dataRows[i]
@@ -168,23 +226,76 @@ void calcValues(def dataRows, def sourceRows) {
         row.deltaPercent = null
         if (rowSource.comparePeriod) {
             row.deltaPercent = ((rowSource.deltaRub ?: BigDecimal.ZERO) as BigDecimal) / rowSource.comparePeriod * 100
+        } else if (dataRows == sourceRows) { // выводить только при расчете
+            rowWarning(logger, rowSource, String.format("Строка %s: Графа «%s» не может быть заполнена. Выполнение расчета невозможно, так как в результате проверки получен нулевой знаменатель (деление на ноль невозможно)",
+                    rowSource.getIndex(), getColumnName(rowSource, 'deltaPercent')))
         }
     }
 }
 
-// Возвращает данные из Формы 102 БО за период
-def get102Sum(def row, def date) {
-    if (opuMap[row.getAlias()] != null && date != null) {
-        def opuCodes = opuMap[row.getAlias()].join("' OR OPU_CODE = '")
-        // справочник "Отчет о прибылях и убытках (Форма 0409102-СБ)"
-        def records = bookerStatementService.getRecords(52L, formData.departmentId, date, "OPU_CODE = '${opuCodes}'")
-        return records?.sum { it.TOTAL_SUM.numberValue } ?: 0
+def getSourceValue(def periodId, def row, def alias) {
+    boolean found = false
+    if (periodId != null) {
+        def reportPeriod = reportPeriodService.get(periodId)
+        for (formDataSource in departmentFormTypeService.getFormSources(formData.departmentId, formData.getFormType().getId(), formData.getKind(),
+                getStartDate(periodId), getEndDate(periodId))) {
+            if (formDataSource.formTypeId == sourceFormTypeId) {
+                found = true
+                def source = formDataService.getLast(formDataSource.formTypeId, formDataSource.kind, formDataSource.departmentId, formData.reportPeriodId, formData.periodOrder)
+                if (source != null && source.state == WorkflowState.ACCEPTED) {
+                    sourceForm = formDataService.getDataRowHelper(source)
+                    return sourceForm.allSaved?.get(0)?.sum
+                } else {
+                    logger.warn("Не найдена форма-источник «Величины налоговых платежей, вводимые вручную» в статусе «Принята»: Тип формы: \"%s\", Период: \"%s %s\", Подразделение: \"%s\". Ячейки по графе «%s», заполняемые из данной формы, будут заполнены нулевым значением.",
+                            formDataSource.kind.name, reportPeriod.getName(), reportPeriod.getTaxPeriod().getYear(), departmentService.get(formDataSource.departmentId)?.name, getColumnName(row, alias))
+                }
+            }
+        }
+    }
+    if (!found) {
+        logger.warn("Не найдена форма «Величины налоговых платежей, вводимые вручную» в списке назначенных источников: Период: \"%s %s\". Ячейки по графе \"%s\", заполняемые из данной формы, будут заполнены нулевым значением.",
+                reportPeriod.getName(), reportPeriod.getTaxPeriod().getYear(), getColumnName(row, alias))
     }
     return 0
 }
 
+// Расчет сумм из БО за определенный период
+def calcBO(def rowSource, def periodId, def alias) {
+    def periodSum = 0
+    if (periodId != null) {
+        def pair = get102Sum(rowSource, periodId)
+        boolean isCorrect = pair[1]
+        periodSum = isCorrect ? pair[0] : 0
+        def reportPeriod = reportPeriodService.get(periodId)
+        if (formData.accruing && reportPeriod.order != 1 && isCorrect) {
+            def prevPeriodId = reportPeriodService.getPrevReportPeriod(periodId)?.id
+            pair = get102Sum(rowSource, prevPeriodId)
+            isCorrect = pair[1]
+            periodSum = isCorrect ? (periodSum - pair[0]) : 0
+        }
+        checkOverflow(periodSum, rowSource, alias, rowSource.getIndex(), 18, null)
+    }
+    return periodSum
+}
+
+// Возвращает данные из Формы 102 БО за период + флаг ошибки
+def get102Sum(def row, def periodId) {
+    if (opuMap[row.getAlias()] != null && periodId != null) {
+        def opuCodes = opuMap[row.getAlias()].join("' OR OPU_CODE = '")
+        // справочник "Отчет о прибылях и убытках (Форма 0409102-СБ)"
+        def records = bookerStatementService.getRecords(52L, formData.departmentId, getEndDate(periodId), "OPU_CODE = '${opuCodes}'")
+        if ((records == null || records.isEmpty())) {
+            return [0, true]
+        }
+        return [records.sum { it.TOTAL_SUM.numberValue }, false]
+    } else if (periodId == null) {
+        return [0, true]
+    }
+    return [0, false]
+}
+
 boolean isBank() {
-    return formData.departmentId == 1 // TODO
+    return formData.departmentId == 1 // по ЧТЗ
 }
 
 void check102(def row, def calcColumns, def tempRow, def logger, boolean required) {
@@ -199,7 +310,7 @@ void check102(def row, def calcColumns, def tempRow, def logger, boolean require
         }
     }
     if (!errorColumns.isEmpty()) {
-        String msg = String.format("Строка %s: Значение граф «%s» не соответствует значению поля «Сумма» соответствующего символа ф. 102 за установленный период.", row.rowNum, errorColumns.join(", "));
+        String msg = String.format("Строка %s: Значение граф «%s» не соответствует значению поля «Сумма» соответствующего символа ф. 102 за установленный период.", row.getIndex(), errorColumns.join(", "));
         if (required) {
             rowError(logger, row, msg);
         } else {
@@ -210,6 +321,7 @@ void check102(def row, def calcColumns, def tempRow, def logger, boolean require
 
 void importData() {
     def tmpRow = formData.createDataRow()
+    int COLUMN_COUNT = 7
     int HEADER_ROW_COUNT = 3
     String TABLE_START_VALUE = getColumnName(tmpRow, 'rowNum')
     String TABLE_END_VALUE = null
@@ -221,7 +333,7 @@ void importData() {
     checkAndReadFile(ImportInputStream, UploadFileName, allValues, headerValues, TABLE_START_VALUE, TABLE_END_VALUE, HEADER_ROW_COUNT, paramsMap)
 
     // проверка шапки
-    checkHeaderXls(headerValues)
+    checkHeaderXls(headerValues, COLUMN_COUNT, HEADER_ROW_COUNT, tmpRow)
     if (logger.containsLevel(LogLevel.ERROR)) {
         return
     }
@@ -238,36 +350,40 @@ void importData() {
     def allValuesCount = allValues.size()
 
     def dataRows = formDataService.getDataRowHelper(formData).allCached
+    // получить строки из шаблона
+    def formTemplate = formDataService.getFormTemplate(formData.formType.id, formData.reportPeriodId)
+    def templateRows = formTemplate.rows
 
     // формирование строк нф
     for (def i = 0; i < allValuesCount; i++) {
-        rowValues = allValues[i]
+        rowValues = allValues[0]
         fileRowIndex++
-        rowIndex++
         // все строки пустые - выход
         if (!rowValues) {
+            allValues.remove(rowValues)
+            rowValues.clear()
             break
         }
+        // простая строка
+        rowIndex++
         // прервать по загрузке нужных строк
         if (rowIndex > dataRows.size()) {
             break
         }
         // найти нужную строку нф
-        def alias = "R" + (rowIndex + 1) // aliasы начинаются с R2
-        def dataRow = dataRows.find{ it.getAlias() == alias }
-        if (dataRow == null) {
-            continue
-        }
+        def dataRow = dataRows.get(rowIndex - 1)
+        def templateRow = getDataRow(templateRows, dataRow.getAlias())
         // заполнить строку нф значениями из эксель
-        fillRowFromXls(dataRow, rowValues, fileRowIndex, rowIndex, colOffset)
+        fillRowFromXls(templateRow, dataRow, rowValues, fileRowIndex, rowIndex, colOffset)
+
+        // освободить ненужные данные - иначе не хватит памяти
+        allValues.remove(rowValues)
+        rowValues.clear()
     }
     if (rowIndex < dataRows.size()) {
         logger.error("Структура файла не соответствует макету налоговой формы.")
     }
     showMessages(dataRows, logger)
-    if (!logger.containsLevel(LogLevel.ERROR)) {
-        updateIndexes(dataRows)
-    }
 }
 
 /**
@@ -275,17 +391,17 @@ void importData() {
  *
  * @param headerRows строки шапки
  */
-void checkHeaderXls(def headerRows) {
+void checkHeaderXls(def headerRows, def colCount, def rowCount, def tmpRow) {
     if (headerRows.isEmpty()) {
         throw new ServiceException(WRONG_HEADER_ROW_SIZE)
     }
-    checkHeaderSize(headerRows[1].size(), headerRows.size(), 7, 3)
+    checkHeaderSize(headerRows[1].size(), headerRows.size(), colCount, rowCount)
     def headerMapping = [
-            (headerRows[0][0]): '№ строки',
-            (headerRows[0][1]): 'Наименование налога',
-            (headerRows[0][2]): 'символ формы 102',
-            (headerRows[0][3]): 'Период сравнения',
-            (headerRows[0][4]): 'Текущий отчетный период',
+            (headerRows[0][0]): getColumnName(tmpRow, 'rowNum'),
+            (headerRows[0][1]): getColumnName(tmpRow, 'taxName'),
+            (headerRows[0][2]): getColumnName(tmpRow, 'symbol102'),
+            (headerRows[0][3]): getColumnName(tmpRow, 'comparePeriod'),
+            (headerRows[0][4]): getColumnName(tmpRow, 'currentPeriod'),
             (headerRows[0][5]): 'Изменение за период',
             (headerRows[1][5]): '(гр.5-гр.4), тыс.руб.',
             (headerRows[1][6]): '(гр.6/гр.4*100),%'
@@ -299,43 +415,66 @@ void checkHeaderXls(def headerRows) {
 /**
  * Заполняет заданную строку нф значениями из экселя.
  *
+ * @param templateRow строка макета
  * @param dataRow строка нф
  * @param values список строк со значениями
  * @param fileRowIndex номер строки в тф
  * @param rowIndex номер строки в нф
  * @param colOffset отступ по столбцам
  */
-def fillRowFromXls(def dataRow, def values, int fileRowIndex, int rowIndex, int colOffset) {
+def fillRowFromXls(def templateRow, def dataRow, def values, int fileRowIndex, int rowIndex, int colOffset) {
     dataRow.setImportIndex(fileRowIndex)
     dataRow.setIndex(rowIndex)
+    def tmpValues = formData.createStoreMessagingDataRow()
 
-    //очищаем столбцы
-    resetColumns.each { alias ->
-        dataRow[alias] = null
-    }
-
-    def rowNum = dataRow.rowNum as Integer
-    def taxName = normalize(dataRow.taxName)
-    def symbol102 = normalize(dataRow.symbol102) ?: ''
-
-
+    // графа 1
     def colIndex = 0
-    def rowNumImport = values[colIndex] as Integer
+    tmpValues.rowNum = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
 
+    // графа 2
     colIndex++
-    def taxNameImport = normalize(values[colIndex])
+    tmpValues.taxName = values[colIndex]
 
+    // графа 3
     colIndex++
-    def symbol102Import = normalize(values[colIndex]) ?: ''
+    tmpValues.symbol102 = values[colIndex]
 
-    if (!(rowNum == rowNumImport && taxName == taxNameImport && symbol102 == symbol102Import)) {
-        logger.error("Структура файла не соответствует макету налоговой формы в строке с номером строки = $rowNum.")
-        return
+    // Проверить фиксированные значения
+    tmpValues.keySet().toArray().each { alias ->
+        def value = tmpValues[alias]?.toString()
+        def valueExpected = StringUtils.cleanString(templateRow.getCell(alias).value?.toString())
+        checkFixedValue(dataRow, value, valueExpected, dataRow.getIndex(), alias, logger, true)
     }
 
     // графа 4..7
-    resetColumns.each { alias ->
+    calcColumns.each { alias ->
         colIndex++
         dataRow[alias] = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
+    }
+}
+
+void consolidation() {
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
+    // очистить значимые ячейки
+    dataRows.each { row ->
+        calcColumns.each { column ->
+            row[column] = null
+        }
+    }
+    for (formDataSource in departmentFormTypeService.getFormSources(formData.departmentId, formData.getFormType().getId(), formData.getKind(),
+            getStartDate(formData.reportPeriodId), getEndDate(formData.reportPeriodId))) {
+        if (formDataSource.formTypeId == formData.getFormType().getId()) {
+            def source = formDataService.getLast(formDataSource.formTypeId, formDataSource.kind, formDataSource.departmentId, formData.reportPeriodId, formData.periodOrder)
+            if (source != null && source.state == WorkflowState.ACCEPTED) {
+                sourceRows = formDataService.getDataRowHelper(source)?.allSaved
+                // суммируем 4, 5-ую графу из источников
+                dataRows.each { row ->
+                    def sourceRow = getDataRow(sourceRows, row.getAlias())
+                    check102Columns.each { column ->
+                        row[column] = (row[column] ?: 0) + (sourceRow[column] ?: 0)
+                    }
+                }
+            }
+        }
     }
 }

@@ -41,8 +41,8 @@
         <name>Период сравнения</name>
         <order>4</order>
         <width>10</width>
-        <maxLength>17</maxLength>
-        <precision>2</precision>
+        <maxLength>22</maxLength>
+        <precision>4</precision>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>currentPeriod</alias>
@@ -51,8 +51,8 @@
         <name>Текущий отчетный период</name>
         <order>5</order>
         <width>10</width>
-        <maxLength>17</maxLength>
-        <precision>2</precision>
+        <maxLength>22</maxLength>
+        <precision>4</precision>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>deltaRub</alias>
@@ -61,8 +61,8 @@
         <name>Изменение за период (гр.5-гр.4), тыс.руб.</name>
         <order>6</order>
         <width>10</width>
-        <maxLength>17</maxLength>
-        <precision>2</precision>
+        <maxLength>22</maxLength>
+        <precision>4</precision>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>deltaPercent</alias>

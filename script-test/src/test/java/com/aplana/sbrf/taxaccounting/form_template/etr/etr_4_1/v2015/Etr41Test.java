@@ -73,7 +73,6 @@ public class Etr41Test extends ScriptTestBase {
         Assert.assertTrue(testHelper.getLogger().containsLevel(LogLevel.ERROR));
     }
 
-    //TODO
     @Test
     public void importExcelTest() {
         int expected = 7; // в файле 7 строк
