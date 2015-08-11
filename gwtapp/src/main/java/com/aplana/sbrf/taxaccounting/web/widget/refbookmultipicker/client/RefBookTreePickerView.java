@@ -61,7 +61,7 @@ public class RefBookTreePickerView extends ViewWithUiHandlers<RefBookTreePickerU
     private Iterator<Long> iterator;
 
     public RefBookTreePickerView() {
-        this(null, null);
+        this(false, null);
     }
 
     public RefBookTreePickerView(final Boolean multiSelect, RefBookPicker refBookPicker) {
