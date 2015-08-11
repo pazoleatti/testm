@@ -9,8 +9,17 @@ public class FormDataReport {
 	private ReportPeriod reportPeriod;
 	private Date acceptanceDate;
 	private Date creationDate;
+    private ReportPeriod rpCompare;
 
-	public FormData getData() {
+    public ReportPeriod getRpCompare() {
+        return rpCompare;
+    }
+
+    public void setRpCompare(ReportPeriod rpCompare) {
+        this.rpCompare = rpCompare;
+    }
+
+    public FormData getData() {
 		return data;
 	}
 	public void setData(FormData data) {

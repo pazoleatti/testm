@@ -229,7 +229,6 @@ public class FormDataCSVReportBuilderTest {
         formData.setSigners(formDataSigners);
 
         data.setData(formData);
-        data.setReportPeriod(reportPeriod);
         data.setFormTemplate(formTemplate);
         data.setAcceptanceDate(null);
         data.setCreationDate(new Date(324234));
