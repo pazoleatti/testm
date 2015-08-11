@@ -128,6 +128,7 @@ public class LockListView extends ViewWithUiHandlers<LockListUiHandlers>
                 return taskItem.getServerNode();
             }
         };
+        serverNodeColumn.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
 
         TextColumn<LockDataItem> userColumn = new TextColumn<LockDataItem>() {
             @Override
