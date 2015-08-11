@@ -1,5 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.mvc;
 
+import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.web.main.api.server.UserAuthenticationToken;
 import com.google.gwt.user.server.rpc.RPCServletUtils;
 import com.gwtplatform.dispatch.server.Dispatch;
 import com.gwtplatform.dispatch.server.RequestProvider;
@@ -10,6 +12,7 @@ import com.gwtplatform.dispatch.shared.Result;
 import com.gwtplatform.dispatch.shared.ServiceException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 import javax.servlet.ServletContext;
@@ -47,19 +50,15 @@ public class RpcDispatchServiceImpl extends DispatchServiceImpl {
 
     @Override
     protected void doUnexpectedFailure(Throwable e) {
-
-        boolean isAccessDeniedException = false;
-
+		boolean isAccessDeniedException = false;
         Throwable cause = e;
 
         while (cause.getCause() != null && !(cause instanceof AccessDeniedException)) {
             if (cause.getCause() instanceof AccessDeniedException) {
                 isAccessDeniedException = true;
             }
-
             cause = cause.getCause();
         }
-
 
         if (isAccessDeniedException) {
             throw new AccessDeniedException("Access is denied", cause);
@@ -70,17 +69,14 @@ public class RpcDispatchServiceImpl extends DispatchServiceImpl {
                 throw new RuntimeException("Unable to report failure", e);
             }
             ServletContext servletContext = getServletContext();
-            RPCServletUtils.writeResponseForUnexpectedFailure(servletContext,
-                    getThreadLocalResponse(), e);
+            RPCServletUtils.writeResponseForUnexpectedFailure(servletContext, getThreadLocalResponse(), e);
         }
     }
 
     @Override
     public Result execute(String cookieSentByRPC, Action<?> action) throws ActionException, ServiceException {
-
         if (action.isSecured() && !cookieMatch(cookieSentByRPC)) {
             String message = xsrfAttackMessage + " While executing action: " + action.getClass().getName();
-
             logger.severe(message);
             throw new ServiceException(message);
         }
@@ -149,4 +145,31 @@ public class RpcDispatchServiceImpl extends DispatchServiceImpl {
 
         return cookieInRequest.equals(cookieSentByRPC);
     }
+
+	/**
+	 * Дополнительная информация о текущей сессии, которая спровоцировала исключительную ситуацию
+	 * @return
+	 */
+	private String getSessionInfo() {
+		if (SecurityContextHolder.getContext().getAuthentication() != null) {
+			UserAuthenticationToken principal = ((UserAuthenticationToken) (SecurityContextHolder.getContext()
+					.getAuthentication().getPrincipal()));
+			TAUserInfo userInfo = principal.getUserInfo();
+			return String.format("Server: %s; User: %s; IP-address: %s",
+					getServletContext().getServerInfo(),
+					userInfo.getUser().getLogin(),
+					userInfo.getIp());
+		}
+		return String.format("Server: %s; User: ?; IP-address: ?", getServletContext().getServerInfo());
+	}
+
+	@Override
+	public void log(String message, Throwable t) {
+		super.log(getSessionInfo() + System.getProperty("line.separator") + message, t);
+	}
+
+	@Override
+	public void log(String msg) {
+		super.log(getSessionInfo() + System.getProperty("line.separator") + msg);
+	}
 }
