@@ -189,6 +189,12 @@ public class FilterFormDataView extends ViewWithUiHandlers<FilterFormDataUIHandl
 				case STATUS:
 					formStateLbl.setText(name.getValue() + app);
 					break;
+                case FORM_KIND_REFBOOK:
+                    formDataKind.setTitle(name.getValue() + app);
+                    break;
+                case FORM_TYPE_REFBOOK:
+                    formTypeId.setTitle(name.getValue() + app);
+                    break;
 				default:
 					break;
 			}

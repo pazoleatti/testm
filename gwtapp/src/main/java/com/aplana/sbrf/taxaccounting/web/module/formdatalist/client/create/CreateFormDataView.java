@@ -7,6 +7,7 @@ import com.aplana.gwt.client.dialog.DialogHandler;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.util.StringUtils;
+import com.aplana.sbrf.taxaccounting.web.module.formdatalist.shared.FormDataElementName;
 import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPickerPopupWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.periodpicker.client.PeriodPickerPopupWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client.RefBookPickerWidget;
@@ -123,6 +124,26 @@ public class CreateFormDataView extends PopupViewWithUiHandlers<CreateFormDataUi
         monthPanel.setVisible(false);
         correctionPanel.setVisible(false);
         updateEnabled();
+    }
+
+    @Override
+    public void setElementNames(Map<FormDataElementName, String> names) {
+        String app = ":";
+        for (Map.Entry<FormDataElementName, String> name : names.entrySet()) {
+            if (name.getValue() == null) {
+                continue;
+            }
+            switch (name.getKey()) {
+                case FORM_KIND_REFBOOK:
+                    formDataKind.setTitle(name.getValue() + app);
+                    break;
+                case FORM_TYPE_REFBOOK:
+                    formTypeId.setTitle(name.getValue() + app);
+                    break;
+                default:
+                    break;
+            }
+        }
     }
 
     private void updateEnabled() {

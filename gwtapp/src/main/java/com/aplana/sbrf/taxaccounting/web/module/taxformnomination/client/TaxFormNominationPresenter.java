@@ -195,7 +195,7 @@ public class TaxFormNominationPresenter
 
     @Override
     public void onClickEditFormDestinations(List<FormTypeKind> formTypeKinds) {
-        formDestinationsPresenter.initAndShowEditDialog(this, formTypeKinds);
+        formDestinationsPresenter.initAndShowEditDialog(this, formTypeKinds, taxType);
     }
 
     @Override

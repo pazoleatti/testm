@@ -17,6 +17,7 @@ import com.gwtplatform.mvp.client.PresenterWidget;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 public class CreateFormDataPresenter extends PresenterWidget<CreateFormDataPresenter.MyView> implements CreateFormDataUiHandlers {
@@ -47,6 +48,8 @@ public class CreateFormDataPresenter extends PresenterWidget<CreateFormDataPrese
         void setFormMonthEnabled(boolean isMonthly);
 
         void setComparative(boolean comparative);
+
+        void setElementNames(Map<FormDataElementName, String> fieldNames);
     }
 
     @Inject
@@ -182,10 +185,24 @@ public class CreateFormDataPresenter extends PresenterWidget<CreateFormDataPrese
 
                         getView().init();
                         getView().setAcceptableReportPeriods(result.getReportPeriods());
+                        changeFilterElementNames(taxType);
 
                         slotForMe.addToPopupSlot(CreateFormDataPresenter.this);
                     }
                 }, this));
+    }
+
+    public void changeFilterElementNames(TaxType taxType) {
+        GetFieldsNames action = new GetFieldsNames();
+        action.setTaxType(taxType);
+        dispatchAsync.execute(action, CallbackUtils
+                        .defaultCallback(new AbstractCallback<GetFieldsNamesResult>() {
+                            @Override
+                            public void onSuccess(GetFieldsNamesResult result) {
+                                getView().setElementNames(result.getFieldNames());
+                            }
+                        }, this)
+        );
     }
 
     @Override
