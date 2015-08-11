@@ -89,13 +89,13 @@ public class RefBookMultiPickerView extends ViewWithUiHandlers<RefBookMultiPicke
                 }
             });
 
-    public RefBookMultiPickerView(boolean b, RefBookPicker refBookPicker) {
-        this(false);
-        this.mainWidget = refBookPicker;
+    public RefBookMultiPickerView() {
+        this(false, null);
     }
 
-    public RefBookMultiPickerView(final Boolean multiSelect) {
+    public RefBookMultiPickerView(final Boolean multiSelect, RefBookPicker refBookPicker) {
         this.multiSelect = multiSelect;
+        this.mainWidget = refBookPicker;
 
         selectionModel = getSelectionModel(multiSelect != null && multiSelect);
 
