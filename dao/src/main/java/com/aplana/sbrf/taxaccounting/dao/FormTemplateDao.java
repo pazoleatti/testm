@@ -155,9 +155,10 @@ public interface FormTemplateDao {
      *
      * @param formTypeId вид шаблона
      * @param reportPeriodId отчетный период
+     * @param excludeInactiveTemplate исключить нф-источники с макетом выведенным из действия?
      * @return
      */
-    boolean existFormTemplate(int formTypeId, int reportPeriodId);
+    boolean existFormTemplate(int formTypeId, int reportPeriodId, boolean excludeInactiveTemplate);
 
 	/**
 	 * Проверяет, есть ли в списке строковых значений, строка с длиной больше maxLength

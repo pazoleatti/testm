@@ -195,7 +195,7 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
 		int reportPeriodId = declarationData.getReportPeriodId();
 
 		// Формирование списка НФ-источников в статусе "Принята"
-		List<DepartmentFormType> sourcesInfo = declarationDataService.getFormDataSources(declarationData, new Logger());
+		List<DepartmentFormType> sourcesInfo = declarationDataService.getFormDataSources(declarationData, true, new Logger());
 		List<FormData> records = new ArrayList<FormData>();
 
         DepartmentReportPeriodFilter filter = new DepartmentReportPeriodFilter();

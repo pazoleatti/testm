@@ -263,8 +263,8 @@ public class FormDataServiceTest extends Assert{
         when(formTypeService.get(dft2.getFormTypeId())).thenReturn(formType1);
         when(formDataDao.get(formData.getId(), false)).thenReturn(formData);
 
-        when(formTemplateService.existFormTemplate(1, 2)).thenReturn(true);
-        when(formTemplateService.existFormTemplate(2, 2)).thenReturn(true);
+        when(formTemplateService.existFormTemplate(1, 2, false)).thenReturn(true);
+        when(formTemplateService.existFormTemplate(2, 2, false)).thenReturn(true);
         when(formTemplateService.getActiveFormTemplateId(1, 2)).thenReturn(1);
         when(formTemplateService.getActiveFormTemplateId(2, 2)).thenReturn(2);
         when(formTemplateService.get(1)).thenReturn(formTemplate1);
@@ -1070,8 +1070,8 @@ public class FormDataServiceTest extends Assert{
         departmentReportPeriod.setActive(true);
         formData.setDepartmentReportPeriodId(departmentReportPeriod.getId());
 
-        when(formTemplateService.existFormTemplate(1, 2)).thenReturn(true);
-        when(formTemplateService.existFormTemplate(2, 2)).thenReturn(true);
+        when(formTemplateService.existFormTemplate(1, 2, false)).thenReturn(true);
+        when(formTemplateService.existFormTemplate(2, 2, false)).thenReturn(true);
         when(formTemplateService.getActiveFormTemplateId(1, 2)).thenReturn(1);
         when(formTemplateService.getActiveFormTemplateId(2, 2)).thenReturn(2);
         when(formTemplateService.get(1)).thenReturn(formTemplate1);
