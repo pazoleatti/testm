@@ -173,8 +173,7 @@ void consolidation() {
     def rows = []
 
     // «Расчет налога на прибыль организаций с доходов, удерживаемого налоговым агентом (источником выплаты доходов)»
-    def sourceFormType03 = 10070
-    def sourceFormType03Alt = 419
+    def sourceFormTypes03 = [419, 10070, 314]
     // «Сведения о уплаченных суммах налога по операциям с ГЦБ»
     def sourceFormTypeGCB = 420
     // «Сведения о суммах налога на прибыль, уплаченного Банком за рубежом»
@@ -188,8 +187,9 @@ void consolidation() {
             def sourceDataRows = formDataService.getDataRowHelper(sourceFormData)?.allSaved
             def newDataRows = []
             switch (it.formTypeId) {
-                case sourceFormType03:
-                case sourceFormType03Alt:
+                case sourceFormTypes03[0]:
+                case sourceFormTypes03[1]:
+                case sourceFormTypes03[2]:
                     newDataRows = formNewRows03(sourceDataRows)
                     break
                 case sourceFormTypeGCB:

@@ -116,7 +116,7 @@ def void addTypeTemplate(FormType formType, FormTemplate formTemplate) {
 }
 
 def void addLongText (def form_template_id, String longString, String alias) {
-    final int MAX_LENGTH = 3000
+    final int MAX_LENGTH = 2000
     namedParameterJdbcTemplate.update("UPDATE FORM_TEMPLATE SET $alias = null where id = $form_template_id", [:])
     int start = 0
     longString = new String(longString.decodeBase64(), "UTF-8")
