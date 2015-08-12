@@ -435,6 +435,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
             public void yes() {
                 ExitAndSaveFormDataAction action = new ExitAndSaveFormDataAction();
                 action.setFormData(formData);
+                action.setModifiedRows(new ArrayList<DataRow<Cell>>(modifiedRows));
                 dispatcher.execute(action, CallbackUtils.defaultCallback(new AsyncCallback<DataRowResult>() {
                     @Override
                     public void onSuccess(DataRowResult result) {

@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdata.server;
 
 import com.aplana.sbrf.taxaccounting.model.FormData;
+import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookHelper;
 import com.aplana.sbrf.taxaccounting.service.DataRowService;
@@ -40,8 +41,13 @@ public class ExitAndSaveFormDataHandler extends
 	@Override
 	public DataRowResult execute(ExitAndSaveFormDataAction action, ExecutionContext context) throws ActionException {
 		Logger logger = new Logger();
+        TAUserInfo userInfo = securityService.currentUserInfo();
 		FormData formData = action.getFormData();
-        formDataService.unlock(formData.getId(), securityService.currentUserInfo());
+        if (!action.getModifiedRows().isEmpty()) {
+            refBookHelper.dataRowsCheck(action.getModifiedRows(), formData.getFormColumns());
+            dataRowService.update(userInfo, formData.getId(), action.getModifiedRows(), formData.isManual());
+        }
+        formDataService.unlock(formData.getId(), userInfo);
 		DataRowResult result = new DataRowResult();
         result.setUuid(logEntryService.save(logger.getEntries()));
 		return result;
