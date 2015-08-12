@@ -438,8 +438,7 @@ void consolidation() {
     def rows = []
 
     def source1FormTypeId = 418
-    def source2FormTypeId = 419
-    def source2FormTypeIdAlt = 10070
+    def source2FormTypeIds = [419, 10070, 314]
 
     // 2..31, 32..71
     def consilidationColumns = allColumns - 'refNum'
@@ -460,7 +459,7 @@ void consolidation() {
                     rows.add(newRow)
                 }
             }
-        } else if (it.formTypeId == source2FormTypeId || it.formTypeId == source2FormTypeIdAlt) {
+        } else if (source2FormTypeIds.contains(it.formTypeId)) {
             // Расчет налога на прибыль организаций с доходов, удерживаемого налоговым агентом (источником выплаты доходов)
             // TODO (Ramil Timerbaev) в чтз не описано как консолидировать второй источник
         }

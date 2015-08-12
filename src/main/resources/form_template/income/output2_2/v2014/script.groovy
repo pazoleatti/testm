@@ -93,10 +93,7 @@ def editableColumns = ['emitent', 'decreeNumber', 'inn', 'kpp', 'recType', 'titl
 def nonEmptyColumns = ['emitent', 'decreeNumber', 'inn', 'kpp', 'recType', 'title', 'dividendDate', 'sumDividend', 'sumTax']
 
 @Field
-def sourceFormType = 10070
-
-@Field
-def sourceFormTypeAlt = 419
+def sourceFormTypes = [419, 10070, 314]
 
 @Field
 def startDate = null
@@ -171,7 +168,7 @@ void consolidation() {
     // получить формы-источники в текущем налоговом периоде
     departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind(),
             getReportPeriodStartDate(), getReportPeriodEndDate()).each {
-        if(it.formTypeId == sourceFormType || it.formTypeId == sourceFormTypeAlt) {
+        if(sourceFormTypes.contains(it.formTypeId)) {
             def sourceFormData = formDataService.getLast(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId, formData.periodOrder)
             if (sourceFormData != null && sourceFormData.state == WorkflowState.ACCEPTED) {
                 def sourceHelper = formDataService.getDataRowHelper(sourceFormData)
