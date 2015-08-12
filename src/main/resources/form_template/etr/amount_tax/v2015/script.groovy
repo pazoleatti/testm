@@ -63,7 +63,7 @@ void logicCheck() {
 }
 
 boolean isBank() {
-    return formData.departmentId == 1 // TODO
+    return formData.departmentId == 1
 }
 
 void importData() {
