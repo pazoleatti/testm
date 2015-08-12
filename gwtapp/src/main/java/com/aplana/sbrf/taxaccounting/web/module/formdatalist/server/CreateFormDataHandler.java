@@ -60,6 +60,8 @@ public class CreateFormDataHandler extends AbstractActionHandler<CreateFormData,
     private static final String ERROR_DEPARTMENT_REPORT_PERIOD_NOT_FOUND = "Не определен отчетный период подразделения!";
     private final static String MANUAL_USED_MESSAGE = "Для формирования декларации в корректируемом периоде используются данные версии ручного ввода, созданной в форме «%s», %s, «%s»!";
     private static final SimpleDateFormat SDF_DD_MM_YYYY = new SimpleDateFormat("dd.MM.yyyy");
+    private static final String NOT_EXIST_DESTINATIONS_ETR = "Не найдены назначения источников-приемников в периоде %s.";
+    private static final String NOT_EXIST_DESTINATIONS_OTHER = "Не найдены назначения источников-приемников в периоде %s. Форма не является источником данных для %s.";
 
     public CreateFormDataHandler() {
 		super(CreateFormData.class);
@@ -119,7 +121,12 @@ public class CreateFormDataHandler extends AbstractActionHandler<CreateFormData,
                 List<DepartmentFormType> formDestinations = sourceService.getFormDestinations(
                         departmentReportPeriod.getDepartmentId(), formDataTypeId, kind, departmentReportPeriod.getReportPeriod().getId());
                 if (declarationDestinations.isEmpty() && formDestinations.isEmpty()){
-                    logger.warn("Не найдены назначения источников-приемников в периоде " + departmentReportPeriod.getReportPeriod().getName() + ". Форма не является источником данных для декларации.");
+                    if (formType.getTaxType() == TaxType.ETR)
+                        logger.warn(String.format(NOT_EXIST_DESTINATIONS_ETR, departmentReportPeriod.getReportPeriod().getName()));
+                    else
+                        logger.warn(String.format(
+                                NOT_EXIST_DESTINATIONS_OTHER,
+                                departmentReportPeriod.getReportPeriod().getName(), formType.getTaxType() == TaxType.DEAL ? "уведомления" : "декларации"));
                 }
 
                 int templateId = formTemplateService.getActiveFormTemplateId(formDataTypeId, departmentReportPeriod.getReportPeriod().getId());

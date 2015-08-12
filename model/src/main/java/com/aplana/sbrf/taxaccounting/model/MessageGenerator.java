@@ -5,7 +5,7 @@ import java.text.SimpleDateFormat;
 /**
  * User: avanteev
  */
-public class MessageGenerator {
+public final class MessageGenerator {
     public static String getFDMsg(String mainStr, String formTypeName, String kindName, String departmentName, Integer periodOrder, boolean manual, DepartmentReportPeriod reportPeriod, DepartmentReportPeriod rpComparison){
         if (rpComparison == null) {
             return String.format(COMPLETE_FORM,
@@ -34,32 +34,8 @@ public class MessageGenerator {
         }
     }
 
-    public static String getErrorFDMsg(String mainStr, String formTypeName, String kindName, boolean manual, String departmentName, Integer periodOrder, DepartmentReportPeriod reportPeriod, DepartmentReportPeriod rpComparison){
-        if (rpComparison == null) {
-            return String.format(ERROR_FORM,
-                    mainStr,
-                    formTypeName,
-                    kindName,
-                    departmentName,
-                    reportPeriod.getReportPeriod().getName(),
-                    reportPeriod.getReportPeriod().getTaxPeriod().getYear(),
-                    periodOrder != null ? String.format(MONTH,  Formats.getRussianMonthNameWithTier(periodOrder)): "",
-                    reportPeriod.getCorrectionDate() != null ? String.format(CORRECTION_DATE, SDF_DD_MM_YYYY.format(reportPeriod.getCorrectionDate())) : "",
-                    manual ? "ручного ввода" : "автоматическая");
-        } else {
-            return String.format(ERROR_FORM_WITH_RP_COMPARISON,
-                    mainStr,
-                    formTypeName,
-                    kindName,
-                    departmentName,
-                    reportPeriod.getReportPeriod().getName(),
-                    reportPeriod.getReportPeriod().getTaxPeriod().getYear(),
-                    rpComparison.getReportPeriod().getName(),
-                    rpComparison.getReportPeriod().getTaxPeriod().getYear(),
-                    periodOrder != null ? String.format(MONTH,  Formats.getRussianMonthNameWithTier(periodOrder)): "",
-                    reportPeriod.getCorrectionDate() != null ? String.format(CORRECTION_DATE, SDF_DD_MM_YYYY.format(reportPeriod.getCorrectionDate())) : "",
-                    manual ? "ручного ввода" : "автоматическая");
-        }
+    public static String mesSpeck(TaxType taxType){
+        return  taxType == TaxType.DEAL || taxType == TaxType.ETR ? "формы" : "налоговые формы";
     }
 
     private static final String COMPLETE_FORM =
