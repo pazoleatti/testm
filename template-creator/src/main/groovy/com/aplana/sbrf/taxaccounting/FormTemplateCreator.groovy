@@ -21,18 +21,18 @@ import javax.xml.bind.Unmarshaller
 
 static void main(String[] args) {
     String resourcePath = "./src/main/resources/com/aplana/sbrf/taxaccounting/"
-    String templatePath = "../src/main/resources/form_template/etr/etr_4_2/v2015/"
+    String templatePath = "../src/main/resources/form_template/income/f7_8_1/v2015/"
     def map = [ // TODO заполнить
                 // заполняем вручную
-                "%1%" : '702', // id типа НФ
-                "%2%" : 'Приложение 4-2. Отношение налогов, уплаченных из прибыли к балансовой прибыли', // имя типа НФ
-                "%3%" : 'TaxType.ETR', // вид налога
+                "%1%" : '363', // id типа НФ
+                "%2%" : '(Ф 7.8) Реестр совершенных операций с ценными бумагами по продаже и погашению, а также по открытию-закрытию короткой позиции (с 9 месяцев 2015)', // имя типа НФ
+                "%3%" : 'TaxType.INCOME', // вид налога
                 "%4%" : 'false', // isIFRS
                 "%5%" : '', // имя ИФРС
-                "%6%" : '702', // id версии макета НФ
+                "%6%" : '363', // id версии макета НФ
                 "%10%" : '01.01.2015', // версия в формате 01.01.2015
-                "%11%" : 'false', // ежемесячность
-                "%18%" : 'true'] // использование периода сравнения
+                "%11%" : 'true', // ежемесячность
+                "%18%" : 'false'] // использование периода сравнения
 
     def writer
     try {

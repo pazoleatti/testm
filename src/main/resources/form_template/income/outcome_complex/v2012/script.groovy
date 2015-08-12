@@ -126,6 +126,8 @@ def formTypeId_RNU71_2 = 503
 def formTypeId_RNU72 = 358
 @Field
 def formTypeId_F7_8 = 362
+@Field
+def formTypeId_F7_8_1 = 363
 
 @Field
 def rowsCalc = ['R3', 'R4', 'R5', 'R6', 'R7', 'R8', 'R9', 'R10', 'R11', 'R12', 'R13', 'R14', 'R15', 'R16', 'R17',
@@ -295,7 +297,7 @@ def consolidation() {
 
 boolean isFromSummary(def formSources) {
     def isSummarySource = formSources.find { it.formTypeId == formData.formType.id } != null
-    def isPrimarySource = formSources.find { it.formTypeId in [formTypeId_RNU12, formTypeId_RNU25, formTypeId_RNU26, formTypeId_RNU27, formTypeId_RNU30, formTypeId_RNU33, formTypeId_RNU45, formTypeId_RNU47, formTypeId_RNU48_1, formTypeId_RNU48_2, formTypeId_RNU49, formTypeId_RNU50, formTypeId_RNU51, formTypeId_RNU57, formTypeId_RNU64, formTypeId_RNU61, formTypeId_RNU62, formTypeId_RNU70_1, formTypeId_RNU70_2, formTypeId_RNU71_1, formTypeId_RNU71_2, formTypeId_RNU72, formTypeId_F7_8] } != null
+    def isPrimarySource = formSources.find { it.formTypeId in [formTypeId_RNU12, formTypeId_RNU25, formTypeId_RNU26, formTypeId_RNU27, formTypeId_RNU30, formTypeId_RNU33, formTypeId_RNU45, formTypeId_RNU47, formTypeId_RNU48_1, formTypeId_RNU48_2, formTypeId_RNU49, formTypeId_RNU50, formTypeId_RNU51, formTypeId_RNU57, formTypeId_RNU64, formTypeId_RNU61, formTypeId_RNU62, formTypeId_RNU70_1, formTypeId_RNU70_2, formTypeId_RNU71_1, formTypeId_RNU71_2, formTypeId_RNU72, formTypeId_F7_8, formTypeId_F7_8_1] } != null
     if (isSummarySource && isPrimarySource) {
         logger.warn("Неверно настроены источники формы \"%s\" для подразделения \"%s\"! Одновременно указаны в качестве источников сводные и первичные налоговые формы. Консолидация произведена из сводных налоговых форм.",
                 formData.formType.name, formDataDepartment.name)
@@ -387,7 +389,7 @@ void consolidationFromPrimary(def dataRows, def formSources) {
     }
     // получить формы-источники в текущем налоговом периоде
     formSources.each {
-        def isMonth = it.formTypeId in [formTypeId_RNU33, formTypeId_RNU45, formTypeId_RNU47, formTypeId_F7_8] //ежемесячная
+        def isMonth = it.formTypeId in [formTypeId_RNU33, formTypeId_RNU45, formTypeId_RNU47, formTypeId_F7_8, formTypeId_F7_8_1] //ежемесячная
         def children = []
         if (isMonth) {
             for (def periodOrder = 3 * reportPeriod.order - 2; periodOrder < 3 * reportPeriod.order + 1; periodOrder++) {
@@ -563,6 +565,7 @@ void consolidationFromPrimary(def dataRows, def formSources) {
                                         getChildTotalValue(dataRowsChild, "total", 'acquisitionPriceTax'))
                         break
                     case formTypeId_F7_8: //(Ф 7.8) Реестр совершенных операций с ценными бумагами по продаже и погашению, а также по открытию-закрытию короткой позиции
+                    case formTypeId_F7_8_1: //(Ф 7.8) Реестр совершенных операций с ценными бумагами по продаже и погашению, а также по открытию-закрытию короткой позиции (с 9 месяцев 2015)
                         // графа 9 = сумма граф 31 фикс строки 14 форм
                         addChildTotalData(dataRows, 52, 'consumptionTaxSumS', dataRowsChild, "R7-total", 'totalLoss')
                         // графа 9 = сумма граф 31 фикс строки 2 форм
