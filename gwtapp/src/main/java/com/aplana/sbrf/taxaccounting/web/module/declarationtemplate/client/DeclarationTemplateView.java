@@ -314,12 +314,9 @@ public class DeclarationTemplateView extends ViewWithUiHandlers<DeclarationTempl
 
     @UiHandler("historyVersion")
     void onHistoryClick(ClickEvent event){
-        Dialog.confirmMessage("Удаление xsd файла", "Вы действительно хотите удалить xsd файл?", new DialogHandler() {
-            @Override
-            public void yes() {
-                getUiHandlers().onDeleteXsd();
-            }
-        });
+        if (getUiHandlers() != null){
+            getUiHandlers().onHistoryClicked();
+        }
     }
 
     @UiHandler("deleteXsd")
