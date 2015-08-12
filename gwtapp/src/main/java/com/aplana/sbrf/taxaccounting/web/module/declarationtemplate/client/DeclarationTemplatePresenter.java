@@ -127,20 +127,24 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
 
     @Override
     public void downloadJrxml() {
-        DownloadUtils.openInIframe(
-                GWT.getHostPageBaseURL() + "download/uploadJrxml/" + (declarationTemplate.getJrxmlBlobId() != null ? declarationTemplate.getJrxmlBlobId() : ""));
+        if (declarationTemplate.getJrxmlBlobId() != null && !declarationTemplate.getJrxmlBlobId().isEmpty()) {
+            DownloadUtils.openInIframe(GWT.getHostPageBaseURL() + "download/downloadByUuid/" + declarationTemplate.getJrxmlBlobId());
+        }
     }
 
     @Override
     public void downloadXsd() {
-        DownloadUtils.openInIframe(
-                GWT.getHostPageBaseURL() + "download/uploadXsd/" + (declarationTemplate.getXsdId() != null ? declarationTemplate.getXsdId() : ""));
+        if (declarationTemplate.getXsdId() != null && !declarationTemplate.getXsdId().isEmpty()) {
+            DownloadUtils.openInIframe(GWT.getHostPageBaseURL() + "download/downloadByUuid/" + declarationTemplate.getXsdId());
+        }
     }
 
     @Override
     public void downloadDect() {
-        DownloadUtils.openInIframe(
-                GWT.getHostPageBaseURL() + "download/declarationTemplate/downloadDect/" + declarationTemplate.getId());
+        if (declarationTemplate.getId() != null) {
+            DownloadUtils.openInIframe(
+                    GWT.getHostPageBaseURL() + "download/declarationTemplate/downloadDect/" + declarationTemplate.getId());
+        }
     }
 
     /**
