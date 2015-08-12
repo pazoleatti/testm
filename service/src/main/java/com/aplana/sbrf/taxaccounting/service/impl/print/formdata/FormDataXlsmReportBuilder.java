@@ -381,7 +381,9 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
                     cell.setCellStyle(cellStyle);
                     cell.setCellType(Cell.CELL_TYPE_NUMERIC);
 
-                    cell.setCellValue(bd != null ? bd.precision() >0 ? bd.floatValue() : bd.intValue() : 0);
+                    if (bd != null){
+                        cell.setCellValue(bd.precision() >0 ? bd.floatValue() : bd.intValue());
+                    }
                 } else if (ColumnType.AUTO.equals(column.getColumnType())) {
                     Long bd = (Long) obj;
                     cellStyle = getCellStyle(dataRow.getCell(column.getAlias()), CellType.NUMERATION, column.getAlias());
