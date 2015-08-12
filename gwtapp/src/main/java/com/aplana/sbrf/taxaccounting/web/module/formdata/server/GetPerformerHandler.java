@@ -59,7 +59,7 @@ public class GetPerformerHandler extends AbstractActionHandler<GetPerformerActio
             LockData lockData = lockService.getLock(key);
             if (lockData == null) {
                 result.setReadOnlyMode(false);
-                result.setCreteLock(true);
+                result.setCreateLock(true);
                 lockService.lock(key, userInfo.getUser().getId(),
                         formDataService.getFormDataFullName(action.getFormData().getId(), action.getFormData().isManual(), null, ReportType.EDIT_FD),
                         lockService.getLockTimeout(LockData.LockObjects.FORM_DATA));

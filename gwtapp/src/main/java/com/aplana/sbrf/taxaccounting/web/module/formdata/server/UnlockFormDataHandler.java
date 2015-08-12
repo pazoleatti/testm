@@ -46,8 +46,10 @@ public class UnlockFormDataHandler extends AbstractActionHandler<UnlockFormData,
             if (lockDataEdit != null && lockDataEdit.getUserId() == userInfo.getUser().getId()) {
                 // Если есть блокировка, то удаляем задачи и откатываем изменения
                 formDataService.unlock(action.getFormId(), userInfo);
-                formDataService.interruptTask(action.getFormId(), userInfo, Arrays.asList(ReportType.CALCULATE_FD, ReportType.IMPORT_FD, ReportType.CHECK_FD));
-                dataRowService.restoreCheckPoint(formDataService.getFormData(userInfo, action.getFormId(), action.isManual(), new Logger()));
+                if (!action.isPerformerLock()) {
+                    formDataService.interruptTask(action.getFormId(), userInfo, Arrays.asList(ReportType.CALCULATE_FD, ReportType.IMPORT_FD, ReportType.CHECK_FD));
+                    dataRowService.restoreCheckPoint(formDataService.getFormData(userInfo, action.getFormId(), action.isManual(), new Logger()));
+                }
             }
 		} catch (Exception e){
 			//

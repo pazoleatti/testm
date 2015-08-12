@@ -24,7 +24,7 @@ import java.util.Set;
  */
 
 public class SignersPresenter extends PresenterWidget<SignersPresenter.MyView> implements SignersUiHandlers {
-	private boolean creteLock;
+	private boolean createLock;
     private boolean readOnlyMode;
     private FormData formData;
     private HandlerRegistration closeFormDataHandlerRegistration;
@@ -59,7 +59,7 @@ public class SignersPresenter extends PresenterWidget<SignersPresenter.MyView> i
                         FormData formData1 = result.getFormData();
                         LogAddEvent.fire(SignersPresenter.this, result.getUuid());
                         readOnlyMode = result.isReadOnlyMode();
-                        creteLock = result.isCreteLock();
+                        createLock = result.isCreateLock();
                         getView().setPerformer(formData1.getPerformer());
                         getView().setSigners(formData1.getSigners());
                         getView().setReadOnlyMode(SignersPresenter.this.readOnlyMode);
@@ -149,9 +149,10 @@ public class SignersPresenter extends PresenterWidget<SignersPresenter.MyView> i
     }
 
     private void unlockForm() {
-        if (!readOnlyMode && creteLock) {
+        if (!readOnlyMode && createLock) {
             UnlockFormData action = new UnlockFormData();
             action.setFormId(formData.getId());
+            action.setPerformerLock(createLock);
             dispatcher.execute(action, CallbackUtils.emptyCallback());
         }
     }
