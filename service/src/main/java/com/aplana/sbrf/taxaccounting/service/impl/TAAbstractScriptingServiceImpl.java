@@ -1,13 +1,14 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
+import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import groovy.lang.GroovyClassLoader;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.codehaus.groovy.control.CompilerConfiguration;
 import org.codehaus.groovy.control.customizers.ImportCustomizer;
 import org.codehaus.groovy.jsr223.GroovyScriptEngineImpl;
-import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 
@@ -58,7 +59,6 @@ public abstract class TAAbstractScriptingServiceImpl implements ApplicationConte
 		classLoader = new GroovyClassLoader(classLoader, config, false);
 		groovyScriptEngine.setClassLoader(classLoader);
 	}
-	
 
 	@Override
 	public void setApplicationContext(ApplicationContext context) {
@@ -86,5 +86,19 @@ public abstract class TAAbstractScriptingServiceImpl implements ApplicationConte
 		}
 		logger.error("Ошибка исполнения [%d]: %s", line, message);
 		this.logger.error("An error occured during script execution", e);
+	}
+
+	/**
+	 * Проверяет целесообразность запуска скрипта для указанного события. Если нет обработчика, то и вызывать не надо
+	 * @param script проверяемый скрипт
+	 * @param event тип события
+	 * @return true - запускать скрипт можно; false - не стоит
+	 */
+	protected boolean canExecuteScript(String script, FormDataEvent event) {
+		if (StringUtils.isBlank(script)) {
+			return false;
+		}
+		// TODO реализовать проверку (http://jira.aplana.com/browse/SBRFACCTAX-12244)
+		return true;
 	}
 }

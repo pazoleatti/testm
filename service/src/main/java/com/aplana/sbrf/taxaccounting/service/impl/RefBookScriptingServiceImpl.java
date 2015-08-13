@@ -62,19 +62,15 @@ public class RefBookScriptingServiceImpl extends TAAbstractScriptingServiceImpl 
     @Override
     public void executeScript(TAUserInfo userInfo, long refBookId, FormDataEvent event, Logger logger, Map<String, Object> additionalParameters) {
         RefBook refBook = refBookFactory.get(refBookId);
-
         if (refBook == null || refBook.getScriptId() == null) {
             return;
         }
-
         BlobData bd = blobDataService.get(refBook.getScriptId());
-
         if (bd == null) {
             return;
         }
-
+		// извлекаем скрипт
         StringWriter writer = new StringWriter();
-
         try {
             IOUtils.copy(bd.getInputStream(), writer, "UTF-8");
         } catch (IOException e) {
@@ -82,10 +78,9 @@ public class RefBookScriptingServiceImpl extends TAAbstractScriptingServiceImpl 
             return;
         }
         String script = writer.toString();
-
-        if (script == null || script.trim().isEmpty() || refBookFactory == null) {
-            return;
-        }
+		if (!canExecuteScript(script, event)) {
+			return;
+		}
 
         // Локальный логгер для импорта конкретного справочника
         Logger scriptLogger = new Logger();
