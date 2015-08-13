@@ -19,6 +19,24 @@ public class ConsolidatedInstance {
     private boolean declaration;
     private String taxOrganCode;
     private String kpp;
+    private boolean manual;
+    private Integer drpComapreId;
+
+    public Integer getDrpComapreId() {
+        return drpComapreId;
+    }
+
+    public void setDrpComapreId(Integer drpComapreId) {
+        this.drpComapreId = drpComapreId;
+    }
+
+    public boolean isManual() {
+        return manual;
+    }
+
+    public void setManual(boolean manual) {
+        this.manual = manual;
+    }
 
     public int getId() {
         return id;

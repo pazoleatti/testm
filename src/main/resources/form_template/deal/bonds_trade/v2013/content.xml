@@ -5,7 +5,7 @@
     <fullName>Отчет в отношении доходов и расходов ОАО «Сбербанк России» по Контролируемым сделкам, связанным с
         реализацией и приобретением ценных бумаг
     </fullName>
-    <code>ПРИЛОЖЕНИЕ 2|к Распоряжению|от «__» марта 2013 № ___</code>
+    <code>ПРИЛОЖЕНИЕ 2|к Распоряжению|от "__" марта 2013 № ___</code>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>rowNum</alias>
         <checking>false</checking>

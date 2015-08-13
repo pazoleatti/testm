@@ -82,6 +82,12 @@ public class SourceDaoTest {
         assertEquals(0, sourceDao.findConsolidatedInstanceIds(1l, new Date(), new Date(), false).size());
     }
 
+    @Test
+    public void testfindConsolidatedInstances() {
+        assertEquals(0, sourceDao.findConsolidatedInstances(1l, 1l, new Date(), new Date(), true).size());
+        assertEquals(0, sourceDao.findConsolidatedInstances(1l, 1l, new Date(), new Date(), false).size());
+    }
+
     /*@Test
     public void testSaveDeclarationSources() {
         List<DepartmentFormType> sources = departmentFormTypeDao.getDeclarationSources(2, 1);

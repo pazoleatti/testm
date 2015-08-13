@@ -5,7 +5,7 @@
     <fullName>Отчет в отношении расходов ОАО «Сбербанк России» по Контролируемым сделкам, связанным с приобретением
         услуг по техническому обслуживанию нежилых помещений
     </fullName>
-    <code>ПРИЛОЖЕНИЕ 2|к Распоряжению|от «__» февраля 2013 № ___</code>
+    <code>ПРИЛОЖЕНИЕ 2|к Распоряжению|от "__" февраля 2013 № ___</code>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>rowNum</alias>
         <checking>false</checking>
