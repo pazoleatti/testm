@@ -202,6 +202,8 @@ public class DataRowDaoImplTest extends Assert {
 		assertTrue(dataRowDao.isDataRowsCountChanged(formData));
 		formData = formDataDao.get(3292, false);
 		assertFalse(dataRowDao.isDataRowsCountChanged(formData));
+		formData = formDataDao.get(3291, false);
+		assertFalse(dataRowDao.isDataRowsCountChanged(formData));
 	}
 
 	@Test
