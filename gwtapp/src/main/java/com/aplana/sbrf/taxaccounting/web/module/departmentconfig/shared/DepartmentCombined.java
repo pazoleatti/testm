@@ -23,6 +23,7 @@ public class DepartmentCombined implements Serializable {
     private String inn;
     private String kpp;
     private String taxOrganCode;
+    private String taxOrganCodeProm;
     private List<Long> okvedCode;
     private String phone;
     private List<Long> reorgFormCode;
@@ -120,6 +121,14 @@ public class DepartmentCombined implements Serializable {
 
     public void setTaxOrganCode(String taxOrganCode) {
         this.taxOrganCode = taxOrganCode;
+    }
+
+    public String getTaxOrganCodeProm() {
+        return taxOrganCodeProm;
+    }
+
+    public void setTaxOrganCodeProm(String taxOrganCodeProm) {
+        this.taxOrganCodeProm = taxOrganCodeProm;
     }
 
     public List<Long> getOkvedCode() {

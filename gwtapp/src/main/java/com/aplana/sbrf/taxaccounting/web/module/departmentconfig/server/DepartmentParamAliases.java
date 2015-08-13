@@ -11,6 +11,7 @@ public enum DepartmentParamAliases {
     INN,
     KPP,
     TAX_ORGAN_CODE,
+    TAX_ORGAN_CODE_PROM,
     OKVED_CODE,
     PHONE,
     REORG_FORM_CODE,
