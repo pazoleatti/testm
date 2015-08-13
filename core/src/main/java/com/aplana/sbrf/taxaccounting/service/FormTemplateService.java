@@ -231,7 +231,8 @@ public interface FormTemplateService {
      *
      * @param formTypeId вид шаблона
      * @param reportPeriodId отчетный период
+     * @param excludeInactiveTemplate исключить нф-источники с макетом выведенным из действия?
      * @return
      */
-    boolean existFormTemplate(int formTypeId, int reportPeriodId);
+    boolean existFormTemplate(int formTypeId, int reportPeriodId, boolean excludeInactiveTemplate);
 }

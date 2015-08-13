@@ -144,9 +144,10 @@ public interface FormDataService {
      * @param logger
      * @param userInfo
      * @param reportPeriod
+     * @param excludeInactiveTemplate исключить нф-источники с макетом выведенным из действия?
      * @return
      */
-    List<DepartmentFormType> getFormSources(FormData formData, Logger logger, TAUserInfo userInfo, ReportPeriod reportPeriod);
+    List<DepartmentFormType> getFormSources(FormData formData, Logger logger, TAUserInfo userInfo, ReportPeriod reportPeriod, boolean excludeInactiveTemplate);
 
     /**
      * Создаёт налоговую форму без проверок прав доступа

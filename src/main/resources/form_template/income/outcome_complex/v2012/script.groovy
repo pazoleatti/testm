@@ -113,7 +113,11 @@ def formTypeId_RNU64 = 355
 @Field
 def formTypeId_RNU61 = 352
 @Field
+def formTypeId_RNU61_1 = 422
+@Field
 def formTypeId_RNU62 = 354
+@Field
+def formTypeId_RNU62_1 = 423
 @Field
 def formTypeId_RNU70_1 = 504
 @Field
@@ -297,7 +301,7 @@ def consolidation() {
 
 boolean isFromSummary(def formSources) {
     def isSummarySource = formSources.find { it.formTypeId == formData.formType.id } != null
-    def isPrimarySource = formSources.find { it.formTypeId in [formTypeId_RNU12, formTypeId_RNU25, formTypeId_RNU26, formTypeId_RNU27, formTypeId_RNU30, formTypeId_RNU33, formTypeId_RNU45, formTypeId_RNU47, formTypeId_RNU48_1, formTypeId_RNU48_2, formTypeId_RNU49, formTypeId_RNU50, formTypeId_RNU51, formTypeId_RNU57, formTypeId_RNU64, formTypeId_RNU61, formTypeId_RNU62, formTypeId_RNU70_1, formTypeId_RNU70_2, formTypeId_RNU71_1, formTypeId_RNU71_2, formTypeId_RNU72, formTypeId_F7_8, formTypeId_F7_8_1] } != null
+    def isPrimarySource = formSources.find { it.formTypeId in [formTypeId_RNU12, formTypeId_RNU25, formTypeId_RNU26, formTypeId_RNU27, formTypeId_RNU30, formTypeId_RNU33, formTypeId_RNU45, formTypeId_RNU47, formTypeId_RNU48_1, formTypeId_RNU48_2, formTypeId_RNU49, formTypeId_RNU50, formTypeId_RNU51, formTypeId_RNU57, formTypeId_RNU64, formTypeId_RNU61, formTypeId_RNU61_1, formTypeId_RNU62, formTypeId_RNU62_1, formTypeId_RNU70_1, formTypeId_RNU70_2, formTypeId_RNU71_1, formTypeId_RNU71_2, formTypeId_RNU72, formTypeId_F7_8, formTypeId_F7_8_1] } != null
     if (isSummarySource && isPrimarySource) {
         logger.warn("Неверно настроены источники формы \"%s\" для подразделения \"%s\"! Одновременно указаны в качестве источников сводные и первичные налоговые формы. Консолидация произведена из сводных налоговых форм.",
                 formData.formType.name, formDataDepartment.name)
@@ -585,10 +589,12 @@ void consolidationFromPrimary(def dataRows, def formSources) {
                         addChildTotalData(dataRows, 58, 'consumptionTaxSumS', dataRowsChild, "total", 'costs')
                         break
                     case formTypeId_RNU61: //(РНУ-61) Регистр налогового учёта расходов по процентным векселям ОАО «Сбербанк России», учёт которых требует применения метода начисления
+                    case formTypeId_RNU61_1: //(РНУ-61) Регистр налогового учёта расходов по процентным векселям ОАО «Сбербанк России», учёт которых требует применения метода начисления (с 9 месяцев 2015)
                         // графа 9 = сумма граф 14 итогов форм
                         addChildTotalData(dataRows, 69, 'consumptionTaxSumS', dataRowsChild, "total", 'percAdjustment')
                         break
                     case formTypeId_RNU62: //(РНУ-62) Регистр налогового учёта расходов по дисконтным векселям ОАО «Сбербанк России»
+                    case formTypeId_RNU62_1: //(РНУ-62) Регистр налогового учёта расходов по дисконтным векселям ОАО «Сбербанк России» (с 9 месяцев 2015)
                         //TODO 22500 (2 строки)
                         break
                     case formTypeId_RNU25: //(РНУ-25) Регистр налогового учёта расчёта резерва под возможное обесценение ГКО, ОФЗ и ОБР в целях налогообложения

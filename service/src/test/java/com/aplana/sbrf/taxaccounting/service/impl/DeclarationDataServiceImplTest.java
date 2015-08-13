@@ -325,8 +325,8 @@ public class DeclarationDataServiceImplTest {
 
         when(departmentReportPeriodService.getLast(2, 1)).thenReturn(drp2);
 
-        when(formTemplateService.existFormTemplate(1, 1)).thenReturn(true);
-        when(formTemplateService.existFormTemplate(2, 1)).thenReturn(true);
+        when(formTemplateService.existFormTemplate(1, 1, true)).thenReturn(true);
+        when(formTemplateService.existFormTemplate(2, 1, true)).thenReturn(true);
         when(formTemplateService.getActiveFormTemplateId(1, 1)).thenReturn(1);
         when(formTemplateService.getActiveFormTemplateId(2, 1)).thenReturn(2);
         when(formTemplateService.get(1)).thenReturn(formTemplate1);

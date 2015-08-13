@@ -43,7 +43,7 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
     private static final String JRXML_NOT_FOUND = "Не удалось получить jrxml-шаблон декларации!";
     private static final SimpleDateFormat SDF_DD_MM_YYYY = new SimpleDateFormat("dd.MM.yyyy");
     private static final String DEC_DATA_EXIST_IN_TASK =
-            "%s в подразделении \"%s\" в периоде \"%s %d%s\", налоговый орган %s, КПП %s";
+            "%s в подразделении \"%s\" в периоде \"%s %d%s\"%s%s";
 
 	@Autowired
 	DeclarationTemplateDao declarationTemplateDao;
@@ -319,8 +319,9 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
                         rp.getTaxPeriod().getYear(),
                         drp.getCorrectionDate() != null ? String.format("с датой сдачи корректировки %s",
                                 SDF_DD_MM_YYYY.format(drp.getCorrectionDate())) : "",
-                        data.getTaxOrganCode(),
-                        data.getKpp()));
+                        data.getTaxOrganCode() != null ? ", налоговый орган " + data.getTaxOrganCode() : "",
+                        data.getKpp() != null ? ", КПП " + data.getKpp() : ""
+                ));
 
             }  else if(lockDataService.isLockExists(decKeyPDF, false) || lockDataService.isLockExists(decKeyXLSM, false)){
                 existInLockDec.add(String.format(
@@ -331,8 +332,9 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
                         rp.getTaxPeriod().getYear(),
                         drp.getCorrectionDate() != null ? String.format("с датой сдачи корректировки %s",
                                 SDF_DD_MM_YYYY.format(drp.getCorrectionDate())) : "",
-                        data.getTaxOrganCode(),
-                        data.getKpp()));
+                        data.getTaxOrganCode() != null ? ", налоговый орган " + data.getTaxOrganCode() : "",
+                        data.getKpp() != null ? ", КПП " + data.getKpp() : ""
+                ));
             }
         }
         if(!existInLockDec.isEmpty()){

@@ -509,7 +509,7 @@ public class FormDataServiceImpl implements FormDataService {
 					}
 				}
 				//Система проверяет статус консолидации из форм-источников.
-				List<DepartmentFormType> dftSources = getFormSources(formData, logger, userInfo, reportPeriod);
+				List<DepartmentFormType> dftSources = getFormSources(formData, logger, userInfo, reportPeriod, true);
 				for (DepartmentFormType dftSource : dftSources){
 					DepartmentReportPeriod sourceDepartmentReportPeriod =
 							departmentReportPeriodService.getLast(dftSource.getDepartmentId(), formData.getReportPeriodId());
@@ -769,7 +769,7 @@ public class FormDataServiceImpl implements FormDataService {
 
 	@Override
 	public List<DepartmentFormType> getFormSources(final FormData formData, final Logger logger, final TAUserInfo userInfo,
-													final ReportPeriod reportPeriod){
+													final ReportPeriod reportPeriod, final boolean excludeInactiveTemplate){
 		return tx.executeInNewReadOnlyTransaction(new TransactionLogic<List<DepartmentFormType>>() {
 			@Override
 			public List<DepartmentFormType> execute() {
@@ -807,21 +807,28 @@ public class FormDataServiceImpl implements FormDataService {
 							reportPeriod.getCalendarStartDate(),
 							reportPeriod.getEndDate());
 					for (DepartmentFormType dft : dftSources) {
-						FormTemplate formTemplate = formTemplateService.get(formTemplateService.getActiveFormTemplateId(dft.getFormTypeId(), reportPeriod.getId()));
-						if (formTemplate.isMonthly()) {
-							for (Months month : reportPeriodService.getAvailableMonthList(reportPeriod.getId())) {
-								if (month != null) {
-									DepartmentFormType source = new DepartmentFormType();
-									source.setDepartmentId(dft.getDepartmentId());
-									source.setFormTypeId(dft.getFormTypeId());
-									source.setKind(dft.getKind());
-									source.setPeriodOrder(month.getId());
-									sourceList.add(source);
-								}
-							}
-						} else {
-							sourceList.add(dft);
-						}
+                        if (formTemplateService.existFormTemplate(dft.getFormTypeId(), reportPeriod.getId(), excludeInactiveTemplate)) {
+                            FormTemplate formTemplate = formTemplateService.get(
+                                    excludeInactiveTemplate ?
+                                            formTemplateService.getActiveFormTemplateId(dft.getFormTypeId(), reportPeriod.getId()) :
+                                            formTemplateService.getFormTemplateIdByFTAndReportPeriod(dft.getFormTypeId(), reportPeriod.getId())
+                            );
+
+                            if (formTemplate.isMonthly()) {
+                                for (Months month : reportPeriodService.getAvailableMonthList(reportPeriod.getId())) {
+                                    if (month != null) {
+                                        DepartmentFormType source = new DepartmentFormType();
+                                        source.setDepartmentId(dft.getDepartmentId());
+                                        source.setFormTypeId(dft.getFormTypeId());
+                                        source.setKind(dft.getKind());
+                                        source.setPeriodOrder(month.getId());
+                                        sourceList.add(source);
+                                    }
+                                }
+                            } else {
+                                sourceList.add(dft);
+                            }
+                        }
 					}
 				}
 				dataRowDao.refreshRefBookLinks(formData);
@@ -837,7 +844,7 @@ public class FormDataServiceImpl implements FormDataService {
         }
         //Проверка выполнена ли консолидация из всех принятых источников текущего экземпляра
         ReportPeriod reportPeriod = reportPeriodService.getReportPeriod(formData.getReportPeriodId());
-        List<DepartmentFormType> departmentFormTypesSources = getFormSources(formData, logger, userInfo, reportPeriod);
+        List<DepartmentFormType> departmentFormTypesSources = getFormSources(formData, logger, userInfo, reportPeriod, true);
         ArrayList<FormData> notAcceptedFDSources = new ArrayList<FormData>();
         ArrayList<FormData> notConsolidatedFDSources = new ArrayList<FormData>();
         for (DepartmentFormType sourceDFT : departmentFormTypesSources) {
@@ -1044,7 +1051,7 @@ public class FormDataServiceImpl implements FormDataService {
         DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.get(formData.getDepartmentReportPeriodId());
         ReportPeriod reportPeriod = reportPeriodService.getReportPeriod(formData.getReportPeriodId());
 
-        List<DepartmentFormType> departmentFormTypesSources = getFormSources(formData, logger, userInfo, reportPeriod);
+        List<DepartmentFormType> departmentFormTypesSources = getFormSources(formData, logger, userInfo, reportPeriod, true);
 
         HashSet<Long> srcAcceptedIds = new HashSet<Long>();
         ArrayList<String> msgPull = new ArrayList<String>(0);
@@ -1210,7 +1217,7 @@ public class FormDataServiceImpl implements FormDataService {
         }
 
         //1Д. Не существует ни одной назначенной формы-источника.
-        List<DepartmentFormType> departmentFormTypesSources = getFormSources(formData, logger, userInfo, reportPeriod);
+        List<DepartmentFormType> departmentFormTypesSources = getFormSources(formData, logger, userInfo, reportPeriod, true);
         if (departmentFormTypesSources.isEmpty()){
             //Очищаем устаревшие данные, оставшиеся после старой консолидации
             /*tx.executeInNewTransaction(new TransactionLogic() {
@@ -1811,7 +1818,7 @@ public class FormDataServiceImpl implements FormDataService {
                 return Long.valueOf(rowCountReport * columnCountReport);
             case CONSOLIDATE_FD:
                 ReportPeriod reportPeriod = reportPeriodService.getReportPeriod(formData.getReportPeriodId());
-                List<DepartmentFormType> departmentFormTypesSources = getFormSources(formData, logger, userInfo, reportPeriod);
+                List<DepartmentFormType> departmentFormTypesSources = getFormSources(formData, logger, userInfo, reportPeriod, true);
                 long cellCountSource = 0;
                 for (DepartmentFormType sourceDFT : departmentFormTypesSources){
                     // Последний отчетный период подразделения

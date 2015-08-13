@@ -73,7 +73,7 @@ public class DeclarationServiceTest {
         when(declarationTypeDao.get(2)).thenReturn(declarationType);
         when(declarationTemplateDao.get(1)).thenReturn(declarationTemplate);
         when(departmentFormTypeDao.getDeclarationSources(eq(1), eq(1), any(Date.class), any(Date.class))).thenReturn(sourcesInfo);
-        when(declarationDataService.getFormDataSources(any(DeclarationData.class), any(Logger.class))).thenReturn(sourcesInfo);
+        when(declarationDataService.getFormDataSources(any(DeclarationData.class), any(Boolean.class), any(Logger.class))).thenReturn(sourcesInfo);
 
         ReflectionTestUtils.setField(service, "declarationDataDao", declarationDataDao);
         ReflectionTestUtils.setField(service, "declarationTypeDao", declarationTypeDao);

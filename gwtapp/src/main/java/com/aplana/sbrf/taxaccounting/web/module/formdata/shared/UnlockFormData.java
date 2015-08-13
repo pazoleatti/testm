@@ -7,6 +7,7 @@ public class UnlockFormData extends UnsecuredActionImpl<UnlockFormDataResult> im
 
 	private long formId;
     private boolean manual;
+    private boolean isPerformerLock;
 
 	public long getFormId() {
 		return formId;
@@ -22,6 +23,14 @@ public class UnlockFormData extends UnsecuredActionImpl<UnlockFormDataResult> im
 
     public void setManual(boolean manual) {
         this.manual = manual;
+    }
+
+    public boolean isPerformerLock() {
+        return isPerformerLock;
+    }
+
+    public void setPerformerLock(boolean isPerformerLock) {
+        this.isPerformerLock = isPerformerLock;
     }
 
     @Override

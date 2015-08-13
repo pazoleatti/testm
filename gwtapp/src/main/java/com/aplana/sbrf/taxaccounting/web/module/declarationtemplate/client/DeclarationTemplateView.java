@@ -147,9 +147,6 @@ public class DeclarationTemplateView extends ViewWithUiHandlers<DeclarationTempl
         deleteJrxml.setEnabled(template.getJrxmlBlobId() != null);
         downloadXsd.setEnabled(template.getXsdId() != null);
         deleteXsd.setEnabled(template.getXsdId() != null);
-        if (template.getId() != null){
-            setHref(template);
-        }
 	}
 
     @Override
@@ -197,14 +194,6 @@ public class DeclarationTemplateView extends ViewWithUiHandlers<DeclarationTempl
         uploadDectFile.setEnabled(isEnable);
         uploadXsdFile.setEnabled(isEnable);
         downloadDectButton.setEnabled(isEnable);
-    }
-
-    private void setHref(DeclarationTemplate dt){
-        /*
-        downloadJrxmlButton.setHref(urlTemplates.getDownloadUrl(dt.getJrxmlBlobId() != null ? dt.getJrxmlBlobId() : "").asString());
-        downloadXsd.setHref(urlTemplates.getDownloadUrl(dt.getXsdId() != null ? dt.getXsdId() : "").asString());
-        downloadDectButton.setHref(urlTemplates.getDownloadDTUrl(dt.getId()).asString());
-        */
     }
 
     @Override
@@ -314,12 +303,9 @@ public class DeclarationTemplateView extends ViewWithUiHandlers<DeclarationTempl
 
     @UiHandler("historyVersion")
     void onHistoryClick(ClickEvent event){
-        Dialog.confirmMessage("Удаление xsd файла", "Вы действительно хотите удалить xsd файл?", new DialogHandler() {
-            @Override
-            public void yes() {
-                getUiHandlers().onDeleteXsd();
-            }
-        });
+        if (getUiHandlers() != null){
+            getUiHandlers().onHistoryClicked();
+        }
     }
 
     @UiHandler("deleteXsd")

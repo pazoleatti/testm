@@ -50,6 +50,7 @@ public class SaveDepartmentRefBookValuesHandler extends AbstractActionHandler<Sa
         Logger logger = new Logger();
         logger.setTaUserInfo(securityService.currentUserInfo());
         SaveDepartmentRefBookValuesResult result = new SaveDepartmentRefBookValuesResult();
+        RefBook slaveRefBook = rbFactory.get(saveDepartmentRefBookValuesAction.getSlaveRefBookId());
 
         Pattern innPattern = Pattern.compile(RefBookUtils.INN_JUR_PATTERN);
         Pattern kppPattern = Pattern.compile(RefBookUtils.KPP_PATTERN);
@@ -115,9 +116,7 @@ public class SaveDepartmentRefBookValuesHandler extends AbstractActionHandler<Sa
 
         for (Integer count : counter.values()) {
             if (count > 1) {
-                logger.error("Нарушено требование к уникальности, уже существуют элементы с такими значениями атрибута " +
-                        "\"Код налогового органа, КПП\"" +
-                        " в указанном периоде!");
+                logger.error("Поля \"" + slaveRefBook.getAttribute("TAX_ORGAN_CODE").getName() + "\" и \"" + slaveRefBook.getAttribute("KPP").getName() + "\" таблицы должны быть уникальны");
                 result.setHasFatalError(true);
                 result.setErrorType(SaveDepartmentRefBookValuesResult.ERROR_TYPE.HAS_DUPLICATES);
                 break;
