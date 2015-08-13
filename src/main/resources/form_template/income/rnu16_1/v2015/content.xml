@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <formTemplateContent>
     <fixedRows>false</fixedRows>
-    <name>(РНУ-17) Регистр налогового учета расходов по поставочным сделкам с ПФИ, не признаваемыми ФИСС, в соответствии с учетной политикой для целей налогообложения ОАО &quot;Сбербанк России&quot;</name>
-    <fullName>(РНУ-17) Регистр налогового учета расходов по поставочным сделкам с ПФИ, не признаваемыми ФИСС, в соответствии с учетной политикой для целей налогообложения ОАО &quot;Сбербанк России&quot;</fullName>
-    <header>852-17</header>
+    <name>(РНУ-16) Регистр налогового учета доходов по поставочным сделкам с ПФИ, не признаваемыми ФИСС, в соответствии с учетной политикой для целей налогообложения ПАО &quot;Сбербанк России&quot; (с 9 месяцев 2015)</name>
+    <fullName>(РНУ-16) Регистр налогового учета доходов по поставочным сделкам с ПФИ, не признаваемыми ФИСС, в соответствии с учетной политикой для целей налогообложения ПАО &quot;Сбербанк России&quot;</fullName>
+    <header>852-16</header>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="autoNumerationColumn">
         <alias>rowNumber</alias>
         <checking>false</checking>
@@ -20,29 +20,29 @@
         <name>fix</name>
         <order>2</order>
         <width>0</width>
-        <maxLength>255</maxLength>
+        <maxLength>10</maxLength>
         <prevLength>0</prevLength>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="referenceColumn">
-        <alias>knu</alias>
+        <alias>code</alias>
         <checking>false</checking>
         <columnType>REFERENCE</columnType>
-        <name>Код налогового учёта</name>
+        <name>Код налогового учета</name>
         <order>3</order>
         <width>5</width>
         <parentAlias>incomeType</parentAlias>
-        <refBookAttributeId>130</refBookAttributeId>
+        <refBookAttributeId>140</refBookAttributeId>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
         <alias>incomeType</alias>
         <checking>false</checking>
         <columnType>REFBOOK</columnType>
-        <name>Вид (наименование) расхода</name>
+        <name>Вид (наименование) дохода</name>
         <order>4</order>
         <width>50</width>
         <hierarchical>false</hierarchical>
-        <nameAttributeId>132</nameAttributeId>
-        <refBookAttributeId>132</refBookAttributeId>
+        <nameAttributeId>142</nameAttributeId>
+        <refBookAttributeId>142</refBookAttributeId>
         <searchEnabled>true</searchEnabled>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
