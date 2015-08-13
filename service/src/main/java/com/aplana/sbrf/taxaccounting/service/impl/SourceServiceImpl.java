@@ -1215,7 +1215,7 @@ public class SourceServiceImpl implements SourceService {
 
         List<FormToFormRelation> formToFormRelations = new LinkedList<FormToFormRelation>();
         // Источники
-        List<DepartmentFormType> sourcesForm = formDataService.getFormSources(formData, logger, userInfo, reportPeriod);
+        List<DepartmentFormType> sourcesForm = formDataService.getFormSources(formData, logger, userInfo, reportPeriod, false);
         formToFormRelations.addAll(createFormToFormRelationModel(sourcesForm, departmentReportPeriod,
                 periodOrder, true));
         // Приемники
