@@ -1,3 +1,9 @@
+--http://jira.aplana.com/browse/SBRFACCTAX-11881: Удаление всех текущих блокировок
+delete from lock_data;
+
+--http://jira.aplana.com/browse/SBRFACCTAX-11881: DECLARATION_TYPE.ID = 7 переименовать с "Декларация по НДС (короткая, раздел 1-7) " на "Декларация по НДС (аудит, раздел 1-7)
+UPDATE declaration_type SET name = 'Декларация по НДС (аудит, раздел 1-7)' WHERE id = 7;
+
 --http://jira.aplana.com/browse/SBRFACCTAX-11977: В справочнике "Тип подразделений" значение "Пустой" переименовать в "Прочие"
 update department_type set name='Прочие' where id = 5;
 

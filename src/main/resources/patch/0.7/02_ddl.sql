@@ -1,6 +1,16 @@
--- Удаление ошибочно существующих невалидных PL/SQL-объектов, относящихся к TAX_RNU
+--http://jira.aplana.com/browse/SBRFACCTAX-11881: Удаление столбца TEMP из FORM_DATA_605 (актуально для ПСИ)
 set serveroutput on size 30000;
+declare query_str varchar2(1024) := '';
+begin
+for x in (select column_name from user_tab_columns where table_name = 'FORM_DATA_605' and column_name like '%TEMP') loop
+    query_str:='ALTER TABLE FORM_DATA_605 DROP COLUMN '||x.column_name;
+    dbms_output.put_line('Execute: '||query_str);
+    execute immediate query_str;
+end loop;
+end;
+/
 
+--http://jira.aplana.com/browse/SBRFACCTAX-11881: Удаление ошибочно существующих невалидных PL/SQL-объектов, относящихся к TAX_RNU
 declare query_str varchar2(1024) := '';
 begin
 for x in (select * from user_objects where object_name like 'APL%' or object_name like 'NSI%' and object_type in ('PROCEDURE', 'FUNCTION')) loop
