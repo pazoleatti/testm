@@ -35,7 +35,6 @@ public class SourceServiceImpl implements SourceService {
     private static final String UPDATE_SUCCESS_MSG = "\"%s\" назначен %s формы \"%s\" в периоде %s.";
     private static final String CIRCLE_MSG = "\"%s\" уже назначен как приёмник \"%s\"";
     private static final String RECONSOLIDATE_FORM_MSG = "Для коррекции консолидированных данных необходимо нажать на кнопку \"Консолидировать\" в формах: ";
-    private static final String FORM_INSTANCE_MSG = "\"%s\", \"%s\", подразделение \"%s\", период \"%s%s%s\"";
     private static final String RECALCULATE_DECLARATION_MSG = "Для коррекции консолидированных данных необходимо нажать на кнопку \"Рассчитать\" в декларациях: ";
     private static final String DECLARATION_INSTANCE_MSG = "\"%s\", подразделение \"%s\", период \"%s%s\"%s%s";
     private static final String EMPTY_LIST_MSG = "Список назначений пуст!";
@@ -102,10 +101,7 @@ public class SourceServiceImpl implements SourceService {
     private FormTemplateService formTemplateService;
 
     @Autowired
-    private DepartmentReportPeriodDao departmentReportPeriodDao;
-
-    @Autowired
-    private PeriodService reportPeriodService;
+    private DepartmentReportPeriodService departmentReportPeriodService;
 
     @Autowired
     private DeclarationTemplateService declarationTemplateService;
@@ -449,17 +445,19 @@ public class SourceServiceImpl implements SourceService {
                         logger.warn(RECONSOLIDATE_FORM_MSG);
                         hasForm = true;
                     }
-                    logger.warn(String.format(FORM_INSTANCE_MSG,
+                    DepartmentReportPeriod drpCompare = consolidatedInstance.getDrpComapreId() != null ?
+                            departmentReportPeriodService.get(consolidatedInstance.getDrpComapreId()) : null;
+                    logger.warn(MessageGenerator.getFDMsg("",
                                     consolidatedInstance.getType(),
                                     consolidatedInstance.getFormKind().getName(),
                                     consolidatedInstance.getDepartment(),
+                                    consolidatedInstance.getMonth(),
+                                    consolidatedInstance.isManual(),
                                     consolidatedInstance.getPeriod(),
-                                    consolidatedInstance.getMonth() != null
-                                            ? " " + Formats.getRussianMonthNameWithTier(consolidatedInstance.getMonth())
-                                            : "",
-                                    consolidatedInstance.getCorrectionDate() != null
-                                            ? " с датой сдачи корректировки " + SIMPLE_DATE_FORMAT.format(consolidatedInstance.getCorrectionDate())
-                                            : "")
+                                    consolidatedInstance.getCorrectionDate(),
+                                    drpCompare != null ?
+                                            drpCompare.getReportPeriod().getName() + " " + drpCompare.getReportPeriod().getTaxPeriod().getYear() : ""
+                            )
                     );
                 }
             }
@@ -1210,7 +1208,7 @@ public class SourceServiceImpl implements SourceService {
         int departmentReportPeriodId = formData.getDepartmentReportPeriodId();
         Integer periodOrder = formData.getPeriodOrder();
 
-        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.get(departmentReportPeriodId);
+        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.get(departmentReportPeriodId);
         ReportPeriod reportPeriod = departmentReportPeriod.getReportPeriod();
 
         List<FormToFormRelation> formToFormRelations = new LinkedList<FormToFormRelation>();
@@ -1234,7 +1232,7 @@ public class SourceServiceImpl implements SourceService {
     @Override
     public List<FormToFormRelation> getRelations(DeclarationData declaration) {
         List<FormToFormRelation> formToFormRelations = new LinkedList<FormToFormRelation>();
-        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.get(declaration.getDepartmentReportPeriodId());
+        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.get(declaration.getDepartmentReportPeriodId());
 
         //Получаем источники-приемники
         List<DepartmentFormType> sourcesForm = declarationDataService.getFormDataSources(declaration, new Logger());
@@ -1444,7 +1442,7 @@ public class SourceServiceImpl implements SourceService {
                 periodOrder, departmentReportPeriod.getCorrectionDate());
         DepartmentReportPeriod formDepartmentReportPeriod = null;
         if (formData != null) {
-            formDepartmentReportPeriod = departmentReportPeriodDao.get(formData.getDepartmentReportPeriodId());
+            formDepartmentReportPeriod = departmentReportPeriodService.get(formData.getDepartmentReportPeriodId());
         }
         FormToFormRelation formToFormRelation = performFormDataRelation(formData,
                 getRelationCommon(true, departmentFormType, formDepartmentReportPeriod, periodOrder), departmentFormType,
@@ -1473,7 +1471,7 @@ public class SourceServiceImpl implements SourceService {
         filter.setReportPeriodIdList(Arrays.asList(departmentReportPeriod.getReportPeriod().getId()));
         filter.setDepartmentIdList(Arrays.asList(departmentFormType.getDepartmentId()));
         // Список всех отчетных периодов
-        List<DepartmentReportPeriod> departmentReportPeriodList = departmentReportPeriodDao.getListByFilter(filter);
+        List<DepartmentReportPeriod> departmentReportPeriodList = departmentReportPeriodService.getListByFilter(filter);
         //TODO: код похож на дублирующий из метода com.aplana.sbrf.taxaccounting.dao.api.DepartmentReportPeriodDao.getLast
         // Приемник в корректирующем периоде может быть или в том же отчетном периоде подразделения или в следующем, поэтому предыдущие отчетные
         // периоды удаляем из списка
@@ -1523,7 +1521,7 @@ public class SourceServiceImpl implements SourceService {
         filter.setReportPeriodIdList(Arrays.asList(departmentReportPeriod.getReportPeriod().getId()));
         filter.setDepartmentIdList(Arrays.asList(departmentDeclarationType.getDepartmentId()));
         // Список всех отчетных периодов
-        List<DepartmentReportPeriod> departmentReportPeriodList = departmentReportPeriodDao.getListByFilter(filter);
+        List<DepartmentReportPeriod> departmentReportPeriodList = departmentReportPeriodService.getListByFilter(filter);
         //TODO: код похож на дублирующий из метода com.aplana.sbrf.taxaccounting.dao.api.DepartmentReportPeriodDao.getLast
         // Приемник в корректирующем периоде может быть или в том же отчетном периоде подразделения или в следующем, поэтому предыдущие отчетные
         // периоды удаляем из списка

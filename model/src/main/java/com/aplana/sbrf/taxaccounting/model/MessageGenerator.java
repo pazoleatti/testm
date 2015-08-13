@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.model;
 
 import java.text.SimpleDateFormat;
+import java.util.Date;
 
 /**
  * User: avanteev
@@ -34,22 +35,32 @@ public final class MessageGenerator {
         }
     }
 
+    public static String getFDMsg(String mainStr, String formTypeName, String kindName, String departmentName, Integer periodOrder, boolean manual, String reportPeriodName, Date correctionDate, String rpComparisonName){
+        return String.format(COMPLETE_FORM_STRINGS_ONLY,
+                mainStr,
+                formTypeName,
+                kindName,
+                departmentName,
+                reportPeriodName,
+                rpComparisonName != null ? rpComparisonName : "",
+                periodOrder != null ? String.format(MONTH,  Formats.getRussianMonthNameWithTier(periodOrder)): "",
+                correctionDate != null ? String.format(CORRECTION_DATE, SDF_DD_MM_YYYY.format(correctionDate)) : "",
+                manual ? "ручного ввода" : "автоматическая");
+    }
+
     public static String mesSpeck(TaxType taxType){
         return  taxType == TaxType.DEAL || taxType == TaxType.ETR ? "формы" : "налоговые формы";
     }
 
     private static final String COMPLETE_FORM =
             "%s: Тип: \"%s\", Вид: \"%s\", Подразделение: \"%s\", Период: \"%s %d\",%s%s Версия: \"%s\"";
+    private static final String COMPLETE_FORM_STRINGS_ONLY   =
+            "%s: Тип: \"%s\", Вид: \"%s\", Подразделение: \"%s\", Период: \"%s\",%s%s%s Версия: \"%s\"";
     private static final String COMPLETE_FORM_WITH_RP_COMPARISON =
             "%s: Тип: \"%s\", Вид: \"%s\", Подразделение: \"%s\", Период: \"%s %d\", Период сравнения: %s %d,%s%s Версия: \"%s\"";
-    private static final String COMPLETE_DECLATATION =
-            "%s:  Период: \"%s %d\", Подразделение: \"%s\", Вид: \"%s\", Налоговый орган: \"%s\", КПП: \"%s\"";
     private static final String MONTH = " Месяц: %s,";
     private static final String CORRECTION_DATE  = " Дата сдачи корректировки: %s,";
-    private static final String ERROR_FORM =
-            "%s Тип: \"%s\", Вид: \"%s\", Подразделение: \"%s\", Период: \"%s %d\",%s%s Версия: \"%s\"";
-    private static final String ERROR_FORM_WITH_RP_COMPARISON =
-            "%s Тип: \"%s\", Вид: \"%s\", Подразделение: \"%s\", Период: \"%s %d\", Период сравнения: %s %d,%s%s Версия: \"%s\"";
+    private static final String COMPARISON_PERIOD = "Период сравнения: %s,";
 
     protected static final SimpleDateFormat SDF_DD_MM_YYYY = new SimpleDateFormat("dd.MM.yyyy");
 }
