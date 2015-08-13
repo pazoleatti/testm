@@ -15,6 +15,7 @@ import org.springframework.context.ApplicationContextAware;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
+import java.util.regex.Pattern;
 
 /**
  * Базовый класс для сервисов, работающих с groovy-скриптами
@@ -22,7 +23,7 @@ import javax.script.ScriptException;
  */
 public abstract class TAAbstractScriptingServiceImpl implements ApplicationContextAware {
 
-	protected Log logger = LogFactory.getLog(getClass());
+	protected static final Log logger = LogFactory.getLog(TAAbstractScriptingServiceImpl.class);
 	
 	protected ApplicationContext applicationContext;
 	
@@ -89,16 +90,16 @@ public abstract class TAAbstractScriptingServiceImpl implements ApplicationConte
 	}
 
 	/**
-	 * Проверяет целесообразность запуска скрипта для указанного события. Если нет обработчика, то и вызывать не надо
-	 * @param script проверяемый скрипт
-	 * @param event тип события
+	 * Проверяет целесообразность запуска скрипта для указанного события. Если скрипт пустой или не содержит
+	 * обработчика указанного события, то он выполняться не будет.
+	 * @param script проверяемый скрипт. Может быть null.
+	 * @param event тип события. Может быть null - тогда не ведется поиск обработчика внутри скрипта.
 	 * @return true - запускать скрипт можно; false - не стоит
 	 */
 	protected boolean canExecuteScript(String script, FormDataEvent event) {
 		if (StringUtils.isBlank(script)) {
 			return false;
 		}
-		// TODO реализовать проверку (http://jira.aplana.com/browse/SBRFACCTAX-12244)
-		return true;
+		return event == null || script.contains("FormDataEvent." + event.name());
 	}
 }
