@@ -5,7 +5,7 @@
     <fullName>Отчет в отношении доходов ОАО «Сбербанк России» по Контролируемым сделкам, связанным с предоставлением
         права пользования товарным знаком
     </fullName>
-    <code>ПРИЛОЖЕНИЕ 4|к Распоряжению|от «__» февраля 2013 № ___</code>
+    <code>ПРИЛОЖЕНИЕ 4|к Распоряжению|от "__" февраля 2013 № ___</code>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>rowNumber</alias>
         <checking>false</checking>
