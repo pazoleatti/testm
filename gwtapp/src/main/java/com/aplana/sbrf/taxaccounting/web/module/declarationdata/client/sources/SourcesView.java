@@ -6,9 +6,12 @@ import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.client.FormDataPresenter;
 import com.google.gwt.cell.client.Cell;
 import com.google.gwt.cell.client.ClickableTextCell;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.i18n.client.DateTimeFormat;
+import com.google.gwt.safehtml.client.SafeHtmlTemplates;
+import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -42,6 +45,13 @@ public class SourcesView extends PopupViewWithUiHandlers<SourcesUiHandlers> impl
 
     private static final DateTimeFormat DATE_TIME_FORMAT = DateTimeFormat.getFormat("dd.MM.yyyy");
     private TaxType taxType;
+
+    interface UrlTemplates extends SafeHtmlTemplates {
+
+        @Template("{0}{1}")
+        SafeHtml getColValue(String main, String optional);
+    }
+    private static final UrlTemplates urlTemplates = GWT.create(UrlTemplates.class);
 
     @UiField
     Button close;
@@ -133,7 +143,10 @@ public class SourcesView extends PopupViewWithUiHandlers<SourcesUiHandlers> impl
         TextColumn<FormToFormRelation> stateColumn = new TextColumn<FormToFormRelation>() {
             @Override
             public String getValue(FormToFormRelation object) {
-                return object.isCreated() ? object.getState().getName(): "Не создана";
+                return urlTemplates.getColValue(
+                        object.isCreated() ? object.getState().getName() : "Не создана",
+                        !object.isStatus() ? " (версия макета выведена из действия)" : "").
+                        asString();
             }
         };
 
@@ -198,15 +211,18 @@ public class SourcesView extends PopupViewWithUiHandlers<SourcesUiHandlers> impl
         table.addColumn(correctionDateColumn, "Дата сдачи корректировки");
         table.setColumnWidth(correctionDateColumn, 85, Style.Unit.PX);
         table.addColumn(formKindColumn, "Тип формы");
-        table.setColumnWidth(formKindColumn, 100, Style.Unit.PX);
+        table.setColumnWidth(formKindColumn, 120, Style.Unit.PX);
         table.addColumn(formTypeColumn, "Вид формы");
-        table.setColumnWidth(formTypeColumn, 100, Style.Unit.PX);
+        table.setColumnWidth(formTypeColumn, 120, Style.Unit.PX);
         table.addColumn(yearColumn, "Год");
+        table.setColumnWidth(yearColumn, 40, Style.Unit.PX);
         table.addColumn(periodColumn, "Период");
+        table.setColumnWidth(periodColumn, 60, Style.Unit.PX);
         table.addColumn(monthColumn, "Месяц");
+        table.setColumnWidth(monthColumn, 80, Style.Unit.PX);
         table.addColumn(performerColumn, "Исполнитель");
         table.addColumn(stateColumn, "Состояние формы");
-        table.setColumnWidth(stateColumn, 120, Style.Unit.PX);
+        table.setColumnWidth(stateColumn, 130, Style.Unit.PX);
         table.setRowCount(0);
         dataProvider.addDataDisplay(table);
     }

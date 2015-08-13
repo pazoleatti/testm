@@ -244,7 +244,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         setDeclarationBlobs(logger, declarationData, docDate, userInfo, stateLogger);
 
         //3. обновляет записи о консолидации
-        List<DepartmentFormType> dftSources = getFormDataSources(declarationData, logger);
+        List<DepartmentFormType> dftSources = getFormDataSources(declarationData, true, logger);
         ArrayList<Long> formDataIds = new ArrayList<Long>();
         for (DepartmentFormType dftSource : dftSources){
             FormData formData =
@@ -1022,7 +1022,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             case XML_DEC:
                 long cellCountSource = 0;
                 DeclarationData declarationData = get(declarationDataId, userInfo);
-                List<DepartmentFormType> dftSources = getFormDataSources(declarationData, new Logger());
+                List<DepartmentFormType> dftSources = getFormDataSources(declarationData, true, new Logger());
                 for (DepartmentFormType dftSource : dftSources){
                     DepartmentReportPeriod sourceDepartmentReportPeriod = departmentReportPeriodService.getLast(dftSource.getDepartmentId(), declarationData.getReportPeriodId());
                     FormData formData =
@@ -1040,7 +1040,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     }
 
     @Override
-    public List<DepartmentFormType> getFormDataSources(DeclarationData declarationData, Logger logger) {
+    public List<DepartmentFormType> getFormDataSources(DeclarationData declarationData, boolean excludeInactiveTemplate, Logger logger) {
         List<DepartmentFormType> sourceList = new ArrayList<DepartmentFormType>();
         Map<String, Object> params = new HashMap<String, Object>();
         FormSources sources = new FormSources();
@@ -1074,8 +1074,12 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                     reportPeriod.getCalendarStartDate(),
                     reportPeriod.getEndDate());
             for (DepartmentFormType dft : dftSources) {
-                if (formTemplateService.existFormTemplate(dft.getFormTypeId(), reportPeriodId)) {
-                    FormTemplate formTemplate = formTemplateService.get(formTemplateService.getActiveFormTemplateId(dft.getFormTypeId(), reportPeriodId));
+                if (formTemplateService.existFormTemplate(dft.getFormTypeId(), reportPeriodId, excludeInactiveTemplate)) {
+                    FormTemplate formTemplate = formTemplateService.get(
+                            excludeInactiveTemplate ?
+                                    formTemplateService.getActiveFormTemplateId(dft.getFormTypeId(), reportPeriodId) :
+                                    formTemplateService.getFormTemplateIdByFTAndReportPeriod(dft.getFormTypeId(), reportPeriodId)
+                    );
                     if (formTemplate.isMonthly()) {
                         for (Months month : reportPeriodService.getAvailableMonthList(reportPeriodId)) {
                             if (month != null) {
@@ -1103,7 +1107,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             /*throw new ServiceLoggerException("", logEntryService.save(logger.getEntries()));*/
         }
         ReportPeriod rp = reportPeriodService.getReportPeriod(dd.getReportPeriodId());
-        List<DepartmentFormType> sourceDDs = getFormDataSources(dd, logger);
+        List<DepartmentFormType> sourceDDs = getFormDataSources(dd, true, logger);
         for (DepartmentFormType sourceDFT : sourceDDs){
             DepartmentReportPeriod drp = departmentReportPeriodService.getLast(sourceDFT.getDepartmentId(), dd.getReportPeriodId());
             FormData sourceFD =

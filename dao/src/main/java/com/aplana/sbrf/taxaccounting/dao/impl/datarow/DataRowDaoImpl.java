@@ -238,10 +238,10 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 		// сравниваем кол-во реальных строк с числом, хранящимся в form_data.number_current_row
 		StringBuilder sql = new StringBuilder("SELECT (SELECT COUNT(*) FROM form_data_");
 		sql.append(formData.getFormTemplateId());
-		sql.append(" WHERE form_data_id = :form_data_id AND (alias IS NULL OR alias LIKE '%)\n");
+		sql.append(" WHERE form_data_id = :form_data_id AND (alias IS NULL OR alias LIKE '%\n");
 		sql.append(DataRowMapper.ALIASED_WITH_AUTO_NUMERATION_AFFIX).append("%')");
 		sql.append(" AND temporary = :temporary AND manual = :manual");
-		sql.append(") - (SELECT number_current_row FROM form_data WHERE id = :form_data_id) FROM DUAL");
+		sql.append(") - (SELECT COALESCE(number_current_row, 0) FROM form_data WHERE id = :form_data_id) FROM DUAL");
 
 		Map<String, Object> params = new HashMap<String, Object>();
 		params.put("form_data_id", formData.getId());

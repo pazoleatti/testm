@@ -167,6 +167,11 @@ public class GetDepartmentCombinedHandler extends AbstractActionHandler<GetDepar
                 Number prepayment = paramsMap.get(DepartmentParamAliases.PREPAYMENT.name()).getNumberValue();
                 depCombined.setPrepayment(prepayment == null ? false : prepayment.longValue() == 1L);
             }
+
+            // НДС
+            if (TaxType.VAT.equals(action.getTaxType())) {
+                depCombined.setTaxOrganCodeProm((paramsMap.get(DepartmentParamAliases.TAX_ORGAN_CODE_PROM.name()).getStringValue()));
+            }
         }
 
         // Если запись не нашлась, то готовим новую

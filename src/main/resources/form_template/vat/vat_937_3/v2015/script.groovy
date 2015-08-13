@@ -163,10 +163,9 @@ def getReportPeriodEndDate() {
 void calc() {
     def dataRows = formDataService.getDataRowHelper(formData).allCached
 
+    calc1(dataRows)
     calcChangeDateFormat(dataRows)
     calcTotal(dataRows)
-
-    sortFormDataRows(false)
 }
 
 void logicCheck() {

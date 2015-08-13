@@ -181,7 +181,7 @@ public class SourcesView extends PopupViewWithUiHandlers<SourcesUiHandlers> impl
                 //return object.isCreated() ? object.getState().getName(): "Не создана";
                 return urlTemplates.getColValue(
                         object.isCreated() ? object.getState().getName() : "Не создана",
-                        !object.isStatus() ? "(версия макета выведена из действия)" : "").
+                        !object.isStatus() ? " (версия макета выведена из действия)" : "").
                         asString();
             }
         };

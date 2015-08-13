@@ -411,7 +411,7 @@ public class DepartmentConfigPropertyPresenter extends Presenter<DepartmentConfi
                                                 if (result.isHasFatalError()) {
                                                     switch (result.getErrorType()) {
                                                         case HAS_DUPLICATES:
-                                                            Dialog.errorMessage("Версия не сохранена. Обнаружены фатальные ошибки!");
+                                                            Dialog.errorMessage("Поля не уникальны", "Поля \"" + getAttributeType("TAX_ORGAN_CODE").getName() + "\" и \"" + getAttributeType("KPP").getName() + "\" таблицы должны быть уникальны");
                                                             break;
                                                         case INCORRECT_FIELDS:
                                                             Dialog.errorMessage("Поля блока \"Ответственный за декларацию\" заполнены некорректно");
@@ -462,7 +462,7 @@ public class DepartmentConfigPropertyPresenter extends Presenter<DepartmentConfi
 
     private boolean checkBeforeSave(List<Map<String, TableCell>> rows) {
         if (!isKppTaxOrgCodeFiled(rows)) {
-            Dialog.errorMessage("Не заполнены обязательные поля", "В таблице не заполнены обязательные поля \"Код налогового органа\" и \"КПП\"");
+            Dialog.errorMessage("Не заполнены обязательные поля", "В таблице не заполнены обязательные поля \"" + getAttributeType("TAX_ORGAN_CODE").getName() + "\" и \"" + getAttributeType("KPP").getName() + "\"");
             return false;
         }
         return true;

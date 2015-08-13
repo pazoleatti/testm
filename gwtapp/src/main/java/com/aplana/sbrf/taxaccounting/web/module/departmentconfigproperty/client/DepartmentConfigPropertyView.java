@@ -101,6 +101,7 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
     private TABLE_HEADER[] TABLE_HEADER_INCOME = new TABLE_HEADER[]{
             new TABLE_HEADER("TAX_ORGAN_CODE"),
             new TABLE_HEADER("KPP"),
+            new TABLE_HEADER("TAX_ORGAN_CODE_PROM"),
             new TABLE_HEADER("TAX_PLACE_TYPE_CODE"),
             new TABLE_HEADER("NAME"),
             new TABLE_HEADER("ADDITIONAL_NAME"),

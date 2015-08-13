@@ -147,6 +147,11 @@ public class SaveDepartmentCombinedHandler extends AbstractActionHandler<SaveDep
                 paramsMap.put(DepartmentParamAliases.PREPAYMENT.name(), new RefBookValue(RefBookAttributeType.NUMBER, depCombined.getPrepayment() ? 1L : 0L));
             }
 
+            // НДС
+            if (TaxType.VAT.equals(action.getTaxType())) {
+                paramsMap.put(DepartmentParamAliases.TAX_ORGAN_CODE_PROM.name(), new RefBookValue(RefBookAttributeType.STRING, depCombined.getTaxOrganCodeProm()));
+            }
+
             Logger logger = new Logger();
             logger.setTaUserInfo(securityService.currentUserInfo());
             RefBookRecord record = new RefBookRecord();

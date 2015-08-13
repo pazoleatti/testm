@@ -1213,7 +1213,7 @@ public class SourceServiceImpl implements SourceService {
 
         List<FormToFormRelation> formToFormRelations = new LinkedList<FormToFormRelation>();
         // Источники
-        List<DepartmentFormType> sourcesForm = formDataService.getFormSources(formData, logger, userInfo, reportPeriod);
+        List<DepartmentFormType> sourcesForm = formDataService.getFormSources(formData, logger, userInfo, reportPeriod, false);
         formToFormRelations.addAll(createFormToFormRelationModel(sourcesForm, departmentReportPeriod,
                 periodOrder, true));
         // Приемники
@@ -1235,7 +1235,7 @@ public class SourceServiceImpl implements SourceService {
         DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.get(declaration.getDepartmentReportPeriodId());
 
         //Получаем источники-приемники
-        List<DepartmentFormType> sourcesForm = declarationDataService.getFormDataSources(declaration, new Logger());
+        List<DepartmentFormType> sourcesForm = declarationDataService.getFormDataSources(declaration, false, new Logger());
         formToFormRelations.addAll(createFormToFormRelationModel(sourcesForm, departmentReportPeriod,
                 null, true));
         return formToFormRelations;
@@ -1447,7 +1447,7 @@ public class SourceServiceImpl implements SourceService {
         FormToFormRelation formToFormRelation = performFormDataRelation(formData,
                 getRelationCommon(true, departmentFormType, formDepartmentReportPeriod, periodOrder), departmentFormType,
                 departmentReportPeriod);
-        formToFormRelation.setStatus(formTemplateService.existFormTemplate(departmentFormType.getFormTypeId(), departmentReportPeriod.getReportPeriod().getId()));
+        formToFormRelation.setStatus(formTemplateService.existFormTemplate(departmentFormType.getFormTypeId(), departmentReportPeriod.getReportPeriod().getId(), true));
         //if (formToFormRelation != null) relations.add(formToFormRelation);
         relations.add(formToFormRelation);
         //}
@@ -1499,7 +1499,7 @@ public class SourceServiceImpl implements SourceService {
             FormToFormRelation formToFormRelation = performFormDataRelation(formData,
                     getRelationCommon(false, departmentFormType, destinationReportPeriod, periodOrder), departmentFormType,
                     departmentReportPeriod);
-            formToFormRelation.setStatus(formTemplateService.existFormTemplate(departmentFormType.getFormTypeId(), departmentReportPeriod.getReportPeriod().getId()));
+            formToFormRelation.setStatus(formTemplateService.existFormTemplate(departmentFormType.getFormTypeId(), departmentReportPeriod.getReportPeriod().getId(), false));
 
             retVal.add(formToFormRelation);
         }

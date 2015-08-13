@@ -86,12 +86,17 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
 			kpp,
 			phone,
 			taxOrganCode,
+            taxOrganCodeProm,
 			reorgInn,
 			reorgKpp,
 			signatorySurname,
 			signatoryFirstname,
 			signatoryLastname,
 			formatVersion;
+
+    @UiField
+    @Ignore
+    Label taxOrganCodeLabel;
 
 	@UiField
 	TextArea approveDocName,
@@ -138,7 +143,8 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
             payPanelObligation,
             payPanelPrepayment,
 			payPanelType,
-			taxRatePanel;
+			taxRatePanel,
+            taxOrganCodePromPanel;
 
 	@UiField
 	@Ignore
@@ -483,6 +489,13 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
 	public void setTaxType(TaxType taxType) {
         currentTaxType = taxType;
         taxTypeLabel.setText(taxType.getName());
+        if (TaxType.VAT.equals(taxType)) {
+            taxOrganCodeLabel.setText("Код налогового органа (кон.):");
+            taxOrganCodePromPanel.setVisible(true);
+        } else {
+            taxOrganCodeLabel.setText("Код налогового органа:");
+            taxOrganCodePromPanel.setVisible(false);
+        }
 		reloadDepartments();
 	}
 
