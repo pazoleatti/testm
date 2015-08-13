@@ -40,8 +40,6 @@ public class RefBookHierDataPresenter extends PresenterWidget<RefBookHierDataPre
     private Long refBookId;
     private RecordChanges recordChanges;
     private Date relevanceDate;
-    /** Признак того, что справочник версионируемый */
-    private boolean versioned;
 
     private final DispatchAsync dispatcher;
 
@@ -150,7 +148,6 @@ public class RefBookHierDataPresenter extends PresenterWidget<RefBookHierDataPre
                 new AbstractCallback<CheckRefBookResult>() {
                     @Override
                     public void onSuccess(CheckRefBookResult result) {
-                        versioned = result.isVersioned();
                         if (!result.isAvailable()) {
                             Dialog.errorMessage("Доступ к справочнику запрещен!");
                         }
@@ -179,7 +176,8 @@ public class RefBookHierDataPresenter extends PresenterWidget<RefBookHierDataPre
 
     private void onDeleteRowClicked() {
         LogCleanEvent.fire(RefBookHierDataPresenter.this);
-        if (canVersion){
+        //TODO: Подумать, может убрать совсем либо DeleteRefBookRowAction, либо DeleteNonVersionRefBookRowAction
+        if (refBookId != 30){
             DeleteRefBookRowAction action = new DeleteRefBookRowAction();
             action.setRefBookId(refBookId);
             final Long selected = getView().getSelectedId();
