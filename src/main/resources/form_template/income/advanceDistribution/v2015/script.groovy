@@ -323,8 +323,6 @@ void calc() {
         // графа 14
         caTotalRow.taxSumOutside = 0.9 * sumNal - totalRow.taxSumOutside + caRow.taxSumOutside
     }
-
-    sortFormDataRows(false)
 }
 
 // название подразделения

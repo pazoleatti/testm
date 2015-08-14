@@ -41,11 +41,11 @@ switch (formDataEvent) {
     case FormDataEvent.CREATE:
         formDataService.checkUnique(formData, logger)
         break
-    case FormDataEvent.CALCULATE:
+    /*case FormDataEvent.CALCULATE:
         calc()
         logicCheck()
         formDataService.saveCachedDataRows(formData, logger)
-        break
+        break*/
     case FormDataEvent.CHECK:
         logicCheck()
         break
@@ -125,7 +125,6 @@ def getRecordIdImport(def Long refBookId, def String alias, def String value, de
 
 void calc() {
     // расчетов нет
-    sortFormDataRows(false)
 }
 
 void logicCheck() {

@@ -360,8 +360,6 @@ void calc() {
         checkOverflow(value25, row, 'taxBase', index, 15, '«Графа 23» - «Графа 24»')
         row.taxBase = value25
     }
-
-    sortFormDataRows(false)
 }
 
 /**

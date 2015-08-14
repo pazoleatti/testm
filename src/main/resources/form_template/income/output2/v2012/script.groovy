@@ -111,8 +111,6 @@ void calc(){
             row.dividendSum = (row.sumDividend ?: 0) - (row.sumTax ?: 0)
         }
     }
-
-    sortFormDataRows(false)
 }
 
 void logicCheck() {

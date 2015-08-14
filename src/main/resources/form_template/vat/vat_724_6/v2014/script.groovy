@@ -161,8 +161,6 @@ void calc() {
 
     def totalRow = getDataRow(dataRows, 'total')
     calcTotalSum(dataRows, totalRow, totalColumns)
-
-    sortFormDataRows(false)
 }
 
 // Консолидация с группировкой по подразделениям

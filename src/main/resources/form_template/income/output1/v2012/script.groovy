@@ -152,8 +152,6 @@ void calc() {
             row.taxSumFromPeriod = calc24(row)
         }
     }
-
-    sortFormDataRows(false)
 }
 
 def BigDecimal calc4(def row) {
