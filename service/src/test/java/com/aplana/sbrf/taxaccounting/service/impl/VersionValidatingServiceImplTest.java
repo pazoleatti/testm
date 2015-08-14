@@ -207,6 +207,7 @@ public class VersionValidatingServiceImplTest {
         formData.setReportPeriodId(1);
         formData.setId(1l);
         formData.setDepartmentReportPeriodId(1);
+        formData.setComparativPeriodId(1);
 
         FormData formData1 = new FormData(formTemplate);
         formData1.setState(WorkflowState.CREATED);
@@ -215,6 +216,7 @@ public class VersionValidatingServiceImplTest {
         formData1.setReportPeriodId(2);
         formData1.setId(2l);
         formData1.setDepartmentReportPeriodId(2);
+        formData1.setComparativPeriodId(2);
 
         TaxPeriod taxPeriod = new TaxPeriod();
         taxPeriod.setId(1);
@@ -238,8 +240,10 @@ public class VersionValidatingServiceImplTest {
         }};
 
         DepartmentReportPeriod drp = new DepartmentReportPeriod();
+        drp.setReportPeriod(reportPeriod);
         when(departmentReportPeriodService.get(formData.getDepartmentReportPeriodId())).thenReturn(drp);
         DepartmentReportPeriod drp1 = new DepartmentReportPeriod();
+        drp1.setReportPeriod(reportPeriod1);
         drp1.setCorrectionDate(SIMPLE_DATE_FORMAT.parse("01.01.2014"));
         when(departmentReportPeriodService.get(formData1.getDepartmentReportPeriodId())).thenReturn(drp1);
 
@@ -263,11 +267,11 @@ public class VersionValidatingServiceImplTest {
                 logger);
 
         Assert.assertEquals(
-                "Существует экземпляр налоговой формы \"Тестовый тип НФ\" типа \"Сводная\" в подразделении \"Тестовое подразделение\" в периоде \"Тестовый период\" 2014 для макета",
+                "Существует экземпляр налоговые формы:  Тип: \"Тестовый тип НФ\", Вид: \"Сводная\", Подразделение: \"Тестовое подразделение\", Период: \"Тестовый период 2014\", Период сравнения: Тестовый период 2014, Версия: \"автоматическая\"",
                 logger.getEntries().get(0).getMessage()
         );
         Assert.assertEquals(
-                "Существует экземпляр налоговой формы \"Тестовый тип НФ\" типа \"Сводная\" в подразделении \"Тестовое подразделение\" в периоде \"Второй тестовый период\" 2014 с датой сдачи корректировки 01.01.2014 для макета",
+                "Существует экземпляр налоговые формы:  Тип: \"Тестовый тип НФ\", Вид: \"Сводная\", Подразделение: \"Тестовое подразделение\", Период: \"Второй тестовый период 2014\", Период сравнения: Второй тестовый период 2014, Дата сдачи корректировки: 01.01.2014,  Версия: \"автоматическая\"",
                 logger.getEntries().get(1).getMessage()
         );
     }

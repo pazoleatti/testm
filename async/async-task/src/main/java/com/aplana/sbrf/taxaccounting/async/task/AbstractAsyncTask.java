@@ -34,9 +34,9 @@ public abstract class AbstractAsyncTask implements AsyncTask {
     protected static final Log log = LogFactory.getLog(AbstractAsyncTask.class);
 
     protected static final String COMPLETE_FORM =
-            "Сформирован %s отчет";
+            "Сформирован %s отчет:";
     protected static final String ERROR_FORM =
-            "Произошла непредвиденная ошибка при формировании %s отчета";
+            "Произошла непредвиденная ошибка при формировании %s отчета:";
 
     @Autowired
     private LockDataService lockService;

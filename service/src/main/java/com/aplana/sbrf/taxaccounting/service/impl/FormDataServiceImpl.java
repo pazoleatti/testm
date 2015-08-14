@@ -64,7 +64,7 @@ public class FormDataServiceImpl implements FormDataService {
     private static final String XLSX_EXT = "xlsx";
     private static final String XLS_EXT = "xls";
     private static final String XLSM_EXT = "xlsm";
-    public static final String MSG_IS_EXIST_FORM = "Существует экземпляр %s";
+    public static final String MSG_IS_EXIST_FORM = "Существует экземпляр %s:";
     final static String LOCK_MESSAGE = "Форма заблокирована и не может быть изменена. Попробуйте выполнить операцию позже.";
     final static String LOCK_MESSAGE_TASK = "Выполнение операции \"%s\" невозможно, т.к. для текущего экземпляра налоговой формы запущена операция изменения данных";
     final static String LOCK_REFBOOK_MESSAGE = "Справочник \"%s\" заблокирован и не может быть использован для заполнения атрибутов формы. Попробуйте выполнить операцию позже.";
@@ -72,7 +72,7 @@ public class FormDataServiceImpl implements FormDataService {
     final static String DEPARTMENT_REPORT_PERIOD_NOT_FOUND_ERROR = "Не найден отчетный период подразделения с id = %d.";
     private static final String SAVE_ERROR = "Найдены ошибки при сохранении формы!";
     private static final String SORT_ERROR = "Найдены ошибки при сортировке строк формы!";
-    private static final String FD_NOT_IN_RANGE = "Найдена форма: \"%s\", \"%d\", \"%s\", \"%s\" в подразделении \"%s\", состояние - \"%s\"";
+    private static final String FD_NOT_IN_RANGE = "Найдена форма: ";
     private static final String LOCK_CURRENT_1 =
             "Текущая налоговая форма заблокирована пользователем \"%s\" в \"%s\". Попробуйте выполнить операцию позже";
     private static final String SOURCE_MSG_ERROR =
@@ -1708,17 +1708,17 @@ public class FormDataServiceImpl implements FormDataService {
                 startDate, endDate != null ? endDate : MAX_DATE);
         for (Integer id : fdIds){
             FormData fd = formDataDao.getWithoutRows(id);
-            ReportPeriod rp = reportPeriodService.getReportPeriod(fd.getReportPeriodId());
             DepartmentReportPeriod drp = departmentReportPeriodService.get(fd.getDepartmentReportPeriodId());
-            FormTemplate ft = formTemplateService.get(fd.getFormTemplateId());
-            logger.error(FD_NOT_IN_RANGE,
-                    rp.getName() + (fd.getPeriodOrder() != null?" " + Months.fromId(fd.getPeriodOrder()).getTitle():""),
-                    rp.getTaxPeriod().getYear(),
-                    drp.getCorrectionDate() != null ? String.format("с датой сдачи корректировки %s",
-                            SDF_DD_MM_YYYY.format(drp.getCorrectionDate())) : "",
-                    ft.getName(),
+            DepartmentReportPeriod drpCompare = departmentReportPeriodService.get(fd.getComparativPeriodId());
+
+            logger.error(MessageGenerator.getFDMsg(FD_NOT_IN_RANGE,
+                    fd.getFormType().getName(),
+                    fd.getKind().getName(),
                     departmentService.getDepartment(fd.getDepartmentId()).getName(),
-                    fd.getState().getName());
+                    fd.getPeriodOrder(),
+                    fd.isManual(),
+                    drp,
+                    drpCompare));
         }
     }
 

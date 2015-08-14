@@ -2,17 +2,7 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentReportPeriodDao;
-import com.aplana.sbrf.taxaccounting.model.AutoNumerationColumn;
-import com.aplana.sbrf.taxaccounting.model.Column;
-import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod;
-import com.aplana.sbrf.taxaccounting.model.FormTemplate;
-import com.aplana.sbrf.taxaccounting.model.NumerationType;
-import com.aplana.sbrf.taxaccounting.model.NumericColumn;
-import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
-import com.aplana.sbrf.taxaccounting.model.StringColumn;
-import com.aplana.sbrf.taxaccounting.model.TAUser;
-import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
-import com.aplana.sbrf.taxaccounting.model.TaxPeriod;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.FormDataService;
 import com.aplana.sbrf.taxaccounting.service.FormTemplateService;
@@ -39,9 +29,8 @@ public class FormTemplateServiceImplTest extends Assert {
     public static final int FORM_TEMPLATE_ID = 1;
     public static final int COLUMN_ID = 1;
 
-    public static final String MESSAGE = "Следующие периоды налоговых форм данной версии макета закрыты: " +
-            "год 2014, первый квартал 2015. " +
-            "Для добавления в макет автонумеруемой графы с типом сквозной нумерации строк необходимо открыть перечисленные периоды!";
+    public static final String MESSAGE =
+            "Следующие периоды форм данной версии макета закрыты: год 2014, первый квартал 2015. Для добавления в макет автонумеруемой графы с типом сквозной нумерации строк необходимо открыть перечисленные периоды!";
 
     Logger logger;
 
@@ -70,9 +59,13 @@ public class FormTemplateServiceImplTest extends Assert {
         user.setName("Name");
         userInfo.setUser(user);
 
+        FormType formType = new FormType();
+        formType.setName("Тестовый");
+        formType.setTaxType(TaxType.ETR);
         // Макет, который "хранится" в БД. До редактирования
         formTemplateFromDB = new FormTemplate();
         formTemplateFromDB.setId(FORM_TEMPLATE_ID);
+        formTemplateFromDB.setType(formType);
 
         AutoNumerationColumn autoNumerationColumn = new AutoNumerationColumn();
         autoNumerationColumn.setId(COLUMN_ID);

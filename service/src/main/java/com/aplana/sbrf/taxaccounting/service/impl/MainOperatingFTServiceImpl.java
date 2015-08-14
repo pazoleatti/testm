@@ -1,7 +1,5 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
-import com.aplana.sbrf.taxaccounting.dao.ColumnDao;
-import com.aplana.sbrf.taxaccounting.dao.api.DataRowDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
@@ -14,7 +12,10 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
 
 /**
  * User: avanteev
@@ -42,10 +43,6 @@ public class MainOperatingFTServiceImpl implements MainOperatingService {
     private SourceService sourceService;
     @Autowired
     private DepartmentService departmentService;
-    @Autowired
-    private DataRowDao dataRowDao;
-    @Autowired
-    private ColumnDao columnDao;
     @Autowired
     private FormDataService formDataService;
     @Autowired
