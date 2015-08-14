@@ -66,21 +66,6 @@ public class SourceDaoTest {
         assertFalse(sourceDao.isDDConsolidationTopical(1));
     }
 
-    @Test
-    public void testUpdateDDConsInfo() {
-        sourceDao.updateDDConsolidationInfo(new ArrayList<Long>() {{
-            add(1l);
-        }}, new ArrayList<Long>() {{
-            add(1l);
-        }});
-        assertFalse(sourceDao.isFDConsolidationTopical(1));
-    }
-
-    @Test
-    public void testFindConsolidatedInstanceIds() {
-        assertEquals(0, sourceDao.findConsolidatedInstanceIds(1l, new Date(), new Date(), true).size());
-        assertEquals(0, sourceDao.findConsolidatedInstanceIds(1l, new Date(), new Date(), false).size());
-    }
 
     /*@Test
     public void testSaveDeclarationSources() {
