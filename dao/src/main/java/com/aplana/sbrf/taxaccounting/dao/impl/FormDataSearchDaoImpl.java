@@ -206,24 +206,24 @@ public class FormDataSearchDaoImpl extends AbstractDao implements FormDataSearch
     }
 
     private final static String FIND_PAGE = "%s" +
-            "select ordDat.* from ( " +
-            "select dat.*, count(*) over() cnt, rownum as rn from ( " +
-            "SELECT fd.ID as form_data_id, fd.form_template_id, fd.return_sign, fd.KIND as form_data_kind_id, " +
-            "fd.department_report_period_id, fd.STATE, " +
-            "fd.PERIOD_ORDER as period_order, tp.year, ft.ID as form_type_id, ft.NAME as form_type_name, ft.TAX_TYPE, " +
-            "dp.ID as department_id, dp.NAME as department_name, dp.TYPE as department_type, rp.ID as report_period_id, " +
-            "rp.NAME as report_period_name %s, drp.correction_date, fd.COMPARATIVE_DEP_REP_PER_ID, fd.ACCRUING " +
-            "FROM form_data fd " +
-            "join department_report_period drp on drp.id = fd.department_report_period_id " +
-            "JOIN FORM_TEMPLATE t on t.id = fd.form_template_id " +
-            "JOIN form_type ft on t.type_id = ft.id " +
-            "JOIN department dp on dp.id = drp.department_id " +
-            "JOIN report_period rp on rp.id = drp.report_period_id " +
-            "LEFT JOIN department_report_period cdrp on (fd.COMPARATIVE_DEP_REP_PER_ID = cdrp.id and cdrp.department_id = dp.id) " +
-            "LEFT JOIN report_period crp on rp.id = cdrp.report_period_id " +
-            "JOIN tax_period tp on tp.id=rp.tax_period_id " +
-            "JOIN log_business lb on lb.form_data_id = fd.id " +
-            "%s" +
+            "select ordDat.* from ( \n" +
+            "select dat.*, count(*) over() cnt, rownum as rn from ( \n" +
+            "SELECT fd.ID as form_data_id, fd.form_template_id, fd.return_sign, fd.KIND as form_data_kind_id, \n" +
+            "fd.department_report_period_id, fd.STATE, \n" +
+            "fd.PERIOD_ORDER as period_order, tp.year, ft.ID as form_type_id, ft.NAME as form_type_name, ft.TAX_TYPE, \n" +
+            "dp.ID as department_id, dp.NAME as department_name, dp.TYPE as department_type, rp.ID as report_period_id, \n" +
+            "rp.NAME as report_period_name %s, drp.correction_date, fd.COMPARATIVE_DEP_REP_PER_ID, fd.ACCRUING \n" +
+            "FROM form_data fd \n" +
+            "join department_report_period drp on drp.id = fd.department_report_period_id \n" +
+            "JOIN FORM_TEMPLATE t on t.id = fd.form_template_id \n" +
+            "JOIN form_type ft on t.type_id = ft.id \n" +
+            "JOIN department dp on dp.id = drp.department_id \n" +
+            "JOIN report_period rp on rp.id = drp.report_period_id \n" +
+            "LEFT JOIN department_report_period cdrp on (fd.COMPARATIVE_DEP_REP_PER_ID = cdrp.id and cdrp.department_id = dp.id) \n" +
+            "LEFT JOIN report_period crp on crp.id = cdrp.report_period_id \n" +
+            "JOIN tax_period tp on tp.id=rp.tax_period_id \n" +
+            "JOIN log_business lb on lb.form_data_id = fd.id \n" +
+            "%s \n" +
             "  WHERE lb.event_id = 1";
 
 	@Override
