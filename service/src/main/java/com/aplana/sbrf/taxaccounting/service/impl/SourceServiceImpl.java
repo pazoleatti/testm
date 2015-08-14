@@ -435,20 +435,22 @@ public class SourceServiceImpl implements SourceService {
                         logger.warn(RECONSOLIDATE_FORM_MSG);
                         hasForm = true;
                     }
-                    DepartmentReportPeriod drpCompare = form.getDrpComapreId() != null ?
-                            departmentReportPeriodService.get(form.getDrpComapreId()) : null;
-                    logger.warn(MessageGenerator.getFDMsg("",
-                                    form.getType(),
-                                    form.getFormKind().getName(),
-                                    form.getDepartment(),
-                                    form.getMonth(),
-                                    form.isManual(),
-                                    form.getPeriod(),
-                                    form.getCorrectionDate(),
-                                    drpCompare != null ?
-                                            drpCompare.getReportPeriod().getName() + " " + drpCompare.getReportPeriod().getTaxPeriod().getYear() : ""
-                            )
-                    );
+                    if (!processedDestinations.contains(form.getId())) {
+                        DepartmentReportPeriod drpCompare = form.getDrpComapreId() != null ?
+                                departmentReportPeriodService.get(form.getDrpComapreId()) : null;
+                        logger.warn(MessageGenerator.getFDMsg("",
+                                        form.getType(),
+                                        form.getFormKind().getName(),
+                                        form.getDepartment(),
+                                        form.getMonth(),
+                                        form.isManual(),
+                                        form.getPeriod(),
+                                        form.getCorrectionDate(),
+                                        drpCompare != null ?
+                                                drpCompare.getReportPeriod().getName() + " " + drpCompare.getReportPeriod().getTaxPeriod().getYear() : ""
+                                )
+                        );
+                    }
                     processedDestinations.add(form.getId());
                 }
             }
