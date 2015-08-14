@@ -774,8 +774,10 @@ public class SourceServiceImpl implements SourceService {
                     );
                 }
             }
-            //Делаем неактуальным признак консолидации для пар источник-приемник
-            sourceDao.updateConsolidationInfo(consolidatedInstances, sourceClientData.isDeclaration());
+            if (!consolidatedInstances.isEmpty()) {
+                //Делаем неактуальным признак консолидации для пар источник-приемник
+                sourceDao.updateConsolidationInfo(consolidatedInstances, sourceClientData.isDeclaration());
+            }
         } else {
             throw new ServiceException(EMPTY_LIST_MSG);
         }
@@ -921,8 +923,11 @@ public class SourceServiceImpl implements SourceService {
                         }
                     }
                     if (!sourcePairs.isEmpty()) {
-                        // удаляем информацию о консолидации
-                        sourceDao.updateConsolidationInfo(unconsolidatedInstances, sourceClientData.isDeclaration());
+
+                        if (!unconsolidatedInstances.isEmpty()) {
+                            // удаляем информацию о консолидации
+                            sourceDao.updateConsolidationInfo(unconsolidatedInstances, sourceClientData.isDeclaration());
+                        }
 
                         List<SourceObject> sourceObjects = pairsToObjects(sourcePairs, oldPeriodStart, oldPeriodEnd);
                         sourceDao.updateAll(sourceObjects, periodStart, periodEnd, sourceClientData.isDeclaration());
