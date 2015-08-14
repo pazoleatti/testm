@@ -104,6 +104,26 @@ def getEndDate(int reportPeriodId) {
     return endDateMap[reportPeriodId]
 }
 
+@Field
+def periodMap = [:]
+
+def getReportPeriod(int reportPeriodId) {
+    if (periodMap[reportPeriodId] == null) {
+        periodMap[reportPeriodId] = reportPeriodService.get(reportPeriodId)
+    }
+    return periodMap[reportPeriodId]
+}
+
+@Field
+def prevPeriodMap = [:]
+
+def getPrevReportPeriod(int reportPeriodId) {
+    if (prevPeriodMap[reportPeriodId] == null) {
+        prevPeriodMap[reportPeriodId] = reportPeriodService.getPrevReportPeriod(reportPeriodId)
+    }
+    return prevPeriodMap[reportPeriodId]
+}
+
 void preCalcCheck() {
     def tmpRow = formData.createDataRow()
     // собираем коды ОПУ
@@ -111,9 +131,9 @@ void preCalcCheck() {
     // находим записи для текущего периода и периода сравнения
     ['comparePeriod': getComparativePeriodId(), 'currentPeriod':formData.reportPeriodId].each { key, value ->
         if (value != null) {
-            def reportPeriod = reportPeriodService.get(value)
+            def reportPeriod = getReportPeriod(value)
             if (formData.accruing && reportPeriod.order != 1) {
-                def prevPeriodId = value ? reportPeriodService.getPrevReportPeriod(value)?.id : null
+                def prevPeriodId = value ? getPrevReportPeriod(value)?.id : null
                 checkOpuCodes(key, prevPeriodId, opuCodes, tmpRow)
             }
         }
@@ -121,12 +141,14 @@ void preCalcCheck() {
     }
 }
 
+@Field
+def comparativPeriodId
+
 def getComparativePeriodId() {
-    if (formData.comparativPeriodId != null) {
-        return departmentReportPeriodService.get(formData.comparativPeriodId)?.reportPeriod?.id
-    } else {
-        return null
+    if (comparativPeriodId == null && formData.comparativPeriodId != null) {
+        comparativPeriodId = departmentReportPeriodService.get(formData.comparativPeriodId)?.reportPeriod?.id
     }
+    return comparativPeriodId
 }
 
 void checkOpuCodes(def alias, def periodId, def opuCodes, def tmpRow) {
@@ -145,7 +167,7 @@ void checkOpuCodes(def alias, def periodId, def opuCodes, def tmpRow) {
             foundBO = false
         }
     }
-    def reportPeriod = reportPeriodService.get(periodId)
+    def reportPeriod = getReportPeriod(periodId)
     if (!foundBO) {
         logger.warn("Не найдена форма 102 бухгалтерской отчетности: Период: \"%s %s\", Подразделение: \"%s\". Ячейки по графе \"%s\", заполняемые из данной формы, будут заполнены нулевым значением.",
                 reportPeriod?.getName() ?: "Период не задан", reportPeriod?.getTaxPeriod()?.getYear() ?: "Год не задан", formDataDepartment.name, getColumnName(tmpRow, alias))
@@ -174,34 +196,40 @@ void logicCheck() {
     // получить строки из шаблона
     def formTemplate = formDataService.getFormTemplate(formData.formType.id, formData.reportPeriodId)
     def tempRows = formTemplate.rows
+    updateIndexes(tempRows)
     calcValues(tempRows, dataRows)
     for(int i = 0; i < dataRows.size(); i++){
         def row = dataRows[i]
         def tempRow = tempRows[i]
+        def checkColumns = []
         // делаем проверку БО только для первичных НФ
         if (opuMap.keySet().contains(row.getAlias()) && (!"R3".equals(row.getAlias()) || isBank())) {
             if (formData.kind == FormDataKind.PRIMARY) {
-                check102(row, check102Columns, tempRow, logger, true)
+                checkColumns += check102Columns
             }
         } else {
-            checkCalc(row, check102Columns, tempRow, logger, true)
+            checkColumns += check102Columns
         }
-        checkCalc(row, checkCalcColumns, tempRow, logger, true)
+        checkColumns += checkCalcColumns
+        checkCalc(row, checkColumns, tempRow, logger, true)
     }
 }
 
 void calcValues(def dataRows, def sourceRows) {
-    for (alias in opuMap.keySet()) {
-        def row = getDataRow(dataRows, alias)
-        def rowSource = getDataRow(sourceRows, alias)
-        if ("R3".equals(alias) && !isBank()) {
-            row.comparePeriod = getSourceValue(getComparativePeriodId(), row, 'comparePeriod')
-            row.currentPeriod = getSourceValue(formData.reportPeriodId, row, 'currentPeriod')
-            continue
-        }
+    // при консолидации не подтягиваем данные при расчете
+    if (formDataEvent != FormDataEvent.COMPOSE) {
+        for (def alias in opuMap.keySet()) {
+            def row = getDataRow(dataRows, alias)
+            def rowSource = getDataRow(sourceRows, alias)
+            if ("R3".equals(alias) && !isBank()) {
+                row.comparePeriod = getSourceValue(getComparativePeriodId(), row, 'comparePeriod')
+                row.currentPeriod = getSourceValue(formData.reportPeriodId, row, 'currentPeriod')
+                continue
+            }
 
-        row.comparePeriod = calcBO(rowSource, getComparativePeriodId(), 'comparePeriod')
-        row.currentPeriod = calcBO(rowSource, formData.reportPeriodId, 'currentPeriod')
+            row.comparePeriod = calcBO(rowSource, getComparativePeriodId(), 'comparePeriod')
+            row.currentPeriod = calcBO(rowSource, formData.reportPeriodId, 'currentPeriod')
+        }
     }
     def row2 = getDataRow(dataRows, "R2")
     def row4 = getDataRow(dataRows, "R4")
@@ -213,10 +241,8 @@ void calcValues(def dataRows, def sourceRows) {
     def row8Source = getDataRow(sourceRows, "R8")
     ['comparePeriod', 'currentPeriod'].each {
         def smallSum = (row5Source[it] ?: 0) + (row6Source[it] ?: 0) + (row7Source[it] ?: 0) + (row8Source[it] ?: 0)
-        checkOverflow(smallSum, row4, it, row4.getIndex() ?: 0, 18, null)
         row4[it] = smallSum
         def largeSum = (row3Source[it] ?: 0) + (row4Source[it] ?: 0)
-        checkOverflow(largeSum, row2, it, row2.getIndex() ?: 0, 18, null)
         row2[it] = largeSum
     }
     for(int i = 0; i < dataRows.size(); i++){
@@ -226,7 +252,7 @@ void calcValues(def dataRows, def sourceRows) {
         row.deltaPercent = null
         if (rowSource.comparePeriod) {
             row.deltaPercent = ((rowSource.deltaRub ?: BigDecimal.ZERO) as BigDecimal) / rowSource.comparePeriod * 100
-        } else if (dataRows == sourceRows) { // выводить только при расчете
+        } else if (dataRows != sourceRows) { // выводить только при расчете
             rowWarning(logger, row, String.format("Строка %s: Графа «%s» не может быть заполнена. Выполнение расчета невозможно, так как в результате проверки получен нулевой знаменатель (деление на ноль невозможно)",
                     row.getIndex(), getColumnName(row, 'deltaPercent')))
         }
@@ -236,7 +262,7 @@ void calcValues(def dataRows, def sourceRows) {
 def getSourceValue(def periodId, def row, def alias) {
     boolean found = false
     if (periodId != null) {
-        def reportPeriod = reportPeriodService.get(periodId)
+        def reportPeriod = getReportPeriod(periodId)
         for (formDataSource in departmentFormTypeService.getFormSources(formData.departmentId, formData.getFormType().getId(), formData.getKind(),
                 getStartDate(periodId), getEndDate(periodId))) {
             if (formDataSource.formTypeId == sourceFormTypeId) {
@@ -266,19 +292,18 @@ def calcBO(def rowSource, def periodId, def alias) {
         def pair = get102Sum(rowSource, periodId)
         boolean isCorrect = pair[1]
         periodSum = isCorrect ? pair[0] : 0
-        def reportPeriod = reportPeriodService.get(periodId)
+        def reportPeriod = getReportPeriod(periodId)
         if (formData.accruing && reportPeriod.order != 1 && isCorrect) {
-            def prevPeriodId = reportPeriodService.getPrevReportPeriod(periodId)?.id
+            def prevPeriodId = getPrevReportPeriod(periodId)?.id
             pair = get102Sum(rowSource, prevPeriodId)
             isCorrect = pair[1]
             periodSum = isCorrect ? (periodSum - pair[0]) : 0
         }
-        checkOverflow(periodSum, rowSource, alias, rowSource.getIndex(), 18, null)
     }
     return periodSum
 }
 
-// Возвращает данные из Формы 102 БО за период + флаг ошибки
+// Возвращает данные из Формы 102 БО за период + флаг корректности
 def get102Sum(def row, def periodId) {
     if (opuMap[row.getAlias()] != null && periodId != null) {
         def opuCodes = opuMap[row.getAlias()].join("' OR OPU_CODE = '")
@@ -296,27 +321,6 @@ def get102Sum(def row, def periodId) {
 
 boolean isBank() {
     return formData.departmentId == 1 // по ЧТЗ
-}
-
-void check102(def row, def calcColumns, def tempRow, def logger, boolean required) {
-    List<String> errorColumns = new LinkedList<String>();
-    for (String alias : calcColumns) {
-        if (tempRow[alias] == null && row[alias] == null) {
-            continue;
-        }
-        if (tempRow[alias] == null || row[alias] == null
-                || ((BigDecimal) tempRow.get(alias)).compareTo((BigDecimal) row.getCell(alias).getValue()) != 0) {
-            errorColumns.add('«' + getColumnName(row, alias) + '»');
-        }
-    }
-    if (!errorColumns.isEmpty()) {
-        String msg = String.format("Строка %s: Значение граф «%s» не соответствует значению поля «Сумма» соответствующего символа ф. 102 за установленный период.", row.getIndex(), errorColumns.join(", "));
-        if (required) {
-            rowError(logger, row, msg);
-        } else {
-            rowWarning(logger, row, msg);
-        }
-    }
 }
 
 void importData() {
