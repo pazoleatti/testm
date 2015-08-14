@@ -26,9 +26,9 @@ public class VersionFTOperatingServiceImpl implements VersionOperatingService {
     private static final SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
 
     private static final String MSG_IS_USED_VERSION =
-            "Существует экземпляр налоговой формы \"%s\" типа \"%s\" в подразделении \"%s\" в периоде \"%s\" %d%s для макета";
+            "Существует экземпляр %s: ";
     private static final String MSG_HAVE_DESTINATION =
-            "Существует назначение налоговой формы в качестве источника данных для налоговой формы типа \"%s\" вида \"%s\" в подразделении \"%s\" начиная с периода %s!";
+            "Существует назначение %s в качестве источника данных для %s типа: \"%s\" вида \"%s\" в подразделении \"%s\" начиная с периода %s!";
     private static final String MSG_HAVE_SOURCE =
             "Существует назначение налоговой формы в качестве приёмника данных для налоговой формы типа \"%s\" вида \"%s\" в подразделении \"%s\" начиная с периода %s!";
 
@@ -57,17 +57,18 @@ public class VersionFTOperatingServiceImpl implements VersionOperatingService {
 
         for (long formDataId : fdIds) {
             FormData formData = formDataDao.getWithoutRows(formDataId);
-            ReportPeriod period = periodService.getReportPeriod(formData.getReportPeriodId());
             DepartmentReportPeriod drp = departmentReportPeriodService.get(formData.getDepartmentReportPeriodId());
+            DepartmentReportPeriod drpCompare = departmentReportPeriodService.get(formData.getComparativPeriodId());
 
-            logger.error(MSG_IS_USED_VERSION,
+            logger.error(MessageGenerator.getFDMsg(
+                    String.format(MSG_IS_USED_VERSION, MessageGenerator.mesSpeck(formData.getFormType().getTaxType())),
                     formData.getFormType().getName(),
                     formData.getKind().getName(),
                     departmentService.getDepartment(formData.getDepartmentId()).getName(),
-                    period.getName() + (formData.getPeriodOrder() != null ? (" - " + Months.fromId(formData.getPeriodOrder()).getTitle()) : ""),
-                    period.getTaxPeriod().getYear(),
-                    drp.getCorrectionDate() != null ? String.format(" с датой сдачи корректировки %s",
-                            sdf.format(drp.getCorrectionDate())) : "");
+                    formData.getPeriodOrder(),
+                    formData.isManual(),
+                    drp,
+                    drpCompare));
         }
 
     }
@@ -165,12 +166,16 @@ public class VersionFTOperatingServiceImpl implements VersionOperatingService {
     public void checkDestinationsSources(int typeId, Date versionActualDateStart, Date versionActualDateEnd, Logger logger) {
         List<Pair<DepartmentFormType, Pair<Date, Date>>> sourcePairs = sourceService.findSourceFTsForFormType(typeId, versionActualDateStart, versionActualDateEnd);
         List<Pair<DepartmentFormType, Pair<Date, Date>>> destinationPairs = sourceService.findDestinationFTsForFormType(typeId, versionActualDateStart, versionActualDateEnd);
+        FormType typeRelated = formTypeService.get(typeId);
         for (Pair<DepartmentFormType, Pair<Date, Date>> pair : sourcePairs){
             DepartmentFormType first = pair.getFirst();
+            FormType typeSource = formTypeService.get(first.getFormTypeId());
             logger.error(
-                    String.format(MSG_HAVE_SOURCE,
+                    String.format(MSG_HAVE_DESTINATION,
+                            MessageGenerator.mesSpeck(typeRelated.getTaxType()),
+                            MessageGenerator.mesSpeck(typeSource.getTaxType()),
                             first.getKind().getName(),
-                            formTypeService.get(first.getFormTypeId()).getName(),
+                            typeSource.getName(),
                             departmentService.getDepartment(first.getDepartmentId()).getName(),
                             getPeriod(pair.getSecond())
                     )
@@ -178,10 +183,13 @@ public class VersionFTOperatingServiceImpl implements VersionOperatingService {
         }
         for (Pair<DepartmentFormType, Pair<Date, Date>> pair : destinationPairs){
             DepartmentFormType first = pair.getFirst();
+            FormType typeTarget = formTypeService.get(first.getFormTypeId());
             logger.error(
                     String.format(MSG_HAVE_DESTINATION,
+                            MessageGenerator.mesSpeck(typeRelated.getTaxType()),
+                            MessageGenerator.mesSpeck(typeTarget.getTaxType()),
                             first.getKind().getName(),
-                            formTypeService.get(first.getFormTypeId()).getName(),
+                            typeTarget.getName(),
                             departmentService.getDepartment(first.getDepartmentId()).getName(),
                             getPeriod(pair.getSecond())
                     )

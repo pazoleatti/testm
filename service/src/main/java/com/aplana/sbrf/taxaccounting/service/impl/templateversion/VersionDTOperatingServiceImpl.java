@@ -24,7 +24,7 @@ import java.util.List;
 public class VersionDTOperatingServiceImpl implements VersionOperatingService {
 
     public static final String MSG_IS_USED_VERSION =
-            "Существует экземпляр декларации \"%s\" в подразделении \"%s\" в периоде \"%s %d\"%s%s для макета";
+            "Существует экземпляр декларации для макета:";
     private static final String MSG_HAVE_DESTINATION =
             "Существует назначение налоговой формы в качестве источника данных для декларации вида \"%s\" в подразделении \"%s\" начиная с периода %s!";
     private static final String MSG_HAVE_SOURCE =
@@ -43,8 +43,6 @@ public class VersionDTOperatingServiceImpl implements VersionOperatingService {
     @Autowired
     private DepartmentService departmentService;
     @Autowired
-    private PeriodService periodService;
-    @Autowired
     private SourceService sourceService;
     @Autowired
     private DepartmentReportPeriodService departmentReportPeriodService;
@@ -58,25 +56,14 @@ public class VersionDTOperatingServiceImpl implements VersionOperatingService {
         List<Long> ddIds = declarationDataService.getFormDataListInActualPeriodByTemplate(templateId, versionActualDateStart);
         for (long declarationId : ddIds) {
             DeclarationData declarationData = declarationDataDao.get(declarationId);
-            ReportPeriod period = periodService.getReportPeriod(declarationData.getReportPeriodId());
             DepartmentReportPeriod drp = departmentReportPeriodService.get(declarationData.getDepartmentReportPeriodId());
 
-            StringBuilder taKPPString = new StringBuilder("");
-            if (declarationData.getTaxOrganCode() != null) {
-                taKPPString.append(", налоговый орган: \"").append(declarationData.getTaxOrganCode()).append("\"");
-            }
-            if (declarationData.getKpp() != null) {
-                taKPPString.append(", КПП: \"").append(declarationData.getKpp()).append("\"");
-            }
-
-            logger.error(String.format(MSG_IS_USED_VERSION,
+            logger.error(MessageGenerator.getDDMsg(MSG_IS_USED_VERSION,
                     declarationTemplateService.get(declarationData.getDeclarationTemplateId()).getType().getName(),
                     departmentService.getDepartment(declarationData.getDepartmentId()).getName(),
-                    period.getName(),
-                    period.getTaxPeriod().getYear(),
-                    drp.getCorrectionDate() != null ? String.format(" с датой сдачи корректировки %s",
-                            sdf.format(drp.getCorrectionDate())) : "",
-                    taKPPString.toString()));
+                    drp,
+                    declarationData.getTaxOrganCode(),
+                    declarationData.getKpp()));
         }
 
     }

@@ -1,10 +1,8 @@
 package com.aplana.sbrf.taxaccounting.web.module.periods.server;
 
 import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
-import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
+import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.*;
-import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.periods.shared.CheckHasNotAcceptedFormAction;
 import com.aplana.sbrf.taxaccounting.web.module.periods.shared.CheckHasNotAcceptedFormResult;
 import com.gwtplatform.dispatch.server.ExecutionContext;
@@ -14,13 +12,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 @PreAuthorize("hasAnyRole('ROLE_CONTROL_UNP', 'ROLE_CONTROL_NS')")
 @Service
 public class CheckHasNotAcceptedFormHandler extends AbstractActionHandler<CheckHasNotAcceptedFormAction, CheckHasNotAcceptedFormResult> {
+
+    private static final String FD_NOT_ACCEPTED = "Форма находится в состоянии отличном от \"Принята\": ";
 
     public CheckHasNotAcceptedFormHandler() {
         super(CheckHasNotAcceptedFormAction.class);
@@ -41,9 +40,12 @@ public class CheckHasNotAcceptedFormHandler extends AbstractActionHandler<CheckH
     @Autowired
     private FormDataSearchService formDataSearchService;
 
+    @Autowired
+    private DepartmentReportPeriodService departmentReportPeriodService;
+
     @Override
     public CheckHasNotAcceptedFormResult execute(CheckHasNotAcceptedFormAction action, ExecutionContext executionContext) throws ActionException {
-        List<LogEntry> logs = new ArrayList<LogEntry>();
+        Logger logger = new Logger();
 
         List<Integer> departments = departmentService.getAllChildrenIds(action.getDepartmentId());
         FormDataFilter dataFilter = new FormDataFilter();
@@ -59,9 +61,16 @@ public class CheckHasNotAcceptedFormHandler extends AbstractActionHandler<CheckH
 
         for (FormData fd : forms) {
             if (fd.getState() != WorkflowState.ACCEPTED) {
-                logs.add(new LogEntry(LogLevel.WARNING, "Форма \"" + fd.getFormType().getName() + "\" \"" + fd.getKind().getName() +
-                    "\" в подразделении \"" + departmentService.getDepartment(fd.getDepartmentId()).getName() +
-                    "\"  находится в состоянии отличном от \"Принята\"" )
+                DepartmentReportPeriod drp = departmentReportPeriodService.get(fd.getDepartmentReportPeriodId());
+                DepartmentReportPeriod drpCompare = departmentReportPeriodService.get(fd.getComparativPeriodId());
+                logger.warn(MessageGenerator.getFDMsg(FD_NOT_ACCEPTED,
+                                fd.getFormType().getName(),
+                                fd.getKind().getName(),
+                                departmentService.getDepartment(fd.getDepartmentId()).getName(),
+                                fd.getPeriodOrder(),
+                                fd.isManual(),
+                                drp,
+                                drpCompare)
                 );
             }
         }
@@ -91,12 +100,12 @@ public class CheckHasNotAcceptedFormHandler extends AbstractActionHandler<CheckH
             msg.append("\"" + departmentService.getDepartment(dd.getDepartmentId()).getName() + "\"");
             msg.append(" находится в состоянии отличном от \"Принята\"");
 
-            logs.add(new LogEntry(LogLevel.WARNING, msg.toString()));
+            logger.warn(msg.toString());
         }
 
         CheckHasNotAcceptedFormResult result = new CheckHasNotAcceptedFormResult();
-        result.setHasNotAcceptedForms(!logs.isEmpty());
-        result.setUuid(logEntryService.save(logs));
+        result.setHasNotAcceptedForms(!logger.getEntries().isEmpty());
+        result.setUuid(logEntryService.save(logger.getEntries()));
 
         return result;
     }

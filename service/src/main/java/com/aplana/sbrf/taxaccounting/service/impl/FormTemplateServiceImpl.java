@@ -43,6 +43,9 @@ public class FormTemplateServiceImpl implements FormTemplateService {
 	private static final int FORM_COLUMN_NAME_MAX_VALUE = 1000;
 	private static final int FORM_COLUMN_ALIAS_MAX_VALUE = 100;
 	private static final int DATA_ROW_ALIAS_MAX_VALUE = 20;
+
+    private static final String CLOSE_PERIOD = "Следующие периоды %s данной версии макета закрыты: %s. " +
+            "Для добавления в макет автонумеруемой графы с типом сквозной нумерации строк необходимо открыть перечисленные периоды!";
     private static final SimpleDateFormat SIMPLE_DATE_FORMAT = new SimpleDateFormat("dd.MM.yyyy");
 
 	private Set<String> checkSet = new HashSet<String>();
@@ -389,9 +392,7 @@ public class FormTemplateServiceImpl implements FormTemplateService {
 						stringBuilder.append(", ");
 					}
 				}
-				logger.error("Следующие периоды налоговых форм данной версии макета закрыты: " +
-						stringBuilder.toString() + ". " +
-						"Для добавления в макет автонумеруемой графы с типом сквозной нумерации строк необходимо открыть перечисленные периоды!");
+				logger.error(CLOSE_PERIOD, MessageGenerator.mesSpeckD(formTemplate.getType().getTaxType()), stringBuilder.toString());
 			} else if (oldSerial && newCross) { // 9А.1.1
 				formDataService.batchUpdatePreviousNumberRow(formTemplate, user);
 			}

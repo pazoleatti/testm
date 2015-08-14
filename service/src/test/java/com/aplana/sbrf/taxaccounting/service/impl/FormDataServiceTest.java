@@ -356,7 +356,7 @@ public class FormDataServiceTest extends Assert{
                 logger.getEntries().get(0).getMessage()
         );
         assertEquals(
-                "Существует экземпляр налоговых форм: Тип: \"тестовый\", Вид: \"Сводная\", Подразделение: \"Тестовое подразделение\", Период: \"Второй тестовый период 2014\", Дата сдачи корректировки: 01.01.2014, Версия: \"автоматическая\"",
+                "Существует экземпляр налоговых форм: Тип: \"тестовый\", Вид: \"Сводная\", Подразделение: \"Тестовое подразделение\", Период: \"Второй тестовый период 2014\", Дата сдачи корректировки: 01.01.2014,  Версия: \"автоматическая\"",
                 logger.getEntries().get(1).getMessage()
         );
     }
@@ -883,12 +883,17 @@ public class FormDataServiceTest extends Assert{
         ArrayList<Integer> a =new ArrayList<Integer>(1);
         a.add(7);
 
+        FormType type = new FormType();
+        type.setName("Тестовый");
         FormData fd = new FormData();
         fd.setReportPeriodId(17);
         fd.setDepartmentReportPeriodId(17);
         fd.setState(WorkflowState.ACCEPTED);
         fd.setFormTemplateId(1);
         fd.setDepartmentId(0);
+        fd.setComparativPeriodId(1);
+        fd.setFormType(type);
+        fd.setKind(FormDataKind.ADDITIONAL);
         ReportPeriod rp = new ReportPeriod();
         rp.setName("Период");
         TaxPeriod tp = new TaxPeriod();
@@ -896,6 +901,7 @@ public class FormDataServiceTest extends Assert{
         rp.setTaxPeriod(tp);
         DepartmentReportPeriod drp = new DepartmentReportPeriod();
         drp.setCorrectionDate(new Date());
+        drp.setReportPeriod(rp);
         FormTemplate ft = new FormTemplate();
         ft.setName("Вид НФ");
 
