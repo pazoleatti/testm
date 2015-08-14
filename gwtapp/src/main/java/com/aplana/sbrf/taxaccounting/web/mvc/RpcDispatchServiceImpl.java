@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.mvc;
 
+import com.aplana.sbrf.taxaccounting.core.api.ServerInfo;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.UserAuthenticationToken;
 import com.google.gwt.user.server.rpc.RPCServletUtils;
@@ -37,6 +38,9 @@ public class RpcDispatchServiceImpl extends DispatchServiceImpl {
 
     private static final String xsrfAttackMessage = "Cookie provided by RPC doesn't match request cookie, " +
             "aborting action, possible XSRF attack. (Maybe you forgot to set the security cookie?)";
+
+	@Autowired
+	private ServerInfo serverInfo;
 
     @Autowired
     public RpcDispatchServiceImpl(Logger logger, Dispatch dispatch, RequestProvider requestProvider) {
@@ -155,12 +159,15 @@ public class RpcDispatchServiceImpl extends DispatchServiceImpl {
 			UserAuthenticationToken principal = ((UserAuthenticationToken) (SecurityContextHolder.getContext()
 					.getAuthentication().getPrincipal()));
 			TAUserInfo userInfo = principal.getUserInfo();
-			return String.format("Server: %s; User: %s; IP-address: %s",
-					getServletContext().getServerInfo(),
+			return String.format("Server: %s; Context path: %s; User: %s; IP-address: %s",
+					serverInfo.getServerName(),
+					getServletContext().getContextPath(),
 					userInfo.getUser().getLogin(),
 					userInfo.getIp());
 		}
-		return String.format("Server: %s; User: ?; IP-address: ?", getServletContext().getServerInfo());
+		return String.format("Server: %s; Context path: %s; User: ?; IP-address: ?",
+				serverInfo.getServerName(),
+				getServletContext().getContextPath());
 	}
 
 	@Override

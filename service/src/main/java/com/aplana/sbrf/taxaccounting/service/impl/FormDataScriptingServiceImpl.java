@@ -50,9 +50,9 @@ public class FormDataScriptingServiceImpl extends TAAbstractScriptingServiceImpl
         // Если скрипт отсутствует, то ничего не делаем
 		FormTemplate formTemplate = formTemplateDao.get(formData.getFormTemplateId());
         String script = formTemplate.getScript();
-		if (StringUtils.isBlank(script)) {
-            return;
-        }
+		if (!canExecuteScript(script, event)) {
+			return;
+		}
 
         // Биндим параметры для выполнения скрипта
         Bindings b = scriptEngine.createBindings();

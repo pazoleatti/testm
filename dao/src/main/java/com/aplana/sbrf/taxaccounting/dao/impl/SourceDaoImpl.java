@@ -370,24 +370,24 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
     }
 
     private static final String FIND_CONSOLIDATED_FORMS =
-            "select tfd.id as form_data_id, fd.id as source_form_data_id, tfd.kind as kind, tfmt.name as type, td.name as department, trp.name as period, ttp.year as year, tfd.period_order as month, tdrp.correction_date as correctionDate \n" +
-            "from department_form_type dft\n" +
-            "join form_template ft on ft.type_id = dft.form_type_id\n" +
-            "join department_report_period drp on drp.department_id = dft.department_id\n" +
-            "join form_data fd on (fd.kind = dft.kind and fd.form_template_id = ft.id and fd.department_report_period_id = drp.id)\n" +
-            "join form_data_consolidation fdc on fdc.source_form_data_id = fd.id\n" +
-            "join form_data tfd on tfd.id = fdc.target_form_data_id\n" +
-            "join form_template tft on tft.id = tfd.form_template_id\n" +
-            "join form_type tfmt on tfmt.id = tft.type_id\n" +
-            "join department_report_period tdrp on tdrp.id = tfd.department_report_period_id\n" +
-            "join department td on td.id = tdrp.department_id\n" +
-            "join report_period trp on trp.id = tdrp.report_period_id\n" +
-            "join tax_period ttp on ttp.id = trp.tax_period_id\n" +
-            "join department_form_type tdft on (tdft.form_type_id = tfmt.id and tdft.department_id = td.id and tdft.kind = tfd.kind)\n" +
-            "where dft.id = :source and tdft.id = :destination and (\n" +
-            "(:periodStart <= trp.calendar_start_date and (:periodEnd is null or :periodEnd >= trp.calendar_start_date)) or\n" +
-            "(:periodStart >= trp.calendar_start_date and :periodStart <= trp.end_date)\n" +
-            ")";
+            "SELECT tfd.id as form_data_id, fd.id as source_form_data_id, tfd.kind AS kind, tfmt.name AS type, td.name AS department, trp.name AS period, ttp.year AS year, tfd.period_order AS month, tdrp.correction_date AS correctionDate, tfd.COMPARATIVE_DEP_REP_PER_ID as drpCompareId \n" +
+                    "FROM department_form_type dft\n" +
+                    "JOIN form_template ft ON ft.type_id = dft.form_type_id\n" +
+                    "JOIN department_report_period drp ON drp.department_id = dft.department_id\n" +
+                    "JOIN form_data fd ON (fd.kind = dft.kind AND fd.form_template_id = ft.id AND fd.department_report_period_id = drp.id)\n" +
+                    "JOIN form_data_consolidation fdc ON fdc.source_form_data_id = fd.id\n" +
+                    "JOIN form_data tfd ON tfd.id = fdc.target_form_data_id\n" +
+                    "JOIN form_template tft ON tft.id = tfd.form_template_id\n" +
+                    "JOIN form_type tfmt ON tfmt.id = tft.type_id\n" +
+                    "JOIN department_report_period tdrp ON tdrp.id = tfd.department_report_period_id\n" +
+                    "JOIN department td ON td.id = tdrp.department_id\n" +
+                    "JOIN report_period trp ON trp.id = tdrp.report_period_id\n" +
+                    "JOIN tax_period ttp ON ttp.id = trp.tax_period_id\n" +
+                    "JOIN department_form_type tdft ON (tdft.form_type_id = tfmt.id AND tdft.department_id = td.id AND tdft.kind = tfd.kind)\n" +
+                    "WHERE dft.id = :source AND tdft.id = :destination AND (\n" +
+                    "(:periodStart <= trp.calendar_start_date AND (:periodEnd IS NULL OR :periodEnd >= trp.calendar_start_date)) OR\n" +
+                    "(:periodStart >= trp.calendar_start_date AND :periodStart <= trp.end_date)\n" +
+                    ")";
 
     private static final String FIND_CONSOLIDATED_DECLARATIONS =
             "select tdd.id as declaration_id, fd.id as source_form_data_id, dt.name as type, td.name as department, trp.name as period, ttp.year as year, tdrp.correction_date as correctionDate, tdd.tax_organ_code as taxOrganCode, tdd.kpp as kpp \n" +
@@ -448,6 +448,7 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
                     form.setType(rs.getString("type"));
                     form.setDepartment(rs.getString("department"));
                     form.setPeriod(rs.getString("period") + " " + rs.getInt("year"));
+                    form.setDrpComapreId(rs.getInt("drpCompareId"));
                     form.setCorrectionDate(rs.getDate("correctionDate"));
                     form.setMonth(SqlUtils.getInteger(rs, "month"));
                     return form;
@@ -476,12 +477,18 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
 
     @Override
     public Integer getDepartmentIdByDepartmentFormType(long departmentFormTypeId) {
-        return getJdbcTemplate().queryForInt("select d.id from department d join department_form_type dft on dft.department_id = d.id where dft.id = ?", departmentFormTypeId);
+        return getJdbcTemplate().queryForObject(
+                "select d.id from department d join department_form_type dft on dft.department_id = d.id where dft.id = ?",
+                Integer.class,
+                departmentFormTypeId);
     }
 
     @Override
     public Integer getDepartmentIdByDepartmentDeclarationType(long departmentDeclarationTypeId) {
-        return getJdbcTemplate().queryForInt("select d.id from department d join department_declaration_type ddt on ddt.department_id = d.id where ddt.id = ?", departmentDeclarationTypeId);
+        return getJdbcTemplate().queryForObject(
+                "select d.id from department d join department_declaration_type ddt on ddt.department_id = d.id where ddt.id = ?",
+                Integer.class,
+                departmentDeclarationTypeId);
     }
 
     private static final String ADD_DECLARATION_CONSOLIDATION =
@@ -517,8 +524,9 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
     @Override
     public boolean isDeclarationSourceConsolidated(long declarationId, long sourceFormDataId) {
         try {
-            getJdbcTemplate().queryForInt(
+            getJdbcTemplate().queryForObject(
                     "select 1 from DECLARATION_DATA_CONSOLIDATION where target_declaration_data_id = ? and source_form_data_id = ?",
+                    Integer.class,
                     declarationId, sourceFormDataId);
         } catch (EmptyResultDataAccessException e) {
             return false;
@@ -575,8 +583,9 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
     @Override
     public boolean isFDSourceConsolidated(long formDataId, long sourceFormDataId) {
         try {
-            return getJdbcTemplate().queryForInt(
+            return getJdbcTemplate().queryForObject(
                     "select 1 from FORM_DATA_CONSOLIDATION where TARGET_FORM_DATA_ID = ? and source_form_data_id = ?",
+                    Integer.class,
                     formDataId, sourceFormDataId) > 0;
         } catch (EmptyResultDataAccessException e) {
             return false;
