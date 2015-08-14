@@ -190,8 +190,6 @@ void calc() {
         def rows = (from <= to ? dataRows[from..to] : [])
         calcTotalSum(rows, lastRow, totalColumns)
     }
-
-    sortFormDataRows(false)
 }
 
 void logicCheck() {

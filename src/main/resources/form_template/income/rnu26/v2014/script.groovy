@@ -93,6 +93,9 @@ switch (formDataEvent) {
         importTransportData()
         formDataService.saveCachedDataRows(formData, logger)
         break
+    case FormDataEvent.SORT_ROWS:
+        sortFormDataRows()
+        break
 }
 
 //// Кэши и константы
@@ -567,6 +570,19 @@ def getBalancePeriod() {
         isBalancePeriod = departmentReportPeriod.isBalance()
     }
     return isBalancePeriod
+}
+
+// Сортировка групп и строк
+void sortFormDataRows() {
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper.allCached
+    sortRows(refBookService, logger, dataRows, getSubTotalRows(dataRows), getDataRow(dataRows, 'total'), true)
+    dataRowHelper.saveSort()
+}
+
+// Получение подитоговых строк
+def getSubTotalRows(def dataRows) {
+    return dataRows.findAll { it.getAlias() != null && !'total'.equals(it.getAlias()) }
 }
 
 void importTransportData() {

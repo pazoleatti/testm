@@ -1,19 +1,18 @@
-CREATE OR REPLACE TRIGGER "DEP_REP_PER_BEFORE_DELETE" 
-for delete on department_report_period
+CREATE OR REPLACE TRIGGER DEP_REP_PER_BEFORE_DELETE for delete on department_report_period 
 COMPOUND TRIGGER
 
     TYPE t_change_tab IS TABLE OF DEPARTMENT_REPORT_PERIOD%ROWTYPE;
     g_change_tab  t_change_tab := t_change_tab();
     
   BEFORE EACH ROW IS
-    vCurrentID number(9) := :old.id;
+    vCurrentID number(18) := :old.id;
     vCurrentDepartmentID number(9) := :old.department_id;
     vCurrentReportPeriodID number(9) := :old.report_period_id;
     vCurrentCorrectionDate date := :old.correction_date;
     vHasLinks number(1);
   BEGIN
     g_change_tab.extend;
-    
+
     g_change_tab(g_change_tab.last).id      := :old.id;
     g_change_tab(g_change_tab.last).department_id := :old.department_id;
     g_change_tab(g_change_tab.last).report_period_id := :old.report_period_id;
@@ -35,19 +34,19 @@ COMPOUND TRIGGER
        -- Запрет изменений, если на запись существуют ссылки
          if vHasLinks = 1 then
             raise_application_error(-20003, 'Нельзя удалить период, если на него есть ссылка в FORM_DATA или DECLARATION_DATA');
-         end if;  
+         end if;
   END BEFORE EACH ROW;
-  
+
   AFTER STATEMENT IS
   vMaxCorrectionDatePerGroup date;
   BEGIN
-  
-  FOR i IN g_change_tab.first .. g_change_tab.last LOOP
+ 
+  FOR i IN 1 .. g_change_tab.count LOOP
       select max(trunc(correction_date)) into vMaxCorrectionDatePerGroup
            from department_report_period
            where department_id = g_change_tab(i).department_id
                  and report_period_id = g_change_tab(i).report_period_id;
-      
+
       --Проверки при удалении
        --Нельзя удалить период, если для него есть корректирующий период
          if (g_change_tab(i).correction_date is null and vMaxCorrectionDatePerGroup is not null) then
@@ -56,10 +55,10 @@ COMPOUND TRIGGER
        --Нельзя удалить корректирующий период, если есть корректирующий период с более поздней датой корректировки
          if (g_change_tab(i).correction_date is not null and g_change_tab(i).correction_date < vMaxCorrectionDatePerGroup) then
               raise_application_error(-20002, 'Нельзя удалить корректирующий период, если есть корректирующий период с более поздней датой корректировки');
-         end if;           
-                 
+         end if;
+
   END LOOP;
-  
+
   g_change_tab.delete;
   END AFTER STATEMENT;
 end dep_rep_per_before_delete;
@@ -71,7 +70,7 @@ CREATE OR REPLACE TRIGGER DEP_REP_PER_BEFORE_INS_UPD
 declare
   pragma autonomous_transaction;
 
-  vCurrentID number(9) := :new.id;
+  vCurrentID number(18) := :new.id;
   vCurrentDepartmentID number(9) := :new.department_id;
   vCurrentReportPeriodID number(9) := :new.report_period_id;
   vFormerDepartmentID number(9) := :old.department_id;
@@ -87,7 +86,7 @@ declare
   vHasInBetweenPeriods number(1);
   vHasConflictPeriods number(1);
   vHasOtherBalancePeriod number(1);
-  vCntOpenPeriods number(1);
+  vCntOpenPeriods number(9);
 begin
   if updating then
      -- --Операция недопустима, если она изменяет значение REPORT_PERIOD_ID или DEPARTMENT_ID
@@ -161,7 +160,7 @@ begin
   if updating then
     begin
      -- -- Нельзя изменить период, если он не открыт
-    if vFormerIsActive <> 1 and vCurrentIsActive <> 1 then
+    if vFormerIsActive <> 1 and vCurrentIsActive <> 1 and (updating('IS_BALANCE_PERIOD') or updating('CORRECTION_DATE')) then
        raise_application_error(-20106, 'Нельзя изменить период, если он не открыт');
     end if;
 

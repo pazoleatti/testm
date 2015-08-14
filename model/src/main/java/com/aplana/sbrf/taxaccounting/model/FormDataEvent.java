@@ -139,4 +139,12 @@ public enum FormDataEvent implements Serializable {
 			throw new IllegalArgumentException("Event with code " + code + " doesn't exist.");
 		}
 	}
+
+	@Override
+	public String toString() {
+		final StringBuilder sb = new StringBuilder("FormDataEvent{");
+		sb.append(name());
+		sb.append('}');
+		return sb.toString();
+	}
 }

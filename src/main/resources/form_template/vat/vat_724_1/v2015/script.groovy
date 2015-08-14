@@ -218,8 +218,6 @@ void calc() {
             }
         }
     }
-
-    sortFormDataRows(false)
 }
 
 void logicCheck() {

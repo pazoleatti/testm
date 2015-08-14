@@ -9,7 +9,10 @@ import java.util.Date;
  * @author dloshkarev
  */
 public class ConsolidatedInstance {
-    private int id;
+    /** Идентификатор приемника */
+    private long id;
+    /** Идентификатор источника */
+    private long sourceId;
     private String type;
     private FormDataKind formKind;
     private String department;
@@ -38,12 +41,21 @@ public class ConsolidatedInstance {
         this.manual = manual;
     }
 
-    public int getId() {
+
+    public long getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(long id) {
         this.id = id;
+    }
+
+    public long getSourceId() {
+        return sourceId;
+    }
+
+    public void setSourceId(long sourceId) {
+        this.sourceId = sourceId;
     }
 
     public boolean isDeclaration() {
@@ -116,5 +128,25 @@ public class ConsolidatedInstance {
 
     public void setKpp(String kpp) {
         this.kpp = kpp;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        ConsolidatedInstance that = (ConsolidatedInstance) o;
+
+        if (id != that.id) return false;
+        if (sourceId != that.sourceId) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = (int) (id ^ (id >>> 32));
+        result = 31 * result + (int) (sourceId ^ (sourceId >>> 32));
+        return result;
     }
 }

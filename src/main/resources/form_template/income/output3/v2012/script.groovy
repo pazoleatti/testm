@@ -108,8 +108,6 @@ void calc() {
                 row.budgetClassificationCode = '18210101060011000110'
             }
         }
-
-        sortFormDataRows(false)
     }
 }
 

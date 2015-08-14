@@ -77,9 +77,14 @@ public class DeclarationDataScriptingServiceImpl extends TAAbstractScriptingServ
 	public void executeScript(TAUserInfo userInfo, DeclarationData declarationData, FormDataEvent event, Logger logger,
 			Map<String, Object> exchangeParams) {
 		this.logger.debug("Starting processing request to run create script");
-		
+
+		String script = declarationTemplateDao.getDeclarationTemplateScript(declarationData.getDeclarationTemplateId());
+		if (!canExecuteScript(script, event)) {
+			return;
+		}
+
 		DeclarationTemplate declarationTemplate = declarationTemplateDao.get(declarationData.getDeclarationTemplateId());
-		
+
 		// Биндим параметры для выполнения скрипта
 		Bindings b = scriptEngine.createBindings();
 		
@@ -114,7 +119,7 @@ public class DeclarationDataScriptingServiceImpl extends TAAbstractScriptingServ
 		ScriptMessageDecorator d = new ScriptMessageDecorator(event.getTitle());
 		logger.setMessageDecorator(d);
 			
-		executeScript(b, declarationTemplateDao.getDeclarationTemplateScript(declarationData.getDeclarationTemplateId()), logger, d);
+		executeScript(b, script, logger, d);
 			
 		logger.setMessageDecorator(null);
 

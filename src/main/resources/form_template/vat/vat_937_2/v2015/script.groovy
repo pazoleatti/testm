@@ -178,8 +178,6 @@ void calc() {
 
     def totalRow = getDataRow(dataRows, 'total')
     calcTotalSum(dataRows, totalRow, totalSumColumns)
-
-    sortFormDataRows(false)
 }
 
 void changeDateFormat(def row){
