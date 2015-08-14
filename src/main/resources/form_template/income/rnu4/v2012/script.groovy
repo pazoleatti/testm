@@ -161,8 +161,6 @@ void calc() {
 
     // Общий итог
     dataRows.add(dataRows.size(), calcTotalRow(dataRows))
-
-    sortFormDataRows(false)
 }
 
 /** Посчитать "итого по коду". */

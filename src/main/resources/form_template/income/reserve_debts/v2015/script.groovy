@@ -241,9 +241,6 @@ void calc() {
     calcTotal(dataRows)
 
     dataRowHelper.save(dataRows)
-
-    // Сортировка групп и строк
-    sortFormDataRows()
 }
 
 /** Рассчитать итоги основного (первого) раздела, итоги разделов А и Б и строки "всего". */
