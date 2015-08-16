@@ -236,8 +236,16 @@ public class ConfigurationView extends ViewWithUiHandlers<ConfigurationUiHandler
         emailTable.setMinimumTableWidth(20, Style.Unit.EM);
 
         emailTable.setKeyboardSelectionPolicy(HasKeyboardSelectionPolicy.KeyboardSelectionPolicy.ENABLED);
-        SingleSelectionModel<DataRow<Cell>> singleSelectionModel = new SingleSelectionModel<DataRow<Cell>>();
+        final SingleSelectionModel<DataRow<Cell>> singleSelectionModel = new SingleSelectionModel<DataRow<Cell>>();
         emailTable.setSelectionModel(singleSelectionModel);
+        singleSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
+            @Override
+            public void onSelectionChange(SelectionChangeEvent event) {
+                if (emailPanel.isVisible()) {
+                    enableButtons(singleSelectionModel.getSelectedObject() != null);
+                }
+            }
+        });
 
         // Обновляем таблицу после обновления модели
         ((DataRowColumn<?>) emailParamColumnUI).addCellModifiedEventHandler(new CellModifiedEventHandler() {
@@ -291,8 +299,16 @@ public class ConfigurationView extends ViewWithUiHandlers<ConfigurationUiHandler
         asyncTable.setMinimumTableWidth(20, Style.Unit.EM);
 
         asyncTable.setKeyboardSelectionPolicy(HasKeyboardSelectionPolicy.KeyboardSelectionPolicy.ENABLED);
-        SingleSelectionModel<DataRow<Cell>> singleSelectionModel = new SingleSelectionModel<DataRow<Cell>>();
+        final SingleSelectionModel<DataRow<Cell>> singleSelectionModel = new SingleSelectionModel<DataRow<Cell>>();
         asyncTable.setSelectionModel(singleSelectionModel);
+        singleSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
+            @Override
+            public void onSelectionChange(SelectionChangeEvent event) {
+                if (asyncPanel.isVisible()) {
+                    enableButtons(singleSelectionModel.getSelectedObject() != null);
+                }
+            }
+        });
 
         // Обновляем таблицу после обновления модели
         ((DataRowColumn<?>) asyncParamColumnUI).addCellModifiedEventHandler(new CellModifiedEventHandler() {
@@ -393,11 +409,13 @@ public class ConfigurationView extends ViewWithUiHandlers<ConfigurationUiHandler
     @UiHandler("emailLink")
     void onEmailLinkClick(ClickEvent event) {
         showTab(ConfigurationParamGroup.EMAIL);
+        enableButtons(((SingleSelectionModel) emailTable.getSelectionModel()).getSelectedObject() != null);
     }
 
     @UiHandler("asyncLink")
     void onAsyncLinkClick(ClickEvent event) {
         showTab(ConfigurationParamGroup.ASYNC);
+        enableButtons(((SingleSelectionModel) asyncTable.getSelectionModel()).getSelectedObject() != null);
     }
 
     @UiHandler("checkButton")
@@ -571,7 +589,7 @@ public class ConfigurationView extends ViewWithUiHandlers<ConfigurationUiHandler
 
     @Override
     public void initView() {
-        enableButtons(false);
+        //enableButtons(false);
         initCommonTable();
         initFormTable();
         initEmailTable();
