@@ -5,6 +5,8 @@ import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
+import com.aplana.sbrf.taxaccounting.service.script.api.DataRowHelper;
+import com.aplana.sbrf.taxaccounting.util.DataRowHelperStub;
 import com.aplana.sbrf.taxaccounting.util.ScriptTestBase;
 import com.aplana.sbrf.taxaccounting.util.TestScriptHelper;
 import com.aplana.sbrf.taxaccounting.util.mock.ScriptTestMockHelper;
@@ -30,7 +32,7 @@ public class Etr4_13Test extends ScriptTestBase {
     private static final int DEPARTMENT_ID = 1;
     private static final int REPORT_PERIOD_ID = 1;
     private static final int DEPARTMENT_PERIOD_ID = 1;
-    private static final FormDataKind KIND = FormDataKind.PRIMARY;
+    private static final FormDataKind KIND = FormDataKind.CONSOLIDATED;
 
     @Override
     protected FormData getFormData() {
@@ -152,6 +154,76 @@ public class Etr4_13Test extends ScriptTestBase {
                 Cell cell = row.getCell(alias);
                 Long value = (cell.getNumericValue() != null ? cell.getNumericValue().longValue() : null);
                 Assert.assertEquals("row." + alias + "[" + row.getIndex() + "]", expected, value);
+            }
+        }
+    }
+
+    // Консолидация
+    @Test
+    public void composeTest() {
+        // Назначен один тип формы
+        DepartmentFormType departmentFormType = new DepartmentFormType();
+        departmentFormType.setKind(FormDataKind.PRIMARY);
+        departmentFormType.setDepartmentId(DEPARTMENT_ID);
+        departmentFormType.setFormTypeId(TYPE_ID);
+        departmentFormType.setId(1);
+        when(testHelper.getDepartmentFormTypeService().getFormSources(anyInt(), anyInt(), any(FormDataKind.class),
+                any(Date.class), any(Date.class))).thenReturn(Arrays.asList(departmentFormType));
+
+        // Один экземпляр-источник
+        FormData sourceFormData = new FormData();
+        sourceFormData.initFormTemplateParams(testHelper.getFormTemplate());
+        sourceFormData.setId(2L);
+        sourceFormData.setState(WorkflowState.ACCEPTED);
+        when(testHelper.getFormDataService().getLast(eq(departmentFormType.getFormTypeId()), eq(FormDataKind.PRIMARY), eq(DEPARTMENT_ID),
+                anyInt(), any(Integer.class))).thenReturn(sourceFormData);
+
+        // DataRowHelper НФ-источника
+        DataRowHelper sourceDataRowHelper = new DataRowHelperStub();
+        when(testHelper.getFormDataService().getDataRowHelper(sourceFormData)).thenReturn(sourceDataRowHelper);
+
+        // Данные НФ-источника, формируются импортом
+        testHelper.setImportFileInputStream(getImportXlsInputStream());
+        testHelper.execute(FormDataEvent.IMPORT);
+        sourceDataRowHelper.save(testHelper.getDataRowHelper().getAll());
+        testHelper.initRowData();
+
+        // Консолидация
+        int expected = testHelper.getDataRowHelper().getAll().size();
+        testHelper.execute(FormDataEvent.COMPOSE);
+        Assert.assertEquals(expected, testHelper.getDataRowHelper().getAll().size());
+
+        checkConsolidatedData(testHelper.getDataRowHelper().getAll());
+        checkLogger();
+    }
+
+    /** Проверить сконсолидированные данные. */
+    void checkConsolidatedData(List<DataRow<Cell>> dataRows) {
+        // графа 4, 6 - для всех строк, кроме строк I, II
+        String [] consolidatedColumns = { "comparePeriod", "currentPeriod" };
+        // графа 4..9 - для всех строк, кроме строк I, II
+        String [] calcColumns = { "comparePeriod", "comparePeriodPercent", "currentPeriod", "currentPeriodPercent", "deltaRub", "deltaPercent" };
+        // графа 4, 6, 8, 9 - для строк I, II
+        String [] calcColumns1_2 = { "comparePeriod", "currentPeriod", "deltaRub", "deltaPercent" };
+        Long expected = 0L;
+        for (DataRow<Cell> row : dataRows) {
+            if (row.getAlias() == null || "".equals(row.getAlias())) {
+                continue;
+            }
+            expected++;
+            // графа 4, 6
+            for (String alias : consolidatedColumns) {
+                Cell cell = row.getCell(alias);
+                Long value = (cell.getNumericValue() != null ? cell.getNumericValue().longValue() : null);
+                Assert.assertEquals("row." + alias + "[" + row.getIndex() + "]", expected, value);
+            }
+
+            // графа 5, 7, 8, 9
+            String [] columns = ("I".equals(row.getAlias()) || "II".equals(row.getAlias()) ? calcColumns1_2 : calcColumns);
+            for (String alias : columns) {
+                Cell cell = row.getCell(alias);
+                Long value = (cell.getNumericValue() != null ? cell.getNumericValue().longValue() : null);
+                Assert.assertNotNull("row." + alias + "[" + row.getIndex() + "]", value);
             }
         }
     }
