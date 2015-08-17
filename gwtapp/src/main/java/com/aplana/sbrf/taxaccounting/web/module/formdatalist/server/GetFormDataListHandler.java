@@ -75,7 +75,9 @@ public class GetFormDataListHandler extends AbstractActionHandler<GetFormDataLis
 
             if (item.getComparativPeriodId() != null) {
                 DepartmentReportPeriod compPeriod = departmentReportPeriodService.get(item.getComparativPeriodId());
-                item.setComparativPeriodName(item.isAccruing() ? compPeriod.getReportPeriod().getAccName() : compPeriod.getReportPeriod().getName());
+                item.setComparativPeriodName(
+                        compPeriod.getReportPeriod().getTaxPeriod().getYear() + ", " +
+                                (item.isAccruing() ? compPeriod.getReportPeriod().getAccName() : compPeriod.getReportPeriod().getName()));
                 if (compPeriod.getCorrectionDate() != null) {
                     item.setComparativPeriodName(item.getComparativPeriodName() + ", корр. (" + DATE_TIME_FORMAT.format(compPeriod.getCorrectionDate()) + ")");
                 }

@@ -1,6 +1,5 @@
 package com.aplana.taxaccounting
 
-import groovy.sql.Sql
 import org.apache.commons.io.IOUtils
 import org.custommonkey.xmlunit.Diff
 import org.custommonkey.xmlunit.XMLUnit
@@ -11,10 +10,7 @@ import com.aplana.sbrf.taxaccounting.model.Color
  */
 class GitReport {
     // Загрузка из git в БД и отчет в html-файле
-    def static void updateScripts(def versionsMap, def checkOnly = true) {
-        println("DBMS connect: ${Main.DB_USER}")
-        def sql = Sql.newInstance(Main.DB_URL, Main.DB_USER, Main.DB_PASSWORD, "oracle.jdbc.OracleDriver")
-
+    def static void updateScripts(def versionsMap, def sql, def checkOnly = true) {
         def writer = new FileWriter(new File(Main.REPORT_GIT_NAME))
         def builder = new groovy.xml.MarkupBuilder(writer)
         builder.html {
@@ -68,16 +64,12 @@ class GitReport {
             }
         }
         writer.close()
-        sql.close()
         def action = checkOnly ? 'Check' : 'Update'
         println("$action DB form_template OK")
     }
 
     // Загрузка скриптов деклараций из git в БД и отчет в html-файле
-    def static void updateDeclarationScripts(def versionsMap, def checkOnly = true) {
-        println("DBMS connect: ${Main.DB_USER}")
-        def sql = Sql.newInstance(Main.DB_URL, Main.DB_USER, Main.DB_PASSWORD, "oracle.jdbc.OracleDriver")
-
+    def static void updateDeclarationScripts(def versionsMap, def sql, def checkOnly = true) {
         def writer = new FileWriter(new File(Main.REPORT_DECL_GIT_NAME))
         def builder = new groovy.xml.MarkupBuilder(writer)
         builder.html {
@@ -90,12 +82,7 @@ class GitReport {
                 p "Сравнение макетов деклараций в БД ${Main.DB_USER} и git:"
                 table(class: 'rt') {
                     Main.TAX_FOLDERS.keySet().each { folderName ->
-                        def scanResult
-                        try {
-                            scanResult = scanDeclarationSrcFolderAndUpdateDb(versionsMap, folderName, checkOnly ? null : sql)
-                        } finally {
-                            sql.close()
-                        }
+                        def scanResult = scanDeclarationSrcFolderAndUpdateDb(versionsMap, folderName, checkOnly ? null : sql)
                         if (scanResult && !scanResult.isEmpty()) {
                             tr {
                                 td(colspan: 8, class: 'hdr', Main.TAX_FOLDERS[folderName])
@@ -585,9 +572,7 @@ class GitReport {
     }
 
     // FORM_TYPE.ID → Версия макета
-    def static getDBVersions() {
-        println("DBMS connect: ${Main.DB_USER}")
-        def sql = Sql.newInstance(Main.DB_URL, Main.DB_USER, Main.DB_PASSWORD, "oracle.jdbc.OracleDriver")
+    def static getDBVersions(def sql) {
         def map = [:]
 
         sql.eachRow("select id, type_id, to_char(version, 'RRRR') as version, name, header, script, status from form_template where status not in (-1, 2)") {
@@ -623,80 +608,66 @@ class GitReport {
             style.bold = it.bold == 1
             map[type_id][version].styles.put(it.alias, style)
         }
-        sql.close()
         println("Load DB form_style OK")
         return map
     }
 
     // DECLARATION_TYPE.ID → Версия макета
-    def static getDeclarationDBVersions() {
-        println("DBMS connect: ${Main.DB_USER}")
-        def sql = Sql.newInstance(Main.DB_URL, Main.DB_USER, Main.DB_PASSWORD, "oracle.jdbc.OracleDriver")
+    def static getDeclarationDBVersions(def sql) {
         def map = [:]
 
-        try {
-            sql.eachRow("select dt.id," +
-                    " dt.declaration_type_id as type_id," +
-                    " to_char(dt.version, 'RRRR') as version," +
-                    " dt.name," +
-                    " dt.create_script as script," +
-                    " dt.status, " +
-                    " (select data from blob_data where id = dt.xsd) As xsd, " +
-                    " (select data from blob_data where id = dt.jrxml) As jrxml " +
-                    "from declaration_template dt where dt.status not in (-1, 2)") {
-                def type_id = it.type_id as Integer
-                if (map[type_id] == null) {
-                    map.put((Integer) it.type_id, [:])
-                }
-                // Версия макета
-                def version = new Expando()
-                version.id = it.id as Integer
-                version.type_id = it.type_id as Integer
-                version.version = it.version
-                version.name = it.name
-                version.status = it.status
-                version.script = it.script?.characterStream?.text
-                if (it.xsd) {
-                    try {
-                        version.xsd = XMLUnit.buildControlDocument(IOUtils.toString(it.xsd.binaryStream))
-                    } catch (SAXException e) {
-                        println("Ошибка при разборе XSD декларации id = ${it.id} \"${version.name}\"")
-                    }
-                }
-                if (it.jrxml) {
-                    try {
-                        version.jrxml = XMLUnit.buildControlDocument(IOUtils.toString(it.jrxml.binaryStream, "UTF-8"))
-                    } catch (SAXException e) {
-                        println("Ошибка при разборе JRXML декларации id = ${it.id} \"${version.name}\"")
-                    }
-                }
-                map[type_id].put(it.version, version)
+        sql.eachRow("select dt.id," +
+                " dt.declaration_type_id as type_id," +
+                " to_char(dt.version, 'RRRR') as version," +
+                " dt.name," +
+                " dt.create_script as script," +
+                " dt.status, " +
+                " (select data from blob_data where id = dt.xsd) As xsd, " +
+                " (select data from blob_data where id = dt.jrxml) As jrxml " +
+                "from declaration_template dt where dt.status not in (-1, 2)") {
+            def type_id = it.type_id as Integer
+            if (map[type_id] == null) {
+                map.put((Integer) it.type_id, [:])
             }
-        } finally {
-            sql.close()
+            // Версия макета
+            def version = new Expando()
+            version.id = it.id as Integer
+            version.type_id = it.type_id as Integer
+            version.version = it.version
+            version.name = it.name
+            version.status = it.status
+            version.script = it.script?.characterStream?.text
+            if (it.xsd) {
+                try {
+                    version.xsd = XMLUnit.buildControlDocument(IOUtils.toString(it.xsd.binaryStream))
+                } catch (SAXException e) {
+                    println("Ошибка при разборе XSD декларации id = ${it.id} \"${version.name}\"")
+                }
+            }
+            if (it.jrxml) {
+                try {
+                    version.jrxml = XMLUnit.buildControlDocument(IOUtils.toString(it.jrxml.binaryStream, "UTF-8"))
+                } catch (SAXException e) {
+                    println("Ошибка при разборе JRXML декларации id = ${it.id} \"${version.name}\"")
+                }
+            }
+            map[type_id].put(it.version, version)
         }
         println("Load DB declaration_template OK")
         return map
     }
 
     // REF_BOOK.ID → Скрипт справочника
-    def static getRefBookScripts() {
-        println("DBMS connect: ${Main.DB_USER}")
+    def static getRefBookScripts(def sql) {
         def refbooks = []
-
-        def sql = Sql.newInstance(Main.DB_URL, Main.DB_USER, Main.DB_PASSWORD, "oracle.jdbc.OracleDriver")
-        try {
-            sql.eachRow("select rb.id, rb.name, (select data from blob_data where id = rb.script_id) as script from ref_book rb where rb.visible = 1 and rb.script_id is not null") {
-                def refbook = new Expando()
-                refbook.id = it.id as Integer
-                refbook.name = it.name
-                if (it.script) {
-                    refbook.script = IOUtils.toString(it.script.binaryStream, "UTF-8")
-                }
-                refbooks.add(refbook)
+        sql.eachRow("select rb.id, rb.name, (select data from blob_data where id = rb.script_id) as script from ref_book rb where rb.visible = 1 and rb.script_id is not null") {
+            def refbook = new Expando()
+            refbook.id = it.id as Integer
+            refbook.name = it.name
+            if (it.script) {
+                refbook.script = IOUtils.toString(it.script.binaryStream, "UTF-8")
             }
-        } finally {
-            sql.close()
+            refbooks.add(refbook)
         }
         println("Load DB ref_book OK")
         return refbooks
