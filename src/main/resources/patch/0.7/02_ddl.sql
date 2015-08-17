@@ -294,8 +294,106 @@ COMPOUND TRIGGER
 end dep_rep_per_before_delete;
 /
 
+--Диагностика корректности структуры и метаданных для FORM_DATA_NNN
+CREATE OR REPLACE PACKAGE form_data_nnn IS
+  TYPE t_message IS RECORD(
+		form_template_id NUMBER(9),
+		form_template_name VARCHAR(1024),
+		message VARCHAR2(1024));
+  TYPE t_message_box IS TABLE OF t_message;
+  FUNCTION check_structure RETURN t_message_box PIPELINED;
+  FUNCTION check_template (p_ft_id number) RETURN t_message_box PIPELINED;
+  END form_data_nnn;
+/
+
+CREATE OR REPLACE PACKAGE BODY form_data_nnn AS
+FUNCTION check_structure RETURN t_message_box PIPELINED IS
+         l_row t_message;
+BEGIN
+         for x in (select id from form_template order by id) loop
+             for xdata in (select * from table(check_template(x.id))) loop
+                 l_row.form_template_id := xdata.form_template_id;
+                 l_row.form_template_name := xdata.form_template_name;
+                 l_row.message := xdata.message;
+                 PIPE ROW(l_row);
+             end loop;
+         end loop;
+
+         for abandoned_tables in (select cast(substr(ut.table_name, 11) as number(9)) as form_template_id, utc.comments,  'Не найдена соответствующая запись в FORM_TEMPLATE для таблицы '||ut.table_name as message
+                                  from user_tables ut
+                                  join user_tab_comments utc on ut.table_name = utc.table_name
+                                  WHERE REGEXP_LIKE(ut.table_name, '^FORM_DATA_[0-9]{1,}$')
+                                        AND not exists (select 1 from form_template where id = cast(substr(ut.table_name, 11) as number(9)))
+                                  ) loop
+          l_row.form_template_id := abandoned_tables.form_template_id;
+          l_row.form_template_name := abandoned_tables.comments;
+          l_row.message := abandoned_tables.message;
+          PIPE ROW(l_row);
+         end loop
+         RETURN;
+      END;
+FUNCTION check_template (p_ft_id number) RETURN t_message_box PIPELINED IS
+         l_row t_message;
+         l_counter number(18) := 0;
+         l_form_column_counter number(9) := 0;
+         l_tab_column_counter number(9) := 0;
+BEGIN
+         for x in (select id, fullname from form_template where id = p_ft_id) loop
+
+          select count(*) into l_counter from user_tables where upper(table_name) = upper('FORM_DATA_'||x.id);
+          if (l_counter = 0) then --If the table does not even exist
+            l_row.form_template_id := x.id;
+            l_row.form_template_name := x.fullname;
+            l_row.message := 'Таблица FORM_DATA_'||x.id||' не найдена';
+            PIPE ROW(l_row);
+
+          else --If exists, compare columns
+            select count(*)*5+6 into l_form_column_counter from form_column where form_template_id = x.id;
+            select count(*) into l_tab_column_counter from user_tab_columns where upper(table_name) = upper('FORM_DATA_'||x.id);
+
+            if (l_form_column_counter <> l_tab_column_counter) then
+               l_row.form_template_id := x.id;
+               l_row.form_template_name := x.fullname;
+               l_row.message := 'Количество столбцов в шаблоне и соответствующей таблице не совпадает';
+               PIPE ROW(l_row);
+            end if;
+
+            for col_check in (
+                    with t as (
+                        select '' as postfix, 1 as ord from dual
+                        union all select '_STYLE_ID' as postfix, 2 as ord from dual
+                        union all select '_EDITABLE' as postfix, 3 as ord  from dual
+                        union all select '_COLSPAN' as postfix, 4 as ord  from dual
+                        union all select '_ROWSPAN' as postfix, 5 as ord from dual),
+                      tdata as (
+                        select fc.form_template_id, fc.id, fc.id||t.postfix as form_column_name, fc.type, utc.TABLE_NAME, utc.COLUMN_NAME, utc.DATA_TYPE
+                        from t
+                            cross join form_column fc
+                            full outer join user_tab_columns utc
+                                 on upper(utc.table_name) = upper('FORM_DATA_'||fc.form_template_id) and upper(utc.COLUMN_NAME) = upper('C'||fc.id||t.postfix)
+                        where (table_name = 'FORM_DATA_'||x.id or fc.form_template_id = x.id)
+                        and (utc.COLUMN_NAME is null or utc.column_name not in ('ID', 'FORM_DATA_ID', 'TEMPORARY', 'MANUAL', 'ORD', 'ALIAS'))),
+                      t_msg as (
+                         select coalesce(form_template_id, cast(substr(table_name, 11) as number(9))) as form_template_id,
+                           case when form_template_id is not null and table_name is null and REGEXP_LIKE(form_column_name, '^[0-9]{1,}$') then 'В таблице FORM_DATA_'||form_template_id||' отсутствует ожидаемое поле '||'C'||form_column_name || ' и иже с ним'
+                                when form_template_id is null and table_name is not null and column_name not like 'C%\_%' ESCAPE '\' then 'Не найдена соответствующая запись в FORM_COLUMN для столбца '||table_name||'.'||column_name
+                                when form_template_id is not null and table_name is not null and column_name not like 'C%\_%' ESCAPE '\' and DECODE(type, 'S', 'VARCHAR2', 'N', 'NUMBER', 'R', 'NUMBER', 'D', 'DATE', 'A', 'NUMBER') <> data_type then 'Расхождение по типам данных между '||table_name||'.'||column_name||'('||data_type||') и form_column (id='||id||', тип='||type||')'
+                                end message
+                                from tdata)
+                    select form_template_id, message from t_msg where message is not null) loop
+                     l_row.form_template_id := x.id;
+                     l_row.form_template_name := x.fullname;
+                     l_row.message := col_check.message;
+                     PIPE ROW(l_row);
+               end loop;
+          end if;
+
+         end loop;
+         RETURN;
+      END;
+   END form_data_nnn;
+/
+
 
 COMMIT;
 EXIT;
-
-

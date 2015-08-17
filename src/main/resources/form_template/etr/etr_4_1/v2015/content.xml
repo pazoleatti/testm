@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <formTemplateContent>
     <fixedRows>true</fixedRows>
-    <name>Абсолютная величина налоговых платежей</name>
+    <name>Приложение 4-1. Абсолютная величина налоговых платежей</name>
     <fullName>Приложение 4-1. Абсолютная величина налоговых платежей</fullName>
     <header>Приложение 4-1</header>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
