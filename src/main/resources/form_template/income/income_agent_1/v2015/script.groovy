@@ -122,9 +122,9 @@ def editableColumns = ['emitentName', 'emitentInn', 'all', 'rateZero', 'distribu
                        'withheldSum', 'withheldDate', 'withheldNumber', 'postcode', 'region', 'district', 'city', 'locality',
                        'street', 'house', 'housing', 'apartment', 'surname', 'name', 'patronymic', 'phone']
 
-// обязательные (графа 1..17, 23..25, 27)
+// обязательные (графа 1..3, 7..13, 16, 17, 23..25, 27)
 @Field
-def nonEmptyColumns = ['emitentName', 'emitentInn', 'distributionSum', 'decisionNumber',
+def nonEmptyColumns = ['emitentName', 'emitentInn', 'decisionNumber',
                        'decisionDate', 'year', 'firstMonth', 'lastMonth', 'allSum', 'addresseeName', 'type',
                        'status', 'dividends', 'sum', 'date', 'withheldSum']
 
