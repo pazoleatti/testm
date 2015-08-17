@@ -36,7 +36,7 @@ public class FormDataSearchDaoImpl extends AbstractDao implements FormDataSearch
                 .append("join report_period rp on rp.id = drp.report_period_id\n")
                 .append("join tax_period tp on tp.id=rp.tax_period_id\n")
                 .append("join log_business lb on lb.form_data_id = fd.id\n")
-                .append("left join department_report_period cdrp on (cdrp.id = fd.COMPARATIVE_DEP_REP_PER_ID and dp.id = cdrp.department_id)\n")
+                .append("left join department_report_period cdrp on cdrp.id = fd.COMPARATIVE_DEP_REP_PER_ID\n")
                 .append("left join report_period crp on crp.id = cdrp.report_period_id \n")
                 .append("where lb.event_id = 1 ");
     }
@@ -219,7 +219,7 @@ public class FormDataSearchDaoImpl extends AbstractDao implements FormDataSearch
             "JOIN form_type ft on t.type_id = ft.id \n" +
             "JOIN department dp on dp.id = drp.department_id \n" +
             "JOIN report_period rp on rp.id = drp.report_period_id \n" +
-            "LEFT JOIN department_report_period cdrp on (fd.COMPARATIVE_DEP_REP_PER_ID = cdrp.id and cdrp.department_id = dp.id) \n" +
+            "LEFT JOIN department_report_period cdrp on fd.COMPARATIVE_DEP_REP_PER_ID = cdrp.id \n" +
             "LEFT JOIN report_period crp on crp.id = cdrp.report_period_id \n" +
             "JOIN tax_period tp on tp.id=rp.tax_period_id \n" +
             "JOIN log_business lb on lb.form_data_id = fd.id \n" +
