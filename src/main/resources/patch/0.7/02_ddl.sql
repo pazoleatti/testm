@@ -70,6 +70,12 @@ comment on column form_data.accruing is 'Признак расчета знач�
 alter table form_data add constraint form_data_fk_co_dep_rep_per_id foreign key (comparative_dep_rep_per_id) references department_report_period (id);
 alter table form_data add constraint form_data_chk_accruing check (accruing in (0, 1));
 
+-- http://jira.aplana.com/browse/SBRFACCTAX-12348 Ошибка при удалении подразделения
+alter table notification drop constraint notification_fk_receiver;
+alter table notification drop constraint notification_fk_sender;
+alter table notification add constraint notification_fk_receiver foreign key (receiver_department_id) references department (id) on delete cascade;
+alter table notification add constraint notification_fk_sender foreign key (sender_department_id) references department (id) on delete cascade;
+
 -- http://jira.aplana.com/browse/SBRFACCTAX-12153: Ошибка при удалении периода
 CREATE OR REPLACE TRIGGER DEP_REP_PER_BEFORE_INS_UPD 
   before insert or update on department_report_period
