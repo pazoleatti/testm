@@ -173,7 +173,10 @@ List<String> getErrorDepartment(record) {
         errorList.add("«КПП»")
     }
     if (record.TAX_ORGAN_CODE?.stringValue == null || record.TAX_ORGAN_CODE.stringValue.isEmpty()) {
-        errorList.add("«Код налогового органа»")
+        errorList.add("«Код налогового органа (кон.)»")
+    }
+    if (useTaxOrganCodeProm() && (record.TAX_ORGAN_CODE_PROM?.value == null || record.TAX_ORGAN_CODE_PROM.value.isEmpty())) {
+        errorList.add("«Код налогового органа (пром.)»")
     }
     if (record.OKVED_CODE?.referenceValue == null) {
         errorList.add("«Код вида экономической деятельности и по классификатору ОКВЭД»")
@@ -207,6 +210,16 @@ List<String> getErrorDepartment(record) {
     errorList
 }
 
+@Field
+def declarationReportPeriod
+
+boolean useTaxOrganCodeProm() {
+    if (declarationReportPeriod == null) {
+        declarationReportPeriod = reportPeriodService.get(declarationData.reportPeriodId)
+    }
+    return (declarationReportPeriod?.taxPeriod?.year > 2015 || declarationReportPeriod?.order > 2)
+}
+
 List<String> getErrorVersion(record) {
     List<String> errorList = new ArrayList<String>()
     if (record.FORMAT_VERSION.stringValue == null || !record.FORMAT_VERSION.stringValue.equals('5.04')) {
@@ -229,6 +242,7 @@ void generateXML() {
     // атрибуты, заполняемые по настройкам подразделений
     def departmentParam = getDepartmentParam()
     def taxOrganCode = departmentParam?.TAX_ORGAN_CODE?.value
+    def taxOrganCodeProm = useTaxOrganCodeProm() ? departmentParam?.TAX_ORGAN_CODE_PROM?.value : taxOrganCode
     def okvedCode = getRefBookValue(34, departmentParam?.OKVED_CODE?.value)?.CODE?.value
     def okato = getOkato(departmentParam?.OKTMO?.value)
     def taxPlaceTypeCode = getRefBookValue(2, departmentParam?.TAX_PLACE_TYPE_CODE?.value)?.CODE?.value
@@ -386,7 +400,7 @@ void generateXML() {
 
     def builder = new MarkupBuilder(xml)
     builder.Файл(
-            [ИдФайл: declarationService.generateXmlFileId(4, declarationData.departmentReportPeriodId, declarationData.taxOrganCode, declarationData.kpp)] +
+            [ИдФайл: declarationService.generateXmlFileId(4, declarationData.departmentReportPeriodId, taxOrganCodeProm, taxOrganCode, declarationData.kpp)] +
                     [ВерсПрог: applicationVersion] +
                     [ВерсФорм: formatVersion] +
                     ['ПризнНал8-12': sign812] +

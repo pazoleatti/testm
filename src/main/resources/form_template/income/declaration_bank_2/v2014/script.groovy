@@ -8,7 +8,7 @@ import groovy.transform.Field
 import groovy.xml.MarkupBuilder
 
 /**
- * Декларация по налогу на прибыль (Банк) (год 2014)
+ * Декларация по налогу на прибыль (Банк) (с периода год 2014)
  * Формирование XML для декларации налога на прибыль.
  * версия 2014 года
  * declarationTemplateId=21447
