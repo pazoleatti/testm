@@ -111,10 +111,9 @@ public abstract class UploadFormDataAsyncTask extends AbstractAsyncTask {
 
         return MessageGenerator.getFDMsg(
                 "Выполнен импорт данных из XLSM файла в экземпляр налоговой формы",
-                formData.getFormType().getName(),
-                formData.getKind().getName(),
+                formData,
                 department.getName(),
-                formData.getPeriodOrder(), false, reportPeriod, rpCompare);
+                false, reportPeriod, rpCompare);
     }
 
     @Override
@@ -133,9 +132,8 @@ public abstract class UploadFormDataAsyncTask extends AbstractAsyncTask {
 
         return MessageGenerator.getFDMsg(
                 "Не выполнен импорт данных из XLSM файла в экземпляр налоговой формы",
-                formData.getFormType().getName(),
-                formData.getKind().getName(),
-                department.getName(), formData.getPeriodOrder(),
+                formData,
+                department.getName(),
                 false, reportPeriod, rpCompare);
     }
 }

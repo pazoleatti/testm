@@ -105,12 +105,10 @@ public abstract class CsvGeneratorAsyncTask extends AbstractAsyncTask {
         DepartmentReportPeriod rpCompare = formData.getComparativPeriodId() != null ?
                 departmentReportPeriodService.get(formData.getComparativPeriodId()) : null;
 
-        return MessageGenerator.getFDMsg(
-                String.format(COMPLETE_FORM, getReportType().getName()),
-                formData.getFormType().getName(),
-                formData.getKind().getName(),
+        return MessageGenerator.getFDMsg(String.format(ERROR_FORM, getReportType()),
+                formData,
                 department.getName(),
-                formData.getPeriodOrder(), manual, reportPeriod, rpCompare);
+                manual, reportPeriod, rpCompare);
     }
 
     @Override
@@ -129,9 +127,8 @@ public abstract class CsvGeneratorAsyncTask extends AbstractAsyncTask {
                 departmentReportPeriodService.get(formData.getComparativPeriodId()) : null;
 
         return MessageGenerator.getFDMsg(String.format(ERROR_FORM, getReportType()),
-                formData.getFormType().getName(),
-                formData.getKind().getName(),
-                department.getName(), formData.getPeriodOrder(),
+                formData,
+                department.getName(),
                 manual, reportPeriod, rpCompare);
     }
 }
