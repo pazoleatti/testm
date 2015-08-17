@@ -812,7 +812,7 @@ void addRowValue(def dataRows, def number, def column, def addValue){
     if (addValue) {
         def row = getDataRow(dataRows, "R$number")
         if (row[column] == null) {
-            logger.info("Пустая ячейка в строке ${number} псевдоним ${alias}")
+            logger.info("Пустая ячейка в строке ${number} псевдоним ${row.getAlias()}")
         }
         row[column] ? (row[column] += addValue) : (row[column] = addValue)
     }

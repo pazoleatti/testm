@@ -101,6 +101,8 @@ switch (formDataEvent) {
 
 //// Кэши и константы
 @Field
+def providerCache = [:]
+@Field
 def refBookCache = [:]
 @Field
 def recordCache = [:]
@@ -429,11 +431,14 @@ void consolidationFromPrimary(def dataRows, def formSources) {
                         addChildTotalData(dataRows, '11270', 'incomeTaxSumS', dataRowsChild, 'total', ['excessOfTheSellingPrice'])
                         break
                     case formTypeId_RNU8: //(РНУ-8) Простой регистр налогового учёта «Требования»
+                        def provider = formDataService.getRefBookProvider(refBookFactory, 28L, providerCache)
+                        def rows = dataRowsChild.findAll { it.getAlias() == null }
                         ['13040', '13045', '13050', '13055', '13060', '13065'].each { knu ->
                             // графа 9 = разность сумм граф 6 и 5 строк источника где КНУ и балансовый счет совпадают с текущей строкой
                             def row = getRow(dataRows, knu)
-                            dataRowsChild.each { rowChild ->
-                                def recordId = getRecordId(28, 'CODE', row.incomeTypeId, getReportPeriodEndDate())
+                            String filter = "LOWER(CODE) = LOWER('" + row.incomeTypeId + "') and LOWER(NUMBER) = LOWER('" + row.incomeBuhSumAccountNumber.replaceAll(/\./, "") + "')"
+                            def recordId = provider.getRecords(getReportPeriodEndDate(), null, filter, null)?.get(0)?.get(RefBook.RECORD_ID_ALIAS)?.value
+                            rows.each { rowChild ->
                                 if (recordId == rowChild.balance && isEqualNum(row.incomeBuhSumAccountNumber, rowChild.balance)) {
                                     (row.incomeTaxSumS) ? (row.incomeTaxSumS += (rowChild.outcome - rowChild.income)) : (row.incomeTaxSumS = (rowChild.outcome - rowChild.income))
                                 }
@@ -724,7 +729,7 @@ def getBalanceValue(def value) {
 }
 
 boolean isEqualNum(String accNum, def balance) {
-    return accNum.replace('.', '') == getBalanceValue(balance).replace('.', '')
+    return accNum.replace('.', '') == getBalanceValue(balance)?.replace('.', '')
 }
 
 
