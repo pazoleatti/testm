@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.view;
 
 
+import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.formdata.HeaderCell;
 import com.aplana.sbrf.taxaccounting.model.util.FormDataUtils;
@@ -352,9 +353,13 @@ public class FormTemplateRowView extends ViewWithUiHandlers<FormTemplateRowUiHan
 
 	@UiHandler("addRowButton")
 	public void onAddButton(ClickEvent event){
-        if (!columns.isEmpty()){
-            rows.add(new DataRow<Cell>("Новый код", FormDataUtils.createCells(columns, styles)));
-            setRowsData(rows);
+        try {
+            if (!columns.isEmpty()){
+                rows.add(new DataRow<Cell>("Новый код", FormDataUtils.createCells(columns, styles)));
+                setRowsData(rows);
+            }
+        } catch (IllegalArgumentException e){
+            Dialog.errorMessage("Ошибка", e.getMessage());
         }
 	}
 
