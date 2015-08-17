@@ -121,18 +121,14 @@ void checkDepartmentParams(LogLevel logLevel) {
 
 // Проверка налоговой формы источника «Сведения о суммах налога на прибыль, уплаченного Банком за рубежом» (данная форма-источник создана и находится в статусе «Принята»)
 private boolean sourceCheck(boolean loggerNeed, LogLevel logLevel) {
-    def sourceFormTypeId = 421
+    def sourceFormTypeId = 417
     def sourceFormType = formTypeService.get(sourceFormTypeId)
     def success = true
 
+    def departmentId = declarationData.getDepartmentId()
     def formDataCollection = declarationService.getAcceptedFormDataSources(declarationData)
     def departmentFormType = formDataCollection?.records?.find { it.formType.id == sourceFormTypeId }
     def reportPeriod = reportPeriodService.get(declarationData.reportPeriodId)
-    if (departmentFormType == null) {
-        sourceFormTypeId = 417
-        sourceFormType = formTypeService.get(sourceFormTypeId)
-        departmentFormType = formDataCollection?.records?.find { it.formType.id == sourceFormTypeId }
-    }
     if (departmentFormType == null) {
         if (loggerNeed) {
             logger.log(logLevel, "Не найден экземпляр «${sourceFormType.name}» за ${reportPeriod.name} ${reportPeriod.taxPeriod.year} в статусе «Принята» (налоговая форма не назначена источником декларации Банка/назначена источником, но не создана/назначена источником, создана, но не принята). Строка 240 Листа 02 декларации заполнена значением «0»!")
@@ -361,13 +357,13 @@ void generateXML() {
     def dataRowsAdvance = getDataRows(formDataCollection, 500)
 
     /** Сведения для расчёта налога с доходов в виде дивидендов. */
-    def output1_id = newDeclaration ? (isTaxPeriod ? 414 : 411) : 306
+    def output1_id = newDeclaration ? 411 : 306
     def dataRowsDividend = getDataRows(formDataCollection, output1_id)
 
     /** Расчет налога на прибыль с доходов, удерживаемого налоговым агентом. */
     /** либо */
     /** Сведения о дивидендах, выплаченных в отчетном квартале. */
-    def output2_id = newDeclaration ? (isTaxPeriod ? 416 : 413) : 307
+    def output2_id = newDeclaration ? 413 : 307
     def dataRowsTaxAgent = getDataRows(formDataCollection, output2_id)
 
     /** Сумма налога, подлежащая уплате в бюджет, по данным налогоплательщика. */
@@ -377,10 +373,7 @@ void generateXML() {
     def dataRowsRemains = getDataRows(formDataCollection, 309)
 
     /** Сведения о суммах налога на прибыль, уплаченного Банком за рубежом */
-    def dataRowsSum = getDataRows(formDataCollection, 421)
-    if (dataRowsSum == null) {
-        dataRowsSum = getDataRows(formDataCollection, 417)
-    }
+    def dataRowsSum = getDataRows(formDataCollection, 417)
 
     /*
      * Получение значении декларации за предыдущий период.
