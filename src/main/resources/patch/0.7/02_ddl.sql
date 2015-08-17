@@ -1,3 +1,8 @@
+-- http://jira.aplana.com/browse/SBRFACCTAX-12351: Удаление из комментариев перечисление вида налогов
+comment on column tax_period.tax_type is 'Вид налога';
+comment on column form_type.tax_type is 'Вид налога';
+comment on column declaration_type.tax_type is 'Вид налога';
+
 --http://jira.aplana.com/browse/SBRFACCTAX-11881: Удаление столбца TEMP из FORM_DATA_605 (актуально для ПСИ)
 set serveroutput on size 30000;
 declare query_str varchar2(1024) := '';
