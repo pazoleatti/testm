@@ -61,10 +61,8 @@ public class VersionFTOperatingServiceImpl implements VersionOperatingService {
 
             logger.error(MessageGenerator.getFDMsg(
                     String.format(MSG_IS_USED_VERSION, MessageGenerator.mesSpeck(formData.getFormType().getTaxType())),
-                    formData.getFormType().getName(),
-                    formData.getKind().getName(),
+                    formData,
                     departmentService.getDepartment(formData.getDepartmentId()).getName(),
-                    formData.getPeriodOrder(),
                     formData.isManual(),
                     drp,
                     drpCompare));

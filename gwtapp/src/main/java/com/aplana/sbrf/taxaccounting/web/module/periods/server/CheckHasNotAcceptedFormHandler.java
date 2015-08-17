@@ -64,10 +64,8 @@ public class CheckHasNotAcceptedFormHandler extends AbstractActionHandler<CheckH
                 DepartmentReportPeriod drp = departmentReportPeriodService.get(fd.getDepartmentReportPeriodId());
                 DepartmentReportPeriod drpCompare = departmentReportPeriodService.get(fd.getComparativPeriodId());
                 logger.warn(MessageGenerator.getFDMsg(FD_NOT_ACCEPTED,
-                                fd.getFormType().getName(),
-                                fd.getKind().getName(),
+                                fd,
                                 departmentService.getDepartment(fd.getDepartmentId()).getName(),
-                                fd.getPeriodOrder(),
                                 fd.isManual(),
                                 drp,
                                 drpCompare)
@@ -91,13 +89,13 @@ public class CheckHasNotAcceptedFormHandler extends AbstractActionHandler<CheckH
         for (DeclarationData dd : declarations) {
             StringBuilder msg = new StringBuilder();
             msg.append("Для декларации/уведомления: ");
-            msg.append("\"" + declarationTemplateService.get(dd.getDeclarationTemplateId()).getType().getName() + "\"");
+            msg.append("\"").append(declarationTemplateService.get(dd.getDeclarationTemplateId()).getType().getName()).append("\"");
             DeclarationType declarationType = declarationTemplateService.get(dd.getDeclarationTemplateId()).getType();
             if (declarationType.getTaxType() == TaxType.PROPERTY || TaxType.TRANSPORT.equals(declarationType.getTaxType())) {
-                msg.append(" (налоговый орган \"" + dd.getTaxOrganCode() + "\", КПП \"" + dd.getKpp() + "\")");
+                msg.append(" (налоговый орган \"").append(dd.getTaxOrganCode()).append("\", КПП \"").append(dd.getKpp()).append("\")");
             }
             msg.append(" в подразделении ");
-            msg.append("\"" + departmentService.getDepartment(dd.getDepartmentId()).getName() + "\"");
+            msg.append("\"").append(departmentService.getDepartment(dd.getDepartmentId()).getName()).append("\"");
             msg.append(" находится в состоянии отличном от \"Принята\"");
 
             logger.warn(msg.toString());

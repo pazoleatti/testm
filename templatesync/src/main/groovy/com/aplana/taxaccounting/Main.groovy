@@ -1,5 +1,7 @@
 package com.aplana.taxaccounting
 
+import groovy.sql.Sql
+
 /**
  * Утилита сравнения скриптов из git и БД с учетом версионирования.
  * Если скрипты в БД не актуальны, то они обновляются.
@@ -329,11 +331,18 @@ class Main {
             report.delete()
         }
 
+        println("DBMS connect: ${DB_USER}")
+        def sql = Sql.newInstance(DB_URL, DB_USER, DB_PASSWORD, "oracle.jdbc.OracleDriver")
+
         // Построение отчета сравнения Git и БД
         // checkOnly, true — только сравнение, false — сравнение и обновление Git → БД
-        GitReport.updateScripts(GitReport.getDBVersions(), true)
-        GitReport.updateDeclarationScripts(GitReport.getDeclarationDBVersions(), true)
-        GitReport.checkRefBooks(GitReport.getRefBookScripts())
+        try {
+            GitReport.updateScripts(GitReport.getDBVersions(sql), sql, true)
+            GitReport.updateDeclarationScripts(GitReport.getDeclarationDBVersions(sql), sql, true)
+            GitReport.checkRefBooks(GitReport.getRefBookScripts(sql))
+        } finally {
+            sql.close()
+        }
         println("See $REPORT_GIT_NAME, $REPORT_DECL_GIT_NAME and $REPORT_REFBOOK_GIT_NAME for details")
 
         // Сравнение схем в БД
