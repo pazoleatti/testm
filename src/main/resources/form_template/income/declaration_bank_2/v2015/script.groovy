@@ -8,7 +8,7 @@ import groovy.transform.Field
 import groovy.xml.MarkupBuilder
 
 /**
- * Декларация по налогу на прибыль (Банк) (год 2014)
+ * Декларация по налогу на прибыль (Банк) (с периода год 2014)
  * Формирование XML для декларации налога на прибыль.
  * версия 2015 года
  * declarationTemplateId=21687
@@ -276,6 +276,7 @@ void generateXML() {
 
     def reorgFormCode = getRefBookValue(5, incomeParamsTable?.REORG_FORM_CODE?.value)?.CODE?.value
     def taxOrganCode = incomeParamsTable?.TAX_ORGAN_CODE?.value
+    def taxOrganCodeProm = useTaxOrganCodeProm() ? incomeParamsTable?.TAX_ORGAN_CODE_PROM?.value : taxOrganCode
     def okvedCode = getRefBookValue(34, incomeParamsTable?.OKVED_CODE?.value)?.CODE?.value
     def phone = incomeParamsTable?.PHONE?.value
     def name = incomeParamsTable?.NAME?.value
@@ -766,7 +767,7 @@ void generateXML() {
 
     def builder = new MarkupBuilder(xml)
     builder.Файл(
-            ИдФайл : declarationService.generateXmlFileId(11, declarationData.departmentReportPeriodId, taxOrganCode, declarationData.kpp),
+            ИдФайл : declarationService.generateXmlFileId(11, declarationData.departmentReportPeriodId, taxOrganCodeProm, taxOrganCode, declarationData.kpp),
             ВерсПрог : applicationVersion,
             ВерсФорм : formatVersion){
 
@@ -1982,7 +1983,10 @@ List<String> getErrorTable(record) {
         errorList.add("«Код по ОКТМО»")
     }
     if (record.TAX_ORGAN_CODE?.value == null || record.TAX_ORGAN_CODE.value.isEmpty()) {
-        errorList.add("«Код налогового органа»")
+        errorList.add("«Код налогового органа (кон.)»")
+    }
+    if (useTaxOrganCodeProm() && (record.TAX_ORGAN_CODE_PROM?.value == null || record.TAX_ORGAN_CODE_PROM.value.isEmpty())) {
+        errorList.add("«Код налогового органа (пром.)»")
     }
     if (record.OKVED_CODE?.value == null) {
         errorList.add("«Код вида экономической деятельности и по классификатору ОКВЭД»")
@@ -2013,6 +2017,16 @@ List<String> getErrorTable(record) {
         errorList.add("«Код места, по которому представляется документ»")
     }
     errorList
+}
+
+@Field
+def declarationReportPeriod
+
+boolean useTaxOrganCodeProm() {
+    if (declarationReportPeriod == null) {
+        declarationReportPeriod = reportPeriodService.get(declarationData.reportPeriodId)
+    }
+    return (declarationReportPeriod?.taxPeriod?.year > 2015 || declarationReportPeriod?.order > 2)
 }
 
 List<String> getErrorDepartment(record) {

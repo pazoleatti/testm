@@ -87,7 +87,7 @@ public class DeclarationServiceTest {
     }
 
     @Test
-    public void generateXmlFileId() {
+    public void generateXmlFileIdTest() {
         DeclarationType declarationType = new DeclarationType();
         declarationType.setTaxType(TaxType.TRANSPORT);
         DeclarationTypeDao declarationTypeDao = mock(DeclarationTypeDao.class);
@@ -104,9 +104,9 @@ public class DeclarationServiceTest {
         ReflectionTestUtils.setField(service, "departmentReportPeriodDao", departmentReportPeriodDao);
 
         Map<String, RefBookValue> departmentParam = new HashMap<String, RefBookValue>();
-        departmentParam.put("TAX_ORGAN_CODE", new RefBookValue(RefBookAttributeType.STRING, "тест"));
-        departmentParam.put("INN", new RefBookValue(RefBookAttributeType.STRING, "тест"));
-        departmentParam.put("KPP", new RefBookValue(RefBookAttributeType.STRING, "тест"));
+        departmentParam.put("TAX_ORGAN_CODE", new RefBookValue(RefBookAttributeType.STRING, "ткод"));
+        departmentParam.put("INN", new RefBookValue(RefBookAttributeType.STRING, "инн"));
+        departmentParam.put("KPP", new RefBookValue(RefBookAttributeType.STRING, "кпп"));
 
         RefBookDataProvider dataProvider = mock(RefBookDataProvider.class);
         PeriodService reportPeriodService = mock(PeriodService.class);
@@ -120,8 +120,49 @@ public class DeclarationServiceTest {
 
         ReflectionTestUtils.setField(service, "periodService", reportPeriodService);
         ReflectionTestUtils.setField(service, "factory", factory);
-        String fileId = service.generateXmlFileId(1, 1, null, null);
+        String fileId = service.generateXmlFileId(1, 1, departmentParam.get("TAX_ORGAN_CODE").getStringValue(), departmentParam.get("KPP").getStringValue());
         assertTrue(fileId != null);
+        assertTrue(fileId.startsWith("NO_TRAND_ткод_ткод_иннкпп_"));
+    }
+
+    @Test
+    public void generateXmlFileIdTest2() {
+        DeclarationType declarationType = new DeclarationType();
+        declarationType.setTaxType(TaxType.TRANSPORT);
+        DeclarationTypeDao declarationTypeDao = mock(DeclarationTypeDao.class);
+        when(declarationTypeDao.get(1)).thenReturn(declarationType);
+        ReflectionTestUtils.setField(service, "declarationTypeDao", declarationTypeDao);
+
+        DepartmentReportPeriod departmentReportPeriod = new DepartmentReportPeriod();
+        ReportPeriod reportPeriod = new ReportPeriod();
+        reportPeriod.setId(48);
+        departmentReportPeriod.setReportPeriod(reportPeriod);
+        departmentReportPeriod.setDepartmentId(2);
+        DepartmentReportPeriodDao departmentReportPeriodDao = mock(DepartmentReportPeriodDao.class);
+        when(departmentReportPeriodDao.get(1)).thenReturn(departmentReportPeriod);
+        ReflectionTestUtils.setField(service, "departmentReportPeriodDao", departmentReportPeriodDao);
+
+        Map<String, RefBookValue> departmentParam = new HashMap<String, RefBookValue>();
+        departmentParam.put("TAX_ORGAN_CODE", new RefBookValue(RefBookAttributeType.STRING, "ткод"));
+        departmentParam.put("TAX_ORGAN_CODE_PROM", new RefBookValue(RefBookAttributeType.STRING, "пкод"));
+        departmentParam.put("INN", new RefBookValue(RefBookAttributeType.STRING, "инн"));
+        departmentParam.put("KPP", new RefBookValue(RefBookAttributeType.STRING, "кпп"));
+
+        RefBookDataProvider dataProvider = mock(RefBookDataProvider.class);
+        PeriodService reportPeriodService = mock(PeriodService.class);
+        when(reportPeriodService.getEndDate(48)).thenReturn(currentCalendar);
+        PagingResult<Map<String, RefBookValue>> list = new PagingResult<Map<String, RefBookValue>>();
+        list.add(departmentParam);
+        when(dataProvider.getRecords(addDayToDate(currentCalendar.getTime(), -1), null, String.format("DEPARTMENT_ID = %d", 2), null)).thenReturn(list);
+
+        RefBookFactory factory = mock(RefBookFactory.class);
+        when(factory.getDataProvider(31L)).thenReturn(dataProvider);
+
+        ReflectionTestUtils.setField(service, "periodService", reportPeriodService);
+        ReflectionTestUtils.setField(service, "factory", factory);
+        String fileId = service.generateXmlFileId(1, 1, departmentParam.get("TAX_ORGAN_CODE_PROM").getStringValue(), departmentParam.get("TAX_ORGAN_CODE").getStringValue(), departmentParam.get("KPP").getStringValue());
+        assertTrue(fileId != null);
+        assertTrue(fileId.startsWith("NO_TRAND_пкод_ткод_иннкпп_"));
     }
 
     @Test

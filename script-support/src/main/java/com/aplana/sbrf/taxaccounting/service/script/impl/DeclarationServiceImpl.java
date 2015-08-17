@@ -130,6 +130,11 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
 
     @Override
 	public String generateXmlFileId(int declarationTypeId, int departmentReportPeriodId, String taxOrganCode, String kpp) {
+        return generateXmlFileId(declarationTypeId, departmentReportPeriodId, taxOrganCode, taxOrganCode, kpp);
+    }
+
+    @Override
+	public String generateXmlFileId(int declarationTypeId, int departmentReportPeriodId, String taxOrganCodeProm, String taxOrganCode, String kpp) {
 
         DateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT);
 
@@ -149,7 +154,7 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
             Calendar calendar = Calendar.getInstance();
             if (declarationTaxType == TaxType.PROPERTY || declarationTaxType == TaxType.TRANSPORT || declarationTaxType == TaxType.INCOME) {
                 stringBuilder.append('_').
-                        append(taxOrganCode).
+                        append(taxOrganCodeProm).
                         append('_').
                         append(taxOrganCode).
                         append('_').
