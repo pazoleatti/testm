@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <formTemplateContent>
-    <fixedRows>false</fixedRows>
+    <fixedRows>true</fixedRows>
     <name>Анализ структуры доходов и расходов, не учитываемых для целей налогообложения</name>
     <fullName>Приложение 4-13. Анализ структуры доходов и расходов, не учитываемых для целей налогообложения</fullName>
     <header>Приложение 4-13</header>

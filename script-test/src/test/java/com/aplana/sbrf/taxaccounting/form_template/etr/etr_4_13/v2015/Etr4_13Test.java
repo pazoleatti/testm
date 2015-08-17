@@ -2,17 +2,24 @@ package com.aplana.sbrf.taxaccounting.form_template.etr.etr_4_13.v2015;
 
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
+import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
+import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.util.ScriptTestBase;
 import com.aplana.sbrf.taxaccounting.util.TestScriptHelper;
 import com.aplana.sbrf.taxaccounting.util.mock.ScriptTestMockHelper;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 
-import java.math.BigDecimal;
+import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
-import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.when;
 
 /**
@@ -49,7 +56,51 @@ public class Etr4_13Test extends ScriptTestBase {
 
     @Before
     public void mockServices() {
+        // макет нф
         when(testHelper.getFormDataService().getFormTemplate(anyInt(), anyInt())).thenReturn(testHelper.getFormTemplate());
+
+        // подразделение-период
+        when(testHelper.getDepartmentReportPeriodService().get(any(Integer.class))).thenAnswer(
+                new Answer<DepartmentReportPeriod>() {
+                    @Override
+                    public DepartmentReportPeriod answer(InvocationOnMock invocation) throws Throwable {
+                        DepartmentReportPeriod result = new DepartmentReportPeriod();
+                        ReportPeriod reportPeriod = new ReportPeriod();
+                        reportPeriod.setId(REPORT_PERIOD_ID);
+                        result.setReportPeriod(reportPeriod);
+                        return result;
+                    }
+                });
+
+        // предыдущий период
+        ReportPeriod prevReportPeriod = new ReportPeriod();
+        prevReportPeriod.setId(0);
+        when(testHelper.getReportPeriodService().getPrevReportPeriod(anyInt())).thenReturn(prevReportPeriod);
+
+        // периоды
+        TaxPeriod taxPeriod = new TaxPeriod();
+        taxPeriod.setId(1);
+        ReportPeriod period = new ReportPeriod();
+        period.setId(1);
+        period.setTaxPeriod(taxPeriod);
+        when(testHelper.getReportPeriodService().get(anyInt())).thenReturn(period);
+
+        // период БО
+        Long accountPeriodId = 1L;
+        when(testHelper.getBookerStatementService().getAccountPeriodId(anyLong(), any(Date.class))).thenReturn(accountPeriodId);
+
+        // провайдер для БО
+        when(testHelper.getFormDataService().getRefBookProvider(any(RefBookFactory.class), anyLong(),
+                anyMapOf(Long.class, RefBookDataProvider.class))).thenReturn(testHelper.getRefBookDataProvider());
+
+        // список id записей БО
+        when(testHelper.getRefBookDataProvider().getUniqueRecordIds(any(Date.class), anyString())).thenReturn(Arrays.asList(1L, 2L, 3L));
+
+        // записи БО
+        Map<Long, Map<String, RefBookValue>> records = testHelper.getRefBookAllRecords(52L);
+        // возвращаются все строки из справочника БО, делать отбор по фильтру не стал, т.к. лишние записи не вызывают ошибок, а только предупреждения
+        PagingResult<Map<String, RefBookValue>> result = new PagingResult<Map<String, RefBookValue>>(records.values());
+        when(testHelper.getBookerStatementService().getRecords(anyLong(), anyLong(), any(Date.class), anyString())).thenReturn(result);
     }
 
     @Test
@@ -80,22 +131,24 @@ public class Etr4_13Test extends ScriptTestBase {
         testHelper.setImportFileInputStream(getImportXlsInputStream());
         testHelper.execute(FormDataEvent.IMPORT);
         Assert.assertEquals(expected, testHelper.getDataRowHelper().getAll().size());
-        // TODO (Ramil Timerbaev) поправить
-        // checkLoadData(testHelper.getDataRowHelper().getAll());
-        // checkLogger();
+        checkLoadData(testHelper.getDataRowHelper().getAll());
+        checkLogger();
     }
 
     /** Проверить загруженные данные. */
     void checkLoadData(List<DataRow<Cell>> dataRows) {
-        // графа 4..9
+        // графа 4..9 - для всех строк, кроме строк I, II
         String [] calcColumns = { "comparePeriod", "comparePeriodPercent", "currentPeriod", "currentPeriodPercent", "deltaRub", "deltaPercent" };
+        // графа 4, 6, 8, 9 - для строк I, II
+        String [] calcColumns1_2 = { "comparePeriod", "currentPeriod", "deltaRub", "deltaPercent" };
         Long expected = 0L;
         for (DataRow<Cell> row : dataRows) {
-            if (row.getAlias() == null) {
+            if (row.getAlias() == null || "".equals(row.getAlias())) {
                 continue;
             }
             expected++;
-            for (String alias : calcColumns) {
+            String [] columns = ("I".equals(row.getAlias()) || "II".equals(row.getAlias()) ? calcColumns1_2 : calcColumns);
+            for (String alias : columns) {
                 Cell cell = row.getCell(alias);
                 Long value = (cell.getNumericValue() != null ? cell.getNumericValue().longValue() : null);
                 Assert.assertEquals("row." + alias + "[" + row.getIndex() + "]", expected, value);

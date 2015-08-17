@@ -68,7 +68,7 @@ def calcColumns = ['comparePeriod', 'comparePeriodPercent', 'currentPeriod', 'cu
 
 // графа 5, 7..9
 @Field
-def checkConsilidetedColumns = ['comparePeriodPercent', 'currentPeriodPercent', 'deltaRub', 'deltaPercent']
+def checkConsolidatedColumns = ['comparePeriodPercent', 'currentPeriodPercent', 'deltaRub', 'deltaPercent']
 
 // графа 4..9
 @Field
@@ -83,7 +83,7 @@ def nonEmptyColumnsIandII = ['comparePeriod', 'currentPeriod', 'deltaRub', 'delt
 def opuMap = [
         'I'    : ['16301', '16302', '16303', '16304', '16305', '16306', '27101', '27102', '27103', '27201', '27202', '27203', '27301', '27302', '27303', '27304', '27305', '27306', '27307', '27308', '27309', '27101', '27102', '27103', '27201', '27202', '27203', '27301', '27302', '27303', '27304', '27305', '27306', '27307', '27308', '27309'],
         'I.I'  : ['16305.02', '17201.97', '17202.07', '17202.08', '17202.09', '17202.97', '17202.99', '17203.02', '17203.03', '17203.06', '17203.09', '17203.11', '17203.13', '17203.14', '17203.97', '17306.19', '17306.20', '17306.99', '17307'],
-        'II'   : ['25301', '25302', '25303', '26101', '26102', '26103', '26104', '26201', '26202', '26203', '26204', '26301', '26302', '26303', '26304', '26305', '26306', '26307', '26401', '26402', '26403', '26404', '26405', '26406', '26407', '26408', '26409', '26410', '26411', '2641227101', '27102', '27103', '27201', '27202', '27203', '27301', '27302', '27303', '27304', '27305', '27306', '27307', '27308', '27309'],
+        'II'   : ['25301', '25302', '25303', '26101', '26102', '26103', '26104', '26201', '26202', '26203', '26204', '26301', '26302', '26303', '26304', '26305', '26306', '26307', '26401', '26402', '26403', '26404', '26405', '26406', '26407', '26408', '26409', '26410', '26411', '26412', '27101', '27102', '27103', '27201', '27202', '27203', '27301', '27302', '27303', '27304', '27305', '27306', '27307', '27308', '27309'],
         '1'    : ['26104.04', '26101.07', '26101.12', '26101.13', '26101.99', '26401.04', '27203.08'],
         '2'    : ['26101.01', '26104.02', '26104.03', '26104.04', '26104.05', '26104.06', '26104.99', '27308.15', '27308.16', '27308.17', '27308.18'],
         '3'    : ['26410.04'],
@@ -241,6 +241,7 @@ void logicCheck() {
     def formTemplate = formDataService.getFormTemplate(formData.formType.id, formData.reportPeriodId)
     def tempRows = formTemplate.rows
     updateIndexes(tempRows)
+    // подсчет временных тестовых данных
     calcValues(tempRows, dataRows)
 
     // 2. Проверка заполнения граф 4 - 9
@@ -251,7 +252,7 @@ void logicCheck() {
         // 2. Проверка заполнения граф 4 - 9 (арифметирческие проверки)
         def tempRow = getDataRow(tempRows, row.getAlias())
         def isConsolidatedCheckRow = (formData.kind == FormDataKind.CONSOLIDATED && opuMap.keySet().contains(row.getAlias()))
-        def chekColumns = (isConsolidatedCheckRow ? checkConsilidetedColumns : calcColumns)
+        def chekColumns = (isConsolidatedCheckRow ? checkConsolidatedColumns : calcColumns)
         checkCalc(row, chekColumns, tempRow, logger, true)
     }
 }
@@ -276,15 +277,15 @@ void calcValues(def resultRows, def sourceRows) {
     ]
 
     // расчет графы 4 и 6 - только для первичных формы
-    if (formData.kind == FormDataKind.CONSOLIDATED) {
+    if (formData.kind != FormDataKind.CONSOLIDATED) {
         // расчет графы 4 и 6 для строк I–II, 1-9, 10.1-19, 20.1–20.3
         for (alias in opuMap.keySet()) {
             def row = getDataRow(resultRows, alias)
             def rowSource = getDataRow(sourceRows, alias)
             // графа 4
-            row.comparePeriod = calcBO(rowSource, getComparativePeriodId(), 'comparePeriod')
+            row.comparePeriod = calcBO(rowSource, getComparativePeriodId())
             // графа 6
-            row.currentPeriod = calcBO(rowSource, formData.reportPeriodId, 'currentPeriod')
+            row.currentPeriod = calcBO(rowSource, formData.reportPeriodId)
         }
 
         // расчет графы 4 и 6 для строк II.I, 10, 20
@@ -298,9 +299,17 @@ void calcValues(def resultRows, def sourceRows) {
             // отобрать нужные строки
             def rows = resultRows.findAll { it.getAlias() in sumRowAliases }
             // графа 4
-            row.comparePeriod = calc4or6(row, rows, 'comparePeriod')
+            row.comparePeriod = calc4or6(rows, 'comparePeriod')
             // графа 6
-            row.currentPeriod = calc4or6(row, rows, 'currentPeriod')
+            row.currentPeriod = calc4or6(rows, 'currentPeriod')
+        }
+    } else {
+        // для консолидлированных форм значения граф 4 и 6 переложить из sourceRows в resultRows
+        def rows = resultRows.findAll { it.getAlias() }
+        rows.each { row ->
+            def sourceRow = getDataRow(sourceRows, row.getAlias())
+            row.comparePeriod = sourceRow.comparePeriod
+            row.currentPeriod = sourceRow.currentPeriod
         }
     }
 
@@ -314,7 +323,7 @@ void calcValues(def resultRows, def sourceRows) {
     calc5or7(resultRows, map, needShowMsg, 'currentPeriod', 'currentPeriodPercent')
 
     // расчет графы 8 и 9 для всех строк
-    def rows = resultRows.findAll { it.getAlias() != null }
+    def rows = resultRows.findAll { it.getAlias() }
     rows.each { row ->
         // графа 8
         row.deltaRub = calc8(row)
@@ -327,14 +336,11 @@ void calcValues(def resultRows, def sourceRows) {
 /**
  * Получить значение для графы 4 или 6.
  *
- * @param row строка нф
  * @param rows строки по которым надо получить сумму
  * @param alias алиас графы для которой расчитывается значения
  */
-def calc4or6(def row, def rows, def alias) {
+def calc4or6(def rows, def alias) {
     def value = rows.sum { it[alias] ?: 0 }
-    // Логическая проверка 1. Проверка превышения разрядности Граф 4, 6
-    checkOverflow(value, row, alias, row.getIndex(), 18, null)
     return value
 }
 /**
@@ -408,7 +414,7 @@ def calc9(def row, def needShowMsg) {
 }
 
 // Расчет сумм из БО за определенный период
-def calcBO(def rowSource, def periodId, def alias) {
+def calcBO(def rowSource, def periodId) {
     def periodSum = 0
     if (periodId != null) {
         def pair = get102Sum(rowSource, periodId)
@@ -421,8 +427,6 @@ def calcBO(def rowSource, def periodId, def alias) {
             isCorrect = pair[1]
             periodSum = isCorrect ? (periodSum - pair[0]) : 0
         }
-        // Логическая проверка 1. Проверка превышения разрядности Граф 4, 6
-        checkOverflow(periodSum, rowSource, alias, rowSource.getIndex(), 18, null)
     }
     return periodSum
 }
@@ -489,7 +493,7 @@ void importData() {
     // проверка шапки
     checkHeaderXls(headerValues, COLUMN_COUNT, HEADER_ROW_COUNT, tmpRow)
     if (logger.containsLevel(LogLevel.ERROR)) {
-        return;
+        return
     }
     // освобождение ресурсов для экономии памяти
     headerValues.clear()
@@ -526,7 +530,7 @@ void importData() {
         }
         // найти нужную строку нф
         def dataRow = dataRows.get(rowIndex - 1)
-        def templateRow = (dataRow.getAlias() != null ? getDataRow(templateRows, dataRow.getAlias()) : templateRows.get(rowIndex - 1))
+        def templateRow = (dataRow.getAlias() ? getDataRow(templateRows, dataRow.getAlias()) : templateRows.get(rowIndex - 1))
         // заполнить строку нф значениями из эксель
         fillRowFromXls(templateRow, dataRow, rowValues, fileRowIndex, rowIndex, colOffset)
 
@@ -534,6 +538,13 @@ void importData() {
         allValues.remove(rowValues)
         rowValues.clear()
     }
+    // очистить графу 5 и 7 в строке I и II
+    def rows1and2 = dataRows.findAll { it.getAlias() in ['I', 'II'] }
+    rows1and2.each { row ->
+        row.comparePeriodPercent = null
+        row.currentPeriodPercent = null
+    }
+
     showMessages(dataRows, logger)
 }
 
