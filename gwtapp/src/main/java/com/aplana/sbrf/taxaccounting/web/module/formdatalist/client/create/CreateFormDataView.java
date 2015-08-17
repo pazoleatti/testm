@@ -146,7 +146,8 @@ public class CreateFormDataView extends PopupViewWithUiHandlers<CreateFormDataUi
         }
     }
 
-    private void updateEnabled() {
+    @Override
+    public void updateEnabled() {
         // "Подразделение" недоступно если не выбран отчетный период
         departmentPicker.setEnabled(reportPeriodIds.getValue() != null && !reportPeriodIds.getValue().isEmpty());
         // "Тип налоговой формы" недоступен если не выбрано подразделение
@@ -165,7 +166,8 @@ public class CreateFormDataView extends PopupViewWithUiHandlers<CreateFormDataUi
         accruingPanel.setVisible(formTypeId.getValue() != null && !formTypeId.getValue().isEmpty() && comparative);
         // Кнопка "Создать" недоступна пока все не заполнено
         continueButton.setEnabled(
-                formMonth.getValue() != null && (
+                (formTypeId.getValue() != null && !formTypeId.getValue().isEmpty()) &&
+                (!isMonthly || formMonth.getValue() != null) && (
                         //Если нф с периодом сравнения, то он должен быть заполнен
                         !comparative || (
                                 comparativPeriodId.getValue() != null && !comparativPeriodId.getValue().isEmpty())
@@ -203,14 +205,19 @@ public class CreateFormDataView extends PopupViewWithUiHandlers<CreateFormDataUi
         updateEnabled();
     }
 
+    @UiHandler("comparativPeriodId")
+    public void onComparativPeriodIdChange(ValueChangeEvent<List<Integer>> event) {
+        updateEnabled();
+    }
+
     @UiHandler("formTypeId")
     public void onFormTypeIdChange(ValueChangeEvent<List<Long>> event) {
         formMonth.setValue(null);
         if (getUiHandlers() != null && formTypeId.getValue() != null && !formTypeId.getValue().isEmpty() && reportPeriodIds.getValue() != null && !reportPeriodIds.getValue().isEmpty()) {
             getUiHandlers().checkFormType(formTypeId.getValue().get(0).intValue(), reportPeriodIds.getValue().get(0));
+        } else {
+            updateEnabled();
         }
-
-        updateEnabled();
     }
 
     @UiHandler("continueButton")
@@ -218,9 +225,11 @@ public class CreateFormDataView extends PopupViewWithUiHandlers<CreateFormDataUi
         if (getUiHandlers() != null) {
             if (isMonthly && formMonth.getValue() == null) {
                 Dialog.errorMessage("Ошибка", "Не задан месяц!");
+                return;
             }
-            if (comparative && comparativPeriodId.getValue() == null) {
+            if (comparative && (comparativPeriodId.getValue() == null || comparativPeriodId.getValue().isEmpty())) {
                 Dialog.errorMessage("Ошибка", "Не задан период сравнения!");
+                return;
             }
             getUiHandlers().onConfirm();
         }
@@ -329,13 +338,6 @@ public class CreateFormDataView extends PopupViewWithUiHandlers<CreateFormDataUi
         this.isMonthly = isMonthly;
         monthPanel.setVisible(isMonthly);
         formMonth.setEnabled(isMonthly);
-        // Кнопка "Создать" пока неактивна
-        if (isMonthly) {
-            continueButton.setEnabled(false);
-            // Иначе, кнопка активна
-        } else {
-            continueButton.setEnabled(true);
-        }
     }
 
     @Override

@@ -50,6 +50,8 @@ public class CreateFormDataPresenter extends PresenterWidget<CreateFormDataPrese
         void setComparative(boolean comparative);
 
         void setElementNames(Map<FormDataElementName, String> fieldNames);
+
+        void updateEnabled();
     }
 
     @Inject
@@ -225,6 +227,7 @@ public class CreateFormDataPresenter extends PresenterWidget<CreateFormDataPrese
                         if (result.isComparative()) {
                             getView().setAcceptableComparativPeriods(result.getComparativPeriods());
                         }
+                        getView().updateEnabled();
                     }
                 }, this));
     }
