@@ -7,14 +7,19 @@ import java.util.Date;
  * User: avanteev
  */
 public final class MessageGenerator {
-    public static String getFDMsg(String mainStr, String formTypeName, String kindName, String departmentName, Integer periodOrder, boolean manual, DepartmentReportPeriod reportPeriod, DepartmentReportPeriod rpComparison){
+
+    public static String getFDMsg(String mainStr, FormData formData, String departmentName, boolean manual, DepartmentReportPeriod reportPeriod, DepartmentReportPeriod rpComparison){
+        return getFDMsg(mainStr, formData.getFormType().getName(), formData.getKind().getName(), formData.isAccruing(), departmentName, formData.getPeriodOrder(), manual, reportPeriod, rpComparison);
+    }
+
+    public static String getFDMsg(String mainStr, String formTypeName, String kindName, boolean isAccruing, String departmentName, Integer periodOrder, boolean manual, DepartmentReportPeriod reportPeriod, DepartmentReportPeriod rpComparison){
         if (rpComparison == null) {
             return String.format(COMPLETE_FORM,
                     mainStr,
                     formTypeName,
                     kindName,
                     departmentName,
-                    reportPeriod.getReportPeriod().getName(),
+                    isAccruing ? reportPeriod.getReportPeriod().getAccName() : reportPeriod.getReportPeriod().getName(),
                     reportPeriod.getReportPeriod().getTaxPeriod().getYear(),
                     periodOrder != null ? String.format(MONTH,  Formats.getRussianMonthNameWithTier(periodOrder)): "",
                     reportPeriod.getCorrectionDate() != null ? String.format(CORRECTION_DATE, SDF_DD_MM_YYYY.format(reportPeriod.getCorrectionDate())) : "",
@@ -25,9 +30,9 @@ public final class MessageGenerator {
                     formTypeName,
                     kindName,
                     departmentName,
-                    reportPeriod.getReportPeriod().getName(),
+                    isAccruing ? reportPeriod.getReportPeriod().getAccName() : reportPeriod.getReportPeriod().getName(),
                     reportPeriod.getReportPeriod().getTaxPeriod().getYear(),
-                    rpComparison.getReportPeriod().getName(),
+                    isAccruing ? rpComparison.getReportPeriod().getAccName() : rpComparison.getReportPeriod().getName(),
                     rpComparison.getReportPeriod().getTaxPeriod().getYear(),
                     periodOrder != null ? String.format(MONTH,  Formats.getRussianMonthNameWithTier(periodOrder)): "",
                     reportPeriod.getCorrectionDate() != null ? String.format(CORRECTION_DATE, SDF_DD_MM_YYYY.format(reportPeriod.getCorrectionDate())) : "",

@@ -168,7 +168,7 @@ public class DeclarationTemplateController {
 
             //Проверка на использоваение jrxml другими декларациями
             //http://jira.aplana.com/browse/SBRFACCTAX-12066
-            String uploadUuid = blobDataService.create(file.getInputStream(), file.getName());
+            String uploadUuid = blobDataService.create(file.getInputStream(), file.getOriginalFilename());
             declarationTemplate.setCreateScript(declarationTemplateService.getDeclarationTemplateScript(declarationTemplateId));
             if (
                     declarationTemplate.getJrxmlBlobId() != null

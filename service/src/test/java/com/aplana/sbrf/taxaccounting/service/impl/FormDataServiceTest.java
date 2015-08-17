@@ -307,6 +307,7 @@ public class FormDataServiceTest extends Assert{
         formData1.setState(WorkflowState.CREATED);
         formData1.setKind(FormDataKind.SUMMARY);
         formData1.setDepartmentId(1);
+        formData1.setAccruing(true);
         formData1.setReportPeriodId(2);
         formData1.setId(2l);
         formData1.setDepartmentReportPeriodId(2);
@@ -323,6 +324,7 @@ public class FormDataServiceTest extends Assert{
         reportPeriod1.setId(2);
         reportPeriod1.setTaxPeriod(taxPeriod);
         reportPeriod1.setName("Второй тестовый период");
+        reportPeriod1.setAccName("второй квартал (полугодие)");
 
         Department department = new Department();
         department.setName("Тестовое подразделение");
@@ -352,11 +354,11 @@ public class FormDataServiceTest extends Assert{
 
         assertTrue(formDataService.existFormData(1, FormDataKind.SUMMARY, 1, logger));
         assertEquals(
-                "Существует экземпляр налоговых форм: Тип: \"тестовый\", Вид: \"Сводная\", Подразделение: \"Тестовое подразделение\", Период: \"Тестовый период 2014\", Период сравнения: Тестовый период 2014, Версия: \"автоматическая\"",
+                "Существует экземпляр налоговых форм: Тип: \"Тестовый тип НФ\", Вид: \"Сводная\", Подразделение: \"Тестовое подразделение\", Период: \"Тестовый период 2014\", Период сравнения: Тестовый период 2014, Версия: \"автоматическая\"",
                 logger.getEntries().get(0).getMessage()
         );
         assertEquals(
-                "Существует экземпляр налоговых форм: Тип: \"тестовый\", Вид: \"Сводная\", Подразделение: \"Тестовое подразделение\", Период: \"Второй тестовый период 2014\", Дата сдачи корректировки: 01.01.2014,  Версия: \"автоматическая\"",
+                "Существует экземпляр налоговых форм: Тип: \"Тестовый тип НФ\", Вид: \"Сводная\", Подразделение: \"Тестовое подразделение\", Период: \"второй квартал (полугодие) 2014\", Дата сдачи корректировки: 01.01.2014,  Версия: \"автоматическая\"",
                 logger.getEntries().get(1).getMessage()
         );
     }

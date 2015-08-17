@@ -229,7 +229,7 @@ void logicCheck() {
 
     // 1. Проверка заполнения ячеек
     for (def row : dataRows) {
-        if (row.getAlias() == null) {
+        if (!row.getAlias()) {
             continue
         }
         // 1. Проверка заполнения ячеек (обязательные поля) (для строки I и II некоторые графы пропускаются)
@@ -246,7 +246,7 @@ void logicCheck() {
 
     // 2. Проверка заполнения граф 4 - 9
     for (def row : dataRows) {
-        if (row.getAlias() == null) {
+        if (!row.getAlias()) {
             continue
         }
         // 2. Проверка заполнения граф 4 - 9 (арифметирческие проверки)
@@ -464,7 +464,7 @@ void consolidation() {
                 def sourceRows = formDataService.getDataRowHelper(source)?.allSaved
                 // суммируем графу 4..9 из источников
                 for (def row : dataRows) {
-                    if (row.getAlias() == null) {
+                    if (!row.getAlias()) {
                         continue
                     }
                     def sourceRow = getDataRow(sourceRows, row.getAlias())

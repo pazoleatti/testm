@@ -1,6 +1,7 @@
 package form_template.etr.amount_tax.v2015
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
+import com.aplana.sbrf.taxaccounting.model.WorkflowState
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import groovy.transform.Field
@@ -38,6 +39,11 @@ switch (formDataEvent) {
         importData()
         formDataService.saveCachedDataRows(formData, logger)
         break
+    case FormDataEvent.COMPOSE:
+        consolidation()
+        logicCheck()
+        formDataService.saveCachedDataRows(formData, logger)
+        break
 }
 
 // Редактируемые атрибуты
@@ -52,6 +58,26 @@ def autoFillColumns = []
 @Field
 def nonEmptyColumns = ['sum']
 
+@Field
+def startDate = null
+
+@Field
+def endDate = null
+
+def getReportPeriodStartDate() {
+    if (startDate == null) {
+        startDate = reportPeriodService.getStartDate(formData.reportPeriodId).time
+    }
+    return startDate
+}
+
+def getReportPeriodEndDate() {
+    if (endDate == null) {
+        endDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
+    }
+    return endDate
+}
+
 void logicCheck() {
     def dataRows = formDataService.getDataRowHelper(formData).allCached
     for (row in dataRows) {
@@ -64,6 +90,29 @@ void logicCheck() {
 
 boolean isBank() {
     return formData.departmentId == 1
+}
+
+void consolidation() {
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
+    // очистить графу 4
+    dataRows.each { row ->
+        row.sum = null
+    }
+
+    departmentFormTypeService.getFormSources(formData.departmentId, formData.formType.id, formData.kind,
+            getReportPeriodStartDate(), getReportPeriodEndDate()).each {
+        if (it.formTypeId == formData.formType.id) {
+            def source = formDataService.getLast(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId, formData.periodOrder)
+            if (source != null && source.state == WorkflowState.ACCEPTED) {
+                def sourceRows = formDataService.getDataRowHelper(source)?.allSaved
+                // суммируем графу 4 из источников
+                for (def row : dataRows) {
+                    def sourceRow = getDataRow(sourceRows, row.getAlias())
+                    row.sum = (row.sum ?: 0) + (sourceRow.sum ?: 0)
+                }
+            }
+        }
+    }
 }
 
 void importData() {

@@ -1260,10 +1260,8 @@ public class FormDataServiceImpl implements FormDataService {
                 case IMPORT_FD:
                 case IMPORT_TF_FD:
                     name = MessageGenerator.getFDMsg(reportType.getDescription(),
-                            formData.getFormType().getName(),
-                            formData.getKind().getName(),
+                            formData,
                             department.getName(),
-                            null,
                             manual,
                             reportPeriod,
                             rpComparison);
@@ -1271,10 +1269,8 @@ public class FormDataServiceImpl implements FormDataService {
                     break;
                 case MOVE_FD:
                     name = MessageGenerator.getFDMsg(str,
-                            formData.getFormType().getName(),
-                            formData.getKind().getName(),
+                            formData,
                             department.getName(),
-                            null,
                             manual,
                             reportPeriod,
                             rpComparison);
@@ -1285,30 +1281,24 @@ public class FormDataServiceImpl implements FormDataService {
                 case EDIT_FD:
                 case DELETE_FD:
                     name = MessageGenerator.getFDMsg(String.format(reportType.getDescription(), formData.getFormType().getTaxType().getTaxText()),
-                            formData.getFormType().getName(),
-                            formData.getKind().getName(),
+                            formData,
                             department.getName(),
-                            null,
                             manual,
                             reportPeriod,
                             rpComparison);
                     break;
                 default:
                     name = MessageGenerator.getFDMsg("Налоговая форма",
-                            formData.getFormType().getName(),
-                            formData.getKind().getName(),
+                            formData,
                             department.getName(),
-                            null,
                             manual,
                             reportPeriod,
                             rpComparison);
             }
         } else {
             name = MessageGenerator.getFDMsg("Налоговая форма",
-                    formData.getFormType().getName(),
-                    formData.getKind().getName(),
+                    formData,
                     department.getName(),
-                    null,
                     manual,
                     reportPeriod,
                     rpComparison);
@@ -1409,10 +1399,8 @@ public class FormDataServiceImpl implements FormDataService {
                         MessageGenerator.getFDMsg(
                                 String.format(MSG_IS_EXIST_FORM,
                                         ft.getType().getTaxType() == TaxType.ETR || ft.getType().getTaxType() == TaxType.DEAL ? "оррм" : "налоговых форм"),
-                                ft.getName(),
-                                kind.getName(),
+                                formData,
                                 departmentService.getDepartment(departmentId).getName(),
-                                formData.getPeriodOrder(),
                                 formData.isManual(),
                                 drp,
                                 drpCompare)
@@ -1712,10 +1700,8 @@ public class FormDataServiceImpl implements FormDataService {
             DepartmentReportPeriod drpCompare = departmentReportPeriodService.get(fd.getComparativPeriodId());
 
             logger.error(MessageGenerator.getFDMsg(FD_NOT_IN_RANGE,
-                    fd.getFormType().getName(),
-                    fd.getKind().getName(),
+                    fd,
                     departmentService.getDepartment(fd.getDepartmentId()).getName(),
-                    fd.getPeriodOrder(),
                     fd.isManual(),
                     drp,
                     drpCompare));
@@ -1815,7 +1801,7 @@ public class FormDataServiceImpl implements FormDataService {
             case CSV:
                 int rowCountReport = dataRowDao.getRowCount(formData);
                 int columnCountReport = formTemplateService.get(formData.getFormTemplateId()).getColumns().size();
-                return Long.valueOf(rowCountReport * columnCountReport);
+                return (long) (rowCountReport * columnCountReport);
             case CONSOLIDATE_FD:
                 ReportPeriod reportPeriod = reportPeriodService.getReportPeriod(formData.getReportPeriodId());
                 List<DepartmentFormType> departmentFormTypesSources = getFormSources(formData, logger, userInfo, reportPeriod, true);
