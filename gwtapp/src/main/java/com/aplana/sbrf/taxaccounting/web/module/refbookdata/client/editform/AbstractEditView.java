@@ -308,6 +308,10 @@ public abstract class AbstractEditView extends ViewWithUiHandlers<EditFormUiHand
     }
 
     private BigDecimal checkNumber(RefBookColumn key, HasValue value, boolean checkRequired)  throws BadValueException{
+        return checkNumber(key, value, checkRequired, new HashMap<String, String>(0));
+    }
+
+    private BigDecimal checkNumber(RefBookColumn key, HasValue value, boolean checkRequired, HashMap<String, String> errorMap)  throws BadValueException{
         BigDecimal number;
         if (value instanceof CheckBox) {
             number = value.getValue() == null ?
@@ -326,7 +330,7 @@ public abstract class AbstractEditView extends ViewWithUiHandlers<EditFormUiHand
                 number = null;
             }
         }
-        if (checkRequired) checkRequired(key, number);
+        if (checkRequired) checkRequired(key, number, errorMap);
         if (number != null) {
             int fractionalPart = number.scale();
             int integerPart = number.precision();
@@ -350,38 +354,36 @@ public abstract class AbstractEditView extends ViewWithUiHandlers<EditFormUiHand
     @SuppressWarnings("unchecked")
     private Map<String, RefBookValueSerializable> getFieldsValues(boolean checkRequired) throws BadValueException {
         Map<String, RefBookValueSerializable> fieldsValues = new HashMap<String, RefBookValueSerializable>();
+        HashMap<String, String> errorMap = new HashMap<String, String>();
         for (Map.Entry<RefBookColumn, HasValue> field : widgets.entrySet()) {
             RefBookValueSerializable value = new RefBookValueSerializable();
             try {
                 switch (field.getKey().getAttributeType()) {
                     case NUMBER:
                         value.setAttributeType(RefBookAttributeType.NUMBER);
-                        value.setNumberValue(checkNumber(field.getKey(), field.getValue(), checkRequired));
+                        value.setNumberValue(checkNumber(field.getKey(), field.getValue(), checkRequired, errorMap));
                         break;
                     case STRING:
                         String string = (field.getValue().getValue() == null || ((String)field.getValue().getValue()).trim().isEmpty()) ?
                                 null : (String)field.getValue().getValue();
-                        if (checkRequired) checkRequired(field.getKey(), string);
+                        if (checkRequired) checkRequired(field.getKey(), string, errorMap);
                         Integer maxLength = field.getKey().getMaxLength();
                         if (maxLength == null) maxLength = MAX_STRING_VALUE_LENGTH;
                         if (string!= null && string.length() > maxLength) {
-                            BadValueException badValueException = new BadValueException();
-                            badValueException.setFieldName(field.getKey().getName());
-                            badValueException.setDescription("количество символов превышает максимально допустимое = " + maxLength);
-                            throw badValueException;
+                            errorMap.put(field.getKey().getName(), "количество символов превышает максимально допустимое = " + maxLength);
                         }
                         value.setAttributeType(RefBookAttributeType.STRING);
                         value.setStringValue(string);
                         break;
                     case DATE:
                         Date date = field.getValue().getValue() == null ? null : (Date)field.getValue().getValue();
-                        if (checkRequired) checkRequired(field.getKey(), date);
+                        if (checkRequired) checkRequired(field.getKey(), date, errorMap);
                         value.setAttributeType(RefBookAttributeType.DATE);
                         value.setDateValue(date);
                         break;
                     case REFERENCE:
                         Long longValue = (field.getValue().getValue() == null || ((List<Long>) field.getValue().getValue()).isEmpty()) ? null : ((List<Long>)field.getValue().getValue()).get(0);
-                        if (checkRequired) checkRequired(field.getKey(), longValue);
+                        if (checkRequired) checkRequired(field.getKey(), longValue, errorMap);
                         value.setAttributeType(RefBookAttributeType.REFERENCE);
                         value.setReferenceValue(longValue);
                         break;
@@ -390,26 +392,31 @@ public abstract class AbstractEditView extends ViewWithUiHandlers<EditFormUiHand
                 }
                 fieldsValues.put(field.getKey().getAlias(), value);
             } catch (NumberFormatException nfe) {
-                BadValueException badValueException = new BadValueException();
+                errorMap.put(field.getKey().getName(), "значение некорректно. Неправильный формат числа");
+                /*BadValueException badValueException = new BadValueException();
                 badValueException.setFieldName(field.getKey().getName());
                 badValueException.setDescription("значение некорректно. Неправильный формат числа");
-                throw badValueException;
+                throw badValueException;*/
             } catch (ClassCastException cce) {
-                BadValueException badValueException = new BadValueException();
+                errorMap.put(field.getKey().getName(), "значение некорректно");
+                /*BadValueException badValueException = new BadValueException();
                 badValueException.setFieldName(field.getKey().getName());
                 badValueException.setDescription("значение некорректно");
-                throw badValueException;
+                throw badValueException;*/
             }
         }
+        if (!errorMap.isEmpty())
+            throw new BadValueException(errorMap);
         return fieldsValues;
     }
 
-    private void checkRequired(RefBookColumn attr, Object val) throws BadValueException {
+    private void checkRequired(RefBookColumn attr, Object val, HashMap<String, String> errorMap) throws BadValueException {
         if (attr.isRequired() && (val == null)) {
-            BadValueException badValueException = new BadValueException();
+            errorMap.put(attr.getName(), "обязателен для заполнения");
+            /*BadValueException badValueException = new BadValueException();
             badValueException.setFieldName(attr.getName());
             badValueException.setDescription("обязателен для заполнения");
-            throw badValueException;
+            throw badValueException;*/
         }
     }
 
