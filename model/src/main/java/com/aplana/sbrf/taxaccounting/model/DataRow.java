@@ -130,7 +130,7 @@ public class DataRow<C extends AbstractCell> extends IdentityObject<Long> implem
 			 C cellValue = col;
 			data.add(cellValue);
 		} else {
-			throw new IllegalArgumentException("Алиас столбца + '"
+			throw new IllegalArgumentException("Алиас столбца '"
 					+ col.getColumn().getAlias() + "' уже существует в шаблоне");
 		}
 	}

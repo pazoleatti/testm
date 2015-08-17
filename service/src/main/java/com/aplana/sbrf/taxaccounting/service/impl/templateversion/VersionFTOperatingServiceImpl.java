@@ -43,8 +43,6 @@ public class VersionFTOperatingServiceImpl implements VersionOperatingService {
     @Autowired
     private DepartmentService departmentService;
     @Autowired
-    private PeriodService periodService;
-    @Autowired
     private SourceService sourceService;
     @Autowired
     private DepartmentReportPeriodService departmentReportPeriodService;
@@ -58,7 +56,8 @@ public class VersionFTOperatingServiceImpl implements VersionOperatingService {
         for (long formDataId : fdIds) {
             FormData formData = formDataDao.getWithoutRows(formDataId);
             DepartmentReportPeriod drp = departmentReportPeriodService.get(formData.getDepartmentReportPeriodId());
-            DepartmentReportPeriod drpCompare = departmentReportPeriodService.get(formData.getComparativPeriodId());
+            DepartmentReportPeriod drpCompare = formData.getComparativPeriodId() != null ?
+                    departmentReportPeriodService.get(formData.getComparativPeriodId()) : null;
 
             logger.error(MessageGenerator.getFDMsg(
                     String.format(MSG_IS_USED_VERSION, MessageGenerator.mesSpeck(formData.getFormType().getTaxType())),
