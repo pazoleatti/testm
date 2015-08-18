@@ -62,7 +62,7 @@ public class CheckHasNotAcceptedFormHandler extends AbstractActionHandler<CheckH
         for (FormData fd : forms) {
             if (fd.getState() != WorkflowState.ACCEPTED) {
                 DepartmentReportPeriod drp = departmentReportPeriodService.get(fd.getDepartmentReportPeriodId());
-                DepartmentReportPeriod drpCompare = departmentReportPeriodService.get(fd.getComparativPeriodId());
+                DepartmentReportPeriod drpCompare = fd.getComparativPeriodId() != null ? departmentReportPeriodService.get(fd.getComparativPeriodId()) : null;
                 logger.warn(MessageGenerator.getFDMsg(FD_NOT_ACCEPTED,
                                 fd,
                                 departmentService.getDepartment(fd.getDepartmentId()).getName(),
