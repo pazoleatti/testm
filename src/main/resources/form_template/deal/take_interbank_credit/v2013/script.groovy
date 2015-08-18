@@ -228,8 +228,6 @@ void calc() {
         // Расчет поля "Стоимость"
         row.total = row.sum
     }
-
-    sortFormDataRows(false)
 }
 
 // Получение импортируемых данных

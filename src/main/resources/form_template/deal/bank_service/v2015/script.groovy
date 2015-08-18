@@ -190,8 +190,6 @@ void calc() {
         // Расчет поля "Стоимость"
         row.cost = row.bankIncomeSum
     }
-
-    sortFormDataRows(false)
 }
 
 // Получение импортируемых данных

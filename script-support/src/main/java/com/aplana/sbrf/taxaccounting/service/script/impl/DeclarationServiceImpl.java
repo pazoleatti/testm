@@ -166,7 +166,7 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
                         append(UUID.randomUUID().toString().toUpperCase());
             } else {
                 stringBuilder.append('_').
-                        append(departmentParam.get("TAX_ORGAN_CODE").toString()).
+                        append(departmentParam.get("TAX_ORGAN_CODE_PROM").toString()).
                         append('_').
                         append(departmentParam.get("TAX_ORGAN_CODE").toString()).
                         append('_').
