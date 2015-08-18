@@ -42,7 +42,7 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 
     private static final String FORM_DATA_KIND_STATE_ERROR_LOG = "Event type: \"%s\". Unsuppotable case for formData with \"%s\" kind and \"%s\" state!";
     private static final String REPORT_PERIOD_IS_CLOSED_LOG = "Department report period (%d) is closed!";
-    private static final String REPORT_PERIOD_IS_CLOSED = "Выбранный отчетный период подразделения закрыт!";
+    private static final String REPORT_PERIOD_IS_CLOSED = "Выбранный период закрыт";
     private static final String FORM_TEMPLATE_WRONG_STATUS_LOG = "Form template (%d) does not exist in report period (%d)!";
     private static final String FORM_TEMPLATE_WRONG_STATUS = "Выбранный вид %s не существует в выбранном периоде!";
     private static final String INCORRECT_DEPARTMENT_FORM_TYPE_LOG = "Form type (%d) and form kind (%d) is not applicated for department (%d)";
