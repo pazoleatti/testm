@@ -423,6 +423,13 @@ DataRow<Cell> calcItog(def int i, def List<DataRow<Cell>> dataRows) {
     newRow.itog = 'Подитог:'
     newRow.setAlias('itg#'.concat(i.toString()))
     newRow.getCell('fix').colSpan = 2
+    ['rowNum', 'itog', 'fullName', 'interdependence', 'inn', 'countryName', 'countryCode',
+            'docNumber', 'docDate', 'dealNumber', 'dealDate', 'dealFocus', 'deliverySign',
+            'metalName', 'foreignDeal', 'countryCodeNumeric', 'regionCode', 'city', 'locality',
+            'countryCodeNumeric2', 'region2', 'city2', 'locality2', 'deliveryCode', 'count',
+            'incomeSum', 'outcomeSum', 'price', 'total', 'fix', 'dealDoneDate'].each {
+        newRow.getCell(it).setStyleAlias('Контрольные суммы')
+    }
 
     // Расчеты подитоговых значений
     def BigDecimal priceItg = 0, totalItg = 0

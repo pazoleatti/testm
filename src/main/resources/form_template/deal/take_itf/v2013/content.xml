@@ -162,4 +162,11 @@
         <fontColor>BLACK</fontColor>
         <italic>false</italic>
     </styles>
+    <styles>
+        <alias>Контрольные суммы</alias>
+        <backColor>LIGHT_BROWN</backColor>
+        <bold>true</bold>
+        <fontColor>BLACK</fontColor>
+        <italic>false</italic>
+    </styles>
 </formTemplateContent>

@@ -281,6 +281,10 @@ DataRow<Cell> calcItog(def int i, def List<DataRow<Cell>> dataRows) {
     newRow.getCell('fix').colSpan = 2
     newRow.itog = 'Подитог:'
     newRow.setAlias('itg#'.concat(i.toString()))
+    ['rowNumber', 'itog', 'fullName', 'inn', 'countryName', 'docNumber', 'docDate',
+            'dealNumber', 'dealDate', 'sum', 'price', 'total', 'fix', 'dealDoneDate'].each {
+        newRow.getCell(it).setStyleAlias('Контрольные суммы')
+    }
 
     // Расчеты подитоговых значений
     def BigDecimal sumItg = 0, priceitg = 0, totalItg = 0
