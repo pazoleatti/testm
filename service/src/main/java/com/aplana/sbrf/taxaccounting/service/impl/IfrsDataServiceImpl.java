@@ -96,6 +96,7 @@ public class IfrsDataServiceImpl implements IfrsDataService {
         for(FormData formData: formDataList) {
             if (!formData.getState().equals(WorkflowState.ACCEPTED)) {
                 notAcceptedFormDataList.add(formData);
+                formTypeList.remove(Integer.valueOf(formData.getFormType().getId()));
             } else {
                 if (formTypeList.contains(formData.getFormType().getId())) {
                     formTypeList.remove(Integer.valueOf(formData.getFormType().getId()));
