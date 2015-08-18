@@ -52,6 +52,7 @@ for x in (select fd.id as form_data_id, ft.id as form_template_id
       join form_data fd on fd.form_template_id = ft.id
       where exists (select 1 from user_tab_columns utc where table_name = 'FORM_DATA_'||ft.id and column_name = 'ALIAS') and
             exists (select 1 from form_column where form_template_id = ft.id and type = 'A')
+			and number_current_row is null
       ) loop
 query_str := 'UPDATE FORM_DATA SET number_current_row = (SELECT count(*) FROM FORM_DATA_'||x.form_template_id||' WHERE form_data_id = '||x.form_data_id||' AND (alias IS NULL OR alias LIKE ''%{wan}%'')) WHERE ID = '||x.form_data_id;
 execute immediate query_str;      
