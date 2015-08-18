@@ -44,11 +44,11 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
     private static final String REPORT_PERIOD_IS_CLOSED_LOG = "Department report period (%d) is closed!";
     private static final String REPORT_PERIOD_IS_CLOSED = "Выбранный период закрыт";
     private static final String FORM_TEMPLATE_WRONG_STATUS_LOG = "Form template (%d) does not exist in report period (%d)!";
-    private static final String FORM_TEMPLATE_WRONG_STATUS = "Выбранный вид %s не существует в выбранном периоде!";
+    private static final String FORM_TEMPLATE_WRONG_STATUS = "Выбранный тип %s не существует в выбранном периоде!";
     private static final String INCORRECT_DEPARTMENT_FORM_TYPE_LOG = "Form type (%d) and form kind (%d) is not applicated for department (%d)";
     private static final String INCORRECT_DEPARTMENT_FORM_TYPE1 = "Выбранный тип %s не назначен подразделению!";
     private static final String INCORRECT_DEPARTMENT_FORM_TYPE2 = "Нет прав доступа к созданию формы с заданными параметрами!";
-    private static final String INCORRECT_DEPARTMENT_FORM_TYPE3 = "Выбранный вид %s не назначен подразделению";
+    private static final String INCORRECT_DEPARTMENT_FORM_TYPE3 = "Выбранный тип %s не назначен подразделению";
     private static final String CREATE_FORM_DATA_ERROR_ONLY_CONTROL_LOG = "Only ROLE_CONTROL can create form in balance period!";
     private static final String CREATE_FORM_DATA_ERROR_ONLY_CONTROL = "Выбран период ввода остатков. В периоде ввода остатков оператор не может создавать %s";
     private static final String CREATE_MANUAL_FORM_DATA_ERROR_ONLY_CONTROL_LOG = "Only ROLE_CONTROL can create manual version of form!";
