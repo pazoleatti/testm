@@ -1,11 +1,11 @@
 package com.aplana.taxaccounting
 
+import com.aplana.sbrf.taxaccounting.model.Color
 import groovy.sql.Sql
+import org.apache.commons.io.IOUtils
 import org.custommonkey.xmlunit.Diff
 import org.custommonkey.xmlunit.XMLUnit
-import org.apache.commons.io.IOUtils
-import org.xml.sax.SAXException;
-import com.aplana.sbrf.taxaccounting.model.Color
+import org.xml.sax.SAXException
 
 /**
  * Отчет сравнения Git и БД
@@ -14,22 +14,25 @@ class DBReport {
     // Сравнение шаблонов в БД
     def static void compareDBFormTemplate(def prefix1, def prefix2) {
         // Запросы на получение макетов
-        def sqlTemplate1 = "SELECT ft1.id " +
-                " ,ft1.type_id " +
-                " ,ft1.data_rows " +
-                " ,ft1.fixed_rows " +
-                " ,ft1.NAME " +
-                " ,ft1.fullname " +
-                " ,ft1.header AS code " +
-                " ,ft1.data_headers " +
-                " ,to_char(ft1.version, 'RRRR') AS version " +
-                " ,(select to_char(MIN(ft2.version) - INTERVAL '1' day, 'RRRR') from form_template ft2 where ft1.type_id = ft2.type_id AND TRUNC(ft2.version, 'DD') > ft1.version AND ft2.STATUS IN (0,1,2) group by ft2.type_id) AS versionEnd " +
-                " ,ft1.STATUS " +
-                " ,ft1.script " +
-                " ,ft1.monthly " +
-                "FROM form_template ft1 " +
-                "WHERE  " +
-                " ft1.STATUS NOT IN (-1,2)"
+        def sqlTemplate1 = { boolean compExist ->
+            return "SELECT ft1.id " +
+                    " ,ft1.type_id " +
+                    " ,ft1.data_rows " +
+                    " ,ft1.fixed_rows " +
+                    " ,ft1.NAME " +
+                    " ,ft1.fullname " +
+                    " ,ft1.header AS code " +
+                    " ,ft1.data_headers " +
+                    " ,to_char(ft1.version, 'RRRR') AS version " +
+                    " ,(select to_char(MIN(ft2.version) - INTERVAL '1' day, 'RRRR') from form_template ft2 where ft1.type_id = ft2.type_id AND TRUNC(ft2.version, 'DD') > ft1.version AND ft2.STATUS IN (0,1,2) group by ft2.type_id) AS versionEnd " +
+                    " ,ft1.STATUS " +
+                    " ,ft1.script " +
+                    " ,ft1.monthly " +
+                    (compExist ? " ,ft1.comparative " : "") +
+                    "FROM form_template ft1 " +
+                    "WHERE  " +
+                    " ft1.STATUS NOT IN (-1,2)"
+        }
         def sqlTemplate2 = sqlTemplate1
 
         // Запросы на получение колонок
@@ -91,7 +94,7 @@ class DBReport {
                 table(class: 'rt') {
                     Main.TAX_FOLDERS.keySet().each { taxName ->
                         tr {
-                            td(colspan: 17, class: 'hdr', Main.TAX_FOLDERS[taxName])
+                            td(colspan: 18, class: 'hdr', Main.TAX_FOLDERS[taxName])
                         }
                         tr {
                             th(rowspan: 2, 'type_id')
@@ -99,7 +102,7 @@ class DBReport {
                             th(rowspan: 2, 'Версия')
                             th(rowspan: 2, "$prefix1 id")
                             th(rowspan: 2, "$prefix2 id")
-                            th(colspan: 12, 'Результат сравнения')
+                            th(colspan: 13, 'Результат сравнения')
                         }
                         tr {
                             th 'name'
@@ -113,6 +116,7 @@ class DBReport {
                             th 'script'
                             th 'columns'
                             th 'monthly'
+                            th 'comparative'
                             th 'styles'
                         }
 
@@ -309,6 +313,7 @@ class DBReport {
                                     def columnsC = colDiff == null ? '+' : '—'
                                     def stylesC = styleDiff == null ? '+' : '—'
                                     def monthlyC = tmp1?.monthly == tmp2?.monthly ? '+' : '—'
+                                    def comparativeC = tmp1?.comparative == tmp2?.comparative ? '+' : '—'
 
                                     tr(class: ((tmp1?.id != null && tmp2?.id != null) ? 'nr' : 'er')) {
                                         td type_id
@@ -391,6 +396,12 @@ class DBReport {
                                             td(class: 'td_error', title: "$prefix1 = ${tmp1?.monthly}, $prefix2 = ${tmp2?.monthly}", monthlyC)
                                         }
 
+                                        if (comparativeC == '+') {
+                                            td(class: 'td_ok', comparativeC)
+                                        } else {
+                                            td(class: 'td_error', title: "$prefix1 = ${tmp1?.comparative}, $prefix2 = ${tmp2?.comparative}", comparativeC)
+                                        }
+
                                         if (stylesC == '+') {
                                             td(class: 'td_ok', stylesC)
                                         } else {
@@ -445,13 +456,15 @@ class DBReport {
         println("DBMS connect: $prefix")
         def retVal = new Expando()
 
-        def sql = Sql.newInstance(Main.DB_URL, prefix, Main.DB_PASSWORD, "oracle.jdbc.OracleDriver")
+        Sql sql = Sql.newInstance(Main.DB_URL, prefix, Main.DB_PASSWORD, "oracle.jdbc.OracleDriver")
 
         def templateMap = [:]
         def columnsMap = [:]
         def stylesMap = [:]
 
-        sql.eachRow(sqlTemplate) {
+        def map = sql.firstRow("SELECT count(column_name) as result FROM user_tab_cols where table_name = 'FORM_TEMPLATE' and column_name = 'COMPARATIVE'")
+        boolean compExist = (map.result as Integer) == 1
+        sql.eachRow(sqlTemplate(compExist)) {
             def type_id = it.type_id as Integer
             if (templateMap[type_id] == null) {
                 templateMap.put((Integer) it.type_id, [:])
@@ -471,6 +484,7 @@ class DBReport {
             version.status = it.status
             version.script = it.script?.characterStream?.text?.trim()?.replaceAll("\r", "")
             version.monthly = it.monthly as Integer
+            version.comparative = compExist ? (it.comparative as Integer) : null
             templateMap[type_id].put(it.version, version)
             if (!allVersions.containsKey(type_id)) {
                 allVersions.put(type_id, [] as Set)
@@ -624,7 +638,7 @@ class DBReport {
     def private static printStylesTable(def builder, def changesMap, def headers, def prefix, def stylesSet) {
         // Название таблицы
         builder.tr {
-            td(colspan: 4, class: 'hdr', prefix)
+            td(colspan: 5, class: 'hdr', prefix)
         }
         builder.tr {
             headers.each { header ->

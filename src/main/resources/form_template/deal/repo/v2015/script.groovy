@@ -16,11 +16,11 @@ switch (formDataEvent) {
     case FormDataEvent.CREATE:
         formDataService.checkUnique(formData, logger)
         break
-    case FormDataEvent.CALCULATE:
-        calc()
-        logicCheck()
-        formDataService.saveCachedDataRows(formData, logger)
-        break
+//    case FormDataEvent.CALCULATE:
+//        calc()
+//        logicCheck()
+//        formDataService.saveCachedDataRows(formData, logger)
+//        break
     case FormDataEvent.CHECK:
         logicCheck()
         break
@@ -31,10 +31,10 @@ switch (formDataEvent) {
         formDataService.getDataRowHelper(formData).delete(currentDataRow)
         break
     case FormDataEvent.MOVE_CREATED_TO_PREPARED:  // Подготовить из "Создана"
-        calc()
-        logicCheck()
-        formDataService.saveCachedDataRows(formData, logger)
-        break
+//        calc()
+//        logicCheck()
+//        formDataService.saveCachedDataRows(formData, logger)
+//        break
     case FormDataEvent.MOVE_CREATED_TO_APPROVED:  // Утвердить из "Создана"
     case FormDataEvent.MOVE_PREPARED_TO_APPROVED: // Утвердить из "Подготовлена"
     case FormDataEvent.MOVE_CREATED_TO_ACCEPTED:  // Принять из "Создана"
@@ -44,7 +44,7 @@ switch (formDataEvent) {
         break
     case FormDataEvent.COMPOSE: // Консолидация
         formDataService.consolidationSimple(formData, logger)
-        calc()
+        //calc()
         logicCheck()
         formDataService.saveCachedDataRows(formData, logger)
         break
@@ -201,13 +201,6 @@ void logicCheck() {
             checkDateValid(logger, row, 'transactionDeliveryDate', row.transactionDeliveryDate, true)
         }
     }
-}
-
-// Алгоритмы заполнения полей формы
-void calc() {
-    // нет полей для заполнения
-    // Сортировка групп и строк
-    sortFormDataRows(false)
 }
 
 // Получение импортируемых данных

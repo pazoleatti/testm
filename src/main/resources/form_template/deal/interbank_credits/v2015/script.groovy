@@ -207,8 +207,6 @@ void calc() {
         // Расчет поля "Итого"
         row.total = row.sum
     }
-
-    sortFormDataRows(false)
 }
 
 // Получение импортируемых данных

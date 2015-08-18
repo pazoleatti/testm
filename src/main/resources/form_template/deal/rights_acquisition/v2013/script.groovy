@@ -187,8 +187,6 @@ void calc() {
         row.totalCost = row.price
         row.okeiCode = getRecordId(12, 'CODE', '796', -1, null, true)
     }
-
-    sortFormDataRows(false)
 }
 
 // Получение импортируемых данных

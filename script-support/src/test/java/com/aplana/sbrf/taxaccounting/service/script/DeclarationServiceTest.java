@@ -128,7 +128,7 @@ public class DeclarationServiceTest {
     @Test
     public void generateXmlFileIdTest2() {
         DeclarationType declarationType = new DeclarationType();
-        declarationType.setTaxType(TaxType.TRANSPORT);
+        declarationType.setTaxType(TaxType.VAT);
         DeclarationTypeDao declarationTypeDao = mock(DeclarationTypeDao.class);
         when(declarationTypeDao.get(1)).thenReturn(declarationType);
         ReflectionTestUtils.setField(service, "declarationTypeDao", declarationTypeDao);
@@ -156,13 +156,13 @@ public class DeclarationServiceTest {
         when(dataProvider.getRecords(addDayToDate(currentCalendar.getTime(), -1), null, String.format("DEPARTMENT_ID = %d", 2), null)).thenReturn(list);
 
         RefBookFactory factory = mock(RefBookFactory.class);
-        when(factory.getDataProvider(31L)).thenReturn(dataProvider);
+        when(factory.getDataProvider(98L)).thenReturn(dataProvider);
 
         ReflectionTestUtils.setField(service, "periodService", reportPeriodService);
         ReflectionTestUtils.setField(service, "factory", factory);
         String fileId = service.generateXmlFileId(1, 1, departmentParam.get("TAX_ORGAN_CODE_PROM").getStringValue(), departmentParam.get("TAX_ORGAN_CODE").getStringValue(), departmentParam.get("KPP").getStringValue());
         assertTrue(fileId != null);
-        assertTrue(fileId.startsWith("NO_TRAND_пкод_ткод_иннкпп_"));
+        assertTrue(fileId.startsWith("NO_NDS_пкод_ткод_иннкпп_"));
     }
 
     @Test
