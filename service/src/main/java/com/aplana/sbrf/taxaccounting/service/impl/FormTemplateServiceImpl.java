@@ -392,7 +392,7 @@ public class FormTemplateServiceImpl implements FormTemplateService {
 						stringBuilder.append(", ");
 					}
 				}
-				logger.error(CLOSE_PERIOD, MessageGenerator.mesSpeckD(formTemplate.getType().getTaxType()), stringBuilder.toString());
+				logger.error(CLOSE_PERIOD, MessageGenerator.mesSpeckPluralD(formTemplate.getType().getTaxType()), stringBuilder.toString());
 			} else if (oldSerial && newCross) { // 9А.1.1
 				formDataService.batchUpdatePreviousNumberRow(formTemplate, user);
 			}

@@ -331,7 +331,8 @@ public class FormDataServiceImpl implements FormDataService {
 		formDataScriptingService.executeScript(userInfo, formData, FormDataEvent.CREATE, logger, null);
 		if (logger.containsLevel(LogLevel.ERROR)) {
 			throw new ServiceLoggerException(
-					"Произошли ошибки в скрипте создания налоговой формы",
+					String.format(
+                            "Произошли ошибки в скрипте создания %s", MessageGenerator.mesSpeckSingleD(formData.getFormType().getTaxType())),
                     logEntryService.save(logger.getEntries()));
 		}
 		formDataDao.save(formData);

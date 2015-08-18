@@ -65,12 +65,20 @@ public final class MessageGenerator {
                 kpp != null ? String.format(KPP, kpp) : "");
     }
 
-    public static String mesSpeck(TaxType taxType){
+    public static String mesSpeckPlural(TaxType taxType){
         return  taxType == TaxType.DEAL || taxType == TaxType.ETR ? "формы" : "налоговые формы";
     }
 
-    public static String mesSpeckD(TaxType taxType){
+    public static String mesSpeckPluralD(TaxType taxType){
         return  taxType == TaxType.DEAL || taxType == TaxType.ETR ? "форм" : "налоговых форм";
+    }
+
+    public static String mesSpeckSingle(TaxType taxType){
+        return  taxType == TaxType.DEAL || taxType == TaxType.ETR ? "форма" : "налоговая форма";
+    }
+
+    public static String mesSpeckSingleD(TaxType taxType){
+        return  taxType == TaxType.DEAL || taxType == TaxType.ETR ? "формы" : "налоговой формы";
     }
 
     private static final String COMPLETE_FORM =

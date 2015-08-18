@@ -60,7 +60,7 @@ public class VersionFTOperatingServiceImpl implements VersionOperatingService {
                     departmentReportPeriodService.get(formData.getComparativPeriodId()) : null;
 
             logger.error(MessageGenerator.getFDMsg(
-                    String.format(MSG_IS_USED_VERSION, MessageGenerator.mesSpeck(formData.getFormType().getTaxType())),
+                    String.format(MSG_IS_USED_VERSION, MessageGenerator.mesSpeckPlural(formData.getFormType().getTaxType())),
                     formData,
                     departmentService.getDepartment(formData.getDepartmentId()).getName(),
                     formData.isManual(),
@@ -169,8 +169,8 @@ public class VersionFTOperatingServiceImpl implements VersionOperatingService {
             FormType typeSource = formTypeService.get(first.getFormTypeId());
             logger.error(
                     String.format(MSG_HAVE_DESTINATION,
-                            MessageGenerator.mesSpeck(typeRelated.getTaxType()),
-                            MessageGenerator.mesSpeck(typeSource.getTaxType()),
+                            MessageGenerator.mesSpeckPlural(typeRelated.getTaxType()),
+                            MessageGenerator.mesSpeckPlural(typeSource.getTaxType()),
                             first.getKind().getName(),
                             typeSource.getName(),
                             departmentService.getDepartment(first.getDepartmentId()).getName(),
@@ -183,8 +183,8 @@ public class VersionFTOperatingServiceImpl implements VersionOperatingService {
             FormType typeTarget = formTypeService.get(first.getFormTypeId());
             logger.error(
                     String.format(MSG_HAVE_DESTINATION,
-                            MessageGenerator.mesSpeck(typeRelated.getTaxType()),
-                            MessageGenerator.mesSpeck(typeTarget.getTaxType()),
+                            MessageGenerator.mesSpeckPlural(typeRelated.getTaxType()),
+                            MessageGenerator.mesSpeckPlural(typeTarget.getTaxType()),
                             first.getKind().getName(),
                             typeTarget.getName(),
                             departmentService.getDepartment(first.getDepartmentId()).getName(),
