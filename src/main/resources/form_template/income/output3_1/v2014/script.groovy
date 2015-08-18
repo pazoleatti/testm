@@ -212,7 +212,7 @@ def formNewRows03(def rows) {
     def dataRowsMap = [:]
     rows.each { row ->
         sum = row.withheldSum
-        if (sum != null && sum != 0) {
+        if (sum != null && sum != 0 && row.type == 1 && row.status == 1) {
             if (dataRowsMap.containsKey(row.withheldDate)) {
                 sum += dataRowsMap.get(row.withheldDate)
                 dataRowsMap.remove(row.withheldDate)
