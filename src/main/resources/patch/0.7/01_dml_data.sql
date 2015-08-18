@@ -4,6 +4,9 @@ delete from lock_data;
 --http://jira.aplana.com/browse/SBRFACCTAX-12347: Удаление задачи "Загрузка ТФ с локального компьютера" из списка асинхронных задач 
 delete from async_task_type where id=12;
 
+--http://jira.aplana.com/browse/SBRFACCTAX-12360: 0.7 Параметры асинхронных заданий. Переименовать "Загрузка ТФ налоговой формы из каталога загрузки" в "Обработка ТФ налоговой формы/справочника из каталога загрузки"
+update async_task_type set name = 'Обработка ТФ налоговой формы/справочника из каталога загрузки' where id = 13;
+
 --http://jira.aplana.com/browse/SBRFACCTAX-11881: DECLARATION_TYPE.ID = 7 переименовать с "Декларация по НДС (короткая, раздел 1-7) " на "Декларация по НДС (аудит, раздел 1-7)
 UPDATE declaration_type SET name = 'Декларация по НДС (аудит, раздел 1-7)' WHERE id = 7;
 
