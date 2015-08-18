@@ -305,7 +305,6 @@ public class GetFormDataHandler extends AbstractActionHandler<GetFormDataAction,
 
         if (prevFormData == null) {
             logger.error(PREVIOUS_FORM_NOT_FOUND_MESSAGE);
-            dataRowService.saveRows(formData, new ArrayList<DataRow<Cell>>(0));
             return;
         }
 
