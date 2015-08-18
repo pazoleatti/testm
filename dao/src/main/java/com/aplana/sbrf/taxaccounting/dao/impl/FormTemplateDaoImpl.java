@@ -7,16 +7,7 @@ import com.aplana.sbrf.taxaccounting.dao.api.FormTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.XmlSerializationUtils;
-import com.aplana.sbrf.taxaccounting.model.Cell;
-import com.aplana.sbrf.taxaccounting.model.Column;
-import com.aplana.sbrf.taxaccounting.model.ColumnKeyEnum;
-import com.aplana.sbrf.taxaccounting.model.DataRow;
-import com.aplana.sbrf.taxaccounting.model.FormTemplate;
-import com.aplana.sbrf.taxaccounting.model.NumericColumn;
-import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
-import com.aplana.sbrf.taxaccounting.model.TemplateFilter;
-import com.aplana.sbrf.taxaccounting.model.VersionSegment;
-import com.aplana.sbrf.taxaccounting.model.VersionedObjectStatus;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.formdata.HeaderCell;
 import com.aplana.sbrf.taxaccounting.model.util.FormDataUtils;
@@ -256,10 +247,10 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
                     params,
                     Integer.class);
 		} catch (EmptyResultDataAccessException e) {
-			throw new DaoException("Для данного вида налоговой формы %d - %s не найдено активного шаблона налоговой формы.",formTypeId, formTypeDao.get(formTypeId).getName());
+			throw new DaoException("Выбранный вид %s не существует в выбранном периоде", MessageGenerator.mesSpeckSingleD(formTypeDao.get(formTypeId).getTaxType()));
 		}catch(IncorrectResultSizeDataAccessException e){
-			throw new DaoException("Для данного вида налоговой формы %d - %s найдено несколько активных шаблонов налоговой формы в одном отчетном периоде %s.",
-                    formTypeId, formTypeDao.get(formTypeId).getName(), reportPeriod.getName());
+			throw new DaoException("Для данного вида %s найдено несколько активных шаблонов налоговой формы в одном отчетном периоде.",
+                    MessageGenerator.mesSpeckSingleD(formTypeDao.get(formTypeId).getTaxType()));
 		}
 	}
 
@@ -293,10 +284,10 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
             params.put("endDate", endDate);
             return getNamedParameterJdbcTemplate().queryForObject(GET_FORM_TEMPLATE_BY_FT_AND_RP, params, Integer.class);
         } catch (EmptyResultDataAccessException e){
-            throw new DaoException("Для данного вида налоговой формы %d - %s не найдено макета налоговой формы.",formTypeId, formTypeDao.get(formTypeId).getName());
+            throw new DaoException("Выбранный вид %s не существует в выбранном периоде", MessageGenerator.mesSpeckSingleD(formTypeDao.get(formTypeId).getTaxType()));
         } catch(IncorrectResultSizeDataAccessException e){
-            throw new DaoException("Для данного вида налоговой формы %d - %s найдено несколько макетов налоговой формы в одном отчетном периоде %s-%s.",
-                    formTypeId, formTypeDao.get(formTypeId).getName(), SDF.format(startDate), SDF.format(endDate));
+            throw new DaoException("Для данного вида %s найдено несколько активных шаблонов налоговой формы в одном отчетном периоде.",
+                    MessageGenerator.mesSpeckSingleD(formTypeDao.get(formTypeId).getTaxType()));
         }
     }
 
