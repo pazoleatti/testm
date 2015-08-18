@@ -320,8 +320,6 @@ void calculationControlGraphs(def dataRows) {
             tmp = calcSum8(dataRows, ['R110', 'R217'])
         } else if (row.getAlias() in ['R108', 'R214']) {
             tmp = calcSum8(dataRows, ['R108', 'R214'])
-        } else if (row.getAlias() in ['R37', 'R38']) {
-            tmp = calcSum8(dataRows, ['R37', 'R38'])
         } else {
             tmp = row.rnu5Field5Accepted
         }
