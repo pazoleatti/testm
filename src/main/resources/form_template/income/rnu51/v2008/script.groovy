@@ -213,26 +213,26 @@ void calc() {
     def dataRows = formDataService.getDataRowHelper(formData).allCached
 
     // Сортировка
-    dataRows.sort({ DataRow a, DataRow b ->
-        if (a.getAlias() != null && b.getAlias() == null) {
-            return 1
-        }
-        if (a.getAlias() == null && b.getAlias() != null) {
-            return -1
-        }
-        if (a.getAlias() != null && b.getAlias() != null) {
-            return b.getAlias() <=> a.getAlias()
-        }
-        def codeA = getCode(a.tradeNumber)
-        def codeB = getCode(b.tradeNumber)
-        if (codeA == codeB && a.singSecurirty == b.singSecurirty) {
-            return a.issue <=> b.issue
-        }
-        if (codeA == codeB) {
-            return a.singSecurirty <=> b.singSecurirty
-        }
-        return codeA <=> codeB
-    })
+//    dataRows.sort({ DataRow a, DataRow b ->
+//        if (a.getAlias() != null && b.getAlias() == null) {
+//            return 1
+//        }
+//        if (a.getAlias() == null && b.getAlias() != null) {
+//            return -1
+//        }
+//        if (a.getAlias() != null && b.getAlias() != null) {
+//            return b.getAlias() <=> a.getAlias()
+//        }
+//        def codeA = getCode(a.tradeNumber)
+//        def codeB = getCode(b.tradeNumber)
+//        if (codeA == codeB && a.singSecurirty == b.singSecurirty) {
+//            return a.issue <=> b.issue
+//        }
+//        if (codeA == codeB) {
+//            return a.singSecurirty <=> b.singSecurirty
+//        }
+//        return codeA <=> codeB
+//    })
 
     for (row in dataRows) {
         if (row.getAlias() != null || isBalancePeriod() || formData.kind != FormDataKind.PRIMARY) {
@@ -266,8 +266,6 @@ void calc() {
         totalOneRow[it] = totalOneSum[it]
         totalTwoRow[it] = totalTwoSum[it]
     }
-
-    sortFormDataRows(false)
 }
 
 // Итого по форме

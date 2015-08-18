@@ -154,7 +154,6 @@ void calc() {
     deleteAllAliased(dataRows)
 
     if (!dataRows.isEmpty()) {
-        def tmp
         /** Количество дней в году. */
         def daysInYear = getCountDaysInYear(new Date())
         // Отчетная дата
@@ -178,8 +177,6 @@ void calc() {
     // добавить строку "итого"
     calcTotalSum(dataRows, totalRow, totalColumns)
     dataRows.add(totalRow)
-
-    sortFormDataRows(false)
 }
 
 // Ресчет графы 9

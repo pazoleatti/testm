@@ -114,8 +114,6 @@ void calc() {
         deleteAllAliased(dataRows)
     }
     dataRows.add(calcTotalRow(dataRows))
-
-    sortFormDataRows(false)
 }
 
 // Логические проверки

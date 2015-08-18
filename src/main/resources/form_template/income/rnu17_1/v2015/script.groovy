@@ -114,8 +114,6 @@ void calc() {
     }
 
     dataRows.add(calcTotalRow(dataRows))
-
-    sortFormDataRows(false)
 }
 
 

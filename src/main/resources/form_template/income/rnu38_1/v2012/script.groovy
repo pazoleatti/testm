@@ -172,9 +172,6 @@ void calc() {
     // добавить строки "итого"
     def totalRow = getTotalRow(dataRows)
     dataRows.add(totalRow)
-
-    // Сортировка групп и строк
-    sortFormDataRows(false)
 }
 
 /**

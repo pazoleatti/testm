@@ -84,6 +84,9 @@ switch (formDataEvent) {
         importData()
         formDataService.saveCachedDataRows(formData, logger)
         break
+    case FormDataEvent.SORT_ROWS:
+        sortFormDataRows()
+        break
 }
 
 @Field

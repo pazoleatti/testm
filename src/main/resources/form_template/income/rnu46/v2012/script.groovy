@@ -237,8 +237,6 @@ void calc() {
         // графа 13
         row.amortNorm = calc13(row)
     }
-
-    sortFormDataRows(false)
 }
 
 // Получить строки за предыдущий отчетный период./

@@ -179,8 +179,6 @@ def calc() {
     // добавить строку "итого"
     calcTotalSum(dataRows, totalRow, totalSumColumns)
     dataRows.add(totalRow)
-
-    sortFormDataRows(false)
 }
 
 /**

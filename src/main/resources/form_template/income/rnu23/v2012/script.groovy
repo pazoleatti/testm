@@ -211,8 +211,6 @@ void calc() {
     // Итого
     calcTotalSum(dataRows, totalRow, totalSumColumns)
     dataRows.add(totalRow)
-
-    sortFormDataRows(false)
 }
 
 void logicCheck() {

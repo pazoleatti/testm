@@ -147,7 +147,7 @@ void calc() {
         deleteAllAliased(dataRows)
 
         // сортируем
-        dataRowHelper.save(dataRows.sort { it.bill })
+        //dataRowHelper.save(dataRows.sort { it.bill })
 
         def rnu55DataRows = getRNU(348)
         def rnu56DataRows = getRNU(349)
@@ -175,8 +175,6 @@ void calc() {
     }
 
     dataRows.add(calcTotalRow(dataRows))
-
-    sortFormDataRows()
 }
 
 def getRNU(def id) {

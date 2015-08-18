@@ -217,8 +217,6 @@ void calc() {
     // добавить строку "итого"
     calcTotalSum(dataRows, totalRow, totalColumns)
     dataRows.add(totalRow)
-
-    sortFormDataRows(false)
 }
 
 // Ресчет графы 8
