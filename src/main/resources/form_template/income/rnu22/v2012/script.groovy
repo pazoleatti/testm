@@ -288,8 +288,6 @@ void calc() {
     // добавить строку "итого"
     def DataRow totalRow = getTotalRow(dataRows)
     dataRows.add(totalRow)
-
-    sortFormDataRows(false)
 }
 
 BigDecimal getGraph13_15(def DataRow row) {

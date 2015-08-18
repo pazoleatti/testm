@@ -174,8 +174,6 @@ def calc() {
     }
     // Добавление итогов
     dataRows.add(getTotalRow(dataRows))
-
-    sortFormDataRows(false)
 }
 
 // Расчет итоговой строки

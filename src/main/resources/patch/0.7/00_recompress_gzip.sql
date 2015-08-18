@@ -55,7 +55,7 @@ declare
               b.name as name,
 			  regexp_substr(b.name, '^(.{1,})\.zip$', 1, 1,'m',1)||'.xml' as xml_name,
               b.creation_date as initial_create_date, 
-              to_date(case when extract(year from b.creation_date) < 100 then to_char(b.creation_date + interval '2000' year(4), 'DD.MM.YYYY') else to_char(b.creation_date, 'DD.MM.YYYY') end) fix_create_date,
+              to_date(case when extract(year from b.creation_date) < 100 then to_char(b.creation_date + interval '2000' year(4), 'DD.MM.YYYY') else to_char(b.creation_date, 'DD.MM.YYYY') end, 'DD.MM.YYYY') fix_create_date,
               rawtohex(DBMS_LOB.SUBSTR(BLOB_TO_CLOB(b.data), 4, 1)) first4bytes_hex,
 			  length(b.data)/1024/1024 as length_Mb, 
               b.data
@@ -66,7 +66,7 @@ declare
    for x in data_to_recompress loop
         b_temp_file := UTL_COMPRESS.LZ_UNCOMPRESS(x.data);
         b_compressed_file := pck_zip.blob_compress(b_temp_file, x.xml_name);
-        update blob_data bd set bd.creation_date = x.fix_create_date, bd.data = b_compressed_file where bd.id = x.id;
+        update blob_data bd set bd.creation_date = to_date(x.fix_create_date, 'DD.MM.YYYY'), bd.data = b_compressed_file where bd.id = x.id;
         dbms_output.put_line('Recompressed: id='||x.id||', name='||x.name ||' (created '||to_char(x.fix_create_date, 'DD.MM.YYYY')||')');
    end loop;        
  end;

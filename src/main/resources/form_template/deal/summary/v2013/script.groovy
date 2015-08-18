@@ -1631,6 +1631,18 @@ void addAllStatic(def dataRows) {
             prevOrganName = row.organName
             def newRow = formData.createDataRow()
             newRow.getCell('groupName').colSpan = 56
+            ['groupName', 'dealNum1', 'interdependenceSing', 'f121', 'f122', 'f123', 'f124',
+                    'f131', 'f132', 'f133', 'f134', 'f135', 'similarDealGroup', 'dealNameCode',
+                    'taxpayerSideCode', 'dealPriceSign', 'dealPriceCode', 'dealMemberCount',
+                    'income', 'incomeIncludingRegulation', 'outcome', 'outcomeIncludingRegulation',
+                    'dealNum2', 'dealType', 'dealSubjectName', 'dealSubjectCode1', 'dealSubjectCode2',
+                    'dealSubjectCode3', 'otherNum', 'contractNum', 'contractDate', 'countryCode',
+                    'countryCode1', 'region1', 'city1', 'locality1', 'countryCode2', 'region2',
+                    'city2', 'locality2', 'deliveryCode', 'okeiCode', 'count', 'price', 'total',
+                    'dealDoneDate', 'dealNum3', 'dealMemberNum', 'organInfo', 'countryCode3',
+                    'organName', 'organINN', 'organKPP', 'organRegNum', 'taxpayerCode', 'address'].each {
+                newRow.getCell(it).setStyleAlias('Раздел 2 уровня')
+            }
             if (row.organName != null) {
                 newRow.groupName = getRefBookValue(9, row.organName).NAME.stringValue
             }

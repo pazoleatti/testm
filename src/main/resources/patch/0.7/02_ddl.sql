@@ -1,3 +1,8 @@
+-- http://jira.aplana.com/browse/SBRFACCTAX-12351: Удаление из комментариев перечисление вида налогов
+comment on column tax_period.tax_type is 'Вид налога';
+comment on column form_type.tax_type is 'Вид налога';
+comment on column declaration_type.tax_type is 'Вид налога';
+
 --http://jira.aplana.com/browse/SBRFACCTAX-11881: Удаление столбца TEMP из FORM_DATA_605 (актуально для ПСИ)
 set serveroutput on size 30000;
 declare query_str varchar2(1024) := '';
@@ -47,6 +52,7 @@ for x in (select fd.id as form_data_id, ft.id as form_template_id
       join form_data fd on fd.form_template_id = ft.id
       where exists (select 1 from user_tab_columns utc where table_name = 'FORM_DATA_'||ft.id and column_name = 'ALIAS') and
             exists (select 1 from form_column where form_template_id = ft.id and type = 'A')
+			and number_current_row is null
       ) loop
 query_str := 'UPDATE FORM_DATA SET number_current_row = (SELECT count(*) FROM FORM_DATA_'||x.form_template_id||' WHERE form_data_id = '||x.form_data_id||' AND (alias IS NULL OR alias LIKE ''%{wan}%'')) WHERE ID = '||x.form_data_id;
 execute immediate query_str;      

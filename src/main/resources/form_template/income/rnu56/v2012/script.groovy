@@ -208,8 +208,6 @@ void calc() {
 
     calcTotalSum(dataRows, totalRow, totalColumns)
     dataRows.add(totalRow)
-
-    sortFormDataRows(false)
 }
 
 // Расчет графы 8

@@ -103,7 +103,7 @@ void calc() {
     deleteAllAliased(dataRows)
 
     // отсортировать/группировать
-    sortRows(dataRows, groupColumns)
+    //sortRows(dataRows, groupColumns)
 
     dataRows.eachWithIndex { row, i ->
         def tmp = calcFor8or9(row)
@@ -116,8 +116,6 @@ void calc() {
     // добавить итого
     def totalRow = getTotalRow(dataRows)
     dataRows.add(totalRow)
-
-    sortFormDataRows()
 }
 
 void logicCheck() {

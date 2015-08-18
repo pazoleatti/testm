@@ -142,7 +142,7 @@ void calc() {
     def dataRows = formDataService.getDataRowHelper(formData).allCached
 
     if (formDataEvent != FormDataEvent.IMPORT) {
-        sortRows(dataRows, sortColumns)
+        //sortRows(dataRows, sortColumns)
     }
 
     // пересчитываем строки итого
@@ -154,8 +154,6 @@ void calc() {
         def dataRowsPrev = getDataRowsPrev()
         total.costs = getTotalValue(dataRows, dataRowsPrev)
     }
-
-    sortFormDataRows(false)
 }
 
 def getDataRowsPrev() {
