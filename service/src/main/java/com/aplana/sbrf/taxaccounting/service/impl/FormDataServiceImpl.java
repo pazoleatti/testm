@@ -1697,7 +1697,7 @@ public class FormDataServiceImpl implements FormDataService {
         for (Integer id : fdIds){
             FormData fd = formDataDao.getWithoutRows(id);
             DepartmentReportPeriod drp = departmentReportPeriodService.get(fd.getDepartmentReportPeriodId());
-            DepartmentReportPeriod drpCompare = departmentReportPeriodService.get(fd.getComparativPeriodId());
+            DepartmentReportPeriod drpCompare = fd.getComparativPeriodId() != null ? departmentReportPeriodService.get(fd.getComparativPeriodId()) : null;
 
             logger.error(MessageGenerator.getFDMsg(FD_NOT_IN_RANGE,
                     fd,
