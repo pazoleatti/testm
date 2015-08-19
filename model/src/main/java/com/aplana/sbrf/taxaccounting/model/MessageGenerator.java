@@ -47,7 +47,7 @@ public final class MessageGenerator {
                 formTypeName,
                 departmentName,
                 reportPeriodName,
-                rpComparisonName != null ? String.format(COMPARISON_PERIOD, rpComparisonName) : "",
+                rpComparisonName != null && !rpComparisonName.isEmpty() ? String.format(COMPARISON_PERIOD, rpComparisonName) : "",
                 periodOrder != null ? String.format(MONTH,  Formats.getRussianMonthNameWithTier(periodOrder)): "",
                 correctionDate != null ? String.format(CORRECTION_DATE, SDF_DD_MM_YYYY.format(correctionDate)) : "",
                 manual ? "ручного ввода" : "автоматическая");
@@ -90,7 +90,7 @@ public final class MessageGenerator {
     private static final String MONTH = " Месяц: %s,";
     private static final String CORRECTION_DATE  = " Дата сдачи корректировки: %s, ";
     private static final String DD_CORRECTION_DATE  = " ,Дата сдачи корректировки: %s";
-    private static final String COMPARISON_PERIOD = "Период сравнения: \"%s\", ";
+    private static final String COMPARISON_PERIOD = " Период сравнения: \"%s\", ";
     private static final String COMPLETE_DECLATATION =
             "%s Вид: \"%s\", Подразделение: \"%s\", Период: \"%s %d\"%s%s%s";
     private static final String TAX_AUTHORITY = " ,Налоговый орган: \"%s\"";
