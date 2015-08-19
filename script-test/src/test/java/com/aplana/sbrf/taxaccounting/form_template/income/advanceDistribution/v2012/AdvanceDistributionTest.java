@@ -3,7 +3,9 @@ package com.aplana.sbrf.taxaccounting.form_template.income.advanceDistribution.v
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
+import com.aplana.sbrf.taxaccounting.refbook.impl.RefBookUniversal;
 import com.aplana.sbrf.taxaccounting.service.script.api.DataRowHelper;
 import com.aplana.sbrf.taxaccounting.util.DataRowHelperStub;
 import com.aplana.sbrf.taxaccounting.util.ScriptTestBase;
@@ -18,6 +20,7 @@ import org.mockito.stubbing.Answer;
 import java.util.*;
 
 import static org.mockito.Matchers.*;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 /**
@@ -218,8 +221,22 @@ public class AdvanceDistributionTest extends ScriptTestBase {
 
     @Test
     public void importExcelTest() {
+        // настройка справочников
+        Long [] refbookIds = new Long [] { 30L, 25L, 26L};
+        for (Long refbookId : refbookIds) {
+            // провайдер для каждого справочника
+            RefBookUniversal provider = mock(RefBookUniversal.class);
+            provider.setRefBookId(refbookId);
+            when(testHelper.getRefBookFactory().getDataProvider(refbookId)).thenReturn(provider);
+
+            // записи для каждого справочника
+            Map<Long, Map<String, RefBookValue>> records = testHelper.getRefBookAllRecords(refbookId);
+            PagingResult<Map<String, RefBookValue>> result = new PagingResult<Map<String, RefBookValue>>(records.values());
+            when(provider.getRecords(any(Date.class), any(PagingParams.class), anyString(),
+                    any(RefBookAttribute.class))).thenReturn(result);
+        }
         testHelper.setImportFileInputStream(getImportXlsInputStream());
         testHelper.execute(FormDataEvent.IMPORT);
-        Assert.assertTrue("Logger must contains error level messages.", testHelper.getLogger().containsLevel(LogLevel.ERROR));
+        Assert.assertFalse(testHelper.getLogger().containsLevel(LogLevel.ERROR));
     }
 }
