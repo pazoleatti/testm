@@ -388,7 +388,7 @@ def someCalc(def row, def dividerRow, def dividendAlias, def dividerAlias, def n
         // Логическая проверка 3. Проверка граф знаменателей при расчете граф 5, 7, 9
         def msg = String.format("Строка %s: Графа «%s» не может быть заполнена. Выполнение расчета невозможно, так как в результате проверки получен нулевой знаменатель (деление на ноль невозможно)",
                 row.getIndex(), getColumnName(row, resultAlias))
-        rowWarning(logger, row, msg)
+        rowError(logger, row, msg)
     }
     return result
 }
