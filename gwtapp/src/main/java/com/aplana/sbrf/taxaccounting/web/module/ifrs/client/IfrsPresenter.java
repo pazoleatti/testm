@@ -158,7 +158,11 @@ public class IfrsPresenter extends Presenter<IfrsPresenter.MyView, IfrsPresenter
                 new AbstractCallback<UpdateStatusIrfsDataResult>() {
                         @Override
                         public void onSuccess(UpdateStatusIrfsDataResult result) {
+                            if (result.isReload()) {
+                                getView().updateTable();
+                            } else {
                                 getView().updateStatus(result.getIfrsStatusMap());
+                            }
                         }
                 }).addCallback(new ManualRevealCallback<GetIrfsDataResult>(IfrsPresenter.this)));
     }

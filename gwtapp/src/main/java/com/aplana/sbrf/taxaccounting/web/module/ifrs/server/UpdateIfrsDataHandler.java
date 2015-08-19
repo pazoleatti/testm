@@ -40,18 +40,22 @@ public class UpdateIfrsDataHandler extends AbstractActionHandler<UpdateStatusIfr
         UpdateStatusIrfsDataResult result = new UpdateStatusIrfsDataResult();
         Map<Integer, IfrsRow.StatusIfrs> statusMap = new HashMap<Integer, IfrsRow.StatusIfrs>();
         PagingResult<IfrsDataSearchResultItem> records = ifrsDataService.findByReportPeriod(action.getReportPeriodIds(), null);
-        for(IfrsDataSearchResultItem record: records) {
-            if (record.getBlobDataId() != null) {
-                statusMap.put(record.getReportPeriodId(), IfrsRow.StatusIfrs.EXIST);
-            } else {
-                if (lockDataService.getLock(ifrsDataService.generateTaskKey(record.getReportPeriodId())) != null) {
-                    statusMap.put(record.getReportPeriodId(), IfrsRow.StatusIfrs.LOCKED);
+        if (action.getReportPeriodIds().size() != records.size()) {
+            result.setReload(true);
+        } else {
+            for (IfrsDataSearchResultItem record : records) {
+                if (record.getBlobDataId() != null) {
+                    statusMap.put(record.getReportPeriodId(), IfrsRow.StatusIfrs.EXIST);
                 } else {
-                    statusMap.put(record.getReportPeriodId(), IfrsRow.StatusIfrs.NOT_EXIST);
+                    if (lockDataService.getLock(ifrsDataService.generateTaskKey(record.getReportPeriodId())) != null) {
+                        statusMap.put(record.getReportPeriodId(), IfrsRow.StatusIfrs.LOCKED);
+                    } else {
+                        statusMap.put(record.getReportPeriodId(), IfrsRow.StatusIfrs.NOT_EXIST);
+                    }
                 }
             }
+            result.setIfrsStatusMap(statusMap);
         }
-        result.setIfrsStatusMap(statusMap);
         return result;
     }
 
