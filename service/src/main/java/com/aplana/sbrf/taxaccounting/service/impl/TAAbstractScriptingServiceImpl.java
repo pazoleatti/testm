@@ -35,6 +35,9 @@ public abstract class TAAbstractScriptingServiceImpl implements ApplicationConte
 			"com.aplana.sbrf.taxaccounting.model.dictionary",
 			"com.aplana.sbrf.taxaccounting.model.log",
 			"com.aplana.sbrf.taxaccounting.model.script.range",
+			"com.aplana.sbrf.taxaccounting.model.refbook",
+			"com.aplana.sbrf.taxaccounting.model.util",
+			"com.aplana.sbrf.taxaccounting.model.datarow",
 			"com.aplana.sbrf.taxaccounting.dao.exсeption"
 	};
 

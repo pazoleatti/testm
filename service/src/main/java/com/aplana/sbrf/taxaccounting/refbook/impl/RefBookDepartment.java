@@ -268,8 +268,6 @@ public class RefBookDepartment implements RefBookDataProvider {
                 if (logger.containsLevel(LogLevel.ERROR))
                     throw new ServiceLoggerException(ERROR_MESSAGE_CREATE,
                             logEntryService.save(logger.getEntries()));
-                Department newDepartment = new Department();    //TODO (aivanov 22.10.14) newDepartment нигде дальше не используется
-                newDepartment.setName(records.get(0).getValues().get(DEPARTMENT_NAME_ATTRIBUTE).getStringValue());
                 if (logger.containsLevel(LogLevel.ERROR))
                     return new ArrayList<Long>(0);
                 int depId = refBookDepartmentDao.create(refBookValueMap, attributes);
