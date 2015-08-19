@@ -279,8 +279,13 @@ def getSourceValue(def periodId, def row, def alias) {
         }
     }
     if (!found) {
-        logger.warn("Не найдена форма «Величины налоговых платежей, вводимые вручную» в списке назначенных источников: Период: \"%s %s\". Ячейки по графе \"%s\", заполняемые из данной формы, будут заполнены нулевым значением.",
-                reportPeriod.getName(), reportPeriod.getTaxPeriod().getYear(), getColumnName(row, alias))
+        String periodString = ""
+        if (periodId != null) {
+            def reportPeriod = getReportPeriod(periodId)
+            periodString = String.format(": Период: \"%s %s\"", reportPeriod.getName(), reportPeriod.getTaxPeriod().getYear())
+        }
+        logger.warn("Не найдена форма «Величины налоговых платежей, вводимые вручную» в списке назначенных источников%s. Ячейки по графе \"%s\", заполняемые из данной формы, будут заполнены нулевым значением.",
+                periodString, getColumnName(row, alias))
     }
     return 0
 }
