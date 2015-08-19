@@ -16,8 +16,8 @@ public final class MessageGenerator {
         if (rpComparison == null) {
             return String.format(COMPLETE_FORM,
                     mainStr,
-                    formTypeName,
                     kindName,
+                    formTypeName,
                     departmentName,
                     isAccruing ? reportPeriod.getReportPeriod().getAccName() : reportPeriod.getReportPeriod().getName(),
                     reportPeriod.getReportPeriod().getTaxPeriod().getYear(),
@@ -27,8 +27,8 @@ public final class MessageGenerator {
         } else {
             return String.format(COMPLETE_FORM_WITH_RP_COMPARISON,
                     mainStr,
-                    formTypeName,
                     kindName,
+                    formTypeName,
                     departmentName,
                     isAccruing ? reportPeriod.getReportPeriod().getAccName() : reportPeriod.getReportPeriod().getName(),
                     reportPeriod.getReportPeriod().getTaxPeriod().getYear(),
@@ -43,8 +43,8 @@ public final class MessageGenerator {
     public static String getFDMsg(String mainStr, String formTypeName, String kindName, String departmentName, Integer periodOrder, boolean manual, String reportPeriodName, Date correctionDate, String rpComparisonName){
         return String.format(COMPLETE_FORM_STRINGS_ONLY,
                 mainStr,
-                formTypeName,
                 kindName,
+                formTypeName,
                 departmentName,
                 reportPeriodName,
                 rpComparisonName != null ? String.format(COMPARISON_PERIOD, rpComparisonName) : "",

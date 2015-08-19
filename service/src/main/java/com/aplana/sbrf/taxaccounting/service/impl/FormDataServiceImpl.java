@@ -473,9 +473,6 @@ public class FormDataServiceImpl implements FormDataService {
 				formDataAccessService.canRead(userInfo, formData.getId());
 				formDataScriptingService.executeScript(userInfo, formData, FormDataEvent.CHECK, logger, null);
 				checkPerformer(logger, formData);
-				if (logger.containsLevel(LogLevel.ERROR)) {
-					throw new ServiceLoggerException("Найдены ошибки при выполнении проверки формы", logEntryService.save(logger.getEntries()));
-				}
 				//Проверка на неактуальные консолидированные данные
 				if (sourceService.isFDConsolidationTopical(formData.getId())){
 					logger.warn(CONSOLIDATION_NOT_TOPICAL);
@@ -726,12 +723,15 @@ public class FormDataServiceImpl implements FormDataService {
                 //Делаем переход
                 moveProcess(formData, userInfo, workflowMove, note, logger, isAsync, stateLogger);
                 if (WorkflowState.ACCEPTED.equals(workflowMove.getToState())) {
-                    // Отработка скриптом события сортировки
-                    formDataScriptingService.executeScript(userInfo, formData, FormDataEvent.SORT_ROWS, logger, null);
-                    if (logger.containsLevel(LogLevel.ERROR)) {
-                        throw new ServiceLoggerException(SORT_ERROR, logEntryService.save(logger.getEntries()));
+                    FormTemplate formTemplate = formTemplateService.get(formData.getFormTemplateId());
+                    if (!formTemplate.isFixedRows()) {
+                        // Отработка скриптом события сортировки
+                        formDataScriptingService.executeScript(userInfo, formData, FormDataEvent.SORT_ROWS, logger, null);
+                        if (logger.containsLevel(LogLevel.ERROR)) {
+                            throw new ServiceLoggerException(SORT_ERROR, logEntryService.save(logger.getEntries()));
+                        }
+                        logger.info("Выполнена сортировка строк налоговой формы.");
                     }
-                    logger.info("Выполнена сортировка строк налоговой формы.");
                 }
                 break;
             case APPROVED_TO_CREATED:
