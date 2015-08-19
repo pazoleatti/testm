@@ -42,13 +42,13 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 
     private static final String FORM_DATA_KIND_STATE_ERROR_LOG = "Event type: \"%s\". Unsuppotable case for formData with \"%s\" kind and \"%s\" state!";
     private static final String REPORT_PERIOD_IS_CLOSED_LOG = "Department report period (%d) is closed!";
-    private static final String REPORT_PERIOD_IS_CLOSED = "Выбранный отчетный период подразделения закрыт!";
+    private static final String REPORT_PERIOD_IS_CLOSED = "Выбранный период закрыт";
     private static final String FORM_TEMPLATE_WRONG_STATUS_LOG = "Form template (%d) does not exist in report period (%d)!";
-    private static final String FORM_TEMPLATE_WRONG_STATUS = "Выбранный вид %s не существует в выбранном периоде!";
+    private static final String FORM_TEMPLATE_WRONG_STATUS = "Выбранный тип %s не существует в выбранном периоде!";
     private static final String INCORRECT_DEPARTMENT_FORM_TYPE_LOG = "Form type (%d) and form kind (%d) is not applicated for department (%d)";
     private static final String INCORRECT_DEPARTMENT_FORM_TYPE1 = "Выбранный тип %s не назначен подразделению!";
     private static final String INCORRECT_DEPARTMENT_FORM_TYPE2 = "Нет прав доступа к созданию формы с заданными параметрами!";
-    private static final String INCORRECT_DEPARTMENT_FORM_TYPE3 = "Выбранный вид %s не назначен подразделению";
+    private static final String INCORRECT_DEPARTMENT_FORM_TYPE3 = "Выбранный тип %s не назначен подразделению";
     private static final String CREATE_FORM_DATA_ERROR_ONLY_CONTROL_LOG = "Only ROLE_CONTROL can create form in balance period!";
     private static final String CREATE_FORM_DATA_ERROR_ONLY_CONTROL = "Выбран период ввода остатков. В периоде ввода остатков оператор не может создавать %s";
     private static final String CREATE_MANUAL_FORM_DATA_ERROR_ONLY_CONTROL_LOG = "Only ROLE_CONTROL can create manual version of form!";
@@ -148,7 +148,7 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
                 && departmentReportPeriod.isBalance()) {
             logger.warn(CREATE_FORM_DATA_ERROR_ONLY_CONTROL_LOG);
             throw new ServiceException(
-                    String.format(CREATE_FORM_DATA_ERROR_ONLY_CONTROL, MessageGenerator.mesSpeck(formTemplate.getType().getTaxType())));
+                    String.format(CREATE_FORM_DATA_ERROR_ONLY_CONTROL, MessageGenerator.mesSpeckPlural(formTemplate.getType().getTaxType())));
         }
 
         // Проверка доступности подразделения
@@ -186,12 +186,12 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
         if (!foundTypeAndKind) {
             logger.warn(String.format(INCORRECT_DEPARTMENT_FORM_TYPE_LOG, formTypeId, kind.getId(),
                     departmentReportPeriod.getDepartmentId()));
-            throw new ServiceException(String.format(INCORRECT_DEPARTMENT_FORM_TYPE3, MessageGenerator.mesSpeck(formType.getTaxType())));
+            throw new ServiceException(String.format(INCORRECT_DEPARTMENT_FORM_TYPE3, MessageGenerator.mesSpeckPlural(formType.getTaxType())));
         }
         if (!foundKind) {
             logger.warn(String.format(INCORRECT_DEPARTMENT_FORM_TYPE_LOG, formTypeId, kind.getId(),
                     departmentReportPeriod.getDepartmentId()));
-            throw new ServiceException(String.format(INCORRECT_DEPARTMENT_FORM_TYPE1, MessageGenerator.mesSpeck(formType.getTaxType())));
+            throw new ServiceException(String.format(INCORRECT_DEPARTMENT_FORM_TYPE1, MessageGenerator.mesSpeckPlural(formType.getTaxType())));
         }
 
         // Доступные типы форм
@@ -208,7 +208,7 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
         boolean intersect = isTemplateIntersectReportPeriod(formTemplate, departmentReportPeriod.getReportPeriod().getId());
         if (!intersect || formTemplate.getStatus() != VersionedObjectStatus.NORMAL) {
             logger.warn(String.format(FORM_TEMPLATE_WRONG_STATUS_LOG, formTemplate.getId(), departmentReportPeriod.getReportPeriod().getId()));
-            throw new AccessDeniedException(String.format(FORM_TEMPLATE_WRONG_STATUS, MessageGenerator.mesSpeck(formType.getTaxType())));
+            throw new AccessDeniedException(String.format(FORM_TEMPLATE_WRONG_STATUS, MessageGenerator.mesSpeckPlural(formType.getTaxType())));
         }
 
         // Если форма с заданными параметрами существует, то система выводит сообщение в панель уведомления:

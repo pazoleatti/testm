@@ -459,7 +459,7 @@ public class RefBookUniversal implements RefBookDataProvider {
                         for (Pair<Date, Date> versions : childrenVersions) {
                             if (logger != null) {
                                 logger.error(String.format("Существует дочерняя запись, действует с %s по %s",
-                                        formatter.get().format(versions.getFirst()), formatter.get().format(versions.getSecond())));
+                                        formatter.get().format(versions.getFirst()), versions.getSecond() != null ? formatter.get().format(versions.getSecond()) : "-"));
                             }
                         }
                         throw new ServiceException(CROSS_ERROR_MSG);

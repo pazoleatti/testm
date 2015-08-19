@@ -221,7 +221,7 @@ def fillRowFromXls(def dataRow, def values, int fileRowIndex, int rowIndex, int 
 
 
     def colIndex = 0
-    def rowNumImport = values[colIndex] as Integer
+    def rowNumImport = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
 
     colIndex++
     def taxNameImport = normalize(values[colIndex])

@@ -205,8 +205,6 @@ void calc() {
             row.priceOne = transactionSumRub / bondCount
         }
     }
-
-    sortFormDataRows(false)
 }
 
 // Получение импортируемых данных

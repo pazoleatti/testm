@@ -653,7 +653,7 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
 
         // форма найдена
         if (existingFormData != null) {
-            logger.error(String.format(CHECK_UNIQUE_ERROR, MessageGenerator.mesSpeck(formData.getFormType().getTaxType())));
+            logger.error(String.format(CHECK_UNIQUE_ERROR, MessageGenerator.mesSpeckSingle(formData.getFormType().getTaxType())));
             return false;
         }
         return true;

@@ -240,8 +240,6 @@ void calc() {
         // Расчет поля "Стоимость"
         row.cost = priceValue
     }
-
-    sortFormDataRows(false)
 }
 
 // Получение импортируемых данных

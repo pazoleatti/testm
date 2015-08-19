@@ -231,8 +231,6 @@ void calc() {
         // Расчет поля "Стоимость"
         row.cost = row.bankSum
     }
-
-    sortFormDataRows(false)
 }
 
 def BigDecimal calc13(def row) {

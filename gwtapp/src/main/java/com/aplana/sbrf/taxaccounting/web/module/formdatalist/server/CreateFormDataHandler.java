@@ -60,8 +60,9 @@ public class CreateFormDataHandler extends AbstractActionHandler<CreateFormData,
     private static final String ERROR_DEPARTMENT_REPORT_PERIOD_NOT_FOUND = "Не определен отчетный период подразделения!";
     private final static String MANUAL_USED_MESSAGE = "Для формирования декларации в корректируемом периоде используются данные версии ручного ввода, созданной в форме «%s», %s, «%s»!";
     private static final SimpleDateFormat SDF_DD_MM_YYYY = new SimpleDateFormat("dd.MM.yyyy");
-    private static final String NOT_EXIST_DESTINATIONS_ETR = "Не найдены назначения источников-приемников в периоде %s.";
-    private static final String NOT_EXIST_DESTINATIONS_OTHER = "Не найдены назначения источников-приемников в периоде %s. Форма не является источником данных для %s.";
+    private static final String NOT_EXIST_DESTINATIONS_ETR = "Форма не является источником данных для %s";
+    private static final String NOT_EXIST_DESTINATIONS_OTHER = "Налоговая форма не является источником данных для других налоговых форм и декларации.";
+    private static final String FORM_IS_DESTINATION = "Не найдены назначения источников-приемников в периоде %s. Форма не является источником данных для %s.";
 
     public CreateFormDataHandler() {
 		super(CreateFormData.class);
@@ -114,7 +115,11 @@ public class CreateFormDataHandler extends AbstractActionHandler<CreateFormData,
                 List<DepartmentFormType> sources = sourceService.getDFTSourcesByDFT(departmentReportPeriod.getDepartmentId(),
                         formDataTypeId, kind, departmentReportPeriod.getReportPeriod().getId());
                 if (!sources.isEmpty()){
-                    logger.warn("Форма является приемником данных.");
+                    if (formType.getTaxType() == TaxType.ETR || formType.getTaxType() == TaxType.DEAL) {
+                        logger.warn("Форма является приемником данных для других форм.");
+                    } else {
+                        logger.warn("Налоговая форма является приемником данных для других налоговых форм.");
+                    }
                 }
 
                 // 2. Если форма не является источников данных для других налоговых форм и деклараций в указанном периоде, то Система выводит сообщение в панель уведомления предупреждение: "Не найдены назначения источников-приемников в периоде <Период создания формы>. Форма не является источником данных для декларации."
@@ -123,12 +128,11 @@ public class CreateFormDataHandler extends AbstractActionHandler<CreateFormData,
                 List<DepartmentFormType> formDestinations = sourceService.getFormDestinations(
                         departmentReportPeriod.getDepartmentId(), formDataTypeId, kind, departmentReportPeriod.getReportPeriod().getId());
                 if (declarationDestinations.isEmpty() && formDestinations.isEmpty()){
-                    if (formType.getTaxType() == TaxType.ETR)
-                        logger.warn(String.format(NOT_EXIST_DESTINATIONS_ETR, departmentReportPeriod.getReportPeriod().getName()));
-                    else
-                        logger.warn(String.format(
-                                NOT_EXIST_DESTINATIONS_OTHER,
-                                departmentReportPeriod.getReportPeriod().getName(), formType.getTaxType() == TaxType.DEAL ? "уведомления" : "декларации"));
+                    if (formType.getTaxType() == TaxType.ETR || formType.getTaxType() == TaxType.DEAL) {
+                        logger.warn(String.format(NOT_EXIST_DESTINATIONS_ETR, (formType.getTaxType() == TaxType.ETR ? "других форм" : "других форм и уведомления")));
+                    } else {
+                        logger.warn(NOT_EXIST_DESTINATIONS_OTHER);
+                    }
                 }
 
                 int templateId = formTemplateService.getActiveFormTemplateId(formDataTypeId, departmentReportPeriod.getReportPeriod().getId());

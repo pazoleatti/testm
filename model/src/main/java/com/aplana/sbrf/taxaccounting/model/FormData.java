@@ -28,7 +28,7 @@ public class FormData extends IdentityObject<Long> {
 	private boolean returnSign;
     /** Статус актуальности сортировки НФ (false - Сортировка неактуальна ; true - Сортировка актуальна) */
     private boolean sorted;
-    /** Период сравнения - ссылка на DepartmentReportPeriod */
+    /** Период сравнения - ссылка на DepartmentReportPeriod. Может быть null */
     private Integer comparativPeriodId;
     /** Признак расчета значений нарастающим итогом (false - не нарастающим итогом, true - нарастающим итогом, пустое - форма без периода сравнения) */
     private boolean accruing;
