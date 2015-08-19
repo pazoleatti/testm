@@ -607,6 +607,10 @@ public class FormDataServiceTest extends Assert{
         when(lockDataService.getLockTimeout(LockData.LockObjects.FORM_DATA)).thenReturn(1000);
         when(lockDataService.lock(formDataService.generateTaskKey(formData.getId(), ReportType.EDIT_FD), userInfo.getUser().getId(), "FORM_DATA", 1000)).
                 thenReturn(lockData);
+        when(lockDataService.getLockTimeout(LockData.LockObjects.FORM_DATA)).thenReturn(1000);
+        FormTemplate formTemplate1 = new FormTemplate();
+        formTemplate1.setFixedRows(false);
+        when(formTemplateService.get(any(Integer.class))).thenReturn(formTemplate1);
 
         formDataService.doMove(formData.getId(), false, userInfo, WorkflowMove.APPROVED_TO_ACCEPTED, "", logger, false, new LockStateLogger() {
             @Override
