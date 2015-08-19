@@ -186,8 +186,20 @@ public class IfrsView extends ViewWithUiHandlers<IfrsUiHandlers> implements Ifrs
 
     private void addAnchor(List<IfrsRow> ifrsRows) {
         for(IfrsRow ifrsRow: ifrsRows) {
-            LinkButton linkButton = mapLinkButton.get(ifrsRow.getReportPeriodId());
-            htmlPanel.addAndReplaceElement(linkButton, TABLE_ROW_ID_PREFIX + ifrsRow.getReportPeriodId());
+            Element element = htmlPanel.getElementById(TABLE_ROW_ID_PREFIX + ifrsRow.getReportPeriodId());
+            if (element != null && element.getChildNodes().getLength() == 0) {
+                LinkButton linkButton = mapLinkButton.get(ifrsRow.getReportPeriodId());
+                IfrsRow.StatusIfrs status = ifrsRow.getStatus();
+                try {
+                    linkButton.removeFromParent();
+                } catch (Exception e) {
+                }
+                if (status != null) {
+                    linkButton.setText(status.getName());
+                    linkButton.getElement().getFirstChildElement().getStyle().setDisplay(Style.Display.INLINE);
+                }
+                htmlPanel.addAndReplaceElement(linkButton, TABLE_ROW_ID_PREFIX + ifrsRow.getReportPeriodId());
+            }
         }
     }
 
