@@ -1854,12 +1854,16 @@ public final class ScriptUtils {
 
         /** Получить значение в виде строки. */
         private String getValue() {
-            // строка/число
+            // строка
             String value = lastValue.toString();
-            if (this.formatString != null && DateUtil.isADateFormat(this.formatIndex, this.formatString)) {
-                // дата
-                Date date = DateUtil.getJavaDate(Double.parseDouble(value), false);
-                value = simpleDateFormat.format(date);
+            if (this.formatString != null) {
+                // дата/число
+                if (DateUtil.isADateFormat(this.formatIndex, this.formatString)) {
+                    Date date = DateUtil.getJavaDate(Double.parseDouble(value), false);
+                    value = simpleDateFormat.format(date);
+                } else {
+                    value = (new BigDecimal(value)).toString();
+                }
             }
             return com.aplana.sbrf.taxaccounting.model.util.StringUtils.cleanString(value);
         }
