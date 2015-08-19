@@ -289,14 +289,14 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
         if (data.getPeriodOrder() != null) {
             sbPeriodName.append(Months.fromId(data.getPeriodOrder()).getTitle().toLowerCase(new Locale("ru", "RU")));
         } else if(data.getComparativPeriodId() != null){
-            String rpName =  !refBookValue.getStringValue().equals("34") ? reportPeriod.getName() : "";
-            String rpCompareName =  !refBookValue.getStringValue().equals("34") ? rpCompare.getName() : "";
+            /*String rpName =  !refBookValue.getStringValue().equals("34") ? reportPeriod.getName() : "";
+            String rpCompareName =  !refBookValue.getStringValue().equals("34") ? rpCompare.getName() : "";*/
             sbPeriodName.append(String.format(
                     XlsxReportMetadata.REPORT_PERIOD,
-                    rpName,
-                    reportPeriod.getTaxPeriod().getYear(),
-                    rpCompareName,
+                    rpCompare.getName(),
                     rpCompare.getTaxPeriod().getYear(),
+                    reportPeriod.getName(),
+                    reportPeriod.getTaxPeriod().getYear(),
                     data.isAccruing() ? "(нарастающим итогом)" : ""));
         }
         sb.append(sbPeriodName.toString());
