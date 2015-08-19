@@ -419,7 +419,6 @@ class GitReport {
                                 }
                                 // Сравнение JRXML
                                 def jrxmlFile = new File("$versionFolder/report.jrxml")
-                                boolean jrxmlEqual = true
                                 if (!jrxmlFile.exists()) {
                                     result.jrxmlCheck = "Макет Jasper не найден в «${jrxmlFile.absolutePath}»"
                                     result.jrxmlError = true
@@ -428,15 +427,16 @@ class GitReport {
                                     def gitJrxml = XMLUnit.buildControlDocument(jrxmlFile?.text)
                                     if (dbJrxml != null && gitJrxml != null) {
                                         Diff diff = XMLUnit.compareXML(dbJrxml, gitJrxml)
-                                        jrxmlEqual = diff.similar()
+                                        def jrxmlEqual = diff.similar()
+                                        if (jrxmlEqual) {
+                                            result.jrxmlCheck = "Ok"
+                                        } else {
+                                            result.jrxmlError = true
+                                            result.jrxmlCheck = "Макеты Jasper отличаются"
+                                        }
                                     } else if (dbJrxml != null || gitJrxml != null) {
-                                        jrxmlEqual = false
-                                    }
-                                    if (jrxmlEqual) {
-                                        result.jrxmlCheck = "Ok"
-                                    } else {
                                         result.jrxmlError = true
-                                        result.jrxmlCheck = "Макеты Jasper отличаются"
+                                        result.jrxmlCheck = "Макет Jasper не обнаружен в БД"
                                     }
                                 }
                                 // Сравнение XSD
@@ -446,22 +446,22 @@ class GitReport {
                                         return name.toLowerCase().endsWith("xsd")
                                     }
                                 })
-                                boolean xsdEqual = false
                                 if (xsdFiles.size() == 1) {
                                     def xsdFile = xsdFiles[0]
                                     def dbXsd = versions[version]?.xsd
                                     def gitXsd = XMLUnit.buildControlDocument(xsdFile?.text)
                                     if (dbXsd != null && gitXsd != null) {
                                         Diff diff = XMLUnit.compareXML(dbXsd, gitXsd)
-                                        xsdEqual = diff.similar()
+                                        def xsdEqual = diff.similar()
+                                        if (xsdEqual) {
+                                            result.xsdCheck = "Ok"
+                                        } else {
+                                            result.xsdError = true
+                                            result.xsdCheck = "Файлы XSD отличаются"
+                                        }
                                     } else if (dbXsd != null || gitXsd != null) {
-                                        xsdEqual = false
-                                    }
-                                    if (xsdEqual) {
-                                        result.xsdCheck = "Ok"
-                                    } else {
                                         result.xsdError = true
-                                        result.xsdCheck = "Файлы XSD отличаются"
+                                        result.xsdCheck = "Файл XSD не обнаружен в БД"
                                     }
                                 } else if (xsdFiles.size() > 1 ) {
                                     result.xsdCheck = "Найдено более одного файла XSD в «${versionFolder.absolutePath}»"
@@ -616,6 +616,11 @@ class GitReport {
     def static getDeclarationDBVersions(def sql) {
         def map = [:]
 
+        XMLUnit.setIgnoreWhitespace(true)
+        XMLUnit.setIgnoreComments(true)
+        XMLUnit.setIgnoreDiffBetweenTextAndCDATA(true)
+        XMLUnit.setNormalizeWhitespace(true)
+
         sql.eachRow("select dt.id," +
                 " dt.declaration_type_id as type_id," +
                 " to_char(dt.version, 'RRRR') as version," +
@@ -639,14 +644,14 @@ class GitReport {
             version.script = it.script?.characterStream?.text
             if (it.xsd) {
                 try {
-                    version.xsd = XMLUnit.buildControlDocument(IOUtils.toString(it.xsd.binaryStream))
+                    version.xsd = it.xsd ? XMLUnit.buildControlDocument(IOUtils.toString(it.xsd.binaryStream)) : null
                 } catch (SAXException e) {
                     println("Ошибка при разборе XSD декларации id = ${it.id} \"${version.name}\"")
                 }
             }
             if (it.jrxml) {
                 try {
-                    version.jrxml = XMLUnit.buildControlDocument(IOUtils.toString(it.jrxml.binaryStream, "UTF-8"))
+                    version.jrxml = it.jrxml ? XMLUnit.buildControlDocument(IOUtils.toString(it.jrxml.binaryStream, "UTF-8")) : null
                 } catch (SAXException e) {
                     println("Ошибка при разборе JRXML декларации id = ${it.id} \"${version.name}\"")
                 }

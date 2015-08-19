@@ -84,7 +84,7 @@ public final class MessageGenerator {
     private static final String COMPLETE_FORM =
             "%s Тип: \"%s\", Вид: \"%s\", Подразделение: \"%s\", Период: \"%s %d\",%s%s Версия: \"%s\"";
     private static final String COMPLETE_FORM_STRINGS_ONLY   =
-            "%s: Тип: \"%s\", Вид: \"%s\", Подразделение: \"%s\", Период: \"%s\",%s%s%s Версия: \"%s\"";
+            "%s Тип: \"%s\", Вид: \"%s\", Подразделение: \"%s\", Период: \"%s\",%s%s%s Версия: \"%s\"";
     private static final String COMPLETE_FORM_WITH_RP_COMPARISON =
             "%s Тип: \"%s\", Вид: \"%s\", Подразделение: \"%s\", Период: \"%s %d\", Период сравнения: %s %d,%s%s Версия: \"%s\"";
     private static final String MONTH = " Месяц: %s,";
