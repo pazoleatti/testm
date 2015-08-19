@@ -4,16 +4,16 @@ import com.aplana.sbrf.taxaccounting.async.exception.AsyncTaskException;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.*;
-import com.aplana.sbrf.taxaccounting.util.TransactionHelper;
-import com.aplana.sbrf.taxaccounting.util.TransactionLogic;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.transaction.TransactionStatus;
 
 import java.util.Map;
 
 import static com.aplana.sbrf.taxaccounting.async.task.AsyncTask.RequiredParams.USER_ID;
 
 public abstract class CheckFormDataAsyncTask extends AbstractAsyncTask {
+
+    private static final String SUCCESS = "Выполнена проверка %s:";
+    private static final String FAIL = "Не выполнена проверка %s:";
 
     @Autowired
     private TAUserService userService;
@@ -26,15 +26,6 @@ public abstract class CheckFormDataAsyncTask extends AbstractAsyncTask {
 
     @Autowired
     private DepartmentReportPeriodService departmentReportPeriodService;
-
-    @Autowired
-    private LogEntryService logEntryService;
-
-    @Autowired
-    private TransactionHelper tx;
-
-    @Autowired
-    private DataRowService dataRowService;
 
     @Override
     protected ReportType getReportType() {
@@ -79,7 +70,7 @@ public abstract class CheckFormDataAsyncTask extends AbstractAsyncTask {
     protected String getNotificationMsg(Map<String, Object> params) {
         int userId = (Integer)params.get(USER_ID.name());
         long formDataId = (Long)params.get("formDataId");
-        boolean manual = false;
+        boolean manual = (Boolean)params.get("manual");
         TAUserInfo userInfo = new TAUserInfo();
         userInfo.setUser(userService.getUser(userId));
 
@@ -87,25 +78,23 @@ public abstract class CheckFormDataAsyncTask extends AbstractAsyncTask {
         FormData formData = formDataService.getFormData(userInfo, formDataId, manual, logger);
         Department department = departmentService.getDepartment(formData.getDepartmentId());
         DepartmentReportPeriod reportPeriod = departmentReportPeriodService.get(formData.getDepartmentReportPeriodId());
-        Integer periodOrder = formData.getPeriodOrder();
-        String strCorrPeriod = "";
-        if (reportPeriod.getCorrectionDate() != null) {
-            strCorrPeriod = ", с датой сдачи корректировки " + SDF_DD_MM_YYYY.format(reportPeriod.getCorrectionDate());
-        }
-        if (periodOrder == null){
-            return String.format("Выполнена проверка налоговой формы: Период: \"%s, %s%s\", Подразделение: \"%s\", Тип: \"%s\", Вид: \"%s\", Версия: \"%s\"",
-                    reportPeriod.getReportPeriod().getTaxPeriod().getYear(), reportPeriod.getReportPeriod().getName(), strCorrPeriod, department.getName(), formData.getKind().getName(), formData.getFormType().getName(), manual ? "ручного ввода" : "автоматическая");
-        } else {
-            return String.format("Выполнена проверка налоговой формы: Период: \"%s, %s%s\", Месяц: \"%s\", Подразделение: \"%s\", Тип: \"%s\", Вид: \"%s\", Версия: \"%s\"",
-                    reportPeriod.getReportPeriod().getTaxPeriod().getYear(), reportPeriod.getReportPeriod().getName(), strCorrPeriod, Formats.getRussianMonthNameWithTier(formData.getPeriodOrder()), department.getName(), formData.getKind().getName(), formData.getFormType().getName(), manual ? "ручного ввода" : "автоматическая");
-        }
+        DepartmentReportPeriod rpCompare = formData.getComparativPeriodId() != null ?
+                departmentReportPeriodService.get(formData.getComparativPeriodId()) : null;
+
+        return MessageGenerator.getFDMsg(
+                String.format(SUCCESS, MessageGenerator.mesSpeckSingleD(formData.getFormType().getTaxType())),
+                formData,
+                department.getName(),
+                manual,
+                reportPeriod,
+                rpCompare);
     }
 
     @Override
     protected String getErrorMsg(Map<String, Object> params) {
         int userId = (Integer)params.get(USER_ID.name());
         long formDataId = (Long)params.get("formDataId");
-        boolean manual = false;
+        boolean manual = (Boolean)params.get("manual");
         TAUserInfo userInfo = new TAUserInfo();
         userInfo.setUser(userService.getUser(userId));
 
@@ -113,17 +102,15 @@ public abstract class CheckFormDataAsyncTask extends AbstractAsyncTask {
         FormData formData = formDataService.getFormData(userInfo, formDataId, manual, logger);
         Department department = departmentService.getDepartment(formData.getDepartmentId());
         DepartmentReportPeriod reportPeriod = departmentReportPeriodService.get(formData.getDepartmentReportPeriodId());
-        Integer periodOrder = formData.getPeriodOrder();
-        String strCorrPeriod = "";
-        if (reportPeriod.getCorrectionDate() != null) {
-            strCorrPeriod = ", с датой сдачи корректировки " + SDF_DD_MM_YYYY.format(reportPeriod.getCorrectionDate());
-        }
-        if (periodOrder == null){
-            return String.format("Выполнена проверка налоговой формы: Период: \"%s, %s%s\", Подразделение: \"%s\", Тип: \"%s\", Вид: \"%s\", Версия: \"%s\". Найдены фатальные ошибки.",
-                    reportPeriod.getReportPeriod().getTaxPeriod().getYear(), reportPeriod.getReportPeriod().getName(), strCorrPeriod, department.getName(), formData.getKind().getName(), formData.getFormType().getName(), manual ? "ручного ввода" : "автоматическая");
-        } else {
-            return String.format("Выполнена проверка налоговой формы: Период: \"%s, %s%s\", Месяц: \"%s\", Подразделение: \"%s\", Тип: \"%s\", Вид: \"%s\", Версия: \"%s\". Найдены фатальные ошибки.",
-                    reportPeriod.getReportPeriod().getTaxPeriod().getYear(), reportPeriod.getReportPeriod().getName(), strCorrPeriod, Formats.getRussianMonthNameWithTier(formData.getPeriodOrder()), department.getName(), formData.getKind().getName(), formData.getFormType().getName(), manual ? "ручного ввода" : "автоматическая");
-        }
+        DepartmentReportPeriod rpCompare = formData.getComparativPeriodId() != null ?
+                departmentReportPeriodService.get(formData.getComparativPeriodId()) : null;
+
+        return MessageGenerator.getFDMsg(
+                String.format(FAIL, MessageGenerator.mesSpeckSingleD(formData.getFormType().getTaxType())),
+                formData,
+                department.getName(),
+                manual,
+                reportPeriod,
+                rpCompare);
     }
 }

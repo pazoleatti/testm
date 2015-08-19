@@ -17,6 +17,9 @@ import static com.aplana.sbrf.taxaccounting.async.task.AsyncTask.RequiredParams.
 
 public abstract class MoveFormDataAsyncTask extends AbstractAsyncTask {
 
+    private static final String SUCCESS = "Успешно переведена из статуса \"%s\" в статус \"%s\" %s:";
+    private static final String FAIL = "Не удалось перевести из статуса \"%s\" в статус \"%s\" %s:";
+
     @Autowired
     private TAUserService userService;
 
@@ -90,21 +93,20 @@ public abstract class MoveFormDataAsyncTask extends AbstractAsyncTask {
         userInfo.setUser(userService.getUser(userId));
 
         Logger logger = new Logger();
-        FormData formData = formDataService.getFormData(userInfo, formDataId, manual, logger);
+        FormData formData = formDataService.getFormData(userInfo, formDataId, false, logger);
         Department department = departmentService.getDepartment(formData.getDepartmentId());
         DepartmentReportPeriod reportPeriod = departmentReportPeriodService.get(formData.getDepartmentReportPeriodId());
-        Integer periodOrder = formData.getPeriodOrder();
-        String strCorrPeriod = "";
-        if (reportPeriod.getCorrectionDate() != null) {
-            strCorrPeriod = ", с датой сдачи корректировки " + SDF_DD_MM_YYYY.format(reportPeriod.getCorrectionDate());
-        }
-        if (periodOrder == null){
-            return String.format("Успешно переведена из статуса \"%s\" в статус \"%s\" налоговая форма: Период: \"%s, %s%s\", Подразделение: \"%s\", Тип: \"%s\", Вид: \"%s\", Версия: \"%s\"",
-                    move.getFromState().getName(), move.getToState().getName(), reportPeriod.getReportPeriod().getTaxPeriod().getYear(), reportPeriod.getReportPeriod().getName(), strCorrPeriod, department.getName(), formData.getKind().getName(), formData.getFormType().getName(), manual ? "ручного ввода" : "автоматическая");
-        } else {
-            return String.format("Успешно переведена из статуса \"%s\" в статус \"%s\" налоговая форма: Период: \"%s, %s%s\", Месяц: \"%s\", Подразделение: \"%s\", Тип: \"%s\", Вид: \"%s\", Версия: \"%s\"",
-                    move.getFromState().getName(), move.getToState().getName(), reportPeriod.getReportPeriod().getTaxPeriod().getYear(), reportPeriod.getReportPeriod().getName(), strCorrPeriod, Formats.getRussianMonthNameWithTier(formData.getPeriodOrder()), department.getName(), formData.getKind().getName(), formData.getFormType().getName(), manual ? "ручного ввода" : "автоматическая");
-        }
+        DepartmentReportPeriod rpCompare = formData.getComparativPeriodId() != null ?
+                departmentReportPeriodService.get(formData.getComparativPeriodId()) : null;
+
+        return MessageGenerator.getFDMsg(
+                String.format(SUCCESS, move.getFromState().getName(), move.getToState().getName(), formData.getFormType().getTaxType() == TaxType.ETR || formData.getFormType().getTaxType() == TaxType.DEAL ?
+                        "форму" : "налоговую форму"),
+                formData,
+                department.getName(),
+                false,
+                reportPeriod,
+                rpCompare);
     }
 
     @Override
@@ -122,17 +124,16 @@ public abstract class MoveFormDataAsyncTask extends AbstractAsyncTask {
         FormData formData = formDataService.getFormData(userInfo, formDataId, manual, logger);
         Department department = departmentService.getDepartment(formData.getDepartmentId());
         DepartmentReportPeriod reportPeriod = departmentReportPeriodService.get(formData.getDepartmentReportPeriodId());
-        Integer periodOrder = formData.getPeriodOrder();
-        String strCorrPeriod = "";
-        if (reportPeriod.getCorrectionDate() != null) {
-            strCorrPeriod = ", с датой сдачи корректировки " + SDF_DD_MM_YYYY.format(reportPeriod.getCorrectionDate());
-        }
-        if (periodOrder == null){
-            return String.format("Не удалось перевести из статуса \"%s\" в статус \"%s\" налоговую форму: Период: \"%s, %s%s\", Подразделение: \"%s\", Тип: \"%s\", Вид: \"%s\", Версия: \"%s\". Найдены фатальные ошибки.",
-                    move.getFromState().getName(), move.getToState().getName(), reportPeriod.getReportPeriod().getTaxPeriod().getYear(), reportPeriod.getReportPeriod().getName(), strCorrPeriod, department.getName(), formData.getKind().getName(), formData.getFormType().getName(), manual ? "ручного ввода" : "автоматическая");
-        } else {
-            return String.format("Не удалось перевести из статуса \"%s\" в статус \"%s\" налоговую форму: Период: \"%s, %s%s\", Месяц: \"%s\", Подразделение: \"%s\", Тип: \"%s\", Вид: \"%s\", Версия: \"%s\". Найдены фатальные ошибки.",
-                    move.getFromState().getName(), move.getToState().getName(), reportPeriod.getReportPeriod().getTaxPeriod().getYear(), reportPeriod.getReportPeriod().getName(), strCorrPeriod, Formats.getRussianMonthNameWithTier(formData.getPeriodOrder()), department.getName(), formData.getKind().getName(), formData.getFormType().getName(), manual ? "ручного ввода" : "автоматическая");
-        }
+        DepartmentReportPeriod rpCompare = formData.getComparativPeriodId() != null ?
+                departmentReportPeriodService.get(formData.getComparativPeriodId()) : null;
+
+        return MessageGenerator.getFDMsg(
+                String.format(FAIL, move.getFromState().getName(), move.getToState().getName(),formData.getFormType().getTaxType() == TaxType.ETR || formData.getFormType().getTaxType() == TaxType.DEAL ?
+                        "форму" : "налоговую форму"),
+                formData,
+                department.getName(),
+                false,
+                reportPeriod,
+                rpCompare);
     }
 }

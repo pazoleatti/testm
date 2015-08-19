@@ -99,18 +99,19 @@ public abstract class UploadFormDataAsyncTask extends AbstractAsyncTask {
     protected String getNotificationMsg(Map<String, Object> params) {
         int userId = (Integer)params.get(USER_ID.name());
         long formDataId = (Long)params.get("formDataId");
+        boolean manual = (Boolean)params.get("manual");
         TAUserInfo userInfo = new TAUserInfo();
         userInfo.setUser(userService.getUser(userId));
 
         Logger logger = new Logger();
-        FormData formData = formDataService.getFormData(userInfo, formDataId, false, logger);
+        FormData formData = formDataService.getFormData(userInfo, formDataId, manual, logger);
         Department department = departmentService.getDepartment(formData.getDepartmentId());
         DepartmentReportPeriod reportPeriod = departmentReportPeriodService.get(formData.getDepartmentReportPeriodId());
         DepartmentReportPeriod rpCompare = formData.getComparativPeriodId() != null ?
                 departmentReportPeriodService.get(formData.getComparativPeriodId()) : null;
 
         return MessageGenerator.getFDMsg(
-                "Выполнен импорт данных из XLSM файла в экземпляр налоговой формы",
+                String.format("Выполнен импорт данных из XLSM файла в экземпляр %s", MessageGenerator.mesSpeckSingleD(formData.getFormType().getTaxType())),
                 formData,
                 department.getName(),
                 false, reportPeriod, rpCompare);
@@ -120,20 +121,21 @@ public abstract class UploadFormDataAsyncTask extends AbstractAsyncTask {
     protected String getErrorMsg(Map<String, Object> params) {
         int userId = (Integer)params.get(USER_ID.name());
         long formDataId = (Long)params.get("formDataId");
+        boolean manual = (Boolean)params.get("manual");
         TAUserInfo userInfo = new TAUserInfo();
         userInfo.setUser(userService.getUser(userId));
 
         Logger logger = new Logger();
-        FormData formData = formDataService.getFormData(userInfo, formDataId, false, logger);
+        FormData formData = formDataService.getFormData(userInfo, formDataId, manual, logger);
         Department department = departmentService.getDepartment(formData.getDepartmentId());
         DepartmentReportPeriod reportPeriod = departmentReportPeriodService.get(formData.getDepartmentReportPeriodId());
         DepartmentReportPeriod rpCompare = formData.getComparativPeriodId() != null ?
                 departmentReportPeriodService.get(formData.getComparativPeriodId()) : null;
 
         return MessageGenerator.getFDMsg(
-                "Не выполнен импорт данных из XLSM файла в экземпляр налоговой формы",
+                String.format("Не выполнен импорт данных из XLSM файла в экземпляр %s", MessageGenerator.mesSpeckSingleD(formData.getFormType().getTaxType())),
                 formData,
                 department.getName(),
-                false, reportPeriod, rpCompare);
+                manual, reportPeriod, rpCompare);
     }
 }
