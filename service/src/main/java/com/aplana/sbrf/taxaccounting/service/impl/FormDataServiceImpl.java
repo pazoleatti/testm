@@ -1256,18 +1256,6 @@ public class FormDataServiceImpl implements FormDataService {
         String name;
         if (reportType != null) {
             switch (reportType) {
-                case CSV:
-                case EXCEL:
-                case IMPORT_FD:
-                case IMPORT_TF_FD:
-                    name = MessageGenerator.getFDMsg(reportType.getDescription(),
-                            formData,
-                            department.getName(),
-                            manual,
-                            reportPeriod,
-                            rpComparison);
-
-                    break;
                 case MOVE_FD:
                     name = MessageGenerator.getFDMsg(str,
                             formData,
@@ -1276,12 +1264,16 @@ public class FormDataServiceImpl implements FormDataService {
                             reportPeriod,
                             rpComparison);
                     break;
+                case CSV:
+                case EXCEL:
+                case IMPORT_FD:
+                case IMPORT_TF_FD:
                 case CONSOLIDATE_FD:
                 case CALCULATE_FD:
                 case CHECK_FD:
                 case EDIT_FD:
                 case DELETE_FD:
-                    name = MessageGenerator.getFDMsg(String.format(reportType.getDescription(), formData.getFormType().getTaxType().getTaxText()),
+                    name = MessageGenerator.getFDMsg(getTaskName(reportType, formData),
                             formData,
                             department.getName(),
                             manual,
@@ -1837,19 +1829,22 @@ public class FormDataServiceImpl implements FormDataService {
 
     @Override
     public String getTaskName(ReportType reportType, long formDataId, TAUserInfo userInfo) {
-        FormData formData = formDataDao.get(formDataId, false);
+        return getTaskName(reportType, formDataDao.get(formDataId, false));
+    }
+
+    private String getTaskName(ReportType reportType, FormData formData) {
         switch (reportType) {
             case DELETE_FD:
             case EDIT_FD:
             case CALCULATE_FD:
             case CONSOLIDATE_FD:
             case CHECK_FD:
+            case MOVE_FD:
                 return String.format(reportType.getDescription(), formData.getFormType().getTaxType().getTaxText());
             case EXCEL:
             case CSV:
             case IMPORT_FD:
             case IMPORT_TF_FD:
-            case MOVE_FD:
                 return reportType.getDescription();
             default:
                 throw new ServiceException("Неверный тип отчета(%s)", reportType.getName());
