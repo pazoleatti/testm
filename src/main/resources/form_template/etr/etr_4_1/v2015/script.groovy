@@ -236,11 +236,9 @@ void calcValues(def dataRows, def sourceRows) {
     def row3Source = getDataRow(sourceRows, "R3")
     def row4Source = getDataRow(sourceRows, "R4")
     def row5Source = getDataRow(sourceRows, "R5")
-    def row6Source = getDataRow(sourceRows, "R6")
-    def row7Source = getDataRow(sourceRows, "R7")
     def row8Source = getDataRow(sourceRows, "R8")
     ['comparePeriod', 'currentPeriod'].each {
-        def smallSum = (row5Source[it] ?: 0) + (row6Source[it] ?: 0) + (row7Source[it] ?: 0) + (row8Source[it] ?: 0)
+        def smallSum = (row5Source[it] ?: 0) + (row8Source[it] ?: 0)
         row4[it] = smallSum
         def largeSum = (row3Source[it] ?: 0) + (row4Source[it] ?: 0)
         row2[it] = largeSum
@@ -267,7 +265,7 @@ def getSourceValue(def periodId, def row, def alias) {
                 getStartDate(periodId), getEndDate(periodId))) {
             if (formDataSource.formTypeId == sourceFormTypeId) {
                 found = true
-                def source = formDataService.getLast(formDataSource.formTypeId, formDataSource.kind, formDataSource.departmentId, formData.reportPeriodId, formData.periodOrder)
+                def source = formDataService.getLast(formDataSource.formTypeId, formDataSource.kind, formDataSource.departmentId, periodId, formData.periodOrder)
                 if (source != null && source.state == WorkflowState.ACCEPTED) {
                     sourceForm = formDataService.getDataRowHelper(source)
                     return sourceForm.allSaved?.get(0)?.sum

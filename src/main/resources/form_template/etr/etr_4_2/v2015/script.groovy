@@ -261,7 +261,7 @@ def getSourceValue(def periodId, def row, def alias) {
                 getStartDate(periodId), getEndDate(periodId))) {
             if (formDataSource.formTypeId == sourceFormTypeId) {
                 found = true
-                def source = formDataService.getLast(formDataSource.formTypeId, formDataSource.kind, formDataSource.departmentId, formData.reportPeriodId, formData.periodOrder)
+                def source = formDataService.getLast(formDataSource.formTypeId, formDataSource.kind, formDataSource.departmentId, periodId, formData.periodOrder)
                 if (source != null && source.state == WorkflowState.ACCEPTED) {
                     sourceForm = formDataService.getDataRowHelper(source)
                     return sourceForm.allSaved?.get(0)?.sum
