@@ -48,6 +48,7 @@ public class Etr4_13Test extends ScriptTestBase {
         formData.setDepartmentReportPeriodId(DEPARTMENT_PERIOD_ID);
         formData.setReportPeriodId(REPORT_PERIOD_ID);
         formData.setPeriodOrder(1);
+        formData.setComparativPeriodId(1);
         return formData;
     }
 

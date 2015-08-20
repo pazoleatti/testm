@@ -1,6 +1,8 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdata.server;
 
 import com.aplana.sbrf.taxaccounting.model.FormData;
+import com.aplana.sbrf.taxaccounting.model.ReportType;
+import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.WorkflowState;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
@@ -14,6 +16,8 @@ import com.gwtplatform.dispatch.shared.ActionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
+
+import java.util.Arrays;
 
 /**
  * 
@@ -39,11 +43,14 @@ public class DeleteFormDataHandler extends AbstractActionHandler<DeleteFormDataA
         // Нажатие на кнопку "Удалить" http://conf.aplana.com/pages/viewpage.action?pageId=11384485
         DeleteFormDataResult result = new DeleteFormDataResult();
         Logger logger = new Logger();
+        TAUserInfo userInfo = securityService.currentUserInfo();
         FormData formData = action.getFormData();
 
         // Версия ручного ввода удаляется без проверок
         if (action.isManual()) {
             formDataService.deleteFormData(logger, securityService.currentUserInfo(), action.getFormDataId(), true);
+            formDataService.unlock(action.getFormDataId(), userInfo);
+            formDataService.interruptTask(action.getFormDataId(), userInfo, Arrays.asList(ReportType.CALCULATE_FD, ReportType.IMPORT_FD, ReportType.CHECK_FD));
             return result;
         }
 
@@ -51,7 +58,7 @@ public class DeleteFormDataHandler extends AbstractActionHandler<DeleteFormDataA
         if (formData.getState() != WorkflowState.CREATED){
             throw new ServiceLoggerException("НФ не может быть удалена, так находится в статусе, отличном от \"Создана\"!", null);
         }
-        formDataService.deleteFormData(logger, securityService.currentUserInfo(), action.getFormDataId(), false);
+        formDataService.deleteFormData(logger, userInfo, action.getFormDataId(), false);
         return result;
     }
 
