@@ -71,7 +71,7 @@
         <name>Изменение за период (гр.6/гр.4*100),%</name>
         <order>7</order>
         <width>10</width>
-        <maxLength>4</maxLength>
+        <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>
     <styles>
