@@ -12,8 +12,7 @@ import static com.aplana.sbrf.taxaccounting.async.task.AsyncTask.RequiredParams.
 
 public abstract class CheckFormDataAsyncTask extends AbstractAsyncTask {
 
-    private static final String SUCCESS = "Выполнена проверка %s:";
-    private static final String FAIL = "Не выполнена проверка %s:";
+    private static final String MESSAGE = "Выполнена проверка %s:";
 
     @Autowired
     private TAUserService userService;
@@ -82,7 +81,7 @@ public abstract class CheckFormDataAsyncTask extends AbstractAsyncTask {
                 departmentReportPeriodService.get(formData.getComparativPeriodId()) : null;
 
         return MessageGenerator.getFDMsg(
-                String.format(SUCCESS, MessageGenerator.mesSpeckSingleD(formData.getFormType().getTaxType())),
+                String.format(MESSAGE, MessageGenerator.mesSpeckSingleD(formData.getFormType().getTaxType())),
                 formData,
                 department.getName(),
                 manual,
@@ -106,7 +105,7 @@ public abstract class CheckFormDataAsyncTask extends AbstractAsyncTask {
                 departmentReportPeriodService.get(formData.getComparativPeriodId()) : null;
 
         return MessageGenerator.getFDMsg(
-                String.format(FAIL, MessageGenerator.mesSpeckSingleD(formData.getFormType().getTaxType())),
+                String.format(MESSAGE, MessageGenerator.mesSpeckSingleD(formData.getFormType().getTaxType())),
                 formData,
                 department.getName(),
                 manual,
