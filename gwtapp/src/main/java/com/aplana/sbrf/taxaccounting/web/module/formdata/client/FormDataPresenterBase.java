@@ -87,7 +87,7 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 
         void showDeleteManualAnchor(boolean show);
 
-		void setLockInformation(boolean isVisible, boolean readOnlyMode, LockInfo lockInfo);
+		void setLockInformation(boolean isVisible, boolean readOnlyMode, LockInfo lockInfo, TaxType taxType);
 
 		DataRow<Cell> getSelectedRow();
 
@@ -234,7 +234,7 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 		view.showOriginalVersionButton(false);
 		view.showPrintAnchor(true);
         view.showDeleteFormButton(!lockInfo.isEditMode() && formDataAccessParams.isCanDelete());
-		view.setLockInformation(true, readOnlyMode, lockInfo);
+		view.setLockInformation(true, readOnlyMode, lockInfo, formData.getFormType().getTaxType());
 
         if (lockInfo.isEditMode()) {
             view.setWorkflowButtons(null);
@@ -275,7 +275,7 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
         view.showOriginalVersionButton(false);
         view.showPrintAnchor(true);
         view.showDeleteFormButton(!lockInfo.isEditMode() && formDataAccessParams.isCanDelete());
-        view.setLockInformation(true, readOnlyMode, lockInfo);
+        view.setLockInformation(true, readOnlyMode, lockInfo, formData.getFormType().getTaxType());
 
         if (lockInfo.isEditMode()) {
             view.setWorkflowButtons(null);
@@ -319,7 +319,7 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 
         view.showPrintAnchor(false);
         view.showDeleteFormButton(false);
-        view.setLockInformation(true, false, lockInfo);
+        view.setLockInformation(true, false, lockInfo, formData.getFormType().getTaxType());
 
         view.setWorkflowButtons(null);
         view.showCheckButton(formDataAccessParams.isCanRead() && absoluteView);
@@ -363,7 +363,7 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 		view.showOriginalVersionButton(false);
 		view.showPrintAnchor(true);
 		view.showDeleteFormButton(formDataAccessParams.isCanDelete());
-		view.setLockInformation(false, readOnlyMode, null);
+		view.setLockInformation(false, readOnlyMode, null, formData.getFormType().getTaxType());
 		
 		view.setWorkflowButtons(formDataAccessParams.getAvailableWorkflowMoves());
 		view.showCheckButton(formDataAccessParams.isCanRead() && absoluteView);
@@ -399,7 +399,7 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 
 		view.showPrintAnchor(false);
 		view.showDeleteFormButton(false);
-		view.setLockInformation(false, readOnlyMode, null);
+		view.setLockInformation(false, readOnlyMode, null, formData.getFormType().getTaxType());
 		
 		view.setWorkflowButtons(null);
 		view.showCheckButton(formDataAccessParams.isCanRead() && absoluteView);

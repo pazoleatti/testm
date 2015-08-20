@@ -764,18 +764,31 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
     }
 
     @Override
-	public void setLockInformation(boolean isVisible, boolean readOnlyMode, LockInfo lockInfo){
+	public void setLockInformation(boolean isVisible, boolean readOnlyMode, LockInfo lockInfo, TaxType taxType){
 		lockInformation.setVisible(isVisible);
 		if(lockInfo != null){
             String text;
             if (readOnlyMode) {
                 if (lockInfo.isEditMode()) {
-                    text = "Выбранная налоговая форма в текущий момент редактируется " + (lockInfo.isLockedMe() ? "текущим пользователем" : ("другим пользователем \"" + lockInfo.getLockedByUser() + "\"")) + " (с " + lockInfo.getLockDate() + ")";
+                    text =
+                            "Выбранная "
+                                    + MessageGenerator.mesSpeckSingle(taxType)
+                                    + " в текущий момент редактируется " +
+                                    (lockInfo.isLockedMe() ? "текущим пользователем" : ("другим пользователем \"" + lockInfo.getLockedByUser() + "\""))
+                                    + " (с " + lockInfo.getLockDate() + ")";
                 } else {
-                    text = "Выбранная налоговая форма в текущий момент заблокирована на изменение " + (lockInfo.isLockedMe() ? "текущим пользователем" : ("другим пользователем \"" + lockInfo.getLockedByUser() + "\"")) + " (с " + lockInfo.getLockDate() + ")";
+                    text =
+                            "Выбранная "
+                                    + MessageGenerator.mesSpeckSingle(taxType)
+                                    + " в текущий момент заблокирована на изменение "
+                                    + (lockInfo.isLockedMe() ? "текущим пользователем" : ("другим пользователем \"" + lockInfo.getLockedByUser() + "\""))
+                                    + " (с " + lockInfo.getLockDate() + ")";
                 }
             } else {
-                text = "Выбранная налоговая форма в текущий момент заблокирована на редактирование текущим пользователем (с " + lockInfo.getLockDate() + ")";
+                text =
+                        "Выбранная "
+                                +  MessageGenerator.mesSpeckSingle(taxType)
+                                + " в текущий момент заблокирована на редактирование текущим пользователем (с " + lockInfo.getLockDate() + ")";
             }
 			lockInformation.setText(text);
 			lockInformation.setTitle(lockInfo.getTitle());
