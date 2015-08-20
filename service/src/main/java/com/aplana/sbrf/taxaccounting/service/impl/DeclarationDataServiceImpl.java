@@ -1101,42 +1101,47 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     }
 
     private void checkSources(DeclarationData dd, Logger logger){
-        //Проверка на неактуальные консолидированные данные
+        boolean consolidationOk = true;
+        //Проверка на неактуальные консолидированные данные  3А
         if (!sourceService.isDDConsolidationTopical(dd.getId())){
             logger.error(CALCULATION_NOT_TOPICAL);
-            /*throw new ServiceLoggerException("", logEntryService.save(logger.getEntries()));*/
-        }
-        ReportPeriod rp = reportPeriodService.getReportPeriod(dd.getReportPeriodId());
-        List<DepartmentFormType> sourceDDs = getFormDataSources(dd, true, logger);
-        for (DepartmentFormType sourceDFT : sourceDDs){
-            DepartmentReportPeriod drp = departmentReportPeriodService.getLast(sourceDFT.getDepartmentId(), dd.getReportPeriodId());
-            FormData sourceFD =
-                    formDataService.findFormData(sourceDFT.getFormTypeId(), sourceDFT.getKind(), drp.getId(), sourceDFT.getPeriodOrder());
-            if (sourceFD==null){
-                logger.warn(
-                        NOT_EXIST_SOURCE_DECLARATION_WARNING,
-                        departmentService.getDepartment(sourceDFT.getDepartmentId()).getName(),
-                        formTypeService.get(sourceDFT.getFormTypeId()).getName(),
-                        sourceDFT.getKind().getName(),
-                        rp.getName() + (sourceDFT.getPeriodOrder() != null ? " " + Months.fromId(sourceDFT.getPeriodOrder()).getTitle() : ""),
-                        rp.getTaxPeriod().getYear(),
-                        drp.getCorrectionDate() != null ? String.format(" с датой сдачи корректировки %s",
-                                formatter.format(drp.getCorrectionDate())) : "");
-            } else if (!sourceService.isDeclarationSourceConsolidated(dd.getId(), sourceFD.getId())){
-                DepartmentReportPeriod sourceDRP = departmentReportPeriodService.get(sourceFD.getDepartmentReportPeriodId());
-                logger.warn(NOT_CONSOLIDATE_SOURCE_DECLARATION_WARNING,
-                        departmentService.getDepartment(sourceFD.getDepartmentId()).getName(),
-                        sourceFD.getFormType().getName(),
-                        sourceFD.getKind().getName(),
-                        rp.getName() + (sourceFD.getPeriodOrder() != null ? " " + Months.fromId(sourceFD.getPeriodOrder()).getTitle() : ""),
-                        rp.getTaxPeriod().getYear(),
-                        sourceDRP.getCorrectionDate() != null ? String.format(" с датой сдачи корректировки %s",
-                                formatter.format(sourceDRP.getCorrectionDate())) : "",
-                        sourceFD.getState().getName());
+            consolidationOk = false;
+        } else {
+            //Проверка того, что консолидация вообще когда то выполнялась для всех источников
+            ReportPeriod rp = reportPeriodService.getReportPeriod(dd.getReportPeriodId());
+            List<DepartmentFormType> sourceDDs = getFormDataSources(dd, true, logger);
+            for (DepartmentFormType sourceDFT : sourceDDs){
+                DepartmentReportPeriod drp = departmentReportPeriodService.getLast(sourceDFT.getDepartmentId(), dd.getReportPeriodId());
+                FormData sourceFD =
+                        formDataService.findFormData(sourceDFT.getFormTypeId(), sourceDFT.getKind(), drp.getId(), sourceDFT.getPeriodOrder());
+                if (sourceFD==null){
+                    consolidationOk = false;
+                    logger.warn(
+                            NOT_EXIST_SOURCE_DECLARATION_WARNING,
+                            departmentService.getDepartment(sourceDFT.getDepartmentId()).getName(),
+                            formTypeService.get(sourceDFT.getFormTypeId()).getName(),
+                            sourceDFT.getKind().getName(),
+                            rp.getName() + (sourceDFT.getPeriodOrder() != null ? " " + Months.fromId(sourceDFT.getPeriodOrder()).getTitle() : ""),
+                            rp.getTaxPeriod().getYear(),
+                            drp.getCorrectionDate() != null ? String.format(" с датой сдачи корректировки %s",
+                                    formatter.format(drp.getCorrectionDate())) : "");
+                } else if (!sourceService.isDeclarationSourceConsolidated(dd.getId(), sourceFD.getId())){
+                    consolidationOk = false;
+                    DepartmentReportPeriod sourceDRP = departmentReportPeriodService.get(sourceFD.getDepartmentReportPeriodId());
+                    logger.warn(NOT_CONSOLIDATE_SOURCE_DECLARATION_WARNING,
+                            departmentService.getDepartment(sourceFD.getDepartmentId()).getName(),
+                            sourceFD.getFormType().getName(),
+                            sourceFD.getKind().getName(),
+                            rp.getName() + (sourceFD.getPeriodOrder() != null ? " " + Months.fromId(sourceFD.getPeriodOrder()).getTitle() : ""),
+                            rp.getTaxPeriod().getYear(),
+                            sourceDRP.getCorrectionDate() != null ? String.format(" с датой сдачи корректировки %s",
+                                    formatter.format(sourceDRP.getCorrectionDate())) : "",
+                            sourceFD.getState().getName());
+                }
             }
         }
 
-        if (!sourceDDs.isEmpty() && !logger.containsLevel(LogLevel.WARNING)){
+        if (consolidationOk){
             logger.info("Консолидация выполнена из всех форм-источников.");
         }
     }

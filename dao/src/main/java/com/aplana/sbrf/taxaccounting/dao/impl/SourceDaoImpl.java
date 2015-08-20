@@ -622,7 +622,7 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
     public boolean isFDConsolidationTopical(long fdTargetId) {
         return getJdbcTemplate().queryForObject(
                 "select count(*) from form_data_consolidation where TARGET_FORM_DATA_ID = ? and SOURCE_FORM_DATA_ID is null",
-                Integer.class, fdTargetId) > 0;
+                Integer.class, fdTargetId) == 0;
     }
 
     @Override

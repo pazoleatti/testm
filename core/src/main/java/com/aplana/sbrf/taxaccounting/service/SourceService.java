@@ -537,14 +537,14 @@ public interface SourceService {
     /**
      * Проверяет не изменились ли данные консолидации для НФ
      * @param fdTargetId идентификатор нф-приемника для проверки
-     * @return
+     * @return true - данные актуальны
      */
     boolean isFDConsolidationTopical(long fdTargetId);
 
     /**
      * Проверяет не изменились ли данные консолидации для декларации
      * @param ddTargetId идентификатор декларации-приемника для проверки
-     * @return true - если данные не актульны
+     * @return true - данные актуальны
      */
     boolean isDDConsolidationTopical(long ddTargetId);
 }
