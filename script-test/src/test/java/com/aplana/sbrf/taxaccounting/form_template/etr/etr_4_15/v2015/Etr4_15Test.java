@@ -1,4 +1,4 @@
-package com.aplana.sbrf.taxaccounting.form_template.etr.etr_4_13.v2015;
+package com.aplana.sbrf.taxaccounting.form_template.etr.etr_4_15.v2015;
 
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
@@ -25,10 +25,10 @@ import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.when;
 
 /**
- * Приложение 4-13. Анализ структуры доходов и расходов, не учитываемых для целей налогообложения.
+ * Приложение 4-15. Анализ структуры налога на добавленную стоимость (НДС).
  */
-public class Etr4_13Test extends ScriptTestBase {
-    private static final int TYPE_ID = 713;
+public class Etr4_15Test extends ScriptTestBase {
+    private static final int TYPE_ID = 715;
     private static final int DEPARTMENT_ID = 1;
     private static final int REPORT_PERIOD_ID = 1;
     private static final int DEPARTMENT_PERIOD_ID = 1;
@@ -54,7 +54,7 @@ public class Etr4_13Test extends ScriptTestBase {
 
     @Override
     protected ScriptTestMockHelper getMockHelper() {
-        return getDefaultScriptTestMockHelper(Etr4_13Test.class);
+        return getDefaultScriptTestMockHelper(Etr4_15Test.class);
     }
 
     @Before
@@ -140,18 +140,13 @@ public class Etr4_13Test extends ScriptTestBase {
 
     /** Проверить загруженные данные. */
     void checkLoadData(List<DataRow<Cell>> dataRows) {
-        // графа 4..9 - для всех строк, кроме строк I, II
-        String [] calcColumns = { "comparePeriod", "comparePeriodPercent", "currentPeriod", "currentPeriodPercent", "deltaRub", "deltaPercent" };
-        // графа 4, 6, 8, 9 - для строк I, II
-        String [] calcColumns1_2 = { "comparePeriod", "currentPeriod", "deltaRub", "deltaPercent" };
+        // графа 1..9
+        String [] calcColumns = { "comparePeriod", "comparePeriodIgnore", "comparePeriodPercent", "currentPeriod",
+                "currentPeriodIgnore", "currentPeriodPercent", "delta", "deltaIgnore", "deltaPercent" };
         Long expected = 0L;
         for (DataRow<Cell> row : dataRows) {
-            if (row.getAlias() == null || "".equals(row.getAlias())) {
-                continue;
-            }
             expected++;
-            String [] columns = ("I".equals(row.getAlias()) || "II".equals(row.getAlias()) ? calcColumns1_2 : calcColumns);
-            for (String alias : columns) {
+            for (String alias : calcColumns) {
                 Cell cell = row.getCell(alias);
                 Long value = (cell.getNumericValue() != null ? cell.getNumericValue().longValue() : null);
                 Assert.assertEquals("row." + alias + "[" + row.getIndex() + "]", expected, value);
@@ -200,28 +195,21 @@ public class Etr4_13Test extends ScriptTestBase {
 
     /** Проверить сконсолидированные данные. */
     void checkConsolidatedData(List<DataRow<Cell>> dataRows) {
-        // графа 4, 6 - для всех строк, кроме строк I, II
-        String [] consolidatedColumns = { "comparePeriod", "currentPeriod" };
-        // графа 4..9 - для всех строк, кроме строк I, II
-        String [] calcColumns = { "comparePeriod", "comparePeriodPercent", "currentPeriod", "currentPeriodPercent", "deltaRub", "deltaPercent" };
-        // графа 4, 6, 8, 9 - для строк I, II
-        String [] calcColumns1_2 = { "comparePeriod", "currentPeriod", "deltaRub", "deltaPercent" };
+        // графа 1, 2, 4, 5
+        String [] consolidatedColumns = { "comparePeriod", "comparePeriodIgnore", "currentPeriod", "currentPeriodIgnore" };
+        // графа 3, 6..9
+        String [] calcColumns = { "comparePeriodPercent", "currentPeriodPercent", "delta", "deltaIgnore", "deltaPercent" };
         Long expected = 0L;
         for (DataRow<Cell> row : dataRows) {
-            if (row.getAlias() == null || "".equals(row.getAlias())) {
-                continue;
-            }
             expected++;
-            // графа 4, 6
+            // графа 1, 2, 4, 5
             for (String alias : consolidatedColumns) {
                 Cell cell = row.getCell(alias);
                 Long value = (cell.getNumericValue() != null ? cell.getNumericValue().longValue() : null);
                 Assert.assertEquals("row." + alias + "[" + row.getIndex() + "]", expected, value);
             }
-
-            // графа 5, 7, 8, 9
-            String [] columns = ("I".equals(row.getAlias()) || "II".equals(row.getAlias()) ? calcColumns1_2 : calcColumns);
-            for (String alias : columns) {
+            // графа 3, 6..9
+            for (String alias : calcColumns) {
                 Cell cell = row.getCell(alias);
                 Long value = (cell.getNumericValue() != null ? cell.getNumericValue().longValue() : null);
                 Assert.assertNotNull("row." + alias + "[" + row.getIndex() + "]", value);

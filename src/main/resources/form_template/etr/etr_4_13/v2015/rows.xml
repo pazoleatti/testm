@@ -106,7 +106,7 @@
         <cell alias="rowNum" colSpan="1" rowSpan="1" stringValue="1" styleAlias="Жирный"/>
         <cell alias="taxName" colSpan="1" rowSpan="1" stringValue="Оплата труда, премии " styleAlias="Жирный"/>
         <cell alias="symbol102" colSpan="1" rowSpan="1"
-              stringValue="симв. ф.102 (26104.04+26101.07+26101.12+26101.13+26101.99+26401.04+27203.08)"/>
+              stringValue="симв. ф.102 (26101.04+26101.07+26101.12+26101.13+26101.99+26401.04+27203.08+26410.12)"/>
         <cell alias="comparePeriod" colSpan="1" rowSpan="1"/>
         <cell alias="comparePeriodPercent" colSpan="1" rowSpan="1"/>
         <cell alias="currentPeriod" colSpan="1" rowSpan="1"/>
@@ -119,7 +119,7 @@
         <cell alias="taxName" colSpan="1" rowSpan="1" stringValue="Социальные выплаты (материальная помощь)"
               styleAlias="Жирный"/>
         <cell alias="symbol102" colSpan="1" rowSpan="1"
-              stringValue="симв. ф.102 (26101.01+26104.02+26104.03+26104.04+26104.05+26104.06+26104.99+27308.15+27308.16+27308.17+27308.18)"/>
+              stringValue="симв. ф.102 (26104.01+26104.02+26104.03+26104.04+26104.05+26104.06+26104.99+27308.15+27308.16+27308.17+27308.18)"/>
         <cell alias="comparePeriod" colSpan="1" rowSpan="1"/>
         <cell alias="comparePeriodPercent" colSpan="1" rowSpan="1"/>
         <cell alias="currentPeriod" colSpan="1" rowSpan="1"/>
@@ -389,7 +389,7 @@
         <cell alias="rowNum" colSpan="1" rowSpan="1" stringValue="19" styleAlias="Жирный"/>
         <cell alias="taxName" colSpan="1" rowSpan="1" stringValue="Прочие расходы" styleAlias="Жирный"/>
         <cell alias="symbol102" colSpan="1" rowSpan="1"
-              stringValue="симв. ф.102 (25203.03+25302.02+26401.02+26403.02+26410.06+26410.99+26412.10+26412.27+27201.97+27202.99+27203.38+27203.40+27203.42+27203.44+27203.97+27203.99+27302+27303+27304+27307+27308.99)"/>
+              stringValue="симв. ф.102 (25203.03+25302.02+26401.02+26403.02+26410.06+26410.99+26412.10+26412.27+27201.97+27202.99+27203.38+27203.40+27203.42+27203.44+27203.97+27203.99+27302+27303+27304+27307+27308.98+27308.97)"/>
         <cell alias="comparePeriod" colSpan="1" rowSpan="1"/>
         <cell alias="comparePeriodPercent" colSpan="1" rowSpan="1"/>
         <cell alias="currentPeriod" colSpan="1" rowSpan="1"/>

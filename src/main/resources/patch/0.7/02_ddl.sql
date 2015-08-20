@@ -15,23 +15,6 @@ end loop;
 end;
 /
 
---http://jira.aplana.com/browse/SBRFACCTAX-11881: Удаление ошибочно существующих невалидных PL/SQL-объектов, относящихся к TAX_RNU
-declare query_str varchar2(1024) := '';
-begin
-for x in (select * from user_objects where object_name like 'APL%' or object_name like 'NSI%' and object_type in ('PROCEDURE', 'FUNCTION')) loop
-	if x.status = 'VALID' then --Better safe than sorry
-		dbms_output.put_line('Valid object '||x.object_name||' ('||x.object_type||') will not be deleted.');
-	end if;
-	if x.status = 'INVALID' then
-		query_str := 'DROP '||x.object_type||' '||x.object_name;
-		dbms_output.put_line(query_str||'.');
-		commit;
-		execute immediate query_str;
-	end if;
-end loop;
-end;
-/
-
 --http://jira.aplana.com/browse/SBRFACCTAX-12250: Наименование узла кластера, на котором выполняется связанная асинхронная задача
 alter table lock_data add SERVER_NODE varchar2(100);
 comment on column lock_data.server_node is 'Наименование узла кластера, на котором выполняется связанная асинхронная задача';

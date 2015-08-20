@@ -98,7 +98,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
         super.prepareFromRequest(request);
         LogCleanEvent.fire(FormDataPresenter.this);
 		GetFormDataAction action = new GetFormDataAction();
-		if ( formData!=null ){
+		if ( formData!=null && !readOnlyMode ){
 			action.setOldFormDataId(formData.getId());
 		}
 		action.setFormDataId(Long.parseLong(request.getParameter(FORM_DATA_ID, null)));
@@ -454,6 +454,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
             @Override
             public void no() {
                 placeManager.setOnLeaveConfirmation(null);
+                modifiedRows.clear();
                 revealFormData(true, formData.isManual(), !absoluteView, null);
             }
         });

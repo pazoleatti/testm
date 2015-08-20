@@ -94,6 +94,7 @@ public abstract class XlsmGeneratorAsyncTask extends AbstractAsyncTask {
         int userId = (Integer)params.get(USER_ID.name());
         long formDataId = (Long)params.get("formDataId");
         boolean manual = (Boolean)params.get("manual");
+        boolean isShowChecked = (Boolean)params.get("isShowChecked");
         TAUserInfo userInfo = new TAUserInfo();
         userInfo.setUser(userService.getUser(userId));
 
@@ -108,7 +109,7 @@ public abstract class XlsmGeneratorAsyncTask extends AbstractAsyncTask {
                 String.format(COMPLETE_FORM, getReportType().getName()),
                 formData,
                 department.getName(),
-                manual, reportPeriod, rpCompare);
+                manual, reportPeriod, rpCompare, isShowChecked);
     }
 
     @Override
@@ -116,6 +117,7 @@ public abstract class XlsmGeneratorAsyncTask extends AbstractAsyncTask {
         int userId = (Integer)params.get(USER_ID.name());
         long formDataId = (Long)params.get("formDataId");
         boolean manual = (Boolean)params.get("manual");
+        boolean isShowChecked = (Boolean)params.get("isShowChecked");
         TAUserInfo userInfo = new TAUserInfo();
         userInfo.setUser(userService.getUser(userId));
 
@@ -129,6 +131,6 @@ public abstract class XlsmGeneratorAsyncTask extends AbstractAsyncTask {
         return MessageGenerator.getFDMsg(String.format(ERROR_FORM, getReportType()),
                 formData,
                 department.getName(),
-                manual, reportPeriod, rpCompare);
+                manual, reportPeriod, rpCompare, isShowChecked);
     }
 }
