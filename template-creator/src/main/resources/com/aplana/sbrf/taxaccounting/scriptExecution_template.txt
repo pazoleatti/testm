@@ -30,6 +30,7 @@ try {
     formType.setTaxType(%3%)
     formType.setIsIfrs(%4%)
     formType.setIfrsName('%5%')
+    formType.setCode('%26%')
     // id шаблона формы, имя шаблона короткое, имя шаблона полное, год версии, ежемесячность(флаг), код
     FormTemplate formTemplate = new FormTemplate()
     formTemplate.setId(%6%)
@@ -114,6 +115,7 @@ def void addTypeTemplate(FormType formType, FormTemplate formTemplate, boolean c
     def form_type_tax_type = formType.taxType.code ?: ""
     def form_type_is_ifrs = formType.isIfrs ? 1 : 0
     def form_type_ifrs_name = formType.ifrsName ?: ""
+    def form_type_ifrs_code = formType.code ?: ""
 
     def form_template_id = formTemplate.id ?: ""
     def form_template_is_fixed_rows = formTemplate.isFixedRows() ? 1 : 0
@@ -124,8 +126,8 @@ def void addTypeTemplate(FormType formType, FormTemplate formTemplate, boolean c
     def form_template_comparative = formTemplate.isComparative() ? 1 : 0
     def form_template_header = formTemplate.header ?: ""
 
-    String formTypeSql = "INSERT INTO FORM_TYPE (ID, NAME, TAX_TYPE, STATUS, IS_IFRS, IFRS_NAME) VALUES " +
-            "('$form_type_id', '$form_type_name', '$form_type_tax_type', '0', '$form_type_is_ifrs', '$form_type_ifrs_name')"
+    String formTypeSql = "INSERT INTO FORM_TYPE (ID, NAME, TAX_TYPE, STATUS, IS_IFRS, IFRS_NAME, CODE) VALUES " +
+            "('$form_type_id', '$form_type_name', '$form_type_tax_type', '0', '$form_type_is_ifrs', '$form_type_ifrs_name', '$form_type_ifrs_code')"
     if (createType) {
         namedParameterJdbcTemplate.update(formTypeSql, [:])
         logger.info("Создан тип НФ с id = $form_type_id без версии макета, колонок, стилей, заголовка, фиксированных строк и скрипта")

@@ -23,20 +23,21 @@ static void main(String[] args) {
     // флаги выполняемых действий (тип, шаблон, колонки, стили, фикс.строки, заголовки, скрипты)
     def flags = [true, true, true, true, true, true, true] // TODO поменять для частичного создания/обновления макетов (тип, макет и колонки не пересоздаются!)
     String resourcePath = "./src/main/resources/com/aplana/sbrf/taxaccounting/"
-    String templatePath = "../src/main/resources/form_template/income/f7_8_1/v2015/" // TODO поменять на путь до нужного макета
+    String templatePath = "../src/main/resources/form_template/etr/etr_4_16/v2015/" // TODO поменять на путь до нужного макета
     def map = [ // TODO заполнить
                 // заполняем вручную
-                "%1%" : '363', // id типа НФ
-                "%2%" : '(Ф 7.8) Реестр совершенных операций с ценными бумагами по продаже и погашению, а также по открытию-закрытию короткой позиции (с 9 месяцев 2015)', // имя типа НФ
-                "%3%" : 'TaxType.INCOME', // вид налога
+                "%1%" : '716', // id типа НФ
+                "%2%" : 'Приложение 4-16. Доходы и расходы, не учитываемые для целей налогообложения по налогу на прибыль, и их влияние на финансовый результат', // имя типа НФ
+                "%3%" : 'TaxType.ETR', // вид налога
                 "%4%" : 'false', // isIFRS
                 "%5%" : '', // имя ИФРС
-                "%6%" : '363', // id версии макета НФ
+                "%26%" : '4-16', // код НФ
+                "%6%" : '716', // id версии макета НФ
                 "%10%" : '01.01.2015', // версия в формате 01.01.2015
-                "%11%" : 'true', // ежемесячность
-                "%18%" : 'false'] // использование периода сравнения
+                "%11%" : 'false', // ежемесячность
+                "%18%" : 'true'] // использование периода сравнения
 
-    String outputFileName = "scriptExecution_output.txt" // TODO поменять имя выходного файла
+    String outputFileName = "scriptExecution_etr_4_16.txt" // TODO поменять имя выходного файла
     def writer
     try {
         File templateFile = new File(resourcePath + "scriptExecution_template.txt")
