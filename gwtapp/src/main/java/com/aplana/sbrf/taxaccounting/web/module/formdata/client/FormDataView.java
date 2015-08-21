@@ -772,14 +772,14 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
                 if (lockInfo.isEditMode()) {
                     text =
                             "Выбранная "
-                                    + MessageGenerator.mesSpeckSingle(taxType)
+                                    + (taxType == TaxType.DEAL || taxType == TaxType.ETR ? "форма" : "налоговая форма")
                                     + " в текущий момент редактируется " +
                                     (lockInfo.isLockedMe() ? "текущим пользователем" : ("другим пользователем \"" + lockInfo.getLockedByUser() + "\""))
                                     + " (с " + lockInfo.getLockDate() + ")";
                 } else {
                     text =
                             "Выбранная "
-                                    + MessageGenerator.mesSpeckSingle(taxType)
+                                    +  (taxType == TaxType.DEAL || taxType == TaxType.ETR ? "форма" : "налоговая форма")
                                     + " в текущий момент заблокирована на изменение "
                                     + (lockInfo.isLockedMe() ? "текущим пользователем" : ("другим пользователем \"" + lockInfo.getLockedByUser() + "\""))
                                     + " (с " + lockInfo.getLockDate() + ")";
@@ -787,7 +787,7 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
             } else {
                 text =
                         "Выбранная "
-                                +  MessageGenerator.mesSpeckSingle(taxType)
+                                +   (taxType == TaxType.DEAL || taxType == TaxType.ETR ? "форма" : "налоговая форма")
                                 + " в текущий момент заблокирована на редактирование текущим пользователем (с " + lockInfo.getLockDate() + ")";
             }
 			lockInformation.setText(text);
