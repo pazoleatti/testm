@@ -297,14 +297,14 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
                     data.isAccruing() ? "(нарастающим итогом)" : ""));
         } else  if (data.getPeriodOrder() != null) {
             sbPeriodName.append(
-                    String.format(XlsxReportMetadata.MOUNTLY,
+                    String.format(XlsxReportMetadata.MONTHLY,
                             Months.fromId(data.getPeriodOrder()).getTitle().toLowerCase(new Locale("ru", "RU")),
                             reportPeriod.getTaxPeriod().getYear()
                     )
             );
         } else {
             sbPeriodName.append(
-                    String.format(XlsxReportMetadata.NO_MOUNTLY,
+                    String.format(XlsxReportMetadata.MONTHLY,
                             !refBookValue.getStringValue().equals("34") ? reportPeriod.getName() : "",
                             reportPeriod.getTaxPeriod().getYear()
                     )
