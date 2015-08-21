@@ -15,6 +15,52 @@ end loop;
 end;
 /
 
+--http://jira.aplana.com/browse/SBRFACCTAX-12430: Удалить временный срез во всех макетах
+--Чистка временного среза
+set serveroutput on size 30000;
+declare ifTableExists varchar2(256);
+begin
+  for x in (select * from form_template ft where status <> 2 order by id) loop
+  
+       select coalesce(max(ifExists), 0) into ifTableExists from (
+          select 1 as ifExists
+            from dual
+            where exists (select 1 from user_tables where table_name = 'FORM_DATA_'||x.id));
+            
+       if ifTableExists = 1 then
+          execute immediate 'delete from form_data_'||x.id||' where temporary=1';
+				if sql%rowcount <> 0 then
+					dbms_output.put_line('Table form_data_'||x.id||': '||sql%rowcount||' rows deleted.');
+				end if;
+		   else
+			    dbms_output.put_line('Table form_data_'||x.id||' does not exist.');
+		end if;     
+  end loop;
+end;
+/
+commit;
+
+--Удаление все таблиц FORM_DATA_NNN, у которых FORM_TEMPLATE.STATUS = 2
+set serveroutput on size 30000;
+declare ifTableExists varchar2(256);
+begin
+  for x in (select * from form_template ft where status = 2 order by id) loop
+  
+       select coalesce(max(ifExists), 0) into ifTableExists from (
+          select 1 as ifExists
+            from dual
+            where exists (select 1 from user_tables where table_name = 'FORM_DATA_'||x.id));
+            
+       if ifTableExists = 1 then
+          execute immediate 'drop table form_data_'||x.id;
+			    dbms_output.put_line('Table form_data_'||x.id||'('||x.name||') droppped.');
+		   else
+			    dbms_output.put_line('Table form_data_'||x.id||' does not exist.');
+		end if;     
+  end loop;
+end;
+/
+
 --http://jira.aplana.com/browse/SBRFACCTAX-12250: Наименование узла кластера, на котором выполняется связанная асинхронная задача
 alter table lock_data add SERVER_NODE varchar2(100);
 comment on column lock_data.server_node is 'Наименование узла кластера, на котором выполняется связанная асинхронная задача';
