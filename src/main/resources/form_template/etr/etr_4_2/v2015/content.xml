@@ -48,7 +48,7 @@
         <alias>currentPeriod</alias>
         <checking>false</checking>
         <columnType>NUMBER</columnType>
-        <name>Текущий период</name>
+        <name>Период</name>
         <order>5</order>
         <width>10</width>
         <maxLength>22</maxLength>

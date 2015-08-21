@@ -4,7 +4,7 @@
     <cell alias="taxName" colSpan="1" rowSpan="2" value="Наименование налога"/>
     <cell alias="symbol102" colSpan="1" rowSpan="2" value="символ формы 102"/>
     <cell alias="comparePeriod" colSpan="1" rowSpan="2" value="Период сравнения"/>
-    <cell alias="currentPeriod" colSpan="1" rowSpan="2" value="Текущий отчетный период"/>
+    <cell alias="currentPeriod" colSpan="1" rowSpan="2" value="Период"/>
     <cell alias="deltaRub" colSpan="2" rowSpan="1" value="Изменение за период"/>
     <cell alias="deltaPercent" colSpan="1" rowSpan="1" value="Изменение за период"/>
   </row>
@@ -13,7 +13,7 @@
     <cell alias="taxName" colSpan="1" rowSpan="1" value="Наименование налога"/>
     <cell alias="symbol102" colSpan="1" rowSpan="1" value="символ формы 102"/>
     <cell alias="comparePeriod" colSpan="1" rowSpan="1" value="Период сравнения"/>
-    <cell alias="currentPeriod" colSpan="1" rowSpan="1" value="Текущий отчетный период"/>
+    <cell alias="currentPeriod" colSpan="1" rowSpan="1" value="Период"/>
     <cell alias="deltaRub" colSpan="1" rowSpan="1" value="(гр.5-гр.4), тыс.руб."/>
     <cell alias="deltaPercent" colSpan="1" rowSpan="1" value="(гр.6/гр.4*100),%"/>
   </row>
