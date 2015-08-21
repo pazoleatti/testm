@@ -91,6 +91,15 @@ public interface FormDataDao {
     FormData find(int formTypeId, FormDataKind kind, int departmentReportPeriodId, Integer periodOrder);
 
     /**
+     * Поиск НФ по отчетному периоду подразделения (и месяцу)
+     * @param formTypeId Вид НФ
+     * @param kind Тип НФ
+     * @param departmentReportPeriodId Отчетный период подразделения
+     * @param periodOrder Порядковый номер (равен номеру месяца, при нумерации с 1) для ежемесячных форм
+     */
+    FormData find(int formTypeId, FormDataKind kind, int departmentReportPeriodId, Integer comparativeDepRepPerId, Integer periodOrder);
+
+    /**
      * Поиск НФ. Не учитывает корректирующий период, т.е. результатом могут быть как id экземпляров
      * корректирующих и/или некорректирующих периодов.
      * @param departmentIds подразделения

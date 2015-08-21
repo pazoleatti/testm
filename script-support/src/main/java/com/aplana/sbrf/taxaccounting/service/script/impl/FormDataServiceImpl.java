@@ -649,7 +649,7 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
     public boolean checkUnique(FormData formData, Logger logger) {
         // поиск формы с учетом периодичности
         FormData existingFormData = dao.find(formData.getFormType().getId(), formData.getKind(),
-                formData.getDepartmentReportPeriodId().intValue(), formData.getPeriodOrder());
+                formData.getDepartmentReportPeriodId().intValue(), formData.getComparativPeriodId(), formData.getPeriodOrder());
 
         // форма найдена
         if (existingFormData != null) {
