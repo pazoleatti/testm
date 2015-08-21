@@ -74,6 +74,7 @@ public class FormDestinationsPresenter extends PresenterWidget<FormDestinationsP
      */
     public void initForm(final TaxType taxType){
         GetDestanationPopupDataAction action = new GetDestanationPopupDataAction();
+        this.taxType = taxType;
 
         dispatchAsync.execute(action,
             CallbackUtils.defaultCallback(
