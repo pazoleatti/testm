@@ -48,6 +48,7 @@ public class ExitAndSaveFormDataHandler extends
             dataRowService.update(userInfo, formData.getId(), action.getModifiedRows(), formData.isManual());
         }
         formDataService.unlock(formData.getId(), userInfo);
+        dataRowService.removeCheckPoint(formData);
 		DataRowResult result = new DataRowResult();
         result.setUuid(logEntryService.save(logger.getEntries()));
 		return result;

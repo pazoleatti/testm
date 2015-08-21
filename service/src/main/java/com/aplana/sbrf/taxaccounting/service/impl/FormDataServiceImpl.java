@@ -1023,6 +1023,7 @@ public class FormDataServiceImpl implements FormDataService {
         //Считаем что при наличие версии ручного ввода движение о жц невозможно
         stateLogger.updateState("Удаление отчетов формы");
         deleteReport(formData.getId(), null, userInfo.getUser().getId());
+        dataRowDao.removeCheckPoint(formData);
 
         logBusinessService.add(formData.getId(), null, userInfo, workflowMove.getEvent(), note);
         auditService.add(workflowMove.getEvent(), userInfo, formData.getDepartmentId(), formData.getReportPeriodId(),
