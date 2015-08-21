@@ -211,7 +211,8 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 		if (closeFormDataHandlerRegistration !=null ){
 			closeFormDataHandlerRegistration.removeHandler();
 		}
-		unlockForm(formData.getId());
+        placeManager.setOnLeaveConfirmation(null);
+        unlockForm(formData.getId());
 	}
 
     /**
