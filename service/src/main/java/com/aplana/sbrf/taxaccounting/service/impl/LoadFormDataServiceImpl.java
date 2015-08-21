@@ -629,7 +629,7 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
         }
         // Проверка наличия каталога в параметрах
         if (pathList == null || pathList.isEmpty()) {
-            log(userInfo, logData, logger, lock);
+            if (lock != null && !lock.isEmpty()) log(userInfo, logData, logger, lock);
             return null;
         }
         return pathList.get(0);
@@ -658,7 +658,7 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
         ConfigurationParamModel model = configurationDao.getByDepartment(departmentId);
         List<String> uploadPathList = model.get(configurationParam, departmentId);
         if (uploadPathList == null || uploadPathList.isEmpty()) {
-            log(userInfo, LogData.L30, logger, lock, departmentService.getDepartment(departmentId).getName());
+            if (lock != null && !lock.isEmpty()) log(userInfo, LogData.L30, logger, lock, departmentService.getDepartment(departmentId).getName());
             return null;
         }
         return uploadPathList.get(0);

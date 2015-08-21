@@ -436,7 +436,7 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
             pathList.add("к каталогу ошибок");
         }
         if (!pathList.isEmpty()) {
-            log(userInfo, LogData.L43, logger, lockId, StringUtils.join(pathList, ", "));
+            if (lockId != null && !lockId.isEmpty()) log(userInfo, LogData.L43, logger, lockId, StringUtils.join(pathList, ", "));
             return false;
         }
         if (!checkPath(archivePath)) {
@@ -446,7 +446,7 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
             pathList.add("к каталогу ошибок «" + errorPath + "»");
         }
         if (!pathList.isEmpty()) {
-            log(userInfo, LogData.L42_1, logger, lockId, StringUtils.join(pathList, ", "));
+            if (lockId != null && !lockId.isEmpty()) log(userInfo, LogData.L42_1, logger, lockId, StringUtils.join(pathList, ", "));
             return false;
         }
         return true;
@@ -673,7 +673,7 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
                 if (mappingMatch(candidateStr, mappingSet) != null) {
                     retVal.add(candidateStr);
                 } else {
-                    log(userInfo, LogData.L4, logger, lockId, candidateStr, folderPath);
+                    if (lockId != null && !lockId.isEmpty()) log(userInfo, LogData.L4, logger, lockId, candidateStr, folderPath);
                     errorFileList.add(candidateStr);
                     wrongImportCounter.add(new ImportCounter(0, 1));
                 }
