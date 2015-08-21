@@ -1862,7 +1862,7 @@ public final class ScriptUtils {
                     Date date = DateUtil.getJavaDate(Double.parseDouble(value), false);
                     value = simpleDateFormat.format(date);
                 } else {
-                    value = (new BigDecimal(value)).toString();
+                    value = (new BigDecimal(value)).toPlainString();
                 }
             }
             return com.aplana.sbrf.taxaccounting.model.util.StringUtils.cleanString(value);
