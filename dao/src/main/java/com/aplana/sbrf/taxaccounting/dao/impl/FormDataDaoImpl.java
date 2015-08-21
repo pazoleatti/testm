@@ -272,11 +272,6 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 
     @Override
     public FormData find(int formTypeId, FormDataKind kind, int departmentReportPeriodId, Integer periodOrder) {
-        return find(formTypeId, kind, departmentReportPeriodId, null, periodOrder);
-    }
-
-    @Override
-    public FormData find(int formTypeId, FormDataKind kind, int departmentReportPeriodId, Integer comparativeDepRepPerId, Integer periodOrder) {
         try {
             String sql = "select fd.id, fd.form_template_id, fd.state, fd.kind, " +
                     "fd.return_sign, fd.period_order, fd.manual, fd.number_previous_row, fd.department_report_period_id, " +
@@ -285,14 +280,12 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
                     "from department_report_period drp, form_data fd " +
                     "where drp.id = fd.department_report_period_id " +
                     "and exists (select 1 from form_template ft where fd.form_template_id = ft.id and ft.type_id = ?) " +
-                    "and fd.kind = ? and drp.id = ? and (? is null or fd.COMPARATIVE_DEP_REP_PER_ID = ?) and (? is null or fd.period_order = ?) ";
+                    "and fd.kind = ? and drp.id = ? and (? is null or fd.period_order = ?) ";
             return getJdbcTemplate().queryForObject(sql,
                     new Object[]{
                             formTypeId,
                             kind.getId(),
                             departmentReportPeriodId,
-                            comparativeDepRepPerId,
-                            comparativeDepRepPerId,
                             periodOrder,
                             periodOrder},
                     new FormDataWithoutRowMapperWithType());
