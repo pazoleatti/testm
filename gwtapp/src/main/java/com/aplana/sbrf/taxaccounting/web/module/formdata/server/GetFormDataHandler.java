@@ -106,6 +106,7 @@ public class GetFormDataHandler extends AbstractActionHandler<GetFormDataAction,
     private final static String RESTRICT_EDIT_MESSAGE = "Нет прав на редактирование налоговой формы!";
     private final static String CLOSED_PERIOD_MESSAGE = "Отчетный период подразделения закрыт!";
     private final static String CORRECTION_EDIT_MESSAGE = "Нельзя открыть налоговую форму в режиме редактирования для представления «Корректировка»!";
+    private final static String CORRECTION_EDIT_MESSAGE_2 = "Нельзя открыть налоговую форму для представления «Корректировка», если она редактируется!";
     private final static String CORRECTION_ERROR_MESSAGE = "Нельзя открыть налоговую форму, созданную в периоде, не являющемся корректирующим в режиме представления «Корректировка»!";
     private final static String PREVIOUS_FORM_NOT_FOUND_MESSAGE = "Форма ранее не была создана, данные о различиях не сформированы.";
     private final static String SUCCESS_CORRECTION_MESSAGE = "Корректировка отображена в результате сравнения с данными формы в периоде %s %s%s.";
@@ -120,8 +121,6 @@ public class GetFormDataHandler extends AbstractActionHandler<GetFormDataAction,
         GetFormDataResult result = new GetFormDataResult();
         Logger logger = new Logger();
 
-        actionCheck(action);
-		
 		// UNLOCK: Попытка разблокировать ту форму которая была открыта ранее
 		try {
 			if (action.getOldFormDataId() != null) {
@@ -136,6 +135,8 @@ public class GetFormDataHandler extends AbstractActionHandler<GetFormDataAction,
 		} catch (Exception e){
 			//
 		}
+
+        actionCheck(action);
 
 		// LOCK: Попытка заблокировать форму которую хотим получить для редактирования
 		if (!action.isReadOnly()) {
@@ -211,6 +212,9 @@ public class GetFormDataHandler extends AbstractActionHandler<GetFormDataAction,
     private void actionCheck(GetFormDataAction action) throws ActionException {
         if (!action.isReadOnly() && action.isCorrectionDiff()) {
             throw new ActionException(CORRECTION_EDIT_MESSAGE);
+        } else if (action.isCorrectionDiff() &&
+                formDataService.getObjectLock(action.getFormDataId(), securityService.currentUserInfo()) != null) {
+            throw new ActionException(CORRECTION_EDIT_MESSAGE_2);
         }
     }
 
@@ -324,7 +328,7 @@ public class GetFormDataHandler extends AbstractActionHandler<GetFormDataAction,
         List<DataRow<Cell>> diffRows = diffService.getDiff(original, revised);
 
         // Сохранение результата сравнения во временном срезе
-        dataRowService.saveRows(formData, diffRows);
+        dataRowService.saveTempRows(formData, diffRows);
     }
 
     /**

@@ -30,7 +30,7 @@ public interface DataRowService {
     /**
      * Сохранение строк во временном срезе НФ
      */
-    void saveRows(FormData formData, List<DataRow<Cell>> dataRows);
+    void saveTempRows(FormData formData, List<DataRow<Cell>> dataRows);
 
     /**
      * Поиск по налоговой форме,

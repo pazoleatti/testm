@@ -441,6 +441,7 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
     void onCorrectionLinkButtonClicked(ClickEvent event) {
         getUiHandlers().onCorrectionSwitch();
     }
+
     @UiHandler("printToExcel")
     void onPrintExcelClicked(ClickEvent event) {
         if (getUiHandlers() != null) {
@@ -631,9 +632,9 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
         }
         factory.setFormDataId(formDataId);
         // Признак корректирующего периода
-        correctionButton.setVisible(correctionPeriod);
+        showCorrectionButton(correctionPeriod);
         // Признак сравнения корректирующих значений
-        getView().setCorrectionText(correctionDiff ? "Показать абсолютные значения" : "Показать изменения");
+        updateCorrectionButton(correctionDiff);
 
         if (correctionDiff) {
             checkButton.setVisible(false);
@@ -977,7 +978,11 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
     }
 
     @Override
-    public void setCorrectionText(String text) {
-        correctionButton.setText(text);
+    public void showCorrectionButton(boolean correctionPeriod) {
+        correctionButton.setVisible(correctionPeriod);
+    }
+
+    public void updateCorrectionButton(boolean correctionDiff) {
+        correctionButton.setText(correctionDiff ? "Показать абсолютные значения" : "Показать изменения");
     }
 }

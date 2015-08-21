@@ -699,7 +699,6 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
     @Override
     public void onCorrectionSwitch() {
         revealFormData(readOnlyMode || absoluteView, false, absoluteView, null);
-        absoluteView = !absoluteView;
     }
 
     @Override
@@ -900,6 +899,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                                 manageDeleteRowButtonEnabled();
 
                                 absoluteView = !result.isCorrectionDiff();
+                                correctionPeriod = result.getDepartmentReportPeriod().getCorrectionDate() != null;
                                 DepartmentReportPeriod drp = result.getDepartmentReportPeriod();
                                 DepartmentReportPeriod cdrp = result.getComparativPeriod();
                                 getView().setAdditionalFormInfo(
@@ -914,7 +914,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                                         result.getFormData().getState().getName(),
 		                                result.getDepartmentReportPeriod().getReportPeriod().getCalendarStartDate(),
                                         result.getDepartmentReportPeriod().getReportPeriod().getEndDate(),
-                                        formData.getId(), result.getDepartmentReportPeriod().getCorrectionDate() != null,
+                                        formData.getId(), correctionPeriod,
                                         result.isCorrectionDiff(), result.isReadOnly());
 
                                 getView().setBackButton("#" + FormDataListNameTokens.FORM_DATA_LIST + ";nType="

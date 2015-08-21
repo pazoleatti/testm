@@ -61,6 +61,17 @@ public interface DataRowDao {
 	int getRowCount(FormData formData);
 
     /**
+     * Метод возвращает строки сохраненного среза строк НФ.
+     *
+     */
+    List<DataRow<Cell>> getTempRows(FormData formData, DataRowRange range);
+
+    /**
+     * Метод возвращает количество строк НФ
+     */
+    int getTempRowCount(FormData formData);
+
+    /**
      * Метод возвращает количество автонумеруемых строк
      */
     int getAutoNumerationRowCount(FormData formData);
@@ -142,6 +153,17 @@ public interface DataRowDao {
 	 * @param rows
 	 */
 	void saveRows(FormData formData, List<DataRow<Cell>> rows);
+
+
+    /**
+     * Заменяет существующие строки в БД во временном(резервном) срезе на те, которые указаны в аргументе rows. Старые данные удаляются.
+     * Поля DataRow.index и DataRow.id не принимаются во внимание. Порядок следования выставляется согласно
+     * последовательности строк в rows. Id выставляется новый из последовательности "seq_form_data_nnn"
+     *
+     * @param formData
+     * @param rows
+     */
+    void saveTempRows(FormData formData, List<DataRow<Cell>> rows);
 
     /**
      * Полнотекстовый поиск по данным налоговой формы

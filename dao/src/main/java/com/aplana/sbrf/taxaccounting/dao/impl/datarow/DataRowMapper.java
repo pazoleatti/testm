@@ -45,11 +45,11 @@ class DataRowMapper implements RowMapper<DataRow<Cell>> {
 	 * @param range параметры пейджинга, может быть null
 	 * @return пара "sql-запрос"-"параметры" для извлечения данных НФ
 	 */
-	public Pair<String, Map<String, Object>> createSql(DataRowRange range) {
+	public Pair<String, Map<String, Object>> createSql(DataRowRange range, DataRowType dataRowType) {
 		DataRowType isManual = formData.isManual() ? DataRowType.MANUAL : DataRowType.AUTO;
 		Map<String, Object> params = new HashMap<String, Object>();
 		params.put("formDataId", formData.getId());
-		params.put("temporary", DataRowType.SAVED.getCode());
+		params.put("temporary", dataRowType.getCode());
 		params.put("manual", isManual.getCode());
 
 		StringBuilder sql = new StringBuilder("SELECT id, ord, alias,\n");

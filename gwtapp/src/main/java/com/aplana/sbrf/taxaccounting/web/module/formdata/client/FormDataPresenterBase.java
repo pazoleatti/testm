@@ -115,8 +115,7 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 
         void setupSelectionModel(boolean fixedRows);
 
-        /** Текст кнопки-ссылки для переключения видов «Абсолютные значения»/«Корректировка» */
-        void setCorrectionText(String text);
+        void showCorrectionButton(boolean correctionPeriod);
 
         void startTimerReport(ReportType reportType);
 
@@ -168,6 +167,7 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 	protected boolean fixedRows;
     // Признак отображения вида для форм в корректирующих периодах, true - обычный режим, false - режим отображения изенений
     protected boolean absoluteView = true;
+    protected boolean correctionPeriod = false;
 
 	protected Set<DataRow<Cell>> modifiedRows = new HashSet<DataRow<Cell>>();
 
@@ -249,6 +249,8 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
         view.showManualAnchor(false);
         view.showDeleteManualAnchor(false);
 
+        view.showCorrectionButton(!lockInfo.isEditMode() && correctionPeriod);
+
         view.setTableLockMode(true);
         view.setColumnsData(formData.getFormColumns(), true, forceEditMode);
 
@@ -288,6 +290,8 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
         view.showModeAnchor(existManual, formData.isManual());
         view.showManualAnchor(canCreatedManual && !existManual);
         view.showDeleteManualAnchor(false);
+
+        view.showCorrectionButton(!lockInfo.isEditMode() && correctionPeriod);
 
         view.setTableLockMode(true);
         view.setColumnsData(formData.getFormColumns(), true, forceEditMode);
@@ -329,6 +333,8 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
         view.showModeAnchor(false, false);
         view.showManualAnchor(false);
         view.showDeleteManualAnchor(formData.isManual());
+
+        view.showCorrectionButton(correctionPeriod);
 
         view.setTableLockMode(true);
         view.setColumnsData(formData.getFormColumns(), readOnlyMode, forceEditMode);
@@ -373,6 +379,8 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
         view.showManualAnchor(canCreatedManual && !existManual);
         view.showDeleteManualAnchor(false);
 
+        view.showCorrectionButton(correctionPeriod);
+
         view.setTableLockMode(false);
         view.setColumnsData(formData.getFormColumns(), readOnlyMode, forceEditMode);
 
@@ -409,6 +417,8 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
         view.showModeAnchor(false, false);
         view.showManualAnchor(false);
         view.showDeleteManualAnchor(formData.isManual());
+
+        view.showCorrectionButton(correctionPeriod);
 
         view.setTableLockMode(false);
         view.setColumnsData(formData.getFormColumns(), readOnlyMode, forceEditMode);
