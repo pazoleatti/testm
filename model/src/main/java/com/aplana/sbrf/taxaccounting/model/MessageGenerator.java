@@ -33,9 +33,9 @@ public final class MessageGenerator {
         public static VERSION getVersion(boolean isCorrection, boolean isManual, boolean isShowChecked){
             if (isCorrection){
                 if (isManual){
-                    return isShowChecked ? CORRECTION_WITH_CONTROL : CORRECTION;
-                } else {
                     return isShowChecked ? ABSOLUTE_WITH_CONTROL : ABSOLUTE;
+                } else {
+                    return isShowChecked ? CORRECTION_WITH_CONTROL : CORRECTION;
                 }
             } else {
                 if (isManual){
