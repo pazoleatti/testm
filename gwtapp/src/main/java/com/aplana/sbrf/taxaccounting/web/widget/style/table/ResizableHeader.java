@@ -83,7 +83,7 @@ public abstract class ResizableHeader<T> extends Header<String> {
                            String resizeStyle, String resizeToolTip) {
         super(cell != null ? cell : new HeaderCell());
         if (title == null || table == null || column == null)
-            throw new NullPointerException();
+            throw new IllegalArgumentException("title == null || table == null || column == null");
         this.title = title;
         this.column = column;
         this.table = table;

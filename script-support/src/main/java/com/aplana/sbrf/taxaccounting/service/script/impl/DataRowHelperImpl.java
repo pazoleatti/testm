@@ -50,7 +50,7 @@ public class DataRowHelperImpl implements DataRowHelper, ScriptComponentContextH
 	public List<DataRow<Cell>> getAllSaved() {
 		List<DataRow<Cell>> rows = dataRowDao.getRows(fd, null);
 		FormDataUtils.setValueOwners(rows);
-		return  rows;
+		return rows;
 	}
 
 	@Override
@@ -169,15 +169,14 @@ public class DataRowHelperImpl implements DataRowHelper, ScriptComponentContextH
     @Override
     public DataRow getDataRow(List<DataRow<Cell>> dataRows, String rowAlias) {
         if (rowAlias == null) {
-            throw new NullPointerException("Row alias cannot be null");
+            throw new IllegalArgumentException("Row alias cannot be null");
         }
         for (DataRow<Cell> row : dataRows) {
             if (rowAlias.equals(row.getAlias())) {
                 return row;
             }
         }
-        throw new IllegalArgumentException("Wrong row alias requested: "
-                + rowAlias);
+        throw new IllegalArgumentException("Wrong row alias requested: " + rowAlias);
     }
 
     @Override
@@ -185,7 +184,6 @@ public class DataRowHelperImpl implements DataRowHelper, ScriptComponentContextH
         if (dataRows == null){
             dataRows = getAll();
         }
-
         return dataRows;
     }
 
@@ -198,7 +196,7 @@ public class DataRowHelperImpl implements DataRowHelper, ScriptComponentContextH
     @Override
     public int getDataRowIndex(List<DataRow<Cell>> dataRows, String rowAlias) {
         if (rowAlias == null) {
-            throw new NullPointerException("Row alias cannot be null");
+            throw new IllegalArgumentException("Row alias cannot be null");
         }
 
         for (int index = 0; index < dataRows.size(); ++index) {
@@ -207,8 +205,7 @@ public class DataRowHelperImpl implements DataRowHelper, ScriptComponentContextH
                 return index;
             }
         }
-        throw new IllegalArgumentException("Wrong row alias requested: "
-                + rowAlias);
+        throw new IllegalArgumentException("Wrong row alias requested: " + rowAlias);
     }
 
     /**

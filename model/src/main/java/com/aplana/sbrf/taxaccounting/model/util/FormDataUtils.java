@@ -71,7 +71,6 @@ public final class FormDataUtils {
 			}
 			rowIdx++;
 		}
-
 	}
 	
 	/**
@@ -89,8 +88,7 @@ public final class FormDataUtils {
 			}
 		}
 	}
-	
-	
+
 	/**
 	 * Создает группу Cell 
 	 * 
@@ -106,7 +104,6 @@ public final class FormDataUtils {
 		return cells;
 	}
 
-	
 	/**
 	 * Создает группу CellHeader
 	 * 
@@ -122,18 +119,15 @@ public final class FormDataUtils {
 	}
 	
 	public static <T extends AbstractCell> DataRow<T> getDataRowByAlias(List<DataRow<T>> dataRows, String rowAlias){
-
 			if (rowAlias == null) {
-				throw new NullPointerException("Row alias cannot be null");
+				throw new IllegalArgumentException("Row alias cannot be null");
 			}
 			for (DataRow<T> row : dataRows) {
 				if (rowAlias.equals(row.getAlias())) {
 					return row;
 				}
 			}
-			throw new IllegalArgumentException("Wrong row alias requested: "
-					+ rowAlias);
+			throw new IllegalArgumentException("Wrong row alias requested: " + rowAlias);
 	}
-	
 
 }

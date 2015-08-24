@@ -55,8 +55,8 @@ public class TransportDataController {
         TAUserInfo userInfo = securityService.currentUserInfo();
 
         // Загрузка в каталог
-        UploadResult uploadResult = uploadTransportDataService.uploadFile(userInfo, fileName,
-                file.getInputStream(), logger);
+        //UploadResult uploadResult =
+		uploadTransportDataService.uploadFile(userInfo, fileName, file.getInputStream(), logger);
 
         // Загрузка из каталога
         /*if (!uploadResult.getDiasoftFileNameList().isEmpty()) {
