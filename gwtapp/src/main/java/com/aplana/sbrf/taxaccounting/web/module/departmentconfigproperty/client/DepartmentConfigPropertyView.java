@@ -224,13 +224,6 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
             }
         };
 
-        ValueChangeHandler<Long> valueChangeHandlerLong = new ValueChangeHandler<Long>() {
-            @Override
-            public void onValueChange(ValueChangeEvent<Long> event) {
-                isFieldsModified = true;
-            }
-        };
-
         periodPickerPopup.addValueChangeHandler(new ValueChangeHandler<List<Integer>>() {
             @Override
             public void onValueChange(ValueChangeEvent<List<Integer>> event) {
@@ -512,7 +505,6 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
         if (taxType == TaxType.PROPERTY) {
             version.setText(itemList.get("PREPAYMENT_VERSION").getStringValue());
         } else if (taxType == TaxType.INCOME) {
-            Number value = itemList.get("TAX_RATE").getNumberValue();
             taxRate.setValue(itemList.get("TAX_RATE").getNumberValue() == null
                     ? null
                     : itemList.get("TAX_RATE").getNumberValue().doubleValue());

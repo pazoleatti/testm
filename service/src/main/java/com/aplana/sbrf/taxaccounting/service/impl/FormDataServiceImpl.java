@@ -1056,7 +1056,6 @@ public class FormDataServiceImpl implements FormDataService {
     public void compose(final FormData formData, final TAUserInfo userInfo, Logger logger, LockStateLogger stateLogger) {
         stateLogger.updateState("Выполнение проверок на возможность консолидации");
         // Период ввода остатков не обрабатывается. Если форма ежемесячная, то только первый месяц периода может быть периодом ввода остатков.
-        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.get(formData.getDepartmentReportPeriodId());
         ReportPeriod reportPeriod = reportPeriodService.getReportPeriod(formData.getReportPeriodId());
 
         List<DepartmentFormType> departmentFormTypesSources = getFormSources(formData, logger, userInfo, reportPeriod, true);

@@ -37,7 +37,6 @@ public class GetIfrsDataHandler extends AbstractActionHandler<GetIfrsDataAction,
     public GetIrfsDataResult execute(GetIfrsDataAction action, ExecutionContext executionContext) throws ActionException {
 
         GetIrfsDataResult result = new GetIrfsDataResult();
-        TAUserInfo userInfo = securityService.currentUserInfo();
         PagingResult<IfrsRow> pagingResult = new PagingResult<IfrsRow>();
         PagingResult<IfrsDataSearchResultItem> records = ifrsDataService.findByReportPeriod(action.getReportPeriodIds(), action.getPagingParams());
         for(IfrsDataSearchResultItem record: records) {
