@@ -76,8 +76,8 @@ def nonEmptyColumns = calcColumns
 // мапа с кодами ОПУ для каждой строки (алиас строки -> список кодов ОПУ)
 @Field
 def opuMap = [
-        'R2' : ['16305.02', '17201.97', '17202.07', '17202.08', '17202.09', '17202.97', '17202.99', '17203.02', '17203.03', '17203.06', '17203.09', '17203.11', '17203.13', '17203.14', '17203.97', '17306.19', '17306.20', '17306.99', '17307'],
-        'R3': [
+        'R1' : ['16305.02', '17201.97', '17202.07', '17202.08', '17202.09', '17202.97', '17202.99', '17203.02', '17203.03', '17203.06', '17203.09', '17203.11', '17203.13', '17203.14', '17203.97', '17306.19', '17306.20', '17306.99', '17307'],
+        'R2': [
                 //1
                 '26104.04', '26101.07', '26101.12', '26101.13', '26101.99', '26401.04', '27203.08',
                 //2
@@ -263,14 +263,14 @@ void calcValues(def dataRows, def sourceRows) {
             row.currentPeriod = calcBO(rowSource, formData.reportPeriodId)
         }
     }
-    def row5 = getDataRow(dataRows, "R5")
     def row4 = getDataRow(dataRows, "R4")
-    def row4Source = getDataRow(sourceRows, "R4")
+    def row3 = getDataRow(dataRows, "R3")
     def row3Source = getDataRow(sourceRows, "R3")
     def row2Source = getDataRow(sourceRows, "R2")
+    def row1Source = getDataRow(sourceRows, "R1")
     ['comparePeriod', 'currentPeriod'].each {
-        row4[it] = (row3Source[it] ?: 0) - (row2Source[it] ?: 0)
-        row5[it] = (row4Source[it] ?: 0) * 0.2
+        row3[it] = (row2Source[it] ?: 0) - (row1Source[it] ?: 0)
+        row4[it] = (row3Source[it] ?: 0) * 0.2
     }
     for(int i = 0; i < dataRows.size(); i++){
         def row = dataRows[i]
@@ -278,7 +278,7 @@ void calcValues(def dataRows, def sourceRows) {
         row.deltaRub = (rowSource.currentPeriod ?: 0) - (rowSource.comparePeriod ?: 0)
         row.deltaPercent = null
         if (rowSource.comparePeriod) {
-            row.deltaPercent = ((rowSource.deltaRub ?: BigDecimal.ZERO) as BigDecimal) / rowSource.comparePeriod.doubleValue() * 100
+            row.deltaPercent = ((rowSource.deltaRub ?: BigDecimal.ZERO) as BigDecimal) * 100 / rowSource.comparePeriod.doubleValue()
         } else if (dataRows != sourceRows) { // выводить только в logicCheck
             rowError(logger, row, String.format("Строка %s: Графа «%s» не может быть заполнена. Выполнение расчета невозможно, так как в результате проверки получен нулевой знаменатель (деление на ноль невозможно)",
                     row.getIndex(), getColumnName(row, 'deltaPercent')))
