@@ -134,7 +134,11 @@ public class Logger {
 		return entries;
 	}
 
-	/**
+    public void setEntries(List<LogEntry> entries) {
+        this.entries = entries;
+    }
+
+    /**
 	 * Установить декоратор для текста сообщений.
 	 * Если установлен в null, то сообщения пишутся в неизменном виде,
 	 * в противном случае к строке будет применено преобразование, выполняемое методом {@LogMessageDecorator#getDecoratedMessage} 

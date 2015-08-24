@@ -5,6 +5,7 @@ import com.aplana.gwt.client.dialog.DialogHandler;
 import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
 import com.aplana.sbrf.taxaccounting.model.DeclarationType;
 import com.aplana.sbrf.taxaccounting.model.VersionedObjectStatus;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.DownloadUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
@@ -15,7 +16,9 @@ import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.client.event
 import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.shared.*;
 import com.aplana.sbrf.taxaccounting.web.module.declarationversionlist.client.event.CreateNewDTVersionEvent;
 import com.aplana.sbrf.taxaccounting.web.widget.fileupload.event.EndLoadFileEvent;
+import com.aplana.sbrf.taxaccounting.web.widget.fileupload.event.JrxmlFileExistEvent;
 import com.aplana.sbrf.taxaccounting.web.widget.historytemplatechanges.client.DeclarationVersionHistoryPresenter;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
@@ -36,6 +39,10 @@ import java.util.Date;
 public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplatePresenter.MyView, DeclarationTemplatePresenter.MyProxy>
 		implements DeclarationTemplateUiHandlers, CreateNewDTVersionEvent.MyHandler, DTCreateNewTypeEvent.MyHandler {
 
+    private static final String ERROR_MSG = "Не удалось загрузить макет";
+    private static final String SUCCESS_MSG = "Файл загружен";
+    private static final String JRXML_INFO_MES =
+            "Загрузка нового jrxml файла приведет к удалению уже сформированных pdf, xlsx отчетов и отмене ранее запущенных операций формирования pdf, xlsx отчетов экземпляров деклараций данной версии макета. Продолжить?";
 
     @Override
     @ProxyEvent
@@ -87,17 +94,15 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
 	}
 
 	public interface MyView extends View, HasUiHandlers<DeclarationTemplateUiHandlers> {
-        String ERROR_RESP = "erroruuid ";
-        String SUCCESS_RESP = "uuid ";
-        String ERROR = "error ";
-
         void setDeclarationTemplate(DeclarationTemplateExt declaration);
         HandlerRegistration addValueChangeHandlerJrxml(ValueChangeHandler<String> valueChangeHandler);
         HandlerRegistration addValueChangeHandlerXsd(ValueChangeHandler<String> valueChangeHandler);
-        HandlerRegistration addChangeHandlerHandlerDect(ValueChangeHandler<String> valueChangeHandler);
-        HandlerRegistration addEndLoadHandlerHandlerXsd(EndLoadFileEvent.EndLoadFileHandler handler);
-        HandlerRegistration addEndLoadHandlerHandlerJrxml(EndLoadFileEvent.EndLoadFileHandler handler);
-        HandlerRegistration addEndLoadHandlerHandlerDect(EndLoadFileEvent.EndLoadFileHandler handler);
+        HandlerRegistration addChangeHandlerDect(ValueChangeHandler<String> valueChangeHandler);
+        HandlerRegistration addEndLoadHandlerXsd(EndLoadFileEvent.EndLoadFileHandler handler);
+        HandlerRegistration addEndLoadHandlerJrxml(EndLoadFileEvent.EndLoadFileHandler handler);
+        HandlerRegistration addEndLoadHandlerDect(EndLoadFileEvent.EndLoadFileHandler handler);
+        HandlerRegistration addJrxmlLoadHandlerDect(JrxmlFileExistEvent.JrxmlFileExistHandler handler);
+        HandlerRegistration addJrxmlLoadHandler(JrxmlFileExistEvent.JrxmlFileExistHandler handler);
         void activateButtonName(String name);
         void activateButton(boolean isVisible);
         void setLockInformation(boolean isVisible, String lockDate, String lockedBy);
@@ -120,7 +125,29 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
         this.versionHistoryPresenter = versionHistoryPresenter;
 	}
 
-	/**
+    @Override
+    public void downloadJrxml() {
+        if (declarationTemplate.getJrxmlBlobId() != null && !declarationTemplate.getJrxmlBlobId().isEmpty()) {
+            DownloadUtils.openInIframe(GWT.getHostPageBaseURL() + "download/downloadByUuid/" + declarationTemplate.getJrxmlBlobId());
+        }
+    }
+
+    @Override
+    public void downloadXsd() {
+        if (declarationTemplate.getXsdId() != null && !declarationTemplate.getXsdId().isEmpty()) {
+            DownloadUtils.openInIframe(GWT.getHostPageBaseURL() + "download/downloadByUuid/" + declarationTemplate.getXsdId());
+        }
+    }
+
+    @Override
+    public void downloadDect() {
+        if (declarationTemplate.getId() != null) {
+            DownloadUtils.openInIframe(
+                    GWT.getHostPageBaseURL() + "download/declarationTemplate/downloadDect/" + declarationTemplate.getId());
+        }
+    }
+
+    /**
 	 * Здесь происходит подготовка декларации администрирования.
 	 *
 	 * @param request запрос
@@ -139,7 +166,7 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
 	@Override
 	public void onHide() {
 		super.onHide();
-        unlockForm(declarationTemplate.getId() != null?declarationTemplate.getId():0);
+        unlockForm(declarationTemplate.getId() != null ? declarationTemplate.getId() : 0);
 		if (closeDeclarationTemplateHandlerRegistration != null)
             closeDeclarationTemplateHandlerRegistration.removeHandler();
 	}
@@ -311,7 +338,63 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
         addToPopupSlot(versionHistoryPresenter);
     }
 
-    private HandlerRegistration[] handlerRegistrations = new HandlerRegistration[6];
+    @Override
+    public void onDeleteXsd() {
+        DeleteXsdAction action = new DeleteXsdAction();
+        action.setDtId(declarationTemplate.getId());
+        dispatcher.execute(action, CallbackUtils.defaultCallback(new AbstractCallback<DeleteXsdResult>() {
+            @Override
+            public void onSuccess(DeleteXsdResult result) {
+                declarationTemplate.setXsdId(null);
+                getView().setDeclarationTemplate(declarationTemplateExt);
+            }
+        }, this));
+    }
+
+    @Override
+    public void onCheckBeforeDeleteJrxml() {
+        final CheckJrxmlAction action = new CheckJrxmlAction();
+        action.setDtId(declarationTemplate.getId());
+        dispatcher.execute(action, CallbackUtils.defaultCallback(new AbstractCallback<CheckJrxmlResult>() {
+            @Override
+            public void onSuccess(final CheckJrxmlResult result) {
+                if (result.isCanDelete()){
+                    DeleteJrxmlAction jrxmlAction = new DeleteJrxmlAction();
+                    jrxmlAction.setDtId(declarationTemplate.getId());
+                    dispatcher.execute(jrxmlAction, CallbackUtils.defaultCallback(new AbstractCallback<DeleteJrxmlResult>() {
+                        @Override
+                        public void onSuccess(DeleteJrxmlResult result) {
+                            LogCleanEvent.fire(DeclarationTemplatePresenter.this);
+                            declarationTemplate.setJrxmlBlobId(null);
+                            getView().setDeclarationTemplate(declarationTemplateExt);
+                        }
+                    }, DeclarationTemplatePresenter.this));
+                } else {
+                    LogCleanEvent.fire(DeclarationTemplatePresenter.this);
+                    LogAddEvent.fire(DeclarationTemplatePresenter.this, result.getUuid());
+                    Dialog.confirmMessage("Удаление jrxml файла",
+                            "Удаление jrxml файла приведет к удалению уже сформированных pdf, xlsx отчетов и отмене ранее запущенных операций формирования pdf, xlsx отчетов экземпляров деклараций данной версии макета. Продолжить?",
+                            new DialogHandler() {
+                                @Override
+                                public void yes() {
+                                    DeleteJrxmlAction jrxmlAction = new DeleteJrxmlAction();
+                                    jrxmlAction.setDtId(declarationTemplate.getId());
+                                    dispatcher.execute(jrxmlAction, CallbackUtils.defaultCallback(new AbstractCallback<DeleteJrxmlResult>() {
+                                        @Override
+                                        public void onSuccess(DeleteJrxmlResult result) {
+                                            LogCleanEvent.fire(DeclarationTemplatePresenter.this);
+                                            declarationTemplate.setJrxmlBlobId(null);
+                                            getView().setDeclarationTemplate(declarationTemplateExt);
+                                        }
+                                    }, DeclarationTemplatePresenter.this));
+                                }
+                            });
+                }
+            }
+        }, this));
+    }
+
+    private HandlerRegistration[] handlerRegistrations = new HandlerRegistration[8];
     @Override
     protected void onBind() {
         super.onBind();
@@ -319,7 +402,7 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
         ValueChangeHandler<String> vchJrxml = new ValueChangeHandler<String>() {
             @Override
             public void onValueChange(ValueChangeEvent<String> event) {
-                Dialog.infoMessage("Файл загружен");
+                Dialog.infoMessage(SUCCESS_MSG);
                 declarationTemplateExt.getDeclarationTemplate().setJrxmlBlobId(event.getValue());
                 getView().setDeclarationTemplate(declarationTemplateExt);
             }
@@ -327,7 +410,7 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
         ValueChangeHandler<String> vchXsd = new ValueChangeHandler<String>() {
             @Override
             public void onValueChange(ValueChangeEvent<String> event) {
-                Dialog.infoMessage("Файл загружен");
+                Dialog.infoMessage(SUCCESS_MSG);
                 declarationTemplateExt.getDeclarationTemplate().setXsdId(event.getValue());
                 getView().setDeclarationTemplate(declarationTemplateExt);
             }
@@ -335,14 +418,14 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
         ValueChangeHandler<String> vchDect = new ValueChangeHandler<String>() {
             @Override
             public void onValueChange(ValueChangeEvent<String> event) {
-                Dialog.infoMessage("Файл загружен");
+                Dialog.infoMessage(SUCCESS_MSG);
             }
         };
         EndLoadFileEvent.EndLoadFileHandler loadFileHandlerXsd = new EndLoadFileEvent.EndLoadFileHandler() {
             @Override
             public void onEndLoad(EndLoadFileEvent event) {
                 if (event.isHasError()){
-                    Dialog.errorMessage("Не удалось импортировать шаблон");
+                    Dialog.errorMessage(ERROR_MSG);
                 }
                 LogAddEvent.fire(DeclarationTemplatePresenter.this, event.getUuid());
             }
@@ -351,7 +434,7 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
             @Override
             public void onEndLoad(EndLoadFileEvent event) {
                 if (event.isHasError()){
-                    Dialog.errorMessage("Не удалось импортировать шаблон");
+                    Dialog.errorMessage(ERROR_MSG);
                 }
                 LogAddEvent.fire(DeclarationTemplatePresenter.this, event.getUuid());
             }
@@ -360,7 +443,7 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
             @Override
             public void onEndLoad(EndLoadFileEvent event) {
                 if (event.isHasError()){
-                    Dialog.errorMessage("Не удалось импортировать макет");
+                    Dialog.errorMessage(ERROR_MSG);
                 } else if (event.getUuid() == null || event.getUuid().isEmpty()){// TODO проверить условие
                     reset();
                     Dialog.infoMessage("Макет успешно обновлен");
@@ -371,10 +454,47 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
 
         handlerRegistrations[0] = getView().addValueChangeHandlerJrxml(vchJrxml);
         handlerRegistrations[1] = getView().addValueChangeHandlerXsd(vchXsd);
-        handlerRegistrations[2] = getView().addChangeHandlerHandlerDect(vchDect);
-        handlerRegistrations[3] = getView().addEndLoadHandlerHandlerXsd(loadFileHandlerXsd);
-        handlerRegistrations[4] = getView().addEndLoadHandlerHandlerJrxml(loadFileHandlerJrxml);
-        handlerRegistrations[5] = getView().addEndLoadHandlerHandlerDect(loadFileHandlerDect);
+        handlerRegistrations[2] = getView().addChangeHandlerDect(vchDect);
+        handlerRegistrations[3] = getView().addEndLoadHandlerXsd(loadFileHandlerXsd);
+        handlerRegistrations[4] = getView().addEndLoadHandlerJrxml(loadFileHandlerJrxml);
+        handlerRegistrations[5] = getView().addEndLoadHandlerDect(loadFileHandlerDect);
+        handlerRegistrations[6] = getView().addJrxmlLoadHandlerDect(getJrxmlFileExistHandler(true));
+        handlerRegistrations[7] = getView().addJrxmlLoadHandler(getJrxmlFileExistHandler(false));
+    }
+
+    private JrxmlFileExistEvent.JrxmlFileExistHandler getJrxmlFileExistHandler(final boolean isArchive){
+        return new JrxmlFileExistEvent.JrxmlFileExistHandler() {
+            @Override
+            public void onJrxmlExist(final JrxmlFileExistEvent event) {
+                LogAddEvent.fire(DeclarationTemplatePresenter.this, event.getErrorUuid());
+                Dialog.confirmMessage("Загрузка jrxml файла", JRXML_INFO_MES,
+                        new DialogHandler() {
+                            @Override
+                            public void yes() {
+                                super.yes();
+                                DeleteJrxmlAction deleteJrxmlAction = new DeleteJrxmlAction();
+                                deleteJrxmlAction.setDtId(getDeclarationId());
+                                dispatcher.execute(deleteJrxmlAction, CallbackUtils.defaultCallback(new AbstractCallback<DeleteJrxmlResult>() {
+                                    @Override
+                                    public void onSuccess(DeleteJrxmlResult result) {
+                                        ResidualSaveAction action = new ResidualSaveAction();
+                                        action.setDtId(getDeclarationId());
+                                        action.setUploadUuid(event.getUploadUuid());
+                                        action.setIsArchive(isArchive);
+                                        dispatcher.execute(action, CallbackUtils.defaultCallback(new AbstractCallback<ResidualSaveResult>() {
+                                            @Override
+                                            public void onSuccess(ResidualSaveResult result) {
+                                                Dialog.infoMessage("Макет успешно обновлен");
+                                                LogCleanEvent.fire(DeclarationTemplatePresenter.this);
+                                                LogAddEvent.fire(DeclarationTemplatePresenter.this, result.getSuccessUuid(), true);
+                                            }
+                                        }, DeclarationTemplatePresenter.this));
+                                    }
+                                }, DeclarationTemplatePresenter.this));
+                            }
+                        });
+            }
+        };
     }
 
     @Override

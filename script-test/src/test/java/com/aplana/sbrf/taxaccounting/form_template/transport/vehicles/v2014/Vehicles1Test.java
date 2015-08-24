@@ -193,12 +193,6 @@ public class Vehicles1Test extends ScriptTestBase {
         testHelper.setImportFileInputStream(getImportXlsInputStream());
         testHelper.execute(FormDataEvent.IMPORT);
         Assert.assertEquals(7, testHelper.getDataRowHelper().getAll().size());
-        // Проверка расчетных данных
-        List<DataRow<Cell>> dataRows = testHelper.getDataRowHelper().getAll();
-        Assert.assertEquals(6, dataRows.get(1).getCell("pastYear").getNumericValue().intValue());
-        Assert.assertEquals(2, dataRows.get(2).getCell("pastYear").getNumericValue().intValue());
-        Assert.assertEquals(13, dataRows.get(4).getCell("pastYear").getNumericValue().intValue());
-        Assert.assertEquals(3, dataRows.get(6).getCell("pastYear").getNumericValue().intValue());
         checkLoadData(testHelper.getDataRowHelper().getAll());
         checkLogger();
     }

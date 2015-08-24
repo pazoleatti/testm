@@ -97,6 +97,7 @@ public class CreateDeclarationHandler extends AbstractActionHandler<CreateDeclar
                 if (declarationData != null) {
                     logger.error("Декларация с заданными параметрами уже существует");
                     result.setDeclarationId(null);
+                    lockDataService.unlock(key, userInfo.getUser().getId());
                     return result;
                 }
 

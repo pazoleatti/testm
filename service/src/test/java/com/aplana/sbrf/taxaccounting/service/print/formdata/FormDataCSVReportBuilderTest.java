@@ -48,7 +48,7 @@ public class FormDataCSVReportBuilderTest {
         Column colNum3 = new StringColumn();
         Column colNum4 = new StringColumn();
         Column colNum5 = new NumericColumn();
-        Column colNum6 = new StringColumn();
+        Column colNum6 = new NumericColumn();
         Column colNum7 = new StringColumn();
         Column colNum8 = new DateColumn();
 
@@ -229,7 +229,6 @@ public class FormDataCSVReportBuilderTest {
         formData.setSigners(formDataSigners);
 
         data.setData(formData);
-        data.setReportPeriod(reportPeriod);
         data.setFormTemplate(formTemplate);
         data.setAcceptanceDate(null);
         data.setCreationDate(new Date(324234));

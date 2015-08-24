@@ -34,6 +34,7 @@
         }
 
         .table {
+            z-index: 0;
             position: absolute !important;
             bottom: 0;
             right: 10px;
@@ -94,7 +95,7 @@
                         <style:LeftBar childValign="middle" height="100%">
                             <style:LinkAnchor text="Экспорт макета" ui:field="downloadDectButton" img="resources/img/down_cc.png"
                                               title="Экспорт макета деклараций"/>
-                            <fileuplod:FileUploadWidget ui:field="uploadDectFile" text="Импорт макета"/>
+                            <fileuplod:FileUploadWidget isJrxml="true" ui:field="uploadDectFile" text="Импорт макета"/>
                         </style:LeftBar>
                     </fm:Right>
                 </fm:right>
@@ -162,7 +163,7 @@
                                 <fileuplod:FileUploadWidget ui:field="uploadXsdFile" extension="xsd" text="Загрузить xsd"/>
                             </g:cell>
                             <g:cell>
-                                <fileuplod:FileUploadWidget ui:field="uploadJrxmlFile" extension="jrxml" text="Загрузить jrxml"/>
+                                <fileuplod:FileUploadWidget isJrxml="true" ui:field="uploadJrxmlFile" extension="jrxml" text="Загрузить jrxml"/>
                             </g:cell>
                         </g:VerticalPanel>
                         <g:VerticalPanel addStyleNames="{style.upload}" height="30px">
@@ -172,6 +173,16 @@
                             </g:cell>
                             <g:cell>
                                 <style:LinkAnchor text="Скачать jrxml" ui:field="downloadJrxmlButton" img="resources/img/down_cc.png"
+                                                  title="Скачать jrxml файл" addStyleNames="{style.marginLeft}"/>
+                            </g:cell>
+                        </g:VerticalPanel>
+                        <g:VerticalPanel addStyleNames="{style.upload}" height="30px">
+                            <g:cell>
+                                <style:LinkButton text="Удалить xsd" ui:field="deleteXsd" img="resources/img/row-delete.png"
+                                                  addStyleNames="{style.marginLeft}" title="Скачать xsd"/>
+                            </g:cell>
+                            <g:cell>
+                                <style:LinkButton text="Удалить jrxml" ui:field="deleteJrxml" img="resources/img/row-delete.png"
                                                   title="Скачать jrxml файл" addStyleNames="{style.marginLeft}"/>
                             </g:cell>
                         </g:VerticalPanel>

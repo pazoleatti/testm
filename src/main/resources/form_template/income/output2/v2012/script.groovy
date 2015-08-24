@@ -63,11 +63,7 @@ switch (formDataEvent) {
         break
     case FormDataEvent.IMPORT:
         importData()
-        if (!logger.containsLevel(LogLevel.ERROR)) {
-            calc()
-            logicCheck()
-            formDataService.saveCachedDataRows(formData, logger)
-        }
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.SORT_ROWS:
         sortFormDataRows()
@@ -100,7 +96,7 @@ def reportPeriodEndDate = null
 
 // Поиск записи в справочнике по значению (для импорта)
 def getRecordIdImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
-                      def boolean required = true) {
+                      def boolean required = false) {
     if (value == null || value.trim().isEmpty()) {
         return null
     }
@@ -115,8 +111,6 @@ void calc(){
             row.dividendSum = (row.sumDividend ?: 0) - (row.sumTax ?: 0)
         }
     }
-
-    sortFormDataRows(false)
 }
 
 void logicCheck() {
@@ -154,7 +148,7 @@ void importData() {
     // проверка шапки
     checkHeaderXls(headerValues, COLUMN_COUNT, HEADER_ROW_COUNT)
     if (logger.containsLevel(LogLevel.ERROR)) {
-        return;
+        return
     }
     // освобождение ресурсов для экономии памяти
     headerValues.clear()

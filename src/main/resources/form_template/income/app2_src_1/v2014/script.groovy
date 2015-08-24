@@ -165,9 +165,9 @@ def autoFillColumns = ['income', 'deduction', 'taxBase']
 @Field
 def editableColumns = allColumns - autoFillColumns
 
-// Проверяемые на пустые значения атрибуты (графа 3, 4, 6-10, 12, 22, 23, 25, 26)
+// Проверяемые на пустые значения атрибуты (графа 3, 4, 6-10, 22, 23, 25, 26)
 @Field
-def nonEmptyColumns = ['surname', 'name', 'status', 'birthday', 'citizenship', 'code', 'series', 'region', 'taxRate', 'income', 'taxBase', 'calculated']
+def nonEmptyColumns = ['surname', 'name', 'status', 'birthday', 'citizenship', 'code', 'series', 'taxRate', 'income', 'taxBase', 'calculated']
 
 @Field
 def tmpMap = [:]
@@ -243,85 +243,91 @@ void logicCheck() {
         def errorMsg = "Строка $index: "
         def citizenshipCode = getRefBookValue(10L, row.citizenship)?.CODE?.value
 
-        // 1-7. Проверка на заполнение поля «<Наименование поля>»
+        // 1. Проверка на заполнение поля «<Наименование поля>»
         checkNonEmptyColumns(row, row.getIndex(), nonEmptyColumns, logger, true)
 
-        // 8. Проверка на заполнение поля «<Наименование поля>»
-        if (address.find { row.getCell(it).value != null }) {
-            checkNonEmptyColumns(row, index, ['region'], logger, true)
+        // 2. Проверка на заполнение графы 12 «Регион (код)»
+        if ((address.find { row.getCell(it).value != null }
+                || (row.country == null && row.address == null)
+                || (!'1'.equals(row.status))
+                || (!'643'.equals(citizenshipCode)))
+                && row.region == null) {
+            rowError(logger, row, errorMsg + String.format("Строка <Номер строки>: Графа  «%s» не заполнена! " +
+                    "Данная графа обязательна для заполнения, если выполняется хотя бы одно из следующих условий: " +
+                    "1. Заполнена хотя бы одна из граф по адресу места жительства в РФ (графы 11, 13-19). " +
+                    "2. Не заполнены графы по адресу места жительства за пределами РФ (графы 20 и 21). " +
+                    "3. Графа «%s» не равна значению «1»  и/или графа «%s» не равна значению «643».",
+                    getColumnName(row, "region"), getColumnName(row, "status"), getColumnName(row, "citizenship")))
         }
 
-        // 9. Проверка вводимых символов в поле «Серия и номер документа»
+        // 3. Проверка вводимых символов в поле «Серия и номер документа»
         if (row.series != null && !row.series?.matches("^[а-яА-ЯёЁa-zA-Z0-9]+\$")) {
             def name = getColumnName(row, 'series')
-            logger.error(errorMsg + "Графа «$name» содержит недопустимые символы!")
+            rowError(logger, row, errorMsg + "Графа «$name» содержит недопустимые символы!")
         }
 
-        // 10. Проверка заполнения поля «Номер дома (владения)»
+        // 4. Проверка заполнения поля «Номер дома (владения)»
         if (row.house && !row.house?.matches("^[а-яА-ЯёЁa-zA-Z0-9/-]+\$")) {
             def name = getColumnName(row, 'house')
-            logger.error(errorMsg + "Графа «$name» содержит недопустимые символы!")
+            rowError(logger, row, errorMsg + "Графа «$name» содержит недопустимые символы!")
         }
 
-        // 11-18. Проверка заполнения полей 11, 13, 14, 15, 16, 17, 18, 19
+        // 5. Проверка заполнения полей 11, 13, 14, 15, 16, 17, 18, 19
         if (row.region != null) {
             checkNonEmptyColumns(row, row.getIndex(), address, logger, true)
         }
 
-        // 19. Проверка заполнения графы «Регион (код)»
-        if (row.country == null && row.address == null && row.region == null) {
-            def name = getColumnName(row, 'region')
-            logger.error(errorMsg + "Графа «$name» не заполнена!")
-        }
-
-        // 20. Проверка правильности заполнения графы «ИНН в стране гражданства»
+        // 7. Проверка правильности заполнения графы «ИНН в стране гражданства»
         if (row.inn && row.citizenship && citizenshipCode == '643') {
             def nameInn = getColumnName(row, 'inn')
             def nameCitizenship = getColumnName(row, 'citizenship')
-            logger.error(errorMsg + "Графа «$nameInn» не должно быть заполнено, если графа «$nameCitizenship» равна «643»")
+            rowError(logger, row, errorMsg + "Графа «$nameInn» не должно быть заполнено, если графа «$nameCitizenship» равна «643»")
         }
 
-        // 21. Проверка правильности заполнения графы «Статус налогоплательщика»
+        // 8. Проверка правильности заполнения графы «Статус налогоплательщика»
         if (row.status && !row.status?.matches("^[1-3]+\$")) {
             def name = getColumnName(row, 'status')
-            logger.error(errorMsg + "Графа «$name» содержит недопустимое значение! Поле может содержать только одно из значений: «1», «2», «3»")
+            rowError(logger, row, errorMsg + "Графа «$name» содержит недопустимое значение! Поле может содержать только одно из значений: «1», «2», «3»")
         }
 
-        // 22-24. Проверка соответствия суммы дохода суммам вычета
+        // 9. Проверка соответствия суммы дохода суммам вычета
         def String errorMsg1 = errorMsg + "Сумма граф «Сумма вычета» для кода дохода = «%s» превышает значение поля «Сумма дохода» для данного кода."
         if (getSum1(row) > roundValue(row.col_041_1 ?: 0)) {
             def value = getRefBookValue(370L, row.col_040_1)?.CODE?.value
-            logger.error(String.format(errorMsg1, value))
+            rowError(logger, row, String.format(errorMsg1, value))
         }
         if (getSum2(row) > roundValue(row.col_041_2 ?: 0)) {
             def value = getRefBookValue(370L, row.col_040_2)?.CODE?.value
-            logger.error(String.format(errorMsg1, value))
+            rowError(logger, row, String.format(errorMsg1, value))
         }
         if (getSum3(row) > roundValue(row.col_041_3 ?: 0)) {
             def value = getRefBookValue(370L, row.col_040_3)?.CODE?.value
-            logger.error(String.format(errorMsg1, value))
+            rowError(logger, row, String.format(errorMsg1, value))
         }
 
-        // 27. Арифметические проверки расчета граф 23, 25, 26
+        // 10. Арифметические проверки расчета граф 23, 25, 26
         needValue['income'] = calc23(row)
         needValue['deduction'] = calc24(row)
         needValue['taxBase'] = calc25(row)
         def arithmeticCheckAlias = needValue.keySet().asList()
         checkCalc(row, arithmeticCheckAlias, needValue, logger, true)
 
-        // 29. Проверка на соответствие паттерну
+        // 11. Проверка на соответствие паттерну
         if (row.innRF && checkPattern(logger, row, 'innRF', row.innRF, INN_IND_PATTERN, wasError ? null : INN_IND_MEANING, true)) {
             checkControlSumInn(logger, row, 'innRF', row.innRF, true)
         } else if (row.innRF) {
             wasError = true
         }
 
-        // 30. Проверка заполнения поля 21
-        if (citizenshipCode != '643' && !row.postcode &&!row.address) {
-            def nameCitizenship = getColumnName(row, 'citizenship')
-            def namePostcode = getColumnName(row, 'postcode')
-            def nameAddress = getColumnName(row, 'address')
-            logger.error(errorMsg + "В случае если графа «$nameCitizenship» не равна «643» и графа «$namePostcode» не заполнена, то графа «$nameAddress» должна быть заполнена!")
+        // 12. Проверка заполнения графы 20, 21
+        if (citizenshipCode != '643' && (address + "region").find { row[it] } == null) {
+            ["country", "address"].each { alias ->
+                if (!row[alias]) {
+                    rowError(logger, row, errorMsg + String.format("Графа «%s» не заполнена! " +
+                            "Данная графа обязательна для заполнения, если графа «%s» не равна значению «643» и графы по адресу места жительства в РФ (графы 11-19) не заполнены.",
+                            getColumnName(row, alias), getColumnName(row, 'citizenship')))
+                }
+            }
         }
     }
 }
@@ -354,8 +360,6 @@ void calc() {
         checkOverflow(value25, row, 'taxBase', index, 15, '«Графа 23» - «Графа 24»')
         row.taxBase = value25
     }
-
-    sortFormDataRows(false)
 }
 
 /**
@@ -459,7 +463,7 @@ void importTransportData() {
     CSVReader reader = new CSVReader(isr, SEPARATOR, QUOTE)
 
     String[] rowCells
-    int fileRowIndex = 0    // номер строки в файле
+    int fileRowIndex = 2    // номер строки в файле (1, 2..). Начинается с 2, потому что первые две строки - заголовок и пустая строка
     int rowIndex = 0        // номер строки в НФ
     def total = null        // итоговая строка со значениями из тф для добавления
     def newRows = []

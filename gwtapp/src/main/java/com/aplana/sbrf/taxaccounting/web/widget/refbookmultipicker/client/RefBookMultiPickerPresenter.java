@@ -49,6 +49,8 @@ public class RefBookMultiPickerPresenter extends PresenterWidget<RefBookMultiPic
           * @param force флаг нужна ли силовая перезагрузка если даже данные уже загружены
          */
         void refresh(boolean force);
+
+        void showVersionDate(boolean versioned);
     }
 
     public RefBookMultiPickerPresenter(MyView view) {
@@ -78,7 +80,7 @@ public class RefBookMultiPickerPresenter extends PresenterWidget<RefBookMultiPic
                         public void onSuccess(InitRefBookMultiResult result) {
                             getView().setAttributes(result.getAttributes());
                             getView().refresh(true);
-
+                            getView().showVersionDate(result.isVersioned());
                             trySelect(ps);
                         }
                     }, this)

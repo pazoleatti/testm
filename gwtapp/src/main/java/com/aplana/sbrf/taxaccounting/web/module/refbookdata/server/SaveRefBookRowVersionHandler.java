@@ -78,9 +78,8 @@ public class SaveRefBookRowVersionHandler extends AbstractActionHandler<SaveRefB
         RefBookDataProvider refBookDataProvider = refBookFactory.getDataProvider(action.getRefBookId());
 
         refBookDataProvider.updateRecordVersion(logger, action.getRecordId(), action.getVersionFrom(), action.getVersionTo(), valueToSave);
-        if (logger.containsLevel(LogLevel.ERROR)) {
-            result.setException(true);
-        }
+
+        result.setException(logger.containsLevel(LogLevel.ERROR));
         result.setUuid(logEntryService.save(logger.getEntries()));
 		return result;
 	}

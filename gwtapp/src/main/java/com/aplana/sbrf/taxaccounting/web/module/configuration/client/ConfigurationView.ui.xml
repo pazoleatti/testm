@@ -52,10 +52,10 @@
                 <fm:right>
                     <fm:Right>
                         <style:LeftBar marginRight="10" childValign="middle" height="100%">
-                            <style:LinkAnchor ui:field="commonLink" text="Общие параметры" disableImage="true" visible="false"/>
-                            <style:LinkAnchor ui:field="formLink" text="Параметры загрузки налоговых форм" disableImage="true" />
-                            <style:LinkAnchor ui:field="emailLink" text="Электронная почта" disableImage="true" />
-                            <style:LinkAnchor ui:field="asyncLink" text="Параметры асинхронных заданий" disableImage="true" />
+                            <style:LinkButton ui:field="commonLink" text="Общие параметры" disableImage="true" visible="false"/>
+                            <style:LinkButton ui:field="formLink" text="Параметры загрузки налоговых форм" disableImage="true" />
+                            <style:LinkButton ui:field="emailLink" text="Электронная почта" disableImage="true" />
+                            <style:LinkButton ui:field="asyncLink" text="Параметры асинхронных заданий" disableImage="true" />
                         </style:LeftBar>
                     </fm:Right>
                 </fm:right>
@@ -70,15 +70,15 @@
             <fm:BodyContainer>
                 <g:HorizontalPanel spacing="5" verticalAlignment="middle" addStyleNames="{style.btnPanel}">
                     <g:cell>
-                        <style:LinkAnchor ui:field="addLink" text="Добавить запись" img="resources/img/row-add.png"
+                        <style:LinkButton ui:field="addLink" text="Добавить запись" img="resources/img/row-add.png"
                                           addStyleNames="{style.mgnl}"/>
                     </g:cell>
                     <g:cell>
-                        <style:LinkAnchor ui:field="delLink" text="Удалить запись" img="resources/img/row-delete.png"
+                        <style:LinkButton enabled="false" ui:field="delLink" text="Удалить запись" img="resources/img/row-delete.png"
                                           addStyleNames="{style.mgnr}"/>
                     </g:cell>
                     <g:cell>
-                        <g:Button ui:field="checkButton" text="Проверить"/>
+                        <g:Button enabled="false" ui:field="checkButton" text="Проверить"/>
                     </g:cell>
                     <g:cell>
                         <g:Button ui:field="saveButton" text="Сохранить"/>

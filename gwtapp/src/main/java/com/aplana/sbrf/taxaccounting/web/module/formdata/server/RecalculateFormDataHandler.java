@@ -83,7 +83,6 @@ public class RecalculateFormDataHandler extends AbstractActionHandler<Recalculat
                     refBookHelper.dataRowsCheck(action.getModifiedRows(), formData.getFormColumns());
                     dataRowService.update(userInfo, formData.getId(), action.getModifiedRows(), formData.isManual());
                 }
-                result.setSave(false);
 
                 Map<String, Object> params = new HashMap<String, Object>();
                 params.put("formDataId", action.getFormData().getId());

@@ -100,6 +100,15 @@ public interface ReportPeriodDao {
     List<ReportPeriod> getCorrectPeriods(TaxType taxType, int departmentId);
 
     /**
+     * Получить периоды сравнения - выборка 50
+     * http://conf.aplana.com/pages/viewpage.action?pageId=20386707
+     * @param taxType тип налога
+     * @param departmentId идентификатор подразделения
+     * @return
+     */
+    List<ReportPeriod> getComparativPeriods(TaxType taxType, int departmentId);
+
+    /**
      * Отчетный период по коду и году
      */
     ReportPeriod getByTaxTypedCodeYear(TaxType taxType, String code, int year);

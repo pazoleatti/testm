@@ -53,11 +53,7 @@ switch (formDataEvent) {
         break
     case FormDataEvent.IMPORT:
         importData()
-        if (!logger.containsLevel(LogLevel.ERROR)) {
-            calc()
-            logicCheck()
-            formDataService.saveCachedDataRows(formData, logger)
-        }
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.SORT_ROWS:
         sortFormDataRows()
@@ -309,6 +305,11 @@ DataRow<Cell> calcItog(def int i, def List<DataRow<Cell>> dataRows) {
     newRow.itog = 'Подитог:'
     newRow.setAlias('itg#'.concat(i.toString()))
     newRow.getCell('fix').colSpan = 2
+    ['rowNum', 'itog', 'name', 'innKio', 'country', 'countryCode', 'contractNum',
+            'contractDate', 'transactionNum', 'transactionDeliveryDate', 'transactionType',
+            'incomeSum', 'consumptionSum', 'price', 'cost', 'fix', 'transactionDate'].each {
+        newRow.getCell(it).setStyleAlias('Контрольные суммы')
+    }
 
     // Расчеты подитоговых значений
     def BigDecimal priceItg = 0, costItg = 0
@@ -364,7 +365,7 @@ void importData() {
     // проверка шапки
     checkHeaderXls(headerValues, COLUMN_COUNT, HEADER_ROW_COUNT, tmpRow)
     if (logger.containsLevel(LogLevel.ERROR)) {
-        return;
+        return
     }
     // освобождение ресурсов для экономии памяти
     headerValues.clear()
@@ -486,13 +487,13 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
     colIndex++
 
     // графа 2
-    newRow.name = getRecordIdImport(9, 'NAME', values[colIndex], fileRowIndex, colIndex + colOffset, true)
+    newRow.name = getRecordIdImport(9, 'NAME', values[colIndex], fileRowIndex, colIndex + colOffset, false)
     def map = getRefBookValue(9, newRow.name)
     colIndex++
 
     // графа 3
     if (map != null) {
-        formDataService.checkReferenceValue(9, values[colIndex], map.INN_KIO?.stringValue, fileRowIndex, colIndex + colOffset, logger, true)
+        formDataService.checkReferenceValue(9, values[colIndex], map.INN_KIO?.stringValue, fileRowIndex, colIndex + colOffset, logger, false)
     }
     colIndex++
 
@@ -500,14 +501,14 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
     if (map != null) {
         map = getRefBookValue(10, map.COUNTRY?.referenceValue)
         if (map != null) {
-            formDataService.checkReferenceValue(10, values[colIndex], map.NAME?.stringValue, fileRowIndex, colIndex + colOffset, logger, true)
+            formDataService.checkReferenceValue(10, values[colIndex], map.NAME?.stringValue, fileRowIndex, colIndex + colOffset, logger, false)
         }
     }
     colIndex++
 
     // графа 4.2
     if (map != null) {
-        formDataService.checkReferenceValue(10, values[colIndex], map.CODE?.stringValue, fileRowIndex, colIndex + colOffset, logger, true)
+        formDataService.checkReferenceValue(10, values[colIndex], map.CODE?.stringValue, fileRowIndex, colIndex + colOffset, logger, false)
     }
     colIndex++
 

@@ -95,15 +95,13 @@ switch (formDataEvent) {
         break
     case FormDataEvent.IMPORT:
         importData()
-        if (!logger.containsLevel(LogLevel.ERROR)) {
-            calc()
-            logicCheck()
-            formDataService.saveCachedDataRows(formData, logger)
-        }
+        formDataService.saveCachedDataRows(formData, logger)
         break
 }
 
 //// Кэши и константы
+@Field
+def providerCache = [:]
 @Field
 def refBookCache = [:]
 @Field
@@ -433,11 +431,14 @@ void consolidationFromPrimary(def dataRows, def formSources) {
                         addChildTotalData(dataRows, '11270', 'incomeTaxSumS', dataRowsChild, 'total', ['excessOfTheSellingPrice'])
                         break
                     case formTypeId_RNU8: //(РНУ-8) Простой регистр налогового учёта «Требования»
+                        def provider = formDataService.getRefBookProvider(refBookFactory, 28L, providerCache)
+                        def rows = dataRowsChild.findAll { it.getAlias() == null }
                         ['13040', '13045', '13050', '13055', '13060', '13065'].each { knu ->
                             // графа 9 = разность сумм граф 6 и 5 строк источника где КНУ и балансовый счет совпадают с текущей строкой
                             def row = getRow(dataRows, knu)
-                            dataRowsChild.each { rowChild ->
-                                def recordId = getRecordId(28, 'CODE', row.incomeTypeId, getReportPeriodEndDate())
+                            String filter = "LOWER(CODE) = LOWER('" + row.incomeTypeId + "') and LOWER(NUMBER) = LOWER('" + row.incomeBuhSumAccountNumber.replaceAll(/\./, "") + "')"
+                            def recordId = provider.getRecords(getReportPeriodEndDate(), null, filter, null)?.get(0)?.get(RefBook.RECORD_ID_ALIAS)?.value
+                            rows.each { rowChild ->
                                 if (recordId == rowChild.balance && isEqualNum(row.incomeBuhSumAccountNumber, rowChild.balance)) {
                                     (row.incomeTaxSumS) ? (row.incomeTaxSumS += (rowChild.outcome - rowChild.income)) : (row.incomeTaxSumS = (rowChild.outcome - rowChild.income))
                                 }
@@ -728,7 +729,7 @@ def getBalanceValue(def value) {
 }
 
 boolean isEqualNum(String accNum, def balance) {
-    return accNum.replace('.', '') == getBalanceValue(balance).replace('.', '')
+    return accNum.replace('.', '') == getBalanceValue(balance)?.replace('.', '')
 }
 
 
@@ -822,18 +823,33 @@ void importData() {
         }
 
         // найти нужную строку нф
-        def dataRow = getDataRow(dataRows, "R" + rowIndex)
+        def alias = "R" + rowIndex
+        def dataRow = getDataRow(dataRows, alias)
         // заполнить строку нф значениями из эксель
-        fillRowFromXls(dataRow, rowValues, fileRowIndex, rowIndex, colOffset)
+        if (alias in [firstTotalRowAlias, secondTotalRowAlias]) {
+            // итоги
+            fillTotalRowFromXls(dataRow, rowValues, fileRowIndex, rowIndex, colOffset)
+        } else {
+            // остальные строки
+            fillRowFromXls(dataRow, rowValues, fileRowIndex, rowIndex, colOffset)
+        }
     }
     if (rowIndex < dataRows.size()) {
         logger.error("Структура файла не соответствует макету налоговой формы.")
     }
+
+    // сравнение итогов
+    def totalRow1Tmp = formData.createStoreMessagingDataRow()
+    def totalRow2Tmp = formData.createStoreMessagingDataRow()
+    totalRow1Tmp[totalColumn] = getSum(dataRows, totalColumn, rowsAliasesForFirstControlSum)
+    totalRow2Tmp[totalColumn] = getSum(dataRows, totalColumn, rowsAliasesForSecondControlSum)
+
+    def totalRow1 = getDataRow(dataRows, firstTotalRowAlias)
+    def totalRow2 = getDataRow(dataRows, secondTotalRowAlias)
+    compareTotalValues(totalRow1, totalRow1Tmp, [totalColumn], logger, false)
+    compareTotalValues(totalRow2, totalRow2Tmp, [totalColumn], logger, false)
+
     showMessages(dataRows, logger)
-    if (!logger.containsLevel(LogLevel.ERROR)) {
-        updateIndexes(dataRows)
-        formDataService.getDataRowHelper(formData).allCached = dataRows
-    }
 }
 
 /**
@@ -926,4 +942,22 @@ def fillRowFromXls(def dataRow, def values, int fileRowIndex, int rowIndex, int 
     if (dataRow.getCell('incomeTaxSumS').isEditable()) {
         dataRow.incomeTaxSumS = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
     }
+}
+
+/**
+ * Заполняет итоговую строку нф значениями из экселя.
+ *
+ * @param dataRow строка нф
+ * @param values список строк со значениями
+ * @param fileRowIndex номер строки в тф
+ * @param rowIndex номер строки в нф
+ * @param colOffset отступ по столбцам
+ */
+def fillTotalRowFromXls(def dataRow, def values, int fileRowIndex, int rowIndex, int colOffset) {
+    dataRow.setImportIndex(fileRowIndex)
+    dataRow.setIndex(rowIndex)
+
+    // графа 9
+    def colIndex = 8
+    dataRow.incomeTaxSumS = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
 }

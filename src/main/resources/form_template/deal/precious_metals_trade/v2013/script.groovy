@@ -53,11 +53,7 @@ switch (formDataEvent) {
         break
     case FormDataEvent.IMPORT:
         importData()
-        if (!logger.containsLevel(LogLevel.ERROR)) {
-            calc()
-            logicCheck()
-            formDataService.saveCachedDataRows(formData, logger)
-        }
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.SORT_ROWS:
         sortFormDataRows()
@@ -495,7 +491,7 @@ void importData() {
     // проверка шапки
     checkHeaderXls(headerValues, COLUMN_COUNT, HEADER_ROW_COUNT, tmpRow)
     if (logger.containsLevel(LogLevel.ERROR)) {
-        return;
+        return
     }
     // освобождение ресурсов для экономии памяти
     headerValues.clear()
@@ -650,17 +646,17 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
     colIndex++
 
     // графа 2.1
-    newRow.fullName = getRecordIdImport(9, 'NAME', values[colIndex], fileRowIndex, colIndex + colOffset, true)
+    newRow.fullName = getRecordIdImport(9, 'NAME', values[colIndex], fileRowIndex, colIndex + colOffset, false)
     def map = getRefBookValue(9, newRow.fullName)
     colIndex++
 
     // графа 2.2
-    newRow.interdependence = getRecordIdImport(38, 'VALUE', values[colIndex], fileRowIndex, colIndex + colOffset, true)
+    newRow.interdependence = getRecordIdImport(38, 'VALUE', values[colIndex], fileRowIndex, colIndex + colOffset, false)
     colIndex++
 
     // графа 3
     if (map != null) {
-        formDataService.checkReferenceValue(9, values[colIndex], map.INN_KIO?.stringValue, fileRowIndex, colIndex + colOffset, logger, true)
+        formDataService.checkReferenceValue(9, values[colIndex], map.INN_KIO?.stringValue, fileRowIndex, colIndex + colOffset, logger, false)
     }
     colIndex++
 
@@ -668,14 +664,14 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
     if (map != null) {
         map = getRefBookValue(10, map.COUNTRY?.referenceValue)
         if (map != null) {
-            formDataService.checkReferenceValue(10, values[colIndex], map.NAME?.stringValue, fileRowIndex, colIndex + colOffset, logger, true)
+            formDataService.checkReferenceValue(10, values[colIndex], map.NAME?.stringValue, fileRowIndex, colIndex + colOffset, logger, false)
         }
     }
     colIndex++
 
     // графа 4.2
     if (map != null) {
-        formDataService.checkReferenceValue(10, values[colIndex], map.CODE?.stringValue, fileRowIndex, colIndex + colOffset, logger, true)
+        formDataService.checkReferenceValue(10, values[colIndex], map.CODE?.stringValue, fileRowIndex, colIndex + colOffset, logger, false)
     }
     colIndex++
 
@@ -696,23 +692,23 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
     colIndex++
 
     // графа 9
-    newRow.dealFocus = getRecordIdImport(20, 'DIRECTION', values[colIndex], fileRowIndex, colIndex + colOffset, true)
+    newRow.dealFocus = getRecordIdImport(20, 'DIRECTION', values[colIndex], fileRowIndex, colIndex + colOffset, false)
     colIndex++
 
     // графа 10
-    newRow.deliverySign = getRecordIdImport(18, 'SIGN', values[colIndex], fileRowIndex, colIndex + colOffset, true)
+    newRow.deliverySign = getRecordIdImport(18, 'SIGN', values[colIndex], fileRowIndex, colIndex + colOffset, false)
     colIndex++
 
     // графа 11
-    newRow.metalName = getRecordIdImport(17, 'INNER_CODE', values[colIndex], fileRowIndex, colIndex + colOffset, true)
+    newRow.metalName = getRecordIdImport(17, 'INNER_CODE', values[colIndex], fileRowIndex, colIndex + colOffset, false)
     colIndex++
 
     // графа 12
-    newRow.foreignDeal = getRecordIdImport(38, 'VALUE', values[colIndex], fileRowIndex, colIndex + colOffset, true)
+    newRow.foreignDeal = getRecordIdImport(38, 'VALUE', values[colIndex], fileRowIndex, colIndex + colOffset, false)
     colIndex++
 
     // графа 13.1
-    newRow.countryCodeNumeric = getRecordIdImport(10, 'CODE', values[colIndex], fileRowIndex, colIndex + colOffset, true)
+    newRow.countryCodeNumeric = getRecordIdImport(10, 'CODE', values[colIndex], fileRowIndex, colIndex + colOffset, false)
     colIndex++
 
     // графа 13.2
@@ -720,7 +716,7 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
     if (code.length() == 1) {    //для кодов 1, 2, 3...9
         code = "0".concat(code)
     }
-    newRow.regionCode = getRecordIdImport(4, 'CODE', code, fileRowIndex, colIndex + colOffset, true)
+    newRow.regionCode = getRecordIdImport(4, 'CODE', code, fileRowIndex, colIndex + colOffset, false)
     colIndex++
 
     // графа 13.3
@@ -732,7 +728,7 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
     colIndex++
 
     // графа 14.1
-    newRow.countryCodeNumeric2 = getRecordIdImport(10, 'CODE', values[colIndex], fileRowIndex, colIndex + colOffset, true)
+    newRow.countryCodeNumeric2 = getRecordIdImport(10, 'CODE', values[colIndex], fileRowIndex, colIndex + colOffset, false)
     colIndex++
 
     // графа 14.2
@@ -740,7 +736,7 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
     if (code.length() == 1) {    //для кодов 1, 2, 3...9
         code = "0".concat(code)
     }
-    newRow.region2 = getRecordIdImport(4, 'CODE', code, fileRowIndex, colIndex + colOffset, true)
+    newRow.region2 = getRecordIdImport(4, 'CODE', code, fileRowIndex, colIndex + colOffset, false)
     colIndex++
 
     // графа 14.3
@@ -752,7 +748,7 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
     colIndex++
 
     // графа 15
-    newRow.deliveryCode = getRecordIdImport(63, 'STRCODE', values[colIndex], fileRowIndex, colIndex + colOffset, true)
+    newRow.deliveryCode = getRecordIdImport(63, 'STRCODE', values[colIndex], fileRowIndex, colIndex + colOffset, false)
     colIndex++
 
     // графа 16

@@ -22,6 +22,8 @@ public class FormTemplate extends IdentityObject<Integer> {
     private String fullName;
     private String header;
     private boolean monthly;
+    /** Признак использования периода сравнения (false - не используется, true - используется) */
+    private boolean comparative;
 
     private VersionedObjectStatus status;
 
@@ -327,6 +329,14 @@ public class FormTemplate extends IdentityObject<Integer> {
         this.monthly = monthly;
     }
 
+    public boolean isComparative() {
+        return comparative;
+    }
+
+    public void setComparative(boolean comparative) {
+        this.comparative = comparative;
+    }
+
     public FormTemplate clone() {
         FormTemplate formTemplateClone = new FormTemplate();
 
@@ -343,6 +353,7 @@ public class FormTemplate extends IdentityObject<Integer> {
         formTemplateClone.getStyles().addAll(this.getStyles());
         formTemplateClone.getHeaders().addAll(this.getHeaders());
         formTemplateClone.setStatus(this.getStatus());
+        formTemplateClone.setComparative(this.isComparative());
 
         // клонировать строки, иначе измения в них попадут в макет формы
         List<DataRow<Cell>> rows = getCloneRows(this.getRows());

@@ -56,7 +56,7 @@ public class SourceDaoTest {
     public void testUpdateFD(){
         sourceDao.addFormDataConsolidationInfo(1l, Arrays.asList(1l));
         sourceDao.updateFDConsolidationInfo(1);
-        assertTrue(sourceDao.isFDConsolidationTopical(1));
+        assertFalse(sourceDao.isFDConsolidationTopical(1));
     }
 
     @Test
@@ -66,20 +66,11 @@ public class SourceDaoTest {
         assertFalse(sourceDao.isDDConsolidationTopical(1));
     }
 
-    @Test
-    public void testUpdateDDConsInfo() {
-        sourceDao.updateDDConsolidationInfo(new ArrayList<Long>() {{
-            add(1l);
-        }}, new ArrayList<Long>() {{
-            add(1l);
-        }});
-        assertFalse(sourceDao.isFDConsolidationTopical(1));
-    }
 
     @Test
-    public void testFindConsolidatedInstanceIds() {
-        assertEquals(0, sourceDao.findConsolidatedInstanceIds(1l, new Date(), new Date(), true).size());
-        assertEquals(0, sourceDao.findConsolidatedInstanceIds(1l, new Date(), new Date(), false).size());
+    public void testfindConsolidatedInstances() {
+        assertEquals(0, sourceDao.findConsolidatedInstances(1l, 1l, new Date(), new Date(), true).size());
+        assertEquals(0, sourceDao.findConsolidatedInstances(1l, 1l, new Date(), new Date(), false).size());
     }
 
     /*@Test

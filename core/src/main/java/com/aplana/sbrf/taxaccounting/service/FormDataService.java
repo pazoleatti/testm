@@ -21,12 +21,15 @@ public interface FormDataService {
      * @param userInfo Пользователь-инициатор операции
      * @param formTemplateId Макет
      * @param departmentReportPeriodId Отчетный период подразделения
+     * @param comparativPeriodId период сравнения
+     * @param accruing признак нарастающего итога
      * @param kind Тип НФ
      * @param periodOrder Номер месяца для ежемесячных форм (для остальных параметр отсутствует)
      * @param importFormData флаг создания при загрузке
      * @return Id НФ
      */
     long createFormData(Logger logger, TAUserInfo userInfo, int formTemplateId, int departmentReportPeriodId,
+                        Integer comparativPeriodId, boolean accruing,
                         FormDataKind kind, Integer periodOrder, boolean importFormData);
 
     /**
@@ -96,15 +99,6 @@ public interface FormDataService {
 	 */
 	long saveFormData(Logger logger, TAUserInfo userInfo, FormData formData);
 
-	/**
-	 * Удаляет точку восстановления, сделанную перед редактированием данных
-	 *
-	 * @param userInfo информация о пользователея, выполняющего операцию
-	 * @param formData объект с данными налоговой формы
-	 * @return идентификатор сохранённой записи
-	 */
-	void removeCheckPoint(Logger logger, TAUserInfo userInfo, FormData formData);
-
     /**
      * Сохранить данные исполнителей и подписантов для налоговой формы
      * @param logger
@@ -145,18 +139,32 @@ public interface FormDataService {
 	void doMove(long formDataId, boolean manual, TAUserInfo userInfo, WorkflowMove move, String note, Logger logger, boolean isAsync, LockStateLogger stateLogger);
 
     /**
+     * Получение назначение для заданной НФ
+     * @param formData
+     * @param logger
+     * @param userInfo
+     * @param reportPeriod
+     * @param excludeInactiveTemplate исключить нф-источники с макетом выведенным из действия?
+     * @return
+     */
+    List<DepartmentFormType> getFormSources(FormData formData, Logger logger, TAUserInfo userInfo, ReportPeriod reportPeriod, boolean excludeInactiveTemplate);
+
+    /**
      * Создаёт налоговую форму без проверок прав доступа
      * Метод предназначен для использования при реализации механизма консолидации, когда требуется создавать формы в чужих подразделениях
      * @param logger объект журнала
      * @param userInfo информация о пользователе, выполняющего операцию
      * @param formTemplateId идентификатор шаблона формы
      * @param departmentReportPeriodId Отчетный период подразделения
+     * @param comparativPeriodId период сравнения
+     * @param accruing признак нарастающего итога
      * @param kind тип налоговой формы
      * @param periodOrder номер месяца для ежемесячных форм (для остальных параметр отсутствует)
      * @param importFormData признак импорта
      * @return созданный объект FormData (еще не сохранённый в БД)
      */
 	long createFormDataWithoutCheck(Logger logger, TAUserInfo userInfo, int formTemplateId, int departmentReportPeriodId,
+                                    Integer comparativPeriodId, boolean accruing,
                                     FormDataKind kind, Integer periodOrder, boolean importFormData);
 
 	/**

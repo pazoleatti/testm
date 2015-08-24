@@ -39,8 +39,9 @@ void importFromXls() {
         return
     }
 
+    def xmlString
     try {
-        def xmlString = importService.getData(inputStream, ".xlsx", 'windows-1251', 'Средняя стоимость', null)
+        xmlString = importService.getData(inputStream, ".xlsx", 'windows-1251', 'Средняя стоимость', null)
     } catch (Exception e) {
         logger.error("Неверная структура загружаемого файла")
         return

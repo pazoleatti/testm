@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.model;
 
 import java.io.Serializable;
+import java.util.Calendar;
 import java.util.Date;
 
 /**
@@ -16,6 +17,8 @@ public class ReportPeriod implements Serializable {
 	private Integer id;
 	/** Текстовое обозначение отчетного периода */
 	private String name;
+    /** Текстовое обозначение отчетного периода для нф с нарастающим итогом*/
+    private String accName;
     /** Порядок следования отчетного периода в рамках налового */
     private int order;
 	/** Ссылка на налоговый период */
@@ -118,4 +121,12 @@ public class ReportPeriod implements Serializable {
 	public void setCalendarStartDate(Date calendarStartDate) {
 		this.calendarStartDate = calendarStartDate;
 	}
+
+    public String getAccName() {
+        return accName;
+    }
+
+    public void setAccName(String accName) {
+        this.accName = accName;
+    }
 }

@@ -66,7 +66,7 @@ public class BookerStatementServiceImpl implements BookerStatementService, Scrip
             if (filter == null || "".equals(filter.trim())) {
                 filter = filter1;
             } else {
-                filter = filter + " and " + filter1;
+                filter = "(" + filter + ") and " + filter1;
             }
             return refBookFactory.getDataProvider(refBookId).getRecords(date, null, filter, null);
         }

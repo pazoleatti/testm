@@ -67,15 +67,10 @@ switch (formDataEvent) {
     case FormDataEvent.IMPORT:
         if (UploadFileName.endsWith(".rnu")) {
             importTransportData()
-            formDataService.saveCachedDataRows(formData, logger)
         } else {
             importData()
-            if (!logger.containsLevel(LogLevel.ERROR)) {
-                calc()
-                logicCheck()
-                formDataService.saveCachedDataRows(formData, logger)
-            }
         }
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.IMPORT_TRANSPORT_FILE:
         importTransportData()
@@ -286,7 +281,7 @@ void importData() {
     // проверка шапки
     checkHeaderXls(headerValues, COLUMN_COUNT, HEADER_ROW_COUNT)
     if (logger.containsLevel(LogLevel.ERROR)) {
-        return;
+        return
     }
     // освобождение ресурсов для экономии памяти
     headerValues.clear()

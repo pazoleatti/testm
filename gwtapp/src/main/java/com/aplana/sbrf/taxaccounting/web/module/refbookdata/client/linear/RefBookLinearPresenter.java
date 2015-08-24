@@ -12,7 +12,10 @@ import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.event.DeleteI
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.event.SearchButtonEvent;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.event.ShowItemEvent;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.*;
-import com.google.gwt.view.client.*;
+import com.google.gwt.view.client.AbstractDataProvider;
+import com.google.gwt.view.client.AsyncDataProvider;
+import com.google.gwt.view.client.HasData;
+import com.google.gwt.view.client.Range;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.dispatch.shared.DispatchAsync;
@@ -21,7 +24,10 @@ import com.gwtplatform.mvp.client.PresenterWidget;
 import com.gwtplatform.mvp.client.View;
 import com.gwtplatform.mvp.client.annotations.ProxyEvent;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * User: avanteev
@@ -80,7 +86,7 @@ public class RefBookLinearPresenter extends PresenterWidget<RefBookLinearPresent
                                 }
                                 LogAddEvent.fire(RefBookLinearPresenter.this, result.getUuid());
                                 if (result.isException()) {
-                                    Dialog.errorMessage("Удаление всех версий элемента справочника", "Обнаружены фатальные ошибки!");
+                                    Dialog.errorMessage("Удаление записи справочника", "Обнаружены фатальные ошибки!");
                                 }
                                 /*editPresenter.setMode(mode);*/
                                 ShowItemEvent.fire(RefBookLinearPresenter.this, null, null);
@@ -150,6 +156,7 @@ public class RefBookLinearPresenter extends PresenterWidget<RefBookLinearPresent
         Integer getSelectedRowIndex();
         void setEnable(FormMode mode);
         void deleteRowButtonClicked();
+        int getTotalCount();
     }
 
     public void setMode(FormMode mode) {
@@ -249,12 +256,12 @@ public class RefBookLinearPresenter extends PresenterWidget<RefBookLinearPresent
 
         public void remove(RefBookDataRow row) {
             visibleData.remove(row);
-            getView().setTableData(getView().getPageStart(), visibleData.size(), visibleData);
+            getView().setTableData(getView().getPageStart(), getView().getTotalCount()-1, visibleData);
         }
 
         public void add(RefBookDataRow row){
             visibleData.add(row);
-            getView().setTableData(getView().getPageStart(), visibleData.size(), visibleData);
+            getView().setTableData(getView().getPageStart(), getView().getTotalCount()+1, visibleData);
         }
 
         public void modify(RefBookDataRow row){

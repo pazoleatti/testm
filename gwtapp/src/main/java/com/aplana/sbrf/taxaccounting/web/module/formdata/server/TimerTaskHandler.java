@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdata.server;
 
+import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.model.LockData;
 import com.aplana.sbrf.taxaccounting.model.ReportType;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
@@ -33,7 +34,7 @@ public class TimerTaskHandler extends AbstractActionHandler<TimerTaskAction, Tim
     private FormDataService formDataService;
 
     @Autowired
-    private FormDataAccessService formDataAccessService;
+    private LockDataService lockService;
 
     @Autowired
     private SecurityService securityService;
@@ -51,12 +52,22 @@ public class TimerTaskHandler extends AbstractActionHandler<TimerTaskAction, Tim
         TAUserInfo userInfo = securityService.currentUserInfo();
         LockInfo lockInfo = new LockInfo();
         Pair<ReportType, LockData> lockType = formDataService.getLockTaskType(action.getFormDataId());
+        LockData lockCheck = lockService.getLock(formDataService.generateTaskKey(action.getFormDataId(), ReportType.CHECK_FD));
         if (lockType != null) {
-            result.setTaskType(lockType.getFirst());
-            lockInfo.setLockedByUser(taUserService.getUser(lockType.getSecond().getUserId()).getName());
+            LockData lock = lockCheck;
+            if (lock != null) {
+                result.setTaskType(ReportType.CHECK_FD);
+                lockInfo.setTitle(String.format("Запущена операция \"%s\"", formDataService.getTaskName(ReportType.CHECK_FD, action.getFormDataId(), userInfo)));
+                result.setTaskName(formDataService.getTaskName(ReportType.CHECK_FD, action.getFormDataId(), userInfo));
+            } else {
+                lock = lockType.getSecond();
+                result.setTaskType(lockType.getFirst());
+                lockInfo.setTitle(String.format("Запущена операция \"%s\"", formDataService.getTaskName(lockType.getFirst(), action.getFormDataId(), userInfo)));
+                result.setTaskName(formDataService.getTaskName(lockType.getFirst(), action.getFormDataId(), userInfo));
+            }
+            lockInfo.setLockedByUser(taUserService.getUser(lock.getUserId()).getName());
             SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy HH:mm z");
-            lockInfo.setLockDate(formatter.format(lockType.getSecond().getDateLock()));
-            lockInfo.setTitle(String.format("Запущена операция \"%s\"", formDataService.getTaskName(lockType.getFirst(), action.getFormDataId(), userInfo)));
+            lockInfo.setLockDate(formatter.format(lock.getDateLock()));
         }
         LockData lockInformation = formDataService.getObjectLock(action.getFormDataId(), userInfo);
         if (lockInformation != null) {
@@ -76,7 +87,7 @@ public class TimerTaskHandler extends AbstractActionHandler<TimerTaskAction, Tim
         }
         result.setLockInfo(lockInfo);
         if (lockInformation != null && lockInformation.getUserId() == userInfo.getUser().getId()) {
-            if (ReportType.EDIT_FD.equals(lockType.getFirst())) {
+            if (ReportType.EDIT_FD.equals(lockType.getFirst()) && lockCheck == null) {
                 // есто только блокировка режима редактирования
                 result.setFormMode(TimerTaskResult.FormMode.EDIT);
             } else {

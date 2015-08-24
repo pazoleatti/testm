@@ -1,11 +1,9 @@
 package com.aplana.sbrf.taxaccounting.dao;
 
 import com.aplana.sbrf.taxaccounting.model.source.*;
+import com.aplana.sbrf.taxaccounting.model.util.Pair;
 
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 
 /**
@@ -113,29 +111,6 @@ public interface SourceDao {
      */
     List<ConsolidatedInstance> findConsolidatedInstances(long source, long destination, Date periodStart, Date periodEnd, boolean declaration);
 
-
-    /**
-     * Получает список идентификаторов нф/деклараций для которых указанная нф является источником при консолидаци и которые находятся
-     * внутри указанного диапазона дат
-     * @param source идентификатор назначения-источника
-     * @param periodStart начало диапазона
-     * @param periodEnd окончание диапазона
-     * @param declaration признак того, что экземпляры-приемники надо искать только среди деклараций
-     * @return
-     */
-    Collection<Long> findConsolidatedInstanceIds(Long source, Date periodStart, Date periodEnd, boolean declaration);
-
-    /**
-     * Получает список идентификаторов нф, которые являются экземплярами указанного идентификатора
-     * формы-источника и по которым есть записи в таблице консолидаций
-     * @param source
-     * @param periodStart
-     * @param periodEnd
-     * @param declaration
-     * @return
-     */
-    Collection<Long> findFDConsolidatedSourceInstanceIds(Long source, Date periodStart, Date periodEnd, boolean declaration);
-
     /**
      * Возвращает названия подразделений для указанных источников
      * @param sources пары id источника - название подразделения
@@ -159,7 +134,7 @@ public interface SourceDao {
 
     /**
      * Обновляет информацию о консолидации(т.е. была ли она сделана).
-     * @param tgtFormDataId идентификатор НФ
+     * @param tgtDeclarationId идентификатор декларации
      * @param srcFormDataIds форма-источник с которой делалась консолидация для НФ
      */
     void addDeclarationConsolidationInfo(Long tgtDeclarationId, Collection<Long> srcFormDataIds);
@@ -195,14 +170,16 @@ public interface SourceDao {
 
     /**
      * Проставление признака неактуальности данных в НФ-приёмнике
-     * @param sourceFormId идентификатор источника
-     * @return колличество обновленных строк
+     * @param sourceFormId идентификатор экземпляра-источника
      */
-    int updateFDConsolidationInfo(long sourceFormId);
+    void updateFDConsolidationInfo(long sourceFormId);
 
-    int updateFDConsolidationInfo(Collection<? extends Number> sourceFormId, Collection<? extends Number> tgtFormId);
-
-    int updateDDConsolidationInfo(Collection<? extends Number> sourceFormId, Collection<? extends Number> tgtFormId);
+    /**
+     * Проставление признака неактуальности консолидации данных для списка пар источник-приемник
+     * @param instances идентификаторы пар источник-приемник
+     * @param declaration признак того, что источник - декларация
+     */
+    void updateConsolidationInfo(Set<ConsolidatedInstance> instances, boolean declaration);
 
     /**
      * Проставление признака неактуальности данных в НФ/декларации-приёмнике
@@ -213,7 +190,7 @@ public interface SourceDao {
     /**
      * Проверяет не изменились ли данные консолидации для НФ
      * @param fdTargetId идентификатор нф-приемника для проверки
-     * @return true если есть хоть одна строка где поле status=0
+     * @return false если есть хоть одна строка где НФ-источник равна null
      */
     boolean isFDConsolidationTopical(long fdTargetId);
 

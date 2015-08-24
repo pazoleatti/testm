@@ -40,14 +40,14 @@ public class SaveFormDataHandler extends
 	public DataRowResult execute(SaveFormDataAction action, ExecutionContext context) throws ActionException {
 		Logger logger = new Logger();
 		FormData formData = action.getFormData();
-        formDataService.checkLockedByTask(formData.getId(), logger, securityService.currentUserInfo(), "Сохранение НФ", true);
+        formDataService.checkLockedByTask(formData.getId(), logger, securityService.currentUserInfo(), String.format("Сохранение %sформы", action.getFormData().getFormType().getTaxType().getTaxText()), true);
 		if (!action.getModifiedRows().isEmpty()) {
             refBookHelper.dataRowsCheck(action.getModifiedRows(), formData.getFormColumns());
 		    dataRowService.update(securityService.currentUserInfo(), formData.getId(), action.getModifiedRows(), formData.isManual());
 		}
 		formDataService.saveFormData(logger, securityService.currentUserInfo(), formData);
-		// Удаляем контрольную точку восстановления
-		formDataService.removeCheckPoint(logger, securityService.currentUserInfo(), formData);
+		// Создаем контрольную точку восстановления
+		dataRowService.createCheckPoint(formData);
 
 		logger.info("Данные успешно записаны");
 		DataRowResult result = new DataRowResult();

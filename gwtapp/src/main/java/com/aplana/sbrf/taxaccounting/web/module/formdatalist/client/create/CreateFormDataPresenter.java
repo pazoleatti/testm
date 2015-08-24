@@ -17,6 +17,7 @@ import com.gwtplatform.mvp.client.PresenterWidget;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 public class CreateFormDataPresenter extends PresenterWidget<CreateFormDataPresenter.MyView> implements CreateFormDataUiHandlers {
@@ -29,6 +30,9 @@ public class CreateFormDataPresenter extends PresenterWidget<CreateFormDataPrese
         void setAcceptableDepartments(List<Department> list, Set<Integer> availableValues);
         void setAcceptableReportPeriods(List<ReportPeriod> reportPeriods);
         void setAcceptableMonthList(List<Months> monthList);
+
+        void setAcceptableComparativPeriods(List<ReportPeriod> comparativPeriods);
+
         void setAcceptableKinds(List<FormDataKind> dataKinds);
         void setAcceptableTypes(List<FormType> types);
         void setCorrectionDate(String correctionDate);
@@ -42,6 +46,12 @@ public class CreateFormDataPresenter extends PresenterWidget<CreateFormDataPrese
          * @param isMonthly true - ежемесячный, false - неежемесячный
          */
         void setFormMonthEnabled(boolean isMonthly);
+
+        void setComparative(boolean comparative);
+
+        void setElementNames(Map<FormDataElementName, String> fieldNames);
+
+        void updateEnabled();
     }
 
     @Inject
@@ -67,6 +77,8 @@ public class CreateFormDataPresenter extends PresenterWidget<CreateFormDataPrese
         action.setFormDataKindId(filterFormData.getFormDataKind().get(0).intValue());
         action.setFormDataTypeId(filterFormData.getFormTypeId().get(0).intValue());
         action.setReportPeriodId(filterFormData.getReportPeriodIds().iterator().next());
+        action.setComparativPeriodId(filterFormData.getComparativPeriodId() != null && !filterFormData.getComparativPeriodId().isEmpty() ? filterFormData.getComparativPeriodId().iterator().next() : null);
+        action.setAccruing(filterFormData.isAccruing());
         if (filterFormData.getFormMonth() != null) {
             action.setMonthId(filterFormData.getFormMonth().getId());
         }
@@ -175,26 +187,47 @@ public class CreateFormDataPresenter extends PresenterWidget<CreateFormDataPrese
 
                         getView().init();
                         getView().setAcceptableReportPeriods(result.getReportPeriods());
+                        changeFilterElementNames(taxType);
 
                         slotForMe.addToPopupSlot(CreateFormDataPresenter.this);
                     }
                 }, this));
     }
 
+    public void changeFilterElementNames(TaxType taxType) {
+        GetFieldsNames action = new GetFieldsNames();
+        action.setTaxType(taxType);
+        dispatchAsync.execute(action, CallbackUtils
+                        .defaultCallback(new AbstractCallback<GetFieldsNamesResult>() {
+                            @Override
+                            public void onSuccess(GetFieldsNamesResult result) {
+                                getView().setElementNames(result.getFieldNames());
+                            }
+                        }, this)
+        );
+    }
+
     @Override
-    public void isMonthly(Integer formId, Integer reportPeriodId) {
-        GetMonthData action = new GetMonthData();
+    public void checkFormType(Integer formId, Integer reportPeriodId) {
+        GetAdditionalData action = new GetAdditionalData();
         action.setTypeId(formId);
         action.setReportPeriodId(reportPeriodId);
+        action.setDepartmentId(getView().getFilterData().getDepartmentIds().get(0));
+        action.setTaxType(taxType);
 
         dispatchAsync.execute(action, CallbackUtils
-                .defaultCallback(new AbstractCallback<GetMonthDataResult>() {
+                .defaultCallback(new AbstractCallback<GetAdditionalDataResult>() {
                     @Override
-                    public void onSuccess(GetMonthDataResult result) {
+                    public void onSuccess(GetAdditionalDataResult result) {
                         getView().setFormMonthEnabled(result.isMonthly());
+                        getView().setComparative(result.isComparative());
                         if (result.isMonthly()) {
                             getView().setAcceptableMonthList(result.getMonthsList());
                         }
+                        if (result.isComparative()) {
+                            getView().setAcceptableComparativPeriods(result.getComparativPeriods());
+                        }
+                        getView().updateEnabled();
                     }
                 }, this));
     }

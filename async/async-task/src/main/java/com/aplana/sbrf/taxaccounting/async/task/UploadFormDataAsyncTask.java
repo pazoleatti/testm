@@ -99,7 +99,7 @@ public abstract class UploadFormDataAsyncTask extends AbstractAsyncTask {
     protected String getNotificationMsg(Map<String, Object> params) {
         int userId = (Integer)params.get(USER_ID.name());
         long formDataId = (Long)params.get("formDataId");
-        boolean manual = false;
+        boolean manual = (Boolean)params.get("manual");
         TAUserInfo userInfo = new TAUserInfo();
         userInfo.setUser(userService.getUser(userId));
 
@@ -107,25 +107,21 @@ public abstract class UploadFormDataAsyncTask extends AbstractAsyncTask {
         FormData formData = formDataService.getFormData(userInfo, formDataId, manual, logger);
         Department department = departmentService.getDepartment(formData.getDepartmentId());
         DepartmentReportPeriod reportPeriod = departmentReportPeriodService.get(formData.getDepartmentReportPeriodId());
-        Integer periodOrder = formData.getPeriodOrder();
-        String strCorrPeriod = "";
-        if (reportPeriod.getCorrectionDate() != null) {
-            strCorrPeriod = ", с датой сдачи корректировки " + SDF_DD_MM_YYYY.format(reportPeriod.getCorrectionDate());
-        }
-        if (periodOrder == null){
-            return String.format("Выполнен импорт данных из XLSM файла в экземпляр налоговой формы: Период: \"%s, %s%s\", Подразделение: \"%s\", Тип: \"%s\", Вид: \"%s\", Версия: \"%s\"",
-                    reportPeriod.getReportPeriod().getTaxPeriod().getYear(), reportPeriod.getReportPeriod().getName(), strCorrPeriod, department.getName(), formData.getKind().getName(), formData.getFormType().getName(), manual ? "ручного ввода" : "автоматическая");
-        } else {
-            return String.format("Выполнен импорт данных из XLSM файла в экземпляр налоговой формы: Период: \"%s, %s%s\", Месяц: \"%s\", Подразделение: \"%s\", Тип: \"%s\", Вид: \"%s\", Версия: \"%s\"",
-                    reportPeriod.getReportPeriod().getTaxPeriod().getYear(), reportPeriod.getReportPeriod().getName(), strCorrPeriod, Formats.getRussianMonthNameWithTier(formData.getPeriodOrder()), department.getName(), formData.getKind().getName(), formData.getFormType().getName(), manual ? "ручного ввода" : "автоматическая");
-        }
+        DepartmentReportPeriod rpCompare = formData.getComparativPeriodId() != null ?
+                departmentReportPeriodService.get(formData.getComparativPeriodId()) : null;
+
+        return MessageGenerator.getFDMsg(
+                String.format("Выполнен импорт данных из XLSM файла в экземпляр %s", MessageGenerator.mesSpeckSingleD(formData.getFormType().getTaxType())),
+                formData,
+                department.getName(),
+                false, reportPeriod, rpCompare);
     }
 
     @Override
     protected String getErrorMsg(Map<String, Object> params) {
         int userId = (Integer)params.get(USER_ID.name());
         long formDataId = (Long)params.get("formDataId");
-        boolean manual = false;
+        boolean manual = (Boolean)params.get("manual");
         TAUserInfo userInfo = new TAUserInfo();
         userInfo.setUser(userService.getUser(userId));
 
@@ -133,17 +129,13 @@ public abstract class UploadFormDataAsyncTask extends AbstractAsyncTask {
         FormData formData = formDataService.getFormData(userInfo, formDataId, manual, logger);
         Department department = departmentService.getDepartment(formData.getDepartmentId());
         DepartmentReportPeriod reportPeriod = departmentReportPeriodService.get(formData.getDepartmentReportPeriodId());
-        Integer periodOrder = formData.getPeriodOrder();
-        String strCorrPeriod = "";
-        if (reportPeriod.getCorrectionDate() != null) {
-            strCorrPeriod = ", с датой сдачи корректировки " + SDF_DD_MM_YYYY.format(reportPeriod.getCorrectionDate());
-        }
-        if (periodOrder == null){
-            return String.format("Не выполнен импорт данных из XLSM файла в экземпляр налоговой формы: Период: \"%s, %s%s\", Подразделение: \"%s\", Тип: \"%s\", Вид: \"%s\", Версия: \"%s\". Найдены фатальные ошибки.",
-                    reportPeriod.getReportPeriod().getTaxPeriod().getYear(), reportPeriod.getReportPeriod().getName(), strCorrPeriod, department.getName(), formData.getKind().getName(), formData.getFormType().getName(), manual ? "ручного ввода" : "автоматическая");
-        } else {
-            return String.format("Не выполнен импорт данных из XLSM файла в экземпляр налоговой формы: Период: \"%s, %s%s\", Месяц: \"%s\", Подразделение: \"%s\", Тип: \"%s\", Вид: \"%s\", Версия: \"%s\". Найдены фатальные ошибки.",
-                    reportPeriod.getReportPeriod().getTaxPeriod().getYear(), reportPeriod.getReportPeriod().getName(), strCorrPeriod, Formats.getRussianMonthNameWithTier(formData.getPeriodOrder()), department.getName(), formData.getKind().getName(), formData.getFormType().getName(), manual ? "ручного ввода" : "автоматическая");
-        }
+        DepartmentReportPeriod rpCompare = formData.getComparativPeriodId() != null ?
+                departmentReportPeriodService.get(formData.getComparativPeriodId()) : null;
+
+        return MessageGenerator.getFDMsg(
+                String.format("Не выполнен импорт данных из XLSM файла в экземпляр %s", MessageGenerator.mesSpeckSingleD(formData.getFormType().getTaxType())),
+                formData,
+                department.getName(),
+                manual, reportPeriod, rpCompare);
     }
 }

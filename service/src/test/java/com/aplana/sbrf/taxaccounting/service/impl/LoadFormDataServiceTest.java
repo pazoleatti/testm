@@ -221,7 +221,7 @@ public class LoadFormDataServiceTest {
 
     private void mockFormDataService() {
         when(formDataService.createFormData(any(Logger.class), any(TAUserInfo.class), eq(1), eq(147),
-                eq(FormDataKind.PRIMARY), any(Integer.class), eq(true))).thenReturn(1L);
+                any(Integer.class), any(Boolean.class), eq(FormDataKind.PRIMARY), any(Integer.class), eq(true))).thenReturn(1L);
     }
 
     private void mockAuditService() {
@@ -242,7 +242,7 @@ public class LoadFormDataServiceTest {
     public void successImportTest() throws IOException {
         File file = new File(uploadFolder.getPath() + "/" + FILE_NAME_1);
         file.createNewFile();
-        ImportCounter importCounter = loadFormDataService.importFormData(USER_INFO, new Logger(), "1");
+        ImportCounter importCounter = loadFormDataService.importFormData(USER_INFO, new Logger(), "1", false);
         // Счетчики
         Assert.assertEquals(1, importCounter.getSuccessCounter());
         Assert.assertEquals(0, importCounter.getFailCounter());
@@ -257,7 +257,7 @@ public class LoadFormDataServiceTest {
     public void wrongNameTest() throws IOException {
         File file = new File(uploadFolder.getPath() + "/" + FILE_NAME_2);
         file.createNewFile();
-        ImportCounter importCounter = loadFormDataService.importFormData(USER_INFO, new Logger(), "1");
+        ImportCounter importCounter = loadFormDataService.importFormData(USER_INFO, new Logger(), "1", false);
         // Счетчики
         Assert.assertEquals(0, importCounter.getSuccessCounter());
         Assert.assertEquals(1, importCounter.getFailCounter());
@@ -272,7 +272,7 @@ public class LoadFormDataServiceTest {
     public void wrongFormCodeTest() throws IOException {
         File file = new File(uploadFolder.getPath() + "/" + FILE_NAME_3);
         file.createNewFile();
-        ImportCounter importCounter = loadFormDataService.importFormData(USER_INFO, new Logger(), "1");
+        ImportCounter importCounter = loadFormDataService.importFormData(USER_INFO, new Logger(), "1", false);
         // Счетчики
         Assert.assertEquals(0, importCounter.getSuccessCounter());
         Assert.assertEquals(1, importCounter.getFailCounter());
@@ -287,7 +287,7 @@ public class LoadFormDataServiceTest {
     public void wrongDepartmentCodeTest() throws IOException {
         File file = new File(uploadFolder.getPath() + "/" + FILE_NAME_4);
         file.createNewFile();
-        ImportCounter importCounter = loadFormDataService.importFormData(USER_INFO, new Logger(), "1");
+        ImportCounter importCounter = loadFormDataService.importFormData(USER_INFO, new Logger(), "1", false);
         // Счетчики
         Assert.assertEquals(0, importCounter.getSuccessCounter());
         Assert.assertEquals(1, importCounter.getFailCounter());
@@ -302,7 +302,7 @@ public class LoadFormDataServiceTest {
     public void wrongReportPeriodCodeTest() throws IOException {
         File file = new File(uploadFolder.getPath() + "/" + FILE_NAME_5);
         file.createNewFile();
-        ImportCounter importCounter = loadFormDataService.importFormData(USER_INFO, new Logger(), "1");
+        ImportCounter importCounter = loadFormDataService.importFormData(USER_INFO, new Logger(), "1", false);
         // Счетчики
         Assert.assertEquals(0, importCounter.getSuccessCounter());
         Assert.assertEquals(1, importCounter.getFailCounter());
@@ -322,7 +322,7 @@ public class LoadFormDataServiceTest {
         when(departmentFormTypeDao.existAssignedForm(147, 1, FormDataKind.PRIMARY)).thenReturn(false);
         ReflectionTestUtils.setField(loadFormDataService, "departmentFormTypeDao", departmentFormTypeDao);
 
-        ImportCounter importCounter = loadFormDataService.importFormData(USER_INFO, new Logger(), "1");
+        ImportCounter importCounter = loadFormDataService.importFormData(USER_INFO, new Logger(), "1", false);
         // Счетчики
         Assert.assertEquals(0, importCounter.getSuccessCounter());
         Assert.assertEquals(1, importCounter.getFailCounter());
@@ -352,7 +352,7 @@ public class LoadFormDataServiceTest {
         departmentReportPeriod.setActive(false);
         ReflectionTestUtils.setField(loadFormDataService, "periodService", periodService);
 
-        ImportCounter importCounter = loadFormDataService.importFormData(USER_INFO, new Logger(), "1");
+        ImportCounter importCounter = loadFormDataService.importFormData(USER_INFO, new Logger(), "1", false);
         // Счетчики
         Assert.assertEquals(0, importCounter.getSuccessCounter());
         Assert.assertEquals(1, importCounter.getFailCounter());
@@ -372,14 +372,14 @@ public class LoadFormDataServiceTest {
 
         FormDataService formDataService = mock(FormDataService.class);
         when(formDataService.createFormData(any(Logger.class), any(TAUserInfo.class), eq(1), eq(147),
-                eq(FormDataKind.PRIMARY), any(Integer.class), eq(true))).thenReturn(1L);
+                any(Integer.class), any(Boolean.class), eq(FormDataKind.PRIMARY), any(Integer.class), eq(true))).thenReturn(1L);
 
         doThrow(new RuntimeException("Test RuntimeException")).when(formDataService).importFormData(any(Logger.class), any(TAUserInfo.class),
                 any(Long.class), any(Boolean.class), any(InputStream.class), anyString(), any(FormDataEvent.class));
 
         ReflectionTestUtils.setField(loadFormDataService, "formDataService", formDataService);
 
-        ImportCounter importCounter = loadFormDataService.importFormData(SYSTEM_INFO, new Logger(), "1");
+        ImportCounter importCounter = loadFormDataService.importFormData(SYSTEM_INFO, new Logger(), "1", false);
         // Счетчики
         Assert.assertEquals(0, importCounter.getSuccessCounter());
         Assert.assertEquals(1, importCounter.getFailCounter());

@@ -2,10 +2,8 @@
 <formTemplateContent>
     <fixedRows>false</fixedRows>
     <name>Предоставление гарантий</name>
-    <fullName>Отчет в отношении доходов ОАО «Сбербанк России» по Контролируемым сделкам, связанным с предоставлением
-        гарантий
-    </fullName>
-    <header>ПРИЛОЖЕНИЕ 2 |к Распоряжению | от «__» апреля 2013 №___</header>
+    <fullName>Отчет в отношении доходов ПАО «Сбербанк России» по Контролируемым сделкам, связанным с предоставлением гарантий</fullName>
+    <header>ПРИЛОЖЕНИЕ 2 |к Распоряжению | от "__" апреля 2013 №___</header>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>rowNumber</alias>
         <checking>false</checking>
@@ -171,6 +169,13 @@
         <backColor>WHITE</backColor>
         <bold>true</bold>
         <fontColor>DARK_GREEN</fontColor>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Контрольные суммы</alias>
+        <backColor>LIGHT_BROWN</backColor>
+        <bold>true</bold>
+        <fontColor>BLACK</fontColor>
         <italic>false</italic>
     </styles>
 </formTemplateContent>

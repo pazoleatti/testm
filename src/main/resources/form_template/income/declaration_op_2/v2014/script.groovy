@@ -8,7 +8,7 @@ import groovy.xml.MarkupBuilder
 import javax.xml.stream.XMLStreamReader
 
 /**
- * Декларация по налогу на прибыль (ОП) (год 2014)
+ * Декларация по налогу на прибыль (ОП) (с периода год 2014)
  * Формирование XML для декларации налога на прибыль уровня обособленного подразделения.
  *
  * declarationTemplateId=21707
@@ -300,6 +300,7 @@ void generateXML(XMLStreamReader readerBank) {
         return
     def reorgFormCode = getRefBookValue(5, incomeParamsTable?.REORG_FORM_CODE?.value)?.CODE?.value
     def taxOrganCode = incomeParamsTable?.TAX_ORGAN_CODE?.value
+    def taxOrganCodeProm = useTaxOrganCodeProm() ? incomeParamsTable?.TAX_ORGAN_CODE_PROM?.value : taxOrganCode
     def okvedCode = getRefBookValue(34, incomeParamsTable?.OKVED_CODE?.value)?.CODE?.value
     def phone = incomeParamsTable?.PHONE?.value
     def name = incomeParamsTable?.NAME?.value
@@ -441,7 +442,7 @@ void generateXML(XMLStreamReader readerBank) {
 
     def builder = new MarkupBuilder(xml)
     builder.Файл(
-            ИдФайл : declarationService.generateXmlFileId(19, declarationData.departmentReportPeriodId, taxOrganCode, declarationData.kpp),
+            ИдФайл : declarationService.generateXmlFileId(19, declarationData.departmentReportPeriodId, taxOrganCodeProm, taxOrganCode, declarationData.kpp),
             ВерсПрог : applicationVersion,
             ВерсФорм : formatVersion){
 
@@ -495,10 +496,15 @@ void generateXML(XMLStreamReader readerBank) {
                                 КБК: kbk,
                                 НалПУ: empty)
 
+                        def appl5List02Row070 = empty
+                        if (dataRowsAdvance != null) {
+                            def rowForAvPlat = dataRowsAdvance.find { row -> declarationData.kpp.equals(row.kpp) }
+                            appl5List02Row070 = (rowForAvPlat != null && (rowForAvPlat.taxSumToPay || rowForAvPlat.taxSumToReduction)) ? (rowForAvPlat.taxSumToPay ?: -rowForAvPlat.taxSumToReduction) : 0
+                        }
                         // 0..1
                         СубБдж(
                                 КБК: kbk2,
-                                НалПУ: empty)
+                                НалПУ: appl5List02Row070)
                     }
                     // Раздел 1. Подраздел 1.1 - конец
 
@@ -518,8 +524,8 @@ void generateXML(XMLStreamReader readerBank) {
                             def avPlat2 = empty
                             def avPlat3 = empty
                             if (!isTaxPeriod && dataRowsAdvance != null) {
-                                // получение строки подразделения "ЦА", затем значение столбца «Ежемесячные авансовые платежи в квартале, следующем за отчётным периодом (текущий отчёт)»
-                                def rowForAvPlat = getDataRow(dataRowsAdvance, 'ca')
+                                // получение строки подразделения, затем значение столбца «Ежемесячные авансовые платежи в квартале, следующем за отчётным периодом (текущий отчёт)»
+                                def rowForAvPlat = dataRowsAdvance.find { row -> declarationData.kpp.equals(row.kpp) }
                                 def appl5List02Row120 = (rowForAvPlat != null && rowForAvPlat.everyMontherPaymentAfterPeriod != null ? rowForAvPlat.everyMontherPaymentAfterPeriod : 0)
                                 avPlat1 = (long) appl5List02Row120 / 3
                                 avPlat2 = avPlat1

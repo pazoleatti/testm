@@ -1,5 +1,7 @@
 package com.aplana.taxaccounting
 
+import groovy.sql.Sql
+
 /**
  * Утилита сравнения скриптов из git и БД с учетом версионирования.
  * Если скрипты в БД не актуальны, то они обновляются.
@@ -16,11 +18,11 @@ package com.aplana.taxaccounting
 class Main {
     // Параметры подключения к БД
     def static DB_URL = 'jdbc:oracle:thin:@//172.16.127.16:1521/ORCL.APLANA.LOCAL'
-    def static DB_USER = 'TAX_0_6'
+    def static DB_USER = 'TAX_0_7'
     def static DB_PASSWORD = 'TAX'
 
     // Схема для сравнения макетов, null если сравнение не требуется
-    def static DB_USER_COMPARE = 'TAX_0_7'
+    def static DB_USER_COMPARE = null
 
     // Путь к папке с шаблонами
     def static SRC_FOLDER_PATH = '../src/main/resources/form_template'
@@ -29,7 +31,8 @@ class Main {
                               'income'   : 'Налог на прибыль',
                               'vat'      : 'НДС',
                               'transport': 'Транспортный налог',
-                              'property' : 'Налог на имущество']
+                              'property' : 'Налог на имущество',
+                              'etr'      : 'Эффективная налоговая ставка']
 
     // Названия файлов отчетов
     def static REPORT_GIT_NAME = 'report_git_db_compare.html'
@@ -38,6 +41,7 @@ class Main {
     def static REPORT_DB_NAME = 'report_db_compare.html'
     def static REPORT_DECL_DB_NAME = 'report_decl_db_compare.html'
     def static REPORT_REFBOOK_DB_NAME = 'report_refbook_db_compare.html'
+    def static REPORT_TYPE_DB_NAME = 'report_form_decl_type_db_compare.html'
 
     // Общие стили отчетов
     def static HTML_STYLE = '''
@@ -137,10 +141,12 @@ class Main {
                     'declaration_op_1'      : -10,
                     'declaration_op_2'      : -19,
                     'f7_8'                  : 362, // (Ф 7.8) Реестр совершенных операций с ценными бумагами по продаже и погашению, а также по открытию-закрытию короткой позиции
+                    'f7_8_1'                : 363, // (Ф 7.8) Реестр совершенных операций с ценными бумагами по продаже и погашению, а также по открытию-закрытию короткой позиции (с 9 месяцев 2015)
                     'income_complex'        : 302, // Сводная форма начисленных доходов (доходы сложные)
                     'income_simple'         : 301, // Расшифровка видов доходов, учитываемых в простых РНУ (доходы простые)
                     'income_simple_1'       : 305, // Расшифровка видов доходов, учитываемых в простых РНУ (доходы простые) (с полугодия 2015)
                     'incomeWithHoldingAgent': 10070, // Расчет налога на прибыль организаций с доходов, удерживаемого налоговым агентом (источником выплаты доходов)
+                    'income_agent_1'        : 314, // Расчет налога на прибыль организаций с доходов, удерживаемого налоговым агентом (источником выплаты доходов) (с 9 месяцев 2015)
                     'outcome_complex'       : 303, // Сводная форма начисленных расходов (расходы сложные)
                     'outcome_simple'        : 304, // Расшифровка видов расходов, учитываемых в простых РНУ (расходы простые)
                     'outcome_simple_1'      : 310, // Расшифровка видов расходов, учитываемых в простых РНУ (расходы простые) (с полугодия 2015)
@@ -166,7 +172,9 @@ class Main {
                     'rnu12'                 : 364, // (РНУ-12) Регистр налогового учета расходов по хозяйственным операциям и оказанным Банку услугам
                     'rnu14'                 : 321, // (РНУ-14) Регистр налогового учета нормируемых расходов
                     'rnu16'                 : 499, // (РНУ-16) Регистр налогового учета доходов по поставочным сделкам с ПФИ, не признаваемыми ФИСС, в соответствии с учетной политикой для целей налогообложения ОАО "Сбербанк России"
+                    'rnu16_1'               : 505, // (РНУ-16) Регистр налогового учета доходов по поставочным сделкам с ПФИ, не признаваемыми ФИСС, в соответствии с учетной политикой для целей налогообложения ПАО "Сбербанк России" (с 9 месяцев 2015)
                     'rnu17'                 : 501, // (РНУ-17) Регистр налогового учета расходов по поставочным сделкам с ПФИ, не признаваемыми ФИСС, в соответствии с учетной политикой для целей налогообложения ОАО "Сбербанк России"
+                    'rnu17_1'               : 506, // (РНУ-17) Регистр налогового учета расходов по поставочным сделкам с ПФИ, не признаваемыми ФИСС, в соответствии с учетной политикой для целей налогообложения ПАО "Сбербанк России" (с 9 месяцев 2015)
                     'rnu22'                 : 322, // (РНУ-22) Регистр налогового учета периодически взимаемых комиссий по операциям кредитования
                     'rnu23'                 : 323, // (РНУ-23) Регистр налогового учета доходов по выданным гарантиям
                     'rnu25'                 : 324, // (РНУ-25) Регистр налогового учета расчета резерва под возможное обесценение ГКО, ОФЗ и ОБР в целях налогообложения
@@ -202,7 +210,9 @@ class Main {
                     'rnu59'                 : 350, // (РНУ-59) Регистр налогового учета закрытых сделок РЕПО с обязательством продажи по 2-й части
                     'rnu60'                 : 351, // (РНУ-60) Регистр налогового учета закрытых сделок РЕПО с обязательством покупки по 2-й части
                     'rnu61'                 : 352, // (РНУ-61) Регистр налогового учета расходов по процентным векселям ОАО "Сбербанк России", учет которых требует применения метода начисления
+                    'rnu61_1'               : 422, // (РНУ-61) Регистр налогового учета расходов по процентным векселям ПАО "Сбербанк России", учет которых требует применения метода начисления (с 9 месяцев 2015)
                     'rnu62'                 : 354, // (РНУ-62) Регистр налогового учета расходов по дисконтным векселям ОАО "Сбербанк России"
+                    'rnu62_1'               : 423, // (РНУ-62) Регистр налогового учета расходов по дисконтным векселям ПАО "Сбербанк России" (с 9 месяцев 2015)
                     'rnu64'                 : 355, // (РНУ-64) Регистр налогового учета затрат, связанных с проведением сделок РЕПО
                     'rnu70_1'               : 504, // (РНУ-70.1) Регистр налогового учета уступки права требования до наступления, предусмотренного кредитным договором срока погашения основного долга
                     'rnu70_2'               : 357, // (РНУ-70.2) Регистр налогового учета уступки права требования до наступления предусмотренного кредитным договором срока погашения основного долга
@@ -254,6 +264,12 @@ class Main {
                     'property_945_3': 613, // Расчет налога на имущество по средней/среднегодовой стоимости
                     'property_945_4': 612, // Расчет налога на имущество по кадастровой стоимости
                     'property_945_5': 615  // Сводная форма данных бухгалтерского учета для расчета налога на имущество
+            ],
+            'etr' : [
+                    'amount_tax'    : 700, // Величины налоговых платежей, вводимые вручную
+                    'etr_4_1'       : 701, // Приложение 4-1. Абсолютная величина налоговых платежей
+                    'etr_4_2'       : 702,  // Приложение 4-2. Отношение налогов, уплаченных из прибыли к балансовой прибыли
+                    'etr_4_13'      : 713  // Приложение 4-13. Анализ структуры доходов и расходов, не учитываемых для целей налогообложения
             ]
     ]
 
@@ -290,6 +306,10 @@ class Main {
         if (report.exists()) {
             report.delete()
         }
+        report = new File(REPORT_REFBOOK_GIT_NAME)
+        if (report.exists()) {
+            report.delete()
+        }
         report = new File(REPORT_DB_NAME)
         if (report.exists()) {
             report.delete()
@@ -302,20 +322,37 @@ class Main {
         if (report.exists()) {
             report.delete()
         }
+        report = new File(REPORT_REFBOOK_DB_NAME)
+        if (report.exists()) {
+            report.delete()
+        }
+        report = new File(REPORT_TYPE_DB_NAME)
+        if (report.exists()) {
+            report.delete()
+        }
+
+        println("DBMS connect: ${DB_USER}")
+        def sql = Sql.newInstance(DB_URL, DB_USER, DB_PASSWORD, "oracle.jdbc.OracleDriver")
 
         // Построение отчета сравнения Git и БД
         // checkOnly, true — только сравнение, false — сравнение и обновление Git → БД
-//        GitReport.updateScripts(GitReport.getDBVersions(), true)
-//        GitReport.updateDeclarationScripts(GitReport.getDeclarationDBVersions(), true)
-        GitReport.checkRefBooks(GitReport.getRefBookScripts())
+        try {
+            GitReport.updateScripts(GitReport.getDBVersions(sql), sql, true)
+            GitReport.updateDeclarationScripts(GitReport.getDeclarationDBVersions(sql), sql, true)
+            GitReport.checkRefBooks(GitReport.getRefBookScripts(sql))
+        } finally {
+            sql.close()
+        }
         println("See $REPORT_GIT_NAME, $REPORT_DECL_GIT_NAME and $REPORT_REFBOOK_GIT_NAME for details")
 
         // Сравнение схем в БД
         if (DB_USER_COMPARE != null) {
+            println("Compare $DB_USER and $DB_USER_COMPARE form/declaration types...")
+            DBReport.compareDBTypes(DB_USER, DB_USER_COMPARE)
             println("Compare $DB_USER and $DB_USER_COMPARE form templates...")
-//            DBReport.compareDBFormTemplate(DB_USER, DB_USER_COMPARE)
+            DBReport.compareDBFormTemplate(DB_USER, DB_USER_COMPARE)
             println("Compare $DB_USER and $DB_USER_COMPARE declaration templates...")
-//            DBReport.compareDBDeclarationTemplate(DB_USER, DB_USER_COMPARE)
+            DBReport.compareDBDeclarationTemplate(DB_USER, DB_USER_COMPARE)
             println("Compare $DB_USER and $DB_USER_COMPARE refbook scripts...")
             DBReport.compareDBRefbookScript(DB_USER, DB_USER_COMPARE)
         }

@@ -39,7 +39,7 @@ public class LockDataDaoImpl extends AbstractDao implements LockDataDao {
     public LockData get(String key, boolean like) {
         try {
             String fullKey = like ? "%" + key + "%" : key;
-            String sql = "SELECT key, user_id, date_before, date_lock, description, state, state_date, queue, queue_position FROM lock_data \n " +
+            String sql = "SELECT key, user_id, date_before, date_lock, description, state, state_date, queue, queue_position, server_node FROM lock_data \n " +
                     "join (select q_key, queue_position from (select ld.key as q_key, " +
                     (isSupportOver() ? "row_number() over (partition by ld.queue order by ld.date_lock)" : "rownum") + " as queue_position from lock_data ld)) q on q.q_key = key \n" +
                     "WHERE key " + (like ? "like ?" : "= ?");
@@ -60,7 +60,7 @@ public class LockDataDaoImpl extends AbstractDao implements LockDataDao {
     public LockData get(String key, Date lockDate) {
         try {
             return getJdbcTemplate().queryForObject(
-                    "SELECT key, user_id, date_before, date_lock, description, state, state_date, queue, queue_position FROM lock_data \n" +
+                    "SELECT key, user_id, date_before, date_lock, description, state, state_date, queue, queue_position, server_node FROM lock_data \n" +
                             "join (select q_key, queue_position from (select ld.key as q_key, " +
                             (isSupportOver() ? "row_number() over (partition by ld.queue order by ld.date_lock)" : "rownum") + " as queue_position from lock_data ld)) q on q.q_key = key \n" +
                             "WHERE key = ? and date_lock = ?",
@@ -211,13 +211,13 @@ public class LockDataDaoImpl extends AbstractDao implements LockDataDao {
             params.put("start", pagingParams.getStartIndex() + 1);
             params.put("count", pagingParams.getStartIndex() + pagingParams.getCount());
             params.put("filter", "%" + filter.toLowerCase() + "%");
-            String sql = " (SELECT ld.key, ld.user_id, ld.date_before, ld.date_lock, ld.state, ld.state_date, ld.description, ld.queue, u.login, \n" +
+            String sql = " (SELECT ld.key, ld.user_id, ld.date_before, ld.date_lock, ld.state, ld.state_date, ld.description, ld.queue, ld.server_node, u.login, \n" +
                     "row_number() over (partition by queue order by date_lock) as queue_position, row_number() over (order by queue, date_lock) as rn \n" +
                     "FROM lock_data ld \n"
                     + "join sec_user u on u.id = ld.user_id \n" +
                     "where " + queueSql + " \n"
                     + (filter != null && !filter.isEmpty() ?
-                    "and lower(ld.key) like :filter or lower(ld.description) like :filter or lower(ld.state) like :filter or lower(u.login) like :filter or lower(u.name) like :filter "
+                    "and (lower(ld.key) like :filter or lower(ld.description) like :filter or lower(ld.state) like :filter or lower(u.login) like :filter or lower(u.name) like :filter or lower(ld.server_node) like :filter) "
                     : "")
                     + "order by queue desc, queue_position) \n";
 
@@ -244,10 +244,10 @@ public class LockDataDaoImpl extends AbstractDao implements LockDataDao {
     }
 
     @Override
-    public void updateState(String key, Date lockDate, String state) {
-        getJdbcTemplate().update("update lock_data set state = ?, state_date = sysdate where key = ? and date_lock = ?",
-                new Object[] {state, key, lockDate},
-                new int[] {Types.VARCHAR, Types.VARCHAR, Types.TIMESTAMP});
+    public void updateState(String key, Date lockDate, String state, String serverNode) {
+        getJdbcTemplate().update("update lock_data set state = ?, state_date = sysdate, server_node = ? where key = ? and date_lock = ?",
+                new Object[] {state, serverNode, key, lockDate},
+                new int[] {Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.TIMESTAMP});
     }
 
     @Override
@@ -270,6 +270,7 @@ public class LockDataDaoImpl extends AbstractDao implements LockDataDao {
             result.setDescription(rs.getString("description"));
             result.setQueue(LockData.LockQueues.getById(rs.getInt("queue")));
             result.setQueuePosition(rs.getInt("queue_position"));
+            result.setServerNode(rs.getString("server_node"));
             return result;
         }
     }

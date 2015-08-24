@@ -66,6 +66,17 @@ public interface FormTemplateService {
      */
     int getActiveFormTemplateId(int formTypeId, int reportPeriodId);
 
+    /**
+     * Возвращает идентификатор {@link FormTemplate описания налоговой формы} по виду налоговой формы
+     * Такое описание для каждого вида формы в аанном отчетном пеииоде может быть только одно
+     * @param formTypeId идентификатор вида налоговой формы
+     * @param reportPeriodId идентификатор отчетного периода
+     * @return идентификатор описания налоговой формы
+     * @throws DaoException если не удалось найти активное описание налоговой формы по заданному типу,
+     * 	или если обнаружено несколько действуюшие описаний по данному виду формы
+     */
+    int getFormTemplateIdByFTAndReportPeriod(int formTypeId, int reportPeriodId);
+
 	/**
 	 * Снять блокировку с formTemplate.
 	 * @param formTemplateId - идентификатор шаблона налоговой формы
@@ -175,10 +186,17 @@ public interface FormTemplateService {
 
     /**
      * Является ли форма ежемесячной.
-     * @param formId идентификатор формы
+     * @param formTemplateId идентификатор макета
      * @return
      */
-    boolean isMonthly(int formId);
+    boolean isMonthly(int formTemplateId);
+
+    /**
+     * Есть ли у макета признак периода сравнения
+     * @param formTemplateId идентификатор макета
+     * @return
+     */
+    boolean isComparative(Integer formTemplateId);
 
     /**
      * Обновление статуса декларации
@@ -213,7 +231,8 @@ public interface FormTemplateService {
      *
      * @param formTypeId вид шаблона
      * @param reportPeriodId отчетный период
+     * @param excludeInactiveTemplate исключить нф-источники с макетом выведенным из действия?
      * @return
      */
-    boolean existFormTemplate(int formTypeId, int reportPeriodId);
+    boolean existFormTemplate(int formTypeId, int reportPeriodId, boolean excludeInactiveTemplate);
 }

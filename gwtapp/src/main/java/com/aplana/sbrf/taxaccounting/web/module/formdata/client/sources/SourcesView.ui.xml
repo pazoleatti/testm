@@ -67,7 +67,7 @@
         <g:FlowPanel addStyleNames="{style.mainPanel}">
             <g:HorizontalPanel verticalAlignment="middle" addStyleNames="{style.formDecPanel}">
                 <g:Label ui:field="formDecLabel" text="Налоговые формы" addStyleNames="{style.formDecLabel}"/>
-                <g:HTML addStyleNames="{style.verSep}"/>
+                <g:HTML ui:field="verSep" addStyleNames="{style.verSep}"/>
                 <style:LinkButton ui:field="formDecAnchor" text="Декларации"
                                   disableImage="true" addStyleNames="{style.formDecAnchor}"/>
             </g:HorizontalPanel>

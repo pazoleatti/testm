@@ -6,13 +6,13 @@
         <cell alias="contractDate" colSpan="1" rowSpan="1" value="Дата договора"/>
         <cell alias="amountOfTheGuarantee" colSpan="1" rowSpan="1" value="Сумма гарантии"/>
         <cell alias="dateOfTransaction" colSpan="1" rowSpan="1" value="Дата совершения операции"/>
-        <cell alias="rateOfTheBankOfRussia" colSpan="1" rowSpan="1" value="Курс Банка России" numericValue="12000"/>
-        <cell alias="interestRate" colSpan="1" rowSpan="1" value="Процентная ставка"/>
+        <cell alias="rateOfTheBankOfRussia" colSpan="1" rowSpan="1" value="Курс Банка России" numericValue="1300470015.57"/>
+        <cell alias="interestRate" colSpan="1" rowSpan="1" numericValue="10,55"/>
         <cell alias="baseForCalculation" colSpan="1" rowSpan="1" value="База для расчёта (дни)"/>
         <cell alias="accrualAccountingStartDate" colSpan="1" rowSpan="1" dateValue="2012-01-01"/>
         <cell alias="accrualAccountingEndDate" colSpan="1" rowSpan="1"
               value="Расчётный период. Начисление/факт. Дата окончания"/>
-        <cell alias="preAccrualsStartDate" colSpan="1" rowSpan="1" value="Расчётный период. Доначисление. Дата начала"/>
+        <cell alias="preAccrualsStartDate" colSpan="1" rowSpan="1" numericValue="11,0"/>
         <cell alias="preAccrualsEndDate" colSpan="1" rowSpan="1"
               value="Расчётный период. Доначисление. Дата окончания"/>
         <cell alias="incomeCurrency" colSpan="2" rowSpan="1" value="Сумма в налоговом учёте"/>

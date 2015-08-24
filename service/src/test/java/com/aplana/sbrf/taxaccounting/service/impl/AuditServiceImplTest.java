@@ -10,6 +10,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.test.util.ReflectionTestUtils;
+import org.springframework.transaction.TransactionStatus;
 
 import java.util.ArrayList;
 
@@ -48,14 +49,14 @@ public class AuditServiceImplTest {
 
         TransactionHelper tx = new TransactionHelper() {
             @Override
-            public void executeInNewTransaction(TransactionLogic logic) {
-                logic.execute();
+            public <T> T executeInNewTransaction(TransactionLogic<T> logic) {
+                return logic.execute();
             }
 
-            @Override
-            public <T> T returnInNewTransaction(TransactionLogic<T> logic) {
-                return null;
-            }
+			@Override
+			public <T> T executeInNewReadOnlyTransaction(TransactionLogic<T> logic) {
+				return null;
+			}
         };
         ReflectionTestUtils.setField(auditService, "tx", tx);
 

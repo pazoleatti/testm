@@ -124,6 +124,9 @@ public final class ScriptUtils {
     private static final String SEPARATOR = "_";
     public static final String CHECK_OVERFLOW_MESSAGE = "Строка %d: Значение графы «%s» превышает допустимую разрядность (%d знаков). Графа «%s» рассчитывается как «%s»!";
 
+    // для проверки итогов при загрузе экселя (посчитанные и ожижаемые значения как %s потому что %f теряет точность)
+    public static final String COMPARE_TOTAL_VALUES = "Строка формы %d: Итоговая сумма по графе «%s» (%s) некорректна (ожидаемое значение %s).";
+
     public static String INN_JUR_PATTERN = RefBookUtils.INN_JUR_PATTERN;
     public static String INN_JUR_MEANING = RefBookUtils.INN_JUR_MEANING;
     public static String INN_IND_PATTERN = RefBookUtils.INN_IND_PATTERN;
@@ -1859,10 +1862,10 @@ public final class ScriptUtils {
                     Date date = DateUtil.getJavaDate(Double.parseDouble(value), false);
                     value = simpleDateFormat.format(date);
                 } else {
-                    value = formatter.formatRawCellContents(Double.parseDouble(value), this.formatIndex, this.formatString);
+                    value = (new BigDecimal(value)).toPlainString();
                 }
             }
-            return value.trim();
+            return com.aplana.sbrf.taxaccounting.model.util.StringUtils.cleanString(value);
         }
     }
 
@@ -1976,5 +1979,81 @@ public final class ScriptUtils {
             }
         }
         return result;
+    }
+
+    public static void compareTotalValues(DataRow<Cell> total, DataRow<Cell> totalTmp, List<String> columns, Logger logger, boolean required) {
+        compareTotalValues(total, totalTmp, columns, logger, 2, required);
+    }
+
+    /**
+     * Сравнить значения итоговых строк.
+     *
+     * @param totalRow итоговая строка нф
+     * @param totalRowTmp итоговая строка с посчитанными значениям
+     * @param columns список алиасов итоговых графов
+     * @param logger для вывода сообщении
+     * @param precision точность значении (для BigDecimal есть различия в точности после запятой, например 1.0 не равно 1.00)
+     * @param required фатальность
+     */
+    public static void compareTotalValues(DataRow<Cell> totalRow, DataRow<Cell> totalRowTmp, List<String> columns,
+                                          Logger logger, int precision, boolean required) {
+        if (totalRow == null || totalRowTmp == null || columns == null || columns.isEmpty()) {
+            return;
+        }
+        for (String alias : columns) {
+            BigDecimal value1 = totalRow.getCell(alias).getNumericValue();
+            BigDecimal value2 = totalRowTmp.getCell(alias).getNumericValue();
+            if (value1 == null) {
+                value1 = BigDecimal.ZERO;
+            }
+            if (value2 == null) {
+                value2 = BigDecimal.ZERO;
+            }
+            value1 = round(value1, precision);
+            value2 = round(value2, precision);
+            if (!value1.equals(value2)) {
+                String msg = String.format(COMPARE_TOTAL_VALUES, totalRow.getIndex(), getColumnName(totalRow, alias), value1, value2);
+                if (required) {
+                    rowError(logger, totalRow, msg);
+                } else {
+                    rowWarning(logger, totalRow, msg);
+                }
+            }
+        }
+    }
+
+    public static BigDecimal round(BigDecimal value, int precision) {
+        if (value == null) {
+            return null;
+        }
+        return (new BigDecimal(value.doubleValue())).setScale(precision, BigDecimal.ROUND_HALF_UP);
+    }
+
+    /**
+     * Сравнить значения итоговых строк.
+     *
+     * @param totalRow итоговая строка нф (с правильными стилями)
+     * @param totalRowFromFile итоговая строка нф со значениями из файла
+     * @param rows строки формы
+     * @param columns список алиасов итоговых графов
+     * @param formData форма
+     * @param logger для вывода сообщении
+     * @param required фатальность
+     */
+    public static void compareSimpleTotalValues(DataRow<Cell> totalRow, DataRow<Cell> totalRowFromFile,
+                                          List<DataRow<Cell>> rows, List<String> columns,
+                                          FormData formData, Logger logger, boolean required) {
+        if (totalRow == null || totalRowFromFile == null || rows == null || columns == null || columns.isEmpty()) {
+            return;
+        }
+        // подсчитанная итоговая строка для сравнения
+        DataRow<Cell> totalRowTmp = formData.createStoreMessagingDataRow();
+        calcTotalSum(rows, totalRowTmp, columns);
+        // задание значении итоговой строке нф из итоговой строки файла
+        totalRow.setImportIndex(totalRowFromFile.getImportIndex());
+        for (String column : columns) {
+            totalRow.getCell(column).setValue(totalRowFromFile.getCell(column).getValue(), null);
+        }
+        compareTotalValues(totalRow, totalRowTmp, columns, logger, required);
     }
 }

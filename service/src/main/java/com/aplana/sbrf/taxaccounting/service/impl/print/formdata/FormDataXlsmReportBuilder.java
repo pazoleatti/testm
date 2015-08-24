@@ -144,7 +144,7 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
     private RefBookValue refBookValue;
 	private List<DataRow<com.aplana.sbrf.taxaccounting.model.Cell>> dataRows;
 	private FormTemplate formTemplate;
-	private ReportPeriod reportPeriod;
+	private ReportPeriod reportPeriod,rpCompare;
 	private Date acceptanceDate;
 	private Date creationDate;
 
@@ -174,6 +174,7 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
 		creationDate = data.getCreationDate();
         this.refBookValue = refBookValue;
         cellStyleBuilder = new CellStyleBuilder();
+        this.rpCompare = data.getRpCompare();
         if (!isShowChecked) {
             Iterator<Column> iterator = data.getFormTemplate().getColumns().iterator();
             while (iterator.hasNext()) {
@@ -231,22 +232,21 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
         2. Если статус формы "Создана", "Подготовлена" - дата создания налоговой формы.*/
         char[] arr;
         Date printDate;
-            printDate = ((data.getState() == WorkflowState.ACCEPTED || data.getState() == WorkflowState.APPROVED) && acceptanceDate!=null)
-                    ? acceptanceDate :
-                    ((data.getState() == WorkflowState.CREATED || data.getState() == WorkflowState.PREPARED) && creationDate!=null)
-                            ? creationDate : new Date();
+        printDate = ((data.getState() == WorkflowState.ACCEPTED || data.getState() == WorkflowState.APPROVED) && acceptanceDate != null)
+                ? acceptanceDate :
+                ((data.getState() == WorkflowState.CREATED || data.getState() == WorkflowState.PREPARED) && creationDate != null)
+                        ? creationDate : new Date();
 
-            arr = XlsxReportMetadata.sdf_m.format(printDate).toLowerCase().toCharArray();
-            if(XlsxReportMetadata.sdf_m.format(printDate).equalsIgnoreCase("март") ||
-                    XlsxReportMetadata.sdf_m.format(printDate).equalsIgnoreCase("август"))
-            {
-                String month = XlsxReportMetadata.sdf_m.format(printDate).toLowerCase() + "а";
-                arr = month.toCharArray();
-            } else {
-                arr[arr.length - 1] = 'я';
-            }
-            sb.append(String.format(XlsxReportMetadata.DATE_CREATE, XlsxReportMetadata.sdf_d.format(printDate),
-                    new String(arr), XlsxReportMetadata.sdf_y.format(printDate)));
+        arr = XlsxReportMetadata.sdf_m.format(printDate).toLowerCase().toCharArray();
+        if (XlsxReportMetadata.sdf_m.format(printDate).equalsIgnoreCase("март") ||
+                XlsxReportMetadata.sdf_m.format(printDate).equalsIgnoreCase("август")) {
+            String month = XlsxReportMetadata.sdf_m.format(printDate).toLowerCase() + "а";
+            arr = month.toCharArray();
+        } else {
+            arr[arr.length - 1] = 'я';
+        }
+        sb.append(String.format(XlsxReportMetadata.DATE_CREATE, XlsxReportMetadata.sdf_d.format(printDate),
+                new String(arr), XlsxReportMetadata.sdf_y.format(printDate)));
 
         createCellByRange(XlsxReportMetadata.RANGE_DATE_CREATE, sb.toString(), 0, 0);
         sb.delete(0, sb.length());
@@ -285,15 +285,32 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
 
         StringBuilder sbPeriodName = new StringBuilder();
         //Fill period
-        if (data.getPeriodOrder() != null) {
-            sbPeriodName.append(Months.fromId(data.getPeriodOrder()).getTitle().toLowerCase(new Locale("ru", "RU")));
+        if(data.getComparativPeriodId() != null){
+            /*String rpName =  !refBookValue.getStringValue().equals("34") ? reportPeriod.getName() : "";
+            String rpCompareName =  !refBookValue.getStringValue().equals("34") ? rpCompare.getName() : "";*/
+            sbPeriodName.append(String.format(
+                    XlsxReportMetadata.REPORT_PERIOD,
+                    rpCompare.getName(),
+                    rpCompare.getTaxPeriod().getYear(),
+                    reportPeriod.getName(),
+                    reportPeriod.getTaxPeriod().getYear(),
+                    data.isAccruing() ? "(нарастающим итогом)" : ""));
+        } else  if (data.getPeriodOrder() != null) {
+            sbPeriodName.append(
+                    String.format(XlsxReportMetadata.MONTHLY,
+                            Months.fromId(data.getPeriodOrder()).getTitle().toLowerCase(new Locale("ru", "RU")),
+                            reportPeriod.getTaxPeriod().getYear()
+                    )
+            );
         } else {
-            sbPeriodName.append("за ");
-            if (!refBookValue.getStringValue().equals("34") ) {
-                sbPeriodName.append(reportPeriod.getName());
-            }
+            sbPeriodName.append(
+                    String.format(XlsxReportMetadata.MONTHLY,
+                            !refBookValue.getStringValue().equals("34") ? reportPeriod.getName() : "",
+                            reportPeriod.getTaxPeriod().getYear()
+                    )
+            );
         }
-        sb.append(String.format(XlsxReportMetadata.REPORT_PERIOD, sbPeriodName.toString(), String.valueOf(reportPeriod.getTaxPeriod().getYear())));
+        sb.append(sbPeriodName.toString());
         createCellByRange(XlsxReportMetadata.RANGE_REPORT_PERIOD, sb.toString(), 0, formTemplate.getColumns().size()/2);
     }
 
@@ -375,7 +392,9 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
                     cell.setCellStyle(cellStyle);
                     cell.setCellType(Cell.CELL_TYPE_NUMERIC);
 
-                    cell.setCellValue(bd != null ? bd.doubleValue() : 0);
+                    if (bd != null){
+                        cell.setCellValue(((NumericColumn)column).getPrecision() >0 ? Double.parseDouble(bd.toString()) : bd.intValue());
+                    }
                 } else if (ColumnType.AUTO.equals(column.getColumnType())) {
                     Long bd = (Long) obj;
                     cellStyle = getCellStyle(dataRow.getCell(column.getAlias()), CellType.NUMERATION, column.getAlias());

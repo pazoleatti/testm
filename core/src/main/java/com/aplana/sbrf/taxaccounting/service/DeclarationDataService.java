@@ -1,14 +1,13 @@
 package com.aplana.sbrf.taxaccounting.service;
 
-import com.aplana.sbrf.taxaccounting.model.BalancingVariants;
 import com.aplana.sbrf.taxaccounting.core.api.LockStateLogger;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
-import com.aplana.sbrf.taxaccounting.model.util.Pair;
 
 import java.io.InputStream;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
@@ -213,6 +212,15 @@ public interface DeclarationDataService {
     Long getValueForCheckLimit(TAUserInfo userInfo, long declarationDataId, ReportType reportType);
 
     /**
+     * Формирование списка НФ-источников
+     * @param declarationData данные декларации-приемника
+     * @param excludeInactiveTemplate исключить нф-источники с макетом выведенным из действия?
+     * @param logger логгер
+     * @return
+     */
+    List<DepartmentFormType> getFormDataSources(DeclarationData declarationData, boolean excludeInactiveTemplate, Logger logger);
+
+    /**
      * Возвращает полное название декларации с указанием подразделения, периода и прочего
      * @param declarationId идентификатор декларации
      * @param reportType тип отчета. Может быть null
@@ -236,4 +244,12 @@ public interface DeclarationDataService {
      * @param reportType
      */
     void interruptTask(long declarationDataId, int userId, ReportType reportType);
+
+    /**
+     * Метод для очитски blob-ов у деклараций.
+     * Применяется в случае удаления jrxml макета декларации.
+     * @param ids идентификаторы деклараций
+     * @param reportTypes типы отчетов, которые надо удалить
+     */
+    void cleanBlobs(Collection<Long> ids, List<ReportType> reportTypes);
 }

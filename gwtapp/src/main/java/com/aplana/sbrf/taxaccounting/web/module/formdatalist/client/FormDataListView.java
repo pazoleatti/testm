@@ -53,8 +53,8 @@ public class FormDataListView extends ViewWithUiHandlers<FormDataListUiHandlers>
 
     private final static DateTimeFormat DATE_TIME_FORMAT = DateTimeFormat.getFormat("dd.MM.yyyy");
 
-    private GenericDataGrid.DataGridResizableHeader formKindHeader, formTypeHeader, periodMonthHeader;
-    private TextColumn<FormDataSearchResultItem> periodMonthColumn;
+    private GenericDataGrid.DataGridResizableHeader formKindHeader, formTypeHeader, periodMonthHeader, comparativPeriodHeader;
+    private TextColumn<FormDataSearchResultItem> periodMonthColumn, comparativPeriodColumn;
 
     private FormDataSearchOrdering sortByColumn;
 
@@ -110,13 +110,16 @@ public class FormDataListView extends ViewWithUiHandlers<FormDataListUiHandlers>
 		TextColumn<FormDataSearchResultItem> reportPeriodColumn = new TextColumn<FormDataSearchResultItem>() {
 			@Override
 			public String getValue(FormDataSearchResultItem object) {
-                String str = object.getReportPeriodName();
-                if (object.getCorrectionDate() != null) {
-                    str += ", корр. (" + DATE_TIME_FORMAT.format(object.getCorrectionDate()) + ")";
-                }
-				return str;
+				return object.getReportPeriodName();
 			}
 		};
+
+        comparativPeriodColumn = new TextColumn<FormDataSearchResultItem>() {
+            @Override
+            public String getValue(FormDataSearchResultItem object) {
+                return object.getComparativPeriodName();
+            }
+        };
 
 		TextColumn<FormDataSearchResultItem> stateColumn = new TextColumn<FormDataSearchResultItem>() {
 			@Override
@@ -188,6 +191,10 @@ public class FormDataListView extends ViewWithUiHandlers<FormDataListUiHandlers>
 		formDataTable.addResizableColumn(reportPeriodColumn, FormDataListUtils.REPORT_PERIOD_TITLE);
         formDataTable.setColumnWidth(reportPeriodColumn, 7, Style.Unit.EM);
 
+        comparativPeriodHeader = formDataTable.createResizableHeader(FormDataListUtils.REPORT_PERIOD_TITLE, comparativPeriodColumn);
+        formDataTable.addColumn(comparativPeriodColumn, comparativPeriodHeader);
+        formDataTable.setColumnWidth(comparativPeriodColumn, 7, Style.Unit.EM);
+
         periodMonthHeader = formDataTable.createResizableHeader(FormDataListUtils.PERIOD_MONTH_TITLE, periodMonthColumn);
 		formDataTable.addColumn(periodMonthColumn, periodMonthHeader);
         formDataTable.setColumnWidth(periodMonthColumn, 6, Style.Unit.EM);
@@ -203,6 +210,7 @@ public class FormDataListView extends ViewWithUiHandlers<FormDataListUiHandlers>
         departmentColumn.setDataStoreName(FormDataSearchOrdering.DEPARTMENT_NAME.name());
         periodYearColumn.setDataStoreName(FormDataSearchOrdering.YEAR.name());
         reportPeriodColumn.setDataStoreName(FormDataSearchOrdering.REPORT_PERIOD_NAME.name());
+        comparativPeriodColumn.setDataStoreName(FormDataSearchOrdering.COMPARATIV_PERIOD_NAME.name());
         periodMonthColumn.setDataStoreName(FormDataSearchOrdering.REPORT_PERIOD_MONTH_NAME.name());
         stateColumn.setDataStoreName(FormDataSearchOrdering.STATE.name());
         returnColumn.setDataStoreName(FormDataSearchOrdering.RETURN.name());
@@ -212,6 +220,7 @@ public class FormDataListView extends ViewWithUiHandlers<FormDataListUiHandlers>
         departmentColumn.setSortable(true);
         periodYearColumn.setSortable(true);
         reportPeriodColumn.setSortable(true);
+        comparativPeriodColumn.setSortable(true);
         periodMonthColumn.setSortable(true);
         stateColumn.setSortable(true);
         returnColumn.setSortable(true);
@@ -232,7 +241,7 @@ public class FormDataListView extends ViewWithUiHandlers<FormDataListUiHandlers>
 
     @Override
     public void updateFormDataTable(TaxType taxType) {
-        if (!taxType.equals(TaxType.DEAL)) {
+        if (!taxType.equals(TaxType.DEAL) && !taxType.equals(TaxType.ETR)) {
             create.setText(FormDataListUtils.FORM_DATA_CREATE);
             create.setTitle(FormDataListUtils.FORM_DATA_CREATE_TITLE);
             formKindHeader.setTitle(FormDataListUtils.FORM_DATA_KIND_TITLE);
@@ -246,6 +255,14 @@ public class FormDataListView extends ViewWithUiHandlers<FormDataListUiHandlers>
             formTypeHeader.setTitle(FormDataListUtils.FORM_DATA_TYPE_TITLE_D);
             periodMonthHeader.setTitle("");
             formDataTable.setColumnWidth(periodMonthColumn, 0, Style.Unit.EM);
+        }
+        if (taxType.equals(TaxType.ETR)) {
+            comparativPeriodHeader.setTitle(FormDataListUtils.COMPARATIV_PERIOD_TITLE);
+            formDataTable.setColumnWidth(comparativPeriodColumn, 7, Style.Unit.EM);
+        } else {
+            comparativPeriodHeader.setTitle("");
+            formDataTable.setColumnWidth(comparativPeriodColumn, 0, Style.Unit.EM);
+
         }
         formDataTable.redrawHeaders();
 

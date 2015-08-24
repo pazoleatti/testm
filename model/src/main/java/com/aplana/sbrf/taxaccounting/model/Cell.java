@@ -80,7 +80,7 @@ public class Cell extends AbstractCell {
 		}
 		// Формируем заготовки сообщений. Используются при оформлении ошибок
         String msg = "Графа «" + getColumn().getName() + "». ";
-        String msgValue = "Значение графы «" + getColumn().getName() + "». ";
+        String msgValue = "Значение графы «" + getColumn().getName() + "» ";
         if (rowNumber != null) {
             msg = "Строка " + rowNumber + ": " + msg;
             msgValue = "Строка " + rowNumber + ": " + msgValue;

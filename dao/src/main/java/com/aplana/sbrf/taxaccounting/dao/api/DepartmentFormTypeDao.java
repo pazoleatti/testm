@@ -301,7 +301,7 @@ public interface DepartmentFormTypeDao {
      * @return приемники существуют?
      */
     List<Pair<String, String>> existAcceptedDestinations(int sourceDepartmentId, int sourceFormTypeId,
-                                                         FormDataKind sourceKind, Integer reportPeriodId,
+                                                         FormDataKind sourceKind, Integer departmentReportPeriodId,
                                                          Date periodStart, Date periodEnd);
 
     /**

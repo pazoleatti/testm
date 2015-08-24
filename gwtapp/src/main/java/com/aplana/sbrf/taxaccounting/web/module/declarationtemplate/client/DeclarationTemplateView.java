@@ -8,7 +8,9 @@ import com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.shared.Decla
 import com.aplana.sbrf.taxaccounting.web.widget.codemirror.client.CodeMirror;
 import com.aplana.sbrf.taxaccounting.web.widget.fileupload.FileUploadWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.fileupload.event.EndLoadFileEvent;
+import com.aplana.sbrf.taxaccounting.web.widget.fileupload.event.JrxmlFileExistEvent;
 import com.aplana.sbrf.taxaccounting.web.widget.style.LinkAnchor;
+import com.aplana.sbrf.taxaccounting.web.widget.style.LinkButton;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.FormElement;
 import com.google.gwt.dom.client.Style;
@@ -68,11 +70,7 @@ public class DeclarationTemplateView extends ViewWithUiHandlers<DeclarationTempl
 	
 	@UiField
 	@Editor.Ignore
-	FileUploadWidget uploadJrxmlFile;
-
-    @UiField
-    @Editor.Ignore
-    FileUploadWidget uploadDectFile;
+	FileUploadWidget uploadJrxmlFile, uploadDectFile, uploadXsdFile;
 
 	@UiField
 	@Editor.Ignore
@@ -93,10 +91,6 @@ public class DeclarationTemplateView extends ViewWithUiHandlers<DeclarationTempl
 	@UiField
     @Path("declarationTemplate.createScript")
 	CodeMirror createScript;
-
-    @UiField
-    @Editor.Ignore
-    FileUploadWidget uploadXsdFile;
 
     @UiField
     @Editor.Ignore
@@ -124,6 +118,8 @@ public class DeclarationTemplateView extends ViewWithUiHandlers<DeclarationTempl
 
     @UiField
     LinkAnchor returnAnchor;
+    @UiField
+    LinkButton deleteXsd, deleteJrxml;
 
     @Inject
 	@UiConstructor
@@ -148,10 +144,9 @@ public class DeclarationTemplateView extends ViewWithUiHandlers<DeclarationTempl
         driver.edit(declarationTemplateExt);
         setEnabled(template.getId() != null);
         downloadJrxmlButton.setEnabled(template.getJrxmlBlobId() != null);
-        downloadXsd.setEnabled(template.getXsdId()!=null);
-        if (template.getId() != null){
-            setHref(template);
-        }
+        deleteJrxml.setEnabled(template.getJrxmlBlobId() != null);
+        downloadXsd.setEnabled(template.getXsdId() != null);
+        deleteXsd.setEnabled(template.getXsdId() != null);
 	}
 
     @Override
@@ -165,23 +160,33 @@ public class DeclarationTemplateView extends ViewWithUiHandlers<DeclarationTempl
     }
 
     @Override
-    public HandlerRegistration addChangeHandlerHandlerDect(ValueChangeHandler<String> valueChangeHandler) {
+    public HandlerRegistration addChangeHandlerDect(ValueChangeHandler<String> valueChangeHandler) {
         return uploadDectFile.addValueChangeHandler(valueChangeHandler);
     }
 
     @Override
-    public HandlerRegistration addEndLoadHandlerHandlerXsd(EndLoadFileEvent.EndLoadFileHandler handler) {
+    public HandlerRegistration addEndLoadHandlerXsd(EndLoadFileEvent.EndLoadFileHandler handler) {
         return uploadXsdFile.addEndLoadHandler(handler);
     }
 
     @Override
-    public HandlerRegistration addEndLoadHandlerHandlerJrxml(EndLoadFileEvent.EndLoadFileHandler handler) {
+    public HandlerRegistration addEndLoadHandlerJrxml(EndLoadFileEvent.EndLoadFileHandler handler) {
         return uploadJrxmlFile.addEndLoadHandler(handler);
     }
 
     @Override
-    public HandlerRegistration addEndLoadHandlerHandlerDect(EndLoadFileEvent.EndLoadFileHandler handler) {
+    public HandlerRegistration addEndLoadHandlerDect(EndLoadFileEvent.EndLoadFileHandler handler) {
         return uploadDectFile.addEndLoadHandler(handler);
+    }
+
+    @Override
+    public HandlerRegistration addJrxmlLoadHandlerDect(JrxmlFileExistEvent.JrxmlFileExistHandler handler) {
+        return uploadDectFile.addJrxmlLoadHandler(handler);
+    }
+
+    @Override
+    public HandlerRegistration addJrxmlLoadHandler(JrxmlFileExistEvent.JrxmlFileExistHandler handler) {
+        return uploadJrxmlFile.addJrxmlLoadHandler(handler);
     }
 
     private void setEnabled(boolean isEnable){
@@ -189,12 +194,6 @@ public class DeclarationTemplateView extends ViewWithUiHandlers<DeclarationTempl
         uploadDectFile.setEnabled(isEnable);
         uploadXsdFile.setEnabled(isEnable);
         downloadDectButton.setEnabled(isEnable);
-    }
-
-    private void setHref(DeclarationTemplate dt){
-        downloadJrxmlButton.setHref(urlTemplates.getDownloadUrl(dt.getJrxmlBlobId()!=null?dt.getJrxmlBlobId():"").asString());
-        downloadXsd.setHref(urlTemplates.getDownloadUrl(dt.getXsdId()!= null? dt.getXsdId():"").asString());
-        downloadDectButton.setHref(urlTemplates.getDownloadDTUrl(dt.getId()).asString());
     }
 
     @Override
@@ -231,6 +230,28 @@ public class DeclarationTemplateView extends ViewWithUiHandlers<DeclarationTempl
         }
         formDataTableStyle.setProperty("top", DEFAULT_TABLE_TOP_POSITION + downShift, Style.Unit.PX);
     }
+
+    @UiHandler("downloadJrxmlButton")
+    void onDownloadJrxmlButtonClicked(ClickEvent event) {
+        if (getUiHandlers() != null) {
+            getUiHandlers().downloadJrxml();
+        }
+    }
+
+    @UiHandler("downloadXsd")
+    void onDownloadXsdClicked(ClickEvent event) {
+        if (getUiHandlers() != null) {
+            getUiHandlers().downloadXsd();
+        }
+    }
+
+    @UiHandler("downloadDectButton")
+    void onDownloadDectButtonClicked(ClickEvent event) {
+        if (getUiHandlers() != null) {
+            getUiHandlers().downloadDect();
+        }
+    }
+
 
     @UiHandler("saveButton")
 	public void onSave(ClickEvent event){
@@ -285,6 +306,26 @@ public class DeclarationTemplateView extends ViewWithUiHandlers<DeclarationTempl
         if (getUiHandlers() != null){
             getUiHandlers().onHistoryClicked();
         }
+    }
+
+    @UiHandler("deleteXsd")
+    void onDeleteXsd(ClickEvent event){
+        Dialog.confirmMessage("Удаление xsd файла", "Вы действительно хотите удалить xsd-файл?", new DialogHandler() {
+            @Override
+            public void yes() {
+                getUiHandlers().onDeleteXsd();
+            }
+        });
+    }
+
+    @UiHandler("deleteJrxml")
+    void onDeleteJrxml(ClickEvent event){
+        Dialog.confirmMessage("Удаление jrxml файла", "Вы действительно хотите удалить jrxml файл?", new DialogHandler() {
+            @Override
+            public void yes() {
+                getUiHandlers().onCheckBeforeDeleteJrxml();
+            }
+        });
     }
 
 }

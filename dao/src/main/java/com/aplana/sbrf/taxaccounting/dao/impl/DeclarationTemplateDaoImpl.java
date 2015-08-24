@@ -480,4 +480,22 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
             throw new DaoException("Для даного вида декларации %d - %s найдено несколько активных шаблонов деклараций.", declarationTypeId, declarationTypeDao.get(declarationTypeId).getName());
         }
     }
+
+    @Override
+    public void deleteXsd(int dtId) {
+        try{
+            getJdbcTemplate().update("update declaration_template set xsd = null where ID = ?", dtId);
+        } catch (DataAccessException e){
+            throw new DaoException("", e);
+        }
+    }
+
+    @Override
+    public void deleteJrxml(int dtId) {
+        try{
+            getJdbcTemplate().update("update declaration_template set jrxml = null WHERE ID = ?", dtId);
+        } catch (DataAccessException e){
+            throw new DaoException("", e);
+        }
+    }
 }

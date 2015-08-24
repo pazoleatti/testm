@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.service;
 
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.log.Logger;
 
 import javax.validation.constraints.NotNull;
 import java.io.InputStream;
@@ -179,5 +180,43 @@ public interface DeclarationTemplateService {
      * @return идентифиактор
      */
     int updateVersionStatus(VersionedObjectStatus versionStatus, int declarationTemplateId);
+
+    void deleteXsd(int dtId);
+
+    void deleteJrxml(int dtId);
+
+    /**
+     * Проверка существования активного шаблона декларации
+     * с типом declarationTypeId и датой актуальности которой является период включающий
+     * reportPeriodId
+     *
+     * @param declarationTypeId вид шаблона
+     * @param reportPeriodId отчетный период
+     * @return true-если существует
+     */
+    boolean existDeclarationTemplate(int declarationTypeId, int reportPeriodId);
+
+    /**
+     * Поиск экземпляров деклараций использующих данную версию макета, которые имеют pdf/xlsx отчеты и/или
+     * для которых созданы блокировки для задания формирования pdf/xlsx отчета
+     * @param dtId идентификатор макета декларации
+     * @param dataIds идентификторы деклараций использующих jrxml этого макета
+     * @param lockDataIds идентификторы деклараций, для которых есть блокировка
+     *                    (т.е. для них запущено создание), относящихся к этому макету
+     * @return true - если есть декларации
+     */
+    boolean checkExistingDataJrxml(int dtId, Logger logger);
+
+    /**
+     * Получает идентификаторы деклараций, которые используют jrxml этого макета
+     * @param dtId
+     */
+    Collection<Long> getDataIdsThatUseJrxml(int dtId, TAUserInfo userInfo);
+
+    /**
+     * Получает идентификаторы деклараций, для которых формируется отчет по этому jrxml
+     * @param dtId
+     */
+    Collection<Long> getLockDataIdsThatUseJrxml(int dtId);
 
 }

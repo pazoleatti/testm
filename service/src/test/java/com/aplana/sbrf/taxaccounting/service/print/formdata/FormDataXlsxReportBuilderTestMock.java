@@ -45,14 +45,17 @@ public class FormDataXlsxReportBuilderTestMock {
 		Column colNum3 = new StringColumn();
 		Column colNum4 = new StringColumn();
 		Column colNum5 = new NumericColumn();
-		Column colNum6 = new StringColumn();
+        ((NumericColumn)colNum5).setPrecision(2);
+		Column colNum6 = new NumericColumn();
+        ((NumericColumn)colNum6).setPrecision(2);
 		Column colNum7 = new StringColumn();
 		Column colNum8 = new DateColumn();
 		
 		Column colStr9 = new StringColumn();
 		Column colStr10 = new NumericColumn();
+        ((NumericColumn)colStr10).setPrecision(2);
 		Column colStr11 = new NumericColumn();
-        Column colDate12 = new StringColumn();
+        Column colDate12 = new NumericColumn();
         Column colDate13 = new StringColumn();
         Column colDate14 = new StringColumn();
         Column colDate15 = new StringColumn();
@@ -172,6 +175,7 @@ public class FormDataXlsxReportBuilderTestMock {
         reportPeriod = new ReportPeriod();
         reportPeriod.setName("1 квартал");
         reportPeriod.setTaxPeriod(taxPeriod);
+
         formTemplate.getStyles().addAll(formStyles);
 		formTemplate.setHeader("Таблица 1\\2\\3 | Приложение 1 | Приложение 2");
         formTemplate.getColumns().addAll(columns);
@@ -224,12 +228,16 @@ public class FormDataXlsxReportBuilderTestMock {
         formData.setState(WorkflowState.CREATED);
         formData.setPerformer(formDataperformer);
         formData.setSigners(formDataSigners);
+        formData.setAccruing(true);
+        formData.setComparativPeriodId(null);
+        formData.setPeriodOrder(1);
 
 		data.setData(formData);
 		data.setReportPeriod(reportPeriod);
 		data.setFormTemplate(formTemplate);
         data.setAcceptanceDate(null);
         data.setCreationDate(new Date(324234));
+        data.setRpCompare(reportPeriod);
 	}
 
 	@Test

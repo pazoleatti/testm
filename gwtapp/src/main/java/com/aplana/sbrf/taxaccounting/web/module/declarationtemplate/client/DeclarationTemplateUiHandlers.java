@@ -2,6 +2,8 @@ package com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.client;
 
 import com.gwtplatform.mvp.client.UiHandlers;
 
+import java.util.Set;
+
 public interface DeclarationTemplateUiHandlers extends UiHandlers {
 	void save();
 	void reset();
@@ -9,4 +11,9 @@ public interface DeclarationTemplateUiHandlers extends UiHandlers {
     void activate(boolean force);
     int getDeclarationId();
     void onHistoryClicked();
+    void onDeleteXsd();
+    void onCheckBeforeDeleteJrxml();
+    void downloadJrxml();
+    void downloadXsd();
+    void downloadDect();
 }

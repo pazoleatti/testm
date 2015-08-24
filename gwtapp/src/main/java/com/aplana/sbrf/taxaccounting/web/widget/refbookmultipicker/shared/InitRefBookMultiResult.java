@@ -12,6 +12,7 @@ public class InitRefBookMultiResult implements Result {
 
     private long refBookId;
     private List<RefBookAttribute> attributes;
+    private boolean versioned;
 
     public long getRefBookId() {
         return refBookId;
@@ -27,5 +28,13 @@ public class InitRefBookMultiResult implements Result {
 
     public void setAttributes(List<RefBookAttribute> attributes) {
         this.attributes = attributes;
+    }
+
+    public void setVersioned(boolean versioned) {
+        this.versioned = versioned;
+    }
+
+    public boolean isVersioned() {
+        return versioned;
     }
 }

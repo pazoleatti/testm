@@ -6,6 +6,7 @@ import com.aplana.sbrf.taxaccounting.dao.api.DepartmentFormTypeDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
+import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.*;
 import org.junit.Test;
@@ -18,12 +19,18 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.UUID;
 
 import static com.aplana.sbrf.taxaccounting.test.UserMockUtils.mockUser;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.anyLong;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration("DeclarationDataServiceTest.xml")
@@ -53,6 +60,8 @@ public class DeclarationDataServiceImplTest {
     DepartmentFormTypeDao departmentFormTypeDao;
     @Autowired
     FormTypeService formTypeService;
+    @Autowired
+    FormTemplateService formTemplateService;
 
     private static final SimpleDateFormat SDF = new SimpleDateFormat("dd.MM.yyyy");
 
@@ -228,12 +237,16 @@ public class DeclarationDataServiceImplTest {
         declarationTemplate.setId(1);
 
         DeclarationData declarationData = new DeclarationData();
-        declarationData.setId(1l);
+        declarationData.setId(1L);
         declarationData.setDeclarationTemplateId(1);
         declarationData.setDepartmentId(1);
         declarationData.setReportPeriodId(1);
-        declarationData.setId(1l);
         declarationData.setDepartmentReportPeriodId(1);
+
+        FormTemplate formTemplate1 = new FormTemplate();
+        formTemplate1.setMonthly(false);
+        FormTemplate formTemplate2 = new FormTemplate();
+        formTemplate2.setMonthly(false);
 
         FormData formData = new FormData();
         formData.setId(1l);
@@ -311,8 +324,16 @@ public class DeclarationDataServiceImplTest {
 
         when(departmentReportPeriodService.getLast(2, 1)).thenReturn(drp2);
 
+        when(formTemplateService.existFormTemplate(1, 1, true)).thenReturn(true);
+        when(formTemplateService.existFormTemplate(2, 1, true)).thenReturn(true);
+        when(formTemplateService.getActiveFormTemplateId(1, 1)).thenReturn(1);
+        when(formTemplateService.getActiveFormTemplateId(2, 1)).thenReturn(2);
+        when(formTemplateService.get(1)).thenReturn(formTemplate1);
+        when(formTemplateService.get(2)).thenReturn(formTemplate2);
+
         try{
-            declarationDataService.check(logger, 1l, userInfo, new LockStateLogger() {
+            when(sourceService.isDDConsolidationTopical(1L)).thenReturn(false);
+            declarationDataService.check(logger, 1L, userInfo, new LockStateLogger() {
                 @Override
                 public void updateState(String state) {
                 }
@@ -324,13 +345,25 @@ public class DeclarationDataServiceImplTest {
         assertEquals("Декларация / Уведомление содержит неактуальные консолидированные данные  (расприняты формы-источники / удалены назначения по формам-источникам, на основе которых ранее выполнена консолидация). Для коррекции консолидированных данных необходимо нажать на кнопку \"Рассчитать\"",
                 logger.getEntries().get(0).getMessage());
 
+        try{
+            logger.clear();
+            when(sourceService.isDDConsolidationTopical(1L)).thenReturn(true);
+            declarationDataService.check(logger, 1L, userInfo, new LockStateLogger() {
+                @Override
+                public void updateState(String state) {
+                }
+            });
+        } catch (ServiceLoggerException e){
+            //Nothing
+        }
+
         assertEquals(
                 "Не выполнена консолидация данных из формы \"Тестовое подразделение\", \"Тестовый макет\", \"Первичная\", \"1 квартал\", \"2015 с датой сдачи корректировки 01.01.1970\" в статусе \"Принята\"",
-                logger.getEntries().get(1).getMessage()
+                logger.getEntries().get(0).getMessage()
         );
         assertEquals(
                 "Не выполнена консолидация данных из формы \"Тестовое подразделение\", \"Тестовый макет\", \"Консолидированная\", \"1 квартал\", \"2015 с датой сдачи корректировки 01.01.1970\" - экземпляр формы не создан",
-                logger.getEntries().get(2).getMessage()
+                logger.getEntries().get(1).getMessage()
         );
     }
 }

@@ -20,14 +20,18 @@ public class FormData extends IdentityObject<Long> {
 	private Integer departmentId;
 	private Integer reportPeriodId;
     private Integer departmentReportPeriodId;
+    /** Номер месяца */
     private Integer periodOrder;
     /** Признак формы ручного ввода */
     private boolean manual;
-	
-	/**
-	 * Признак возврата
-	 */
+	/** Признак возврата */
 	private boolean returnSign;
+    /** Статус актуальности сортировки НФ (false - Сортировка неактуальна ; true - Сортировка актуальна) */
+    private boolean sorted;
+    /** Период сравнения - ссылка на DepartmentReportPeriod. Может быть null */
+    private Integer comparativPeriodId;
+    /** Признак расчета значений нарастающим итогом (false - не нарастающим итогом, true - нарастающим итогом, пустое - форма без периода сравнения) */
+    private boolean accruing;
 
 	private int formTemplateId;
 	private List<Column> formColumns;
@@ -273,40 +277,50 @@ public class FormData extends IdentityObject<Long> {
         this.previousRowNumber = previousRowNumber;
     }
 
+    public boolean isSorted() {
+        return sorted;
+    }
+
+    public void setSorted(boolean sorted) {
+        this.sorted = sorted;
+    }
+
+    public Integer getComparativPeriodId() {
+        return comparativPeriodId;
+    }
+
+    public void setComparativPeriodId(Integer comparativPeriodId) {
+        this.comparativPeriodId = comparativPeriodId;
+    }
+
+    public boolean isAccruing() {
+        return accruing;
+    }
+
+    public void setAccruing(boolean accruing) {
+        this.accruing = accruing;
+    }
+
     @Override
-	public String toString() {
-		StringBuilder builder = new StringBuilder();
-		builder.append("FormData [state=");
-		builder.append(state);
-		builder.append(", kind=");
-		builder.append(kind);
-        builder.append(", manual=");
-        builder.append(manual);
-		builder.append(", departmentId=");
-		builder.append(departmentId);
-		builder.append(", reportPeriodId=");
-		builder.append(reportPeriodId);
-        builder.append(", periodOrder=");
-        builder.append(periodOrder);
-		builder.append(", returnSign=");
-		builder.append(returnSign);
-		builder.append(", formTemplateId=");
-		builder.append(formTemplateId);
-		builder.append(", formColumns=");
-		builder.append(formColumns);
-		builder.append(", formStyles=");
-		builder.append(formStyles);
-		builder.append(", headers=");
-		builder.append(headers);
-		builder.append(", formType=");
-		builder.append(formType);
-		builder.append(", performer=");
-		builder.append(performer);
-		builder.append(", signers=");
-		builder.append(signers);
-		builder.append("]");
-		return builder.toString();
-	}
+    public String toString() {
+        return "FormData{" +
+                "state=" + state +
+                ", kind=" + kind +
+                ", departmentId=" + departmentId +
+                ", reportPeriodId=" + reportPeriodId +
+                ", departmentReportPeriodId=" + departmentReportPeriodId +
+                ", periodOrder=" + periodOrder +
+                ", manual=" + manual +
+                ", returnSign=" + returnSign +
+                ", sorted=" + sorted +
+                ", comparativPeriodId=" + comparativPeriodId +
+                ", accruing=" + accruing +
+                ", formTemplateId=" + formTemplateId +
+                ", formType=" + formType +
+                ", performer=" + performer +
+                ", previousRowNumber=" + previousRowNumber +
+                '}';
+    }
 
     @Override
     public boolean equals(Object o) {
@@ -315,9 +329,16 @@ public class FormData extends IdentityObject<Long> {
 
         FormData formData = (FormData) o;
 
+        if (accruing != formData.accruing) return false;
         if (formTemplateId != formData.formTemplateId) return false;
+        if (manual != formData.manual) return false;
         if (returnSign != formData.returnSign) return false;
+        if (sorted != formData.sorted) return false;
+        if (comparativPeriodId != null ? !comparativPeriodId.equals(formData.comparativPeriodId) : formData.comparativPeriodId != null)
+            return false;
         if (departmentId != null ? !departmentId.equals(formData.departmentId) : formData.departmentId != null)
+            return false;
+        if (departmentReportPeriodId != null ? !departmentReportPeriodId.equals(formData.departmentReportPeriodId) : formData.departmentReportPeriodId != null)
             return false;
         if (formColumns != null ? !formColumns.equals(formData.formColumns) : formData.formColumns != null)
             return false;
@@ -325,9 +346,10 @@ public class FormData extends IdentityObject<Long> {
         if (formType != null ? !formType.equals(formData.formType) : formData.formType != null) return false;
         if (headers != null ? !headers.equals(formData.headers) : formData.headers != null) return false;
         if (kind != formData.kind) return false;
-        if (manual != formData.manual) return false;
         if (performer != null ? !performer.equals(formData.performer) : formData.performer != null) return false;
         if (periodOrder != null ? !periodOrder.equals(formData.periodOrder) : formData.periodOrder != null)
+            return false;
+        if (previousRowNumber != null ? !previousRowNumber.equals(formData.previousRowNumber) : formData.previousRowNumber != null)
             return false;
         if (reportPeriodId != null ? !reportPeriodId.equals(formData.reportPeriodId) : formData.reportPeriodId != null)
             return false;
@@ -343,9 +365,13 @@ public class FormData extends IdentityObject<Long> {
         result = 31 * result + (kind != null ? kind.hashCode() : 0);
         result = 31 * result + (departmentId != null ? departmentId.hashCode() : 0);
         result = 31 * result + (reportPeriodId != null ? reportPeriodId.hashCode() : 0);
+        result = 31 * result + (departmentReportPeriodId != null ? departmentReportPeriodId.hashCode() : 0);
         result = 31 * result + (periodOrder != null ? periodOrder.hashCode() : 0);
         result = 31 * result + (manual ? 1 : 0);
         result = 31 * result + (returnSign ? 1 : 0);
+        result = 31 * result + (sorted ? 1 : 0);
+        result = 31 * result + (comparativPeriodId != null ? comparativPeriodId.hashCode() : 0);
+        result = 31 * result + (accruing ? 1 : 0);
         result = 31 * result + formTemplateId;
         result = 31 * result + (formColumns != null ? formColumns.hashCode() : 0);
         result = 31 * result + (formStyles != null ? formStyles.hashCode() : 0);
@@ -353,6 +379,7 @@ public class FormData extends IdentityObject<Long> {
         result = 31 * result + (formType != null ? formType.hashCode() : 0);
         result = 31 * result + (performer != null ? performer.hashCode() : 0);
         result = 31 * result + (signers != null ? signers.hashCode() : 0);
+        result = 31 * result + (previousRowNumber != null ? previousRowNumber.hashCode() : 0);
         return result;
     }
 }

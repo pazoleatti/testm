@@ -4,16 +4,7 @@ import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
 import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.api.FormTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.script.FormDataCacheDao;
-import com.aplana.sbrf.taxaccounting.model.Cell;
-import com.aplana.sbrf.taxaccounting.model.DataRow;
-import com.aplana.sbrf.taxaccounting.model.DepartmentFormType;
-import com.aplana.sbrf.taxaccounting.model.FormData;
-import com.aplana.sbrf.taxaccounting.model.FormDataKind;
-import com.aplana.sbrf.taxaccounting.model.FormTemplate;
-import com.aplana.sbrf.taxaccounting.model.Formats;
-import com.aplana.sbrf.taxaccounting.model.PagingResult;
-import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
-import com.aplana.sbrf.taxaccounting.model.WorkflowState;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
@@ -59,7 +50,7 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
     private ScriptComponentContext scriptComponentContext;
 
     private static final String FIND_ERROR = "FormData не сохранена, id = null.";
-    private static final String CHECK_UNIQUE_ERROR = "Налоговая форма с заданными параметрами уже существует!";
+    private static final String CHECK_UNIQUE_ERROR = "%s с заданными параметрами уже существует!";
     private static final String REF_BOOK_ROW_NOT_FOUND_ERROR = "Строка %d, графа «%s» содержит значение, отсутствующее в справочнике «%s»!";
     private static final String REF_BOOK_NOT_FOUND_ERROR = "В справочнике «%s» не найдено значение «%s», соответствующее атрибуту «%s»!";
     private static final String WRONG_FORM_IS_NOT_ACCEPTED = "Не найдены экземпляры «%s» за %s в статусе «Принята». Расчеты не могут быть выполнены.";
@@ -662,7 +653,7 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
 
         // форма найдена
         if (existingFormData != null) {
-            logger.error(CHECK_UNIQUE_ERROR);
+            logger.error(String.format(CHECK_UNIQUE_ERROR, MessageGenerator.mesSpeckSingle(formData.getFormType().getTaxType())));
             return false;
         }
         return true;

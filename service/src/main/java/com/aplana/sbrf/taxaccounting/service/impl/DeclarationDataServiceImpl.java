@@ -1,11 +1,10 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
-import com.aplana.sbrf.taxaccounting.dao.api.DataRowDao;
-import com.aplana.sbrf.taxaccounting.model.BalancingVariants;
 import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.core.api.LockStateLogger;
 import com.aplana.sbrf.taxaccounting.dao.AsyncTaskTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationDataDao;
+import com.aplana.sbrf.taxaccounting.dao.api.DataRowDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentFormTypeDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
@@ -13,7 +12,6 @@ import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
-import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.service.*;
 import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
@@ -246,18 +244,11 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         setDeclarationBlobs(logger, declarationData, docDate, userInfo, stateLogger);
 
         //3. обновляет записи о консолидации
-        ReportPeriod reportPeriod = reportPeriodService.getReportPeriod(declarationData.getReportPeriodId());
-        DeclarationTemplate template = declarationTemplateService.get(declarationData.getDeclarationTemplateId());
-        List<DepartmentFormType> dftSources = departmentFormTypeDao.getDeclarationSources(
-                declarationData.getDepartmentId(),
-                template.getType().getId(),
-                reportPeriod.getCalendarStartDate(),
-                reportPeriod.getEndDate());
+        List<DepartmentFormType> dftSources = getFormDataSources(declarationData, true, logger);
         ArrayList<Long> formDataIds = new ArrayList<Long>();
         for (DepartmentFormType dftSource : dftSources){
-            DepartmentReportPeriod sourceDepartmentReportPeriod = departmentReportPeriodService.getLast(dftSource.getDepartmentId(), declarationData.getReportPeriodId());
             FormData formData =
-                    formDataService.findFormData(dftSource.getFormTypeId(), dftSource.getKind(), sourceDepartmentReportPeriod.getId(), null);
+                    formDataService.getLast(dftSource.getFormTypeId(), dftSource.getKind(), dftSource.getDepartmentId(), declarationData.getReportPeriodId(), dftSource.getPeriodOrder());
             if (formData != null && formData.getState() == WorkflowState.ACCEPTED) {
                 formDataIds.add(formData.getId());
             }
@@ -587,10 +578,10 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 File zipOutFile = null;
                 try {
                     zipOutFile = new File(String.format(FILE_NAME_IN_TEMP_PATTERN, decName, "zip"));
-                    FileOutputStream fileOutputStream = new FileOutputStream(zipOutFile);
-                    ZipOutputStream zos = new ZipOutputStream(fileOutputStream);
-                    ZipEntry zipEntry = new ZipEntry(decName+".xml");
-                    zos.putNextEntry(zipEntry);
+					FileOutputStream fileOutputStream = new FileOutputStream(zipOutFile);
+					ZipOutputStream zos = new ZipOutputStream(fileOutputStream);
+					ZipEntry zipEntry = new ZipEntry(decName+".xml");
+					zos.putNextEntry(zipEntry);
                     FileInputStream fi = new FileInputStream(renameToFile);
 
                     try {
@@ -661,14 +652,14 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 log.info(String.format("Выполнение проверок XSD-файла декларации %s", declarationData.getId()));
                 stateLogger.updateState("Выполнение проверок XSD-файла");
                 if (!validateXMLService.validate(declarationData, userInfo, logger, isErrorFatal, xmlFile) && logger.containsLevel(LogLevel.ERROR)){
-                    throw new ServiceException();
+                    throw new ServiceLoggerException(VALIDATION_ERR_MSG, logEntryService.save(logger.getEntries()));
                 }
             } catch (Exception e) {
                 log.error(VALIDATION_ERR_MSG, e);
                 if (!(e instanceof ServiceException))
                     logger.error(e);
                 throw new ServiceException(VALIDATION_ERR_MSG);
-            } finally {
+            }finally {
                 Locale.setDefault(oldLocale);
             }
         }
@@ -917,6 +908,15 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     }
 
     @Override
+    @Transactional(readOnly = false)
+    public void cleanBlobs(Collection<Long> ids, List<ReportType> reportTypes) {
+        if (ids.isEmpty()){
+            return;
+        }
+        reportService.deleteDec(ids, reportTypes);
+    }
+
+    @Override
     public void findDDIdsByRangeInReportPeriod(int decTemplateId, Date startDate, Date endDate, Logger logger) {
         List<Integer> ddIds = declarationDataDao.findDDIdsByRangeInReportPeriod(decTemplateId,
                 startDate, endDate != null ? endDate : MAX_DATE);
@@ -1022,19 +1022,13 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             case XML_DEC:
                 long cellCountSource = 0;
                 DeclarationData declarationData = get(declarationDataId, userInfo);
-                DeclarationTemplate declarationTemplate = declarationTemplateService.get(declarationData.getDeclarationTemplateId());
-                ReportPeriod reportPeriod = reportPeriodService.getReportPeriod(declarationData.getReportPeriodId());
-                List<DepartmentFormType> dftSources = departmentFormTypeDao.getDeclarationSources(
-                        declarationData.getDepartmentId(),
-                        declarationTemplate.getType().getId(),
-                        reportPeriod.getCalendarStartDate(),
-                        reportPeriod.getEndDate());
+                List<DepartmentFormType> dftSources = getFormDataSources(declarationData, true, new Logger());
                 for (DepartmentFormType dftSource : dftSources){
                     DepartmentReportPeriod sourceDepartmentReportPeriod = departmentReportPeriodService.getLast(dftSource.getDepartmentId(), declarationData.getReportPeriodId());
                     FormData formData =
-                            formDataService.findFormData(dftSource.getFormTypeId(), dftSource.getKind(), sourceDepartmentReportPeriod.getId(), null);
+                            formDataService.findFormData(dftSource.getFormTypeId(), dftSource.getKind(), sourceDepartmentReportPeriod.getId(), dftSource.getPeriodOrder());
                     if (formData != null && formData.getState() == WorkflowState.ACCEPTED) {
-                        int rowCountSource = dataRowDao.getSavedSize(formData);
+                        int rowCountSource = dataRowDao.getRowCount(formData);
                         int columnCountSource = formTemplateService.get(formData.getFormTemplateId()).getColumns().size();
                         cellCountSource += rowCountSource * columnCountSource;
                     }
@@ -1045,47 +1039,109 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         }
     }
 
+    @Override
+    public List<DepartmentFormType> getFormDataSources(DeclarationData declarationData, boolean excludeInactiveTemplate, Logger logger) {
+        List<DepartmentFormType> sourceList = new ArrayList<DepartmentFormType>();
+        Map<String, Object> params = new HashMap<String, Object>();
+        FormSources sources = new FormSources();
+        sources.setSourceList(new ArrayList<FormToFormRelation>());
+        sources.setSourcesProcessedByScript(false);
+        params.put("sources", sources);
+        declarationDataScriptingService.executeScript(null, declarationData, FormDataEvent.GET_SOURCES, logger, params);
+        if (sources.isSourcesProcessedByScript()) {
+            //Скрипт возвращает все необходимые источники-приемники
+            if (sources.getSourceList() != null) {
+                for (FormToFormRelation relation : sources.getSourceList()) {
+                    if (relation.isSource() && relation.isCreated() && relation.getFormType() != null) {
+                        //TODO: Заполняем DepartmentFormType не полностью!
+                        DepartmentFormType source = new DepartmentFormType();
+                        source.setDepartmentId(declarationData.getDepartmentId());
+                        source.setFormTypeId(relation.getFormType().getId());
+                        source.setKind(relation.getFormDataKind());
+                        source.setPeriodOrder(relation.getPeriodOrder());
+                        sourceList.add(source);
+                    }
+                }
+            }
+        } else {
+            DeclarationTemplate declarationTemplate = declarationTemplateService.get(declarationData.getDeclarationTemplateId());
+            int reportPeriodId = declarationData.getReportPeriodId();
+            ReportPeriod reportPeriod = reportPeriodService.getReportPeriod(reportPeriodId);
+
+            List<DepartmentFormType> dftSources = departmentFormTypeDao.getDeclarationSources(
+                    declarationData.getDepartmentId(),
+                    declarationTemplate.getType().getId(),
+                    reportPeriod.getCalendarStartDate(),
+                    reportPeriod.getEndDate());
+            for (DepartmentFormType dft : dftSources) {
+                if (formTemplateService.existFormTemplate(dft.getFormTypeId(), reportPeriodId, excludeInactiveTemplate)) {
+                    FormTemplate formTemplate = formTemplateService.get(
+                            excludeInactiveTemplate ?
+                                    formTemplateService.getActiveFormTemplateId(dft.getFormTypeId(), reportPeriodId) :
+                                    formTemplateService.getFormTemplateIdByFTAndReportPeriod(dft.getFormTypeId(), reportPeriodId)
+                    );
+                    if (formTemplate.isMonthly()) {
+                        for (Months month : reportPeriodService.getAvailableMonthList(reportPeriodId)) {
+                            if (month != null) {
+                                DepartmentFormType source = new DepartmentFormType();
+                                source.setDepartmentId(dft.getDepartmentId());
+                                source.setFormTypeId(dft.getFormTypeId());
+                                source.setKind(dft.getKind());
+                                source.setPeriodOrder(month.getId());
+                                sourceList.add(source);
+                            }
+                        }
+                    } else {
+                        sourceList.add(dft);
+                    }
+                }
+            }
+        }
+        return sourceList;
+    }
+
     private void checkSources(DeclarationData dd, Logger logger){
-        //Проверка на неактуальные консолидированные данные
+        boolean consolidationOk = true;
+        //Проверка на неактуальные консолидированные данные  3А
         if (!sourceService.isDDConsolidationTopical(dd.getId())){
             logger.error(CALCULATION_NOT_TOPICAL);
-            /*throw new ServiceLoggerException("", logEntryService.save(logger.getEntries()));*/
-        }
-        ReportPeriod rp = reportPeriodService.getReportPeriod(dd.getReportPeriodId());
-        List<DepartmentFormType> sourceDDs = departmentFormTypeDao.getDeclarationSources(
-                dd.getDepartmentId(),
-                declarationTemplateService.get(dd.getDeclarationTemplateId()).getType().getId(),
-                rp.getStartDate(),
-                rp.getEndDate());
-        for (DepartmentFormType sourceDFT : sourceDDs){
-            DepartmentReportPeriod drp = departmentReportPeriodService.getLast(sourceDFT.getDepartmentId(), dd.getReportPeriodId());
-            FormData sourceFD =
-                    formDataService.findFormData(sourceDFT.getFormTypeId(), sourceDFT.getKind(), drp.getId(), null);
-            if (sourceFD==null){
-                logger.warn(
-                        NOT_EXIST_SOURCE_DECLARATION_WARNING,
-                        departmentService.getDepartment(sourceDFT.getDepartmentId()).getName(),
-                        formTypeService.get(sourceDFT.getFormTypeId()).getName(),
-                        sourceDFT.getKind().getName(),
-                        rp.getName(),
-                        rp.getTaxPeriod().getYear(),
-                        drp.getCorrectionDate() != null ? String.format(" с датой сдачи корректировки %s",
-                                formatter.format(drp.getCorrectionDate())) : "");
-            } else if (!sourceService.isDeclarationSourceConsolidated(dd.getId(), sourceFD.getId())){
-                DepartmentReportPeriod sourceDRP = departmentReportPeriodService.get(sourceFD.getDepartmentReportPeriodId());
-                logger.warn(NOT_CONSOLIDATE_SOURCE_DECLARATION_WARNING,
-                        departmentService.getDepartment(sourceFD.getDepartmentId()).getName(),
-                        sourceFD.getFormType().getName(),
-                        sourceFD.getKind().getName(),
-                        rp.getName() + (sourceFD.getPeriodOrder() != null ? " " + Months.fromId(sourceFD.getPeriodOrder()).getTitle() : ""),
-                        rp.getTaxPeriod().getYear(),
-                        sourceDRP.getCorrectionDate() != null ? String.format(" с датой сдачи корректировки %s",
-                                formatter.format(sourceDRP.getCorrectionDate())) : "",
-                        sourceFD.getState().getName());
+            consolidationOk = false;
+        } else {
+            //Проверка того, что консолидация вообще когда то выполнялась для всех источников
+            ReportPeriod rp = reportPeriodService.getReportPeriod(dd.getReportPeriodId());
+            List<DepartmentFormType> sourceDDs = getFormDataSources(dd, true, logger);
+            for (DepartmentFormType sourceDFT : sourceDDs){
+                DepartmentReportPeriod drp = departmentReportPeriodService.getLast(sourceDFT.getDepartmentId(), dd.getReportPeriodId());
+                FormData sourceFD =
+                        formDataService.findFormData(sourceDFT.getFormTypeId(), sourceDFT.getKind(), drp.getId(), sourceDFT.getPeriodOrder());
+                if (sourceFD==null){
+                    consolidationOk = false;
+                    logger.warn(
+                            NOT_EXIST_SOURCE_DECLARATION_WARNING,
+                            departmentService.getDepartment(sourceDFT.getDepartmentId()).getName(),
+                            formTypeService.get(sourceDFT.getFormTypeId()).getName(),
+                            sourceDFT.getKind().getName(),
+                            rp.getName() + (sourceDFT.getPeriodOrder() != null ? " " + Months.fromId(sourceDFT.getPeriodOrder()).getTitle() : ""),
+                            rp.getTaxPeriod().getYear(),
+                            drp.getCorrectionDate() != null ? String.format(" с датой сдачи корректировки %s",
+                                    formatter.format(drp.getCorrectionDate())) : "");
+                } else if (!sourceService.isDeclarationSourceConsolidated(dd.getId(), sourceFD.getId())){
+                    consolidationOk = false;
+                    DepartmentReportPeriod sourceDRP = departmentReportPeriodService.get(sourceFD.getDepartmentReportPeriodId());
+                    logger.warn(NOT_CONSOLIDATE_SOURCE_DECLARATION_WARNING,
+                            departmentService.getDepartment(sourceFD.getDepartmentId()).getName(),
+                            sourceFD.getFormType().getName(),
+                            sourceFD.getKind().getName(),
+                            rp.getName() + (sourceFD.getPeriodOrder() != null ? " " + Months.fromId(sourceFD.getPeriodOrder()).getTitle() : ""),
+                            rp.getTaxPeriod().getYear(),
+                            sourceDRP.getCorrectionDate() != null ? String.format(" с датой сдачи корректировки %s",
+                                    formatter.format(sourceDRP.getCorrectionDate())) : "",
+                            sourceFD.getState().getName());
+                }
             }
         }
 
-        if (!sourceDDs.isEmpty() && !logger.containsLevel(LogLevel.WARNING)){
+        if (consolidationOk){
             logger.info("Консолидация выполнена из всех форм-источников.");
         }
     }

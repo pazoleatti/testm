@@ -1,10 +1,19 @@
 <ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
              xmlns:cm='urn:import:com.aplana.sbrf.taxaccounting.web.widget.codemirror.client'
-             xmlns:g="urn:import:com.google.gwt.user.client.ui"
              xmlns:fm="urn:import:com.aplana.gwt.client.form">
+    <ui:style>
+        .table {
+            z-index: 0;
+            position: absolute !important;
+        }
+    </ui:style>
 
-    <fm:BodyContainer>
-        <cm:CodeMirror ui:field="script"/>
-    </fm:BodyContainer>
+    <fm:MainContainer>
+        <fm:body>
+            <fm:BodyContainer>
+                <cm:CodeMirror ui:field="script" addStyleNames="{style.table}"/>
+            </fm:BodyContainer>
+        </fm:body>
+    </fm:MainContainer>
 
 </ui:UiBinder>

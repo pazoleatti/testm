@@ -106,6 +106,7 @@ public class GetFormDataHandler extends AbstractActionHandler<GetFormDataAction,
     private final static String RESTRICT_EDIT_MESSAGE = "Нет прав на редактирование налоговой формы!";
     private final static String CLOSED_PERIOD_MESSAGE = "Отчетный период подразделения закрыт!";
     private final static String CORRECTION_EDIT_MESSAGE = "Нельзя открыть налоговую форму в режиме редактирования для представления «Корректировка»!";
+    private final static String CORRECTION_EDIT_MESSAGE_2 = "Нельзя открыть налоговую форму для представления «Корректировка», если она редактируется!";
     private final static String CORRECTION_ERROR_MESSAGE = "Нельзя открыть налоговую форму, созданную в периоде, не являющемся корректирующим в режиме представления «Корректировка»!";
     private final static String PREVIOUS_FORM_NOT_FOUND_MESSAGE = "Форма ранее не была создана, данные о различиях не сформированы.";
     private final static String SUCCESS_CORRECTION_MESSAGE = "Корректировка отображена в результате сравнения с данными формы в периоде %s %s%s.";
@@ -116,19 +117,26 @@ public class GetFormDataHandler extends AbstractActionHandler<GetFormDataAction,
 
 	@Override
 	public GetFormDataResult execute(GetFormDataAction action, ExecutionContext context) throws ActionException {
-
         TAUserInfo userInfo = securityService.currentUserInfo();
+        GetFormDataResult result = new GetFormDataResult();
+        Logger logger = new Logger();
 
-        actionCheck(action);
-		
 		// UNLOCK: Попытка разблокировать ту форму которая была открыта ранее
 		try {
 			if (action.getOldFormDataId() != null) {
-				formDataService.unlock(action.getOldFormDataId(), userInfo);
+                LockData lockDataEdit = formDataService.getObjectLock(action.getOldFormDataId(), userInfo);
+                if (lockDataEdit != null && lockDataEdit.getUserId() == userInfo.getUser().getId()) {
+                    // Если есть блокировка, то удаляем задачи и откатываем изменения
+                    formDataService.unlock(action.getOldFormDataId(), userInfo);
+                    formDataService.interruptTask(action.getOldFormDataId(), userInfo, Arrays.asList(ReportType.CALCULATE_FD, ReportType.IMPORT_FD, ReportType.CHECK_FD));
+                    dataRowService.restoreCheckPoint(formDataService.getFormData(userInfo, action.getOldFormDataId(), action.isManual(), new Logger()));
+                }
 			}
 		} catch (Exception e){
 			//
 		}
+
+        actionCheck(action);
 
 		// LOCK: Попытка заблокировать форму которую хотим получить для редактирования
 		if (!action.isReadOnly()) {
@@ -143,9 +151,6 @@ public class GetFormDataHandler extends AbstractActionHandler<GetFormDataAction,
 				//
 			}
 		}
-
-		GetFormDataResult result = new GetFormDataResult();
-		Logger logger = new Logger();
 
         try {
             if (!action.isReadOnly()) {
@@ -189,7 +194,10 @@ public class GetFormDataHandler extends AbstractActionHandler<GetFormDataAction,
         } catch (Exception e) {
 			LOG.error(e.getMessage(), e);
             if (!action.isReadOnly()) {
-                //
+                // Удаляем контрольную точку восстановления
+                FormData formData = formDataService.getFormData(userInfo, action.getFormDataId(), action.isManual(), logger);
+                dataRowService.removeCheckPoint(formData);
+                // Удаляем блокировку
                 formDataService.unlock(action.getFormDataId(), userInfo);
             }
             if (e instanceof ActionException)
@@ -204,6 +212,9 @@ public class GetFormDataHandler extends AbstractActionHandler<GetFormDataAction,
     private void actionCheck(GetFormDataAction action) throws ActionException {
         if (!action.isReadOnly() && action.isCorrectionDiff()) {
             throw new ActionException(CORRECTION_EDIT_MESSAGE);
+        } else if (action.isCorrectionDiff() &&
+                formDataService.getObjectLock(action.getFormDataId(), securityService.currentUserInfo()) != null) {
+            throw new ActionException(CORRECTION_EDIT_MESSAGE_2);
         }
     }
 
@@ -238,6 +249,8 @@ public class GetFormDataHandler extends AbstractActionHandler<GetFormDataAction,
             departmentReportPeriod.getReportPeriod().setName(ReportPeriodSpecificName.fromId(code).getName());
         }
         result.setDepartmentReportPeriod(departmentReportPeriod);
+        result.setComparativPeriod(formData.getComparativPeriodId() != null ? departmentReportPeriodService.get(
+                formData.getComparativPeriodId()) : null);
 		result.setDepartmentName(departmentService.getDepartment(formData.getDepartmentId()).getName());
         result.setDepartmentFullName(departmentService.getParentsHierarchy(formData.getDepartmentId()));
 		result.setAllStyles(formTemplate.getStyles());
@@ -296,7 +309,6 @@ public class GetFormDataHandler extends AbstractActionHandler<GetFormDataAction,
 
         if (prevFormData == null) {
             logger.error(PREVIOUS_FORM_NOT_FOUND_MESSAGE);
-            dataRowService.saveRows(formData, new ArrayList<DataRow<Cell>>(0));
             return;
         }
 
@@ -316,7 +328,7 @@ public class GetFormDataHandler extends AbstractActionHandler<GetFormDataAction,
         List<DataRow<Cell>> diffRows = diffService.getDiff(original, revised);
 
         // Сохранение результата сравнения во временном срезе
-        dataRowService.saveRows(formData, diffRows);
+        dataRowService.saveTempRows(formData, diffRows);
     }
 
     /**

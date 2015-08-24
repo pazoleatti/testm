@@ -1,9 +1,9 @@
 package form_template.income.rnu64.v2014
 
+import au.com.bytecode.opencsv.CSVReader
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.FormDataKind
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
-import au.com.bytecode.opencsv.CSVReader
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.model.util.StringUtils
@@ -67,11 +67,7 @@ switch (formDataEvent) {
         break
     case FormDataEvent.IMPORT:
         importData()
-        if (!logger.containsLevel(LogLevel.ERROR)) {
-            calc()
-            logicCheck()
-            formDataService.saveCachedDataRows(formData, logger)
-        }
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.IMPORT_TRANSPORT_FILE:
         importTransportData()
@@ -134,7 +130,7 @@ def getReportPeriodEndDate() {
 
 // Поиск записи в справочнике по значению (для импорта)
 def getRecordIdImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
-                      def boolean required = true) {
+                      def boolean required = false) {
     if (value == null || value.trim().isEmpty()) {
         return null
     }
@@ -146,7 +142,7 @@ void calc() {
     def dataRows = formDataService.getDataRowHelper(formData).allCached
 
     if (formDataEvent != FormDataEvent.IMPORT) {
-        sortRows(dataRows, sortColumns)
+        //sortRows(dataRows, sortColumns)
     }
 
     // пересчитываем строки итого
@@ -158,8 +154,6 @@ void calc() {
         def dataRowsPrev = getDataRowsPrev()
         total.costs = getTotalValue(dataRows, dataRowsPrev)
     }
-
-    sortFormDataRows(false)
 }
 
 def getDataRowsPrev() {
@@ -308,9 +302,9 @@ void importTransportData() {
     char QUOTE = '\0'
 
     String[] rowCells
-    int fileRowIndex = 0    // номер строки в файле
+    int fileRowIndex = 2    // номер строки в файле (1, 2..). Начинается с 2, потому что первые две строки - заголовок и пустая строка
     int rowIndex = 0        // номер строки в НФ
-    def total = null		// итоговая строка со значениями из тф для добавления
+    def total = null        // итоговая строка со значениями из тф для добавления
     def newRows = []
 
     InputStreamReader isr = new InputStreamReader(ImportInputStream, DEFAULT_CHARSET)
@@ -361,9 +355,9 @@ void importTransportData() {
     newRows.add(totalRow)
 
     // сравнение итогов
-    if (total) {
+    if (!logger.containsLevel(LogLevel.ERROR) && total) {
         // мапа с алиасами граф и номерами колонокв в xml (алиас -> номер колонки)
-        def totalColumnsIndexMap = [ 'costs' : 5 ]
+        def totalColumnsIndexMap = ['costs': 5]
 
         // итоговая строка для сверки сумм
         def totalTmp = formData.createDataRow()
@@ -476,14 +470,14 @@ void importData() {
 
     def allValues = []      // значения формы
     def headerValues = []   // значения шапки
-    def paramsMap = ['rowOffset' : 0, 'colOffset' : 0]  // мапа с параметрами (отступы сверху и слева)
+    def paramsMap = ['rowOffset': 0, 'colOffset': 0]  // мапа с параметрами (отступы сверху и слева)
 
     checkAndReadFile(ImportInputStream, UploadFileName, allValues, headerValues, TABLE_START_VALUE, TABLE_END_VALUE, HEADER_ROW_COUNT, paramsMap)
 
     // проверка шапки
     checkHeaderXls(headerValues, COLUMN_COUNT, HEADER_ROW_COUNT, tmpRow)
     if (logger.containsLevel(LogLevel.ERROR)) {
-        return;
+        return
     }
     // освобождение ресурсов для экономии памяти
     headerValues.clear()
@@ -497,6 +491,8 @@ void importData() {
     def rowIndex = 0
     def rows = []
     def allValuesCount = allValues.size()
+    def totalQuarterRowFromFile = null
+    def totalRowFromFile = null
 
     // формирвание строк нф
     for (def i = 0; i < allValuesCount; i++) {
@@ -509,7 +505,15 @@ void importData() {
             break
         }
         // Пропуск итоговых строк
-        if (rowValues[INDEX_FOR_SKIP] == "Итого за текущий отчетный (налоговый) период" || rowValues[INDEX_FOR_SKIP].contains("Итого за текущий квартал")) {
+        if (rowValues[INDEX_FOR_SKIP]) {
+            if (rowValues[INDEX_FOR_SKIP].contains("Итого за текущий квартал")) {
+                rowIndex++
+                totalQuarterRowFromFile = getNewRowFromXls(rowValues, colOffset, fileRowIndex, rowIndex)
+            } else if (rowValues[INDEX_FOR_SKIP] == "Итого за текущий отчетный (налоговый) период") {
+                rowIndex++
+                totalRowFromFile = getNewRowFromXls(rowValues, colOffset, fileRowIndex, rowIndex)
+            }
+
             allValues.remove(rowValues)
             rowValues.clear()
             continue
@@ -523,11 +527,26 @@ void importData() {
         rowValues.clear()
     }
 
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.allSaved
-    // итоговые строки
-    rows.add(getDataRow(dataRows, 'totalQuarter'))
-    rows.add(getDataRow(dataRows, 'total'))
+    // получить строки из шаблона
+    def formTemplate = formDataService.getFormTemplate(formData.formType.id, formData.reportPeriodId)
+    def templateRows = formTemplate.rows
+
+    def totalQuarterRow = getDataRow(templateRows, 'totalQuarter')
+    def totalRow = getDataRow(templateRows, 'total')
+    rows.add(totalQuarterRow)
+    rows.add(totalRow)
+    updateIndexes(rows)
+
+    // сравнение итогов
+    if (totalQuarterRowFromFile) {
+        compareSimpleTotalValues(totalQuarterRow, totalQuarterRowFromFile, rows, totalColumns, formData, logger, false)
+    }
+    if (totalRowFromFile && formData.kind == FormDataKind.PRIMARY) {
+        // строка Итого за текущий отчетный (налоговый) период
+        def dataRowsPrev = getDataRowsPrev()
+        totalRow.costs = getTotalValue(rows, dataRowsPrev)
+        compareSimpleTotalValues(totalRow, totalRowFromFile, rows, totalColumns, formData, logger, false)
+    }
 
     showMessages(rows, logger)
     if (!logger.containsLevel(LogLevel.ERROR)) {

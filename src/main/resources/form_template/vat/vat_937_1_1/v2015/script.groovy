@@ -67,10 +67,7 @@ switch (formDataEvent) {
         break
     case FormDataEvent.IMPORT:
         importData()
-        if (!logger.containsLevel(LogLevel.ERROR)) {
-            calc()
-            formDataService.saveCachedDataRows(formData, logger)
-        }
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.IMPORT_TRANSPORT_FILE:
         importTransportData()
@@ -91,7 +88,7 @@ def editableColumns = allColumns - 'rowNum'
 
 // Проверяемые на пустые значения атрибуты (графа )
 @Field
-def nonEmptyColumns = ['typeCode', 'invoice']
+def nonEmptyColumns = ['typeCode', 'invoice', 'cost', 'nds']
 
 // Атрибуты итоговых строк для которых вычисляются суммы (графа )
 @Field
@@ -167,8 +164,6 @@ void calc() {
 
     def totalRow = getDataRow(dataRows, 'total')
     calcTotalSum(dataRows, totalRow, totalSumColumns)
-
-    sortFormDataRows(false)
 }
 
 void logicCheck() {
@@ -409,7 +404,7 @@ void importTransportData() {
     char QUOTE = '\0'
 
     String[] rowCells
-    int fileRowIndex = 0    // номер строки в файле
+    int fileRowIndex = 2    // номер строки в файле (1, 2..). Начинается с 2, потому что первые две строки - заголовок и пустая строка
     int rowIndex = 0        // номер строки в НФ
     def total = null		// итоговая строка со значениями из тф для добавления
     def newRows = []
@@ -447,7 +442,7 @@ void importTransportData() {
     }
 
     // сравнение итогов
-    if (total) {
+    if (!logger.containsLevel(LogLevel.ERROR) && total) {
         // мапа с алиасами граф и номерами колонокв в xml (алиас -> номер колонки)
         def totalColumnsIndexMap = ['nds' : 16]
         // подсчет итогов
@@ -472,7 +467,6 @@ void importTransportData() {
 
     showMessages(newRows, logger)
     if (!logger.containsLevel(LogLevel.ERROR)) {
-        logger.info("newRows "+newRows.size())
         updateIndexes(newRows)
         formDataService.getDataRowHelper(formData).allCached = newRows
     }
@@ -551,7 +545,7 @@ void importData() {
     // проверка шапки
     checkHeaderXls(headerValues, COLUMN_COUNT, HEADER_ROW_COUNT, tmpRow)
     if (logger.containsLevel(LogLevel.ERROR)) {
-        return;
+        return
     }
     // освобождение ресурсов для экономии памяти
     headerValues.clear()
@@ -565,6 +559,7 @@ void importData() {
     def rowIndex = 0
     def rows = []
     def allValuesCount = allValues.size()
+    def totalRowFromFile = null
 
     // формирвание строк нф
     for (def i = 0; i < allValuesCount; i++) {
@@ -578,6 +573,9 @@ void importData() {
         }
         // Пропуск итоговых строк
         if (!rowValues[INDEX_FOR_SKIP]) {
+            // последняя итоговая строка - ВСЕГО
+            totalRowFromFile = getNewRowFromXls(rowValues, colOffset, fileRowIndex, rowIndex)
+
             allValues.remove(rowValues)
             rowValues.clear()
             continue
@@ -593,12 +591,13 @@ void importData() {
 
     // подсчет итогов
     def totalRow = getFixedRow('Всего', 'total', true)
-    calcTotalSum(rows, totalRow, totalSumColumns)
     rows.add(totalRow)
+    updateIndexes(rows)
+    // сравнение итогов
+    compareSimpleTotalValues(totalRow, totalRowFromFile, rows, totalSumColumns, formData, logger, false)
 
     showMessages(rows, logger)
     if (!logger.containsLevel(LogLevel.ERROR)) {
-        updateIndexes(rows)
         formDataService.getDataRowHelper(formData).allCached = rows
     }
 }

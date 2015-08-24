@@ -19,6 +19,8 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 import static java.util.Arrays.asList;
@@ -39,6 +41,8 @@ public class RefBookDaoTest {
     public static final String ATTRIBUTE_WEIGHT = "weight";
 	public static final String ATTRIBUTE_NULL = "null";
     private static final String REF_BOOK_RECORD_TABLE_NAME = "REF_BOOK_RECORD";
+
+    private static final SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
 
 	@Autowired
     RefBookDao refBookDao;
@@ -675,5 +679,12 @@ public class RefBookDaoTest {
         List<String> matchedRecordsCount = refBookDao.getMatchedRecordsByUniqueAttributesIncome102(attributes, records, 1);
         assertEquals(1, matchedRecordsCount.size());
         assertEquals(opuCode, matchedRecordsCount.get(0));
+    }
+
+    @Test
+    public void testIsVersionUsedLikeParent() throws ParseException {
+        List<Pair<Date, Date>> pairs = refBookDao.isVersionUsedLikeParent(4L, 8l, sdf.parse("01.01.2012"));
+        assertEquals(2, pairs.size());
+        assertNull(pairs.get(0).getSecond());
     }
 }

@@ -3,26 +3,14 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentReportPeriodDao;
-import com.aplana.sbrf.taxaccounting.model.AutoNumerationColumn;
-import com.aplana.sbrf.taxaccounting.model.Cell;
-import com.aplana.sbrf.taxaccounting.model.Column;
-import com.aplana.sbrf.taxaccounting.model.ColumnType;
-import com.aplana.sbrf.taxaccounting.model.DataRow;
-import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod;
-import com.aplana.sbrf.taxaccounting.model.FormStyle;
-import com.aplana.sbrf.taxaccounting.model.FormTemplate;
-import com.aplana.sbrf.taxaccounting.model.LockData;
-import com.aplana.sbrf.taxaccounting.model.NumerationType;
-import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
-import com.aplana.sbrf.taxaccounting.model.TemplateFilter;
-import com.aplana.sbrf.taxaccounting.model.VersionSegment;
-import com.aplana.sbrf.taxaccounting.model.VersionedObjectStatus;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.FormDataService;
 import com.aplana.sbrf.taxaccounting.service.FormTemplateService;
+import com.aplana.sbrf.taxaccounting.service.PeriodService;
 import com.aplana.sbrf.taxaccounting.util.TransactionHelper;
 import com.aplana.sbrf.taxaccounting.util.TransactionLogic;
 import org.apache.commons.lang3.ArrayUtils;
@@ -55,6 +43,9 @@ public class FormTemplateServiceImpl implements FormTemplateService {
 	private static final int FORM_COLUMN_NAME_MAX_VALUE = 1000;
 	private static final int FORM_COLUMN_ALIAS_MAX_VALUE = 100;
 	private static final int DATA_ROW_ALIAS_MAX_VALUE = 20;
+
+    private static final String CLOSE_PERIOD = "Следующие периоды %s данной версии макета закрыты: %s. " +
+            "Для добавления в макет автонумеруемой графы с типом сквозной нумерации строк необходимо открыть перечисленные периоды!";
     private static final SimpleDateFormat SIMPLE_DATE_FORMAT = new SimpleDateFormat("dd.MM.yyyy");
 
 	private Set<String> checkSet = new HashSet<String>();
@@ -71,6 +62,8 @@ public class FormTemplateServiceImpl implements FormTemplateService {
     private LockDataService lockDataService;
     @Autowired
     private DepartmentReportPeriodDao departmentReportPeriodDao;
+    @Autowired
+    PeriodService periodService;
 
 	@Override
 	public List<FormTemplate> listAll() {
@@ -120,7 +113,18 @@ public class FormTemplateServiceImpl implements FormTemplateService {
         }
 	}
 
-	@Override
+    @Override
+    public int getFormTemplateIdByFTAndReportPeriod(int formTypeId, int reportPeriodId) {
+        try {
+            ReportPeriod reportPeriod = periodService.getReportPeriod(reportPeriodId);
+            return formTemplateDao.getFormTemplateIdByFTAndReportPeriod(formTypeId, reportPeriod.getStartDate(), reportPeriod.getEndDate());
+        } catch (DaoException e){
+            logger.error(e.getMessage(), e);
+            throw new ServiceException(e.getMessage(), e);
+        }
+    }
+
+    @Override
 	public void checkLockedByAnotherUser(Integer formTemplateId, TAUserInfo userInfo){
 		if (formTemplateId!=null){
             LockData objectLock = lockDataService.getLock(LockData.LockObjects.FORM_TEMPLATE.name() + "_" + formTemplateId);
@@ -133,14 +137,10 @@ public class FormTemplateServiceImpl implements FormTemplateService {
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
     public LockData getObjectLock(final Integer formTemplateId, final TAUserInfo userInfo) {
-        return tx.returnInNewTransaction(new TransactionLogic<LockData>() {
+        return tx.executeInNewTransaction(new TransactionLogic<LockData>() {
             @Override
-            public LockData executeWithReturn() {
+            public LockData execute() {
                 return lockDataService.getLock(LockData.LockObjects.FORM_TEMPLATE.name() + "_" + formTemplateId);
-            }
-
-            @Override
-            public void execute() {
             }
         });
     }
@@ -352,9 +352,15 @@ public class FormTemplateServiceImpl implements FormTemplateService {
     }
 
     @Override
-    public boolean isMonthly(int formId) {
-        FormTemplate formTemplate = formTemplateDao.get(formId);
+    public boolean isMonthly(int formTemplateId) {
+        FormTemplate formTemplate = formTemplateDao.get(formTemplateId);
         return formTemplate.isMonthly();
+    }
+
+    @Override
+    public boolean isComparative(Integer formTemplateId) {
+        FormTemplate formTemplate = formTemplateDao.get(formTemplateId);
+        return formTemplate.isComparative();
     }
 
     @Override
@@ -386,9 +392,7 @@ public class FormTemplateServiceImpl implements FormTemplateService {
 						stringBuilder.append(", ");
 					}
 				}
-				logger.error("Следующие периоды налоговых форм данной версии макета закрыты: " +
-						stringBuilder.toString() + ". " +
-						"Для добавления в макет автонумеруемой графы с типом сквозной нумерации строк необходимо открыть перечисленные периоды!");
+				logger.error(CLOSE_PERIOD, MessageGenerator.mesSpeckPluralD(formTemplate.getType().getTaxType()), stringBuilder.toString());
 			} else if (oldSerial && newCross) { // 9А.1.1
 				formDataService.batchUpdatePreviousNumberRow(formTemplate, user);
 			}
@@ -406,7 +410,7 @@ public class FormTemplateServiceImpl implements FormTemplateService {
     }
 
     @Override
-    public boolean existFormTemplate(int formTypeId, int reportPeriodId) {
-        return formTemplateDao.existFormTemplate(formTypeId, reportPeriodId);
+    public boolean existFormTemplate(int formTypeId, int reportPeriodId, boolean excludeInactiveTemplate) {
+        return formTemplateDao.existFormTemplate(formTypeId, reportPeriodId, excludeInactiveTemplate);
     }
 }

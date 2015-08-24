@@ -60,6 +60,9 @@ public class CreateFormDataHandler extends AbstractActionHandler<CreateFormData,
     private static final String ERROR_DEPARTMENT_REPORT_PERIOD_NOT_FOUND = "Не определен отчетный период подразделения!";
     private final static String MANUAL_USED_MESSAGE = "Для формирования декларации в корректируемом периоде используются данные версии ручного ввода, созданной в форме «%s», %s, «%s»!";
     private static final SimpleDateFormat SDF_DD_MM_YYYY = new SimpleDateFormat("dd.MM.yyyy");
+    private static final String NOT_EXIST_DESTINATIONS_ETR = "Форма не является источником данных для %s";
+    private static final String NOT_EXIST_DESTINATIONS_OTHER = "Налоговая форма не является источником данных для других налоговых форм и декларации.";
+    private static final String FORM_IS_DESTINATION = "Не найдены назначения источников-приемников в периоде %s. Форма не является источником данных для %s.";
 
     public CreateFormDataHandler() {
 		super(CreateFormData.class);
@@ -77,6 +80,14 @@ public class CreateFormDataHandler extends AbstractActionHandler<CreateFormData,
         // Подставляется последний отчетный период подразделения
         DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.getLast(action.getDepartmentId(),
                 action.getReportPeriodId());
+        // Получаем DepartmentReportPeriod для периода сравнения (может быть null)
+        Integer comparativDrpId = null;
+        DepartmentReportPeriod comparativDrp = null;
+        if (action.getComparativPeriodId() != null) {
+            comparativDrp = departmentReportPeriodService.getLast(action.getDepartmentId(),
+                    action.getComparativPeriodId());
+            comparativDrpId = comparativDrp.getId();
+        }
         if (departmentReportPeriod == null) {
             throw new ServiceException(ERROR_DEPARTMENT_REPORT_PERIOD_NOT_FOUND);
         }
@@ -86,21 +97,12 @@ public class CreateFormDataHandler extends AbstractActionHandler<CreateFormData,
         FormType formType = formTypeService.get(formDataTypeId);
 
         if (lockDataService.lock(key, userInfo.getUser().getId(),
-                String.format(LockData.DescriptionTemplate.FORM_DATA_TASK.getText(),
+                MessageGenerator.getFDMsg(
                         "Создание налоговой формы",
-                        departmentReportPeriod.getReportPeriod().getName() + " " + departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear(),
-                        action.getMonthId() != null
-                                ? " " + Formats.getRussianMonthNameWithTier(action.getMonthId())
-                                : "",
-                        departmentReportPeriod.getCorrectionDate() != null
-                                ? " с датой сдачи корректировки " + SDF_DD_MM_YYYY.format(departmentReportPeriod.getCorrectionDate())
-                                : "",
-                        department.getName(),
                         formType.getName(),
                         kind.getName(),
-                        departmentReportPeriod.getCorrectionDate() != null
-                                ? "Корректировка"
-                                : "Абсолютные значения"),
+                        action.isAccruing(),
+                        department.getName(), action.getMonthId(), true, departmentReportPeriod, comparativDrp),
                 lockDataService.getLockTimeout(LockData.LockObjects.FORM_DATA_CREATE)) == null) {
             //Если блокировка успешно установлена
             try {
@@ -113,7 +115,11 @@ public class CreateFormDataHandler extends AbstractActionHandler<CreateFormData,
                 List<DepartmentFormType> sources = sourceService.getDFTSourcesByDFT(departmentReportPeriod.getDepartmentId(),
                         formDataTypeId, kind, departmentReportPeriod.getReportPeriod().getId());
                 if (!sources.isEmpty()){
-                    logger.warn("Форма является приемником данных.");
+                    if (formType.getTaxType() == TaxType.ETR || formType.getTaxType() == TaxType.DEAL) {
+                        logger.warn("Форма является приемником данных для других форм.");
+                    } else {
+                        logger.warn("Налоговая форма является приемником данных для других налоговых форм.");
+                    }
                 }
 
                 // 2. Если форма не является источников данных для других налоговых форм и деклараций в указанном периоде, то Система выводит сообщение в панель уведомления предупреждение: "Не найдены назначения источников-приемников в периоде <Период создания формы>. Форма не является источником данных для декларации."
@@ -122,11 +128,16 @@ public class CreateFormDataHandler extends AbstractActionHandler<CreateFormData,
                 List<DepartmentFormType> formDestinations = sourceService.getFormDestinations(
                         departmentReportPeriod.getDepartmentId(), formDataTypeId, kind, departmentReportPeriod.getReportPeriod().getId());
                 if (declarationDestinations.isEmpty() && formDestinations.isEmpty()){
-                    logger.warn("Не найдены назначения источников-приемников в периоде " + departmentReportPeriod.getReportPeriod().getName() + ". Форма не является источником данных для декларации.");
+                    if (formType.getTaxType() == TaxType.ETR || formType.getTaxType() == TaxType.DEAL) {
+                        logger.warn(String.format(NOT_EXIST_DESTINATIONS_ETR, (formType.getTaxType() == TaxType.ETR ? "других форм" : "других форм и уведомления")));
+                    } else {
+                        logger.warn(NOT_EXIST_DESTINATIONS_OTHER);
+                    }
                 }
 
                 int templateId = formTemplateService.getActiveFormTemplateId(formDataTypeId, departmentReportPeriod.getReportPeriod().getId());
                 long formDataId = formDataService.createFormData(logger, userInfo, templateId, departmentReportPeriod.getId(),
+                        comparativDrpId, action.isAccruing(),
                         kind, action.getMonthId(), false);
 
                 // Если декларация является приемником и есть форма ручного ввода в корректируемом периоде

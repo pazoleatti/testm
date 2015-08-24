@@ -82,6 +82,7 @@ public class PeriodsGetFilterDataHandler extends AbstractActionHandler<PeriodsGe
                 case INCOME:
                 case DEAL:
                 case VAT:
+                case ETR: //TODO
                     res.setCanChangeDepartment(false);
 	                res.setDepartments(Arrays.asList(departmentService.getBankDepartment()));
 	                res.setSelectedDepartment(
@@ -109,6 +110,7 @@ public class PeriodsGetFilterDataHandler extends AbstractActionHandler<PeriodsGe
 		        case INCOME:
 		        case DEAL:
 		        case VAT:
+                case ETR: //TODO
 			        res.setCanEdit(false);
 			        break;
 	        }

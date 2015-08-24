@@ -6,6 +6,7 @@ import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.TaxType
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
 import com.aplana.sbrf.taxaccounting.model.util.StringUtils
 import groovy.transform.Field
 
@@ -70,11 +71,7 @@ switch (formDataEvent) {
         break
     case FormDataEvent.IMPORT:
         importData()
-        if (!logger.containsLevel(LogLevel.ERROR)) {
-            calc()
-            formDataService.saveCachedDataRows(formData, logger)
-        }
-        calc()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.IMPORT_TRANSPORT_FILE:
         importTransportData()
@@ -122,11 +119,24 @@ def endDate = null
 @Field
 def Boolean isBalancePeriod = null
 
+@Field
+def periodsMap = [:]
+
+@Field
+def formDataMap = [:]
+
+// значения графы 10 за последение 3 года (ключ: идентификатор формы, графа 4, 5, 6)
+@Field
+def last3YearsValuesMap = [:]
+
+@Field
+def useFormMap = [:]
+
 //// Обертки методов
 
 // Поиск записи в справочнике по значению (для импорта)
 def getRecordIdImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
-                      def boolean required = true) {
+                      def boolean required = false) {
     if (value == null || value.trim().isEmpty()) {
         return null
     }
@@ -164,20 +174,27 @@ void calc() {
             }
         }
 
-        calcSubTotal(dataRows)
+        // посчитать "итого по коду"
+        def totalRows = calcSubTotalRows(dataRows)
+
+        // добавить "итого по коду" в таблицу
+        def i = 0
+        totalRows.each { index, row ->
+            dataRows.add(index + i++, row)
+        }
     }
 
     dataRows.add(calcTotalRow(dataRows))
-
-    sortFormDataRows(false)
 }
 
-void calcSubTotal(def dataRows) {
+def calcSubTotalRows(def dataRows) {
     // посчитать "итого по коду"
     def totalRows = [:]
     def code = null
     def sum = 0, sum2 = 0
-    dataRows.eachWithIndex { row, i ->
+    def rows = dataRows.findAll { it.getAlias() == null }
+
+    rows.eachWithIndex { row, i ->
         if (code == null) {
             code = getKnu(row.code)
         }
@@ -189,7 +206,7 @@ void calcSubTotal(def dataRows) {
             code = getKnu(row.code)
         }
         // если строка последняя то сделать для ее кода расхода новую строку "итого по коду"
-        if (i == dataRows.size() - 1) {
+        if (i == rows.size() - 1) {
             sum += (row.taxAccountingRuble ?: 0)
             sum2 += (row.ruble ?: 0)
             def totalRowCode = getNewRow(code, sum, sum2)
@@ -201,11 +218,7 @@ void calcSubTotal(def dataRows) {
         sum2 += (row.ruble ?: 0)
     }
 
-    // добавить "итого по коду" в таблицу
-    def i = 0
-    totalRows.each { index, row ->
-        dataRows.add(index + i++, row)
-    }
+    return totalRows
 }
 
 def BigDecimal calc8(DataRow row) {
@@ -371,24 +384,34 @@ void logicCheck() {
         // 12. Проверка значения суммы дохода в налоговом учете, для первичного документа, указанного для суммы дохода в бухгалтерском учёте
         if (row.ruble && row.docDate != null) {
             def Date date = row.docDate
-            def Date from = new SimpleDateFormat('dd.MM.yyyy').parse('01.01.' + (Integer.valueOf(new SimpleDateFormat('yyyy').format(date)) - 3))
-            def reportPeriods = reportPeriodService.getReportPeriodsByDate(TaxType.INCOME, from, date)
+            def Date from = Date.parse('dd.MM.yyyy', '01.01.' + (Integer.valueOf(date.format('yyyy')) - 3))
+            def reportPeriods = getPeriods(from, date)
 
             isFind = false
-            def sum = 0 // сумма 12-х граф
+            def sum = 0 // сумма 10-х граф
             def periods = []
 
+            // обход периодов за последние 3 года
             for (reportPeriod in reportPeriods) {
-                def findFormData = formDataService.getLast(formData.formType.id, formData.kind, formData.departmentId, reportPeriod.id, formData.periodOrder)
+                def findFormData = getFormData(reportPeriod.id)
                 if (findFormData != null) {
-                    for (findRow in formDataService.getDataRowHelper(findFormData).allSaved) {
-                        // SBRFACCTAX-3531 исключать строку из той же самой формы не надо
-                        if (findRow.getAlias() == null && findRow.code == row.code && findRow.docNumber == row.docNumber
-                                && findRow.docDate == row.docDate && findRow.taxAccountingRuble > 0) {
-                            isFind = true
-                            sum += findRow.taxAccountingRuble
-                            periods += (reportPeriod.name + " " + reportPeriod.taxPeriod.year)
+                    // если форма не использовалась, то пройтись по ней и собрать данные в мапу
+                    if (useFormMap[findFormData.id] == null) {
+                        for (findRow in formDataService.getDataRowHelper(findFormData).allSaved) {
+                            def key = getLast3YearsKey(findFormData.id, findRow.code, findRow.docNumber, findRow.docDate)
+                            // SBRFACCTAX-3531 исключать строку из той же самой формы не надо
+                            if (findRow.getAlias() == null && findRow.taxAccountingRuble > 0) {
+                                last3YearsValuesMap[key] = (last3YearsValuesMap[key] ?: 0) + findRow.taxAccountingRuble
+                            }
                         }
+                        useFormMap[findFormData.id] = true
+                    }
+                    // среди собранных данных проверить наличие подходящей строки
+                    def key = getLast3YearsKey(findFormData.id, row.code, row.docNumber, row.docDate)
+                    if (last3YearsValuesMap[key] != null) {
+                        isFind = true
+                        sum += last3YearsValuesMap[key]
+                        periods += (reportPeriod.name + " " + reportPeriod.taxPeriod.year)
                     }
                 }
             }
@@ -418,6 +441,34 @@ void logicCheck() {
 
     // 10. Арифметические проверки расчета строки общих итогов
     checkTotalSum(dataRows, totalColumns, logger, !isBalancePeriod())
+}
+
+def getPeriods(def date1, date2) {
+    def key = "$date1#$date2"
+    if (periodsMap[key] == null) {
+        periodsMap[key] = reportPeriodService.getReportPeriodsByDate(TaxType.INCOME, date1, date2)
+    }
+    return periodsMap[key]
+}
+
+def getFormData(reportPeriodId) {
+    String key = "$reportPeriodId"
+    if (formDataMap[key] != -1 && formDataMap[key] == null) { // чтобы повторно не искал несуществующие формы
+        formDataMap[key] = (formDataService.getLast(formData.formType.id, formData.kind, formData.departmentId, reportPeriodId, formData.periodOrder) ?: -1)
+    }
+    return (formDataMap[key] != -1) ? formDataMap[key] : null
+}
+
+/**
+ * Получить ключ для мапы в которой хранятся занчения за последние 3 года.
+ *
+ * @param findFormDataId идентификатор формы
+ * @param code графа 4
+ * @param docNumber графа 5
+ * @param docDate графа 6
+ */
+def getLast3YearsKey(def findFormDataId, def code, def  docNumber, def docDate) {
+    return "$findFormDataId#$code#$docNumber#$docDate"
 }
 
 def String getKnu(def code) {
@@ -493,7 +544,7 @@ void importTransportData() {
                 // итоговая строка тф
                 rowCells = reader.readNext()
                 if (rowCells != null) {
-                    totalTF = getNewRow(rowCells, COLUMN_COUNT, ++fileRowIndex, rowIndex)
+                    totalTF = getNewRow(rowCells, COLUMN_COUNT, ++fileRowIndex, rowIndex, true)
                 }
                 break
             }
@@ -503,14 +554,20 @@ void importTransportData() {
         reader.close()
     }
 
-    calcSubTotal(newRows)
+    // посчитать "итого по коду"
+    def totalRows = calcSubTotalRows(newRows)
+    def i = 0
+    totalRows.each { index, row ->
+        newRows.add(index + i++, row)
+    }
+
     def totalRow = calcTotalRow(newRows)
     newRows.add(totalRow)
 
     showMessages(newRows, logger)
 
     // сравнение итогов
-    if (totalTF) {
+    if (!logger.containsLevel(LogLevel.ERROR) && totalTF) {
         // мапа с алиасами граф и номерами колонокв в xml (алиас -> номер колонки)
         def totalColumnsIndexMap = ['taxAccountingRuble' : 10, 'ruble' : 12]
         def colOffset = 1
@@ -558,10 +615,11 @@ def getSubTotalRows(def dataRows) {
  * @param columnCount количество колонок
  * @param fileRowIndex номер строки в тф
  * @param rowIndex строка в нф
+ * @param isTotal признак итоговой строки (для пропуска получения справочных значении)
  *
  * @return вернет строку нф или null, если количество значений в строке тф меньше
  */
-def getNewRow(String[] rowCells, def columnCount, def fileRowIndex, def rowIndex) {
+def getNewRow(String[] rowCells, def columnCount, def fileRowIndex, def rowIndex, def isTotal = false) {
     def newRow = formData.createStoreMessagingDataRow()
     newRow.setIndex(rowIndex)
     newRow.setImportIndex(fileRowIndex)
@@ -583,14 +641,13 @@ def getNewRow(String[] rowCells, def columnCount, def fileRowIndex, def rowIndex
     def int colIndex
 
     // графа 4 - поиск записи идет по графе 2
-    colIndex = 2
-    newRow.code = getRecordIdImport(28, 'CODE', pure(rowCells[colIndex]), fileRowIndex, colIndex + colOffset, false)
-    def map = getRefBookValue(28, newRow.code)
-
-    // графа 4 проверка
-    if (map != null) {
-        colIndex = 4
-        formDataService.checkReferenceValue(28, pure(rowCells[colIndex]), map.NUMBER?.stringValue, fileRowIndex, colIndex + colOffset, logger, false)
+    if (!isTotal) {
+        String filter = "LOWER(CODE) = LOWER('" + pure(rowCells[2]) + "') and LOWER(NUMBER) = LOWER('" + pure(rowCells[4]).replaceAll(/\./, "") + "')"
+        def records = refBookFactory.getDataProvider(28).getRecords(getReportPeriodEndDate(), null, filter, null)
+        colIndex = 2
+        if (checkImportRecordsCount(records, refBookFactory.get(28), 'CODE', pure(rowCells[colIndex]), getReportPeriodEndDate(), fileRowIndex, colIndex + colOffset, logger, false)) {
+            newRow.code = records.get(0).get(RefBook.RECORD_ID_ALIAS).numberValue
+        }
     }
 
     // графа 3
@@ -645,7 +702,7 @@ void importData() {
     // проверка шапки
     checkHeaderXls(headerValues, COLUMN_COUNT, HEADER_ROW_COUNT)
     if (logger.containsLevel(LogLevel.ERROR)) {
-        return;
+        return
     }
     // освобождение ресурсов для экономии памяти
     headerValues.clear()
@@ -659,6 +716,8 @@ void importData() {
     def rowIndex = 0
     def rows = []
     def allValuesCount = allValues.size()
+    def totalRowFromFile = null
+    def totalRowFromFileMap = [:]           // мапа для хранения строк подитогов со значениями из файла (стили простых строк)
 
     // формирвание строк нф
     for (def i = 0; i < allValuesCount; i++) {
@@ -670,19 +729,65 @@ void importData() {
             rowValues.clear()
             break
         }
+        rowIndex++
         // Пропуск итоговых строк
-        if (rowValues[INDEX_FOR_SKIP] && (rowValues[INDEX_FOR_SKIP] == "Итого" || rowValues[INDEX_FOR_SKIP].contains("Итого по КНУ "))) {
+        if (rowValues[INDEX_FOR_SKIP] == "Итого") {
+            totalRowFromFile = getNewRowFromXls(rowValues, colOffset, fileRowIndex, rowIndex, true)
+
+            allValues.remove(rowValues)
+            rowValues.clear()
+            continue
+        } else if (rowValues[INDEX_FOR_SKIP].contains("Итого по КНУ ")) {
+            def subTotalRow = getNewSubTotalRowFromXls(rowValues, colOffset, fileRowIndex, rowIndex)
+            if (totalRowFromFileMap[subTotalRow.helper] == null) {
+                totalRowFromFileMap[subTotalRow.helper] = []
+            }
+            totalRowFromFileMap[subTotalRow.helper].add(subTotalRow)
+            rows.add(subTotalRow)
+
             allValues.remove(rowValues)
             rowValues.clear()
             continue
         }
         // простая строка
-        rowIndex++
         def newRow = getNewRowFromXls(rowValues, colOffset, fileRowIndex, rowIndex)
         rows.add(newRow)
         // освободить ненужные данные - иначе не хватит памяти
         allValues.remove(rowValues)
         rowValues.clear()
+    }
+
+    // сравнение подитогов
+    if (!totalRowFromFileMap.isEmpty()) {
+        def totalRowsMap = calcSubTotalRows(rows)
+        totalRowsMap.values().toArray().each { tmpRow ->
+            def totalRows = totalRowFromFileMap[tmpRow.helper]
+            if (totalRows) {
+                totalRows.each { totalRow ->
+                    compareTotalValues(totalRow, tmpRow, totalColumns, logger, false)
+                }
+                totalRowFromFileMap.remove(tmpRow.helper)
+            }
+        }
+        if (!totalRowFromFileMap.isEmpty()) {
+            // для этих подитогов из файла нет групп
+            totalRowFromFileMap.each { key, totalRows ->
+                totalRows.each { totalRow ->
+                    totalColumns.each { alias ->
+                        def msg = String.format(COMPARE_TOTAL_VALUES, totalRow.getIndex(), getColumnName(totalRow, alias), totalRow[alias], BigDecimal.ZERO)
+                        rowWarning(logger, totalRow, msg)
+                    }
+                }
+            }
+        }
+    }
+
+    // сравнение итогов
+    def totalRow = calcTotalRow(rows)
+    rows.add(totalRow)
+    updateIndexes(rows)
+    if (totalRowFromFile) {
+        compareSimpleTotalValues(totalRow, totalRowFromFile, rows, totalColumns, formData, logger, false)
     }
 
     showMessages(rows, logger)
@@ -734,8 +839,9 @@ void checkHeaderXls(def headerRows, def colCount, rowCount) {
  * @param colOffset отступ в колонках
  * @param fileRowIndex номер строки в тф
  * @param rowIndex строка в нф
+ * @param isTotal признак итоговой строки (для пропуска получения справочных значении)
  */
-def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) {
+def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex, def isTotal = false) {
     def newRow = formData.createStoreMessagingDataRow()
     newRow.setIndex(rowIndex)
     newRow.setImportIndex(fileRowIndex)
@@ -749,14 +855,13 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
     }
 
     // графа 4 - поиск записи идет по графе 2
-    def colIndex = 2
-    newRow.code = getRecordIdImport(28, 'CODE', values[colIndex], fileRowIndex, colIndex + colOffset)
-    def map = getRefBookValue(28, newRow.code)
-
-    // графа 4 проверка
-    if (map != null) {
-        colIndex = 4
-        formDataService.checkReferenceValue(28, values[colIndex], map.NUMBER?.stringValue, fileRowIndex, colIndex + colOffset, logger, true)
+    if (!isTotal) {
+        String filter = "LOWER(CODE) = LOWER('" + values[2] + "') and LOWER(NUMBER) = LOWER('" + values[4].replaceAll(/\./, "") + "')"
+        def records = refBookFactory.getDataProvider(28).getRecords(getReportPeriodEndDate(), null, filter, null)
+        colIndex = 2
+        if (checkImportRecordsCount(records, refBookFactory.get(28), 'CODE', values[colIndex], getReportPeriodEndDate(), fileRowIndex, colIndex + colOffset, logger, false)) {
+            newRow.code = records.get(0).get(RefBook.RECORD_ID_ALIAS).numberValue
+        }
     }
 
     // графа 3
@@ -773,13 +878,41 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
 
     // графа 7
     colIndex++
-    newRow.currencyCode = getRecordIdImport(15, 'CODE', values[colIndex], fileRowIndex, colIndex + colOffset)
+    newRow.currencyCode = getRecordIdImport(15, 'CODE', values[colIndex], fileRowIndex, colIndex + colOffset, false)
 
     // графа 8..12
     ['rateOfTheBankOfRussia', 'taxAccountingCurrency', 'taxAccountingRuble', 'accountingCurrency', 'ruble'].each { alias ->
         colIndex++
         newRow[alias] = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
     }
+
+    return newRow
+}
+
+/**
+ * Получить новую подитоговую строку нф по значениям из экселя.
+ *
+ * @param values список строк со значениями
+ * @param colOffset отступ в колонках
+ * @param fileRowIndex номер строки в тф
+ * @param rowIndex строка в нф
+ */
+def getNewSubTotalRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) {
+    // графа helper
+    def title = values[1]
+    def alias = title.substring("Итого по КНУ ".size())?.trim()
+
+    def newRow = getNewRow(alias, 0, 0)
+    newRow.setIndex(rowIndex)
+    newRow.setImportIndex(fileRowIndex)
+
+    // графа 10
+    colIndex = 10
+    newRow.taxAccountingRuble = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
+
+    // графа 12
+    colIndex = 12
+    newRow.ruble = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
 
     return newRow
 }

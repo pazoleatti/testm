@@ -61,10 +61,7 @@ switch (formDataEvent) {
         break
     case FormDataEvent.IMPORT:
         importData()
-        if (!logger.containsLevel(LogLevel.ERROR)) {
-            calc()
-            formDataService.saveCachedDataRows(formData, logger)
-        }
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.IMPORT_TRANSPORT_FILE:
         importTransportData()
@@ -221,8 +218,6 @@ void calc() {
             }
         }
     }
-
-    sortFormDataRows(false)
 }
 
 void logicCheck() {
@@ -541,7 +536,7 @@ void importTransportData() {
 
     String[] rowCells
     int countEmptyRow = 0	// количество пустых строк
-    int fileRowIndex = 0    // номер строки в файле
+    int fileRowIndex = 2    // номер строки в файле (1, 2..). Начинается с 2, потому что первые две строки - заголовок и пустая строка
     int rowIndex = 0        // номер строки в НФ
     def totalTF = null		// итоговая строка со значениями из тф для добавления
     def mapRows = [:]
@@ -754,38 +749,19 @@ void importData() {
     // проверка шапки
     checkHeaderXls(headerValues, COLUMN_COUNT, HEADER_ROW_COUNT, tmpRow)
     if (logger.containsLevel(LogLevel.ERROR)) {
-        return;
+        return
     }
     // освобождение ресурсов для экономии памяти
     headerValues.clear()
     headerValues = null
 
     def title = null
-    def isFirstSection = true
     def isSection7 = false
 
     // получить строки из шаблона
     def formTemplate = formDataService.getFormTemplate(formData.formType.id, formData.reportPeriodId)
-    def templateRows = formTemplate.rows
-    def rowHead7 = getDataRow(templateRows, 'head_7')
-
-    def aliasR = [
-            '1. Суммы, полученные от реализации товаров (услуг, имущественных прав) по ставке 18%': [getDataRow(templateRows, 'head_1')],
-            'total_1': [getDataRow(templateRows, 'total_1')],
-            '2. Суммы, полученные от реализации товаров (услуг, имущественных прав) по ставке 10%': [getDataRow(templateRows, 'head_2')],
-            'total_2': [getDataRow(templateRows, 'total_2')],
-            '3. Суммы, полученные от реализации товаров (услуг, имущественных прав) по расчётной ставке исчисления налога от суммы полученного дохода 18/118': [getDataRow(templateRows, 'head_3')],
-            'total_3': [getDataRow(templateRows, 'total_3')],
-            '4. Суммы, полученные от реализации товаров (услуг, имущественных прав) по расчётной ставке исчисления налога от суммы полученного дохода 10/110': [getDataRow(templateRows, 'head_4')],
-            'total_4': [getDataRow(templateRows, 'total_4')],
-            '5. Суммы полученной оплаты (частичной оплаты) в счёт предстоящего оказания услуг по расчётной ставке исчисления налога от суммы полученного дохода 18/118': [getDataRow(templateRows, 'head_5')],
-            'total_5': [getDataRow(templateRows, 'total_5')],
-            '6. Суммы, полученные в виде штрафов, пени, неустоек по расчётной ставке исчисления налога от общей суммы полученного дохода 18/118': [getDataRow(templateRows, 'head_6')],
-            'total_6': [getDataRow(templateRows, 'total_6')],
-            'total': [getDataRow(templateRows, 'total')],
-            '7. Сумма налога, подлежащая вычету у продавца, по которой отгрузка соответствующих товаров осуществлена в текущем отчетном периоде': [rowHead7],
-            'total_7': [getDataRow(templateRows, 'total_7')]
-    ]
+    def rows = formTemplate.rows
+    def rowHead7 = getDataRow(rows, 'head_7')
 
     def fileRowIndex = paramsMap.rowOffset
     def colOffset = paramsMap.colOffset
@@ -793,8 +769,11 @@ void importData() {
     paramsMap = null
 
     def rowIndex = 0
-    def rows = []
     def allValuesCount = allValues.size()
+    def totalRowFromFileMap = [:]
+
+    def sectionIndex = null
+    def mapRows = [:]
 
     // формирвание строк нф
     for (def i = 0; i < allValuesCount; i++) {
@@ -808,39 +787,96 @@ void importData() {
             break
         }
         // Пропуск итоговых строк
-        def String str = rowValues[INDEX_FOR_SKIP]
-        if (str && (aliasR[str] != null || str == 'Итого' || str == 'Всего')) {
-            title = rowValues[1]
-            if (isFirstSection && title == 'Итого') {
-                isFirstSection = false
-            }
-            isSection7 = (title == rowHead7.fix)
+        def str = rowValues[INDEX_FOR_SKIP]
+        if (str != null && str != '' && str != 'Всего' && str != 'Итого') {
+            sectionIndex = str[0]
+            mapRows.put(sectionIndex, [])
+            isSection7 = (str == rowHead7.fix)
+
+            allValues.remove(rowValues)
+            rowValues.clear()
+            continue
+        } else if (str == 'Всего' || str == 'Итого') {
+            rowIndex++
+            def alias = (str == 'Всего' ? 'total' : getLastRowAlias(sectionIndex))
+            totalRowFromFileMap[alias] = getNewRowFromXls(rowValues, colOffset, fileRowIndex, rowIndex, false)
 
             allValues.remove(rowValues)
             rowValues.clear()
             continue
         }
         // простая строка
-        if (aliasR[title] == null) {
-            logger.error("Строка %d: Структура файла не соответствует макету налоговой формы", fileRowIndex)
-        } else {
-            // простая строка
-            rowIndex++
-            def newRow = getNewRowFromXls(rowValues, colOffset, fileRowIndex, rowIndex, isSection7)
-            aliasR[title].add(newRow)
-        }
+        rowIndex++
+        def newRow = getNewRowFromXls(rowValues, colOffset, fileRowIndex, rowIndex, isSection7)
+        mapRows[sectionIndex].add(newRow)
         // освободить ненужные данные - иначе не хватит памяти
         allValues.remove(rowValues)
         rowValues.clear()
     }
 
-    aliasR.each { k, v ->
-        rows.addAll(v)
+    def onlyTotalRowsMap = [:]
+    rows.each { row ->
+        if (row.getAlias() != null && row.getAlias().contains('total')) {
+            onlyTotalRowsMap[row.getAlias()] = row
+        }
+    }
+
+    // копирование данных по разделам
+    updateIndexes(rows)
+    sections.each { section ->
+        def copyRows = mapRows[section]
+        if (copyRows != null && !copyRows.isEmpty()) {
+            def insertIndex = getDataRow(rows, getFirstRowAlias(section)).getIndex()
+            rows.addAll(insertIndex, copyRows)
+            updateIndexes(rows)
+        }
+    }
+
+    // сравнение итогов
+    if (!totalRowFromFileMap.isEmpty()) {
+        // подсчет итоговой строки ВСЕГО
+        def total = formData.createStoreMessagingDataRow()
+        def section1_6Rows = []
+        // собрать строки из всех разделок кроме седьмого
+        (sections - '7').each { section ->
+            section1_6Rows.addAll(mapRows[section])
+        }
+        calcTotalSum(section1_6Rows, total, totalColumns + 'ndsDealSum')
+
+        // подсчитанные итоговые строки для сравнения
+        def totalRowTmpMap = [:]
+        mapRows.each { section, sectionRows ->
+            def totalRowTmp = formData.createStoreMessagingDataRow()
+            def columns = (section == '7' ? (totalColumns + 'ndsDealSum') : totalColumns)
+            calcTotalSum(sectionRows, totalRowTmp, columns)
+            def alias = getLastRowAlias(section)
+            if (section == '7') {
+                // строку ВСЕГО добавить перед итоговой строкой 7ого раздела
+                totalRowTmpMap['total'] = total
+            }
+            totalRowTmpMap[alias] = totalRowTmp
+        }
+
+        // задание значении итоговым строкам нф из итоговых строк файла
+        totalRowTmpMap.keySet().toArray().each { rowAlias ->
+            def totalRow = getDataRow(rows, rowAlias)
+            def totalRowFromFile = totalRowFromFileMap[rowAlias]
+            def columns = (rowAlias == 'total_7' ? (totalColumns + 'ndsDealSum') : totalColumns)
+            columns.each { alias ->
+                totalRow[alias] = totalRowFromFile[alias]
+                totalRow.setImportIndex(totalRowFromFile.getImportIndex())
+            }
+        }
+        // сравнение
+        totalRowTmpMap.each { alias, totalRowTmp ->
+            def totalRow = onlyTotalRowsMap[alias]
+            def columns = (alias == getLastRowAlias('7') ? (totalColumns + 'ndsDealSum') : totalColumns)
+            compareTotalValues(totalRow, totalRowTmp, columns, logger, false)
+        }
     }
 
     showMessages(rows, logger)
     if (!logger.containsLevel(LogLevel.ERROR)) {
-        updateIndexes(rows)
         formDataService.getDataRowHelper(formData).allCached = rows
     }
 }

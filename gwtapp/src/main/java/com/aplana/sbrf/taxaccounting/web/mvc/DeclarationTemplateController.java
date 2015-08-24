@@ -1,9 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.mvc;
 
-import com.aplana.sbrf.taxaccounting.model.BlobData;
-import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
-import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
-import com.aplana.sbrf.taxaccounting.model.UuidEnum;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
@@ -80,30 +77,56 @@ public class DeclarationTemplateController {
         declarationTemplateService.lock(declarationTemplateId, userInfo);
 
         try {
-            DeclarationTemplate declarationTemplateOld = declarationTemplateService.get(declarationTemplateId);
-            String jrxmBlobIdOld = declarationTemplateOld.getJrxmlBlobId();
-            String xsdUuidOld = declarationTemplateOld.getXsdId();
             req.setCharacterEncoding("UTF-8");
 
             if (file.getSize() == 0)
                 throw new ServiceException("Архив пустой.");
             DeclarationTemplate declarationTemplate = declarationTemplateImpexService.importDeclarationTemplate
                     (securityService.currentUserInfo(), declarationTemplateId, file.getInputStream());
-            Date endDate = declarationTemplateService.getDTEndDate(declarationTemplateId);
-            Logger customLog = new Logger();
-            mainOperatingService.edit(declarationTemplate, endDate, customLog, securityService.currentUserInfo());
-            IOUtils.closeQuietly(file.getInputStream());
+            //http://jira.aplana.com/browse/SBRFACCTAX-12066
+            Logger logger = new Logger();
+            logger.setTaUserInfo(securityService.currentUserInfo());
 
-            deleteBlobs(customLog, jrxmBlobIdOld, xsdUuidOld);
-            checkErrors(customLog);
+
+            Date endDate = declarationTemplateService.getDTEndDate(declarationTemplateId);
+
+            if (declarationTemplate.getStatus().equals(VersionedObjectStatus.NORMAL)){
+                mainOperatingService.isInUsed(
+                        declarationTemplateId,
+                        declarationTemplate.getType().getId(),
+                        declarationTemplate.getStatus(),
+                        declarationTemplate.getVersion(),
+                        endDate,
+                        logger);
+                checkErrors(logger);
+            }
+
+            //Проверка на использоваение jrxml другими декларациями
+            //http://jira.aplana.com/browse/SBRFACCTAX-12066
+            if (
+                    declarationTemplate.getJrxmlBlobId() != null
+                            &&
+                    declarationTemplateService.checkExistingDataJrxml(declarationTemplateId, logger)){
+                JSONObject resultUuid = new JSONObject();
+                String uploadUuid = blobDataService.create(file.getInputStream(), file.getName());
+                resultUuid.put(UuidEnum.ERROR_UUID.toString(), logEntryService.save(logger.getEntries()));
+                resultUuid.put(UuidEnum.UPLOADED_FILE.toString(), uploadUuid);
+
+                resp.getWriter().printf(resultUuid.toString());
+                return;
+            } else {
+                mainOperatingService.edit(declarationTemplate, endDate, logger, securityService.currentUserInfo());
+            }
+
             JSONObject resultUuid = new JSONObject();
-            resultUuid.put(UuidEnum.SUCCESS_UUID.toString(), logEntryService.save(customLog.getEntries()));
+            resultUuid.put(UuidEnum.SUCCESS_UUID.toString(), logEntryService.save(logger.getEntries()));
             resp.getWriter().printf(resultUuid.toString());
         } catch (JSONException e) {
             logger.error(e);
             throw new ServiceException("", e);
         } finally {
             declarationTemplateService.unlock(declarationTemplateId, userInfo);
+            IOUtils.closeQuietly(file.getInputStream());
         }
 	}
 
@@ -122,7 +145,6 @@ public class DeclarationTemplateController {
         req.setCharacterEncoding("UTF-8");
         resp.setCharacterEncoding("UTF-8");
         InputStream inputStream = null;
-        JSONObject resultUuid = new JSONObject();
         try {
             if (file.getSize() == 0)
                 throw new ServiceException("Файл jrxml пустой.");
@@ -130,20 +152,44 @@ public class DeclarationTemplateController {
                 throw new ServiceException("Формат файла должен быть *.jrxml");
             inputStream = file.getInputStream();
             Date endDate = declarationTemplateService.getDTEndDate(declarationTemplateId);
-            Logger customLog = new Logger();
+            Logger logger = new Logger();
+            logger.setTaUserInfo(securityService.currentUserInfo());
             DeclarationTemplate declarationTemplate = declarationTemplateService.get(declarationTemplateId);
+            if (declarationTemplate.getStatus().equals(VersionedObjectStatus.NORMAL)){
+                mainOperatingService.isInUsed(
+                        declarationTemplateId,
+                        declarationTemplate.getType().getId(),
+                        declarationTemplate.getStatus(),
+                        declarationTemplate.getVersion(),
+                        endDate,
+                        logger);
+                checkErrors(logger);
+            }
 
-            String jrxmBlobIdOld = declarationTemplate.getJrxmlBlobId();
-            String jrxmBlobId = blobDataService.create(inputStream, file.getOriginalFilename());
-            resultUuid.put(UuidEnum.UUID.toString(), jrxmBlobId);
-            declarationTemplate.setJrxmlBlobId(jrxmBlobId);
+            //Проверка на использоваение jrxml другими декларациями
+            //http://jira.aplana.com/browse/SBRFACCTAX-12066
+            String uploadUuid = blobDataService.create(file.getInputStream(), file.getOriginalFilename());
             declarationTemplate.setCreateScript(declarationTemplateService.getDeclarationTemplateScript(declarationTemplateId));
-            mainOperatingService.edit(declarationTemplate, endDate, customLog, securityService.currentUserInfo());
+            if (
+                    declarationTemplate.getJrxmlBlobId() != null
+                            &&
+                            declarationTemplateService.checkExistingDataJrxml(declarationTemplateId, logger)){
+                JSONObject resultUuid = new JSONObject();
+                resultUuid.put(UuidEnum.ERROR_UUID.toString(), logEntryService.save(logger.getEntries()));
+                resultUuid.put(UuidEnum.UPLOADED_FILE.toString(), uploadUuid);
 
-            deleteBlobs(customLog, jrxmBlobIdOld);
-            checkErrors(customLog);
-            resultUuid.put(UuidEnum.SUCCESS_UUID.toString(), logEntryService.save(customLog.getEntries()));
-            resp.getWriter().printf(resultUuid.toString());
+                resp.getWriter().printf(resultUuid.toString());
+            } else {
+                declarationTemplate.setJrxmlBlobId(uploadUuid);
+                mainOperatingService.edit(declarationTemplate, endDate, logger, securityService.currentUserInfo());
+
+                checkErrors(logger);
+
+                JSONObject resultUuid = new JSONObject();
+                resultUuid.put(UuidEnum.UUID.toString(), uploadUuid);
+                resultUuid.put(UuidEnum.SUCCESS_UUID.toString(), logEntryService.save(logger.getEntries()));
+                resp.getWriter().printf(resultUuid.toString());
+            }
         } catch (JSONException e) {
             logger.error(e);
             throw new ServiceException("", e);
@@ -177,13 +223,11 @@ public class DeclarationTemplateController {
 
             Logger customLog = new Logger();
             DeclarationTemplate declarationTemplate = declarationTemplateService.get(declarationTemplateId);
-            String xsdBlobIdOld = declarationTemplate.getXsdId();
             String xsdBlobId = blobDataService.create(file.getInputStream(), file.getOriginalFilename());
             declarationTemplate.setXsdId(xsdBlobId);
             resultUuid.put(UuidEnum.UUID.toString(), xsdBlobId);
             declarationTemplateService.save(declarationTemplate);
 
-            deleteBlobs(customLog, xsdBlobIdOld);
             checkErrors(customLog);
             resultUuid.put(UuidEnum.SUCCESS_UUID.toString(), logEntryService.save(customLog.getEntries()));
             resp.getWriter().printf(resultUuid.toString());
@@ -224,20 +268,6 @@ public class DeclarationTemplateController {
 			logger.error(ioException.getMessage(), ioException);
 		}
 	}
-
-
-    private void deleteBlobs(Logger log, String... uuds){
-        for (String uuid : uuds){
-            if (uuid != null && !uuid.isEmpty()) {
-                try {
-                    blobDataService.delete(uuid);
-                } catch (ServiceException e){
-                    //Если вдруг не удалось удалить старую запись
-                    log.warn(e.getMessage());
-                }
-            }
-        }
-    }
 
     private void checkErrors(Logger logger) throws IOException {
         if (!logger.getEntries().isEmpty()){

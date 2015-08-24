@@ -19,7 +19,6 @@ public class CheckFormDataAction extends UnsecuredActionImpl<TaskFormDataResult>
     private FormData formData;
     private boolean manual;
     private boolean force;
-    private boolean save;
 
     public boolean isEditMode() {
         return editMode;
@@ -59,14 +58,6 @@ public class CheckFormDataAction extends UnsecuredActionImpl<TaskFormDataResult>
 
     public void setForce(boolean force) {
         this.force = force;
-    }
-
-    public boolean isSave() {
-        return save;
-    }
-
-    public void setSave(boolean save) {
-        this.save = save;
     }
 
     @Override

@@ -3,6 +3,8 @@ package form_template.income.rnu55.v2012
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.FormDataKind
 import com.aplana.sbrf.taxaccounting.model.TaxType
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
+import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import groovy.transform.Field
 
 import java.math.RoundingMode
@@ -23,6 +25,7 @@ switch (formDataEvent) {
         prevPeriodCheck()
         calc()
         logicCheck()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.CHECK:
         prevPeriodCheck()
@@ -51,14 +54,15 @@ switch (formDataEvent) {
         formDataService.consolidationTotal(formData, logger, ['total'])
         calc()
         logicCheck()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.IMPORT:
         importData()
-        calc()
-        logicCheck()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.IMPORT_TRANSPORT_FILE:
         importTransportData()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.SORT_ROWS:
         sortFormDataRows()
@@ -119,12 +123,12 @@ def getRefBookValue(def long refBookId, def Long recordId) {
 
 // Поиск записи в справочнике по значению (для импорта)
 def getRecordIdImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
-                      def boolean required = true) {
+                      def boolean required = false) {
     if (value == null || value.trim().isEmpty()) {
         return null
     }
     return formDataService.getRefBookRecordIdImport(refBookId, recordCache, providerCache, alias, value,
-            reportPeriodEndDate, rowIndex, colIndex, logger, required)
+            getEndDate(), rowIndex, colIndex, logger, required)
 }
 
 // Если не период ввода остатков, то должна быть форма с данными за предыдущий отчетный период
@@ -139,8 +143,7 @@ void prevPeriodCheck() {
 
 // Алгоритмы заполнения полей формы
 void calc() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.getAllCached()
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
 
     def totalRow = getDataRow(dataRows, 'total')
     totalColumns.each {
@@ -151,7 +154,6 @@ void calc() {
     deleteAllAliased(dataRows)
 
     if (!dataRows.isEmpty()) {
-        def tmp
         /** Количество дней в году. */
         def daysInYear = getCountDaysInYear(new Date())
         // Отчетная дата
@@ -175,9 +177,6 @@ void calc() {
     // добавить строку "итого"
     calcTotalSum(dataRows, totalRow, totalColumns)
     dataRows.add(totalRow)
-    dataRowHelper.save(dataRows)
-
-    sortFormDataRows()
 }
 
 // Ресчет графы 9
@@ -238,8 +237,7 @@ def BigDecimal calc11(def row, def endDate, def startDate) {
 
 // Логические проверки
 void logicCheck() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.getAllCached()
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
 
     if (dataRows.isEmpty()) {
         return
@@ -262,7 +260,7 @@ void logicCheck() {
     // Векселя
     def List<String> billsList = new ArrayList<String>()
 
-    for (def row in dataRowHelper.getAllCached()) {
+    for (def row in dataRows) {
         if (row.getAlias() != null) {
             continue
         }
@@ -305,7 +303,7 @@ void logicCheck() {
                         reportPeriod.id, null)
                 if (findFormData != null) {
                     isFind = false
-                    for (findRow in formDataService.getDataRowHelper(findFormData).getAllCached()) {
+                    for (findRow in formDataService.getDataRowHelper(findFormData).getAllSaved()) {
                         if (findRow.bill == row.bill) {
                             isFind = true
                             // лп 8
@@ -366,7 +364,7 @@ def BigDecimal getCalcPrevColumn10(def row, def sumColumnName, def startDate) {
                     reportPeriod.id, null)
             if (findFormData != null) {
                 isFind = false
-                for (findRow in formDataService.getDataRowHelper(findFormData).getAllCached()) {
+                for (findRow in formDataService.getDataRowHelper(findFormData).allSaved) {
                     if (findRow.bill == row.bill && findRow.buyDate == row.buyDate) {
                         sum += findRow.getCell(sumColumnName).getValue() != null ? findRow.getCell(sumColumnName).getValue() : 0
                     }
@@ -416,138 +414,6 @@ def getReportDate() {
     return (tmp ? tmp.getTime() + 1 : null)
 }
 
-// Получение импортируемых данных
-void importData() {
-    def xml = getXML(ImportInputStream, importService, UploadFileName, '№ пп', null)
-
-    checkHeaderSize(xml.row[0].cell.size(), xml.row.size(), 10, 3)
-
-    def headerMapping = [
-            (xml.row[0].cell[0]): '№ пп',
-            (xml.row[0].cell[2]): 'Вексель',
-            (xml.row[0].cell[3]): 'Дата приобретения',
-            (xml.row[0].cell[4]): 'Код валюты',
-            (xml.row[0].cell[5]): 'Номинал, ед. валюты',
-            (xml.row[0].cell[6]): 'Процентная ставка',
-            (xml.row[0].cell[7]): 'Дата реализации (погашения)',
-            (xml.row[0].cell[8]): 'Фактически поступившая сумма процентов',
-            (xml.row[0].cell[10]): 'Сумма начисленного процентного дохода за отчётный период',
-            (xml.row[1].cell[8]): 'в валюте',
-            (xml.row[1].cell[9]): 'в рублях по курсу Банка России',
-            (xml.row[1].cell[10]): 'в валюте',
-            (xml.row[1].cell[11]): 'в рублях по курсу Банка России',
-            (xml.row[2].cell[0]): '1',
-            (xml.row[2].cell[2]): '2',
-            (xml.row[2].cell[3]): '3',
-            (xml.row[2].cell[4]): '4',
-            (xml.row[2].cell[5]): '5',
-            (xml.row[2].cell[6]): '6',
-            (xml.row[2].cell[7]): '7',
-            (xml.row[2].cell[8]): '8',
-            (xml.row[2].cell[9]): '9',
-            (xml.row[2].cell[10]): '10',
-            (xml.row[2].cell[11]): '11'
-    ]
-
-    checkHeaderEquals(headerMapping)
-
-    addData(xml, 2)
-}
-
-// Заполнить форму данными
-void addData(def xml, int headRowCount) {
-    reportPeriodEndDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-
-    def xmlIndexRow = -1 // Строки xml, от 0
-    def int rowOffset = xml.infoXLS.rowOffset[0].cell[0].text().toInteger()
-    def int colOffset = xml.infoXLS.colOffset[0].cell[0].text().toInteger()
-
-    def rows = []
-    def int rowIndex = 1  // Строки НФ, от 1
-
-    def dataRows = dataRowHelper.allCached
-
-    // Итоговая строка
-    def totalRow = getDataRow(dataRows, 'total')
-    // Очистка итогов
-    totalColumns.each { alias ->
-        totalRow[alias] = null
-    }
-
-    for (def row : xml.row) {
-        xmlIndexRow++
-        def int xlsIndexRow = xmlIndexRow + rowOffset
-
-        // Пропуск строк шапки
-        if (xmlIndexRow <= headRowCount) {
-            continue
-        }
-
-        if ((row.cell.find { it.text() != "" }.toString()) == "") {
-            break
-        }
-
-        // Пропуск итоговых строк
-        if (row.cell[1].text() != null && row.cell[1].text() != '') {
-            continue
-        }
-
-        def xmlIndexCol = 0
-
-        def newRow = formData.createDataRow()
-        newRow.setIndex(rowIndex++)
-        newRow.setImportIndex(xlsIndexRow)
-        def cols = isBalancePeriod() ? (allColumns - 'number') : editableColumns
-        def autoColumns = isBalancePeriod() ? ['number'] : autoFillColumns
-        cols.each {
-            newRow.getCell(it).editable = true
-            newRow.getCell(it).setStyleAlias('Редактируемая')
-        }
-        autoColumns.each {
-            newRow.getCell(it).setStyleAlias('Автозаполняемая')
-        }
-
-        // графа 1
-        xmlIndexCol++
-        // fix
-        xmlIndexCol++
-        // графа 2
-        newRow.bill = row.cell[xmlIndexCol].text()
-        xmlIndexCol++
-        // графа 3
-        newRow.buyDate = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, true)
-        xmlIndexCol++
-        // графа 4
-        newRow.currency = getRecordIdImport(15, 'CODE', row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset)
-        xmlIndexCol++
-        // графа 5
-        newRow.nominal = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
-        xmlIndexCol++
-        // графа 6
-        newRow.percent = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
-        xmlIndexCol++
-        // графа 7
-        newRow.implementationDate = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", xlsIndexRow, xmlIndexCol + colOffset, logger, true)
-        xmlIndexCol++
-        // графа 8
-        newRow.percentInCurrency = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
-        xmlIndexCol++
-        // графа 9
-        newRow.percentInRuble = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
-        xmlIndexCol++
-        // графа 10
-        newRow.sumIncomeinCurrency = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
-        xmlIndexCol++
-        // графа 11
-        newRow.sumIncomeinRuble = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
-
-        rows.add(newRow)
-    }
-    rows.add(totalRow)
-    dataRowHelper.save(rows)
-}
-
 // Вывести сообщение. В периоде ввода остатков сообщения должны быть только НЕфатальными
 void loggerError(def row, def msg) {
     if (isBalancePeriod()) {
@@ -571,13 +437,14 @@ void importTransportData() {
     addTransportData(xml)
 
     // TODO (Ramil Timerbaev) возможно надо поменять на общее сообщение TRANSPORT_FILE_SUM_ERROR
-    def dataRows = formDataService.getDataRowHelper(formData)?.allCached
-    checkTotalSum(dataRows, totalColumns, logger, false)
+    if (!logger.containsLevel(LogLevel.ERROR)) {
+        def dataRows = formDataService.getDataRowHelper(formData).allCached
+        checkTotalSum(dataRows, totalColumns, logger, false)
+    }
 }
 
 void addTransportData(def xml) {
     reportPeriodEndDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
     def int rnuIndexRow = 2
     def int colOffset = 1
     def rows = []
@@ -625,28 +492,21 @@ void addTransportData(def xml) {
         xmlIndexCol++
         // графа 7
         newRow.implementationDate = parseDate(row.cell[xmlIndexCol].text(), "dd.MM.yyyy", rnuIndexRow, xmlIndexCol + colOffset, logger, true)
-        xmlIndexCol++
-        // графа 8
-        newRow.percentInCurrency = parseNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, logger, true)
-        xmlIndexCol++
-        // графа 9
-        newRow.percentInRuble = parseNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, logger, true)
-        xmlIndexCol++
-        // графа 10
-        newRow.sumIncomeinCurrency = parseNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, logger, true)
-        xmlIndexCol++
-        // графа 11
-        newRow.sumIncomeinRuble = parseNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, logger, true)
+        // графа 8..11
+        ['percentInCurrency', 'percentInRuble', 'sumIncomeinCurrency', 'sumIncomeinRuble'].each { alias ->
+            xmlIndexCol++
+            newRow[alias] = parseNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, logger, true)
+        }
 
         rows.add(newRow)
     }
 
-    if (xml.rowTotal.size() == 1) {
+    if (!logger.containsLevel(LogLevel.ERROR) && xml.rowTotal.size() == 1) {
         rnuIndexRow = rnuIndexRow + 2
 
         def row = xml.rowTotal[0]
 
-        def total = getDataRow(dataRowHelper.getAllCached(), 'total')
+        def total = getDataRow(formDataService.getDataRowHelper(formData).allCached, 'total')
 
         // графа 9
         total.percentInRuble = parseNumber(row.cell[9].text(), rnuIndexRow, 9 + colOffset, logger, true)
@@ -655,12 +515,186 @@ void addTransportData(def xml) {
 
         rows.add(total)
     }
-    dataRowHelper.save(rows)
+
+    if (!logger.containsLevel(LogLevel.ERROR)) {
+        updateIndexes(rows)
+        formDataService.getDataRowHelper(formData).allCached = rows
+    }
 }
 
-void sortFormDataRows() {
+void sortFormDataRows(def saveInDB = true) {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
     sortRows(refBookService, logger, dataRows, null, getDataRow(dataRows, 'total'), null)
-    dataRowHelper.saveSort()
+    if (saveInDB) {
+        dataRowHelper.saveSort()
+    } else {
+        updateIndexes(dataRows)
+    }
+}
+
+void importData() {
+    def tmpRow = formData.createDataRow()
+    int COLUMN_COUNT = 12
+    int HEADER_ROW_COUNT = 3
+    String TABLE_START_VALUE = getColumnName(tmpRow, 'number')
+    String TABLE_END_VALUE = null
+    int INDEX_FOR_SKIP = 1
+
+    def allValues = []      // значения формы
+    def headerValues = []   // значения шапки
+    def paramsMap = ['rowOffset': 0, 'colOffset': 0]  // мапа с параметрами (отступы сверху и слева)
+
+    checkAndReadFile(ImportInputStream, UploadFileName, allValues, headerValues, TABLE_START_VALUE, TABLE_END_VALUE, HEADER_ROW_COUNT, paramsMap)
+
+    // проверка шапки
+    checkHeaderXls(headerValues, COLUMN_COUNT, HEADER_ROW_COUNT, tmpRow)
+    if (logger.containsLevel(LogLevel.ERROR)) {
+        return
+    }
+    // освобождение ресурсов для экономии памяти
+    headerValues.clear()
+    headerValues = null
+
+    def fileRowIndex = paramsMap.rowOffset
+    def colOffset = paramsMap.colOffset
+    paramsMap.clear()
+    paramsMap = null
+
+    def rowIndex = 0
+    def rows = []
+    def allValuesCount = allValues.size()
+    def totalRowFromFile = null
+
+    // формирвание строк нф
+    for (def i = 0; i < allValuesCount; i++) {
+        rowValues = allValues[0]
+        fileRowIndex++
+        // все строки пустые - выход
+        if (!rowValues) {
+            allValues.remove(rowValues)
+            rowValues.clear()
+            break
+        }
+        rowIndex++
+        // Пропуск итоговых строк
+        if (rowValues[INDEX_FOR_SKIP] == "Итого") {
+            totalRowFromFile = getNewRowFromXls(rowValues, colOffset, fileRowIndex, rowIndex)
+
+            allValues.remove(rowValues)
+            rowValues.clear()
+            continue
+        }
+        // простая строка
+        def newRow = getNewRowFromXls(rowValues, colOffset, fileRowIndex, rowIndex)
+        rows.add(newRow)
+        // освободить ненужные данные - иначе не хватит памяти
+        allValues.remove(rowValues)
+        rowValues.clear()
+    }
+
+    // получить строки из шаблона
+    def formTemplate = formDataService.getFormTemplate(formData.formType.id, formData.reportPeriodId)
+    def totalRow = getDataRow(formTemplate.rows, 'total')
+    rows.add(totalRow)
+    updateIndexes(rows)
+    // сравнение итогов
+    compareSimpleTotalValues(totalRow, totalRowFromFile, rows, totalColumns, formData, logger, false)
+
+    showMessages(rows, logger)
+    if (!logger.containsLevel(LogLevel.ERROR)) {
+        updateIndexes(rows)
+        formDataService.getDataRowHelper(formData).allCached = rows
+    }
+}
+
+/**
+ * Проверить шапку таблицы
+ *
+ * @param headerRows строки шапки
+ * @param colCount количество колонок в таблице
+ * @param rowCount количество строк в таблице
+ * @param tmpRow вспомогательная строка для получения названии графов
+ */
+void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
+    if (headerRows.isEmpty()) {
+        throw new ServiceException(WRONG_HEADER_ROW_SIZE)
+    }
+    checkHeaderSize(headerRows[headerRows.size() - 1].size(), headerRows.size(), colCount, rowCount)
+
+    def headerMapping = [
+            (headerRows[0][0]) : getColumnName(tmpRow, 'number'),
+            (headerRows[0][2]) : getColumnName(tmpRow, 'bill'),
+            (headerRows[0][3]) : getColumnName(tmpRow, 'buyDate'),
+            (headerRows[0][4]) : getColumnName(tmpRow, 'currency'),
+            (headerRows[0][5]) : getColumnName(tmpRow, 'nominal'),
+            (headerRows[0][6]) : getColumnName(tmpRow, 'percent'),
+            (headerRows[0][7]) : getColumnName(tmpRow, 'implementationDate'),
+            (headerRows[0][8]) : 'Фактически поступившая сумма процентов',
+            (headerRows[0][10]): 'Сумма начисленного процентного дохода за отчётный период',
+            (headerRows[1][8]) : 'в валюте',
+            (headerRows[1][9]) : 'в рублях по курсу Банка России',
+            (headerRows[1][10]): 'в валюте',
+            (headerRows[1][11]): 'в рублях по курсу Банка России',
+            (headerRows[2][0]) : '1'
+    ]
+    (2..11).each { index ->
+        headerMapping.put(headerRows[2][index], index.toString())
+    }
+    checkHeaderEquals(headerMapping, logger)
+}
+
+/**
+ * Получить новую строку нф по значениям из экселя.
+ *
+ * @param values список строк со значениями
+ * @param colOffset отступ в колонках
+ * @param fileRowIndex номер строки в тф
+ * @param rowIndex строка в нф
+ */
+def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) {
+    def newRow = formData.createStoreMessagingDataRow()
+    newRow.setIndex(rowIndex)
+    newRow.setImportIndex(fileRowIndex)
+    def cols = isBalancePeriod() ? (allColumns - 'number') : editableColumns
+    def autoColumns = isBalancePeriod() ? ['number'] : autoFillColumns
+    cols.each {
+        newRow.getCell(it).editable = true
+        newRow.getCell(it).setStyleAlias('Редактируемая')
+    }
+    autoColumns.each {
+        newRow.getCell(it).setStyleAlias('Автозаполняемая')
+    }
+
+    // графа 2
+    def colIndex = 2
+    newRow.bill = values[colIndex]
+
+    // графа 3
+    colIndex++
+    newRow.buyDate = parseDate(values[colIndex], "dd.MM.yyyy", fileRowIndex, colIndex + colOffset, logger, true)
+
+    // графа 4
+    colIndex++
+    newRow.currency = getRecordIdImport(15, 'CODE', values[colIndex], fileRowIndex, colIndex + colOffset)
+
+    // графа 5
+    colIndex++
+    newRow.nominal = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
+
+    // графа 6
+    colIndex++
+    newRow.percent = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
+
+    // графа 7
+    colIndex++
+    newRow.implementationDate = parseDate(values[colIndex], "dd.MM.yyyy", fileRowIndex, colIndex + colOffset, logger, true)
+
+    // графа 8..11
+    ['percentInCurrency', 'percentInRuble', 'sumIncomeinCurrency', 'sumIncomeinRuble'].each { alias ->
+        colIndex++
+        newRow[alias] = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
+    }
+
+    return newRow
 }

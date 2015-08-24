@@ -89,7 +89,7 @@ public class RefBookUtils extends AbstractDao {
                 if (record.getUniqueRecordId() != null && a.getAlias().equals(RefBook.RECORD_PARENT_ID_ALIAS)) {
                     Long parentId = value.getReferenceValue();
                     if (record.getUniqueRecordId().equals(parentId)) {
-                        errors.add("Элемент справочника не может быть родительским для самого себя!");
+                        errors.add("Запись справочника не может быть родительской сама для себя!");
                     }
                 }
 

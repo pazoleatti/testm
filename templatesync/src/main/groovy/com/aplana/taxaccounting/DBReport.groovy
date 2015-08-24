@@ -1,10 +1,11 @@
 package com.aplana.taxaccounting
 
+import com.aplana.sbrf.taxaccounting.model.Color
 import groovy.sql.Sql
+import org.apache.commons.io.IOUtils
 import org.custommonkey.xmlunit.Diff
 import org.custommonkey.xmlunit.XMLUnit
-import org.apache.commons.io.IOUtils
-import org.xml.sax.SAXException;
+import org.xml.sax.SAXException
 
 /**
  * Отчет сравнения Git и БД
@@ -13,22 +14,25 @@ class DBReport {
     // Сравнение шаблонов в БД
     def static void compareDBFormTemplate(def prefix1, def prefix2) {
         // Запросы на получение макетов
-        def sqlTemplate1 = "SELECT ft1.id " +
-                " ,ft1.type_id " +
-                " ,ft1.data_rows " +
-                " ,ft1.fixed_rows " +
-                " ,ft1.NAME " +
-                " ,ft1.fullname " +
-                " ,ft1.header AS code " +
-                " ,ft1.data_headers " +
-                " ,to_char(ft1.version, 'RRRR') AS version " +
-                " ,(select to_char(MIN(ft2.version) - INTERVAL '1' day, 'RRRR') from form_template ft2 where ft1.type_id = ft2.type_id AND TRUNC(ft2.version, 'DD') > ft1.version AND ft2.STATUS IN (0,1,2) group by ft2.type_id) AS versionEnd " +
-                " ,ft1.STATUS " +
-                " ,ft1.script " +
-                " ,ft1.monthly " +
-                "FROM form_template ft1 " +
-                "WHERE  " +
-                " ft1.STATUS NOT IN (-1,2)"
+        def sqlTemplate1 = { boolean compExist ->
+            return "SELECT ft1.id " +
+                    " ,ft1.type_id " +
+                    " ,ft1.data_rows " +
+                    " ,ft1.fixed_rows " +
+                    " ,ft1.NAME " +
+                    " ,ft1.fullname " +
+                    " ,ft1.header AS code " +
+                    " ,ft1.data_headers " +
+                    " ,to_char(ft1.version, 'RRRR') AS version " +
+                    " ,(select to_char(MIN(ft2.version) - INTERVAL '1' day, 'RRRR') from form_template ft2 where ft1.type_id = ft2.type_id AND TRUNC(ft2.version, 'DD') > ft1.version AND ft2.STATUS IN (0,1,2) group by ft2.type_id) AS versionEnd " +
+                    " ,ft1.STATUS " +
+                    " ,ft1.script " +
+                    " ,ft1.monthly " +
+                    (compExist ? " ,ft1.comparative " : "") +
+                    "FROM form_template ft1 " +
+                    "WHERE  " +
+                    " ft1.STATUS NOT IN (-1,2)"
+        }
         def sqlTemplate2 = sqlTemplate1
 
         // Запросы на получение колонок
@@ -90,7 +94,7 @@ class DBReport {
                 table(class: 'rt') {
                     Main.TAX_FOLDERS.keySet().each { taxName ->
                         tr {
-                            td(colspan: 17, class: 'hdr', Main.TAX_FOLDERS[taxName])
+                            td(colspan: 18, class: 'hdr', Main.TAX_FOLDERS[taxName])
                         }
                         tr {
                             th(rowspan: 2, 'type_id')
@@ -98,7 +102,7 @@ class DBReport {
                             th(rowspan: 2, 'Версия')
                             th(rowspan: 2, "$prefix1 id")
                             th(rowspan: 2, "$prefix2 id")
-                            th(colspan: 12, 'Результат сравнения')
+                            th(colspan: 13, 'Результат сравнения')
                         }
                         tr {
                             th 'name'
@@ -112,6 +116,7 @@ class DBReport {
                             th 'script'
                             th 'columns'
                             th 'monthly'
+                            th 'comparative'
                             th 'styles'
                         }
 
@@ -308,6 +313,7 @@ class DBReport {
                                     def columnsC = colDiff == null ? '+' : '—'
                                     def stylesC = styleDiff == null ? '+' : '—'
                                     def monthlyC = tmp1?.monthly == tmp2?.monthly ? '+' : '—'
+                                    def comparativeC = tmp1?.comparative == tmp2?.comparative ? '+' : '—'
 
                                     tr(class: ((tmp1?.id != null && tmp2?.id != null) ? 'nr' : 'er')) {
                                         td type_id
@@ -390,6 +396,12 @@ class DBReport {
                                             td(class: 'td_error', title: "$prefix1 = ${tmp1?.monthly}, $prefix2 = ${tmp2?.monthly}", monthlyC)
                                         }
 
+                                        if (comparativeC == '+') {
+                                            td(class: 'td_ok', comparativeC)
+                                        } else {
+                                            td(class: 'td_error', title: "$prefix1 = ${tmp1?.comparative}, $prefix2 = ${tmp2?.comparative}", comparativeC)
+                                        }
+
                                         if (stylesC == '+') {
                                             td(class: 'td_ok', stylesC)
                                         } else {
@@ -444,13 +456,15 @@ class DBReport {
         println("DBMS connect: $prefix")
         def retVal = new Expando()
 
-        def sql = Sql.newInstance(Main.DB_URL, prefix, Main.DB_PASSWORD, "oracle.jdbc.OracleDriver")
+        Sql sql = Sql.newInstance(Main.DB_URL, prefix, Main.DB_PASSWORD, "oracle.jdbc.OracleDriver")
 
         def templateMap = [:]
         def columnsMap = [:]
         def stylesMap = [:]
 
-        sql.eachRow(sqlTemplate) {
+        def map = sql.firstRow("SELECT count(column_name) as result FROM user_tab_cols where table_name = 'FORM_TEMPLATE' and column_name = 'COMPARATIVE'")
+        boolean compExist = (map.result as Integer) == 1
+        sql.eachRow(sqlTemplate(compExist)) {
             def type_id = it.type_id as Integer
             if (templateMap[type_id] == null) {
                 templateMap.put((Integer) it.type_id, [:])
@@ -470,6 +484,7 @@ class DBReport {
             version.status = it.status
             version.script = it.script?.characterStream?.text?.trim()?.replaceAll("\r", "")
             version.monthly = it.monthly as Integer
+            version.comparative = compExist ? (it.comparative as Integer) : null
             templateMap[type_id].put(it.version, version)
             if (!allVersions.containsKey(type_id)) {
                 allVersions.put(type_id, [] as Set)
@@ -512,8 +527,8 @@ class DBReport {
             }
             def style = new Expando()
             style.alias = it.alias
-            style.font_color = StyleColor.getById(it.font_color as Integer)
-            style.back_color = StyleColor.getById(it.back_color as Integer)
+            style.font_color = Color.getById(it.font_color as Integer)
+            style.back_color = Color.getById(it.back_color as Integer)
             style.italic = it.italic == 1
             style.bold = it.bold == 1
             stylesMap[form_template_id].add(style)
@@ -623,7 +638,7 @@ class DBReport {
     def private static printStylesTable(def builder, def changesMap, def headers, def prefix, def stylesSet) {
         // Название таблицы
         builder.tr {
-            td(colspan: 4, class: 'hdr', prefix)
+            td(colspan: 5, class: 'hdr', prefix)
         }
         builder.tr {
             headers.each { header ->
@@ -879,6 +894,112 @@ class DBReport {
         println("See ${Main.REPORT_REFBOOK_DB_NAME} for details")
     }
 
+    // Сравнение типов НФ/деклараций
+    def static void compareDBTypes(def prefix1, def prefix2) {
+        // Запросы на получение справочников
+        def sqlTemplate1 = "select id, tax_type, name, status, code, is_ifrs, ifrs_name, 0 as flag from form_type where status not in (-1, 2) " +
+                "union all " +
+                "(select id, tax_type, name, status, null as code, is_ifrs, ifrs_name, 1 as flag from declaration_type where status not in (-1, 2)) " +
+                "order by tax_type"
+        def sqlTemplate2 = sqlTemplate1
+
+        def types1 = getFormDeclarationTypes(prefix1, sqlTemplate1)
+        def types2 = getFormDeclarationTypes(prefix2, sqlTemplate2)
+
+        // Построение отчета
+        def report = new File(Main.REPORT_TYPE_DB_NAME)
+        if (report.exists()) {
+            report.delete()
+        }
+        def writer = new FileWriter(new File(Main.REPORT_TYPE_DB_NAME))
+        def builder = new groovy.xml.MarkupBuilder(writer)
+        builder.html {
+            head {
+                meta(charset: 'windows-1251')
+                title "Сравнение типов форм/деклараций в $prefix1 и $prefix2"
+                style(type: "text/css", Main.HTML_STYLE)
+                script('', type: 'text/javascript', src: 'http://code.jquery.com/jquery-1.9.1.min.js')
+                script('', type: 'text/javascript', src: 'http://code.jquery.com/ui/1.10.3/jquery-ui.min.js')
+                link('', rel: 'stylesheet', href: 'http://code.jquery.com/ui/1.10.3/themes/black-tie/jquery-ui.css')
+            }
+            body {
+                p "Сравнение типов форм/деклараций в БД $prefix1 и $prefix2:"
+                table(class: 'rt') {
+                    tr {
+                        th 'id'
+                        th 'Наименование'
+                        th 'tax_type'
+                        th 'name'
+                        th 'status'
+                        th 'code'
+                        th 'is_ifrs'
+                        th 'ifrs_name'
+                    }
+
+                    [0, 1].each{ typeType ->
+                        tr {
+                            td(colspan: 8, class: 'hdr', typeType ? "Декларации" : "Налоговые формы")
+                        }
+                        def types = (types1[typeType] + types2[typeType]).collect { it.id }.unique(true)
+
+                        // Сравнение
+                        types.each { id ->
+                            def tmp1 = types1[typeType].find { it.id == id }
+                            def tmp2 = types2[typeType].find { it.id == id }
+
+                            def name = tmp1?.name
+                            if (name == null) {
+                                name = tmp2?.name
+                            }
+                            def taxType = tmp1?.tax_type
+
+                            // Признак сравнения
+                            def nameC = tmp1?.name == tmp2?.name ? '+' : '—'
+                            def statusC = tmp1?.status == tmp2?.status ? '+' : '—'
+                            def codeC = tmp1?.code == tmp2?.code ? '+' : '—'
+                            def isIfrsC = tmp1?.is_ifrs == tmp2?.is_ifrs ? '+' : '—'
+                            def ifrsNameC = tmp1?.ifrs_name == tmp2?.ifrs_name ? '+' : '—'
+
+                            tr(class: ((tmp1?.id != null && tmp2?.id != null) ? 'nr' : 'er')) {
+                                td id
+                                td name
+                                td taxType
+
+                                if (nameC == '+') {
+                                    td(class: 'td_ok', nameC)
+                                } else {
+                                    td(class: 'td_error', title: "$prefix1: ${tmp1?.name}; $prefix2: ${tmp2?.name}", nameC)
+                                }
+                                if (statusC == '+') {
+                                    td(class: 'td_ok', statusC)
+                                } else {
+                                    td(class: 'td_error', title: "$prefix1: ${tmp1?.status}; $prefix2: ${tmp2?.status}", statusC)
+                                }
+                                if (codeC == '+') {
+                                    td(class: 'td_ok', codeC)
+                                } else {
+                                    td(class: 'td_error', title: "$prefix1: ${tmp1?.code}; $prefix2: ${tmp2?.code}", codeC)
+                                }
+                                if (isIfrsC == '+') {
+                                    td(class: 'td_ok', isIfrsC)
+                                } else {
+                                    td(class: 'td_error', title: "$prefix1: ${tmp1?.isIfrs}; $prefix2: ${tmp2?.isIfrs}", isIfrsC)
+                                }
+                                if (ifrsNameC == '+') {
+                                    td(class: 'td_ok', ifrsNameC)
+                                } else {
+                                    td(class: 'td_error', title: "$prefix1: ${tmp1?.ifrs_name}; $prefix2: ${tmp2?.ifrs_name}", ifrsNameC)
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        writer.close()
+        println("See ${Main.REPORT_REFBOOK_DB_NAME} for details")
+    }
+
     def private static getDeclarationTemplates(def prefix, def sqlTemplate, def allVersions) {
         println("DBMS connect: $prefix")
         def retVal = new Expando()
@@ -930,6 +1051,38 @@ class DBReport {
         return retVal
 
     }
+
+    def private static getFormDeclarationTypes(def prefix, def sqlTemplate) {
+        println("DBMS connect: $prefix")
+        def formTypes = []
+        def declarationTypes = []
+
+        def sql = Sql.newInstance(Main.DB_URL, prefix, Main.DB_PASSWORD, "oracle.jdbc.OracleDriver")
+
+        try {
+            sql.eachRow(sqlTemplate) {
+                // Версия макета
+                def type = new Expando()
+                type.key = it.flag + it.id
+                type.id = it.id as Integer
+                type.tax_type = it.tax_type
+                type.name = it.name
+                type.status = it.status
+                type.code = it.code // для деклараций = null
+                type.is_ifrs = it.is_ifrs
+                type.ifrs_name = it.ifrs_name
+                type.flag = it.flag // для форм = 0, для деклараций = 1
+                (it.flag == 0) ? formTypes.add(type) : declarationTypes.add(type)
+            }
+        } finally {
+            sql.close()
+        }
+        println("Load DB form/declaration type from $prefix OK")
+        formTypes.sort{ it.id }.sort { it.tax_type }
+        declarationTypes.sort{ it.id }.sort { it.tax_type }
+        return [formTypes, declarationTypes]
+    }
+
     def private static getRefbooks(def prefix, def sqlTemplate) {
         println("DBMS connect: $prefix")
         def refbooks = []

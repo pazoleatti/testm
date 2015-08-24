@@ -248,6 +248,7 @@ public class App5Test extends ScriptTestBase {
     public void importExcelTest() {
         testHelper.setImportFileInputStream(getImportXlsInputStream());
         testHelper.execute(FormDataEvent.IMPORT);
+        testHelper.execute(FormDataEvent.CALCULATE);
         Assert.assertEquals(5, testHelper.getDataRowHelper().getAll().size());
         checkLoadData(testHelper.getDataRowHelper().getAll());
         checkLogger();
@@ -257,7 +258,7 @@ public class App5Test extends ScriptTestBase {
     void checkLoadData(List<DataRow<Cell>> dataRows) {
         // графа 2
         for (int i = 0; i < dataRows.size() - 1; i++) {
-            Assert.assertNull(dataRows.get(i).getCell("regionBank").getNumericValue());
+            Assert.assertEquals(2, dataRows.get(i).getCell("regionBank").getNumericValue().intValue());
         }
 
         // графа 3
@@ -266,11 +267,7 @@ public class App5Test extends ScriptTestBase {
         Assert.assertEquals(2, dataRows.get(2).getCell("regionBankDivision").getNumericValue().intValue());
         Assert.assertEquals(2, dataRows.get(2).getCell("regionBankDivision").getNumericValue().intValue());
 
-        // графа 4
-        Assert.assertNull(dataRows.get(0).getCell("divisionName").getStringValue());
-        Assert.assertNull(dataRows.get(1).getCell("divisionName").getStringValue());
-        Assert.assertNull(dataRows.get(2).getCell("divisionName").getStringValue());
-        Assert.assertNull(dataRows.get(3).getCell("divisionName").getStringValue());
+        // TODO графа 4
 
         // графа 5
         Assert.assertEquals("111111111", dataRows.get(0).getCell("kpp").getStringValue());

@@ -44,11 +44,6 @@ public class EditFormPresenter extends AbstractEditPresenter<EditFormPresenter.M
 		super(eventBus, view, dispatchAsync, placeManager);
 	}
 
-    public void clearRecordId() {
-        currentUniqueRecordId = null;
-        previousURId = null;
-    }
-
     @Override
     void save() throws BadValueException {
         Map<String, RefBookValueSerializable> map = getView().getFieldsValues();

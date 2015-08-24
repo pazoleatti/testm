@@ -2,10 +2,8 @@
 <formTemplateContent>
     <fixedRows>false</fixedRows>
     <name>Беспоставочные срочные сделки</name>
-    <fullName>Отчет в отношении доходов и расходов ОАО «Сбербанк России» по признанным Контролируемыми сделками
-        беспоставочным срочным сделкам
-    </fullName>
-    <header>ПРИЛОЖЕНИЕ 1|к Распоряжению|от «__» апреля 2013 № ___</header>
+    <fullName>Отчет в отношении доходов и расходов ПАО «Сбербанк России» по признанным Контролируемыми сделками беспоставочным срочным сделкам</fullName>
+    <header>ПРИЛОЖЕНИЕ 1|к Распоряжению|от "__" апреля 2013 № ___</header>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>rowNum</alias>
         <checking>false</checking>
@@ -199,6 +197,13 @@
         <backColor>WHITE</backColor>
         <bold>true</bold>
         <fontColor>DARK_GREEN</fontColor>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Контрольные суммы</alias>
+        <backColor>LIGHT_BROWN</backColor>
+        <bold>true</bold>
+        <fontColor>BLACK</fontColor>
         <italic>false</italic>
     </styles>
 </formTemplateContent>

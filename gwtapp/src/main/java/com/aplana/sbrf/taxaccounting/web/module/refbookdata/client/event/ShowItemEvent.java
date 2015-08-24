@@ -49,6 +49,13 @@ public class ShowItemEvent extends GwtEvent<ShowItemEvent.ShowItemHandler> {
         void onShowItem(ShowItemEvent event);
     }
 
+    /**
+     * Вызывается для отображения элемента в форме редактирования.
+     * В случае если dereferenceValue != null значит, что создается новый элемент в иерархическом справочнике.
+     * @param source
+     * @param dereferenceValue наименование родительского элемента
+     * @param recordId
+     */
     public static void fire(HasHandlers source, String dereferenceValue, Long recordId) {
         ShowItemEvent event = new ShowItemEvent(dereferenceValue, recordId);
         source.fireEvent(event);

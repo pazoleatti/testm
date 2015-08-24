@@ -19,6 +19,7 @@ public final class FormDataListUtils {
     public static final String DEPARTMENT_TITLE = "Подразделение";
     public static final String PERIOD_YEAR_TITLE = "Год";
     public static final String REPORT_PERIOD_TITLE = "Период";
+    public static final String COMPARATIV_PERIOD_TITLE = "Период сравнения";
     public static final String PERIOD_MONTH_TITLE = "Месяц";
     public static final String FORM_DATA_STATE_TITLE = "Состояние";
     public static final String FORM_DATA_RETURN_TITLE = "Признак возврата";

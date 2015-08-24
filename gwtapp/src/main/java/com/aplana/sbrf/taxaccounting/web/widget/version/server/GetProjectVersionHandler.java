@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.widget.version.server;
 
+import com.aplana.sbrf.taxaccounting.core.api.ServerInfo;
 import com.aplana.sbrf.taxaccounting.web.widget.version.shared.GetProjectVersion;
 import com.aplana.sbrf.taxaccounting.web.widget.version.shared.GetProjectVersionResult;
 import com.gwtplatform.dispatch.server.ExecutionContext;
@@ -19,6 +20,9 @@ public class GetProjectVersionHandler extends AbstractActionHandler<GetProjectVe
     @Qualifier("versionInfoProperties")
     private Properties versionInfoProperties;
 
+	@Autowired
+	private ServerInfo serverInfo;
+
 	public GetProjectVersionHandler() {
 		super(GetProjectVersion.class);
 	}
@@ -28,21 +32,12 @@ public class GetProjectVersionHandler extends AbstractActionHandler<GetProjectVe
 		
 		String version = "?";
 		String revision = "?";
-		String serverName = "?";
+		String serverName = serverInfo.getServerName();
 
         if (versionInfoProperties != null) {
             version = versionInfoProperties.getProperty("version");
             revision = versionInfoProperties.getProperty("revision");
         }
-
-		// получаем информацию о сервере приложений
-		try {
-			Class clazz = Class.forName("com.ibm.websphere.runtime.ServerName");
-			Method method =	clazz.getMethod("getDisplayName", null);
-			serverName = (String) method.invoke(null, null);
-		} catch (Exception e) {
-			// do nothing (dev mode)
-		}
 
 		GetProjectVersionResult result = new GetProjectVersionResult();
 		result.setProjectVersion(String.format("Версия: %s, Ревизия: %s, Сервер: %s", version, revision, serverName));

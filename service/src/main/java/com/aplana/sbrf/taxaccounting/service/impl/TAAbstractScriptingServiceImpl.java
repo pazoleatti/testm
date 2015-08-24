@@ -1,19 +1,21 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
+import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import groovy.lang.GroovyClassLoader;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.codehaus.groovy.control.CompilerConfiguration;
 import org.codehaus.groovy.control.customizers.ImportCustomizer;
 import org.codehaus.groovy.jsr223.GroovyScriptEngineImpl;
-import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
+import java.util.regex.Pattern;
 
 /**
  * Базовый класс для сервисов, работающих с groovy-скриптами
@@ -21,7 +23,7 @@ import javax.script.ScriptException;
  */
 public abstract class TAAbstractScriptingServiceImpl implements ApplicationContextAware {
 
-	protected Log logger = LogFactory.getLog(getClass());
+	protected static final Log logger = LogFactory.getLog(TAAbstractScriptingServiceImpl.class);
 	
 	protected ApplicationContext applicationContext;
 	
@@ -33,6 +35,9 @@ public abstract class TAAbstractScriptingServiceImpl implements ApplicationConte
 			"com.aplana.sbrf.taxaccounting.model.dictionary",
 			"com.aplana.sbrf.taxaccounting.model.log",
 			"com.aplana.sbrf.taxaccounting.model.script.range",
+			"com.aplana.sbrf.taxaccounting.model.refbook",
+			"com.aplana.sbrf.taxaccounting.model.util",
+			"com.aplana.sbrf.taxaccounting.model.datarow",
 			"com.aplana.sbrf.taxaccounting.dao.exсeption"
 	};
 
@@ -58,7 +63,6 @@ public abstract class TAAbstractScriptingServiceImpl implements ApplicationConte
 		classLoader = new GroovyClassLoader(classLoader, config, false);
 		groovyScriptEngine.setClassLoader(classLoader);
 	}
-	
 
 	@Override
 	public void setApplicationContext(ApplicationContext context) {
@@ -86,5 +90,19 @@ public abstract class TAAbstractScriptingServiceImpl implements ApplicationConte
 		}
 		logger.error("Ошибка исполнения [%d]: %s", line, message);
 		this.logger.error("An error occured during script execution", e);
+	}
+
+	/**
+	 * Проверяет целесообразность запуска скрипта для указанного события. Если скрипт пустой или не содержит
+	 * обработчика указанного события, то он выполняться не будет.
+	 * @param script проверяемый скрипт. Может быть null.
+	 * @param event тип события. Может быть null - тогда не ведется поиск обработчика внутри скрипта.
+	 * @return true - запускать скрипт можно; false - не стоит
+	 */
+	protected boolean canExecuteScript(String script, FormDataEvent event) {
+		if (StringUtils.isBlank(script)) {
+			return false;
+		}
+		return event == null || script.contains("FormDataEvent." + event.name());
 	}
 }

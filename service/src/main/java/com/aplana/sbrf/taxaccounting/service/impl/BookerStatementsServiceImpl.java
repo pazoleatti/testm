@@ -5,6 +5,7 @@ import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookIncome101Dao;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookIncome102Dao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
@@ -13,10 +14,7 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBookRecord;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
-import com.aplana.sbrf.taxaccounting.service.AuditService;
-import com.aplana.sbrf.taxaccounting.service.BookerStatementsService;
-import com.aplana.sbrf.taxaccounting.service.DepartmentService;
-import com.aplana.sbrf.taxaccounting.service.PeriodService;
+import com.aplana.sbrf.taxaccounting.service.*;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
@@ -61,6 +59,7 @@ public class BookerStatementsServiceImpl implements BookerStatementsService {
 
     private static final String BAD_FILE_MSG = "Формат файла не соответствуют ожидаемому формату. Файл не может быть загружен.";
 
+    private static final String INCORRECT_NAME_MSG = "Выбранный файл не соответствует формату xls. Файл не может быть загружен.";
     private static final String NO_DATA_FILE_MSG = "Файл не содержит данных. Файл не может быть загружен.";
     private static final String IO_WORKBOOK_EXCEPTION = "Не могу прочитать загруженный Excel фаил.";
     private static final String ACCOUNT_PERIOD_INVALID = "Период не указан.";
@@ -98,11 +97,14 @@ public class BookerStatementsServiceImpl implements BookerStatementsService {
     @Autowired
     private DepartmentService departmentService;
 
+    @Autowired
+    private LogEntryService logEntryService;
+
     @Override
     public void importXML(String realFileName, InputStream stream, Integer accountPeriodId, int typeId, Integer departmentId, TAUserInfo userInfo) {
 
         if (stream == null) {
-            throw new ServiceException(FILE_NULL);
+            throw new ServiceException(NO_DATA_FILE_MSG);
         }
         if (departmentId == null) {
             throw new ServiceException(DEPARTMENTID_INVALID);
@@ -111,7 +113,7 @@ public class BookerStatementsServiceImpl implements BookerStatementsService {
             throw new ServiceException(ACCOUNT_PERIOD_INVALID);
         }
         if (realFileName == null || !getFileExtention(realFileName).equals("xls")) {
-            throw new ServiceException(NO_DATA_FILE_MSG);
+            throw new ServiceException(INCORRECT_NAME_MSG);
         }
 
         if (typeId == 0) {
@@ -165,7 +167,10 @@ public class BookerStatementsServiceImpl implements BookerStatementsService {
                             codeOpu.append(", ");
                         }
                     }
-                    throw new ServiceException("Код ОПУ " + codeOpu + " указан в форме более одного раза! Файл не может быть загружен.");
+                    Logger logger = new Logger();
+                    logger.error("Следующие коды ОПУ указаны в форме более одного раза:");
+                    logger.error(codeOpu.toString());
+                    throw new ServiceLoggerException("Нарушена уникальность кодов ОПУ. Файл не может быть загружен.", logEntryService.save(logger.getEntries()));
                 }
 
                 provider.updateRecords(userInfo, getStartDate(), records);

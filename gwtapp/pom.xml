@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>com.aplana.taxaccounting</groupId>
 		<artifactId>taxaccounting</artifactId>
-        <version>0.8</version>
+        <version>0.7</version>
 	</parent>
 
 	<artifactId>gwtapp</artifactId>
@@ -325,11 +325,6 @@
                     <groupId>com.aplana.taxaccounting</groupId>
                     <artifactId>async-mock</artifactId>
                     <version>${project.version}</version>
-                </dependency>
-                <dependency>
-                    <groupId>javax</groupId>
-                    <artifactId>javaee-api</artifactId>
-                    <scope>test</scope>
                 </dependency>
             </dependencies>
 		</profile>

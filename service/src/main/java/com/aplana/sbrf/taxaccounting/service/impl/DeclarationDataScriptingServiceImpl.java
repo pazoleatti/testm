@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationTemplateDao;
 import com.aplana.sbrf.taxaccounting.log.impl.ScriptMessageDecorator;
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
@@ -76,9 +77,14 @@ public class DeclarationDataScriptingServiceImpl extends TAAbstractScriptingServ
 	public void executeScript(TAUserInfo userInfo, DeclarationData declarationData, FormDataEvent event, Logger logger,
 			Map<String, Object> exchangeParams) {
 		this.logger.debug("Starting processing request to run create script");
-		
+
+		String script = declarationTemplateDao.getDeclarationTemplateScript(declarationData.getDeclarationTemplateId());
+		if (!canExecuteScript(script, event)) {
+			return;
+		}
+
 		DeclarationTemplate declarationTemplate = declarationTemplateDao.get(declarationData.getDeclarationTemplateId());
-		
+
 		// Биндим параметры для выполнения скрипта
 		Bindings b = scriptEngine.createBindings();
 		
@@ -113,7 +119,7 @@ public class DeclarationDataScriptingServiceImpl extends TAAbstractScriptingServ
 		ScriptMessageDecorator d = new ScriptMessageDecorator(event.getTitle());
 		logger.setMessageDecorator(d);
 			
-		executeScript(b, declarationTemplateDao.getDeclarationTemplateScript(declarationData.getDeclarationTemplateId()), logger, d);
+		executeScript(b, script, logger, d);
 			
 		logger.setMessageDecorator(null);
 
@@ -130,7 +136,8 @@ public class DeclarationDataScriptingServiceImpl extends TAAbstractScriptingServ
 			logScriptException(e, logger);
 			return false;
 		} catch (Exception e) {
-			logger.error(e);
+            //TODO: Добавить вывод номера строки в скрипте
+			logger.error(new ServiceException("Обнаружены ошибки в скрипте!", e));
 			return false;
 		}
 	}

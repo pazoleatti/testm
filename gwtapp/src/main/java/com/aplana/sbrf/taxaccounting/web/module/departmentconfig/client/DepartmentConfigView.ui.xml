@@ -206,10 +206,18 @@
                                     </g:HorizontalPanel>
                                     <g:HorizontalPanel width="100%" spacing="1" verticalAlignment="middle">
                                         <g:cell width="1%" height="22px">
-                                            <g:Label text="Код налогового органа:" addStyleNames="{style.leftLabels}"/>
+                                            <g:Label ui:field="taxOrganCodeLabel" text="Код налогового органа:" addStyleNames="{style.leftLabels}"/>
                                         </g:cell>
                                         <g:cell width="99%">
                                             <aplana:TextBox ui:field="taxOrganCode" width="150px" maxLength="4"/>
+                                        </g:cell>
+                                    </g:HorizontalPanel>
+                                    <g:HorizontalPanel ui:field="taxOrganCodePromPanel" width="100%" spacing="1" verticalAlignment="middle">
+                                        <g:cell width="1%" height="22px">
+                                            <g:Label text="Код налогового органа (пром.):" addStyleNames="{style.leftLabels}"/>
+                                        </g:cell>
+                                        <g:cell width="99%">
+                                            <aplana:TextBox ui:field="taxOrganCodeProm" width="150px" maxLength="4"/>
                                         </g:cell>
                                     </g:HorizontalPanel>
                                     <g:HorizontalPanel width="100%" spacing="1" verticalAlignment="middle">

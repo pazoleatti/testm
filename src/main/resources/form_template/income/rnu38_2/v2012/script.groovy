@@ -33,22 +33,24 @@ switch (formDataEvent) {
         checkSourceAccepted()
         if (!isConsolidated) {
             calc()
+            formDataService.saveCachedDataRows(formData, logger)
         }
         logicCheck()
         break
-    case FormDataEvent.MOVE_CREATED_TO_APPROVED :  // Утвердить из "Создана"
-    case FormDataEvent.MOVE_APPROVED_TO_ACCEPTED : // Принять из "Утверждена"
-    case FormDataEvent.MOVE_CREATED_TO_ACCEPTED :  // Принять из "Создана"
-    case FormDataEvent.MOVE_CREATED_TO_PREPARED :  // Подготовить из "Создана"
-    case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED : // Принять из "Подготовлена"
-    case FormDataEvent.MOVE_PREPARED_TO_APPROVED : // Утвердить из "Подготовлена"
+    case FormDataEvent.MOVE_CREATED_TO_APPROVED:  // Утвердить из "Создана"
+    case FormDataEvent.MOVE_APPROVED_TO_ACCEPTED: // Принять из "Утверждена"
+    case FormDataEvent.MOVE_CREATED_TO_ACCEPTED:  // Принять из "Создана"
+    case FormDataEvent.MOVE_CREATED_TO_PREPARED:  // Подготовить из "Создана"
+    case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED: // Принять из "Подготовлена"
+    case FormDataEvent.MOVE_PREPARED_TO_APPROVED: // Утвердить из "Подготовлена"
         checkSourceAccepted()
         logicCheck()
         break
-    case FormDataEvent.COMPOSE :
+    case FormDataEvent.COMPOSE:
         consolidation()
         // расчет после консолидации не нужен
         logicCheck()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.IMPORT:
         noImport(logger)
@@ -86,8 +88,7 @@ def getReportPeriodEndDate() {
 }
 
 void calc() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.allCached
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
 
     def totalRow = getDataRow(dataRows, 'total')
 
@@ -99,7 +100,6 @@ void calc() {
     // получение данных из первичной рну-36.1
     def dataRowsFromSource = getDataRowsFromSource()
     if (!dataRowsFromSource) {
-        dataRowHelper.save(dataRows)
         return
     }
 
@@ -107,8 +107,6 @@ void calc() {
     allColumns.each {
         totalRow[it] = totalRowSource[it]
     }
-
-    dataRowHelper.save(dataRows)
 }
 
 void logicCheck() {
@@ -132,8 +130,7 @@ void logicCheck() {
 }
 
 void consolidation() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.allCached
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
 
     def totalRow = getDataRow(dataRows, 'total')
 
@@ -146,14 +143,14 @@ void consolidation() {
             getReportPeriodStartDate(), getReportPeriodEndDate()).each {
         def source = formDataService.getLast(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId, formData.periodOrder)
         if (source != null && source.state == WorkflowState.ACCEPTED) {
-            def sourceRows = formDataService.getDataRowHelper(source).allCached
+            def sourceRows = formDataService.getDataRowHelper(source).allSaved
             def totalRowSource = getDataRow(sourceRows, 'total')
             allColumns.each {
                 totalRow[it] += totalRowSource[it]
             }
         }
     }
-    dataRowHelper.save(dataRows)
+    updateIndexes(dataRows)
 }
 
 def getTaxPeriod() {
@@ -181,7 +178,7 @@ void checkSourceAccepted() {
 def getDataRowsFromSource() {
     def formDataSource = getFormDataSource()
     if (formDataSource != null) {
-        return formDataService.getDataRowHelper(formDataSource)?.allCached
+        return formDataService.getDataRowHelper(formDataSource)?.allSaved
     }
     return null
 }

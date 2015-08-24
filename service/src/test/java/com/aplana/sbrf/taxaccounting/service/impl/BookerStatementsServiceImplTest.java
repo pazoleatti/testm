@@ -2,6 +2,8 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
+import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
@@ -9,6 +11,7 @@ import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.AuditService;
 import com.aplana.sbrf.taxaccounting.service.BookerStatementsService;
+import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.service.PeriodService;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -136,11 +139,16 @@ public class BookerStatementsServiceImplTest {
         return BookerStatementsServiceImplTest.class.getClassLoader().getResourceAsStream("com/aplana/sbrf/taxaccounting/service/impl/BookerStatementsServiceImplTestInvalid.xls");
     }
 
-    @Test(expected = ServiceException.class)
+    @Test(expected = ServiceLoggerException.class)
     public void importXML() {
         List<String> list = new ArrayList<String>();
         list.add("string");
         when(provider102.getMatchedRecords(Matchers.<List<RefBookAttribute>>any(), Matchers.<List<Map<String, RefBookValue>>>any(), Matchers.<Integer>any())).thenReturn(list);
+
+        LogEntryService logEntryService = mock(LogEntryService.class);
+        when(logEntryService.save(Matchers.<List<LogEntry>>any())).thenReturn("uuid");
+        ReflectionTestUtils.setField(service, "logEntryService", logEntryService);
+
         service.importXML("test.xls", get102Stream(), REPORT_PERIOD_ID_OPEN, TYPE_INCOME_102, DEPARTMENT_ID, new TAUserInfo());
     }
 }

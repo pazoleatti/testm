@@ -5,6 +5,7 @@ import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.gwt.client.dialog.DialogHandler;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.util.StringUtils;
+import com.aplana.sbrf.taxaccounting.web.module.formdatalist.shared.FormDataElementName;
 import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPickerPopupWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client.RefBookPickerWidget;
 import com.google.gwt.editor.client.Editor;
@@ -91,6 +92,26 @@ public class FormDestinationsView extends PopupViewWithUiHandlers<FormDestinatio
         formDataKind.setPeriodDates(current, current);
         setButtonStatusUpdateHandlers();
 	}
+
+    @Override
+    public void setElementNames(Map<FormDataElementName, String> names) {
+        String app = ":";
+        for (Map.Entry<FormDataElementName, String> name : names.entrySet()) {
+            if (name.getValue() == null) {
+                continue;
+            }
+            switch (name.getKey()) {
+                case FORM_KIND_REFBOOK:
+                    formDataKind.setTitle(name.getValue() + app);
+                    break;
+                case FORM_TYPE_REFBOOK:
+                    formTypeId.setTitle(name.getValue() + app);
+                    break;
+                default:
+                    break;
+            }
+        }
+    }
 
     private void setButtonStatusUpdateHandlers() {
         departmentPicker.addValueChangeHandler(new ValueChangeHandler<List<Integer>>() {
@@ -320,7 +341,7 @@ public class FormDestinationsView extends PopupViewWithUiHandlers<FormDestinatio
 
     @Override
     public void updateLabel(TaxType taxType) {
-        if (!taxType.equals(TaxType.DEAL)) {
+        if (!taxType.equals(TaxType.DEAL) && !taxType.equals(TaxType.ETR)) {
             formDataKindLabel.setText(FORM_DATA_KIND_TITLE);
             formTypeLabel.setText(FORM_DATA_TYPE_TITLE);
             modalWindowTitle.setTitle(MODAL_WINDOW_TITLE);

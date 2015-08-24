@@ -130,6 +130,11 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
 
     @Override
 	public String generateXmlFileId(int declarationTypeId, int departmentReportPeriodId, String taxOrganCode, String kpp) {
+        return generateXmlFileId(declarationTypeId, departmentReportPeriodId, taxOrganCode, taxOrganCode, kpp);
+    }
+
+    @Override
+	public String generateXmlFileId(int declarationTypeId, int departmentReportPeriodId, String taxOrganCodeProm, String taxOrganCode, String kpp) {
 
         DateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT);
 
@@ -149,7 +154,7 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
             Calendar calendar = Calendar.getInstance();
             if (declarationTaxType == TaxType.PROPERTY || declarationTaxType == TaxType.TRANSPORT || declarationTaxType == TaxType.INCOME) {
                 stringBuilder.append('_').
-                        append(taxOrganCode).
+                        append(taxOrganCodeProm).
                         append('_').
                         append(taxOrganCode).
                         append('_').
@@ -161,7 +166,7 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
                         append(UUID.randomUUID().toString().toUpperCase());
             } else {
                 stringBuilder.append('_').
-                        append(departmentParam.get("TAX_ORGAN_CODE").toString()).
+                        append(departmentParam.get("TAX_ORGAN_CODE_PROM").toString()).
                         append('_').
                         append(departmentParam.get("TAX_ORGAN_CODE").toString()).
                         append('_').
@@ -192,14 +197,10 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
     @Override
 	public FormDataCollection getAcceptedFormDataSources(DeclarationData declarationData) {
 		int departmentId = declarationData.getDepartmentId();
-		int declarationTemplateId = declarationData.getDeclarationTemplateId();
 		int reportPeriodId = declarationData.getReportPeriodId();
-        ReportPeriod reportPeriod = periodService.getReportPeriod(reportPeriodId);
 
 		// Формирование списка НФ-источников в статусе "Принята"
-		DeclarationTemplate declarationTemplate = declarationTemplateDao.get(declarationTemplateId);
-		List<DepartmentFormType> sourcesInfo = departmentFormTypeDao.getDeclarationSources(departmentId, declarationTemplate.getType().getId(),
-                reportPeriod.getCalendarStartDate(), reportPeriod.getEndDate());
+		List<DepartmentFormType> sourcesInfo = declarationDataService.getFormDataSources(declarationData, true, new Logger());
 		List<FormData> records = new ArrayList<FormData>();
 
         DepartmentReportPeriodFilter filter = new DepartmentReportPeriodFilter();
@@ -222,8 +223,7 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
         });
 
 		for (DepartmentFormType dft : sourcesInfo) {
-            // Ежемесячные формы не являются источниками для декларация, поэтому periodOrder = null
-			FormData formData = formDataDao.getLast(dft.getFormTypeId(), dft.getKind(), dft.getDepartmentId(), reportPeriodId, null);
+			FormData formData = formDataDao.getLast(dft.getFormTypeId(), dft.getKind(), dft.getDepartmentId(), reportPeriodId, dft.getPeriodOrder());
 			if (formData != null) {
 				if (formData.getState() != WorkflowState.ACCEPTED) {
                     //TODO возможно перенести initFormTemplateParams внутрь функции

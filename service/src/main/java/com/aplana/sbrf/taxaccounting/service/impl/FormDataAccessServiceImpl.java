@@ -21,6 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 import static java.util.Arrays.asList;
@@ -29,6 +30,7 @@ import static java.util.Arrays.asList;
 public class FormDataAccessServiceImpl implements FormDataAccessService {
 
     private static final Log logger = LogFactory.getLog(FormDataAccessServiceImpl.class);
+    private static final SimpleDateFormat SDF = new SimpleDateFormat("dd.MM.yyyy");
 
     public static final String LOG_EVENT_AVAILABLE_MOVES = "LOG_EVENT_AVAILABLE_MOVES";
     public static final String LOG_EVENT_READ = "READ";
@@ -40,21 +42,22 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 
     private static final String FORM_DATA_KIND_STATE_ERROR_LOG = "Event type: \"%s\". Unsuppotable case for formData with \"%s\" kind and \"%s\" state!";
     private static final String REPORT_PERIOD_IS_CLOSED_LOG = "Department report period (%d) is closed!";
-    private static final String REPORT_PERIOD_IS_CLOSED = "Выбранный отчетный период подразделения закрыт!";
+    private static final String REPORT_PERIOD_IS_CLOSED = "Выбранный период закрыт";
     private static final String FORM_TEMPLATE_WRONG_STATUS_LOG = "Form template (%d) does not exist in report period (%d)!";
-    private static final String FORM_TEMPLATE_WRONG_STATUS = "Выбранный вид налоговой формы не существует в выбранном периоде!";
+    private static final String FORM_TEMPLATE_WRONG_STATUS = "Выбранный тип %s не существует в выбранном периоде!";
     private static final String INCORRECT_DEPARTMENT_FORM_TYPE_LOG = "Form type (%d) and form kind (%d) is not applicated for department (%d)";
-    private static final String INCORRECT_DEPARTMENT_FORM_TYPE1 = "Выбранный тип налоговой формы не назначен подразделению!";
+    private static final String INCORRECT_DEPARTMENT_FORM_TYPE1 = "Выбранный тип %s не назначен подразделению!";
     private static final String INCORRECT_DEPARTMENT_FORM_TYPE2 = "Нет прав доступа к созданию формы с заданными параметрами!";
-    private static final String INCORRECT_DEPARTMENT_FORM_TYPE3 = "Выбранный вид налоговой формы не назначен подразделению";
+    private static final String INCORRECT_DEPARTMENT_FORM_TYPE3 = "Выбранный тип %s не назначен подразделению";
     private static final String CREATE_FORM_DATA_ERROR_ONLY_CONTROL_LOG = "Only ROLE_CONTROL can create form in balance period!";
-    private static final String CREATE_FORM_DATA_ERROR_ONLY_CONTROL = "Выбран период ввода остатков. В периоде ввода остатков оператор не может создавать налоговые формы";
+    private static final String CREATE_FORM_DATA_ERROR_ONLY_CONTROL = "Выбран период ввода остатков. В периоде ввода остатков оператор не может создавать %s";
     private static final String CREATE_MANUAL_FORM_DATA_ERROR_ONLY_CONTROL_LOG = "Only ROLE_CONTROL can create manual version of form!";
     private static final String CREATE_MANUAL_FORM_DATA_ERROR_ONLY_CONTROL = "Только контролер может создавать версию ручного ввода";
     private static final String FORM_DATA_ERROR_ACCESS_DENIED = "Недостаточно прав на %s формы с типом \"%s\" в статусе \"%s\"!";
     private static final String FORM_DATA_DEPARTMENT_ACCESS_DENIED_LOG = "Selected department (%d) not available in report period (%d)!";
     private static final String FORM_DATA_DEPARTMENT_ACCESS_DENIED = "Выбранное подразделение недоступно для пользователя!";
     private static final String FORM_DATA_EDIT_ERROR = "Нельзя редактировать форму \"%s\" в состоянии \"%s\"";
+    private static final String ACCEPTED_DESTINATION_MSG = "Приёмник формы - \"%s\" для подразделения \"%s\" в периоде \"%s%s%s\" - находится в статусе \"Принят\"!";
 
     @Autowired
     private FormDataDao formDataDao;
@@ -127,6 +130,8 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
     @Override
     public void canCreate(TAUserInfo userInfo, int formTemplateId, FormDataKind kind, int departmentReportPeriodId) {
         // http://conf.aplana.com/pages/viewpage.action?pageId=11383566
+        // Макет формы
+        FormTemplate formTemplate = formTemplateDao.get(formTemplateId);
 
         // Если выбранный "Период" закрыт, то система выводит сообщение в панель уведомления:
         // "Выбранный период закрыт".
@@ -141,12 +146,10 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
                 && !userInfo.getUser().hasRole(TARole.ROLE_CONTROL_NS)
                 && !userInfo.getUser().hasRole(TARole.ROLE_CONTROL_UNP)
                 && departmentReportPeriod.isBalance()) {
-            logger.warn(String.format(CREATE_FORM_DATA_ERROR_ONLY_CONTROL_LOG));
-            throw new ServiceException(CREATE_FORM_DATA_ERROR_ONLY_CONTROL);
+            logger.warn(CREATE_FORM_DATA_ERROR_ONLY_CONTROL_LOG);
+            throw new ServiceException(
+                    String.format(CREATE_FORM_DATA_ERROR_ONLY_CONTROL, MessageGenerator.mesSpeckPlural(formTemplate.getType().getTaxType())));
         }
-
-        // Макет формы
-        FormTemplate formTemplate = formTemplateDao.get(formTemplateId);
 
         // Проверка доступности подразделения
         if (!departmentService.getOpenPeriodDepartments(userInfo.getUser(),
@@ -183,12 +186,12 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
         if (!foundTypeAndKind) {
             logger.warn(String.format(INCORRECT_DEPARTMENT_FORM_TYPE_LOG, formTypeId, kind.getId(),
                     departmentReportPeriod.getDepartmentId()));
-            throw new ServiceException(INCORRECT_DEPARTMENT_FORM_TYPE3);
+            throw new ServiceException(String.format(INCORRECT_DEPARTMENT_FORM_TYPE3, MessageGenerator.mesSpeckPlural(formType.getTaxType())));
         }
         if (!foundKind) {
             logger.warn(String.format(INCORRECT_DEPARTMENT_FORM_TYPE_LOG, formTypeId, kind.getId(),
                     departmentReportPeriod.getDepartmentId()));
-            throw new ServiceException(INCORRECT_DEPARTMENT_FORM_TYPE1);
+            throw new ServiceException(String.format(INCORRECT_DEPARTMENT_FORM_TYPE1, MessageGenerator.mesSpeckPlural(formType.getTaxType())));
         }
 
         // Доступные типы форм
@@ -205,7 +208,7 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
         boolean intersect = isTemplateIntersectReportPeriod(formTemplate, departmentReportPeriod.getReportPeriod().getId());
         if (!intersect || formTemplate.getStatus() != VersionedObjectStatus.NORMAL) {
             logger.warn(String.format(FORM_TEMPLATE_WRONG_STATUS_LOG, formTemplate.getId(), departmentReportPeriod.getReportPeriod().getId()));
-            throw new AccessDeniedException(FORM_TEMPLATE_WRONG_STATUS);
+            throw new AccessDeniedException(String.format(FORM_TEMPLATE_WRONG_STATUS, MessageGenerator.mesSpeckPlural(formType.getTaxType())));
         }
 
         // Если форма с заданными параметрами существует, то система выводит сообщение в панель уведомления:
@@ -241,10 +244,13 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
         List<Pair<String, String>> destinations = sourceService.existAcceptedDestinations(formData.getDepartmentId(), formData.getFormType().getId(),
                 formData.getKind(), formData.getReportPeriodId(), null, null);
         if (!destinations.isEmpty()) {
-            ReportPeriod period = reportPeriodService.getReportPeriod(formData.getReportPeriodId());
             for (Pair<String, String> destination : destinations) {
-                logger.error("Приёмник формы - " + destination.getFirst() + " для подразделения " + destination.getSecond() +
-                        " в периоде " + period.getTaxPeriod().getYear() + " " + period.getName() + " - находится в статусе \"Принят\"!");
+                logger.error(String.format(ACCEPTED_DESTINATION_MSG,
+                        destination.getFirst(), destination.getSecond(),
+                        departmentReportPeriod.getReportPeriod().getName() + " " + departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear(),
+                        formData.getPeriodOrder() != null ? ", Месяц: " + Months.fromId(formData.getPeriodOrder()).getTitle() : "",
+                        departmentReportPeriod.getCorrectionDate() != null ? ", Дата сдачи корректировки: " + SDF.format(departmentReportPeriod.getCorrectionDate()) : ""
+                ));
             }
         }
 

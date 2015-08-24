@@ -1,7 +1,5 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
-import com.aplana.sbrf.taxaccounting.dao.ColumnDao;
-import com.aplana.sbrf.taxaccounting.dao.api.DataRowDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
@@ -14,7 +12,10 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
 
 /**
  * User: avanteev
@@ -42,10 +43,6 @@ public class MainOperatingFTServiceImpl implements MainOperatingService {
     private SourceService sourceService;
     @Autowired
     private DepartmentService departmentService;
-    @Autowired
-    private DataRowDao dataRowDao;
-    @Autowired
-    private ColumnDao columnDao;
     @Autowired
     private FormDataService formDataService;
     @Autowired
@@ -109,13 +106,13 @@ public class MainOperatingFTServiceImpl implements MainOperatingService {
         return id;
     }
 
-    /**
+    /*
      * Удаление устаревших данных НФ, при смене типа хранения графы
      * http://jira.aplana.com/browse/SBRFACCTAX-8467
      *
      * @param oldTemplate
      * @param newTemplate
-     */
+     *
     private void cleanData(FormTemplate oldTemplate, FormTemplate newTemplate) {
         if (oldTemplate.getColumns() == null || oldTemplate.getColumns().isEmpty()
                 || newTemplate.getColumns() == null || newTemplate.getColumns().isEmpty()) {
@@ -143,7 +140,7 @@ public class MainOperatingFTServiceImpl implements MainOperatingService {
             return;
         }
         dataRowDao.cleanValue(cleanColumnList);
-    }
+    }*/
 
     @Override
     public <T> int createNewType(T template, Date templateActualEndDate, Logger logger, TAUserInfo user) {
@@ -259,6 +256,11 @@ public class MainOperatingFTServiceImpl implements MainOperatingService {
             logging(templateId, FormDataEvent.TEMPLATE_ACTIVATED, user.getUser());
         }
         return true;
+    }
+
+    @Override
+    public void isInUsed(int templateId, int typeId, VersionedObjectStatus status, Date versionActualDateStart, Date versionActualDateEnd, Logger logger) {
+        versionOperatingService.isUsedVersion(templateId, typeId, status, versionActualDateStart, versionActualDateEnd, logger);
     }
 
     private void checkError(Logger logger, String errorMsg){

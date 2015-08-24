@@ -294,4 +294,18 @@ public class FileWrapper {
             return false;
         }
     }
+
+    public long length() {
+        if (file != null) {
+            return file.length();
+        }
+        if (smbFile != null) {
+            try {
+                return smbFile.length();
+            } catch (SmbException e) {
+                throw new ServiceException(ERROR_RESOURCE_SMB, e);
+            }
+        }
+        throw new ServiceException(ERROR_RESOURCE_INIT);
+    }
 }

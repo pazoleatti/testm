@@ -94,7 +94,7 @@ public class IncomeWithHoldingAgentTest extends ScriptTestBase {
     // Консолидация
     @Test
     public void composeTest() {
-        // Кроме простого выполнения события других проверок нет, т.к. для МУКС-отчетов консолидация выполняется сервисом
+        // Кроме простого выполнения события других проверок нет, т.к. для формы консолидация выполняется сервисом
         testHelper.execute(FormDataEvent.COMPOSE);
         checkLogger();
     }

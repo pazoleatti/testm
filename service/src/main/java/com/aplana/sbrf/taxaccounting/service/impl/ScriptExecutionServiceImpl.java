@@ -31,6 +31,10 @@ public class ScriptExecutionServiceImpl extends TAAbstractScriptingServiceImpl i
 
     @Override
     public void executeScript(TAUserInfo userInfo, String script, Logger logger) {
+		if (!canExecuteScript(script, null)) {
+			logger.warn("Скрипт не может быть выполнен, так как он не содержит кода");
+			return;
+		}
         // Биндим параметры для выполнения скрипта
         Bindings b = scriptEngine.createBindings();
         Map<String, ?> scriptComponents =  getScriptExposedBeans();

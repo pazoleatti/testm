@@ -19,12 +19,6 @@ import java.util.List;
 public interface DataRowDao {
 
 	/**
-	 * Удаление значений неактуальных граф. Метод используется настройщиком при смене типов граф
-	 * @param columnIdList Список Id измененных/удаленных граф
-	 */
-	void cleanValue(Collection<Integer> columnIdList);
-
-	/**
 	 * Удаляет точку восстановления, сделанную перед редактированием данных (бывший commit)
 	 *
 	 * @param formData
@@ -56,21 +50,31 @@ public interface DataRowDao {
 	void createCheckPoint(FormData formData);
 
 	/**
-	 * Метод получает строки сохраненного среза строк НФ.
+	 * Метод возвращает строки сохраненного среза строк НФ.
 	 *
 	 */
-	List<DataRow<Cell>> getSavedRows(FormData formData, DataRowRange range);
+	List<DataRow<Cell>> getRows(FormData formData, DataRowRange range);
 
 	/**
-	 * Метод получает количество строк сохранненого среза
+	 * Метод возвращает количество строк НФ
 	 */
-	int getSavedSize(FormData formData);
+	int getRowCount(FormData formData);
 
     /**
-     * Метод получает количество строк без учета итоговых
+     * Метод возвращает строки сохраненного среза строк НФ.
+     *
      */
-	//TODO детально изучить метод
-    int getSizeWithoutTotal(FormData formData);
+    List<DataRow<Cell>> getTempRows(FormData formData, DataRowRange range);
+
+    /**
+     * Метод возвращает количество строк НФ
+     */
+    int getTempRowCount(FormData formData);
+
+    /**
+     * Метод возвращает количество автонумеруемых строк
+     */
+    int getAutoNumerationRowCount(FormData formData);
 
 	/**
 	 * Вставляет строки начиная с указанного индекса. Выставленные в rows значения id и index игнорируются и
@@ -88,7 +92,6 @@ public interface DataRowDao {
 	 * @param formData экземпляр НФ
 	 * @return true - изменилось, false - не изменилось
 	 */
-	//TODO детально изучить метод
 	boolean isDataRowsCountChanged(FormData formData);
 
 	/**
@@ -150,6 +153,17 @@ public interface DataRowDao {
 	 * @param rows
 	 */
 	void saveRows(FormData formData, List<DataRow<Cell>> rows);
+
+
+    /**
+     * Заменяет существующие строки в БД во временном(резервном) срезе на те, которые указаны в аргументе rows. Старые данные удаляются.
+     * Поля DataRow.index и DataRow.id не принимаются во внимание. Порядок следования выставляется согласно
+     * последовательности строк в rows. Id выставляется новый из последовательности "seq_form_data_nnn"
+     *
+     * @param formData
+     * @param rows
+     */
+    void saveTempRows(FormData formData, List<DataRow<Cell>> rows);
 
     /**
      * Полнотекстовый поиск по данным налоговой формы

@@ -6,6 +6,8 @@ import com.gwtplatform.dispatch.shared.UnsecuredActionImpl;
 public class UnlockFormData extends UnsecuredActionImpl<UnlockFormDataResult> implements ActionName {
 
 	private long formId;
+    private boolean manual;
+    private boolean isPerformerLock;
 
 	public long getFormId() {
 		return formId;
@@ -15,7 +17,23 @@ public class UnlockFormData extends UnsecuredActionImpl<UnlockFormDataResult> im
 		this.formId = formId;
 	}
 
-	@Override
+    public boolean isManual() {
+        return manual;
+    }
+
+    public void setManual(boolean manual) {
+        this.manual = manual;
+    }
+
+    public boolean isPerformerLock() {
+        return isPerformerLock;
+    }
+
+    public void setPerformerLock(boolean isPerformerLock) {
+        this.isPerformerLock = isPerformerLock;
+    }
+
+    @Override
 	public String getName() {
 		return "Разблокировка формы";
 	}

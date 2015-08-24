@@ -195,7 +195,14 @@ public class FormTemplateMainPresenter extends TabContainerPresenter<FormTemplat
                 LogAddEvent.fire(FormTemplateMainPresenter.this, result.getUuid());
                 if (!result.isSetStatusSuccessfully()) { //
                     Dialog.confirmMessage("Информация",
-                            "Найдены экземпляры налоговых форм, использующие версию макета. Изменить статус версии?",
+                            "Найдены экземпляры " +
+                                    (
+                                            formTemplate.getType().getTaxType() == TaxType.DEAL
+                                                    ||
+                                            formTemplate.getType().getTaxType() == TaxType.ETR
+                                                    ? "форм" : "налоговых форм"
+                                    )
+                                    + ", использующие версию макета. Изменить статус версии?",
                             new DialogHandler() {
                                 @Override
                                 public void yes() {
@@ -305,7 +312,7 @@ public class FormTemplateMainPresenter extends TabContainerPresenter<FormTemplat
             }, this));
         }
         //Новая версия макета
-        else if (formTemplate.getId() == null && formTemplate.getType().getId() != 0){
+        else if (formTemplate.getId() == null){
             CreateNewVersionAction action = new CreateNewVersionAction();
             action.setForm(formTemplateExt.getFormTemplate());
             action.setVersionEndDate(formTemplateExt.getActualEndVersionDate());

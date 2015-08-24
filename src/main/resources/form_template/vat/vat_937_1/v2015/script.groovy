@@ -66,10 +66,7 @@ switch (formDataEvent) {
         break
     case FormDataEvent.IMPORT:
         importData()
-        if (!logger.containsLevel(LogLevel.ERROR)) {
-            calc()
-            formDataService.saveCachedDataRows(formData, logger)
-        }
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.IMPORT_TRANSPORT_FILE:
         importTransportData()
@@ -149,8 +146,6 @@ void calc() {
 
     def totalRow = getDataRow(dataRows, 'total')
     calcTotalSum(dataRows, totalRow, totalSumColumns)
-
-    sortFormDataRows(false)
 }
 
 void changeDateFormat(def row){
@@ -442,7 +437,7 @@ void importTransportData() {
     char QUOTE = '\0'
 
     String[] rowCells
-    int fileRowIndex = 0    // номер строки в файле
+    int fileRowIndex = 2    // номер строки в файле (1, 2..). Начинается с 2, потому что первые две строки - заголовок и пустая строка
     int rowIndex = 0        // номер строки в НФ
     def total = null        // итоговая строка со значениями из тф для добавления
     def newRows = []
@@ -480,7 +475,7 @@ void importTransportData() {
     }
 
     // сравнение итогов
-    if (total) {
+    if (!logger.containsLevel(LogLevel.ERROR) && total) {
         // мапа с алиасами граф и номерами колонокв в xml (алиас -> номер колонки)
         def totalColumnsIndexMap = ['nds' : 16]
         // подсчет итогов
@@ -601,7 +596,7 @@ void importData() {
     // проверка шапки
     checkHeaderXls(headerValues, COLUMN_COUNT, HEADER_ROW_COUNT, tmpRow)
     if (logger.containsLevel(LogLevel.ERROR)) {
-        return;
+        return
     }
     // освобождение ресурсов для экономии памяти
     headerValues.clear()
@@ -615,6 +610,7 @@ void importData() {
     def rowIndex = 0
     def rows = []
     def allValuesCount = allValues.size()
+    def totalRowFromFile = null
 
     // формирвание строк нф
     for (def i = 0; i < allValuesCount; i++) {
@@ -626,14 +622,15 @@ void importData() {
             rowValues.clear()
             break
         }
+        rowIndex++
         // Пропуск итоговых строк
         if (!rowValues[INDEX_FOR_SKIP]) {
+            totalRowFromFile = getNewRowFromXls(rowValues, colOffset, fileRowIndex, rowIndex)
             allValues.remove(rowValues)
             rowValues.clear()
             continue
         }
         // простая строка
-        rowIndex++
         def newRow = getNewRowFromXls(rowValues, colOffset, fileRowIndex, rowIndex)
         rows.add(newRow)
         // освободить ненужные данные - иначе не хватит памяти
@@ -641,15 +638,15 @@ void importData() {
         rowValues.clear()
     }
 
-    // получить строки из шаблона
-    def formTemplate = formDataService.getFormTemplate(formData.formType.id, formData.reportPeriodId)
-    def templateRows = formTemplate.rows
     // итоговая строка
-    rows.add(getDataRow(templateRows, 'total'))
+    def totalRow = getFixedRow('Всего', 'total')
+    rows.add(totalRow)
+    updateIndexes(rows)
+    // сравнение итогов
+    compareSimpleTotalValues(totalRow, totalRowFromFile, rows, totalSumColumns, formData, logger, false)
 
     showMessages(rows, logger)
     if (!logger.containsLevel(LogLevel.ERROR)) {
-        updateIndexes(rows)
         formDataService.getDataRowHelper(formData).allCached = rows
     }
 }

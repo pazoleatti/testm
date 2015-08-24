@@ -53,10 +53,7 @@ switch (formDataEvent) {
         break
     case FormDataEvent.IMPORT:
         importData()
-        if (!logger.containsLevel(LogLevel.ERROR)) {
-            calc()
-            formDataService.saveCachedDataRows(formData, logger)
-        }
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.IMPORT_TRANSPORT_FILE:
         importTransportData()
@@ -204,7 +201,8 @@ void importTransportData() {
     char QUOTE = '\0'
 
     String[] rowCells
-    int fileRowIndex = 0    // номер строки в файле
+    int fileRowIndex = 2    // номер строки в файле (1, 2..). Начинается с 2, потому что первые две строки - заголовок и пустая строка
+    int rowIndex = 0
     def totalTF = null        // итоговая строка со значениями из тф для добавления
 
     InputStreamReader isr = new InputStreamReader(ImportInputStream, DEFAULT_CHARSET)
@@ -226,6 +224,7 @@ void importTransportData() {
         // грузим основные данные
         while ((rowCells = reader.readNext()) != null) {
             fileRowIndex++
+            rowIndex++
             if (isEmptyCells(rowCells)) { // проверка окончания блока данных, пустая строка
                 // итоговая строка тф
                 rowCells = reader.readNext()
@@ -235,7 +234,7 @@ void importTransportData() {
                 }
                 break
             }
-            setValues(dataRows, rowCells, COLUMN_COUNT, fileRowIndex)
+            setValues(dataRows, rowCells, COLUMN_COUNT, fileRowIndex, rowIndex)
         }
     } finally {
         reader.close()
@@ -253,7 +252,7 @@ void importTransportData() {
     }
 
     // сравнение итогов
-    if (totalTF) {
+    if (!logger.containsLevel(LogLevel.ERROR) && totalTF) {
         // сравнение контрольных сумм
         def colOffset = 1
         for (def alias : totalColumnsIndexMap.keySet().asList()) {
@@ -270,7 +269,7 @@ void importTransportData() {
 }
 
 /** Устанавливает значения из тф в строку нф. */
-def setValues(def dataRows, String[] rowCells, def columnCount, def rowIndex) {
+def setValues(def dataRows, String[] rowCells, def columnCount, def fileRowIndex, def rowIndex) {
     if (rowCells == null) {
         return true
     }
@@ -280,7 +279,7 @@ def setValues(def dataRows, String[] rowCells, def columnCount, def rowIndex) {
     // найти нужную строку нф
     def dataRow = dataRows.get(rowIndex - 1)
     // заполнить строку нф значениями из тф
-    return fillRow(dataRow, rowCells, columnCount, rowIndex, true)
+    return fillRow(dataRow, rowCells, columnCount, fileRowIndex, true)
 }
 
 /**
@@ -362,7 +361,7 @@ void importData() {
     // проверка шапки
     checkHeaderXls(headerValues, COLUMN_COUNT, HEADER_ROW_COUNT, tmpRow)
     if (logger.containsLevel(LogLevel.ERROR)) {
-        return;
+        return
     }
     // освобождение ресурсов для экономии памяти
     headerValues.clear()
@@ -378,6 +377,7 @@ void importData() {
     def allValuesCount = allValues.size()
 
     def dataRows = formDataService.getDataRowHelper(formData).allCached
+    def totalRow = getDataRow(dataRows, 'itog')
 
     // формирвание строк нф
     for (def i = 0; i < allValuesCount; i++) {
@@ -389,14 +389,16 @@ void importData() {
             rowValues.clear()
             break
         }
-        // Пропуск итоговых строк
+        rowIndex++
+        // итоговая строка
         if (rowValues[INDEX_FOR_SKIP] == 'Итого') {
+            fillTotalFromXls(totalRow, rowValues, fileRowIndex, rowIndex, colOffset)
+
             allValues.remove(rowValues)
             rowValues.clear()
             break
         }
         // простая строка
-        rowIndex++
         if (rowIndex > dataRows.size()) {
             break
         }
@@ -409,6 +411,16 @@ void importData() {
         allValues.remove(rowValues)
         rowValues.clear()
     }
+
+    // сравнение итогов
+    def totalRowTmp = formData.createStoreMessagingDataRow()
+    // подсчитанные итоговые значения для сравнения
+    def itogValues = calcItog(dataRows)
+    totalColumns.each { alias ->
+        totalRowTmp[alias] = itogValues[alias]
+    }
+    compareTotalValues(totalRow, totalRowTmp, totalColumns, logger, false)
+
     showMessages(dataRows, logger)
 }
 
@@ -482,4 +494,26 @@ def fillRowFromXls(def dataRow, def values, int fileRowIndex, int rowIndex, int 
         colIndex++
         dataRow.obtainCost = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
     }
+}
+
+/**
+ * Заполняет итоговую строку нф значениями из экселя.
+ *
+ * @param dataRow итоговая строка нф
+ * @param values список строк со значениями
+ * @param fileRowIndex номер строки в тф
+ * @param rowIndex номер строки в нф
+ * @param colOffset отступ по столбцам
+ */
+void fillTotalFromXls(def dataRow, def values, int fileRowIndex, int rowIndex, int colOffset) {
+    dataRow.setImportIndex(fileRowIndex)
+    dataRow.setIndex(rowIndex)
+
+    // графа 4
+    def colIndex = 3
+    dataRow.realizeCost = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
+
+    // графа 5
+    colIndex = 4
+    dataRow.obtainCost = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
 }

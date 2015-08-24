@@ -54,7 +54,7 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 		void addCustomTableStyles(List<FormStyle> allStyles);
 
 		void setAdditionalFormInfo(String formType, TaxType taxType, String formKind, String departmentId,
-                                   String reportPeriod, String state, Date startDate, Date endDate, Long formDataId,
+                                   String comparativPeriod, String reportPeriod, String state, Date startDate, Date endDate, Long formDataId,
                                    boolean correctionPeriod, boolean correctionDiff, boolean readOnly);
 
 		void setWorkflowButtons(List<WorkflowMove> moves);
@@ -87,15 +87,15 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 
         void showDeleteManualAnchor(boolean show);
 
-		void setLockInformation(boolean isVisible, boolean readOnlyMode, LockInfo lockInfo);
+		void setLockInformation(boolean isVisible, boolean readOnlyMode, LockInfo lockInfo, TaxType taxType);
 
 		DataRow<Cell> getSelectedRow();
 
 		void setSelectedRow(DataRow<Cell> item, boolean selected);
 
 		void enableRemoveRowButton(boolean enable);
-		
-		boolean getCheckedColumnsClicked();
+
+        boolean getCheckedColumnsClicked();
 
 		void assignDataProvider(int pageSize);
 
@@ -115,12 +115,13 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 
         void setupSelectionModel(boolean fixedRows);
 
-        /** Текст кнопки-ссылки для переключения видов «Абсолютные значения»/«Корректировка» */
-        void setCorrectionText(String text);
+        void showCorrectionButton(boolean correctionPeriod);
 
         void startTimerReport(ReportType reportType);
 
         void stopTimerReport(ReportType reportType);
+
+        void updateTableTopPosition(int position);
 
         void updatePrintReportButtonName(ReportType reportType, boolean isLoad);
 
@@ -166,6 +167,7 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 	protected boolean fixedRows;
     // Признак отображения вида для форм в корректирующих периодах, true - обычный режим, false - режим отображения изенений
     protected boolean absoluteView = true;
+    protected boolean correctionPeriod = false;
 
 	protected Set<DataRow<Cell>> modifiedRows = new HashSet<DataRow<Cell>>();
 
@@ -209,7 +211,8 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 		if (closeFormDataHandlerRegistration !=null ){
 			closeFormDataHandlerRegistration.removeHandler();
 		}
-		unlockForm(formData.getId());
+        placeManager.setOnLeaveConfirmation(null);
+        unlockForm(formData.getId());
 	}
 
     /**
@@ -232,7 +235,7 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 		view.showOriginalVersionButton(false);
 		view.showPrintAnchor(true);
         view.showDeleteFormButton(!lockInfo.isEditMode() && formDataAccessParams.isCanDelete());
-		view.setLockInformation(true, readOnlyMode, lockInfo);
+		view.setLockInformation(true, readOnlyMode, lockInfo, formData.getFormType().getTaxType());
 
         if (lockInfo.isEditMode()) {
             view.setWorkflowButtons(null);
@@ -246,6 +249,8 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
         view.showModeAnchor(existManual, formData.isManual());
         view.showManualAnchor(false);
         view.showDeleteManualAnchor(false);
+
+        view.showCorrectionButton(!lockInfo.isEditMode() && correctionPeriod);
 
         view.setTableLockMode(true);
         view.setColumnsData(formData.getFormColumns(), true, forceEditMode);
@@ -273,7 +278,7 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
         view.showOriginalVersionButton(false);
         view.showPrintAnchor(true);
         view.showDeleteFormButton(!lockInfo.isEditMode() && formDataAccessParams.isCanDelete());
-        view.setLockInformation(true, readOnlyMode, lockInfo);
+        view.setLockInformation(true, readOnlyMode, lockInfo, formData.getFormType().getTaxType());
 
         if (lockInfo.isEditMode()) {
             view.setWorkflowButtons(null);
@@ -287,6 +292,8 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
         view.showManualAnchor(canCreatedManual && !existManual);
         view.showDeleteManualAnchor(false);
 
+        view.showCorrectionButton(!lockInfo.isEditMode() && correctionPeriod);
+
         view.setTableLockMode(true);
         view.setColumnsData(formData.getFormColumns(), true, forceEditMode);
 
@@ -294,10 +301,10 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
     }
 
     /**
-     * Форма находиться в режиме редактирования, при этом запущена операция изменения данных
+     * Форма находится в режиме редактирования, при этом запущена операция изменения данных
      * @param lockInfo
      */
-    protected void setLowEditLockedMode(LockInfo lockInfo){
+    protected void setLowEditLockedMode(LockInfo lockInfo, String taskName){
         readOnlyMode = false;
 
         MyView view = getView();
@@ -317,7 +324,7 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 
         view.showPrintAnchor(false);
         view.showDeleteFormButton(false);
-        view.setLockInformation(true, false, lockInfo);
+        view.setLockInformation(true, false, lockInfo, formData.getFormType().getTaxType());
 
         view.setWorkflowButtons(null);
         view.showCheckButton(formDataAccessParams.isCanRead() && absoluteView);
@@ -328,10 +335,16 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
         view.showManualAnchor(false);
         view.showDeleteManualAnchor(formData.isManual());
 
+        view.showCorrectionButton(correctionPeriod);
+
         view.setTableLockMode(true);
         view.setColumnsData(formData.getFormColumns(), readOnlyMode, forceEditMode);
 
-        placeManager.setOnLeaveConfirmation("Вы уверены, что хотите прекратить редактирование данных налоговой формы?");
+        if (taskName == null) {
+            placeManager.setOnLeaveConfirmation("Вы уверены, что хотите прекратить редактирование данных налоговой формы? В случае выхода все несохраненные изменения будут утеряны.");
+        } else {
+            placeManager.setOnLeaveConfirmation("Вы уверены, что хотите прекратить редактирование данных налоговой формы? В случае выхода все несохраненные изменения будут утеряны и будет отменена операция \""+taskName+"\".");
+        }
         closeFormDataHandlerRegistration = Window.addCloseHandler(new CloseHandler<Window>() {
             @Override
             public void onClose(CloseEvent<Window> event) {
@@ -357,7 +370,7 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 		view.showOriginalVersionButton(false);
 		view.showPrintAnchor(true);
 		view.showDeleteFormButton(formDataAccessParams.isCanDelete());
-		view.setLockInformation(false, readOnlyMode, null);
+		view.setLockInformation(false, readOnlyMode, null, formData.getFormType().getTaxType());
 		
 		view.setWorkflowButtons(formDataAccessParams.getAvailableWorkflowMoves());
 		view.showCheckButton(formDataAccessParams.isCanRead() && absoluteView);
@@ -366,6 +379,8 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
         view.showModeAnchor(existManual, formData.isManual());
         view.showManualAnchor(canCreatedManual && !existManual);
         view.showDeleteManualAnchor(false);
+
+        view.showCorrectionButton(correctionPeriod);
 
         view.setTableLockMode(false);
         view.setColumnsData(formData.getFormColumns(), readOnlyMode, forceEditMode);
@@ -393,7 +408,7 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 
 		view.showPrintAnchor(false);
 		view.showDeleteFormButton(false);
-		view.setLockInformation(false, readOnlyMode, null);
+		view.setLockInformation(false, readOnlyMode, null, formData.getFormType().getTaxType());
 		
 		view.setWorkflowButtons(null);
 		view.showCheckButton(formDataAccessParams.isCanRead() && absoluteView);
@@ -404,11 +419,13 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
         view.showManualAnchor(false);
         view.showDeleteManualAnchor(formData.isManual());
 
+        view.showCorrectionButton(correctionPeriod);
+
         view.setTableLockMode(false);
         view.setColumnsData(formData.getFormColumns(), readOnlyMode, forceEditMode);
 
-		placeManager.setOnLeaveConfirmation("Вы уверены, что хотите прекратить редактирование данных налоговой формы?");
-		closeFormDataHandlerRegistration = Window.addCloseHandler(new CloseHandler<Window>() {
+        placeManager.setOnLeaveConfirmation("Вы уверены, что хотите прекратить редактирование данных налоговой формы? В случае выхода все несохраненные изменения будут утеряны.");
+        closeFormDataHandlerRegistration = Window.addCloseHandler(new CloseHandler<Window>() {
 			@Override
 			public void onClose(CloseEvent<Window> event) {
 				closeFormDataHandlerRegistration.removeHandler();
@@ -443,6 +460,7 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 	protected void unlockForm(Long formId){
 		UnlockFormData action = new UnlockFormData();
 		action.setFormId(formId);
+        action.setManual(formData.isManual());
 		dispatcher.execute(action, CallbackUtils.emptyCallback());
 	}
 }

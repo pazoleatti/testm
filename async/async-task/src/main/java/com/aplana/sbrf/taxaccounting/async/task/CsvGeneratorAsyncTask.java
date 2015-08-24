@@ -3,22 +3,18 @@ package com.aplana.sbrf.taxaccounting.async.task;
 import com.aplana.sbrf.taxaccounting.async.exception.AsyncTaskException;
 import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.core.api.LockStateLogger;
-import com.aplana.sbrf.taxaccounting.dao.AsyncTaskTypeDao;
 import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
-import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Date;
 import java.util.Map;
 
-import static com.aplana.sbrf.taxaccounting.async.task.AsyncTask.RequiredParams.LOCKED_OBJECT;
-import static com.aplana.sbrf.taxaccounting.async.task.AsyncTask.RequiredParams.LOCK_DATE;
-import static com.aplana.sbrf.taxaccounting.async.task.AsyncTask.RequiredParams.USER_ID;
+import static com.aplana.sbrf.taxaccounting.async.task.AsyncTask.RequiredParams.*;
 
 public abstract class CsvGeneratorAsyncTask extends AbstractAsyncTask {
+
 
     @Autowired
     private TAUserService userService;
@@ -80,7 +76,7 @@ public abstract class CsvGeneratorAsyncTask extends AbstractAsyncTask {
         final Date lockDate = (Date) params.get(LOCK_DATE.name());
 
         formDataAccessService.canRead(userInfo, formDataId);
-        String uuid = printingService.generateCSV(userInfo, formDataId, manual, isShowChecked, saved, new LockStateLogger() {
+        String uuid = printingService.generateCSV(userInfo, formDataId, manual, isShowChecked, new LockStateLogger() {
             @Override
             public void updateState(String state) {
                 lockService.updateState(lock, lockDate, state);
@@ -99,6 +95,7 @@ public abstract class CsvGeneratorAsyncTask extends AbstractAsyncTask {
         int userId = (Integer)params.get(USER_ID.name());
         long formDataId = (Long)params.get("formDataId");
         boolean manual = (Boolean)params.get("manual");
+        boolean isShowChecked = (Boolean)params.get("isShowChecked");
         TAUserInfo userInfo = new TAUserInfo();
         userInfo.setUser(userService.getUser(userId));
 
@@ -106,18 +103,13 @@ public abstract class CsvGeneratorAsyncTask extends AbstractAsyncTask {
         FormData formData = formDataService.getFormData(userInfo, formDataId, manual, logger);
         Department department = departmentService.getDepartment(formData.getDepartmentId());
         DepartmentReportPeriod reportPeriod = departmentReportPeriodService.get(formData.getDepartmentReportPeriodId());
-        Integer periodOrder = formData.getPeriodOrder();
-        String strCorrPeriod = "";
-        if (reportPeriod.getCorrectionDate() != null) {
-            strCorrPeriod = ", с датой сдачи корректировки " + SDF_DD_MM_YYYY.format(reportPeriod.getCorrectionDate());
-        }
-        if (periodOrder == null){
-            return String.format("Сформирован %s отчет налоговой формы: Период: \"%s, %s%s\", Подразделение: \"%s\", Тип: \"%s\", Вид: \"%s\", Версия: \"%s\"",
-                    getReportType().getName(), reportPeriod.getReportPeriod().getTaxPeriod().getYear(), reportPeriod.getReportPeriod().getName(), strCorrPeriod, department.getName(), formData.getKind().getName(), formData.getFormType().getName(), manual ? "ручного ввода" : "автоматическая");
-        } else {
-            return String.format("Сформирован %s отчет налоговой формы: Период: \"%s, %s%s\", Месяц: \"%s\", Подразделение: \"%s\", Тип: \"%s\", Вид: \"%s\", Версия: \"%s\"",
-                    getReportType().getName(), reportPeriod.getReportPeriod().getTaxPeriod().getYear(), reportPeriod.getReportPeriod().getName(), strCorrPeriod, Formats.getRussianMonthNameWithTier(formData.getPeriodOrder()), department.getName(), formData.getKind().getName(), formData.getFormType().getName(), manual ? "ручного ввода" : "автоматическая");
-        }
+        DepartmentReportPeriod rpCompare = formData.getComparativPeriodId() != null ?
+                departmentReportPeriodService.get(formData.getComparativPeriodId()) : null;
+
+        return MessageGenerator.getFDMsg(String.format(ERROR_FORM, getReportType()),
+                formData,
+                department.getName(),
+                manual, reportPeriod, rpCompare, isShowChecked);
     }
 
     @Override
@@ -125,6 +117,7 @@ public abstract class CsvGeneratorAsyncTask extends AbstractAsyncTask {
         int userId = (Integer)params.get(USER_ID.name());
         long formDataId = (Long)params.get("formDataId");
         boolean manual = (Boolean)params.get("manual");
+        boolean isShowChecked = (Boolean)params.get("isShowChecked");
         TAUserInfo userInfo = new TAUserInfo();
         userInfo.setUser(userService.getUser(userId));
 
@@ -132,17 +125,12 @@ public abstract class CsvGeneratorAsyncTask extends AbstractAsyncTask {
         FormData formData = formDataService.getFormData(userInfo, formDataId, manual, logger);
         Department department = departmentService.getDepartment(formData.getDepartmentId());
         DepartmentReportPeriod reportPeriod = departmentReportPeriodService.get(formData.getDepartmentReportPeriodId());
-        Integer periodOrder = formData.getPeriodOrder();
-        String strCorrPeriod = "";
-        if (reportPeriod.getCorrectionDate() != null) {
-            strCorrPeriod = ", с датой сдачи корректировки " + SDF_DD_MM_YYYY.format(reportPeriod.getCorrectionDate());
-        }
-        if (periodOrder == null){
-            return String.format("Произошла непредвиденная ошибка при формировании %s отчета налоговой формы: Период: \"%s, %s%s\", Подразделение: \"%s\", Тип: \"%s\", Вид: \"%s\", Версия: \"%s\". Для запуска процедуры формирования необходимо повторно инициировать формирование данного отчета",
-                    getReportType().getName(), reportPeriod.getReportPeriod().getTaxPeriod().getYear(), reportPeriod.getReportPeriod().getName(), strCorrPeriod, department.getName(), formData.getKind().getName(), formData.getFormType().getName(), manual ? "ручного ввода" : "автоматическая");
-        } else {
-            return String.format("Произошла непредвиденная ошибка при формировании %s отчета налоговой формы: Период: \"%s, %s$s\", Месяц: \"%s\", Подразделение: \"%s\", Тип: \"%s\", Вид: \"%s\", Версия: \"%s\". Для запуска процедуры формирования необходимо повторно инициировать формирование данного отчета",
-                    getReportType().getName(), reportPeriod.getReportPeriod().getTaxPeriod().getYear(), reportPeriod.getReportPeriod().getName(), strCorrPeriod, Formats.getRussianMonthNameWithTier(formData.getPeriodOrder()), department.getName(), formData.getKind().getName(), formData.getFormType().getName(), manual ? "ручного ввода" : "автоматическая");
-        }
+        DepartmentReportPeriod rpCompare = formData.getComparativPeriodId() != null ?
+                departmentReportPeriodService.get(formData.getComparativPeriodId()) : null;
+
+        return MessageGenerator.getFDMsg(String.format(ERROR_FORM, getReportType()),
+                formData,
+                department.getName(),
+                manual, reportPeriod, rpCompare, isShowChecked);
     }
 }

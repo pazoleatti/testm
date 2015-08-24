@@ -62,10 +62,7 @@ switch (formDataEvent) {
         break
     case FormDataEvent.IMPORT:
         importData()
-        if (!logger.containsLevel(LogLevel.ERROR)) {
-            calc()
-            formDataService.saveCachedDataRows(formData, logger)
-        }
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.IMPORT_TRANSPORT_FILE:
         importTransportData()
@@ -193,8 +190,6 @@ void calc() {
         def rows = (from <= to ? dataRows[from..to] : [])
         calcTotalSum(rows, lastRow, totalColumns)
     }
-
-    sortFormDataRows(false)
 }
 
 void logicCheck() {
@@ -369,7 +364,7 @@ void importTransportData() {
     char QUOTE = '\0'
 
     String[] rowCells
-    int fileRowIndex = 0    // номер строки в файле
+    int fileRowIndex = 2    // номер строки в файле (1, 2..). Начинается с 2, потому что первые две строки - заголовок и пустая строка
     int rowIndex = 0        // номер строки в НФ
     def totalTF = null        // итоговая строка со значениями из тф для добавления
     def mapRows = [:]
@@ -565,7 +560,7 @@ void importData() {
     // проверка шапки
     checkHeaderXls(headerValues, COLUMN_COUNT, HEADER_ROW_COUNT, tmpRow)
     if (logger.containsLevel(LogLevel.ERROR)) {
-        return;
+        return
     }
     // освобождение ресурсов для экономии памяти
     headerValues.clear()
@@ -576,10 +571,16 @@ void importData() {
     paramsMap.clear()
     paramsMap = null
 
+    // получить строки из шаблона
+    def formTemplate = formDataService.getFormTemplate(formData.formType.id, formData.reportPeriodId)
+    def templateRows = formTemplate.rows
+    def valuesTotal = [ getDataRow(templateRows, 'head1')?.fix, getDataRow(templateRows, 'head2')?.fix ]
+
     def rowIndex = 0
     def allValuesCount = allValues.size()
     def mapRows = [:]
     def sectionIndex = null
+    def totalRowFromFileMap = [:]
 
     // формирвание строк нф
     for (def i = 0; i < allValuesCount; i++) {
@@ -596,14 +597,17 @@ void importData() {
         // Пропуск итоговых строк
         // если это начало раздела, то запомнить его название и обрабатывать следующую строку
         def firstValue = rowValues[INDEX_FOR_SKIP]
-        def valuesTotal = ['1. По операциям Банка', '2. По налоговому агенту']
-        if (firstValue != null && firstValue != '' && valuesTotal.contains(firstValue)) {
+        if (valuesTotal.contains(firstValue)) {
             sectionIndex = firstValue[0]
             mapRows.put(sectionIndex, [])
             allValues.remove(rowValues)
             rowValues.clear()
             continue
         } else if (firstValue == 'Итого') {
+            rowIndex++
+            def alias = getLastRowAlias(sectionIndex)
+            totalRowFromFileMap[alias] = getNewRowFromXls(rowValues, colOffset, fileRowIndex, rowIndex)
+
             allValues.remove(rowValues)
             rowValues.clear()
             continue
@@ -629,10 +633,6 @@ void importData() {
         return
     }
 
-    // получить строки из шаблона
-    def formTemplate = formDataService.getFormTemplate(formData.formType.id, formData.reportPeriodId)
-    def templateRows = formTemplate.rows
-
     def rows = []
     sections.each { section ->
         def firstRow = getDataRow(templateRows, getFirstRowAlias(section))
@@ -646,7 +646,20 @@ void importData() {
         rows.add(lastRow)
     }
     updateIndexes(rows)
-    formDataService.getDataRowHelper(formData).allCached = rows
+
+    // сравнение итогов
+    if (!totalRowFromFileMap.isEmpty()) {
+        mapRows.each { section, sectionRows ->
+            def rowAlias = getLastRowAlias(section)
+            def totalRow = getDataRow(templateRows, rowAlias)
+            def totalRowFromFile = totalRowFromFileMap[rowAlias]
+            compareSimpleTotalValues(totalRow, totalRowFromFile, sectionRows, totalColumns, formData, logger, false)
+        }
+    }
+
+    if (!logger.containsLevel(LogLevel.ERROR)) {
+        formDataService.getDataRowHelper(formData).allCached = rows
+    }
 }
 
 /**

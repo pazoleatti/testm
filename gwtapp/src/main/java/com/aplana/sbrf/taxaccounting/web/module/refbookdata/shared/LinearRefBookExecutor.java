@@ -11,11 +11,6 @@ public class LinearRefBookExecutor implements IRefBookExecutor {
     }
 
     @Override
-    public void updateData() {
-        linearRefBookData.updateTable();
-    }
-
-    @Override
     public void setMode(FormMode mode) {
         linearRefBookData.setMode(mode);
     }

@@ -653,4 +653,11 @@
         <fontColor>RED</fontColor>
         <italic>false</italic>
     </styles>
+    <styles>
+        <alias>Раздел 2 уровня</alias>
+        <backColor>LIGHT_YELLOW</backColor>
+        <bold>true</bold>
+        <fontColor>BLACK</fontColor>
+        <italic>false</italic>
+    </styles>
 </formTemplateContent>

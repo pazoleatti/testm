@@ -30,7 +30,7 @@ public interface DataRowService {
     /**
      * Сохранение строк во временном срезе НФ
      */
-    void saveRows(FormData formData, List<DataRow<Cell>> dataRows);
+    void saveTempRows(FormData formData, List<DataRow<Cell>> dataRows);
 
     /**
      * Поиск по налоговой форме,
@@ -61,5 +61,19 @@ public interface DataRowService {
      * @param formData
      */
     void createCheckPoint(FormData formData);
+
+	/**
+	 * Удаляет точку восстановления, сделанную перед редактированием данных (бывший commit)
+	 *
+	 * @param formData
+	 */
+	void removeCheckPoint(FormData formData);
+
+	/**
+	 * Откатывает все изменения и восстанавливает данные из контрольной точки
+	 *
+	 * @param formData
+	 */
+	void restoreCheckPoint(FormData formData);
 
 }

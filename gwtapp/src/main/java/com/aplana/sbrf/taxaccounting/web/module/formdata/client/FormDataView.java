@@ -113,6 +113,8 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 
 	@UiField
 	Button cancelButton;
+    @UiField
+    Button exitAndSaveButton;
 	@UiField
 	Button saveButton;
 
@@ -131,6 +133,10 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 	Label departmentIdLabel;
 	@UiField
 	Label reportPeriodLabel;
+    @UiField
+    Label comparativPeriodTitle;
+    @UiField
+    Label comparativPeriodLabel;
 	@UiField
 	Label stateLabel;
 	@UiField
@@ -184,9 +190,17 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 
     private Timer timerExcel, timerCSV;
 
-    private final static int DEFAULT_TABLE_TOP_POSITION = 104;
+    public final static int DEFAULT_TABLE_TOP_POSITION = 104;
     private final static int DEFAULT_REPORT_PERIOD_LABEL_WIDTH = 150;
     private final static int LOCK_INFO_BLOCK_HEIGHT = 25;
+
+    /** Положение таблицы по высоте в данный момент времени */
+    private int tableTopPosition = DEFAULT_TABLE_TOP_POSITION;
+
+    @Override
+    public void updateTableTopPosition(int position) {
+        tableTopPosition = position;
+    }
 
     @Inject
     public FormDataView(final Binder binder) {
@@ -281,14 +295,12 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
         if (ReportType.EXCEL.equals(reportType)) {
             if (isLoad) {
                 printToExcel.setText("Выгрузить в XLSM");
-                timerExcel.cancel();
             } else {
                 printToExcel.setText("Сформировать XLSM");
             }
         } else {
             if (isLoad) {
                 printToCSV.setText("Выгрузить в CSV");
-                timerCSV.cancel();
             } else {
                 printToCSV.setText("Сформировать CSV");
             }
@@ -429,6 +441,7 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
     void onCorrectionLinkButtonClicked(ClickEvent event) {
         getUiHandlers().onCorrectionSwitch();
     }
+
     @UiHandler("printToExcel")
     void onPrintExcelClicked(ClickEvent event) {
         if (getUiHandlers() != null) {
@@ -449,6 +462,13 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 			getUiHandlers().onCancelClicked();
 		}
 	}
+
+    @UiHandler("exitAndSaveButton")
+    void onExitAndSaveButtonClicked(ClickEvent event) {
+        if (getUiHandlers() != null) {
+            getUiHandlers().onExitAndSaveClicked();
+        }
+    }
 
 	@UiHandler("saveButton")
 	void onSaveButtonClicked(ClickEvent event) {
@@ -528,14 +548,14 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 	@UiHandler("recalculateButton")
 	void onRecalculateButtonClicked(ClickEvent event) {
 		if (getUiHandlers() != null) {
-			getUiHandlers().onRecalculateClicked(false, false, false);
+			getUiHandlers().onRecalculateClicked(false, false);
 		}
 	}
 
 	@UiHandler("checkButton")
 	void onCheckButtonClicked(ClickEvent event) {
 		if (getUiHandlers() != null) {
-			getUiHandlers().onCheckClicked(false, false);
+			getUiHandlers().onCheckClicked(false);
 		}
 	}
 
@@ -585,7 +605,7 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 
 	@Override
 	public void setAdditionalFormInfo(
-			String formType, TaxType taxType, String formKind, String departmentId, String reportPeriod, String state,
+			String formType, TaxType taxType, String formKind, String departmentId, String reportPeriod, String comparativPeriod, String state,
             Date startDate, Date endDate, Long formDataId, boolean correctionPeriod, boolean correctionDiff, boolean readOnly) {
         returnAnchor.setText(taxType.getName());
         title.setText(formType);
@@ -597,16 +617,24 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 		reportPeriodLabel.setTitle(reportPeriod);
 		stateLabel.setText(state);
 		factory.setDateRange(startDate, endDate);
-        if (!taxType.equals(TaxType.DEAL)) {
+        if (!taxType.equals(TaxType.DEAL) && !taxType.equals(TaxType.ETR)) {
             formKindTitle.setText(FORM_DATA_KIND_TITLE);
         } else {
             formKindTitle.setText(FORM_DATA_KIND_TITLE_D);
         }
+        if (comparativPeriod != null && !comparativPeriod.isEmpty()) {
+            comparativPeriodLabel.setVisible(true);
+            comparativPeriodTitle.setVisible(true);
+            comparativPeriodLabel.setText(comparativPeriod);
+        } else {
+            comparativPeriodLabel.setVisible(false);
+            comparativPeriodTitle.setVisible(false);
+        }
         factory.setFormDataId(formDataId);
         // Признак корректирующего периода
-        correctionButton.setVisible(correctionPeriod);
+        showCorrectionButton(correctionPeriod);
         // Признак сравнения корректирующих значений
-        getView().setCorrectionText(correctionDiff ? "Показать абсолютные значения" : "Показать изменения");
+        updateCorrectionButton(correctionDiff);
 
         if (correctionDiff) {
             checkButton.setVisible(false);
@@ -737,18 +765,31 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
     }
 
     @Override
-	public void setLockInformation(boolean isVisible, boolean readOnlyMode, LockInfo lockInfo){
+	public void setLockInformation(boolean isVisible, boolean readOnlyMode, LockInfo lockInfo, TaxType taxType){
 		lockInformation.setVisible(isVisible);
 		if(lockInfo != null){
             String text;
             if (readOnlyMode) {
                 if (lockInfo.isEditMode()) {
-                    text = "Выбранная налоговая форма в текущий момент редактируется " + (lockInfo.isLockedMe() ? "текущим пользователем" : ("другим пользователем \"" + lockInfo.getLockedByUser() + "\"")) + " (с " + lockInfo.getLockDate() + ")";
+                    text =
+                            "Выбранная "
+                                    + (taxType == TaxType.DEAL || taxType == TaxType.ETR ? "форма" : "налоговая форма")
+                                    + " в текущий момент редактируется " +
+                                    (lockInfo.isLockedMe() ? "текущим пользователем" : ("другим пользователем \"" + lockInfo.getLockedByUser() + "\""))
+                                    + " (с " + lockInfo.getLockDate() + ")";
                 } else {
-                    text = "Выбранная налоговая форма в текущий момент заблокирована на изменение " + (lockInfo.isLockedMe() ? "текущим пользователем" : ("другим пользователем \"" + lockInfo.getLockedByUser() + "\"")) + " (с " + lockInfo.getLockDate() + ")";
+                    text =
+                            "Выбранная "
+                                    +  (taxType == TaxType.DEAL || taxType == TaxType.ETR ? "форма" : "налоговая форма")
+                                    + " в текущий момент заблокирована на изменение "
+                                    + (lockInfo.isLockedMe() ? "текущим пользователем" : ("другим пользователем \"" + lockInfo.getLockedByUser() + "\""))
+                                    + " (с " + lockInfo.getLockDate() + ")";
                 }
             } else {
-                text = "Выбранная налоговая форма в текущий момент заблокирована на редактирование текущим пользователем (с " + lockInfo.getLockDate() + ")";
+                text =
+                        "Выбранная "
+                                +   (taxType == TaxType.DEAL || taxType == TaxType.ETR ? "форма" : "налоговая форма")
+                                + " в текущий момент заблокирована на редактирование текущим пользователем (с " + lockInfo.getLockDate() + ")";
             }
 			lockInformation.setText(text);
 			lockInformation.setTitle(lockInfo.getTitle());
@@ -766,7 +807,7 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
         if (isLockInfoVisible){
             downShift = LOCK_INFO_BLOCK_HEIGHT;
         }
-        formDataTableStyle.setProperty("top", DEFAULT_TABLE_TOP_POSITION + downShift, Style.Unit.PX);
+        formDataTableStyle.setProperty("top", tableTopPosition + downShift, Style.Unit.PX);
     }
 
     /**
@@ -937,7 +978,11 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
     }
 
     @Override
-    public void setCorrectionText(String text) {
-        correctionButton.setText(text);
+    public void showCorrectionButton(boolean correctionPeriod) {
+        correctionButton.setVisible(correctionPeriod);
+    }
+
+    public void updateCorrectionButton(boolean correctionDiff) {
+        correctionButton.setText(correctionDiff ? "Показать абсолютные значения" : "Показать изменения");
     }
 }

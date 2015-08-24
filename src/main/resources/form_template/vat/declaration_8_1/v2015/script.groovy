@@ -110,6 +110,16 @@ List<String> getErrorDepartment(record) {
     errorList
 }
 
+@Field
+def declarationReportPeriod
+
+boolean useTaxOrganCodeProm() {
+    if (declarationReportPeriod == null) {
+        declarationReportPeriod = reportPeriodService.get(declarationData.reportPeriodId)
+    }
+    return (declarationReportPeriod?.taxPeriod?.year > 2015 || declarationReportPeriod?.order > 2)
+}
+
 List<String> getErrorVersion(record) {
     List<String> errorList = new ArrayList<String>()
     if (record.FORMAT_VERSION.stringValue == null || !record.FORMAT_VERSION.stringValue.equals('5.04')) {
@@ -122,13 +132,14 @@ void generateXML() {
     // атрибуты, заполняемые по настройкам подразделений
     def departmentParam = getDepartmentParam()
     def taxOrganCode = departmentParam?.TAX_ORGAN_CODE?.value
+    def taxOrganCodeProm = useTaxOrganCodeProm() ? departmentParam?.TAX_ORGAN_CODE_PROM?.value : taxOrganCode
     def inn = departmentParam?.INN?.value
     def kpp = departmentParam?.KPP?.value
     def formatVersion = departmentParam?.FORMAT_VERSION?.value
 
     // атрибуты элементов Файл и Документ
     def fileId = TaxType.VAT.declarationPrefix + ".81" + "_" +
-            taxOrganCode + "_" +
+            taxOrganCodeProm + "_" +
             taxOrganCode + "_" +
             inn + "" + kpp + "_" +
             Calendar.getInstance().getTime().format('yyyyMMdd') + "_" +

@@ -78,15 +78,10 @@ switch (formDataEvent) {
         def fileName = UploadFileName?.toLowerCase()
         if (fileName.endsWith(".xlsx") || fileName.endsWith(".xlsm")) {
             importDataXLS()
-            if (!logger.containsLevel(LogLevel.ERROR)) {
-                calc()
-                logicCheck()
-                formDataService.saveCachedDataRows(formData, logger)
-            }
         } else {
             importData()
-            formDataService.saveCachedDataRows(formData, logger)
         }
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.MIGRATION:
         importData()
@@ -218,26 +213,26 @@ void calc() {
     def dataRows = formDataService.getDataRowHelper(formData).allCached
 
     // Сортировка
-    dataRows.sort({ DataRow a, DataRow b ->
-        if (a.getAlias() != null && b.getAlias() == null) {
-            return 1
-        }
-        if (a.getAlias() == null && b.getAlias() != null) {
-            return -1
-        }
-        if (a.getAlias() != null && b.getAlias() != null) {
-            return b.getAlias() <=> a.getAlias()
-        }
-        def codeA = getCode(a.tradeNumber)
-        def codeB = getCode(b.tradeNumber)
-        if (codeA == codeB && a.singSecurirty == b.singSecurirty) {
-            return a.issue <=> b.issue
-        }
-        if (codeA == codeB) {
-            return a.singSecurirty <=> b.singSecurirty
-        }
-        return codeA <=> codeB
-    })
+//    dataRows.sort({ DataRow a, DataRow b ->
+//        if (a.getAlias() != null && b.getAlias() == null) {
+//            return 1
+//        }
+//        if (a.getAlias() == null && b.getAlias() != null) {
+//            return -1
+//        }
+//        if (a.getAlias() != null && b.getAlias() != null) {
+//            return b.getAlias() <=> a.getAlias()
+//        }
+//        def codeA = getCode(a.tradeNumber)
+//        def codeB = getCode(b.tradeNumber)
+//        if (codeA == codeB && a.singSecurirty == b.singSecurirty) {
+//            return a.issue <=> b.issue
+//        }
+//        if (codeA == codeB) {
+//            return a.singSecurirty <=> b.singSecurirty
+//        }
+//        return codeA <=> codeB
+//    })
 
     for (row in dataRows) {
         if (row.getAlias() != null || isBalancePeriod() || formData.kind != FormDataKind.PRIMARY) {
@@ -271,8 +266,6 @@ void calc() {
         totalOneRow[it] = totalOneSum[it]
         totalTwoRow[it] = totalTwoSum[it]
     }
-
-    sortFormDataRows(false)
 }
 
 // Итого по форме
@@ -561,96 +554,41 @@ def addData(def xml, def fileName) {
         }
 
         // графа 1
-        fileColIndex++
 
         // графа 2 - справочник 61 "Коды сделок"
+        fileColIndex++
         def val = getCellValue(row, fileColIndex, type)
         if (val != null && !val.trim().isEmpty()) {
-            newRow.tradeNumber = getRecordIdImport(61, 'CODE', val, fileRowIndex + rowOffset, fileColIndex + colOffset, true)
+            newRow.tradeNumber = getRecordIdImport(61, 'CODE', val, fileRowIndex + rowOffset, fileColIndex + colOffset, false)
         }
-        fileColIndex++
 
         // графа 3 - справочник 62 "Признаки ценных бумаг"
+        fileColIndex++
         val = getCellValue(row, fileColIndex, type, true)
         if (val != null && !val.trim().isEmpty()) {
-            newRow.singSecurirty = getRecordIdImport(62, 'CODE', val, fileRowIndex + rowOffset, fileColIndex + colOffset, true)
+            newRow.singSecurirty = getRecordIdImport(62, 'CODE', val, fileRowIndex + rowOffset, fileColIndex + colOffset, false)
         }
-        fileColIndex++
 
         // графа 4
-        newRow.issue = getCellValue(row, fileColIndex, type, true)
         fileColIndex++
+        newRow.issue = getCellValue(row, fileColIndex, type, true)
 
         // графа 5
-        newRow.acquisitionDate = parseDate(getCellValue(row, fileColIndex, type), 'dd.MM.yyyy', fileRowIndex + rowOffset, fileColIndex + colOffset, logger, true)
         fileColIndex++
+        newRow.acquisitionDate = parseDate(getCellValue(row, fileColIndex, type), 'dd.MM.yyyy', fileRowIndex + rowOffset, fileColIndex + colOffset, logger, true)
 
         // графа 6
+        fileColIndex++
         newRow.saleDate = parseDate(getCellValue(row, fileColIndex, type), 'dd.MM.yyyy', fileRowIndex + rowOffset, fileColIndex + colOffset, logger, true)
-        fileColIndex++
 
-        // графа 7
-        newRow.amountBonds = parseNumber(getCellValue(row, fileColIndex, type), fileRowIndex + rowOffset, fileColIndex + colOffset, logger, true)
-        fileColIndex++
-
-        // графа 8
-        newRow.acquisitionPrice = parseNumber(getCellValue(row, fileColIndex, type), fileRowIndex + rowOffset, fileColIndex + colOffset, logger, true)
-        fileColIndex++
-
-        // графа 9
-        newRow.costOfAcquisition = parseNumber(getCellValue(row, fileColIndex, type), fileRowIndex + rowOffset, fileColIndex + colOffset, logger, true)
-        fileColIndex++
-
-        // графа 10
-        newRow.marketPriceInPerc = parseNumber(getCellValue(row, fileColIndex, type), fileRowIndex + rowOffset, fileColIndex + colOffset, logger, true)
-        fileColIndex++
-
-        // графа 11
-        newRow.marketPriceInRub = parseNumber(getCellValue(row, fileColIndex, type), fileRowIndex + rowOffset, fileColIndex + colOffset, logger, true)
-        fileColIndex++
-
-        // графа 12
-        newRow.acquisitionPriceTax = parseNumber(getCellValue(row, fileColIndex, type), fileRowIndex + rowOffset, fileColIndex + colOffset, logger, true)
-        fileColIndex++
-
-        // графа 13
-        newRow.redemptionValue = parseNumber(getCellValue(row, fileColIndex, type), fileRowIndex + rowOffset, fileColIndex + colOffset, logger, true)
-        fileColIndex++
-
-        // графа 14
-        newRow.priceInFactPerc = parseNumber(getCellValue(row, fileColIndex, type), fileRowIndex + rowOffset, fileColIndex + colOffset, logger, true)
-        fileColIndex++
-
-        // графа 15
-        newRow.priceInFactRub = parseNumber(getCellValue(row, fileColIndex, type), fileRowIndex + rowOffset, fileColIndex + colOffset, logger, true)
-        fileColIndex++
-
-        // графа 16
-        newRow.marketPriceInPerc1 = parseNumber(getCellValue(row, fileColIndex, type), fileRowIndex + rowOffset, fileColIndex + colOffset, logger, true)
-        fileColIndex++
-
-        // графа 17
-        newRow.marketPriceInRub1 = parseNumber(getCellValue(row, fileColIndex, type), fileRowIndex + rowOffset, fileColIndex + colOffset, logger, true)
-        fileColIndex++
-
-        // графа 18
-        newRow.salePriceTax = parseNumber(getCellValue(row, fileColIndex, type), fileRowIndex + rowOffset, fileColIndex + colOffset, logger, true)
-        fileColIndex++
-
-        // графа 19
-        newRow.expensesOnSale = parseNumber(getCellValue(row, fileColIndex, type), fileRowIndex + rowOffset, fileColIndex + colOffset, logger, true)
-        fileColIndex++
-
-        // графа 20
-        newRow.expensesTotal = parseNumber(getCellValue(row, fileColIndex, type), fileRowIndex + rowOffset, fileColIndex + colOffset, logger, true)
-        fileColIndex++
-
-        // графа 21
-        newRow.profit = parseNumber(getCellValue(row, fileColIndex, type), fileRowIndex + rowOffset, fileColIndex + colOffset, logger, true)
-        fileColIndex++
-
-        // графа 22
-        newRow.excessSalePriceTax = parseNumber(getCellValue(row, fileColIndex, type), fileRowIndex + rowOffset, fileColIndex + colOffset, logger, true)
+        // графа 7..22
+        ['amountBonds', 'acquisitionPrice', 'costOfAcquisition', 'marketPriceInPerc',
+         'marketPriceInRub', 'acquisitionPriceTax', 'redemptionValue', 'priceInFactPerc',
+         'priceInFactRub', 'marketPriceInPerc1', 'marketPriceInRub1', 'salePriceTax',
+         'expensesOnSale', 'expensesTotal', 'profit', 'excessSalePriceTax'].each { alias ->
+            fileColIndex++
+            newRow[alias] = parseNumber(getCellValue(row, fileColIndex, type), fileRowIndex + rowOffset, fileColIndex + colOffset, logger, true)
+        }
 
         newRows.add(newRow)
     }
@@ -771,7 +709,7 @@ void importDataXLS() {
     // проверка шапки
     checkHeaderXls(headerValues, COLUMN_COUNT, HEADER_ROW_COUNT, tmpRow)
     if (logger.containsLevel(LogLevel.ERROR)) {
-        return;
+        return
     }
     // освобождение ресурсов для экономии памяти
     headerValues.clear()

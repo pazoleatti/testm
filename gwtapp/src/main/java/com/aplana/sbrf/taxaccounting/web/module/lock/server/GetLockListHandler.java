@@ -66,6 +66,7 @@ public class GetLockListHandler extends AbstractActionHandler<GetLockListAction,
             if (lock.getState() != null && lock.getQueuePosition() == 1 && lock.getState().equals(LockData.State.IN_QUEUE.getText())) {
                 lock.setState(LockData.State.LOCKED.getText());
             }
+            lock.setServerNode(lockData.getServerNode());
             locks.add(lock);
         }
 

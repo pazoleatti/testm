@@ -7,13 +7,12 @@ import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
 import com.aplana.sbrf.taxaccounting.model.FormTemplate;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.FormDataScriptingService;
 import com.aplana.sbrf.taxaccounting.service.shared.ScriptComponentContextHolder;
 import com.aplana.sbrf.taxaccounting.util.ScriptExposed;
-import com.aplana.sbrf.taxaccounting.util.TransactionHelper;
-import com.aplana.sbrf.taxaccounting.util.TransactionLogic;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -42,8 +41,6 @@ public class FormDataScriptingServiceImpl extends TAAbstractScriptingServiceImpl
     @Autowired
     @Qualifier("versionInfoProperties")
     private Properties versionInfoProperties;
-	@Autowired
-	private TransactionHelper tx;
 
     @Override
     public void executeScript(TAUserInfo userInfo, FormData formData,
@@ -53,9 +50,9 @@ public class FormDataScriptingServiceImpl extends TAAbstractScriptingServiceImpl
         // Если скрипт отсутствует, то ничего не делаем
 		FormTemplate formTemplate = formTemplateDao.get(formData.getFormTemplateId());
         String script = formTemplate.getScript();
-		if (StringUtils.isBlank(script)) {
-            return;
-        }
+		if (!canExecuteScript(script, event)) {
+			return;
+		}
 
         // Биндим параметры для выполнения скрипта
         Bindings b = scriptEngine.createBindings();
@@ -162,7 +159,8 @@ public class FormDataScriptingServiceImpl extends TAAbstractScriptingServiceImpl
         } catch (ScriptException e) {
             logScriptException(e, logger);
         } catch (Exception e) {
-            logger.error(e.getMessage());
+            //TODO: Добавить вывод номера строки в скрипте
+            logger.error(new ServiceException("Обнаружены ошибки в скрипте!", e));
         }
     }
 

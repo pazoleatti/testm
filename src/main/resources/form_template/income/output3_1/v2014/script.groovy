@@ -108,7 +108,7 @@ def getRefBookValue(def long refBookId, def Long recordId) {
 
 // Поиск записи в справочнике по значению (для импорта)
 def getRecordIdImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
-                      def boolean required = true) {
+                      def boolean required = false) {
     return formDataService.getRefBookRecordIdImport(refBookId, recordCache, providerCache, alias, value,
             reportPeriodEndDate, rowIndex, colIndex, logger, required)
 }
@@ -152,8 +152,6 @@ void calc() {
                 row.budgetClassificationCode = '18210101060011000110'
             }
         }
-
-        sortFormDataRows(false)
     }
 }
 
@@ -173,8 +171,7 @@ void consolidation() {
     def rows = []
 
     // «Расчет налога на прибыль организаций с доходов, удерживаемого налоговым агентом (источником выплаты доходов)»
-    def sourceFormType03 = 10070
-    def sourceFormType03Alt = 419
+    def sourceFormTypes03 = [419, 10070, 314]
     // «Сведения о уплаченных суммах налога по операциям с ГЦБ»
     def sourceFormTypeGCB = 420
     // «Сведения о суммах налога на прибыль, уплаченного Банком за рубежом»
@@ -188,8 +185,9 @@ void consolidation() {
             def sourceDataRows = formDataService.getDataRowHelper(sourceFormData)?.allSaved
             def newDataRows = []
             switch (it.formTypeId) {
-                case sourceFormType03:
-                case sourceFormType03Alt:
+                case sourceFormTypes03[0]:
+                case sourceFormTypes03[1]:
+                case sourceFormTypes03[2]:
                     newDataRows = formNewRows03(sourceDataRows)
                     break
                 case sourceFormTypeGCB:
@@ -214,7 +212,7 @@ def formNewRows03(def rows) {
     def dataRowsMap = [:]
     rows.each { row ->
         sum = row.withheldSum
-        if (sum != null && sum != 0) {
+        if (sum != null && sum != 0 && row.type == 1 && row.status == 1) {
             if (dataRowsMap.containsKey(row.withheldDate)) {
                 sum += dataRowsMap.get(row.withheldDate)
                 dataRowsMap.remove(row.withheldDate)
@@ -312,7 +310,7 @@ void importData() {
     // проверка шапки
     checkHeaderXls(headerValues, COLUMN_COUNT, HEADER_ROW_COUNT, tmpRow)
     if (logger.containsLevel(LogLevel.ERROR)) {
-        return;
+        return
     }
     // освобождение ресурсов для экономии памяти
     headerValues.clear()

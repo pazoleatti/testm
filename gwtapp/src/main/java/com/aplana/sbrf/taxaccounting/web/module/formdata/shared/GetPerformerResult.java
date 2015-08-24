@@ -11,7 +11,7 @@ public class GetPerformerResult implements Result {
     private List<Department> departments;
     private Set<Integer> availableDepartments;
     private boolean readOnlyMode;
-    private boolean creteLock = false;
+    private boolean createLock = false;
     private String uuid;
     private FormData formData;
 
@@ -39,12 +39,12 @@ public class GetPerformerResult implements Result {
         this.readOnlyMode = readOnlyMode;
     }
 
-    public boolean isCreteLock() {
-        return creteLock;
+    public boolean isCreateLock() {
+        return createLock;
     }
 
-    public void setCreteLock(boolean creteLock) {
-        this.creteLock = creteLock;
+    public void setCreateLock(boolean creteLock) {
+        this.createLock = creteLock;
     }
 
     public String getUuid() {

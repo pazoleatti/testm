@@ -74,14 +74,22 @@ public class HierEditView extends AbstractEditView implements HierEditPresenter.
     public void fillVersionData(RefBookRecordVersionData versionData) {
         versionStart.setValue(versionData.getVersionStart());
         versionEnd.setValue(versionData.getVersionEnd());
-        allVersion.setVisible(!isVersionMode);
+        allVersion.setVisible(!isVersionMode && versioned);
         allVersion.setText("Все версии ("+versionData.getVersionCount()+")");
     }
 
     @Override
     public void setVersionMode(boolean versionMode) {
         super.setVersionMode(versionMode);
-        allVersion.setVisible(!versionMode);
+        allVersion.setVisible(!versionMode && versioned);
+    }
+
+    @Override
+    public void showVersioned(boolean versioned) {
+        this.versioned = versioned;
+        versionStart.setVisible(versioned);
+        versionEnd.setVisible(versioned);
+        allVersion.setVisible(versioned);
     }
 
     @Override
