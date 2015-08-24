@@ -78,8 +78,8 @@ def checkCalcColumns = ['deltaRub', 'deltaPercent']
 def nonEmptyColumns = calcColumns
 
 @Field
-def opuMap = ['R2' : ['28101'],
-              'R3' : ['01000']]
+def opuMap = ['R1' : ['28101'],
+              'R2' : ['01000']]
 
 @Field
 def startDateMap = [:]
@@ -124,7 +124,7 @@ def getPrevReportPeriod(int reportPeriodId) {
 void preCalcCheck() {
     def tmpRow = formData.createDataRow()
     // собираем коды ОПУ
-    def final opuCodes = opuMap.findAll { key, value -> !("R2".equals(key)) || isBank() }.values().sum()
+    def final opuCodes = opuMap.findAll { key, value -> !("R1".equals(key)) || isBank() }.values().sum()
     // находим записи для текущего периода и периода сравнения
     ['comparePeriod': getComparativePeriodId(), 'currentPeriod':formData.reportPeriodId].each { key, value ->
         if (value != null) {
@@ -200,7 +200,7 @@ void logicCheck() {
         def tempRow = tempRows[i]
         def checkColumns = []
         // делаем проверку БО только для первичных НФ
-        if (opuMap.keySet().contains(row.getAlias()) && (!"R2".equals(row.getAlias()) || isBank())) {
+        if (opuMap.keySet().contains(row.getAlias()) && (!"R1".equals(row.getAlias()) || isBank())) {
             if (formData.kind == FormDataKind.PRIMARY) {
                 checkColumns += check102Columns
             }
@@ -219,7 +219,7 @@ void calcValues(def dataRows, def sourceRows) {
         for (def alias in opuMap.keySet()) {
             def row = getDataRow(dataRows, alias)
             def rowSource = getDataRow(sourceRows, alias)
-            if ("R2".equals(alias) && !isBank()) {
+            if ("R1".equals(alias) && !isBank()) {
                 row.comparePeriod = getSourceValue(getComparativePeriodId(), row, 'comparePeriod', isCalc)
                 row.currentPeriod = getSourceValue(formData.reportPeriodId, row, 'currentPeriod', isCalc)
                 continue
@@ -229,15 +229,15 @@ void calcValues(def dataRows, def sourceRows) {
             row.currentPeriod = calcBO(rowSource, formData.reportPeriodId)
         }
     }
-    def row4 = getDataRow(dataRows, "R4")
+    def row3 = getDataRow(dataRows, "R3")
+    def row1Source = getDataRow(sourceRows, "R1")
     def row2Source = getDataRow(sourceRows, "R2")
-    def row3Source = getDataRow(sourceRows, "R3")
     ['comparePeriod', 'currentPeriod'].each {
-        if (row3Source[it]) {
-            row4[it] = (row2Source[it] ?: 0) / row3Source[it].doubleValue() * 100
+        if (row2Source[it]) {
+            row3[it] = (row1Source[it] ?: 0) * 100 / row2Source[it].doubleValue()
         } else if (isCalc) { // выводить только при расчете
-            rowError(logger, row4, String.format("Строка %s: Графа «%s» не может быть заполнена. Выполнение расчета невозможно, так как в результате проверки получен нулевой знаменатель (деление на ноль невозможно)",
-                    row4.getIndex(), getColumnName(row4, it)))
+            rowError(logger, row3, String.format("Строка %s: Графа «%s» не может быть заполнена. Выполнение расчета невозможно, так как в результате проверки получен нулевой знаменатель (деление на ноль невозможно)",
+                    row3.getIndex(), getColumnName(row3, it)))
         }
     }
     for(int i = 0; i < dataRows.size(); i++){
@@ -246,7 +246,7 @@ void calcValues(def dataRows, def sourceRows) {
         row.deltaRub = (rowSource.currentPeriod ?: 0) - (rowSource.comparePeriod ?: 0)
         row.deltaPercent = null
         if (rowSource.comparePeriod) {
-            row.deltaPercent = ((rowSource.deltaRub ?: BigDecimal.ZERO) as BigDecimal) / rowSource.comparePeriod.doubleValue() * 100
+            row.deltaPercent = ((rowSource.deltaRub ?: BigDecimal.ZERO) as BigDecimal) * 100 / rowSource.comparePeriod.doubleValue()
         } else if (isCalc) { // выводить только при расчете
             rowError(logger, row, String.format("Строка %s: Графа «%s» не может быть заполнена. Выполнение расчета невозможно, так как в результате проверки получен нулевой знаменатель (деление на ноль невозможно)",
                     row.getIndex(), getColumnName(row, 'deltaPercent')))
