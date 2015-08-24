@@ -50,7 +50,7 @@ public class ValidateXMLServiceImpl implements ValidateXMLService {
     @Autowired
     private LockDataService lockDataService;
 
-    private class ProcessRunner implements Runnable{
+    private final class ProcessRunner implements Runnable{
         private String[] params;
         private Logger logger;
         private boolean isErrorFatal;

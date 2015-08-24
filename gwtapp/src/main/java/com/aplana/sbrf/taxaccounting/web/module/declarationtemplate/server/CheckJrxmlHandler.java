@@ -1,6 +1,5 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationtemplate.server;
 
-import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
@@ -18,23 +17,11 @@ import org.springframework.stereotype.Service;
 public class CheckJrxmlHandler extends AbstractActionHandler<CheckJrxmlAction, CheckJrxmlResult> {
 
     @Autowired
-    DeclarationTemplateService declarationTemplateService;
+    private DeclarationTemplateService declarationTemplateService;
     @Autowired
-    DeclarationDataService declarationDataService;
+	private SecurityService securityService;
     @Autowired
-    SecurityService securityService;
-    @Autowired
-    ReportService reportService;
-    @Autowired
-    DepartmentReportPeriodService departmentReportPeriodService;
-    @Autowired
-    DepartmentService departmentService;
-    @Autowired
-    PeriodService periodService;
-    @Autowired
-    LockDataService lockDataService;
-    @Autowired
-    LogEntryService logEntryService;
+	private LogEntryService logEntryService;
 
     public CheckJrxmlHandler() {
         super(CheckJrxmlAction.class);
@@ -42,7 +29,6 @@ public class CheckJrxmlHandler extends AbstractActionHandler<CheckJrxmlAction, C
 
     @Override
     public CheckJrxmlResult execute(CheckJrxmlAction action, ExecutionContext context) throws ActionException {
-
         Logger logger = new Logger();
         logger.setTaUserInfo(securityService.currentUserInfo());
 

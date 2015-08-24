@@ -13,10 +13,11 @@ import java.util.List;
  * @author Levykin
  */
 public interface DiffService {
-    public final static String STYLE_NO_CHANGE = "Корректировка-без изменений";
-    public final static String STYLE_INSERT = "Корректировка-добавлено";
-    public final static String STYLE_DELETE = "Корректировка-удалено";
-    public final static String STYLE_CHANGE = "Корректировка-изменено";
+
+    String STYLE_NO_CHANGE = "Корректировка-без изменений";
+    String STYLE_INSERT = "Корректировка-добавлено";
+    String STYLE_DELETE = "Корректировка-удалено";
+    String STYLE_CHANGE = "Корректировка-изменено";
 
     /**
      * Вычисление изменений для строк

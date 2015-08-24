@@ -58,74 +58,73 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
 
     @Override
     public void setSortByColumn(String dataStoreName) {
-
     }
 
-    private TABLE_HEADER[] TABLE_HEADER_PROPERTY = new TABLE_HEADER[]{
-            new TABLE_HEADER("TAX_ORGAN_CODE"),
-            new TABLE_HEADER("KPP"),
-            new TABLE_HEADER("TAX_PLACE_TYPE_CODE"),
-            new TABLE_HEADER("NAME"),
-            new TABLE_HEADER("OKVED_CODE"),
-            new TABLE_HEADER("PHONE"),
-            new TABLE_HEADER("REORG_FORM_CODE"),
-            new TABLE_HEADER("REORG_INN"),
-            new TABLE_HEADER("REORG_KPP"),
-            new TABLE_HEADER("SIGNATORY_ID"),
-            new TABLE_HEADER("SIGNATORY_SURNAME"),
-            new TABLE_HEADER("SIGNATORY_FIRSTNAME"),
-            new TABLE_HEADER("SIGNATORY_LASTNAME"),
-            new TABLE_HEADER("APPROVE_DOC_NAME"),
-            new TABLE_HEADER("APPROVE_ORG_NAME")
+    private TableHeader[] tableHeaderProperty = new TableHeader[]{
+            new TableHeader("TAX_ORGAN_CODE"),
+            new TableHeader("KPP"),
+            new TableHeader("TAX_PLACE_TYPE_CODE"),
+            new TableHeader("NAME"),
+            new TableHeader("OKVED_CODE"),
+            new TableHeader("PHONE"),
+            new TableHeader("REORG_FORM_CODE"),
+            new TableHeader("REORG_INN"),
+            new TableHeader("REORG_KPP"),
+            new TableHeader("SIGNATORY_ID"),
+            new TableHeader("SIGNATORY_SURNAME"),
+            new TableHeader("SIGNATORY_FIRSTNAME"),
+            new TableHeader("SIGNATORY_LASTNAME"),
+            new TableHeader("APPROVE_DOC_NAME"),
+            new TableHeader("APPROVE_ORG_NAME")
     };
 
-    private TABLE_HEADER[] TABLE_HEADER_TRANSPORT = new TABLE_HEADER[]{
-            new TABLE_HEADER("TAX_ORGAN_CODE"),
-            new TABLE_HEADER("KPP"),
-            new TABLE_HEADER("TAX_PLACE_TYPE_CODE"),
-            new TABLE_HEADER("NAME"),
-            new TABLE_HEADER("OKVED_CODE"),
-            new TABLE_HEADER("PHONE"),
-            new TABLE_HEADER("PREPAYMENT"),
-            new TABLE_HEADER("REORG_FORM_CODE"),
-            new TABLE_HEADER("REORG_INN"),
-            new TABLE_HEADER("REORG_KPP"),
-            new TABLE_HEADER("SIGNATORY_ID"),
-            new TABLE_HEADER("SIGNATORY_SURNAME"),
-            new TABLE_HEADER("SIGNATORY_FIRSTNAME"),
-            new TABLE_HEADER("SIGNATORY_LASTNAME"),
-            new TABLE_HEADER("APPROVE_DOC_NAME"),
-            new TABLE_HEADER("APPROVE_ORG_NAME")
+    private TableHeader[] tableHeaderTransport = new TableHeader[]{
+            new TableHeader("TAX_ORGAN_CODE"),
+            new TableHeader("KPP"),
+            new TableHeader("TAX_PLACE_TYPE_CODE"),
+            new TableHeader("NAME"),
+            new TableHeader("OKVED_CODE"),
+            new TableHeader("PHONE"),
+            new TableHeader("PREPAYMENT"),
+            new TableHeader("REORG_FORM_CODE"),
+            new TableHeader("REORG_INN"),
+            new TableHeader("REORG_KPP"),
+            new TableHeader("SIGNATORY_ID"),
+            new TableHeader("SIGNATORY_SURNAME"),
+            new TableHeader("SIGNATORY_FIRSTNAME"),
+            new TableHeader("SIGNATORY_LASTNAME"),
+            new TableHeader("APPROVE_DOC_NAME"),
+            new TableHeader("APPROVE_ORG_NAME")
     };
 
-    private TABLE_HEADER[] TABLE_HEADER_INCOME = new TABLE_HEADER[]{
-            new TABLE_HEADER("TAX_ORGAN_CODE"),
-            new TABLE_HEADER("KPP"),
-            new TABLE_HEADER("TAX_ORGAN_CODE_PROM"),
-            new TABLE_HEADER("TAX_PLACE_TYPE_CODE"),
-            new TABLE_HEADER("NAME"),
-            new TABLE_HEADER("ADDITIONAL_NAME"),
-            new TABLE_HEADER("OKVED_CODE"),
-            new TABLE_HEADER("DICT_REGION_ID"),
-            new TABLE_HEADER("OKTMO"),
-            new TABLE_HEADER("PHONE"),
-            new TABLE_HEADER("OBLIGATION"),
-            new TABLE_HEADER("TYPE"),
-            new TABLE_HEADER("REORG_FORM_CODE"),
-            new TABLE_HEADER("REORG_INN"),
-            new TABLE_HEADER("REORG_KPP"),
-            new TABLE_HEADER("SIGNATORY_ID"),
-            new TABLE_HEADER("SIGNATORY_SURNAME"),
-            new TABLE_HEADER("SIGNATORY_FIRSTNAME"),
-            new TABLE_HEADER("SIGNATORY_LASTNAME"),
-            new TABLE_HEADER("APPROVE_DOC_NAME"),
-            new TABLE_HEADER("APPROVE_ORG_NAME")
+    private TableHeader[] tableHeaderIncome = new TableHeader[]{
+            new TableHeader("TAX_ORGAN_CODE"),
+            new TableHeader("KPP"),
+            new TableHeader("TAX_ORGAN_CODE_PROM"),
+            new TableHeader("TAX_PLACE_TYPE_CODE"),
+            new TableHeader("NAME"),
+            new TableHeader("ADDITIONAL_NAME"),
+            new TableHeader("OKVED_CODE"),
+            new TableHeader("DICT_REGION_ID"),
+            new TableHeader("OKTMO"),
+            new TableHeader("PHONE"),
+            new TableHeader("OBLIGATION"),
+            new TableHeader("TYPE"),
+            new TableHeader("REORG_FORM_CODE"),
+            new TableHeader("REORG_INN"),
+            new TableHeader("REORG_KPP"),
+            new TableHeader("SIGNATORY_ID"),
+            new TableHeader("SIGNATORY_SURNAME"),
+            new TableHeader("SIGNATORY_FIRSTNAME"),
+            new TableHeader("SIGNATORY_LASTNAME"),
+            new TableHeader("APPROVE_DOC_NAME"),
+            new TableHeader("APPROVE_ORG_NAME")
     };
 
-    public class TABLE_HEADER {
+    public final class TableHeader {
         String name;
 
-        private TABLE_HEADER(String name) {
+        private TableHeader(String name) {
             this.name = name;
         }
 
@@ -330,15 +329,15 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
     }
 
     @Override
-    public TABLE_HEADER[] getCurrentTableHeaders() {
+    public TableHeader[] getCurrentTableHeaders() {
         if (taxType == TaxType.PROPERTY) {
-            return TABLE_HEADER_PROPERTY;
+            return tableHeaderProperty;
         } else if (taxType == TaxType.TRANSPORT) {
-            return TABLE_HEADER_TRANSPORT;
+            return tableHeaderTransport;
         } else if (taxType == TaxType.INCOME) {
-            return TABLE_HEADER_INCOME;
+            return tableHeaderIncome;
         }
-        return new TABLE_HEADER[0];
+        return new TableHeader[0];
     }
 
     @Override
@@ -374,7 +373,7 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
         for (RefBookAttribute attr : attributes) {
             attributeMap.put(attr.getAlias(), attr);
         }
-        for (TABLE_HEADER h : getCurrentTableHeaders()) {
+        for (TableHeader h : getCurrentTableHeaders()) {
             if (attributeMap.containsKey(h.name())) {
                 RefBookAttribute cell = attributeMap.get(h.name());
 
@@ -656,7 +655,7 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
 
 
         for (DataRow<Cell> row : model.getList()) {
-            for (TABLE_HEADER h : getCurrentTableHeaders()) {
+            for (TableHeader h : getCurrentTableHeaders()) {
                 try {
                     if (isEditable) {
                         if (isUnp != null && isUnp) {

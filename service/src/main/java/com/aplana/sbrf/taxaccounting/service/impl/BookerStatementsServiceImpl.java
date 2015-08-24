@@ -64,7 +64,6 @@ public class BookerStatementsServiceImpl implements BookerStatementsService {
     private static final String IO_WORKBOOK_EXCEPTION = "Не могу прочитать загруженный Excel фаил.";
     private static final String ACCOUNT_PERIOD_INVALID = "Период не указан.";
     private static final String DEPARTMENTID_INVALID = "Подразделение не указано.";
-    private static final String FILE_NULL = "Не указан файл.";
     private static final String ATTRIBUTE_ACCOUNT_NO = "Номер счета";
     private static final String ATTRIBUTE_NAME = "Название";
     private static final String ATTRIBUTE_INCOME_REMAINS = "Входящие остатки";

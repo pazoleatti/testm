@@ -238,14 +238,14 @@ public class MessageServiceBean implements MessageService {
             connection = connectionFactory.createConnection();
             session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
             messageProducer = session.createProducer(queue);
-
-            result.setExemplarList(getExemplarsByRnuTypes(rnus, year));
-            result.setSendFilesCount(startSendFiles(rnus, year));
-
-            messageProducer.close();
-            session.close();
-            connection.close();
-
+			try {
+            	result.setExemplarList(getExemplarsByRnuTypes(rnus, year));
+            	result.setSendFilesCount(startSendFiles(rnus, year));
+			} finally {
+				messageProducer.close();
+				session.close();
+				connection.close();
+			}
         } catch (JMSException e) {
             logger.error("Ошибка подготовки JMS. " + e.getMessage(), e);
             return result;

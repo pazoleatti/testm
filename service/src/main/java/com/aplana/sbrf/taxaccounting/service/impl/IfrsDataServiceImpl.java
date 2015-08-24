@@ -5,7 +5,6 @@ import com.aplana.sbrf.taxaccounting.core.api.LockStateLogger;
 import com.aplana.sbrf.taxaccounting.dao.IfrsDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
-import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.*;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
@@ -36,8 +35,6 @@ public class IfrsDataServiceImpl implements IfrsDataService {
     @Autowired
     private DeclarationDataSearchService declarationDataSearchService;
     @Autowired
-    private DeclarationDataService declarationDataService;
-    @Autowired
     private DeclarationTemplateService declarationTemplateService;
     @Autowired
     private DeclarationTypeService declarationTypeService;
@@ -49,10 +46,6 @@ public class IfrsDataServiceImpl implements IfrsDataService {
     private TAUserService userService;
     @Autowired
     private BlobDataService blobDataService;
-    @Autowired
-    private PrintingService printingService;
-    @Autowired
-    private SourceService sourceService;
     @Autowired
     private LockDataService lockService;
     @Autowired

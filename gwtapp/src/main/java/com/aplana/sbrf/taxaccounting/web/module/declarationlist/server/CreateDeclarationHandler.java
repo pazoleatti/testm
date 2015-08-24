@@ -121,7 +121,7 @@ public class CreateDeclarationHandler extends AbstractActionHandler<CreateDeclar
                 try {
                     lockDataService.unlock(key, userInfo.getUser().getId());
                 } catch (ServiceException e2) {
-                    if (PropertyLoader.isProductionMode() || !(e instanceof RuntimeException)) { // в debug-режиме не выводим сообщение об отсутсвии блокировки, если оня снята при выбрасывании исключения
+                    if (PropertyLoader.isProductionMode() || !(e instanceof RuntimeException)) { // в debug-режиме не выводим сообщение об отсутствии блокировки, если она снята при выбрасывании исключения
                         throw new ActionException(e2);
                     }
                 }

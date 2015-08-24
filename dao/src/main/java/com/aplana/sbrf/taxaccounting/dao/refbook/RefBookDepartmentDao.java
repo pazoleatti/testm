@@ -22,15 +22,15 @@ public interface RefBookDepartmentDao {
 
 	Long REF_BOOK_ID = Department.REF_BOOK_ID;
 
-    static final String UNIQUE_ATTRIBUTES_ALIAS = "uniqueAttributes";
-    static final String STRING_VALUE_COLUMN_ALIAS = "string_value";
-    static final String NUMBER_VALUE_COLUMN_ALIAS = "number_value";
-    static final String DATE_VALUE_COLUMN_ALIAS = "date_value";
-    static final String REFERENCE_VALUE_COLUMN_ALIAS = "reference_value";
-    static final String REFBOOK_NAME_ALIAS = "refbookName";
-    static final String REFBOOK_ID_ALIAS = "ref_book_id";
-    static final String VERSION_START_ALIAS = "versionStart";
-    static final String VERSION_END_ALIAS = "versionEnd";
+    String UNIQUE_ATTRIBUTES_ALIAS = "uniqueAttributes";
+    String STRING_VALUE_COLUMN_ALIAS = "string_value";
+    String NUMBER_VALUE_COLUMN_ALIAS = "number_value";
+    String DATE_VALUE_COLUMN_ALIAS = "date_value";
+    String REFERENCE_VALUE_COLUMN_ALIAS = "reference_value";
+    String REFBOOK_NAME_ALIAS = "refbookName";
+    String REFBOOK_ID_ALIAS = "ref_book_id";
+    String VERSION_START_ALIAS = "versionStart";
+    String VERSION_END_ALIAS = "versionEnd";
 
     /**
      * Загружает данные справочника
@@ -41,7 +41,6 @@ public interface RefBookDepartmentDao {
      * @return
      */
     PagingResult<Map<String, RefBookValue>> getRecords(PagingParams pagingParams, String filter, RefBookAttribute sortAttribute, boolean isSortAscending);
-
 
     /**
      * Перегруженный метод с восходящей сортировкой по умолчанию

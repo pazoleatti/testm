@@ -1,6 +1,5 @@
 package com.aplana.sbrf.taxaccounting.service.script;
 
-
 import com.aplana.sbrf.taxaccounting.model.Cell;
 import com.aplana.sbrf.taxaccounting.model.Column;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
@@ -13,7 +12,6 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-
 
 @ScriptExposed
 public interface RefBookService {
@@ -42,7 +40,7 @@ public interface RefBookService {
      * Разыменование строк НФ
      */
     @SuppressWarnings("unused")
-    public void dataRowsDereference(Logger logger, Collection<DataRow<Cell>> dataRows, List<Column> columns);
+    void dataRowsDereference(Logger logger, Collection<DataRow<Cell>> dataRows, List<Column> columns);
     /**
      * Выполняет указанную логику в новой транзакции
      * @param logic код выполняемый в транзакции
