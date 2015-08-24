@@ -552,7 +552,7 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
         if (lockData != null)
             throw new ServiceException(String.format(
                     LOCK_MSG,
-                    formData.getKind().getName() + ": " + formData.getFormType().getName(),
+                    formData.getKind().getTitle() + ": " + formData.getFormType().getName(),
                     departmentService.getDepartment(formData.getDepartmentId()).getName(),
                     reportPeriodName,
                     userService.getUser(lockData.getUserId()).getName(),
@@ -588,10 +588,10 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
 
             // 16 если форма не была создана
             if (!formWasCreated) {
-                log(userInfo, LogData.L18, localLogger, lock, formDataKind.getName(), formType.getName(), formDepartment.getName(), reportPeriodName);
+                log(userInfo, LogData.L18, localLogger, lock, formDataKind.getTitle(), formType.getName(), formDepartment.getName(), reportPeriodName);
             } else {
                 // 13А.2 НФ корректно заполнена значениями из ТФ.
-                log(userInfo, LogData.L19, localLogger, lock, formDataKind.getName(), formType.getName(), formDepartment.getName(), reportPeriodName);
+                log(userInfo, LogData.L19, localLogger, lock, formDataKind.getTitle(), formType.getName(), formDepartment.getName(), reportPeriodName);
             }
             // 17 Перенос в архив
             if (moveToArchiveDirectory(userInfo, getFormDataArchivePath(userInfo, departmentId, localLogger, lock), currentFile, localLogger, lock)) {

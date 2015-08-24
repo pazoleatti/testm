@@ -46,25 +46,23 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
             "%s в подразделении \"%s\" в периоде \"%s %d%s\"%s%s";
 
 	@Autowired
-	DeclarationTemplateDao declarationTemplateDao;
-
+	private DeclarationTemplateDao declarationTemplateDao;
     @Autowired
-    BlobDataService blobDataService;
-
+	private BlobDataService blobDataService;
     @Autowired
-    TransactionHelper tx;
+	private TransactionHelper tx;
     @Autowired
-    LockDataService lockDataService;
+	private LockDataService lockDataService;
     @Autowired
-    DepartmentService departmentService;
+	private DepartmentService departmentService;
     @Autowired
-    DeclarationDataService declarationDataService;
+	private DeclarationDataService declarationDataService;
     @Autowired
-    PeriodService periodService;
+	private PeriodService periodService;
     @Autowired
-    ReportService reportService;
+	private ReportService reportService;
     @Autowired
-    DepartmentReportPeriodService departmentReportPeriodService;
+	private DepartmentReportPeriodService departmentReportPeriodService;
 
     @Override
 	public List<DeclarationTemplate> listAll() {

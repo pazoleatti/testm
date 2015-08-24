@@ -18,23 +18,23 @@ import org.springframework.stereotype.Service;
 public class CheckJrxmlHandler extends AbstractActionHandler<CheckJrxmlAction, CheckJrxmlResult> {
 
     @Autowired
-    DeclarationTemplateService declarationTemplateService;
+	private DeclarationTemplateService declarationTemplateService;
     @Autowired
-    DeclarationDataService declarationDataService;
+	private DeclarationDataService declarationDataService;
     @Autowired
-    SecurityService securityService;
+	private SecurityService securityService;
     @Autowired
-    ReportService reportService;
+	private ReportService reportService;
     @Autowired
-    DepartmentReportPeriodService departmentReportPeriodService;
+	private DepartmentReportPeriodService departmentReportPeriodService;
     @Autowired
-    DepartmentService departmentService;
+	private DepartmentService departmentService;
     @Autowired
-    PeriodService periodService;
+	private PeriodService periodService;
     @Autowired
-    LockDataService lockDataService;
+	private LockDataService lockDataService;
     @Autowired
-    LogEntryService logEntryService;
+	private LogEntryService logEntryService;
 
     public CheckJrxmlHandler() {
         super(CheckJrxmlAction.class);
@@ -54,6 +54,5 @@ public class CheckJrxmlHandler extends AbstractActionHandler<CheckJrxmlAction, C
 
     @Override
     public void undo(CheckJrxmlAction action, CheckJrxmlResult result, ExecutionContext context) throws ActionException {
-
     }
 }

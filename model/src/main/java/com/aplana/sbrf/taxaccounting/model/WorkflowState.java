@@ -1,6 +1,5 @@
 package com.aplana.sbrf.taxaccounting.model;
 
-
 /**
  * Стадии жизненного цикла налоговой формы 
  */
@@ -15,20 +14,20 @@ public enum WorkflowState {
 	ACCEPTED(4, "Принята", "Принятие");
 
 	private final int id;
-	private final String name;
+	private final String title;
     private final String actionName;
 	
-	private WorkflowState(int id, String name, String actionName) {
+	private WorkflowState(int id, String title, String actionName) {
 		this.id = id;
-		this.name = name;
+		this.title = title;
         this.actionName = actionName;
 	}
 	
 	public int getId() {
 		return id;
 	}
-	public String getName() {
-		return name;
+	public String getTitle() {
+		return title;
 	}
     public String getActionName() {
         return actionName;

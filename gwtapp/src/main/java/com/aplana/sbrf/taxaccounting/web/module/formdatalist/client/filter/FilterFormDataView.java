@@ -89,7 +89,7 @@ public class FilterFormDataView extends ViewWithUiHandlers<FilterFormDataUIHandl
 				if (object == null) {
 					return "";
 				}
-				return object.getName();
+				return object.getTitle();
 			}
 		});
 

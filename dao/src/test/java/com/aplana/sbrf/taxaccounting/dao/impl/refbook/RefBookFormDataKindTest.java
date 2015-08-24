@@ -55,9 +55,9 @@ public class RefBookFormDataKindTest {
         PagingResult<Map<String, RefBookValue>> records = refBookDao.getRecords(FORM_DATA_KIND_REF_BOOK_ID, FORM_DATA_KIND_TABLE_NAME, pagingParams, null, null, null);
         assertEquals(2, records.size());
         assertEquals(FormDataKind.UNP.getId(), records.get(0).get(RefBook.RECORD_ID_ALIAS).getNumberValue().intValue());
-        assertEquals(FormDataKind.UNP.getName(), records.get(0).get(ATTRIBUTE_NAME).getStringValue());
+        assertEquals(FormDataKind.UNP.getTitle(), records.get(0).get(ATTRIBUTE_NAME).getStringValue());
         assertEquals(FormDataKind.ADDITIONAL.getId(), records.get(1).get(RefBook.RECORD_ID_ALIAS).getNumberValue().intValue());
-        assertEquals(FormDataKind.ADDITIONAL.getName(), records.get(1).get(ATTRIBUTE_NAME).getStringValue());
+        assertEquals(FormDataKind.ADDITIONAL.getTitle(), records.get(1).get(ATTRIBUTE_NAME).getStringValue());
     }
 
     @Test
@@ -68,7 +68,7 @@ public class RefBookFormDataKindTest {
         PagingResult<Map<String, RefBookValue>> records = refBookDao.getRecords(FORM_DATA_KIND_REF_BOOK_ID, FORM_DATA_KIND_TABLE_NAME, pagingParams, null, null, null);
         assertEquals(1, records.size());
         assertEquals(FormDataKind.ADDITIONAL.getId(), records.get(0).get(RefBook.RECORD_ID_ALIAS).getNumberValue().intValue());
-        assertEquals(FormDataKind.ADDITIONAL.getName(), records.get(0).get(ATTRIBUTE_NAME).getStringValue());
+        assertEquals(FormDataKind.ADDITIONAL.getTitle(), records.get(0).get(ATTRIBUTE_NAME).getStringValue());
     }
 
     @Test

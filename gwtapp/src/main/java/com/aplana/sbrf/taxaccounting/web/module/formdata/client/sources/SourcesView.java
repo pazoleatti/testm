@@ -178,9 +178,9 @@ public class SourcesView extends PopupViewWithUiHandlers<SourcesUiHandlers> impl
         TextColumn<FormToFormRelation> stateColumn = new TextColumn<FormToFormRelation>() {
             @Override
             public String getValue(FormToFormRelation object) {
-                //return object.isCreated() ? object.getState().getName(): "Не создана";
+                //return object.isCreated() ? object.getState().getTitle(): "Не создана";
                 return urlTemplates.getColValue(
-                        object.isCreated() ? object.getState().getName() : "Не создана",
+                        object.isCreated() ? object.getState().getTitle() : "Не создана",
                         !object.isStatus() ? " (версия макета выведена из действия)" : "").
                         asString();
             }
@@ -190,7 +190,7 @@ public class SourcesView extends PopupViewWithUiHandlers<SourcesUiHandlers> impl
             @Override
             public String getValue(FormToFormRelation object) {
                 if (object.getFormType()!= null)
-                    return object.getFormDataKind().getName();
+                    return object.getFormDataKind().getTitle();
                 else
                     return "";
             }

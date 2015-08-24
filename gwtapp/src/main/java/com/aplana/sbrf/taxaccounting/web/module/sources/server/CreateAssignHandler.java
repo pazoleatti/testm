@@ -46,22 +46,22 @@ public class CreateAssignHandler extends AbstractActionHandler<CreateAssignActio
             SourcePair sourcePair;
             if (action.getMode() == SourceMode.SOURCES) {
                 sourcePair = new SourcePair(right.getId(), action.getLeftObject().getId());
-                sourcePair.setSourceKind(right.getKind().getName());
+                sourcePair.setSourceKind(right.getKind().getTitle());
                 sourcePair.setSourceType(sourceService.getFormType(right.getTypeId()).getName());
                 if (action.isDeclaration()) {
                     sourcePair.setDestinationType(sourceService.getDeclarationType(action.getLeftObject().getTypeId()).getName());
                 } else {
-                    sourcePair.setDestinationKind(action.getLeftObject().getKind().getName());
+                    sourcePair.setDestinationKind(action.getLeftObject().getKind().getTitle());
                     sourcePair.setDestinationType(sourceService.getFormType(action.getLeftObject().getTypeId()).getName());
                 }
             } else {
                 sourcePair = new SourcePair(action.getLeftObject().getId(), right.getId());
-                sourcePair.setSourceKind(action.getLeftObject().getKind().getName());
+                sourcePair.setSourceKind(action.getLeftObject().getKind().getTitle());
                 sourcePair.setSourceType(sourceService.getFormType(action.getLeftObject().getTypeId()).getName());
                 if (action.isDeclaration()) {
                     sourcePair.setDestinationType(sourceService.getDeclarationType(right.getTypeId()).getName());
                 } else {
-                    sourcePair.setDestinationKind(right.getKind().getName());
+                    sourcePair.setDestinationKind(right.getKind().getTitle());
                     sourcePair.setDestinationType(sourceService.getFormType(right.getTypeId()).getName());
                 }
             }

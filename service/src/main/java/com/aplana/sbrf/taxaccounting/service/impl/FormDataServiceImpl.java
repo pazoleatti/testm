@@ -497,7 +497,7 @@ public class FormDataServiceImpl implements FormDataService {
                                         NOT_CONSOLIDATE_DESTINATION_FORM_WARNING,
                                         departmentService.getDepartment(destinationFD.getDepartmentId()).getName(),
                                         destinationFD.getFormType().getName(),
-                                        destinationFD.getKind().getName(),
+                                        destinationFD.getKind().getTitle(),
                                         rp.getName() + (destinationFD.getPeriodOrder() != null?" " + Months.fromId(destinationFD.getPeriodOrder()).getTitle():""),
                                         rp.getTaxPeriod().getYear(),
                                         drp.getCorrectionDate() != null ? String.format("с датой сдачи корректировки %s",
@@ -522,7 +522,7 @@ public class FormDataServiceImpl implements FormDataService {
                                     NOT_EXIST_SOURCE_FORM_WARNING,
                                     departmentService.getDepartment(dftSource.getDepartmentId()).getName(),
                                     formTypeService.get(dftSource.getFormTypeId()).getName(),
-                                    dftSource.getKind().getName(),
+                                    dftSource.getKind().getTitle(),
                                     rp.getName() + (dftSource.getPeriodOrder() != null ? " " + Months.fromId(dftSource.getPeriodOrder()).getTitle() : ""),
                                     rp.getTaxPeriod().getYear(),
                                     drp.getCorrectionDate() != null ? String.format(" с датой сдачи корректировки %s",
@@ -535,12 +535,12 @@ public class FormDataServiceImpl implements FormDataService {
                                     NOT_CONSOLIDATE_SOURCE_FORM_WARNING,
                                     departmentService.getDepartment(sourceFormData.getDepartmentId()).getName(),
                                     sourceFormData.getFormType().getName(),
-                                    sourceFormData.getKind().getName(),
+                                    sourceFormData.getKind().getTitle(),
                                     rp.getName() + (sourceFormData.getPeriodOrder() != null ? " " + Months.fromId(sourceFormData.getPeriodOrder()).getTitle() : ""),
                                     rp.getTaxPeriod().getYear(),
                                     drp.getCorrectionDate() != null ? String.format(" с датой сдачи корректировки %s",
                                             SDF_DD_MM_YYYY.format(drp.getCorrectionDate())) : "",
-                                    sourceFormData.getState().getName()
+                                    sourceFormData.getState().getTitle()
                             );
                         }
                     }
@@ -867,7 +867,7 @@ public class FormDataServiceImpl implements FormDataService {
                     DepartmentReportPeriod drp = departmentReportPeriodService.get(sourceForm.getDepartmentReportPeriodId());
                     logger.error(NOT_CONSOLIDATED_SOURCE_FORM,
                             departmentService.getDepartment(sourceForm.getDepartmentId()).getName(),
-                            sourceForm.getKind().getName(),
+                            sourceForm.getKind().getTitle(),
                             sourceForm.getFormType().getName(),
                             reportPeriod.getName() + (sourceForm.getPeriodOrder() != null ? " " + Months.fromId(sourceForm.getPeriodOrder()).getTitle() : ""),
                             reportPeriod.getTaxPeriod().getYear(),
@@ -878,14 +878,14 @@ public class FormDataServiceImpl implements FormDataService {
                     notAcceptedFDSources.add(sourceForm);
                     logger.warn(NOT_ACCEPTED_SOURCE_FORM,
                             departmentService.getDepartment(sourceDFT.getDepartmentId()).getName(),
-                            sourceDFT.getKind().getName(),
+                            sourceDFT.getKind().getTitle(),
                             formTypeService.get(sourceDFT.getFormTypeId()).getName(),
                             reportPeriod.getName() + (formData.getPeriodOrder() != null ? " " + Months.fromId(formData.getPeriodOrder()).getTitle() : ""),
                             reportPeriod.getTaxPeriod().getYear(),
                             sourceDepartmentReportPeriod.getCorrectionDate() != null ?
                                     String.format(" с датой сдачи корректировки %s",
                                             SDF_DD_MM_YYYY.format(sourceDepartmentReportPeriod.getCorrectionDate())) : "",
-                            sourceForm == null ? "Не создана" : sourceForm.getState().getName());
+                            sourceForm == null ? "Не создана" : sourceForm.getState().getTitle());
                 }
             }
             //Если консолидация из всех принятых источников текущего экземпляра не была выполнена
@@ -1016,7 +1016,7 @@ public class FormDataServiceImpl implements FormDataService {
 		dataRowDao.refreshRefBookLinks(formData);
 
         if (!isAsync)
-            logger.info("Форма \"" + formData.getFormType().getName() + "\" переведена в статус \"" + workflowMove.getToState().getName() + "\"");
+            logger.info("Форма \"" + formData.getFormType().getName() + "\" переведена в статус \"" + workflowMove.getToState().getTitle() + "\"");
 
         //Считаем что при наличие версии ручного ввода движение о жц невозможно
         stateLogger.updateState("Удаление отчетов формы");
@@ -1082,7 +1082,7 @@ public class FormDataServiceImpl implements FormDataService {
                 srcAcceptedIds.add(sourceForm.getId());
                 msgPull.add(String.format(FORM_DATA_INFO_MSG,
                         departmentService.getDepartment(sourceDFT.getDepartmentId()).getName(),
-                        sourceDFT.getKind().getName(),
+                        sourceDFT.getKind().getTitle(),
                         formTypeService.get(sourceDFT.getFormTypeId()).getName(),
                         formDepartmentReportPeriod.getReportPeriod().getName() + (sourceForm.getPeriodOrder() != null ? " " + Months.fromId(sourceForm.getPeriodOrder()).getTitle() : ""),
                         (formDepartmentReportPeriod.getCorrectionDate() != null ?
@@ -1130,7 +1130,7 @@ public class FormDataServiceImpl implements FormDataService {
                 DepartmentReportPeriod drp = departmentReportPeriodService.get(sourceForm.getDepartmentReportPeriodId());
                 logger.error(LOCK_SOURCE,
                         sourceForm.getFormType().getName(),
-                        sourceForm.getKind().getName(),
+                        sourceForm.getKind().getTitle(),
                         drp.getReportPeriod().getTaxPeriod().getYear() + " " + drp.getReportPeriod().getName(),
                         departmentService.getDepartment(sourceForm.getDepartmentId()).getName(),
                         userService.getUser(lockData.getUserId()).getName(),
@@ -1184,7 +1184,7 @@ public class FormDataServiceImpl implements FormDataService {
         //1Б. Статус экземпляра не допускает его редактирование
         if (formData.getState() != WorkflowState.CREATED) {
             throw new ServiceException("форма находится в статусе \"%s\", консолидация возможна только в статусе \"Создана\"",
-                    formData.getState().getName());
+                    formData.getState().getTitle());
         }
         //1В. Проверяем формы-приемники
         List<DepartmentFormType> destinationDFTs = departmentFormTypeDao.getFormDestinations(
@@ -1202,7 +1202,7 @@ public class FormDataServiceImpl implements FormDataService {
             if (destinationForm != null && destinationForm.getState() != WorkflowState.CREATED){
                 msgPull.add(String.format(FORM_DATA_INFO_MSG,
                         departmentService.getDepartment(formData.getDepartmentId()).getName(),
-                        formData.getKind().getName(),
+                        formData.getKind().getTitle(),
                         formData.getFormType().getName(),
                         reportPeriodService.getReportPeriod(formData.getReportPeriodId()).getName(),
                         (destinationDRP.getCorrectionDate() != null ?

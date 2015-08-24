@@ -171,7 +171,7 @@ public class VersionFTOperatingServiceImpl implements VersionOperatingService {
                     String.format(MSG_HAVE_DESTINATION,
                             MessageGenerator.mesSpeckPlural(typeRelated.getTaxType()),
                             MessageGenerator.mesSpeckPlural(typeSource.getTaxType()),
-                            first.getKind().getName(),
+                            first.getKind().getTitle(),
                             typeSource.getName(),
                             departmentService.getDepartment(first.getDepartmentId()).getName(),
                             getPeriod(pair.getSecond())
@@ -185,7 +185,7 @@ public class VersionFTOperatingServiceImpl implements VersionOperatingService {
                     String.format(MSG_HAVE_DESTINATION,
                             MessageGenerator.mesSpeckPlural(typeRelated.getTaxType()),
                             MessageGenerator.mesSpeckPlural(typeTarget.getTaxType()),
-                            first.getKind().getName(),
+                            first.getKind().getTitle(),
                             typeTarget.getName(),
                             departmentService.getDepartment(first.getDepartmentId()).getName(),
                             getPeriod(pair.getSecond())

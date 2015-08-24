@@ -210,7 +210,7 @@ public class PeriodServiceImpl implements PeriodService {
             if (lock != null) {
                 logs.add(new LogEntry(LogLevel.WARNING,
                         "Форма " + fd.getFormType().getName() +
-                                " " + fd.getKind().getName() +
+                                " " + fd.getKind().getTitle() +
                                 " в подразделении " + departmentService.getDepartment(fd.getDepartmentId()).getName() +
                                 " редактируется пользователем " + userService.getUser(lock.getUserId()).getName()));
                 allGood = false;
@@ -432,7 +432,7 @@ public class PeriodServiceImpl implements PeriodService {
         List<FormData> formDatas = formDataSearchService.findDataByFilter(dataFilter);
         for (FormData fd : formDatas) {
             logger.error("Форма \"%s\" \"%s\" в подразделении \"%s\" находится в удаляемом периоде!",
-                    fd.getFormType().getName(), fd.getKind().getName(),
+                    fd.getFormType().getName(), fd.getKind().getTitle(),
                     departmentService.getDepartment(fd.getDepartmentId()).getName());
         }
 

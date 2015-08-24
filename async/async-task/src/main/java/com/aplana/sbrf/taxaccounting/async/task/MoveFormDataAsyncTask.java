@@ -100,7 +100,7 @@ public abstract class MoveFormDataAsyncTask extends AbstractAsyncTask {
                 departmentReportPeriodService.get(formData.getComparativPeriodId()) : null;
 
         return MessageGenerator.getFDMsg(
-                String.format(SUCCESS, move.getFromState().getName(), move.getToState().getName(), formData.getFormType().getTaxType() == TaxType.ETR || formData.getFormType().getTaxType() == TaxType.DEAL ?
+                String.format(SUCCESS, move.getFromState().getTitle(), move.getToState().getTitle(), formData.getFormType().getTaxType() == TaxType.ETR || formData.getFormType().getTaxType() == TaxType.DEAL ?
                         "форму" : "налоговую форму"),
                 formData,
                 department.getName(),
@@ -128,7 +128,7 @@ public abstract class MoveFormDataAsyncTask extends AbstractAsyncTask {
                 departmentReportPeriodService.get(formData.getComparativPeriodId()) : null;
 
         return MessageGenerator.getFDMsg(
-                String.format(FAIL, move.getFromState().getName(), move.getToState().getName(),formData.getFormType().getTaxType() == TaxType.ETR || formData.getFormType().getTaxType() == TaxType.DEAL ?
+                String.format(FAIL, move.getFromState().getTitle(), move.getToState().getTitle(),formData.getFormType().getTaxType() == TaxType.ETR || formData.getFormType().getTaxType() == TaxType.DEAL ?
                         "форму" : "налоговую форму"),
                 formData,
                 department.getName(),

@@ -161,7 +161,7 @@ public class LogSystemXlsxReportBuilder extends AbstractReportBuilder {
 
             cell = row.createCell(cellNumber);
             cell.setCellStyle(cs);
-            cell.setCellValue(item.getFormKind() != null?item.getFormKind().getName():"");
+            cell.setCellValue(item.getFormKind() != null?item.getFormKind().getTitle():"");
             cellNumber++;
 
             cell = row.createCell(cellNumber);

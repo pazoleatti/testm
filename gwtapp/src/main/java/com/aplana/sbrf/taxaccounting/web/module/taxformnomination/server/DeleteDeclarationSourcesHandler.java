@@ -67,7 +67,7 @@ public class DeleteDeclarationSourcesHandler extends AbstractActionHandler<Delet
 				for (DepartmentFormType dft : departmentFormTypes) {
 					sb.append(departmentService.getDepartment(dft.getDepartmentId()).getName() + " - ");
 					sb.append(formTypeService.get(dft.getFormTypeId()).getName() + " - ");
-					sb.append(dft.getKind().getName() + "; ");
+					sb.append(dft.getKind().getTitle() + "; ");
 				}
 
 				logs.add(new LogEntry(LogLevel.ERROR, sb.delete(sb.length() - 2, sb.length()).toString()));

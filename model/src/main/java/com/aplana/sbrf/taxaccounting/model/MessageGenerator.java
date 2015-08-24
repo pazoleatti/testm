@@ -55,7 +55,7 @@ public final class MessageGenerator {
     }
 
     public static String getFDMsg(String mainStr, FormData formData, String departmentName, boolean manual, DepartmentReportPeriod reportPeriod, DepartmentReportPeriod rpComparison, boolean isShowChecked){
-        return getFDMsg(mainStr, formData.getFormType().getName(), formData.getKind().getName(), formData.isAccruing(), departmentName, formData.getPeriodOrder(), manual, reportPeriod, rpComparison, isShowChecked);
+        return getFDMsg(mainStr, formData.getFormType().getName(), formData.getKind().getTitle(), formData.isAccruing(), departmentName, formData.getPeriodOrder(), manual, reportPeriod, rpComparison, isShowChecked);
     }
 
     public static String getFDMsg(String mainStr, FormData formData, String departmentName, boolean manual, DepartmentReportPeriod reportPeriod, DepartmentReportPeriod rpComparison){

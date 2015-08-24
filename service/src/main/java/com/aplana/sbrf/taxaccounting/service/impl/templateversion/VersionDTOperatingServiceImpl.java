@@ -164,7 +164,7 @@ public class VersionDTOperatingServiceImpl implements VersionOperatingService {
             DepartmentFormType first = pair.getFirst();
             logger.error(
                     String.format(MSG_HAVE_SOURCE,
-                            first.getKind().getName(),
+                            first.getKind().getTitle(),
                             formTypeService.get(first.getFormTypeId()).getName(),
                             departmentService.getDepartment(first.getDepartmentId()).getName(),
                             getPeriod(pair.getSecond())

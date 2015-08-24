@@ -100,7 +100,7 @@ public class CreateFormDataHandler extends AbstractActionHandler<CreateFormData,
                 MessageGenerator.getFDMsg(
                         "Создание налоговой формы",
                         formType.getName(),
-                        kind.getName(),
+                        kind.getTitle(),
                         action.isAccruing(),
                         department.getName(), action.getMonthId(), true, departmentReportPeriod, comparativDrp),
                 lockDataService.getLockTimeout(LockData.LockObjects.FORM_DATA_CREATE)) == null) {
@@ -146,7 +146,7 @@ public class CreateFormDataHandler extends AbstractActionHandler<CreateFormData,
                         departmentReportPeriod.getReportPeriod().getId(),
                         departmentReportPeriod.getReportPeriod().getTaxPeriod().getTaxType(), kind);
                 if (departmentReportPeriod.getCorrectionDate() != null && !declarationDestinations.isEmpty() && !manualInputForms.isEmpty()) {
-                    logger.info(String.format(MANUAL_USED_MESSAGE, formType.getName(), kind.getName(), department.getName()));
+                    logger.info(String.format(MANUAL_USED_MESSAGE, formType.getName(), kind.getTitle(), department.getName()));
                 }
 
                 result.setFormDataId(formDataId);

@@ -277,7 +277,7 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers> implement
         leftFormKindColumn = new TextColumn<DepartmentAssign>() {
             @Override
             public String getValue(DepartmentAssign object) {
-                return object.getKind() != null ? object.getKind().getName() : "";
+                return object.getKind() != null ? object.getKind().getTitle() : "";
             }
         };
 
@@ -338,7 +338,7 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers> implement
             @Override
             public void render(Context context, DepartmentAssign value, SafeHtmlBuilder sb) {
                 if (value != null) {
-                    String text = value.getKind() != null ? value.getKind().getName() : "";
+                    String text = value.getKind() != null ? value.getKind().getTitle() : "";
                     if (value.isEnabled()) {
                         sb.appendHtmlConstant(text);
                     } else {
@@ -501,7 +501,7 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers> implement
         downAssignKindColumn = new TextColumn<CurrentAssign>() {
             @Override
             public String getValue(CurrentAssign object) {
-                return object.getFormKind() != null ? object.getFormKind().getName() : "—";
+                return object.getFormKind() != null ? object.getFormKind().getTitle() : "—";
             }
         };
 

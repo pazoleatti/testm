@@ -314,7 +314,7 @@ public class AuditClientView extends ViewWithUiHandlers<AuditClientUIHandler>
             @Override
             public String getValue(LogSearchResultItem object) {
                 if (object.getFormKind() != null) {
-                    return object.getFormKind().getName();
+                    return object.getFormKind().getTitle();
                 } else {
                     return "";
                 }

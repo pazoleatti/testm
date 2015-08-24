@@ -164,6 +164,6 @@ public class LogSearchResultItem implements Serializable {
                 " department: " + " departmentName: " + departmentName +
                 " roles: " + roles + " event: " + (event != null ? event.getTitle() : "") + " logdate: " + logDate +
                 " note: " + note + " reportperiod: " +
-                " formKind: " + (formKind != null ? formKind.getName() : "") + " formTypeName: " + formTypeName + " declarationTypeName: " + declarationTypeName;
+                " formKind: " + (formKind != null ? formKind.getTitle() : "") + " formTypeName: " + formTypeName + " declarationTypeName: " + declarationTypeName;
     }
 }

@@ -120,11 +120,11 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 
         // Непредусмотренное сочетание параметров состояния формы и пользователя - запрет доступа
         // Или подразделение недоступно
-        logger.error(String.format(FORM_DATA_KIND_STATE_ERROR_LOG, LOG_EVENT_READ, formData.getKind().getName(),
-                formData.getState().getName()));
+        logger.error(String.format(FORM_DATA_KIND_STATE_ERROR_LOG, LOG_EVENT_READ, formData.getKind().getTitle(),
+                formData.getState().getTitle()));
 
         throw new AccessDeniedException(String.format(FORM_DATA_ERROR_ACCESS_DENIED, LOG_EVENT_READ_RU,
-                formData.getKind().getName(), formData.getState().getName()));
+                formData.getKind().getTitle(), formData.getState().getTitle()));
     }
 
     @Override
@@ -270,7 +270,7 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
         // Проверка закрытого периода
         if (!departmentReportPeriod.isActive()) {
             throw new AccessDeniedException(String.format(FORM_DATA_ERROR_ACCESS_DENIED, LOG_EVENT_EDIT_RU,
-                    formData.getKind().getName(), formData.getState().getName()) + " Период закрыт!");
+                    formData.getKind().getTitle(), formData.getState().getTitle()) + " Период закрыт!");
         }
 
         // Проверка периода ввода остатков
@@ -283,14 +283,14 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
                             && !userInfo.getUser().hasRole(TARole.ROLE_CONTROL_UNP)) {
                         throw new AccessDeniedException(
                                 String.format(FORM_DATA_ERROR_ACCESS_DENIED, LOG_EVENT_EDIT_RU,
-                                        formData.getKind().getName(), formData.getState().getName()));
+                                        formData.getKind().getTitle(), formData.getState().getTitle()));
                     }
                     return;
                 case ACCEPTED:
                     if (!manual) {
                         // Нельзя редактировать в состоянии "Принята"
                         throw new AccessDeniedException(String.format(FORM_DATA_EDIT_ERROR,
-                                formData.getFormType().getName(), formData.getState().getName()));
+                                formData.getFormType().getName(), formData.getState().getTitle()));
                     }
             }
         }
@@ -307,7 +307,7 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
                             && !userInfo.getUser().hasRole(TARole.ROLE_CONTROL_NS)
                             && !userInfo.getUser().hasRole(TARole.ROLE_CONTROL_UNP)) {
                         throw new AccessDeniedException(String.format(FORM_DATA_ERROR_ACCESS_DENIED, LOG_EVENT_EDIT_RU,
-                                formData.getKind().getName(), formData.getState().getName()));
+                                formData.getKind().getTitle(), formData.getState().getTitle()));
                     }
                     return;
                 case APPROVED:
@@ -317,21 +317,21 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
                             && !userInfo.getUser().hasRole(TARole.ROLE_CONTROL_NS)
                             && !userInfo.getUser().hasRole(TARole.ROLE_CONTROL_UNP)) {
                         throw new AccessDeniedException(String.format(FORM_DATA_ERROR_ACCESS_DENIED, LOG_EVENT_EDIT_RU,
-                                formData.getKind().getName(), formData.getState().getName()));
+                                formData.getKind().getTitle(), formData.getState().getTitle()));
                     }
                     // Контролеры текущего уровня
                     if ((userInfo.getUser().hasRole(TARole.ROLE_CONTROL)
                             || userInfo.getUser().hasRole(TARole.ROLE_CONTROL_NS))
                             && userInfo.getUser().getDepartmentId() == formData.getDepartmentId()) {
                         throw new AccessDeniedException(String.format(FORM_DATA_ERROR_ACCESS_DENIED, LOG_EVENT_EDIT_RU,
-                                formData.getKind().getName(), formData.getState().getName()));
+                                formData.getKind().getTitle(), formData.getState().getTitle()));
                     }
                     return;
                 case ACCEPTED:
                     if (!manual) {
                         // Нельзя редактировать НФ в состоянии "Принята"
                         throw new AccessDeniedException(String.format(FORM_DATA_EDIT_ERROR,
-                                formData.getFormType().getName(), formData.getState().getName()));
+                                formData.getFormType().getName(), formData.getState().getTitle()));
                     }
             }
         }
@@ -345,7 +345,7 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
                             && !userInfo.getUser().hasRole(TARole.ROLE_CONTROL_NS)
                             && !userInfo.getUser().hasRole(TARole.ROLE_CONTROL_UNP)) {
                         throw new AccessDeniedException(String.format(FORM_DATA_ERROR_ACCESS_DENIED, LOG_EVENT_EDIT_RU,
-                                formData.getKind().getName(), formData.getState().getName()));
+                                formData.getKind().getTitle(), formData.getState().getTitle()));
                     }
                     return;
                 case APPROVED:
@@ -353,17 +353,17 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
                     if (!manual) {
                         // Нельзя редактировать НФ в состоянии "Принята"
                         throw new AccessDeniedException(String.format(FORM_DATA_EDIT_ERROR,
-                                formData.getFormType().getName(), formData.getState().getName()));
+                                formData.getFormType().getName(), formData.getState().getTitle()));
                     }
                     return;
             }
         }
 
         // Непредвиденное состояние формы
-        logger.error(String.format(FORM_DATA_KIND_STATE_ERROR_LOG, LOG_EVENT_EDIT, formData.getKind().getName(),
-                formData.getState().getName()));
+        logger.error(String.format(FORM_DATA_KIND_STATE_ERROR_LOG, LOG_EVENT_EDIT, formData.getKind().getTitle(),
+                formData.getState().getTitle()));
         throw new AccessDeniedException(String.format(FORM_DATA_ERROR_ACCESS_DENIED, LOG_EVENT_EDIT_RU,
-                formData.getKind().getName(), formData.getState().getName()));
+                formData.getKind().getTitle(), formData.getState().getTitle()));
     }
 
     @Override
@@ -371,7 +371,7 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
         FormData formData = formDataDao.getWithoutRows(formDataId);
         if (formData.getState() != WorkflowState.CREATED) {
             throw new AccessDeniedException(String.format(FORM_DATA_ERROR_ACCESS_DENIED, LOG_EVENT_DELETE_RU,
-                    formData.getKind().getName(), formData.getState().getName()));
+                    formData.getKind().getTitle(), formData.getState().getTitle()));
         }
         canEdit(userInfo, formDataId, false);
     }
@@ -445,7 +445,7 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
                     break;
                 default:
                     logger.warn(String.format(FORM_DATA_KIND_STATE_ERROR_LOG, LOG_EVENT_AVAILABLE_MOVES,
-                            formData.getKind().getName(), formData.getState()));
+                            formData.getKind().getTitle(), formData.getState()));
             }
         } else {
             // Призрак передачи НФ на вышестоящий уровень
@@ -504,7 +504,7 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
                         break;
                     default:
                         logger.warn(String.format(FORM_DATA_KIND_STATE_ERROR_LOG, LOG_EVENT_AVAILABLE_MOVES,
-                                formData.getKind().getName(), formData.getState().getName()));
+                                formData.getKind().getTitle(), formData.getState().getTitle()));
                 }
             } else if (asList(FormDataKind.PRIMARY, FormDataKind.ADDITIONAL, FormDataKind.UNP).contains(
                     formData.getKind()) && !sendToNextLevel) {
@@ -543,7 +543,7 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
                         break;
                     default:
                         logger.warn(String.format(FORM_DATA_KIND_STATE_ERROR_LOG, LOG_EVENT_AVAILABLE_MOVES,
-                                formData.getKind().getName(), formData.getState().getName()));
+                                formData.getKind().getTitle(), formData.getState().getTitle()));
                 }
             } else if (asList(FormDataKind.SUMMARY, FormDataKind.CONSOLIDATED).contains(formData.getKind())
                     && !sendToNextLevel) {
@@ -572,7 +572,7 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
                         break;
                     default:
                         logger.warn(String.format(FORM_DATA_KIND_STATE_ERROR_LOG, LOG_EVENT_AVAILABLE_MOVES,
-                                formData.getKind().getName(), formData.getState().getName()));
+                                formData.getKind().getTitle(), formData.getState().getTitle()));
 
                 }
             } else if (asList(FormDataKind.SUMMARY, FormDataKind.CONSOLIDATED).contains(formData.getKind())
@@ -608,11 +608,11 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
                         }
                         break;
                     default:
-                        logger.warn(String.format(FORM_DATA_KIND_STATE_ERROR_LOG, LOG_EVENT_AVAILABLE_MOVES, formData.getKind().getName(), formData.getState().getName()));
+                        logger.warn(String.format(FORM_DATA_KIND_STATE_ERROR_LOG, LOG_EVENT_AVAILABLE_MOVES, formData.getKind().getTitle(), formData.getState().getTitle()));
                 }
             } else {
                 logger.warn(String.format(FORM_DATA_KIND_STATE_ERROR_LOG, LOG_EVENT_AVAILABLE_MOVES,
-                        formData.getKind().getName(), formData.getState().getName()));
+                        formData.getKind().getTitle(), formData.getState().getTitle()));
             }
         }
         return result;

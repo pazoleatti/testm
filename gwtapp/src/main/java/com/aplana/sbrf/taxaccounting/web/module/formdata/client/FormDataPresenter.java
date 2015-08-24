@@ -754,7 +754,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
 	}
 
     private void deleteManualAndGoForm(final WorkflowMove wfMove) {
-        Dialog.confirmMessage("Подтверждение", "Удалить версию ручного ввода и выполнить переход в статус \""+wfMove.getToState().getName()+"\"?", new DialogHandler() {
+        Dialog.confirmMessage("Подтверждение", "Удалить версию ручного ввода и выполнить переход в статус \""+wfMove.getToState().getTitle()+"\"?", new DialogHandler() {
             @Override
             public void yes() {
                 commonMoveLogic(wfMove);
@@ -905,13 +905,13 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                                 getView().setAdditionalFormInfo(
                                         result.getTemplateFormName(),
                                         result.getFormData().getFormType().getTaxType(),
-                                        result.getFormData().getKind().getName(),
+                                        result.getFormData().getKind().getTitle(),
                                         result.getDepartmentFullName(),
                                         buildPeriodName(formData.isAccruing() ? drp.getReportPeriod().getAccName() : drp.getReportPeriod().getName(),
                                                 drp.getReportPeriod().getTaxPeriod().getYear(), formData.getPeriodOrder(), drp.getCorrectionDate()),
                                         cdrp != null ? buildPeriodName(formData.isAccruing() ? cdrp.getReportPeriod().getAccName() : cdrp.getReportPeriod().getName(),
                                                 cdrp.getReportPeriod().getTaxPeriod().getYear(), formData.getPeriodOrder(), cdrp.getCorrectionDate()) : null,
-                                        result.getFormData().getState().getName(),
+                                        result.getFormData().getState().getTitle(),
 		                                result.getDepartmentReportPeriod().getReportPeriod().getCalendarStartDate(),
                                         result.getDepartmentReportPeriod().getReportPeriod().getEndDate(),
                                         formData.getId(), correctionPeriod,

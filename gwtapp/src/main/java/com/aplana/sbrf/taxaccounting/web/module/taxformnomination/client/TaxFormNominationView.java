@@ -167,7 +167,7 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
         TextColumn<FormTypeKind> receiverSourcesKindColumn = new TextColumn<FormTypeKind>() {
 			@Override
 			public String getValue(FormTypeKind object) {
-				return object.getKind() != null ? object.getKind().getName() : "";
+				return object.getKind() != null ? object.getKind().getTitle() : "";
 			}
 		};
 

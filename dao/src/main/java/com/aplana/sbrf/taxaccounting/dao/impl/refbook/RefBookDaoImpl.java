@@ -1891,7 +1891,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
                     Date correctionDate = rs.getDate("correctionDate");
                     return String.format(
                             FORM_LINK_MSG,
-                            FormDataKind.fromId(SqlUtils.getInteger(rs, "formKind")).getName(),
+                            FormDataKind.fromId(SqlUtils.getInteger(rs, "formKind")).getTitle(),
                             rs.getString("formType"),
                             (SqlUtils.getInteger(rs, "departmentType") != 1) ?
                                     rs.getString("departmentPath").substring(rs.getString("departmentPath").indexOf("/") + 1) :

@@ -61,7 +61,7 @@ public class FormDataCompositionServiceImpl implements FormDataCompositionServic
                     FormDataEvent.COMPOSE, scriptComponentContext.getLogger(), null);
 			// Проверяем результат выполнения скрипта
 			String formName = formData.getFormType().getName();
-            String kindName = formData.getKind().getName();
+            String kindName = formData.getKind().getTitle();
             String departmentName = departmentService.get(formData.getDepartmentId()).getName();
             if (scriptComponentContext.getLogger().containsLevel(LogLevel.ERROR)) {
                 throw new ServiceLoggerException("Налоговая форма-приемник не сформирована: Подразделение: «%s», Тип: «%s», Вид: «%s».",

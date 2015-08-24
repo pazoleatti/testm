@@ -440,7 +440,7 @@ public class SourceServiceImpl implements SourceService {
                                 departmentReportPeriodService.get(form.getDrpComapreId()) : null;
                         logger.warn(MessageGenerator.getFDMsg("",
                                         form.getType(),
-                                        form.getFormKind().getName(),
+                                        form.getFormKind().getTitle(),
                                         form.getDepartment(),
                                         form.getMonth(),
                                         form.isManual(),

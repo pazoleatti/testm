@@ -61,8 +61,8 @@ public class RefBookUniversal implements RefBookDataProvider {
         }
     };
 
-    private final static String CROSS_ERROR_MSG = "Обнаружено пересечение указанного срока актуальности с существующей версией!";
-    private final static String UNIQ_ERROR_MSG = "Нарушено требование к уникальности, уже существуют записи %s в указанном периоде!";
+    private static final String CROSS_ERROR_MSG = "Обнаружено пересечение указанного срока актуальности с существующей версией!";
+    private static final String UNIQ_ERROR_MSG = "Нарушено требование к уникальности, уже существуют записи %s в указанном периоде!";
 
 	public void setRefBookId(Long refBookId) {
 		this.refBookId = refBookId;

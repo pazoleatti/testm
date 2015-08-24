@@ -174,7 +174,7 @@ public class GetCheckDeclarationHandler extends AbstractActionHandler<GetCheckDe
                         correctionDate = (departmentReportPeriod.getCorrectionDate() == null) ? "" :
                                 "с датой сдачи корректировки \"" + (departmentReportPeriod.getCorrectionDate()) + "\"";
                         logger.warn(String.format(WARN_MSG, periodName, correctionDate, formData.getFormType().getName(), "",
-                                formData.getState().getName()));
+                                formData.getState().getTitle()));
                         result.setDeclarationFormFound(true);
                     }
                 }

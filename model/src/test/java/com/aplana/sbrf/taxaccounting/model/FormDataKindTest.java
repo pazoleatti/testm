@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.model;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
 import java.util.HashSet;
@@ -37,12 +38,16 @@ public class FormDataKindTest {
 
         kind = FormDataKind.fromId(5);
         assert (kind == FormDataKind.ADDITIONAL);
+	}
 
-        try {
-			kind = FormDataKind.fromId(100);
-			fail("Checking of wrong id retrieval failed");
-		} catch (IllegalArgumentException e) {
-			
-		}
+	@Test(expected = IllegalArgumentException.class)
+	public void testFromIdException() {
+		FormDataKind.fromId(100);
+	}
+
+	@Test
+	public void testGetName() {
+		FormDataKind kind = FormDataKind.fromId(3);
+		assertEquals("Сводная", kind.getTitle());
 	}
 }

@@ -51,7 +51,7 @@ public class CanRemovePeriodHandler extends AbstractActionHandler<CanRemovePerio
         //Check forms
         List<FormData> formDatas = formDataService.find(departmentIds, action.getReportPeriodId());
         for (FormData fd : formDatas) {
-            logs.add(new LogEntry(LogLevel.ERROR, "Форма \"" + fd.getFormType().getName() + "\" \"" + fd.getKind().getName() +
+            logs.add(new LogEntry(LogLevel.ERROR, "Форма \"" + fd.getFormType().getName() + "\" \"" + fd.getKind().getTitle() +
                     "\" в подразделении \"" + departmentService.getDepartment(fd.getDepartmentId()).getName() + "\" находится в " +
                     action.getOperationName() +
                     " периоде!"));

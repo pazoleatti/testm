@@ -1,7 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationdata.server;
 
 import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.SourcesAction;
@@ -69,7 +68,7 @@ public class DeclarationSourcesHandler extends AbstractActionHandler<SourcesActi
                         } else if (!o2.isCreated()){
                             return -1;
                         }
-                        return o1.getState().getName().compareTo(o2.getState().getName());
+                        return o1.getState().getTitle().compareTo(o2.getState().getTitle());
                     }
                 } else{
                     return o1.isSource() ? 1:-1;

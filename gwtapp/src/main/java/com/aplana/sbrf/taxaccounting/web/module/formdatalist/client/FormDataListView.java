@@ -96,7 +96,7 @@ public class FormDataListView extends ViewWithUiHandlers<FormDataListUiHandlers>
 		TextColumn<FormDataSearchResultItem> formKindColumn = new TextColumn<FormDataSearchResultItem>() {
 			@Override
 			public String getValue(FormDataSearchResultItem object) {
-				return object.getFormDataKind().getName();
+				return object.getFormDataKind().getTitle();
 			}
 		};
 
@@ -124,7 +124,7 @@ public class FormDataListView extends ViewWithUiHandlers<FormDataListUiHandlers>
 		TextColumn<FormDataSearchResultItem> stateColumn = new TextColumn<FormDataSearchResultItem>() {
 			@Override
 			public String getValue(FormDataSearchResultItem object) {
-				return object.getState().getName();
+				return object.getState().getTitle();
 			}
 		};
 

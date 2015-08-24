@@ -77,7 +77,7 @@ public class DeleteFormSoursesHandler extends AbstractActionHandler<DeleteFormsS
             // шаблонг начала сообщения
             final String headErrMsg = "Не может быть отменено назначение " +
                     data.getDepartment().getName() +
-                    " - "+data.getKind().getName() +
+                    " - "+data.getKind().getTitle() +
                     " - "+data.getName() +
                     " т.к. назначение является ";
             // если есть источники или назначения выводим ошибку
@@ -126,7 +126,7 @@ public class DeleteFormSoursesHandler extends AbstractActionHandler<DeleteFormsS
 
         stringBuffer.append(departmentService.getDepartment(departmentId).getName());
         stringBuffer.append(" - ");
-        stringBuffer.append(formDataKind.getName());
+        stringBuffer.append(formDataKind.getTitle());
         stringBuffer.append(" - ");
         stringBuffer.append(formTypeService.get(formTypeId).getName());
         stringBuffer.append(", ");

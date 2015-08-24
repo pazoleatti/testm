@@ -40,21 +40,21 @@ import java.util.Map;
 public class UnitEditingHandler extends AbstractActionHandler<UnitEditingAction, UnitEditingResult> {
 
     @Autowired
-    FormDataService formDataService;
+	private FormDataService formDataService;
     @Autowired
-    SecurityService securityService;
+	private SecurityService securityService;
     @Autowired
     private RefBookDepartmentDao refBookDepartmentDao;
     @Autowired
-    AuditService auditService;
+	private AuditService auditService;
     @Autowired
-    RefBookDao refBookDao;
+	private RefBookDao refBookDao;
     @Autowired
     private LockDataService lockService;
     @Autowired
     private LogEntryService logEntryService;
 
-    String LOCK_MESSAGE = "Справочник «%s» заблокирован, попробуйте выполнить операцию позже!";
+	private static final String LOCK_MESSAGE = "Справочник «%s» заблокирован, попробуйте выполнить операцию позже!";
 
 
     public UnitEditingHandler() {

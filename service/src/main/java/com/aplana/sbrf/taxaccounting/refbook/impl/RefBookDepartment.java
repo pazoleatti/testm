@@ -729,7 +729,7 @@ public class RefBookDepartment implements RefBookDataProvider {
         for (FormData formData : formDatas){
             logger.error(String.format("Существует экземпляр формы \"%s\" типа \"%s\" в подразделении \"%s\" в периоде \"%s\"!",
                     formTemplateService.get(formData.getFormTemplateId()).getName(),
-                    formData.getKind().getName(),
+                    formData.getKind().getTitle(),
                     department.getName(),
                     periodService.getReportPeriod(formData.getReportPeriodId()).getName()));
         }
@@ -756,7 +756,7 @@ public class RefBookDepartment implements RefBookDataProvider {
         for (DepartmentFormType dft : departmentFormTypes){
             FormType formType =  formTypeService.get(dft.getFormTypeId());
             logger.warn(String.format("Существует назначение формы \"%s\" типа \"%s\" подразделению \"%s\"!",
-                    formType.getName(), dft.getKind().getName(), department.getName())
+                    formType.getName(), dft.getKind().getTitle(), department.getName())
             );
         }
 
@@ -774,7 +774,7 @@ public class RefBookDepartment implements RefBookDataProvider {
             logger.warn(String.format("Существует назначение подразделения \"%s\" в качестве исполнителя для формы \"%s\" типа \"%s\" в подразделении \"%s\"",
                     department.getName(),
                     formTypeService.get(type.getFormTypeId()).getName(),
-                    type.getKind().getName(),
+                    type.getKind().getTitle(),
                     departmentService.getDepartment(type.getDepartmentId()).getName()));
         }
 
@@ -805,7 +805,7 @@ public class RefBookDepartment implements RefBookDataProvider {
         for (DepartmentFormType departmentFormType : departmentFormTypesDest){
             logger.warn(String.format("назначение является источником для %s - %s - %s приемника",
                     department.getName(),
-                    departmentFormType.getKind().getName(),
+                    departmentFormType.getKind().getTitle(),
                     formTypeService.get(departmentFormType.getFormTypeId()).getName()));
         }
         for (DepartmentDeclarationType departmentDeclarationType : departmentDeclarationTypesDest){
@@ -816,7 +816,7 @@ public class RefBookDepartment implements RefBookDataProvider {
         for (DepartmentFormType departmentFormType : depFTSources){
             logger.warn(String.format("назначение является приёмником для %s - %s - %s приемника",
                     department.getName(),
-                    departmentFormType.getKind().getName(),
+                    departmentFormType.getKind().getTitle(),
                     formTypeService.get(departmentFormType.getFormTypeId()).getName()));
         }
 

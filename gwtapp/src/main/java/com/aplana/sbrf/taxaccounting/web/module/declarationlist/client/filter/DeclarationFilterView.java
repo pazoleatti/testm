@@ -62,7 +62,7 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
                 if (object == null) {
                     return "";
                 }
-                return object.getName();
+                return object.getTitle();
             }
         });
         formStatePicker.setWidth("100%");

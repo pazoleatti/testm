@@ -91,7 +91,7 @@ public class SourcesHandler extends AbstractActionHandler<SourcesAction, Sources
                         } else if (!o2.isCreated()){
                             return -1;
                         }
-                        return o1.getState().getName().compareTo(o2.getState().getName());
+                        return o1.getState().getTitle().compareTo(o2.getState().getTitle());
                     }
                 } else{
                     return o1.isSource() ? 1:-1;

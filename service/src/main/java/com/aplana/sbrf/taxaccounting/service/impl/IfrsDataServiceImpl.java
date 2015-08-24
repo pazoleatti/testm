@@ -5,7 +5,6 @@ import com.aplana.sbrf.taxaccounting.core.api.LockStateLogger;
 import com.aplana.sbrf.taxaccounting.dao.IfrsDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
-import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.*;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
@@ -134,7 +133,7 @@ public class IfrsDataServiceImpl implements IfrsDataService {
         if (!notAcceptedFormDataList.isEmpty() || !notAcceptedDeclarationDataList.isEmpty()) {
             logger.error("Следующие формы за %s %s, включаемые в архив с отчетностью для МСФО, не находятся в состоянии \"Принята\":", reportPeriod.getName(), reportPeriod.getTaxPeriod().getYear());
             for(FormData formData: notAcceptedFormDataList) {
-                logger.error("Налоговая форма: Подразделение: \"%s\", Тип: \"%s\", Вид: \"%s\".", departmentService.getParentsHierarchy(formData.getDepartmentId()), formData.getKind().getName(), formData.getFormType().getName());
+                logger.error("Налоговая форма: Подразделение: \"%s\", Тип: \"%s\", Вид: \"%s\".", departmentService.getParentsHierarchy(formData.getDepartmentId()), formData.getKind().getTitle(), formData.getFormType().getName());
             }
             for(DeclarationData declarationData: notAcceptedDeclarationDataList) {
                 DeclarationTemplate declarationTemplate = declarationTemplateService.get(declarationData.getDeclarationTemplateId());
@@ -145,7 +144,7 @@ public class IfrsDataServiceImpl implements IfrsDataService {
         if (!notReportFormDataList.isEmpty() || !notReportDeclarationDataList.isEmpty()) {
             logger.error("Для следующих форм за %s %s, еще не созданы отчетные формы, включаемые в архив с отчетностью для МСФО:", reportPeriod.getName(), reportPeriod.getTaxPeriod().getYear());
             for(FormData formData: notReportFormDataList) {
-                logger.error("Налоговая форма: Подразделение: \"%s\", Тип: \"%s\", Вид: \"%s\".", departmentService.getParentsHierarchy(formData.getDepartmentId()), formData.getKind().getName(), formData.getFormType().getName());
+                logger.error("Налоговая форма: Подразделение: \"%s\", Тип: \"%s\", Вид: \"%s\".", departmentService.getParentsHierarchy(formData.getDepartmentId()), formData.getKind().getTitle(), formData.getFormType().getName());
             }
             for(DeclarationData declarationData: notReportDeclarationDataList) {
                 DeclarationTemplate declarationTemplate = declarationTemplateService.get(declarationData.getDeclarationTemplateId());
@@ -246,7 +245,7 @@ public class IfrsDataServiceImpl implements IfrsDataService {
         Department department = departmentService.getDepartment(formData.getDepartmentId());
 
         String msg = String.format("Отменено формирование архива с отчетностью для МСФО за %s %s, так как распринят экземпляр налоговой формы с отчетом для МСФО: Подразделение: \"%s\", Тип: \"%s\", Вид: \"%s\"",
-                        reportPeriod.getName(), reportPeriod.getTaxPeriod().getYear(), department.getName(), formData.getKind().getName(), formTemplate.getName());
+                        reportPeriod.getName(), reportPeriod.getTaxPeriod().getYear(), department.getName(), formData.getKind().getTitle(), formTemplate.getName());
         sendNotification(usersList, msg);
     }
 
@@ -258,7 +257,7 @@ public class IfrsDataServiceImpl implements IfrsDataService {
         Department department = departmentService.getDepartment(formData.getDepartmentId());
 
         String msg = String.format("Удален архив с отчетностью для МСФО за %s %s, так как распринят экземпляр налоговой формы с отчетом для МСФО: Подразделение: \"%s\", Тип: \"%s\", Вид: \"%s\"",
-                reportPeriod.getName(), reportPeriod.getTaxPeriod().getYear(), department.getName(), formData.getKind().getName(), formTemplate.getName());
+                reportPeriod.getName(), reportPeriod.getTaxPeriod().getYear(), department.getName(), formData.getKind().getTitle(), formTemplate.getName());
         sendNotification(getIfrsUsers(), msg);
     }
 

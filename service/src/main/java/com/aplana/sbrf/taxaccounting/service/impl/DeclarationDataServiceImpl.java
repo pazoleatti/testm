@@ -1120,7 +1120,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                             NOT_EXIST_SOURCE_DECLARATION_WARNING,
                             departmentService.getDepartment(sourceDFT.getDepartmentId()).getName(),
                             formTypeService.get(sourceDFT.getFormTypeId()).getName(),
-                            sourceDFT.getKind().getName(),
+                            sourceDFT.getKind().getTitle(),
                             rp.getName() + (sourceDFT.getPeriodOrder() != null ? " " + Months.fromId(sourceDFT.getPeriodOrder()).getTitle() : ""),
                             rp.getTaxPeriod().getYear(),
                             drp.getCorrectionDate() != null ? String.format(" с датой сдачи корректировки %s",
@@ -1131,12 +1131,12 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                     logger.warn(NOT_CONSOLIDATE_SOURCE_DECLARATION_WARNING,
                             departmentService.getDepartment(sourceFD.getDepartmentId()).getName(),
                             sourceFD.getFormType().getName(),
-                            sourceFD.getKind().getName(),
+                            sourceFD.getKind().getTitle(),
                             rp.getName() + (sourceFD.getPeriodOrder() != null ? " " + Months.fromId(sourceFD.getPeriodOrder()).getTitle() : ""),
                             rp.getTaxPeriod().getYear(),
                             sourceDRP.getCorrectionDate() != null ? String.format(" с датой сдачи корректировки %s",
                                     formatter.format(sourceDRP.getCorrectionDate())) : "",
-                            sourceFD.getState().getName());
+                            sourceFD.getState().getTitle());
                 }
             }
         }

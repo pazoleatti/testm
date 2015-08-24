@@ -26,15 +26,15 @@ public class ResidualSaveHandler extends AbstractActionHandler<ResidualSaveActio
     @Qualifier("declarationTemplateMainOperatingService")
     private MainOperatingService mainOperatingService;
     @Autowired
-    DeclarationTemplateImpexService declarationTemplateImpexService;
+	private DeclarationTemplateImpexService declarationTemplateImpexService;
     @Autowired
-    SecurityService securityService;
+	private SecurityService securityService;
     @Autowired
-    BlobDataService blobDataService;
+	private BlobDataService blobDataService;
     @Autowired
-    DeclarationTemplateService declarationTemplateService;
+	private DeclarationTemplateService declarationTemplateService;
     @Autowired
-    LogEntryService logEntryService;
+	private LogEntryService logEntryService;
 
     public ResidualSaveHandler() {
         super(ResidualSaveAction.class);

@@ -228,7 +228,7 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
                         context.getLogger().warn(
                                 "Форма-источник существует, но не может быть использована, так как еще не принята. Вид формы: \"%s\", тип формы: \"%s\", подразделение: \"%s\"",
                                 formType.getName(),
-                                dft.getKind().getName(),
+                                dft.getKind().getTitle(),
                                 department.getName()
                         );
                     } else {
