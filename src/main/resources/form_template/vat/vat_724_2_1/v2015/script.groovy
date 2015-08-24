@@ -29,6 +29,9 @@ switch (formDataEvent) {
     case FormDataEvent.CREATE:
         formDataService.checkUnique(formData, logger)
         break
+    case FormDataEvent.AFTER_CREATE:
+        checkPeriod()
+        break
     case FormDataEvent.CALCULATE:
         calc()
         logicCheck()
@@ -87,6 +90,18 @@ def endDate = null
 def editableStyle = 'Редактируемая'
 
 //// Кастомные методы
+
+// для первого периода 2015 года сделать редактируемой ячейку графы 5 строки с кодом операции 1010812
+void checkPeriod() {
+    def reportPeriod = reportPeriodService.get(formData.reportPeriodId)
+    if (reportPeriod.order == 1 && reportPeriod.taxPeriod.year == 2015) {
+        def dataRows = formDataService.getDataRowHelper(formData).allCached
+        def row = getDataRow(dataRows, 'R24')
+        row.getCell('obtainCost').setStyleAlias(editableStyle)
+        row.getCell('obtainCost').editable = true
+        formDataService.saveCachedDataRows(formData, logger)
+    }
+}
 
 void calc() {
     def dataRows = formDataService.getDataRowHelper(formData).allCached
@@ -454,7 +469,7 @@ def fillRowFromXls(def dataRow, def values, int fileRowIndex, int rowIndex, int 
     dataRow.setImportIndex(fileRowIndex)
     dataRow.setIndex(rowIndex)
     def colIndex = -1
-    def skipValue = (rowIndex in [9, 10, 13, 15, 19, 20, 21, 22, 23, 24, 25])
+    def skipValue = dataRow.getCell('obtainCost')?.style?.alias != editableStyle
 
     def tmpValues = [:]
     colIndex++
@@ -469,7 +484,7 @@ def fillRowFromXls(def dataRow, def values, int fileRowIndex, int rowIndex, int 
     }
 
     // Проверить фиксированные значения (графы 2, 3)
-    ['code', 'name'].each { alias ->
+    tmpValues.keySet().asList().each { alias ->
         def value = StringUtils.cleanString(tmpValues[alias]?.toString())
         def valueExpected = StringUtils.cleanString(dataRow.getCell(alias).value?.toString())
         checkFixedValue(dataRow, value, valueExpected, dataRow.getIndex(), alias, logger, true)
