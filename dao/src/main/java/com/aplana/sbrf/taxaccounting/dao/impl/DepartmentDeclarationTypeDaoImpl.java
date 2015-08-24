@@ -275,7 +275,7 @@ public class DepartmentDeclarationTypeDaoImpl extends AbstractDao implements Dep
                     order.append("ORDER BY ");
                 else
                     order.append(", ");
-                order.append(column.name() + asc);
+                order.append(column.name()).append(asc);
                 first = false;
             }
         }
