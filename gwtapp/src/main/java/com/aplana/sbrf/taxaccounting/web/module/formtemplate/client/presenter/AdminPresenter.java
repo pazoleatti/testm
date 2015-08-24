@@ -36,6 +36,7 @@ import com.gwtplatform.mvp.client.proxy.ProxyPlace;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Presenter для страницы администрирования. Выполняет следующие действия:
@@ -78,7 +79,7 @@ public class AdminPresenter
 
     private TemplateFilter previousFilter;
 
-    private HashMap<Integer, String> lstHistory = new HashMap<Integer, String>();
+    private Map<Integer, String> lstHistory = new HashMap<Integer, String>();
 
     private Integer selectedItemId;
 

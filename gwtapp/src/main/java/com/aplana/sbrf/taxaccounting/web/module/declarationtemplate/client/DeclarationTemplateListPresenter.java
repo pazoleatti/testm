@@ -34,6 +34,7 @@ import com.gwtplatform.mvp.client.proxy.ProxyPlace;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Presenter для страницы администрирования деклараций. Выполняет следующие действия:
@@ -55,7 +56,7 @@ public class DeclarationTemplateListPresenter
 	public interface MyProxy extends ProxyPlace<DeclarationTemplateListPresenter> {
 	}
 
-    private HashMap<Integer, String> lstHistory = new HashMap<Integer, String>();
+    private Map<Integer, String> lstHistory = new HashMap<Integer, String>();
 
 	/**
 	 * Интерфейс декларации, т.е. представления. Такой, каким видит его Presenter.

@@ -312,7 +312,7 @@ public abstract class AbstractEditView extends ViewWithUiHandlers<EditFormUiHand
         return checkNumber(key, value, checkRequired, new HashMap<String, String>(0));
     }
 
-    private BigDecimal checkNumber(RefBookColumn key, HasValue value, boolean checkRequired, HashMap<String, String> errorMap)  throws BadValueException{
+    private BigDecimal checkNumber(RefBookColumn key, HasValue value, boolean checkRequired, Map<String, String> errorMap)  throws BadValueException{
         BigDecimal number;
         if (value instanceof CheckBox) {
             number = value.getValue() == null ?
@@ -364,7 +364,7 @@ public abstract class AbstractEditView extends ViewWithUiHandlers<EditFormUiHand
     @SuppressWarnings("unchecked")
     private Map<String, RefBookValueSerializable> getFieldsValues(boolean checkRequired) throws BadValueException {
         Map<String, RefBookValueSerializable> fieldsValues = new HashMap<String, RefBookValueSerializable>();
-        HashMap<String, String> errorMap = new HashMap<String, String>();
+        Map<String, String> errorMap = new HashMap<String, String>();
         for (Map.Entry<RefBookColumn, HasValue> field : widgets.entrySet()) {
             RefBookValueSerializable value = new RefBookValueSerializable();
             try {
@@ -420,7 +420,7 @@ public abstract class AbstractEditView extends ViewWithUiHandlers<EditFormUiHand
         return fieldsValues;
     }
 
-    private void checkRequired(RefBookColumn attr, Object val, HashMap<String, String> errorMap) throws BadValueException {
+    private void checkRequired(RefBookColumn attr, Object val, Map<String, String> errorMap) throws BadValueException {
         if (attr.isRequired() && (val == null)) {
             errorMap.put(attr.getName(), "обязателен для заполнения");
             /*BadValueException badValueException = new BadValueException();

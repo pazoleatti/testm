@@ -1,19 +1,19 @@
 package com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.exception;
 
-import java.util.HashMap;
+import java.util.Map;
 
 public class BadValueException extends Exception {
 
-	private HashMap<String, String> descriptionMap;
+	private Map<String, String> descriptionMap;
 
-	public BadValueException(HashMap<String, String> descriptionMap) {
+	public BadValueException(Map<String, String> descriptionMap) {
 		this.descriptionMap = descriptionMap;
 	}
 
 	public BadValueException() {
 	}
 
-	public HashMap<String, String> getDescriptionMap() {
+	public Map<String, String> getDescriptionMap() {
 		return descriptionMap;
 	}
 
