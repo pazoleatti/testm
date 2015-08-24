@@ -278,8 +278,8 @@ void calcValues(def dataRows, def sourceRows) {
         row.deltaRub = (rowSource.currentPeriod ?: 0) - (rowSource.comparePeriod ?: 0)
         row.deltaPercent = null
         if (rowSource.comparePeriod) {
-            row.deltaPercent = ((rowSource.deltaRub ?: BigDecimal.ZERO) as BigDecimal) / rowSource.comparePeriod * 100
-        } else if (dataRows != sourceRows) { // выводить только при расчете
+            row.deltaPercent = ((rowSource.deltaRub ?: BigDecimal.ZERO) as BigDecimal) / rowSource.comparePeriod.doubleValue() * 100
+        } else if (dataRows != sourceRows) { // выводить только в logicCheck
             rowError(logger, row, String.format("Строка %s: Графа «%s» не может быть заполнена. Выполнение расчета невозможно, так как в результате проверки получен нулевой знаменатель (деление на ноль невозможно)",
                     row.getIndex(), getColumnName(row, 'deltaPercent')))
         }

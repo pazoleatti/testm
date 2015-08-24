@@ -234,7 +234,7 @@ void calcValues(def dataRows, def sourceRows) {
     def row3Source = getDataRow(sourceRows, "R3")
     ['comparePeriod', 'currentPeriod'].each {
         if (row3Source[it]) {
-            row4[it] = (row2Source[it] ?: 0) / row3Source[it] * 100
+            row4[it] = (row2Source[it] ?: 0) / row3Source[it].doubleValue() * 100
         } else if (isCalc) { // выводить только при расчете
             rowError(logger, row4, String.format("Строка %s: Графа «%s» не может быть заполнена. Выполнение расчета невозможно, так как в результате проверки получен нулевой знаменатель (деление на ноль невозможно)",
                     row4.getIndex(), getColumnName(row4, it)))
@@ -246,7 +246,7 @@ void calcValues(def dataRows, def sourceRows) {
         row.deltaRub = (rowSource.currentPeriod ?: 0) - (rowSource.comparePeriod ?: 0)
         row.deltaPercent = null
         if (rowSource.comparePeriod) {
-            row.deltaPercent = ((rowSource.deltaRub ?: BigDecimal.ZERO) as BigDecimal) / rowSource.comparePeriod * 100
+            row.deltaPercent = ((rowSource.deltaRub ?: BigDecimal.ZERO) as BigDecimal) / rowSource.comparePeriod.doubleValue() * 100
         } else if (isCalc) { // выводить только при расчете
             rowError(logger, row, String.format("Строка %s: Графа «%s» не может быть заполнена. Выполнение расчета невозможно, так как в результате проверки получен нулевой знаменатель (деление на ноль невозможно)",
                     row.getIndex(), getColumnName(row, 'deltaPercent')))
