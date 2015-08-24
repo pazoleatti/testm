@@ -268,7 +268,7 @@ def calc3or6(def row, def dividendAlias, def dividerAlias, def needShowMsg, def 
     // проверка делителя на 0 или null
     if (divider) {
         // расчет
-        result = (dividend / divider) * 100
+        result = (dividend / divider.doubleValue()) * 100
     } else if (needShowMsg) {
         // Логическая проверка 3. Проверка графы 2 при расчете графы 3
         // Логическая проверка 4. Проверка графы 2 при расчете графы 6

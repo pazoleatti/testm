@@ -213,19 +213,20 @@ void logicCheck() {
 }
 
 void calcValues(def dataRows, def sourceRows) {
+    def isCalc = dataRows == sourceRows
     // при консолидации не подтягиваем данные при расчете
     if (formDataEvent != FormDataEvent.COMPOSE) {
         for (def alias in opuMap.keySet()) {
             def row = getDataRow(dataRows, alias)
             def rowSource = getDataRow(sourceRows, alias)
             if ("R2".equals(alias) && !isBank()) {
-                row.comparePeriod = getSourceValue(getComparativePeriodId(), row, 'comparePeriod')
-                row.currentPeriod = getSourceValue(formData.reportPeriodId, row, 'currentPeriod')
+                row.comparePeriod = getSourceValue(getComparativePeriodId(), row, 'comparePeriod', isCalc)
+                row.currentPeriod = getSourceValue(formData.reportPeriodId, row, 'currentPeriod', isCalc)
                 continue
             }
 
-            row.comparePeriod = calcBO(rowSource, getComparativePeriodId(), 'comparePeriod')
-            row.currentPeriod = calcBO(rowSource, formData.reportPeriodId, 'currentPeriod')
+            row.comparePeriod = calcBO(rowSource, getComparativePeriodId())
+            row.currentPeriod = calcBO(rowSource, formData.reportPeriodId)
         }
     }
     def row4 = getDataRow(dataRows, "R4")
@@ -233,8 +234,8 @@ void calcValues(def dataRows, def sourceRows) {
     def row3Source = getDataRow(sourceRows, "R3")
     ['comparePeriod', 'currentPeriod'].each {
         if (row3Source[it]) {
-            row4[it] = (row2Source[it] ?: 0) / row3Source[it] * 100
-        } else if (dataRows == sourceRows) { // выводить только при расчете
+            row4[it] = (row2Source[it] ?: 0) / row3Source[it].doubleValue() * 100
+        } else if (isCalc) { // выводить только при расчете
             rowError(logger, row4, String.format("Строка %s: Графа «%s» не может быть заполнена. Выполнение расчета невозможно, так как в результате проверки получен нулевой знаменатель (деление на ноль невозможно)",
                     row4.getIndex(), getColumnName(row4, it)))
         }
@@ -245,47 +246,46 @@ void calcValues(def dataRows, def sourceRows) {
         row.deltaRub = (rowSource.currentPeriod ?: 0) - (rowSource.comparePeriod ?: 0)
         row.deltaPercent = null
         if (rowSource.comparePeriod) {
-            row.deltaPercent = ((rowSource.deltaRub ?: BigDecimal.ZERO) as BigDecimal) / rowSource.comparePeriod * 100
-        } else if (dataRows != sourceRows) { // выводить только при расчете
+            row.deltaPercent = ((rowSource.deltaRub ?: BigDecimal.ZERO) as BigDecimal) / rowSource.comparePeriod.doubleValue() * 100
+        } else if (isCalc) { // выводить только при расчете
             rowError(logger, row, String.format("Строка %s: Графа «%s» не может быть заполнена. Выполнение расчета невозможно, так как в результате проверки получен нулевой знаменатель (деление на ноль невозможно)",
                     row.getIndex(), getColumnName(row, 'deltaPercent')))
         }
     }
 }
 
-def getSourceValue(def periodId, def row, def alias) {
-    boolean found = false
+def getSourceValue(def periodId, def row, def alias, def isCalc) {
     if (periodId != null) {
         def reportPeriod = getReportPeriod(periodId)
-        for (formDataSource in departmentFormTypeService.getFormSources(formData.departmentId, formData.getFormType().getId(), formData.getKind(),
-                getStartDate(periodId), getEndDate(periodId))) {
-            if (formDataSource.formTypeId == sourceFormTypeId) {
-                found = true
-                def source = formDataService.getLast(formDataSource.formTypeId, formDataSource.kind, formDataSource.departmentId, periodId, formData.periodOrder)
-                if (source != null && source.state == WorkflowState.ACCEPTED) {
-                    sourceForm = formDataService.getDataRowHelper(source)
-                    return sourceForm.allSaved?.get(0)?.sum
-                } else {
-                    logger.warn("Не найдена форма-источник «Величины налоговых платежей, вводимые вручную» в статусе «Принята»: Тип формы: \"%s\", Период: \"%s %s\", Подразделение: \"%s\". Ячейки по графе «%s», заполняемые из данной формы, будут заполнены нулевым значением.",
-                            formDataSource.kind.name, reportPeriod.getName(), reportPeriod.getTaxPeriod().getYear(), departmentService.get(formDataSource.departmentId)?.name, getColumnName(row, alias))
-                }
+        int startOrder = formData.accruing ? reportPeriod.order : 1
+        def periods = reportPeriodService.listByTaxPeriod(reportPeriod.taxPeriod.id).findAll{ it.order <= reportPeriod.order && it.order >= startOrder}
+        periods.each { period ->
+            // берем консолидированную, если ее нет, то берем первичную (подразумевается, что форма одна, в 0.8 исправить на множество источников)
+            def sourceForm = getSourceForm(FormDataKind.CONSOLIDATED, period.id)
+            if (sourceForm == null) {
+                sourceForm = getSourceForm(FormDataKind.PRIMARY, period.id)
+            }
+            if (sourceForm != null) {
+                return sourceForm?.allSaved?.get(0)?.sum ?: 0
+            } else if (!isCalc) { // выводим в logicCheck
+                logger.warn("Не найдена форма-источник «Величины налоговых платежей, вводимые вручную» в статусе «Принята»: Тип: \"%s/%s\", Период: \"%s %s\", Подразделение: \"%s\". Ячейки по графе «%s», заполняемые из данной формы, будут заполнены нулевым значением.",
+                        FormDataKind.CONSOLIDATED.name, FormDataKind.PRIMARY.name, period.getName(), period.getTaxPeriod().getYear(), departmentService.get(formData.departmentId)?.name, getColumnName(row, alias))
             }
         }
-    }
-    if (!found) {
-        String periodString = ""
-        if (periodId != null) {
-            def reportPeriod = getReportPeriod(periodId)
-            periodString = String.format(": Период: \"%s %s\"", reportPeriod.getName(), reportPeriod.getTaxPeriod().getYear())
-        }
-        logger.warn("Не найдена форма «Величины налоговых платежей, вводимые вручную» в списке назначенных источников%s. Ячейки по графе \"%s\", заполняемые из данной формы, будут заполнены нулевым значением.",
-                periodString, getColumnName(row, alias))
     }
     return 0
 }
 
+def getSourceForm(def formDataKind, def periodId) {
+    def source = formDataService.getLast(sourceFormTypeId, formDataKind, formData.departmentId, periodId, formData.periodOrder)
+    if (source != null && source.state == WorkflowState.ACCEPTED) {
+        return formDataService.getDataRowHelper(source)
+    }
+    return null
+}
+
 // Расчет сумм из БО за определенный период
-def calcBO(def rowSource, def periodId, def alias) {
+def calcBO(def rowSource, def periodId) {
     def periodSum = 0
     if (periodId != null) {
         def pair = get102Sum(rowSource, periodId)
