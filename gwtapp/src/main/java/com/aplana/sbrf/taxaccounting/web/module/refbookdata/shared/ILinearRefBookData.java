@@ -6,7 +6,7 @@ import java.util.List;
  * Интерфейс общий для презентер-виджетов в справочнике.
  */
 public interface ILinearRefBookData {
-    public void updateTable();
+    void updateTable();
     void setTableColumns(final List<RefBookColumn> columns);
     void setMode(FormMode mode);
     void setRefBookId(Long refBookId);

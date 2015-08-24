@@ -29,8 +29,7 @@ import static com.google.gwt.view.client.DefaultSelectionEventManager.createCust
  * View для формы "Блокировки"
  * @author dloshkarev
  */
-public class LockListView extends ViewWithUiHandlers<LockListUiHandlers>
-        implements LockListPresenter.MyView {
+public class LockListView extends ViewWithUiHandlers<LockListUiHandlers> implements LockListPresenter.MyView {
 
     interface Binder extends UiBinder<Widget, LockListView> {
     }

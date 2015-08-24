@@ -39,7 +39,7 @@ public interface DataRowDao {
 	 * автоматической версии постоянного среза.
 	 * @param formData
 	 */
-	public void createManual(FormData formData);
+	void createManual(FormData formData);
 
 	/**
 	 * Создает точку восстановления при ручном редактировании. Работает как с обычной, так и с версией ручного ввода.

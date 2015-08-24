@@ -1,6 +1,5 @@
 package com.aplana.sbrf.taxaccounting.common.service;
 
-
 import com.aplana.sbrf.taxaccounting.common.model.EventType;
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
 
@@ -14,7 +13,7 @@ import java.util.Map;
  */
 public class EventRelationsContainer {
 
-    private static EventRelationsContainer INST;
+    private static EventRelationsContainer instance;
 
     private Map<EventType, FormDataEvent> map;
 
@@ -39,12 +38,11 @@ public class EventRelationsContainer {
 
         map.put(EventType.CREATE_TASK_FORMATION_RNU23, FormDataEvent.GAR_CREATE_TASK_FORMATION_RNU23);
         map.put(EventType.CREATE_TASK_FORMATION_REPORT, FormDataEvent.GAR_CREATE_TASK_FORMATION_REPORT);
-
     }
 
     public static EventRelationsContainer get() {
-        if (INST == null) INST = new EventRelationsContainer();
-        return INST;
+        if (instance == null) instance = new EventRelationsContainer();
+        return instance;
     }
 
     public static FormDataEvent get(EventType eventType) {

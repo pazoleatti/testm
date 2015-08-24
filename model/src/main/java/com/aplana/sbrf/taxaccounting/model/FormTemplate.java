@@ -180,7 +180,7 @@ public class FormTemplate extends IdentityObject<Integer> implements Cloneable {
 	 */
 	public Column getColumn(String columnAlias) {
 		if (columnAlias == null) {
-			throw new NullPointerException("Column alias cannot be null");
+			throw new IllegalArgumentException("Column alias cannot be null");
 		}
 		for (Column col : columns) {
 			if (columnAlias.equals(col.getAlias())) {
@@ -289,15 +289,14 @@ public class FormTemplate extends IdentityObject<Integer> implements Cloneable {
 	 */
 	public FormStyle getStyle(String alias) {
 		if (alias == null) {
-			throw new NullPointerException("Style alias cannot be null");
+			throw new IllegalArgumentException("Style alias cannot be null");
 		}
 		for (FormStyle style : styles) {
 			if (alias.equals(style.getAlias())) {
 				return style;
 			}
 		}
-		throw new IllegalArgumentException("Wrong style alias: '" + alias
-				+ '\'');
+		throw new IllegalArgumentException("Wrong style alias: '" + alias + '\'');
 	}
 	
     /**

@@ -327,7 +327,7 @@ public class Spinner extends DoubleStateComposite
         this.handler = handler;
     }
 
-    public static interface EnterKeyPressHandler {
+    public interface EnterKeyPressHandler {
         void onEnterKeyPress();
     }
 }

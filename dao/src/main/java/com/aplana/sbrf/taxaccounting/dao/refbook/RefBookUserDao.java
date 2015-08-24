@@ -16,8 +16,8 @@ import java.util.Map;
  */
 public interface RefBookUserDao {
 
-	final Long REF_BOOK_ID = 74L;
-	final String TABLE_NAME = "SEC_USER";
+	Long REF_BOOK_ID = 74L;
+	String TABLE_NAME = "SEC_USER";
 
     /**
      * Вариант перегрузки, для обратной совместимости интерфейса

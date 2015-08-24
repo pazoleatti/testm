@@ -267,7 +267,7 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 			throw new IllegalArgumentException(String.format("Вставка записей допустима только в диапазоне индексов [1; %s]. index = %s", size + 1, index));
 		}
 		if (rows == null) {
-			throw new NullPointerException("Аргумент \"rows\" должен быть задан");
+			throw new IllegalArgumentException("Аргумент \"rows\" должен быть задан");
 		}
 		// сдвигаем строки
 		shiftRows(formData, new DataRowRange(index, rows.size()));
@@ -359,7 +359,6 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 			log.trace("updateRows: " + sql.toString().intern());
 		}
 		// формируем список параметров для батча
-		int manual = formData.isManual() ? DataRowType.MANUAL.getCode() : DataRowType.AUTO.getCode();
 		List<Map<String, Object>> params = new ArrayList<Map<String, Object>>(rows.size());
 		for (DataRow<Cell> row : rows) {
 			Map<String, Object> values = new HashMap<String, Object>();
