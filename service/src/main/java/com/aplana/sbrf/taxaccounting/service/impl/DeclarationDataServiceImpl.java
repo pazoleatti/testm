@@ -1139,10 +1139,10 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                             sourceFD.getState().getName());
                 }
             }
-        }
 
-        if (consolidationOk){
-            logger.info("Консолидация выполнена из всех форм-источников.");
+            if (!sourceDDs.isEmpty() && consolidationOk){
+                logger.info("Консолидация выполнена из всех форм-источников.");
+            }
         }
     }
 }

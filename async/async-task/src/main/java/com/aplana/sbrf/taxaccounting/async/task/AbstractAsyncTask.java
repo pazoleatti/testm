@@ -87,6 +87,9 @@ public abstract class AbstractAsyncTask implements AsyncTask {
 
     protected BalancingVariants checkTask(ReportType reportType, Long value, String taskName, String msg) throws AsyncTaskException {
         AsyncTaskTypeData taskTypeData = asyncTaskTypeDao.get(reportType.getAsyncTaskTypeId(true));
+        if (taskTypeData == null) {
+            throw new AsyncTaskException(String.format("Не найдены параметры задачи \"%s\"", taskName));
+        }
         if (taskTypeData.getTaskLimit() != 0 && taskTypeData.getTaskLimit() < value) {
             Logger logger = new Logger();
             logger.error("Критерии возможности выполнения задач задаются в конфигурационных параметрах (параметры асинхронных заданий). За разъяснениями обратитесь к Администратору");
