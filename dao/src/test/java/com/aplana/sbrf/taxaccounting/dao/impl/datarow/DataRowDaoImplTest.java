@@ -190,7 +190,7 @@ public class DataRowDaoImplTest extends Assert {
 		dataRowDao.insertRows(formData, 1000000, null);
 	}
 
-	@Test(expected = DaoException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void insertRowsNull() {
 		FormData formData = formDataDao.get(329, false);
 		dataRowDao.insertRows(formData, 1, null);

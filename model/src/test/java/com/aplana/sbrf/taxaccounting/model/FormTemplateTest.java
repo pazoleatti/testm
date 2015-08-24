@@ -42,7 +42,7 @@ public class FormTemplateTest {
 		assertEquals(new Integer(1), s.getId());
 	}
 	
-	@Test(expected=NullPointerException.class)
+	@Test(expected=IllegalArgumentException.class)
 	public void testGetStyleNullAlias() {
 		FormTemplate ft = createFormTemplateWithStyles();
 		ft.getStyle(null);
