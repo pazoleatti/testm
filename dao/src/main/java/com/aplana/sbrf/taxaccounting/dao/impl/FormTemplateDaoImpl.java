@@ -115,10 +115,10 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
 	}
 
 
-    private static String FORM_DATA_COLUMNS_DELETE = "alter table form_data_%d drop (%s)";
-    private static String FORM_DATA_COLUMNS_ADD = "alter table FORM_DATA_%d add (%s)";
-    private static String FORM_DATA_COLUMNS_UPDATE = "alter table FORM_DATA_%d modify (%s)";
-    private static String FORM_DATA_COLUMNS_COMMENT = "comment on column form_data_%d.c%d is '%s'";
+    private static final String FORM_DATA_COLUMNS_DELETE = "alter table form_data_%d drop (%s)";
+    private static final String FORM_DATA_COLUMNS_ADD = "alter table FORM_DATA_%d add (%s)";
+    private static final String FORM_DATA_COLUMNS_UPDATE = "alter table FORM_DATA_%d modify (%s)";
+    private static final String FORM_DATA_COLUMNS_COMMENT = "comment on column form_data_%d.c%d is '%s'";
 	/**
 	 * Кэш инфалидируется перед вызовом. Т.е. несмотря на результат выполнения, кэш будет сброшен.
 	 * Иначе, если версии не совпадают кэш продолжает возвращать старую версию.

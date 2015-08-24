@@ -58,14 +58,14 @@ public class FormTemplateImpexServiceImpl implements
     DeclarationTemplateService declarationTemplateService;
 
 	private final XmlSerializationUtils xmlSerializationUtils = XmlSerializationUtils.getInstance();
-	private final static String VERSION_FILE = "version";
-	private final static String CONTENT_FILE = "content.xml";
-	private final static String SCRIPT_FILE = "script.groovy";
-	private final static String ROWS_FILE = "rows.xml";
-	private final static String HEADERS_FILE = "headers.xml";
+	private static final String VERSION_FILE = "version";
+	private static final String CONTENT_FILE = "content.xml";
+	private static final String SCRIPT_FILE = "script.groovy";
+	private static final String ROWS_FILE = "rows.xml";
+	private static final String HEADERS_FILE = "headers.xml";
     private static String[] strings = new String[]{VERSION_FILE, CONTENT_FILE, SCRIPT_FILE, ROWS_FILE, HEADERS_FILE};
-	private final static String ENCODING = "UTF-8";
-    private final static String REG_EXP = "[^\\d\\sA-Za-z'-]";
+	private static final String ENCODING = "UTF-8";
+    private static final String REG_EXP = "[^\\d\\sA-Za-z'-]";
 
     private static final Log logger = LogFactory.getLog(FormTemplateImpexServiceImpl.class);
 

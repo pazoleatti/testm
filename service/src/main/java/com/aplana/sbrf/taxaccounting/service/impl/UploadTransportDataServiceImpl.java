@@ -54,29 +54,29 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
     private FormTypeService formTypeService;
 
     // Сообщения при загрузке в каталоги
-    final static String U1 = "В каталоге загрузки ранее загруженный файл «%s» был заменен!";
-    final static String U2 = "Файл «%s» не загружен, т.к. имеет некорректный формат имени!";
-    final static String U2_1 = " Код подразделения «%s» не существует в АС «Учет налогов»!";
-    final static String U2_2 = " Код налоговой формы «%s» не существует в АС «Учет налогов»!";
-    final static String U2_3 = " Код отчетного периода «%s» не существует в налоговом периоде %d года в АС «Учет налогов»!";
-    final static String U3_1 = "Указанное в транспортном файле подразделение «%s» недоступно текущему пользователю!";
-    final static String U3_2 = "Для подразделения «%s» не назначено первичной или выходной налоговой формы «%s»!";
-    final static String U4 = "Загружаемая налоговая форма «%s» подразделения «%s» не относится ни к одному ТБ, " +
+    static final String U1 = "В каталоге загрузки ранее загруженный файл «%s» был заменен!";
+    static final String U2 = "Файл «%s» не загружен, т.к. имеет некорректный формат имени!";
+    static final String U2_1 = " Код подразделения «%s» не существует в АС «Учет налогов»!";
+    static final String U2_2 = " Код налоговой формы «%s» не существует в АС «Учет налогов»!";
+    static final String U2_3 = " Код отчетного периода «%s» не существует в налоговом периоде %d года в АС «Учет налогов»!";
+    static final String U3_1 = "Указанное в транспортном файле подразделение «%s» недоступно текущему пользователю!";
+    static final String U3_2 = "Для подразделения «%s» не назначено первичной или выходной налоговой формы «%s»!";
+    static final String U4 = "Загружаемая налоговая форма «%s» подразделения «%s» не относится ни к одному ТБ, " +
             "в связи с чем для нее не существует каталог загрузки в конфигурационных параметрах АС «Учет налогов»!";
 
-    final static String U5 = "Начата загрузка транспортного файла «%s» в каталог загрузки.";
-    final static String U5_1 = "Из наименования транспортного файла получены следующие данные:";
-    final static String U6_1 = "Код вида НФ: %s, код подразделения: %s, код периода: %s, год: %s.";
-    final static String U6_2 = "Код вида НФ: %s, код подразделения: %s, код периода: %s, год: %s, месяц: %s";
+    static final String U5 = "Начата загрузка транспортного файла «%s» в каталог загрузки.";
+    static final String U5_1 = "Из наименования транспортного файла получены следующие данные:";
+    static final String U6_1 = "Код вида НФ: %s, код подразделения: %s, код периода: %s, год: %s.";
+    static final String U6_2 = "Код вида НФ: %s, код подразделения: %s, код периода: %s, год: %s, месяц: %s";
 
     private static final String DIASOFT_NAME = "справочников Diasoft";
     private static final String AVG_COST_NAME = "справочника «Средняя стоимость транспортных средств»";
 
     // Сообщения, которые не учтены в постановка
-    final static String USER_NOT_FOUND_ERROR = "Не определен пользователь!";
-    final static String ACCESS_DENIED_ERROR = "У пользователя нет прав для загрузки транспортных файлов!";
-    final static String NO_FILE_NAME_ERROR = "Невозможно определить имя файла!";
-    final static String EMPTY_INPUT_STREAM_ERROR = "Поток данных пуст!";
+    static final String USER_NOT_FOUND_ERROR = "Не определен пользователь!";
+    static final String ACCESS_DENIED_ERROR = "У пользователя нет прав для загрузки транспортных файлов!";
+    static final String NO_FILE_NAME_ERROR = "Невозможно определить имя файла!";
+    static final String EMPTY_INPUT_STREAM_ERROR = "Поток данных пуст!";
 
     protected static enum LogData {
         L32("Файл «%s» сохранен в каталоге загрузки «%s».", LogLevel.INFO, true),
@@ -110,7 +110,7 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
     }
 
     // Константы
-    final static String ZIP_ENCODING = "cp866";
+    static final String ZIP_ENCODING = "cp866";
 
     @Override
     public UploadResult uploadFile(TAUserInfo userInfo, String fileName, InputStream inputStream, Logger logger) {

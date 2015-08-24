@@ -206,7 +206,7 @@ public class ValidateXMLServiceImpl implements ValidateXMLService {
          * @param dwDummy A pointer to a variable that the function sets to zero.
          * @return info size
          */
-        public int GetFileVersionInfoSizeW(String lptstrFilename, int dwDummy);
+        int GetFileVersionInfoSizeW(String lptstrFilename, int dwDummy);
 
         /**
          * Retrieves version information for the specified file.
@@ -217,7 +217,7 @@ public class ValidateXMLServiceImpl implements ValidateXMLService {
          * @param lpData Pointer to a buffer that receives the file-version information.
          * @return true If the function succeeds
          */
-        public boolean GetFileVersionInfoW(String lptstrFilename, int dwHandle,
+        boolean GetFileVersionInfoW(String lptstrFilename, int dwHandle,
                                            int dwLen, Pointer lpData);
 
         /**
@@ -236,7 +236,7 @@ public class ValidateXMLServiceImpl implements ValidateXMLService {
          *              and for root block, the size in bytes of the structure
          * @return the return value is nonzero - If the specified version-information structure exists, and version information is available
          */
-        public int VerQueryValueW(Pointer pBlock, String lpSubBlock,
+        int VerQueryValueW(Pointer pBlock, String lpSubBlock,
                                   PointerByReference lplpBuffer, IntByReference puLen);
 
     }

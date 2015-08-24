@@ -4,9 +4,9 @@ import com.aplana.sbrf.taxaccounting.web.widget.style.table.CheckBoxHeader;
 
 public interface TableWithCheckedColumn {
 
-    public CheckBoxHeader getCheckBoxHeader();
+    CheckBoxHeader getCheckBoxHeader();
 
-    public boolean isNeedCheckedRow();
+    boolean isNeedCheckedRow();
 
-    public void setNeedCheckedRow(boolean needCheckedRow);
+    void setNeedCheckedRow(boolean needCheckedRow);
 }

@@ -127,14 +127,14 @@ public final class ScriptUtils {
     // для проверки итогов при загрузе экселя (посчитанные и ожижаемые значения как %s потому что %f теряет точность)
     public static final String COMPARE_TOTAL_VALUES = "Строка формы %d: Итоговая сумма по графе «%s» (%s) некорректна (ожидаемое значение %s).";
 
-    public static String INN_JUR_PATTERN = RefBookUtils.INN_JUR_PATTERN;
-    public static String INN_JUR_MEANING = RefBookUtils.INN_JUR_MEANING;
-    public static String INN_IND_PATTERN = RefBookUtils.INN_IND_PATTERN;
-    public static String INN_IND_MEANING = RefBookUtils.INN_IND_MEANING;
-    public static String KPP_PATTERN = RefBookUtils.KPP_PATTERN;
-    public static String KPP_MEANING = RefBookUtils.KPP_MEANING;
-    public static String TAX_ORGAN_PATTERN = RefBookUtils.TAX_ORGAN_PATTERN;
-    public static String TAX_ORGAN_MEANING = RefBookUtils.TAX_ORGAN_MEANING;
+    public static final String INN_JUR_PATTERN = RefBookUtils.INN_JUR_PATTERN;
+    public static final String INN_JUR_MEANING = RefBookUtils.INN_JUR_MEANING;
+    public static final String INN_IND_PATTERN = RefBookUtils.INN_IND_PATTERN;
+    public static final String INN_IND_MEANING = RefBookUtils.INN_IND_MEANING;
+    public static final String KPP_PATTERN = RefBookUtils.KPP_PATTERN;
+    public static final String KPP_MEANING = RefBookUtils.KPP_MEANING;
+    public static final String TAX_ORGAN_PATTERN = RefBookUtils.TAX_ORGAN_PATTERN;
+    public static final String TAX_ORGAN_MEANING = RefBookUtils.TAX_ORGAN_MEANING;
 
     /**
      * Интерфейс для переопределения алгоритма расчета

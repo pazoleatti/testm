@@ -136,8 +136,7 @@ public class FilterFormDataView extends ViewWithUiHandlers<FilterFormDataUIHandl
 
     @Override
     public FormDataFilter getDataFilter() {
-    	FormDataFilter filter = driver.flush();
-        return filter;
+    	return driver.flush();
     }
 
 	@Override

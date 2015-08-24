@@ -77,7 +77,6 @@ public class IfrsView extends ViewWithUiHandlers<IfrsUiHandlers> implements Ifrs
 
     private Timer timer;
     private List<IfrsRow> records;
-    private HandlerRegistration selectionHandlerRegistration;
 
     private DefaultSelectionEventManager<IfrsRow> multiSelectManager = createCustomManager(
             new DefaultSelectionEventManager.CheckboxEventTranslator<IfrsRow>()
@@ -91,7 +90,7 @@ public class IfrsView extends ViewWithUiHandlers<IfrsUiHandlers> implements Ifrs
         initWidget(uiBinder.createAndBindUi(this));
         init();
         table.setSelectionModel(selectionModel, multiSelectManager);
-        selectionHandlerRegistration = selectionModel.addSelectionChangeHandler(
+		selectionModel.addSelectionChangeHandler(
                 new SelectionChangeEvent.Handler() {
                     @Override
                     public void onSelectionChange(SelectionChangeEvent event) {
@@ -219,7 +218,7 @@ public class IfrsView extends ViewWithUiHandlers<IfrsUiHandlers> implements Ifrs
                 @Override
                 public void onClick(ClickEvent event) {
                     Element element = event.getRelativeElement();
-                    Integer id = new Integer(element.getId().replaceFirst(TABLE_ROW_ID_PREFIX, ""));
+                    Integer id = Integer.valueOf(element.getId().replaceFirst(TABLE_ROW_ID_PREFIX, ""));
                     getUiHandlers().onClickCalc(id);
                 }
             });

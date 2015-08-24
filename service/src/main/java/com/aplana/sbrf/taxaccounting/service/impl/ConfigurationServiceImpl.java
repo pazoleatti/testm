@@ -25,20 +25,20 @@ import static java.util.Arrays.asList;
 @Service
 @Transactional
 public class ConfigurationServiceImpl implements ConfigurationService {
-    private final static int MAX_LENGTH = 500;
-    private final static int EMAIL_MAX_LENGTH = 200;
-    private final static String NOT_SET_ERROR = "Не задано значение поля «%s»!";
-    private final static String DUPLICATE_SET_ERROR = "Значение «%s» уже задано!";
-    private final static String ACCESS_READ_ERROR = "Нет прав на просмотр конфигурационных параметров приложения!";
-    private final static String ACCESS_WRITE_ERROR = "Нет прав на изменение конфигурационных параметров приложения!";
-    private final static String READ_ERROR = "«%s»: Отсутствует доступ на чтение!";
-    private final static String WRITE_ERROR = "«%s»: Отсутствует доступ на запись!";
-    private final static String LOAD_WRITE_ERROR = "«%s» для «%s»: отсутствует доступ на запись!";
-    private final static String READ_INFO = "«%s»: Присутствует доступ на чтение!";
-    private final static String WRITE_INFO = "«%s»: Присутствует доступ на запись!";
-    private final static String UNIQUE_PATH_ERROR = "«%s»: Значение параметра «%s» не может быть равно значению параметра «%s» для «%s»!";
-    private final static String MAX_LENGTH_ERROR = "«%s»: Длина значения превышает максимально допустимую (%d)!";
-    private final static String SIGN_CHECK_ERROR = "«%s»: значение не соответствует допустимому (0,1)!";
+    private static final int MAX_LENGTH = 500;
+    private static final int EMAIL_MAX_LENGTH = 200;
+    private static final String NOT_SET_ERROR = "Не задано значение поля «%s»!";
+    private static final String DUPLICATE_SET_ERROR = "Значение «%s» уже задано!";
+    private static final String ACCESS_READ_ERROR = "Нет прав на просмотр конфигурационных параметров приложения!";
+    private static final String ACCESS_WRITE_ERROR = "Нет прав на изменение конфигурационных параметров приложения!";
+    private static final String READ_ERROR = "«%s»: Отсутствует доступ на чтение!";
+    private static final String WRITE_ERROR = "«%s»: Отсутствует доступ на запись!";
+    private static final String LOAD_WRITE_ERROR = "«%s» для «%s»: отсутствует доступ на запись!";
+    private static final String READ_INFO = "«%s»: Присутствует доступ на чтение!";
+    private static final String WRITE_INFO = "«%s»: Присутствует доступ на запись!";
+    private static final String UNIQUE_PATH_ERROR = "«%s»: Значение параметра «%s» не может быть равно значению параметра «%s» для «%s»!";
+    private static final String MAX_LENGTH_ERROR = "«%s»: Длина значения превышает максимально допустимую (%d)!";
+    private static final String SIGN_CHECK_ERROR = "«%s»: значение не соответствует допустимому (0,1)!";
 
     @Autowired
     private ConfigurationDao configurationDao;
@@ -54,8 +54,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
         if (!userInfo.getUser().hasRole(TARole.ROLE_ADMIN) && !userInfo.getUser().hasRole(TARole.ROLE_CONTROL_UNP)) {
             throw new AccessDeniedException(ACCESS_READ_ERROR);
         }
-        ConfigurationParamModel model = configurationDao.getAll();
-        return model;
+        return configurationDao.getAll();
     }
 
     @Override

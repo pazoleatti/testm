@@ -22,15 +22,15 @@ public interface RefBookDepartmentDao {
 
 	Long REF_BOOK_ID = Department.REF_BOOK_ID;
 
-    static final String UNIQUE_ATTRIBUTES_ALIAS = "uniqueAttributes";
-    static final String STRING_VALUE_COLUMN_ALIAS = "string_value";
-    static final String NUMBER_VALUE_COLUMN_ALIAS = "number_value";
-    static final String DATE_VALUE_COLUMN_ALIAS = "date_value";
-    static final String REFERENCE_VALUE_COLUMN_ALIAS = "reference_value";
-    static final String REFBOOK_NAME_ALIAS = "refbookName";
-    static final String REFBOOK_ID_ALIAS = "ref_book_id";
-    static final String VERSION_START_ALIAS = "versionStart";
-    static final String VERSION_END_ALIAS = "versionEnd";
+    final String UNIQUE_ATTRIBUTES_ALIAS = "uniqueAttributes";
+    final String STRING_VALUE_COLUMN_ALIAS = "string_value";
+    final String NUMBER_VALUE_COLUMN_ALIAS = "number_value";
+    final String DATE_VALUE_COLUMN_ALIAS = "date_value";
+    final String REFERENCE_VALUE_COLUMN_ALIAS = "reference_value";
+    final String REFBOOK_NAME_ALIAS = "refbookName";
+    final String REFBOOK_ID_ALIAS = "ref_book_id";
+    final String VERSION_START_ALIAS = "versionStart";
+    final String VERSION_END_ALIAS = "versionEnd";
 
     /**
      * Загружает данные справочника

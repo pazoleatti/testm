@@ -11,7 +11,7 @@ import java.util.List;
  * 
  * @author dsultanbekov
  */
-public class FormTemplate extends IdentityObject<Integer> {
+public class FormTemplate extends IdentityObject<Integer> implements Cloneable {
 	private static final long serialVersionUID = -8304772615983231523L;
 	
 	private FormType type;
@@ -361,6 +361,8 @@ public class FormTemplate extends IdentityObject<Integer> {
 
         return formTemplateClone;
     }
+
+
 
     /** Получить копию строки. */
     private List<DataRow<Cell>> getCloneRows(List<DataRow<Cell>> dataRows) {
