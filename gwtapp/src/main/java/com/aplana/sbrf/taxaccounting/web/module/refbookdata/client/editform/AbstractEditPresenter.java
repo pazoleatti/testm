@@ -294,7 +294,10 @@ public abstract class AbstractEditPresenter<V extends AbstractEditPresenter.MyVi
         } catch (BadValueException bve) {
             Dialog.errorMessage(title, "Обнаружены фатальные ошибки!");
             List<LogEntry> logEntries = new ArrayList<LogEntry>();
-            logEntries.add(new LogEntry(LogLevel.ERROR, bve.toString()));
+            for (Map.Entry<String, String> entry : bve.getDescriptionMap().entrySet()){
+                logEntries.add(new LogEntry(LogLevel.ERROR, "Атрибут \"" + entry.getKey() + "\": " + entry.getValue()));
+            }
+
             SaveLogEntriesAction action = new SaveLogEntriesAction();
             action.setLogEntries(logEntries);
 
