@@ -546,12 +546,12 @@ public class FormDataServiceImpl implements FormDataService {
                             );
                         }
                     }
+
+                    if (!dftSources.isEmpty() && consolidationOk){
+                        logger.info("Консолидация выполнена из всех форм-источников");
+                    }
                 }
 
-
-				if (consolidationOk){
-					logger.info("Консолидация выполнена из всех форм-источников");
-				}
 				logger.info("Проверка завершена, фатальных ошибок не обнаружено");
 				return null;
 			}
