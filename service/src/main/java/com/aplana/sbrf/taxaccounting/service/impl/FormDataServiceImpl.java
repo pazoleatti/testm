@@ -474,9 +474,6 @@ public class FormDataServiceImpl implements FormDataService {
 				formDataAccessService.canRead(userInfo, formData.getId());
 				formDataScriptingService.executeScript(userInfo, formData, FormDataEvent.CHECK, logger, null);
 				checkPerformer(logger, formData);
-                if (logger.containsLevel(LogLevel.ERROR)){
-                    throw new ServiceLoggerException("", logEntryService.save(logger.getEntries()));
-                }
 				//Проверка на неактуальные консолидированные данные
 				if (!sourceService.isFDConsolidationTopical(formData.getId())){
 					logger.warn(CONSOLIDATION_NOT_TOPICAL);
