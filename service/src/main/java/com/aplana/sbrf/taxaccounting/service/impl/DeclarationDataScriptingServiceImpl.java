@@ -4,8 +4,6 @@ import com.aplana.sbrf.taxaccounting.dao.DeclarationTemplateDao;
 import com.aplana.sbrf.taxaccounting.log.impl.ScriptMessageDecorator;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
-import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.DeclarationDataScriptingService;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
@@ -123,9 +121,9 @@ public class DeclarationDataScriptingServiceImpl extends TAAbstractScriptingServ
 			
 		logger.setMessageDecorator(null);
 
-		if (logger.containsLevel(LogLevel.ERROR)) {
+		/*if (logger.containsLevel(LogLevel.ERROR)) {
 			throw new ServiceLoggerException("Обнаружены фатальные ошибки!", logEntryService.save(logger.getEntries()));
-		}
+		}*/
 	}
 
 	private boolean executeScript(Bindings bindings, String script, Logger logger, ScriptMessageDecorator decorator) {
