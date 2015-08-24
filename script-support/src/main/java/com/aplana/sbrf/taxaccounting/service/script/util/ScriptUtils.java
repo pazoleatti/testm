@@ -394,13 +394,13 @@ public final class ScriptUtils {
         // формат строки и шаблона не совпадают (excel может подставить в ячейку "yyyy" значение "01.01.yyyy")
         if (tmp.matches("\\d*") && format.contains(".")) {
             BigDecimal tmpNum = parseNumber(tmp, indexRow, indexColumn, logger, required);
-            if (tmpNum != null && !tmpNum.equals(0)) {
+            if (tmpNum != null && tmpNum.compareTo(BigDecimal.ZERO) != 0) {
                 return new GregorianCalendar(tmpNum.intValue(), Calendar.JANUARY, 1).getTime();
             }
         }
         if (tmp.contains(".") && !format.contains(".")) {
             BigDecimal tmpNum = parseNumber(tmp.substring(tmp.lastIndexOf('.') + 1), indexRow, indexColumn, logger, required);
-            if (tmpNum != null && !tmpNum.equals(0)) {
+            if (tmpNum != null && tmpNum.compareTo(BigDecimal.ZERO) != 0) {
                 return new GregorianCalendar(tmpNum.intValue(), Calendar.JANUARY, 1).getTime();
             }
         }
