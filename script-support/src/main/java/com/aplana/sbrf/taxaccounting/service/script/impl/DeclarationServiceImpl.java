@@ -102,13 +102,7 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
     private DepartmentReportPeriodDao departmentReportPeriodDao;
 
     @Autowired
-    private BlobDataService blobDataService;
-
-    @Autowired
     private DeclarationDataSearchService declarationDataSearchService;
-
-    @Autowired
-    private ReportService reportService;
 
     @Autowired
     private TAUserService taUserService;

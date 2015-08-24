@@ -2,7 +2,6 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.core.api.LockStateLogger;
-import com.aplana.sbrf.taxaccounting.dao.AsyncTaskTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
 import com.aplana.sbrf.taxaccounting.dao.FormPerformerDao;
 import com.aplana.sbrf.taxaccounting.dao.api.ConfigurationDao;
@@ -149,10 +148,6 @@ public class FormDataServiceImpl implements FormDataService {
     private IfrsDataService ifrsDataService;
     @Autowired
     private SourceService sourceService;
-    @Autowired
-    private AsyncTaskTypeDao asyncTaskTypeDao;
-    @Autowired
-    private DeclarationTypeService declarationTypeService;
     @Autowired
     private BlobDataService blobDataService;
 

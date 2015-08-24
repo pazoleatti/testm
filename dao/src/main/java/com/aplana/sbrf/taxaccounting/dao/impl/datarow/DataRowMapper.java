@@ -26,7 +26,7 @@ import static com.aplana.sbrf.taxaccounting.dao.impl.datarow.DataRowDaoImplUtils
  */
 class DataRowMapper implements RowMapper<DataRow<Cell>> {
 
-	private static final Log log = LogFactory.getLog(DataRowMapper.class);
+	//private static final Log log = LogFactory.getLog(DataRowMapper.class);
 
 			/**
 			 * Признак участия фиксированной строки в автонумерации
