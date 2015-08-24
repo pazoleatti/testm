@@ -66,8 +66,8 @@ public class RefBookUtils extends AbstractDao {
                 RefBookValue value = values.get(a.getAlias());
                 //Должны содержать только цифры - Код валюты. Цифровой, Определяющая часть кода ОКАТО, Определяющая часть кода ОКТМО, Цифровой код валюты выпуска
                 if ((a.getId() == 64L || a.getId() == 12L || a.getId() == 5L) &&
-                        (value != null && !value.isEmpty() && !NumberUtils.isNumber(value.getStringValue()) || a.isRequired() && value == null)) {
-                    errors.add(String.format("Атрибут \"%s\" заполнен неверно (%s)! Значение должно содержать только цифры!", a.getName(), value.getStringValue()));
+                        ((value != null && !value.isEmpty() && !NumberUtils.isNumber(value.getStringValue())) || (a.isRequired() && value == null))) {
+                    errors.add(String.format("Атрибут \"%s\" заполнен неверно (%s)! Значение должно содержать только цифры!", a.getName(), value != null ? value.getStringValue() : ""));
                 }
 
                 //Проверка формата для кода окато
