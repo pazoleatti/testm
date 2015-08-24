@@ -28,20 +28,28 @@ public class CreateFormDataHandler extends AbstractActionHandler<CreateFormData,
 
 	@Autowired
 	private SecurityService securityService;
+
 	@Autowired
 	private FormDataService formDataService;
+
 	@Autowired
 	private DepartmentReportPeriodService departmentReportPeriodService;
+
     @Autowired
     private DepartmentService departmentService;
+
     @Autowired
     private FormTypeService formTypeService;
+
 	@Autowired
-	private FormTemplateService formTemplateService;
+	FormTemplateService formTemplateService;
+
     @Autowired
-	private SourceService sourceService;
+    SourceService sourceService;
+
     @Autowired
-	private LogEntryService logEntryService;
+    LogEntryService logEntryService;
+
     @Autowired
     private LockDataService lockDataService;
 
@@ -51,8 +59,10 @@ public class CreateFormDataHandler extends AbstractActionHandler<CreateFormData,
     private static final String ERROR_SELECT_FORM_DATA_TYPE = "Вид налоговой формы не выбран!";
     private static final String ERROR_DEPARTMENT_REPORT_PERIOD_NOT_FOUND = "Не определен отчетный период подразделения!";
     private final static String MANUAL_USED_MESSAGE = "Для формирования декларации в корректируемом периоде используются данные версии ручного ввода, созданной в форме «%s», %s, «%s»!";
+    private static final SimpleDateFormat SDF_DD_MM_YYYY = new SimpleDateFormat("dd.MM.yyyy");
     private static final String NOT_EXIST_DESTINATIONS_ETR = "Форма не является источником данных для %s";
     private static final String NOT_EXIST_DESTINATIONS_OTHER = "Налоговая форма не является источником данных для других налоговых форм и декларации.";
+    private static final String FORM_IS_DESTINATION = "Не найдены назначения источников-приемников в периоде %s. Форма не является источником данных для %s.";
 
     public CreateFormDataHandler() {
 		super(CreateFormData.class);

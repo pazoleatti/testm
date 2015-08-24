@@ -106,7 +106,7 @@ public class DepartmentConfigPropertyPresenter extends Presenter<DepartmentConfi
 
         TaxType getTaxType();
 
-        DepartmentConfigPropertyView.TableHeader[] getCurrentTableHeaders();
+        DepartmentConfigPropertyView.TABLE_HEADER[] getCurrentTableHeaders();
 
         void setEditMode(boolean isEditable);
 
@@ -165,7 +165,7 @@ public class DepartmentConfigPropertyPresenter extends Presenter<DepartmentConfi
         List<Map<String, TableCell>> converted = new ArrayList<Map<String, TableCell>>();
         for (DataRow<Cell> row : rows) {
             Map<String, TableCell> tableRow = new HashMap<String, TableCell>();
-            for (DepartmentConfigPropertyView.TableHeader h : getView().getCurrentTableHeaders()) {
+            for (DepartmentConfigPropertyView.TABLE_HEADER h : getView().getCurrentTableHeaders()) {
                 Cell cell = row.getCell(h.name());
                 Object val = cell.getValue();
                 TableCell tableCell = new TableCell();

@@ -22,12 +22,16 @@ public abstract class MoveFormDataAsyncTask extends AbstractAsyncTask {
 
     @Autowired
     private TAUserService userService;
+
     @Autowired
     private FormDataService formDataService;
+
     @Autowired
     private DepartmentService departmentService;
+
     @Autowired
     private DepartmentReportPeriodService departmentReportPeriodService;
+
     @Autowired
     private LockDataService lockService;
 
@@ -84,6 +88,7 @@ public abstract class MoveFormDataAsyncTask extends AbstractAsyncTask {
         int workflowMoveId = (Integer)params.get("workflowMoveId");
         WorkflowMove move = WorkflowMove.fromId(workflowMoveId);
 
+        boolean manual = false;
         TAUserInfo userInfo = new TAUserInfo();
         userInfo.setUser(userService.getUser(userId));
 

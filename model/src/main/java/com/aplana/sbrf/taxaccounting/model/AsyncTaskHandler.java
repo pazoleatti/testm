@@ -2,6 +2,8 @@ package com.aplana.sbrf.taxaccounting.model;
 
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 
+import java.util.Map;
+
 /**
  * Created by lhaziev on 29.06.2015.
  */

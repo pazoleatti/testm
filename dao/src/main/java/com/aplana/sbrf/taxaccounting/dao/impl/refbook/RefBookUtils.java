@@ -25,17 +25,17 @@ import java.util.regex.Pattern;
 @Repository
 public class RefBookUtils extends AbstractDao {
 
-    public static final String INN_JUR_PATTERN = "([0-9]{1}[1-9]{1}|[1-9]{1}[0-9]{1})[0-9]{8}";
-    public static final String INN_JUR_MEANING = "Первые 2 символа: (0-9; 1-9 / 1-9; 0-9). Следующие 8 символов: (0-9)";
-    public static final String INN_IND_PATTERN = "([0-9]{1}[1-9]{1}|[1-9]{1}[0-9]{1})[0-9]{10}";
-    public static final String INN_IND_MEANING = "Первые 2 символа: (0-9; 1-9 / 1-9; 0-9). Следующие 10 символов: (0-9)";
-    public static final String KPP_PATTERN = "([0-9]{1}[1-9]{1}|[1-9]{1}[0-9]{1})([0-9]{2})([0-9A-Z]{2})([0-9]{3})";
-    public static final String KPP_MEANING = "Первые 2 символа: (0-9; 1-9 / 1-9; 0-9). Следующие 2 символа: (0-9). Следующие 2 символа: (0-9 / A-Z). Последние 3 символа: (0-9)";
-    public static final String TAX_ORGAN_PATTERN = "[0-9]{4}";
-    public static final String TAX_ORGAN_MEANING = "Все 4 символа: (0-9)";
-    public static final String OKATO_PATTERN = "[0-9]{11}";
-    public static final String OKTMO_PATTERN = "[0-9]{11}|[0-9]{8}";
-    public static final String CODE_TS_PATTERN = "[0-9]{3}([0-9]{2}|[?]{2})";
+    public static String INN_JUR_PATTERN = "([0-9]{1}[1-9]{1}|[1-9]{1}[0-9]{1})[0-9]{8}";
+    public static String INN_JUR_MEANING = "Первые 2 символа: (0-9; 1-9 / 1-9; 0-9). Следующие 8 символов: (0-9)";
+    public static String INN_IND_PATTERN = "([0-9]{1}[1-9]{1}|[1-9]{1}[0-9]{1})[0-9]{10}";
+    public static String INN_IND_MEANING = "Первые 2 символа: (0-9; 1-9 / 1-9; 0-9). Следующие 10 символов: (0-9)";
+    public static String KPP_PATTERN = "([0-9]{1}[1-9]{1}|[1-9]{1}[0-9]{1})([0-9]{2})([0-9A-Z]{2})([0-9]{3})";
+    public static String KPP_MEANING = "Первые 2 символа: (0-9; 1-9 / 1-9; 0-9). Следующие 2 символа: (0-9). Следующие 2 символа: (0-9 / A-Z). Последние 3 символа: (0-9)";
+    public static String TAX_ORGAN_PATTERN = "[0-9]{4}";
+    public static String TAX_ORGAN_MEANING = "Все 4 символа: (0-9)";
+    public static String OKATO_PATTERN = "[0-9]{11}";
+    public static String OKTMO_PATTERN = "[0-9]{11}|[0-9]{8}";
+    public static String CODE_TS_PATTERN = "[0-9]{3}([0-9]{2}|[?]{2})";
 
     public static List<String> checkFillRequiredRefBookAtributes(List<RefBookAttribute> attributes, Map<String, RefBookValue> record) {
         List<String> errors = new ArrayList<String>();

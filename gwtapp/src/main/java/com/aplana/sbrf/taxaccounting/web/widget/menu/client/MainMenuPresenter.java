@@ -2,8 +2,11 @@ package com.aplana.sbrf.taxaccounting.web.widget.menu.client;
 
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
-import com.aplana.sbrf.taxaccounting.web.widget.menu.shared.GetMainMenuAction;
-import com.aplana.sbrf.taxaccounting.web.widget.menu.shared.GetMainMenuResult;
+import com.aplana.sbrf.taxaccounting.web.widget.menu.client.notificationswindow.DialogPresenter;
+import com.aplana.sbrf.taxaccounting.web.widget.menu.shared.*;
+import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.user.client.Timer;
+import com.google.gwt.user.client.ui.MenuBar;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.dispatch.shared.DispatchAsync;

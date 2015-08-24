@@ -84,6 +84,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     public static final String NOT_HIERARCHICAL_REF_BOOK_ERROR = "Справочник \"%s\" (id=%d) не является иерархичным";
 
     private static final String DELETE_VERSION = "delete from %s where %s";
+	private static final String UNIQUE_ATTRIBUTES_ALIAS = "uniqueAttributes";
 	private static final String STRING_VALUE_COLUMN_ALIAS = "string_value";
 	private static final String NUMBER_VALUE_COLUMN_ALIAS = "number_value";
 	private static final String DATE_VALUE_COLUMN_ALIAS = "date_value";

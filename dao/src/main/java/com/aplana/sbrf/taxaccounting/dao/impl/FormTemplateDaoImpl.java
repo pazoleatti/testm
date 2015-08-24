@@ -30,6 +30,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -48,6 +49,8 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
 
     @Autowired
     private ReportPeriodDao reportPeriodDao;
+
+    private static final SimpleDateFormat SDF = new SimpleDateFormat("dd.MM.yyyy");
 
 	private final XmlSerializationUtils xmlSerializationUtils = XmlSerializationUtils.getInstance();
 
@@ -111,12 +114,13 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
 		}
 	}
 
-    /*private static final String FORM_DATA_COLUMNS_DELETE = "alter table form_data_%d drop (%s)";
-    private static final String FORM_DATA_COLUMNS_ADD = "alter table FORM_DATA_%d add (%s)";
-    private static final String FORM_DATA_COLUMNS_UPDATE = "alter table FORM_DATA_%d modify (%s)";
-    private static final String FORM_DATA_COLUMNS_COMMENT = "comment on column form_data_%d.c%d is '%s'"; */
+
+    private static String FORM_DATA_COLUMNS_DELETE = "alter table form_data_%d drop (%s)";
+    private static String FORM_DATA_COLUMNS_ADD = "alter table FORM_DATA_%d add (%s)";
+    private static String FORM_DATA_COLUMNS_UPDATE = "alter table FORM_DATA_%d modify (%s)";
+    private static String FORM_DATA_COLUMNS_COMMENT = "comment on column form_data_%d.c%d is '%s'";
 	/**
-	 * Кэш инвалидируется перед вызовом. Т.е. несмотря на результат выполнения, кэш будет сброшен.
+	 * Кэш инфалидируется перед вызовом. Т.е. несмотря на результат выполнения, кэш будет сброшен.
 	 * Иначе, если версии не совпадают кэш продолжает возвращать старую версию.
 	 */
     //@Caching(evict = {@CacheEvict(value = CacheConstants.FORM_TEMPLATE, key = "#formTemplate.id", beforeInvocation = true),
