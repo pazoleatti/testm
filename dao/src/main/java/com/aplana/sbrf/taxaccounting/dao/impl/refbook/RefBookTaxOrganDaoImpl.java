@@ -96,7 +96,7 @@ public class RefBookTaxOrganDaoImpl extends AbstractDao implements RefBookTaxOrg
         RefBook refBook = refBookDao.get(REF_BOOK_ID_200);
         PreparedStatementData ps = new PreparedStatementData();
 
-        String sql = String.format(SQL_FOR_RECORD, getRefBookSelect(REF_BOOK_ID_200), refBookNameMapping.get(refBookId), recordId);
+        String sql = String.format(SQL_FOR_RECORD, getRefBookSelect(REF_BOOK_ID_200), refBookNameMapping.get(refBookId));
         ps.appendQuery(sql);
         ps.addParam(recordId);
 

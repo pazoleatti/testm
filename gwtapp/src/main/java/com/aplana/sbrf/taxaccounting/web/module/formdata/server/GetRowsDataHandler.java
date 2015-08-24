@@ -76,7 +76,7 @@ public class GetRowsDataHandler extends
             // Порция строк, режим отображения различий для корр. периода также как и режим редактирования работат со
             // временным срезом
             PagingResult<DataRow<Cell>> rows = dataRowService.getDataRows(action.getFormDataId(), dataRowRange,
-                    action.isReadOnly() && !action.isCorrectionDiff(), action.isManual());
+                    !action.isCorrectionDiff(), action.isManual());
 
             Collections.sort(rows, new Comparator<DataRow<Cell>>() {
                 @Override

@@ -120,7 +120,7 @@ public class DataRowHelperImpl implements DataRowHelper, ScriptComponentContextH
 	@Override
 	public void delete(List<DataRow<Cell>> dataRows) {
 		dataRowDao.removeRows(fd, dataRows);
-        getAllCached().remove(dataRows);
+        getAllCached().removeAll(dataRows);
 	}
 
 	@Override

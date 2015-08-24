@@ -213,13 +213,9 @@ public class LockListView extends ViewWithUiHandlers<LockListUiHandlers> impleme
     private void updateButtonsStatuses(){
         boolean selected = !selectionModel.getSelectedSet().isEmpty();
         boolean hasNoOwnLocks = false;
-        boolean hasNoAsyncLocks = false;
         for (LockDataItem item : selectionModel.getSelectedSet()) {
             if (currentUserId != item.getUserId()) {
                 hasNoOwnLocks = true;
-            }
-            if (item.getQueue() == null || item.getQueue().isEmpty()) {
-                hasNoAsyncLocks = true;
             }
         }
         boolean status = selected && (hasRoleAdmin || !hasNoOwnLocks);

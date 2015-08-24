@@ -594,7 +594,7 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
         return sb.toString().substring(0, sb.length() - 1);
     }
 
-    private static String COLUMN_PATTERN_UPDATED = "c%d %s,";
+    /*private static String COLUMN_PATTERN_UPDATED = "c%d %s,";
     private static String transformToCommaUpdated(Collection<Long> columns, FormTemplate ft){
         StringBuilder sb = new StringBuilder();
         for (Long colId : columns){
@@ -621,7 +621,7 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
         }
 
         return sb.toString().substring(0, sb.length()-1);
-    }
+    }*/
 
     private static final String CLEAR_COLS = "c%s%s = null,";
     private static <T extends Number> String transformForCleanColumns(Collection<T> columns, String prefix){
@@ -634,7 +634,7 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
     }
 
     //Пока еще не используем, просто блокируем столбцы
-    private void modifyTables(FormTemplate formTemplate, final Map<ColumnKeyEnum, Collection<Long>> columns){
+    /*private void modifyTables(FormTemplate formTemplate, final Map<ColumnKeyEnum, Collection<Long>> columns){
         //Получаем макет ради колонок, чтобы потом сравнить тип
         FormTemplate dbT = getJdbcTemplate().queryForObject(
                 "select id, type_id, data_rows, fixed_rows, name, fullname, script, data_headers, version, status, monthly, header, COMPARATIVE " +
@@ -644,7 +644,7 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
                 new FormTemplateMapper()
         );
 
-        /*if (columns.get(ColumnDao.KEYS.DELETED) != null){
+        *//*if (columns.get(ColumnDao.KEYS.DELETED) != null){
             String sqlColumnForDrop =
                     String.format(FORM_DATA_COLUMNS_DELETE, formTemplate.getId(), transformToCommaDeleted(columns.get(ColumnDao.KEYS.DELETED)));
             getJdbcTemplate().execute(sqlColumnForDrop);
@@ -654,13 +654,13 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
                             formTemplate.getId()
                     )
             );
-        }*/
+        }*//*
 
         if (columns.get(ColumnKeyEnum.ADDED) !=null){
             String sqlColumnForAdd =
                     String.format(FORM_DATA_COLUMNS_ADD, formTemplate.getId(), transformToCommaAdded(columns.get(ColumnKeyEnum.ADDED), formTemplate));
             getJdbcTemplate().execute(sqlColumnForAdd);
-            /*for (Long aLong : columns.get(ColumnDao.KEYS.ADDED)){
+            *//*for (Long aLong : columns.get(ColumnDao.KEYS.ADDED)){
                 Column column = formTemplate.getColumn(aLong.intValue());
                 getJdbcTemplate().execute(
                         String.format(FORM_DATA_COLUMNS_COMMENT,
@@ -668,7 +668,7 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
                                 aLong,
                                 column.getAlias() + "-" + column.getName())
                 );
-            }*/
+            }*//*
             logger.info(
                     String.format(
                             "Added columns in table FORM_DATA_%d",
@@ -714,7 +714,7 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
                 );
             }
         }
-    }
+    }*/
 
 	@Override
 	public boolean checkExistLargeString(Integer formTemplateId, Integer columnId, int maxLength) {
@@ -763,7 +763,7 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
     }
 
     //@Override
-    public void modifyAdd(FormTemplate formTemplate, Map<ColumnKeyEnum, Collection<Long>> columns) {
+    /*public void modifyAdd(FormTemplate formTemplate, Map<ColumnKeyEnum, Collection<Long>> columns) {
         if (columns.get(ColumnKeyEnum.ADDED) !=null){
             String sqlColumnForAdd =
                     String.format(FORM_DATA_COLUMNS_ADD, formTemplate.getId(), transformToCommaAdded(columns.get(ColumnKeyEnum.ADDED), formTemplate));
@@ -784,5 +784,5 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
                     )
             );
         }
-    }
+    }*/
 }

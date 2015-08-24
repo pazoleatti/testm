@@ -95,7 +95,7 @@ public class Range implements Serializable {
 		int colFrom = getColumnIndex(formData, getColFromAlias());
 		int colTo = getColumnIndex(formData, getColToAlias());
 		if (rowTo >= dataRows.size())
-			throw new IndexOutOfBoundsException(String.format(WRONG_ROW_RANGE, rowFrom, rowTo, dataRows.size()));
+			throw new IndexOutOfBoundsException(String.format(WRONG_ROW_RANGE, rowFrom, rowTo));
 		return new Rect(colFrom, rowFrom, colTo, rowTo);
 	}
 
