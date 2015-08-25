@@ -255,6 +255,7 @@ void calcValues(def dataRows, def sourceRows) {
 }
 
 def getSourceValue(def periodId, def row, def alias, def isCalc) {
+    def sum = BigDecimal.ZERO
     if (periodId != null) {
         def reportPeriod = getReportPeriod(periodId)
         int startOrder = formData.accruing ? reportPeriod.order : 1
@@ -266,14 +267,14 @@ def getSourceValue(def periodId, def row, def alias, def isCalc) {
                 sourceForm = getSourceForm(FormDataKind.PRIMARY, period.id)
             }
             if (sourceForm != null) {
-                return sourceForm?.allSaved?.get(0)?.sum ?: 0
+                sum += (sourceForm?.allSaved?.get(0)?.sum ?: 0)
             } else if (!isCalc) { // выводим в logicCheck
                 logger.warn("Не найдена форма-источник «Величины налоговых платежей, вводимые вручную» в статусе «Принята»: Тип: \"%s/%s\", Период: \"%s %s\", Подразделение: \"%s\". Ячейки по графе «%s», заполняемые из данной формы, будут заполнены нулевым значением.",
                         FormDataKind.CONSOLIDATED.name, FormDataKind.PRIMARY.name, period.getName(), period.getTaxPeriod().getYear(), departmentService.get(formData.departmentId)?.name, getColumnName(row, alias))
             }
         }
     }
-    return 0
+    return sum
 }
 
 def getSourceForm(def formDataKind, def periodId) {
