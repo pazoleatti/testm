@@ -129,7 +129,7 @@ void preCalcCheck() {
     ['comparePeriod': getComparativePeriodId(), 'currentPeriod':formData.reportPeriodId].each { key, value ->
         if (value != null) {
             def reportPeriod = getReportPeriod(value)
-            if (formData.accruing && reportPeriod.order != 1) {
+            if (!formData.accruing && reportPeriod.order != 1) {
                 def prevPeriodId = value ? getPrevReportPeriod(value)?.id : null
                 checkOpuCodes(key, prevPeriodId, opuCodes, tmpRow)
             }
@@ -292,7 +292,7 @@ def calcBO(def rowSource, def periodId) {
         boolean isCorrect = pair[1]
         periodSum = isCorrect ? pair[0] : 0
         def reportPeriod = getReportPeriod(periodId)
-        if (formData.accruing && reportPeriod.order != 1 && isCorrect) {
+        if (!formData.accruing && reportPeriod.order != 1 && isCorrect) {
             def prevPeriodId = getPrevReportPeriod(periodId)?.id
             pair = get102Sum(rowSource, prevPeriodId)
             isCorrect = pair[1]
