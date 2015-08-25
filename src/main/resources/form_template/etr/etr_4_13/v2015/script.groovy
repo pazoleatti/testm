@@ -81,7 +81,7 @@ def nonEmptyColumnsIandII = ['comparePeriod', 'currentPeriod', 'deltaRub', 'delt
 // мапа с кодами ОПУ для каждой строки (алиас строки -> список кодов ОПУ)
 @Field
 def opuMap = [
-        'I'    : ['16301', '16302', '16303', '16304', '16305', '16306', '27101', '27102', '27103', '27201', '27202', '27203', '27301', '27302', '27303', '27304', '27305', '27306', '27307', '27308', '27309', '27101', '27102', '27103', '27201', '27202', '27203', '27301', '27302', '27303', '27304', '27305', '27306', '27307', '27308', '27309'],
+        'I'    : ['16301', '16302', '16303', '16304', '16305', '16306', '27101', '27102', '27103', '27201', '27202', '27203', '27301', '27302', '27303', '27304', '27305', '27306', '27307', '27308', '27309'],
         'I.I'  : ['16305.02', '17201.97', '17202.07', '17202.08', '17202.09', '17202.97', '17202.99', '17203.02', '17203.03', '17203.06', '17203.09', '17203.11', '17203.13', '17203.14', '17203.97', '17306.19', '17306.20', '17306.99', '17307'],
         'II'   : ['25301', '25302', '25303', '26101', '26102', '26103', '26104', '26201', '26202', '26203', '26204', '26301', '26302', '26303', '26304', '26305', '26306', '26307', '26401', '26402', '26403', '26404', '26405', '26406', '26407', '26408', '26409', '26410', '26411', '26412', '27101', '27102', '27103', '27201', '27202', '27203', '27301', '27302', '27303', '27304', '27305', '27306', '27307', '27308', '27309'],
         '1'    : ['26101.04', '26101.07', '26101.12', '26101.13', '26101.99', '26401.04', '27203.08', '26410.12'],
@@ -173,7 +173,7 @@ void preCalcCheck() {
     [ 'comparePeriod' : getComparativePeriodId(), 'currentPeriod' : formData.reportPeriodId ].each { columnAlias, reportPeriodId ->
         if (reportPeriodId != null) {
             def reportPeriod = getReportPeriod(reportPeriodId)
-            if (formData.accruing && reportPeriod.order != 1) {
+            if (!formData.accruing && reportPeriod.order != 1) {
                 def prevPeriodId = reportPeriodId ? getPrevReportPeriod(reportPeriodId)?.id : null
                 checkOpuCodes(columnAlias, prevPeriodId, opuCodes, tmpRow)
             }
@@ -421,7 +421,7 @@ def calcBO(def rowSource, def periodId) {
         boolean isCorrect = pair[1]
         periodSum = isCorrect ? pair[0] : 0
         def reportPeriod = getReportPeriod(periodId)
-        if (formData.accruing && reportPeriod.order != 1 && isCorrect) {
+        if (!formData.accruing && reportPeriod.order != 1 && isCorrect) {
             def prevPeriodId = getPrevReportPeriod(periodId)?.id
             pair = get102Sum(rowSource, prevPeriodId)
             isCorrect = pair[1]
