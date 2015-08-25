@@ -339,7 +339,7 @@ class Main {
         // Построение отчета сравнения Git и БД
         // checkOnly, true — только сравнение, false — сравнение и обновление Git → БД
         try {
-            GitReport.updateScripts(GitReport.getDBVersions(sql), sql, true)
+            GitReport.updateScripts(GitReport.getDBVersions(sql), sql, false)
             GitReport.updateDeclarationScripts(GitReport.getDeclarationDBVersions(sql), sql, true)
             GitReport.checkRefBooks(GitReport.getRefBookScripts(sql))
         } finally {

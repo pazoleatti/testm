@@ -274,13 +274,13 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         declarationDataScriptingService.executeScript(userInfo, dd, FormDataEvent.CHECK, logger, null);
         validateDeclaration(userInfo, dd, logger, true, FormDataEvent.CHECK, lockStateLogger);
         // Проверяем ошибки при пересчете
-        /*if (logger.containsLevel(LogLevel.ERROR)) {
+        if (logger.containsLevel(LogLevel.ERROR)) {
             throw new ServiceLoggerException(
                     "Найдены ошибки при выполнении проверки декларации",
                     logEntryService.save(logger.getEntries()));
         } else {
             logger.info("Проверка завершена, ошибок не обнаружено");
-        }*/
+        }
     }
 
     @Override
