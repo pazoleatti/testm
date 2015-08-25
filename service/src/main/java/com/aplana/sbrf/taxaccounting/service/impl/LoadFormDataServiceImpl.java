@@ -109,10 +109,9 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
             for (Object departmentIdObj : CollectionUtils.intersection(departmentIdList, tbList)) {
                 int departmentId = (Integer) departmentIdObj;
                 try {
-                    fileList.addAll(getFormDataTBFiles(userInfo, ConfigurationParam.FORM_UPLOAD_DIRECTORY, departmentId,
-                            loadedFileNameList, logger, ""));
+                    getFormDataTBFiles(fileList, userInfo, ConfigurationParam.FORM_UPLOAD_DIRECTORY, departmentId,
+                            loadedFileNameList, logger, "");
                 } catch (Exception e) {
-                    e.printStackTrace();
                 }
             }
         }
@@ -437,27 +436,26 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
         return new ImportCounter(success, fail + wrongImportCounter.getFailCounter());
     }
 
-    private List<TransportFileInfo> getFormDataTBFiles(TAUserInfo userInfo, ConfigurationParam param, Integer departmentId,
+    private void getFormDataTBFiles(List<TransportFileInfo> fileList, TAUserInfo userInfo, ConfigurationParam param, Integer departmentId,
                                                List<String> loadedFileNameList, Logger logger, String lockId) {
-        List<TransportFileInfo> fileList = new ArrayList<TransportFileInfo>();
         String path = getUploadPath(userInfo, param, departmentId, logger, lockId);
         if (path == null) {
             // Ошибка получения пути
-            return fileList;
+            return;
         }
 
         // Проверка каталогов, указанных в параметрах "Путь к каталогу загрузки", "Путь к каталогу архива" и "Путь к каталогу ошибок" для ТБ, на наличие доступа
         String archivePath = getFormDataArchivePath(userInfo, departmentId, logger, lockId);
         String errorPath = getFormDataErrorPath(userInfo, departmentId, logger, lockId);
         if (!checkPath(path) || !checkPath(archivePath) || !checkPath(errorPath)) {
-            return fileList;
+            return;
         }
 
 
         // Если изначально нет подходящих файлов то выдаем отдельную ошибку
         List<String> workFilesList = getWorkTransportFiles(userInfo, path, new HashSet<String>(), loadedFileNameList, logger, new ImportCounter(), lockId);
         if (workFilesList.isEmpty()) {
-            return fileList;
+            return;
         }
 
         // Обработка всех подходящих файлов, с получением списка на каждой итерации
@@ -465,8 +463,6 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
             FileWrapper currentFile = ResourceUtils.getSharedResource(path + "/" + fileName);
             fileList.add(new TransportFileInfo(currentFile.getName(), path, currentFile.length() / 1024));
         }
-
-        return fileList;
     }
 
     private boolean checkPath(String path) {
