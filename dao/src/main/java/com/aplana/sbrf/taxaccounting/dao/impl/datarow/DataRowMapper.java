@@ -5,8 +5,6 @@ import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.datarow.DataRowRange;
 import com.aplana.sbrf.taxaccounting.model.util.FormDataUtils;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.jdbc.core.RowMapper;
 
 import java.math.BigDecimal;
@@ -16,21 +14,17 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static com.aplana.sbrf.taxaccounting.dao.impl.datarow.DataRowDaoImplUtils.getCellValueExtractor;
-
 /**
  * @author sgoryachkin
  *
- *         <a>http://conf.aplana.com/pages/viewpage.action?pageId=9588773&
- *         focusedCommentId=9591393#comment-9591393</a>
  */
 class DataRowMapper implements RowMapper<DataRow<Cell>> {
 
 	//private static final Log log = LogFactory.getLog(DataRowMapper.class);
 
-			/**
-			 * Признак участия фиксированной строки в автонумерации
-			 */
+	/**
+	 * Признак участия фиксированной строки в автонумерации
+	 */
 	public final static String ALIASED_WITH_AUTO_NUMERATION_AFFIX = "{wan}";
 
 	private FormData formData;
@@ -94,6 +88,11 @@ class DataRowMapper implements RowMapper<DataRow<Cell>> {
 		}
 	}
 
+	/**
+	 * Формирует список названий столбцов таблицы как они хранятся в бд
+	 * @param formData
+	 * @return
+	 */
 	static Map<Integer, String[]> getColumnNames(FormData formData) {
 		Map<Integer, String[]> columnNames = new HashMap<Integer, String[]>();
 		for (Column column : formData.getFormColumns()){
@@ -125,8 +124,7 @@ class DataRowMapper implements RowMapper<DataRow<Cell>> {
 					cell.setValue(numeration, rowNum);
 				}
 			} else {
-				DataRowDaoImplUtils.CellValueExtractor extr = getCellValueExtractor(cell.getColumn());
-				cell.setValue(extr.getValue(rs, String.format("c%s", columnId)), rowNum);
+				cell.setValue(getCellValue(cell.getColumn(), rs, String.format("c%s", columnId)), rowNum);
 			}
 			// Styles
 			BigDecimal styleId = rs.getBigDecimal(String.format("c%s_style_id", columnId));
@@ -143,5 +141,24 @@ class DataRowMapper implements RowMapper<DataRow<Cell>> {
 		dataRow.setId(SqlUtils.getLong(rs, "id"));
 		dataRow.setIndex(SqlUtils.getInteger(rs,"ord"));
 		return dataRow;
+	}
+
+	/**
+	 * Извлекает значение ячейки в зависимости от её типа
+	 * @param column
+	 * @param rs
+	 * @param columnLabel
+	 * @return
+	 * @throws SQLException
+	 */
+	private Object getCellValue(Column column, ResultSet rs, String columnLabel) throws SQLException {
+		switch (column.getColumnType()) {
+			case STRING:
+				return rs.getString(columnLabel);
+			case DATE:
+				return rs.getDate(columnLabel);
+			default:
+				return rs.getBigDecimal(columnLabel);
+		}
 	}
 }
