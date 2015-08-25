@@ -258,7 +258,8 @@ def getSourceValue(def periodId, def row, def alias, def isCalc) {
     def sum = BigDecimal.ZERO
     if (periodId != null) {
         def reportPeriod = getReportPeriod(periodId)
-        int startOrder = formData.accruing ? reportPeriod.order : 1
+        // если нарастающий итог, то собираем формы с начала года
+        int startOrder = formData.accruing ? 1 : reportPeriod.order
         def periods = reportPeriodService.listByTaxPeriod(reportPeriod.taxPeriod.id).findAll{ it.order <= reportPeriod.order && it.order >= startOrder}
         periods.each { period ->
             // берем консолидированную, если ее нет, то берем первичную (подразумевается, что форма одна, в 0.8 исправить на множество источников)
