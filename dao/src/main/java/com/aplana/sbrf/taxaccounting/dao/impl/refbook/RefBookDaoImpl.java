@@ -7,14 +7,7 @@ import com.aplana.sbrf.taxaccounting.dao.impl.refbook.filter.UniversalFilterTree
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.dao.mapper.RefBookValueMapper;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
-import com.aplana.sbrf.taxaccounting.model.FormDataKind;
-import com.aplana.sbrf.taxaccounting.model.Formats;
-import com.aplana.sbrf.taxaccounting.model.PagingParams;
-import com.aplana.sbrf.taxaccounting.model.PagingResult;
-import com.aplana.sbrf.taxaccounting.model.PreparedStatementData;
-import com.aplana.sbrf.taxaccounting.model.RefBookTableRef;
-import com.aplana.sbrf.taxaccounting.model.TaxTypeCase;
-import com.aplana.sbrf.taxaccounting.model.VersionedObjectStatus;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
@@ -89,7 +82,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 	private static final String DATE_VALUE_COLUMN_ALIAS = "date_value";
 	private static final String REFERENCE_VALUE_COLUMN_ALIAS = "reference_value";
 
-    private static final String FORM_LINK_MSG = "Существует экземпляр налоговой формы, который содержит ссылку на запись! Тип: \"%s\", Вид: \"%s\", Подразделение: \"%s\", Период: \"%s\"%s%s%s%s.";
+    private static final String FORM_LINK_MSG = "Существует экземпляр %sформы, который содержит ссылку на запись! Тип: \"%s\", Вид: \"%s\", Подразделение: \"%s\", Период: \"%s\"%s%s%s%s.";
     private static final String REF_BOOK_LINK_MSG = "Существует ссылка на запись справочника. Справочник \"%s\", запись: \"%s\"%s.";
 
 	@Autowired
@@ -1815,7 +1808,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             "  join form_data_ref_book fdrf on fdrf.form_data_id = fd.id \n" +
             "  where %s\n" +
             ")" +
-            "select distinct f.kind as formKind, t.name as formType, d.path as departmentPath, d.type as departmentType, rp.name as reportPeriodName, tp.year as year, f.period_order as month, f.correctionDate as correctionDate from forms f \n" +
+            "select distinct t.tax_type, f.kind as formKind, t.name as formType, d.path as departmentPath, d.type as departmentType, rp.name as reportPeriodName, tp.year as year, f.period_order as month, f.correctionDate as correctionDate from forms f \n" +
             "join (select d.id, d.type, substr(sys_connect_by_path(name,'/'), 2) as path \n" +
             "\t\tfrom department d \n" +
             "\t\twhere d.id in (select department_id from forms) \n" +
@@ -1890,6 +1883,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
                     Date correctionDate = rs.getDate("correctionDate");
                     return String.format(
                             FORM_LINK_MSG,
+                            rs.getString("tax_type").charAt(0) == TaxType.ETR.getCode() ? " " : "налоговой ",
                             FormDataKind.fromId(SqlUtils.getInteger(rs, "formKind")).getTitle(),
                             rs.getString("formType"),
                             (SqlUtils.getInteger(rs, "departmentType") != 1) ?

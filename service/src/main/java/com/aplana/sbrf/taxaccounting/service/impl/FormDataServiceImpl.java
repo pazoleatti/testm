@@ -546,6 +546,9 @@ public class FormDataServiceImpl implements FormDataService {
                         logger.info("Консолидация выполнена из всех форм-источников");
                     }
                 }
+                if (logger.containsLevel(LogLevel.ERROR)){
+                    throw new ServiceLoggerException("", logEntryService.save(logger.getEntries()));
+                }
 
 				logger.info("Проверка завершена, фатальных ошибок не обнаружено");
 				return null;

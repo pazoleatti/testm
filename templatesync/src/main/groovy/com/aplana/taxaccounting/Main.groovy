@@ -20,6 +20,9 @@ class Main {
     def static DB_URL = 'jdbc:oracle:thin:@//172.16.127.16:1521/ORCL.APLANA.LOCAL'
     def static DB_USER = 'TAX_0_7'
     def static DB_PASSWORD = 'TAX'
+    // checkOnly, true — только сравнение, false — сравнение и обновление Git → БД
+    def static checkOnlyFD = true // для налоговых форм
+    def static checkOnlyDD = true // для деклараций
 
     // Схема для сравнения макетов, null если сравнение не требуется
     def static DB_USER_COMPARE = null
@@ -337,10 +340,13 @@ class Main {
         def sql = Sql.newInstance(DB_URL, DB_USER, DB_PASSWORD, "oracle.jdbc.OracleDriver")
 
         // Построение отчета сравнения Git и БД
-        // checkOnly, true — только сравнение, false — сравнение и обновление Git → БД
         try {
-            GitReport.updateScripts(GitReport.getDBVersions(sql), sql, false)
-            GitReport.updateDeclarationScripts(GitReport.getDeclarationDBVersions(sql), sql, true)
+            if ((DB_USER.contains("NEXT") || DB_USER.contains("PSI")) && (!checkOnlyFD || !checkOnlyDD)) {
+                println("На стендах NEXT и PSI ручное/автоматическое обновление скриптов запрещено! Будет произведено только сравнение.")
+                println("Manual/automatic scripts update forbidden on NEXT and PSI stands! Only comparison will be done.")
+            }
+            GitReport.updateScripts(GitReport.getDBVersions(sql), sql, DB_USER.contains("NEXT") || DB_USER.contains("PSI") || checkOnlyFD)
+            GitReport.updateDeclarationScripts(GitReport.getDeclarationDBVersions(sql), sql, DB_USER.contains("NEXT") || DB_USER.contains("PSI") || checkOnlyDD)
             GitReport.checkRefBooks(GitReport.getRefBookScripts(sql))
         } finally {
             sql.close()

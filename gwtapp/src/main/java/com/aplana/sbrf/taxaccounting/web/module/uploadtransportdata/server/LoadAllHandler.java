@@ -55,7 +55,7 @@ public class LoadAllHandler extends AbstractActionHandler<LoadAllAction, LoadAll
     @Autowired
     private AsyncTaskTypeDao asyncTaskTypeDao;
 
-    static final public String TASK_NAME = "Импорт транспортного файла из каталога загрузки";
+    static final private ReportType reportType = ReportType.LOAD_ALL_TF;
 
     public LoadAllHandler() {
         super(LoadAllAction.class);
@@ -76,7 +76,7 @@ public class LoadAllHandler extends AbstractActionHandler<LoadAllAction, LoadAll
             files.addAll(loadFormDataService.getFormDataFiles(userInfo, loadFormDataService.getTB(userInfo, localLogger), null, localLogger));
             if (files.isEmpty()) {
                 logger.error("Нет файлов для обработки");
-                throw new ServiceLoggerException("Выполнение операции \"%s\" невозможно, т.к. нет файлов для обработки!", logEntryService.save(logger.getEntries()), TASK_NAME);
+                throw new ServiceLoggerException("Выполнение операции \"%s\" невозможно, т.к. нет файлов для обработки!", logEntryService.save(logger.getEntries()), reportType.getDescription());
             }
 
             AsyncTaskTypeData taskTypeData = asyncTaskTypeDao.get(ReportType.LOAD_ALL_TF.getAsyncTaskTypeId(true));
@@ -95,13 +95,13 @@ public class LoadAllHandler extends AbstractActionHandler<LoadAllAction, LoadAll
                 }
                 if (skip == files.size()) {
                     logger.error("Критерии возможности выполнения задач задаются в конфигурационных параметрах (параметры асинхронных заданий). За разъяснениями обратитесь к Администратору");
-                    result.setDialogMsg(String.format("Выполнение операции \"%s\" невозможно, т.к. размер всех ТФ превышает максимально допустимый (%s Кбайт)!", TASK_NAME, taskTypeData.getTaskLimit()));
+                    result.setDialogMsg(String.format("Выполнение операции \"%s\" невозможно, т.к. размер всех ТФ превышает максимально допустимый (%s Кбайт)!", reportType.getDescription(), taskTypeData.getTaskLimit()));
                     result.setUuid(logEntryService.save(logger.getEntries()));
                     return result;
                 }
                 if (logger.containsLevel(LogLevel.ERROR)) {
                     logger.error("Критерии возможности выполнения задач задаются в конфигурационных параметрах (параметры асинхронных заданий). За разъяснениями обратитесь к Администратору");
-                    result.setDialogMsg(String.format("Выполнение операции \"%s\" для части ТФ невозможно, т.к. их размер превышает максимально допустимый (%s Кбайт). Продолжить?", TASK_NAME, taskTypeData.getTaskLimit()));
+                    result.setDialogMsg(String.format("Выполнение операции \"%s\" для части ТФ невозможно, т.к. их размер превышает максимально допустимый (%s Кбайт). Продолжить?", reportType.getDescription(), taskTypeData.getTaskLimit()));
                     result.setFileSizeLimit(true);
                     result.setUuid(logEntryService.save(logger.getEntries()));
                     return result;

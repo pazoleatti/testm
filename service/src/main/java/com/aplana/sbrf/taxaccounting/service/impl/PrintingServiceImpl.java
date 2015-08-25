@@ -78,7 +78,7 @@ public class PrintingServiceImpl implements PrintingService {
     private static final String REF_BOOK_VALUE_NAME = "CODE";
 
 	@Override
-	public String generateExcel(TAUserInfo userInfo, long formDataId, boolean manual, boolean isShowChecked, LockStateLogger stateLogger) {
+	public String generateExcel(TAUserInfo userInfo, long formDataId, boolean manual, boolean isShowChecked, boolean saved, LockStateLogger stateLogger) {
         String filePath = null;
         try {
             formDataAccessService.canRead(userInfo, formDataId);
@@ -100,7 +100,7 @@ public class PrintingServiceImpl implements PrintingService {
             data.setAcceptanceDate(logBusinessDao.getFormAcceptanceDate(formDataId));
             data.setCreationDate(logBusinessDao.getFormCreationDate(formDataId));
             data.setRpCompare(formData.getComparativPeriodId() != null ? departmentReportPeriodService.get(formData.getComparativPeriodId()).getReportPeriod() : null);
-            List<DataRow<Cell>> dataRows = dataRowDao.getRows(formData, null);
+            List<DataRow<Cell>> dataRows = (saved ? dataRowDao.getRows(formData, null) : dataRowDao.getTempRows(formData, null));
             Logger log = new Logger();
             refBookHelper.dataRowsDereference(log, dataRows, formTemplate.getColumns());
 
@@ -128,7 +128,7 @@ public class PrintingServiceImpl implements PrintingService {
 	}
 
     @Override
-    public String generateCSV(TAUserInfo userInfo, long formDataId, boolean manual, boolean isShowChecked, LockStateLogger stateLogger) {
+    public String generateCSV(TAUserInfo userInfo, long formDataId, boolean manual, boolean isShowChecked, boolean saved, LockStateLogger stateLogger) {
         String reportPath = null;
         try {
             formDataAccessService.canRead(userInfo, formDataId);
@@ -148,10 +148,9 @@ public class PrintingServiceImpl implements PrintingService {
             data.setFormTemplate(formTemplate);
             data.setAcceptanceDate(logBusinessDao.getFormAcceptanceDate(formDataId));
             data.setCreationDate(logBusinessDao.getFormCreationDate(formDataId));
-            List<DataRow<Cell>> dataRows = dataRowDao.getRows(formData, null);
+            List<DataRow<Cell>> dataRows = (saved ? dataRowDao.getRows(formData, null) : dataRowDao.getTempRows(formData, null));
             Logger log = new Logger();
             refBookHelper.dataRowsDereference(log, dataRows, formTemplate.getColumns());
-
 
             RefBookValue refBookValue = refBookFactory.getDataProvider(REF_BOOK_ID).
                     getRecordData(reportPeriod.getDictTaxPeriodId()).get(REF_BOOK_VALUE_NAME);
