@@ -404,7 +404,7 @@ def calc10(def row) {
 def calc11(def row, def propertyPriceSumm, def workersCountSumm) {
     BigDecimal temp = 0
     if (row.propertyPrice != null && row.workersCount != null && propertyPriceSumm > 0 && workersCountSumm > 0) {
-        temp = (row.propertyPrice / propertyPriceSumm * 100 + row.workersCount / workersCountSumm * 100) / 2
+        temp = (row.propertyPrice * 100 / propertyPriceSumm + row.workersCount * 100 / workersCountSumm) / 2
     }
     return roundValue(temp, 15).toString()
 }
@@ -473,7 +473,7 @@ def calc18_19 (def prevDataRows, def dataRows, def row, def reportPeriod) {
             def previousSum = prevDataRows?.sum { (it.getAlias() == null) ? (it.taxSum ?: 0) : 0 } ?: 0
             // остальные
             if (currentSum) {
-                tmp = (currentSum - previousSum) * (row.taxSum / currentSum)
+                tmp = (currentSum - previousSum) * row.taxSum / currentSum
             }
     }
     row.everyMontherPaymentAfterPeriod = tmp
