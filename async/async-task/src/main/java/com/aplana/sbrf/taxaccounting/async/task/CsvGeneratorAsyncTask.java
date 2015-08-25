@@ -76,7 +76,7 @@ public abstract class CsvGeneratorAsyncTask extends AbstractAsyncTask {
         final Date lockDate = (Date) params.get(LOCK_DATE.name());
 
         formDataAccessService.canRead(userInfo, formDataId);
-        String uuid = printingService.generateCSV(userInfo, formDataId, manual, isShowChecked, new LockStateLogger() {
+        String uuid = printingService.generateCSV(userInfo, formDataId, manual, isShowChecked, saved, new LockStateLogger() {
             @Override
             public void updateState(String state) {
                 lockService.updateState(lock, lockDate, state);
@@ -106,7 +106,7 @@ public abstract class CsvGeneratorAsyncTask extends AbstractAsyncTask {
         DepartmentReportPeriod rpCompare = formData.getComparativPeriodId() != null ?
                 departmentReportPeriodService.get(formData.getComparativPeriodId()) : null;
 
-        return MessageGenerator.getFDMsg(String.format(ERROR_FORM, getReportType()),
+        return MessageGenerator.getFDMsg(String.format(COMPLETE_FORM, getReportType()),
                 formData,
                 department.getName(),
                 manual, reportPeriod, rpCompare, isShowChecked);
