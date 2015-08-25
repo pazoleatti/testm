@@ -1641,7 +1641,7 @@ public final class ScriptUtils {
         }
     }
 
-    static class SheetHandler extends DefaultHandler {
+    static final class SheetHandler extends DefaultHandler {
         private SharedStringsTable sst;     // таблица со строковыми значениями (Shared Strings Table)
         private StylesTable stylesTable;    // таблица со стилями ячеек
         private List<List<String>> allValues;     // список для хранения списков значении каждой строки данных
