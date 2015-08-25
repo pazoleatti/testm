@@ -341,6 +341,10 @@ class Main {
 
         // Построение отчета сравнения Git и БД
         try {
+            if ((DB_USER.contains("NEXT") || DB_USER.contains("PSI")) && (!checkOnlyFD || !checkOnlyDD)) {
+                println("На стендах NEXT и PSI ручное/автоматическое обновление скриптов запрещено! Будет произведено только сравнение.")
+                println("Manual/automatic scripts update forbidden on NEXT and PSI stands! Only comparison will be done.")
+            }
             GitReport.updateScripts(GitReport.getDBVersions(sql), sql, DB_USER.contains("NEXT") || DB_USER.contains("PSI") || checkOnlyFD)
             GitReport.updateDeclarationScripts(GitReport.getDeclarationDBVersions(sql), sql, DB_USER.contains("NEXT") || DB_USER.contains("PSI") || checkOnlyDD)
             GitReport.checkRefBooks(GitReport.getRefBookScripts(sql))
