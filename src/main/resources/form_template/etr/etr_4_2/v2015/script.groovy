@@ -213,7 +213,7 @@ void logicCheck() {
 }
 
 void calcValues(def dataRows, def sourceRows) {
-    def isCalc = dataRows == sourceRows
+    def isCalc = dataRows == sourceRows && formDataEvent == FormDataEvent.CALCULATE
     // при консолидации не подтягиваем данные при расчете
     if (formDataEvent != FormDataEvent.COMPOSE) {
         for (def alias in opuMap.keySet()) {
@@ -269,7 +269,7 @@ def getSourceValue(def periodId, def row, def alias, def isCalc) {
             }
             if (sourceForm != null) {
                 sum += (sourceForm?.allSaved?.get(0)?.sum ?: 0)
-            } else if (!isCalc) { // выводим в logicCheck
+            } else if (isCalc) { // выводить только при расчете
                 logger.warn("Не найдена форма-источник «Величины налоговых платежей, вводимые вручную» в статусе «Принята»: Тип: \"%s/%s\", Период: \"%s %s\", Подразделение: \"%s\". Ячейки по графе «%s», заполняемые из данной формы, будут заполнены нулевым значением.",
                         FormDataKind.CONSOLIDATED.name, FormDataKind.PRIMARY.name, period.getName(), period.getTaxPeriod().getYear(), departmentService.get(formData.departmentId)?.name, getColumnName(row, alias))
             }

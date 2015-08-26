@@ -75,17 +75,18 @@ public class RefBookPickerFilterBuilder {
                 resultFilter.append("(" + regionFilter + ")");
             }
 
-            String resultSearch = refBookFactory.getSearchQueryStatement(searchPattern, refBook.getId());
+        }
 
-            if (resultFilter.length() > 0 && resultSearch != null && resultSearch.length() > 0) {
-                return "(" + resultFilter.toString() + ") and (" + resultSearch + ")";
-            } else if (resultFilter.length() > 0 && (resultSearch == null || resultSearch.length() == 0)) {
-                return resultFilter.toString();
-            } else if (resultSearch != null && resultSearch.length() > 0 && resultFilter.length() == 0) {
-                return resultSearch;
-            } else if ("".equals(filter)) {
-                return "";
-            }
+        String resultSearch = refBookFactory.getSearchQueryStatement(searchPattern, refBook.getId());
+
+        if (resultFilter.length() > 0 && resultSearch != null && resultSearch.length() > 0) {
+            return "(" + resultFilter.toString() + ") and (" + resultSearch + ")";
+        } else if (resultFilter.length() > 0 && (resultSearch == null || resultSearch.length() == 0)) {
+            return resultFilter.toString();
+        } else if (resultSearch != null && resultSearch.length() > 0 && resultFilter.length() == 0) {
+            return resultSearch;
+        } else if ("".equals(filter)) {
+            return "";
         }
         return null;
     }

@@ -79,10 +79,10 @@ def nonEmptyColumns = calcColumns
 
 @Field
 def opuMap = ['R2' : ['28101'],
-           'R4' : ['26411.01', '26411.02'],
-           'R5' : ['26411.03'],
-           'R6' : ['26102' ,'26410.09'],
-           'R7' : ['26411.12', '26411.13']]
+              'R4' : ['26411.01', '26411.02'],
+              'R5' : ['26411.03'],
+              'R6' : ['26102' ,'26410.09'],
+              'R7' : ['26411.12', '26411.13']]
 
 @Field
 def startDateMap = [:]
@@ -216,7 +216,7 @@ void logicCheck() {
 }
 
 void calcValues(def dataRows, def sourceRows) {
-    def isCalc = dataRows == sourceRows
+    def isCalc = dataRows == sourceRows && formDataEvent == FormDataEvent.CALCULATE
     // при консолидации не подтягиваем данные при расчете
     if (formDataEvent != FormDataEvent.COMPOSE) {
         for (def alias in opuMap.keySet()) {
@@ -251,7 +251,7 @@ void calcValues(def dataRows, def sourceRows) {
         row.deltaPercent = null
         if (rowSource.comparePeriod) {
             row.deltaPercent = ((rowSource.deltaRub ?: BigDecimal.ZERO) as BigDecimal) * 100 / rowSource.comparePeriod.doubleValue()
-        } else if (!isCalc) { // выводим в logicCheck
+        } else if (isCalc) { // выводить только при расчете
             rowError(logger, row, String.format("Строка %s: Графа «%s» не может быть заполнена. Выполнение расчета невозможно, так как в результате проверки получен нулевой знаменатель (деление на ноль невозможно)",
                     row.getIndex(), getColumnName(row, 'deltaPercent')))
         }
@@ -273,7 +273,7 @@ def getSourceValue(def periodId, def row, def alias, def isCalc) {
             }
             if (sourceForm != null) {
                 sum += (sourceForm?.allSaved?.get(0)?.sum ?: 0)
-            } else if (isCalc) {
+            } else if (isCalc) { // выводить только при расчете
                 logger.warn("Не найдена форма-источник «Величины налоговых платежей, вводимые вручную» в статусе «Принята»: Тип: \"%s/%s\", Период: \"%s %s\", Подразделение: \"%s\". Ячейки по графе «%s», заполняемые из данной формы, будут заполнены нулевым значением.",
                         FormDataKind.CONSOLIDATED.name, FormDataKind.PRIMARY.name, period.getName(), period.getTaxPeriod().getYear(), departmentService.get(formData.departmentId)?.name, getColumnName(row, alias))
             }
