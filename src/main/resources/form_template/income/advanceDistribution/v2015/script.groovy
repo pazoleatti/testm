@@ -1,6 +1,5 @@
 package form_template.income.advanceDistribution.v2015
 
-import com.aplana.sbrf.taxaccounting.model.FormData
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.FormDataKind
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
@@ -269,6 +268,12 @@ void calc() {
         calc18_19(prevDataRows, dataRows, row, reportPeriod)
     }
 
+    def isOldCalc = reportPeriod.taxPeriod.year < 2015 || (reportPeriod.taxPeriod.year == 2015 && reportPeriod.order < 3)
+
+    if (!isOldCalc) { // для ЦА досчитать 18-ую графу, используя итог по 18-й графе
+        fixCA18_19(prevDataRows, dataRows, findCA(dataRows), reportPeriod)
+    }
+
     // Сортировка
     // отсортировать можно только после расчета графы regionBank
     dataRows.sort { a, b ->
@@ -459,28 +464,55 @@ def calc14(def row) {
 
 def calc18_19 (def prevDataRows, def dataRows, def row, def reportPeriod) {
     def tmp
+    def isCA = row == findCA(dataRows)
+    // использовать старый расчет до сентября 2015
+    def isOldCalc = reportPeriod.taxPeriod.year < 2015 || (reportPeriod.taxPeriod.year == 2015 && reportPeriod.order < 3)
     // графа 18
     switch (reportPeriod.order) {
         case 1: //«графа 18» = «графа 14»
             tmp = row.taxSum
             break
         case 4:
-            tmp = null
-            break
-        default:
-            // (Сумма всех нефиксированных строк по «графе 14» - Сумма всех нефиксированных строк по «графе 14» из предыдущего периода) * («графа 14» / Сумма всех нефиксированных строк по «графе 14»)
-            def currentSum = dataRows?.sum { (it.getAlias() == null) ? (it.taxSum ?: 0) : 0 } ?: 0
-            def previousSum = prevDataRows?.sum { (it.getAlias() == null) ? (it.taxSum ?: 0) : 0 } ?: 0
-            // остальные
-            if (currentSum) {
-                tmp = (currentSum - previousSum) * row.taxSum / currentSum
+            if (!isCA || isOldCalc) { // использовать старый расчет до сентября 2015
+                tmp = null
+            } else {
+                tmp = calc18Parts(dataRows, prevDataRows, row)
             }
+            break
+        default: // для не ЦА расчет актуален, для ЦА требуется досчитать (в новом расчете)
+            tmp = calc18Parts(dataRows, prevDataRows, row)
     }
     row.everyMontherPaymentAfterPeriod = tmp
 
     // графа 19
     row.everyMonthForKvartalNextPeriod = ((reportPeriod.order == 3) ? row.everyMontherPaymentAfterPeriod : 0)
+}
 
+def calc18Parts(def dataRows, def prevDataRows, def row) {
+    // (Сумма всех нефиксированных строк по «графе 14» - Сумма всех нефиксированных строк по «графе 14» из предыдущего периода) * («графа 14» / Сумма всех нефиксированных строк по «графе 14»)
+    def currentSum = dataRows?.sum { (it.getAlias() == null) ? (it.taxSum ?: 0) : 0 } ?: 0
+    def previousSum = prevDataRows?.sum { (it.getAlias() == null) ? (it.taxSum ?: 0) : 0 } ?: 0
+    // остальные
+    if (currentSum) {
+        return (currentSum - previousSum) * row.taxSum / currentSum
+    }
+    return null
+}
+
+void fixCA18_19(def prevDataRows, def dataRows, def rowCA, def reportPeriod) {
+    def tmp = BigDecimal.ZERO
+    // «графа 18» = (Сумма всех нефиксированных строк по «графе 14» - Сумма всех нефиксированных строк по «графе 14» из предыдущего периода) * («графа 14» / Сумма всех нефиксированных строк по «графе 14»)
+    // + (значение итоговой строки «графы 18» - (значение итоговой строки «графы 14» текущего периода - значение итоговой строки графы «графа 14» предыдущего периода))
+    if (reportPeriod.order != 1) {
+        def current18Sum = dataRows?.sum { (it.getAlias() == null) ? (it.everyMontherPaymentAfterPeriod ?: 0) : 0 } ?: 0
+        def current14Sum = dataRows?.sum { (it.getAlias() == null) ? (it.taxSum ?: 0) : 0 } ?: 0
+        def previous14Sum = prevDataRows?.sum { (it.getAlias() == null) ? (it.taxSum ?: 0) : 0 } ?: 0
+        tmp = current18Sum - (current14Sum - previous14Sum)
+    }
+    rowCA.everyMontherPaymentAfterPeriod += tmp // добавляем к предыдущей сумме разницу
+
+    // графа 19
+    rowCA.everyMonthForKvartalNextPeriod = ((reportPeriod.order == 3) ? rowCA.everyMontherPaymentAfterPeriod : 0)
 }
 
 /**
