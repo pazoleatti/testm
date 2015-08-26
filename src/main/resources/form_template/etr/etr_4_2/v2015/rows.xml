@@ -11,7 +11,7 @@
   <row alias="R2">
     <cell alias="rowNum" colSpan="1" numericValue="2" rowSpan="1"/>
     <cell alias="taxName" colSpan="1" rowSpan="1" stringValue="Балансовая прибыль до налогов из прибыли"/>
-    <cell alias="symbol102" colSpan="1" rowSpan="1" stringValue="симв.01000"/>
+    <cell alias="symbol102" colSpan="1" rowSpan="1" stringValue="симв.01000-02000"/>
     <cell alias="comparePeriod" colSpan="1" rowSpan="1"/>
     <cell alias="currentPeriod" colSpan="1" rowSpan="1"/>
     <cell alias="deltaRub" colSpan="1" rowSpan="1"/>

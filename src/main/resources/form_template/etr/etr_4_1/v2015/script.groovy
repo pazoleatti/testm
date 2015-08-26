@@ -185,7 +185,7 @@ void checkOpuCodes(def alias, def periodId, def opuCodes, def tmpRow) {
 
 void calc() {
     def dataRows = formDataService.getDataRowHelper(formData).allCached
-    calcValues(dataRows, dataRows)
+    calcValues(dataRows, dataRows, true)
 }
 
 void logicCheck() {
@@ -197,7 +197,7 @@ void logicCheck() {
     def formTemplate = formDataService.getFormTemplate(formData.formType.id, formData.reportPeriodId)
     def tempRows = formTemplate.rows
     updateIndexes(tempRows)
-    calcValues(tempRows, dataRows)
+    calcValues(tempRows, dataRows, false)
     for(int i = 0; i < dataRows.size(); i++){
         def row = dataRows[i]
         def tempRow = tempRows[i]
@@ -215,8 +215,7 @@ void logicCheck() {
     }
 }
 
-void calcValues(def dataRows, def sourceRows) {
-    def isCalc = dataRows == sourceRows && formDataEvent == FormDataEvent.CALCULATE
+void calcValues(def dataRows, def sourceRows, boolean isCalc) {
     // при консолидации не подтягиваем данные при расчете
     if (formDataEvent != FormDataEvent.COMPOSE) {
         for (def alias in opuMap.keySet()) {
@@ -251,9 +250,12 @@ void calcValues(def dataRows, def sourceRows) {
         row.deltaPercent = null
         if (rowSource.comparePeriod) {
             row.deltaPercent = ((rowSource.deltaRub ?: BigDecimal.ZERO) as BigDecimal) * 100 / rowSource.comparePeriod.doubleValue()
-        } else if (isCalc) { // выводить только при расчете
-            rowError(logger, row, String.format("Строка %s: Графа «%s» не может быть заполнена. Выполнение расчета невозможно, так как в результате проверки получен нулевой знаменатель (деление на ноль невозможно)",
-                    row.getIndex(), getColumnName(row, 'deltaPercent')))
+        } else {
+            row.deltaPercent = 0
+            if (!isCalc) { // выводим при проверках и в проверках после расчета
+                rowWarning(logger, row, String.format("Строка %s: Графа «%s» не может быть заполнена. Выполнение расчета невозможно, так как в результате проверки получен нулевой знаменатель (деление на ноль невозможно). Ячейка будет заполнена значением «0».",
+                        row.getIndex(), getColumnName(row, 'deltaPercent')))
+            }
         }
     }
 }
