@@ -70,7 +70,7 @@ public class Etr41Test extends ScriptTestBase {
     @Test
     public void calcTest() {
         testHelper.execute(FormDataEvent.CALCULATE);
-        Assert.assertTrue(testHelper.getLogger().containsLevel(LogLevel.ERROR));
+        Assert.assertFalse(testHelper.getLogger().containsLevel(LogLevel.ERROR));
     }
 
     @Test
