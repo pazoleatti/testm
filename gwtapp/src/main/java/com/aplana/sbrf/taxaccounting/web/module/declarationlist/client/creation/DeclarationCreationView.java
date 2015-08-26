@@ -37,19 +37,14 @@ public class DeclarationCreationView extends PopupViewWithUiHandlers<Declaration
 
     @UiField
     ModalWindow modalWindowTitle;
-
     @UiField
     PeriodPickerPopupWidget periodPicker;
-
     @UiField
     DepartmentPickerPopupWidget departmentPicker;
-
     @UiField
     Label declarationTypeLabel;
-
     @UiField
     RefBookPickerWidget declarationTypeId;
-
     @UiField
     RefBookPicker taxOrganCode;
     @UiField
@@ -62,14 +57,10 @@ public class DeclarationCreationView extends PopupViewWithUiHandlers<Declaration
     HorizontalPanel correctionPanel;
     @UiField
     Label correctionDate;
-
     @UiField
     Button continueButton;
-
     @UiField
     Button cancelButton;
-
-    private boolean refBookEnabled;
 
     @Inject
     public DeclarationCreationView(Binder uiBinder, EventBus eventBus) {
@@ -127,8 +118,6 @@ public class DeclarationCreationView extends PopupViewWithUiHandlers<Declaration
         }
         taxOrganCode.setSingleColumn("TAX_ORGAN_CODE");
         taxOrganKpp.setSingleColumn("KPP");
-
-        refBookEnabled = filter != null && !filter.isEmpty();
     }
 
     @Override

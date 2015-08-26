@@ -64,46 +64,30 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
 
 	@Autowired
 	private DeclarationDataDao declarationDataDao;
-
 	@Autowired
 	private DeclarationDataService declarationDataService;
-
 	@Autowired
     private DeclarationTypeDao declarationTypeDao;
-	
-	@Autowired
-	private DepartmentFormTypeDao departmentFormTypeDao;
-	
 	@Autowired
 	private FormDataDao formDataDao;
-	
 	@Autowired
 	private FormDataService formDataService;
-
 	@Autowired
 	private DepartmentDao departmentDao;
-	
 	@Autowired
 	private FormTypeDao formTypeDao;
-	
 	@Autowired
 	private FormTemplateDao formTemplateDao;
-
 	@Autowired
     private DeclarationTemplateDao declarationTemplateDao;
-
     @Autowired
     private RefBookFactory factory;
-
     @Autowired
     private PeriodService periodService;
-
     @Autowired
     private DepartmentReportPeriodDao departmentReportPeriodDao;
-
     @Autowired
     private DeclarationDataSearchService declarationDataSearchService;
-
     @Autowired
     private TAUserService taUserService;
 
