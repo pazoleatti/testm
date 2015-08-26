@@ -11,7 +11,9 @@ import java.util.Date;
  * Основные операции над макетами
  */
 public interface MainOperatingService {
-    String SAVE_MESSAGE = "Версия макета не сохранена, обнаружены фатальные ошибки!";
+    String SAVE_MESSAGE = "Версия макета не сохранена. Обнаружены фатальные ошибки!";
+    String FORM_EXIST =
+            "Версия макета не сохранена. Период актуальности версии не может быть изменен, пока существуют экземпляры форм в отчетных периодах, в течение которых версия макета более не должна действовать";
 
     <T> int edit(T template, Date templateActualEndDate, Logger logger, TAUserInfo user);
     <T> int createNewType(T template, Date templateActualEndDate, Logger logger, TAUserInfo user);
