@@ -80,7 +80,7 @@ public class MainOperatingFTServiceImpl implements MainOperatingService {
                 endRange = new Pair<Date, Date>(c.getTime(), dbVersionEndDate);
             }
             versionOperatingService.checkDestinationsSources(formTemplate.getType().getId(), beginRange, endRange, logger);
-            checkError(logger, FORM_EXIST);
+            checkError(logger, SAVE_MESSAGE);
             formDataService.findFormDataIdsByRangeInReportPeriod(formTemplate.getId(), formTemplate.getVersion(), templateActualEndDate, logger);
             checkError(logger, FORM_EXIST);
         }

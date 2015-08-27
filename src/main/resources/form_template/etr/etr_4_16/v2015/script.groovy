@@ -240,11 +240,7 @@ void logicCheck() {
         def tempRow = tempRows[i]
         def checkColumns = []
         // делаем проверку БО только для первичных НФ
-        if (opuMap.keySet().contains(row.getAlias())) {
-            if (formData.kind == FormDataKind.PRIMARY) {
-                checkColumns += check102Columns
-            }
-        } else {
+        if ((formData.kind == FormDataKind.PRIMARY) && opuMap.keySet().contains(row.getAlias())) {
             checkColumns += check102Columns
         }
         checkColumns += checkCalcColumns
@@ -254,13 +250,15 @@ void logicCheck() {
 
 void calcValues(def dataRows, def sourceRows, boolean needShowMessage) {
     // при консолидации не подтягиваем данные при расчете
-    if (formDataEvent != FormDataEvent.COMPOSE) {
-        for (def alias in opuMap.keySet()) {
-            def row = getDataRow(dataRows, alias)
-            def rowSource = getDataRow(sourceRows, alias)
-
+    for (def alias in opuMap.keySet()) {
+        def row = getDataRow(dataRows, alias)
+        def rowSource = getDataRow(sourceRows, alias)
+        if (formData.kind == FormDataKind.PRIMARY) {
             row.comparePeriod = calcBO(rowSource, getComparativePeriodId())
             row.currentPeriod = calcBO(rowSource, formData.reportPeriodId)
+        } else {
+            row.comparePeriod = rowSource.comparePeriod
+            row.currentPeriod = rowSource.currentPeriod
         }
     }
     def row4 = getDataRow(dataRows, "R4")

@@ -199,12 +199,8 @@ void logicCheck() {
         def row = dataRows[i]
         def tempRow = tempRows[i]
         def checkColumns = []
-        // делаем проверку БО только для первичных НФ
-        if (opuMap.keySet().contains(row.getAlias()) && (!"R1".equals(row.getAlias()) || isBank())) {
-            if (formData.kind == FormDataKind.PRIMARY) {
-                checkColumns += check102Columns
-            }
-        } else {
+        // делаем проверку БО только для первичных НФ и для ячеек в которых она используется
+        if ((formData.kind == FormDataKind.PRIMARY) && opuMap.keySet().contains(row.getAlias()) && (!"R1".equals(row.getAlias()) || isBank())) {
             checkColumns += check102Columns
         }
         checkColumns += checkCalcColumns
@@ -214,10 +210,10 @@ void logicCheck() {
 
 void calcValues(def dataRows, def sourceRows, boolean isCalc) {
     // при консолидации не подтягиваем данные при расчете
-    if (formDataEvent != FormDataEvent.COMPOSE) {
-        for (def alias in opuMap.keySet()) {
-            def row = getDataRow(dataRows, alias)
-            def rowSource = getDataRow(sourceRows, alias)
+    for (def alias in opuMap.keySet()) {
+        def row = getDataRow(dataRows, alias)
+        def rowSource = getDataRow(sourceRows, alias)
+        if (formData.kind == FormDataKind.PRIMARY) {
             if ("R1".equals(alias) && !isBank()) {
                 row.comparePeriod = getSourceValue(getComparativePeriodId(), row, 'comparePeriod', isCalc)
                 row.currentPeriod = getSourceValue(formData.reportPeriodId, row, 'currentPeriod', isCalc)
@@ -226,6 +222,9 @@ void calcValues(def dataRows, def sourceRows, boolean isCalc) {
 
             row.comparePeriod = calcBO(rowSource, getComparativePeriodId())
             row.currentPeriod = calcBO(rowSource, formData.reportPeriodId)
+        } else {
+            row.comparePeriod = rowSource.comparePeriod
+            row.currentPeriod = rowSource.currentPeriod
         }
     }
     def row3 = getDataRow(dataRows, "R3")
