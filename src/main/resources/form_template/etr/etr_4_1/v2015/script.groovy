@@ -79,10 +79,10 @@ def nonEmptyColumns = calcColumns
 
 @Field
 def opuMap = ['R2' : ['28101'],
-           'R4' : ['26411.01', '26411.02'],
-           'R5' : ['26411.03'],
-           'R6' : ['26102' ,'26410.09'],
-           'R7' : ['26411.12', '26411.13']]
+              'R4' : ['26411.01', '26411.02'],
+              'R5' : ['26411.03'],
+              'R6' : ['26102' ,'26410.09'],
+              'R7' : ['26411.12', '26411.13']]
 
 @Field
 def startDateMap = [:]
@@ -185,7 +185,7 @@ void checkOpuCodes(def alias, def periodId, def opuCodes, def tmpRow) {
 
 void calc() {
     def dataRows = formDataService.getDataRowHelper(formData).allCached
-    calcValues(dataRows, dataRows)
+    calcValues(dataRows, dataRows, true)
 }
 
 void logicCheck() {
@@ -197,17 +197,13 @@ void logicCheck() {
     def formTemplate = formDataService.getFormTemplate(formData.formType.id, formData.reportPeriodId)
     def tempRows = formTemplate.rows
     updateIndexes(tempRows)
-    calcValues(tempRows, dataRows)
+    calcValues(tempRows, dataRows, false)
     for(int i = 0; i < dataRows.size(); i++){
         def row = dataRows[i]
         def tempRow = tempRows[i]
         def checkColumns = []
-        // делаем проверку БО только для первичных НФ
-        if (opuMap.keySet().contains(row.getAlias()) && (!"R2".equals(row.getAlias()) || isBank())) {
-            if (formData.kind == FormDataKind.PRIMARY) {
-                checkColumns += check102Columns
-            }
-        } else {
+        // делаем проверку БО только для первичных НФ и для ячеек в которых она используется
+        if ((formData.kind == FormDataKind.PRIMARY) && opuMap.keySet().contains(row.getAlias()) && (!"R2".equals(row.getAlias()) || isBank())) {
             checkColumns += check102Columns
         }
         checkColumns += checkCalcColumns
@@ -215,13 +211,12 @@ void logicCheck() {
     }
 }
 
-void calcValues(def dataRows, def sourceRows) {
-    def isCalc = dataRows == sourceRows
+void calcValues(def dataRows, def sourceRows, boolean isCalc) {
     // при консолидации не подтягиваем данные при расчете
-    if (formDataEvent != FormDataEvent.COMPOSE) {
-        for (def alias in opuMap.keySet()) {
-            def row = getDataRow(dataRows, alias)
-            def rowSource = getDataRow(sourceRows, alias)
+    for (def alias in opuMap.keySet()) {
+        def row = getDataRow(dataRows, alias)
+        def rowSource = getDataRow(sourceRows, alias)
+        if (formData.kind == FormDataKind.PRIMARY) {
             if ("R2".equals(alias) && !isBank()) {
                 row.comparePeriod = getSourceValue(getComparativePeriodId(), row, 'comparePeriod', isCalc)
                 row.currentPeriod = getSourceValue(formData.reportPeriodId, row, 'currentPeriod', isCalc)
@@ -230,6 +225,9 @@ void calcValues(def dataRows, def sourceRows) {
 
             row.comparePeriod = calcBO(rowSource, getComparativePeriodId())
             row.currentPeriod = calcBO(rowSource, formData.reportPeriodId)
+        } else {
+            row.comparePeriod = rowSource.comparePeriod
+            row.currentPeriod = rowSource.currentPeriod
         }
     }
     def row1 = getDataRow(dataRows, "R1")
@@ -251,17 +249,22 @@ void calcValues(def dataRows, def sourceRows) {
         row.deltaPercent = null
         if (rowSource.comparePeriod) {
             row.deltaPercent = ((rowSource.deltaRub ?: BigDecimal.ZERO) as BigDecimal) * 100 / rowSource.comparePeriod.doubleValue()
-        } else if (!isCalc) { // выводим в logicCheck
-            rowError(logger, row, String.format("Строка %s: Графа «%s» не может быть заполнена. Выполнение расчета невозможно, так как в результате проверки получен нулевой знаменатель (деление на ноль невозможно)",
-                    row.getIndex(), getColumnName(row, 'deltaPercent')))
+        } else {
+            row.deltaPercent = 0
+            if (!isCalc) { // выводим при проверках и в проверках после расчета
+                rowWarning(logger, row, String.format("Строка %s: Графа «%s» не может быть заполнена. Выполнение расчета невозможно, так как в результате проверки получен нулевой знаменатель (деление на ноль невозможно). Ячейка будет заполнена значением «0».",
+                        row.getIndex(), getColumnName(row, 'deltaPercent')))
+            }
         }
     }
 }
 
 def getSourceValue(def periodId, def row, def alias, def isCalc) {
+    def sum = BigDecimal.ZERO
     if (periodId != null) {
         def reportPeriod = getReportPeriod(periodId)
-        int startOrder = formData.accruing ? reportPeriod.order : 1
+        // если нарастающий итог, то собираем формы с начала года
+        int startOrder = formData.accruing ? 1 : reportPeriod.order
         def periods = reportPeriodService.listByTaxPeriod(reportPeriod.taxPeriod.id).findAll{ it.order <= reportPeriod.order && it.order >= startOrder}
         periods.each { period ->
             // берем консолидированную, если ее нет, то берем первичную (подразумевается, что форма одна, в 0.8 исправить на множество источников)
@@ -270,14 +273,14 @@ def getSourceValue(def periodId, def row, def alias, def isCalc) {
                 sourceForm = getSourceForm(FormDataKind.PRIMARY, period.id)
             }
             if (sourceForm != null) {
-                return sourceForm?.allSaved?.get(0)?.sum ?: 0
-            } else if (isCalc) {
+                sum += (sourceForm?.allSaved?.get(0)?.sum ?: 0)
+            } else if (isCalc) { // выводить только при расчете
                 logger.warn("Не найдена форма-источник «Величины налоговых платежей, вводимые вручную» в статусе «Принята»: Тип: \"%s/%s\", Период: \"%s %s\", Подразделение: \"%s\". Ячейки по графе «%s», заполняемые из данной формы, будут заполнены нулевым значением.",
                         FormDataKind.CONSOLIDATED.name, FormDataKind.PRIMARY.name, period.getName(), period.getTaxPeriod().getYear(), departmentService.get(formData.departmentId)?.name, getColumnName(row, alias))
             }
         }
     }
-    return 0
+    return sum
 }
 
 def getSourceForm(def formDataKind, def periodId) {

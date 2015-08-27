@@ -30,7 +30,7 @@ public class VersionFTOperatingServiceImpl implements VersionOperatingService {
     private static final String MSG_HAVE_DESTINATION =
             "Существует назначение %s в качестве источника данных для %s типа: \"%s\" вида \"%s\" в подразделении \"%s\" начиная с периода %s!";
     private static final String MSG_HAVE_SOURCE =
-            "Существует назначение налоговой формы в качестве приёмника данных для налоговой формы типа \"%s\" вида \"%s\" в подразделении \"%s\" начиная с периода %s!";
+            "Существует назначение %s в качестве приёмника данных для %s типа \"%s\" вида \"%s\" в подразделении \"%s\" начиная с периода %s!";
 
     @Autowired
     private FormDataDao formDataDao;
@@ -168,9 +168,9 @@ public class VersionFTOperatingServiceImpl implements VersionOperatingService {
             DepartmentFormType first = pair.getFirst();
             FormType typeSource = formTypeService.get(first.getFormTypeId());
             logger.error(
-                    String.format(MSG_HAVE_DESTINATION,
-                            MessageGenerator.mesSpeckPlural(typeRelated.getTaxType()),
-                            MessageGenerator.mesSpeckPlural(typeSource.getTaxType()),
+                    String.format(MSG_HAVE_SOURCE,
+                            MessageGenerator.mesSpeckSingleD(typeRelated.getTaxType()),
+                            MessageGenerator.mesSpeckSingleD(typeSource.getTaxType()),
                             first.getKind().getName(),
                             typeSource.getName(),
                             departmentService.getDepartment(first.getDepartmentId()).getName(),
@@ -183,8 +183,8 @@ public class VersionFTOperatingServiceImpl implements VersionOperatingService {
             FormType typeTarget = formTypeService.get(first.getFormTypeId());
             logger.error(
                     String.format(MSG_HAVE_DESTINATION,
-                            MessageGenerator.mesSpeckPlural(typeRelated.getTaxType()),
-                            MessageGenerator.mesSpeckPlural(typeTarget.getTaxType()),
+                            MessageGenerator.mesSpeckSingleD(typeRelated.getTaxType()),
+                            MessageGenerator.mesSpeckSingleD(typeTarget.getTaxType()),
                             first.getKind().getName(),
                             typeTarget.getName(),
                             departmentService.getDepartment(first.getDepartmentId()).getName(),

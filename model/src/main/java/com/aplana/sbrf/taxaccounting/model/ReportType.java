@@ -32,7 +32,7 @@ public enum ReportType {
     ARCHIVE_AUDIT(0, "ARCHIVE_AUDIT", "", 10L, 110L),
     CSV_AUDIT(1, "CSV_AUDIT", "", 11l, 111L),
 
-    LOAD_ALL_TF(1, "LoadAllTF", "", 13L, 113L);
+    LOAD_ALL_TF(1, "LoadAllTF", "Импорт транспортного файла из каталога загрузки", 13L, 113L);
 
 
     private int id;

@@ -341,9 +341,9 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
         view.setColumnsData(formData.getFormColumns(), readOnlyMode, forceEditMode);
 
         if (taskName == null) {
-            placeManager.setOnLeaveConfirmation("Вы уверены, что хотите прекратить редактирование данных налоговой формы? В случае выхода все несохраненные изменения будут утеряны.");
+            placeManager.setOnLeaveConfirmation("Вы уверены, что хотите прекратить редактирование данных " + speck() + "? В случае выхода все несохраненные изменения будут утеряны.");
         } else {
-            placeManager.setOnLeaveConfirmation("Вы уверены, что хотите прекратить редактирование данных налоговой формы? В случае выхода все несохраненные изменения будут утеряны и будет отменена операция \""+taskName+"\".");
+            placeManager.setOnLeaveConfirmation("Вы уверены, что хотите прекратить редактирование данных " + speck() +"? В случае выхода все несохраненные изменения будут утеряны и будет отменена операция \""+taskName+"\".");
         }
         closeFormDataHandlerRegistration = Window.addCloseHandler(new CloseHandler<Window>() {
             @Override
@@ -424,7 +424,7 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
         view.setTableLockMode(false);
         view.setColumnsData(formData.getFormColumns(), readOnlyMode, forceEditMode);
 
-        placeManager.setOnLeaveConfirmation("Вы уверены, что хотите прекратить редактирование данных налоговой формы? В случае выхода все несохраненные изменения будут утеряны.");
+        placeManager.setOnLeaveConfirmation("Вы уверены, что хотите прекратить редактирование данных " + speck() +"? В случае выхода все несохраненные изменения будут утеряны.");
         closeFormDataHandlerRegistration = Window.addCloseHandler(new CloseHandler<Window>() {
 			@Override
 			public void onClose(CloseEvent<Window> event) {
@@ -463,4 +463,10 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
         action.setManual(formData.isManual());
 		dispatcher.execute(action, CallbackUtils.emptyCallback());
 	}
+
+    private String speck(){
+        return formData.getFormType().getTaxType() == TaxType.ETR
+                ||
+                formData.getFormType().getTaxType() == TaxType.DEAL ? "формы" : "налоговой формы";
+    }
 }

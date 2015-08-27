@@ -269,12 +269,15 @@ def calc3or6(def row, def dividendAlias, def dividerAlias, def needShowMsg, def 
     if (divider) {
         // расчет
         result = dividend * 100 / divider.doubleValue()
-    } else if (needShowMsg) {
-        // Логическая проверка 3. Проверка графы 2 при расчете графы 3
-        // Логическая проверка 4. Проверка графы 2 при расчете графы 6
-        def msg = String.format("Строка %s: Графа «%s» не может быть заполнена. Выполнение расчета невозможно, так как в результате проверки получен нулевой знаменатель (деление на ноль невозможно)",
-                row.getIndex(), getColumnName(row, resultAlias))
-        rowError(logger, row, msg)
+    } else {
+        result = 0
+        if (needShowMsg) {
+            // Логическая проверка 3. Проверка графы 2 при расчете графы 3
+            // Логическая проверка 4. Проверка графы 2 при расчете графы 6
+            def msg = String.format("Строка %s: Графа «%s» не может быть заполнена. Выполнение расчета невозможно, так как в результате проверки получен нулевой знаменатель (деление на ноль невозможно). Ячейка будет заполнена значением «0».",
+                    row.getIndex(), getColumnName(row, resultAlias))
+            rowWarning(logger, row, msg)
+        }
     }
     return result
 }

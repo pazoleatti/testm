@@ -96,6 +96,7 @@ public abstract class CsvGeneratorAsyncTask extends AbstractAsyncTask {
         long formDataId = (Long)params.get("formDataId");
         boolean manual = (Boolean)params.get("manual");
         boolean isShowChecked = (Boolean)params.get("isShowChecked");
+        boolean saved = (Boolean)params.get("saved");
         TAUserInfo userInfo = new TAUserInfo();
         userInfo.setUser(userService.getUser(userId));
 
@@ -109,7 +110,7 @@ public abstract class CsvGeneratorAsyncTask extends AbstractAsyncTask {
         return MessageGenerator.getFDMsg(String.format(COMPLETE_FORM, getReportType()),
                 formData,
                 department.getName(),
-                manual, reportPeriod, rpCompare, isShowChecked);
+                manual, reportPeriod, rpCompare, isShowChecked, saved);
     }
 
     @Override
@@ -118,6 +119,7 @@ public abstract class CsvGeneratorAsyncTask extends AbstractAsyncTask {
         long formDataId = (Long)params.get("formDataId");
         boolean manual = (Boolean)params.get("manual");
         boolean isShowChecked = (Boolean)params.get("isShowChecked");
+        boolean saved = (Boolean)params.get("saved");
         TAUserInfo userInfo = new TAUserInfo();
         userInfo.setUser(userService.getUser(userId));
 
@@ -131,6 +133,6 @@ public abstract class CsvGeneratorAsyncTask extends AbstractAsyncTask {
         return MessageGenerator.getFDMsg(String.format(ERROR_FORM, getReportType()),
                 formData,
                 department.getName(),
-                manual, reportPeriod, rpCompare, isShowChecked);
+                manual, reportPeriod, rpCompare, isShowChecked, saved);
     }
 }
