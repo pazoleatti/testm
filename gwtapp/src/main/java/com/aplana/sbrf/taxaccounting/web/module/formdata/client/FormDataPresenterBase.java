@@ -212,7 +212,7 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 			closeFormDataHandlerRegistration.removeHandler();
 		}
         placeManager.setOnLeaveConfirmation(null);
-        unlockForm(formData.getId());
+        unlockForm(formData.getId(), "onHide()");
 	}
 
     /**
@@ -349,7 +349,7 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
             @Override
             public void onClose(CloseEvent<Window> event) {
                 closeFormDataHandlerRegistration.removeHandler();
-                unlockForm(formData.getId());
+                unlockForm(formData.getId(), "onClose()");
             }
         });
     }
@@ -429,7 +429,7 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 			@Override
 			public void onClose(CloseEvent<Window> event) {
 				closeFormDataHandlerRegistration.removeHandler();
-				unlockForm(formData.getId());
+				unlockForm(formData.getId(), "onClose()");
 			}
 		});
 	}
@@ -457,10 +457,11 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 	}
 
 	@SuppressWarnings("unchecked")
-	protected void unlockForm(Long formId){
+	protected void unlockForm(Long formId, String msg){
 		UnlockFormData action = new UnlockFormData();
 		action.setFormId(formId);
         action.setManual(formData.isManual());
+        action.setMsg(msg);
 		dispatcher.execute(action, CallbackUtils.emptyCallback());
 	}
 
