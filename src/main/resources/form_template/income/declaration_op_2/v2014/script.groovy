@@ -831,3 +831,13 @@ def getDepartmentParamTable(def departmentParamId) {
     }
     return departmentParamTable
 }
+
+@Field
+def declarationReportPeriod
+
+boolean useTaxOrganCodeProm() {
+    if (declarationReportPeriod == null) {
+        declarationReportPeriod = reportPeriodService.get(declarationData.reportPeriodId)
+    }
+    return (declarationReportPeriod?.taxPeriod?.year > 2015 || declarationReportPeriod?.order > 2)
+}
