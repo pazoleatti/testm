@@ -47,7 +47,7 @@ public class AuditArchiveDialogView extends PopupViewWithUiHandlers<AuditArchive
     @UiHandler("archiveButton")
     public void onArchiveButton(ClickEvent event){
         if (toSearchDate.getValue() != null) {
-            Dialog.confirmMessage("При архивации данные будут выгружены в файл и удалены из Системы. Продолжить выполнение операции?", new DialogHandler() {
+            Dialog.confirmMessage("При архивации данные выбранного периода будут удалены из Системы и перенесены в архив, файл с архивом за прошлый период архивации будет удалён. Продолжить выполнение операции?", new DialogHandler() {
                 @Override
                 public void yes() {
                     super.yes();
