@@ -497,6 +497,9 @@ def calc18Parts(def dataRows, def prevDataRows, def row) {
 }
 
 void fixCA18_19(def prevDataRows, def dataRows, def rowCA, def reportPeriod) {
+    if (rowCA == null) { // если строки ЦА нет, то ничего не делаем
+        return
+    }
     def tmp = BigDecimal.ZERO
     // «графа 18» = (Сумма всех нефиксированных строк по «графе 14» - Сумма всех нефиксированных строк по «графе 14» из предыдущего периода) * («графа 14» / Сумма всех нефиксированных строк по «графе 14»)
     // + (значение итоговой строки «графы 18» - (значение итоговой строки «графы 14» текущего периода - значение итоговой строки графы «графа 14» предыдущего периода))
@@ -506,7 +509,9 @@ void fixCA18_19(def prevDataRows, def dataRows, def rowCA, def reportPeriod) {
         def previous14Sum = prevDataRows?.sum { (it.getAlias() == null) ? (it.taxSum ?: 0) : 0 } ?: 0
         tmp = current18Sum - (current14Sum - previous14Sum)
     }
-    rowCA.everyMontherPaymentAfterPeriod += tmp // добавляем к предыдущей сумме разницу
+    if (tmp!= null) {
+        rowCA.everyMontherPaymentAfterPeriod = (rowCA.everyMontherPaymentAfterPeriod ?: 0) + tmp // добавляем к предыдущей сумме разницу
+    }
 
     // графа 19
     rowCA.everyMonthForKvartalNextPeriod = ((reportPeriod.order == 3) ? rowCA.everyMontherPaymentAfterPeriod : 0)
