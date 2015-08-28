@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+       <import resource="classpath:testServiceContext.xml"/>
+
+       <bean class="org.mockito.Mockito" factory-method="mock">
+              <constructor-arg value="com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider"/>
+       </bean>
+       <bean class="org.mockito.Mockito" factory-method="mock">
+              <constructor-arg value="com.aplana.sbrf.taxaccounting.refbook.RefBookFactory"/>
+       </bean>
+       <bean class="org.mockito.Mockito" factory-method="mock">
+              <constructor-arg value="com.aplana.sbrf.taxaccounting.service.DepartmentReportPeriodService"/>
+       </bean>
+       <bean class="org.mockito.Mockito" factory-method="mock">
+              <constructor-arg value="com.aplana.sbrf.taxaccounting.service.DepartmentService"/>
+       </bean>
+       <bean class="org.mockito.Mockito" factory-method="mock">
+              <constructor-arg value="com.aplana.sbrf.taxaccounting.service.FormDataService"/>
+       </bean>
+       <bean class="org.mockito.Mockito" factory-method="mock">
+              <constructor-arg value="com.aplana.sbrf.taxaccounting.service.FormDataSearchService"/>
+       </bean>
+       <bean class="org.mockito.Mockito" factory-method="mock">
+              <constructor-arg value="com.aplana.sbrf.taxaccounting.service.DeclarationDataService"/>
+       </bean>
+       <bean class="org.mockito.Mockito" factory-method="mock">
+              <constructor-arg value="com.aplana.sbrf.taxaccounting.service.DeclarationTemplateImpexService"/>
+       </bean>
+       <bean class="org.mockito.Mockito" factory-method="mock">
+              <constructor-arg value="com.aplana.sbrf.taxaccounting.service.TAUserService"/>
+       </bean>
+       <bean class="org.mockito.Mockito" factory-method="mock">
+              <constructor-arg value="com.aplana.sbrf.taxaccounting.service.DeclarationDataSearchService"/>
+       </bean>
+       <bean class="org.mockito.Mockito" factory-method="mock">
+              <constructor-arg value="com.aplana.sbrf.taxaccounting.service.NotificationService"/>
+       </bean>
+       <bean class="org.mockito.Mockito" factory-method="mock">
+              <constructor-arg value="com.aplana.sbrf.taxaccounting.core.api.LockDataService"/>
+       </bean>
+       <bean class="org.mockito.Mockito" factory-method="mock">
+              <constructor-arg value="com.aplana.sbrf.taxaccounting.service.DeclarationTemplateService"/>
+       </bean>
+       <bean id="periodService" class="com.aplana.sbrf.taxaccounting.service.impl.PeriodServiceImpl" />
+
+</beans>

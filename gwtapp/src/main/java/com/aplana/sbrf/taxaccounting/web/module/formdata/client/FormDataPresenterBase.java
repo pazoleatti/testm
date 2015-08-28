@@ -340,7 +340,7 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
         if (taskName == null) {
             setOnLeaveConfirmation("Вы уверены, что хотите прекратить редактирование данных " + speck() + "? В случае выхода все несохраненные изменения будут утеряны.");
         } else {
-            setOnLeaveConfirmation("Вы уверены, что хотите прекратить редактирование данных " + speck() +"? В случае выхода все несохраненные изменения будут утеряны и будет отменена операция \""+taskName+"\".");
+            setOnLeaveConfirmation("Вы уверены, что хотите прекратить редактирование данных " + speck() + "? В случае выхода все несохраненные изменения будут утеряны и будет отменена операция \"" + taskName + "\".");
         }
     }
 
@@ -414,21 +414,28 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
         view.setTableLockMode(false);
         view.setColumnsData(formData.getFormColumns(), readOnlyMode, forceEditMode);
 
-        setOnLeaveConfirmation("Вы уверены, что хотите прекратить редактирование данных " + speck() +"? В случае выхода все несохраненные изменения будут утеряны.");
+        setOnLeaveConfirmation("Вы уверены, что хотите прекратить редактирование данных " + speck() + "? В случае выхода все несохраненные изменения будут утеряны.");
 	}
 
     protected void setOnLeaveConfirmation(String msg) {
-        placeManager.setOnLeaveConfirmation(msg);
-        if (closeFormDataHandlerRegistration != null && msg == null) {
-            closeFormDataHandlerRegistration.removeHandler();
-        } else if (closeFormDataHandlerRegistration == null && msg != null) {
-            closeFormDataHandlerRegistration = Window.addCloseHandler(new CloseHandler<Window>() {
-                @Override
-                public void onClose(CloseEvent<Window> event) {
-                    closeFormDataHandlerRegistration.removeHandler();
-                    unlockForm(formData.getId());
-                }
-            });
+        if (isVisible()) {
+            placeManager.setOnLeaveConfirmation(msg);
+            if (closeFormDataHandlerRegistration != null && msg == null) {
+                closeFormDataHandlerRegistration.removeHandler();
+            } else if (closeFormDataHandlerRegistration == null && msg != null) {
+                closeFormDataHandlerRegistration = Window.addCloseHandler(new CloseHandler<Window>() {
+                    @Override
+                    public void onClose(CloseEvent<Window> event) {
+                        closeFormDataHandlerRegistration.removeHandler();
+                        unlockForm(formData.getId());
+                    }
+                });
+            }
+        } else {
+            placeManager.setOnLeaveConfirmation(null);
+            if (closeFormDataHandlerRegistration != null) {
+                closeFormDataHandlerRegistration.removeHandler();
+            }
         }
     }
 

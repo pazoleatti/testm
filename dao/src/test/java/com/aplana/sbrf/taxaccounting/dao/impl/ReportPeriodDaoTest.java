@@ -88,14 +88,14 @@ public class ReportPeriodDaoTest {
 		newReportPeriod.setDictTaxPeriodId(21);
 		newReportPeriod.setStartDate(new Date());
 		newReportPeriod.setEndDate(new Date());
-		newReportPeriod.setCalendarStartDate(new GregorianCalendar(2014,Calendar.JANUARY,1).getTime());
+		newReportPeriod.setCalendarStartDate(new GregorianCalendar(2014, Calendar.JANUARY, 1).getTime());
 
 		int newReportPeriodId = reportPeriodDao.save(newReportPeriod);
 		ReportPeriod reportPeriod = reportPeriodDao.get(newReportPeriodId);
 
 		assertEquals("MyTestName", reportPeriod.getName());
-		assertEquals(taxPeriod.getId(), Integer.valueOf(reportPeriod.getTaxPeriod().getId()));
-		assertEquals(taxPeriod.getId(), Integer.valueOf(reportPeriod.getTaxPeriod().getId()));
+		assertEquals(taxPeriod.getId(), reportPeriod.getTaxPeriod().getId());
+		assertEquals(taxPeriod.getId(), reportPeriod.getTaxPeriod().getId());
 		assertEquals(21, reportPeriod.getDictTaxPeriodId());
 	}
 
@@ -128,7 +128,7 @@ public class ReportPeriodDaoTest {
         reportPeriods = reportPeriodDao.getPeriodsByTaxTypeAndDepartments(TaxType.TRANSPORT, asList(1, 2, 3));
         Assert.assertEquals(2, reportPeriods.size());
         Assert.assertTrue(getReportPeriodIds(reportPeriods).containsAll(asList(1, 2)));
-        reportPeriods = reportPeriodDao.getPeriodsByTaxTypeAndDepartments(TaxType.TRANSPORT, asList(3));
+        reportPeriods = reportPeriodDao.getPeriodsByTaxTypeAndDepartments(TaxType.TRANSPORT, Collections.singletonList(3));
         Assert.assertEquals(0, reportPeriods.size());
     }
 
@@ -196,5 +196,12 @@ public class ReportPeriodDaoTest {
         List<ReportPeriod> actualPeriods = reportPeriodDao.getReportPeriodsByDate(TaxType.TRANSPORT, startDate, endDate);
         Assert.assertEquals(periodList.get(0).getId(), actualPeriods.get(0).getId());
         Assert.assertEquals(periodList.get(1).getId(), actualPeriods.get(1).getId());
+    }
+
+    @Test
+    public void getReportPeriodsByDateAndDepartmentTest() {
+        Date startDate = new GregorianCalendar(2011, Calendar.JANUARY, 1).getTime();
+        Date endDate = new GregorianCalendar(2014, Calendar.JANUARY, 10).getTime();
+        assertEquals(0, reportPeriodDao.getReportPeriodsByDateAndDepartment(TaxType.ETR, 1, startDate, endDate).size());
     }
 }

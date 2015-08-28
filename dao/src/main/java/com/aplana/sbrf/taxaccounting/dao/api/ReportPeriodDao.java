@@ -82,6 +82,16 @@ public interface ReportPeriodDao {
 	List<ReportPeriod> getReportPeriodsByDate(TaxType taxType, Date startDate, Date endDate);
 
 	/**
+	 * Возвращает все периоды которые либо пересекаются с указанным диапазоном дат, либо полностью находятся внутри него
+	 * @param taxType
+	 * @param startDate начало диапазона
+	 * @param endDate конец диапазона
+	 * @param depId
+	 * @return
+	 */
+	List<ReportPeriod> getReportPeriodsByDateAndDepartment(TaxType taxType, int depId, Date startDate, Date endDate);
+
+	/**
 	 * Список открытых периодов
 	 * @param taxType тип налога
 	 * @param departmentList подразделения
