@@ -1,6 +1,7 @@
 package form_template.deal.notification.v2013
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
+import com.aplana.sbrf.taxaccounting.model.TaxType
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
 import groovy.transform.Field
@@ -110,8 +111,16 @@ void generateXML() {
         formDataService.fillRefBookCache(matrixRecords.get(0), refBookCache)
     }
 
+    // атрибуты элементов Файл и Документ
+    def fileId = TaxType.DEAL.declarationPrefix + "_" +
+            departmentParam.TAX_ORGAN_CODE.value + "_" +
+            departmentParam.TAX_ORGAN_CODE.value + "_" +
+            departmentParam.INN.value + "" + departmentParam.KPP.value + "_" +
+            Calendar.getInstance().getTime().format('yyyyMMdd') + "_" +
+            UUID.randomUUID().toString().toUpperCase()
+
     builder.Файл(
-            ИдФайл: declarationService.generateXmlFileId(notificationType, declarationData.departmentReportPeriodId, declarationData.taxOrganCode, declarationData.kpp),
+            ИдФайл: fileId,
             ВерсПрог: applicationVersion,
             ВерсФорм: departmentParam.FORMAT_VERSION.stringValue) {
         Документ(
