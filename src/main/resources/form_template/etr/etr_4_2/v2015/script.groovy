@@ -199,8 +199,8 @@ void logicCheck() {
         def row = dataRows[i]
         def tempRow = tempRows[i]
         def checkColumns = []
-        // делаем проверку БО только для первичных НФ и для ячеек в которых она используется
-        if ((formData.kind == FormDataKind.PRIMARY) && opuMap.keySet().contains(row.getAlias()) && (!"R1".equals(row.getAlias()) || isBank())) {
+        // делаем проверку для первичных НФ или расчетных ячеек
+        if ((formData.kind == FormDataKind.PRIMARY) || !opuMap.keySet().contains(row.getAlias())) {
             checkColumns += check102Columns
         }
         checkColumns += checkCalcColumns
