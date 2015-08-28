@@ -138,20 +138,29 @@ public class GetFormDataHandler extends AbstractActionHandler<GetFormDataAction,
 
 		// LOCK: Попытка заблокировать форму которую хотим получить для редактирования
 		if (!action.isReadOnly()) {
+            Pair<ReportType, LockData> lockType = formDataService.getLockTaskType(action.getFormDataId());
+            try {
+                if (action.getOldFormDataId() != null) {
+                    LockData lockDataEdit = formDataService.getObjectLock(action.getFormDataId(), userInfo);
+                    if (lockDataEdit != null && lockDataEdit.getUserId() == userInfo.getUser().getId() && ReportType.EDIT_FD.equals(lockType.getFirst())) {
+                        // Если есть блокировка, то удаляем задачи и откатываем изменения
+                        formDataService.restoreCheckPoint(action.getFormDataId(), action.isManual(), userInfo);
+                    }
+                }
+            } catch (Exception e){
+            }
 			try {
-                Pair<ReportType, LockData> lockType = formDataService.getLockTaskType(action.getFormDataId());
                 // Защита от перехода в режим редактирования если нф заблокирована какой-либо операцией
-//                LockData lockImport = lockDataService.getLock(LockData.LockObjects.FORM_DATA_IMPORT.name() + "_" + action.getFormDataId());
-                if (lockType == null || ReportType.EDIT_FD.equals(lockType.getFirst())) {
+                if (lockType == null) {
                     formDataService.lock(action.getFormDataId(), action.isManual(), userInfo);
                 }
 			} catch (Exception e){
-				//
 			}
 		}
 
         try {
-            if (!action.isReadOnly()) {
+            LockData lockDataEdit = formDataService.getObjectLock(action.getFormDataId(), userInfo);
+            if (!action.isReadOnly() && lockDataEdit != null && lockDataEdit.getUserId() == userInfo.getUser().getId() ) {
                 FormData formData = formDataService.getFormData(userInfo, action.getFormDataId(), action.isManual(), logger);
 				// Когда пользователь входит в режим редактирования, то создаем контрольную точку восстановления
                 dataRowService.createCheckPoint(formData);
@@ -191,7 +200,8 @@ public class GetFormDataHandler extends AbstractActionHandler<GetFormDataAction,
             return result;
         } catch (Exception e) {
 			LOG.error(e.getMessage(), e);
-            if (!action.isReadOnly()) {
+            LockData lockDataEdit = formDataService.getObjectLock(action.getFormDataId(), userInfo);
+            if (!action.isReadOnly() && lockDataEdit != null && lockDataEdit.getUserId() == userInfo.getUser().getId()) {
                 // Удаляем контрольную точку восстановления
                 FormData formData = formDataService.getFormData(userInfo, action.getFormDataId(), action.isManual(), logger);
                 dataRowService.removeCheckPoint(formData);

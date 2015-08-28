@@ -35,14 +35,12 @@ public class UnlockFormDataHandler extends AbstractActionHandler<UnlockFormData,
         TAUserInfo userInfo = securityService.currentUserInfo();
         String uuid = UUID.randomUUID().toString();
 		try{
-            System.out.printf("UnlockFormDataHandler %s:: formDataId: %s, action: %s\n", uuid, action.getFormId(), action.getMsg());
             LockData lockDataEdit = formDataService.getObjectLock(action.getFormId(), userInfo);
             if (lockDataEdit != null && lockDataEdit.getUserId() == userInfo.getUser().getId()) {
                 // Если есть блокировка, то удаляем задачи и откатываем изменения
                 if (action.isPerformerLock()) {
                     formDataService.unlock(action.getFormId(), userInfo);
                 } else if (!action.isReadOnlyMode()) {
-                    System.out.printf("UnlockFormDataHandler %s:: formDataId: %s, unlock %s\n", uuid, action.getFormId(), action.getMsg());
                     formDataService.restoreCheckPoint(action.getFormId(), action.isManual(), userInfo);
                 }
             }
