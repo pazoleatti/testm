@@ -1403,7 +1403,7 @@ public class FormDataServiceImpl implements FormDataService {
                 logger.error(
                         MessageGenerator.getFDMsg(
                                 String.format(MSG_IS_EXIST_FORM,
-                                        ft.getType().getTaxType() == TaxType.ETR || ft.getType().getTaxType() == TaxType.DEAL ? "оррм" : "налоговых форм"),
+                                        ft.getType().getTaxType() == TaxType.ETR || ft.getType().getTaxType() == TaxType.DEAL ? "форм" : "налоговых форм"),
                                 formData,
                                 departmentService.getDepartment(departmentId).getName(),
                                 formData.isManual(),
