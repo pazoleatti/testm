@@ -509,9 +509,8 @@ void fixCA18_19(def prevDataRows, def dataRows, def rowCA, def reportPeriod) {
         def previous14Sum = prevDataRows?.sum { (it.getAlias() == null) ? (it.taxSum ?: 0) : 0 } ?: 0
         tmp = current18Sum - (current14Sum - previous14Sum)
     }
-    if (tmp!= null) {
-        rowCA.everyMontherPaymentAfterPeriod = (rowCA.everyMontherPaymentAfterPeriod ?: 0) + tmp // добавляем к предыдущей сумме разницу
-    }
+
+    rowCA.everyMontherPaymentAfterPeriod = (rowCA.everyMontherPaymentAfterPeriod ?: 0) + tmp // добавляем к предыдущей сумме разницу
 
     // графа 19
     rowCA.everyMonthForKvartalNextPeriod = ((reportPeriod.order == 3) ? rowCA.everyMontherPaymentAfterPeriod : 0)
