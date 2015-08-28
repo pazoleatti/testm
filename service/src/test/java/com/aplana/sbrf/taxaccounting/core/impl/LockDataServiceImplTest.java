@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.core.impl;
 
 import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
+import com.aplana.sbrf.taxaccounting.core.api.ServerInfo;
 import com.aplana.sbrf.taxaccounting.dao.LockDataDao;
 import com.aplana.sbrf.taxaccounting.model.LockData;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
@@ -53,6 +54,8 @@ public class LockDataServiceImplTest {
 			}
 		};
         ReflectionTestUtils.setField(service, "tx", tx);
+        ServerInfo serverInfo = mock(ServerInfo.class);
+        ReflectionTestUtils.setField(service, "serverInfo", serverInfo);
 	}
 
 	@Test
