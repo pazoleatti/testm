@@ -124,15 +124,15 @@ public class LockDataServiceImpl implements LockDataService {
 	}
 
 	@Override
-	public void unlock(final String key, final int userId) {
-        unlock(key, userId, false);
+	public Boolean unlock(final String key, final int userId) {
+        return unlock(key, userId, false);
     }
 
     @Override
-    public void unlock(final String key, final int userId, final boolean force) {
-        tx.executeInNewTransaction(new TransactionLogic() {
+    public Boolean unlock(final String key, final int userId, final boolean force) {
+        return tx.executeInNewTransaction(new TransactionLogic<Boolean>() {
             @Override
-            public Object execute() {
+            public Boolean execute() {
                 try {
                     synchronized(LockDataServiceImpl.class) {
                         LockData lock = validateLock(dao.get(key, false));
@@ -145,6 +145,7 @@ public class LockDataServiceImpl implements LockDataService {
                             dao.deleteLock(key);
                         } else if (!force) {
                             log.warn(String.format("Нельзя снять несуществующую блокировку. key = \"%s\"", key));
+                            return false;
                         }
                     }
                 } catch (ServiceException e) {
@@ -152,7 +153,7 @@ public class LockDataServiceImpl implements LockDataService {
                 } catch (Exception e) {
                     throw new ServiceException("Не удалось снять блокировку с объекта", e);
                 }
-				return null;
+				return true;
             }
         });
 	}
