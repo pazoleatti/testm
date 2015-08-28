@@ -356,6 +356,10 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
                         logger.getEntries().addAll(getEntries(localLoggerList));
                         // Файл пропущен всеми справочниками — неправильный формат
                         log(userInfo, LogData.L38, logger, lockId, refBookName);
+                        if (move) {
+                            moveToErrorDirectory(userInfo, getRefBookErrorPath(userInfo, logger, lockId), currentFile,
+                                    getEntries(localLoggerList), logger, lockId);
+                        }
                         fail++;
                     }
                 } finally {
