@@ -526,10 +526,10 @@ void generateXML(XMLStreamReader readerBank) {
                             if (!isTaxPeriod && dataRowsAdvance != null) {
                                 // получение строки подразделения, затем значение столбца «Ежемесячные авансовые платежи в квартале, следующем за отчётным периодом (текущий отчёт)»
                                 def rowForAvPlat = dataRowsAdvance.find { row -> declarationData.kpp.equals(row.kpp) }
-                                def appl5List02Row120 = (rowForAvPlat != null && rowForAvPlat.everyMontherPaymentAfterPeriod != null ? rowForAvPlat.everyMontherPaymentAfterPeriod : 0)
-                                avPlat1 = (long) appl5List02Row120 / 3
-                                avPlat2 = avPlat1
-                                avPlat3 = getLong(appl5List02Row120 - avPlat1 - avPlat2)
+                                def avPlats = getAvPlats(rowForAvPlat, reportPeriod)
+                                avPlat1 = avPlats[0]
+                                avPlat2 = avPlats[1]
+                                avPlat3 = avPlats[2]
                             }
                             // 0..1
                             СубБдж(
@@ -665,6 +665,34 @@ def getCalculatedSimpleConsumption(def dataRowsSimple, def codes) {
         }
     }
     return result
+}
+
+// Получить значения для АвПлат1 (220), АвПлат2 (230), АвПлат3 (240)
+def getAvPlats(def row, def reportPeriod) {
+    def appl5List02Row120 = (row != null && row.everyMontherPaymentAfterPeriod != null ? row.everyMontherPaymentAfterPeriod : 0)
+    def avPlat1
+    def avPlat2
+    def avPlat3
+    if (reportPeriod.taxPeriod.year >= 2015 || reportPeriod.taxPeriod.year == 2015 && reportPeriod.order > 2) {
+        // с 9 месяцев 2015
+        def a = roundValue(appl5List02Row120 / 3, 0)
+        avPlat1 = a
+        avPlat2 = a
+        avPlat3 = a
+        def b = a * 3
+        def c = appl5List02Row120 - b
+        if (c == -1) {
+            avPlat1--
+        } else if (c == 1) {
+            avPlat3++
+        }
+    } else {
+        // до 9 месяцев 2015
+        avPlat1 = (long) appl5List02Row120 / 3
+        avPlat2 = avPlat1
+        avPlat3 = getLong(appl5List02Row120 - avPlat1 - avPlat2)
+    }
+    return [avPlat1, avPlat2, avPlat3]
 }
 
 /**
