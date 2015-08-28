@@ -1741,6 +1741,7 @@ public class FormDataServiceImpl implements FormDataService {
         TAUserInfo userInfo = new TAUserInfo();
         userInfo.setUser(user);
         String msg = "";
+        FormData formData = formDataDao.get(formDataId, false);
         switch (reportType) {
             case CONSOLIDATE_FD:
                 logger.error(
@@ -1763,13 +1764,22 @@ public class FormDataServiceImpl implements FormDataService {
         switch (reportType) {
             case EXCEL:
             case CSV:
-                msg = "Для текущего экземпляра налоговой формы запущены операции, при которых формирование отчета невозможно";
+                msg = String.format(
+                        "Для текущего экземпляра %s запущены операции, при которых формирование отчета невозможно",
+                        MessageGenerator.mesSpeckSingleD(formData.getFormType().getTaxType())
+                );
                 break;
             case CHECK_FD:
-                msg = "Для текущего экземпляра налоговой формы запущены операции, при которых ее проверка невозможна";
+                msg = String.format(
+                        "Для текущего экземпляра %s запущены операции, при которых ее проверка невозможна",
+                        MessageGenerator.mesSpeckSingleD(formData.getFormType().getTaxType())
+                );
                 break;
             case MOVE_FD:
-                msg = "Для текущего экземпляра налоговой формы запущены операции, при которых изменение его состояния невозможно";
+                msg = String.format(
+                        "Для текущего экземпляра %s запущены операции, при которых изменение его состояния невозможно",
+                        MessageGenerator.mesSpeckSingleD(formData.getFormType().getTaxType())
+                );
                 break;
             case CALCULATE_FD:
                 msg = String.format("Выполнение операции \"%s\" невозможно, т.к. для текущего экземпляра налоговой формы запущена операция \"%s\". Расчет данных невозможен", getTaskName(reportType, formDataId, userInfo), getTaskName(lockType.getFirst(), formDataId, userInfo));
