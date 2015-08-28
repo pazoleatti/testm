@@ -278,7 +278,7 @@
                     </g:cell>
 
                     <g:CheckBox ui:field="showCheckedColumns" addStyleNames="{style.showCheckedColumns}"
-                                value="false" text="Показывать контрольные поля" visible="false"/>
+                                value="true" text="Показывать контрольные поля" visible="false"/>
 
                     <g:HorizontalPanel verticalAlignment="middle" ui:field="versionBlock" visible="false">
                         <g:Label addStyleNames="{style.verSep}"/>
