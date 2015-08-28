@@ -92,7 +92,7 @@ public class RefBookLinearPresenter extends PresenterWidget<RefBookLinearPresent
                                 ShowItemEvent.fire(RefBookLinearPresenter.this, null, null);
                                 /*getView().updateTable();*/
                                 dataProvider.remove(getSelectedRow());
-                                if (dataProvider.visibleData.size()!=0) {
+                                if (dataProvider.visibleData.size() != 0) {
                                     getView().setSelected(dataProvider.visibleData.get(dataProvider.visibleData.size() - 1).getRefBookRowId());
                                 }
                             }
@@ -284,5 +284,9 @@ public class RefBookLinearPresenter extends PresenterWidget<RefBookLinearPresent
         addVisibleHandler(DeleteItemEvent.getType(), this);
         addVisibleHandler(SearchButtonEvent.getType(), this);
         addVisibleHandler(UpdateForm.getType(), this);
+    }
+
+    public void cleanPage(){
+        getView().setPage(0);
     }
 }

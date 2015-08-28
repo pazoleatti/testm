@@ -34,7 +34,6 @@ import com.gwtplatform.mvp.client.proxy.PlaceManager;
 import com.gwtplatform.mvp.client.proxy.PlaceRequest;
 import com.gwtplatform.mvp.client.proxy.ProxyPlace;
 
-import java.util.Arrays;
 import java.util.Date;
 
 public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
@@ -239,6 +238,8 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
     @Override
     public void prepareFromRequest(final PlaceRequest request) {
         super.prepareFromRequest(request);
+        refBookLinearPresenter.cleanPage();
+        versionPresenter.cleanPage();
 
         refBookId = Long.parseLong(request.getParameter(RefBookDataTokens.REFBOOK_DATA_ID, null));
         refBookLinearPresenter.setRefBookId(refBookId);
