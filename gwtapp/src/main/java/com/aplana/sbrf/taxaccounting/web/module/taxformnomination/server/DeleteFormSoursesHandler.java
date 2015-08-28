@@ -1,9 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.taxformnomination.server;
 
-import com.aplana.sbrf.taxaccounting.model.DepartmentDeclarationType;
-import com.aplana.sbrf.taxaccounting.model.DepartmentFormType;
-import com.aplana.sbrf.taxaccounting.model.FormDataKind;
-import com.aplana.sbrf.taxaccounting.model.FormTypeKind;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.*;
@@ -28,6 +25,9 @@ import java.util.Set;
 @PreAuthorize("hasAnyRole('ROLE_CONTROL', 'ROLE_CONTROL_UNP', 'ROLE_CONTROL_NS')")
 public class DeleteFormSoursesHandler extends AbstractActionHandler<DeleteFormsSourseAction, DeleteFormsSourceResult> {
 
+    private static final String SOURCE_CANCEL_ERR =
+            "Не может быть отменено назначение %s-%s-%s, т.к. назначение является %s ";
+
     @Autowired
     SourceService departmentFormTypeService;
 
@@ -45,6 +45,9 @@ public class DeleteFormSoursesHandler extends AbstractActionHandler<DeleteFormsS
 
     @Autowired
     private LogEntryService logEntryService;
+
+    @Autowired
+    private PeriodService periodService;
 
     public DeleteFormSoursesHandler() {
         super(DeleteFormsSourseAction.class);
@@ -74,37 +77,37 @@ public class DeleteFormSoursesHandler extends AbstractActionHandler<DeleteFormsS
             List<DepartmentFormType> formsDestinations = departmentFormTypeService.getFormDestinations(data.getDepartment().getId(), data.getFormTypeId().intValue(), data.getKind(), null, null);
             // приемники - декларации, источников деклараций у нас не существует
             List<DepartmentDeclarationType> declarationDestinations = departmentFormTypeService.getDeclarationDestinations(data.getDepartment().getId(), data.getFormTypeId().intValue(), data.getKind(), null, null);
-            // шаблонг начала сообщения
-            final String headErrMsg = "Не может быть отменено назначение " +
-                    data.getDepartment().getName() +
-                    " - "+data.getKind().getName() +
-                    " - "+data.getName() +
-                    " т.к. назначение является ";
             // если есть источники или назначения выводим ошибку
             if (formsSources.size() != 0){
-                StringBuffer stringBuffer = new StringBuffer();
+                StringBuilder stringBuffer = new StringBuilder();
                 for (DepartmentFormType form: formsSources){
-                    stringBuffer.append(getTaxFormErrorTextPart(form.getDepartmentId(), form.getKind(), form.getFormTypeId()));
+                    stringBuffer.append(getTaxFormErrorTextPart(form));
                 }
                 // удаляем последний символ ", "
-                logger.error(headErrMsg+ " приемником для "+stringBuffer.delete(stringBuffer.length()-2, stringBuffer.length()).toString());
+                logger.error(
+                        SOURCE_CANCEL_ERR + stringBuffer.delete(stringBuffer.length()-2, stringBuffer.length()).toString(),
+                        data.getDepartment().getName(), data.getKind().getName(), data.getName(), "приемником для"
+                );
             } else if (formsDestinations.size() != 0){
-                StringBuffer stringBuffer = new StringBuffer();
+                StringBuilder stringBuffer = new StringBuilder();
                 for (DepartmentFormType form: formsDestinations){
-                    stringBuffer.append(getTaxFormErrorTextPart(form.getDepartmentId(), form.getKind(), form.getFormTypeId()));
+                    stringBuffer.append(getTaxFormErrorTextPart(form));
                 }
                 // удаляем последний символ ", "
-                logger.error(headErrMsg+ " источником для "+stringBuffer.delete(stringBuffer.length()-2, stringBuffer.length()).toString());
+                logger.error(
+                        SOURCE_CANCEL_ERR + stringBuffer.delete(stringBuffer.length()-2, stringBuffer.length()).toString(),
+                        data.getDepartment().getName(), data.getKind().getName(), data.getName(), "источником для"
+                );
             } else if (declarationDestinations.size() != 0){
-                StringBuffer stringBuffer = new StringBuffer();
+                StringBuilder stringBuffer = new StringBuilder();
                 for (DepartmentDeclarationType form: declarationDestinations){
-                    stringBuffer.append(departmentService.getDepartment(form.getDepartmentId()).getName());
-                    stringBuffer.append(" - ");
-                    stringBuffer.append(declarationTypeService.get(form.getDeclarationTypeId()).getName());
-                    stringBuffer.append(", ");
+                    stringBuffer.append(getTaxDeclarationErrorTextPart(form));
                 }
                 // удаляем последний символ ", "
-                logger.error(headErrMsg + " источником для декларации " + stringBuffer.delete(stringBuffer.length() - 2, stringBuffer.length()).toString());
+                logger.error(
+                        SOURCE_CANCEL_ERR + stringBuffer.delete(stringBuffer.length()-2, stringBuffer.length()).toString(),
+                        data.getDepartment().getName(), data.getKind().getName(), data.getName(), "источником для декларации"
+                );
             } else{
                 set.add(data.getId());
             }
@@ -121,14 +124,62 @@ public class DeleteFormSoursesHandler extends AbstractActionHandler<DeleteFormsS
         return result;
     }
 
-    private StringBuffer getTaxFormErrorTextPart(int departmentId, FormDataKind formDataKind, int formTypeId){
+    //http://conf.aplana.com/pages/viewpage.action?pageId=9583288
+    private StringBuffer getTaxFormErrorTextPart(DepartmentFormType dft){
         StringBuffer stringBuffer = new StringBuffer();
+        FormType type = formTypeService.get(dft.getFormTypeId());
+        List<ReportPeriod> periods =
+                periodService.getReportPeriodsByDateAndDepartment(type.getTaxType(), dft.getDepartmentId(), dft.getPeriodStart(), dft.getPeriodEnd());
+        String periodCombo = "";
+        if (!periods.isEmpty()){
+            if (periods.size() == 1){
+                ReportPeriod first = periods.get(0);
+                periodCombo = String.format(" в периоде %s %d", first.getName(), first.getTaxPeriod().getYear());
+            } else {
+                ReportPeriod first = periods.get(0);
+                ReportPeriod last = periods.get(periods.size()-1);
+                periodCombo = dft.getPeriodEnd() == null ?
+                        String.format(" в периоде %s %d", first.getName(), first.getTaxPeriod().getYear())
+                        :
+                        String.format(" в периоде %s %d-%s %d", first.getName(), first.getTaxPeriod().getYear(), last.getName(), last.getTaxPeriod().getYear());
+            }
+        }
 
-        stringBuffer.append(departmentService.getDepartment(departmentId).getName());
+        stringBuffer.append(departmentService.getDepartment(dft.getDepartmentId()).getName());
         stringBuffer.append(" - ");
-        stringBuffer.append(formDataKind.getName());
+        stringBuffer.append(dft.getKind().getName());
         stringBuffer.append(" - ");
-        stringBuffer.append(formTypeService.get(formTypeId).getName());
+        stringBuffer.append(type.getName());
+        stringBuffer.append(periodCombo);
+        stringBuffer.append(", ");
+
+        return stringBuffer;
+    }
+
+    private StringBuffer getTaxDeclarationErrorTextPart(DepartmentDeclarationType dft){
+        StringBuffer stringBuffer = new StringBuffer();
+        DeclarationType type = declarationTypeService.get(dft.getDeclarationTypeId());
+        List<ReportPeriod> periods =
+                periodService.getReportPeriodsByDateAndDepartment(type.getTaxType(), dft.getDepartmentId(), dft.getPeriodStart(), dft.getPeriodEnd());
+        String periodCombo = "";
+        if (!periods.isEmpty()){
+            if (periods.size() == 1){
+                ReportPeriod first = periods.get(0);
+                periodCombo = String.format(" в периоде %s %d", first.getName(), first.getTaxPeriod().getYear());
+            } else {
+                ReportPeriod first = periods.get(0);
+                ReportPeriod last = periods.get(periods.size()-1);
+                periodCombo = dft.getPeriodEnd() == null ?
+                        String.format(" в периоде %s %d", first.getName(), first.getTaxPeriod().getYear())
+                        :
+                        String.format(" в периоде %s %d-%s %d", first.getName(), first.getTaxPeriod().getYear(), last.getName(), last.getTaxPeriod().getYear());
+            }
+        }
+
+        stringBuffer.append(departmentService.getDepartment(dft.getDepartmentId()).getName());
+        stringBuffer.append(" - ");
+        stringBuffer.append(type.getName());
+        stringBuffer.append(periodCombo);
         stringBuffer.append(", ");
 
         return stringBuffer;
