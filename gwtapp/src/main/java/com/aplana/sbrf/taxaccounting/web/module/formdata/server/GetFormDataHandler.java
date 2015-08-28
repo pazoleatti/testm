@@ -127,9 +127,7 @@ public class GetFormDataHandler extends AbstractActionHandler<GetFormDataAction,
                 LockData lockDataEdit = formDataService.getObjectLock(action.getOldFormDataId(), userInfo);
                 if (lockDataEdit != null && lockDataEdit.getUserId() == userInfo.getUser().getId()) {
                     // Если есть блокировка, то удаляем задачи и откатываем изменения
-                    formDataService.unlock(action.getOldFormDataId(), userInfo);
-                    formDataService.interruptTask(action.getOldFormDataId(), userInfo, Arrays.asList(ReportType.CALCULATE_FD, ReportType.IMPORT_FD, ReportType.CHECK_FD));
-                    dataRowService.restoreCheckPoint(formDataService.getFormData(userInfo, action.getOldFormDataId(), action.isManual(), new Logger()));
+                    formDataService.restoreCheckPoint(action.getOldFormDataId(), action.isManual(), userInfo);
                 }
 			}
 		} catch (Exception e){

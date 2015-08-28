@@ -8,6 +8,7 @@ public class UnlockFormData extends UnsecuredActionImpl<UnlockFormDataResult> im
 	private long formId;
     private boolean manual;
     private boolean isPerformerLock;
+    private boolean readOnlyMode;
     private String msg;
 
 	public long getFormId() {
@@ -32,6 +33,14 @@ public class UnlockFormData extends UnsecuredActionImpl<UnlockFormDataResult> im
 
     public void setPerformerLock(boolean isPerformerLock) {
         this.isPerformerLock = isPerformerLock;
+    }
+
+    public boolean isReadOnlyMode() {
+        return readOnlyMode;
+    }
+
+    public void setReadOnlyMode(boolean readOnlyMode) {
+        this.readOnlyMode = readOnlyMode;
     }
 
     public String getMsg() {

@@ -439,7 +439,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                 dispatcher.execute(action, CallbackUtils.defaultCallback(new AsyncCallback<DataRowResult>() {
                     @Override
                     public void onSuccess(DataRowResult result) {
-                        placeManager.setOnLeaveConfirmation(null);
+                        setOnLeaveConfirmation(null);
                         modifiedRows.clear();
                         revealFormData(true, formData.isManual(), !absoluteView, null);
                     }
@@ -453,7 +453,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
 
             @Override
             public void no() {
-                placeManager.setOnLeaveConfirmation(null);
+                setOnLeaveConfirmation(null);
                 modifiedRows.clear();
                 revealFormData(true, formData.isManual(), !absoluteView, null);
             }

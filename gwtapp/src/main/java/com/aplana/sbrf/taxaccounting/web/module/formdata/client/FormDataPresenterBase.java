@@ -208,10 +208,7 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 	@Override
 	protected void onHide() {
 		super.onHide();
-		if (closeFormDataHandlerRegistration !=null ){
-			closeFormDataHandlerRegistration.removeHandler();
-		}
-        placeManager.setOnLeaveConfirmation(null);
+        setOnLeaveConfirmation(null);
         unlockForm(formData.getId(), "onHide()");
 	}
 
@@ -255,7 +252,7 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
         view.setTableLockMode(true);
         view.setColumnsData(formData.getFormColumns(), true, forceEditMode);
 
-        placeManager.setOnLeaveConfirmation(null);
+        setOnLeaveConfirmation(null);
     }
 
     /**
@@ -297,7 +294,7 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
         view.setTableLockMode(true);
         view.setColumnsData(formData.getFormColumns(), true, forceEditMode);
 
-        placeManager.setOnLeaveConfirmation(null);
+        setOnLeaveConfirmation(null);
     }
 
     /**
@@ -341,17 +338,10 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
         view.setColumnsData(formData.getFormColumns(), readOnlyMode, forceEditMode);
 
         if (taskName == null) {
-            placeManager.setOnLeaveConfirmation("Вы уверены, что хотите прекратить редактирование данных " + speck() + "? В случае выхода все несохраненные изменения будут утеряны.");
+            setOnLeaveConfirmation("Вы уверены, что хотите прекратить редактирование данных " + speck() + "? В случае выхода все несохраненные изменения будут утеряны.");
         } else {
-            placeManager.setOnLeaveConfirmation("Вы уверены, что хотите прекратить редактирование данных " + speck() +"? В случае выхода все несохраненные изменения будут утеряны и будет отменена операция \""+taskName+"\".");
+            setOnLeaveConfirmation("Вы уверены, что хотите прекратить редактирование данных " + speck() +"? В случае выхода все несохраненные изменения будут утеряны и будет отменена операция \""+taskName+"\".");
         }
-        closeFormDataHandlerRegistration = Window.addCloseHandler(new CloseHandler<Window>() {
-            @Override
-            public void onClose(CloseEvent<Window> event) {
-                closeFormDataHandlerRegistration.removeHandler();
-                unlockForm(formData.getId(), "onClose()");
-            }
-        });
     }
 
 	protected void setReadUnlockedMode() {
@@ -385,7 +375,7 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
         view.setTableLockMode(false);
         view.setColumnsData(formData.getFormColumns(), readOnlyMode, forceEditMode);
 
-        placeManager.setOnLeaveConfirmation(null);
+        setOnLeaveConfirmation(null);
 	}
 
 	protected void setEditMode() {
@@ -424,15 +414,23 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
         view.setTableLockMode(false);
         view.setColumnsData(formData.getFormColumns(), readOnlyMode, forceEditMode);
 
-        placeManager.setOnLeaveConfirmation("Вы уверены, что хотите прекратить редактирование данных " + speck() +"? В случае выхода все несохраненные изменения будут утеряны.");
-        closeFormDataHandlerRegistration = Window.addCloseHandler(new CloseHandler<Window>() {
-			@Override
-			public void onClose(CloseEvent<Window> event) {
-				closeFormDataHandlerRegistration.removeHandler();
-				unlockForm(formData.getId(), "onClose()");
-			}
-		});
+        setOnLeaveConfirmation("Вы уверены, что хотите прекратить редактирование данных " + speck() +"? В случае выхода все несохраненные изменения будут утеряны.");
 	}
+
+    protected void setOnLeaveConfirmation(String msg) {
+        placeManager.setOnLeaveConfirmation(msg);
+        if (closeFormDataHandlerRegistration != null && msg == null) {
+            closeFormDataHandlerRegistration.removeHandler();
+        } else if (closeFormDataHandlerRegistration == null && msg != null) {
+            closeFormDataHandlerRegistration = Window.addCloseHandler(new CloseHandler<Window>() {
+                @Override
+                public void onClose(CloseEvent<Window> event) {
+                    closeFormDataHandlerRegistration.removeHandler();
+                    unlockForm(formData.getId(), "onClose()");
+                }
+            });
+        }
+    }
 
 	protected void revealFormDataList() {
 		placeManager.revealPlace(new PlaceRequest.Builder().nameToken(
@@ -462,6 +460,7 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 		action.setFormId(formId);
         action.setManual(formData.isManual());
         action.setMsg(msg);
+        action.setReadOnlyMode(readOnlyMode);
 		dispatcher.execute(action, CallbackUtils.emptyCallback());
 	}
 
