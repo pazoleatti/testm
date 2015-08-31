@@ -202,8 +202,8 @@ void logicCheck() {
         def row = dataRows[i]
         def tempRow = tempRows[i]
         def checkColumns = []
-        // делаем проверку БО только для первичных НФ и для ячеек в которых она используется
-        if ((formData.kind == FormDataKind.PRIMARY) && opuMap.keySet().contains(row.getAlias()) && (!"R2".equals(row.getAlias()) || isBank())) {
+        // делаем проверку для первичных НФ или расчетных ячеек
+        if ((formData.kind == FormDataKind.PRIMARY) || !opuMap.keySet().contains(row.getAlias())) {
             checkColumns += check102Columns
         }
         checkColumns += checkCalcColumns
@@ -261,6 +261,7 @@ void calcValues(def dataRows, def sourceRows, boolean isCalc) {
 
 def getSourceValue(def periodId, def row, def alias, def isCalc) {
     def sum = BigDecimal.ZERO
+    boolean notFound404 = false
     if (periodId != null) {
         def reportPeriod = getReportPeriod(periodId)
         // если нарастающий итог, то собираем формы с начала года
@@ -274,13 +275,16 @@ def getSourceValue(def periodId, def row, def alias, def isCalc) {
             }
             if (sourceForm != null) {
                 sum += (sourceForm?.allSaved?.get(0)?.sum ?: 0)
-            } else if (isCalc) { // выводить только при расчете
-                logger.warn("Не найдена форма-источник «Величины налоговых платежей, вводимые вручную» в статусе «Принята»: Тип: \"%s/%s\", Период: \"%s %s\", Подразделение: \"%s\". Ячейки по графе «%s», заполняемые из данной формы, будут заполнены нулевым значением.",
-                        FormDataKind.CONSOLIDATED.name, FormDataKind.PRIMARY.name, period.getName(), period.getTaxPeriod().getYear(), departmentService.get(formData.departmentId)?.name, getColumnName(row, alias))
+            } else {
+                notFound404 = true
+                if (isCalc) { // выводить только при расчете
+                    logger.warn("Не найдена форма-источник «Величины налоговых платежей, вводимые вручную» в статусе «Принята»: Тип: \"%s/%s\", Период: \"%s %s\", Подразделение: \"%s\". Ячейки по графе «%s», заполняемые из данной формы, будут заполнены нулевым значением.",
+                            FormDataKind.CONSOLIDATED.name, FormDataKind.PRIMARY.name, period.getName(), period.getTaxPeriod().getYear(), departmentService.get(formData.departmentId)?.name, getColumnName(row, alias))
+                }
             }
         }
     }
-    return sum
+    return notFound404 ? BigDecimal.ZERO : sum
 }
 
 def getSourceForm(def formDataKind, def periodId) {

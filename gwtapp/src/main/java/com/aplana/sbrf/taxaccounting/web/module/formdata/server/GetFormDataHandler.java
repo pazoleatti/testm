@@ -127,9 +127,7 @@ public class GetFormDataHandler extends AbstractActionHandler<GetFormDataAction,
                 LockData lockDataEdit = formDataService.getObjectLock(action.getOldFormDataId(), userInfo);
                 if (lockDataEdit != null && lockDataEdit.getUserId() == userInfo.getUser().getId()) {
                     // Если есть блокировка, то удаляем задачи и откатываем изменения
-                    formDataService.unlock(action.getOldFormDataId(), userInfo);
-                    formDataService.interruptTask(action.getOldFormDataId(), userInfo, Arrays.asList(ReportType.CALCULATE_FD, ReportType.IMPORT_FD, ReportType.CHECK_FD));
-                    dataRowService.restoreCheckPoint(formDataService.getFormData(userInfo, action.getOldFormDataId(), action.isManual(), new Logger()));
+                    formDataService.restoreCheckPoint(action.getOldFormDataId(), action.isManual(), userInfo);
                 }
 			}
 		} catch (Exception e){
@@ -140,20 +138,27 @@ public class GetFormDataHandler extends AbstractActionHandler<GetFormDataAction,
 
 		// LOCK: Попытка заблокировать форму которую хотим получить для редактирования
 		if (!action.isReadOnly()) {
+            try {
+                LockData lockDataEdit = formDataService.getObjectLock(action.getFormDataId(), userInfo);
+                if (lockDataEdit != null && lockDataEdit.getUserId() == userInfo.getUser().getId()) {
+                    // Если есть блокировка, то удаляем задачи и откатываем изменения
+                    formDataService.restoreCheckPoint(action.getFormDataId(), action.isManual(), userInfo);
+                }
+            } catch (Exception e){
+            }
+            Pair<ReportType, LockData> lockType = formDataService.getLockTaskType(action.getFormDataId());
 			try {
-                Pair<ReportType, LockData> lockType = formDataService.getLockTaskType(action.getFormDataId());
                 // Защита от перехода в режим редактирования если нф заблокирована какой-либо операцией
-//                LockData lockImport = lockDataService.getLock(LockData.LockObjects.FORM_DATA_IMPORT.name() + "_" + action.getFormDataId());
-                if (lockType == null || ReportType.EDIT_FD.equals(lockType.getFirst())) {
+                if (lockType == null) {
                     formDataService.lock(action.getFormDataId(), action.isManual(), userInfo);
                 }
 			} catch (Exception e){
-				//
 			}
 		}
 
         try {
-            if (!action.isReadOnly()) {
+            LockData lockDataEdit = formDataService.getObjectLock(action.getFormDataId(), userInfo);
+            if (!action.isReadOnly() && lockDataEdit != null && lockDataEdit.getUserId() == userInfo.getUser().getId()) {
                 FormData formData = formDataService.getFormData(userInfo, action.getFormDataId(), action.isManual(), logger);
 				// Когда пользователь входит в режим редактирования, то создаем контрольную точку восстановления
                 dataRowService.createCheckPoint(formData);
@@ -193,7 +198,8 @@ public class GetFormDataHandler extends AbstractActionHandler<GetFormDataAction,
             return result;
         } catch (Exception e) {
 			LOG.error(e.getMessage(), e);
-            if (!action.isReadOnly()) {
+            LockData lockDataEdit = formDataService.getObjectLock(action.getFormDataId(), userInfo);
+            if (!action.isReadOnly() && lockDataEdit != null && lockDataEdit.getUserId() == userInfo.getUser().getId()) {
                 // Удаляем контрольную точку восстановления
                 FormData formData = formDataService.getFormData(userInfo, action.getFormDataId(), action.isManual(), logger);
                 dataRowService.removeCheckPoint(formData);

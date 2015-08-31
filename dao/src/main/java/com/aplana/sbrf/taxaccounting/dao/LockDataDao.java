@@ -38,8 +38,9 @@ public interface LockDataDao {
      * @param dateBefore срок жизни блокировки
      * @param description описание блокировки
      * @param state Статус асинхронной задачи, связанной с блокировкой
+     * @param serverNode Наименование узла кластера, на котором выполняется связанная асинхронная задача
      */
-	void createLock(String key, int userId, Date dateBefore, String description, String state);
+	void createLock(String key, int userId, Date dateBefore, String description, String state, String serverNode);
 
 	/**
 	 * Обновляет блокировку

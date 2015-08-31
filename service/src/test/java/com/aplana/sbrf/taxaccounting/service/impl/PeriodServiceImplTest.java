@@ -12,8 +12,11 @@ import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.PeriodService;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
-import org.springframework.test.util.ReflectionTestUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.util.*;
 
@@ -21,12 +24,23 @@ import static com.aplana.sbrf.taxaccounting.test.UserMockUtils.mockUser;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration("PeriodServiceImplTest.xml")
 public class PeriodServiceImplTest {
-    PeriodService service = new PeriodServiceImpl();
+    @Autowired
+    PeriodService periodService;
+    @Autowired
+    ReportPeriodDao reportPeriodDao;
+    @Autowired
+    TaxPeriodDao taxPeriodDao;
+    @Autowired
+    RefBookDataProvider provider;
+    @Autowired
+    RefBookFactory rbFactory;
+
     private static final Long PERIOD_CODE_REFBOOK = 8L;
     private final static String LOCAL_IP = "127.0.0.1";
     private static final int CONTROL_USER_ID = 2;
-    ReportPeriodDao reportPeriodDao;
 
     @Before
     public void init(){
@@ -55,15 +69,11 @@ public class PeriodServiceImplTest {
         taxPeriodList.add(taxPeriod2);
 
         // Mock для taxPeriodDao
-        TaxPeriodDao taxPeriodDao = mock(TaxPeriodDao.class);
         when(taxPeriodDao.get(1)).thenReturn(taxPeriod1);
         when(taxPeriodDao.get(2)).thenReturn(taxPeriod2);
         when(taxPeriodDao.get(3)).thenReturn(taxPeriod3);
         when(taxPeriodDao.listByTaxType(TaxType.TRANSPORT)).thenReturn(taxPeriodList);
         when(taxPeriodDao.getByTaxTypeAndYear(TaxType.TRANSPORT, 2012)).thenReturn(taxPeriod1);
-
-        ReflectionTestUtils.setField(service, "taxPeriodDao", taxPeriodDao);
-
         /**
          * подготовим отчетные периоды для 1 налогового
          */
@@ -162,8 +172,6 @@ public class PeriodServiceImplTest {
 
 
         // Mock для reportPeriodDao
-        reportPeriodDao = mock(ReportPeriodDao.class);
-
         // перехват вызова функции получения отчетного периода по налоговому и возвращение нашего reportPeriod
         when(reportPeriodDao.get(1)).thenReturn(reportPeriod11);
         when(reportPeriodDao.get(2)).thenReturn(reportPeriod12);
@@ -176,16 +184,12 @@ public class PeriodServiceImplTest {
         when(reportPeriodDao.listByTaxPeriod(2)).thenReturn(reportPeriodListBy2Period);
         when(reportPeriodDao.listByTaxPeriod(3)).thenReturn(reportPeriodListBy3Period);
 
-        ReflectionTestUtils.setField(service, "reportPeriodDao", reportPeriodDao);
-
-        RefBookFactory rbFactory = mock(RefBookFactory.class);
         RefBook refBook = new RefBook(){{
             setId(PERIOD_CODE_REFBOOK);
             setName("REFBOOK_NAME");
         }};
         when(rbFactory.get(PERIOD_CODE_REFBOOK)).thenReturn(refBook);
 
-        RefBookDataProvider provider = mock(RefBookDataProvider.class);
         when(rbFactory.getDataProvider(PERIOD_CODE_REFBOOK)).thenReturn(provider);
         Map<String, RefBookValue> record = new HashMap<String, RefBookValue>();
         record.put("NAME", new RefBookValue(RefBookAttributeType.STRING, "NAME"));
@@ -194,7 +198,6 @@ public class PeriodServiceImplTest {
         record.put("END_DATE", new RefBookValue(RefBookAttributeType.DATE, new Date(101, Calendar.FEBRUARY, 28)));
         record.put("CALENDAR_START_DATE", new RefBookValue(RefBookAttributeType.DATE, new Date(101, Calendar.FEBRUARY, 1)));
         when(provider.getRecordData(1L)).thenReturn(record);
-        ReflectionTestUtils.setField(service, "rbFactory", rbFactory);
     }
 
 	private void checkDates(int year, int month, int day, Date date) {
@@ -212,52 +215,52 @@ public class PeriodServiceImplTest {
 
     @Test
     public void getStartDate(){
-		checkDates(2012, Calendar.APRIL, 1, service.getReportPeriod(2).getStartDate());
+		checkDates(2012, Calendar.APRIL, 1, periodService.getReportPeriod(2).getStartDate());
     }
 
     @Test
     public void getEndDate(){
-		checkDates(2012, Calendar.JUNE, 30, service.getReportPeriod(2).getEndDate());
+		checkDates(2012, Calendar.JUNE, 30, periodService.getReportPeriod(2).getEndDate());
     }
 
     @Test
     public void getReportDate(){
-		checkDates(2012, Calendar.JULY, 1, service.getReportDate(2).getTime());
+		checkDates(2012, Calendar.JULY, 1, periodService.getReportDate(2).getTime());
     }
 
     @Test
     public void getStartDateIncome(){
-		checkDates(2012, Calendar.JANUARY, 1, service.getReportPeriod(8).getStartDate());
+		checkDates(2012, Calendar.JANUARY, 1, periodService.getReportPeriod(8).getStartDate());
     }
 
 	@Test
 	public void getCalendarStartDateIncome(){
-		checkDates(2012, Calendar.APRIL, 1, service.getReportPeriod(8).getCalendarStartDate());
+		checkDates(2012, Calendar.APRIL, 1, periodService.getReportPeriod(8).getCalendarStartDate());
 	}
 
     @Test
     public void getEndDateIncome(){
-		checkDates(2012, Calendar.JUNE, 30, service.getReportPeriod(8).getEndDate());
+		checkDates(2012, Calendar.JUNE, 30, periodService.getReportPeriod(8).getEndDate());
     }
 
     @Test
     public void getForthTransportPeriod(){
-		checkDates(2012, Calendar.OCTOBER, 1, service.getReportPeriod(4).getStartDate());
+		checkDates(2012, Calendar.OCTOBER, 1, periodService.getReportPeriod(4).getStartDate());
     }
 
     @Test
     public void getMonthStartDate() {
-		checkDates(2012, Calendar.MAY, 1, service.getMonthStartDate(8, 5).getTime());
+		checkDates(2012, Calendar.MAY, 1, periodService.getMonthStartDate(8, 5).getTime());
     }
 
     @Test
     public void getMonthEndDate() {
-		checkDates(2012, Calendar.MAY, 31, service.getMonthEndDate(8, 5).getTime());
+		checkDates(2012, Calendar.MAY, 31, periodService.getMonthEndDate(8, 5).getTime());
     }
 
     @Test
     public void getMonthReportDate() {
-		checkDates(2012, Calendar.JUNE, 1, service.getMonthReportDate(8, 5).getTime());
+		checkDates(2012, Calendar.JUNE, 1, periodService.getMonthReportDate(8, 5).getTime());
     }
 
     /*
@@ -265,8 +268,8 @@ public class PeriodServiceImplTest {
      */
     @Test
     public void getPrevReportPeriodInSide(){
-        assertNotNull(service.getPrevReportPeriod(2));
-        assertTrue(service.getPrevReportPeriod(2).getId() == 1);
+        assertNotNull(periodService.getPrevReportPeriod(2));
+        assertTrue(periodService.getPrevReportPeriod(2).getId() == 1);
     }
 
     /*
@@ -274,8 +277,8 @@ public class PeriodServiceImplTest {
      */
     @Test
     public void getPrevReportPeriodOutSide(){
-        service.getPrevReportPeriod(5);
-        assertEquals(service.getPrevReportPeriod(5).getId().intValue(), 4);
+        periodService.getPrevReportPeriod(5);
+        assertEquals(periodService.getPrevReportPeriod(5).getId().intValue(), 4);
     }
 
     @Test
@@ -283,7 +286,7 @@ public class PeriodServiceImplTest {
         TAUserInfo userInfo = new TAUserInfo();
         userInfo.setIp(LOCAL_IP);
         userInfo.setUser(mockUser(CONTROL_USER_ID, 1, TARole.ROLE_CONTROL));
-        service.open(2012, 1, TaxType.TRANSPORT, userInfo, 1, new ArrayList<LogEntry>(), false, new Date());
+        periodService.open(2012, 1, TaxType.TRANSPORT, userInfo, 1, new ArrayList<LogEntry>(), false, new Date());
 
         ArgumentCaptor<ReportPeriod> argument = ArgumentCaptor.forClass(ReportPeriod.class);
         verify(reportPeriodDao, times(1)).save(argument.capture());

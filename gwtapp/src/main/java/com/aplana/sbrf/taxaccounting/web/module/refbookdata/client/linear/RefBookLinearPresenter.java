@@ -92,7 +92,7 @@ public class RefBookLinearPresenter extends PresenterWidget<RefBookLinearPresent
                                 ShowItemEvent.fire(RefBookLinearPresenter.this, null, null);
                                 /*getView().updateTable();*/
                                 dataProvider.remove(getSelectedRow());
-                                if (dataProvider.visibleData.size()!=0) {
+                                if (dataProvider.visibleData.size() != 0) {
                                     getView().setSelected(dataProvider.visibleData.get(dataProvider.visibleData.size() - 1).getRefBookRowId());
                                 }
                             }
@@ -191,6 +191,12 @@ public class RefBookLinearPresenter extends PresenterWidget<RefBookLinearPresent
     @Override
     protected void onReveal() {
         super.onReveal();
+    }
+
+    @Override
+    protected void onReset() {
+        super.onReset();
+        getView().setPage(0);
     }
 
     private class TableDataProvider extends AsyncDataProvider<RefBookDataRow> {

@@ -387,7 +387,7 @@
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>taxSumToPay</alias>
-        <checking>true</checking>
+        <checking>false</checking>
         <columnType>NUMBER</columnType>
         <name>Исчисленная сумма налога, подлежащая уплате в бюджет (руб.)</name>
         <order>38</order>
