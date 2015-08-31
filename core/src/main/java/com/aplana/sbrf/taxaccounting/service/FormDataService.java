@@ -206,7 +206,7 @@ public interface FormDataService {
 	 * @param userInfo информация о пользователе
 	 * true - если удалось разблокировать налоговую форму, иначе - false
 	 * */
-	void unlock(long formDataId, TAUserInfo userInfo);
+	Boolean unlock(long formDataId, TAUserInfo userInfo);
 
 	/**
 	 * Получить информацию о состоянии блокировки налоговой формы.
@@ -467,4 +467,11 @@ public interface FormDataService {
      * @param userId
      */
     void interruptTask(long formDataId, boolean manual, int userId, ReportType reportType);
+
+    /**
+     * Откатывает все изменения, отменяет асинх задачи, снимает блокирови и восстанавливает данные из контрольной точки
+     *
+     * @param formData
+     */
+    void restoreCheckPoint(long formDataId, boolean manual, TAUserInfo userInfo);
 }

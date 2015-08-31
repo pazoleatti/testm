@@ -77,16 +77,17 @@ public class LockDataDaoImpl extends AbstractDao implements LockDataDao {
     }
 
     @Override
-    public void createLock(String key, int userId, Date dateBefore, String description, String state) {
+    public void createLock(String key, int userId, Date dateBefore, String description, String state, String serverNode) {
         try {
-            getJdbcTemplate().update("INSERT INTO lock_data (key, user_id, date_before, description, state, state_date) VALUES (?,?,?,?,?,sysdate)",
+            getJdbcTemplate().update("INSERT INTO lock_data (key, user_id, date_before, description, state, state_date, server_node) VALUES (?,?,?,?,?,sysdate,?)",
                     new Object[] {key,
                             userId,
                             dateBefore,
                             description,
-                            state
+                            state,
+                            serverNode
                     },
-                    new int[] {Types.VARCHAR, Types.NUMERIC, Types.TIMESTAMP, Types.VARCHAR, Types.VARCHAR});
+                    new int[] {Types.VARCHAR, Types.NUMERIC, Types.TIMESTAMP, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR});
         } catch (DataAccessException e) {
             throw new LockException("Ошибка при создании блокировки (%s, %s, %s). %s", key, userId, dateBefore, e.getMessage());
         }

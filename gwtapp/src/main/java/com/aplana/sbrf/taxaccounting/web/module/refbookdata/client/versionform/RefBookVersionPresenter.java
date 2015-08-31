@@ -99,6 +99,7 @@ public class RefBookVersionPresenter extends PresenterWidget<RefBookVersionPrese
         Integer getSelectedRowIndex();
 
         void deleteRowButtonClicked();
+        void setPage(int page);
     }
 
     @Override
@@ -250,5 +251,11 @@ public class RefBookVersionPresenter extends PresenterWidget<RefBookVersionPrese
     @Override
     public void setMode(FormMode mode) {
         getView().updateMode(mode);
+    }
+
+    @Override
+    protected void onReset() {
+        super.onReset();
+        getView().setPage(0);
     }
 }

@@ -180,7 +180,12 @@ public class RefBookVersionView extends ViewWithUiHandlers<RefBookVersionUiHandl
         });*/
 	}
 
-    @Override
+	@Override
+	public void setPage(int page) {
+		pager.setPage(page);
+	}
+
+	@Override
     public void updateMode(FormMode mode) {
         refBookDataTable.setEnabled(mode != FormMode.CREATE);
     }

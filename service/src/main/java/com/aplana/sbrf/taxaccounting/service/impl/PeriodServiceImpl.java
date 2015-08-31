@@ -179,7 +179,7 @@ public class PeriodServiceImpl implements PeriodService {
         int reportPeriodId = drp.getReportPeriod().getId();
         if (checkBeforeClose(departments, reportPeriodId, logs, user.getUser())) {
             DepartmentReportPeriodFilter filter = new DepartmentReportPeriodFilter();
-            filter.setReportPeriodIdList(Arrays.asList(reportPeriodId));
+            filter.setReportPeriodIdList(Collections.singletonList(reportPeriodId));
             filter.setDepartmentIdList(getAvailableDepartments(taxType, user.getUser(), Operation.CLOSE, drp.getDepartmentId()));
             if (drp.getCorrectionDate() == null)
                 filter.setIsCorrection(false);
@@ -222,8 +222,8 @@ public class PeriodServiceImpl implements PeriodService {
 	@Override
     public void saveOrOpen(DepartmentReportPeriod departmentReportPeriod, List<LogEntry> logs) {
         DepartmentReportPeriodFilter filter = new DepartmentReportPeriodFilter();
-        filter.setDepartmentIdList(Arrays.asList(departmentReportPeriod.getDepartmentId()));
-        filter.setReportPeriodIdList(Arrays.asList(departmentReportPeriod.getReportPeriod().getId()));
+        filter.setDepartmentIdList(Collections.singletonList(departmentReportPeriod.getDepartmentId()));
+        filter.setReportPeriodIdList(Collections.singletonList(departmentReportPeriod.getReportPeriod().getId()));
         filter.setCorrectionDate(departmentReportPeriod.getCorrectionDate());
 
         List<DepartmentReportPeriod> departmentReportPeriodList = departmentReportPeriodService.getListByFilter(filter);
@@ -359,8 +359,8 @@ public class PeriodServiceImpl implements PeriodService {
 		else {
 			if (existForDepartment(departmentId, reportPeriods.get(0).getId())) {
                 DepartmentReportPeriodFilter filter = new DepartmentReportPeriodFilter();
-                filter.setReportPeriodIdList(Arrays.asList(reportPeriods.get(0).getId()));
-                filter.setDepartmentIdList(Arrays.asList(departmentId));
+                filter.setReportPeriodIdList(Collections.singletonList(reportPeriods.get(0).getId()));
+                filter.setDepartmentIdList(Collections.singletonList(departmentId));
                 filter.setIsCorrection(false);
                 List<DepartmentReportPeriod> departmentReportPeriodList = departmentReportPeriodService.getListByFilter(filter);
 
@@ -382,8 +382,8 @@ public class PeriodServiceImpl implements PeriodService {
                             return PeriodStatusBeforeOpen.BALANCE_STATUS_CHANGED;
                         }
                         filter = new DepartmentReportPeriodFilter();
-                        filter.setReportPeriodIdList(Arrays.asList(reportPeriods.get(0).getId()));
-                        filter.setDepartmentIdList(Arrays.asList(departmentId));
+                        filter.setReportPeriodIdList(Collections.singletonList(reportPeriods.get(0).getId()));
+                        filter.setDepartmentIdList(Collections.singletonList(departmentId));
                         filter.setIsCorrection(true);
                         departmentReportPeriodList = departmentReportPeriodService.getListByFilter(filter);
                         if (!departmentReportPeriodList.isEmpty()){
@@ -399,7 +399,7 @@ public class PeriodServiceImpl implements PeriodService {
 
 	@Override
 	public Set<ReportPeriod> getOpenForUser(TAUser user, TaxType taxType) {
-		List<Integer> departments = departmentService.getTaxFormDepartments(user, Arrays.asList(taxType), null, null);
+		List<Integer> departments = departmentService.getTaxFormDepartments(user, Collections.singletonList(taxType), null, null);
 		if (user.hasRole(TARole.ROLE_CONTROL_UNP)
 				|| user.hasRole(TARole.ROLE_CONTROL_NS)
 				|| user.hasRole(TARole.ROLE_CONTROL)
@@ -428,7 +428,7 @@ public class PeriodServiceImpl implements PeriodService {
             dataFilter.setCorrectionTag(false);
         }
         dataFilter.setDepartmentIds(departmentIds);
-        dataFilter.setReportPeriodIds(Arrays.asList(drp.getReportPeriod().getId()));
+        dataFilter.setReportPeriodIds(Collections.singletonList(drp.getReportPeriod().getId()));
         List<FormData> formDatas = formDataSearchService.findDataByFilter(dataFilter);
         for (FormData fd : formDatas) {
             logger.error("Форма \"%s\" \"%s\" в подразделении \"%s\" находится в удаляемом периоде!",
@@ -462,8 +462,8 @@ public class PeriodServiceImpl implements PeriodService {
             //3 Существуют ли корректирующий период
             DepartmentReportPeriodFilter drpFilter = new DepartmentReportPeriodFilter();
             drpFilter.setIsCorrection(true);
-            drpFilter.setReportPeriodIdList(Arrays.asList(reportPeriodId));
-            drpFilter.setDepartmentIdList(Arrays.asList(drp.getDepartmentId()));
+            drpFilter.setReportPeriodIdList(Collections.singletonList(reportPeriodId));
+            drpFilter.setDepartmentIdList(Collections.singletonList(drp.getDepartmentId()));
             List<Integer> corrIds = departmentReportPeriodService.getListIdsByFilter(drpFilter);
             if (!corrIds.isEmpty()){
                 logger.error("Удаление периода невозможно, т.к. для него существует корректирующий период!");
@@ -490,8 +490,8 @@ public class PeriodServiceImpl implements PeriodService {
         }
 		for (Integer dep : departments) {
 			DeclarationDataFilter filter = new DeclarationDataFilter();
-			filter.setDepartmentIds(Arrays.asList(dep));
-			filter.setReportPeriodIds(Arrays.asList(reportPeriodId));
+			filter.setDepartmentIds(Collections.singletonList(dep));
+			filter.setReportPeriodIds(Collections.singletonList(reportPeriodId));
 			filter.setSearchOrdering(DeclarationDataSearchOrdering.ID);
 			if (!declarationDataSearchService.search(filter).isEmpty()) {
 				blockedBy.add(dep);
@@ -520,7 +520,7 @@ public class PeriodServiceImpl implements PeriodService {
         DepartmentReportPeriodFilter filter = new DepartmentReportPeriodFilter();
         filter.setCorrectionDate(correctionDate);
         filter.setDepartmentIdList(departmentIds);
-        filter.setReportPeriodIdList(Arrays.asList(reportPeriodId));
+        filter.setReportPeriodIdList(Collections.singletonList(reportPeriodId));
         List<Integer> drpIds = departmentReportPeriodService.getListIdsByFilter(filter);
         departmentReportPeriodService.delete(drpIds);
 		for (Integer id : departmentIds) {
@@ -590,7 +590,7 @@ public class PeriodServiceImpl implements PeriodService {
 				case TRANSPORT:
 					switch (operation) {
 						case FIND:
-							return Arrays.asList(departmentId);
+							return Collections.singletonList(departmentId);
 						case OPEN:
 						case CLOSE:
 						case DELETE:
@@ -765,8 +765,8 @@ public class PeriodServiceImpl implements PeriodService {
     @Override
     public PeriodStatusBeforeOpen checkPeriodStatusBeforeOpen(ReportPeriod reportPeriod, int departmentId, Date term) {
         DepartmentReportPeriodFilter filter = new DepartmentReportPeriodFilter();
-        filter.setDepartmentIdList(Arrays.asList(departmentId));
-        filter.setReportPeriodIdList(Arrays.asList(reportPeriod.getId()));
+        filter.setDepartmentIdList(Collections.singletonList(departmentId));
+        filter.setReportPeriodIdList(Collections.singletonList(reportPeriod.getId()));
         filter.setIsCorrection(true);
         List<DepartmentReportPeriod> drpList = departmentReportPeriodService.getListByFilter(filter);
         if (!drpList.isEmpty()) {
@@ -795,8 +795,8 @@ public class PeriodServiceImpl implements PeriodService {
         //Система проверяет статус периода корректировки (конкретный период ищем, т.е. д.б. одно значение)
         filter = new DepartmentReportPeriodFilter();
         filter.setIsCorrection(false);
-        filter.setDepartmentIdList(Arrays.asList(departmentId));
-        filter.setReportPeriodIdList(Arrays.asList(reportPeriod.getId()));
+        filter.setDepartmentIdList(Collections.singletonList(departmentId));
+        filter.setReportPeriodIdList(Collections.singletonList(reportPeriod.getId()));
         List<DepartmentReportPeriod> onePeriod = departmentReportPeriodService.getListByFilter(filter);
         if (!onePeriod.isEmpty() && onePeriod.size()!=1){
             throw new ServiceException("Найдено больше одного периода корректировки с заданной датой корректировки.");
@@ -827,7 +827,7 @@ public class PeriodServiceImpl implements PeriodService {
         if ((rp.getDictTaxPeriodId() == newDictTaxPeriodId) && (rp.getTaxPeriod().getYear() == newYear)) { // Изменился только ввод остатков
 
             DepartmentReportPeriodFilter filter = new DepartmentReportPeriodFilter();
-            filter.setReportPeriodIdList(Arrays.asList(reportPeriodId));
+            filter.setReportPeriodIdList(Collections.singletonList(reportPeriodId));
             filter.setIsCorrection(false);
             filter.setDepartmentIdList(depIds);
             departmentReportPeriodService.updateBalance(departmentReportPeriodService.getListIdsByFilter(filter), isBalance);
@@ -859,7 +859,7 @@ public class PeriodServiceImpl implements PeriodService {
                 List<Integer> depIds = getAvailableDepartments(taxType, user.getUser(), Operation.EDIT, newDepartmentId);
                 DepartmentReportPeriodFilter filter = new DepartmentReportPeriodFilter();
                 filter.setCorrectionDate(correctionDate);
-                filter.setReportPeriodIdList(Arrays.asList(reportPeriodId));
+                filter.setReportPeriodIdList(Collections.singletonList(reportPeriodId));
                 filter.setDepartmentIdList(depIds);
                 List<Integer> drpIds = departmentReportPeriodService.getListIdsByFilter(filter);
                 for (Integer drpId : drpIds) {
@@ -913,5 +913,10 @@ public class PeriodServiceImpl implements PeriodService {
     @Override
     public List<ReportPeriod> getReportPeriodsByDate(TaxType taxType, Date startDate, Date endDate) {
         return reportPeriodDao.getReportPeriodsByDate(taxType, startDate, endDate);
+    }
+
+    @Override
+    public List<ReportPeriod> getReportPeriodsByDateAndDepartment(TaxType taxType, int depId, Date startDate, Date endDate) {
+        return reportPeriodDao.getReportPeriodsByDateAndDepartment(taxType, depId, startDate, endDate);
     }
 }

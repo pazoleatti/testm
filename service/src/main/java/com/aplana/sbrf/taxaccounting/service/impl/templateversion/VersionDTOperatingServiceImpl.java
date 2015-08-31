@@ -28,7 +28,7 @@ public class VersionDTOperatingServiceImpl implements VersionOperatingService {
     private static final String MSG_HAVE_DESTINATION =
             "Существует назначение налоговой формы в качестве источника данных для декларации вида \"%s\" в подразделении \"%s\" начиная с периода %s!";
     private static final String MSG_HAVE_SOURCE =
-            "Существует назначение декларации в качестве приёмника данных для налоговой формы типа \"%s\" вида \"%s\" в подразделении \"%s\" начиная с периода %s!";
+            "Существует назначение декларации в качестве приёмника данных для %s типа \"%s\" вида \"%s\" в подразделении \"%s\" начиная с периода %s!";
 
     private static final SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
 
@@ -162,8 +162,10 @@ public class VersionDTOperatingServiceImpl implements VersionOperatingService {
         List<Pair<DepartmentDeclarationType, Pair<Date, Date>>> destinationPairs = sourceService.findDestinationDTsForFormType(typeId, versionActualDateStart, versionActualDateEnd);
         for (Pair<DepartmentFormType, Pair<Date, Date>> pair : sourcePairs){
             DepartmentFormType first = pair.getFirst();
+            FormType typeSource = formTypeService.get(first.getFormTypeId());
             logger.error(
                     String.format(MSG_HAVE_SOURCE,
+                            MessageGenerator.mesSpeckPlural(typeSource.getTaxType()),
                             first.getKind().getTitle(),
                             formTypeService.get(first.getFormTypeId()).getName(),
                             departmentService.getDepartment(first.getDepartmentId()).getName(),
