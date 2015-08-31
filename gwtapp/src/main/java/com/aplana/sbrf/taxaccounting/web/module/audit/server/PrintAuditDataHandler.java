@@ -34,6 +34,7 @@ import java.util.HashMap;
 public class PrintAuditDataHandler extends AbstractActionHandler<PrintAuditDataAction, PrintAuditDataResult> {
 
     private static final SimpleDateFormat SDF = new SimpleDateFormat("dd.MM.yyyy");
+    private static final String SEARCH_CRITERIA = "От даты: \"%s\", До даты: \"%s\", Критерий поиска: \"%s\", Искать в найденном: \"%s\", Искать по полям: \"%s\"";
 
     @Autowired
     BlobDataService blobDataService;
@@ -59,6 +60,19 @@ public class PrintAuditDataHandler extends AbstractActionHandler<PrintAuditDataA
         PrintAuditDataResult result = new PrintAuditDataResult();
         TAUserInfo userInfo = securityService.currentUserInfo();
         LogSystemAuditFilter filter = action.getLogSystemFilter();
+        StringBuilder builder = new StringBuilder();
+        for (Long aLong : filter.getAuditFieldList()) {
+            builder.append(AuditFieldList.fromId(aLong).getName()).append(", ");
+        }
+        String fields = builder.substring(0, builder.toString().length() - 2);
+
+        String searchCriteria = String.format(SEARCH_CRITERIA,
+                SDF.format(filter.getFromSearchDate()),
+                SDF.format(filter.getToSearchDate()),
+                filter.getFilter() != null ? filter.getFilter() : "Не задано",
+                filter.getOldLogSystemAuditFilter() == null ? "Нет" : "Да",
+                fields
+        );
         Logger logger = new Logger();
         long recordsCount = auditService.getCountRecords(action.getLogSystemFilter().convertTo(), userInfo);
         if (recordsCount==0) {
@@ -81,10 +95,7 @@ public class PrintAuditDataHandler extends AbstractActionHandler<PrintAuditDataA
             if ((lockData = lockDataService.lock(key, userInfo.getUser().getId(),
                     String.format(
                             LockData.DescriptionTemplate.LOG_SYSTEM_CSV.getText(),
-                            filter.getFilter() != null ?
-                                    action.getLogSystemFilter().getFilter()
-                                    :
-                                    String.format("От даты: \"%s\", До даты: \"%s\"", SDF.format(filter.getFromSearchDate()), SDF.format(filter.getToSearchDate()))
+                            searchCriteria
                     ),
                     LockData.State.IN_QUEUE.getText(),
                     lockDataService.getLockTimeout(LockData.LockObjects.LOG_SYSTEM_CSV))) == null) {
