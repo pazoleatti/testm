@@ -557,6 +557,9 @@ public class FormDataServiceImpl implements FormDataService {
                         logger.info("Консолидация выполнена из всех форм-источников");
                     }
                 }
+                if (logger.containsLevel(LogLevel.ERROR)){
+                    throw new ServiceLoggerException("", logEntryService.save(logger.getEntries()));
+                }
 
 				logger.info("Проверка завершена, фатальных ошибок не обнаружено");
 				return null;
@@ -1338,12 +1341,11 @@ public class FormDataServiceImpl implements FormDataService {
 
 	@Override
 	@Transactional(propagation = Propagation.REQUIRED)
-	public void unlock(final long formDataId, final TAUserInfo userInfo) {
-        tx.executeInNewTransaction(new TransactionLogic() {
+	public Boolean unlock(final long formDataId, final TAUserInfo userInfo) {
+        return tx.executeInNewTransaction(new TransactionLogic<Boolean>() {
             @Override
-            public Object execute() {
-                lockService.unlock(generateTaskKey(formDataId, ReportType.EDIT_FD), userInfo.getUser().getId());
-				return null;
+            public Boolean execute() {
+                return lockService.unlock(generateTaskKey(formDataId, ReportType.EDIT_FD), userInfo.getUser().getId());
             }
         });
 	}
@@ -1410,7 +1412,7 @@ public class FormDataServiceImpl implements FormDataService {
                 logger.error(
                         MessageGenerator.getFDMsg(
                                 String.format(MSG_IS_EXIST_FORM,
-                                        ft.getType().getTaxType() == TaxType.ETR || ft.getType().getTaxType() == TaxType.DEAL ? "оррм" : "налоговых форм"),
+                                        ft.getType().getTaxType() == TaxType.ETR || ft.getType().getTaxType() == TaxType.DEAL ? "форм" : "налоговых форм"),
                                 formData,
                                 departmentService.getDepartment(departmentId).getName(),
                                 formData.isManual(),
@@ -1755,6 +1757,7 @@ public class FormDataServiceImpl implements FormDataService {
         TAUserInfo userInfo = new TAUserInfo();
         userInfo.setUser(user);
         String msg = "";
+        FormData formData = formDataDao.get(formDataId, false);
         switch (reportType) {
             case CONSOLIDATE_FD:
                 logger.error(
@@ -1777,13 +1780,22 @@ public class FormDataServiceImpl implements FormDataService {
         switch (reportType) {
             case EXCEL:
             case CSV:
-                msg = "Для текущего экземпляра налоговой формы запущены операции, при которых формирование отчета невозможно";
+                msg = String.format(
+                        "Для текущего экземпляра %s запущены операции, при которых формирование отчета невозможно",
+                        MessageGenerator.mesSpeckSingleD(formData.getFormType().getTaxType())
+                );
                 break;
             case CHECK_FD:
-                msg = "Для текущего экземпляра налоговой формы запущены операции, при которых ее проверка невозможна";
+                msg = String.format(
+                        "Для текущего экземпляра %s запущены операции, при которых ее проверка невозможна",
+                        MessageGenerator.mesSpeckSingleD(formData.getFormType().getTaxType())
+                );
                 break;
             case MOVE_FD:
-                msg = "Для текущего экземпляра налоговой формы запущены операции, при которых изменение его состояния невозможно";
+                msg = String.format(
+                        "Для текущего экземпляра %s запущены операции, при которых изменение его состояния невозможно",
+                        MessageGenerator.mesSpeckSingleD(formData.getFormType().getTaxType())
+                );
                 break;
             case CALCULATE_FD:
                 msg = String.format("Выполнение операции \"%s\" невозможно, т.к. для текущего экземпляра налоговой формы запущена операция \"%s\". Расчет данных невозможен", getTaskName(reportType, formDataId, userInfo), getTaskName(lockType.getFirst(), formDataId, userInfo));
@@ -1864,6 +1876,7 @@ public class FormDataServiceImpl implements FormDataService {
                 return String.format(reportType.getDescription(), formData.getFormType().getTaxType().getTaxText());
             case EXCEL:
             case CSV:
+                return String.format(reportType.getDescription(), MessageGenerator.mesSpeckSingleD(formData.getFormType().getTaxType()));
             case IMPORT_FD:
             case IMPORT_TF_FD:
                 return reportType.getDescription();
@@ -1964,6 +1977,15 @@ public class FormDataServiceImpl implements FormDataService {
                     lockService.interruptTask(lock, userId, true);
                 }
             }
+        }
+    }
+
+    @Override
+    public void restoreCheckPoint(long formDataId, boolean manual, TAUserInfo userInfo) {
+        interruptTask(formDataId, userInfo, Arrays.asList(ReportType.CALCULATE_FD, ReportType.IMPORT_FD, ReportType.CHECK_FD));
+        dataRowDao.restoreCheckPoint(getFormData(userInfo, formDataId, manual, new Logger()));
+        if (!unlock(formDataId, userInfo)) {
+            throw new ServiceException("Форма не заблокирована текущим пользователем, formDataId = %s", formDataId);
         }
     }
 }

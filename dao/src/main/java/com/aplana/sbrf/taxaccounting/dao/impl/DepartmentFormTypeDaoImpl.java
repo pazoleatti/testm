@@ -25,7 +25,7 @@ import java.util.*;
 @Transactional(readOnly = true)
 public class DepartmentFormTypeDaoImpl extends AbstractDao implements DepartmentFormTypeDao {
 
-	private static final Log logger = LogFactory.getLog(DepartmentFormTypeDaoImpl.class);
+	private static final Log LOG = LogFactory.getLog(DepartmentFormTypeDaoImpl.class);
 
     @Autowired
     DepartmentDao departmentDao;
@@ -498,7 +498,8 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
         );
     }
 
-    private static final String GET_ALL_DEPARTMENT_SOURCES_SQL = "select * from department_form_type src_dft where "
+    private static final String GET_ALL_DEPARTMENT_SOURCES_SQL = "select src_dft.id, src_dft.department_id, src_dft.form_type_id, "
+			+ "src_dft.kind, src_dft.performer_dep_id from department_form_type src_dft where "
             + "exists (select 1 from department_form_type dft, form_data_source fds, form_type src_ft where "
             + "fds.department_form_type_id=dft.id and fds.src_department_form_type_id=src_dft.id and src_ft.id = src_dft.form_type_id "
             + "and (:periodStart is null or ((fds.period_end >= :periodStart or fds.period_end is null) and (:periodEnd is null or fds.period_start <= :periodEnd))) "
@@ -523,12 +524,12 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
     }
 
 
-    private final static String GET_SQL = "select * from department_form_type where department_id=?";
+    private static final String GET_SQL = "SELECT id, department_id, form_type_id, kind, performer_dep_id FROM department_form_type WHERE department_id=?";
 
     @Override
     public List<DepartmentFormType> getByListIds(List<Long> ids) {
         return getJdbcTemplate().query(
-                "select ID, DEPARTMENT_ID, FORM_TYPE_ID, KIND, PERFORMER_DEP_ID from DEPARTMENT_FORM_TYPE where " +
+                "SELECT id, department_id, form_type_id, kind, performer_dep_id FROM department_form_type WHERE " +
                         SqlUtils.transformToSqlInStatement("id", ids),
                 DFT_MAPPER);
     }
@@ -537,14 +538,14 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
     public List<DepartmentFormType> getByDepartment(int departmentId) {
         return getJdbcTemplate().query(
                 GET_SQL,
-                new Object[]{
-                        departmentId
-                },
+                new Object[]{departmentId},
                 DFT_MAPPER
         );
     }
 
-    private final static String GET_SQL_BY_TAX_TYPE_SQL = "select src_dft.*, ft.name from department_form_type src_dft\n" +
+    private static final String GET_SQL_BY_TAX_TYPE_SQL = "select " +
+			"src_dft.id, src_dft.department_id, src_dft.form_type_id, src_dft.kind, src_dft.performer_dep_id, " +
+			"ft.name from department_form_type src_dft\n" +
             "LEFT JOIN form_type ft ON src_dft.FORM_TYPE_ID = ft.ID\n" +
             "where department_id = :departmentId and exists (\n" +
             "select 1 from form_type ft \n" +
@@ -574,18 +575,17 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
         return getNamedParameterJdbcTemplate().query(GET_SQL_BY_TAX_TYPE_SQL + getSortingClause(queryParams), params, DFT_MAPPER);
     }
 
-    private final static String GET_SQL_BY_TAX_TYPE_SQL_OLD = "select * from department_form_type dft where department_id = ?" +
-            " and exists (select 1 from form_type ft where ft.id = dft.form_type_id ";
+    private static final String GET_SQL_BY_TAX_TYPE_SQL_OLD =
+			"SELECT id, department_id, form_type_id, kind, performer_dep_id FROM department_form_type dft WHERE department_id = ?" +
+            " AND EXISTS (SELECT 1 FROM form_type ft WHERE ft.id = dft.form_type_id ";
 
     @Override
     public List<DepartmentFormType> getByTaxType(int departmentId, TaxType taxType) {
         return getJdbcTemplate().query(
                 GET_SQL_BY_TAX_TYPE_SQL_OLD +
-                        (taxType != null ? "and ft.tax_type in" + SqlUtils.transformTaxTypeToSqlInStatement(Arrays.asList(taxType)) : "")
+                        (taxType != null ? "AND ft.tax_type IN " + SqlUtils.transformTaxTypeToSqlInStatement(Arrays.asList(taxType)) : "")
                 + ")",
-                new Object[]{
-                        departmentId
-                },
+                new Object[]{departmentId},
                 DFT_MAPPER
         );
     }
@@ -601,7 +601,7 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
                     Long.class,
                     performerDepId);
         } catch (DataAccessException e){
-            logger.error("", e);
+            LOG.error("", e);
             throw new DaoException("", e);
         }
     }
@@ -617,18 +617,15 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
                     Long.class,
                     performerDepId);
         } catch (DataAccessException e){
-            logger.error("", e);
+            LOG.error("", e);
             throw new DaoException("", e);
         }
     }
 
 
     @Override
-    public List<Long> getFormTypeBySource(int performerDepId, TaxType taxType, List<FormDataKind> kinds){
-        HashMap<String, Object> values = new HashMap<String, Object>(3);
-        values.put("performerDepId", performerDepId);
-
-        ArrayList<Integer> ids = new ArrayList<Integer>();
+    public List<Long> getFormTypeBySource(final int performerDepId, TaxType taxType, List<FormDataKind> kinds){
+        final ArrayList<Integer> ids = new ArrayList<Integer>();
         if (kinds.isEmpty()){
             for (FormDataKind kind : FormDataKind.values())
                 ids.add(kind.getId());
@@ -636,7 +633,6 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
             for (FormDataKind kind : kinds)
                 ids.add(kind.getId());
         }
-        values.put("kinds", ids);
 
         try {
             return getNamedParameterJdbcTemplate().queryForList("with " +
@@ -659,7 +655,11 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
                     "select type from l2 " +
                     "union " +
                     "select type from l3 ",
-                    values, Long.class);
+					new HashMap<String, Object>(3) {{
+						put("performerDepId", performerDepId);
+						put("kinds", ids);
+					}},
+					Long.class);
         } catch (EmptyResultDataAccessException e) {
             return new ArrayList<Long>(0);
         }
@@ -673,7 +673,7 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
 	                "delete from department_form_type where id = ?",
                     id);
     	} catch (DataIntegrityViolationException e){
-			logger.error(e.getMessage(), e);
+			LOG.error(e.getMessage(), e);
     		throw new DaoException("Назначение является источником или приемником данных", e);
     	}
     }
@@ -683,7 +683,7 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
         try {
             getJdbcTemplate().update("delete from DEPARTMENT_FORM_TYPE where " + SqlUtils.transformToSqlInStatement("id", ids));
         } catch (DataAccessException e){
-            logger.error("", e);
+            LOG.error("", e);
             throw new DaoException("", e);
         }
     }
@@ -697,7 +697,7 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
 	                        " values (?, ?, seq_department_form_type.nextval, ?)",
                     departmentId, formTypeId, formKindId);
     	} catch (DataIntegrityViolationException e){
-			logger.error(e.getMessage(), e);
+			LOG.error(e.getMessage(), e);
     		throw new DaoException(DUPLICATE_ERROR, e);
     	} 
     }
@@ -711,7 +711,7 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
                             " values (?, ?, seq_department_form_type.nextval, ?, ?)",
                     departmentId, typeId, kindId, performerId);
         } catch (DataIntegrityViolationException e){
-			logger.error(e.getMessage(), e);
+			LOG.error(e.getMessage(), e);
             throw new DaoException(DUPLICATE_ERROR, e);
         }
     }
@@ -777,7 +777,7 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
     @Override
     public List<Pair<DepartmentFormType, Pair<Date, Date>>> findDestinationsForFormType(int typeId, Date dateFrom, Date dateTo) {
         try {
-            HashMap<String, Object> values = new HashMap<String, Object>();
+            Map<String, Object> values = new HashMap<String, Object>();
             values.put("formTypeId", typeId);
             values.put("dateFrom", dateFrom);
             values.put("dateTo", dateTo);
@@ -787,7 +787,7 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
                     values,
                     DFT_SOURCES_MAPPER);
         } catch (DataAccessException e){
-            logger.error("", e);
+            LOG.error("", e);
             throw new DaoException("", e);
         }
     }
@@ -804,7 +804,7 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
     @Override
     public List<Pair<DepartmentFormType, Pair<Date, Date>>> findSourcesForFormType(int typeId, Date dateFrom, Date dateTo) {
         try {
-            HashMap<String, Object> values = new HashMap<String, Object>();
+            Map<String, Object> values = new HashMap<String, Object>();
             values.put("formTypeId", typeId);
             values.put("dateFrom", dateFrom);
             values.put("dateTo", dateTo);
@@ -814,7 +814,7 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
                     values,
                     DFT_SOURCES_MAPPER);
         } catch (DataAccessException e){
-            logger.error("", e);
+            LOG.error("", e);
             throw new DaoException("", e);
         }
     }
@@ -826,7 +826,7 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
                     new Object[]{formTypeId},
                     DFT_MAPPER);
         }catch (DataAccessException e){
-            logger.error("Получение назначений НФ", e);
+            LOG.error("Получение назначений НФ", e);
             throw new DaoException("Получение назначений НФ", e);
         }
     }

@@ -96,7 +96,7 @@ public interface LockDataService {
 	 * @param userId код установившего блокировку пользователя
 	 * @throws com.aplana.sbrf.taxaccounting.model.exception.ServiceException если блокировка была установлена другим пользователем, либо блокировки не было в бд
 	 */
-	void unlock(String key, int userId);
+    Boolean unlock(String key, int userId);
 
     /**
      * Снимает блокировку по ее идентификатору. Если блокировки не было, либо была установлена другим пользователем, то exception.
@@ -106,7 +106,7 @@ public interface LockDataService {
      * @param force при force = true блокировка снимается принудительно, без вывода ошибки при отсутсвии блокировки
      * @throws com.aplana.sbrf.taxaccounting.model.exception.ServiceException если блокировка была установлена другим пользователем, либо блокировки не было в бд
      */
-    void unlock(String key, int userId, boolean force);
+    Boolean unlock(String key, int userId, boolean force);
 
     /**
 	 * Аналогично методу lock с той разницей, что если блокировка объекта от имени указанного пользователя существует,

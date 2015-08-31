@@ -322,8 +322,7 @@ public class BookerStatementsServiceImpl implements BookerStatementsService {
         // строки со следующими кодами игнорируем
         Set<String> excludeCode = new HashSet<String>();
         excludeCode.add("");
-        excludeCode.add("10000");
-        excludeCode.add("20000");
+        excludeCode.add("0");
         // выходной лист с моделями для записи в бд
         List<Income102> list = new ArrayList<Income102>();
         HSSFWorkbook wb;
@@ -391,7 +390,7 @@ public class BookerStatementsServiceImpl implements BookerStatementsService {
                         case 3:
                             //Пропускаем строки с "плохим" кодом
                             String opCode = cell.getStringCellValue().trim();
-                            if (opCode == null || excludeCode.contains(opCode.trim()) || opCode.startsWith("0")) {
+                            if (opCode == null || excludeCode.contains(opCode.trim())) {
                                 isValid = false;
                                 break;
                             }

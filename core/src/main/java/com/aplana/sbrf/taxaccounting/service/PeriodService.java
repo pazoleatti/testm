@@ -304,4 +304,6 @@ public interface PeriodService {
      * @param endDate Конец периода
      */
     List<ReportPeriod> getReportPeriodsByDate(TaxType taxType, Date startDate, Date endDate);
+
+    List<ReportPeriod> getReportPeriodsByDateAndDepartment(TaxType taxType, int depId, Date startDate, Date endDate);
 }

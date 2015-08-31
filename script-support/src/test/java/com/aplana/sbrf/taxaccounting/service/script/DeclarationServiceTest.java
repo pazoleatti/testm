@@ -77,7 +77,6 @@ public class DeclarationServiceTest {
 
         ReflectionTestUtils.setField(service, "declarationDataDao", declarationDataDao);
         ReflectionTestUtils.setField(service, "declarationTypeDao", declarationTypeDao);
-        ReflectionTestUtils.setField(service, "departmentFormTypeDao", departmentFormTypeDao);
         ReflectionTestUtils.setField(service, "declarationTemplateDao", declarationTemplateDao);
         ReflectionTestUtils.setField(service, "declarationDataService", declarationDataService);
 

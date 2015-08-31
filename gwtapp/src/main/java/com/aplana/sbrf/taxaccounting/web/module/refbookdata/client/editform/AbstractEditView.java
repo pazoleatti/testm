@@ -394,6 +394,7 @@ public abstract class AbstractEditView extends ViewWithUiHandlers<EditFormUiHand
                         if (checkRequired) checkRequired(field.getKey(), longValue, errorMap);
                         value.setAttributeType(RefBookAttributeType.REFERENCE);
                         value.setReferenceValue(longValue);
+                        value.setDereferenceValue(((RefBookPickerWidget)field.getValue()).getDereferenceValue());
                         break;
                     default:
                         break;

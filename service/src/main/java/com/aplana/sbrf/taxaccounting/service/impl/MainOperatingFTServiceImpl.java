@@ -12,10 +12,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 /**
  * User: avanteev
@@ -26,7 +23,7 @@ public class MainOperatingFTServiceImpl implements MainOperatingService {
 
     private static final String DELETE_TEMPLATE_MESSAGE = "Удаление невозможно, обнаружено использование макета!";
     private static final String DELETE_TEMPLATE_VERSION_MESSAGE = "Удаление невозможно, обнаружено использование макета!";
-    private static final String HAVE_DFT_MESSAGE = "Существует назначение налоговой формы подразделению \"%s\"!";
+    private static final String HAVE_DFT_MESSAGE = "Существует назначение %s подразделению \"%s\"!";
 
     @Autowired
     private LogEntryService logEntryService;
@@ -85,7 +82,7 @@ public class MainOperatingFTServiceImpl implements MainOperatingService {
             versionOperatingService.checkDestinationsSources(formTemplate.getType().getId(), beginRange, endRange, logger);
             checkError(logger, SAVE_MESSAGE);
             formDataService.findFormDataIdsByRangeInReportPeriod(formTemplate.getId(), formTemplate.getVersion(), templateActualEndDate, logger);
-            checkError(logger, SAVE_MESSAGE);
+            checkError(logger, FORM_EXIST);
         }
 
         if (formTemplate.getStatus().equals(VersionedObjectStatus.NORMAL)){
@@ -198,6 +195,7 @@ public class MainOperatingFTServiceImpl implements MainOperatingService {
         for (DepartmentFormType departmentFormType : sourceService.getDFTByFormType(typeId))
             logger.error(
                     String.format(HAVE_DFT_MESSAGE,
+                            MessageGenerator.mesSpeckSingleD(formTypeService.get(departmentFormType.getFormTypeId()).getTaxType()),
                             departmentService.getDepartment(departmentFormType.getDepartmentId()).getName()));
         checkError(logger, DELETE_TEMPLATE_MESSAGE);
         formTypeService.delete(typeId);
@@ -223,6 +221,7 @@ public class MainOperatingFTServiceImpl implements MainOperatingService {
             for (DepartmentFormType departmentFormType : sourceService.getDFTByFormType(template.getType().getId())){
                 logger.error(
                         String.format(HAVE_DFT_MESSAGE,
+                                MessageGenerator.mesSpeckSingleD(formTypeService.get(departmentFormType.getFormTypeId()).getTaxType()),
                                 departmentService.getDepartment(departmentFormType.getDepartmentId()).getName()));
             }
             checkError(logger, DELETE_TEMPLATE_VERSION_MESSAGE);
@@ -230,7 +229,7 @@ public class MainOperatingFTServiceImpl implements MainOperatingService {
 
         //Если нет версий макетов, то можно удалить весь макет
         if (formTemplates.isEmpty()){
-            templateChangesService.deleteByTemplateIds(Arrays.asList(deletedFTid), null);
+            templateChangesService.deleteByTemplateIds(Collections.singletonList(deletedFTid), null);
             formTypeService.delete(template.getType().getId());
             logger.info("Макет удален в связи с удалением его последней версии");
             isDeleteAll = true;

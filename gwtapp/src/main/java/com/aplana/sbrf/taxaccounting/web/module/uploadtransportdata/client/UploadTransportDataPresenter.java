@@ -79,7 +79,7 @@ public class UploadTransportDataPresenter extends Presenter<UploadTransportDataP
                             super.yes();
                         }
                     });
-                } else if (false) {
+                } else if (result.getDialogMsg() != null && !result.getDialogMsg().isEmpty()) {
                     Dialog.errorMessage(result.getDialogMsg());
                 }
             }

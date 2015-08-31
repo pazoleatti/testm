@@ -179,14 +179,14 @@ def BigDecimal calc21(def row) {
     if (row.dividendRussianOrgStavka9 == null || !row.dividendRussianMembersAll || row.dividendSumForTaxAll == null) {
         return null
     }
-    return roundValue(row.dividendRussianOrgStavka9 / row.dividendRussianMembersAll * row.dividendSumForTaxAll, 0)
+    return roundValue(row.dividendRussianOrgStavka9 * row.dividendSumForTaxAll / row.dividendRussianMembersAll, 0)
 }
 
 def BigDecimal calc22(def row) {
     if (row.dividendRussianOrgStavka0 == null || !row.dividendRussianMembersAll || row.dividendSumForTaxAll == null) {
         return null
     }
-    return roundValue(row.dividendRussianOrgStavka0 / row.dividendRussianMembersAll * row.dividendSumForTaxAll, 0)
+    return roundValue(row.dividendRussianOrgStavka0 * row.dividendSumForTaxAll / row.dividendRussianMembersAll, 0)
 }
 
 def BigDecimal calc23(def row) {

@@ -1,6 +1,7 @@
 package form_template.income.output3_1.v2014
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
+import com.aplana.sbrf.taxaccounting.model.FormDataKind
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
@@ -168,6 +169,9 @@ def logicCheck() {
 }
 
 void consolidation() {
+    if (formData.kind != FormDataKind.SUMMARY) {
+        return
+    }
     def rows = []
 
     // «Расчет налога на прибыль организаций с доходов, удерживаемого налоговым агентом (источником выплаты доходов)»
@@ -195,6 +199,9 @@ void consolidation() {
                     break
                 case sourceFormTypeFRN:
                     newDataRows = formNewRowsFRN(sourceDataRows)
+                    break
+                case formData.formType.id:
+                    newDataRows = formNewRows(sourceDataRows)
                     break
             }
             if(!newDataRows.isEmpty()) {
@@ -277,6 +284,20 @@ def formNewRowsFRN(def rows) {
         newRow.dateOfPayment = row.dealDate
         // есть графа 4 источника
         newRow.sumTax = row.taxSum
+        newRows.add(newRow)
+    }
+    return newRows
+}
+
+// консолидация из первичной формы текущего типа
+def formNewRows(def rows) {
+    def newRows = []
+    rows.each { row ->
+        def newRow = formData.createDataRow()
+        // графа 1..5
+        nonEmptyColumns.each { alias ->
+            newRow[alias] = row[alias]
+        }
         newRows.add(newRow)
     }
     return newRows

@@ -1,6 +1,5 @@
 package form_template.income.advanceDistribution.v2015
 
-import com.aplana.sbrf.taxaccounting.model.FormData
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.FormDataKind
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
@@ -149,9 +148,6 @@ def summaryMap = [[301, 305] : "Доходы, учитываемые в прос
                   [303] : "Сводная форма начисленных расходов", [304, 310] : "Расходы, учитываемые в простых РНУ"]
 
 @Field
-def baseTaxOfPattern = "[0-9]{1,3}(\\.[0-9]{0,15})?"
-
-@Field
 def startDate = null
 
 @Field
@@ -267,6 +263,12 @@ void calc() {
     // нужен отдельный расчет
     for (row in dataRows) {
         calc18_19(prevDataRows, dataRows, row, reportPeriod)
+    }
+
+    def isOldCalc = reportPeriod.taxPeriod.year < 2015 || (reportPeriod.taxPeriod.year == 2015 && reportPeriod.order < 3)
+
+    if (!isOldCalc) { // для ЦА досчитать 18-ую графу, используя итог по 18-й графе
+        fixCA18_19(prevDataRows, dataRows, findCA(dataRows), reportPeriod)
     }
 
     // Сортировка
@@ -404,13 +406,13 @@ def calc10(def row) {
 def calc11(def row, def propertyPriceSumm, def workersCountSumm) {
     BigDecimal temp = 0
     if (row.propertyPrice != null && row.workersCount != null && propertyPriceSumm > 0 && workersCountSumm > 0) {
-        temp = (row.propertyPrice / propertyPriceSumm * 100 + row.workersCount / workersCountSumm * 100) / 2
+        temp = (row.propertyPrice * 100 / propertyPriceSumm + row.workersCount * 100 / workersCountSumm) / 2
     }
     return roundValue(temp, 15).toString()
 }
 
 def calc12(def row, def taxBase) {
-    if (row.baseTaxOf != null && checkFormat(row.baseTaxOf, baseTaxOfPattern) && taxBase != null) {
+    if (row.baseTaxOf != null && checkColumn11(row.baseTaxOf) && taxBase != null) {
         return roundValue(taxBase * new BigDecimal(row.baseTaxOf) / 100, 0)
     }
     return 0
@@ -459,28 +461,59 @@ def calc14(def row) {
 
 def calc18_19 (def prevDataRows, def dataRows, def row, def reportPeriod) {
     def tmp
+    def isCA = row == findCA(dataRows)
+    // использовать старый расчет до сентября 2015
+    def isOldCalc = reportPeriod.taxPeriod.year < 2015 || (reportPeriod.taxPeriod.year == 2015 && reportPeriod.order < 3)
     // графа 18
     switch (reportPeriod.order) {
         case 1: //«графа 18» = «графа 14»
             tmp = row.taxSum
             break
         case 4:
-            tmp = null
-            break
-        default:
-            // (Сумма всех нефиксированных строк по «графе 14» - Сумма всех нефиксированных строк по «графе 14» из предыдущего периода) * («графа 14» / Сумма всех нефиксированных строк по «графе 14»)
-            def currentSum = dataRows?.sum { (it.getAlias() == null) ? (it.taxSum ?: 0) : 0 } ?: 0
-            def previousSum = prevDataRows?.sum { (it.getAlias() == null) ? (it.taxSum ?: 0) : 0 } ?: 0
-            // остальные
-            if (currentSum) {
-                tmp = (currentSum - previousSum) * (row.taxSum / currentSum)
+            if (!isCA || isOldCalc) { // использовать старый расчет до сентября 2015
+                tmp = null
+            } else {
+                tmp = calc18Parts(dataRows, prevDataRows, row)
             }
+            break
+        default: // для не ЦА расчет актуален, для ЦА требуется досчитать (в новом расчете)
+            tmp = calc18Parts(dataRows, prevDataRows, row)
     }
     row.everyMontherPaymentAfterPeriod = tmp
 
     // графа 19
     row.everyMonthForKvartalNextPeriod = ((reportPeriod.order == 3) ? row.everyMontherPaymentAfterPeriod : 0)
+}
 
+def calc18Parts(def dataRows, def prevDataRows, def row) {
+    // (Сумма всех нефиксированных строк по «графе 14» - Сумма всех нефиксированных строк по «графе 14» из предыдущего периода) * («графа 14» / Сумма всех нефиксированных строк по «графе 14»)
+    def currentSum = dataRows?.sum { (it.getAlias() == null) ? (it.taxSum ?: 0) : 0 } ?: 0
+    def previousSum = prevDataRows?.sum { (it.getAlias() == null) ? (it.taxSum ?: 0) : 0 } ?: 0
+    // остальные
+    if (currentSum) {
+        return (currentSum - previousSum) * row.taxSum / currentSum
+    }
+    return null
+}
+
+void fixCA18_19(def prevDataRows, def dataRows, def rowCA, def reportPeriod) {
+    if (rowCA == null) { // если строки ЦА нет, то ничего не делаем
+        return
+    }
+    def tmp = BigDecimal.ZERO
+    // «графа 18» = (Сумма всех нефиксированных строк по «графе 14» - Сумма всех нефиксированных строк по «графе 14» из предыдущего периода) * («графа 14» / Сумма всех нефиксированных строк по «графе 14»)
+    // + (значение итоговой строки «графы 18» - (значение итоговой строки «графы 14» текущего периода - значение итоговой строки графы «графа 14» предыдущего периода))
+    if (reportPeriod.order != 1) {
+        def current18Sum = dataRows?.sum { (it.getAlias() == null) ? (it.everyMontherPaymentAfterPeriod ?: 0) : 0 } ?: 0
+        def current14Sum = dataRows?.sum { (it.getAlias() == null) ? (it.taxSum ?: 0) : 0 } ?: 0
+        def previous14Sum = prevDataRows?.sum { (it.getAlias() == null) ? (it.taxSum ?: 0) : 0 } ?: 0
+        tmp = current18Sum - (current14Sum - previous14Sum)
+    }
+
+    rowCA.everyMontherPaymentAfterPeriod = (rowCA.everyMontherPaymentAfterPeriod ?: 0) + tmp // добавляем к предыдущей сумме разницу
+
+    // графа 19
+    rowCA.everyMonthForKvartalNextPeriod = ((reportPeriod.order == 3) ? rowCA.everyMontherPaymentAfterPeriod : 0)
 }
 
 /**
@@ -594,13 +627,31 @@ void logicalCheckAfterCalc() {
         checkNonEmptyColumns(row, index, nonEmptyColumns, logger, true)
 
         // 2. Проверка значения в графе «Доля налоговой базы (№)»
-        if (row.baseTaxOf != null && !checkFormat(row.baseTaxOf, baseTaxOfPattern)) {
-            logger.error("Строка $index: Графа «%s» заполнена неверно! Ожидаемый тип поля: Число/18.15/ (3 знака до запятой, 15 после запятой).", getColumnName(row,'baseTaxOf'))
+        if (row.baseTaxOf != null && !checkColumn11(row.baseTaxOf)) {
+            logger.error("Строка $index: Графа «%s» заполнена неверно! Ожидаемый тип поля: Число/18.15/ (максимальное общее количество цифр 18 - до и после запятой; после запятой максимальное количество цифр 15).", getColumnName(row,'baseTaxOf'))
         }
         // 3. Проверка на соответствие паттерну
         if (row.kpp && !checkPattern(logger, row, 'kpp', row.kpp, KPP_PATTERN, wasError ? null : KPP_MEANING, true)) {
             wasError = true
         }
+    }
+}
+
+// проверка графы 11: максимальное общее количество цифр 18 - до и после запятой; после запятой максимальное количество цифр 15
+def checkColumn11(def value) {
+    if (value == null) {
+        return false
+    }
+    def i = value.indexOf('.')
+    if (i != -1) {
+        def head = value.substring(0, i)
+        def tail = value.substring(i + 1)
+        def headSize = 18 - tail.size()
+        // после точки максимум 15 знаков, всего не больше 18 знаков
+        return head.matches("[0-9]{1,$headSize}") && tail.matches("[0-9]{1,15}")
+    } else {
+        // если нет точки, то размер не больше 18
+        return value.matches("[0-9]{1,18}")
     }
 }
 
@@ -1188,7 +1239,7 @@ def getTaxBase() {
  */
 void calcColumnFrom14To21(def prevDataRows, def row, def sumNal, def reportPeriod) {
     // графа 15
-    if (sumNal == null || row.baseTaxOf == null || !checkFormat(row.baseTaxOf, baseTaxOfPattern)) {
+    if (sumNal == null || row.baseTaxOf == null || !checkColumn11(row.baseTaxOf)) {
         row.taxSumOutside = 0
     } else {
         row.taxSumOutside = roundValue(sumNal * 0.9 * new BigDecimal(row.baseTaxOf) / 100, 0)

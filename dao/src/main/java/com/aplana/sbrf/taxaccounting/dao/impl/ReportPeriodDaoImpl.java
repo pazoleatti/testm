@@ -281,6 +281,30 @@ public class ReportPeriodDaoImpl extends AbstractDao implements ReportPeriodDao 
 		}
 	}
 
+    private static final String RP_BY_DATE_AND_DEPARTMENT =
+            "SELECT\n" +
+                    "  rp.id,\n" +
+                    "  rp.name,\n" +
+                    "  rp.tax_period_id,\n" +
+                    "  rp.start_date,\n" +
+                    "  rp.end_date,\n" +
+                    "  rp.dict_tax_period_id,\n" +
+                    "  rp.calendar_start_date\n" +
+                    "FROM report_period rp\n" +
+                    "  JOIN tax_period tp ON rp.tax_period_id = tp.id\n" +
+                    "  JOIN DEPARTMENT_REPORT_PERIOD drp ON drp.REPORT_PERIOD_ID = rp.id\n" +
+                    "WHERE tp.tax_type = ? AND rp.end_date >= ? AND (? IS NULL OR rp.calendar_start_date <= ?)\n" +
+                    "      AND drp.DEPARTMENT_ID = ?\n" +
+                    "ORDER BY rp.end_date";
+    @Override
+    public List<ReportPeriod> getReportPeriodsByDateAndDepartment(TaxType taxType, int depId, Date startDate, Date endDate) {
+        return getJdbcTemplate().query(
+                RP_BY_DATE_AND_DEPARTMENT,
+                new Object[]{String.valueOf(taxType.getCode()), startDate, endDate, endDate, depId},
+                new ReportPeriodMapper()
+        );
+    }
+
     @Override
     public ReportPeriod getByTaxTypedCodeYear(TaxType taxType, String code, int year) {
         try {

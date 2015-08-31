@@ -75,7 +75,7 @@ public abstract class XlsmGeneratorAsyncTask extends AbstractAsyncTask {
         final Date lockDate = (Date) params.get(LOCK_DATE.name());
 
         formDataAccessService.canRead(userInfo, formDataId);
-        String uuid = printingService.generateExcel(userInfo, formDataId, manual, isShowChecked, new LockStateLogger() {
+        String uuid = printingService.generateExcel(userInfo, formDataId, manual, isShowChecked, saved, new LockStateLogger() {
             @Override
             public void updateState(String state) {
                 lockService.updateState(lock, lockDate, state);
@@ -95,6 +95,7 @@ public abstract class XlsmGeneratorAsyncTask extends AbstractAsyncTask {
         long formDataId = (Long)params.get("formDataId");
         boolean manual = (Boolean)params.get("manual");
         boolean isShowChecked = (Boolean)params.get("isShowChecked");
+        boolean saved = (Boolean)params.get("saved");
         TAUserInfo userInfo = new TAUserInfo();
         userInfo.setUser(userService.getUser(userId));
 
@@ -109,7 +110,7 @@ public abstract class XlsmGeneratorAsyncTask extends AbstractAsyncTask {
                 String.format(COMPLETE_FORM, getReportType().getName()),
                 formData,
                 department.getName(),
-                manual, reportPeriod, rpCompare, isShowChecked);
+                manual, reportPeriod, rpCompare, isShowChecked, saved);
     }
 
     @Override
@@ -118,6 +119,7 @@ public abstract class XlsmGeneratorAsyncTask extends AbstractAsyncTask {
         long formDataId = (Long)params.get("formDataId");
         boolean manual = (Boolean)params.get("manual");
         boolean isShowChecked = (Boolean)params.get("isShowChecked");
+        boolean saved = (Boolean)params.get("saved");
         TAUserInfo userInfo = new TAUserInfo();
         userInfo.setUser(userService.getUser(userId));
 
@@ -131,6 +133,6 @@ public abstract class XlsmGeneratorAsyncTask extends AbstractAsyncTask {
         return MessageGenerator.getFDMsg(String.format(ERROR_FORM, getReportType()),
                 formData,
                 department.getName(),
-                manual, reportPeriod, rpCompare, isShowChecked);
+                manual, reportPeriod, rpCompare, isShowChecked, saved);
     }
 }

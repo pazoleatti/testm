@@ -1,5 +1,7 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
+import static com.aplana.sbrf.taxaccounting.model.FormDataEvent.*;
+
 import com.aplana.sbrf.taxaccounting.dao.AuditDao;
 import com.aplana.sbrf.taxaccounting.dao.EventDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
@@ -250,7 +252,7 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
         ps.appendQuery(sql);
         appendSelectWhereClause(ps, filter, " AND ");
         try{
-            return getJdbcTemplate().queryForLong(ps.getQuery().toString(), ps.getParams().toArray());
+            return getJdbcTemplate().queryForObject(ps.getQuery().toString(), ps.getParams().toArray(), Long.class);
         } catch (EmptyResultDataAccessException e){
             return 0;
         }
@@ -369,7 +371,7 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
 
         appendSelectWhereClause(ps, filter, " AND ");
         try{
-            return getJdbcTemplate().queryForLong(ps.getQuery().toString(), ps.getParams().toArray());
+            return getJdbcTemplate().queryForObject(ps.getQuery().toString(), ps.getParams().toArray(), Long.class);
         } catch (EmptyResultDataAccessException e){
             return 0;
         }
@@ -390,7 +392,11 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
 
         ps.appendQuery("WHERE (");
         ps.appendQuery(SqlUtils.transformToSqlInStatement("ls.EVENT_ID",
-                eventDao.getEventCodes(TARole.ROLE_CONTROL, Arrays.asList(501, 502, 601, 701))));
+                eventDao.getEventCodes(TARole.ROLE_CONTROL, Arrays.asList(
+								LOGIN.getCode(),
+								LOGOUT.getCode(),
+								LOG_SYSTEM_BACKUP.getCode(),
+								TEMPLATE_CREATED.getCode()))));
         ps.appendQuery(" )");
 
         appendSelectWhereClause(ps, filter, " AND ");
@@ -416,12 +422,16 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
 
         ps.appendQuery("WHERE (");
         ps.appendQuery(SqlUtils.transformToSqlInStatement("ls.EVENT_ID",
-                eventDao.getEventCodes(TARole.ROLE_CONTROL, Arrays.asList(501, 502, 601, 701))));
+                eventDao.getEventCodes(TARole.ROLE_CONTROL, Arrays.asList(
+						LOGIN.getCode(),
+						LOGOUT.getCode(),
+						LOG_SYSTEM_BACKUP.getCode(),
+						TEMPLATE_CREATED.getCode()))));
         ps.appendQuery(" )");
 
         appendSelectWhereClause(ps, filter, " AND ");
         try{
-            return getJdbcTemplate().queryForLong(ps.getQuery().toString(), ps.getParams().toArray());
+            return getJdbcTemplate().queryForObject(ps.getQuery().toString(), ps.getParams().toArray(), Long.class);
         } catch (EmptyResultDataAccessException e){
             return 0;
         }
@@ -441,9 +451,9 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
         ps.appendQuery("WHERE ");
         appendSelectWhereClause(ps, filter, "");
         try{
-            return getJdbcTemplate().queryForLong(
+            return getJdbcTemplate().queryForObject(
                     ps.getQuery().toString(),
-                    ps.getParams().toArray());
+                    ps.getParams().toArray(), Long.class);
         } catch (EmptyResultDataAccessException e){
             return 0;
         }
@@ -493,7 +503,7 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
     }
 
 
-    private final static String DELETE_RECORDS_BY_FILTER =
+    private static final String DELETE_RECORDS_BY_FILTER =
             "delete from LOG_SYSTEM where id in (\n" +
                     "  select ls.id\n" +
                     "    from log_system ls \n" +
@@ -640,18 +650,10 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
 	}
 
     public String orderByClause(HistoryBusinessSearchOrdering ordering, boolean ascSorting) {
-
         StringBuilder order = new StringBuilder();
-
         order.append(" order by ");
-
         String column = null;
-
-        if (ordering == null) {
-            ordering = HistoryBusinessSearchOrdering.DATE;
-        }
-
-        switch (ordering) {
+        switch (ordering == null ? HistoryBusinessSearchOrdering.DATE : ordering) {
             case ID:
                 // Сортировка по умолчанию
                 break;
@@ -692,7 +694,6 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
                 column = "ls.ip";
                 break;
         }
-
         if (column != null) {
             order.append(column);
             if (!ascSorting) {
@@ -700,13 +701,11 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
             }
             order.append(", ");
         }
-
         // Сортировка по умолчанию
         order.append("ls.id");
         if (!ascSorting) {
             order.append(" DESC");
         }
-
         return order.toString();
     }
 
@@ -726,8 +725,7 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
         ps.appendQuery(orderByClause(filter.getSearchOrdering(), filter.isAscSorting()));
         ps.appendQuery(") dat) ordDat");
         if (filter.getCountOfRecords() != 0) {
-            ps.appendQuery(" where ordDat.rn between ? and ?" +
-                    " order by ordDat.rn");
+            ps.appendQuery(" where ordDat.rn between ? and ? order by ordDat.rn");
             ps.addParam(filter.getStartIndex() + 1);
             ps.addParam(filter.getStartIndex() + filter.getCountOfRecords());
         } else {

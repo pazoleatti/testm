@@ -37,7 +37,12 @@ import java.util.Map;
 @Repository
 public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 
-	private static final Log log = LogFactory.getLog(DataRowDaoImpl.class);
+	private static final Log LOG = LogFactory.getLog(DataRowDaoImpl.class);
+	private static final byte COL_VALUE_IDX = 0;
+	private static final byte COL_STYLE_IDX = 1;
+	private static final byte COL_EDIT_IDX = 2;
+	private static final byte COL_COLSPAN_IDX = 3;
+	private static final byte COL_ROWSPAN_IDX = 4;
 
 	@Autowired
 	private BDUtils bdUtils;
@@ -198,9 +203,9 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 		params.put("temporary_source", DataRowType.SAVED.getCode());
 		params.put("manual", DataRowType.AUTO.getCode());
 
-		if (log.isTraceEnabled()) {
-			log.trace(params);
-			log.trace(sql.toString());
+		if (LOG.isTraceEnabled()) {
+			LOG.trace(params);
+			LOG.trace(sql.toString());
         }
 		getNamedParameterJdbcTemplate().update(sql.toString().intern(), params);
 	}
@@ -227,8 +232,8 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 			values.put("id", row.getId());
 			params.add(values);
 		}
-		if (log.isTraceEnabled()) {
-			log.trace(sql.toString());
+		if (LOG.isTraceEnabled()) {
+			LOG.trace(sql.toString());
 		}
 		getNamedParameterJdbcTemplate().batchUpdate(sql.toString().intern(), params.toArray(new Map[0]));
 	}
@@ -248,9 +253,9 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 		params.put("temporary", DataRowType.SAVED.getCode());
 		params.put("manual", DataRowType.AUTO.getCode());
 
-		if (log.isTraceEnabled()) {
-			log.trace(params);
-			log.trace(sql.toString());
+		if (LOG.isTraceEnabled()) {
+			LOG.trace(params);
+			LOG.trace(sql.toString());
 		}
 		int difference = getNamedParameterJdbcTemplate().queryForObject(sql.toString().intern(), params, Integer.class);
 		return difference != 0;
@@ -292,7 +297,7 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 		}
 		sql.append(')');
 		// формируем список параметров для батча
-		List<Long> ids = bdUtils.getNextDataRowIds(Long.valueOf(rows.size())); // нужно получить отдельным запросом, чтобы актуализировать rows
+		List<Long> ids = bdUtils.getNextDataRowIds(Long.valueOf(rows.size()));
 		int manual = formData.isManual() ? DataRowType.MANUAL.getCode() : DataRowType.AUTO.getCode();
 		List<Map<String, Object>> params = new ArrayList<Map<String, Object>>(rows.size());
 		int i = 0;
@@ -310,16 +315,16 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 			for (Column column : formData.getFormColumns()) {
 				String[] names = columnNames.get(column.getId());
 				Cell cell = row.getCell(column.getAlias());
-				values.put(names[0], cell.getValue());
-				values.put(names[1], cell.getStyle() == null ? null : cell.getStyle().getId());
-				values.put(names[2], cell.isEditable() ? 1 : 0);
-				values.put(names[3], cell.getColSpan());
-				values.put(names[4], cell.getRowSpan());
+				values.put(names[COL_VALUE_IDX], cell.getValue());
+				values.put(names[COL_STYLE_IDX], cell.getStyle() == null ? null : cell.getStyle().getId());
+				values.put(names[COL_EDIT_IDX], cell.isEditable() ? 1 : 0);
+				values.put(names[COL_COLSPAN_IDX], cell.getColSpan());
+				values.put(names[COL_ROWSPAN_IDX], cell.getRowSpan());
 			}
 			params.add(values);
 		}
-		if (log.isTraceEnabled()) {
-			log.trace(sql.toString());
+		if (LOG.isTraceEnabled()) {
+			LOG.trace(sql.toString());
 		}
 		getNamedParameterJdbcTemplate().batchUpdate(sql.toString().intern(), params.toArray(new Map[0]));
 	}
@@ -355,8 +360,8 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 			}
 		}
 		sql.append(" WHERE id = :id");
-		if (log.isTraceEnabled()) {
-			log.trace("updateRows: " + sql.toString().intern());
+		if (LOG.isTraceEnabled()) {
+			LOG.trace("updateRows: " + sql.toString().intern());
 		}
 		// формируем список параметров для батча
 		List<Map<String, Object>> params = new ArrayList<Map<String, Object>>(rows.size());
@@ -367,16 +372,16 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 			for (Column column : formData.getFormColumns()) {
 				String[] names = columnNames.get(column.getId());
 				Cell cell = row.getCell(column.getAlias());
-				values.put(names[0], cell.getValue());
-				values.put(names[1], cell.getStyle() == null ? null : cell.getStyle().getId());
-				values.put(names[2], cell.isEditable() ? 1 : 0);
-				values.put(names[3], cell.getColSpan());
-				values.put(names[4], cell.getRowSpan());
+				values.put(names[COL_VALUE_IDX], cell.getValue());
+				values.put(names[COL_STYLE_IDX], cell.getStyle() == null ? null : cell.getStyle().getId());
+				values.put(names[COL_EDIT_IDX], cell.isEditable() ? 1 : 0);
+				values.put(names[COL_COLSPAN_IDX], cell.getColSpan());
+				values.put(names[COL_ROWSPAN_IDX], cell.getRowSpan());
 			}
 			params.add(values);
 		}
-		if (log.isTraceEnabled()) {
-			log.trace(sql.toString());
+		if (LOG.isTraceEnabled()) {
+			LOG.trace(sql.toString());
 		}
 		getNamedParameterJdbcTemplate().batchUpdate(sql.toString().intern(), params.toArray(new Map[0]));
 	}
@@ -395,8 +400,8 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 			values.put("id", row.getId());
 			params.add(values);
 		}
-		if (log.isTraceEnabled()) {
-			log.trace(sql.toString());
+		if (LOG.isTraceEnabled()) {
+			LOG.trace(sql.toString());
 		}
 		getNamedParameterJdbcTemplate().batchUpdate(sql.toString().intern(), params.toArray(new Map[0]));
 		reorderRows(formData);
@@ -426,9 +431,9 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 		params.put("temporary", DataRowType.SAVED.getCode());
 		params.put("manual", formData.isManual() ? DataRowType.MANUAL.getCode() : DataRowType.AUTO.getCode());
 
-		if (log.isTraceEnabled()) {
-			log.trace(params);
-			log.trace(sql.toString());
+		if (LOG.isTraceEnabled()) {
+			LOG.trace(params);
+			LOG.trace(sql.toString());
 		}
 		getNamedParameterJdbcTemplate().update(sql.toString().intern(), params);
 	}
@@ -453,9 +458,9 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 		params.put("temporary", DataRowType.SAVED.getCode());
 		params.put("manual", formData.isManual() ? DataRowType.MANUAL.getCode() : DataRowType.AUTO.getCode());
 
-		if (log.isTraceEnabled()) {
-			log.trace(params);
-			log.trace(sql.toString());
+		if (LOG.isTraceEnabled()) {
+			LOG.trace(params);
+			LOG.trace(sql.toString());
 		}
 		getNamedParameterJdbcTemplate().update(sql.toString().intern(), params);
 		refreshRefBookLinks(formData);
@@ -485,9 +490,9 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 		params.put("temporary", DataRowType.SAVED.getCode());
 		params.put("manual", DataRowType.MANUAL.getCode());
 
-		if (log.isTraceEnabled()) {
-			log.trace(params);
-			log.trace(sql.toString());
+		if (LOG.isTraceEnabled()) {
+			LOG.trace(params);
+			LOG.trace(sql.toString());
 		}
 		getNamedParameterJdbcTemplate().update(sql.toString().intern(), params);
 	}
@@ -511,9 +516,9 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 		params.put("temporary", DataRowType.TEMP.getCode());
 		params.put("manual", formData.isManual() ? DataRowType.MANUAL.getCode() : DataRowType.AUTO.getCode());
 
-		if (log.isTraceEnabled()) {
-			log.trace(params);
-			log.trace(sql.toString());
+		if (LOG.isTraceEnabled()) {
+			LOG.trace(params);
+			LOG.trace(sql.toString());
 		}
 		getNamedParameterJdbcTemplate().update(sql.toString().intern(), params);
 	}
@@ -550,9 +555,9 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 		params.put("temporary", DataRowType.SAVED.getCode());
 		params.put("manual", formData.isManual() ? DataRowType.MANUAL.getCode() : DataRowType.AUTO.getCode());
 
-		if (log.isTraceEnabled()) {
-			log.trace(params);
-			log.trace(sql.toString());
+		if (LOG.isTraceEnabled()) {
+			LOG.trace(params);
+			LOG.trace(sql.toString());
 		}
 		return getNamedParameterJdbcTemplate().queryForObject(sql.toString().intern(), params, Integer.class);
 	}
@@ -571,9 +576,9 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 		if (!isSupportOver()) {
 			sql.setFirst(sql.getFirst().replaceAll("OVER \\(PARTITION BY.{0,}ORDER BY ord\\)", "OVER ()"));
 		}
-		if (log.isTraceEnabled()) {
-			log.trace(sql.getSecond());
-			log.trace(sql.getFirst());
+		if (LOG.isTraceEnabled()) {
+			LOG.trace(sql.getSecond());
+			LOG.trace(sql.getFirst());
 		}
 		return getNamedParameterJdbcTemplate().query(sql.getFirst(), sql.getSecond(), dataRowMapper);
 	}
@@ -594,9 +599,9 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 		params.put("temporary", dataRowType.getCode());
 		params.put("manual", formData.isManual() ? DataRowType.MANUAL.getCode() : DataRowType.AUTO.getCode());
 
-		if (log.isTraceEnabled()) {
-			log.trace(params);
-			log.trace(sql.toString());
+		if (LOG.isTraceEnabled()) {
+			LOG.trace(params);
+			LOG.trace(sql.toString());
 		}
 		return getNamedParameterJdbcTemplate().queryForObject(sql.toString().intern(), params, Integer.class);
 	}
@@ -616,9 +621,9 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 		params.put("form_data_id", formData.getId());
 		params.put("manual", DataRowType.MANUAL.getCode());
 
-		if (log.isTraceEnabled()) {
-			log.trace(params);
-			log.trace(sql.toString());
+		if (LOG.isTraceEnabled()) {
+			LOG.trace(params);
+			LOG.trace(sql.toString());
 		}
 		getNamedParameterJdbcTemplate().update(sql.toString().intern(), params);
 	}
@@ -650,9 +655,9 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 			params.put("manual", formData.isManual() ? DataRowType.MANUAL.getCode() : DataRowType.AUTO.getCode());
 		}
 
-		if (log.isTraceEnabled()) {
-			log.trace(params);
-			log.trace(sql.toString());
+		if (LOG.isTraceEnabled()) {
+			LOG.trace(params);
+			LOG.trace(sql.toString());
 		}
 		getNamedParameterJdbcTemplate().update(sql.toString().intern(), params);
 	}
@@ -670,9 +675,9 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 		params.put("indexFrom", range.getOffset());
 		params.put("indexTo", range.getOffset() + range.getCount() - 1);
 
-		if (log.isTraceEnabled()) {
-			log.trace(params);
-			log.trace(sql.toString());
+		if (LOG.isTraceEnabled()) {
+			LOG.trace(params);
+			LOG.trace(sql.toString());
 		}
 		getNamedParameterJdbcTemplate().update(sql.toString().intern(), params);
 		shiftRows(formData, new DataRowRange(range.getOffset() + range.getCount(), -range.getCount()));
@@ -697,9 +702,9 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 		params.put("offset", range.getOffset());
 		params.put("shift", range.getCount());
 
-		if (log.isTraceEnabled()) {
-			log.trace(params);
-			log.trace(sql.toString());
+		if (LOG.isTraceEnabled()) {
+			LOG.trace(params);
+			LOG.trace(sql.toString());
 		}
 		return getNamedParameterJdbcTemplate().update(sql.toString().intern(), params);
 	}
@@ -753,10 +758,10 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 		params.put("form_data_id", formData.getId());
 		params.put("temporary", DataRowType.SAVED.getCode());
 
-		if (log.isTraceEnabled()) {
-			log.trace(params);
-			log.trace(deleteSql.toString());
-			log.trace(insertSql.toString());
+		if (LOG.isTraceEnabled()) {
+			LOG.trace(params);
+			LOG.trace(deleteSql.toString());
+			LOG.trace(insertSql.toString());
 		}
 		getNamedParameterJdbcTemplate().update(deleteSql.toString(), params);
 		getNamedParameterJdbcTemplate().update(insertSql.toString(), params);
