@@ -238,8 +238,6 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
     @Override
     public void prepareFromRequest(final PlaceRequest request) {
         super.prepareFromRequest(request);
-        refBookLinearPresenter.cleanPage();
-        versionPresenter.cleanPage();
 
         refBookId = Long.parseLong(request.getParameter(RefBookDataTokens.REFBOOK_DATA_ID, null));
         refBookLinearPresenter.setRefBookId(refBookId);

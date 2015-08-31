@@ -253,7 +253,9 @@ public class RefBookVersionPresenter extends PresenterWidget<RefBookVersionPrese
         getView().updateMode(mode);
     }
 
-    public void cleanPage(){
+    @Override
+    protected void onReset() {
+        super.onReset();
         getView().setPage(0);
     }
 }

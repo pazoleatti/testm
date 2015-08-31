@@ -193,6 +193,12 @@ public class RefBookLinearPresenter extends PresenterWidget<RefBookLinearPresent
         super.onReveal();
     }
 
+    @Override
+    protected void onReset() {
+        super.onReset();
+        getView().setPage(0);
+    }
+
     private class TableDataProvider extends AsyncDataProvider<RefBookDataRow> {
 
         Date relevanceDate;
@@ -284,9 +290,5 @@ public class RefBookLinearPresenter extends PresenterWidget<RefBookLinearPresent
         addVisibleHandler(DeleteItemEvent.getType(), this);
         addVisibleHandler(SearchButtonEvent.getType(), this);
         addVisibleHandler(UpdateForm.getType(), this);
-    }
-
-    public void cleanPage(){
-        getView().setPage(0);
     }
 }
