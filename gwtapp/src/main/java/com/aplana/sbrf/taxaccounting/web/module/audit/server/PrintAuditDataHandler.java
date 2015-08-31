@@ -1,13 +1,10 @@
 package com.aplana.sbrf.taxaccounting.web.module.audit.server;
 
-import com.aplana.sbrf.taxaccounting.model.BalancingVariants;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.async.exception.AsyncTaskException;
 import com.aplana.sbrf.taxaccounting.async.manager.AsyncManager;
 import com.aplana.sbrf.taxaccounting.async.task.AsyncTask;
 import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
-import com.aplana.sbrf.taxaccounting.model.LockData;
-import com.aplana.sbrf.taxaccounting.model.ReportType;
-import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.AuditService;
@@ -15,6 +12,7 @@ import com.aplana.sbrf.taxaccounting.service.BlobDataService;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.service.ReportService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
+import com.aplana.sbrf.taxaccounting.web.module.audit.shared.LogSystemAuditFilter;
 import com.aplana.sbrf.taxaccounting.web.module.audit.shared.PrintAuditDataAction;
 import com.aplana.sbrf.taxaccounting.web.module.audit.shared.PrintAuditDataResult;
 import com.aplana.sbrf.taxaccounting.web.service.PropertyLoader;
@@ -25,6 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
+import java.text.SimpleDateFormat;
 import java.util.HashMap;
 
 /**
@@ -33,6 +32,8 @@ import java.util.HashMap;
 @Service
 @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CONTROL_UNP', 'ROLE_CONTROL_NS', 'ROLE_OPER', 'ROLE_CONTROL')")
 public class PrintAuditDataHandler extends AbstractActionHandler<PrintAuditDataAction, PrintAuditDataResult> {
+
+    private static final SimpleDateFormat SDF = new SimpleDateFormat("dd.MM.yyyy");
 
     @Autowired
     BlobDataService blobDataService;
@@ -57,6 +58,7 @@ public class PrintAuditDataHandler extends AbstractActionHandler<PrintAuditDataA
     public PrintAuditDataResult execute(PrintAuditDataAction action, ExecutionContext executionContext) throws ActionException {
         PrintAuditDataResult result = new PrintAuditDataResult();
         TAUserInfo userInfo = securityService.currentUserInfo();
+        LogSystemAuditFilter filter = action.getLogSystemFilter();
         Logger logger = new Logger();
         long recordsCount = auditService.getCountRecords(action.getLogSystemFilter().convertTo(), userInfo);
         if (recordsCount==0) {
@@ -77,7 +79,13 @@ public class PrintAuditDataHandler extends AbstractActionHandler<PrintAuditDataA
         }
         try {
             if ((lockData = lockDataService.lock(key, userInfo.getUser().getId(),
-                    String.format(LockData.DescriptionTemplate.LOG_SYSTEM_CSV.getText(), action.getLogSystemFilter().getFilter()),
+                    String.format(
+                            LockData.DescriptionTemplate.LOG_SYSTEM_CSV.getText(),
+                            filter.getFilter() != null ?
+                                    action.getLogSystemFilter().getFilter()
+                                    :
+                                    String.format("От даты: \"%s\", До даты: \"%s\"", SDF.format(filter.getFromSearchDate()), SDF.format(filter.getToSearchDate()))
+                    ),
                     LockData.State.IN_QUEUE.getText(),
                     lockDataService.getLockTimeout(LockData.LockObjects.LOG_SYSTEM_CSV))) == null) {
                 lockData = lockDataService.getLock(key);
