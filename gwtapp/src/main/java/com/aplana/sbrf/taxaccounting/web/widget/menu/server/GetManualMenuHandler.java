@@ -70,7 +70,7 @@ public class GetManualMenuHandler extends AbstractActionHandler<GetManualMenuAct
                     || currentUser.hasRole(TARole.ROLE_CONTROL)
                     || currentUser.hasRole(TARole.ROLE_CONTROL_NS)
                     || currentUser.hasRole(TARole.ROLE_CONTROL_UNP)) {
-                manualMenu.getSubMenu().add(new MenuItem("ЭНС", "help_ens.pdf", "ЭНС"));
+                manualMenu.getSubMenu().add(new MenuItem("ЭНС", "resources/help_ens.pdf", "ЭНС"));
             }
             manualMenu.getSubMenu().add(menuItem);
             menuItems.add(manualMenu);
