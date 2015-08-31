@@ -56,8 +56,8 @@ public class VersionFTOperatingServiceImpl implements VersionOperatingService {
         for (long formDataId : fdIds) {
             FormData formData = formDataDao.getWithoutRows(formDataId);
             DepartmentReportPeriod drp = departmentReportPeriodService.get(formData.getDepartmentReportPeriodId());
-            DepartmentReportPeriod drpCompare = formData.getComparativPeriodId() != null ?
-                    departmentReportPeriodService.get(formData.getComparativPeriodId()) : null;
+            DepartmentReportPeriod drpCompare = formData.getComparativePeriodId() != null ?
+                    departmentReportPeriodService.get(formData.getComparativePeriodId()) : null;
 
             logger.error(MessageGenerator.getFDMsg(
                     String.format(MSG_IS_USED_VERSION, MessageGenerator.mesSpeckPlural(formData.getFormType().getTaxType())),

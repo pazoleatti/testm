@@ -194,7 +194,7 @@ void calc() {
         if (!rowsNotCalc.contains(row.getAlias())) {
             // получим форму «Сводная форма начисленных доходов уровня обособленного подразделения»(см. раздел 6.1.1)
             def sum6ColumnOfForm302 = 0
-            def formData302 = formDataService.getLast(302, FormDataKind.SUMMARY, formData.departmentId, formData.reportPeriodId, formData.periodOrder)
+            def formData302 = formDataService.getLast(302, FormDataKind.SUMMARY, formData.departmentId, formData.reportPeriodId, formData.periodOrder, formData.comparativePeriodId, formData.accruing)
             if (formData302 != null) {
                 data302 = formDataService.getDataRowHelper(formData302)
                 for (def rowOfForm302 in data302.allSaved) {
@@ -351,7 +351,7 @@ def consolidationFromSummary(def dataRows, def formSources) {
     }
     // получить данные из источников
     formSources.each { departmentFormType ->
-        def child = formDataService.getLast(departmentFormType.formTypeId, departmentFormType.kind, departmentFormType.departmentId, formData.reportPeriodId, formData.periodOrder)
+        def child = formDataService.getLast(departmentFormType.formTypeId, departmentFormType.kind, departmentFormType.departmentId, formData.reportPeriodId, formData.periodOrder, formData.comparativePeriodId, formData.accruing)
         if (child != null && child.state == WorkflowState.ACCEPTED && child.formType.id == departmentFormType.formTypeId) {
             def childData = formDataService.getDataRowHelper(child)
 
@@ -425,7 +425,7 @@ def consolidationFromPrimary(def dataRows, def formSources) {
 
     // получить формы-источники в текущем налоговом периоде
     formSources.each {
-        def child = formDataService.getLast(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId, formData.periodOrder)
+        def child = formDataService.getLast(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId, formData.periodOrder, formData.comparativePeriodId, formData.accruing)
         if (child != null && child.state == WorkflowState.ACCEPTED) {
             def dataChild = formDataService.getDataRowHelper(child)
             switch (child.formType.id) {
@@ -453,7 +453,7 @@ def consolidationFromPrimary(def dataRows, def formSources) {
                                         def dateFrom = Date.parse('dd.MM.yyyy', '01.01.' + (Integer.valueOf(rowRNU6.date?.format('yyyy')) - 3))
                                         def reportPeriodList = reportPeriodService.getReportPeriodsByDate(TaxType.INCOME, dateFrom, rowRNU6.date)
                                         reportPeriodList.each { period ->
-                                            def primaryRNU6 = formDataService.getLast(child.formType.id, child.kind, child.departmentId, period.getId(), null) // TODO не реализовано получение по всем подразделениям.
+                                            def primaryRNU6 = formDataService.getLast(child.formType.id, child.kind, child.departmentId, period.getId(), null, child.comparativePeriodId, child.accruing) // TODO не реализовано получение по всем подразделениям.
                                             if (primaryRNU6 != null) {
                                                 def dataPrimary = formDataService.getDataRowHelper(primaryRNU6)
                                                 dataPrimary.allSaved.each { rowPrimary ->

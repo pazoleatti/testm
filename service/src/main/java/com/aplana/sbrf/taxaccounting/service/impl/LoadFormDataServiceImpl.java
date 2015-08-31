@@ -382,7 +382,8 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
                 }
 
                 formData = formDataDao.find(formType.getId(), formDataKind, departmentReportPeriod.getId().intValue(),
-                        monthly ? transportDataParam.getMonth() : null);
+                        monthly ? transportDataParam.getMonth() : null,
+                        null, false);
 
                 // Экземпляр уже есть и не в статусе «Создана»
                 if (formData != null && formData.getState() != WorkflowState.CREATED) {

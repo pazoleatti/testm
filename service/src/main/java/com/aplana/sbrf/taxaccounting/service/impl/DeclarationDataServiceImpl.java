@@ -248,7 +248,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         ArrayList<Long> formDataIds = new ArrayList<Long>();
         for (DepartmentFormType dftSource : dftSources){
             FormData formData =
-                    formDataService.getLast(dftSource.getFormTypeId(), dftSource.getKind(), dftSource.getDepartmentId(), declarationData.getReportPeriodId(), dftSource.getPeriodOrder());
+                    formDataService.getLast(dftSource.getFormTypeId(), dftSource.getKind(), dftSource.getDepartmentId(),
+                            declarationData.getReportPeriodId(), dftSource.getPeriodOrder(), null, false);
             if (formData != null && formData.getState() == WorkflowState.ACCEPTED) {
                 formDataIds.add(formData.getId());
             }
@@ -1026,7 +1027,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 for (DepartmentFormType dftSource : dftSources){
                     DepartmentReportPeriod sourceDepartmentReportPeriod = departmentReportPeriodService.getLast(dftSource.getDepartmentId(), declarationData.getReportPeriodId());
                     FormData formData =
-                            formDataService.findFormData(dftSource.getFormTypeId(), dftSource.getKind(), sourceDepartmentReportPeriod.getId(), dftSource.getPeriodOrder());
+                            formDataService.findFormData(dftSource.getFormTypeId(), dftSource.getKind(),
+                                    sourceDepartmentReportPeriod.getId(), dftSource.getPeriodOrder(), null, false);
                     if (formData != null && formData.getState() == WorkflowState.ACCEPTED) {
                         int rowCountSource = dataRowDao.getRowCount(formData);
                         int columnCountSource = formTemplateService.get(formData.getFormTemplateId()).getColumns().size();
@@ -1113,7 +1115,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             for (DepartmentFormType sourceDFT : sourceDDs){
                 DepartmentReportPeriod drp = departmentReportPeriodService.getLast(sourceDFT.getDepartmentId(), dd.getReportPeriodId());
                 FormData sourceFD =
-                        formDataService.findFormData(sourceDFT.getFormTypeId(), sourceDFT.getKind(), drp.getId(), sourceDFT.getPeriodOrder());
+                        formDataService.findFormData(sourceDFT.getFormTypeId(), sourceDFT.getKind(), drp.getId(),
+                                sourceDFT.getPeriodOrder(), null, false);
                 if (sourceFD==null){
                     consolidationOk = false;
                     logger.warn(

@@ -200,7 +200,7 @@ void consolidation() {
 
     departmentFormTypeService.getFormSources(formDataDepartment.id, formData.formType.id, formData.kind,
             getReportPeriodStartDate(), getReportPeriodEndDate()).each {
-        def source = formDataService.getLast(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId, formData.periodOrder)
+        def source = formDataService.getLast(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId, formData.periodOrder, formData.comparativePeriodId, formData.accruing)
         if (source != null && source.state == WorkflowState.ACCEPTED) {
             def dataRowsFromSource = formDataService.getDataRowHelper(source).allSaved
 
@@ -234,7 +234,7 @@ def getTaxPeriod() {
 /** Получить данные формы РНУ-36.1 (id = 333) */
 def getFormDataSource() {
     if (sourceFormData == null) {
-        sourceFormData = formDataService.getLast(333, formData.kind, formDataDepartment.id, formData.reportPeriodId, formData.periodOrder)
+        sourceFormData = formDataService.getLast(333, formData.kind, formDataDepartment.id, formData.reportPeriodId, formData.periodOrder, formData.comparativePeriodId, formData.accruing)
     }
     return sourceFormData
 }

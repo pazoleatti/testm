@@ -27,13 +27,6 @@ public interface FormDataService {
     String AUTO_FILL_CELL_STYLE = "Автозаполняемая";
 
     /**
-     * Поиск налоговой формы
-     * @deprecated Неактуально с появлением корректирующих периодов
-     */
-    @Deprecated
-	FormData find(int formTypeId, FormDataKind kind, int departmentId, int reportPeriodId);
-
-    /**
      * Поиск ежемесячной налоговой формы
      * @deprecated Неактуально с появлением корректирующих периодов
      */
@@ -41,15 +34,21 @@ public interface FormDataService {
     FormData findMonth(int formTypeId, FormDataKind kind, int departmentId, int taxPeriodId, int periodOrder);
 
     /**
-     * НФ по отчетному периоду подразделения
+     * Поиск НФ по отчетному периоду подразделения (и месяцу)
+     * @param formTypeId Вид НФ
+     * @param kind Тип НФ
+     * @param departmentReportPeriodId Отчетный период подразделения
+     * @param periodOrder Порядковый номер (равен номеру месяца, при нумерации с 1) для ежемесячных форм
+     * @param comparativePeriodId период сравнения
+     * @param accruing период сравнения
      */
-    FormData find(int formTypeId, FormDataKind kind, int departmentReportPeriodId, Integer periodOrder);
+    FormData find(int formTypeId, FormDataKind kind, int departmentReportPeriodId, Integer periodOrder, Integer comparativePeriodId, boolean accruing);
 
     /**
      * НФ созданная в последнем отчетном периоде подразделения
      */
     @SuppressWarnings("unused")
-    FormData getLast(int formTypeId, FormDataKind kind, int departmentId, int reportPeriodId, Integer periodOrder);
+    FormData getLast(int formTypeId, FormDataKind kind, int departmentId, int reportPeriodId, Integer periodOrder, Integer comparativePeriodId, boolean accruing);
 
     /**
      * Получить шаблон нф.
@@ -220,11 +219,14 @@ public interface FormDataService {
      * @param prevPeriod проверять в предыдущем периоде
      * @param logger логгер
      * @param required фатальность
+     * @param comparativePeriodId Период сравнения - ссылка на DepartmentReportPeriod. Может быть null
+     * @param accruing Признак расчета значений нарастающим итогом (false - не нарастающим итогом, true - нарастающим итогом, пустое - форма без периода сравнения)
      */
     @SuppressWarnings("unused")
     void checkFormExistAndAccepted(int formTypeId, FormDataKind kind, int departmentId,
                                           int currentReportPeriodId, Boolean prevPeriod,
-                                          Logger logger, boolean required);
+                                          Logger logger, boolean required,
+                                          Integer comparativePeriodId, boolean accruing);
 
     /**
      * Проверить существование и принятость ежемесячной формы, а также наличие данных в ней.
@@ -237,11 +239,14 @@ public interface FormDataService {
      * @param prevPeriod проверять в предыдущем периоде
      * @param logger логгер
      * @param required фатальность
+     * @param comparativePeriodId Период сравнения - ссылка на DepartmentReportPeriod. Может быть null
+     * @param accruing Признак расчета значений нарастающим итогом (false - не нарастающим итогом, true - нарастающим итогом, пустое - форма без периода сравнения)
      */
     @SuppressWarnings("unused")
     void checkMonthlyFormExistAndAccepted(int formTypeId, FormDataKind kind, int departmentId,
                                                  int currentReportPeriodId, int currentPeriodOrder, boolean prevPeriod,
-                                                 Logger logger, boolean required);
+                                                 Logger logger, boolean required,
+                                                 Integer comparativePeriodId, boolean accruing);
 
     /**
      * Проверка формы на уникальность с аналогичными параметрам

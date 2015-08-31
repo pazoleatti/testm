@@ -87,7 +87,7 @@ public class DeclarationDataScriptingServiceImplTest {
 		FormDataDao formDataDao = mock(FormDataDao.class);
 		FormData formData = new FormData();
 		formData.setState(WorkflowState.ACCEPTED);
-		when(formDataDao.find(1, FormDataKind.SUMMARY, DEPARTMENT_ID, REPORT_PERIOD_ID)).thenReturn(formData);
+		when(formDataDao.find(1, FormDataKind.SUMMARY, DEPARTMENT_ID, REPORT_PERIOD_ID, null, false)).thenReturn(formData);
 		//ReflectionTestUtils.setField(service, "formDataDao", formDataDao, FormDataDao.class);
 
         LogEntryService logEntryService = mock(LogEntryService.class);

@@ -337,7 +337,7 @@ void consolidationFromSummary(def dataRows, def formSources) {
 
     // получить консолидированные формы из источников
     formSources.each {
-        def child = formDataService.getLast(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId, formData.periodOrder)
+        def child = formDataService.getLast(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId, formData.periodOrder, formData.comparativePeriodId, formData.accruing)
         if (child != null && child.state == WorkflowState.ACCEPTED && child.formType.id == formData.formType.id) {
             for (def row : formDataService.getDataRowHelper(child).allSaved) {
                 if (row.getAlias() == null) {
@@ -397,11 +397,11 @@ void consolidationFromPrimary(def dataRows, def formSources) {
         def children = []
         if (isMonth) {
             for (def periodOrder = 3 * reportPeriod.order - 2; periodOrder < 3 * reportPeriod.order + 1; periodOrder++) {
-                def child = formDataService.getLast(it.formTypeId, it.kind, it.departmentId, reportPeriod.id, periodOrder)
+                def child = formDataService.getLast(it.formTypeId, it.kind, it.departmentId, reportPeriod.id, periodOrder, it.comparativePeriodId, it.accruing)
                 children.add(child)
             }
         } else {
-            children.add(formDataService.getLast(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId, formData.periodOrder))
+            children.add(formDataService.getLast(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId, formData.periodOrder, it.comparativePeriodId, it.accruing))
         }
         for (def child in children) {
             if (child != null) {
@@ -700,7 +700,7 @@ def calcColumn6(def dataRows, def aliasRows) {
  * Получить данные формы "расходы простые" (id = 304)
  */
 def getFormDataSimple(def id) {
-    return formDataService.getLast(id, formData.kind, formDataDepartment.id, formData.reportPeriodId, formData.periodOrder)
+    return formDataService.getLast(id, formData.kind, formDataDepartment.id, formData.reportPeriodId, formData.periodOrder, formData.comparativePeriodId, formData.accruing)
 }
 
 /**

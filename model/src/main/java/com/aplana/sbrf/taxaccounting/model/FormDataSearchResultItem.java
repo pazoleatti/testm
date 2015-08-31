@@ -54,7 +54,7 @@ public class FormDataSearchResultItem implements Serializable {
     //Иерархические имена
     private String hierarchicalDepName;
     //Название периода сравнения
-    private Integer comparativPeriodId;
+    private Integer comparativePeriodId;
     //Название периода сравнения
     private String comparativPeriodName;
     /** Признак расчета значений нф нарастающим итогом (false - не нарастающим итогом, true - нарастающим итогом, пустое - форма без периода сравнения) */
@@ -183,12 +183,12 @@ public class FormDataSearchResultItem implements Serializable {
         this.correctionDate = correctionDate;
     }
 
-    public Integer getComparativPeriodId() {
-        return comparativPeriodId;
+    public Integer getComparativePeriodId() {
+        return comparativePeriodId;
     }
 
-    public void setComparativPeriodId(Integer comparativPeriodId) {
-        this.comparativPeriodId = comparativPeriodId;
+    public void setComparativePeriodId(Integer comparativePeriodId) {
+        this.comparativePeriodId = comparativePeriodId;
     }
 
     public String getComparativPeriodName() {

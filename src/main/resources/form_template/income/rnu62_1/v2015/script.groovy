@@ -440,7 +440,7 @@ def getDataRowsPrev() {
         def prevReportPeriod = reportPeriodService.getPrevReportPeriod(formData.getReportPeriodId());
         if (prevReportPeriod != null) {
             // Последний экземпляр
-            formDataPrev = formDataService.getLast(formTypeIdOld, formData.getKind(), formData.getDepartmentId(), prevReportPeriod.getId(), null);
+            formDataPrev = formDataService.getLast(formTypeIdOld, formData.getKind(), formData.getDepartmentId(), prevReportPeriod.getId(), null, formData.comparativePeriodId, formData.accruing);
             formDataPrev = formDataPrev?.state == WorkflowState.ACCEPTED ? formDataPrev : null
         }
     }
@@ -816,7 +816,7 @@ def checkFormExistAndAccepted(List<Integer> formTypeIds, FormDataKind kind, int 
     if (reportPeriod != null) {
         for (int i = 0; i < formTypeIds.size() && !foundData; i++) {
             def formTypeId = formTypeIds[i]
-            formData = formDataService.getLast(formTypeId, kind, departmentId, reportPeriod.getId(), null);
+            formData = formDataService.getLast(formTypeId, kind, departmentId, reportPeriod.getId(), null, formData.comparativePeriodId, formData.accruing);
             // проверка существования, принятости и наличия данных
             if (formData != null && formData.getState() == WorkflowState.ACCEPTED) {
                 def dataRowHelper = formDataService.getDataRowHelper(formData);

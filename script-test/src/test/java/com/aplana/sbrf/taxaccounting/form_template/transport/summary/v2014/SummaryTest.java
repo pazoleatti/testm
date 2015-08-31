@@ -204,7 +204,7 @@ public class SummaryTest extends ScriptTestBase {
         sourceDataRowHelper.save(sourceTestHelper.getDataRowHelper().getAll());
 
         when(testHelper.getFormDataService().getLast(eq(SOURCE_TYPE_ID), eq(SOURCE_KIND), eq(DEPARTMENT_ID), anyInt(),
-                any(Integer.class))).thenReturn(sourceFormData);
+                any(Integer.class), any(Integer.class), any(Boolean.class))).thenReturn(sourceFormData);
 
         when(testHelper.getDepartmentService().get(DEPARTMENT_ID)).thenReturn(department);
 

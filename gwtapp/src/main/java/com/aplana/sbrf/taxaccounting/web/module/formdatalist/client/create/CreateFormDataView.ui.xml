@@ -85,7 +85,7 @@
                     <g:Label width="180px" wordWrap="false" text="Период сравнения:"/>
                 </g:cell>
                 <g:cell width="100%">
-                    <rep:PeriodPickerPopupWidget width="100%" ui:field="comparativPeriodId" multiselect="false"/>
+                    <rep:PeriodPickerPopupWidget width="100%" ui:field="comparativePeriodId" multiselect="false"/>
                 </g:cell>
             </g:HorizontalPanel>
 

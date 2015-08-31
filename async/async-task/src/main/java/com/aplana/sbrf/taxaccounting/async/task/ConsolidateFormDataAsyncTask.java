@@ -114,8 +114,8 @@ public abstract class ConsolidateFormDataAsyncTask extends AbstractAsyncTask {
         FormData formData = formDataService.getFormData(userInfo, formDataId, false, logger);
         Department department = departmentService.getDepartment(formData.getDepartmentId());
         DepartmentReportPeriod reportPeriod = departmentReportPeriodService.get(formData.getDepartmentReportPeriodId());
-        DepartmentReportPeriod rpCompare = formData.getComparativPeriodId() != null ?
-                departmentReportPeriodService.get(formData.getComparativPeriodId()) : null;
+        DepartmentReportPeriod rpCompare = formData.getComparativePeriodId() != null ?
+                departmentReportPeriodService.get(formData.getComparativePeriodId()) : null;
 
         return MessageGenerator.getFDMsg(
                 String.format(SUCCESS, MessageGenerator.mesSpeckSingleD(formData.getFormType().getTaxType())),
@@ -137,8 +137,8 @@ public abstract class ConsolidateFormDataAsyncTask extends AbstractAsyncTask {
         FormData formData = formDataService.getFormData(userInfo, formDataId, false, logger);
         Department department = departmentService.getDepartment(formData.getDepartmentId());
         DepartmentReportPeriod reportPeriod = departmentReportPeriodService.get(formData.getDepartmentReportPeriodId());
-        DepartmentReportPeriod rpCompare = formData.getComparativPeriodId() != null ?
-                departmentReportPeriodService.get(formData.getComparativPeriodId()) : null;
+        DepartmentReportPeriod rpCompare = formData.getComparativePeriodId() != null ?
+                departmentReportPeriodService.get(formData.getComparativePeriodId()) : null;
 
         return MessageGenerator.getFDMsg(
                 String.format(FAIL, MessageGenerator.mesSpeckSingleD(formData.getFormType().getTaxType())),

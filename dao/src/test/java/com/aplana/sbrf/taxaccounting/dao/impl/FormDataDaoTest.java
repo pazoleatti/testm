@@ -141,22 +141,15 @@ public class FormDataDaoTest {
     }
 
     @Test
-    public void find1Test() {
-        FormData formData = formDataDao.find(1, FormDataKind.SUMMARY, 1, 11);
-        assertNotNull(formData);
-        assertEquals(11l, formData.getId().longValue());
-    }
-
-    @Test
     public void find2Test() {
-        FormData formData = formDataDao.find(1, FormDataKind.PRIMARY, 301, Integer.valueOf(1));
+        FormData formData = formDataDao.find(1, FormDataKind.PRIMARY, 301, Integer.valueOf(1), null, false);
         assertNotNull(formData);
         assertEquals(301, formData.getId().intValue());
     }
 
     @Test
     public void find3Test() {
-        FormData formData = formDataDao.find(1, FormDataKind.SUMMARY, 111, null);
+        FormData formData = formDataDao.find(1, FormDataKind.SUMMARY, 111, null, null, false);
         assertNotNull(formData);
         assertNotNull(formData.getFormType());
         assertEquals(11, formData.getId().intValue());
@@ -209,7 +202,7 @@ public class FormDataDaoTest {
 
     @Test
     public void findMonth3Test() throws ParseException {
-        FormData formData = formDataDao.find(2, FormDataKind.PRIMARY, 115, Integer.valueOf(4));
+        FormData formData = formDataDao.find(2, FormDataKind.PRIMARY, 115, Integer.valueOf(4), null, false);
         assertNotNull(formData);
         assertEquals(17, formData.getId().intValue());
     }
@@ -232,20 +225,9 @@ public class FormDataDaoTest {
         formData.setKind(FormDataKind.PRIMARY);
         long id = formDataDao.save(formData);
 
-        formData = formDataDao.find(2, FormDataKind.PRIMARY, 1000, Integer.valueOf(4));
+        formData = formDataDao.find(2, FormDataKind.PRIMARY, 1000, Integer.valueOf(4), null, false);
         assertNotNull(formData);
         assertEquals(id, formData.getId().intValue());
-    }
-
-    @Test(expected = DaoException.class)
-    public void testFindTooManyResult() {
-        formDataDao.find(1, FormDataKind.SUMMARY, 1, 12);
-    }
-
-    @Test
-    public void testFindEmptyResult() {
-        FormData fd = formDataDao.find(1, FormDataKind.SUMMARY, 1, 13);
-        assertNull(fd);
     }
 
     @Test
@@ -343,11 +325,11 @@ public class FormDataDaoTest {
     @Test
     public void getLast1Test() {
         // Ежемесячная НФ
-        FormData formData = formDataDao.getLast(1, FormDataKind.PRIMARY, 1, 20, 3);
+        FormData formData = formDataDao.getLast(1, FormDataKind.PRIMARY, 1, 20, 3, null, false);
         assertNotNull(formData);
         assertEquals(303, formData.getId().intValue());
         // Не ежемесячная форма
-        formData = formDataDao.getLast(1, FormDataKind.SUMMARY, 1, 12, null);
+        formData = formDataDao.getLast(1, FormDataKind.SUMMARY, 1, 12, null, null, false);
         assertNotNull(formData);
         assertEquals(12, formData.getId().intValue());
     }
@@ -404,7 +386,7 @@ public class FormDataDaoTest {
         FormDataKind primary = FormDataKind.PRIMARY;
         WorkflowState state = WorkflowState.CREATED;
         // НФ нет
-        FormData formData = formDataDao.getLast(typeId, primary, departmentId, reportPeriodId, null);
+        FormData formData = formDataDao.getLast(typeId, primary, departmentId, reportPeriodId, null, null, false);
         assertNull(formData);
 
         FormTemplate formTemplate = formTemplateDao.get(typeId);
@@ -416,7 +398,7 @@ public class FormDataDaoTest {
 
         formData1.setState(state);
         final long fd1 = formDataDao.save(formData1);
-        formData = formDataDao.getLast(typeId, primary, departmentId, reportPeriodId, null);
+        formData = formDataDao.getLast(typeId, primary, departmentId, reportPeriodId, null, null, false);
         assertNotNull(formData);
         assertEquals(fd1, formData.getId().longValue());
 
@@ -426,7 +408,7 @@ public class FormDataDaoTest {
         formData2.setKind(primary);
         formData2.setState(state);
         final long fd2 = formDataDao.save(formData2);
-        formData = formDataDao.getLast(typeId, primary, departmentId, reportPeriodId, null);
+        formData = formDataDao.getLast(typeId, primary, departmentId, reportPeriodId, null, null, false);
         assertNotNull(formData);
         assertEquals(fd2, formData.getId().longValue());
 
@@ -436,22 +418,22 @@ public class FormDataDaoTest {
         formData3.setKind(primary);
         formData3.setState(state);
         final long fd3 = formDataDao.save(formData3);
-        formData = formDataDao.getLast(typeId, primary, departmentId, reportPeriodId, null);
+        formData = formDataDao.getLast(typeId, primary, departmentId, reportPeriodId, null, null, false);
         assertNotNull(formData);
         assertEquals(fd3, formData.getId().longValue());
     }
 
     @Test
     public void getLastByDateTest() throws ParseException {
-        FormData formData = formDataDao.getLastByDate(1, FormDataKind.PRIMARY, 1, 20, null, null);
+        FormData formData = formDataDao.getLastByDate(1, FormDataKind.PRIMARY, 1, 20, null, null, null, false);
         assertNotNull(formData);
         assertEquals(303, formData.getId().intValue());
 
-        formData = formDataDao.getLastByDate(1, FormDataKind.PRIMARY, 1, 20, null, SIMPLE_DATE_FORMAT.parse("02.01.2014"));
+        formData = formDataDao.getLastByDate(1, FormDataKind.PRIMARY, 1, 20, null, SIMPLE_DATE_FORMAT.parse("02.01.2014"), null, false);
         assertNotNull(formData);
         assertEquals(303, formData.getId().intValue());
 
-        formData = formDataDao.getLastByDate(1, FormDataKind.PRIMARY, 1, 20, null, SIMPLE_DATE_FORMAT.parse("01.01.2014"));
+        formData = formDataDao.getLastByDate(1, FormDataKind.PRIMARY, 1, 20, null, SIMPLE_DATE_FORMAT.parse("01.01.2014"), null, false);
         assertNotNull(formData);
         assertEquals(302, formData.getId().intValue());
     }

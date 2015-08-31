@@ -229,7 +229,7 @@ public class FormDataXlsxReportBuilderTestMock {
         formData.setPerformer(formDataperformer);
         formData.setSigners(formDataSigners);
         formData.setAccruing(true);
-        formData.setComparativPeriodId(null);
+        formData.setComparativePeriodId(null);
         formData.setPeriodOrder(1);
 
 		data.setData(formData);

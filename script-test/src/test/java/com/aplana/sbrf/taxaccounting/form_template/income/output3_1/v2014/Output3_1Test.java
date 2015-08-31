@@ -175,7 +175,7 @@ public class Output3_1Test extends ScriptTestBase {
             // форма источника
             FormData sourceFormData = getSourceFormData(sourceTemplateId, sourceTemplateId);
             when(testHelper.getFormDataService().getLast(eq(sourceTypeId), eq(kind), eq(DEPARTMENT_ID),
-                    anyInt(), any(Integer.class))).thenReturn(sourceFormData);
+                    anyInt(), any(Integer.class), any(Integer.class), any(Boolean.class))).thenReturn(sourceFormData);
 
             // строки и хелпер источника
             List<DataRow<Cell>> dataRows = getFillDataRows(sourceTemplateId, sourceFormData);

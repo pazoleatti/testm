@@ -304,7 +304,7 @@ def calcTotalTwo(def totalOneSum) {
     } else if (formData.kind == FormDataKind.CONSOLIDATED) {
         departmentFormTypeService.getFormSources(formDataDepartment.id, formData.formType.id, formData.kind, getReportPeriodStartDate(), getReportPeriodEndDate()).each {
             if (it.formTypeId == formData.getFormType().getId()) {
-                def source = formDataService.getLast(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId, formData.periodOrder)
+                def source = formDataService.getLast(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId, formData.periodOrder, formData.comparativePeriodId, formData.accruing)
                 if (source != null && source.state == WorkflowState.ACCEPTED) {
                     formDataService.getDataRowHelper(source).getAllSaved().each { row ->
                         if (row.getAlias() == 'itogoKvartal') {

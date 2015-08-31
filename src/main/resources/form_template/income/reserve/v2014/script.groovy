@@ -168,7 +168,7 @@ void preCalcLogicCheck() {
         if (departmentFormType == null) {
             logger.error ("Строка ${row.getIndex()}: " + "Не назначена источником налоговая форма «${sourceFormType.name}» для «${row.bankName}»!")
         } else {
-            def child = formDataService.getLast(departmentFormType.formTypeId, departmentFormType.kind, departmentFormType.departmentId, formData.reportPeriodId, formData.periodOrder)
+            def child = formDataService.getLast(departmentFormType.formTypeId, departmentFormType.kind, departmentFormType.departmentId, formData.reportPeriodId, formData.periodOrder, formData.comparativePeriodId, formData.accruing)
             if (departmentFormType.formTypeId == sourceFormTypeId && (child == null || child.state != WorkflowState.ACCEPTED)) {
                 def cause = child == null ? "не создана" : "не находится в статусе «Принята»"
                 def childDepartment = departmentService.get(departmentFormType.departmentId)
@@ -214,7 +214,7 @@ void consolidation() {
     // получить данные из источников
     for (def departmentFormType in departmentFormTypeService.getFormSources(formData.departmentId, formData.getFormType().getId(), formData.getKind(),
             getReportPeriodStartDate(), getReportPeriodEndDate())) {
-        def child = formDataService.getLast(departmentFormType.formTypeId, departmentFormType.kind, departmentFormType.departmentId, formData.reportPeriodId, formData.periodOrder)
+        def child = formDataService.getLast(departmentFormType.formTypeId, departmentFormType.kind, departmentFormType.departmentId, formData.reportPeriodId, formData.periodOrder, formData.comparativePeriodId, formData.accruing)
         if (child != null && child.state == WorkflowState.ACCEPTED && child.formType.id == sourceFormTypeId) {
             def childData = formDataService.getDataRowHelper(child)
             def childRows = childData.all

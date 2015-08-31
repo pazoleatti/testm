@@ -127,7 +127,7 @@ def isMonthBalance() {
 
 // Получить данные из формы РНУ-46
 def getRnu46DataRowHelper() {
-    def formData46 = formDataService.getLast(342, formData.kind, formDataDepartment.id, formData.reportPeriodId, formData.periodOrder)
+    def formData46 = formDataService.getLast(342, formData.kind, formDataDepartment.id, formData.reportPeriodId, formData.periodOrder, formData.comparativePeriodId, formData.accruing)
     if (formData46 != null) {
         return formDataService.getDataRowHelper(formData46)
     }
@@ -344,7 +344,7 @@ void logicCheck() {
 /** Получить данные за определенный месяц */
 def FormData getFormDataPeriod(def reportPeriodId, def periodOrder) {
     if (reportPeriodId != null && periodOrder != null) {
-        return formDataService.getLast(formData.formType.id, formData.kind, formDataDepartment.id, reportPeriodId, periodOrder)
+        return formDataService.getLast(formData.formType.id, formData.kind, formDataDepartment.id, reportPeriodId, periodOrder, formData.comparativePeriodId, formData.accruing)
     }
 }
 
@@ -399,7 +399,7 @@ void consolidation() {
     for (formDataSource in departmentFormTypeService.getFormSources(formData.departmentId, formData.getFormType().getId(), formData.getKind(),
             getReportPeriodStartDate(), getReportPeriodEndDate())) {
         if (formDataSource.formTypeId == formData.getFormType().getId()) {
-            def source = formDataService.getLast(formDataSource.formTypeId, formDataSource.kind, formDataSource.departmentId, formData.reportPeriodId, formData.periodOrder)
+            def source = formDataService.getLast(formDataSource.formTypeId, formDataSource.kind, formDataSource.departmentId, formData.reportPeriodId, formData.periodOrder, formData.comparativePeriodId, formData.accruing)
             if (source != null && source.state == WorkflowState.ACCEPTED) {
                 sourceForm = formDataService.getDataRowHelper(source)
                 addRowsToRows(dataRows, sourceForm.allCached)

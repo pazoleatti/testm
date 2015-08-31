@@ -939,7 +939,7 @@ def getFormDataSources() {
             // получить данные источников
             monthOrders.each { monthOrder ->
                 formSources945_1.each { formSource ->
-                    FormData source = formDataService.getLast(sourceFormTypeId, formSource.kind, formSource.departmentId, period.id, monthOrder)
+                    FormData source = formDataService.getLast(sourceFormTypeId, formSource.kind, formSource.departmentId, period.id, monthOrder, null, false)
                     if (source != null && source.getState() == WorkflowState.ACCEPTED) {
                         def alias = 'cost' + monthOrder
                         // если форма за январь следующего года, то заполняется графа 17 (cost13)
@@ -1344,14 +1344,14 @@ def getSources() {
             // другая ежемесячная форма
             otherMonthlyFormsPeriods.each { monthOrder ->
                 FormData tmpFormData = formDataService.getLast(departmentFormType.formTypeId, departmentFormType.kind,
-                        departmentFormType.departmentId, currentPeriod.id, monthOrder)
+                        departmentFormType.departmentId, currentPeriod.id, monthOrder, null, false)
                 def formToFormRelation = getFormToFormRelation(tmpFormData, departmentFormType, isSource, currentPeriod, monthOrder)
                 sources.sourceList.add(formToFormRelation)
             }
         } else {
             // квартальная форма
             FormData tmpFormData = formDataService.getLast(departmentFormType.formTypeId, departmentFormType.kind,
-                    departmentFormType.departmentId, currentPeriod.id, null)
+                    departmentFormType.departmentId, currentPeriod.id, null, null, false)
             def formToFormRelation = getFormToFormRelation(tmpFormData, departmentFormType, isSource, currentPeriod, null)
             sources.sourceList.add(formToFormRelation)
         }
@@ -1370,7 +1370,7 @@ def getSources() {
         } else {
             // квартальная форма
             FormData tmpFormData = formDataService.getLast(departmentFormType.formTypeId, departmentFormType.kind,
-                    departmentFormType.departmentId, currentPeriod.id, null)
+                    departmentFormType.departmentId, currentPeriod.id, null, null, false)
             def formToFormRelation = getFormToFormRelation(tmpFormData, departmentFormType, isSource, currentPeriod, null)
             sources.sourceList.add(formToFormRelation)
             continue
@@ -1379,7 +1379,7 @@ def getSources() {
         monthlyFormsPeriodsMap.each { period, monthOrders ->
             monthOrders.each { monthOrder ->
                 FormData tmpFormData = formDataService.getLast(departmentFormType.formTypeId, departmentFormType.kind,
-                        departmentFormType.departmentId, period.id, monthOrder)
+                        departmentFormType.departmentId, period.id, monthOrder, null, false)
                 def formToFormRelation = getFormToFormRelation(tmpFormData, departmentFormType, isSource, period, monthOrder)
                 sources.sourceList.add(formToFormRelation)
             }

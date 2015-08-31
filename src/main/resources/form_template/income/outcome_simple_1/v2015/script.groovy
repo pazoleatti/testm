@@ -541,7 +541,7 @@ void consolidationFromPrimary(def dataRows, def formSources) {
 FormData getFormData(int formTypeId, FormDataKind kind, int departmentId, int reportPeriodId, Integer periodOrder) {
     String key = "$formTypeId#${kind.id}#$departmentId#$reportPeriodId#$periodOrder"
     if (formDataCache[key] != -1 && formDataCache[key] == null){ // чтобы повторно не искал несуществующие формы
-        formDataCache[key] = formDataService.getLast(formTypeId, kind, departmentId, reportPeriodId, periodOrder) ?: -1
+        formDataCache[key] = formDataService.getLast(formTypeId, kind, departmentId, reportPeriodId, periodOrder, formData.comparativePeriodId, formData.accruing) ?: -1
     }
     return (formDataCache[key] != -1) ? formDataCache[key] : null
 }

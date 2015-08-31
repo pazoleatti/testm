@@ -120,7 +120,7 @@ void logicCheck() {
         logger.error(WRONG_TOTAL, getColumnName(itog, 'sum'))
     }
     // Проверка наличия экземпляра налоговой формы 937.2 по соответствующему подразделению за соответствующий налоговый период; проверка итоговой суммы
-    def formData937_2 = formDataService.getLast(608, formData.kind, formData.departmentId, formData.reportPeriodId, formData.periodOrder)
+    def formData937_2 = formDataService.getLast(608, formData.kind, formData.departmentId, formData.reportPeriodId, formData.periodOrder, formData.comparativePeriodId, formData.accruing)
     if (formData937_2 == null) {
         logger.warn("Экземпляр налоговой формы 937.2 «Итоговые данные книги продаж» за период %s — %s не существует (отсутствуют первичные данные для проверки)!",
                 getReportPeriodStartDate().format(dateFormat), getReportPeriodEndDate().format(dateFormat))
@@ -193,7 +193,7 @@ void consolidation() {
     dataRows = tmp
     departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind(),
             getCalendarStartDate(), getReportPeriodEndDate()).each {
-        def source = formDataService.getLast(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId, formData.periodOrder)
+        def source = formDataService.getLast(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId, formData.periodOrder, formData.comparativePeriodId, formData.accruing)
         if (source != null && source.state == WorkflowState.ACCEPTED && source.getFormType().getTaxType() == TaxType.VAT) {
             formDataService.getDataRowHelper(source).getAllCached().each { srcRow ->
                 def srcAlias = srcRow.getAlias()

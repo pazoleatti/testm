@@ -73,9 +73,9 @@ public class CreateFormDataHandler extends AbstractActionHandler<CreateFormData,
         // Получаем DepartmentReportPeriod для периода сравнения (может быть null)
         Integer comparativDrpId = null;
         DepartmentReportPeriod comparativDrp = null;
-        if (action.getComparativPeriodId() != null) {
+        if (action.getComparativePeriodId() != null) {
             comparativDrp = departmentReportPeriodService.getLast(action.getDepartmentId(),
-                    action.getComparativPeriodId());
+                    action.getComparativePeriodId());
             comparativDrpId = comparativDrp.getId();
         }
         if (departmentReportPeriod == null) {

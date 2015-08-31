@@ -80,7 +80,7 @@ public class Property945_5Test extends ScriptTestBase {
         sourceFormData.setId((long) SOURCE_FORM_TYPE_ID);
         sourceFormData.setState(WorkflowState.ACCEPTED);
         when(testHelper.getFormDataService().getLast(eq(departmentFormType.getFormTypeId()), eq(KIND), eq(DEPARTMENT_ID),
-                anyInt(), any(Integer.class))).thenReturn(sourceFormData);
+                anyInt(), any(Integer.class), any(Integer.class), any(Boolean.class))).thenReturn(sourceFormData);
 
         // Определение балансового периода
         when(testHelper.getDepartmentReportPeriodService().get(any(Integer.class))).thenAnswer(

@@ -152,9 +152,9 @@ public class FormDataServiceImpl implements FormDataService {
     private BlobDataService blobDataService;
 
     @Override
-    public long createFormData(Logger logger, TAUserInfo userInfo, int formTemplateId, int departmentReportPeriodId, Integer comparativPeriodId, boolean accruing, FormDataKind kind, Integer periodOrder, boolean importFormData) {
+    public long createFormData(Logger logger, TAUserInfo userInfo, int formTemplateId, int departmentReportPeriodId, Integer comparativePeriodId, boolean accruing, FormDataKind kind, Integer periodOrder, boolean importFormData) {
         formDataAccessService.canCreate(userInfo, formTemplateId, kind, departmentReportPeriodId);
-        return createFormDataWithoutCheck(logger, userInfo, formTemplateId, departmentReportPeriodId, comparativPeriodId, accruing, kind, periodOrder, importFormData);
+        return createFormDataWithoutCheck(logger, userInfo, formTemplateId, departmentReportPeriodId, comparativePeriodId, accruing, kind, periodOrder, importFormData);
     }
 
     @Override
@@ -279,7 +279,7 @@ public class FormDataServiceImpl implements FormDataService {
 
     @Override
 	public long createFormDataWithoutCheck(Logger logger, TAUserInfo userInfo, int formTemplateId, int departmentReportPeriodId,
-                                           Integer comparativPeriodId, boolean accruing,
+                                           Integer comparativePeriodId, boolean accruing,
                                            FormDataKind kind, Integer periodOrder, boolean importFormData) {
 		FormTemplate formTemplate = formTemplateService.get(formTemplateId);
         FormData formData = new FormData(formTemplate);
@@ -296,11 +296,12 @@ public class FormDataServiceImpl implements FormDataService {
         formData.setKind(kind);
         formData.setPeriodOrder(periodOrder);
         formData.setManual(false);
-        formData.setComparativPeriodId(comparativPeriodId);
+        formData.setComparativePeriodId(comparativePeriodId);
         formData.setAccruing(accruing);
 
         FormDataPerformer performer = null;
-        FormData formDataOld = getPrevPeriodFormData(formTemplate, departmentReportPeriod, kind, periodOrder);
+        FormData formDataOld = getPrevPeriodFormData(formTemplate, departmentReportPeriod, kind, periodOrder,
+                comparativePeriodId, accruing);
         if (formDataOld != null) {
             FormData fdOld = formDataDao.get(formDataOld.getId(), false);
             List<FormDataSigner> signerOld = fdOld.getSigners();
@@ -358,13 +359,19 @@ public class FormDataServiceImpl implements FormDataService {
      * @param departmentReportPeriod
      * @param kind
      * @param periodOrder
+     * @param comparativePeriodId Период сравнения - ссылка на DepartmentReportPeriod. Может быть null
+     * @param accruing Признак расчета значений нарастающим итогом (false - не нарастающим итогом, true - нарастающим итогом, пустое - форма без периода сравнения)
      * @return
      */
-    public FormData getPrevPeriodFormData(FormTemplate formTemplate, DepartmentReportPeriod departmentReportPeriod, FormDataKind kind, Integer periodOrder) {
+    public FormData getPrevPeriodFormData(FormTemplate formTemplate, DepartmentReportPeriod departmentReportPeriod,
+                                          FormDataKind kind, Integer periodOrder,
+                                          Integer comparativePeriodId, boolean accruing) {
         if (periodOrder != null) {
             List<Months> availableMonthList = reportPeriodService.getAvailableMonthList(departmentReportPeriod.getReportPeriod().getId());
             if  (periodOrder > 1 && availableMonthList.contains(Months.fromId(periodOrder - 1))) {
-                return formDataDao.find(formTemplate.getType().getId(), kind, departmentReportPeriod.getId().intValue(), Integer.valueOf(periodOrder - 1));
+                return formDataDao.find(formTemplate.getType().getId(), kind,
+                        departmentReportPeriod.getId(), periodOrder - 1,
+                        comparativePeriodId, accruing);
             }
         }
         ReportPeriod prevReportPeriod = reportPeriodService.getPrevReportPeriod(departmentReportPeriod.getReportPeriod().getId());
@@ -376,7 +383,9 @@ public class FormDataServiceImpl implements FormDataService {
             }
             DepartmentReportPeriod departmentReportPeriodOld = departmentReportPeriodService.getLast(departmentReportPeriod.getDepartmentId(), prevReportPeriod.getId());
             if (departmentReportPeriodOld != null) {
-                return formDataDao.find(formTemplate.getType().getId(), kind, departmentReportPeriodOld.getId().intValue(), lastPeriodOrder);
+                return formDataDao.find(formTemplate.getType().getId(), kind,
+                        departmentReportPeriodOld.getId(), lastPeriodOrder,
+                        comparativePeriodId, accruing);
             }
         }
         return null;
@@ -486,7 +495,8 @@ public class FormDataServiceImpl implements FormDataService {
                         for (DepartmentFormType dftTarget : destinationsDFT) {
                             DepartmentReportPeriod drp = departmentReportPeriodService.getLast(dftTarget.getDepartmentId(), formData.getReportPeriodId());
                             FormData destinationFD =
-                                    findFormData(dftTarget.getFormTypeId(), dftTarget.getKind(), drp.getId(), formData.getPeriodOrder());
+                                    findFormData(dftTarget.getFormTypeId(), dftTarget.getKind(), drp.getId(), formData.getPeriodOrder(),
+                                            formData.getComparativePeriodId(), formData.isAccruing());
                             if (destinationFD != null && !sourceService.isFDSourceConsolidated(destinationFD.getId(), formData.getId())){
                                 ReportPeriod rp = reportPeriodService.getReportPeriod(destinationFD.getReportPeriodId());
                                 consolidationOk = false;
@@ -510,7 +520,8 @@ public class FormDataServiceImpl implements FormDataService {
                                 departmentReportPeriodService.getLast(dftSource.getDepartmentId(), formData.getReportPeriodId());
                         FormData sourceFormData =
                                 findFormData(dftSource.getFormTypeId(), dftSource.getKind(),
-                                        sourceDepartmentReportPeriod.getId(), dftSource.getPeriodOrder());
+                                        sourceDepartmentReportPeriod.getId(), dftSource.getPeriodOrder(),
+                                        formData.getComparativePeriodId(), formData.isAccruing());
                         ReportPeriod rp = reportPeriodService.getReportPeriod(formData.getReportPeriodId());
                         if (sourceFormData == null){
                             DepartmentReportPeriod drp = departmentReportPeriodService.get(formData.getDepartmentReportPeriodId());
@@ -854,7 +865,8 @@ public class FormDataServiceImpl implements FormDataService {
                 DepartmentReportPeriod sourceDepartmentReportPeriod =
                         departmentReportPeriodService.getLast(sourceDFT.getDepartmentId(), formData.getReportPeriodId());
                 FormData sourceForm = findFormData(sourceDFT.getFormTypeId(), sourceDFT.getKind(),
-                        sourceDepartmentReportPeriod.getId(), sourceDFT.getPeriodOrder());
+                        sourceDepartmentReportPeriod.getId(), sourceDFT.getPeriodOrder(),
+                        formData.getComparativePeriodId(), formData.isAccruing());
                 if (
                         sourceForm != null && sourceForm.getState() == WorkflowState.ACCEPTED
                                 &&
@@ -1068,7 +1080,9 @@ public class FormDataServiceImpl implements FormDataService {
             if (sourceDepartmentReportPeriod == null) {
                 continue;
             }
-            FormData sourceForm = getLast(sourceDFT.getFormTypeId(), sourceDFT.getKind(), sourceDFT.getDepartmentId(), formData.getReportPeriodId(), sourceDFT.getPeriodOrder());
+            FormData sourceForm = getLast(sourceDFT.getFormTypeId(), sourceDFT.getKind(), sourceDFT.getDepartmentId(),
+                    formData.getReportPeriodId(), sourceDFT.getPeriodOrder(),
+                    formData.getComparativePeriodId(), formData.isAccruing());
             if (sourceForm == null){
                 continue;
             }
@@ -1195,7 +1209,8 @@ public class FormDataServiceImpl implements FormDataService {
             DepartmentReportPeriod destinationDRP =
                     departmentReportPeriodService.getLast(destinationDFT.getDepartmentId(), formData.getReportPeriodId());
             FormData destinationForm = findFormData(destinationDFT.getFormTypeId(), destinationDFT.getKind(),
-                    destinationDRP.getId(), formData.getPeriodOrder());
+                    destinationDRP.getId(), formData.getPeriodOrder(),
+                    formData.getComparativePeriodId(), formData.isAccruing());
             if (destinationForm != null && destinationForm.getState() != WorkflowState.CREATED){
                 msgPull.add(String.format(FORM_DATA_INFO_MSG,
                         departmentService.getDepartment(formData.getDepartmentId()).getName(),
@@ -1254,8 +1269,8 @@ public class FormDataServiceImpl implements FormDataService {
         Department department = departmentService.getDepartment(formData.getDepartmentId());
         DepartmentReportPeriod reportPeriod = departmentReportPeriodService.get(formData.getDepartmentReportPeriodId());
         DepartmentReportPeriod rpComparison =
-                formData.getComparativPeriodId() != null ?
-                        departmentReportPeriodService.get(formData.getComparativPeriodId()) : null;
+                formData.getComparativePeriodId() != null ?
+                        departmentReportPeriodService.get(formData.getComparativePeriodId()) : null;
         String name;
         if (reportType != null) {
             switch (reportType) {
@@ -1303,12 +1318,13 @@ public class FormDataServiceImpl implements FormDataService {
     }
 
     @Override
-    public FormData findFormData(int formTypeId, FormDataKind kind, int departmentReportPeriodId, Integer periodOrder) {
+    public FormData findFormData(int formTypeId, FormDataKind kind, int departmentReportPeriodId, Integer periodOrder,
+                                 Integer comparativePeriodId, boolean accruing) {
         if (periodOrder == null || kind != FormDataKind.PRIMARY && kind != FormDataKind.CONSOLIDATED) {
             // Если форма-источник квартальная или форма-приемник не является первичной или консолидированной, то ищем квартальный экземпляр
             periodOrder = null;
         }
-        return formDataDao.find(formTypeId, kind, departmentReportPeriodId, periodOrder);
+        return formDataDao.find(formTypeId, kind, departmentReportPeriodId, periodOrder, comparativePeriodId, accruing);
     }
 
     @Override
@@ -1388,7 +1404,7 @@ public class FormDataServiceImpl implements FormDataService {
                 FormData formData = formDataDao.getWithoutRows(formDataId);
                 //ReportPeriod period = reportPeriodService.getReportPeriod(formData.getReportPeriodId());
                 DepartmentReportPeriod drp = departmentReportPeriodService.get(formData.getDepartmentReportPeriodId());
-                DepartmentReportPeriod drpCompare = formData.getComparativPeriodId() != null ? departmentReportPeriodService.get(formData.getComparativPeriodId()) : null;
+                DepartmentReportPeriod drpCompare = formData.getComparativePeriodId() != null ? departmentReportPeriodService.get(formData.getComparativePeriodId()) : null;
                 FormTemplate ft = formTemplateService.get(formData.getFormTemplateId());
 
                 logger.error(
@@ -1554,8 +1570,8 @@ public class FormDataServiceImpl implements FormDataService {
     }
 
     @Override
-    public FormData getLast(int formTypeId, FormDataKind kind, int departmentId, int reportPeriodId, Integer periodOrder) {
-        return formDataDao.getLast(formTypeId, kind, departmentId, reportPeriodId, periodOrder);
+    public FormData getLast(int formTypeId, FormDataKind kind, int departmentId, int reportPeriodId, Integer periodOrder, Integer comparativePeriodId, boolean accruing) {
+        return formDataDao.getLast(formTypeId, kind, departmentId, reportPeriodId, periodOrder, comparativePeriodId, accruing);
     }
 
     @Override
@@ -1576,7 +1592,8 @@ public class FormDataServiceImpl implements FormDataService {
 
         // Экземпляр НФ в пред. отчетном периоде подразделения
         FormData prevFormData = findFormData(formData.getFormType().getId(), formData.getKind(),
-                prevDepartmentReportPeriod.getId(), formData.getPeriodOrder());
+                prevDepartmentReportPeriod.getId(), formData.getPeriodOrder(),
+                formData.getComparativePeriodId(), formData.isAccruing());
 
         if (prevFormData != null && prevFormData.getState() == WorkflowState.ACCEPTED) {
             return prevFormData;
@@ -1693,7 +1710,7 @@ public class FormDataServiceImpl implements FormDataService {
         for (Integer id : fdIds){
             FormData fd = formDataDao.getWithoutRows(id);
             DepartmentReportPeriod drp = departmentReportPeriodService.get(fd.getDepartmentReportPeriodId());
-            DepartmentReportPeriod drpCompare = fd.getComparativPeriodId() != null ? departmentReportPeriodService.get(fd.getComparativPeriodId()) : null;
+            DepartmentReportPeriod drpCompare = fd.getComparativePeriodId() != null ? departmentReportPeriodService.get(fd.getComparativePeriodId()) : null;
 
             logger.error(MessageGenerator.getFDMsg(FD_NOT_IN_RANGE,
                     fd,
@@ -1810,7 +1827,8 @@ public class FormDataServiceImpl implements FormDataService {
                         continue;
                     }
                     FormData sourceForm = findFormData(sourceDFT.getFormTypeId(), sourceDFT.getKind(),
-                            sourceDepartmentReportPeriod.getId(), sourceDFT.getPeriodOrder());
+                            sourceDepartmentReportPeriod.getId(), sourceDFT.getPeriodOrder(),
+                            formData.getComparativePeriodId(), formData.isAccruing());
                     if (sourceForm == null){
                         continue;
                     }

@@ -227,7 +227,7 @@ void calc() {
         if (!rowsNotCalc.contains(row.getAlias())) {
             // получим форму «Сводная форма начисленных доходов уровня обособленного подразделения»(см. раздел 6.1.1)
             def sum6ColumnOfForm302 = 0
-            def formData302 = getFormData(302, FormDataKind.SUMMARY, formData.departmentId, formData.reportPeriodId, formData.periodOrder)
+            def formData302 = getFormData(302, FormDataKind.SUMMARY, formData.departmentId, formData.reportPeriodId, formData.periodOrder, formData.comparativePeriodId, formData.accruing)
             if (formData302 != null) {
                 data302 = formDataService.getDataRowHelper(formData302)
                 for (def rowOfForm302 in data302.allSaved) {
@@ -384,7 +384,7 @@ def consolidationFromSummary(def dataRows, def formSources) {
     }
     // получить данные из источников
     formSources.each { departmentFormType ->
-        def child = getFormData(departmentFormType.formTypeId, departmentFormType.kind, departmentFormType.departmentId, formData.reportPeriodId, formData.periodOrder)
+        def child = getFormData(departmentFormType.formTypeId, departmentFormType.kind, departmentFormType.departmentId, formData.reportPeriodId, formData.periodOrder, formData.comparativePeriodId, formData.accruing)
         if (child != null && child.state == WorkflowState.ACCEPTED && child.formType.id == departmentFormType.formTypeId) {
             def childData = formDataService.getDataRowHelper(child)
 
@@ -429,7 +429,7 @@ def consolidationFromPrimary(def dataRows, def formSources) {
         ReportPeriod prevReportPeriod = reportPeriodService.getPrevReportPeriod(formData.getReportPeriodId());
         if (prevReportPeriod != null) {
             // Последний экземпляр
-            formDataOld = getFormData(301, formData.getKind(), formData.getDepartmentId(), prevReportPeriod.getId(), null);
+            formDataOld = getFormData(301, formData.getKind(), formData.getDepartmentId(), prevReportPeriod.getId(), null, formData.comparativePeriodId, formData.accruing);
         }
     }
     if (formDataOld != null && reportPeriod.order != 1) {
@@ -468,7 +468,7 @@ def consolidationFromPrimary(def dataRows, def formSources) {
 
     // получить формы-источники в текущем налоговом периоде
     formSources.each {
-        def child = getFormData(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId, formData.periodOrder)
+        def child = getFormData(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId, formData.periodOrder, formData.comparativePeriodId, formData.accruing)
         if (child != null && child.state == WorkflowState.ACCEPTED) {
             def dataRowsChild = formDataService.getDataRowHelper(child).allSaved
             switch (child.formType.id) {
@@ -492,7 +492,7 @@ def consolidationFromPrimary(def dataRows, def formSources) {
                                 def reportPeriodList = reportPeriodService.getReportPeriodsByDate(TaxType.INCOME, dateFrom, rowRNU6.docDate)
                                 reportPeriodList.each { period ->
                                     // ищем формы, в процессе заполняем карту
-                                    def primaryRNU6 = getFormData(child.formType.id, child.kind, child.departmentId, period.getId(), null)
+                                    def primaryRNU6 = getFormData(child.formType.id, child.kind, child.departmentId, period.getId(), null, child.comparativePeriodId, child.accruing)
                                     if (primaryRNU6 != null) {
                                         // для формы достаточно id в качестве ключа
                                         String keyForm = String.valueOf(primaryRNU6.id)
@@ -560,10 +560,10 @@ def consolidationFromPrimary(def dataRows, def formSources) {
     }
 }
 
-FormData getFormData(int formTypeId, FormDataKind kind, int departmentId, int reportPeriodId, Integer periodOrder) {
+FormData getFormData(int formTypeId, FormDataKind kind, int departmentId, int reportPeriodId, Integer periodOrder, Integer comparativePeriodId, boolean accruing) {
     String key = "$formTypeId#${kind.id}#$departmentId#$reportPeriodId#$periodOrder"
     if (formDataCache[key] != -1 && formDataCache[key] == null){ // чтобы повторно не искал несуществующие формы
-        formDataCache[key] = formDataService.getLast(formTypeId, kind, departmentId, reportPeriodId, periodOrder) ?: -1
+        formDataCache[key] = formDataService.getLast(formTypeId, kind, departmentId, reportPeriodId, periodOrder, comparativePeriodId, accruing) ?: -1
     }
     return (formDataCache[key] != -1) ? formDataCache[key] : null
 }

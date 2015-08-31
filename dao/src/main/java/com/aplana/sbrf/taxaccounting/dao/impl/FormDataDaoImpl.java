@@ -10,15 +10,7 @@ import com.aplana.sbrf.taxaccounting.dao.api.FormTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.api.TaxPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
-import com.aplana.sbrf.taxaccounting.model.DataRowType;
-import com.aplana.sbrf.taxaccounting.model.FormData;
-import com.aplana.sbrf.taxaccounting.model.FormDataKind;
-import com.aplana.sbrf.taxaccounting.model.FormTemplate;
-import com.aplana.sbrf.taxaccounting.model.Formats;
-import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
-import com.aplana.sbrf.taxaccounting.model.TaxPeriod;
-import com.aplana.sbrf.taxaccounting.model.TaxType;
-import com.aplana.sbrf.taxaccounting.model.WorkflowState;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
@@ -79,7 +71,7 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
         formData.setPeriodOrder(rs.wasNull() ? null : SqlUtils.getInteger(rs, "period_order"));
         formData.setManual(rs.getBoolean("manual"));
         formData.setSorted(rs.getBoolean("SORTED"));
-        formData.setComparativPeriodId(SqlUtils.getInteger(rs, "COMPARATIVE_DEP_REP_PER_ID"));
+        formData.setComparativePeriodId(SqlUtils.getInteger(rs, "COMPARATIVE_DEP_REP_PER_ID"));
         formData.setAccruing(rs.getBoolean("ACCRUING"));
     }
 
@@ -152,7 +144,7 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
                     formDataId, formData.getFormTemplateId(),
                     formData.getDepartmentReportPeriodId(), formData.getKind().getId(),
                     formData.getState().getId(), formData.getPeriodOrder(), formData.getPreviousRowNumber(),
-                    formData.getComparativPeriodId(), formData.isAccruing());
+                    formData.getComparativePeriodId(), formData.isAccruing());
             formData.setId(formDataId);
             savePerformerSigner(formData);
         } else {
@@ -180,42 +172,8 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
         int[] types = {Types.NUMERIC};
         getJdbcTemplate().update("delete from form_data where id = ?", params, types);
     }
+
     @Override
-    public FormData find(int formTypeId, FormDataKind kind, int departmentId, int reportPeriodId) {
-        try {
-            Long formDataId = getJdbcTemplate().queryForLong(
-                    "select fd.id from form_data fd, department_report_period drp where fd.department_report_period_id = drp.id " +
-                            "and exists (select 1 from form_template ft where fd.form_template_id = ft.id and ft.type_id = ?) " +
-                            "and fd.kind = ? and drp.department_id = ? and drp.report_period_id = ? and drp.correction_date is null",
-                    new Object[]{
-                            formTypeId,
-                            kind.getId(),
-                            departmentId,
-                            reportPeriodId
-                    },
-                    new int[]{
-                            Types.NUMERIC,
-                            Types.NUMERIC,
-                            Types.NUMERIC,
-                            Types.NUMERIC
-                    }
-            );
-            return get(formDataId, null);
-        } catch (EmptyResultDataAccessException e) {
-            return null;
-        } catch (IncorrectResultSizeDataAccessException e) {
-            ReportPeriod reportPeriod = reportPeriodDao.get(reportPeriodId);
-            throw new DaoException(
-                    "Для заданного сочетания параметров найдено несколько налоговых форм: вид \"%s\", тип \"%s\", подразделение \"%s\", отчетный период \"%s\", налоговый период \"%s\"",
-                    formTypeDao.get(formTypeId).getName(),
-                    kind.getTitle(),
-                    departmentDao.getDepartment(departmentId).getName(),
-                    reportPeriod.getName(),
-                    reportPeriod.getTaxPeriod().getYear()
-            );
-        }
-    }
-     @Override
     public List<Long> findFormDataByFormTemplate(int formTemplateId) {
         try {
             return getJdbcTemplate().queryForList(
@@ -271,23 +229,29 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
     }
 
     @Override
-    public FormData find(int formTypeId, FormDataKind kind, int departmentReportPeriodId, Integer periodOrder) {
+    public FormData find(int formTypeId, FormDataKind kind, int departmentReportPeriodId, Integer periodOrder, Integer comparativePeriodId, boolean accruing) {
         try {
-            String sql = "select fd.id, fd.form_template_id, fd.state, fd.kind, " +
-                    "fd.return_sign, fd.period_order, fd.manual, fd.number_previous_row, fd.department_report_period_id, " +
-                    "drp.report_period_id, drp.department_id, fd.SORTED, fd.COMPARATIVE_DEP_REP_PER_ID, fd.ACCRUING, " +
-                    "(SELECT type_id FROM form_template ft WHERE ft.id = fd.form_template_id) type_id " +
-                    "from department_report_period drp, form_data fd " +
-                    "where drp.id = fd.department_report_period_id " +
-                    "and exists (select 1 from form_template ft where fd.form_template_id = ft.id and ft.type_id = ?) " +
-                    "and fd.kind = ? and drp.id = ? and (? is null or fd.period_order = ?) ";
-            return getJdbcTemplate().queryForObject(sql,
-                    new Object[]{
-                            formTypeId,
-                            kind.getId(),
-                            departmentReportPeriodId,
-                            periodOrder,
-                            periodOrder},
+            Map<String, Object> params = new HashMap<String, Object>();
+            params.put("formTypeId", formTypeId);
+            params.put("kind", kind.getId());
+            params.put("departmentReportPeriodId", departmentReportPeriodId);
+            params.put("periodOrder", periodOrder);
+            params.put("comparativePeriodId", comparativePeriodId);
+            params.put("accruing", accruing);
+            String sql = "select fd.id, fd.form_template_id, fd.state, fd.kind, \n" +
+                    "fd.return_sign, fd.period_order, fd.manual, fd.number_previous_row, fd.department_report_period_id, \n" +
+                    "drp.report_period_id, drp.department_id, fd.SORTED, fd.COMPARATIVE_DEP_REP_PER_ID, fd.ACCRUING, \n" +
+                    "(SELECT type_id FROM form_template ft WHERE ft.id = fd.form_template_id) type_id \n" +
+                    "from form_data fd \n" +
+                    "join department_report_period drp on drp.id = fd.department_report_period_id \n" +
+                    "join form_template ft on ft.id = fd.form_template_id \n" +
+                    "left join department_report_period cdrp on cdrp.id = fd.COMPARATIVE_DEP_REP_PER_ID \n" +
+                    "left join report_period crp on crp.id = cdrp.report_period_id \n" +
+                    "where ft.type_id = :formTypeId and fd.kind = :kind and drp.id = :departmentReportPeriodId \n" +
+                    "and (:periodOrder is null or fd.period_order = :periodOrder) \n" +
+                    "and (:comparativePeriodId is null or crp.id = (select report_period_id from department_report_period where id = :comparativePeriodId)) and fd.accruing = :accruing \n";
+            return getNamedParameterJdbcTemplate().queryForObject(sql,
+                    params,
                     new FormDataWithoutRowMapperWithType());
         } catch (EmptyResultDataAccessException e) {
             return null;
@@ -529,34 +493,43 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
     }
 
     @Override
-    public FormData getLast(int formTypeId, FormDataKind kind, int departmentId, int reportPeriodId, Integer periodOrder) {
-        return getLastByDate(formTypeId, kind, departmentId, reportPeriodId, periodOrder, null);
+    public FormData getLast(int formTypeId, FormDataKind kind, int departmentId, int reportPeriodId,
+                            Integer periodOrder, Integer comparativePeriodId, boolean accruing) {
+        return getLastByDate(formTypeId, kind, departmentId, reportPeriodId, periodOrder, null, comparativePeriodId, accruing);
     }
 
     @Override
-    public FormData getLastByDate(int formTypeId, FormDataKind kind, int departmentId, int reportPeriodId, Integer periodOrder, Date correctionDate) {
+    public FormData getLastByDate(int formTypeId, FormDataKind kind, int departmentId, int reportPeriodId,
+                                  Integer periodOrder, Date correctionDate, Integer comparativePeriodId, boolean accruing) {
         try {
-            return getJdbcTemplate().queryForObject(
-                    "select * from " +
-                            "(select fd.id, fd.form_template_id, fd.state, fd.kind, fd.return_sign, fd.period_order, " +
-                            "fd.number_previous_row, fd.department_report_period_id, drp.report_period_id, drp.department_id, fd.manual, " +
-                            "fd.SORTED, fd.COMPARATIVE_DEP_REP_PER_ID, fd.ACCRUING " +
-                            "from form_data fd, department_report_period drp, form_template ft " +
-                            "where drp.id = fd.department_report_period_id " +
-                            "and ft.id = fd.form_template_id " +
-                            "and drp.department_id = ? " +
-                            "and drp.report_period_id = ? " +
-                            "and ft.type_id = ? " +
-                            "and fd.kind = ? " +
-                            "and (? is null or fd.period_order = ?) " +
-                            "and (? is null or drp.correction_date is null or drp.correction_date <= ?) " +
-                            "order by drp.correction_date desc nulls last) " +
-                            (isSupportOver() ? "where rownum = 1" : "limit 1"),
-                    new Object[]{departmentId, reportPeriodId, formTypeId, kind.getId(), periodOrder, periodOrder,
-                            correctionDate, correctionDate},
-                    new int[]{Types.NUMERIC, Types.NUMERIC, Types.NUMERIC, Types.NUMERIC, Types.NUMERIC, Types.NUMERIC,
-                            Types.DATE, Types.DATE},
-                    new FormDataRowMapper());
+            Map<String, Object> params = new HashMap<String, Object>();
+            params.put("departmentId", departmentId);
+            params.put("reportPeriodId", reportPeriodId);
+            params.put("formTypeId", formTypeId);
+            params.put("kindId", kind.getId());
+            params.put("periodOrder", periodOrder);
+            params.put("correctionDate", correctionDate);
+            params.put("comparativePeriodId", comparativePeriodId);
+            params.put("accruing", accruing);
+            String sql = "select * from " +
+                    "(select fd.id, fd.form_template_id, fd.state, fd.kind, fd.return_sign, fd.period_order, \n" +
+                    "fd.number_previous_row, fd.department_report_period_id, drp.report_period_id, drp.department_id, fd.manual, \n" +
+                    "fd.SORTED, fd.COMPARATIVE_DEP_REP_PER_ID, fd.ACCRUING \n" +
+                    "from form_data fd \n" +
+                    "join department_report_period drp on drp.id = fd.department_report_period_id \n" +
+                    "join form_template ft on ft.id = fd.form_template_id\n" +
+                    "left join department_report_period cdrp on cdrp.id = fd.COMPARATIVE_DEP_REP_PER_ID \n" +
+                    "left join report_period crp on crp.id = cdrp.report_period_id \n" +
+                    "where drp.department_id = :departmentId \n" +
+                    "and drp.report_period_id = :reportPeriodId \n" +
+                    "and ft.type_id = :formTypeId \n" +
+                    "and fd.kind = :kindId \n" +
+                    "and (:periodOrder is null or fd.period_order = :periodOrder) \n" +
+                    "and (:correctionDate is null or drp.correction_date is null or drp.correction_date <= :correctionDate) \n" +
+                    "and (:comparativePeriodId is null or crp.id = (select report_period_id from department_report_period where id = :comparativePeriodId)) and fd.accruing = :accruing \n" +
+                    "order by drp.correction_date desc nulls last) \n" +
+                    (isSupportOver() ? "where rownum = 1" : "limit 1");
+            return getNamedParameterJdbcTemplate().queryForObject(sql, params, new FormDataRowMapper());
         } catch (EmptyResultDataAccessException e) {
             return null;
         }

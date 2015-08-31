@@ -316,7 +316,7 @@ void preCalcLogicCheck() {
             logger.warn("Строка $rowIndex: Не назначена источником налоговая форма «$sourceName» для $bankName (подразделение «$departmentName»)! " +
                     "Графы текущей строки, заполняемые данными формы источника, будут заполнены значением «0».")
         } else {
-            def child = formDataService.getLast(departmentFormType.formTypeId, departmentFormType.kind, departmentFormType.departmentId, formData.reportPeriodId, null)
+            def child = formDataService.getLast(departmentFormType.formTypeId, departmentFormType.kind, departmentFormType.departmentId, formData.reportPeriodId, null, formData.comparativePeriodId, formData.accruing)
             if (child == null || child.state != WorkflowState.ACCEPTED) {
                 // Не создана / Создана, но не принята
                 def cause = (child == null ? "не создана" : "не находится в статусе «Принята»")
@@ -420,7 +420,7 @@ void consolidation() {
         if (departmentFormType.formTypeId != sourceFormTypeId) {
             continue
         }
-        def child = formDataService.getLast(departmentFormType.formTypeId, departmentFormType.kind, departmentFormType.departmentId, formData.reportPeriodId, null)
+        def child = formDataService.getLast(departmentFormType.formTypeId, departmentFormType.kind, departmentFormType.departmentId, formData.reportPeriodId, null, formData.comparativePeriodId, formData.accruing)
         if (child != null && child.state == WorkflowState.ACCEPTED) {
             def childRows = formDataService.getDataRowHelper(child).allSaved
             def rowTotal = getDataRow(childRows, 'total')

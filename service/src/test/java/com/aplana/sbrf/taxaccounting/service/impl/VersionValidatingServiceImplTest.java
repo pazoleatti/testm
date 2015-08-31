@@ -207,7 +207,7 @@ public class VersionValidatingServiceImplTest {
         formData.setReportPeriodId(1);
         formData.setId(1l);
         formData.setDepartmentReportPeriodId(1);
-        formData.setComparativPeriodId(1);
+        formData.setComparativePeriodId(1);
 
         FormData formData1 = new FormData(formTemplate);
         formData1.setState(WorkflowState.CREATED);
@@ -216,7 +216,7 @@ public class VersionValidatingServiceImplTest {
         formData1.setReportPeriodId(2);
         formData1.setId(2l);
         formData1.setDepartmentReportPeriodId(2);
-        formData1.setComparativPeriodId(2);
+        formData1.setComparativePeriodId(2);
 
         TaxPeriod taxPeriod = new TaxPeriod();
         taxPeriod.setId(1);

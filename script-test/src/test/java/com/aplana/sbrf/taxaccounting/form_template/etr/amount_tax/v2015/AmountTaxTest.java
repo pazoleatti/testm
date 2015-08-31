@@ -107,7 +107,7 @@ public class AmountTaxTest extends ScriptTestBase {
         sourceFormData.setId(2L);
         sourceFormData.setState(WorkflowState.ACCEPTED);
         when(testHelper.getFormDataService().getLast(eq(departmentFormType.getFormTypeId()), eq(KIND), eq(DEPARTMENT_ID),
-                anyInt(), any(Integer.class))).thenReturn(sourceFormData);
+                anyInt(), any(Integer.class), any(Integer.class), any(Boolean.class))).thenReturn(sourceFormData);
 
         // DataRowHelper НФ-источника
         DataRowHelper sourceDataRowHelper = new DataRowHelperStub();

@@ -217,7 +217,8 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
         });
 
 		for (DepartmentFormType dft : sourcesInfo) {
-			FormData formData = formDataDao.getLast(dft.getFormTypeId(), dft.getKind(), dft.getDepartmentId(), reportPeriodId, dft.getPeriodOrder());
+			FormData formData = formDataDao.getLast(dft.getFormTypeId(), dft.getKind(), dft.getDepartmentId(),
+                    reportPeriodId, dft.getPeriodOrder(), null, false);
 			if (formData != null) {
 				if (formData.getState() != WorkflowState.ACCEPTED) {
                     //TODO возможно перенести initFormTemplateParams внутрь функции

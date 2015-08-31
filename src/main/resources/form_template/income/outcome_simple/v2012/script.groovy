@@ -321,7 +321,7 @@ def consolidationFromSummary(def dataRows, def formSources) {
 
     // получить консолидированные формы в дочерних подразделениях в текущем налоговом периоде
     formSources.each { departmentFormType ->
-        def child = formDataService.getLast(departmentFormType.formTypeId, departmentFormType.kind, departmentFormType.departmentId, formData.reportPeriodId, formData.periodOrder)
+        def child = formDataService.getLast(departmentFormType.formTypeId, departmentFormType.kind, departmentFormType.departmentId, formData.reportPeriodId, formData.periodOrder, formData.comparativePeriodId, formData.accruing)
         if (child != null && child.state == WorkflowState.ACCEPTED && child.formType.id == formData.formType.id) {
             def childData = formDataService.getDataRowHelper(child)
             for (DataRow<Cell> row : childData.allSaved) {
@@ -362,7 +362,7 @@ void consolidationFromPrimary(def dataRows, def formSources) {
     if (reportPeriod != null && reportPeriod.order != 1) {
         def prevReportPeriod = reportPeriodService.getPrevReportPeriod(formData.reportPeriodId)
         if (prevReportPeriod != null) {
-            def formDataOld = formDataService.getLast(formData.getFormType().getId(), formData.getKind(), formDataDepartment.id, prevReportPeriod.getId(), formData.periodOrder)
+            def formDataOld = formDataService.getLast(formData.getFormType().getId(), formData.getKind(), formDataDepartment.id, prevReportPeriod.getId(), formData.periodOrder, formData.comparativePeriodId, formData.accruing)
             dataRowsOld = (formDataOld ? formDataService.getDataRowHelper(formDataOld)?.allSaved : null)
             if (dataRowsOld != null) {
                 // данные за предыдущий отчетный период рну-7
@@ -398,7 +398,7 @@ void consolidationFromPrimary(def dataRows, def formSources) {
 
     // получить консолидированные формы в дочерних подразделениях в текущем налоговом периоде
     formSources.each {
-        def child = formDataService.getLast(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId, formData.periodOrder)
+        def child = formDataService.getLast(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId, formData.periodOrder, formData.comparativePeriodId, formData.accruing)
         if (child != null && child.state == WorkflowState.ACCEPTED) {
             def dataRowsChild = formDataService.getDataRowHelper(child)?.allSaved
             switch (child.formType.id) {
@@ -511,14 +511,14 @@ def calcSum8(def dataRows, def aliasRows) {
  * Получить данные формы "расходы сложные" (id = 303)
  */
 def getFormDataComplex() {
-    return formDataService.getLast(303, formData.kind, formDataDepartment.id, formData.reportPeriodId, formData.periodOrder)
+    return formDataService.getLast(303, formData.kind, formDataDepartment.id, formData.reportPeriodId, formData.periodOrder, formData.comparativePeriodId, formData.accruing)
 }
 
 /**
  * Получить данные формы РНУ-14 (id = 321)
  */
 def getFormDataRNU14() {
-    return formDataService.getLast(321, FormDataKind.UNP, formDataDepartment.id, formData.reportPeriodId, formData.periodOrder)
+    return formDataService.getLast(321, FormDataKind.UNP, formDataDepartment.id, formData.reportPeriodId, formData.periodOrder, formData.comparativePeriodId, formData.accruing)
 }
 
 /**
@@ -556,7 +556,7 @@ def getSumForColumn7(def form, def dataRows, def value1, def value2) {
                 def reportPeriods = reportPeriodService.getReportPeriodsByDate(TaxType.INCOME, dateFrom, row.docDate)
                 reportPeriods.each { reportPeriod ->
                     // в каждой форме относящейся к этим периодам ищем соответствующие строки и суммируем по 10 графе
-                    def FormData f = formDataService.getLast(form.getFormType().getId(), form.kind, form.getDepartmentId(), reportPeriod.getId(), form.periodOrder)
+                    def FormData f = formDataService.getLast(form.getFormType().getId(), form.kind, form.getDepartmentId(), reportPeriod.getId(), form.periodOrder, form.comparativePeriodId, form.accruing)
                     if (f != null) {
                         def d = formDataService.getDataRowHelper(f)
                         if (d != null) {

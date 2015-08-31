@@ -313,7 +313,7 @@ public class FormDataAccessServiceImplTest {
                 }
                 return null;
             }
-        }).when(formDataDao).getLast(anyInt(), any(FormDataKind.class), anyInt(), anyInt(), anyInt());
+        }).when(formDataDao).getLast(anyInt(), any(FormDataKind.class), anyInt(), anyInt(), anyInt(), any(Integer.class), any(Boolean.class));
 
         ReflectionTestUtils.setField(service, "formDataDao", formDataDao);
 
@@ -375,7 +375,7 @@ public class FormDataAccessServiceImplTest {
 
         formDataService = mock(FormDataService.class);
         fd = mockFormData(TB1_CREATED_FORMDATA_ID, TB1_ID, WorkflowState.CREATED, FormDataKind.SUMMARY, REPORT_PERIOD_ACTIVE_ID, summaryFormType1);
-        when(formDataService.getLast(summaryFormType1.getId(), FormDataKind.SUMMARY, ROOT_BANK_ID, REPORT_PERIOD_ACTIVE_ID, null)).thenReturn(fd);
+        when(formDataService.getLast(summaryFormType1.getId(), FormDataKind.SUMMARY, ROOT_BANK_ID, REPORT_PERIOD_ACTIVE_ID, null, null, false)).thenReturn(fd);
     }
 
     @Before
@@ -959,7 +959,7 @@ public class FormDataAccessServiceImplTest {
 
         when(departmentFormTypeDao.getFormDestinations(any(Integer.class), any(Integer.class), any(FormDataKind.class),
                 any(Date.class), any(Date.class))).thenReturn(departmentFormTypes);
-        when(formDataService.findFormData(anyInt(), any(FormDataKind.class), anyInt(), anyInt())).thenReturn(formData);
+        when(formDataService.findFormData(anyInt(), any(FormDataKind.class), anyInt(), anyInt(), any(Integer.class), any(Boolean.class))).thenReturn(formData);
 
         service.checkDestinations(editedFormData.getId());
     }

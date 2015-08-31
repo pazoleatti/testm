@@ -29,7 +29,7 @@ public class FormData extends IdentityObject<Long> {
     /** Статус актуальности сортировки НФ (false - Сортировка неактуальна ; true - Сортировка актуальна) */
     private boolean sorted;
     /** Период сравнения - ссылка на DepartmentReportPeriod. Может быть null */
-    private Integer comparativPeriodId;
+    private Integer comparativePeriodId;
     /** Признак расчета значений нарастающим итогом (false - не нарастающим итогом, true - нарастающим итогом, пустое - форма без периода сравнения) */
     private boolean accruing;
 
@@ -285,12 +285,12 @@ public class FormData extends IdentityObject<Long> {
         this.sorted = sorted;
     }
 
-    public Integer getComparativPeriodId() {
-        return comparativPeriodId;
+    public Integer getComparativePeriodId() {
+        return comparativePeriodId;
     }
 
-    public void setComparativPeriodId(Integer comparativPeriodId) {
-        this.comparativPeriodId = comparativPeriodId;
+    public void setComparativePeriodId(Integer comparativePeriodId) {
+        this.comparativePeriodId = comparativePeriodId;
     }
 
     public boolean isAccruing() {
@@ -313,7 +313,7 @@ public class FormData extends IdentityObject<Long> {
                 ", manual=" + manual +
                 ", returnSign=" + returnSign +
                 ", sorted=" + sorted +
-                ", comparativPeriodId=" + comparativPeriodId +
+                ", comparativePeriodId=" + comparativePeriodId +
                 ", accruing=" + accruing +
                 ", formTemplateId=" + formTemplateId +
                 ", formType=" + formType +
@@ -334,7 +334,7 @@ public class FormData extends IdentityObject<Long> {
         if (manual != formData.manual) return false;
         if (returnSign != formData.returnSign) return false;
         if (sorted != formData.sorted) return false;
-        if (comparativPeriodId != null ? !comparativPeriodId.equals(formData.comparativPeriodId) : formData.comparativPeriodId != null)
+        if (comparativePeriodId != null ? !comparativePeriodId.equals(formData.comparativePeriodId) : formData.comparativePeriodId != null)
             return false;
         if (departmentId != null ? !departmentId.equals(formData.departmentId) : formData.departmentId != null)
             return false;
@@ -370,7 +370,7 @@ public class FormData extends IdentityObject<Long> {
         result = 31 * result + (manual ? 1 : 0);
         result = 31 * result + (returnSign ? 1 : 0);
         result = 31 * result + (sorted ? 1 : 0);
-        result = 31 * result + (comparativPeriodId != null ? comparativPeriodId.hashCode() : 0);
+        result = 31 * result + (comparativePeriodId != null ? comparativePeriodId.hashCode() : 0);
         result = 31 * result + (accruing ? 1 : 0);
         result = 31 * result + formTemplateId;
         result = 31 * result + (formColumns != null ? formColumns.hashCode() : 0);

@@ -695,7 +695,7 @@ FormData getFormPrev() {
     def reportPeriodPrev = reportPeriodService.getPrevReportPeriod(formData.reportPeriodId)
     FormData formPrev = null
     if (reportPeriodPrev != null) {
-        formPrev = formDataService.getLast(formData.formType.id, FormDataKind.PRIMARY, formData.departmentId, reportPeriodPrev.id, null)
+        formPrev = formDataService.getLast(formData.formType.id, FormDataKind.PRIMARY, formData.departmentId, reportPeriodPrev.id, null, formData.comparativePeriodId, formData.accruing)
     }
     return formPrev
 }

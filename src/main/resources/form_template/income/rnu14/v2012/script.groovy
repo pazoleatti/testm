@@ -229,10 +229,10 @@ def getTotalRowFromRNU(def knu, def dataRowsOutcome) {
 
 // Получить данные формы "расходы простые" (id = 304)
 def getFormDataOutcomeSimple() {
-    def tmp = formDataService.getLast(310, FormDataKind.SUMMARY, formDataDepartment.id, formData.reportPeriodId, formData.periodOrder)
+    def tmp = formDataService.getLast(310, FormDataKind.SUMMARY, formDataDepartment.id, formData.reportPeriodId, formData.periodOrder, formData.comparativePeriodId, formData.accruing)
     if (tmp == null) {
-        tmp = formDataService.getLast(304, FormDataKind.SUMMARY, formDataDepartment.id, formData.reportPeriodId, formData.periodOrder)
-    } else if (formDataService.getLast(304, FormDataKind.SUMMARY, formDataDepartment.id, formData.reportPeriodId, formData.periodOrder) != null) {
+        tmp = formDataService.getLast(304, FormDataKind.SUMMARY, formDataDepartment.id, formData.reportPeriodId, formData.periodOrder, formData.comparativePeriodId, formData.accruing)
+    } else if (formDataService.getLast(304, FormDataKind.SUMMARY, formDataDepartment.id, formData.reportPeriodId, formData.periodOrder, formData.comparativePeriodId, formData.accruing) != null) {
         logger.warn("Неверно настроены источники формы УНП! Одновременно созданы в качестве источников налоговые формы: «%s», «%s». Расчет произведен из «%s».",
                 formTypeService.get(310).name, formTypeService.get(304)?.name, formTypeService.get(310)?.name)
     }
@@ -241,15 +241,15 @@ def getFormDataOutcomeSimple() {
 
 // Получить данные формы "доходы сложные" (id = 302)
 def getFormDataComplex() {
-    return formDataService.getLast(302, FormDataKind.SUMMARY, formDataDepartment.id, formData.reportPeriodId, formData.periodOrder)
+    return formDataService.getLast(302, FormDataKind.SUMMARY, formDataDepartment.id, formData.reportPeriodId, formData.periodOrder, formData.comparativePeriodId, formData.accruing)
 }
 
 // Получить данные формы "доходы простые" (id = 305/301)
 def getFormDataSimple() {
-    def tmp = formDataService.getLast(305, FormDataKind.SUMMARY, formDataDepartment.id, formData.reportPeriodId, formData.periodOrder)
+    def tmp = formDataService.getLast(305, FormDataKind.SUMMARY, formDataDepartment.id, formData.reportPeriodId, formData.periodOrder, formData.comparativePeriodId, formData.accruing)
     if (tmp == null) {
-        tmp = formDataService.getLast(301, FormDataKind.SUMMARY, formDataDepartment.id, formData.reportPeriodId, formData.periodOrder)
-    } else if (formDataService.getLast(301, FormDataKind.SUMMARY, formDataDepartment.id, formData.reportPeriodId, formData.periodOrder) != null) {
+        tmp = formDataService.getLast(301, FormDataKind.SUMMARY, formDataDepartment.id, formData.reportPeriodId, formData.periodOrder, formData.comparativePeriodId, formData.accruing)
+    } else if (formDataService.getLast(301, FormDataKind.SUMMARY, formDataDepartment.id, formData.reportPeriodId, formData.periodOrder, formData.comparativePeriodId, formData.accruing) != null) {
         logger.warn("Неверно настроены источники формы УНП! Одновременно созданы в качестве источников налоговые формы: «%s», «%s». Расчет произведен из «%s».",
                 formTypeService.get(305).name, formTypeService.get(301)?.name, formTypeService.get(305)?.name)
     }

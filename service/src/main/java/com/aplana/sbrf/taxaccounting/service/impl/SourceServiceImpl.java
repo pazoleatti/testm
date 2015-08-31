@@ -1196,12 +1196,12 @@ public class SourceServiceImpl implements SourceService {
         // Источники
         List<DepartmentFormType> sourcesForm = formDataService.getFormSources(formData, logger, userInfo, reportPeriod, false);
         formToFormRelations.addAll(createFormToFormRelationModel(sourcesForm, departmentReportPeriod,
-                periodOrder, true));
+                periodOrder, formData.getComparativePeriodId(), formData.isAccruing(), true));
         // Приемники
         List<DepartmentFormType> destinationsForm = getFormDestinations(departmentId, formTypeId, kind,
                 reportPeriod.getCalendarStartDate(), reportPeriod.getEndDate());
         formToFormRelations.addAll(createFormToFormRelationModel(destinationsForm, departmentReportPeriod,
-                periodOrder, false));
+                periodOrder, formData.getComparativePeriodId(), formData.isAccruing(), false));
 
         List<DepartmentDeclarationType> destinationsDeclaration = getDeclarationDestinations(departmentId, formTypeId, kind,
                 reportPeriod.getCalendarStartDate(), reportPeriod.getEndDate());
@@ -1217,8 +1217,9 @@ public class SourceServiceImpl implements SourceService {
 
         //Получаем источники-приемники
         List<DepartmentFormType> sourcesForm = declarationDataService.getFormDataSources(declaration, false, new Logger());
+        //Для декларации не может быть источников с признаком сравнения
         formToFormRelations.addAll(createFormToFormRelationModel(sourcesForm, departmentReportPeriod,
-                null, true));
+                null, null, false, true));
         return formToFormRelations;
     }
 
@@ -1281,18 +1282,24 @@ public class SourceServiceImpl implements SourceService {
      */
     private List<FormToFormRelation> createFormToFormRelationModel(List<DepartmentFormType> departmentFormTypes,
                                                                    DepartmentReportPeriod departmentReportPeriod,
-                                                                   Integer periodOrder,
+                                                                   Integer periodOrder, Integer comparativePeriodId,
+                                                                   boolean accruing,
                                                                    boolean isSource){
         List<FormToFormRelation> formToFormRelations = new LinkedList<FormToFormRelation>();
 
         // По назначениям
         for (DepartmentFormType departmentFormType : departmentFormTypes) {
             if (isSource) {
-                formToFormRelations.addAll(getSourceList(departmentFormType, departmentReportPeriod,
-                        periodOrder==null?departmentFormType.getPeriodOrder():null));
+                formToFormRelations.addAll(
+                        getSourceList(
+                                departmentFormType, departmentReportPeriod,
+                                periodOrder==null ? departmentFormType.getPeriodOrder() : null,
+                                comparativePeriodId, accruing
+                        )
+                );
             } else {
                 formToFormRelations.addAll(getDestinationList(departmentFormType, departmentReportPeriod,
-                        periodOrder));
+                        periodOrder, comparativePeriodId, accruing));
             }
         }
         return formToFormRelations;
@@ -1410,17 +1417,20 @@ public class SourceServiceImpl implements SourceService {
      * @param departmentFormType Назначение
      * @param departmentReportPeriod Отчетный период подраделения формы, для которой ищутся формы-источники
      * @param periodOrder Месяц формы, для которой ищутся формы-источники
+     * @param comparativePeriodId Период сравнения - ссылка на DepartmentReportPeriod. Может быть null
+     * @param accruing Признак расчета значений нарастающим итогом (false - не нарастающим итогом, true - нарастающим итогом, пустое - форма без периода сравнения)
      */
     private List<FormToFormRelation> getSourceList(DepartmentFormType departmentFormType,
                                                    DepartmentReportPeriod departmentReportPeriod,
-                                                   Integer periodOrder) {
+                                                   Integer periodOrder, Integer comparativePeriodId, boolean accruing) {
         List<FormToFormRelation> relations = new ArrayList<FormToFormRelation>();
         /*if (!formTemplateService.existFormTemplate(departmentFormType.getFormTypeId(), departmentReportPeriod.getReportPeriod().getId()))
             return relations;*/
 
         FormData formData = formDataDao.getLastByDate(departmentFormType.getFormTypeId(), departmentFormType.getKind(),
                 departmentFormType.getDepartmentId(), departmentReportPeriod.getReportPeriod().getId(),
-                periodOrder, departmentReportPeriod.getCorrectionDate());
+                periodOrder, departmentReportPeriod.getCorrectionDate(),
+                comparativePeriodId, accruing);
         DepartmentReportPeriod formDepartmentReportPeriod = null;
         if (formData != null) {
             formDepartmentReportPeriod = departmentReportPeriodService.get(formData.getDepartmentReportPeriodId());
@@ -1440,10 +1450,13 @@ public class SourceServiceImpl implements SourceService {
      * @param departmentFormType Назначение
      * @param departmentReportPeriod Отчетный период подраделения формы, для которой ищутся формы-приемники
      * @param periodOrder Месяц формы, для которой ищутся формы-приемники
+     * @param comparativePeriodId Период сравнения - ссылка на DepartmentReportPeriod. Может быть null
+     * @param accruing Признак расчета значений нарастающим итогом (false - не нарастающим итогом, true - нарастающим итогом, пустое - форма без периода сравнения)
      */
     private List<FormToFormRelation> getDestinationList(DepartmentFormType departmentFormType,
                                                         DepartmentReportPeriod departmentReportPeriod,
-                                                        Integer periodOrder) {
+                                                        Integer periodOrder, Integer comparativePeriodId,
+                                                        boolean accruing) {
         List<FormToFormRelation> retVal = new LinkedList<FormToFormRelation>();
         /*if (!formTemplateService.existFormTemplate(departmentFormType.getFormTypeId(), departmentReportPeriod.getReportPeriod().getId()))
             return retVal;*/
@@ -1474,8 +1487,8 @@ public class SourceServiceImpl implements SourceService {
         for (DepartmentReportPeriod destinationReportPeriod : departmentReportPeriodList) {
             // Поиск экземпляра НФ в каждом существующем отчетном периоде подразделения
             FormData formData = formDataDao.find(departmentFormType.getFormTypeId(), departmentFormType.getKind(),
-                    destinationReportPeriod.getId().intValue(),
-                    periodOrder);
+                    destinationReportPeriod.getId(),
+                    periodOrder, comparativePeriodId, accruing);
 
             FormToFormRelation formToFormRelation = performFormDataRelation(formData,
                     getRelationCommon(false, departmentFormType, destinationReportPeriod, periodOrder), departmentFormType,

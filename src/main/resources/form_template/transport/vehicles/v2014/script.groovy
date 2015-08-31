@@ -500,7 +500,7 @@ void consolidation() {
     departmentFormTypeService.getFormSources(formDataDepartment.id, formData.formType.id, formData.kind,
             getReportPeriodStartDate(), getReportPeriodEndDate()).each {
         if (it.formTypeId == formData.formType.id) {
-            def source = formDataService.getLast(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId, formData.periodOrder)
+            def source = formDataService.getLast(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId, formData.periodOrder, formData.comparativePeriodId, formData.accruing)
             if (source != null && source.state == WorkflowState.ACCEPTED) {
                 def sourceDataRows = formDataService.getDataRowHelper(source).allSaved
                 // копирование данных по разделам
@@ -515,7 +515,7 @@ void consolidation() {
 def String checkPrevPeriod(def reportPeriod) {
     if (reportPeriod != null) {
         // ищем форму нового типа иначе две формы старого
-        if (formDataService.getLast(formData.formType.id, formData.kind, formDataDepartment.id, reportPeriod.id, formData.periodOrder) == null) {
+        if (formDataService.getLast(formData.formType.id, formData.kind, formDataDepartment.id, reportPeriod.id, formData.periodOrder, formData.comparativePeriodId, formData.accruing) == null) {
             return reportPeriod.name + " " + reportPeriod.taxPeriod.year + ", "
         }
     }
@@ -584,7 +584,7 @@ def getNewRow() {
 // Получить строки для копирования за предыдущий отчетный период
 def getPrevRowsForCopy(def reportPeriod, def dataRows) {
     if (reportPeriod != null) {
-        def formData201 = formDataService.getLast(201, formData.kind, formDataDepartment.id, reportPeriod.id, null)
+        def formData201 = formDataService.getLast(201, formData.kind, formDataDepartment.id, reportPeriod.id, null, formData.comparativePeriodId, formData.accruing)
         if (formData201 != null && formData201.formTemplateId == 201) {
             // получить нет формы за предыдущий отчетный период, то попытаться найти старую форму 201
             def dataRows201 = (formData201 != null ? formDataService.getDataRowHelper(formData201)?.allSaved : null)

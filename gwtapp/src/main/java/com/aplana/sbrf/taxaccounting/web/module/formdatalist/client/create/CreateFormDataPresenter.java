@@ -77,7 +77,7 @@ public class CreateFormDataPresenter extends PresenterWidget<CreateFormDataPrese
         action.setFormDataKindId(filterFormData.getFormDataKind().get(0).intValue());
         action.setFormDataTypeId(filterFormData.getFormTypeId().get(0).intValue());
         action.setReportPeriodId(filterFormData.getReportPeriodIds().iterator().next());
-        action.setComparativPeriodId(filterFormData.getComparativPeriodId() != null && !filterFormData.getComparativPeriodId().isEmpty() ? filterFormData.getComparativPeriodId().iterator().next() : null);
+        action.setComparativePeriodId(filterFormData.getComparativePeriodId() != null && !filterFormData.getComparativePeriodId().isEmpty() ? filterFormData.getComparativePeriodId().iterator().next() : null);
         action.setAccruing(filterFormData.isAccruing());
         if (filterFormData.getFormMonth() != null) {
             action.setMonthId(filterFormData.getFormMonth().getId());

@@ -92,7 +92,7 @@ public class CreateFormDataView extends PopupViewWithUiHandlers<CreateFormDataUi
     Button cancelButton;
 
     @UiField
-    PeriodPickerPopupWidget comparativPeriodId;
+    PeriodPickerPopupWidget comparativePeriodId;
 
     @UiField
     CheckBox accruing;
@@ -170,7 +170,7 @@ public class CreateFormDataView extends PopupViewWithUiHandlers<CreateFormDataUi
                 (!isMonthly || formMonth.getValue() != null) && (
                         //Если нф с периодом сравнения, то он должен быть заполнен
                         !comparative || (
-                                comparativPeriodId.getValue() != null && !comparativPeriodId.getValue().isEmpty())
+                                comparativePeriodId.getValue() != null && !comparativePeriodId.getValue().isEmpty())
                         )
         );
     }
@@ -205,8 +205,8 @@ public class CreateFormDataView extends PopupViewWithUiHandlers<CreateFormDataUi
         updateEnabled();
     }
 
-    @UiHandler("comparativPeriodId")
-    public void onComparativPeriodIdChange(ValueChangeEvent<List<Integer>> event) {
+    @UiHandler("comparativePeriodId")
+    public void onComparativePeriodIdChange(ValueChangeEvent<List<Integer>> event) {
         updateEnabled();
     }
 
@@ -214,7 +214,7 @@ public class CreateFormDataView extends PopupViewWithUiHandlers<CreateFormDataUi
     public void onFormTypeIdChange(ValueChangeEvent<List<Long>> event) {
         formMonth.setValue(null);
         if (getUiHandlers() != null && formTypeId.getValue() != null && !formTypeId.getValue().isEmpty() && reportPeriodIds.getValue() != null && !reportPeriodIds.getValue().isEmpty()) {
-            comparativPeriodId.setValue(null);
+            comparativePeriodId.setValue(null);
             accruing.setValue(false);
             getUiHandlers().checkFormType(formTypeId.getValue().get(0).intValue(), reportPeriodIds.getValue().get(0));
         } else {
@@ -229,7 +229,7 @@ public class CreateFormDataView extends PopupViewWithUiHandlers<CreateFormDataUi
                 Dialog.errorMessage("Ошибка", "Не задан месяц!");
                 return;
             }
-            if (comparative && (comparativPeriodId.getValue() == null || comparativPeriodId.getValue().isEmpty())) {
+            if (comparative && (comparativePeriodId.getValue() == null || comparativePeriodId.getValue().isEmpty())) {
                 Dialog.errorMessage("Ошибка", "Не задан период сравнения!");
                 return;
             }
@@ -260,7 +260,7 @@ public class CreateFormDataView extends PopupViewWithUiHandlers<CreateFormDataUi
 
     @Override
     public void setAcceptableComparativPeriods(List<ReportPeriod> comparativPeriods) {
-        comparativPeriodId.setPeriods(comparativPeriods);
+        comparativePeriodId.setPeriods(comparativPeriods);
     }
 
     @Override

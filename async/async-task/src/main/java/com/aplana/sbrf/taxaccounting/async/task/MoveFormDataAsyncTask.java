@@ -91,8 +91,8 @@ public abstract class MoveFormDataAsyncTask extends AbstractAsyncTask {
         FormData formData = formDataService.getFormData(userInfo, formDataId, false, logger);
         Department department = departmentService.getDepartment(formData.getDepartmentId());
         DepartmentReportPeriod reportPeriod = departmentReportPeriodService.get(formData.getDepartmentReportPeriodId());
-        DepartmentReportPeriod rpCompare = formData.getComparativPeriodId() != null ?
-                departmentReportPeriodService.get(formData.getComparativPeriodId()) : null;
+        DepartmentReportPeriod rpCompare = formData.getComparativePeriodId() != null ?
+                departmentReportPeriodService.get(formData.getComparativePeriodId()) : null;
 
         return MessageGenerator.getFDMsg(
                 String.format(SUCCESS, move.getFromState().getTitle(), move.getToState().getTitle(), formData.getFormType().getTaxType() == TaxType.ETR || formData.getFormType().getTaxType() == TaxType.DEAL ?
@@ -119,8 +119,8 @@ public abstract class MoveFormDataAsyncTask extends AbstractAsyncTask {
         FormData formData = formDataService.getFormData(userInfo, formDataId, manual, logger);
         Department department = departmentService.getDepartment(formData.getDepartmentId());
         DepartmentReportPeriod reportPeriod = departmentReportPeriodService.get(formData.getDepartmentReportPeriodId());
-        DepartmentReportPeriod rpCompare = formData.getComparativPeriodId() != null ?
-                departmentReportPeriodService.get(formData.getComparativPeriodId()) : null;
+        DepartmentReportPeriod rpCompare = formData.getComparativePeriodId() != null ?
+                departmentReportPeriodService.get(formData.getComparativePeriodId()) : null;
 
         return MessageGenerator.getFDMsg(
                 String.format(FAIL, move.getFromState().getTitle(), move.getToState().getTitle(),formData.getFormType().getTaxType() == TaxType.ETR || formData.getFormType().getTaxType() == TaxType.DEAL ?

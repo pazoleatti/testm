@@ -99,7 +99,7 @@ public class PrintingServiceImpl implements PrintingService {
             data.setReportPeriod(reportPeriod);
             data.setAcceptanceDate(logBusinessDao.getFormAcceptanceDate(formDataId));
             data.setCreationDate(logBusinessDao.getFormCreationDate(formDataId));
-            data.setRpCompare(formData.getComparativPeriodId() != null ? departmentReportPeriodService.get(formData.getComparativPeriodId()).getReportPeriod() : null);
+            data.setRpCompare(formData.getComparativePeriodId() != null ? departmentReportPeriodService.get(formData.getComparativePeriodId()).getReportPeriod() : null);
             List<DataRow<Cell>> dataRows = dataRowDao.getRows(formData, null);
             Logger log = new Logger();
             refBookHelper.dataRowsDereference(log, dataRows, formTemplate.getColumns());

@@ -185,7 +185,7 @@ def calc() {
  * Получить данные за формы "(РНУ-49) Регистр налогового учёта «ведомость определения результатов от реализации (выбытия) имущества»"
  */
 def getRnu49FormData() {
-    def formData49 = formDataService.getLast(312, formData.kind, formDataDepartment.id, formData.reportPeriodId, formData.periodOrder)
+    def formData49 = formDataService.getLast(312, formData.kind, formDataDepartment.id, formData.reportPeriodId, formData.periodOrder, formData.comparativePeriodId, formData.accruing)
     if (formData49 != null && formData49.id != null) {
         return formDataService.getDataRowHelper(formData49)
     }

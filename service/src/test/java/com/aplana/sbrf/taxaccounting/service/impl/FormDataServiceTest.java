@@ -178,7 +178,7 @@ public class FormDataServiceTest extends Assert{
         formData1.setFormType(formType);
         formData1.setKind(FormDataKind.CONSOLIDATED);
         formData1.setDepartmentId(1);
-        when(formDataDao.find(departmentFormType.getFormTypeId(), departmentFormType.getKind(), 1, null)).thenReturn(formData1);
+        when(formDataDao.find(departmentFormType.getFormTypeId(), departmentFormType.getKind(), 1, null, null, false)).thenReturn(formData1);
         when(formDataDao.get(formData1.getId(), false)).thenReturn(formData);
         when(departmentService.getDepartment(formData1.getDepartmentId())).thenReturn(department);
 
@@ -203,7 +203,7 @@ public class FormDataServiceTest extends Assert{
         when(departmentReportPeriodService.getLast(anyInt(), anyInt())).thenReturn(departmentReportPeriod);
         when(departmentReportPeriodService.get(anyInt())).thenReturn(departmentReportPeriod);
 
-        when(formDataDao.getLast(anyInt(), any(FormDataKind.class), anyInt(), anyInt(), anyInt())).thenReturn(formData1);
+        when(formDataDao.getLast(anyInt(), any(FormDataKind.class), anyInt(), anyInt(), anyInt(), any(Integer.class), any(Boolean.class))).thenReturn(formData1);
         when(userService.getUser(user.getId())).thenReturn(user);
 
         final Map<String, LockData> map = new HashMap<String, LockData>();
@@ -257,8 +257,8 @@ public class FormDataServiceTest extends Assert{
         formDataDest.setState(WorkflowState.ACCEPTED);
         formDataDest.setDepartmentReportPeriodId(3);
         formDataDest.setFormType(formType1);
-        when(formDataDao.getLast(dft1.getFormTypeId(), dft1.getKind(), formData.getDepartmentId(), 2, null)).thenReturn(formDataDest);
-        when(formDataDao.getLast(dft2.getFormTypeId(), dft2.getKind(), formData.getDepartmentId(), 2, null)).thenReturn(formDataDest);
+        when(formDataDao.getLast(dft1.getFormTypeId(), dft1.getKind(), formData.getDepartmentId(), 2, null, null, false)).thenReturn(formDataDest);
+        when(formDataDao.getLast(dft2.getFormTypeId(), dft2.getKind(), formData.getDepartmentId(), 2, null, null, false)).thenReturn(formDataDest);
         when(formTypeService.get(dft1.getFormTypeId())).thenReturn(formType1);
         when(formTypeService.get(dft2.getFormTypeId())).thenReturn(formType1);
         when(formDataDao.get(formData.getId(), false)).thenReturn(formData);
@@ -301,7 +301,7 @@ public class FormDataServiceTest extends Assert{
         formData.setReportPeriodId(1);
         formData.setId(1l);
         formData.setDepartmentReportPeriodId(1);
-        formData.setComparativPeriodId(1);
+        formData.setComparativePeriodId(1);
 
         FormData formData1 = new FormData(formTemplate);
         formData1.setState(WorkflowState.CREATED);
@@ -749,9 +749,9 @@ public class FormDataServiceTest extends Assert{
         formData3.setState(WorkflowState.ACCEPTED);
         formData3.setId(3L);
 
-        when(formDataService.findFormData(1, FormDataKind.PRIMARY, 1, null)).thenReturn(formData1);
-        when(formDataService.findFormData(1, FormDataKind.PRIMARY, 2, null)).thenReturn(formData2);
-        when(formDataService.findFormData(1, FormDataKind.PRIMARY, 3, null)).thenReturn(formData3);
+        when(formDataService.findFormData(1, FormDataKind.PRIMARY, 1, null, null, false)).thenReturn(formData1);
+        when(formDataService.findFormData(1, FormDataKind.PRIMARY, 2, null, null, false)).thenReturn(formData2);
+        when(formDataService.findFormData(1, FormDataKind.PRIMARY, 3, null, null, false)).thenReturn(formData3);
 
         List<DepartmentReportPeriod> periodList = Arrays.asList(departmentReportPeriod1,
                 departmentReportPeriod2, departmentReportPeriod3);
@@ -812,9 +812,9 @@ public class FormDataServiceTest extends Assert{
         when(periodService.getReportPeriod(1)).thenReturn(reportPeriod);
         when(periodService.getPrevReportPeriod(1)).thenReturn(reportPeriodPrev);
         when(departmentReportPeriodService.getLast(1, 0)).thenReturn(departmentReportPeriodPrev);
-        when(formDataDao.find(111, kind, 0, null)).thenReturn(formData1);
+        when(formDataDao.find(111, kind, 0, null, null, false)).thenReturn(formData1);
 
-        FormData formDataOld = formDataService.getPrevPeriodFormData(formTemplate, departmentReportPeriod, kind, null);
+        FormData formDataOld = formDataService.getPrevPeriodFormData(formTemplate, departmentReportPeriod, kind, null, null, false);
         assertEquals(formDataOld.getId(), formData1.getId());
     }
 
@@ -861,11 +861,11 @@ public class FormDataServiceTest extends Assert{
         when(periodService.getReportPeriod(1)).thenReturn(reportPeriod);
         when(periodService.getPrevReportPeriod(1)).thenReturn(reportPeriodPrev);
         when(departmentReportPeriodService.getLast(1, 0)).thenReturn(departmentReportPeriodPrev);
-        when(formDataDao.find(111, kind, 0, new Integer(12))).thenReturn(formData1);
-        when(formDataDao.find(111, kind, 1, new Integer(1))).thenReturn(formData2);
+        when(formDataDao.find(111, kind, 0, new Integer(12), null, false)).thenReturn(formData1);
+        when(formDataDao.find(111, kind, 1, new Integer(1), null, false)).thenReturn(formData2);
 
-        FormData formDataOld = formDataService.getPrevPeriodFormData(formTemplate, departmentReportPeriod, kind, periodOrder);
-        FormData formDataOld2 = formDataService.getPrevPeriodFormData(formTemplate, departmentReportPeriod, kind, periodOrder2);
+        FormData formDataOld = formDataService.getPrevPeriodFormData(formTemplate, departmentReportPeriod, kind, periodOrder, null, false);
+        FormData formDataOld2 = formDataService.getPrevPeriodFormData(formTemplate, departmentReportPeriod, kind, periodOrder2, null, false);
 
         assertEquals(formDataOld.getId(), formData1.getId());
         assertEquals(formDataOld2.getId(), formData2.getId());
@@ -898,7 +898,7 @@ public class FormDataServiceTest extends Assert{
         fd.setState(WorkflowState.ACCEPTED);
         fd.setFormTemplateId(1);
         fd.setDepartmentId(0);
-        fd.setComparativPeriodId(1);
+        fd.setComparativePeriodId(1);
         fd.setFormType(type);
         fd.setKind(FormDataKind.ADDITIONAL);
         ReportPeriod rp = new ReportPeriod();
@@ -1067,7 +1067,7 @@ public class FormDataServiceTest extends Assert{
                 formData.getKind(),
                 reportPeriod.getStartDate(),
                 reportPeriod.getEndDate())).thenReturn(dftTargets);
-        when(formDataDao.find(dft2.getFormTypeId(), dft2.getKind(), formData.getDepartmentReportPeriodId(), null)).thenReturn(formDataDest);
+        when(formDataDao.find(dft2.getFormTypeId(), dft2.getKind(), formData.getDepartmentReportPeriodId(), null, null, false)).thenReturn(formDataDest);
 
         when(formTypeService.get(dft1.getFormTypeId())).thenReturn(formType1);
 

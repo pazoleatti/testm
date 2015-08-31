@@ -267,7 +267,7 @@ public class FormDataSearchDaoImpl extends AbstractDao implements FormDataSearch
                         result.setFormTypeName(rs.getString("form_type_name"));
                         result.setReportPeriodId(SqlUtils.getInteger(rs,"report_period_id"));
                         result.setReportPeriodName(rs.getString("report_period_name"));
-                        result.setComparativPeriodId(SqlUtils.getInteger(rs,"COMPARATIVE_DEP_REP_PER_ID"));
+                        result.setComparativePeriodId(SqlUtils.getInteger(rs,"COMPARATIVE_DEP_REP_PER_ID"));
                         result.setAccruing(rs.getBoolean("ACCRUING"));
                         result.setState(WorkflowState.fromId(SqlUtils.getInteger(rs,"state")));
                         result.setTaxType(TaxType.fromCode(rs.getString("tax_type").charAt(0)));

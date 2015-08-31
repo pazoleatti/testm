@@ -326,7 +326,7 @@ def getReportDate() {
 
 def String checkPrevPeriod(def reportPeriod) {
     if (reportPeriod != null) {
-        if (formDataService.getLast(formData.formType.id, formData.kind, formDataDepartment.id, reportPeriod.id, formData.periodOrder) == null) {
+        if (formDataService.getLast(formData.formType.id, formData.kind, formDataDepartment.id, reportPeriod.id, formData.periodOrder, formData.comparativePeriodId, formData.accruing) == null) {
             return reportPeriod.name + " " + reportPeriod.taxPeriod.year + ", "
         }
     }
@@ -378,7 +378,7 @@ def getPrevRowsForCopy(def reportPeriod, def rowsOldE) {
     def rowsOld = []
     rowsOld.addAll(rowsOldE)
     if (reportPeriod != null) {
-        formDataOld = formDataService.getLast(formData.formType.id, formData.kind, formDataDepartment.id, reportPeriod.id, formData.periodOrder)
+        formDataOld = formDataService.getLast(formData.formType.id, formData.kind, formDataDepartment.id, reportPeriod.id, formData.periodOrder, formData.comparativePeriodId, formData.accruing)
         def dataRowsOld = (formDataOld != null ? formDataService.getDataRowHelper(formDataOld)?.allCached : null)
         if (dataRowsOld != null && !dataRowsOld.isEmpty()) {
             def dFrom = getReportPeriodStartDate()

@@ -211,7 +211,7 @@ public class LoadFormDataServiceTest {
         formType.setName("Тип формы");
         formData.setFormType(formType);
         when(formDataDao.get(1L, false)).thenReturn(formData);
-        when(formDataDao.find(1, FormDataKind.PRIMARY, 1, null)).thenReturn(formData);
+        when(formDataDao.find(1, FormDataKind.PRIMARY, 1, null, null, false)).thenReturn(formData);
     }
 
     private void mockLockDataService() {

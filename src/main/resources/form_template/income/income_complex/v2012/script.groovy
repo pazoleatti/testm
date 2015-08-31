@@ -317,7 +317,7 @@ void consolidationFromSummary(def dataRows, def formSources) {
 
     // получить консолидированные формы в дочерних подразделениях в текущем налоговом периоде
     formSources.each {
-        def child = formDataService.getLast(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId, formData.periodOrder)
+        def child = formDataService.getLast(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId, formData.periodOrder, formData.comparativePeriodId, formData.accruing)
         if (child != null && child.state == WorkflowState.ACCEPTED && child.formType.id == formData.formType.id) {
             for (def row : formDataService.getDataRowHelper(child).allSaved) {
                 if (row.getAlias() == null) {
@@ -360,7 +360,7 @@ void consolidationFromPrimary(def dataRows, def formSources) {
         def prevReportPeriod = reportPeriodService.getPrevReportPeriod(formData.reportPeriodId)
         def isMonth = it.formTypeId in [formTypeId_RNU33, formTypeId_RNU31] //ежемесячная
         if (!isMonth && prevReportPeriod != null) {
-            def childOld = formDataService.getLast(it.formTypeId, it.kind, it.departmentId, prevReportPeriod.id, null)
+            def childOld = formDataService.getLast(it.formTypeId, it.kind, it.departmentId, prevReportPeriod.id, null, it.comparativePeriodId, it.accruing)
             //(РНУ-75) Регистр налогового учета доходов по операциям депозитария
             if (childOld != null && childOld.formType.id == formTypeId_RNU75) {
                 def dataRowsChildOld = formDataService.getDataRowHelper(childOld)?.allSaved
@@ -372,7 +372,7 @@ void consolidationFromPrimary(def dataRows, def formSources) {
         def children = []
         if (isMonth) {
             for (def periodOrder = 3 * reportPeriod.order - 2; periodOrder < 3 * reportPeriod.order + 1; periodOrder++) {
-                def child = formDataService.getLast(it.formTypeId, it.kind, it.departmentId, reportPeriod.id, periodOrder)
+                def child = formDataService.getLast(it.formTypeId, it.kind, it.departmentId, reportPeriod.id, periodOrder, it.comparativePeriodId, it.accruing)
                 children.add(child)
             }
         } else {
@@ -680,7 +680,7 @@ def getIncomeSimpleDataRows(def formId) {
     def periodOrder = formData.periodOrder
     // TODO (Aydar Kadyrgulov) Проверить, существует ли за этот же период простая форма. если нет, то вывести сообщение.
     // TODO (Ramil Timerbaev) Аналитик сказала, что ничего нового от банка пока нет, оставь так как есть
-    def incomeSimpleFormData = formDataService.getLast(formId, formDataKind, departmentId, reportPeriodId, periodOrder)
+    def incomeSimpleFormData = formDataService.getLast(formId, formDataKind, departmentId, reportPeriodId, periodOrder, formData.comparativePeriodId, formData.accruing)
     if (incomeSimpleFormData != null && incomeSimpleFormData.id != null)
         return formDataService.getDataRowHelper(incomeSimpleFormData)?.allSaved
     return null

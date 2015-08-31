@@ -859,7 +859,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                                 formSearchPresenter.setFormDataId(formData.getId());
                                 formSearchPresenter.setFormTemplateId(formData.getFormTemplateId());
 
-                                getView().updateTableTopPosition(formData.getComparativPeriodId() != null ? FormDataView.DEFAULT_TABLE_TOP_POSITION + 20 : FormDataView.DEFAULT_TABLE_TOP_POSITION);
+                                getView().updateTableTopPosition(formData.getComparativePeriodId() != null ? FormDataView.DEFAULT_TABLE_TOP_POSITION + 20 : FormDataView.DEFAULT_TABLE_TOP_POSITION);
 
                                 /**
                                  * Передаем призентору поиска по форме, данные о скрытых колонках

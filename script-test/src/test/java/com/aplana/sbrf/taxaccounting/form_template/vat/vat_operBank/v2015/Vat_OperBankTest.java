@@ -98,7 +98,7 @@ public class Vat_OperBankTest extends ScriptTestBase {
         sourceFormData.setState(WorkflowState.ACCEPTED);
         sourceFormData.setFormType(formType);
         when(testHelper.getFormDataService().getLast(eq(departmentFormType.getFormTypeId()), eq(KIND), eq(DEPARTMENT_ID),
-                anyInt(), any(Integer.class))).thenReturn(sourceFormData);
+                anyInt(), any(Integer.class), any(Integer.class), any(Boolean.class))).thenReturn(sourceFormData);
 
         // DataRowHelper НФ-источника
         DataRowHelper sourceDataRowHelper = new DataRowHelperStub();

@@ -177,7 +177,7 @@ def getRefBookValue(def long refBookId, def Long recordId) {
 
 // Проверка при создании формы
 void checkCreation() {
-    def findForm = formDataService.find(formData.formType.id, formData.kind, formData.getDepartmentReportPeriodId().intValue(), formData.periodOrder);
+    def findForm = formDataService.find(formData.formType.id, formData.kind, formData.departmentReportPeriodId, formData.periodOrder, formData.comparativePeriodId, formData.accruing);
     if (findForm != null) {
         logger.error('Отчет с указанными параметрами уже сформирован!')
     }
@@ -222,7 +222,7 @@ void consolidation() {
 
     departmentFormTypeService.getFormSources(formDataDepartment.id, formData.formType.id, formData.kind,
             getReportPeriodStartDate(), getReportPeriodEndDate()).each {
-        def source = formDataService.getLast(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId, formData.periodOrder)
+        def source = formDataService.getLast(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId, formData.periodOrder, formData.comparativePeriodId, formData.accruing)
         if (source != null && source.state == WorkflowState.ACCEPTED && source.formType.taxType == TaxType.DEAL) {
             formDataService.getDataRowHelper(source).allSaved.each { srcRow ->
                 if (srcRow.getAlias() == null) {

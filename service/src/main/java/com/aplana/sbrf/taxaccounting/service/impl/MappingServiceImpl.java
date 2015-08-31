@@ -131,7 +131,8 @@ public class MappingServiceImpl implements MappingService {
             FormData formData;
             formData = formDataDao.find(formTemplateId.intValue(), FormDataKind.PRIMARY,
                     departmentReportPeriod.getId().intValue(),
-                    periodOrder == null ? null : periodOrder);
+                    periodOrder == null ? null : periodOrder,
+                    null, false);
 
             if (formData == null) {
                 long formDataId = formDataService.createFormData(logger,

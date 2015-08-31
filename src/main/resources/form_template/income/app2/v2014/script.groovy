@@ -446,7 +446,7 @@ void consolidation() {
             getReportPeriodStartDate(), getReportPeriodEndDate()).each {
         if (it.formTypeId == source1FormTypeId) {
             // Сведения о доходах физического лица, выплаченных ему налоговым агентом ... (ЦФО НДФЛ)
-            def source = formDataService.getLast(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId, null)
+            def source = formDataService.getLast(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId, null, formData.comparativePeriodId, formData.accruing)
             if (source != null && source.state == WorkflowState.ACCEPTED) {
                 def sourceDataRows = formDataService.getDataRowHelper(source).allSaved
                 sourceDataRows.each { row ->

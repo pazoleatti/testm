@@ -309,7 +309,7 @@ public class FormDataServiceTest {
         ReflectionTestUtils.setField(formDataService, "reportPeriodService", reportPeriodService);
 
         FormDataDao formDataDao = mock(FormDataDao.class);
-        when(formDataDao.getLast(anyInt(), any(FormDataKind.class), anyInt(), anyInt(), any(Integer.class))).thenAnswer(
+        when(formDataDao.getLast(anyInt(), any(FormDataKind.class), anyInt(), anyInt(), any(Integer.class), any(Integer.class), any(Boolean.class))).thenAnswer(
                 new Answer<FormData>() {
                     @Override
                     public FormData answer(InvocationOnMock invocation) throws Throwable {

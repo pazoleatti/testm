@@ -312,9 +312,9 @@ public class DeclarationDataServiceImplTest {
         when(reportService.getDec(Matchers.<TAUserInfo>any(), anyLong(), Matchers.<ReportType>anyObject())).thenReturn(UUID.randomUUID().toString());
         when(declarationTemplateService.get(declarationData.getDeclarationTemplateId())).thenReturn(declarationTemplate);
         when(periodService.getReportPeriod(declarationData.getReportPeriodId())).thenReturn(reportPeriod);
-        when(formDataService.findFormData(dft1.getFormTypeId(), dft1.getKind(), drp1.getId(), null)).
+        when(formDataService.findFormData(dft1.getFormTypeId(), dft1.getKind(), drp1.getId(), null, null, false)).
                 thenReturn(formData);
-        when(formDataService.findFormData(dft2.getFormTypeId(), dft2.getKind(), drp2.getId(), null)).
+        when(formDataService.findFormData(dft2.getFormTypeId(), dft2.getKind(), drp2.getId(), null, null, false)).
                 thenReturn(null);
         when(formTypeService.get(dft2.getFormTypeId())).thenReturn(formType);
 

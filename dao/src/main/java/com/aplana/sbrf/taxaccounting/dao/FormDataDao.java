@@ -62,13 +62,6 @@ public interface FormDataDao {
 	 */
 	void delete(long formDataId);
 
-	/**
-	 * Ищет налоговую форму по заданным параметрам (формы в корректирующем периоде не найдутся)
-     * @deprecated Неактуально с появлением корректирующих периодов
-	 */
-    @Deprecated
-	FormData find(int formTypeId, FormDataKind kind, int departmentId, int reportPeriodId);
-
     /**
      * Список Id экземпляров НФ по Id шаблона
      */
@@ -87,8 +80,10 @@ public interface FormDataDao {
      * @param kind Тип НФ
      * @param departmentReportPeriodId Отчетный период подразделения
      * @param periodOrder Порядковый номер (равен номеру месяца, при нумерации с 1) для ежемесячных форм
+     * @param comparativePeriodId Период сравнения - ссылка на DepartmentReportPeriod. Может быть null
+     * @param accruing Признак расчета значений нарастающим итогом (false - не нарастающим итогом, true - нарастающим итогом, пустое - форма без периода сравнения)
      */
-    FormData find(int formTypeId, FormDataKind kind, int departmentReportPeriodId, Integer periodOrder);
+    FormData find(int formTypeId, FormDataKind kind, int departmentReportPeriodId, Integer periodOrder, Integer comparativePeriodId, boolean accruing);
 
     /**
      * Поиск НФ. Не учитывает корректирующий период, т.е. результатом могут быть как id экземпляров
@@ -217,15 +212,19 @@ public interface FormDataDao {
     /**
      * НФ созданная в последнем отчетном периоде подразделения, если в нем нет формы, то берется форма из предыдущего
      * отчетного периода подразделения и т.д. в рамках отчетного периода
+     * @param comparativePeriodId Период сравнения - ссылка на DepartmentReportPeriod. Может быть null
+     * @param accruing Признак расчета значений нарастающим итогом (false - не нарастающим итогом, true - нарастающим итогом, пустое - форма без периода сравнения)
      */
-    FormData getLast(int formTypeId, FormDataKind kind, int departmentId, int reportPeriodId, Integer periodOrder);
+    FormData getLast(int formTypeId, FormDataKind kind, int departmentId, int reportPeriodId, Integer periodOrder, Integer comparativePeriodId, boolean accruing);
 
     /**
      * НФ созданная в последнем отчетном периоде подразделения с отсутствующей датой корректировки или меньшей или
      * равной заданной, если в нем нет формы, то берется форма из предыдущего отчетного периода подразделения
      * и т.д. в рамках отчетного периода
+     * @param comparativePeriodId Период сравнения - ссылка на DepartmentReportPeriod. Может быть null
+     * @param accruing Признак расчета значений нарастающим итогом (false - не нарастающим итогом, true - нарастающим итогом, пустое - форма без периода сравнения)
      */
-    FormData getLastByDate(int formTypeId, FormDataKind kind, int departmentId, int reportPeriodId, Integer periodOrder, Date correctionDate);
+    FormData getLastByDate(int formTypeId, FormDataKind kind, int departmentId, int reportPeriodId, Integer periodOrder, Date correctionDate, Integer comparativePeriodId, boolean accruing);
 
     /**
      * НФ созданные в последнем отчетном периоде подразделения с отсутствующей датой корректировки или меньшей или

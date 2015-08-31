@@ -145,8 +145,8 @@ def getEndDate(int reportPeriodId) {
 }
 
 def getComparativePeriodId() {
-    if (formData.comparativPeriodId != null && comparativePeriodId == null) {
-        comparativePeriodId = departmentReportPeriodService.get(formData.comparativPeriodId)?.reportPeriod?.id
+    if (formData.comparativePeriodId != null && comparativePeriodId == null) {
+        comparativePeriodId = departmentReportPeriodService.get(formData.comparativePeriodId)?.reportPeriod?.id
     }
     return comparativePeriodId
 }
@@ -459,7 +459,7 @@ void consolidation() {
     departmentFormTypeService.getFormSources(formData.departmentId, formData.formType.id, formData.kind,
             getStartDate(formData.reportPeriodId), getEndDate(formData.reportPeriodId)).each {
         if (it.formTypeId == formData.formType.id) {
-            def source = formDataService.getLast(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId, formData.periodOrder)
+            def source = formDataService.getLast(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId, formData.periodOrder, formData.comparativePeriodId, formData.accruing)
             if (source != null && source.state == WorkflowState.ACCEPTED) {
                 def sourceRows = formDataService.getDataRowHelper(source)?.allSaved
                 // суммируем графу 4..9 из источников

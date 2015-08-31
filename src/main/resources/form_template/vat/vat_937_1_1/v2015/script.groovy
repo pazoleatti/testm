@@ -355,7 +355,7 @@ void consolidation() {
     formSources.sort { departmentService.get(it.departmentId).name }
     formSources.each {
         if (it.formTypeId == formData.formType.id) {
-            def final child = formDataService.getLast(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId, null)
+            def final child = formDataService.getLast(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId, null, formData.comparativePeriodId, formData.accruing)
             if (child != null && child.state == WorkflowState.ACCEPTED) {
                 // получить все строки источника
                 def final childDataRows = formDataService.getDataRowHelper(child).allCached

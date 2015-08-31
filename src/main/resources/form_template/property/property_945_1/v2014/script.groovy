@@ -1067,7 +1067,7 @@ def addToResult(def resultList, def periodDepartmentFormTypesMap, def isSource) 
         departmentFormTypes.each { departmentFormType ->
             def monthOrder = (isMonthlyForm(departmentFormType.formTypeId, period.id) ? formData.periodOrder : null)
             FormData tmpFormData = formDataService.getLast(departmentFormType.formTypeId, departmentFormType.kind,
-                    departmentFormType.departmentId, period.id, monthOrder)
+                    departmentFormType.departmentId, period.id, monthOrder, null, false)
 
             FormToFormRelation formToFormRelation = getFormToFormRelation(tmpFormData, departmentFormType, isSource, period.taxPeriod.year, period.name, monthOrder)
             resultList.add(formToFormRelation)

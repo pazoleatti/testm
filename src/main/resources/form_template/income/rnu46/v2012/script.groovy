@@ -390,7 +390,7 @@ void logicCheck() {
     def monthsRowMap = [:]
     for (def month = formData.periodOrder - 1; month >= 1; month--) {
         def prevFormData = formDataService.getLast(formData.formType.id, formData.kind, formData.departmentId,
-                formData.reportPeriodId, month)
+                formData.reportPeriodId, month, formData.comparativePeriodId, formData.accruing)
         if (prevFormData != null && prevFormData.state == WorkflowState.ACCEPTED) {
             def prevDataRows = formDataService.getDataRowHelper(prevFormData).allSaved
             monthsRowMap[month] = getInvNumberObjectMap(prevDataRows)

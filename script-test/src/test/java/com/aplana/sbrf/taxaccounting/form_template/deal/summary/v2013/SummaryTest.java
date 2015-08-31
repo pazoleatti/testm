@@ -107,7 +107,7 @@ public class SummaryTest extends ScriptTestBase {
 
     @Test
     public void create() {
-        when(testHelper.getFormDataService().find(anyInt(), any(FormDataKind.class), anyInt(), (Integer) anyInt())).thenReturn(null);
+        when(testHelper.getFormDataService().find(anyInt(), any(FormDataKind.class), anyInt(), (Integer) anyInt(), any(Integer.class), any(Boolean.class))).thenReturn(null);
 
         testHelper.execute(FormDataEvent.CREATE);
         Assert.assertEquals(testHelper.getFormTemplate().getRows().size(), testHelper.getDataRowHelper().getAll().size());
@@ -209,7 +209,7 @@ public class SummaryTest extends ScriptTestBase {
             // форма источника
             FormData sourceFormData = getSourceFormData(sourceTemplateId, sourceTemplateId);
             when(testHelper.getFormDataService().getLast(eq(sourceTypeId), eq(kind), eq(DEPARTMENT_ID),
-                    anyInt(), any(Integer.class))).thenReturn(sourceFormData);
+                    anyInt(), any(Integer.class), any(Integer.class), any(Boolean.class))).thenReturn(sourceFormData);
 
             // строки и хелпер источника
             List<DataRow<Cell>> dataRows = getFillDataRows(sourceTemplateId, sourceFormData, 1L);
@@ -245,7 +245,7 @@ public class SummaryTest extends ScriptTestBase {
             // форма источника
             FormData sourceFormData = getSourceFormData(sourceTemplateId, sourceTemplateId);
             when(testHelper.getFormDataService().getLast(eq(sourceTypeId), eq(kind), eq(DEPARTMENT_ID),
-                    anyInt(), any(Integer.class))).thenReturn(sourceFormData);
+                    anyInt(), any(Integer.class), any(Integer.class), any(Boolean.class))).thenReturn(sourceFormData);
 
             // строки и хелпер источника
             List<DataRow<Cell>> dataRows = getFillDataRows(sourceTemplateId, sourceFormData, 1L);

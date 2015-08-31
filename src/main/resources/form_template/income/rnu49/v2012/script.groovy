@@ -281,7 +281,7 @@ void logicCheck() {
     def numbers = []
     for (ReportPeriod period in reportPeriodList) {
         if (period.order < reportPeriod.order) {
-            def findFormData = formDataService.getLast(formData.formType.id, formData.kind, formData.departmentId, period.id, formData.periodOrder)
+            def findFormData = formDataService.getLast(formData.formType.id, formData.kind, formData.departmentId, period.id, formData.periodOrder, formData.comparativePeriodId, formData.accruing)
             if (!findFormData) {
                 continue
             }
@@ -423,7 +423,7 @@ void consolidation() {
     departmentFormTypeService.getFormSources(formDataDepartment.id, formData.formType.id, formData.kind,
             getReportPeriodStartDate(), getReportPeriodEndDate()).each {
         if (it.formTypeId == formData.formType.id) {
-            def source = formDataService.getLast(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId, formData.periodOrder)
+            def source = formDataService.getLast(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId, formData.periodOrder, formData.comparativePeriodId, formData.accruing)
             if (source != null && source.state == WorkflowState.ACCEPTED) {
                 def sourceDataRows = formDataService.getDataRowHelper(source).allSaved
                 groups.each { section ->
@@ -616,7 +616,7 @@ def getDataRowsByFormTemplateId(def formTemplateId, def reportPeriod, def start,
 def List<FormData> getFormDataList(def formTemplateId, def reportPeriod, def start, def end) {
     def formList = []
     for (def periodOrder = start[Calendar.MONTH] + 1; periodOrder <= end[Calendar.MONTH] + 1; periodOrder++) {
-        formList += formDataService.getLast(formTemplateId, formData.kind, formDataDepartment.id, reportPeriod.taxPeriod.id, periodOrder)
+        formList += formDataService.getLast(formTemplateId, formData.kind, formDataDepartment.id, reportPeriod.taxPeriod.id, periodOrder, formData.comparativePeriodId, formData.accruing)
     }
     return formList
 }

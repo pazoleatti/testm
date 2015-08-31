@@ -178,7 +178,7 @@ void calc() {
 }
 
 def getRNU(def id) {
-    def sourceFormData = formDataService.getLast(id, formData.kind, formDataDepartment.id, formData.reportPeriodId, formData.periodOrder)
+    def sourceFormData = formDataService.getLast(id, formData.kind, formDataDepartment.id, formData.reportPeriodId, formData.periodOrder, formData.comparativePeriodId, formData.accruing)
     if (sourceFormData == null)
         return null
     return formDataService.getDataRowHelper(sourceFormData).allSaved

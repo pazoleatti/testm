@@ -94,23 +94,18 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
     private static final Long TOO_MANY_VALUE_MARKER = -2L;
 
     @Override
-    public FormData find(int formTypeId, FormDataKind kind, int departmentId, int reportPeriodId) {
-        return dao.find(formTypeId, kind, departmentId, reportPeriodId);
-    }
-
-    @Override
     public FormData findMonth(int formTypeId, FormDataKind kind, int departmentId, int taxPeriodId, int periodOrder) {
         return dao.findMonth(formTypeId, kind, departmentId, taxPeriodId, periodOrder);
     }
 
     @Override
-    public FormData find(int formTypeId, FormDataKind kind, int departmentReportPeriodId, Integer periodOrder) {
-        return dao.find(formTypeId, kind, departmentReportPeriodId, periodOrder);
+    public FormData find(int formTypeId, FormDataKind kind, int departmentReportPeriodId, Integer periodOrder, Integer comparativePeriodId, boolean accruing) {
+        return dao.find(formTypeId, kind, departmentReportPeriodId, periodOrder, comparativePeriodId, accruing);
     }
 
     @Override
-    public FormData getLast(int formTypeId, FormDataKind kind, int departmentId, int reportPeriodId, Integer periodOrder) {
-        return dao.getLast(formTypeId, kind, departmentId, reportPeriodId, periodOrder);
+    public FormData getLast(int formTypeId, FormDataKind kind, int departmentId, int reportPeriodId, Integer periodOrder, Integer comparativePeriodId, boolean accruing) {
+        return dao.getLast(formTypeId, kind, departmentId, reportPeriodId, periodOrder, comparativePeriodId, accruing);
     }
 
     @Override
@@ -176,7 +171,7 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
             // поиск источника с учетом периодичности
             // НФ ищется в последнем отчетном периоде подразделения
             FormData sourceFormData = getLast(type.getFormTypeId(), type.getKind(), type.getDepartmentId(),
-                    formData.getReportPeriodId(), formData.getPeriodOrder());
+                    formData.getReportPeriodId(), formData.getPeriodOrder(), formData.getComparativePeriodId(), formData.isAccruing());
 
             // источник не нашелся или не в статусе "Принята"
             if (sourceFormData == null || sourceFormData.getState() != WorkflowState.ACCEPTED) {
@@ -498,13 +493,13 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
 
     // Поиск предыдущей НФ относительно формы с заданными параметрами
     private FormData getFormDataPrev(int formTypeId, FormDataKind kind, int departmentId, int reportPeriodId,
-                                     Integer periodOrder) {
+                                     Integer periodOrder, Integer comparativePeriodId, boolean accruing) {
         if (periodOrder == null) {
             // Квартальная форма, берем предыдущий отчетный период
             ReportPeriod prevReportPeriod = reportPeriodService.getPrevReportPeriod(reportPeriodId);
             if (prevReportPeriod != null) {
                 // Последний экземпляр
-                return getLast(formTypeId, kind, departmentId, prevReportPeriod.getId(), null);
+                return getLast(formTypeId, kind, departmentId, prevReportPeriod.getId(), null, comparativePeriodId, accruing);
             }
         } else {
             // Ежемесячная форма
@@ -522,13 +517,14 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
             if (!overReportPeriod) {
                 // Последний экземпляр в том же отчетном периоде, но предыдущем месяце
                 return getLast(formTypeId, kind, departmentId,
-                        reportPeriodId, prevMonth);
+                        reportPeriodId, prevMonth, comparativePeriodId, accruing);
             } else {
                 // Предыдущий отчетный период
                 ReportPeriod prevReportPeriod = reportPeriodService.getPrevReportPeriod(reportPeriodId);
                 if (prevReportPeriod != null) {
                     // Последний экземпляр
-                    return getLast(formTypeId, kind, departmentId, prevReportPeriod.getId(), prevMonth);
+                    return getLast(formTypeId, kind, departmentId, prevReportPeriod.getId(), prevMonth,
+                            comparativePeriodId, accruing);
                 }
             }
         }
@@ -541,7 +537,7 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
             return null;
         }
         return getFormDataPrev(formData.getFormType().getId(), formData.getKind(), formData.getDepartmentId(),
-                formData.getReportPeriodId(), formData.getPeriodOrder());
+                formData.getReportPeriodId(), formData.getPeriodOrder(), formData.getComparativePeriodId(), formData.isAccruing());
     }
 
     @Override
@@ -565,7 +561,7 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
     @Override
     public void checkFormExistAndAccepted(int formTypeId, FormDataKind kind, int departmentId,
                                           int currentReportPeriodId, Boolean prevPeriod,
-                                          Logger logger, boolean required) {
+                                          Logger logger, boolean required, Integer comparativePeriodId, boolean accruing) {
         // определение периода формы
         ReportPeriod reportPeriod;
         if (prevPeriod) {
@@ -577,7 +573,7 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
         // получение данных формы
         FormData formData = null;
         if (reportPeriod != null) {
-            formData = getLast(formTypeId, kind, departmentId, reportPeriod.getId(), null);
+            formData = getLast(formTypeId, kind, departmentId, reportPeriod.getId(), null, comparativePeriodId, accruing);
         }
 
         // проверка существования, принятости и наличия данных
@@ -608,11 +604,11 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
     @Override
     public void checkMonthlyFormExistAndAccepted(final int formTypeId, FormDataKind kind, int departmentId,
                                                  int currentReportPeriodId, int currentPeriodOrder, boolean prevPeriod,
-                                                 Logger logger, boolean required) {
+                                                 Logger logger, boolean required, Integer comparativePeriodId, boolean accruing) {
 
-        FormData formData = prevPeriod ? getFormDataPrev(formTypeId, kind, departmentId,
-                currentReportPeriodId, currentPeriodOrder) : getLast(formTypeId, kind, departmentId,
-                currentReportPeriodId, currentPeriodOrder);
+        FormData formData = prevPeriod ?
+                getFormDataPrev(formTypeId, kind, departmentId, currentReportPeriodId, currentPeriodOrder, comparativePeriodId, accruing) :
+                getLast(formTypeId, kind, departmentId, currentReportPeriodId, currentPeriodOrder, comparativePeriodId, accruing);
 
         int month = prevPeriod ? currentPeriodOrder - 1 : currentPeriodOrder;
         month = month == 0 ? 12 : month;
@@ -649,7 +645,7 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
     public boolean checkUnique(FormData formData, Logger logger) {
         // поиск формы с учетом периодичности
         FormData existingFormData = dao.find(formData.getFormType().getId(), formData.getKind(),
-                formData.getDepartmentReportPeriodId().intValue(), formData.getPeriodOrder());
+                formData.getDepartmentReportPeriodId(), formData.getPeriodOrder(), formData.getComparativePeriodId(), formData.isAccruing());
 
         // форма найдена
         if (existingFormData != null) {

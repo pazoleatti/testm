@@ -617,7 +617,7 @@ void consolidation() {
     departmentFormTypeService.getFormSources(formData.departmentId, formData.formType.id, formData.kind,
             getReportPeriodStartDate(), getReportPeriodEndDate()).each {
         if (it.formTypeId == id) {
-            def source = formDataService.getLast(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId, formData.periodOrder)
+            def source = formDataService.getLast(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId, formData.periodOrder, formData.comparativePeriodId, formData.accruing)
             if (source != null && source.state == WorkflowState.ACCEPTED) {
                 def sourceDataRows = formDataService.getDataRowHelper(source).allSaved
                 sourceDataRows.each { row ->
@@ -669,7 +669,7 @@ void consolidation() {
  */
 void checkDeclaration() {
     declarationType = 2    // Тип декларации которую проверяем (Налог на прибыль)
-    declaration = declarationService.getLast(declarationType, formData.getDepartmentId(), formData.getReportPeriodId())
+    declaration = declarationService.getLast(declarationType, formData.getDepartmentId(), formData.getReportPeriodId(), formData.comparativePeriodId, formData.accruing)
     if (declaration != null && declaration.isAccepted()) {
         logger.error("Декларация банка находится в статусе принята")
     }
@@ -728,7 +728,7 @@ def getFormDataSummaryMap(def ids) {
     def map = [:]
     ids.each{ id ->
         if (!formDataCache[id]) {
-            formDataCache[id] = formDataService.getLast(id, com.aplana.sbrf.taxaccounting.model.FormDataKind.SUMMARY, formDataDepartment.id, formData.reportPeriodId, formData.periodOrder)
+            formDataCache[id] = formDataService.getLast(id, com.aplana.sbrf.taxaccounting.model.FormDataKind.SUMMARY, formDataDepartment.id, formData.reportPeriodId, formData.periodOrder, formData.comparativePeriodId, formData.accruing)
         }
         if (formDataCache[id]) {
             map[id] = formDataCache[id]
@@ -1325,7 +1325,7 @@ def getDataRows(def formId, def kind) {
     def departmentId = formData.departmentId
     def reportPeriodId = formData.reportPeriodId
     def periodOrder = formData.periodOrder
-    def sourceFormData = formDataService.getLast(formId, kind, departmentId, reportPeriodId, periodOrder)
+    def sourceFormData = formDataService.getLast(formId, kind, departmentId, reportPeriodId, periodOrder, formData.comparativePeriodId, formData.accruing)
     if (sourceFormData != null && sourceFormData.id != null)
         return formDataService.getDataRowHelper(sourceFormData)?.allSaved
     return null

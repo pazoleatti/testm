@@ -454,7 +454,7 @@ def getPeriods(def date1, date2) {
 def getFormData(reportPeriodId) {
     String key = "$reportPeriodId"
     if (formDataMap[key] != -1 && formDataMap[key] == null) { // чтобы повторно не искал несуществующие формы
-        formDataMap[key] = (formDataService.getLast(formData.formType.id, formData.kind, formData.departmentId, reportPeriodId, formData.periodOrder) ?: -1)
+        formDataMap[key] = (formDataService.getLast(formData.formType.id, formData.kind, formData.departmentId, reportPeriodId, formData.periodOrder, formData.comparativePeriodId, formData.accruing) ?: -1)
     }
     return (formDataMap[key] != -1) ? formDataMap[key] : null
 }

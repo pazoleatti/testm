@@ -285,7 +285,7 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
 
         StringBuilder sbPeriodName = new StringBuilder();
         //Fill period
-        if(data.getComparativPeriodId() != null){
+        if(data.getComparativePeriodId() != null){
             /*String rpName =  !refBookValue.getStringValue().equals("34") ? reportPeriod.getName() : "";
             String rpCompareName =  !refBookValue.getStringValue().equals("34") ? rpCompare.getName() : "";*/
             sbPeriodName.append(String.format(

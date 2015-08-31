@@ -107,8 +107,8 @@ public abstract class UploadFormDataAsyncTask extends AbstractAsyncTask {
         FormData formData = formDataService.getFormData(userInfo, formDataId, manual, logger);
         Department department = departmentService.getDepartment(formData.getDepartmentId());
         DepartmentReportPeriod reportPeriod = departmentReportPeriodService.get(formData.getDepartmentReportPeriodId());
-        DepartmentReportPeriod rpCompare = formData.getComparativPeriodId() != null ?
-                departmentReportPeriodService.get(formData.getComparativPeriodId()) : null;
+        DepartmentReportPeriod rpCompare = formData.getComparativePeriodId() != null ?
+                departmentReportPeriodService.get(formData.getComparativePeriodId()) : null;
 
         return MessageGenerator.getFDMsg(
                 String.format("Выполнен импорт данных из XLSM файла в экземпляр %s", MessageGenerator.mesSpeckSingleD(formData.getFormType().getTaxType())),
@@ -129,8 +129,8 @@ public abstract class UploadFormDataAsyncTask extends AbstractAsyncTask {
         FormData formData = formDataService.getFormData(userInfo, formDataId, manual, logger);
         Department department = departmentService.getDepartment(formData.getDepartmentId());
         DepartmentReportPeriod reportPeriod = departmentReportPeriodService.get(formData.getDepartmentReportPeriodId());
-        DepartmentReportPeriod rpCompare = formData.getComparativPeriodId() != null ?
-                departmentReportPeriodService.get(formData.getComparativPeriodId()) : null;
+        DepartmentReportPeriod rpCompare = formData.getComparativePeriodId() != null ?
+                departmentReportPeriodService.get(formData.getComparativePeriodId()) : null;
 
         return MessageGenerator.getFDMsg(
                 String.format("Не выполнен импорт данных из XLSM файла в экземпляр %s", MessageGenerator.mesSpeckSingleD(formData.getFormType().getTaxType())),
