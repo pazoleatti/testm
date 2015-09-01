@@ -88,7 +88,6 @@ public class RefBookHierView extends ViewWithUiHandlers<RefBookHierUIHandlers> i
                 deleteRow.setVisible(true);
                 separator.setVisible(true);
                 edit.setVisible(false);
-                cancelEdit.setVisible(true);
                 search.setEnabled(true);
                 filterText.setEnabled(true);
                 relevanceDate.setEnabled(true);
@@ -98,14 +97,12 @@ public class RefBookHierView extends ViewWithUiHandlers<RefBookHierUIHandlers> i
                 deleteRow.setVisible(false);
                 separator.setVisible(false);
                 edit.setVisible(false);
-                cancelEdit.setVisible(false);
                 search.setEnabled(true);
                 filterText.setEnabled(true);
                 relevanceDate.setEnabled(true);
                 break;
             case VIEW:
                 edit.setVisible(true);
-                cancelEdit.setVisible(false);
                 addRow.setVisible(false);
                 deleteRow.setVisible(false);
                 separator.setVisible(false);
@@ -116,13 +113,13 @@ public class RefBookHierView extends ViewWithUiHandlers<RefBookHierUIHandlers> i
             case CREATE:
                 addRow.setVisible(false);
                 deleteRow.setVisible(false);
-                cancelEdit.setVisible(false);
                 search.setEnabled(false);
                 filterText.setEnabled(false);
                 separator.setVisible(false);
                 relevanceDate.setEnabled(false);
                 break;
         }
+        cancelEdit.setVisible(!isVersion&&mode==FormMode.EDIT);
     }
 
     @Override

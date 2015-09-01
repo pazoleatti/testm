@@ -28,24 +28,16 @@ public class EditFormView extends AbstractEditView implements EditFormPresenter.
 	@UiField
 	VerticalPanel editPanel;
 	@UiField
-	Button save;
-	@UiField
-	Button cancel;
+	Button save, cancel;
 
     @UiField
-    DateMaskBoxPicker versionStart;
-    @UiField
-    DateMaskBoxPicker versionEnd;
+    DateMaskBoxPicker versionStart, versionEnd;
     @UiField
     LinkButton allVersion;
     @UiField
     HorizontalPanel buttonBlock;
     @UiField
-    Label startVersionDateLabel;
-    @UiField
-    Label endVersionDateLabel;
-    @UiField
-    Label separator;
+    Label startVersionDateLabel, endVersionDateLabel, separator;
 
 	@Inject
 	@UiConstructor
@@ -125,7 +117,7 @@ public class EditFormView extends AbstractEditView implements EditFormPresenter.
     public void fillVersionData(RefBookRecordVersionData versionData) {
         versionStart.setValue(versionData.getVersionStart());
         versionEnd.setValue(versionData.getVersionEnd());
-        allVersion.setVisible(!isVersionMode && versioned);
+        allVersion.setVisible(!isVersionMode && getUiHandlers().isVersioned());
         allVersion.setText("Все версии ("+versionData.getVersionCount()+")");
         /*allVersion.setHref("#"
                 + RefBookDataTokens.refBookVersion
@@ -136,12 +128,11 @@ public class EditFormView extends AbstractEditView implements EditFormPresenter.
     @Override
     public void setVersionMode(boolean versionMode) {
         super.setVersionMode(versionMode);
-        allVersion.setVisible(!versionMode && versioned);
+        allVersion.setVisible(!versionMode && getUiHandlers().isVersioned());
     }
 
     @Override
     public void showVersioned(boolean versioned) {
-        this.versioned = versioned;
         versionStart.setVisible(versioned);
         versionEnd.setVisible(versioned);
         allVersion.setVisible(versioned);
