@@ -249,6 +249,7 @@ public class RefBookHierPresenter extends Presenter<RefBookHierPresenter.MyView,
                                                 }
                                             }, RefBookHierPresenter.this));
                                     getView().setVersionedFields(versioned);
+                                    commonEditPresenter.setVersioned(versioned);
                                     //hierEditFormPresenter.setCanVersion(canVersion);
                                     versionPresenter.setHierarchy(true);
                                 } else {
@@ -273,51 +274,65 @@ public class RefBookHierPresenter extends Presenter<RefBookHierPresenter.MyView,
         setInSlot(TYPE_editFormPresenter, Department.REF_BOOK_ID.equals(refBookId) ? departmentEditPresenter : hierEditFormPresenter);
         setInSlot(TYPE_mainFormPresenter, refBookHierDataPresenter);
 
-        registrations[0] = commonEditPresenter.addClickHandlerForAllVersions(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                setInSlot(TYPE_mainFormPresenter, versionPresenter);
-                versionPresenter.setUniqueRecordId(refBookHierDataPresenter.getSelectedId());
+        CheckRefBookAction checkAction = new CheckRefBookAction();
+        checkAction.setRefBookId(refBookId);
+        dispatcher.execute(checkAction, CallbackUtils.defaultCallback(
+                new AbstractCallback<CheckRefBookResult>() {
+                    @Override
+                    public void onSuccess(CheckRefBookResult result) {
+                        versioned = result.isVersioned();
+                        commonEditPresenter.setVersioned(versioned);
+                        if (result.isAvailable()) {
+                            registrations[0] = commonEditPresenter.addClickHandlerForAllVersions(new ClickHandler() {
+                                @Override
+                                public void onClick(ClickEvent event) {
+                                    setInSlot(TYPE_mainFormPresenter, versionPresenter);
+                                    versionPresenter.setUniqueRecordId(refBookHierDataPresenter.getSelectedId());
 
                 /*refBookLinearPresenter.changeProvider(true);*/
-                commonEditPresenter.setVersionMode(true);
-                commonEditPresenter.setCurrentUniqueRecordId(null);
-                commonEditPresenter.setRecordId(null);
-                recordId = refBookHierDataPresenter.getSelectedId();
-                dataInterface.setMode(mode);
+                                    commonEditPresenter.setVersionMode(true);
+                                    commonEditPresenter.setCurrentUniqueRecordId(null);
+                                    commonEditPresenter.setRecordId(null);
+                                    recordId = refBookHierDataPresenter.getSelectedId();
+                                    dataInterface.setMode(mode);
 
-                GetRefBookAttributesAction action = new GetRefBookAttributesAction();
-                action.setRefBookId(refBookId);
-                dispatcher.execute(action,
-                        CallbackUtils.defaultCallback(
-                                new AbstractCallback<GetRefBookAttributesResult>() {
-                                    @Override
-                                    public void onSuccess(GetRefBookAttributesResult result) {
+                                    GetRefBookAttributesAction action = new GetRefBookAttributesAction();
+                                    action.setRefBookId(refBookId);
+                                    dispatcher.execute(action,
+                                            CallbackUtils.defaultCallback(
+                                                    new AbstractCallback<GetRefBookAttributesResult>() {
+                                                        @Override
+                                                        public void onSuccess(GetRefBookAttributesResult result) {
                                                             /*getView().resetRefBookElements();
                                                             refBookLinearPresenter.setTableColumns(result.getColumns());*/
-                                        getView().setVersionView(true);
-                                        versionPresenter.setTableColumns(result.getColumns());
-                                        commonEditPresenter.setMode(mode);
-                                        versionPresenter.updateTable();
-                                        //hierEditFormPresenter.init(refBookId);
+                                                            getView().setVersionView(true);
+                                                            versionPresenter.setTableColumns(result.getColumns());
+                                                            commonEditPresenter.setMode(mode);
+                                                            versionPresenter.updateTable();
+                                                            //hierEditFormPresenter.init(refBookId);
                                                             /*getProxy().manualReveal(RefBookDataPresenter.this);*/
-                                    }
-                                }, RefBookHierPresenter.this));
+                                                        }
+                                                    }, RefBookHierPresenter.this));
 
-                GetNameAction nameAction = new GetNameAction();
-                nameAction.setRefBookId(refBookId);
-                nameAction.setUniqueRecordId(recordId);
-                dispatcher.execute(nameAction,
-                        CallbackUtils.defaultCallback(
-                                new AbstractCallback<GetNameResult>() {
-                                    @Override
-                                    public void onSuccess(GetNameResult result) {
-                                        getView().setRefBookNameDesc(result.getUniqueAttributeValues(), getView().getRelevanceDate());
-                                        commonEditPresenter.setRecordId(result.getRecordId());
-                                    }
-                                }, RefBookHierPresenter.this));
-            }
-        });
+                                    GetNameAction nameAction = new GetNameAction();
+                                    nameAction.setRefBookId(refBookId);
+                                    nameAction.setUniqueRecordId(recordId);
+                                    dispatcher.execute(nameAction,
+                                            CallbackUtils.defaultCallback(
+                                                    new AbstractCallback<GetNameResult>() {
+                                                        @Override
+                                                        public void onSuccess(GetNameResult result) {
+                                                            getView().setRefBookNameDesc(result.getUniqueAttributeValues(), getView().getRelevanceDate());
+                                                            commonEditPresenter.setRecordId(result.getRecordId());
+                                                        }
+                                                    }, RefBookHierPresenter.this));
+                                }
+                            });
+                        } else {
+                            Dialog.errorMessage("Доступ к справочнику запрещен!");
+                        }
+                    }
+                }, RefBookHierPresenter.this));
     }
 
     @Override

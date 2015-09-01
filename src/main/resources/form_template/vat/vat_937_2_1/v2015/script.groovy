@@ -472,13 +472,16 @@ void importTransportData() {
         reader.close()
     }
 
+    // подсчет итогов
+    def totalRow = getFixedRow('Всего', 'total', true)
+    calcTotalSum(newRows, totalRow, totalSumColumns)
+    newRows.add(totalRow)
+
     // сравнение итогов
     if (!logger.containsLevel(LogLevel.ERROR) && total) {
         // мапа с алиасами граф и номерами колонокв в xml (алиас -> номер колонки)
         def totalColumnsIndexMap = ['saleCostB18' : 14, 'saleCostB10' : 15, 'saleCostB0' : 16, 'vatSum18' : 17, 'vatSum10' : 18, 'bonifSalesSum' : 19]
-        // подсчет итогов
-        def totalRow = getFixedRow('Всего', 'total', true)
-        calcTotalSum(newRows, totalRow, totalColumnsIndexMap.keySet().asList())
+
         // сравнение контрольных сумм
         def colOffset = 1
         for (def alias : totalColumnsIndexMap.keySet().asList()) {
@@ -491,8 +494,6 @@ void importTransportData() {
                 logger.warn(TRANSPORT_FILE_SUM_ERROR + " Из файла: $v1, рассчитано: $v2", totalColumnsIndexMap[alias] + colOffset, fileRowIndex)
             }
         }
-        // добавить итоговую строку
-        newRows.add(totalRow)
     } else {
         logger.warn("В транспортном файле не найдена итоговая строка")
     }
