@@ -10,6 +10,7 @@ import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.Abst
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.DepartmentEditPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.HierEditPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.event.SetFormMode;
+import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.event.UpdateForm;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.event.AddItemEvent;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.event.DeleteItemEvent;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.event.SearchButtonEvent;
@@ -39,7 +40,7 @@ import java.util.Date;
  * User: avanteev
  */
 public class RefBookHierPresenter extends Presenter<RefBookHierPresenter.MyView, RefBookHierPresenter.MyProxy>
-        implements RefBookHierUIHandlers, SetFormMode.SetFormModeHandler {
+        implements RefBookHierUIHandlers, SetFormMode.SetFormModeHandler, UpdateForm.UpdateFormHandler {
 
     private final DispatchAsync dispatcher;
     private PlaceManager placeManager;
@@ -140,6 +141,21 @@ public class RefBookHierPresenter extends Presenter<RefBookHierPresenter.MyView,
         getView().updateView(event.getFormMode());
     }
 
+    @Override
+    public void onUpdateForm(UpdateForm event) {
+        GetNameAction nameAction = new GetNameAction();
+        nameAction.setRefBookId(refBookId);
+        nameAction.setUniqueRecordId(recordId);
+        dispatcher.execute(nameAction,
+                CallbackUtils.defaultCallback(
+                        new AbstractCallback<GetNameResult>() {
+                            @Override
+                            public void onSuccess(GetNameResult result) {
+                                getView().setRefBookNameDesc(result.getUniqueAttributeValues(), getView().getRelevanceDate());
+                            }
+                        }, RefBookHierPresenter.this));
+    }
+
     /*@Override
     public void onUpdateForm(UpdateForm event) {
         if (event.isSuccess()) {
@@ -180,7 +196,7 @@ public class RefBookHierPresenter extends Presenter<RefBookHierPresenter.MyView,
     protected void onBind() {
         super.onBind();
         addVisibleHandler(SetFormMode.getType(), this);
-
+        addVisibleHandler(UpdateForm.getType(), this);
     }
 
     @Override

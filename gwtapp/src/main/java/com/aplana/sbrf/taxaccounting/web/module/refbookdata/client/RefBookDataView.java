@@ -248,13 +248,6 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
     }
 
     @Override
-    public void setVersionedFields(boolean isVisible) {
-        relevanceDate.setVisible(isVisible);
-        relevanceDateLabel.setVisible(isVisible);
-        separator1.setVisible(isVisible);
-    }
-
-    @Override
     public void setVersionView(boolean isVersion) {
         this.isVersion = isVersion;
         edit.setVisible(!isVersion);

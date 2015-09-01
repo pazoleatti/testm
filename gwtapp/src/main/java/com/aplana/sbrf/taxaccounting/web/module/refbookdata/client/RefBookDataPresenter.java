@@ -9,6 +9,7 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.AbstractEditPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.EditFormPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.event.SetFormMode;
+import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.event.UpdateForm;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.event.DeleteItemEvent;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.event.SearchButtonEvent;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.event.ShowItemEvent;
@@ -37,12 +38,28 @@ import com.gwtplatform.mvp.client.proxy.ProxyPlace;
 import java.util.Date;
 
 public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
-		RefBookDataPresenter.MyProxy> implements RefBookDataUiHandlers, SetFormMode.SetFormModeHandler {
+		RefBookDataPresenter.MyProxy> implements RefBookDataUiHandlers,
+        SetFormMode.SetFormModeHandler, UpdateForm.UpdateFormHandler {
 
     @Override
     public void onSetFormMode(SetFormMode event) {
         setMode(event.getFormMode());
         dataInterface.setMode(event.getFormMode());
+    }
+
+    @Override
+    public void onUpdateForm(UpdateForm event) {
+        GetNameAction nameAction = new GetNameAction();
+        nameAction.setRefBookId(refBookId);
+        nameAction.setUniqueRecordId(recordId);
+        dispatcher.execute(nameAction,
+                CallbackUtils.defaultCallback(
+                        new AbstractCallback<GetNameResult>() {
+                            @Override
+                            public void onSuccess(GetNameResult result) {
+                                getView().setRefBookNameDesc(result.getUniqueAttributeValues(), getView().getRelevanceDate());
+                            }
+                        }, RefBookDataPresenter.this));
     }
 
     /*@Override
@@ -91,8 +108,6 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
         void updateMode(FormMode mode);
         /** доступность  кнопки-ссылка "Создать запрос на изменение..." для справочника "Организации-участники контролируемых сделок" */
         void updateSendQuery(boolean isAvailable);
-        //Показывает/скрывает поля, которые необходимы только для версионирования
-        void setVersionedFields(boolean isVisible);
 
         /**
          * Устанавливает версионный вид справочника.
@@ -245,6 +260,7 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
     public void onBind(){
         super.onBind();
         addVisibleHandler(SetFormMode.getType(), this);
+        addVisibleHandler(UpdateForm.getType(), this);
     }
 
     @Override
