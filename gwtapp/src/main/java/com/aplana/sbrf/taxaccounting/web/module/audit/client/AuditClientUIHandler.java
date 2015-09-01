@@ -7,7 +7,7 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.AplanaUiHandlers;
  * User: avanteev
  */
 public interface AuditClientUIHandler extends AplanaUiHandlers {
-    void onPrintButtonClicked();
+    void onPrintButtonClicked(boolean force);
     void onArchiveButtonClicked();
     void onSortingChanged();
     void onEventClick(String uuid);

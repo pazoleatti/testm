@@ -1,5 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.audit.client;
 
+import com.aplana.gwt.client.dialog.Dialog;
+import com.aplana.gwt.client.dialog.DialogHandler;
 import com.aplana.sbrf.taxaccounting.model.HistoryBusinessSearchOrdering;
 import com.aplana.sbrf.taxaccounting.model.LogSearchResultItem;
 import com.aplana.sbrf.taxaccounting.model.LogSystemFilter;
@@ -18,6 +20,7 @@ import com.aplana.sbrf.taxaccounting.web.module.audit.client.archive.AuditArchiv
 import com.aplana.sbrf.taxaccounting.web.module.audit.client.event.AuditClientSearchEvent;
 import com.aplana.sbrf.taxaccounting.web.module.audit.client.filter.AuditFilterPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.audit.shared.*;
+import com.aplana.sbrf.taxaccounting.web.widget.menu.client.ManualMenuPresenter;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.dispatch.shared.DispatchAsync;
@@ -71,14 +74,16 @@ public class AuditClientPresenter extends Presenter<AuditClientPresenter.MyView,
     protected final DispatchAsync dispatcher;
     private AuditArchiveDialogPresenter auditArchiveDialogPresenter;
     private AuditFilterPresenter auditFilterPresenter;
+    private final ManualMenuPresenter manualMenuPresenter;
 
 
     @Inject
-    public AuditClientPresenter(EventBus eventBus, MyView view, MyProxy proxy, AuditArchiveDialogPresenter auditArchiveDialogPresenter, AuditFilterPresenter auditFilterPresenter, DispatchAsync dispatcher) {
+    public AuditClientPresenter(EventBus eventBus, MyView view, MyProxy proxy, AuditArchiveDialogPresenter auditArchiveDialogPresenter, AuditFilterPresenter auditFilterPresenter, ManualMenuPresenter manualMenuPresenter, DispatchAsync dispatcher) {
         super(eventBus, view, proxy, RevealContentTypeHolder.getMainContent());
         this.auditArchiveDialogPresenter = auditArchiveDialogPresenter;
         this.auditFilterPresenter = auditFilterPresenter;
         this.dispatcher = dispatcher;
+        this.manualMenuPresenter = manualMenuPresenter;
         getView().setUiHandlers(this);
     }
 
@@ -112,22 +117,40 @@ public class AuditClientPresenter extends Presenter<AuditClientPresenter.MyView,
     }
 
     @Override
-    public void onPrintButtonClicked() {
+    public void onPrintButtonClicked(final boolean force) {
         try {
             PrintAuditDataAction dataAction = new PrintAuditDataAction();
             dataAction.setLogSystemFilter(new LogSystemAuditFilter(auditFilterPresenter.getLogSystemFilter()));
             dataAction.getLogSystemFilter().setStartIndex(0);
             dataAction.getLogSystemFilter().setCountOfRecords(0);
+            dataAction.setForce(force);
             dispatcher.execute(dataAction, CallbackUtils.defaultCallbackNoLock(new AbstractCallback<PrintAuditDataResult>() {
                 @Override
                 public void onSuccess(PrintAuditDataResult result) {
-                    if (result.getLogUuid() == null) {
-                        MessageEvent.fire(AuditClientPresenter.this, true,
-                                "В журнале аудита отсутствуют записи по заданным параметрам поиска.");
-                        return;
+                    if (result.getUuid() != null) {
+                        DownloadUtils.
+                                openInIframe("download/downloadBlobController/processLogDownload/" + result.getUuid());
+                        getView().updatePrintReportButtonName(ReportType.CSV_AUDIT, false);
+                        getView().stopTimerReport(ReportType.CSV_AUDIT);
+                        manualMenuPresenter.updateNotificationCount();
+                    } else {
+                        if (result.isLock()) {
+                            Dialog.confirmMessage(result.getRestartMsg(), new DialogHandler() {
+                                @Override
+                                public void yes() {
+                                    onPrintButtonClicked(true);
+                                }
+                            });
+                        } else {
+                            if (result.getLogUuid() == null) {
+                                MessageEvent.fire(AuditClientPresenter.this, true,
+                                        "В журнале аудита отсутствуют записи по заданным параметрам поиска.");
+                                return;
+                            }
+                            LogAddEvent.fire(AuditClientPresenter.this, result.getLogUuid());
+                            getView().startTimerReport(ReportType.CSV_AUDIT);
+                        }
                     }
-                    LogAddEvent.fire(AuditClientPresenter.this, result.getLogUuid());
-                    getView().startTimerReport(ReportType.CSV_AUDIT);
                 }
 
                 @Override
@@ -180,13 +203,11 @@ public class AuditClientPresenter extends Presenter<AuditClientPresenter.MyView,
                                         openInIframe("download/downloadBlobController/processArchiveDownload/" + result.getUuid());
                                 getView().stopTimerReport(ReportType.ARCHIVE_AUDIT);
                             }
-
                         } else if (reportType == ReportType.CSV_AUDIT){
                             if (!isTimer){
-                                DownloadUtils.
-                                        openInIframe("download/downloadBlobController/processLogDownload/" + result.getUuid());
                                 getView().updatePrintReportButtonName(ReportType.CSV_AUDIT, false);
                                 getView().stopTimerReport(ReportType.CSV_AUDIT);
+                                manualMenuPresenter.updateNotificationCount();
                             } else{
                                 getView().updatePrintReportButtonName(reportType, !result.isLocked() && result.isExist());
                             }

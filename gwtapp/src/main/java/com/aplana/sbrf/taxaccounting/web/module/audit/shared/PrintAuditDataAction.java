@@ -9,6 +9,7 @@ import com.gwtplatform.dispatch.shared.UnsecuredActionImpl;
 public class PrintAuditDataAction extends UnsecuredActionImpl<PrintAuditDataResult> implements ActionName {
 
     private LogSystemAuditFilter logSystemFilter;
+    private boolean force;
 
     public LogSystemAuditFilter getLogSystemFilter() {
         return logSystemFilter;
@@ -16,6 +17,14 @@ public class PrintAuditDataAction extends UnsecuredActionImpl<PrintAuditDataResu
 
     public void setLogSystemFilter(LogSystemAuditFilter logSystemFilter) {
         this.logSystemFilter = logSystemFilter;
+    }
+
+    public boolean isForce() {
+        return force;
+    }
+
+    public void setForce(boolean force) {
+        this.force = force;
     }
 
     @Override

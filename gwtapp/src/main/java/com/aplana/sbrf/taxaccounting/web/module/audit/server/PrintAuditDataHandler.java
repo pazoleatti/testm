@@ -7,10 +7,8 @@ import com.aplana.sbrf.taxaccounting.async.task.AsyncTask;
 import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
-import com.aplana.sbrf.taxaccounting.service.AuditService;
-import com.aplana.sbrf.taxaccounting.service.BlobDataService;
-import com.aplana.sbrf.taxaccounting.service.LogEntryService;
-import com.aplana.sbrf.taxaccounting.service.ReportService;
+import com.aplana.sbrf.taxaccounting.model.util.Pair;
+import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.audit.shared.LogSystemAuditFilter;
 import com.aplana.sbrf.taxaccounting.web.module.audit.shared.PrintAuditDataAction;
@@ -25,6 +23,7 @@ import org.springframework.stereotype.Service;
 
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  * User: avanteev
@@ -49,7 +48,7 @@ public class PrintAuditDataHandler extends AbstractActionHandler<PrintAuditDataA
     @Autowired
     ReportService reportService;
     @Autowired
-    private AsyncManager asyncManager;
+    private AsyncTaskManagerService asyncTaskManagerService;
 
     public PrintAuditDataHandler() {
         super(PrintAuditDataAction.class);
@@ -57,6 +56,7 @@ public class PrintAuditDataHandler extends AbstractActionHandler<PrintAuditDataA
 
     @Override
     public PrintAuditDataResult execute(PrintAuditDataAction action, ExecutionContext executionContext) throws ActionException {
+        final ReportType reportType = ReportType.CSV_AUDIT;
         PrintAuditDataResult result = new PrintAuditDataResult();
         TAUserInfo userInfo = securityService.currentUserInfo();
         LogSystemAuditFilter filter = action.getLogSystemFilter();
@@ -65,8 +65,7 @@ public class PrintAuditDataHandler extends AbstractActionHandler<PrintAuditDataA
             builder.append(AuditFieldList.fromId(aLong).getName()).append(", ");
         }
         String fields = builder.substring(0, builder.toString().length() - 2);
-
-        String searchCriteria = String.format(SEARCH_CRITERIA,
+        final String searchCriteria = String.format(SEARCH_CRITERIA,
                 SDF.format(filter.getFromSearchDate()),
                 SDF.format(filter.getToSearchDate()),
                 filter.getFilter() != null ? filter.getFilter() : "Не задано",
@@ -74,50 +73,60 @@ public class PrintAuditDataHandler extends AbstractActionHandler<PrintAuditDataA
                 fields
         );
         Logger logger = new Logger();
+        String reportUuid = reportService.getAudit(userInfo, reportType);
+        if (reportUuid != null){
+            result.setUuid(reportUuid);
+            return result;
+        }
         long recordsCount = auditService.getCountRecords(action.getLogSystemFilter().convertTo(), userInfo);
         if (recordsCount==0) {
             result.setLogUuid(null);
             return result;
         }
-        String key = LockData.LockObjects.LOG_SYSTEM_CSV.name() + "_" + userInfo.getUser().getId();
-        HashMap<String, Object> params = new HashMap<String, Object>();
-        params.put(AsyncTask.RequiredParams.USER_ID.name(), userInfo.getUser().getId());
-        params.put(AsyncTask.RequiredParams.LOCKED_OBJECT.name(), key);
-        params.put(AuditService.AsyncNames.LOG_FILTER.name(), action.getLogSystemFilter().convertTo());
-        params.put(AuditService.AsyncNames.LOG_COUNT.name(), recordsCount);
-        LockData lockData;
-        if (reportService.getAudit(userInfo, ReportType.CSV) != null){
-            logger.error("Для этого пользователя уже есть отчет по ЖА, проверьте выгрузку.");
-            result.setLogUuid(logEntryService.save(logger.getEntries()));
-            return result;
-        }
-        try {
-            if ((lockData = lockDataService.lock(key, userInfo.getUser().getId(),
-                    String.format(
-                            LockData.DescriptionTemplate.LOG_SYSTEM_CSV.getText(),
-                            searchCriteria
-                    ),
-                    LockData.State.IN_QUEUE.getText(),
-                    lockDataService.getLockTimeout(LockData.LockObjects.LOG_SYSTEM_CSV))) == null) {
-                lockData = lockDataService.getLock(key);
-                params.put(AsyncTask.RequiredParams.LOCK_DATE.name(), lockData.getDateLock());
-                lockDataService.addUserWaitingForLock(key, userInfo.getUser().getId());
-                BalancingVariants balancingVariant = asyncManager.checkCreate(ReportType.CSV_AUDIT.getAsyncTaskTypeId(PropertyLoader.isProductionMode()), params);
-                asyncManager.executeAsync(ReportType.CSV_AUDIT.getAsyncTaskTypeId(PropertyLoader.isProductionMode()), params, balancingVariant);
-                lockDataService.updateQueue(key, lockData.getDateLock(), balancingVariant);
-            } else {
-                if (lockData.getUserId() != userInfo.getUser().getId()) {
-                    try {
-                        lockDataService.addUserWaitingForLock(key, userInfo.getUser().getId());
-                    } catch (ServiceException e) {
-                        //
-                    }
+
+        String keyTask = LockData.LockObjects.LOG_SYSTEM_CSV.name() + "_" + userInfo.getUser().getId();
+        Pair<Boolean, String> restartStatus = asyncTaskManagerService.restartTask(keyTask, reportType.getDescription(), userInfo, action.isForce(), logger);
+        if (restartStatus != null && restartStatus.getFirst()) {
+            result.setLock(true);
+            result.setRestartMsg(restartStatus.getSecond());
+        } else if (restartStatus != null && !restartStatus.getFirst()) {
+            result.setLock(false);
+        } else {
+            result.setLock(false);
+            Map<String, Object> params = new HashMap<String, Object>();
+            params.put(AuditService.AsyncNames.LOG_FILTER.name(), action.getLogSystemFilter().convertTo());
+            params.put(AuditService.AsyncNames.LOG_COUNT.name(), recordsCount);
+            asyncTaskManagerService.createTask(keyTask, reportType, params, false, PropertyLoader.isProductionMode(), userInfo, logger, new AsyncTaskHandler() {
+                @Override
+                public LockData createLock(String keyTask, ReportType reportType, TAUserInfo userInfo) {
+                    return lockDataService.lock(keyTask, userInfo.getUser().getId(),
+                            String.format(
+                                    LockData.DescriptionTemplate.LOG_SYSTEM_CSV.getText(),
+                                    searchCriteria
+                            ),
+                            LockData.State.IN_QUEUE.getText(),
+                            lockDataService.getLockTimeout(LockData.LockObjects.LOG_SYSTEM_CSV));
                 }
-            }
-        } catch (AsyncTaskException e) {
-            lockDataService.unlock(key, userInfo.getUser().getId());
+
+                @Override
+                public void executePostCheck() {
+                }
+
+                @Override
+                public boolean checkExistTask(ReportType reportType, TAUserInfo userInfo, Logger logger) {
+                    return false;
+                }
+
+                @Override
+                public void interruptTask(ReportType reportType, TAUserInfo userInfo) {
+                }
+
+                @Override
+                public String getTaskName(ReportType reportType, TAUserInfo userInfo) {
+                    return reportType.getDescription();
+                }
+            });
         }
-        logger.info("ZIP файл с данными журнала аудита по параметрам поиска, заданным для отображаемого табличного представления, поставлен в очередь на формирование.");
         result.setLogUuid(logEntryService.save(logger.getEntries()));
         return result;
     }
