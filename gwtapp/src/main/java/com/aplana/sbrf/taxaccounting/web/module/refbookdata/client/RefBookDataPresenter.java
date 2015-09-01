@@ -68,8 +68,6 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
     private FormMode mode;
     private String refBookName;
     private IRefBookExecutor dataInterface;
-    /** Признак того, что справочник версионируемый */
-    private boolean versioned;
 
     AbstractEditPresenter editFormPresenter;
     RefBookVersionPresenter versionPresenter;
@@ -134,67 +132,6 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
         LogCleanEvent.fire(this);
         setInSlot(TYPE_editFormPresenter, editFormPresenter);
         setInSlot(TYPE_mainFormPresenter, refBookLinearPresenter);
-
-        CheckRefBookAction checkAction = new CheckRefBookAction();
-        checkAction.setRefBookId(refBookId);
-        dispatcher.execute(checkAction, CallbackUtils.defaultCallback(
-                new AbstractCallback<CheckRefBookResult>() {
-                    @Override
-                    public void onSuccess(CheckRefBookResult result) {
-                        versioned = result.isVersioned();
-                        editFormPresenter.setVersioned(versioned);
-                        if (result.isAvailable()) {
-                            registrations[0] = editFormPresenter.addClickHandlerForAllVersions(new ClickHandler() {
-                                @Override
-                                public void onClick(ClickEvent event) {
-                                    recordId = refBookLinearPresenter.getSelectedRow().getRefBookRowId();
-                                    getView().setVersionView(true);
-                                    clearSlot(TYPE_mainFormPresenter);
-                                    setInSlot(TYPE_mainFormPresenter, versionPresenter);
-                                    versionPresenter.setUniqueRecordId(recordId);
-
-                                    /*refBookLinearPresenter.changeProvider(true);*/
-                                    editFormPresenter.setVersionMode(true);
-                                    editFormPresenter.setCurrentUniqueRecordId(null);
-                                    editFormPresenter.setRecordId(null);
-
-                                    GetRefBookAttributesAction action = new GetRefBookAttributesAction();
-                                    action.setRefBookId(refBookId);
-                                    dispatcher.execute(action,
-                                            CallbackUtils.defaultCallback(
-                                                    new AbstractCallback<GetRefBookAttributesResult>() {
-                                                        @Override
-                                                        public void onSuccess(GetRefBookAttributesResult result) {
-                                                            /*getView().resetRefBookElements();
-                                                            refBookLinearPresenter.setTableColumns(result.getColumns());*/
-                                                            versionPresenter.setTableColumns(result.getColumns());
-                                                            versionPresenter.setMode(mode);
-                                                            //editFormPresenter.init(refBookId, result.getColumns());
-                                                            editFormPresenter.setMode(mode);
-                                                            /*hierEditFormPresenter.show(recordId);*/
-                                                            versionPresenter.updateTable();
-                                                        }
-                                                    }, RefBookDataPresenter.this));
-
-                                    GetNameAction nameAction = new GetNameAction();
-                                    nameAction.setRefBookId(refBookId);
-                                    nameAction.setUniqueRecordId(recordId);
-                                    dispatcher.execute(nameAction,
-                                            CallbackUtils.defaultCallback(
-                                                    new AbstractCallback<GetNameResult>() {
-                                                        @Override
-                                                        public void onSuccess(GetNameResult result) {
-                                                            getView().setRefBookNameDesc(result.getUniqueAttributeValues(), getView().getRelevanceDate());
-                                                            editFormPresenter.setRecordId(result.getRecordId());
-                                                        }
-                                                    }, RefBookDataPresenter.this));
-                                }
-                            });
-                        } else {
-                            Dialog.errorMessage("Доступ к справочнику запрещен!");
-                        }
-                    }
-                }, RefBookDataPresenter.this));
     }
 
     @Override
@@ -241,6 +178,7 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
         refBookId = Long.parseLong(request.getParameter(RefBookDataTokens.REFBOOK_DATA_ID, null));
         refBookLinearPresenter.setRefBookId(refBookId);
         versionPresenter.setRefBookId(refBookId);
+        versionPresenter.setHierarchy(false);
         CheckRefBookAction checkAction = new CheckRefBookAction();
         checkAction.setRefBookId(refBookId);
 
@@ -249,8 +187,8 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
                         new AbstractCallback<CheckRefBookResult>() {
                             @Override
                             public void onSuccess(CheckRefBookResult result) {
-                                versioned = result.isVersioned();
                                 editFormPresenter.init(refBookId, result.isVersioned());
+                                registrations[0] = editFormPresenter.addClickHandlerForAllVersions(getClick());
                                 if (result.isAvailable()) {
                                     getView().resetSearchInputBox();
                                     editFormPresenter.setVersionMode(false);
@@ -295,9 +233,6 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
                                                             getView().setRefBookNameDesc(result.getName());
                                                         }
                                                     }, RefBookDataPresenter.this));
-                                    getView().setVersionedFields(versioned);
-                                    editFormPresenter.setVersioned(versioned);
-                                    versionPresenter.setHierarchy(false);
                                 } else {
                                     getProxy().manualReveal(RefBookDataPresenter.this);
                                     Dialog.errorMessage("Доступ к справочнику запрещен!");
@@ -376,5 +311,54 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
     @Override
     public void onReset(){
         this.dialogPresenter.getView().hide();
+    }
+
+    private ClickHandler getClick(){
+        return new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                recordId = refBookLinearPresenter.getSelectedRow().getRefBookRowId();
+                getView().setVersionView(true);
+                clearSlot(TYPE_mainFormPresenter);
+                setInSlot(TYPE_mainFormPresenter, versionPresenter);
+                versionPresenter.setUniqueRecordId(recordId);
+
+                                    /*refBookLinearPresenter.changeProvider(true);*/
+                editFormPresenter.setVersionMode(true);
+                editFormPresenter.setCurrentUniqueRecordId(null);
+                editFormPresenter.setRecordId(null);
+
+                GetRefBookAttributesAction action = new GetRefBookAttributesAction();
+                action.setRefBookId(refBookId);
+                dispatcher.execute(action,
+                        CallbackUtils.defaultCallback(
+                                new AbstractCallback<GetRefBookAttributesResult>() {
+                                    @Override
+                                    public void onSuccess(GetRefBookAttributesResult result) {
+                                                            /*getView().resetRefBookElements();
+                                                            refBookLinearPresenter.setTableColumns(result.getColumns());*/
+                                        versionPresenter.setTableColumns(result.getColumns());
+                                        versionPresenter.setMode(mode);
+                                        //editFormPresenter.init(refBookId, result.getColumns());
+                                        editFormPresenter.setMode(mode);
+                                                            /*hierEditFormPresenter.show(recordId);*/
+                                        versionPresenter.updateTable();
+                                    }
+                                }, RefBookDataPresenter.this));
+
+                GetNameAction nameAction = new GetNameAction();
+                nameAction.setRefBookId(refBookId);
+                nameAction.setUniqueRecordId(recordId);
+                dispatcher.execute(nameAction,
+                        CallbackUtils.defaultCallback(
+                                new AbstractCallback<GetNameResult>() {
+                                    @Override
+                                    public void onSuccess(GetNameResult result) {
+                                        getView().setRefBookNameDesc(result.getUniqueAttributeValues(), getView().getRelevanceDate());
+                                        editFormPresenter.setRecordId(result.getRecordId());
+                                    }
+                                }, RefBookDataPresenter.this));
+            }
+        };
     }
 }

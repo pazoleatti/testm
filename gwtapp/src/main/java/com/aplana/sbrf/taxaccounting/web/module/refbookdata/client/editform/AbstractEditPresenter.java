@@ -9,7 +9,6 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallba
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
-import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.RefBookDataModule;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.event.RollbackTableRowSelection;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.event.SetFormMode;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.exception.BadValueException;
@@ -91,10 +90,6 @@ public abstract class AbstractEditPresenter<V extends AbstractEditPresenter.MyVi
         void showVersioned(boolean versioned);
     }
 
-    public void setVersioned(boolean versioned) {
-        this.versioned = versioned;
-        getView().showVersioned(versioned);
-    }
 
     RecordChanges fillRecordChanges(Long recordId, Map<String, RefBookValueSerializable> map, Date start, Date end) {
         RecordChanges recordChanges = new RecordChanges();
@@ -337,6 +332,11 @@ public abstract class AbstractEditPresenter<V extends AbstractEditPresenter.MyVi
         return currentUniqueRecordId != null ? "Запись не сохранена" : "Запись не создана";
     }
 
+    @Override
+    public boolean isVersioned() {
+        return versioned;
+    }
+
     public void setCurrentUniqueRecordId(Long currentUniqueRecordId) {
         this.currentUniqueRecordId = currentUniqueRecordId;
     }
@@ -361,6 +361,7 @@ public abstract class AbstractEditPresenter<V extends AbstractEditPresenter.MyVi
         currentRefBookId = refbookId;
         this.versioned = versioned;
         setIsFormModified(false);
+        getView().showVersioned(versioned);
     }
 
     public void createFields(List<RefBookColumn> columns){
