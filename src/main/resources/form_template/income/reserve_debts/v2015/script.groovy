@@ -81,6 +81,7 @@ switch (formDataEvent) {
         break
     case FormDataEvent.IMPORT_TRANSPORT_FILE:
         importTransportData()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.SORT_ROWS:
         sortFormDataRows()
@@ -428,7 +429,7 @@ def isSection(def dataRows, def row, def section) {
  * Задать редактируемые графы в зависимости от раздела.
  *
  * @param row строка
- * @param section раздел: A, B или пустая строка (первые строки)
+ * @param section раздел: А, Б или пустая строка (первые строки)
  */
 def setEdit(def row, def section) {
     if (row == null) {
@@ -436,7 +437,7 @@ def setEdit(def row, def section) {
     }
     def editColumns
     // TODO (Ramil Timerbaev) потом возможно надо будет добавить условие для включения/исключения графы 10 в редактируемые
-    if (section == '' || section == null) {
+    if (isFirstSection(section)) {
         // первые строки (графа 2, 3, 6, 10(!), 12..14)
         editColumns = ['numberAccount', 'debt45_90DaysSum', 'debtOver90DaysSum', 'reservePrev', 'calcReserve','reserveRecovery', 'useReserve',]
     } else {
@@ -590,17 +591,6 @@ def addData(def xml, int headRowCount) {
 
 def isFirstSection(def alias) {
     return alias == null || alias == '0' || alias == ''
-}
-
-def getTotalRowAlias(def sectionKey) {
-    if (isFirstSection(sectionKey)) {
-        return 'total'
-    } else if (sectionKey == 'А') { // русская А
-        return 'totalA' // англицкая A
-    } else if (sectionKey == 'Б') { // русская Б
-        return 'totalB' // англицкая B
-    }
-    return null
 }
 
 def roundValue(def value, int precision) {
@@ -831,11 +821,12 @@ void importTransportData() {
     def formTemplate = formDataService.getFormTemplate(formData.formType.id, formData.reportPeriodId)
     def templateRows = formTemplate.rows
 
+    def map = [ '' : '0', 'A' : 'А', 'B' : 'Б']
     def rows = []
-    ['', 'A', 'B'].each { section ->
+    map.keySet().asList().each { section ->
         def firstRow = section.isEmpty() ? null : getDataRow(templateRows, section)
         def lastRow = getDataRow(templateRows, "total$section")
-        def copyRows = mapRows[section]
+        def copyRows = mapRows[map[section]]
 
         if (firstRow != null) {
             rows.add(firstRow)
