@@ -136,18 +136,19 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
         setInSlot(TYPE_editFormPresenter, editFormPresenter);
         setInSlot(TYPE_mainFormPresenter, refBookLinearPresenter);
 
-        registrations[0] = commonEditPresenter.addClickHandlerForAllVersions(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                CheckRefBookAction checkAction = new CheckRefBookAction();
-                checkAction.setRefBookId(refBookId);
-                dispatcher.execute(checkAction, CallbackUtils.defaultCallback(
-                        new AbstractCallback<CheckRefBookResult>() {
-                            @Override
-                            public void onSuccess(CheckRefBookResult result) {
-                                versioned = result.isVersioned();
-                                recordId = refBookLinearPresenter.getSelectedRow().getRefBookRowId();
-                                if (result.isAvailable()) {
+        CheckRefBookAction checkAction = new CheckRefBookAction();
+        checkAction.setRefBookId(refBookId);
+        dispatcher.execute(checkAction, CallbackUtils.defaultCallback(
+                new AbstractCallback<CheckRefBookResult>() {
+                    @Override
+                    public void onSuccess(CheckRefBookResult result) {
+                        versioned = result.isVersioned();
+                        commonEditPresenter.setVersioned(versioned);
+                        if (result.isAvailable()) {
+                            registrations[0] = commonEditPresenter.addClickHandlerForAllVersions(new ClickHandler() {
+                                @Override
+                                public void onClick(ClickEvent event) {
+                                    recordId = refBookLinearPresenter.getSelectedRow().getRefBookRowId();
                                     getView().setVersionView(true);
                                     clearSlot(TYPE_mainFormPresenter);
                                     setInSlot(TYPE_mainFormPresenter, versionPresenter);
@@ -188,14 +189,13 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
                                                             commonEditPresenter.setRecordId(result.getRecordId());
                                                         }
                                                     }, RefBookDataPresenter.this));
-                                } else {
-                                    /*getProxy().manualReveal(RefBookDataPresenter.this);*/
-                                    Dialog.errorMessage("Доступ к справочнику запрещен!");
                                 }
-                            }
-                        }, RefBookDataPresenter.this));
-            }
-        });
+                            });
+                        } else {
+                            Dialog.errorMessage("Доступ к справочнику запрещен!");
+                        }
+                    }
+                }, RefBookDataPresenter.this));
     }
 
     @Override

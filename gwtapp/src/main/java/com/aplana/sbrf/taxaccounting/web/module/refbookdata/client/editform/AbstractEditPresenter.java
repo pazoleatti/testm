@@ -92,6 +92,7 @@ public abstract class AbstractEditPresenter<V extends AbstractEditPresenter.MyVi
     }
 
     public void setVersioned(boolean versioned) {
+        this.versioned = versioned;
         getView().showVersioned(versioned);
     }
 

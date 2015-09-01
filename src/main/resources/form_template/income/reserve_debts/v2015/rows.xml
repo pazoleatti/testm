@@ -2,7 +2,7 @@
   <row alias="total">
     <cell alias="number" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
     <cell alias="forLabel" colSpan="2" rowSpan="1" stringValue="ИТОГО" styleAlias="Контрольные суммы"/>
-    <cell alias="numberAccount" colSpan="1" rowSpan="1" stringValue="" styleAlias="Контрольные суммы"/>
+    <cell alias="numberAccount" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
     <cell alias="debt45_90DaysSum" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
     <cell alias="debt45_90DaysNormAllocation50per" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
     <cell alias="debt45_90DaysReserve" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
@@ -36,7 +36,7 @@
   <row alias="totalA">
     <cell alias="number" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
     <cell alias="forLabel" colSpan="2" rowSpan="1" stringValue="ИТОГО" styleAlias="Контрольные суммы"/>
-    <cell alias="numberAccount" colSpan="1" rowSpan="1" stringValue="" styleAlias="Контрольные суммы"/>
+    <cell alias="numberAccount" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
     <cell alias="debt45_90DaysSum" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
     <cell alias="debt45_90DaysNormAllocation50per" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
     <cell alias="debt45_90DaysReserve" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
@@ -70,7 +70,7 @@
   <row alias="totalB">
     <cell alias="number" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
     <cell alias="forLabel" colSpan="2" rowSpan="1" stringValue="ИТОГО" styleAlias="Контрольные суммы"/>
-    <cell alias="numberAccount" colSpan="1" rowSpan="1" stringValue="" styleAlias="Контрольные суммы"/>
+    <cell alias="numberAccount" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
     <cell alias="debt45_90DaysSum" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
     <cell alias="debt45_90DaysNormAllocation50per" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
     <cell alias="debt45_90DaysReserve" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
@@ -87,7 +87,7 @@
   <row alias="totalAll">
     <cell alias="number" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
     <cell alias="forLabel" colSpan="2" rowSpan="1" stringValue="ВСЕГО" styleAlias="Контрольные суммы"/>
-    <cell alias="numberAccount" colSpan="1" rowSpan="1" stringValue="" styleAlias="Контрольные суммы"/>
+    <cell alias="numberAccount" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
     <cell alias="debt45_90DaysSum" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
     <cell alias="debt45_90DaysNormAllocation50per" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
     <cell alias="debt45_90DaysReserve" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
