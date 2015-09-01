@@ -65,8 +65,8 @@ public class AuditClientView extends ViewWithUiHandlers<AuditClientUIHandler>
     @UiField
     LinkAnchor printButton;
     //Загружает отчет
-    @UiField
-    LinkAnchor downloadCsvButton;
+    //@UiField
+    //LinkAnchor downloadCsvButton;
     @UiField
     LinkAnchor archive;
     @UiField
@@ -174,8 +174,11 @@ public class AuditClientView extends ViewWithUiHandlers<AuditClientUIHandler>
         if (reportType == ReportType.ARCHIVE_AUDIT){
             downloadArchive.setVisible(isVisibleLoad && archive.isVisible());
         } else {
-            printButton.setVisible(!isVisibleLoad);
-            downloadCsvButton.setVisible(isVisibleLoad);
+            if (isVisibleLoad) {
+                printButton.setText("Выгрузить ZIP");
+            } else {
+                printButton.setText("Сформировать ZIP");
+            }
         }
     }
 
@@ -212,16 +215,17 @@ public class AuditClientView extends ViewWithUiHandlers<AuditClientUIHandler>
     @UiHandler("printButton")
     void onPrintButtonClicked(ClickEvent event) {
         if (getUiHandlers()!= null){
-            getUiHandlers().onPrintButtonClicked();
+            getUiHandlers().onPrintButtonClicked(false);
         }
     }
 
+    /*
     @UiHandler("downloadCsvButton")
     void onDownloadButtonClicked(ClickEvent event) {
         if (getUiHandlers()!= null){
             getUiHandlers().onTimerReport(ReportType.CSV_AUDIT, false);
         }
-    }
+    }*/
 
     @UiHandler("downloadArchive")
     void onDownloadArchiveClicked(ClickEvent event) {

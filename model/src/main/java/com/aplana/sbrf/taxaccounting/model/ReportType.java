@@ -30,7 +30,7 @@ public enum ReportType {
     ZIP_IFRS(0, "Zip", "", 9L, 109L),
 
     ARCHIVE_AUDIT(0, "ARCHIVE_AUDIT", "", 10L, 110L),
-    CSV_AUDIT(1, "CSV_AUDIT", "", 11l, 111L),
+    CSV_AUDIT(1, "CSV_AUDIT", "Формирование zip-архива с csv-файлом журнала аудита по параметрам поиска", 11l, 111L),
 
     LOAD_ALL_TF(1, "LoadAllTF", "Импорт транспортного файла из каталога загрузки", 13L, 113L);
 
