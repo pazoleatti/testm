@@ -538,10 +538,10 @@ def copyData() {
         // 3 квартал
         dataRows = getPrevRowsForCopy(prevReportPeriod, dataRows)
         // 2 квартал
-        prevReportPeriod = reportPeriodService.getPrevReportPeriod(prevReportPeriod.id)
+        prevReportPeriod = (prevReportPeriod ? reportPeriodService.getPrevReportPeriod(prevReportPeriod.id) : null)
         dataRows = getPrevRowsForCopy(prevReportPeriod, dataRows)
         // 1 квартал
-        prevReportPeriod = reportPeriodService.getPrevReportPeriod(prevReportPeriod.id)
+        prevReportPeriod = (prevReportPeriod ? reportPeriodService.getPrevReportPeriod(prevReportPeriod.id) : null)
         dataRows = getPrevRowsForCopy(prevReportPeriod, dataRows)
     } else {
         dataRows = getPrevRowsForCopy(prevReportPeriod, dataRows)
