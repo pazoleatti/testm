@@ -142,9 +142,9 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
                     @Override
                     public void onSuccess(CheckRefBookResult result) {
                         versioned = result.isVersioned();
-                        commonEditPresenter.setVersioned(versioned);
+                        editFormPresenter.setVersioned(versioned);
                         if (result.isAvailable()) {
-                            registrations[0] = commonEditPresenter.addClickHandlerForAllVersions(new ClickHandler() {
+                            registrations[0] = editFormPresenter.addClickHandlerForAllVersions(new ClickHandler() {
                                 @Override
                                 public void onClick(ClickEvent event) {
                                     recordId = refBookLinearPresenter.getSelectedRow().getRefBookRowId();
