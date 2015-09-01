@@ -29,8 +29,6 @@ public class VersionFTOperatingServiceImpl implements VersionOperatingService {
             "Существует экземпляр %s: ";
     private static final String MSG_HAVE_DESTINATION =
             "Существует назначение %s в качестве источника данных для %s типа: \"%s\" вида \"%s\" в подразделении \"%s\" начиная с периода %s!";
-    private static final String MSG_HAVE_SOURCE =
-            "Существует назначение налоговой формы в качестве приёмника данных для налоговой формы типа \"%s\" вида \"%s\" в подразделении \"%s\" начиная с периода %s!";
 
     @Autowired
     private FormDataDao formDataDao;

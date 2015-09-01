@@ -7,10 +7,10 @@ package com.aplana.sbrf.taxaccounting.model;
  */
 public enum ReportType {
 
-    EXCEL(0, "Excel", "Формирование XLSM-файла налоговой формы", 3L, 103L),
-    CSV(1, "CSV", "Формирование CSV-файла налоговой формы", 4L, 104L),
+    EXCEL(0, "XLSM", "Формирование XLSM-файла %s", 3L, 103L),
+    CSV(1, "CSV", "Формирование CSV-файла %s", 4L, 104L),
 
-    EXCEL_DEC(0, "Excel", "Формирование печатного представления %s", 5L, 105L),
+    EXCEL_DEC(0, "XLSX", "Формирование печатного представления %s", 5L, 105L),
     XML_DEC(1, "XML", "Расчет %s", 6L, 106L),
     PDF_DEC(2, "PDF", "Формирование формы предварительного просмотра %s", 7L, 107L),
     JASPER_DEC(3, "JASPER", "", 8L, 108L),
