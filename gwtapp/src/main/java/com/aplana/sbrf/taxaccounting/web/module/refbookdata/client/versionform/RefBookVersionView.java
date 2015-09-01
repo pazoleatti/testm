@@ -7,10 +7,7 @@ import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.RefBookColumn
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.RefBookDataRow;
 import com.aplana.sbrf.taxaccounting.web.widget.pager.FlexiblePager;
 import com.aplana.sbrf.taxaccounting.web.widget.style.GenericDataGrid;
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.safehtml.client.SafeHtmlTemplates;
-import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.cellview.client.HasKeyboardSelectionPolicy;
@@ -37,13 +34,7 @@ public class RefBookVersionView extends ViewWithUiHandlers<RefBookVersionUiHandl
 	@UiField
 	FlexiblePager pager;
 
-    interface UrlTemplates extends SafeHtmlTemplates {
-        @Template("#{0};id={1};{2}={3}")
-        SafeHtml getBackAction(String refBookTypeKey, long refBookId, String recordKey, long recordId);
-    }
-    private static final UrlTemplates backUrlTemplates = GWT.create(UrlTemplates.class);
-
-	SingleSelectionModel<RefBookDataRow> selectionModel = new SingleSelectionModel<RefBookDataRow>();
+    SingleSelectionModel<RefBookDataRow> selectionModel = new SingleSelectionModel<RefBookDataRow>();
 
 	@Inject
 	public RefBookVersionView(final Binder uiBinder) {
