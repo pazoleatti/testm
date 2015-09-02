@@ -12,7 +12,7 @@
         <cell alias="percIncome" colSpan="1" rowSpan="1"/>
     </row>
     <row alias="totalA">
-        <cell alias="series" colSpan="1" rowSpan="1" stringValue="Итого «А»" styleAlias="Контрольные суммы"/>
+        <cell alias="series" colSpan="1" rowSpan="1" stringValue="Итого &quot;А&quot;" styleAlias="Контрольные суммы"/>
         <cell alias="amount" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
         <cell alias="nominal" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
         <cell alias="shortPositionDate" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
@@ -33,7 +33,7 @@
         <cell alias="percIncome" colSpan="1" rowSpan="1"/>
     </row>
     <row alias="totalB">
-        <cell alias="series" colSpan="1" rowSpan="1" stringValue="Итого «Б»" styleAlias="Контрольные суммы"/>
+        <cell alias="series" colSpan="1" rowSpan="1" stringValue="Итого &quot;Б&quot;" styleAlias="Контрольные суммы"/>
         <cell alias="amount" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
         <cell alias="nominal" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
         <cell alias="shortPositionDate" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>

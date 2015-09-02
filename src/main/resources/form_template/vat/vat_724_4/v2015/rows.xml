@@ -7,7 +7,7 @@
     <cell alias="sum" colSpan="1" rowSpan="1" styleAlias="Заголовок"/>
     <cell alias="number2" colSpan="1" rowSpan="1" styleAlias="Заголовок"/>
     <cell alias="sum2" colSpan="1" rowSpan="1" styleAlias="Заголовок"/>
-    <cell alias="nds" colSpan="1" rowSpan="1" stringValue="" styleAlias="Заголовок"/>
+    <cell alias="nds" colSpan="1" rowSpan="1" styleAlias="Заголовок"/>
   </row>
   <row alias="total1">
     <cell alias="rowNum" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>

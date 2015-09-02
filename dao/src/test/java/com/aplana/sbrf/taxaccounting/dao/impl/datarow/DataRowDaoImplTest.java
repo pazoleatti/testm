@@ -343,6 +343,32 @@ public class DataRowDaoImplTest extends Assert {
 	}
 
 	@Test
+	public void refreshRefBookLinks2() {
+		FormData formData = formDataDao.get(330, false);
+		List<DataRow<Cell>> insertRows = new ArrayList<DataRow<Cell>>();
+		DataRow<Cell> row = formData.createDataRow();
+		row.setAlias("a1");
+		row.put("refBookColumn1", 182632);
+		insertRows.add(row);
+		row = formData.createDataRow();
+		row.setAlias("a1");
+		row.put("refBookColumn2", 182633);
+		insertRows.add(row);
+		dataRowDao.insertRows(formData, 1, insertRows);
+		dataRowDao.refreshRefBookLinks(formData);
+
+		Map<String, Object> params = new HashMap<String, Object>();
+		params.put("form_data_id", formData.getId());
+		params.put("ref_book_id", 38);
+
+		List<Integer> recordIds = jdbc.queryForList("SELECT record_id FROM form_data_ref_book WHERE " +
+				"form_data_id = :form_data_id AND ref_book_id = :ref_book_id ORDER BY record_id", params, Integer.class);
+		assertEquals(2, recordIds.size());
+		assertEquals(Integer.valueOf(182632), recordIds.get(0));
+		assertEquals(Integer.valueOf(182633), recordIds.get(1));
+	}
+
+	@Test
 	public void updateRows() {
 		FormData formData = formDataDao.get(329, false);
 		List<DataRow<Cell>> rows = dataRowDao.getRows(formData, null);

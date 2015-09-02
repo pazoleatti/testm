@@ -3,7 +3,7 @@
     <row alias="itg">
         <cell alias="rowNumber" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
         <cell alias="fix" colSpan="2" rowSpan="1" stringValue="Всего" styleAlias="Контрольные суммы"/>
-        <cell alias="contragent" colSpan="1" rowSpan="1" stringValue="Всего" styleAlias="Контрольные суммы"/>
+        <cell alias="contragent" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
         <cell alias="inn" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
         <cell alias="assignContractNumber" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
         <cell alias="assignContractDate" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>

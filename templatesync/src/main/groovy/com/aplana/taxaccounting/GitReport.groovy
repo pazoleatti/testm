@@ -26,7 +26,7 @@ class GitReport {
                         def scanResult = scanSrcFolderAndUpdateDb(versionsMap, folderName, checkOnly ? null : sql)
                         if (!scanResult.isEmpty()) {
                             tr {
-                                td(colspan: 8, class: 'hdr', Main.TAX_FOLDERS[folderName])
+                                td(colspan: 10, class: 'hdr', Main.TAX_FOLDERS[folderName])
                             }
                             tr {
                                 th 'type_id'
@@ -36,6 +36,8 @@ class GitReport {
                                 th 'Версия БД'
                                 th 'Заголовок'
                                 th 'Сравнение скриптов'
+                                th 'Сравнение заголовка данных'
+                                th 'Сравнение фикс.строк'
                                 th 'Сравнение стилей'
                             }
                             scanResult.each { result ->
@@ -55,6 +57,8 @@ class GitReport {
                                     td result.versionDB
                                     td(class: (result.errorCode ? 'td_error' : 'td_ok'), result.checkCode)
                                     td(class: (result.error ? 'td_error' : 'td_ok'), result.check)
+                                    td(class: (result.errorHeader ? 'td_error' : 'td_ok'), result.checkHeader)
+                                    td(class: (result.errorRows ? 'td_error' : 'td_ok'), result.checkRows)
                                     td(class: (result.errorStyle ? 'td_error' : 'td_ok'), result.checkStyle)
                                 }
                             }
@@ -168,6 +172,11 @@ class GitReport {
     def static scanSrcFolderAndUpdateDb(def versionsMap, def folderName, def sql) {
         def scanResult = []
 
+        XMLUnit.setIgnoreWhitespace(true)
+        XMLUnit.setIgnoreComments(true)
+        XMLUnit.setIgnoreDiffBetweenTextAndCDATA(true)
+        XMLUnit.setNormalizeWhitespace(true)
+
         def folderFile = new File("${Main.SRC_FOLDER_PATH}/$folderName")
         // По видам НФ
         folderFile.eachDir { templateFolder ->
@@ -233,6 +242,50 @@ class GitReport {
                                             }
                                             result.check = updateResult == 1 ? "Скрипт устарел и был обновлен" : "Скрипт устарел. Ошибка обновления: $error"
                                         }
+                                    }
+                                }
+                                // Сравнение заголовка
+                                def headerFile = new File("$versionFolder/headers.xml")
+                                if (!headerFile.exists()) {
+                                    result.checkHeader = "Файл заголовка данных не найден в «${scriptFile.absolutePath}»"
+                                    result.errorHeader = true
+                                } else {
+                                    def dbHeader = versions[version]?.data_headers
+                                    def gitHeader = XMLUnit.buildControlDocument(headerFile?.text)
+                                    if (dbHeader != null && gitHeader != null) {
+                                        Diff diff = XMLUnit.compareXML(dbHeader, gitHeader)
+                                        def headerEqual = diff.similar()
+                                        if (headerEqual) {
+                                            result.checkHeader = "Ok"
+                                        } else {
+                                            result.errorHeader = true
+                                            result.checkHeader = "Заголовки данных отличаются"
+                                        }
+                                    } else if (dbHeader != null || gitHeader != null) {
+                                        result.errorHeader = true
+                                        result.checkHeader = "Заголовок данных не обнаружен в БД"
+                                    }
+                                }
+                                // Сравнение фикс.строк
+                                def rowsFile = new File("$versionFolder/rows.xml")
+                                if (!rowsFile.exists()) {
+                                    result.checkRows = "Файл фикс.строк не найден в «${scriptFile.absolutePath}»"
+                                    result.errorRows = true
+                                } else {
+                                    def dbRows = versions[version]?.data_rows
+                                    def gitRows = XMLUnit.buildControlDocument(rowsFile?.text?.replaceAll('stringValue=""', ''))
+                                    if (dbRows != null && gitRows != null) {
+                                        Diff diff = XMLUnit.compareXML(dbRows, gitRows)
+                                        def rowsEqual = diff.similar()
+                                        if (rowsEqual) {
+                                            result.checkRows = "Ok"
+                                        } else {
+                                            result.errorRows = true
+                                            result.checkRows = "Фикс.строки отличаются"
+                                        }
+                                    } else if (dbRows != null || gitRows != null) {
+                                        result.errorRows = true
+                                        result.checkRows = "Фикс.строк нет в БД"
                                     }
                                 }
                                 // Сравнение стилей
@@ -575,7 +628,12 @@ class GitReport {
     def static getDBVersions(def sql) {
         def map = [:]
 
-        sql.eachRow("select id, type_id, to_char(version, 'RRRR') as version, name, header, script, status from form_template where status not in (-1, 2)") {
+        XMLUnit.setIgnoreWhitespace(true)
+        XMLUnit.setIgnoreComments(true)
+        XMLUnit.setIgnoreDiffBetweenTextAndCDATA(true)
+        XMLUnit.setNormalizeWhitespace(true)
+
+        sql.eachRow("select id, type_id, to_char(version, 'RRRR') as version, name, header, data_rows, data_headers, script, status from form_template where status not in (-1, 2)") {
             def type_id = it.type_id as Integer
             if (map[type_id] == null) {
                 map.put((Integer) it.type_id, [:])
@@ -589,6 +647,16 @@ class GitReport {
             version.code = it.header
             version.status = it.status
             version.script = it.script?.characterStream?.text
+            try {
+                version.data_rows = it.data_rows ? XMLUnit.buildControlDocument(it.data_rows?.stringValue()?.replaceAll('stringValue=""', '')) : null
+            } catch (SAXException e) {
+                println("Ошибка при разборе DATA_ROWS id = ${it.id} \"${version.name}\"")
+            }
+            try {
+                version.data_headers = it.data_headers ? XMLUnit.buildControlDocument(it.data_headers?.stringValue()?.replaceAll('stringValue=""', '')) : null
+            } catch (SAXException e) {
+                println("Ошибка при разборе DATA_HEADERS id = ${it.id} \"${version.name}\"")
+            }
             map[type_id].put(it.version, version)
         }
         println("Load DB form_template OK")
