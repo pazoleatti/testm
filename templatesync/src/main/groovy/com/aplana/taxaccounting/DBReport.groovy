@@ -473,7 +473,7 @@ class DBReport {
             def version = new Expando()
             version.id = it.id as Integer
             version.type_id = it.type_id as Integer
-            version.data_rows = it.data_rows?.characterStream?.text
+            version.data_rows = it.data_rows?.stringValue()?.replaceAll('stringValue=""', '')
             version.fixed_rows = it.fixed_rows as Integer
             version.name = it.name
             version.fullname = it.fullname

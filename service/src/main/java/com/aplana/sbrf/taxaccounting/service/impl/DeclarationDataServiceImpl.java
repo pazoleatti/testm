@@ -536,8 +536,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
         try {
             try {
-                log.info(String.format("Cоздание временного файла для записи расчета для декларации %s", declarationData.getId()));
-                stateLogger.updateState("Cоздание временного файла для записи расчета");
+                log.info(String.format("Создание временного файла для записи расчета для декларации %s", declarationData.getId()));
+                stateLogger.updateState("Создание временного файла для записи расчета");
                 try {
                     xmlFile = File.createTempFile("file_for_validate", ".xml");
                     fileWriter = new FileWriter(xmlFile);

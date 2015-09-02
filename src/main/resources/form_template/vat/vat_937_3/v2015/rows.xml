@@ -50,7 +50,7 @@
         <cell alias="fix" colSpan="19" rowSpan="1" stringValue="Часть 2. Полученные счета-фактуры"
               styleAlias="Раздел 2 уровня"/>
         <cell alias="date" colSpan="1" rowSpan="1"/>
-        <cell alias="opTypeCode" colSpan="1" rowSpan="1" stringValue=""/>
+        <cell alias="opTypeCode" colSpan="1" rowSpan="1"/>
         <cell alias="invoiceNumDate" colSpan="1" rowSpan="1"/>
         <cell alias="invoiceCorrNumDate" colSpan="1" rowSpan="1"/>
         <cell alias="corrInvoiceNumDate" colSpan="1" rowSpan="1"/>
