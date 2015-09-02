@@ -707,6 +707,9 @@ void importData() {
     def rows = []
     def allValuesCount = allValues.size()
 
+    def caTotalRow
+    def totalRow
+
     // формирвание строк нф
     for (def i = 0; i < allValuesCount; i++) {
         rowValues = allValues[0]
@@ -719,6 +722,13 @@ void importData() {
         }
         // Пропуск итоговых строк
         if (rowValues[INDEX_FOR_SKIP] && (rowValues[INDEX_FOR_SKIP] == "Центральный аппарат (скорректированный)" || rowValues[INDEX_FOR_SKIP] =="Сбербанк России")) {
+            switch (rowValues[INDEX_FOR_SKIP]) {
+                case 'Центральный аппарат (скорректированный)' :
+                    caTotalRow = getTotalRowFromXls('ca', rowValues[INDEX_FOR_SKIP], 2, rowValues, colOffset, fileRowIndex, rowIndex, true)
+                    break
+                case 'Сбербанк России' :
+                    totalRow = getTotalRowFromXls('total', rowValues[INDEX_FOR_SKIP], 5, rowValues, colOffset, fileRowIndex, rowIndex, false)
+            }
             allValues.remove(rowValues)
             rowValues.clear()
             continue
@@ -735,25 +745,29 @@ void importData() {
     showMessages(rows, logger)
     if (!logger.containsLevel(LogLevel.ERROR)) {
         updateIndexes(rows);
-        // добавить строку ЦА (скорректрированный) (графа 1..22)
-        def caTotalRow = formData.createDataRow()
-        caTotalRow.setAlias('ca')
-        caTotalRow.fix = 'Центральный аппарат (скорректированный)'
-        caTotalRow.getCell('fix').colSpan = 2
-        setTotalStyle(caTotalRow)
+        // добавить строку ЦА (скорректрированный)
+        if (caTotalRow == null) { // если итоговых строк нет, то создать
+            caTotalRow = formData.createDataRow()
+            caTotalRow.setAlias('ca')
+            caTotalRow.fix = 'Центральный аппарат (скорректированный)'
+            caTotalRow.getCell('fix').colSpan = 2
+            setTotalStyle(caTotalRow)
+        }
         rows.add(caTotalRow)
 
-        // добавить итого (графа 5..7, 10, 11, 13..22)
-        def totalRow = formData.createDataRow()
-        totalRow.setAlias('total')
-        totalRow.fix = 'Сбербанк России'
-        totalRow.getCell('fix').colSpan = 5
-        setTotalStyle(totalRow)
-        calcTotalSum(rows, totalRow, totalColumns)
-        totalRow.baseTaxOf = rows.sum{ row ->
-            String value = row.baseTaxOf
-            (row.getAlias() == null && value?.isBigDecimal()) ? new BigDecimal(value) : BigDecimal.ZERO
-        }.toString()
+        // добавить итого
+        if (totalRow == null) { // если итоговых строк нет, то создать
+            totalRow = formData.createDataRow()
+            totalRow.setAlias('total')
+            totalRow.fix = 'Сбербанк России'
+            totalRow.getCell('fix').colSpan = 5
+            setTotalStyle(totalRow)
+            calcTotalSum(rows, totalRow, totalColumns)
+            totalRow.baseTaxOf = rows.sum{ row ->
+                String value = row.baseTaxOf
+                (row.getAlias() == null && value?.isBigDecimal()) ? new BigDecimal(value) : BigDecimal.ZERO
+            }.toString()
+        }
         rows.add(totalRow)
         formDataService.getDataRowHelper(formData).allCached = rows
     }
@@ -887,6 +901,96 @@ def getNewRow() {
         newRow.getCell(it).setStyleAlias('Автозаполняемая')
     }
     return newRow
+}
+
+def getTotalRowFromXls(def alias, def title, def colSpan, def values, def colOffset, def fileRowIndex, def rowIndex, boolean fillCA) {
+    def totalRow = formData.createStoreMessagingDataRow()
+    totalRow.setIndex(rowIndex)
+    totalRow.setImportIndex(fileRowIndex)
+    totalRow.setAlias(alias)
+    totalRow.fix = title
+    totalRow.getCell('fix').colSpan = colSpan
+    setTotalStyle(totalRow)
+
+    def required = true
+
+    // графа 1
+    def colIndex = 0
+
+    if (fillCA) {
+        // графа 2
+        colIndex = 2
+        totalRow.regionBank = getRecordIdImport(30L, 'NAME', values[colIndex], fileRowIndex, colIndex + colOffset, false)
+        // графа 3
+        colIndex = 3
+        totalRow.regionBankDivision = getRecordIdImport(30L, 'NAME', values[colIndex], fileRowIndex, colIndex + colOffset, false)
+        // графа 4
+        colIndex = 4
+        totalRow.divisionName = values[colIndex]
+        // графа 5
+        colIndex = 5
+        totalRow.kpp = values[colIndex]
+        // графа 9
+        colIndex = 9
+        totalRow.calcFlag = getRecordIdImport(26L, 'CODE', values[colIndex], fileRowIndex, colIndex + colOffset, false)
+        // графа 10
+        colIndex = 10
+        totalRow.obligationPayTax = getRecordIdImport(25L, 'CODE', values[colIndex], fileRowIndex, colIndex + colOffset, false)
+        // графа 11
+        colIndex = 11
+        totalRow.baseTaxOf = values[colIndex]
+        // графа 24
+        colIndex = 24
+        totalRow.amountTax = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, required)
+    }
+
+    // графа 6
+    colIndex = 6
+    totalRow.propertyPrice = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, required)
+    // графа 7
+    colIndex = 7
+    totalRow.workersCount = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, required)
+    // графа 8
+    colIndex = 8
+    totalRow.subjectTaxCredit = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, required)
+    // графа 12
+    colIndex = 12
+    totalRow.baseTaxOfRub = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, required)
+    // графа 13
+    colIndex = 13
+    totalRow.subjectTaxStavka = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, required)
+    // графа 14
+    colIndex = 14
+    totalRow.taxSum = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, required)
+    // графа 15
+    colIndex = 15
+    totalRow.taxSumOutside = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, required)
+    // графа 16
+    colIndex = 16
+    totalRow.taxSumToPay = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, required)
+    // графа 17
+    colIndex = 17
+    totalRow.taxSumToReduction = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, required)
+    // графа 18
+    colIndex = 18
+    totalRow.everyMontherPaymentAfterPeriod = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, required)
+    // графа 19
+    colIndex = 19
+    totalRow.everyMonthForKvartalNextPeriod = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, required)
+    // графа 20
+    colIndex = 20
+    totalRow.everyMonthForSecondKvartalNextPeriod = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, required)
+    // графа 21
+    colIndex = 21
+    totalRow.everyMonthForThirdKvartalNextPeriod = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, required)
+    // графа 22
+    colIndex = 22
+    totalRow.everyMonthForFourthKvartalNextPeriod = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, required)
+    // графа 23
+    colIndex = 23
+    totalRow.minimizeTaxSum = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, required)
+
+    return totalRow
 }
 
 /**
