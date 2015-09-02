@@ -3,7 +3,7 @@
     <row alias="total">
         <cell alias="fix" colSpan="15" rowSpan="1" stringValue="Всего" styleAlias="Контрольные суммы"/>
         <cell alias="rowNumber" colSpan="1" rowSpan="1"/>
-        <cell alias="opTypeCode" colSpan="1" rowSpan="1" stringValue=""/>
+        <cell alias="opTypeCode" colSpan="1" rowSpan="1"/>
         <cell alias="invoiceNumDate" colSpan="1" rowSpan="1"/>
         <cell alias="invoiceCorrNumDate" colSpan="1" rowSpan="1"/>
         <cell alias="corrInvoiceNumDate" colSpan="1" rowSpan="1"/>

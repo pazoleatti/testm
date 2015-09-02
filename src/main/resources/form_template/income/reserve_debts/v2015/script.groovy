@@ -81,6 +81,7 @@ switch (formDataEvent) {
         break
     case FormDataEvent.IMPORT_TRANSPORT_FILE:
         importTransportData()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.SORT_ROWS:
         sortFormDataRows()
@@ -425,7 +426,7 @@ def isSection(def dataRows, def row, def section) {
  * Задать редактируемые графы в зависимости от раздела.
  *
  * @param row строка
- * @param section раздел: A, B или пустая строка (первые строки)
+ * @param section раздел: А, Б или пустая строка (первые строки)
  */
 def setEdit(def row, def section) {
     if (row == null) {
@@ -433,7 +434,7 @@ def setEdit(def row, def section) {
     }
     def editColumns
     // TODO (Ramil Timerbaev) потом возможно надо будет добавить условие для включения/исключения графы 10 в редактируемые
-    if (section == '' || section == null) {
+    if (isFirstSection(section)) {
         // первые строки (графа 2, 3, 6, 10(!), 12..14)
         editColumns = ['numberAccount', 'debt45_90DaysSum', 'debtOver90DaysSum', 'reservePrev', 'calcReserve','reserveRecovery', 'useReserve',]
     } else {
@@ -589,17 +590,6 @@ def isFirstSection(def alias) {
     return alias == null || alias == '0' || alias == ''
 }
 
-def getTotalRowAlias(def sectionKey) {
-    if (isFirstSection(sectionKey)) {
-        return 'total'
-    } else if (sectionKey == 'А') { // русская А
-        return 'totalA' // англицкая A
-    } else if (sectionKey == 'Б') { // русская Б
-        return 'totalB' // англицкая B
-    }
-    return null
-}
-
 def roundValue(def value, int precision) {
     if (value != null) {
         return ((BigDecimal) value).setScale(precision, BigDecimal.ROUND_HALF_UP)
@@ -692,7 +682,7 @@ void sortFormDataRows(def saveInDB = true) {
     for (def section : ['', 'A', 'B']) {
         def firstRow = section.isEmpty() ? dataRows[0] : getDataRow(dataRows, section)
         def lastRow = getDataRow(dataRows, "total$section")
-        def from = firstRow.getIndex()
+        def from = firstRow.getIndex() - (section.isEmpty() ? 1 : 0)
         def to = lastRow.getIndex() - 1
         def sectionRows = (from < to ? dataRows[from..(to - 1)] : [])
 
@@ -828,11 +818,12 @@ void importTransportData() {
     def formTemplate = formDataService.getFormTemplate(formData.formType.id, formData.reportPeriodId)
     def templateRows = formTemplate.rows
 
+    def map = [ '' : '0', 'A' : 'А', 'B' : 'Б']
     def rows = []
-    ['', 'A', 'B'].each { section ->
+    map.keySet().asList().each { section ->
         def firstRow = section.isEmpty() ? null : getDataRow(templateRows, section)
         def lastRow = getDataRow(templateRows, "total$section")
-        def copyRows = mapRows[section]
+        def copyRows = mapRows[map[section]]
 
         if (firstRow != null) {
             rows.add(firstRow)
