@@ -9,4 +9,5 @@ public interface EditFormUiHandlers extends UiHandlers {
 	void valueChanged(String alias, Object value);
     void setMode(FormMode mode);
     String getTitle();
+    boolean isVersioned();
 }

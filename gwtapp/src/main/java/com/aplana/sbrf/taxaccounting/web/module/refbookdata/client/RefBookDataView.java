@@ -39,27 +39,19 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
 	@UiField
 	Panel contentPanel, mainPanel;
 	@UiField
-	Label titleDesc;
+	Label titleDesc, editModeLabel, relevanceDateLabel;
 	@UiField
     DateMaskBoxPicker relevanceDate;
     @UiField
-    LinkButton addRow, deleteRow, edit;
+    LinkButton addRow, deleteRow, edit, backToRefBookAnchor;
     @UiField
     LinkAnchor backAnchor;
     @UiField
-    LinkButton backToRefBookAnchor;
-    @UiField
-    Button search;
-    @UiField
-    Button cancelEdit;
+    Button search, cancelEdit;
     @UiField
     HTML separator, separator1;
     @UiField
-    Label editModeLabel;
-    @UiField
     TextBox filterText;
-    @UiField
-    Label relevanceDateLabel;
     @UiField
     LinkButton sendQuery;
 
