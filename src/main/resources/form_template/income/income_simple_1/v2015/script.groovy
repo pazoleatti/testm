@@ -395,7 +395,7 @@ def consolidationFromSummary(def dataRows, def formSources) {
                 def rowResult = dataRows.find { row.getAlias() == it.getAlias() }
                 if (rowResult != null) {
                     for (alias in ['rnu6Field10Sum', 'rnu6Field12Accepted', 'rnu6Field12PrevTaxPeriod', 'rnu4Field5Accepted']) {
-                        if (row.getCell(alias).getValue() != null) {
+                        if (rowResult.getCell(alias)?.editable && row.getCell(alias).getValue() != null) {
                             rowResult.getCell(alias).setValue(summ(rowResult.getCell(alias), row.getCell(alias)), null)
                         }
                     }
@@ -765,18 +765,14 @@ def fillRowFromXls(def dataRow, def values, int fileRowIndex, int rowIndex, int 
         return
     }
 
-    // графа 5..7
+    // графа 5..8 (графа 8 всегда редактируемая, добавил для однообразности)
     colIndex = 3
-    ['rnu6Field10Sum', 'rnu6Field12Accepted', 'rnu6Field12PrevTaxPeriod'].each { alias ->
+    ['rnu6Field10Sum', 'rnu6Field12Accepted', 'rnu6Field12PrevTaxPeriod', 'rnu4Field5Accepted'].each { alias ->
         colIndex++
         if (dataRow.getCell(alias).isEditable()) {
             dataRow[alias] = parseNumber(normalize(values[colIndex]), fileRowIndex, colIndex + colOffset, logger, true)
         }
     }
-
-    // графа 8
-    colIndex++
-    dataRow.rnu4Field5Accepted = parseNumber(normalize(values[colIndex]), fileRowIndex, colIndex + colOffset, logger, true)
 }
 
 /**

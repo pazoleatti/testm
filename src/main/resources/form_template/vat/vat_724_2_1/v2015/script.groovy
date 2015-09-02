@@ -174,7 +174,9 @@ void consolidation() {
                 if (srcRow.getAlias() != null && !srcRow.getAlias().equals('itog')) {
                     def row = getDataRow(dataRows, srcRow.getAlias())
                     row.realizeCost = (row.realizeCost ?: 0) + (srcRow.realizeCost ?: 0)
-                    row.obtainCost = (row.obtainCost ?: 0) + (srcRow.obtainCost ?: 0)
+                    if (row.getCell('obtainCost')?.editable) {
+                        row.obtainCost = (row.obtainCost ?: 0) + (srcRow.obtainCost ?: 0)
+                    }
                 }
             }
         }
@@ -332,12 +334,22 @@ def fillRow(def dataRow, String[] rowCells, def columnCount, def fileRowIndex, d
         colIndex = 3
         values.name = pure(rowCells[colIndex])
 
-        // Проверить фиксированные значения (графа 1..3)
-        ['rowNum', 'code', 'name'].each { alias ->
-            def value = values[alias].toString()
+        // графа 4
+        colIndex = 4
+        fillTempOrRow(values, dataRow, 'realizeCost', parseNumber(pure(rowCells[colIndex]), fileRowIndex, colIndex + colOffset, logger, true))
+
+        // графа 5
+        colIndex = 5
+        fillTempOrRow(values, dataRow, 'obtainCost', parseNumber(pure(rowCells[colIndex]), fileRowIndex, colIndex + colOffset, logger, true))
+
+        // Проверить фиксированные значения
+        values.keySet().each { alias ->
+            def value = values[alias]?.toString()
             def valueExpected = pure(dataRow.getCell(alias).value?.toString())
             checkFixedValue(dataRow, value, valueExpected, fileRowIndex, alias, logger, true)
         }
+
+        return true
     }
 
     // графа 4
@@ -466,6 +478,15 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
     checkHeaderEquals(headerMapping, logger)
 }
 
+// заполняем временную карту или строку
+void fillTempOrRow(def tmpValues, def dataRow, String alias, def value) {
+    if (dataRow.getCell(alias)?.editable) {
+        dataRow[alias] = value
+    } else {
+        tmpValues[alias] = value
+    }
+}
+
 /**
  * Заполняет заданную строку нф значениями из экселя.
  *
@@ -479,7 +500,6 @@ def fillRowFromXls(def dataRow, def values, int fileRowIndex, int rowIndex, int 
     dataRow.setImportIndex(fileRowIndex)
     dataRow.setIndex(rowIndex)
     def colIndex = -1
-    def skipValue = dataRow.getCell('obtainCost')?.style?.alias != editableStyle
 
     def tmpValues = [:]
     colIndex++
@@ -488,26 +508,16 @@ def fillRowFromXls(def dataRow, def values, int fileRowIndex, int rowIndex, int 
     tmpValues.code = values[colIndex]
     colIndex++
     tmpValues.name = values[colIndex]
-    if (skipValue) {
-        colIndex = 4
-        tmpValues.obtainCost = values[colIndex]
-    }
+    colIndex++
+    fillTempOrRow(tmpValues, dataRow, 'realizeCost', parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true))
+    colIndex++
+    fillTempOrRow(tmpValues, dataRow, 'obtainCost', parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true))
 
-    // Проверить фиксированные значения (графы 2, 3)
+    // Проверить фиксированные значения (графы 2, 3 и немного 5)
     tmpValues.keySet().asList().each { alias ->
         def value = StringUtils.cleanString(tmpValues[alias]?.toString())
         def valueExpected = StringUtils.cleanString(dataRow.getCell(alias).value?.toString())
         checkFixedValue(dataRow, value, valueExpected, dataRow.getIndex(), alias, logger, true)
-    }
-
-    // графа 4
-    colIndex = 3
-    dataRow.realizeCost = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
-
-    // графа 5
-    if (!skipValue) {
-        colIndex++
-        dataRow.obtainCost = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
     }
 }
 

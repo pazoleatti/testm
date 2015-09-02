@@ -344,9 +344,9 @@ void consolidationFromSummary(def dataRows, def formSources) {
                     continue
                 }
                 def rowResult = getDataRow(dataRows, row.getAlias())
-                ['consumptionBuhSumAccepted', 'consumptionBuhSumPrevTaxPeriod', 'consumptionTaxSumS'].each {
-                    if (row.getCell(it).getValue() != null && !row.getCell(it).hasValueOwner()) {
-                        rowResult.getCell(it).setValue(summ(rowResult.getCell(it), row.getCell(it)), rowResult.getIndex())
+                ['consumptionBuhSumAccepted', 'consumptionBuhSumPrevTaxPeriod', 'consumptionTaxSumS'].each { alias ->
+                    if (rowResult.getCell(alias)?.editable && row.getCell(alias).getValue() != null) {
+                        rowResult[alias] = summ(rowResult.getCell(alias), row.getCell(alias))
                     }
                 }
             }
@@ -1008,7 +1008,8 @@ def fillRowFromXls(def dataRow, def values, int fileRowIndex, int rowIndex, int 
 
     // графа 9
     colIndex++
-    if (!notImportSum.contains(dataRow.getAlias())) {
+    //if (!notImportSum.contains(dataRow.getAlias())) {
+    if (dataRow.getCell('consumptionTaxSumS').isEditable()) {
         dataRow.consumptionTaxSumS = parseNumber(values[colIndex].trim(), fileRowIndex, colIndex + colOffset, logger, true)
     }
 }

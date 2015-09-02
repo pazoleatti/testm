@@ -324,9 +324,9 @@ void consolidationFromSummary(def dataRows, def formSources) {
                     continue
                 }
                 def rowResult = getDataRow(dataRows, row.getAlias())
-                editableColumns.each {
-                    if (row.getCell(it).value != null) {
-                        rowResult.getCell(it).setValue(summ(rowResult.getCell(it), row.getCell(it)), rowResult.getIndex())
+                editableColumns.each { alias ->
+                    if (rowResult.getCell(alias)?.editable && row.getCell(alias).getValue() != null) {
+                        rowResult[alias] = summ(rowResult.getCell(alias), row.getCell(alias))
                     }
                 }
             }

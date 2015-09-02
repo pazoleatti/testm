@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
+import com.aplana.sbrf.taxaccounting.model.util.StringUtils
 import groovy.transform.Field
 
 /**
@@ -212,26 +213,21 @@ def fillRowFromXls(def dataRow, def values, int fileRowIndex, int rowIndex, int 
     dataRow.setImportIndex(fileRowIndex)
     dataRow.setIndex(rowIndex)
 
-    //очищаем столбцы
-    dataRow['sum'] = null
-
-    def rowNum = dataRow.rowNum as Integer
-    def taxName = normalize(dataRow.taxName)
-    def filledBy = normalize(dataRow.filledBy)
-
+    def tmpValues = [:]
 
     def colIndex = 0
-    def rowNumImport = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
+    tmpValues.rowNum = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
 
     colIndex++
-    def taxNameImport = normalize(values[colIndex])
+    tmpValues.taxName = values[colIndex]
 
     colIndex++
-    def filledByImport = normalize(values[colIndex])
+    tmpValues.filledBy = values[colIndex]
 
-    if (!(rowNum == rowNumImport && taxName == taxNameImport && filledBy == filledByImport)) {
-        logger.error("Структура файла не соответствует макету налоговой формы в строке с номером строки = $rowNum.")
-        return
+    tmpValues.keySet().asList().each { alias ->
+        def value = StringUtils.cleanString(tmpValues[alias]?.toString())
+        def valueExpected = StringUtils.cleanString(dataRow.getCell(alias).value?.toString())
+        checkFixedValue(dataRow, value, valueExpected, dataRow.getIndex(), alias, logger, true)
     }
 
     colIndex++

@@ -364,7 +364,7 @@ def consolidationFromSummary(def dataRows, def formSources) {
                 }
                 DataRow<Cell> rowResult = getDataRow(dataRows, row.getAlias())
                 for (alias in ['rnu7Field10Sum', 'rnu7Field12Accepted', 'rnu7Field12PrevTaxPeriod', 'rnu5Field5Accepted']) {
-                    if (row[alias] != null) {
+                    if (rowResult.getCell(alias)?.editable && row[alias] != null) {
                         rowResult[alias] = summ(rowResult.getCell(alias), row.getCell(alias))
                     }
                 }

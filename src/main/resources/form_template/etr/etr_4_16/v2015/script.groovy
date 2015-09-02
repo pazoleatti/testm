@@ -240,7 +240,7 @@ void logicCheck() {
         def tempRow = tempRows[i]
         def checkColumns = []
         // делаем проверку БО только для первичных НФ
-        if ((formData.kind == FormDataKind.PRIMARY) && opuMap.keySet().contains(row.getAlias())) {
+        if ((formData.kind == FormDataKind.PRIMARY) || !opuMap.keySet().contains(row.getAlias())) {
             checkColumns += check102Columns
         }
         checkColumns += checkCalcColumns
