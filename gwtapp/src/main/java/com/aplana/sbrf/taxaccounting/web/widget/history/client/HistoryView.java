@@ -17,6 +17,7 @@ import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.PopupPanel;
+import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.CellPreviewEvent;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
@@ -40,11 +41,13 @@ public class HistoryView extends PopupViewWithUiHandlers<AplanaUiHandlers> imple
     Button hideButton;
     private AsyncDataProviderWithSortableTable dataProvider;
     private HistoryBusinessSearchOrdering sortByColumn;
+    private final PopupPanel widget;
 
     @Inject
     public HistoryView(EventBus eventBus, Binder uiBinder) {
         super(eventBus);
-        initWidget(uiBinder.createAndBindUi(this));
+        widget = uiBinder.createAndBindUi(this);
+        widget.setAnimationEnabled(true);
         setTableColumns();
 
         dataProvider = new AsyncDataProviderWithSortableTable<LogBusinessClient, AplanaUiHandlers, HistoryView>(logsTable, this) {
@@ -54,6 +57,11 @@ public class HistoryView extends PopupViewWithUiHandlers<AplanaUiHandlers> imple
             }
         };
         dataProvider.setAscSorting(false);
+    }
+
+    @Override
+    public Widget asWidget() {
+        return widget;
     }
 
     @Override
