@@ -795,7 +795,7 @@ void importTransportData() {
     int fileRowIndex = 2    // номер строки в файле (1, 2..). Начинается с 2, потому что первые две строки - заголовок и пустая строка
     int rowIndex = 0        // номер строки в НФ
     def totalTF = null		// итоговая строка со значениями из тф для добавления
-    def mapRows = [:]
+    def newRows = []
 
     InputStreamReader isr = new InputStreamReader(ImportInputStream, DEFAULT_CHARSET)
     CSVReader reader = new CSVReader(isr, SEPARATOR, QUOTE)
@@ -825,22 +825,12 @@ void importTransportData() {
             }
 
             def newRow = getNewRow(rowCells, COLUMN_COUNT, fileRowIndex, rowIndex)
-            if (rowCells.length < 26 || newRow == null) {
-                continue
-            }
-            // определить раздел по техническому полю и добавить строку в нужный раздел
-            def sectionIndex = pure(rowCells[26])
-            if (mapRows[sectionIndex] == null) {
-                mapRows[sectionIndex] = []
-            }
-
-            mapRows[sectionIndex].add(newRow)
+            newRows.add(newRow)
         }
     } finally {
         reader.close()
     }
 
-    def newRows = (mapRows.values().sum { it } ?: [])
     showMessages(newRows, logger)
     if (logger.containsLevel(LogLevel.ERROR) || newRows == null || newRows.isEmpty()) {
         return
@@ -888,6 +878,25 @@ void importTransportData() {
     def formTemplate = formDataService.getFormTemplate(formData.formType.id, formData.reportPeriodId)
     def templateRows = formTemplate.rows
 
+    def sectionMap = ['50000' : 'A', '40200' : 'B', '40100' : 'C']
+    def mapRows = [:]
+    sections.each {
+        mapRows[it] = []
+    }
+    // собрать строки по разделам, раздел определяется по графе 4 (tsTypeCode)
+    newRows.each { row ->
+        if (row.tsTypeCode != null) {
+            // проверить корень дерева видов ТС на соответствие
+            def perentTsTypeCode = getParentTsTypeCode(row.tsTypeCode)
+            if (perentTsTypeCode != null) {
+                // ожидается наземные (50000), водные (40200), воздушные (40100) ТС, остальные отбрасываются
+                def key = sectionMap[perentTsTypeCode]
+                if (key != null) {
+                    mapRows[key].add(row)
+                }
+            }
+        }
+    }
     def rows = []
     sections.each { section ->
         def firstRow = getDataRow(templateRows, section)
@@ -1023,10 +1032,15 @@ def getNewRow(String[] rowCells, def columnCount, def fileRowIndex, def rowIndex
     // графа 23 - атрибут 19 - TAX_BENEFIT_ID - «Код налоговой льготы», справочник 7 «Параметры налоговых льгот транспортного налога»
     if (pure(rowCells[colIndex])) {
         def recordId = getRecordIdImport(6L, 'CODE', pure(rowCells[colIndex]), fileRowIndex, colIndex + colOffset, false)
+        def columnName = getColumnName(newRow, 'taxBenefitCode')
+        def dTo = getReportPeriodEndDate()
         if(recordId != null) {
             String filter = "TAX_BENEFIT_ID = $recordId and DECLARATION_REGION_ID = $regionId"
-            String columnName = getColumnName(newRow, 'taxBenefitCode')
-            newRow.taxBenefitCode = getRefBookRecordIdImport(7L, getReportPeriodEndDate(), filter, columnName, fileRowIndex, colIndex + colOffset, false)
+            newRow.taxBenefitCode = getRefBookRecordIdImport(7L, dTo, filter, columnName, fileRowIndex, colIndex + colOffset, false)
+        } else {
+            RefBook rb = refBookFactory.get(7L)
+            String msg = String.format(REF_BOOK_NOT_FOUND_IMPORT_ERROR_NEW, fileRowIndex, getXLSColumnName(colIndex + colOffset), rb.getName(), columnName, dTo.format('dd.MM.yyyy'))
+            logger.warn("%s", msg)
         }
     }
     colIndex++
@@ -1466,11 +1480,17 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
     colIndex++
     if (values[colIndex]) {
         def recordId = getRecordIdImport(6L, 'CODE', values[colIndex], fileRowIndex, colIndex + colOffset)
-        def regionId = formDataDepartment.regionId
-        def dTo = getReportPeriodEndDate()
-        def filter = "TAX_BENEFIT_ID = $recordId and DECLARATION_REGION_ID = $regionId"
         def columnName = getColumnName(newRow, 'taxBenefitCode')
-        newRow.taxBenefitCode = getRefBookRecordIdImport(7L, dTo, filter, columnName, fileRowIndex, colIndex + colOffset, false)
+        def dTo = getReportPeriodEndDate()
+        if (recordId != null) {
+            def regionId = formDataDepartment.regionId
+            def filter = "TAX_BENEFIT_ID = $recordId and DECLARATION_REGION_ID = $regionId"
+            newRow.taxBenefitCode = getRefBookRecordIdImport(7L, dTo, filter, columnName, fileRowIndex, colIndex + colOffset, false)
+        } else {
+            RefBook rb = refBookFactory.get(7L)
+            String msg = String.format(REF_BOOK_NOT_FOUND_IMPORT_ERROR_NEW, fileRowIndex, getXLSColumnName(colIndex + colOffset), rb.getName(), columnName, dTo.format('dd.MM.yyyy'))
+            logger.warn("%s", msg)
+        }
     }
 
     // графа 24
