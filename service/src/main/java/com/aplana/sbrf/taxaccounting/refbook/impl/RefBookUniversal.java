@@ -632,8 +632,16 @@ public class RefBookUniversal implements RefBookDataProvider {
                     checkUsages(refBook, uniqueRecordId, versionFrom, versionTo, null, logger);
                 } else {
                     if (!isValuesChanged) {
-                        //Если изменился только период актуальности, то ищем все ссылки не пересекающиеся с новым периодом
-                        checkUsages(refBook, uniqueRecordId, versionFrom, versionTo, false, logger);
+                        //Если изменился только период актуальности, то ищем все ссылки не пересекающиеся с новым периодом, но которые действовали в старом
+                        Date oldStart = oldVersionPeriod.getVersionStart();
+                        Date oldEnd = oldVersionPeriod.getVersionEnd();
+                        if (!(((versionTo == oldEnd && versionTo == null) || versionTo.equals(oldEnd) && versionFrom.before(oldStart)) ||                                           //период расширился слева
+                                (versionFrom.equals(oldStart) && ((oldEnd != null && versionTo == null) || (oldEnd != null && versionTo != null && versionTo.after(oldEnd)))) ||    //период расширился справа
+                                (versionFrom.before(oldStart) && ((oldEnd != null && versionTo == null) || (oldEnd != null && versionTo != null && versionTo.after(oldEnd))))       //период расширился слева и справа
+                        )) {
+                            //Если период расширился то проверку использования можно не выполнять, т.к все ссылки точно действуют в большем периоде
+                            checkUsages(refBook, uniqueRecordId, versionFrom, versionTo, false, logger);
+                        }
                     }
 
                     List<Long> uniqueIdAsList = Arrays.asList(uniqueRecordId);
