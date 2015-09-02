@@ -682,7 +682,7 @@ void sortFormDataRows(def saveInDB = true) {
     for (def section : ['', 'A', 'B']) {
         def firstRow = section.isEmpty() ? dataRows[0] : getDataRow(dataRows, section)
         def lastRow = getDataRow(dataRows, "total$section")
-        def from = firstRow.getIndex()
+        def from = firstRow.getIndex() - (section.isEmpty() ? 1 : 0)
         def to = lastRow.getIndex() - 1
         def sectionRows = (from < to ? dataRows[from..(to - 1)] : [])
 
