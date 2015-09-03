@@ -48,7 +48,7 @@ switch (formDataEvent) {
         logicCheck()
         break
     case FormDataEvent.ADD_ROW:
-        addNewRow()
+        formDataService.addRow(formData, currentDataRow, editableColumns, autoFillColumns)
         break
     case FormDataEvent.DELETE_ROW:
         if (currentDataRow != null && currentDataRow.getAlias() == null) {
@@ -142,27 +142,6 @@ def getReportPeriodEndDate() {
         endDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
     }
     return endDate
-}
-
-void addNewRow() {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.allCached
-    def newRow = formData.createDataRow()
-    autoFillColumns.each {
-        newRow.getCell(it).styleAlias = 'Автозаполняемая'
-    }
-    editableColumns.each {
-        newRow.getCell(it).editable = true
-        newRow.getCell(it).styleAlias = 'Редактируемая'
-    }
-
-    def index
-    if (currentDataRow != null && currentDataRow.getIndex() != -1 && currentDataRow.getAlias() == null) {
-        index = currentDataRow.getIndex() + 1
-    } else {
-        index = getDataRow(dataRows, 'total').getIndex()
-    }
-    dataRowHelper.insert(newRow, index)
 }
 
 void calc() {
