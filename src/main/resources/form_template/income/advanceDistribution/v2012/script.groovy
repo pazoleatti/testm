@@ -505,10 +505,10 @@ def logicalCheck() {
 
 void logicalCheckBeforeCalc() {
     def dataRows = formDataService.getDataRowHelper(formData).allCached
-    def departmentParam
     def fieldNumber = 0
 
     dataRows.eachWithIndex { row, i ->
+        def departmentParam
         if (isFixedRow(row)) {
             return
         }
