@@ -225,6 +225,7 @@ public class DeclarationTemplateController {
             DeclarationTemplate declarationTemplate = declarationTemplateService.get(declarationTemplateId);
             String xsdBlobId = blobDataService.create(file.getInputStream(), file.getOriginalFilename());
             declarationTemplate.setXsdId(xsdBlobId);
+            declarationTemplate.setCreateScript(declarationTemplateService.getDeclarationTemplateScript(declarationTemplateId));
             resultUuid.put(UuidEnum.UUID.toString(), xsdBlobId);
             declarationTemplateService.save(declarationTemplate);
 
