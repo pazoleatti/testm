@@ -377,6 +377,7 @@ def BigDecimal calc16(def row, def countDaysInYear) {
             tmpForMultiplication = row.interestRate
         }
         if (row.operationDate != null && row.creationDate != null) {
+            //TODO деление и округление
             tmp = row.sellingPrice * (row.operationDate - row.creationDate) / countDaysInYear * tmpForMultiplication / 100
         }
         return round(tmp)
@@ -393,7 +394,8 @@ def BigDecimal calc16(def row, def countDaysInYear) {
 }
 
 def subCalc16(def row, def t, def days) {
-    return (row.nominal * t * row.interestRate * (row.rateWithDiscCoef - row.interestRate)) / days * 100
+    // TODO проверить формулу
+    return (row.nominal * t * row.interestRate * (row.rateWithDiscCoef - row.interestRate)) * 100 / days
 }
 
 def BigDecimal calc17(def row) {

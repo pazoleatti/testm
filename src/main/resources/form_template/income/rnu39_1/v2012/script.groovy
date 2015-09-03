@@ -330,7 +330,8 @@ BigDecimal calc14(def dataRows, def row, def period) {
         if (rate == null) {
             return null
         }
-        return roundValue(row.currentCouponRate * row.cost * (row.maturityDateCurrent - row.maturityDatePrev) / 360 * rate)
+        // TODO сомнительный расчет и округление
+        return roundValue(roundValue(row.currentCouponRate * row.cost * (row.maturityDateCurrent - row.maturityDatePrev) / 360) * rate)
     }
 }
 

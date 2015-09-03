@@ -224,7 +224,7 @@ def BigDecimal calc8(def row) {
     if (row.usefulLife == null || row.usefulLife == 0) {
         return null
     }
-    return ((1 / row.usefulLife) * 100).setScale(4, RoundingMode.HALF_UP)
+    return (100 / row.usefulLife).setScale(4, RoundingMode.HALF_UP)
 }
 
 // Ресчет графы 9

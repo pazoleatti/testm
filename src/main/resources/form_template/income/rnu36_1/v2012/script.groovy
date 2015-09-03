@@ -267,8 +267,7 @@ def calcPercIncome(def row, def lastDay) {
             row.shortPositionDate == null || row.amount == null) {
         return null
     }
-    def tmp = ((row.nominal - row.averageWeightedPrice) *
-            (lastDay - row.shortPositionDate) / row.termBondsIssued) * row.amount
+    def tmp = (row.nominal - row.averageWeightedPrice) * (lastDay - row.shortPositionDate) * row.amount / row.termBondsIssued
     return roundValue(tmp, 2)
 }
 

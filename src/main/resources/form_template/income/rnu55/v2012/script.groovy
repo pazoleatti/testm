@@ -204,7 +204,7 @@ def BigDecimal calc10(def row, def startDate, def endDate, def daysInYear) {
         countsDays = (row.buyDate >= startDate ?
             endDate - row.buyDate - 1 : endDate - startDate)
         if (countsDays != 0) {
-            tmp = row.nominal * (row.percent / 100) * (countsDays / daysInYear)
+            tmp = row.nominal * (row.percent * countsDays) / (100 * daysInYear)
         }
     } else {
         tmp = row.percentInCurrency - getCalcPrevColumn10(row, 'sumIncomeinCurrency', startDate)
