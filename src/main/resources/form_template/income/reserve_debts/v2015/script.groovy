@@ -51,6 +51,7 @@ switch (formDataEvent) {
     case FormDataEvent.CALCULATE:
         calc()
         logicCheck()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.ADD_ROW:
         addRow()
@@ -78,6 +79,7 @@ switch (formDataEvent) {
     case FormDataEvent.IMPORT:
         importData()
         calc()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.IMPORT_TRANSPORT_FILE:
         importTransportData()
@@ -240,8 +242,6 @@ void calc() {
     }
 
     calcTotal(dataRows)
-
-    dataRowHelper.save(dataRows)
 }
 
 /** Рассчитать итоги основного (первого) раздела, итоги разделов А и Б и строки "всего". */
@@ -583,7 +583,6 @@ def addData(def xml, int headRowCount) {
         dataRows.addAll(insertIndex, mapRows.get(sectionKey))
         updateIndexes(dataRows)
     }
-    dataRowHelper.save(dataRows)
 }
 
 def isFirstSection(def alias) {
