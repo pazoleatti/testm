@@ -740,7 +740,13 @@ void importData() {
     // копирование данных по разделам
     updateIndexes(templateRows)
     def rows = []
+    // заголовок первого раздела
+    rows.add(headerARow)
     groups.each { section ->
+        if ('B1'.equals(section)) {
+            // заголовок второго раздела
+            rows.add(headerBRow)
+        }
         def headRow = getDataRow(templateRows, section)
         def totalRow = getDataRow(templateRows, 'total' + section)
         rows.add(headRow)
