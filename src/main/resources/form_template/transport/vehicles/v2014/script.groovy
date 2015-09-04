@@ -54,7 +54,6 @@ switch (formDataEvent) {
         break
     case FormDataEvent.AFTER_CREATE:
         if (formData.kind == FormDataKind.PRIMARY) {
-            checkRegionId()
             copyData()
             formDataService.saveCachedDataRows(formData, logger)
         }
