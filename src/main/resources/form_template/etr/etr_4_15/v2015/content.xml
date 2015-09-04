@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <formTemplateContent>
     <fixedRows>true</fixedRows>
-    <name>Приложение 4-15. «Анализ структуры налога на добавленную стоимость (НДС)»</name>
-    <fullName>Приложение 4-15. «Анализ структуры налога на добавленную стоимость (НДС)»</fullName>
+    <name>Приложение 4-15. Анализ структуры налога на добавленную стоимость (НДС)</name>
+    <fullName>Приложение 4-15. Анализ структуры налога на добавленную стоимость (НДС)</fullName>
     <header>Приложение 4-15</header>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>comparePeriod</alias>
