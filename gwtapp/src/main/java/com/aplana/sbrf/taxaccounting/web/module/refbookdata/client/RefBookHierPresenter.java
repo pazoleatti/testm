@@ -40,7 +40,7 @@ import java.util.Date;
  * User: avanteev
  */
 public class RefBookHierPresenter extends Presenter<RefBookHierPresenter.MyView, RefBookHierPresenter.MyProxy>
-        implements RefBookHierUIHandlers, SetFormMode.SetFormModeHandler, UpdateForm.UpdateFormHandler {
+        implements RefBookHierUIHandlers, SetFormMode.SetFormModeHandler {
 
     private final DispatchAsync dispatcher;
     private PlaceManager placeManager;
@@ -53,7 +53,7 @@ public class RefBookHierPresenter extends Presenter<RefBookHierPresenter.MyView,
     public static final Object TYPE_editFormPresenter = new Object();
     public static final Object TYPE_mainFormPresenter = new Object();
 
-    private final HandlerRegistration[] registrations = new HandlerRegistration[1];
+    private final HandlerRegistration[] registrations = new HandlerRegistration[2];
     private IRefBookExecutor dataInterface;
     private FormMode mode;
     private Long attrId, recordId, refBookId;
@@ -133,27 +133,13 @@ public class RefBookHierPresenter extends Presenter<RefBookHierPresenter.MyView,
         setMode(mode);
         commonEditPresenter.setVersionMode(false);
         commonEditPresenter.show(recordId);
+        registrations[1].removeHandler();
     }
 
     @Override
     public void onSetFormMode(SetFormMode event) {
         dataInterface.setMode(event.getFormMode());
         getView().updateView(event.getFormMode());
-    }
-
-    @Override
-    public void onUpdateForm(UpdateForm event) {
-        GetNameAction nameAction = new GetNameAction();
-        nameAction.setRefBookId(refBookId);
-        nameAction.setUniqueRecordId(recordId);
-        dispatcher.execute(nameAction,
-                CallbackUtils.defaultCallback(
-                        new AbstractCallback<GetNameResult>() {
-                            @Override
-                            public void onSuccess(GetNameResult result) {
-                                getView().setRefBookNameDesc(result.getUniqueAttributeValues(), getView().getRelevanceDate());
-                            }
-                        }, RefBookHierPresenter.this));
     }
 
     /*@Override
@@ -196,14 +182,16 @@ public class RefBookHierPresenter extends Presenter<RefBookHierPresenter.MyView,
     protected void onBind() {
         super.onBind();
         addVisibleHandler(SetFormMode.getType(), this);
-        addVisibleHandler(UpdateForm.getType(), this);
     }
 
     @Override
     protected void onHide() {
         super.onHide();
+        clearSlot(TYPE_editFormPresenter);
+        clearSlot(TYPE_mainFormPresenter);
         for (HandlerRegistration han : registrations) {
-            han.removeHandler();
+            if (han != null)
+                han.removeHandler();
         }
     }
 
@@ -353,6 +341,23 @@ public class RefBookHierPresenter extends Presenter<RefBookHierPresenter.MyView,
                                         commonEditPresenter.setRecordId(result.getRecordId());
                                     }
                                 }, RefBookHierPresenter.this));
+
+                registrations[1] = commonEditPresenter.addUpdateFormHandler(new UpdateForm.UpdateFormHandler() {
+                    @Override
+                    public void onUpdateForm(UpdateForm event) {
+                        GetNameAction nameAction = new GetNameAction();
+                        nameAction.setRefBookId(refBookId);
+                        nameAction.setUniqueRecordId(recordId);
+                        dispatcher.execute(nameAction,
+                                CallbackUtils.defaultCallback(
+                                        new AbstractCallback<GetNameResult>() {
+                                            @Override
+                                            public void onSuccess(GetNameResult result) {
+                                                getView().setRefBookNameDesc(result.getUniqueAttributeValues(), getView().getRelevanceDate());
+                                            }
+                                        }, RefBookHierPresenter.this));
+                    }
+                });
             }
         };
     }

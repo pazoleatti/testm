@@ -176,7 +176,17 @@ public class RefBookVersionView extends ViewWithUiHandlers<RefBookVersionUiHandl
 		pager.setPage(page);
 	}
 
-	@Override
+    @Override
+    public int getPageStart() {
+        return pager.getPageStart();
+    }
+
+    @Override
+    public int getTotalCount() {
+        return refBookDataTable.getRowCount();
+    }
+
+    @Override
     public void updateMode(FormMode mode) {
         refBookDataTable.setEnabled(mode != FormMode.CREATE);
     }

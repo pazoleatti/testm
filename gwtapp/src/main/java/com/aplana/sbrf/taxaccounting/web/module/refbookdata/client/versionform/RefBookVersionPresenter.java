@@ -28,6 +28,7 @@ import com.gwtplatform.mvp.client.proxy.PlaceManager;
 import com.gwtplatform.mvp.client.proxy.PlaceRequest;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 public class RefBookVersionPresenter extends PresenterWidget<RefBookVersionPresenter.MyView>
@@ -49,6 +50,7 @@ public class RefBookVersionPresenter extends PresenterWidget<RefBookVersionPrese
 
 	private final DispatchAsync dispatcher;
 	private final PlaceManager placeManager;
+    private TableDataProvider dataProvider;
 
     @Override
     public void updateTable() {
@@ -100,6 +102,8 @@ public class RefBookVersionPresenter extends PresenterWidget<RefBookVersionPrese
 
         void deleteRowButtonClicked();
         void setPage(int page);
+        int getPageStart();
+        int getTotalCount();
     }
 
     @Override
@@ -118,7 +122,7 @@ public class RefBookVersionPresenter extends PresenterWidget<RefBookVersionPrese
 		this.dispatcher = dispatcher;
 		this.placeManager = placeManager;
 		getView().setUiHandlers(this);
-        TableDataProvider dataProvider = new TableDataProvider();
+        dataProvider = new TableDataProvider();
         getView().assignDataProvider(getView().getPageSize(), dataProvider);
         /*setMode(FormMode.READ);*/
 	}
@@ -187,7 +191,11 @@ public class RefBookVersionPresenter extends PresenterWidget<RefBookVersionPrese
                                 ShowItemEvent.fire(RefBookVersionPresenter.this, null, null);
                                 //editPresenter.clean();
                                 if (result.getNextVersion() != null) {
-                                    getView().updateTable();
+                                    dataProvider.remove(getView().getSelectedRow());
+                                    if (!dataProvider.visibleData.isEmpty()) {
+                                        getView().setSelected(dataProvider.visibleData.get(dataProvider.visibleData.size() - 1).getRefBookRowId());
+                                    }
+                                    //getView().updateTable();
                                     ShowItemEvent.fire(RefBookVersionPresenter.this, isHierarchy ?
                                             getView().getSelectedRow().getValues().get("PARENT_ID") : null,
                                             result.getNextVersion());
@@ -219,6 +227,8 @@ public class RefBookVersionPresenter extends PresenterWidget<RefBookVersionPrese
 
 	private class TableDataProvider extends AsyncDataProvider<RefBookDataRow> {
 
+        private List<RefBookDataRow> visibleData = new LinkedList<RefBookDataRow>();
+
 		@Override
 		protected void onRangeChanged(HasData<RefBookDataRow> display) {
 			if (refBookId == null) return;
@@ -232,6 +242,8 @@ public class RefBookVersionPresenter extends PresenterWidget<RefBookVersionPrese
 							new AbstractCallback<GetRefBookRecordVersionResult>() {
 								@Override
 								public void onSuccess(GetRefBookRecordVersionResult result) {
+                                    visibleData.clear();
+                                    visibleData.addAll(result.getDataRows());
 									getView().setTableData(range.getStart(),
 											result.getTotalCount(), result.getDataRows());
                                     if (recordId == null && !result.getDataRows().isEmpty()) {
@@ -249,6 +261,23 @@ public class RefBookVersionPresenter extends PresenterWidget<RefBookVersionPrese
 								}
 							}, RefBookVersionPresenter.this));
 		}
+
+        public void remove(RefBookDataRow row) {
+            visibleData.remove(row);
+            getView().setTableData(getView().getPageStart(), getView().getTotalCount()-1, visibleData);
+        }
+
+        public void add(RefBookDataRow row){
+            visibleData.add(row);
+            getView().setTableData(getView().getPageStart(), getView().getTotalCount()+1, visibleData);
+        }
+
+        public void modify(RefBookDataRow row){
+            int index = visibleData.indexOf(row);
+            visibleData.remove(index);
+            visibleData.add(index, row);
+            getView().setTableData(getView().getPageStart(), visibleData.size(), visibleData);
+        }
 	}
 
     @Override
