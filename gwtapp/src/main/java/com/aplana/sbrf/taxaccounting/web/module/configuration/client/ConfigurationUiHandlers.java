@@ -5,12 +5,14 @@ import com.aplana.sbrf.taxaccounting.model.ConfigurationParamGroup;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.gwtplatform.mvp.client.UiHandlers;
 
+import java.util.List;
+
 public interface ConfigurationUiHandlers extends UiHandlers{
 
     /**
      * Сохранение изменений
      */
-	void onSave();
+	void onSaveClicked();
 
     /**
      * Отмема изменений и обновление формы
@@ -20,12 +22,14 @@ public interface ConfigurationUiHandlers extends UiHandlers{
     /**
      * Добавление строки в таблицу общих параметров
      */
-    void onAddRow(ConfigurationParamGroup group, Integer index);
+    void onAddRow();
 
     /**
      * Проверка достуности путей, указанных в выделенной строке
      */
-    void onCheckAccess(ConfigurationParamGroup group, DataRow<Cell> selRow, boolean needSaveAfter);
+    void onCheckAccess(boolean needSaveAfter);
 
+    List<DataRow<Cell>> getRowsData(ConfigurationParamGroup group);
 
+    void onDeleteItem();
 }

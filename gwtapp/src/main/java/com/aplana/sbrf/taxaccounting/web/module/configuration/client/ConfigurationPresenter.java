@@ -32,13 +32,17 @@ public class ConfigurationPresenter extends Presenter<ConfigurationPresenter.MyV
 
     public static final String TOKEN = "!configuration";
 
+    private final Map<ConfigurationParamGroup, List<DataRow<Cell>>> rowsDataMap = new HashMap<ConfigurationParamGroup, List<DataRow<Cell>>>();
+    private final Map<ConfigurationParamGroup, Comparator<DataRow<Cell>>> comparatorMap = new HashMap<ConfigurationParamGroup, Comparator<DataRow<Cell>>>();
+    private ConfigurationParamGroup activeGroup = ConfigurationParamGroup.COMMON;
+
     @ProxyStandard
     @NameToken(TOKEN)
     public interface MyProxy extends ProxyPlace<ConfigurationPresenter> {
     }
 
     public interface MyView extends View, HasUiHandlers<ConfigurationUiHandlers> {
-        void setConfigData(ConfigurationParamGroup group, List<DataRow<Cell>> rowsData, boolean needSort);
+        void setConfigData(List<DataRow<Cell>> rowsData);
 
         RefBookColumn getParamColumn();
 
@@ -66,13 +70,13 @@ public class ConfigurationPresenter extends Presenter<ConfigurationPresenter.MyV
 
         StringColumn getAsyncShortLimitColumn();
 
-        List<DataRow<Cell>> getRowsData(ConfigurationParamGroup group);
-
         void clearSelection();
 
         StringColumn getAsyncTypeIdColumn();
 
         void initView();
+
+        DataRow<Cell> getSelectedObject();
     }
 
     private final DispatchAsync dispatcher;
@@ -93,19 +97,20 @@ public class ConfigurationPresenter extends Presenter<ConfigurationPresenter.MyV
         LogCleanEvent.fire(this);
         LogShowEvent.fire(this, false);
         getView().initView();
-        GetConfigurationAction action = new GetConfigurationAction();
+        initMaps();
+        /*GetConfigurationAction action = new GetConfigurationAction();
         dispatcher.execute(action,
                 CallbackUtils.defaultCallback(
                         new AbstractCallback<GetConfigurationResult>() {
                             @Override
                             public void onSuccess(GetConfigurationResult result) {
                                 getView().setConfigData(ConfigurationParamGroup.COMMON, getCommonRowsData(result.getModel()), true);
-                                getView().setConfigData(ConfigurationParamGroup.FORM, getFormRowsData(result.getModel(),
+                                *//*getView().setConfigData(ConfigurationParamGroup.FORM, getFormRowsData(result.getModel(),
                                         result.getDereferenceDepartmentNameMap()), true);
                                 getView().setConfigData(ConfigurationParamGroup.EMAIL, getEmailRowsData(result.getEmailConfigs()), false);
-                                getView().setConfigData(ConfigurationParamGroup.ASYNC, getAsyncRowsData(result.getAsyncConfigs()), true);
+                                getView().setConfigData(ConfigurationParamGroup.ASYNC, getAsyncRowsData(result.getAsyncConfigs()), true);*//*
                             }
-                        }, this).addCallback(TaManualRevealCallback.create(this, placeManager)));
+                        }, this).addCallback(TaManualRevealCallback.create(this, placeManager)));*/
     }
 
 
@@ -318,16 +323,24 @@ public class ConfigurationPresenter extends Presenter<ConfigurationPresenter.MyV
     }
 
     @Override
-    public void onSave() {
+    public void onSaveClicked() {
+        if (activeGroup.equals(ConfigurationParamGroup.ASYNC)) {
+            onCheckAccess(true);
+        } else {
+            save();
+        }
+    }
+
+    private void save(){
         LogCleanEvent.fire(this);
         ConfigurationParamModel model = new ConfigurationParamModel();
         SaveConfigurationAction action = new SaveConfigurationAction();
         action.setModel(model);
         // Преобразование данных таблиц в ConfigurationParamModel
-        List<DataRow<Cell>> commonRowsData = getView().getRowsData(ConfigurationParamGroup.COMMON);
-        List<DataRow<Cell>> formRowsData = getView().getRowsData(ConfigurationParamGroup.FORM);
-        List<DataRow<Cell>> emailRowsData = getView().getRowsData(ConfigurationParamGroup.EMAIL);
-        List<DataRow<Cell>> asyncRowsData = getView().getRowsData(ConfigurationParamGroup.ASYNC);
+        List<DataRow<Cell>> commonRowsData = rowsDataMap.get(ConfigurationParamGroup.COMMON);
+        List<DataRow<Cell>> formRowsData = rowsDataMap.get(ConfigurationParamGroup.FORM);
+        List<DataRow<Cell>> emailRowsData = rowsDataMap.get(ConfigurationParamGroup.EMAIL);
+        List<DataRow<Cell>> asyncRowsData = rowsDataMap.get(ConfigurationParamGroup.ASYNC);
 
         fillModel(model, commonRowsData, formRowsData, action.getDublicateDepartmentIdSet(), action.getNotSetFields());
 
@@ -367,7 +380,7 @@ public class ConfigurationPresenter extends Presenter<ConfigurationPresenter.MyV
         dispatcher.execute(action, CallbackUtils.defaultCallback(new AbstractCallback<SaveConfigurationResult>() {
             @Override
             public void onSuccess(SaveConfigurationResult result) {
-                placeManager.revealCurrentPlace();
+                /*placeManager.revealCurrentPlace();*/
             }
         }, this));
     }
@@ -375,7 +388,8 @@ public class ConfigurationPresenter extends Presenter<ConfigurationPresenter.MyV
     @Override
     public void onCancel() {
         getView().clearSelection();
-        placeManager.revealCurrentPlace();
+        initRowsData(activeGroup);
+        getView().setConfigData(getRowsData(activeGroup));
     }
 
     /**
@@ -456,35 +470,40 @@ public class ConfigurationPresenter extends Presenter<ConfigurationPresenter.MyV
     }
 
     @Override
-    public void onAddRow(ConfigurationParamGroup group, Integer index) {
-        List<DataRow<Cell>> data = new ArrayList<DataRow<Cell>>(getView().getRowsData(group));
+    public void onAddRow() {
+        Integer index = getSelectedIndex();
+        List<DataRow<Cell>> data = rowsDataMap.get(activeGroup);
         if (index == null) {
             index = data.size() - 1;
         }
-        data.add(index + 1, createDataRow(group));
-        getView().setConfigData(group, data, false);
+        data.add(index + 1, createDataRow(activeGroup));
+        getView().setConfigData(data);
     }
 
     @Override
-    public void onCheckAccess(ConfigurationParamGroup group, DataRow<Cell> selRow, final boolean needSaveAfter) {
+    public void onCheckAccess(final boolean needSaveAfter) {
+        DataRow<Cell> selRow = getView().getSelectedObject();
+        if (selRow == null && !(activeGroup.equals(ConfigurationParamGroup.EMAIL) || activeGroup.equals(ConfigurationParamGroup.ASYNC))) {
+            return;
+        }
         LogCleanEvent.fire(this);
         ConfigurationParamModel model = new ConfigurationParamModel();
         final CheckAccessAction action = new CheckAccessAction();
         action.setModel(model);
-        action.setGroup(group);
+        action.setGroup(activeGroup);
         // Преобразование данных таблиц в ConfigurationParamModel
         List<DataRow<Cell>> commonRowsData = new ArrayList<DataRow<Cell>>();
         List<DataRow<Cell>> formRowsData = new ArrayList<DataRow<Cell>>();
         List<DataRow<Cell>> emailRowsData = new ArrayList<DataRow<Cell>>();
         List<DataRow<Cell>> asyncRowsData = new ArrayList<DataRow<Cell>>();
-        if (group.equals(ConfigurationParamGroup.COMMON)) {
+        if (activeGroup.equals(ConfigurationParamGroup.COMMON)) {
             commonRowsData.add(selRow);
-        } else if (group.equals(ConfigurationParamGroup.FORM)) {
+        } else if (activeGroup.equals(ConfigurationParamGroup.FORM)) {
             formRowsData.add(selRow);
-        }  else if (group.equals(ConfigurationParamGroup.EMAIL)) {
-            emailRowsData.addAll(getView().getRowsData(group));
-        } else if (group.equals(ConfigurationParamGroup.ASYNC)) {
-            asyncRowsData = getView().getRowsData(ConfigurationParamGroup.ASYNC);
+        }  else if (activeGroup.equals(ConfigurationParamGroup.EMAIL)) {
+            emailRowsData.addAll(rowsDataMap.get(activeGroup));
+        } else if (activeGroup.equals(ConfigurationParamGroup.ASYNC)) {
+            asyncRowsData = rowsDataMap.get(ConfigurationParamGroup.ASYNC);
         }
         fillModel(model, commonRowsData, formRowsData, null, null);
 
@@ -527,7 +546,7 @@ public class ConfigurationPresenter extends Presenter<ConfigurationPresenter.MyV
                         LogAddEvent.fire(ConfigurationPresenter.this, result.getUuid());
                         LogShowEvent.fire(ConfigurationPresenter.this, true);
                     } else {
-                        onSave();
+                        save();
                     }
                 } else {
                     if (result.getUuid() != null) {
@@ -541,4 +560,134 @@ public class ConfigurationPresenter extends Presenter<ConfigurationPresenter.MyV
         }, this));
     }
 
+    private void initRowsData(final ConfigurationParamGroup group) {
+        dispatcher.execute(new GetConfigurationAction(),
+                CallbackUtils.defaultCallback(
+                        new AbstractCallback<GetConfigurationResult>() {
+                            @Override
+                            public void onSuccess(GetConfigurationResult result) {
+                                rowsDataMap.put(ConfigurationParamGroup.COMMON, getCommonRowsData(result.getModel()));
+                                Collections.sort(rowsDataMap.get(group), comparatorMap.get(group));
+                                rowsDataMap.put(ConfigurationParamGroup.FORM, getFormRowsData(result.getModel(),
+                                        result.getDereferenceDepartmentNameMap()));
+                                Collections.sort(rowsDataMap.get(group), comparatorMap.get(group));
+                                rowsDataMap.put(ConfigurationParamGroup.ASYNC, getAsyncRowsData(result.getAsyncConfigs()));
+                                Collections.sort(rowsDataMap.get(group), comparatorMap.get(group));
+                                rowsDataMap.put(ConfigurationParamGroup.EMAIL, getEmailRowsData(result.getEmailConfigs()));
+                                switch (group){
+                                    case COMMON:
+                                        getView().setConfigData(rowsDataMap.get(ConfigurationParamGroup.COMMON));
+                                        break;
+                                    case FORM:
+
+                                        getView().setConfigData(rowsDataMap.get(ConfigurationParamGroup.FORM)) ;
+                                        break;
+                                    case ASYNC:
+                                        getView().setConfigData(getAsyncRowsData(result.getAsyncConfigs()));
+                                        break;
+                                    case EMAIL:
+                                        getView().setConfigData(getEmailRowsData(result.getEmailConfigs()));
+                                        break;
+                                }
+                            }
+                        }, this).addCallback(TaManualRevealCallback.create(this, placeManager)));
+    }
+
+    @Override
+    public List<DataRow<Cell>> getRowsData(ConfigurationParamGroup group) {
+        activeGroup = group;
+        if (rowsDataMap.containsKey(group) && !rowsDataMap.get(group).isEmpty()){
+            return rowsDataMap.get(group);
+        } else {
+            initRowsData(group);
+            return new ArrayList<DataRow<Cell>>(0);
+        }
+    }
+
+    @Override
+    public void onDeleteItem() {
+        List<DataRow<Cell>> rowsData = rowsDataMap.get(activeGroup);
+        rowsData.remove(getView().getSelectedObject());
+        getView().clearSelection();
+        getView().setConfigData(rowsData);
+    }
+
+    private void initMaps() {
+        /*tableMap.put(ConfigurationParamGroup.COMMON, commonTable);*/
+        /*tableMap.put(ConfigurationParamGroup.FORM, formTable);
+        tableMap.put(ConfigurationParamGroup.EMAIL, emailTable);
+        tableMap.put(ConfigurationParamGroup.ASYNC, asyncTable);*/
+
+        rowsDataMap.put(ConfigurationParamGroup.COMMON, new ArrayList<DataRow<Cell>>());
+        rowsDataMap.put(ConfigurationParamGroup.FORM, new ArrayList<DataRow<Cell>>());
+        rowsDataMap.put(ConfigurationParamGroup.EMAIL, new ArrayList<DataRow<Cell>>());
+        rowsDataMap.put(ConfigurationParamGroup.ASYNC, new ArrayList<DataRow<Cell>>());
+
+        comparatorMap.put(ConfigurationParamGroup.COMMON, commonComparator);
+        comparatorMap.put(ConfigurationParamGroup.FORM, formComparator);
+        comparatorMap.put(ConfigurationParamGroup.ASYNC, asyncComparator);
+    }
+
+    private static final Comparator<DataRow<Cell>> commonComparator = new Comparator<DataRow<Cell>>() {
+        @Override
+        public int compare(DataRow<Cell> o1, DataRow<Cell> o2) {
+            String name1 = o1.getCell("paramColumn").getRefBookDereference();
+            String name2 = o2.getCell("paramColumn").getRefBookDereference();
+            if (name1 == null && name2 == null) {
+                return 0;
+            }
+            if (name1 == null) {
+                return 1;
+            }
+            if (name2 == null) {
+                return -1;
+            }
+            return name1.compareTo(name2);
+        }
+    };
+
+    private static final Comparator<DataRow<Cell>> formComparator = new Comparator<DataRow<Cell>>() {
+        @Override
+        public int compare(DataRow<Cell> o1, DataRow<Cell> o2) {
+            String name1 = o1.getCell("departmentColumn").getRefBookDereference();
+            String name2 = o2.getCell("departmentColumn").getRefBookDereference();
+            if (name1 == null && name2 == null) {
+                return 0;
+            }
+            if (name1 == null) {
+                return 1;
+            }
+            if (name2 == null) {
+                return -1;
+            }
+            return name1.compareTo(name2);
+        }
+    };
+
+    private static final Comparator<DataRow<Cell>> asyncComparator = new Comparator<DataRow<Cell>>() {
+        @Override
+        public int compare(DataRow<Cell> o1, DataRow<Cell> o2) {
+            String type1 = o1.getCell("asyncTypeColumn").getStringValue();
+            String type2 = o2.getCell("asyncTypeColumn").getStringValue();
+            if (type1 == null && type2 == null) {
+                return 0;
+            }
+            if (type1 == null) {
+                return 1;
+            }
+            if (type2 == null) {
+                return -1;
+            }
+            return type1.compareTo(type2);
+        }
+    };
+
+    private Integer getSelectedIndex() {
+        DataRow<Cell> selRow = getView().getSelectedObject();
+        if (selRow == null) {
+            return null;
+        }
+        List<DataRow<Cell>> rowsData = rowsDataMap.get(activeGroup);
+        return rowsData.indexOf(selRow);
+    }
 }
