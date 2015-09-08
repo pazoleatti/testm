@@ -295,17 +295,6 @@ void calc() {
             row.divisionName = calc4(row)
         }
     }
-    // Сортировка
-    dataRows.sort { a, b ->
-        def regionBankA = getRefBookValue(30, a.regionBank)?.NAME?.stringValue
-        def regionBankB = getRefBookValue(30, b.regionBank)?.NAME?.stringValue
-        if (regionBankA == regionBankB) {
-            def regionBankDivisionA = getRefBookValue(30, a.regionBankDivision)?.NAME?.stringValue
-            def regionBankDivisionB = getRefBookValue(30, b.regionBankDivision)?.NAME?.stringValue
-            return (regionBankDivisionA <=> regionBankDivisionB)
-        }
-        return (regionBankA <=> regionBankB)
-    }
 
     dataRows.add(getTotalRow(dataRows))
 }

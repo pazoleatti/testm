@@ -271,19 +271,6 @@ void calc() {
         fixCA18_19(prevDataRows, dataRows, findCA(dataRows), reportPeriod)
     }
 
-    // Сортировка
-    // отсортировать можно только после расчета графы regionBank
-    dataRows.sort { a, b ->
-        def regionBankA = getRefBookValue(30, a.regionBank)?.NAME?.stringValue
-        def regionBankB = getRefBookValue(30, b.regionBank)?.NAME?.stringValue
-        if (regionBankA == regionBankB) {
-            def regionBankDivisionA = getRefBookValue(30, a.regionBankDivision)?.NAME?.stringValue
-            def regionBankDivisionB = getRefBookValue(30, b.regionBankDivision)?.NAME?.stringValue
-            return (regionBankDivisionA <=> regionBankDivisionB)
-        }
-        return (regionBankA <=> regionBankB)
-    }
-
     // добавить строку ЦА (скорректрированный) (графа 1..22)
     def caTotalRow = formData.createDataRow()
     caTotalRow.setAlias('ca')
