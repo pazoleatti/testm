@@ -105,12 +105,8 @@ void calc() {
     def dataRows = formDataService.getDataRowHelper(formData).allCached
 
     if (!dataRows.isEmpty()) {
-
         // Удаление подитогов
         deleteAllAliased(dataRows)
-
-        // сортируем по кодам
-        dataRows.sort { getKnu(it.incomeType) }
     }
 
     dataRows.add(calcTotalRow(dataRows))

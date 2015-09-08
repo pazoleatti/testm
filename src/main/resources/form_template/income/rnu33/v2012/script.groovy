@@ -196,9 +196,6 @@ def getDate(def value, def indexRow, def indexCol) {
 void calc() {
     def dataRows = formDataService.getDataRowHelper(formData).allCached
 
-    // отсортировать/группировать
-    sort(dataRows)
-
     for (def row : dataRows) {
         if (row.getAlias() != null) {
             continue
@@ -237,9 +234,6 @@ void calc() {
 
     // посчитать строку "Итого за текущий отчётный (налоговый) период"
     calcTotalRow(monthRow, totalRow)
-
-    // Сортировка групп и строк
-    sortFormDataRows(false)
 }
 
 void logicCheck() {

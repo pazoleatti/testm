@@ -184,9 +184,6 @@ void calc() {
     // удалить строку "итого"
     deleteAllAliased(dataRows)
 
-    // отсортировать/группировать
-    sortRows(dataRows, groupColumns)
-
     // графа 1, 13..20
     if (formData.kind == FormDataKind.PRIMARY) {
         dataRows.eachWithIndex { row, i ->
