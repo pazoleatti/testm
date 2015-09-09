@@ -148,6 +148,8 @@ alter table form_data add constraint form_data_chk_period_order check(period_ord
 alter table form_data add constraint form_data_chk_manual check (manual in (0, 1));
 alter table form_data add constraint form_data_chk_sorted check (sorted in (0, 1));
 alter table form_data add constraint form_data_chk_accruing check (accruing in (0, 1));
+alter table form_data add constraint form_data_chk_edited check (edited in (0, 1));
+alter table form_data add constraint form_data_chk_sorted_backup check (sorted_backup in (0, 1));
 
 alter table form_data_ref_book add constraint form_data_ref_book_fk_formdata foreign key (form_data_id) references form_data(id) on delete cascade;
 alter table form_data_ref_book add constraint form_data_ref_book_fk_refbook foreign key (ref_book_id) references ref_book(id) on delete cascade;
