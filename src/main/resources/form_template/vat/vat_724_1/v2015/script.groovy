@@ -560,7 +560,7 @@ void importTransportData() {
                 // итоговая строка тф
                 rowCells = reader.readNext()
                 if (rowCells != null && !isEmptyCells(rowCells)) {
-                    totalTF = getNewRow(rowCells, COLUMN_COUNT, ++fileRowIndex, rowIndex)
+                    totalTF = getNewRow(rowCells, COLUMN_COUNT, ++fileRowIndex, rowIndex, true)
                 }
                 break
             }
@@ -638,7 +638,8 @@ void importTransportData() {
             rows.addAll(copyRows)
 
             // расчет итогов
-            calcTotalSum(copyRows, lastRow, totalColumns)
+            def columns = (section == '7' ? (totalColumns + 'ndsDealSum') : totalColumns)
+            calcTotalSum(copyRows, lastRow, columns)
         }
         rows.add(lastRow)
 
@@ -658,10 +659,11 @@ void importTransportData() {
  * @param columnCount количество колонок
  * @param fileRowIndex номер строки в тф
  * @param rowIndex строка в нф
+ * @param isTotal признак того что строка итоговая
  *
  * @return вернет строку нф или null, если количество значений в строке тф меньше
  */
-def getNewRow(String[] rowCells, def columnCount, def fileRowIndex, def rowIndex) {
+def getNewRow(String[] rowCells, def columnCount, def fileRowIndex, def rowIndex, def isTotal = false) {
     def newRow = formData.createStoreMessagingDataRow()
     newRow.setIndex(rowIndex)
     newRow.setImportIndex(fileRowIndex)
@@ -719,7 +721,12 @@ def getNewRow(String[] rowCells, def columnCount, def fileRowIndex, def rowIndex
     // Техническое поле(группа)
     colIndex++
     def sectionIndex = pure(rowCells[colIndex])
-    setRowStyles(newRow, sectionIndex == '7')
+    def isSection7 = sectionIndex == '7'
+    setRowStyles(newRow, isSection7)
+    if (!isSection7 && !isTotal) {
+        // графа 9 - очистить, не заполняется для раделов 1..6
+        newRow.ndsDealSum = null
+    }
 
     return newRow
 }
@@ -799,7 +806,7 @@ void importData() {
         } else if (str == 'Всего' || str == 'Итого') {
             rowIndex++
             def alias = (str == 'Всего' ? 'total' : getLastRowAlias(sectionIndex))
-            totalRowFromFileMap[alias] = getNewRowFromXls(rowValues, colOffset, fileRowIndex, rowIndex, false)
+            totalRowFromFileMap[alias] = getNewRowFromXls(rowValues, colOffset, fileRowIndex, rowIndex, isSection7)
 
             allValues.remove(rowValues)
             rowValues.clear()
@@ -962,8 +969,10 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex, 
     newRow.ndsBookSum = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
 
     // Графа 9
-    colIndex = 9
-    newRow.ndsDealSum = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
+    if (isSection7) {
+        colIndex = 9
+        newRow.ndsDealSum = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
+    }
 
     return newRow
 }
