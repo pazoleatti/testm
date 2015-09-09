@@ -24,7 +24,6 @@ import com.google.gwt.view.client.SingleSelectionModel;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class ConfigurationView extends ViewWithUiHandlers<ConfigurationUiHandlers> implements MyView {
@@ -78,6 +77,8 @@ public class ConfigurationView extends ViewWithUiHandlers<ConfigurationUiHandler
     public ConfigurationView(final Binder binder) {
         initWidget(binder.createAndBindUi(this));
         commonTable.setSelectionModel(singleSelectionModel);
+        commonTable.setMinimumTableWidth(20, Style.Unit.EM);
+        commonTable.setKeyboardSelectionPolicy(HasKeyboardSelectionPolicy.KeyboardSelectionPolicy.ENABLED);
         initCommonTable();
         initFormTable();
         initAsyncTable();
@@ -164,11 +165,6 @@ public class ConfigurationView extends ViewWithUiHandlers<ConfigurationUiHandler
 
         asyncShortLimitColumn.setAlias("asyncShortLimitColumn");
         asyncShortLimitColumn.setName("Значение параметра \"Ограничение на выполнение задания в очереди быстрых заданий\"");
-
-        commonTable.setRowData(0, new ArrayList<DataRow<Cell>>(0));
-        commonTable.setMinimumTableWidth(20, Style.Unit.EM);
-
-        commonTable.setKeyboardSelectionPolicy(HasKeyboardSelectionPolicy.KeyboardSelectionPolicy.ENABLED);
         /*final SingleSelectionModel<DataRow<Cell>> singleSelectionModel = new SingleSelectionModel<DataRow<Cell>>();
         asyncTable.setSelectionModel(singleSelectionModel);
         singleSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
@@ -188,13 +184,7 @@ public class ConfigurationView extends ViewWithUiHandlers<ConfigurationUiHandler
         Column<DataRow<Cell>, ?> paramColumnUI = factory.createTableColumn(paramColumn, commonTable);
         commonTable.setColumnWidth(paramColumnUI, 30, Style.Unit.EM);
         commonTable.addColumn(paramColumnUI, paramColumn.getName());
-
         commonTable.addColumn(factory.createTableColumn(valueColumn, commonTable), valueColumn.getName());
-
-        commonTable.setRowData(0, new ArrayList<DataRow<Cell>>(0));
-        commonTable.setMinimumTableWidth(40, Style.Unit.EM);
-
-        commonTable.setKeyboardSelectionPolicy(HasKeyboardSelectionPolicy.KeyboardSelectionPolicy.ENABLED);
 
         // Обновляем таблицу после обновления модели
         ((DataRowColumn<?>) paramColumnUI).addCellModifiedEventHandler(new CellModifiedEventHandler() {
@@ -217,10 +207,6 @@ public class ConfigurationView extends ViewWithUiHandlers<ConfigurationUiHandler
         commonTable.addColumn(factory.createTableColumn(uploadPathColumn, commonTable), uploadPathColumn.getName());
         commonTable.addColumn(factory.createTableColumn(archivePathColumn, commonTable), archivePathColumn.getName());
         commonTable.addColumn(factory.createTableColumn(errorPathColumn, commonTable), errorPathColumn.getName());
-        commonTable.setRowData(0, new ArrayList<DataRow<Cell>>(0));
-        commonTable.setMinimumTableWidth(70, Style.Unit.EM);
-
-        commonTable.setKeyboardSelectionPolicy(HasKeyboardSelectionPolicy.KeyboardSelectionPolicy.ENABLED);
 
         // Обновляем таблицу после обновления модели
         ((DataRowColumn<?>) departmentColumnUI).addCellModifiedEventHandler(new CellModifiedEventHandler() {
@@ -245,9 +231,6 @@ public class ConfigurationView extends ViewWithUiHandlers<ConfigurationUiHandler
         commonTable.setColumnWidth(emailParamColumnUI, 30, Style.Unit.EM);
         commonTable.addColumn(emailParamColumnUI, emailValueColumn.getName());
         commonTable.addColumn(factory.createTableColumn(emailDescriptionColumn, commonTable), emailDescriptionColumn.getName());
-        commonTable.setRowData(0, new ArrayList<DataRow<Cell>>(0));
-        commonTable.setMinimumTableWidth(20, Style.Unit.EM);
-        commonTable.setKeyboardSelectionPolicy(HasKeyboardSelectionPolicy.KeyboardSelectionPolicy.ENABLED);
 
         // Обновляем таблицу после обновления модели
         ((DataRowColumn<?>) emailParamColumnUI).addCellModifiedEventHandler(new CellModifiedEventHandler() {
@@ -265,8 +248,6 @@ public class ConfigurationView extends ViewWithUiHandlers<ConfigurationUiHandler
             commonTable.removeColumn(0);
         }
         Column<DataRow<Cell>, ?> asyncParamColumnUI = factory.createTableColumn(asyncTypeIdColumn, commonTable);
-        commonTable.setColumnWidth(asyncParamColumnUI, 0, Style.Unit.EM);
-        commonTable.addColumn(asyncParamColumnUI, asyncTypeIdColumn.getName());
 
         asyncParamColumnUI = factory.createTableColumn(asyncTypeColumn, commonTable);
         commonTable.setColumnWidth(asyncParamColumnUI, 20, Style.Unit.EM);
@@ -283,11 +264,6 @@ public class ConfigurationView extends ViewWithUiHandlers<ConfigurationUiHandler
         asyncParamColumnUI = factory.createTableColumn(asyncShortLimitColumn, commonTable);
         commonTable.setColumnWidth(asyncParamColumnUI, 20, Style.Unit.EM);
         commonTable.addColumn(asyncParamColumnUI, asyncShortLimitColumn.getName());
-
-        commonTable.setRowData(0, new ArrayList<DataRow<Cell>>(0));
-        commonTable.setMinimumTableWidth(20, Style.Unit.EM);
-
-        commonTable.setKeyboardSelectionPolicy(HasKeyboardSelectionPolicy.KeyboardSelectionPolicy.ENABLED);
 
         // Обновляем таблицу после обновления модели
         ((DataRowColumn<?>) asyncParamColumnUI).addCellModifiedEventHandler(new CellModifiedEventHandler() {
@@ -491,9 +467,6 @@ public class ConfigurationView extends ViewWithUiHandlers<ConfigurationUiHandler
         //enableButtons(false);
         changeToCommon();
         setConfigData(getUiHandlers().getRowsData(ConfigurationParamGroup.COMMON));
-        /*initFormTable();
-        initEmailTable();
-        initAsyncTable();*/
     }
 
     @Override
