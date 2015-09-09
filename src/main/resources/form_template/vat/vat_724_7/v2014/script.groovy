@@ -355,16 +355,14 @@ void importTransportData() {
         reader.close()
     }
 
-    // мапа с алиасами граф и номерами колонокв в xml (алиас -> номер колонки)
-    def totalColumnsIndexMap = ['sum' : 6, 'ndsSum' : 8]
     def totalRow = getFixedRow('Итого', 'total', true)
-    calcTotalSum(newRows, totalRow, totalColumnsIndexMap.keySet().asList())
     newRows.add(totalRow)
-
-    showMessages(newRows, logger)
 
     // сравнение итогов
     if (!logger.containsLevel(LogLevel.ERROR) && totalTF) {
+        // мапа с алиасами граф и номерами колонокв в xml (алиас -> номер колонки)
+        def totalColumnsIndexMap = ['sum' : 6, 'ndsSum' : 8]
+        calcTotalSum(newRows, totalRow, totalColumnsIndexMap.keySet().asList())
         // сравнение контрольных сумм
         def colOffset = 1
         for (def alias : totalColumnsIndexMap.keySet().asList()) {
@@ -377,10 +375,15 @@ void importTransportData() {
                 logger.warn(TRANSPORT_FILE_SUM_ERROR, totalColumnsIndexMap[alias] + colOffset, fileRowIndex)
             }
         }
+        // задать итоговой строке нф значения из итоговой строки тф
+        totalColumns.each { alias ->
+            totalRow[alias] = totalTF[alias]
+        }
     }
 
+    updateIndexes(newRows)
+    showMessages(newRows, logger)
     if (!logger.containsLevel(LogLevel.ERROR)) {
-        updateIndexes(newRows)
         formDataService.getDataRowHelper(formData).allCached = newRows
     }
 }

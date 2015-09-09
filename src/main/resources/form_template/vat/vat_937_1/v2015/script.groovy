@@ -439,7 +439,7 @@ void importTransportData() {
     String[] rowCells
     int fileRowIndex = 2    // номер строки в файле (1, 2..). Начинается с 2, потому что первые две строки - заголовок и пустая строка
     int rowIndex = 0        // номер строки в НФ
-    def total = null        // итоговая строка со значениями из тф для добавления
+    def totalTF = null        // итоговая строка со значениями из тф для добавления
     def newRows = []
 
     InputStreamReader isr = new InputStreamReader(ImportInputStream, DEFAULT_CHARSET)
@@ -464,7 +464,7 @@ void importTransportData() {
                 // итоговая строка тф
                 rowCells = reader.readNext()
                 if (rowCells != null) {
-                    total = getNewRow(rowCells, COLUMN_COUNT, ++fileRowIndex, rowIndex)
+                    totalTF = getNewRow(rowCells, COLUMN_COUNT, ++fileRowIndex, rowIndex)
                 }
                 break
             }
@@ -476,16 +476,17 @@ void importTransportData() {
 
     // подсчет итогов
     def totalRow = getFixedRow('Всего', 'total')
-    calcTotalSum(newRows, totalRow, totalSumColumns)
     newRows.add(totalRow)
 
     // сравнение итогов
-    if (!logger.containsLevel(LogLevel.ERROR) && total) {
+    if (!logger.containsLevel(LogLevel.ERROR) && totalTF) {
+        calcTotalSum(newRows, totalRow, totalSumColumns)
+
         // мапа с алиасами граф и номерами колонокв в xml (алиас -> номер колонки)
         def totalColumnsIndexMap = ['nds' : 16]
         def colOffset = 1
         for (def alias : totalColumnsIndexMap.keySet().asList()) {
-            def v1 = total.getCell(alias).value
+            def v1 = totalTF.getCell(alias).value
             def v2 = totalRow.getCell(alias).value
             if (v1 == null && v2 == null) {
                 continue
@@ -494,13 +495,17 @@ void importTransportData() {
                 logger.warn(TRANSPORT_FILE_SUM_ERROR + " Из файла: $v1, рассчитано: $v2", totalColumnsIndexMap[alias] + colOffset, fileRowIndex)
             }
         }
+        // задать итоговой строке нф значения из итоговой строки тф
+        totalSumColumns.each { alias ->
+            totalRow[alias] = totalTF[alias]
+        }
     } else {
         logger.warn("В транспортном файле не найдена итоговая строка")
     }
 
+    updateIndexes(newRows)
     showMessages(newRows, logger)
     if (!logger.containsLevel(LogLevel.ERROR)) {
-        updateIndexes(newRows)
         formDataService.getDataRowHelper(formData).allCached = newRows
     }
 }

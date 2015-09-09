@@ -257,24 +257,25 @@ void importTransportData() {
         reader.close()
     }
 
-    showMessages(dataRows, logger)
-
-    // мапа с алиасами граф и номерами колонокв в xml (алиас -> номер колонки)
-    def totalColumnsIndexMap = [ 'realizeCost' : 4, 'obtainCost' : 5 ]
-    // подсчет итогов
-    def itogValues = calcItog(dataRows)
-    def totalRow = getDataRow(dataRows, 'itog')
-    totalColumnsIndexMap.keySet().asList().each { alias ->
-        totalRow[alias] = itogValues[alias]
-    }
-
     // сравнение итогов
     if (!logger.containsLevel(LogLevel.ERROR) && totalTF) {
+        // мапа с алиасами граф и номерами колонок в xml (алиас -> номер колонки)
+        def totalColumnsIndexMap = [ 'realizeCost' : 4, 'obtainCost' : 5 ]
+
+        // задать итоговой строке значения из итоговой строки тф
+        def totalRow = getDataRow(dataRows, 'itog')
+        totalColumnsIndexMap.keySet().asList().each { alias ->
+            totalRow[alias] = totalTF[alias]
+        }
+
+        // подсчет итогов
+        def itogValues = calcItog(dataRows)
+
         // сравнение контрольных сумм
         def colOffset = 1
         for (def alias : totalColumnsIndexMap.keySet().asList()) {
             def v1 = totalTF.getCell(alias).value
-            def v2 = totalRow.getCell(alias).value
+            def v2 = itogValues[alias]
             if (v1 == null && v2 == null) {
                 continue
             }
@@ -283,6 +284,7 @@ void importTransportData() {
             }
         }
     }
+    showMessages(dataRows, logger)
 }
 
 /** Устанавливает значения из тф в строку нф. */
