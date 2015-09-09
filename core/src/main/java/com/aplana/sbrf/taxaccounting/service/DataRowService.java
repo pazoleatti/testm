@@ -47,7 +47,7 @@ public interface DataRowService {
     PagingResult<FormDataSearchResult> searchByKey(Long formDataId, Integer formTemplateId, DataRowRange range, String key, boolean isCaseSensitive, boolean manual);
 
     /**
-     * Копирование строк из сохраненного среза НФ-источника во временный срез НФ-приемника.
+     * Копирование строк из сохраненного среза НФ-источника в срез НФ-приемника.
      * Временный срез приемника предварительно очищается.
      * Не копирует версию ручного ввода!
      *

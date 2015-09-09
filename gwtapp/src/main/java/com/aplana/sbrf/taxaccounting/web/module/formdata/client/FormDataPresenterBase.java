@@ -10,6 +10,7 @@ import com.aplana.sbrf.taxaccounting.web.module.formdata.client.signers.SignersP
 import com.aplana.sbrf.taxaccounting.web.module.formdata.client.sources.SourcesPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.client.workflowdialog.DialogPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.LockInfo;
+import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.TimerTaskResult;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.UnlockFormData;
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.FormDataListNameTokens;
 import com.aplana.sbrf.taxaccounting.web.widget.history.client.HistoryPresenter;
@@ -148,7 +149,7 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
     protected final SourcesPresenter sourcesPresenter;
 
     protected FormData formData;
-	
+
 	protected FormDataAccessParams formDataAccessParams;
 
     /** Признак сводной формы банка */
@@ -168,6 +169,9 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
     // Признак отображения вида для форм в корректирующих периодах, true - обычный режим, false - режим отображения изенений
     protected boolean absoluteView = true;
     protected boolean correctionPeriod = false;
+    protected boolean edited;
+    protected String taskName;
+    protected TimerTaskResult.FormMode formMode;
 
 	protected Set<DataRow<Cell>> modifiedRows = new HashSet<DataRow<Cell>>();
 
@@ -337,11 +341,7 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
         view.setTableLockMode(true);
         view.setColumnsData(formData.getFormColumns(), readOnlyMode, forceEditMode);
 
-        if (taskName == null) {
-            setOnLeaveConfirmation("Вы уверены, что хотите прекратить редактирование данных " + speck() + "? В случае выхода все несохраненные изменения будут утеряны.");
-        } else {
-            setOnLeaveConfirmation("Вы уверены, что хотите прекратить редактирование данных " + speck() + "? В случае выхода все несохраненные изменения будут утеряны и будет отменена операция \"" + taskName + "\".");
-        }
+        setOnLeaveConfirmation();
     }
 
 	protected void setReadUnlockedMode() {
@@ -414,8 +414,24 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
         view.setTableLockMode(false);
         view.setColumnsData(formData.getFormColumns(), readOnlyMode, forceEditMode);
 
-        setOnLeaveConfirmation("Вы уверены, что хотите прекратить редактирование данных " + speck() + "? В случае выхода все несохраненные изменения будут утеряны.");
-	}
+        setOnLeaveConfirmation();
+    }
+
+    protected void setOnLeaveConfirmation() {
+        if (taskName == null || TimerTaskResult.FormMode.EDIT.equals(formMode)) {
+            if (edited || !modifiedRows.isEmpty()) {
+                setOnLeaveConfirmation("Вы уверены, что хотите прекратить редактирование данных " + speck() + "? В случае выхода все несохраненные изменения будут утеряны.");
+            } else {
+                setOnLeaveConfirmation("Вы уверены, что хотите прекратить редактирование данных " + speck() + " (несохраненные изменения отсутствуют)?");
+            }
+        } else {
+            if (edited || !modifiedRows.isEmpty()) {
+                setOnLeaveConfirmation("Вы уверены, что хотите прекратить редактирование данных " + speck() + "? В случае выхода все несохраненные изменения будут утеряны и будет отменена операция \"" + taskName + "\".");
+            } else {
+                setOnLeaveConfirmation("Вы уверены, что хотите прекратить редактирование данных " + speck() + "? В случае выхода будет отменена операция \"" + taskName + "\".");
+            }
+        }
+    }
 
     protected void setOnLeaveConfirmation(String msg) {
         if (isVisible()) {

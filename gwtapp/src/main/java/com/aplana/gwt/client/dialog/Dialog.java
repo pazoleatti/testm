@@ -277,6 +277,21 @@ public final class Dialog extends ModalWindow {
     }
 
     /**
+     * Вызывает диалоговое окно с кнопками "да", "закрыть"
+     *
+     * @param title   - Заголовок
+     * @param text    - Текст сообщения
+     * @param handler - обработчик
+     */
+    public static void confirmMessageYeClose(String title, String text, DialogHandler handler) {
+        INSTANCE.setGlassEnabled(true);
+        dialogPanel.setPredefinedButtons(PredefinedButton.YES, PredefinedButton.CLOSE);
+        dialogPanel.setImage(questionImage);
+        dialogPanel.setImageVisible(true);
+        showDialog(title, text, handler);
+    }
+
+    /**
      * Скрывает окно сообщения
      */
     public static void hideMessage() {

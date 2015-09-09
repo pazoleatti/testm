@@ -474,4 +474,27 @@ public class FormDataDaoTest {
 		params.put("form_data_id", formData.getId());
 		assertEquals(Integer.valueOf(1), jdbc.queryForObject("SELECT number_current_row FROM form_data WHERE id = :form_data_id", params, Integer.class));
 	}
+
+    @Test
+    public void testSorted() {
+        FormData formData = formDataDao.get(1, false);
+        assertTrue(formData.isSorted());
+
+        formDataDao.backupSorted(1);
+        formDataDao.updateSorted(1, false);
+        formData = formDataDao.get(1, false);
+        assertFalse(formData.isSorted());
+
+        formDataDao.restoreSorted(1);
+        formData = formDataDao.get(1, false);
+        assertTrue(formData.isSorted());
+    }
+
+    @Test
+    public void testEdited() {
+        assertFalse(formDataDao.isEdited(1));
+
+        formDataDao.updateEdited(1, true);
+        assertTrue(formDataDao.isEdited(1));
+    }
 }

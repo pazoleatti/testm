@@ -56,9 +56,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
     private static final int EXTEND_LOCKTIME_LIMIT_IN_MINUTES = 5;
     private Timer timer;
     private ReportType timerType;
-    private TimerTaskResult.FormMode formMode;
     private boolean lockEditMode;
-    private String taskName;
 
     private Map<ReportType, TimerReportResult.StatusReport> reportTimerStatus;
 
@@ -162,7 +160,10 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                                 }
                                 getView().isCanEditPage(!fixedRows);
                             }
-                            modifiedRows.clear();
+                            if (!modifiedRows.isEmpty()) {
+                                edited = true;
+                                modifiedRows.clear();
+                            }
                         }
 					}, FormDataPresenter.this));
 		}
@@ -171,6 +172,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
 	@Override
 	public void onCellModified(DataRow<Cell> dataRow) {
         modifiedRows.add(dataRow);
+        setOnLeaveConfirmation();
 
         if (lastSendingTime == null) {
             lastSendingTime = new Date();
@@ -424,10 +426,45 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
 	@Override
 	public void onCancelClicked() {
         String msg;
+        boolean isEdited = edited || !modifiedRows.isEmpty();
+
         if (formMode.equals(TimerTaskResult.FormMode.LOCKED_EDIT) && !readOnlyMode) {
-            msg = "Сохранить изменения без отмены операции \"" + taskName + "\", выйти из режима редактирования? \n\"Да\" - выйти с сохранением без отмены операции. \"Нет\" - выйти без сохранения с отменой операции.";
-        } else {
+            if (isEdited) {
+                msg = "Сохранить изменения без отмены операции \"" + taskName + "\", выйти из режима редактирования? \n\"Да\" - выйти с сохранением без отмены операции. \"Нет\" - выйти без сохранения с отменой операции.";
+            } else {
+                msg = "Выйти из режима редактирования без отмены операции \"" + taskName + "\"? \n\"Да\" - выйти без отмены операции. \"Нет\" - выйти с отменой операции.";
+            }
+        } else if (isEdited) {
             msg = "Сохранить изменения, выйти из режима редактирования? \n\"Да\" - выйти с сохранением. \"Нет\" - выйти без сохранения.";
+        } else {
+            msg = "Выйти из режима редактирования (несохраненные изменения отсутствуют)?";
+            Dialog.confirmMessageYeClose("Подтверждение выхода из режима редактирования", msg, new DialogHandler() {
+                @Override
+                public void yes() {
+                    ExitAndSaveFormDataAction action = new ExitAndSaveFormDataAction();
+                    action.setFormData(formData);
+                    action.setModifiedRows(new ArrayList<DataRow<Cell>>(modifiedRows));
+                    dispatcher.execute(action, CallbackUtils.defaultCallback(new AsyncCallback<DataRowResult>() {
+                        @Override
+                        public void onSuccess(DataRowResult result) {
+                            setOnLeaveConfirmation(null);
+                            modifiedRows.clear();
+                            revealFormData(true, formData.isManual(), !absoluteView, null);
+                        }
+
+                        @Override
+                        public void onFailure(Throwable caught) {
+
+                        }
+                    }, FormDataPresenter.this));
+                }
+
+                @Override
+                public void close() {
+                    super.close();
+                }
+            });
+            return;
         }
 
         Dialog.confirmMessage("Подтверждение выхода из режима редактирования", msg, new DialogHandler() {
@@ -460,12 +497,18 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
         });
 	}
 	
-	private AsyncCallback<DataRowResult> createDataRowResultCallback(final boolean showMsg){
+	private AsyncCallback<DataRowResult> createDataRowResultCallback(final boolean showMsg, final boolean isSave){
 			LogCleanEvent.fire(this);
 			AbstractCallback<DataRowResult> callback = new AbstractCallback<DataRowResult>() {
 				@Override
 				public void onSuccess(DataRowResult result) {
 					modifiedRows.clear();
+                    if (isSave) {
+                        edited = false;
+                    } else {
+                        edited = true;
+                    }
+                    setOnLeaveConfirmation();
                     LogAddEvent.fire(FormDataPresenter.this, result.getUuid());
 					getView().updateData();
 					getView().setSelectedRow(result.getCurrentRow(), true);
@@ -504,7 +547,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
         SaveFormDataAction action = new SaveFormDataAction();
         action.setFormData(formData);
 		action.setModifiedRows(new ArrayList<DataRow<Cell>>(modifiedRows));
-		dispatcher.execute(action, createDataRowResultCallback(true));
+		dispatcher.execute(action, createDataRowResultCallback(true, true));
 	}
 
     @Override
@@ -522,7 +565,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
 		action.setCurrentDataRow(dataRow);
 		action.setFormData(formData);
 		action.setModifiedRows(new ArrayList<DataRow<Cell>>(modifiedRows));
-		dispatcher.execute(action, createDataRowResultCallback(true));
+		dispatcher.execute(action, createDataRowResultCallback(true, false));
 	}
 
 	/* (non-Javadoc)
@@ -536,7 +579,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
 		action.setFormData(formData);
 		action.setModifiedRows(new ArrayList<DataRow<Cell>>(modifiedRows));
 		if (dataRow != null) {
-			dispatcher.execute(action, createDataRowResultCallback(true));
+			dispatcher.execute(action, createDataRowResultCallback(true, false));
 		}
 	}
 
@@ -544,7 +587,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
     public void onFillPreviousButtonClicked() {
         FillPreviousAction action = new FillPreviousAction();
         action.setFormData(formData);
-        dispatcher.execute(action, createDataRowResultCallback(true));
+        dispatcher.execute(action, createDataRowResultCallback(true, false));
     }
 
     /* (non-Javadoc)
@@ -577,7 +620,10 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                         }
                     });
                 } else if (result.isLockTask()) {
-                    modifiedRows.clear();
+                    if (!modifiedRows.isEmpty()) {
+                        edited = true;
+                        modifiedRows.clear();
+                    }
                     Dialog.confirmMessage(LockData.RESTART_LINKED_TASKS_MSG, new DialogHandler() {
                         @Override
                         public void yes() {
@@ -589,7 +635,10 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                         }
                     });
                 } else {
-                    modifiedRows.clear();
+                    if (!modifiedRows.isEmpty()) {
+                        edited = true;
+                        modifiedRows.clear();
+                    }
                     timerType = reportType;
                     timer.run();
                     getView().setSelectedRow(null, true);
@@ -851,6 +900,8 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                                 LogAddEvent.fire(FormDataPresenter.this, result.getUuid());
                     			// Очищаем возможные изменения на форме перед открытием.
                     			modifiedRows.clear();
+                                edited = false;
+                                //setOnLeaveConfirmation();
 
                     			formData = result.getFormData();
                                 existManual = result.existManual();
@@ -1000,7 +1051,10 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                         }
                     });
                 } else if (result.isLockTask()) {
-                    modifiedRows.clear();
+                    if (!modifiedRows.isEmpty()) {
+                        edited = true;
+                        modifiedRows.clear();
+                    }
                     LogAddEvent.fire(FormDataPresenter.this, result.getUuid());
                     Dialog.confirmMessage(LockData.RESTART_LINKED_TASKS_MSG, new DialogHandler() {
                         @Override
@@ -1010,7 +1064,10 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                         }
                     });
                 } else {
-                    modifiedRows.clear();
+                    if (!modifiedRows.isEmpty()) {
+                        edited = true;
+                        modifiedRows.clear();
+                    }
                     timerType = reportType;
                     timer.run();
                     getView().setSelectedRow(null, true);
@@ -1038,6 +1095,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
             dispatcher.execute(preSearchAction, CallbackUtils.defaultCallback(new AbstractCallback<DataRowResult>() {
                 @Override
                 public void onSuccess(DataRowResult result) {
+                    edited = true;
                     modifiedRows.clear();
                     LogAddEvent.fire(FormDataPresenter.this, result.getUuid());
                     getView().updateData();
@@ -1088,6 +1146,10 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                             @Override
                             public void onSuccess(TimerTaskResult result) {
                                 timerType = result.getTaskType();
+                                edited = result.isEdited();
+                                taskName = result.getTaskName();
+                                formMode = result.getFormMode();
+                                lockEditMode = result.getLockInfo().isEditMode();
                                 boolean isUpdate = false;
                                 if (readOnlyMode) {
                                     if (timerType == null
@@ -1163,9 +1225,6 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                                             onTimerReport(ReportType.CSV, false);
                                             break;
                                     }
-                                taskName = result.getTaskName();
-                                formMode = result.getFormMode();
-                                lockEditMode = result.getLockInfo().isEditMode();
                             }
 
                             @Override

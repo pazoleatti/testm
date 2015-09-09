@@ -57,32 +57,32 @@ public class DialogPanel extends Composite {
         yesButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                closeAfterCkick();
+                closeAfterClick();
             }
         });
 
         noButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                closeAfterCkick();
+                closeAfterClick();
             }
         });
         okButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                closeAfterCkick();
+                closeAfterClick();
             }
         });
         cancelButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                closeAfterCkick();
+                closeAfterClick();
             }
         });
         closeButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                closeAfterCkick();
+                closeAfterClick();
             }
         });
         setWidth("450px");
@@ -90,7 +90,7 @@ public class DialogPanel extends Composite {
         getElement().getStyle().setProperty("minHeight", "inherit");
     }
 
-    private void closeAfterCkick(){
+    private void closeAfterClick(){
         Dialog.hideMessage();
     }
 

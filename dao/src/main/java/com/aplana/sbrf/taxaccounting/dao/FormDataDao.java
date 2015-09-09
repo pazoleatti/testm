@@ -257,4 +257,27 @@ public interface FormDataDao {
      * @return
      */
     int deleteFormDataNnn(int ftId, long fdId);
+
+    /**
+     * Обновить значение признака сортировки
+     * @param formDataId
+     * @param isSorted
+     */
+    void updateSorted(long formDataId, boolean isSorted);
+
+    /**
+     * Сделать резервную копию признака сортировки
+     * @param formDataId
+     */
+    void backupSorted(long formDataId);
+
+    /**
+     * Восстановить признак сотрировки из резервной копии
+     * @param formDataId
+     */
+    void restoreSorted(long formDataId);
+
+    void updateEdited(long formDataId, boolean isModification);
+
+    boolean isEdited(long formDataId);
 }

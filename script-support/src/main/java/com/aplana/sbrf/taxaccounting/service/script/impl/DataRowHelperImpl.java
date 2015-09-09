@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.service.script.impl;
 
+import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DataRowDao;
 import com.aplana.sbrf.taxaccounting.model.Cell;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
@@ -34,6 +35,9 @@ public class DataRowHelperImpl implements DataRowHelper, ScriptComponentContextH
 
 	@Autowired
 	private DataRowDao dataRowDao;
+
+    @Autowired
+    private FormDataDao formDataDao;
 
 	public FormData getFormData() {
 		return fd;
@@ -225,5 +229,6 @@ public class DataRowHelperImpl implements DataRowHelper, ScriptComponentContextH
     @Override
     public void saveSort() {
         dataRowDao.reorderRows(fd, dataRows);
+        formDataDao.updateSorted(fd.getId(), true);
     }
 }

@@ -670,4 +670,44 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
             throw new DaoException("", e);
         }
     }
+
+    @Override
+    public void updateSorted(long formDataId, boolean isSorted) {
+        int sorted = (isSorted ? 1 : 0);
+        HashMap<String, Object> values = new HashMap<String, Object>();
+        values.put("formDataId", formDataId);
+        values.put("sorted", sorted);
+        getNamedParameterJdbcTemplate().update("UPDATE form_data SET sorted = :sorted WHERE id = :formDataId and not (sorted = :sorted) ", values);
+    }
+
+    @Override
+    public void backupSorted(long formDataId) {
+        HashMap<String, Object> values = new HashMap<String, Object>();
+        values.put("formDataId", formDataId);
+        getNamedParameterJdbcTemplate().update("UPDATE form_data SET sorted_backup = sorted WHERE id = :formDataId and not (sorted_backup = sorted) ", values);
+    }
+
+    @Override
+    public void restoreSorted(long formDataId) {
+        HashMap<String, Object> values = new HashMap<String, Object>();
+        values.put("formDataId", formDataId);
+        getNamedParameterJdbcTemplate().update("UPDATE form_data SET sorted = sorted_backup WHERE id = :formDataId and not (sorted = sorted_backup) ", values);
+    }
+
+    @Override
+    public void updateEdited(long formDataId, boolean isEdited) {
+        int edited = (isEdited ? 1 : 0);
+        HashMap<String, Object> values = new HashMap<String, Object>();
+        values.put("formDataId", formDataId);
+        values.put("edited", edited);
+        getNamedParameterJdbcTemplate().update("UPDATE form_data SET edited = :edited WHERE id = :formDataId", values);
+    }
+
+    @Override
+    public boolean isEdited(long formDataId) {
+        HashMap<String, Object> values = new HashMap<String, Object>();
+        values.put("formDataId", formDataId);
+        return getNamedParameterJdbcTemplate().queryForObject("SELECT edited FROM form_data WHERE id = :formDataId", values, Boolean.class);
+    }
+
 }
