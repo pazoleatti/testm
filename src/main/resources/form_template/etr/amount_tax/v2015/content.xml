@@ -3,7 +3,6 @@
     <fixedRows>true</fixedRows>
     <name>Величины налоговых платежей, вводимые вручную</name>
     <fullName>Величины налоговых платежей, вводимые вручную</fullName>
-    <header></header>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>rowNum</alias>
         <checking>false</checking>
@@ -42,7 +41,7 @@
         <order>4</order>
         <width>10</width>
         <maxLength>22</maxLength>
-        <precision>4</precision>
+        <precision>2</precision>
     </columns>
     <styles>
         <alias>Автозаполняемая</alias>

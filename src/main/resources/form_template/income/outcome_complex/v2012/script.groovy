@@ -388,8 +388,8 @@ void consolidationFromPrimary(def dataRows, def formSources) {
         prevList = ((2..17) + (26..32) + [70, 71])
         addPrevValue(prevList, dataRows, 'consumptionBuhSumPrevTaxPeriod', dataRowsOld, 'consumptionBuhSumAccepted')
         //графа 9
-        prevList = ([14] + (18..26) + [28] + (30..46) + (49..66) + [69, 70, 72] + (76..88) + [90, 91])
-        addPrevValue(prevList, dataRows, 'consumptionBuhSumPrevTaxPeriod', dataRowsOld, 'consumptionBuhSumAccepted')
+        prevList = ([14] + (18..26) + [28] + (30..46) + (49..66) + [69, 70, 72] + (76..88))
+        addPrevValue(prevList, dataRows, 'consumptionTaxSumS', dataRowsOld, 'consumptionTaxSumS')
     }
     // получить формы-источники в текущем налоговом периоде
     formSources.each {

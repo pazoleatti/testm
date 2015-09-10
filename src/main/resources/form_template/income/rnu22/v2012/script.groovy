@@ -249,11 +249,6 @@ void calc() {
     // удалить строку "итого"
     deleteAllAliased(dataRows)
 
-    sortRows(dataRows, sortColumns)
-    dataRows.eachWithIndex { row, i ->
-        row.setIndex(i + 1)
-    }
-
     // графа 1, 13..20
     dataRows.each { DataRow row ->
 

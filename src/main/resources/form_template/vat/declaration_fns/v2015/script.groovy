@@ -665,7 +665,7 @@ void logicCheck() {
     def r9str200sum = 0, r9str210sum = 0, r9str190sum = 0
     // Приложение 1 к Разделу 9
     def r91str340, r91str350, r91str050, r91str060, r91str020, r91str310, r91str320, r91str330
-    def r91str280sum = 0, r91str290sum = 0, r91str250sum = 0, r91str270sum = 0
+    def r91str280sum = 0, r91str290sum = 0, r91str250sum = 0, r91str260sum = 0, r91str270sum = 0
 
     try { // ищем пока есть элементы и есть что искать
         while (reader.hasNext()) {
@@ -860,6 +860,7 @@ void logicCheck() {
                         r91str280sumTmp = getXmlDecimal(reader91, "СумНДССФ18") ?: 0
                         r91str290sumTmp = getXmlDecimal(reader91, "СумНДССФ10") ?: 0
                         r91str250sum += getXmlDecimal(reader91, "СтоимПродСФ18") ?: 0
+                        r91str260sum += getXmlDecimal(reader91, "СтоимПродСФ10") ?: 0
                         r91str270sum += getXmlDecimal(reader91, "СтоимПродСФ0") ?: 0
                     }
                 }

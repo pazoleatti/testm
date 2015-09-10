@@ -323,11 +323,11 @@ def get102Sum(def row, def periodId) {
         }
         switch (row.getAlias()) {
             case 'R1' :
-                return [records.sum { it.TOTAL_SUM.numberValue }, true]
+                return [records.sum { it.TOTAL_SUM.numberValue } / 1000, true]
             case 'R2' :
                 def minuend = records.sum { '01000'.equals(it.OPU_CODE.stringValue) ? it.TOTAL_SUM.numberValue : BigDecimal.ZERO }
                 def subtrahend = records.sum { '02000'.equals(it.OPU_CODE.stringValue) ? it.TOTAL_SUM.numberValue : BigDecimal.ZERO }
-                return [minuend - subtrahend, true]
+                return [(minuend - subtrahend) / 1000, true]
         }
     } else if (periodId == null) {
         return [0, false]
