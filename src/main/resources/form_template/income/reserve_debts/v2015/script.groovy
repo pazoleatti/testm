@@ -614,62 +614,6 @@ void importTransportData() {
         reader.close()
     }
 
-    def newRows = (mapRows.values().sum { it } ?: [])
-    showMessages(newRows, logger)
-    if (logger.containsLevel(LogLevel.ERROR) || newRows == null || newRows.isEmpty()) {
-        return
-    }
-
-    // сравнение итогов
-    if (totalTF) {
-        // мапа с алиасами граф и номерами колонокв в xml (алиас -> номер колонки)
-        def totalColumnsIndexMap = [
-                'debt45_90DaysSum'      : 3,
-                'debt45_90DaysReserve'  : 5,
-                'debtOver90DaysSum'     : 6,
-                'debtOver90DaysReserve' : 8,
-                'totalReserve'          : 9,
-                'reservePrev'           : 10,
-                'reserveCurrent'        : 11,
-                'calcReserve'           : 12,
-                'reserveRecovery'       : 13,
-                'useReserve'            : 14
-        ]
-
-        // итоговая строка для сверки сумм
-        def totalTmp = formData.createStoreMessagingDataRow()
-        totalColumnsIndexMap.keySet().asList().each { alias ->
-            totalTmp.getCell(alias).setValue(BigDecimal.ZERO, null)
-        }
-
-        // подсчет итогов
-        for (def row : newRows) {
-            if (row.getAlias()) {
-                continue
-            }
-            totalColumnsIndexMap.keySet().asList().each { alias ->
-                def value1 = totalTmp.getCell(alias).value
-                def value2 = (row.getCell(alias).value ?: BigDecimal.ZERO)
-                totalTmp.getCell(alias).setValue(value1 + value2, null)
-            }
-        }
-
-        // сравнение контрольных сумм
-        def colOffset = 1
-        for (def alias : totalColumnsIndexMap.keySet().asList()) {
-            def v1 = totalTF.getCell(alias).value
-            def v2 = totalTmp.getCell(alias).value
-            if (v1 == null && v2 == null) {
-                continue
-            }
-            if (v1 == null || v1 != null && v1 != v2) {
-                logger.warn(TRANSPORT_FILE_SUM_ERROR + " Из файла: $v1, рассчитано: $v2", totalColumnsIndexMap[alias] + colOffset, fileRowIndex)
-            }
-        }
-    } else {
-        logger.warn("В транспортном файле не найдена итоговая строка")
-    }
-
     // получить строки из шаблона
     def formTemplate = formDataService.getFormTemplate(formData.formType.id, formData.reportPeriodId)
     def templateRows = formTemplate.rows
@@ -701,10 +645,56 @@ void importTransportData() {
         rows.add(lastRow)
     }
     def totalAll = getDataRow(templateRows, "totalAll")
-    calcTotalSum(newRows, totalAll, totalColumnsAll)
     rows.add(totalAll)
+
+    // сравнение итогов
+    if (totalTF) {
+        // мапа с алиасами граф и номерами колонокв в xml (алиас -> номер колонки)
+        def totalColumnsIndexMap = [
+                'debt45_90DaysSum'      : 3,
+                'debt45_90DaysReserve'  : 5,
+                'debtOver90DaysSum'     : 6,
+                'debtOver90DaysReserve' : 8,
+                'totalReserve'          : 9,
+                'reservePrev'           : 10,
+                'reserveCurrent'        : 11,
+                'calcReserve'           : 12,
+                'reserveRecovery'       : 13,
+                'useReserve'            : 14
+        ]
+
+        // подсчет итогов
+        calcTotalSum(rows, totalAll, totalColumnsAll)
+
+        // сравнение контрольных сумм
+        def colOffset = 1
+        for (def alias : totalColumnsIndexMap.keySet().asList()) {
+            def v1 = totalTF.getCell(alias).value
+            def v2 = totalAll.getCell(alias).value
+            if (v1 == null && v2 == null) {
+                continue
+            }
+            if (v1 == null || v1 != null && v1 != v2) {
+                logger.warn(TRANSPORT_FILE_SUM_ERROR + " Из файла: $v1, рассчитано: $v2", totalColumnsIndexMap[alias] + colOffset, fileRowIndex)
+            }
+        }
+        // задать кварталаьной итоговой строке нф значения из итоговой строки тф
+        totalColumnsAll.each { alias ->
+            totalAll[alias] = totalTF[alias]
+        }
+    } else {
+        logger.warn("В транспортном файле не найдена итоговая строка")
+        // очистить итоги
+        totalColumnsAll.each { alias ->
+            totalAll[alias] = null
+        }
+    }
+
     updateIndexes(rows)
-    formDataService.getDataRowHelper(formData).allCached = rows
+    showMessages(rows, logger)
+    if (!logger.containsLevel(LogLevel.ERROR)) {
+        formDataService.getDataRowHelper(formData).allCached = rows
+    }
 }
 
 /**

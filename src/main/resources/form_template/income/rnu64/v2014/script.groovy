@@ -304,7 +304,7 @@ void importTransportData() {
     String[] rowCells
     int fileRowIndex = 2    // номер строки в файле (1, 2..). Начинается с 2, потому что первые две строки - заголовок и пустая строка
     int rowIndex = 0        // номер строки в НФ
-    def total = null        // итоговая строка со значениями из тф для добавления
+    def totalTF = null        // итоговая строка со значениями из тф для добавления
     def newRows = []
 
     InputStreamReader isr = new InputStreamReader(ImportInputStream, DEFAULT_CHARSET)
@@ -335,7 +335,7 @@ void importTransportData() {
                 // итоговая строка тф
                 rowCells = reader.readNext()
                 if (rowCells != null) {
-                    total = getNewRow(rowCells, COLUMN_COUNT, ++fileRowIndex, rowIndex)
+                    totalTF = getNewRow(rowCells, COLUMN_COUNT, ++fileRowIndex, rowIndex)
                 }
                 break
             }
@@ -355,7 +355,7 @@ void importTransportData() {
     newRows.add(totalRow)
 
     // сравнение итогов
-    if (!logger.containsLevel(LogLevel.ERROR) && total) {
+    if (!logger.containsLevel(LogLevel.ERROR) && totalTF) {
         // мапа с алиасами граф и номерами колонокв в xml (алиас -> номер колонки)
         def totalColumnsIndexMap = ['costs': 5]
 
@@ -380,7 +380,7 @@ void importTransportData() {
         // сравнение контрольных сумм
         def colOffset = 1
         for (def alias : totalColumns) {
-            def v1 = total.getCell(alias).value
+            def v1 = totalTF.getCell(alias).value
             def v2 = totalTmp.getCell(alias).value
             if (v1 == null && v2 == null) {
                 continue
@@ -389,8 +389,16 @@ void importTransportData() {
                 logger.warn(TRANSPORT_FILE_SUM_ERROR + " Из файла: $v1, рассчитано: $v2", totalColumnsIndexMap[alias] + colOffset, fileRowIndex)
             }
         }
+        // задать кварталаьной итоговой строке нф значения из итоговой строки тф
+        totalColumns.each { alias ->
+            totalQuarterRow[alias] = totalTF[alias]
+        }
     } else {
         logger.warn("В транспортном файле не найдена итоговая строка")
+        // очистить итоги
+        totalColumns.each { alias ->
+            totalQuarterRow[alias] = null
+        }
     }
 
     showMessages(newRows, logger)
