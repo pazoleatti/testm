@@ -59,7 +59,7 @@
 		<field name="КБК" class="java.lang.String">
 			<fieldDescription><![CDATA[@КБК]]></fieldDescription>
 		</field>
-		<field name="НалПУ" class="java.lang.Integer">
+		<field name="НалПУ" class="java.lang.Long">
 			<fieldDescription><![CDATA[@НалПУ]]></fieldDescription>
 		</field>
 		<variable name="ОКТМО" class="java.lang.String">
@@ -76,7 +76,7 @@
 			<variableExpression><![CDATA[$P{КоличествоБлоковXML} == 0? "---------------------------------" :"18210602010021000110"]]></variableExpression>
 			<initialValueExpression><![CDATA["-------------------------------------"]]></initialValueExpression>
 		</variable>
-		<variable name="НалПУ" class="java.lang.Integer">
+		<variable name="НалПУ" class="java.lang.Long">
 			<variableExpression><![CDATA[$F{НалПУ} >=0 ? $F{НалПУ} : 0-$F{НалПУ}]]></variableExpression>
 			<initialValueExpression><![CDATA[0]]></initialValueExpression>
 		</variable>
