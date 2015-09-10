@@ -102,8 +102,6 @@ void calc() {
 
     // удалить строку "итого"
     deleteAllAliased(dataRows)
-    // сортировка
-    sortRows(dataRows, groupColumns)
 
     // добавить строку "итого"
     calcTotalSum(dataRows, totalRow, totalColumns)
