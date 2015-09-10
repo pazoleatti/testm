@@ -802,6 +802,7 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
     return newRow
 }
 
+// аналогичен FormDataServiceImpl.checkFormExistAndAccepted, только проверяет несколько типов форм, вместо одного
 def checkFormExistAndAccepted(List<Integer> formTypeIds, FormDataKind kind, int departmentId,
                                       int currentReportPeriodId, Boolean prevPeriod,
                                       def logger, boolean required) {
@@ -832,7 +833,7 @@ def checkFormExistAndAccepted(List<Integer> formTypeIds, FormDataKind kind, int 
 
     // выводить ли сообщение
     if (!foundData) {
-        String formName = (formData == null ? formTypeDao.get(formTypeIds[0]).getName() : formData.getFormType().getName());
+        String formName = (formData == null ? formTypeService.get(formTypeIds[0]).getName() : formData.getFormType().getName());
         // период может не найтись для предыдущего периода, потому что периода не существует
         String periodName = "предыдущий период";
         if (reportPeriod != null) {
