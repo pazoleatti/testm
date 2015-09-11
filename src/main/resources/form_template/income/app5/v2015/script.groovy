@@ -70,6 +70,9 @@ switch (formDataEvent) {
         importTransportData()
         formDataService.saveCachedDataRows(formData, logger)
         break
+    case FormDataEvent.SORT_ROWS:
+        sortFormDataRows()
+        break
 }
 
 //// Кэши и константы
@@ -299,6 +302,12 @@ void calc() {
     dataRows.add(getTotalRow(dataRows))
 }
 
+void sortFormDataRows() {
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper.allCached
+    sortRows(refBookService, logger, dataRows, null, dataRows.find { it.getAlias() == 'total' }, null)
+    dataRowHelper.saveSort()
+}
 
 // название подразделения
 def calc2(def row) {
