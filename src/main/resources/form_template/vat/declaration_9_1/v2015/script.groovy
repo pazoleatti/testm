@@ -152,19 +152,20 @@ void generateXML() {
     def code001 = null
     def (code020, code030, code040, code050, code060, code070, code310, code320, code330, code340, code350, code360) =
     [null, null, null, null, null, null, null, null, null, null, null, null]
+
+    def codes = getCodes()
+    code020 = codes?.code020
+    code030 = codes?.code030
+    code040 = codes?.code040
+    code050 = codes?.code050
+    code060 = codes?.code060
+    code070 = codes?.code070
+
     def sourceCorrNumber
     for (def formData : declarationService.getAcceptedFormDataSources(declarationData).getRecords()) {
         if (formData.formType.id == 617) {
             sourceDataRows = formDataService.getDataRowHelper(formData)?.getAll()
             sourceCorrNumber = reportPeriodService.getCorrectionNumber(formData.departmentReportPeriodId) ?: 0
-
-            def codes = getCodes()
-            code020 = codes?.code020
-            code030 = codes?.code030
-            code040 = codes?.code040
-            code050 = codes?.code050
-            code060 = codes?.code060
-            code070 = codes?.code070
 
             def totalRow = getDataRow(sourceDataRows, 'total') // "Всего"
             code310 = totalRow?.saleCostB18
@@ -388,6 +389,7 @@ def getCodes() {
                               'code050' : code050, 'code060' : code060, 'code070' : code070]
                     break
                 }
+                reader.next()
             }
         } finally {
             reader.close()
