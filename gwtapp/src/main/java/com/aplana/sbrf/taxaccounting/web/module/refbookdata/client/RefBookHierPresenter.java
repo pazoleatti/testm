@@ -281,7 +281,6 @@ public class RefBookHierPresenter extends Presenter<RefBookHierPresenter.MyView,
                     @Override
                     public void onSuccess(CheckRefBookResult result) {
                         versioned = result.isVersioned();
-                        commonEditPresenter.setVersioned(versioned);
                         if (result.isAvailable()) {
                             registrations[0] = commonEditPresenter.addClickHandlerForAllVersions(new ClickHandler() {
                                 @Override
