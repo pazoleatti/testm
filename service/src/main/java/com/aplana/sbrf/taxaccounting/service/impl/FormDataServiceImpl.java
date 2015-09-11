@@ -863,7 +863,6 @@ public class FormDataServiceImpl implements FormDataService {
                         }
 					}
 				}
-				dataRowDao.refreshRefBookLinks(formData);
 				return sourceList;
 			}
 		});
