@@ -128,7 +128,7 @@ public class FormDataSearchServiceTest {
 		userInfo.setUser(mockUser(CONTROL_UNP_USER_ID, 1, TARole.ROLE_CONTROL_UNP));
 		FormDataFilterAvailableValues values = formDataSearchService.getAvailableFilterValues(userInfo, TaxType.TRANSPORT);
         assertEquals(values.getFormTypes().size(), FORM_TYPES_BY_TAX_TYPE.size());
-		assertEquals(6, values.getKinds().size());
+		assertEquals(7, values.getKinds().size());
         assertTrue(values.getKinds().containsAll(asList(FormDataKind.PRIMARY, FormDataKind.CONSOLIDATED,
                 FormDataKind.SUMMARY, null)));
         assertEquals(3, values.getDepartmentIds().size());
@@ -142,7 +142,7 @@ public class FormDataSearchServiceTest {
             userInfo.setUser(mockUser(OPERATOR_USER_ID, 1, TARole.ROLE_OPER));
             FormDataFilterAvailableValues values = formDataSearchService.getAvailableFilterValues(userInfo, TaxType.TRANSPORT);
             assertEquals(0, values.getFormTypes().size());
-            assertEquals(6, values.getKinds().size());
+            assertEquals(7, values.getKinds().size());
             assertTrue(values.getKinds().containsAll(asList(FormDataKind.PRIMARY, null)));
             /*assertFalse(values.getKinds().contains(FormDataKind.SUMMARY));
             assertFalse(values.getKinds().contains(FormDataKind.CONSOLIDATED));*/
@@ -160,7 +160,7 @@ public class FormDataSearchServiceTest {
 		userInfo.setUser(mockUser(CONTROL_USER_ID, 1, TARole.ROLE_CONTROL));
 		FormDataFilterAvailableValues values = formDataSearchService.getAvailableFilterValues(userInfo, TaxType.TRANSPORT);
 		assertEquals(0, values.getFormTypes().size());
-		assertEquals(6, values.getKinds().size());
+		assertEquals(7, values.getKinds().size());
         assertTrue(values.getKinds().containsAll(asList(FormDataKind.PRIMARY, FormDataKind.CONSOLIDATED,
                 FormDataKind.SUMMARY, null)));
 		assertEquals(3, values.getDepartmentIds().size());

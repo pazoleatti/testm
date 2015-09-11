@@ -503,11 +503,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
 				@Override
 				public void onSuccess(DataRowResult result) {
 					modifiedRows.clear();
-                    if (isSave) {
-                        edited = false;
-                    } else {
-                        edited = true;
-                    }
+                    edited = !isSave;
                     setOnLeaveConfirmation();
                     LogAddEvent.fire(FormDataPresenter.this, result.getUuid());
 					getView().updateData();
@@ -990,7 +986,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                                 getView().showConsolidation(
                                         WorkflowState.ACCEPTED != formData.getState()
                                                 &&
-                                                (FormDataKind.CONSOLIDATED == formData.getKind() || FormDataKind.SUMMARY == formData.getKind())
+                                                (FormDataKind.CONSOLIDATED == formData.getKind() || FormDataKind.SUMMARY == formData.getKind() || FormDataKind.CALCULATED == formData.getKind())
                                                 &&
                                                 readOnlyMode);
 

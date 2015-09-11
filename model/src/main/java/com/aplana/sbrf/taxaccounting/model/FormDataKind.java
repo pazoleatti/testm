@@ -25,7 +25,11 @@ public enum FormDataKind {
 	 * Выходная форма
 	 * (содержит информацию, которая должна попасть в декларацию, но отсутствует в сводных формах)
 	 */
-	ADDITIONAL(5, "Выходная");
+	ADDITIONAL(5, "Выходная"),
+    /**
+     * Расеетная форма
+     */
+    CALCULATED(6, "Расчетная");
 	
 	private final int id;
 	private final String title;
