@@ -92,7 +92,6 @@ public abstract class AbstractEditPresenter<V extends AbstractEditPresenter.MyVi
     }
 
     public void setVersioned(boolean versioned) {
-        System.out.println("setVersioned: "+versioned);
         getView().showVersioned(versioned);
     }
 
@@ -343,7 +342,6 @@ public abstract class AbstractEditPresenter<V extends AbstractEditPresenter.MyVi
     }
 
     public HandlerRegistration addClickHandlerForAllVersions(ClickHandler clickHandler){
-        System.out.println("addClickHandlerForAllVersions: "+versioned);
         if (versioned)
             return getView().getClickAllVersion().addClickHandler(clickHandler);
         else
@@ -356,7 +354,6 @@ public abstract class AbstractEditPresenter<V extends AbstractEditPresenter.MyVi
     }
 
     public void init(final Long refbookId, boolean versioned) {
-        System.out.println("init: "+versioned);
         currentRefBookId = refbookId;
         this.versioned = versioned;
         setIsFormModified(false);
