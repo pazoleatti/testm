@@ -365,11 +365,17 @@ def getCurrencyCode(String str) {
 
 def getCodes() {
     def result = null
-    def declarationTypeId = 14
+    // получить данные "декларации 9 без консолидированных"
+    def declarationTypeId = 21
     def reportPeriod = reportPeriodService.get(declarationData.reportPeriodId)
     def declarationData9 = declarationService.getLast(declarationTypeId, declarationData.departmentId, reportPeriod.id)
     if (declarationData9 == null || !declarationData9.accepted) {
-        return result
+        // при отсутствии данные "декларации 9 без консолидированных", получить данные "декларации 9"
+        declarationTypeId = 14
+        declarationData9 = declarationService.getLast(declarationTypeId, declarationData.departmentId, reportPeriod.id)
+        if (declarationData9 == null || !declarationData9.accepted) {
+            return result
+        }
     }
     if (declarationData9.id != null) {
         def reader = declarationService.getXmlStreamReader(declarationData9.id)

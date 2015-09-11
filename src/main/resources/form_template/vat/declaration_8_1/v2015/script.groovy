@@ -332,11 +332,17 @@ def getCurrencyCode(String str) {
 
 def getCode005() {
     def result = null
-    def declarationTypeId = 12
+    // получить данные "декларации 8 без консолидированных"
+    def declarationTypeId = 18
     def reportPeriod = reportPeriodService.get(declarationData.reportPeriodId)
     def declarationData8 = declarationService.getLast(declarationTypeId, declarationData.departmentId, reportPeriod.id)
     if (declarationData8 == null || !declarationData8.accepted) {
-        return result
+        // при отсутствии данные "декларации 8 без консолидированных", получить данные "декларации 8"
+        declarationTypeId = 12
+        declarationData8 = declarationService.getLast(declarationTypeId, declarationData.departmentId, reportPeriod.id)
+        if (declarationData8 == null || !declarationData8.accepted) {
+            return result
+        }
     }
     if (declarationData8.id != null) {
         def reader = declarationService.getXmlStreamReader(declarationData8.id)
