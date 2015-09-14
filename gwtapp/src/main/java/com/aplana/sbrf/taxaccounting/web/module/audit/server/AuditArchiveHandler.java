@@ -1,11 +1,12 @@
 package com.aplana.sbrf.taxaccounting.web.module.audit.server;
 
-import com.aplana.sbrf.taxaccounting.model.BalancingVariants;
-import com.aplana.sbrf.taxaccounting.async.exception.AsyncTaskException;
 import com.aplana.sbrf.taxaccounting.async.manager.AsyncManager;
 import com.aplana.sbrf.taxaccounting.async.task.AsyncTask;
 import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
-import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.BalancingVariants;
+import com.aplana.sbrf.taxaccounting.model.LockData;
+import com.aplana.sbrf.taxaccounting.model.ReportType;
+import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
@@ -77,8 +78,11 @@ public class AuditArchiveHandler extends AbstractActionHandler<AuditArchiveActio
         action.getLogSystemFilter().setToSearchDate(c.getTime());
 
         long recordsCount = auditService.getCountRecords(action.getLogSystemFilter(), userInfo);
-        if (recordsCount==0)
-            throw new ServiceException("Нет записей за указанную дату.");
+        if (recordsCount==0){
+            result.setException(true);
+//            throw new ServiceException("В журнале аудита отсутствуют записи за выбранный период.");
+            return result;
+        }
         Logger logger = new Logger();
 
         Map<String, Object> params = new HashMap<String, Object>();
