@@ -16,8 +16,8 @@ import groovy.transform.Field
  *
  * графа 1 - rowNum         - № строки
  * графа 2 - indicatorName  - Наименование показателя
- * графа 3 - comparePeriod  - Период сравнения
- * графа 4 - currentPeriod  - Текущий отчетный период
+ * графа 3 - comparePeriod  - Период сравнения, тыс. руб.
+ * графа 4 - currentPeriod  - Текущий отчетный период, тыс. руб.
  * графа 5 - deltaRub       - Изменение за период (гр.4-гр.3), тыс.руб.
  * графа 6 - deltaPercent   - Изменение за период (гр.5/гр.3*100),%
  */
@@ -314,7 +314,7 @@ def get102Sum(def row, def periodId) {
         if ((records == null || records.isEmpty())) {
             return [0, false]
         }
-        return [records.sum { it.TOTAL_SUM.numberValue }, true]
+        return [records.sum { it.TOTAL_SUM.numberValue } / 1000, true]
     } else if (periodId == null) {
         return [0, false]
     }
