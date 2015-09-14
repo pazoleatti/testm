@@ -352,7 +352,7 @@ def getCode005() {
         try{
             while (reader.hasNext()) {
                 if (reader.startElement && QName.valueOf('КнигаПокуп').equals(reader.name)) {
-                    result = reader.getAttributeValue(null, "СумНДСВсКПк")
+                    result = getXmlDecimal(reader, "СумНДСВсКПк")
                     break
                 }
                 reader.next()
@@ -362,4 +362,12 @@ def getCode005() {
         }
     }
     return result
+}
+
+BigDecimal getXmlDecimal(def reader, String attrName) {
+    def value = reader?.getAttributeValue(null, attrName)
+    if (!value) {
+        return null
+    }
+    return new BigDecimal(value)
 }

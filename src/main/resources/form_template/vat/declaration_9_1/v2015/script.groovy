@@ -385,12 +385,12 @@ def getCodes() {
         try{
             while (reader.hasNext()) {
                 if (reader.startElement && QName.valueOf('КнигаПрод').equals(reader.name)) {
-                    def code020 = reader.getAttributeValue(null, "СтПродБезНДС18")
-                    def code030 = reader.getAttributeValue(null, "СтПродБезНДС10")
-                    def code040 = reader.getAttributeValue(null, "СтПродБезНДС0")
-                    def code050 = reader.getAttributeValue(null, "СумНДСВсКПр18")
-                    def code060 = reader.getAttributeValue(null, "СумНДСВсКПр10")
-                    def code070 = reader.getAttributeValue(null, "СтПродОсвВсКПр")
+                    def code020 = getXmlDecimal(reader, "СтПродБезНДС18")
+                    def code030 = getXmlDecimal(reader, "СтПродБезНДС10")
+                    def code040 = getXmlDecimal(reader, "СтПродБезНДС0")
+                    def code050 = getXmlDecimal(reader, "СумНДСВсКПр18")
+                    def code060 = getXmlDecimal(reader, "СумНДСВсКПр10")
+                    def code070 = getXmlDecimal(reader, "СтПродОсвВсКПр")
                     result = ['code020' : code020, 'code030' : code030, 'code040' : code040,
                               'code050' : code050, 'code060' : code060, 'code070' : code070]
                     break
@@ -402,4 +402,12 @@ def getCodes() {
         }
     }
     return result
+}
+
+BigDecimal getXmlDecimal(def reader, String attrName) {
+    def value = reader?.getAttributeValue(null, attrName)
+    if (!value) {
+        return null
+    }
+    return new BigDecimal(value)
 }
