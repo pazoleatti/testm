@@ -1818,19 +1818,21 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     private static final String CHECK_USAGES_IN_DEPARTMENT_CONFIG = "select * from (with checkRecords as (select * from ref_book_record r where %s),\n" +
             "periodCodes as (select a.alias, v.* from ref_book_value v, ref_book_attribute a where v.attribute_id=a.id and a.ref_book_id=8),\n" +
             "usages as (select r.* from ref_book_value v, ref_book_record r, checkRecords cr " +
-            "where v.attribute_id in (select id from ref_book_attribute where ref_book_id in (31,33,37,98,99) and id not in (170,192,180,206)) and v.reference_value = cr.id and r.id=v.record_id)\n" +   //170,192,180 - ссылки на подразделения
+            "where v.attribute_id in (select id from ref_book_attribute where ref_book_id in (37,310,31,98,330,33,206,99) and alias != 'DEPARTMENT_ID') and v.reference_value = cr.id and r.id=v.record_id)\n" +
             "select distinct d.name as departmentName, concat(pn.string_value, to_char(u.version,' yyyy')) as periodName, nt.number_value as isT, ni.number_value as isI, nd.number_value as isD, nv.number_value as isV, np.number_value as isP,\n" +
             "to_date(concat(to_char(ps.date_value,'dd.mm'), to_char(u.version,'.yyyy')), 'DD.MM.YYYY') as periodStart, to_date(concat(to_char(pe.date_value,'dd.mm'), to_char(u.version,'.yyyy')), 'DD.MM.YYYY') as periodEnd,\n" +
             "case\n" +
-            "\twhen u.ref_book_id = 31 then 'T'\n" +        //Транспортный налог
-            "\twhen u.ref_book_id = 33 then 'I'\n" +        //Налог на прибыль
-            "\twhen u.ref_book_id = 37 then 'D'\n" +        //Учет контролируемых сделок
-            "\twhen u.ref_book_id = 98 then 'V'\n" +        //НДС
-            "\twhen u.ref_book_id = 99 then 'P'\n" +        //Налог на имущество
+            "\twhen (u.ref_book_id = 31 or u.ref_book_id = 310) then 'T'\n" +           //Транспортный налог
+            "\twhen (u.ref_book_id = 33 or u.ref_book_id = 330) then 'I'\n" +           //Налог на прибыль
+            "\twhen u.ref_book_id = 37 then 'D'\n" +                                    //Учет контролируемых сделок
+            "\twhen u.ref_book_id = 98 then 'V'\n" +                                    //НДС
+            "\twhen (u.ref_book_id = 99 or u.ref_book_id = 206) then 'P'\n" +           //Налог на имущество
             "\telse null\n" +
             "end as taxCode\n" +
             "from usages u\n" +
-            "join department d on d.id in (select v.reference_value from ref_book_value v, usages u where v.record_id=u.id and v.attribute_id = (select id from ref_book_attribute where ref_book_id=u.ref_book_id and alias='DEPARTMENT_ID'))\n" +
+            "join ref_book_value dv on dv.record_id = u.id\n" +
+            "join ref_book_attribute da on (da.id = dv.attribute_id and da.alias='DEPARTMENT_ID')\n" +
+            "join department d on d.id = dv.reference_value\n" +
             "join (select date_value, record_id from periodCodes where alias='CALENDAR_START_DATE') ps on to_char(ps.date_value,'dd.mm')=to_char(u.version,'dd.mm')\n" +
             "join (select date_value, record_id from periodCodes where alias='END_DATE') pe on pe.record_id = ps.record_id\n" +
             "join (select string_value, record_id from periodCodes where alias='NAME') pn on pn.record_id=ps.record_id\n" +
@@ -1936,55 +1938,40 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     }
 
     private static final String CHECK_USAGES_IN_REFBOOK =
-            "SELECT r.id, b.name AS refbookName, b.is_versioned as versioned, r.version AS versionStart, v.string_value, v.number_value, v.date_value, v.reference_value, \n" +
+            "SELECT r.id, b.name AS refbookName, b.is_versioned as versioned, r.version AS versionStart, uv.string_value, uv.number_value, uv.date_value, uv.reference_value,\n" +
                     "  (SELECT\n" +
                     "  min(version) - interval '1' DAY FROM ref_book_record rn WHERE rn.ref_book_id = r.ref_book_id AND rn.record_id = r.record_id AND rn.version > r.version) AS versionEnd\n" +
-            "FROM ref_book b\n" +
-            "  JOIN ref_book_record r ON b.id = r.ref_book_id AND r.id IN (\n" +
-            "    SELECT r.id\n" +
-            "    FROM ref_book_record r\n" +
-            "      JOIN ref_book_value v ON v.record_id = r.id AND %s\n" +
-            "      JOIN ref_book_attribute a ON r.ref_book_id = a.ref_book_id AND a.id = v.attribute_id AND a.reference_id = :refBookId)\n" +
-            "  JOIN ref_book_attribute a ON a.ref_book_id = b.id\n" +
-            "  JOIN ref_book_value v ON r.id = v.record_id AND a.id = v.attribute_id \n" +
-                    "where a.is_unique > 0 %s";
-
-    private static final String CHECK_USAGES_IN_REFBOOK_WITH_PERIOD_RESTRICTION =
-            "SELECT * FROM (\n" +
-            "SELECT r.id, b.name AS refbookName, b.is_versioned as versioned, r.version AS versionStart, v.string_value, v.number_value, v.date_value, v.reference_value,\n" +
-            "  (SELECT\n" +
-            "  min(version) - interval '1' DAY FROM ref_book_record rn WHERE rn.ref_book_id = r.ref_book_id AND rn.record_id = r.record_id AND rn.version > r.version) AS versionEnd\n" +
-            "FROM ref_book b\n" +
-            "  JOIN ref_book_record r ON b.id = r.ref_book_id AND r.id IN (\n" +
-            "    SELECT r.id\n" +
-            "    FROM ref_book_record r\n" +
-            "      JOIN ref_book_value v ON v.record_id = r.id AND %s\n" +
-            "      JOIN ref_book_attribute a ON r.ref_book_id = a.ref_book_id AND a.id = v.attribute_id AND a.reference_id = :refBookId)\n" +
-            "  JOIN ref_book_attribute a ON a.ref_book_id = b.id\n" +
-            "  JOIN ref_book_value v ON r.id = v.record_id AND a.id = v.attribute_id \n" +
-                    "where a.is_unique > 0 %s) %s";
+                    "FROM ref_book_record r\n" +
+                    "  JOIN ref_book b on b.id = r.REF_BOOK_ID\n" +
+                    "  JOIN ref_book_value v on v.RECORD_ID = r.id\n" +
+                    "  JOIN ref_book_attribute a on a.id = v.ATTRIBUTE_ID\n" +
+                    "  JOIN ref_book_value uv on uv.RECORD_ID = r.id \n" +
+                    "  JOIN ref_book_attribute ua on (ua.id = uv.ATTRIBUTE_ID and ua.is_unique > 0)\n" +
+                    "WHERE %s and a.reference_id = :refBookId and b.id not in (37,310,31,98,330,33,206,99) %s";
 
     public List<String> isVersionUsedInRefBooks(Long refBookId, List<Long> uniqueRecordIds, Date versionFrom, Date versionTo,
                                                 Boolean restrictPeriod, List<Long> excludedRefBooks) {
 
         String in = transformToSqlInStatement("v.reference_value", uniqueRecordIds);
-        String inExcludeRefBook = "";
+        String inExcludedRefBook = "";
         if (excludedRefBooks != null && !excludedRefBooks.isEmpty()) {
-            inExcludeRefBook = " and " + transformToSqlInStatement("b.id not ", excludedRefBooks);
+            inExcludedRefBook = " and " + transformToSqlInStatement("b.id not ", excludedRefBooks);
         }
         String sql;
         Map<String, Object> params = new HashMap<String, Object>();
-        //Проверка использования в справочниках
+
+        String fullSql;
+        //Без ограничений по периоду
+        sql = String.format(CHECK_USAGES_IN_REFBOOK, in, inExcludedRefBook);
         try {
             if (restrictPeriod == null) {
-                //Без ограничений по периоду
-                sql = String.format(CHECK_USAGES_IN_REFBOOK, in, inExcludeRefBook);
                 params.put("refBookId", refBookId);
+                fullSql = sql;
             } else if (restrictPeriod) {
                 //Отбираем только ссылки пересекающиеся с указанным периодом
                 String restrictQuery = " where ((versionStart >= :versionFrom and (versionEnd is null or :versionTo is null or versionEnd <= :versionTo)) or " +
                         "(versionStart <= :versionFrom and (versionEnd is null or versionEnd >= :versionFrom)))";
-                sql = String.format(CHECK_USAGES_IN_REFBOOK_WITH_PERIOD_RESTRICTION, in, inExcludeRefBook, restrictQuery);
+                fullSql = "SELECT * FROM (\n" + sql + "\n ) " + restrictQuery;
                 params.put("refBookId", refBookId);
                 params.put("versionFrom", versionFrom);
                 params.put("versionTo", versionTo);
@@ -1992,7 +1979,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
                 //Отбираем только ссылки НЕ попадающие в указанный период
                 String restrictQuery = " where ((:versionTo is not null and :versionTo < versionStart) or " +
                         "(versionEnd is not null and versionEnd < :versionFrom))";
-                sql = String.format(CHECK_USAGES_IN_REFBOOK_WITH_PERIOD_RESTRICTION, in, inExcludeRefBook, restrictQuery);
+                fullSql = "SELECT * FROM (\n" + sql + "\n ) " + restrictQuery;
                 params.put("refBookId", refBookId);
                 params.put("versionFrom", versionFrom);
                 params.put("versionTo", versionTo);
@@ -2000,7 +1987,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 
             //Формируем список значений уникальных атрибутов + основных параметров
             final Map<Long, RecordTemp> records = new HashMap<Long, RecordTemp>();
-            getNamedParameterJdbcTemplate().query(sql, params, new RowCallbackHandler() {
+            getNamedParameterJdbcTemplate().query(fullSql, params, new RowCallbackHandler() {
                 @Override
                 public void processRow(ResultSet rs) throws SQLException {
                     Long uniqueRecordId = SqlUtils.getLong(rs, "id");
