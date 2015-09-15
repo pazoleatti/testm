@@ -205,7 +205,7 @@ public class SaveDepartmentCombinedHandler extends AbstractActionHandler<SaveDep
                 record.setRecordId(recordPairs.get(0).getSecond());
             }
 
-            // Поиск версий настроек для указанного подразделения. Если они есть - создаем новую версию с существующим record_id, иначе создаем новый record_id (по сути элемент справочника)
+            // Проверяем, нужно ли обновление существующих настроек
             recordPairs = provider.checkRecordExistence(period.getCalendarStartDate(), filter);
             if (recordPairs.size() != 0) {
                 needEdit = true;
@@ -218,16 +218,9 @@ public class SaveDepartmentCombinedHandler extends AbstractActionHandler<SaveDep
 
             RefBookRecordVersion recordVersion;
             if (!needEdit) {
-                //Получаем дату окончания = дате начала следующей версии. Нужно для проверки справочных атрибутов
-                /*Date versionEnd = provider.getNextVersion(period.getCalendarStartDate(), filter);
-                if (versionEnd != null && period.getCalendarStartDate().after(versionEnd)) {
-                    throw new ActionException("Дата окончания настроек подразделения получена некорректно");
-                }*/
                 List<Long> newRecordIds = provider.createRecordVersion(logger, period.getCalendarStartDate(), null, Arrays.asList(record));
                 recordVersion = provider.getRecordVersionInfo(newRecordIds.get(0));
             } else {
-                /*recordVersion = provider.getRecordVersionInfo(depCombined.getRecordId());
-                provider.updateRecordVersion(logger, depCombined.getRecordId(), recordVersion.getVersionStart(), recordVersion.getVersionEnd(), paramsMap);*/
                 provider.updateRecordVersion(logger, depCombined.getRecordId(), period.getCalendarStartDate(), null, paramsMap);
                 recordVersion = provider.getRecordVersionInfo(depCombined.getRecordId());
             }
@@ -235,9 +228,9 @@ public class SaveDepartmentCombinedHandler extends AbstractActionHandler<SaveDep
             String departmentName = departmentService.getDepartment(action.getDepartment()).getName();
             if (!logger.containsLevel(LogLevel.ERROR)) {
                 if (recordVersion.getVersionEnd() != null) {
-                    logger.info(String.format(SUCCESS_INFO, departmentName, sdf.format(period.getCalendarStartDate()), sdf.format(recordVersion.getVersionEnd())));
+                    logger.info(String.format(SUCCESS_INFO, departmentName, sdf.format(recordVersion.getVersionStart()), sdf.format(recordVersion.getVersionEnd())));
                 } else {
-                    logger.info(String.format(SUCCESS_INFO, departmentName, sdf.format(period.getCalendarStartDate()), "\"-\""));
+                    logger.info(String.format(SUCCESS_INFO, departmentName, sdf.format(recordVersion.getVersionStart()), "\"-\""));
                 }
             }
 

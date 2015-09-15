@@ -4,8 +4,7 @@ import com.aplana.sbrf.taxaccounting.model.Cell;
 import com.aplana.sbrf.taxaccounting.model.Column;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
+import com.aplana.sbrf.taxaccounting.model.refbook.*;
 
 import java.util.Collection;
 import java.util.List;
@@ -74,4 +73,23 @@ public interface RefBookHelper {
 	 * @return
 	 */
     Map<Long, RefBookDataProvider> getProviders(Set<Long> attributeIds);
+
+    /**
+     * Сохраняет настройки подразделений с табличной частью
+     * @param uniqueRecordId уникальный идентификатор основной части настроек
+     * @param refBookId идентификатор справочника для основной части настроек
+     * @param slaveRefBookId идентификатор справочника для табличной части настроек
+     * @param reportPeriodId идентификатор периода
+     * @param departmentAlias алиас подразделения
+     * @param departmentId идентификатор подразделения
+     * @param mainConfig данные основной части настроек
+     * @param tablePart данные табличной части настроек
+     * @param logger логгер
+     * @return обновленная информация о настройках подразделений
+     */
+    RefBookRecordVersion saveOrUpdateDepartmentConfig(Long uniqueRecordId, long refBookId, long slaveRefBookId,
+                                                      int reportPeriodId, String departmentAlias, long departmentId,
+                                                      Map<String, RefBookValue> mainConfig,
+                                                      List<Map<String, RefBookValue>> tablePart,
+                                                      Logger logger);
 }

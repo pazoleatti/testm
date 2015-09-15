@@ -1,24 +1,26 @@
 package com.aplana.sbrf.taxaccounting.refbook.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.ColumnDao;
+import com.aplana.sbrf.taxaccounting.dao.impl.refbook.RefBookUtils;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
+import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
+import com.aplana.sbrf.taxaccounting.model.refbook.*;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookHelper;
+import com.aplana.sbrf.taxaccounting.service.PeriodService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.*;
+import java.util.regex.Pattern;
+
 /**
  * User: avanteev
  */
@@ -31,6 +33,11 @@ public class RefBookHelperImpl implements RefBookHelper {
 
     @Autowired
 	private ColumnDao columnDao;
+
+    @Autowired
+    private PeriodService periodService;
+
+
 
     @Override
     public void dataRowsCheck(Collection<DataRow<Cell>> dataRows, List<Column> columns) {
@@ -254,6 +261,142 @@ public class RefBookHelperImpl implements RefBookHelper {
             }
         }
         return result;
+    }
+
+    @Override
+    public RefBookRecordVersion saveOrUpdateDepartmentConfig(Long uniqueRecordId, long refBookId, long slaveRefBookId,
+                                                      int reportPeriodId, String departmentAlias, long departmentId,
+                                                      Map<String, RefBookValue> mainConfig,
+                                                      List<Map<String, RefBookValue>> tablePart,
+                                                      Logger logger) {
+        RefBook slaveRefBook = refBookFactory.get(slaveRefBookId);
+        RefBookDataProvider provider = refBookFactory.getDataProvider(refBookId);
+        RefBookDataProvider providerSlave = refBookFactory.getDataProvider(slaveRefBookId);
+        ReportPeriod rp = periodService.getReportPeriod(reportPeriodId);
+        String filter = departmentAlias + " = " + departmentId;
+
+        boolean needEdit = false;
+        RefBookRecord record = new RefBookRecord();
+
+        // Поиск версий настроек для указанного подразделения. Если они есть - создаем новую версию с существующим record_id, иначе создаем новый record_id (по сути элемент справочника)
+        List<Pair<Long, Long>> recordPairsExistence = provider.checkRecordExistence(null, filter);
+        if (recordPairsExistence.size() != 0) {
+            //Проверяем, к одному ли элементу относятся версии
+            Set<Long> recordIdSet = new HashSet<Long>();
+            for (Pair<Long, Long> pair : recordPairsExistence) {
+                recordIdSet.add(pair.getSecond());
+            }
+
+            if (recordIdSet.size() > 1) {
+                throw new ServiceException("Версии настроек, отобраные по фильтру, относятся к разным подразделениям");
+            }
+
+            // Существуют версии настроек для указанного подразделения
+            record.setRecordId(recordPairsExistence.get(0).getSecond());
+        }
+
+        // Проверяем, нужно ли обновление существующих настроек
+        List<Pair<Long, Long>> recordPairs = provider.checkRecordExistence(rp.getCalendarStartDate(), filter);
+        if (recordPairs.size() != 0) {
+            needEdit = true;
+            // Запись нашлась
+            if (recordPairs.size() != 1) {
+                throw new ServiceException("Найдено несколько настроек для подразделения ");
+            }
+        }
+
+        mainConfig.put(departmentAlias, new RefBookValue(RefBookAttributeType.REFERENCE, departmentId));
+
+        RefBookRecordVersion recordVersion;
+        if (!needEdit) {
+            record.setValues(mainConfig);
+            uniqueRecordId = provider.createRecordVersion(logger, rp.getCalendarStartDate(), null, Arrays.asList(record)).get(0);
+        } else {
+            provider.updateRecordVersion(logger, uniqueRecordId, rp.getCalendarStartDate(), null, mainConfig);
+        }
+        recordVersion = provider.getRecordVersionInfo(uniqueRecordId);
+
+        /** Сохраняем табличную часть */
+        String filterSlave = "LINK = " + uniqueRecordId;
+        RefBookAttribute sortAttr = slaveRefBook.getAttribute("ROW_ORD");
+
+        PagingResult<Map<String, RefBookValue>> paramsSlave = providerSlave.getRecords(rp.getCalendarStartDate(), null, filterSlave, sortAttr);
+
+        Set<Map<String, RefBookValue>> toUpdate = new HashSet<Map<String, RefBookValue>>();
+        Set<Map<String, RefBookValue>> toAdd = new HashSet<Map<String, RefBookValue>>();
+        Set<Map<String, RefBookValue>> toDelete = new HashSet<Map<String, RefBookValue>>();
+
+        int maxRowOrd = 0;
+        for (Map<String, RefBookValue> rowFromClient : tablePart) {
+            boolean contains = false;
+            for (Map<String, RefBookValue> rowFromServer : paramsSlave) {
+                if (rowFromClient.get("TAX_ORGAN_CODE").getStringValue().equals(rowFromServer.get("TAX_ORGAN_CODE").getStringValue())
+                        && rowFromClient.get("KPP").getStringValue().equals(rowFromServer.get("KPP").getStringValue())) {
+                    contains = true;
+                    rowFromClient.put("LINK",new RefBookValue(RefBookAttributeType.REFERENCE, uniqueRecordId));
+                    rowFromClient.put("ROW_ORD",rowFromServer.get("ROW_ORD"));
+                    rowFromClient.put("record_id",rowFromServer.get("record_id"));
+                    rowFromClient.put("DEPARTMENT_ID", new RefBookValue(RefBookAttributeType.REFERENCE, departmentId));
+                    toUpdate.add(rowFromClient);
+                    break;
+                }
+            }
+            if (rowFromClient.containsKey("ROW_ORD") && rowFromClient.get("ROW_ORD") != null) {
+                int rowOrd = rowFromClient.get("ROW_ORD").getNumberValue().intValue();
+                if (rowOrd > maxRowOrd) {
+                    maxRowOrd = rowOrd;
+                }
+            }
+            if (!contains) {
+                rowFromClient.put("LINK", new RefBookValue(RefBookAttributeType.REFERENCE, uniqueRecordId));
+                rowFromClient.put("ROW_ORD", new RefBookValue(RefBookAttributeType.NUMBER, ++maxRowOrd));
+                rowFromClient.put("DEPARTMENT_ID", new RefBookValue(RefBookAttributeType.REFERENCE, departmentId));
+                toAdd.add(rowFromClient);
+            }
+        }
+
+        List<RefBookRecord> recordsToAdd = new ArrayList<RefBookRecord>();
+        for (Map<String, RefBookValue> add : toAdd) {
+            RefBookRecord slaveRecord = new RefBookRecord();
+            slaveRecord.setValues(add);
+            slaveRecord.setRecordId(null);
+            recordsToAdd.add(slaveRecord);
+        }
+
+
+        for (Map<String, RefBookValue> rowFromServer : paramsSlave) {
+            boolean notFound = true;
+            for (Map<String, RefBookValue> rowFromClient : tablePart) {
+                if (rowFromClient.get("TAX_ORGAN_CODE").getStringValue().equals(rowFromServer.get("TAX_ORGAN_CODE").getStringValue())
+                        && rowFromClient.get("KPP").getStringValue().equals(rowFromServer.get("KPP").getStringValue())) {
+                    notFound = false;
+                    break;
+                }
+            }
+            if (notFound) {
+                toDelete.add(rowFromServer);
+            }
+        }
+
+        List<Long> deleteIds = new ArrayList<Long>();
+        for (Map<String, RefBookValue> del : toDelete) {
+            deleteIds.add(del.get("record_id").getNumberValue().longValue());
+        }
+
+        if (!logger.containsLevel(LogLevel.ERROR)) {
+            if (!recordsToAdd.isEmpty()) {
+                providerSlave.createRecordVersion(logger, recordVersion.getVersionStart(), recordVersion.getVersionEnd(), recordsToAdd);
+            }
+
+            for (Map<String, RefBookValue> up : toUpdate) {
+                providerSlave.updateRecordVersion(logger, up.get("record_id").getNumberValue().longValue(), recordVersion.getVersionStart(), recordVersion.getVersionEnd(), up);
+            }
+
+            if (!deleteIds.isEmpty()) {
+                providerSlave.deleteRecordVersions(logger, deleteIds);
+            }
+        }
+        return recordVersion;
     }
 
 }

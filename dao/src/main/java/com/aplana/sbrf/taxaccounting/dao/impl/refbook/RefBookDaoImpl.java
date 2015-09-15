@@ -1303,40 +1303,36 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         }
     }
 
-    private static final String CHECK_PARENT_CONFLICT = "with currentRecord as (select id, ref_book_id, record_id, version from ref_book_record where %s),\n" +
+    private static final String CHECK_PARENT_CONFLICT = "with currentRecord as (select id, ref_book_id, record_id, version from ref_book_record where id = :parentId),\n" +
             "nextVersion as (select min(r.version) as version from ref_book_record r, currentRecord cr where r.version > cr.version and r.record_id=cr.record_id and r.ref_book_id=cr.ref_book_id),\n" +
             "allRecords as (select cr.id, cr.version as versionStart, nv.version - interval '1' day as versionEnd from currentRecord cr, nextVersion nv)\n" +
             "select distinct id,\n" +
             "case\n" +
-            "\twhen (versionEnd is not null and ? > versionEnd) then 1\n" +
-            "\twhen ((versionEnd is null or ? <= versionEnd) and ? < versionStart) then -1\n" +
+            "\twhen (versionEnd is not null and :versionTo > versionEnd) then 1\n" +
+            "\twhen ((versionEnd is null or :versionTo <= versionEnd) and :versionFrom < versionStart) then -1\n" +
             "\telse 0\n" +
             "end as result\n" +
             "from allRecords";
 
     @Override
-    public List<Pair<Long, Integer>> checkParentConflict(Date versionFrom, Date versionTo, List<RefBookRecord> records) {
-        List<Long> ids = new ArrayList<Long>();
+    public List<Pair<Long, Integer>> checkParentConflict(Date versionFrom, List<RefBookRecord> records) {
+        final Set<Pair<Long, Integer>> result = new HashSet<Pair<Long, Integer>>();
         for (RefBookRecord record : records) {
-            Long id = record.getValues().get(RefBook.RECORD_PARENT_ID_ALIAS).getReferenceValue();
-            if (id != null) {
-                ids.add(id);
+            Long parentId = record.getValues().get(RefBook.RECORD_PARENT_ID_ALIAS).getReferenceValue();
+            if (parentId != null) {
+                Map<String, Object> params = new HashMap<String, Object>();
+                params.put("parentId", parentId);
+                params.put("versionFrom", versionFrom);
+                params.put("versionTo", record.getVersionTo());
+                getNamedParameterJdbcTemplate().query(CHECK_PARENT_CONFLICT, params, new RowCallbackHandler() {
+                    @Override
+                    public void processRow(ResultSet rs) throws SQLException {
+                        result.add(new Pair<Long, Integer>(SqlUtils.getLong(rs, "id"), SqlUtils.getInteger(rs, "result")));
+                    }
+                });
             }
         }
-        if (!ids.isEmpty()) {
-            String sql = String.format(CHECK_PARENT_CONFLICT, transformToSqlInStatement("id", ids));
-            final Set<Pair<Long, Integer>> result = new HashSet<Pair<Long, Integer>>();
-            getJdbcTemplate().query(sql, new RowMapper<Pair<Long, Integer>>() {
-                @Override
-                public Pair<Long, Integer> mapRow(ResultSet rs, int rowNum) throws SQLException {
-                    result.add(new Pair<Long, Integer>(SqlUtils.getLong(rs, "id"), SqlUtils.getInteger(rs, "result")));
-                    return null;
-                }
-            }, versionTo, versionTo, versionFrom);
-            return new ArrayList<Pair<Long, Integer>>(result);
-        } else {
-            return new ArrayList<Pair<Long, Integer>>();
-        }
+        return new ArrayList<Pair<Long, Integer>>(result);
     }
 
     @Override
@@ -2826,12 +2822,13 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             ") where (:versionTo is not null and :versionTo < versionStart) or (versionEnd is not null and versionEnd < :versionFrom)";
 
     @Override
-    public void isReferenceValuesCorrect(final Logger logger, String tableName, @NotNull Date versionFrom, Date versionTo,
+    public void isReferenceValuesCorrect(final Logger logger, String tableName, @NotNull Date versionFrom,
                                          @NotNull List<RefBookAttribute> attributes, List<RefBookRecord> records, final boolean isConfig) {
         if (attributes.size() > 0) {
-            List<Long> in = new ArrayList<Long>();
             final Map<Long, String> attributeIds = new HashMap<Long, String>();
+            List<Long> allIn = new ArrayList<Long>();
             for (RefBookRecord record : records) {
+                List<Long> in = new ArrayList<Long>();
                 Map<String, RefBookValue> values = record.getValues();
                 for (RefBookAttribute attribute : attributes) {
                     if (attribute.getAttributeType().equals(RefBookAttributeType.REFERENCE) &&
@@ -2842,34 +2839,37 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
                         in.add(id);
                     }
                 }
+                allIn.addAll(in);
+
+                if (in.size() != 0) {
+                    /** Проверяем пересекаются ли периоды ссылочных атрибутов с периодом текущей записи справочника */
+                    String sql = String.format(CHECK_REFERENCE_VERSIONS_IN_PERIOD, tableName, tableName, transformToSqlInStatement("id", in));
+                    Map<String, Object> params = new HashMap<String, Object>();
+                    params.put("versionFrom", versionFrom);
+                    params.put("versionTo", record.getVersionTo());
+                    getNamedParameterJdbcTemplate().query(sql, params, new RowCallbackHandler() {
+                        @Override
+                        public void processRow(ResultSet rs) throws SQLException {
+                            Long id = rs.getLong("id");
+                            Date versionStart = rs.getDate("versionStart");
+                            Date versionEnd = rs.getDate("versionEnd");
+                            logger.error("Период элемента, указанного в поле \"%s\" составляет %s - %s и не пересекается %s",
+                                    attributeIds.get(id),
+                                    sdf.format(versionStart),
+                                    versionEnd != null ? sdf.format(versionEnd) : "\"-\"",
+                                    (isConfig ? "с отчетным периодом!" : "с периодом актуальности версии!"));
+                        }
+                    });
+                }
             }
 
-            if (in.size() != 0) {
-                /** Проверяем пересекаются ли периоды ссылочных атрибутов с периодом текущей записи справочника */
-                String sql = String.format(CHECK_REFERENCE_VERSIONS_IN_PERIOD, tableName, tableName, transformToSqlInStatement("id", in));
-                Map<String, Object> params = new HashMap<String, Object>();
-                params.put("versionFrom", versionFrom);
-                params.put("versionTo", versionTo);
-                getNamedParameterJdbcTemplate().query(sql, params, new RowCallbackHandler() {
-                    @Override
-                    public void processRow(ResultSet rs) throws SQLException {
-                        Long id = rs.getLong("id");
-                        Date versionStart = rs.getDate("versionStart");
-                        Date versionEnd = rs.getDate("versionEnd");
-                        logger.error("Период элемента, указанного в поле \"%s\" составляет %s - %s и не пересекается %s",
-                                attributeIds.get(id),
-                                sdf.format(versionStart),
-                                versionEnd != null ? sdf.format(versionEnd) : "\"-\"",
-                                (isConfig ? "с отчетным периодом!" : "с периодом актуальности версии!"));
-                    }
-                });
+            if (logger.containsLevel(LogLevel.ERROR)) {
+                throw new ServiceException("Обнаружено некорректное значение атрибута");
+            }
 
-                if (logger.containsLevel(LogLevel.ERROR)) {
-                    throw new ServiceException("Обнаружено некорректное значение атрибута");
-                }
-
+            if (allIn.size() != 0) {
                 /** Проверяем не начинается ли период актуальности ссылочного атрибута раньше чем период актуальности текущей записи справочника */
-                sql = String.format(CHECK_REFERENCE_VERSIONS_START, tableName, transformToSqlInStatement("id", in));
+                String sql = String.format(CHECK_REFERENCE_VERSIONS_START, tableName, transformToSqlInStatement("id", allIn));
                 getJdbcTemplate().query(sql, new RowCallbackHandler() {
                     @Override
                     public void processRow(ResultSet rs) throws SQLException {
