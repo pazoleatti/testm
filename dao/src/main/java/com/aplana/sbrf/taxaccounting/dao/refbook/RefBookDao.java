@@ -641,4 +641,11 @@ public interface RefBookDao {
 	 * @return ref_book_record.id - ref_book_value
 	 */
 	Map<Long, RefBookValue> dereferenceValues(String tableName, Long attributeId, Collection<Long> recordIds);
+
+    /**
+     * Проверяет, существуют ли указанные версии элемента справочника
+     * @param uniqueRecordIds список уникальных идентификаторов версий записей справочника
+     * @return все записи существуют?
+     */
+    boolean isRecordsExist(List<Long> uniqueRecordIds);
 }

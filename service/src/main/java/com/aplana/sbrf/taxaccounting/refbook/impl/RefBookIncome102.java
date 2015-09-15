@@ -84,6 +84,11 @@ public class RefBookIncome102 implements RefBookDataProvider {
     }
 
     @Override
+    public boolean isRecordsExist(List<Long> uniqueRecordIds) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public PagingResult<Map<String, RefBookValue>> getChildrenRecords(Long parentRecordId, Date version, PagingParams pagingParams, String filter, RefBookAttribute sortAttribute) {
 		throw new UnsupportedOperationException();
     }

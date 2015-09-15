@@ -85,6 +85,11 @@ public abstract class AbstractReadOnlyRefBook implements RefBookDataProvider {
     }
 
     @Override
+    public boolean isRecordsExist(List<Long> uniqueRecordIds) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public RefBookRecordVersion getRecordVersionInfo(Long uniqueRecordId) {
 		RefBookRecordVersion version = new RefBookRecordVersion();
 		version.setRecordId(uniqueRecordId);

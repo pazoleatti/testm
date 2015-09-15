@@ -1,7 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.departmentconfigproperty.server;
 
 import com.aplana.sbrf.taxaccounting.dao.impl.refbook.RefBookUtils;
-import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.*;
@@ -62,7 +62,10 @@ public class SaveDepartmentRefBookValuesHandler extends AbstractActionHandler<Sa
         SaveDepartmentRefBookValuesResult result = new SaveDepartmentRefBookValuesResult();
         RefBook slaveRefBook = rbFactory.get(action.getSlaveRefBookId());
 
-        /** Специфичные проерки для настроек подразделений */
+        /** Проверка существования справочных атрибутов */
+        checkReferenceValues(rbFactory.getDataProvider(slaveRefBook.getId()), action.getRows());
+
+        /** Специфичные проверки для настроек подразделений */
         Pattern innPattern = Pattern.compile(RefBookUtils.INN_JUR_PATTERN);
         Pattern kppPattern = Pattern.compile(RefBookUtils.KPP_PATTERN);
         Pattern taxOrganPattern = Pattern.compile(RefBookUtils.TAX_ORGAN_PATTERN);
@@ -165,6 +168,31 @@ public class SaveDepartmentRefBookValuesHandler extends AbstractActionHandler<Sa
     @Override
     public void undo(SaveDepartmentRefBookValuesAction saveDepartmentRefBookValuesAction, SaveDepartmentRefBookValuesResult saveDepartmentRefBookValuesResult, ExecutionContext executionContext) throws ActionException {
 
+    }
+
+    /**
+     * Проверка существования записей справочника на которые ссылаются атрибуты.
+     * Считаем что все справочные атрибуты хранятся в универсальной структуре как и сами настройки
+     * @param provider
+     * @param rows
+     */
+    private void checkReferenceValues(RefBookDataProvider provider, List<Map<String, TableCell>> rows) {
+        List<Long> references = new ArrayList<Long>();
+        for (Map<String, TableCell> row : rows) {
+            for (Map.Entry<String, TableCell> e : row.entrySet()) {
+                if (e.getValue().getType() == null) {
+                    continue;
+                }
+                if (e.getValue().getType() == RefBookAttributeType.REFERENCE) {
+                    if (e.getValue().getRefValue() != null) {
+                        references.add(e.getValue().getRefValue());
+                    }
+                }
+            }
+        }
+        if (!provider.isRecordsExist(references)) {
+            throw new ServiceException("Данные не могут быть сохранены, так как часть выбранных справочных значений была удалена. Отредактируйте таблицу и попытайтесь сохранить заново");
+        }
     }
 
     private List<Map<String,RefBookValue>> convertRows(List<Map<String, TableCell>> rows) {

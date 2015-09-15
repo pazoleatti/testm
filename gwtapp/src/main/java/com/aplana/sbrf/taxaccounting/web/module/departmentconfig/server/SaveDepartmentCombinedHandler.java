@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.module.departmentconfig.server;
 
 import com.aplana.sbrf.taxaccounting.dao.impl.refbook.RefBookUtils;
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.*;
@@ -152,6 +153,9 @@ public class SaveDepartmentCombinedHandler extends AbstractActionHandler<SaveDep
                 paramsMap.put(DepartmentParamAliases.TAX_ORGAN_CODE_PROM.name(), new RefBookValue(RefBookAttributeType.STRING, depCombined.getTaxOrganCodeProm()));
             }
 
+            /** Проверка существования справочных атрибутов */
+            checkReferenceValues(provider, paramsMap);
+
             Logger logger = new Logger();
             logger.setTaUserInfo(securityService.currentUserInfo());
             RefBookRecord record = new RefBookRecord();
@@ -245,6 +249,27 @@ public class SaveDepartmentCombinedHandler extends AbstractActionHandler<SaveDep
             }
         }
         return result;
+    }
+
+
+    /**
+     * Проверка существования записей справочника на которые ссылаются атрибуты.
+     * Считаем что все справочные атрибуты хранятся в универсальной структуре как и сами настройки
+     * @param provider
+     * @param rows
+     */
+    private void checkReferenceValues(RefBookDataProvider provider, Map<String, RefBookValue> rows) {
+        List<Long> references = new ArrayList<Long>();
+        for (Map.Entry<String, RefBookValue> e : rows.entrySet()) {
+            if (e.getValue().getAttributeType() == RefBookAttributeType.REFERENCE) {
+                if (e.getValue().getReferenceValue() != null) {
+                    references.add(e.getValue().getReferenceValue());
+                }
+            }
+        }
+        if (!provider.isRecordsExist(references)) {
+            throw new ServiceException("Данные не могут быть сохранены, так как часть выбранных справочных значений была удалена. Отредактируйте таблицу и попытайтесь сохранить заново");
+        }
     }
 
     @Override

@@ -134,6 +134,11 @@ public class RefBookUniversal implements RefBookDataProvider {
     }
 
     @Override
+    public boolean isRecordsExist(List<Long> uniqueRecordIds) {
+        return refBookDao.isRecordsExist(uniqueRecordIds);
+    }
+
+    @Override
     @Transactional(noRollbackFor = DaoException.class)
 	public Map<String, RefBookValue> getRecordData(Long recordId) {
 		return refBookDao.getRecordData(refBookId, recordId);
