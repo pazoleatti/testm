@@ -211,7 +211,7 @@ public class FormDataServiceTest extends Assert{
             @Override
             public Object answer(InvocationOnMock invocation) {
                 Object[] arguments = invocation.getArguments();
-                map.put((String) arguments[0], new LockData((String) arguments[0], (Integer) arguments[1], new Date()));
+                map.put((String) arguments[0], new LockData((String) arguments[0], (Integer) arguments[1], new Date(), true));
                 return null;
             }
         }).when(lockDataService).lock(anyString(), anyInt(), anyString(), anyString(), anyInt());
