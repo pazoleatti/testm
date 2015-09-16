@@ -2,7 +2,6 @@ package com.aplana.sbrf.taxaccounting.web.module.refbookdata.client;
 
 import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
-import com.aplana.sbrf.taxaccounting.web.main.api.client.TaPlaceManager;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
@@ -12,10 +11,10 @@ import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.even
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.event.UpdateForm;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.event.DeleteItemEvent;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.event.SearchButtonEvent;
-import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.event.ShowItemEvent;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.linear.RefBookLinearPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.sendquerydialog.DialogPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.versionform.RefBookVersionPresenter;
+import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.versionform.event.BackEvent;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.*;
 import com.aplana.sbrf.taxaccounting.web.module.refbooklist.client.RefBookListTokens;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -39,12 +38,17 @@ import java.util.Date;
 
 public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
 		RefBookDataPresenter.MyProxy> implements RefBookDataUiHandlers,
-        SetFormMode.SetFormModeHandler {
+        SetFormMode.SetFormModeHandler, BackEvent.BackHandler {
 
     @Override
     public void onSetFormMode(SetFormMode event) {
         setMode(event.getFormMode());
         dataInterface.setMode(event.getFormMode());
+    }
+
+    @Override
+    public void onBack(BackEvent event) {
+        onBackToRefBookAnchorClicked();
     }
 
     /*@Override
@@ -61,8 +65,8 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
     public interface MyProxy extends ProxyPlace<RefBookDataPresenter>, Place {
     }
 
-    static final Object TYPE_editFormPresenter = new Object();
-    static final Object TYPE_mainFormPresenter = new Object();
+    public static final Object TYPE_editFormPresenter = new Object();
+    public static final Object TYPE_mainFormPresenter = new Object();
 
     private Long refBookId;
 
@@ -79,9 +83,14 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
     private final HandlerRegistration[] registrations = new HandlerRegistration[2];
 
     private final DispatchAsync dispatcher;
-    private final TaPlaceManager placeManager;
+    private final PlaceManager placeManager;
 
     public interface MyView extends View, HasUiHandlers<RefBookDataUiHandlers> {
+        /**
+         * Выставляет наменование на форме при переходе на все версии
+         * @param verCount колличество версий
+         * @param relDate дата актульности
+         */
         void setRefBookNameDesc(String verCount, Date relDate);
         void setRefBookNameDesc(String desc);
         Date getRelevanceDate();
@@ -108,7 +117,7 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
                                 PlaceManager placeManager, final MyProxy proxy, DispatchAsync dispatcher) {
         super(eventBus, view, proxy, RevealContentTypeHolder.getMainContent());
         this.dispatcher = dispatcher;
-        this.placeManager = (TaPlaceManager)placeManager;
+        this.placeManager = placeManager;
         this.editFormPresenter = editFormPresenter;
         this.versionPresenter = versionPresenter;
         this.dialogPresenter = dialogPresenter;
@@ -218,7 +227,7 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
                                                             refBookLinearPresenter.initState(getView().getRelevanceDate(), getView().getSearchPattern());
                                                             refBookLinearPresenter.updateTable();
                                                             //т.к. не срабатывает событие onSelectionChange приповторном переходе
-                                                            editFormPresenter.show(recordId);
+//                                                            editFormPresenter.show(recordId);
                                                             getProxy().manualReveal(RefBookDataPresenter.this);
                                                         }
                                                     }, RefBookDataPresenter.this));
@@ -234,7 +243,7 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
                                                             getView().setRefBookNameDesc(result.getName());
                                                         }
                                                     }, RefBookDataPresenter.this));
-                                    registrations[1] = editFormPresenter.addUpdateFormHandler(new UpdateForm.UpdateFormHandler() {
+                                    /*registrations[1] = editFormPresenter.addUpdateFormHandler(new UpdateForm.UpdateFormHandler() {
                                         @Override
                                         public void onUpdateForm(UpdateForm event) {
                                             GetNameAction nameAction = new GetNameAction();
@@ -249,7 +258,7 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
                                                                 }
                                                             }, RefBookDataPresenter.this));
                                         }
-                                    });
+                                    });*/
                                 } else {
                                     getProxy().manualReveal(RefBookDataPresenter.this);
                                     Dialog.errorMessage("Доступ к справочнику запрещен!");
@@ -262,6 +271,7 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
     public void onBind(){
         super.onBind();
         addVisibleHandler(SetFormMode.getType(), this);
+        addVisibleHandler(BackEvent.getType(), this);
     }
 
     @Override
@@ -314,7 +324,8 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
         getView().setRefBookNameDesc(refBookName);
         setMode(mode);
         editFormPresenter.setVersionMode(false);
-        ShowItemEvent.fire(RefBookDataPresenter.this, null, recordId);
+        //ShowItemEvent.fire(RefBookDataPresenter.this, null, versionPresenter.getSelectedRow().getRefBookRowId());
+        refBookLinearPresenter.updateTable();
         registrations[1].removeHandler();
     }
 
@@ -368,6 +379,24 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
                                         editFormPresenter.setRecordId(result.getRecordId());
                                     }
                                 }, RefBookDataPresenter.this));
+
+                //Изменение заголовка формы при изменение неких атрибутов
+                registrations[1] = editFormPresenter.addUpdateFormHandler(new UpdateForm.UpdateFormHandler() {
+                    @Override
+                    public void onUpdateForm(UpdateForm event) {
+                        GetNameAction nameAction = new GetNameAction();
+                        nameAction.setRefBookId(refBookId);
+                        nameAction.setUniqueRecordId(recordId);
+                        dispatcher.execute(nameAction,
+                                CallbackUtils.defaultCallback(
+                                        new AbstractCallback<GetNameResult>() {
+                                            @Override
+                                            public void onSuccess(GetNameResult result) {
+                                                getView().setRefBookNameDesc(result.getUniqueAttributeValues(), getView().getRelevanceDate());
+                                            }
+                                        }, RefBookDataPresenter.this));
+                    }
+                });
             }
         };
     }

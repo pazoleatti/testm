@@ -90,11 +90,11 @@ public class RefBookLinearPresenter extends PresenterWidget<RefBookLinearPresent
                                 }
                                 /*editPresenter.setMode(mode);*/
                                 ShowItemEvent.fire(RefBookLinearPresenter.this, null, null);
-                                /*getView().updateTable();*/
-                                dataProvider.remove(getSelectedRow());
-                                if (dataProvider.visibleData.size() != 0) {
+                                getView().updateTable();
+                                /*dataProvider.remove(getSelectedRow());*/
+                                /*if (getSelectedRowIndex() != 0) {
                                     getView().setSelected(dataProvider.visibleData.get(dataProvider.visibleData.size() - 1).getRefBookRowId());
-                                }
+                                }*/
                             }
                         }, this));
     }
@@ -125,12 +125,11 @@ public class RefBookLinearPresenter extends PresenterWidget<RefBookLinearPresent
         row.setValues(event.getRecordChanges().getInfo());
         row.setRefBookRowId(event.getRecordChanges().getId());
         if (event.getRecordChanges().isCreate()){
-            dataProvider.add(row);
-            getView().setSelected(row.getRefBookRowId());
+            updateTable();
         } else {
-            dataProvider.modify(row);
+            updateTable();
         }
-
+        getView().setSelected(row.getRefBookRowId());
     }
 
     public interface MyView extends View, HasUiHandlers<RefBookDataLinearUiHandlers> {
@@ -258,23 +257,6 @@ public class RefBookLinearPresenter extends PresenterWidget<RefBookLinearPresent
                                     }*/
                                 }
                             }, RefBookLinearPresenter.this));
-        }
-
-        public void remove(RefBookDataRow row) {
-            visibleData.remove(row);
-            getView().setTableData(getView().getPageStart(), getView().getTotalCount()-1, visibleData);
-        }
-
-        public void add(RefBookDataRow row){
-            visibleData.add(row);
-            getView().setTableData(getView().getPageStart(), getView().getTotalCount()+1, visibleData);
-        }
-
-        public void modify(RefBookDataRow row){
-            int index = visibleData.indexOf(row);
-            visibleData.remove(index);
-            visibleData.add(index, row);
-            getView().setTableData(getView().getPageStart(), visibleData.size(), visibleData);
         }
     }
 

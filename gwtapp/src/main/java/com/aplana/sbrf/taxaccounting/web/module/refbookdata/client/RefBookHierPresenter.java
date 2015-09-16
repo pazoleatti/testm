@@ -16,6 +16,7 @@ import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.event.DeleteI
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.event.SearchButtonEvent;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.hierarchy.RefBookHierDataPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.versionform.RefBookVersionPresenter;
+import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.versionform.event.BackEvent;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.*;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -40,7 +41,7 @@ import java.util.Date;
  * User: avanteev
  */
 public class RefBookHierPresenter extends Presenter<RefBookHierPresenter.MyView, RefBookHierPresenter.MyProxy>
-        implements RefBookHierUIHandlers, SetFormMode.SetFormModeHandler {
+        implements RefBookHierUIHandlers, SetFormMode.SetFormModeHandler, BackEvent.BackHandler {
 
     private final DispatchAsync dispatcher;
     private PlaceManager placeManager;
@@ -142,6 +143,12 @@ public class RefBookHierPresenter extends Presenter<RefBookHierPresenter.MyView,
         getView().updateView(event.getFormMode());
     }
 
+    @Override
+    public void onBack(BackEvent event) {
+        refBookHierDataPresenter.onDeleteItem(new DeleteItemEvent());
+        onBackToRefBookAnchorClicked();
+    }
+
     /*@Override
     public void onUpdateForm(UpdateForm event) {
         if (event.isSuccess()) {
@@ -182,6 +189,7 @@ public class RefBookHierPresenter extends Presenter<RefBookHierPresenter.MyView,
     protected void onBind() {
         super.onBind();
         addVisibleHandler(SetFormMode.getType(), this);
+        addVisibleHandler(BackEvent.getType(), this);
     }
 
     @Override

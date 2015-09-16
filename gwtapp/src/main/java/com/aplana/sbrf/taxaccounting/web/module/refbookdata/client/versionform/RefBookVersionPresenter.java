@@ -6,12 +6,12 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallba
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
-import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.RefBookDataTokens;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.event.RollbackTableRowSelection;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.event.UpdateForm;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.event.AddItemEvent;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.event.DeleteItemEvent;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.event.ShowItemEvent;
+import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.versionform.event.BackEvent;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.*;
 import com.google.gwt.view.client.AbstractDataProvider;
 import com.google.gwt.view.client.AsyncDataProvider;
@@ -24,11 +24,8 @@ import com.gwtplatform.mvp.client.HasUiHandlers;
 import com.gwtplatform.mvp.client.PresenterWidget;
 import com.gwtplatform.mvp.client.View;
 import com.gwtplatform.mvp.client.annotations.ProxyEvent;
-import com.gwtplatform.mvp.client.proxy.PlaceManager;
-import com.gwtplatform.mvp.client.proxy.PlaceRequest;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 
 public class RefBookVersionPresenter extends PresenterWidget<RefBookVersionPresenter.MyView>
@@ -49,7 +46,6 @@ public class RefBookVersionPresenter extends PresenterWidget<RefBookVersionPrese
     }
 
 	private final DispatchAsync dispatcher;
-	private final PlaceManager placeManager;
     private TableDataProvider dataProvider;
 
     @Override
@@ -57,8 +53,8 @@ public class RefBookVersionPresenter extends PresenterWidget<RefBookVersionPrese
         getView().updateTable();
     }
 
-    public Integer getSelectedRowIndex() {
-        return getView().getSelectedRowIndex();
+    public RefBookDataRow getSelectedRow() {
+        return getView().getSelectedRow();
     }
 
     @Override
@@ -117,10 +113,9 @@ public class RefBookVersionPresenter extends PresenterWidget<RefBookVersionPrese
 
     @Inject
 	public RefBookVersionPresenter(final EventBus eventBus, final MyView view,
-                                   PlaceManager placeManager, DispatchAsync dispatcher) {
+                                   DispatchAsync dispatcher) {
 		super(eventBus, view);
 		this.dispatcher = dispatcher;
-		this.placeManager = placeManager;
 		getView().setUiHandlers(this);
         dataProvider = new TableDataProvider();
         getView().assignDataProvider(getView().getPageSize(), dataProvider);
@@ -188,22 +183,22 @@ public class RefBookVersionPresenter extends PresenterWidget<RefBookVersionPrese
                                 }
                                 LogCleanEvent.fire(RefBookVersionPresenter.this);
                                 LogAddEvent.fire(RefBookVersionPresenter.this, result.getUuid());
-                                ShowItemEvent.fire(RefBookVersionPresenter.this, null, null);
+//                                ShowItemEvent.fire(RefBookVersionPresenter.this, null, null);
                                 //editPresenter.clean();
                                 if (result.getNextVersion() != null) {
-                                    dataProvider.remove(getView().getSelectedRow());
-                                    if (!dataProvider.visibleData.isEmpty()) {
-                                        getView().setSelected(dataProvider.visibleData.get(dataProvider.visibleData.size() - 1).getRefBookRowId());
-                                    }
-                                    //getView().updateTable();
-                                    ShowItemEvent.fire(RefBookVersionPresenter.this, isHierarchy ?
-                                            getView().getSelectedRow().getValues().get("PARENT_ID") : null,
+                                    getView().setSelected(result.getNextVersion());
+                                    RefBookDataRow row = getView().getSelectedRow();
+                                    ShowItemEvent.fire(
+                                            RefBookVersionPresenter.this, isHierarchy ? row.getValues().get("PARENT_ID") : null,
                                             result.getNextVersion());
+                                    getView().updateTable();
                                 } else {
-                                    placeManager
+                                    /*placeManager
                                             .revealPlace(new PlaceRequest.Builder().nameToken(isHierarchy ? RefBookDataTokens.refBookHierData : RefBookDataTokens.refBookData)
                                                     .with(RefBookDataTokens.REFBOOK_DATA_ID, String.valueOf(refBookId))
-                                                    .build());
+                                                    .build());*/
+                                    BackEvent.fire(RefBookVersionPresenter.this);
+                                    ShowItemEvent.fire(RefBookVersionPresenter.this, null, null);
                                 }
 							}
 						}, this));
@@ -227,8 +222,6 @@ public class RefBookVersionPresenter extends PresenterWidget<RefBookVersionPrese
 
 	private class TableDataProvider extends AsyncDataProvider<RefBookDataRow> {
 
-        private List<RefBookDataRow> visibleData = new LinkedList<RefBookDataRow>();
-
 		@Override
 		protected void onRangeChanged(HasData<RefBookDataRow> display) {
 			if (refBookId == null) return;
@@ -242,8 +235,6 @@ public class RefBookVersionPresenter extends PresenterWidget<RefBookVersionPrese
 							new AbstractCallback<GetRefBookRecordVersionResult>() {
 								@Override
 								public void onSuccess(GetRefBookRecordVersionResult result) {
-                                    visibleData.clear();
-                                    visibleData.addAll(result.getDataRows());
 									getView().setTableData(range.getStart(),
 											result.getTotalCount(), result.getDataRows());
                                     if (recordId == null && !result.getDataRows().isEmpty()) {
@@ -261,23 +252,6 @@ public class RefBookVersionPresenter extends PresenterWidget<RefBookVersionPrese
 								}
 							}, RefBookVersionPresenter.this));
 		}
-
-        public void remove(RefBookDataRow row) {
-            visibleData.remove(row);
-            getView().setTableData(getView().getPageStart(), getView().getTotalCount()-1, visibleData);
-        }
-
-        public void add(RefBookDataRow row){
-            visibleData.add(row);
-            getView().setTableData(getView().getPageStart(), getView().getTotalCount()+1, visibleData);
-        }
-
-        public void modify(RefBookDataRow row){
-            int index = visibleData.indexOf(row);
-            visibleData.remove(index);
-            visibleData.add(index, row);
-            getView().setTableData(getView().getPageStart(), visibleData.size(), visibleData);
-        }
 	}
 
     @Override

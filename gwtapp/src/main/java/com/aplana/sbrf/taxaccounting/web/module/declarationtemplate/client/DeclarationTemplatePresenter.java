@@ -421,16 +421,7 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
                 Dialog.infoMessage(SUCCESS_MSG);
             }
         };
-        EndLoadFileEvent.EndLoadFileHandler loadFileHandlerXsd = new EndLoadFileEvent.EndLoadFileHandler() {
-            @Override
-            public void onEndLoad(EndLoadFileEvent event) {
-                if (event.isHasError()){
-                    Dialog.errorMessage(ERROR_MSG);
-                }
-                LogAddEvent.fire(DeclarationTemplatePresenter.this, event.getUuid());
-            }
-        };
-        EndLoadFileEvent.EndLoadFileHandler loadFileHandlerJrxml = new EndLoadFileEvent.EndLoadFileHandler() {
+        EndLoadFileEvent.EndLoadFileHandler loadFileHandlerContent = new EndLoadFileEvent.EndLoadFileHandler() {
             @Override
             public void onEndLoad(EndLoadFileEvent event) {
                 if (event.isHasError()){
@@ -455,8 +446,8 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
         handlerRegistrations[0] = getView().addValueChangeHandlerJrxml(vchJrxml);
         handlerRegistrations[1] = getView().addValueChangeHandlerXsd(vchXsd);
         handlerRegistrations[2] = getView().addChangeHandlerDect(vchDect);
-        handlerRegistrations[3] = getView().addEndLoadHandlerXsd(loadFileHandlerXsd);
-        handlerRegistrations[4] = getView().addEndLoadHandlerJrxml(loadFileHandlerJrxml);
+        handlerRegistrations[3] = getView().addEndLoadHandlerXsd(loadFileHandlerContent);
+        handlerRegistrations[4] = getView().addEndLoadHandlerJrxml(loadFileHandlerContent);
         handlerRegistrations[5] = getView().addEndLoadHandlerDect(loadFileHandlerDect);
         handlerRegistrations[6] = getView().addJrxmlLoadHandlerDect(getJrxmlFileExistHandler(true));
         handlerRegistrations[7] = getView().addJrxmlLoadHandler(getJrxmlFileExistHandler(false));
