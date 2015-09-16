@@ -2,7 +2,7 @@
 <formTemplateContent>
     <fixedRows>false</fixedRows>
     <name>Предоставление гарантий</name>
-    <fullName>Отчет в отношении доходов ПАО «Сбербанк России» по Контролируемым сделкам, связанным с предоставлением гарантий</fullName>
+    <fullName>Отчет в отношении доходов ПАО Сбербанк по Контролируемым сделкам, связанным с предоставлением гарантий</fullName>
     <header>ПРИЛОЖЕНИЕ 2 |к Распоряжению | от "__" апреля 2013 №___</header>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>rowNumber</alias>
