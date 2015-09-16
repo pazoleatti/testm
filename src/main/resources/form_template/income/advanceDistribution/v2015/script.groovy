@@ -480,7 +480,7 @@ def calc18Parts(def dataRows, def prevDataRows, def row) {
     if (currentSum) {
         return (currentSum - previousSum) * row.taxSum / currentSum
     }
-    return null
+    return BigDecimal.ZERO
 }
 
 void fixCA18_19(def prevDataRows, def dataRows, def rowCA, def reportPeriod) {
