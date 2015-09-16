@@ -175,8 +175,7 @@ public class LockDataServiceImpl implements LockDataService {
                                 throw new ServiceException(String.format("Невозможно продлить блокировку, так как она установлена " +
                                         "пользователем \"$s\"(id = %s). Текущий пользователь id = %s", blocker.getLogin(), blocker.getId()));
                             }
-                            Date dateBefore = new Date();
-                            dao.updateLock(key, new Date(dateBefore.getTime() + age));
+                            dao.updateLock(key, age);
                         } else {
                             internalLock(key, userId, age, description, state, serverInfo.getServerName()); // создаем блокировку, если ее не было
                         }
@@ -324,7 +323,7 @@ public class LockDataServiceImpl implements LockDataService {
 		if (lock == null) {
 			return null;
 		}
-		if (new Date().after(lock.getDateBefore())) {
+		if (!lock.isValid()) {
 			dao.deleteLock(lock.getKey());
 			return null;
 		}
@@ -335,8 +334,7 @@ public class LockDataServiceImpl implements LockDataService {
 	 * Блокировка без всяких проверок - позволяет сократить количество обращений к бд для вложенных вызовов методов
 	 */
 	private void internalLock(String key, int userId, long age, String description, String state, String serverNode) {
-		Date dateBefore = new Date();
-		dao.createLock(key, userId, new Date(dateBefore.getTime() + age), description, state, serverNode);
+		dao.createLock(key, userId, age, description, state, serverNode);
 	}
 
     @Override

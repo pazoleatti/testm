@@ -117,9 +117,8 @@ public class LogBusinessDaoImpl extends AbstractDao implements LogBusinessDao {
 
 		jt.update(
 				"insert into log_business (id, log_date, event_id, user_login, roles, declaration_data_id, form_data_id, user_department_name, note)" +
-						" values (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+						" values (?, sysdate, ?, ?, ?, ?, ?, ?, ?)",
 				id,
-				logBusiness.getLogDate(),
 				logBusiness.getEventId(),
 				logBusiness.getUserLogin(),
 				logBusiness.getRoles(),

@@ -134,6 +134,11 @@ public class RefBookUniversal implements RefBookDataProvider {
     }
 
     @Override
+    public boolean isRecordsExist(List<Long> uniqueRecordIds) {
+        return refBookDao.isRecordsExist(uniqueRecordIds);
+    }
+
+    @Override
     @Transactional(noRollbackFor = DaoException.class)
 	public Map<String, RefBookValue> getRecordData(Long recordId) {
 		return refBookDao.getRecordData(refBookId, recordId);
@@ -233,11 +238,25 @@ public class RefBookUniversal implements RefBookDataProvider {
             for (RefBookRecord record : records) {
                 if (record.getRecordId() == null) {
                     countIds++;
+                    record.setVersionTo(versionTo);
+                } else {
+                    //Получение фактической даты окончания, которая может быть задана датой начала следующей версии
+                    RefBookRecordVersion nextVersion = refBookDao.getNextVersion(refBookId, record.getRecordId(), versionFrom);
+                    if (nextVersion != null) {
+                        Date versionEnd = nextVersion.getVersionStart();
+                        if (versionEnd != null && versionFrom.after(versionEnd)) {
+                            throw new ServiceException("Дата окончания настроек подразделения получена некорректно");
+                        }
+                        record.setVersionTo(versionEnd);
+                    } else {
+                        record.setVersionTo(versionTo);
+
+                    }
                 }
             }
 
             //Проверка корректности
-            checkCorrectness(logger, refBook, null, versionFrom, versionTo, attributes, records);
+            checkCorrectness(logger, refBook, null, versionFrom, attributes, records);
 
             if (!refBookId.equals(RefBook.DEPARTMENT_CONFIG_TRANSPORT) &&
                     !refBookId.equals(RefBook.DEPARTMENT_CONFIG_INCOME) &&
@@ -253,8 +272,8 @@ public class RefBookUniversal implements RefBookDataProvider {
                     for (RefBookRecord record : records) {
                         //Проверка пересечения версий
                         if (record.getRecordId() != null) {
-                            boolean needToCreateFakeVersion = crossVersionsProcessing(refBookDao.checkCrossVersions(refBookId, record.getRecordId(), versionFrom, versionTo, null),
-                                    refBook, versionFrom, versionTo, logger);
+                            boolean needToCreateFakeVersion = crossVersionsProcessing(refBookDao.checkCrossVersions(refBookId, record.getRecordId(), versionFrom, record.getVersionTo(), null),
+                                    refBook, versionFrom, record.getVersionTo(), logger);
                             if (!needToCreateFakeVersion) {
                                 //Добавляем запись в список тех, для которых не будут созданы фиктивные версии
                                 excludedVersionEndRecords.add(record.getRecordId());
@@ -274,7 +293,7 @@ public class RefBookUniversal implements RefBookDataProvider {
     /**
      * Проверка корректности
      */
-    private void checkCorrectness(Logger logger, RefBook refBook, Long uniqueRecordId, Date versionFrom, Date versionTo, List<RefBookAttribute> attributes, List<RefBookRecord> records) {
+    private void checkCorrectness(Logger logger, RefBook refBook, Long uniqueRecordId, Date versionFrom, List<RefBookAttribute> attributes, List<RefBookRecord> records) {
         //Проверка обязательности заполнения записей справочника
         List<String> errors = RefBookUtils.checkFillRequiredRefBookAtributes(attributes, records);
         if (errors.size() > 0){
@@ -304,26 +323,29 @@ public class RefBookUniversal implements RefBookDataProvider {
 
             //Проверка отсутствия конфликта с датой актуальности родительского элемента
             if (refBook.isHierarchic() && refBook.isVersioned()) {
-                checkParentConflict(logger, versionFrom, versionTo, records);
+                checkParentConflict(logger, versionFrom, records);
             }
-            //Получаем записи у которых совпали значения уникальных атрибутов
-            List<Pair<Long,String>> matchedRecords = refBookDao.getMatchedRecordsByUniqueAttributes(refBookId, uniqueRecordId, attributes, records);
-            if (matchedRecords != null && !matchedRecords.isEmpty()) {
-                if (refBook.isVersioned()) {
-                    throw new ServiceException(String.format(UNIQ_ERROR_MSG, makeAttrNames(matchedRecords, null)));
-                }
-                //Проверка на пересечение версий у записей справочника, в которых совпали уникальные атрибуты
-                List<Long> conflictedIds = refBookDao.checkConflictValuesVersions(matchedRecords, versionFrom, versionTo);
 
-                if (conflictedIds.size() > 0) {
-                    throw new ServiceException(String.format(UNIQ_ERROR_MSG, makeAttrNames(matchedRecords, conflictedIds)));
+            for (RefBookRecord record : records) {
+                //Получаем записи у которых совпали значения уникальных атрибутов
+                List<Pair<Long,String>> matchedRecords = refBookDao.getMatchedRecordsByUniqueAttributes(refBookId, uniqueRecordId, attributes, Arrays.asList(record));
+                if (matchedRecords != null && !matchedRecords.isEmpty()) {
+                    if (refBook.isVersioned()) {
+                        throw new ServiceException(String.format(UNIQ_ERROR_MSG, makeAttrNames(matchedRecords, null)));
+                    }
+                    //Проверка на пересечение версий у записей справочника, в которых совпали уникальные атрибуты
+                    List<Long> conflictedIds = refBookDao.checkConflictValuesVersions(matchedRecords, versionFrom, record.getVersionTo());
+
+                    if (conflictedIds.size() > 0) {
+                        throw new ServiceException(String.format(UNIQ_ERROR_MSG, makeAttrNames(matchedRecords, conflictedIds)));
+                    }
                 }
             }
         }
 
         if (refBook.isVersioned()) {
             //Проверка ссылочных значений
-            refBookDao.isReferenceValuesCorrect(logger, REF_BOOK_RECORD_TABLE_NAME, versionFrom, versionTo,
+            refBookDao.isReferenceValuesCorrect(logger, REF_BOOK_RECORD_TABLE_NAME, versionFrom,
                     attributes, records, isConfig);
         }
     }
@@ -372,8 +394,8 @@ public class RefBookUniversal implements RefBookDataProvider {
     /**
      * Проверка отсутствия конфликта с датой актуальности родительского элемента
      */
-    private void checkParentConflict(Logger logger, Date versionFrom, Date versionTo, List<RefBookRecord> records) {
-        List<Pair<Long, Integer>> checkResult = refBookDao.checkParentConflict(versionFrom, versionTo, records);
+    private void checkParentConflict(Logger logger, Date versionFrom, List<RefBookRecord> records) {
+        List<Pair<Long, Integer>> checkResult = refBookDao.checkParentConflict(versionFrom, records);
         if (!checkResult.isEmpty()) {
             for (Pair<Long, Integer> conflict : checkResult) {
                 //Дата окончания периода актуальности проверяемой версии больше даты окончания периода актуальности родительской записи для проверяемой версии
@@ -419,6 +441,9 @@ public class RefBookUniversal implements RefBookDataProvider {
                 if (versionTo == null) {
                     if (nextVersion != null && logger != null) {
                         logger.info("Установлена дата окончания актуальности версии "+formatter.get().format(SimpleDateUtils.addDayToDate(nextVersion.getVersionStart(), -1))+" в связи с наличием следующей версии");
+                        if (!record.getVersionTo().equals(nextVersion.getVersionStart())) {
+                            throw new ServiceException("Дата окончания получена некорректно!");
+                        }
                     }
                 } else {
                     if (!excludedVersionEndRecords.contains(record.getRecordId())) {
@@ -568,9 +593,10 @@ public class RefBookUniversal implements RefBookDataProvider {
             RefBookRecord refBookRecord = new RefBookRecord();
             refBookRecord.setUniqueRecordId(uniqueRecordId);
             refBookRecord.setValues(records);
+            refBookRecord.setVersionTo(versionTo);
 
             //Проверка корректности
-            checkCorrectness(logger, refBook, uniqueRecordId, versionFrom, versionTo, attributes, Arrays.asList(refBookRecord));
+            checkCorrectness(logger, refBook, uniqueRecordId, versionFrom, attributes, Arrays.asList(refBookRecord));
 
             if (refBook.isHierarchic()) {
                 RefBookValue oldParent = refBookDao.getValue(uniqueRecordId, refBook.getAttribute(RefBook.RECORD_PARENT_ID_ALIAS).getId());
@@ -633,15 +659,7 @@ public class RefBookUniversal implements RefBookDataProvider {
                 } else {
                     if (!isValuesChanged) {
                         //Если изменился только период актуальности, то ищем все ссылки не пересекающиеся с новым периодом, но которые действовали в старом
-                        Date oldStart = oldVersionPeriod.getVersionStart();
-                        Date oldEnd = oldVersionPeriod.getVersionEnd();
-                        if (!(((versionTo == oldEnd && versionTo == null) || versionTo.equals(oldEnd) && versionFrom.before(oldStart)) ||                                           //период расширился слева
-                                (versionFrom.equals(oldStart) && ((oldEnd != null && versionTo == null) || (oldEnd != null && versionTo != null && versionTo.after(oldEnd)))) ||    //период расширился справа
-                                (versionFrom.before(oldStart) && ((oldEnd != null && versionTo == null) || (oldEnd != null && versionTo != null && versionTo.after(oldEnd))))       //период расширился слева и справа
-                        )) {
-                            //Если период расширился то проверку использования можно не выполнять, т.к все ссылки точно действуют в большем периоде
-                            checkUsages(refBook, uniqueRecordId, versionFrom, versionTo, false, logger);
-                        }
+                        checkUsages(refBook, uniqueRecordId, versionFrom, versionTo, false, logger);
                     }
 
                     List<Long> uniqueIdAsList = Arrays.asList(uniqueRecordId);

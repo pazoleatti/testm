@@ -5,6 +5,7 @@ import com.aplana.sbrf.taxaccounting.model.LockData;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 
+import javax.validation.constraints.NotNull;
 import java.util.Date;
 import java.util.List;
 
@@ -35,20 +36,20 @@ public interface LockDataDao {
 	 * Создает новую блокировку
      * @param key код блокировки
      * @param userId код пользователя, установившего блокировку
-     * @param dateBefore срок жизни блокировки
+     * @param min время жизни блокировки
      * @param description описание блокировки
      * @param state Статус асинхронной задачи, связанной с блокировкой
      * @param serverNode Наименование узла кластера, на котором выполняется связанная асинхронная задача
      */
-	void createLock(String key, int userId, Date dateBefore, String description, String state, String serverNode);
+	void createLock(String key, int userId, long min, String description, String state, String serverNode);
 
 	/**
 	 * Обновляет блокировку
 	 * @param key код блокировки
-	 * @param dateBefore срок жизни блокировки
+	 * @param min время жизни блокировки
 	 * @throws com.aplana.sbrf.taxaccounting.model.exception.LockException если блокировки нет в БД
 	 */
-	void updateLock(String key, Date dateBefore);
+	void updateLock(String key, long min);
 
 	/**
 	 * Снимает блокировку

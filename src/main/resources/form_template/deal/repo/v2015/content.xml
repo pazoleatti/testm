@@ -2,7 +2,7 @@
 <formTemplateContent>
     <fixedRows>false</fixedRows>
     <name>Сделки РЕПО</name>
-    <fullName>Отчет в отношении доходов и расходов по сделкам РЕПО ПАО «Сбербанк России», признанных Контролируемыми сделками</fullName>
+    <fullName>Отчет в отношении доходов и расходов по сделкам РЕПО ПАО Сбербанк, признанных Контролируемыми сделками</fullName>
     <code>ПРИЛОЖЕНИЕ 1|к Распоряжению|от "__" марта 2013 № ___</code>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>rowNum</alias>

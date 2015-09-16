@@ -94,6 +94,11 @@ public class RefBookOktmoProvider implements RefBookDataProvider {
     }
 
     @Override
+    public boolean isRecordsExist(List<Long> uniqueRecordIds) {
+        return dao.isRecordsExist(uniqueRecordIds);
+    }
+
+    @Override
     public PagingResult<Map<String, RefBookValue>> getChildrenRecords(Long parentRecordId, Date version, PagingParams pagingParams, String filter, RefBookAttribute sortAttribute){
         return dao.getChildrenRecords(getTableName(), refBookId, version, parentRecordId, pagingParams, filter, sortAttribute);
     }
