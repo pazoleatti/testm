@@ -128,4 +128,6 @@ public interface RefBookDepartmentDao {
      * @param startDate Начало периода
      */
     String getReportPeriodNameByDate(TaxType taxType, Date startDate);
+
+    boolean isRecordsExist(List<Long> uniqueRecordIds);
 }

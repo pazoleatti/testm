@@ -928,4 +928,9 @@ public class RefBookOktmoDaoImpl extends AbstractDao implements RefBookOktmoDao 
             return null;
         }
     }
+
+    @Override
+    public boolean isRecordsExist(List<Long> uniqueRecordIds) {
+        return getJdbcTemplate().queryForObject(String.format("select count (*) from ref_book_oktmo where %s", SqlUtils.transformToSqlInStatement("id", uniqueRecordIds)), Integer.class) == uniqueRecordIds.size();
+    }
 }

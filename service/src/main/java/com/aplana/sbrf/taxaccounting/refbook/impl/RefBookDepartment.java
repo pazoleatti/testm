@@ -140,7 +140,7 @@ public class RefBookDepartment implements RefBookDataProvider {
 
     @Override
     public boolean isRecordsExist(List<Long> uniqueRecordIds) {
-        throw new UnsupportedOperationException();
+        return refBookDepartmentDao.isRecordsExist(uniqueRecordIds);
     }
 
     @Override

@@ -274,4 +274,6 @@ public interface RefBookOktmoDao {
      * @return пары идентификатор версии элемента - идентификатор элемента справочника
      */
     List<Pair<Long, Long>> getRecordIdPairs(String tableName, @NotNull Long refBookId, Date version, Boolean needAccurateVersion, String filter);
+
+    boolean isRecordsExist(List<Long> uniqueRecordIds);
 }

@@ -404,4 +404,9 @@ public class RefBookDepartmentDaoImpl extends AbstractDao implements RefBookDepa
             throw new DaoException("", e);
         }
     }
+
+    @Override
+    public boolean isRecordsExist(List<Long> uniqueRecordIds) {
+        return getJdbcTemplate().queryForObject(String.format("select count (*) from department where %s", SqlUtils.transformToSqlInStatement("id", uniqueRecordIds)), Integer.class) == uniqueRecordIds.size();
+    }
 }

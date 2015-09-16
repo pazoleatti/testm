@@ -95,7 +95,7 @@ public class RefBookOktmoProvider implements RefBookDataProvider {
 
     @Override
     public boolean isRecordsExist(List<Long> uniqueRecordIds) {
-        throw new UnsupportedOperationException();
+        return dao.isRecordsExist(uniqueRecordIds);
     }
 
     @Override
