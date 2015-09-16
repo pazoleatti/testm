@@ -9,6 +9,7 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.AbstractEditPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.EditFormPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.event.SetFormMode;
+import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.event.UpdateForm;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.event.DeleteItemEvent;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.event.SearchButtonEvent;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.event.ShowItemEvent;
@@ -37,7 +38,8 @@ import com.gwtplatform.mvp.client.proxy.ProxyPlace;
 import java.util.Date;
 
 public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
-		RefBookDataPresenter.MyProxy> implements RefBookDataUiHandlers, SetFormMode.SetFormModeHandler {
+		RefBookDataPresenter.MyProxy> implements RefBookDataUiHandlers,
+        SetFormMode.SetFormModeHandler {
 
     @Override
     public void onSetFormMode(SetFormMode event) {
@@ -74,7 +76,7 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
     DialogPresenter dialogPresenter;
     RefBookLinearPresenter refBookLinearPresenter;
 
-    private final HandlerRegistration[] registrations = new HandlerRegistration[1];
+    private final HandlerRegistration[] registrations = new HandlerRegistration[2];
 
     private final DispatchAsync dispatcher;
     private final TaPlaceManager placeManager;
@@ -91,8 +93,6 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
         void updateMode(FormMode mode);
         /** доступность  кнопки-ссылка "Создать запрос на изменение..." для справочника "Организации-участники контролируемых сделок" */
         void updateSendQuery(boolean isAvailable);
-        //Показывает/скрывает поля, которые необходимы только для версионирования
-        void setVersionedFields(boolean isVisible);
 
         /**
          * Устанавливает версионный вид справочника.
@@ -122,7 +122,8 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
         clearSlot(TYPE_editFormPresenter);
         clearSlot(TYPE_mainFormPresenter);
         for (HandlerRegistration han : registrations){
-            han.removeHandler();
+            if (han != null)
+                han.removeHandler();
         }
     }
 
@@ -233,6 +234,22 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
                                                             getView().setRefBookNameDesc(result.getName());
                                                         }
                                                     }, RefBookDataPresenter.this));
+                                    registrations[1] = editFormPresenter.addUpdateFormHandler(new UpdateForm.UpdateFormHandler() {
+                                        @Override
+                                        public void onUpdateForm(UpdateForm event) {
+                                            GetNameAction nameAction = new GetNameAction();
+                                            nameAction.setRefBookId(refBookId);
+                                            nameAction.setUniqueRecordId(recordId);
+                                            dispatcher.execute(nameAction,
+                                                    CallbackUtils.defaultCallback(
+                                                            new AbstractCallback<GetNameResult>() {
+                                                                @Override
+                                                                public void onSuccess(GetNameResult result) {
+                                                                    getView().setRefBookNameDesc(result.getUniqueAttributeValues(), getView().getRelevanceDate());
+                                                                }
+                                                            }, RefBookDataPresenter.this));
+                                        }
+                                    });
                                 } else {
                                     getProxy().manualReveal(RefBookDataPresenter.this);
                                     Dialog.errorMessage("Доступ к справочнику запрещен!");
@@ -245,14 +262,6 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
     public void onBind(){
         super.onBind();
         addVisibleHandler(SetFormMode.getType(), this);
-    }
-
-    @Override
-    protected void onUnbind() {
-        super.onUnbind();
-        for (HandlerRegistration han : registrations){
-            han.removeHandler();
-        }
     }
 
     @Override
@@ -306,6 +315,7 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
         setMode(mode);
         editFormPresenter.setVersionMode(false);
         ShowItemEvent.fire(RefBookDataPresenter.this, null, recordId);
+        registrations[1].removeHandler();
     }
 
     @Override

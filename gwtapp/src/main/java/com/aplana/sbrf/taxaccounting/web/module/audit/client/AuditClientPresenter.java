@@ -237,9 +237,13 @@ public class AuditClientPresenter extends Presenter<AuditClientPresenter.MyView,
         dispatcher.execute(action, CallbackUtils.defaultCallbackNoLock(new AbstractCallback<AuditArchiveResult>() {
             @Override
             public void onSuccess(AuditArchiveResult result) {
-                LogCleanEvent.fire(AuditClientPresenter.this);
-                LogAddEvent.fire(AuditClientPresenter.this, result.getUuid());
-                getView().startTimerReport(ReportType.ARCHIVE_AUDIT);
+                if (result.isException()){
+                    Dialog.errorMessage("В журнале аудита отсутствуют записи за выбранный период.");
+                } else {
+                    LogCleanEvent.fire(AuditClientPresenter.this);
+                    LogAddEvent.fire(AuditClientPresenter.this, result.getUuid());
+                    getView().startTimerReport(ReportType.ARCHIVE_AUDIT);
+                }
                 /*if (!result.isException()) {
                     //MessageEvent.fire(AuditClientPresenter.this, "Архивация выполнена успешно. Архивировано " + result.getCountOfRemoveRecords() + " записей");
 //                    getView().getBlobFromServer(result.getFileUuid());

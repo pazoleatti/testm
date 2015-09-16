@@ -258,6 +258,8 @@ public class FormDataServiceImpl implements FormDataService {
             } else if (isInner) {
                 logger.info("Данные загружены");
             }
+            formDataDao.updateSorted(fd.getId(), false);
+            formDataDao.updateEdited(fd.getId(), true);
 			dataRowDao.refreshRefBookLinks(fd);
             logBusinessService.add(formDataId, null, userInfo, formDataEvent, null);
             auditService.add(formDataEvent, userInfo, fd.getDepartmentId(), fd.getReportPeriodId(),
@@ -296,6 +298,7 @@ public class FormDataServiceImpl implements FormDataService {
         formData.setKind(kind);
         formData.setPeriodOrder(periodOrder);
         formData.setManual(false);
+        formData.setSorted(false);
         formData.setComparativePeriodId(comparativePeriodId);
         formData.setAccruing(accruing);
 
@@ -416,6 +419,9 @@ public class FormDataServiceImpl implements FormDataService {
 
 		formDataAccessService.canEdit(userInfo, formData.getId(), formData.isManual());
 
+        formDataDao.updateSorted(formData.getId(), false);
+        formDataDao.updateEdited(formData.getId(), true);
+
 		Map<String, Object> additionalParameters = new HashMap<String, Object>();
 		additionalParameters.put("currentDataRow", currentDataRow);
 		formDataScriptingService.executeScript(userInfo, formData, FormDataEvent.ADD_ROW, logger, additionalParameters);
@@ -440,6 +446,9 @@ public class FormDataServiceImpl implements FormDataService {
 
 		formDataAccessService.canEdit(userInfo, formData.getId(), formData.isManual());
 
+        formDataDao.updateSorted(formData.getId(), false);
+        formDataDao.updateEdited(formData.getId(), true);
+
 		Map<String, Object> additionalParameters = new HashMap<String, Object>();
 		additionalParameters.put("currentDataRow", currentDataRow);
 		formDataScriptingService.executeScript(userInfo, formData, FormDataEvent.DELETE_ROW, logger, additionalParameters);
@@ -459,7 +468,9 @@ public class FormDataServiceImpl implements FormDataService {
 	@Override
 	public void doCalc(Logger logger, TAUserInfo userInfo, FormData formData) {
 		formDataAccessService.canEdit(userInfo, formData.getId(), formData.isManual());
-		formDataScriptingService.executeScript(userInfo, formData, FormDataEvent.CALCULATE, logger, null);
+        formDataDao.updateSorted(formData.getId(), false);
+        formDataDao.updateEdited(formData.getId(), true);
+        formDataScriptingService.executeScript(userInfo, formData, FormDataEvent.CALCULATE, logger, null);
         if (logger.containsLevel(LogLevel.ERROR)) {
 			throw new ServiceException("Найдены ошибки при выполнении расчета формы");
 		} else {
@@ -738,7 +749,7 @@ public class FormDataServiceImpl implements FormDataService {
                 checkConsolidateFromSources(formData, logger, userInfo);
                 //Делаем переход
                 moveProcess(formData, userInfo, workflowMove, note, logger, isAsync, stateLogger);
-                if (WorkflowState.ACCEPTED.equals(workflowMove.getToState())) {
+                if (!formData.isSorted() && WorkflowState.ACCEPTED.equals(workflowMove.getToState())) {
                     FormTemplate formTemplate = formTemplateService.get(formData.getFormTemplateId());
                     if (!formTemplate.isFixedRows()) {
                         // Отработка скриптом события сортировки
@@ -746,6 +757,8 @@ public class FormDataServiceImpl implements FormDataService {
                         if (logger.containsLevel(LogLevel.ERROR)) {
                             throw new ServiceLoggerException(SORT_ERROR, logEntryService.save(logger.getEntries()));
                         }
+                        // сортировка актуальна (событие сортировки отработало)
+                        formDataDao.updateSorted(formData.getId(), true);
                         logger.info("Выполнена сортировка строк налоговой формы.");
                     }
                 }
@@ -757,6 +770,8 @@ public class FormDataServiceImpl implements FormDataService {
                 if (workflowMove.getFromState().equals(WorkflowState.ACCEPTED)) {
                     // удаляем версию ручного ввода
                     deleteFormData(logger, userInfo, formDataId, true);
+                    // устанавливаем признак в "1", т.к. могли отредактировать версию ручного ввода
+                    formDataDao.updateSorted(formData.getId(), true);
                 }
                 sourceService.updateFDDDConsolidation(formDataId);
                 moveProcess(formData, userInfo, workflowMove, note, logger, isAsync, stateLogger);
@@ -848,7 +863,6 @@ public class FormDataServiceImpl implements FormDataService {
                         }
 					}
 				}
-				dataRowDao.refreshRefBookLinks(formData);
 				return sourceList;
 			}
 		});
@@ -1168,6 +1182,8 @@ public class FormDataServiceImpl implements FormDataService {
         ((ScriptComponentContextHolder) formDataCompositionService).setScriptComponentContext(scriptComponentContext);
         /*Integer periodOrder =
                 (formData.getKind() == FormDataKind.PRIMARY || formData.getKind() == FormDataKind.CONSOLIDATED) ? formData.getPeriodOrder() : null;*/
+        formDataDao.updateSorted(formData.getId(), false);
+        formDataDao.updateEdited(formData.getId(), true);
         formDataCompositionService.compose(formData, 0, null, formData.getFormType().getId(), formData.getKind());
 
         //Система выводит сообщение в панель уведомлений
@@ -1983,9 +1999,19 @@ public class FormDataServiceImpl implements FormDataService {
     @Override
     public void restoreCheckPoint(long formDataId, boolean manual, TAUserInfo userInfo) {
         interruptTask(formDataId, userInfo, Arrays.asList(ReportType.CALCULATE_FD, ReportType.IMPORT_FD, ReportType.CHECK_FD));
-        dataRowDao.restoreCheckPoint(getFormData(userInfo, formDataId, manual, new Logger()));
+        if (formDataDao.isEdited(formDataId)) {
+            dataRowDao.restoreCheckPoint(getFormData(userInfo, formDataId, manual, new Logger()));
+            formDataDao.restoreSorted(formDataId);
+        } else {
+            dataRowDao.removeCheckPoint(getFormData(userInfo, formDataId, manual, new Logger()));
+        }
         if (!unlock(formDataId, userInfo)) {
             throw new ServiceException("Форма не заблокирована текущим пользователем, formDataId = %s", formDataId);
         }
+    }
+
+    @Override
+    public boolean isEdited(long formDataId) {
+        return formDataDao.isEdited(formDataId);
     }
 }

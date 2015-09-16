@@ -11,6 +11,7 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.event.RollbackTableRowSelection;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.event.SetFormMode;
+import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.event.UpdateForm;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.exception.BadValueException;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.event.ShowItemEvent;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.*;
@@ -348,6 +349,18 @@ public abstract class AbstractEditPresenter<V extends AbstractEditPresenter.MyVi
     public HandlerRegistration addClickHandlerForAllVersions(ClickHandler clickHandler){
         if (versioned)
             return getView().getClickAllVersion().addClickHandler(clickHandler);
+        else
+            return new HandlerRegistration() {
+                @Override
+                public void removeHandler() {
+                    //Nothing
+                }
+            };
+    }
+
+    public final HandlerRegistration addUpdateFormHandler(UpdateForm.UpdateFormHandler handler){
+        if (versioned)
+            return addHandler(UpdateForm.getType(), handler);
         else
             return new HandlerRegistration() {
                 @Override

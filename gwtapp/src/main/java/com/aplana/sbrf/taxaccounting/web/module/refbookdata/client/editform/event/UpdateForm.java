@@ -24,12 +24,6 @@ public class UpdateForm extends
 		return TYPE;
 	}
 
-	public static void fire(HasHandlers source,	boolean success) {
-		UpdateForm event = new UpdateForm();
-		event.setSuccess(success);
-		source.fireEvent(event);
-	}
-
     public static void fire(HasHandlers source,	boolean success, RecordChanges recordChanges) {
         UpdateForm event = new UpdateForm();
         event.setRecordChanges(recordChanges);

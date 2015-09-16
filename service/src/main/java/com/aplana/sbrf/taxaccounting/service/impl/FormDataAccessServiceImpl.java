@@ -449,7 +449,7 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
             }
         } else {
             // Призрак передачи НФ на вышестоящий уровень
-            boolean sendToNextLevel = false;
+            boolean sendToNextLevel;
             try {
                 // Проверки статуса приемников
                 sendToNextLevel = checkDestinations(formDataId);
@@ -545,7 +545,7 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
                         logger.warn(String.format(FORM_DATA_KIND_STATE_ERROR_LOG, LOG_EVENT_AVAILABLE_MOVES,
                                 formData.getKind().getTitle(), formData.getState().getTitle()));
                 }
-            } else if (asList(FormDataKind.SUMMARY, FormDataKind.CONSOLIDATED).contains(formData.getKind())
+            } else if (asList(FormDataKind.SUMMARY, FormDataKind.CONSOLIDATED, FormDataKind.CALCULATED).contains(formData.getKind())
                     && !sendToNextLevel) {
                 // Жизненный цикл налоговых форм, формируемых автоматически и НЕ передаваемых на вышестоящий уровень
                 switch (formData.getState()) {
@@ -575,7 +575,7 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
                                 formData.getKind().getTitle(), formData.getState().getTitle()));
 
                 }
-            } else if (asList(FormDataKind.SUMMARY, FormDataKind.CONSOLIDATED).contains(formData.getKind())
+            } else if (asList(FormDataKind.SUMMARY, FormDataKind.CONSOLIDATED, FormDataKind.CALCULATED).contains(formData.getKind())
                     && sendToNextLevel) {
                 // Жизненный цикл налоговых форм, формируемых автоматически и передаваемых на вышестоящий уровень
                 switch (formData.getState()) {
@@ -660,7 +660,6 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
         // http://conf.aplana.com/pages/viewpage.action?pageId=11386069
         formDataKindList.add(FormDataKind.PRIMARY);
         if (userInfo.getUser().hasRole(TARole.ROLE_CONTROL)
-                || userInfo.getUser().hasRole(TARole.ROLE_CONTROL)
                 || userInfo.getUser().hasRole(TARole.ROLE_CONTROL_NS)
                 || userInfo.getUser().hasRole(TARole.ROLE_CONTROL_UNP)) {
             formDataKindList.add(FormDataKind.CONSOLIDATED);
@@ -670,6 +669,9 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
         if (taxTypes.contains(TaxType.INCOME)) {
             formDataKindList.add(FormDataKind.ADDITIONAL);
             formDataKindList.add(FormDataKind.UNP);
+        }
+        if (taxTypes.contains(TaxType.ETR)) {
+            formDataKindList.add(FormDataKind.CALCULATED);
         }
         return formDataKindList;
     }

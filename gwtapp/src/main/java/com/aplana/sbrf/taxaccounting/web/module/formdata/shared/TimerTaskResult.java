@@ -17,6 +17,7 @@ public class TimerTaskResult implements Result {
     private FormMode formMode;
     private LockInfo lockInfo;
     private String taskName;
+    private boolean edited;
 
     public ReportType getTaskType() {
         return taskType;
@@ -48,5 +49,13 @@ public class TimerTaskResult implements Result {
 
     public void setTaskName(String taskName) {
         this.taskName = taskName;
+    }
+
+    public boolean isEdited() {
+        return edited;
+    }
+
+    public void setEdited(boolean edited) {
+        this.edited = edited;
     }
 }

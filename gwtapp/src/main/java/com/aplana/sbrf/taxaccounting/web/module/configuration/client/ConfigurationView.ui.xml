@@ -90,15 +90,6 @@
                 <g:ResizeLayoutPanel ui:field="commonPanel" addStyleNames="{style.table}">
                     <style:GenericDataGrid width="100%" height="100%" ui:field="commonTable"/>
                 </g:ResizeLayoutPanel>
-                <g:ResizeLayoutPanel ui:field="formPanel" addStyleNames="{style.table}" visible="false">
-                    <style:GenericDataGrid width="100%" height="100%" ui:field="formTable"/>
-                </g:ResizeLayoutPanel>
-                <g:ResizeLayoutPanel ui:field="emailPanel" addStyleNames="{style.table}" visible="false">
-                    <style:GenericDataGrid width="100%" height="100%" ui:field="emailTable"/>
-                </g:ResizeLayoutPanel>
-                <g:ResizeLayoutPanel ui:field="asyncPanel" addStyleNames="{style.table}" visible="false">
-                    <style:GenericDataGrid width="100%" height="100%" ui:field="asyncTable"/>
-                </g:ResizeLayoutPanel>
             </fm:BodyContainer>
         </fm:body>
     </fm:MainContainer>

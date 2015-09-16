@@ -1,6 +1,5 @@
 package com.aplana.sbrf.taxaccounting.async.task;
 
-import com.aplana.sbrf.taxaccounting.model.BalancingVariants;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
@@ -62,8 +61,8 @@ public abstract class CsvAuditArchiveGeneratorAsyncTask extends AbstractAsyncTas
 
         auditService.removeRecords(
                 filter,
-                records.get(0),
                 records.get(records.size()-1),
+                records.get(0),
                 userInfo);
         /*result.setCountOfRemoveRecords(records.getTotalCount());*/
     }

@@ -57,6 +57,8 @@ public class DataRowServiceImpl implements DataRowService {
 		if ((dataRows != null) && (!dataRows.isEmpty())) {
 			FormData fd = formDataDao.get(formDataId, manual);
 			dataRowDao.updateRows(fd, dataRows);
+            formDataDao.updateSorted(fd.getId(), false);
+            formDataDao.updateEdited(fd.getId(), true);
 		}
 	}
 
@@ -75,11 +77,16 @@ public class DataRowServiceImpl implements DataRowService {
     @Transactional(readOnly = false)
     public void copyRows(long formDataSourceId, long formDataDestinationId) {
         dataRowDao.copyRows(formDataSourceId, formDataDestinationId);
+        FormData formDataDestination = formDataDao.get(formDataDestinationId, false);
+        formDataDao.updateSorted(formDataDestinationId, formDataDestination.isSorted() || formDataDestination.getState().equals(WorkflowState.ACCEPTED));
+        formDataDao.updateEdited(formDataDestinationId, true);
     }
 
     @Override
     public void createCheckPoint(FormData formData) {
         dataRowDao.createCheckPoint(formData);
+        formDataDao.backupSorted(formData.getId());
+        formDataDao.updateEdited(formData.getId(), false);
     }
 
 	@Override
@@ -90,7 +97,8 @@ public class DataRowServiceImpl implements DataRowService {
 	@Override
 	public void restoreCheckPoint(FormData formData) {
 		dataRowDao.restoreCheckPoint(formData);
-	}
+        formDataDao.restoreSorted(formData.getId());
+    }
 
 	private void checkLockedMe(LockData lockData, TAUser user){
         if (lockData == null || lockData.getUserId() != user.getId()) {

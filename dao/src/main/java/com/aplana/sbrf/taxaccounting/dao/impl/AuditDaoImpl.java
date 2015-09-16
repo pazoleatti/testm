@@ -1,7 +1,5 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
-import static com.aplana.sbrf.taxaccounting.model.FormDataEvent.*;
-
 import com.aplana.sbrf.taxaccounting.dao.AuditDao;
 import com.aplana.sbrf.taxaccounting.dao.EventDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
@@ -18,6 +16,8 @@ import org.springframework.stereotype.Repository;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
+
+import static com.aplana.sbrf.taxaccounting.model.FormDataEvent.*;
 
 @Repository
 public class AuditDaoImpl extends AbstractDao implements AuditDao {
@@ -693,19 +693,22 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
             case IP_ADDRESS:
                 column = "ls.ip";
                 break;
+            default:
+                column = "ls.log_date";
+                break;
         }
         if (column != null) {
             order.append(column);
             if (!ascSorting) {
                 order.append(" DESC");
             }
-            order.append(", ");
+            /*order.append(", ");*/
         }
         // Сортировка по умолчанию
-        order.append("ls.id");
+        /*order.append("ls.id");
         if (!ascSorting) {
             order.append(" DESC");
-        }
+        }*/
         return order.toString();
     }
 

@@ -47,6 +47,7 @@ public class TimerTaskHandler extends AbstractActionHandler<TimerTaskAction, Tim
         TimerTaskResult result = new TimerTaskResult();
         TAUserInfo userInfo = securityService.currentUserInfo();
         LockInfo lockInfo = new LockInfo();
+        result.setEdited(formDataService.isEdited(action.getFormDataId()));
         Pair<ReportType, LockData> lockType = formDataService.getLockTaskType(action.getFormDataId());
         LockData lockCheck = lockService.getLock(formDataService.generateTaskKey(action.getFormDataId(), ReportType.CHECK_FD));
         if (lockType != null) {

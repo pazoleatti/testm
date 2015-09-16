@@ -33,7 +33,6 @@ public class UnlockFormDataHandler extends AbstractActionHandler<UnlockFormData,
 	public UnlockFormDataResult execute(UnlockFormData action, ExecutionContext executionContext) throws ActionException {
 		UnlockFormDataResult result = new UnlockFormDataResult();
         TAUserInfo userInfo = securityService.currentUserInfo();
-        String uuid = UUID.randomUUID().toString();
 		try{
             LockData lockDataEdit = formDataService.getObjectLock(action.getFormId(), userInfo);
             if (lockDataEdit != null && lockDataEdit.getUserId() == userInfo.getUser().getId()) {

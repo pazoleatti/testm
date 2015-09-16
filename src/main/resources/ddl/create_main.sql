@@ -437,7 +437,9 @@ create table form_data (
   sorted number(1) default 0 not null,
   number_current_row number(9),
   comparative_dep_rep_per_id number(18), 
-  accruing number(1)
+  accruing number(1),
+  sorted_backup number(1) default 0 not null, 
+  edited number(1) default 0 not null
 );
 comment on table form_data is 'Данные по налоговым формам';
 comment on column form_data.id is 'Первичный ключ';
@@ -453,6 +455,8 @@ comment on column form_data.sorted is 'Признак актуальности �
 comment on column form_data.number_current_row is 'Количество пронумерованных строк текущей НФ';
 comment on column form_data.comparative_dep_rep_per_id is 'Период сравнения';
 comment on column form_data.accruing is 'Признак расчета значений нарастающим итогом (0 - не нарастающим итогом, 1 - нарастающим итогом, пустое - форма без периода сравнения)';
+comment on column form_data.sorted_backup is 'Статус актуальности сортировки НФ для резервного среза (0 - Сортировка неактуальна; 1 - Сортировка актуальна)';
+comment on column form_data.edited is 'Признак изменения данных НФ в режиме редактирования (0 - Нет изменений; 1 - Есть изменения)';
 
 create sequence seq_form_data start with 10000;
 ---------------------------------------------------------------------------------------------------

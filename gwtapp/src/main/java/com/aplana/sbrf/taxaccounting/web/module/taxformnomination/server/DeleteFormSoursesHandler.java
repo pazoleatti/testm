@@ -26,7 +26,7 @@ import java.util.Set;
 public class DeleteFormSoursesHandler extends AbstractActionHandler<DeleteFormsSourseAction, DeleteFormsSourceResult> {
 
     private static final String SOURCE_CANCEL_ERR =
-            "Не может быть отменено назначение %s-%s-%s, т.к. назначение является %s ";
+            "Не может быть отменено назначение \"%s\"-\"%s\"-\"%s\", т.к. назначение является %s ";
 
     @Autowired
     SourceService departmentFormTypeService;
@@ -145,13 +145,14 @@ public class DeleteFormSoursesHandler extends AbstractActionHandler<DeleteFormsS
             }
         }
 
-        stringBuffer.append(departmentService.getDepartment(dft.getDepartmentId()).getName());
-        stringBuffer.append(" - ");
-        stringBuffer.append(dft.getKind().getTitle());
-        stringBuffer.append(" - ");
-        stringBuffer.append(type.getName());
-        stringBuffer.append(periodCombo);
-        stringBuffer.append(", ");
+        stringBuffer.append(
+                String.format(
+                        "\"%s\"-\"%s\"-\"%s\" %s, ",
+                        departmentService.getDepartment(dft.getDepartmentId()).getName(),
+                        dft.getKind().getTitle(),
+                        type.getName(),
+                        periodCombo)
+        );
 
         return stringBuffer;
     }

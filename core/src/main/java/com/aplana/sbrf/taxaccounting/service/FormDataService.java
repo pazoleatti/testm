@@ -474,4 +474,11 @@ public interface FormDataService {
      * @param formData
      */
     void restoreCheckPoint(long formDataId, boolean manual, TAUserInfo userInfo);
+
+    /**
+     * Проверка наличия изменении в НФ
+     * @param formDataId
+     * @return
+     */
+    boolean isEdited(long formDataId);
 }
