@@ -139,6 +139,11 @@ public class RefBookDepartment implements RefBookDataProvider {
     }
 
     @Override
+    public boolean isRecordsExist(List<Long> uniqueRecordIds) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public PagingResult<Map<String, RefBookValue>> getChildrenRecords(Long parentRecordId, Date version, PagingParams pagingParams, String filter, RefBookAttribute sortAttribute) {
         return refBookDao.getChildrenRecords(REF_BOOK_ID, DEPARTMENT_TABLE_NAME, parentRecordId, pagingParams, filter, sortAttribute, true);
     }

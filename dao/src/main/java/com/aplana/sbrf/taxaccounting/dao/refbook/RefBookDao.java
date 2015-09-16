@@ -465,10 +465,9 @@ public interface RefBookDao {
     /**
      * Проверяет существуют ли конфликты в датах актуальности у проверяемых записей и их родительских записей (в иерархических справочниках)
      * @param versionFrom дата начала актуальности
-     * @param versionTo дата окончания актуальности
      * @param records проверяемые записи
      */
-    List<Pair<Long, Integer>> checkParentConflict(Date versionFrom, Date versionTo, List<RefBookRecord> records);
+    List<Pair<Long, Integer>> checkParentConflict(Date versionFrom, List<RefBookRecord> records);
 
     /**
      * Устанавливает SCRIPT_ID для справочника
@@ -598,7 +597,7 @@ public interface RefBookDao {
      * @param records     новые значения полей элемента справочника
      * @param isConfig    признак того, что проверка выполняется для настроек подразделений
      */
-    void isReferenceValuesCorrect(Logger logger, String tableName, @NotNull Date versionFrom, Date versionTo,
+    void isReferenceValuesCorrect(Logger logger, String tableName, @NotNull Date versionFrom,
                                   @NotNull List<RefBookAttribute> attributes, List<RefBookRecord> records, boolean isConfig);
 
     Map<String, RefBookValue> getRecordData(Long refBookId, String tableName, Long recordId);
@@ -642,4 +641,11 @@ public interface RefBookDao {
 	 * @return ref_book_record.id - ref_book_value
 	 */
 	Map<Long, RefBookValue> dereferenceValues(String tableName, Long attributeId, Collection<Long> recordIds);
+
+    /**
+     * Проверяет, существуют ли указанные версии элемента справочника
+     * @param uniqueRecordIds список уникальных идентификаторов версий записей справочника
+     * @return все записи существуют?
+     */
+    boolean isRecordsExist(List<Long> uniqueRecordIds);
 }

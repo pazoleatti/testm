@@ -1,14 +1,16 @@
 package com.aplana.sbrf.taxaccounting.web.module.departmentconfigproperty.server;
 
 import com.aplana.sbrf.taxaccounting.dao.impl.refbook.RefBookUtils;
-import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.*;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
+import com.aplana.sbrf.taxaccounting.refbook.RefBookHelper;
 import com.aplana.sbrf.taxaccounting.service.DepartmentReportPeriodService;
+import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.service.PeriodService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
@@ -23,6 +25,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.regex.Pattern;
 
@@ -33,6 +36,9 @@ public class SaveDepartmentRefBookValuesHandler extends AbstractActionHandler<Sa
     public SaveDepartmentRefBookValuesHandler() {
         super(SaveDepartmentRefBookValuesAction.class);
     }
+    private static final String SUCCESS_INFO = "Настройки для \"%s\" в периоде с %s по %s успешно сохранены.";
+
+    private final static SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
 
     @Autowired
     RefBookFactory rbFactory;
@@ -44,25 +50,33 @@ public class SaveDepartmentRefBookValuesHandler extends AbstractActionHandler<Sa
     PeriodService reportService;
     @Autowired
     LogEntryService logEntryService;
+    @Autowired
+    DepartmentService departmentService;
+    @Autowired
+    RefBookHelper refBookHelper;
 
     @Override
-    public SaveDepartmentRefBookValuesResult execute(SaveDepartmentRefBookValuesAction saveDepartmentRefBookValuesAction, ExecutionContext executionContext) throws ActionException {
+    public SaveDepartmentRefBookValuesResult execute(SaveDepartmentRefBookValuesAction action, ExecutionContext executionContext) throws ActionException {
         Logger logger = new Logger();
         logger.setTaUserInfo(securityService.currentUserInfo());
         SaveDepartmentRefBookValuesResult result = new SaveDepartmentRefBookValuesResult();
-        RefBook slaveRefBook = rbFactory.get(saveDepartmentRefBookValuesAction.getSlaveRefBookId());
+        RefBook slaveRefBook = rbFactory.get(action.getSlaveRefBookId());
 
+        /** Проверка существования справочных атрибутов */
+        checkReferenceValues(rbFactory.getDataProvider(slaveRefBook.getId()), action.getRows());
+
+        /** Специфичные проверки для настроек подразделений */
         Pattern innPattern = Pattern.compile(RefBookUtils.INN_JUR_PATTERN);
         Pattern kppPattern = Pattern.compile(RefBookUtils.KPP_PATTERN);
         Pattern taxOrganPattern = Pattern.compile(RefBookUtils.TAX_ORGAN_PATTERN);
 
-        String inn = saveDepartmentRefBookValuesAction.getNotTableParams().get("INN").getStringValue();
+        String inn = action.getNotTableParams().get("INN").getStringValue();
         if (inn != null && !inn.isEmpty()) {
             if (checkPattern(logger, false, null, null, "ИНН", inn, innPattern, RefBookUtils.INN_JUR_MEANING)){
                 checkSumInn(logger, false, null, null, "ИНН", inn);
             }
         }
-        for (Map<String, TableCell> row : saveDepartmentRefBookValuesAction.getRows()) {
+        for (Map<String, TableCell> row : action.getRows()) {
             String sig = row.get("SIGNATORY_ID").getDeRefValue();
             Integer signatoryId = (sig == null || sig.isEmpty()) ?
                     null :
@@ -106,7 +120,7 @@ public class SaveDepartmentRefBookValuesHandler extends AbstractActionHandler<Sa
         }
 
         Map<Pair<String, String>, Integer> counter = new HashMap<Pair<String, String>, Integer>();
-        for (Map<String, TableCell> row : saveDepartmentRefBookValuesAction.getRows()) {
+        for (Map<String, TableCell> row : action.getRows()) {
             Pair<String, String> p = new Pair<String, String>(row.get("KPP").getStringValue(), row.get("TAX_ORGAN_CODE").getStringValue());
             if (!counter.containsKey(p)) {
                 counter.put(p, 0);
@@ -128,143 +142,57 @@ public class SaveDepartmentRefBookValuesHandler extends AbstractActionHandler<Sa
             return result;
         }
 
+        /** Сохранение настроек подразделений */
+        RefBookRecordVersion recordVersion = refBookHelper.saveOrUpdateDepartmentConfig(
+                action.getRecordId(), action.getRefBookId(), action.getSlaveRefBookId(), action.getReportPeriodId(),
+                DepartmentParamAliases.DEPARTMENT_ID.name(), action.getDepartmentId(),
+                convert(action.getNotTableParams()), convertRows(action.getRows()), logger);
 
-        RefBookDataProvider provider = rbFactory.getDataProvider(saveDepartmentRefBookValuesAction.getRefBookId());
-        ReportPeriod rp = reportService.getReportPeriod(saveDepartmentRefBookValuesAction.getReportPeriodId());
-        String filter = DepartmentParamAliases.DEPARTMENT_ID.name() + " = " + saveDepartmentRefBookValuesAction.getDepartmentId();
-
-        boolean needEdit = false;
-        Long recordId = saveDepartmentRefBookValuesAction.getRecordId();
-
-        // Поиск версий настроек для указанного подразделения. Если они есть - создаем новую версию с существующим record_id, иначе создаем новый record_id (по сути элемент справочника)
-        List<Pair<Long, Long>> recordPairsExistence = provider.checkRecordExistence(null, filter);
-        if (recordPairsExistence.size() != 0) {
-            //Проверяем, к одному ли элементу относятся версии
-            Set<Long> recordIdSet = new HashSet<Long>();
-            for (Pair<Long, Long> pair : recordPairsExistence) {
-                recordIdSet.add(pair.getSecond());
+        String departmentName = departmentService.getDepartment(action.getDepartmentId()).getName();
+        if (!logger.containsLevel(LogLevel.ERROR)) {
+            if (recordVersion.getVersionEnd() != null) {
+                logger.info(String.format(SUCCESS_INFO, departmentName, sdf.format(recordVersion.getVersionStart()), sdf.format(recordVersion.getVersionEnd())));
+            } else {
+                logger.info(String.format(SUCCESS_INFO, departmentName, sdf.format(recordVersion.getVersionStart()), "\"-\""));
             }
-
-            if (recordIdSet.size() > 1) {
-                throw new ActionException("Версии настроек, отобраные по фильтру, относятся к разным подразделениям");
-            }
-
-            // Существуют версии настроек для указанного подразделения
-            recordId = recordPairsExistence.get(0).getSecond();
         }
 
-        List<Pair<Long, Long>> recordPairs = provider.checkRecordExistence(rp.getCalendarStartDate(), filter);
-        if (recordPairs.size() != 0) {
-            needEdit = true;
-            // Запись нашлась
-            if (recordPairs.size() != 1) {
-                throw new ActionException("Найдено несколько настроек для подразделения ");
-            }
-            recordId = recordPairs.get(0).getFirst();
-        }
-
-        Map<String, RefBookValue> notTable = convert(saveDepartmentRefBookValuesAction.getNotTableParams());
-        notTable.put(DepartmentParamAliases.DEPARTMENT_ID.name(), new RefBookValue(RefBookAttributeType.REFERENCE, saveDepartmentRefBookValuesAction.getDepartmentId().longValue()));
-
-        if (!needEdit) {
-            RefBookRecord record = new RefBookRecord();
-            record.setValues(notTable);
-            record.setRecordId(recordId);
-            recordId = provider.createRecordVersion(logger, rp.getCalendarStartDate(), null, Arrays.asList(record)).get(0);
+        if (result.getUuid() == null) {
+            result.setUuid(logEntryService.save(logger.getEntries()));
         } else {
-            provider.updateRecordVersion(logger, recordId, rp.getCalendarStartDate(), null, notTable);
+            result.setUuid(logEntryService.update(logger.getEntries(), result.getUuid()));
         }
-
-        if (recordId != null) {
-            List<Map<String, RefBookValue>> convertedRows = convertRows(saveDepartmentRefBookValuesAction.getRows());
-
-            RefBookDataProvider providerSlave = rbFactory.getDataProvider(saveDepartmentRefBookValuesAction.getSlaveRefBookId());
-            String filterSlave = "LINK = " + recordId;
-            RefBookAttribute sortAttr = rbFactory.get(saveDepartmentRefBookValuesAction.getSlaveRefBookId()).getAttribute("ROW_ORD");
-
-            PagingResult<Map<String, RefBookValue>> paramsSlave = providerSlave.getRecords(rp.getCalendarStartDate(), null, filterSlave, sortAttr);
-
-            Set<Map<String, RefBookValue>> toUpdate = new HashSet<Map<String, RefBookValue>>();
-            Set<Map<String, RefBookValue>> toAdd = new HashSet<Map<String, RefBookValue>>();
-            Set<Map<String, RefBookValue>> toDelete = new HashSet<Map<String, RefBookValue>>();
-
-            int maxRowOrd = 0;
-            for (Map<String, RefBookValue> rowFromClient : convertedRows) {
-                boolean contains = false;
-                for (Map<String, RefBookValue> rowFromServer : paramsSlave) {
-                    if (rowFromClient.get("TAX_ORGAN_CODE").getStringValue().equals(rowFromServer.get("TAX_ORGAN_CODE").getStringValue())
-                            && rowFromClient.get("KPP").getStringValue().equals(rowFromServer.get("KPP").getStringValue())) {
-                        contains = true;
-                        rowFromClient.put("LINK",new RefBookValue(RefBookAttributeType.REFERENCE, recordId));
-                        rowFromClient.put("ROW_ORD",rowFromServer.get("ROW_ORD"));
-                        rowFromClient.put("record_id",rowFromServer.get("record_id"));
-                        rowFromClient.put("DEPARTMENT_ID", new RefBookValue(RefBookAttributeType.REFERENCE, saveDepartmentRefBookValuesAction.getDepartmentId().longValue()));
-                        toUpdate.add(rowFromClient);
-                        break;
-                    }
-                }
-                if (rowFromClient.containsKey("ROW_ORD") && rowFromClient.get("ROW_ORD") != null) {
-                    int rowOrd = rowFromClient.get("ROW_ORD").getNumberValue().intValue();
-                    if (rowOrd > maxRowOrd) {
-                        maxRowOrd = rowOrd;
-                    }
-                }
-                if (!contains) {
-                    rowFromClient.put("LINK", new RefBookValue(RefBookAttributeType.REFERENCE, recordId));
-                    rowFromClient.put("ROW_ORD", new RefBookValue(RefBookAttributeType.NUMBER, ++maxRowOrd));
-                    rowFromClient.put("DEPARTMENT_ID", new RefBookValue(RefBookAttributeType.REFERENCE, saveDepartmentRefBookValuesAction.getDepartmentId().longValue()));
-                    toAdd.add(rowFromClient);
-                }
-            }
-
-            List<RefBookRecord> recordsToAdd = new ArrayList<RefBookRecord>();
-            for (Map<String, RefBookValue> add : toAdd) {
-                RefBookRecord record = new RefBookRecord();
-                record.setValues(add);
-                record.setRecordId(null);
-                recordsToAdd.add(record);
-            }
-
-
-            for (Map<String, RefBookValue> rowFromServer : paramsSlave) {
-                boolean notFound = true;
-                for (Map<String, RefBookValue> rowFromClient : convertedRows) {
-                    if (rowFromClient.get("TAX_ORGAN_CODE").getStringValue().equals(rowFromServer.get("TAX_ORGAN_CODE").getStringValue())
-                            && rowFromClient.get("KPP").getStringValue().equals(rowFromServer.get("KPP").getStringValue())) {
-                        notFound = false;
-                        break;
-                    }
-                }
-                if (notFound) {
-                    toDelete.add(rowFromServer);
-                }
-            }
-
-            List<Long> deleteIds = new ArrayList<Long>();
-            for (Map<String, RefBookValue> del : toDelete) {
-                deleteIds.add(del.get("record_id").getNumberValue().longValue());
-            }
-
-            if (!logger.containsLevel(LogLevel.ERROR)) {
-                if (!recordsToAdd.isEmpty()) {
-                    providerSlave.createRecordVersion(logger, rp.getCalendarStartDate(), null, recordsToAdd);
-                }
-
-                for (Map<String, RefBookValue> up : toUpdate) {
-                    providerSlave.updateRecordVersion(logger, up.get("record_id").getNumberValue().longValue(), rp.getCalendarStartDate(), null, up);
-                }
-
-                if (!deleteIds.isEmpty()) {
-                    providerSlave.deleteRecordVersions(logger, deleteIds);
-                }
-            }
-        }
-        return new SaveDepartmentRefBookValuesResult();
+        return result;
     }
 
     @Override
     public void undo(SaveDepartmentRefBookValuesAction saveDepartmentRefBookValuesAction, SaveDepartmentRefBookValuesResult saveDepartmentRefBookValuesResult, ExecutionContext executionContext) throws ActionException {
 
+    }
+
+    /**
+     * Проверка существования записей справочника на которые ссылаются атрибуты.
+     * Считаем что все справочные атрибуты хранятся в универсальной структуре как и сами настройки
+     * @param provider
+     * @param rows
+     */
+    private void checkReferenceValues(RefBookDataProvider provider, List<Map<String, TableCell>> rows) {
+        List<Long> references = new ArrayList<Long>();
+        for (Map<String, TableCell> row : rows) {
+            for (Map.Entry<String, TableCell> e : row.entrySet()) {
+                if (e.getValue().getType() == null) {
+                    continue;
+                }
+                if (e.getValue().getType() == RefBookAttributeType.REFERENCE) {
+                    if (e.getValue().getRefValue() != null) {
+                        references.add(e.getValue().getRefValue());
+                    }
+                }
+            }
+        }
+        if (!provider.isRecordsExist(references)) {
+            throw new ServiceException("Данные не могут быть сохранены, так как часть выбранных справочных значений была удалена. Отредактируйте таблицу и попытайтесь сохранить заново");
+        }
     }
 
     private List<Map<String,RefBookValue>> convertRows(List<Map<String, TableCell>> rows) {

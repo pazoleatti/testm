@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.module.departmentconfig.server;
 
 import com.aplana.sbrf.taxaccounting.dao.impl.refbook.RefBookUtils;
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.*;
@@ -152,6 +153,9 @@ public class SaveDepartmentCombinedHandler extends AbstractActionHandler<SaveDep
                 paramsMap.put(DepartmentParamAliases.TAX_ORGAN_CODE_PROM.name(), new RefBookValue(RefBookAttributeType.STRING, depCombined.getTaxOrganCodeProm()));
             }
 
+            /** Проверка существования справочных атрибутов */
+            checkReferenceValues(provider, paramsMap);
+
             Logger logger = new Logger();
             logger.setTaUserInfo(securityService.currentUserInfo());
             RefBookRecord record = new RefBookRecord();
@@ -205,7 +209,7 @@ public class SaveDepartmentCombinedHandler extends AbstractActionHandler<SaveDep
                 record.setRecordId(recordPairs.get(0).getSecond());
             }
 
-            // Поиск версий настроек для указанного подразделения. Если они есть - создаем новую версию с существующим record_id, иначе создаем новый record_id (по сути элемент справочника)
+            // Проверяем, нужно ли обновление существующих настроек
             recordPairs = provider.checkRecordExistence(period.getCalendarStartDate(), filter);
             if (recordPairs.size() != 0) {
                 needEdit = true;
@@ -218,16 +222,9 @@ public class SaveDepartmentCombinedHandler extends AbstractActionHandler<SaveDep
 
             RefBookRecordVersion recordVersion;
             if (!needEdit) {
-                //Получаем дату окончания = дате начала следующей версии. Нужно для проверки справочных атрибутов
-                /*Date versionEnd = provider.getNextVersion(period.getCalendarStartDate(), filter);
-                if (versionEnd != null && period.getCalendarStartDate().after(versionEnd)) {
-                    throw new ActionException("Дата окончания настроек подразделения получена некорректно");
-                }*/
                 List<Long> newRecordIds = provider.createRecordVersion(logger, period.getCalendarStartDate(), null, Arrays.asList(record));
                 recordVersion = provider.getRecordVersionInfo(newRecordIds.get(0));
             } else {
-                /*recordVersion = provider.getRecordVersionInfo(depCombined.getRecordId());
-                provider.updateRecordVersion(logger, depCombined.getRecordId(), recordVersion.getVersionStart(), recordVersion.getVersionEnd(), paramsMap);*/
                 provider.updateRecordVersion(logger, depCombined.getRecordId(), period.getCalendarStartDate(), null, paramsMap);
                 recordVersion = provider.getRecordVersionInfo(depCombined.getRecordId());
             }
@@ -235,9 +232,9 @@ public class SaveDepartmentCombinedHandler extends AbstractActionHandler<SaveDep
             String departmentName = departmentService.getDepartment(action.getDepartment()).getName();
             if (!logger.containsLevel(LogLevel.ERROR)) {
                 if (recordVersion.getVersionEnd() != null) {
-                    logger.info(String.format(SUCCESS_INFO, departmentName, sdf.format(period.getCalendarStartDate()), sdf.format(recordVersion.getVersionEnd())));
+                    logger.info(String.format(SUCCESS_INFO, departmentName, sdf.format(recordVersion.getVersionStart()), sdf.format(recordVersion.getVersionEnd())));
                 } else {
-                    logger.info(String.format(SUCCESS_INFO, departmentName, sdf.format(period.getCalendarStartDate()), "\"-\""));
+                    logger.info(String.format(SUCCESS_INFO, departmentName, sdf.format(recordVersion.getVersionStart()), "\"-\""));
                 }
             }
 
@@ -252,6 +249,27 @@ public class SaveDepartmentCombinedHandler extends AbstractActionHandler<SaveDep
             }
         }
         return result;
+    }
+
+
+    /**
+     * Проверка существования записей справочника на которые ссылаются атрибуты.
+     * Считаем что все справочные атрибуты хранятся в универсальной структуре как и сами настройки
+     * @param provider
+     * @param rows
+     */
+    private void checkReferenceValues(RefBookDataProvider provider, Map<String, RefBookValue> rows) {
+        List<Long> references = new ArrayList<Long>();
+        for (Map.Entry<String, RefBookValue> e : rows.entrySet()) {
+            if (e.getValue().getAttributeType() == RefBookAttributeType.REFERENCE) {
+                if (e.getValue().getReferenceValue() != null) {
+                    references.add(e.getValue().getReferenceValue());
+                }
+            }
+        }
+        if (!provider.isRecordsExist(references)) {
+            throw new ServiceException("Данные не могут быть сохранены, так как часть выбранных справочных значений была удалена. Отредактируйте таблицу и попытайтесь сохранить заново");
+        }
     }
 
     @Override

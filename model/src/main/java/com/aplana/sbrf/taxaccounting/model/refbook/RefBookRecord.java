@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.model.refbook;
 
 import java.io.Serializable;
+import java.util.Date;
 import java.util.Map;
 
 /**
@@ -19,6 +20,9 @@ public class RefBookRecord implements Serializable {
     /** Идентификатор записи без учета версий.
      * Может быть null - тогда создается новый элемент справочника, а не новая версия элемента */
     private Long recordId;
+
+    /** Дата окончания. Может быть уникальной для каждой записи в группе, в зависиомти от наличия следующей версии */
+    private Date versionTo;
 
     public Map<String, RefBookValue> getValues() {
         return values;
@@ -44,12 +48,21 @@ public class RefBookRecord implements Serializable {
         this.uniqueRecordId = uniqueRecordId;
     }
 
+    public Date getVersionTo() {
+        return versionTo;
+    }
+
+    public void setVersionTo(Date versionTo) {
+        this.versionTo = versionTo;
+    }
+
     @Override
     public String toString() {
         return "RefBookRecord{" +
                 "values=" + values +
                 ", uniqueRecordId=" + uniqueRecordId +
                 ", recordId=" + recordId +
+                ", versionTo=" + versionTo +
                 '}';
     }
 }
