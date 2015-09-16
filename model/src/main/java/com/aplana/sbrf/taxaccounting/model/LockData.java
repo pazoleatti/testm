@@ -30,6 +30,8 @@ public final class LockData {
     private int queuePosition;
     /* Наименование узла кластера, на котором выполняется связанная асинхронная задача */
     private String serverNode;
+    /* Признак актуальности блокировки(dateBefore<sysdate)*/
+    private boolean isValid;
 
     public enum LockObjects {
         REF_BOOK,
@@ -139,10 +141,11 @@ public final class LockData {
 	public LockData(){
 	}
 
-	public LockData(String key, int userId, Date dateBefore) {
+	public LockData(String key, int userId, Date dateBefore, boolean isValid) {
 		this.key = key;
 		this.userId = userId;
 		this.dateBefore = dateBefore;
+        this.isValid = isValid;
 	}
 
 	public Date getDateBefore() {
@@ -223,6 +226,14 @@ public final class LockData {
 
     public void setServerNode(String serverNode) {
         this.serverNode = serverNode;
+    }
+
+    public boolean isValid() {
+        return isValid;
+    }
+
+    public void setValid(boolean isValid) {
+        this.isValid = isValid;
     }
 
     @Override

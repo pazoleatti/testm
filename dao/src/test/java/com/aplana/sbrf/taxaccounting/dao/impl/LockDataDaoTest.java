@@ -55,53 +55,41 @@ public class LockDataDaoTest {
 		Assert.assertNull(dao.get("c", false));
 	}
 
-	@Test (expected = LockException.class)
+	/*@Test// (expected = LockException.class)
 	public void createLockTest() {
-		dao.createLock("c", 0, null, "", "", ""); // пропущена дата
-	}
+		dao.createLock("c", 0, 1, "", "", "");
+	}*/
 
 	@Test (expected = LockException.class)
-	public void createLockTest2() {
-		dao.createLock("a", 0, new Date(), "", "", ""); // дубликат
+	public void createLockTest() {
+		dao.createLock("a", 0, 1, "", "", ""); // дубликат
 	}
 
 	@Test
-	public void createLockTest3() {
-		Calendar cal = Calendar.getInstance();
-		cal.clear();
-		cal.set(2013, 0, 1, 0, 5, 0);
-		Date dateBefore = cal.getTime();
-		dao.createLock("c", 0, dateBefore, "", "", "");
+	public void createLockTest2() {
+		dao.createLock("c", 0, 1, "", "", "");
 		LockData data = dao.get("c", false);
 		Assert.assertEquals("c", data.getKey());
 		Assert.assertEquals(0, data.getUserId());
-		Assert.assertEquals(dateBefore, data.getDateBefore());
 
-
-        Date before = new Date();
-        dao.createLock("abc", 0, before, "", "", "test");
-        data = dao.get("abc", before);
+        dao.createLock("abc", 0, 1, "", "", "test");
+        data = dao.get("abc", false);
+        data = dao.get("abc", data.getDateLock());
         Assert.assertNotNull(data);
         Assert.assertEquals(data.getServerNode(), "test");
 	}
 
 	@Test
 	public void updateLockTest() {
-		Calendar cal = Calendar.getInstance();
-		cal.clear();
-		cal.set(2013, 0, 1, 0, 5, 0);
-		Date dateBefore = cal.getTime();
-
-		dao.updateLock("b", dateBefore);
+		dao.updateLock("b", 1);
 		LockData data = dao.get("b", false);
 		Assert.assertEquals("b", data.getKey());
 		Assert.assertEquals(1, data.getUserId());
-		Assert.assertEquals(dateBefore, data.getDateBefore());
 	}
 
 	@Test (expected = LockException.class)
 	public void updateLockTest2() {
-		dao.updateLock("c", new Date());
+		dao.updateLock("c", 0);
 	}
 
 	@Test

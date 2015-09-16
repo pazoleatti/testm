@@ -93,7 +93,7 @@ public class NotificationDaoImpl extends AbstractDao implements NotificationDao 
     public void saveList(final List<Notification> notifications) {
         getJdbcTemplate().batchUpdate("insert into notification (ID, REPORT_PERIOD_ID, SENDER_DEPARTMENT_ID, RECEIVER_DEPARTMENT_ID, " +
                 "IS_READ, TEXT, CREATE_DATE, DEADLINE, USER_ID, ROLE_ID, BLOB_DATA_ID)" +
-                " values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", new BatchPreparedStatementSetter() {
+                " values (?, ?, ?, ?, ?, ?, sysdate ,?, ?, ?, ?)", new BatchPreparedStatementSetter() {
 
             @Override
             public void setValues(PreparedStatement ps, int i) throws SQLException {
@@ -121,31 +121,29 @@ public class NotificationDaoImpl extends AbstractDao implements NotificationDao 
                 ps.setInt(5, elem.isRead() ? 1 : 0);
                 //Текст
                 ps.setString(6, elem.getText());
-                //Дата создания
-                ps.setTimestamp(7, new java.sql.Timestamp(elem.getCreateDate().getTime()));
                 //Срок сдачи отчетности
                 if (elem.getDeadline() != null) {
-                    ps.setDate(8, new java.sql.Date(elem.getDeadline().getTime()));
+                    ps.setDate(7, new java.sql.Date(elem.getDeadline().getTime()));
                 } else {
-                    ps.setNull(8, Types.DATE);
+                    ps.setNull(7, Types.DATE);
                 }
                 //Пользователь-получатель  сообщения
                 if (elem.getUserId() != null) {
-                    ps.setInt(9, elem.getUserId());
+                    ps.setInt(8, elem.getUserId());
                 } else {
-                    ps.setNull(9, Types.NUMERIC);
+                    ps.setNull(8, Types.NUMERIC);
                 }
                 //Роль пользователей-получателей сообщения
                 if (elem.getRoleId() != null) {
-                    ps.setInt(10, elem.getRoleId());
+                    ps.setInt(9, elem.getRoleId());
                 } else {
-                    ps.setNull(10, Types.NUMERIC);
+                    ps.setNull(9, Types.NUMERIC);
                 }
 
                 if (elem.getBlobDataId() != null) {
-                    ps.setString(11, elem.getBlobDataId());
+                    ps.setString(10, elem.getBlobDataId());
                 } else {
-                    ps.setNull(11, Types.VARCHAR);
+                    ps.setNull(10, Types.VARCHAR);
                 }
             }
 
