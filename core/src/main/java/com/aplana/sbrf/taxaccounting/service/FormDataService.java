@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.service;
 import com.aplana.sbrf.taxaccounting.core.api.LockStateLogger;
 import com.aplana.sbrf.taxaccounting.model.BalancingVariants;
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.formdata.HeaderCell;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 
@@ -481,4 +482,11 @@ public interface FormDataService {
      * @return
      */
     boolean isEdited(long formDataId);
+
+    /**
+     * Получение заголовка таблицы
+     * @param formData
+     * @return
+     */
+    List<DataRow<HeaderCell>> getHeaders(FormData formData, TAUserInfo userInfo, Logger logger);
 }

@@ -183,7 +183,7 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
                     for(DataRow<com.aplana.sbrf.taxaccounting.model.Cell> dataRow: this.dataRows) {
                         dataRow.removeColumn(c);
                     }
-                    for(DataRow<HeaderCell> header: formTemplate.getHeaders()) {
+                    for(DataRow<HeaderCell> header: this.data.getHeaders()) {
                         header.removeColumn(c);
                     }
                     iterator.remove();
@@ -321,14 +321,14 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
         //и если превышает,то сдвигаем
         AreaReference ar = new AreaReference(workBook.getName(XlsxReportMetadata.RANGE_POSITION).getRefersToFormula());
         Row r = sheet.getRow(ar.getFirstCell().getRow());
-        if (rowNumber + formTemplate.getHeaders().size() >= r.getRowNum()){
-            int rowBreakes = rowNumber + formTemplate.getHeaders().size() - r.getRowNum();
+        if (rowNumber + data.getHeaders().size() >= r.getRowNum()){
+            int rowBreakes = rowNumber + data.getHeaders().size() - r.getRowNum();
             if(0 == rowBreakes)
                 sheet.shiftRows(r.getRowNum(), r.getRowNum() + 1, 1);
             else
                 sheet.shiftRows(r.getRowNum(), r.getRowNum() + 1, rowBreakes);
         }
-        for (DataRow<HeaderCell> headerCellDataRow : formTemplate.getHeaders()){
+        for (DataRow<HeaderCell> headerCellDataRow : data.getHeaders()){
             Row row = sheet.createRow(rowNumber);
             for (int i=0; i<formTemplate.getColumns().size(); i++){
                 Column column = formTemplate.getColumns().get(i);
@@ -536,8 +536,8 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
                 columnBreaks++;
             }
         }
-        workBook.setPrintArea(0, 0, (!formTemplate.getHeaders().isEmpty()?formTemplate.getHeaders().get(0).size() - columnBreaks : 0) , 0,
-                (dataRows != null ? dataRows.size() : 0) + data.getSigners().size() + formTemplate.getHeaders().size() + 15);
+        workBook.setPrintArea(0, 0, (!data.getHeaders().isEmpty()?data.getHeaders().get(0).size() - columnBreaks : 0) , 0,
+                (dataRows != null ? dataRows.size() : 0) + data.getSigners().size() + data.getHeaders().size() + 15);
         sheet.setFitToPage(true);
         sheet.setAutobreaks(true);
         sheet.getPrintSetup().setFitHeight((short) 0);

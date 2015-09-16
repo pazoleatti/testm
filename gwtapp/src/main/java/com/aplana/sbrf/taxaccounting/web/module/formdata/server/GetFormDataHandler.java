@@ -262,6 +262,7 @@ public class GetFormDataHandler extends AbstractActionHandler<GetFormDataAction,
 		result.setAllStyles(formTemplate.getStyles());
 		result.setFixedRows(formTemplate.isFixedRows());
 		result.setTemplateFormName(formTemplate.getName());
+        formData.setHeaders(formDataService.getHeaders(formData, userInfo, logger));
 		result.setFormData(formData);
         result.setBankSummaryForm(true);
         result.setCorrectionDiff(action.isCorrectionDiff());

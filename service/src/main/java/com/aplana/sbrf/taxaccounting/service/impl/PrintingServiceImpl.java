@@ -19,6 +19,7 @@ import com.aplana.sbrf.taxaccounting.service.BlobDataService;
 import com.aplana.sbrf.taxaccounting.service.DepartmentReportPeriodService;
 import com.aplana.sbrf.taxaccounting.service.FormDataAccessService;
 import com.aplana.sbrf.taxaccounting.service.PrintingService;
+import com.aplana.sbrf.taxaccounting.service.FormDataService;
 import com.aplana.sbrf.taxaccounting.service.impl.print.formdata.FormDataCSVReportBuilder;
 import com.aplana.sbrf.taxaccounting.service.impl.print.formdata.FormDataXlsmReportBuilder;
 import com.aplana.sbrf.taxaccounting.service.impl.print.logentry.LogEntryReportBuilder;
@@ -63,16 +64,19 @@ public class PrintingServiceImpl implements PrintingService {
     private DataRowDao dataRowDao;
 
     @Autowired
-    RefBookHelper refBookHelper;
+    private RefBookHelper refBookHelper;
 
     @Autowired
-    RefBookFactory refBookFactory;
+    private RefBookFactory refBookFactory;
 
     @Autowired
     private BlobDataService blobDataService;
 
     @Autowired
-    DepartmentReportPeriodService departmentReportPeriodService;
+    private DepartmentReportPeriodService departmentReportPeriodService;
+
+    @Autowired
+    private FormDataService formDataService;
 
     private static final long REF_BOOK_ID = 8L;
     private static final String REF_BOOK_VALUE_NAME = "CODE";
@@ -80,6 +84,7 @@ public class PrintingServiceImpl implements PrintingService {
 	@Override
 	public String generateExcel(TAUserInfo userInfo, long formDataId, boolean manual, boolean isShowChecked, boolean saved, LockStateLogger stateLogger) {
         String filePath = null;
+        Logger log = new Logger();
         try {
             formDataAccessService.canRead(userInfo, formDataId);
             FormDataReport data = new FormDataReport();
@@ -94,6 +99,7 @@ public class PrintingServiceImpl implements PrintingService {
                 Integer code = Integer.parseInt(refBookValueMap.get(REF_BOOK_VALUE_NAME).getStringValue());
                 reportPeriod.setName(ReportPeriodSpecificName.fromId(code).getName());
             }
+            formData.setHeaders(formDataService.getHeaders(formData, userInfo, log));
             data.setData(formData);
             data.setFormTemplate(formTemplate);
             data.setReportPeriod(reportPeriod);
@@ -101,7 +107,6 @@ public class PrintingServiceImpl implements PrintingService {
             data.setCreationDate(logBusinessDao.getFormCreationDate(formDataId));
             data.setRpCompare(formData.getComparativePeriodId() != null ? departmentReportPeriodService.get(formData.getComparativePeriodId()).getReportPeriod() : null);
             List<DataRow<Cell>> dataRows = (saved ? dataRowDao.getRows(formData, null) : dataRowDao.getTempRows(formData, null));
-            Logger log = new Logger();
             refBookHelper.dataRowsDereference(log, dataRows, formTemplate.getColumns());
 
             RefBookValue refBookValue = refBookFactory.getDataProvider(REF_BOOK_ID).

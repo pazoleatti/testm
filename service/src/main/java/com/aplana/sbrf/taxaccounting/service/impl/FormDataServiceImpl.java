@@ -11,6 +11,7 @@ import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
+import com.aplana.sbrf.taxaccounting.model.formdata.HeaderCell;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
@@ -2013,5 +2014,16 @@ public class FormDataServiceImpl implements FormDataService {
     @Override
     public boolean isEdited(long formDataId) {
         return formDataDao.isEdited(formDataId);
+    }
+
+    @Override
+    public List<DataRow<HeaderCell>> getHeaders(final FormData formData, final TAUserInfo userInfo, final Logger logger) {
+        FormTemplate formTemplate = formTemplateService.get(formData.getFormTemplateId());
+        Map<String, Object> params = new HashMap<String, Object>();
+        List<DataRow<HeaderCell>> headers = formTemplate.getHeaders();
+        params.put("headers", headers);
+        formDataScriptingService.executeScript(userInfo, formData, FormDataEvent.GET_HEADERS, logger, params);
+
+        return headers;
     }
 }
