@@ -190,7 +190,7 @@ public class SaveDepartmentRefBookValuesHandler extends AbstractActionHandler<Sa
                 }
             }
         }
-        if (!provider.isRecordsExist(references)) {
+        if (references.size() > 0 && !provider.isRecordsExist(references)) {
             throw new ServiceException("Данные не могут быть сохранены, так как часть выбранных справочных значений была удалена. Отредактируйте таблицу и попытайтесь сохранить заново");
         }
     }
