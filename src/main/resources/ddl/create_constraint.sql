@@ -151,6 +151,10 @@ alter table form_data add constraint form_data_chk_accruing check (accruing in (
 alter table form_data add constraint form_data_chk_edited check (edited in (0, 1));
 alter table form_data add constraint form_data_chk_sorted_backup check (sorted_backup in (0, 1));
 
+alter table form_data_file add constraint form_data_file_pk primary key (blob_data_id, form_data_id);
+alter table form_data_file add constraint form_data_file_fk_form_data foreign key (form_data_id) references form_data(id);
+alter table form_data_file add constraint form_data_file_fk_blob_data foreign key (blob_data_id) references blob_data(id);
+
 alter table form_data_ref_book add constraint form_data_ref_book_fk_formdata foreign key (form_data_id) references form_data(id) on delete cascade;
 alter table form_data_ref_book add constraint form_data_ref_book_fk_refbook foreign key (ref_book_id) references ref_book(id) on delete cascade;
 

@@ -439,7 +439,8 @@ create table form_data (
   comparative_dep_rep_per_id number(18), 
   accruing number(1) default 0 not null,
   sorted_backup number(1) default 0 not null, 
-  edited number(1) default 0 not null
+  edited number(1) default 0 not null,
+  note varchar2(512)
 );
 comment on table form_data is 'Данные по налоговым формам';
 comment on column form_data.id is 'Первичный ключ';
@@ -457,6 +458,7 @@ comment on column form_data.comparative_dep_rep_per_id is 'Период срав
 comment on column form_data.accruing is 'Признак расчета значений нарастающим итогом (0 - не нарастающим итогом, 1 - нарастающим итогом)';
 comment on column form_data.sorted_backup is 'Статус актуальности сортировки НФ для резервного среза (0 - Сортировка неактуальна; 1 - Сортировка актуальна)';
 comment on column form_data.edited is 'Признак изменения данных НФ в режиме редактирования (0 - Нет изменений; 1 - Есть изменения)';
+comment on column form_data.note is 'Комментарий к НФ, вводимый в модальном окне "Файлы и комментарии"';
 
 create sequence seq_form_data start with 10000;
 ---------------------------------------------------------------------------------------------------
@@ -955,4 +957,24 @@ comment on column log_clob_query.session_id is 'Идентификатор се�
 
 create sequence seq_log_query start with 1;
 create sequence seq_log_query_session start with 1;
+--------------------------------------------------------------------------------------------------------
+
+create table form_data_file
+(
+form_data_id number(18) not null,
+blob_data_id varchar2(36) not null,
+attachment_date date not null,
+user_name varchar2(512) not null,
+user_department_name varchar2(4000) not null,
+note varchar2(512)    
+);
+
+comment on table form_data_file is 'Файлы налоговой формы';
+comment on column form_data_file.form_data_id is 'Идентификатор экземпляра налоговой формы';
+comment on column form_data_file.blob_data_id is 'Файл налоговой формы';
+comment on column form_data_file.attachment_date is 'Дата-время прикрепления файла';
+comment on column form_data_file.user_name is 'Полное имя пользователя, прикрепившего файл';
+comment on column form_data_file.user_department_name is 'Наименование подразделения пользователя, прикрепившего файл';
+comment on column form_data_file.note is 'Комментарий к файлу';
+
 --------------------------------------------------------------------------------------------------------

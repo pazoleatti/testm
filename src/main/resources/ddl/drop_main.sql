@@ -50,6 +50,7 @@ begin
  end loop;
 end;
 /
+drop table form_data_file;
 drop table form_data;
 drop sequence seq_declaration_data;
 drop table declaration_data;
