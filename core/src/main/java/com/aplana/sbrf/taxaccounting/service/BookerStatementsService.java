@@ -13,16 +13,16 @@ import java.io.InputStream;
 public interface BookerStatementsService {
 
     /**
-     * Загрузка бух отчетности из хмл
+     * Загрузка бух отчетности
      *
-     * @param realFileName Имя файла что импортируем (валидируем расширение должно быть xml)
+     * @param realFileName Имя файла что импортируем
      * @param stream       Steam на загруженный фаил
      * @param accountPeriodId     идентификатор периода и подразделения БО
      * @param typeId       0 - Оборотная ведомость по счетам бухгалтерского учёта кредитной организации (Ф-101);
      * @param departmentId Подразделение // TODO (Ramil Timerbaev)
      * @throws IOException, ServiceException
      */
-    void importXML(String realFileName, InputStream stream, Integer accountPeriodId, int typeId, Integer departmentId, TAUserInfo userInfo);
+    void importData(String realFileName, InputStream stream, Integer accountPeriodId, int typeId, Integer departmentId, TAUserInfo userInfo);
 
     /**
      * Получение списка бух отчетностей соответсвующих заданному фильтру

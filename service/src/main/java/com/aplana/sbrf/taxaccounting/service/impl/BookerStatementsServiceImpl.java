@@ -5,30 +5,22 @@ import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookIncome101Dao;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookIncome102Dao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookRecord;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.*;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * Сервис для форм бухгалтерской отчётности
@@ -54,32 +46,9 @@ public class BookerStatementsServiceImpl implements BookerStatementsService {
     private static final String I_102_ITEM_NAME = "ITEM_NAME";
     private static final String I_102_ACCOUNT_PERIOD_ID = "ACCOUNT_PERIOD_ID";
 
-    // Ограничение по строкам для xls-файла
-    private static final long MAX_FILE_ROW = 10000L;
-
-    private static final String BAD_FILE_MSG = "Формат файла не соответствуют ожидаемому формату. Файл не может быть загружен.";
-
-    private static final String INCORRECT_NAME_MSG = "Выбранный файл не соответствует формату xls. Файл не может быть загружен.";
     private static final String NO_DATA_FILE_MSG = "Файл не содержит данных. Файл не может быть загружен.";
-    private static final String IO_WORKBOOK_EXCEPTION = "Не могу прочитать загруженный Excel фаил.";
     private static final String ACCOUNT_PERIOD_INVALID = "Период не указан.";
     private static final String DEPARTMENTID_INVALID = "Подразделение не указано.";
-    private static final String ATTRIBUTE_ACCOUNT_NO = "Номер счета";
-    private static final String ATTRIBUTE_NAME = "Название";
-    private static final String ATTRIBUTE_INCOME_REMAINS = "Входящие остатки";
-    private static final String ATTRIBUTE_REPORT_PERIOD_TURN = "Обороты за отчетный период";
-    private static final String ATTRIBUTE_OUTCOME_REMAINS = "Исходящие остатки";
-    private static final String ON_DEBET = "по дебету";
-    private static final String ON_CREDIT = "по кредиту";
-    private static final String ATTRIBUTE_INCOME_REMAINS_ON_DEBET = "Входящие остатки по дебету";
-    private static final String ATTRIBUTE_INCOME_REMAINS_ON_CREDIT = "Входящие остатки по кредиту";
-    private static final String ATTRIBUTE_REPORT_PERIOD_TURN_ON_DEBET = "Обороты за отчетный период по дебету";
-    private static final String ATTRIBUTE_REPORT_PERIOD_TURN_ON_CREDIT = "Обороты за отчетный период по кредиту";
-    private static final String ATTRIBUTE_OUTCOME_REMAINS_ON_DEBET = "Исходящие остатки по дебету";
-    private static final String ATTRIBUTE_OUTCOME_REMAINS_ON_CREDIT = "Исходящие остатки по кредиту";
-    private static final String ATTRIBUTE_ARTICLE_NAME = "Наименование статей";
-    private static final String ATTRIBUTE_SYMBOLS = "Символы";
-    private static final String ATTRIBUTE_TOTAL = "Всего";
 
     @Autowired
     PeriodService reportPeriodService;
@@ -97,10 +66,10 @@ public class BookerStatementsServiceImpl implements BookerStatementsService {
     private DepartmentService departmentService;
 
     @Autowired
-    private LogEntryService logEntryService;
+    private RefBookScriptingService refBookScriptingService;
 
     @Override
-    public void importXML(String realFileName, InputStream stream, Integer accountPeriodId, int typeId, Integer departmentId, TAUserInfo userInfo) {
+    public void importData(String realFileName, InputStream stream, Integer accountPeriodId, int typeId, Integer departmentId, TAUserInfo userInfo) {
 
         if (stream == null) {
             throw new ServiceException(NO_DATA_FILE_MSG);
@@ -111,390 +80,24 @@ public class BookerStatementsServiceImpl implements BookerStatementsService {
         if (accountPeriodId == null) {
             throw new ServiceException(ACCOUNT_PERIOD_INVALID);
         }
-        if (realFileName == null || !getFileExtention(realFileName).equals("xls")) {
-            throw new ServiceException(INCORRECT_NAME_MSG);
-        }
 
-        if (typeId == 0) {
-            RefBookDataProvider provider = rbFactory.getDataProvider(RefBookIncome101Dao.REF_BOOK_ID);
-            List<Income101> list = importIncome101(stream);
+        // Обращение к скрипту
+        Map<String, Object> additionalParameters = new HashMap<String, Object>();
+        additionalParameters.put("inputStream", stream);
+        additionalParameters.put("fileName", realFileName);
+        additionalParameters.put("accountPeriodId", accountPeriodId);
 
-            if (list != null && !list.isEmpty()) {
-                List<Map<String, RefBookValue>> records = new LinkedList<Map<String, RefBookValue>>();
+        Logger logger = new Logger();
 
-                for (Income101 item : list) {
-                    Map<String, RefBookValue> map = new HashMap<String, RefBookValue>();
-                    map.put(I_101_ACCOUNT, new RefBookValue(RefBookAttributeType.STRING, item.getAccount()));
-                    map.put(I_101_ACCOUNT_NAME, new RefBookValue(RefBookAttributeType.STRING, item.getAccountName()));
-                    map.put(I_101_INCOME_DEBET_REMAINS, new RefBookValue(RefBookAttributeType.NUMBER, item.getIncomeDebetRemains()));
-                    map.put(I_101_INCOME_CREDIT_REMAINS, new RefBookValue(RefBookAttributeType.NUMBER, item.getIncomeCreditRemains()));
-                    map.put(I_101_DEBET_RATE, new RefBookValue(RefBookAttributeType.NUMBER, item.getDebetRate()));
-                    map.put(I_101_CREDIT_RATE, new RefBookValue(RefBookAttributeType.NUMBER, item.getCreditRate()));
-                    map.put(I_101_OUTCOME_DEBET_REMAINS, new RefBookValue(RefBookAttributeType.NUMBER, item.getOutcomeDebetRemains()));
-                    map.put(I_101_OUTCOME_CREDIT_REMAINS, new RefBookValue(RefBookAttributeType.NUMBER, item.getOutcomeCreditRemains()));
-                    map.put(I_101_ACCOUNT_PERIOD_ID, new RefBookValue(RefBookAttributeType.REFERENCE, accountPeriodId.longValue()));
-                    records.add(map);
-                }
+        Long refBookId = (typeId == 0 ? RefBookIncome101Dao.REF_BOOK_ID : RefBookIncome102Dao.REF_BOOK_ID);
 
-                provider.updateRecords(userInfo, getStartDate(), records);
-            } else {
-                throw new ServiceException(NO_DATA_FILE_MSG);
-            }
-        } else {
-            RefBookDataProvider provider = rbFactory.getDataProvider(RefBookIncome102Dao.REF_BOOK_ID);
-            RefBook refBook = rbFactory.get(RefBookIncome102Dao.REF_BOOK_ID);
-            List<Income102> list = importIncome102(stream);
-
-            if (list != null && !list.isEmpty()) {
-                List<Map<String, RefBookValue>> records = new LinkedList<Map<String, RefBookValue>>();
-
-                for (Income102 item : list) {
-                    Map<String, RefBookValue> map = new HashMap<String, RefBookValue>();
-                    map.put(I_102_OPU_CODE, new RefBookValue(RefBookAttributeType.STRING, item.getOpuCode()));
-                    map.put(I_102_TOTAL_SUM, new RefBookValue(RefBookAttributeType.NUMBER, item.getTotalSum()));
-                    map.put(I_102_ITEM_NAME, new RefBookValue(RefBookAttributeType.STRING, item.getItemName()));
-                    map.put(I_102_ACCOUNT_PERIOD_ID, new RefBookValue(RefBookAttributeType.REFERENCE, accountPeriodId.longValue()));
-                    records.add(map);
-                }
-
-                List<String> matchedRecords = provider.getMatchedRecords(refBook.getAttributes(), records, accountPeriodId);
-                StringBuilder codeOpu = new StringBuilder();
-                if (matchedRecords.size() > 0) {
-                    for (int i = 0; i < matchedRecords.size(); i++) {
-                        codeOpu.append(matchedRecords.get(i));
-                        if (i < matchedRecords.size() - 1) {
-                            codeOpu.append(", ");
-                        }
-                    }
-                    Logger logger = new Logger();
-                    logger.error("Следующие коды ОПУ указаны в форме более одного раза:");
-                    logger.error(codeOpu.toString());
-                    throw new ServiceLoggerException("Нарушена уникальность кодов ОПУ. Файл не может быть загружен.", logEntryService.save(logger.getEntries()));
-                }
-
-                provider.updateRecords(userInfo, getStartDate(), records);
-
-            } else {
-                throw new ServiceException(NO_DATA_FILE_MSG);
-            }
-        }
+        //Выполняем логику скрипта
+        refBookScriptingService.executeScript(userInfo, refBookId, FormDataEvent.IMPORT_TRANSPORT_FILE,
+                logger, additionalParameters);
+        IOUtils.closeQuietly(stream);
 
         String msg = String.format("Импорт бухгалтерской отчётности: %s", realFileName);
-        auditService.add(FormDataEvent.IMPORT, userInfo, departmentId, null, null, null, null, msg, null, typeId);
-    }
-
-    // Проверка расширения Булата Кинзибулатова из com.aplana.sbrf.taxaccounting.web.mvc.BookerStatementsController.getFileExtention()
-    private static String getFileExtention(String filename) {
-        int dotPos = filename.lastIndexOf('.') + 1;
-        return filename.substring(dotPos);
-    }
-
-    private List<Income101> importIncome101(InputStream stream) {
-        List<Income101> list = new ArrayList<Income101>();
-        HSSFWorkbook wb;
-        try {
-            wb = new HSSFWorkbook(stream);
-        } catch (IOException e) {
-            throw new ServiceException(IO_WORKBOOK_EXCEPTION);
-        }
-        Sheet sheet = wb.getSheetAt(0);
-        Iterator<Row> it = sheet.iterator();
-        boolean endOfFile = false;
-        boolean hasHeader = false;
-        long rowCounter = 1L;
-        while (it.hasNext() && !endOfFile) {
-            if (rowCounter++ > MAX_FILE_ROW) {
-                throw new ServiceException(BAD_FILE_MSG);
-            }
-
-            Row row = it.next();
-            Iterator<Cell> cells = row.iterator();
-
-            // проверка ячеек в строке 10
-            if (row.getRowNum() == 9) {
-                while (cells.hasNext()) {
-                    Cell cell = cells.next();
-                    if ((cell.getCellType() != Cell.CELL_TYPE_STRING)
-                            && (cell.getCellType() != Cell.CELL_TYPE_BLANK)) {
-                        throw new ServiceException(BAD_FILE_MSG);
-                    }
-                    int colNum = cell.getColumnIndex();
-                    String colName = cell.getStringCellValue().trim();
-                    if ((colNum == 1 && !colName.equals(ATTRIBUTE_ACCOUNT_NO))
-                            || (colNum == 2 && !colName.equals(ATTRIBUTE_NAME))
-                            || (colNum == 4 && !colName.equals(ATTRIBUTE_INCOME_REMAINS))
-                            || (colNum == 6 && !colName.equals(ATTRIBUTE_REPORT_PERIOD_TURN))
-                            || (colNum == 8 && !colName.equals(ATTRIBUTE_OUTCOME_REMAINS)))
-                        throw new ServiceException(BAD_FILE_MSG);
-                }
-            }
-            // проверка ячеек в строке 12
-            if (row.getRowNum() == 11) {
-                hasHeader = true;
-                while (cells.hasNext()) {
-                    Cell cell = cells.next();
-                    int colNum = cell.getColumnIndex();
-                    String colName = cell.getStringCellValue().trim();
-                    if (((colNum == 4 || colNum == 6 || colNum == 8) && !colName.equals(ON_DEBET))
-                            || ((colNum == 5 || colNum == 7 || colNum == 9) && !colName.equals(ON_CREDIT)))
-                        throw new ServiceException(BAD_FILE_MSG);
-                }
-            }
-            // парсим с 18 строки
-            if (row.getRowNum() < 18) {
-                continue;
-            }
-            // парсим каждую третью строку
-            if (row.getRowNum() % 3 == 0) {
-                boolean isValid = true;
-                Income101 model = new Income101();
-                endOfFile = true;
-                while (cells.hasNext()) {
-                    if (!isValid)
-                        break;
-
-                    Cell cell = row.getCell(cells.next().getColumnIndex(), Row.RETURN_BLANK_AS_NULL);
-
-                    // первая ячейка не должна быть пустой
-                    if (cell == null) {
-                        throw new ServiceException(BAD_FILE_MSG);
-                    }
-
-                    if (cell.getColumnIndex() > 1 && endOfFile) {
-                        break;
-                    }
-
-                    try {
-                        // заполняем модель для вставки в БД
-                        switch (cell.getColumnIndex()) {
-                            case 1:
-                                endOfFile = false;
-                                // игнорируем строки не соотнесённые с номерами счетов (разделы, главы)
-                                String account = cell.getStringCellValue();
-                                Pattern p = Pattern.compile("[0-9.]+");
-                                Matcher m = p.matcher(account);
-                                if (!m.matches()) {
-                                    isValid = false;
-                                }
-                                model.setAccount(cell.getStringCellValue());
-                                break;
-                            case 2:
-                                model.setAccountName(cell.getStringCellValue());
-                                break;
-                            case 4:
-                                model.setIncomeDebetRemains(cell.getNumericCellValue());
-                                break;
-                            case 5:
-                                model.setIncomeCreditRemains(cell.getNumericCellValue());
-                                break;
-                            case 6:
-                                model.setDebetRate(cell.getNumericCellValue());
-                                break;
-                            case 7:
-                                model.setCreditRate(cell.getNumericCellValue());
-                                break;
-                            case 8:
-                                model.setOutcomeDebetRemains(cell.getNumericCellValue());
-                                break;
-                            case 9:
-                                model.setOutcomeCreditRemains(cell.getNumericCellValue());
-                                break;
-                        }
-                    } catch (IllegalStateException e) {
-                        throw getServiceException(cell.getColumnIndex(), RefBookIncome101Dao.REF_BOOK_ID);
-                    }
-                }
-                if (!endOfFile && isValid) {
-                    if (!isModelValid(model)) {
-                        throw new ServiceException(BAD_FILE_MSG);
-                    }
-                    list.add(model);
-                }
-            }
-        }
-        if (!hasHeader) {
-            throw new ServiceException(BAD_FILE_MSG);
-        }
-        return list;
-    }
-
-    private List<Income102> importIncome102(InputStream stream) {
-        // строки со следующими кодами игнорируем
-        Set<String> excludeCode = new HashSet<String>();
-        excludeCode.add("");
-        excludeCode.add("0");
-        // выходной лист с моделями для записи в бд
-        List<Income102> list = new ArrayList<Income102>();
-        HSSFWorkbook wb;
-        try {
-            wb = new HSSFWorkbook(stream);
-        } catch (IOException e) {
-            throw new ServiceException(IO_WORKBOOK_EXCEPTION);
-        }
-        Sheet sheet = wb.getSheetAt(0);
-        Iterator<Row> it = sheet.iterator();
-        boolean endOfFile = false;
-        long rowCounter = 1L;
-        while (it.hasNext() && !endOfFile) {
-            if (rowCounter++ > MAX_FILE_ROW) {
-                throw new ServiceException(BAD_FILE_MSG);
-            }
-
-            Row row = it.next();
-            Iterator<Cell> cells = row.iterator();
-
-            // проверка ячеек в строке 10
-            if (row.getRowNum() == 9) {
-                while (cells.hasNext()) {
-                    Cell cell = cells.next();
-                    if ((cell.getCellType() != Cell.CELL_TYPE_STRING)
-                            && (cell.getCellType() != Cell.CELL_TYPE_BLANK)) {
-                        throw new ServiceException(BAD_FILE_MSG);
-                    }
-                    int colNum = cell.getColumnIndex();
-                    String colName = cell.getStringCellValue().trim();
-                    if ((colNum == 2 && !colName.equals(ATTRIBUTE_ARTICLE_NAME))
-                            || (colNum == 3 && !colName.equals(ATTRIBUTE_SYMBOLS))
-                            || (colNum == 6 && !colName.equals(ATTRIBUTE_TOTAL)))
-                        throw new ServiceException(BAD_FILE_MSG);
-                }
-            }
-
-            // парсим с 17 строки
-            if (row.getRowNum() < 16) {
-                continue;
-            }
-
-            boolean isValid = true;
-            Income102 model = new Income102();
-            while (cells.hasNext()) {
-                if (!isValid)
-                    break;
-
-                int index = cells.next().getColumnIndex();
-                Cell cell = row.getCell(index, Row.RETURN_BLANK_AS_NULL);
-
-                if (cell == null) {
-                    if (index == 3) {
-                        isValid = false;
-                    }
-                    continue;
-                }
-
-                try {
-                    // заполняем модель для вставки в БД
-                    switch (cell.getColumnIndex()) {
-                        case 2:
-                            model.setItemName(cell.getStringCellValue());
-                            break;
-                        case 3:
-                            //Пропускаем строки с "плохим" кодом
-                            String opCode = cell.getStringCellValue().trim();
-                            if (opCode == null || excludeCode.contains(opCode.trim())) {
-                                isValid = false;
-                                break;
-                            }
-                            model.setOpuCode(opCode.trim());
-                            break;
-                        case 6:
-                            model.setTotalSum(cell.getNumericCellValue());
-                            break;
-                    }
-                } catch (IllegalStateException e) {
-                    throw getServiceException(cell.getColumnIndex(), RefBookIncome102Dao.REF_BOOK_ID);
-                }
-            }
-            endOfFile = isEndOfFile102(model);
-            if (!endOfFile && isValid) {
-                if (!isModelValid(model)) {
-                    throw new ServiceException(BAD_FILE_MSG);
-                }
-                list.add(model);
-            }
-        }
-        return list;
-    }
-
-    private boolean isEndOfFile102(Income102 model) {
-        return model.getOpuCode() == null
-                && model.getTotalSum() == null &&
-                model.getItemName() == null;
-    }
-
-    /**
-     * @param model проверяемая модель
-     * @return true если ячейки в столбцах, указанные в описании формата, не пустые (нет ни одной пустой ячейки), иначе - false
-     */
-    private boolean isModelValid(Income101 model) {
-        return model.getAccount() != null && !model.getAccount().isEmpty()
-                && model.getIncomeDebetRemains() != null
-                && model.getIncomeCreditRemains() != null
-                && model.getDebetRate() != null
-                && model.getCreditRate() != null
-                && model.getOutcomeDebetRemains() != null
-                && model.getOutcomeCreditRemains() != null
-                && model.getAccountName() != null && !model.getAccountName().isEmpty();
-    }
-
-    /**
-     * @param model проверяемая модель
-     * @return true если ячейки в столбцах, указанные в описании формата, не пустые (нет ни одной пустой ячейки), иначе - false
-     */
-    private boolean isModelValid(Income102 model) {
-        return model.getOpuCode() != null && !model.getOpuCode().isEmpty()
-                && model.getTotalSum() != null
-                && model.getItemName() != null && !model.getItemName().isEmpty();
-    }
-
-    /**
-     * Если тип загружаемых данных не соответствует объявленным
-     *
-     * @param columnIndex индекс колонки (для определения текста ошибки)
-     * @param typeID      тип бух отчетности
-     */
-    private ServiceException getServiceException(int columnIndex, long typeID) {
-        String colName = "";
-        if (typeID == RefBookIncome101Dao.REF_BOOK_ID) {
-            switch (columnIndex) {
-                case 1:
-                    colName = ATTRIBUTE_ACCOUNT_NO;
-                    break;
-                case 2:
-                    colName = ATTRIBUTE_NAME;
-                    break;
-                case 4:
-                    colName = ATTRIBUTE_INCOME_REMAINS_ON_DEBET;
-                    break;
-                case 5:
-                    colName = ATTRIBUTE_INCOME_REMAINS_ON_CREDIT;
-                    break;
-                case 6:
-                    colName = ATTRIBUTE_REPORT_PERIOD_TURN_ON_DEBET;
-                    break;
-                case 7:
-                    colName = ATTRIBUTE_REPORT_PERIOD_TURN_ON_CREDIT;
-                    break;
-                case 8:
-                    colName = ATTRIBUTE_OUTCOME_REMAINS_ON_DEBET;
-                    break;
-                case 9:
-                    colName = ATTRIBUTE_OUTCOME_REMAINS_ON_CREDIT;
-                    break;
-            }
-        } else {
-            switch (columnIndex) {
-                case 2:
-                    colName = ATTRIBUTE_ARTICLE_NAME;
-                    break;
-                case 3:
-                    colName = ATTRIBUTE_SYMBOLS;
-                    break;
-                case 6:
-                    colName = ATTRIBUTE_TOTAL;
-                    break;
-            }
-        }
-        return new ServiceException("Данные столбца '" + colName + "' файла не соответствуют ожидаемому типу данных. Файл не может быть загружен.");
+        auditService.add(FormDataEvent.IMPORT, userInfo, departmentId, null, null, null, null, msg, null);
     }
 
     @Override
