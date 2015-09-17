@@ -494,7 +494,8 @@ def checkPrevForm() {
         return
     }
     // проверить существование и принятость предыдущей формы, а также наличие данных в них.
-    formDataService.checkFormExistAndAccepted(formData.formType.id, FormDataKind.SUMMARY, formDataDepartment.id, reportPeriod.id, true, logger, true)
+    formDataService.checkFormExistAndAccepted(formData.formType.id, FormDataKind.SUMMARY, formDataDepartment.id,
+            reportPeriod.id, true, logger, true, formData.comparativePeriodId, formData.accruing)
 }
 
 def getNewRow(def title, isEditable) {

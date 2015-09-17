@@ -132,8 +132,10 @@ def getRefBookValue(def long refBookId, def Long recordId) {
 void checkRNU() {
     // проверить рну 55 (id = 348) и 56 (id = 349)
     if (formData.kind == FormDataKind.PRIMARY) {
-        formDataService.checkFormExistAndAccepted(348, FormDataKind.PRIMARY, formData.departmentId, formData.reportPeriodId, false, logger, true)
-        formDataService.checkFormExistAndAccepted(349, FormDataKind.PRIMARY, formData.departmentId, formData.reportPeriodId, false, logger, true)
+        formDataService.checkFormExistAndAccepted(348, FormDataKind.PRIMARY, formData.departmentId,
+                formData.reportPeriodId, false, logger, true, formData.comparativePeriodId, formData.accruing)
+        formDataService.checkFormExistAndAccepted(349, FormDataKind.PRIMARY, formData.departmentId,
+                formData.reportPeriodId, false, logger, true, formData.comparativePeriodId, formData.accruing)
     }
 }
 

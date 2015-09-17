@@ -631,8 +631,9 @@ void checkTotalRow(def totalRow) {
 
 /** Если не период ввода остатков, то должна быть форма с данными за предыдущий отчетный период. */
 void prevPeriodCheck() {
-    if (!isConsolidated && !isBalancePeriod()) {
-        formDataService.checkFormExistAndAccepted(formData.formType.id, FormDataKind.PRIMARY, formData.departmentId, formData.reportPeriodId, true, logger, true)
+    if (formData.kind == FormDataKind.PRIMARY && !isBalancePeriod()) {
+        formDataService.checkFormExistAndAccepted(formData.formType.id, formData.kind, formData.departmentId,
+                formData.reportPeriodId, true, logger, true, formData.comparativePeriodId, formData.accruing)
     }
 }
 

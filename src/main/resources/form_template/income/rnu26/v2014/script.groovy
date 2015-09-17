@@ -545,8 +545,9 @@ void loggerError(def row, def msg) {
 
 /** Если не период ввода остатков, то должна быть форма с данными за предыдущий отчетный период. */
 void prevPeriodCheck() {
-    if (!isConsolidated && !getBalancePeriod()) {
-        formDataService.checkFormExistAndAccepted(formData.formType.id, FormDataKind.PRIMARY, formData.departmentId, formData.reportPeriodId, true, logger, true)
+    if (formData.kind == FormDataKind.PRIMARY && !getBalancePeriod()) {
+        formDataService.checkFormExistAndAccepted(formData.formType.id, formData.kind, formData.departmentId,
+                formData.reportPeriodId, true, logger, true, formData.comparativePeriodId, formData.accruing)
     }
 }
 

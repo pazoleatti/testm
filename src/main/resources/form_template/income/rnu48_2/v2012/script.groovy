@@ -137,7 +137,8 @@ def checkRNU48_1() {
     // идентификатор формы рну-48.1
     def rnuId = 343
     if (formData.kind == FormDataKind.PRIMARY) {
-        formDataService.checkFormExistAndAccepted(rnuId, FormDataKind.PRIMARY, formData.departmentId, formData.reportPeriodId, false, logger, true)
+        formDataService.checkFormExistAndAccepted(rnuId, FormDataKind.PRIMARY, formData.departmentId,
+                formData.reportPeriodId, false, logger, true, formData.comparativePeriodId, formData.accruing)
     }
 }
 

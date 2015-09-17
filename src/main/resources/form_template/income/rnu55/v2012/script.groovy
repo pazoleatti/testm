@@ -135,7 +135,8 @@ def getRecordIdImport(def Long refBookId, def String alias, def String value, de
 void prevPeriodCheck() {
     // Проверка только для первичных
     if (formData.kind == FormDataKind.PRIMARY && !isBalancePeriod()) {
-        formDataService.checkFormExistAndAccepted(formData.formType.id, FormDataKind.PRIMARY, formData.departmentId, formData.reportPeriodId, true, logger, true)
+        formDataService.checkFormExistAndAccepted(formData.formType.id, formData.kind, formData.departmentId,
+                formData.reportPeriodId, true, logger, true, formData.comparativePeriodId, formData.accruing)
     }
 }
 

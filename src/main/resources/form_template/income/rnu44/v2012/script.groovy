@@ -370,7 +370,8 @@ void addTransportData(def xml) {
 // проверить наличие рну 49
 void checkRNU() {
     if (formData.kind == FormDataKind.PRIMARY) {
-        formDataService.checkFormExistAndAccepted(312, FormDataKind.PRIMARY, formData.departmentId, formData.reportPeriodId, false, logger, true)
+        formDataService.checkFormExistAndAccepted(312, FormDataKind.PRIMARY, formData.departmentId,
+                formData.reportPeriodId, false, logger, true, formData.comparativePeriodId, formData.accruing)
     }
 }
 

@@ -287,7 +287,8 @@ void prevPeriodCheck() {
     }
     def reportPeriod = reportPeriodService.get(formData.reportPeriodId)
     if (reportPeriod && reportPeriod.order != 1) {
-        formDataService.checkFormExistAndAccepted(formData.formType.id, FormDataKind.PRIMARY, formData.departmentId, formData.reportPeriodId, true, logger, true)
+        formDataService.checkFormExistAndAccepted(formData.formType.id, FormDataKind.PRIMARY, formData.departmentId,
+                formData.reportPeriodId, true, logger, true, formData.comparativePeriodId, formData.accruing)
     }
 }
 

@@ -461,7 +461,8 @@ def checkPrevForm() {
     def reportPeriods = getPrevReportPeriods()
 
     for (def reportPeriod : reportPeriods) {
-        formDataService.checkFormExistAndAccepted(formData.formType.id, FormDataKind.SUMMARY, formDataDepartment.id, reportPeriod.id, false, logger, true)
+        formDataService.checkFormExistAndAccepted(formData.formType.id, FormDataKind.SUMMARY, formDataDepartment.id,
+                reportPeriod.id, false, logger, true, formData.comparativePeriodId, formData.accruing)
     }
 }
 
