@@ -361,7 +361,7 @@ def BigDecimal getCalcPrevColumn10(def row, def sumColumnName, def startDate) {
         def reportPeriods = reportPeriodService.getReportPeriodsByDate(TaxType.INCOME, row.buyDate, startDate - 1)
         for (reportPeriod in reportPeriods) {
             findFormData = formDataService.getLast(formData.formType.id, formData.kind, formData.departmentId,
-                    reportPeriod.id, null)
+                    reportPeriod.id, null, formData.comparativePeriodId, formData.accruing)
             if (findFormData != null) {
                 isFind = false
                 for (findRow in formDataService.getDataRowHelper(findFormData).allSaved) {

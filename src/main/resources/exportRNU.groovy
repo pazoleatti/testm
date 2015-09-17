@@ -353,12 +353,12 @@ def getAllDataRows() {
 
     formTemplates.each { FormTemplate formTemplate ->
         def monthOrder = (formTemplate?.isMonthly() ? periodOrder : null)
-        def formData = formDataService.getLast(formTemplate.type.id, kind1, departmentId, reportPeriodId, monthOrder)
+        def formData = formDataService.getLast(formTemplate.type.id, kind1, departmentId, reportPeriodId, monthOrder, null, false)
         if (formData == null) {
-            formData = formDataService.getLast(formTemplate.type.id, kind2, departmentId, reportPeriodId, monthOrder)
+            formData = formDataService.getLast(formTemplate.type.id, kind2, departmentId, reportPeriodId, monthOrder, null, false)
         }
         if (formData == null) {
-            formData = formDataService.getLast(formTemplate.type.id, kind3, departmentId, reportPeriodId, monthOrder)
+            formData = formDataService.getLast(formTemplate.type.id, kind3, departmentId, reportPeriodId, monthOrder, null, false)
         }
         if (formData != null) {
             formDataMap[formTemplate.id] = formData

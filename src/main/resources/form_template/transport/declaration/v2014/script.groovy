@@ -213,7 +213,9 @@ def buildXml(def departmentParamTransport, def departmentParamTransportRow, def 
                                 reportPeriods.each { period ->
                                     def order = period.order
                                     reportPeriodMap[order] = period
-                                    formDataMap[order] = formDataService.getLast(formDataMap[reportPeriod.order].formType.id, formDataMap[reportPeriod.order].kind, formDataMap[reportPeriod.order].departmentId, reportPeriodMap[order].id, formDataMap[reportPeriod.order].periodOrder)
+                                    formDataMap[order] = formDataService.getLast(formDataMap[reportPeriod.order].formType.id, formDataMap[reportPeriod.order].kind,
+                                            formDataMap[reportPeriod.order].departmentId, reportPeriodMap[order].id, formDataMap[reportPeriod.order].periodOrder,
+                                            formDataMap[reportPeriod.order].comparativePeriodId, formDataMap[reportPeriod.order].accruing)
                                     if (formDataMap[order] != null && formDataMap[order].state == WorkflowState.ACCEPTED) {
                                         rowsDataMap[order] = formDataService.getDataRowHelper(formDataMap[order]).allSaved
                                     }

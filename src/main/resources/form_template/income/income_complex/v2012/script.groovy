@@ -376,7 +376,7 @@ void consolidationFromPrimary(def dataRows, def formSources) {
                 children.add(child)
             }
         } else {
-            children.add(formDataService.getLast(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId, formData.periodOrder))
+            children.add(formDataService.getLast(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId, formData.periodOrder, formData.comparativePeriodId, formData.accruing))
         }
         for (def child in children) {
             if (child != null) {
