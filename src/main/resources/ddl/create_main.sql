@@ -743,7 +743,7 @@ create table lock_data
   key varchar2(1000) not null,
   user_id number(9) not null,
   date_before date not null,
-  date_lock date default current_date not null,
+  date_lock date default sysdate not null,
   state varchar2(500),
   state_date date,
   description varchar2(4000),
