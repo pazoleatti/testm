@@ -262,7 +262,7 @@ void prevPeriodCheck() {
     // Проверка наличия формы за предыдущий период начиная с отчета за 2-й отчетный период,
     // т.е. проверка отчёта за январь не осуществляется
     if (formData.periodOrder != 1 && formData.kind == FormDataKind.PRIMARY) {
-        formDataService.checkMonthlyFormExistAndAccepted(formData.formType.id, FormDataKind.PRIMARY, formData.departmentId, formData.reportPeriodId, formData.periodOrder, true, logger, true)
+        formDataService.checkMonthlyFormExistAndAccepted(formData.formType.id, FormDataKind.PRIMARY, formData.departmentId, formData.reportPeriodId, formData.periodOrder, true, logger, true, formData.comparativePeriodId, formData.accruing)
     }
 }
 
