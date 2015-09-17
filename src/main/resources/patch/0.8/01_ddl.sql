@@ -10,6 +10,10 @@ alter table form_data add constraint form_data_chk_sorted_backup check (sorted_b
 alter table LOCK_DATA modify DATE_LOCK default sysdate;
 update CONFIGURATION_LOCK set timeout = timeout / 60000 where timeout >= 60000;
 
+--http://jira.aplana.com/browse/SBRFACCTAX-12711: Обязательность заполнения для form_data.accruing
+update form_data set accruing = 0 where accruing is null;
+alter table form_data modify accruing default 0 not null;
+comment on column form_data.accruing is 'Признак расчета значений нарастающим итогом (0 - не нарастающим итогом, 1 - нарастающим итогом)';
 
 commit;
 exit;
