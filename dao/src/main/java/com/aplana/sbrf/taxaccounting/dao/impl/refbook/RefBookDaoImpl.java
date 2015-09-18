@@ -1844,7 +1844,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     private static final String CHECK_USAGES_IN_DEPARTMENT_CONFIG = "select * from (with checkRecords as (select * from ref_book_record r where %s),\n" +
             "periodCodes as (select a.alias, v.* from ref_book_value v, ref_book_attribute a where v.attribute_id=a.id and a.ref_book_id=8),\n" +
             "usages as (select r.* from ref_book_value v, ref_book_record r, checkRecords cr " +
-            "where v.attribute_id in (select id from ref_book_attribute where ref_book_id in (37,310,31,98,330,33,206,99) and alias != 'DEPARTMENT_ID') and v.reference_value = cr.id and r.id=v.record_id)\n" +
+            "where v.attribute_id in (select id from ref_book_attribute where ref_book_id in (37,310,31,98,330,33,206,99) %s and alias != 'DEPARTMENT_ID') and v.reference_value = cr.id and r.id=v.record_id)\n" +
             "select distinct d.name as departmentName, concat(pn.string_value, to_char(u.version,' yyyy')) as periodName, nt.number_value as isT, ni.number_value as isI, nd.number_value as isD, nv.number_value as isV, np.number_value as isP,\n" +
             "to_date(concat(to_char(ps.date_value,'dd.mm'), to_char(u.version,'.yyyy')), 'DD.MM.YYYY') as periodStart, to_date(concat(to_char(pe.date_value,'dd.mm'), to_char(u.version,'.yyyy')), 'DD.MM.YYYY') as periodEnd,\n" +
             "case\n" +
@@ -1929,7 +1929,11 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         try {
             //Проверка использования в настройках подразделений
             in = transformToSqlInStatement("r.id", uniqueRecordIds);
-            sql = String.format(CHECK_USAGES_IN_DEPARTMENT_CONFIG, in);
+            String inExcludedRefBook = "";
+            if (excludedRefBooks != null && !excludedRefBooks.isEmpty()) {
+                inExcludedRefBook = " and " + transformToSqlInStatement("ref_book_id not ", excludedRefBooks);
+            }
+            sql = String.format(CHECK_USAGES_IN_DEPARTMENT_CONFIG, in, inExcludedRefBook);
             params.clear();
             if (restrictPeriod != null) {
                 if (restrictPeriod) {
