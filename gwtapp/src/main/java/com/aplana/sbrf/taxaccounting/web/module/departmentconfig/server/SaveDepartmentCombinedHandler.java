@@ -259,16 +259,25 @@ public class SaveDepartmentCombinedHandler extends AbstractActionHandler<SaveDep
      * @param rows
      */
     private void checkReferenceValues(RefBookDataProvider provider, Map<String, RefBookValue> rows) {
-        List<Long> references = new ArrayList<Long>();
+        Map<RefBookDataProvider, List<Long>> references = new HashMap<RefBookDataProvider, List<Long>>();
+        RefBookDataProvider oktmoProvider = rbFactory.getDataProvider(96L);
         for (Map.Entry<String, RefBookValue> e : rows.entrySet()) {
             if (e.getValue().getAttributeType() == RefBookAttributeType.REFERENCE) {
                 if (e.getValue().getReferenceValue() != null) {
-                    references.add(e.getValue().getReferenceValue());
+                    RefBookDataProvider linkProvider = e.getKey().equals("OKTMO") ? oktmoProvider : provider;
+                    List<Long> links = (references.containsKey(linkProvider)) ?
+                            references.get(linkProvider) : new ArrayList<Long>();
+                    links.add(e.getValue().getReferenceValue());
+                    references.put(linkProvider, links);
                 }
             }
         }
-        if (references.size() > 0 && !provider.isRecordsExist(references)) {
-            throw new ServiceException("Данные не могут быть сохранены, так как часть выбранных справочных значений была удалена. Отредактируйте таблицу и попытайтесь сохранить заново");
+        if (references.size() > 0) {
+            for (Map.Entry<RefBookDataProvider, List<Long>> entry : references.entrySet()) {
+                if (!entry.getKey().isRecordsExist(entry.getValue())) {
+                    throw new ServiceException("Данные не могут быть сохранены, так как часть выбранных справочных значений была удалена. Отредактируйте таблицу и попытайтесь сохранить заново");
+                }
+            }
         }
     }
 

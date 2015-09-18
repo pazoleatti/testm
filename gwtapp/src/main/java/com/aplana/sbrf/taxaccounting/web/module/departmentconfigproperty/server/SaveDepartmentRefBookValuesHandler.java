@@ -185,7 +185,8 @@ public class SaveDepartmentRefBookValuesHandler extends AbstractActionHandler<Sa
      * @param rows
      */
     private void checkReferenceValues(RefBookDataProvider provider, List<Map<String, TableCell>> rows) {
-        List<Long> references = new ArrayList<Long>();
+        Map<RefBookDataProvider, List<Long>> references = new HashMap<RefBookDataProvider, List<Long>>();
+        RefBookDataProvider oktmoProvider = rbFactory.getDataProvider(96L);
         for (Map<String, TableCell> row : rows) {
             for (Map.Entry<String, TableCell> e : row.entrySet()) {
                 if (e.getValue().getType() == null) {
@@ -193,13 +194,21 @@ public class SaveDepartmentRefBookValuesHandler extends AbstractActionHandler<Sa
                 }
                 if (e.getValue().getType() == RefBookAttributeType.REFERENCE) {
                     if (e.getValue().getRefValue() != null) {
-                        references.add(e.getValue().getRefValue());
+                        RefBookDataProvider linkProvider = e.getKey().equals("OKTMO") ? oktmoProvider : provider;
+                        List<Long> links = (references.containsKey(linkProvider)) ?
+                                references.get(linkProvider) : new ArrayList<Long>();
+                        links.add(e.getValue().getRefValue());
+                        references.put(linkProvider, links);
                     }
                 }
             }
         }
-        if (references.size() > 0 && !provider.isRecordsExist(references)) {
-            throw new ServiceException("Данные не могут быть сохранены, так как часть выбранных справочных значений была удалена. Отредактируйте таблицу и попытайтесь сохранить заново");
+        if (references.size() > 0) {
+            for (Map.Entry<RefBookDataProvider, List<Long>> entry : references.entrySet()) {
+                if (!entry.getKey().isRecordsExist(entry.getValue())) {
+                    throw new ServiceException("Данные не могут быть сохранены, так как часть выбранных справочных значений была удалена. Отредактируйте таблицу и попытайтесь сохранить заново");
+                }
+            }
         }
     }
 
