@@ -120,8 +120,8 @@ public class RegionSecurityServiceImplTest {
         when(provider.getRecordIdPairs(REGION_REF_BOOK_ID, START, false, null)).thenReturn(pairs);
         when(provider.getRecordsVersionStart(list)).thenReturn(versionDateMap);
 
-        when(provider.getRecordVersions(UNIQUE_RECORD_ID, null, null, null)).thenReturn(versionsGood);
-        when(provider.getRecordVersions(UNIQUE_RECORD_ID_BAD_VERSION, null, null, null)).thenReturn(versionsBad);
+        when(provider.getRecordVersionsById(UNIQUE_RECORD_ID, null, null, null)).thenReturn(versionsGood);
+        when(provider.getRecordVersionsById(UNIQUE_RECORD_ID_BAD_VERSION, null, null, null)).thenReturn(versionsBad);
     }
 
     @Test

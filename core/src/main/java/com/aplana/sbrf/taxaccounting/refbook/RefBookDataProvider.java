@@ -106,7 +106,7 @@ public interface RefBookDataProvider {
      */
     boolean isRecordsExist(List<Long> uniqueRecordIds);
 
-	/**
+    /**
 	 * Загружает данные иерархического справочника на определенную дату актуальности
 	 *
 	 *
@@ -177,8 +177,19 @@ public interface RefBookDataProvider {
      * @param sortAttribute сортируемый столбец. Может быть не задан
      * @return
      */
-    PagingResult<Map<String, RefBookValue>> getRecordVersions(Long uniqueRecordId, PagingParams pagingParams,
-                                                              String filter, RefBookAttribute sortAttribute);
+    PagingResult<Map<String, RefBookValue>> getRecordVersionsById(Long uniqueRecordId, PagingParams pagingParams,
+                                                                  String filter, RefBookAttribute sortAttribute);
+
+    /**
+     * Возвращает все версии из указанной группы версий записи справочника
+     * @param recordId идентификатор группы версий записи справочника
+     * @param pagingParams определяет параметры запрашиваемой страницы данных. Могут быть не заданы
+     * @param filter условие фильтрации строк. Может быть не задано
+     * @param sortAttribute сортируемый столбец. Может быть не задан
+     * @return
+     */
+    PagingResult<Map<String, RefBookValue>> getRecordVersionsByRecordId(Long recordId, PagingParams pagingParams,
+                                                                        String filter, RefBookAttribute sortAttribute);
 
     /**
      * Возвращает информацию о версии записи справочника

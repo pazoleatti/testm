@@ -177,8 +177,13 @@ public class RefBookDepartment implements RefBookDataProvider {
 
     @SuppressWarnings("unchecked")
     @Override
-    public PagingResult<Map<String, RefBookValue>> getRecordVersions(final Long recordId, PagingParams pagingParams, String filter, RefBookAttribute sortAttribute) {
+    public PagingResult<Map<String, RefBookValue>> getRecordVersionsById(final Long recordId, PagingParams pagingParams, String filter, RefBookAttribute sortAttribute) {
         return new PagingResult(new ArrayList<Map<String, RefBookValue>>(){{add(getRecordData(recordId));}}, 1);
+    }
+
+    @Override
+    public PagingResult<Map<String, RefBookValue>> getRecordVersionsByRecordId(Long recordId, PagingParams pagingParams, String filter, RefBookAttribute sortAttribute) {
+        throw new UnsupportedOperationException();
     }
 
     @Override

@@ -107,7 +107,12 @@ public class RefBookEmailConfigProvider implements RefBookDataProvider {
     }
 
     @Override
-    public PagingResult<Map<String, RefBookValue>> getRecordVersions(Long uniqueRecordId, PagingParams pagingParams, String filter, RefBookAttribute sortAttribute) {
+    public PagingResult<Map<String, RefBookValue>> getRecordVersionsById(Long uniqueRecordId, PagingParams pagingParams, String filter, RefBookAttribute sortAttribute) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public PagingResult<Map<String, RefBookValue>> getRecordVersionsByRecordId(Long recordId, PagingParams pagingParams, String filter, RefBookAttribute sortAttribute) {
         throw new UnsupportedOperationException();
     }
 

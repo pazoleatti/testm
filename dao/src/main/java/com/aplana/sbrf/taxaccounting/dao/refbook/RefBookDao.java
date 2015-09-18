@@ -257,9 +257,22 @@ public interface RefBookDao {
      * @param sortAttribute сортируемый столбец. Может быть не задан
      * @return
      */
-    PagingResult<Map<String,RefBookValue>> getRecordVersions(@NotNull Long refBookId, @NotNull Long uniqueRecordId,
-                                                             PagingParams pagingParams, String filter,
-                                                             RefBookAttribute sortAttribute);
+    PagingResult<Map<String,RefBookValue>> getRecordVersionsById(@NotNull Long refBookId, @NotNull Long uniqueRecordId,
+                                                                 PagingParams pagingParams, String filter,
+                                                                 RefBookAttribute sortAttribute);
+
+    /**
+     * Возвращает все версии из указанной группы версий записи справочника
+     * @param refBookId идентификатор справочника
+     * @param recordId идентификатор группы версий записи справочника
+     * @param pagingParams определяет параметры запрашиваемой страницы данных. Могут быть не заданы
+     * @param filter условие фильтрации строк. Может быть не задано
+     * @param sortAttribute сортируемый столбец. Может быть не задан
+     * @return
+     */
+    PagingResult<Map<String,RefBookValue>> getRecordVersionsByRecordId(Long refBookId, Long recordId,
+                                                                       PagingParams pagingParams, String filter,
+                                                                       RefBookAttribute sortAttribute);
 
     /**
      * Возвращает значения уникальных атрибутов справочника

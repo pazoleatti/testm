@@ -46,7 +46,7 @@ public class GetLastVersionHierarchyHandler extends AbstractActionHandler<GetLas
         RefBook refBook = refBookFactory.get(action.getRefBookId());
         //1000 записей взято с потолка, предполагается что версий много не будет
         PagingResult<Map<String, RefBookValue>> refBookPage = refBookDataProvider
-                .getRecordVersions(action.getRefBookRecordId(), new PagingParams(0, 1000), null, refBook.getAttributes().get(0));
+                .getRecordVersionsById(action.getRefBookRecordId(), new PagingParams(0, 1000), null, refBook.getAttributes().get(0));
 
         if (refBookPage.isEmpty()){
             return new GetLastVersionHierarchyResult();

@@ -65,11 +65,16 @@ public abstract class AbstractReadOnlyRefBook implements RefBookDataProvider {
     }
 
     @Override
-    public PagingResult<Map<String, RefBookValue>> getRecordVersions(final Long recordId, PagingParams pagingParams, String filter, RefBookAttribute sortAttribute) {
-        return new PagingResult(new ArrayList<Map<String, RefBookValue>>(){{add(getRecordData(recordId));}}, 1);
+    public PagingResult<Map<String, RefBookValue>> getRecordVersionsById(final Long uniqueRecordId, PagingParams pagingParams, String filter, RefBookAttribute sortAttribute) {
+        return new PagingResult(new ArrayList<Map<String, RefBookValue>>(){{add(getRecordData(uniqueRecordId));}}, 1);
     }
 
-	@Override
+    @Override
+    public PagingResult<Map<String, RefBookValue>> getRecordVersionsByRecordId(Long recordId, PagingParams pagingParams, String filter, RefBookAttribute sortAttribute) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
 	public PagingResult<Map<String, RefBookValue>> getChildrenRecords(Long parentRecordId, Date version, PagingParams pagingParams, String filter, RefBookAttribute sortAttribute) {
 		throw new UnsupportedOperationException();
 	}

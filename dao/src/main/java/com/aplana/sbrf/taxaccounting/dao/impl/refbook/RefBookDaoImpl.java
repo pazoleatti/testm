@@ -275,12 +275,12 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     @Override
     public PagingResult<Map<String, RefBookValue>> getRecords(Long refBookId, Date version, PagingParams pagingParams,
                                                               String filter, RefBookAttribute sortAttribute, boolean isSortAscending) {
-        PreparedStatementData ps = getRefBookSql(refBookId, null, version, sortAttribute, filter, pagingParams, isSortAscending);
+        PreparedStatementData ps = getRefBookSql(refBookId, null, null, version, sortAttribute, filter, pagingParams, isSortAscending);
         RefBook refBook = get(refBookId);
         List<Map<String, RefBookValue>> records = getJdbcTemplate().query(ps.getQuery().toString(), ps.getParams().toArray(), new RefBookValueMapper(refBook));
         PagingResult<Map<String, RefBookValue>> result = new PagingResult<Map<String, RefBookValue>>(records);
         // Получение количества данных в справочнике
-        PreparedStatementData psForCount = getRefBookSql(refBookId, null, version, sortAttribute, filter, null, true);
+        PreparedStatementData psForCount = getRefBookSql(refBookId, null, null, version, sortAttribute, filter, null, true);
         psForCount.setQuery(new StringBuilder("SELECT count(*) FROM (" + psForCount.getQuery() + ")"));
         result.setTotalCount(getJdbcTemplate().queryForInt(psForCount.getQuery().toString(), psForCount.getParams().toArray()));
         return result;
@@ -289,7 +289,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     @Override
     public Long getRowNum(Long refBookId, Date version, Long recordId,
                           String filter, RefBookAttribute sortAttribute, boolean isSortAscending) {
-        PreparedStatementData ps = getRefBookSql(refBookId, null, version, sortAttribute, filter, null, isSortAscending);
+        PreparedStatementData ps = getRefBookSql(refBookId, null, null, version, sortAttribute, filter, null, isSortAscending);
         return getRowNum(ps, recordId);
     }
 
@@ -447,7 +447,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 
     @Override
     public int getRecordsCount(Long refBookId, Date version, String filter) {
-        PreparedStatementData psForCount = getRefBookSql(refBookId, null, version, null, filter, null, true);
+        PreparedStatementData psForCount = getRefBookSql(refBookId, null, null, version, null, filter, null, true);
         psForCount.setQuery(new StringBuilder("SELECT count(*) FROM (" + psForCount.getQuery() + ")"));
         return getJdbcTemplate().queryForInt(psForCount.getQuery().toString(), psForCount.getParams().toArray());
     }
@@ -563,9 +563,13 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
                     "group by\n" +
                     "  record_id)\n";
 
-    private static final String RECORD_VERSIONS_STATEMENT =
+    private static final String RECORD_VERSIONS_STATEMENT_BY_ID =
             "with currentRecord as (select id, record_id, version from REF_BOOK_RECORD where id=%d),\n" +
                     "recordsByVersion as (select r.ID, r.RECORD_ID, r.REF_BOOK_ID, r.VERSION, r.STATUS, row_number() over(partition by r.RECORD_ID order by r.version) rn from REF_BOOK_RECORD r, currentRecord cr where r.REF_BOOK_ID=%d and r.RECORD_ID=cr.RECORD_ID), \n" +
+                    "t as (select rv.ID, rv.RECORD_ID RECORD_ID, rv.VERSION version, rv2.version - interval '1' day versionEnd from recordsByVersion rv left outer join recordsByVersion rv2 on rv.RECORD_ID = rv2.RECORD_ID and rv.rn+1 = rv2.rn where rv.status=?)\n";
+
+    private static final String RECORD_VERSIONS_STATEMENT_BY_RECORD_ID =
+            "with recordsByVersion as (select r.ID, r.RECORD_ID, r.REF_BOOK_ID, r.VERSION, r.STATUS, row_number() over(partition by r.RECORD_ID order by r.version) rn from REF_BOOK_RECORD r where r.record_id=%d), \n" +
                     "t as (select rv.ID, rv.RECORD_ID RECORD_ID, rv.VERSION version, rv2.version - interval '1' day versionEnd from recordsByVersion rv left outer join recordsByVersion rv2 on rv.RECORD_ID = rv2.RECORD_ID and rv.rn+1 = rv2.rn where rv.status=?)\n";
 
     /**
@@ -580,7 +584,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
      * @param isSortAscending порядок сортировки, по умолчанию используется сортировка по возрастанию
      * @return
      */
-    private PreparedStatementData getRefBookSql(@NotNull Long refBookId, Long uniqueRecordId, Date version, RefBookAttribute sortAttribute,
+    private PreparedStatementData getRefBookSql(@NotNull Long refBookId, Long uniqueRecordId, Long recordId, Date version, RefBookAttribute sortAttribute,
                                                 String filter, PagingParams pagingParams, boolean isSortAscending) {
         // модель которая будет возвращаться как результат
         PreparedStatementData ps = new PreparedStatementData();
@@ -608,8 +612,16 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             ps.addParam(version);
             ps.addParam(version);
         } else {
-            ps.appendQuery(String.format(RECORD_VERSIONS_STATEMENT, uniqueRecordId, refBookId));
-            ps.addParam(VersionedObjectStatus.NORMAL.getId());
+            if (uniqueRecordId != null){
+                //Ищем все версии по уникальному идентификатору
+                ps.appendQuery(String.format(RECORD_VERSIONS_STATEMENT_BY_ID, uniqueRecordId, refBookId));
+                ps.addParam(VersionedObjectStatus.NORMAL.getId());
+            }
+            if (recordId != null){
+                //Ищем все версии в группе версий
+                ps.appendQuery(String.format(RECORD_VERSIONS_STATEMENT_BY_RECORD_ID, recordId));
+                ps.addParam(VersionedObjectStatus.NORMAL.getId());
+            }
         }
 
         ps.appendQuery("SELECT * FROM "); //TODO: заменить "select *" на полное перечисление полей (Marat Fayzullin 30.01.2014)
@@ -770,7 +782,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             ps.addParam(version);
             ps.addParam(version);
         } else {
-            ps.appendQuery(String.format(RECORD_VERSIONS_STATEMENT, uniqueRecordId, refBookId));
+            ps.appendQuery(String.format(RECORD_VERSIONS_STATEMENT_BY_ID, uniqueRecordId, refBookId));
             ps.addParam(VersionedObjectStatus.NORMAL.getId());
         }
 
@@ -1386,9 +1398,9 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     }
 
     @Override
-    public PagingResult<Map<String, RefBookValue>> getRecordVersions(Long refBookId, Long uniqueRecordId,
-                                                                     PagingParams pagingParams, String filter, RefBookAttribute sortAttribute) {
-        PreparedStatementData ps = getRefBookSql(refBookId, uniqueRecordId, null, sortAttribute, filter, pagingParams, true);
+    public PagingResult<Map<String, RefBookValue>> getRecordVersionsById(Long refBookId, Long uniqueRecordId,
+                                                                         PagingParams pagingParams, String filter, RefBookAttribute sortAttribute) {
+        PreparedStatementData ps = getRefBookSql(refBookId, uniqueRecordId, null, null, sortAttribute, filter, pagingParams, true);
         RefBook refBookClone = SerializationUtils.clone(get(refBookId));
         refBookClone.getAttributes().add(RefBook.getVersionFromAttribute());
         refBookClone.getAttributes().add(RefBook.getVersionToAttribute());
@@ -1397,6 +1409,20 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         PagingResult<Map<String, RefBookValue>> result = new PagingResult<Map<String, RefBookValue>>(records);
         // Получение количества данных в справочнике
         result.setTotalCount(getRecordVersionsCount(refBookId, uniqueRecordId));
+        return result;
+    }
+
+    @Override
+    public PagingResult<Map<String, RefBookValue>> getRecordVersionsByRecordId(Long refBookId, Long recordId, PagingParams pagingParams, String filter, RefBookAttribute sortAttribute) {
+        PreparedStatementData ps = getRefBookSql(refBookId, null, recordId, null, sortAttribute, filter, pagingParams, true);
+        RefBook refBookClone = SerializationUtils.clone(get(refBookId));
+        refBookClone.getAttributes().add(RefBook.getVersionFromAttribute());
+        refBookClone.getAttributes().add(RefBook.getVersionToAttribute());
+
+        List<Map<String, RefBookValue>> records = getJdbcTemplate().query(ps.getQuery().toString(), ps.getParams().toArray(), new RefBookValueMapper(refBookClone));
+        PagingResult<Map<String, RefBookValue>> result = new PagingResult<Map<String, RefBookValue>>(records);
+        // Получение количества данных в справочнике
+        result.setTotalCount(getRecordVersionsCount(refBookId, recordId));
         return result;
     }
 

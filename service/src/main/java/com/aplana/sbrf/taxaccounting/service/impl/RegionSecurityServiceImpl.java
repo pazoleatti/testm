@@ -118,7 +118,7 @@ public class RegionSecurityServiceImpl implements RegionSecurityService {
                 if (!isAllowed) {
                     return isAllowed;
                 }
-                PagingResult<Map<String, RefBookValue>> versions = provider.getRecordVersions(uniqueRecordId, null, null, null);
+                PagingResult<Map<String, RefBookValue>> versions = provider.getRecordVersionsById(uniqueRecordId, null, null, null);
                 for (Map<String, RefBookValue> version : versions) {
                     RefBookValue region = version.get(refBook.getRegionAttribute().getAlias());
                     // если регион версии не указан или он не равен региону пользователя, то проверка не проходит
