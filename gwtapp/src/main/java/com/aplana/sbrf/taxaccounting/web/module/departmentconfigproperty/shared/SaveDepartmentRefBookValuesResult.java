@@ -8,7 +8,8 @@ public class SaveDepartmentRefBookValuesResult implements Result {
         NONE,
         HAS_DUPLICATES,
         INCORRECT_FIELDS,
-        COMMON_ERROR
+        COMMON_ERROR,
+        SAVING_FAILED
     }
 
     private String uuid;

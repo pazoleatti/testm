@@ -143,17 +143,25 @@ public class SaveDepartmentRefBookValuesHandler extends AbstractActionHandler<Sa
         }
 
         /** Сохранение настроек подразделений */
-        RefBookRecordVersion recordVersion = refBookHelper.saveOrUpdateDepartmentConfig(
-                action.getRecordId(), action.getRefBookId(), action.getSlaveRefBookId(), action.getReportPeriodId(),
-                DepartmentParamAliases.DEPARTMENT_ID.name(), action.getDepartmentId(),
-                convert(action.getNotTableParams()), convertRows(action.getRows()), logger);
+        RefBookRecordVersion recordVersion = null;
+        try {
+            recordVersion = refBookHelper.saveOrUpdateDepartmentConfig(
+                    action.getRecordId(), action.getRefBookId(), action.getSlaveRefBookId(), action.getReportPeriodId(),
+                    DepartmentParamAliases.DEPARTMENT_ID.name(), action.getDepartmentId(),
+                    convert(action.getNotTableParams()), convertRows(action.getRows()), logger);
+        } catch (Exception e) {
+            result.setHasFatalError(true);
+            result.setErrorType(SaveDepartmentRefBookValuesResult.ERROR_TYPE.SAVING_FAILED);
+        }
 
         String departmentName = departmentService.getDepartment(action.getDepartmentId()).getName();
         if (!logger.containsLevel(LogLevel.ERROR)) {
-            if (recordVersion.getVersionEnd() != null) {
-                logger.info(String.format(SUCCESS_INFO, departmentName, sdf.format(recordVersion.getVersionStart()), sdf.format(recordVersion.getVersionEnd())));
-            } else {
-                logger.info(String.format(SUCCESS_INFO, departmentName, sdf.format(recordVersion.getVersionStart()), "\"-\""));
+            if (recordVersion != null) {
+                if (recordVersion.getVersionEnd() != null) {
+                    logger.info(String.format(SUCCESS_INFO, departmentName, sdf.format(recordVersion.getVersionStart()), sdf.format(recordVersion.getVersionEnd())));
+                } else {
+                    logger.info(String.format(SUCCESS_INFO, departmentName, sdf.format(recordVersion.getVersionStart()), "\"-\""));
+                }
             }
         }
 

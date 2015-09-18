@@ -408,6 +408,7 @@ public class DepartmentConfigPropertyPresenter extends Presenter<DepartmentConfi
                                         .defaultCallback(new AbstractCallback<SaveDepartmentRefBookValuesResult>() {
                                             @Override
                                             public void onSuccess(SaveDepartmentRefBookValuesResult result) {
+                                                System.out.println("result.isHasFatalError(): "+result.isHasFatalError());
                                                 if (result.isHasFatalError()) {
                                                     switch (result.getErrorType()) {
                                                         case HAS_DUPLICATES:
@@ -418,6 +419,9 @@ public class DepartmentConfigPropertyPresenter extends Presenter<DepartmentConfi
                                                             break;
                                                         case COMMON_ERROR:
                                                             Dialog.errorMessage("Операция не выполнена. Запись не сохранена, обнаружены фатальные ошибки!");
+                                                            break;
+                                                        case SAVING_FAILED:
+                                                            getData();
                                                             break;
                                                     }
 
