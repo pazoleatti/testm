@@ -428,6 +428,7 @@ public class DepartmentConfigPropertyPresenter extends Presenter<DepartmentConfi
                                                     LogAddEvent.fire(DepartmentConfigPropertyPresenter.this, result.getUuid());
                                                 } else {
                                                     getData();
+                                                    LogAddEvent.fire(DepartmentConfigPropertyPresenter.this, result.getUuid());
                                                 }
                                             }
                                         }, DepartmentConfigPropertyPresenter.this));
