@@ -2601,7 +2601,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             ps.appendQuery(attribute.getAlias());
         }
         ps.appendQuery(" FROM (SELECT distinct ");
-        ps.appendQuery(" CONNECT_BY_ROOT ID as \"RECORD_ID\" ");
+        ps.appendQuery(" CONNECT_BY_ROOT frb.ID as \"RECORD_ID\" ");
         for (RefBookAttribute attribute : refBook.getAttributes()) {
             ps.appendQuery(", CONNECT_BY_ROOT frb.");
             ps.appendQuery(attribute.getAlias());
