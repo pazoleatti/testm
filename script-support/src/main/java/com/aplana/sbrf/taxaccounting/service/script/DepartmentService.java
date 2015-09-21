@@ -27,4 +27,8 @@ public interface DepartmentService {
      * @return список объектов, представляющих текущее и дочерние подразделения
      */
     List<Department> getAllChildren(int parentDepartmentId);
+
+    Integer getParentTBId(int departmentId);
+
+    Department getBankDepartment();
 }

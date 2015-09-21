@@ -274,7 +274,7 @@ public class RefBookDepartment implements RefBookDataProvider {
                 }
 
                 Map<String, RefBookValue> refBookValueMap = records.get(0).getValues();
-                checkCorrectness(logger, null, attributes, records);
+                checkCorrectness(logger, attributes, records);
                 if (logger.containsLevel(LogLevel.ERROR))
                     throw new ServiceLoggerException(ERROR_MESSAGE_CREATE,
                             logEntryService.save(logger.getEntries()));
@@ -345,68 +345,6 @@ public class RefBookDepartment implements RefBookDataProvider {
             Department parentDep = records.get(DEPARTMENT_PARENT_ATTRIBUTE).getReferenceValue() != null ?
                     departmentService.getDepartment(records.get(DEPARTMENT_PARENT_ATTRIBUTE).getReferenceValue().intValue())
                     : null;
-            DepartmentType oldType = dep.getType();
-            DepartmentType newType = fromCode(records.get(DEPARTMENT_TYPE_ATTRIBUTE).getReferenceValue().intValue());
-            boolean isChangeType = oldType != newType;
-
-            Department oldTb = departmentService.getParentTB(uniqueRecordId.intValue());
-            int oldTBId = oldTb != null ? oldTb.getId() : 0;
-            Department newTb =
-                    records.get(DEPARTMENT_PARENT_ATTRIBUTE).getReferenceValue() != null ?
-                            departmentService.getParentTB(records.get(DEPARTMENT_PARENT_ATTRIBUTE).getReferenceValue().intValue()) :
-                            departmentService.getBankDepartment();
-            int newTBId = newTb != null ? newTb.getId() : uniqueRecordId.intValue();
-            boolean isChangeTB = oldTBId != 0 && oldTBId != newTBId;
-
-            if (isChangeTB)
-                throw new ServiceLoggerException(
-                        "Подразделение не может быть отредактировано, так как невозможно его переместить в состав другого территориального банка!",
-                        logEntryService.save(logger.getEntries()));
-
-            if (isChangeType){
-                switch (oldType){
-                    //3 шаг
-                    case ROOT_BANK :
-                        throw new ServiceLoggerException(
-                                "Подразделение не может быть отредактировано, так как для него нельзя изменить тип \"Банк\"!\"",
-                                logEntryService.save(logger.getEntries()));
-                        //4 шаг
-                        /*case TERR_BANK:
-                            List<ReportPeriod> openReportPeriods = new ArrayList<ReportPeriod>(0);
-                            openReportPeriods.addAll(periodService.getOpenPeriodsByTaxTypeAndDepartments(TaxType.TRANSPORT, Arrays.asList(uniqueRecordId.intValue()), true, true));
-                            openReportPeriods.addAll(periodService.getOpenPeriodsByTaxTypeAndDepartments(TaxType.PROPERTY, Arrays.asList(uniqueRecordId.intValue()), true, true));
-                            if (!openReportPeriods.isEmpty()){
-                                for (ReportPeriod period : openReportPeriods)
-                                    logger.warn(
-                                            "Для подразделения %s для налога %s уже открыт период %s для %d",
-                                            dep.getName(),
-                                            period.getTaxPeriod().getTaxType().getName(),
-                                            period.getName(),
-                                            period.getTaxPeriod().getYear());
-                                throw new ServiceLoggerException(
-                                        "Подразделение не может быть отредактировано, так как для него нельзя изменить тип \"ТБ\", если для него существует период!",
-                                        logEntryService.save(logger.getEntries()));
-                            }
-                            break;*/
-                        //5 шаг
-                    case CSKO_PCP:
-                    case MANAGEMENT:
-                        if (newType.equals(CSKO_PCP) || newType.equals(MANAGEMENT))
-                            break;
-                        List<TAUserView> users = taUserService.getUsersByFilter(new MembersFilterData() {{
-                            setDepartmentIds(new HashSet<Integer>(Arrays.asList(uniqueRecordId.intValue())));
-                        }});
-                        if (!users.isEmpty()){
-                            for (TAUserView user : users)
-                                logger.error("Пользователь %s назначен подразделению %s", user.getName(), dep.getName());
-                            throw new ServiceLoggerException(
-                                    "Подразделение не может быть отредактировано, так как для него нельзя изменить тип \"Управление\", если ему назначены пользователи!",
-                                    logEntryService.save(logger.getEntries())
-                            );
-                        }
-                        break;
-                }
-            }
 
             RefBookRecord refBookRecord = new RefBookRecord();
             refBookRecord.setUniqueRecordId(uniqueRecordId);
@@ -414,7 +352,7 @@ public class RefBookDepartment implements RefBookDataProvider {
 
             //Проверка корректности
             //6 шаг
-            checkCorrectness(logger, uniqueRecordId, attributes, Arrays.asList(refBookRecord));
+            checkCorrectness(logger, attributes, Arrays.asList(refBookRecord));
             if (logger.containsLevel(LogLevel.ERROR))
                 throw new ServiceLoggerException(ERROR_MESSAGE,
                         logEntryService.save(logger.getEntries()));
@@ -647,11 +585,10 @@ public class RefBookDepartment implements RefBookDataProvider {
 
     /**
      * Проверка корректности
-     * @param recordId уникальный идентификатор записи
      * @param attributes атрибуты справочника
      * @param records значения справочника
      */
-    private void checkCorrectness(Logger logger, Long recordId, List<RefBookAttribute> attributes, List<RefBookRecord> records) {
+    private void checkCorrectness(Logger logger, List<RefBookAttribute> attributes, List<RefBookRecord> records) {
         /*Map<String, RefBookValue> values = records.get(0).getValues();
         DepartmentType type = values.get(DEPARTMENT_TYPE_ATTRIBUTE) != null ?
                 DepartmentType.fromCode(values.get(DEPARTMENT_TYPE_ATTRIBUTE).getReferenceValue().intValue()) :
@@ -665,16 +602,6 @@ public class RefBookDepartment implements RefBookDataProvider {
         if (!errors.isEmpty()){
             for (String error : errors) {
                 logger.error(error);
-            }
-            return;
-        }
-
-        //Получаем записи у которых совпали значения уникальных атрибутов
-        List<Pair<String,String>> matchedRecords = refBookDepartmentDao.getMatchedRecordsByUniqueAttributes(recordId, attributes, records);
-        if (matchedRecords != null && !matchedRecords.isEmpty()) {
-            for (Pair<String,String> pair : matchedRecords) {
-                logger.error(String.format("Нарушено требование к уникальности, уже существует подразделение %s с таким значением атрибута \"%s\"!",
-                        pair.getFirst(), pair.getSecond()));
             }
         }
     }
