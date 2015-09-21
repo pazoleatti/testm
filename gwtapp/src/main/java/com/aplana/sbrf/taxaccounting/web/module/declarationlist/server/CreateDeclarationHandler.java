@@ -88,8 +88,7 @@ public class CreateDeclarationHandler extends AbstractActionHandler<CreateDeclar
                                 : "",
                         command.getTaxOrganKpp() != null
                                 ? ", КПП: \"" + command.getTaxOrganKpp() + "\""
-                                : ""),
-                lockDataService.getLockTimeout(LockData.LockObjects.DECLARATION_CREATE)) == null) {
+                                : "")) == null) {
             //Если блокировка успешно установлена
             try {
 

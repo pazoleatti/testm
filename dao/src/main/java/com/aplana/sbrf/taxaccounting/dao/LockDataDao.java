@@ -27,29 +27,20 @@ public interface LockDataDao {
     /**
      * Возвращает информацию о блокировке
      * @param key код блокировки
-     * @param dateBefore срок жизни блокировки
+     * @param lockDate дата начала блокировки
      * @return возвращает null, если блокировка по данному коду не найдена
      */
-    LockData get(String key, Date dateBefore);
+    LockData get(String key, Date lockDate);
 
 	/**
 	 * Создает новую блокировку
      * @param key код блокировки
      * @param userId код пользователя, установившего блокировку
-     * @param min время жизни блокировки
      * @param description описание блокировки
      * @param state Статус асинхронной задачи, связанной с блокировкой
      * @param serverNode Наименование узла кластера, на котором выполняется связанная асинхронная задача
      */
-	void createLock(String key, int userId, long min, String description, String state, String serverNode);
-
-	/**
-	 * Обновляет блокировку
-	 * @param key код блокировки
-	 * @param min время жизни блокировки
-	 * @throws com.aplana.sbrf.taxaccounting.model.exception.LockException если блокировки нет в БД
-	 */
-	void updateLock(String key, long min);
+	void createLock(String key, int userId, String description, String state, String serverNode);
 
 	/**
 	 * Снимает блокировку
@@ -67,12 +58,6 @@ public interface LockDataDao {
     void unlockAllByUserId(int userId, boolean ignoreError);
 
     /**
-     * Удаляет все блокировки, которые старше заданого времени
-     * @param sec
-     */
-    void unlockIfOlderThan(int sec);
-
-    /**
      * Возвращает список идентификаторов пользователей, которые ожидают разблокировки указанного объекта
      * @param key ключ заблокированного объекта
      * @return список идентификаторов пользователей
@@ -85,13 +70,6 @@ public interface LockDataDao {
      * @param userId идентификатор пользователя
      */
     void addUserWaitingForLock(String key, int userId);
-
-    /**
-     * Получает таймаут для блокировки
-     * @param lockObject объект блокировки
-     * @return время в милисекундах
-     */
-    int getLockTimeout(LockData.LockObjects lockObject);
 
     /**
      * Получает список всех блокировок
@@ -107,13 +85,6 @@ public interface LockDataDao {
      * @param keys список ключей блокировок
      */
     void unlockAll(List<String> keys);
-
-    /**
-     * Продляет все указанные блокировки
-     * @param keys список ключей блокировок
-     * @param hours количество часов, на которое будут продлены блокировки
-     */
-    void extendAll(List<String> keys, int hours);
 
     /**
      * Обновляет статус выполнения асинхронной задачи, связанной с блокировкой

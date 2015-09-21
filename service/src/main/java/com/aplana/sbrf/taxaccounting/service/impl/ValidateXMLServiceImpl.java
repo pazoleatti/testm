@@ -34,8 +34,8 @@ public class ValidateXMLServiceImpl implements ValidateXMLService {
 
     static final Log log = LogFactory.getLog(ValidateXMLService.class);
 
-    private static final String TEMPLATE = ClassUtils
-            .classPackageAsResourcePath(ValidateXMLServiceImpl.class) + "/VSAX3.exe";
+    private static final String TEMPLATE = ClassUtils.classPackageAsResourcePath(ValidateXMLServiceImpl.class) + "/VSAX3.exe";
+	private static final long VALIDATION_TIMEOUT = 1000 * 60 * 60; //таймаут работы утилиты для валидации XML по XSD
 
     private static final String SUCCESS_FLAG = "SUCCESS";
     public static final String NOT_DELETE_WARN = "Файл %s не был удален";
@@ -136,7 +136,6 @@ public class ValidateXMLServiceImpl implements ValidateXMLService {
             outputStream.close();
             params[2] = xsdFile.getAbsolutePath();
 
-            int timeout = lockDataService.getLockTimeout(LockData.LockObjects.XSD_VALIDATION);
             ProcessRunner runner = new ProcessRunner(params, logger, isErrorFatal);
             Thread threadRunner = new Thread(runner);
             threadRunner.start();
@@ -148,9 +147,9 @@ public class ValidateXMLServiceImpl implements ValidateXMLService {
                     } catch (InterruptedException e) {
                         throw new RuntimeException(e);
                     }
-                    if (Math.abs(new Date().getTime() - startTime) > timeout) {
+                    if (Math.abs(new Date().getTime() - startTime) > VALIDATION_TIMEOUT) {
                         threadRunner.interrupt();
-                        logger.warn(String.format("Время ожидания (%d мс) для установки блокировки истекло", timeout));
+                        logger.warn(String.format("Истекло время выполнения проверки. Проверка длилась более %d мс.", VALIDATION_TIMEOUT));
                         return false;
                     }
                     if (!threadRunner.isAlive()){

@@ -110,8 +110,7 @@ public class LoadAllHandler extends AbstractActionHandler<LoadAllAction, LoadAll
         }
         LockData lockData = lockDataService.lock(key, userId,
                 LockData.DescriptionTemplate.LOAD_TRANSPORT_DATA.getText(),
-                LockData.State.IN_QUEUE.getText(),
-                lockDataService.getLockTimeout(LockData.LockObjects.LOAD_TRANSPORT_DATA));
+                LockData.State.IN_QUEUE.getText());
         if (lockData == null) {
             try {
                 Map<String, Object> params = new HashMap<String, Object>();

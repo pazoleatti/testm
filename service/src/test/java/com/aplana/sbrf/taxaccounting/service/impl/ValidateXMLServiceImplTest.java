@@ -73,8 +73,6 @@ public class ValidateXMLServiceImplTest implements Runnable {
 
         when(blobDataService.get(uuidXsd1)).thenReturn(blobDataXsd);
         when(blobDataService.get(uuidXml)).thenReturn(blobDataXml);
-
-        when(lockDataService.getLockTimeout(LockData.LockObjects.XSD_VALIDATION)).thenReturn(10000);
     }
 
     @Test

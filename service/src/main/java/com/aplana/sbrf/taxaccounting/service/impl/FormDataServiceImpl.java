@@ -687,8 +687,7 @@ public class FormDataServiceImpl implements FormDataService {
 
         String keyTask = generateTaskKey(formDataId, reportType);
         if (lockService.lock(keyTask, userInfo.getUser().getId(),
-                getFormDataFullName(formDataId, false, null, reportType),
-                lockService.getLockTimeout(LockData.LockObjects.FORM_DATA)) == null) {
+                getFormDataFullName(formDataId, false, null, reportType)) == null) {
             try {
                 FormData formData = formDataDao.get(formDataId, manual);
                 if (manual) {
@@ -1352,8 +1351,8 @@ public class FormDataServiceImpl implements FormDataService {
 	public void lock(long formDataId, boolean manual, TAUserInfo userInfo) {// используется для редактирования и миграции
         checkLockAnotherUser(lockService.lock(generateTaskKey(formDataId, ReportType.EDIT_FD),
                 userInfo.getUser().getId(),
-                getFormDataFullName(formDataId, manual, null, ReportType.EDIT_FD), // FIXME для миграции не совсем верно
-                lockService.getLockTimeout(LockData.LockObjects.FORM_DATA)), null, userInfo.getUser());
+                getFormDataFullName(formDataId, manual, null, ReportType.EDIT_FD)), // FIXME для миграции не совсем верно
+                null, userInfo.getUser());
 	}
 
 	@Override
@@ -1685,12 +1684,9 @@ public class FormDataServiceImpl implements FormDataService {
 			throw new ServiceException("Блокировка не найдена. Объект должен быть заблокирован текущим пользователем");
 		}
         if (lockData.getUserId() != user.getId()) {
-            throw new ServiceException(String.format("Объект заблокирован другим пользователем (\"%s\", срок \"%s\")",
-					userService.getUser(lockData.getUserId()).getLogin(), SDF_HH_MM_DD_MM_YYYY.format(lockData.getDateBefore())));
+            throw new ServiceException(String.format("Объект заблокирован другим пользователем \"%s\" (\"%s\")",
+					userService.getUser(lockData.getUserId()).getLogin(), SDF_HH_MM_DD_MM_YYYY.format(lockData.getDateLock())));
         }
-		// продлеваем пользовательскую блокировку
-		lockService.extend(lockData.getKey(), user.getId(),
-                lockService.getLockTimeout(LockData.LockObjects.FORM_DATA));
     }
 
     @Override

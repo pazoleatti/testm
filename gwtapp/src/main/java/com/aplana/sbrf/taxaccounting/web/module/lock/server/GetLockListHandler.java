@@ -52,7 +52,6 @@ public class GetLockListHandler extends AbstractActionHandler<GetLockListAction,
             lock.setDescription(lockData.getDescription());
             lock.setUser(TAUser.SYSTEM_USER_ID != user.getId() ? user.getName() + " (" + user.getLogin() + ")" : user.getName());
             lock.setUserId(user.getId());
-            lock.setDateBefore(df.format(lockData.getDateBefore()));
             lock.setDateLock(df.format(lockData.getDateLock()));
             lock.setStateDate(lockData.getStateDate() != null ? df.format(lockData.getStateDate()) : null);
             if (lockData.getQueue() == LockData.LockQueues.NONE) {

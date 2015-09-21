@@ -92,8 +92,7 @@ public class CreateFormDataHandler extends AbstractActionHandler<CreateFormData,
                         formType.getName(),
                         kind.getTitle(),
                         action.isAccruing(),
-                        department.getName(), action.getMonthId(), true, departmentReportPeriod, comparativDrp),
-                lockDataService.getLockTimeout(LockData.LockObjects.FORM_DATA_CREATE)) == null) {
+                        department.getName(), action.getMonthId(), true, departmentReportPeriod, comparativDrp)) == null) {
             //Если блокировка успешно установлена
             try {
 

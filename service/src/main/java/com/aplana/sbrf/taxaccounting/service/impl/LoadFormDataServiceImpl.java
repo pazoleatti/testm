@@ -223,8 +223,7 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
             // Блокировка файла
             LockData fileLock = lockDataService.lock(LockData.LockObjects.FILE.name() + "_" + fileName,
                     userInfo.getUser().getId(),
-                    String.format(LockData.DescriptionTemplate.FILE.getText(), fileName),
-                    lockDataService.getLockTimeout(LockData.LockObjects.FILE));
+                    String.format(LockData.DescriptionTemplate.FILE.getText(), fileName));
             if (fileLock != null) {
                 log(userInfo, LogData.L41, logger, lockId, fileName);
                 fail++;
@@ -544,8 +543,7 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
         // Блокировка
         LockData lockData = lockDataService.lock(formDataService.generateTaskKey(formData.getId(), ReportType.IMPORT_TF_FD),
                 userInfo.getUser().getId(),
-                formDataService.getFormDataFullName(formData.getId(), false, currentFile.getName(), ReportType.IMPORT_TF_FD),
-                lockDataService.getLockTimeout(LockData.LockObjects.FORM_DATA_IMPORT));
+                formDataService.getFormDataFullName(formData.getId(), false, currentFile.getName(), ReportType.IMPORT_TF_FD));
         if (lockData != null)
             throw new ServiceException(String.format(
                     LOCK_MSG,

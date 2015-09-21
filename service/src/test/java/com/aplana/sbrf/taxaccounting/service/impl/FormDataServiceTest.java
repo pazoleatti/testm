@@ -211,10 +211,10 @@ public class FormDataServiceTest extends Assert{
             @Override
             public Object answer(InvocationOnMock invocation) {
                 Object[] arguments = invocation.getArguments();
-                map.put((String) arguments[0], new LockData((String) arguments[0], (Integer) arguments[1], new Date(), true));
+                map.put((String) arguments[0], new LockData((String) arguments[0], (Integer) arguments[1]));
                 return null;
             }
-        }).when(lockDataService).lock(anyString(), anyInt(), anyString(), anyString(), anyInt());
+        }).when(lockDataService).lock(anyString(), anyInt(), anyString(), anyString());
         doAnswer(new Answer<Object>() {
             @Override
             public Object answer(InvocationOnMock invocation) {
@@ -605,10 +605,8 @@ public class FormDataServiceTest extends Assert{
         when(formDataDao.get(formData.getId(), false)).thenReturn(formData);
         when(departmentService.getDepartment(formData.getDepartmentId())).thenReturn(department);
         when(periodService.getReportPeriod(formData.getReportPeriodId())).thenReturn(rp);
-        when(lockDataService.getLockTimeout(LockData.LockObjects.FORM_DATA)).thenReturn(1000);
-        when(lockDataService.lock(formDataService.generateTaskKey(formData.getId(), ReportType.EDIT_FD), userInfo.getUser().getId(), "FORM_DATA", 1000)).
+        when(lockDataService.lock(formDataService.generateTaskKey(formData.getId(), ReportType.EDIT_FD), userInfo.getUser().getId(), "FORM_DATA")).
                 thenReturn(lockData);
-        when(lockDataService.getLockTimeout(LockData.LockObjects.FORM_DATA)).thenReturn(1000);
         FormTemplate formTemplate1 = new FormTemplate();
         formTemplate1.setFixedRows(false);
         when(formTemplateService.get(any(Integer.class))).thenReturn(formTemplate1);
@@ -950,7 +948,6 @@ public class FormDataServiceTest extends Assert{
 
 		LockData lockData = new LockData();
 		lockData.setUserId(666);
-		lockData.setDateBefore(SIMPLE_DATE_FORMAT.parse("30.10.1983"));
 
 		TAUser user = new TAUser();
 		user.setId(31);

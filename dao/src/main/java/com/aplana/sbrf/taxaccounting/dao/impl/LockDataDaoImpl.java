@@ -18,7 +18,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -39,8 +38,8 @@ public class LockDataDaoImpl extends AbstractDao implements LockDataDao {
     public LockData get(String key, boolean like) {
         try {
             String fullKey = like ? "%" + key + "%" : key;
-            String sql = "SELECT key, user_id, date_before, date_lock, description, state, state_date, queue, queue_position, server_node, " +
-                    "case when date_before < sysdate then 0 else 1 end is_valid FROM lock_data \n " +
+            String sql = "SELECT key, user_id, date_lock, description, state, state_date, queue, queue_position, server_node, " +
+                    "FROM lock_data \n " +
                     "join (select q_key, queue_position from (select ld.key as q_key, " +
                     (isSupportOver() ? "row_number() over (partition by ld.queue order by ld.date_lock)" : "rownum") + " as queue_position from lock_data ld)) q on q.q_key = key \n" +
                     "WHERE key " + (like ? "like ?" : "= ?");
@@ -61,8 +60,8 @@ public class LockDataDaoImpl extends AbstractDao implements LockDataDao {
     public LockData get(String key, Date lockDate) {
         try {
             return getJdbcTemplate().queryForObject(
-                    "SELECT key, user_id, date_before, date_lock, description, state, state_date, queue, queue_position, server_node, " +
-                            "case when date_before < sysdate then 0 else 1 end is_valid FROM lock_data \n" +
+                    "SELECT key, user_id, date_lock, description, state, state_date, queue, queue_position, server_node, " +
+                            "FROM lock_data \n" +
                             "join (select q_key, queue_position from (select ld.key as q_key, " +
                             (isSupportOver() ? "row_number() over (partition by ld.queue order by ld.date_lock)" : "rownum") + " as queue_position from lock_data ld)) q on q.q_key = key \n" +
                             "WHERE key = ? and date_lock = ?",
@@ -79,9 +78,9 @@ public class LockDataDaoImpl extends AbstractDao implements LockDataDao {
     }
 
     @Override
-    public void createLock(String key, int userId, long min, String description, String state, String serverNode) {
+    public void createLock(String key, int userId, String description, String state, String serverNode) {
         try {
-            getJdbcTemplate().update("INSERT INTO lock_data (key, user_id, date_before, description, state, state_date, server_node) VALUES (?,?,sysdate + interval '" + min + "' minute,?,?,sysdate,?)",
+            getJdbcTemplate().update("INSERT INTO lock_data (key, user_id, description, state, state_date, server_node) VALUES (?, ?, ?, ?, sysdate, ?)",
                     new Object[] {key,
                             userId,
                             description,
@@ -90,21 +89,7 @@ public class LockDataDaoImpl extends AbstractDao implements LockDataDao {
                     },
                     new int[] {Types.VARCHAR, Types.NUMERIC, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR});
         } catch (DataAccessException e) {
-            throw new LockException("Ошибка при создании блокировки (%s, %s, %s). %s", key, userId, min, e.getMessage());
-        }
-    }
-
-    @Override
-    public void updateLock(String key, long min) {
-        try {
-            int affectedCount = getJdbcTemplate().update("UPDATE lock_data SET date_before = (sysdate + interval '" + min + "' minute) WHERE key = ?",
-                    new Object[] {key},
-                    new int[] {Types.VARCHAR});
-            if (affectedCount == 0) {
-                throw new LockException("Ошибка обновления. Блокировка с кодом = %s не найдена в БД.", key);
-            }
-        } catch (DataAccessException e) {
-            throw new LockException("Ошибка при обновлении блокировки с кодом = %s. %s", key, e.getMessage());
+            throw new LockException("Ошибка при создании блокировки (%s, %s). %s", key, userId, e.getMessage());
         }
     }
 
@@ -125,7 +110,7 @@ public class LockDataDaoImpl extends AbstractDao implements LockDataDao {
     @Override
     public void unlockAllByUserId(int userId, boolean ignoreError) {
         try {
-            getJdbcTemplate().update("delete from lock_data ld where user_id = ? and (not exists (select 1 from lock_data_subscribers lds where lds.lock_key=ld.key) or ld.date_before < sysdate)", userId);
+            getJdbcTemplate().update("delete from lock_data ld where user_id = ? and (not exists (select 1 from lock_data_subscribers lds where lds.lock_key=ld.key))", userId);
         } catch (DataAccessException e) {
             if (ignoreError) {
                 LOG.error(e);
@@ -136,17 +121,6 @@ public class LockDataDaoImpl extends AbstractDao implements LockDataDao {
             if (ignoreError) {
                 LOG.error(e);
             }
-        }
-    }
-
-    @Override
-    public void unlockIfOlderThan(int sec) {
-        try {
-            getJdbcTemplate().update(
-                    "delete from lock_data where date_before < (sysdate - interval '" + sec + "' second)");
-        } catch (DataAccessException e){
-            logger.error("", e);
-            throw new LockException("Ошибка при удалении блокировок. %s", e.getMessage());
         }
     }
 
@@ -182,12 +156,6 @@ public class LockDataDaoImpl extends AbstractDao implements LockDataDao {
     }
 
     @Override
-    //@Cacheable(value = "PermanentData", key = "'LockTimeout_'+#lockObject.name()")
-    public int getLockTimeout(LockData.LockObjects lockObject) {
-        return getJdbcTemplate().queryForInt("select timeout from configuration_lock where key = ? ", lockObject.name());
-    }
-
-    @Override
     public PagingResult<LockData> getLocks(String filter,  LockData.LockQueues queues, PagingParams pagingParams) {
         try {
             Map<String, Object> params = new HashMap<String, Object>();
@@ -208,8 +176,7 @@ public class LockDataDaoImpl extends AbstractDao implements LockDataDao {
             params.put("start", pagingParams.getStartIndex() + 1);
             params.put("count", pagingParams.getStartIndex() + pagingParams.getCount());
             params.put("filter", "%" + filter.toLowerCase() + "%");
-            String sql = " (SELECT ld.key, ld.user_id, ld.date_before, ld.date_lock, ld.state, ld.state_date, ld.description, ld.queue, ld.server_node, u.login, \n" +
-                    "case when ld.date_before < sysdate then 0 else 1 end is_valid, \n" +
+            String sql = " (SELECT ld.key, ld.user_id, ld.date_lock, ld.state, ld.state_date, ld.description, ld.queue, ld.server_node, u.login, \n" +
                     "row_number() over (partition by queue order by date_lock) as queue_position, row_number() over (order by queue, date_lock) as rn \n" +
                     "FROM lock_data ld \n"
                     + "join sec_user u on u.id = ld.user_id \n" +
@@ -235,13 +202,6 @@ public class LockDataDaoImpl extends AbstractDao implements LockDataDao {
     }
 
     @Override
-    public void extendAll(List<String> keys, int hours) {
-        getJdbcTemplate().update("update lock_data set date_before = date_before + interval '"+ hours +
-                "' hour where " + SqlUtils.transformToSqlInStatementForString("key", keys));
-
-    }
-
-    @Override
     public void updateState(String key, Date lockDate, String state, String serverNode) {
         getJdbcTemplate().update("update lock_data set state = ?, state_date = sysdate, server_node = ? where key = ? and date_lock = ?",
                 new Object[] {state, serverNode, key, lockDate},
@@ -261,7 +221,6 @@ public class LockDataDaoImpl extends AbstractDao implements LockDataDao {
             LockData result = new LockData();
             result.setKey(rs.getString("key"));
             result.setUserId(rs.getInt("user_id"));
-            result.setDateBefore(rs.getTimestamp("date_before"));
             result.setDateLock(rs.getTimestamp("date_lock"));
             result.setState(rs.getString("state"));
             result.setStateDate(result.getState() != null ? rs.getTimestamp("state_date") : null);
@@ -269,7 +228,6 @@ public class LockDataDaoImpl extends AbstractDao implements LockDataDao {
             result.setQueue(LockData.LockQueues.getById(rs.getInt("queue")));
             result.setQueuePosition(rs.getInt("queue_position"));
             result.setServerNode(rs.getString("server_node"));
-            result.setValid(rs.getBoolean("is_valid"));
             return result;
         }
     }

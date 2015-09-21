@@ -65,8 +65,7 @@ public class CalculateIfrsDataHandler extends AbstractActionHandler<CalculateIfr
         String key = ifrsDataService.generateTaskKey(action.getReportPeriodId());
         LockData lockData = lockDataService.lock(key, userInfo.getUser().getId(),
                 LockData.State.IN_QUEUE.getText(),
-                String.format(LockData.DescriptionTemplate.IFRS.getText(), reportPeriod.getName(), reportPeriod.getTaxPeriod().getYear()),
-                lockDataService.getLockTimeout(LockData.LockObjects.IFRS));
+                String.format(LockData.DescriptionTemplate.IFRS.getText(), reportPeriod.getName(), reportPeriod.getTaxPeriod().getYear()));
         if (lockData == null) {
             try {
                 Map<String, Object> params = new HashMap<String, Object>();

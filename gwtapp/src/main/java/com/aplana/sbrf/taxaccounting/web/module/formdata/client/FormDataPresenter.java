@@ -51,9 +51,6 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
 
     private final ManualMenuPresenter manualMenuPresenter;
     private final LogAreaPresenter logAreaPresenter;
-    private Date lastSendingTime;
-
-    private static final int EXTEND_LOCKTIME_LIMIT_IN_MINUTES = 5;
     private Timer timer;
     private ReportType timerType;
     private boolean lockEditMode;
@@ -173,31 +170,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
 	public void onCellModified(DataRow<Cell> dataRow) {
         modifiedRows.add(dataRow);
         setOnLeaveConfirmation();
-
-        if (lastSendingTime == null) {
-            lastSendingTime = new Date();
-        }
-        Date currentDate = new Date();
-        long diffMinutes = (currentDate.getTime() - lastSendingTime.getTime()) / (60 * 1000);
-        if (diffMinutes >= EXTEND_LOCKTIME_LIMIT_IN_MINUTES) {
-            lastSendingTime = currentDate;
-            extendFormLock();
-        }
-
 	}
-
-    private void extendFormLock() {
-        ExtendFormLockAction action = new ExtendFormLockAction();
-        action.setFormDataId(formData.getId());
-        dispatcher.execute(action, CallbackUtils
-                        .defaultCallback(new AbstractCallback<ExtendFormLockResult>() {
-                            @Override
-                            public void onSuccess(ExtendFormLockResult result) {
-                                //nothing
-                            }
-                        }, FormDataPresenter.this)
-        );
-    }
 
     @Override
     public void onStartLoad() {
