@@ -441,6 +441,18 @@ public class DepartmentConfigPropertyPresenter extends Presenter<DepartmentConfi
                                     Dialog.confirmMessage(((getView().getTaxType().equals(TaxType.DEAL) ? EDIT_FOUND_TEXT_D : EDIT_FOUND_TEXT)).replace("%s", result.getReportPeriodName()),
                                             new DialogHandler() {
                                                 @Override
+                                                public void no() {
+                                                    super.no();
+                                                    getData();
+                                                }
+
+                                                @Override
+                                                public void close() {
+                                                    super.close();
+                                                    getData();
+                                                }
+
+                                                @Override
                                                 public void yes() {
                                                     super.yes();
                                                     AddLogAction addLogAction = new AddLogAction();
