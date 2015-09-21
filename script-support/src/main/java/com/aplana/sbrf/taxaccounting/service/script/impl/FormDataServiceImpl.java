@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.service.script.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
 import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
+import com.aplana.sbrf.taxaccounting.dao.TAUserDao;
 import com.aplana.sbrf.taxaccounting.dao.api.FormTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.script.FormDataCacheDao;
 import com.aplana.sbrf.taxaccounting.model.*;
@@ -82,6 +83,9 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
 
     @Autowired
     private FormTemplateDao formTemplateDao;
+
+    @Autowired
+    private TAUserDao userDao;
 
     private Map<Number, DataRowHelper> helperHashMap = new HashMap<Number, DataRowHelper>();
 
@@ -661,5 +665,10 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
             DataRowHelper dataRowHelper = getDataRowHelper(formData);
             dataRowHelper.save(dataRowHelper.getAllCached());
         }
+    }
+
+    @Override
+    public PagingResult<TAUserView> getUsersByFilter(MembersFilterData filter) {
+        return userDao.getUsersByFilter(filter);
     }
 }

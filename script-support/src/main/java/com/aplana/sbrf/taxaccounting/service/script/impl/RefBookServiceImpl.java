@@ -1,11 +1,15 @@
 package com.aplana.sbrf.taxaccounting.service.script.impl;
 
+import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDepartmentDao;
 import com.aplana.sbrf.taxaccounting.model.Cell;
 import com.aplana.sbrf.taxaccounting.model.Column;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookRecord;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
+import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookHelper;
 import com.aplana.sbrf.taxaccounting.service.script.RefBookService;
@@ -33,6 +37,9 @@ public class RefBookServiceImpl implements RefBookService {
 
     @Autowired
     private TransactionHelper transactionHelper;
+
+    @Autowired
+    private RefBookDepartmentDao refBookDepartmentDao;
 
     @Override
     public Map<String, RefBookValue> getRecordData(Long refBookId, Long recordId) {
@@ -74,6 +81,11 @@ public class RefBookServiceImpl implements RefBookService {
     @Override
     public <T> T returnInNewTransaction(TransactionLogic<T> logic) {
         return transactionHelper.executeInNewTransaction(logic);
+    }
+
+    @Override
+    public List<Pair<String, String>> getMatchedRecordsByUniqueAttributes(Long recordId, List<RefBookAttribute> attributes, List<RefBookRecord> records) {
+        return refBookDepartmentDao.getMatchedRecordsByUniqueAttributes(recordId, attributes, records);
     }
 
     private RefBookValue getValue(Long refBookId, Long recordId, String alias) {

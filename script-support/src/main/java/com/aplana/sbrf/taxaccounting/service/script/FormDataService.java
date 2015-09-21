@@ -5,6 +5,9 @@ import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.FormData;
 import com.aplana.sbrf.taxaccounting.model.FormDataKind;
 import com.aplana.sbrf.taxaccounting.model.FormTemplate;
+import com.aplana.sbrf.taxaccounting.model.PagingResult;
+import com.aplana.sbrf.taxaccounting.model.MembersFilterData;
+import com.aplana.sbrf.taxaccounting.model.TAUserView;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
@@ -259,4 +262,11 @@ public interface FormDataService {
      */
     @SuppressWarnings("unused")
     void saveCachedDataRows(FormData formData, Logger logger);
+
+    /**
+     * Получить выборку пользователей для представления "Список пользователей"
+     * @param filter фильтер
+     * @return возвращает страницу со списком пользователей
+     */
+    PagingResult<TAUserView> getUsersByFilter(MembersFilterData filter);
 }

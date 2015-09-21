@@ -82,12 +82,13 @@ public interface LoadRefBookDataService {
      * Вызов события FormDataEvent.SAVE для скрипта справочника
      * http://jira.aplana.com/browse/SBRFACCTAX-6780
      *
+     * @param uniqueRecordId уникальный идентификатор версии записи справочника
      * @param saveRecords новые значения для проверки по БЛ
      * @param validDateFrom действует с
      * @param validDateTo действует по
      * @param isNewRecords признак новой записи
      */
-    void saveRefBookRecords(long refBookId, List<Map<String, RefBookValue>> saveRecords, Date validDateFrom,
+    void saveRefBookRecords(long refBookId, Long uniqueRecordId, List<Map<String, RefBookValue>> saveRecords, Date validDateFrom,
                             Date validDateTo, boolean isNewRecords, TAUserInfo userInfo, Logger logger);
 
     void checkImportRefBookTransportData(TAUserInfo userInfo, Logger logger, String lock, Date lockDate, boolean isAsync);

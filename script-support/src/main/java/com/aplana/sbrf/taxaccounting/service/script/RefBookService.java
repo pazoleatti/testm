@@ -4,7 +4,10 @@ import com.aplana.sbrf.taxaccounting.model.Cell;
 import com.aplana.sbrf.taxaccounting.model.Column;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookRecord;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
+import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.util.ScriptExposed;
 import com.aplana.sbrf.taxaccounting.util.TransactionLogic;
 
@@ -52,4 +55,15 @@ public interface RefBookService {
      * @param logic код выполняемый в транзакции
      */
     <T> T returnInNewTransaction(TransactionLogic<T> logic);
+
+    /**
+     * Поиск среди всех элементов справочника (без учета версий) значений уникальных атрибутов, которые бы дублировались с новыми,
+     * отдельных справочников.
+     * Обеспечение соблюдения уникальности атрибутов в пределах справочника
+     * @param recordId уникальный идентификатор записи
+     * @param attributes атрибуты справочника
+     * @param records новые значения полей элемента справочника
+     * @return список пар идентификатор записи-имя атрибута, у которых совпали значения уникальных атрибутов
+     */
+    List<Pair<String,String>> getMatchedRecordsByUniqueAttributes(Long recordId, List<RefBookAttribute> attributes, List<RefBookRecord> records);
 }

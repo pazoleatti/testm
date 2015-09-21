@@ -14,6 +14,9 @@ public class DepartmentServiceImpl implements DepartmentService {
 	@Autowired
 	DepartmentDao departmentDao;
 
+    @Autowired(required = false)
+    com.aplana.sbrf.taxaccounting.service.DepartmentService departmentService;
+
     @Override
     public Department get(Integer id) {
         List<Department> departments = departmentDao.listDepartments();
@@ -33,6 +36,16 @@ public class DepartmentServiceImpl implements DepartmentService {
     @Override
     public List<Department> getAllChildren(int parentDepartmentId) {
         return departmentDao.getAllChildren(parentDepartmentId);
+    }
+
+    @Override
+    public Integer getParentTBId(int departmentId) {
+        return departmentDao.getParentTBId(departmentId);
+    }
+
+    @Override
+    public Department getBankDepartment() {
+        return departmentService.getBankDepartment();
     }
 }
 
