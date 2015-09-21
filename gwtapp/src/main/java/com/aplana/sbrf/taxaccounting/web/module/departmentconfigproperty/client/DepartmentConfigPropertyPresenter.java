@@ -395,7 +395,7 @@ public class DepartmentConfigPropertyPresenter extends Presenter<DepartmentConfi
         dispatcher.execute(action,
                 CallbackUtils.defaultCallback(
                         new AbstractCallback<GetCheckDeclarationResult>() {
-                            void save() {
+                            void save(String uuid) {
                                 SaveDepartmentRefBookValuesAction saveAction = new SaveDepartmentRefBookValuesAction();
                                 saveAction.setRows(rows);
                                 saveAction.setRecordId(recordId);
@@ -404,11 +404,11 @@ public class DepartmentConfigPropertyPresenter extends Presenter<DepartmentConfi
                                 saveAction.setNotTableParams(getView().getNonTableParams());
                                 saveAction.setRefBookId(getCurrentRefBookId());
                                 saveAction.setSlaveRefBookId(getCurrentTableRefBookId());
+                                saveAction.setOldUUID(uuid);
                                 dispatcher.execute(saveAction, CallbackUtils
                                         .defaultCallback(new AbstractCallback<SaveDepartmentRefBookValuesResult>() {
                                             @Override
                                             public void onSuccess(SaveDepartmentRefBookValuesResult result) {
-                                                System.out.println("result.isHasFatalError(): "+result.isHasFatalError());
                                                 if (result.isHasFatalError()) {
                                                     switch (result.getErrorType()) {
                                                         case HAS_DUPLICATES:
@@ -464,14 +464,13 @@ public class DepartmentConfigPropertyPresenter extends Presenter<DepartmentConfi
                                                             .defaultCallback(new AbstractCallback<AddLogResult>() {
                                                                 @Override
                                                                 public void onSuccess(AddLogResult result) {
-                                                                    LogAddEvent.fire(DepartmentConfigPropertyPresenter.this, result.getUuid());
+                                                                    save(result.getUuid());
                                                                 }
                                                             }, DepartmentConfigPropertyPresenter.this));
-                                                    save();
                                                 }
                                             });
                                 } else {
-                                    save();
+                                    save(result.getUuid());
                                 }
                             }
                         }, this));
