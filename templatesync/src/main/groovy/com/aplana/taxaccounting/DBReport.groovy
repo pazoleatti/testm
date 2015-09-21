@@ -983,7 +983,7 @@ class DBReport {
                                 if (isIfrsC == '+') {
                                     td(class: 'td_ok', isIfrsC)
                                 } else {
-                                    td(class: 'td_error', title: "$prefix1: ${tmp1?.isIfrs}; $prefix2: ${tmp2?.isIfrs}", isIfrsC)
+                                    td(class: 'td_error', title: "$prefix1: ${tmp1?.is_ifrs}; $prefix2: ${tmp2?.is_ifrs}", isIfrsC)
                                 }
                                 if (ifrsNameC == '+') {
                                     td(class: 'td_ok', ifrsNameC)

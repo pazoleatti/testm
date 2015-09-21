@@ -70,6 +70,9 @@ switch (formDataEvent) {
         importTransportData()
         formDataService.saveCachedDataRows(formData, logger)
         break
+    case FormDataEvent.SORT_ROWS:
+        sortFormDataRows()
+        break
 }
 
 //// Кэши и константы
@@ -295,21 +298,16 @@ void calc() {
             row.divisionName = calc4(row)
         }
     }
-    // Сортировка
-    dataRows.sort { a, b ->
-        def regionBankA = getRefBookValue(30, a.regionBank)?.NAME?.stringValue
-        def regionBankB = getRefBookValue(30, b.regionBank)?.NAME?.stringValue
-        if (regionBankA == regionBankB) {
-            def regionBankDivisionA = getRefBookValue(30, a.regionBankDivision)?.NAME?.stringValue
-            def regionBankDivisionB = getRefBookValue(30, b.regionBankDivision)?.NAME?.stringValue
-            return (regionBankDivisionA <=> regionBankDivisionB)
-        }
-        return (regionBankA <=> regionBankB)
-    }
 
     dataRows.add(getTotalRow(dataRows))
 }
 
+void sortFormDataRows() {
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper.allCached
+    sortRows(refBookService, logger, dataRows, null, dataRows.find { it.getAlias() == 'total' }, null)
+    dataRowHelper.saveSort()
+}
 
 // название подразделения
 def calc2(def row) {
@@ -511,8 +509,16 @@ void importTransportData() {
                 logger.warn(TRANSPORT_FILE_SUM_ERROR + " Из файла: $v1, рассчитано: $v2", totalColumnsIndexMap[alias] + colOffset, fileRowIndex)
             }
         }
+        // задать кварталаьной итоговой строке нф значения из итоговой строки тф
+        totalColumns.each { alias ->
+            totalRow[alias] = totalTF[alias]
+        }
     } else {
         logger.warn("В транспортном файле не найдена итоговая строка")
+        // очистить итоги
+        totalColumns.each { alias ->
+            totalRow[alias] = null
+        }
     }
 
     if (!logger.containsLevel(LogLevel.ERROR)) {

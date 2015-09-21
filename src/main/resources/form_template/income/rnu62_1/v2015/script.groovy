@@ -11,7 +11,7 @@ import groovy.transform.Field
 import java.math.RoundingMode
 
 /**
- * Форма "(РНУ-62) Регистр налогового учёта расходов по дисконтным векселям ОАО «Сбербанк России» (с 9 месяцев 2015)"
+ * Форма "(РНУ-62) Регистр налогового учёта расходов по дисконтным векселям ПАО Сбербанк (с 9 месяцев 2015)"
  * formTypeId=423 (354 у старого макета)
  *
  * @author bkinzyabulatov
@@ -380,6 +380,7 @@ def BigDecimal calc16(def row, def countDaysInYear) {
             tmpForMultiplication = row.interestRate
         }
         if (row.operationDate != null && row.creationDate != null) {
+            //TODO деление и округление
             tmp = row.sellingPrice * (row.operationDate - row.creationDate) / countDaysInYear * tmpForMultiplication / 100
         }
         return round(tmp)
@@ -396,6 +397,7 @@ def BigDecimal calc16(def row, def countDaysInYear) {
 }
 
 def subCalc16(def row, def t, def days) {
+    //TODO деление и округление
     return (row.nominal * t * row.interestRate * (row.rateWithDiscCoef - row.interestRate)) / days * 100
 }
 
@@ -804,6 +806,7 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
     return newRow
 }
 
+// аналогичен FormDataServiceImpl.checkFormExistAndAccepted, только проверяет несколько типов форм, вместо одного
 def checkFormExistAndAccepted(List<Integer> formTypeIds, FormDataKind kind, int departmentId,
                                       int currentReportPeriodId, Boolean prevPeriod,
                                       def logger, boolean required) {
@@ -834,7 +837,7 @@ def checkFormExistAndAccepted(List<Integer> formTypeIds, FormDataKind kind, int 
 
     // выводить ли сообщение
     if (!foundData) {
-        String formName = (formData == null ? formTypeDao.get(formTypeIds[0]).getName() : formData.getFormType().getName());
+        String formName = (formData == null ? formTypeService.get(formTypeIds[0]).getName() : formData.getFormType().getName());
         // период может не найтись для предыдущего периода, потому что периода не существует
         String periodName = "предыдущий период";
         if (reportPeriod != null) {

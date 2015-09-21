@@ -151,12 +151,12 @@ void generateXML() {
     def sourceDataRows = []
     def code001 = null
     def (code005, code190) = [null, null]
+    code005 = (getCode005() ?: 0)
     def sourceCorrNumber
     for (def formData : declarationService.getAcceptedFormDataSources(declarationData).getRecords()) {
         if (formData.formType.id == 616) {
             sourceDataRows = formDataService.getDataRowHelper(formData)?.getAll()
             sourceCorrNumber = reportPeriodService.getCorrectionNumber(formData.departmentReportPeriodId) ?: 0
-            code005 = (getCode005() ?: 0)
             code190 = code005 + (getDataRow(sourceDataRows, 'total')?.nds ?: 0) // "Всего"
         }
     }
@@ -332,11 +332,17 @@ def getCurrencyCode(String str) {
 
 def getCode005() {
     def result = null
-    def declarationTypeId = 12
+    // получить данные "декларации 8 без консолидированных"
+    def declarationTypeId = 18
     def reportPeriod = reportPeriodService.get(declarationData.reportPeriodId)
     def declarationData8 = declarationService.getLast(declarationTypeId, declarationData.departmentId, reportPeriod.id)
     if (declarationData8 == null || !declarationData8.accepted) {
-        return result
+        // при отсутствии данные "декларации 8 без консолидированных", получить данные "декларации 8"
+        declarationTypeId = 12
+        declarationData8 = declarationService.getLast(declarationTypeId, declarationData.departmentId, reportPeriod.id)
+        if (declarationData8 == null || !declarationData8.accepted) {
+            return result
+        }
     }
     if (declarationData8.id != null) {
         def reader = declarationService.getXmlStreamReader(declarationData8.id)
@@ -346,13 +352,22 @@ def getCode005() {
         try{
             while (reader.hasNext()) {
                 if (reader.startElement && QName.valueOf('КнигаПокуп').equals(reader.name)) {
-                    result = reader.getAttributeValue(null, "СумНДСВсКПк")
+                    result = getXmlDecimal(reader, "СумНДСВсКПк")
                     break
                 }
+                reader.next()
             }
         } finally {
             reader.close()
         }
     }
     return result
+}
+
+BigDecimal getXmlDecimal(def reader, String attrName) {
+    def value = reader?.getAttributeValue(null, attrName)
+    if (!value) {
+        return null
+    }
+    return new BigDecimal(value)
 }

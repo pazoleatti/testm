@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <formTemplateContent>
     <fixedRows>true</fixedRows>
-    <name>Приложение 4-15. «Анализ структуры налога на добавленную стоимость (НДС)»</name>
-    <fullName>Приложение 4-15. «Анализ структуры налога на добавленную стоимость (НДС)»</fullName>
+    <name>Приложение 4-15. Анализ структуры налога на добавленную стоимость (НДС)</name>
+    <fullName>Приложение 4-15. Анализ структуры налога на добавленную стоимость (НДС)</fullName>
     <header>Приложение 4-15</header>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>comparePeriod</alias>
         <checking>false</checking>
         <columnType>NUMBER</columnType>
-        <name>Период сравнения. НДС всего</name>
+        <name>Период сравнения. НДС всего, тыс. руб.</name>
         <order>1</order>
         <width>15</width>
         <maxLength>22</maxLength>
@@ -18,7 +18,7 @@
         <alias>comparePeriodIgnore</alias>
         <checking>false</checking>
         <columnType>NUMBER</columnType>
-        <name>Период сравнения. В том числе НДС не учитываемый</name>
+        <name>Период сравнения. В том числе НДС не учитываемый, тыс. руб.</name>
         <order>2</order>
         <width>15</width>
         <maxLength>22</maxLength>
@@ -38,7 +38,7 @@
         <alias>currentPeriod</alias>
         <checking>false</checking>
         <columnType>NUMBER</columnType>
-        <name>Период. НДС всего</name>
+        <name>Период. НДС всего, тыс. руб.</name>
         <order>4</order>
         <width>15</width>
         <maxLength>22</maxLength>
@@ -48,7 +48,7 @@
         <alias>currentPeriodIgnore</alias>
         <checking>false</checking>
         <columnType>NUMBER</columnType>
-        <name>Период. В том числе НДС не учитываемый</name>
+        <name>Период. В том числе НДС не учитываемый, тыс. руб.</name>
         <order>5</order>
         <width>15</width>
         <maxLength>22</maxLength>
@@ -68,7 +68,7 @@
         <alias>delta</alias>
         <checking>false</checking>
         <columnType>NUMBER</columnType>
-        <name>Изменения за период. НДС всего</name>
+        <name>Изменения за период. НДС всего, тыс. руб.</name>
         <order>7</order>
         <width>10</width>
         <maxLength>22</maxLength>
@@ -78,7 +78,7 @@
         <alias>deltaIgnore</alias>
         <checking>false</checking>
         <columnType>NUMBER</columnType>
-        <name>Изменения за период. В том числе НДС не учитываемый</name>
+        <name>Изменения за период. В том числе НДС не учитываемый, тыс. руб.</name>
         <order>8</order>
         <width>10</width>
         <maxLength>22</maxLength>

@@ -143,7 +143,7 @@
     <row alias="4">
         <cell alias="rowNum" colSpan="1" rowSpan="1" stringValue="4" styleAlias="Жирный"/>
         <cell alias="taxName" colSpan="1" rowSpan="1" stringValue="Пенсионные взносы в рамках КПП" styleAlias="Жирный"/>
-        <cell alias="symbol102" colSpan="1" rowSpan="1" stringValue="симв. ф.102 (27308.19+27308.20+27308.21)"/>
+        <cell alias="symbol102" colSpan="1" rowSpan="1" stringValue="симв. ф.102 (27308.20+27308.21)"/>
         <cell alias="comparePeriod" colSpan="1" rowSpan="1"/>
         <cell alias="comparePeriodPercent" colSpan="1" rowSpan="1"/>
         <cell alias="currentPeriod" colSpan="1" rowSpan="1"/>
@@ -234,8 +234,8 @@
         <cell alias="deltaRub" colSpan="1" rowSpan="1"/>
         <cell alias="deltaPercent" colSpan="1" rowSpan="1"/>
     </row>
-    <row alias="10,1">
-        <cell alias="rowNum" colSpan="1" rowSpan="1" stringValue="10,1" styleAlias="Курсив"/>
+    <row alias="10.1">
+        <cell alias="rowNum" colSpan="1" rowSpan="1" stringValue="10.1" styleAlias="Курсив"/>
         <cell alias="taxName" colSpan="1" rowSpan="1" stringValue="НДС" styleAlias="Курсив"/>
         <cell alias="symbol102" colSpan="1" rowSpan="1" stringValue="симв. ф.102 (26411.02+26411.11+27203.02)"
               styleAlias="Курсив"/>
@@ -246,8 +246,8 @@
         <cell alias="deltaRub" colSpan="1" rowSpan="1"/>
         <cell alias="deltaPercent" colSpan="1" rowSpan="1"/>
     </row>
-    <row alias="10,2">
-        <cell alias="rowNum" colSpan="1" rowSpan="1" stringValue="10,2" styleAlias="Курсив"/>
+    <row alias="10.2">
+        <cell alias="rowNum" colSpan="1" rowSpan="1" stringValue="10.2" styleAlias="Курсив"/>
         <cell alias="taxName" colSpan="1" rowSpan="1"
               stringValue="Другие налоги и сборы, не учитываемые для целей налогообложения" styleAlias="Курсив"/>
         <cell alias="symbol102" colSpan="1" rowSpan="1" stringValue="симв. ф.102  (26411.05+26411.10+27203.05)"
@@ -259,8 +259,8 @@
         <cell alias="deltaRub" colSpan="1" rowSpan="1"/>
         <cell alias="deltaPercent" colSpan="1" rowSpan="1"/>
     </row>
-    <row alias="10,3">
-        <cell alias="rowNum" colSpan="1" rowSpan="1" stringValue="10,3" styleAlias="Курсив"/>
+    <row alias="10.3">
+        <cell alias="rowNum" colSpan="1" rowSpan="1" stringValue="10.3" styleAlias="Курсив"/>
         <cell alias="taxName" colSpan="1" rowSpan="1"
               stringValue="Налог на прибыль (доход), удержанный за рубежом, не учитываемый для целей налогообложения"
               styleAlias="Курсив"/>
@@ -272,8 +272,8 @@
         <cell alias="deltaRub" colSpan="1" rowSpan="1"/>
         <cell alias="deltaPercent" colSpan="1" rowSpan="1"/>
     </row>
-    <row alias="10,4">
-        <cell alias="rowNum" colSpan="1" rowSpan="1" stringValue="10,4" styleAlias="Курсив"/>
+    <row alias="10.4">
+        <cell alias="rowNum" colSpan="1" rowSpan="1" stringValue="10.4" styleAlias="Курсив"/>
         <cell alias="taxName" colSpan="1" rowSpan="1"
               stringValue="Плата за негативное воздействие на окружающую среду, сверх установленных норм"
               styleAlias="Курсив"/>
@@ -419,8 +419,8 @@
         <cell alias="deltaRub" colSpan="1" rowSpan="1"/>
         <cell alias="deltaPercent" colSpan="1" rowSpan="1"/>
     </row>
-    <row alias="20,1">
-        <cell alias="rowNum" colSpan="1" rowSpan="1" stringValue="20,1" styleAlias="Курсив"/>
+    <row alias="20.1">
+        <cell alias="rowNum" colSpan="1" rowSpan="1" stringValue="20.1" styleAlias="Курсив"/>
         <cell alias="taxName" colSpan="1" rowSpan="1"
               stringValue="Расходы на благотворительность и другие аналогичные цели" styleAlias="Курсив"/>
         <cell alias="symbol102" colSpan="1" rowSpan="1" stringValue="симв. ф.102 (27305)" styleAlias="Курсив"/>
@@ -431,8 +431,8 @@
         <cell alias="deltaRub" colSpan="1" rowSpan="1"/>
         <cell alias="deltaPercent" colSpan="1" rowSpan="1"/>
     </row>
-    <row alias="20,2">
-        <cell alias="rowNum" colSpan="1" rowSpan="1" stringValue="20,2" styleAlias="Курсив"/>
+    <row alias="20.2">
+        <cell alias="rowNum" colSpan="1" rowSpan="1" stringValue="20.2" styleAlias="Курсив"/>
         <cell alias="taxName" colSpan="1" rowSpan="1"
               stringValue="Расходы на осуществление спортивных мероприятий, отдыха, мероприятий культурно-просветительского характера и иных аналогичных мероприятий"
               styleAlias="Курсив"/>
@@ -444,8 +444,8 @@
         <cell alias="deltaRub" colSpan="1" rowSpan="1"/>
         <cell alias="deltaPercent" colSpan="1" rowSpan="1"/>
     </row>
-    <row alias="20,3">
-        <cell alias="rowNum" colSpan="1" rowSpan="1" stringValue="20,3" styleAlias="Курсив"/>
+    <row alias="20.3">
+        <cell alias="rowNum" colSpan="1" rowSpan="1" stringValue="20.3" styleAlias="Курсив"/>
         <cell alias="taxName" colSpan="1" rowSpan="1"
               stringValue="Подарки и денежные поощрения клиентов, партнеров Банка, прочих физических и юридических лиц"
               styleAlias="Курсив"/>

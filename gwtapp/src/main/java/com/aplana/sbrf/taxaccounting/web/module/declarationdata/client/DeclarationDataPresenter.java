@@ -239,6 +239,8 @@ public class DeclarationDataPresenter
                             if (ReportType.PDF_DEC.equals(reportType)) {
                                 getView().showNoPdf((!TaxType.DEAL.equals(taxType) ? DECLARATION_UPDATE_MSG : DECLARATION_UPDATE_MSG_D) +
                                         "  Форма предварительного просмотра недоступна");
+                            } else if (ReportType.XML_DEC.equals(reportType)) {
+                                getView().showNoPdf("Область предварительного просмотра");
                             }
                             getView().updatePrintReportButtonName(reportType, false);
                         } else if (!isTimer) {  //Если задача на формирование уже запущена, то переходим в режим ожидания

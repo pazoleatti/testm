@@ -156,9 +156,6 @@ void calc() {
     // удалить строку "итого"
     deleteAllAliased(dataRows)
 
-    // отсортировать/группировать
-    sortRows(dataRows, groupColumns)
-
     // последний день месяца
     def lastDay = getMonthEndDate()
     for (def row : dataRows) {

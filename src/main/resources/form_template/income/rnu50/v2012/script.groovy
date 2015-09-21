@@ -104,15 +104,6 @@ void calc() {
         deleteAllAliased(dataRows)
     }
 
-    if (dataRows) {
-        // сортировка
-        sortRows(dataRows, groupColumns)
-
-        dataRows.eachWithIndex { row, i ->
-            row.setIndex(i + 1)
-        }
-    }
-
     // итоги
     def totalRow = getTotalRow(dataRows)
     dataRows.add(totalRow)

@@ -38,21 +38,21 @@
         <alias>comparePeriod</alias>
         <checking>false</checking>
         <columnType>NUMBER</columnType>
-        <name>Период сравнения</name>
+        <name>Период сравнения, тыс. руб.</name>
         <order>4</order>
         <width>10</width>
         <maxLength>22</maxLength>
-        <precision>4</precision>
+        <precision>2</precision>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>currentPeriod</alias>
         <checking>false</checking>
         <columnType>NUMBER</columnType>
-        <name>Период</name>
+        <name>Период, тыс. руб.</name>
         <order>5</order>
         <width>10</width>
         <maxLength>22</maxLength>
-        <precision>4</precision>
+        <precision>2</precision>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>deltaRub</alias>
@@ -62,7 +62,7 @@
         <order>6</order>
         <width>10</width>
         <maxLength>22</maxLength>
-        <precision>4</precision>
+        <precision>2</precision>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>deltaPercent</alias>
