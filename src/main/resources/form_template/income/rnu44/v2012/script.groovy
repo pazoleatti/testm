@@ -124,7 +124,7 @@ def nonEmptyColumns = ['operationDate', 'name', 'inventoryNumber', 'baseNumber',
 
 // Атрибуты итоговых строк для которых вычисляются суммы
 @Field
-def totalSumColumns = ['summ']
+def totalColumns = ['summ']
 
 // алиасы графов для арифметической проверки
 @Field
@@ -159,7 +159,7 @@ def calc() {
     // получить строку "итого"
     def totalRow = getDataRow(dataRows, 'total')
     // очистить итоги
-    totalSumColumns.each {
+    totalColumns.each {
         totalRow[it] = null
     }
 
@@ -177,7 +177,7 @@ def calc() {
         }
     }
     // добавить строку "итого"
-    calcTotalSum(dataRows, totalRow, totalSumColumns)
+    calcTotalSum(dataRows, totalRow, totalColumns)
     dataRows.add(totalRow)
 }
 
@@ -280,7 +280,7 @@ boolean logicCheck() {
         }
     }
     // 4. Арифметические проверки расчета итоговой графы
-    checkTotalSum(dataRows, totalSumColumns, logger, true)
+    checkTotalSum(dataRows, totalColumns, logger, true)
 }
 
 void importTransportData() {
@@ -334,7 +334,7 @@ void addTransportData(def xml) {
         rows.add(newRow)
     }
     def totalRow = getDataRow(dataRows, 'total')
-    calcTotalSum(rows, totalRow, totalSumColumns)
+    calcTotalSum(rows, totalRow, totalColumns)
     rows.add(totalRow)
 
     if (!logger.containsLevel(LogLevel.ERROR) && xml.rowTotal.size() == 1) {
@@ -349,7 +349,7 @@ void addTransportData(def xml) {
         total.summ = parseNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, logger, true)
 
         def colIndexMap = ['summ': 7]
-        for (def alias : totalSumColumns) {
+        for (def alias : totalColumns) {
             def v1 = total[alias]
             def v2 = totalRow[alias]
             if (v1 == null && v2 == null) {
@@ -358,6 +358,16 @@ void addTransportData(def xml) {
             if (v1 == null || v1 != null && v1 != v2) {
                 logger.warn(TRANSPORT_FILE_SUM_ERROR, colIndexMap[alias] + colOffset, rnuIndexRow)
             }
+        }
+        // задать итоговой строке нф значения из итоговой строки тф
+        totalColumns.each { alias ->
+            totalRow[alias] = total[alias]
+        }
+    } else {
+        logger.warn("В транспортном файле не найдена итоговая строка")
+        // очистить итоги
+        totalColumns.each { alias ->
+            totalRow[alias] = null
         }
     }
 
@@ -452,7 +462,7 @@ void importData() {
     rows.add(totalRow)
     updateIndexes(rows)
     // сравнение итогов
-    compareSimpleTotalValues(totalRow, totalRowFromFile, rows, totalSumColumns, formData, logger, false)
+    compareSimpleTotalValues(totalRow, totalRowFromFile, rows, totalColumns, formData, logger, false)
 
     showMessages(rows, logger)
     if (!logger.containsLevel(LogLevel.ERROR)) {

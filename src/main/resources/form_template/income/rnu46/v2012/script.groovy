@@ -120,6 +120,9 @@ def nonEmptyColumns = ['invNumber', 'name', 'cost', 'amortGroup', 'monthsUsed',
 def autoFillColumns = ['rowNumber', 'cost10perMonth', 'cost10perTaxPeriod', 'cost10perExploitation',
                        'amortNorm', 'amortMonth', 'usefulLife', 'amortTaxPeriod', 'amortExploitation', 'usefullLifeEnd']
 
+@Field
+def totalColumns = ['cost', 'specCoef', 'cost10perMonth', 'cost10perTaxPeriod', 'cost10perExploitation', 'amortTaxPeriod', 'amortExploitation']
+
 //// Обертки методов
 
 // Разыменование записи справочника
@@ -536,8 +539,8 @@ void importTransportData() {
     String[] rowCells
     int fileRowIndex = 2    // номер строки в файле (1, 2..). Начинается с 2, потому что первые две строки - заголовок и пустая строка
     int rowIndex = 0        // номер строки в НФ
-    def totalTF = null
-    def newRows = []
+    def total = null
+    def rows = []
 
     InputStreamReader isr = new InputStreamReader(ImportInputStream, DEFAULT_CHARSET)
     CSVReader reader = new CSVReader(isr, SEPARATOR, QUOTE)
@@ -561,20 +564,23 @@ void importTransportData() {
                 // итоговая строка тф
                 rowCells = reader.readNext()
                 if (rowCells != null) {
-                    totalTF = getNewRow(rowCells, COLUMN_COUNT, ++fileRowIndex, rowIndex)
+                    total = getNewRow(rowCells, COLUMN_COUNT, ++fileRowIndex, rowIndex)
                 }
                 break
             }
-            newRows.add(getNewRow(rowCells, COLUMN_COUNT, fileRowIndex, rowIndex))
+            rows.add(getNewRow(rowCells, COLUMN_COUNT, fileRowIndex, rowIndex))
         }
     } finally {
         reader.close()
     }
 
-    showMessages(newRows, logger)
+    showMessages(rows, logger)
+
+    def totalRow = getDataRow(dataRows, 'total')
+    rows.add(totalRow)
 
     // сравнение итогов
-    if (!logger.containsLevel(LogLevel.ERROR) && totalTF) {
+    if (!logger.containsLevel(LogLevel.ERROR) && total) {
         // мапа с алиасами граф и номерами колонокв в xml (алиас -> номер колонки)
         def totalColumnsIndexMap = [
                 'cost'                 : 4,
@@ -585,10 +591,8 @@ void importTransportData() {
                 'amortTaxPeriod'       : 15,
                 'amortExploitation'    : 16,
         ]
-        // итоговая строка для сверки сумм
-        def totalTmp = formData.createDataRow()
         totalColumnsIndexMap.keySet().asList().each { alias ->
-            totalTmp.getCell(alias).setValue(BigDecimal.ZERO, null)
+            totalRow.getCell(alias).setValue(BigDecimal.ZERO, null)
         }
         // подсчет итогов
         def dataRows = dataRowHelper.allCached
@@ -597,17 +601,17 @@ void importTransportData() {
                 continue
             }
             totalColumnsIndexMap.keySet().asList().each { alias ->
-                def value1 = totalTmp.getCell(alias).value
+                def value1 = totalRow.getCell(alias).value
                 def value2 = (row.getCell(alias).value ?: BigDecimal.ZERO)
-                totalTmp.getCell(alias).setValue(value1 + value2, null)
+                totalRow.getCell(alias).setValue(value1 + value2, null)
             }
         }
 
         // сравнение контрольных сумм
         def colOffset = 1
         for (def alias : totalColumnsIndexMap.keySet().asList()) {
-            def v1 = totalTF.getCell(alias).value
-            def v2 = totalTmp.getCell(alias).value
+            def v1 = total.getCell(alias).value
+            def v2 = totalRow.getCell(alias).value
             if (v1 == null && v2 == null) {
                 continue
             }
@@ -615,11 +619,21 @@ void importTransportData() {
                 logger.warn(TRANSPORT_FILE_SUM_ERROR, totalColumnsIndexMap[alias] + colOffset, fileRowIndex)
             }
         }
+        // задать итоговой строке нф значения из итоговой строки тф
+        totalColumns.each { alias ->
+            totalRow[alias] = total[alias]
+        }
+    } else {
+        logger.warn("В транспортном файле не найдена итоговая строка")
+        // очистить итоги
+        totalColumns.each { alias ->
+            totalRow[alias] = null
+        }
     }
 
     if (!logger.containsLevel(LogLevel.ERROR)) {
-        updateIndexes(newRows)
-        formDataService.getDataRowHelper(formData).allCached = newRows
+        updateIndexes(rows)
+        formDataService.getDataRowHelper(formData).allCached = rows
     }
 }
 

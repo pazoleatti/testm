@@ -570,25 +570,30 @@ void addTransportData(def xml) {
 
         rows.add(newRow)
     }
+    def totalRow = formData.createDataRow()
+    totalRow.setAlias('itg')
+    totalRow.fix = 'Итого'
+    totalRow.getCell("fix").colSpan = 2
+    allColumns.each {
+        totalRow.getCell(it).setStyleAlias('Контрольные суммы')
+    }
+    rows.add(totalRow)
 
     if (!logger.containsLevel(LogLevel.ERROR) && xml.rowTotal.size() == 1) {
         rnuIndexRow = rnuIndexRow + 2
 
         def row = xml.rowTotal[0]
 
-        def total = formData.createDataRow()
-        total.setAlias('itg')
-        total.fix = 'Итого'
-        total.getCell("fix").colSpan = 2
-        allColumns.each {
-            total.getCell(it).setStyleAlias('Контрольные суммы')
-        }
-
         // графа 18
         xlsIndexCol = 18
-        total.sum = parseNumber(row.cell[xlsIndexCol].text(), rnuIndexRow, xlsIndexCol + colOffset, logger, true)
+        totalRow.sum = parseNumber(row.cell[xlsIndexCol].text(), rnuIndexRow, xlsIndexCol + colOffset, logger, true)
 
-        rows.add(total)
+    } else {
+        logger.warn("В транспортном файле не найдена итоговая строка")
+        // очистить итоги
+        totalColumns.each { alias ->
+            totalRow[alias] = null
+        }
     }
 
     if (!logger.containsLevel(LogLevel.ERROR)) {

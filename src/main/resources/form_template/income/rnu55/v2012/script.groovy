@@ -502,19 +502,24 @@ void addTransportData(def xml) {
         rows.add(newRow)
     }
 
+    def totalRow = getDataRow(formDataService.getDataRowHelper(formData).allCached, 'total')
+    rows.add(totalRow)
+
     if (!logger.containsLevel(LogLevel.ERROR) && xml.rowTotal.size() == 1) {
         rnuIndexRow = rnuIndexRow + 2
 
         def row = xml.rowTotal[0]
 
-        def total = getDataRow(formDataService.getDataRowHelper(formData).allCached, 'total')
-
         // графа 9
-        total.percentInRuble = parseNumber(row.cell[9].text(), rnuIndexRow, 9 + colOffset, logger, true)
+        totalRow.percentInRuble = parseNumber(row.cell[9].text(), rnuIndexRow, 9 + colOffset, logger, true)
         // графа 11
-        total.sumIncomeinRuble = parseNumber(row.cell[11].text(), rnuIndexRow, 11 + colOffset, logger, true)
-
-        rows.add(total)
+        totalRow.sumIncomeinRuble = parseNumber(row.cell[11].text(), rnuIndexRow, 11 + colOffset, logger, true)
+    } else {
+        logger.warn("В транспортном файле не найдена итоговая строка")
+        // очистить итоги
+        totalColumns.each { alias ->
+            totalRow[alias] = null
+        }
     }
 
     if (!logger.containsLevel(LogLevel.ERROR)) {

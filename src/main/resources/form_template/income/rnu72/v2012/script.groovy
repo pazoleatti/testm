@@ -243,27 +243,31 @@ void addTransportData(def xml) {
         rows.add(newRow)
     }
 
+    def totalRow = formData.createDataRow()
+    totalRow.setAlias('total')
+    totalRow.forLabel = 'Итого'
+    totalRow.getCell('forLabel').setColSpan(2)
+    allColumns.each { alias ->
+        totalRow.getCell(alias).setStyleAlias('Контрольные суммы')
+    }
+    rows.add(totalRow)
+
     if (!logger.containsLevel(LogLevel.ERROR) && xml.rowTotal.size() == 1) {
         rnuIndexRow = rnuIndexRow + 2
 
         def row = xml.rowTotal[0]
-
-        def total = formData.createDataRow()
-        total.setAlias('total')
-        total.forLabel = 'Итого'
-        total.getCell('forLabel').setColSpan(2)
-        allColumns.each { alias ->
-            total.getCell(alias).setStyleAlias('Контрольные суммы')
-        }
-
         // графа 5..9
         def xmlIndexCol = 5
         ['income', 'cost279', 'costReserve', 'loss', 'profit'].each { alias ->
-            total[alias] = parseNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, logger, true)
+            totalRow[alias] = parseNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset, logger, true)
             xmlIndexCol++
         }
-
-        rows.add(total)
+    } else {
+        logger.warn("В транспортном файле не найдена итоговая строка")
+        // очистить итоги
+        totalColumns.each { alias ->
+            totalRow[alias] = null
+        }
     }
 
     if (!logger.containsLevel(LogLevel.ERROR)) {

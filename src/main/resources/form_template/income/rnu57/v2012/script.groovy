@@ -467,33 +467,40 @@ void addTransportData(def xml) {
         rows.add(newRow)
     }
 
+
+    def totalRow = formData.createDataRow()
+    totalRow.setAlias('total')
+    totalRow.fix = 'Итого'
+    totalRow.getCell('fix').colSpan = 2
+    (nonEmptyColumns + ['number', 'fix']).each {
+        totalRow.getCell(it).setStyleAlias('Контрольные суммы')
+    }
+    rows.add(totalRow)
+
     if (!logger.containsLevel(LogLevel.ERROR) && xml.rowTotal.size() == 1) {
         rnuIndexRow = rnuIndexRow + 2
 
         def row = xml.rowTotal[0]
 
-        def total = formData.createDataRow()
-        total.setAlias('total')
-        total.fix = 'Итого'
-        total.getCell('fix').colSpan = 2
-        (nonEmptyColumns + ['number', 'fix']).each {
-            total.getCell(it).setStyleAlias('Контрольные суммы')
-        }
-
         // графа 5
-        total.purchaseOutcome = parseNumber(row.cell[5].text(), rnuIndexRow, 5 + colOffset, logger, true)
+        totalRow.purchaseOutcome = parseNumber(row.cell[5].text(), rnuIndexRow, 5 + colOffset, logger, true)
         // графа 8
-        total.implementationOutcome = parseNumber(row.cell[8].text(), rnuIndexRow, 8 + colOffset, logger, true)
+        totalRow.implementationOutcome = parseNumber(row.cell[8].text(), rnuIndexRow, 8 + colOffset, logger, true)
         // графа 10
-        total.percent = parseNumber(row.cell[10].text(), rnuIndexRow, 10 + colOffset, logger, true)
+        totalRow.percent = parseNumber(row.cell[10].text(), rnuIndexRow, 10 + colOffset, logger, true)
         // графа 11
-        total.implementationpPriceTax = parseNumber(row.cell[11].text(), rnuIndexRow, 11 + colOffset, logger, true)
+        totalRow.implementationpPriceTax = parseNumber(row.cell[11].text(), rnuIndexRow, 11 + colOffset, logger, true)
         // графа 12
-        total.allIncome = parseNumber(row.cell[12].text(), rnuIndexRow, 12 + colOffset, logger, true)
+        totalRow.allIncome = parseNumber(row.cell[12].text(), rnuIndexRow, 12 + colOffset, logger, true)
         // графа 13
-        total.implementationPriceUp = parseNumber(row.cell[13].text(), rnuIndexRow, 13 + colOffset, logger, true)
+        totalRow.implementationPriceUp = parseNumber(row.cell[13].text(), rnuIndexRow, 13 + colOffset, logger, true)
 
-        rows.add(total)
+    } else {
+        logger.warn("В транспортном файле не найдена итоговая строка")
+        // очистить итоги
+        totalColumns.each { alias ->
+            totalRow[alias] = null
+        }
     }
 
     if (!logger.containsLevel(LogLevel.ERROR)) {

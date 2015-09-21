@@ -567,19 +567,25 @@ void addTransportData(def xml) {
         rows.add(newRow)
     }
 
+    def totalRow = getDataRow(formDataService.getDataRowHelper(formData).allCached, 'total')
+    rows.add(totalRow)
+
     if (!logger.containsLevel(LogLevel.ERROR) && xml.rowTotal.size() == 1) {
         rnuIndexRow = rnuIndexRow + 2
 
         def row = xml.rowTotal[0]
 
-        def total = getDataRow(formDataService.getDataRowHelper(formData).allCached, 'total')
-
         // графа 13
-        total.discountInRub = parseNumber(row.cell[13].text(), rnuIndexRow, 13 + colOffset, logger, true)
+        totalRow.discountInRub = parseNumber(row.cell[13].text(), rnuIndexRow, 13 + colOffset, logger, true)
         // графа 15
-        total.sumIncomeinRuble = parseNumber(row.cell[15].text(), rnuIndexRow, 15 + colOffset, logger, true)
+        totalRow.sumIncomeinRuble = parseNumber(row.cell[15].text(), rnuIndexRow, 15 + colOffset, logger, true)
 
-        rows.add(total)
+    } else {
+        logger.warn("В транспортном файле не найдена итоговая строка")
+        // очистить итоги
+        totalColumns.each { alias ->
+            totalRow[alias] = null
+        }
     }
 
     if (!logger.containsLevel(LogLevel.ERROR)) {

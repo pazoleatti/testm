@@ -217,25 +217,29 @@ void addTransportData(def xml) {
         rows.add(newRow)
     }
 
+    def totalRow = formData.createDataRow()
+    totalRow.setAlias('total')
+    totalRow.fix = 'Итого'
+    totalRow.getCell('fix').colSpan = 5
+    ['number', 'fix', 'taxSum', 'factSum'].each {
+        totalRow.getCell(it).setStyleAlias('Контрольные суммы')
+    }
+    rows.add(totalRow)
+
     if (!logger.containsLevel(LogLevel.ERROR) && xml.rowTotal.size() == 1) {
         rnuIndexRow = rnuIndexRow + 2
 
         def row = xml.rowTotal[0]
-
-        def total = formData.createDataRow()
-        total.setAlias('total')
-        total.fix = 'Итого'
-        total.getCell('fix').colSpan = 5
-        ['number', 'fix', 'taxSum', 'factSum'].each {
-            total.getCell(it).setStyleAlias('Контрольные суммы')
-        }
-
         // графа 6
-        total.taxSum = parseNumber(row.cell[6].text(), rnuIndexRow, 6 + colOffset, logger, true)
+        totalRow.taxSum = parseNumber(row.cell[6].text(), rnuIndexRow, 6 + colOffset, logger, true)
         // графа 7
-        total.factSum = parseNumber(row.cell[7].text(), rnuIndexRow, 7 + colOffset, logger, true)
-
-        rows.add(total)
+        totalRow.factSum = parseNumber(row.cell[7].text(), rnuIndexRow, 7 + colOffset, logger, true)
+    } else {
+        logger.warn("В транспортном файле не найдена итоговая строка")
+        // очистить итоги
+        totalColumns.each { alias ->
+            totalRow[alias] = null
+        }
     }
 
     if (!logger.containsLevel(LogLevel.ERROR)) {

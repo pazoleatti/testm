@@ -317,7 +317,6 @@ void importTransportData() {
 
 void addTransportData(def xml) {
     reportPeriodEndDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
     def int rnuIndexRow = 2
     def int colOffset = 1
     def rows = []
@@ -355,24 +354,30 @@ void addTransportData(def xml) {
         rows.add(newRow)
     }
 
+    def totalRow = formData.createDataRow()
+    totalRow.setAlias('total')
+    totalRow.rnu49rowNumber = 'Итого'
+    allColumns.each {
+        totalRow.getCell(it).setStyleAlias('Контрольные суммы')
+    }
+    rows.add(totalRow)
+
     if (!logger.containsLevel(LogLevel.ERROR) && xml.rowTotal.size() == 1) {
         rnuIndexRow = rnuIndexRow + 2
 
         def row = xml.rowTotal[0]
 
-        def total = formData.createDataRow()
-        total.setAlias('total')
-        total.rnu49rowNumber = 'Итого'
-        allColumns.each {
-            total.getCell(it).setStyleAlias('Контрольные суммы')
-        }
-
         // графа 4
-        total.lossReportPeriod = parseNumber(row.cell[4].text(), rnuIndexRow, 4 + colOffset, logger, true)
+        totalRow.lossReportPeriod = parseNumber(row.cell[4].text(), rnuIndexRow, 4 + colOffset, logger, true)
         // графа 5
-        total.lossTaxPeriod = parseNumber(row.cell[5].text(), rnuIndexRow, 5 + colOffset, logger, true)
+        totalRow.lossTaxPeriod = parseNumber(row.cell[5].text(), rnuIndexRow, 5 + colOffset, logger, true)
 
-        rows.add(total)
+    } else {
+        logger.warn("В транспортном файле не найдена итоговая строка")
+        // очистить итоги
+        totalColumns.each { alias ->
+            totalRow[alias] = null
+        }
     }
 
     if (!logger.containsLevel(LogLevel.ERROR)) {

@@ -126,7 +126,7 @@ def nonEmptyColumns = ['contract', 'contractDate', 'amountOfTheGuarantee', 'date
 
 // Атрибуты итоговых строк для которых вычисляются суммы (графа 13..20)
 @Field
-def totalSumColumns = ['incomeCurrency', 'incomeRuble', 'accountingCurrency', 'accountingRuble', 'preChargeCurrency',
+def totalColumns = ['incomeCurrency', 'incomeRuble', 'accountingCurrency', 'accountingRuble', 'preChargeCurrency',
                        'preChargeRuble', 'taxPeriodCurrency', 'taxPeriodRuble']
 
 // Дата окончания отчетного периода
@@ -177,7 +177,7 @@ void calc() {
     // Итоговая строка
     def totalRow = getDataRow(dataRows, 'total')
     // Очистка итогов
-    totalSumColumns.each { alias ->
+    totalColumns.each { alias ->
         totalRow.getCell(alias).setValue(null, null)
     }
 
@@ -209,7 +209,7 @@ void calc() {
         }
     }
     // Итого
-    calcTotalSum(dataRows, totalRow, totalSumColumns)
+    calcTotalSum(dataRows, totalRow, totalColumns)
     dataRows.add(totalRow)
 }
 
@@ -318,7 +318,7 @@ void logicCheck() {
     }
 
     // 18. Проверка итогового значений по всей форме (графа 13..20)
-    checkTotalSum(dataRows, totalSumColumns, logger, true)
+    checkTotalSum(dataRows, totalColumns, logger, true)
 }
 
 /*
@@ -565,10 +565,10 @@ void addTransportData(def xml) {
     // Итоговая строка
     def totalRow = getDataRow(dataRows, 'total')
     // Очистка итогов
-    totalSumColumns.each { alias ->
+    totalColumns.each { alias ->
         totalRow.getCell(alias).setValue(null, null)
     }
-    calcTotalSum(rows, totalRow, totalSumColumns)
+    calcTotalSum(rows, totalRow, totalColumns)
     rows.add(totalRow)
 
     // сравнение итогов
@@ -612,7 +612,7 @@ void addTransportData(def xml) {
         def colIndexMap = ['incomeCurrency'   : 13, 'incomeRuble': 14, 'accountingCurrency': 15,
                            'accountingRuble'  : 16, 'preChargeCurrency': 17, 'preChargeRuble': 18,
                            'taxPeriodCurrency': 19, 'taxPeriodRuble': 20]
-        for (def alias : totalSumColumns) {
+        for (def alias : totalColumns) {
             def v1 = total.getCell(alias).value
             def v2 = totalRow.getCell(alias).value
             if (v1 == null && v2 == null) {
@@ -621,6 +621,16 @@ void addTransportData(def xml) {
             if (v1 == null || v1 != null && v1 != v2) {
                 logger.warn(TRANSPORT_FILE_SUM_ERROR, colIndexMap[alias] + colOffset, rnuIndexRow)
             }
+        }
+        // задать итоговой строке нф значения из итоговой строки тф
+        totalColumns.each { alias ->
+            totalRow[alias] = total[alias]
+        }
+    } else {
+        logger.warn("В транспортном файле не найдена итоговая строка")
+        // очистить итоги
+        totalColumns.each { alias ->
+            totalRow[alias] = null
         }
     }
 
@@ -722,7 +732,7 @@ void importData() {
     rows.add(totalRow)
     updateIndexes(rows)
     // сравнение итогов
-    compareSimpleTotalValues(totalRow, totalRowFromFile, rows, totalSumColumns, formData, logger, false)
+    compareSimpleTotalValues(totalRow, totalRowFromFile, rows, totalColumns, formData, logger, false)
 
     showMessages(rows, logger)
     if (!logger.containsLevel(LogLevel.ERROR)) {

@@ -674,6 +674,16 @@ void addTransportData(def xml) {
                 logger.warn(TRANSPORT_FILE_SUM_ERROR, colIndexMap[alias] + colOffset, rnuIndexRow)
             }
         }
+        // задать итоговой строке нф значения из итоговой строки тф
+        totalColumns.each { alias ->
+            totalRow[alias] = total[alias]
+        }
+    } else {
+        logger.warn("В транспортном файле не найдена итоговая строка")
+        // очистить итоги
+        totalColumns.each { alias ->
+            totalRow[alias] = null
+        }
     }
 
     def monthRow = getDataRow(dataRows, 'total')

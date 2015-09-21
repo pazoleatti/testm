@@ -607,50 +607,55 @@ void addTransportData(def xml) {
         rows.add(newRow)
     }
 
+    def totalRow = formData.createDataRow()
+    totalRow.setAlias('itg')
+    totalRow.fix = 'Всего'
+    totalRow.getCell('fix').colSpan = 2
+    allColumns.each {
+        totalRow.getCell(it).setStyleAlias('Контрольные суммы')
+    }
+    rows.add(totalRow)
+
     if (!logger.containsLevel(LogLevel.ERROR) && xml.rowTotal.size() == 1) {
         rnuIndexRow = rnuIndexRow + 2
 
         def row = xml.rowTotal[0]
-
-        def total = formData.createDataRow()
-        total.setAlias('itg')
-        total.fix = 'Всего'
-        total.getCell('fix').colSpan = 2
-        allColumns.each {
-            total.getCell(it).setStyleAlias('Контрольные суммы')
-        }
         // графа 6
         def xmlIndexCol = 6
-        total.amount = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+        totalRow.amount = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
         // графа 7
         xmlIndexCol = 7
-        total.amountForReserve = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+        totalRow.amountForReserve = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
         // графа 10
         xmlIndexCol = 10
-        total.income = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+        totalRow.income = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
         // графа 11
         xmlIndexCol = 11
-        total.result = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+        totalRow.result = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
         // графа 13
         xmlIndexCol = 13
-        total.lossThisQuarter = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+        totalRow.lossThisQuarter = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
         // графа 14
         xmlIndexCol = 14
-        total.lossNextQuarter = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+        totalRow.lossNextQuarter = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
         // графа 15
         xmlIndexCol = 15
-        total.lossThisTaxPeriod = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+        totalRow.lossThisTaxPeriod = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
         // графа 18
         xmlIndexCol = 18
-        total.correctThisPrev = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+        totalRow.correctThisPrev = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
         // графа 19
         xmlIndexCol = 19
-        total.correctThisThis = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+        totalRow.correctThisThis = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
         // графа 20
         xmlIndexCol = 20
-        total.correctThisNext = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
-
-        rows.add(total)
+        totalRow.correctThisNext = getNumber(row.cell[xmlIndexCol].text(), rnuIndexRow, xmlIndexCol + colOffset)
+    } else {
+        logger.warn("В транспортном файле не найдена итоговая строка")
+        // очистить итоги
+        totalColumns.each { alias ->
+            totalRow[alias] = null
+        }
     }
 
     if (!logger.containsLevel(LogLevel.ERROR)) {

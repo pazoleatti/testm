@@ -663,30 +663,36 @@ void addTransportData(def xml) {
         rows.add(newRow)
     }
 
+    def totalRow = formData.createDataRow()
+    totalRow.setAlias('total')
+    totalRow.fix = "Всего"
+    totalRow.getCell('fix').colSpan = 2
+    allColumns.each {
+        totalRow.getCell(it).setStyleAlias('Контрольные суммы')
+    }
+    rows.add(totalRow)
+
     if (!logger.containsLevel(LogLevel.ERROR) && xml.rowTotal.size() == 1) {
         rnuIndexRow = rnuIndexRow + 2
 
         def row = xml.rowTotal[0]
 
-        def total = formData.createDataRow()
-        total.setAlias('total')
-        total.fix = "Всего"
-        total.getCell('fix').colSpan = 2
-        allColumns.each {
-            total.getCell(it).setStyleAlias('Контрольные суммы')
-        }
         // графа 9
-        total.income = parseNumber(row.cell[9].text(), rnuIndexRow, 9 + colOffset, logger, true)
+        totalRow.income = parseNumber(row.cell[9].text(), rnuIndexRow, 9 + colOffset, logger, true)
         // графа 10
-        total.financialResult1 = parseNumber(row.cell[10].text(), rnuIndexRow, 10 + colOffset, logger, true)
+        totalRow.financialResult1 = parseNumber(row.cell[10].text(), rnuIndexRow, 10 + colOffset, logger, true)
         // графа 14
-        total.perc = parseNumber(row.cell[14].text(), rnuIndexRow, 14 + colOffset, logger, true)
+        totalRow.perc = parseNumber(row.cell[14].text(), rnuIndexRow, 14 + colOffset, logger, true)
         // графа 15
-        total.loss = parseNumber(row.cell[15].text(), rnuIndexRow, 15 + colOffset, logger, true)
+        totalRow.loss = parseNumber(row.cell[15].text(), rnuIndexRow, 15 + colOffset, logger, true)
         // графа 19
-        total.financialResultAdjustment = parseNumber(row.cell[19].text(), rnuIndexRow, 19 + colOffset, logger, true)
-
-        rows.add(total)
+        totalRow.financialResultAdjustment = parseNumber(row.cell[19].text(), rnuIndexRow, 19 + colOffset, logger, true)
+    } else {
+        logger.warn("В транспортном файле не найдена итоговая строка")
+        // очистить итоги
+        totalColumns.each { alias ->
+            totalRow[alias] = null
+        }
     }
 
     if (!logger.containsLevel(LogLevel.ERROR)) {
