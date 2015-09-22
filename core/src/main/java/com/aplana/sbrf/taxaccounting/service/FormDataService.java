@@ -489,4 +489,14 @@ public interface FormDataService {
      * @return
      */
     List<DataRow<HeaderCell>> getHeaders(FormData formData, TAUserInfo userInfo, Logger logger);
+
+    /**
+     *
+     */
+    List<FormDataFile> getFiles(long formDataId);
+
+    /**
+     *
+     */
+    void saveFilesComments(FormData formData, List<FormDataFile> files);
 }

@@ -86,6 +86,8 @@ public class GenericDataGrid<T> extends DataGrid<T> implements HasEnabled{
     public void removeAllColumns() {
         int columnCount = getColumnCount();
         for (int i = 0; i < columnCount; i++) {
+//            setColumnWidth(getColumn(0), null);
+//            clearColumnWidth(getColumn(0));
             removeColumn(0);
         }
     }

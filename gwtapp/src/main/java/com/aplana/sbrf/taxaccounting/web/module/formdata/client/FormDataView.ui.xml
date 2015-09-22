@@ -121,6 +121,11 @@
             margin-left: 2px;
         }
 
+        .rightPanel {
+            overflow-x: visible;
+            overflow-y: scroll;
+        }
+
     </ui:style>
 
     <ui:style field="lock">
@@ -216,16 +221,20 @@
                     </g:cell>
                     <!--Правые кнопки ссылки-->
                     <g:cell horizontalAlignment="right">
-                        <g:VerticalPanel width="180px" spacing="2">
-                            <style:LinkButton ui:field="signersAnchor" text="Параметры печатной формы"
-                                              img="resources/img/businessperson-16.png"
-                                              title="Указать параметры печатной формы"/>
-                            <style:LinkButton ui:field="infoAnchor" text="История изменений"
-                                              img="resources/img/exclamation_mark.png"
-                                              title="Отобразить историю налоговой формы"/>
-                            <style:LinkButton ui:field="sources" text="Источники и приемники" img="resources/img/source-target.png"
-                                              title="Источники и приемники"/>
-                        </g:VerticalPanel>
+                        <g:SimplePanel addStyleNames="{style.rightPanel}" height="61px">
+                            <g:VerticalPanel width="180px" spacing="2">
+                                <style:LinkButton ui:field="signersAnchor" text="Параметры печатной формы"
+                                                  img="resources/img/businessperson-16.png"
+                                                  title="Указать параметры печатной формы"/>
+                                <style:LinkButton ui:field="filesComments" text="Файлы и комментарий" img="resources/img/exclamation_mark.png"
+                                                  title="Источники и приемники"/>
+                                <style:LinkButton ui:field="sources" text="Источники и приемники" img="resources/img/source-target.png"
+                                                  title="Источники и приемники"/>
+                                <style:LinkButton ui:field="infoAnchor" text="История изменений"
+                                                  img="resources/img/exclamation_mark.png"
+                                                  title="Отобразить историю налоговой формы"/>
+                            </g:VerticalPanel>
+                        </g:SimplePanel>
                     </g:cell>
 
                 </g:HorizontalPanel>
