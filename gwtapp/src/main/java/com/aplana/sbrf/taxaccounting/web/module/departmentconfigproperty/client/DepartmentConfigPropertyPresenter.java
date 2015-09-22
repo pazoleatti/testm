@@ -420,9 +420,6 @@ public class DepartmentConfigPropertyPresenter extends Presenter<DepartmentConfi
                                                         case COMMON_ERROR:
                                                             Dialog.errorMessage("Операция не выполнена. Запись не сохранена, обнаружены фатальные ошибки!");
                                                             break;
-                                                        case SAVING_FAILED:
-                                                            getData();
-                                                            break;
                                                     }
 
                                                     LogAddEvent.fire(DepartmentConfigPropertyPresenter.this, result.getUuid());

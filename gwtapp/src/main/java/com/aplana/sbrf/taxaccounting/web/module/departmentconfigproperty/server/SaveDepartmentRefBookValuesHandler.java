@@ -146,7 +146,7 @@ public class SaveDepartmentRefBookValuesHandler extends AbstractActionHandler<Sa
                     convert(action.getNotTableParams()), convertRows(action.getRows()), logger);
         } catch (Exception e) {
             result.setHasFatalError(true);
-            result.setErrorType(SaveDepartmentRefBookValuesResult.ERROR_TYPE.SAVING_FAILED);
+            result.setErrorType(SaveDepartmentRefBookValuesResult.ERROR_TYPE.COMMON_ERROR);
         }
 
         String departmentName = departmentService.getDepartment(action.getDepartmentId()).getName();
