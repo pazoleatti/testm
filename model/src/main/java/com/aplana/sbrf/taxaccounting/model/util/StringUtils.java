@@ -7,18 +7,16 @@ public final class StringUtils {
 
     /**
      * Удаление двоиных пробелов, пробелов перед и после текста,
-     * замена вида кавычек.
+     * замена вида кавычек, замена переноса строки на пробел.
      */
     public static  String cleanString(String uncleanString) {
         if (uncleanString != null) {
             String cleanString = uncleanString.trim();
-            cleanString = cleanString.replaceAll("\\s{2,}", " ");
-            cleanString = cleanString.replaceAll("['`«»„“‘’”]", "\"");
+            cleanString = cleanString.replaceAll("\\s{2,}", " ").replaceAll("['`«»„“‘’”]", "\"").replaceAll("\n"," ");
             return cleanString;
         } else {
             return null;
         }
-
     }
 
     public static String join(Object[] array, char separator){
