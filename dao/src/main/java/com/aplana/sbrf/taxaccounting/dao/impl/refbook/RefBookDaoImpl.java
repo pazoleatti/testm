@@ -569,7 +569,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
                     "t as (select rv.ID, rv.RECORD_ID RECORD_ID, rv.VERSION version, rv2.version - interval '1' day versionEnd from recordsByVersion rv left outer join recordsByVersion rv2 on rv.RECORD_ID = rv2.RECORD_ID and rv.rn+1 = rv2.rn where rv.status=?)\n";
 
     private static final String RECORD_VERSIONS_STATEMENT_BY_RECORD_ID =
-            "with recordsByVersion as (select r.ID, r.RECORD_ID, r.REF_BOOK_ID, r.VERSION, r.STATUS, row_number() over(partition by r.RECORD_ID order by r.version) rn from REF_BOOK_RECORD r where r.record_id=%d), \n" +
+            "with recordsByVersion as (select r.ID, r.RECORD_ID, r.REF_BOOK_ID, r.VERSION, r.STATUS, row_number() over(partition by r.RECORD_ID order by r.version) rn from REF_BOOK_RECORD r where r.record_id=%d and r.ref_book_id = %d), \n" +
                     "t as (select rv.ID, rv.RECORD_ID RECORD_ID, rv.VERSION version, rv2.version - interval '1' day versionEnd from recordsByVersion rv left outer join recordsByVersion rv2 on rv.RECORD_ID = rv2.RECORD_ID and rv.rn+1 = rv2.rn where rv.status=?)\n";
 
     /**
@@ -619,7 +619,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             }
             if (recordId != null){
                 //Ищем все версии в группе версий
-                ps.appendQuery(String.format(RECORD_VERSIONS_STATEMENT_BY_RECORD_ID, recordId));
+                ps.appendQuery(String.format(RECORD_VERSIONS_STATEMENT_BY_RECORD_ID, recordId, refBookId));
                 ps.addParam(VersionedObjectStatus.NORMAL.getId());
             }
         }
