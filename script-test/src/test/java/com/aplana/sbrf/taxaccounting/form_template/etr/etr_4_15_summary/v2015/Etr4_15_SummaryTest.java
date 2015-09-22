@@ -201,8 +201,7 @@ public class Etr4_15_SummaryTest extends ScriptTestBase {
      */
     private FormData getSourceFormData(int id, int sourceTemplateId) {
         // Макет источника
-        FormTemplate sourceTemplate = testHelper.getTemplate("D:\\\\workspace\\\\sbrfacctax\\\\//src/main//resources//form_template//etr//etr_4_15//v2015//");
-        // FormTemplate sourceTemplate = testHelper.getTemplate("..//src/main//resources//form_template//etr//etr_4_15//v2015//");
+        FormTemplate sourceTemplate = testHelper.getTemplate("..//src/main//resources//form_template//etr//etr_4_15//v2015//");
 
         FormType formType = new FormType();
         formType.setId(SOURCE_TYPE_ID);
