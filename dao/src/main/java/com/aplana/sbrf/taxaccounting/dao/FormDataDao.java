@@ -280,4 +280,18 @@ public interface FormDataDao {
     void updateEdited(long formDataId, boolean isModification);
 
     boolean isEdited(long formDataId);
+
+    /**
+     * Обновления комментария НФ
+     * @param formDataId
+     * @param note
+     */
+    void updateNote(long formDataId, String note);
+
+    /**
+     * Получение комментария НФ
+     * @param formDataId
+     * @return
+     */
+    String getNote(long formDataId);
 }

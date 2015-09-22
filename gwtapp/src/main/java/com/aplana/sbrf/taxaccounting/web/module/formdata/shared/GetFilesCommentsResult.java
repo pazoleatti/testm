@@ -1,13 +1,10 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdata.shared;
 
-import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.FormData;
 import com.aplana.sbrf.taxaccounting.model.FormDataFile;
-import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.model.FilesCommentsRow;
 import com.gwtplatform.dispatch.shared.Result;
 
 import java.util.List;
-import java.util.Set;
 
 public class GetFilesCommentsResult implements Result {
 

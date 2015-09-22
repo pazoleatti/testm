@@ -114,17 +114,14 @@ public class FormDataFilesDaoImpl extends AbstractDao implements FormDataFilesDa
         // update old
         if (!oldFiles.isEmpty()) {
             getJdbcTemplate().batchUpdate(
-                    "update form_data_file set form_data_id = ?, user_name = ?, user_department_name = ?, note = ?, attachment_date = sysdate " +
+                    "update form_data_file set note = ? " +
                             "where blob_data_id = ?",
                     new BatchPreparedStatementSetter() {
                         @Override
                         public void setValues(PreparedStatement ps, int index) throws SQLException {
                             FormDataFile file = oldFiles.get(index);
-                            ps.setLong(1, formDataId);
-                            ps.setString(2, file.getUserName());
-                            ps.setString(3, file.getUserDepartmentName());
-                            ps.setString(4, file.getNote());
-                            ps.setString(5, file.getUuid());
+                            ps.setString(1, file.getNote());
+                            ps.setString(2, file.getUuid());
                         }
 
                         @Override

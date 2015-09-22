@@ -45,12 +45,11 @@ public class AddFilesHandler extends
         BlobData blobData = blobDataService.get(action.getUuid());
         TAUser user = securityService.currentUserInfo().getUser();
         FormDataFile formDataFile = new FormDataFile();
-        //formDataFile.setFormDataId(action.getFormData().getId());
         formDataFile.setUuid(action.getUuid());
         formDataFile.setFileName(blobData.getName());
         formDataFile.setDate(blobData.getCreationDate());
         formDataFile.setUserName(user.getName());
-        formDataFile.setUserDepartmentName(departmentService.getDepartment(user.getDepartmentId()).getName());
+        formDataFile.setUserDepartmentName(departmentService.getParentsHierarchyShortNames(user.getDepartmentId()));
         formDataFile.setNote("");
         result.setFile(formDataFile);
 		return result;

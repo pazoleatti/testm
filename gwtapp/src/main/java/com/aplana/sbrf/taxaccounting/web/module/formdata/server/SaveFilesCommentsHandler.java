@@ -7,16 +7,12 @@ import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GetFilesCommentsResult;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.SaveFilesCommentsAction;
-import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.SaveFilesCommentsResult;
 import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.text.SimpleDateFormat;
-import java.util.List;
 
 @Service
 public class SaveFilesCommentsHandler extends AbstractActionHandler<SaveFilesCommentsAction, GetFilesCommentsResult> {
@@ -47,17 +43,16 @@ public class SaveFilesCommentsHandler extends AbstractActionHandler<SaveFilesCom
         String key = formDataService.generateTaskKey(action.getFormData().getId(), ReportType.EDIT_FILE_COMMENT);
         LockData lockData = lockService.getLock(key);
         if ((formData.getState().equals(WorkflowState.CREATED) || formData.getState().equals(WorkflowState.PREPARED)) &&
-                lockData.getUserId() == userInfo.getUser().getId()) {
+                lockData != null && lockData.getUserId() == userInfo.getUser().getId()) {
             result.setReadOnlyMode(false);
-            formData.setNote(action.getNote());
-            formDataService.saveFilesComments(formData, action.getFiles());
+            formDataService.saveFilesComments(formData.getId(), action.getNote(), action.getFiles());
             logger.info("Данные успешно сохранены.");
         } else {
             result.setReadOnlyMode(true);
             logger.error("Сохранение не выполнено, так как файлы и комментарии данного экземпляра налоговой формы не заблокированы текущим пользователем.");
         }
         result.setFiles(formDataService.getFiles(formData.getId()));
-        result.setNote(formData.getNote());
+        result.setNote(formDataService.getNote(formData.getId()));
         result.setUuid(logEntryService.save(logger.getEntries()));
         return result;
     }

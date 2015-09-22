@@ -2038,8 +2038,13 @@ public class FormDataServiceImpl implements FormDataService {
     }
 
     @Override
-    public void saveFilesComments(FormData formData, List<FormDataFile> files) {
-        formDataDao.save(formData);
-        formDataFilesDao.saveFiles(formData.getId(), files);
+    public String getNote(long formDataId) {
+        return formDataDao.getNote(formDataId);
+    }
+
+    @Override
+    public void saveFilesComments(long formDataId, String note, List<FormDataFile> files) {
+        formDataDao.updateNote(formDataId, note);
+        formDataFilesDao.saveFiles(formDataId, files);
     }
 }

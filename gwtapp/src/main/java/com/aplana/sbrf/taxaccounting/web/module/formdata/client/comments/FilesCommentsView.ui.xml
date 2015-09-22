@@ -40,7 +40,7 @@
                     </g:HorizontalPanel>
 
                     <g:HorizontalPanel>
-                        <aplana:TextArea width="700px" ui:field="note" visibleLines="4"/>
+                        <aplana:TextArea width="700px" ui:field="note" visibleLines="4" maxLength="255"/>
                     </g:HorizontalPanel>
 
                     <g:VerticalPanel width="100%">
@@ -57,7 +57,7 @@
                         </g:cell>
                     </g:VerticalPanel>
                     <g:HorizontalPanel ui:field="buttonPanel" spacing="3" verticalAlignment="middle">
-                        <fileuplod:FileUploadWidget text="Добавить" ui:field="addFile" actionUrl="upload/uploadController/formDataFile/" />
+                        <fileuplod:FileUploadWidget text="Добавить" ui:field="addFile" actionUrl="upload/uploadController/formDataFile/" img="resources/img/row-add.png" />
                         <style:LinkButton text="Удалить" ui:field="removeFile" img="resources/img/row-delete.png"/>
                     </g:HorizontalPanel>
                 </g:VerticalPanel>

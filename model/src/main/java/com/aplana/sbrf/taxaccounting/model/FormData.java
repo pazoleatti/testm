@@ -46,8 +46,6 @@ public class FormData extends IdentityObject<Long> {
     // Номер предыдущей формы
     private Integer previousRowNumber;
 
-    private String note;
-
 	public FormData() {
 	}
 
@@ -302,14 +300,6 @@ public class FormData extends IdentityObject<Long> {
         this.accruing = accruing;
     }
 
-    public String getNote() {
-        return note;
-    }
-
-    public void setNote(String note) {
-        this.note = note;
-    }
-
     @Override
     public String toString() {
         return "FormData{" +
@@ -328,7 +318,6 @@ public class FormData extends IdentityObject<Long> {
                 ", formType=" + formType +
                 ", performer=" + performer +
                 ", previousRowNumber=" + previousRowNumber +
-                ", note=" + note +
                 '}';
     }
 
@@ -365,7 +354,6 @@ public class FormData extends IdentityObject<Long> {
             return false;
         if (signers != null ? !signers.equals(formData.signers) : formData.signers != null) return false;
         if (state != formData.state) return false;
-        if (note != formData.note) return false;
 
         return true;
     }
@@ -391,7 +379,6 @@ public class FormData extends IdentityObject<Long> {
         result = 31 * result + (performer != null ? performer.hashCode() : 0);
         result = 31 * result + (signers != null ? signers.hashCode() : 0);
         result = 31 * result + (previousRowNumber != null ? previousRowNumber.hashCode() : 0);
-        result = 31 * result + (note != null ? note.hashCode() : 0);
         return result;
     }
 }

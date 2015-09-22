@@ -7,18 +7,12 @@ import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GetFilesCommentsAction;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.GetFilesCommentsResult;
-import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.model.FilesCommentsRow;
 import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
 
 @Service
 public class GetFilesCommentsHandler extends AbstractActionHandler<GetFilesCommentsAction, GetFilesCommentsResult> {
@@ -41,18 +35,12 @@ public class GetFilesCommentsHandler extends AbstractActionHandler<GetFilesComme
     @Autowired
     private LogEntryService logEntryService;
 
-    @Autowired
-    private BlobDataService blobDataService;
-
-    private static final SimpleDateFormat formatter = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
-
-
     public GetFilesCommentsHandler() {
         super(GetFilesCommentsAction.class);
     }
 
     @Override
-    @Transactional
+    @Transactional(readOnly = true)
     public GetFilesCommentsResult execute(GetFilesCommentsAction action, ExecutionContext executionContext) throws ActionException {
         TAUserInfo userInfo = securityService.currentUserInfo();
         GetFilesCommentsResult result = new GetFilesCommentsResult();
@@ -74,7 +62,7 @@ public class GetFilesCommentsHandler extends AbstractActionHandler<GetFilesComme
             result.setReadOnlyMode(true);
         }
         result.setFiles(formDataService.getFiles(formData.getId()));
-        result.setNote(formData.getNote());
+        result.setNote(formDataService.getNote(formData.getId()));
         result.setUuid(logEntryService.save(logger.getEntries()));
         return result;
     }

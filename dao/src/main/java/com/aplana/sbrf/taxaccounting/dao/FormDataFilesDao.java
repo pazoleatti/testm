@@ -12,16 +12,15 @@ import java.util.List;
 public interface FormDataFilesDao {
 
     /**
-     * Получение данных по id НФ
+     * Получение данных по файлам НФ
      * @param formDataId
      * @return
      */
     List<FormDataFile> getFiles(long formDataId);
 
     /**
-     *
+     * Сохранение набора файлов НФ
      * @param files
      */
     void saveFiles(final long formDataId, List<FormDataFile> files);
-
 }

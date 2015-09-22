@@ -3,15 +3,12 @@ package com.aplana.sbrf.taxaccounting.web.module.formdata.client.comments;
 import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.sbrf.taxaccounting.model.FormData;
 import com.aplana.sbrf.taxaccounting.model.FormDataFile;
-import com.aplana.sbrf.taxaccounting.model.FormToFormRelation;
-import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CompositeCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.*;
-import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.model.FilesCommentsRow;
 import com.aplana.sbrf.taxaccounting.web.widget.fileupload.event.EndLoadFileEvent;
 import com.google.gwt.event.logical.shared.CloseEvent;
 import com.google.gwt.event.logical.shared.CloseHandler;
@@ -29,13 +26,12 @@ import com.gwtplatform.mvp.client.proxy.LockInteractionEvent;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 /**
- * Презентер попап модыльного окна "Файлы и комментарии",
+ * Презентер попап модального окна "Файлы и комментарии",
  * данное окно вызывается с формы нф
  *
- * @author lhaziev
+ * @author Lhaziev
  */
 public class FilesCommentsPresenter extends PresenterWidget<FilesCommentsPresenter.MyView> implements FilesCommentsUiHandlers {
     public interface MyView extends PopupView, HasUiHandlers<FilesCommentsUiHandlers> {
@@ -46,6 +42,7 @@ public class FilesCommentsPresenter extends PresenterWidget<FilesCommentsPresent
         void addFileUploadValueChangeHandler(ValueChangeHandler<String> changeHandler);
         void addFile(FormDataFile file);
         HandlerRegistration addEndLoadFileHandler(EndLoadFileEvent.EndLoadFileHandler handler);
+        HandlerRegistration addStartLoadFileHandler(EndLoadFileEvent.EndLoadFileHandler handler);
     }
 
     private static final String ERROR_MSG = "Операция не выполнена";
@@ -54,7 +51,7 @@ public class FilesCommentsPresenter extends PresenterWidget<FilesCommentsPresent
     private HandlerRegistration closeFormDataHandlerRegistration;
     private FormData formData;
 
-        @Inject
+    @Inject
     public FilesCommentsPresenter(final EventBus eventBus, final MyView view, DispatchAsync dispatcher) {
         super(eventBus, view);
         this.dispatcher = dispatcher;
@@ -66,39 +63,37 @@ public class FilesCommentsPresenter extends PresenterWidget<FilesCommentsPresent
     }
 
     @Override
-    public TaxType getTaxType() {
-        return formData.getFormType().getTaxType();
-    }
-
-    @Override
     protected void onReveal() {
         super.onReveal();
-        // проверяем статус и определяем режим редактирования/чтения
         GetFilesCommentsAction action = new GetFilesCommentsAction();
         action.setFormData(formData);
-        dispatcher.execute(action, getCallback());
+        dispatcher.execute(action, getCallback(false));
     }
 
-    CompositeCallback<GetFilesCommentsResult> getCallback() {
+    CompositeCallback<GetFilesCommentsResult> getCallback(final boolean exit) {
         return CallbackUtils
                 .defaultCallback(new AbstractCallback<GetFilesCommentsResult>() {
                     @Override
                     public void onSuccess(GetFilesCommentsResult result) {
                         LogCleanEvent.fire(FilesCommentsPresenter.this);
                         LogAddEvent.fire(FilesCommentsPresenter.this, result.getUuid());
-                        getView().setReadOnlyMode(result.isReadOnlyMode());
-                        getView().setNote(result.getNote());
-                        getView().setTableData(result.getFiles());
-                        if (closeFormDataHandlerRegistration != null)
-                            closeFormDataHandlerRegistration.removeHandler();
-                        if (!result.isReadOnlyMode()) {
-                            closeFormDataHandlerRegistration = Window.addCloseHandler(new CloseHandler<Window>() {
-                                @Override
-                                public void onClose(CloseEvent<Window> event) {
-                                    closeFormDataHandlerRegistration.removeHandler();
-                                    unlockForm();
-                                }
-                            });
+                        if (exit) {
+                            getView().hide();
+                        } else {
+                            getView().setReadOnlyMode(result.isReadOnlyMode());
+                            getView().setNote(result.getNote());
+                            getView().setTableData(result.getFiles());
+                            if (closeFormDataHandlerRegistration != null)
+                                closeFormDataHandlerRegistration.removeHandler();
+                            if (!result.isReadOnlyMode()) {
+                                closeFormDataHandlerRegistration = Window.addCloseHandler(new CloseHandler<Window>() {
+                                    @Override
+                                    public void onClose(CloseEvent<Window> event) {
+                                        closeFormDataHandlerRegistration.removeHandler();
+                                        unlockForm();
+                                    }
+                                });
+                            }
                         }
                     }
                 }, this);
@@ -121,21 +116,21 @@ public class FilesCommentsPresenter extends PresenterWidget<FilesCommentsPresent
     }
 
     @Override
-    public void onSaveClicked(String note, final List<FormDataFile> files) {
+    public void onSaveClicked(String note, final List<FormDataFile> files, boolean exit) {
         SaveFilesCommentsAction action = new SaveFilesCommentsAction();
         List<FormDataFile> formDataFiles = new ArrayList<FormDataFile>();
         formDataFiles.addAll(files);
         action.setFormData(formData);
         action.setNote(note);
         action.setFiles(formDataFiles);
-        dispatcher.execute(action, getCallback());
+        dispatcher.execute(action, getCallback(exit));
     }
 
 
     @Override
     protected void onBind() {
         super.onBind();
-        ValueChangeHandler<String> valueChangeHandler = new ValueChangeHandler<String>() {
+        getView().addFileUploadValueChangeHandler( new ValueChangeHandler<String>() {
             @Override
             public void onValueChange(ValueChangeEvent<String> event) {
                 AddFileAction action = new AddFileAction();
@@ -149,8 +144,7 @@ public class FilesCommentsPresenter extends PresenterWidget<FilesCommentsPresent
                             }
                         }, FilesCommentsPresenter.this));
             }
-        };
-        getView().addFileUploadValueChangeHandler(valueChangeHandler);
+        });
         getView().addEndLoadFileHandler(new EndLoadFileEvent.EndLoadFileHandler() {
             @Override
             public void onEndLoad(EndLoadFileEvent event) {
@@ -158,19 +152,15 @@ public class FilesCommentsPresenter extends PresenterWidget<FilesCommentsPresent
                     Dialog.errorMessage("Ошибка", ERROR_MSG);
                     LogAddEvent.fire(FilesCommentsPresenter.this, event.getUuid());
                 }
-                onEndLoadFile();
+                LockInteractionEvent.fire(FilesCommentsPresenter.this, false);
             }
         });
-    }
-
-    @Override
-    public void onStartLoadFile() {
-        LockInteractionEvent.fire(this, true);
-    }
-
-    @Override
-    public void onEndLoadFile() {
-        LockInteractionEvent.fire(this, false);
+        getView().addStartLoadFileHandler(new EndLoadFileEvent.EndLoadFileHandler() {
+            @Override
+            public void onEndLoad(EndLoadFileEvent event) {
+                LockInteractionEvent.fire(FilesCommentsPresenter.this, true);
+            }
+        });
     }
 }
 

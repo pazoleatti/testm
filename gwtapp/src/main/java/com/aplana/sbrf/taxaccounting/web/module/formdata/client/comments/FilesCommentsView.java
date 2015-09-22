@@ -3,38 +3,26 @@ package com.aplana.sbrf.taxaccounting.web.module.formdata.client.comments;
 import com.aplana.gwt.client.*;
 import com.aplana.gwt.client.TextArea;
 import com.aplana.gwt.client.dialog.Dialog;
+import com.aplana.gwt.client.dialog.DialogHandler;
 import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
-import com.aplana.sbrf.taxaccounting.web.module.departmentconfigproperty.client.ConstIncomeHeaderBuilder;
-import com.aplana.sbrf.taxaccounting.web.module.departmentconfigproperty.client.TableWithCheckedColumn;
-import com.aplana.sbrf.taxaccounting.web.module.formdata.client.FormDataPresenter;
-import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.model.FilesCommentsRow;
-import com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.FormDataListUtils;
-import com.aplana.sbrf.taxaccounting.web.module.ifrs.shared.model.IfrsRow;
-import com.aplana.sbrf.taxaccounting.web.widget.datarow.EditTextColumn;
 import com.aplana.sbrf.taxaccounting.web.widget.fileupload.FileUploadWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.fileupload.event.EndLoadFileEvent;
-import com.aplana.sbrf.taxaccounting.web.widget.fileupload.event.StartLoadFileEvent;
 import com.aplana.sbrf.taxaccounting.web.widget.style.GenericDataGrid;
 import com.aplana.sbrf.taxaccounting.web.widget.style.LinkButton;
 import com.aplana.sbrf.taxaccounting.web.widget.style.table.CheckBoxHeader;
 import com.google.gwt.cell.client.*;
 import com.google.gwt.cell.client.Cell;
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.i18n.client.DateTimeFormat;
-import com.google.gwt.safehtml.client.SafeHtmlTemplates;
-import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.cellview.client.Column;
-import com.google.gwt.user.cellview.client.DataGrid;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.ui.*;
 import com.google.gwt.view.client.*;
@@ -42,32 +30,26 @@ import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.mvp.client.PopupViewWithUiHandlers;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static com.google.gwt.view.client.DefaultSelectionEventManager.createCustomManager;
 
 /**
- * Представление попапа модыльного окна "Файлы и комментарии",
+ * Представление попапа модального окна "Файлы и комментарии",
  * данное окно вызывается с формы нф
  *
- * @author lhaziev
+ * @author Lhaziev
  */
 public class FilesCommentsView extends PopupViewWithUiHandlers<FilesCommentsUiHandlers> implements FilesCommentsPresenter.MyView{
 
     public interface Binder extends UiBinder<PopupPanel, FilesCommentsView> {
     }
 
-    private List<FormDataFile> tableData = null;
     private static final DateTimeFormat format = DateTimeFormat.getFormat("dd.MM.yyyy HH:mm:ss");
+    private static final int NOTE_MAX_LENGTH = 255;
 
     private final PopupPanel widget;
-
-    interface UrlTemplates extends SafeHtmlTemplates {
-
-        @Template("{0}{1}")
-        SafeHtml getColValue(String main, String optional);
-    }
-    private static final UrlTemplates urlTemplates = GWT.create(UrlTemplates.class);
 
     @UiField
     ModalWindow modalWindow;
@@ -86,10 +68,11 @@ public class FilesCommentsView extends PopupViewWithUiHandlers<FilesCommentsUiHa
 
     private boolean readOnlyMode;
 
+    private List<FormDataFile> oldFiles = null;
+    private String oldNote = null;
+
     private ListDataProvider<FormDataFile> dataProvider = new ListDataProvider<FormDataFile>();
-
     private MultiSelectionModel<FormDataFile> selectionModel = new MultiSelectionModel<FormDataFile>();
-
     private CheckBoxHeader checkBoxHeader = new CheckBoxHeader();
     private DefaultSelectionEventManager<FormDataFile> multiSelectManager = createCustomManager(
             new DefaultSelectionEventManager.CheckboxEventTranslator<FormDataFile>()
@@ -101,8 +84,14 @@ public class FilesCommentsView extends PopupViewWithUiHandlers<FilesCommentsUiHa
         widget = uiBinder.createAndBindUi(this);
         widget.setAnimationEnabled(true);
 
+        selectionModel.addSelectionChangeHandler(
+                new SelectionChangeEvent.Handler() {
+                    @Override
+                    public void onSelectionChange(SelectionChangeEvent event) {
+                        onSelection();
+                    }
+                });
         table.setSelectionModel(selectionModel, multiSelectManager);
-
         checkBoxHeader.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
             @Override
             public void onValueChange(ValueChangeEvent<Boolean> event) {
@@ -111,30 +100,54 @@ public class FilesCommentsView extends PopupViewWithUiHandlers<FilesCommentsUiHa
                 }
             }
         });
-
-        selectionModel.addSelectionChangeHandler(
-                new SelectionChangeEvent.Handler() {
-                    @Override
-                    public void onSelectionChange(SelectionChangeEvent event) {
-                        onSelection();
-                    }
-                });
-
         initColumns();
         table.setRowCount(0);
         dataProvider.addDataDisplay(table);
-
-        addFile.addStartLoadHandler(new StartLoadFileEvent.StartLoadFileHandler() {
-            @Override
-            public void onStartLoad(StartLoadFileEvent event) {
-                getUiHandlers().onStartLoadFile();
-            }
-        });
     }
 
-    @Override
-    public void addFileUploadValueChangeHandler(ValueChangeHandler<String> changeHandler) {
-        addFile.addValueChangeHandler(changeHandler);
+    @UiHandler("removeFile")
+    public void onRemoveFileClicked(ClickEvent event){
+        Dialog.confirmMessage("Подтверждение удаления файлов", "Вы уверены, что хотите удалить выбранные файлы?", new DialogHandler() {
+            @Override
+            public void yes() {
+                for (FormDataFile row : selectionModel.getSelectedSet()) {
+                    dataProvider.getList().remove(row);
+                }
+                table.redraw();
+                super.yes();
+            }
+        });
+
+    }
+
+    @UiHandler("saveButton")
+    public void onSaveClicked(ClickEvent event){
+        table.flush();
+        getUiHandlers().onSaveClicked(note.getValue(), dataProvider.getList(), false);
+    }
+
+    @UiHandler("cancelButton")
+    public void onCloseClicked(ClickEvent event){
+        if (!readOnlyMode && isModify() ) {
+            Dialog.confirmMessage("Подтверждение", "Первоначальные данные изменились, применить изменения?", new DialogHandler() {
+                @Override
+                public void yes() {
+                    getUiHandlers().onSaveClicked(note.getValue(), dataProvider.getList(), true);
+                }
+
+                @Override
+                public void no() {
+                    hide();
+                }
+
+                @Override
+                public void cancel() {
+                    super.cancel();
+                }
+            });
+        } else {
+            hide();
+        }
     }
 
     private void onSelection() {
@@ -153,29 +166,6 @@ public class FilesCommentsView extends PopupViewWithUiHandlers<FilesCommentsUiHa
             removeFile.setEnabled(false);
         }
     }
-    @Override
-    public Widget asWidget() {
-        return widget;
-    }
-
-    @UiHandler("removeFile")
-    public void onRemoveFileClicked(ClickEvent event){
-        for (FormDataFile row : selectionModel.getSelectedSet()) {
-            dataProvider.getList().remove(row);
-        }
-        table.redraw();
-    }
-
-    @UiHandler("saveButton")
-    public void onSaveClicked(ClickEvent event){
-        table.flush();
-        getUiHandlers().onSaveClicked(note.getValue(), dataProvider.getList());
-    }
-
-    @UiHandler("cancelButton")
-    public void onCloseClicked(ClickEvent event){
-        hide();
-    }
 
     private void initColumns() {
         table.removeAllColumns();
@@ -192,7 +182,7 @@ public class FilesCommentsView extends PopupViewWithUiHandlers<FilesCommentsUiHa
 
             @Override
             public void render(Cell.Context context, FormDataFile object, SafeHtmlBuilder sb) {
-                String link = "<a href=\"/download/downloadBlobController/processArchiveDownload/" + object.getUuid() + "\">" + object.getFileName() + "</a>";
+                String link = "<a href=\"/download/downloadBlobController/formDataFile/" + object.getUuid() + "\">" + object.getFileName() + "</a>";
                 sb.appendHtmlConstant(link);
             }
 
@@ -218,7 +208,12 @@ public class FilesCommentsView extends PopupViewWithUiHandlers<FilesCommentsUiHa
         noteColumn.setFieldUpdater(new FieldUpdater<FormDataFile, String>() {
             @Override
             public void update(int index, FormDataFile object, String value) {
-                object.setNote(value);
+                if (value.length() <= NOTE_MAX_LENGTH) {
+                    object.setNote(value);
+                } else {
+                    object.setNote(value.substring(0, NOTE_MAX_LENGTH));
+                    Dialog.warningMessage("Количество символов для комментария превысило допустимое значение " + NOTE_MAX_LENGTH + ".");
+                }
             }
         });
 
@@ -268,13 +263,49 @@ public class FilesCommentsView extends PopupViewWithUiHandlers<FilesCommentsUiHa
         table.setColumnWidth(departmentColumn, 10, Style.Unit.EM);
     }
 
+    private boolean isModify() {
+        if (!(note.getValue().equals(oldNote) || note.getValue().isEmpty() && oldNote == null)) {
+            return true;
+        }
+        if (oldFiles != null && dataProvider.getList() != null && oldFiles.size() == dataProvider.getList().size()) {
+            for(int i = 0; i < oldFiles.size(); i++) {
+                if (!dataProvider.getList().get(i).getUuid().equals(oldFiles.get(i).getUuid()) ||
+                        !((dataProvider.getList().get(i).getNote() == null || dataProvider.getList().get(i).getNote().isEmpty()) && oldFiles.get(i).getNote() == null
+                                || dataProvider.getList().get(i).getNote().equals(oldFiles.get(i).getNote()))) {
+                    return true;
+                }
+            }
+        } else if ((dataProvider.getList() != null ? dataProvider.getList().size() : 0) != 0) {
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public Widget asWidget() {
+        return widget;
+    }
+
+    @Override
+    public void addFileUploadValueChangeHandler(ValueChangeHandler<String> changeHandler) {
+        addFile.addValueChangeHandler(changeHandler);
+    }
+
+    private List<FormDataFile> copyFiles(List<FormDataFile> from) {
+        List<FormDataFile> to = new ArrayList<FormDataFile>();
+        for (FormDataFile file : from) {
+            FormDataFile clonedFile = new FormDataFile();
+            clonedFile.setUuid(file.getUuid());
+            clonedFile.setNote(file.getNote());
+            to.add(clonedFile);
+        }
+        return to;
+    }
+
     @Override
     public void setTableData(List<FormDataFile> result) {
-        tableData = result;
-        table.setRowData(tableData);
+        oldFiles = copyFiles(result);
         dataProvider.setList(result);
-        //table.setVisibleRange(new Range(0, result.size()));
-        //table.flush();
         selectionModel.clear();
         onSelection();
     }
@@ -290,32 +321,35 @@ public class FilesCommentsView extends PopupViewWithUiHandlers<FilesCommentsUiHa
         if (readOnlyMode) {
             buttonPanel.setVisible(false);
             saveButton.setVisible(false);
+            note.setEnabled(false);
         } else {
             buttonPanel.setVisible(true);
             saveButton.setVisible(true);
+            note.setEnabled(true);
         }
         initColumns();
         table.redraw();
-
     }
 
     @Override
     public void setNote(String note) {
+        oldNote = note;
         this.note.setValue(note);
     }
 
     @Override
     public void addFile(FormDataFile file) {
-        tableData.add(0, file);
-        table.setRowData(tableData);
-        dataProvider.setList(tableData);
-        //table.setVisibleRange(new Range(0, dataProvider.getList().size()));
-        //table.flush();
+        dataProvider.getList().add(0, file);
         table.redraw();
     }
 
     @Override
     public HandlerRegistration addEndLoadFileHandler(EndLoadFileEvent.EndLoadFileHandler handler) {
+        return addFile.addEndLoadHandler(handler);
+    }
+
+    @Override
+    public HandlerRegistration addStartLoadFileHandler(EndLoadFileEvent.EndLoadFileHandler handler) {
         return addFile.addEndLoadHandler(handler);
     }
 }

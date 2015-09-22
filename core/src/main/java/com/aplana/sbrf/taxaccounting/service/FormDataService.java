@@ -491,12 +491,17 @@ public interface FormDataService {
     List<DataRow<HeaderCell>> getHeaders(FormData formData, TAUserInfo userInfo, Logger logger);
 
     /**
-     *
+     * Получение данных по файлам для формы "Файлы и комментарии"
      */
     List<FormDataFile> getFiles(long formDataId);
 
     /**
-     *
+     * Получения комментария для формы "Файлы и комментарии"
      */
-    void saveFilesComments(FormData formData, List<FormDataFile> files);
+    String getNote(long formDataId);
+
+    /**
+     * Сохранение данных формы "Файлы и комментарии"
+     */
+    void saveFilesComments(long formDataId, String note, List<FormDataFile> files);
 }
