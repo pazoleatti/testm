@@ -12,7 +12,7 @@ import java.math.RoundingMode
 import java.text.SimpleDateFormat
 
 /**
- * Форма "(РНУ-61) Регистр налогового учёта расходов по процентным векселям ПАО «Сбербанк России»,
+ * Форма "(РНУ-61) Регистр налогового учёта расходов по процентным векселям ПАО Сбербанк,
  * учёт которых требует применения метода начисления (с 9 месяцев 2015)"
  * formTypeId=422 (352 у старого макета)
  *
@@ -265,6 +265,7 @@ def BigDecimal calc13(def DataRow<Cell> row, def daysOfYear) {
                 }
                 // «Графа 13» = («Графа 4» * «Графа 10» / 100 * («Графа 11» - «Графа 3») / 365 (366)),
                 // с округлением до двух знаков после запятой по правилам округления * «Графа 7»
+                //TODO деление и округление
                 return (row.nominal * row.interestRate / 100 * TimeCategory.minus(row.operationDate, row.creationDate).getDays() / daysOfYear * row.rateBROperation)
                         .setScale(2, RoundingMode.HALF_UP)
 
@@ -277,6 +278,7 @@ def BigDecimal calc13(def DataRow<Cell> row, def daysOfYear) {
                 }
                 // «Графа 13» = («Графа 4» * «Графа 10» / 100 * («Графа 9» - «Графа 3») / 365 (366)),
                 // с округлением до двух знаков после запятой по правилам округления * «Графа 7»
+                //TODO деление и округление
                 return (row.nominal * row.interestRate / 100 * TimeCategory.minus(row.paymentEnd, row.creationDate).getDays() / daysOfYear * row.rateBROperation)
                         .setScale(2, RoundingMode.HALF_UP)
             }

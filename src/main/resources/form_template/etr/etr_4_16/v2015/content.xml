@@ -28,7 +28,7 @@
         <alias>comparePeriod</alias>
         <checking>false</checking>
         <columnType>NUMBER</columnType>
-        <name>Период сравнения</name>
+        <name>Период сравнения, тыс. руб.</name>
         <order>3</order>
         <width>10</width>
         <maxLength>22</maxLength>
@@ -38,7 +38,7 @@
         <alias>currentPeriod</alias>
         <checking>false</checking>
         <columnType>NUMBER</columnType>
-        <name>Период</name>
+        <name>Период, тыс. руб.</name>
         <order>4</order>
         <width>10</width>
         <maxLength>22</maxLength>

@@ -8,7 +8,7 @@ import groovy.transform.Field
 /**
  *  Скрипт для РНУ-16 (с 9 месяцев 2015)
  *  Форма "(РНУ-16) Регистр налогового учёта доходов по поставочным сделкам с ПФИ, не признаваемыми ФИСС,
- *                          в соответствии с учётной политикой для целей налогообложения ПАО «Сбербанк России» (с 9 месяцев 2015)"
+ *                          в соответствии с учётной политикой для целей налогообложения ПАО Сбербанк (с 9 месяцев 2015)"
  * formTemplateId=505 (499 у старого макета)
  *
  * графа - rowNumber
@@ -114,12 +114,8 @@ void calc() {
     def dataRows = formDataService.getDataRowHelper(formData).allCached
 
     if (!dataRows.isEmpty()) {
-
         // Удаление подитогов
         deleteAllAliased(dataRows)
-
-        // сортируем по кодам
-        dataRows.sort { getKnu(it.incomeType) }
     }
 
     dataRows.add(calcTotalRow(dataRows))

@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <formTemplateContent>
     <fixedRows>false</fixedRows>
-    <name>(РНУ-8) Простой регистр налогового учёта «Требования»</name>
-    <fullName>(РНУ-8) Простой регистр налогового учёта «Требования»</fullName>
+    <name>(РНУ-8) Простой регистр налогового учёта &quot;Требования&quot;</name>
+    <fullName>(РНУ-8) Простой регистр налогового учёта &quot;Требования&quot;</fullName>
     <code>РНУ-8</code>
+    <header>852-8</header>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>number</alias>
         <checking>false</checking>

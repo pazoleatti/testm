@@ -738,7 +738,7 @@ public class DataRowDaoImpl extends AbstractDao implements DataRowDao {
 		withSql.append(" WHERE temporary = :temporary AND form_data_id = :form_data_id), DATA AS(\n");
 		withSql.append("SELECT DISTINCT '").append(names.get(0)).append("' AS column_name, ").append(names.get(0)).append(" AS value FROM TAB");
 		for (int i = 1; i < names.size(); i++) {
-			withSql.append(" UNION \n SELECT DISTINCT '").append(names.get(i)).append("' AS column_name, ").append(names.get(i)).append(" AS value FROM TAB");
+			withSql.append(" UNION \n SELECT DISTINCT '").append(names.get(0)).append("' AS column_name, ").append(names.get(0)).append(" AS value FROM TAB");
 		}
 		withSql.append(")\nSELECT DISTINCT rba.ref_book_id, data.value AS record_id FROM data\n");
 		withSql.append("JOIN form_column fc ON('c'||fc.id = data.column_name AND fc.parent_column_id IS NULL)\n");

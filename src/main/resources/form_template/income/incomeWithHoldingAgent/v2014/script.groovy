@@ -151,10 +151,6 @@ def getRecordIdImport(def Long refBookId, def String alias, def String value, de
 
 // Алгоритмы заполнения полей формы
 void calc() {
-    def dataRows =  formDataService.getDataRowHelper(formData).allCached
-
-    // сортировка
-    sortRows(dataRows, sortColumns)
 }
 
 def logicCheck() {

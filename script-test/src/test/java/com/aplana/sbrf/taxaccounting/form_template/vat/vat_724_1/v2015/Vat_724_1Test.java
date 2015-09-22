@@ -140,8 +140,10 @@ public class Vat_724_1Test extends ScriptTestBase {
     /** Проверить загруженные данные. */
     void checkLoadData(List<DataRow<Cell>> dataRows) {
         long recordId = 1L;
+        boolean isSection7 = false;
         for (DataRow<Cell> row : dataRows) {
             if (row.getAlias() != null) {
+                isSection7 = "head_7".equals(row.getAlias());
                 continue;
             }
 
@@ -170,8 +172,10 @@ public class Vat_724_1Test extends ScriptTestBase {
             Assert.assertEquals("row.ndsBookSum[" + row.getIndex() + "]", expected, row.getCell("ndsBookSum").getNumericValue());
 
             // графа 9
-            expected = roundValue(1L, 2);
-            Assert.assertEquals("row.ndsDealSum[" + row.getIndex() + "]", expected, row.getCell("ndsDealSum").getNumericValue());
+            if (isSection7) {
+                expected = roundValue(1L, 2);
+                Assert.assertEquals("row.ndsDealSum[" + row.getIndex() + "]", expected, row.getCell("ndsDealSum").getNumericValue());
+            }
         }
     }
 

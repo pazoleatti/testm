@@ -271,19 +271,6 @@ void calc() {
         fixCA18_19(prevDataRows, dataRows, findCA(dataRows), reportPeriod)
     }
 
-    // Сортировка
-    // отсортировать можно только после расчета графы regionBank
-    dataRows.sort { a, b ->
-        def regionBankA = getRefBookValue(30, a.regionBank)?.NAME?.stringValue
-        def regionBankB = getRefBookValue(30, b.regionBank)?.NAME?.stringValue
-        if (regionBankA == regionBankB) {
-            def regionBankDivisionA = getRefBookValue(30, a.regionBankDivision)?.NAME?.stringValue
-            def regionBankDivisionB = getRefBookValue(30, b.regionBankDivision)?.NAME?.stringValue
-            return (regionBankDivisionA <=> regionBankDivisionB)
-        }
-        return (regionBankA <=> regionBankB)
-    }
-
     // добавить строку ЦА (скорректрированный) (графа 1..22)
     def caTotalRow = formData.createDataRow()
     caTotalRow.setAlias('ca')
@@ -493,7 +480,7 @@ def calc18Parts(def dataRows, def prevDataRows, def row) {
     if (currentSum) {
         return (currentSum - previousSum) * row.taxSum / currentSum
     }
-    return null
+    return BigDecimal.ZERO
 }
 
 void fixCA18_19(def prevDataRows, def dataRows, def rowCA, def reportPeriod) {
@@ -628,7 +615,7 @@ void logicalCheckAfterCalc() {
 
         // 2. Проверка значения в графе «Доля налоговой базы (№)»
         if (row.baseTaxOf != null && !checkColumn11(row.baseTaxOf)) {
-            logger.error("Строка $index: Графа «%s» заполнена неверно! Ожидаемый тип поля: Число/18.15/ (максимальное общее количество цифр 18 - до и после запятой; после запятой максимальное количество цифр 15).", getColumnName(row,'baseTaxOf'))
+            logger.error("Строка $index: Графа «%s» заполнена неверно! Ожидаемый тип поля: Число/18.15/ (максимальное общее количество цифр 18 - до и после точки; после точки максимальное количество цифр 15).", getColumnName(row,'baseTaxOf'))
         }
         // 3. Проверка на соответствие паттерну
         if (row.kpp && !checkPattern(logger, row, 'kpp', row.kpp, KPP_PATTERN, wasError ? null : KPP_MEANING, true)) {
@@ -637,7 +624,7 @@ void logicalCheckAfterCalc() {
     }
 }
 
-// проверка графы 11: максимальное общее количество цифр 18 - до и после запятой; после запятой максимальное количество цифр 15
+// проверка графы 11: максимальное общее количество цифр 18 - до и после точки; после точки максимальное количество цифр 15
 def checkColumn11(def value) {
     if (value == null) {
         return false

@@ -37,7 +37,7 @@ import com.gwtplatform.mvp.client.proxy.ProxyPlace;
 import java.util.Date;
 
 public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
-		RefBookDataPresenter.MyProxy> implements RefBookDataUiHandlers,
+        RefBookDataPresenter.MyProxy> implements RefBookDataUiHandlers,
         SetFormMode.SetFormModeHandler, BackEvent.BackHandler {
 
     @Override

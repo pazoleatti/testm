@@ -25,8 +25,10 @@
 						<xs:appinfo>
 							<sch:pattern name="Значение ПоМесту в зависимости от значения КПП">
 								<sch:rule context="Документ">
-									<!-- Табл.4.8. Контроль значения элемента ПоМесту в  зависимости  от  значения элемента  КПП -->
-									<sch:assert test="( ( (substring(СвНП/НПЮЛ/@КПП,5,2)=50) and @ПоМесту=213 ) or ( (substring(СвНП/НПЮЛ/@КПП,5,2)= '4U') and @ПоМесту=218 ) or ( (substring(СвНП/НПЮЛ/@КПП,5,2)!=50) and (number(substring(СвНП/НПЮЛ/@КПП,5,2)!='4U') ) and ( @ПоМесту=214 or @ПоМесту=215 or @ПоМесту=216 or @ПоМесту=220 or @ПоМесту=223 or @ПоМесту=225 or @ПоМесту=226 or @ПоМесту=228 or @ПоМесту=229 or @ПоМесту=231 or @ПоМесту=234 or @ПоМесту=235 ) ) )">
+									<!-- Табл.4.8. Контроль значения элемента ПоМесту в  зависимости  от  значения элемента  КПП
+[50 и 213] или [ (01 или 50 или 4U) и 218] или [ (не 50) и (не 4U) и (214 или 215 или 216 или 220 или 223 или 225 или 226 или 228 или 229 или 231 или 234 или 235)]  -->
+									<sch:assert test="(  ( (substring(СвНП/НПЮЛ/@КПП,5,2)=50) and @ПоМесту=213 ) or ( ( (substring(СвНП/НПЮЛ/@КПП,5,2)= '4U') or (substring(СвНП/НПЮЛ/@КПП,5,2)= 50) or (substring(СвНП/НПЮЛ/@КПП,5,2)= 01) ) and @ПоМесту=218 ) or ( (substring(СвНП/НПЮЛ/@КПП,5,2)!='4U' ) and ( @ПоМесту=214 or @ПоМесту=215 or @ПоМесту=216 or @ПоМесту=220 or @ПоМесту=223 or @ПоМесту=225 or @ПоМесту=226 or @ПоМесту=228 or @ПоМесту=229 or @ПоМесту=231 or @ПоМесту=234 or @ПоМесту=235 or @ПоМесту=236  or @ПоМесту=237 ) )  )">
+										<!--sch:assert test="( ( (substring(СвНП/НПЮЛ/@КПП,5,2)=50) and @ПоМесту=213 ) or ( (substring(СвНП/НПЮЛ/@КПП,5,2)= '4U') and @ПоМесту=218 ) or ( (substring(СвНП/НПЮЛ/@КПП,5,2)!=50) and (number(substring(СвНП/НПЮЛ/@КПП,5,2)!='4U') ) and ( @ПоМесту=214 or @ПоМесту=215 or @ПоМесту=216 or @ПоМесту=220 or @ПоМесту=223 or @ПоМесту=225 or @ПоМесту=226 or @ПоМесту=228 or @ПоМесту=229 or @ПоМесту=231 or @ПоМесту=234 or @ПоМесту=235 ) ) )"-->
 										<usch:error code="0400400007" path="@ПоМесту" value-of-select="@ПоМесту"> Значение элемента Файл/Документ/ПоМесту не соответствует условию при значении элемента КПП, равном "<usch:value-of select="СвНП/НПЮЛ/@КПП"/>". </usch:error>
 									</sch:assert>
 								</sch:rule>
@@ -394,7 +396,7 @@
 											</xs:complexType>
 										</xs:element>
 										<xs:choice>
-											<xs:element name="РасчНал" minOccurs="0" maxOccurs="4">
+											<xs:element name="РасчНал" minOccurs="0" maxOccurs="unbounded">
 												<xs:annotation>
 													<xs:documentation>Расчет налога (лист 02)</xs:documentation>
 												</xs:annotation>
@@ -1713,7 +1715,7 @@
 																</xs:attribute>
 															</xs:complexType>
 														</xs:element>
-														<xs:element name="УбытУменНБ" minOccurs="0">
+														<xs:element name="УбытУменНБ" minOccurs="0" maxOccurs="unbounded">
 															<xs:annotation>
 																<xs:documentation>Расчет суммы убытка или части убытка, уменьшающего налоговую базу (приложение №4 к листу 02)</xs:documentation>
 															</xs:annotation>
@@ -4926,6 +4928,8 @@
 									<xs:enumeration value="231"/>
 									<xs:enumeration value="234"/>
 									<xs:enumeration value="235"/>
+									<xs:enumeration value="236"/>
+									<xs:enumeration value="237"/>
 								</xs:restriction>
 							</xs:simpleType>
 						</xs:attribute>

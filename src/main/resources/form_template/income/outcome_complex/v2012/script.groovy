@@ -344,9 +344,9 @@ void consolidationFromSummary(def dataRows, def formSources) {
                     continue
                 }
                 def rowResult = getDataRow(dataRows, row.getAlias())
-                ['consumptionBuhSumAccepted', 'consumptionBuhSumPrevTaxPeriod', 'consumptionTaxSumS'].each {
-                    if (row.getCell(it).getValue() != null && !row.getCell(it).hasValueOwner()) {
-                        rowResult.getCell(it).setValue(summ(rowResult.getCell(it), row.getCell(it)), rowResult.getIndex())
+                ['consumptionBuhSumAccepted', 'consumptionBuhSumPrevTaxPeriod', 'consumptionTaxSumS'].each { alias ->
+                    if (rowResult.getCell(alias)?.editable && row.getCell(alias).getValue() != null) {
+                        rowResult[alias] = summ(rowResult.getCell(alias), row.getCell(alias))
                     }
                 }
             }
@@ -388,8 +388,8 @@ void consolidationFromPrimary(def dataRows, def formSources) {
         prevList = ((2..17) + (26..32) + [70, 71])
         addPrevValue(prevList, dataRows, 'consumptionBuhSumPrevTaxPeriod', dataRowsOld, 'consumptionBuhSumAccepted')
         //графа 9
-        prevList = ([14] + (18..26) + [28] + (30..46) + (49..66) + [69, 70, 72] + (76..88) + [90, 91])
-        addPrevValue(prevList, dataRows, 'consumptionBuhSumPrevTaxPeriod', dataRowsOld, 'consumptionBuhSumAccepted')
+        prevList = ([14] + (18..26) + [28] + (30..46) + (49..66) + [69, 70, 72] + (76..88))
+        addPrevValue(prevList, dataRows, 'consumptionTaxSumS', dataRowsOld, 'consumptionTaxSumS')
     }
     // получить формы-источники в текущем налоговом периоде
     formSources.each {
@@ -1008,7 +1008,8 @@ def fillRowFromXls(def dataRow, def values, int fileRowIndex, int rowIndex, int 
 
     // графа 9
     colIndex++
-    if (!notImportSum.contains(dataRow.getAlias())) {
+    //if (!notImportSum.contains(dataRow.getAlias())) {
+    if (dataRow.getCell('consumptionTaxSumS').isEditable()) {
         dataRow.consumptionTaxSumS = parseNumber(values[colIndex].trim(), fileRowIndex, colIndex + colOffset, logger, true)
     }
 }

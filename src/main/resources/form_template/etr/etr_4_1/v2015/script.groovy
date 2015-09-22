@@ -322,7 +322,7 @@ def get102Sum(def row, def periodId) {
         if ((records == null || records.isEmpty())) {
             return [0, false]
         }
-        return [records.sum { it.TOTAL_SUM.numberValue }, true]
+        return [records.sum { it.TOTAL_SUM.numberValue } / 1000, true]
     } else if (periodId == null) {
         return [0, false]
     }
