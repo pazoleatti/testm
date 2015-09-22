@@ -168,7 +168,7 @@
         <cell alias="excessSellingPrice" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
     </row>
     <row alias="R3">
-        <cell alias="fix" colSpan="39" rowSpan="1" stringValue="3. Акции: ПАО «АК Сбербанк России»"
+        <cell alias="fix" colSpan="39" rowSpan="1" stringValue="3. Акции: ПАО &quot;АК Сбербанк&quot;"
               styleAlias="Раздел 1 уровня"/>
         <cell alias="balanceNumber" colSpan="1" rowSpan="1"/>
         <cell alias="operationType" colSpan="1" rowSpan="1"/>

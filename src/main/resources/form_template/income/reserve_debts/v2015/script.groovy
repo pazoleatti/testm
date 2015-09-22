@@ -2,6 +2,8 @@ package form_template.income.reserve_debts.v2015
 
 import au.com.bytecode.opencsv.CSVReader
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
+import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.model.script.range.ColumnRange
 import com.aplana.sbrf.taxaccounting.model.util.StringUtils
 import groovy.transform.Field
@@ -51,6 +53,7 @@ switch (formDataEvent) {
     case FormDataEvent.CALCULATE:
         calc()
         logicCheck()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.ADD_ROW:
         addRow()
@@ -77,7 +80,7 @@ switch (formDataEvent) {
         break
     case FormDataEvent.IMPORT:
         importData()
-        calc()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.IMPORT_TRANSPORT_FILE:
         importTransportData()
@@ -240,8 +243,6 @@ void calc() {
     }
 
     calcTotal(dataRows)
-
-    dataRowHelper.save(dataRows)
 }
 
 /** Рассчитать итоги основного (первого) раздела, итоги разделов А и Б и строки "всего". */
@@ -448,144 +449,6 @@ def setEdit(def row, def section) {
     }
 }
 
-void importData() {
-    def tmpRow = formData.createDataRow()
-    def xml = getXML(ImportInputStream, importService, UploadFileName, getColumnName(tmpRow, 'number'), null)
-
-    checkHeaderSize(xml.row[0].cell.size(), xml.row.size(), 14, 3)
-
-    def headerMapping = [
-            (xml.row[0].cell[0]) : getColumnName(tmpRow, 'number'),
-            (xml.row[0].cell[2]) : getColumnName(tmpRow, 'numberAccount'),
-
-            (xml.row[0].cell[3]) : 'Задолженность от 45 до 90 дней',
-            (xml.row[1].cell[3]) : 'сумма долга',
-            (xml.row[1].cell[4]) : 'норматив отчислений 50%',
-            (xml.row[1].cell[5]) : 'расчётный резерв',
-
-            (xml.row[0].cell[6]) : 'Задолженность более 90 дней',
-            (xml.row[1].cell[6]) : 'сумма долга',
-            (xml.row[1].cell[7]) : 'норматив отчислений 100%',
-            (xml.row[1].cell[8]) : 'расчётный резерв',
-
-            (xml.row[0].cell[9]) : getColumnName(tmpRow, 'totalReserve'),
-
-            (xml.row[0].cell[10]): 'Резерв',
-            (xml.row[1].cell[10]): 'на предыдущую отчётную дату',
-            (xml.row[1].cell[11]): 'на отчетную дату',
-
-            (xml.row[0].cell[12]): 'Изменение фактического резерва',
-            (xml.row[1].cell[12]): 'Доначисление резерва с отнесением на расходы код 22670',
-            (xml.row[1].cell[13]): 'Восстановление резерва на доходах код 13091',
-            (xml.row[1].cell[14]): 'Использование резерва на погашение процентов по безнадежным долгам в отчетном периоде',
-            (xml.row[2].cell[0]) : '1'
-    ]
-    (2..14).each { index ->
-        headerMapping.put((xml.row[2].cell[index]), index.toString())
-    }
-    checkHeaderEquals(headerMapping)
-
-    addData(xml, 2)
-}
-
-// Заполнить форму данными.
-def addData(def xml, int headRowCount) {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.allCached
-
-    def aRow = getDataRow(dataRows, 'A')
-    def bRow = getDataRow(dataRows, 'B')
-    def groupsMap = [
-            (aRow.forLabel) : 'A',
-            (bRow.forLabel) : 'B'
-    ]
-
-    def xmlIndexRow = -1 // Строки xml, от 0
-    def int rowOffset = xml.infoXLS.rowOffset[0].cell[0].text().toInteger()
-    def int colOffset = xml.infoXLS.colOffset[0].cell[0].text().toInteger()
-    def isFirstRow = true
-    def section = null //название секции
-    def mapRows = [:]
-    mapRows[section] = []
-
-    for (def row : xml.row) {
-        xmlIndexRow++
-        def int xlsIndexRow = xmlIndexRow + rowOffset
-
-        // Пропуск строк шапки
-        if (xmlIndexRow <= headRowCount) {
-            continue
-        }
-
-        if (!isFirstRow && groupsMap.get(row.cell[1].text()) != null) {
-            section = groupsMap.get(row.cell[1].text())
-            mapRows[section] = []
-            continue
-        }
-
-        // Пропуск итоговых строк
-        if (row.cell[1].text() != null && row.cell[1].text() != "") {
-            isFirstRow = false
-            continue
-        }
-
-        if ((row.cell.find { it.text() != "" }.toString()) == "") {
-            break
-        }
-
-        def xmlIndexCol
-
-        // редактируемые(импортируемые) графы:
-        // первые строки  (графа 2, 3, 6, 10(!), 12..14)
-        // раздел А или Б (графа 2,       10(!),     14)
-        def newRow = formData.createDataRow()
-        newRow.setImportIndex(xlsIndexRow)
-        setEdit(newRow, section)
-
-        // графа 2
-        newRow.numberAccount = row.cell[2].text()
-
-        // графа 10
-        xmlIndexCol = 10
-        newRow.reservePrev = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
-
-        // графа 14
-        xmlIndexCol = 14
-        newRow.useReserve = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
-
-        if (isFirstRow) {
-            // графа 3
-            xmlIndexCol = 3
-            newRow.debt45_90DaysSum = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
-
-            // графа 6
-            xmlIndexCol = 6
-            newRow.debtOver90DaysSum = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
-
-            // графа 12
-            xmlIndexCol = 12
-            newRow.calcReserve = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
-
-            // графа 13
-            xmlIndexCol = 13
-            newRow.reserveRecovery = parseNumber(row.cell[xmlIndexCol].text(), xlsIndexRow, xmlIndexCol + colOffset, logger, true)
-        }
-
-        mapRows[section].add(newRow)
-    }
-
-    // удалить нефиксированные строки
-    deleteNotFixedRows(dataRows)
-
-    // собрать строки из разделов в один список
-    mapRows.keySet().each { sectionKey ->
-        def insertIndex = (sectionKey != null ? getDataRow(dataRows, sectionKey).getIndex() : 0)
-        dataRows.addAll(insertIndex, mapRows.get(sectionKey))
-        updateIndexes(dataRows)
-    }
-    dataRowHelper.save(dataRows)
-}
-
 def isFirstSection(def alias) {
     return alias == null || alias == '0' || alias == ''
 }
@@ -652,13 +515,6 @@ def calc11AB(def row) {
         return null
     }
     return roundValue(row.reservePrev - row.useReserve, 2)
-}
-
-/** Поправить индексы. */
-void updateIndexes(def dataRows) {
-    dataRows.eachWithIndex { row, i ->
-        row.setIndex(i + 1)
-    }
 }
 
 // Удалить нефиксированные строки
@@ -758,62 +614,6 @@ void importTransportData() {
         reader.close()
     }
 
-    def newRows = (mapRows.values().sum { it } ?: [])
-    showMessages(newRows, logger)
-    if (logger.containsLevel(LogLevel.ERROR) || newRows == null || newRows.isEmpty()) {
-        return
-    }
-
-    // сравнение итогов
-    if (totalTF) {
-        // мапа с алиасами граф и номерами колонокв в xml (алиас -> номер колонки)
-        def totalColumnsIndexMap = [
-                'debt45_90DaysSum'      : 3,
-                'debt45_90DaysReserve'  : 5,
-                'debtOver90DaysSum'     : 6,
-                'debtOver90DaysReserve' : 8,
-                'totalReserve'          : 9,
-                'reservePrev'           : 10,
-                'reserveCurrent'        : 11,
-                'calcReserve'           : 12,
-                'reserveRecovery'       : 13,
-                'useReserve'            : 14
-        ]
-
-        // итоговая строка для сверки сумм
-        def totalTmp = formData.createStoreMessagingDataRow()
-        totalColumnsIndexMap.keySet().asList().each { alias ->
-            totalTmp.getCell(alias).setValue(BigDecimal.ZERO, null)
-        }
-
-        // подсчет итогов
-        for (def row : newRows) {
-            if (row.getAlias()) {
-                continue
-            }
-            totalColumnsIndexMap.keySet().asList().each { alias ->
-                def value1 = totalTmp.getCell(alias).value
-                def value2 = (row.getCell(alias).value ?: BigDecimal.ZERO)
-                totalTmp.getCell(alias).setValue(value1 + value2, null)
-            }
-        }
-
-        // сравнение контрольных сумм
-        def colOffset = 1
-        for (def alias : totalColumnsIndexMap.keySet().asList()) {
-            def v1 = totalTF.getCell(alias).value
-            def v2 = totalTmp.getCell(alias).value
-            if (v1 == null && v2 == null) {
-                continue
-            }
-            if (v1 == null || v1 != null && v1 != v2) {
-                logger.warn(TRANSPORT_FILE_SUM_ERROR + " Из файла: $v1, рассчитано: $v2", totalColumnsIndexMap[alias] + colOffset, fileRowIndex)
-            }
-        }
-    } else {
-        logger.warn("В транспортном файле не найдена итоговая строка")
-    }
-
     // получить строки из шаблона
     def formTemplate = formDataService.getFormTemplate(formData.formType.id, formData.reportPeriodId)
     def templateRows = formTemplate.rows
@@ -845,10 +645,56 @@ void importTransportData() {
         rows.add(lastRow)
     }
     def totalAll = getDataRow(templateRows, "totalAll")
-    calcTotalSum(newRows, totalAll, totalColumnsAll)
     rows.add(totalAll)
+
+    // сравнение итогов
+    if (totalTF) {
+        // мапа с алиасами граф и номерами колонокв в xml (алиас -> номер колонки)
+        def totalColumnsIndexMap = [
+                'debt45_90DaysSum'      : 3,
+                'debt45_90DaysReserve'  : 5,
+                'debtOver90DaysSum'     : 6,
+                'debtOver90DaysReserve' : 8,
+                'totalReserve'          : 9,
+                'reservePrev'           : 10,
+                'reserveCurrent'        : 11,
+                'calcReserve'           : 12,
+                'reserveRecovery'       : 13,
+                'useReserve'            : 14
+        ]
+
+        // подсчет итогов
+        calcTotalSum(rows, totalAll, totalColumnsAll)
+
+        // сравнение контрольных сумм
+        def colOffset = 1
+        for (def alias : totalColumnsIndexMap.keySet().asList()) {
+            def v1 = totalTF.getCell(alias).value
+            def v2 = totalAll.getCell(alias).value
+            if (v1 == null && v2 == null) {
+                continue
+            }
+            if (v1 == null || v1 != null && v1 != v2) {
+                logger.warn(TRANSPORT_FILE_SUM_ERROR + " Из файла: $v1, рассчитано: $v2", totalColumnsIndexMap[alias] + colOffset, fileRowIndex)
+            }
+        }
+        // задать кварталаьной итоговой строке нф значения из итоговой строки тф
+        totalColumnsAll.each { alias ->
+            totalAll[alias] = totalTF[alias]
+        }
+    } else {
+        logger.warn("В транспортном файле не найдена итоговая строка")
+        // очистить итоги
+        totalColumnsAll.each { alias ->
+            totalAll[alias] = null
+        }
+    }
+
     updateIndexes(rows)
-    formDataService.getDataRowHelper(formData).allCached = rows
+    showMessages(rows, logger)
+    if (!logger.containsLevel(LogLevel.ERROR)) {
+        formDataService.getDataRowHelper(formData).allCached = rows
+    }
 }
 
 /**
@@ -862,7 +708,7 @@ void importTransportData() {
  * @return вернет строку нф или null, если количество значений в строке тф меньше
  */
 def getNewRow(String[] rowCells, def columnCount, def fileRowIndex, def rowIndex) {
-    def newRow = formData.createDataRow()
+    def newRow = formData.createStoreMessagingDataRow()
     newRow.setIndex(rowIndex)
     newRow.setImportIndex(fileRowIndex)
 
@@ -914,4 +760,253 @@ String pure(String cell) {
 
 boolean isEmptyCells(def rowCells) {
     return rowCells.length == 1 && rowCells[0] == ''
+}
+
+void importData() {
+    def tmpRow = formData.createDataRow()
+    int COLUMN_COUNT = 15
+    int HEADER_ROW_COUNT = 3
+    String TABLE_START_VALUE = getColumnName(tmpRow, 'number')
+    String TABLE_END_VALUE = null
+    int INDEX_FOR_SKIP = 1
+
+    def allValues = []      // значения формы
+    def headerValues = []   // значения шапки
+    def paramsMap = ['rowOffset': 0, 'colOffset': 0]  // мапа с параметрами (отступы сверху и слева)
+
+    checkAndReadFile(ImportInputStream, UploadFileName, allValues, headerValues, TABLE_START_VALUE, TABLE_END_VALUE, HEADER_ROW_COUNT, paramsMap)
+
+    // проверка шапки
+    checkHeaderXls(headerValues, COLUMN_COUNT, HEADER_ROW_COUNT, tmpRow)
+    if (logger.containsLevel(LogLevel.ERROR)) {
+        return
+    }
+    // освобождение ресурсов для экономии памяти
+    headerValues.clear()
+    headerValues = null
+
+    def fileRowIndex = paramsMap.rowOffset
+    def colOffset = paramsMap.colOffset
+    paramsMap.clear()
+    paramsMap = null
+
+    def rowIndex = 0
+    def allValuesCount = allValues.size()
+
+    def isFirstRow = true
+    def section = null // название секции
+    def mapRows = [:]
+    mapRows[section] = []
+    def totalRowFromFileMap = [:]
+
+    // получить строки из шаблона
+    def formTemplate = formDataService.getFormTemplate(formData.formType.id, formData.reportPeriodId)
+    def templateRows = formTemplate.rows
+    def aRow = getDataRow(templateRows, 'A')
+    def bRow = getDataRow(templateRows, 'B')
+    def groupsMap = [
+            (aRow.forLabel) : 'A',
+            (bRow.forLabel) : 'B'
+    ]
+
+    // формирвание строк нф
+    for (def i = 0; i < allValuesCount; i++) {
+        rowValues = allValues[0]
+        fileRowIndex++
+
+        // все строки пустые - выход
+        if (!rowValues) {
+            allValues.remove(rowValues)
+            rowValues.clear()
+            break
+        }
+
+        def titleValue = rowValues[INDEX_FOR_SKIP]
+        // если это начало раздела, то запомнить его название и обрабатывать следующую строку
+        if (!isFirstRow && groupsMap.get(titleValue) != null) {
+            section = groupsMap.get(titleValue)
+            mapRows[section] = []
+            allValues.remove(rowValues)
+            rowValues.clear()
+            continue
+        } else if (titleValue == 'ИТОГО') {
+            isFirstRow = false
+            totalRowFromFileMap[section] = getNewRowFromXls(rowValues, colOffset, fileRowIndex, rowIndex, section)
+            allValues.remove(rowValues)
+            rowValues.clear()
+            continue
+        } else if (titleValue == 'ВСЕГО') {
+            totalRowFromFileMap['all'] = getTotalRowFromXls(rowValues, colOffset, fileRowIndex, rowIndex)
+            allValues.remove(rowValues)
+            rowValues.clear()
+            continue
+        }
+
+        // простая строка
+        rowIndex++
+        def newRow = getNewRowFromXls(rowValues, colOffset, fileRowIndex, rowIndex, section)
+        mapRows[section].add(newRow)
+        // освободить ненужные данные - иначе не хватит памяти
+        allValues.remove(rowValues)
+        rowValues.clear()
+    }
+
+    // копирование данных по разделам
+    def rows = []
+    mapRows.keySet().each { sectionKey ->
+        def headRow = (sectionKey ? getDataRow(templateRows, sectionKey) : null)
+        def totalRow = getDataRow(templateRows, 'total' + (sectionKey ?: ''))
+        if (headRow) {
+            rows.add(headRow)
+        }
+        def copyRows = mapRows[sectionKey]
+        if (copyRows != null && !copyRows.isEmpty()) {
+            rows.addAll(copyRows)
+        }
+        rows.add(totalRow)
+
+        // сравнение итогов ИТОГО
+        updateIndexes(rows)
+        def totalRowFromFile = totalRowFromFileMap[sectionKey]
+        def columns = (sectionKey ? totalColumns1 : totalColumnsAB)
+        compareSimpleTotalValues(totalRow, totalRowFromFile, copyRows, columns, formData, logger, false)
+    }
+    def totalAll = getDataRow(templateRows, 'totalAll')
+    rows.add(totalAll)
+    updateIndexes(rows)
+
+    // сравнение итогов ВСЕГО
+    if (totalRowFromFileMap['all']) {
+        def tmpRows = mapRows.values().sum { it } ?: []
+        compareSimpleTotalValues(totalAll, totalRowFromFileMap['all'], tmpRows, totalColumnsAll, formData, logger, false)
+    }
+
+    showMessages(rows, logger)
+    if (!logger.containsLevel(LogLevel.ERROR)) {
+        formDataService.getDataRowHelper(formData).allCached = rows
+    }
+}
+
+/**
+ * Проверить шапку таблицы
+ *
+ * @param headerRows строки шапки
+ * @param colCount количество колонок в таблице
+ * @param rowCount количество строк в таблице
+ * @param tmpRow вспомогательная строка для получения названии графов
+ */
+void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
+    if (headerRows.isEmpty()) {
+        throw new ServiceException(WRONG_HEADER_ROW_SIZE)
+    }
+    checkHeaderSize(headerRows[headerRows.size() - 1].size(), headerRows.size(), colCount, rowCount)
+
+    def headerMapping = [
+            (headerRows[0][0]) : getColumnName(tmpRow, 'number'),
+            (headerRows[0][2]) : getColumnName(tmpRow, 'numberAccount'),
+            (headerRows[0][3]) : 'Задолженность от 45 до 90 дней',
+            (headerRows[1][3]) : 'сумма долга',
+            (headerRows[1][4]) : 'норматив отчислений 50%',
+            (headerRows[1][5]) : 'расчётный резерв',
+            (headerRows[0][6]) : 'Задолженность более 90 дней',
+            (headerRows[1][6]) : 'сумма долга',
+            (headerRows[1][7]) : 'норматив отчислений 100%',
+            (headerRows[1][8]) : 'расчётный резерв',
+            (headerRows[0][9]) : getColumnName(tmpRow, 'totalReserve'),
+            (headerRows[0][10]): 'Резерв',
+            (headerRows[1][10]): 'на предыдущую отчётную дату',
+            (headerRows[1][11]): 'на отчетную дату',
+            (headerRows[0][12]): 'Изменение фактического резерва',
+            (headerRows[1][12]): 'Доначисление резерва с отнесением на расходы код 22670',
+            (headerRows[1][13]): 'Восстановление резерва на доходах код 13091',
+            (headerRows[1][14]): 'Использование резерва на погашение процентов по безнадежным долгам в отчетном периоде',
+            (headerRows[2][0]) : '1'
+    ]
+    (2..14).each { index ->
+        headerMapping.put(headerRows[2][index], index.toString())
+    }
+    checkHeaderEquals(headerMapping, logger)
+}
+
+/**
+ * Получить новую строку нф по значениям из экселя.
+ *
+ * @param values список строк со значениями
+ * @param colOffset отступ в колонках
+ * @param fileRowIndex номер строки в тф
+ * @param rowIndex строка в нф
+ * @param section раздел (A, B или null/пустая строка)
+ */
+def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex, def section) {
+    def newRow = formData.createStoreMessagingDataRow()
+    newRow.setIndex(rowIndex)
+    newRow.setImportIndex(fileRowIndex)
+    // редактируемые(импортируемые) графы:
+    // первые строки  (графа 2, 3, 6, 10(!), 12..14)
+    // раздел А или Б (графа 2,       10(!),     14)
+    setEdit(newRow, section)
+
+    // графа 2
+    def colIndex = 2
+    newRow.numberAccount = values[colIndex]
+
+    if (isFirstSection(section)) {
+        // графа 3..14
+        ['debt45_90DaysSum', 'debt45_90DaysNormAllocation50per', 'debt45_90DaysReserve', 'debtOver90DaysSum',
+                'debtOver90DaysNormAllocation100per', 'debtOver90DaysReserve', 'totalReserve', 'reservePrev',
+                'reserveCurrent', 'calcReserve', 'reserveRecovery', 'useReserve'].each { alias ->
+            colIndex++
+            newRow[alias] = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
+        }
+    } else {
+        // графа 10
+        colIndex = 10
+        newRow.reservePrev = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
+
+        // графа 11
+        colIndex = 11
+        newRow.reserveCurrent = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
+
+        // графа 14
+        colIndex = 14
+        newRow.useReserve = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
+    }
+
+    return newRow
+}
+
+/**
+ * Получить итоговую строку ВСЕГО по значениям из экселя.
+ *
+ * @param values список строк со значениями
+ * @param colOffset отступ в колонках
+ * @param fileRowIndex номер строки в тф
+ * @param rowIndex строка в нф
+ */
+def getTotalRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) {
+    def newRow = formData.createStoreMessagingDataRow()
+    newRow.setIndex(rowIndex)
+    newRow.setImportIndex(fileRowIndex)
+
+    // графа 3
+    def colIndex = 3
+    newRow.debt45_90DaysSum = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
+
+    // графа 5
+    colIndex = 5
+    newRow.debt45_90DaysReserve = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
+
+    // графа 6
+    colIndex = 6
+    newRow.debtOver90DaysSum = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
+
+    // графа 8..14
+    colIndex = 7
+    ['debtOver90DaysReserve', 'totalReserve', 'reservePrev', 'reserveCurrent',
+            'calcReserve', 'reserveRecovery', 'useReserve'].each { alias ->
+        colIndex++
+        newRow[alias] = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
+    }
+
+    return newRow
 }

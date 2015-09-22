@@ -42,7 +42,7 @@
         <order>4</order>
         <width>15</width>
         <maxLength>22</maxLength>
-        <precision>4</precision>
+        <precision>2</precision>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>comparePeriodPercent</alias>
@@ -62,7 +62,7 @@
         <order>6</order>
         <width>15</width>
         <maxLength>22</maxLength>
-        <precision>4</precision>
+        <precision>2</precision>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>currentPeriodPercent</alias>

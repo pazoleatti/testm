@@ -37,7 +37,7 @@
         <alias>all</alias>
         <checking>false</checking>
         <columnType>NUMBER</columnType>
-        <name>Дивиденды полученные ПАО &quot;Сбербанк России&quot;. Всего</name>
+        <name>Дивиденды полученные ПАО Сбербанк. Всего</name>
         <order>4</order>
         <width>5</width>
         <maxLength>15</maxLength>
@@ -47,7 +47,7 @@
         <alias>rateZero</alias>
         <checking>false</checking>
         <columnType>NUMBER</columnType>
-        <name>Дивиденды полученные ПАО &quot;Сбербанк России&quot;. По ставке 0%</name>
+        <name>Дивиденды полученные ПАО Сбербанк. По ставке 0%</name>
         <order>5</order>
         <width>5</width>
         <maxLength>15</maxLength>
@@ -125,7 +125,7 @@
         <alias>addresseeName</alias>
         <checking>false</checking>
         <columnType>STRING</columnType>
-        <name>Дивиденды выплаченные. Сумма дивидендов. Выплачиваемая через ПАО &quot;Сбербанк России&quot;. Получатель. Наименование (ЮЛ) или ФИО (ФЛ)</name>
+        <name>Дивиденды выплаченные. Сумма дивидендов. Выплачиваемая через ПАО Сбербанк. Получатель. Наименование (ЮЛ) или ФИО (ФЛ)</name>
         <order>13</order>
         <width>10</width>
         <maxLength>255</maxLength>
@@ -135,7 +135,7 @@
         <alias>inn</alias>
         <checking>false</checking>
         <columnType>STRING</columnType>
-        <name>Дивиденды выплаченные. Сумма дивидендов. Выплачиваемая через ПАО &quot;Сбербанк России&quot;. Получатель. ИНН</name>
+        <name>Дивиденды выплаченные. Сумма дивидендов. Выплачиваемая через ПАО Сбербанк. Получатель. ИНН</name>
         <order>14</order>
         <width>5</width>
         <maxLength>12</maxLength>
@@ -145,7 +145,7 @@
         <alias>kpp</alias>
         <checking>false</checking>
         <columnType>STRING</columnType>
-        <name>Дивиденды выплаченные. Сумма дивидендов. Выплачиваемая через ПАО &quot;Сбербанк России&quot;. Получатель. КПП</name>
+        <name>Дивиденды выплаченные. Сумма дивидендов. Выплачиваемая через ПАО Сбербанк. Получатель. КПП</name>
         <order>15</order>
         <width>5</width>
         <maxLength>9</maxLength>
@@ -155,7 +155,7 @@
         <alias>type</alias>
         <checking>false</checking>
         <columnType>NUMBER</columnType>
-        <name>Дивиденды выплаченные. Сумма дивидендов. Выплачиваемая через ПАО &quot;Сбербанк России&quot;. Получатель. Тип</name>
+        <name>Дивиденды выплаченные. Сумма дивидендов. Выплачиваемая через ПАО Сбербанк. Получатель. Тип</name>
         <order>16</order>
         <width>5</width>
         <maxLength>2</maxLength>
@@ -165,7 +165,7 @@
         <alias>status</alias>
         <checking>false</checking>
         <columnType>NUMBER</columnType>
-        <name>Дивиденды выплаченные. Сумма дивидендов. Выплачиваемая через ПАО &quot;Сбербанк России&quot;. Получатель. Статус</name>
+        <name>Дивиденды выплаченные. Сумма дивидендов. Выплачиваемая через ПАО Сбербанк. Получатель. Статус</name>
         <order>17</order>
         <width>5</width>
         <maxLength>1</maxLength>
@@ -175,7 +175,7 @@
         <alias>birthday</alias>
         <checking>false</checking>
         <columnType>DATE</columnType>
-        <name>Дивиденды выплаченные. Сумма дивидендов. Выплачиваемая через ПАО &quot;Сбербанк России&quot;. Получатель. Физическое лицо. Дата рождения</name>
+        <name>Дивиденды выплаченные. Сумма дивидендов. Выплачиваемая через ПАО Сбербанк. Получатель. Физическое лицо. Дата рождения</name>
         <order>18</order>
         <width>5</width>
         <formatId>0</formatId>
@@ -184,7 +184,7 @@
         <alias>citizenship</alias>
         <checking>false</checking>
         <columnType>REFBOOK</columnType>
-        <name>Дивиденды выплаченные. Сумма дивидендов. Выплачиваемая через ПАО &quot;Сбербанк России&quot;. Получатель. Физическое лицо. Гражданство</name>
+        <name>Дивиденды выплаченные. Сумма дивидендов. Выплачиваемая через ПАО Сбербанк. Получатель. Физическое лицо. Гражданство</name>
         <order>19</order>
         <width>6</width>
         <hierarchical>false</hierarchical>
@@ -196,7 +196,7 @@
         <alias>kind</alias>
         <checking>false</checking>
         <columnType>REFBOOK</columnType>
-        <name>Дивиденды выплаченные. Сумма дивидендов. Выплачиваемая через ПАО &quot;Сбербанк России&quot;. Получатель. Физическое лицо. Документ. Вид</name>
+        <name>Дивиденды выплаченные. Сумма дивидендов. Выплачиваемая через ПАО Сбербанк. Получатель. Физическое лицо. Документ. Вид</name>
         <order>20</order>
         <width>5</width>
         <hierarchical>false</hierarchical>
@@ -208,7 +208,7 @@
         <alias>series</alias>
         <checking>false</checking>
         <columnType>STRING</columnType>
-        <name>Дивиденды выплаченные. Сумма дивидендов. Выплачиваемая через ПАО &quot;Сбербанк России&quot;. Получатель. Физическое лицо. Документ. Серия и номер</name>
+        <name>Дивиденды выплаченные. Сумма дивидендов. Выплачиваемая через ПАО Сбербанк. Получатель. Физическое лицо. Документ. Серия и номер</name>
         <order>21</order>
         <width>10</width>
         <maxLength>25</maxLength>
@@ -218,7 +218,7 @@
         <alias>rate</alias>
         <checking>false</checking>
         <columnType>NUMBER</columnType>
-        <name>Дивиденды выплаченные. Сумма дивидендов. Выплачиваемая через ПАО &quot;Сбербанк России&quot;. Ставка</name>
+        <name>Дивиденды выплаченные. Сумма дивидендов. Выплачиваемая через ПАО Сбербанк. Ставка</name>
         <order>22</order>
         <width>5</width>
         <maxLength>3</maxLength>
@@ -228,7 +228,7 @@
         <alias>dividends</alias>
         <checking>false</checking>
         <columnType>NUMBER</columnType>
-        <name>Дивиденды выплаченные. Сумма дивидендов. Выплачиваемая через ПАО &quot;Сбербанк России&quot;. Дивиденды начисленные</name>
+        <name>Дивиденды выплаченные. Сумма дивидендов. Выплачиваемая через ПАО Сбербанк. Дивиденды начисленные</name>
         <order>23</order>
         <width>6</width>
         <maxLength>15</maxLength>
@@ -238,7 +238,7 @@
         <alias>sum</alias>
         <checking>false</checking>
         <columnType>NUMBER</columnType>
-        <name>Дивиденды выплаченные. Сумма дивидендов. Выплачиваемая через ПАО &quot;Сбербанк России&quot;. Платёжное поручение. Сумма</name>
+        <name>Дивиденды выплаченные. Сумма дивидендов. Выплачиваемая через ПАО Сбербанк. Платёжное поручение. Сумма</name>
         <order>24</order>
         <width>5</width>
         <maxLength>15</maxLength>
@@ -248,7 +248,7 @@
         <alias>date</alias>
         <checking>false</checking>
         <columnType>DATE</columnType>
-        <name>Дивиденды выплаченные. Сумма дивидендов. Выплачиваемая через ПАО &quot;Сбербанк России&quot;. Платёжное поручение. Дата</name>
+        <name>Дивиденды выплаченные. Сумма дивидендов. Выплачиваемая через ПАО Сбербанк. Платёжное поручение. Дата</name>
         <order>25</order>
         <width>5</width>
         <formatId>0</formatId>
@@ -257,7 +257,7 @@
         <alias>number</alias>
         <checking>false</checking>
         <columnType>STRING</columnType>
-        <name>Дивиденды выплаченные. Сумма дивидендов. Выплачиваемая через ПАО &quot;Сбербанк России&quot;. Платёжное поручение. Номер</name>
+        <name>Дивиденды выплаченные. Сумма дивидендов. Выплачиваемая через ПАО Сбербанк. Платёжное поручение. Номер</name>
         <order>26</order>
         <width>5</width>
         <maxLength>20</maxLength>
@@ -267,7 +267,7 @@
         <alias>withheldSum</alias>
         <checking>false</checking>
         <columnType>NUMBER</columnType>
-        <name>Дивиденды выплаченные. Сумма удержанного налога. Выплачиваемая через ПАО &quot;Сбербанк России&quot;. Платёжное поручение. Сумма</name>
+        <name>Дивиденды выплаченные. Сумма удержанного налога. Выплачиваемая через ПАО Сбербанк. Платёжное поручение. Сумма</name>
         <order>27</order>
         <width>5</width>
         <maxLength>15</maxLength>
@@ -277,7 +277,7 @@
         <alias>withheldDate</alias>
         <checking>false</checking>
         <columnType>DATE</columnType>
-        <name>Дивиденды выплаченные. Сумма удержанного налога. Выплачиваемая через ПАО &quot;Сбербанк России&quot;. Платёжное поручение. Дата</name>
+        <name>Дивиденды выплаченные. Сумма удержанного налога. Выплачиваемая через ПАО Сбербанк. Платёжное поручение. Дата</name>
         <order>28</order>
         <width>5</width>
         <formatId>0</formatId>
@@ -286,7 +286,7 @@
         <alias>withheldNumber</alias>
         <checking>false</checking>
         <columnType>STRING</columnType>
-        <name>Дивиденды выплаченные. Сумма удержанного налога. Выплачиваемая через ПАО &quot;Сбербанк России&quot;. Платёжное поручение. Номер</name>
+        <name>Дивиденды выплаченные. Сумма удержанного налога. Выплачиваемая через ПАО Сбербанк. Платёжное поручение. Номер</name>
         <order>29</order>
         <width>5</width>
         <maxLength>20</maxLength>

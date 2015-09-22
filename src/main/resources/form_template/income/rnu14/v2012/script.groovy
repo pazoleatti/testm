@@ -265,6 +265,23 @@ void addTransportData(def xml) {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
 
+    dataRows.each { dataRow ->
+        def values = xml.row[dataRows.indexOf(dataRow)]
+        def tmpValues = [:]
+        // графа 1
+        tmpValues.knu = values.cell[1].text()
+        // графа 2
+        tmpValues.mode = values.cell[2].text()
+        // графа 5
+        tmpValues.normCoef = values.cell[5].text()
+
+        // Проверить фиксированные значения (графа 1, 2, 5)
+        tmpValues.keySet().toArray().each { alias ->
+            def value = StringUtils.cleanString(tmpValues[alias]?.toString())
+            def valueExpected = StringUtils.cleanString(dataRow.getCell(alias).value?.toString())
+            checkFixedValue(dataRow, value, valueExpected, dataRow.getIndex(), alias, logger, true)
+        }
+    }
     ((DataRow<Cell>)dataRows[4]).getCell('normBase').setCheckMode(true)
     // графа 4 строки 5
     if (xml.row[4] != null) {

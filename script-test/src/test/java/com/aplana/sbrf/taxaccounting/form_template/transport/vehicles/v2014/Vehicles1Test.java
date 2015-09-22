@@ -5,6 +5,8 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
+import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
+import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.script.api.DataRowHelper;
 import com.aplana.sbrf.taxaccounting.util.DataRowHelperStub;
 import com.aplana.sbrf.taxaccounting.util.ScriptTestBase;
@@ -85,6 +87,13 @@ public class Vehicles1Test extends ScriptTestBase {
                 });
 
         when(testHelper.getFormDataService().getFormTemplate(anyInt(), anyInt())).thenReturn(testHelper.getFormTemplate());
+
+        // провайдер
+        when(testHelper.getFormDataService().getRefBookProvider(any(RefBookFactory.class), anyLong(),
+                anyMapOf(Long.class, RefBookDataProvider.class))).thenReturn(testHelper.getRefBookDataProvider());
+
+        // список id записей справочника 42
+        when(testHelper.getRefBookDataProvider().getParentsHierarchy(anyLong())).thenReturn(Arrays.asList(3L));
     }
 
     @Test
@@ -183,7 +192,8 @@ public class Vehicles1Test extends ScriptTestBase {
         when(testHelper.getFormDataService().getFormTemplate(anyInt(), anyInt())).thenReturn(testHelper.getFormTemplate());
         testHelper.setImportFileInputStream(getImportRnuInputStream());
         testHelper.execute(FormDataEvent.IMPORT_TRANSPORT_FILE);
-        Assert.assertEquals(4, testHelper.getDataRowHelper().getAll().size());
+        int expected = 4; // 3 строки фиксированны (заголовки разделов) + 1 строка из тф
+        Assert.assertEquals(expected, testHelper.getDataRowHelper().getAll().size());
         //checkLoadData(testHelper.getDataRowHelper().getAll());
         checkLogger();
     }

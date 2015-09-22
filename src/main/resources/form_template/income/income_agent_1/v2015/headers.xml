@@ -48,8 +48,8 @@
         <cell alias="rowNum" colSpan="1" rowSpan="7" value="№ п/п"/>
         <cell alias="emitentName" colSpan="2" rowSpan="1" value="Эмитент"/>
         <cell alias="emitentInn" colSpan="1" rowSpan="1" value="Эмитент"/>
-        <cell alias="all" colSpan="2" rowSpan="1" value="Дивиденды полученные ПАО &quot;Сбербанк России&quot;"/>
-        <cell alias="rateZero" colSpan="1" rowSpan="1" value="Дивиденды полученные ПАО &quot;Сбербанк России&quot;"/>
+        <cell alias="all" colSpan="2" rowSpan="1" value="Дивиденды полученные ПАО Сбербанк"/>
+        <cell alias="rateZero" colSpan="1" rowSpan="1" value="Дивиденды полученные ПАО Сбербанк"/>
         <cell alias="distributionSum" colSpan="1" rowSpan="7" value="Сумма дивидендов Эмитента, распределяемая в пользу всех получателей, уменьшенная на сумму дивидендов, полученных самим Эмитентом"/>
         <cell alias="decisionNumber" colSpan="36" rowSpan="1" value="Дивиденды выплаченные"/>
         <cell alias="decisionDate" colSpan="1" rowSpan="1" value="Дивиденды выплаченные"/>
@@ -145,23 +145,23 @@
         <cell alias="firstMonth" colSpan="2" rowSpan="1" value="Период распределения"/>
         <cell alias="lastMonth" colSpan="1" rowSpan="1" value="Период распределения"/>
         <cell alias="allSum" colSpan="1" rowSpan="5" value="Всего"/>
-        <cell alias="addresseeName" colSpan="17" rowSpan="1" value="Выплачиваемая через ПАО &quot;Сбербанк России&quot;"/>
-        <cell alias="inn" colSpan="1" rowSpan="1" value="Выплачиваемая через ПАО &quot;Сбербанк России&quot;"/>
-        <cell alias="kpp" colSpan="1" rowSpan="1" value="Выплачиваемая через ПАО &quot;Сбербанк России&quot;"/>
-        <cell alias="type" colSpan="1" rowSpan="1" value="Выплачиваемая через ПАО &quot;Сбербанк России&quot;"/>
-        <cell alias="status" colSpan="1" rowSpan="1" value="Выплачиваемая через ПАО &quot;Сбербанк России&quot;"/>
-        <cell alias="birthday" colSpan="1" rowSpan="1" value="Выплачиваемая через ПАО &quot;Сбербанк России&quot;"/>
-        <cell alias="citizenship" colSpan="1" rowSpan="1" value="Выплачиваемая через ПАО &quot;Сбербанк России&quot;"/>
-        <cell alias="kind" colSpan="1" rowSpan="1" value="Выплачиваемая через ПАО &quot;Сбербанк России&quot;"/>
-        <cell alias="series" colSpan="1" rowSpan="1" value="Выплачиваемая через ПАО &quot;Сбербанк России&quot;"/>
-        <cell alias="rate" colSpan="1" rowSpan="1" value="Выплачиваемая через ПАО &quot;Сбербанк России&quot;"/>
-        <cell alias="dividends" colSpan="1" rowSpan="1" value="Выплачиваемая через ПАО &quot;Сбербанк России&quot;"/>
-        <cell alias="sum" colSpan="1" rowSpan="1" value="Выплачиваемая через ПАО &quot;Сбербанк России&quot;"/>
-        <cell alias="date" colSpan="1" rowSpan="1" value="Выплачиваемая через ПАО &quot;Сбербанк России&quot;"/>
-        <cell alias="number" colSpan="1" rowSpan="1" value="Выплачиваемая через ПАО &quot;Сбербанк России&quot;"/>
-        <cell alias="withheldSum" colSpan="1" rowSpan="1" value="Выплачиваемая через ПАО &quot;Сбербанк России&quot;"/>
-        <cell alias="withheldDate" colSpan="1" rowSpan="1" value="Выплачиваемая через ПАО &quot;Сбербанк России&quot;"/>
-        <cell alias="withheldNumber" colSpan="1" rowSpan="1" value="Выплачиваемая через ПАО &quot;Сбербанк России&quot;"/>
+        <cell alias="addresseeName" colSpan="17" rowSpan="1" value="Выплачиваемая через ПАО Сбербанк"/>
+        <cell alias="inn" colSpan="1" rowSpan="1" value="Выплачиваемая через ПАО Сбербанк"/>
+        <cell alias="kpp" colSpan="1" rowSpan="1" value="Выплачиваемая через ПАО Сбербанк"/>
+        <cell alias="type" colSpan="1" rowSpan="1" value="Выплачиваемая через ПАО Сбербанк"/>
+        <cell alias="status" colSpan="1" rowSpan="1" value="Выплачиваемая через ПАО Сбербанк"/>
+        <cell alias="birthday" colSpan="1" rowSpan="1" value="Выплачиваемая через ПАО Сбербанк"/>
+        <cell alias="citizenship" colSpan="1" rowSpan="1" value="Выплачиваемая через ПАО Сбербанк"/>
+        <cell alias="kind" colSpan="1" rowSpan="1" value="Выплачиваемая через ПАО Сбербанк"/>
+        <cell alias="series" colSpan="1" rowSpan="1" value="Выплачиваемая через ПАО Сбербанк"/>
+        <cell alias="rate" colSpan="1" rowSpan="1" value="Выплачиваемая через ПАО Сбербанк"/>
+        <cell alias="dividends" colSpan="1" rowSpan="1" value="Выплачиваемая через ПАО Сбербанк"/>
+        <cell alias="sum" colSpan="1" rowSpan="1" value="Выплачиваемая через ПАО Сбербанк"/>
+        <cell alias="date" colSpan="1" rowSpan="1" value="Выплачиваемая через ПАО Сбербанк"/>
+        <cell alias="number" colSpan="1" rowSpan="1" value="Выплачиваемая через ПАО Сбербанк"/>
+        <cell alias="withheldSum" colSpan="1" rowSpan="1" value="Выплачиваемая через ПАО Сбербанк"/>
+        <cell alias="withheldDate" colSpan="1" rowSpan="1" value="Выплачиваемая через ПАО Сбербанк"/>
+        <cell alias="withheldNumber" colSpan="1" rowSpan="1" value="Выплачиваемая через ПАО Сбербанк"/>
         <cell alias="postcode" colSpan="1" rowSpan="5" value="Индекс"/>
         <cell alias="region" colSpan="1" rowSpan="5" value="Код региона"/>
         <cell alias="district" colSpan="1" rowSpan="5" value="Район"/>

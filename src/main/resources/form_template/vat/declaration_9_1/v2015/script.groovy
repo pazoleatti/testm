@@ -152,19 +152,20 @@ void generateXML() {
     def code001 = null
     def (code020, code030, code040, code050, code060, code070, code310, code320, code330, code340, code350, code360) =
     [null, null, null, null, null, null, null, null, null, null, null, null]
+
+    def codes = getCodes()
+    code020 = codes?.code020
+    code030 = codes?.code030
+    code040 = codes?.code040
+    code050 = codes?.code050
+    code060 = codes?.code060
+    code070 = codes?.code070
+
     def sourceCorrNumber
     for (def formData : declarationService.getAcceptedFormDataSources(declarationData).getRecords()) {
         if (formData.formType.id == 617) {
             sourceDataRows = formDataService.getDataRowHelper(formData)?.getAll()
             sourceCorrNumber = reportPeriodService.getCorrectionNumber(formData.departmentReportPeriodId) ?: 0
-
-            def codes = getCodes()
-            code020 = codes?.code020
-            code030 = codes?.code030
-            code040 = codes?.code040
-            code050 = codes?.code050
-            code060 = codes?.code060
-            code070 = codes?.code070
 
             def totalRow = getDataRow(sourceDataRows, 'total') // "Всего"
             code310 = totalRow?.saleCostB18
@@ -364,11 +365,17 @@ def getCurrencyCode(String str) {
 
 def getCodes() {
     def result = null
-    def declarationTypeId = 14
+    // получить данные "декларации 9 без консолидированных"
+    def declarationTypeId = 21
     def reportPeriod = reportPeriodService.get(declarationData.reportPeriodId)
     def declarationData9 = declarationService.getLast(declarationTypeId, declarationData.departmentId, reportPeriod.id)
     if (declarationData9 == null || !declarationData9.accepted) {
-        return result
+        // при отсутствии данные "декларации 9 без консолидированных", получить данные "декларации 9"
+        declarationTypeId = 14
+        declarationData9 = declarationService.getLast(declarationTypeId, declarationData.departmentId, reportPeriod.id)
+        if (declarationData9 == null || !declarationData9.accepted) {
+            return result
+        }
     }
     if (declarationData9.id != null) {
         def reader = declarationService.getXmlStreamReader(declarationData9.id)
@@ -378,20 +385,29 @@ def getCodes() {
         try{
             while (reader.hasNext()) {
                 if (reader.startElement && QName.valueOf('КнигаПрод').equals(reader.name)) {
-                    def code020 = reader.getAttributeValue(null, "СтПродБезНДС18")
-                    def code030 = reader.getAttributeValue(null, "СтПродБезНДС10")
-                    def code040 = reader.getAttributeValue(null, "СтПродБезНДС0")
-                    def code050 = reader.getAttributeValue(null, "СумНДСВсКПр18")
-                    def code060 = reader.getAttributeValue(null, "СумНДСВсКПр10")
-                    def code070 = reader.getAttributeValue(null, "СтПродОсвВсКПр")
+                    def code020 = getXmlDecimal(reader, "СтПродБезНДС18")
+                    def code030 = getXmlDecimal(reader, "СтПродБезНДС10")
+                    def code040 = getXmlDecimal(reader, "СтПродБезНДС0")
+                    def code050 = getXmlDecimal(reader, "СумНДСВсКПр18")
+                    def code060 = getXmlDecimal(reader, "СумНДСВсКПр10")
+                    def code070 = getXmlDecimal(reader, "СтПродОсвВсКПр")
                     result = ['code020' : code020, 'code030' : code030, 'code040' : code040,
                               'code050' : code050, 'code060' : code060, 'code070' : code070]
                     break
                 }
+                reader.next()
             }
         } finally {
             reader.close()
         }
     }
     return result
+}
+
+BigDecimal getXmlDecimal(def reader, String attrName) {
+    def value = reader?.getAttributeValue(null, attrName)
+    if (!value) {
+        return null
+    }
+    return new BigDecimal(value)
 }

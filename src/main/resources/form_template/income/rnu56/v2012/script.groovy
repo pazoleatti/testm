@@ -271,7 +271,7 @@ def BigDecimal calcSumIncomeinCurrency(def row, def startDate, def endDate) {
         if (countsDays == 0) {
             return null
         }
-        tmp = (row.percIncome / row.termDealBill * countsDays).setScale(2, RoundingMode.HALF_UP)
+        tmp = (row.percIncome * countsDays / row.termDealBill).setScale(2, RoundingMode.HALF_UP)
     } else {
         def sum = getCalcPrevColumn(row, 'sumIncomeinCurrency', startDate)
         if (row.sum != null) {

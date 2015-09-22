@@ -12,14 +12,14 @@ import groovy.transform.Field
  * formTemplateId = 715
  */
 
-// графа 1 - comparePeriod			Период сравнения. НДС всего
-// графа 2 - comparePeriodIgnore	Период сравнения. В том числе НДС не учитываемый
+// графа 1 - comparePeriod			Период сравнения. НДС всего, тыс. руб.
+// графа 2 - comparePeriodIgnore	Период сравнения. В том числе НДС не учитываемый, тыс. руб.
 // графа 3 - comparePeriodPercent	Период сравнения. Доля НДС не учитываемый, %
-// графа 4 - currentPeriod			Период. НДС всего
-// графа 5 - currentPeriodIgnore	Период. В том числе НДС не учитываемый
+// графа 4 - currentPeriod			Период. НДС всего, тыс. руб.
+// графа 5 - currentPeriodIgnore	Период. В том числе НДС не учитываемый, тыс. руб.
 // графа 6 - currentPeriodPercent	Период. Доля НДС не учитываемый, %
-// графа 7 - delta					Изменения за период. НДС всего
-// графа 8 - deltaIgnore			Изменения за период. В том числе НДС не учитываемый
+// графа 7 - delta					Изменения за период. НДС всего, тыс. руб.
+// графа 8 - deltaIgnore			Изменения за период. В том числе НДС не учитываемый, тыс. руб.
 // графа 9 - deltaPercent			Изменения за период. Доля НДС не учитываемый, %
 
 switch (formDataEvent) {
@@ -328,7 +328,7 @@ def get102Sum(def columnAlias, def periodId) {
         if ((records == null || records.isEmpty())) {
             return [0, false]
         }
-        return [records.sum { it.TOTAL_SUM.numberValue ?: 0 }, true]
+        return [records.sum { it.TOTAL_SUM.numberValue ?: 0 } / 1000, true]
     } else if (periodId == null) {
         return [0, false]
     }
@@ -440,14 +440,14 @@ void checkHeaderXls(def headerRows, def colCount, rowCount) {
             (headerRows[0][0]): 'Период сравнения',
             (headerRows[0][3]): 'Период',
             (headerRows[0][6]): 'Изменения за период',
-            (headerRows[1][0]): 'НДС всего',
-            (headerRows[1][1]): 'В том числе НДС не учитываемый',
+            (headerRows[1][0]): 'НДС всего, тыс. руб.',
+            (headerRows[1][1]): 'В том числе НДС не учитываемый, тыс. руб.',
             (headerRows[1][2]): 'Доля НДС не учитываемый, %',
-            (headerRows[1][3]): 'НДС всего',
-            (headerRows[1][4]): 'В том числе НДС не учитываемый',
+            (headerRows[1][3]): 'НДС всего, тыс. руб.',
+            (headerRows[1][4]): 'В том числе НДС не учитываемый, тыс. руб.',
             (headerRows[1][5]): 'Доля НДС не учитываемый, %',
-            (headerRows[1][6]): 'НДС всего',
-            (headerRows[1][7]): 'В том числе НДС не учитываемый',
+            (headerRows[1][6]): 'НДС всего, тыс. руб.',
+            (headerRows[1][7]): 'В том числе НДС не учитываемый, тыс. руб.',
             (headerRows[1][8]): 'Доля НДС не учитываемый, %'
     ]
     (1..9).each { index ->

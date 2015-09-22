@@ -231,7 +231,7 @@ def BigDecimal calc9(DataRow row, DataRow rnu55DataRow, DataRow rnu56DataRow) {
             def k = rnu56DataRow.price
             def t = rnu56DataRow.maturity - rnu56DataRow.buyDate
             def d = row.implementationDate - rnu56DataRow.buyDate
-            return (((n - k) / t * d + k) * currencyRate)?.setScale(2, RoundingMode.HALF_UP)
+            return (((n - k) * d / t + k) * currencyRate)?.setScale(2, RoundingMode.HALF_UP)
         }
     }
     if (rnu55DataRow != null) {

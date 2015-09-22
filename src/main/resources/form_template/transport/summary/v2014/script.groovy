@@ -909,10 +909,9 @@ def calc24(def row, def region, def errorMsg, def check) {
             def String filter = "DECLARATION_REGION_ID = " + formDataDepartment.regionId?.toString() + " and OKTMO = " + row.okato?.toString()
             def records = getProvider(210L).getRecords(getReportPeriodEndDate(), null, filter, null)
             def String declarationRegionId = ''
-            def String regionId = ''
+            def String regionId = (region?.CODE?.value ?: '')
             if (records != null && records.size() == 1) {
                 declarationRegionId = getRefBookValue(4, records[0].DECLARATION_REGION_ID.value)?.CODE?.value ?: ''
-                regionId = getRefBookValue(4, records[0].REGION_ID.value)?.CODE?.value ?: ''
             }
             // дополнить 0 слева если значении меньше четырех
             logger.error(errorMsg + "Для заданных параметров ТС (" +

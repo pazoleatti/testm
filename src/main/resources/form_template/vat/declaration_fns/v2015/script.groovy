@@ -7,6 +7,8 @@ import groovy.transform.Field
 import groovy.xml.MarkupBuilder
 import org.apache.commons.collections.map.HashedMap
 
+import javax.xml.stream.XMLStreamReader
+
 /**
  * Декларация по НДС (раздел 1-7)
  *
@@ -638,6 +640,11 @@ void logicCheck() {
     def has9 = (isDeclarationExist(declarations().declaration9[0]) == 1)
     def has9n = (isDeclarationExist(declarations().declaration9n[0]) == 1)
 
+    declaration8 = has8n ? declarations().declaration8n[0] : declarations().declaration8[0]
+    declaration9 = has9n ? declarations().declaration9n[0] : declarations().declaration9[0]
+    declaration81 = declarations().declaration81[0]
+    declaration91 = declarations().declaration91[0]
+
     def elements = [:]
 
     def exist8_12, exist8, exist81, exist9, exist91, exist10, exist11, exist12, existFound = false
@@ -665,7 +672,7 @@ void logicCheck() {
     def r9str200sum = 0, r9str210sum = 0, r9str190sum = 0
     // Приложение 1 к Разделу 9
     def r91str340, r91str350, r91str050, r91str060, r91str020, r91str310, r91str320, r91str330
-    def r91str280sum = 0, r91str290sum = 0, r91str250sum = 0, r91str270sum = 0
+    def r91str280sum = 0, r91str290sum = 0, r91str280sumAll = 0, r91str290sumAll = 0, r91str250sum = 0, r91str260sum = 0, r91str270sum = 0
 
     try { // ищем пока есть элементы и есть что искать
         while (reader.hasNext()) {
@@ -730,8 +737,8 @@ void logicCheck() {
         reader8 = declarationService.getXmlStreamReader(getParts().get(declarations().declaration8n[0]).id)
     }
     def reader81
-    if (isDeclarationExist(declarations().declaration81[0]) == 1) {
-        reader81 = declarationService.getXmlStreamReader(getParts().get(declarations().declaration81[0]).id)
+    if (isDeclarationExist(declaration81) == 1) {
+        reader81 = declarationService.getXmlStreamReader(getParts().get(declaration81).id)
     }
     def reader9
     if (has9) {
@@ -740,8 +747,8 @@ void logicCheck() {
         reader9 = declarationService.getXmlStreamReader(getParts().get(declarations().declaration9n[0]).id)
     }
     def reader91
-    if (isDeclarationExist(declarations().declaration91[0]) == 1) {
-        reader91 = declarationService.getXmlStreamReader(getParts().get(declarations().declaration91[0]).id)
+    if (isDeclarationExist(declaration91) == 1) {
+        reader91 = declarationService.getXmlStreamReader(getParts().get(declaration91).id)
     }
 
     if (reader8 != null) {
@@ -757,8 +764,7 @@ void logicCheck() {
                     }
                     if (!r8str190 && "КнигаПокуп".equals(reader8.name.localPart)) {
                         r8str190 = getXmlDecimal(reader8, "СумНДСВсКПк") ?: 0
-                    }
-                    else if ("КнПокСтр".equals(reader8.name.localPart)) {
+                    } else if ("КнПокСтр".equals(reader8.name.localPart)) {
                         r8str180sumTmp = getXmlDecimal(reader8, "СумНДСВыч") ?: 0
                     }
                 }
@@ -860,7 +866,10 @@ void logicCheck() {
                         r91str280sumTmp = getXmlDecimal(reader91, "СумНДССФ18") ?: 0
                         r91str290sumTmp = getXmlDecimal(reader91, "СумНДССФ10") ?: 0
                         r91str250sum += getXmlDecimal(reader91, "СтоимПродСФ18") ?: 0
+                        r91str260sum += getXmlDecimal(reader91, "СтоимПродСФ10") ?: 0
                         r91str270sum += getXmlDecimal(reader91, "СтоимПродСФ0") ?: 0
+                        r91str280sumAll += r91str280sumTmp
+                        r91str290sumAll += r91str290sumTmp
                     }
                 }
                 if (reader91.endElement) {
@@ -904,11 +913,11 @@ void logicCheck() {
                 'Признак наличия сведений из книги покупок об операциях, отражаемых за истекший налоговый период'
                 : [getXmlValue(exist8) as BigDecimal, (has8 || has8n) ? 1 : 0],
                 'Признак наличия сведений из дополнительного листа книги покупок'
-                : [getXmlValue(exist81) as BigDecimal, isDeclarationExist(declarations().declaration81[0])],
+                : [getXmlValue(exist81) as BigDecimal, isDeclarationExist(declaration81)],
                 'Признак наличия сведений из книги продаж об операциях, отражаемых за истекший налоговый период'
                 : [getXmlValue(exist9) as BigDecimal, (has9 || has9n) ? 1 : 0],
                 'Признак наличия сведений из дополнительного листа книги продаж'
-                : [getXmlValue(exist91) as BigDecimal, isDeclarationExist(declarations().declaration91[0])],
+                : [getXmlValue(exist91) as BigDecimal, isDeclarationExist(declaration91)],
                 'Признак наличия сведений из журнала учета выставленных счетов-фактур в отношении операций, осуществляемых в интересах другого лица на основе договоров комиссии, агентских договоров или на основе договоров транспортной экспедиции, отражаемых за истекший налоговый период'
                 : [getXmlValue(exist10) as BigDecimal, isDeclarationExist(declarations().declaration10[0])],
                 'Признак наличия сведений из журнала учета полученных счетов-фактур в отношении операций, осуществляемых в интересах другого лица на основе договоров комиссии, агентских договоров или на основе договоров транспортной экспедиции, отражаемых за истекший налоговый период'
@@ -937,49 +946,50 @@ void logicCheck() {
         logger.warn("КС 1.4. Возможно нарушение ст. 149, 170 п.4 возможно необоснованное применение налоговых вычетов.")
     }
     // 1.11
+    //logger.info("" + r3g3str170 ?: 0 + " > " + r3g5str010 ?: 0 + " + " + r3g5str020 ?: 0 + " + " + r3g5str030 ?: 0 + " + " + r3g5str040 ?: 0)
     if (r3g3str170 ?: 0 > r3g5str010 ?: 0 + r3g5str020 ?: 0 + r3g5str030 ?: 0 + r3g5str040 ?: 0) {
         logger.warn("КС 1.11. Возможно нарушение ст. 171, п. 8, НК РФ ст. 172, п. 6, либо НК РФ ст. 146, п. 1 налоговые " +
                 "вычеты не обоснованы, либо налоговая база занижена, так как суммы отработанных авансов не включены в реализацию.")
     }
     // 1.25 (8, 8.1, 9, 9.1)
-    if (checkReader('1.25', [(has8n ? declarations().declaration8n[0] : declarations().declaration8[0]), declarations().declaration81[0], (has9n ? declarations().declaration9n[0] : declarations().declaration9[0]), declarations().declaration91[0]])) {
+    if (checkReader('1.25', [(declaration8): reader8, (declaration81): reader81, (declaration9): reader9, (declaration91): reader91])) {
         def sum25 = r8str190 + (r81str190 - r81str005) - (r9str260 + r9str270) - (r9str200sum + r9str210sum) + (r91str340 + r91str350 - r91str050 - r91str060) - (r91str280sum + r91str290sum)
         if (r1str050 > 0 && sum25 <= 0) {
             logger.warn("КС 1.25. Возможно нарушение ст. 173 завышение суммы НДС, подлежащей возмещению за онп.")
         }
     }
     // 1.26 (9, 9.1)
-    if (checkReader('1.26', [(has9n ? declarations().declaration9n[0] : declarations().declaration9[0]), declarations().declaration91[0]])) {
+    if (checkReader('1.26', [(declaration9): reader9, (declaration91): reader91])) {
         if (r2str060sum < r9str200sum + r9str210sum + r91str280sum + r91str290sum) {
             logger.warn("КС 1.26. Возможно нарушение ст. 161, п. 4 ст. 173 занижение суммы НДС, подлежащей уплате в бюджет.")
         }
     }
     // 1.27 (9, 9.1)
-    if (checkReader('1.27', [(has9n ? declarations().declaration9n[0] : declarations().declaration9[0]), declarations().declaration91[0]])) {
+    if (checkReader('1.27', [(declaration9): reader9, (declaration91): reader91])) {
         if (r3g5str110 + r2str060sum < r9str260 + r9str270 + r91str340 + r91str350 - r91str050 - r91str060) {
             logger.warn("КС 1.27. Возможно нарушение РФ ст. 153, 161, 164, 165, 166, 167, 173 занижение суммы НДС, исчисленного к уплате в бюджет.")
         }
     }
     // 1.28 (8, 8.1)
-    if (checkReader('1.28', [(has8n ? declarations().declaration8n[0] : declarations().declaration8[0]), declarations().declaration81[0]])) {
+    if (checkReader('1.28', [(declaration8): reader8, (declaration81): reader81])) {
         if (r3g3str190 > r8str190 + r81str190 - r81str005) {
             logger.warn("КС 1.28. Возможно нарушение ст. 171, 172 завышение суммы НДС, подлежащей вычету.")
         }
     }
     // 1.31 (8, 8.1)
-    if (checkReader('1.31', [(has8n ? declarations().declaration8n[0] : declarations().declaration8[0]), declarations().declaration81[0]])) {
+    if (checkReader('1.31', [(declaration8): reader8, (declaration81): reader81])) {
         if (r3g3str180 > r8str180sum + r81str180sum) {
             logger.warn("КС 1.31. Возможно нарушение ст. 161, 171, 172 завышение суммы НДС, подлежащей вычету.")
         }
     }
     // 1.33 (8.1)
-    if (checkReader('1.33', [declarations().declaration81[0]])) {
+    if (checkReader('1.33', [(declaration81): reader81])) {
         if (r81str005 + r81str180sum < r81str190) {
             logger.warn("КС 1.33. Возможно нарушение ст. 171, 172 возможно завышение суммы НДС, подлежащей вычету.")
         }
     }
     // 1.36 (9)
-    if (checkReader('1.36', [has9n ? declarations().declaration9n[0] : declarations().declaration9[0]])) {
+    if (checkReader('1.36', [(declaration9): reader9])) {
         //logger.info(""+r9str190sum + " >= " +r9str250)
         if (r9str250 > r9str190sum) {
             logger.warn("КС 1.36. Возможно нарушение ст. 164, 165, 167, 173 возможно занижение исчисленной суммы НДС вследствие " +
@@ -987,36 +997,36 @@ void logicCheck() {
         }
     }
     // 1.39 (9.1)
-    if (checkReader('1.39', [declarations().declaration91[0]])) {
+    if (checkReader('1.39', [(declaration91): reader91])) {
         if (r91str020 + r91str250sum > r91str310) {
             logger.warn("КС 1.39. Возможно нарушение ст. 153, 173, п. 3 Раздела IV Приложения 5 к Постановлению N 1137 возможно " +
                     "занижение суммы НДС, исчисленного к уплате в бюджет (при условии, что соотношение 1.32 и 1.49 выполняются)")
         }
     }
     // 1.40 (9.1)
-    if (checkReader('1.40', [declarations().declaration91[0]])) {
+    if (checkReader('1.40', [(declaration91): reader91])) {
         if (r91str020 + r91str260sum > r91str320) {
             logger.warn("КС 1.40. Возможно нарушение ст. 153, 173, п. 3 Раздела IV Приложения 5 к Постановлению N 1137 " +
                     "возможно занижение суммы НДС, исчисленного к уплате в бюджет")
         }
     }
     // 1.41  (9.1)
-    if (checkReader('1.41', [declarations().declaration91[0]])) {
+    if (checkReader('1.41', [(declaration91): reader91])) {
         if (r91str020 + r91str270sum > r91str330) {
             logger.warn("КС 1.41. Возможно нарушение ст. 164, 165, 167, 173 возможно занижение исчисленной суммы НДС, " +
                     "вследствие неполного отражения НБ либо неверное применение ставки по НДС")
         }
     }
     // 1.42 (9.1)
-    if (checkReader('1.42', [declarations().declaration91[0]])) {
-        if (r91str020 + r91str280sum > r91str340) {
+    if (checkReader('1.42', [(declaration91): reader91])) {
+        if (r91str020 + r91str280sumAll > r91str340) {
             logger.warn("КС 1.42. Возможно нарушение ст. 153, 173, п. 3 Раздела IV Приложения 5 к Постановлению N 1137 " +
                     "возможно занижение суммы НДС, исчисленного к уплате в бюджет (при условии, что соотношение 1.32 выполняется)")
         }
     }
     // 1.43 (9.1)
-    if (checkReader('1.43', [declarations().declaration91[0]])) {
-        if (r91str020 + r91str290sum > r91str350) {
+    if (checkReader('1.43', [(declaration91): reader91])) {
+        if (r91str020 + r91str290sumAll > r91str350) {
             logger.warn("КС 1.43. Возможно нарушение ст. 153, 173, п. 3 Раздела IV Приложения 5 к Постановлению N 1137 " +
                     "возможно занижение суммы НДС, исчисленного к уплате в бюджет")
         }
@@ -1064,11 +1074,14 @@ def BigDecimal isDeclarationExist(def declarationTypeId) {
     return getParts().get(declarationTypeId)?.exist ? 1 : 0
 }
 
-def boolean checkReader(String number, List<Integer> ids) {
+def boolean checkReader(String number, Map<Integer, XMLStreamReader> map) {
     boolean exist = true
-    ids.each {
-        if (!isDeclarationExist(it)) {
-            logger.warn("%s. Экземпляр декларации вида «%s» не создан. Проверка контрольного соотношения невозможна.", number, getParts().get(it).name)
+    map.each { id, reader ->
+        if (!isDeclarationExist(id)) {
+            logger.warn("%s. Экземпляр декларации вида «%s» не создан. Проверка контрольного соотношения невозможна.", number, getParts().get(id).name)
+            exist = false
+        } else if (!reader) {
+            logger.warn("%s. Экземпляр декларации вида «%s» создан, но не рассчитан. Проверка контрольного соотношения невозможна.", number, getParts().get(id).name)
             exist = false
         }
     }

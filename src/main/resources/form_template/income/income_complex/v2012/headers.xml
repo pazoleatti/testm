@@ -52,7 +52,7 @@
         <cell alias="accountingRecords" colSpan="1" rowSpan="1" value="12"/>
         <cell alias="opuSumByEnclosure2" colSpan="1" rowSpan="1" value="13"/>
         <cell alias="opuSumByTableD" colSpan="1" rowSpan="1" value="14"/>
-        <cell alias="opuSumTotal" colSpan="1" rowSpan="1" value="16"/>
-        <cell alias="difference" colSpan="1" rowSpan="1" value="17"/>
+        <cell alias="opuSumTotal" colSpan="1" rowSpan="1" value="15"/>
+        <cell alias="difference" colSpan="1" rowSpan="1" value="16"/>
     </row>
 </rows>
