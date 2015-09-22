@@ -43,7 +43,7 @@ public class Etr4_15_SummaryTest extends ScriptTestBase {
         formData.setDepartmentReportPeriodId(DEPARTMENT_PERIOD_ID);
         formData.setReportPeriodId(REPORT_PERIOD_ID);
         formData.setPeriodOrder(1);
-        formData.setComparativPeriodId(1);
+        formData.setComparativePeriodId(1);
         return formData;
     }
 
@@ -153,7 +153,7 @@ public class Etr4_15_SummaryTest extends ScriptTestBase {
             // форма источника
             FormData sourceFormData = getSourceFormData(i, sourceTemplateId);
             when(testHelper.getFormDataService().getLast(anyInt(), eq(kind), eq(i),
-                    anyInt(), any(Integer.class))).thenReturn(sourceFormData);
+                    anyInt(), any(Integer.class), anyInt(), anyBoolean())).thenReturn(sourceFormData);
 
             // строки и хелпер источника
             List<DataRow<Cell>> dataRows = getFillDataRows(sourceFormData, (long) i);
@@ -201,7 +201,8 @@ public class Etr4_15_SummaryTest extends ScriptTestBase {
      */
     private FormData getSourceFormData(int id, int sourceTemplateId) {
         // Макет источника
-        FormTemplate sourceTemplate = testHelper.getTemplate("..//src/main//resources//form_template//etr//etr_4_15//v2015//");
+        FormTemplate sourceTemplate = testHelper.getTemplate("D:\\\\workspace\\\\sbrfacctax\\\\//src/main//resources//form_template//etr//etr_4_15//v2015//");
+        // FormTemplate sourceTemplate = testHelper.getTemplate("..//src/main//resources//form_template//etr//etr_4_15//v2015//");
 
         FormType formType = new FormType();
         formType.setId(SOURCE_TYPE_ID);
