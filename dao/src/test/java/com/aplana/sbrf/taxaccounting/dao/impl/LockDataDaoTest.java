@@ -13,7 +13,6 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Calendar;
-import java.util.Date;
 
 /**
  * @author <a href="mailto:Marat.Fayzullin@aplana.com">Файзуллин Марат</a>
@@ -36,8 +35,6 @@ public class LockDataDaoTest {
 		Calendar cal = Calendar.getInstance();
 		cal.clear();
 		cal.set(2013, 0, 1, 0, 5, 0);
-		Assert.assertEquals(cal.getTime().getTime(), data.getDateBefore().getTime());
-
         data = dao.get("a", cal.getTime());
         Assert.assertNotNull(data);
         cal.set(Calendar.YEAR, 2014);
@@ -62,34 +59,21 @@ public class LockDataDaoTest {
 
 	@Test (expected = LockException.class)
 	public void createLockTest() {
-		dao.createLock("a", 0, 1, "", "", ""); // дубликат
+		dao.createLock("a", 0, "", "", ""); // дубликат
 	}
 
 	@Test
 	public void createLockTest2() {
-		dao.createLock("c", 0, 1, "", "", "");
+		dao.createLock("c", 0, "", "", "");
 		LockData data = dao.get("c", false);
 		Assert.assertEquals("c", data.getKey());
 		Assert.assertEquals(0, data.getUserId());
 
-        dao.createLock("abc", 0, 1, "", "", "test");
+        dao.createLock("abc", 0, "", "", "test");
         data = dao.get("abc", false);
         data = dao.get("abc", data.getDateLock());
         Assert.assertNotNull(data);
         Assert.assertEquals(data.getServerNode(), "test");
-	}
-
-	@Test
-	public void updateLockTest() {
-		dao.updateLock("b", 1);
-		LockData data = dao.get("b", false);
-		Assert.assertEquals("b", data.getKey());
-		Assert.assertEquals(1, data.getUserId());
-	}
-
-	@Test (expected = LockException.class)
-	public void updateLockTest2() {
-		dao.updateLock("c", 0);
 	}
 
 	@Test
@@ -102,9 +86,4 @@ public class LockDataDaoTest {
 		dao.deleteLock("a");
 		Assert.assertNull(dao.get("a", false));
 	}
-
-    @Test
-    public void getLockTimeoutTest() {
-        Assert.assertEquals(dao.getLockTimeout(LockData.LockObjects.FORM_DATA), 1);
-    }
 }

@@ -43,7 +43,7 @@ public class RefBookDepartmentTest {
         RefBook refBook = mock(RefBook.class);
         when(refBookDao.get(anyLong())).thenReturn(refBook);
 
-        when(lockService.lock(anyString(), anyInt(), anyString(), anyString(), anyLong())).thenReturn(null);
+        when(lockService.lock(anyString(), anyInt(), anyString(), anyString())).thenReturn(null);
     }
 
     /**

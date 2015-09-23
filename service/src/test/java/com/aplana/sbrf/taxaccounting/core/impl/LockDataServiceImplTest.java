@@ -37,9 +37,9 @@ public class LockDataServiceImplTest {
 	public static void init() {
 		service = new LockDataServiceImpl();
 		LockDataDao dao = mock(LockDataDao.class);
-		when(dao.get("a",false)).thenReturn(new LockData("a", 0, FUTURE, true));
-		when(dao.get("b",false)).thenReturn(new LockData("b", 0, PAST, false));
-		when(dao.get("c",false)).thenReturn(new LockData("c", 1, FUTURE, true));
+		when(dao.get("a",false)).thenReturn(new LockData("a", 0));
+		when(dao.get("b",false)).thenReturn(new LockData("b", 0));
+		when(dao.get("c",false)).thenReturn(new LockData("c", 1));
 		ReflectionTestUtils.setField(service, "dao", dao);
 
         TransactionHelper tx = new TransactionHelper() {
@@ -60,10 +60,9 @@ public class LockDataServiceImplTest {
 
 	@Test
 	public void lockTest() {
-		Assert.assertNotNull(service.lock("a", 0, "", "", 0)); // есть активная блокировка
-		Assert.assertNotNull(service.lock("a", 1, "", "", 0)); // есть активная блокировка
-		Assert.assertNull(service.lock("z", 0, "", "", 0)); // можно заблокировать
-		Assert.assertNull(service.lock("b", 1, "", "", 0)); // можно заблокировать - просроченная блокировка
+		Assert.assertNotNull(service.lock("a", 0, "", "")); // есть активная блокировка
+		Assert.assertNotNull(service.lock("a", 1, "", "")); // есть активная блокировка
+		Assert.assertNull(service.lock("z", 0, "", "")); // можно заблокировать
 	}
 
 	@Test (expected = ServiceException.class)
@@ -75,19 +74,6 @@ public class LockDataServiceImplTest {
 	public void unlockTest4() {
 		service.unlock("a", 0);
 		service.unlock("c", 1);
-	}
-
-	@Test
-	public void extendTest() {
-		service.extend("a", 0, 0);
-		service.extend("b", 0, 0);
-		service.extend("b", 1, 0);
-		service.extend("c", 1, 0);
-	}
-
-	@Test (expected = ServiceException.class)
-	public void extendTest2() {
-		service.extend("a", 1, 0);
 	}
 
 }

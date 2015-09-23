@@ -31,7 +31,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Presenter для формы "Планировщик задач"       *
+ * Presenter для формы "Планировщик задач"
  * @author dloshkarev
  */
 public class LockListPresenter extends Presenter<LockListPresenter.MyView,
@@ -66,22 +66,6 @@ public class LockListPresenter extends Presenter<LockListPresenter.MyView,
         this.placeManager = placeManager;
         getView().setUiHandlers(this);
         getView().assignDataProvider(getView().getPageSize(), dataProvider);
-    }
-
-    @Override
-    public void onExtendLock() {
-        if (isSelectedTaskExist()) {
-            ExtendLockAction action = new ExtendLockAction();
-            action.setKeys(getView().getSelectedItem());
-            dispatcher.execute(action, CallbackUtils
-                    .defaultCallback(new AbstractCallback<ExtendLockResult>() {
-                        @Override
-                        public void onSuccess(ExtendLockResult result) {
-                            getView().updateData(0);
-                            MessageEvent.fire(LockListPresenter.this, "Операция \"Продлить на 1 час\" выполнена успешно");
-                        }
-                    }, LockListPresenter.this));
-        }
     }
 
     @Override

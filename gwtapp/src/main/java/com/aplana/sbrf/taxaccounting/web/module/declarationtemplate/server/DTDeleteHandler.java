@@ -67,8 +67,7 @@ public class DTDeleteHandler extends AbstractActionHandler<DTDeleteAction, DTDel
         for (DeclarationTemplate template : declarationTemplateService.getDecTemplateVersionsByStatus(action.getDtTypeId())){
             String lockKey = LockData.LockObjects.DECLARATION_TEMPLATE.name() + "_" + template.getId();
             checkLockAnotherUser(lockDataService.getLock(lockKey), logger,  userInfo.getUser(), template);
-            LockData lockData = lockDataService.lock(lockKey, userId, template.getName(),
-                    lockDataService.getLockTimeout(LockData.LockObjects.DECLARATION_TEMPLATE));
+            LockData lockData = lockDataService.lock(lockKey, userId, template.getName());
             if (lockData == null) {
                 lockedObjects.add(lockKey);
             }

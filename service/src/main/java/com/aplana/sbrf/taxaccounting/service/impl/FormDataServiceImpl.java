@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.core.api.LockStateLogger;
 import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
+import com.aplana.sbrf.taxaccounting.dao.FormDataFilesDao;
 import com.aplana.sbrf.taxaccounting.dao.FormPerformerDao;
 import com.aplana.sbrf.taxaccounting.dao.api.ConfigurationDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DataRowDao;
@@ -151,6 +152,8 @@ public class FormDataServiceImpl implements FormDataService {
     private SourceService sourceService;
     @Autowired
     private BlobDataService blobDataService;
+    @Autowired
+    private FormDataFilesDao formDataFilesDao;
 
     @Override
     public long createFormData(Logger logger, TAUserInfo userInfo, int formTemplateId, int departmentReportPeriodId, Integer comparativePeriodId, boolean accruing, FormDataKind kind, Integer periodOrder, boolean importFormData) {
@@ -687,8 +690,7 @@ public class FormDataServiceImpl implements FormDataService {
 
         String keyTask = generateTaskKey(formDataId, reportType);
         if (lockService.lock(keyTask, userInfo.getUser().getId(),
-                getFormDataFullName(formDataId, false, null, reportType),
-                lockService.getLockTimeout(LockData.LockObjects.FORM_DATA)) == null) {
+                getFormDataFullName(formDataId, false, null, reportType)) == null) {
             try {
                 FormData formData = formDataDao.get(formDataId, manual);
                 if (manual) {
@@ -1161,7 +1163,7 @@ public class FormDataServiceImpl implements FormDataService {
                         sourceForm.getFormType().getName(),
                         sourceForm.getKind().getTitle(),
                         drp.getReportPeriod().getTaxPeriod().getYear() + " " + drp.getReportPeriod().getName(),
-                        departmentService.getDepartment(sourceForm.getDepartmentId()).getName(),
+                        departmentService.getUserDepartmentName(sourceForm.getDepartmentId()).getName(),
                         userService.getUser(lockData.getUserId()).getName(),
                         SDF_HH_MM_DD_MM_YYYY.format(lockData.getDateLock()));
             } else {
@@ -1311,6 +1313,7 @@ public class FormDataServiceImpl implements FormDataService {
                 case CHECK_FD:
                 case EDIT_FD:
                 case DELETE_FD:
+                case EDIT_FILE_COMMENT:
                     name = MessageGenerator.getFDMsg(getTaskName(reportType, formData),
                             formData,
                             department.getName(),
@@ -1352,8 +1355,8 @@ public class FormDataServiceImpl implements FormDataService {
 	public void lock(long formDataId, boolean manual, TAUserInfo userInfo) {// используется для редактирования и миграции
         checkLockAnotherUser(lockService.lock(generateTaskKey(formDataId, ReportType.EDIT_FD),
                 userInfo.getUser().getId(),
-                getFormDataFullName(formDataId, manual, null, ReportType.EDIT_FD), // FIXME для миграции не совсем верно
-                lockService.getLockTimeout(LockData.LockObjects.FORM_DATA)), null, userInfo.getUser());
+                getFormDataFullName(formDataId, manual, null, ReportType.EDIT_FD)), // FIXME для миграции не совсем верно
+                null, userInfo.getUser());
 	}
 
 	@Override
@@ -1685,12 +1688,9 @@ public class FormDataServiceImpl implements FormDataService {
 			throw new ServiceException("Блокировка не найдена. Объект должен быть заблокирован текущим пользователем");
 		}
         if (lockData.getUserId() != user.getId()) {
-            throw new ServiceException(String.format("Объект заблокирован другим пользователем (\"%s\", срок \"%s\")",
-					userService.getUser(lockData.getUserId()).getLogin(), SDF_HH_MM_DD_MM_YYYY.format(lockData.getDateBefore())));
+            throw new ServiceException(String.format("Объект заблокирован другим пользователем (\"%s\", \"%s\")",
+					userService.getUser(lockData.getUserId()).getLogin(), SDF_HH_MM_DD_MM_YYYY.format(lockData.getDateLock())));
         }
-		// продлеваем пользовательскую блокировку
-		lockService.extend(lockData.getKey(), user.getId(),
-                lockService.getLockTimeout(LockData.LockObjects.FORM_DATA));
     }
 
     @Override
@@ -1896,6 +1896,7 @@ public class FormDataServiceImpl implements FormDataService {
                 return String.format(reportType.getDescription(), MessageGenerator.mesSpeckSingleD(formData.getFormType().getTaxType()));
             case IMPORT_FD:
             case IMPORT_TF_FD:
+            case EDIT_FILE_COMMENT:
                 return reportType.getDescription();
             default:
                 throw new ServiceException("Неверный тип отчета(%s)", reportType.getName());
@@ -2025,5 +2026,21 @@ public class FormDataServiceImpl implements FormDataService {
         formDataScriptingService.executeScript(userInfo, formData, FormDataEvent.GET_HEADERS, logger, params);
 
         return headers;
+    }
+
+    @Override
+    public List<FormDataFile> getFiles(long formDataId) {
+        return formDataFilesDao.getFiles(formDataId);
+    }
+
+    @Override
+    public String getNote(long formDataId) {
+        return formDataDao.getNote(formDataId);
+    }
+
+    @Override
+    public void saveFilesComments(long formDataId, String note, List<FormDataFile> files) {
+        formDataDao.updateNote(formDataId, note);
+        formDataFilesDao.saveFiles(formDataId, files);
     }
 }

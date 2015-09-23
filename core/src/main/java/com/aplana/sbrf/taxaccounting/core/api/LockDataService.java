@@ -46,27 +46,25 @@ public interface LockDataService {
     String LOCK_DATA = "Объект заблокирован для редактирования пользователем \"%s\"(id=%s)";
 
 	/**
-	 * Устанавливает новую блокировку до времени = now + age. Если блокировка успешно установилась, то возвращается null.
+	 * Устанавливает новую блокировку. Если блокировка успешно установилась, то возвращается null.
 	 * Если блокировка уже существовала, то возвращется информация по этой блокировке в виде объекта LockData
      * @param key код блокировки
 	 * @param userId код установившего блокировку пользователя
      * @param description описание блокировки
-	 * @param age относительное время жизни блокировки в миллисекундах
 	 * @return информация о блокировке
 	 */
-	LockData lock(String key, int userId, String description, long age);
+	LockData lock(String key, int userId, String description);
 
     /**
-     * Устанавливает новую блокировку до времени = now + age. Если блокировка успешно установилась, то возвращается null.
+     * Устанавливает новую блокировку. Если блокировка успешно установилась, то возвращается null.
      * Если блокировка уже существовала, то возвращется информация по этой блокировке в виде объекта LockData
      * @param key код блокировки
      * @param userId код установившего блокировку пользователя
      * @param description описание блокировки
      * @param state Статус асинхронной задачи, связанной с блокировкой
-     * @param age относительное время жизни блокировки в миллисекундах
      * @return информация о блокировке
      */
-    LockData lock(String key, int userId, String description, String state, long age);
+	LockData lock(String key, int userId, String description, String state);
 
     /**
      * Возвращает данные блокировки по ключу
@@ -74,20 +72,6 @@ public interface LockDataService {
      * @return данные блокировки. Если блокировки не существует - возвращается null
      */
     LockData getLock(String key);
-
-    /**
-	 * Установка блокировки с ожиданием
-	 * В течении времени timeout ожидает пока объект не будет разблокирован. При его освобождении тут же блокирует и
-	 * возвращает управление вызвавшему методу. Если за время timeout объект не удалось перехватить, то вызывается exception
-	 *
-	 * @param key код блокировки
-	 * @param userId код установившего блокировку пользователя
-	 * @param age относительное время жизни блокировки в миллисекундах
-     * @param description описание блокировки
-	 * @param timeout максимальное относительное время ожидания для установки новой блокировки
-	 * @throws com.aplana.sbrf.taxaccounting.model.exception.ServiceException если время ожидания timeout истекло
-	 */
-	void lockWait(String key, int userId, long age, String description, long timeout);
 
 	/**
 	 * Снимает блокировку по ее идентификатору. Если блокировки не было, либо была установлена другим пользователем, то exception.
@@ -108,17 +92,6 @@ public interface LockDataService {
      */
     Boolean unlock(String key, int userId, boolean force);
 
-    /**
-	 * Аналогично методу lock с той разницей, что если блокировка объекта от имени указанного пользователя существует,
-	 * то она продлевается по времени (now + age )
-	 *
-	 * @param key код блокировки
-	 * @param userId код установившего блокировку пользователя
-	 * @param age относительное время жизни блокировки в миллисекундах
-	 * @throws com.aplana.sbrf.taxaccounting.model.exception.ServiceException если блокировка была установлена другим пользователем
-	 */
-	void extend(String key, int userId, long age);
-
     void unlockAll(TAUserInfo userInfo);
 
     /**
@@ -128,8 +101,6 @@ public interface LockDataService {
      * @param ignoreError признак игнорирования ошибок при снятии блокировок. Нужен при разлогинивании
      */
     void unlockAll(TAUserInfo userInfo, boolean ignoreError);
-
-    void unlockIfOlderThan(int sec);
 
     /**
      * Проверяет, установлена ли блокировка на указанном объекте
@@ -162,13 +133,6 @@ public interface LockDataService {
     List<Integer> getUsersWaitingForLock(String key);
 
     /**
-     * Получает таймаут для блокировки
-     * @param lockObject объект блокировки
-     * @return время в милисекундах
-     */
-    int getLockTimeout(LockData.LockObjects lockObject);
-
-    /**
      * Получает список всех блокировок
      * @return все блокировки
      * @param filter ограничение по имени пользователя или ключу
@@ -182,13 +146,6 @@ public interface LockDataService {
      * @param keys список ключей блокировок
      */
     void unlockAll(List<String> keys);
-
-    /**
-     * Продляет все указанные блокировки
-     * @param keys список ключей блокировок
-     * @param hours количество часов, на которое будут продлены блокировки
-     */
-    void extendAll(List<String> keys, int hours);
 
     /**
      * Обновляет статус выполнения асинхронной задачи, связанной с блокировкой

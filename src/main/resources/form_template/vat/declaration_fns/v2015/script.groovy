@@ -402,7 +402,7 @@ void generateXML() {
 
     def builder = new MarkupBuilder(xml)
     builder.Файл(
-            [ИдФайл: declarationService.generateXmlFileId(4, declarationData.departmentReportPeriodId, taxOrganCodeProm, taxOrganCode, declarationData.kpp)] +
+            [ИдФайл: generateXmlFileId(taxOrganCodeProm, taxOrganCode)] +
                     [ВерсПрог: applicationVersion] +
                     [ВерсФорм: formatVersion] +
                     ['ПризнНал8-12': sign812] +
@@ -1207,4 +1207,20 @@ def getOkato(def id) {
         okato = getRefBookValue(96, id)?.CODE?.stringValue
     }
     return okato
+}
+
+def generateXmlFileId(String taxOrganCodeProm, String taxOrganCode) {
+    def departmentParam = getDepartmentParam()
+    if (departmentParam) {
+        def date = Calendar.getInstance().getTime()?.format("yyyyMMdd")
+        def fileId = TaxType.VAT.declarationPrefix + '_' +
+                taxOrganCodeProm + '_' +
+                taxOrganCode + '_' +
+                departmentParam.INN?.value +
+                departmentParam.KPP?.value + "_" +
+                date + "_" +
+                UUID.randomUUID().toString().toUpperCase()
+        return fileId
+    }
+    return null
 }

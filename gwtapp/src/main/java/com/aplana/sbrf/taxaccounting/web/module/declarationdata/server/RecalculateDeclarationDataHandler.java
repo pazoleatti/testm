@@ -80,8 +80,7 @@ public class RecalculateDeclarationDataHandler extends AbstractActionHandler<Rec
                 public LockData createLock(String keyTask, ReportType reportType, TAUserInfo userInfo) {
                     return lockDataService.lock(keyTask, userInfo.getUser().getId(),
                             declarationDataService.getDeclarationFullName(action.getDeclarationId(), reportType),
-                            LockData.State.IN_QUEUE.getText(),
-                            lockDataService.getLockTimeout(LockData.LockObjects.DECLARATION_DATA));
+                            LockData.State.IN_QUEUE.getText());
                 }
 
                 @Override

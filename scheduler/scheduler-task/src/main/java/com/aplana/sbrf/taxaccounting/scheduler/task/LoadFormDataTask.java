@@ -83,8 +83,7 @@ public class LoadFormDataTask extends AbstractUserTask {
         }
         String key = LockData.LockObjects.CONFIGURATION_PARAMS.name() + "_" + UUID.randomUUID().toString().toLowerCase();
         lockDataService.lock(key, userId,
-                LockData.DescriptionTemplate.CONFIGURATION_PARAMS.getText(),
-                lockDataService.getLockTimeout(LockData.LockObjects.CONFIGURATION_PARAMS));
+                LockData.DescriptionTemplate.CONFIGURATION_PARAMS.getText());
         try {
             loadFormDataService.importFormData(userService.getSystemUserInfo(), departmentsIds, null, new Logger(), lockId, false);
         } finally {

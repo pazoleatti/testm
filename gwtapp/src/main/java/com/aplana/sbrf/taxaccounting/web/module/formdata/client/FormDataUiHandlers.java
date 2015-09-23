@@ -66,6 +66,8 @@ public interface FormDataUiHandlers extends UiHandlers{
 
     void onOpenSourcesDialog();
 
+    void onFilesCommentsDialog();
+
     void onCorrectionSwitch();
 
     void onConsolidate(boolean force, boolean cancelTask);

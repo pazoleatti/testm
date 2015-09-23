@@ -1,6 +1,7 @@
 package form_template.property.declaration.v2014
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
+import com.aplana.sbrf.taxaccounting.model.TaxType
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import groovy.transform.Field
 import groovy.xml.MarkupBuilder
@@ -169,7 +170,7 @@ void generateXML() {
     // Формирование XML'ки.
     def builder = new MarkupBuilder(xml)
     builder.Файл(
-            ИдФайл : declarationService.generateXmlFileId(3, declarationData.departmentReportPeriodId, declarationData.taxOrganCode, declarationData.kpp),
+            ИдФайл : generateXmlFileId(taxOrganCode),
             ВерсПрог : applicationVersion,
             ВерсФорм : formatVersion) {
 
@@ -476,4 +477,27 @@ def getSubjectOktmoRows(def rows, def exampleRow) {
     return rows.findAll { row ->
         getOwnerValue(row, 'subject') == exampleRow.subject && getOwnerValue(row, 'oktmo') == exampleRow.oktmo
     }
+}
+
+def generateXmlFileId(String taxOrganCode) {
+    def departmentId =  declarationData.departmentId
+    // Параметры подразделения
+    def departmentParam = getProvider(99).getRecords(getEndDate() - 1, null, "DEPARTMENT_ID = $departmentId", null)
+    if (departmentParam == null ||  departmentParam.size() ==0 || departmentParam.get(0) == null) {
+        return null
+    }
+    departmentParam = departmentParam.get(0)
+
+    if (departmentParam) {
+        def date = Calendar.getInstance().getTime()?.format("yyyyMMdd")
+        def fileId = TaxType.PROPERTY.declarationPrefix + '_' +
+                taxOrganCode + '_' +
+                taxOrganCode + '_' +
+                departmentParam.INN?.value +
+                declarationData.kpp + "_" +
+                date + "_" +
+                UUID.randomUUID().toString().toUpperCase()
+        return fileId
+    }
+    return null
 }

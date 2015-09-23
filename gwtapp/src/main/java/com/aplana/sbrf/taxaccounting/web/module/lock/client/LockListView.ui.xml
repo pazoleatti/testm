@@ -76,9 +76,6 @@
                     <g:cell>
                         <g:Button text="Удалить блокировку" ui:field="deleteButton" />
                     </g:cell>
-                    <g:cell>
-                        <g:Button text="Продлить на 1 час" ui:field="extendButton" />
-                    </g:cell>
                     <g:cell width="18px" horizontalAlignment="right">
                         <g:HTML addStyleNames="{style.separator}"/>
                     </g:cell>

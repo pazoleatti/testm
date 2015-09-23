@@ -171,7 +171,7 @@ public class FormTemplateMainView extends ViewWithUiHandlers<FormTemplateMainUiH
         lockInformation.setVisible(isVisible);
         if(lockedBy != null && lockDate != null){
             String text = "Выбранный макет в текущий момент редактируется другим пользователем \"" + lockedBy
-                    + "\" (до "+ lockDate + " )";
+                    + "\" ("+ lockDate + ")";
             lockInformation.setText(text);
             lockInformation.setTitle(text);
         }

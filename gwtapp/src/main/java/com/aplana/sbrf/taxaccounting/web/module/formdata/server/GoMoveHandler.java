@@ -84,8 +84,7 @@ public class GoMoveHandler extends AbstractActionHandler<GoMoveAction, GoMoveRes
                             public LockData createLock(String keyTask, ReportType reportType, TAUserInfo userInfo) {
                                 return lockDataService.lock(keyTask, userInfo.getUser().getId(),
                                         formDataService.getFormDataFullName(action.getFormDataId(), false, action.getMove().isReasonToMoveShouldBeSpecified() ? String.format("Возврат налоговой формы в \"%s\"", action.getMove().getToState().getTitle()) : String.format("%s налоговой формы", action.getMove().getToState().getActionName()), reportType),
-                                        LockData.State.IN_QUEUE.getText(),
-                                        lockDataService.getLockTimeout(LockData.LockObjects.FORM_DATA));
+                                        LockData.State.IN_QUEUE.getText());
                             }
 
                             @Override
@@ -113,8 +112,7 @@ public class GoMoveHandler extends AbstractActionHandler<GoMoveAction, GoMoveRes
                 default:
                     if (lockDataService.lock(keyTask,
                             userInfo.getUser().getId(),
-                            formDataService.getFormDataFullName(action.getFormDataId(), false, action.getMove().isReasonToMoveShouldBeSpecified() ? String.format("Возврат налоговой формы в \"%s\"", action.getMove().getToState().getTitle()) : String.format("\"%s\" налоговой формы", action.getMove().getToState().getActionName()), reportType),
-                            lockDataService.getLockTimeout(LockData.LockObjects.FORM_DATA)) == null) {
+                            formDataService.getFormDataFullName(action.getFormDataId(), false, action.getMove().isReasonToMoveShouldBeSpecified() ? String.format("Возврат налоговой формы в \"%s\"", action.getMove().getToState().getTitle()) : String.format("\"%s\" налоговой формы", action.getMove().getToState().getActionName()), reportType)) == null) {
                         try {
                             formDataService.doMove(action.getFormDataId(), false, securityService.currentUserInfo(),
                                     action.getMove(), action.getReasonToWorkflowMove(), logger, false, new LockStateLogger() {

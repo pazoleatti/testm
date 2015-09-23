@@ -162,23 +162,15 @@ public class RefBookHierPresenter extends Presenter<RefBookHierPresenter.MyView,
 
     public interface MyView extends View, HasUiHandlers<RefBookHierUIHandlers> {
         void clearFilterInputBox();
-
         Date getRelevanceDate();
-
         void updateView(FormMode mode);
-
         String getSearchPattern();
-
         //Показывает/скрывает поля, которые необходимы только для версионирования
         void setVersionedFields(boolean isVisible);
-
         void setRefBookNameDesc(String desc);
-
         void setRefBookNameDesc(String verCount, Date relDate);
-
         /**
          * Устанавливает версионный вид справочника.
-         *
          * @param isVersion true - если переходим в версионное представление
          */
         void setVersionView(boolean isVersion);
@@ -206,7 +198,6 @@ public class RefBookHierPresenter extends Presenter<RefBookHierPresenter.MyView,
     public void prepareFromRequest(final PlaceRequest request) {
         refBookId = Long.parseLong(request.getParameter(RefBookDataTokens.REFBOOK_DATA_ID, null));
         commonEditPresenter = Department.REF_BOOK_ID.equals(refBookId) ? departmentEditPresenter : hierEditFormPresenter;
-
         CheckHierAction checkHierAction = new CheckHierAction();
         checkHierAction.setRefBookId(refBookId);
         refBookHierDataPresenter.setRefBookId(refBookId);

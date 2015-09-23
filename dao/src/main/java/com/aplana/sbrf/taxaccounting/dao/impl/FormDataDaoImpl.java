@@ -55,10 +55,10 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
     private ReportPeriodDao reportPeriodDao;
     @Autowired
     private TaxPeriodDao taxPeriodDao;
-	@Autowired
-	private DataRowDao dataRowDao;
+    @Autowired
+    private DataRowDao dataRowDao;
 
-	// Общий маппер
+    // Общий маппер
     private void mapCommon(FormData formData, ResultSet rs) throws SQLException {
         formData.setId(SqlUtils.getLong(rs, "id"));
         formData.setFormTemplateId(SqlUtils.getInteger(rs, "form_template_id"));
@@ -107,7 +107,7 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
             return getJdbcTemplate().queryForObject(
                     "select fd.id, fd.form_template_id, fd.state, fd.kind, fd.return_sign, fd.period_order, fd.number_previous_row, " +
                             "CASE WHEN ? IS NULL THEN fd.manual ELSE ? END manual, " +
-							"fd.department_report_period_id, drp.report_period_id, drp.department_id, fd.SORTED, fd.COMPARATIVE_DEP_REP_PER_ID, fd.ACCRUING from form_data fd, " +
+                            "fd.department_report_period_id, drp.report_period_id, drp.department_id, fd.SORTED, fd.COMPARATIVE_DEP_REP_PER_ID, fd.ACCRUING from form_data fd, " +
                             "department_report_period drp where fd.id = ? and fd.department_report_period_id = drp.id",
                     new Object[]{
                             manual == null ? null : manual ? 1 : 0,
@@ -324,8 +324,8 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
     public List<Long> getFormDataListInActualPeriodByTemplate(int templateId, Date startDate) {
         try {
             return getJdbcTemplate().queryForList("SELECT fd.id FROM form_data fd, department_report_period drp " +
-                    "WHERE drp.id = fd.department_report_period_id and fd.form_template_id = ? AND drp.report_period_id " +
-                    "IN (SELECT id FROM report_period WHERE calendar_start_date >= ?)",
+                            "WHERE drp.id = fd.department_report_period_id and fd.form_template_id = ? AND drp.report_period_id " +
+                            "IN (SELECT id FROM report_period WHERE calendar_start_date >= ?)",
                     new Object[]{templateId, startDate},
                     Long.class);
         } catch (EmptyResultDataAccessException e) {
@@ -390,9 +390,9 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 
     @Override
     public void deleteManual(FormData formData) {
-		dataRowDao.removeAllManualRows(formData);
-		formData.setManual(false);
-		updateManual(formData);
+        dataRowDao.removeAllManualRows(formData);
+        formData.setManual(false);
+        updateManual(formData);
     }
 
     private static final String GET_FORM_DATA_LIST_QUERY = "WITH list AS (SELECT ROWNUM as row_number, sorted.* from " +
@@ -441,21 +441,21 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 
     @Override
     public void updatePreviousRowNumber(FormData formData, Integer previousRowNumber) {
-		Map<String, Object> params = new HashMap<String, Object>();
-		params.put("count", previousRowNumber);
-		params.put("form_data_id", formData.getId());
-		getNamedParameterJdbcTemplate().update("UPDATE form_data SET number_previous_row = :count WHERE id = :form_data_id", params);
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.put("count", previousRowNumber);
+        params.put("form_data_id", formData.getId());
+        getNamedParameterJdbcTemplate().update("UPDATE form_data SET number_previous_row = :count WHERE id = :form_data_id", params);
     }
 
-	@Override
-	public void updateCurrentRowNumber(FormData formData) {
-		Map<String, Object> params = new HashMap<String, Object>();
-		params.put("count", dataRowDao.getAutoNumerationRowCount(formData));
-		params.put("form_data_id", formData.getId());
-		getNamedParameterJdbcTemplate().update("UPDATE form_data SET number_current_row = :count WHERE id = :form_data_id", params);
-	}
+    @Override
+    public void updateCurrentRowNumber(FormData formData) {
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.put("count", dataRowDao.getAutoNumerationRowCount(formData));
+        params.put("form_data_id", formData.getId());
+        getNamedParameterJdbcTemplate().update("UPDATE form_data SET number_current_row = :count WHERE id = :form_data_id", params);
+    }
 
-	private static final String GET_MANUAL_UNPUTS_FORMS = "select fd.*, drp.report_period_id, drp.department_id, ft.type_id \n" +
+    private static final String GET_MANUAL_UNPUTS_FORMS = "select fd.*, drp.report_period_id, drp.department_id, ft.type_id \n" +
             "from form_data fd \n" +
             "join department_form_type dft on dft.kind = fd.kind \n" +
             "join form_template ft on ft.id = fd.form_template_id and ft.type_id = dft.form_type_id \n" +
@@ -710,4 +710,18 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
         return getNamedParameterJdbcTemplate().queryForObject("SELECT edited FROM form_data WHERE id = :formDataId", values, Boolean.class);
     }
 
+    @Override
+    public void updateNote(long formDataId, String note) {
+        HashMap<String, Object> values = new HashMap<String, Object>();
+        values.put("formDataId", formDataId);
+        values.put("note", note);
+        getNamedParameterJdbcTemplate().update("UPDATE form_data SET note = :note WHERE id = :formDataId", values);
+    }
+
+    @Override
+    public String getNote(long formDataId) {
+        HashMap<String, Object> values = new HashMap<String, Object>();
+        values.put("formDataId", formDataId);
+        return getNamedParameterJdbcTemplate().queryForObject("SELECT note FROM form_data WHERE id = :formDataId", values, String.class);
+    }
 }

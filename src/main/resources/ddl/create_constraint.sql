@@ -260,8 +260,6 @@ alter table ifrs_data add constraint ifrs_data_fk_blob_data foreign key (blob_da
 alter table configuration_email add constraint configuration_email_pk primary key (id);
 alter table configuration_email add constraint configuration_email_unqname unique (name);
 
-alter table configuration_lock add constraint configuration_lock_pk primary key (key);
-
 alter table form_data_consolidation add constraint form_data_consolidation_fk_src foreign key (source_form_data_id) references form_data(id);
 alter table form_data_consolidation add constraint form_data_consolidation_fk_tgt foreign key (target_form_data_id) references form_data(id) on delete cascade;
 --create unique index i_form_data_consolidation_unq on form_data_consolidation (case when source_form_data_id is not null then target_form_data_id end, source_form_data_id);

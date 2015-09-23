@@ -64,8 +64,7 @@ public class CreateIfrsDataHandler extends AbstractActionHandler<CreateIfrsDataA
         String key = ifrsDataService.generateTaskKey(action.getReportPeriodId());
         LockData lockData = lockDataService.lock(key, userInfo.getUser().getId(),
                 String.format(LockData.DescriptionTemplate.IFRS.getText(), reportPeriod.getName(), reportPeriod.getTaxPeriod().getYear()),
-                LockData.State.IN_QUEUE.getText(),
-                lockDataService.getLockTimeout(LockData.LockObjects.IFRS));
+                LockData.State.IN_QUEUE.getText());
         if (lockData == null) {
             try {
                 ifrsDataService.create(action.getReportPeriodId());

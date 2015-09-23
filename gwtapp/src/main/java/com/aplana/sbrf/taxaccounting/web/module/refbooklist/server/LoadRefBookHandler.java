@@ -91,8 +91,7 @@ public class LoadRefBookHandler extends AbstractActionHandler<LoadRefBookAction,
             }
             String key = LockData.LockObjects.CONFIGURATION_PARAMS.name() + "_" + UUID.randomUUID().toString().toLowerCase();
             lockDataService.lock(key, userInfo.getUser().getId(),
-                    LockData.DescriptionTemplate.CONFIGURATION_PARAMS.getText(),
-                    lockDataService.getLockTimeout(LockData.LockObjects.CONFIGURATION_PARAMS));
+                    LockData.DescriptionTemplate.CONFIGURATION_PARAMS.getText());
             try {
                 loadRefBookDataService.checkImportRefBooks(securityService.currentUserInfo(), logger, UUID.randomUUID().toString().toLowerCase(), false);
             } finally {

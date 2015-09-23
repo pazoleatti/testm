@@ -394,8 +394,7 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
                         declarationTemplate.getType().getTaxType().getName(),
                         SDF_DD_MM_YYYY.format(declarationTemplate.getVersion()),
                         endVersion != null ? SDF_DD_MM_YYYY.format(endVersion) : "-"
-                ),
-                lockDataService.getLockTimeout(LockData.LockObjects.DECLARATION_TEMPLATE));
+                ));
         return !(objectLock != null && objectLock.getUserId() != userInfo.getUser().getId());
     }
 

@@ -63,8 +63,7 @@ public class DeleteFormTypeHandler extends AbstractActionHandler<DeleteFormTypeA
         for (FormTemplate template : formTemplateService.getFormTemplateVersionsByStatus(action.getFormTypeId())){
             String lockKey = LockData.LockObjects.FORM_TEMPLATE.name() + "_" + template.getId();
             checkLockAnotherUser(lockDataService.getLock(lockKey), logger,  userInfo.getUser(), template);
-            LockData lockData = lockDataService.lock(lockKey, userId, template.getName(),
-                    lockDataService.getLockTimeout(LockData.LockObjects.FORM_TEMPLATE));
+            LockData lockData = lockDataService.lock(lockKey, userId, template.getName());
             if (lockData == null) {
                 lockedObjects.add(lockKey);
                 try {

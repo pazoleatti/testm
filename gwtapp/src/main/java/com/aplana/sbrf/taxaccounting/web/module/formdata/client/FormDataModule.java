@@ -1,5 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdata.client;
 
+import com.aplana.sbrf.taxaccounting.web.module.formdata.client.comments.FilesCommentsPresenter;
+import com.aplana.sbrf.taxaccounting.web.module.formdata.client.comments.FilesCommentsView;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.client.search.FormSearchPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.client.search.FormSearchView;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.client.signers.SignersPresenter;
@@ -18,6 +20,7 @@ public class FormDataModule extends AbstractPresenterModule {
 		bindSingletonPresenterWidget(DialogPresenter.class, DialogPresenter.MyView.class, DialogView.class);
 		bindSingletonPresenterWidget(FormSearchPresenter.class, FormSearchPresenter.MyView.class, FormSearchView.class);
 		bindSingletonPresenterWidget(SourcesPresenter.class, SourcesPresenter.MyView.class, SourcesView.class);
-	}
+        bindSingletonPresenterWidget(FilesCommentsPresenter.class, FilesCommentsPresenter.MyView.class, FilesCommentsView.class);
+    }
 
 }

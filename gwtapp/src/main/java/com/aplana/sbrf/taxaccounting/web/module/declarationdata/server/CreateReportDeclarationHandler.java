@@ -78,8 +78,7 @@ public class CreateReportDeclarationHandler extends AbstractActionHandler<Create
                         public LockData createLock(String keyTask, ReportType reportType, TAUserInfo userInfo) {
                             return lockDataService.lock(keyTask, userInfo.getUser().getId(),
                                     declarationDataService.getDeclarationFullName(action.getDeclarationDataId(), reportType),
-                                    LockData.State.IN_QUEUE.getText(),
-                                    lockDataService.getLockTimeout(LockData.LockObjects.DECLARATION_DATA));
+                                    LockData.State.IN_QUEUE.getText());
                         }
 
                         @Override

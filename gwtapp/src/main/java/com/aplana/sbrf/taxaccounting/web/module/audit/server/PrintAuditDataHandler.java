@@ -104,8 +104,7 @@ public class PrintAuditDataHandler extends AbstractActionHandler<PrintAuditDataA
                                     LockData.DescriptionTemplate.LOG_SYSTEM_CSV.getText(),
                                     searchCriteria
                             ),
-                            LockData.State.IN_QUEUE.getText(),
-                            lockDataService.getLockTimeout(LockData.LockObjects.LOG_SYSTEM_CSV));
+                            LockData.State.IN_QUEUE.getText());
                 }
 
                 @Override

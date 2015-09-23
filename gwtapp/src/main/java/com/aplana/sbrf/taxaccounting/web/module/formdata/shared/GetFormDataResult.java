@@ -24,36 +24,25 @@ public class GetFormDataResult implements Result {
 	}
 
     private DepartmentReportPeriod departmentReportPeriod;
-    private DepartmentReportPeriod comparativPeriod;
-	
+    private DepartmentReportPeriod comparativePeriod;
 	private FormData formData;
-	
 	private String templateFormName;
-	
 	private String uuid;
-	
 	private String departmentName;
-
-    private String departmentFullName;
-
+	private String departmentFullName;
 	private FormDataAccessParams formDataAccessParams;
-
 	private List<FormStyle> allStyles;
-
     private boolean existManual;
     private boolean isBankSummaryForm;
     private boolean canCreatedManual;
     private boolean correctionDiff;
     private boolean readOnly;
-
 	/* Т.к. на GWT уровне сложно преобразовать Date в дату формата dd.mm.yyyy hh:mm (из-за того что функции работы
 	с временем в Date - Deprecated, а Calendar не поддерживается), то клиенту мы будем посылать уже сформировнную в
 	таком формате строку*/
 	private String lockDate;
 	private String lockedByUser;
-
 	private FormMode formMode;
-	
 	private boolean fixedRows;
 
     public boolean canCreatedManual() {
@@ -193,10 +182,10 @@ public class GetFormDataResult implements Result {
     }
 
     public DepartmentReportPeriod getComparativPeriod() {
-        return comparativPeriod;
+        return comparativePeriod;
     }
 
     public void setComparativPeriod(DepartmentReportPeriod comparativPeriod) {
-        this.comparativPeriod = comparativPeriod;
+        this.comparativePeriod = comparativPeriod;
     }
 }

@@ -48,8 +48,7 @@ public class LoadRefBookDiasoftTask extends AbstractUserTask {
     public void executeBusinessLogic(Map<String, TaskParam> params, int userId) throws TaskExecutionException {
         String key = LockData.LockObjects.CONFIGURATION_PARAMS.name() + "_" + UUID.randomUUID().toString().toLowerCase();
         lockDataService.lock(key, userId,
-                LockData.DescriptionTemplate.CONFIGURATION_PARAMS.getText(),
-                lockDataService.getLockTimeout(LockData.LockObjects.CONFIGURATION_PARAMS));;
+                LockData.DescriptionTemplate.CONFIGURATION_PARAMS.getText());
         try {
             loadRefBookDataService.importRefBookDiasoft(userService.getSystemUserInfo(), new Logger(), lockId, false);
         } finally {

@@ -101,7 +101,7 @@ public class FileUploadWidget extends Composite implements HasHandlers, HasValue
 
     /**
      * По умолчанию используются стандартные url для загрузки файлов на сервер,
-     * но возможны специфичные контроллеры(напрcимер, для деклараций)
+     * но возможны специфичные контроллеры(например, для деклараций)
      * @param actionUrl - url контроллера, который будет обрабатывать запрос
      */
     public void setActionUrl(String actionUrl){
@@ -249,5 +249,9 @@ public class FileUploadWidget extends Composite implements HasHandlers, HasValue
                 }
             });
         }
+    }
+
+    public void setImg(String url) {
+        uploadButton.setImg(url);
     }
 }

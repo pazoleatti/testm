@@ -17,8 +17,6 @@ public class LockDataItem implements Serializable {
     private String user;
     /* Код пользователя, установившего блокировку*/
     private int userId;
-    /* Дата истечения блокировки */
-    private String dateBefore;
     /* Дата установки блокировки */
     private String dateLock;
     /* Состояние связанной асинхронной задачи */
@@ -38,14 +36,6 @@ public class LockDataItem implements Serializable {
 
     public void setKey(String key) {
         this.key = key;
-    }
-
-    public String getDateBefore() {
-        return dateBefore;
-    }
-
-    public void setDateBefore(String dateBefore) {
-        this.dateBefore = dateBefore;
     }
 
     public String getDateLock() {
