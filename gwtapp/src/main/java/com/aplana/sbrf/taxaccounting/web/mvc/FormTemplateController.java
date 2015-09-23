@@ -54,9 +54,11 @@ public class FormTemplateController {
 		String fileName = "formTemplate_" + formTemplateId + ".zip";
 		resp.setHeader("Content-Disposition", "attachment; filename=\"" + fileName + "\"");
 		resp.setCharacterEncoding("UTF-8");
-
-		formTemplateImpexService.exportFormTemplate(formTemplateId, resp.getOutputStream());
-		IOUtils.closeQuietly(resp.getOutputStream());
+		try {
+			formTemplateImpexService.exportFormTemplate(formTemplateId, resp.getOutputStream());
+		} finally {
+			IOUtils.closeQuietly(resp.getOutputStream());
+		}
 	}
 
     @RequestMapping(value = "formTemplate/downloadAll")
@@ -66,9 +68,11 @@ public class FormTemplateController {
                         new SimpleDateFormat("yyyy-MM-dd").format(new Date()))
         );
         response.setCharacterEncoding("UTF-8");
-
-        formTemplateImpexService.exportAllTemplates(response.getOutputStream());
-        IOUtils.closeQuietly(response.getOutputStream());
+		try {
+        	formTemplateImpexService.exportAllTemplates(response.getOutputStream());
+		} finally {
+        	IOUtils.closeQuietly(response.getOutputStream());
+		}
     }
 	
 	
@@ -86,10 +90,12 @@ public class FormTemplateController {
         try {
             Logger logger = new Logger();
             Date endDate = formTemplateService.getFTEndDate(formTemplateId);
-            FormTemplate formTemplate = formTemplateImpexService.importFormTemplate(formTemplateId, file.getInputStream());
-            mainOperatingService.edit(formTemplate, endDate, logger, securityService.currentUserInfo());
-
-            IOUtils.closeQuietly(file.getInputStream());
+			try {
+				FormTemplate formTemplate = formTemplateImpexService.importFormTemplate(formTemplateId, file.getInputStream());
+				mainOperatingService.edit(formTemplate, endDate, logger, securityService.currentUserInfo());
+			} finally {
+            	IOUtils.closeQuietly(file.getInputStream());
+			}
             resp.setContentType("text/plain");
             resp.setCharacterEncoding("UTF-8");
             /*JSONObject result = new JSONObject();

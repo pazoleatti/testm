@@ -279,25 +279,34 @@ public class FormTemplateImpexServiceImpl implements
                 ze = new ZipArchiveEntry(DEC_TEMPLATES_FOLDER + String.format(pathPattern, path, DeclarationTemplateImpexServiceImpl.VERSION_FILE));
                 zipOutputStream.putArchiveEntry(ze);
                 in = new FileInputStream(temFolder.getAbsolutePath() + String.format(pathPattern, path, DeclarationTemplateImpexServiceImpl.VERSION_FILE));
-                IOUtils.copy(in, zipOutputStream);
-                zipOutputStream.closeArchiveEntry();
-                IOUtils.closeQuietly(in);
+				try {
+					IOUtils.copy(in, zipOutputStream);
+					zipOutputStream.closeArchiveEntry();
+				} finally {
+                	IOUtils.closeQuietly(in);
+				}
 
                 // Script
                 ze = new ZipArchiveEntry(DEC_TEMPLATES_FOLDER + String.format(pathPattern, path, DeclarationTemplateImpexServiceImpl.SCRIPT_FILE));
                 zipOutputStream.putArchiveEntry(ze);
                 in = new FileInputStream(temFolder.getAbsolutePath() + String.format(pathPattern, path, DeclarationTemplateImpexServiceImpl.SCRIPT_FILE));
-                IOUtils.copy(in, zipOutputStream);
-                zipOutputStream.closeArchiveEntry();
-                IOUtils.closeQuietly(in);
+				try {
+					IOUtils.copy(in, zipOutputStream);
+					zipOutputStream.closeArchiveEntry();
+				} finally {
+                	IOUtils.closeQuietly(in);
+				}
 
                 // JasperTemplate
                 ze = new ZipArchiveEntry(DEC_TEMPLATES_FOLDER + String.format(pathPattern, path, DeclarationTemplateImpexServiceImpl.REPORT_FILE));
                 zipOutputStream.putArchiveEntry(ze);
                 in = new FileInputStream(temFolder.getAbsolutePath() + String.format(pathPattern, path, DeclarationTemplateImpexServiceImpl.REPORT_FILE));
-                IOUtils.copy(in, zipOutputStream);
-                zipOutputStream.closeArchiveEntry();
-                IOUtils.closeQuietly(in);
+				try {
+					IOUtils.copy(in, zipOutputStream);
+					zipOutputStream.closeArchiveEntry();
+				} finally {
+					IOUtils.closeQuietly(in);
+				}
             }
         } catch (IOException e){
             logger.error("Error ", e);
