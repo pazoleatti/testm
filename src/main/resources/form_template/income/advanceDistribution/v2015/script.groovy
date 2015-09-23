@@ -279,12 +279,6 @@ void calc() {
         calc18_19(prevDataRows, dataRows, row, reportPeriod)
     }
 
-    def isOldCalc = reportPeriod.taxPeriod.year < 2015 || (reportPeriod.taxPeriod.year == 2015 && reportPeriod.order < 3)
-
-    if (!isOldCalc) { // для ЦА досчитать 18-ую графу, используя итог по 18-й графе
-        fixCA18_19(prevDataRows, dataRows, findCA(dataRows), reportPeriod)
-    }
-
     // добавить строку ЦА (скорректрированный) (графа 1..22)
     def caTotalRow = formData.createDataRow()
     caTotalRow.setAlias('ca')
@@ -306,17 +300,36 @@ void calc() {
     }.toString()
     dataRows.add(totalRow)
 
+    def isOldCalc = reportPeriod.taxPeriod.year < 2015 || (reportPeriod.taxPeriod.year == 2015 && reportPeriod.order < 3)
+
     // найти строку ЦА
     def caRow = findCA(dataRows)
     if (caRow != null) {
         // расчеты для строки ЦА (скорректированный)
         ['number', 'regionBankDivision', 'divisionName', 'kpp', 'propertyPrice', 'workersCount', 'subjectTaxCredit',
          'calcFlag', 'obligationPayTax', 'baseTaxOf', 'subjectTaxStavka', 'taxSum', 'taxSumToPay',
-         'taxSumToReduction', 'everyMontherPaymentAfterPeriod', 'everyMonthForKvartalNextPeriod',
+         'taxSumToReduction', 'everyMonthForKvartalNextPeriod',
          'everyMonthForSecondKvartalNextPeriod', 'everyMonthForThirdKvartalNextPeriod',
          'everyMonthForFourthKvartalNextPeriod'].each { alias ->
-            caTotalRow.getCell(alias).setValue(caRow.getCell(alias).getValue(), caTotalRow.getIndex())
+            caTotalRow[alias] = caRow[alias]
         }
+
+        def tempValue
+        if (isOldCalc) {
+            tempValue = caRow.everyMontherPaymentAfterPeriod
+        } else {
+            switch (reportPeriod.order) {
+                case 1: // Период формы «1 квартал»:
+                    // Принимает значение «графы 18» подразделения «Центральный аппарат»
+                    tempValue = caRow.everyMontherPaymentAfterPeriod
+                    break
+                default: // Период формы «полугодие / 9 месяцев / год»:
+                    // «Графа 18» = Значение «графы 18» подразделения «Центральный аппарат» + (Значение итоговой строки по «графе 18» - (Значение итоговой строки по «графе 14» - Значение итоговой строки по «графе 14» формы предыдущего периода))
+                    def prevTaxSum = prevDataRows?.find {it.getAlias() == 'total'}?.taxSum ?: 0
+                    tempValue = (caRow.everyMontherPaymentAfterPeriod ?: 0) + ((totalRow.everyMontherPaymentAfterPeriod ?: 0) - ((totalRow.taxSum ?: 0) - prevTaxSum))
+            }
+        }
+        caTotalRow.everyMontherPaymentAfterPeriod = tempValue
 
         if (formDataEvent != FormDataEvent.COMPOSE) {
             // графа 12
@@ -462,59 +475,27 @@ def calc14(def row) {
 
 def calc18_19 (def prevDataRows, def dataRows, def row, def reportPeriod) {
     def tmp
-    def isCA = row == findCA(dataRows)
-    // использовать старый расчет до сентября 2015
-    def isOldCalc = reportPeriod.taxPeriod.year < 2015 || (reportPeriod.taxPeriod.year == 2015 && reportPeriod.order < 3)
     // графа 18
     switch (reportPeriod.order) {
         case 1: //«графа 18» = «графа 14»
             tmp = row.taxSum
             break
         case 4:
-            if (!isCA || isOldCalc) { // использовать старый расчет до сентября 2015
-                tmp = null
-            } else {
-                tmp = calc18Parts(dataRows, prevDataRows, row)
-            }
+            tmp = null
             break
-        default: // для не ЦА расчет актуален, для ЦА требуется досчитать (в новом расчете)
-            tmp = calc18Parts(dataRows, prevDataRows, row)
+        default:
+            // (Сумма всех нефиксированных строк по «графе 14» - Сумма всех нефиксированных строк по «графе 14» из предыдущего периода) * («графа 14» / Сумма всех нефиксированных строк по «графе 14»)
+            def currentSum = dataRows?.sum { (it.getAlias() == null) ? (it.taxSum ?: 0) : 0 } ?: 0
+            def previousSum = prevDataRows?.sum { (it.getAlias() == null) ? (it.taxSum ?: 0) : 0 } ?: 0
+            // остальные
+            if (currentSum) {
+                tmp = (currentSum - previousSum) * row.taxSum / currentSum
+            }
     }
     row.everyMontherPaymentAfterPeriod = tmp
 
     // графа 19
     row.everyMonthForKvartalNextPeriod = ((reportPeriod.order == 3) ? row.everyMontherPaymentAfterPeriod : 0)
-}
-
-def calc18Parts(def dataRows, def prevDataRows, def row) {
-    // (Сумма всех нефиксированных строк по «графе 14» - Сумма всех нефиксированных строк по «графе 14» из предыдущего периода) * («графа 14» / Сумма всех нефиксированных строк по «графе 14»)
-    def currentSum = dataRows?.sum { (it.getAlias() == null) ? (it.taxSum ?: 0) : 0 } ?: 0
-    def previousSum = prevDataRows?.sum { (it.getAlias() == null) ? (it.taxSum ?: 0) : 0 } ?: 0
-    // остальные
-    if (currentSum) {
-        return (currentSum - previousSum) * row.taxSum / currentSum
-    }
-    return BigDecimal.ZERO
-}
-
-void fixCA18_19(def prevDataRows, def dataRows, def rowCA, def reportPeriod) {
-    if (rowCA == null) { // если строки ЦА нет, то ничего не делаем
-        return
-    }
-    def tmp = BigDecimal.ZERO
-    // «графа 18» = (Сумма всех нефиксированных строк по «графе 14» - Сумма всех нефиксированных строк по «графе 14» из предыдущего периода) * («графа 14» / Сумма всех нефиксированных строк по «графе 14»)
-    // + (значение итоговой строки «графы 18» - (значение итоговой строки «графы 14» текущего периода - значение итоговой строки графы «графа 14» предыдущего периода))
-    if (reportPeriod.order != 1) {
-        def current18Sum = dataRows?.sum { (it.getAlias() == null) ? (it.everyMontherPaymentAfterPeriod ?: 0) : 0 } ?: 0
-        def current14Sum = dataRows?.sum { (it.getAlias() == null) ? (it.taxSum ?: 0) : 0 } ?: 0
-        def previous14Sum = prevDataRows?.sum { (it.getAlias() == null) ? (it.taxSum ?: 0) : 0 } ?: 0
-        tmp = current18Sum - (current14Sum - previous14Sum)
-    }
-
-    rowCA.everyMontherPaymentAfterPeriod = (rowCA.everyMontherPaymentAfterPeriod ?: 0) + tmp // добавляем к предыдущей сумме разницу
-
-    // графа 19
-    rowCA.everyMonthForKvartalNextPeriod = ((reportPeriod.order == 3) ? rowCA.everyMontherPaymentAfterPeriod : 0)
 }
 
 /**
