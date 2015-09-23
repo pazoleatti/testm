@@ -53,7 +53,6 @@ public class TaskParamsWidget extends HTMLPanel {
         boolean result = true;
         errorMessage = "";
         for (ParamWidget widget : widgets) {
-            System.out.println("validate: " +widget.isValid());
             result = result ? widget.isValid() : result;
             String errorMsg = widget.getErrorMsg();
             if (errorMsg != null){
