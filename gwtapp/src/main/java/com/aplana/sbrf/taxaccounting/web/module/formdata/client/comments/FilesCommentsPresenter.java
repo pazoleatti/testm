@@ -40,7 +40,7 @@ public class FilesCommentsPresenter extends PresenterWidget<FilesCommentsPresent
         void setReadOnlyMode(boolean readOnlyMode);
         void setNote(String note);
         void addFileUploadValueChangeHandler(ValueChangeHandler<String> changeHandler);
-        void addFile(FormDataFile file);
+        void addFile(List<FormDataFile> files);
         HandlerRegistration addEndLoadFileHandler(EndLoadFileEvent.EndLoadFileHandler handler);
         HandlerRegistration addStartLoadFileHandler(EndLoadFileEvent.EndLoadFileHandler handler);
     }
@@ -140,7 +140,7 @@ public class FilesCommentsPresenter extends PresenterWidget<FilesCommentsPresent
                         .defaultCallback(new AbstractCallback<AddFileResult>() {
                             @Override
                             public void onSuccess(AddFileResult result) {
-                                getView().addFile(result.getFile());
+                                getView().addFile(result.getFiles());
                             }
                         }, FilesCommentsPresenter.this));
             }
@@ -150,8 +150,8 @@ public class FilesCommentsPresenter extends PresenterWidget<FilesCommentsPresent
             public void onEndLoad(EndLoadFileEvent event) {
                 if (event.isHasError()) {
                     Dialog.errorMessage("Ошибка", ERROR_MSG);
-                    LogAddEvent.fire(FilesCommentsPresenter.this, event.getUuid());
                 }
+                LogAddEvent.fire(FilesCommentsPresenter.this, event.getUuid());
                 LockInteractionEvent.fire(FilesCommentsPresenter.this, false);
             }
         });

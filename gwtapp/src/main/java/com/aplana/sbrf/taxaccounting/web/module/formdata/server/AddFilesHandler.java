@@ -15,6 +15,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Хандлер обрабатывает событие добавления файлов в НФ
  *
@@ -42,16 +45,22 @@ public class AddFilesHandler extends
 	public AddFileResult execute(AddFileAction action, ExecutionContext context)
 		throws ActionException {
         AddFileResult result = new AddFileResult();
-        BlobData blobData = blobDataService.get(action.getUuid());
         TAUser user = securityService.currentUserInfo().getUser();
-        FormDataFile formDataFile = new FormDataFile();
-        formDataFile.setUuid(action.getUuid());
-        formDataFile.setFileName(blobData.getName());
-        formDataFile.setDate(blobData.getCreationDate());
-        formDataFile.setUserName(user.getName());
-        formDataFile.setUserDepartmentName(departmentService.getParentsHierarchyShortNames(user.getDepartmentId()));
-        formDataFile.setNote("");
-        result.setFile(formDataFile);
+        String userName = user.getName();
+        String userDepartmentName = departmentService.getParentsHierarchyShortNames(user.getDepartmentId());
+        List<FormDataFile> files = new ArrayList<FormDataFile>();
+        for(String uuid: action.getUuid().split(",")) {
+            BlobData blobData = blobDataService.get(uuid);
+            FormDataFile formDataFile = new FormDataFile();
+            formDataFile.setUuid(uuid);
+            formDataFile.setFileName(blobData.getName());
+            formDataFile.setDate(blobData.getCreationDate());
+            formDataFile.setUserName(userName);
+            formDataFile.setUserDepartmentName(userDepartmentName);
+            formDataFile.setNote("");
+            files.add(formDataFile);
+        }
+        result.setFile(files);
 		return result;
 	}
 

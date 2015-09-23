@@ -971,7 +971,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                                 onTimerReport(ReportType.EXCEL, false);
                                 onTimerReport(ReportType.CSV, false);
                                 onTimer(true);
-                                timer.scheduleRepeating(50000);
+                                timer.scheduleRepeating(5000);
                             }
                         }, this).addCallback(
                         TaManualRevealCallback.create(this, placeManager)));

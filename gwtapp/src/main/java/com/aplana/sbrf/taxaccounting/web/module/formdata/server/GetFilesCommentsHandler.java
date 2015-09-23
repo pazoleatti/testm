@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.module.formdata.server;
 
 import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
@@ -19,6 +20,9 @@ public class GetFilesCommentsHandler extends AbstractActionHandler<GetFilesComme
 
     @Autowired
     private FormDataService formDataService;
+
+    @Autowired
+    private FormDataAccessService accessService;
 
     @Autowired
     DepartmentService departmentService;
@@ -45,8 +49,13 @@ public class GetFilesCommentsHandler extends AbstractActionHandler<GetFilesComme
         TAUserInfo userInfo = securityService.currentUserInfo();
         GetFilesCommentsResult result = new GetFilesCommentsResult();
         Logger logger = new Logger();
-        FormData formData = formDataService.getFormData(userInfo, action.getFormData().getId(), action.getFormData().isManual(), logger);
-        if (formData.getState().equals(WorkflowState.CREATED) || formData.getState().equals(WorkflowState.PREPARED)) {
+        boolean canEdit = true;
+        try {
+            accessService.canEdit(userInfo, action.getFormData().getId(), false);
+        } catch (AccessDeniedException e) {
+            canEdit = false;
+        }
+        if (canEdit) {
             String key = formDataService.generateTaskKey(action.getFormData().getId(), ReportType.EDIT_FILE_COMMENT);
             LockData lockData = lockService.lock(key, userInfo.getUser().getId(),
                     formDataService.getFormDataFullName(action.getFormData().getId(), action.getFormData().isManual(), null, ReportType.EDIT_FILE_COMMENT));
@@ -60,8 +69,8 @@ public class GetFilesCommentsHandler extends AbstractActionHandler<GetFilesComme
         } else {
             result.setReadOnlyMode(true);
         }
-        result.setFiles(formDataService.getFiles(formData.getId()));
-        result.setNote(formDataService.getNote(formData.getId()));
+        result.setFiles(formDataService.getFiles(action.getFormData().getId()));
+        result.setNote(formDataService.getNote(action.getFormData().getId()));
         result.setUuid(logEntryService.save(logger.getEntries()));
         return result;
     }

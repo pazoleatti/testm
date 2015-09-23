@@ -12,6 +12,7 @@ import com.aplana.sbrf.taxaccounting.web.widget.style.LinkButton;
 import com.aplana.sbrf.taxaccounting.web.widget.style.table.CheckBoxHeader;
 import com.google.gwt.cell.client.*;
 import com.google.gwt.cell.client.Cell;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
@@ -31,6 +32,8 @@ import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.mvp.client.PopupViewWithUiHandlers;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import static com.google.gwt.view.client.DefaultSelectionEventManager.createCustomManager;
@@ -182,7 +185,7 @@ public class FilesCommentsView extends PopupViewWithUiHandlers<FilesCommentsUiHa
 
             @Override
             public void render(Cell.Context context, FormDataFile object, SafeHtmlBuilder sb) {
-                String link = "<a href=\"/download/downloadBlobController/formDataFile/" + object.getUuid() + "\">" + object.getFileName() + "</a>";
+                String link = "<a href=\"" + GWT.getHostPageBaseURL() + "download/downloadBlobController/formDataFile/" + object.getUuid() + "\">" + object.getFileName() + "</a>";
                 sb.appendHtmlConstant(link);
             }
 
@@ -253,14 +256,14 @@ public class FilesCommentsView extends PopupViewWithUiHandlers<FilesCommentsUiHa
             table.setColumnWidth(fixColumn, 0, Style.Unit.EM);
         }
         table.addColumn(fileColumn, "Файл");
+        table.setColumnWidth(fileColumn, 13, Style.Unit.EM);
         table.addColumn(noteColumn, "Комментарий");
-        table.setColumnWidth(noteColumn, 15, Style.Unit.EM);
         table.addColumn(dateColumn, "Дата-время");
         table.setColumnWidth(dateColumn, 8.5, Style.Unit.EM);
         table.addColumn(userColumn, "Пользователь");
         table.setColumnWidth(userColumn, 10, Style.Unit.EM);
         table.addColumn(departmentColumn, "Подразделение пользователя");
-        table.setColumnWidth(departmentColumn, 10, Style.Unit.EM);
+        table.setColumnWidth(departmentColumn, 12, Style.Unit.EM);
     }
 
     private boolean isModify() {
@@ -304,6 +307,7 @@ public class FilesCommentsView extends PopupViewWithUiHandlers<FilesCommentsUiHa
 
     @Override
     public void setTableData(List<FormDataFile> result) {
+        sort(result);
         oldFiles = copyFiles(result);
         dataProvider.setList(result);
         selectionModel.clear();
@@ -338,11 +342,24 @@ public class FilesCommentsView extends PopupViewWithUiHandlers<FilesCommentsUiHa
     }
 
     @Override
-    public void addFile(FormDataFile file) {
-        dataProvider.getList().add(0, file);
+    public void addFile(List<FormDataFile> files) {
+        checkBoxHeader.setValue(false);
+        dataProvider.getList().addAll(0, files);
+        sort(dataProvider.getList());
         table.redraw();
     }
 
+    private void sort(List<FormDataFile> files) {
+        Collections.sort(files, new Comparator<FormDataFile>() {
+            @Override
+            public int compare(FormDataFile o1, FormDataFile o2) {
+                int compareFileName = o1.getFileName().compareTo(o2.getFileName());
+                if (compareFileName != 0)
+                    return compareFileName;
+                return -o1.getDate().compareTo(o2.getDate());
+            }
+        });
+    }
     @Override
     public HandlerRegistration addEndLoadFileHandler(EndLoadFileEvent.EndLoadFileHandler handler) {
         return addFile.addEndLoadHandler(handler);

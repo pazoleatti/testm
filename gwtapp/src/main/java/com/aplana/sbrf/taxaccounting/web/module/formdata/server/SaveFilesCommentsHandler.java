@@ -21,6 +21,9 @@ public class SaveFilesCommentsHandler extends AbstractActionHandler<SaveFilesCom
     private FormDataService formDataService;
 
     @Autowired
+    private FormDataAccessService accessService;
+
+    @Autowired
     private LockDataService lockService;
 
     @Autowired
@@ -38,21 +41,20 @@ public class SaveFilesCommentsHandler extends AbstractActionHandler<SaveFilesCom
     public GetFilesCommentsResult execute(SaveFilesCommentsAction action, ExecutionContext executionContext) throws ActionException {
         TAUserInfo userInfo = securityService.currentUserInfo();
         GetFilesCommentsResult result = new GetFilesCommentsResult();
+        accessService.canEdit(userInfo, action.getFormData().getId(), false);
         Logger logger = new Logger();
-        FormData formData = formDataService.getFormData(userInfo, action.getFormData().getId(), action.getFormData().isManual(), logger);
         String key = formDataService.generateTaskKey(action.getFormData().getId(), ReportType.EDIT_FILE_COMMENT);
         LockData lockData = lockService.getLock(key);
-        if ((formData.getState().equals(WorkflowState.CREATED) || formData.getState().equals(WorkflowState.PREPARED)) &&
-                lockData != null && lockData.getUserId() == userInfo.getUser().getId()) {
+        if (lockData != null && lockData.getUserId() == userInfo.getUser().getId()) {
             result.setReadOnlyMode(false);
-            formDataService.saveFilesComments(formData.getId(), action.getNote(), action.getFiles());
+            formDataService.saveFilesComments(action.getFormData().getId(), action.getNote(), action.getFiles());
             logger.info("Данные успешно сохранены.");
         } else {
             result.setReadOnlyMode(true);
             logger.error("Сохранение не выполнено, так как файлы и комментарии данного экземпляра налоговой формы не заблокированы текущим пользователем.");
         }
-        result.setFiles(formDataService.getFiles(formData.getId()));
-        result.setNote(formDataService.getNote(formData.getId()));
+        result.setFiles(formDataService.getFiles(action.getFormData().getId()));
+        result.setNote(formDataService.getNote(action.getFormData().getId()));
         result.setUuid(logEntryService.save(logger.getEntries()));
         return result;
     }

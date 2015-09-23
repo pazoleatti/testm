@@ -497,4 +497,13 @@ public class FormDataDaoTest {
         formDataDao.updateEdited(1, true);
         assertTrue(formDataDao.isEdited(1));
     }
+
+    @Test
+    public void testNote() {
+        assertNull(formDataDao.getNote(1));
+        assertEquals(formDataDao.getNote(11), "Первичка по");
+
+        formDataDao.updateNote(1, "Проверка комментария к НФ");
+        assertEquals(formDataDao.getNote(1), "Проверка комментария к НФ");
+    }
 }

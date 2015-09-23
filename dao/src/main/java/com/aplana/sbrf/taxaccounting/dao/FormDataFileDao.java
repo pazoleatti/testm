@@ -9,7 +9,7 @@ import java.util.List;
 /**
  * DAO-Интерфейс для работы с типами асинхронных задач
  */
-public interface FormDataFilesDao {
+public interface FormDataFileDao {
 
     /**
      * Получение данных по файлам НФ

@@ -254,4 +254,11 @@ public class FileUploadWidget extends Composite implements HasHandlers, HasValue
     public void setImg(String url) {
         uploadButton.setImg(url);
     }
+
+    public void setMultiple(boolean multiple) {
+        if (multiple)
+            uploader.getElement().setAttribute("multiple", "multiple");
+        else
+            uploader.getElement().removeAttribute("multiple");
+    }
 }

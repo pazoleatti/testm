@@ -1,6 +1,6 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
-import com.aplana.sbrf.taxaccounting.dao.FormDataFilesDao;
+import com.aplana.sbrf.taxaccounting.dao.FormDataFileDao;
 import com.aplana.sbrf.taxaccounting.model.FormDataFile;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.RowMapper;
@@ -16,7 +16,7 @@ import java.util.*;
  * Реализация DAO для работы с информацией о {@link com.aplana.sbrf.taxaccounting.model.FormDataFile файлах НФ}
  */
 @Repository
-public class FormDataFilesDaoImpl extends AbstractDao implements FormDataFilesDao {
+public class FormDataFileDaoImpl extends AbstractDao implements FormDataFileDao {
 
 	private final static class FormDataFilesMapper implements RowMapper<FormDataFile> {
 		@Override
@@ -39,8 +39,7 @@ public class FormDataFilesDaoImpl extends AbstractDao implements FormDataFilesDa
 				"select form_data_id, blob_data_id, user_name, user_department_name, note, bd.creation_date file_creation_date, bd.name file_name " +
                     "from form_data_file " +
                     "left join blob_data bd on bd.id=form_data_file.blob_data_id " +
-                    "where form_data_id = ? " +
-                    "order by file_creation_date desc",
+                    "where form_data_id = ?",
 				new Object[]{formDataId},
 				new int[]{Types.NUMERIC},
 				new FormDataFilesMapper()
@@ -91,8 +90,8 @@ public class FormDataFilesDaoImpl extends AbstractDao implements FormDataFilesDa
         // create new
         if (!newFiles.isEmpty()) {
             getJdbcTemplate().batchUpdate(
-                    "insert into form_data_file (form_data_id, blob_data_id, user_name, user_department_name, note, attachment_date) " +
-                            "values (?, ?, ?, ?, ?, sysdate)",
+                    "insert into form_data_file (form_data_id, blob_data_id, user_name, user_department_name, note) " +
+                            "values (?, ?, ?, ?, ?)",
                     new BatchPreparedStatementSetter() {
                         @Override
                         public void setValues(PreparedStatement ps, int index) throws SQLException {

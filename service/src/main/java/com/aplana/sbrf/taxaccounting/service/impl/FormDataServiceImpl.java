@@ -3,7 +3,7 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.core.api.LockStateLogger;
 import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
-import com.aplana.sbrf.taxaccounting.dao.FormDataFilesDao;
+import com.aplana.sbrf.taxaccounting.dao.FormDataFileDao;
 import com.aplana.sbrf.taxaccounting.dao.FormPerformerDao;
 import com.aplana.sbrf.taxaccounting.dao.api.ConfigurationDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DataRowDao;
@@ -153,7 +153,7 @@ public class FormDataServiceImpl implements FormDataService {
     @Autowired
     private BlobDataService blobDataService;
     @Autowired
-    private FormDataFilesDao formDataFilesDao;
+    private FormDataFileDao formDataFileDao;
 
     @Override
     public long createFormData(Logger logger, TAUserInfo userInfo, int formTemplateId, int departmentReportPeriodId, Integer comparativePeriodId, boolean accruing, FormDataKind kind, Integer periodOrder, boolean importFormData) {
@@ -2030,7 +2030,7 @@ public class FormDataServiceImpl implements FormDataService {
 
     @Override
     public List<FormDataFile> getFiles(long formDataId) {
-        return formDataFilesDao.getFiles(formDataId);
+        return formDataFileDao.getFiles(formDataId);
     }
 
     @Override
@@ -2041,6 +2041,6 @@ public class FormDataServiceImpl implements FormDataService {
     @Override
     public void saveFilesComments(long formDataId, String note, List<FormDataFile> files) {
         formDataDao.updateNote(formDataId, note);
-        formDataFilesDao.saveFiles(formDataId, files);
+        formDataFileDao.saveFiles(formDataId, files);
     }
 }

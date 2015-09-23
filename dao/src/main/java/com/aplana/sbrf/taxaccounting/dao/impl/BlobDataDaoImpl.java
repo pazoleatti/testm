@@ -14,6 +14,7 @@ import java.io.InputStream;
 import java.sql.*;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Date;
 
 /**
  * User: avanteev
@@ -28,7 +29,7 @@ public class BlobDataDaoImpl extends AbstractDao implements BlobDataDao {
         @Override
         public BlobData mapRow(ResultSet rs, int rowNum) throws SQLException {
             BlobData blobData = new BlobData();
-            blobData.setCreationDate(rs.getDate("creation_date"));
+            blobData.setCreationDate(new Date(rs.getTimestamp("creation_date").getTime()));
             blobData.setName(rs.getString("name"));
             blobData.setUuid(rs.getString("id"));
             blobData.setInputStream(rs.getBlob("data").getBinaryStream());

@@ -317,10 +317,10 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
     @Override
     public void startTimerReport(ReportType reportType) {
         if (ReportType.EXCEL.equals(reportType)) {
-            timerExcel.scheduleRepeating(30000);
+            timerExcel.scheduleRepeating(3000);
             timerExcel.run();
         } else {
-            timerCSV.scheduleRepeating(30000);
+            timerCSV.scheduleRepeating(3000);
             timerCSV.run();
         }
     }

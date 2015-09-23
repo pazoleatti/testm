@@ -951,7 +951,7 @@ create table form_data_file
 (
 form_data_id number(18) not null,
 blob_data_id varchar2(36) not null,
-attachment_date date not null,
+attachment_date date,
 user_name varchar2(512) not null,
 user_department_name varchar2(4000) not null,
 note varchar2(512)    
