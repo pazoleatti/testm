@@ -160,27 +160,42 @@ def logicCheck() {
     def dataRows = formDataService.getDataRowHelper(formData)?.allCached
 
     def wasError = [false, false]
+    def dateFrom = Date.parse('dd.MM.yyyy', '01.01.1900')
+    def dateTo = Date.parse('dd.MM.yyyy', '31.12.2099')
+    def period = reportPeriodService.get(formData.reportPeriodId)
+    def year = period?.taxPeriod?.year
+    def before9Month2015 = (year < 2015 || (year == 2015 && period.order < 3))
+    def departmentInn = (!before9Month2015 ? getDepartmentParams()?.INN?.value : null)
 
     for (def row in dataRows) {
         def index = row.getIndex()
 
-        // Проверка обязательных полей
+        // 1. Проверка обязательных полей
         checkNonEmptyColumns(row, index, nonEmptyColumns, logger, true)
 
-        // «Графа 14» и «Графа 15» обязательны для заполнения, если значение «Графы 16» и «Графы 17» = «1»
-        if (row.type == 1 && row.status == 1 && (row.inn == null || row.kpp == null)) {
-            logger.error("Строка ${index}: В случае если графы «%s» и «%s» равны значению «1», должна быть заполнена графа  «%s» и «%s»!",
+        // 2. Проверка на заполнение зависимого поля ИНН и КПП (графа 14 и 15)
+        if (before9Month2015 && row.type == 1 && row.status == 1 && (row.inn == null || row.kpp == null)) {
+            // до 9 месяцев 2015 года
+            logger.error("Строка $index: В случае если графы «%s» и «%s» равны значению «1», должна быть заполнена графа «%s» и «%s»!",
+                    getColumnName(row, 'type'), getColumnName(row, 'status'), getColumnName(row, 'inn'), getColumnName(row, 'kpp'))
+        } else if (!before9Month2015 && row.type?.intValue() in [1, 3, 4, 5] && row.status == 1 && (row.inn == null || row.kpp == null)) {
+            // с 9 месяцев 2015 года
+            logger.error("Строка $index: В случае если графы «%s» равна значению «1» / «3» / «4» / «5» и графа и «%s» равны значению «1», должна быть заполнена графа «%s» и «%s»!",
                     getColumnName(row, 'type'), getColumnName(row, 'status'), getColumnName(row, 'inn'), getColumnName(row, 'kpp'))
         }
 
-        // Проверка паттернов
+        // 3. Проверка паттернов (+ 5. Проверка контрольной суммы)
         if (row.emitentInn && checkPattern(logger, row, 'emitentInn', row.emitentInn, INN_JUR_PATTERN, wasError[1] ? null : INN_JUR_MEANING, true)) {
+            // 5. Проверка контрольной суммы
             checkControlSumInn(logger, row, 'emitentInn', row.emitentInn, true)
         } else if (row.emitentInn){
             wasError[1] = true
         }
-        if (row.type != 2 && row.status != 2) { // если хотя бы одна графа из 16-й и 17-й равна 2. то не проверять 14-ю и 15-ю
+        if ((before9Month2015 && row.type != 2 && row.status != 2) ||
+                (!before9Month2015 && row.type != 2 && !(row.status?.intValue() in [2, 3]))) {
+            // если хотя бы одна графа из 16-й и 17-й равна 2. то не проверять 14-ю и 15-ю
             if (row.inn && checkPattern(logger, row, 'inn', row.inn, INN_JUR_PATTERN, wasError[1] ? null : INN_JUR_MEANING, true)) {
+                // 5. Проверка контрольной суммы
                 checkControlSumInn(logger, row, 'inn', row.inn, true)
             } else if (row.inn){
                 wasError[1] = true
@@ -190,12 +205,45 @@ def logicCheck() {
             }
         }
 
-        // «Графа 17» принимает значения «1» или «2»
-        if (row.status && row.status != 1 && row.status != 2) {
-            logger.error("Строка ${index}: Атрибут «%s» заполнен неверно («%s»)! Возможные значения: может принимать значение «1» или «2»!",
+        // 4. Проверка диапазона дат
+        if (row.date && dateFrom < row.date && row.date > dateTo) {
+            logger.error("Строка $index: Значение даты графы «%s» должно принимать значение из следующего диапазона: 01.01.1900 - 31.12.2099!", getColumnName(row, 'date'))
+        }
+
+        // 6. Проверка значения «Графы 17» (статус получателя)
+        if (before9Month2015 && row.status && row.status != 1 && row.status != 2) {
+            logger.error("Строка $index: Графа «%s» заполнен неверно (%s)! Возможные значения: «1» или «2»",
+                    getColumnName(row, 'status'), row.status)
+        } else if (!before9Month2015 && !(row.status?.intValue() in [1, 2, 3])) {
+            logger.error("Строка $index: Графа «%s» заполнен неверно (%s)! Возможные значения: «1», «2», «3»",
                     getColumnName(row, 'status'), row.status)
         }
+
+        // 7. Проверка значения «Графы 16» (тип получателя)
+        if (!before9Month2015 && row.type && !(row.type?.intValue() in [1, 2, 3, 4, 5])) {
+            logger.error("Строка $index: Графа «%s» заполнена неверно (%s)! Возможные значения: «1», «2», «3», «4», «5»",
+                    getColumnName(row, 'type'), row.type)
+        }
+
+        // 8. Проверка значения «Графы 9» (отчетный год)
+        if (!before9Month2015 && row.emitentInn && departmentInn && row.emitentInn == departmentInn && row.year) {
+            def rowYear = row.year.format('yyyy').toInteger()
+            if (rowYear < year - 4 || year < rowYear) {
+                logger.warn("Строка $index: Графа «%s» заполнена неверно (%s)! Для Банка (графа «%s» = ИНН %s формы настроек подразделения формы) по данной графе может быть указан отчетный год формы или предыдущие отчетные года с периодом давности до четырех лет включительно.",
+                        getColumnName(row, 'year'), rowYear, getColumnName(row, 'emitentInn'), row.emitentInn)
+            }
+
+        }
     }
+}
+
+def getDepartmentParams() {
+    def filter = "DEPARTMENT_ID = $formDataDepartment.id"
+    def departmentParamList = refBookFactory.getDataProvider(33).getRecords(getReportPeriodEndDate() - 1, null, filter, null)
+    if (departmentParamList && !departmentParamList.isEmpty()) {
+        return departmentParamList.get(0)
+    }
+    return null
 }
 
 def roundValue(BigDecimal value, def int precision) {
