@@ -1,11 +1,9 @@
 package com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared;
 
 import java.util.List;
-import java.util.Map;
 
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.gwtplatform.dispatch.shared.Result;
-
 
 public class InitRefBookMultiResult implements Result {
     private static final long serialVersionUID = 1099858218534060155L;

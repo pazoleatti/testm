@@ -7,7 +7,6 @@ import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.scheduler.api.entity.TaskParam;
 import com.aplana.sbrf.taxaccounting.scheduler.api.exception.TaskExecutionException;
 import com.aplana.sbrf.taxaccounting.scheduler.api.form.FormElement;
-import com.aplana.sbrf.taxaccounting.scheduler.api.task.UserTask;
 import com.aplana.sbrf.taxaccounting.scheduler.api.task.UserTaskLocal;
 import com.aplana.sbrf.taxaccounting.scheduler.api.task.UserTaskRemote;
 import com.aplana.sbrf.taxaccounting.service.LoadRefBookDataService;

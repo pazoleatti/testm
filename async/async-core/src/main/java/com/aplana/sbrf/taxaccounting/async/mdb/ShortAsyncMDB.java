@@ -14,7 +14,6 @@ import javax.jms.*;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import java.util.Map;
-import static com.aplana.sbrf.taxaccounting.async.task.AsyncTask.RequiredParams.LOCKED_OBJECT;
 
 /**
  * Обработчик асинхронных задач из очереди с быстрым выполнением
