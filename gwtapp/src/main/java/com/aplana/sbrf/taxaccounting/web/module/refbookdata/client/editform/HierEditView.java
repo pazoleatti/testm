@@ -100,7 +100,7 @@ public class HierEditView extends AbstractEditView implements HierEditPresenter.
                 updateWidgetsVisibility(true);
                 versionStart.setEnabled(true);
                 versionEnd.setEnabled(true);
-                /*allVersion.setVisible(false);*/
+                allVersion.setVisible(false);
                 break;
             case EDIT:
                 save.setEnabled(true);

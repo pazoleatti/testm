@@ -347,7 +347,7 @@ public class RefBookHierDataPresenter extends PresenterWidget<RefBookHierDataPre
         getView().searchButtonClicked();
     }
 
-    private void checkRecord() {
+    /*private void checkRecord() {
         CheckRecordExistenceAction action = new CheckRecordExistenceAction();
         action.setRefBookId(refBookId);
         action.setRecordId(recordId);
@@ -367,7 +367,7 @@ public class RefBookHierDataPresenter extends PresenterWidget<RefBookHierDataPre
                         }
                     }
                 }, this));
-    }
+    }*/
 
 
 }

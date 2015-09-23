@@ -4,6 +4,9 @@ import java.io.Serializable;
 import java.util.Map;
 
 public class RefBookDataRow implements Serializable {
+    /**
+     * Уникальной идентификатор из таблицы ref_book_record
+     */
 	Long refBookRowId;
 	Map<String, String> values;
 

@@ -10,7 +10,6 @@ import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.Abst
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.DepartmentEditPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.HierEditPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.event.SetFormMode;
-import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.event.UpdateForm;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.event.AddItemEvent;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.event.DeleteItemEvent;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.event.SearchButtonEvent;
@@ -57,7 +56,7 @@ public class RefBookHierPresenter extends Presenter<RefBookHierPresenter.MyView,
     private final HandlerRegistration[] registrations = new HandlerRegistration[2];
     private IRefBookExecutor dataInterface;
     private FormMode mode;
-    private Long attrId, recordId, refBookId;
+    private Long attrId, uniqueRecordId, refBookId;
     private String refBookName;
 
     @Inject
@@ -133,8 +132,8 @@ public class RefBookHierPresenter extends Presenter<RefBookHierPresenter.MyView,
         getView().setRefBookNameDesc(refBookName);
         setMode(mode);
         commonEditPresenter.setVersionMode(false);
-        commonEditPresenter.show(recordId);
-        registrations[1].removeHandler();
+        commonEditPresenter.show(uniqueRecordId);
+        //registrations[1].removeHandler();
     }
 
     @Override
@@ -226,8 +225,7 @@ public class RefBookHierPresenter extends Presenter<RefBookHierPresenter.MyView,
                                 registrations[0] = commonEditPresenter.addClickHandlerForAllVersions(getClick());
                                 if (result.isAvailable()) {
                                     commonEditPresenter.setVersionMode(false);
-                                    commonEditPresenter.setCurrentUniqueRecordId(null);
-                                    commonEditPresenter.setRecordId(null);
+                                    /*commonEditPresenter.setRecordId(null);*/
 
                                     GetRefBookAttributesAction action = new GetRefBookAttributesAction(refBookId);
                                     dispatcher.execute(action, CallbackUtils.defaultCallback(
@@ -314,9 +312,8 @@ public class RefBookHierPresenter extends Presenter<RefBookHierPresenter.MyView,
 
                 /*refBookLinearPresenter.changeProvider(true);*/
                 commonEditPresenter.setVersionMode(true);
-                commonEditPresenter.setCurrentUniqueRecordId(null);
-                commonEditPresenter.setRecordId(null);
-                recordId = refBookHierDataPresenter.getSelectedId();
+                /*commonEditPresenter.setRecordId(null);*/
+                uniqueRecordId = refBookHierDataPresenter.getSelectedId();
                 dataInterface.setMode(mode);
 
                 GetRefBookAttributesAction action = new GetRefBookAttributesAction();
@@ -331,41 +328,22 @@ public class RefBookHierPresenter extends Presenter<RefBookHierPresenter.MyView,
                                         getView().setVersionView(true);
                                         versionPresenter.setTableColumns(result.getColumns());
                                         commonEditPresenter.setMode(mode);
-                                        versionPresenter.updateTable();
+
                                         //hierEditFormPresenter.init(refBookId);
                                                             /*getProxy().manualReveal(RefBookDataPresenter.this);*/
-                                    }
-                                }, RefBookHierPresenter.this));
-
-                GetNameAction nameAction = new GetNameAction();
-                nameAction.setRefBookId(refBookId);
-                nameAction.setUniqueRecordId(recordId);
-                dispatcher.execute(nameAction,
-                        CallbackUtils.defaultCallback(
-                                new AbstractCallback<GetNameResult>() {
-                                    @Override
-                                    public void onSuccess(GetNameResult result) {
-                                        getView().setRefBookNameDesc(result.getUniqueAttributeValues(), getView().getRelevanceDate());
-                                        commonEditPresenter.setRecordId(result.getRecordId());
-                                    }
-                                }, RefBookHierPresenter.this));
-
-                registrations[1] = commonEditPresenter.addUpdateFormHandler(new UpdateForm.UpdateFormHandler() {
-                    @Override
-                    public void onUpdateForm(UpdateForm event) {
-                        GetNameAction nameAction = new GetNameAction();
-                        nameAction.setRefBookId(refBookId);
-                        nameAction.setUniqueRecordId(recordId);
-                        dispatcher.execute(nameAction,
-                                CallbackUtils.defaultCallback(
-                                        new AbstractCallback<GetNameResult>() {
+                                        GetRefBookRecordIdAction recordIdAction = new GetRefBookRecordIdAction();
+                                        recordIdAction.setRefBookId(refBookId);
+                                        recordIdAction.setUniqueRecordId(refBookHierDataPresenter.getSelectedId());
+                                        dispatcher.execute(recordIdAction, CallbackUtils.defaultCallback(new AbstractCallback<GetRefBookRecordIdResult>() {
                                             @Override
-                                            public void onSuccess(GetNameResult result) {
-                                                getView().setRefBookNameDesc(result.getUniqueAttributeValues(), getView().getRelevanceDate());
+                                            public void onSuccess(GetRefBookRecordIdResult result) {
+                                                commonEditPresenter.setRecordId(result.getRecordId());
+                                                versionPresenter.setRecordId(result.getRecordId());
+                                                versionPresenter.updateTable();
                                             }
                                         }, RefBookHierPresenter.this));
-                    }
-                });
+                                    }
+                                }, RefBookHierPresenter.this));
             }
         };
     }
@@ -373,19 +351,19 @@ public class RefBookHierPresenter extends Presenter<RefBookHierPresenter.MyView,
     /*private void checkRecord() {
         CheckRecordExistenceAction action = new CheckRecordExistenceAction();
         action.setRefBookId(refBookId);
-        action.setRecordId(recordId);
+        action.setRecordId(uniqueRecordId);
         dispatcher.execute(action, CallbackUtils.defaultCallback(
                 new AbstractCallback<CheckRecordExistenceResult>() {
                     @Override
                     public void onSuccess(CheckRecordExistenceResult result) {
                         if (result.isRecordExistence()) {
-                            recordId = null;
+                            uniqueRecordId = null;
                             refBookHierDataPresenter.reload();
                             getView().loadAndSelect();
                         } else {
                             refBookHierDataPresenter.reload();
-                            refBookHierDataPresenter.setSelected(recordId);
-                            hierEditFormPresenter.show(recordId);
+                            refBookHierDataPresenter.setSelected(uniqueRecordId);
+                            hierEditFormPresenter.show(uniqueRecordId);
                         }
                     }
                 }, this));

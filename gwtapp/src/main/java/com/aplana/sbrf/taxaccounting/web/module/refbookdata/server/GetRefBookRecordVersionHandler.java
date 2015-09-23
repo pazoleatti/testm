@@ -36,9 +36,9 @@ public class GetRefBookRecordVersionHandler extends AbstractActionHandler<GetRef
         RefBook refBook = refBookFactory.get(action.getRefBookId());
         if (action.getPagingParams() != null) {//TODO перенести в отдельный хэндлер
             //TODO: recordId надо передавать с клиента!!
-            Long recordId = refBookDataProvider.getRecordId(action.getRefBookRecordId());
+            Long recordId;
             PagingResult<Map<String, RefBookValue>> refBookPage = refBookDataProvider
-                    .getRecordVersionsByRecordId(recordId, action.getPagingParams(), null, refBook.getAttributes().get(0));
+                    .getRecordVersionsByRecordId(action.getRefBookRecordId(), action.getPagingParams(), null, refBook.getAttributes().get(0));
             List<RefBookDataRow> rows = new ArrayList<RefBookDataRow>();
 
             //кэшируем список провайдеров для атрибутов-ссылок, чтобы для каждой строки их заново не создавать

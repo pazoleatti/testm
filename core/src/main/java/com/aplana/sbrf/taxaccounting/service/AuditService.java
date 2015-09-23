@@ -55,7 +55,7 @@ public interface AuditService {
              String declarationTypeName, String formTypeName, Integer formKindId, String note, String blobDataId);
 
     /**
-     * Добавить информацию об логировании из версий макетов
+     * Добавить информацию о логировании из версий макетов
      * @param event событие {@link FormDataEvent} (обязательное)
      * @param userInfo информация о пользователе, который совершает событие (обязательное)
      * @param departmentId подразделение НФ/декларации (необязательное)

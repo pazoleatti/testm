@@ -194,7 +194,7 @@ public class RefBook implements Serializable {
 				return attribute;
 			}
 		}
-		throw new IllegalArgumentException(new StringBuilder("Attribute \"").append(alias).append("\" not found in refbook (id=").append(id).append(", \"").append(name).append("\"))").toString());
+		throw new IllegalArgumentException("Attribute \"" + alias + "\" not found in refbook (id=" + id + ", \"" + name + "\"))");
 	}
 
 	/**
@@ -208,7 +208,7 @@ public class RefBook implements Serializable {
 				return attribute;
 			}
 		}
-		throw new IllegalArgumentException(new StringBuilder("Attribute id=").append(attributeId).append(" not found in refbook (id=").append(id).append(", \"").append(name).append("\"))").toString());
+		throw new IllegalArgumentException("Attribute id=" + attributeId + " not found in refbook (id=" + id + ", \"" + name + "\"))");
 	}
 
 	/**

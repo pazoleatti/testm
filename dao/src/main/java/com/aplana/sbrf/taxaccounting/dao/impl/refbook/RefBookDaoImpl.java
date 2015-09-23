@@ -1221,7 +1221,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     public int getRecordVersionsCount(Long refBookId, Long uniqueRecordId) {
         return getJdbcTemplate().queryForInt("select count(*) as cnt from REF_BOOK_RECORD " +
                 "where REF_BOOK_ID=? and STATUS=" + VersionedObjectStatus.NORMAL.getId() + " and RECORD_ID=(select RECORD_ID from REF_BOOK_RECORD where ID=?)",
-                new Object[]{refBookId, uniqueRecordId});
+                refBookId, uniqueRecordId);
     }
 
     private static final String RECORD_VERSION =
@@ -1263,7 +1263,9 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     @Override
     public Long getFirstRecordId(Long refBookId, Long uniqueRecordId) {
         try {
-            return getJdbcTemplate().queryForLong(GET_FIRST_RECORD_ID, uniqueRecordId, refBookId, uniqueRecordId);
+            return getJdbcTemplate().queryForObject(GET_FIRST_RECORD_ID,
+                    new Object[]{uniqueRecordId, refBookId, uniqueRecordId},
+                    Long.class);
         } catch (EmptyResultDataAccessException e) {
             return null;
         }
