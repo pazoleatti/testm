@@ -40,11 +40,8 @@ public class SourcesView extends PopupViewWithUiHandlers<SourcesUiHandlers> impl
     }
 
     private List<FormToFormRelation> tableData = null;
-
     private final PopupPanel widget;
-
     private static final DateTimeFormat DATE_TIME_FORMAT = DateTimeFormat.getFormat("dd.MM.yyyy");
-    private TaxType taxType;
 
     interface UrlTemplates extends SafeHtmlTemplates {
 
@@ -241,7 +238,6 @@ public class SourcesView extends PopupViewWithUiHandlers<SourcesUiHandlers> impl
 
     @Override
     public void setTaxType(TaxType taxType) {
-        this.taxType = taxType;
         if (!taxType.equals(TaxType.DEAL)) {
             modalWindow.setTitle("Источники декларации");
         } else {

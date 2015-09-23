@@ -38,7 +38,6 @@ public class LockListPresenter extends Presenter<LockListPresenter.MyView,
         LockListPresenter.MyProxy> implements LockListUiHandlers {
 
     private final DispatchAsync dispatcher;
-    private PlaceManager placeManager;
     private final TableDataProvider dataProvider = new TableDataProvider();
 
     @ProxyCodeSplit
@@ -63,7 +62,6 @@ public class LockListPresenter extends Presenter<LockListPresenter.MyView,
                              DispatchAsync dispatcher, PlaceManager placeManager) {
         super(eventBus, view, proxy, RevealContentTypeHolder.getMainContent());
         this.dispatcher = dispatcher;
-        this.placeManager = placeManager;
         getView().setUiHandlers(this);
         getView().assignDataProvider(getView().getPageSize(), dataProvider);
     }
