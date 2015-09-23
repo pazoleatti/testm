@@ -1905,7 +1905,6 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
                 public String mapRow(ResultSet rs, int rowNum) throws SQLException {
                     Integer month = SqlUtils.getInteger(rs, "month");
                     Date correctionDate = rs.getDate("correctionDate");
-                    char taxType = rs.getString("tax_type").charAt(0);
                     return String.format(
                             FORM_LINK_MSG,
                             rs.getString("tax_type").charAt(0) == TaxType.ETR.getCode() ? " " : "налоговой ",
