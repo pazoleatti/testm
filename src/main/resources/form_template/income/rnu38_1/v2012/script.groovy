@@ -251,7 +251,7 @@ void importTransportData() {
 }
 
 void addTransportData(def xml) {
-    def dataRows = []
+    def rows = []
 
     def int rnuIndexRow = 2
     def int colOffset = 1
@@ -283,11 +283,11 @@ void addTransportData(def xml) {
             newRow[alias] = getNumber(row.cell[rnuIndexCol].text(), rnuIndexRow, rnuIndexCol + colOffset)
         }
 
-        dataRows.add(newRow)
+        rows.add(newRow)
     }
 
-    def totalRow = getTotalRow(dataRows)
-    dataRows.add(totalRow)
+    def totalRow = getTotalRow(rows)
+    rows.add(totalRow)
 
     // сравнение итогов
     if (!logger.containsLevel(LogLevel.ERROR) && xml.rowTotal.size() == 1) {
