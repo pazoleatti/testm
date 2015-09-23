@@ -23,6 +23,7 @@ import com.aplana.sbrf.taxaccounting.web.module.refbookdata.server.RefBookDataSe
 import com.aplana.sbrf.taxaccounting.web.module.refbooklist.server.RefBookListServerModule;
 import com.aplana.sbrf.taxaccounting.web.module.scheduler.server.SchedulerServerModule;
 import com.aplana.sbrf.taxaccounting.web.module.scriptexecution.server.ScriptExecutionServerModule;
+import com.aplana.sbrf.taxaccounting.web.module.scriptsimport.server.ScriptsImportServerModule;
 import com.aplana.sbrf.taxaccounting.web.module.sources.server.SourcesServerModule;
 import com.aplana.sbrf.taxaccounting.web.module.taxformnomination.server.TaxFormNominationServerModule;
 import com.aplana.sbrf.taxaccounting.web.module.testpage.server.TestPageServerModule;
@@ -49,7 +50,7 @@ import org.springframework.context.annotation.Import;
         DepartmentConfigServerModule.class, DepartmentConfigPropertyServerModule.class, BookerStatementsServerModule.class, BookerStatementsDataServerModule.class,
         RefBookListServerModule.class, RefBookDataServerModule.class, MigrationServerModule.class, SchedulerServerModule.class,
         TestPageServerModule.class, DeclarationVersionListServerModule.class, VersionHistoryServerModule.class,
-        RefBookMultiPickerServerModule.class, ScriptExecutionServerModule.class, UploadTransportDataServerModule.class, IfrsServerModule.class, LockServerModule.class})
+        RefBookMultiPickerServerModule.class, ScriptExecutionServerModule.class, ScriptsImportServerModule.class, UploadTransportDataServerModule.class, IfrsServerModule.class, LockServerModule.class})
 @ComponentScan(basePackageClasses = MainServerModule.class)
 @EnableAspectJAutoProxy
 public class MainServerModule {

@@ -3049,4 +3049,9 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     public boolean isRecordsExist(List<Long> uniqueRecordIds) {
         return getJdbcTemplate().queryForObject(String.format("select count (*) from ref_book_record where %s", SqlUtils.transformToSqlInStatement("id", uniqueRecordIds)), Integer.class) == uniqueRecordIds.size();
     }
+
+    @Override
+    public boolean isRefBookExist(long refBookId) {
+        return getJdbcTemplate().queryForObject("select count(*) from ref_book where id = ?", new Object[]{refBookId}, Integer.class) > 0;
+    }
 }

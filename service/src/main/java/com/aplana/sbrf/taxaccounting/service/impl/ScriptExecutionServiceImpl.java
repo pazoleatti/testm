@@ -1,12 +1,22 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
+import com.aplana.sbrf.taxaccounting.dao.BlobDataDao;
+import com.aplana.sbrf.taxaccounting.dao.DeclarationTemplateDao;
+import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
+import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
+import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
+import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
+import com.aplana.sbrf.taxaccounting.model.FormTemplate;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
-import com.aplana.sbrf.taxaccounting.service.LogEntryService;
-import com.aplana.sbrf.taxaccounting.service.ScriptExecutionService;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
+import com.aplana.sbrf.taxaccounting.model.util.Pair;
+import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.service.shared.ScriptComponentContextHolder;
+import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Service;
@@ -14,8 +24,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.script.Bindings;
 import javax.script.ScriptException;
-import java.util.HashMap;
-import java.util.Map;
+import java.io.*;
+import java.util.*;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 /**
  * Реализация сервиса для выполнения скриптов над формой.
@@ -28,6 +40,24 @@ public class ScriptExecutionServiceImpl extends TAAbstractScriptingServiceImpl i
 
     @Autowired
     private LogEntryService logEntryService;
+    @Autowired
+    private BlobDataService blobDataService;
+    @Autowired
+    private FormDataScriptingService formDataScriptingService;
+    @Autowired
+    private DeclarationDataScriptingService declarationDataScriptingService;
+    @Autowired
+    private RefBookScriptingService refBookScriptingService;
+    @Autowired
+    private FormTemplateDao formTemplateDao;
+    @Autowired
+    private DeclarationTemplateDao declarationTemplateDao;
+    @Autowired
+    private RefBookDao refBookDao;
+    @Autowired
+    private AuditService auditService;
+
+
 
     @Override
     public void executeScript(TAUserInfo userInfo, String script, Logger logger) {
@@ -81,4 +111,128 @@ public class ScriptExecutionServiceImpl extends TAAbstractScriptingServiceImpl i
 
         return beans;
     }
+
+    @Override
+    public void importScripts(Logger logger, InputStream zipFile, String fileName, TAUserInfo userInfo) {
+        Map<String, List<String>> files = new HashMap<String, List<String>>();
+        ZipInputStream zis = null;
+        boolean hasFatalError = false;
+        try {
+            zis = new ZipInputStream(new BufferedInputStream(zipFile));
+            ZipEntry entry;
+            while((entry = zis.getNextEntry()) != null) {
+                if (!entry.isDirectory()) {
+                    String folderName = entry.getName().substring(0, entry.getName().indexOf("/"));
+                    String scriptName = entry.getName().substring(entry.getName().indexOf("/") + 1, entry.getName().indexOf("."));
+
+                    if (!files.containsKey(folderName)) {
+                        files.put(folderName, new ArrayList<String>());
+                    }
+                    files.get(folderName).add(scriptName);
+
+                    if (!FOLDERS.contains(folderName)) {
+                        logger.error("Пропущен каталог \"%s\", так как его имя не поддерживается", folderName);
+                        continue;
+                    }
+                    String script = IOUtils.toString(zis);
+                    /** Импорт скриптов нф */
+                    if (folderName.equals(FOLDERS.form_template.name())) {
+                        int formTypeId = 0;
+                        int year = 0;
+                        try {
+                            formTypeId = Integer.parseInt(scriptName.substring(0, scriptName.indexOf("-")));
+                            year = Integer.parseInt(scriptName.substring(scriptName.indexOf("-") + 1));
+                        } catch (NumberFormatException e) {
+                            e.printStackTrace();
+                            logger.error("Название файла \"%s\" некорректно. Файл был пропущен.", scriptName);
+                            continue;
+                        }
+                        Integer formTemplateId = formTemplateDao.get(formTypeId, year);
+                        if (formTemplateId == null) {
+                            logger.error("Макет налоговой формы, указанный в файле \"%s\" не существует. Файл был пропущен.", scriptName);
+                            continue;
+                        }
+                        formTemplateDao.updateScript(formTemplateId, script);
+                        FormTemplate formTemplate = formTemplateDao.get(formTemplateId);
+                        logger.info("Выполнен импорт скрипта для макета налоговой формы \"%s\"", formTemplate.getName());
+                    }
+
+                    /** Импорт скриптов деклараций */
+                    if (folderName.equals(FOLDERS.declaration_template.name())) {
+                        int declarationTypeId = 0;
+                        int year = 0;
+                        try {
+                            declarationTypeId = Integer.parseInt(scriptName.substring(0, scriptName.indexOf("-")));
+                            year = Integer.parseInt(scriptName.substring(scriptName.indexOf("-") + 1));
+                        } catch (NumberFormatException e) {
+                            logger.error("Название файла \"%s\" некорректно. Файл был пропущен.", scriptName);
+                            continue;
+                        }
+                        Integer declarationTemplateId = declarationTemplateDao.get(declarationTypeId, year);
+                        if (declarationTemplateId == null) {
+                            logger.error("Макет декларации, указанный в файле \"%s\" не существует. Файл был пропущен.", scriptName);
+                            continue;
+                        }
+                        declarationTemplateDao.updateScript(declarationTemplateId, script);
+                        DeclarationTemplate declarationTemplate = declarationTemplateDao.get(declarationTemplateId);
+                        logger.info("Выполнен импорт скрипта для макета декларации формы \"%s\"", declarationTemplate.getName());
+                    }
+
+                    /** Импорт скриптов справочников */
+                    if (folderName.equals(FOLDERS.ref_book.name())) {
+                        long refBookId = 0;
+                        try {
+                            refBookId = Long.parseLong(scriptName);
+                        } catch (NumberFormatException e) {
+                            logger.error("Название файла \"%s\" некорректно. Файл был пропущен.", scriptName);
+                            continue;
+                        }
+                        if (!refBookDao.isRefBookExist(refBookId)) {
+                            logger.error("Справочник, указанный в файле \"%s\" не существует. Файл был пропущен.", scriptName);
+                            continue;
+                        }
+                        refBookScriptingService.saveScript(refBookId, script);
+                        RefBook refBook = refBookDao.get(refBookId);
+                        logger.info("Выполнен импорт скрипта для справочника \"%s\"", refBook.getName());
+                    }
+                }
+            }
+        } catch(Exception e) {
+            logger.error("Произошла непредвиденная ошибка при импорте скриптов");
+            hasFatalError = true;
+            throw new ServiceException(e.getMessage(), e);
+        } finally {
+            logger.info("Импорт завершен");
+            StringBuilder auditMsg = new StringBuilder()
+                    .append(hasFatalError ? "Ошибка при импорте скриптов из файла \"" : "Выполнен импорт скриптов из файла \"")
+                    .append(fileName).append("\". ");
+            for (Map.Entry<String, List<String>> file : files.entrySet()) {
+                auditMsg.append(file.getKey()).append(": ");
+                for (Iterator<String> it = file.getValue().iterator(); it.hasNext();) {
+                    auditMsg.append(it.next());
+                    if (it.hasNext()) {
+                        auditMsg.append(",");
+                    } else {
+                        auditMsg.append("; ");
+                    }
+                }
+            }
+            auditService.add(FormDataEvent.SCRIPTS_IMPORT, userInfo, null, null, null, null, null, auditMsg.toString(), logEntryService.save(logger.getEntries()));
+            if (zis != null) {
+                try {
+                    zis.close();
+                } catch (IOException e) {}
+            }
+        }
+    }
+
+    private enum FOLDERS {declaration_template, form_template, ref_book;
+        public static boolean contains(String fileName) {
+            for (FOLDERS folder : values()) {
+                if (folder.name().equals(fileName)) {
+                    return true;
+                }
+            }
+            return false;
+        }}
 }

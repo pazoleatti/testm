@@ -661,4 +661,11 @@ public interface RefBookDao {
      * @return все записи существуют?
      */
     boolean isRecordsExist(List<Long> uniqueRecordIds);
+
+    /**
+     * Проверяет, существует ли указанный справочник
+     * @param refBookId идентификатор справочника
+     * @return все записи существуют?
+     */
+    boolean isRefBookExist(long refBookId);
 }

@@ -94,7 +94,9 @@ public enum FormDataEvent implements Serializable {
 
     ADD_DEPARTMENT(901, "Создание подразделения"),
     UPDATE_DEPARTMENT(902, "Модификация подразделения"),
-    DELETE_DEPARTMENT(903, "Удаление подразделения");
+    DELETE_DEPARTMENT(903, "Удаление подразделения"),
+
+    SCRIPTS_IMPORT(904, "Импорт скриптов");
 
 	private String title;
 	private int code;

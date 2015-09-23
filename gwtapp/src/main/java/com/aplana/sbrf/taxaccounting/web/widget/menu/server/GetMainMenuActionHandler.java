@@ -20,6 +20,7 @@ import com.aplana.sbrf.taxaccounting.web.module.migration.client.MigrationTokens
 import com.aplana.sbrf.taxaccounting.web.module.periods.client.PeriodsTokens;
 import com.aplana.sbrf.taxaccounting.web.module.refbooklist.client.RefBookListTokens;
 import com.aplana.sbrf.taxaccounting.web.module.scheduler.client.SchedulerTokens;
+import com.aplana.sbrf.taxaccounting.web.module.scriptsimport.client.ScriptsImportTokens;
 import com.aplana.sbrf.taxaccounting.web.module.sources.client.SourcesTokens;
 import com.aplana.sbrf.taxaccounting.web.module.taxformnomination.client.TaxFormNominationToken;
 import com.aplana.sbrf.taxaccounting.web.module.testpage.client.TestPageTokens;
@@ -269,6 +270,8 @@ public class GetMainMenuActionHandler extends
                             + RefBookListTokens.REFBOOK_LIST_ADMIN));
                     templateMenu.getSubMenu().add(new MenuItem("Сбросить кэш", CLEAR_CACHE_LINK, "", "_blank"));
                     templateMenu.getSubMenu().add(new MenuItem("Экспорт макетов", DOWNLOAD_ALL_TEMPLATES));
+                    templateMenu.getSubMenu().add(new MenuItem("Импорт скриптов", NUMBER_SIGN
+                            + ScriptsImportTokens.SCRIPTS_IMPORT));
                 }
 
                 // в банке все равно такого пользователя не будет, если надо убрать скажите мне aivanov
