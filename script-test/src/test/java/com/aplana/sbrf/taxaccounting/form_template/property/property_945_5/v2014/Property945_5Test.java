@@ -1,7 +1,6 @@
 package com.aplana.sbrf.taxaccounting.form_template.property.property_945_5.v2014;
 
 import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.util.ScriptTestBase;
 import com.aplana.sbrf.taxaccounting.util.TestScriptHelper;
 import com.aplana.sbrf.taxaccounting.util.mock.ScriptTestMockHelper;
@@ -13,6 +12,7 @@ import org.mockito.stubbing.Answer;
 
 import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 
 import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.when;
@@ -133,6 +133,40 @@ public class Property945_5Test extends ScriptTestBase {
     public void importExcelTest() {
         testHelper.setImportFileInputStream(getImportXlsInputStream());
         testHelper.execute(FormDataEvent.IMPORT);
-        Assert.assertTrue("Logger must contains error level messages.", testHelper.getLogger().containsLevel(LogLevel.ERROR));
+        int expected = 3; // в файле 3 строк
+        Assert.assertEquals(expected, testHelper.getDataRowHelper().getAll().size());
+        checkLoadData(testHelper.getDataRowHelper().getAll());
+        checkLogger();
+    }
+
+    /** Проверить загруженные данные. */
+    void checkLoadData(List<DataRow<Cell>> dataRows) {
+        String [] refBookColumns = { "subject", "oktmo" };
+        String [] stringColumns = { "taxAuthority", "kpp", "title" };
+        // графа 5..18
+        String [] numberColumns = { "cost1", "cost2", "cost3", "cost4", "cost5", "cost6", "cost7", "cost8",
+                "cost9", "cost10", "cost11", "cost12", "cost13", "cost31_12" };
+        Long expected = 0L;
+        for (DataRow<Cell> row : dataRows) {
+            for (String alias : refBookColumns) {
+                Cell cell = row.getCell(alias);
+                Long value = (cell.getNumericValue() != null ? cell.getNumericValue().longValue() : null);
+                Assert.assertNotNull("row." + alias + "[" + row.getIndex() + "]", value);
+            }
+
+            for (String alias : stringColumns) {
+                Cell cell = row.getCell(alias);
+                String value = cell.getStringValue();
+                Assert.assertNotNull("row." + alias + "[" + row.getIndex() + "]", value);
+            }
+
+            expected++;
+            // графа 5..18
+            for (String alias : numberColumns) {
+                Cell cell = row.getCell(alias);
+                Long value = (cell.getNumericValue() != null ? cell.getNumericValue().longValue() : null);
+                Assert.assertEquals("row." + alias + "[" + row.getIndex() + "]", expected, value);
+            }
+        }
     }
 }
