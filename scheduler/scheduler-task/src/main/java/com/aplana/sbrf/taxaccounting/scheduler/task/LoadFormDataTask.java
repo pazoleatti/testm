@@ -10,12 +10,9 @@ import com.aplana.sbrf.taxaccounting.scheduler.api.exception.TaskExecutionExcept
 import com.aplana.sbrf.taxaccounting.scheduler.api.form.FormElement;
 import com.aplana.sbrf.taxaccounting.scheduler.api.form.SelectBox;
 import com.aplana.sbrf.taxaccounting.scheduler.api.form.SelectBoxItem;
-import com.aplana.sbrf.taxaccounting.scheduler.api.task.UserTask;
 import com.aplana.sbrf.taxaccounting.scheduler.api.task.UserTaskLocal;
 import com.aplana.sbrf.taxaccounting.scheduler.api.task.UserTaskRemote;
 import com.aplana.sbrf.taxaccounting.service.*;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.ejb.Local;
@@ -83,8 +80,7 @@ public class LoadFormDataTask extends AbstractUserTask {
         }
         String key = LockData.LockObjects.CONFIGURATION_PARAMS.name() + "_" + UUID.randomUUID().toString().toLowerCase();
         lockDataService.lock(key, userId,
-                LockData.DescriptionTemplate.CONFIGURATION_PARAMS.getText(),
-                lockDataService.getLockTimeout(LockData.LockObjects.CONFIGURATION_PARAMS));
+                LockData.DescriptionTemplate.CONFIGURATION_PARAMS.getText());
         try {
             loadFormDataService.importFormData(userService.getSystemUserInfo(), departmentsIds, null, new Logger(), lockId, false);
         } finally {

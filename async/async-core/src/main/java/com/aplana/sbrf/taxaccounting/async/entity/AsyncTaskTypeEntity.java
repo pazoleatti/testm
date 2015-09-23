@@ -2,7 +2,6 @@ package com.aplana.sbrf.taxaccounting.async.entity;
 
 import javax.persistence.*;
 import java.io.Serializable;
-import java.util.Date;
 
 /**
  * Сущность представляющая типы асинхронных задач, связывающие их идентификаторы и классы-обработчики

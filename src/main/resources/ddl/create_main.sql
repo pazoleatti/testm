@@ -744,7 +744,6 @@ create table lock_data
 (
   key varchar2(1000) not null,
   user_id number(9) not null,
-  date_before date not null,
   date_lock date default sysdate not null,
   state varchar2(500),
   state_date date,
@@ -756,7 +755,6 @@ create table lock_data
 comment on table lock_data is 'Информация о блокировках';
 comment on column lock_data.key is 'Код блокировки';
 comment on column lock_data.user_id is 'Идентификатор пользователя, установившего блокировку';
-comment on column lock_data.date_before is 'Срок истечения блокировки';
 comment on column lock_data.date_lock is 'Дата установки блокировки';
 comment on column lock_data.state is 'Статус выполнения асинхронной задачи, связанной с блокировкой';
 comment on column lock_data.state_date is 'Дата последнего изменения статуса';
@@ -864,16 +862,6 @@ comment on column configuration_email.name is 'Код параметра';
 comment on column configuration_email.value is 'Значение параметра';
 comment on column configuration_email.description is 'Описание параметра';
 
---------------------------------------------------------------------------------------------------------
-create table configuration_lock
-(
-key varchar2(100) not null,
-timeout number(9) not null
-);
-
-comment on table configuration_lock is 'Параметры блокировок';
-comment on column configuration_lock.key is 'Ключ блокировки';
-comment on column configuration_lock.timeout is 'Таймаут блокировки';
 --------------------------------------------------------------------------------------------------------
 create table form_data_consolidation
 (

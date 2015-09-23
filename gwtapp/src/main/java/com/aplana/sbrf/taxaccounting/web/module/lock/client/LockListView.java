@@ -40,25 +40,17 @@ public class LockListView extends ViewWithUiHandlers<LockListUiHandlers> impleme
     public static final String USER_TITLE = "Пользователь";
     public static final String STATE_TITLE = "Состояние задачи";
     public static final String STATE_DATE_TITLE = "Дата изменения состояния";
-    public static final String DATE_LOCK_BEFORE = "Дата истечения блокировки";
     public static final String DATE_LOCK = "Дата установки блокировки";
     public static final String SERVER_NODE_TITLE = "Сервер";
 
     @UiField
-    Button extendButton;
-
-    @UiField
     Button deleteButton;
-
     @UiField
     TextBox filterText;
-
     @UiField
     GenericDataGrid<LockDataItem> lockDataTable;
-
     @UiField
     FlexiblePager pager;
-
     @UiField(provided = true)
     ValueListBox<LockData.LockQueues> queueList;
 
@@ -160,17 +152,8 @@ public class LockListView extends ViewWithUiHandlers<LockListUiHandlers> impleme
         };
         dateLockColumn.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
 
-        TextColumn<LockDataItem> dateBeforeColumn = new TextColumn<LockDataItem>() {
-            @Override
-            public String getValue(LockDataItem taskItem) {
-                return taskItem.getDateBefore();
-            }
-        };
-        dateBeforeColumn.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
-
         lockDataTable.setColumnWidth(checkColumn, 20, Style.Unit.PX);
         lockDataTable.setColumnWidth(dateLockColumn, 110, Style.Unit.PX);
-        lockDataTable.setColumnWidth(dateBeforeColumn, 110, Style.Unit.PX);
         lockDataTable.setColumnWidth(userColumn, 120, Style.Unit.PX);
         lockDataTable.setColumnWidth(stateColumn, 100, Style.Unit.PX);
         lockDataTable.setColumnWidth(stateDateColumn, 120, Style.Unit.PX);
@@ -181,7 +164,6 @@ public class LockListView extends ViewWithUiHandlers<LockListUiHandlers> impleme
 
         lockDataTable.addColumn(checkColumn);
         lockDataTable.addResizableColumn(dateLockColumn, DATE_LOCK);
-        lockDataTable.addResizableColumn(dateBeforeColumn, DATE_LOCK_BEFORE);
         lockDataTable.addColumn(keyColumn, KEY_TITLE);
         lockDataTable.addColumn(serverNodeColumn, SERVER_NODE_TITLE);
         lockDataTable.addColumn(descriptionColumn, DESCRIPTION_TITLE);
@@ -220,7 +202,6 @@ public class LockListView extends ViewWithUiHandlers<LockListUiHandlers> impleme
         }
         boolean status = selected && (hasRoleAdmin || !hasNoOwnLocks);
         deleteButton.setEnabled(status);
-        extendButton.setEnabled(status);
     }
 
     @Override
@@ -259,20 +240,6 @@ public class LockListView extends ViewWithUiHandlers<LockListUiHandlers> impleme
     @Override
     public LockData.LockQueues getQueues() {
         return queueList.getValue();
-    }
-
-    @UiHandler("extendButton")
-    public void onExtend(ClickEvent event){
-        if(getUiHandlers() != null) {
-            Dialog.confirmMessage("Продление блокировок", "Вы действительно хотите продлить блокировку на 1 час?", new DialogHandler() {
-                @Override
-                public void yes() {
-                    if (getUiHandlers() != null) {
-                        getUiHandlers().onExtendLock();
-                    }
-                }
-            });
-        }
     }
 
     @UiHandler("deleteButton")

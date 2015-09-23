@@ -92,8 +92,7 @@ public class RecalculateFormDataHandler extends AbstractActionHandler<Recalculat
                     public LockData createLock(String keyTask, ReportType reportType, TAUserInfo userInfo) {
                         return lockDataService.lock(keyTask, userInfo.getUser().getId(),
                                 formDataService.getFormDataFullName(action.getFormData().getId(), action.getFormData().isManual(), null, reportType),
-                                LockData.State.IN_QUEUE.getText(),
-                                lockDataService.getLockTimeout(LockData.LockObjects.FORM_DATA));
+                                LockData.State.IN_QUEUE.getText());
                     }
 
                     @Override

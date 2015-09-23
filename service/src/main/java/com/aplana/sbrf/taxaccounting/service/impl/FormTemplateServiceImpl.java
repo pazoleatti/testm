@@ -253,8 +253,7 @@ public class FormTemplateServiceImpl implements FormTemplateService {
                         formTemplate.getType().getTaxType().getName(),
                         SIMPLE_DATE_FORMAT.format(formTemplate.getVersion()),
                         endVersion != null ? SIMPLE_DATE_FORMAT.format(endVersion) : "-"
-                ),
-                lockDataService.getLockTimeout(LockData.LockObjects.FORM_TEMPLATE));
+                ));
         return !(objectLock != null && objectLock.getUserId() != userInfo.getUser().getId());
 	}
 

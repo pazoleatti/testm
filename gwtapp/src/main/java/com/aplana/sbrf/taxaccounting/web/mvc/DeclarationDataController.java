@@ -93,7 +93,10 @@ public class DeclarationDataController {
         response.setContentType("application/octet-stream");
         response.setHeader("Content-Disposition", "attachment; filename=\""
                 + fileName + "\"");
-        IOUtils.copy(xmlDataIn, response.getOutputStream());
-        IOUtils.closeQuietly(xmlDataIn);
+		try {
+        	IOUtils.copy(xmlDataIn, response.getOutputStream());
+		} finally {
+        	IOUtils.closeQuietly(xmlDataIn);
+		}
     }
 }

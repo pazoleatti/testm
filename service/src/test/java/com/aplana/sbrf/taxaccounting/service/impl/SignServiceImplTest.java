@@ -116,11 +116,13 @@ public class SignServiceImplTest {
         InputStream dataIn = Thread.currentThread().getContextClassLoader().getResourceAsStream(dataFilePath);
         File dataFile = File.createTempFile(prefix,suffix);
         FileOutputStream dataOut = new FileOutputStream(dataFile);
-        IOUtils.copy(dataIn, dataOut);
-        IOUtils.closeQuietly(dataIn);
-        IOUtils.closeQuietly(dataOut);
-        dataFile.deleteOnExit();
-
+		try {
+	        IOUtils.copy(dataIn, dataOut);
+		} finally {
+			IOUtils.closeQuietly(dataIn);
+			IOUtils.closeQuietly(dataOut);
+			dataFile.deleteOnExit();
+		}
         return dataFile;
     }
 }

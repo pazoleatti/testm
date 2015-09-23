@@ -215,7 +215,7 @@ public class LoadFormDataServiceTest {
     }
 
     private void mockLockDataService() {
-        when(lockDataService.lock(anyString(), anyInt(), anyString(), anyString(), anyLong())).thenReturn(null);
+        when(lockDataService.lock(anyString(), anyInt(), anyString(), anyString())).thenReturn(null);
         ReflectionTestUtils.setField(loadFormDataService, "lockDataService", lockDataService);
     }
 

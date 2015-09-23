@@ -100,7 +100,7 @@ public class HierEditView extends AbstractEditView implements HierEditPresenter.
                 updateWidgetsVisibility(true);
                 versionStart.setEnabled(true);
                 versionEnd.setEnabled(true);
-                /*allVersion.setVisible(false);*/
+                allVersion.setVisible(false);
                 break;
             case EDIT:
                 save.setEnabled(true);
@@ -153,10 +153,6 @@ public class HierEditView extends AbstractEditView implements HierEditPresenter.
                 }
             }
         }
-    }
-
-    private boolean equalsCleanStrings(String first, String second) {
-        return StringUtils.cleanString(first).equals(StringUtils.cleanString(second));
     }
 
     @Override

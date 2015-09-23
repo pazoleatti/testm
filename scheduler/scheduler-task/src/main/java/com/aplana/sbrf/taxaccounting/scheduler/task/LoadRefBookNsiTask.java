@@ -7,7 +7,6 @@ import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.scheduler.api.entity.TaskParam;
 import com.aplana.sbrf.taxaccounting.scheduler.api.exception.TaskExecutionException;
 import com.aplana.sbrf.taxaccounting.scheduler.api.form.FormElement;
-import com.aplana.sbrf.taxaccounting.scheduler.api.task.UserTask;
 import com.aplana.sbrf.taxaccounting.scheduler.api.task.UserTaskLocal;
 import com.aplana.sbrf.taxaccounting.scheduler.api.task.UserTaskRemote;
 import com.aplana.sbrf.taxaccounting.service.LoadRefBookDataService;
@@ -48,8 +47,7 @@ public class LoadRefBookNsiTask extends AbstractUserTask {
     public void executeBusinessLogic(Map<String, TaskParam> params, int userId) throws TaskExecutionException {
         String key = LockData.LockObjects.CONFIGURATION_PARAMS.name() + "_" + UUID.randomUUID().toString().toLowerCase();
         lockDataService.lock(key, userId,
-                LockData.DescriptionTemplate.CONFIGURATION_PARAMS.getText(),
-                lockDataService.getLockTimeout(LockData.LockObjects.CONFIGURATION_PARAMS));
+                LockData.DescriptionTemplate.CONFIGURATION_PARAMS.getText());
         try {
             loadRefBookDataService.importRefBookNsi(userService.getSystemUserInfo(), new Logger(), lockId, false);
         } finally {

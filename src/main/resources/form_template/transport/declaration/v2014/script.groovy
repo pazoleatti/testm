@@ -141,7 +141,7 @@ def buildXml(def departmentParamTransport, def departmentParamTransportRow, def 
         Date yearStartDate = Date.parse(dateFormat,"01.01.${reportPeriod.taxPeriod.year}")
         def reportPeriods = reportPeriodService.getReportPeriodsByDate(TaxType.TRANSPORT, yearStartDate, getReportPeriodEndDate())
         builder.Файл(
-                ИдФайл: declarationService.generateXmlFileId(1, declarationData.departmentReportPeriodId, declarationData.taxOrganCode, declarationData.kpp),
+                ИдФайл: generateXmlFileId(declarationData.taxOrganCode),
                 ВерсПрог: applicationVersion,
                 ВерсФорм: departmentParamTransport.FORMAT_VERSION) {
             Документ(
@@ -608,4 +608,20 @@ def roundInt(def value) {
 def getBenefitCode(def parentRecordId) {
     def recordId = getRefBookValue(7, parentRecordId)?.TAX_BENEFIT_ID?.value
     return getRefBookValue(6, recordId)?.CODE?.value
+}
+
+def generateXmlFileId(String taxOrganCode) {
+    def departmentParam = getDepartmentParam()
+    if (departmentParam) {
+        def date = Calendar.getInstance().getTime()?.format("yyyyMMdd")
+        def fileId = TaxType.TRANSPORT.declarationPrefix + '_' +
+                taxOrganCode + '_' +
+                taxOrganCode + '_' +
+                departmentParam.INN?.value +
+                declarationData.kpp + "_" +
+                date + "_" +
+                UUID.randomUUID().toString().toUpperCase()
+        return fileId
+    }
+    return null
 }

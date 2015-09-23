@@ -69,8 +69,7 @@ public class UnitEditingHandler extends AbstractActionHandler<UnitEditingAction,
         String lockKey = LockData.LockObjects.REF_BOOK.name() + "_" + RefBookDepartmentDao.REF_BOOK_ID;
         RefBook refBook = refBookDao.get(RefBookDepartmentDao.REF_BOOK_ID);
         LockData lockData = lockService.lock(lockKey, userId,
-                String.format(LockData.DescriptionTemplate.REF_BOOK.getText(), refBook.getName()),
-                lockService.getLockTimeout(LockData.LockObjects.REF_BOOK));
+                String.format(LockData.DescriptionTemplate.REF_BOOK.getText(), refBook.getName()));
         if (lockData == null) {
             try {
                 //Блокировка установлена
@@ -83,8 +82,7 @@ public class UnitEditingHandler extends AbstractActionHandler<UnitEditingAction,
                         String referenceLockKey = LockData.LockObjects.REF_BOOK.name() + "_" + attributeRefBook.getId();
                         if (!lockedObjects.contains(referenceLockKey)) {
                             LockData referenceLockData = lockService.lock(referenceLockKey, userId,
-                                    String.format(LockData.DescriptionTemplate.REF_BOOK.getText(), attributeRefBook.getName()),
-                                    lockService.getLockTimeout(LockData.LockObjects.REF_BOOK));
+                                    String.format(LockData.DescriptionTemplate.REF_BOOK.getText(), attributeRefBook.getName()));
                             if (referenceLockData == null) {
                                 //Блокировка установлена
                                 lockedObjects.add(referenceLockKey);

@@ -170,7 +170,7 @@ public class EditFormView extends AbstractEditView implements EditFormPresenter.
                 updateWidgetsVisibility(true);
                 versionStart.setEnabled(true);
                 versionEnd.setEnabled(true);
-                //allVersion.setVisible(false);
+                allVersion.setVisible(false);
                 break;
             case EDIT:
                 save.setEnabled(true);

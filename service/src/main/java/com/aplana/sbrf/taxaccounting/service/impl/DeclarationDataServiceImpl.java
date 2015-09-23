@@ -809,8 +809,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     @Transactional
     public LockData lock(long declarationDataId, TAUserInfo userInfo) {
         LockData lockData = lockDataService.lock(generateAsyncTaskKey(declarationDataId, null), userInfo.getUser().getId(),
-                getDeclarationFullName(declarationDataId, null),
-                lockDataService.getLockTimeout(LockData.LockObjects.DECLARATION_DATA));
+                getDeclarationFullName(declarationDataId, null));
         checkLock(lockData, userInfo.getUser());
         return lockData;
     }

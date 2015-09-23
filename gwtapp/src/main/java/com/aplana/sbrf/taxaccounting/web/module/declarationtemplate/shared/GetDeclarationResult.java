@@ -45,7 +45,7 @@ public class GetDeclarationResult implements Result {
         this.uuid = uuid;
     }
 
-    public String getLockDate() {
+	public String getLockDate() {
         return lockDate;
     }
 

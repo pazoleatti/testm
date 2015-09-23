@@ -118,15 +118,6 @@ public class FormTemplateColumnPresenter
 		getView().flush();
 	}
 
-	private boolean aliasExists(Column column) {
-		for (Column col : formTemplate.getColumns()) {
-			if ((col.getAlias() == null)  || col.getAlias().equals(column.getAlias()) && col != column) {
-				return true;
-			}
-		}
-		return false;
-	}
-
 	/**
 	 * Исправляем значение alias чтобы небыло дубликатов
 	 * 

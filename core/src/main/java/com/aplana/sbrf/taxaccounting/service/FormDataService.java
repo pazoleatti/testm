@@ -489,4 +489,19 @@ public interface FormDataService {
      * @return
      */
     List<DataRow<HeaderCell>> getHeaders(FormData formData, TAUserInfo userInfo, Logger logger);
+
+    /**
+     * Получение данных по файлам для формы "Файлы и комментарии"
+     */
+    List<FormDataFile> getFiles(long formDataId);
+
+    /**
+     * Получения комментария для формы "Файлы и комментарии"
+     */
+    String getNote(long formDataId);
+
+    /**
+     * Сохранение данных формы "Файлы и комментарии"
+     */
+    void saveFilesComments(long formDataId, String note, List<FormDataFile> files);
 }

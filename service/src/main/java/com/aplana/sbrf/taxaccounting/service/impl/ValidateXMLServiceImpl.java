@@ -34,8 +34,8 @@ public class ValidateXMLServiceImpl implements ValidateXMLService {
 
     static final Log log = LogFactory.getLog(ValidateXMLService.class);
 
-    private static final String TEMPLATE = ClassUtils
-            .classPackageAsResourcePath(ValidateXMLServiceImpl.class) + "/VSAX3.exe";
+    private static final String TEMPLATE = ClassUtils.classPackageAsResourcePath(ValidateXMLServiceImpl.class) + "/VSAX3.exe";
+	private static final long VALIDATION_TIMEOUT = 1000 * 60 * 60; //таймаут работы утилиты для валидации XML по XSD
 
     private static final String SUCCESS_FLAG = "SUCCESS";
     public static final String NOT_DELETE_WARN = "Файл %s не был удален";
@@ -100,14 +100,18 @@ public class ValidateXMLServiceImpl implements ValidateXMLService {
 
     @Override
     public boolean validate(DeclarationData data,  TAUserInfo userInfo, Logger logger, boolean isErrorFatal, File xmlFile) {
+		return validate(data, userInfo, logger, isErrorFatal, xmlFile, VALIDATION_TIMEOUT);
+	}
+
+	boolean validate(DeclarationData data,  TAUserInfo userInfo, Logger logger, boolean isErrorFatal, File xmlFile, long timeout) {
         if (xmlFile!=null){
-            return isValid(data, userInfo, logger, isErrorFatal, xmlFile);
+            return isValid(data, userInfo, logger, isErrorFatal, xmlFile, timeout);
         } else {
-            return isValid(data, userInfo, logger, isErrorFatal);
+            return isValid(data, userInfo, logger, isErrorFatal, timeout);
         }
     }
 
-    private boolean isValid(DeclarationData data, TAUserInfo userInfo, Logger logger, boolean isErrorFatal, File xmlFile) {
+    boolean isValid(DeclarationData data, TAUserInfo userInfo, Logger logger, boolean isErrorFatal, File xmlFile, long timeout) {
         String[] params = new String[3];
         DeclarationTemplate template = declarationTemplateService.get(data.getDeclarationTemplateId());
 
@@ -118,25 +122,28 @@ public class ValidateXMLServiceImpl implements ValidateXMLService {
             vsax3File = File.createTempFile("VSAX3",".exe");
             outputStream = new FileOutputStream(vsax3File);
             inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(TEMPLATE);
-            log.info("VSAX3.exe copy, total number of bytes " + IOUtils.copy(inputStream, outputStream));
-            inputStream.close();
-            outputStream.close();
+			try {
+            	log.info("VSAX3.exe copy, total number of bytes " + IOUtils.copy(inputStream, outputStream));
+			} finally {
+				inputStream.close();
+				outputStream.close();
+			}
             params[0] = vsax3File.getAbsolutePath();
-
             //Получаем xml
             params[1] = xmlFile.getAbsolutePath();
-
             //Получаем xsd файл
             xsdFile = File.createTempFile("validation_file",".xsd");
             outputStream = new FileOutputStream(xsdFile);
             BlobData blobData = blobDataService.get(template.getXsdId());
             inputStream = blobData.getInputStream();
-            log.info("Xsd copy, total number of bytes " + IOUtils.copy(inputStream, outputStream));
-            inputStream.close();
-            outputStream.close();
+			try {
+            	log.info("Xsd copy, total number of bytes " + IOUtils.copy(inputStream, outputStream));
+			} finally {
+				inputStream.close();
+				outputStream.close();
+			}
             params[2] = xsdFile.getAbsolutePath();
 
-            int timeout = lockDataService.getLockTimeout(LockData.LockObjects.XSD_VALIDATION);
             ProcessRunner runner = new ProcessRunner(params, logger, isErrorFatal);
             Thread threadRunner = new Thread(runner);
             threadRunner.start();
@@ -150,7 +157,7 @@ public class ValidateXMLServiceImpl implements ValidateXMLService {
                     }
                     if (Math.abs(new Date().getTime() - startTime) > timeout) {
                         threadRunner.interrupt();
-                        logger.warn(String.format("Время ожидания (%d мс) для установки блокировки истекло", timeout));
+                        logger.warn(String.format("Истекло время выполнения проверки. Проверка длилась более %d мс.", timeout));
                         return false;
                     }
                     if (!threadRunner.isAlive()){
@@ -175,7 +182,7 @@ public class ValidateXMLServiceImpl implements ValidateXMLService {
         }
     }
 
-    private boolean isValid(DeclarationData data, TAUserInfo userInfo, Logger logger, boolean isErrorFatal) {
+    private boolean isValid(DeclarationData data, TAUserInfo userInfo, Logger logger, boolean isErrorFatal, long timeout) {
         BlobData xmlBlob = blobDataService.get(reportService.getDec(userInfo, data.getId(), ReportType.XML_DEC));
         File xmlFileBD = null;
         try {
@@ -184,7 +191,7 @@ public class ValidateXMLServiceImpl implements ValidateXMLService {
             FileOutputStream outputStream = new FileOutputStream(xmlFileBD);
             InputStream inputStream = xmlBlob.getInputStream();
             unzip(outputStream, inputStream);
-            return isValid(data, userInfo, logger, isErrorFatal, xmlFileBD);
+            return isValid(data, userInfo, logger, isErrorFatal, xmlFileBD, timeout);
         } catch (IOException e) {
             log.error("", e);
             throw new ServiceException("", e);
@@ -315,11 +322,14 @@ public class ValidateXMLServiceImpl implements ValidateXMLService {
 
     private void unzip(FileOutputStream outFile, InputStream zipXml) throws IOException {
         ZipInputStream zis = new ZipInputStream(zipXml);
-        while (zis.getNextEntry() != null){
-            log.info("Xml copy, total number of bytes " + IOUtils.copy(zis, outFile));
-        }
-        IOUtils.closeQuietly(zis);
-        IOUtils.closeQuietly(outFile);
-        IOUtils.closeQuietly(zipXml);
+		try {
+			while (zis.getNextEntry() != null){
+				log.info("Xml copy, total number of bytes " + IOUtils.copy(zis, outFile));
+			}
+		} finally {
+			IOUtils.closeQuietly(zis);
+			IOUtils.closeQuietly(outFile);
+			IOUtils.closeQuietly(zipXml);
+		}
     }
 }

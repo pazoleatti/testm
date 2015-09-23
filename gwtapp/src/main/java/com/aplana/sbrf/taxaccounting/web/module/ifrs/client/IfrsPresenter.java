@@ -41,10 +41,7 @@ import java.util.Set;
 public class IfrsPresenter extends Presenter<IfrsPresenter.MyView, IfrsPresenter.MyProxy> implements IfrsUiHandlers {
 
     private final DispatchAsync dispatcher;
-    private final PlaceManager placeManager;
-
     protected final CreateIfrsDataPresenter dialogPresenter;
-
     private final TableDataProvider dataProvider = new TableDataProvider();
     private List<Integer> reportPeriods;
 
@@ -71,7 +68,6 @@ public class IfrsPresenter extends Presenter<IfrsPresenter.MyView, IfrsPresenter
                          DispatchAsync dispatcher, PlaceManager placeManager, CreateIfrsDataPresenter dialogPresenter) {
         super(eventBus, view, proxy, RevealContentTypeHolder.getMainContent());
         this.dispatcher = dispatcher;
-        this.placeManager = placeManager;
         this.dialogPresenter = dialogPresenter;
         getView().setUiHandlers(this);
         getView().assignDataProvider(getView().getPageSize(), dataProvider);

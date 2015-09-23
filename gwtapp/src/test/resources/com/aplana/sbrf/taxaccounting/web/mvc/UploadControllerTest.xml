@@ -7,6 +7,10 @@
         <constructor-arg value="com.aplana.sbrf.taxaccounting.service.BlobDataService"/>
     </bean>
 
+    <bean class="org.mockito.Mockito" factory-method="mock">
+        <constructor-arg value="com.aplana.sbrf.taxaccounting.service.LogEntryService"/>
+    </bean>
+
     <bean id="uploadController" class="com.aplana.sbrf.taxaccounting.web.mvc.UploadController"/>
 
 </beans>

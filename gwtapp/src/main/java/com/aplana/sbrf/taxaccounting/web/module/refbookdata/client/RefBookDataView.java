@@ -7,13 +7,9 @@ import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.HorizontalAli
 import com.aplana.sbrf.taxaccounting.web.widget.datepicker.DateMaskBoxPicker;
 import com.aplana.sbrf.taxaccounting.web.widget.style.LinkAnchor;
 import com.aplana.sbrf.taxaccounting.web.widget.style.LinkButton;
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.*;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
-import com.google.gwt.i18n.client.DateTimeFormat;
-import com.google.gwt.safehtml.client.SafeHtmlTemplates;
-import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
@@ -24,13 +20,6 @@ import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 import java.util.Date;
 
 public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> implements RefBookDataPresenter.MyView {
-
-    interface UrlTemplates extends SafeHtmlTemplates {
-        @Template("Все значения записи {0} (дата актуальности {1})")
-        SafeHtml getName(String versionCount, String actualDate);
-    }
-    private static final UrlTemplates urlTemplates = GWT.create(UrlTemplates.class);
-    DateTimeFormat dtf = DateTimeFormat.getFormat("dd.MM.yyyy");
 
     interface Binder extends UiBinder<Widget, RefBookDataView> {
 	}
@@ -110,11 +99,6 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
 	}
 
     @Override
-    public void setRefBookNameDesc(String verCount, Date relDate) {
-        titleDesc.setText(urlTemplates.getName(verCount, dtf.format(relDate)).asString());
-    }
-
-    @Override
 	public void setRefBookNameDesc(String desc) {
 		titleDesc.setText(desc);
 	}
@@ -185,19 +169,6 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
             getUiHandlers().onBackClicked();
         }
     }
-
-	private HasHorizontalAlignment.HorizontalAlignmentConstant convertAlignment(HorizontalAlignment alignment) {
-		switch (alignment) {
-			case ALIGN_LEFT:
-				return HasHorizontalAlignment.ALIGN_LEFT;
-			case ALIGN_CENTER:
-				return HasHorizontalAlignment.ALIGN_CENTER;
-			case ALIGN_RIGHT:
-				return HasHorizontalAlignment.ALIGN_RIGHT;
-			default:
-				return HasHorizontalAlignment.ALIGN_LEFT;
-		}
-	}
 
     @Override
     public void updateMode(FormMode mode) {

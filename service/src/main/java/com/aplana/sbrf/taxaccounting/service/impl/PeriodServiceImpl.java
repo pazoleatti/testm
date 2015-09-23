@@ -478,43 +478,6 @@ public class PeriodServiceImpl implements PeriodService {
         removePeriodWithLog(drp.getReportPeriod().getId(), drp.getCorrectionDate(), departments, taxType, logger.getEntries());
 	}
 
-	private boolean checkBeforeRemove(List<Integer> departments, int reportPeriodId, List<LogEntry> logs) {
-		boolean canRemove = true;
-		Set<Integer> blockedBy = new HashSet<Integer>();
-        List<FormData> formDataList = formDataService.find(departments, reportPeriodId);
-        if (!formDataList.isEmpty()) {
-            for (FormData fd : formDataList) {
-                blockedBy.add(fd.getDepartmentId());
-            }
-            canRemove = false;
-        }
-		for (Integer dep : departments) {
-			DeclarationDataFilter filter = new DeclarationDataFilter();
-			filter.setDepartmentIds(Collections.singletonList(dep));
-			filter.setReportPeriodIds(Collections.singletonList(reportPeriodId));
-			filter.setSearchOrdering(DeclarationDataSearchOrdering.ID);
-			if (!declarationDataSearchService.search(filter).isEmpty()) {
-				blockedBy.add(dep);
-				canRemove = false;
-            }
-		}
-
-		if (!canRemove) {
-			StringBuilder msg = new StringBuilder(
-					"Перед удалением периода необходимо удалить все налоговые формы и декларации в подразделениях, " +
-							"для которых удаляется период! На текущий момент не удалены налоговые формы / декларации " +
-							"в следующих подразделениях: "
-			);
-			for (Integer dep : blockedBy) {
-                //TODO dloshkarev: можно сразу получать список а не выполнять запросы в цикле
-				msg.append(departmentService.getDepartment(dep).getName()).append("; ");
-			}
-			logs.add(new LogEntry(LogLevel.ERROR, msg.toString()));
-		}
-
-		return canRemove;
-	}
-
 	private void removePeriodWithLog(int reportPeriodId, Date correctionDate, List<Integer> departmentIds,  TaxType taxType, List<LogEntry> logs) {
         ReportPeriod rp = reportPeriodDao.get(reportPeriodId);
         DepartmentReportPeriodFilter filter = new DepartmentReportPeriodFilter();

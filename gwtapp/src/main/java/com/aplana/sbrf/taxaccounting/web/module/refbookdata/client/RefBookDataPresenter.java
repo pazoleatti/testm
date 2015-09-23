@@ -8,7 +8,6 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.AbstractEditPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.EditFormPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.event.SetFormMode;
-import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.event.UpdateForm;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.event.DeleteItemEvent;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.event.SearchButtonEvent;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.linear.RefBookLinearPresenter;
@@ -70,7 +69,7 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
 
     private Long refBookId;
 
-    private Long recordId;
+    private Long recordId, refBookRowId;
     private FormMode mode;
     private String refBookName;
     private IRefBookExecutor dataInterface;
@@ -86,12 +85,6 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
     private final PlaceManager placeManager;
 
     public interface MyView extends View, HasUiHandlers<RefBookDataUiHandlers> {
-        /**
-         * Выставляет наменование на форме при переходе на все версии
-         * @param verCount колличество версий
-         * @param relDate дата актульности
-         */
-        void setRefBookNameDesc(String verCount, Date relDate);
         void setRefBookNameDesc(String desc);
         Date getRelevanceDate();
         /** Метод для получения строки с поля фильтрации*/
@@ -177,7 +170,6 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
     @Override
     public void onBackClicked() {
         refBookId = null;
-        recordId = null;
         placeManager.revealPlace(new PlaceRequest.Builder().nameToken(RefBookListTokens.REFBOOK_LIST).build());
     }
 
@@ -202,8 +194,7 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
                                 if (result.isAvailable()) {
                                     getView().resetSearchInputBox();
                                     editFormPresenter.setVersionMode(false);
-                                    editFormPresenter.setCurrentUniqueRecordId(null);
-                                    editFormPresenter.setRecordId(null);
+                                    /*editFormPresenter.setRecordId(null);*/
                                     GetRefBookAttributesAction action = new GetRefBookAttributesAction();
 
                                     action.setRefBookId(refBookId);
@@ -326,7 +317,7 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
         editFormPresenter.setVersionMode(false);
         //ShowItemEvent.fire(RefBookDataPresenter.this, null, versionPresenter.getSelectedRow().getRefBookRowId());
         refBookLinearPresenter.updateTable();
-        registrations[1].removeHandler();
+        /*registrations[1].removeHandler();*/
     }
 
     @Override
@@ -338,19 +329,18 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
         return new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                recordId = refBookLinearPresenter.getSelectedRow().getRefBookRowId();
+                refBookRowId = refBookLinearPresenter.getSelectedRow().getRefBookRowId();
                 getView().setVersionView(true);
                 clearSlot(TYPE_mainFormPresenter);
                 setInSlot(TYPE_mainFormPresenter, versionPresenter);
-                versionPresenter.setUniqueRecordId(recordId);
+                versionPresenter.setUniqueRecordId(refBookLinearPresenter.getSelectedRow().getRefBookRowId());
 
-                                    /*refBookLinearPresenter.changeProvider(true);*/
                 editFormPresenter.setVersionMode(true);
-                editFormPresenter.setCurrentUniqueRecordId(null);
-                editFormPresenter.setRecordId(null);
+                /*editFormPresenter.setRecordId(null);*/
 
                 GetRefBookAttributesAction action = new GetRefBookAttributesAction();
                 action.setRefBookId(refBookId);
+                getView().setRefBookNameDesc("Все версии записи");
                 dispatcher.execute(action,
                         CallbackUtils.defaultCallback(
                                 new AbstractCallback<GetRefBookAttributesResult>() {
@@ -362,12 +352,25 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
                                         versionPresenter.setMode(mode);
                                         //editFormPresenter.init(refBookId, result.getColumns());
                                         editFormPresenter.setMode(mode);
-                                                            /*hierEditFormPresenter.show(recordId);*/
-                                        versionPresenter.updateTable();
+
+                                        //Получение группы для версий, реального record_id
+                                        GetRefBookRecordIdAction recordIdAction = new GetRefBookRecordIdAction();
+                                        recordIdAction.setRefBookId(refBookId);
+                                        recordIdAction.setUniqueRecordId(refBookLinearPresenter.getSelectedRow().getRefBookRowId());
+                                        dispatcher.execute(recordIdAction, CallbackUtils.defaultCallback(new AbstractCallback<GetRefBookRecordIdResult>() {
+                                            @Override
+                                            public void onSuccess(GetRefBookRecordIdResult result) {
+                                                editFormPresenter.setRecordId(result.getRecordId());
+                                                versionPresenter.setRecordId(result.getRecordId());
+                                                versionPresenter.updateTable();
+                                            }
+                                        }, RefBookDataPresenter.this));
                                     }
                                 }, RefBookDataPresenter.this));
 
-                GetNameAction nameAction = new GetNameAction();
+                //Убираем изменение наименования в связи с изменениями в постановке
+                //http://jira.aplana.com/browse/SBRFACCTAX-12015?focusedCommentId=125046&page=com.atlassian.jira.plugin.system.issuetabpanels:comment-tabpanel#comment-125046
+                /*GetNameAction nameAction = new GetNameAction();
                 nameAction.setRefBookId(refBookId);
                 nameAction.setUniqueRecordId(recordId);
                 dispatcher.execute(nameAction,
@@ -378,10 +381,10 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
                                         getView().setRefBookNameDesc(result.getUniqueAttributeValues(), getView().getRelevanceDate());
                                         editFormPresenter.setRecordId(result.getRecordId());
                                     }
-                                }, RefBookDataPresenter.this));
+                                }, RefBookDataPresenter.this));*/
 
                 //Изменение заголовка формы при изменение неких атрибутов
-                registrations[1] = editFormPresenter.addUpdateFormHandler(new UpdateForm.UpdateFormHandler() {
+                /*registrations[1] = editFormPresenter.addUpdateFormHandler(new UpdateForm.UpdateFormHandler() {
                     @Override
                     public void onUpdateForm(UpdateForm event) {
                         GetNameAction nameAction = new GetNameAction();
@@ -396,7 +399,7 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
                                             }
                                         }, RefBookDataPresenter.this));
                     }
-                });
+                });*/
             }
         };
     }

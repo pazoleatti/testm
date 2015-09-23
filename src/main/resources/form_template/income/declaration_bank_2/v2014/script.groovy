@@ -696,7 +696,7 @@ void generateXML() {
 
     def builder = new MarkupBuilder(xml)
     builder.Файл(
-            ИдФайл : declarationService.generateXmlFileId(11, declarationData.departmentReportPeriodId, taxOrganCode, declarationData.kpp),
+            ИдФайл : generateXmlFileId(taxOrganCode),
             ВерсПрог : applicationVersion,
             ВерсФорм : formatVersion){
 
@@ -2111,4 +2111,20 @@ def fillRecordsMap(def refBookIds) {
             }
         }
     }
+}
+
+def generateXmlFileId(String taxOrganCode) {
+    def departmentParam = getDepartmentParam()
+    if (departmentParam) {
+        def date = Calendar.getInstance().getTime()?.format("yyyyMMdd")
+        def fileId = TaxType.INCOME.declarationPrefix + '_' +
+                taxOrganCode + '_' +
+                taxOrganCode + '_' +
+                departmentParam.INN?.value +
+                declarationData.kpp + "_" +
+                date + "_" +
+                UUID.randomUUID().toString().toUpperCase()
+        return fileId
+    }
+    return null
 }
