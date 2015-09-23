@@ -140,20 +140,4 @@ public class GetRefBookValuesHandler extends AbstractActionHandler<GetRefBookVal
         c.add(Calendar.DATE, days);
         return c.getTime();
     }
-
-    /**
-     * Разыменование числовых значений как строк и строк как строк
-     */
-    private String getNumberValue(RefBookValue value) {
-        if (value == null) {
-            return null;
-        }
-        if (value.getAttributeType() == RefBookAttributeType.STRING) {
-            return value.getStringValue();
-        }
-        if (value.getNumberValue() == null) {
-            return null;
-        }
-        return value.getNumberValue().toString();
-    }
 }
