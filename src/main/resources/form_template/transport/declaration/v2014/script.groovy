@@ -138,7 +138,7 @@ def buildXml(def departmentParamTransport, def departmentParamTransportRow, def 
     def builder = new MarkupBuilder(xml)
     if (!declarationData.isAccepted()) {
         def reportPeriod = reportPeriodService.get(declarationData.reportPeriodId)
-        Date yearStartDate = Date.parse(dateFormat,"01.01.${reportPeriod.taxPeriod.year}")
+        Date yearStartDate = Date.parse(dateFormat, "01.01.${reportPeriod.taxPeriod.year}")
         def reportPeriods = reportPeriodService.getReportPeriodsByDate(TaxType.TRANSPORT, yearStartDate, getReportPeriodEndDate())
         builder.Файл(
                 ИдФайл: declarationService.generateXmlFileId(1, declarationData.departmentReportPeriodId, declarationData.taxOrganCode, declarationData.kpp),
@@ -283,9 +283,10 @@ def buildXml(def departmentParamTransport, def departmentParamTransportRow, def 
                                     }
 
                                     // НалПУ = НалИсчисл – (АвПУКв1+ АвПУКв2+ АвПУКв3)
-                                    resultMap[row.okato].amountOfTaxPayable = resultMap[row.okato].calculationOfTaxes - (
-                                            resultMap[row.okato].amountOfTheAdvancePayment1 + resultMap[row.okato].amountOfTheAdvancePayment2 + resultMap[row.okato].amountOfTheAdvancePayment3
-                                    )
+                                    resultMap[row.okato].amountOfTaxPayable = roundInt(resultMap[row.okato].calculationOfTaxes) -
+                                            (roundInt(resultMap[row.okato].amountOfTheAdvancePayment1) +
+                                                    roundInt(resultMap[row.okato].amountOfTheAdvancePayment2) +
+                                                    roundInt(resultMap[row.okato].amountOfTheAdvancePayment3))
                                     // В случае  если полученное значение отрицательно, - не заполняется
                                     // resultMap[row.okato].amountOfTaxPayable = resultMap[row.okato].amountOfTaxPayable < 0 ? 0:resultMap[row.okato].amountOfTaxPayable;
                                 }
