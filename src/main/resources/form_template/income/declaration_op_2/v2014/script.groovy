@@ -1,6 +1,7 @@
 package form_template.income.declaration_op_2.v2014
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
+import com.aplana.sbrf.taxaccounting.model.TaxType
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import groovy.transform.Field
 import groovy.xml.MarkupBuilder
@@ -442,7 +443,7 @@ void generateXML(XMLStreamReader readerBank) {
 
     def builder = new MarkupBuilder(xml)
     builder.Файл(
-            ИдФайл : declarationService.generateXmlFileId(19, declarationData.departmentReportPeriodId, taxOrganCodeProm, taxOrganCode, declarationData.kpp),
+            ИдФайл : generateXmlFileId(taxOrganCodeProm, taxOrganCode),
             ВерсПрог : applicationVersion,
             ВерсФорм : formatVersion){
 
@@ -868,4 +869,20 @@ boolean useTaxOrganCodeProm() {
         declarationReportPeriod = reportPeriodService.get(declarationData.reportPeriodId)
     }
     return (declarationReportPeriod?.taxPeriod?.year > 2015 || declarationReportPeriod?.order > 2)
+}
+
+def generateXmlFileId(String taxOrganCodeProm, String taxOrganCode) {
+    def departmentParam = getDepartmentParam()
+    if (departmentParam) {
+        def date = Calendar.getInstance().getTime()?.format("yyyyMMdd")
+        def fileId = TaxType.INCOME.declarationPrefix + '_' +
+                taxOrganCodeProm + '_' +
+                taxOrganCode + '_' +
+                departmentParam.INN?.value +
+                declarationData.kpp + "_" +
+                date + "_" +
+                UUID.randomUUID().toString().toUpperCase()
+        return fileId
+    }
+    return null
 }
