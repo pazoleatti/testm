@@ -49,8 +49,7 @@ public class GetFilesCommentsHandler extends AbstractActionHandler<GetFilesComme
         if (formData.getState().equals(WorkflowState.CREATED) || formData.getState().equals(WorkflowState.PREPARED)) {
             String key = formDataService.generateTaskKey(action.getFormData().getId(), ReportType.EDIT_FILE_COMMENT);
             LockData lockData = lockService.lock(key, userInfo.getUser().getId(),
-                    formDataService.getFormDataFullName(action.getFormData().getId(), action.getFormData().isManual(), null, ReportType.EDIT_FILE_COMMENT),
-                    lockService.getLockTimeout(LockData.LockObjects.FORM_DATA));
+                    formDataService.getFormDataFullName(action.getFormData().getId(), action.getFormData().isManual(), null, ReportType.EDIT_FILE_COMMENT));
             if (lockData == null) {
                 result.setReadOnlyMode(false);
             } else {
