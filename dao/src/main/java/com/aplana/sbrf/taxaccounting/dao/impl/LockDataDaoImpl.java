@@ -37,14 +37,13 @@ public class LockDataDaoImpl extends AbstractDao implements LockDataDao {
     @Override
     public LockData get(String key, boolean like) {
         try {
-            String fullKey = like ? "%" + key + "%" : key;
             String sql = "SELECT key, user_id, date_lock, description, state, state_date, queue, queue_position, server_node " +
                     "FROM lock_data \n " +
                     "JOIN (SELECT q_key, queue_position FROM (SELECT ld.key AS q_key, " +
                     (isSupportOver() ? "ROW_NUMBER() OVER (PARTITION BY ld.queue ORDER BY ld.date_lock)" : "rownum") + " AS queue_position FROM lock_data ld)) q ON q.q_key = key \n" +
                     "WHERE key " + (like ? "LIKE ?" : "= ?");
             return getJdbcTemplate().queryForObject(sql,
-                    new Object[] {fullKey},
+                    new Object[] {like ? "%" + key + "%" : key},
                     new int[] {Types.VARCHAR},
                     new LockDataMapper()
             );
@@ -146,13 +145,12 @@ public class LockDataDaoImpl extends AbstractDao implements LockDataDao {
     @Override
     public void addUserWaitingForLock(String key, int userId) {
         try {
-            getJdbcTemplate().update("INSERT INTO lock_data_subscribers (lock_key, user_id) VALUES (?,?)",
+            getJdbcTemplate().update("INSERT INTO lock_data_subscribers (lock_key, user_id) VALUES (?, ?)",
                     new Object[] {key, userId},
                     new int[] {Types.VARCHAR, Types.NUMERIC});
         } catch (DataAccessException e) {
             throw new LockException("Ошибка при добавлении пользователя в список ожидающих объект блокировки (%s, %s). %s", key, userId, e.getMessage());
         }
-
     }
 
     @Override
@@ -177,17 +175,23 @@ public class LockDataDaoImpl extends AbstractDao implements LockDataDao {
             params.put("count", pagingParams.getStartIndex() + pagingParams.getCount());
             params.put("filter", "%" + filter.toLowerCase() + "%");
             String sql = " (SELECT ld.key, ld.user_id, ld.date_lock, ld.state, ld.state_date, ld.description, ld.queue, ld.server_node, u.login, \n" +
-                    "row_number() over (partition by queue order by date_lock) as queue_position, row_number() over (order by queue, date_lock) as rn \n" +
+					(isSupportOver() ? "ROW_NUMBER() OVER (partition BY queue ORDER BY date_lock)" : "ROWNUM") +
+                    " AS queue_position, " +
+					(isSupportOver() ? "ROW_NUMBER() OVER (ORDER BY queue, date_lock)" : "ROWNUM") +
+					" AS rn \n" +
                     "FROM lock_data ld \n"
                     + "join sec_user u on u.id = ld.user_id \n" +
-                    "where " + queueSql + " \n"
+                    "WHERE " + queueSql + " \n"
                     + (filter != null && !filter.isEmpty() ?
-                    "and (lower(ld.key) like :filter or lower(ld.description) like :filter or lower(ld.state) like :filter or lower(u.login) like :filter or lower(u.name) like :filter or lower(ld.server_node) like :filter) "
+                    "AND (LOWER(ld.key) LIKE :filter OR LOWER(ld.description) LIKE :filter OR LOWER(ld.state) LIKE :filter OR LOWER(u.login) LIKE :filter OR LOWER(u.name) LIKE :filter OR LOWER(ld.server_node) LIKE :filter) "
                     : "")
-                    + "order by queue desc, queue_position) \n";
-
-            String fullSql = "select * from" + sql + "where rn between :start and :count";
-            String countSql = "select count(*) from" + sql;
+                    + "ORDER BY queue DESC, queue_position) \n";
+			if (LOG.isTraceEnabled()) {
+				LOG.trace(params);
+				LOG.trace(sql.toString());
+			}
+            String fullSql = "SELECT * FROM" + sql + "WHERE rn BETWEEN :start AND :count";
+            String countSql = "SELECT COUNT(*) FROM" + sql;
             List<LockData> records = getNamedParameterJdbcTemplate().query(fullSql, params, new LockDataMapper());
             int count = getNamedParameterJdbcTemplate().queryForInt(countSql, params);
             return new PagingResult<LockData>(records, count);
@@ -198,19 +202,19 @@ public class LockDataDaoImpl extends AbstractDao implements LockDataDao {
 
     @Override
     public void unlockAll(List<String> keys) {
-        getJdbcTemplate().update("delete from lock_data ld where " + SqlUtils.transformToSqlInStatementForString("key", keys));
+        getJdbcTemplate().update("DELETE FROM lock_data ld WHERE " + SqlUtils.transformToSqlInStatementForString("key", keys));
     }
 
     @Override
     public void updateState(String key, Date lockDate, String state, String serverNode) {
-        getJdbcTemplate().update("update lock_data set state = ?, state_date = sysdate, server_node = ? where key = ? and date_lock = ?",
+        getJdbcTemplate().update("UPDATE lock_data SET state = ?, state_date = sysdate, server_node = ? WHERE KEY = ? AND date_lock = ?",
                 new Object[] {state, serverNode, key, lockDate},
                 new int[] {Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.TIMESTAMP});
     }
 
     @Override
-    public void updateQueue(String key, Date lockDate, BalancingVariants queue) {
-        getJdbcTemplate().update("update lock_data set queue = ?, state_date = sysdate where key = ? and date_lock = ?",
+    public void updateQueue(String key, Date lockDate, LockData.LockQueues queue) {
+        getJdbcTemplate().update("UPDATE lock_data SET queue = ?, state_date = sysdate WHERE key = ? AND date_lock = ?",
                 new Object[] {queue.getId(), key, lockDate},
                 new int[] {Types.INTEGER, Types.VARCHAR, Types.TIMESTAMP});
     }

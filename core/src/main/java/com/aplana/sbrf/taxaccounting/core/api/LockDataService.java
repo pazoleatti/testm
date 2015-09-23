@@ -161,7 +161,7 @@ public interface LockDataService {
      * @param lockDate дата начала действия блокировки
      * @param queue очередь
      */
-    void updateQueue(String key, Date lockDate, BalancingVariants queue);
+    void updateQueue(String key, Date lockDate, LockData.LockQueues queue);
 
     /**
      * Останавливает выполнение задач с указанными ключами блокировки, удаляет блокировку и

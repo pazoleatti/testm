@@ -222,7 +222,7 @@ public class LockDataServiceImpl implements LockDataService {
     }
 
     @Override
-    public void updateQueue(final String key, final Date lockDate, final BalancingVariants queue) {
+    public void updateQueue(final String key, final Date lockDate, final LockData.LockQueues queue) {
         tx.executeInNewTransaction(new TransactionLogic() {
             @Override
             public Object execute() {

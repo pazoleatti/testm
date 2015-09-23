@@ -94,9 +94,13 @@ public final class LockData {
     }
 
     public enum LockQueues {
+		/** -1 - Все блокировки */
         ALL("Все блокировки", -1),
+		/** 2 - Длительные задачи */
         LONG("Очередь длительных задач", BalancingVariants.LONG.getId()),
+		/** 1 - Кратковременные задачи */
         SHORT("Очередь кратковременных задач", BalancingVariants.SHORT.getId()),
+		/** 0 - Без очереди */
         NONE("Без очереди", 0);
 
         private String text;
