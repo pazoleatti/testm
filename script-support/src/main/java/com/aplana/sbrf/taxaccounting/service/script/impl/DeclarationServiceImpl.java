@@ -1,17 +1,13 @@
 package com.aplana.sbrf.taxaccounting.service.script.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.*;
-import com.aplana.sbrf.taxaccounting.dao.api.DeclarationTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.api.FormTypeDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.model.util.DepartmentReportPeriodFilter;
-import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
-import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.service.script.DeclarationService;
 import com.aplana.sbrf.taxaccounting.service.shared.ScriptComponentContext;
@@ -28,8 +24,6 @@ import javax.xml.stream.XMLStreamReader;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.zip.ZipInputStream;
 
@@ -38,9 +32,7 @@ import java.util.zip.ZipInputStream;
  */
 @Service("declarationService")
 @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-public class DeclarationServiceImpl implements DeclarationService, ScriptComponentContextHolder{
-
-	private static final String DATE_FORMAT = "yyyyMMdd";
+public class DeclarationServiceImpl implements DeclarationService, ScriptComponentContextHolder {
 
     private static final String CHECK_UNIQUE_ERROR = "Декларация с заданными параметрами уже существует!";
     private static final String CHECK_UNIQUE_NOTIFICATION_ERROR = "Уведомление с заданными параметрами уже существует!";
@@ -56,33 +48,24 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
         }
     };
 
-    private static final int PROPERTY_DECLARATION_ID = 3;
-    private static final int PROPERTY_AVANS_ID = 8;
-
     private ScriptComponentContext context;
 
-	@Autowired
-	private DeclarationDataDao declarationDataDao;
-	@Autowired
-	private DeclarationDataService declarationDataService;
-	@Autowired
-    private DeclarationTypeDao declarationTypeDao;
-	@Autowired
-	private FormDataDao formDataDao;
-	@Autowired
-	private FormDataService formDataService;
-	@Autowired
-	private DepartmentDao departmentDao;
-	@Autowired
-	private FormTypeDao formTypeDao;
-	@Autowired
-	private FormTemplateDao formTemplateDao;
-	@Autowired
+    @Autowired
+    private DeclarationDataDao declarationDataDao;
+    @Autowired
+    private DeclarationDataService declarationDataService;
+    @Autowired
+    private FormDataDao formDataDao;
+    @Autowired
+    private FormDataService formDataService;
+    @Autowired
+    private DepartmentDao departmentDao;
+    @Autowired
+    private FormTypeDao formTypeDao;
+    @Autowired
+    private FormTemplateDao formTemplateDao;
+    @Autowired
     private DeclarationTemplateDao declarationTemplateDao;
-    @Autowired
-    private RefBookFactory factory;
-    @Autowired
-    private PeriodService periodService;
     @Autowired
     private DepartmentReportPeriodDao departmentReportPeriodDao;
     @Autowired
@@ -106,79 +89,13 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
     }
 
     @Override
-	public String generateXmlFileId(int declarationTypeId, int departmentReportPeriodId, String taxOrganCode, String kpp) {
-        return generateXmlFileId(declarationTypeId, departmentReportPeriodId, taxOrganCode, taxOrganCode, kpp);
-    }
+    public FormDataCollection getAcceptedFormDataSources(DeclarationData declarationData) {
+        int departmentId = declarationData.getDepartmentId();
+        int reportPeriodId = declarationData.getReportPeriodId();
 
-    @Override
-	public String generateXmlFileId(int declarationTypeId, int departmentReportPeriodId, String taxOrganCodeProm, String taxOrganCode, String kpp) {
-
-        DateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT);
-
-        TaxType declarationTaxType = declarationTypeDao.get(declarationTypeId).getTaxType();
-        String declarationPrefix = getDeclarationPrefix(declarationTypeId, declarationTaxType);
-		StringBuilder stringBuilder = new StringBuilder(declarationPrefix);
-
-        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.get(departmentReportPeriodId);
-
-		RefBookDataProvider tmp = factory.getDataProvider(TAX_TYPE_TO_REF_BOOK_MAP.get(declarationTaxType));
-        Date endDate = periodService.getEndDate(departmentReportPeriod.getReportPeriod().getId()).getTime();
-        List<Map<String, RefBookValue>> departmentParams = tmp.getRecords(addDayToDate(endDate, -1), null, String.format("DEPARTMENT_ID = %d", departmentReportPeriod.getDepartmentId()), null);
-
-        if (departmentParams != null && !departmentParams.isEmpty()) {
-            Map<String, RefBookValue> departmentParam = departmentParams.get(0);
-
-            Calendar calendar = Calendar.getInstance();
-            if (declarationTaxType == TaxType.PROPERTY || declarationTaxType == TaxType.TRANSPORT || declarationTaxType == TaxType.INCOME) {
-                stringBuilder.append('_').
-                        append(taxOrganCodeProm).
-                        append('_').
-                        append(taxOrganCode).
-                        append('_').
-                        append(departmentParam.get("INN").toString()).
-                        append(kpp).
-                        append('_').
-                        append(dateFormat.format(calendar.getTime())).
-                        append('_').
-                        append(UUID.randomUUID().toString().toUpperCase());
-            } else {
-                stringBuilder.append('_').
-                        append(departmentParam.get("TAX_ORGAN_CODE_PROM").toString()).
-                        append('_').
-                        append(departmentParam.get("TAX_ORGAN_CODE").toString()).
-                        append('_').
-                        append(departmentParam.get("INN").toString()).
-                        append(departmentParam.get("KPP").toString()).
-                        append('_').
-                        append(dateFormat.format(calendar.getTime())).
-                        append('_').
-                        append(UUID.randomUUID().toString().toUpperCase());
-            }
-
-            return stringBuilder.toString();
-        }
-        return null;
-	}
-
-    private String getDeclarationPrefix(int declarationTypeId, TaxType declarationTaxType) {
-        switch(declarationTypeId){
-            case PROPERTY_DECLARATION_ID :
-                return declarationTaxType.getDeclarationPrefix() + "UD";
-            case PROPERTY_AVANS_ID :
-                return declarationTaxType.getDeclarationPrefix() + "UR";
-            default:
-                return declarationTaxType.getDeclarationPrefix();
-        }
-    }
-
-    @Override
-	public FormDataCollection getAcceptedFormDataSources(DeclarationData declarationData) {
-		int departmentId = declarationData.getDepartmentId();
-		int reportPeriodId = declarationData.getReportPeriodId();
-
-		// Формирование списка НФ-источников в статусе "Принята"
-		List<DepartmentFormType> sourcesInfo = declarationDataService.getFormDataSources(declarationData, true, new Logger());
-		List<FormData> records = new ArrayList<FormData>();
+        // Формирование списка НФ-источников в статусе "Принята"
+        List<DepartmentFormType> sourcesInfo = declarationDataService.getFormDataSources(declarationData, true, new Logger());
+        List<FormData> records = new ArrayList<FormData>();
 
         DepartmentReportPeriodFilter filter = new DepartmentReportPeriodFilter();
         filter.setDepartmentIdList(Arrays.asList(departmentId));
@@ -199,11 +116,11 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
             }
         });
 
-		for (DepartmentFormType dft : sourcesInfo) {
-			FormData formData = formDataDao.getLast(dft.getFormTypeId(), dft.getKind(), dft.getDepartmentId(),
+        for (DepartmentFormType dft : sourcesInfo) {
+            FormData formData = formDataDao.getLast(dft.getFormTypeId(), dft.getKind(), dft.getDepartmentId(),
                     reportPeriodId, dft.getPeriodOrder(), null, false);
-			if (formData != null) {
-				if (formData.getState() != WorkflowState.ACCEPTED) {
+            if (formData != null) {
+                if (formData.getState() != WorkflowState.ACCEPTED) {
                     //TODO возможно перенести initFormTemplateParams внутрь функции
                     FormData prevFormDataCorrection = formDataService.getPreviousFormDataCorrection(formData, departmentReportPeriodList, departmentReportPeriod);
                     if (prevFormDataCorrection == null) {
@@ -221,14 +138,14 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
                         records.add(prevFormDataCorrection);
                     }
                 } else {
-					records.add(formData);
-				}
-			}
-		}
-		FormDataCollection formDataCollection = new FormDataCollection();
-		formDataCollection.setRecords(records);
-		return formDataCollection;
-	}
+                    records.add(formData);
+                }
+            }
+        }
+        FormDataCollection formDataCollection = new FormDataCollection();
+        formDataCollection.setRecords(records);
+        return formDataCollection;
+    }
 
     @Override
     public String getXmlData(long declarationDataId) {
@@ -303,15 +220,8 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
     }
 
     @Override
-	public void setScriptComponentContext(ScriptComponentContext context) {
-		this.context = context;
-	}
-
-    private Date addDayToDate(Date date, int days) {
-        Calendar c = Calendar.getInstance();
-        c.setTime(date);
-        c.add(Calendar.DATE, days);
-        return c.getTime();
+    public void setScriptComponentContext(ScriptComponentContext context) {
+        this.context = context;
     }
 
     @Override

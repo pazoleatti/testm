@@ -5,6 +5,7 @@ import com.aplana.sbrf.taxaccounting.model.formdata.HeaderCell;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.TaPlaceManager;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
+import com.aplana.sbrf.taxaccounting.web.module.formdata.client.comments.FilesCommentsPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.client.search.FormSearchPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.client.signers.SignersPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.client.sources.SourcesPresenter;
@@ -147,6 +148,7 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 	protected final HistoryPresenter historyPresenter;
 	protected final FormSearchPresenter formSearchPresenter;
     protected final SourcesPresenter sourcesPresenter;
+    protected final FilesCommentsPresenter filesCommentsPresenter;
 
     protected FormData formData;
 
@@ -184,7 +186,8 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 								 DialogPresenter dialogPresenter,
 								 HistoryPresenter historyPresenter,
                                  FormSearchPresenter formDataPresenter,
-                                 SourcesPresenter sourcesPresenter) {
+                                 SourcesPresenter sourcesPresenter,
+                                 FilesCommentsPresenter filesCommentsPresenter) {
 		super(eventBus, view, proxy, RevealContentTypeHolder.getMainContent());
 		this.historyPresenter = historyPresenter;
 		this.placeManager = (TaPlaceManager)placeManager;
@@ -193,6 +196,7 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 		this.dialogPresenter = dialogPresenter;
         this.formSearchPresenter = formDataPresenter;
         this.sourcesPresenter = sourcesPresenter;
+        this.filesCommentsPresenter = filesCommentsPresenter;
 	}
 
 	@Override

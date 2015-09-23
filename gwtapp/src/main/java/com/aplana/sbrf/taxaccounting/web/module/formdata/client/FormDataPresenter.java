@@ -13,6 +13,7 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogShowEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.shared.dispatch.TaActionException;
+import com.aplana.sbrf.taxaccounting.web.module.formdata.client.comments.FilesCommentsPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.client.event.SetFocus;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.client.search.FormSearchPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.client.signers.SignersPresenter;
@@ -70,8 +71,8 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
 	public FormDataPresenter(EventBus eventBus, MyView view, MyProxy proxy,
 			PlaceManager placeManager, DispatchAsync dispatcher,
 			SignersPresenter signersPresenter, DialogPresenter dialogPresenter, HistoryPresenter historyPresenter, FormSearchPresenter searchPresenter,
-            SourcesPresenter sourcesPresenter, ManualMenuPresenter manualMenuPresenter, LogAreaPresenter logAreaPresenter) {
-		super(eventBus, view, proxy, placeManager, dispatcher, signersPresenter, dialogPresenter, historyPresenter, searchPresenter, sourcesPresenter);
+            SourcesPresenter sourcesPresenter, FilesCommentsPresenter filesCommentsPresenter, ManualMenuPresenter manualMenuPresenter, LogAreaPresenter logAreaPresenter) {
+		super(eventBus, view, proxy, placeManager, dispatcher, signersPresenter, dialogPresenter, historyPresenter, searchPresenter, sourcesPresenter, filesCommentsPresenter);
 		this.manualMenuPresenter = manualMenuPresenter;
         this.logAreaPresenter = logAreaPresenter;
         getView().setUiHandlers(this);
@@ -710,6 +711,12 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
 
     @Override
     public void onOpenSourcesDialog() {
+        filesCommentsPresenter.setFormData(formData);
+        addToPopupSlot(filesCommentsPresenter);
+    }
+
+    @Override
+    public void onFilesCommentsDialog() {
         sourcesPresenter.setFormData(formData);
         addToPopupSlot(sourcesPresenter);
     }
@@ -966,7 +973,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                                 onTimerReport(ReportType.EXCEL, false);
                                 onTimerReport(ReportType.CSV, false);
                                 onTimer(true);
-                                timer.scheduleRepeating(5000);
+                                timer.scheduleRepeating(50000);
                             }
                         }, this).addCallback(
                         TaManualRevealCallback.create(this, placeManager)));

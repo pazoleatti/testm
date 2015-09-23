@@ -182,6 +182,8 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
     @UiField
     HorizontalPanel versionBlock;
     @UiField
+    LinkButton filesComments;
+    @UiField
     LinkButton sources;
     @UiField
     LinkButton printToExcel;
@@ -315,10 +317,10 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
     @Override
     public void startTimerReport(ReportType reportType) {
         if (ReportType.EXCEL.equals(reportType)) {
-            timerExcel.scheduleRepeating(3000);
+            timerExcel.scheduleRepeating(30000);
             timerExcel.run();
         } else {
-            timerCSV.scheduleRepeating(3000);
+            timerCSV.scheduleRepeating(30000);
             timerCSV.run();
         }
     }
@@ -898,6 +900,11 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
     @UiHandler("search")
     public void onSearchClicked(ClickEvent event){
         getUiHandlers().onOpenSearchDialog();
+    }
+
+    @UiHandler("filesComments")
+    public void onFilesCommentsClicked(ClickEvent event){
+        getUiHandlers().onOpenSourcesDialog();
     }
 
     @UiHandler("sources")

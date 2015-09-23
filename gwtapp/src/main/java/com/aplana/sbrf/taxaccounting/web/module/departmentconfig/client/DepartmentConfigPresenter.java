@@ -181,13 +181,13 @@ public class DepartmentConfigPresenter extends Presenter<DepartmentConfigPresent
         dispatcher.execute(action,
                 CallbackUtils.defaultCallback(
                         new AbstractCallback<GetCheckDeclarationResult>() {
-                            void save() {
+                            void save(String uuid) {
                                 SaveDepartmentCombinedAction action = new SaveDepartmentCombinedAction();
                                 action.setDepartmentCombined(combinedDepartmentParam);
                                 action.setReportPeriodId(period);
                                 action.setTaxType(getView().getTaxType());
                                 action.setDepartment(department);
-                                action.setOldUUID(uuid[0]);
+                                action.setOldUUID(uuid);
                                 dispatcher.execute(action, CallbackUtils
                                         .defaultCallback(new AbstractCallback<SaveDepartmentCombinedResult>() {
                                             @Override
@@ -222,14 +222,13 @@ public class DepartmentConfigPresenter extends Presenter<DepartmentConfigPresent
                                                             .defaultCallback(new AbstractCallback<AddLogResult>() {
                                                                 @Override
                                                                 public void onSuccess(AddLogResult result) {
-                                                                    LogAddEvent.fire(DepartmentConfigPresenter.this, result.getUuid());
+                                                                    save(result.getUuid());
                                                                 }
                                                             }, DepartmentConfigPresenter.this));
-                                                    save();
                                                 }
                                             });
                                 } else {
-                                    save();
+                                    save(uuid[0]);
                                 }
                             }
                         }, this));

@@ -137,11 +137,6 @@ public class SaveDepartmentRefBookValuesHandler extends AbstractActionHandler<Sa
             }
         }
 
-        if (result.isHasFatalError()) {
-            result.setUuid(logEntryService.save(logger.getEntries()));
-            return result;
-        }
-
         /** Сохранение настроек подразделений */
         RefBookRecordVersion recordVersion = null;
         try {
@@ -151,7 +146,7 @@ public class SaveDepartmentRefBookValuesHandler extends AbstractActionHandler<Sa
                     convert(action.getNotTableParams()), convertRows(action.getRows()), logger);
         } catch (Exception e) {
             result.setHasFatalError(true);
-            result.setErrorType(SaveDepartmentRefBookValuesResult.ERROR_TYPE.SAVING_FAILED);
+            result.setErrorType(SaveDepartmentRefBookValuesResult.ERROR_TYPE.COMMON_ERROR);
         }
 
         String departmentName = departmentService.getDepartment(action.getDepartmentId()).getName();
@@ -165,10 +160,13 @@ public class SaveDepartmentRefBookValuesHandler extends AbstractActionHandler<Sa
             }
         }
 
-        if (result.getUuid() == null) {
+        if (result.isHasFatalError()) {
+            logger.clear(LogLevel.INFO);
+        }
+        if (action.getOldUUID() == null) {
             result.setUuid(logEntryService.save(logger.getEntries()));
         } else {
-            result.setUuid(logEntryService.update(logger.getEntries(), result.getUuid()));
+            result.setUuid(logEntryService.update(logger.getEntries(), action.getOldUUID()));
         }
         return result;
     }

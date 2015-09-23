@@ -13,6 +13,7 @@ public class SaveDepartmentRefBookValuesAction extends UnsecuredActionImpl<SaveD
     Map<String, TableCell> notTableParams;
     Long refBookId;
     Long slaveRefBookId;
+    private String oldUUID;
 
     public List<Map<String, TableCell>> getRows() {
         return rows;
@@ -68,5 +69,13 @@ public class SaveDepartmentRefBookValuesAction extends UnsecuredActionImpl<SaveD
 
     public void setSlaveRefBookId(Long slaveRefBookId) {
         this.slaveRefBookId = slaveRefBookId;
+    }
+
+    public void setOldUUID(String oldUUID) {
+        this.oldUUID = oldUUID;
+    }
+
+    public String getOldUUID() {
+        return oldUUID;
     }
 }
