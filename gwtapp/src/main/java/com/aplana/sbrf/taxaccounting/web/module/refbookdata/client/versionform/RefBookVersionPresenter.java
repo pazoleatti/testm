@@ -35,9 +35,7 @@ public class RefBookVersionPresenter extends PresenterWidget<RefBookVersionPrese
 
 	private Long refBookId;
     //Идентификатор записи
-    private Long uniqueRecordId;
-    //Идентификатор версии
-    private Long recordId;
+    private Long uniqueRecordId, recordId;
     private boolean isHierarchy = false;
     private Integer selectedRowIndex;
 
@@ -108,6 +106,10 @@ public class RefBookVersionPresenter extends PresenterWidget<RefBookVersionPrese
 
     public void setUniqueRecordId(Long uniqueRecordId) {
         this.uniqueRecordId = uniqueRecordId;
+    }
+
+    public void setRecordId(Long recordId) {
+        this.recordId = recordId;
     }
 
     @Inject
@@ -184,6 +186,7 @@ public class RefBookVersionPresenter extends PresenterWidget<RefBookVersionPrese
 //                                ShowItemEvent.fire(RefBookVersionPresenter.this, null, null);
                                 //editPresenter.clean();
                                 if (result.getNextVersion() != null) {
+                                    setUniqueRecordId(result.getNextVersion());
                                     getView().setSelected(result.getNextVersion());
                                     RefBookDataRow row = getView().getSelectedRow();
                                     ShowItemEvent.fire(
@@ -226,7 +229,7 @@ public class RefBookVersionPresenter extends PresenterWidget<RefBookVersionPrese
 			final Range range = display.getVisibleRange();
             GetRefBookRecordVersionAction action = new GetRefBookRecordVersionAction();
             action.setRefBookId(refBookId);
-            action.setRefBookRecordId(uniqueRecordId);
+            action.setRefBookRecordId(recordId);
 			action.setPagingParams(new PagingParams(range.getStart() + 1, range.getLength()));
 			dispatcher.execute(action,
 					CallbackUtils.defaultCallback(
@@ -235,13 +238,13 @@ public class RefBookVersionPresenter extends PresenterWidget<RefBookVersionPrese
 								public void onSuccess(GetRefBookRecordVersionResult result) {
 									getView().setTableData(range.getStart(),
 											result.getTotalCount(), result.getDataRows());
-                                    if (recordId == null && !result.getDataRows().isEmpty()) {
+                                    if (!result.getDataRows().isEmpty()) {
                                         getView().setSelected(result.getDataRows().get(0).getRefBookRowId());
                                         // recordCommonId = result.getRefBookRecordCommonId();
-                                    } else if (recordId != null){
+                                    } /*else if (recordId != null){
                                         getView().setSelected(recordId);
-                                    }
-                                    recordId = null;
+                                    } */
+                                    //recordId = null;
                                     if (selectedRowIndex != null && result.getDataRows().size() > selectedRowIndex) {
                                         //сохраняем позицию после удаления записи
                                         getView().setSelected(result.getDataRows().get(selectedRowIndex).getRefBookRowId());
