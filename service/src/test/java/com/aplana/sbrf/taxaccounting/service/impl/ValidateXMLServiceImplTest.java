@@ -1,6 +1,5 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
-
 import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
@@ -46,7 +45,7 @@ public class ValidateXMLServiceImplTest implements Runnable {
     @Autowired
     private ReportService reportService;
     @Autowired
-    private ValidateXMLService validateService;
+    private ValidateXMLServiceImpl validateService;
     @Autowired
     private LockDataService lockDataService;
 
@@ -186,7 +185,8 @@ public class ValidateXMLServiceImplTest implements Runnable {
         DeclarationData data = new DeclarationData();
         data.setDeclarationTemplateId(3);
         data.setId(5l);
-        Assert.assertFalse(validateService.validate(data, userInfo, logger, true, null));
+		// при маленьком таймауте проверка не должна пройти
+		Assert.assertFalse(validateService.validate(data, userInfo, logger, true, null, 1000L));
         Assert.assertEquals(3, logger.getEntries().size());
     }
 

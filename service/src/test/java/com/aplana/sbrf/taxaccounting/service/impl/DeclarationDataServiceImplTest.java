@@ -6,7 +6,6 @@ import com.aplana.sbrf.taxaccounting.dao.api.DepartmentFormTypeDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
-import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.*;
 import org.junit.Test;

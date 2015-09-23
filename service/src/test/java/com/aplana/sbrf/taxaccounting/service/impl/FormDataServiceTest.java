@@ -948,6 +948,7 @@ public class FormDataServiceTest extends Assert{
 
 		LockData lockData = new LockData();
 		lockData.setUserId(666);
+		lockData.setDateLock(new Date());
 
 		TAUser user = new TAUser();
 		user.setId(31);
@@ -955,7 +956,10 @@ public class FormDataServiceTest extends Assert{
 		try {
 			formDataService.checkLockedMe(lockData, user);
 		} catch (ServiceException e) {
-			assertEquals("Объект заблокирован другим пользователем (\"MockUser\", срок \"00:00 30.10.1983\")", e.getMessage());
+			SimpleDateFormat SDF_HH_MM_DD_MM_YYYY = new SimpleDateFormat("HH:mm dd.MM.yyyy");
+			String s = "Объект заблокирован другим пользователем";
+			assertNotNull(e.getMessage());
+			assertEquals(s, e.getMessage().substring(0, s.length()));
 			exceptionCount++;
 		}
 		try {

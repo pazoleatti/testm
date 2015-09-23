@@ -1684,7 +1684,7 @@ public class FormDataServiceImpl implements FormDataService {
 			throw new ServiceException("Блокировка не найдена. Объект должен быть заблокирован текущим пользователем");
 		}
         if (lockData.getUserId() != user.getId()) {
-            throw new ServiceException(String.format("Объект заблокирован другим пользователем \"%s\" (\"%s\")",
+            throw new ServiceException(String.format("Объект заблокирован другим пользователем (\"%s\", \"%s\")",
 					userService.getUser(lockData.getUserId()).getLogin(), SDF_HH_MM_DD_MM_YYYY.format(lockData.getDateLock())));
         }
     }

@@ -38,11 +38,11 @@ public class LockDataDaoImpl extends AbstractDao implements LockDataDao {
     public LockData get(String key, boolean like) {
         try {
             String fullKey = like ? "%" + key + "%" : key;
-            String sql = "SELECT key, user_id, date_lock, description, state, state_date, queue, queue_position, server_node, " +
+            String sql = "SELECT key, user_id, date_lock, description, state, state_date, queue, queue_position, server_node " +
                     "FROM lock_data \n " +
-                    "join (select q_key, queue_position from (select ld.key as q_key, " +
-                    (isSupportOver() ? "row_number() over (partition by ld.queue order by ld.date_lock)" : "rownum") + " as queue_position from lock_data ld)) q on q.q_key = key \n" +
-                    "WHERE key " + (like ? "like ?" : "= ?");
+                    "JOIN (SELECT q_key, queue_position FROM (SELECT ld.key AS q_key, " +
+                    (isSupportOver() ? "ROW_NUMBER() OVER (PARTITION BY ld.queue ORDER BY ld.date_lock)" : "rownum") + " AS queue_position FROM lock_data ld)) q ON q.q_key = key \n" +
+                    "WHERE key " + (like ? "LIKE ?" : "= ?");
             return getJdbcTemplate().queryForObject(sql,
                     new Object[] {fullKey},
                     new int[] {Types.VARCHAR},
@@ -60,7 +60,7 @@ public class LockDataDaoImpl extends AbstractDao implements LockDataDao {
     public LockData get(String key, Date lockDate) {
         try {
             return getJdbcTemplate().queryForObject(
-                    "SELECT key, user_id, date_lock, description, state, state_date, queue, queue_position, server_node, " +
+                    "SELECT key, user_id, date_lock, description, state, state_date, queue, queue_position, server_node " +
                             "FROM lock_data \n" +
                             "join (select q_key, queue_position from (select ld.key as q_key, " +
                             (isSupportOver() ? "row_number() over (partition by ld.queue order by ld.date_lock)" : "rownum") + " as queue_position from lock_data ld)) q on q.q_key = key \n" +
@@ -100,10 +100,10 @@ public class LockDataDaoImpl extends AbstractDao implements LockDataDao {
                     new Object[] {key},
                     new int[] {Types.VARCHAR});
             if (affectedCount == 0) {
-                throw new LockException("Ошибка удаления. Блокировка с кодом = %s не найдена в БД.", key);
+                throw new LockException("Ошибка удаления. Блокировка с кодом \"%s\" не найдена в БД.", key);
             }
         } catch (DataAccessException e) {
-            throw new LockException("Ошибка при удалении блокировки с кодом = %s. %s", key, e.getMessage());
+            throw new LockException("Ошибка при удалении блокировки с кодом \"%s\". %s", key, e.getMessage());
         }
     }
 
