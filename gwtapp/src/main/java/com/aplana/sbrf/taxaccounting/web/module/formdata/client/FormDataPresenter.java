@@ -54,8 +54,6 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
     private final LogAreaPresenter logAreaPresenter;
     private Timer timer;
     private ReportType timerType;
-    private boolean lockEditMode;
-
     private Map<ReportType, TimerReportResult.StatusReport> reportTimerStatus;
 
     /**
@@ -1125,7 +1123,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                                 edited = result.isEdited();
                                 taskName = result.getTaskName();
                                 formMode = result.getFormMode();
-                                lockEditMode = result.getLockInfo().isEditMode();
+								boolean lockEditMode = result.getLockInfo().isEditMode();
                                 boolean isUpdate = false;
                                 if (readOnlyMode) {
                                     if (timerType == null

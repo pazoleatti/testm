@@ -1907,7 +1907,6 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
                 public String mapRow(ResultSet rs, int rowNum) throws SQLException {
                     Integer month = SqlUtils.getInteger(rs, "month");
                     Date correctionDate = rs.getDate("correctionDate");
-                    char taxType = rs.getString("tax_type").charAt(0);
                     return String.format(
                             FORM_LINK_MSG,
                             rs.getString("tax_type").charAt(0) == TaxType.ETR.getCode() ? " " : "налоговой ",
@@ -3050,5 +3049,10 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     @Override
     public boolean isRecordsExist(List<Long> uniqueRecordIds) {
         return getJdbcTemplate().queryForObject(String.format("select count (*) from ref_book_record where %s", SqlUtils.transformToSqlInStatement("id", uniqueRecordIds)), Integer.class) == uniqueRecordIds.size();
+    }
+
+    @Override
+    public boolean isRefBookExist(long refBookId) {
+        return getJdbcTemplate().queryForObject("select count(*) from ref_book where id = ?", new Object[]{refBookId}, Integer.class) > 0;
     }
 }

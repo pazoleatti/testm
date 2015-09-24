@@ -10,12 +10,9 @@ import com.aplana.sbrf.taxaccounting.scheduler.api.exception.TaskExecutionExcept
 import com.aplana.sbrf.taxaccounting.scheduler.api.form.FormElement;
 import com.aplana.sbrf.taxaccounting.scheduler.api.form.SelectBox;
 import com.aplana.sbrf.taxaccounting.scheduler.api.form.SelectBoxItem;
-import com.aplana.sbrf.taxaccounting.scheduler.api.task.UserTask;
 import com.aplana.sbrf.taxaccounting.scheduler.api.task.UserTaskLocal;
 import com.aplana.sbrf.taxaccounting.scheduler.api.task.UserTaskRemote;
 import com.aplana.sbrf.taxaccounting.service.*;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.ejb.Local;

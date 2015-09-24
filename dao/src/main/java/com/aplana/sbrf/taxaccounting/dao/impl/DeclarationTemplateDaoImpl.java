@@ -17,14 +17,13 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.PreparedStatementCreator;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Types;
+import java.io.InputStream;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -497,5 +496,20 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
         } catch (DataAccessException e){
             throw new DaoException("", e);
         }
+    }
+
+    @Override
+    public Integer get(int declarationTypeId, int year) {
+        try {
+            return getJdbcTemplate().queryForObject("select id from declaration_template where declaration_type_id = ? and extract(year from version) = ?",
+                    new Object[]{declarationTypeId, year}, Integer.class);
+        } catch (EmptyResultDataAccessException e) {
+            return null;
+        }
+    }
+
+    @Override
+    public void updateScript(final int declarationTemplateId, final String script) {
+        getJdbcTemplate().update("UPDATE DECLARATION_TEMPLATE SET CREATE_SCRIPT = ? WHERE ID = ?", script, declarationTemplateId);
     }
 }

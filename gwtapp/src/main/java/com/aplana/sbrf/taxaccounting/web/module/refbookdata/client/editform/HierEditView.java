@@ -155,10 +155,6 @@ public class HierEditView extends AbstractEditView implements HierEditPresenter.
         }
     }
 
-    private boolean equalsCleanStrings(String first, String second) {
-        return StringUtils.cleanString(first).equals(StringUtils.cleanString(second));
-    }
-
     @Override
     public HasClickHandlers getClickAllVersion() {
         return allVersion;

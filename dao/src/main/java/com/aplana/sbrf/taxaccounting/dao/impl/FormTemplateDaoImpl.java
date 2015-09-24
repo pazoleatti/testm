@@ -17,13 +17,10 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataRetrievalFailureException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
-import org.springframework.jdbc.core.BatchPreparedStatementSetter;
-import org.springframework.jdbc.core.CallableStatementCreator;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowMapper;
-import org.springframework.jdbc.core.SqlParameter;
+import org.springframework.jdbc.core.*;
 import org.springframework.stereotype.Repository;
 
+import java.io.InputStream;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -760,6 +757,21 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
     public boolean isFDTableExist(int ftId) {
         return getJdbcTemplate().queryForObject("SELECT * FROM USER_TABLES where table_name = ?",
                 new Object[]{String.format("form_data_%d", ftId)}, Integer.class) > 0;
+    }
+
+    @Override
+    public Integer get(int formTypeId, int year) {
+        try {
+            return getJdbcTemplate().queryForObject("select id from form_template where type_id = ? and extract(year from version) = ?",
+                    new Object[]{formTypeId, year}, Integer.class);
+        } catch (EmptyResultDataAccessException e) {
+            return null;
+        }
+    }
+
+    @Override
+    public void updateScript(final int formTemplateId, final String script) {
+        getJdbcTemplate().update("UPDATE FORM_TEMPLATE SET SCRIPT = ? WHERE ID = ?", script, formTemplateId);
     }
 
     //@Override

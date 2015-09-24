@@ -266,8 +266,11 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
             FileWrapper file = ResourceUtils.getSharedResource(checkResult.getPath() + "/" + fileName, false);
             boolean exist = file.exists();
             OutputStream outputStream = file.getOutputStream();
-            IOUtils.copy(inputStream, outputStream);
-            IOUtils.closeQuietly(outputStream);
+			try {
+            	IOUtils.copy(inputStream, outputStream);
+			} finally {
+            	IOUtils.closeQuietly(outputStream);
+			}
             log(userInfo, LogData.L32, logger, fileName, checkResult.getPath());
             if (exist) {
                 logger.info(U1, fileName);

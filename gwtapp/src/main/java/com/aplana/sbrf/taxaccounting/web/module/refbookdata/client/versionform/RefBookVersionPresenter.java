@@ -44,7 +44,6 @@ public class RefBookVersionPresenter extends PresenterWidget<RefBookVersionPrese
     }
 
 	private final DispatchAsync dispatcher;
-    private TableDataProvider dataProvider;
 
     @Override
     public void updateTable() {
@@ -119,8 +118,7 @@ public class RefBookVersionPresenter extends PresenterWidget<RefBookVersionPrese
 		super(eventBus, view);
 		this.dispatcher = dispatcher;
 		getView().setUiHandlers(this);
-        dataProvider = new TableDataProvider();
-        getView().assignDataProvider(getView().getPageSize(), dataProvider);
+        getView().assignDataProvider(getView().getPageSize(), new TableDataProvider());
         /*setMode(FormMode.READ);*/
 	}
 

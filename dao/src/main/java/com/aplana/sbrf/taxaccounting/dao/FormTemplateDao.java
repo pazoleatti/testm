@@ -5,6 +5,7 @@ import com.aplana.sbrf.taxaccounting.model.TemplateFilter;
 import com.aplana.sbrf.taxaccounting.model.VersionSegment;
 import com.aplana.sbrf.taxaccounting.model.VersionedObjectStatus;
 
+import java.io.InputStream;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -192,4 +193,19 @@ public interface FormTemplateDao {
     void dropFTTable(List<Integer> ftId);
 
     boolean isFDTableExist(int ftId);
+
+    /**
+     * Получает макет нф по типу и году (версии)
+     * @param formTypeId
+     * @param year
+     * @return идентификатор макета, либо null, если он не найден
+     */
+    Integer get(int formTypeId, int year);
+
+    /**
+     * Обновляет скрипт макета
+     * @param formTemplateId идентификатор макета
+     * @param script скрипт
+     */
+    void updateScript(int formTemplateId, String script);
 }

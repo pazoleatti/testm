@@ -39,5 +39,5 @@ public interface RefBookScriptingService {
      * @param refBookId идентификатор справочника
      * @param script скрипт
      */
-    void saveScript(Long refBookId, String script);
+    void saveScript(long refBookId, String script);
 }

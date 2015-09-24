@@ -214,9 +214,12 @@ public class ValidateXMLServiceImplTest implements Runnable {
         try {
             FileOutputStream outputStream = new FileOutputStream(fileVSAX);
             InputStream inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(TEMPLATE);
-            IOUtils.copy(inputStream, outputStream);
-            IOUtils.closeQuietly(inputStream);
-            IOUtils.closeQuietly(outputStream);
+			try {
+            	IOUtils.copy(inputStream, outputStream);
+			} finally {
+				IOUtils.closeQuietly(inputStream);
+				IOUtils.closeQuietly(outputStream);
+			}
 
             Method method = validateService.getClass().getDeclaredMethod("fileInfo", Logger.class, File.class);
             method.setAccessible(true);

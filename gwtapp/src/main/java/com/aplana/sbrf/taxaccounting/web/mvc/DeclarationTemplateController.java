@@ -59,9 +59,11 @@ public class DeclarationTemplateController {
 		resp.setContentType("application/zip");
 		resp.setHeader("Content-Disposition", "attachment; filename=\"" + fileName + "\"");
 		resp.setCharacterEncoding("UTF-8");
-
-		declarationTemplateImpexService.exportDeclarationTemplate(securityService.currentUserInfo(), declarationTemplateId, resp.getOutputStream());
-        IOUtils.closeQuietly(resp.getOutputStream());
+		try {
+			declarationTemplateImpexService.exportDeclarationTemplate(securityService.currentUserInfo(), declarationTemplateId, resp.getOutputStream());
+		} finally {
+        	IOUtils.closeQuietly(resp.getOutputStream());
+		}
 	}
 
 

@@ -170,19 +170,6 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
         }
     }
 
-	private HasHorizontalAlignment.HorizontalAlignmentConstant convertAlignment(HorizontalAlignment alignment) {
-		switch (alignment) {
-			case ALIGN_LEFT:
-				return HasHorizontalAlignment.ALIGN_LEFT;
-			case ALIGN_CENTER:
-				return HasHorizontalAlignment.ALIGN_CENTER;
-			case ALIGN_RIGHT:
-				return HasHorizontalAlignment.ALIGN_RIGHT;
-			default:
-				return HasHorizontalAlignment.ALIGN_LEFT;
-		}
-	}
-
     @Override
     public void updateMode(FormMode mode) {
         switch (mode){

@@ -1,0 +1,27 @@
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+             xmlns:g='urn:import:com.google.gwt.user.client.ui'
+             xmlns:fm="urn:import:com.aplana.gwt.client.form"
+             xmlns:fileuplod="urn:import:com.aplana.sbrf.taxaccounting.web.widget.fileupload"
+        >
+    <fm:MainContainer>
+        <fm:header>
+            <fm:HeaderContainer>
+                <fm:resizable>
+                    <fm:Resizable>
+                        <g:Label text="Импорт справочников"/>
+                    </fm:Resizable>
+                </fm:resizable>
+            </fm:HeaderContainer>
+        </fm:header>
+        <fm:body>
+            <fm:BodyContainer>
+                <g:VerticalPanel spacing="10">
+                    <g:HorizontalPanel>
+                        <fileuplod:FileUploadWidget ui:field="fileUploader" width="185px" extension="zip"/>
+                    </g:HorizontalPanel>
+                </g:VerticalPanel>
+            </fm:BodyContainer>
+        </fm:body>
+    </fm:MainContainer>
+
+</ui:UiBinder>
