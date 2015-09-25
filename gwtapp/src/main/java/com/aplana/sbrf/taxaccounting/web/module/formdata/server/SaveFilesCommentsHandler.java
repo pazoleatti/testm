@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.module.formdata.server;
 
 import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
@@ -41,11 +42,17 @@ public class SaveFilesCommentsHandler extends AbstractActionHandler<SaveFilesCom
     public GetFilesCommentsResult execute(SaveFilesCommentsAction action, ExecutionContext executionContext) throws ActionException {
         TAUserInfo userInfo = securityService.currentUserInfo();
         GetFilesCommentsResult result = new GetFilesCommentsResult();
-        accessService.canEdit(userInfo, action.getFormData().getId(), false);
         Logger logger = new Logger();
         String key = formDataService.generateTaskKey(action.getFormData().getId(), ReportType.EDIT_FILE_COMMENT);
         LockData lockData = lockService.getLock(key);
         if (lockData != null && lockData.getUserId() == userInfo.getUser().getId()) {
+            try {
+                accessService.canEdit(userInfo, action.getFormData().getId(), false);
+            } catch (AccessDeniedException e) {
+                //удаляем блокировку, если пользователю недоступно редактирование
+                lockService.unlock(key, userInfo.getUser().getId());
+                throw e;
+            }
             result.setReadOnlyMode(false);
             formDataService.saveFilesComments(action.getFormData().getId(), action.getNote(), action.getFiles());
             logger.info("Данные успешно сохранены.");
