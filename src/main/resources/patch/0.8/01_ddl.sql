@@ -25,7 +25,6 @@ create table form_data_file
 (
    form_data_id number(18) not null,
    blob_data_id varchar2(36) not null,
-   attachment_date date not null,
    user_name varchar2(512) not null,
    user_department_name varchar2(4000) not null,
    note varchar2(512)    
@@ -34,7 +33,6 @@ create table form_data_file
 comment on table form_data_file is 'Файлы налоговой формы';
 comment on column form_data_file.form_data_id is 'Идентификатор экземпляра налоговой формы';
 comment on column form_data_file.blob_data_id is 'Файл налоговой формы';
-comment on column form_data_file.attachment_date is 'Дата-время прикрепления файла';
 comment on column form_data_file.user_name is 'Полное имя пользователя, прикрепившего файл';
 comment on column form_data_file.user_department_name is 'Наименование подразделения пользователя, прикрепившего файл';
 comment on column form_data_file.note is 'Комментарий к файлу';
