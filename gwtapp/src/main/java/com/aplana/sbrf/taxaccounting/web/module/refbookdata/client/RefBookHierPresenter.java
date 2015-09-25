@@ -168,7 +168,7 @@ public class RefBookHierPresenter extends Presenter<RefBookHierPresenter.MyView,
         //Показывает/скрывает поля, которые необходимы только для версионирования
         void setVersionedFields(boolean isVisible);
         void setRefBookNameDesc(String desc);
-        void setRefBookNameDesc(String verCount, Date relDate);
+
         /**
          * Устанавливает версионный вид справочника.
          * @param isVersion true - если переходим в версионное представление
@@ -197,6 +197,9 @@ public class RefBookHierPresenter extends Presenter<RefBookHierPresenter.MyView,
     @Override
     public void prepareFromRequest(final PlaceRequest request) {
         refBookId = Long.parseLong(request.getParameter(RefBookDataTokens.REFBOOK_DATA_ID, null));
+        //Очистка слота в случае перехода прямо по ссылке, без перерисовки
+        clearSlot(TYPE_editFormPresenter);
+        setInSlot(TYPE_editFormPresenter, Department.REF_BOOK_ID.equals(refBookId) ? departmentEditPresenter : hierEditFormPresenter);
         commonEditPresenter = Department.REF_BOOK_ID.equals(refBookId) ? departmentEditPresenter : hierEditFormPresenter;
         CheckHierAction checkHierAction = new CheckHierAction();
         checkHierAction.setRefBookId(refBookId);
@@ -270,6 +273,7 @@ public class RefBookHierPresenter extends Presenter<RefBookHierPresenter.MyView,
             @Override
             public void onFailure(Throwable caught) {
                 placeManager.unlock();
+                placeManager.revealErrorPlace("");
             }
         }, RefBookHierPresenter.this));
     }

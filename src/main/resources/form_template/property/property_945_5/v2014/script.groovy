@@ -7,6 +7,8 @@ import com.aplana.sbrf.taxaccounting.model.FormToFormRelation
 import com.aplana.sbrf.taxaccounting.model.Formats
 import com.aplana.sbrf.taxaccounting.model.TaxType
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
+import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import groovy.transform.Field
 
 /**
@@ -63,7 +65,8 @@ switch (formDataEvent) {
         // консолидация для этой формы выполняется при расчете, а не при принятии источников
         break
     case FormDataEvent.IMPORT:
-        noImport(logger)
+        importData()
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.GET_SOURCES:
         getSources()
@@ -274,6 +277,16 @@ def getRefBookValue(def long refBookId, def Long recordId) {
         return null
     }
     return formDataService.getRefBookValue(refBookId, recordId, refBookCache)
+}
+
+// Поиск записи в справочнике по значению (для импорта)
+def getRecordIdImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
+                      def boolean required = false) {
+    if (value == null || value.trim().isEmpty()) {
+        return null
+    }
+    return formDataService.getRefBookRecordIdImport(refBookId, recordCache, providerCache, alias, value,
+            getReportPeriodEndDate(), rowIndex, colIndex, logger, required)
 }
 
 void calc() {
@@ -499,7 +512,7 @@ def checkPrevForm() {
 }
 
 def getNewRow(def title, isEditable) {
-    def row = formData.createDataRow()
+    def row = (formDataEvent in [FormDataEvent.IMPORT, FormDataEvent.IMPORT_TRANSPORT_FILE]) ? formData.createStoreMessagingDataRow() : formData.createDataRow()
     row.title = title
     row.getCell('title').setStyleAlias('Заголовок')
 
@@ -1429,4 +1442,185 @@ def isMonthlyForm(def formTemplateId, def periodId) {
         monthlyMap[key] = formDataService.getFormTemplate(formTemplateId, periodId)?.monthly
     }
     return monthlyMap[key]
+}
+
+void importData() {
+    def tmpRow = formData.createDataRow()
+    int COLUMN_COUNT = 19
+    int HEADER_ROW_COUNT = 3
+    String TABLE_START_VALUE = getColumnName(tmpRow, 'subject')
+    String TABLE_END_VALUE = null
+
+    def allValues = []      // значения формы
+    def headerValues = []   // значения шапки
+    def paramsMap = ['rowOffset' : 0, 'colOffset' : 0]  // мапа с параметрами (отступы сверху и слева)
+
+    checkAndReadFile(ImportInputStream, UploadFileName, allValues, headerValues, TABLE_START_VALUE, TABLE_END_VALUE, HEADER_ROW_COUNT, paramsMap)
+
+    // проверка шапки
+    checkHeaderXls(headerValues, COLUMN_COUNT, HEADER_ROW_COUNT, tmpRow)
+    if (logger.containsLevel(LogLevel.ERROR)) {
+        return
+    }
+    // освобождение ресурсов для экономии памяти
+    headerValues.clear()
+    headerValues = null
+
+    def fileRowIndex = paramsMap.rowOffset
+    def colOffset = paramsMap.colOffset
+    paramsMap.clear()
+    paramsMap = null
+
+    def rowIndex = 0
+    def rows = []
+    def allValuesCount = allValues.size()
+
+    // формирвание строк нф
+    for (def i = 0; i < allValuesCount; i++) {
+        rowValues = allValues[0]
+        fileRowIndex++
+        // все строки пустые - выход
+        if (!rowValues) {
+            allValues.remove(rowValues)
+            rowValues.clear()
+            break
+        }
+        rowIndex++
+        // простая строка
+        def newRow = getNewRowFromXls(rowValues, colOffset, fileRowIndex, rowIndex)
+        rows.add(newRow)
+        // освободить ненужные данные - иначе не хватит памяти
+        allValues.remove(rowValues)
+        rowValues.clear()
+    }
+    updateIndexes(rows)
+
+    // объединение групп
+    def firstRowInGroup = null
+    def rowInGroup = 0
+    rows.each { row ->
+        if (firstRowInGroup == null || !isEquals(row, firstRowInGroup) || row.getIndex() == rows.size()) {
+            if (firstRowInGroup) {
+                if (row.getIndex() == rows.size()) {
+                    rowInGroup++
+                }
+                groupColumns.each { alias ->
+                    firstRowInGroup.getCell(alias).rowSpan = rowInGroup
+                }
+            }
+            firstRowInGroup = row
+            rowInGroup = 0
+        }
+        rowInGroup++
+    }
+
+    showMessages(rows, logger)
+    if (!logger.containsLevel(LogLevel.ERROR)) {
+        formDataService.getDataRowHelper(formData).allCached = rows
+    }
+}
+
+/**
+ * Проверить шапку таблицы
+ *
+ * @param headerRows строки шапки
+ * @param colCount количество колонок в таблице
+ * @param rowCount количество строк в таблице
+ * @param tmpRow вспомогательная строка для получения названии графов
+ */
+void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
+    if (headerRows.isEmpty()) {
+        throw new ServiceException(WRONG_HEADER_ROW_SIZE)
+    }
+    checkHeaderSize(headerRows[headerRows.size() - 1].size(), headerRows.size(), colCount, rowCount)
+
+    // для проверки шапки
+    def headerMapping = [
+            (headerRows[0][0])  : getColumnName(tmpRow, 'subject'),
+            (headerRows[0][1])  : getColumnName(tmpRow, 'taxAuthority'),
+            (headerRows[0][2])  : getColumnName(tmpRow, 'kpp'),
+            (headerRows[0][3])  : getColumnName(tmpRow, 'oktmo'),
+            (headerRows[0][4])  : '',
+            (headerRows[1][4])  : '',
+            (headerRows[2][4])  : '',
+            (headerRows[0][5])  : 'Остаточная стоимость основных средств',
+            (headerRows[1][5])  : getColumnName(tmpRow, 'cost1'),
+            (headerRows[0][6])  : getColumnName(tmpRow, 'cost2'),
+            (headerRows[0][7])  : getColumnName(tmpRow, 'cost3'),
+            (headerRows[0][8])  : getColumnName(tmpRow, 'cost4'),
+            (headerRows[0][9])  : getColumnName(tmpRow, 'cost5'),
+            (headerRows[0][10]) : getColumnName(tmpRow, 'cost6'),
+            (headerRows[0][11]) : getColumnName(tmpRow, 'cost7'),
+            (headerRows[0][12]) : getColumnName(tmpRow, 'cost8'),
+            (headerRows[0][13]) : getColumnName(tmpRow, 'cost9'),
+            (headerRows[0][14]) : getColumnName(tmpRow, 'cost10'),
+            (headerRows[0][15]) : getColumnName(tmpRow, 'cost11'),
+            (headerRows[0][16]) : getColumnName(tmpRow, 'cost12'),
+            (headerRows[0][17]) : getColumnName(tmpRow, 'cost13'),
+            (headerRows[0][18]) : getColumnName(tmpRow, 'cost31_12'),
+            (headerRows[2][0]) : '1',
+            (headerRows[2][1]) : '2',
+            (headerRows[2][2]) : '3',
+            (headerRows[2][3]) : '4'
+    ]
+    (5..18).each { index ->
+        headerMapping.put((headerRows[2][index]), index.toString())
+    }
+    checkHeaderEquals(headerMapping, logger)
+}
+
+/**
+ * Получить новую строку нф по значениям из экселя.
+ *
+ * @param values список строк со значениями
+ * @param colOffset отступ в колонках
+ * @param fileRowIndex номер строки в тф
+ * @param rowIndex строка в нф
+ */
+def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) {
+    def isEditable = (TOTAL_ROW_TITLE != values[4])
+    def newRow = getNewRow(values[4], isEditable)
+    newRow.setIndex(rowIndex)
+    newRow.setImportIndex(fileRowIndex)
+
+    // графа 1 - атрибут 9 - CODE - «Код», справочник 4 «Коды субъектов Российской Федерации»
+    def colIndex = 0
+    newRow.subject = getRecordIdImport(4, 'CODE', values[colIndex], fileRowIndex, colIndex + colOffset)
+
+    // графа 2
+    colIndex++
+    newRow.taxAuthority = values[colIndex]
+
+    // графа 3
+    colIndex++
+    newRow.kpp = values[colIndex]
+
+    // графа 4 - атрибут 840 - CODE - «Код», справочник 96 «Общероссийский классификатор территорий муниципальных образований»
+    colIndex++
+    newRow.oktmo = getRecordIdImport(96, 'CODE', values[colIndex], fileRowIndex, colIndex + colOffset)
+
+    // графа - title
+    colIndex++
+    newRow.title = values[colIndex]
+
+    // графа 5..18
+    ['cost1', 'cost2', 'cost3', 'cost4', 'cost5', 'cost6', 'cost7', 'cost8', 'cost9', 'cost10',
+            'cost11', 'cost12', 'cost13', 'cost31_12'].each { alias ->
+        colIndex++
+        newRow[alias] = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
+    }
+
+    return newRow
+}
+
+def isEquals(def rowA, def rowB) {
+    if (rowA == null || rowB == null) {
+        return false
+    }
+    for (def alias : groupColumns) {
+        if (rowA[alias] != rowB[alias]) {
+            return false
+        }
+    }
+    return true
 }

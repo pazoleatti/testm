@@ -267,11 +267,6 @@ public class RefBookHierView extends ViewWithUiHandlers<RefBookHierUIHandlers> i
     }
 
     @Override
-    public void setRefBookNameDesc(String verCount, Date relDate) {
-        titleDesc.setText(urlTemplates.getName(verCount, dtf.format(relDate)).asString());
-    }
-
-    @Override
     public void setVersionView(boolean isVersion) {
         this.isVersion = isVersion;
         edit.setVisible(!isVersion);

@@ -34,6 +34,7 @@
     <inherits name="com.aplana.sbrf.taxaccounting.web.module.taxformnomination.TaxFormNomination"/>
     <inherits name="com.aplana.sbrf.taxaccounting.web.module.testpage.TestPage"/>
     <inherits name="com.aplana.sbrf.taxaccounting.web.module.scriptexecution.ScriptExecution"/>
+    <inherits name="com.aplana.sbrf.taxaccounting.web.module.scriptsimport.ScriptsImport"/>
     <inherits name="com.aplana.sbrf.taxaccounting.web.module.uploadtransportdata.UploadTransportData"/>
     <inherits name="com.aplana.sbrf.taxaccounting.web.module.ifrs.Ifrs"/>
     <inherits name="com.aplana.sbrf.taxaccounting.web.module.lock.Lock"/>

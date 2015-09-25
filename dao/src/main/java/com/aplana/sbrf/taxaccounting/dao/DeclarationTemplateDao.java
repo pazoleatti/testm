@@ -5,6 +5,7 @@ import com.aplana.sbrf.taxaccounting.model.VersionSegment;
 import com.aplana.sbrf.taxaccounting.model.TemplateFilter;
 import com.aplana.sbrf.taxaccounting.model.VersionedObjectStatus;
 
+import java.io.InputStream;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -170,4 +171,19 @@ public interface DeclarationTemplateDao {
     void deleteXsd(int dtId);
 
     void deleteJrxml(int dtId);
+
+    /**
+     * Получает макет декларации по типу и году (версии)
+     * @param declarationTypeId
+     * @param year
+     * @return идентификатор макета, либо null, если он не найден
+     */
+    Integer get(int declarationTypeId, int year);
+
+    /**
+     * Обновляет скрипт макета
+     * @param declarationTemplateId идентификатор макета
+     * @param script скрипт
+     */
+    void updateScript(int declarationTemplateId, String script);
 }
