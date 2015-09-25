@@ -110,7 +110,7 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
         }
 
         // Создаваемые автоматически формы (читают все контролеры, имеющие доступ к подразделению в любом статусе)
-        if (asList(FormDataKind.CONSOLIDATED, FormDataKind.SUMMARY).contains(formData.getKind())
+        if (asList(FormDataKind.CONSOLIDATED, FormDataKind.SUMMARY, FormDataKind.CALCULATED).contains(formData.getKind())
                 && (userInfo.getUser().hasRole(TARole.ROLE_CONTROL)
                 || userInfo.getUser().hasRole(TARole.ROLE_CONTROL_NS))
                 && availableDepartmentList.contains(formData.getDepartmentId())) {
@@ -337,7 +337,7 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
         }
 
         // Создаваемые автоматически формы
-        if (asList(FormDataKind.CONSOLIDATED, FormDataKind.SUMMARY).contains(formData.getKind())) {
+        if (asList(FormDataKind.CONSOLIDATED, FormDataKind.SUMMARY, FormDataKind.CALCULATED).contains(formData.getKind())) {
             switch (formData.getState()) {
                 case CREATED:
                     // Созданные редактируют только контролеры, которые могут открыть форму для чтения
