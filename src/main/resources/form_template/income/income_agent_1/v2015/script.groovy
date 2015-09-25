@@ -164,8 +164,7 @@ def logicCheck() {
     def dateTo = Date.parse('dd.MM.yyyy', '31.12.2099')
     def period = reportPeriodService.get(formData.reportPeriodId)
     def year = period?.taxPeriod?.year
-    def before9Month2015 = (year < 2015 || (year == 2015 && period.order < 3))
-    def departmentInn = (!before9Month2015 ? getDepartmentParams()?.INN?.value : null)
+    def departmentInn = getDepartmentParams()?.INN?.value
 
     for (def row in dataRows) {
         def index = row.getIndex()
@@ -174,11 +173,7 @@ def logicCheck() {
         checkNonEmptyColumns(row, index, nonEmptyColumns, logger, true)
 
         // 2. Проверка на заполнение зависимого поля ИНН и КПП (графа 14 и 15)
-        if (before9Month2015 && row.type == 1 && row.status == 1 && (row.inn == null || row.kpp == null)) {
-            // до 9 месяцев 2015 года
-            logger.error("Строка $index: В случае если графы «%s» и «%s» равны значению «1», должна быть заполнена графа «%s» и «%s»!",
-                    getColumnName(row, 'type'), getColumnName(row, 'status'), getColumnName(row, 'inn'), getColumnName(row, 'kpp'))
-        } else if (!before9Month2015 && row.type?.intValue() in [1, 3, 4, 5] && row.status == 1 && (row.inn == null || row.kpp == null)) {
+         if (row.type?.intValue() in [1, 3, 4, 5] && row.status == 1 && (row.inn == null || row.kpp == null)) {
             // с 9 месяцев 2015 года
             logger.error("Строка $index: В случае если графы «%s» равна значению «1» / «3» / «4» / «5» и графа и «%s» равны значению «1», должна быть заполнена графа «%s» и «%s»!",
                     getColumnName(row, 'type'), getColumnName(row, 'status'), getColumnName(row, 'inn'), getColumnName(row, 'kpp'))
@@ -191,8 +186,7 @@ def logicCheck() {
         } else if (row.emitentInn){
             wasError[1] = true
         }
-        if ((before9Month2015 && row.type != 2 && row.status != 2) ||
-                (!before9Month2015 && row.type != 2 && !(row.status?.intValue() in [2, 3]))) {
+        if (row.type != 2 && !(row.status?.intValue() in [2, 3])) {
             // если хотя бы одна графа из 16-й и 17-й равна 2. то не проверять 14-ю и 15-ю
             if (row.inn && checkPattern(logger, row, 'inn', row.inn, INN_JUR_PATTERN, wasError[1] ? null : INN_JUR_MEANING, true)) {
                 // 5. Проверка контрольной суммы
@@ -211,28 +205,32 @@ def logicCheck() {
         }
 
         // 6. Проверка значения «Графы 17» (статус получателя)
-        if (before9Month2015 && row.status && row.status != 1 && row.status != 2) {
-            logger.error("Строка $index: Графа «%s» заполнен неверно (%s)! Возможные значения: «1» или «2»",
-                    getColumnName(row, 'status'), row.status)
-        } else if (!before9Month2015 && !(row.status?.intValue() in [1, 2, 3])) {
+        if (row.status != null && !(row.status?.intValue() in [1, 2, 3])) {
             logger.error("Строка $index: Графа «%s» заполнен неверно (%s)! Возможные значения: «1», «2», «3»",
                     getColumnName(row, 'status'), row.status)
         }
 
         // 7. Проверка значения «Графы 16» (тип получателя)
-        if (!before9Month2015 && row.type && !(row.type?.intValue() in [1, 2, 3, 4, 5])) {
+        if (row.type != null && !(row.type?.intValue() in [1, 2, 3, 4, 5])) {
             logger.error("Строка $index: Графа «%s» заполнена неверно (%s)! Возможные значения: «1», «2», «3», «4», «5»",
                     getColumnName(row, 'type'), row.type)
         }
 
         // 8. Проверка значения «Графы 9» (отчетный год)
-        if (!before9Month2015 && row.emitentInn && departmentInn && row.emitentInn == departmentInn && row.year) {
+        if (row.emitentInn && departmentInn && row.emitentInn == departmentInn && row.year) {
             def rowYear = row.year.format('yyyy').toInteger()
             if (rowYear < year - 4 || year < rowYear) {
                 logger.warn("Строка $index: Графа «%s» заполнена неверно (%s)! Для Банка (графа «%s» = ИНН %s формы настроек подразделения формы) по данной графе может быть указан отчетный год формы или предыдущие отчетные года с периодом давности до четырех лет включительно.",
                         getColumnName(row, 'year'), rowYear, getColumnName(row, 'emitentInn'), row.emitentInn)
             }
+        }
 
+        // 9. Проверка значения «Графы 10» и «Графы 11» (период распределения)
+        ['firstMonth', 'lastMonth'].each { alias ->
+            if (row[alias] != null && !(row[alias].intValue() in (1..12))) {
+                logger.warn("Строка $index: Графа «%s» заполнена неверно (%s)! Возможные значения: «1», «2», «3», «4», «5», «6», «7», «8», «9», «10», «11», «12»",
+                        getColumnName(row, alias), row[alias])
+            }
         }
     }
 }
