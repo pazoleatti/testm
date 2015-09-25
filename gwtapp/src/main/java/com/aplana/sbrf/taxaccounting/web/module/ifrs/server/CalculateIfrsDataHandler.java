@@ -90,7 +90,8 @@ public class CalculateIfrsDataHandler extends AbstractActionHandler<CalculateIfr
                     }
                     BalancingVariants balancingVariant = asyncManager.checkCreate(ReportType.ZIP_IFRS.getAsyncTaskTypeId(PropertyLoader.isProductionMode()), params);
                     asyncManager.executeAsync(ReportType.ZIP_IFRS.getAsyncTaskTypeId(PropertyLoader.isProductionMode()), params, balancingVariant);
-                    lockDataService.updateQueue(key, lockData.getDateLock(), balancingVariant);
+					LockData.LockQueues queue = LockData.LockQueues.getById(balancingVariant.getId());
+                    lockDataService.updateQueue(key, lockData.getDateLock(), queue);
                 } catch (AsyncTaskException e) {
                     lockDataService.unlock(key, userInfo.getUser().getId());
                     logger.error("Ошибка при постановке в очередь асинхронной задачи формирования отчета");

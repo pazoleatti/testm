@@ -6,9 +6,9 @@ package com.aplana.sbrf.taxaccounting.model;
  */
 public enum BalancingVariants {
 	/** 1 - Кратковременные задачи */
-	SHORT(1, "Кратковременные задачи"),
+	SHORT(1, "Очередь кратковременных задач"),
 	/** 2 - Длительные задачи */
-    LONG(2, "Длительные задачи");
+    LONG(2, "Очередь длительных задач");
 
     private int id;
     private String name;

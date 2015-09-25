@@ -101,7 +101,8 @@ public class AuditArchiveHandler extends AbstractActionHandler<AuditArchiveActio
                 lockDataService.addUserWaitingForLock(key, userInfo.getUser().getId());
                 BalancingVariants balancingVariant = asyncManager.checkCreate(ReportType.ARCHIVE_AUDIT.getAsyncTaskTypeId(PropertyLoader.isProductionMode()), params);
                 asyncManager.executeAsync(ReportType.ARCHIVE_AUDIT.getAsyncTaskTypeId(PropertyLoader.isProductionMode()), params, balancingVariant);
-                lockDataService.updateQueue(key, lockData.getDateLock(), balancingVariant);
+				LockData.LockQueues queue = LockData.LockQueues.getById(balancingVariant.getId());
+                lockDataService.updateQueue(key, lockData.getDateLock(), queue);
                 logger.info(String.format("Задание на архивацию журнала аудита (до даты: %s) поставлено в очередь на формирование.", SDF.format(action.getLogSystemFilter().getToSearchDate())));
                 return result;
             } catch (Exception e) {
