@@ -30,13 +30,15 @@ insert into department_report_period(id, department_id, report_period_id, is_act
 insert into department_report_period(id, department_id, report_period_id, is_active, is_balance_period) values (2, 2, 2, 1, 0);
 
 insert into form_data (id, form_template_id, department_report_period_id, state, kind, return_sign) values (1, 1, 1, 1, 2, 0);
-insert into form_data (id, form_template_id, department_report_period_id, state, kind, return_sign) values (2, 2, 2, 2, 3, 0);
+insert into form_data (id, form_template_id, department_report_period_id, state, kind, return_sign) values (2, 1, 2, 2, 3, 0);
+insert into form_data (id, form_template_id, department_report_period_id, state, kind, return_sign) values (3, 2, 2, 2, 3, 0);
 
 insert into blob_data (id, name, data, creation_date) values ('uuid_1', 'file_1', 'b1', sysdate);
 insert into blob_data (id, name, data, creation_date) values ('uuid_2', 'file_2', 'b2', sysdate);
 insert into blob_data (id, name, data, creation_date) values ('uuid_3', 'file_3', 'b3', sysdate);
 insert into blob_data (id, name, data, creation_date) values ('uuid_4', 'file_4', 'b4', sysdate);
 insert into blob_data (id, name, data, creation_date) values ('uuid_5', 'file_5', 'b5', sysdate);
+insert into blob_data (id, name, data, creation_date) values ('uuid_6', 'file_6', 'b6', sysdate);
 
 insert into form_data_file (blob_data_id, form_data_id, user_name, user_department_name, note) values ('uuid_1', 1, 'name1', 'dep1', null);
 insert into form_data_file (blob_data_id, form_data_id, user_name, user_department_name, note) values ('uuid_2', 1, 'name2', 'dep2', 'str');

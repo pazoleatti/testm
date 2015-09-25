@@ -10,6 +10,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
@@ -125,4 +126,26 @@ public class FormDataFileDaoTest {
             }
         }
 	}
+
+    @Test
+    public void saveFilesTest2() {
+        List<FormDataFile> files = new ArrayList<FormDataFile>();
+        FormDataFile newFile = new FormDataFile();
+        newFile.setUuid("uuid_6");
+        newFile.setUserName("Контролер");
+        newFile.setUserDepartmentName("Банк");
+        newFile.setNote("прим");
+        files.add(newFile);
+        formDataFileDao.saveFiles(3, files);
+
+        files = formDataFileDao.getFiles(3);
+        assertEquals(1, files.size());
+        FormDataFile file = files.get(0);
+        assertEquals(3, file.getFormDataId());
+        assertEquals("uuid_6", file.getUuid());
+        assertEquals("file_6", file.getFileName());
+        assertEquals("Контролер", file.getUserName());
+        assertEquals("Банк", file.getUserDepartmentName());
+        assertEquals("прим", file.getNote());
+    }
 }
