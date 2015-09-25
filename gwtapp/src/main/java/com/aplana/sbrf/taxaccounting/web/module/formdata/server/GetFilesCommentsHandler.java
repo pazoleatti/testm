@@ -63,8 +63,8 @@ public class GetFilesCommentsHandler extends AbstractActionHandler<GetFilesComme
                 result.setReadOnlyMode(false);
             } else {
                 result.setReadOnlyMode(true);
-                logger.error("Прикрепление файлов и редактирование комментариев недоступно, так как файлы и комментарии данного экземпляра налоговой формы в текущий момент редактируются пользователем \"%s\"",
-                        taUserService.getUser(lockData.getUserId()).getName());
+                logger.error("Прикрепление файлов и редактирование комментариев недоступно, так как файлы и комментарии данного экземпляра %s в текущий момент редактируются пользователем \"%s\"",
+                        MessageGenerator.mesSpeckSingleD(action.getFormData().getFormType().getTaxType()), taUserService.getUser(lockData.getUserId()).getName());
             }
         } else {
             result.setReadOnlyMode(true);

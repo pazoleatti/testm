@@ -157,7 +157,7 @@ public class FilesCommentsView extends PopupViewWithUiHandlers<FilesCommentsUiHa
         int selectedItemCount = selectionModel.getSelectedSet().size();
         int visibleItemCount = table.getVisibleItemCount();
 
-        if (selectedItemCount < visibleItemCount) {
+        if (selectedItemCount < visibleItemCount || selectedItemCount == 0) {
             checkBoxHeader.setValue(false);
         } else if (selectedItemCount == visibleItemCount) {
             checkBoxHeader.setValue(true);

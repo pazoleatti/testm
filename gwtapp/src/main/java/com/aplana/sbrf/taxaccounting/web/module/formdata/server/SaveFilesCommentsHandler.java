@@ -51,7 +51,8 @@ public class SaveFilesCommentsHandler extends AbstractActionHandler<SaveFilesCom
             logger.info("Данные успешно сохранены.");
         } else {
             result.setReadOnlyMode(true);
-            logger.error("Сохранение не выполнено, так как файлы и комментарии данного экземпляра налоговой формы не заблокированы текущим пользователем.");
+            logger.error("Сохранение не выполнено, так как файлы и комментарии данного экземпляра %s не заблокированы текущим пользователем.",
+                    MessageGenerator.mesSpeckSingleD(action.getFormData().getFormType().getTaxType()));
         }
         result.setFiles(formDataService.getFiles(action.getFormData().getId()));
         result.setNote(formDataService.getNote(action.getFormData().getId()));
