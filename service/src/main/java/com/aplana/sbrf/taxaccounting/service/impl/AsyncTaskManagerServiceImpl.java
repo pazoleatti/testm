@@ -99,7 +99,8 @@ public class AsyncTaskManagerServiceImpl implements AsyncTaskManagerService{
                     lockData = lockDataService.getLock(keyTask);
                     params.put(AsyncTask.RequiredParams.LOCK_DATE.name(), lockData.getDateLock());
                     asyncManager.executeAsync(reportType.getAsyncTaskTypeId(isProductionMode), params, balancingVariant);
-                    lockDataService.updateQueue(keyTask, lockData.getDateLock(), balancingVariant);
+					LockData.LockQueues queue = LockData.LockQueues.getById(balancingVariant.getId());
+                    lockDataService.updateQueue(keyTask, lockData.getDateLock(), queue);
 
                     // Шаг 8
                     logger.info(String.format(CREATE_TASK, handler.getTaskName(reportType, userInfo)));

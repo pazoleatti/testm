@@ -72,7 +72,7 @@ public interface LockDataDao {
     void addUserWaitingForLock(String key, int userId);
 
     /**
-     * Получает список всех блокировок
+     * Получает список всех блокировок с учетом фильтра + пейджинг. Используется на форме просмотра блокировок.
      * @return все блокировки
      * @param filter ограничение по имени пользователя или ключу
      * @param queues тип очереди
@@ -101,5 +101,5 @@ public interface LockDataDao {
      * @param lockDate дата начала действия блокировки
      * @param queue очередь
      */
-    void updateQueue(String key, Date lockDate, BalancingVariants queue);
+    void updateQueue(String key, Date lockDate, LockData.LockQueues queue);
 }
