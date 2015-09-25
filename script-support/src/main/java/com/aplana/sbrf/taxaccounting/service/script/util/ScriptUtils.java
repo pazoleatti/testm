@@ -1621,7 +1621,7 @@ public final class ScriptUtils {
             sheetSource = new InputSource(sheet1);
             parser.parse(sheetSource);
         } catch (InvalidFormatException e) {
-            throw new ServiceException(WRONG_FORMAT_FILE + e.getMessage());
+            throw new ServiceException(WRONG_FORMAT_FILE);
         } finally {
             // освобождение ресурсов для экономии памяти
             if (sheet1 != null) {

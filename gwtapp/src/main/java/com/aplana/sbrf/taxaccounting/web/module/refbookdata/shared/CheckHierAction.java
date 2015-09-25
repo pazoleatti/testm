@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.web.main.api.shared.dispatch.ActionName;
 import com.gwtplatform.dispatch.shared.UnsecuredActionImpl;
 
 /**
+ * Проверка что справочник является иерархическим
  * User: avanteev
  */
 public class CheckHierAction extends UnsecuredActionImpl<CheckHierResult> implements ActionName {

@@ -1,10 +1,12 @@
 package form_template.income.rnu8.v2012
 
+import au.com.bytecode.opencsv.CSVReader
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
+import com.aplana.sbrf.taxaccounting.model.util.StringUtils
 import groovy.transform.Field
 
 /**
@@ -97,6 +99,10 @@ def startDate = null
 @Field
 def endDate = null
 
+// Признак периода ввода остатков
+@Field
+def Boolean isBalancePeriod = null
+
 def getReportPeriodStartDate() {
     if (startDate == null) {
         startDate = reportPeriodService.getCalendarStartDate(formData.reportPeriodId).time
@@ -109,6 +115,15 @@ def getReportPeriodEndDate() {
         endDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
     }
     return endDate
+}
+
+// Признак периода ввода остатков для отчетного периода подразделения
+def isBalancePeriod() {
+    if (isBalancePeriod == null) {
+        def departmentReportPeriod = departmentReportPeriodService.get(formData.departmentReportPeriodId)
+        isBalancePeriod = departmentReportPeriod.isBalance()
+    }
+    return isBalancePeriod
 }
 
 // Поиск записи в справочнике по значению (для импорта)
@@ -314,87 +329,88 @@ void consolidation() {
     formDataService.getDataRowHelper(formData).allCached = rows
 }
 
-void importTransportData() {
-    def xml = getTransportXML(ImportInputStream, importService, UploadFileName, 6, 1)
-    addTransportData(xml)
+static String pure(String cell) {
+    return StringUtils.cleanString(cell).intern()
 }
 
-void addTransportData(def xml) {
-    def int rnuIndexRow = 2
-    def int colOffset = 1
-    def rows = []
-    def int rowIndex = 1  // Строки НФ, от 1
+boolean isEmptyCells(def rowCells) {
+    return rowCells.length == 1 && rowCells[0] == ''
+}
 
-    for (def row : xml.row) {
-        rnuIndexRow++
-
-        if ((row.cell.find { it.text() != "" }.toString()) == "") {
-            break
-        }
-        def newRow = formData.createDataRow()
-        newRow.setIndex(rowIndex++)
-        editableColumns.each {
-            newRow.getCell(it).editable = true
-            newRow.getCell(it).setStyleAlias('Редактируемая')
-        }
-        autoFillColumns.each {
-            newRow.getCell(it).setStyleAlias('Автозаполняемая')
-        }
-
-        // графа 3 - поиск записи идет по графе 2
-        String filter = "LOWER(CODE) = LOWER('" + row.cell[2].text() + "') and LOWER(NUMBER) = LOWER('" + row.cell[3].text().replaceAll(/\./, "") + "')"
-        def records = refBookFactory.getDataProvider(28).getRecords(getReportPeriodEndDate(), null, filter, null)
-        if (checkImportRecordsCount(records, refBookFactory.get(28), 'CODE', row.cell[2].text(), getReportPeriodEndDate(), rnuIndexRow, 2 + colOffset, logger, false)) {
-            // графа 3
-            newRow.balance = records.get(0).get(RefBook.RECORD_ID_ALIAS).numberValue
-
-            // графа 4 проверка
-            formDataService.checkReferenceValue(28, row.cell[4].text(), records.get(0).TYPE_INCOME?.stringValue, rnuIndexRow, 4 + colOffset, logger, false)
-        }
-
-        // графа 5
-        newRow.income = parseNumber(row.cell[5].text(), rnuIndexRow, 5 + colOffset, logger, true)
-
-        // графа 6
-        newRow.outcome = parseNumber(row.cell[6].text(), rnuIndexRow, 6 + colOffset, logger, true)
-        rows.add(newRow)
+void importTransportData() {
+    checkBeforeGetXml(ImportInputStream, UploadFileName)
+    if (!UploadFileName.endsWith(".rnu")) {
+        logger.error(WRONG_RNU_FORMAT)
     }
+    int COLUMN_COUNT = 6
+    def DEFAULT_CHARSET = "cp866"
+    char SEPARATOR = '|'
+    char QUOTE = '\0'
+
+    String[] rowCells
+    int fileRowIndex = 2    // номер строки в файле (1, 2..). Начинается с 2, потому что первые две строки - заголовок и пустая строка
+    int rowIndex = 0        // номер строки в НФ (1, 2, ..)
+    def totalTF = null      // итоговая строка со значениями из тф для добавления
+    def newRows = []
+
+    InputStreamReader isr = new InputStreamReader(ImportInputStream, DEFAULT_CHARSET)
+    CSVReader reader = new CSVReader(isr, SEPARATOR, QUOTE)
+    try {
+        // пропускаем заголовок
+        rowCells = reader.readNext()
+        if (isEmptyCells(rowCells)) {
+            logger.error('Первой строкой должен идти заголовок, а не пустая строка')
+        }
+        // пропускаем пустую строку
+        rowCells = reader.readNext()
+        if (!isEmptyCells(rowCells)) {
+            logger.error('Вторая строка должна быть пустой')
+        }
+        // грузим основные данные
+        while ((rowCells = reader.readNext()) != null) {
+            fileRowIndex++
+            rowIndex++
+            if (isEmptyCells(rowCells)) { // проверка окончания блока данных, пустая строка
+                // итоговая строка тф
+                rowCells = reader.readNext()
+                if (rowCells != null) {
+                    totalTF = getNewRow(rowCells, COLUMN_COUNT, ++fileRowIndex, rowIndex, true)
+                }
+                break
+            }
+            newRows.add(getNewRow(rowCells, COLUMN_COUNT, fileRowIndex, rowIndex))
+        }
+    } finally {
+        reader.close()
+    }
+
     // посчитать "итого по коду"
-    def totalRows = calcSubTotalRows(rows)
+    def totalRows = calcSubTotalRows(newRows)
     def i = 0
     totalRows.each { index, row ->
-        rows.add(index + i++, row)
+        newRows.add(index + i++, row)
     }
-    def totalRow = calcTotalRow(rows)
-    rows.add(totalRow)
+    def totalRow = calcTotalRow(newRows)
+    newRows.add(totalRow)
 
-    if (!logger.containsLevel(LogLevel.ERROR) && xml.rowTotal.size() == 1) {
-        rnuIndexRow += 2
-
-        def row = xml.rowTotal[0]
-
-        def total = formData.createDataRow()
-
-        // графа 5
-        total.income = parseNumber(row.cell[5].text(), rnuIndexRow, 5 + colOffset, logger, true)
-
-        // графа 6
-        total.outcome = parseNumber(row.cell[6].text(), rnuIndexRow, 6 + colOffset, logger, true)
-
-        def colIndexMap = ['income': 5, 'outcome': 6]
-        for (def alias : totalColumns) {
-            def v1 = total[alias]
-            def v2 = totalRow[alias]
+    // сравнение итогов
+    if (!logger.containsLevel(LogLevel.ERROR) && totalTF) {
+        // мапа с алиасами граф и номерами колонокв в xml (алиас -> номер колонки)
+        def totalColumnsIndexMap = ['income' : 5, 'outcome' : 6]
+        def colOffset = 1
+        for (def alias : totalColumnsIndexMap.keySet().asList()) {
+            def v1 = totalTF.getCell(alias).value
+            def v2 = totalRow.getCell(alias).value
             if (v1 == null && v2 == null) {
                 continue
             }
             if (v1 == null || v1 != null && v1 != v2) {
-                logger.warn(TRANSPORT_FILE_SUM_ERROR, colIndexMap[alias] + colOffset, rnuIndexRow)
+                logger.warn(TRANSPORT_FILE_SUM_ERROR + " Из файла: $v1, рассчитано: $v2", totalColumnsIndexMap[alias] + colOffset, fileRowIndex)
             }
         }
         // задать итоговой строке нф значения из итоговой строки тф
         totalColumns.each { alias ->
-            totalRow[alias] = total[alias]
+            totalRow[alias] = totalRow[alias]
         }
     } else {
         logger.warn("В транспортном файле не найдена итоговая строка")
@@ -404,10 +420,62 @@ void addTransportData(def xml) {
         }
     }
 
+    updateIndexes(newRows)
+    showMessages(newRows, logger)
     if (!logger.containsLevel(LogLevel.ERROR)) {
-        updateIndexes(rows)
-        formDataService.getDataRowHelper(formData).allCached = rows
+        formDataService.getDataRowHelper(formData).allCached = newRows
     }
+}
+
+/**
+ * Получить новую строку нф по строке из тф (*.rnu).
+ *
+ * @param rowCells список строк со значениями
+ * @param columnCount количество колонок
+ * @param fileRowIndex номер строки в тф
+ * @param rowIndex строка в нф
+ * @param isTotal признак итоговой строки (для пропуска получения справочных значении)
+ *
+ * @return вернет строку нф или null, если количество значений в строке тф меньше
+ */
+def getNewRow(String[] rowCells, def columnCount, def fileRowIndex, def rowIndex, def isTotal = false) {
+    def newRow = formData.createStoreMessagingDataRow()
+    newRow.setIndex(rowIndex)
+    newRow.setImportIndex(fileRowIndex)
+    if (rowCells.length != columnCount + 2) {
+        rowError(logger, newRow, String.format(ROW_FILE_WRONG + "Ошибка при подсчете количества граф '${rowCells.length}' вместо '${columnCount + 2}", fileRowIndex))
+        return newRow
+    }
+    def cols = (isBalancePeriod() ? editableColumns + autoFillColumns : editableColumns)
+    cols.each {
+        newRow.getCell(it).editable = true
+        newRow.getCell(it).setStyleAlias('Редактируемая')
+    }
+    (autoFillColumns - cols).each {
+        newRow.getCell(it).setStyleAlias('Автозаполняемая')
+    }
+
+    def int colOffset = 1
+    if (!isTotal) {
+        // графа 3 - поиск записи идет по графе 2
+        String filter = "LOWER(CODE) = LOWER('" + pure(rowCells[2]) + "') and LOWER(NUMBER) = LOWER('" + pure(rowCells[3]).replaceAll(/\./, "") + "')"
+        def records = refBookFactory.getDataProvider(28).getRecords(getReportPeriodEndDate(), null, filter, null)
+        if (checkImportRecordsCount(records, refBookFactory.get(28), 'CODE', pure(rowCells[2]), getReportPeriodEndDate(), fileRowIndex, 2 + colOffset, logger, false)) {
+            // графа 3
+            newRow.balance = records.get(0).get(RefBook.RECORD_ID_ALIAS).numberValue
+
+            // графа 4 проверка
+            formDataService.checkReferenceValue(28, pure(rowCells[4]), records.get(0).TYPE_INCOME?.stringValue, fileRowIndex, 4 + colOffset, logger, false)
+        }
+    }
+
+    // графа 5
+    newRow.income = parseNumber(pure(rowCells[5]), fileRowIndex, 5 + colOffset, logger, true)
+
+    // графа 6
+    newRow.outcome = parseNumber(pure(rowCells[6]), fileRowIndex, 6 + colOffset, logger, true)
+
+    return newRow
 }
 
 // Сортировка групп и строк
