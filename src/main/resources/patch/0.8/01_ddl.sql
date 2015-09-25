@@ -50,5 +50,9 @@ alter table log_system drop constraint log_system_chk_dcl_form;
 alter table log_system add constraint log_system_chk_rp check (event_id in (7, 11, 401, 402, 501, 502, 503, 601, 650, 901, 902, 903, 810, 811, 812, 813, 820, 821, 830, 831, 832, 840, 841, 842, 850, 860, 701, 702, 703, 704, 705, 904) or report_period_name is not null);
 alter table log_system add constraint log_system_chk_dcl_form check (event_id in (7, 11, 401, 402, 501, 502, 503, 601, 650, 901, 902, 903, 810, 811, 812, 813, 820, 821, 830, 831, 832, 840, 841, 842, 850, 860, 701, 702, 703, 704, 705, 904) or declaration_type_name is not null or (form_type_name is not null and form_kind_id is not null));
 
+
+--http://jira.aplana.com/browse/SBRFACCTAX-12760: PK для lock_data_subscribers
+alter table lock_data_subscribers add constraint lock_data_subscribers_pk primary key (lock_key, user_id);
+
 commit;
 exit;
