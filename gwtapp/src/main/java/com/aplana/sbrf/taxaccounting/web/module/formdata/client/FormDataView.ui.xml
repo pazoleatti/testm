@@ -121,11 +121,6 @@
             margin-left: 2px;
         }
 
-        .rightPanel {
-            overflow-x: visible;
-            overflow-y: scroll;
-        }
-
     </ui:style>
 
     <ui:style field="lock">
@@ -221,7 +216,7 @@
                     </g:cell>
                     <!--Правые кнопки ссылки-->
                     <g:cell horizontalAlignment="right">
-                        <g:SimplePanel addStyleNames="{style.rightPanel}" height="61px">
+                        <g:SimplePanel ui:field="linkButtonPanel" height="61px">
                             <g:VerticalPanel width="180px" spacing="2">
                                 <style:LinkButton ui:field="signersAnchor" text="Параметры печатной формы"
                                                   img="resources/img/businessperson-16.png"

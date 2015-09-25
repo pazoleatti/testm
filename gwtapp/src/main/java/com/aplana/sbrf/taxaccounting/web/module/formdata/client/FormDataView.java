@@ -144,6 +144,9 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 	@UiField
 	LinkButton signersAnchor;
 
+    @UiField
+    Panel linkButtonPanel;
+
 	@UiField
 	CheckBox showCheckedColumns;
 
@@ -628,9 +631,11 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
             comparativPeriodLabel.setVisible(true);
             comparativPeriodTitle.setVisible(true);
             comparativPeriodLabel.setText(comparativPeriod);
+            linkButtonPanel.getElement().getStyle().clearOverflowY();
         } else {
             comparativPeriodLabel.setVisible(false);
             comparativPeriodTitle.setVisible(false);
+            linkButtonPanel.getElement().getStyle().setOverflowY(Style.Overflow.SCROLL);
         }
         factory.setFormDataId(formDataId);
         // Признак корректирующего периода
