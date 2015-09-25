@@ -7,8 +7,9 @@ alter table form_data add constraint form_data_chk_edited check (edited in (0, 1
 alter table form_data add constraint form_data_chk_sorted_backup check (sorted_backup in (0, 1));
 
 --http://jira.aplana.com/browse/SBRFACCTAX-12692: 0.8 Добавить в патч изменение таблиц LOCK_DATA и CONFIGURATION_LOCK
-alter table LOCK_DATA modify DATE_LOCK default sysdate;
-update CONFIGURATION_LOCK set timeout = timeout / 60000 where timeout >= 60000;
+alter table lock_data modify date_lock default sysdate;
+alter table lock_data drop column date_before;
+drop table configuration_lock;
 
 --http://jira.aplana.com/browse/SBRFACCTAX-12711: Обязательность заполнения для form_data.accruing
 update form_data set accruing = 0 where accruing is null;
