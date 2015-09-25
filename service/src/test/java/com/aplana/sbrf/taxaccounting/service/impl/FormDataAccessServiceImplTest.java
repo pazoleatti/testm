@@ -69,6 +69,9 @@ public class FormDataAccessServiceImplTest {
     private static final long TB1_CREATED_FORMDATA_BALANCED_ID = 19;
     private static final long TB1_ACCEPTED_FORMDATA_BALANCED_ID = 20;
 
+    private static final long GOSB_TB1_CREATED_CALCULATED_FORMDATA_ID = 21;
+    private static final long GOSB_TB1_ACCEPTED_CALCULATED_FORMDATA_ID = 22;
+
     private static final long GOSB_TB1_CREATED_FORMDATA_ID = 13;
 
     private static final long INACTIVE_FORMDATA_ID = 10;
@@ -79,6 +82,7 @@ public class FormDataAccessServiceImplTest {
     private static final int BANK_CONTROL_USER_ID = 3;
     private static final int BANK_OPERATOR_USER_ID = 4;
     private static final int BANK_CONTROL_UNP_USER_ID = 5;
+    private static final int BANK_CONTROL_NS_USER_ID = 6;
 
     private static final int REPORT_PERIOD_ACTIVE_ID = 1;
     private static final int REPORT_PERIOD_INACTIVE_ID = 2;
@@ -294,6 +298,13 @@ public class FormDataAccessServiceImplTest {
         fdList.add(fd);
         when(formDataDao.getWithoutRows(TB1_ACCEPTED_FORMDATA_BALANCED_ID)).thenReturn(fd);
 
+        fd = mockFormData(GOSB_TB1_CREATED_CALCULATED_FORMDATA_ID, WorkflowState.CREATED, FormDataKind.CALCULATED, summaryFormType1, periods.get(GOSB_TB1_ACTIVE_ID));
+        fdList.add(fd);
+        when(formDataDao.getWithoutRows(GOSB_TB1_CREATED_CALCULATED_FORMDATA_ID)).thenReturn(fd);
+        fd = mockFormData(GOSB_TB1_ACCEPTED_CALCULATED_FORMDATA_ID, WorkflowState.ACCEPTED, FormDataKind.CALCULATED, summaryFormType1, periods.get(GOSB_TB1_ACTIVE_ID));
+        fdList.add(fd);
+        when(formDataDao.getWithoutRows(GOSB_TB1_ACCEPTED_CALCULATED_FORMDATA_ID)).thenReturn(fd);
+
         doAnswer(new Answer<Object>() {
             @Override
             public Object answer(InvocationOnMock invocation) {
@@ -492,6 +503,12 @@ public class FormDataAccessServiceImplTest {
 		/*Жизненный цикл налоговых форм, формируемых автоматически
 			и передаваемых на вышестоящий уровень (Сводные формы (кроме уровня БАНК)*/
 
+        userInfo.setUser(mockUser(BANK_CONTROL_NS_USER_ID, ROOT_BANK_ID, TARole.ROLE_CONTROL_NS));
+        service.canEdit(userInfo, GOSB_TB1_CREATED_CALCULATED_FORMDATA_ID, false);
+        userInfo.setUser(mockUser(BANK_CONTROL_UNP_USER_ID, ROOT_BANK_ID, TARole.ROLE_CONTROL_UNP));
+        service.canEdit(userInfo, GOSB_TB1_ACCEPTED_CALCULATED_FORMDATA_ID, true);
+
+
         //Контролер текущего уровня, Контролер вышестоящего уровня и Контролер УНП могут редактировать НФ в состоянии "Создана"
         userInfo.setUser(mockUser(TB1_CONTROL_USER_ID, TB1_ID, TARole.ROLE_CONTROL));
         service.canEdit(userInfo, TB1_CREATED_FORMDATA_ID, false);
@@ -519,6 +536,13 @@ public class FormDataAccessServiceImplTest {
         assertFalse(service.canEdit(userInfo, TB1_APPROVED_FORMDATA_ID));
         userInfo.setUser(mockUser(BANK_CONTROL_USER_ID, ROOT_BANK_ID, TARole.ROLE_CONTROL));
         assertFalse(service.canEdit(userInfo, TB1_APPROVED_FORMDATA_ID));*/
+    }
+
+    @Test(expected = AccessDeniedException.class)
+    public void testCanEditForThirdLifeCycleFalseResult2() {
+        //Никто не может редактировать НФ данного жизненного цикла в состоянии "Принята"
+        userInfo.setUser(mockUser(BANK_CONTROL_NS_USER_ID, ROOT_BANK_ID, TARole.ROLE_CONTROL_NS));
+        service.canEdit(userInfo, GOSB_TB1_ACCEPTED_CALCULATED_FORMDATA_ID, false);
     }
 
     @Test
@@ -698,8 +722,12 @@ public class FormDataAccessServiceImplTest {
 		userInfo.setUser(mockUser(BANK_CONTROL_USER_ID, ROOT_BANK_ID, TARole.ROLE_CONTROL));
 		assertArrayEquals(new Object[] { WorkflowMove.CREATED_TO_APPROVED },
 				service.getAvailableMoves(userInfo, TB1_CREATED_FORMDATA_ID).toArray());
-		userInfo.setUser(mockUser(TB1_OPERATOR_USER_ID, TB1_ID, TARole.ROLE_OPER));
-		/*assertArrayEquals(new Object[] { }, service.getAvailableMoves(userInfo, TB1_CREATED_FORMDATA_ID).toArray());*/
+		userInfo.setUser(mockUser(BANK_CONTROL_UNP_USER_ID, ROOT_BANK_ID, TARole.ROLE_CONTROL_UNP));
+        assertArrayEquals(new Object[] { WorkflowMove.ACCEPTED_TO_APPROVED},
+                service.getAvailableMoves(userInfo, GOSB_TB1_ACCEPTED_CALCULATED_FORMDATA_ID).toArray());
+        assertArrayEquals(new Object[] { WorkflowMove.CREATED_TO_APPROVED},
+                service.getAvailableMoves(userInfo, GOSB_TB1_CREATED_CALCULATED_FORMDATA_ID).toArray());
+        /*assertArrayEquals(new Object[] { }, service.getAvailableMoves(userInfo, TB1_CREATED_FORMDATA_ID).toArray());*/
 	}
 
 	@Test
