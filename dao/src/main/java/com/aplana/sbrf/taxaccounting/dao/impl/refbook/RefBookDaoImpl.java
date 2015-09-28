@@ -75,6 +75,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 	private static final Log logger = LogFactory.getLog(RefBookDaoImpl.class);
 
     public static final String NOT_HIERARCHICAL_REF_BOOK_ERROR = "Справочник \"%s\" (id=%d) не является иерархичным";
+    public static final String NOT_LINEAR_REF_BOOK_ERROR = "Справочник \"%s\" (id=%d) не является линейным";
 
     private static final String DELETE_VERSION = "delete from %s where %s";
 	private static final String STRING_VALUE_COLUMN_ALIAS = "string_value";
@@ -2453,8 +2454,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         }
         List<Object[]> insertValues = new ArrayList<Object[]>();
         List<Object[]> deleteValues = new ArrayList<Object[]>();
-        for (int i = 0; i < recordIds.size(); i++) {
-            Long id = recordIds.get(i);
+        for (Long id : recordIds) {
             Long rowId = getRowId(id);
             Long recordId = checkRecordUnique(refBookId, version, rowId);
             if (recordId == null) {
