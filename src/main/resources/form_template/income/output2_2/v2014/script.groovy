@@ -1,9 +1,11 @@
 package form_template.income.output2_2.v2014
 
+import au.com.bytecode.opencsv.CSVReader
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
+import com.aplana.sbrf.taxaccounting.model.util.StringUtils
 import groovy.transform.Field
 
 /**
@@ -69,6 +71,10 @@ switch (formDataEvent) {
         break
     case FormDataEvent.IMPORT:
         importData()
+        formDataService.saveCachedDataRows(formData, logger)
+        break
+    case FormDataEvent.IMPORT_TRANSPORT_FILE:
+        importTransportData()
         formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.SORT_ROWS:
@@ -430,4 +436,189 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
     newRow.sumTax = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
 
     return newRow
+}
+
+void importTransportData() {
+    checkBeforeGetXml(ImportInputStream, UploadFileName)
+    if (!UploadFileName.endsWith(".rnu")) {
+        logger.error(WRONG_RNU_FORMAT)
+    }
+    int COLUMN_COUNT = 23
+    def DEFAULT_CHARSET = "cp866"
+    char SEPARATOR = '|'
+    char QUOTE = '\0'
+
+    String[] rowCells
+    int fileRowIndex = 2    // номер строки в файле (1, 2..). Начинается с 2, потому что первые две строки - заголовок и пустая строка
+    int rowIndex = 0        // номер строки в НФ
+    def totalTF = null		// итоговая строка со значениями из тф для добавления
+    def newRows = []
+
+    InputStreamReader isr = new InputStreamReader(ImportInputStream, DEFAULT_CHARSET)
+    CSVReader reader = new CSVReader(isr, SEPARATOR, QUOTE)
+    try{
+        // пропускаем заголовок
+        rowCells = reader.readNext()
+        if (isEmptyCells(rowCells)) {
+            logger.error('Первой строкой должен идти заголовок, а не пустая строка')
+        }
+        // пропускаем пустую строку
+        rowCells = reader.readNext()
+        if (!isEmptyCells(rowCells)) {
+            logger.error('Вторая строка должна быть пустой')
+        }
+        // грузим основные данные
+        while ((rowCells = reader.readNext()) != null) {
+            fileRowIndex++
+            rowIndex++
+            if (isEmptyCells(rowCells)) { // проверка окончания блока данных, пустая строка
+                // итоговая строка тф
+                rowCells = reader.readNext()
+                if (rowCells != null) {
+                    totalTF = getNewRow(rowCells, COLUMN_COUNT, ++fileRowIndex, rowIndex)
+                }
+                break
+            }
+            newRows.add(getNewRow(rowCells, COLUMN_COUNT, fileRowIndex, rowIndex))
+        }
+    } finally {
+        reader.close()
+    }
+
+    showMessages(newRows, logger)
+
+    // сравнение итогов
+    if (!logger.containsLevel(LogLevel.ERROR) && totalTF) {
+        // мапа с алиасами граф и номерами колонокв в xml (алиас -> номер колонки)
+        def totalColumnsIndexMap = [
+                'sumDividend'        : 22,
+                'sumTax'             : 23
+        ]
+        // итоговая строка для сверки сумм
+        def totalTmp = formData.createDataRow()
+        totalColumnsIndexMap.keySet().asList().each { alias ->
+            totalTmp.getCell(alias).setValue(BigDecimal.ZERO, null)
+        }
+        // подсчет итогов
+        for (def row : newRows) {
+            if (row.getAlias()) {
+                continue
+            }
+            totalColumnsIndexMap.keySet().asList().each { alias ->
+                def value1 = totalTmp.getCell(alias).value
+                def value2 = (row.getCell(alias).value ?: BigDecimal.ZERO)
+                totalTmp.getCell(alias).setValue(value1 + value2, null)
+            }
+        }
+
+        // сравнение контрольных сумм
+        def colOffset = 1
+        for (def alias : totalColumnsIndexMap.keySet().asList()) {
+            def v1 = totalTF.getCell(alias).value
+            def v2 = totalTmp.getCell(alias).value
+            if (v1 == null && v2 == null) {
+                continue
+            }
+            if (v1 == null || v1 != null && v1 != v2) {
+                logger.warn(TRANSPORT_FILE_SUM_ERROR + " Из файла: $v1, рассчитано: $v2", totalColumnsIndexMap[alias] + colOffset, fileRowIndex)
+            }
+        }
+    }
+
+    if (!logger.containsLevel(LogLevel.ERROR)) {
+        updateIndexes(newRows)
+        formDataService.getDataRowHelper(formData).allCached = newRows
+    }
+}
+
+boolean isEmptyCells(def rowCells) {
+    return rowCells.length == 1 && rowCells[0] == ''
+}
+
+/**
+ * Получить новую строку нф по строке из тф (*.rnu).
+ *
+ * @param rowCells список строк со значениями
+ * @param columnCount количество колонок
+ * @param fileRowIndex номер строки в тф
+ * @param rowIndex строка в нф
+ *
+ * @return вернет строку нф или null, если количество значений в строке тф меньше
+ */
+def getNewRow(String[] rowCells, def columnCount, def fileRowIndex, def rowIndex) {
+    def newRow = formData.createStoreMessagingDataRow()
+    newRow.setIndex(rowIndex)
+    newRow.setImportIndex(fileRowIndex)
+
+    if (rowCells.length != columnCount + 2) {
+        rowError(logger, newRow, String.format(ROW_FILE_WRONG + "Ошибка при подсчете количества граф '${rowCells.length}' вместо '${columnCount + 2}", fileRowIndex))
+        return newRow
+    }
+
+    editableColumns.each {
+        newRow.getCell(it).editable = true
+        newRow.getCell(it).setStyleAlias('Редактируемая')
+    }
+
+    def int colOffset = 1
+    def int colIndex = 1
+
+    // графа 2..5
+    ['emitent', 'decreeNumber', 'inn', 'kpp'].each { alias ->
+        colIndex++
+        newRow[alias] = pure(rowCells[colIndex])
+    }
+
+    // графа 6
+    colIndex++
+    //Проверяется: если загруженное из Excel значение - цифра от 0 до 9, то спереди подставляется 0, чтобы получилось двузначное число.
+    if (pure(rowCells[colIndex]).matches("[0-9]")) {
+        newRow.recType = "0" + pure(rowCells[colIndex])
+    } else {
+        newRow.recType = pure(rowCells[colIndex])
+    }
+
+    // графа 7
+    colIndex++
+    newRow.title = pure(rowCells[colIndex])
+
+    // графа 8
+    colIndex++
+    newRow.zipCode = pure(rowCells[colIndex])
+
+    // графа 9 - справочник "Коды субъектов Российской Федерации"
+    //Проверяется: если загруженное из Excel значение - цифра от 0 до 9, то спереди подставляется 0, чтобы получилось двузначное число.
+    colIndex++
+    def code = pure(rowCells[colIndex])
+    if (code) {
+        if (code.matches("[0-9]")) {
+            newRow.subdivisionRF = getRecordIdImport(4, 'CODE', "0" + code, fileRowIndex, colIndex + colOffset, false)
+        } else {
+            newRow.subdivisionRF = getRecordIdImport(4, 'CODE', code, fileRowIndex, colIndex + colOffset, false)
+        }
+    }
+
+    // графа 10..20
+    ['area', 'city', 'region', 'street', 'homeNumber', 'corpNumber', 'apartment', 'surname', 'name', 'patronymic', 'phone'].each { alias ->
+        colIndex++
+        newRow[alias] = pure(rowCells[colIndex])
+    }
+
+    // графа 21
+    colIndex++
+    newRow.dividendDate = parseDate(pure(rowCells[colIndex]), "dd.MM.yyyy", fileRowIndex, colIndex + colOffset, logger, true)
+
+    // графа 22
+    colIndex++
+    newRow.sumDividend = parseNumber(pure(rowCells[colIndex]), fileRowIndex, colIndex + colOffset, logger, true)
+
+    // графа 23
+    colIndex++
+    newRow.sumTax = parseNumber(pure(rowCells[colIndex]), fileRowIndex, colIndex + colOffset, logger, true)
+
+    return newRow
+}
+
+static String pure(String cell) {
+    return StringUtils.cleanString(cell).intern()
 }
