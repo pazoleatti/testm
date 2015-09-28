@@ -1188,6 +1188,7 @@ public class FormDataServiceImpl implements FormDataService {
         formDataDao.updateSorted(formData.getId(), false);
         formDataDao.updateEdited(formData.getId(), true);
         formDataCompositionService.compose(formData, 0, null, formData.getFormType().getId(), formData.getKind());
+        dataRowDao.refreshRefBookLinks(formData);
 
         //Система выводит сообщение в панель уведомлений
         logger.info("Выполнена консолидация данных из форм-источников:");
