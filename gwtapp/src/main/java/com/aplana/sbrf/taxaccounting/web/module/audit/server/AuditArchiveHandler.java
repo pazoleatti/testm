@@ -23,7 +23,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -69,13 +68,13 @@ public class AuditArchiveHandler extends AbstractActionHandler<AuditArchiveActio
         AuditArchiveResult result = new AuditArchiveResult();
         LockData lockData;
 
-        Calendar c = Calendar.getInstance();
+        /*Calendar c = Calendar.getInstance();
         c.setTime(action.getLogSystemFilter().getToSearchDate());
         c.set(Calendar.HOUR_OF_DAY, 23);
         c.set(Calendar.MINUTE, 59);
         c.set(Calendar.SECOND, 59);
         c.set(Calendar.MILLISECOND, 999);
-        action.getLogSystemFilter().setToSearchDate(c.getTime());
+        action.getLogSystemFilter().setToSearchDate(c.getTime());*/
 
         long recordsCount = auditService.getCountRecords(action.getLogSystemFilter(), userInfo);
         if (recordsCount==0){
