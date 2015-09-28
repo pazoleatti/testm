@@ -709,14 +709,14 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
 
     @Override
     public void onOpenSourcesDialog() {
-        filesCommentsPresenter.setFormData(formData);
-        addToPopupSlot(filesCommentsPresenter);
+        sourcesPresenter.setFormData(formData);
+        addToPopupSlot(sourcesPresenter);
     }
 
     @Override
     public void onFilesCommentsDialog() {
-        sourcesPresenter.setFormData(formData);
-        addToPopupSlot(sourcesPresenter);
+        filesCommentsPresenter.setFormData(formData);
+        addToPopupSlot(filesCommentsPresenter);
     }
 
     @Override

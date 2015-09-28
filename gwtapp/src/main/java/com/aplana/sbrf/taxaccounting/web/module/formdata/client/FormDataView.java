@@ -909,7 +909,7 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 
     @UiHandler("filesComments")
     public void onFilesCommentsClicked(ClickEvent event){
-        getUiHandlers().onOpenSourcesDialog();
+        getUiHandlers().onFilesCommentsDialog();
     }
 
     @UiHandler("sources")
