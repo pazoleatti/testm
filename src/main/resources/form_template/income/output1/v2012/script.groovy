@@ -69,10 +69,10 @@ switch (formDataEvent) {
         logicCheck()
         break
     case FormDataEvent.IMPORT:
-//        importData()
-//        formDataService.saveCachedDataRows(formData, logger)
-//        break
-//    case FormDataEvent.IMPORT_TRANSPORT_FILE:
+        importData()
+        formDataService.saveCachedDataRows(formData, logger)
+        break
+    case FormDataEvent.IMPORT_TRANSPORT_FILE:
         importTransportData()
         formDataService.saveCachedDataRows(formData, logger)
         break
