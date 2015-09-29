@@ -71,18 +71,20 @@ public class Rnu7Test extends ScriptTestBase {
             public Object answer(InvocationOnMock invocation) throws Throwable {
                 // ищет среди записей справочника запись соответствующую коду из фильтра
                 // в фильтре: LOWER(CODE) = LOWER('codeA') and LOWER(NUMBER) = LOWER('numberA')
+                // либо: LOWER(CODE) = LOWER('codeA')
                 String filter = (String) invocation.getArguments()[2];
-                String before = "LOWER(CODE) = LOWER('";
-                String after = "') and LOWER(NUMBER)";
-                int beforeIndex = filter.indexOf(before) + before.length();
-                int afterIndex = filter.indexOf(after);
-                String findValue = filter.substring(beforeIndex, afterIndex);
-                if (findValue == null) {
+                String codeValue = filter.substring(filter.indexOf("('") + 2, filter.indexOf("')"));
+                if (codeValue == null) {
                     return new PagingResult<Map<String, RefBookValue>>();
+                }
+                String numberValue = null;
+                if(filter.lastIndexOf("('") != filter.indexOf("('")){
+                    numberValue = filter.substring(filter.lastIndexOf("('") + 2, filter.lastIndexOf("')"));
                 }
                 final Map<Long, Map<String, RefBookValue>> records = testHelper.getRefBookAllRecords(refbookId);
                 for (Map<String, RefBookValue> row : records.values()) {
-                    if (findValue.equals(row.get("CODE").getStringValue())) {
+                    if (codeValue.equals(row.get("CODE").getStringValue())
+                            && (numberValue == null || numberValue.equals(row.get("NUMBER").getStringValue()))) {
                         List<Map<String, RefBookValue>> tmpRecords = Arrays.asList(row);
                         return new PagingResult<Map<String, RefBookValue>>(tmpRecords);
                     }
