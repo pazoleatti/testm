@@ -119,7 +119,7 @@ def sbStrings = [
 ]
 
 @Field
-def graph3String = null
+String graph3String = null
 
 @Field
 def lastSourceFormType = 314 // с 9 месяцев 2015
@@ -281,7 +281,9 @@ void consolidation() {
     def lastPeriodEndDate = reportPeriodService.getEndDate(lastPeriod.id).time
 
     def departmentParams = refBookFactory.getDataProvider(33).getRecords(getReportPeriodEndDate() - 1, null, "DEPARTMENT_ID = 1", null)
-    graph3String = departmentParams?.INN?.value?.toString()
+    if (departmentParams?.size() > 0) {
+        graph3String = departmentParams?.get(0)?.INN?.stringValue
+    }
 
     // получить формы-источники в текущем налоговом периоде
     departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind(),
