@@ -437,7 +437,7 @@ def getNewRow(String[] rowCells, def columnCount, def fileRowIndex, def rowIndex
     def int colOffset = 1
 
     if (!isTotal) {
-        String filter = "LOWER(CODE) = LOWER('" + pure(rowCells[2]) + "') and LOWER(NUMBER) = LOWER('" + pure(rowCells[3]) + "')"
+        String filter = getFilter(pure(rowCells[2]), pure(rowCells[3]))
         def records = refBookFactory.getDataProvider(27).getRecords(getReportPeriodEndDate(), null, filter, null)
         if (checkImportRecordsCount(records, refBookFactory.get(27), 'CODE', pure(rowCells[2]), getReportPeriodEndDate(), fileRowIndex, 2 + colOffset, logger, false)) {
             // графа 2
@@ -617,7 +617,7 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex, 
 
     // графа 3
     if (!isTotal) {
-        String filter = "LOWER(CODE) = LOWER('" + values[2] + "') and LOWER(NUMBER) = LOWER('" + values[3] + "')"
+        String filter = getFilter(values[2], values[3])
         def records = refBookFactory.getDataProvider(27).getRecords(getReportPeriodEndDate(), null, filter, null)
         def colIndex = 2
         if (checkImportRecordsCount(records, refBookFactory.get(27), 'CODE', values[colIndex], getReportPeriodEndDate(), fileRowIndex, colOffset + colIndex, logger, false)) {
@@ -655,4 +655,12 @@ def getNewSubTotalRowFromXls(def values, def colOffset, def fileRowIndex, def ro
     newRow.sum = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
 
     return newRow
+}
+
+def String getFilter(def String code, def String number){
+    String filter = "LOWER(CODE) = LOWER('" + code + "')"
+    if (number != '') {
+        filter += " and LOWER(NUMBER) = LOWER('" + number + "')"
+    }
+    return filter
 }
