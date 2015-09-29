@@ -88,6 +88,13 @@ public class TaxFormNominationPresenter
         FlexiblePager getDeclarationPager();
 
         Pair<TaxNominationColumnEnum, Boolean> getSort();
+
+        /**
+         * Перезагрузка таблицы, отображающий данные для "Назначение деклараций"
+         */
+        void reloadFormTableData();
+
+        void reloadDeclarationTableData();
     }
 
     private TaxType taxType;
@@ -148,32 +155,6 @@ public class TaxFormNominationPresenter
 
     // TODO Unlock. Реализовать механизм блокировок.
 
-    /**
-     * Перезагрузка таблицы, отображающий данные для "Назначение деклараций"
-     */
-    @Override
-    public void reloadFormTableData() {
-        dispatcher.execute(getTableDataAction(), CallbackUtils
-                .defaultCallback(new AbstractCallback<GetTableDataResult>() {
-                    @Override
-                    public void onSuccess(GetTableDataResult result) {
-                        getView().setDataToFormTable(0, result.getTotalCount(), result.getTableData());
-                        getView().updateButtonsEnabled();
-                    }
-                }, this));
-    }
-
-    @Override
-    public void reloadDeclarationTableData(){
-        dispatcher.execute(getTableDataAction(), CallbackUtils
-		        .defaultCallback(new AbstractCallback<GetTableDataResult>() {
-                    @Override
-                    public void onSuccess(GetTableDataResult result) {
-                        getView().setDataToDeclarationTable(0, result.getTotalCount(), result.getTableData());
-                        getView().updateButtonsEnabled();
-                    }
-                }, this));
-    }
 
      private GetTableDataAction getTableDataAction(){
          GetTableDataAction action = new GetTableDataAction();
@@ -212,7 +193,7 @@ public class TaxFormNominationPresenter
                         new AbstractCallback<DeleteDeclarationSourcesResult>() {
                             @Override
                             public void onSuccess(DeleteDeclarationSourcesResult result) {
-                                reloadDeclarationTableData();
+                                getView().reloadDeclarationTableData();
                                 if ((result.getUuid() != null) && !result.getUuid().isEmpty()) {
                                     if (result.isExistDeclaration()) {
                                         Dialog.errorMessage("Невозможно отменить назначение, т.к. созданы экземпляры декларации");
@@ -233,10 +214,10 @@ public class TaxFormNominationPresenter
             if (event.getDepartments() != null){
                 getView().setDepartments(event.getDepartments());
             }
-            reloadFormTableData();
+            getView().reloadFormTableData();
         } else {
 	        getView().setDepartments(event.getDepartments());
-            reloadDeclarationTableData();
+            getView().reloadDeclarationTableData();
         }
 	}
 
@@ -261,7 +242,7 @@ public class TaxFormNominationPresenter
                                         // TODO удаление источников-приемников
                                     }
                                 }
-                                reloadFormTableData();
+                                getView().reloadFormTableData();
                             }
                         }, this));
     }

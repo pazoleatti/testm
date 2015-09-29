@@ -13,8 +13,8 @@ import java.util.List;
  */
 public interface TaxFormNominationUiHandlers extends UiHandlers {
 
-    void reloadFormTableData();
-    void reloadDeclarationTableData();
+//    void reloadFormTableData();
+//    void reloadDeclarationTableData();
 
     void onClickOpenFormDestinations();
     void onClickEditFormDestinations(List<FormTypeKind> formTypeKinds);

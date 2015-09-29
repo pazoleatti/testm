@@ -332,7 +332,7 @@ public class DepartmentDeclarationTypeDaoImpl extends AbstractDao implements Dep
         // Limit
         if (queryParams != null && queryParams.getCount() != 0){
             query = "SELECT * FROM ( " + query + " ) WHERE row_number_over BETWEEN :from and :to";
-            parameters.addValue("from", queryParams.getFrom());
+            parameters.addValue("from", queryParams.getFrom()+1);
             parameters.addValue("to", queryParams.getFrom() + queryParams.getCount());
         }
 

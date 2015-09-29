@@ -393,6 +393,18 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
 		formGrid.setRowData(start, departmentFormTypes);
 	}
 
+    @Override
+    public void reloadFormTableData(){
+        Range range = new Range(formPager.getPage()*formPager.getPageSize(), formPager.getPageSize());
+        formGrid.setVisibleRangeAndClearData(range, true);
+    }
+
+    @Override
+    public void reloadDeclarationTableData(){
+        Range range = new Range(declarationPager.getPage()*declarationPager.getPageSize(), declarationPager.getPageSize());
+        decGrid.setVisibleRangeAndClearData(range, true);
+    }
+
 	@Override
 	public void setDataToDeclarationTable(int start, int totalCount, List<FormTypeKind> departmentFormTypes) {
         decSM.clear();
@@ -413,10 +425,10 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
 	@UiHandler("search")
 	public void onSearchClick(ClickEvent event) {
 		if (isForm) {
-			getUiHandlers().reloadFormTableData();
-			formPager.firstPage();
+            formPager.firstPage();
+			reloadFormTableData();
 		} else {
-			getUiHandlers().reloadDeclarationTableData();
+			reloadDeclarationTableData();
 			declarationPager.firstPage();
 		}
 	}

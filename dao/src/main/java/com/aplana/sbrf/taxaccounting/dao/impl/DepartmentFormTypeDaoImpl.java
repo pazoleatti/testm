@@ -451,7 +451,7 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
         // Limit
         if (paging){
             query = "SELECT * FROM ( " + query + " ) WHERE row_number_over BETWEEN :from and :to";
-            parameters.addValue("from", queryParams.getFrom());
+            parameters.addValue("from", queryParams.getFrom()+1);
             parameters.addValue("to", queryParams.getFrom() + queryParams.getCount());
         }
 
