@@ -1,5 +1,6 @@
 package form_template.income.output4_1.v2014
 
+import au.com.bytecode.opencsv.CSVReader
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
@@ -35,6 +36,10 @@ switch (formDataEvent) {
         break
     case FormDataEvent.IMPORT:
         importData()
+        formDataService.saveCachedDataRows(formData, logger)
+        break
+    case FormDataEvent.IMPORT_TRANSPORT_FILE:
+        importTransportData()
         formDataService.saveCachedDataRows(formData, logger)
         break
 }
@@ -179,4 +184,141 @@ def fillRowFromXls(def dataRow, def values, int fileRowIndex, int rowIndex, int 
     colIndex = 3
     dataRow.getCell('taxSum').setCheckMode(true)
     dataRow.taxSum = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, false)
+}
+
+void importTransportData() {
+    checkBeforeGetXml(ImportInputStream, UploadFileName)
+    if (!UploadFileName.endsWith(".rnu")) {
+        logger.error(WRONG_RNU_FORMAT)
+    }
+    int COLUMN_COUNT = 4
+    def DEFAULT_CHARSET = "cp866"
+    char SEPARATOR = '|'
+    char QUOTE = '\0'
+
+    String[] rowCells
+    int fileRowIndex = 2    // номер строки в файле (1, 2..). Начинается с 2, потому что первые две строки - заголовок и пустая строка
+    int rowIndex = 0
+    def totalTF = null        // итоговая строка со значениями из тф для добавления
+
+    InputStreamReader isr = new InputStreamReader(ImportInputStream, DEFAULT_CHARSET)
+    CSVReader reader = new CSVReader(isr, SEPARATOR, QUOTE)
+
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
+
+    try {
+        // пропускаем заголовок
+        rowCells = reader.readNext()
+        if (isEmptyCells(rowCells)) {
+            logger.error('Первой строкой должен идти заголовок, а не пустая строка')
+        }
+        // пропускаем пустую строку
+        rowCells = reader.readNext()
+        if (!isEmptyCells(rowCells)) {
+            logger.error('Вторая строка должна быть пустой')
+        }
+        // грузим основные данные
+        while ((rowCells = reader.readNext()) != null) {
+            fileRowIndex++
+            rowIndex++
+            if (isEmptyCells(rowCells)) { // проверка окончания блока данных, пустая строка
+                // итоговая строка тф
+                rowCells = reader.readNext()
+                if (rowCells != null) {
+                    totalTF = formData.createStoreMessagingDataRow()
+                    fillRow(totalTF, rowCells, COLUMN_COUNT, fileRowIndex)
+                }
+                break
+            }
+            setValues(dataRows, rowCells, COLUMN_COUNT, fileRowIndex, rowIndex)
+        }
+    } finally {
+        reader.close()
+    }
+
+    // сравнение итогов
+    if (!logger.containsLevel(LogLevel.ERROR) && totalTF) {
+        // мапа с алиасами граф и номерами колонок в xml (алиас -> номер колонки)
+        def totalColumnsIndexMap = [ 'taxSum' : 4]
+
+        def totalColumns = totalColumnsIndexMap.keySet().asList()
+
+        // подсчет итогов
+        def itogValues = [:]
+        totalColumns.each {alias ->
+            itogValues[alias] = BigDecimal.ZERO
+        }
+        for (def row in dataRows) {
+            totalColumns.each { alias ->
+                itogValues[alias] += (row.getCell(alias).value ?: 0)
+            }
+        }
+
+        // сравнение контрольных сумм
+        def colOffset = 1
+        for (def alias : totalColumns) {
+            def v1 = totalTF.getCell(alias).value
+            def v2 = itogValues[alias]
+            if (v1 == null && v2 == null) {
+                continue
+            }
+            if (v1 == null || v1 != null && v1 != v2) {
+                logger.warn(TRANSPORT_FILE_SUM_ERROR, totalColumnsIndexMap[alias] + colOffset, fileRowIndex)
+            }
+        }
+    }
+    showMessages(dataRows, logger)
+}
+
+/** Устанавливает значения из тф в строку нф. */
+def setValues(def dataRows, String[] rowCells, def columnCount, def fileRowIndex, def rowIndex) {
+    if (rowCells == null) {
+        return true
+    }
+    if (rowIndex - 1 >= dataRows.size()) {
+        return false
+    }
+    // найти нужную строку нф
+    def dataRow = dataRows.get(rowIndex - 1)
+    // заполнить строку нф значениями из тф
+    return fillRow(dataRow, rowCells, columnCount, fileRowIndex)
+}
+
+/**
+ * Заполняет заданную строку нф (любую) значениями из тф.
+ *
+ * @param dataRow строка нф
+ * @param rowCells список строк со значениями
+ * @param columnCount количество колонок
+ * @param fileRowIndex номер строки в тф
+ * @param checkFixedValues проверить ли фиксированные значения (при заполенении итоговой строки это не нужно делать)
+ *
+ * @return вернет true или false, если количество значений в строке тф меньше
+ */
+def fillRow(def dataRow, String[] rowCells, def columnCount, def fileRowIndex) {
+    dataRow.setImportIndex(fileRowIndex)
+    if (rowCells.length != columnCount + 2) {
+        rowError(logger, dataRow, String.format(ROW_FILE_WRONG, fileRowIndex))
+        return false
+    }
+    def colOffset = 1
+    def colIndex
+
+    // графа 3
+    colIndex = 3
+    dataRow.dealDate = parseDate(pure(rowCells[colIndex]), 'dd.MM.yyyy', fileRowIndex, colIndex + colOffset, logger, true)
+
+    // графа 4
+    colIndex = 4
+    dataRow.taxSum = parseNumber(pure(rowCells[colIndex]), fileRowIndex, colIndex + colOffset, logger, true)
+
+    return true
+}
+
+String pure(String cell) {
+    return StringUtils.cleanString(cell)?.intern()
+}
+
+boolean isEmptyCells(def rowCells) {
+    return rowCells.length == 1 && rowCells[0] == ''
 }
