@@ -765,15 +765,20 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
         );
     }
 
-    private static final String FIND_DESTINATIONS_SQL = "SELECT tgt.id id, tgt.DEPARTMENT_ID department_id, tgt.FORM_TYPE_ID form_type_id, tgt.KIND kind, fds.PERIOD_START start_date, fds.PERIOD_END end_date \n" +
-            "from department_form_type src \n" +
-            "join form_data_source fds on src.id = fds.src_department_form_type_id\n" +
-            "join department_form_type tgt on fds.department_form_type_id = tgt.id \n" +
-            "   WHERE src.form_type_id = :formTypeId " +
-            "   AND (fds.PERIOD_START BETWEEN :dateFrom AND :dateTo " +
-            "   OR fds.PERIOD_END BETWEEN :dateFrom AND :dateTo \n" +
-            "   OR (fds.PERIOD_START BETWEEN :dateFrom AND :dateTo \n" +
-            "   AND fds.PERIOD_END IS null))";
+    private static final String FIND_DESTINATIONS_SQL =
+            "SELECT\n" +
+                    "  tgt.id            id,\n" +
+                    "  tgt.DEPARTMENT_ID department_id,\n" +
+                    "  tgt.FORM_TYPE_ID  form_type_id,\n" +
+                    "  tgt.KIND          kind,\n" +
+                    "  fds.PERIOD_START  start_date,\n" +
+                    "  fds.PERIOD_END    end_date\n" +
+                    "FROM department_form_type src\n" +
+                    "  JOIN form_data_source fds ON src.id = fds.src_department_form_type_id\n" +
+                    "  JOIN department_form_type tgt ON fds.department_form_type_id = tgt.id\n" +
+                    "WHERE src.form_type_id = :formTypeId AND\n" +
+                    "      ((:dateTo IS NULL AND (fds.PERIOD_START >= :dateFrom OR fds.PERIOD_END >= :dateFrom))\n" +
+                    "       OR (fds.PERIOD_START BETWEEN :dateFrom AND :dateTo OR fds.PERIOD_END BETWEEN :dateFrom AND :dateTo))";
     @Override
     public List<Pair<DepartmentFormType, Pair<Date, Date>>> findDestinationsForFormType(int typeId, Date dateFrom, Date dateTo) {
         try {
@@ -792,15 +797,19 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
         }
     }
 
-    private static final String FIND_SOURCES_SQL = "SELECT src.id id, src.DEPARTMENT_ID department_id, src.FORM_TYPE_ID form_type_id, src.KIND kind, fds.PERIOD_START start_date, fds.PERIOD_END end_date \n" +
-            "from department_form_type src \n" +
-            "join form_data_source fds on src.id = fds.src_department_form_type_id\n" +
-            "join department_form_type tgt on fds.department_form_type_id = tgt.id \n" +
-            "   WHERE tgt.form_type_id = :formTypeId " +
-            "   AND (fds.PERIOD_START BETWEEN :dateFrom AND :dateTo " +
-            "   OR fds.PERIOD_END BETWEEN :dateFrom AND :dateTo \n" +
-            "   OR (fds.PERIOD_START BETWEEN :dateFrom AND :dateTo \n" +
-            "   AND fds.PERIOD_END IS null))";
+    private static final String FIND_SOURCES_SQL =
+            "SELECT\n" +
+            "  src.id            id,\n" +
+            "  src.DEPARTMENT_ID department_id,\n" +
+            "  src.FORM_TYPE_ID  form_type_id,\n" +
+            "  src.KIND          kind,\n" +
+            "  fds.PERIOD_START  start_date,\n" +
+            "  fds.PERIOD_END    end_date\n" +
+            "FROM department_form_type src\n" +
+            "  JOIN form_data_source fds ON src.id = fds.src_department_form_type_id\n" +
+            "  JOIN department_form_type tgt ON fds.department_form_type_id = tgt.id\n" +
+            "WHERE tgt.form_type_id = :formTypeId AND ((:dateTo IS NULL and (fds.PERIOD_START >= :dateFrom OR fds.PERIOD_END >= :dateFrom))\n" +
+            "       OR (fds.PERIOD_START BETWEEN :dateFrom AND :dateTo or fds.PERIOD_END BETWEEN :dateFrom AND :dateTo))";
     @Override
     public List<Pair<DepartmentFormType, Pair<Date, Date>>> findSourcesForFormType(int typeId, Date dateFrom, Date dateTo) {
         try {

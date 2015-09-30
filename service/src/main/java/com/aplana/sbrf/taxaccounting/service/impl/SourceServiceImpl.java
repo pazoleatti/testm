@@ -53,7 +53,6 @@ public class SourceServiceImpl implements SourceService {
     };
 
 	private static final Date MIN_DATE = new Date(0);
-	private static final Date MAX_DATE = new Date(Long.MAX_VALUE);
 
     @Autowired
     private DepartmentFormTypeDao departmentFormTypeDao;
@@ -95,14 +94,6 @@ public class SourceServiceImpl implements SourceService {
 	 */
 	private Date checkMinDate(Date date) {
 		return date != null ? date : MIN_DATE;
-	}
-	/**
-	 * Проверяет конец диапазона дат и если оно не задано, то возвращает значение по умолчанию
-	 * @param date
-	 * @return
-	 */
-	private Date checkMaxDate(Date date) {
-		return date != null ? date : MAX_DATE;
 	}
 
     @Override
@@ -1218,22 +1209,22 @@ public class SourceServiceImpl implements SourceService {
 
     @Override
     public List<Pair<DepartmentFormType, Pair<Date, Date>>> findDestinationFTsForFormType(int typeId, Date dateFrom, Date dateTo) {
-        return departmentFormTypeDao.findDestinationsForFormType(typeId, checkMinDate(dateFrom), checkMaxDate(dateTo));
+        return departmentFormTypeDao.findDestinationsForFormType(typeId, checkMinDate(dateFrom), dateTo);
     }
 
     @Override
     public List<Pair<DepartmentFormType, Pair<Date, Date>>> findSourceFTsForFormType(int typeId, Date dateFrom, Date dateTo) {
-        return departmentFormTypeDao.findSourcesForFormType(typeId, checkMinDate(dateFrom), checkMaxDate(dateTo));
+        return departmentFormTypeDao.findSourcesForFormType(typeId, checkMinDate(dateFrom), dateTo);
     }
 
     @Override
     public List<Pair<DepartmentFormType, Pair<Date, Date>>> findSourceFTsForDeclaration(int typeId, Date dateFrom, Date dateTo) {
-        return departmentDeclarationTypeDao.findSourceFTsForDeclaration(typeId, checkMinDate(dateFrom), checkMaxDate(dateTo));
+        return departmentDeclarationTypeDao.findSourceFTsForDeclaration(typeId, checkMinDate(dateFrom),dateTo);
     }
 
     @Override
     public List<Pair<DepartmentDeclarationType, Pair<Date, Date>>> findDestinationDTsForFormType(int typeId, Date dateFrom, Date dateTo) {
-        return departmentDeclarationTypeDao.findDestinationDTsForFormType(typeId, checkMinDate(dateFrom), checkMaxDate(dateTo));
+        return departmentDeclarationTypeDao.findDestinationDTsForFormType(typeId, checkMinDate(dateFrom), dateTo);
     }
 
     @Override

@@ -143,6 +143,22 @@ public class DepartmentDeclarationTypeDaoImpl extends AbstractDao implements Dep
 		}
 	}
 
+
+    private static final String FIND_DT_DESTINATIONS_FOR_FORM_TYPE =
+            "SELECT\n" +
+                    "  tgt.id                  id,\n" +
+                    "  tgt.DEPARTMENT_ID       department_id,\n" +
+                    "  tgt.DECLARATION_TYPE_ID declaration_type_id,\n" +
+                    "  ds.PERIOD_START         start_date,\n" +
+                    "  ds.PERIOD_END           end_date\n" +
+                    "FROM department_form_type src\n" +
+                    "  JOIN declaration_source ds ON src.id = ds.src_department_form_type_id\n" +
+                    "  JOIN department_declaration_type tgt ON ds.department_declaration_type_id = tgt.id\n" +
+                    "WHERE\n" +
+                    "  src.form_type_id = :formTypeId\n" +
+                    "  AND ((:dateTo IS NULL AND (ds.PERIOD_START >= :dateFrom OR ds.PERIOD_END >= :dateFrom))\n" +
+                    "       OR (ds.PERIOD_START BETWEEN :dateFrom AND :dateTo OR\n" +
+                    "           ds.PERIOD_END BETWEEN :dateFrom AND :dateTo))";
     @Override
     public List<Pair<DepartmentDeclarationType, Pair<Date, Date>>> findDestinationDTsForFormType(int typeId, Date dateFrom, Date dateTo) {
         try {
@@ -151,16 +167,8 @@ public class DepartmentDeclarationTypeDaoImpl extends AbstractDao implements Dep
             values.put("dateFrom", dateFrom);
             values.put("dateTo", dateTo);
 
-            return getNamedParameterJdbcTemplate().query("select tgt.id id, tgt.DEPARTMENT_ID department_id, tgt.DECLARATION_TYPE_ID declaration_type_id, ds.PERIOD_START start_date, ds.PERIOD_END end_date \n" +
-                    "from department_form_type src \n" +
-                    "join declaration_source ds on src.id = ds.src_department_form_type_id\n" +
-                    "join department_declaration_type tgt on ds.department_declaration_type_id = tgt.id \n" +
-                    "  where \n" +
-                    "    src.form_type_id=:formTypeId \n" +
-                    "   AND (ds.PERIOD_START BETWEEN :dateFrom AND :dateTo " +
-                    "   OR ds.PERIOD_END BETWEEN :dateFrom AND :dateTo \n" +
-                    "   OR (ds.PERIOD_START BETWEEN :dateFrom AND :dateTo \n" +
-                    "   AND ds.PERIOD_END IS null))",
+            return getNamedParameterJdbcTemplate().query(
+                    FIND_DT_DESTINATIONS_FOR_FORM_TYPE,
                     values,
                     DDT_SOURCES_MAPPER);
         } catch (DataAccessException e){
@@ -169,6 +177,22 @@ public class DepartmentDeclarationTypeDaoImpl extends AbstractDao implements Dep
         }
     }
 
+
+    private static final String FIND_FT_SOURCES_FOR_DECLARATION =
+            "SELECT\n" +
+                    "  src.DEPARTMENT_ID department_id,\n" +
+                    "  src.FORM_TYPE_ID  form_type_id,\n" +
+                    "  src.KIND          kind,\n" +
+                    "  ds.PERIOD_START   start_date,\n" +
+                    "  ds.PERIOD_END     end_date\n" +
+                    "FROM department_form_type src\n" +
+                    "  JOIN declaration_source ds ON src.id = ds.src_department_form_type_id\n" +
+                    "  JOIN department_declaration_type tgt ON ds.department_declaration_type_id = tgt.id\n" +
+                    "WHERE\n" +
+                    "  tgt.declaration_type_id = :formTypeId\n" +
+                    "  AND ((:dateTo IS NULL AND (ds.PERIOD_START >= :dateFrom OR ds.PERIOD_END >= :dateFrom))\n" +
+                    "       OR (ds.PERIOD_START BETWEEN :dateFrom AND :dateTo OR\n" +
+                    "           ds.PERIOD_END BETWEEN :dateFrom AND :dateTo))";
     @Override
     public List<Pair<DepartmentFormType, Pair<Date, Date>>> findSourceFTsForDeclaration(int typeId, Date dateFrom, Date dateTo) {
         try {
@@ -177,16 +201,7 @@ public class DepartmentDeclarationTypeDaoImpl extends AbstractDao implements Dep
             values.put("dateFrom", dateFrom);
             values.put("dateTo", dateTo);
 
-            return getNamedParameterJdbcTemplate().query("select src.DEPARTMENT_ID department_id, src.FORM_TYPE_ID form_type_id, src.KIND kind, ds.PERIOD_START start_date, ds.PERIOD_END end_date \n" +
-                    "from department_form_type src \n" +
-                    "join declaration_source ds on src.id = ds.src_department_form_type_id\n" +
-                    "join department_declaration_type tgt on ds.department_declaration_type_id = tgt.id \n" +
-                    "  where \n" +
-                    "    tgt.declaration_type_id = :formTypeId \n" +
-                    "   AND (ds.PERIOD_START BETWEEN :dateFrom AND :dateTo " +
-                    "   OR ds.PERIOD_END BETWEEN :dateFrom AND :dateTo \n" +
-                    "   OR (ds.PERIOD_START BETWEEN :dateFrom AND :dateTo \n" +
-                    "   AND ds.PERIOD_END IS null))",
+            return getNamedParameterJdbcTemplate().query(FIND_FT_SOURCES_FOR_DECLARATION,
                     values,
                     DFT_SOURCES_MAPPER);
         } catch (DataAccessException e){

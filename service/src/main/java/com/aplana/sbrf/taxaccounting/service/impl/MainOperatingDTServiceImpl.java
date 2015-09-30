@@ -177,7 +177,7 @@ public class MainOperatingDTServiceImpl implements MainOperatingService {
             for (DepartmentFormType departmentFormType : sourceService.getDFTByFormType(template.getType().getId())){
                 logger.error(
                         String.format(HAVE_DDT_MESSAGE,
-                                departmentService.getDepartment(departmentFormType.getDepartmentId())));
+                                departmentService.getDepartment(departmentFormType.getDepartmentId()).getName()));
                 checkError(logger, DELETE_TEMPLATE_VERSION_MESSAGE);
             }
         }
