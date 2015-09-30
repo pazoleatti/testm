@@ -359,7 +359,7 @@ public class FormDataServiceTest extends Assert{
                 logger.getEntries().get(0).getMessage()
         );
         assertEquals(
-                "Существует экземпляр налоговых форм: Тип: \"Сводная\", Вид: \"Тестовый тип НФ\", Подразделение: \"Тестовое подразделение\", Период: \"второй квартал (полугодие) 2014\", Дата сдачи корректировки: 01.01.2014,  Версия: \"Абсолютные значения\".",
+                "Существует экземпляр налоговых форм: Тип: \"Сводная\", Вид: \"Тестовый тип НФ\", Подразделение: \"Тестовое подразделение\", Период: \"второй квартал (полугодие) 2014\", Дата сдачи корректировки: 01.01.2014, Версия: \"Абсолютные значения\".",
                 logger.getEntries().get(1).getMessage()
         );
     }
@@ -1113,6 +1113,152 @@ public class FormDataServiceTest extends Assert{
         assertEquals(
                 "Не выполнена консолидация данных из формы \"Тестовое подразделение\", \"РНУ\", \"Первичная\", \"1 квартал 2015 с датой сдачи корректировки 01.01.1970\" в статусе \"Принята\"",
                 logger.getEntries().get(2).getMessage()
+        );
+    }
+
+    @Test
+    public void checkSourcesTest() {
+        TAUserInfo userInfo = new TAUserInfo();
+        TAUser user = new TAUser();
+        user.setId(1);
+        userInfo.setUser(user);
+        userInfo.setIp("127.0.0.1");
+        Logger logger = new Logger();
+
+        FormType formType = new FormType();
+        formType.setId(1);
+        formType.setName("Type1");
+        FormType formType2 = new FormType();
+        formType2.setId(2);
+        formType2.setName("РНУ");
+
+        FormTemplate formTemplate1 = new FormTemplate();
+        formTemplate1.setMonthly(false);
+        FormTemplate formTemplate2 = new FormTemplate();
+        formTemplate2.setMonthly(false);
+
+        when(formTemplateService.existFormTemplate(1, 2, true)).thenReturn(true);
+        when(formTemplateService.existFormTemplate(2, 2, true)).thenReturn(true);
+        when(formTemplateService.getActiveFormTemplateId(1, 2)).thenReturn(1);
+        when(formTemplateService.getActiveFormTemplateId(2, 2)).thenReturn(2);
+        when(formTemplateService.get(1)).thenReturn(formTemplate1);
+        when(formTemplateService.get(2)).thenReturn(formTemplate2);
+
+        Department department1 = new Department();
+        department1.setName("Тестовое подразделение");
+        Department department2 = new Department();
+        department2.setName("Тестовое подразделение2");
+
+        ReportPeriod reportPeriod = new ReportPeriod();
+        TaxPeriod tp = new TaxPeriod();
+        tp.setYear(2015);
+        reportPeriod.setTaxPeriod(tp);
+        reportPeriod.setCalendarStartDate(new Date());
+        reportPeriod.setName("1 квартал");
+        reportPeriod.setId(2);
+        reportPeriod.setStartDate(new Date());
+        reportPeriod.setEndDate(new Date());
+        when(periodService.getReportPeriod(2)).thenReturn(reportPeriod);
+
+        DepartmentReportPeriod drp = new DepartmentReportPeriod();
+        drp.setId(1);
+        drp.setReportPeriod(reportPeriod);
+        drp.setCorrectionDate(new Date(0));
+        drp.setDepartmentId(1);
+        drp.setBalance(false);
+        drp.setActive(true);
+        DepartmentReportPeriod drp1 = new DepartmentReportPeriod();
+        drp1.setReportPeriod(reportPeriod);
+        DepartmentReportPeriod drp2 = new DepartmentReportPeriod();
+        drp1.setReportPeriod(reportPeriod);
+
+        FormData formData = new FormData();
+        formData.setId(1L);
+        formData.setReportPeriodId(2);
+        formData.setDepartmentId(1);
+
+        formData.setFormType(formType);
+        formData.setKind(FormDataKind.PRIMARY);
+        formData.setManual(false);
+        formData.setState(WorkflowState.ACCEPTED);
+        formData.setDepartmentReportPeriodId(1);
+        formData.setPeriodOrder(null);
+        formData.setAccruing(false);
+        formData.setDepartmentReportPeriodId(drp.getId());
+        when(formDataDao.get(1, false)).thenReturn(formData);
+        when(departmentReportPeriodService.get(formData.getDepartmentReportPeriodId())).thenReturn(drp);
+
+        ArrayList<DepartmentFormType> dftSources = new ArrayList<DepartmentFormType>();
+        DepartmentFormType dft1 = new DepartmentFormType();
+        dft1.setDepartmentId(1);
+        dft1.setFormTypeId(1);
+        dft1.setKind(FormDataKind.ADDITIONAL);
+        DepartmentFormType dft2 = new DepartmentFormType();
+        dft2.setDepartmentId(2);
+        dft2.setFormTypeId(2);
+        dft2.setKind(FormDataKind.CONSOLIDATED);
+        DepartmentFormType dft3 = new DepartmentFormType();
+        dft3.setDepartmentId(2);
+        dft3.setFormTypeId(2);
+        dft3.setKind(FormDataKind.PRIMARY);
+
+        when(departmentService.getDepartment(dft1.getDepartmentId())).thenReturn(department1);
+        when(departmentService.getDepartment(dft2.getDepartmentId())).thenReturn(department2);
+
+        dftSources.add(dft1);
+        dftSources.add(dft2);
+        dftSources.add(dft3);
+        when(departmentFormTypeDao.getFormSources(
+                formData.getDepartmentId(),
+                formData.getFormType().getId(),
+                formData.getKind(),
+                reportPeriod.getStartDate(),
+                reportPeriod.getEndDate())).thenReturn(dftSources);
+
+        FormData formDataSource1 = new FormData();
+        formDataSource1.setId(3l);
+        formDataSource1.setReportPeriodId(2);
+        formDataSource1.setDepartmentId(dft1.getDepartmentId());
+        formDataSource1.setFormType(formType);
+        formDataSource1.setKind(dft1.getKind());
+        formDataSource1.setManual(false);
+        formDataSource1.setState(WorkflowState.ACCEPTED);
+        formDataSource1.setDepartmentReportPeriodId(3);
+        when(formDataDao.get(formDataSource1.getId(), null)).thenReturn(formDataSource1);
+        when(departmentReportPeriodService.get(formDataSource1.getDepartmentReportPeriodId())).thenReturn(drp1);
+
+        FormData formDataSource2 = new FormData();
+        formDataSource2.setId(32L);
+        formDataSource2.setReportPeriodId(2);
+        formDataSource2.setDepartmentId(1);
+        formDataSource2.setKind(dft2.getKind());
+        formDataSource2.setManual(false);
+        formDataSource2.setState(WorkflowState.CREATED);
+        formDataSource2.setDepartmentReportPeriodId(4);
+        formDataSource2.setFormType(formType2);
+        when(formDataDao.get(formDataSource2.getId(), null)).thenReturn(formDataSource2);
+        when(departmentReportPeriodService.get(formDataSource2.getDepartmentReportPeriodId())).thenReturn(drp2);
+
+        when(formDataDao.getLast(dft1.getFormTypeId(), dft1.getKind(), dft1.getDepartmentId(), 2, null, null, false)).thenReturn(formDataSource1);
+        when(formDataDao.getLast(dft2.getFormTypeId(), dft2.getKind(), dft2.getDepartmentId(), 2, null, null, false)).thenReturn(formDataSource2);
+
+        formDataService.checkSources(1, false, userInfo, logger);
+        assertEquals(
+                "Для текущей формы следующие формы-источники имеют статус отличный от \"Принята\" (консолидация предусмотрена из форм-источников в статусе \"Принята\"):",
+                logger.getEntries().get(0).getMessage()
+        );
+        assertEquals(
+                "Тип: \"Консолидированная\", Вид: \"РНУ\", Подразделение: \"Тестовое подразделение\", Период: \"1 квартал 2015\", Дата сдачи корректировки: 01.01.1970, Версия: \"Абсолютные значения\".",
+                logger.getEntries().get(1).getMessage()
+        );
+
+        assertEquals(
+                "Для текущей формы следующие формы-источники не созданы:",
+                logger.getEntries().get(2).getMessage()
+        );
+        assertEquals(
+                "Тип: \"Первичная\", Вид: \"Type1\", Подразделение: \"Тестовое подразделение2\", Период: \"1 квартал 2015\", Дата сдачи корректировки: 01.01.1970, Версия: \"Абсолютные значения\".",
+                logger.getEntries().get(3).getMessage()
         );
     }
 }

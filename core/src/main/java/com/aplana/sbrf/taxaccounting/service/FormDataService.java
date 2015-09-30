@@ -375,6 +375,15 @@ public interface FormDataService {
     void checkCompose(final FormData formData, TAUserInfo userInfo, Logger logger);
 
     /**
+     * Выводит список не принятых и не созданных источников при консолидации
+     * @param formDataId
+     * @param manual
+     * @param userInfo
+     * @param logger
+     */
+    void checkSources(long formDataId, boolean manual, TAUserInfo userInfo, Logger logger);
+
+    /**
      * Консолидация НФ
      * @param workflowMove
      * @param formData

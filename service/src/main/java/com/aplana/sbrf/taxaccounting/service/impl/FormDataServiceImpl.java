@@ -1277,6 +1277,62 @@ public class FormDataServiceImpl implements FormDataService {
         }
     }
 
+    @Override
+    public void checkSources(long formDataId, boolean manual, TAUserInfo userInfo, Logger logger) {
+        FormData formData = getFormData(userInfo, formDataId, manual, logger);
+        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.get(formData.getDepartmentReportPeriodId());
+        ReportPeriod reportPeriod = reportPeriodService.getReportPeriod(formData.getReportPeriodId());
+
+        List<DepartmentFormType> departmentFormTypesSources = getFormSources(formData, logger, userInfo, reportPeriod, true);
+        List<FormData> createFormDataList = new ArrayList<FormData>();
+        List<DepartmentFormType> notExistFormTypeList = new ArrayList<DepartmentFormType>();
+        boolean existAcceptedFD = false;
+        for (DepartmentFormType departmentFormType: departmentFormTypesSources) {
+            FormData fd = getLast(departmentFormType.getFormTypeId(), departmentFormType.getKind(),
+                    departmentFormType.getDepartmentId(), formData.getReportPeriodId(),
+                    departmentFormType.getPeriodOrder(), formData.getComparativePeriodId(), formData.isAccruing());
+            if (fd != null) {
+                if (!fd.getState().equals(WorkflowState.ACCEPTED)) {
+                    createFormDataList.add(fd);
+                } else {
+                    existAcceptedFD = true;
+                }
+            } else {
+                notExistFormTypeList.add(departmentFormType);
+            }
+        }
+        if (!existAcceptedFD) {
+            logger.warn("Для текущей формы не существует ни одной формы-источника в статусе \"Принята\". Консолидация предусмотрена из форм-источников в статусе \"Принята\".");
+        } else {
+            if (!createFormDataList.isEmpty()) {
+                logger.warn("Для текущей формы следующие формы-источники имеют статус отличный от \"Принята\" (консолидация предусмотрена из форм-источников в статусе \"Принята\"):");
+                for (FormData fd: createFormDataList) {
+                    Department department = departmentService.getDepartment(fd.getDepartmentId());
+                    DepartmentReportPeriod rpCompare = fd.getComparativePeriodId() != null ?
+                            departmentReportPeriodService.get(fd.getComparativePeriodId()) : null;
+                    logger.warn(MessageGenerator.getFDMsg("",
+                                    fd,
+                                    department.getName(),
+                                    false,
+                                    departmentReportPeriod,
+                                    rpCompare)
+                    );
+                }
+            }
+            if (!notExistFormTypeList.isEmpty()) {
+                logger.warn("Для текущей формы следующие формы-источники не созданы:");
+                for(DepartmentFormType departmentFormType: notExistFormTypeList) {
+                    Department department = departmentService.getDepartment(departmentFormType.getDepartmentId());
+                    DepartmentReportPeriod rpCompare = formData.getComparativePeriodId() != null ?
+                            departmentReportPeriodService.get(formData.getComparativePeriodId()) : null;
+                    logger.warn(MessageGenerator.getFDMsg("", formData.getFormType().getName(), formData.getKind().getTitle(),
+                            formData.isAccruing(), department.getName(), departmentFormType.getPeriodOrder(),
+                            false, departmentReportPeriod, rpCompare, false, true));
+                }
+            }
+        }
+    }
+
     // очищаем данные в нф, приводим их к исходному состоянию (только фиксированные)
     private void clearDataRows(FormData formData, TAUserInfo userInfo){
         List<DataRow<Cell>> fixRows = formTemplateService.get(formData.getFormTemplateId()).getRows();

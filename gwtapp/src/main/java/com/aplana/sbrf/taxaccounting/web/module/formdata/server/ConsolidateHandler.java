@@ -87,6 +87,7 @@ public class ConsolidateHandler extends AbstractActionHandler<ConsolidateAction,
                         return formDataService.getTaskName(reportType, action.getFormDataId(), userInfo);
                     }
                 });
+                formDataService.checkSources(action.getFormDataId(), action.isManual(), userInfo, logger);
             }
         } else {
             formDataService.locked(action.getFormDataId(), reportType, lockType, logger);
