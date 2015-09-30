@@ -123,7 +123,7 @@ def getPrevReportPeriod(int reportPeriodId) {
 void preCalcCheck() {
     def tmpRow = formData.createDataRow()
     // собираем коды ОПУ
-    def final opuCodes = opuMap.findAll { key, value -> !("R2".equals(key)) || isBank() }.values().sum()
+    def final opuCodes = opuMap.values().sum()
     // находим записи для текущего периода и периода сравнения
     ['comparePeriod': getComparativePeriodId(), 'currentPeriod':formData.reportPeriodId].each { key, value ->
         if (value != null) {
