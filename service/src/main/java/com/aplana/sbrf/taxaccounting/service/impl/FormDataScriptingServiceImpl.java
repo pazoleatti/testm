@@ -43,7 +43,7 @@ public class FormDataScriptingServiceImpl extends TAAbstractScriptingServiceImpl
     private Properties versionInfoProperties;
 
     @Override
-    public void executeScript(TAUserInfo userInfo, FormData formData,
+    public boolean executeScript(TAUserInfo userInfo, FormData formData,
                               FormDataEvent event, Logger logger,
                               Map<String, Object> additionalParameters) {
 
@@ -51,7 +51,7 @@ public class FormDataScriptingServiceImpl extends TAAbstractScriptingServiceImpl
 		FormTemplate formTemplate = formTemplateDao.get(formData.getFormTemplateId());
         String script = formTemplate.getScript();
 		if (!canExecuteScript(script, event)) {
-			return;
+			return false;
 		}
 
         // Биндим параметры для выполнения скрипта
@@ -97,7 +97,7 @@ public class FormDataScriptingServiceImpl extends TAAbstractScriptingServiceImpl
         executeScript(b, script, logger);
 
         logger.setMessageDecorator(null);
-
+        return true;
     }
 
     /**
@@ -163,7 +163,4 @@ public class FormDataScriptingServiceImpl extends TAAbstractScriptingServiceImpl
             logger.error(new ServiceException("Обнаружены ошибки в скрипте!", e));
         }
     }
-
-
-
 }

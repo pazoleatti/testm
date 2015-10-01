@@ -11,7 +11,6 @@ import com.aplana.sbrf.taxaccounting.service.DeclarationDataScriptingService;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.service.shared.ScriptComponentContextHolder;
 import com.aplana.sbrf.taxaccounting.util.ScriptExposed;
-import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.annotation.AnnotationUtils;
@@ -19,8 +18,6 @@ import org.springframework.stereotype.Component;
 
 import javax.script.Bindings;
 import javax.script.ScriptException;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -37,10 +34,8 @@ public class DeclarationDataScriptingServiceImpl extends TAAbstractScriptingServ
 
 	@Autowired
 	private DeclarationTemplateDao declarationTemplateDao;
-
     @Autowired
     private LogEntryService logEntryService;
-
     @Autowired
     @Qualifier("versionInfoProperties")
     private Properties versionInfoProperties;
@@ -77,13 +72,13 @@ public class DeclarationDataScriptingServiceImpl extends TAAbstractScriptingServ
 	}
 
 	@Override
-	public void executeScript(TAUserInfo userInfo, DeclarationData declarationData, FormDataEvent event, Logger logger,
+	public boolean executeScript(TAUserInfo userInfo, DeclarationData declarationData, FormDataEvent event, Logger logger,
 			Map<String, Object> exchangeParams) {
 		TAAbstractScriptingServiceImpl.logger.debug("Starting processing request to run create script");
 
 		String script = declarationTemplateDao.getDeclarationTemplateScript(declarationData.getDeclarationTemplateId());
 		if (!canExecuteScript(script, event)) {
-			return;
+			return false;
 		}
 
 		DeclarationTemplate declarationTemplate = declarationTemplateDao.get(declarationData.getDeclarationTemplateId());
@@ -129,6 +124,7 @@ public class DeclarationDataScriptingServiceImpl extends TAAbstractScriptingServ
 		if (logger.containsLevel(LogLevel.ERROR)) {
 			throw new ServiceLoggerException("Обнаружены фатальные ошибки!", logEntryService.save(logger.getEntries()));
 		}
+		return true;
 	}
 
     private boolean executeScript(Bindings bindings, String script, Logger logger, ScriptMessageDecorator decorator) {
