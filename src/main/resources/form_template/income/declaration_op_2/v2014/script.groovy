@@ -19,21 +19,20 @@ import javax.xml.stream.XMLStreamReader
 switch (formDataEvent) {
     case FormDataEvent.CREATE : // создать / обновить
         checkDepartmentParams(LogLevel.WARNING)
-        checkDeclarationBank()
+        checkDeclarationBank(LogLevel.WARNING)
         break
     case FormDataEvent.CHECK : // проверить
-        checkDepartmentParams(LogLevel.ERROR)
-        break
     case FormDataEvent.MOVE_CREATED_TO_ACCEPTED : // принять из создана
-        checkDepartmentParams(LogLevel.ERROR)
+        checkDepartmentParams(LogLevel.WARNING)
+        checkDeclarationBank(declarationData.accepted ? LogLevel.WARNING : LogLevel.ERROR)
         break
     case FormDataEvent.PRE_CALCULATION_CHECK:
         checkDepartmentParams(LogLevel.WARNING)
-        checkDeclarationBank()
+        checkDeclarationBank(LogLevel.WARNING)
         break
     case FormDataEvent.CALCULATE:
         checkDepartmentParams(LogLevel.WARNING)
-        def readerBank = checkDeclarationBank(false)
+        def readerBank = checkDeclarationBank(LogLevel.WARNING, false)
         generateXML(readerBank)
         break
     default:
@@ -93,7 +92,7 @@ void checkDepartmentParams(LogLevel logLevel) {
 }
 
 // Провека декларации банка.
-def checkDeclarationBank(boolean onlyCheck = true) {
+def checkDeclarationBank(LogLevel logLevel, boolean onlyCheck = true) {
     /** Отчётный период. */
     def reportPeriod = reportPeriodService.get(declarationData.reportPeriodId)
 
@@ -104,7 +103,7 @@ def checkDeclarationBank(boolean onlyCheck = true) {
     def departmentBankId = 1
     def bankDeclarationData = declarationService.getLast(declarationTypeId, departmentBankId, reportPeriod.id)
     if (bankDeclarationData == null || !bankDeclarationData.accepted) {
-        logger.error('Декларация Банка по прибыли за указанный период не сформирована или не находится в статусе "Принята".')
+        logger.log(logLevel, 'Декларация Банка по прибыли за указанный период не сформирована или не находится в статусе "Принята".')
         return null
     }
 
@@ -114,171 +113,18 @@ def checkDeclarationBank(boolean onlyCheck = true) {
     if (bankDeclarationData.id != null) {
         readerBank = declarationService.getXmlStreamReader(bankDeclarationData.id)
         if (!readerBank) {
-            logger.error('Данные декларации Банка не заполнены.')
+            logger.log(logLevel, 'Данные декларации Банка не заполнены.')
             return null
         }
     }
     if (readerBank == null) {
-        logger.error('Не удалось получить данные декларации Банка.')
+        logger.log(logLevel, 'Не удалось получить данные декларации Банка.')
     }
     if (onlyCheck) {
         readerBank.close()
         return null
     }
     return readerBank
-}
-
-// Логические проверки.
-void logicCheck() {
-    // получение данных из xml'ки
-    def reader = getXmlStreamReader(declarationData.reportPeriodId, declarationData.departmentId, false, false)
-    if(reader == null){
-        return
-    }
-    def empty = 0
-    def elements = [:]
-
-    def nalVipl311, nalIschisl, nalVipl311FB, nalIschislFB, nalVipl311Sub, nalIschislSub, raschNalFound = false
-    def vneRealDohSt, vneRealDohBezv, vneRealDohIzl, vneRealDohVRash, vneRealDohRinCBDD, vneRealDohCor, vneRealDohVs, dohVnerealFound = false
-    def cosvRashVs, nalogi, rashCapVl10, rashCapVl30, rashZemUchVs, rashRealFound = false
-    def rashVnerealPrDO, ubitRealPravTr, rashLikvOS, rashShtraf, rashRinCBDD, rashVnerealVs, rashVneRealFound = false
-    def stoimRealPTDoSr, stoimRealPTPosSr, stoimRealPTFound = false
-    def viruchRealPTDoSr, viruchRealPTPosSr, viruchRealPTFound = false
-    def ubit1Prev269, ubit1Soot269, ubitRealPT1Found = false
-    def ubit2RealPT, ubitRealPT2Found = false
-
-    try{
-        while(reader.hasNext()) {
-            if (reader.startElement) {
-                elements[reader.name.localPart] = true
-                if (!raschNalFound && isCurrentNode(['Документ', 'Прибыль', 'РасчНал'], elements)) {
-                    raschNalFound = true
-                    nalVipl311 = getXmlDecimal(reader, "НалВыпл311")
-                    nalIschisl = getXmlDecimal(reader, "НалИсчисл")
-                    nalVipl311FB = getXmlDecimal(reader, "НалВыпл311ФБ")
-                    nalIschislFB = getXmlDecimal(reader, "НалИсчислФБ")
-                    nalVipl311Sub = getXmlDecimal(reader, "НалВыпл311Суб")
-                    nalIschislSub = getXmlDecimal(reader, "НалИсчислСуб")
-                } else if (!dohVnerealFound && isCurrentNode(['Документ', 'Прибыль', 'РасчНал', 'ДохРеалВнеРеал', 'ДохВнеРеал'], elements)) {
-                    dohVnerealFound = true
-                    vneRealDohSt = getXmlDecimal(reader, "ВнеРеалДохСт")
-                    vneRealDohBezv = getXmlDecimal(reader, "ВнеРеалДохБезв")
-                    vneRealDohIzl = getXmlDecimal(reader, "ВнеРеалДохИзл")
-                    vneRealDohVRash = getXmlDecimal(reader, "ВнеРеалДохВРасх")
-                    vneRealDohRinCBDD = getXmlDecimal(reader, "ВнеРеалДохРынЦБДД")
-                    vneRealDohCor = getXmlDecimal(reader, "ВнеРеалДохКор")
-                    vneRealDohVs = getXmlDecimal(reader, "ВнеРеалДохВс")
-                } else if (!rashRealFound && isCurrentNode(['Документ', 'Прибыль', 'РасчНал', 'РасхРеалВнеРеал', 'РасхРеал'], elements)) {
-                    rashRealFound = true
-                    cosvRashVs = getXmlDecimal(reader, "КосвРасхВс")
-                    nalogi = getXmlDecimal(reader, "Налоги")
-                    rashCapVl10 = getXmlDecimal(reader, "РасхКапВл10")
-                    rashCapVl30 = getXmlDecimal(reader, "РасхКапВл30")
-                    rashZemUchVs = getXmlDecimal(reader, "РасхЗемУчВс")
-                } else if (!rashVneRealFound && isCurrentNode(['Документ', 'Прибыль', 'РасчНал', 'РасхРеалВнеРеал', 'РасхВнеРеал'], elements)) {
-                    rashVneRealFound = true
-                    rashVnerealPrDO = getXmlDecimal(reader, "РасхВнереалПрДО")
-                    ubitRealPravTr = getXmlDecimal(reader, "УбытРеалПравТр")
-                    rashLikvOS = getXmlDecimal(reader, "РасхЛиквОС")
-                    rashShtraf = getXmlDecimal(reader, "РасхШтраф")
-                    rashRinCBDD = getXmlDecimal(reader, "РасхРынЦБДД")
-                    rashVnerealVs = getXmlDecimal(reader, "РасхВнеРеалВс")
-                } else if (!stoimRealPTFound && isCurrentNode(['Документ', 'Прибыль', 'РасчНал', 'РасчРасхОпер', 'СтоимРеалПТ'], elements)) {
-                    stoimRealPTFound = true
-                    stoimRealPTDoSr = getXmlDecimal(reader, "СтоимРеалПТДоСр")
-                    stoimRealPTPosSr = getXmlDecimal(reader, "СтоимРеалПТПосСр")
-                } else if (!viruchRealPTFound && isCurrentNode(['Документ', 'Прибыль', 'РасчНал', 'РасчРасхОпер', 'ВыручРеалПТ'], elements)) {
-                    viruchRealPTFound = true
-                    viruchRealPTDoSr = getXmlDecimal(reader, "ВыручРеалПТДоСр")
-                    viruchRealPTPosSr = getXmlDecimal(reader, "ВыручРеалПТПосСр")
-                } else if (!ubitRealPT1Found && isCurrentNode(['Документ', 'Прибыль', 'РасчНал', 'РасчРасхОпер', 'УбытРеалПТ1'], elements)) {
-                    ubitRealPT1Found = true
-                    ubit1Prev269 = getXmlDecimal(reader, "Убыт1Прев269")
-                    ubit1Soot269 = getXmlDecimal(reader, "Убыт1Соот269")
-                } else if (!ubitRealPT2Found && isCurrentNode(['Документ', 'Прибыль', 'РасчНал', 'РасчРасхОпер', 'УбытРеалПТ2'], elements)) {
-                    ubitRealPT2Found = true
-                    ubit2RealPT = getXmlDecimal(reader, "Убыт2РеалПТ")
-                }
-            }
-            if (reader.endElement) {
-                elements[reader.name.localPart] = false
-            }
-            reader.next()
-        }
-    } finally {
-        reader.close()
-    }
-
-    // Проверки Листа 02 - Превышение суммы налога, выплаченного за пределами РФ (всего)
-    if (nalVipl311 != null && nalIschisl != null && nalVipl311 > nalIschisl) {
-        logger.error('Сумма налога, выплаченная за пределами РФ (всего) превышает сумму исчисленного налога на прибыль (всего)!')
-    }
-
-    // Проверки Листа 02 - Превышение суммы налога, выплаченного за пределами РФ (в федеральный бюджет)
-    if (nalVipl311FB != null && nalIschislFB != null &&
-            nalVipl311FB > nalIschislFB) {
-        logger.error('Сумма налога, выплаченная за пределами РФ (в федеральный бюджет) превышает сумму исчисленного налога на прибыль (в федеральный бюджет)!')
-    }
-
-    // Проверки Листа 02 - Превышение суммы налога, выплаченного за пределами РФ (в бюджет субъекта РФ)
-    if (nalVipl311Sub != null && nalIschislSub != null &&
-            nalVipl311Sub > nalIschislSub) {
-        logger.error('Сумма налога, выплаченная за пределами РФ (в бюджет субъекта РФ) превышает сумму исчисленного налога на прибыль (в бюджет субъекта РФ)!')
-    }
-
-    // Проверки Приложения № 1 к Листу 02 - Превышение суммы составляющих над общим показателем («Внереализационные доходы (всего)»)
-    // (ВнеРеалДохПр + ВнеРеалДохСт + ВнеРеалДохБезв + ВнеРеалДохИзл + ВнеРеалДохВРасх + ВнеРеалДохРынЦБДД + ВнеРеалДохКор) < ВнеРеалДохВс
-    if (vneRealDohSt != null && vneRealDohBezv != null && vneRealDohIzl != null && vneRealDohVRash != null &&
-            vneRealDohRinCBDD != null && vneRealDohCor != null && vneRealDohVs != null &&
-            (empty + vneRealDohSt + vneRealDohBezv +
-                    vneRealDohIzl + vneRealDohVRash + vneRealDohRinCBDD +
-                    vneRealDohCor) > vneRealDohVs) {
-        logger.error('Показатель «Внереализационные доходы (всего)» меньше суммы его составляющих!')
-    }
-
-    // Проверки Приложения № 2 к Листу 02 - Превышение суммы составляющих над общим показателем («Косвенные расходы (всего)»)
-    // КосвРасхВс < (Налоги + РасхКапВл10 + РасхКапВл30 + РасхТрудИнв + РасхОргИнв + РасхЗемУчВс + НИОКР)
-    if (cosvRashVs != null && nalogi != null && rashCapVl10 != null && rashCapVl30 != null && rashZemUchVs != null &&
-            cosvRashVs < (nalogi + rashCapVl10 + rashCapVl30 +
-            empty + empty + rashZemUchVs + empty)) {
-        logger.error('Показатель «Косвенные расходы (всего)» меньше суммы его составляющих!')
-    }
-
-    // Проверки Приложения № 2 к Листу 02 - Превышение суммы составляющих над общим показателем («Внереализационные расходы (всего)»)
-    // (РасхВнереалПрДО + РасхВнереалРзрв + УбытРеалПравТр + РасхЛиквОС + РасхШтраф + РасхРынЦБДД) > РасхВнеРеалВс
-    if (rashVnerealPrDO != null && ubitRealPravTr != null && rashLikvOS != null &&
-            rashShtraf != null && rashRinCBDD != null && rashVnerealVs != null &&
-            (rashVnerealPrDO + empty + ubitRealPravTr + rashLikvOS + rashShtraf + rashRinCBDD) > rashVnerealVs) {
-        logger.error('Показатель «Внереализационные расходы (всего)» меньше суммы его составляющих!')
-    }
-
-    // Проверки Приложения № 3 к Листу 02 - Проверка отрицательной разницы (убыток) от реализации права требования
-    // долга до наступления срока платежа, определенной налогоплательщиком в соответствии с п. 1 статьи 279 НК
-    // строка 100 = ВыручРеалПТДоСр = viruchRealPTDoSr
-    // строка 120 = СтоимРеалПТДоСр = stoimRealPTDoSr
-    // строка 140 = Убыт1Соот269	= ubit1Soot269
-    // строка 150 = Убыт1Прев269	= ubit1Prev269
-    if (stoimRealPTDoSr != null && viruchRealPTDoSr != null && ubit1Prev269 != null && ubit1Soot269 != null &&
-            (stoimRealPTDoSr > viruchRealPTDoSr ?
-                    (ubit1Prev269 != stoimRealPTDoSr - viruchRealPTDoSr - ubit1Soot269)
-                    : (ubit1Prev269 != 0))) {
-        logger.warn('В Приложении 3 к Листу 02 строка 150 неверно указана сумма!')
-    }
-
-    // Проверки Приложения № 3 к Листу 02 - Проверка отрицательной разницы (убыток), полученной налогоплательщиком
-    // при уступке права требования долга после наступления срока платежа в соответствии с п. 2 статьи 279 НК
-    // строка 110 = ВыручРеалПТПосСр = viruchRealPTPosSr
-    // строка 130 = СтоимРеалПТПосСр = stoimRealPTPosSr
-    // строка 160 = Убыт2РеалПТ		 = ubit2RealPT
-    def reportPeriod = reportPeriodService.get(declarationData.reportPeriodId)
-    if (reportPeriod.order == 4 && reportPeriod.taxPeriod.year == 2014) {
-        if (stoimRealPTPosSr != null && viruchRealPTPosSr != null && ubit2RealPT != null &&
-                (stoimRealPTPosSr > viruchRealPTPosSr ?
-                        (ubit2RealPT != stoimRealPTPosSr - viruchRealPTPosSr)
-                        : (ubit2RealPT != 0))) {
-            logger.warn('В Приложении 3 к Листу 02 строка 160 неверно указана сумма!')
-        }
-    }
 }
 
 // Запуск генерации XML.

@@ -22,14 +22,10 @@ switch (formDataEvent) {
         sourceCheck(true, LogLevel.WARNING)
         break
     case FormDataEvent.CHECK : // проверить
-        checkDepartmentParams(LogLevel.ERROR)
-        sourceCheck(true, LogLevel.ERROR)
-        logicCheck()
-        break
     case FormDataEvent.MOVE_CREATED_TO_ACCEPTED : // принять из создана
-        checkDepartmentParams(LogLevel.ERROR)
-        sourceCheck(true, LogLevel.ERROR)
-        logicCheck()
+        checkDepartmentParams(LogLevel.WARNING)
+        sourceCheck(true, declarationData.accepted ? LogLevel.WARNING : LogLevel.ERROR)
+        logicCheck(LogLevel.ERROR)
         break
     case FormDataEvent.MOVE_ACCEPTED_TO_CREATED: // отменить принятие
         сancelAccepted()
@@ -42,6 +38,7 @@ switch (formDataEvent) {
         checkDepartmentParams(LogLevel.WARNING)
         sourceCheck(true, LogLevel.WARNING)
         generateXML()
+        logicCheck(LogLevel.WARNING)
         break
     default:
         return
@@ -120,7 +117,7 @@ private boolean sourceCheck(boolean loggerNeed, LogLevel logLevel) {
 }
 
 // Логические проверки.
-void logicCheck() {
+void logicCheck(LogLevel logLevel) {
     def empty = 0
     // получение данных из xml'ки
     def reader = getXmlStreamReader(declarationData.reportPeriodId, declarationData.departmentId, false, false)
@@ -198,19 +195,19 @@ void logicCheck() {
 
     // Проверки Листа 02 - Превышение суммы налога, выплаченного за пределами РФ (всего)
     if (nalVipl311 != null && nalIschisl != null && nalVipl311 > nalIschisl) {
-        logger.error('Сумма налога, выплаченная за пределами РФ (всего) превышает сумму исчисленного налога на прибыль (всего)!')
+        logger.log(logLevel, 'Сумма налога, выплаченная за пределами РФ (всего) превышает сумму исчисленного налога на прибыль (всего)!')
     }
 
     // Проверки Листа 02 - Превышение суммы налога, выплаченного за пределами РФ (в федеральный бюджет)
     if (nalVipl311FB != null && nalIschislFB != null &&
             nalVipl311FB > nalIschislFB) {
-        logger.error('Сумма налога, выплаченная за пределами РФ (в федеральный бюджет) превышает сумму исчисленного налога на прибыль (в федеральный бюджет)!')
+        logger.log(logLevel, 'Сумма налога, выплаченная за пределами РФ (в федеральный бюджет) превышает сумму исчисленного налога на прибыль (в федеральный бюджет)!')
     }
 
     // Проверки Листа 02 - Превышение суммы налога, выплаченного за пределами РФ (в бюджет субъекта РФ)
     if (nalVipl311Sub != null && nalIschislSub != null &&
             nalVipl311Sub > nalIschislSub) {
-        logger.error('Сумма налога, выплаченная за пределами РФ (в бюджет субъекта РФ) превышает сумму исчисленного налога на прибыль (в бюджет субъекта РФ)!')
+        logger.log(logLevel, 'Сумма налога, выплаченная за пределами РФ (в бюджет субъекта РФ) превышает сумму исчисленного налога на прибыль (в бюджет субъекта РФ)!')
     }
 
     // Проверки Приложения № 1 к Листу 02 - Превышение суммы составляющих над общим показателем («Внереализационные доходы (всего)»)
@@ -220,7 +217,7 @@ void logicCheck() {
             (empty + vneRealDohSt + vneRealDohBezv +
                     vneRealDohIzl + vneRealDohVRash + vneRealDohRinCBDD +
                     vneRealDohCor) > vneRealDohVs) {
-        logger.error('Показатель «Внереализационные доходы (всего)» меньше суммы его составляющих!')
+        logger.log(logLevel, 'Показатель «Внереализационные доходы (всего)» меньше суммы его составляющих!')
     }
 
     // Проверки Приложения № 2 к Листу 02 - Превышение суммы составляющих над общим показателем («Косвенные расходы (всего)»)
@@ -228,7 +225,7 @@ void logicCheck() {
     if (cosvRashVs != null && nalogi != null && rashCapVl10 != null && rashCapVl30 != null && rashZemUchVs != null &&
             cosvRashVs < (nalogi + rashCapVl10 + rashCapVl30 +
             empty + empty + rashZemUchVs + empty)) {
-        logger.error('Показатель «Косвенные расходы (всего)» меньше суммы его составляющих!')
+        logger.log(logLevel, 'Показатель «Косвенные расходы (всего)» меньше суммы его составляющих!')
     }
 
     // Проверки Приложения № 2 к Листу 02 - Превышение суммы составляющих над общим показателем («Внереализационные расходы (всего)»)
@@ -236,7 +233,7 @@ void logicCheck() {
     if (rashVnerealPrDO != null && ubitRealPravTr != null && rashLikvOS != null &&
             rashShtraf != null && rashRinCBDD != null && rashVnerealVs != null &&
             (rashVnerealPrDO + empty + ubitRealPravTr + rashLikvOS + rashShtraf + rashRinCBDD) > rashVnerealVs) {
-        logger.error('Показатель «Внереализационные расходы (всего)» меньше суммы его составляющих!')
+        logger.log(logLevel, 'Показатель «Внереализационные расходы (всего)» меньше суммы его составляющих!')
     }
 
     // Проверки Приложения № 3 к Листу 02 - Проверка отрицательной разницы (убыток) от реализации права требования
