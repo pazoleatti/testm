@@ -82,11 +82,6 @@ def providerCache = [:]
 @Field
 def recordCache = [:]
 
-@Field
-def allColumns = ['emitent', 'decreeNumber', 'inn', 'kpp', 'recType', 'title', 'zipCode', 'subdivisionRF', 'area',
-                       'city', 'region', 'street', 'homeNumber', 'corpNumber', 'apartment', 'surname', 'name', 'patronymic',
-                       'phone', 'dividendDate', 'sumDividend', 'sumTax']
-
 // Редактируемые атрибуты 2-23
 @Field
 def editableColumns = ['emitent', 'decreeNumber', 'inn', 'kpp', 'recType', 'title', 'zipCode', 'subdivisionRF', 'area',
@@ -172,18 +167,6 @@ void logicCheck() {
 void consolidation() {
     def rows = []
 
-    def departmentReportPeriod = departmentReportPeriodService.get(formData.departmentReportPeriodId)
-    def formDataPrev = formDataService.getFormDataPrev(formData)
-    def dataRowsPrev
-    def departmentReportPeriodPrev
-    if (formDataPrev != null) {
-        dataRowsPrev = formDataService.getDataRowHelper(formDataPrev).allSaved
-        departmentReportPeriodPrev = departmentReportPeriodService.get(formDataPrev.departmentReportPeriodId)
-    }
-
-    def complexPrevMap = getDataRowsMap(dataRowsPrev, true)
-    def simplePrevMap = getDataRowsMap(dataRowsPrev, false)
-
     // получить формы-источники в текущем налоговом периоде
     departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind(),
             getReportPeriodStartDate(), getReportPeriodEndDate()).each {
@@ -197,7 +180,7 @@ void consolidation() {
                     if (sourceRow.status == 1 &&
                             (it.formTypeId != lastSourceFormType && sourceRow.type == 1 || it.formTypeId == lastSourceFormType && sourceRow.type != 2) &&
                             (sourceRow.rate == 0 || sourceRow.rate == 9 || sourceRow.rate == 13)) {
-                        def newRow = formNewRow(sourceRow, departmentReportPeriod, departmentReportPeriodPrev, complexPrevMap, simplePrevMap, rows.size())
+                        def newRow = formNewRow(sourceRow)
                         rows.add(newRow)
                     }
                 }
@@ -209,28 +192,7 @@ void consolidation() {
     formDataService.getDataRowHelper(formData).allCached = rows
 }
 
-def getDataRowsMap(def dataRows, boolean isComplex) {
-    def map = [:]
-    if (dataRows == null)
-        return map
-    dataRows.each { row ->
-        def key = isComplex ? getComplexRowKey(row) : getSimpleRowKey(row)
-        map[key] = row
-    }
-    return map
-}
-
-// делаем сложный ключ по всем значениям строки кроме 6-й графы
-String getComplexRowKey(def row) {
-    return (allColumns - 'recType').each { alias -> row[alias]?.toString()}.join("#")
-}
-
-// делаем простой ключ по ИНН и КПП
-String getSimpleRowKey(def row) {
-    return ['inn', 'kpp'].each { alias -> row[alias]?.toString()}.join("#")
-}
-
-def formNewRow(def row, def departmentReportPeriod, def departmentReportPeriodPrev, def complexPrevMap, def simplePrevMap, def rowSize) {
+def formNewRow(def row) {
     def newRow = formData.createDataRow()
     editableColumns.each {
         newRow.getCell(it).editable = true
@@ -244,6 +206,8 @@ def formNewRow(def row, def departmentReportPeriod, def departmentReportPeriodPr
     newRow.inn = row.inn
     //«Графа 5» = «Графа 15» первичной формы
     newRow.kpp = row.kpp
+    //«Графа 6» = «00»
+    newRow.recType = '00'
     //«Графа 7» = «Графа 13» первичной формы
     newRow.title = row.addresseeName
     //«Графа 8» = «Графа 30» первичной формы
@@ -279,48 +243,7 @@ def formNewRow(def row, def departmentReportPeriod, def departmentReportPeriodPr
     //«Графа 23» = «Графа 27» первичной формы
     newRow.sumTax = row.withheldSum
 
-    //«Графа 6» - пользуем текущую строку, поэтому расче тпосле остальных
-    newRow.recType = calc6(newRow, departmentReportPeriod, departmentReportPeriodPrev, complexPrevMap, simplePrevMap, rowSize)
-
     return newRow
-}
-
-def calc6(def row, def departmentReportPeriod, def departmentReportPeriodPrev, def complexPrevMap, def simplePrevMap, def rowSize) {
-    //если период формы не корректирующий
-    if (departmentReportPeriod?.correctionDate == null) {
-        return '00'
-    } else {
-        def dataRowPrev = complexPrevMap[getComplexRowKey(row)]
-        // если предыдущий период отчетный
-        if (departmentReportPeriodPrev != null && departmentReportPeriodPrev.correctionDate == null) {
-            // если форма предыдущего периода содержит строку, идентичную текущей, кроме графы 6
-            if (dataRowPrev != null) {
-                // добавляем единичку к числу в строковом формате
-                return "00"
-            } else {
-                // Если в форме предыдущего периода найдена строка, в которой графы 4 и 5 (ИНН и КПП получателя) равны графам 4 и 5 заполняемой строки текущей формы
-                return "01"
-            }
-        } else {
-            // если форма предыдущего периода содержит строку, идентичную текущей, кроме графы 6
-            if (dataRowPrev != null) {
-                // добавляем единичку к числу в строковом формате
-                return (Integer.parseInt(dataRowPrev.recType) + 1).toString().padLeft(2,"0")
-            } else {
-                // Если в форме предыдущего периода найдена строка, в которой графы 4 и 5 (ИНН и КПП получателя) равны графам 4 и 5 заполняемой строки текущей формы
-                dataRowPrev = simplePrevMap[getSimpleRowKey(row)]
-                if (dataRowPrev != null) {
-                    return dataRowPrev.recType
-                } else {
-                    logger.warn("Строка %s: Графа «%s» заполнена Системой значением «00»! " +
-                            "В форме предыдущего периода не найдена строка, в которой графа «%s» = «%s» и графа «%s» = «%s»",
-                            rowSize + 1, getColumnName(row,'recType'), getColumnName(row,'inn'), row.inn, getColumnName(row,'kpp'), row.kpp
-                    )
-                    return "00"
-                }
-            }
-        }
-    }
 }
 
 void sortFormDataRows(def saveInDB = true) {
