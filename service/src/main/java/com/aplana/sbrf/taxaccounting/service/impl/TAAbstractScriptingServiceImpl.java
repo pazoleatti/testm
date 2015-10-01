@@ -15,6 +15,7 @@ import org.springframework.context.ApplicationContextAware;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
@@ -24,6 +25,8 @@ import java.util.regex.Pattern;
 public abstract class TAAbstractScriptingServiceImpl implements ApplicationContextAware {
 
 	protected static final Log logger = LogFactory.getLog(TAAbstractScriptingServiceImpl.class);
+	/** Регулярка для поиска номера строки ошибки в теле скрипта */
+	private static final Pattern REGEXP = Pattern.compile("^.*Script[0-9]+$");
 	
 	protected ApplicationContext applicationContext;
 	
@@ -82,8 +85,8 @@ public abstract class TAAbstractScriptingServiceImpl implements ApplicationConte
 		// К сожалению, использовать информацию из ScriptException.getLineNumber() не получается - там всегда -1
 		int line = -1;
 		for (StackTraceElement stackElement: rootCause.getStackTrace()) {
-            String className = stackElement.getClassName();
-            if (className.matches("^.*Script[0-9]+$") && stackElement.getFileName().endsWith(".groovy")) {
+			Matcher matcher = REGEXP.matcher(stackElement.getClassName());
+            if (matcher.matches() && stackElement.getFileName().endsWith(".groovy")) {
 				line = stackElement.getLineNumber();
 				break;
 			}
