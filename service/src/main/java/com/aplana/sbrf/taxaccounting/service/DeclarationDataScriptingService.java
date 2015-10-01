@@ -8,10 +8,19 @@ import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import java.util.Map;
 
 /**
- * Интерфейс сервиса для запуска скриптов по декларациями (пока существует только один скрипт - скрипт создания)
+ * Интерфейс сервиса для запуска скриптов по декларациями
  * @author dsultanbekov
  */
 public interface DeclarationDataScriptingService {
-	void executeScript(TAUserInfo userInfo, DeclarationData declarationData, FormDataEvent event, Logger logger,
+	/**
+	 *
+	 * @param userInfo информация о текущем пользоваетеле
+	 * @param declarationData данные декларации
+	 * @param event событие
+	 * @param logger логгер для сохранения ошибок выполнения скриптов
+	 * @param exchangeParams параметры для обратной связи ядра со скриптом
+	 * @return true - скрипт был исполнен, false - скрипт не запускался
+	 */
+	boolean executeScript(TAUserInfo userInfo, DeclarationData declarationData, FormDataEvent event, Logger logger,
                        Map<String, Object> exchangeParams);
 }
