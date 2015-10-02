@@ -218,6 +218,11 @@ public class DeclarationTemplateView extends ViewWithUiHandlers<DeclarationTempl
         changeTableTopPosition(isVisible);
     }
 
+    @Override
+    public void clearCode() {
+        createScript.setText("");
+    }
+
     /**
      * Увеличивает верхний отступ у панели, когда показывается сообщение о блокировки
      * @param isLockInfoVisible показано ли сообщение

@@ -106,7 +106,10 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
         void activateButtonName(String name);
         void activateButton(boolean isVisible);
         void setLockInformation(boolean isVisible, String lockDate, String lockedBy);
-	}
+
+        void clearCode();
+
+    }
 
 	private final DispatchAsync dispatcher;
 	private final PlaceManager placeManager;
@@ -169,6 +172,7 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
         unlockForm(declarationTemplate.getId() != null ? declarationTemplate.getId() : 0);
 		if (closeDeclarationTemplateHandlerRegistration != null)
             closeDeclarationTemplateHandlerRegistration.removeHandler();
+        getView().clearCode();
 	}
 
 	/**
