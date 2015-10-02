@@ -19,25 +19,30 @@ import javax.xml.stream.XMLStreamReader
 switch (formDataEvent) {
     case FormDataEvent.CREATE : // создать / обновить
         checkDepartmentParams(LogLevel.WARNING)
-        checkDeclarationBank(LogLevel.WARNING)
+        checkDeclarationBank()
         break
     case FormDataEvent.CHECK : // проверить
     case FormDataEvent.MOVE_CREATED_TO_ACCEPTED : // принять из создана
         checkDepartmentParams(LogLevel.WARNING)
-        checkDeclarationBank(declarationData.accepted ? LogLevel.WARNING : LogLevel.ERROR)
+        logicCheck(LogLevel.ERROR)
         break
     case FormDataEvent.PRE_CALCULATION_CHECK:
         checkDepartmentParams(LogLevel.WARNING)
-        checkDeclarationBank(LogLevel.WARNING)
+        checkDeclarationBank()
         break
     case FormDataEvent.CALCULATE:
         checkDepartmentParams(LogLevel.WARNING)
-        def readerBank = checkDeclarationBank(LogLevel.WARNING, false)
+        def readerBank = checkDeclarationBank(false)
         generateXML(readerBank)
+        logicCheck(LogLevel.WARNING)
         break
     default:
         return
 }
+
+@Field
+def version = '5.06'
+
 // Кэш провайдеров
 @Field
 def providerCache = [:]
@@ -87,12 +92,12 @@ void checkDepartmentParams(LogLevel logLevel) {
 
     errorList = getErrorVersion(departmentParam)
     for (String error : errorList) {
-        logger.log(logLevel, String.format("Неверно указано значение атрибута %s на форме настроек подразделений!", error))
+        logger.log(logLevel, String.format("На форме настроек подразделения текущего экземпляра декларации неверно указано значение атрибута %s", error))
     }
 }
 
 // Провека декларации банка.
-def checkDeclarationBank(LogLevel logLevel, boolean onlyCheck = true) {
+def checkDeclarationBank(boolean onlyCheck = true) {
     /** Отчётный период. */
     def reportPeriod = reportPeriodService.get(declarationData.reportPeriodId)
 
@@ -103,7 +108,7 @@ def checkDeclarationBank(LogLevel logLevel, boolean onlyCheck = true) {
     def departmentBankId = 1
     def bankDeclarationData = declarationService.getLast(declarationTypeId, departmentBankId, reportPeriod.id)
     if (bankDeclarationData == null || !bankDeclarationData.accepted) {
-        logger.log(logLevel, 'Декларация Банка по прибыли за указанный период не сформирована или не находится в статусе "Принята".')
+        logger.error('Декларация Банка по прибыли за указанный период не сформирована или не находится в статусе "Принята".')
         return null
     }
 
@@ -113,18 +118,151 @@ def checkDeclarationBank(LogLevel logLevel, boolean onlyCheck = true) {
     if (bankDeclarationData.id != null) {
         readerBank = declarationService.getXmlStreamReader(bankDeclarationData.id)
         if (!readerBank) {
-            logger.log(logLevel, 'Данные декларации Банка не заполнены.')
+            logger.error('Данные декларации Банка не заполнены.')
             return null
         }
     }
     if (readerBank == null) {
-        logger.log(logLevel, 'Не удалось получить данные декларации Банка.')
+        logger.error('Не удалось получить данные декларации Банка.')
     }
     if (onlyCheck) {
         readerBank.close()
         return null
     }
     return readerBank
+}
+
+// Логические проверки.
+void logicCheck(LogLevel logLevel) {
+    // получение данных из xml'ки
+    def reader = getXmlStreamReader(declarationData.reportPeriodId, declarationData.departmentId, false, false)
+    if(reader == null){
+        return
+    }
+    def elements = [:]
+
+    def kodNO, poMestu, documentFound = false
+    def naimOrg, innJulNpJul, npJulFound = false
+    def prPodp, podpisantFound = false
+    def signatorySurname, signatoryFirstName, fioFound = false
+    def naimDok, svPredFound = false
+    def oktmoNalPUAv, nalPUAvFound = false
+    def oktmoNalPUMes, nalPUMesFound = false
+    def okved, svNPFound = false
+    def innJulSvReorgJul, kppSvReorgJul, formReorg, svReorgJulFound = false
+    def versForm, fileFound = false
+
+    try{
+        while(reader.hasNext()) {
+            if (reader.startElement) {
+                elements[reader.name.localPart] = true
+                if (!documentFound && isCurrentNode(['Документ'], elements)) {
+                    documentFound = true
+                    kodNO = getXmlValue(reader, 'КодНО')
+                    poMestu = getXmlValue(reader, 'ПоМесту')
+                } else if (!svNPFound && isCurrentNode(['Документ', 'СвНП'], elements)) {
+                    svNPFound = true
+                    okved = getXmlValue(reader, 'ОКВЭД')
+                } else if (!podpisantFound && isCurrentNode(['Документ', 'Подписант'], elements)) {
+                    podpisantFound = true
+                    prPodp = getXmlValue(reader, 'ПрПодп')
+                } else if (!fioFound && isCurrentNode(['Документ', 'Подписант', 'ФИО'], elements)) {
+                    fioFound = true
+                    signatorySurname = getXmlValue(reader, 'Фамилия')
+                    signatoryFirstName = getXmlValue(reader, 'Имя')
+                } else if (!svPredFound && isCurrentNode(['Документ', 'Подписант', 'СвПред'], elements)) {
+                    svPredFound = true
+                    naimDok = getXmlValue(reader, 'НаимДок')
+                } else if (!npJulFound && isCurrentNode(['Документ', 'СвНП', 'НПЮЛ'], elements)) {
+                    npJulFound = true
+                    naimOrg = getXmlValue(reader, 'НаимОрг')
+                    innJulNpJul = getXmlValue(reader, 'ИННЮЛ')
+                } else if (!svReorgJulFound && isCurrentNode(['Документ', 'СвНП', 'НПЮЛ', 'СвРеоргЮЛ'], elements)) {
+                    svReorgJulFound = true
+                    innJulSvReorgJul = getXmlValue(reader, 'ИННЮЛ')
+                    kppSvReorgJul = getXmlValue(reader, 'КПП')
+                    formReorg = getXmlValue(reader, 'ФормРеорг')
+                } else if (!nalPUAvFound && isCurrentNode(['Документ', 'Прибыль', 'НалПУ', 'НалПУАв'], elements)) {
+                    nalPUAvFound = true
+                    oktmoNalPUAv = getXmlValue(reader, 'ОКТМО')
+                } else if (!nalPUMesFound && isCurrentNode(['Документ', 'Прибыль', 'НалПУ', 'НалПУМес'], elements)) {
+                    nalPUMesFound = true
+                    oktmoNalPUMes = getXmlValue(reader, 'ОКТМО')
+                } else if (!fileFound && isCurrentNode([], elements)) {
+                    fileFound = true
+                    versForm = getXmlValue(reader, 'ВерсФорм')
+                }
+            }
+            if (reader.endElement) {
+                elements[reader.name.localPart] = false
+            }
+            reader.next()
+        }
+    } finally {
+        reader.close()
+    }
+
+    if (naimOrg == null || naimOrg.trim().isEmpty()) {
+        logger.log(logLevel, getMessage("Титульный лист", "Наименование организации (обособленного подразделения)", "НПЮЛ.НаимОрг", "Наименование для титульного листа"))
+    }
+    // is1_2 = если поле ОКТМО не заполнено в разделе 1.2
+    boolean is1_2 = nalPUMesFound && (oktmoNalPUMes == null || oktmoNalPUMes.trim().isEmpty())
+    if (oktmoNalPUAv == null || oktmoNalPUAv.trim().isEmpty() || is1_2) {
+        logger.log(logLevel, getMessage("Подраздел 1.1" + (is1_2 ? ", 1.2" : ""), "Код по ОКТМО", "НалПУАв.ОКТМО" + (is1_2 ? "», «НалПУМес.ОКТМО" : ""), "ОКТМО"))
+    }
+    if (innJulNpJul == null || innJulNpJul.trim().isEmpty()) {
+        logger.log(logLevel, getMessage("Титульный лист", "ИНН налогоплательщика", "НПЮЛ.ИННЮЛ", "ИНН"))
+    }
+    if (kodNO == null || kodNO.trim().isEmpty()) {
+        logger.log(logLevel, getMessage("Наименование xml файла (кон. налоговый орган) и титульный лист", "Код налогового органа", "Документ.КодНО", "Код налогового органа (кон.)"))
+    }
+    if (okved == null || okved.trim().isEmpty()) {
+        logger.log(logLevel, getMessage("Титульный лист", "Код вида экономической деятельности и по классификатору ОКВЭД", "СвНП.ОКВЭД", "Код вида экономической деятельности и по классификатору ОКВЭД"))
+    }
+    if ((formReorg != null && formReorg != '0') && (innJulSvReorgJul == null || innJulSvReorgJul.trim().isEmpty())) {
+        logger.log(logLevel, getReorgMessage("Титульный лист", "ИНН реорганизованной организации (обособленного подразделения)", "СвРеоргЮЛ.ИННЮЛ", "ИНН реорганизованного обособленного подразделения"))
+    }
+    if ((formReorg != null && formReorg != '0') && (kppSvReorgJul == null || kppSvReorgJul.trim().isEmpty())) {
+        logger.log(logLevel, getReorgMessage("Титульный лист", "КПП реорганизованной организации (обособленного подразделения)", "СвРеоргЮЛ.КПП", "КПП реорганизованного обособленного подразделения"))
+    }
+    if (prPodp == null || prPodp.trim().isEmpty()) {
+        logger.log(logLevel, getMessage("Титульный лист", "Признак лица, подписавшего документ", "Подписант.ПрПодп", "Признак лица подписавшего документ"))
+    }
+    if (signatorySurname == null || signatorySurname.trim().isEmpty()) {
+        logger.log(logLevel, getMessage("Титульный лист", "Фамилия", "Подписант.Фамилия", "Фамилия подписанта"))
+    }
+    if (signatoryFirstName == null || signatoryFirstName.trim().isEmpty()) {
+        logger.log(logLevel, getMessage("Титульный лист", "Имя", "Подписант.Имя", "Имя подписанта"))
+    }
+    if (prPodp == '2' && (naimDok == null || naimDok.trim().isEmpty())) {
+        logger.log(logLevel, getDocumentMessage("Титульный лист", "Наименование документа, подтверждающего полномочия представителя", "СвПред.НаимДок", "Наименование документа, подтверждающего полномочия представителя"))
+    }
+    if (poMestu == null || poMestu.trim().isEmpty()) {
+        logger.log(logLevel, getMessage("Титульный лист", "Код места, по которому представляется документ", "Документ.ПоМесту", "Код места, по которому представляется документ"))
+    }
+    if (versForm == null || versForm.trim().isEmpty()) {
+        logger.log(logLevel, getVersionMessage(versForm, "Файл.ВерсФорм", "Версия формата"))
+    }
+}
+
+String getMessage(String place, String printName, String xmlName, String departmentName) {
+    return String.format("%s. Обязательный для заполнения атрибут «%s» (%s) не заполнен! На момент расчёта экземпляра декларации (формирование XML) на форме настроек подразделения отсутствовало значение атрибута «%s».",
+            place, printName, xmlName, departmentName)
+}
+
+String getVersionMessage(String value, String xmlName, String departmentName) {
+    return String.format("Обязательный для заполнения атрибут «%s» (%s) )>) заполнен неверно (%s)! Ожидаемое значение «$version». На момент расчёта экземпляра декларации (формирование XML) на форме настроек подразделения было указано неверное значение атрибута «%s».",
+            departmentName, xmlName, value?:'пустое значение', departmentName)
+}
+
+String getReorgMessage(String place, String printName, String xmlName, String departmentName) {
+    return String.format("%s. Условно обязательный для заполнения (заполнен код формы реорганизации) атрибут «%s» (%s) не заполнен! На момент расчёта экземпляра декларации (формирование XML) на форме настроек подразделения отсутствовало значение атрибута «%s».",
+            place, printName, xmlName, departmentName)
+}
+
+String getDocumentMessage(String place, String printName, String xmlName, String departmentName) {
+    return String.format("%s. Условно обязательный для заполнения (Признак лица, подписавшего документ = 2) атрибут «%s» (%s) не заполнен! На момент расчёта экземпляра декларации (формирование XML) на форме настроек подразделения отсутствовало значение атрибута «%s».",
+            place, printName, xmlName, departmentName)
 }
 
 // Запуск генерации XML.
@@ -616,8 +754,8 @@ List<String> getErrorTable(record) {
         errorList.add("«Имя подписанта»")
     }
     def signatoryId = getRefBookValue(35, record?.SIGNATORY_ID?.value)?.CODE?.value
-    if ((signatoryId != null && signatoryId != 1) && (record.APPROVE_DOC_NAME?.value == null || record.APPROVE_DOC_NAME.value.isEmpty())) {
-        errorList.add("«Наименование документа, подтверждающего полномочия представителя»")
+    if ((signatoryId != null && signatoryId == 2) && (record.APPROVE_DOC_NAME?.value == null || record.APPROVE_DOC_NAME.value.isEmpty())) {
+        errorList.add("«Наименование документа, подтверждающего полномочия представителя» (Признак лица, подписавшего документ = 2)")
     }
     if (record.TAX_PLACE_TYPE_CODE?.value == null) {
         errorList.add("«Код места, по которому представляется документ»")
@@ -631,16 +769,14 @@ List<String> getErrorDepartment(record) {
     if (record.INN?.stringValue == null || record.INN.stringValue.isEmpty()) {
         errorList.add("«ИНН»")
     }
-    if (record.TAX_RATE?.value == null) {
-        errorList.add("«Ставка налога»")
-    }
+    // Cтавка налога не проверяется в ОП
     errorList
 }
 
 List<String> getErrorVersion(record) {
     List<String> errorList = new ArrayList<String>()
-    if (record.FORMAT_VERSION == null || record.FORMAT_VERSION.value == null || !record.FORMAT_VERSION.value.equals('5.06')) {
-        errorList.add("«Версия формата»")
+    if (record.FORMAT_VERSION == null || record.FORMAT_VERSION.value == null || !record.FORMAT_VERSION.value.equals(version)) {
+        errorList.add("«Версия формата» (${record.FORMAT_VERSION.value?:'пустое значение'})! Ожидаемое значение «$version».")
     }
     errorList
 }
@@ -656,14 +792,6 @@ def getProvider(def long providerId) {
         providerCache.put(providerId, refBookFactory.getDataProvider(providerId))
     }
     return providerCache.get(providerId)
-}
-
-BigDecimal getXmlDecimal(def reader, String attrName) {
-    def value = reader?.getAttributeValue(null, attrName)
-    if (!value) {
-        return null
-    }
-    return new BigDecimal(value)
 }
 
 String getXmlValue(XMLStreamReader reader, String attrName) {
