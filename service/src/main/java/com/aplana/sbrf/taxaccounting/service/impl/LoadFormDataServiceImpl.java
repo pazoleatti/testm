@@ -238,6 +238,51 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
                 Integer year = transportDataParam.getYear();
                 String departmentCode = transportDataParam.getDepartmentCode();
 
+                // Указан несуществующий код налоговой формы
+                FormType formType = formTypeService.getByCode(formCode);
+                if (formType == null) {
+                    log(userInfo, LogData.L6, logger, lockId, fileName);
+                    moveToErrorDirectory(userInfo, getFormDataErrorPath(userInfo, departmentId, logger, lockId), currentFile,
+                            Arrays.asList(new LogEntry(LogLevel.ERROR, String.format(LogData.L6.getText(), lockId, fileName))), logger, lockId);
+                    fail++;
+                    continue;
+                }
+
+                formTypeId = formType.getId();
+
+                // Указан недопустимый код периода
+                ReportPeriod reportPeriod = periodService.getByTaxTypedCodeYear(formType.getTaxType(), reportPeriodCode, year);
+                if (reportPeriod == null) {
+                    log(userInfo, LogData.L7, logger, lockId, fileName);
+                    moveToErrorDirectory(userInfo, getFormDataErrorPath(userInfo, departmentId, logger, lockId), currentFile,
+                            Arrays.asList(new LogEntry(LogLevel.ERROR, String.format(LogData.L7.getText(), lockId, fileName))), logger, lockId);
+                    fail++;
+                    continue;
+                }
+
+                // Актуальный шаблон НФ, введенный в действие
+                Integer formTemplateId;
+                try {
+                    formTemplateId = formTemplateService.getActiveFormTemplateId(formType.getId(), reportPeriod.getId());
+                } catch (Exception e) {
+                    // Если шаблона нет, то не загружаем ТФ
+                    log(userInfo, LogData.L21, logger, lockId, e.getMessage());
+                    moveToErrorDirectory(userInfo, getFormDataErrorPath(userInfo, departmentId, logger, lockId), currentFile,
+                            Arrays.asList(new LogEntry(LogLevel.ERROR, String.format(LogData.L21.getText(), lockId, e.getMessage()))), logger, lockId);
+                    fail++;
+                    continue;
+                }
+
+                FormTemplate formTemplate = formTemplateService.get(formTemplateId);
+
+                if (!TAAbstractScriptingServiceImpl.canExecuteScript(formTemplate.getScript(), FormDataEvent.IMPORT_TRANSPORT_FILE)) {
+                    log(userInfo, LogData.L48, logger, lockId, fileName);
+                    moveToErrorDirectory(userInfo, getFormDataErrorPath(userInfo, departmentId, logger, lockId), currentFile,
+                            Arrays.asList(new LogEntry(LogLevel.ERROR, String.format(LogData.L48.getText(), logger, lockId, fileName))), logger, lockId);
+                    fail++;
+                    continue;
+                }
+
                 // Подразделение НФ
                 Department formDepartment = departmentService.getDepartmentBySbrfCode(departmentCode);
                 formDepartmentId = formDepartment != null ? formDepartment.getId(): null;
@@ -291,18 +336,6 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
                     continue;
                 }
 
-                // Указан несуществующий код налоговой формы
-                FormType formType = formTypeService.getByCode(formCode);
-                if (formType == null) {
-                    log(userInfo, LogData.L6, logger, lockId, fileName);
-                    moveToErrorDirectory(userInfo, getFormDataErrorPath(userInfo, departmentId, logger, lockId), currentFile,
-                            Arrays.asList(new LogEntry(LogLevel.ERROR, String.format(LogData.L6.getText(), lockId, fileName))), logger, lockId);
-                    fail++;
-                    continue;
-                }
-
-                formTypeId = formType.getId();
-
                 FormDataKind formDataKind = FormDataKind.PRIMARY;
 
                 // Назначение подразделению типа и вида НФ
@@ -319,16 +352,6 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
                 } else if (!existedPrimaryAssigning) {
                     // иначе если нет назначения на первичную, то ищем выходную
                     formDataKind = FormDataKind.ADDITIONAL;
-                }
-
-                // Указан недопустимый код периода
-                ReportPeriod reportPeriod = periodService.getByTaxTypedCodeYear(formType.getTaxType(), reportPeriodCode, year);
-                if (reportPeriod == null) {
-                    log(userInfo, LogData.L7, logger, lockId, fileName);
-                    moveToErrorDirectory(userInfo, getFormDataErrorPath(userInfo, departmentId, logger, lockId), currentFile,
-                            Arrays.asList(new LogEntry(LogLevel.ERROR, String.format(LogData.L7.getText(), lockId, fileName))), logger, lockId);
-                    fail++;
-                    continue;
                 }
 
                 // Последний отчетный период подразделения для указанного отчетного периода
@@ -357,20 +380,6 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
                 // Признак ежемесячной формы по файлу
                 boolean monthly = transportDataParam.getMonth() != null;
 
-                // Актуальный шаблон НФ, введенный в действие
-                Integer formTemplateId;
-                try {
-                    formTemplateId = formTemplateService.getActiveFormTemplateId(formType.getId(), reportPeriod.getId());
-                } catch (Exception e) {
-                    // Если шаблона нет, то не загружаем ТФ
-                    log(userInfo, LogData.L21, logger, lockId, e.getMessage());
-                    moveToErrorDirectory(userInfo, getFormDataErrorPath(userInfo, departmentId, logger, lockId), currentFile,
-                            Arrays.asList(new LogEntry(LogLevel.ERROR, String.format(LogData.L21.getText(), lockId, e.getMessage()))), logger, lockId);
-                    fail++;
-                    continue;
-                }
-
-                FormTemplate formTemplate = formTemplateService.get(formTemplateId);
                 if (monthly != formTemplate.isMonthly()) {
                     log(userInfo, LogData.L4, logger, lockId, fileName, path);
                     moveToErrorDirectory(userInfo, getFormDataErrorPath(userInfo, departmentId, logger, lockId), currentFile,

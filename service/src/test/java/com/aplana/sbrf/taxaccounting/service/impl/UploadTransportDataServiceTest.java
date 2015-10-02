@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 import com.aplana.sbrf.taxaccounting.dao.api.ConfigurationDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentFormTypeDao;
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.*;
@@ -36,6 +37,7 @@ import static org.mockito.Mockito.when;
 public class UploadTransportDataServiceTest {
     private static String FILE_NAME_1 = "1290-39.2_______18_0000_00212014_1.rnu"; // Mock как справочник
     private static String FILE_NAME_2 = "Тестовый файл 2.zip"; // Архив
+    private static String FILE_NAME_3 = "____101-1______________147212014__.rnu"; // Архив
     private static String FILE_NAME_2_EXTRACT_1 = "____852-4______________147212014__.rnu"; // ТФ НФ
     private static String FILE_NAME_2_EXTRACT_2 = "Тестовый файл 2.txt"; // Mock как неподходящий файл
 
@@ -62,6 +64,8 @@ public class UploadTransportDataServiceTest {
     DepartmentFormTypeDao departmentFormTypeDao;
     @Autowired
     UploadTransportDataService uploadTransportDataService;
+    @Autowired
+    FormTemplateService formTemplateService;
 
     @Before
     public void init() throws IOException {
@@ -121,12 +125,31 @@ public class UploadTransportDataServiceTest {
         formType852_4.setName("Test form type 852-4");
         when(formTypeService.getByCode("852-4")).thenReturn(formType852_4);
 
+        FormType formType101_1 = new FormType();
+        formType101_1.setId(2);
+        formType101_1.setTaxType(TaxType.DEAL);
+        formType101_1.setName("Test form type 101.1");
+        when(formTypeService.getByCode("101-1")).thenReturn(formType101_1);
+
         ReportPeriod reportPeriod21 = new ReportPeriod();
         reportPeriod21.setId(1);
         reportPeriod21.setName("Test period");
         when(periodService.getByTaxTypedCodeYear(TaxType.INCOME, "21", 2014)).thenReturn(reportPeriod21);
+        when(periodService.getByTaxTypedCodeYear(TaxType.DEAL, "21", 2014)).thenReturn(reportPeriod21);
 
-        when(departmentFormTypeDao.existAssignedForm(TEST_DEPARTMENT_ID, 1, FormDataKind.PRIMARY)).thenReturn(true);
+        when(departmentFormTypeDao.existAssignedForm(TEST_DEPARTMENT_ID, formType852_4.getId(), FormDataKind.PRIMARY)).thenReturn(true);
+        when(departmentFormTypeDao.existAssignedForm(TEST_DEPARTMENT_ID, formType101_1.getId(), FormDataKind.PRIMARY)).thenReturn(true);
+
+        FormTemplate ft = new FormTemplate();
+        ft.setScript("FormDataEvent."+FormDataEvent.IMPORT_TRANSPORT_FILE.name());
+        FormTemplate ft2 = new FormTemplate();
+        ft2.setScript("FormDataEvent."+FormDataEvent.CALCULATE.name());
+
+        when(formTemplateService.existFormTemplate(any(Integer.class), any(Integer.class), any(Boolean.class))).thenReturn(true);
+        when(formTemplateService.getActiveFormTemplateId(eq(1), any(Integer.class))).thenReturn(1);
+        when(formTemplateService.getActiveFormTemplateId(eq(2), any(Integer.class))).thenReturn(2);
+        when(formTemplateService.get(eq(1), any(Logger.class))).thenReturn(ft);
+        when(formTemplateService.get(eq(2), any(Logger.class))).thenReturn(ft2);
     }
 
     @AfterClass
@@ -234,6 +257,20 @@ public class UploadTransportDataServiceTest {
         Assert.assertTrue(files != null && files.length != 0);
         List<String> fileList = asList(files);
         Assert.assertTrue(fileList.contains(FILE_NAME_2_EXTRACT_1));
+    }
+
+    // Не успешный импорт архива НФ
+    @Test
+    public void uploadFile7Test() throws IOException {
+        TAUserInfo userInfo = new TAUserInfo();
+        TAUser user = new TAUser();
+        userInfo.setUser(user);
+        TARole role = new TARole();
+        role.setAlias(TARole.ROLE_CONTROL_UNP);
+        user.setRoles(asList(role));
+        Logger logger = new Logger();
+        uploadTransportDataService.uploadFile(userInfo, FILE_NAME_3, getFileAsStream(FILE_NAME_3), logger);
+        Assert.assertEquals("Для налоговой формы загружаемого файла \"" + FILE_NAME_3 + "\" не предусмотрена обработка транспортного файла! Загрузка не выполнена.", logger.getEntries().get(3).getMessage());
     }
 
     @Test
