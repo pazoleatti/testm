@@ -235,9 +235,11 @@ void calcValues(def dataRows, def sourceRows, boolean isCalc) {
     def row2Source = getDataRow(sourceRows, "R2")
     def row3Source = getDataRow(sourceRows, "R3")
     def row4Source = getDataRow(sourceRows, "R4")
+    def row5Source = getDataRow(sourceRows, "R5")
+    def row6Source = getDataRow(sourceRows, "R6")
     def row7Source = getDataRow(sourceRows, "R7")
     ['comparePeriod', 'currentPeriod'].each {
-        def smallSum = (row4Source[it] ?: 0) + (row7Source[it] ?: 0)
+        def smallSum = (row4Source[it] ?: 0) + (row5Source[it] ?: 0) + (row6Source[it] ?: 0) + (row7Source[it] ?: 0)
         row3[it] = smallSum
         def largeSum = (row2Source[it] ?: 0) + (row3Source[it] ?: 0)
         row1[it] = largeSum
