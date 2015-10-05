@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDepartmentDao;
+import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.TARole;
 import com.aplana.sbrf.taxaccounting.model.TAUser;
@@ -9,14 +10,12 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
+import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.RegionSecurityService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 public class RegionSecurityServiceImpl implements RegionSecurityService {
@@ -25,6 +24,9 @@ public class RegionSecurityServiceImpl implements RegionSecurityService {
 
     @Autowired
     RefBookFactory refBookFactory;
+
+    @Autowired
+    DepartmentService departmentService;
 
     @Override
     public boolean checkDelete(TAUser user, Long refBookId, Long uniqueRecordId, boolean isDeleteVersion) {
@@ -56,11 +58,10 @@ public class RegionSecurityServiceImpl implements RegionSecurityService {
         // получить подразделение пользователя, получить регион подразделения
         RefBookDataProvider departmentProvider = refBookFactory.getDataProvider(DEPARTMENT_REF_BOOK_ID);
         Map<String, RefBookValue> department = departmentProvider.getRecordData((long) user.getDepartmentId());
-        RefBookValue userRegion = department.get("REGION_ID");
-        if (userRegion == null || userRegion.getReferenceValue() == null) {
-            return false;
+        Set<Long> availableRegions = new HashSet<Long>();
+        for (Department dep : departmentService.getBADepartments(user)) {
+            availableRegions.add(dep.getRegionId());
         }
-        Long userRegionId = userRegion.getReferenceValue();
 
         // проверить новые значения
         if (values != null && !values.isEmpty()) {
@@ -71,7 +72,7 @@ public class RegionSecurityServiceImpl implements RegionSecurityService {
             }
             // если новый регион не соотвествует региону пользователя, то завершить запретив изменения
             Long newRecordRegionId = newRecordRegion.getReferenceValue();
-            if (!userRegionId.equals(newRecordRegionId)) {
+            if (!availableRegions.contains(newRecordRegionId)) {
                 return false;
             }
         }
@@ -97,7 +98,7 @@ public class RegionSecurityServiceImpl implements RegionSecurityService {
                 Map<Long, Date> versionDateMap = provider.getRecordsVersionStart(list);
                 Long preRecordId = getActualRecordId(versionDateMap, start);
                 Long preRecordRegionId = getRegionId(preRecordId, refBook.getRegionAttribute().getAlias(), provider);
-                if (!userRegionId.equals(preRecordRegionId)) {
+                if (!availableRegions.contains(preRecordRegionId)) {
                     return false;
                 }
             }
@@ -111,18 +112,18 @@ public class RegionSecurityServiceImpl implements RegionSecurityService {
             }
 
             // проверить соответствие региона старой записи региону пользователя
-            boolean isAllowed = userRegionId.equals(recordRegionId);
+            boolean isAllowed = availableRegions.contains(recordRegionId);
 
             if (isDeleteVersion != null && !isDeleteVersion) {
                 // удаление записи - проверить все версии записи
                 if (!isAllowed) {
-                    return isAllowed;
+                    return false;
                 }
                 PagingResult<Map<String, RefBookValue>> versions = provider.getRecordVersionsById(uniqueRecordId, null, null, null);
                 for (Map<String, RefBookValue> version : versions) {
                     RefBookValue region = version.get(refBook.getRegionAttribute().getAlias());
                     // если регион версии не указан или он не равен региону пользователя, то проверка не проходит
-                    if (region == null || region.getReferenceValue() == null || !region.getReferenceValue().equals(userRegionId)) {
+                    if (region == null || region.getReferenceValue() == null || !availableRegions.contains(region.getReferenceValue())) {
                         return false;
                     }
                 }
