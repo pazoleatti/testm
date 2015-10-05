@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
+import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.TARole;
 import com.aplana.sbrf.taxaccounting.model.TAUser;
@@ -10,6 +11,7 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
+import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -39,6 +41,8 @@ public class RegionSecurityServiceImplTest {
     private final Long BAD_DEPARTAMENT_ID = 2L;
 
     private final Date START = new Date();
+
+    private TAUser nsUser = getUser(TARole.ROLE_CONTROL_NS);
 
     @Before
     public void init() {
@@ -104,6 +108,14 @@ public class RegionSecurityServiceImplTest {
 
         RefBookFactory refBookFactory = mock(RefBookFactory.class);
         ReflectionTestUtils.setField(regionSecurityService, "refBookFactory", refBookFactory);
+        DepartmentService departmentService = mock(DepartmentService.class);
+        ReflectionTestUtils.setField(regionSecurityService, "departmentService", departmentService);
+
+        List<Department> departments = new ArrayList<Department>();
+        Department nsDepartment = new Department();
+        nsDepartment.setRegionId(USER_REGION);
+        departments.add(nsDepartment);
+        when(departmentService.getBADepartments(nsUser)).thenReturn(departments);
 
         when(refBookFactory.get(NOT_REGION_REF_BOOK_ID)).thenReturn(notRegionRefBook);
         when(refBookFactory.get(REGION_REF_BOOK_ID)).thenReturn(refBook);
@@ -155,14 +167,13 @@ public class RegionSecurityServiceImplTest {
     @Test
     public void deleteRecordForNs() {
         // для ролей NS можно править только региональные записи относящиеся к его региону
-        TAUser user = getUser(TARole.ROLE_CONTROL_NS);
         Long regionRefBookId = REGION_REF_BOOK_ID;
         Long uniqueRecordId = UNIQUE_RECORD_ID;
-        boolean result = regionSecurityService.checkDelete(user, regionRefBookId, uniqueRecordId, true);
+        boolean result = regionSecurityService.checkDelete(nsUser, regionRefBookId, uniqueRecordId, true);
         Assert.assertTrue(result);
 
         regionRefBookId = NOT_REGION_REF_BOOK_ID;
-        result = regionSecurityService.checkDelete(user, regionRefBookId, uniqueRecordId, true);
+        result = regionSecurityService.checkDelete(nsUser, regionRefBookId, uniqueRecordId, true);
         Assert.assertFalse(result);
     }
 
@@ -179,27 +190,24 @@ public class RegionSecurityServiceImplTest {
     @Test
     public void deleteRecordForNsGoodVersions() {
         // для ролей NS можно править только региональные записи относящиеся к его региону
-        TAUser user = getUser(TARole.ROLE_CONTROL_NS);
         Long regionRefBookId = REGION_REF_BOOK_ID;
         Long uniqueRecordId = UNIQUE_RECORD_ID;
-        boolean result = regionSecurityService.checkDelete(user, regionRefBookId, uniqueRecordId, false);
+        boolean result = regionSecurityService.checkDelete(nsUser, regionRefBookId, uniqueRecordId, false);
         Assert.assertTrue(result);
     }
 
     @Test
     public void deleteRecordFailForNsBadVersions() {
         // для ролей NS можно править только региональные записи относящиеся к его региону
-        TAUser user = getUser(TARole.ROLE_CONTROL_NS);
         Long regionRefBookId = REGION_REF_BOOK_ID;
         Long uniqueRecordId = UNIQUE_RECORD_ID_BAD_VERSION;
-        boolean result = regionSecurityService.checkDelete(user, regionRefBookId, uniqueRecordId, false);
+        boolean result = regionSecurityService.checkDelete(nsUser, regionRefBookId, uniqueRecordId, false);
         Assert.assertFalse(result);
     }
 
     @Test
     public void saveRecordSuccessForNs() {
         // для ролей NS можно править только региональные записи относящиеся к его региону
-        TAUser user = getUser(TARole.ROLE_CONTROL_NS);
         Long regionRefBookId = REGION_REF_BOOK_ID;
         Long uniqueRecordId = UNIQUE_RECORD_ID;
         Long recordCommonId = COMMON_RECORD_ID;
@@ -208,7 +216,7 @@ public class RegionSecurityServiceImplTest {
         Map<String, RefBookValue> values = new HashMap<String, RefBookValue>();
         RefBookValue regionValue = new RefBookValue(RefBookAttributeType.REFERENCE, USER_REGION);
         values.put(REGION_ALIAS, regionValue);
-        boolean result = regionSecurityService.check(user, regionRefBookId, uniqueRecordId, recordCommonId, values, start, end);
+        boolean result = regionSecurityService.check(nsUser, regionRefBookId, uniqueRecordId, recordCommonId, values, start, end);
 
         Assert.assertTrue(result);
     }
@@ -233,7 +241,6 @@ public class RegionSecurityServiceImplTest {
     @Test
     public void addRecordSuccessForNs() {
         // для ролей NS можно править только региональные записи относящиеся к его региону
-        TAUser user = getUser(TARole.ROLE_CONTROL_NS);
         Long regionRefBookId = REGION_REF_BOOK_ID;
         Long uniqueRecordId = null;
         Long recordCommonId = COMMON_RECORD_ID;
@@ -242,7 +249,7 @@ public class RegionSecurityServiceImplTest {
         Map<String, RefBookValue> values = new HashMap<String, RefBookValue>();
         RefBookValue regionValue = new RefBookValue(RefBookAttributeType.REFERENCE, USER_REGION);
         values.put(REGION_ALIAS, regionValue);
-        boolean result = regionSecurityService.check(user, regionRefBookId, uniqueRecordId, recordCommonId, values, start, end);
+        boolean result = regionSecurityService.check(nsUser, regionRefBookId, uniqueRecordId, recordCommonId, values, start, end);
 
         Assert.assertTrue(result);
     }
