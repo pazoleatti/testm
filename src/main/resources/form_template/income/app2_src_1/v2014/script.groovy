@@ -261,7 +261,8 @@ void logicCheck() {
         }
 
         // 3. Проверка вводимых символов в поле «Серия и номер документа»
-        if (row.series != null && !row.series?.matches("^[а-яА-ЯёЁa-zA-Z0-9]+\$")) {
+        def code = (row.code != null ? getRefBookValue(360, row.code)?.CODE?.value : null)
+        if (code == '21' && row.series != null && !row.series?.matches("^[а-яА-ЯёЁa-zA-Z0-9]+\$")) {
             def name = getColumnName(row, 'series')
             rowError(logger, row, errorMsg + "Графа «$name» содержит недопустимые символы!")
         }
