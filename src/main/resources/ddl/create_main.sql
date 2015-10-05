@@ -81,7 +81,8 @@ create table form_template (
   status number(1) default 0 not null,
   monthly number(1) default 0 not null,
   header varchar2(1000),
-  comparative number(1)
+  comparative number(1),
+  accruing number(1) default 0
 );
 comment on table form_template IS 'Описания шаблонов налоговых форм';
 comment on column form_template.data_rows is 'Предопределённые строки формы в формате XML';
@@ -97,6 +98,7 @@ comment on column form_template.status is 'Статус версии (0 - дей
 comment on column form_template.monthly is 'Признак ежемесячной формы (0 - не ежемесячная, 1 - ежемесячная)';
 comment on column form_template.header is 'Верхний колонтитул печатной формы';
 comment on column form_template.comparative is '"Признак использования периода сравнения (0 - не используется, 1 - используется)';
+comment on column form_template.accruing is 'Признак расчета нарастающим итогом (0 - не используется, 1 - используется)';
 
 create sequence seq_form_template start with 10000;
 ---------------------------------------------------------------------------------------------------

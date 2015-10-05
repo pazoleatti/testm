@@ -306,4 +306,6 @@ public interface PeriodService {
     List<ReportPeriod> getReportPeriodsByDate(TaxType taxType, Date startDate, Date endDate);
 
     List<ReportPeriod> getReportPeriodsByDateAndDepartment(TaxType taxType, int depId, Date startDate, Date endDate);
+
+    boolean isFirstPeriod(int reportPeriodId);
 }

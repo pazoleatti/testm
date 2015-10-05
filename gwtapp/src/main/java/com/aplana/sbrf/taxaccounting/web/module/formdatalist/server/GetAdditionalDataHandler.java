@@ -1,5 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdatalist.server;
 
+import com.aplana.sbrf.taxaccounting.model.FormTemplate;
+import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.aplana.sbrf.taxaccounting.service.FormTemplateService;
 import com.aplana.sbrf.taxaccounting.service.PeriodService;
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.shared.GetAdditionalData;
@@ -9,6 +11,8 @@ import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.Calendar;
 
 /**
  * Проверяет является ли налоговая форма ежемесячной и возвращает список доступных месяцев.
@@ -32,8 +36,19 @@ public class GetAdditionalDataHandler extends AbstractActionHandler<GetAdditiona
 
         GetAdditionalDataResult result = new GetAdditionalDataResult();
         Integer formTemplateId = formTemplateService.getActiveFormTemplateId(action.getTypeId(), action.getReportPeriodId());
-        result.setMonthly(formTemplateService.isMonthly(formTemplateId));
-        result.setComparative(formTemplateService.isComparative(formTemplateId));
+        FormTemplate formTemplate = formTemplateService.get(formTemplateId);
+        result.setMonthly(formTemplate.isMonthly());
+        result.setComparative(formTemplate.isComparative());
+        result.setAccruing(formTemplate.isAccruing());
+        if (formTemplate.isAccruing() && (!formTemplate.isComparative() || formTemplate.isComparative() && action.getComparativeReportPeriodId()  != null)) {
+            int reportPeriodId;
+            if (formTemplate.isComparative()) {
+                reportPeriodId = action.getComparativeReportPeriodId();
+            } else {
+                reportPeriodId = action.getReportPeriodId();
+            }
+            result.setFirstPeriod(periodService.isFirstPeriod(reportPeriodId));
+        }
 
         if (result.isMonthly()) {
             //Заполняем доступные месяцы
@@ -41,7 +56,7 @@ public class GetAdditionalDataHandler extends AbstractActionHandler<GetAdditiona
         }
         if (result.isComparative()) {
             //Заполняем доступные периоды сравнения
-            result.setComparativPeriods(periodService.getComparativPeriods(action.getTaxType(), action.getDepartmentId()));
+            result.setComparativePeriods(periodService.getComparativPeriods(action.getTaxType(), action.getDepartmentId()));
         }
         return result;
     }
