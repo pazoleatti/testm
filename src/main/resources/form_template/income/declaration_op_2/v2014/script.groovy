@@ -848,5 +848,6 @@ boolean useTaxOrganCodeProm() {
     if (declarationReportPeriod == null) {
         declarationReportPeriod = reportPeriodService.get(declarationData.reportPeriodId)
     }
-    return (declarationReportPeriod?.taxPeriod?.year > 2015 || declarationReportPeriod?.order > 2)
+    def year = declarationReportPeriod?.taxPeriod?.year
+    return (year > 2015 || (year == 2015 && declarationReportPeriod?.order > 2))
 }
