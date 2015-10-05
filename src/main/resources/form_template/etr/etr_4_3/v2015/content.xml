@@ -8,7 +8,7 @@
         <alias>rowNum</alias>
         <checking>false</checking>
         <columnType>NUMBER</columnType>
-        <name>№ п/п</name>
+        <name>№ строки</name>
         <order>1</order>
         <width>5</width>
         <maxLength>1</maxLength>
