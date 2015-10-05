@@ -95,11 +95,11 @@ void checkDepartmentParams(LogLevel logLevel) {
     // Проверки подразделения
     def List<String> errorList = getErrorTable(departmentParamIncomeRow)
     for (String error : errorList) {
-        logger.log(logLevel, String.format("Для данного подразделения на форме настроек подразделений отсутствует значение атрибута %s!", error))
+        logger.log(logLevel, String.format("На форме настроек подразделения текущего экземпляра декларации отсутствует значение атрибута %s!", error))
     }
     errorList = getErrorDepartment(departmentParam)
     for (String error : errorList) {
-        logger.log(logLevel, String.format("Для данного подразделения на форме настроек подразделений отсутствует значение атрибута %s!", error))
+        logger.log(logLevel, String.format("На форме настроек подразделения текущего экземпляра декларации отсутствует значение атрибута %s!", error))
     }
 
     errorList = getErrorVersion(departmentParam)
@@ -2189,6 +2189,9 @@ List<String> getErrorDepartment(record) {
 
     if (record.INN?.stringValue == null || record.INN.stringValue.isEmpty()) {
         errorList.add("«ИНН»")
+    }
+    if (record.KPP?.stringValue == null || record.KPP.stringValue.isEmpty()) {
+        errorList.add("«КПП»")
     }
     // Декларация Банка в статусе отличном от «Принята».
     if (!declarationData.accepted && record.TAX_RATE?.value == null) {

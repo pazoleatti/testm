@@ -87,11 +87,11 @@ void checkDepartmentParams(LogLevel logLevel) {
     // Проверки подразделения
     def List<String> errorList = getErrorTable(departmentParamIncomeRow)
     for (String error : errorList) {
-        logger.log(logLevel, String.format("Для данного подразделения на форме настроек подразделений отсутствует значение атрибута %s!", error))
+        logger.log(logLevel, String.format("На форме настроек подразделения текущего экземпляра декларации неверно указано значение атрибута %s!", error))
     }
     errorList = getErrorDepartment(departmentParam)
     for (String error : errorList) {
-        logger.log(logLevel, String.format("Для данного подразделения на форме настроек подразделений отсутствует значение атрибута %s!", error))
+        logger.log(logLevel, String.format("На форме настроек подразделения текущего экземпляра декларации неверно указано значение атрибута %s!", error))
     }
 
     errorList = getErrorVersion(departmentParam)
@@ -731,13 +731,16 @@ def roundValue(def value, def precision) {
 List<String> getErrorTable(record) {
     List<String> errorList = new ArrayList<String>()
     if (record.NAME?.value == null || record.NAME.value.isEmpty()) {
-        errorList.add("«Наименование подразделения»")
+        errorList.add("«Наименование для титульного листа»")
     }
     if (record.OKTMO == null || record.OKTMO.value == null) {
-        errorList.add("«Код по ОКТМО»")
+        errorList.add("«ОКТМО»")
     }
     if (record.TAX_ORGAN_CODE?.value == null || record.TAX_ORGAN_CODE.value.isEmpty()) {
-        errorList.add("«Код налогового органа»")
+        errorList.add("«Код налогового органа (кон.)»")
+    }
+    if (useTaxOrganCodeProm() && (record.TAX_ORGAN_CODE_PROM?.value == null || record.TAX_ORGAN_CODE_PROM.value.isEmpty())) {
+        errorList.add("«Код налогового органа (пром.)»")
     }
     if (record.OKVED_CODE?.value == null) {
         errorList.add("«Код вида экономической деятельности и по классификатору ОКВЭД»")
@@ -775,6 +778,9 @@ List<String> getErrorDepartment(record) {
 
     if (record.INN?.stringValue == null || record.INN.stringValue.isEmpty()) {
         errorList.add("«ИНН»")
+    }
+    if (record.KPP?.stringValue == null || record.KPP.stringValue.isEmpty()) {
+        errorList.add("«КПП»")
     }
     // Cтавка налога не проверяется в ОП
     errorList
