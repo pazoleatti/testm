@@ -539,9 +539,12 @@ void logicalCheckBeforeCalc() {
 
         // Определение условий для проверок 2, 3, 4
         def depParam = getDepParam(departmentParam)
-        def depId = depParam.get(RefBook.RECORD_ID_ALIAS).numberValue as long ?: -1
+        def depId = (depParam?.get(RefBook.RECORD_ID_ALIAS)?.numberValue ?: -1) as long
         def departmentName = depParam?.NAME?.stringValue ?: "Не задано"
-        def incomeParam = getProvider(33).getRecords(getReportPeriodEndDate() - 1, null, "DEPARTMENT_ID = $depId", null)
+        def incomeParam
+        if (depId != -1) {
+            incomeParam = getProvider(33).getRecords(getReportPeriodEndDate() - 1, null, "DEPARTMENT_ID = $depId", null)
+        }
         def incomeParamTable = getIncomeParamTable(depParam)
 
         // 2. Проверка наличия формы настроек подразделения
@@ -1717,11 +1720,16 @@ def getProvider(def long providerId) {
 def getDepParam(def departmentParam) {
     def departmentId = departmentParam.get(RefBook.RECORD_ID_ALIAS).numberValue as int
     def departmentType = departmentService.get(departmentId).getType()
+    def depParam
     if (departmentType.equals(departmentType.TERR_BANK)) {
         depParam = departmentParam
     } else {
         def tbCode = (Integer) departmentParam.get('PARENT_ID').getReferenceValue()
+        if (tbCode == null) {
+            return null
+        }
         def taxPlaningTypeCode = departmentService.get(tbCode).getType().MANAGEMENT.getCode()
+        logger.info("2")
         depParam = getProvider(30).getRecords(getReportPeriodEndDate(), null, "PARENT_ID = ${departmentParam.get('PARENT_ID').getReferenceValue()} and TYPE = $taxPlaningTypeCode", null).get(0)
     }
     return depParam
@@ -1729,8 +1737,11 @@ def getDepParam(def departmentParam) {
 
 // Получение параметров (справочник 330)
 def getIncomeParamTable(def depParam) {
-    def depId = depParam.get(RefBook.RECORD_ID_ALIAS).numberValue as long
-    def incomeParam = getProvider(33).getRecords(getReportPeriodEndDate() - 1, null, "DEPARTMENT_ID = $depId", null)
+    def depId = (depParam?.get(RefBook.RECORD_ID_ALIAS)?.numberValue ?: -1) as long
+    def incomeParam
+    if (depId != -1) {
+        incomeParam = getProvider(33).getRecords(getReportPeriodEndDate() - 1, null, "DEPARTMENT_ID = $depId", null)
+    }
     if (incomeParam != null && !incomeParam.isEmpty()) {
         def link = incomeParam.get(0).record_id.value
         def incomeParamTable = getProvider(330).getRecords(getReportPeriodEndDate() - 1, null, "LINK = $link", null)

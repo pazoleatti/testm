@@ -23,9 +23,15 @@ switch (formDataEvent) {
         sourceCheck(true, LogLevel.WARNING)
         break
     case FormDataEvent.CHECK : // проверить
+        def logLevel = declarationData.accepted ? LogLevel.WARNING : LogLevel.ERROR
+        checkDepartmentParams(logLevel)
+        sourceCheck(true, logLevel)
+        logicCheck(logLevel)
+        break
     case FormDataEvent.MOVE_CREATED_TO_ACCEPTED : // принять из создана
-        checkDepartmentParams(LogLevel.WARNING)
-        sourceCheck(true, declarationData.accepted ? LogLevel.WARNING : LogLevel.ERROR)
+        def logLevel = declarationData.accepted ? LogLevel.WARNING : LogLevel.ERROR
+        checkDepartmentParams(logLevel)
+        sourceCheck(true, logLevel)
         logicCheck(LogLevel.ERROR)
         break
     case FormDataEvent.MOVE_ACCEPTED_TO_CREATED: // отменить принятие
@@ -139,7 +145,7 @@ void logicCheck(LogLevel logLevel) {
     def viruchRealPTDoSr, viruchRealPTFound = false
     def ubit1Prev269, ubit1Soot269, ubitRealPT1Found = false
     def kodNO, poMestu, documentFound = false
-    def naimOrg, innJulNpJul, npJulFound = false
+    def naimOrg, innJulNpJul, kppJulNpJul, npJulFound = false
     def prPodp, podpisantFound = false
     def signatorySurname, signatoryFirstName, fioFound = false
     def naimDok, svPredFound = false
@@ -218,6 +224,7 @@ void logicCheck(LogLevel logLevel) {
                     npJulFound = true
                     naimOrg = getXmlValue(reader, 'НаимОрг')
                     innJulNpJul = getXmlValue(reader, 'ИННЮЛ')
+                    kppJulNpJul = getXmlValue(reader, 'КПП')
                 } else if (!svReorgJulFound && isCurrentNode(['Документ', 'СвНП', 'НПЮЛ', 'СвРеоргЮЛ'], elements)) {
                     svReorgJulFound = true
                     innJulSvReorgJul = getXmlValue(reader, 'ИННЮЛ')
@@ -253,6 +260,9 @@ void logicCheck(LogLevel logLevel) {
     }
     if (innJulNpJul == null || innJulNpJul.trim().isEmpty()) {
         logger.log(logLevel, getMessage("Титульный лист", "ИНН налогоплательщика", "НПЮЛ.ИННЮЛ", "ИНН"))
+    }
+    if (kppJulNpJul == null || kppJulNpJul.trim().isEmpty()) {
+        logger.log(logLevel, getMessage("Титульный лист", "КПП налогоплательщика", "НПЮЛ.КПП", "КПП"))
     }
     if (kodNO == null || kodNO.trim().isEmpty()) {
         logger.log(logLevel, getMessage("Наименование xml файла (кон. налоговый орган) и титульный лист", "Код налогового органа", "Документ.КодНО", "Код налогового органа (кон.)"))

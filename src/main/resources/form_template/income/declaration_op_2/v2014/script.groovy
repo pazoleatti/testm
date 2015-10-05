@@ -22,8 +22,12 @@ switch (formDataEvent) {
         checkDeclarationBank()
         break
     case FormDataEvent.CHECK : // проверить
+        def logLevel = declarationData.accepted ? LogLevel.WARNING : LogLevel.ERROR
+        checkDepartmentParams(logLevel)
+        logicCheck(logLevel)
+        break
     case FormDataEvent.MOVE_CREATED_TO_ACCEPTED : // принять из создана
-        checkDepartmentParams(LogLevel.WARNING)
+        checkDepartmentParams(declarationData.accepted ? LogLevel.WARNING : LogLevel.ERROR)
         logicCheck(LogLevel.ERROR)
         break
     case FormDataEvent.PRE_CALCULATION_CHECK:
@@ -142,7 +146,7 @@ void logicCheck(LogLevel logLevel) {
     def elements = [:]
 
     def kodNO, poMestu, documentFound = false
-    def naimOrg, innJulNpJul, npJulFound = false
+    def naimOrg, innJulNpJul, kppJulNpJul, npJulFound = false
     def prPodp, podpisantFound = false
     def signatorySurname, signatoryFirstName, fioFound = false
     def naimDok, svPredFound = false
@@ -212,6 +216,9 @@ void logicCheck(LogLevel logLevel) {
     }
     if (innJulNpJul == null || innJulNpJul.trim().isEmpty()) {
         logger.log(logLevel, getMessage("Титульный лист", "ИНН налогоплательщика", "НПЮЛ.ИННЮЛ", "ИНН"))
+    }
+    if (kppJulNpJul == null || kppJulNpJul.trim().isEmpty()) {
+        logger.log(logLevel, getMessage("Титульный лист", "КПП налогоплательщика", "НПЮЛ.КПП", "КПП"))
     }
     if (kodNO == null || kodNO.trim().isEmpty()) {
         logger.log(logLevel, getMessage("Наименование xml файла (кон. налоговый орган) и титульный лист", "Код налогового органа", "Документ.КодНО", "Код налогового органа (кон.)"))
