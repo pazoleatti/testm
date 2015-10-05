@@ -1,32 +1,34 @@
-<?xml version="1.0" encoding="utf-8"?><rows>
-  <row alias="R1">
-    <cell alias="rowNum" colSpan="1" rowSpan="1" numericValue="1"/>
-    <cell alias="taxName" colSpan="1" rowSpan="1" stringValue="Налоги, уплачиваемые из прибыли, всего"/>
-    <cell alias="filledBy" colSpan="1" rowSpan="1" stringValue="ТБ"/>
-    <cell alias="sum" colSpan="1" rowSpan="1" editable="true" styleAlias="Редактируемая"/>
-  </row>
-  <row alias="R2">
-      <cell alias="rowNum" colSpan="1" rowSpan="1" numericValue="2"/>
-      <cell alias="taxName" colSpan="1" rowSpan="1" stringValue="Чистая прибыль Банка"/>
-      <cell alias="filledBy" colSpan="1" rowSpan="1" stringValue="ТБ"/>
-      <cell alias="sum" colSpan="1" rowSpan="1" editable="true" styleAlias="Редактируемая"/>
-  </row>
-  <row alias="R3">
-      <cell alias="rowNum" colSpan="1" rowSpan="1" numericValue="3"/>
-      <cell alias="taxName" colSpan="1" rowSpan="1" stringValue="Операционные доходы"/>
-      <cell alias="filledBy" colSpan="1" rowSpan="1" stringValue="ТБ и Банком"/>
-      <cell alias="sum" colSpan="1" rowSpan="1" editable="true" styleAlias="Редактируемая"/>
-  </row>
-  <row alias="R4">
-      <cell alias="rowNum" colSpan="1" rowSpan="1" numericValue="4"/>
-      <cell alias="taxName" colSpan="1" rowSpan="1" stringValue="Предельная величина страховых взносов"/>
-      <cell alias="filledBy" colSpan="1" rowSpan="1" stringValue="ТБ и Банком"/>
-      <cell alias="sum" colSpan="1" rowSpan="1" editable="true" styleAlias="Редактируемая"/>
-  </row>
-  <row alias="R5">
-      <cell alias="rowNum" colSpan="1" rowSpan="1" numericValue="5"/>
-      <cell alias="taxName" colSpan="1" rowSpan="1" stringValue="Тариф отчисления страховых взносов"/>
-      <cell alias="filledBy" colSpan="1" rowSpan="1" stringValue="ТБ и Банком"/>
-      <cell alias="sum" colSpan="1" rowSpan="1" editable="true" styleAlias="Редактируемая"/>
-  </row>
+<?xml version="1.0" encoding="utf-8"?>
+<rows>
+    <row alias="R1">
+        <cell alias="rowNum" colSpan="1" numericValue="1" rowSpan="1"/>
+        <cell alias="taxName" colSpan="1" rowSpan="1" stringValue="Налоги, уплачиваемые из прибыли, всего"/>
+        <cell alias="filledBy" colSpan="1" rowSpan="1" stringValue="ТБ"/>
+        <cell alias="sum" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
+    </row>
+    <row alias="R2">
+        <cell alias="rowNum" colSpan="1" numericValue="2" rowSpan="1"/>
+        <cell alias="taxName" colSpan="1" rowSpan="1" stringValue="Чистая прибыль Банка"/>
+        <cell alias="filledBy" colSpan="1" rowSpan="1" stringValue="ТБ"/>
+        <cell alias="sum" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
+    </row>
+    <row alias="R3">
+        <cell alias="rowNum" colSpan="1" numericValue="3" rowSpan="1"/>
+        <cell alias="taxName" colSpan="1" rowSpan="1" stringValue="Операционные доходы"/>
+        <cell alias="filledBy" colSpan="1" rowSpan="1" stringValue="ТБ и Банком"/>
+        <cell alias="sum" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
+    </row>
+    <row alias="R4">
+        <cell alias="rowNum" colSpan="1" numericValue="4" rowSpan="1"/>
+        <cell alias="taxName" colSpan="1" rowSpan="1" stringValue="Операционные расходы"/>
+        <cell alias="filledBy" colSpan="1" rowSpan="1" stringValue="ТБ и Банком"/>
+        <cell alias="sum" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
+    </row>
+    <row alias="R5">
+        <cell alias="rowNum" colSpan="1" numericValue="5" rowSpan="1"/>
+        <cell alias="taxName" colSpan="1" rowSpan="1"
+              stringValue="Счет ф.101 (60348) в части выплат премий, вознаграждений сотрудникам Банка"/>
+        <cell alias="filledBy" colSpan="1" rowSpan="1" stringValue="ТБ и Банком"/>
+        <cell alias="sum" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
+    </row>
 </rows>

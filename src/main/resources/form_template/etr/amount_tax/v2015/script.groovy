@@ -14,7 +14,7 @@ import groovy.transform.Field
  * @author Stanislav Yasinskiy
  *
  * графа 1 - rowNum        - № п/п
- * графа 2 - taxName       - Наименование налога
+ * графа 2 - taxName       - Наименование показателя
  * графа 3 - filledBy      - Графа 4 заполняется
  * графа 4 - sum           - Сумма, тыс. руб.
  */
@@ -190,7 +190,7 @@ void checkHeaderXls(def headerRows) {
     checkHeaderSize(headerRows[1].size(), headerRows.size(), 4, 2)
     def headerMapping = [
             (headerRows[0][0]): '№ п/п',
-            (headerRows[0][1]): 'Наименование налога',
+            (headerRows[0][1]): 'Наименование показателя',
             (headerRows[0][2]): 'Графа 4 заполняется',
             (headerRows[0][3]): 'Сумма, тыс. руб.'
     ]
@@ -216,7 +216,7 @@ def fillRowFromXls(def dataRow, def values, int fileRowIndex, int rowIndex, int 
     def tmpValues = [:]
 
     def colIndex = 0
-    tmpValues.rowNum = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
+    tmpValues.rowNum = round(parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true), 0)
 
     colIndex++
     tmpValues.taxName = values[colIndex]
