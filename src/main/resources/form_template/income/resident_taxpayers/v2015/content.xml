@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<formTemplateContent>
+    <fixedRows>true</fixedRows>
+    <name>Расчет налога и облагаемой суммы дивидендов по акциям налогоплательщиков-резидентов</name>
+    <fullName>Расчет налога и облагаемой суммы дивидендов по акциям налогоплательщиков-резидентов</fullName>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
+        <alias>shareKind</alias>
+        <checking>false</checking>
+        <columnType>STRING</columnType>
+        <name>Вид акции</name>
+        <order>1</order>
+        <width>20</width>
+        <maxLength>255</maxLength>
+        <prevLength>0</prevLength>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
+        <alias>shareHolder</alias>
+        <checking>false</checking>
+        <columnType>STRING</columnType>
+        <name>Держатель акции</name>
+        <order>2</order>
+        <width>20</width>
+        <maxLength>255</maxLength>
+        <prevLength>0</prevLength>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>shareCount</alias>
+        <checking>false</checking>
+        <columnType>NUMBER</columnType>
+        <name>Количество акций, шт.</name>
+        <order>3</order>
+        <width>10</width>
+        <maxLength>15</maxLength>
+        <precision>0</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>shareProfit</alias>
+        <checking>false</checking>
+        <columnType>NUMBER</columnType>
+        <name>Доход на 1 акцию, руб.</name>
+        <order>4</order>
+        <width>10</width>
+        <maxLength>17</maxLength>
+        <precision>2</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>d1</alias>
+        <checking>false</checking>
+        <columnType>NUMBER</columnType>
+        <name>Общая сумма дивидендов, подлежащая распределению в пользу всех получателей (показатель Д1), руб.</name>
+        <order>5</order>
+        <width>10</width>
+        <maxLength>17</maxLength>
+        <precision>2</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>d2</alias>
+        <checking>false</checking>
+        <columnType>NUMBER</columnType>
+        <name>Общая сумма дивидендов, полученных в текущем отчетном (налоговом) периоде и предыдущих отчетных (налоговых) периодах без учета полученных дивидендов, налог с которых исчислен по ставке 0% согласно пп.1 п.3 ст. 284 НК РФ (показатель Д2), руб.</name>
+        <order>6</order>
+        <width>10</width>
+        <maxLength>17</maxLength>
+        <precision>2</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>taxRate</alias>
+        <checking>false</checking>
+        <columnType>NUMBER</columnType>
+        <name>Налоговая ставка (%)</name>
+        <order>7</order>
+        <width>10</width>
+        <maxLength>5</maxLength>
+        <precision>2</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
+        <alias>kIndex</alias>
+        <checking>false</checking>
+        <columnType>STRING</columnType>
+        <name>Показатель (К) в расчете на 1 акцию (гр.8 =гр.4/гр.5)</name>
+        <order>8</order>
+        <width>20</width>
+        <maxLength>29</maxLength>
+        <prevLength>0</prevLength>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
+        <alias>taxPerShare</alias>
+        <checking>false</checking>
+        <columnType>STRING</columnType>
+        <name>Сумма налога, подлежащая удержанию в расчете на 1 акцию (гр.9=гр.8*гр.7/100*(гр.5-гр.6), руб.</name>
+        <order>9</order>
+        <width>20</width>
+        <maxLength>29</maxLength>
+        <prevLength>0</prevLength>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
+        <alias>dividendPerShareIndividual</alias>
+        <checking>false</checking>
+        <columnType>STRING</columnType>
+        <name>Облагаемая сумма дивидендов, руб. на 1 акцию физических лиц (гр.10=гр.3*гр.9/(гр.7/100)</name>
+        <order>10</order>
+        <width>20</width>
+        <maxLength>29</maxLength>
+        <prevLength>0</prevLength>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
+        <alias>dividendPerShareLegal</alias>
+        <checking>false</checking>
+        <columnType>STRING</columnType>
+        <name>Облагаемая сумма дивидендов, руб. на 1 акцию юридических лиц (гр.11=гр.8*(гр.5-гр.6))</name>
+        <order>11</order>
+        <width>20</width>
+        <maxLength>29</maxLength>
+        <prevLength>0</prevLength>
+    </columns>
+    <styles>
+        <alias>Автозаполняемая</alias>
+        <backColor>WHITE</backColor>
+        <bold>true</bold>
+        <fontColor>DARK_GREEN</fontColor>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Редактируемая</alias>
+        <backColor>LIGHT_BLUE</backColor>
+        <bold>false</bold>
+        <fontColor>BLACK</fontColor>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Контрольные суммы</alias>
+        <backColor>LIGHT_BROWN</backColor>
+        <bold>true</bold>
+        <fontColor>BLACK</fontColor>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Корректировка-добавлено</alias>
+        <backColor>PALE_GREEN</backColor>
+        <bold>false</bold>
+        <fontColor>BLACK</fontColor>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Корректировка-удалено</alias>
+        <backColor>LIGHT_CORAL</backColor>
+        <bold>false</bold>
+        <fontColor>BLACK</fontColor>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Корректировка-без изменений</alias>
+        <backColor>GREY</backColor>
+        <bold>false</bold>
+        <fontColor>BLACK</fontColor>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Корректировка-изменено</alias>
+        <backColor>WHITE</backColor>
+        <bold>true</bold>
+        <fontColor>RED</fontColor>
+        <italic>false</italic>
+    </styles>
+</formTemplateContent>

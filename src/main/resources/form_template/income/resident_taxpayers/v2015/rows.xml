@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?><rows>
+  <row alias="R1">
+    <cell alias="shareKind" colSpan="1" rowSpan="1" stringValue="обыкновенная"/>
+    <cell alias="shareHolder" colSpan="1" rowSpan="1" stringValue="физическое лицо"/>
+    <cell alias="shareCount" colSpan="1" editable="true" numericValue="1" rowSpan="1" styleAlias="Редактируемая"/>
+    <cell alias="shareProfit" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
+    <cell alias="d1" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
+    <cell alias="d2" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
+    <cell alias="taxRate" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
+    <cell alias="kIndex" colSpan="1" rowSpan="1" styleAlias="Автозаполняемая"/>
+    <cell alias="taxPerShare" colSpan="1" rowSpan="1" styleAlias="Автозаполняемая"/>
+    <cell alias="dividendPerShareIndividual" colSpan="1" rowSpan="1" styleAlias="Автозаполняемая"/>
+    <cell alias="dividendPerShareLegal" colSpan="1" rowSpan="1"/>
+  </row>
+  <row alias="R2">
+    <cell alias="shareKind" colSpan="1" rowSpan="1" stringValue="привилегированная"/>
+    <cell alias="shareHolder" colSpan="1" rowSpan="1" stringValue="физическое лицо"/>
+    <cell alias="shareCount" colSpan="1" editable="true" numericValue="1" rowSpan="1" styleAlias="Редактируемая"/>
+    <cell alias="shareProfit" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
+    <cell alias="d1" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
+    <cell alias="d2" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
+    <cell alias="taxRate" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
+    <cell alias="kIndex" colSpan="1" rowSpan="1" styleAlias="Автозаполняемая"/>
+    <cell alias="taxPerShare" colSpan="1" rowSpan="1" styleAlias="Автозаполняемая"/>
+    <cell alias="dividendPerShareIndividual" colSpan="1" rowSpan="1" styleAlias="Автозаполняемая"/>
+    <cell alias="dividendPerShareLegal" colSpan="1" rowSpan="1"/>
+  </row>
+  <row alias="R3">
+    <cell alias="shareKind" colSpan="1" rowSpan="1" stringValue="обыкновенная"/>
+    <cell alias="shareHolder" colSpan="1" rowSpan="1" stringValue="юридическое лицо"/>
+    <cell alias="shareCount" colSpan="1" editable="true" numericValue="1" rowSpan="1" styleAlias="Редактируемая"/>
+    <cell alias="shareProfit" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
+    <cell alias="d1" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
+    <cell alias="d2" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
+    <cell alias="taxRate" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
+    <cell alias="kIndex" colSpan="1" rowSpan="1" styleAlias="Автозаполняемая"/>
+    <cell alias="taxPerShare" colSpan="1" rowSpan="1" styleAlias="Автозаполняемая"/>
+    <cell alias="dividendPerShareIndividual" colSpan="1" rowSpan="1"/>
+    <cell alias="dividendPerShareLegal" colSpan="1" rowSpan="1" styleAlias="Автозаполняемая"/>
+  </row>
+  <row alias="R4">
+    <cell alias="shareKind" colSpan="1" rowSpan="1" stringValue="привилегированная"/>
+    <cell alias="shareHolder" colSpan="1" rowSpan="1" stringValue="юридическое лицо"/>
+    <cell alias="shareCount" colSpan="1" editable="true" numericValue="1" rowSpan="1" styleAlias="Редактируемая"/>
+    <cell alias="shareProfit" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
+    <cell alias="d1" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
+    <cell alias="d2" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
+    <cell alias="taxRate" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
+    <cell alias="kIndex" colSpan="1" rowSpan="1" styleAlias="Автозаполняемая"/>
+    <cell alias="taxPerShare" colSpan="1" rowSpan="1" styleAlias="Автозаполняемая"/>
+    <cell alias="dividendPerShareIndividual" colSpan="1" rowSpan="1"/>
+    <cell alias="dividendPerShareLegal" colSpan="1" rowSpan="1" styleAlias="Автозаполняемая"/>
+  </row>
+</rows>
