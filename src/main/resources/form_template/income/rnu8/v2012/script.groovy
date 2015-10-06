@@ -342,7 +342,7 @@ void addTransportData(def xml) {
         }
 
         // графа 3 - поиск записи идет по графе 2
-        String filter = "LOWER(CODE) = LOWER('" + row.cell[2].text() + "') and LOWER(NUMBER) = LOWER('" + row.cell[3].text().replaceAll(/\./, "") + "')"
+        String filter =  getFilter(row.cell[2].text(), row.cell[3].text().replaceAll(/\./, ""))
         def records = refBookFactory.getDataProvider(28).getRecords(getReportPeriodEndDate(), null, filter, null)
         if (checkImportRecordsCount(records, refBookFactory.get(28), 'CODE', row.cell[2].text(), getReportPeriodEndDate(), rnuIndexRow, 2 + colOffset, logger, false)) {
             // графа 3
@@ -583,7 +583,7 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex, 
 
     // графа 3 - поиск записи идет по графе 2
     if (!isTotal) {
-        String filter = "LOWER(CODE) = LOWER('" + values[2] + "') and LOWER(NUMBER) = LOWER('" + values[3].replaceAll(/\./, "") + "')"
+        String filter =  getFilter(values[2], values[3].replaceAll(/\./, ""))
         def records = refBookFactory.getDataProvider(28).getRecords(getReportPeriodEndDate(), null, filter, null)
         colIndex = 2
         if (checkImportRecordsCount(records, refBookFactory.get(28), 'CODE', values[colIndex], getReportPeriodEndDate(), fileRowIndex, colIndex + colOffset, logger, false)) {
@@ -633,4 +633,12 @@ def getNewSubTotalRowFromXls(def values, def colOffset, def fileRowIndex, def ro
     newRow.outcome = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
 
     return newRow
+}
+
+def String getFilter(def String code, def String number){
+    String filter = "LOWER(CODE) = LOWER('" + code + "')"
+    if (number != '') {
+        filter += " and LOWER(NUMBER) = LOWER('" + number + "')"
+    }
+    return filter
 }

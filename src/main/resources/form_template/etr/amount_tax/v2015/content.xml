@@ -17,7 +17,7 @@
         <alias>taxName</alias>
         <checking>false</checking>
         <columnType>STRING</columnType>
-        <name>Наименование налога</name>
+        <name>Наименование показателя</name>
         <order>2</order>
         <width>20</width>
         <maxLength>256</maxLength>

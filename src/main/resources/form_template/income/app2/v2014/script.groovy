@@ -243,7 +243,8 @@ void logicCheck() {
         }
 
         // 3. Проверка вводимых символов в поле «Серия и номер документа»
-        if (row.series != null && !row.series?.matches("^[а-яА-ЯёЁa-zA-Z0-9]+\$")) {
+        def code = (row.code != null ? getRefBookValue(360, row.code)?.CODE?.value : null)
+        if (code == '21' && row.series != null && !row.series?.matches("^[а-яА-ЯёЁa-zA-Z0-9]+\$")) {
             def name = getColumnName(row, 'series')
             rowError(logger, row, errorMsg + "Графа «$name» содержит недопустимые символы!")
         }
@@ -251,12 +252,12 @@ void logicCheck() {
         // 4. Проверка заполнения поля «Номер дома (владения)»
         if (row.house && !row.house?.matches("^[а-яА-ЯёЁa-zA-Z0-9/-]+\$")) {
             def name = getColumnName(row, 'house')
-            rowError(logger, row, errorMsg + "Графа «$name» содержит недопустимые символы!")
+            rowWarning(logger, row, errorMsg + "Графа «$name» содержит недопустимые символы!")
         }
 
         // 5. Проверка заполнения полей 12, 14..20
         if (row.region != null) {
-            checkNonEmptyColumns(row, row.getIndex(), address, logger, true)
+            checkNonEmptyColumns(row, row.getIndex(), address, logger, false)
         }
 
         // 7. Проверка правильности заполнения графы «ИНН в стране гражданства»
@@ -276,15 +277,15 @@ void logicCheck() {
         def String errorMsg1 = errorMsg + "Сумма граф «Сумма вычета» для кода дохода = «%s» превышает значение поля «Сумма дохода» для данного кода."
         if (getSum1(row) > roundValue(row.col_041_1 ?: 0)) {
             def value = getRefBookValue(370L, row.col_040_1)?.CODE?.value
-            rowError(logger, row, String.format(errorMsg1, value))
+            rowWarning(logger, row, String.format(errorMsg1, value))
         }
         if (getSum2(row) > roundValue(row.col_041_2 ?: 0)) {
             def value = getRefBookValue(370L, row.col_040_2)?.CODE?.value
-            rowError(logger, row, String.format(errorMsg1, value))
+            rowWarning(logger, row, String.format(errorMsg1, value))
         }
         if (getSum3(row) > roundValue(row.col_041_3 ?: 0)) {
             def value = getRefBookValue(370L, row.col_040_3)?.CODE?.value
-            rowError(logger, row, String.format(errorMsg1, value))
+            rowWarning(logger, row, String.format(errorMsg1, value))
         }
 
         // 10. Арифметические проверки расчета граф 24, 25, 26

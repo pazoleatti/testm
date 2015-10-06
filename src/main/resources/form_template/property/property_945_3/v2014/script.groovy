@@ -345,7 +345,8 @@ void logicCheck() {
 }
 
 void consolidation() {
-    def dataRows = formDataService.getDataRowHelper(formData).allCached
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper.allCached
 
     def totalRow = getDataRow(dataRows, 'total')
     dataRows = []
@@ -361,6 +362,7 @@ void consolidation() {
     dataRows.add(totalRow)
 
     updateIndexes(dataRows)
+    dataRowHelper.allCached = dataRows
 }
 
 def getSourceRowsGroups() {

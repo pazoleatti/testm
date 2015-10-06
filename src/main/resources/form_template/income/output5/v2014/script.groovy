@@ -1,5 +1,6 @@
 package form_template.income.output5.v2014
 
+import au.com.bytecode.opencsv.CSVReader
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
@@ -26,7 +27,6 @@ switch (formDataEvent) {
     case FormDataEvent.CREATE:
         formDataService.checkUnique(formData, logger)
         break
-        break
     case FormDataEvent.CHECK:
         logicCheck()
         break
@@ -40,6 +40,10 @@ switch (formDataEvent) {
         break
     case FormDataEvent.IMPORT:
         importData()
+        formDataService.saveCachedDataRows(formData, logger)
+        break
+    case FormDataEvent.IMPORT_TRANSPORT_FILE:
+        importTransportData()
         formDataService.saveCachedDataRows(formData, logger)
         break
 }
@@ -172,18 +176,18 @@ def fillRowFromXls(def dataRow, def values, int fileRowIndex, int rowIndex, int 
     dataRow.setImportIndex(fileRowIndex)
     dataRow.setIndex(rowIndex)
     def colIndex = -1
-    def tmpValues = [:]
+    def tmpRow = formData.createStoreMessagingDataRow()
 
     // графа 1
     colIndex++
-    tmpValues.rowNum = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
+    tmpRow.rowNum = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
     // графа 2
     colIndex++
-    tmpValues.name = values[colIndex]
+    tmpRow.name = values[colIndex]
 
     // Проверить фиксированные значения (графа 1, 2)
     ['rowNum', 'name'].each { alias ->
-        def value = StringUtils.cleanString(tmpValues[alias]?.toString())
+        def value = StringUtils.cleanString(tmpRow[alias]?.toString())
         def valueExpected = StringUtils.cleanString(dataRow.getCell(alias).value?.toString())
         checkFixedValue(dataRow, value, valueExpected, rowIndex, alias, logger, true)
     }
@@ -206,3 +210,186 @@ def fillRowFromXls(def dataRow, def values, int fileRowIndex, int rowIndex, int 
         dataRow.sum = null
     }
 }
+
+void importTransportData() {
+    checkBeforeGetXml(ImportInputStream, UploadFileName)
+    if (!UploadFileName.endsWith(".rnu")) {
+        logger.error(WRONG_RNU_FORMAT)
+    }
+    int COLUMN_COUNT = 4
+    def DEFAULT_CHARSET = "cp866"
+    char SEPARATOR = '|'
+    char QUOTE = '\0'
+
+    String[] rowCells
+    int fileRowIndex = 2    // номер строки в файле (1, 2..). Начинается с 2, потому что первые две строки - заголовок и пустая строка
+    int rowIndex = 0        // номер строки в НФ
+    def totalTF = null		// итоговая строка со значениями из тф для добавления
+
+    InputStreamReader isr = new InputStreamReader(ImportInputStream, DEFAULT_CHARSET)
+    CSVReader reader = new CSVReader(isr, SEPARATOR, QUOTE)
+
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
+
+    try {
+        // пропускаем заголовок
+        rowCells = reader.readNext()
+        if (isEmptyCells(rowCells)) {
+            logger.error('Первой строкой должен идти заголовок, а не пустая строка')
+        }
+        // пропускаем пустую строку
+        rowCells = reader.readNext()
+        if (!isEmptyCells(rowCells)) {
+            logger.error('Вторая строка должна быть пустой')
+        }
+        // грузим основные данные
+        while ((rowCells = reader.readNext()) != null) {
+            fileRowIndex++
+            rowIndex++
+            if (isEmptyCells(rowCells)) { // проверка окончания блока данных, пустая строка
+                // итоговая строка тф
+                rowCells = reader.readNext()
+                if (rowCells != null) {
+                    totalTF = formData.createStoreMessagingDataRow()
+                    fillRow(totalTF, rowCells, COLUMN_COUNT, fileRowIndex, false)
+                }
+                break
+            }
+            setValues(dataRows, rowCells, COLUMN_COUNT, fileRowIndex, rowIndex)
+        }
+    } finally {
+        reader.close()
+    }
+
+    // сравнение итогов
+    if (!logger.containsLevel(LogLevel.ERROR) && totalTF) {
+        // мапа с алиасами граф и номерами колонокв в xml (алиас -> номер колонки)
+        def totalColumnsIndexMap = ['sum' : 4]
+
+        // подсчет итогов
+        def itogValues = calcItog(dataRows)
+
+        // сравнение контрольных сумм
+        def colOffset = 1
+        for (def alias : totalColumnsIndexMap.keySet().asList()) {
+            def v1 = totalTF.getCell(alias).value
+            def v2 = itogValues[alias]
+            if (v1 == null && v2 == null) {
+                continue
+            }
+            if (v1 == null || v1 != null && v1 != v2) {
+                logger.warn(TRANSPORT_FILE_SUM_ERROR + " Из файла: $v1, рассчитано: $v2", totalColumnsIndexMap[alias] + colOffset, fileRowIndex)
+            }
+        }
+    }
+    showMessages(dataRows, logger)
+}
+
+def calcItog(def dataRows) {
+    def totalColumns = ['sum']
+    def itogValues = [:]
+    totalColumns.each {alias ->
+        itogValues[alias] = BigDecimal.ZERO
+    }
+    for (def row in dataRows) {
+        if (row.getAlias() == 'R2') {
+            continue
+        }
+        totalColumns.each { alias ->
+            itogValues[alias] += (row.getCell(alias).value ?: 0)
+        }
+    }
+    return itogValues
+}
+
+boolean isEmptyCells(def rowCells) {
+    return rowCells.length == 1 && rowCells[0] == ''
+}
+
+/** Устанавливает значения из тф в строку нф. */
+def setValues(def dataRows, String[] rowCells, def columnCount, def fileRowIndex, def rowIndex) {
+    if (rowCells == null) {
+        return true
+    }
+    if (rowIndex - 1 >= dataRows.size()) {
+        return false
+    }
+    // найти нужную строку нф
+    def dataRow = dataRows.get(rowIndex - 1)
+    // заполнить строку нф значениями из тф
+    return fillRow(dataRow, rowCells, columnCount, fileRowIndex, true)
+}
+
+/**
+ * Заполняет заданную строку нф (любую) значениями из тф.
+ *
+ * @param dataRow строка нф
+ * @param rowCells список строк со значениями
+ * @param columnCount количество колонок
+ * @param fileRowIndex номер строки в тф
+ * @param checkFixedValues проверить ли фиксированные значения (при заполнении итоговой строки это не нужно делать)
+ *
+ * @return вернет true или false, если количество значений в строке тф меньше
+ */
+def fillRow(def dataRow, String[] rowCells, def columnCount, def fileRowIndex, def checkFixedValues) {
+    dataRow.setImportIndex(fileRowIndex)
+    if (rowCells.length != columnCount + 2) {
+        rowError(logger, dataRow, String.format(ROW_FILE_WRONG, fileRowIndex))
+        return false
+    }
+    def colOffset = 1
+    def colIndex
+
+    if (checkFixedValues) {
+        def values = [:]
+
+        // графа 1
+        colIndex = 1
+        values.rowNum = parseNumber(pure(rowCells[colIndex]), fileRowIndex, colIndex + colOffset, logger, true)
+
+        // графа 2
+        colIndex = 2
+        values.name = pure(rowCells[colIndex])
+
+        // графа 3
+        colIndex = 3
+        fillTempOrRow(values, dataRow, 'date', parseDate(pure(rowCells[colIndex]), 'dd.MM.yyyy', fileRowIndex, colIndex + colOffset, logger, true))
+
+        // графа 4
+        colIndex = 4
+        fillTempOrRow(values, dataRow, 'sum', parseNumber(pure(rowCells[colIndex]), fileRowIndex, colIndex + colOffset, logger, true))
+
+        // Проверить фиксированные значения
+        values.keySet().each { alias ->
+            def value = values[alias]?.toString()
+            def valueExpected = pure(dataRow.getCell(alias).value?.toString())
+            checkFixedValue(dataRow, value, valueExpected, fileRowIndex, alias, logger, true)
+        }
+
+        return true
+    }
+
+    // графа 3
+    colIndex = 3
+    dataRow.date = parseDate(pure(rowCells[colIndex]), 'dd.MM.yyyy', fileRowIndex, colIndex + colOffset, logger, true)
+
+    // графа 4
+    colIndex = 4
+    dataRow.sum = parseNumber(pure(rowCells[colIndex]), fileRowIndex, colIndex + colOffset, logger, true)
+
+    return true
+}
+
+String pure(String cell) {
+    return StringUtils.cleanString(cell)?.intern()
+}
+
+// заполняем временную карту или строку
+void fillTempOrRow(def tmpValues, def dataRow, String alias, def value) {
+    if (dataRow.getCell(alias)?.editable) {
+        dataRow[alias] = value
+    } else {
+        tmpValues[alias] = value
+    }
+}
+
