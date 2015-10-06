@@ -13,6 +13,7 @@ public class GetAdditionalData extends UnsecuredActionImpl<GetAdditionalDataResu
     private Integer reportPeriodId;
     private int departmentId;
     private TaxType taxType;
+    private Integer comparativeReportPeriodId;
 
     public Integer getTypeId() {
         return typeId;
@@ -44,5 +45,13 @@ public class GetAdditionalData extends UnsecuredActionImpl<GetAdditionalDataResu
 
     public TaxType getTaxType() {
         return taxType;
+    }
+
+    public Integer getComparativeReportPeriodId() {
+        return comparativeReportPeriodId;
+    }
+
+    public void setComparativeReportPeriodId(Integer comparativeReportPeriodId) {
+        this.comparativeReportPeriodId = comparativeReportPeriodId;
     }
 }

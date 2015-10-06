@@ -25,6 +25,7 @@ alter table form_template add constraint form_template_chk_fixed_rows check(fixe
 alter table form_template add constraint form_template_check_status check (status in (-1, 0, 1, 2));
 alter table form_template add constraint form_template_chk_monthly check (monthly in (0, 1));
 alter table form_template add constraint form_template_chk_comparative check (comparative in (0, 1));
+alter table form_template add constraint form_template_chk_accruing check (accruing in (0, 1));
 
 alter table form_style add constraint form_style_pk primary key (id);
 alter table form_style add constraint form_style_fk_form_template_id foreign key (form_template_id) references form_template(id) on delete cascade;

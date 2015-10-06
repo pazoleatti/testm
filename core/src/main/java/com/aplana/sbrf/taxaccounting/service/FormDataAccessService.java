@@ -33,7 +33,7 @@ public interface FormDataAccessService {
      * @param kind Тип НЫ
      * @param departmentReportPeriodId Отчетный период подразделения
      */
-    void canCreate(TAUserInfo userInfo, int formTemplateId, FormDataKind kind, int departmentReportPeriodId);
+    void canCreate(TAUserInfo userInfo, int formTemplateId, FormDataKind kind, int departmentReportPeriodId, Integer comparativePeriodId, boolean accruing);
 
     /**
      * Проверка того, что у пользователя есть права на создание версии ручного ввода

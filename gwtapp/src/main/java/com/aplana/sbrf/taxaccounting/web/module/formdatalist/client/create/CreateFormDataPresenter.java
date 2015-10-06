@@ -49,6 +49,8 @@ public class CreateFormDataPresenter extends PresenterWidget<CreateFormDataPrese
 
         void setComparative(boolean comparative);
 
+        void setAccruing(boolean accruing, boolean enabled);
+
         void setElementNames(Map<FormDataElementName, String> fieldNames);
 
         void updateEnabled();
@@ -208,12 +210,13 @@ public class CreateFormDataPresenter extends PresenterWidget<CreateFormDataPrese
     }
 
     @Override
-    public void checkFormType(Integer formId, Integer reportPeriodId) {
+    public void checkFormType(Integer formId, Integer reportPeriodId, final Integer comparativePeriodId) {
         GetAdditionalData action = new GetAdditionalData();
         action.setTypeId(formId);
         action.setReportPeriodId(reportPeriodId);
         action.setDepartmentId(getView().getFilterData().getDepartmentIds().get(0));
         action.setTaxType(taxType);
+        action.setComparativeReportPeriodId(comparativePeriodId);
 
         dispatchAsync.execute(action, CallbackUtils
                 .defaultCallback(new AbstractCallback<GetAdditionalDataResult>() {
@@ -224,8 +227,11 @@ public class CreateFormDataPresenter extends PresenterWidget<CreateFormDataPrese
                         if (result.isMonthly()) {
                             getView().setAcceptableMonthList(result.getMonthsList());
                         }
-                        if (result.isComparative()) {
-                            getView().setAcceptableComparativPeriods(result.getComparativPeriods());
+                        if (result.isComparative() && comparativePeriodId == null) {
+                            getView().setAcceptableComparativPeriods(result.getComparativePeriods());
+                            getView().setAccruing(result.isAccruing(), false);
+                        } else {
+                            getView().setAccruing(result.isAccruing(), !result.isFirstPeriod());
                         }
                         getView().updateEnabled();
                     }

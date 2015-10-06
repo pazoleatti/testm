@@ -71,12 +71,12 @@ public class CreateFormDataHandler extends AbstractActionHandler<CreateFormData,
         DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.getLast(action.getDepartmentId(),
                 action.getReportPeriodId());
         // Получаем DepartmentReportPeriod для периода сравнения (может быть null)
-        Integer comparativDrpId = null;
-        DepartmentReportPeriod comparativDrp = null;
+        Integer comparativeDrpId = null;
+        DepartmentReportPeriod comparativeDrp = null;
         if (action.getComparativePeriodId() != null) {
-            comparativDrp = departmentReportPeriodService.getLast(action.getDepartmentId(),
+            comparativeDrp = departmentReportPeriodService.getLast(action.getDepartmentId(),
                     action.getComparativePeriodId());
-            comparativDrpId = comparativDrp.getId();
+            comparativeDrpId = comparativeDrp.getId();
         }
         if (departmentReportPeriod == null) {
             throw new ServiceException(ERROR_DEPARTMENT_REPORT_PERIOD_NOT_FOUND);
@@ -92,7 +92,7 @@ public class CreateFormDataHandler extends AbstractActionHandler<CreateFormData,
                         formType.getName(),
                         kind.getTitle(),
                         action.isAccruing(),
-                        department.getName(), action.getMonthId(), true, departmentReportPeriod, comparativDrp)) == null) {
+                        department.getName(), action.getMonthId(), true, departmentReportPeriod, comparativeDrp)) == null) {
             //Если блокировка успешно установлена
             try {
 
@@ -126,7 +126,7 @@ public class CreateFormDataHandler extends AbstractActionHandler<CreateFormData,
 
                 int templateId = formTemplateService.getActiveFormTemplateId(formDataTypeId, departmentReportPeriod.getReportPeriod().getId());
                 long formDataId = formDataService.createFormData(logger, userInfo, templateId, departmentReportPeriod.getId(),
-                        comparativDrpId, action.isAccruing(),
+                        comparativeDrpId, action.isAccruing(),
                         kind, action.getMonthId(), false);
 
                 // Если декларация является приемником и есть форма ручного ввода в корректируемом периоде
