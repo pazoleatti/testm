@@ -10,6 +10,7 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.PeriodService;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -177,6 +178,7 @@ public class PeriodServiceImplTest {
         when(reportPeriodDao.get(2)).thenReturn(reportPeriod12);
 		when(reportPeriodDao.get(4)).thenReturn(reportPeriod14);
 		when(reportPeriodDao.get(5)).thenReturn(reportPeriod21);
+        when(reportPeriodDao.get(7)).thenReturn(reportPeriod31);
         when(reportPeriodDao.get(8)).thenReturn(reportPeriod32);
 
         // переотпределение вызовов метода listByTaxPeriod
@@ -294,5 +296,11 @@ public class PeriodServiceImplTest {
         checkDates(2012, Calendar.FEBRUARY, 1, argument.getAllValues().get(0).getStartDate());
         checkDates(2012, Calendar.FEBRUARY, 29, argument.getAllValues().get(0).getEndDate());
         checkDates(2012, Calendar.FEBRUARY, 1, argument.getAllValues().get(0).getCalendarStartDate());
+    }
+
+    @Test
+    public void isFirstPeriod() {
+        Assert.assertTrue(periodService.isFirstPeriod(7));
+        Assert.assertFalse(periodService.isFirstPeriod(8));
     }
 }

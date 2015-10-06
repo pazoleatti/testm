@@ -45,6 +45,14 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
     private static final String REPORT_PERIOD_IS_CLOSED = "Выбранный период закрыт";
     private static final String FORM_TEMPLATE_WRONG_STATUS_LOG = "Form template (%d) does not exist in report period (%d)!";
     private static final String FORM_TEMPLATE_WRONG_STATUS = "Выбранный тип %s не существует в выбранном периоде!";
+    private static final String FORM_TEMPLATE_COMPARATIVE_LOG = "Form template (%d) is comparative!";
+    private static final String FORM_TEMPLATE_COMPARATIVE = "Не указан параметр \"Период сравнения\"!";
+    private static final String FORM_TEMPLATE_NOT_COMPARATIVE_LOG = "Form template (%d) is not comparative!";
+    private static final String FORM_TEMPLATE_NOT_COMPARATIVE = "Указан недопустимый параметр \"Период сравнения\"!";
+    private static final String FORM_TEMPLATE_PERIOD_NOT_ACCRUING_LOG = "Form template (%d) is not accruing in period (%d)!";
+    private static final String FORM_TEMPLATE_PERIOD_NOT_ACCRUING = "Нельзя создать форму с признаком \"Расчет нарастающим итогом\" для данного периода!";
+    private static final String FORM_TEMPLATE_NOT_ACCRUING_LOG = "Form template (%d) is not accruing!";
+    private static final String FORM_TEMPLATE_NOT_ACCRUING = "Нельзя создать форму с признаком \"Расчет нарастающим итогом\"!";
     private static final String INCORRECT_DEPARTMENT_FORM_TYPE_LOG = "Form type (%d) and form kind (%d) is not applicated for department (%d)";
     private static final String INCORRECT_DEPARTMENT_FORM_TYPE1 = "Выбранный тип %s не назначен подразделению!";
     private static final String INCORRECT_DEPARTMENT_FORM_TYPE2 = "Нет прав доступа к созданию формы с заданными параметрами!";
@@ -128,7 +136,7 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
     }
 
     @Override
-    public void canCreate(TAUserInfo userInfo, int formTemplateId, FormDataKind kind, int departmentReportPeriodId) {
+    public void canCreate(TAUserInfo userInfo, int formTemplateId, FormDataKind kind, int departmentReportPeriodId, Integer comparativeDepPeriodId, boolean accruing) {
         // http://conf.aplana.com/pages/viewpage.action?pageId=11383566
         // Макет формы
         FormTemplate formTemplate = formTemplateDao.get(formTemplateId);
@@ -141,6 +149,31 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
             throw new ServiceException(REPORT_PERIOD_IS_CLOSED);
         }
 
+        if (formTemplate.isComparative() && comparativeDepPeriodId == null) {
+            logger.warn(String.format(FORM_TEMPLATE_COMPARATIVE_LOG, formTemplateId));
+            throw new ServiceException(FORM_TEMPLATE_COMPARATIVE);
+        } else if (!formTemplate.isComparative() && comparativeDepPeriodId != null) {
+            logger.warn(String.format(FORM_TEMPLATE_NOT_COMPARATIVE_LOG, formTemplateId));
+            throw new ServiceException(FORM_TEMPLATE_NOT_COMPARATIVE);
+        }
+
+        if (formTemplate.isAccruing()) {
+            int reportPeriodId;
+            if (formTemplate.isComparative()) {
+                reportPeriodId = departmentReportPeriodDao.get(comparativeDepPeriodId).getReportPeriod().getId();
+            } else {
+                reportPeriodId = departmentReportPeriod.getReportPeriod().getId();
+            }
+            if (reportPeriodService.isFirstPeriod(reportPeriodId) && accruing) {
+                logger.warn(String.format(FORM_TEMPLATE_PERIOD_NOT_ACCRUING_LOG, formTemplateId, reportPeriodId ));
+                throw new ServiceException(FORM_TEMPLATE_PERIOD_NOT_ACCRUING);
+            }
+        } else {
+            if (accruing) {
+                logger.warn(String.format(FORM_TEMPLATE_NOT_ACCRUING_LOG, formTemplateId));
+                throw new ServiceException(FORM_TEMPLATE_NOT_ACCRUING);
+            }
+        }
         // Проверка периода ввода остатков
         if (!userInfo.getUser().hasRole(TARole.ROLE_CONTROL)
                 && !userInfo.getUser().hasRole(TARole.ROLE_CONTROL_NS)

@@ -16,6 +16,9 @@ public class GetAdditionalDataResult implements Result {
     private boolean isMonthly;
     /** Признак использования периода сравнения (false - не используется, true - используется) */
     private boolean comparative;
+    /** Признак расчета нарастающим итогом (false - не используется, true - используется)*/
+    private boolean accruing;
+    private boolean isFirstPeriod;
 
     private List<Months> monthsList;
     private List<ReportPeriod> comparativPeriods;
@@ -44,11 +47,27 @@ public class GetAdditionalDataResult implements Result {
         this.comparative = comparative;
     }
 
-    public List<ReportPeriod> getComparativPeriods() {
+    public boolean isAccruing() {
+        return accruing;
+    }
+
+    public void setAccruing(boolean accruing) {
+        this.accruing = accruing;
+    }
+
+    public List<ReportPeriod> getComparativePeriods() {
         return comparativPeriods;
     }
 
-    public void setComparativPeriods(List<ReportPeriod> comparativPeriods) {
+    public void setComparativePeriods(List<ReportPeriod> comparativPeriods) {
         this.comparativPeriods = comparativPeriods;
+    }
+
+    public boolean isFirstPeriod() {
+        return isFirstPeriod;
+    }
+
+    public void setFirstPeriod(boolean isFirstPeriod) {
+        this.isFirstPeriod = isFirstPeriod;
     }
 }

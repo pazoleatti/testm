@@ -157,7 +157,7 @@ public class FormDataServiceImpl implements FormDataService {
 
     @Override
     public long createFormData(Logger logger, TAUserInfo userInfo, int formTemplateId, int departmentReportPeriodId, Integer comparativePeriodId, boolean accruing, FormDataKind kind, Integer periodOrder, boolean importFormData) {
-        formDataAccessService.canCreate(userInfo, formTemplateId, kind, departmentReportPeriodId);
+        formDataAccessService.canCreate(userInfo, formTemplateId, kind, departmentReportPeriodId, comparativePeriodId, accruing);
         return createFormDataWithoutCheck(logger, userInfo, formTemplateId, departmentReportPeriodId, comparativePeriodId, accruing, kind, periodOrder, importFormData);
     }
 

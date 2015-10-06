@@ -882,4 +882,13 @@ public class PeriodServiceImpl implements PeriodService {
     public List<ReportPeriod> getReportPeriodsByDateAndDepartment(TaxType taxType, int depId, Date startDate, Date endDate) {
         return reportPeriodDao.getReportPeriodsByDateAndDepartment(taxType, depId, startDate, endDate);
     }
+
+    @Override
+    public boolean isFirstPeriod(int reportPeriodId) {
+        ReportPeriod rp = getReportPeriod(reportPeriodId);
+        Calendar sDate = Calendar.getInstance();
+        sDate.setTime(rp.getCalendarStartDate());
+        int month = sDate.get(Calendar.MONTH) + 1;
+        return month == 1;
+    }
 }
