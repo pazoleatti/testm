@@ -258,7 +258,7 @@ String getMessage(String place, String printName, String xmlName, String departm
 }
 
 String getVersionMessage(String value, String xmlName, String departmentName) {
-    return String.format("Обязательный для заполнения атрибут «%s» (%s) )>) заполнен неверно (%s)! Ожидаемое значение «$version». На момент расчёта экземпляра декларации (формирование XML) на форме настроек подразделения было указано неверное значение атрибута «%s».",
+    return String.format("Обязательный для заполнения атрибут «%s» (%s) заполнен неверно (%s)! Ожидаемое значение «$version». На момент расчёта экземпляра декларации (формирование XML) на форме настроек подразделения было указано неверное значение атрибута «%s».",
             departmentName, xmlName, value?:'пустое значение', departmentName)
 }
 

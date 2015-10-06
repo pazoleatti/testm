@@ -370,7 +370,7 @@ String getTaxRateMessage(String place, String printName, String xmlName, String 
 }
 
 String getVersionMessage(String value, String xmlName, String departmentName) {
-    return String.format("Обязательный для заполнения атрибут «%s» (%s) )>) заполнен неверно (%s)! Ожидаемое значение «$version». На момент расчёта экземпляра декларации (формирование XML) на форме настроек подразделения было указано неверное значение атрибута «%s».",
+    return String.format("Обязательный для заполнения атрибут «%s» (%s) заполнен неверно (%s)! Ожидаемое значение «$version». На момент расчёта экземпляра декларации (формирование XML) на форме настроек подразделения было указано неверное значение атрибута «%s».",
             departmentName, xmlName, value?:'пустое значение', departmentName)
 }
 
@@ -892,7 +892,8 @@ void generateXML() {
 
     // Формирование XML'ки.
 
-    def builder = new MarkupBuilder(xml)
+    MarkupBuilder builder = new MarkupBuilder(xml)
+
     builder.Файл(
             ИдФайл : declarationService.generateXmlFileId(11, declarationData.departmentReportPeriodId, taxOrganCodeProm, taxOrganCode, declarationData.kpp),
             ВерсПрог : applicationVersion,
