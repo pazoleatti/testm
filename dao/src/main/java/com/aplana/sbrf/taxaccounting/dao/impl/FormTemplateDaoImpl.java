@@ -20,19 +20,9 @@ import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.jdbc.core.*;
 import org.springframework.stereotype.Repository;
 
-import java.io.InputStream;
-import java.sql.CallableStatement;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Types;
-import java.util.ArrayList;
-import java.util.Collection;
+import java.sql.*;
+import java.util.*;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 @Repository
 public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao {
@@ -140,7 +130,7 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
 
             getJdbcTemplate().update(
                     "update form_template set data_rows = ?, data_headers = ?, version = ?, fixed_rows = ?, name = ?, " +
-                            " monthly = ?, fullname = ?, header = ?, script=?, status=? where id = ?",
+                            " monthly = ?, fullname = ?, header = ?, script=?, status=?, comparative = ?, accruing = ? where id = ?",
                     dataRowsXml,
                     dataHeadersXml,
                     formTemplate.getVersion(),
@@ -151,6 +141,8 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
                     formTemplate.getHeader(),
                     formTemplate.getScript() != null ? formTemplate.getScript() : " ",
                     formTemplate.getStatus().getId(),
+                    formTemplate.isComparative(),
+                    formTemplate.isAccruing(),
                     formTemplateId
             );
 
@@ -460,8 +452,8 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
         try {
             formTemplate.setId(formTemplateId);
             getJdbcTemplate().
-                    update("insert into form_template (id, data_rows, data_headers, version, fixed_rows, name, fullname, header, script, status, type_id) " +
-                    "values (?,?,?,?,?,?,?,?,?,?,?)",
+                    update("insert into form_template (id, data_rows, data_headers, version, fixed_rows, name, fullname, header, script, status, type_id, comparative, accruing) " +
+                    "values (?,?,?,?,?,?,?,?,?,?,?,?,?)",
                             formTemplateId,
                             dataRowsXml,
                             dataHeadersXml,
@@ -472,7 +464,9 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
                             formTemplate.getHeader() != null?formTemplate.getHeader() : "",
                             formTemplate.getScript() != null ? formTemplate.getScript() : " ",
                             formTemplate.getStatus().getId(),
-                            formTemplate.getType().getId()
+                            formTemplate.getType().getId(),
+                            formTemplate.isComparative(),
+                            formTemplate.isAccruing()
                             );
 
             formStyleDao.saveFormStyles(formTemplate);
