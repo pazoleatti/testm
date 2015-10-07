@@ -4,7 +4,6 @@ import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.dao.api.ConfigurationDao;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
 import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
@@ -19,12 +18,10 @@ import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.util.*;
 
 import static org.mockito.Matchers.any;
@@ -218,6 +215,7 @@ public class LoadRefBookDataServiceTest {
                 Map map = (Map) invocation.getArguments()[4];
                 ScriptStatusHolder scriptStatusHolder = (ScriptStatusHolder) map.get("scriptStatusHolder");
                 scriptStatusHolder.setScriptStatus(statusQueue.poll());
+                if (scriptStatusHolder.getScriptStatus().equals(ScriptStatus.SKIP)) scriptStatusHolder.setStatusMessage("SKIP");
                 return null;
             }
         }).when(refBookScriptingService).executeScript(any(TAUserInfo.class), anyInt(), any(FormDataEvent.class),

@@ -29,7 +29,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.io.BufferedInputStream;
 import java.io.InputStream;
 import java.util.*;
-import java.util.concurrent.ExecutionException;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -323,6 +322,8 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
                                             break;
                                         case SKIP:
                                             skip++;
+                                            localLoggerList.get(i).error("Импорт данных справочника \"%s\" из файла \"%s\".", refBook.getName(), fileName);
+                                            localLoggerList.get(i).error(scriptStatusHolder.getStatusMessage());
                                             break;
                                     }
                                 } finally {
@@ -341,7 +342,7 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
                             // Ошибка импорта отдельного справочника — откатываются изменения только по нему, импорт продолжается
                             log(userInfo, LogData.L21, logger, lockId, e.getMessage());
                             // Перемещение в каталог ошибок
-                            logger.getEntries().addAll(getEntries(localLoggerList));
+                            logger.getEntries().addAll(localLoggerList.get(i).getEntries());
                             if (move) {
                                 moveToErrorDirectory(userInfo, getRefBookErrorPath(userInfo, logger, lockId), currentFile,
                                         getEntries(localLoggerList), logger, lockId);
