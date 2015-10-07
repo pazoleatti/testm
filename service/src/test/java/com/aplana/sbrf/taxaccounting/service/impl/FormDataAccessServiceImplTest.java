@@ -843,7 +843,6 @@ public class FormDataAccessServiceImplTest {
         try {
             service.canCreate(userInfo, formTemplateId, kind, departmentReportPeriodId, comparativeDepReportPeriod, accruing);
         } catch (ServiceException se) {
-            System.out.println(se.getMessage());
             return false;
         }
         return true;
