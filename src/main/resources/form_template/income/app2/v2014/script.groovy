@@ -231,14 +231,14 @@ void logicCheck() {
         // 2. Проверка на заполнение графы 13 «Регион (код)»
         if ((address.find { row.getCell(it).value != null }
                 || (row.country == null && row.address == null)
-                || (!'1'.equals(row.status))
-                || (!'643'.equals(citizenshipCode)))
+                || ('1'.equals(row.status))
+                || ('643'.equals(citizenshipCode)))
                 && row.region == null) {
-            rowError(logger, row, errorMsg + String.format("Графа  «%s» не заполнена! " +
+            rowError(logger, row, errorMsg + String.format("Графа «%s» не заполнена! " +
                     "Данная графа обязательна для заполнения, если выполняется хотя бы одно из следующих условий: " +
                     "1. Заполнена хотя бы одна из граф по адресу места жительства в РФ (графы 12, 14-20). " +
                     "2. Не заполнены графы по адресу места жительства за пределами РФ (графы 21 и 22). " +
-                    "3. Графа «%s» не равна значению «1»  и/или графа «%s» не равна значению «643».",
+                    "3. Графа «%s» равна значению «1» и/или графа «%s» равна значению «643».",
                     getColumnName(row, "region"), getColumnName(row, "status"), getColumnName(row, "citizenship")))
         }
 
