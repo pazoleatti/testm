@@ -198,7 +198,7 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
         }
 
         // Если изначально нет подходящих файлов то выдаем отдельную ошибку
-        List<String> workFilesList = getWorkTransportFiles(userInfo, path, ignoreFileSet, loadedFileNameList, logger, wrongImportCounter, lockId);
+        List<String> workFilesList = getWorkTransportFiles(userInfo, path, ignoreFileSet, loadedFileNameList, logger, wrongImportCounter, lockId, true);
         if (workFilesList.isEmpty()) {
             log(userInfo, LogData.L3, logger, lockId, departmentName);
             return wrongImportCounter;
@@ -462,7 +462,7 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
 
 
         // Если изначально нет подходящих файлов то выдаем отдельную ошибку
-        List<String> workFilesList = getWorkTransportFiles(userInfo, path, new HashSet<String>(), loadedFileNameList, logger, new ImportCounter(), lockId);
+        List<String> workFilesList = getWorkTransportFiles(userInfo, path, new HashSet<String>(), loadedFileNameList, logger, new ImportCounter(), lockId, false);
         if (workFilesList.isEmpty()) {
             return;
         }
@@ -672,7 +672,7 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
      * Получение спика ТФ НФ из каталога загрузки. Файлы, которые не соответствуют маппингу пропускаются.
      */
     private List<String> getWorkTransportFiles(TAUserInfo userInfo, String folderPath, Set<String> ignoreFileSet,
-                                               List<String> loadedFileNameList, Logger logger, ImportCounter wrongImportCounter, String lock) {
+                                               List<String> loadedFileNameList, Logger logger, ImportCounter wrongImportCounter, String lock, boolean validateFileName) {
         List<String> retVal = new LinkedList<String>();
         FileWrapper catalogFile = ResourceUtils.getSharedResource(folderPath + "/");
         for (String candidateStr : catalogFile.list()) {
@@ -688,7 +688,7 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
             // Это файл, а не директория и соответствует формату имени ТФ
             FileWrapper candidateFile = ResourceUtils.getSharedResource(folderPath + "/" + candidateStr);
             if (candidateFile.isFile()) {
-                if (TransportDataParam.isValidName(candidateStr)) {
+                if (!validateFileName || TransportDataParam.isValidName(candidateStr)) {
                     retVal.add(candidateStr);
                 } else {
                     log(userInfo, LogData.L4, logger, lock, candidateStr, folderPath);
