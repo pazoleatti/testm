@@ -38,7 +38,6 @@ switch (formDataEvent) {
         checkDepartmentParams(LogLevel.WARNING)
         def readerBank = checkDeclarationBank(false)
         generateXML(readerBank)
-        logicCheck(LogLevel.WARNING)
         break
     default:
         return
@@ -154,7 +153,7 @@ void logicCheck(LogLevel logLevel) {
     def oktmoNalPUMes, nalPUMesFound = false
     def okved, svNPFound = false
     def innJulSvReorgJul, kppSvReorgJul, formReorg, svReorgJulFound = false
-    def versForm, fileFound = false
+    def versForm, idFile, kodNOProm, fileFound = false
 
     try{
         while(reader.hasNext()) {
@@ -195,6 +194,11 @@ void logicCheck(LogLevel logLevel) {
                 } else if (!fileFound && isCurrentNode([], elements)) {
                     fileFound = true
                     versForm = getXmlValue(reader, 'ВерсФорм')
+                    idFile = getXmlValue(reader, 'ИдФайл')
+                    def idFileParts = idFile?.split("_")
+                    if (idFileParts.size() >= 3) { // на всякий случай
+                        kodNOProm = idFileParts[2]
+                    }
                 }
             }
             if (reader.endElement) {
@@ -212,7 +216,7 @@ void logicCheck(LogLevel logLevel) {
     // is1_2 = если поле ОКТМО не заполнено в разделе 1.2
     boolean is1_2 = nalPUMesFound && (oktmoNalPUMes == null || oktmoNalPUMes.trim().isEmpty())
     if (oktmoNalPUAv == null || oktmoNalPUAv.trim().isEmpty() || is1_2) {
-        logger.log(logLevel, getMessage("Подраздел 1.1" + (is1_2 ? ", 1.2" : ""), "Код по ОКТМО", "НалПУАв.ОКТМО" + (is1_2 ? "», «НалПУМес.ОКТМО" : ""), "ОКТМО"))
+        logger.log(logLevel, getMessage("Подраздел 1.1" + (is1_2 ? ", 1.2" : ""), "Код по ОКТМО", "НалПУАв.ОКТМО" + (is1_2 ? ", НалПУМес.ОКТМО" : ""), "ОКТМО"))
     }
     if (innJulNpJul == null || innJulNpJul.trim().isEmpty()) {
         logger.log(logLevel, getMessage("Титульный лист", "ИНН налогоплательщика", "НПЮЛ.ИННЮЛ", "ИНН"))
@@ -222,6 +226,9 @@ void logicCheck(LogLevel logLevel) {
     }
     if (kodNO == null || kodNO.trim().isEmpty()) {
         logger.log(logLevel, getMessage("Наименование xml файла (кон. налоговый орган) и титульный лист", "Код налогового органа", "Документ.КодНО", "Код налогового органа (кон.)"))
+    }
+    if (kodNOProm == null || kodNOProm.trim().isEmpty() || "null".equals(kodNOProm)) {
+        logger.log(logLevel, getPromMessage("Код налогового органа (пром.)"))
     }
     if (okved == null || okved.trim().isEmpty()) {
         logger.log(logLevel, getMessage("Титульный лист", "Код вида экономической деятельности и по классификатору ОКВЭД", "СвНП.ОКВЭД", "Код вида экономической деятельности и по классификатору ОКВЭД"))
@@ -247,7 +254,7 @@ void logicCheck(LogLevel logLevel) {
     if (poMestu == null || poMestu.trim().isEmpty()) {
         logger.log(logLevel, getMessage("Титульный лист", "Код места, по которому представляется документ", "Документ.ПоМесту", "Код места, по которому представляется документ"))
     }
-    if (versForm == null || versForm.trim().isEmpty()) {
+    if (versForm == null || versForm.trim().isEmpty() || !version.equals(versForm)) {
         logger.log(logLevel, getVersionMessage(versForm, "Файл.ВерсФорм", "Версия формата"))
     }
 }
@@ -255,6 +262,11 @@ void logicCheck(LogLevel logLevel) {
 String getMessage(String place, String printName, String xmlName, String departmentName) {
     return String.format("%s. Обязательный для заполнения атрибут «%s» (%s) не заполнен! На момент расчёта экземпляра декларации (формирование XML) на форме настроек подразделения отсутствовало значение атрибута «%s».",
             place, printName, xmlName, departmentName)
+}
+
+String getPromMessage(String departmentName) {
+    return String.format("Обязательный для заполнения атрибут «%s» в наименовании xml файла не заполнен! На момент расчёта экземпляра декларации (формирование XML) на форме настроек подразделения отсутствовало значение атрибута «%s».",
+            departmentName, departmentName)
 }
 
 String getVersionMessage(String value, String xmlName, String departmentName) {
@@ -778,9 +790,6 @@ List<String> getErrorDepartment(record) {
 
     if (record.INN?.stringValue == null || record.INN.stringValue.isEmpty()) {
         errorList.add("«ИНН»")
-    }
-    if (record.KPP?.stringValue == null || record.KPP.stringValue.isEmpty()) {
-        errorList.add("«КПП»")
     }
     // Cтавка налога не проверяется в ОП
     errorList
