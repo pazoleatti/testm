@@ -423,10 +423,17 @@ void logicCheck() {
     // 7. Проверка на уникальность записи по налоговому учету
     for (def map : uniq456.keySet()) {
         def rowList = uniq456.get(map)
+        def name4 = getColumnName(dataRows[0], 'code')
+        def name5 = getColumnName(dataRows[0], 'docNumber')
+        def name6 = getColumnName(dataRows[0], 'docDate')
         if (rowList.size() > 1) {
-            loggerError(null, "Несколько строк " + rowList.join(", ") + " содержат записи в налоговом учете для балансового " +
-                    "счета=" + refBookService.getStringValue(27, map.get(4), 'NUMBER').toString() + ", документа № " +
-                    map.get(5).toString() +" от " + dateFormat.format(map.get(6)) + ".")
+            def rowIndexes = rowList.join(', ')
+            def value4 = getRefBookValue(27, map.get(4))?.NUMBER?.value
+            def value5 = map.get(5)
+            def value6 = dateFormat.format(map.get(6))
+            def message = "Строки $rowIndexes не уникальны в рамках текущей налоговой формы! По данным строкам значения следующих граф совпадают: «$name4» ($value4), «$name5» ($value5), «$name6» ($value6)."
+            logger.warn("%s", message)
+
         }
     }
 
