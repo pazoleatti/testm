@@ -345,11 +345,11 @@ def logicCheck() {
 
         // LC 20
         if (row.getAlias() != null && row.getAlias().indexOf('itogoRegNumber') != -1) {
-            srow = calcItogRegNumber(dataRows.indexOf(row), dataRows)
+            srow = calcItogRegNumber(dataRows.indexOf(row) - 1, dataRows)
 
             for (column in totalColumns) {
                 if (row.get(column) != srow.get(column)) {
-                    def regNumber = getRegNumberOrIssuer(dataRows, row, 'regNumber')
+                    def regNumber = (getRegNumberOrIssuer(dataRows, row, 'regNumber') ?: "ГРН не задан")
                     loggerError(null, "Итоговые значения по «$regNumber» рассчитаны неверно в графе «${getColumnName(row, column)}»!")
                 }
             }
@@ -357,7 +357,7 @@ def logicCheck() {
 
         // LC 21
         if (row.getAlias() != null && row.getAlias().indexOf('itogoIssuer') != -1) {
-            srow = calcItogIssuer(dataRows.indexOf(row), dataRows)
+            srow = calcItogIssuer(dataRows.indexOf(row) - 1, dataRows)
 
             for (column in totalColumns) {
                 if (row.get(column) != srow.get(column)) {
