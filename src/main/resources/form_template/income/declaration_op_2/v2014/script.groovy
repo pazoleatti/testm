@@ -46,6 +46,9 @@ switch (formDataEvent) {
 @Field
 def version = '5.06'
 
+@Field
+def declarationOPTypeId = 19
+
 // Кэш провайдеров
 @Field
 def providerCache = [:]
@@ -138,7 +141,7 @@ def checkDeclarationBank(boolean onlyCheck = true) {
 // Логические проверки.
 void logicCheck(LogLevel logLevel) {
     // получение данных из xml'ки
-    def reader = getXmlStreamReader(declarationData.reportPeriodId, declarationData.departmentId, false, false)
+    def reader = getStreamReader(declarationOPTypeId, declarationData.departmentId, declarationData.reportPeriodId, false)
     if(reader == null){
         return
     }
@@ -591,85 +594,6 @@ def getLong(def value) {
     return roundValue(value, 0)
 }
 
-/**
- * Получить сумму значении столбца по указанным строкам.
- *
- * @param dataRows строки нф
- * @param columnCode псевдоним столбца по которому отбирать данные для суммирования
- * @param columnSum псевдоним столбца значения которого надо суммировать
- * @param codes список значении, которые надо учитывать при суммировании
- */
-def getSumRowsByCol(def dataRows, def columnCode, def columnSum, def codes) {
-    def result = 0
-    if (!dataRows) {
-        return result
-    }
-    dataRows.each { row ->
-        def cell = row.getCell(columnSum)
-        if (row.getCell(columnCode).value in (String [])codes && !cell.hasValueOwner()) {
-            result += (cell.value ?: 0)
-        }
-    }
-    return result
-}
-
-/**
- * Получить сумму графы 9 формы доходы сложные.
- *
- * @param dataRows строки нф доходы сложные
- * @param codes коды которые надо учитывать при суммировании
- */
-def getComplexIncomeSumRows9(def dataRows, def codes) {
-    return getSumRowsByCol(dataRows, 'incomeTypeId', 'incomeTaxSumS', codes)
-}
-
-/**
- * Получить сумму графы 9 формы расходы сложные.
- *
- * @param dataRows строки нф расходы сложные
- * @param codes коды которые надо учитывать при суммировании
- */
-def getComplexConsumptionSumRows9(def dataRows, def codes) {
-    return getSumRowsByCol(dataRows, 'consumptionTypeId', 'consumptionTaxSumS', codes)
-}
-
-/**
- * Получить сумму графы 8 формы доходы простые.
- *
- * @param dataRows строки нф доходы простые
- * @param codes коды которые надо учитывать при суммировании
- */
-def getSimpleIncomeSumRows8(def dataRows, def codes) {
-    return getSumRowsByCol(dataRows, 'incomeTypeId', 'rnu4Field5Accepted', codes)
-}
-
-/**
- * Получить сумму графы 8 формы расходы простые.
- *
- * @param dataRows строки нф расходы простые
- * @param codes коды которые надо учитывать при суммировании
- */
-def getSimpleConsumptionSumRows8(def dataRows, def codes) {
-    return getSumRowsByCol(dataRows, 'consumptionTypeId', 'rnu5Field5Accepted', codes)
-}
-
-/** Подсчет простых расходов: сумма(графа 8 + графа 5 - графа 6). */
-def getCalculatedSimpleConsumption(def dataRowsSimple, def codes) {
-    def result = 0
-    if (dataRowsSimple == null) {
-        return result
-    }
-    dataRowsSimple.each { row ->
-        if (row.getCell('consumptionTypeId').value in (String [])codes) {
-            result +=
-                    (row.rnu5Field5Accepted ?: 0) +
-                            (row.rnu7Field10Sum ?: 0) -
-                            (row.rnu7Field12Accepted ?: 0)
-        }
-    }
-    return result
-}
-
 // Получить значения для АвПлат1 (220), АвПлат2 (230), АвПлат3 (240)
 def getAvPlats(def row, def reportPeriod) {
     def appl5List02Row120 = (row != null && row.everyMontherPaymentAfterPeriod != null ? row.everyMontherPaymentAfterPeriod : 0)
@@ -696,29 +620,6 @@ def getAvPlats(def row, def reportPeriod) {
         avPlat3 = getLong(appl5List02Row120 - avPlat1 - avPlat2)
     }
     return [avPlat1, avPlat2, avPlat3]
-}
-
-/**
- * Получить xml декларации.
- *
- * @param reportPeriodId
- * @param departmentId
- */
-def getXmlStreamReader(def reportPeriodId, def departmentId, def acceptedOnly, def anyPrevDeclaration) {
-    if (reportPeriodId != null) {
-        // вид декларации 11 - декларация банка
-        def declarationTypeId = 11
-        def xml = getStreamReader(declarationTypeId, departmentId, reportPeriodId, acceptedOnly)
-        if (xml != null) {
-            return xml
-        }
-        // для новой декларации можно поискать в прошлом периоде другую декларацию (обычную Банка)
-        if (anyPrevDeclaration) {
-            declarationTypeId = 2
-            return getStreamReader(declarationTypeId, departmentId, reportPeriodId, acceptedOnly)
-        }
-    }
-    return null
 }
 
 def getStreamReader(def declarationTypeId, def departmentId, def reportPeriodId, def acceptedOnly) {
