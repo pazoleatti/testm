@@ -256,6 +256,7 @@ public class MessageServiceBean implements MessageService {
     @Override
     public void getRateMessages() {
         QueueConnection queueConnection = null;
+        TAUserInfo userInfo = getUser();
         try {
             /** Подключение к очереди */
             logger.info("Подключение к КСШ");
@@ -273,12 +274,14 @@ public class MessageServiceBean implements MessageService {
                     logger.error("Произошла ошибка при обработке сообщения, оно будет пропущено", e);
                 }
             }
-
             queueReceiver.close();
             queueSession.close();
             logger.info("Данные КСШ обработаны");
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("Не удалось получить данные из КСШ", e);
+            Logger l = new Logger();
+            l.error("Не удалось получить данные из КСШ", e);
+            addLog(userInfo, "Не удалось получить данные из КСШ", logEntryService.save(l.getEntries()));
         } finally {
             if (queueConnection != null) {
                 try {
