@@ -200,7 +200,7 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
         // Если изначально нет подходящих файлов то выдаем отдельную ошибку
         List<String> workFilesList = getWorkTransportFiles(userInfo, path, ignoreFileSet, loadedFileNameList, logger, wrongImportCounter, lockId, true);
         if (workFilesList.isEmpty()) {
-            log(userInfo, LogData.L3, logger, lockId, departmentName);
+            if (wrongImportCounter.getFailCounter() == 0) log(userInfo, LogData.L3, logger, lockId, departmentName);
             return wrongImportCounter;
         }
 
