@@ -183,6 +183,7 @@ void logicCheck(LogLevel logLevel) {
                     npJulFound = true
                     naimOrg = getXmlValue(reader, 'НаимОрг')
                     innJulNpJul = getXmlValue(reader, 'ИННЮЛ')
+                    kppJulNpJul = getXmlValue(reader, 'КПП')
                 } else if (!svReorgJulFound && isCurrentNode(['Документ', 'СвНП', 'НПЮЛ', 'СвРеоргЮЛ'], elements)) {
                     svReorgJulFound = true
                     innJulSvReorgJul = getXmlValue(reader, 'ИННЮЛ')
