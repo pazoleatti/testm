@@ -1166,48 +1166,6 @@ public class SourceServiceImpl implements SourceService {
     }
 
     @Override
-    public List<FormToFormRelation> getRelations(FormData formData, Logger logger, TAUserInfo userInfo) {
-        int departmentId = formData.getDepartmentId();
-        int formTypeId = formData.getFormType().getId();
-        FormDataKind kind = formData.getKind();
-        int departmentReportPeriodId = formData.getDepartmentReportPeriodId();
-        Integer periodOrder = formData.getPeriodOrder();
-
-        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.get(departmentReportPeriodId);
-        ReportPeriod reportPeriod = departmentReportPeriod.getReportPeriod();
-
-        List<FormToFormRelation> formToFormRelations = new LinkedList<FormToFormRelation>();
-        // Источники
-        List<DepartmentFormType> sourcesForm = formDataService.getFormSources(formData, logger, userInfo, reportPeriod, false);
-        formToFormRelations.addAll(createFormToFormRelationModel(sourcesForm, departmentReportPeriod,
-                periodOrder, formData.getComparativePeriodId(), formData.isAccruing(), true));
-        // Приемники
-        List<DepartmentFormType> destinationsForm = getFormDestinations(departmentId, formTypeId, kind,
-                reportPeriod.getCalendarStartDate(), reportPeriod.getEndDate());
-        formToFormRelations.addAll(createFormToFormRelationModel(destinationsForm, departmentReportPeriod,
-                periodOrder, formData.getComparativePeriodId(), formData.isAccruing(), false));
-
-        List<DepartmentDeclarationType> destinationsDeclaration = getDeclarationDestinations(departmentId, formTypeId, kind,
-                reportPeriod.getCalendarStartDate(), reportPeriod.getEndDate());
-        formToFormRelations.addAll(createFormToFormRelationModel(destinationsDeclaration, departmentReportPeriod));
-
-        return formToFormRelations;
-    }
-
-    @Override
-    public List<FormToFormRelation> getRelations(DeclarationData declaration) {
-        List<FormToFormRelation> formToFormRelations = new LinkedList<FormToFormRelation>();
-        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.get(declaration.getDepartmentReportPeriodId());
-
-        //Получаем источники-приемники
-        List<DepartmentFormType> sourcesForm = declarationDataService.getFormDataSources(declaration, false, new Logger());
-        //Для декларации не может быть источников с признаком сравнения
-        formToFormRelations.addAll(createFormToFormRelationModel(sourcesForm, departmentReportPeriod,
-                null, null, false, true));
-        return formToFormRelations;
-    }
-
-    @Override
     public List<Pair<DepartmentFormType, Pair<Date, Date>>> findDestinationFTsForFormType(int typeId, Date dateFrom, Date dateTo) {
         return departmentFormTypeDao.findDestinationsForFormType(typeId, checkMinDate(dateFrom), dateTo);
     }
@@ -1238,284 +1196,6 @@ public class SourceServiceImpl implements SourceService {
     }
 
     /**
-     * Метод для составления списка с информацией об источниках приемниках
-     */
-    private List<FormToFormRelation> createFormToFormRelationModel(List<DepartmentFormType> departmentFormTypes,
-                                                                   DepartmentReportPeriod departmentReportPeriod,
-                                                                   Integer periodOrder, Integer comparativePeriodId,
-                                                                   boolean accruing,
-                                                                   boolean isSource){
-        List<FormToFormRelation> formToFormRelations = new LinkedList<FormToFormRelation>();
-
-        // По назначениям
-        for (DepartmentFormType departmentFormType : departmentFormTypes) {
-            if (isSource) {
-                formToFormRelations.addAll(
-                        getSourceList(
-                                departmentFormType, departmentReportPeriod,
-                                periodOrder==null ? departmentFormType.getPeriodOrder() : null,
-                                comparativePeriodId, accruing
-                        )
-                );
-            } else {
-                formToFormRelations.addAll(getDestinationList(departmentFormType, departmentReportPeriod,
-                        periodOrder, comparativePeriodId, accruing));
-            }
-        }
-        return formToFormRelations;
-    }
-
-    /**
-     * Метод для составления списка с информацией об источниках приемниках
-     */
-    private List<FormToFormRelation> createFormToFormRelationModel(List<DepartmentDeclarationType> departmentDeclarationTypes,
-                                                                   DepartmentReportPeriod departmentReportPeriod){
-        List<FormToFormRelation> formToFormRelations = new LinkedList<FormToFormRelation>();
-
-        // По назначениям
-        for (DepartmentDeclarationType departmentDeclarationType : departmentDeclarationTypes) {
-            formToFormRelations.addAll(getDestinationList(departmentDeclarationType, departmentReportPeriod));
-        }
-        return formToFormRelations;
-    }
-
-    /**
-     * Подготовка общей модели для сущестувющих и не существующих экземпляров
-     */
-    private FormToFormRelation getRelationCommon(boolean isSource, DepartmentFormType departmentFormType,
-                                                 DepartmentReportPeriod departmentreportPeriod, Integer periodOrder) {
-        FormToFormRelation formToFormRelation = new FormToFormRelation();
-        formToFormRelation.setSource(isSource);
-        formToFormRelation.setFormDataKind(departmentFormType.getKind());
-        formToFormRelation.setPerformer(departmentFormType.getPerformerId() != null ? departmentService.getDepartment(departmentFormType.getPerformerId()) : null);
-        formToFormRelation.setFullDepartmentName(departmentService.getParentsHierarchy(departmentFormType.getDepartmentId()));
-        if (departmentreportPeriod != null) {
-            if (departmentreportPeriod.getCorrectionDate() != null) {
-                formToFormRelation.setCorrectionDate(departmentreportPeriod.getCorrectionDate());
-            }
-            formToFormRelation.setYear(departmentreportPeriod.getReportPeriod().getTaxPeriod().getYear());
-            formToFormRelation.setPeriodName(departmentreportPeriod.getReportPeriod().getName());
-        }
-        formToFormRelation.setMonth(periodOrder != null ? Months.fromId(periodOrder).getTitle() : "");
-        return formToFormRelation;
-    }
-
-    /**
-     * Подготовка общей модели для сущестувющих и не существующих экземпляров
-     */
-    private FormToFormRelation getRelationCommon(DepartmentDeclarationType departmentDeclarationType,
-                                                 DepartmentReportPeriod departmentreportPeriod) {
-        FormToFormRelation formToFormRelation = new FormToFormRelation();
-        formToFormRelation.setSource(false);
-        formToFormRelation.setFullDepartmentName(departmentService.getParentsHierarchy(departmentDeclarationType.getDepartmentId()));
-        if (departmentreportPeriod != null) {
-            if (departmentreportPeriod.getCorrectionDate() != null) {
-                formToFormRelation.setCorrectionDate(departmentreportPeriod.getCorrectionDate());
-            }
-            formToFormRelation.setYear(departmentreportPeriod.getReportPeriod().getTaxPeriod().getYear());
-            formToFormRelation.setPeriodName(departmentreportPeriod.getReportPeriod().getName());
-        }
-        return formToFormRelation;
-    }
-
-    /**
-     * Заполнение модели отношения по экземпляру НФ
-     */
-    private void fillFormDataRelation(FormToFormRelation formToFormRelation, FormData formData) {
-        formToFormRelation.setCreated(true);
-        formToFormRelation.setFormType(formData.getFormType());
-        formToFormRelation.setFormDataId(formData.getId());
-        formToFormRelation.setState(formData.getState());
-    }
-
-    /**
-     * Заполенени модели отношения данными из экземпляра НФ или поиск не созданного экземпляра
-     */
-    private FormToFormRelation performFormDataRelation(FormData formData, FormToFormRelation formToFormRelation,
-                                                       DepartmentFormType departmentFormType,
-                                                       DepartmentReportPeriod departmentReportPeriod) {
-        if (formData != null) {
-            // Созданный экземпляр найден
-            fillFormDataRelation(formToFormRelation, formData);
-        } else {
-            // Созданный экземпляр не найден, ищем не созданный в том же периоде
-            formToFormRelation.setCreated(false);
-            formToFormRelation.setFormType(formTypeDao.get(departmentFormType.getFormTypeId()));
-            formToFormRelation.setFormDataKind(departmentFormType.getKind());
-            formToFormRelation.setYear(departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear());
-            formToFormRelation.setPeriodName(departmentReportPeriod.getReportPeriod().getName());
-        }
-        return formToFormRelation;
-    }
-
-    /**
-     * Заполенени модели отношения данными из экземпляра декларации или не созданного экземпляра
-     */
-    private FormToFormRelation performFormDataRelation(DeclarationData declarationData, FormToFormRelation formToFormRelation,
-                                                       DepartmentDeclarationType departmentDeclarationType,
-                                                       DepartmentReportPeriod departmentReportPeriod) {
-        if (declarationData != null) {
-            // Созданный экземпляр найден
-            formToFormRelation.setCreated(true);
-            formToFormRelation.setDeclarationType(declarationTypeDao.get(departmentDeclarationType.getDeclarationTypeId()));
-            formToFormRelation.setDeclarationDataId(declarationData.getId());
-            formToFormRelation.setState(declarationData.isAccepted()?WorkflowState.ACCEPTED:WorkflowState.CREATED);
-            formToFormRelation.setKpp(declarationData.getKpp());
-            formToFormRelation.setTaxOrganCode(declarationData.getTaxOrganCode());
-        } else {
-            // Экземпляр не найден
-            formToFormRelation.setCreated(false);
-            formToFormRelation.setDeclarationType(declarationTypeDao.get(departmentDeclarationType.getDeclarationTypeId()));
-            formToFormRelation.setYear(departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear());
-            formToFormRelation.setPeriodName(departmentReportPeriod.getReportPeriod().getName());
-        }
-        return formToFormRelation;
-    }
-
-    /**
-     * Список экземпляров-источников
-     * @param departmentFormType Назначение
-     * @param departmentReportPeriod Отчетный период подраделения формы, для которой ищутся формы-источники
-     * @param periodOrder Месяц формы, для которой ищутся формы-источники
-     * @param comparativePeriodId Период сравнения - ссылка на DepartmentReportPeriod. Может быть null
-     * @param accruing Признак расчета значений нарастающим итогом (false - не нарастающим итогом, true - нарастающим итогом, пустое - форма без периода сравнения)
-     */
-    private List<FormToFormRelation> getSourceList(DepartmentFormType departmentFormType,
-                                                   DepartmentReportPeriod departmentReportPeriod,
-                                                   Integer periodOrder, Integer comparativePeriodId, boolean accruing) {
-        List<FormToFormRelation> relations = new ArrayList<FormToFormRelation>();
-        /*if (!formTemplateService.existFormTemplate(departmentFormType.getFormTypeId(), departmentReportPeriod.getReportPeriod().getId()))
-            return relations;*/
-
-        FormData formData = formDataDao.getLastByDate(departmentFormType.getFormTypeId(), departmentFormType.getKind(),
-                departmentFormType.getDepartmentId(), departmentReportPeriod.getReportPeriod().getId(),
-                periodOrder, departmentReportPeriod.getCorrectionDate(),
-                comparativePeriodId, accruing);
-        DepartmentReportPeriod formDepartmentReportPeriod = null;
-        if (formData != null) {
-            formDepartmentReportPeriod = departmentReportPeriodService.get(formData.getDepartmentReportPeriodId());
-        }
-        FormToFormRelation formToFormRelation = performFormDataRelation(formData,
-                getRelationCommon(true, departmentFormType, formDepartmentReportPeriod, periodOrder), departmentFormType,
-                departmentReportPeriod);
-        formToFormRelation.setStatus(formTemplateService.existFormTemplate(departmentFormType.getFormTypeId(), departmentReportPeriod.getReportPeriod().getId(), true));
-        //if (formToFormRelation != null) relations.add(formToFormRelation);
-        relations.add(formToFormRelation);
-        //}
-        return relations;
-    }
-
-    /**
-     * Список экземпляров-приемников
-     * @param departmentFormType Назначение
-     * @param departmentReportPeriod Отчетный период подраделения формы, для которой ищутся формы-приемники
-     * @param periodOrder Месяц формы, для которой ищутся формы-приемники
-     * @param comparativePeriodId Период сравнения - ссылка на DepartmentReportPeriod. Может быть null
-     * @param accruing Признак расчета значений нарастающим итогом (false - не нарастающим итогом, true - нарастающим итогом, пустое - форма без периода сравнения)
-     */
-    private List<FormToFormRelation> getDestinationList(DepartmentFormType departmentFormType,
-                                                        DepartmentReportPeriod departmentReportPeriod,
-                                                        Integer periodOrder, Integer comparativePeriodId,
-                                                        boolean accruing) {
-        List<FormToFormRelation> retVal = new LinkedList<FormToFormRelation>();
-        /*if (!formTemplateService.existFormTemplate(departmentFormType.getFormTypeId(), departmentReportPeriod.getReportPeriod().getId()))
-            return retVal;*/
-
-        DepartmentReportPeriodFilter filter = new DepartmentReportPeriodFilter();
-        filter.setReportPeriodIdList(Arrays.asList(departmentReportPeriod.getReportPeriod().getId()));
-        filter.setDepartmentIdList(Arrays.asList(departmentFormType.getDepartmentId()));
-        // Список всех отчетных периодов
-        List<DepartmentReportPeriod> departmentReportPeriodList = departmentReportPeriodService.getListByFilter(filter);
-        //TODO: код похож на дублирующий из метода com.aplana.sbrf.taxaccounting.dao.api.DepartmentReportPeriodDao.getLast
-        // Приемник в корректирующем периоде может быть или в том же отчетном периоде подразделения или в следующем, поэтому предыдущие отчетные
-        // периоды удаляем из списка
-        if (departmentReportPeriod.getCorrectionDate() != null) {
-            List<DepartmentReportPeriod> delList = new LinkedList<DepartmentReportPeriod>();
-            for (DepartmentReportPeriod destinationReportPeriod : departmentReportPeriodList) {
-                if (destinationReportPeriod.getCorrectionDate() == null ||
-                        destinationReportPeriod.getCorrectionDate().before(departmentReportPeriod.getCorrectionDate())) {
-                        delList.add(destinationReportPeriod);
-                }
-            }
-            departmentReportPeriodList.removeAll(delList);
-        }
-
-        int formTemplateId = formTemplateService.getFormTemplateIdByFTAndReportPeriod(departmentFormType.getFormTypeId(), departmentReportPeriod.getReportPeriod().getId());
-        if (!formTemplateService.get(formTemplateId).isMonthly()) {
-            periodOrder = null;
-        }
-        for (DepartmentReportPeriod destinationReportPeriod : departmentReportPeriodList) {
-            // Поиск экземпляра НФ в каждом существующем отчетном периоде подразделения
-            FormData formData = formDataDao.find(departmentFormType.getFormTypeId(), departmentFormType.getKind(),
-                    destinationReportPeriod.getId(),
-                    periodOrder, comparativePeriodId, accruing);
-
-            FormToFormRelation formToFormRelation = performFormDataRelation(formData,
-                    getRelationCommon(false, departmentFormType, destinationReportPeriod, periodOrder), departmentFormType,
-                    departmentReportPeriod);
-            formToFormRelation.setStatus(formTemplateService.existFormTemplate(departmentFormType.getFormTypeId(), departmentReportPeriod.getReportPeriod().getId(), false));
-
-            retVal.add(formToFormRelation);
-        }
-        return retVal;
-    }
-
-    /**
-     * Список экземпляров-приемников
-     * @param departmentDeclarationType Назначение
-     * @param departmentReportPeriod Отчетный период подраделения формы, для которой ищутся формы-приемники
-     */
-    private List<FormToFormRelation> getDestinationList(DepartmentDeclarationType departmentDeclarationType,
-                                                        DepartmentReportPeriod departmentReportPeriod) {
-        List<FormToFormRelation> retVal = new LinkedList<FormToFormRelation>();
-        /*if (!declarationTemplateService.existDeclarationTemplate(departmentDeclarationType.getDeclarationTypeId(), departmentReportPeriod.getReportPeriod().getId()))
-            return retVal;*/
-
-        DepartmentReportPeriodFilter filter = new DepartmentReportPeriodFilter();
-        filter.setReportPeriodIdList(Arrays.asList(departmentReportPeriod.getReportPeriod().getId()));
-        filter.setDepartmentIdList(Arrays.asList(departmentDeclarationType.getDepartmentId()));
-        // Список всех отчетных периодов
-        List<DepartmentReportPeriod> departmentReportPeriodList = departmentReportPeriodService.getListByFilter(filter);
-        //TODO: код похож на дублирующий из метода com.aplana.sbrf.taxaccounting.dao.api.DepartmentReportPeriodDao.getLast
-        // Приемник в корректирующем периоде может быть или в том же отчетном периоде подразделения или в следующем, поэтому предыдущие отчетные
-        // периоды удаляем из списка
-        if (departmentReportPeriod.getCorrectionDate() != null) {
-            List<DepartmentReportPeriod> delList = new LinkedList<DepartmentReportPeriod>();
-            for (DepartmentReportPeriod destinationReportPeriod : departmentReportPeriodList) {
-                if (destinationReportPeriod.getCorrectionDate() == null ||
-                        destinationReportPeriod.getCorrectionDate().before(departmentReportPeriod.getCorrectionDate())) {
-                    delList.add(destinationReportPeriod);
-                }
-            }
-            departmentReportPeriodList.removeAll(delList);
-        }
-
-        for (DepartmentReportPeriod destinationReportPeriod : departmentReportPeriodList) {
-            // Поиск экземпляра декларации в каждом существующем отчетном периоде подразделения
-            List<DeclarationData> declarationDataList = declarationDataDao.find(departmentDeclarationType.getDeclarationTypeId(), destinationReportPeriod.getId().intValue());
-
-            if (declarationDataList.isEmpty()) {
-                FormToFormRelation formToFormRelation = performFormDataRelation(null,
-                        getRelationCommon(departmentDeclarationType, destinationReportPeriod), departmentDeclarationType,
-                        departmentReportPeriod);
-                formToFormRelation.setStatus(declarationTemplateService.existDeclarationTemplate(departmentDeclarationType.getDeclarationTypeId(), departmentReportPeriod.getReportPeriod().getId()));
-
-                retVal.add(formToFormRelation);
-            } else {
-                for (DeclarationData declarationData: declarationDataList) {
-                    FormToFormRelation formToFormRelation = performFormDataRelation(declarationData,
-                            getRelationCommon(departmentDeclarationType, destinationReportPeriod), departmentDeclarationType,
-                            departmentReportPeriod);
-                    formToFormRelation.setStatus(declarationTemplateService.existDeclarationTemplate(departmentDeclarationType.getDeclarationTypeId(), departmentReportPeriod.getReportPeriod().getId()));
-
-                    retVal.add(formToFormRelation);
-                }
-            }
-        }
-        return retVal;
-    }
-
-    /**
      * Фильтр по умолчанию
      */
     private QueryParams<SourcesSearchOrdering> getSearchOrderingDefaultFilter() {
@@ -1523,5 +1203,25 @@ public class SourceServiceImpl implements SourceService {
         queryParams.setSearchOrdering(SourcesSearchOrdering.TYPE);
         queryParams.setAscending(true);
         return queryParams;
+    }
+
+    @Override
+    public List<Relation> getSourcesInfo(long formDataId, boolean light) {
+        return sourceDao.getSourcesInfo(formDataId, light);
+    }
+
+    @Override
+    public List<Relation> getDestinationsInfo(long formDataId, boolean light) {
+        return sourceDao.getDestinationsInfo(formDataId, light);
+    }
+
+    @Override
+    public List<Relation> getDeclarationDestinationsInfo(long formDataId, boolean light) {
+        return sourceDao.getDeclarationDestinationsInfo(formDataId, light);
+    }
+
+    @Override
+    public List<Relation> getDeclarationSourcesInfo(long declarationId, boolean light) {
+        return sourceDao.getDeclarationSourcesInfo(declarationId, light);
     }
 }

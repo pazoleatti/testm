@@ -87,4 +87,11 @@ public class DeclarationType implements Serializable {
     public void setIfrsName(String ifrsName) {
         this.ifrsName = ifrsName;
     }
+
+    @Override
+    public String toString() {
+        return "DeclarationType{" +
+                "name='" + name + '\'' +
+                '}';
+    }
 }

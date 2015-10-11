@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationdata.server;
 
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.shared.SourcesAction;
@@ -21,12 +22,12 @@ public class DeclarationSourcesHandler extends AbstractActionHandler<SourcesActi
 
     @Autowired
     SourceService sourceService;
-
     @Autowired
     DeclarationDataService declarationDataService;
-
     @Autowired
     SecurityService securityService;
+    @Autowired
+    DeclarationDataScriptingService scriptingService;
 
     public DeclarationSourcesHandler() {
         super(SourcesAction.class);
@@ -36,45 +37,27 @@ public class DeclarationSourcesHandler extends AbstractActionHandler<SourcesActi
     public SourcesResult execute(SourcesAction action, ExecutionContext executionContext) throws ActionException {
         SourcesResult result = new SourcesResult();
         TAUserInfo userInfo = securityService.currentUserInfo();
+        Logger logger = new Logger();
         DeclarationData declaration = declarationDataService.get(action.getDeclarationId(), userInfo);
-        List<FormToFormRelation> relationList = sourceService.getRelations(declaration);
+        List<Relation> relationList = new ArrayList<Relation>();
 
-        Collections.sort(relationList, new Comparator<FormToFormRelation>() {
-            @Override
-            public int compare(FormToFormRelation o1, FormToFormRelation o2) {
-                // вначале сортируем по типу источник/приемник
-                if (o1.isSource() ^ (!o2.isSource())){
-                    // если тип (источник или приемник) совпали то сортируем по типу формы
-                    int type = o1.getFormType().getName().compareTo(o2.getFormType().getName());
-                    if (type != 0){
-                        return type;
-                    } else{
-                        // Сотируем дате корректировки
-                        if (o1.getCorrectionDate() != null || o2.getCorrectionDate() != null) {
-                            if (o1.getCorrectionDate() == null) {
-                                return -1;
-                            }
-                            if (o2.getCorrectionDate() == null) {
-                                return 1;
-                            }
-                            int dateCompare = o1.getCorrectionDate().compareTo(o2.getCorrectionDate());
-                            if (dateCompare != 0) {
-                                return dateCompare;
-                            }
-                        }
-                        // Сотируем по состоянию формы
-                        if (!o1.isCreated()){
-                            return 1;
-                        } else if (!o2.isCreated()){
-                            return -1;
-                        }
-                        return o1.getState().getTitle().compareTo(o2.getState().getTitle());
-                    }
-                } else{
-                    return o1.isSource() ? 1:-1;
-                }
+        /** Проверяем в скрипте источники-приемники для особенных форм */
+        Map<String, Object> params = new HashMap<String, Object>();
+        FormSources sources = new FormSources();
+        sources.setSourceList(new ArrayList<Relation>());
+        sources.setSourcesProcessedByScript(false);
+        params.put("sources", sources);
+        scriptingService.executeScript(userInfo, declaration, FormDataEvent.GET_SOURCES, logger, params);
+
+        if (sources.isSourcesProcessedByScript()) {
+            //Скрипт возвращает все необходимые источники-приемники
+            if (sources.getSourceList() != null) {
+                relationList.addAll(sources.getSourceList());
             }
-        });
+        } else {
+            //Получаем нф-источники
+            relationList.addAll(sourceService.getDeclarationSourcesInfo(declaration.getId(), true));
+        }
         result.setData(relationList);
         return result;
     }

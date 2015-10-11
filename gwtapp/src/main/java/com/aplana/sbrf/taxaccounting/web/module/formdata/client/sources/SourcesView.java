@@ -1,8 +1,10 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdata.client.sources;
 
 import com.aplana.gwt.client.ModalWindow;
-import com.aplana.sbrf.taxaccounting.model.FormToFormRelation;
+import com.aplana.sbrf.taxaccounting.model.Months;
+import com.aplana.sbrf.taxaccounting.model.Relation;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
+import com.aplana.sbrf.taxaccounting.model.util.FormDataUtils;
 import com.aplana.sbrf.taxaccounting.web.module.declarationdata.client.DeclarationDataTokens;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.client.FormDataPresenter;
 import com.aplana.sbrf.taxaccounting.web.widget.style.LinkButton;
@@ -42,7 +44,7 @@ public class SourcesView extends PopupViewWithUiHandlers<SourcesUiHandlers> impl
     public interface Binder extends UiBinder<PopupPanel, SourcesView> {
     }
 
-    private List<FormToFormRelation> tableData = null;
+    private List<Relation> tableData = null;
 
     private final PopupPanel widget;
 
@@ -63,7 +65,7 @@ public class SourcesView extends PopupViewWithUiHandlers<SourcesUiHandlers> impl
     @UiField
     ModalWindow modalWindow;
     @UiField
-    DataGrid<FormToFormRelation> table;
+    DataGrid<Relation> table;
     @UiField
     LinkButton formDecAnchor;
     @UiField
@@ -78,7 +80,7 @@ public class SourcesView extends PopupViewWithUiHandlers<SourcesUiHandlers> impl
     HTML verSep;
 
     private boolean isForm;
-    private ListDataProvider<FormToFormRelation> dataProvider = new ListDataProvider<FormToFormRelation>();
+    private ListDataProvider<Relation> dataProvider = new ListDataProvider<Relation>();
 
     @Inject
     public SourcesView(Binder uiBinder, EventBus eventBus) {
@@ -86,7 +88,9 @@ public class SourcesView extends PopupViewWithUiHandlers<SourcesUiHandlers> impl
         widget = uiBinder.createAndBindUi(this);
         widget.setAnimationEnabled(true);
         isForm = true;
-        initColumns();
+        if (getUiHandlers() != null) {
+            initColumns();
+        }
         table.setRowCount(0);
         dataProvider.addDataDisplay(table);
         initCheckboxes();
@@ -105,9 +109,11 @@ public class SourcesView extends PopupViewWithUiHandlers<SourcesUiHandlers> impl
     @UiHandler("formDecAnchor")
     public void changeView(ClickEvent event){
         isForm = !isForm;
-        initColumns();
-        updateSwitchMode();
-        updateTableData();
+        if (getUiHandlers() != null) {
+            initColumns();
+            updateSwitchMode();
+            updateTableData();
+        }
     }
 
     @UiHandler("source")
@@ -130,36 +136,36 @@ public class SourcesView extends PopupViewWithUiHandlers<SourcesUiHandlers> impl
             table.removeColumn(0);
         }
 
-        Column<FormToFormRelation, String> counterColumn = new Column<FormToFormRelation, String>(new ClickableTextCell()){
+        Column<Relation, String> counterColumn = new Column<Relation, String>(new ClickableTextCell()){
 
             @Override
-            public void render(Cell.Context context, FormToFormRelation object, SafeHtmlBuilder sb) {
+            public void render(Cell.Context context, Relation object, SafeHtmlBuilder sb) {
                 sb.appendHtmlConstant(String.valueOf(context.getIndex() + 1));
             }
 
             @Override
-            public String getValue(FormToFormRelation formToFormRelation) {
+            public String getValue(Relation formToFormRelation) {
                 return null;
             }
         };
 
-        TextColumn<FormToFormRelation> sourceColumn = new TextColumn<FormToFormRelation>() {
+        TextColumn<Relation> sourceColumn = new TextColumn<Relation>() {
             @Override
-            public String getValue(FormToFormRelation object) {
+            public String getValue(Relation object) {
                 return object.isSource() ? "Источник" : "Приемник";
             }
         };
 
-        TextColumn<FormToFormRelation> departmentColumn = new TextColumn<FormToFormRelation>() {
+        TextColumn<Relation> departmentColumn = new TextColumn<Relation>() {
             @Override
-            public String getValue(FormToFormRelation object) {
+            public String getValue(Relation object) {
                 return object.getFullDepartmentName();
             }
         };
 
-        TextColumn<FormToFormRelation> correctionDateColumn = new TextColumn<FormToFormRelation>() {
+        TextColumn<Relation> correctionDateColumn = new TextColumn<Relation>() {
             @Override
-            public String getValue(FormToFormRelation object) {
+            public String getValue(Relation object) {
                 if (object.getCorrectionDate() == null) {
                     return null;
                 }
@@ -168,16 +174,16 @@ public class SourcesView extends PopupViewWithUiHandlers<SourcesUiHandlers> impl
         };
         correctionDateColumn.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
 
-        TextColumn<FormToFormRelation> performerColumn = new TextColumn<FormToFormRelation>() {
+        TextColumn<Relation> performerColumn = new TextColumn<Relation>() {
             @Override
-            public String getValue(FormToFormRelation object) {
-                return object.getPerformer() != null ? object.getPerformer().getName() : "";
+            public String getValue(Relation object) {
+                return object.getPerformerName() != null ? object.getPerformerName() : "";
             }
         };
 
-        TextColumn<FormToFormRelation> stateColumn = new TextColumn<FormToFormRelation>() {
+        TextColumn<Relation> stateColumn = new TextColumn<Relation>() {
             @Override
-            public String getValue(FormToFormRelation object) {
+            public String getValue(Relation object) {
                 //return object.isCreated() ? object.getState().getTitle(): "Не создана";
                 return urlTemplates.getColValue(
                         object.isCreated() ? object.getState().getTitle() : "Не создана",
@@ -186,44 +192,52 @@ public class SourcesView extends PopupViewWithUiHandlers<SourcesUiHandlers> impl
             }
         };
 
-        TextColumn<FormToFormRelation> formKindColumn = new TextColumn<FormToFormRelation>() {
+        TextColumn<Relation> formKindColumn = new TextColumn<Relation>() {
             @Override
-            public String getValue(FormToFormRelation object) {
-                if (object.getFormType()!= null)
+            public String getValue(Relation object) {
+                if (object.getFormTypeName()!= null)
                     return object.getFormDataKind().getTitle();
                 else
                     return "";
             }
         };
 
-        TextColumn<FormToFormRelation> yearColumn = new TextColumn<FormToFormRelation>() {
+        TextColumn<Relation> yearColumn = new TextColumn<Relation>() {
             @Override
-            public String getValue(FormToFormRelation object) {
+            public String getValue(Relation object) {
                 return String.valueOf(object.getYear());
             }
         };
 
-        TextColumn<FormToFormRelation> periodColumn = new TextColumn<FormToFormRelation>() {
+        TextColumn<Relation> periodColumn = new TextColumn<Relation>() {
             @Override
-            public String getValue(FormToFormRelation object) {
+            public String getValue(Relation object) {
                 return object.getPeriodName();
             }
         };
 
-        Column<FormToFormRelation, String> formTypeColumn = new Column<FormToFormRelation, String>(new ClickableTextCell()){
+        TextColumn<Relation> comparativePeriodColumn = new TextColumn<Relation>() {
+            @Override
+            public String getValue(Relation object) {
+                return object.getComparativePeriodName() != null ?
+                        object.getComparativePeriodYear() + ", " + FormDataUtils.getAccName(object.getComparativePeriodName(), object.getComparativePeriodStartDate()): "";
+            }
+        };
+
+        Column<Relation, String> formTypeColumn = new Column<Relation, String>(new ClickableTextCell()){
 
             @Override
-            public void render(Cell.Context context, FormToFormRelation object, SafeHtmlBuilder sb) {
+            public void render(Cell.Context context, Relation object, SafeHtmlBuilder sb) {
                 String link;
-                if (object.getFormType() != null) {
+                if (object.getFormTypeName() != null) {
                     if (object.isCreated()) {
                         link = "<a href=\"#"
                                 + FormDataPresenter.NAME_TOKEN + ";"
                                 + FormDataPresenter.FORM_DATA_ID + "="
                                 + object.getFormDataId() + "\">"
-                                + object.getFormType().getName() + "</a>";
+                                + object.getFormTypeName() + "</a>";
                     } else {
-                        link = object.getFormType().getName();
+                        link = object.getFormTypeName();
                     }
                 } else {
                     if (object.isCreated()) {
@@ -231,42 +245,42 @@ public class SourcesView extends PopupViewWithUiHandlers<SourcesUiHandlers> impl
                                 + DeclarationDataTokens.declarationData + ";"
                                 + DeclarationDataTokens.declarationId + "="
                                 + object.getDeclarationDataId() + "\">"
-                                + object.getDeclarationType().getName() + "</a>";
+                                + object.getDeclarationTypeName() + "</a>";
                     } else {
-                        link = object.getDeclarationType().getName();
+                        link = object.getDeclarationTypeName();
                     }
                 }
                 sb.appendHtmlConstant(link);
             }
 
             @Override
-            public String getValue(FormToFormRelation formToFormRelation) {
-                if (formToFormRelation.getFormType()!= null)
-                    return formToFormRelation.getFormType().getName();
+            public String getValue(Relation formToFormRelation) {
+                if (formToFormRelation.getFormTypeName() != null)
+                    return formToFormRelation.getFormTypeName();
                 else
-                    return formToFormRelation.getDeclarationType().getName();
+                    return formToFormRelation.getDeclarationTypeName();
             }
         };
 
         formKindColumn.setCellStyleNames("linkCell");
 
-        TextColumn<FormToFormRelation> monthColumn = new TextColumn<FormToFormRelation>() {
+        TextColumn<Relation> monthColumn = new TextColumn<Relation>() {
             @Override
-            public String getValue(FormToFormRelation object) {
-                return object.getMonth() != null ? object.getMonth() : "";
+            public String getValue(Relation object) {
+                return object.getMonth() != null ? Months.fromId(object.getMonth()).getTitle() : "";
             }
         };
 
-        TextColumn<FormToFormRelation> declarationTaxOrganColumn = new TextColumn<FormToFormRelation>() {
+        TextColumn<Relation> declarationTaxOrganColumn = new TextColumn<Relation>() {
             @Override
-            public String getValue(FormToFormRelation object) {
+            public String getValue(Relation object) {
                 return object.getTaxOrganCode() != null ? object.getTaxOrganCode() : "";
             }
         };
 
-        TextColumn<FormToFormRelation> declarationTaxOrganKppColumn = new TextColumn<FormToFormRelation>() {
+        TextColumn<Relation> declarationTaxOrganKppColumn = new TextColumn<Relation>() {
             @Override
-            public String getValue(FormToFormRelation object) {
+            public String getValue(Relation object) {
                 return object.getKpp() != null ? object.getKpp() : "";
             }
         };
@@ -294,6 +308,9 @@ public class SourcesView extends PopupViewWithUiHandlers<SourcesUiHandlers> impl
         table.addColumn(yearColumn, "Год");
         table.addColumn(periodColumn, "Период");
         if (isForm) {
+            if (TaxType.ETR.equals(getUiHandlers().getTaxType())) {
+                table.addColumn(comparativePeriodColumn, "Период сравнения");
+            }
             table.addColumn(monthColumn, "Месяц");
             table.addColumn(performerColumn, "Исполнитель");
         } else {
@@ -348,29 +365,31 @@ public class SourcesView extends PopupViewWithUiHandlers<SourcesUiHandlers> impl
     }
 
     @Override
-    public void setTableData(List<FormToFormRelation> result) {
+    public void setTableData(List<Relation> result) {
         tableData = result;
         isForm = true;
-        if (result == null)
-            initColumns();
-        updateSwitchMode();
-        initCheckboxes();
-        updateTableData();
+        if (getUiHandlers() != null) {
+            if (result == null)
+                initColumns();
+            updateSwitchMode();
+            initCheckboxes();
+            updateTableData();
+        }
     }
 
     private void updateTableData() {
-        List<FormToFormRelation> filteredData = new LinkedList<FormToFormRelation>();
+        List<Relation> filteredData = new LinkedList<Relation>();
         if (tableData != null) {
             boolean src = source.getValue();
             boolean dst = destination.getValue();
             boolean uncr = uncreated.getValue();
 
-            for (FormToFormRelation formToFormRelation : tableData) {
-                boolean fSrc = formToFormRelation.isSource();
-                boolean fCr = formToFormRelation.isCreated();
-                boolean fForm = formToFormRelation.getFormType() != null;
+            for (Relation relation : tableData) {
+                boolean fSrc = relation.isSource();
+                boolean fCr = relation.isCreated();
+                boolean fForm = relation.getFormTypeName() != null;
                 if ((src && fSrc || dst && !fSrc) && (uncr || fCr) && (fForm == isForm)) {
-                    filteredData.add(formToFormRelation);
+                    filteredData.add(relation);
                 }
             }
             dataProvider.setList(filteredData);

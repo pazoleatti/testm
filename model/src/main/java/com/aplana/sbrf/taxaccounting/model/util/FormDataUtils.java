@@ -1,9 +1,6 @@
 package com.aplana.sbrf.taxaccounting.model.util;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
 
 import com.aplana.sbrf.taxaccounting.model.Cell;
@@ -24,6 +21,29 @@ public final class FormDataUtils {
 	
 	private FormDataUtils(){	
 	}
+
+    /**
+     * Возвращает полное имя периода для нф с нарастающим итогом
+     * @return
+     */
+    public static String getAccName(String name, Date calendarStartDate) {
+        Calendar sDate = Calendar.getInstance();
+        sDate.setTime(calendarStartDate);
+        int day = sDate.get(Calendar.DAY_OF_MONTH);
+        int month = sDate.get(Calendar.MONTH) + 1;
+        if (day == 1 && month == 4) {
+            //2 квартал: 2 квартал (полугодие)
+            return name + " (полугодие)";
+        } else if (day == 1 && month == 7) {
+            //3 квартал: 3 квартал (9 месяцев)
+            return name + " (9 месяцев)";
+        } else if (day == 1 && month == 10) {
+            //4 квартал: 4 квартал (год)
+            return name + " (год)";
+        } else {
+            return name;
+        }
+    }
 	
 	/**
 	 * Метод приводит список строк в форму, которая позволяет получать/сохранять

@@ -55,4 +55,13 @@ public enum FormDataKind {
 		}
 		throw new IllegalArgumentException("Wrong FormDataKind id: " + kindId);
 	}
+
+    public static FormDataKind fromName(String name) {
+        for (FormDataKind kind: values()) {
+            if (kind.title.equals(name)) {
+                return kind;
+            }
+        }
+        throw new IllegalArgumentException("Wrong FormDataKind id: " + name);
+    }
 }

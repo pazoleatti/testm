@@ -40,12 +40,12 @@ public class SourcesHandler extends AbstractActionHandler<SourcesAction, Sources
         SourcesResult result = new SourcesResult();
         Logger logger = new Logger();
         TAUserInfo userInfo = securityService.currentUserInfo();
-        List<FormToFormRelation> relationList = new ArrayList<FormToFormRelation>();
+        List<Relation> relationList = new ArrayList<Relation>();
 
         /** Проверяем в скрипте источники-приемники для особенных форм */
         Map<String, Object> params = new HashMap<String, Object>();
         FormSources sources = new FormSources();
-        sources.setSourceList(new ArrayList<FormToFormRelation>());
+        sources.setSourceList(new ArrayList<Relation>());
         sources.setSourcesProcessedByScript(false);
         params.put("sources", sources);
         scriptingService.executeScript(userInfo, formData, FormDataEvent.GET_SOURCES, logger, params);
@@ -56,48 +56,13 @@ public class SourcesHandler extends AbstractActionHandler<SourcesAction, Sources
                 relationList.addAll(sources.getSourceList());
             }
         } else {
-            //Получаем источники-приемники стандартными методами ядра
-            relationList = sourceService.getRelations(formData, logger, userInfo);
+            //Получаем нф-источники
+            relationList.addAll(sourceService.getSourcesInfo(formData.getId(), true));
+            //Получаем нф-приемники
+            relationList.addAll(sourceService.getDestinationsInfo(formData.getId(), true));
+            //Получаем декларации-приемники
+            relationList.addAll(sourceService.getDeclarationDestinationsInfo(formData.getId(), true));
         }
-
-        Collections.sort(relationList, new Comparator<FormToFormRelation>() {
-            @Override
-            public int compare(FormToFormRelation o1, FormToFormRelation o2) {
-                // вначале сортируем по типу источник/приемник
-                if (o1.isSource() ^ (!o2.isSource())){
-                    // если тип (источник или приемник) совпали то сортируем по типу формы
-                    String name1 = o1.getFormType() != null?o1.getFormType().getName():o1.getDeclarationType().getName();
-                    String name2 = o2.getFormType() != null?o2.getFormType().getName():o2.getDeclarationType().getName();
-                    int type = name1.compareTo(name2);
-                    if (type != 0){
-                        return type;
-                    } else{
-                        // Сотируем дате корректировки
-                        if (o1.getCorrectionDate() != null || o2.getCorrectionDate() != null) {
-                            if (o1.getCorrectionDate() == null) {
-                                return -1;
-                            }
-                            if (o2.getCorrectionDate() == null) {
-                                return 1;
-                            }
-                            int dateCompare = o1.getCorrectionDate().compareTo(o2.getCorrectionDate());
-                            if (dateCompare != 0) {
-                                return dateCompare;
-                            }
-                        }
-                        // Сотируем по состоянию формы
-                        if (!o1.isCreated()){
-                            return 1;
-                        } else if (!o2.isCreated()){
-                            return -1;
-                        }
-                        return o1.getState().getTitle().compareTo(o2.getState().getTitle());
-                    }
-                } else{
-                    return o1.isSource() ? 1:-1;
-                }
-            }
-        });
         result.setData(relationList);
         return result;
     }

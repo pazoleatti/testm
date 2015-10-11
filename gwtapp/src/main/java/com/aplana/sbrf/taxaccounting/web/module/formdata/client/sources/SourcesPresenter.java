@@ -1,7 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdata.client.sources;
 
 import com.aplana.sbrf.taxaccounting.model.FormData;
-import com.aplana.sbrf.taxaccounting.model.FormToFormRelation;
+import com.aplana.sbrf.taxaccounting.model.Relation;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
@@ -24,7 +24,7 @@ import java.util.List;
  */
 public class SourcesPresenter extends PresenterWidget<SourcesPresenter.MyView> implements SourcesUiHandlers {
     public interface MyView extends PopupView, HasUiHandlers<SourcesUiHandlers> {
-        void setTableData(List<FormToFormRelation> tableData);
+        void setTableData(List<Relation> tableData);
     }
 
     private final DispatchAsync dispatcher;

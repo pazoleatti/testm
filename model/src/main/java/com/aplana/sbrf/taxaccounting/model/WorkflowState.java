@@ -11,13 +11,15 @@ public enum WorkflowState {
 	/** Статус "Утверждена" */
 	APPROVED(3, "Утверждена", "Утверждение"),
 	/** Статус "Принята" */
-	ACCEPTED(4, "Принята", "Принятие");
+	ACCEPTED(4, "Принята", "Принятие"),
+    /** Статус "Не создана" */
+    NOT_EXIST(null, "Не создана", "Создание");
 
-	private final int id;
+	private final Integer id;
 	private final String title;
     private final String actionName;
 	
-	private WorkflowState(int id, String title, String actionName) {
+	private WorkflowState(Integer id, String title, String actionName) {
 		this.id = id;
 		this.title = title;
         this.actionName = actionName;
@@ -33,9 +35,12 @@ public enum WorkflowState {
         return actionName;
     }
 
-    public static WorkflowState fromId(int id) {
+    public static WorkflowState fromId(Integer id) {
+        if (id == null) {
+            return NOT_EXIST;
+        }
 		for(WorkflowState state: values()) {
-			if (state.id == id) {
+			if (state.id.equals(id)) {
 				return state;
 			}
 		}

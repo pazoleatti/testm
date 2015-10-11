@@ -812,7 +812,7 @@ public class FormDataServiceImpl implements FormDataService {
 				/** Проверяем в скрипте источники-приемники для особенных форм */
 				Map<String, Object> params = new HashMap<String, Object>();
 				FormSources sources = new FormSources();
-				sources.setSourceList(new ArrayList<FormToFormRelation>());
+				sources.setSourceList(new ArrayList<Relation>());
 				sources.setSourcesProcessedByScript(false);
 				params.put("sources", sources);
 				formDataScriptingService.executeScript(userInfo, formData, FormDataEvent.GET_SOURCES, logger, params);
@@ -820,14 +820,14 @@ public class FormDataServiceImpl implements FormDataService {
 				if (sources.isSourcesProcessedByScript()) {
 					//Скрипт возвращает все необходимые источники-приемники
 					if (sources.getSourceList() != null) {
-						for (FormToFormRelation relation : sources.getSourceList()) {
+						for (Relation relation : sources.getSourceList()) {
 							if (relation.isSource() && relation.isCreated() && relation.getFormType() != null) {
 								//TODO: Заполняем DepartmentFormType не полностью!
 								DepartmentFormType source = new DepartmentFormType();
 								source.setDepartmentId(formData.getDepartmentId());
 								source.setFormTypeId(relation.getFormType().getId());
 								source.setKind(relation.getFormDataKind());
-								source.setPeriodOrder(relation.getPeriodOrder());
+								source.setPeriodOrder(relation.getMonth());
 								sourceList.add(source);
 							}
 						}

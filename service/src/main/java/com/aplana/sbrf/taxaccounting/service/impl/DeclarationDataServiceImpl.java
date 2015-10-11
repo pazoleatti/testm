@@ -1045,21 +1045,21 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         List<DepartmentFormType> sourceList = new ArrayList<DepartmentFormType>();
         Map<String, Object> params = new HashMap<String, Object>();
         FormSources sources = new FormSources();
-        sources.setSourceList(new ArrayList<FormToFormRelation>());
+        sources.setSourceList(new ArrayList<Relation>());
         sources.setSourcesProcessedByScript(false);
         params.put("sources", sources);
         declarationDataScriptingService.executeScript(null, declarationData, FormDataEvent.GET_SOURCES, logger, params);
         if (sources.isSourcesProcessedByScript()) {
             //Скрипт возвращает все необходимые источники-приемники
             if (sources.getSourceList() != null) {
-                for (FormToFormRelation relation : sources.getSourceList()) {
+                for (Relation relation : sources.getSourceList()) {
                     if (relation.isSource() && relation.isCreated() && relation.getFormType() != null) {
                         //TODO: Заполняем DepartmentFormType не полностью!
                         DepartmentFormType source = new DepartmentFormType();
                         source.setDepartmentId(declarationData.getDepartmentId());
                         source.setFormTypeId(relation.getFormType().getId());
                         source.setKind(relation.getFormDataKind());
-                        source.setPeriodOrder(relation.getPeriodOrder());
+                        source.setPeriodOrder(relation.getMonth());
                         sourceList.add(source);
                     }
                 }

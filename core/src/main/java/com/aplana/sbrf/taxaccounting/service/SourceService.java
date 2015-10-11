@@ -2,7 +2,6 @@ package com.aplana.sbrf.taxaccounting.service;
 
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
-import com.aplana.sbrf.taxaccounting.model.source.ConsolidatedInstance;
 import com.aplana.sbrf.taxaccounting.model.source.SourceClientData;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 
@@ -381,24 +380,6 @@ public interface SourceService {
     void updatePerformer(int id, Integer performerId);
 
     /**
-     * Метод возвращает модель с информацией о созданных/не созданных
-     * источниках/приемниках для налоговых форм
-     *
-     * @param formData
-     * @param logger
-     * @param userInfo
-     */
-    List<FormToFormRelation> getRelations(FormData formData, Logger logger, TAUserInfo userInfo);
-
-    /**
-     * Метод возвращает модель с информацией о созданных/не созданных
-     * источниках для деклараций/уведомлений
-     *
-     * @param declaration декларация/уведомление
-     */
-    List<FormToFormRelation> getRelations(DeclarationData declaration);
-
-    /**
      * Находит назначенные виды налоговые форм, которые являются потребителями налоговой формы{@code typeId}
      * @param typeId вид налоговой формы источника
      * @param dateFrom дата начала действия
@@ -547,4 +528,36 @@ public interface SourceService {
      * @return true - данные актуальны
      */
     boolean isDDConsolidationTopical(long ddTargetId);
+
+    /**
+     * Возвращает список нф-источников для указанной нф (включая несозданные)
+     * @param destinationFormDataId идентификатор нф-приемника
+     * @param light true - заполнятся только текстовые данные для GUI
+     * @return список нф-источников
+     */
+    List<Relation> getSourcesInfo(long destinationFormDataId, boolean light);
+
+    /**
+     * Возвращает список нф-приемников для указанной нф (включая несозданные)
+     * @param sourceFormDataId идентификатор нф-источника
+     * @param light true - заполнятся только текстовые данные для GUI
+     * @return список нф-приемников
+     */
+    List<Relation> getDestinationsInfo(long sourceFormDataId, boolean light);
+
+    /**
+     * Возвращает список нф-источников для указанной декларации (включая несозданные)
+     * @param sourceFormDataId идентификатор нф-источника
+     * @param light true - заполнятся только текстовые данные для GUI
+     * @return список нф-источников
+     */
+    List<Relation> getDeclarationDestinationsInfo(long sourceFormDataId, boolean light);
+
+    /**
+     * Возвращает список нф-источников для указанной декларации (включая несозданные)
+     * @param declarationId идентификатор декларации-приемника
+     * @param light true - заполнятся только текстовые данные для GUI
+     * @return список нф-источников
+     */
+    List<Relation> getDeclarationSourcesInfo(long declarationId, boolean light);
 }

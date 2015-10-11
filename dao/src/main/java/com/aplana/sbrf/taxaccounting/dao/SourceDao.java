@@ -1,7 +1,8 @@
 package com.aplana.sbrf.taxaccounting.dao;
 
+import com.aplana.sbrf.taxaccounting.model.FormData;
+import com.aplana.sbrf.taxaccounting.model.Relation;
 import com.aplana.sbrf.taxaccounting.model.source.*;
-import com.aplana.sbrf.taxaccounting.model.util.Pair;
 
 import java.util.*;
 
@@ -200,4 +201,36 @@ public interface SourceDao {
      * @return false если есть хоть одна строка где НФ-источник равна null
      */
     boolean isDDConsolidationTopical(long ddTargetId);
+
+    /**
+     * Возвращает список нф-источников для указанной нф (включая несозданные)
+     * @param destinationFormDataId идентификатор нф-приемника
+     * @param light true - заполнятся только текстовые данные для GUI
+     * @return список нф-источников
+     */
+    List<Relation> getSourcesInfo(long destinationFormDataId, boolean light);
+
+    /**
+     * Возвращает список нф-приемников для указанной нф (включая несозданные)
+     * @param sourceFormDataId идентификатор нф-источника
+     * @param light true - заполнятся только текстовые данные для GUI
+     * @return список нф-приемников
+     */
+    List<Relation> getDestinationsInfo(long sourceFormDataId, boolean light);
+
+    /**
+     * Возвращает список нф-источников для указанной декларации (включая несозданные)
+     * @param sourceFormDataId идентификатор нф-источника
+     * @param light true - заполнятся только текстовые данные для GUI
+     * @return список нф-источников
+     */
+    List<Relation> getDeclarationDestinationsInfo(long sourceFormDataId, boolean light);
+
+    /**
+     * Возвращает список нф-источников для указанной декларации (включая несозданные)
+     * @param declarationId идентификатор декларации-приемника
+     * @param light true - заполнятся только текстовые данные для GUI
+     * @return список нф-источников
+     */
+    List<Relation> getDeclarationSourcesInfo(long declarationId, boolean light);
 }

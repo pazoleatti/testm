@@ -1,6 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdata.shared;
 
-import com.aplana.sbrf.taxaccounting.model.FormToFormRelation;
+import com.aplana.sbrf.taxaccounting.model.Relation;
 import com.gwtplatform.dispatch.shared.Result;
 
 import java.util.List;
@@ -9,13 +9,13 @@ import java.util.List;
  * @author auldanov
  */
 public class SourcesResult implements Result {
-    private List<FormToFormRelation> data;
+    private List<Relation> data;
 
-    public List<FormToFormRelation> getData() {
+    public List<Relation> getData() {
         return data;
     }
 
-    public void setData(List<FormToFormRelation> data) {
+    public void setData(List<Relation> data) {
         this.data = data;
     }
 }

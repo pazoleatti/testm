@@ -100,4 +100,11 @@ public class FormType implements Serializable {
     public void setIfrsName(String ifrsName) {
         this.ifrsName = ifrsName;
     }
+
+    @Override
+    public String toString() {
+        return "FormType{" +
+                "name='" + name + '\'' +
+                '}';
+    }
 }
