@@ -3,7 +3,7 @@ package form_template.property.property_945_5.v2014
 import com.aplana.sbrf.taxaccounting.model.FormData
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.FormDataKind
-import com.aplana.sbrf.taxaccounting.model.FormToFormRelation
+import com.aplana.sbrf.taxaccounting.model.Relation
 import com.aplana.sbrf.taxaccounting.model.Formats
 import com.aplana.sbrf.taxaccounting.model.TaxType
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
@@ -1359,15 +1359,15 @@ def getSources() {
             otherMonthlyFormsPeriods.each { monthOrder ->
                 FormData tmpFormData = formDataService.getLast(departmentFormType.formTypeId, departmentFormType.kind,
                         departmentFormType.departmentId, currentPeriod.id, monthOrder, null, false)
-                def formToFormRelation = getFormToFormRelation(tmpFormData, departmentFormType, isSource, currentPeriod, monthOrder)
-                sources.sourceList.add(formToFormRelation)
+                def relation = getRelation(tmpFormData, departmentFormType, isSource, currentPeriod, monthOrder)
+                sources.sourceList.add(relation)
             }
         } else {
             // квартальная форма
             FormData tmpFormData = formDataService.getLast(departmentFormType.formTypeId, departmentFormType.kind,
                     departmentFormType.departmentId, currentPeriod.id, null, null, false)
-            def formToFormRelation = getFormToFormRelation(tmpFormData, departmentFormType, isSource, currentPeriod, null)
-            sources.sourceList.add(formToFormRelation)
+            def relation = getRelation(tmpFormData, departmentFormType, isSource, currentPeriod, null)
+            sources.sourceList.add(relation)
         }
     }
 
@@ -1385,8 +1385,8 @@ def getSources() {
             // квартальная форма
             FormData tmpFormData = formDataService.getLast(departmentFormType.formTypeId, departmentFormType.kind,
                     departmentFormType.departmentId, currentPeriod.id, null, null, false)
-            def formToFormRelation = getFormToFormRelation(tmpFormData, departmentFormType, isSource, currentPeriod, null)
-            sources.sourceList.add(formToFormRelation)
+            def relation = getRelation(tmpFormData, departmentFormType, isSource, currentPeriod, null)
+            sources.sourceList.add(relation)
             continue
         }
         // ежемесячные
@@ -1394,8 +1394,8 @@ def getSources() {
             monthOrders.each { monthOrder ->
                 FormData tmpFormData = formDataService.getLast(departmentFormType.formTypeId, departmentFormType.kind,
                         departmentFormType.departmentId, period.id, monthOrder, null, false)
-                def formToFormRelation = getFormToFormRelation(tmpFormData, departmentFormType, isSource, period, monthOrder)
-                sources.sourceList.add(formToFormRelation)
+                def relation = getRelation(tmpFormData, departmentFormType, isSource, period, monthOrder)
+                sources.sourceList.add(relation)
             }
         }
     }
@@ -1413,27 +1413,26 @@ def getSources() {
  * @param period период нф
  * @param monthOrder номер месяца (для ежемесячной формы)
  */
-def getFormToFormRelation(def tmpFormData, def departmentFormType, def isSource, def period, def monthOrder) {
-    FormToFormRelation formToFormRelation = new FormToFormRelation()
-    formToFormRelation.fullDepartmentName = getDepartmentFullName(departmentFormType.departmentId)
-    formToFormRelation.performer = getDepartmentById(departmentFormType.performerId);
-    formToFormRelation.formDataKind = departmentFormType.kind
-    formToFormRelation.source = isSource
-    formToFormRelation.month = (monthOrder ? Formats.getRussianMonthNameWithTier(monthOrder) : null)
-    formToFormRelation.year = period.taxPeriod.year
-    formToFormRelation.periodName = period.name
+def getRelation(def tmpFormData, def departmentFormType, def isSource, def period, def monthOrder) {
+    Relation relation = new Relation()
+    relation.fullDepartmentName = getDepartmentFullName(departmentFormType.departmentId)
+    relation.performer = getDepartmentById(departmentFormType.performerId);
+    relation.formDataKind = departmentFormType.kind
+    relation.source = isSource
+    relation.year = period.taxPeriod.year
+    relation.periodName = period.name
     if (tmpFormData != null) {
-        formToFormRelation.created = true
-        formToFormRelation.formType = tmpFormData.formType
-        formToFormRelation.state = tmpFormData.state
-        formToFormRelation.formDataId = tmpFormData.id
-        formToFormRelation.correctionDate = departmentReportPeriodService.get(tmpFormData.departmentReportPeriodId)?.correctionDate
-        formToFormRelation.periodOrder = tmpFormData.periodOrder
+        relation.created = true
+        relation.formType = tmpFormData.formType
+        relation.state = tmpFormData.state
+        relation.formDataId = tmpFormData.id
+        relation.correctionDate = departmentReportPeriodService.get(tmpFormData.departmentReportPeriodId)?.correctionDate
+        relation.month = tmpFormData.periodOrder
     } else {
-        formToFormRelation.formType = getFormTypeById(departmentFormType.formTypeId)
-        formToFormRelation.created = false
+        relation.formType = getFormTypeById(departmentFormType.formTypeId)
+        relation.created = false
     }
-    return formToFormRelation
+    return relation
 }
 
 def isMonthlyForm(def formTemplateId, def periodId) {

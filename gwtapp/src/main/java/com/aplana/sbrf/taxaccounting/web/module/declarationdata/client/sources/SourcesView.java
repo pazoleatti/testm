@@ -101,7 +101,7 @@ public class SourcesView extends PopupViewWithUiHandlers<SourcesUiHandlers> impl
             }
 
             @Override
-            public String getValue(Relation formToFormRelation) {
+            public String getValue(Relation relation) {
                 return null;
             }
         };
@@ -187,8 +187,8 @@ public class SourcesView extends PopupViewWithUiHandlers<SourcesUiHandlers> impl
             }
 
             @Override
-            public String getValue(Relation formToFormRelation) {
-                return formToFormRelation.getFormTypeName();
+            public String getValue(Relation relation) {
+                return relation.getFormTypeName();
             }
         };
 

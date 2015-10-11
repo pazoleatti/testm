@@ -13,7 +13,7 @@ public class WorkflowStateTest {
 		// Проверяем, что идентификаторы всех состояний уникальны
 		Set<Integer> ids = new HashSet<Integer>();
 		for (WorkflowState state: WorkflowState.values()) {
-			int id = state.getId();
+			Integer id = state.getId();
 			if (ids.contains(id)) {
 				fail("Multiple occurences of id " + id);		
 			}

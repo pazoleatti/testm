@@ -25,7 +25,7 @@ public enum WorkflowState {
         this.actionName = actionName;
 	}
 	
-	public int getId() {
+	public Integer getId() {
 		return id;
 	}
 	public String getTitle() {
@@ -40,7 +40,7 @@ public enum WorkflowState {
             return NOT_EXIST;
         }
 		for(WorkflowState state: values()) {
-			if (state.id.equals(id)) {
+            if (id.equals(state.id)) {
 				return state;
 			}
 		}
