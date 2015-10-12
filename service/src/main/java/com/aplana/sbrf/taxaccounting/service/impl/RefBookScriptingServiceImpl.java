@@ -7,7 +7,6 @@ import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
-import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
@@ -45,29 +44,25 @@ public class RefBookScriptingServiceImpl extends TAAbstractScriptingServiceImpl 
 
     @Autowired
     private BlobDataService blobDataService;
-
     @Autowired
     private RefBookFactory refBookFactory;
-
     @Autowired
     private RefBookDao refBookDao;
-
     @Autowired
     private LogEntryService logEntryService;
-
     @Autowired
     @Qualifier("versionInfoProperties")
     private Properties versionInfoProperties;
 
     @Override
-    public void executeScript(TAUserInfo userInfo, long refBookId, FormDataEvent event, Logger logger, Map<String, Object> additionalParameters) {
+    public boolean executeScript(TAUserInfo userInfo, long refBookId, FormDataEvent event, Logger logger, Map<String, Object> additionalParameters) {
         RefBook refBook = refBookFactory.get(refBookId);
         if (refBook == null || refBook.getScriptId() == null) {
-            return;
+            return false;
         }
         BlobData bd = blobDataService.get(refBook.getScriptId());
         if (bd == null) {
-            return;
+            return false;
         }
 		// извлекаем скрипт
         StringWriter writer = new StringWriter();
@@ -75,11 +70,11 @@ public class RefBookScriptingServiceImpl extends TAAbstractScriptingServiceImpl 
             IOUtils.copy(bd.getInputStream(), writer, "UTF-8");
         } catch (IOException e) {
             logger.error(e);
-            return;
+            return false;
         }
         String script = writer.toString();
 		if (!canExecuteScript(script, event)) {
-			return;
+			return false;
 		}
 
         // Локальный логгер для импорта конкретного справочника
@@ -137,25 +132,21 @@ public class RefBookScriptingServiceImpl extends TAAbstractScriptingServiceImpl 
         if (scriptLogger.containsLevel(LogLevel.ERROR)) {
             throw new ServiceLoggerException("Проверка не пройдена (присутствуют фатальные ошибки)", logEntryService.save(logger.getEntries()));
         }
+        return true;
     }
 
     @Override
     public String getScript(Long refBookId) {
-
         StringWriter writer = new StringWriter();
-
         RefBook refBook = refBookFactory.get(refBookId);
-
         if (refBook.getScriptId() != null) {
             BlobData blobData = blobDataService.get(refBook.getScriptId());
-
             try {
                 IOUtils.copy(blobData.getInputStream(), writer, "UTF-8");
             } catch (IOException e) {
                 throw new ServiceException(ERROR_MSG, e);
             }
         }
-
         return writer.toString();
     }
 

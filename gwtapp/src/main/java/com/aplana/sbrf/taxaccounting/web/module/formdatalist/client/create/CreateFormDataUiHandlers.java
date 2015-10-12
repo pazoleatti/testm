@@ -14,6 +14,6 @@ public interface CreateFormDataUiHandlers extends UiHandlers {
      * @param formId идентификатор налоговой формы
      * @return true - ежемесячная, false - не ежемесячная
      */
-    void checkFormType(Integer formId, Integer reportPeriodId);
+    void checkFormType(Integer formId, Integer reportPeriodId, Integer comparativePeriodId);
     TaxType getTaxType();
 }

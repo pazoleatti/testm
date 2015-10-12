@@ -59,7 +59,7 @@ public class FilesCommentsView extends PopupViewWithUiHandlers<FilesCommentsUiHa
     @UiField
     GenericDataGrid<FormDataFile> table;
     @UiField
-    TextArea note;
+    com.google.gwt.user.client.ui.TextArea note;
     @UiField
     HorizontalPanel buttonPanel;
     @UiField
@@ -86,6 +86,8 @@ public class FilesCommentsView extends PopupViewWithUiHandlers<FilesCommentsUiHa
         super(eventBus);
         widget = uiBinder.createAndBindUi(this);
         widget.setAnimationEnabled(true);
+
+        note.getElement().setAttribute("maxLength", "255");
 
         selectionModel.addSelectionChangeHandler(
                 new SelectionChangeEvent.Handler() {
@@ -325,11 +327,11 @@ public class FilesCommentsView extends PopupViewWithUiHandlers<FilesCommentsUiHa
         if (readOnlyMode) {
             buttonPanel.setVisible(false);
             saveButton.setVisible(false);
-            note.setEnabled(false);
+            note.getElement().setAttribute("readonly", "readonly");
         } else {
             buttonPanel.setVisible(true);
             saveButton.setVisible(true);
-            note.setEnabled(true);
+            note.getElement().removeAttribute("readonly");
         }
         initColumns();
         table.redraw();

@@ -21,8 +21,9 @@ public interface RefBookScriptingService {
      * @param logger логгер для сохранения ошибок выполнения скриптов.
      * @param additionalParameters дополнительные параметры для передачи в скрипты. Их состав зависит от события для которого вызываются
      *                             скрипты. Параметр может иметь значение null
+     * @return true - скрипт был исполнен, false - скрипт не запускался
      */
-    void executeScript(TAUserInfo userInfo, long refBookId, FormDataEvent event, Logger logger,  Map<String, Object> additionalParameters);
+    boolean executeScript(TAUserInfo userInfo, long refBookId, FormDataEvent event, Logger logger,  Map<String, Object> additionalParameters);
 
     /**
      * Получение скрипта справочника

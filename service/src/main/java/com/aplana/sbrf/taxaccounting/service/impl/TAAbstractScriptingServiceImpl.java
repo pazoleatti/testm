@@ -99,7 +99,7 @@ public abstract class TAAbstractScriptingServiceImpl implements ApplicationConte
 	 * @param event тип события. Может быть null - тогда не ведется поиск обработчика внутри скрипта.
 	 * @return true - запускать скрипт можно; false - не стоит
 	 */
-	protected boolean canExecuteScript(String script, FormDataEvent event) {
+	public static boolean canExecuteScript(String script, FormDataEvent event) {
 		if (StringUtils.isBlank(script)) {
 			return false;
 		}

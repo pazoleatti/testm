@@ -40,7 +40,7 @@
                     </g:HorizontalPanel>
 
                     <g:HorizontalPanel>
-                        <aplana:TextArea width="800px" ui:field="note" visibleLines="4" maxLength="255"/>
+                        <g:TextArea width="800px" ui:field="note" visibleLines="4"/>
                     </g:HorizontalPanel>
 
                     <g:VerticalPanel width="100%">

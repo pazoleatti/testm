@@ -14,16 +14,14 @@ public interface FormDataScriptingService {
 
 	/**
 	 * Выполняет скрипт формы (FormTemplate.script) по определенному событию.
-	 * (Для временной поддержки старого механизма при отсутствии FormTemplate.script
-	 * отработает старый механизм работы скриптов)
 	 *
-	 * @param userInfo Информация о текущем пользоваетеле. Вообще, сомнительно его здесь нахождение. Моё мнение: выполднение скриптов
-	 *                 не должно зависеть от пользователя.
+	 * @param userInfo информация о текущем пользоваетеле
 	 * @param formData данные налоговой формы
-	 * @param event    событие формы
-	 * @param logger   логгер для сохранения ошибок выполнения скриптов.
+	 * @param event    событие
+	 * @param logger   логгер для сохранения ошибок выполнения скриптов
 	 * @param additionalParameters дополнительные параметры для передачи в скрипты. Их состав зависит от события для которого вызываются
 	 *                             скрипты. Параметр может иметь значение null
+	 * @return true - скрипт был исполнен, false - скрипт не запускался
 	 */
-	void executeScript(TAUserInfo userInfo, FormData formData, FormDataEvent event, Logger logger,  Map<String, Object> additionalParameters);
+	boolean executeScript(TAUserInfo userInfo, FormData formData, FormDataEvent event, Logger logger,  Map<String, Object> additionalParameters);
 }

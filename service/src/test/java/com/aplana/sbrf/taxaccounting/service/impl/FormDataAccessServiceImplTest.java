@@ -113,6 +113,7 @@ public class FormDataAccessServiceImplTest {
         FormType summaryFormType1 = FormTypeMockUtils.mockFormType(1, TaxType.INCOME, "summary 1");
         FormType summaryFormType2 = FormTypeMockUtils.mockFormType(2, TaxType.INCOME, "summary 2");
         FormType additionalFormType = FormTypeMockUtils.mockFormType(3, TaxType.INCOME, "additional");
+        FormType etrFormType = FormTypeMockUtils.mockFormType(4, TaxType.ETR, "etr");
 
         FormTemplateDao formTemplateDao = mock(FormTemplateDao.class);
         FormTemplate formTemplate1 = mockFormTemplate(1, summaryFormType1.getId(), TaxType.INCOME, "Тип формы 1",
@@ -127,6 +128,20 @@ public class FormDataAccessServiceImplTest {
                 VersionedObjectStatus.NORMAL);
         when(formTemplate3.getVersion()).thenReturn(new Date(34543534));
         when(formTemplateDao.get(3)).thenReturn(formTemplate3);
+
+        FormTemplate formTemplate4 = mockFormTemplate(4, etrFormType.getId(), TaxType.ETR, "Форма ЭНС 1",
+                VersionedObjectStatus.NORMAL);
+        when(formTemplate4.getVersion()).thenReturn(new Date(34543534));
+        when(formTemplate4.isComparative()).thenReturn(true);
+        when(formTemplate4.isAccruing()).thenReturn(true);
+        when(formTemplateDao.get(4)).thenReturn(formTemplate4);
+
+        FormTemplate formTemplate5 = mockFormTemplate(5, etrFormType.getId(), TaxType.ETR, "Форма ЭНС 2",
+                VersionedObjectStatus.NORMAL);
+        when(formTemplate5.getVersion()).thenReturn(new Date(34543534));
+        when(formTemplate5.isComparative()).thenReturn(false);
+        when(formTemplate5.isAccruing()).thenReturn(true);
+        when(formTemplateDao.get(5)).thenReturn(formTemplate5);
 
         ReflectionTestUtils.setField(service, "formTemplateDao", formTemplateDao);
 
@@ -337,6 +352,7 @@ public class FormDataAccessServiceImplTest {
             }
         }).when(departmentReportPeriodDao).get(anyInt());
         when(departmentReportPeriodDao.getListIdsByFilter(any(DepartmentReportPeriodFilter.class))).thenReturn(Arrays.asList(1));
+        //when(departmentReportPeriodDao.get().thenReturn(Arrays.asList(1));
         ReflectionTestUtils.setField(service, "departmentReportPeriodDao", departmentReportPeriodDao);
 
         PeriodService reportPeriodService = mock(PeriodService.class);
@@ -345,18 +361,22 @@ public class FormDataAccessServiceImplTest {
         reportPeriod.setEndDate(new Date(908686433));
         when(reportPeriodService.getReportPeriod(REPORT_PERIOD_ACTIVE_ID)).thenReturn(reportPeriod);
         when(reportPeriodService.getReportPeriod(REPORT_PERIOD_BALANCED_ID)).thenReturn(reportPeriod);
+        when(reportPeriodService.isFirstPeriod(REPORT_PERIOD_ACTIVE_ID)).thenReturn(false);
+        when(reportPeriodService.isFirstPeriod(REPORT_PERIOD_BALANCED_ID)).thenReturn(true);
         ReflectionTestUtils.setField(service, "reportPeriodService", reportPeriodService);
 
         SourceService sourceService = mock(SourceService.class);
         dfts.add(mockDepartmentFormType(TB1_ID, summaryFormType1.getId(), FormDataKind.SUMMARY));
         dfts.add(mockDepartmentFormType(TB1_ID, summaryFormType1.getId(), FormDataKind.CONSOLIDATED));
         dfts.add(mockDepartmentFormType(TB1_ID, additionalFormType.getId(), FormDataKind.ADDITIONAL));
+        dfts.add(mockDepartmentFormType(TB1_ID, etrFormType.getId(), FormDataKind.CONSOLIDATED));
         when(sourceService.getDFTByDepartment(Matchers.eq(TB1_ID), Matchers.any(TaxType.class), any(Date.class), any(Date.class))).thenReturn(dfts);
 
         dfts = new ArrayList<DepartmentFormType>();
         dfts.add(mockDepartmentFormType(TB2_ID, summaryFormType1.getId(), FormDataKind.SUMMARY));
         dfts.add(mockDepartmentFormType(TB2_ID, summaryFormType1.getId(), FormDataKind.CONSOLIDATED));
         dfts.add(mockDepartmentFormType(TB2_ID, additionalFormType.getId(), FormDataKind.ADDITIONAL));
+        dfts.add(mockDepartmentFormType(TB2_ID, etrFormType.getId(), FormDataKind.CONSOLIDATED));
         when(sourceService.getDFTByDepartment(Matchers.eq(TB2_ID), Matchers.any(TaxType.class), any(Date.class), any(Date.class))).thenReturn(dfts);
 
         dfts = new ArrayList<DepartmentFormType>();
@@ -611,6 +631,22 @@ public class FormDataAccessServiceImplTest {
 		assertFalse(checkFail(userInfo, 1, FormDataKind.SUMMARY, TB2_ACTIVE_ID));
         userInfo.setUser(mockUser(TB1_CONTROL_USER_ID, TB1_ID, TARole.ROLE_CONTROL));
         assertTrue(checkFail(userInfo, 1, FormDataKind.CONSOLIDATED, TB1_BALANCED_ID));
+
+        userInfo.setUser(mockUser(TB1_CONTROL_USER_ID, TB1_ID, TARole.ROLE_CONTROL));
+        assertFalse(checkFail(userInfo, 4, FormDataKind.CONSOLIDATED, TB1_ACTIVE_ID, null, false));
+        assertFalse(checkFail(userInfo, 4, FormDataKind.CONSOLIDATED, TB1_ACTIVE_ID, null, true));
+        assertTrue(checkFail(userInfo, 4, FormDataKind.CONSOLIDATED, TB1_ACTIVE_ID, TB1_ACTIVE_ID, false));
+        assertTrue(checkFail(userInfo, 4, FormDataKind.CONSOLIDATED, TB1_ACTIVE_ID, TB1_ACTIVE_ID, true));
+        assertTrue(checkFail(userInfo, 4, FormDataKind.CONSOLIDATED, TB1_ACTIVE_ID, TB1_BALANCED_ID, false));
+        assertFalse(checkFail(userInfo, 4, FormDataKind.CONSOLIDATED, TB1_ACTIVE_ID, TB1_BALANCED_ID, true));
+
+        assertTrue(checkFail(userInfo, 5, FormDataKind.CONSOLIDATED, TB1_ACTIVE_ID, null, false));
+        assertTrue(checkFail(userInfo, 5, FormDataKind.CONSOLIDATED, TB1_ACTIVE_ID, null, true));
+        assertFalse(checkFail(userInfo, 5, FormDataKind.CONSOLIDATED, TB1_ACTIVE_ID, TB1_ACTIVE_ID, false));
+        assertFalse(checkFail(userInfo, 5, FormDataKind.CONSOLIDATED, TB1_ACTIVE_ID, TB1_ACTIVE_ID, true));
+
+        assertTrue(checkFail(userInfo, 5, FormDataKind.CONSOLIDATED, TB1_BALANCED_ID, null, false));
+        assertFalse(checkFail(userInfo, 5, FormDataKind.CONSOLIDATED, TB1_BALANCED_ID, null, true));
     }
 
     @Test
@@ -796,7 +832,16 @@ public class FormDataAccessServiceImplTest {
      */
     private boolean checkFail(TAUserInfo userInfo, int formTemplateId, FormDataKind kind, int departmentReportPeriodId) {
         try {
-            service.canCreate(userInfo, formTemplateId, kind, departmentReportPeriodId);
+            service.canCreate(userInfo, formTemplateId, kind, departmentReportPeriodId, null, false);
+        } catch (ServiceException se) {
+            return false;
+        }
+        return true;
+    }
+
+    private boolean checkFail(TAUserInfo userInfo, int formTemplateId, FormDataKind kind, int departmentReportPeriodId, Integer comparativeDepReportPeriod, boolean accruing) {
+        try {
+            service.canCreate(userInfo, formTemplateId, kind, departmentReportPeriodId, comparativeDepReportPeriod, accruing);
         } catch (ServiceException se) {
             return false;
         }

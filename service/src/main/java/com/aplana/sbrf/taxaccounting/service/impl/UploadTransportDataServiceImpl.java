@@ -52,6 +52,8 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
     private DepartmentFormTypeDao departmentFormTypeDao;
     @Autowired
     private FormTypeService formTypeService;
+    @Autowired
+    private FormTemplateService formTemplateService;
 
     // Сообщения при загрузке в каталоги
     static final String U1 = "В каталоге загрузки ранее загруженный файл «%s» был заменен!";
@@ -84,7 +86,8 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
         L34_1("Не указан путь к каталогу загрузки %s! Файл «%s» не сохранен.", LogLevel.ERROR, true),
         L34_2("Не указан путь к каталогу загрузки для ТБ «%s» в конфигурационных параметрах АС «Учет налогов». Файл «%s» не сохранен.", LogLevel.ERROR, true),
         L35("Завершена процедура загрузки транспортных файлов в каталог загрузки. Файлов загружено: %d. Файлов отклонено: %d.", LogLevel.INFO, true),
-        L37("При загрузке файла «%s» произошла непредвиденная ошибка: %s.", LogLevel.ERROR, true);
+        L37("При загрузке файла «%s» произошла непредвиденная ошибка: %s.", LogLevel.ERROR, true),
+        L48("Для налоговой формы загружаемого файла \"%s\" не предусмотрена обработка транспортного файла! Загрузка не выполнена.", LogLevel.ERROR, true);
 
         private LogLevel level;
         private String text;
@@ -387,6 +390,17 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
             if (!departmentFormTypeDao.existAssignedForm(formDepartment.getId(), formType.getId(), FormDataKind.PRIMARY) &&
                     !departmentFormTypeDao.existAssignedForm(formDepartment.getId(), formType.getId(), FormDataKind.ADDITIONAL)) {
                 logger.warn(U3_2, formDepartment.getName(), formType.getName());
+                return null;
+            }
+
+            if (formTemplateService.existFormTemplate(formType.getId(), reportPeriod.getId(), true)) {
+                FormTemplate formTemplate = formTemplateService.get(formTemplateService.getActiveFormTemplateId(formType.getId(), reportPeriod.getId()), logger);
+                if (!TAAbstractScriptingServiceImpl.canExecuteScript(formTemplate.getScript(), FormDataEvent.IMPORT_TRANSPORT_FILE)) {
+                    log(userInfo, LogData.L48, logger, fileName);
+                    return null;
+                }
+            } else {
+                log(userInfo, LogData.L48, logger, formType.getName());
                 return null;
             }
 

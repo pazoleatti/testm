@@ -65,32 +65,34 @@ public class RefBookMultiPickerPresenter extends PresenterWidget<RefBookMultiPic
         if (newState.getPickerContext() == null) {
             newState.setPickerContext(ps.getPickerContext());
         }
-        if (isNeedReloadHeaders(newState)) {
-            // Установка новых значений после проверки на новость основных параметров
-            ps.setValues(newState);
-            if (ps.getRefBookAttrId() == null) {
-                return;
-            }
-            if (ps.getVersionDate() == null) {
-                return;
-            }
-            dispatcher.execute(new InitRefBookMultiAction(ps.getRefBookAttrId()),
-                    CallbackUtils.defaultCallback(new AbstractCallback<InitRefBookMultiResult>() {
-                        @Override
-                        public void onSuccess(InitRefBookMultiResult result) {
-                            getView().setAttributes(result.getAttributes());
-                            getView().refresh(true);
-                            getView().showVersionDate(result.isVersioned());
-                            trySelect(ps);
-                        }
-                    }, this)
-            );
+        //Убрал кэширование, т.к есть вероятность отображения неактуальных данных
+        // Установка новых значений после проверки на новость основных параметров
+        ps.setValues(newState);
+        if (ps.getRefBookAttrId() == null) {
+            return;
+        }
+        if (ps.getVersionDate() == null) {
+            return;
+        }
+        dispatcher.execute(new InitRefBookMultiAction(ps.getRefBookAttrId()),
+                CallbackUtils.defaultCallback(new AbstractCallback<InitRefBookMultiResult>() {
+                    @Override
+                    public void onSuccess(InitRefBookMultiResult result) {
+                        getView().setAttributes(result.getAttributes());
+                        getView().refresh(true);
+                        getView().showVersionDate(result.isVersioned());
+                        trySelect(ps);
+                    }
+                }, this)
+        );
+        /*if (isNeedReloadHeaders(newState)) {
+
         } else {
             //иначе просто сеттим
             ps.setValues(newState);
             trySelect(ps);
             getView().refresh(false);
-        }
+        }*/
     }
 
     private void trySelect(PickerState stateWithIds){

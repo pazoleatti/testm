@@ -49,6 +49,8 @@ public class CreateFormDataView extends PopupViewWithUiHandlers<CreateFormDataUi
     private boolean isMonthly = false;
     /** признак формы с периодом сравнения */
     private boolean comparative = false;
+    /** Признак расчета нарастающим итогом */
+    private boolean isAccruing = false;
 
     @UiField
     @Ignore
@@ -163,7 +165,8 @@ public class CreateFormDataView extends PopupViewWithUiHandlers<CreateFormDataUi
                 correctionDate.getText() != null && !correctionDate.getText().isEmpty());
         // Период сравнения и признак нарастающих итогов доступен только для вида формы с признаком использования двух периодов
         comparativPeriodPanel.setVisible(formTypeId.getValue() != null && !formTypeId.getValue().isEmpty() && comparative);
-        accruingPanel.setVisible(formTypeId.getValue() != null && !formTypeId.getValue().isEmpty() && comparative);
+        accruingPanel.setVisible(formTypeId.getValue() != null && !formTypeId.getValue().isEmpty() && isAccruing);
+
         // Кнопка "Создать" недоступна пока все не заполнено
         continueButton.setEnabled(
                 (formTypeId.getValue() != null && !formTypeId.getValue().isEmpty()) &&
@@ -207,7 +210,11 @@ public class CreateFormDataView extends PopupViewWithUiHandlers<CreateFormDataUi
 
     @UiHandler("comparativePeriodId")
     public void onComparativePeriodIdChange(ValueChangeEvent<List<Integer>> event) {
-        updateEnabled();
+        if (isAccruing) {
+            getUiHandlers().checkFormType(formTypeId.getValue().get(0).intValue(), reportPeriodIds.getValue().get(0), (comparativePeriodId.getValue() != null && !comparativePeriodId.getValue().isEmpty()) ? comparativePeriodId.getValue().get(0) : null);
+        } else {
+            updateEnabled();
+        }
     }
 
     @UiHandler("formTypeId")
@@ -216,7 +223,7 @@ public class CreateFormDataView extends PopupViewWithUiHandlers<CreateFormDataUi
         if (getUiHandlers() != null && formTypeId.getValue() != null && !formTypeId.getValue().isEmpty() && reportPeriodIds.getValue() != null && !reportPeriodIds.getValue().isEmpty()) {
             comparativePeriodId.setValue(null);
             accruing.setValue(false);
-            getUiHandlers().checkFormType(formTypeId.getValue().get(0).intValue(), reportPeriodIds.getValue().get(0));
+            getUiHandlers().checkFormType(formTypeId.getValue().get(0).intValue(), reportPeriodIds.getValue().get(0), null);
         } else {
             updateEnabled();
         }
@@ -347,6 +354,17 @@ public class CreateFormDataView extends PopupViewWithUiHandlers<CreateFormDataUi
         this.comparative = comparative;
         comparativPeriodPanel.setVisible(comparative);
         accruingPanel.setVisible(comparative);
+    }
+
+    @Override
+    public void setAccruing(boolean accruing, boolean enabled) {
+        isAccruing = accruing;
+        if (isAccruing) {
+            this.accruing.setEnabled(enabled);
+            if (!enabled) {
+                this.accruing.setValue(false);
+            }
+        }
     }
 
     @Override
