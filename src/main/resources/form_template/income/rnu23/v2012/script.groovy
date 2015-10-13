@@ -68,7 +68,7 @@ switch (formDataEvent) {
         logicCheck()
         break
     case FormDataEvent.COMPOSE:
-        formDataService.consolidationTotal(formData, logger, ['total'])
+        formDataService.consolidationTotal(formData, logger, userInfo, ['total'])
         calc()
         logicCheck()
         formDataService.saveCachedDataRows(formData, logger)

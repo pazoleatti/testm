@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.service.script.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
 import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
+import com.aplana.sbrf.taxaccounting.dao.SourceDao;
 import com.aplana.sbrf.taxaccounting.dao.TAUserDao;
 import com.aplana.sbrf.taxaccounting.dao.api.FormTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.script.FormDataCacheDao;
@@ -14,6 +15,7 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
+import com.aplana.sbrf.taxaccounting.service.SourceService;
 import com.aplana.sbrf.taxaccounting.service.script.DepartmentFormTypeService;
 import com.aplana.sbrf.taxaccounting.service.script.FormDataService;
 import com.aplana.sbrf.taxaccounting.service.script.RefBookService;
@@ -87,6 +89,9 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
     @Autowired
     private TAUserDao userDao;
 
+    @Autowired
+    private SourceService sourceService;
+
     private Map<Number, DataRowHelper> helperHashMap = new HashMap<Number, DataRowHelper>();
 
     private static ApplicationContext applicationContext;
@@ -153,32 +158,23 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
     }
 
     @Override
-    public void consolidationSimple(FormData formData, Logger logger) {
-        consolidationTotal(formData, logger, null);
+    public void consolidationSimple(FormData formData, Logger logger, TAUserInfo userInfo) {
+        consolidationTotal(formData, logger, userInfo, null);
     }
 
     @Override
-    public void consolidationTotal(FormData formData, Logger logger, List<String> totalAliases) {
+    public void consolidationTotal(FormData formData, Logger logger, TAUserInfo userInfo, List<String> totalAliases) {
         DataRowHelper dataRowHelper = getDataRowHelper(formData);
         // Новый список строк
         List<DataRow<Cell>> rows = new LinkedList<DataRow<Cell>>();
-        // даты начала и конца отчетного периода
-        Date startDate = reportPeriodService.getCalendarStartDate(formData.getReportPeriodId()).getTime();
-        Date endDate = reportPeriodService.getEndDate(formData.getReportPeriodId()).getTime();
-        // НФ назначения
-        List<DepartmentFormType> typeList = departmentFormTypeService.getFormSources(formData.getDepartmentId(),
-                formData.getFormType().getId(), formData.getKind(), startDate, endDate);
         // периодичность приёмника "ежемесячно"
         boolean isFormDataMonthly = formData.getPeriodOrder() != null;
-
-        for (DepartmentFormType type : typeList) {
-            // поиск источника с учетом периодичности
-            // НФ ищется в последнем отчетном периоде подразделения
-            FormData sourceFormData = getLast(type.getFormTypeId(), type.getKind(), type.getDepartmentId(),
-                    formData.getReportPeriodId(), formData.getPeriodOrder(), formData.getComparativePeriodId(), formData.isAccruing());
-
+        // получаем экземпляры-источники
+        List<Relation> relations = sourceService.getSourcesInfo(formData, true, true, WorkflowState.ACCEPTED, userInfo, logger);
+        for (Relation relation : relations) {
+            FormData sourceFormData = dao.get(relation.getFormDataId(), null);
             // источник не нашелся или не в статусе "Принята"
-            if (sourceFormData == null || sourceFormData.getState() != WorkflowState.ACCEPTED) {
+            if (sourceFormData.getState() != WorkflowState.ACCEPTED) {
                 continue;
             }
             // приёмник ежемесячный, а источник нет или наоборот

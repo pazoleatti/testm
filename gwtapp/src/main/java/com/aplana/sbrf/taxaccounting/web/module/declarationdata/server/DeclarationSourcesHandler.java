@@ -56,7 +56,7 @@ public class DeclarationSourcesHandler extends AbstractActionHandler<SourcesActi
             }
         } else {
             //Получаем нф-источники
-            relationList.addAll(sourceService.getDeclarationSourcesInfo(declaration.getId(), true));
+            relationList.addAll(sourceService.getDeclarationSourcesInfo(declaration, true, false, null, userInfo, logger));
         }
         result.setData(relationList);
         return result;

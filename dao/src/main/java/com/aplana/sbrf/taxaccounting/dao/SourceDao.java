@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.dao;
 
 import com.aplana.sbrf.taxaccounting.model.FormData;
 import com.aplana.sbrf.taxaccounting.model.Relation;
+import com.aplana.sbrf.taxaccounting.model.WorkflowState;
 import com.aplana.sbrf.taxaccounting.model.source.*;
 
 import java.util.*;
@@ -205,32 +206,40 @@ public interface SourceDao {
     /**
      * Возвращает список нф-источников для указанной нф (включая несозданные)
      * @param destinationFormDataId идентификатор нф-приемника
-     * @param light true - заполнятся только текстовые данные для GUI
+     * @param light true - заполнятся только текстовые данные для GUI и сообщений
+     * @param excludeIfNotExist true - исключить несозданные источники
+     * @param stateRestriction ограничение по состоянию для созданных экземпляров
      * @return список нф-источников
      */
-    List<Relation> getSourcesInfo(long destinationFormDataId, boolean light);
+    List<Relation> getSourcesInfo(long destinationFormDataId, boolean light, boolean excludeIfNotExist, WorkflowState stateRestriction);
 
     /**
      * Возвращает список нф-приемников для указанной нф (включая несозданные)
      * @param sourceFormDataId идентификатор нф-источника
-     * @param light true - заполнятся только текстовые данные для GUI
+     * @param light true - заполнятся только текстовые данные для GUI и сообщений
+     * @param excludeIfNotExist true - исключить несозданные приемники
+     * @param stateRestriction ограничение по состоянию для созданных экземпляров
      * @return список нф-приемников
      */
-    List<Relation> getDestinationsInfo(long sourceFormDataId, boolean light);
+    List<Relation> getDestinationsInfo(long sourceFormDataId, boolean light, boolean excludeIfNotExist, WorkflowState stateRestriction);
 
     /**
      * Возвращает список нф-источников для указанной декларации (включая несозданные)
      * @param sourceFormDataId идентификатор нф-источника
-     * @param light true - заполнятся только текстовые данные для GUI
+     * @param light true - заполнятся только текстовые данные для GUI и сообщений
+     * @param excludeIfNotExist true - исключить несозданные приемники
+     * @param stateRestriction ограничение по состоянию для созданных экземпляров
      * @return список нф-источников
      */
-    List<Relation> getDeclarationDestinationsInfo(long sourceFormDataId, boolean light);
+    List<Relation> getDeclarationDestinationsInfo(long sourceFormDataId, boolean light, boolean excludeIfNotExist, WorkflowState stateRestriction);
 
     /**
      * Возвращает список нф-источников для указанной декларации (включая несозданные)
      * @param declarationId идентификатор декларации-приемника
-     * @param light true - заполнятся только текстовые данные для GUI
+     * @param light true - заполнятся только текстовые данные для GUI и сообщений
+     * @param excludeIfNotExist true - исключить несозданные источники
+     * @param stateRestriction ограничение по состоянию для созданных экземпляров
      * @return список нф-источников
      */
-    List<Relation> getDeclarationSourcesInfo(long declarationId, boolean light);
+    List<Relation> getDeclarationSourcesInfo(long declarationId, boolean light, boolean excludeIfNotExist, WorkflowState stateRestriction);
 }

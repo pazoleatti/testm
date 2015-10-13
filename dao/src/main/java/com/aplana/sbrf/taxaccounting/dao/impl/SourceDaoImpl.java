@@ -11,6 +11,7 @@ import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.source.ConsolidatedInstance;
 import com.aplana.sbrf.taxaccounting.model.source.SourceObject;
 import com.aplana.sbrf.taxaccounting.model.source.SourcePair;
+import com.aplana.sbrf.taxaccounting.model.util.FormDataUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -650,7 +651,7 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
     private static final String GET_SOURCES_INFO = "with insanity as \n" +
             "     (\n" +
             "     select sfd.id, sd.id as departmentId, sd.name as departmentName, sdrp.id as departmentReportPeriod, stp.YEAR, srp.name as periodName, \n" +
-            "     sdrp.CORRECTION_DATE, sfd.state, sft.status as templateState,\n" +
+            "     sdrp.CORRECTION_DATE, sfd.state, sft.status as templateState, sfd.manual \n" +
             "     st.id as formTypeId, st.name as formTypeName, sfk.id as formDataKind, fdpd.id as performerId, fdpd.name as performerName, \n" +
             "     --Если искомый экземпляр создан, то берем его значения периода и признака. \n" +
             "     --Если не создан и в его макете есть признак сравнения, то период и признак такой же как у источника\n" +
@@ -704,6 +705,7 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
             "      left join form_data sfd on (sfd.kind = sfk.id and sfd.FORM_TEMPLATE_ID = sft.id and sfd.DEPARTMENT_REPORT_PERIOD_ID = sdrp.id \n" +
             "        and (sft.COMPARATIVE = 0 or ft.COMPARATIVE = 0 or sfd.COMPARATIVE_DEP_REP_PER_ID = fd.COMPARATIVE_DEP_REP_PER_ID) and (sft.ACCRUING = 0 or ft.ACCRUING = 0 or sfd.ACCRUING = fd.ACCRUING)) \n" +
             "        and coalesce(sfd.PERIOD_ORDER, perversion.month) = perversion.month\n" +
+            "        and (:stateRestriction is null or sfd.state = :stateRestriction)\n" +
             "      left join form_data_performer fdp on fdp.form_data_id = sfd.id \n" +
             "      left join department fdpd on fdpd.id = fdp.PRINT_DEPARTMENT_ID      \n" +
             "      left join department_report_period scdrp on scdrp.id = sfd.COMPARATIVE_DEP_REP_PER_ID\n" +
@@ -719,27 +721,33 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
             "select id, departmentId, departmentName, correction_date, departmentReportPeriod, periodName, year, state, templateState, formTypeId, formTypeName, formDataKind, performerId, performerName, compPeriodId, compPeriodName, compPeriodYear, compPeriodStartDate, accruing, month \n" +
             "       from insanity i\n" +
             "       left join aggregated_insanity i_agg on i.sdft_id = i_agg.sdft_id \n" +
-            "       where nvl(i.correction_date, to_date('01.01.0001', 'DD.MM.YYYY')) = nvl(i_agg.last_correction_date, to_date('01.01.0001', 'DD.MM.YYYY'))\n" +
+            "       where nvl(i.correction_date, to_date('01.01.0001', 'DD.MM.YYYY')) = nvl(i_agg.last_correction_date, to_date('01.01.0001', 'DD.MM.YYYY')) and (:excludeIfNotExist != 1 or id is not null)\n" +
             "       order by formTypeName, state";
 
     @Override
-    public List<Relation> getSourcesInfo(long destinationFormDataId, final boolean light) {
+    public List<Relation> getSourcesInfo(long destinationFormDataId, final boolean light, boolean excludeIfNotExist, WorkflowState stateRestriction) {
         Map<String, Object> params = new HashMap<String, Object>();
         params.put("destinationFormDataId", destinationFormDataId);
-        return getNamedParameterJdbcTemplate().query(GET_SOURCES_INFO, params, new RowMapper<Relation>() {
-            @Override
-            public Relation mapRow(ResultSet rs, int i) throws SQLException {
-                Relation relation =  mapFormCommon(rs, light, false);
-                relation.setSource(true);
-                return relation;
-            }
-        });
+        params.put("excludeIfNotExist", excludeIfNotExist ? 1 : 0);
+        params.put("stateRestriction", stateRestriction != null ? stateRestriction.getId() : null);
+        try {
+            return getNamedParameterJdbcTemplate().query(GET_SOURCES_INFO, params, new RowMapper<Relation>() {
+                @Override
+                public Relation mapRow(ResultSet rs, int i) throws SQLException {
+                    Relation relation =  mapFormCommon(rs, light, false);
+                    relation.setSource(true);
+                    return relation;
+                }
+            });
+        } catch (EmptyResultDataAccessException e) {
+            return new ArrayList<Relation>();
+        }
     }
 
     private static final String GET_DESTINATIONS_INFO = "with insanity as \n" +
             "     (\n" +
             "     select tfd.id, td.id as departmentId, td.name as departmentName, tdrp.id as departmentReportPeriod, ttp.YEAR, trp.name as periodName, \n" +
-            "     tdrp.CORRECTION_DATE, tfd.state, tft.status as templateState, tfd.PERIOD_ORDER as month,\n" +
+            "     tdrp.CORRECTION_DATE, tfd.state, tft.status as templateState, tfd.PERIOD_ORDER as month, tfd.manual,\n" +
             "     tt.id as formTypeId, tt.name as formTypeName, tfk.id as formDataKind, fdpd.id as performerId, fdpd.name as performerName, \n" +
             "     --Если искомый экземпляр создан, то берем его значения периода и признака. \n" +
             "     --Если не создан и в его макете есть признак сравнения, то период и признак такой же как у источника\n" +
@@ -785,6 +793,7 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
             "      --отбираем экземпляры с учетом периода сравнения, признака нарастающего истога, списка месяцов     \n" +
             "      join form_data tfd on (tfd.kind = tfk.id and tfd.FORM_TEMPLATE_ID = tft.id and tfd.DEPARTMENT_REPORT_PERIOD_ID = tdrp.id\n" +
             "        and (tft.COMPARATIVE = 0 or ft.COMPARATIVE = 0 or tfd.COMPARATIVE_DEP_REP_PER_ID = fd.COMPARATIVE_DEP_REP_PER_ID) and (tft.ACCRUING = 0 or ft.ACCRUING = 0 or tfd.ACCRUING = fd.ACCRUING)) \n" +
+            "        and (:stateRestriction is null or tfd.state = :stateRestriction)\n" +
             "      left join form_data_performer fdp on fdp.form_data_id = tfd.id \n" +
             "      left join department fdpd on fdpd.id = fdp.PRINT_DEPARTMENT_ID\n" +
             "      left join department_report_period tcdrp on tcdrp.id = tfd.COMPARATIVE_DEP_REP_PER_ID\n" +
@@ -794,21 +803,27 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
             "  )         \n" +
             "select id, departmentId, departmentName, correction_date, departmentReportPeriod, periodName, year, state, templateState, formTypeId, formTypeName, formDataKind, performerId, performerName, compPeriodId, compPeriodName, compPeriodYear, compPeriodStartDate, accruing, month \n" +
             "       from insanity i\n" +
-            "       where (id is not null or correction_date is null)\n" +
+            "       where (id is not null or correction_date is null) and (:excludeIfNotExist != 1 or id is not null)\n" +
             "       order by formTypeName, state";
 
     @Override
-    public List<Relation> getDestinationsInfo(long sourceFormDataId, final boolean light) {
+    public List<Relation> getDestinationsInfo(long sourceFormDataId, final boolean light, boolean excludeIfNotExist, WorkflowState stateRestriction) {
         Map<String, Object> params = new HashMap<String, Object>();
         params.put("sourceFormDataId", sourceFormDataId);
-        return getNamedParameterJdbcTemplate().query(GET_DESTINATIONS_INFO, params, new RowMapper<Relation>() {
-            @Override
-            public Relation mapRow(ResultSet rs, int i) throws SQLException {
-                Relation relation =  mapFormCommon(rs, light, false);
-                relation.setSource(false);
-                return relation;
-            }
-        });
+        params.put("excludeIfNotExist", excludeIfNotExist ? 1 : 0);
+        params.put("stateRestriction", stateRestriction != null ? stateRestriction.getId() : null);
+        try {
+            return getNamedParameterJdbcTemplate().query(GET_DESTINATIONS_INFO, params, new RowMapper<Relation>() {
+                @Override
+                public Relation mapRow(ResultSet rs, int i) throws SQLException {
+                    Relation relation =  mapFormCommon(rs, light, false);
+                    relation.setSource(false);
+                    return relation;
+                }
+            });
+        } catch (EmptyResultDataAccessException e) {
+            return new ArrayList<Relation>();
+        }
     }
 
     private static final String GET_DECLARATION_DESTINATIONS_INFO = "with insanity as \n" +
@@ -843,48 +858,54 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
             "      --отбираем макет действующий для приемника в периоде источника\n" +
             "      join declaration_template tdt on (tdt.DECLARATION_TYPE_ID = dt.ID and tdt.status = 0 and tdt.version = (select max(dt2.version) from declaration_template dt2 where dt2.DECLARATION_TYPE_ID = tdt.DECLARATION_TYPE_ID and extract(year from dt2.version) <= ttp.year)) \n" +
             "      --отбираем экземпляры с учетом периода сравнения, признака нарастающего истога, списка месяцов     \n" +
-            "      left join declaration_data tdd on (tdd.DECLARATION_TEMPLATE_ID = tdt.id and tdd.DEPARTMENT_REPORT_PERIOD_ID = tdrp.id) \n" +
+            "      left join declaration_data tdd on (tdd.DECLARATION_TEMPLATE_ID = tdt.id and tdd.DEPARTMENT_REPORT_PERIOD_ID = tdrp.id) and (:stateRestriction is null or tdd.IS_ACCEPTED = :stateRestriction)\n" +
             "      where fd.id = :sourceFormDataId\n" +
             "  )         \n" +
             "select id, departmentId, departmentName, correction_date, departmentReportPeriod, periodName, year, IS_ACCEPTED, templateState, declarationTypeId, declarationTypeName\n" +
             "       from insanity i\n" +
-            "       where (id is not null or correction_date is null)\n" +
+            "       where (id is not null or correction_date is null) and (:excludeIfNotExist != 1 or id is not null)\n" +
             "       order by declarationTypeName, IS_ACCEPTED";
 
     @Override
-    public List<Relation> getDeclarationDestinationsInfo(long sourceFormDataId, final boolean light) {
+    public List<Relation> getDeclarationDestinationsInfo(long sourceFormDataId, final boolean light, boolean excludeIfNotExist, WorkflowState stateRestriction) {
         Map<String, Object> params = new HashMap<String, Object>();
         params.put("sourceFormDataId", sourceFormDataId);
-        return getNamedParameterJdbcTemplate().query(GET_DECLARATION_DESTINATIONS_INFO, params, new RowMapper<Relation>() {
-            @Override
-            public Relation mapRow(ResultSet rs, int i) throws SQLException {
-                Relation relation = new Relation();
-                relation.setSource(false);
-                relation.setDeclarationDataId(SqlUtils.getLong(rs, "id"));
-                relation.setCreated(relation.getDeclarationDataId() != null);
-                relation.setState(relation.getDeclarationDataId() == null ? WorkflowState.NOT_EXIST :
-                        SqlUtils.getInteger(rs, "IS_ACCEPTED") == 1 ? WorkflowState.ACCEPTED : WorkflowState.CREATED);
-                relation.setStatus(SqlUtils.getInteger(rs, "templateState") == 0);
-                if (light) {
-                    relation.setFullDepartmentName(rs.getString("departmentName"));
-                    relation.setCorrectionDate(rs.getDate("correction_date"));
-                    relation.setPeriodName(rs.getString("periodName"));
-                    relation.setYear(SqlUtils.getInteger(rs, "year"));
-                    relation.setDeclarationTypeName(rs.getString("declarationTypeName"));
-                } else {
-                    relation.setDepartment(departmentDao.getDepartment(SqlUtils.getInteger(rs, "departmentId")));
-                    relation.setDepartmentReportPeriod(departmentReportPeriodDao.get(SqlUtils.getInteger(rs, "departmentReportPeriod")));
-                    relation.setDeclarationType(declarationTypeDao.get(SqlUtils.getInteger(rs, "declarationTypeId")));
+        params.put("excludeIfNotExist", excludeIfNotExist ? 1 : 0);
+        params.put("stateRestriction", stateRestriction != null ? stateRestriction.getId() : null);
+        try {
+            return getNamedParameterJdbcTemplate().query(GET_DECLARATION_DESTINATIONS_INFO, params, new RowMapper<Relation>() {
+                @Override
+                public Relation mapRow(ResultSet rs, int i) throws SQLException {
+                    Relation relation = new Relation();
+                    relation.setSource(false);
+                    relation.setDeclarationDataId(SqlUtils.getLong(rs, "id"));
+                    relation.setCreated(relation.getDeclarationDataId() != null);
+                    relation.setState(relation.getDeclarationDataId() == null ? WorkflowState.NOT_EXIST :
+                            SqlUtils.getInteger(rs, "IS_ACCEPTED") == 1 ? WorkflowState.ACCEPTED : WorkflowState.CREATED);
+                    relation.setStatus(SqlUtils.getInteger(rs, "templateState") == 0);
+                    if (light) {
+                        relation.setFullDepartmentName(rs.getString("departmentName"));
+                        relation.setCorrectionDate(rs.getDate("correction_date"));
+                        relation.setPeriodName(rs.getString("periodName"));
+                        relation.setYear(SqlUtils.getInteger(rs, "year"));
+                        relation.setDeclarationTypeName(rs.getString("declarationTypeName"));
+                    } else {
+                        relation.setDepartment(departmentDao.getDepartment(SqlUtils.getInteger(rs, "departmentId")));
+                        relation.setDepartmentReportPeriod(departmentReportPeriodDao.get(SqlUtils.getInteger(rs, "departmentReportPeriod")));
+                        relation.setDeclarationType(declarationTypeDao.get(SqlUtils.getInteger(rs, "declarationTypeId")));
+                    }
+                    return relation;
                 }
-                return relation;
-            }
-        });
+            });
+        } catch (EmptyResultDataAccessException e) {
+            return new ArrayList<Relation>();
+        }
     }
 
     private static final String GET_DECLARATION_SOURCES_INFO = "with insanity as \n" +
             "     (\n" +
             "     select sfd.id, sd.id as departmentId, sd.name as departmentName, sdrp.id as departmentReportPeriod, stp.YEAR, srp.name as periodName, \n" +
-            "     sdrp.CORRECTION_DATE, sfd.state, sft.status as templateState,\n" +
+            "     sdrp.CORRECTION_DATE, sfd.state, sft.status as templateState, sfd.manual, \n" +
             "     st.id as formTypeId, st.name as formTypeName, sfk.id as formDataKind, fdpd.id as performerId, fdpd.name as performerName, \n" +
             "     case when sft.MONTHLY=1 then perversion.month else sfd.PERIOD_ORDER end as month, sdft.id as sdft_id\n" +
             "      from declaration_data dd \n" +
@@ -925,6 +946,7 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
             "           ) perversion on perversion.record_id = rp.DICT_TAX_PERIOD_ID and perversion.lvl = case when sft.MONTHLY=1 then perversion.lvl else 1 end\n" +
             "      --отбираем экземпляры с учетом списка месяцов     \n" +
             "      left join form_data sfd on (sfd.kind = sfk.id and sfd.FORM_TEMPLATE_ID = sft.id and sfd.DEPARTMENT_REPORT_PERIOD_ID = sdrp.id) and coalesce(sfd.PERIOD_ORDER, perversion.month) = perversion.month\n" +
+            "        and (:stateRestriction is null or sfd.state = :stateRestriction)\n" +
             "      left join form_data_performer fdp on fdp.form_data_id = sfd.id \n" +
             "      left join department fdpd on fdpd.id = fdp.PRINT_DEPARTMENT_ID  \n" +
             "           ),\n" +
@@ -937,21 +959,27 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
             "select id, departmentId, departmentName, correction_date, departmentReportPeriod, periodName, year, state, templateState, formTypeId, formTypeName, formDataKind, performerId, performerName, month \n" +
             "       from insanity i\n" +
             "       left join aggregated_insanity i_agg on i.sdft_id = i_agg.sdft_id \n" +
-            "       where nvl(i.correction_date, to_date('01.01.0001', 'DD.MM.YYYY')) = nvl(i_agg.last_correction_date, to_date('01.01.0001', 'DD.MM.YYYY'))\n" +
+            "       where nvl(i.correction_date, to_date('01.01.0001', 'DD.MM.YYYY')) = nvl(i_agg.last_correction_date, to_date('01.01.0001', 'DD.MM.YYYY')) and (:excludeIfNotExist != 1 or id is not null)\n" +
             "       order by formTypeName, state";
 
     @Override
-    public List<Relation> getDeclarationSourcesInfo(long declarationId, final boolean light) {
+    public List<Relation> getDeclarationSourcesInfo(long declarationId, final boolean light, boolean excludeIfNotExist, WorkflowState stateRestriction) {
         Map<String, Object> params = new HashMap<String, Object>();
         params.put("declarationId", declarationId);
-        return getNamedParameterJdbcTemplate().query(GET_DECLARATION_SOURCES_INFO, params, new RowMapper<Relation>() {
-            @Override
-            public Relation mapRow(ResultSet rs, int i) throws SQLException {
-                Relation relation =  mapFormCommon(rs, light, true);
-                relation.setSource(true);
-                return relation;
-            }
-        });
+        params.put("excludeIfNotExist", excludeIfNotExist ? 1 : 0);
+        params.put("stateRestriction", stateRestriction != null ? stateRestriction.getId() : null);
+        try {
+            return getNamedParameterJdbcTemplate().query(GET_DECLARATION_SOURCES_INFO, params, new RowMapper<Relation>() {
+                @Override
+                public Relation mapRow(ResultSet rs, int i) throws SQLException {
+                    Relation relation =  mapFormCommon(rs, light, true);
+                    relation.setSource(true);
+                    return relation;
+                }
+            });
+        } catch (EmptyResultDataAccessException e) {
+            return new ArrayList<Relation>();
+        }
     }
 
     private Relation mapFormCommon(ResultSet rs, boolean light, boolean forDeclaration) throws SQLException {
@@ -961,6 +989,7 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
         relation.setState(WorkflowState.fromId(SqlUtils.getInteger(rs, "state")));
         relation.setStatus(SqlUtils.getInteger(rs, "templateState") == 0);
         relation.setFormDataKind(FormDataKind.fromId(SqlUtils.getInteger(rs, "formDataKind")));
+        relation.setManual(rs.getBoolean("manual"));
         if (!forDeclaration) {
             relation.setAccruing(rs.getBoolean("accruing"));
         }
@@ -973,8 +1002,10 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
             relation.setFormTypeName(rs.getString("formTypeName"));
             if (!forDeclaration) {
                 relation.setComparativePeriodYear(SqlUtils.getInteger(rs, "compPeriodYear"));
-                relation.setComparativePeriodName(rs.getString("compPeriodName"));
                 relation.setComparativePeriodStartDate(rs.getDate("compPeriodStartDate"));
+                String baseCompPeriodName = rs.getString("compPeriodName");
+                relation.setComparativePeriodName(relation.isAccruing() ?
+                        FormDataUtils.getAccName(baseCompPeriodName, relation.getComparativePeriodStartDate()) : baseCompPeriodName);
             }
             relation.setPerformerName(rs.getString("performerName"));
         } else {

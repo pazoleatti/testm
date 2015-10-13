@@ -111,7 +111,7 @@ void checkDepartmentParams(LogLevel logLevel) {
 def checkAndBuildXml() {
 
     // проверка наличия источников в стутусе принят
-    def formDataCollection = declarationService.getAcceptedFormDataSources(declarationData)
+    def formDataCollection = declarationService.getAcceptedFormDataSources(declarationData, userInfo, logger)
     // формируем xml
 
     // Получить параметры по транспортному налогу

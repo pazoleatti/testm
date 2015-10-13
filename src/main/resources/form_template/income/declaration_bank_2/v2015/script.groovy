@@ -108,7 +108,7 @@ private boolean sourceCheck(boolean loggerNeed, LogLevel logLevel) {
     def sourceFormType = formTypeService.get(sourceFormTypeId)
     def success = true
 
-    def formDataCollection = declarationService.getAcceptedFormDataSources(declarationData)
+    def formDataCollection = declarationService.getAcceptedFormDataSources(declarationData, userInfo, logger)
     def departmentFormType = formDataCollection?.records?.find { it.formType.id == sourceFormTypeId }
     def reportPeriod = reportPeriodService.get(declarationData.reportPeriodId)
     if (departmentFormType == null) {
@@ -403,7 +403,7 @@ void generateXML() {
 
     // Данные налоговых форм.
 
-    def formDataCollection = declarationService.getAcceptedFormDataSources(declarationData)
+    def formDataCollection = declarationService.getAcceptedFormDataSources(declarationData, userInfo, logger)
 
     /** Доходы сложные уровня Банка "Сводная форма начисленных доходов". */
     def dataRowsComplexIncome = getDataRows(formDataCollection, 302)

@@ -16,6 +16,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.*;
 
+import static com.aplana.sbrf.taxaccounting.test.UserMockUtils.mockUser;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
@@ -65,7 +66,6 @@ public class DeclarationServiceTest {
 
         when(declarationTemplateDao.get(1)).thenReturn(declarationTemplate);
         when(departmentFormTypeDao.getDeclarationSources(eq(1), eq(1), any(Date.class), any(Date.class))).thenReturn(sourcesInfo);
-        when(declarationDataService.getFormDataSources(any(DeclarationData.class), any(Boolean.class), any(Logger.class))).thenReturn(sourcesInfo);
 
         ReflectionTestUtils.setField(service, "declarationDataDao", declarationDataDao);
         ReflectionTestUtils.setField(service, "declarationTemplateDao", declarationTemplateDao);
@@ -92,7 +92,9 @@ public class DeclarationServiceTest {
 
         ReflectionTestUtils.setField(service, "formDataDao", formDataDao);
         ReflectionTestUtils.setField(service, "departmentReportPeriodDao", departmentReportPeriodDao);
-        assertTrue(service.getAcceptedFormDataSources(declarationData) != null);
+        TAUserInfo userInfo = new TAUserInfo();
+        userInfo.setUser(mockUser(1, 1, TARole.ROLE_CONTROL_UNP));
+        assertTrue(service.getAcceptedFormDataSources(declarationData, userInfo, new Logger()) != null);
     }
 
     @Test

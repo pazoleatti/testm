@@ -88,5 +88,5 @@ public interface FormDataAccessService {
      * @param formDataId
      * @return true, если есть приемники находищиеся в другом подразделении
      */
-    boolean checkDestinations(long formDataId);
+    boolean checkDestinations(long formDataId, TAUserInfo userInfo, Logger logger);
 }

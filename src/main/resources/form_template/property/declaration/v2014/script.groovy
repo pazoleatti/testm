@@ -145,7 +145,7 @@ void generateXML() {
     // Налоговый период.
     def taxPeriod = (reportPeriod != null ? taxPeriodService.get(reportPeriod.getTaxPeriod().getId()) : null)
 
-    def formDataCollection = declarationService.getAcceptedFormDataSources(declarationData)
+    def formDataCollection = declarationService.getAcceptedFormDataSources(declarationData, userInfo, logger)
 
     // Форма 945.3 получаем только строки с Кодом НО и КПП
     def dataRowsAverage = getDataRows(taxOrganCode, kpp, 613, formDataCollection)

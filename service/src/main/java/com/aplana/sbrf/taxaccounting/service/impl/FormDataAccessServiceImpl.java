@@ -485,7 +485,7 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
             boolean sendToNextLevel;
             try {
                 // Проверки статуса приемников
-                sendToNextLevel = checkDestinations(formDataId);
+                sendToNextLevel = checkDestinations(formDataId, userInfo, new Logger());
             } catch (ServiceException e) {
                 // Нет
                 return result;
@@ -729,75 +729,35 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 
     @Override
     @Transactional(readOnly = true)
-    public boolean checkDestinations(long formDataId) {
+    public boolean checkDestinations(long formDataId, TAUserInfo userInfo, Logger logger) {
         // Признак наличия назначения-приемника в другом подразделении
         boolean retVal = false;
-
         // НФ
         FormData formData = formDataDao.getWithoutRows(formDataId);
-        // Отчетный период подразделения НФ
-        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.get(formData.getDepartmentReportPeriodId());
-        // Отчетный период
-        ReportPeriod reportPeriod = departmentReportPeriod.getReportPeriod();
-        // Назначения НФ-приемников в периоде отчетного периода
-        List<DepartmentFormType> departmentFormTypes = departmentFormTypeDao.getFormDestinations(
-                formData.getDepartmentId(), formData.getFormType().getId(), formData.getKind(),
-                reportPeriod.getCalendarStartDate(), reportPeriod.getEndDate());
-        if (departmentFormTypes != null) {
-            for (DepartmentFormType departmentFormType : departmentFormTypes) {
-                // Экземпляр приемника в том же отчетном периоде подразделения
-                DepartmentReportPeriodFilter filter = new DepartmentReportPeriodFilter();
-                filter.setDepartmentIdList(Arrays.asList(departmentFormType.getDepartmentId()));
-                filter.setReportPeriodIdList(Arrays.asList(reportPeriod.getId()));
-                filter.setIsActive(departmentReportPeriod.isActive());
-                filter.setIsBalance(departmentReportPeriod.isBalance());
-                filter.setCorrectionDate(departmentReportPeriod.getCorrectionDate());
-                List<Integer> ids = departmentReportPeriodDao.getListIdsByFilter(filter);
-                if (ids.size() > 1) {
-                    throw new ServiceException("Не удалось получить приемники");
-                }
 
-                FormData form = formDataService.findFormData(departmentFormType.getFormTypeId(),
-                        departmentFormType.getKind(), ids.get(0), formData.getPeriodOrder(),
-                        formData.getComparativePeriodId(), formData.isAccruing());
-                // Если форма существует и ее статус отличен от «Создана»
-                if (form != null && form.getState() != WorkflowState.CREATED) {
-                    throw new ServiceException("Переход невозможен, т.к. уже подготовлена/утверждена/принята вышестоящая налоговая форма.");
-                }
-                if (formData.getDepartmentId() != departmentFormType.getDepartmentId()) {
-                    retVal = true;
-                }
+        List<Relation> destinations = sourceService.getDestinationsInfo(formData, false, true, null, userInfo, logger);
+        for (Relation form : destinations) {
+            // Если форма существует и ее статус отличен от «Создана»
+            if (form.isCreated() && form.getState() != WorkflowState.CREATED) {
+                throw new ServiceException("Переход невозможен, т.к. уже подготовлена/утверждена/принята вышестоящая налоговая форма.");
+            }
+            if (formData.getDepartmentId() != form.getDepartment().getId()) {
+                retVal = true;
             }
         }
 
         // Назначения деклараций-приемников в периоде отчетного периода
-        List<DepartmentDeclarationType> departmentDeclarationTypes = sourceService.getDeclarationDestinations(
-                formData.getDepartmentId(), formData.getFormType().getId(), formData.getKind(), formData.getReportPeriodId());
-        if (departmentDeclarationTypes != null) {
-            for (DepartmentDeclarationType departmentDeclarationType : departmentDeclarationTypes) {
-                DepartmentReportPeriodFilter filter = new DepartmentReportPeriodFilter();
-                filter.setDepartmentIdList(Arrays.asList(departmentDeclarationType.getDepartmentId()));
-                filter.setReportPeriodIdList(Arrays.asList(reportPeriod.getId()));
-                filter.setIsActive(departmentReportPeriod.isActive());
-                filter.setIsBalance(departmentReportPeriod.isBalance());
-                filter.setCorrectionDate(departmentReportPeriod.getCorrectionDate());
-                List<Integer> ids = departmentReportPeriodDao.getListIdsByFilter(filter);
-                if (ids.size() > 1) {
-                    throw new ServiceException("Не удалось получить приемники");
-                }
-                List<DeclarationData> declarations = declarationDataDao.find(departmentDeclarationType.getDeclarationTypeId(),
-                        ids.get(0));
-                // Если декларация существует и статус "Принята"
-                for(DeclarationData declaration: declarations)
-                    if (declaration != null && declaration.isAccepted()) {
-                        String str = formData.getFormType().getTaxType() == TaxType.DEAL ? "принято уведомление" :
-                                "принята декларация";
-                        throw new ServiceException("Переход невозможен, т.к. уже %s.", str);
-                    }
-                if (!retVal) {
-                    if (formData.getDepartmentId() != departmentDeclarationType.getDepartmentId()) {
-                        retVal = true;
-                    }
+        destinations = sourceService.getDeclarationDestinationsInfo(formData, true, true, null, userInfo, logger);
+        for (Relation declaration : destinations) {
+            // Если декларация существует и статус "Принята"
+            if (declaration.isCreated() && declaration.getState() == WorkflowState.ACCEPTED) {
+                throw new ServiceException("Переход невозможен, т.к. уже %s.",
+                        formData.getFormType().getTaxType() == TaxType.DEAL ? "принято уведомление" : "принята декларация"
+                );
+            }
+            if (!retVal) {
+                if (formData.getDepartmentId() != declaration.getDepartment().getId()) {
+                    retVal = true;
                 }
             }
         }

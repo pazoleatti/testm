@@ -9,6 +9,7 @@ import com.aplana.sbrf.taxaccounting.dao.api.FormTypeDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
+import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.util.DepartmentReportPeriodFilter;
 import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.test.FormTypeMockUtils;
@@ -917,8 +918,10 @@ public class FormDataAccessServiceImplTest {
 
         when(departmentFormTypeDao.getFormDestinations(any(Integer.class), any(Integer.class), any(FormDataKind.class), any(Date.class), any(Date.class))).thenReturn(null);
 
+        TAUserInfo userInfo = new TAUserInfo();
+        userInfo.setUser(mockUser(1, 1, TARole.ROLE_CONTROL_UNP));
         // Нет назначенных приемников
-        assertFalse(service.checkDestinations(formData.getId()));
+        assertFalse(service.checkDestinations(formData.getId(), userInfo, new Logger()));
     }
 
     @Test
@@ -955,7 +958,9 @@ public class FormDataAccessServiceImplTest {
         when(departmentFormTypeDao.getFormDestinations(any(Integer.class), any(Integer.class), any(FormDataKind.class), any(Date.class), any(Date.class))).thenReturn(departmentFormTypes);
 //        when(formDataService.findFormData(anyInt(), any(FormDataKind.class), anyInt(), anyInt(), anyInt())).thenReturn(null);
 
-        assertTrue(service.checkDestinations(editedFormData.getId()));
+        TAUserInfo userInfo = new TAUserInfo();
+        userInfo.setUser(mockUser(1, 1, TARole.ROLE_CONTROL_UNP));
+        assertTrue(service.checkDestinations(editedFormData.getId(), userInfo, new Logger()));
     }
 
     @Test
@@ -994,7 +999,9 @@ public class FormDataAccessServiceImplTest {
 
         when(departmentFormTypeDao.getFormDestinations(any(Integer.class), any(Integer.class), any(FormDataKind.class), any(Date.class), any(Date.class))).thenReturn(departmentFormTypes);
 
-        assertTrue(service.checkDestinations(editedFormData.getId()));
+        TAUserInfo userInfo = new TAUserInfo();
+        userInfo.setUser(mockUser(1, 1, TARole.ROLE_CONTROL_UNP));
+        assertTrue(service.checkDestinations(editedFormData.getId(), userInfo, new Logger()));
     }
 
     @Test(expected = ServiceException.class)
@@ -1035,6 +1042,8 @@ public class FormDataAccessServiceImplTest {
                 any(Date.class), any(Date.class))).thenReturn(departmentFormTypes);
         when(formDataService.findFormData(anyInt(), any(FormDataKind.class), anyInt(), anyInt(), any(Integer.class), any(Boolean.class))).thenReturn(formData);
 
-        service.checkDestinations(editedFormData.getId());
+        TAUserInfo userInfo = new TAUserInfo();
+        userInfo.setUser(mockUser(1, 1, TARole.ROLE_CONTROL_UNP));
+        service.checkDestinations(editedFormData.getId(), userInfo, new Logger());
     }
 }

@@ -69,32 +69,49 @@ public final class MessageGenerator {
         return getFDMsg(mainStr, formData, departmentName, manual, reportPeriod, rpComparison, false, true);
     }
 
-    public static String getFDMsg(String mainStr, String formTypeName, String kindName, boolean isAccruing, String departmentName, Integer periodOrder, boolean manual, DepartmentReportPeriod reportPeriod, DepartmentReportPeriod rpComparison, boolean isShowChecked, boolean isAbsolute){
-        if (rpComparison == null) {
+    public static String getFDMsg(String mainStr, String formTypeName, String kindName, String departmentName, Integer periodOrder, boolean manual, String reportPeriodName, String fullRpComparisonName, int year, Integer commpYear, Date correctionDate){
+        return getFDMsg(mainStr, formTypeName, kindName, departmentName, periodOrder, manual, reportPeriodName, fullRpComparisonName, year, commpYear, correctionDate, false, true);
+    }
+
+    public static String getFDMsg(String mainStr, String formTypeName, String kindName, String departmentName, Integer periodOrder, boolean manual, String reportPeriodName, String fullRpComparisonName, int year, Integer commpYear, Date correctionDate, boolean isShowChecked, boolean isAbsolute){
+        if (fullRpComparisonName == null) {
             return String.format(COMPLETE_FORM,
                     mainStr,
                     kindName,
                     formTypeName,
                     departmentName,
-                    isAccruing ? reportPeriod.getReportPeriod().getAccName() : reportPeriod.getReportPeriod().getName(),
-                    reportPeriod.getReportPeriod().getTaxPeriod().getYear(),
+                    reportPeriodName,
+                    year,
                     periodOrder != null ? String.format(MONTH,  Formats.getRussianMonthNameWithTier(periodOrder)): "",
-                    reportPeriod.getCorrectionDate() != null ? String.format(CORRECTION_DATE, SDF_DD_MM_YYYY.format(reportPeriod.getCorrectionDate())) : "",
-                    VERSION.getVersion(reportPeriod.getCorrectionDate()!= null, manual, isShowChecked, isAbsolute)).trim();
+                    correctionDate != null ? String.format(CORRECTION_DATE, SDF_DD_MM_YYYY.format(correctionDate)) : "",
+                    VERSION.getVersion(correctionDate!= null, manual, isShowChecked, isAbsolute)).trim();
         } else {
             return String.format(COMPLETE_FORM_WITH_RP_COMPARISON,
                     mainStr,
                     kindName,
                     formTypeName,
                     departmentName,
-                    isAccruing ? reportPeriod.getReportPeriod().getAccName() : reportPeriod.getReportPeriod().getName(),
-                    reportPeriod.getReportPeriod().getTaxPeriod().getYear(),
-                    isAccruing ? rpComparison.getReportPeriod().getAccName() : rpComparison.getReportPeriod().getName(),
-                    rpComparison.getReportPeriod().getTaxPeriod().getYear(),
+                    reportPeriodName,
+                    year,
+                    fullRpComparisonName,
+                    commpYear,
                     periodOrder != null ? String.format(MONTH,  Formats.getRussianMonthNameWithTier(periodOrder)): "",
-                    reportPeriod.getCorrectionDate() != null ? String.format(CORRECTION_DATE, SDF_DD_MM_YYYY.format(reportPeriod.getCorrectionDate())) : "",
-                    VERSION.getVersion(reportPeriod.getCorrectionDate()!= null, manual, isShowChecked, isAbsolute)).trim();
+                    correctionDate != null ? String.format(CORRECTION_DATE, SDF_DD_MM_YYYY.format(correctionDate)) : "",
+                    VERSION.getVersion(correctionDate!= null, manual, isShowChecked, isAbsolute)).trim();
         }
+    }
+
+    public static String getFDMsg(String mainStr, String formTypeName, String kindName, boolean isAccruing, String departmentName, Integer periodOrder, boolean manual, DepartmentReportPeriod reportPeriod, DepartmentReportPeriod rpComparison, boolean isShowChecked, boolean isAbsolute){
+        return getFDMsg(mainStr, formTypeName, kindName, departmentName, periodOrder, manual,
+                isAccruing ? reportPeriod.getReportPeriod().getAccName() : reportPeriod.getReportPeriod().getName(),
+                reportPeriod.getReportPeriod().getName(),
+                reportPeriod.getReportPeriod().getTaxPeriod().getYear(),
+                rpComparison != null ?
+                        rpComparison.getReportPeriod().getTaxPeriod().getYear()
+                        : null,
+                reportPeriod.getCorrectionDate(),
+                isShowChecked, isAbsolute
+        );
     }
 
     public static String getFDMsg(String mainStr, String formTypeName, String kindName, boolean isAccruing, String departmentName, Integer periodOrder, boolean manual, DepartmentReportPeriod reportPeriod, DepartmentReportPeriod rpComparison){

@@ -77,7 +77,7 @@ void generateXML() {
     // Параметры подразделения
     def departmentParam = getProvider(37).getRecords(date, null, "DEPARTMENT_ID = '$departmentId'", null).get(0)
 
-    def formDataCollection = declarationService.getAcceptedFormDataSources(declarationData)
+    def formDataCollection = declarationService.getAcceptedFormDataSources(declarationData, userInfo, logger)
 
     def builder = new MarkupBuilder(xml)
 

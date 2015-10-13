@@ -52,8 +52,6 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
     @Autowired
     private DepartmentDao departmentDao;
     @Autowired
-    private ReportPeriodDao reportPeriodDao;
-    @Autowired
     private TaxPeriodDao taxPeriodDao;
     @Autowired
     private DataRowDao dataRowDao;

@@ -99,6 +99,7 @@ public class DeclarationDataScriptingServiceImpl extends TAAbstractScriptingServ
 		
 		b.put("formDataEvent", event);
 		b.put("logger", logger);
+        b.put("userInfo", userInfo);
 		b.put("declarationData", declarationData);
         String applicationVersion = "АС Учет налогов";
         if (versionInfoProperties != null) {

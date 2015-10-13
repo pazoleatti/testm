@@ -206,7 +206,7 @@ void generateXML() {
     // Параметры подразделения - конец
 
     // Список данных форм-источников
-    def formDataList = declarationService.getAcceptedFormDataSources(declarationData).getRecords()
+    def formDataList = declarationService.getAcceptedFormDataSources(declarationData, userInfo, logger).getRecords()
     // Тип формы > Строки формы
     def dataRowsMap = [:]
     for (def formData : formDataList) {

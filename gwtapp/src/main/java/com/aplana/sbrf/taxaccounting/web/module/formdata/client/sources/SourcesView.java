@@ -220,7 +220,7 @@ public class SourcesView extends PopupViewWithUiHandlers<SourcesUiHandlers> impl
             @Override
             public String getValue(Relation object) {
                 return object.getComparativePeriodName() != null ?
-                        object.getComparativePeriodYear() + ", " + FormDataUtils.getAccName(object.getComparativePeriodName(), object.getComparativePeriodStartDate()): "";
+                        object.getComparativePeriodYear() + ", " + object.getComparativePeriodName() : "";
             }
         };
 

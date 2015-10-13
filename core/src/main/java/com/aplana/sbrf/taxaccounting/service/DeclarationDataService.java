@@ -212,15 +212,6 @@ public interface DeclarationDataService {
     Long getValueForCheckLimit(TAUserInfo userInfo, long declarationDataId, ReportType reportType);
 
     /**
-     * Формирование списка НФ-источников
-     * @param declarationData данные декларации-приемника
-     * @param excludeInactiveTemplate исключить нф-источники с макетом выведенным из действия?
-     * @param logger логгер
-     * @return
-     */
-    List<DepartmentFormType> getFormDataSources(DeclarationData declarationData, boolean excludeInactiveTemplate, Logger logger);
-
-    /**
      * Возвращает полное название декларации с указанием подразделения, периода и прочего
      * @param declarationId идентификатор декларации
      * @param reportType тип отчета. Может быть null

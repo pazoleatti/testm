@@ -150,7 +150,7 @@ void generateXML() {
     def code001 = null
     def code190 = null
     def sourceCorrNumber
-    for (def formData : declarationService.getAcceptedFormDataSources(declarationData).getRecords()) {
+    for (def formData : declarationService.getAcceptedFormDataSources(declarationData, userInfo, logger).getRecords()) {
         if (formData.formType.id == 606) {
             sourceDataRows = formDataService.getDataRowHelper(formData)?.getAll()
             sourceCorrNumber = reportPeriodService.getCorrectionNumber(formData.departmentReportPeriodId) ?: 0

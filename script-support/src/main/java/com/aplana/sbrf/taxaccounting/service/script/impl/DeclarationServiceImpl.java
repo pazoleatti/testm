@@ -67,6 +67,8 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
     @Autowired
     private DeclarationTemplateDao declarationTemplateDao;
     @Autowired
+    private SourceService sourceService;
+    @Autowired
     private DepartmentReportPeriodDao departmentReportPeriodDao;
     @Autowired
     private DeclarationDataSearchService declarationDataSearchService;
@@ -89,61 +91,15 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
     }
 
     @Override
-    public FormDataCollection getAcceptedFormDataSources(DeclarationData declarationData) {
-        int departmentId = declarationData.getDepartmentId();
-        int reportPeriodId = declarationData.getReportPeriodId();
-
-        // Формирование списка НФ-источников в статусе "Принята"
-        List<DepartmentFormType> sourcesInfo = declarationDataService.getFormDataSources(declarationData, true, new Logger());
-        List<FormData> records = new ArrayList<FormData>();
-
-        DepartmentReportPeriodFilter filter = new DepartmentReportPeriodFilter();
-        filter.setDepartmentIdList(Arrays.asList(departmentId));
-        filter.setReportPeriodIdList(Arrays.asList(reportPeriodId));
-        // Список всех отчетных периодов для пары отчетный период-подразделение
-        List<DepartmentReportPeriod> departmentReportPeriodList = departmentReportPeriodDao.getListByFilter(filter);
-        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.get(declarationData.getDepartmentReportPeriodId());
-        Collections.sort(departmentReportPeriodList, new Comparator<DepartmentReportPeriod>() {
-            @Override
-            public int compare(DepartmentReportPeriod o1, DepartmentReportPeriod o2) {
-                if (o1.getCorrectionDate() == null) {
-                    return -1;
-                }
-                if (o2.getCorrectionDate() == null) {
-                    return 1;
-                }
-                return o1.getCorrectionDate().compareTo(o2.getCorrectionDate());
-            }
-        });
-
-        for (DepartmentFormType dft : sourcesInfo) {
-            FormData formData = formDataDao.getLast(dft.getFormTypeId(), dft.getKind(), dft.getDepartmentId(),
-                    reportPeriodId, dft.getPeriodOrder(), null, false);
-            if (formData != null) {
-                if (formData.getState() != WorkflowState.ACCEPTED) {
-                    //TODO возможно перенести initFormTemplateParams внутрь функции
-                    FormData prevFormDataCorrection = formDataService.getPreviousFormDataCorrection(formData, departmentReportPeriodList, departmentReportPeriod);
-                    if (prevFormDataCorrection == null) {
-                        Department department = departmentDao.getDepartment(dft.getDepartmentId());
-                        FormType formType = formTypeDao.get(dft.getFormTypeId());
-                        context.getLogger().warn(
-                                "Форма-источник существует, но не может быть использована, так как еще не принята. Вид формы: \"%s\", тип формы: \"%s\", подразделение: \"%s\"",
-                                formType.getName(),
-                                dft.getKind().getTitle(),
-                                department.getName()
-                        );
-                    } else {
-                        FormTemplate formTemplate = formTemplateDao.get(prevFormDataCorrection.getFormTemplateId());
-                        prevFormDataCorrection.initFormTemplateParams(formTemplate);
-                        records.add(prevFormDataCorrection);
-                    }
-                } else {
-                    records.add(formData);
-                }
-            }
+    public FormDataCollection getAcceptedFormDataSources(DeclarationData declarationData, TAUserInfo userInfo, Logger logger) {
+        List<Relation> relations = sourceService.getDeclarationSourcesInfo(declarationData, true, true, WorkflowState.ACCEPTED, userInfo, logger);
+        List<FormData> sources = new ArrayList<FormData>();
+        for (Relation relation : relations){
+            FormData formData = formDataDao.get(relation.getFormDataId(), relation.isManual());
+            sources.add(formData);
         }
         FormDataCollection formDataCollection = new FormDataCollection();
-        formDataCollection.setRecords(records);
+        formDataCollection.setRecords(sources);
         return formDataCollection;
     }
 

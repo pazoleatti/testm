@@ -346,7 +346,7 @@ def getCurrencyCode(String str) {
 // получаем источники и сортируем по ТБ
 def getSources() {
     sourceFormDataList = []
-    for (def FormData formData : declarationService.getAcceptedFormDataSources(declarationData).getRecords()) {
+    for (def FormData formData : declarationService.getAcceptedFormDataSources(declarationData, userInfo, logger).getRecords()) {
         if (formData.formType.id == 606) {
             sourceFormDataList.add(formData)
         }

@@ -69,23 +69,15 @@ public class SourceServiceImpl implements SourceService {
     @Autowired
     private SourceDao sourceDao;
     @Autowired
-    private FormDataDao formDataDao;
-    @Autowired
-    private DeclarationDataDao declarationDataDao;
-    @Autowired
     private ReportPeriodDao reportPeriodDao;
     @Autowired
     private LogEntryService logEntryService;
     @Autowired
-    private FormTemplateService formTemplateService;
-    @Autowired
     private DepartmentReportPeriodService departmentReportPeriodService;
     @Autowired
-    private DeclarationTemplateService declarationTemplateService;
+    private FormDataScriptingService formDataScriptingService;
     @Autowired
-    private DeclarationDataService declarationDataService;
-    @Autowired
-    private FormDataService formDataService;
+    private DeclarationDataScriptingService declarationDataScriptingService;
 
 	/**
 	 * Проверяет начало диапазона дат и если оно не задано, то возвращает значение по умолчанию
@@ -1206,22 +1198,98 @@ public class SourceServiceImpl implements SourceService {
     }
 
     @Override
-    public List<Relation> getSourcesInfo(long formDataId, boolean light) {
-        return sourceDao.getSourcesInfo(formDataId, light);
+    public List<Relation> getSourcesInfo(FormData destinationFormData, boolean light, boolean excludeIfNotExist, WorkflowState stateRestriction, TAUserInfo userInfo, Logger logger) {
+        /** Проверяем в скрипте источники-приемники для особенных форм/деклараций */
+        Map<String, Object> params = new HashMap<String, Object>();
+        FormSources sources = new FormSources();
+        sources.setSourceList(new ArrayList<Relation>());
+        sources.setSourcesProcessedByScript(false);
+        params.put("sources", sources);
+
+        formDataScriptingService.executeScript(userInfo, destinationFormData, FormDataEvent.GET_SOURCES, logger, params);
+        if (sources.isSourcesProcessedByScript()) {
+            for (Iterator<Relation> it = sources.getSourceList().iterator(); it.hasNext();) {
+                Relation relation = it.next();
+                //Убираем ненужное, т.к скрипт возвращает сразу все источники и приемники
+                if (!relation.isSource() || relation.getDeclarationDataId() != null) {
+                    it.remove();
+                }
+            }
+            return sources.getSourceList();
+        } else {
+            return sourceDao.getSourcesInfo(destinationFormData.getId(), light, excludeIfNotExist, stateRestriction);
+        }
     }
 
     @Override
-    public List<Relation> getDestinationsInfo(long formDataId, boolean light) {
-        return sourceDao.getDestinationsInfo(formDataId, light);
+    public List<Relation> getDestinationsInfo(FormData sourceFormData, boolean light, boolean excludeIfNotExist, WorkflowState stateRestriction, TAUserInfo userInfo, Logger logger) {
+        /** Проверяем в скрипте источники-приемники для особенных форм/деклараций */
+        Map<String, Object> params = new HashMap<String, Object>();
+        FormSources sources = new FormSources();
+        sources.setSourceList(new ArrayList<Relation>());
+        sources.setSourcesProcessedByScript(false);
+        params.put("sources", sources);
+
+        formDataScriptingService.executeScript(userInfo, sourceFormData, FormDataEvent.GET_SOURCES, logger, params);
+        if (sources.isSourcesProcessedByScript()) {
+            for (Iterator<Relation> it = sources.getSourceList().iterator(); it.hasNext();) {
+                Relation relation = it.next();
+                //Убираем ненужное, т.к скрипт возвращает сразу все источники и приемники
+                if (relation.isSource() || relation.getDeclarationDataId() != null) {
+                    it.remove();
+                }
+            }
+            return sources.getSourceList();
+        } else {
+            return sourceDao.getDestinationsInfo(sourceFormData.getId(), light, excludeIfNotExist, stateRestriction);
+        }
     }
 
     @Override
-    public List<Relation> getDeclarationDestinationsInfo(long formDataId, boolean light) {
-        return sourceDao.getDeclarationDestinationsInfo(formDataId, light);
+    public List<Relation> getDeclarationDestinationsInfo(FormData sourceFormData, boolean light, boolean excludeIfNotExist, WorkflowState stateRestriction, TAUserInfo userInfo, Logger logger) {
+        /** Проверяем в скрипте источники-приемники для особенных форм/деклараций */
+        Map<String, Object> params = new HashMap<String, Object>();
+        FormSources sources = new FormSources();
+        sources.setSourceList(new ArrayList<Relation>());
+        sources.setSourcesProcessedByScript(false);
+        params.put("sources", sources);
+
+        formDataScriptingService.executeScript(userInfo, sourceFormData, FormDataEvent.GET_SOURCES, logger, params);
+        if (sources.isSourcesProcessedByScript()) {
+            for (Iterator<Relation> it = sources.getSourceList().iterator(); it.hasNext();) {
+                Relation relation = it.next();
+                //Убираем ненужное, т.к скрипт возвращает сразу все источники и приемники
+                if (relation.isSource() || relation.getFormDataId() != null) {
+                    it.remove();
+                }
+            }
+            return sources.getSourceList();
+        } else {
+            return sourceDao.getDeclarationDestinationsInfo(sourceFormData.getId(), light, excludeIfNotExist, stateRestriction);
+        }
     }
 
     @Override
-    public List<Relation> getDeclarationSourcesInfo(long declarationId, boolean light) {
-        return sourceDao.getDeclarationSourcesInfo(declarationId, light);
+    public List<Relation> getDeclarationSourcesInfo(DeclarationData declaration, boolean light, boolean excludeIfNotExist, WorkflowState stateRestriction, TAUserInfo userInfo, Logger logger) {
+        /** Проверяем в скрипте источники-приемники для особенных форм/деклараций */
+        Map<String, Object> params = new HashMap<String, Object>();
+        FormSources sources = new FormSources();
+        sources.setSourceList(new ArrayList<Relation>());
+        sources.setSourcesProcessedByScript(false);
+        params.put("sources", sources);
+
+        declarationDataScriptingService.executeScript(userInfo, declaration, FormDataEvent.GET_SOURCES, logger, params);
+        if (sources.isSourcesProcessedByScript()) {
+            for (Iterator<Relation> it = sources.getSourceList().iterator(); it.hasNext();) {
+                Relation relation = it.next();
+                //Убираем ненужное, т.к скрипт возвращает сразу все источники и приемники
+                if (!relation.isSource() || relation.getDeclarationDataId() != null) {
+                    it.remove();
+                }
+            }
+            return sources.getSourceList();
+        } else {
+            return sourceDao.getDeclarationSourcesInfo(declaration.getId(), light, excludeIfNotExist, stateRestriction);
+        }
     }
 }

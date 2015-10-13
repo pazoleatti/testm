@@ -71,6 +71,7 @@ public class FormDataScriptingServiceImpl extends TAAbstractScriptingServiceImpl
         b.putAll(scriptComponents);
         b.put("formDataEvent", event);
         b.put("logger", logger);
+        b.put("userInfo", userInfo);
         b.put("formData", formData);
         String applicationVersion = "АС Учет налогов";
         if (versionInfoProperties != null) {

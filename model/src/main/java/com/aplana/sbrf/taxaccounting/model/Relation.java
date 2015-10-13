@@ -39,6 +39,8 @@ public class Relation implements Serializable {
     private boolean accruing;
     /** Номер месяца */
     private Integer month;
+    /** Признак ручного ввода */
+    private boolean manual;
 
     /**************  Параметры декларации ***************/
 
@@ -288,5 +290,13 @@ public class Relation implements Serializable {
 
     public Integer getComparativePeriodYear() {
         return comparativePeriodYear;
+    }
+
+    public boolean isManual() {
+        return manual;
+    }
+
+    public void setManual(boolean manual) {
+        this.manual = manual;
     }
 }

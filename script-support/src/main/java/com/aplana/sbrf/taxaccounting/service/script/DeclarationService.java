@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.service.script;
 
 import com.aplana.sbrf.taxaccounting.model.DeclarationData;
 import com.aplana.sbrf.taxaccounting.model.FormDataCollection;
+import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.util.ScriptExposed;
 
@@ -34,7 +35,7 @@ public interface DeclarationService {
 	 * @param declarationData декларация
 	 * @return список НФ-источников в статусе "Принята"
 	 */
-	FormDataCollection getAcceptedFormDataSources(DeclarationData declarationData);
+	FormDataCollection getAcceptedFormDataSources(DeclarationData declarationData, TAUserInfo userInfo, Logger logger);
 
     /**
      * Получить данные декларации в формате законодателя (XML)

@@ -1,13 +1,6 @@
 package com.aplana.sbrf.taxaccounting.service.script;
 
-import com.aplana.sbrf.taxaccounting.model.Cell;
-import com.aplana.sbrf.taxaccounting.model.DataRow;
-import com.aplana.sbrf.taxaccounting.model.FormData;
-import com.aplana.sbrf.taxaccounting.model.FormDataKind;
-import com.aplana.sbrf.taxaccounting.model.FormTemplate;
-import com.aplana.sbrf.taxaccounting.model.PagingResult;
-import com.aplana.sbrf.taxaccounting.model.MembersFilterData;
-import com.aplana.sbrf.taxaccounting.model.TAUserView;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
@@ -81,14 +74,14 @@ public interface FormDataService {
      * Без записи в бд (только сохранение в кэш DataRowHelper)
      */
     @SuppressWarnings("unused")
-    void consolidationSimple(FormData formData, Logger logger);
+    void consolidationSimple(FormData formData, Logger logger, TAUserInfo userInfo);
 
     /**
      * Консолидация формы с итоговыми строками
      * Без записи в бд (только сохранение в кэш DataRowHelper)
      */
     @SuppressWarnings("unused")
-    void consolidationTotal(FormData formData, Logger logger, List<String> totalAliases);
+    void consolidationTotal(FormData formData, Logger logger, TAUserInfo userInfo, List<String> totalAliases);
 
     /**
      * Добавление новой строки

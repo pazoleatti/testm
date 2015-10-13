@@ -531,33 +531,45 @@ public interface SourceService {
 
     /**
      * Возвращает список нф-источников для указанной нф (включая несозданные)
-     * @param destinationFormDataId идентификатор нф-приемника
-     * @param light true - заполнятся только текстовые данные для GUI
+     * @param destinationFormData нф-приемник
+     * @param light true - заполнятся только текстовые данные для GUI и сообщений
+     * @param excludeIfNotExist true - исключить несозданные источники
+     * @param stateRestriction ограничение по состоянию для созданных экземпляров
      * @return список нф-источников
      */
-    List<Relation> getSourcesInfo(long destinationFormDataId, boolean light);
+    List<Relation> getSourcesInfo(FormData destinationFormData, boolean light, boolean excludeIfNotExist, WorkflowState stateRestriction,
+                                  TAUserInfo userInfo, Logger logger);
 
     /**
      * Возвращает список нф-приемников для указанной нф (включая несозданные)
-     * @param sourceFormDataId идентификатор нф-источника
-     * @param light true - заполнятся только текстовые данные для GUI
+     * @param sourceFormData нф-источник
+     * @param light true - заполнятся только текстовые данные для GUI и сообщений
+     * @param excludeIfNotExist true - исключить несозданные приемники
+     * @param stateRestriction ограничение по состоянию для созданных экземпляров
      * @return список нф-приемников
      */
-    List<Relation> getDestinationsInfo(long sourceFormDataId, boolean light);
+    List<Relation> getDestinationsInfo(FormData sourceFormData, boolean light, boolean excludeIfNotExist, WorkflowState stateRestriction,
+                                       TAUserInfo userInfo, Logger logger);
 
     /**
      * Возвращает список нф-источников для указанной декларации (включая несозданные)
-     * @param sourceFormDataId идентификатор нф-источника
-     * @param light true - заполнятся только текстовые данные для GUI
+     * @param sourceFormData нф-источник
+     * @param light true - заполнятся только текстовые данные для GUI и сообщений
+     * @param excludeIfNotExist true - исключить несозданные приемники
+     * @param stateRestriction ограничение по состоянию для созданных экземпляров
      * @return список нф-источников
      */
-    List<Relation> getDeclarationDestinationsInfo(long sourceFormDataId, boolean light);
+    List<Relation> getDeclarationDestinationsInfo(FormData sourceFormData, boolean light, boolean excludeIfNotExist, WorkflowState stateRestriction,
+                                                  TAUserInfo userInfo, Logger logger);
 
     /**
      * Возвращает список нф-источников для указанной декларации (включая несозданные)
-     * @param declarationId идентификатор декларации-приемника
-     * @param light true - заполнятся только текстовые данные для GUI
+     * @param declaration декларациz-приемник
+     * @param light true - заполнятся только текстовые данные для GUI и сообщений
+     * @param excludeIfNotExist true - исключить несозданные источники
+     * @param stateRestriction ограничение по состоянию для созданных экземпляров
      * @return список нф-источников
      */
-    List<Relation> getDeclarationSourcesInfo(long declarationId, boolean light);
+    List<Relation> getDeclarationSourcesInfo(DeclarationData declaration, boolean light, boolean excludeIfNotExist, WorkflowState stateRestriction,
+                                             TAUserInfo userInfo, Logger logger);
 }

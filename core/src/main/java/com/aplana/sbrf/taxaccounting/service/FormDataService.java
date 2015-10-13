@@ -140,17 +140,6 @@ public interface FormDataService {
 	void doMove(long formDataId, boolean manual, TAUserInfo userInfo, WorkflowMove move, String note, Logger logger, boolean isAsync, LockStateLogger stateLogger);
 
     /**
-     * Получение назначение для заданной НФ
-     * @param formData
-     * @param logger
-     * @param userInfo
-     * @param reportPeriod
-     * @param excludeInactiveTemplate исключить нф-источники с макетом выведенным из действия?
-     * @return
-     */
-    List<DepartmentFormType> getFormSources(FormData formData, Logger logger, TAUserInfo userInfo, ReportPeriod reportPeriod, boolean excludeInactiveTemplate);
-
-    /**
      * Создаёт налоговую форму без проверок прав доступа
      * Метод предназначен для использования при реализации механизма консолидации, когда требуется создавать формы в чужих подразделениях
      * @param logger объект журнала

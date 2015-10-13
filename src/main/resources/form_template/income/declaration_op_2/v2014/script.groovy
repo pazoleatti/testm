@@ -416,7 +416,7 @@ void generateXML(XMLStreamReader readerBank) {
 
     // Данные налоговых форм.
 
-    def formDataCollection = declarationService.getAcceptedFormDataSources(declarationData)
+    def formDataCollection = declarationService.getAcceptedFormDataSources(declarationData, userInfo, logger)
 
     /** Сводная налоговая формы Банка «Расчёт распределения авансовых платежей и налога на прибыль по обособленным подразделениям организации». */
     def dataRowsAdvance = getDataRows(formDataCollection, 500)

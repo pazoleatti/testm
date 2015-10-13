@@ -117,8 +117,6 @@ public class FormDataServiceImpl implements FormDataService {
 	@Autowired
 	private DepartmentService departmentService;
     @Autowired
-    private DepartmentFormTypeDao departmentFormTypeDao;
-    @Autowired
     private PeriodService reportPeriodService;
     @Autowired
     private EventLauncher eventHandlerLauncher;
@@ -498,77 +496,58 @@ public class FormDataServiceImpl implements FormDataService {
 					logger.warn(CONSOLIDATION_NOT_TOPICAL);
                     consolidationOk = false;
 				} else {
-                    ReportPeriod reportPeriod = reportPeriodService.getReportPeriod(formData.getReportPeriodId());
                     if (formData.getState() == WorkflowState.ACCEPTED) {
                         // Система проверяет, существует ли экземпляр формы-приёмника, консолидация в который не была выполнена.
-                        List<DepartmentFormType> destinationsDFT = departmentFormTypeDao.getFormDestinations(
-                                formData.getDepartmentId(),
-                                formData.getFormType().getId(),
-                                formData.getKind(),
-                                reportPeriod.getStartDate(),
-                                reportPeriod.getEndDate());
-                        for (DepartmentFormType dftTarget : destinationsDFT) {
-                            DepartmentReportPeriod drp = departmentReportPeriodService.getLast(dftTarget.getDepartmentId(), formData.getReportPeriodId());
-                            FormData destinationFD =
-                                    findFormData(dftTarget.getFormTypeId(), dftTarget.getKind(), drp.getId(), formData.getPeriodOrder(),
-                                            formData.getComparativePeriodId(), formData.isAccruing());
-                            if (destinationFD != null && !sourceService.isFDSourceConsolidated(destinationFD.getId(), formData.getId())){
-                                ReportPeriod rp = reportPeriodService.getReportPeriod(destinationFD.getReportPeriodId());
+                        List<Relation> relations = sourceService.getDestinationsInfo(formData, true, true, null, userInfo, logger);
+                        for (Relation relation : relations) {
+                            if (!sourceService.isFDSourceConsolidated(relation.getFormDataId(), formData.getId())){
                                 consolidationOk = false;
                                 logger.warn(
                                         NOT_CONSOLIDATE_DESTINATION_FORM_WARNING,
-                                        departmentService.getDepartment(destinationFD.getDepartmentId()).getName(),
-                                        destinationFD.getFormType().getName(),
-                                        destinationFD.getKind().getTitle(),
-                                        rp.getName() + (destinationFD.getPeriodOrder() != null?" " + Months.fromId(destinationFD.getPeriodOrder()).getTitle():""),
-                                        rp.getTaxPeriod().getYear(),
-                                        drp.getCorrectionDate() != null ? String.format("с датой сдачи корректировки %s",
-                                                SDF_DD_MM_YYYY.format(drp.getCorrectionDate())) : ""
+                                        relation.getFullDepartmentName(),
+                                        relation.getFormTypeName(),
+                                        relation.getFormDataKind().getTitle(),
+                                        relation.getPeriodName() + (relation.getMonth() != null?" " + Months.fromId(relation.getMonth()).getTitle():""),
+                                        relation.getYear(),
+                                        relation.getCorrectionDate() != null ? String.format("с датой сдачи корректировки %s",
+                                                SDF_DD_MM_YYYY.format(relation.getCorrectionDate())) : ""
                                 );
                             }
                         }
                     }
                     //Система проверяет статус консолидации из форм-источников.
-                    List<DepartmentFormType> dftSources = getFormSources(formData, logger, userInfo, reportPeriod, true);
-                    for (DepartmentFormType dftSource : dftSources){
-                        DepartmentReportPeriod sourceDepartmentReportPeriod =
-                                departmentReportPeriodService.getLast(dftSource.getDepartmentId(), formData.getReportPeriodId());
-                        FormData sourceFormData =
-                                findFormData(dftSource.getFormTypeId(), dftSource.getKind(),
-                                        sourceDepartmentReportPeriod.getId(), dftSource.getPeriodOrder(),
-                                        formData.getComparativePeriodId(), formData.isAccruing());
-                        ReportPeriod rp = reportPeriodService.getReportPeriod(formData.getReportPeriodId());
-                        if (sourceFormData == null){
-                            DepartmentReportPeriod drp = departmentReportPeriodService.get(formData.getDepartmentReportPeriodId());
+                    // получаем экземпляры-источники
+                    List<Relation> relations = sourceService.getSourcesInfo(formData, true, false, null, userInfo, logger);
+                    for (Relation relation : relations){
+                        if (relation.getFormDataId() == null){
                             consolidationOk = false;
                             logger.warn(
                                     NOT_EXIST_SOURCE_FORM_WARNING,
-                                    departmentService.getDepartment(dftSource.getDepartmentId()).getName(),
-                                    formTypeService.get(dftSource.getFormTypeId()).getName(),
-                                    dftSource.getKind().getTitle(),
-                                    rp.getName() + (dftSource.getPeriodOrder() != null ? " " + Months.fromId(dftSource.getPeriodOrder()).getTitle() : ""),
-                                    rp.getTaxPeriod().getYear(),
-                                    drp.getCorrectionDate() != null ? String.format(" с датой сдачи корректировки %s",
-                                            SDF_DD_MM_YYYY.format(drp.getCorrectionDate())) : ""
+                                    relation.getFullDepartmentName(),
+                                    relation.getFormTypeName(),
+                                    relation.getFormDataKind().getTitle(),
+                                    relation.getPeriodName() + (relation.getMonth() != null ? " " + Months.fromId(relation.getMonth()).getTitle() : ""),
+                                    relation.getYear(),
+                                    relation.getCorrectionDate() != null ? String.format(" с датой сдачи корректировки %s",
+                                            SDF_DD_MM_YYYY.format(relation.getCorrectionDate())) : ""
                             );
-                        } else if (!sourceService.isFDSourceConsolidated(formData.getId(), sourceFormData.getId())){
-                            DepartmentReportPeriod drp = departmentReportPeriodService.get(formData.getDepartmentReportPeriodId());
+                        } else if (!sourceService.isFDSourceConsolidated(formData.getId(), relation.getFormDataId())){
                             consolidationOk = false;
                             logger.warn(
                                     NOT_CONSOLIDATE_SOURCE_FORM_WARNING,
-                                    departmentService.getDepartment(sourceFormData.getDepartmentId()).getName(),
-                                    sourceFormData.getFormType().getName(),
-                                    sourceFormData.getKind().getTitle(),
-                                    rp.getName() + (sourceFormData.getPeriodOrder() != null ? " " + Months.fromId(sourceFormData.getPeriodOrder()).getTitle() : ""),
-                                    rp.getTaxPeriod().getYear(),
-                                    drp.getCorrectionDate() != null ? String.format(" с датой сдачи корректировки %s",
-                                            SDF_DD_MM_YYYY.format(drp.getCorrectionDate())) : "",
-                                    sourceFormData.getState().getTitle()
+                                    relation.getFullDepartmentName(),
+                                    relation.getFormTypeName(),
+                                    relation.getFormDataKind().getTitle(),
+                                    relation.getPeriodName() + (relation.getMonth() != null ? " " + Months.fromId(relation.getMonth()).getTitle() : ""),
+                                    relation.getYear(),
+                                    relation.getCorrectionDate() != null ? String.format(" с датой сдачи корректировки %s",
+                                            SDF_DD_MM_YYYY.format(relation.getCorrectionDate())) : "",
+                                    relation.getState().getTitle()
                             );
                         }
                     }
 
-                    if (!dftSources.isEmpty() && consolidationOk){
+                    if (!relations.isEmpty() && consolidationOk){
                         logger.info("Консолидация выполнена из всех форм-источников");
                     }
                 }
@@ -721,7 +700,7 @@ public class FormDataServiceImpl implements FormDataService {
      */
     @Override
     public void doMove(long formDataId, boolean manual, TAUserInfo userInfo, WorkflowMove workflowMove, String note, Logger logger, boolean isAsync, LockStateLogger stateLogger) {
-        formDataAccessService.checkDestinations(formDataId);
+        formDataAccessService.checkDestinations(formDataId, userInfo, logger);
         List<WorkflowMove> availableMoves = formDataAccessService.getAvailableMoves(userInfo, formDataId);
         if (!availableMoves.contains(workflowMove)) {
             throw new ServiceException(
@@ -802,129 +781,48 @@ public class FormDataServiceImpl implements FormDataService {
         }
     }
 
-	@Override
-	public List<DepartmentFormType> getFormSources(final FormData formData, final Logger logger, final TAUserInfo userInfo,
-													final ReportPeriod reportPeriod, final boolean excludeInactiveTemplate){
-		return tx.executeInNewReadOnlyTransaction(new TransactionLogic<List<DepartmentFormType>>() {
-			@Override
-			public List<DepartmentFormType> execute() {
-				List<DepartmentFormType> sourceList = new ArrayList<DepartmentFormType>();
-				/** Проверяем в скрипте источники-приемники для особенных форм */
-				Map<String, Object> params = new HashMap<String, Object>();
-				FormSources sources = new FormSources();
-				sources.setSourceList(new ArrayList<Relation>());
-				sources.setSourcesProcessedByScript(false);
-				params.put("sources", sources);
-				formDataScriptingService.executeScript(userInfo, formData, FormDataEvent.GET_SOURCES, logger, params);
-
-				if (sources.isSourcesProcessedByScript()) {
-					//Скрипт возвращает все необходимые источники-приемники
-					if (sources.getSourceList() != null) {
-						for (Relation relation : sources.getSourceList()) {
-							if (relation.isSource() && relation.isCreated() && relation.getFormType() != null) {
-								//TODO: Заполняем DepartmentFormType не полностью!
-								DepartmentFormType source = new DepartmentFormType();
-								source.setDepartmentId(formData.getDepartmentId());
-								source.setFormTypeId(relation.getFormType().getId());
-								source.setKind(relation.getFormDataKind());
-								source.setPeriodOrder(relation.getMonth());
-								sourceList.add(source);
-							}
-						}
-					}
-				} else {
-					//Получаем источники-приемники стандартными методами ядра
-					//Номер месяца для источников получаемых обычным способом не указан. Такие случаи должны обрабатываться в скриптах
-					List<DepartmentFormType> dftSources = departmentFormTypeDao.getFormSources(
-							formData.getDepartmentId(),
-							formData.getFormType().getId(),
-							formData.getKind(),
-							reportPeriod.getCalendarStartDate(),
-							reportPeriod.getEndDate());
-					for (DepartmentFormType dft : dftSources) {
-                        if (formTemplateService.existFormTemplate(dft.getFormTypeId(), reportPeriod.getId(), excludeInactiveTemplate)) {
-                            FormTemplate formTemplate = formTemplateService.get(
-                                    excludeInactiveTemplate ?
-                                            formTemplateService.getActiveFormTemplateId(dft.getFormTypeId(), reportPeriod.getId()) :
-                                            formTemplateService.getFormTemplateIdByFTAndReportPeriod(dft.getFormTypeId(), reportPeriod.getId())
-                            );
-
-                            if (formTemplate.isMonthly()) {
-                                for (Months month : reportPeriodService.getAvailableMonthList(reportPeriod.getId())) {
-                                    if (month != null) {
-                                        DepartmentFormType source = new DepartmentFormType();
-                                        source.setDepartmentId(dft.getDepartmentId());
-                                        source.setFormTypeId(dft.getFormTypeId());
-                                        source.setKind(dft.getKind());
-                                        source.setPeriodOrder(month.getId());
-                                        sourceList.add(source);
-                                    }
-                                }
-                            } else {
-                                sourceList.add(dft);
-                            }
-                        }
-					}
-				}
-				return sourceList;
-			}
-		});
-	}
-
     private void checkConsolidateFromSources(FormData formData, Logger logger, TAUserInfo userInfo){
         //Проверка на неактуальные консолидированные данные
         if (!sourceService.isFDConsolidationTopical(formData.getId())){
             logger.warn(CONSOLIDATION_NOT_TOPICAL);
         } else {
             //Проверка выполнена ли консолидация из всех принятых источников текущего экземпляра
-            ReportPeriod reportPeriod = reportPeriodService.getReportPeriod(formData.getReportPeriodId());
-            List<DepartmentFormType> departmentFormTypesSources = getFormSources(formData, logger, userInfo, reportPeriod, true);
-            ArrayList<FormData> notAcceptedFDSources = new ArrayList<FormData>();
-            ArrayList<FormData> notConsolidatedFDSources = new ArrayList<FormData>();
-            for (DepartmentFormType sourceDFT : departmentFormTypesSources) {
-                DepartmentReportPeriod sourceDepartmentReportPeriod =
-                        departmentReportPeriodService.getLast(sourceDFT.getDepartmentId(), formData.getReportPeriodId());
-                FormData sourceForm = findFormData(sourceDFT.getFormTypeId(), sourceDFT.getKind(),
-                        sourceDepartmentReportPeriod.getId(), sourceDFT.getPeriodOrder(),
-                        formData.getComparativePeriodId(), formData.isAccruing());
-                if (
-                        sourceForm != null && sourceForm.getState() == WorkflowState.ACCEPTED
-                                &&
-                                !sourceService.isFDSourceConsolidated(formData.getId(), sourceForm.getId())
-                        ) {
-                    notConsolidatedFDSources.add(sourceForm);
-                    DepartmentReportPeriod drp = departmentReportPeriodService.get(sourceForm.getDepartmentReportPeriodId());
+            boolean hasNotAccepted = false;
+            boolean hasNotConsolidated = false;
+            for (Relation relation : sourceService.getSourcesInfo(formData, true, false, null, userInfo, logger)) {
+                if (relation.isCreated() && relation.getState() == WorkflowState.ACCEPTED &&
+                        !sourceService.isFDSourceConsolidated(formData.getId(), relation.getFormDataId())) {
+                    hasNotConsolidated = true;
                     logger.error(NOT_CONSOLIDATED_SOURCE_FORM,
-                            departmentService.getDepartment(sourceForm.getDepartmentId()).getName(),
-                            sourceForm.getKind().getTitle(),
-                            sourceForm.getFormType().getName(),
-                            reportPeriod.getName() + (sourceForm.getPeriodOrder() != null ? " " + Months.fromId(sourceForm.getPeriodOrder()).getTitle() : ""),
-                            reportPeriod.getTaxPeriod().getYear(),
-                            drp.getCorrectionDate() != null ? String.format(" с датой сдачи корректировки %s",
-                                    SDF_DD_MM_YYYY.format(drp.getCorrectionDate())) : ""
+                            relation.getFullDepartmentName(),
+                            relation.getFormDataKind().getTitle(),
+                            relation.getFormTypeName(),
+                            relation.getPeriodName() + (relation.getMonth() != null ? " " + Months.fromId(relation.getMonth()).getTitle() : ""),
+                            relation.getYear(),
+                            relation.getCorrectionDate() != null ? String.format(" с датой сдачи корректировки %s",
+                                    SDF_DD_MM_YYYY.format(relation.getCorrectionDate())) : ""
                     );
-                } else if (sourceForm == null || sourceForm.getState() != WorkflowState.ACCEPTED) {
-                    notAcceptedFDSources.add(sourceForm);
+                } else if (!relation.isCreated() || relation.getState() != WorkflowState.ACCEPTED) {
+                    hasNotAccepted = true;
                     logger.warn(NOT_ACCEPTED_SOURCE_FORM,
-                            departmentService.getDepartment(sourceDFT.getDepartmentId()).getName(),
-                            sourceDFT.getKind().getTitle(),
-                            formTypeService.get(sourceDFT.getFormTypeId()).getName(),
-                            reportPeriod.getName() + (formData.getPeriodOrder() != null ? " " + Months.fromId(formData.getPeriodOrder()).getTitle() : ""),
-                            reportPeriod.getTaxPeriod().getYear(),
-                            sourceDepartmentReportPeriod.getCorrectionDate() != null ?
-                                    String.format(" с датой сдачи корректировки %s",
-                                            SDF_DD_MM_YYYY.format(sourceDepartmentReportPeriod.getCorrectionDate())) : "",
-                            sourceForm == null ? "Не создана" : sourceForm.getState().getTitle());
+                            relation.getFullDepartmentName(),
+                            relation.getFormDataKind().getTitle(),
+                            relation.getFormTypeName(),
+                            relation.getPeriodName() + (relation.getMonth() != null ? " " + Months.fromId(relation.getMonth()).getTitle() : ""),
+                            relation.getYear(),
+                            relation.getCorrectionDate() != null ? String.format(" с датой сдачи корректировки %s",
+                                    SDF_DD_MM_YYYY.format(relation.getCorrectionDate())) : "",
+                            !relation.isCreated() ? "Не создана" : relation.getState().getTitle());
                 }
             }
             //Если консолидация из всех принятых источников текущего экземпляра не была выполнена
-            if (!notConsolidatedFDSources.isEmpty()) {
+            if (hasNotConsolidated) {
                 logger.clear(LogLevel.WARNING);
                 logger.getEntries().add(0, new LogEntry(LogLevel.ERROR, NOT_CONSOLIDATED_SOURCE_FORM_ERR));
                 throw new ServiceLoggerException("", logEntryService.save(logger.getEntries()));
             }
             //Если консолидация из всех принятых источников текущего экземпляра была выполнена, но есть непринятые или несозданные источники
-            if (!notAcceptedFDSources.isEmpty()) {
+            if (hasNotAccepted) {
                 logger.getEntries().add(0, new LogEntry(LogLevel.WARNING, NOT_ACCEPTED_SOURCE_FORM_WARN));
             }
         }
@@ -1084,45 +982,22 @@ public class FormDataServiceImpl implements FormDataService {
     @Transactional(readOnly = false)
     public void compose(final FormData formData, final TAUserInfo userInfo, Logger logger, LockStateLogger stateLogger) {
         stateLogger.updateState("Выполнение проверок на возможность консолидации");
-        // Период ввода остатков не обрабатывается. Если форма ежемесячная, то только первый месяц периода может быть периодом ввода остатков.
-        ReportPeriod reportPeriod = reportPeriodService.getReportPeriod(formData.getReportPeriodId());
-
-        List<DepartmentFormType> departmentFormTypesSources = getFormSources(formData, logger, userInfo, reportPeriod, true);
-
         HashSet<Long> srcAcceptedIds = new HashSet<Long>();
         ArrayList<String> msgPull = new ArrayList<String>(0);
-        //Список для блокировки форм
-        ArrayList<FormData> sources = new ArrayList<FormData>(departmentFormTypesSources.size());
-        for (DepartmentFormType sourceDFT : departmentFormTypesSources){
-            // Последний отчетный период подразделения
-            DepartmentReportPeriod sourceDepartmentReportPeriod =
-                    departmentReportPeriodService.getLast(sourceDFT.getDepartmentId(), formData.getReportPeriodId());
-            if (sourceDepartmentReportPeriod == null) {
-                continue;
-            }
-            FormData sourceForm = getLast(sourceDFT.getFormTypeId(), sourceDFT.getKind(), sourceDFT.getDepartmentId(),
-                    formData.getReportPeriodId(), sourceDFT.getPeriodOrder(),
-                    formData.getComparativePeriodId(), formData.isAccruing());
-            if (sourceForm == null){
-                continue;
-            }
-            //Запись на будущее, чтобы второго цикла не делать
-            //1E.
-            if (sourceForm.getState() == WorkflowState.ACCEPTED){
-                DepartmentReportPeriod formDepartmentReportPeriod = departmentReportPeriodService.get(sourceForm.getDepartmentReportPeriodId());
-                srcAcceptedIds.add(sourceForm.getId());
-                msgPull.add(String.format(FORM_DATA_INFO_MSG,
-                        departmentService.getDepartment(sourceDFT.getDepartmentId()).getName(),
-                        sourceDFT.getKind().getTitle(),
-                        formTypeService.get(sourceDFT.getFormTypeId()).getName(),
-                        formDepartmentReportPeriod.getReportPeriod().getName() + (sourceForm.getPeriodOrder() != null ? " " + Months.fromId(sourceForm.getPeriodOrder()).getTitle() : ""),
-                        (formDepartmentReportPeriod.getCorrectionDate() != null ?
-                                String.format(CORRECTION_PATTERN, SDF_DD_MM_YYYY.format(formDepartmentReportPeriod.getCorrectionDate()))
-                                :
-                                "")
-                ));
-                sources.add(sourceForm);
-            }
+        //Проверяем наличие принятых экземпляров-источников
+        List<Relation> relations = sourceService.getSourcesInfo(formData, true, true, WorkflowState.ACCEPTED, userInfo, logger);
+        for (Relation relation : relations){
+            srcAcceptedIds.add(relation.getFormDataId());
+            msgPull.add(String.format(FORM_DATA_INFO_MSG,
+                    relation.getFullDepartmentName(),
+                    relation.getFormDataKind().getTitle(),
+                    relation.getFormTypeName(),
+                    relation.getPeriodName() + (relation.getMonth() != null ? " " + Months.fromId(relation.getMonth()).getTitle() : ""),
+                    (relation.getCorrectionDate() != null ?
+                            String.format(CORRECTION_PATTERN, SDF_DD_MM_YYYY.format(relation.getCorrectionDate()))
+                            :
+                            "")
+            ));
         }
 
         //1Е.  Система проверяет экземпляр на возможность выполнения консолидации в него. Не существует ни одной принятой формы-источника
@@ -1138,44 +1013,6 @@ public class FormDataServiceImpl implements FormDataService {
             throw new ServiceException("Для текущей формы не существует ни одного источника в статусе \"Принята\"");
         }
 
-        /*
-        //Блокировка всех экземпляров источников
-        List<String> lockedForms = new ArrayList<String>();
-        String lockKey = "";
-        //Переменная для отмечания консолидации в таблице консолидации
-        for (FormData sourceForm : sources){
-            // Проверяем/устанавливаем блокировку для источников
-            LockData lockData;
-            Pair<ReportType, LockData> lockType = getLockTaskType(sourceForm.getId());
-            if (lockType == null) {
-                lockKey = generateTaskKey(sourceForm.getId(), ReportType.EDIT_FD);
-                lockData = lockService.lock(
-                        lockKey,
-                        userInfo.getUser().getId(), getFormDataFullName(formData.getId(), null, null),
-                        lockService.getLockTimeout(LockData.LockObjects.FORM_DATA));
-            } else {
-                lockData = lockType.getSecond();
-            }
-
-            if (lockData != null) {
-                DepartmentReportPeriod drp = departmentReportPeriodService.get(sourceForm.getDepartmentReportPeriodId());
-                logger.error(LOCK_SOURCE,
-                        sourceForm.getFormType().getName(),
-                        sourceForm.getKind().getTitle(),
-                        drp.getReportPeriod().getTaxPeriod().getYear() + " " + drp.getReportPeriod().getName(),
-                        departmentService.getUserDepartmentName(sourceForm.getDepartmentId()).getName(),
-                        userService.getUser(lockData.getUserId()).getName(),
-                        SDF_HH_MM_DD_MM_YYYY.format(lockData.getDateLock()));
-            } else {
-                lockedForms.add(lockKey);
-            }
-        }
-
-        //2А. Выводим ошибки блокировок
-        if (logger.containsLevel(LogLevel.ERROR)) {
-            throw new ServiceException("Ошибка при консолидации");
-        }
-         */
         //3. Консолидируем
         stateLogger.updateState("Консолидация данных в форму");
         ScriptComponentContextImpl scriptComponentContext = new ScriptComponentContextImpl();
@@ -1183,8 +1020,6 @@ public class FormDataServiceImpl implements FormDataService {
         scriptComponentContext.setLogger(logger);
         FormDataCompositionService formDataCompositionService = applicationContext.getBean(FormDataCompositionService.class);
         ((ScriptComponentContextHolder) formDataCompositionService).setScriptComponentContext(scriptComponentContext);
-        /*Integer periodOrder =
-                (formData.getKind() == FormDataKind.PRIMARY || formData.getKind() == FormDataKind.CONSOLIDATED) ? formData.getPeriodOrder() : null;*/
         formDataDao.updateSorted(formData.getId(), false);
         formDataDao.updateEdited(formData.getId(), true);
         formDataCompositionService.compose(formData, 0, null, formData.getFormType().getId(), formData.getKind());
@@ -1221,27 +1056,16 @@ public class FormDataServiceImpl implements FormDataService {
                     formData.getState().getTitle());
         }
         //1В. Проверяем формы-приемники
-        List<DepartmentFormType> destinationDFTs = departmentFormTypeDao.getFormDestinations(
-                formData.getDepartmentId(),
-                formData.getFormType().getId(),
-                formData.getKind(),
-                reportPeriod.getCalendarStartDate(),
-                reportPeriod.getEndDate());
         ArrayList<String> msgPull = new ArrayList<String>(0);
-        for (DepartmentFormType destinationDFT : destinationDFTs){
-            DepartmentReportPeriod destinationDRP =
-                    departmentReportPeriodService.getLast(destinationDFT.getDepartmentId(), formData.getReportPeriodId());
-            FormData destinationForm = findFormData(destinationDFT.getFormTypeId(), destinationDFT.getKind(),
-                    destinationDRP.getId(), formData.getPeriodOrder(),
-                    formData.getComparativePeriodId(), formData.isAccruing());
-            if (destinationForm != null && destinationForm.getState() != WorkflowState.CREATED){
+        for (Relation destination : sourceService.getDestinationsInfo(formData, true, true, null, userInfo, logger)){
+            if (destination.isCreated() && destination.getState() != WorkflowState.CREATED){
                 msgPull.add(String.format(FORM_DATA_INFO_MSG,
-                        departmentService.getDepartment(formData.getDepartmentId()).getName(),
-                        formData.getKind().getTitle(),
-                        formData.getFormType().getName(),
-                        reportPeriodService.getReportPeriod(formData.getReportPeriodId()).getName(),
-                        (destinationDRP.getCorrectionDate() != null ?
-                                String.format(CORRECTION_PATTERN, SDF_DD_MM_YYYY.format(destinationDRP.getCorrectionDate()))
+                        destination.getFullDepartmentName(),
+                        destination.getFormDataKind().getTitle(),
+                        destination.getFormTypeName(),
+                        destination.getPeriodName(),
+                        (destination.getCorrectionDate() != null ?
+                                String.format(CORRECTION_PATTERN, SDF_DD_MM_YYYY.format(destination.getCorrectionDate()))
                                 :
                                 "")
                 ));
@@ -1259,75 +1083,67 @@ public class FormDataServiceImpl implements FormDataService {
         }
 
         //1Д. Не существует ни одной назначенной формы-источника.
-        List<DepartmentFormType> departmentFormTypesSources = getFormSources(formData, logger, userInfo, reportPeriod, true);
-        if (departmentFormTypesSources.isEmpty()){
-            //Очищаем устаревшие данные, оставшиеся после старой консолидации
-            /*tx.executeInNewTransaction(new TransactionLogic() {
-                @Override
-                public void execute() {
-                    clearDataRows(formData, userInfo);
-                }
-
-                @Override
-                public Object executeWithReturn() {
-                    return null;
-                }
-            });  */
+        if (sourceService.getSourcesInfo(formData, true, false, null, userInfo, logger).isEmpty()){
             throw new ServiceException("для текущей формы не назначено ни одного источника");
         }
     }
 
     @Override
     public void checkSources(long formDataId, boolean manual, TAUserInfo userInfo, Logger logger) {
-        FormData formData = getFormData(userInfo, formDataId, manual, logger);
-        DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.get(formData.getDepartmentReportPeriodId());
-        ReportPeriod reportPeriod = reportPeriodService.getReportPeriod(formData.getReportPeriodId());
-
-        List<DepartmentFormType> departmentFormTypesSources = getFormSources(formData, logger, userInfo, reportPeriod, true);
-        List<FormData> createFormDataList = new ArrayList<FormData>();
-        List<DepartmentFormType> notExistFormTypeList = new ArrayList<DepartmentFormType>();
+        List<String> notAcceptedMsgs = new ArrayList<String>();
+        List<String> notExistMsgs = new ArrayList<String>();
         boolean existAcceptedFD = false;
-        for (DepartmentFormType departmentFormType: departmentFormTypesSources) {
-            FormData fd = getLast(departmentFormType.getFormTypeId(), departmentFormType.getKind(),
-                    departmentFormType.getDepartmentId(), formData.getReportPeriodId(),
-                    departmentFormType.getPeriodOrder(), formData.getComparativePeriodId(), formData.isAccruing());
-            if (fd != null) {
-                if (!fd.getState().equals(WorkflowState.ACCEPTED)) {
-                    createFormDataList.add(fd);
+        FormData formData = formDataDao.getWithoutRows(formDataId);
+        for (Relation relation : sourceService.getSourcesInfo(formData, true, false, null, userInfo, logger)){
+            if (relation.isCreated()) {
+                if (!relation.getState().equals(WorkflowState.ACCEPTED)) {
+                    notAcceptedMsgs.add(
+                            MessageGenerator.getFDMsg("",
+                                    relation.getFormTypeName(),
+                                    relation.getFormDataKind().getTitle(),
+                                    relation.getFullDepartmentName(),
+                                    relation.getMonth(),
+                                    relation.isManual(),
+                                    relation.getPeriodName(),
+                                    relation.getComparativePeriodName(),
+                                    relation.getYear(),
+                                    relation.getComparativePeriodYear(),
+                                    relation.getCorrectionDate()
+                            )
+                    );
                 } else {
                     existAcceptedFD = true;
                 }
             } else {
-                notExistFormTypeList.add(departmentFormType);
+                notExistMsgs.add(
+                        MessageGenerator.getFDMsg("",
+                                relation.getFormTypeName(),
+                                relation.getFormDataKind().getTitle(),
+                                relation.getFullDepartmentName(),
+                                relation.getMonth(),
+                                relation.isManual(),
+                                relation.getPeriodName(),
+                                relation.getComparativePeriodName(),
+                                relation.getYear(),
+                                relation.getComparativePeriodYear(),
+                                relation.getCorrectionDate()
+                        )
+                );
             }
         }
         if (!existAcceptedFD) {
             logger.warn("Для текущей формы не существует ни одной формы-источника в статусе \"Принята\". Консолидация предусмотрена из форм-источников в статусе \"Принята\".");
         } else {
-            if (!createFormDataList.isEmpty()) {
+            if (!notAcceptedMsgs.isEmpty()) {
                 logger.warn("Для текущей формы следующие формы-источники имеют статус отличный от \"Принята\" (консолидация предусмотрена из форм-источников в статусе \"Принята\"):");
-                for (FormData fd: createFormDataList) {
-                    Department department = departmentService.getDepartment(fd.getDepartmentId());
-                    DepartmentReportPeriod rpCompare = fd.getComparativePeriodId() != null ?
-                            departmentReportPeriodService.get(fd.getComparativePeriodId()) : null;
-                    logger.warn(MessageGenerator.getFDMsg("",
-                                    fd,
-                                    department.getName(),
-                                    false,
-                                    departmentReportPeriod,
-                                    rpCompare)
-                    );
+                for (String msg : notAcceptedMsgs) {
+                    logger.warn(msg);
                 }
             }
-            if (!notExistFormTypeList.isEmpty()) {
+            if (!notExistMsgs.isEmpty()) {
                 logger.warn("Для текущей формы следующие формы-источники не созданы:");
-                for(DepartmentFormType departmentFormType: notExistFormTypeList) {
-                    Department department = departmentService.getDepartment(departmentFormType.getDepartmentId());
-                    DepartmentReportPeriod rpCompare = formData.getComparativePeriodId() != null ?
-                            departmentReportPeriodService.get(formData.getComparativePeriodId()) : null;
-                    logger.warn(MessageGenerator.getFDMsg("", formData.getFormType().getName(), formData.getKind().getTitle(),
-                            formData.isAccruing(), department.getName(), departmentFormType.getPeriodOrder(),
-                            false, departmentReportPeriod, rpCompare, false, true));
+                for(String msg : notExistMsgs) {
+                    logger.warn(msg);
                 }
             }
         }
@@ -1344,7 +1160,7 @@ public class FormDataServiceImpl implements FormDataService {
     @Override
     public String getFormDataFullName(long formDataId, boolean manual, String str, ReportType reportType) {
         //TODO: можно оптимизировать и сделать в 1 запрос
-        FormData formData = formDataDao.get(formDataId, manual);
+        FormData formData = formDataDao.getWithoutRows(formDataId);
         Department department = departmentService.getDepartment(formData.getDepartmentId());
         DepartmentReportPeriod reportPeriod = departmentReportPeriodService.get(formData.getDepartmentReportPeriodId());
         DepartmentReportPeriod rpComparison =
@@ -1902,29 +1718,12 @@ public class FormDataServiceImpl implements FormDataService {
                 int columnCountReport = formTemplateService.get(formData.getFormTemplateId()).getColumns().size();
                 return (long) (rowCountReport * columnCountReport);
             case CONSOLIDATE_FD:
-                ReportPeriod reportPeriod = reportPeriodService.getReportPeriod(formData.getReportPeriodId());
-                List<DepartmentFormType> departmentFormTypesSources = getFormSources(formData, logger, userInfo, reportPeriod, true);
                 long cellCountSource = 0;
-                for (DepartmentFormType sourceDFT : departmentFormTypesSources){
-                    // Последний отчетный период подразделения
-                    DepartmentReportPeriod sourceDepartmentReportPeriod =
-                            departmentReportPeriodService.getLast(sourceDFT.getDepartmentId(), formData.getReportPeriodId());
-                    if (sourceDepartmentReportPeriod == null) {
-                        continue;
-                    }
-                    FormData sourceForm = findFormData(sourceDFT.getFormTypeId(), sourceDFT.getKind(),
-                            sourceDepartmentReportPeriod.getId(), sourceDFT.getPeriodOrder(),
-                            formData.getComparativePeriodId(), formData.isAccruing());
-                    if (sourceForm == null){
-                        continue;
-                    }
-                    //Запись на будущее, чтобы второго цикла не делать
-                    //1E.
-                    if (sourceForm.getState() == WorkflowState.ACCEPTED){
-                        int rowCountSource = dataRowDao.getRowCount(sourceForm);
-                        int columnCountSource = formTemplateService.get(sourceForm.getFormTemplateId()).getColumns().size();
-                        cellCountSource += rowCountSource * columnCountSource;
-                    }
+                for (Relation relation : sourceService.getSourcesInfo(formData, true, true, WorkflowState.ACCEPTED, userInfo, logger)){
+                    FormData sourceForm = formDataDao.getWithoutRows(relation.getFormDataId());
+                    int rowCountSource = dataRowDao.getRowCount(sourceForm);
+                    int columnCountSource = formTemplateService.get(sourceForm.getFormTemplateId()).getColumns().size();
+                    cellCountSource += rowCountSource * columnCountSource;
                 }
                 return cellCountSource;
             case IMPORT_FD:
@@ -1936,7 +1735,7 @@ public class FormDataServiceImpl implements FormDataService {
 
     @Override
     public String getTaskName(ReportType reportType, long formDataId, TAUserInfo userInfo) {
-        return getTaskName(reportType, formDataDao.get(formDataId, false));
+        return getTaskName(reportType, formDataDao.getWithoutRows(formDataId));
     }
 
     private String getTaskName(ReportType reportType, FormData formData) {

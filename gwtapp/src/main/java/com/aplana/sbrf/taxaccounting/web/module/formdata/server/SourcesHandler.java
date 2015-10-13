@@ -56,12 +56,13 @@ public class SourcesHandler extends AbstractActionHandler<SourcesAction, Sources
                 relationList.addAll(sources.getSourceList());
             }
         } else {
+            //TODO: уточнить у аналитиков, может ли тут быть форма ручного ввода и как их обрабатывать в источниках-приемниках
             //Получаем нф-источники
-            relationList.addAll(sourceService.getSourcesInfo(formData.getId(), true));
+            relationList.addAll(sourceService.getSourcesInfo(formData, true, false, null, userInfo, logger));
             //Получаем нф-приемники
-            relationList.addAll(sourceService.getDestinationsInfo(formData.getId(), true));
+            relationList.addAll(sourceService.getDestinationsInfo(formData, true, false, null, userInfo, logger));
             //Получаем декларации-приемники
-            relationList.addAll(sourceService.getDeclarationDestinationsInfo(formData.getId(), true));
+            relationList.addAll(sourceService.getDeclarationDestinationsInfo(formData, true, false, null, userInfo, logger));
         }
         result.setData(relationList);
         return result;
