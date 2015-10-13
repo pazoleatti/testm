@@ -651,7 +651,7 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
     private static final String GET_SOURCES_INFO = "with insanity as \n" +
             "     (\n" +
             "     select sfd.id, sd.id as departmentId, sd.name as departmentName, sdrp.id as departmentReportPeriod, stp.YEAR, srp.name as periodName, \n" +
-            "     sdrp.CORRECTION_DATE, sfd.state, sft.status as templateState, sfd.manual \n" +
+            "     sdrp.CORRECTION_DATE, sfd.state, sft.status as templateState, sfd.manual, \n" +
             "     st.id as formTypeId, st.name as formTypeName, sfk.id as formDataKind, fdpd.id as performerId, fdpd.name as performerName, \n" +
             "     --Если искомый экземпляр создан, то берем его значения периода и признака. \n" +
             "     --Если не создан и в его макете есть признак сравнения, то период и признак такой же как у источника\n" +
@@ -718,7 +718,9 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
             "      where id is not null\n" +
             "      group by sdft_id\n" +
             "  )         \n" +
-            "select id, departmentId, departmentName, correction_date, departmentReportPeriod, periodName, year, state, templateState, formTypeId, formTypeName, formDataKind, performerId, performerName, compPeriodId, compPeriodName, compPeriodYear, compPeriodStartDate, accruing, month \n" +
+            "select id, departmentId, departmentName, correction_date, departmentReportPeriod, periodName, year, state, " +
+            "templateState, formTypeId, formTypeName, formDataKind, performerId, performerName, " +
+            "compPeriodId, compPeriodName, compPeriodYear, compPeriodStartDate, accruing, month, manual \n" +
             "       from insanity i\n" +
             "       left join aggregated_insanity i_agg on i.sdft_id = i_agg.sdft_id \n" +
             "       where nvl(i.correction_date, to_date('01.01.0001', 'DD.MM.YYYY')) = nvl(i_agg.last_correction_date, to_date('01.01.0001', 'DD.MM.YYYY')) and (:excludeIfNotExist != 1 or id is not null)\n" +
@@ -801,7 +803,9 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
             "      left join tax_period tctp on tctp.id = tcrp.TAX_PERIOD_ID\n" +
             "      where fd.id = :sourceFormDataId\n" +
             "  )         \n" +
-            "select id, departmentId, departmentName, correction_date, departmentReportPeriod, periodName, year, state, templateState, formTypeId, formTypeName, formDataKind, performerId, performerName, compPeriodId, compPeriodName, compPeriodYear, compPeriodStartDate, accruing, month \n" +
+            "select id, departmentId, departmentName, correction_date, departmentReportPeriod, periodName, year, state, " +
+            "templateState, formTypeId, formTypeName, formDataKind, performerId, performerName, " +
+            "compPeriodId, compPeriodName, compPeriodYear, compPeriodStartDate, accruing, month, manual \n" +
             "       from insanity i\n" +
             "       where (id is not null or correction_date is null) and (:excludeIfNotExist != 1 or id is not null)\n" +
             "       order by formTypeName, state";
@@ -957,7 +961,8 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
             "      where id is not null\n" +
             "      group by sdft_id\n" +
             "  )         \n" +
-            "select id, departmentId, departmentName, correction_date, departmentReportPeriod, periodName, year, state, templateState, formTypeId, formTypeName, formDataKind, performerId, performerName, month \n" +
+            "select id, departmentId, departmentName, correction_date, departmentReportPeriod, periodName, year, state, " +
+            "templateState, formTypeId, formTypeName, formDataKind, performerId, performerName, month, manual \n" +
             "       from insanity i\n" +
             "       left join aggregated_insanity i_agg on i.sdft_id = i_agg.sdft_id \n" +
             "       where nvl(i.correction_date, to_date('01.01.0001', 'DD.MM.YYYY')) = nvl(i_agg.last_correction_date, to_date('01.01.0001', 'DD.MM.YYYY')) and (:excludeIfNotExist != 1 or id is not null)\n" +
