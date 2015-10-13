@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rows>
+    <row alias="">
+        <cell alias="rowNum" colSpan="1" rowSpan="2" value="№ строки"/>
+        <cell alias="taxName" colSpan="1" rowSpan="2" value="Наименование налога"/>
+        <cell alias="comparePeriod" colSpan="1" rowSpan="2" value="Период сравнения, тыс. руб."/>
+        <cell alias="currentPeriod" colSpan="1" rowSpan="2" value="Период, тыс. руб."/>
+        <cell alias="deltaRub" colSpan="2" rowSpan="1" value="Изменение за период"/>
+        <cell alias="deltaPercent" colSpan="1" rowSpan="1" value="Изменение за период"/>
+    </row>
+    <row alias="">
+        <cell alias="rowNum" colSpan="1" rowSpan="1" value="№ строки"/>
+        <cell alias="taxName" colSpan="1" rowSpan="1" value="Наименование налога"/>
+        <cell alias="comparePeriod" colSpan="1" rowSpan="1" value="Период сравнения, тыс. руб."/>
+        <cell alias="currentPeriod" colSpan="1" rowSpan="1" value="Период, тыс. руб."/>
+        <cell alias="deltaRub" colSpan="1" rowSpan="1" value="(гр.4-гр.3), тыс.руб."/>
+        <cell alias="deltaPercent" colSpan="1" rowSpan="1" value="(гр.5/гр.3*100),%"/>
+    </row>
+    <row alias="">
+        <cell alias="rowNum" colSpan="1" rowSpan="1" value="1"/>
+        <cell alias="taxName" colSpan="1" rowSpan="1" value="2"/>
+        <cell alias="comparePeriod" colSpan="1" rowSpan="1" value="3"/>
+        <cell alias="currentPeriod" colSpan="1" rowSpan="1" value="4"/>
+        <cell alias="deltaRub" colSpan="1" rowSpan="1" value="5"/>
+        <cell alias="deltaPercent" colSpan="1" rowSpan="1" value="6"/>
+    </row>
+</rows>
