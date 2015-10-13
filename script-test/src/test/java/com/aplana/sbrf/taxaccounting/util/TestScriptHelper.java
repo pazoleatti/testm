@@ -226,6 +226,7 @@ public class TestScriptHelper {
         bindings.put("formDataDepartment", userDepartment);
         bindings.put("formData", formData);
         bindings.put("logger", logger);
+        bindings.put("userInfo", new TAUserInfo());
         bindings.put("user", user);
         bindings.put("applicationVersion", "test-version");
         bindings.put("userDepartment", userDepartment);

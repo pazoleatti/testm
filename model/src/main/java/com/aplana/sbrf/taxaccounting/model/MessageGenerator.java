@@ -104,11 +104,9 @@ public final class MessageGenerator {
     public static String getFDMsg(String mainStr, String formTypeName, String kindName, boolean isAccruing, String departmentName, Integer periodOrder, boolean manual, DepartmentReportPeriod reportPeriod, DepartmentReportPeriod rpComparison, boolean isShowChecked, boolean isAbsolute){
         return getFDMsg(mainStr, formTypeName, kindName, departmentName, periodOrder, manual,
                 isAccruing ? reportPeriod.getReportPeriod().getAccName() : reportPeriod.getReportPeriod().getName(),
-                reportPeriod.getReportPeriod().getName(),
+                rpComparison != null ? rpComparison.getReportPeriod().getName(): null,
                 reportPeriod.getReportPeriod().getTaxPeriod().getYear(),
-                rpComparison != null ?
-                        rpComparison.getReportPeriod().getTaxPeriod().getYear()
-                        : null,
+                rpComparison != null ? rpComparison.getReportPeriod().getTaxPeriod().getYear() : null,
                 reportPeriod.getCorrectionDate(),
                 isShowChecked, isAbsolute
         );

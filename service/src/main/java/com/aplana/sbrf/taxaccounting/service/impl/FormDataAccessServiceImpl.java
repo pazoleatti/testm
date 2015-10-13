@@ -735,13 +735,13 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
         // НФ
         FormData formData = formDataDao.getWithoutRows(formDataId);
 
-        List<Relation> destinations = sourceService.getDestinationsInfo(formData, false, true, null, userInfo, logger);
+        List<Relation> destinations = sourceService.getDestinationsInfo(formData, true, true, null, userInfo, logger);
         for (Relation form : destinations) {
             // Если форма существует и ее статус отличен от «Создана»
             if (form.isCreated() && form.getState() != WorkflowState.CREATED) {
                 throw new ServiceException("Переход невозможен, т.к. уже подготовлена/утверждена/принята вышестоящая налоговая форма.");
             }
-            if (formData.getDepartmentId() != form.getDepartment().getId()) {
+            if (formData.getDepartmentId() != form.getDepartmentId()) {
                 retVal = true;
             }
         }
@@ -756,7 +756,7 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
                 );
             }
             if (!retVal) {
-                if (formData.getDepartmentId() != declaration.getDepartment().getId()) {
+                if (formData.getDepartmentId() != declaration.getDepartmentId()) {
                     retVal = true;
                 }
             }

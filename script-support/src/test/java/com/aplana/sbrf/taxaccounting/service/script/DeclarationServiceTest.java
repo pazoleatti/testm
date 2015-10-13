@@ -9,6 +9,7 @@ import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.util.DepartmentReportPeriodFilter;
 import com.aplana.sbrf.taxaccounting.service.DeclarationDataService;
+import com.aplana.sbrf.taxaccounting.service.SourceService;
 import com.aplana.sbrf.taxaccounting.service.script.impl.DeclarationServiceImpl;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -41,6 +42,7 @@ public class DeclarationServiceTest {
         DeclarationTemplateDao declarationTemplateDao = mock(DeclarationTemplateDao.class);
         DepartmentFormTypeDao departmentFormTypeDao = mock(DepartmentFormTypeDao.class);
         DeclarationDataService declarationDataService = mock(DeclarationDataService.class);
+        SourceService sourceService = mock(SourceService.class);
 
         declarationType.setId(1);
         declarationType.setName("name");
@@ -70,6 +72,7 @@ public class DeclarationServiceTest {
         ReflectionTestUtils.setField(service, "declarationDataDao", declarationDataDao);
         ReflectionTestUtils.setField(service, "declarationTemplateDao", declarationTemplateDao);
         ReflectionTestUtils.setField(service, "declarationDataService", declarationDataService);
+        ReflectionTestUtils.setField(service, "sourceService", sourceService);
     }
 
     @Test

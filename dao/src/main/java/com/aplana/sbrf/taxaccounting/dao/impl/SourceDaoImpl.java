@@ -884,6 +884,7 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
                             SqlUtils.getInteger(rs, "IS_ACCEPTED") == 1 ? WorkflowState.ACCEPTED : WorkflowState.CREATED);
                     relation.setStatus(SqlUtils.getInteger(rs, "templateState") == 0);
                     if (light) {
+                        relation.setDepartmentId(SqlUtils.getInteger(rs, "departmentId"));
                         relation.setFullDepartmentName(rs.getString("departmentName"));
                         relation.setCorrectionDate(rs.getDate("correction_date"));
                         relation.setPeriodName(rs.getString("periodName"));
@@ -995,6 +996,7 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
         }
         relation.setMonth(SqlUtils.getInteger(rs, "month"));
         if (light) {
+            relation.setDepartmentId(SqlUtils.getInteger(rs, "departmentId"));
             relation.setFullDepartmentName(rs.getString("departmentName"));
             relation.setCorrectionDate(rs.getDate("correction_date"));
             relation.setPeriodName(rs.getString("periodName"));

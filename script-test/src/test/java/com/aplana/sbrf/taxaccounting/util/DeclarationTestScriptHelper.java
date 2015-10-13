@@ -130,6 +130,7 @@ public class DeclarationTestScriptHelper {
         bindings.put("formDataDepartment", userDepartment);
         bindings.put("declarationData", declarationData);
         bindings.put("logger", logger);
+        bindings.put("userInfo", new TAUserInfo());
         bindings.put("user", user);
         bindings.put("applicationVersion", "test-version");
 

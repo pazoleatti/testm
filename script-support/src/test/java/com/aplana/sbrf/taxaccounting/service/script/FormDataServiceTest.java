@@ -11,6 +11,7 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
+import com.aplana.sbrf.taxaccounting.service.SourceService;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -93,6 +94,9 @@ public class FormDataServiceTest {
         refBookCache = new HashMap<String, Map<String, RefBookValue>>();
 
         ReflectionTestUtils.setField(formDataService, "refBookFactory", refBookFactory);
+
+        SourceService sourceService = mock(SourceService.class);
+        ReflectionTestUtils.setField(formDataService, "sourceService", sourceService);
     }
 
     @Test

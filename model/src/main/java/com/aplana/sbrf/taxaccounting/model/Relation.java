@@ -55,6 +55,8 @@ public class Relation implements Serializable {
 
     /**************  Параметры для легкой версии ***************/
 
+    /** Идентификатор подразделения */
+    private int departmentId;
     /** полное название подразделения */
     private String fullDepartmentName;
     /** Дата корректировки */
@@ -298,5 +300,13 @@ public class Relation implements Serializable {
 
     public void setManual(boolean manual) {
         this.manual = manual;
+    }
+
+    public int getDepartmentId() {
+        return departmentId;
+    }
+
+    public void setDepartmentId(int departmentId) {
+        this.departmentId = departmentId;
     }
 }

@@ -43,6 +43,9 @@ public class FormDataAccessServiceImplTest {
     private static final TAUserInfo userInfo = new TAUserInfo() {{
         setIp(LOCAL_IP);
     }};
+    static SourceService sourceService = mock(SourceService.class);
+
+    private static final Logger logger = new Logger();
 
     private final static int ROOT_BANK_ID = 1;
     private static final int TB1_ID = 2;
@@ -226,7 +229,9 @@ public class FormDataAccessServiceImplTest {
         List<DepartmentFormType> dfts = new ArrayList<DepartmentFormType>();
         dfts.add(mockDepartmentFormType(ROOT_BANK_ID, summaryFormType1.getId(), FormDataKind.SUMMARY));
         dfts.add(mockDepartmentFormType(ROOT_BANK_ID, summaryFormType2.getId(), FormDataKind.SUMMARY));
-        when(departmentFormTypeDao.getFormDestinations(any(Integer.class), any(Integer.class), any(FormDataKind.class), any(Date.class), any(Date.class))).thenReturn(dfts);
+
+
+        //when(departmentFormTypeDao.getFormDestinations(any(Integer.class), any(Integer.class), any(FormDataKind.class), any(Date.class), any(Date.class))).thenReturn(dfts);
 
         final Map<Integer, DepartmentReportPeriod> periods = new HashMap<Integer, DepartmentReportPeriod>();
         periods.put(BANK_ACTIVE_ID, mockDepartmentReportPeriodData(BANK_ACTIVE_ID, ROOT_BANK_ID, mockReportPeriod(REPORT_PERIOD_ACTIVE_ID), true, false, null));
@@ -366,7 +371,6 @@ public class FormDataAccessServiceImplTest {
         when(reportPeriodService.isFirstPeriod(REPORT_PERIOD_BALANCED_ID)).thenReturn(true);
         ReflectionTestUtils.setField(service, "reportPeriodService", reportPeriodService);
 
-        SourceService sourceService = mock(SourceService.class);
         dfts.add(mockDepartmentFormType(TB1_ID, summaryFormType1.getId(), FormDataKind.SUMMARY));
         dfts.add(mockDepartmentFormType(TB1_ID, summaryFormType1.getId(), FormDataKind.CONSOLIDATED));
         dfts.add(mockDepartmentFormType(TB1_ID, additionalFormType.getId(), FormDataKind.ADDITIONAL));
@@ -750,6 +754,13 @@ public class FormDataAccessServiceImplTest {
 			и передаваемых на вышестоящий уровень (Сводные формы (кроме уровня БАНК)*/
 		//Переводить из состояния "Создана" в "Утверждена" может контролер текущего уровня, контролер вышестоящего уровня
 		// и контролер УНП
+        ArrayList<Relation> destinations = new ArrayList<Relation>();
+        Relation r1 = new Relation();
+        r1.setDepartmentId(1);
+        r1.setFormTypeName("summary 1");
+        r1.setFormDataKind(FormDataKind.SUMMARY);
+        destinations.add(r1);
+        when(sourceService.getDestinationsInfo(any(FormData.class), any(Boolean.class), any(Boolean.class), any(WorkflowState.class), any(TAUserInfo.class), any(Logger.class))).thenReturn(destinations);
 		userInfo.setUser(mockUser(TB1_CONTROL_USER_ID, TB1_ID, TARole.ROLE_CONTROL));
 		assertArrayEquals(new Object[] { WorkflowMove.CREATED_TO_APPROVED },
 				service.getAvailableMoves(userInfo, TB1_CREATED_FORMDATA_ID).toArray());
@@ -771,6 +782,13 @@ public class FormDataAccessServiceImplTest {
 	public void testGetAvailableMovesForThirdLifeCycle2(){
 		// Перевести из состояния "Утверждена" в "Создана" и из "Утверждена" в "Принята" контролер вышестоящего уровня или контролер УНП.
 		userInfo.setUser(mockUser(BANK_CONTROL_UNP_USER_ID, ROOT_BANK_ID, TARole.ROLE_CONTROL_UNP));
+        ArrayList<Relation> destinations = new ArrayList<Relation>();
+        Relation r1 = new Relation();
+        r1.setDepartmentId(1);
+        r1.setFormTypeName("summary 1");
+        r1.setFormDataKind(FormDataKind.SUMMARY);
+        destinations.add(r1);
+        when(sourceService.getDestinationsInfo(any(FormData.class), any(Boolean.class), any(Boolean.class), any(WorkflowState.class), any(TAUserInfo.class), any(Logger.class))).thenReturn(destinations);
         assertArrayEquals(new Object[] { WorkflowMove.APPROVED_TO_CREATED, WorkflowMove.APPROVED_TO_ACCEPTED },
 				service.getAvailableMoves(userInfo, TB1_APPROVED_FORMDATA_ID).toArray());
 		userInfo.setUser(mockUser(BANK_CONTROL_USER_ID, ROOT_BANK_ID, TARole.ROLE_CONTROL));
@@ -786,6 +804,13 @@ public class FormDataAccessServiceImplTest {
 	public void testGetAvailableMovesForThirdLifeCycle3(){
 		// Перевести из состояния "Принята" в "Утверждена" контролер вышестоящего уровня или контролер УНП.
 		userInfo.setUser(mockUser(BANK_CONTROL_UNP_USER_ID, ROOT_BANK_ID, TARole.ROLE_CONTROL_UNP));
+        ArrayList<Relation> destinations = new ArrayList<Relation>();
+        Relation r1 = new Relation();
+        r1.setDepartmentId(1);
+        r1.setFormTypeName("summary 1");
+        r1.setFormDataKind(FormDataKind.SUMMARY);
+        destinations.add(r1);
+        when(sourceService.getDestinationsInfo(any(FormData.class), any(Boolean.class), any(Boolean.class), any(WorkflowState.class), any(TAUserInfo.class), any(Logger.class))).thenReturn(destinations);
 		assertArrayEquals(new Object[] { WorkflowMove.ACCEPTED_TO_APPROVED},
 				service.getAvailableMoves(userInfo, TB1_ACCEPTED_FORMDATA_ID).toArray());
 		userInfo.setUser(mockUser(BANK_CONTROL_USER_ID, ROOT_BANK_ID, TARole.ROLE_CONTROL));
@@ -816,6 +841,15 @@ public class FormDataAccessServiceImplTest {
         userInfo.setUser(mockUser(BANK_CONTROL_USER_ID, ROOT_BANK_ID, TARole.ROLE_CONTROL));
         // Проверяем только один случай, так как этот метод просто агрегирует результаты других методов,
         // а мы их уже оттестировали отдельно
+
+        ArrayList<Relation> destinations = new ArrayList<Relation>();
+        Relation r1 = new Relation();
+        r1.setDepartmentId(2);
+        r1.setFormTypeName("summary 1");
+        r1.setFormDataKind(FormDataKind.SUMMARY);
+        destinations.add(r1);
+        when(sourceService.getDestinationsInfo(any(FormData.class), any(Boolean.class), any(Boolean.class), any(WorkflowState.class), any(TAUserInfo.class), any(Logger.class))).thenReturn(destinations);
+
         FormDataAccessParams params = service.getFormDataAccessParams(userInfo, BANK_PREPARED_ADDITIONAL_FORMDATA_ID, false);
         assertTrue(params.isCanRead());
         assertTrue(params.isCanEdit());
@@ -921,7 +955,7 @@ public class FormDataAccessServiceImplTest {
         TAUserInfo userInfo = new TAUserInfo();
         userInfo.setUser(mockUser(1, 1, TARole.ROLE_CONTROL_UNP));
         // Нет назначенных приемников
-        assertFalse(service.checkDestinations(formData.getId(), userInfo, new Logger()));
+        assertFalse(service.checkDestinations(formData.getId(), userInfo, logger));
     }
 
     @Test
@@ -960,7 +994,15 @@ public class FormDataAccessServiceImplTest {
 
         TAUserInfo userInfo = new TAUserInfo();
         userInfo.setUser(mockUser(1, 1, TARole.ROLE_CONTROL_UNP));
-        assertTrue(service.checkDestinations(editedFormData.getId(), userInfo, new Logger()));
+
+        ArrayList<Relation> destinations = new ArrayList<Relation>();
+        Relation r1 = new Relation();
+        r1.setDepartmentId(1);
+        r1.setFormTypeName("summary 1");
+        r1.setFormDataKind(FormDataKind.SUMMARY);
+        destinations.add(r1);
+        when(sourceService.getDestinationsInfo(any(FormData.class), any(Boolean.class), any(Boolean.class), any(WorkflowState.class), any(TAUserInfo.class), any(Logger.class))).thenReturn(destinations);
+        assertTrue(service.checkDestinations(editedFormData.getId(), userInfo, logger));
     }
 
     @Test
@@ -1001,7 +1043,15 @@ public class FormDataAccessServiceImplTest {
 
         TAUserInfo userInfo = new TAUserInfo();
         userInfo.setUser(mockUser(1, 1, TARole.ROLE_CONTROL_UNP));
-        assertTrue(service.checkDestinations(editedFormData.getId(), userInfo, new Logger()));
+
+        ArrayList<Relation> destinations = new ArrayList<Relation>();
+        Relation r1 = new Relation();
+        r1.setDepartmentId(1);
+        r1.setFormTypeName("summary 1");
+        r1.setFormDataKind(FormDataKind.SUMMARY);
+        destinations.add(r1);
+        when(sourceService.getDestinationsInfo(any(FormData.class), any(Boolean.class), any(Boolean.class), any(WorkflowState.class), any(TAUserInfo.class), any(Logger.class))).thenReturn(destinations);
+        assertTrue(service.checkDestinations(editedFormData.getId(), userInfo, logger));
     }
 
     @Test(expected = ServiceException.class)
@@ -1044,6 +1094,15 @@ public class FormDataAccessServiceImplTest {
 
         TAUserInfo userInfo = new TAUserInfo();
         userInfo.setUser(mockUser(1, 1, TARole.ROLE_CONTROL_UNP));
+        ArrayList<Relation> destinations = new ArrayList<Relation>();
+        Relation r1 = new Relation();
+        r1.setDepartmentId(1);
+        r1.setFormTypeName("summary 1");
+        r1.setFormDataKind(FormDataKind.SUMMARY);
+        r1.setCreated(true);
+        r1.setState(WorkflowState.ACCEPTED);
+        destinations.add(r1);
+        when(sourceService.getDestinationsInfo(any(FormData.class), any(Boolean.class), any(Boolean.class), any(WorkflowState.class), any(TAUserInfo.class), any(Logger.class))).thenReturn(destinations);
         service.checkDestinations(editedFormData.getId(), userInfo, new Logger());
     }
 }

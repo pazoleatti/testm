@@ -299,11 +299,30 @@ public class DeclarationDataServiceImplTest {
         drp2.setId(2);
         drp2.setCorrectionDate(new Date(0));
 
-        when(departmentFormTypeDao.getDeclarationSources(
-                declarationData.getDepartmentId(),
-                declarationTemplate.getType().getId(),
-                reportPeriod.getStartDate(),
-                reportPeriod.getEndDate())).thenReturn(departmentFormTypes);
+
+        ArrayList<Relation> sources = new ArrayList<Relation>();
+        Relation r1 = new Relation();
+        r1.setFullDepartmentName("Тестовое подразделение");
+        r1.setFormTypeName("Тестовый макет");
+        r1.setFormDataKind(FormDataKind.PRIMARY);
+        r1.setPeriodName("1 квартал");
+        r1.setYear(2015);
+        r1.setCorrectionDate(new Date(0));
+        r1.setCreated(true);
+        r1.setFormDataId(11L);
+        r1.setState(WorkflowState.ACCEPTED);
+
+        Relation r2 = new Relation();
+        r2.setFullDepartmentName("Тестовое подразделение");
+        r2.setFormTypeName("Тестовый макет");
+        r2.setFormDataKind(FormDataKind.CONSOLIDATED);
+        r2.setPeriodName("1 квартал");
+        r2.setYear(2015);
+        r2.setCorrectionDate(new Date(0));
+        r2.setCreated(false);
+        sources.add(r1);
+        sources.add(r2);
+        when(sourceService.getDeclarationSourcesInfo(declarationData, true, false, null, userInfo, logger)).thenReturn(sources);
 
         when(departmentService.getDepartment(declarationData.getDepartmentId())).thenReturn(department);
         when(departmentService.getDepartment(dft2.getDepartmentId())).thenReturn(department);
