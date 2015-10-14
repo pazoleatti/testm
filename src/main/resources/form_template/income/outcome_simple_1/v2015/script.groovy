@@ -221,8 +221,14 @@ void logicCheck() {
         logger.warn("Cтроки ${rowIndexes102.join(', ')}: Отсутствуют данные бухгалтерской отчетности в форме \"Отчет о прибылях и убытках\"")
     }
 
-    dataRows.each {row ->
-         checkRequiredColumns(row, nonEmptyColumns)
+    for (def row : dataRows) {
+        def columns = []
+        nonEmptyColumns.each { alias ->
+            if (row.getCell(alias)?.style?.alias == editableStyle) {
+                columns.add(alias)
+            }
+        }
+        checkNonEmptyColumns(row, row.getIndex(), columns, logger, true)
     }
 
     def row50001 = getDataRow(dataRows, total1Alias)
@@ -622,22 +628,6 @@ boolean isEqualNum(String accNum, def balance) {
     def a = accNum?.replace('.', '')
     def b = (balance ? getBalanceValue(balance)?.replace('.', '') : null)
     return a == b
-}
-
-/** Проверить заполненость обязательных полей. */
-void checkRequiredColumns(def row, def columns) {
-    def colNames = []
-    columns.each {
-        def cell = row.getCell(it)
-        if (cell?.style?.alias == editableStyle && (cell.getValue() == null || row[it] == '')) {
-            colNames.add('"' + getColumnName(row, it) + '"')
-        }
-    }
-    if (!colNames.isEmpty()) {
-        def index = row.getIndex()
-        def errorMsg = colNames.join(', ')
-        logger.error("В строке $index не заполнены колонки : $errorMsg.")
-    }
 }
 
 // для уроня Банка:	проверка наличия и принятия РНУ-14
