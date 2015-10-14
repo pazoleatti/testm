@@ -269,10 +269,13 @@ def logicCheck() {
         logger.warn("Cтроки ${rowIndexes102.join(', ')}: Отсутствуют данные бухгалтерской отчетности в форме \"Отчет о прибылях и убытках\"")
     }
     for (def row in dataRows) {
-        if (rowsCalc.contains(row.getAlias())) {
-            // Проверка обязательных полей
-            checkRequiredColumns(row, nonEmptyColumns)
+        def columns = []
+        nonEmptyColumns.each { alias ->
+            if (row.getCell(alias)?.style?.alias == editableStyle) {
+                columns.add(alias)
+            }
         }
+        checkNonEmptyColumns(row, row.getIndex(), columns, logger, true)
     }
     checkTotalSum(getDataRow(dataRows, 'R67'), getSum(dataRows, totalColumn, 'R2', 'R66'))
     checkTotalSum(getDataRow(dataRows, 'R90'), getSum(dataRows, totalColumn, 'R69', 'R89'))
@@ -721,23 +724,6 @@ def getSumFromSimple(data, columnAliasCheck, columnAliasSum, value) {
         }
     }
     return sum
-}
-
-// Проверить заполненость обязательных полей
-// Нередактируемые не проверяются
-def checkRequiredColumns(def row, def columns) {
-    def colNames = []
-    columns.each {
-        def cell = row.getCell(it)
-        if (cell?.style?.alias == editableStyle && (cell.getValue() == null || row.getCell(it).getValue() == '')) {
-            def name = getColumnName(row, it)
-            colNames.add('«' + name + '»')
-        }
-    }
-    if (!colNames.isEmpty()) {
-        def errorMsg = colNames.join(', ')
-        logger.error("Строка ${row.getIndex()}: не заполнены графы : $errorMsg.")
-    }
 }
 
 def getOpuValue(def value) {

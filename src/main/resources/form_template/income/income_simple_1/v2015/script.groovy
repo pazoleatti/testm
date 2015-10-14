@@ -327,11 +327,14 @@ void logicCheck() {
         logger.warn("Cтроки ${rowIndexes102.join(', ')}: Отсутствуют данные бухгалтерской отчетности в форме \"Отчет о прибылях и убытках\"")
     }
 
-    dataRows.each { row ->
-        if (!rowsNotCalc.contains(row.getAlias())) {
-            // Проверка обязательных полей
-            checkRequiredColumns(row, nonEmptyColumns)
+    for (def row : dataRows) {
+        def columns = []
+        nonEmptyColumns.each { alias ->
+            if (row.getCell(alias)?.style?.alias == editableStyle) {
+                columns.add(alias)
+            }
         }
+        checkNonEmptyColumns(row, row.getIndex(), columns, logger, true)
     }
 
     def row40001 = getDataRow(dataRows, total1Alias)
@@ -576,22 +579,6 @@ boolean isEqualNum(String accNum, def balance) {
     def a = accNum?.replace('.', '')
     def b = (balance ? getBalanceValue(balance)?.replace('.', '') : null)
     return a == b
-}
-
-// Проверить заполненость обязательных полей
-// Нередактируемые не проверяются
-def checkRequiredColumns(def row, def columns) {
-    def colNames = []
-    columns.each {
-        def cell = row.getCell(it)
-        if (cell?.style?.alias == editableStyle && (cell.getValue() == null || row.getCell(it).getValue() == '')) {
-            colNames.add('«' + getColumnName(row, it) + '»')
-        }
-    }
-    if (!colNames.isEmpty()) {
-        def errorMsg = colNames.join(', ')
-        logger.error("Строка ${row.getIndex()}: не заполнены графы : $errorMsg.")
-    }
 }
 
 /** Получить сумму диапазона строк определенного столбца. */
