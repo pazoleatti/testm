@@ -510,7 +510,6 @@ def logicalCheck() {
 
 void logicalCheckBeforeCalc() {
     def dataRows = formDataService.getDataRowHelper(formData).allCached
-    def departmentParam
     def fieldNumber = 0
 
     dataRows.eachWithIndex { row, i ->
@@ -520,11 +519,11 @@ void logicalCheckBeforeCalc() {
         fieldNumber++
         def index = row.getIndex()
         def errorMsg = "Строка ${index}: "
+        def departmentParam = null
         if (row.regionBankDivision != null) {
             departmentParam = getRefBookValue(30, row.regionBankDivision)
         }
         if (departmentParam == null || departmentParam.isEmpty()) {
-            logger.error(errorMsg + "Не найдено подразделение территориального банка!")
             return
         } else {
             long centralId = 113 // ID Центрального аппарата.
