@@ -48,7 +48,7 @@
         <checking>false</checking>
         <columnType>NUMBER</columnType>
         <name>Уровень доначислений/ не учитываемых расходов (в % от факта)</name>
-        <order>4</order>
+        <order>5</order>
         <width>10</width>
         <maxLength>7</maxLength>
         <precision>2</precision>
@@ -58,7 +58,7 @@
         <checking>false</checking>
         <columnType>NUMBER</columnType>
         <name>Налоговое бремя, тыс. руб.</name>
-        <order>4</order>
+        <order>6</order>
         <width>10</width>
         <maxLength>22</maxLength>
         <precision>2</precision>

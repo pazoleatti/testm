@@ -83,7 +83,6 @@ public class Etr4_11Test extends ScriptTestBase {
     @Test
     public void checkTest() {
         testHelper.execute(FormDataEvent.CHECK);
-        // должны быть незаполненые обязательные поля в итогах
         Assert.assertFalse(testHelper.getLogger().containsLevel(LogLevel.ERROR));
     }
 
@@ -175,26 +174,8 @@ public class Etr4_11Test extends ScriptTestBase {
 
         Assert.assertEquals(46.98, dataRows.get(0).getCell("taxBurden").getNumericValue().doubleValue(), 0);
         Assert.assertEquals(0.00, dataRows.get(1).getCell("taxBurden").getNumericValue().doubleValue(), 0);
-    }
 
-    /**
-     * Проверить сконсолидированные данные.
-     */
-    void checkComposeData(List<DataRow<Cell>> dataRows) {
-        Assert.assertEquals("name_1", dataRows.get(0).getCell("name").getStringValue());
-        Assert.assertEquals("name_2", dataRows.get(1).getCell("name").getStringValue());
-
-        Assert.assertEquals(20, dataRows.get(0).getCell("sum1").getNumericValue().doubleValue(), 0);
-        Assert.assertEquals(10, dataRows.get(1).getCell("sum1").getNumericValue().doubleValue(), 0);
-
-        Assert.assertEquals(40, dataRows.get(0).getCell("sum2").getNumericValue().doubleValue(), 0);
-        Assert.assertEquals(20, dataRows.get(1).getCell("sum2").getNumericValue().doubleValue(), 0);
-
-        Assert.assertEquals(200, dataRows.get(0).getCell("level").getNumericValue().doubleValue(), 0);
-        Assert.assertEquals(200, dataRows.get(1).getCell("level").getNumericValue().doubleValue(), 0);
-
-        Assert.assertEquals(8, dataRows.get(0).getCell("taxBurden").getNumericValue().doubleValue(), 0);
-        Assert.assertEquals(4, dataRows.get(1).getCell("taxBurden").getNumericValue().doubleValue(), 0);
+        Assert.assertEquals(2, testHelper.getDataRowHelper().getCount());
     }
 
     // Консолидация
@@ -234,6 +215,28 @@ public class Etr4_11Test extends ScriptTestBase {
         Assert.assertEquals(2, testHelper.getDataRowHelper().getAll().size());
         checkComposeData(testHelper.getDataRowHelper().getAll());
         checkLogger();
+    }
+
+    /**
+     * Проверить сконсолидированные данные.
+     */
+    void checkComposeData(List<DataRow<Cell>> dataRows) {
+        Assert.assertEquals("name_1", dataRows.get(0).getCell("name").getStringValue());
+        Assert.assertEquals("name_2", dataRows.get(1).getCell("name").getStringValue());
+
+        Assert.assertEquals(20, dataRows.get(0).getCell("sum1").getNumericValue().doubleValue(), 0);
+        Assert.assertEquals(10, dataRows.get(1).getCell("sum1").getNumericValue().doubleValue(), 0);
+
+        Assert.assertEquals(40, dataRows.get(0).getCell("sum2").getNumericValue().doubleValue(), 0);
+        Assert.assertEquals(20, dataRows.get(1).getCell("sum2").getNumericValue().doubleValue(), 0);
+
+        Assert.assertEquals(200, dataRows.get(0).getCell("level").getNumericValue().doubleValue(), 0);
+        Assert.assertEquals(200, dataRows.get(1).getCell("level").getNumericValue().doubleValue(), 0);
+
+        Assert.assertEquals(8, dataRows.get(0).getCell("taxBurden").getNumericValue().doubleValue(), 0);
+        Assert.assertEquals(4, dataRows.get(1).getCell("taxBurden").getNumericValue().doubleValue(), 0);
+
+        Assert.assertEquals(2, testHelper.getDataRowHelper().getCount());
     }
 
     /**

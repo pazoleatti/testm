@@ -183,7 +183,7 @@ void importData() {
     checkAndReadFile(ImportInputStream, UploadFileName, allValues, headerValues, TABLE_START_VALUE, TABLE_END_VALUE, HEADER_ROW_COUNT, paramsMap)
 
     // проверка шапки
-    checkHeaderXls(headerValues)
+    checkHeaderXls(headerValues, tmpRow)
     if (logger.containsLevel(LogLevel.ERROR)) {
         return
     }
@@ -232,18 +232,18 @@ void importData() {
  *
  * @param headerRows строки шапки
  */
-void checkHeaderXls(def headerRows) {
+void checkHeaderXls(def headerRows, def tmpRow) {
     if (headerRows.isEmpty()) {
         throw new ServiceException(WRONG_HEADER_ROW_SIZE)
     }
     checkHeaderSize(headerRows[1].size(), headerRows.size(), 6, 3)
     def headerMapping = [
-            (headerRows[0][0]): '№ п/п',
-            (headerRows[0][1]): 'Наименование сделки',
-            (headerRows[0][2]): 'Сумма фактического дохода/расхода по нерыночным сделкам, тыс. руб. (налоговый учет)',
-            (headerRows[0][3]): 'Сумма доначислений до рыночного уровня, тыс. руб.',
-            (headerRows[0][4]): 'Уровень доначислений/ не учитываемых расходов (в % от факта)',
-            (headerRows[0][5]): 'Налоговое бремя, тыс. руб.',
+            (headerRows[0][0]): getColumnName(tmpRow, 'rowNum'),//'№ п/п',
+            (headerRows[0][1]): getColumnName(tmpRow, 'name'),//'Наименование сделки',
+            (headerRows[0][2]): getColumnName(tmpRow, 'sum1'),//'Сумма фактического дохода/расхода по нерыночным сделкам, тыс. руб. (налоговый учет)',
+            (headerRows[0][3]): getColumnName(tmpRow, 'sum2'),//'Сумма доначислений до рыночного уровня, тыс. руб.',
+            (headerRows[0][4]): getColumnName(tmpRow, 'level'),//'Уровень доначислений/ не учитываемых расходов (в % от факта)',
+            (headerRows[0][5]): getColumnName(tmpRow, 'taxBurden'),//'Налоговое бремя, тыс. руб.',
             (headerRows[1][2]): 'данные из РНУ по соответствующему виду операций/сделок/продуктов',
             (headerRows[1][3]): 'данные из РНУ по соответствующему виду операций/сделок/продуктов',
             (headerRows[1][4]): '(гр.4/гр.3)*100',
