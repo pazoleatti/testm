@@ -1,8 +1,9 @@
-package form_template.income.outcome_simple_1.v2015
+package form_template.income.outcome_simple_gosb.v2015
 
 import com.aplana.sbrf.taxaccounting.model.Cell
 import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormData
+import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.FormDataKind
 import com.aplana.sbrf.taxaccounting.model.TaxType
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
@@ -14,7 +15,7 @@ import groovy.transform.Field
 
 /**
  * Форма "Расходы, учитываемые в простых РНУ (расходы простые) (с полугодия 2015)"
- * formTypeId=310
+ * formTypeId=327
  *
  * графа  1 - consumptionTypeId
  * графа  2 - consumptionGroup
@@ -53,7 +54,6 @@ switch (formDataEvent) {
     case FormDataEvent.MOVE_APPROVED_TO_ACCEPTED: // Принять из "Утверждена"
     case FormDataEvent.MOVE_CREATED_TO_ACCEPTED: // Принять из "Создано"
         logicCheck()
-        checkRnu14Accepted()
         break
     case FormDataEvent.COMPOSE:
         consolidation()
@@ -75,8 +75,8 @@ def formDataCache = [:]
 
 @Field
 def allColumns = ['consumptionTypeId', 'consumptionGroup', 'consumptionTypeByOperation', 'consumptionAccountNumber',
-        'rnu7Field10Sum', 'rnu7Field12Accepted', 'rnu7Field12PrevTaxPeriod', 'rnu5Field5Accepted',
-        'logicalCheck', 'accountingRecords', 'opuSumByEnclosure2', 'opuSumByTableP', 'opuSumTotal', 'difference']
+                  'rnu7Field10Sum', 'rnu7Field12Accepted', 'rnu7Field12PrevTaxPeriod', 'rnu5Field5Accepted',
+                  'logicalCheck', 'accountingRecords', 'opuSumByEnclosure2', 'opuSumByTableP', 'opuSumTotal', 'difference']
 
 @Field
 def nonEmptyColumns = ['rnu7Field10Sum', 'rnu7Field12Accepted', 'rnu7Field12PrevTaxPeriod', 'rnu5Field5Accepted']
@@ -84,7 +84,7 @@ def nonEmptyColumns = ['rnu7Field10Sum', 'rnu7Field12Accepted', 'rnu7Field12Prev
 //Аттрибуты, очищаемые перед импортом формы
 @Field
 def resetColumns = ['rnu7Field10Sum', 'rnu7Field12Accepted', 'rnu7Field12PrevTaxPeriod', 'rnu5Field5Accepted',
-        'logicalCheck', 'opuSumByEnclosure2', 'opuSumByTableP', 'opuSumTotal', 'difference']
+                    'logicalCheck', 'opuSumByEnclosure2', 'opuSumByTableP', 'opuSumTotal', 'difference']
 
 @Field
 def totalColumns = ['rnu7Field10Sum', 'rnu7Field12Accepted', 'rnu7Field12PrevTaxPeriod', 'rnu5Field5Accepted']
@@ -96,19 +96,22 @@ def formTypeId_RNU7 = 311
 def formTypeId_RNU5 = 317
 
 @Field
-head1Alias = 'R1'
+def formTypeId_summary = 310
+
 @Field
-first1Alias = 'R2'
+def head1Alias = 'R1'
 @Field
-last1Alias = 'R110'
+def first1Alias = 'R2'
+@Field
+def last1Alias = 'R110'
 @Field
 def total1Alias = 'R111'
 @Field
-head2Alias = 'R112'
+def head2Alias = 'R112'
 @Field
-first2Alias = 'R113'
+def first2Alias = 'R113'
 @Field
-last2Alias = 'R217'
+def last2Alias = 'R217'
 @Field
 def total2Alias = 'R218'
 @Field
@@ -245,14 +248,14 @@ void logicCheck() {
 
 void consolidation() {
     def dataRows = formDataService.getDataRowHelper(formData).allCached
-    def formSources = departmentFormTypeService.getFormSources(formData.departmentId, formData.getFormType().getId(), formData.getKind(), getReportPeriodStartDate(), getReportPeriodEndDate())
+    def formSources = departmentFormTypeService.getFormSources(formData.departmentId, formData.formType.getId(), formData.kind, getReportPeriodStartDate(), getReportPeriodEndDate())
     def isFromSummary = isFromSummary(formSources)
     isFromSummary ? consolidationFromSummary(dataRows, formSources) : consolidationFromPrimary(dataRows, formSources)
     calculationBasicSum(dataRows)
 }
 
 boolean isFromSummary(def formSources) {
-    def isSummarySource = formSources.find { it.formTypeId == formData.formType.id } != null
+    def isSummarySource = formSources.find { it.formTypeId in [formData.formType.id, formTypeId_summary] } != null
     def isPrimarySource = formSources.find { it.formTypeId in [formTypeId_RNU7, formTypeId_RNU5] } != null
     if (isSummarySource && isPrimarySource) {
         logger.warn("Для текущей формы назначены формы-источники по двум видам консолидации: 1. «РНУ-5», «РНУ-7»; 2. «Расходы, учитываемые в простых РНУ». Консолидация выполнена из форм-источников «Расходы, учитываемые в простых РНУ».")
@@ -274,21 +277,6 @@ void calculationBasicSum(def dataRows) {
     totalColumns.each { alias ->
         row50001[alias] = getSum(dataRows, alias, first1Alias, last1Alias) - (getDataRow(dataRows, exceptAlias).get(alias)?:0)
         row50002[alias] = getSum(dataRows, alias, first2Alias, last2Alias)
-    }
-    def formDataRNU14 = getFormDataRNU14()
-    def dataRowsRNU14 = (formDataRNU14 ? formDataService.getDataRowHelper(formDataRNU14)?.allSaved : null)
-    rowsEnd.collect{ "R$it" }.each { alias ->
-        def row = getDataRow(dataRows, alias)
-        if (isBank()) {
-            //Строки 219-223 расчет 8-й графы (при консолидации из сводных)
-            if (formDataRNU14 != null) {
-                for (def rowRNU14 : dataRowsRNU14) {
-                    if (rowRNU14.inApprovedNprms != rowRNU14.sum && row.consumptionTypeId == rowRNU14.knu) {
-                        row.rnu5Field5Accepted = rowRNU14.inApprovedNprms
-                    }
-                }
-            }
-        }
     }
 }
 
@@ -361,7 +349,7 @@ def consolidationFromSummary(def dataRows, def formSources) {
     // получить консолидированные формы в дочерних подразделениях в текущем налоговом периоде
     formSources.each { departmentFormType ->
         def child = getFormData(departmentFormType.formTypeId, departmentFormType.kind, departmentFormType.departmentId, formData.reportPeriodId, formData.periodOrder)
-        if (child != null && child.state == WorkflowState.ACCEPTED && child.formType.id == formData.formType.id) {
+        if (child != null && child.state == WorkflowState.ACCEPTED && child.formType.id in [formData.formType.id, formTypeId_summary]) {
             def childData = formDataService.getDataRowHelper(child)
             for (DataRow<Cell> row : childData.allSaved) {
                 if (row.getAlias() == null) {
@@ -401,13 +389,7 @@ void consolidationFromPrimary(def dataRows, def formSources) {
     if (reportPeriod != null && reportPeriod.order != 1) {
         def prevReportPeriod = reportPeriodService.getPrevReportPeriod(formData.reportPeriodId)
         if (prevReportPeriod != null) {
-            def formDataOld = getFormData(formData.getFormType().getId(), formData.getKind(), formDataDepartment.id, prevReportPeriod.getId(), formData.periodOrder)
-            if (formDataOld == null) {
-                if (prevReportPeriod != null) {
-                    // Последний экземпляр
-                    formDataOld = getFormData(304, formData.getKind(), formData.getDepartmentId(), prevReportPeriod.getId(), null);
-                }
-            }
+            def formDataOld = getFormData(formData.formType.id, formData.kind, formDataDepartment.id, prevReportPeriod.id, formData.periodOrder)
             dataRowsOld = (formDataOld ? formDataService.getDataRowHelper(formDataOld)?.allSaved : null)
             if (dataRowsOld != null) {
                 // данные за предыдущий отчетный период рну-7
@@ -551,20 +533,6 @@ FormData getFormData(int formTypeId, FormDataKind kind, int departmentId, int re
     return (formDataCache[key] != -1) ? formDataCache[key] : null
 }
 
-// Проверка на банк
-def isBank() {
-    boolean isBank = true
-    // получаем список приемников
-    def list = departmentFormTypeService.getFormDestinations(formData.departmentId, formData.formType.id, FormDataKind.SUMMARY, getReportPeriodStartDate(), getReportPeriodEndDate())
-    // если есть приемники в других подразделениях, то это не банк, а ОП
-    list.each {
-        if (it.departmentId != formData.departmentId) {
-            isBank = false
-        }
-    }
-    return isBank
-}
-
 /** Получить сумму диапазона строк определенного столбца. */
 def getSum(def dataRows, String columnAlias, String rowFromAlias, String rowToAlias) {
     def from = getDataRow(dataRows, rowFromAlias).getIndex() - 1
@@ -612,13 +580,6 @@ def getFormDataComplex() {
     return getFormData(303, formData.kind, formDataDepartment.id, formData.reportPeriodId, formData.periodOrder)
 }
 
-/**
- * Получить данные формы РНУ-14 (id = 321)
- */
-def getFormDataRNU14() {
-    return getFormData(321, FormDataKind.UNP, formDataDepartment.id, formData.reportPeriodId, formData.periodOrder)
-}
-
 def getBalanceValue(def value) {
     formDataService.getRefBookValue(27, value, refBookCache)?.NUMBER?.stringValue
 }
@@ -627,17 +588,6 @@ boolean isEqualNum(String accNum, def balance) {
     def a = accNum?.replace('.', '')
     def b = (balance ? getBalanceValue(balance)?.replace('.', '') : null)
     return a == b
-}
-
-// для уроня Банка:	проверка наличия и принятия РНУ-14
-void checkRnu14Accepted() {
-    if (!isBank()) {
-        return
-    }
-    def formData14 = getFormDataRNU14()
-    if (formData14 == null || formData14.state != WorkflowState.ACCEPTED) {
-        logger.error("Принятие сводной налоговой формы невозможно, т.к. форма РНУ-14 не сформирована или имеет статус, отличный от «Принята»")
-    }
 }
 
 // Возвращает данные из Отчета о прибылях и убытках за период, для которого сформирована текущая форма
