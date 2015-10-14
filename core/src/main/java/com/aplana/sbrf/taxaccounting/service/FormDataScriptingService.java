@@ -24,4 +24,18 @@ public interface FormDataScriptingService {
 	 * @return true - скрипт был исполнен, false - скрипт не запускался
 	 */
 	boolean executeScript(TAUserInfo userInfo, FormData formData, FormDataEvent event, Logger logger,  Map<String, Object> additionalParameters);
+
+    /**
+     * Выполняет скрипт формы (FormTemplate.script) по определенному событию(без сохранения изменений в БД).
+     *
+     * @param userInfo информация о текущем пользоваетеле
+     * @param script скрипт макета НФ
+     * @param formData данные налоговой формы
+     * @param event    событие
+     * @param logger   логгер для сохранения ошибок выполнения скриптов
+     * @param additionalParameters дополнительные параметры для передачи в скрипты. Их состав зависит от события для которого вызываются
+     *                             скрипты. Параметр может иметь значение null
+     * @return true - скрипт был исполнен, false - скрипт не запускался
+     */
+    boolean executeScriptInNewReadOnlyTransaction(TAUserInfo userInfo, String script, FormData formData, FormDataEvent event, Logger logger,  Map<String, Object> additionalParameters);
 }

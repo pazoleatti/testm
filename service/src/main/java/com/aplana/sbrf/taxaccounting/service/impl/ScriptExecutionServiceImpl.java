@@ -1,8 +1,5 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
-import com.aplana.sbrf.taxaccounting.dao.BlobDataDao;
-import com.aplana.sbrf.taxaccounting.dao.DeclarationTemplateDao;
-import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
 import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
@@ -13,7 +10,6 @@ import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
-import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.service.shared.ScriptComponentContextHolder;
 import org.apache.commons.io.IOUtils;
@@ -24,7 +20,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.script.Bindings;
 import javax.script.ScriptException;
-import java.io.*;
+import java.io.BufferedInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.*;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -49,9 +47,9 @@ public class ScriptExecutionServiceImpl extends TAAbstractScriptingServiceImpl i
     @Autowired
     private RefBookScriptingService refBookScriptingService;
     @Autowired
-    private FormTemplateDao formTemplateDao;
+    private FormTemplateService formTemplateService;
     @Autowired
-    private DeclarationTemplateDao declarationTemplateDao;
+    private DeclarationTemplateService declarationTemplateService;
     @Autowired
     private RefBookDao refBookDao;
     @Autowired
@@ -147,13 +145,19 @@ public class ScriptExecutionServiceImpl extends TAAbstractScriptingServiceImpl i
                             logger.error("Название файла \"%s\" некорректно. Файл был пропущен.", scriptName);
                             continue;
                         }
-                        Integer formTemplateId = formTemplateDao.get(formTypeId, year);
+                        Integer formTemplateId = formTemplateService.get(formTypeId, year);
                         if (formTemplateId == null) {
                             logger.error("Макет налоговой формы, указанный в файле \"%s\" не существует. Файл был пропущен.", scriptName);
                             continue;
                         }
-                        formTemplateDao.updateScript(formTemplateId, script);
-                        FormTemplate formTemplate = formTemplateDao.get(formTemplateId);
+                        FormTemplate formTemplate = formTemplateService.get(formTemplateId);
+                        formTemplate.setScript(script);
+                        try {
+                            formTemplateService.updateScript(formTemplate, logger);
+                        } catch (ServiceLoggerException e) {
+                            logger.info("Макет налоговой формы \"%s\", указанный в файле \"%s\" содержит ошибки. Файл был пропущен ", formTemplate.getName(), formTemplate.getName());
+                            continue;
+                        }
                         logger.info("Выполнен импорт скрипта для макета налоговой формы \"%s\"", formTemplate.getName());
                     }
 
@@ -168,13 +172,18 @@ public class ScriptExecutionServiceImpl extends TAAbstractScriptingServiceImpl i
                             logger.error("Название файла \"%s\" некорректно. Файл был пропущен.", scriptName);
                             continue;
                         }
-                        Integer declarationTemplateId = declarationTemplateDao.get(declarationTypeId, year);
+                        Integer declarationTemplateId = declarationTemplateService.get(declarationTypeId, year);
                         if (declarationTemplateId == null) {
                             logger.error("Макет декларации, указанный в файле \"%s\" не существует. Файл был пропущен.", scriptName);
                             continue;
                         }
-                        declarationTemplateDao.updateScript(declarationTemplateId, script);
-                        DeclarationTemplate declarationTemplate = declarationTemplateDao.get(declarationTemplateId);
+                        DeclarationTemplate declarationTemplate = declarationTemplateService.get(declarationTemplateId);
+                        declarationTemplate.setCreateScript(script);
+                        try {
+                            declarationTemplateService.updateScript(declarationTemplate, logger);
+                        } catch (ServiceLoggerException e) {
+                            logger.error("Макет декларации \"%s\", указанный в файле \"%s\" содержит ошибки. Файл был пропущен.", declarationTemplate.getName(), scriptName);
+                        }
                         logger.info("Выполнен импорт скрипта для макета декларации формы \"%s\"", declarationTemplate.getName());
                     }
 
@@ -191,8 +200,12 @@ public class ScriptExecutionServiceImpl extends TAAbstractScriptingServiceImpl i
                             logger.error("Справочник, указанный в файле \"%s\" не существует. Файл был пропущен.", scriptName);
                             continue;
                         }
-                        refBookScriptingService.saveScript(refBookId, script);
                         RefBook refBook = refBookDao.get(refBookId);
+                        try {
+                            refBookScriptingService.saveScript(refBookId, script, logger);
+                        } catch (ServiceLoggerException e) {
+                            logger.error("Справочник \"%s\", указанный в файле \"%s\" содержит ошибки. Файл был пропущен.", refBook.getName(), scriptName);
+                        }
                         logger.info("Выполнен импорт скрипта для справочника \"%s\"", refBook.getName());
                     }
                 }

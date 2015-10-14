@@ -6,6 +6,7 @@ import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.util.TransactionHelper;
@@ -63,6 +64,10 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
 	private ReportService reportService;
     @Autowired
 	private DepartmentReportPeriodService departmentReportPeriodService;
+    @Autowired
+    private DeclarationDataScriptingService declarationDataScriptingService;
+    @Autowired
+    private LogEntryService logEntryService;
 
     @Override
 	public List<DeclarationTemplate> listAll() {
@@ -83,6 +88,7 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
         if (declarationTemplate.getId() == null){
             return declarationTemplateDao.create(declarationTemplate);
         }
+        checkScript(declarationTemplate, new Logger());
         DeclarationTemplate declarationTemplateBase = declarationTemplateDao.get(declarationTemplate.getId());
         int savedId = declarationTemplateDao.save(declarationTemplate);
         if (declarationTemplate.getXsdId() != null && !declarationTemplate.getXsdId().equals(declarationTemplateBase.getXsdId()))
@@ -91,6 +97,41 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
             blobDataService.delete(declarationTemplateBase.getJrxmlBlobId());
         return savedId;
 	}
+
+    private void checkScript(DeclarationTemplate declarationTemplate, Logger log) {
+        if (declarationTemplate.getCreateScript() == null || declarationTemplate.getCreateScript().isEmpty())
+            return;
+        Logger logger1 = new Logger();
+        try{
+            // Создаем тестового пользователя
+            TAUser user = new TAUser();
+            user.setId(1);
+            user.setName("Test Test Test");
+            user.setActive(true);
+            user.setDepartmentId(1);
+            user.setLogin("test");
+            user.setEmail("test@test.test");
+
+            //Формируем контекст выполнения скрипта(userInfo)
+            TAUserInfo userInfo = new TAUserInfo();
+            userInfo.setUser(user);
+            userInfo.setIp("127.0.0.1");
+
+            // Устанавливает тестовые параметры НФ. При необходимости в скрипте значения можно поменять
+            DeclarationData declaration = new DeclarationData();
+            declaration.setDepartmentReportPeriodId(1);
+            declaration.setReportPeriodId(1);
+            declaration.setDepartmentId(1);
+            declaration.setAccepted(false);
+
+            declarationDataScriptingService.executeScriptInNewReadOnlyTransaction(userInfo, declarationTemplate, declaration, FormDataEvent.CHECK_SCRIPT, logger1, null);
+        } catch (Exception ex) {
+            logger1.error(ex);
+            log.getEntries().addAll(logger1.getEntries());
+            throw new ServiceLoggerException("Обнаружены ошибки в скрипте!", logEntryService.save(log.getEntries()));
+        }
+        log.getEntries().addAll(logger1.getEntries());
+    }
 
     @Override
     public void update(List<DeclarationTemplate> declarationTemplates) {
@@ -417,5 +458,16 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
         }
 
         return statusList;
+    }
+
+    @Override
+    public void updateScript(DeclarationTemplate declarationTemplate, Logger log) {
+        checkScript(declarationTemplate, log);
+        declarationTemplateDao.updateScript(declarationTemplate.getId(), declarationTemplate.getCreateScript());
+    }
+
+    @Override
+    public Integer get(int declarationTypeId, int year) {
+        return declarationTemplateDao.get(declarationTypeId, year);
     }
 }

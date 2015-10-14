@@ -235,4 +235,19 @@ public interface FormTemplateService {
      * @return
      */
     boolean existFormTemplate(int formTypeId, int reportPeriodId, boolean excludeInactiveTemplate);
+
+    /**
+     * Получает макет нф по типу и году (версии)
+     * @param formTypeId
+     * @param year
+     * @return идентификатор макета, либо null, если он не найден
+     */
+    Integer get(int formTypeId, int year);
+
+    /**
+     * Обновляет скрипт макета
+     * @param formTemplateId идентификатор макета
+     * @param script скрипт
+     */
+    void updateScript(FormTemplate formTemplate, Logger log);
 }

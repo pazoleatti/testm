@@ -7,10 +7,9 @@ import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
-import com.aplana.sbrf.taxaccounting.service.FormDataService;
-import com.aplana.sbrf.taxaccounting.service.FormTemplateService;
-import com.aplana.sbrf.taxaccounting.service.PeriodService;
+import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.util.TransactionHelper;
 import com.aplana.sbrf.taxaccounting.util.TransactionLogic;
 import org.apache.commons.lang3.ArrayUtils;
@@ -23,14 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Реализация сервиса для работы с шаблонами налоговых форм
@@ -64,6 +56,10 @@ public class FormTemplateServiceImpl implements FormTemplateService {
     private DepartmentReportPeriodDao departmentReportPeriodDao;
     @Autowired
     PeriodService periodService;
+    @Autowired
+    private FormDataScriptingService scriptingService;
+    @Autowired
+    private LogEntryService logEntryService;
 
 	@Override
 	public List<FormTemplate> listAll() {
@@ -93,10 +89,12 @@ public class FormTemplateServiceImpl implements FormTemplateService {
     @Transactional(readOnly = false)
 	@Override
 	public int save(FormTemplate formTemplate) {
+        Logger log = new Logger();
+        checkScript(formTemplate, log);
         if (formTemplate.getId() != null) {
             int formTemplateId = formTemplateDao.save(formTemplate);
             List<Long> formDataIds = formDataService.getFormDataListInActualPeriodByTemplate(formTemplateId, formTemplate.getVersion());
-            for(Long formDataId: formDataIds)
+            for (Long formDataId : formDataIds)
                 formDataService.deleteReport(formDataId, null, 0);
             return formTemplateId;
         } else
@@ -412,4 +410,56 @@ public class FormTemplateServiceImpl implements FormTemplateService {
     public boolean existFormTemplate(int formTypeId, int reportPeriodId, boolean excludeInactiveTemplate) {
         return formTemplateDao.existFormTemplate(formTypeId, reportPeriodId, excludeInactiveTemplate);
     }
+
+    @Override
+    public void updateScript(FormTemplate formTemplate, Logger log) {
+        checkScript(formTemplate, log);
+        formTemplateDao.updateScript(formTemplate.getId(), formTemplate.getScript());
+    }
+
+    @Override
+    public Integer get(int formTypeId, int year) {
+        return formTemplateDao.get(formTypeId, year);
+    }
+
+    private void checkScript(final FormTemplate formTemplate, final Logger log) {
+        if (formTemplate.getScript() == null || formTemplate.getScript().isEmpty())
+            return;
+        Logger logger1 = new Logger();
+        try{
+            // Создаем тестового пользователя
+            TAUser user = new TAUser();
+            user.setId(1);
+            user.setName("Test Test Test");
+            user.setActive(true);
+            user.setDepartmentId(1);
+            user.setLogin("test");
+            user.setEmail("test@test.test");
+
+            //Формируем контекст выполнения скрипта(userInfo)
+            TAUserInfo userInfo = new TAUserInfo();
+            userInfo.setUser(user);
+            userInfo.setIp("127.0.0.1");
+
+            // Устанавливает тестовые параметры НФ. При необходимости в скрипте значения можно поменять
+            FormData formData = new FormData(formTemplate);
+            formData.setState(WorkflowState.CREATED);
+            formData.setDepartmentId(userInfo.getUser().getDepartmentId());
+            formData.setKind(FormDataKind.PRIMARY);
+            formData.setDepartmentReportPeriodId(1);
+            formData.setReportPeriodId(1);
+
+            scriptingService.executeScriptInNewReadOnlyTransaction(userInfo, formTemplate.getScript(), formData, FormDataEvent.CHECK_SCRIPT, logger1, null);
+        } catch (Exception ex) {
+            logger1.error(ex);
+            log.getEntries().addAll(logger1.getEntries());
+            throw new ServiceLoggerException("Обнаружены ошибки при выполнении проверки скрипта!", logEntryService.save(log.getEntries()));
+        }
+        log.getEntries().addAll(logger1.getEntries());
+        if (!logger1.getEntries().isEmpty()) {
+            throw new ServiceLoggerException("Обнаружены ошибки в скрипте!", logEntryService.save(log.getEntries()));
+        }
+
+    }
+
 }
