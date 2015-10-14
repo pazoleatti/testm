@@ -86,20 +86,20 @@ void calcValues(def dataRows, def sourceRows) {
         // «Графа 8» = ОКРУГЛ («Графа 4»  / «Графа 5»; 16)
         if (rowSource.d1) {
             if (rowSource.shareProfit != null) {
-                row.kIndex = rowSource.shareProfit.divide(rowSource.d1, 16, BigDecimal.ROUND_HALF_UP).toString()
+                row.kIndex = rowSource.shareProfit.divide(rowSource.d1, 16, BigDecimal.ROUND_HALF_UP).toPlainString()
             }
         } else {
             row.kIndex = zeroString
         }
         // «Графа 9» = ОКРУГЛ («Графа 8» * «Графа 7» / 100 * («Графа 5» - «Графа 6»); 16)
         if (rowSource.kIndex && rowSource.taxRate != null && rowSource.d1 != null && rowSource.d2 != null) {
-            row.taxPerShare = (new BigDecimal(rowSource.kIndex) * rowSource.taxRate * (rowSource.d1 - rowSource.d2)).divide(new BigDecimal(100), 16, BigDecimal.ROUND_HALF_UP).toString()
+            row.taxPerShare = (new BigDecimal(rowSource.kIndex) * rowSource.taxRate * (rowSource.d1 - rowSource.d2)).divide(new BigDecimal(100), 16, BigDecimal.ROUND_HALF_UP).toPlainString()
         }
         // «Графа 10» = ОКРУГЛ («Графа 3» * «Графа 9» / («Графа 7» / 100); 16) для строк 1,2
         if ([0, 1].contains(i)) {
             if (rowSource.taxRate) {
                 if (rowSource.shareCount && rowSource.taxPerShare) {
-                    row.dividendPerShareIndividual = (new BigDecimal(rowSource.shareCount) * new BigDecimal(rowSource.taxPerShare) * 100).divide(rowSource.taxRate, 16, BigDecimal.ROUND_HALF_UP).toString()
+                    row.dividendPerShareIndividual = (new BigDecimal(rowSource.shareCount) * new BigDecimal(rowSource.taxPerShare) * 100).divide(rowSource.taxRate, 16, BigDecimal.ROUND_HALF_UP).toPlainString()
                 }
             } else {
                 row.dividendPerShareIndividual = zeroString
@@ -110,7 +110,7 @@ void calcValues(def dataRows, def sourceRows) {
         // «Графа 11» = ОКРУГЛ («Графа 8» * («Графа 5» - «Графа 6»); 16) для строк 3,4
         if ([2, 3].contains(i)) {
             if (rowSource.kIndex && rowSource.d1 != null && rowSource.d2 != null) {
-                row.dividendPerShareLegal = (new BigDecimal(rowSource.kIndex) * (rowSource.d1 - rowSource.d2)).setScale(16, BigDecimal.ROUND_HALF_UP).toString()
+                row.dividendPerShareLegal = (new BigDecimal(rowSource.kIndex) * (rowSource.d1 - rowSource.d2)).setScale(16, BigDecimal.ROUND_HALF_UP).toPlainString()
             }
         } else {
             row.dividendPerShareLegal = null
