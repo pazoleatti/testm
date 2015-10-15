@@ -219,9 +219,12 @@ public class GetMainMenuActionHandler extends
                         + LockTokens.lockList));
             }
 
-            if (currentUser.hasRole(TARole.ROLE_OPER) || currentUser.hasRole(TARole.ROLE_CONTROL)) {
+            if (currentUser.hasRole(TARole.ROLE_ADMIN)
+                    || currentUser.hasRole(TARole.ROLE_CONTROL_NS)
+                    || currentUser.hasRole(TARole.ROLE_CONTROL_UNP)
+                    || currentUser.hasRole(TARole.ROLE_OPER)
+                    || currentUser.hasRole(TARole.ROLE_CONTROL)) {
                 adminMenuItem.getSubMenu().add(new MenuItem("Журнал аудита", NUMBER_SIGN + AuditToken.AUDIT));
-                menuItems.add(adminMenuItem);
             }
 
             if (currentUser.hasRole(TARole.ROLE_ADMIN)
@@ -232,20 +235,6 @@ public class GetMainMenuActionHandler extends
                 if (currentUser.hasRole(TARole.ROLE_ADMIN)
                         || currentUser.hasRole(TARole.ROLE_CONTROL_NS)
                         || currentUser.hasRole(TARole.ROLE_CONTROL_UNP)) {
-                    // добавить "Журнал аудита"
-                    if (currentUser.hasRole(TARole.ROLE_ADMIN)) {
-                        adminMenuItem.getSubMenu().add(new MenuItem("Журнал аудита", NUMBER_SIGN + AuditToken.AUDIT));
-                    }
-                /*
-                Если пользователю назначено несколько ролей, включая роль Администратор,
-                то права доступа должны браться как для Администратора
-                http://jira.aplana.com/browse/SBRFACCTAX-5687
-                 */
-                    if ((currentUser.hasRole(TARole.ROLE_CONTROL_NS)
-                            || currentUser.hasRole(TARole.ROLE_CONTROL_UNP))
-                            && !currentUser.hasRole(TARole.ROLE_ADMIN)){
-                        adminMenuItem.getSubMenu().add(new MenuItem("Журнал аудита", NUMBER_SIGN + AuditToken.AUDIT));
-                    }
                     adminMenuItem.getSubMenu().add(new MenuItem("Список пользователей", NUMBER_SIGN
                             + MembersTokens.MEMBERS));
                 }
@@ -280,8 +269,10 @@ public class GetMainMenuActionHandler extends
                             + TestPageTokens.TEST_PAGE));
                 }
 
-                menuItems.add(adminMenuItem);
             }
+            if (!adminMenuItem.getSubMenu().isEmpty())
+                menuItems.add(adminMenuItem);
+
         }
 
 		GetMainMenuResult result = new GetMainMenuResult();
