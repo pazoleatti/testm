@@ -55,6 +55,7 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
 			formTemplate.setScript(rs.getString("script"));
             formTemplate.setComparative(rs.getBoolean("COMPARATIVE"));
             formTemplate.setAccruing(rs.getBoolean("accruing"));
+            formTemplate.setUpdating(rs.getBoolean("updating"));
 
 			// стили и графы
 			formTemplate.getStyles().addAll(formStyleDao.getFormStyles(formTemplate.getId()));
@@ -88,7 +89,7 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
 		JdbcTemplate jt = getJdbcTemplate();
 		try {
 			return jt.queryForObject(
-					"select id, type_id, data_rows, fixed_rows, name, fullname, script, data_headers, version, status, monthly, header, COMPARATIVE, accruing " +
+					"select id, type_id, data_rows, fixed_rows, name, fullname, script, data_headers, version, status, monthly, header, COMPARATIVE, accruing, updating " +
                             "from form_template where id = ?",
 					new Object[]{formId},
 					new int[]{Types.NUMERIC},
@@ -130,7 +131,7 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
 
             getJdbcTemplate().update(
                     "update form_template set data_rows = ?, data_headers = ?, version = ?, fixed_rows = ?, name = ?, " +
-                            " monthly = ?, fullname = ?, header = ?, script=?, status=?, comparative = ?, accruing = ? where id = ?",
+                            " monthly = ?, fullname = ?, header = ?, script=?, status=?, comparative = ?, accruing = ?, updating = ? where id = ?",
                     dataRowsXml,
                     dataHeadersXml,
                     formTemplate.getVersion(),
@@ -143,6 +144,7 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
                     formTemplate.getStatus().getId(),
                     formTemplate.isComparative(),
                     formTemplate.isAccruing(),
+                    formTemplate.isUpdating(),
                     formTemplateId
             );
 
@@ -207,7 +209,7 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
 
 	@Override
 	public List<FormTemplate> listAll() {
-		return getJdbcTemplate().query("select id, type_id, data_rows, fixed_rows, name, fullname, script, data_headers, version, status, monthly, header, COMPARATIVE, accruing " +
+		return getJdbcTemplate().query("select id, type_id, data_rows, fixed_rows, name, fullname, script, data_headers, version, status, monthly, header, COMPARATIVE, accruing, updating " +
                 " from form_template where status in (0,1)", new FormTemplateMapper());
 	}
 
@@ -452,7 +454,7 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
         try {
             formTemplate.setId(formTemplateId);
             getJdbcTemplate().
-                    update("insert into form_template (id, data_rows, data_headers, version, fixed_rows, name, fullname, header, script, status, type_id, comparative, accruing) " +
+                    update("insert into form_template (id, data_rows, data_headers, version, fixed_rows, name, fullname, header, script, status, type_id, comparative, accruing, updating) " +
                     "values (?,?,?,?,?,?,?,?,?,?,?,?,?)",
                             formTemplateId,
                             dataRowsXml,
@@ -466,7 +468,8 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
                             formTemplate.getStatus().getId(),
                             formTemplate.getType().getId(),
                             formTemplate.isComparative(),
-                            formTemplate.isAccruing()
+                            formTemplate.isAccruing(),
+                            formTemplate.isUpdating()
                             );
 
             formStyleDao.saveFormStyles(formTemplate);

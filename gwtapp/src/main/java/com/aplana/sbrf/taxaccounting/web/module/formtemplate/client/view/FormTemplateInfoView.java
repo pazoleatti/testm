@@ -36,6 +36,9 @@ public class FormTemplateInfoView extends ViewWithUiHandlers<FormTemplateInfoUiH
     @UiField
     CheckBox accruingCheckBox;
 
+    @UiField
+    CheckBox updatingCheckBox;
+
 	@UiField
 	TextBox nameBox;
 	
@@ -51,13 +54,14 @@ public class FormTemplateInfoView extends ViewWithUiHandlers<FormTemplateInfoUiH
 	}
 
 	@Override
-	public void setViewData(TaxType taxType, Date version, Date versionEnd, boolean fixedRows, boolean monthlyForm, boolean comparative, boolean accruing, String name, String fullName, String header) {
+	public void setViewData(TaxType taxType, Date version, Date versionEnd, boolean fixedRows, boolean monthlyForm, boolean comparative, boolean accruing, boolean updating, String name, String fullName, String header) {
         versionDateBegin.setValue(version);
         versionDateEnd.setValue(versionEnd);
 		fixedRowsCheckBox.setValue(fixedRows);
 		monthlyCheckBox.setValue(monthlyForm);
         comparativeCheckBox.setValue(comparative);
         accruingCheckBox.setValue(accruing);
+        updatingCheckBox.setValue(updating);
 		nameBox.setValue(name);
 		fullnameBox.setValue(fullName);
         headerBox.setValue(header);
@@ -82,6 +86,7 @@ public class FormTemplateInfoView extends ViewWithUiHandlers<FormTemplateInfoUiH
 		getUiHandlers().setMonthlyForm(monthlyCheckBox.getValue());
         getUiHandlers().setComparative(comparativeCheckBox.getValue());
         getUiHandlers().setAccruing(accruingCheckBox.getValue());
+        getUiHandlers().setUpdating(updatingCheckBox.getValue());
         getUiHandlers().setName(nameBox.getValue());
 		getUiHandlers().setFullname(fullnameBox.getValue());
 		getUiHandlers().setHeader(headerBox.getValue());
