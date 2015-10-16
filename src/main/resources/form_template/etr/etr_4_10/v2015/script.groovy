@@ -1,7 +1,6 @@
-package form_template.etr.etr_4_11.v2015
+package form_template.etr.etr_4_10.v2015
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
-import com.aplana.sbrf.taxaccounting.model.WorkflowState
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import groovy.transform.Field
@@ -111,6 +110,7 @@ void logicCheck() {
 }
 
 void importData() {
+    int COLUMN_COUNT = 3
     int HEADER_ROW_COUNT = 4
     String TABLE_START_VALUE = "Сумма увеличения базы по налогу на прибыль, в том числе"
     String TABLE_END_VALUE = null
@@ -122,7 +122,7 @@ void importData() {
     checkAndReadFile(ImportInputStream, UploadFileName, allValues, headerValues, TABLE_START_VALUE, TABLE_END_VALUE, HEADER_ROW_COUNT, paramsMap)
 
     // проверка шапки
-    checkHeaderXls(headerValues)
+    checkHeaderXls(headerValues, COLUMN_COUNT, HEADER_ROW_COUNT)
     if (logger.containsLevel(LogLevel.ERROR)) {
         return
     }
@@ -176,11 +176,11 @@ void importData() {
  *
  * @param headerRows строки шапки
  */
-void checkHeaderXls(def headerRows) {
+void checkHeaderXls(def headerRows, def colCount, rowCount) {
     if (headerRows.isEmpty()) {
         throw new ServiceException(WRONG_HEADER_ROW_SIZE)
     }
-    checkHeaderSize(headerRows[2].size(), headerRows.size(), 3, 4)
+    checkHeaderSize(headerRows[2].size(), headerRows.size(), colCount, rowCount)
     def tmpRow = formData.createDataRow()
     def headerMapping = [
             (headerRows[0][0]): 'Сумма увеличения базы по налогу на прибыль, в том числе',

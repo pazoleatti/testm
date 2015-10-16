@@ -12,8 +12,6 @@ import org.junit.Test;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import static org.mockito.Matchers.*;
@@ -28,7 +26,6 @@ public class Etr4_10Test extends ScriptTestBase {
     private static final int REPORT_PERIOD_ID = 1;
     private static final int DEPARTMENT_PERIOD_ID = 1;
     private static final FormDataKind KIND = FormDataKind.CONSOLIDATED;
-    private static final int SOURCE_TYPE_ID = 710;
 
     @Override
     protected FormData getFormData() {
@@ -80,8 +77,6 @@ public class Etr4_10Test extends ScriptTestBase {
     // Проверка со входом во все ЛП
     @Test
     public void checkTest() {
-        FormData formData = getFormData();
-        formData.initFormTemplateParams(testHelper.getTemplate("..//src/main//resources//form_template//etr//etr_4_10//v2015//"));
         List<DataRow<Cell>> dataRows = testHelper.getDataRowHelper().getAll();
 
         // для попадания в ЛП:
