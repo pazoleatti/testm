@@ -93,16 +93,16 @@ public class RefBookScriptingServiceImpl extends TAAbstractScriptingServiceImpl 
         });
     }
 
-    private void checkScript(RefBook refBook, String script, final Logger log) {
-        Logger logger1 = new Logger();
+    private void checkScript(RefBook refBook, String script, final Logger logger) {
+        Logger tempLogger = new Logger();
         try {
-            executeScriptInNewReadOnlyTransaction(null, refBook, script, FormDataEvent.CHECK_SCRIPT, logger1, null);
+            executeScriptInNewReadOnlyTransaction(null, refBook, script, FormDataEvent.CHECK_SCRIPT, tempLogger, null);
         } catch (Exception ex) {
-            logger1.error(ex);
-            log.getEntries().addAll(logger1.getEntries());
-            throw new ServiceLoggerException("Обнаружены ошибки в скрипте!", logEntryService.save(log.getEntries()));
+            tempLogger.error(ex);
+            logger.getEntries().addAll(tempLogger.getEntries());
+            throw new ServiceLoggerException("Обнаружены ошибки в скрипте!", logEntryService.save(logger.getEntries()));
         }
-        log.getEntries().addAll(logger1.getEntries());
+        logger.getEntries().addAll(tempLogger.getEntries());
     }
 
     private boolean executeScript(TAUserInfo userInfo, RefBook refBook, String script, FormDataEvent event, Logger logger, Map<String, Object> additionalParameters) {

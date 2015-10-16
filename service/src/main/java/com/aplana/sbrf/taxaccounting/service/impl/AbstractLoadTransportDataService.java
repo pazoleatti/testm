@@ -10,6 +10,8 @@ import com.aplana.sbrf.taxaccounting.utils.ResourceUtils;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.ByteArrayInputStream;
@@ -25,6 +27,8 @@ import java.util.List;
  * @author Dmitriy Levykin
  */
 public abstract class AbstractLoadTransportDataService {
+
+	protected static final Log LOG = LogFactory.getLog(AbstractLoadTransportDataService.class);
 
     @Autowired
     private AuditService auditService;
@@ -232,14 +236,14 @@ public abstract class AbstractLoadTransportDataService {
             } catch (Exception e) {
                 success = false;
                 log(userInfo, deleteErrorLogData, logger, lock, file.getPath(), e.getMessage());
-                e.printStackTrace();
+				LOG.error(e.getMessage(), e);
             }
 
             log(userInfo, successLogData, logger, lock, fileDst.getName());
         } catch (Exception e) {
             success = false;
             log(userInfo, moveErrorLogData, logger, lock, e.getMessage());
-            e.printStackTrace();
+			LOG.error(e.getMessage(), e);
         }
         return success;
     }

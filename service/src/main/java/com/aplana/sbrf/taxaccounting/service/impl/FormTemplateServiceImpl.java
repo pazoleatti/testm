@@ -31,18 +31,17 @@ import java.util.*;
 @Service
 @Transactional
 public class FormTemplateServiceImpl implements FormTemplateService {
+
+	private static final Log LOG = LogFactory.getLog(FormTemplateServiceImpl.class);
 	private static final int FORM_STYLE_ALIAS_MAX_VALUE = 40;
 	private static final int FORM_COLUMN_NAME_MAX_VALUE = 1000;
 	private static final int FORM_COLUMN_ALIAS_MAX_VALUE = 100;
 	private static final int DATA_ROW_ALIAS_MAX_VALUE = 20;
-
     private static final String CLOSE_PERIOD = "Следующие периоды %s данной версии макета закрыты: %s. " +
             "Для добавления в макет автонумеруемой графы с типом сквозной нумерации строк необходимо открыть перечисленные периоды!";
     private static final SimpleDateFormat SIMPLE_DATE_FORMAT = new SimpleDateFormat("dd.MM.yyyy");
 
 	private Set<String> checkSet = new HashSet<String>();
-
-    private final Log logger = LogFactory.getLog(getClass());
 
     @Autowired
 	private FormTemplateDao formTemplateDao;
@@ -60,6 +59,8 @@ public class FormTemplateServiceImpl implements FormTemplateService {
     private FormDataScriptingService scriptingService;
     @Autowired
     private LogEntryService logEntryService;
+	@Autowired
+	private TAUserService userService;
 
 	@Override
 	public List<FormTemplate> listAll() {
@@ -80,7 +81,7 @@ public class FormTemplateServiceImpl implements FormTemplateService {
 		try {
 			return formTemplateDao.get(formTemplateId);
 		} catch (DaoException e){
-			this.logger.error("Ошибка при получении версии макета НФ.", e);
+			LOG.error("Ошибка при получении версии макета НФ.", e);
 			logger.error("Ошибка при получении версии макета НФ. %s", e.getMessage());
 		}
 		return null;
@@ -106,7 +107,7 @@ public class FormTemplateServiceImpl implements FormTemplateService {
         try {
             return formTemplateDao.getActiveFormTemplateId(formTypeId, reportPeriodId);
         } catch (DaoException e){
-			logger.error(e.getMessage(), e);
+			LOG.error(e.getMessage(), e);
             throw new ServiceException(e.getMessage(), e);
         }
 	}
@@ -117,7 +118,7 @@ public class FormTemplateServiceImpl implements FormTemplateService {
             ReportPeriod reportPeriod = periodService.getReportPeriod(reportPeriodId);
             return formTemplateDao.getFormTemplateIdByFTAndReportPeriod(formTypeId, reportPeriod.getStartDate(), reportPeriod.getEndDate());
         } catch (DaoException e){
-            logger.error(e.getMessage(), e);
+            LOG.error(e.getMessage(), e);
             throw new ServiceException(e.getMessage(), e);
         }
     }
@@ -412,8 +413,8 @@ public class FormTemplateServiceImpl implements FormTemplateService {
     }
 
     @Override
-    public void updateScript(FormTemplate formTemplate, Logger log) {
-        checkScript(formTemplate, log);
+    public void updateScript(FormTemplate formTemplate, Logger logger) {
+        checkScript(formTemplate, logger);
         formTemplateDao.updateScript(formTemplate.getId(), formTemplate.getScript());
     }
 
@@ -422,25 +423,13 @@ public class FormTemplateServiceImpl implements FormTemplateService {
         return formTemplateDao.get(formTypeId, year);
     }
 
-    private void checkScript(final FormTemplate formTemplate, final Logger log) {
+    private void checkScript(final FormTemplate formTemplate, final Logger logger) {
         if (formTemplate.getScript() == null || formTemplate.getScript().isEmpty())
             return;
-        Logger logger1 = new Logger();
+        Logger tempLogger = new Logger();
         try{
-            // Создаем тестового пользователя
-            TAUser user = new TAUser();
-            user.setId(1);
-            user.setName("Test Test Test");
-            user.setActive(true);
-            user.setDepartmentId(1);
-            user.setLogin("test");
-            user.setEmail("test@test.test");
-
-            //Формируем контекст выполнения скрипта(userInfo)
-            TAUserInfo userInfo = new TAUserInfo();
-            userInfo.setUser(user);
-            userInfo.setIp("127.0.0.1");
-
+            // Формируем контекст выполнения скрипта(userInfo)
+            TAUserInfo userInfo = userService.getSystemUserInfo();
             // Устанавливает тестовые параметры НФ. При необходимости в скрипте значения можно поменять
             FormData formData = new FormData(formTemplate);
             formData.setState(WorkflowState.CREATED);
@@ -449,15 +438,15 @@ public class FormTemplateServiceImpl implements FormTemplateService {
             formData.setDepartmentReportPeriodId(1);
             formData.setReportPeriodId(1);
 
-            scriptingService.executeScriptInNewReadOnlyTransaction(userInfo, formTemplate.getScript(), formData, FormDataEvent.CHECK_SCRIPT, logger1, null);
+            scriptingService.executeScriptInNewReadOnlyTransaction(userInfo, formTemplate.getScript(), formData, FormDataEvent.CHECK_SCRIPT, tempLogger, null);
         } catch (Exception ex) {
-            logger1.error(ex);
-            log.getEntries().addAll(logger1.getEntries());
-            throw new ServiceLoggerException("Обнаружены ошибки при выполнении проверки скрипта!", logEntryService.save(log.getEntries()));
+            tempLogger.error(ex);
+            logger.getEntries().addAll(tempLogger.getEntries());
+            throw new ServiceLoggerException("Обнаружены ошибки при выполнении проверки скрипта!", logEntryService.save(logger.getEntries()));
         }
-        log.getEntries().addAll(logger1.getEntries());
-        if (!logger1.getEntries().isEmpty()) {
-            throw new ServiceLoggerException("Обнаружены ошибки в скрипте!", logEntryService.save(log.getEntries()));
+        logger.getEntries().addAll(tempLogger.getEntries());
+        if (!tempLogger.getEntries().isEmpty()) {
+            throw new ServiceLoggerException("Обнаружены ошибки в скрипте!", logEntryService.save(logger.getEntries()));
         }
 
     }

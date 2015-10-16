@@ -9,6 +9,7 @@ import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.FormDataService;
 import com.aplana.sbrf.taxaccounting.service.FormTemplateService;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
+import com.aplana.sbrf.taxaccounting.service.TAUserService;
 import com.aplana.sbrf.taxaccounting.util.ScriptExposed;
 import com.aplana.sbrf.taxaccounting.util.TransactionHelper;
 import com.aplana.sbrf.taxaccounting.util.TransactionLogic;
@@ -35,29 +36,19 @@ public class FormTemplateServiceImplTest extends Assert {
 
     public static final int FORM_TEMPLATE_ID = 1;
     public static final int COLUMN_ID = 1;
-
     public static final String MESSAGE =
             "Следующие периоды форм данной версии макета закрыты: год 2014, первый квартал 2015. Для добавления в макет автонумеруемой графы с типом сквозной нумерации строк необходимо открыть перечисленные периоды!";
 
-    Logger logger;
-
-    FormTemplate formTemplateFromDB;
-
-    TAUserInfo userInfo;
-
+    private Logger logger;
+	private FormTemplate formTemplateFromDB;
+	private TAUserInfo userInfo;
     private List<DepartmentReportPeriod> departmentReportPeriodList;
-
     private DepartmentReportPeriodDao departmentReportPeriodDao;
-
-    FormTemplateDao formTemplateDao;
-
-    FormTemplate formTemplateEdited;
-
-    FormDataService formDataService;
-
-    LogEntryService logEntryService;
-
-    FormTemplateService formTemplateService = new FormTemplateServiceImpl();
+	private FormTemplateDao formTemplateDao;
+	private FormTemplate formTemplateEdited;
+	private FormDataService formDataService;
+	private LogEntryService logEntryService;
+	private FormTemplateService formTemplateService = new FormTemplateServiceImpl();
 
     @Before
     public void init() {
@@ -66,6 +57,7 @@ public class FormTemplateServiceImplTest extends Assert {
         TAUser user = new TAUser();
         user.setId(0);
         user.setName("Name");
+		user.setDepartmentId(0);
         userInfo.setUser(user);
 
         FormType formType = new FormType();
@@ -112,11 +104,14 @@ public class FormTemplateServiceImplTest extends Assert {
         formTemplateEdited = SerializationUtils.clone(formTemplateFromDB);
 
         logEntryService = mock(LogEntryService.class);
+		TAUserService userService = mock(TAUserService.class);
+		when(userService.getSystemUserInfo()).thenReturn(userInfo);
 
         ReflectionTestUtils.setField(formTemplateService, "formTemplateDao", formTemplateDao);
         ReflectionTestUtils.setField(formTemplateService, "formDataService", formDataService);
         ReflectionTestUtils.setField(formTemplateService, "departmentReportPeriodDao", departmentReportPeriodDao);
         ReflectionTestUtils.setField(formTemplateService, "logEntryService", logEntryService);
+		ReflectionTestUtils.setField(formTemplateService, "userService", userService);
 
         FormDataScriptingServiceImpl scriptingService = new FormDataScriptingServiceImpl();
         ApplicationContext ctx = mock(ApplicationContext.class);

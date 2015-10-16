@@ -13,6 +13,8 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.service.shared.ScriptComponentContextHolder;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Service;
@@ -36,6 +38,8 @@ import java.util.zip.ZipInputStream;
 @Transactional
 public class ScriptExecutionServiceImpl extends TAAbstractScriptingServiceImpl implements ApplicationContextAware, ScriptExecutionService {
 
+	protected static final Log LOG = LogFactory.getLog(ScriptExecutionServiceImpl.class);
+
     @Autowired
     private LogEntryService logEntryService;
     @Autowired
@@ -54,8 +58,6 @@ public class ScriptExecutionServiceImpl extends TAAbstractScriptingServiceImpl i
     private RefBookDao refBookDao;
     @Autowired
     private AuditService auditService;
-
-
 
     @Override
     public void executeScript(TAUserInfo userInfo, String script, Logger logger) {
@@ -93,6 +95,7 @@ public class ScriptExecutionServiceImpl extends TAAbstractScriptingServiceImpl i
             logScriptException(e, logger);
         } catch (Exception e) {
             logger.error(e.getMessage());
+			LOG.error(e.getMessage(), e);
         }
     }
 
@@ -141,7 +144,6 @@ public class ScriptExecutionServiceImpl extends TAAbstractScriptingServiceImpl i
                             formTypeId = Integer.parseInt(scriptName.substring(0, scriptName.indexOf("-")));
                             year = Integer.parseInt(scriptName.substring(scriptName.indexOf("-") + 1));
                         } catch (NumberFormatException e) {
-                            e.printStackTrace();
                             logger.error("Название файла \"%s\" некорректно. Файл был пропущен.", scriptName);
                             continue;
                         }
