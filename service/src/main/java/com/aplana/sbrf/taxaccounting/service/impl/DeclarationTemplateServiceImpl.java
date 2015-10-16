@@ -39,8 +39,8 @@ import static com.aplana.sbrf.taxaccounting.model.VersionedObjectStatus.FAKE;
 @Transactional
 public class DeclarationTemplateServiceImpl implements DeclarationTemplateService {
 
-	private static final Log logger = LogFactory.getLog(DeclarationTemplateServiceImpl.class);
-    private final static String ENCODING = "UTF-8";
+	private static final Log LOG = LogFactory.getLog(DeclarationTemplateServiceImpl.class);
+    private static final String ENCODING = "UTF-8";
     private static final String JRXML_NOT_FOUND = "Не удалось получить jrxml-шаблон декларации!";
     private static final SimpleDateFormat SDF_DD_MM_YYYY = new SimpleDateFormat("dd.MM.yyyy");
     private static final String DEC_DATA_EXIST_IN_TASK =
@@ -68,6 +68,8 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
     private DeclarationDataScriptingService declarationDataScriptingService;
     @Autowired
     private LogEntryService logEntryService;
+	@Autowired
+	private TAUserService userService;
 
     @Override
 	public List<DeclarationTemplate> listAll() {
@@ -98,25 +100,11 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
         return savedId;
 	}
 
-    private void checkScript(DeclarationTemplate declarationTemplate, Logger log) {
+    private void checkScript(DeclarationTemplate declarationTemplate, Logger logger) {
         if (declarationTemplate.getCreateScript() == null || declarationTemplate.getCreateScript().isEmpty())
             return;
-        Logger logger1 = new Logger();
+        Logger tempLogger = new Logger();
         try{
-            // Создаем тестового пользователя
-            TAUser user = new TAUser();
-            user.setId(1);
-            user.setName("Test Test Test");
-            user.setActive(true);
-            user.setDepartmentId(1);
-            user.setLogin("test");
-            user.setEmail("test@test.test");
-
-            //Формируем контекст выполнения скрипта(userInfo)
-            TAUserInfo userInfo = new TAUserInfo();
-            userInfo.setUser(user);
-            userInfo.setIp("127.0.0.1");
-
             // Устанавливает тестовые параметры НФ. При необходимости в скрипте значения можно поменять
             DeclarationData declaration = new DeclarationData();
             declaration.setDepartmentReportPeriodId(1);
@@ -124,13 +112,13 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
             declaration.setDepartmentId(1);
             declaration.setAccepted(false);
 
-            declarationDataScriptingService.executeScriptInNewReadOnlyTransaction(userInfo, declarationTemplate, declaration, FormDataEvent.CHECK_SCRIPT, logger1, null);
+            declarationDataScriptingService.executeScriptInNewReadOnlyTransaction(userService.getSystemUserInfo(), declarationTemplate, declaration, FormDataEvent.CHECK_SCRIPT, tempLogger, null);
         } catch (Exception ex) {
-            logger1.error(ex);
-            log.getEntries().addAll(logger1.getEntries());
-            throw new ServiceLoggerException("Обнаружены ошибки в скрипте!", logEntryService.save(log.getEntries()));
+            tempLogger.error(ex);
+            logger.getEntries().addAll(tempLogger.getEntries());
+            throw new ServiceLoggerException("Обнаружены ошибки в скрипте!", logEntryService.save(logger.getEntries()));
         }
-        log.getEntries().addAll(logger1.getEntries());
+        logger.getEntries().addAll(tempLogger.getEntries());
     }
 
     @Override
@@ -153,7 +141,6 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
 
 	}
 
-
 	@Override
 	public String getJrxml(int declarationTemplateId) {
         BlobData jrxmlBlobData = blobDataService.get(this.get(declarationTemplateId).getJrxmlBlobId());
@@ -166,7 +153,7 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
             IOUtils.copy(jrxmlBlobData.getInputStream(), writer, ENCODING);
             return writer.toString();
         } catch (IOException e) {
-            logger.error(e.getMessage(), e);
+            LOG.error(e.getMessage(), e);
             throw new ServiceException(JRXML_NOT_FOUND);
         }
 	}
@@ -182,10 +169,10 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
             JasperDesign jasperDesign = JRXmlLoader.load(new ByteArrayInputStream(jrxml.getBytes(ENCODING)));
             JasperCompileManager.compileReportToStream(jasperDesign, compiledReport);
         } catch (JRException e) {
-            logger.error(e.getMessage(), e);
+            LOG.error(e.getMessage(), e);
             throw new ServiceException("Произошли ошибки во время формирования отчета!");
         } catch (UnsupportedEncodingException e2) {
-            logger.error(e2.getMessage(), e2);
+            LOG.error(e2.getMessage(), e2);
             throw new ServiceException("Шаблон отчета имеет неправильную кодировку!");
         }
         return new ByteArrayInputStream(compiledReport.toByteArray());
