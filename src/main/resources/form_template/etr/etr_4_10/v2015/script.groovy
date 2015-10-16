@@ -37,12 +37,6 @@ switch (formDataEvent) {
     case FormDataEvent.MOVE_APPROVED_TO_ACCEPTED: // Принять из "Утверждена"
         logicCheck()
         break
-    case FormDataEvent.COMPOSE:
-        consolidation()
-        calc()
-        logicCheck()
-        formDataService.saveCachedDataRows(formData, logger)
-        break
     case FormDataEvent.IMPORT:
         importData()
         formDataService.saveCachedDataRows(formData, logger)
@@ -113,27 +107,6 @@ void logicCheck() {
         def needValue = [:]
         needValue['taxBurden'] = calc3(row)
         checkCalc(row, needValue.keySet().asList(), needValue, logger, true)
-    }
-}
-
-void consolidation() {
-    def dataRows = formDataService.getDataRowHelper(formData).allCached
-    row = dataRows.get(0)
-    // очистить графы
-    allColumns.each { alias ->
-        row[alias] = null
-    }
-    departmentFormTypeService.getFormSources(formData.departmentId, formData.formType.id, formData.kind,
-            getStartDate(formData.reportPeriodId), getEndDate(formData.reportPeriodId)).each {
-        if (it.formTypeId == formData.formType.id) {
-            def source = formDataService.getLast(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId, formData.periodOrder)
-            if (source != null && source.state == WorkflowState.ACCEPTED) {
-                def sourceRow = formDataService.getDataRowHelper(source)?.allSaved.get(0)
-                // суммируем графы 1 и 2 из источников
-                row.sum1 = (row.sum1 ?: 0) + (sourceRow.sum1 ?: 0)
-                row.sum2 = (row.sum2 ?: 0) + (sourceRow.sum2 ?: 0)
-            }
-        }
     }
 }
 

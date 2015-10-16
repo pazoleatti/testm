@@ -3,8 +3,6 @@ package com.aplana.sbrf.taxaccounting.form_template.etr.etr_4_10.v2015;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
-import com.aplana.sbrf.taxaccounting.service.script.api.DataRowHelper;
-import com.aplana.sbrf.taxaccounting.util.DataRowHelperStub;
 import com.aplana.sbrf.taxaccounting.util.ScriptTestBase;
 import com.aplana.sbrf.taxaccounting.util.TestScriptHelper;
 import com.aplana.sbrf.taxaccounting.util.mock.ScriptTestMockHelper;
@@ -146,112 +144,5 @@ public class Etr4_10Test extends ScriptTestBase {
         Assert.assertEquals(22348, dataRows.get(0).getCell("sum2").getNumericValue().doubleValue(), 0);
         Assert.assertEquals(4469.6, dataRows.get(0).getCell("taxBurden").getNumericValue().doubleValue(), 0);
         Assert.assertEquals(1, testHelper.getDataRowHelper().getCount());
-    }
-
-    // Консолидация
-    @Test
-    public void composeTest() {
-        int sourceTemplateId = SOURCE_TYPE_ID;
-        FormDataKind kind = FormDataKind.CONSOLIDATED;
-        List<DepartmentFormType> departmentFormTypes = new ArrayList<DepartmentFormType>();
-        int sourceCount = 10;
-
-        for (int i = 1; i <= sourceCount; i++) {
-            // источник
-            DepartmentFormType departmentFormType = getSource(i, kind, i);
-            departmentFormTypes.add(departmentFormType);
-
-            // форма источника
-            FormData sourceFormData = getSourceFormData(i, sourceTemplateId);
-            when(testHelper.getFormDataService().getLast(anyInt(), eq(kind), eq(i),
-                    anyInt(), any(Integer.class))).thenReturn(sourceFormData);
-
-            // строки и хелпер источника
-            List<DataRow<Cell>> dataRows = getFillDataRows(sourceFormData, i);
-            DataRowHelper sourceDataRowHelper = new DataRowHelperStub();
-            sourceDataRowHelper.save(dataRows);
-            when(testHelper.getFormDataService().getDataRowHelper(sourceFormData)).thenReturn(sourceDataRowHelper);
-        }
-        // источник
-        when(testHelper.getDepartmentFormTypeService().getFormSources(anyInt(), anyInt(), any(FormDataKind.class),
-                any(Date.class), any(Date.class))).thenReturn(departmentFormTypes);
-
-        testHelper.initRowData();
-
-        // Консолидация
-        testHelper.execute(FormDataEvent.COMPOSE);
-
-        // проверка значении
-        Assert.assertEquals(1, testHelper.getDataRowHelper().getAll().size());
-        checkComposeData(testHelper.getDataRowHelper().getAll());
-        checkLogger();
-    }
-
-    /**
-     * Проверить сконсолидированные данные.
-     */
-    void checkComposeData(List<DataRow<Cell>> dataRows) {
-        Assert.assertEquals(55, dataRows.get(0).getCell("sum1").getNumericValue().doubleValue(), 0);
-        Assert.assertEquals(155, dataRows.get(0).getCell("sum2").getNumericValue().doubleValue(), 0);
-        Assert.assertEquals(42, dataRows.get(0).getCell("taxBurden").getNumericValue().doubleValue(), 0);
-        Assert.assertEquals(1, testHelper.getDataRowHelper().getCount());
-    }
-
-    /**
-     * Получить источник.
-     *
-     * @param id           идентификатор источника
-     * @param kind         вид формы источника
-     * @param departmentId подразделение
-     */
-    private DepartmentFormType getSource(int id, FormDataKind kind, int departmentId) {
-        DepartmentFormType departmentFormType = new DepartmentFormType();
-        departmentFormType.setId(id);
-        departmentFormType.setFormTypeId(SOURCE_TYPE_ID);
-        departmentFormType.setKind(kind);
-        departmentFormType.setDepartmentId(departmentId);
-        return departmentFormType;
-    }
-
-    /**
-     * Получить форму источника.
-     *
-     * @param id               идентификатор источника
-     * @param sourceTemplateId идентификатор макета источника
-     */
-    private FormData getSourceFormData(int id, int sourceTemplateId) {
-        // Макет источника
-        FormTemplate sourceTemplate = testHelper.getTemplate("..//src/main//resources//form_template//etr//etr_4_11//v2015//");
-
-        FormType formType = new FormType();
-        formType.setId(SOURCE_TYPE_ID);
-        formType.setTaxType(TaxType.ETR);
-        formType.setName(sourceTemplate.getName());
-
-        // Один экземпляр-источник
-        FormData sourceFormData = new FormData();
-        sourceFormData.initFormTemplateParams(sourceTemplate);
-        sourceFormData.setId((long) id);
-        sourceFormData.setState(WorkflowState.ACCEPTED);
-        sourceFormData.setFormType(formType);
-        sourceFormData.setFormTemplateId(sourceTemplateId);
-
-        return sourceFormData;
-    }
-
-    /**
-     * Получить заполненные строки источника.
-     *
-     * @param sourceFormData форма источника
-     */
-    private List<DataRow<Cell>> getFillDataRows(FormData sourceFormData, int i) {
-        List<DataRow<Cell>> dataRows = new ArrayList<DataRow<Cell>>();
-
-        DataRow<Cell> row = sourceFormData.createDataRow();
-        row.getCell("sum1").setValue(i, null);
-        row.getCell("sum2").setValue(i + 10, null);
-        dataRows.add(row);
-
-        return dataRows;
     }
 }
