@@ -413,8 +413,8 @@ public class FormTemplateServiceImpl implements FormTemplateService {
     }
 
     @Override
-    public void updateScript(FormTemplate formTemplate, Logger log) {
-        checkScript(formTemplate, log);
+    public void updateScript(FormTemplate formTemplate, Logger logger) {
+        checkScript(formTemplate, logger);
         formTemplateDao.updateScript(formTemplate.getId(), formTemplate.getScript());
     }
 
