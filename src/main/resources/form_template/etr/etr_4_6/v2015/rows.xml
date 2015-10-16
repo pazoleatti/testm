@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?><rows>
+  <row alias="R1">
+    <cell alias="rowNum" colSpan="1" numericValue="1" rowSpan="1"/>
+    <cell alias="taxName" colSpan="1" rowSpan="1" stringValue="Страховые взносы во внебюджетные фонды"/>
+    <cell alias="symbol102" colSpan="1" rowSpan="1" stringValue="симв. (26102+26410.09)"/>
+    <cell alias="comparePeriod" colSpan="1" rowSpan="1"/>
+    <cell alias="currentPeriod" colSpan="1" rowSpan="1"/>
+    <cell alias="deltaRub" colSpan="1" rowSpan="1"/>
+    <cell alias="deltaPercent" colSpan="1" rowSpan="1"/>
+  </row>
+  <row alias="R2">
+    <cell alias="rowNum" colSpan="1" numericValue="2" rowSpan="1"/>
+    <cell alias="taxName" colSpan="1" rowSpan="1" stringValue="Сумма выплат"/>
+    <cell alias="symbol102" colSpan="1" rowSpan="1" stringValue="симв.(26101+26104-26101.05-26101.06-26101.15+60348)"/>
+    <cell alias="comparePeriod" colSpan="1" rowSpan="1"/>
+    <cell alias="currentPeriod" colSpan="1" rowSpan="1"/>
+    <cell alias="deltaRub" colSpan="1" rowSpan="1"/>
+    <cell alias="deltaPercent" colSpan="1" rowSpan="1"/>
+  </row>
+  <row alias="R3">
+    <cell alias="rowNum" colSpan="1" numericValue="3" rowSpan="1"/>
+    <cell alias="taxName" colSpan="1" rowSpan="1" stringValue="Отношение страховых взносов, уплачиваемых во внебюджетные фонды к расходам на оплату труда, %"/>
+    <cell alias="symbol102" colSpan="1" rowSpan="1"/>
+    <cell alias="comparePeriod" colSpan="1" rowSpan="1"/>
+    <cell alias="currentPeriod" colSpan="1" rowSpan="1"/>
+    <cell alias="deltaRub" colSpan="1" rowSpan="1"/>
+    <cell alias="deltaPercent" colSpan="1" rowSpan="1"/>
+  </row>
+  <row alias="R4">
+    <cell alias="rowNum" colSpan="1" numericValue="4" rowSpan="1"/>
+    <cell alias="taxName" colSpan="1" rowSpan="1" stringValue="Предельная величина для взносов, уплачиваемых в ФСС"/>
+    <cell alias="symbol102" colSpan="1" rowSpan="1" stringValue="ПВ"/>
+    <cell alias="comparePeriod" colSpan="1" rowSpan="1"/>
+    <cell alias="currentPeriod" colSpan="1" rowSpan="1"/>
+    <cell alias="deltaRub" colSpan="1" rowSpan="1"/>
+    <cell alias="deltaPercent" colSpan="1" rowSpan="1"/>
+  </row>
+  <row alias="R5">
+    <cell alias="rowNum" colSpan="1" numericValue="5" rowSpan="1"/>
+    <cell alias="taxName" colSpan="1" rowSpan="1" stringValue="Предельная величина для взносов, уплачиваемых в ПФР"/>
+    <cell alias="symbol102" colSpan="1" rowSpan="1" stringValue="ПВ"/>
+    <cell alias="comparePeriod" colSpan="1" rowSpan="1"/>
+    <cell alias="currentPeriod" colSpan="1" rowSpan="1"/>
+    <cell alias="deltaRub" colSpan="1" rowSpan="1"/>
+    <cell alias="deltaPercent" colSpan="1" rowSpan="1"/>
+  </row>
+  <row alias="R6">
+    <cell alias="rowNum" colSpan="1" numericValue="6" rowSpan="1"/>
+    <cell alias="taxName" colSpan="1" rowSpan="1" stringValue="Тариф отчислений страховых взносов, %"/>
+    <cell alias="symbol102" colSpan="1" rowSpan="1" stringValue="Т"/>
+    <cell alias="comparePeriod" colSpan="1" rowSpan="1"/>
+    <cell alias="currentPeriod" colSpan="1" rowSpan="1"/>
+    <cell alias="deltaRub" colSpan="1" rowSpan="1"/>
+    <cell alias="deltaPercent" colSpan="1" rowSpan="1"/>
+  </row>
+</rows>
