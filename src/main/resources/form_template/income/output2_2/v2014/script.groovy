@@ -90,7 +90,7 @@ def editableColumns = ['emitent', 'decreeNumber', 'inn', 'kpp', 'recType', 'titl
 
 // Проверяемые на пустые значения атрибуты
 @Field
-def nonEmptyColumns = ['emitent', 'decreeNumber', 'inn', 'kpp', 'recType', 'title', 'dividendDate', 'sumDividend', 'sumTax']
+def nonEmptyColumns = ['emitent', 'decreeNumber', 'inn', 'kpp', 'recType', 'title', 'subdivisionRF', 'dividendDate', 'sumDividend', 'sumTax']
 
 @Field
 def lastSourceFormType = 314 // с 9 месяцев 2015
