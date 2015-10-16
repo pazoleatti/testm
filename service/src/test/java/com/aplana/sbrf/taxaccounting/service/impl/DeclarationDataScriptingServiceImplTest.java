@@ -9,6 +9,8 @@ import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.util.ScriptExposed;
+import com.aplana.sbrf.taxaccounting.util.TransactionHelper;
+import com.aplana.sbrf.taxaccounting.util.TransactionLogic;
 import org.apache.commons.io.IOUtils;
 import org.custommonkey.xmlunit.Diff;
 import org.custommonkey.xmlunit.XMLUnit;
@@ -27,7 +29,6 @@ import static com.aplana.sbrf.taxaccounting.test.DeclarationDataMockUtils.mockDe
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -54,20 +55,18 @@ public class DeclarationDataScriptingServiceImplTest {
 		when(declarationType.getId()).thenReturn(1);
 
 		// Этот шаблон генерирует демо-XML
-		DeclarationTemplate template1 = mock(DeclarationTemplate.class);
+		DeclarationTemplate template1 = new DeclarationTemplate();
 		InputStream stream = DeclarationDataScriptingServiceImplTest.class.getResourceAsStream("createDeclaration.groovy");
 		String createScript1 = IOUtils.toString(stream, "UTF-8");
-		when(template1.getId()).thenReturn(REPORT_TEMPLATE_ID1);
-		/*when(template1.getCreateScript()).thenReturn(createScript);*/
-		when(template1.getType()).thenReturn(declarationType);
+        template1.setId(REPORT_TEMPLATE_ID1);
+        template1.setType(declarationType);
 
 		// Этот шаблон содержит ошибку в скрипте
-		DeclarationTemplate template2 = mock(DeclarationTemplate.class);
+		DeclarationTemplate template2 = new DeclarationTemplate();
 		stream = DeclarationDataScriptingServiceImplTest.class.getResourceAsStream("createDeclarationException.groovy");
         String createScript2 = IOUtils.toString(stream, "UTF-8");
-		when(template2.getId()).thenReturn(REPORT_TEMPLATE_ID2);
-		/*when(template2.getCreateScript()).thenReturn(createScript);*/
-		when(template2.getType()).thenReturn(declarationType);
+        template2.setId(REPORT_TEMPLATE_ID2);
+        template2.setType(declarationType);
 
 		DeclarationTemplateDao declarationTemplateDao = mock(DeclarationTemplateDao.class);
 		when(declarationTemplateDao.get(REPORT_TEMPLATE_ID1)).thenReturn(template1);
@@ -94,6 +93,19 @@ public class DeclarationDataScriptingServiceImplTest {
 
         LogEntryService logEntryService = mock(LogEntryService.class);
         ReflectionTestUtils.setField(service, "logEntryService", logEntryService);
+
+        TransactionHelper tx = new TransactionHelper() {
+            @Override
+            public <T> T executeInNewTransaction(TransactionLogic<T> logic) {
+                return logic.execute();
+            }
+
+            @Override
+            public <T> T executeInNewReadOnlyTransaction(TransactionLogic<T> logic) {
+                return logic.execute();
+            }
+        };
+        ReflectionTestUtils.setField(service, "tx", tx);
 	}
 
 	@Test
@@ -132,4 +144,34 @@ public class DeclarationDataScriptingServiceImplTest {
 
 		service.executeScript(null, declarationData, FormDataEvent.CREATE, logger, exchangeParams);
 	}
+
+    @Test(expected = ServiceLoggerException.class)
+    public void checkScript1() throws IOException {
+        Logger logger = new Logger();
+
+        DeclarationType declarationType = mock(DeclarationType.class);
+        // Шаблон содержит синтаксическую ошибку в скрипте
+        DeclarationTemplate template = new DeclarationTemplate();
+        InputStream stream = DeclarationDataScriptingServiceImplTest.class.getResourceAsStream("checkDeclarationException.groovy");
+        String script = IOUtils.toString(stream, "UTF-8");
+        template.setType(declarationType);
+        template.setCreateScript(script);
+
+        service.executeScriptInNewReadOnlyTransaction(null, template, null, FormDataEvent.CHECK_SCRIPT, logger, null);
+    }
+
+    @Test
+    public void checkScript2() throws IOException {
+        Logger logger = new Logger();
+
+        DeclarationType declarationType = mock(DeclarationType.class);
+        // Шаблон содержит логическую ошибку в скрипте
+        DeclarationTemplate template = new DeclarationTemplate();
+        InputStream stream = DeclarationDataScriptingServiceImplTest.class.getResourceAsStream("createDeclarationException.groovy");
+        String script = IOUtils.toString(stream, "UTF-8");
+        template.setType(declarationType);
+        template.setCreateScript(script);
+
+        service.executeScriptInNewReadOnlyTransaction(null, template, null, FormDataEvent.CHECK_SCRIPT, logger, null);
+    }
 }

@@ -16,6 +16,8 @@ public class FormTemplateContent {
     private boolean comparative;
     @XmlElement
     private boolean accruing;
+    @XmlElement
+    private boolean updating;
 	@XmlElement
 	private String name;
 	@XmlElement
@@ -43,6 +45,7 @@ public class FormTemplateContent {
         monthly = formTemplate.isMonthly();
         comparative = formTemplate.isComparative();
         accruing = formTemplate.isAccruing();
+        updating = formTemplate.isUpdating();
 	}
 
 	public void fillFormTemplate(FormTemplate formTemplate) {
@@ -50,6 +53,7 @@ public class FormTemplateContent {
         formTemplate.setMonthly(monthly);
         formTemplate.setComparative(comparative);
         formTemplate.setAccruing(accruing);
+        formTemplate.setUpdating(updating);
 		formTemplate.setName(name);
 		formTemplate.setFullName(fullName);
 		formTemplate.setHeader(header);
@@ -64,6 +68,7 @@ public class FormTemplateContent {
         formTemplate.setMonthly(monthly);
         formTemplate.setComparative(comparative);
         formTemplate.setAccruing(accruing);
+        formTemplate.setUpdating(updating);
         formTemplate.setName(name);
         formTemplate.setFullName(fullName);
         formTemplate.setHeader(header);

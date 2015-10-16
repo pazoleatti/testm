@@ -393,7 +393,7 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
                     cell.setCellType(Cell.CELL_TYPE_NUMERIC);
 
                     if (bd != null){
-                        cell.setCellValue(((NumericColumn)column).getPrecision() >0 ? Double.parseDouble(bd.toString()) : bd.intValue());
+                        cell.setCellValue(((NumericColumn)column).getPrecision() >0 ? Double.parseDouble(bd.toString()) : bd.longValue());
                     }
                 } else if (ColumnType.AUTO.equals(column.getColumnType())) {
                     Long bd = (Long) obj;

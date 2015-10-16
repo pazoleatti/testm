@@ -26,6 +26,8 @@ public class FormTemplate extends IdentityObject<Integer> implements Cloneable {
     private boolean comparative;
     /** Признак расчета нарастающим итогом (false - не используется, true - используется)*/
     private boolean accruing;
+    /** Отображать кнопку "Обновить" */
+    private boolean updating;
 
     private VersionedObjectStatus status;
 
@@ -346,6 +348,14 @@ public class FormTemplate extends IdentityObject<Integer> implements Cloneable {
         this.accruing = accruing;
     }
 
+    public boolean isUpdating() {
+        return updating;
+    }
+
+    public void setUpdating(boolean updating) {
+        this.updating = updating;
+    }
+
     public FormTemplate clone() {
         FormTemplate formTemplateClone = new FormTemplate();
 
@@ -364,6 +374,7 @@ public class FormTemplate extends IdentityObject<Integer> implements Cloneable {
         formTemplateClone.setStatus(this.getStatus());
         formTemplateClone.setComparative(this.isComparative());
         formTemplateClone.setAccruing(this.isAccruing());
+        formTemplateClone.setUpdating(this.isUpdating());
 
         // клонировать строки, иначе измения в них попадут в макет формы
         List<DataRow<Cell>> rows = getCloneRows(this.getRows());

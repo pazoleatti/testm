@@ -3,23 +3,30 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.FormDataService;
 import com.aplana.sbrf.taxaccounting.service.FormTemplateService;
+import com.aplana.sbrf.taxaccounting.service.LogEntryService;
+import com.aplana.sbrf.taxaccounting.util.ScriptExposed;
+import com.aplana.sbrf.taxaccounting.util.TransactionHelper;
+import com.aplana.sbrf.taxaccounting.util.TransactionLogic;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.SerializationUtils;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.context.ApplicationContext;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 /**
  * @author Fail Mukhametdinov
@@ -47,6 +54,8 @@ public class FormTemplateServiceImplTest extends Assert {
     FormTemplate formTemplateEdited;
 
     FormDataService formDataService;
+
+    LogEntryService logEntryService;
 
     FormTemplateService formTemplateService = new FormTemplateServiceImpl();
 
@@ -102,9 +111,35 @@ public class FormTemplateServiceImplTest extends Assert {
 
         formTemplateEdited = SerializationUtils.clone(formTemplateFromDB);
 
+        logEntryService = mock(LogEntryService.class);
+
         ReflectionTestUtils.setField(formTemplateService, "formTemplateDao", formTemplateDao);
         ReflectionTestUtils.setField(formTemplateService, "formDataService", formDataService);
         ReflectionTestUtils.setField(formTemplateService, "departmentReportPeriodDao", departmentReportPeriodDao);
+        ReflectionTestUtils.setField(formTemplateService, "logEntryService", logEntryService);
+
+        FormDataScriptingServiceImpl scriptingService = new FormDataScriptingServiceImpl();
+        ApplicationContext ctx = mock(ApplicationContext.class);
+        when(ctx.getBeansWithAnnotation(ScriptExposed.class)).thenReturn(new HashMap<String, Object>());
+        scriptingService.setApplicationContext(ctx);
+
+        TransactionHelper tx = new TransactionHelper() {
+            @Override
+            public <T> T executeInNewTransaction(TransactionLogic<T> logic) {
+                return logic.execute();
+            }
+
+            @Override
+            public <T> T executeInNewReadOnlyTransaction(TransactionLogic<T> logic) {
+                return logic.execute();
+            }
+        };
+        ReflectionTestUtils.setField(scriptingService, "tx", tx);
+
+        DepartmentService departmentService = mock(DepartmentService.class);
+        ReflectionTestUtils.setField(scriptingService, "departmentService", departmentService);
+
+        ReflectionTestUtils.setField(formTemplateService, "scriptingService", scriptingService);
     }
 
     /**
@@ -266,6 +301,36 @@ public class FormTemplateServiceImplTest extends Assert {
         boolean anySerialAutoNumerationColumn = formTemplateService.isAnyAutoNumerationColumn(formTemplate, NumerationType.SERIAL);
         assertTrue("Должна быть хотя бы одна сквозная автонумеруемая графа", anyCrossAutoNumerationColumn);
         assertTrue("Должна быть хотя бы одна последовательная автонумеруемая графа", anySerialAutoNumerationColumn);
+    }
+
+    @Test
+    public void updateScript1() throws IOException {
+        FormTemplate formTemplate = new FormTemplate();
+        formTemplate.setId(1);
+        FormType formType = new FormType();
+        formType.setName("Тестовый");
+        formType.setTaxType(TaxType.ETR);
+        formTemplate.setType(formType);
+        InputStream stream = DeclarationDataScriptingServiceImplTest.class.getResourceAsStream("updateFormTemplateScript1.groovy");
+        String script = IOUtils.toString(stream, "UTF-8");
+        formTemplate.setScript(script);
+        Logger log = new Logger();
+        formTemplateService.updateScript(formTemplate, log);
+    }
+
+    @Test(expected = ServiceLoggerException.class)
+    public void updateScript2() throws IOException {
+        FormTemplate formTemplate = new FormTemplate();
+        formTemplate.setId(1);
+        FormType formType = new FormType();
+        formType.setName("Тестовый");
+        formType.setTaxType(TaxType.ETR);
+        formTemplate.setType(formType);
+        InputStream stream = FormTemplateServiceImplTest.class.getResourceAsStream("updateFormTemplateScript2.groovy");
+        String script = IOUtils.toString(stream, "UTF-8");
+        formTemplate.setScript(script);
+        Logger log = new Logger();
+        formTemplateService.updateScript(formTemplate, log);
     }
 
 //    @Test(expected = ValidationException.class)
