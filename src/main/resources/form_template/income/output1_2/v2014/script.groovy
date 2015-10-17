@@ -432,7 +432,7 @@ def formNewRow(def rowList, def dataRowsPrev, def prevPeriodStartDate, def prevP
         newRow.dividendRussianStavka9 = rowList.sum{ (it.status == 1 && it.type == 5 && it.rate != null && it.rate != 9 && it.rate != 0 && it.dividends != null) ? it.dividends : 0 }
 
         // «Графа 14» = Сумма по «Графа 23» для каждого уникального сочетания «Графа 7» и «Графа 8» формы-источника, если «Графа 17» формы-источника = «1» и «Графа 16» формы-источника = «4»
-        newRow.dividendRussianTaxFree = rowList.sum{ (it.status == 1 && it.type == 1 && it.rate == 4 && it.dividends != null) ? it.dividends : 0 }
+        newRow.dividendRussianTaxFree = rowList.sum{ (it.status == 1 && it.type == 4 && it.dividends != null) ? it.dividends : 0 }
 
         // «Графа 16» = Сумма по «Графа 23» для каждого уникального сочетания «Графа 7» и «Графа 8» формы-источника, если «Графа 16» формы-источника = «5» и «Графа 17» формы-источника равна «2»
         newRow.dividendForgeinOrgAll = rowList.sum{ (it.type == 5 && it.status == 2 && it.dividends != null) ? it.dividends : 0 }
@@ -498,10 +498,10 @@ def formNewRow(def rowList, def dataRowsPrev, def prevPeriodStartDate, def prevP
     newRow.dividendRussianPersonal = rowList.sum{ (it.status == 1 && it.type == 2 && it.dividends != null) ? it.dividends : 0 }
 
     // «Графа 22» = Сумма по «Графа 23» для каждого уникального сочетания «Графа 7» первичной формы и «Графа 8» первичной формы, если «Графа 17» = «3»
-    newRow.dividendTaxUnknown = rowList.sum{ (it.status == '3' && it.dividends != null) ? it.dividends : 0 }
+    newRow.dividendTaxUnknown = rowList.sum{ (it.status == 3 && it.dividends != null) ? it.dividends : 0 }
 
     // Если «Графа 3» формы-источника = Значение атрибута «ИНН» формы настроек подразделения, то «Графа 24» = «Графа 4» первичной формы для каждого уникального сочетания «Графа 7» первичной формы и «Графа 8» первичной формы, иначе не заполняется
-    newRow.dividendAgentAll = (row.emitentInn == graph3String && row.all != null) ? row.all : null
+    newRow.dividendAgentAll = (row.emitentInn == graph3String && row.all != null) ? row.all : nullf
 
     // «Графа 25» = Если «Графа 3» формы-источника = Значение атрибута «ИНН» формы настроек подразделения, то «Графа 25» =(«Графа 4» первичной формы - «Графа 5» первичной формы) для каждого уникального сочетания «Графа 7» первичной формы и «Графа 8» первичной формы, иначе не заполняется
     newRow.dividendAgentWithStavka0 = (row.emitentInn == graph3String) ? ((row.all ?: 0) - (row.rateZero ?: 0)) : null
