@@ -501,7 +501,7 @@ def formNewRow(def rowList, def dataRowsPrev, def prevPeriodStartDate, def prevP
     newRow.dividendTaxUnknown = rowList.sum{ (it.status == 3 && it.dividends != null) ? it.dividends : 0 }
 
     // Если «Графа 3» формы-источника = Значение атрибута «ИНН» формы настроек подразделения, то «Графа 24» = «Графа 4» первичной формы для каждого уникального сочетания «Графа 7» первичной формы и «Графа 8» первичной формы, иначе не заполняется
-    newRow.dividendAgentAll = (row.emitentInn == graph3String && row.all != null) ? row.all : nullf
+    newRow.dividendAgentAll = (row.emitentInn == graph3String && row.all != null) ? row.all : null
 
     // «Графа 25» = Если «Графа 3» формы-источника = Значение атрибута «ИНН» формы настроек подразделения, то «Графа 25» =(«Графа 4» первичной формы - «Графа 5» первичной формы) для каждого уникального сочетания «Графа 7» первичной формы и «Графа 8» первичной формы, иначе не заполняется
     newRow.dividendAgentWithStavka0 = (row.emitentInn == graph3String) ? ((row.all ?: 0) - (row.rateZero ?: 0)) : null
