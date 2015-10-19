@@ -84,31 +84,41 @@ insert into ref_book_record (id, record_id, ref_book_id, version, status) values
 	insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 5052, 'Независимые лица');
 
 ----------------------------------------------------------------------------------------------------------------
+--http://jira.aplana.com/browse/SBRFACCTAX-12997: Цвета
+INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id, table_name, is_versioned) VALUES (1,'Цвета',1,0,1,null, 'COLOR', 0);
+
+INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (95, 1, 'Наименование цвета', 	'NAME', 1, 1, null, null, 1, null, 20, 1, 1, null, 	null, 0, 50);
+INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (96, 1, 'R', 'R', 	2, 2, null, null, 1, 0, 	5, 1, 2, null, 	null, 0, 3);
+INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (97, 1, 'G', 'G', 	2, 3, null, null, 1, 0, 	5, 1, 2, null, 	null, 0, 3);
+INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (98, 1, 'B', 'B', 	2, 4, null, null, 1, 0, 	5, 1, 2, null, 	null, 0, 3);
+INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (99, 1, 'HEX', 'HEX', 1, 5, null, null, 1, null, 	7, 1, 3, null, 	null, 0, 7);
+
+----------------------------------------------------------------------------------------------------------------
 --http://jira.aplana.com/browse/SBRFACCTAX-12852: Категории юридического лица по системе «светофор»
 INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) VALUES (506, 'Категории юридического лица по системе «светофор»',1,0,0,null);
 
-INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (5061, 506, 'Код категории', 'CODE', 	1, 1, null, null, 1, null, 	5, 1, 1, 1, 	null, 0, 30);
-INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (5062, 506, 'Цвет', 			'COLOR', 	2, 2, null, null, 1, 0, 	5, 1, 0, 1, 	null, 0, 9);
-INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (5063, 506, 'Описание', 		'NAME', 	1, 3, null, null, 1, null, 20, 1, 0, null, 	null, 0, 256);
+INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (5061, 506, 'Код категории', 'CODE',   1, 1, null, null, 1, null,   5, 1, 1, 1,   null, 0, 30);
+INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (5062, 506, 'Цвет',       'COLOR',   4, 2, 1, 95, 1, null,   5, 1, 0, null,   null, 0, null);
+INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (5063, 506, 'Описание',     'NAME',   1, 3, null, null, 1, null, 20, 1, 0, null, 	null, 0, 256);
 
 insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 1, 506, to_date('01.01.2008', 'DD.MM.YYYY'), 0);
 	insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 5061, 'Категория 1');
-	insert into ref_book_value (record_id, attribute_id, number_value) values (seq_ref_book_record.currval, 5062, 1);
+	insert into ref_book_value (record_id, attribute_id, reference_value) values (seq_ref_book_record.currval, 5062, 8);
 	insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 5063, 'Пороговые значения с большей долей вероятности за Налоговый период будут превышен. ');
 
 insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 2, 506, to_date('01.01.2008', 'DD.MM.YYYY'), 0);
 	insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 5061, 'Категория 2');
-	insert into ref_book_value (record_id, attribute_id, number_value) values (seq_ref_book_record.currval, 5062, 1);
+	insert into ref_book_value (record_id, attribute_id, reference_value) values (seq_ref_book_record.currval, 5062, 8);
 	insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 5063, 'Пороговые значения с большей долей вероятности за Налоговый период будут превышен. Назначается только ВЗЛ с общим режимом налогообложения');
 
 insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 3, 506, to_date('01.01.2008', 'DD.MM.YYYY'), 0);
 	insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 5061, 'Категория 3');
-	insert into ref_book_value (record_id, attribute_id, number_value) values (seq_ref_book_record.currval, 5062, 1);
+	insert into ref_book_value (record_id, attribute_id, reference_value) values (seq_ref_book_record.currval, 5062, 1);
 	insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 5063, 'Существует неопределенность в отношении того, будут ли превышены пороговые значения');
 
 insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 4, 506, to_date('01.01.2008', 'DD.MM.YYYY'), 0);
 	insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 5061, 'Категория 4');
-	insert into ref_book_value (record_id, attribute_id, number_value) values (seq_ref_book_record.currval, 5062, 1);
+	insert into ref_book_value (record_id, attribute_id, reference_value) values (seq_ref_book_record.currval, 5062, 12);
 	insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 5063, 'Пороговые значения, с высокой долей вероятности, не будут превышены');
 
 
@@ -228,10 +238,6 @@ insert into ref_book_record (id, record_id, ref_book_id, version, status) values
 	insert into ref_book_value (record_id, attribute_id, number_value) values (seq_ref_book_record.currval, 5131, 2);	
 	insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 5132, 'Юридическое лицо является иностранной организацией');
 
-	
-
-----------------------------------------------------------------------------------------------------------------
-----------------------------------------------------------------------------------------------------------------
 ----------------------------------------------------------------------------------------------------------------
 ----------------------------------------------------------------------------------------------------------------
 ----------------------------------------------------------------------------------------------------------------
