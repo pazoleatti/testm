@@ -82,6 +82,7 @@ drop table ref_book;
 drop table blob_data;
 drop sequence seq_form_style;
 drop table form_style;
+drop table color;
 drop sequence seq_form_template;
 drop table form_template;
 drop sequence seq_tax_period;

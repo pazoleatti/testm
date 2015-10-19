@@ -28,6 +28,15 @@ alter table form_template add constraint form_template_chk_comparative check (co
 alter table form_template add constraint form_template_chk_accruing check (accruing in (0, 1));
 alter table form_template add constraint form_template_chk_updating check (updating in (0, 1));
 
+alter table color add constraint color_pk primary key(id);
+alter table color add constraint color_unq_name unique(name);
+alter table color add constraint color_unq_rgb unique (r,g,b);
+alter table color add constraint color_unq_hex unique (hex);
+alter table color add constraint color_chk_rgb_limits check ((r between 0 and 255) and (g between 0 and 255) and (b between 0 and 255));
+
+alter table form_style add constraint form_style_fk_font_color foreign key(font_color) references color(id);
+alter table form_style add constraint form_style_fk_back_color foreign key(back_color) references color(id);
+
 alter table form_style add constraint form_style_pk primary key (id);
 alter table form_style add constraint form_style_fk_form_template_id foreign key (form_template_id) references form_template(id) on delete cascade;
 alter table form_style add constraint form_style_chk_font_color check (font_color in (0,1,2,3,4,5,6,7,8,9,10,11,12,13));
