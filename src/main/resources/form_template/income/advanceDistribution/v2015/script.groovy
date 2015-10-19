@@ -1728,7 +1728,6 @@ def getDepParam(def departmentParam) {
             return null
         }
         def taxPlaningTypeCode = departmentService.get(tbCode).getType().MANAGEMENT.getCode()
-        logger.info("2")
         depParam = getProvider(30).getRecords(getReportPeriodEndDate(), null, "PARENT_ID = ${departmentParam.get('PARENT_ID').getReferenceValue()} and TYPE = $taxPlaningTypeCode", null).get(0)
     }
     return depParam
