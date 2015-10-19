@@ -28,7 +28,7 @@ import java.util.Date;
 @Controller
 public class FormTemplateController {
 
-	private static final Log logger = LogFactory.getLog(FormTemplateController.class);
+	private static final Log LOG = LogFactory.getLog(FormTemplateController.class);
 
 	@Autowired
 	SecurityService securityService;
@@ -105,7 +105,7 @@ public class FormTemplateController {
             resp.getWriter().printf("uuid %s",  logEntryService.save(logger.getEntries()));
         } finally {
             if (formTemplateService.unlock(formTemplateId, userInfo)){
-                logger.warn(String.format("Не разблокировалась запись %d в макетах НФ", formTemplateId));
+                LOG.warn(String.format("Не разблокировалась запись %d в макетах НФ", formTemplateId));
             }
         }
     }
@@ -121,11 +121,11 @@ public class FormTemplateController {
 	public void exceptionHandler(Exception e, final HttpServletResponse response) {
 		response.setContentType("text/plain");
 		response.setCharacterEncoding("UTF-8");
-		logger.warn(e.getLocalizedMessage(), e);
+		LOG.warn(e.getLocalizedMessage(), e);
 		try {
             response.getWriter().printf("error %s", e.getMessage());
 		} catch (IOException ioException) {
-			logger.error(ioException.getMessage(), ioException);
+			LOG.error(ioException.getMessage(), ioException);
 		}
 	}
 }

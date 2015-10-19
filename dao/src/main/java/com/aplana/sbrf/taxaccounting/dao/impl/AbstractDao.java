@@ -1,7 +1,5 @@
 package com.aplana.sbrf.taxaccounting.dao.impl;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -11,8 +9,6 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
  * и содержащий вспомогательные методы, востребованные наследниками
  */
 public abstract class AbstractDao {
-
-	protected static final Log logger = LogFactory.getLog(AbstractDao.class);
 
     @Autowired
     DBInfo dbInfo;

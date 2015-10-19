@@ -23,7 +23,7 @@ import static com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils.*;
 @Transactional(readOnly = true)
 public class FormDataSearchDaoImpl extends AbstractDao implements FormDataSearchDao {
 
-	private static final Log logger = LogFactory.getLog(FormDataSearchDaoImpl.class);
+	private static final Log LOG = LogFactory.getLog(FormDataSearchDaoImpl.class);
 
     private final static SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
 
@@ -102,8 +102,8 @@ public class FormDataSearchDaoImpl extends AbstractDao implements FormDataSearch
         appendFromClause(sql);
 		appendWhereClause(sql, dataFilter);
 
-		if (logger.isTraceEnabled()) {
-			logger.trace(sql);
+		if (LOG.isTraceEnabled()) {
+			LOG.trace(sql);
 		}
 
 		sql.append(" order by fd.id desc");
@@ -117,8 +117,8 @@ public class FormDataSearchDaoImpl extends AbstractDao implements FormDataSearch
         appendSelectClause(sql);
         appendFromClause(sql);
         appendWhereClause(sql, filter);
-        if (logger.isTraceEnabled()) {
-            logger.trace(sql);
+        if (LOG.isTraceEnabled()) {
+            LOG.trace(sql);
         }
         sql.append(" order by fd.id desc");
 

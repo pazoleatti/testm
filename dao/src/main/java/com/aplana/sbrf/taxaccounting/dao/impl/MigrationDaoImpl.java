@@ -20,8 +20,7 @@ import java.util.List;
 @Repository
 public class MigrationDaoImpl extends AbstractDao implements MigrationDao {
 
-    private final Log logger = LogFactory.getLog(getClass());
-
+    private static final Log LOG = LogFactory.getLog(MigrationDaoImpl.class);
     private static final String ACTUAL_EXEMPLAR_NOT_FOUND_MESSAGE = "Актуального экземпляра записей для типа РНУ - %d не найдено в БД";
 
     private class ExemplarRowMapper implements RowMapper<Exemplar> {
@@ -104,7 +103,7 @@ public class MigrationDaoImpl extends AbstractDao implements MigrationDao {
     @Override
     public List<Rnu25Row> getRnu25RowList(Exemplar ex) {
         try {
-            logger.debug("Start getRnu25RowList with " + ex);
+            LOG.debug("Start getRnu25RowList with " + ex);
             return getJdbcTemplate().query(
                     "select\n" +
                             "\"r25\".num as \"num\",\n" +
@@ -170,7 +169,7 @@ public class MigrationDaoImpl extends AbstractDao implements MigrationDao {
     @Override
     public List<Rnu26Row> getRnu26RowList(Exemplar ex) {
         try {
-            logger.debug("Start getRnu26RowList with " + ex);
+            LOG.debug("Start getRnu26RowList with " + ex);
             return getJdbcTemplate().query(
                     "select\n" +
                             "\"r26\".num,\n" +
@@ -238,7 +237,7 @@ public class MigrationDaoImpl extends AbstractDao implements MigrationDao {
     @Override
     public List<Rnu27Row> getRnu27RowList(Exemplar ex) {
         try {
-            logger.debug("Start getRnu27RowList with " + ex);
+            LOG.debug("Start getRnu27RowList with " + ex);
             return getJdbcTemplate().query(
                     "select\n" +
                             "\"r27\".num,\n" +
@@ -303,7 +302,7 @@ public class MigrationDaoImpl extends AbstractDao implements MigrationDao {
     @Override
     public List<Rnu31Row> getRnu31RowList(Exemplar ex) {
         try {
-            logger.debug("Start getRnu31RowList with " + ex);
+            LOG.debug("Start getRnu31RowList with " + ex);
             return getJdbcTemplate().query(
                     "select\n" +
                             "\"r31\".num,\n" +
@@ -357,7 +356,7 @@ public class MigrationDaoImpl extends AbstractDao implements MigrationDao {
     @Override
     public List<Rnu64Row> getRnu64RowList(Exemplar ex) {
         try {
-            logger.debug("Start getRnu64RowList with " + ex);
+            LOG.debug("Start getRnu64RowList with " + ex);
             return getJdbcTemplate().query(
                     "select\n" +
                             "\"r64\".num,\n" +
@@ -413,7 +412,7 @@ public class MigrationDaoImpl extends AbstractDao implements MigrationDao {
     @Override
     public List<RnuCommonRow> getRnu60RowList(Exemplar ex) {
         try {
-            logger.debug("Start getRnu60RowList with " + ex);
+            LOG.debug("Start getRnu60RowList with " + ex);
             return getJdbcTemplate().query(
                     "select\n" +
                             "\"r60\".num,\n" +
@@ -451,7 +450,7 @@ public class MigrationDaoImpl extends AbstractDao implements MigrationDao {
     @Override
     public List<RnuCommonRow> getRnu59RowList(Exemplar ex) {
         try {
-            logger.debug("Start getRnu59RowList with " + ex);
+            LOG.debug("Start getRnu59RowList with " + ex);
             return getJdbcTemplate().query(
                     "select\n" +
                             "\"r59\".num,\n" +
@@ -489,7 +488,7 @@ public class MigrationDaoImpl extends AbstractDao implements MigrationDao {
     @Override
     public List<RnuCommonRow> getRnu54RowList(Exemplar ex) {
         try {
-            logger.debug("Start getRnu54RowList with " + ex);
+            LOG.debug("Start getRnu54RowList with " + ex);
             return getJdbcTemplate().query(
                     "select\n" +
                             "\"r54\".num,\n" +
@@ -528,7 +527,7 @@ public class MigrationDaoImpl extends AbstractDao implements MigrationDao {
     @Override
     public List<RnuCommonRow> getRnu53RowList(Exemplar ex) {
         try {
-            logger.debug("Start getRnu53RowList with " + ex);
+            LOG.debug("Start getRnu53RowList with " + ex);
             return getJdbcTemplate().query(
                     "select\n" +
                             "\"r53\".num,\n" +
@@ -600,7 +599,7 @@ public class MigrationDaoImpl extends AbstractDao implements MigrationDao {
     @Override
     public List<Rnu51Row> getRnu51RowList(Exemplar ex) {
         try {
-            logger.debug("Start getRnu51RowList with " + ex);
+            LOG.debug("Start getRnu51RowList with " + ex);
             return getJdbcTemplate().query(
                     "select\n" +
                             "\"r51\".num,\n" +

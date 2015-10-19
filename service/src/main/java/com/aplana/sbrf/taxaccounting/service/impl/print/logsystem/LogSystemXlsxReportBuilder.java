@@ -18,19 +18,19 @@ import java.util.List;
  */
 public class LogSystemXlsxReportBuilder extends AbstractReportBuilder {
 
-    private int rowNumber = 3;
-    private int cellNumber = 0;
+	private static final Log LOG = LogFactory.getLog(LogSystemXlsxReportBuilder.class);
 
-    private static final String DATE_DATA_FORMAT = "dd.MM.yyyy HH:mm:ss";
-    private static final String DATE_FORMAT = "dd.MM.yyyy";
+	private static final String DATE_DATA_FORMAT = "dd.MM.yyyy HH:mm:ss";
+	private static final String DATE_FORMAT = "dd.MM.yyyy";
+
+	private int rowNumber = 3;
+    private int cellNumber = 0;
 
     private List<LogSearchResultItem> items;
 
     private static String[] headers = new String[]{"Дата-время", "Событие", "Текст события", "Период", "Подразделение",
             "Тип формы", "Тип налоговой формы", "Вид налоговой формы/декларации",
             "Пользователь", "Роль пользователя", "IP пользователя"};
-
-	private static final Log logger = LogFactory.getLog(LogSystemXlsxReportBuilder.class);
 
     public LogSystemXlsxReportBuilder(List<LogSearchResultItem> items) {
         super("audit",".xlsx");
@@ -42,8 +42,8 @@ public class LogSystemXlsxReportBuilder extends AbstractReportBuilder {
 
     @Override
     protected void createTableHeaders() {
-        if (logger.isDebugEnabled())
-            logger.debug("Initialize table headers " + getClass());
+        if (LOG.isDebugEnabled())
+            LOG.debug("Initialize table headers " + getClass());
         CellStyle cs = workBook.createCellStyle();
         cs.setAlignment(CellStyle.ALIGN_CENTER);
         cs.setBorderBottom(CellStyle.BORDER_THIN);
@@ -68,8 +68,8 @@ public class LogSystemXlsxReportBuilder extends AbstractReportBuilder {
 
     @Override
     protected void fillHeader() {
-        if (logger.isDebugEnabled())
-            logger.debug("Initialize file header. " + getClass());
+        if (LOG.isDebugEnabled())
+            LOG.debug("Initialize file header. " + getClass());
         CellStyle cs = workBook.createCellStyle();
         Font font = workBook.createFont();
         font.setBoldweight(Font.BOLDWEIGHT_BOLD);
@@ -104,8 +104,8 @@ public class LogSystemXlsxReportBuilder extends AbstractReportBuilder {
 
     @Override
     protected void createDataForTable() {
-        if (logger.isDebugEnabled())
-            logger.debug("Fill data for table. " + getClass() + "Data size: " + items.size());
+        if (LOG.isDebugEnabled())
+            LOG.debug("Fill data for table. " + getClass() + "Data size: " + items.size());
         CellStyle cs = workBook.createCellStyle();
         cs.setAlignment(CellStyle.ALIGN_CENTER);
         cs.setWrapText(true);
@@ -125,8 +125,8 @@ public class LogSystemXlsxReportBuilder extends AbstractReportBuilder {
         SimpleDateFormat sdf = new SimpleDateFormat(DATE_DATA_FORMAT);
 
         for(LogSearchResultItem item : items){
-            if (logger.isDebugEnabled())
-                logger.debug("Data table " + item);
+            if (LOG.isDebugEnabled())
+                LOG.debug("Data table " + item);
             Row row = sheet.createRow(rowNumber++);
             Cell cell = row.createCell(cellNumber);
             cell.setCellStyle(cs);

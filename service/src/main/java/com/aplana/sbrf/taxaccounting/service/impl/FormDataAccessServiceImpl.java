@@ -29,7 +29,7 @@ import static java.util.Arrays.asList;
 @Service
 public class FormDataAccessServiceImpl implements FormDataAccessService {
 
-    private static final Log logger = LogFactory.getLog(FormDataAccessServiceImpl.class);
+    private static final Log LOG = LogFactory.getLog(FormDataAccessServiceImpl.class);
     private static final SimpleDateFormat SDF = new SimpleDateFormat("dd.MM.yyyy");
 
     public static final String LOG_EVENT_AVAILABLE_MOVES = "LOG_EVENT_AVAILABLE_MOVES";
@@ -128,8 +128,8 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 
         // Непредусмотренное сочетание параметров состояния формы и пользователя - запрет доступа
         // Или подразделение недоступно
-        logger.error(String.format(FORM_DATA_KIND_STATE_ERROR_LOG, LOG_EVENT_READ, formData.getKind().getTitle(),
-                formData.getState().getTitle()));
+        LOG.error(String.format(FORM_DATA_KIND_STATE_ERROR_LOG, LOG_EVENT_READ, formData.getKind().getTitle(),
+				formData.getState().getTitle()));
 
         throw new AccessDeniedException(String.format(FORM_DATA_ERROR_ACCESS_DENIED, LOG_EVENT_READ_RU,
                 formData.getKind().getTitle(), formData.getState().getTitle()));
@@ -145,15 +145,15 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
         // "Выбранный период закрыт".
         DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodDao.get(departmentReportPeriodId);
         if (!departmentReportPeriod.isActive()) {
-            logger.warn(String.format(REPORT_PERIOD_IS_CLOSED_LOG, departmentReportPeriodId));
+            LOG.warn(String.format(REPORT_PERIOD_IS_CLOSED_LOG, departmentReportPeriodId));
             throw new ServiceException(REPORT_PERIOD_IS_CLOSED);
         }
 
         if (formTemplate.isComparative() && comparativeDepPeriodId == null) {
-            logger.warn(String.format(FORM_TEMPLATE_COMPARATIVE_LOG, formTemplateId));
+            LOG.warn(String.format(FORM_TEMPLATE_COMPARATIVE_LOG, formTemplateId));
             throw new ServiceException(FORM_TEMPLATE_COMPARATIVE);
         } else if (!formTemplate.isComparative() && comparativeDepPeriodId != null) {
-            logger.warn(String.format(FORM_TEMPLATE_NOT_COMPARATIVE_LOG, formTemplateId));
+            LOG.warn(String.format(FORM_TEMPLATE_NOT_COMPARATIVE_LOG, formTemplateId));
             throw new ServiceException(FORM_TEMPLATE_NOT_COMPARATIVE);
         }
 
@@ -165,12 +165,12 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
                 reportPeriodId = departmentReportPeriod.getReportPeriod().getId();
             }
             if (reportPeriodService.isFirstPeriod(reportPeriodId) && accruing) {
-                logger.warn(String.format(FORM_TEMPLATE_PERIOD_NOT_ACCRUING_LOG, formTemplateId, reportPeriodId ));
+                LOG.warn(String.format(FORM_TEMPLATE_PERIOD_NOT_ACCRUING_LOG, formTemplateId, reportPeriodId));
                 throw new ServiceException(FORM_TEMPLATE_PERIOD_NOT_ACCRUING);
             }
         } else {
             if (accruing) {
-                logger.warn(String.format(FORM_TEMPLATE_NOT_ACCRUING_LOG, formTemplateId));
+                LOG.warn(String.format(FORM_TEMPLATE_NOT_ACCRUING_LOG, formTemplateId));
                 throw new ServiceException(FORM_TEMPLATE_NOT_ACCRUING);
             }
         }
@@ -179,7 +179,7 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
                 && !userInfo.getUser().hasRole(TARole.ROLE_CONTROL_NS)
                 && !userInfo.getUser().hasRole(TARole.ROLE_CONTROL_UNP)
                 && departmentReportPeriod.isBalance()) {
-            logger.warn(CREATE_FORM_DATA_ERROR_ONLY_CONTROL_LOG);
+            LOG.warn(CREATE_FORM_DATA_ERROR_ONLY_CONTROL_LOG);
             throw new ServiceException(
                     String.format(CREATE_FORM_DATA_ERROR_ONLY_CONTROL, MessageGenerator.mesSpeckPlural(formTemplate.getType().getTaxType())));
         }
@@ -188,8 +188,8 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
         if (!departmentService.getOpenPeriodDepartments(userInfo.getUser(),
                 asList(formTemplate.getType().getTaxType()),
                 departmentReportPeriod.getReportPeriod().getId()).contains(departmentReportPeriod.getDepartmentId())) {
-            logger.warn(String.format(FORM_DATA_DEPARTMENT_ACCESS_DENIED_LOG, departmentReportPeriod.getDepartmentId(),
-                    departmentReportPeriod.getReportPeriod().getId()));
+            LOG.warn(String.format(FORM_DATA_DEPARTMENT_ACCESS_DENIED_LOG, departmentReportPeriod.getDepartmentId(),
+					departmentReportPeriod.getReportPeriod().getId()));
             throw new ServiceException(FORM_DATA_DEPARTMENT_ACCESS_DENIED);
         }
 
@@ -217,21 +217,21 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
             }
         }
         if (!foundTypeAndKind) {
-            logger.warn(String.format(INCORRECT_DEPARTMENT_FORM_TYPE_LOG, formTypeId, kind.getId(),
-                    departmentReportPeriod.getDepartmentId()));
+            LOG.warn(String.format(INCORRECT_DEPARTMENT_FORM_TYPE_LOG, formTypeId, kind.getId(),
+					departmentReportPeriod.getDepartmentId()));
             throw new ServiceException(String.format(INCORRECT_DEPARTMENT_FORM_TYPE3, MessageGenerator.mesSpeckPlural(formType.getTaxType())));
         }
         if (!foundKind) {
-            logger.warn(String.format(INCORRECT_DEPARTMENT_FORM_TYPE_LOG, formTypeId, kind.getId(),
-                    departmentReportPeriod.getDepartmentId()));
+            LOG.warn(String.format(INCORRECT_DEPARTMENT_FORM_TYPE_LOG, formTypeId, kind.getId(),
+					departmentReportPeriod.getDepartmentId()));
             throw new ServiceException(String.format(INCORRECT_DEPARTMENT_FORM_TYPE1, MessageGenerator.mesSpeckPlural(formType.getTaxType())));
         }
 
         // Доступные типы форм
         List<FormDataKind> formDataKindList = getAvailableFormDataKind(userInfo, asList(formTemplate.getType().getTaxType()));
         if (!formDataKindList.contains(kind)) {
-            logger.warn(String.format(INCORRECT_DEPARTMENT_FORM_TYPE_LOG, formTypeId, kind.getId(),
-                    departmentReportPeriod.getDepartmentId()));
+            LOG.warn(String.format(INCORRECT_DEPARTMENT_FORM_TYPE_LOG, formTypeId, kind.getId(),
+					departmentReportPeriod.getDepartmentId()));
             throw new ServiceException(INCORRECT_DEPARTMENT_FORM_TYPE2);
         }
 
@@ -240,7 +240,7 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
         // "Выбранный вид налоговой формы не существует в выбранном периоде"
         boolean intersect = isTemplateIntersectReportPeriod(formTemplate, departmentReportPeriod.getReportPeriod().getId());
         if (!intersect || formTemplate.getStatus() != VersionedObjectStatus.NORMAL) {
-            logger.warn(String.format(FORM_TEMPLATE_WRONG_STATUS_LOG, formTemplate.getId(), departmentReportPeriod.getReportPeriod().getId()));
+            LOG.warn(String.format(FORM_TEMPLATE_WRONG_STATUS_LOG, formTemplate.getId(), departmentReportPeriod.getReportPeriod().getId()));
             throw new AccessDeniedException(String.format(FORM_TEMPLATE_WRONG_STATUS, MessageGenerator.mesSpeckPlural(formType.getTaxType())));
         }
 
@@ -393,8 +393,8 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
         }
 
         // Непредвиденное состояние формы
-        logger.error(String.format(FORM_DATA_KIND_STATE_ERROR_LOG, LOG_EVENT_EDIT, formData.getKind().getTitle(),
-                formData.getState().getTitle()));
+        LOG.error(String.format(FORM_DATA_KIND_STATE_ERROR_LOG, LOG_EVENT_EDIT, formData.getKind().getTitle(),
+				formData.getState().getTitle()));
         throw new AccessDeniedException(String.format(FORM_DATA_ERROR_ACCESS_DENIED, LOG_EVENT_EDIT_RU,
                 formData.getKind().getTitle(), formData.getState().getTitle()));
     }
@@ -463,7 +463,7 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
 
         // Проверка открытости периода
         if (!departmentReportPeriod.isActive()) {
-            logger.warn(String.format(REPORT_PERIOD_IS_CLOSED_LOG, formData.getReportPeriodId()));
+            LOG.warn(String.format(REPORT_PERIOD_IS_CLOSED_LOG, formData.getReportPeriodId()));
             return result;
         }
 
@@ -477,8 +477,8 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
                     result.add(WorkflowMove.ACCEPTED_TO_CREATED);
                     break;
                 default:
-                    logger.warn(String.format(FORM_DATA_KIND_STATE_ERROR_LOG, LOG_EVENT_AVAILABLE_MOVES,
-                            formData.getKind().getTitle(), formData.getState()));
+                    LOG.warn(String.format(FORM_DATA_KIND_STATE_ERROR_LOG, LOG_EVENT_AVAILABLE_MOVES,
+							formData.getKind().getTitle(), formData.getState()));
             }
         } else {
             // Призрак передачи НФ на вышестоящий уровень
@@ -536,8 +536,8 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
                         }
                         break;
                     default:
-                        logger.warn(String.format(FORM_DATA_KIND_STATE_ERROR_LOG, LOG_EVENT_AVAILABLE_MOVES,
-                                formData.getKind().getTitle(), formData.getState().getTitle()));
+                        LOG.warn(String.format(FORM_DATA_KIND_STATE_ERROR_LOG, LOG_EVENT_AVAILABLE_MOVES,
+								formData.getKind().getTitle(), formData.getState().getTitle()));
                 }
             } else if (asList(FormDataKind.PRIMARY, FormDataKind.ADDITIONAL, FormDataKind.UNP).contains(
                     formData.getKind()) && !sendToNextLevel) {
@@ -575,8 +575,8 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
                         }
                         break;
                     default:
-                        logger.warn(String.format(FORM_DATA_KIND_STATE_ERROR_LOG, LOG_EVENT_AVAILABLE_MOVES,
-                                formData.getKind().getTitle(), formData.getState().getTitle()));
+                        LOG.warn(String.format(FORM_DATA_KIND_STATE_ERROR_LOG, LOG_EVENT_AVAILABLE_MOVES,
+								formData.getKind().getTitle(), formData.getState().getTitle()));
                 }
             } else if (asList(FormDataKind.SUMMARY, FormDataKind.CONSOLIDATED, FormDataKind.CALCULATED).contains(formData.getKind())
                     && !sendToNextLevel) {
@@ -604,8 +604,8 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
                         }
                         break;
                     default:
-                        logger.warn(String.format(FORM_DATA_KIND_STATE_ERROR_LOG, LOG_EVENT_AVAILABLE_MOVES,
-                                formData.getKind().getTitle(), formData.getState().getTitle()));
+                        LOG.warn(String.format(FORM_DATA_KIND_STATE_ERROR_LOG, LOG_EVENT_AVAILABLE_MOVES,
+								formData.getKind().getTitle(), formData.getState().getTitle()));
 
                 }
             } else if (asList(FormDataKind.SUMMARY, FormDataKind.CONSOLIDATED, FormDataKind.CALCULATED).contains(formData.getKind())
@@ -641,11 +641,11 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
                         }
                         break;
                     default:
-                        logger.warn(String.format(FORM_DATA_KIND_STATE_ERROR_LOG, LOG_EVENT_AVAILABLE_MOVES, formData.getKind().getTitle(), formData.getState().getTitle()));
+                        LOG.warn(String.format(FORM_DATA_KIND_STATE_ERROR_LOG, LOG_EVENT_AVAILABLE_MOVES, formData.getKind().getTitle(), formData.getState().getTitle()));
                 }
             } else {
-                logger.warn(String.format(FORM_DATA_KIND_STATE_ERROR_LOG, LOG_EVENT_AVAILABLE_MOVES,
-                        formData.getKind().getTitle(), formData.getState().getTitle()));
+                LOG.warn(String.format(FORM_DATA_KIND_STATE_ERROR_LOG, LOG_EVENT_AVAILABLE_MOVES,
+						formData.getKind().getTitle(), formData.getState().getTitle()));
             }
         }
         return result;

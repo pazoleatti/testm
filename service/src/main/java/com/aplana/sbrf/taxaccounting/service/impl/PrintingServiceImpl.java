@@ -40,7 +40,7 @@ import java.util.Map;
 @Service
 public class PrintingServiceImpl implements PrintingService {
 
-	private static final Log logger = LogFactory.getLog(PrintingServiceImpl.class);
+	private static final Log LOG = LogFactory.getLog(PrintingServiceImpl.class);
 
     private static final String FILE_NAME = "Налоговый_отчет_";
     private static final String POSTFIX = ".xlsm";
@@ -122,7 +122,7 @@ public class PrintingServiceImpl implements PrintingService {
             }
             return blobDataService.create(new FileInputStream(filePath), FILE_NAME + POSTFIX);
         } catch (IOException e) {
-            logger.error(e.getMessage(), e);
+            LOG.error(e.getMessage(), e);
             throw new ServiceException("Ошибка при создании печатной формы.");
         } catch (DaoException ex) {
             throw new ServiceException(ex.getMessage());
@@ -165,7 +165,7 @@ public class PrintingServiceImpl implements PrintingService {
             stateLogger.updateState("Сохранение CSV-файла в базе данных");
             return blobDataService.create(new FileInputStream(reportPath), FILE_NAME + ".csv");
         } catch (IOException e) {
-            logger.error(e.getMessage(), e);
+            LOG.error(e.getMessage(), e);
             throw new ServiceException("Ошибка при создании печатной формы.");
         } catch (DaoException ex) {
             throw new ServiceException(ex.getMessage());
@@ -182,7 +182,7 @@ public class PrintingServiceImpl implements PrintingService {
             reportPath = builder.createReport();
             return blobDataService.create(new FileInputStream(reportPath), "errors.csv");
 		} catch (IOException e) {
-			logger.error(e.getMessage(), e);
+			LOG.error(e.getMessage(), e);
 			throw new ServiceException("Ошибка при создании печатной формы." + LogEntryReportBuilder.class);
 		}finally {
             cleanTmp(reportPath);
@@ -197,7 +197,7 @@ public class PrintingServiceImpl implements PrintingService {
             reportPath = taBuilder.createReport();
             return blobDataService.create(new FileInputStream(reportPath), "Список_пользователей.xlsx");
         }catch (IOException e){
-            logger.error(e.getMessage(), e);
+            LOG.error(e.getMessage(), e);
             throw new ServiceException("Ошибка при создании печатной формы." + TAUsersReportBuilder.class);
         }finally {
             cleanTmp(reportPath);
@@ -212,7 +212,7 @@ public class PrintingServiceImpl implements PrintingService {
             reportPath = builder.createReport();
             return blobDataService.create(new FileInputStream(reportPath), "Журнал_аудита.xlsx");
         } catch (IOException e) {
-            logger.error(e.getMessage(), e);
+            LOG.error(e.getMessage(), e);
             throw new ServiceException("Ошибка при создании печатной формы." + LogSystemXlsxReportBuilder.class);
         } finally {
             cleanTmp(reportPath);
@@ -228,7 +228,7 @@ public class PrintingServiceImpl implements PrintingService {
             String fileName = reportPath.substring(reportPath.lastIndexOf("\\") + 1);
             return blobDataService.create(new FileInputStream(reportPath), fileName);
         } catch (IOException e) {
-            logger.error(e.getMessage(), e);
+            LOG.error(e.getMessage(), e);
             throw new ServiceException("Ошибка при архивировании журнала аудита." + LogSystemXlsxReportBuilder.class);
         } finally {
             cleanTmp(reportPath);
@@ -239,7 +239,7 @@ public class PrintingServiceImpl implements PrintingService {
         if (filePath != null){
             File file = new File(filePath);
             if (file.delete()){
-                logger.warn(String.format("Временный файл %s не был удален", filePath));
+                LOG.warn(String.format("Временный файл %s не был удален", filePath));
             }
         }
     }

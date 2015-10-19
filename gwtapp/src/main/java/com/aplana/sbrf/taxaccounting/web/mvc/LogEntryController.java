@@ -27,7 +27,8 @@ import java.util.List;
  */
 @Controller
 public class LogEntryController {
-    private static final Log logger = LogFactory.getLog(LogEntryController.class);
+
+    private static final Log LOG = LogFactory.getLog(LogEntryController.class);
 
     @Autowired
     private PrintingService printingService;
@@ -39,7 +40,7 @@ public class LogEntryController {
     @RequestMapping(value = "/logEntry/{uuid}", method = RequestMethod.GET)
     public void download(@PathVariable String uuid, HttpServletRequest req, HttpServletResponse resp) throws IOException {
         if (uuid == null || uuid.isEmpty()) {
-            logger.error("Ошибка получения сообщений. Не задан параметр uuid.");
+            LOG.error("Ошибка получения сообщений. Не задан параметр uuid.");
             resp.sendError(HttpServletResponse.SC_NOT_FOUND);
             return;
         }
@@ -48,7 +49,7 @@ public class LogEntryController {
         try {
             logEntryList = logEntryService.getAll(uuid);
         } catch (Exception ex) {
-            logger.error("Ошибка получения сообщений. " + ex.getMessage());
+            LOG.error("Ошибка получения сообщений. " + ex.getMessage());
             resp.sendError(HttpServletResponse.SC_NOT_FOUND);
             return;
         }

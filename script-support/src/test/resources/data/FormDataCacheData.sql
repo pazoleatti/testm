@@ -100,6 +100,10 @@ INSERT INTO report_period (id, name, tax_period_id, dict_tax_period_id, start_da
 insert into form_template (id, type_id, data_rows, version, fixed_rows, name, fullname, header)
   values (1, 1, null, date '2013-01-01', 1, 'name_1', 'fullname_1', 'header_1');
 
+INSERT INTO color (id, name, r, g, b, hex) VALUES (1,'Светло - желтый', 255, 255, 153, '#FFFF99');
+INSERT INTO color (id, name, r, g, b, hex) VALUES (2,'Светло - коричневый', 255, 204, 153, '#FFCC99');
+INSERT INTO color (id, name, r, g, b, hex) VALUES (3,'Светло - голубой', 204, 255, 255, '#CCFFFF');
+
 INSERT INTO form_style (id, alias, form_template_id, font_color, back_color, italic, bold) VALUES (1, 'alias1', 1, 3, 2, 1, 0);
 INSERT INTO form_style (id, alias, form_template_id, font_color, back_color, italic, bold) VALUES (2, 'alias2', 1, 2, 3, 0, 1);
 INSERT INTO form_style (id, alias, form_template_id, font_color, back_color, italic, bold) VALUES (3, 'alias3', 1, 1, 1, 1, 1);

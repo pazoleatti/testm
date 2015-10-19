@@ -9,6 +9,8 @@ import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.model.TemplateFilter;
 import com.aplana.sbrf.taxaccounting.model.VersionedObjectStatus;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.RowMapper;
@@ -23,7 +25,9 @@ import java.util.List;
 @Repository
 @Transactional(readOnly=true)
 public class FormTypeDaoImpl extends AbstractDao implements FormTypeDao {
-	
+
+	private static final Log LOG = LogFactory.getLog(FormTypeDaoImpl.class);
+
 	private static final class FormTypeMapper implements RowMapper<FormType> {
 		@Override
         public FormType mapRow(ResultSet rs, int index) throws SQLException {
@@ -43,8 +47,8 @@ public class FormTypeDaoImpl extends AbstractDao implements FormTypeDao {
 	@Override
 	//@Cacheable("FormType")
 	public FormType get(int typeId) {
-		if (logger.isDebugEnabled()) {
-			logger.debug("Fetching FormType with id = " + typeId);	
+		if (LOG.isDebugEnabled()) {
+			LOG.debug("Fetching FormType with id = " + typeId);
 		}		
 		try {
 			return getJdbcTemplate().queryForObject(
@@ -85,7 +89,7 @@ public class FormTypeDaoImpl extends AbstractDao implements FormTypeDao {
             }
             return getJdbcTemplate().queryForList(query.toString(), Integer.class);
         } catch (DataAccessException e) {
-            logger.error("Ошибка при получении данных НФ по фильтру", e);
+			LOG.error("Ошибка при получении данных НФ по фильтру", e);
             throw new DaoException("Ошибка при получении данных НФ по фильтру", e);
         }
     }
@@ -107,7 +111,7 @@ public class FormTypeDaoImpl extends AbstractDao implements FormTypeDao {
                     new int[]{Types.NUMERIC,  Types.VARCHAR, Types.VARCHAR, Types.NUMERIC, Types.VARCHAR, Types.NUMERIC, Types.VARCHAR});
             return formTypeId;
         } catch (DataAccessException e){
-            logger.error("Ошибка при создании макета", e);
+			LOG.error("Ошибка при создании макета", e);
             throw new DaoException("Ошибка при создании макета. %s", e.getMessage());
         }
     }
@@ -136,7 +140,7 @@ public class FormTypeDaoImpl extends AbstractDao implements FormTypeDao {
                     new Object[]{formTypeId},
                     new int[]{Types.INTEGER});
         } catch (DataAccessException e){
-            logger.error("Ошибка при удалении макета", e);
+			LOG.error("Ошибка при удалении макета", e);
             throw new DaoException("Ошибка при удалении макета", e);
         }
     }

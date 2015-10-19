@@ -2,6 +2,8 @@ package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.EventDao;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Repository;
 
@@ -13,6 +15,8 @@ import java.util.HashMap;
  */
 @Repository
 public class EventDaoImpl extends AbstractDao implements EventDao {
+
+	private static final Log LOG = LogFactory.getLog(EventDaoImpl.class);
 
     private static final String GET_BY_MASK = "select ev.ID event_code from EVENT ev\n" +
             "LEFT JOIN ROLE_EVENT re on ev.ID = re.EVENT_ID\n" +
@@ -50,7 +54,7 @@ public class EventDaoImpl extends AbstractDao implements EventDao {
                     Integer.class
             );
         } catch (DataAccessException e) {
-            logger.error("", e);
+			LOG.error("", e);
             throw new DaoException("", e);
         }
     }

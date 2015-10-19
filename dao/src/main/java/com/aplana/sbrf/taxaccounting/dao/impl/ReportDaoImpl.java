@@ -5,6 +5,8 @@ import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.model.PreparedStatementData;
 import com.aplana.sbrf.taxaccounting.model.ReportType;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -18,6 +20,9 @@ import java.util.*;
 @Repository
 @Transactional(readOnly=true)
 public class ReportDaoImpl extends AbstractDao implements ReportDao {
+
+	private static final Log LOG = LogFactory.getLog(ReportDaoImpl.class);
+
     @Override
     public void create(final long formDataId, final String blobDataId, final ReportType type, final boolean checking, final boolean manual, final boolean absolute) {
         try{
@@ -74,7 +79,7 @@ public class ReportDaoImpl extends AbstractDao implements ReportDao {
                     "INSERT INTO LOG_SYSTEM_REPORT (SEC_USER_ID, BLOB_DATA_ID, TYPE) VALUES (?,?,?)",
                     userId, blobDataId, type.getId());
         } catch (DataIntegrityViolationException e){
-            logger.error("", e);
+			LOG.error("", e);
             throw new DaoException("Возможно для этого пользователя уже есть отчет по ЖА, проверьте выгрузку.", e);
         }
     }

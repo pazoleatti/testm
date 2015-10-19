@@ -10,6 +10,8 @@ import com.aplana.sbrf.taxaccounting.model.TemplateFilter;
 import com.aplana.sbrf.taxaccounting.model.VersionSegment;
 import com.aplana.sbrf.taxaccounting.model.VersionedObjectStatus;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataRetrievalFailureException;
@@ -17,12 +19,10 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.PreparedStatementCreator;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.InputStream;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -39,9 +39,10 @@ import java.util.Map;
 @Transactional(readOnly = true)
 public class DeclarationTemplateDaoImpl extends AbstractDao implements DeclarationTemplateDao {
 
+	private static final Log LOG = LogFactory.getLog(DeclarationTemplateDaoImpl.class);
+
 	@Autowired
 	private DeclarationTypeDao declarationTypeDao;
-
     @Autowired
     private ReportPeriodDao reportPeriodDao;
 
@@ -149,7 +150,7 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
 
             return declarationTemplate.getId();
         } catch (DataAccessException e) {
-            logger.error("Ошибка при создании шаблона.", e);
+			LOG.error("Ошибка при создании шаблона.", e);
             throw new DaoException("Ошибка при создании шаблона.", e);
         }
     }
@@ -181,7 +182,7 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
             );
             return declarationTemplateId;
         } catch (DataAccessException e){
-            logger.error("Ошибка при создании шаблона.", e);
+			LOG.error("Ошибка при создании шаблона.", e);
             throw new DaoException("Ошибка при создании шаблона.", e);
         }
 
@@ -205,7 +206,7 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
                         }
                     });
         } catch (DataAccessException e){
-            logger.error("Ошибка обновления деклараций.", e);
+			LOG.error("Ошибка обновления деклараций.", e);
             throw new DaoException("Ошибка обновления деклараций.", e);
         }
     }
@@ -242,7 +243,7 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
         } catch (EmptyResultDataAccessException e){
             return "";
         } catch (DataAccessException e){
-            logger.error("Ошибка получения скрипта декларации.", e);
+			LOG.error("Ошибка получения скрипта декларации.", e);
             throw new DaoException("Ошибка получения скрипта декларации.", e);
         }
     }
@@ -303,7 +304,7 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
         } catch (EmptyResultDataAccessException e){
             return new ArrayList<Integer>();
         } catch (DataAccessException e){
-            logger.error("Ошибка при получении списка версий макетов.", e);
+			LOG.error("Ошибка при получении списка версий макетов.", e);
             throw new DaoException("Ошибка при получении списка версий макетов.", e);
         }
     }
@@ -401,7 +402,7 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
                     new int[]{Types.INTEGER});
             return declarationTemplateId;
         }catch (DataAccessException e){
-            logger.error("Ошибка во время удаления.", e);
+			LOG.error("Ошибка во время удаления.", e);
             throw new DaoException("Ошибка во время удаления.", e);
         }
     }
@@ -413,7 +414,7 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
             getNamedParameterJdbcTemplate().update("delete from declaration_template where " + SqlUtils.transformToSqlInStatement("id", templateIds),
                     new HashMap<String, Object>(){{put("ids", templateIds);}});
         } catch (DataAccessException e){
-            logger.error("", e);
+			LOG.error("", e);
             throw new DaoException("", e);
         }
     }
@@ -434,7 +435,7 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
             return 0;
         }
         catch (DataAccessException e){
-            logger.error("Ошибка при получении числа версий.", e);
+			LOG.error("Ошибка при получении числа версий.", e);
             throw new DaoException("Ошибка при получении числа версий. %s", e.getMessage());
         }
     }
@@ -449,7 +450,7 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
         try {
             return getNamedParameterJdbcTemplate().queryForList(sql, valueMap);
         } catch (DataAccessException e){
-            logger.error("Ошибка при получении числа версий.", e);
+			LOG.error("Ошибка при получении числа версий.", e);
             throw new DaoException("Ошибка при получении числа версий. %s", e.getMessage());
         }
     }
@@ -460,7 +461,7 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
         try {
             return getJdbcTemplate().update("update declaration_template set status= ? where id = ?", versionStatus.getId(), decTemplateId);
         } catch (DataAccessException e){
-            logger.error("Ошибка при обновлении статуса версии " + decTemplateId, e);
+			LOG.error("Ошибка при обновлении статуса версии " + decTemplateId, e);
             throw new DaoException("Ошибка при обновлении статуса версии", e);
         }
     }
