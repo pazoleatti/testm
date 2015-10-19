@@ -14,15 +14,14 @@
         <maxLength>30</maxLength>
         <prevLength>0</prevLength>
     </columns>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="autoNumerationColumn">
         <alias>rowNum</alias>
         <checking>false</checking>
-        <columnType>NUMBER</columnType>
+        <columnType>AUTO</columnType>
         <name>№ п/п</name>
         <order>2</order>
-        <width>10</width>
-        <maxLength>2</maxLength>
-        <precision>0</precision>
+        <width>4</width>
+        <numerationType>SERIAL</numerationType>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
         <alias>department</alias>

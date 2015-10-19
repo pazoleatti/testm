@@ -444,7 +444,7 @@ def formNewRow(def rowList, def dataRowsPrev, def prevPeriodStartDate, def prevP
         newRow.dividendStavka0 = rowList.sum{ (it.rate == 0 && (it.type == 2 || it.type == 5) && it.status == 2 &&  it.dividends != null) ? it.dividends : 0 }
 
         // «Графа 19» = Сумма по «Графа 23» для каждого уникального сочетания «Графа 7» и «Графа 8» формы-источника, если «Графа 22» формы-источника <= «5» и «Графа 16» формы-источника = «2»/«5» и «Графа 17» формы-источника = «2»
-        newRow.dividendStavkaLess5 = rowList.sum{ (!(it.rate > 5) && (it.type == 2 || it.type == 5) && it.status == 2 && it.dividends != null) ? it.dividends : 0 }
+        newRow.dividendStavkaLess5 = rowList.sum{ ((it.rate > 0 && !(it.rate > 5)) && (it.type == 2 || it.type == 5) && it.status == 2 && it.dividends != null) ? it.dividends : 0 }
 
         // «Графа 20» = Сумма по «Графа 23» для каждого уникального сочетания «Графа 7» и «Графа 8» формы-источника, если «Графа 22» формы-источника > «5» и <= «10»  и «Графа 16» формы-источника = «2»/«5» и «Графа 17» формы-источника = «2»
         newRow.dividendStavkaMore5 = rowList.sum{ ((it.rate > 5 && !(it.rate > 10)) && (it.type == 2 || it.type == 5) && it.status == 2 && it.dividends != null) ? it.dividends : 0 }

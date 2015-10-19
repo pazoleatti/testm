@@ -59,7 +59,7 @@ def providerCache = [:]
 def recordCache = [:]
 
 @Field
-def allColumns = ['rowNum', 'department', 'sum1', 'sum2', 'taxBurden']
+def allColumns = ['department', 'sum1', 'sum2', 'taxBurden']
 
 // Проверяемые на пустые значения атрибуты
 @Field
@@ -105,15 +105,6 @@ def getRecordIdImport(def Long refBookId, def String alias, def String value, de
 
 void calc() {
     def dataRows = formDataService.getDataRowHelper(formData).allCached
-
-    def index = 0
-    for (def row : dataRows) {
-        if (row.getAlias()) {
-            continue
-        }
-        // графа 1
-        row.rowNum = ++index
-    }
 
     // итоги
     def totalRow = getDataRow(dataRows, 'total')
@@ -271,7 +262,7 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
             (headerRows[2][3]): '(РНУ-108 гр.13+РНУ-115 гр.20+ РНУ-116 гр.20)',
             (headerRows[2][4]): '(РНУ-107 гр.12+ РНУ-110 гр.11+ РНУ-111 гр.13+ РНУ-115 гр.19+ РНУ-116 гр.19+РНУ-114 гр.16)',
             (headerRows[2][5]): '(гр.1+гр.2)*20%',
-            '1': '1'
+            (headerRows[3][0]): '1'
     ]
     (2..5).each {
         headerMapping.put((headerRows[3][it]), it.toString())
@@ -293,12 +284,8 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex, 
     newRow.setIndex(rowIndex)
     newRow.setImportIndex(fileRowIndex)
 
-    // графа 1
-    def colIndex = 1
-    newRow.rowNum = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
-
     // графа 2
-    colIndex++
+    colIndex = 2
     if (!isTotal) {
         newRow.department = getRecordIdImport(30, 'NAME', values[colIndex], fileRowIndex, colIndex + colOffset, false)
     }
