@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <rows>
     <row alias="total">
-        <cell alias="fix" colSpan="2" rowSpan="1" stringValue="В целом по Банку" styleAlias="Контрольные суммы"/>
+        <cell alias="fix" colSpan="3" rowSpan="1" stringValue="В целом по Банку" styleAlias="Контрольные суммы"/>
         <cell alias="rowNum" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
         <cell alias="department" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
         <cell alias="sum1" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
