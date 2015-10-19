@@ -19,6 +19,8 @@ import com.aplana.sbrf.taxaccounting.utils.ResourceUtils;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -35,6 +37,7 @@ import java.util.*;
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
 public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService implements LoadFormDataService {
 
+	protected static final Log LOG = LogFactory.getLog(LoadFormDataServiceImpl.class);
     private static final String LOCK_MSG = "Обработка данных транспортного файла не выполнена, " +
             "т.к. в данный момент выполняется изменение данных формы \"%s\" " +
             "для подразделения \"%s\" " +
@@ -90,7 +93,7 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
                     importCounter.add(importDataFromFolder(userInfo, ConfigurationParam.FORM_UPLOAD_DIRECTORY, departmentId,
                             loadedFileNameList, logger, lockId, isAsync));
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    LOG.error(e.getMessage(), e);
                     logger.error("Ошибка при загрузке транспортных файлов подразделения «%s». %s", departmentService.getDepartment(departmentId).getName(), e.getMessage());
                 }
             }
@@ -480,7 +483,7 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
         try {
             ResourceUtils.getSharedResource(path + "/");
         } catch (Exception e) {
-            e.printStackTrace();
+			LOG.error(e.getMessage(), e);
             return false;
         }
         return true;

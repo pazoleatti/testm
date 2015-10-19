@@ -40,7 +40,7 @@ public class CustomHeaderBuilder extends AbstractHeaderOrFooterBuilder<DataRow<C
 		TableCellBuilder th = out.startTH().colSpan(colSpan).rowSpan(rowSpan).className(classesBuilder.toString());
 
 		Context context = new Context(0, 2, header.getKey());
-		if (!needBorder) {
+		if (!needBorder && colSpan == 1) {
             th.style().borderStyle(com.google.gwt.dom.client.Style.BorderStyle.NONE);
 		} else {
             th.style().width(0, com.google.gwt.dom.client.Style.Unit.EM);

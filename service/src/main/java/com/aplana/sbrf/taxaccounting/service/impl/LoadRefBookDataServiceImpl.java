@@ -21,6 +21,8 @@ import com.aplana.sbrf.taxaccounting.utils.FileWrapper;
 import com.aplana.sbrf.taxaccounting.utils.ResourceUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -40,6 +42,7 @@ import static java.util.Arrays.asList;
 @Service
 public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService implements LoadRefBookDataService {
 
+	protected static final Log LOG = LogFactory.getLog(LoadRefBookDataServiceImpl.class);
     @Autowired
     private RefBookScriptingService refBookScriptingService;
     @Autowired
@@ -461,7 +464,7 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
         try {
             ResourceUtils.getSharedResource(path + "/");
         } catch (Exception e) {
-            e.printStackTrace();
+			LOG.error(e.getMessage(), e);
             return false;
         }
         return true;

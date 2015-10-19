@@ -6,6 +6,7 @@ import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.util.TransactionHelper;
@@ -38,8 +39,8 @@ import static com.aplana.sbrf.taxaccounting.model.VersionedObjectStatus.FAKE;
 @Transactional
 public class DeclarationTemplateServiceImpl implements DeclarationTemplateService {
 
-	private static final Log logger = LogFactory.getLog(DeclarationTemplateServiceImpl.class);
-    private final static String ENCODING = "UTF-8";
+	private static final Log LOG = LogFactory.getLog(DeclarationTemplateServiceImpl.class);
+    private static final String ENCODING = "UTF-8";
     private static final String JRXML_NOT_FOUND = "Не удалось получить jrxml-шаблон декларации!";
     private static final SimpleDateFormat SDF_DD_MM_YYYY = new SimpleDateFormat("dd.MM.yyyy");
     private static final String DEC_DATA_EXIST_IN_TASK =
@@ -63,6 +64,12 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
 	private ReportService reportService;
     @Autowired
 	private DepartmentReportPeriodService departmentReportPeriodService;
+    @Autowired
+    private DeclarationDataScriptingService declarationDataScriptingService;
+    @Autowired
+    private LogEntryService logEntryService;
+	@Autowired
+	private TAUserService userService;
 
     @Override
 	public List<DeclarationTemplate> listAll() {
@@ -83,6 +90,7 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
         if (declarationTemplate.getId() == null){
             return declarationTemplateDao.create(declarationTemplate);
         }
+        checkScript(declarationTemplate, new Logger());
         DeclarationTemplate declarationTemplateBase = declarationTemplateDao.get(declarationTemplate.getId());
         int savedId = declarationTemplateDao.save(declarationTemplate);
         if (declarationTemplate.getXsdId() != null && !declarationTemplate.getXsdId().equals(declarationTemplateBase.getXsdId()))
@@ -91,6 +99,27 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
             blobDataService.delete(declarationTemplateBase.getJrxmlBlobId());
         return savedId;
 	}
+
+    private void checkScript(DeclarationTemplate declarationTemplate, Logger logger) {
+        if (declarationTemplate.getCreateScript() == null || declarationTemplate.getCreateScript().isEmpty())
+            return;
+        Logger tempLogger = new Logger();
+        try{
+            // Устанавливает тестовые параметры НФ. При необходимости в скрипте значения можно поменять
+            DeclarationData declaration = new DeclarationData();
+            declaration.setDepartmentReportPeriodId(1);
+            declaration.setReportPeriodId(1);
+            declaration.setDepartmentId(1);
+            declaration.setAccepted(false);
+
+            declarationDataScriptingService.executeScriptInNewReadOnlyTransaction(userService.getSystemUserInfo(), declarationTemplate, declaration, FormDataEvent.CHECK_SCRIPT, tempLogger, null);
+        } catch (Exception ex) {
+            tempLogger.error(ex);
+            logger.getEntries().addAll(tempLogger.getEntries());
+            throw new ServiceLoggerException("Обнаружены ошибки в скрипте!", logEntryService.save(logger.getEntries()));
+        }
+        logger.getEntries().addAll(tempLogger.getEntries());
+    }
 
     @Override
     public void update(List<DeclarationTemplate> declarationTemplates) {
@@ -112,7 +141,6 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
 
 	}
 
-
 	@Override
 	public String getJrxml(int declarationTemplateId) {
         BlobData jrxmlBlobData = blobDataService.get(this.get(declarationTemplateId).getJrxmlBlobId());
@@ -125,7 +153,7 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
             IOUtils.copy(jrxmlBlobData.getInputStream(), writer, ENCODING);
             return writer.toString();
         } catch (IOException e) {
-            logger.error(e.getMessage(), e);
+            LOG.error(e.getMessage(), e);
             throw new ServiceException(JRXML_NOT_FOUND);
         }
 	}
@@ -141,10 +169,10 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
             JasperDesign jasperDesign = JRXmlLoader.load(new ByteArrayInputStream(jrxml.getBytes(ENCODING)));
             JasperCompileManager.compileReportToStream(jasperDesign, compiledReport);
         } catch (JRException e) {
-            logger.error(e.getMessage(), e);
+            LOG.error(e.getMessage(), e);
             throw new ServiceException("Произошли ошибки во время формирования отчета!");
         } catch (UnsupportedEncodingException e2) {
-            logger.error(e2.getMessage(), e2);
+            LOG.error(e2.getMessage(), e2);
             throw new ServiceException("Шаблон отчета имеет неправильную кодировку!");
         }
         return new ByteArrayInputStream(compiledReport.toByteArray());
@@ -417,5 +445,16 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
         }
 
         return statusList;
+    }
+
+    @Override
+    public void updateScript(DeclarationTemplate declarationTemplate, Logger log) {
+        checkScript(declarationTemplate, log);
+        declarationTemplateDao.updateScript(declarationTemplate.getId(), declarationTemplate.getCreateScript());
+    }
+
+    @Override
+    public Integer get(int declarationTypeId, int year) {
+        return declarationTemplateDao.get(declarationTypeId, year);
     }
 }

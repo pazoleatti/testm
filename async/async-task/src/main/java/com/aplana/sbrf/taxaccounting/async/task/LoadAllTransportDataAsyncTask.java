@@ -68,6 +68,7 @@ public abstract class LoadAllTransportDataAsyncTask extends AbstractAsyncTask {
         lockDataService.lock(key, userInfo.getUser().getId(),
                 LockData.DescriptionTemplate.CONFIGURATION_PARAMS.getText());
         try {
+            logger.info("Номер загрузки: %s", lock);
             // Справочники
             loadRefBookDataService.checkImportRefBookTransportData(userInfo, logger, lock, lockDate, true);
             // НФ

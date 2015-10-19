@@ -34,7 +34,7 @@ public class FormTemplateInfoPresenter extends Presenter<FormTemplateInfoPresent
 	}
 
 	public interface MyView extends View, HasUiHandlers<FormTemplateInfoUiHandlers> {
-		void setViewData(TaxType taxType, Date versionBegin, Date versionEnd, boolean fixedRows, boolean monthlyForm, boolean comparative, boolean accruing, String name, String fullName, String header);
+		void setViewData(TaxType taxType, Date versionBegin, Date versionEnd, boolean fixedRows, boolean monthlyForm, boolean comparative, boolean accruing, boolean updating, String name, String fullName, String header);
 		void onFlush();
 	}
 
@@ -60,7 +60,8 @@ public class FormTemplateInfoPresenter extends Presenter<FormTemplateInfoPresent
         formTemplate = formTemplateExt.getFormTemplate();
 		getView().setViewData(formTemplate != null ? formTemplate.getType().getTaxType(): null,
                 formTemplate.getVersion(), formTemplateExt.getActualEndVersionDate(), formTemplate.isFixedRows(),
-                formTemplate.isMonthly(), formTemplate.isComparative(), formTemplate.isAccruing(), formTemplate.getName(), formTemplate.getFullName(), formTemplate.getHeader());
+                formTemplate.isMonthly(), formTemplate.isComparative(), formTemplate.isAccruing(), formTemplate.isUpdating(),
+                formTemplate.getName(), formTemplate.getFullName(), formTemplate.getHeader());
 	}
 
 	@Override
@@ -92,6 +93,11 @@ public class FormTemplateInfoPresenter extends Presenter<FormTemplateInfoPresent
     @Override
     public void setComparative(boolean comparative) {
         formTemplate.setComparative(comparative);
+    }
+
+    @Override
+    public void setUpdating(boolean updating) {
+        formTemplate.setUpdating(updating);
     }
 
     @Override

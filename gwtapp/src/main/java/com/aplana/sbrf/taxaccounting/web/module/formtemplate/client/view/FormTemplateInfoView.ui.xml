@@ -81,6 +81,11 @@
                 <g:Label text="Расчет нарастающим итогом:" width="250px"/>
                 <g:CheckBox ui:field="accruingCheckBox" />
             </g:HorizontalPanel>
+
+            <g:HorizontalPanel verticalAlignment="middle" height="26px">
+                <g:Label text='Отображать кнопку "Обновить":' width="250px"/>
+                <g:CheckBox ui:field="updatingCheckBox" />
+            </g:HorizontalPanel>
         </g:FlowPanel>
     </g:VerticalPanel>
 

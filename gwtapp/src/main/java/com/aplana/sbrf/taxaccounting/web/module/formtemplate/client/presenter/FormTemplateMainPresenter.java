@@ -351,6 +351,7 @@ public class FormTemplateMainPresenter extends TabContainerPresenter<FormTemplat
                     .defaultCallback(new AbstractCallback<UpdateFormResult>() {
                         @Override
                         public void onSuccess(UpdateFormResult result) {
+                            LogCleanEvent.fire(FormTemplateMainPresenter.this);
                             LogAddEvent.fire(FormTemplateMainPresenter.this, result.getUuid());
                             Dialog.infoMessage("Форма сохранена");
                         }
