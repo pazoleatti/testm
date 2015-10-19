@@ -42,6 +42,9 @@ public class RefBookSimpleReadOnly extends AbstractReadOnlyRefBook {
     // Справочник "Типы налоговых форм"
     public static final Long FORM_DATA_KIND_REF_BOOK_ID = 94L;
     public static final String FORM_DATA_KIND_TABLE_NAME = "FORM_KIND";
+	// Справочник "Цвета"
+	public static final Long COLOR_REF_BOOK_ID = 1L;
+	public static final String COLOR_TABLE_NAME = "COLOR";
 
 	/** Название таблицы для запроса данных*/
 	private String tableName;

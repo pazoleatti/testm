@@ -84,13 +84,18 @@ public class RefBookFactoryImpl implements RefBookFactory {
                 dataProvider.setTableName(RefBookOktmoProvider.OKTMO_TABLE_NAME);
             }
             return dataProvider;
-		} else if (RefBookSimpleReadOnly.FORM_DATA_KIND_REF_BOOK_ID.equals(refBookId)) { // Справавочник "Типы налоговых форм"
-            RefBookSimpleReadOnly refBookSimple =  (RefBookSimpleReadOnly) applicationContext.getBean("refBookSimpleReadOnly", RefBookDataProvider.class);
+		} else if (RefBookSimpleReadOnly.FORM_DATA_KIND_REF_BOOK_ID.equals(refBookId)) { // Справочник "Типы налоговых форм"
+            RefBookSimpleReadOnly refBookSimple = (RefBookSimpleReadOnly) applicationContext.getBean("refBookSimpleReadOnly", RefBookDataProvider.class);
             refBookSimple.setRefBookId(RefBookSimpleReadOnly.FORM_DATA_KIND_REF_BOOK_ID);
             refBookSimple.setTableName(RefBookSimpleReadOnly.FORM_DATA_KIND_TABLE_NAME);
             return refBookSimple;
+		} else if (RefBookSimpleReadOnly.COLOR_REF_BOOK_ID.equals(refBookId)) { // Справочник "Цвета"
+			RefBookSimpleReadOnly refBookSimple = (RefBookSimpleReadOnly) applicationContext.getBean("refBookSimpleReadOnly", RefBookDataProvider.class);
+			refBookSimple.setRefBookId(RefBookSimpleReadOnly.COLOR_REF_BOOK_ID);
+			refBookSimple.setTableName(RefBookSimpleReadOnly.COLOR_TABLE_NAME);
+			return refBookSimple;
 		} else if (RefBookSimpleReadOnly.DEPARTMENT_TYPE_REF_BOOK_ID.equals(refBookId)) { // Справочник "Типы подразделений"
-            RefBookSimpleReadOnly refBookSimple =  (RefBookSimpleReadOnly) applicationContext.getBean("refBookSimpleReadOnly", RefBookDataProvider.class);
+            RefBookSimpleReadOnly refBookSimple = (RefBookSimpleReadOnly) applicationContext.getBean("refBookSimpleReadOnly", RefBookDataProvider.class);
             refBookSimple.setRefBookId(RefBookSimpleReadOnly.DEPARTMENT_TYPE_REF_BOOK_ID);
             refBookSimple.setTableName(RefBookSimpleReadOnly.DEPARTMENT_TYPE_TABLE_NAME);
             return refBookSimple;
