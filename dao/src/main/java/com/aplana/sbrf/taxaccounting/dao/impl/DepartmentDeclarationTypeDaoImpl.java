@@ -5,6 +5,8 @@ import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.jdbc.core.RowMapper;
@@ -24,6 +26,8 @@ import java.util.*;
 @Repository
 @Transactional
 public class DepartmentDeclarationTypeDaoImpl extends AbstractDao implements DepartmentDeclarationTypeDao {
+
+	private static final Log LOG = LogFactory.getLog(DepartmentDeclarationTypeDaoImpl.class);
 
 	public static final RowMapper<DepartmentDeclarationType> DEPARTMENT_DECLARATION_TYPE_ROW_MAPPER =
 			new RowMapper<DepartmentDeclarationType>() {
@@ -172,7 +176,7 @@ public class DepartmentDeclarationTypeDaoImpl extends AbstractDao implements Dep
                     values,
                     DDT_SOURCES_MAPPER);
         } catch (DataAccessException e){
-            logger.error("", e);
+			LOG.error("", e);
             throw new DaoException("", e);
         }
     }
@@ -205,7 +209,7 @@ public class DepartmentDeclarationTypeDaoImpl extends AbstractDao implements Dep
                     values,
                     DFT_SOURCES_MAPPER);
         } catch (DataAccessException e){
-            logger.error("", e);
+			LOG.error("", e);
             throw new DaoException("", e);
         }
     }
@@ -217,7 +221,7 @@ public class DepartmentDeclarationTypeDaoImpl extends AbstractDao implements Dep
                     new Object[]{declarationTypeId},
                     DEPARTMENT_DECLARATION_TYPE_ROW_MAPPER);
         } catch (DataAccessException e){
-            logger.error("Получение списка деклараций назначений", e);
+			LOG.error("Получение списка деклараций назначений", e);
             throw new DaoException("Получение списка деклараций назначений", e);
         }
     }

@@ -16,7 +16,7 @@ import java.util.logging.LoggingPermission;
 
 public class ScriptSecureSandBoxWrapper implements ScriptEngine {
 
-	private static final Log logger = LogFactory.getLog(ScriptSecureSandBoxWrapper.class);
+	private static final Log LOG = LogFactory.getLog(ScriptSecureSandBoxWrapper.class);
 
 	private ScriptEngine scriptEngine;
 	private AccessControlContext accessControlContext;
@@ -40,7 +40,7 @@ public class ScriptSecureSandBoxWrapper implements ScriptEngine {
 		AccessControlContext acc = null;
 		if(sm!=null){
 			acc = (AccessControlContext)sm.getSecurityContext();
-			logger.debug(acc);
+			LOG.debug(acc);
 		}
 		return AccessController.doPrivileged(new PrivilegedAction<Object>() {
 
@@ -49,7 +49,7 @@ public class ScriptSecureSandBoxWrapper implements ScriptEngine {
 				try {
 					return scriptEngine.eval(script);
 				} catch (ScriptException e) {
-					logger.error(e.getMessage(), e);
+					LOG.error(e.getMessage(), e);
 				}
 				return null;
 			}

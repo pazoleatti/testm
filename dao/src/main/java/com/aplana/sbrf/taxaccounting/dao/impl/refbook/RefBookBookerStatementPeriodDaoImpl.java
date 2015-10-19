@@ -13,6 +13,8 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -29,6 +31,8 @@ import java.util.Map;
 
 @Repository
 public class RefBookBookerStatementPeriodDaoImpl extends AbstractDao implements RefBookBookerStatementPeriodDao {
+
+	private static final Log LOG = LogFactory.getLog(RefBookBookerStatementPeriodDaoImpl.class);
 
     private static final Long REF_BOOK_ID_106 = 106L;
     private static final Long REF_BOOK_ID_107 = 107L;
@@ -146,7 +150,7 @@ public class RefBookBookerStatementPeriodDaoImpl extends AbstractDao implements 
             List<Map<String, RefBookValue>> records = getJdbcTemplate().query(ps.getQuery().toString(), ps.getParams().toArray(), new RefBookValueMapper(refBook));
             return records.isEmpty()? new HashMap<String, RefBookValue>(0) : records.get(0);
         } catch (DataAccessException e){
-            logger.error("", e);
+			LOG.error("", e);
             throw new DaoException("", e);
         }
     }

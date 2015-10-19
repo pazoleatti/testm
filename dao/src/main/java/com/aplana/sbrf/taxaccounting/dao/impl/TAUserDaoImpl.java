@@ -29,7 +29,8 @@ import java.util.List;
 
 @Repository
 public class TAUserDaoImpl extends AbstractDao implements TAUserDao {
-	private final Log logger = LogFactory.getLog(getClass());
+
+	private static final Log LOG = LogFactory.getLog(TAUserDaoImpl.class);
 	
 	private static final RowMapper<TARole> TA_ROLE_MAPPER = new RowMapper<TARole>() {
 		
@@ -106,8 +107,8 @@ public class TAUserDaoImpl extends AbstractDao implements TAUserDao {
 	
 	private void initUser(TAUser user) {
 		if (user != null) {
-			if (logger.isTraceEnabled()) {
-				logger.trace("User found, login = " + user.getLogin() + ", id = " + user.getId());
+			if (LOG.isTraceEnabled()) {
+				LOG.trace("User found, login = " + user.getLogin() + ", id = " + user.getId());
 			}
 			List<TARole> userRoles = getJdbcTemplate().query(
 				"select id, alias, name from sec_role r where exists (select 1 from sec_user_role ur where ur.role_id = r.id and ur.user_id = ?)",
@@ -199,7 +200,7 @@ public class TAUserDaoImpl extends AbstractDao implements TAUserDao {
 			int rows = getJdbcTemplate().update(sb.toString(),	array.toArray());
 			if(rows == 0)
 				throw new DaoException("Пользователя с login = " + user.getLogin() + " не существует.");
-			logger.debug("Update user meta info " + user);
+			LOG.debug("Update user meta info " + user);
 			
 			
 		} catch (DataAccessException e) {
@@ -232,7 +233,7 @@ public class TAUserDaoImpl extends AbstractDao implements TAUserDao {
 					return user.getRoles().size();
 				}
 			});
-			logger.debug("User update roles success " + user);
+			LOG.debug("User update roles success " + user);
 		} catch (DataAccessException e) {
 			throw new DaoException("Не удалось обновить роли для пользователя с login = " + user.getLogin() + "." + e.getLocalizedMessage());
 		}

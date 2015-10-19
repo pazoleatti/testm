@@ -24,7 +24,7 @@ import java.util.regex.Pattern;
  */
 public abstract class TAAbstractScriptingServiceImpl implements ApplicationContextAware {
 
-	protected static final Log logger = LogFactory.getLog(TAAbstractScriptingServiceImpl.class);
+	private static final Log LOG = LogFactory.getLog(TAAbstractScriptingServiceImpl.class);
 	/** Регулярка для поиска номера строки ошибки в теле скрипта */
 	private static final Pattern REGEXP = Pattern.compile("^.*Script[0-9]+$");
 	
@@ -92,7 +92,7 @@ public abstract class TAAbstractScriptingServiceImpl implements ApplicationConte
 			}
 		}
 		logger.error("Ошибка исполнения [%d]: %s", line, message);
-		this.logger.error("An error occured during script execution", e);
+		this.LOG.error("An error occured during script execution", e);
 	}
 
 	/**

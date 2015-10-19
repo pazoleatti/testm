@@ -1,7 +1,5 @@
 package com.aplana.sbrf.taxaccounting.service.impl.print;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 
@@ -15,10 +13,7 @@ import java.util.Map;
  */
 public abstract class AbstractReportBuilder {
 
-    protected final Log logger = LogFactory.getLog(getClass());
-
     protected Workbook workBook;
-
     protected Sheet sheet;
 
     protected static final int cellWidthMin = 30;

@@ -5,6 +5,8 @@ import com.aplana.sbrf.taxaccounting.dao.FormPerformerDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.model.FormDataPerformer;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -25,6 +27,8 @@ import java.util.List;
  */
 @Repository
 public class FormPerformerDaoImpl extends AbstractDao implements FormPerformerDao {
+
+	private static final Log LOG = LogFactory.getLog(FormPerformerDaoImpl.class);
 
 	@Autowired
 	private FormDataDao formDataDao;
@@ -126,7 +130,7 @@ public class FormPerformerDaoImpl extends AbstractDao implements FormPerformerDa
         } catch (EmptyResultDataAccessException e){
             return new ArrayList<Long>(0);
         } catch (DataAccessException e) {
-            logger.error("Ошибка при поиске налоговых форм с заданными параметрами: departmentId = %s, dateFrom = %s, dateTo = %s", e);
+			LOG.error("Ошибка при поиске налоговых форм с заданными параметрами: departmentId = %s, dateFrom = %s, dateTo = %s", e);
             throw new DaoException("Ошибка при поиске налоговых форм с заданными параметрами", e);
         }
     }

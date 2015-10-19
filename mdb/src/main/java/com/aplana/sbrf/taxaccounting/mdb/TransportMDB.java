@@ -31,7 +31,7 @@ public class TransportMDB implements MessageListener {
     public static final String FILENAME_PROPERTY_NAME = "FILENAME";
     public static final String DATA_PROPERTY_NAME = "DATA";
 
-    private static final Log logger = LogFactory.getLog(TransportMDB.class);
+    private static final Log LOG = LogFactory.getLog(TransportMDB.class);
 
     @Override
     // @TransactionAttribute(TransactionAttributeType.REQUIRED)
@@ -45,12 +45,12 @@ public class TransportMDB implements MessageListener {
         try {
             String fileName = mm.getString(FILENAME_PROPERTY_NAME);
             byte[] bodyFile = mm.getBytes(DATA_PROPERTY_NAME);
-            logger.debug("fileName = " + fileName);
-            logger.debug("bodyFile.length = " + bodyFile.length);
+            LOG.debug("fileName = " + fileName);
+            LOG.debug("bodyFile.length = " + bodyFile.length);
 
             mappingService.addFormData(fileName, bodyFile);
         } catch (Exception e) {
-            logger.error("Ошибка при получении сообщения: " + e.getMessage(), e);
+            LOG.error("Ошибка при получении сообщения: " + e.getMessage(), e);
         }
     }
 }

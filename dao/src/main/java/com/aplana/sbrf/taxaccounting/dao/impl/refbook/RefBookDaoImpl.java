@@ -72,7 +72,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 
     private static final SimpleDateFormat SDF_DD_MM_YYYY = new SimpleDateFormat("dd-MM-yyyy");
 
-	private static final Log logger = LogFactory.getLog(RefBookDaoImpl.class);
+	private static final Log LOG = LogFactory.getLog(RefBookDaoImpl.class);
 
     public static final String NOT_HIERARCHICAL_REF_BOOK_ERROR = "Справочник \"%s\" (id=%d) не является иерархичным";
     public static final String NOT_LINEAR_REF_BOOK_ERROR = "Справочник \"%s\" (id=%d) не является линейным";
@@ -1132,8 +1132,8 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     @Override
     public Long checkRecordUnique(Long refBookId, Date version, Long rowId) {
         try {
-            if (logger.isDebugEnabled()) {
-                logger.trace(String.format("refBookId: %d; version: %s; rowId: %s", refBookId, version.toString(), rowId));
+            if (LOG.isDebugEnabled()) {
+                LOG.trace(String.format("refBookId: %d; version: %s; rowId: %s", refBookId, version.toString(), rowId));
             }
             return getJdbcTemplate().queryForLong(CHECK_REF_BOOK_RECORD_UNIQUE_SQL,
                     new Object[]{refBookId, version, rowId},
@@ -2069,7 +2069,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         } catch (EmptyResultDataAccessException e) {
             return new ArrayList<String>(0);
         } catch (DataAccessException e) {
-            logger.error("Проверка использования", e);
+            LOG.error("Проверка использования", e);
             throw new DaoException("Проверка использования", e);
         }
     }

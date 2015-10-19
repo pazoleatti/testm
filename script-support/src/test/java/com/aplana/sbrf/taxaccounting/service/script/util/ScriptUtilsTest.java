@@ -34,7 +34,7 @@ import static org.mockito.Mockito.mock;
  */
 public class ScriptUtilsTest {
 
-    private static final Log logger = LogFactory.getLog(ScriptUtilsTest.class);
+    private static final Log LOG = LogFactory.getLog(ScriptUtilsTest.class);
 
     private static final String STRING_NAME = "Строка";
     private static final String STRING_ALIAS = "string";
@@ -96,7 +96,7 @@ public class ScriptUtilsTest {
     @Test
     public void summTest() {
         FormData fd = getTestFormData().getFirst();
-        logger.info(fd);
+        LOG.info(fd);
         double r = ScriptUtils.summ(fd, getTestFormData().getSecond(), new ColumnRange(NUMBER_ALIAS, 0, 1));
         Assert.assertTrue(Math.abs(r) > Constants.EPS);
     }

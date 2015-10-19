@@ -22,7 +22,7 @@ import javax.servlet.http.HttpServletResponse;
  */
 public class LogSystemLogoutHandler implements LogoutHandler {
 
-    protected Log logger = LogFactory.getLog(getClass());
+    private static final Log LOG = LogFactory.getLog(LogSystemLogoutHandler.class);
 
     @Autowired
     private LockDataService lockDataService;
@@ -37,12 +37,12 @@ public class LogSystemLogoutHandler implements LogoutHandler {
                     .getAuthentication().getPrincipal()));
             TAUserInfo userInfo = principal.getUserInfo();
 
-            logger.info("Exit: " + userInfo);
+            LOG.info("Exit: " + userInfo);
             lockDataService.unlockAll(userInfo, true);
             AuditService auditService = (AuditService) springContext.getBean("auditServiceImpl");
             auditService.add(FormDataEvent.LOGOUT, userInfo,
                     userInfo.getUser().getDepartmentId(), null, null, null, null, null, null, null);
-            logger.info("Security logout system success.");
+            LOG.info("Security logout system success.");
         }
     }
 }

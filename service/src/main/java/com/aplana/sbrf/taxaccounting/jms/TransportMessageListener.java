@@ -23,11 +23,11 @@ public class TransportMessageListener implements MessageListener {
     public static final String FILENAME_PROPERTY_NAME = "FILENAME";
     public static final String DATA_PROPERTY_NAME = "DATA";
 
-    private static final Log logger = LogFactory.getLog(TransportMessageListener.class);
+    private static final Log LOG = LogFactory.getLog(TransportMessageListener.class);
 
     @Override
     public void onMessage(Message message) {
-        logger.debug("onMessage: " + message);
+        LOG.debug("onMessage: " + message);
         if (!(message instanceof MapMessage)) {
             return;
         }
@@ -38,13 +38,13 @@ public class TransportMessageListener implements MessageListener {
             String fileName = mm.getString(FILENAME_PROPERTY_NAME);
             byte[] bodyFile = mm.getBytes(DATA_PROPERTY_NAME);
 
-            logger.debug("fileName = " + fileName);
-            logger.debug("bodyFile.length = " + bodyFile.length);
+            LOG.debug("fileName = " + fileName);
+            LOG.debug("bodyFile.length = " + bodyFile.length);
 
             mappingService.addFormData(fileName, bodyFile);
 
         } catch (JMSException e) {
-            logger.error("Retrieving error message: " + e.getMessage(), e);
+            LOG.error("Retrieving error message: " + e.getMessage(), e);
         }
     }
 }

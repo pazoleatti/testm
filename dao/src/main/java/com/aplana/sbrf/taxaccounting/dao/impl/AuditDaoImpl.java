@@ -5,6 +5,8 @@ import com.aplana.sbrf.taxaccounting.dao.EventDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -21,6 +23,8 @@ import static com.aplana.sbrf.taxaccounting.model.FormDataEvent.*;
 
 @Repository
 public class AuditDaoImpl extends AbstractDao implements AuditDao {
+
+	private static final Log LOG = LogFactory.getLog(AuditDaoImpl.class);
 
     private static final int FILTER_LENGTH = 1000;
 
@@ -186,7 +190,7 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
                     new AuditRowMapper());
             return new PagingResult<LogSearchResultItem>(records, !records.isEmpty()?records.get(0).getCnt():0);
         } catch (DataAccessException e){
-            logger.error("", e);
+			LOG.error("", e);
             throw new DaoException("", e);
         }
     }
@@ -330,7 +334,7 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
                     new AuditRowMapper());
             return new PagingResult<LogSearchResultItem>(records, !records.isEmpty()?records.get(0).getCnt():0);
         } catch (DataAccessException e){
-            logger.error("", e);
+			LOG.error("", e);
             throw new DaoException("", e);
         }
     }
@@ -408,7 +412,7 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
                     new AuditRowMapper());
             return new PagingResult<LogSearchResultItem>(records, !records.isEmpty()?records.get(0).getCnt():0);
         } catch (DataAccessException e){
-            logger.error("", e);
+			LOG.error("", e);
             throw new DaoException("", e);
         }
     }
@@ -491,7 +495,7 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
                     logSystem.getFormTypeId()
             );
         } catch (DataAccessException e){
-            logger.error("Ошибки при логировании.", e);
+			LOG.error("Ошибки при логировании.", e);
             throw new DaoException("Ошибки при логировании.", e);
         }
 	}
@@ -524,13 +528,13 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
         try {
             return getJdbcTemplate().queryForObject("select max(log_date) from log_system where event_id = 601", Date.class);
         } catch (EmptyResultDataAccessException e){
-            logger.warn("Не найдено записей об архивации.", e);
+			LOG.warn("Не найдено записей об архивации.", e);
             return null;
         } catch (IncorrectResultSizeDataAccessException e){
-            logger.error("Найдено больше одной записи об архивировании.", e);
+			LOG.error("Найдено больше одной записи об архивировании.", e);
             throw new DaoException("Найдено больше одной записи об архивировании.", e);
         } catch (DataAccessException e){
-            logger.error("Ошибка при получении даты последней архивации", e);
+			LOG.error("Ошибка при получении даты последней архивации", e);
             throw new DaoException("Ошибка при получении даты последней архивации", e);
         }
 

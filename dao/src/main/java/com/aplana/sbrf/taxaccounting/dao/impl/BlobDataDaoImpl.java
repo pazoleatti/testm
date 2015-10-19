@@ -4,6 +4,8 @@ import com.aplana.sbrf.taxaccounting.dao.BlobDataDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.model.BlobData;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.PreparedStatementCreator;
@@ -23,6 +25,8 @@ import java.util.Date;
  */
 @Repository
 public class BlobDataDaoImpl extends AbstractDao implements BlobDataDao {
+
+	private static final Log LOG = LogFactory.getLog(BlobDataDaoImpl.class);
 
     private static final class BlobDataRowMapper implements RowMapper<BlobData>{
 
@@ -106,7 +110,7 @@ public class BlobDataDaoImpl extends AbstractDao implements BlobDataDao {
             getNamedParameterJdbcTemplate().update(String.format("DELETE FROM blob_data WHERE %s", SqlUtils.transformToSqlInStatementForString("id", uuidStrings)),
                     valuesMap);
         } catch (DataAccessException e){
-            logger.error(String.format("Не удалось удалить записи с id = %s", uuidStrings), e);
+			LOG.error(String.format("Не удалось удалить записи с id = %s", uuidStrings), e);
             throw new DaoException(String.format("Не удалось удалить записи с id = %s", uuidStrings), e);
         }
     }

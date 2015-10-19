@@ -23,25 +23,25 @@ public class DepartmentUsageServiceImpl implements DepartmentUsageService {
     @Autowired
     private DepartmentService departmentService;
 
-    private static final Log logger = LogFactory.getLog(DepartmentUsageServiceImpl.class);
+    private static final Log LOG = LogFactory.getLog(DepartmentUsageServiceImpl.class);
 
     @Override
     public void setDepartmentUsedByGarant(long depId, boolean used) throws CommonServiceException {
         try {
-            logger.info("Setting department usage by Garants: depId="+depId + ", used=" + used);
+            LOG.info("Setting department usage by Garants: depId=" + depId + ", used=" + used);
             Department department = departmentService.getDepartment((int) depId);
             if (department == null) {
-                logger.info("Department not found: depId="+depId);
+                LOG.info("Department not found: depId=" + depId);
                 throw new CommonServiceException("Подразделения не существует!");
             } else {
                 departmentService.setUsedByGarant((int) depId, used);
             }
 
         } catch (RuntimeException e) {
-            logger.info("Error setting department usage by Garants: " + e.getClass() + " - " + e. getMessage());
+            LOG.info("Error setting department usage by Garants: " + e.getClass() + " - " + e.getMessage());
             throw new CommonServiceException(e. getMessage(), e.getCause());
         } catch (Exception e) {
-            logger.info("Error setting departmentusage by Garants: " + e.getClass() + " - " + e. getMessage());
+            LOG.info("Error setting departmentusage by Garants: " + e.getClass() + " - " + e.getMessage());
             throw new CommonServiceException(e. getMessage(), e.getCause());
         }
     }

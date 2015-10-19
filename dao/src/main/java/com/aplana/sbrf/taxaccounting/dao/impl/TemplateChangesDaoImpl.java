@@ -31,7 +31,7 @@ public class TemplateChangesDaoImpl extends AbstractDao implements TemplateChang
     @Autowired
     private TAUserDao taUserDao;
 
-    private final Log logger = LogFactory.getLog(getClass());
+    private static final Log LOG = LogFactory.getLog(TemplateChangesDaoImpl.class);
 
     private class TemplateChangesMapper implements RowMapper<TemplateChanges>{
 
@@ -59,7 +59,7 @@ public class TemplateChangesDaoImpl extends AbstractDao implements TemplateChang
                     new int[]{Types.NUMERIC, Types.NUMERIC, Types.TIMESTAMP, Types.NUMERIC, Types.NUMERIC, Types.NUMERIC});
             return templateEventId;
         } catch (DataAccessException e){
-            logger.error("Ошибка при добавлении истории событий.", e);
+            LOG.error("Ошибка при добавлении истории событий.", e);
             throw new DaoException("Ошибка при добавлении истории событий.", e);
         }
 
@@ -81,7 +81,7 @@ public class TemplateChangesDaoImpl extends AbstractDao implements TemplateChang
                     new int[]{Types.NUMERIC},
                     new TemplateChangesMapper());
         } catch (DataAccessException e) {
-            logger.error("Ошибка при получении истории изменнений.", e);
+            LOG.error("Ошибка при получении истории изменнений.", e);
             throw new DaoException("Ошибка при получении истории изменнений.", e);
         }
     }
@@ -101,7 +101,7 @@ public class TemplateChangesDaoImpl extends AbstractDao implements TemplateChang
                     new int[]{Types.NUMERIC},
                     new TemplateChangesMapper());
         } catch (DataAccessException e){
-            logger.error("Ошибка при получении истории изменнений.", e);
+            LOG.error("Ошибка при получении истории изменнений.", e);
             throw new DaoException("Ошибка при получении истории изменнений.", e);
         }
     }
@@ -122,7 +122,7 @@ public class TemplateChangesDaoImpl extends AbstractDao implements TemplateChang
                     new int[]{Types.NUMERIC},
                     new TemplateChangesMapper());
         } catch (DataAccessException e){
-            logger.error("Ошибка при получении истории изменнений.", e);
+            LOG.error("Ошибка при получении истории изменнений.", e);
             throw new DaoException("Ошибка при получении истории изменнений.", e);
         }
     }
@@ -140,7 +140,7 @@ public class TemplateChangesDaoImpl extends AbstractDao implements TemplateChang
                     new HashMap<String, Object>(){{put("ftIds", ftIds);}},
                     new TemplateChangesMapper() );
         } catch (DataAccessException e){
-            logger.error("", e);
+            LOG.error("", e);
             throw new DaoException("", e);
         }
     }
@@ -171,7 +171,7 @@ public class TemplateChangesDaoImpl extends AbstractDao implements TemplateChang
                     params,
                     Integer.class);
         } catch (DataAccessException e){
-            logger.error("", e);
+            LOG.error("", e);
             throw new DaoException("", e);
         }
     }
@@ -192,7 +192,7 @@ public class TemplateChangesDaoImpl extends AbstractDao implements TemplateChang
                     new int[]{Types.NUMERIC},
                     new TemplateChangesMapper());
         } catch (DataAccessException e){
-            logger.error("Ошибка при получении истории изменнений.", e);
+            LOG.error("Ошибка при получении истории изменнений.", e);
             throw new DaoException("Ошибка при получении истории изменнений.", e);
         }
     }
@@ -203,7 +203,7 @@ public class TemplateChangesDaoImpl extends AbstractDao implements TemplateChang
             getNamedParameterJdbcTemplate().update("delete from template_changes where " + SqlUtils.transformToSqlInStatement("id", ids),
                     new HashMap<String, Object>(){{put("ids", ids);}});
         } catch (DataAccessException e){
-            logger.error("Удаление записей журнала изменений", e);
+            LOG.error("Удаление записей журнала изменений", e);
             throw new DaoException("Удаление записей журнала изменений", e);
         }
     }

@@ -10,6 +10,8 @@ import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Repository;
@@ -20,6 +22,8 @@ import java.util.Map;
 
 @Repository
 public class RefBookTaxOrganDaoImpl extends AbstractDao implements RefBookTaxOrganDao {
+
+	private static final Log LOG = LogFactory.getLog(RefBookTaxOrganDaoImpl.class);
 
     private final static Long REF_BOOK_ID_200 = 200L;
     private final static String CODE = "t200.TAX_ORGAN_CODE";
@@ -104,7 +108,7 @@ public class RefBookTaxOrganDaoImpl extends AbstractDao implements RefBookTaxOrg
             List<Map<String, RefBookValue>> records = getJdbcTemplate().query(ps.getQuery().toString(), ps.getParams().toArray(), new RefBookValueMapper(refBook));
             return records.isEmpty() ? new HashMap<String, RefBookValue>(0) : records.get(0);
         } catch (DataAccessException e) {
-            logger.error("", e);
+            LOG.error("", e);
             throw new DaoException("", e);
         }
     }

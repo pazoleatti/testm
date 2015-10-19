@@ -8,6 +8,8 @@ import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.util.DepartmentReportPeriodFilter;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -27,6 +29,8 @@ import java.util.*;
 @Repository
 @Transactional(readOnly = true)
 public class DepartmentReportPeriodDaoImpl extends AbstractDao implements DepartmentReportPeriodDao {
+
+	private static final Log LOG = LogFactory.getLog(DepartmentReportPeriodDaoImpl.class);
 
     @Autowired
     private ReportPeriodDao reportPeriodDao;
@@ -126,7 +130,7 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
                         put("yearEnd", filter.getYearEnd());
                     }}, mapper);
         } catch (DataAccessException e) {
-            logger.error("", e);
+			LOG.error("", e);
             throw new DaoException("", e);
         }
     }
@@ -147,7 +151,7 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
                         put("yearEnd", filter.getYearEnd());
                     }}, Integer.class);
         } catch (DataAccessException e){
-            logger.error("", e);
+			LOG.error("", e);
             throw new DaoException("", e);
         }
     }
@@ -197,7 +201,7 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
                 }
             });
         } catch (DataAccessException e){
-            logger.error("", e);
+			LOG.error("", e);
             throw new DaoException("", e);
         }
     }
@@ -220,7 +224,7 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
                     new int[]{Types.NUMERIC, Types.NUMERIC}
             );
         } catch (DataAccessException e){
-            logger.error("", e);
+			LOG.error("", e);
             throw new DaoException("", e);
         }
     }
@@ -242,7 +246,7 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
                         }
                     });
         } catch (DataAccessException e){
-            logger.error("", e);
+			LOG.error("", e);
             throw new DaoException("", e);
         }
     }
@@ -256,7 +260,7 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
                     new int[]{Types.NUMERIC}
             );
         } catch (DataAccessException e){
-            logger.error("", e);
+			LOG.error("", e);
         }
     }
 
@@ -277,7 +281,7 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
                     }
             );
         } catch (DataAccessException e){
-            logger.error("", e);
+			LOG.error("", e);
         }
     }
 
@@ -337,7 +341,7 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
                                     "drp.DEPARTMENT_ID = ? and drp.report_period_id = ? and drp.CORRECTION_DATE > ?",
                             departmentId, reportPeriodId, correctionDate) > 0;
         } catch (DataAccessException e){
-            logger.error("", e);
+			LOG.error("", e);
             throw new DaoException("", e);
         }
     }
@@ -390,7 +394,7 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
                         put("formTemplateId", formTemplateId);
                     }}, mapper);
         } catch (DataAccessException e) {
-            logger.error("", e);
+			LOG.error("", e);
             throw new DaoException("", e);
         }
     }

@@ -23,11 +23,10 @@ import java.util.Collection;
 
 public class AuthenticationUserDetailsServiceImpl implements AuthenticationUserDetailsService<Authentication> {
 
-	private static final Log logger = LogFactory.getLog(AuthenticationUserDetailsServiceImpl.class);
+	private static final Log LOG = LogFactory.getLog(AuthenticationUserDetailsServiceImpl.class);
 
 	@Autowired
 	TAUserService userService;
-
 	@Autowired
 	private AuditService auditService;
 
@@ -37,11 +36,11 @@ public class AuthenticationUserDetailsServiceImpl implements AuthenticationUserD
 
 		if (!userService.existsUser(userName)) {
 			String message = "User with login '" + userName + "' was not found in TaxAccounting database";
-			logger.error(message);
+			LOG.error(message);
 			throw new UsernameNotFoundException(message);
 		}
 
-		logger.info("Получение информации пользователя по логину \"" + userName + "\" getUser()");
+		LOG.info("Получение информации пользователя по логину \"" + userName + "\" getUser()");
 		TAUser user = userService.getUser(userName.toLowerCase());
 
         if (!user.isActive()) {

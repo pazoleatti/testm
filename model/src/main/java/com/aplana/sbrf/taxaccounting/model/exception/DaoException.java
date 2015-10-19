@@ -14,7 +14,7 @@ import org.apache.commons.logging.LogFactory;
 public class DaoException extends TAException {
 	private static final long serialVersionUID = 1L;
 
-	private static final Log logger = LogFactory.getLog(DaoException.class);
+	private static final Log LOG = LogFactory.getLog(DaoException.class);
 
 	public DaoException(String message, Object... params) {
 		super(message, params);
@@ -22,6 +22,6 @@ public class DaoException extends TAException {
 
 	public DaoException(String message, Throwable cause){
 		super(message, cause);
-		logger.error(cause.getMessage(), cause);
+		LOG.error(cause.getMessage(), cause);
 	}
 }

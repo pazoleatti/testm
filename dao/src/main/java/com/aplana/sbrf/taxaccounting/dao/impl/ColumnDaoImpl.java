@@ -9,6 +9,8 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.model.util.OrderUtils;
 import com.aplana.sbrf.taxaccounting.util.BDUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -27,9 +29,10 @@ import java.util.*;
 @Repository
 public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
 
+	private static final Log LOG = LogFactory.getLog(ColumnDaoImpl.class);
+
     @Autowired
     private BDUtils bdUtils;
-
     @Autowired
     private RefBookDao refBookDao;
 
@@ -186,7 +189,7 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
 
                         if (ColumnType.NUMBER.equals(col.getColumnType())) {
                             if (((NumericColumn) col).getPrecision() > NumericColumn.MAX_PRECISION){
-                                logger.warn("Превышена максимально допустимая точность числа в графе " + col.getName() +
+								LOG.warn("Превышена максимально допустимая точность числа в графе " + col.getName() +
                                         "\". Будет установлено максимальное значение: " + NumericColumn.MAX_PRECISION);
                             }
                             ps.setInt(7, ((NumericColumn)col).getPrecision());
@@ -199,14 +202,14 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
 
                         if (ColumnType.STRING.equals(col.getColumnType())) {
                             if (((StringColumn) col).getMaxLength() > StringColumn.MAX_LENGTH){
-                                logger.warn("Превышена максимально допустимая длина строки в графе \"" + col.getName() +
+								LOG.warn("Превышена максимально допустимая длина строки в графе \"" + col.getName() +
                                         "\". Будет установлено максимальное значение: " + StringColumn.MAX_LENGTH);
                             }
                             ps.setInt(9, Math.min(((StringColumn) col).getMaxLength(), StringColumn.MAX_LENGTH));
                             ps.setNull(11, Types.INTEGER);
                         } else if (ColumnType.NUMBER.equals(col.getColumnType())) {
                             if (((NumericColumn) col).getMaxLength() > NumericColumn.MAX_LENGTH){
-                                logger.warn("Превышена максимально допустимая длина числа в графе " + col.getName() +
+								LOG.warn("Превышена максимально допустимая длина числа в графе " + col.getName() +
                                         "\". Будет установлено максимальное значение: " + NumericColumn.MAX_LENGTH);
                             }
                             ps.setInt(9, Math.min(((NumericColumn) col).getMaxLength(), NumericColumn.MAX_LENGTH));
@@ -335,7 +338,7 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
 
             return setIds;
         } catch (DataIntegrityViolationException e){
-            logger.error("", e);
+			LOG.error("", e);
             throw new DaoException("Обнаружено использование колонки", e);
         }
     }
@@ -497,7 +500,7 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
                     "SELECT id FROM form_column WHERE form_template_id = ? and alias = ?",
                     formTemplateId, columnAlias);
         } catch (DataAccessException e){
-            logger.error("", e);
+			LOG.error("", e);
             throw new DaoException("", e);
         }
     }

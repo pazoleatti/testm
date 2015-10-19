@@ -1,7 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.mvc;
 
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
-import com.aplana.sbrf.taxaccounting.model.UploadResult;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
@@ -25,7 +24,7 @@ import java.io.IOException;
 
 @Controller
 public class TransportDataController {
-    private static final Log logger = LogFactory.getLog(TransportDataController.class);
+    private static final Log LOG = LogFactory.getLog(TransportDataController.class);
 
     @Autowired
     private LogEntryService logEntryService;
@@ -91,13 +90,13 @@ public class TransportDataController {
     public void exceptionHandler(Exception e, final HttpServletResponse response) {
         response.setContentType("text/html");
         response.setCharacterEncoding("UTF-8");
-        logger.warn(e.getLocalizedMessage(), e);
+        LOG.warn(e.getLocalizedMessage(), e);
         try {
             Logger logger = new Logger();
             logger.error("Ошибка: " + e.getMessage());
             response.getWriter().printf("error uuid %s", logEntryService.save(logger.getEntries()));
         } catch (IOException ioException) {
-            logger.error(ioException.getMessage(), ioException);
+            LOG.error(ioException.getMessage(), ioException);
         }
     }
 }

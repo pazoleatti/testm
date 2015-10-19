@@ -4,6 +4,8 @@ import com.aplana.sbrf.taxaccounting.dao.api.ConfigurationDao;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.ConfigurationParam;
 import com.aplana.sbrf.taxaccounting.model.ConfigurationParamModel;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.RowCallbackHandler;
 import org.springframework.stereotype.Repository;
@@ -25,7 +27,9 @@ import java.util.*;
 @Repository
 @Transactional
 public class ConfigurationDaoImpl extends AbstractDao implements ConfigurationDao {
-    private final static String GET_ALL_ERROR = "Ошибка получения конфигурационных параметров!";
+
+	private static final Log LOG = LogFactory.getLog(ConfigurationDaoImpl.class);
+    private static final String GET_ALL_ERROR = "Ошибка получения конфигурационных параметров!";
 
     @Override
     public ConfigurationParamModel getAll() {
@@ -83,7 +87,7 @@ public class ConfigurationDaoImpl extends AbstractDao implements ConfigurationDa
                     });
             return model;
         } catch (DataAccessException e){
-            logger.error("", e);
+			LOG.error("", e);
             throw new DaoException("", e);
         }
     }
