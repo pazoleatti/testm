@@ -363,7 +363,7 @@ void consolidation() {
 
 void importData() {
     int COLUMN_COUNT = 9
-    int HEADER_ROW_COUNT = 3
+    int HEADER_ROW_COUNT = 4
     String TABLE_START_VALUE = 'Период сравнения'
     String TABLE_END_VALUE = null
 
@@ -448,10 +448,19 @@ void checkHeaderXls(def headerRows, def colCount, rowCount) {
             (headerRows[1][5]): 'Доля НДС не учитываемый, %',
             (headerRows[1][6]): 'НДС всего, тыс. руб.',
             (headerRows[1][7]): 'В том числе НДС не учитываемый, тыс. руб.',
-            (headerRows[1][8]): 'Доля НДС не учитываемый, %'
+            (headerRows[1][8]): 'Доля НДС не учитываемый, %' ,
+            (headerRows[2][0]) : 'символ формы 102 (26411.01+26411.02+26411.11+27203.01+27203.02)',
+            (headerRows[2][1]) : 'символ формы 102 (26411.02+26411.11+27203.02)',
+            (headerRows[2][2]) : '(гр.2/гр.1)*100',
+            (headerRows[2][3]) : 'символ формы 102 (26411.01+26411.02+26411.11+27203.01+27203.02)',
+            (headerRows[2][4]) : 'символ формы 102 (26411.02+26411.11+27203.02)',
+            (headerRows[2][5]) : '(гр.5/гр.4)*100',
+            (headerRows[2][6]) : 'гр.4-гр.1',
+            (headerRows[2][7]) : 'гр.5-гр.2',
+            (headerRows[2][8]): 'гр.6-гр.3'
     ]
     (1..9).each { index ->
-        headerMapping.put((headerRows[2][index - 1]), index.toString())
+        headerMapping.put((headerRows[3][index - 1]), index.toString())
     }
     checkHeaderEquals(headerMapping, logger)
 }
