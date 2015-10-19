@@ -2,7 +2,6 @@ package com.aplana.sbrf.taxaccounting.dao.impl.refbook;
 
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookIncome102Dao;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
-import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
@@ -15,10 +14,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -85,7 +81,7 @@ public class RefBookIncome102DaoTest {
         PagingResult<Map<String, RefBookValue>> records = dao.getRecords(null, null, null);
         Assert.assertEquals(records.size(), 5);
         Map<String, RefBookValue> record = records.get(0);
-        long accountPeriodId = record.get("ACCOUNT_PERIOD_ID").getReferenceValue().longValue();
+        long accountPeriodId = record.get("ACCOUNT_PERIOD_ID").getReferenceValue();
 
         record.put("OPU_CODE", new RefBookValue(RefBookAttributeType.STRING, testVal1));
         record.put("TOTAL_SUM", new RefBookValue(RefBookAttributeType.NUMBER, testVal2));
@@ -96,11 +92,11 @@ public class RefBookIncome102DaoTest {
 
         boolean catcha = false;
         for (Map<String, RefBookValue> map : records) {
-            long accountPeriodId2 = map.get("ACCOUNT_PERIOD_ID").getReferenceValue().longValue();
+            long accountPeriodId2 = map.get("ACCOUNT_PERIOD_ID").getReferenceValue();
 
             if (accountPeriodId2 == accountPeriodId) {
                 Assert.assertEquals(map.get("OPU_CODE").getStringValue(), testVal1);
-                Assert.assertEquals(map.get("TOTAL_SUM").getNumberValue().doubleValue(), testVal3.doubleValue(), 0d);
+                Assert.assertEquals(map.get("TOTAL_SUM").getNumberValue().doubleValue(), testVal3, 0d);
                 catcha = true;
                 break;
             }
@@ -117,5 +113,10 @@ public class RefBookIncome102DaoTest {
         dao.updateRecords(Arrays.asList(record));
         PagingResult<Map<String, RefBookValue>> records = dao.getRecords(null, null, null);
         Assert.assertEquals(records.size(), 5);
+    }
+
+    @Test
+    public void getPeriodNameFromRefBookTest() {
+        Assert.assertEquals("", dao.getPeriodNameFromRefBook(1));
     }
 }
