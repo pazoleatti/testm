@@ -26,7 +26,7 @@ import java.util.Map;
 @TransactionManagement(TransactionManagementType.CONTAINER)
 public class ShortAsyncMDB implements MessageListener {
 
-    private static final Log log = LogFactory.getLog(ShortAsyncMDB.class);
+    private static final Log LOG = LogFactory.getLog(ShortAsyncMDB.class);
 
     @EJB
     private AsyncTaskPersistenceServiceLocal persistenceService;
@@ -37,7 +37,7 @@ public class ShortAsyncMDB implements MessageListener {
     @Override
     public void onMessage(Message message) {
         if (!(message instanceof ObjectMessage)) {
-            log.error("Incorrect message type!");
+            LOG.error("Incorrect message type!");
             return;
         }
 
@@ -59,14 +59,14 @@ public class ShortAsyncMDB implements MessageListener {
                 //interruptionManager.addTask((String) params.get(LOCKED_OBJECT.name()), Thread.currentThread());
                 task.execute(params);
             } else {
-                log.error("Unexpected empty message content. Instance of com.aplana.sbrf.taxaccounting.async.entity.AsyncMdbObject cannot be null!");
+                LOG.error("Unexpected empty message content. Instance of com.aplana.sbrf.taxaccounting.async.entity.AsyncMdbObject cannot be null!");
             }
         } catch (JMSException e) {
-            log.error("Incorrect parameters data! It must be instance of com.aplana.sbrf.taxaccounting.async.entity.AsyncMdbObject but it wasn't", e);
+            LOG.error("Incorrect parameters data! It must be instance of com.aplana.sbrf.taxaccounting.async.entity.AsyncMdbObject but it wasn't", e);
         } catch (AsyncTaskPersistenceException e) {
-            log.error("Task parameters with id = " + taskTypeId + " were not found!", e);
+            LOG.error("Task parameters with id = " + taskTypeId + " were not found!", e);
         } catch (NamingException e) {
-            log.error("Async task handler was not found! JNDI = " + taskType.getHandlerJndi(), e);
+            LOG.error("Async task handler was not found! JNDI = " + taskType.getHandlerJndi(), e);
         }
     }
 }

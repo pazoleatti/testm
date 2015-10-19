@@ -46,7 +46,7 @@ public class RefBookListView extends AbstractRefBookListView implements RefBookL
                             return;
                         }
                         sb.appendHtmlConstant("<a href=\"#" +
-                                (RefBookType.LINEAR == model.getType() ? RefBookDataTokens.refBookData : RefBookDataTokens.refBookHierData) + ";"
+                                (RefBookType.LINEAR == model.getType() ? RefBookDataTokens.REFBOOK_DATA : RefBookDataTokens.REFBOOK_HIER_DATA) + ";"
                                 + RefBookDataTokens.REFBOOK_DATA_ID + "=" + model.getId() + "\">"
                                 + model.getName() + "</a>");
                     }

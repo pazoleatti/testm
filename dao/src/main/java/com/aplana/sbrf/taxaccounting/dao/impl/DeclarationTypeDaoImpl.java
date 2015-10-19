@@ -41,7 +41,6 @@ public class DeclarationTypeDaoImpl extends AbstractDao implements DeclarationTy
             res.setIfrsName(rs.getString("ifrs_name"));
 			return res;
 		}
-		
 	}
 	
 	@Override
@@ -150,7 +149,6 @@ public class DeclarationTypeDaoImpl extends AbstractDao implements DeclarationTy
 				new DeclarationTypeRowMapper()
 		);
 	}
-
 
     @Override
     public List<Integer> getIfrsDeclarationTypes() {

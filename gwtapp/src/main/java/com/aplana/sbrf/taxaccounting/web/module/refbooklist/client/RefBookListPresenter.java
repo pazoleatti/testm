@@ -50,8 +50,8 @@ public class RefBookListPresenter extends AbstractRefBookListPresenter<RefBookLi
     public void prepareFromRequest(final PlaceRequest request) {
         LogCleanEvent.fire(this);
         LogShowEvent.fire(this, false);
-        String url = RefBookDataTokens.refBookHierData + ";" + RefBookDataTokens.REFBOOK_DATA_ID;
-        String url2 = RefBookDataTokens.refBookData + ";" + RefBookDataTokens.REFBOOK_DATA_ID;
+        String url = RefBookDataTokens.REFBOOK_HIER_DATA + ";" + RefBookDataTokens.REFBOOK_DATA_ID;
+        String url2 = RefBookDataTokens.REFBOOK_DATA + ";" + RefBookDataTokens.REFBOOK_DATA_ID;
         if ((lstHistory.get(0) == null || (!lstHistory.get(0).startsWith(url) && !lstHistory.get(0).startsWith(url2))) &&
                 (lstHistory.get(1) == null || (!lstHistory.get(1).startsWith(url) && !lstHistory.get(1).startsWith(url2)))) {
             selectedItemId = null;

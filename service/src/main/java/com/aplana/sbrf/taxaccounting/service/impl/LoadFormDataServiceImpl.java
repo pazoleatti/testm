@@ -37,7 +37,7 @@ import java.util.*;
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
 public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService implements LoadFormDataService {
 
-	protected static final Log LOG = LogFactory.getLog(LoadFormDataServiceImpl.class);
+	private static final Log LOG = LogFactory.getLog(LoadFormDataServiceImpl.class);
     private static final String LOCK_MSG = "Обработка данных транспортного файла не выполнена, " +
             "т.к. в данный момент выполняется изменение данных формы \"%s\" " +
             "для подразделения \"%s\" " +

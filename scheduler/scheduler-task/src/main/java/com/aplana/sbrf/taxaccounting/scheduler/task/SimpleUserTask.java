@@ -26,12 +26,12 @@ import java.util.Map;
 @Interceptors(SchedulerInterceptor.class)
 public class SimpleUserTask extends AbstractUserTask {
 
-	protected static final Log LOG = LogFactory.getLog(SimpleUserTask.class);
+	private static final Log LOG = LogFactory.getLog(SimpleUserTask.class);
 
     @Override
     public void executeBusinessLogic(Map<String, TaskParam> params, int userId) throws TaskExecutionException {
         for (int i = 0; i<10; i++) {
-            log.info("SimpleUserTask started: " + i);
+			LOG.info("SimpleUserTask started: " + i);
             try {
                 Thread.sleep(60*1000); // 1 минута
             } catch (InterruptedException e) {

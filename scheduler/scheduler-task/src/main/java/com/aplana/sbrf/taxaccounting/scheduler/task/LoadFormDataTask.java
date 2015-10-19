@@ -13,6 +13,8 @@ import com.aplana.sbrf.taxaccounting.scheduler.api.form.SelectBoxItem;
 import com.aplana.sbrf.taxaccounting.scheduler.api.task.UserTaskLocal;
 import com.aplana.sbrf.taxaccounting.scheduler.api.task.UserTaskRemote;
 import com.aplana.sbrf.taxaccounting.service.*;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.ejb.Local;
@@ -32,21 +34,19 @@ import java.util.*;
 @Interceptors(SchedulerInterceptor.class)
 public class LoadFormDataTask extends AbstractUserTask {
 
+	private static final Log LOG = LogFactory.getLog(LoadFormDataTask.class);
+	private static final String TB_NAME = "ТБ";
+	private static final int ALL_DEPARTMENTS_ID = -1;
+	private static final String ALL_DEPARTMENTS_LABEL = "Все подразделения";
+
     @Autowired
     LoadFormDataService loadFormDataService;
-
     @Autowired
     TAUserService userService;
-
     @Autowired
     DepartmentService departmentService;
-
     @Autowired
     private LockDataService lockDataService;
-
-    private static final String TB_NAME = "ТБ";
-    private static final int ALL_DEPARTMENTS_ID = -1;
-    private static final String ALL_DEPARTMENTS_LABEL = "Все подразделения";
 
     @Override
     public void executeBusinessLogic(Map<String, TaskParam> params, int userId) throws TaskExecutionException {
@@ -59,7 +59,7 @@ public class LoadFormDataTask extends AbstractUserTask {
         try {
             departmentId = (Integer) param.getTypifiedValue();
         } catch (InvalidTaskParamException e) {
-            log.error(e.getMessage(), e);
+            LOG.error(e.getMessage(), e);
             throw new TaskExecutionException("Не верный тип параметра задачи");
         }
 

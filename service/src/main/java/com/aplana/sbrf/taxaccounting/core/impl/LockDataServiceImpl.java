@@ -1,7 +1,6 @@
 package com.aplana.sbrf.taxaccounting.core.impl;
 
 import com.aplana.sbrf.taxaccounting.core.api.ServerInfo;
-import com.aplana.sbrf.taxaccounting.model.BalancingVariants;
 import com.aplana.sbrf.taxaccounting.async.manager.AsyncInterruptionManager;
 import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.dao.LockDataDao;
@@ -33,7 +32,7 @@ import java.util.List;
 @Transactional(propagation = Propagation.SUPPORTS)
 public class LockDataServiceImpl implements LockDataService {
 
-    private static final Log log = LogFactory.getLog(LockDataServiceImpl.class);
+    private static final Log LOG = LogFactory.getLog(LockDataServiceImpl.class);
 	private static final long SLEEP_TIME = 500; //шаг времени между проверками освобождения блокировки, миллисекунды
 
 	@Autowired
@@ -119,7 +118,7 @@ public class LockDataServiceImpl implements LockDataService {
                             }
                             dao.deleteLock(key);
                         } else if (!force) {
-                            log.warn(String.format("Нельзя снять несуществующую блокировку. key = \"%s\"", key));
+                            LOG.warn(String.format("Нельзя снять несуществующую блокировку. key = \"%s\"", key));
                             return false;
                         }
                     }
@@ -250,7 +249,7 @@ public class LockDataServiceImpl implements LockDataService {
     @Override
     public void interruptTask(final LockData lockData, final int userId, final boolean force) {
         if (lockData != null) {
-            log.info(String.format("Останавливается асинхронная задача с ключом %s", lockData.getKey()));
+            LOG.info(String.format("Останавливается асинхронная задача с ключом %s", lockData.getKey()));
             tx.executeInNewTransaction(new TransactionLogic() {
 				   @Override
 				   public Object execute() {

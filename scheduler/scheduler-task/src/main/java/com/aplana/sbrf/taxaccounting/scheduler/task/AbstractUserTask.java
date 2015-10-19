@@ -19,7 +19,7 @@ import java.util.Map;
  */
 public abstract class AbstractUserTask implements UserTask {
 
-    protected static final Log log = LogFactory.getLog(AbstractUserTask.class);
+    private static final Log LOG = LogFactory.getLog(AbstractUserTask.class);
 
     @Autowired
     LockDataService lockDataService;
@@ -33,14 +33,14 @@ public abstract class AbstractUserTask implements UserTask {
         if ((lockData = lockDataService.lock(lockId, TAUser.SYSTEM_USER_ID,
                 String.format(LockData.DescriptionTemplate.SCHEDULER_TASK.getText(), getTaskName()))) == null) {
             try {
-                log.info("Планировщиком запущена задача \"" + getTaskName() + "\"");
+                LOG.info("Планировщиком запущена задача \"" + getTaskName() + "\"");
                 executeBusinessLogic(params, userId);
-                log.info("Задача планировщика \"" + getTaskName() + "\" успешно завершена");
+                LOG.info("Задача планировщика \"" + getTaskName() + "\" успешно завершена");
             } finally {
                 lockDataService.unlock(lockId, TAUser.SYSTEM_USER_ID, true);
             }
         } else {
-            log.info("Задача планировщика \"" + getTaskName() + "\" уже выполняется. Дата начала выполнения: " + lockData.getDateLock());
+            LOG.info("Задача планировщика \"" + getTaskName() + "\" уже выполняется. Дата начала выполнения: " + lockData.getDateLock());
         }
     }
 

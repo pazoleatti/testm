@@ -21,7 +21,7 @@ public class RefBookHierPresenterTest {
 
     @Test
     public void testOnAddRowClicked(RefBookHierDataPresenter.MyView myView) {
-        refBookHierPresenter.prepareFromRequest(new PlaceRequest.Builder().nameToken(RefBookDataTokens.refBookHierData).with("id", "71").build());
+        refBookHierPresenter.prepareFromRequest(new PlaceRequest.Builder().nameToken(RefBookDataTokens.REFBOOK_HIER_DATA).with("id", "71").build());
         refBookHierPresenter.setInSlot(RefBookHierPresenter.TYPE_mainFormPresenter, refBookHierDataPresenter);
         refBookHierPresenter.onAddRowClicked();
         verify(myView, times(1)).updateMode(FormMode.CREATE);
@@ -29,7 +29,7 @@ public class RefBookHierPresenterTest {
 
     @Test
     public void testOnDeleteClicked(RefBookHierDataPresenter.MyView myView, EditFormPresenter.MyView editView) {
-        refBookHierPresenter.prepareFromRequest(new PlaceRequest.Builder().nameToken(RefBookDataTokens.refBookHierData).with("id", "71").build());
+        refBookHierPresenter.prepareFromRequest(new PlaceRequest.Builder().nameToken(RefBookDataTokens.REFBOOK_HIER_DATA).with("id", "71").build());
         refBookHierPresenter.setInSlot(RefBookHierPresenter.TYPE_mainFormPresenter, refBookHierDataPresenter);
         refBookHierPresenter.onDeleteRowClicked();
         verify(myView, never()).updateMode(FormMode.EDIT);

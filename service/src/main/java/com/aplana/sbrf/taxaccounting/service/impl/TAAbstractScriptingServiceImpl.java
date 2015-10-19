@@ -36,7 +36,7 @@ public abstract class TAAbstractScriptingServiceImpl implements ApplicationConte
 	private static final String[] PREDEFINED_IMPORTS = new String[]{
 			"com.aplana.sbrf.taxaccounting.model",
 			"com.aplana.sbrf.taxaccounting.model.dictionary",
-			"com.aplana.sbrf.taxaccounting.model.log",
+			"com.aplana.sbrf.taxaccounting.model.LOG",
 			"com.aplana.sbrf.taxaccounting.model.script.range",
 			"com.aplana.sbrf.taxaccounting.model.refbook",
 			"com.aplana.sbrf.taxaccounting.model.util",

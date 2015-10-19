@@ -32,7 +32,7 @@ import java.util.zip.ZipInputStream;
 @Service
 public class ValidateXMLServiceImpl implements ValidateXMLService {
 
-    static final Log log = LogFactory.getLog(ValidateXMLService.class);
+    static final Log LOG = LogFactory.getLog(ValidateXMLServiceImpl.class);
 
     private static final String TEMPLATE = ClassUtils.classPackageAsResourcePath(ValidateXMLServiceImpl.class) + "/VSAX3.exe";
 	private static final long VALIDATION_TIMEOUT = 1000 * 60 * 60; //таймаут работы утилиты для валидации XML по XSD
@@ -65,7 +65,7 @@ public class ValidateXMLServiceImpl implements ValidateXMLService {
         public void run() {
             Process process;
             try {
-                log.info("Запускаем проверку xml.");
+                LOG.info("Запускаем проверку xml.");
                 process = (new ProcessBuilder(params)).start();
                 /*process.waitFor();*/
                 BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream(), "Cp866"));
@@ -89,10 +89,10 @@ public class ValidateXMLServiceImpl implements ValidateXMLService {
                     reader.close();
                 }
             } catch (UnsupportedEncodingException e) {
-                log.error("", e);
+                LOG.error("", e);
                 throw new ServiceException("", e);
             } catch (IOException e) {
-                log.error("", e);
+                LOG.error("", e);
                 throw new ServiceException("", e);
             }
         }
@@ -123,7 +123,7 @@ public class ValidateXMLServiceImpl implements ValidateXMLService {
             outputStream = new FileOutputStream(vsax3File);
             inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(TEMPLATE);
 			try {
-            	log.info("VSAX3.exe copy, total number of bytes " + IOUtils.copy(inputStream, outputStream));
+            	LOG.info("VSAX3.exe copy, total number of bytes " + IOUtils.copy(inputStream, outputStream));
 			} finally {
 				inputStream.close();
 				outputStream.close();
@@ -137,7 +137,7 @@ public class ValidateXMLServiceImpl implements ValidateXMLService {
             BlobData blobData = blobDataService.get(template.getXsdId());
             inputStream = blobData.getInputStream();
 			try {
-            	log.info("Xsd copy, total number of bytes " + IOUtils.copy(inputStream, outputStream));
+            	LOG.info("Xsd copy, total number of bytes " + IOUtils.copy(inputStream, outputStream));
 			} finally {
 				inputStream.close();
 				outputStream.close();
@@ -170,14 +170,14 @@ public class ValidateXMLServiceImpl implements ValidateXMLService {
                 fileInfo(logger, vsax3File);
             }
         } catch (IOException e) {
-            log.error("", e);
+            LOG.error("", e);
             throw new ServiceException("", e);
         } finally {
             if (xsdFile != null && !xsdFile.delete()){
-                log.warn(String.format(NOT_DELETE_WARN, xsdFile.getName()));
+                LOG.warn(String.format(NOT_DELETE_WARN, xsdFile.getName()));
             }
             if (vsax3File != null && !vsax3File.delete()){
-                log.warn(String.format(NOT_DELETE_WARN, vsax3File.getName()));
+                LOG.warn(String.format(NOT_DELETE_WARN, vsax3File.getName()));
             }
         }
     }
@@ -193,11 +193,11 @@ public class ValidateXMLServiceImpl implements ValidateXMLService {
             unzip(outputStream, inputStream);
             return isValid(data, userInfo, logger, isErrorFatal, xmlFileBD, timeout);
         } catch (IOException e) {
-            log.error("", e);
+            LOG.error("", e);
             throw new ServiceException("", e);
         } finally {
             if (xmlFileBD!=null && !xmlFileBD.delete()){
-                log.warn(String.format(NOT_DELETE_WARN, xmlFileBD.getName()));
+                LOG.warn(String.format(NOT_DELETE_WARN, xmlFileBD.getName()));
             }
         }
     }
@@ -324,7 +324,7 @@ public class ValidateXMLServiceImpl implements ValidateXMLService {
         ZipInputStream zis = new ZipInputStream(zipXml);
 		try {
 			while (zis.getNextEntry() != null){
-				log.info("Xml copy, total number of bytes " + IOUtils.copy(zis, outFile));
+				LOG.info("Xml copy, total number of bytes " + IOUtils.copy(zis, outFile));
 			}
 		} finally {
 			IOUtils.closeQuietly(zis);

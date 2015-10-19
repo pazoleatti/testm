@@ -156,7 +156,7 @@ public class RefBookHierPresenter extends Presenter<RefBookHierPresenter.MyView,
     }*/
 
     @ProxyCodeSplit
-    @NameToken(RefBookDataTokens.refBookHierData)
+    @NameToken(RefBookDataTokens.REFBOOK_HIER_DATA)
     public interface MyProxy extends ProxyPlace<RefBookHierPresenter>, Place {
     }
 

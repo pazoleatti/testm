@@ -47,7 +47,8 @@ import java.util.*;
 @Service("unlockFormData")
 @Transactional
 public class FormDataServiceImpl implements FormDataService {
-    protected static final Log log = LogFactory.getLog(FormDataServiceImpl.class);
+
+	private static final Log LOG = LogFactory.getLog(FormDataServiceImpl.class);
 
     private static final SimpleDateFormat SDF_DD_MM_YYYY = new SimpleDateFormat("dd.MM.yyyy");
 	private static final SimpleDateFormat SDF_HH_MM_DD_MM_YYYY = new SimpleDateFormat("HH:mm dd.MM.yyyy");
@@ -194,7 +195,7 @@ public class FormDataServiceImpl implements FormDataService {
 
         File dataFile = null;
         try {
-            log.info(String.format("Создание временного файла: %s", key));
+            LOG.info(String.format("Создание временного файла: %s", key));
             if (stateLogger != null) {
                 stateLogger.updateState("Создание временного файла");
             }
@@ -218,7 +219,7 @@ public class FormDataServiceImpl implements FormDataService {
                     List<String> paramList = configurationDao.getAll().get(ConfigurationParam.KEY_FILE, 0);
                     if (paramList != null) { // Необходимо проверить подпись
                         try {
-                            log.info(String.format("Проверка ЭЦП: %s", key));
+                            LOG.info(String.format("Проверка ЭЦП: %s", key));
                             check = signService.checkSign(dataFile.getAbsolutePath(), 0);
                         } catch (Exception e) {
                             logger.error("Ошибка при проверке ЭЦП: " + e.getMessage());
@@ -245,7 +246,7 @@ public class FormDataServiceImpl implements FormDataService {
 					if (stateLogger != null) {
 						stateLogger.updateState("Импорт XLSM-файла");
 					}
-					log.info(String.format("Выполнение скрипта: %s", key));
+					LOG.info(String.format("Выполнение скрипта: %s", key));
 					formDataScriptingService.executeScript(userInfo, fd, formDataEvent, logger, additionalParameters);
 				} finally {
 					IOUtils.closeQuietly(dataFileInputStream);
@@ -256,7 +257,7 @@ public class FormDataServiceImpl implements FormDataService {
                 if (stateLogger != null) {
                     stateLogger.updateState("Сохранение ошибок");
                 }
-                log.info(String.format("Сохранение ошибок: %s", key));
+                LOG.info(String.format("Сохранение ошибок: %s", key));
                 String uuid = logEntryService.save(logger.getEntries());
                 throw new ServiceLoggerException("Есть критические ошибки при выполнении скрипта", uuid);
             } else if (isInner) {

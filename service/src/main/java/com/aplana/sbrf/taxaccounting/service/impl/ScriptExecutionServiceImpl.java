@@ -38,7 +38,7 @@ import java.util.zip.ZipInputStream;
 @Transactional
 public class ScriptExecutionServiceImpl extends TAAbstractScriptingServiceImpl implements ApplicationContextAware, ScriptExecutionService {
 
-	protected static final Log LOG = LogFactory.getLog(ScriptExecutionServiceImpl.class);
+	private static final Log LOG = LogFactory.getLog(ScriptExecutionServiceImpl.class);
 
     @Autowired
     private LogEntryService logEntryService;

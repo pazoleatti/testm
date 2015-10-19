@@ -43,7 +43,7 @@ import java.util.*;
 @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
 public class MessageServiceBean implements MessageService {
 
-	protected static final Log LOG = LogFactory.getLog(MessageServiceBean.class);
+	private static final Log LOG = LogFactory.getLog(MessageServiceBean.class);
     private static final String FILENAME_PROPERTY_NAME = "FILENAME";
     private static final String DATA_PROPERTY_NAME = "DATA";
 
@@ -61,39 +61,35 @@ public class MessageServiceBean implements MessageService {
     // Формат XML
     private static final Set<Integer> XML_SET = new HashSet<Integer>(Arrays.asList(51, 53, 54, 59, 60, 64));
 
-    @Autowired
-    private MigrationDao migrationDao;
-
-    private Session session;
-    private MessageProducer messageProducer;
-
-    private RnuMigrationGenerator rnuGenerator = new RnuMigrationGenerator();
-    private XmlMigrationGenerator xmlGenerator = new XmlMigrationGenerator();
-
     /** Параметры КСШ */
-    static final String ERROR_FORMAT = "Сообщение не соответствует заданному формату";
-    static final String ERROR_RATE = "Сообщение не соответствует передаче данных по курсам валют / драгоценным металлам";
-    static final String ERROR_PUBLIC = "Сообщение не содержит публичные курсы";
-    static final String ERROR_VALUE = "Сообщение не содержит значений";
-    static final String ERROR_CODE = "Значения сообщения установлены не по отношению к российскому рублю";
-    static final String SUCCESS_IMPORT = "Успешный обмен данными с КСШ. %s %d %s справочника «%s».";
-    static final String FAIL_IMPORT = "Неуспешная попытка обмена данными с КСШ. %s.";
-    static final String FAIL_IMPORT_DELIVERY_COUNT = "Неуспешная попытка обмена данными с КСШ. %s. Попытка № %s";
-    static final String ERROR_AUDIT = "Ошибка записи в журнал аудита.";
+	private static final String ERROR_FORMAT = "Сообщение не соответствует заданному формату";
+	private static final String ERROR_RATE = "Сообщение не соответствует передаче данных по курсам валют / драгоценным металлам";
+	private static final String ERROR_PUBLIC = "Сообщение не содержит публичные курсы";
+	private static final String ERROR_VALUE = "Сообщение не содержит значений";
+	private static final String ERROR_CODE = "Значения сообщения установлены не по отношению к российскому рублю";
+	private static final String SUCCESS_IMPORT = "Успешный обмен данными с КСШ. %s %d %s справочника «%s».";
+	private static final String FAIL_IMPORT = "Неуспешная попытка обмена данными с КСШ. %s.";
+	private static final String FAIL_IMPORT_DELIVERY_COUNT = "Неуспешная попытка обмена данными с КСШ. %s. Попытка № %s";
+	private static final String ERROR_AUDIT = "Ошибка записи в журнал аудита.";
     // Максимальное число попыток загрузки одного сообщения
     private static final int MAX_DELIVERY_COUNT = 10;
-    static final String ERROR_COUNT = "Превышено максимальное число попыток загрузки сообщения (" + MAX_DELIVERY_COUNT + ").";
+	private static final String ERROR_COUNT = "Превышено максимальное число попыток загрузки сообщения (" + MAX_DELIVERY_COUNT + ").";
     private static final String RATE_ENCODING = "UTF-8";
 
-    @Autowired
-    private RefBookScriptingService refBookScriptingService;
+	private Session session;
+	private MessageProducer messageProducer;
 
+	private RnuMigrationGenerator rnuGenerator = new RnuMigrationGenerator();
+	private XmlMigrationGenerator xmlGenerator = new XmlMigrationGenerator();
+
+	@Autowired
+	private MigrationDao migrationDao;
+	@Autowired
+    private RefBookScriptingService refBookScriptingService;
     @Autowired
     private AuditService auditService;
-
     @Autowired
     private TAUserService taUserService;
-
     @Autowired
     private LogEntryService logEntryService;
 

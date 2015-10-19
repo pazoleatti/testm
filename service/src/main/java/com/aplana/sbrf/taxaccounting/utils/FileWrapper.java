@@ -15,7 +15,7 @@ import java.io.*;
  */
 public class FileWrapper {
 
-	protected static final Log LOG = LogFactory.getLog(FileWrapper.class);
+	private static final Log LOG = LogFactory.getLog(FileWrapper.class);
 
     private File file = null;
     private SmbFile smbFile = null;

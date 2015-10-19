@@ -28,7 +28,7 @@ import java.util.List;
  */
 public abstract class AbstractLoadTransportDataService {
 
-	protected static final Log LOG = LogFactory.getLog(AbstractLoadTransportDataService.class);
+	private static final Log LOG = LogFactory.getLog(AbstractLoadTransportDataService.class);
 
     @Autowired
     private AuditService auditService;

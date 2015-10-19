@@ -195,7 +195,7 @@ public class RefBookVersionPresenter extends PresenterWidget<RefBookVersionPrese
                                     getView().updateTable();
                                 } else {
                                     /*placeManager
-                                            .revealPlace(new PlaceRequest.Builder().nameToken(isHierarchy ? RefBookDataTokens.refBookHierData : RefBookDataTokens.refBookData)
+                                            .revealPlace(new PlaceRequest.Builder().nameToken(isHierarchy ? RefBookDataTokens.REFBOOK_HIER_DATA : RefBookDataTokens.REFBOOK_DATA)
                                                     .with(RefBookDataTokens.REFBOOK_DATA_ID, String.valueOf(refBookId))
                                                     .build());*/
                                     BackEvent.fire(RefBookVersionPresenter.this);

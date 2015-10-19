@@ -120,7 +120,7 @@ public class EditFormView extends AbstractEditView implements EditFormPresenter.
         allVersion.setVisible(!isVersionMode && getUiHandlers().isVersioned());
         allVersion.setText("Все версии ("+versionData.getVersionCount()+")");
         /*allVersion.setHref("#"
-                + RefBookDataTokens.refBookVersion
+                + RefBookDataTokens.REFBOOK_VERSION
                 + ";" + RefBookDataTokens.REFBOOK_DATA_ID  + "=" + refBookId
                 + ";" + RefBookDataTokens.REFBOOK_RECORD_ID + "=" + refBookRecordId);*/
     }

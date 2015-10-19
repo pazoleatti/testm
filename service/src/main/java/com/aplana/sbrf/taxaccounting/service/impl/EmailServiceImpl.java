@@ -3,7 +3,6 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 import com.aplana.sbrf.taxaccounting.model.ConfigurationParamModel;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.service.EmailService;
 import com.aplana.sbrf.taxaccounting.service.api.ConfigurationService;
 import com.sun.mail.util.MailSSLSocketFactory;
@@ -19,11 +18,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
-
 @Service
 public class EmailServiceImpl implements EmailService {
 
-	static final Log Log = LogFactory.getLog(EmailServiceImpl.class);
+	private static final Log LOG = LogFactory.getLog(EmailServiceImpl.class);
 
     @Autowired
     private ConfigurationService configurationService;
@@ -81,7 +79,7 @@ public class EmailServiceImpl implements EmailService {
                 message.setText(text);
                 Transport.send(message);
             } catch (Exception e) {
-                Log.error(e.getMessage(), e);
+                LOG.error(e.getMessage(), e);
                 throw new ServiceException("Ошибка отправки сообщения. %s", e.getMessage());
             }
         }
@@ -129,7 +127,7 @@ public class EmailServiceImpl implements EmailService {
                 logger.info("Авторизация выполнена успешно");
             }
         } catch (Exception e) {
-            Log.error("Авторизация с указанными параметрами не выполнена!", e);
+            LOG.error("Авторизация с указанными параметрами не выполнена!", e);
             logger.error(e.getLocalizedMessage());
             logger.error("Авторизация с указанными параметрами не выполнена!");
 			return false;
