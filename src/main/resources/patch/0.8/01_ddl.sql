@@ -99,5 +99,13 @@ INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, referen
 INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (98, 1, 'B', 'B', 	2, 4, null, null, 1, 0, 	5, 1, 0, 1, 	null, 0, 3);
 INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (99, 1, 'HEX', 'HEX', 1, 5, null, null, 1, null, 	5, 1, 1, 1, 	null, 0, 7);
 
+--http://jira.aplana.com/browse/SBRFACCTAX-12847: Новые поля в form_template
+alter table form_template add accruing number(1) default 0;
+alter table form_template add updating number(1) default 0;
+comment on column form_template.accruing is 'Признак расчета нарастающим итогом (0 - не используется, 1 - используется)';
+comment on column form_template.updating is 'Отображать кнопку "Обновить" (0 - нет, 1 - да)';
+alter table form_template add constraint form_template_chk_accruing check (accruing in (0, 1));
+alter table form_template add constraint form_template_chk_updating check (updating in (0, 1));
+
 commit;
 exit;
