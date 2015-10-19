@@ -93,14 +93,8 @@ public class Etr46Test extends ScriptTestBase {
         String WRONG_NON_EMPTY = "Строка %d: Графа «%s» не заполнена!";
         String ERROR_ZERO_DIVIDE = "Строка %d: Графа «%s» не может быть заполнена. Выполнение расчета невозможно, так как в результате проверки получен нулевой знаменатель (деление на ноль невозможно). Ячейка будет заполнена значением «0».";
         String WRONG_VALUE = "Строка %d: Неверное значение граф: «%s», «%s», «%s», «%s»!";
-        FormData formData = getFormData();
-        formData.initFormTemplateParams(testHelper.getTemplate("..//src/main//resources//form_template//etr//etr_4_6//v2015//"));
         List<DataRow<Cell>> dataRows = testHelper.getDataRowHelper().getAll();
-
-        for (int i = 0; i < dataRows.size(); i++) {
-            DataRow<Cell> row = dataRows.get(i);
-            row.setIndex(i + 1);
-        }
+        DataRow<Cell> row = dataRows.get(0);
 
         testHelper.execute(FormDataEvent.CHECK);
 
@@ -108,7 +102,6 @@ public class Etr46Test extends ScriptTestBase {
 
         int i = 0;
         for (int rowIndex = 1; rowIndex <= dataRows.size(); rowIndex++) {
-            DataRow<Cell> row = dataRows.get(rowIndex - 1);
             Assert.assertEquals(String.format(WRONG_NON_EMPTY, rowIndex, getColumnName(row, "comparePeriod")), entries.get(i++).getMessage());
             Assert.assertEquals(String.format(WRONG_NON_EMPTY, rowIndex, getColumnName(row, "currentPeriod")), entries.get(i++).getMessage());
             if (rowIndex < 4) {
@@ -117,11 +110,9 @@ public class Etr46Test extends ScriptTestBase {
             }
         }
         for (int rowIndex = 1; rowIndex <= 3; rowIndex++) {
-            DataRow<Cell> row = dataRows.get(rowIndex - 1);
             Assert.assertEquals(String.format(ERROR_ZERO_DIVIDE, rowIndex, getColumnName(row, "deltaPercent")), entries.get(i++).getMessage());
         }
         for (int rowIndex = 1; rowIndex <= 3; rowIndex++) {
-            DataRow<Cell> row = dataRows.get(rowIndex - 1);
             Assert.assertEquals(String.format(WRONG_VALUE, rowIndex, getColumnName(row, "comparePeriod"), getColumnName(row, "currentPeriod"), getColumnName(row, "deltaRub"), getColumnName(row, "deltaPercent")), entries.get(i++).getMessage());
         }
         Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
@@ -132,17 +123,11 @@ public class Etr46Test extends ScriptTestBase {
     public void check1Test() {
         String WRONG_VALUE_IMPORT = "Строка файла %d: Строка %d: Неверное значение граф: «%s», «%s»!";
         int SHIFT = 12;
-        FormData formData = getFormData();
-        formData.initFormTemplateParams(testHelper.getTemplate("..//src/main//resources//form_template//etr//etr_4_6//v2015//"));
         List<DataRow<Cell>> dataRows = testHelper.getDataRowHelper().getAll();
+        DataRow<Cell> row = dataRows.get(0);
 
         testHelper.setImportFileInputStream(getCustomInputStream("importFileCheck.xlsm"));
         testHelper.execute(FormDataEvent.IMPORT);
-
-        for (int i = 0; i < dataRows.size(); i++) {
-            DataRow<Cell> row = dataRows.get(i);
-            row.setIndex(i + 1);
-        }
 
         testHelper.execute(FormDataEvent.CHECK);
 
@@ -153,7 +138,6 @@ public class Etr46Test extends ScriptTestBase {
             if (rowIndex == 3) { // 3-я строка считается на основе 1-й и 2-й
                 continue;
             }
-            DataRow<Cell> row = dataRows.get(rowIndex - 1);
             Assert.assertEquals(String.format(WRONG_VALUE_IMPORT, SHIFT + rowIndex, rowIndex, getColumnName(row, "comparePeriod"), getColumnName(row, "currentPeriod")), entries.get(i++).getMessage());
         }
         Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
