@@ -225,9 +225,9 @@ void consolidation() {
 }
 
 void importData() {
-    int COLUMN_COUNT = 10
-    int HEADER_ROW_COUNT = 3
-    String TABLE_START_VALUE = 'Подразделение Банка'
+    int COLUMN_COUNT = 11
+    int HEADER_ROW_COUNT = 4
+    String TABLE_START_VALUE = '№ п/п'
     String TABLE_END_VALUE = null
     int INDEX_FOR_SKIP = 0
 
@@ -321,7 +321,8 @@ void checkHeaderXls(def headerRows, def colCount, rowCount) {
     checkHeaderSize(headerRows[headerRows.size() - 1].size(), headerRows.size(), colCount, rowCount)
 
     def headerMapping = [
-            (headerRows[0][0]) : 'Подразделение Банка',
+            (headerRows[0][0]) : '№ п/п',
+            (headerRows[0][1]) : 'Подразделение Банка',
             (headerRows[0][2]) : 'Период сравнения',
             (headerRows[0][5]) : 'Период',
             (headerRows[0][8]) : 'Изменения за период',
@@ -334,10 +335,18 @@ void checkHeaderXls(def headerRows, def colCount, rowCount) {
             (headerRows[1][8]) : 'НДС всего, тыс. руб.',
             (headerRows[1][9]) : 'В том числе НДС не учитываемый, тыс. руб.',
             (headerRows[1][10]): 'Доля НДС не учитываемый, %',
-            '1' : '1'
+            (headerRows[2][2]) : 'символ формы 102 (26411.01+26411.02+26411.11+27203.01+27203.02)',
+            (headerRows[2][3]) : 'символ формы 102 (26411.02+26411.11+27203.02)',
+            (headerRows[2][4]) : '(гр.4/гр.3)*100',
+            (headerRows[2][5]) : 'символ формы 102 (26411.01+26411.02+26411.11+27203.01+27203.02)',
+            (headerRows[2][6]) : 'символ формы 102 (26411.02+26411.11+27203.02)',
+            (headerRows[2][7]) : '(гр.7/гр.6)*100',
+            (headerRows[2][8]) : 'гр.6-гр.3',
+            (headerRows[2][9]) : 'гр.7-гр.4',
+            (headerRows[2][10]): 'гр.8-гр.5'
     ]
-    (2..10).each { index ->
-        headerMapping.put((headerRows[2][index]), index.toString())
+    (2..11).each { index ->
+        headerMapping.put((headerRows[3][index-1]), index.toString())
     }
     checkHeaderEquals(headerMapping, logger)
 }
