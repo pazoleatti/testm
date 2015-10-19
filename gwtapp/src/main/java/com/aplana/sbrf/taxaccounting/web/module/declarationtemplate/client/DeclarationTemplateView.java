@@ -67,22 +67,14 @@ public class DeclarationTemplateView extends ViewWithUiHandlers<DeclarationTempl
     @UiField
     @Path("endDate")
     YearMaskBox versionDateEnd;
-	
+
 	@UiField
 	@Editor.Ignore
 	FileUploadWidget uploadJrxmlFile, uploadDectFile, uploadXsdFile;
 
 	@UiField
 	@Editor.Ignore
-	Button saveButton;
-
-	@UiField
-	@Editor.Ignore
-	Button resetButton;
-
-	@UiField
-	@Editor.Ignore
-	Button cancelButton;
+	Button saveButton, resetButton, cancelButton, activateVersion;
 
 	@UiField
 	@Editor.Ignore
@@ -94,10 +86,6 @@ public class DeclarationTemplateView extends ViewWithUiHandlers<DeclarationTempl
 
     @UiField
     @Editor.Ignore
-    Button activateVersion;
-
-    @UiField
-    @Editor.Ignore
     Label lockInformation;
 
     @UiField
@@ -106,15 +94,7 @@ public class DeclarationTemplateView extends ViewWithUiHandlers<DeclarationTempl
 
     @UiField
     @Editor.Ignore
-    Anchor downloadDectButton;
-
-    @UiField
-    @Editor.Ignore
-    Anchor downloadJrxmlButton;
-
-    @UiField
-    @Editor.Ignore
-    Anchor downloadXsd;
+    Anchor downloadDectButton, downloadJrxmlButton, downloadXsd;
 
     @UiField
     LinkAnchor returnAnchor;
@@ -264,7 +244,7 @@ public class DeclarationTemplateView extends ViewWithUiHandlers<DeclarationTempl
         getUiHandlers().save();
 	}
 
-	
+
 	@UiHandler("resetButton")
 	public void onReset(ClickEvent event){
 		if(getUiHandlers()!=null){
