@@ -114,8 +114,6 @@ public class Etr4_10_SummaryTest extends ScriptTestBase {
      * Проверить загруженные данные.
      */
     void checkLoadData(List<DataRow<Cell>> dataRows) {
-        // графа 1
-        Assert.assertEquals(1, dataRows.get(0).getCell("rowNum").getNumericValue().intValue(), 0);
         // графа 2
         Assert.assertEquals(1, dataRows.get(0).getCell("department").getNumericValue().doubleValue(), 0);
         // графа 3
@@ -168,8 +166,8 @@ public class Etr4_10_SummaryTest extends ScriptTestBase {
 
     /** Проверить загруженные данные. */
     void checkComposeData(List<DataRow<Cell>> dataRows) {
-        // графа 1, 3, 4
-        String [] calcColumns = { "rowNum", "sum1", "sum2" };
+        // графа 3, 4
+        String [] calcColumns = { "sum1", "sum2" };
         Long expected = 0L;
         for (DataRow<Cell> row : dataRows) {
             if ("total".equals(row.getAlias())) {
@@ -177,7 +175,7 @@ public class Etr4_10_SummaryTest extends ScriptTestBase {
             }
             expected++;
 
-            // 1, 4, 5
+            // 3, 4
             for (String alias : calcColumns) {
                 Cell cell = row.getCell(alias);
                 Long value = (cell.getNumericValue() != null ? cell.getNumericValue().longValue() : null);
