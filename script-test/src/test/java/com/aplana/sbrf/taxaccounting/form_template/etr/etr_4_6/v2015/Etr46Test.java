@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.form_template.etr.etr_4_6.v2015;
 
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.util.ScriptTestBase;
 import com.aplana.sbrf.taxaccounting.util.TestScriptHelper;
@@ -13,7 +14,7 @@ import org.mockito.stubbing.Answer;
 
 import java.util.List;
 
-import static org.mockito.Matchers.any;
+import static com.aplana.sbrf.taxaccounting.service.script.util.ScriptUtils.*;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Mockito.when;
 
@@ -58,7 +59,7 @@ public class Etr46Test extends ScriptTestBase {
         when(testHelper.getFormDataService().getFormTemplate(anyInt(), anyInt())).thenReturn(testHelper.getFormTemplate());
 
         // подразделение-период
-        when(testHelper.getDepartmentReportPeriodService().get(any(Integer.class))).thenAnswer(
+        when(testHelper.getDepartmentReportPeriodService().get(anyInt())).thenAnswer(
                 new Answer<DepartmentReportPeriod>() {
                     @Override
                     public DepartmentReportPeriod answer(InvocationOnMock invocation) throws Throwable {
@@ -89,8 +90,73 @@ public class Etr46Test extends ScriptTestBase {
     // Проверка пустой
     @Test
     public void checkTest() {
+        String WRONG_NON_EMPTY = "Строка %d: Графа «%s» не заполнена!";
+        String ERROR_ZERO_DIVIDE = "Строка %d: Графа «%s» не может быть заполнена. Выполнение расчета невозможно, так как в результате проверки получен нулевой знаменатель (деление на ноль невозможно). Ячейка будет заполнена значением «0».";
+        String WRONG_VALUE = "Строка %d: Неверное значение граф: «%s», «%s», «%s», «%s»!";
+        FormData formData = getFormData();
+        formData.initFormTemplateParams(testHelper.getTemplate("..//src/main//resources//form_template//etr//etr_4_6//v2015//"));
+        List<DataRow<Cell>> dataRows = testHelper.getDataRowHelper().getAll();
+
+        for (int i = 0; i < dataRows.size(); i++) {
+            DataRow<Cell> row = dataRows.get(i);
+            row.setIndex(i + 1);
+        }
+
         testHelper.execute(FormDataEvent.CHECK);
-        Assert.assertTrue(testHelper.getLogger().containsLevel(LogLevel.ERROR));
+
+        List<LogEntry> entries = testHelper.getLogger().getEntries();
+
+        int i = 0;
+        for (int rowIndex = 1; rowIndex <= dataRows.size(); rowIndex++) {
+            DataRow<Cell> row = dataRows.get(rowIndex - 1);
+            Assert.assertEquals(String.format(WRONG_NON_EMPTY, rowIndex, getColumnName(row, "comparePeriod")), entries.get(i++).getMessage());
+            Assert.assertEquals(String.format(WRONG_NON_EMPTY, rowIndex, getColumnName(row, "currentPeriod")), entries.get(i++).getMessage());
+            if (rowIndex < 4) {
+                Assert.assertEquals(String.format(WRONG_NON_EMPTY, rowIndex, getColumnName(row, "deltaRub")), entries.get(i++).getMessage());
+                Assert.assertEquals(String.format(WRONG_NON_EMPTY, rowIndex, getColumnName(row, "deltaPercent")), entries.get(i++).getMessage());
+            }
+        }
+        for (int rowIndex = 1; rowIndex <= 3; rowIndex++) {
+            DataRow<Cell> row = dataRows.get(rowIndex - 1);
+            Assert.assertEquals(String.format(ERROR_ZERO_DIVIDE, rowIndex, getColumnName(row, "deltaPercent")), entries.get(i++).getMessage());
+        }
+        for (int rowIndex = 1; rowIndex <= 3; rowIndex++) {
+            DataRow<Cell> row = dataRows.get(rowIndex - 1);
+            Assert.assertEquals(String.format(WRONG_VALUE, rowIndex, getColumnName(row, "comparePeriod"), getColumnName(row, "currentPeriod"), getColumnName(row, "deltaRub"), getColumnName(row, "deltaPercent")), entries.get(i++).getMessage());
+        }
+        Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
+    }
+
+    // Проверка после импорта
+    @Test
+    public void check1Test() {
+        String WRONG_VALUE_IMPORT = "Строка файла %d: Строка %d: Неверное значение граф: «%s», «%s»!";
+        int SHIFT = 12;
+        FormData formData = getFormData();
+        formData.initFormTemplateParams(testHelper.getTemplate("..//src/main//resources//form_template//etr//etr_4_6//v2015//"));
+        List<DataRow<Cell>> dataRows = testHelper.getDataRowHelper().getAll();
+
+        testHelper.setImportFileInputStream(getCustomInputStream("importFileCheck.xlsm"));
+        testHelper.execute(FormDataEvent.IMPORT);
+
+        for (int i = 0; i < dataRows.size(); i++) {
+            DataRow<Cell> row = dataRows.get(i);
+            row.setIndex(i + 1);
+        }
+
+        testHelper.execute(FormDataEvent.CHECK);
+
+        List<LogEntry> entries = testHelper.getLogger().getEntries();
+
+        int i = 0;
+        for (int rowIndex = 1; rowIndex <= dataRows.size(); rowIndex++) {
+            if (rowIndex == 3) { // 3-я строка считается на основе 1-й и 2-й
+                continue;
+            }
+            DataRow<Cell> row = dataRows.get(rowIndex - 1);
+            Assert.assertEquals(String.format(WRONG_VALUE_IMPORT, SHIFT + rowIndex, rowIndex, getColumnName(row, "comparePeriod"), getColumnName(row, "currentPeriod")), entries.get(i++).getMessage());
+        }
+        Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
     }
 
     // Расчет пустой
