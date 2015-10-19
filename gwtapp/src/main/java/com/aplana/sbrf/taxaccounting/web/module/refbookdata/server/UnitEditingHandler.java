@@ -92,31 +92,31 @@ public class UnitEditingHandler extends AbstractActionHandler<UnitEditingAction,
                             }
                         }
                     }
+                }
 
-                    Map<String, RefBookValue> valueToSave = new HashMap<String, RefBookValue>();
-                    for(Map.Entry<String, RefBookValueSerializable> v : action.getValueToSave().entrySet()) {
-                        RefBookValue value = new RefBookValue(v.getValue().getAttributeType(), v.getValue().getValue());
-                        valueToSave.put(v.getKey(), value);
-                    }
+                Map<String, RefBookValue> valueToSave = new HashMap<String, RefBookValue>();
+                for(Map.Entry<String, RefBookValueSerializable> v : action.getValueToSave().entrySet()) {
+                    RefBookValue value = new RefBookValue(v.getValue().getAttributeType(), v.getValue().getValue());
+                    valueToSave.put(v.getKey(), value);
+                }
 
-                    refBookDepartmentDao.update(action.getDepId(), valueToSave, refBook.getAttributes());
-                    logger.info("Подразделение сохранено");
+                refBookDepartmentDao.update(action.getDepId(), valueToSave, refBook.getAttributes());
+                logger.info("Подразделение сохранено");
 
-                    auditService.add(FormDataEvent.UPDATE_DEPARTMENT, securityService.currentUserInfo(), action.getDepId(),
-                            null, null, null, null,
-                            String.format("Изменены значения атрибутов подразделения %s, новые значения атрибутов: %s",
-                                    action.getDepName(),
-                                    assembleMessage(valueToSave)), null);
-                    if (action.getVersionFrom()!= null){
-                        if (!action.isChangeType()){
-                            //Обновляем имена подразделений в печатных формах
-                            formDataService.
-                                    updateFDDepartmentNames(action.getDepId(), action.getDepName(), action.getVersionFrom(), action.getVersionTo(), securityService.currentUserInfo());
-                        }else {
-                            //Обновляем имена ТБ в печатных формах
-                            formDataService.
-                                    updateFDTBNames(action.getDepId(), action.getDepName(), action.getVersionFrom(), action.getVersionTo(), action.isChangeType(), securityService.currentUserInfo());
-                        }
+                auditService.add(FormDataEvent.UPDATE_DEPARTMENT, securityService.currentUserInfo(), action.getDepId(),
+                        null, null, null, null,
+                        String.format("Изменены значения атрибутов подразделения %s, новые значения атрибутов: %s",
+                                action.getDepName(),
+                                assembleMessage(valueToSave)), null);
+                if (action.getVersionFrom()!= null){
+                    if (!action.isChangeType()){
+                        //Обновляем имена подразделений в печатных формах
+                        formDataService.
+                                updateFDDepartmentNames(action.getDepId(), action.getDepName(), action.getVersionFrom(), action.getVersionTo(), securityService.currentUserInfo());
+                    }else {
+                        //Обновляем имена ТБ в печатных формах
+                        formDataService.
+                                updateFDTBNames(action.getDepId(), action.getDepName(), action.getVersionFrom(), action.getVersionTo(), action.isChangeType(), securityService.currentUserInfo());
                     }
                 }
             } finally {

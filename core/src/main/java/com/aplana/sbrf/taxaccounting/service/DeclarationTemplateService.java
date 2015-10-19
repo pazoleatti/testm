@@ -219,4 +219,18 @@ public interface DeclarationTemplateService {
      */
     Collection<Long> getLockDataIdsThatUseJrxml(int dtId);
 
+    /**
+     * Получает макет декларации по типу и году (версии)
+     * @param declarationTypeId
+     * @param year
+     * @return идентификатор макета, либо null, если он не найден
+     */
+    Integer get(int declarationTypeId, int year);
+
+    /**
+     * Обновляет скрипт макета
+     * @param declarationTemplateId идентификатор макета
+     * @param script скрипт
+     */
+    void updateScript(DeclarationTemplate declarationTemplate, Logger log);
 }

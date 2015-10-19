@@ -2,18 +2,15 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
 import com.aplana.sbrf.taxaccounting.log.impl.ScriptMessageDecorator;
-import com.aplana.sbrf.taxaccounting.model.FormData;
-import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
-import com.aplana.sbrf.taxaccounting.model.FormTemplate;
-import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
-import com.aplana.sbrf.taxaccounting.model.TaxType;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.FormDataScriptingService;
 import com.aplana.sbrf.taxaccounting.service.shared.ScriptComponentContextHolder;
 import com.aplana.sbrf.taxaccounting.util.ScriptExposed;
-import org.apache.commons.lang3.StringUtils;
+import com.aplana.sbrf.taxaccounting.util.TransactionHelper;
+import com.aplana.sbrf.taxaccounting.util.TransactionLogic;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationContextAware;
@@ -41,6 +38,8 @@ public class FormDataScriptingServiceImpl extends TAAbstractScriptingServiceImpl
     @Autowired
     @Qualifier("versionInfoProperties")
     private Properties versionInfoProperties;
+    @Autowired
+    private TransactionHelper tx;
 
     @Override
     public boolean executeScript(TAUserInfo userInfo, FormData formData,
@@ -48,12 +47,29 @@ public class FormDataScriptingServiceImpl extends TAAbstractScriptingServiceImpl
                               Map<String, Object> additionalParameters) {
 
         // Если скрипт отсутствует, то ничего не делаем
-		FormTemplate formTemplate = formTemplateDao.get(formData.getFormTemplateId());
+        FormTemplate formTemplate = formTemplateDao.get(formData.getFormTemplateId());
         String script = formTemplate.getScript();
-		if (!canExecuteScript(script, event)) {
-			return false;
-		}
+        if (!canExecuteScript(script, event)) {
+            return false;
+        }
+        return executeScript(userInfo, script, formData, event, logger, additionalParameters);
+    }
 
+    @Override
+    public boolean executeScriptInNewReadOnlyTransaction(final TAUserInfo userInfo, final String script, final FormData formData,
+                                 final FormDataEvent event, final Logger logger,
+                                 final Map<String, Object> additionalParameters) {
+        return tx.executeInNewReadOnlyTransaction(new TransactionLogic<Boolean>() {
+            @Override
+            public Boolean execute() {
+                return executeScript(userInfo, script, formData, event, logger, additionalParameters);
+            }
+        });
+    }
+
+    private boolean executeScript(TAUserInfo userInfo, String script, FormData formData,
+                          FormDataEvent event, Logger logger,
+                          Map<String, Object> additionalParameters) {
         // Биндим параметры для выполнения скрипта
         Bindings b = scriptEngine.createBindings();
 
