@@ -165,9 +165,11 @@ def logicCheck() {
     def period = reportPeriodService.get(formData.reportPeriodId)
     def year = period?.taxPeriod?.year
     def departmentInn = getDepartmentParams()?.INN?.value
+    def yearRowMap = [:]
 
     for (def row in dataRows) {
         def index = row.getIndex()
+        def rowYear = row.year.format('yyyy').toInteger()
 
         // 1. Проверка обязательных полей
         checkNonEmptyColumns(row, index, nonEmptyColumns, logger, true)
@@ -218,7 +220,6 @@ def logicCheck() {
 
         // 8. Проверка значения «Графы 9» (отчетный год)
         if (row.emitentInn && departmentInn && row.emitentInn == departmentInn && row.year) {
-            def rowYear = row.year.format('yyyy').toInteger()
             if (rowYear < year - 4 || year < rowYear) {
                 logger.warn("Строка $index: Графа «%s» заполнена неверно (%s)! Для Банка (графа «%s» = ИНН %s формы настроек подразделения формы) по данной графе может быть указан отчетный год формы или предыдущие отчетные года с периодом давности до четырех лет включительно.",
                         getColumnName(row, 'year'), rowYear, getColumnName(row, 'emitentInn'), row.emitentInn)
@@ -230,6 +231,29 @@ def logicCheck() {
             if (row[alias] != null && !(row[alias].intValue() in (1..12))) {
                 logger.warn("Строка $index: Графа «%s» заполнена неверно (%s)! Возможные значения: «1», «2», «3», «4», «5», «6», «7», «8», «9», «10», «11», «12»",
                         getColumnName(row, alias), row[alias])
+            }
+        }
+
+        // 10. Начиная с периода формы «9 месяцев 2015»:
+        // Проверка по «Графе 7» должна выполняться только для тех строк, в которых «Графа 3» (ИНН) = Значение атрибута «ИНН» формы настроек подразделения текущей формы.
+        // Для каждого уникального значения «Графы  9» (отчетный год) уникально значение «Графы 7» (номер решения)
+        // формируем карту строк для годов
+        if (row.emitentInn && departmentInn && row.emitentInn == departmentInn) {
+            if (yearRowMap[rowYear] == null) {
+                yearRowMap[rowYear] = []
+            }
+            yearRowMap[rowYear].add(row)
+        }
+    }
+    // 10. Проверка уникальности значения графы 7 (номер решения)
+    yearRowMap.each { yearValue, rows ->
+        if (rows.size() > 1) {
+            def row = rows[0]
+            def rowNumbers = rows.collect{ it.rowNum }
+            def decisionNumbers = rows.collect{ it.decisionNumber }.unique() // может быть две строки с одинаковых годом и номером решения
+            if (decisionNumbers.size() > 1) {
+                logger.error("Строки %s: Неуникальное значение графы «%s» (%s) в рамках «%s» = «%s» для строк Банка (графа «%s» = ИНН %s формы настроек подразделения формы)!",
+                        rowNumbers.join(", "), getColumnName(row, 'decisionNumber'), decisionNumbers.join(", "), getColumnName(row, 'year'), yearValue, getColumnName(row, 'emitentInn'), departmentInn)
             }
         }
     }
