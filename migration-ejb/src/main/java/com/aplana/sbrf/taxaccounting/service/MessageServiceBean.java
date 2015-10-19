@@ -62,13 +62,13 @@ public class MessageServiceBean implements MessageService {
     private static final Set<Integer> XML_SET = new HashSet<Integer>(Arrays.asList(51, 53, 54, 59, 60, 64));
 
     /** Параметры КСШ */
-	private static final String ERROR_FORMAT = "Сообщение не соответствует заданному формату";
+	static final String ERROR_FORMAT = "Сообщение не соответствует заданному формату";
 	private static final String ERROR_RATE = "Сообщение не соответствует передаче данных по курсам валют / драгоценным металлам";
 	private static final String ERROR_PUBLIC = "Сообщение не содержит публичные курсы";
 	private static final String ERROR_VALUE = "Сообщение не содержит значений";
 	private static final String ERROR_CODE = "Значения сообщения установлены не по отношению к российскому рублю";
-	private static final String SUCCESS_IMPORT = "Успешный обмен данными с КСШ. %s %d %s справочника «%s».";
-	private static final String FAIL_IMPORT = "Неуспешная попытка обмена данными с КСШ. %s.";
+	static final String SUCCESS_IMPORT = "Успешный обмен данными с КСШ. %s %d %s справочника «%s».";
+	static final String FAIL_IMPORT = "Неуспешная попытка обмена данными с КСШ. %s.";
 	private static final String FAIL_IMPORT_DELIVERY_COUNT = "Неуспешная попытка обмена данными с КСШ. %s. Попытка № %s";
 	private static final String ERROR_AUDIT = "Ошибка записи в журнал аудита.";
     // Максимальное число попыток загрузки одного сообщения

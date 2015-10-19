@@ -34,33 +34,33 @@ import static org.mockito.Mockito.*;
 public class DeclarationDataAccessServiceImplBalancePeriodTest {
     private static DeclarationDataAccessServiceImpl service;
 
-    private final static int ROOT_BANK_ID = 1;
-    private final static int DEPARTMENT_TB1_ID = 2;
-    private final static int DEPARTMENT_TB2_ID = 3;
+    private static final int ROOT_BANK_ID = 1;
+    private static final int DEPARTMENT_TB1_ID = 2;
+    private static final int DEPARTMENT_TB2_ID = 3;
 
-    private final static int USER_CONTROL_BANK_ID = 10;
-    private final static int USER_CONTROL_UNP_ID = 11;
-    private final static int USER_CONTROL_TB1_ID = 12;
-    private final static int USER_OPERATOR_ID = 14;
+    private static final int USER_CONTROL_BANK_ID = 10;
+    private static final int USER_CONTROL_UNP_ID = 11;
+    private static final int USER_CONTROL_TB1_ID = 12;
+    private static final int USER_OPERATOR_ID = 14;
 
-    private final static int DECLARATION_TYPE_1_ID = 101;
-    private final static int DECLARATION_TYPE_2_ID = 102;
+    private static final int DECLARATION_TYPE_1_ID = 101;
+    private static final int DECLARATION_TYPE_2_ID = 102;
 
-    private final static int DECLARATION_TEMPLATE_1_ID = 111;
-    private final static int DECLARATION_TEMPLATE_2_ID = 112;
+    private static final int DECLARATION_TEMPLATE_1_ID = 111;
+    private static final int DECLARATION_TEMPLATE_2_ID = 112;
 
-    private final static int DECLARATION_CREATED_BANK_ID = 119;
-    private final static int DECLARATION_ACCEPTED_BANK_ID = 120;
-    private final static int DECLARATION_CREATED_TB1_ID = 121;
-    private final static int DECLARATION_ACCEPTED_TB1_ID = 122;
-    private final static int DECLARATION_CREATED_TB2_ID = 123;
-    private final static int DECLARATION_ACCEPTED_TB2_ID = 124;
+    private static final int DECLARATION_CREATED_BANK_ID = 119;
+    private static final int DECLARATION_ACCEPTED_BANK_ID = 120;
+    private static final int DECLARATION_CREATED_TB1_ID = 121;
+    private static final int DECLARATION_ACCEPTED_TB1_ID = 122;
+    private static final int DECLARATION_CREATED_TB2_ID = 123;
+    private static final int DECLARATION_ACCEPTED_TB2_ID = 124;
 
-    private final static int REPORT_PERIOD_ID = 1;
+    private static final int REPORT_PERIOD_ID = 1;
 
-    private final static int BANK_REPORT_PERIOD_ID = 0;
-    private final static int TB1_REPORT_PERIOD_ID = 1;
-    private final static int TB2_REPORT_PERIOD_ID = 2;
+    private static final int BANK_REPORT_PERIOD_ID = 0;
+    private static final int TB1_REPORT_PERIOD_ID = 1;
+    private static final int TB2_REPORT_PERIOD_ID = 2;
 
     private boolean canAccept(TAUserInfo userInfo, int declarationDataId) {
         try {
