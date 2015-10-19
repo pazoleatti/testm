@@ -54,5 +54,50 @@ alter table log_system add constraint log_system_chk_dcl_form check (event_id in
 --http://jira.aplana.com/browse/SBRFACCTAX-12760: PK для lock_data_subscribers
 alter table lock_data_subscribers add constraint lock_data_subscribers_pk primary key (lock_key, user_id);
 
+--http://jira.aplana.com/browse/SBRFACCTAX-12997: Справочник "Цвета"
+create table color
+(
+id number(3) not null,
+name varchar2(100) not null,
+r number(3) not null,
+g number(3) not null,
+b number(3) not null, 
+hex varchar2(7) not null
+);
+
+alter table color add constraint color_pk primary key(id);
+alter table color add constraint color_unq_name unique(name);
+alter table color add constraint color_unq_rgb unique (r,g,b);
+alter table color add constraint color_unq_hex unique (hex);
+alter table color add constraint color_chk_rgb_limits check ((r between 0 and 255) and (g between 0 and 255) and (b between 0 and 255));
+
+alter table form_style add constraint form_style_fk_font_color foreign key(font_color) references color(id);
+alter table form_style add constraint form_style_fk_back_color foreign key(back_color) references color(id);
+
+insert all
+	into color values (0,  'Черный',          0,  0,  0,  '#000000')
+	into color values (4,  'Белый',          255, 255, 255, '#FFFFFF')
+	into color values (1,  'Светло-желтый',      255, 255, 153, '#FFFF99')
+	into color values (2,  'Светло-коричневый',    255, 204, 153,  '#FFCC99')
+	into color values (3,  'Светло-голубой',      204, 255, 255,  '#CCFFFF')
+	into color values (5,  'Темно-серый',        149, 149, 149,	'#959595')
+	into color values (6,	'Серый',					192, 192, 192,	'#C0C0C0')
+	into color values (7,	'Голубой',					153, 204, 255,	'#99CCFF')
+	into color values (8,	'Светло-красный',			240, 128, 128,	'#F08080')
+	into color values (9,	'Светло-оранжевый',			255, 220, 130,	'#FFDC82')
+	into color values (10,	'Красный',					255, 0,	0,	'#FF0000')
+	into color values (11,	'Синий',					0,	0,	255,	'#0000FF')
+	into color values (12,	'Светло-зеленый',			152, 251, 152,	'#98FB98')
+	into color values (13,	'Темно-зеленый',			0,	108, 0,	'#006C00')
+select * from dual;	
+
+INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id, table_name, is_versioned) VALUES (1,'Цвета',1,0,1,null, 'COLOR', 0);
+
+INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (95, 1, 'Наименование цвета', 	'NAME', 1, 1, null, null, 1, null, 20, 1, 0, null, 	null, 0, 50);
+INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (96, 1, 'R', 'R', 	2, 2, null, null, 1, 0, 	5, 1, 0, 1, 	null, 0, 3);
+INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (97, 1, 'G', 'G', 	2, 3, null, null, 1, 0, 	5, 1, 0, 1, 	null, 0, 3);
+INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (98, 1, 'B', 'B', 	2, 4, null, null, 1, 0, 	5, 1, 0, 1, 	null, 0, 3);
+INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (99, 1, 'HEX', 'HEX', 1, 5, null, null, 1, null, 	5, 1, 1, 1, 	null, 0, 7);
+
 commit;
 exit;

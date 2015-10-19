@@ -968,3 +968,13 @@ comment on column form_data_file.user_department_name is 'Наименовани
 comment on column form_data_file.note is 'Комментарий к файлу';
 
 --------------------------------------------------------------------------------------------------------
+create table color
+(
+id number(3) not null,
+name varchar2(100) not null,
+r number(3) not null,
+g number(3) not null,
+b number(3) not null, 
+hex varchar2(7) not null
+);
+--------------------------------------------------------------------------------------------------------
