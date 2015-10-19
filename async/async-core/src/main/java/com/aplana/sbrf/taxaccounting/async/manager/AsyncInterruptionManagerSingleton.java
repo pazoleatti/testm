@@ -14,7 +14,8 @@ import java.util.concurrent.ConcurrentHashMap;
 @Local(AsyncInterruptionManagerLocal.class)
 @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
 public class AsyncInterruptionManagerSingleton implements AsyncInterruptionManager {
-    private final Log log = LogFactory.getLog(getClass());
+
+    private static final Log log = LogFactory.getLog(AsyncInterruptionManagerSingleton.class);
 
     private ConcurrentHashMap<String, Thread> tasks = new ConcurrentHashMap<String, Thread>();
 

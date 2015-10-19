@@ -26,7 +26,7 @@ import java.util.Map;
 @TransactionManagement(TransactionManagementType.CONTAINER)
 public class ShortAsyncMDB implements MessageListener {
 
-    private final Log log = LogFactory.getLog(getClass());
+    private static final Log log = LogFactory.getLog(ShortAsyncMDB.class);
 
     @EJB
     private AsyncTaskPersistenceServiceLocal persistenceService;

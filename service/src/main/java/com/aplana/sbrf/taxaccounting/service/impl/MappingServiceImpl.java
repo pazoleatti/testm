@@ -32,7 +32,7 @@ import java.util.List;
 @Transactional
 public class MappingServiceImpl implements MappingService {
 
-    private final Log log = LogFactory.getLog(getClass());
+    private static final Log LOG = LogFactory.getLog(MappingServiceImpl.class);
 
     @Autowired
     private FormDataService formDataService;
@@ -70,7 +70,7 @@ public class MappingServiceImpl implements MappingService {
 
     @Override
     public void addFormData(String filename, byte[] fileContent) {
-        log.info("Принят файл " + filename + ", размер = " + (fileContent == null ? null : fileContent.length));
+        LOG.info("Принят файл " + filename + ", размер = " + (fileContent == null ? null : fileContent.length));
 
         TAUserInfo userInfo = taUserService.getSystemUserInfo();
 
@@ -102,7 +102,7 @@ public class MappingServiceImpl implements MappingService {
                 periodOrder = restoreExemplar.getPeriodOrder();
             }
 
-            log.debug(restoreExemplar);
+            LOG.debug(restoreExemplar);
 
             reportPeriodId = reportPeriodMappingDao.getByTaxPeriodAndDict(
                     restoreExemplar.getTaxPeriod(),
@@ -162,11 +162,11 @@ public class MappingServiceImpl implements MappingService {
         } catch (Exception e) {
             if (e instanceof ServiceLoggerException) {
                 ServiceLoggerException sle = (ServiceLoggerException)e;
-                log.error(ServiceLoggerException.getLogEntriesString(logEntryService.getAll(sle.getUuid())));
+                LOG.error(ServiceLoggerException.getLogEntriesString(logEntryService.getAll(sle.getUuid())));
             }
 
             // Ошибка импорта
-            log.error("Ошибка импорта файла " + filename + " : " + e.getClass() + " " +  e.getMessage(), e);
+            LOG.error("Ошибка импорта файла " + filename + " : " + e.getClass() + " " + e.getMessage(), e);
             addLog(userInfo, departmentId, reportPeriodId, formTypeName, "Ошибка импорта файла " + filename + ": "
                         + e.getMessage());
 
@@ -175,14 +175,14 @@ public class MappingServiceImpl implements MappingService {
 
         if(isAlreadyCreated){
             // Форма уже была создана
-            log.info("Уже был создан экземпляр формы с такими параметрами как в " + filename + " departmentId = " + departmentId + " reportPeriodId = "
-                    + reportPeriodId );
+            LOG.info("Уже был создан экземпляр формы с такими параметрами как в " + filename + " departmentId = " + departmentId + " reportPeriodId = "
+					+ reportPeriodId);
             addLog(userInfo, departmentId, reportPeriodId, formTypeName, "Экзмепляр формы для файла " + filename + " уже существует. Импорт файла был пропущен.");
 
         } else {
             // Успешный импорт
-            log.info("Успешно импортирован файл " + filename + " departmentId = " + departmentId + " reportPeriodId = "
-                    + reportPeriodId + " formTypeName = " + formTypeName);
+            LOG.info("Успешно импортирован файл " + filename + " departmentId = " + departmentId + " reportPeriodId = "
+					+ reportPeriodId + " formTypeName = " + formTypeName);
             addLog(userInfo, departmentId, reportPeriodId, formTypeName, "Успешно импортирован файл " + filename);
         }
 
@@ -203,7 +203,7 @@ public class MappingServiceImpl implements MappingService {
             auditService.add(FormDataEvent.MIGRATION, userInfo, departmentId, reportPeriodId, null, formTypeName,
                     FormDataKind.PRIMARY.getId(), msg, null, null);
         } catch (Exception e) {
-            log.error("Ошибка записи в журнал аудита", e);
+            LOG.error("Ошибка записи в журнал аудита", e);
         }
     }
 
@@ -222,7 +222,7 @@ public class MappingServiceImpl implements MappingService {
         try {
             String str = new String(fileContent, CHARSET);
             firstRow = str.substring(0, str.indexOf('\r'));
-            log.debug("firstRow: " + firstRow);
+            LOG.debug("firstRow: " + firstRow);
         } catch (UnsupportedEncodingException e) {
             throw new ServiceException("Failure to get the file first line! " + e.getMessage(), e);
         }

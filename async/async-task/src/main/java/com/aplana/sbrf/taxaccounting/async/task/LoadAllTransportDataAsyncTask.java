@@ -26,7 +26,7 @@ import static com.aplana.sbrf.taxaccounting.async.task.AsyncTask.RequiredParams.
  */
 public abstract class LoadAllTransportDataAsyncTask extends AbstractAsyncTask {
 
-    // private final Log log = LogFactory.getLog(getClass());
+    // private static final Log LOG = LogFactory.getLog(LoadAllTransportDataAsyncTask.class);
 
     @Autowired
     TAUserService userService;
