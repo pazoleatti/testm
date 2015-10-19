@@ -169,7 +169,7 @@ def logicCheck() {
 
     for (def row in dataRows) {
         def index = row.getIndex()
-        def rowYear = row.year.format('yyyy').toInteger()
+        def rowYear = row.year?.format('yyyy')?.toInteger()
 
         // 1. Проверка обязательных полей
         checkNonEmptyColumns(row, index, nonEmptyColumns, logger, true)
@@ -238,7 +238,7 @@ def logicCheck() {
         // Проверка по «Графе 7» должна выполняться только для тех строк, в которых «Графа 3» (ИНН) = Значение атрибута «ИНН» формы настроек подразделения текущей формы.
         // Для каждого уникального значения «Графы  9» (отчетный год) уникально значение «Графы 7» (номер решения)
         // формируем карту строк для годов
-        if (row.emitentInn && departmentInn && row.emitentInn == departmentInn) {
+        if (row.emitentInn && departmentInn && row.emitentInn == departmentInn && row.year) {
             if (yearRowMap[rowYear] == null) {
                 yearRowMap[rowYear] = []
             }
