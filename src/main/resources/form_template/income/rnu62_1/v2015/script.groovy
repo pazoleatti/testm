@@ -819,15 +819,15 @@ def checkFormExistAndAccepted(List<Integer> formTypeIds, FormDataKind kind, int 
     }
 
     // получение данных формы
-    def formData = null;
+    def formDataCheck = null;
     boolean foundData = false;
     if (reportPeriod != null) {
         for (int i = 0; i < formTypeIds.size() && !foundData; i++) {
             def formTypeId = formTypeIds[i]
-            formData = formDataService.getLast(formTypeId, kind, departmentId, reportPeriod.getId(), null, formData.comparativePeriodId, formData.accruing);
+            formDataCheck = formDataService.getLast(formTypeId, kind, departmentId, reportPeriod.getId(), null, formData.comparativePeriodId, formData.accruing);
             // проверка существования, принятости и наличия данных
-            if (formData != null && formData.getState() == WorkflowState.ACCEPTED) {
-                def dataRowHelper = formDataService.getDataRowHelper(formData);
+            if (formDataCheck != null && formDataCheck.getState() == WorkflowState.ACCEPTED) {
+                def dataRowHelper = formDataService.getDataRowHelper(formDataCheck);
                 def dataRows = dataRowHelper.getAllCached();
                 foundData = dataRows != null && !dataRows.isEmpty();
             }
@@ -837,7 +837,7 @@ def checkFormExistAndAccepted(List<Integer> formTypeIds, FormDataKind kind, int 
 
     // выводить ли сообщение
     if (!foundData) {
-        String formName = (formData == null ? formTypeService.get(formTypeIds[0]).getName() : formData.getFormType().getName());
+        String formName = (formDataCheck == null ? formTypeService.get(formTypeIds[0]).getName() : formDataCheck.getFormType().getName());
         // период может не найтись для предыдущего периода, потому что периода не существует
         String periodName = "предыдущий период";
         if (reportPeriod != null) {
