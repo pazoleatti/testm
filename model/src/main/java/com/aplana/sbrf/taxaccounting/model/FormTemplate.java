@@ -407,15 +407,16 @@ public class FormTemplate extends IdentityObject<Integer> implements Cloneable {
             }
             DataRow<Cell> newRow = new DataRow<Cell>(row.getAlias(), cells);
 
+			Integer index = row.getIndex();
             newRow.setAlias(row.getAlias());
-            newRow.setIndex(row.getIndex());
+            newRow.setIndex(index);
             newRow.setId(row.getId());
             newRow.setImportIndex(row.getImportIndex());
             for (String alias : row.keySet()) {
                 Cell newCell = newRow.getCell(alias);
                 Cell cell = row.getCell(alias);
 
-                newCell.setValue(cell.getValue(), null);
+                newCell.setValue(cell.getValue(), index);
                 newCell.setEditable(cell.isEditable());
                 newCell.setColSpan(cell.getColSpan());
                 newCell.setRowSpan(cell.getRowSpan());

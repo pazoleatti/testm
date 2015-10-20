@@ -218,7 +218,7 @@ public class FormTemplateColumnPresenter
             HeaderCell cell = headerRow.getCell(oldColumn.getAlias());
             cell.setColSpan(colSpansHeaders.get(i));
             cell.setRowSpan(rowSpansHeaders.get(i));
-            cell.setValue(valuesHeaders.get(i), null);
+            cell.setValue(valuesHeaders.get(i), headerRow.getIndex());
             i++;
         }
     }

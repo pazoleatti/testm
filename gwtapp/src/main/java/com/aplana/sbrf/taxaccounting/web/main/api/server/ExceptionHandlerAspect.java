@@ -45,7 +45,7 @@ public class ExceptionHandlerAspect {
     @AfterThrowing(pointcut = "target(com.gwtplatform.dispatch.server.actionhandler.ActionHandler) && args(action,..)", throwing = "e")
     public void handleException(@SuppressWarnings("rawtypes") Action action, Throwable e) throws ActionException {
 
-        LOG.error(e);
+        LOG.error(e.getMessage(), e);
 
         String actionName = "";
 
