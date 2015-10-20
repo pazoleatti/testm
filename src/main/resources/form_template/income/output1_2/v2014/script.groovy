@@ -106,9 +106,12 @@ def nonEmptyColumns = allColumns - ['inn', 'dividendAgentAll', 'dividendAgentWit
 @Field
 def editableColumns = allColumns
 
-// 7, 8 графа источника
+// 7, 8 графа источника (группировка при консолидации для старого алгоритма)
 @Field
 def keyColumns = ['decisionNumber', 'decisionDate']
+// 7 графа источника (группировка при консолидации для нового алгоритма)
+@Field
+def keyColumnsNew = ['decisionNumber']
 
 @Field
 def sbStrings = [
@@ -292,9 +295,10 @@ void consolidation() {
             def sourceFormData = formDataService.getLast(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId, formData.periodOrder)
             if (sourceFormData != null && sourceFormData.state == WorkflowState.ACCEPTED) {
                 def sourceHelper = formDataService.getDataRowHelper(sourceFormData)
-                def rowMap = getRowMap(sourceHelper.allSaved)
+                def isNewFormType = (it.formTypeId == lastSourceFormType)
+                def rowMap = getRowMap(sourceHelper.allSaved, isNewFormType)
                 rowMap.each { key, sourceRows ->
-                    def newRow = formNewRow(sourceRows, dataRowsPrev, prevPeriodStartDate, prevPeriodEndDate, lastPeriodStartDate, lastPeriodEndDate, it.formTypeId == lastSourceFormType)
+                    def newRow = formNewRow(sourceRows, dataRowsPrev, prevPeriodStartDate, prevPeriodEndDate, lastPeriodStartDate, lastPeriodEndDate, isNewFormType)
                     rows.add(newRow)
                 }
             }
@@ -305,10 +309,10 @@ void consolidation() {
     formDataService.getDataRowHelper(formData).allCached = rows
 }
 
-def getRowMap(def rows) {
+def getRowMap(def rows, boolean isNewFormType) {
     def result = [:]
     rows.each{ row ->
-        def keyString = keyColumns.collect{ row[it] ?: 0 }.join("#")
+        def keyString = isNewFormType ? keyColumnsNew.collect{ row[it] ?: 0 }.join("#") : keyColumns.collect{ row[it] ?: 0 }.join("#")
         if(result[keyString] == null) {
             result[keyString] = []
         }
@@ -317,7 +321,7 @@ def getRowMap(def rows) {
     return result
 }
 
-def formNewRow(def rowList, def dataRowsPrev, def prevPeriodStartDate, def prevPeriodEndDate, def lastPeriodStartDate, def lastPeriodEndDate, boolean is9months2015) {
+def formNewRow(def rowList, def dataRowsPrev, def prevPeriodStartDate, def prevPeriodEndDate, def lastPeriodStartDate, def lastPeriodEndDate, boolean isNewFormType) {
     def newRow = formData.createDataRow()
     editableColumns.each {
         newRow.getCell(it).editable = true
@@ -356,7 +360,7 @@ def formNewRow(def rowList, def dataRowsPrev, def prevPeriodStartDate, def prevP
     // «Графа 10» = Сумма по «Графа 23» для каждого уникального сочетания «Графа 7» первичной формы и «Графа 8» первичной формы, если «Графа 17» первичной формы = 1
     newRow.dividendRussianTotal = rowList.sum{ (it.status == 1 && it.dividends != null) ? it.dividends : 0 }
 
-    if (!is9months2015) { // старый алгоритм
+    if (!isNewFormType) { // старый алгоритм
         // «Графа 11» = Сумма по «Графа 23» для каждого уникального сочетания «Графа 7» первичной формы и «Графа 8» первичной формы, если «Графа 17» первичной формы = 1 и «Графа 16» первичной формы = «1» и «Графа 22» первичной формы = «0»
         newRow.dividendRussianStavka0 = rowList.sum{ (it.status == 1 && it.type == 1 && it.rate == 0 && it.dividends != null) ? it.dividends : 0 }
 
