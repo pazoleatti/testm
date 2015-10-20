@@ -496,7 +496,8 @@ def checkPrevForm() {
         monthOrders.each { monthOrder ->
             formSources945_1.each { formSource ->
                 formDataService.checkMonthlyFormExistAndAccepted(sourceFormTypeId, formSource.kind,
-                        formSource.departmentId, period.id, monthOrder,false, logger, true, formSource.comparativePeriodId, formSource.accruing)
+                        formSource.departmentId, period.id, monthOrder,false, logger, true,
+                        formData.comparativePeriodId, formData.accruing)
             }
         }
     }
