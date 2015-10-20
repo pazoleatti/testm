@@ -237,8 +237,8 @@ def logicCheck() {
         // 10. Начиная с периода формы «9 месяцев 2015»:
         // Проверка по «Графе 7» должна выполняться только для тех строк, в которых «Графа 3» (ИНН) = Значение атрибута «ИНН» формы настроек подразделения текущей формы.
         // Для каждого уникального значения «Графы  9» (отчетный год) уникально значение «Графы 7» (номер решения)
-        // формируем карту строк для годов
-        if (row.emitentInn && departmentInn && row.emitentInn == departmentInn && row.year) {
+        // формируем карту строк для годов (если год и номер решения заполнены)
+        if (row.emitentInn && departmentInn && row.emitentInn == departmentInn && row.year && row.decisionNumber) {
             if (yearRowMap[rowYear] == null) {
                 yearRowMap[rowYear] = []
             }
