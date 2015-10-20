@@ -548,27 +548,27 @@ void logicalCheckBeforeCalc() {
 
         // 2. Проверка наличия формы настроек подразделения
         if (incomeParam == null || incomeParam.isEmpty()) {
-            rowServiceException(row, errorMsg + "Для подразделения «${departmentName}» не создана форма настроек подразделений!")
+            rowError(logger, row, errorMsg + "Для подразделения «${departmentName}» не создана форма настроек подразделений!")
         }
 
         // 3. Проверка наличия строки с «КПП» в табличной части формы настроек подразделения
         // 4. Проверка наличия значения «Наименование для Приложения №5» в форме настроек подразделения
-        for (int k = 0; k < incomeParamTable.size(); k++) {
+        for (int k = 0; k < incomeParamTable?.size(); k++) {
             if (row.kpp != null && row.kpp != '') {
                 if (incomeParamTable?.get(k)?.KPP?.stringValue == row.kpp) {
                     if (incomeParamTable?.get(k)?.ADDITIONAL_NAME?.stringValue == null) {
-                        rowServiceException(row, errorMsg + "Для подразделения «${departmentName}» на форме настроек подразделений по КПП «${row.kpp}» отсутствует значение атрибута «Наименование для «Приложения №5»!")
+                        rowError(logger, row, errorMsg + "Для подразделения «${departmentName}» на форме настроек подразделений по КПП «${row.kpp}» отсутствует значение атрибута «Наименование для «Приложения №5»!")
                     }
                     if (incomeParamTable?.get(k)?.TYPE?.referenceValue == null) {
-                        rowServiceException(row, errorMsg + "Для подразделения «${departmentName}» на форме настроек подразделений по КПП «${row.kpp}» отсутствует значение атрибута «Признак расчета»!")
+                        rowError(logger, row, errorMsg + "Для подразделения «${departmentName}» на форме настроек подразделений по КПП «${row.kpp}» отсутствует значение атрибута «Признак расчета»!")
                     }
                     if (incomeParamTable?.get(k)?.OBLIGATION?.referenceValue == null) {
-                        rowServiceException(row, errorMsg + "Для подразделения «${departmentName}» на форме настроек подразделений по КПП «${row.kpp}» отсутствует значение атрибута «Обязанность по уплате налога»!")
+                        rowError(logger, row, errorMsg + "Для подразделения «${departmentName}» на форме настроек подразделений по КПП «${row.kpp}» отсутствует значение атрибута «Обязанность по уплате налога»!")
                     }
                     break
                 }
                 if (k == incomeParamTable.size() - 1) {
-                    rowServiceException(row, errorMsg + "Для подразделения «${departmentName}» на форме настроек подразделений отсутствует строка с КПП «${row.kpp}»!")
+                    rowError(logger, row, errorMsg + "Для подразделения «${departmentName}» на форме настроек подразделений отсутствует строка с КПП «${row.kpp}»!")
                 }
             }
         }
