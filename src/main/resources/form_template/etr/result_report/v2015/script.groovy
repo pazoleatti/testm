@@ -54,6 +54,8 @@ switch (formDataEvent) {
 def providerCache = [:]
 @Field
 def recordCache = [:]
+@Field
+def refBookCache = [:]
 
 // Редактируемые атрибуты
 @Field
@@ -66,6 +68,28 @@ def autoFillColumns = []
 // Проверяемые на пустые значения атрибуты
 @Field
 def nonEmptyColumns = ['problemZone', 'measures', 'realizationDate', 'performMark', 'comments']
+
+@Field
+def needShowRegionMsg = true
+
+@Field
+def endDate = null
+
+def getEndDate() {
+    if (endDate == null) {
+        endDate = reportPeriodService.getEndDate(formData.reportPeriodId)?.time
+    }
+    return endDate
+}
+
+// Разыменование записи справочника
+def getRefBookValue(def long refBookId, def Long recordId) {
+    if (recordId == null) {
+        return null
+    }
+    return formDataService.getRefBookValue(refBookId, recordId, refBookCache)
+}
+
 
 // Поиск записи в справочнике по значению (для импорта)
 def getRecordIdImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
@@ -190,8 +214,29 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
     def colIndex = 0
     newRow.rowNum = round(parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true), 0)
 
+    // графа 2
     colIndex++
-    newRow.problemZone = getRecordIdImport(504, 'NAME', values[colIndex], fileRowIndex, colIndex + colOffset, false)
+    if (formDataDepartment.regionId) {
+        def filter = "REGION_ID = $formDataDepartment.regionId and NAME like '${values[colIndex]}'"
+        def provider = formDataService.getRefBookProvider(refBookFactory, 504, providerCache)
+        def records = provider.getRecords(getEndDate(), null, filter, null)
+        if (records) {
+            newRow.problemZone = records.get(0)?.record_id?.value
+        } else {
+            def columnIndex = getXLSColumnName(colIndex + colOffset)
+            def dateStr = getEndDate().format('dd.MM.yyyy')
+            // наименование субъекта РФ для атрибута «Регион» подразделения формы
+            def regionName = getRefBookValue(4L, formDataDepartment.regionId)?.NAME?.value
+            logger.warn('Строка %s, столбец %s: В региональном справочнике «%s» не найдена запись, актуальная на дату %s: ' +
+                    'поле «Код субъекта РФ» = «%s», поле «Проблемная зона» = «%s»',
+                    fileRowIndex, columnIndex, getRefBook(504).name, dateStr, regionName, values[colIndex])
+        }
+    } else if (needShowRegionMsg) {
+        needShowRegionMsg = false
+        logger.warn('Невозможно выполнить поиск записи в справочнике «%s» для заполнения графы «%s» формы! ' +
+                'Атрибут «Регион» подразделения текущей формы не заполнен (справочник «Подразделения»).',
+                getRefBook(504).name, getColumnName(newRow, 'problemZone'))
+    }
 
     colIndex++
     newRow.measures = values[colIndex]
@@ -218,4 +263,15 @@ void sortFormDataRows(def saveInDB = true) {
     } else {
         updateIndexes(dataRows)
     }
+}
+
+// для хранения информации о справочниках
+@Field
+def refBooks = [:]
+
+def getRefBook(def id) {
+    if (refBooks[id] == null) {
+        refBooks[id] = refBookFactory.get(id)
+    }
+    return refBooks[id]
 }
