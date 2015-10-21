@@ -491,7 +491,7 @@ def formNewRow(def rowList, def dataRowsPrev, def prevPeriodStartDate, def prevP
 
         if (dataRowsPrev != null) {
             newRow.taxSumFromPeriod = dataRowsPrev.sum {
-                (it.taCategory == 1 && it.decreeNumber == newRow.decreeNumber && it.financialYear == newRow.financialYear) ? ((it.taxSumFromPeriod ?: 0) + (it.taxSumLast ?: 0)) : 0
+                (it.taCategory == 1 && it.decreeNumber == newRow.decreeNumber && it.financialYear?.format("yyyy") == newRow.financialYear?.format("yyyy")) ? ((it.taxSumFromPeriod ?: 0) + (it.taxSumLast ?: 0)) : 0
             }
         } else {
             newRow.taxSumFromPeriod = 0
