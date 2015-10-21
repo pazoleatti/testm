@@ -79,9 +79,91 @@ public class Etr4_15_SummaryTest extends ScriptTestBase {
     // Проверка пустой
     @Test
     public void checkTest() {
+        // ПРОВЕРКА - пустая форма
         testHelper.execute(FormDataEvent.CHECK);
-        // должны быть незаполненые обязательные поля в итогах
+        // ожидаемый результат - должны быть незаполненые обязательные поля в итогах
         Assert.assertTrue(testHelper.getLogger().containsLevel(LogLevel.ERROR));
+        int i = 0;
+        String [] logMsgs = new String [] {
+                "Строка 1: Графа «Период сравнения. НДС всего, тыс. руб.» не заполнена!",
+                "Строка 1: Графа «Период сравнения. В том числе НДС не учитываемый, тыс. руб.» не заполнена!",
+                "Строка 1: Графа «Период сравнения. Доля НДС не учитываемый, %» не заполнена!",
+                "Строка 1: Графа «Период. НДС всего, тыс. руб.» не заполнена!",
+                "Строка 1: Графа «Период. В том числе НДС не учитываемый, тыс. руб.» не заполнена!",
+                "Строка 1: Графа «Период. Доля НДС не учитываемый, %» не заполнена!",
+                "Строка 1: Графа «Изменения за период. НДС всего, тыс. руб.» не заполнена!",
+                "Строка 1: Графа «Изменения за период. В том числе НДС не учитываемый, тыс. руб.» не заполнена!",
+                "Строка 1: Графа «Изменения за период. Доля НДС не учитываемый, %» не заполнена!"
+        };
+        for (String logMsg : logMsgs) {
+            Assert.assertEquals(logMsg, testHelper.getLogger().getEntries().get(i++).getMessage());
+        }
+        Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
+
+        // получение строк, в форме одна итогвая строка + добавить еще одну обычную
+        List<DataRow<Cell>> dataRows = testHelper.getDataRowHelper().getAll();
+        FormData formData = getFormData();
+        formData.initFormTemplateParams(testHelper.getFormTemplate());
+        DataRow<Cell> newRow = formData.createDataRow();
+        dataRows.add(0, newRow);
+        i = 1;
+        for (DataRow<Cell> row : dataRows) {
+            row.setIndex(i);
+            i++;
+        }
+
+        // ПРОВЕРКА - заполнение единицами
+        String [] aliases = new String[] { "department", "comparePeriod", "comparePeriodIgnore", "comparePeriodPercent",
+                "currentPeriod", "currentPeriodIgnore", "currentPeriodPercent", "delta", "deltaIgnore", "deltaPercent" };
+        for (String alias : aliases) {
+            for (DataRow<Cell> row : dataRows) {
+                row.getCell(alias).setValue(1, null);
+            }
+        }
+        testHelper.getLogger().clear();
+        testHelper.execute(FormDataEvent.CHECK);
+        // ожидаемый результат - нет ошибок
+        Assert.assertEquals(0, testHelper.getLogger().getEntries().size());
+
+        // ПРОВЕРКА - заполнение значениями
+        Map<String, Double> map = new HashMap<String, Double>();
+        map.put("department", 1.0);
+        map.put("comparePeriod", 0.0);
+        map.put("comparePeriodIgnore", 1.0);
+        map.put("comparePeriodPercent", 100.0);
+        map.put("currentPeriod", 0.0);
+        map.put("currentPeriodIgnore", 1.0);
+        map.put("currentPeriodPercent", 100.0);
+        map.put("delta", 0.0);
+        map.put("deltaIgnore", 0.0);
+        map.put("deltaPercent", 0.0);
+        for (String alias : map.keySet()) {
+            for (DataRow<Cell> row : dataRows) {
+                row.getCell(alias).setValue(map.get(alias), null);
+            }
+        }
+        testHelper.getLogger().clear();
+        testHelper.execute(FormDataEvent.CHECK);
+        // ожидаемый результат - деление на ноль
+        checkLogger();
+        Assert.assertEquals(2, testHelper.getLogger().getEntries().size());
+        for (String alias : map.keySet()) {
+            for (DataRow<Cell> row : dataRows) {
+                Cell cell = row.getCell(alias);
+                Double value = (cell.getNumericValue() != null ? cell.getNumericValue().doubleValue() : null);
+                Double expected = map.get(alias);
+                Assert.assertEquals("row." + alias + "[" + row.getIndex() + "]", expected, value);
+            }
+        }
+        i = 0;
+        String [] logMsgs2 = new String [] {
+                "Строка 2: Графа «Период сравнения. Доля НДС не учитываемый, %» не может быть заполнена. Выполнение расчета невозможно, так как в результате проверки получен нулевой знаменатель (деление на ноль невозможно). Ячейка будет заполнена значением «0».",
+                "Строка 2: Графа «Период. Доля НДС не учитываемый, %» не может быть заполнена. Выполнение расчета невозможно, так как в результате проверки получен нулевой знаменатель (деление на ноль невозможно). Ячейка будет заполнена значением «0»."
+        };
+        for (String logMsg : logMsgs2) {
+            Assert.assertEquals(logMsg, testHelper.getLogger().getEntries().get(i++).getMessage());
+        }
+        Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
     }
 
     // Расчет пустой

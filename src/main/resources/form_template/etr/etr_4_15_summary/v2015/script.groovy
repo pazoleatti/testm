@@ -12,16 +12,17 @@ import groovy.transform.Field
  */
 
 // графа    - fix
-// графа 1  - department	        Подразделение Банка
-// графа 2  - comparePeriod			Период сравнения. НДС всего, тыс. руб.
-// графа 3  - comparePeriodIgnore	Период сравнения. В том числе НДС не учитываемый, тыс. руб.
-// графа 4  - comparePeriodPercent	Период сравнения. Доля НДС не учитываемый, %
-// графа 5  - currentPeriod			Период. НДС всего, тыс. руб.
-// графа 6  - currentPeriodIgnore	Период. В том числе НДС не учитываемый, тыс. руб.
-// графа 7  - currentPeriodPercent	Период. Доля НДС не учитываемый, %
-// графа 8  - delta					Изменения за период. НДС всего, тыс. руб.
-// графа 9  - deltaIgnore			Изменения за период. В том числе НДС не учитываемый, тыс. руб.
-// графа 10 - deltaPercent			Изменения за период. Доля НДС не учитываемый, %
+// графа 1  - rowNum	            № п/п
+// графа 2  - department	        Подразделение Банка
+// графа 3  - comparePeriod			Период сравнения. НДС всего, тыс. руб.
+// графа 4  - comparePeriodIgnore	Период сравнения. В том числе НДС не учитываемый, тыс. руб.
+// графа 5  - comparePeriodPercent	Период сравнения. Доля НДС не учитываемый, %
+// графа 6  - currentPeriod			Период. НДС всего, тыс. руб.
+// графа 7  - currentPeriodIgnore	Период. В том числе НДС не учитываемый, тыс. руб.
+// графа 8  - currentPeriodPercent	Период. Доля НДС не учитываемый, %
+// графа 9  - delta					Изменения за период. НДС всего, тыс. руб.
+// графа 10 - deltaIgnore			Изменения за период. В том числе НДС не учитываемый, тыс. руб.
+// графа 11 - deltaPercent			Изменения за период. Доля НДС не учитываемый, %
 
 switch (formDataEvent) {
     case FormDataEvent.CREATE:
@@ -72,7 +73,7 @@ def commonColumns = ['comparePeriod', 'comparePeriodIgnore', 'comparePeriodPerce
 @Field
 def nonEmptyColumns = allColumns
 
-// итоговые графы (графа 2, 3, 5, 6, 8, 9)
+// итоговые графы (графа 3, 4, 6, 7, 9, 10)
 @Field
 def totalColumns = ['comparePeriod', 'comparePeriodIgnore', 'currentPeriod', 'currentPeriodIgnore', 'delta', 'deltaIgnore']
 
@@ -123,8 +124,8 @@ void logicCheck() {
     def formTemplate = formDataService.getFormTemplate(formData.formType.id, formData.reportPeriodId)
     def tempRows = formTemplate.rows
     updateIndexes(tempRows)
-    // 2. Проверка графы 3 при расчете графы 4
-    // 3. Проверка графы 6 при расчете графы 7
+    // 2. Проверка графы 3 при расчете графы 5
+    // 3. Проверка графы 5 при расчете графы 8
     calcValues(tempRows, dataRows)
 }
 
@@ -141,23 +142,23 @@ void calcValues(def resultRows, def sourceRows) {
     // признак показывать ли сообщение логической проверки 3
     def needShowMsg = resultRows != sourceRows
 
-    // графа 2, 3, 5, 6, 8, 9
+    // графа 3, 4, 6, 7, 9, 10
     calcTotalSum(sourceRows, resultRow, totalColumns)
 
-    // графа 4
-    resultRow.comparePeriodPercent = calc4(sourceRow, needShowMsg)
-    // графа 7
-    resultRow.currentPeriodPercent = calc7(sourceRow, needShowMsg)
-    // графа 10
-    resultRow.deltaPercent = calc10(resultRow)
+    // графа 5
+    resultRow.comparePeriodPercent = calc5(sourceRow, needShowMsg)
+    // графа 8
+    resultRow.currentPeriodPercent = calc8(sourceRow, needShowMsg)
+    // графа 11
+    resultRow.deltaPercent = calc11(resultRow)
 }
 
-def calc4(def row, def needShowMsg) {
-    return calc4or7(row, 'comparePeriodIgnore', 'comparePeriod', needShowMsg, 'comparePeriodPercent')
+def calc5(def row, def needShowMsg) {
+    return calc5or8(row, 'comparePeriodIgnore', 'comparePeriod', needShowMsg, 'comparePeriodPercent')
 }
 
-def calc7(def row, def needShowMsg) {
-    return calc4or7(row, 'currentPeriodIgnore', 'currentPeriod', needShowMsg, 'currentPeriodPercent')
+def calc8(def row, def needShowMsg) {
+    return calc5or8(row, 'currentPeriodIgnore', 'currentPeriod', needShowMsg, 'currentPeriodPercent')
 }
 
 /**
@@ -169,7 +170,7 @@ def calc7(def row, def needShowMsg) {
  * @param needShowMsg выводить ли сообщение логической проверки 3
  * @param resultAlias алиас графы для которой производится расчет (нужен для вывода сообщения)
  */
-def calc4or7(def row, def dividendAlias, def dividerAlias, def needShowMsg, def resultAlias) {
+def calc5or8(def row, def dividendAlias, def dividerAlias, def needShowMsg, def resultAlias) {
     def result = 0
     def dividend = (row[dividendAlias] ?: 0)
     def divider = row[dividerAlias]
@@ -178,8 +179,8 @@ def calc4or7(def row, def dividendAlias, def dividerAlias, def needShowMsg, def 
         // расчет
         result = dividend * 100 / divider
     } else if (needShowMsg) {
-        // Логическая проверка 2. Проверка графы 3 при расчете графы 4
-        // Логическая проверка 3. Проверка графы 6 при расчете графы 7
+        // Логическая проверка 2. Проверка графы 3 при расчете графы 5
+        // Логическая проверка 3. Проверка графы 6 при расчете графы 8
         def msg = String.format("Строка %s: Графа «%s» не может быть заполнена. Выполнение расчета невозможно, так как в результате проверки получен нулевой знаменатель (деление на ноль невозможно). Ячейка будет заполнена значением «0».",
                 row.getIndex(), getColumnName(row, resultAlias))
         rowWarning(logger, row, msg)
@@ -187,7 +188,7 @@ def calc4or7(def row, def dividendAlias, def dividerAlias, def needShowMsg, def 
     return result
 }
 
-def calc10(def row) {
+def calc11(def row) {
     if (row.currentPeriodPercent == null || row.comparePeriodPercent == null) {
         return null
     }
@@ -207,9 +208,9 @@ void consolidation() {
                 def sourceRows = formDataService.getDataRowHelper(source)?.allSaved
                 def row = getDataRow(sourceRows, 'R1')
                 def newRow = formData.createDataRow()
-                // графа 1
+                // графа 2
                 newRow.department = it.departmentId
-                // графа 2..10
+                // графа 3..11
                 commonColumns.each { column ->
                     newRow[column] = row[column]
                 }
@@ -386,13 +387,13 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex, 
     newRow.setIndex(rowIndex)
     newRow.setImportIndex(fileRowIndex)
 
-    // графа 1
+    // графа 2
     def colIndex = 1
     if (!isTotal) {
         newRow.department = getRecordIdImport(30, 'NAME', values[colIndex], fileRowIndex, colIndex + colOffset, false)
     }
 
-    // графа 2..10
+    // графа 3..11
     colIndex = 1
     commonColumns.each { alias ->
         colIndex++
