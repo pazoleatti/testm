@@ -462,7 +462,7 @@ public class MessageServiceBean implements MessageService {
         try {
             // Ошибка записи в журнал аудита не должна откатывать импорт
             if (auditService != null) {
-                auditService.add(FormDataEvent.IMPORT, userInfo, 0, null, null, null, null, msg, uuid, null);
+                auditService.add(FormDataEvent.IMPORT, userInfo, 0, null, null, null, null, msg, uuid);
             }
         } catch (Exception e) {
             LOG.error(ERROR_AUDIT, e);

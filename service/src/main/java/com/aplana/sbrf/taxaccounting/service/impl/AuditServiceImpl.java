@@ -32,8 +32,6 @@ public class AuditServiceImpl implements AuditService {
     @Autowired
     private DepartmentReportPeriodService departmentReportPeriodService;
     @Autowired
-    private FormTemplateService formTemplateService;
-    @Autowired
     private DeclarationTemplateService declarationTemplateService;
 
     private static final String RP_NAME_PATTERN = "%s %s";
