@@ -109,9 +109,9 @@ def editableColumns = allColumns
 // 7, 8 графа источника (группировка при консолидации для старого алгоритма)
 @Field
 def keyColumns = ['decisionNumber', 'decisionDate']
-// 7 графа источника (группировка при консолидации для нового алгоритма)
+// 3, 7 графа источника (группировка при консолидации для нового алгоритма)
 @Field
-def keyColumnsNew = ['inn', 'decisionNumber']
+def keyColumnsNew = ['emitentInn', 'decisionNumber']
 
 @Field
 def sbStrings = [
