@@ -47,6 +47,7 @@
         <releasePostfix>-${project.version}</releasePostfix>
         <releaseName>taxaccounting${releasePostfix}</releaseName>
         <guaranteeUrl>/taxaccounting-rnu${releasePostfix}/module</guaranteeUrl>
+        <ejb.version>3.0</ejb.version>
 	</properties>
 
 	<dependencyManagement>
@@ -402,6 +403,12 @@
 				<version>1.4</version>
 				<scope>test</scope>
 			</dependency>
+
+            <dependency>
+                <groupId>javax.ejb</groupId>
+                <artifactId>ejb-api</artifactId>
+                <version>${ejb.version}</version>
+            </dependency>
 		</dependencies>
 	</dependencyManagement>
 

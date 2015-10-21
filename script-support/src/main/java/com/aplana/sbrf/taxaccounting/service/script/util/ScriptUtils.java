@@ -331,8 +331,9 @@ public final class ScriptUtils {
         for (int i = 0; i < fromRect.getHeight(); i++) {
             for (int j = 0; j < fromRect.getWidth(); j++) {
                 Object value = fromRows.get(fromRect.y1 + i).get(fromCols.get(fromRect.x1 + j).getAlias());
-                Cell cell = toRows.get(toRect.y1 + i).getCell(toCols.get(toRect.x1 + j).getAlias());
-                cell.setValue(value, null);
+				DataRow<Cell> toRow = toRows.get(toRect.y1 + i);
+                Cell cell = toRow.getCell(toCols.get(toRect.x1 + j).getAlias());
+                cell.setValue(value, toRow.getIndex());
             }
         }
     }
@@ -1062,7 +1063,8 @@ public final class ScriptUtils {
                     }
                 }
             }
-            totalRow.getCell(alias).setValue(sum, null);
+			Integer lastIndex = (dataRows != null && dataRows.size() > 0) ? dataRows.get(dataRows.size() - 1).getIndex() : 0;
+            totalRow.getCell(alias).setValue(sum, lastIndex == null ? 1 : lastIndex + 1);
         }
     }
 
@@ -2051,7 +2053,7 @@ public final class ScriptUtils {
         // задание значении итоговой строке нф из итоговой строки файла
         totalRow.setImportIndex(totalRowFromFile.getImportIndex());
         for (String column : columns) {
-            totalRow.getCell(column).setValue(totalRowFromFile.getCell(column).getValue(), null);
+            totalRow.getCell(column).setValue(totalRowFromFile.getCell(column).getValue(), totalRow.getIndex());
         }
         compareTotalValues(totalRow, totalRowTmp, columns, logger, required);
     }

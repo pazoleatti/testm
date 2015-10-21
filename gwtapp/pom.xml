@@ -191,6 +191,12 @@
             <groupId>org.jukito</groupId>
             <artifactId>jukito</artifactId>
         </dependency>
+        <dependency>
+            <groupId>javax.ejb</groupId>
+            <artifactId>ejb-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
 	</dependencies>
 
 	<build>
@@ -201,7 +207,6 @@
 				<artifactId>gwt-maven-plugin</artifactId>
 				<configuration>
 					<logLevel>INFO</logLevel>
-					<style>${gwt.style}</style>
 					<hostedWebapp>${webappDirectory}</hostedWebapp>
 					<copyWebapp>true</copyWebapp>
 					<runTarget>Main.jsp</runTarget>

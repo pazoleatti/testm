@@ -37,7 +37,7 @@ public class HeaderCell extends AbstractCell {
 	public Object setValue(Object value, Integer rowNumber) {
 		// Устанавливаем значение в главную ячейку (SBRFACCTAX-2082)
 		if (hasValueOwner()) {
-			getValueOwner().setValue(value, null);
+			getValueOwner().setValue(value, rowNumber);
 			return getValueOwner().getValue();
 		}
 		this.value = String.valueOf(value);
