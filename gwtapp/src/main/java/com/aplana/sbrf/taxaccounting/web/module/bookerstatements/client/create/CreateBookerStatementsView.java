@@ -147,7 +147,7 @@ public class CreateBookerStatementsView extends PopupViewWithUiHandlers<CreateBo
         if (accountPeriodIds.getValue() == null || accountPeriodIds.getValue().isEmpty()) {
             names.append("«Период», ");
         }
-        if (departmentPicker.getValue() == null || departmentPicker.getValue().size() == 0) {
+        if (departmentPicker.getValue() == null || departmentPicker.getValue().isEmpty()) {
             names.append("«Подразделение», ");
         }
         if (bookerReportType.getValue() == null) {

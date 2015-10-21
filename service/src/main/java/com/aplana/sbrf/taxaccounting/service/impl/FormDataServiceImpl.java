@@ -583,7 +583,7 @@ public class FormDataServiceImpl implements FormDataService {
 
     private void checkPerformer(Logger logger, FormData formData) {
         boolean check = true;
-        if (formData.getPerformer() == null || formData.getPerformer().getPrintDepartmentId() == null || formData.getSigners().size() == 0 ||
+        if (formData.getPerformer() == null || formData.getPerformer().getPrintDepartmentId() == null || formData.getSigners().isEmpty() ||
                     formData.getPerformer().getReportDepartmentName() == null || formData.getPerformer().getName() == null || formData.getPerformer().getPhone() == null ||
                     formData.getPerformer().getReportDepartmentName().trim().isEmpty() || formData.getPerformer().getName().trim().isEmpty() || formData.getPerformer().getPhone().trim().isEmpty()) {
             check = false;

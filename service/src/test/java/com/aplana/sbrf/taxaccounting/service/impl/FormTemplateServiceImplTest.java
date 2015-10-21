@@ -144,7 +144,7 @@ public class FormTemplateServiceImplTest extends Assert {
     public void validateFormAutoNumerationColumn_notCross() {
         formTemplateService.validateFormAutoNumerationColumn(formTemplateEdited, logger, userInfo);
         verify(formDataService, never()).batchUpdatePreviousNumberRow(any(FormTemplate.class), any(TAUserInfo.class));
-        assertTrue(logger.getEntries().size() == 0);
+        assertTrue(logger.getEntries().isEmpty());
     }
 
     /**
@@ -162,7 +162,7 @@ public class FormTemplateServiceImplTest extends Assert {
         formTemplateService.validateFormAutoNumerationColumn(formTemplateEdited, logger, userInfo);
 
         verify(formDataService).batchUpdatePreviousNumberRow(any(FormTemplate.class), any(TAUserInfo.class));
-        assertTrue(logger.getEntries().size() == 0);
+        assertTrue(logger.getEntries().isEmpty());
     }
 
     /**
@@ -206,7 +206,7 @@ public class FormTemplateServiceImplTest extends Assert {
         formTemplateService.validateFormAutoNumerationColumn(formTemplateEdited, logger, userInfo);
 
         verify(formDataService, never()).batchUpdatePreviousNumberRow(any(FormTemplate.class), any(TAUserInfo.class));
-        assertTrue(logger.getEntries().size() == 0);
+        assertTrue(logger.getEntries().isEmpty());
     }
 
     /**

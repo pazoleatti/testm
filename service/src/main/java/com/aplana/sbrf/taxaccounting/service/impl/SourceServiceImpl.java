@@ -173,7 +173,7 @@ public class SourceServiceImpl implements SourceService {
                     it.remove();
                 }
                 /** Если единственное назначение было удалено, то продолжать нет смысла */
-                if (!emptyIsOk && sourcePairsOut.size() == 0) {
+                if (!emptyIsOk && sourcePairsOut.isEmpty()) {
                     throw new ServiceLoggerException(FATAL_SAVE_MSG,
                             logEntryService.save(logger.getEntries()));
                 }

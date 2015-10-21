@@ -893,7 +893,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
      */
     public static String getParentFilter(String filter, Long parentRecordId) {
         String parentFilter = RefBook.RECORD_PARENT_ID_ALIAS + (parentRecordId == null ? " is null" : " = " + parentRecordId.toString());
-        return (filter == null || filter.trim().length() == 0) ? parentFilter : filter + " AND " + parentFilter;
+        return (filter == null || filter.trim().isEmpty()) ? parentFilter : filter + " AND " + parentFilter;
     }
 
     public static boolean checkHierarchical(RefBook refBook) {
@@ -1024,7 +1024,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     public void updateRecordVersion(Long refBookId, Long uniqueRecordId, Map<String, RefBookValue> records) {
         try {
             // нет данных - нет работы
-            if (records.size() == 0) {
+            if (records.isEmpty()) {
                 return;
             }
             RefBook refBook = get(refBookId);
@@ -1516,7 +1516,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 
         List<Map<Integer, List<Pair<RefBookAttribute, RefBookValue>>>> recordsGroupsUniqueAttributesValues = aggregateUniqueAttributesAndValuesByRecords(attributes, records);
 
-        if (recordsGroupsUniqueAttributesValues.size() == 0) {
+        if (recordsGroupsUniqueAttributesValues.isEmpty()) {
             return new ArrayList<Pair<Long, String>>();
         }
 
@@ -2234,7 +2234,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     @Override
     public void createRecords(Long refBookId, Date version, List<Map<String, RefBookValue>> records) {
         // нет данных - нет работы
-        if (records.size() == 0) {
+        if (records.isEmpty()) {
             return;
         }
         final List<Long> refBookRecordIds = dbUtils.getNextRefBookRecordIds(Long.valueOf(records.size()));
@@ -2340,7 +2340,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         try {
             //TODO: возможно стоит добавить проверку, что запись еще не удалена (Marat Fayzullin 2013-07-26)
             // нет данных - нет работы
-            if (records.size() == 0) {
+            if (records.isEmpty()) {
                 return;
             }
             RefBook refBook = get(refBookId);
@@ -2449,7 +2449,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             throw new IllegalArgumentException("refBookId: " + refBookId + "; version: " + version + "; recordIds: " + recordIds);
         }
         // нет данных - нет работы
-        if (recordIds.size() == 0) {
+        if (recordIds.isEmpty()) {
             return;
         }
         List<Object[]> insertValues = new ArrayList<Object[]>();

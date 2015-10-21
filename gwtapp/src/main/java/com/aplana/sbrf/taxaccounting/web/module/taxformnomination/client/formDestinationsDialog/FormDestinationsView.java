@@ -223,12 +223,12 @@ public class FormDestinationsView extends PopupViewWithUiHandlers<FormDestinatio
         }
 
         // Тип налоговой формы
-        if (formDataKind.getValue() == null || formDataKind.getValue().size() == 0){
+        if (formDataKind.getValue() == null || formDataKind.getValue().isEmpty()){
             cnt++;
         }
 
         // Вид налоговой формы
-        if (formTypeId.getValue() == null || formTypeId.getValue().size() == 0){
+        if (formTypeId.getValue() == null || formTypeId.getValue().isEmpty()){
             cnt++;
         }
 

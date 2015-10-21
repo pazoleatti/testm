@@ -36,7 +36,7 @@ public class ValidationService {
 			}
 			
 			if(FieldNames.getByName(ga.getName()) == FieldNames.ROLE_CODE){
-				if(ga.getValues().getItem().size() == 0)
+				if(ga.getValues().getItem().isEmpty())
 					throw new GenericAccountManagementException_Exception("Не заполнены роли пользователя. ", errorCreator(SudirErrorCodes.SUDIR_007));
 			}
 				

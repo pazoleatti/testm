@@ -81,7 +81,7 @@ public class RefBookPickerFilterBuilder {
 
         if (resultFilter.length() > 0 && resultSearch != null && resultSearch.length() > 0) {
             return "(" + resultFilter.toString() + ") and (" + resultSearch + ")";
-        } else if (resultFilter.length() > 0 && (resultSearch == null || resultSearch.length() == 0)) {
+        } else if (resultFilter.length() > 0 && (resultSearch == null || resultSearch.isEmpty())) {
             return resultFilter.toString();
         } else if (resultSearch != null && resultSearch.length() > 0 && resultFilter.length() == 0) {
             return resultSearch;
@@ -120,7 +120,7 @@ public class RefBookPickerFilterBuilder {
         String resultSearch = refBookFactory.getSearchQueryStatement(searchPattern, refBook.getId());
         if (resultFilter.length() > 0 && resultSearch != null && resultSearch.length() > 0) {
             return "(" + resultFilter.toString() + ") and (" + resultSearch + ")";
-        } else if (resultFilter.length() > 0 && resultSearch != null && resultSearch.length() == 0) {
+        } else if (resultFilter.length() > 0 && resultSearch != null && resultSearch.isEmpty()) {
             return resultFilter.toString();
         } else if (resultSearch != null && resultSearch.length() > 0 && resultFilter.length() == 0) {
             return resultSearch;

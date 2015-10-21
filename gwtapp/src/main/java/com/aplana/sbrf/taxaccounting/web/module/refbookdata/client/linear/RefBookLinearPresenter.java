@@ -252,7 +252,7 @@ public class RefBookLinearPresenter extends PresenterWidget<RefBookLinearPresent
                                         getView().setSelected(result.getDataRows().get(selectedRowIndex).getRefBookRowId());
                                     }
                                     selectedRowIndex = null;*/
-                                    /*if (result.getDataRows().size() == 0) {
+                                    /*if (result.getDataRows().isEmpty()) {
                                         editPresenter.setCanVersion(false);
                                     }*/
                                 }

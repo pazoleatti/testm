@@ -1154,7 +1154,7 @@ public final class ScriptUtils {
             }
         }
 
-        if (subAliases.size() == 0)
+        if (subAliases.isEmpty())
             return;
 
         String subAlias;

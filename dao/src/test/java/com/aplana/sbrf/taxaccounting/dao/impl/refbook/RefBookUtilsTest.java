@@ -51,7 +51,7 @@ public class RefBookUtilsTest {
         records1.put("NAME", new RefBookValue(RefBookAttributeType.STRING, "Виктор Васильевич Талалихин"));
         records1.put("BIRTHYEAR", new RefBookValue(RefBookAttributeType.STRING, "1918"));
         // все заполнено, все ок
-        assertTrue(RefBookUtils.checkFillRequiredRefBookAtributes(attributes, records1).size() == 0);
+        assertTrue(RefBookUtils.checkFillRequiredRefBookAtributes(attributes, records1).isEmpty());
 
         Map<String, RefBookValue> records2 = new HashMap<String, RefBookValue>();
         records2.put("BIRTHYEAR", new RefBookValue(RefBookAttributeType.STRING, "1918"));

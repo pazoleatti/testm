@@ -24,7 +24,7 @@ import java.math.BigDecimal;
 public class Tooltip extends Composite {
 
     public static boolean isBlank(final String str) {
-        return (str == null) || (str.trim().length() == 0);
+        return (str == null) || (str.trim().isEmpty());
     }
 
     interface TooltipStyle extends CssResource {
