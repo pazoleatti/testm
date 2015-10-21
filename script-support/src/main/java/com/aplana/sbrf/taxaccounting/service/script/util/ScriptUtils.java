@@ -1053,12 +1053,16 @@ public final class ScriptUtils {
      */
     @SuppressWarnings("unused")
     public static void calcTotalSum(List<DataRow<Cell>> dataRows, DataRow<Cell> totalRow, List<String> columns) {
-		// вычисляем индекс для итоговой строки = индекс последней строки в наборе + 1
-		Integer lastIndex = 0;
-		if (dataRows != null && dataRows.size() > 0 && dataRows.get(dataRows.size() - 1) != null) {
-			lastIndex = dataRows.get(dataRows.size() - 1).getIndex();
+		if (dataRows == null || dataRows.isEmpty()) {
+			return; // нечего вычислять
 		}
-		totalRow.setIndex(lastIndex == null ? 1 : lastIndex + 1);
+		Integer totalRowIndex = totalRow.getIndex(); // totalRowIndex необходим для вывода сообщений в Cell.setValue
+		if (totalRowIndex == null) {
+			DataRow<Cell> lastRow = dataRows.get(dataRows.size() - 1);
+			if(lastRow != null) {
+				totalRowIndex = lastRow.getIndex() == null ? 1 : lastRow.getIndex() + 1;
+			}
+		}
 
         for (String alias : columns) {
             BigDecimal sum = BigDecimal.valueOf(0);
@@ -1070,7 +1074,7 @@ public final class ScriptUtils {
                     }
                 }
             }
-            totalRow.getCell(alias).setValue(sum, totalRow.getIndex());
+            totalRow.getCell(alias).setValue(sum, totalRowIndex);
         }
     }
 

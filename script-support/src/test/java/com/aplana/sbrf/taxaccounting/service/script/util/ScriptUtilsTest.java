@@ -753,7 +753,7 @@ public class ScriptUtilsTest {
 
 		ScriptUtils.calcTotalSum(dataRows, totalRow, columns);
 		Assert.assertEquals(10, ((BigDecimal) totalRow.get("c2")).doubleValue(), 1e-2);
-		Assert.assertEquals(11, totalRow.getIndex().intValue());
+		Assert.assertNull(totalRow.getIndex());
 	}
 
 }
