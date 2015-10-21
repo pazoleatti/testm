@@ -70,6 +70,9 @@ public abstract class ScriptTestBase {
      * Проверка логгера на наличие ошибок
      */
     protected void checkLogger() {
+		if (testHelper.getLogger().containsLevel(LogLevel.ERROR)) {
+			printLog();
+		}
         Assert.assertFalse("Logger contains error level messages.", testHelper.getLogger().containsLevel(LogLevel.ERROR));
     }
 
