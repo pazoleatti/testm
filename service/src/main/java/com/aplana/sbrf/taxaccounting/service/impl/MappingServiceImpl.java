@@ -201,7 +201,7 @@ public class MappingServiceImpl implements MappingService {
         try {
             // Ошибка записи в журнал аудита не должна откатывать импорт
             auditService.add(FormDataEvent.MIGRATION, userInfo, departmentId, reportPeriodId, null, formTypeName,
-                    FormDataKind.PRIMARY.getId(), msg, null, null);
+                    FormDataKind.PRIMARY.getId(), msg, null);
         } catch (Exception e) {
             LOG.error("Ошибка записи в журнал аудита", e);
         }

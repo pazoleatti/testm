@@ -4,9 +4,7 @@ import com.aplana.sbrf.taxaccounting.dao.AuditDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
-import com.aplana.sbrf.taxaccounting.service.AuditService;
-import com.aplana.sbrf.taxaccounting.service.DepartmentService;
-import com.aplana.sbrf.taxaccounting.service.PeriodService;
+import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.util.TransactionHelper;
 import com.aplana.sbrf.taxaccounting.util.TransactionLogic;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,9 +29,17 @@ public class AuditServiceImpl implements AuditService {
     private TransactionHelper tx;
     @Autowired
     private PeriodService periodService;
+    @Autowired
+    private DepartmentReportPeriodService departmentReportPeriodService;
+    @Autowired
+    private FormTemplateService formTemplateService;
+    @Autowired
+    private DeclarationTemplateService declarationTemplateService;
 
     private static final String RP_NAME_PATTERN = "%s %s";
+    private static final String RP_NAME_WITH_CORR_PATTERN = "%s %s%s";
     private static final SimpleDateFormat SDF_YYYY = new SimpleDateFormat("yyyy");
+    private static final SimpleDateFormat SDF_DD_MM_YYYY = new SimpleDateFormat("dd.MM.yyyy");
 
     @Override
 	public PagingResult<LogSearchResultItem> getLogsByFilter(LogSystemFilter filter) {
@@ -53,20 +59,6 @@ public class AuditServiceImpl implements AuditService {
         tx.executeInNewTransaction(new TransactionLogic() {
             @Override
             public Object execute() {
-                LogSystem log = new LogSystem();
-                log.setIp(userInfo.getIp());
-                log.setEventId(event.getCode());
-                log.setUserLogin(userInfo.getUser().getLogin());
-
-                StringBuilder roles = new StringBuilder();
-                List<TARole> taRoles = userInfo.getUser().getRoles();
-                for (int i = 0; i < taRoles.size(); i++) {
-                    roles.append(taRoles.get(i).getName());
-                    if (i != taRoles.size() - 1) {
-                        roles.append(", ");
-                    }
-                }
-                log.setRoles(roles.toString());
 
                 String departmentName = departmentId == null ?
                         departmentService.getParentsHierarchy(userInfo.getUser().getDepartmentId())
@@ -75,25 +67,15 @@ public class AuditServiceImpl implements AuditService {
                                 departmentId == 0 ? departmentService.getDepartment(departmentId).getName() :
                                 departmentService.getParentsHierarchy(departmentId)
                         );
-                log.setFormDepartmentName(departmentName.substring(0, Math.min(departmentName.length(), 2000)));
-                log.setFormDepartmentId(departmentId);
 
-                if (reportPeriodId == null)
-                    log.setReportPeriodName(null);
-                else {
+                String rpName = null;
+                if (reportPeriodId != null) {
                     ReportPeriod reportPeriod = periodService.getReportPeriod(reportPeriodId);
-                    log.setReportPeriodName(String.format(RP_NAME_PATTERN, reportPeriod.getTaxPeriod().getYear(), reportPeriod.getName()));
+                    rpName = String.format(RP_NAME_PATTERN, reportPeriod.getTaxPeriod().getYear(), reportPeriod.getName());
                 }
-                log.setDeclarationTypeName(declarationTypeName);
-                log.setFormTypeName(formTypeName);
-                log.setFormKindId(formKindId);
-                log.setNote(note != null ? note.substring(0, Math.min(note.length(), 2000)) : null);
-                int userDepId = userInfo.getUser().getDepartmentId();
-                String userDepartmentName = userDepId == 0 ? departmentService.getDepartment(userDepId).getName() : departmentService.getParentsHierarchy(userDepId);
-                log.setUserDepartmentName(userDepartmentName.substring(0, Math.min(userDepartmentName.length(), 2000)));
-                log.setBlobDataId(blobDataId);
+                String mnote = note != null ? note.substring(0, Math.min(note.length(), 2000)) : null;
 
-                auditDao.add(log);
+                add(event, userInfo, departmentName, departmentId, rpName, declarationTypeName, formTypeName, formKindId, mnote, blobDataId);
 				return null;
             }
         });
@@ -106,62 +88,56 @@ public class AuditServiceImpl implements AuditService {
 
             @Override
             public Object execute() {
-                LogSystem log = new LogSystem();
-                log.setIp(userInfo.getIp());
-                log.setEventId(event.getCode());
-                log.setUserLogin(userInfo.getUser().getLogin());
 
-                StringBuilder roles = new StringBuilder();
-                List<TARole> taRoles = userInfo.getUser().getRoles();
-                for (int i = 0; i < taRoles.size(); i++) {
-                    roles.append(taRoles.get(i).getName());
-                    if (i != taRoles.size() - 1) {
-                        roles.append(", ");
-                    }
-                }
-                log.setRoles(roles.toString());
-
-                log.setFormDepartmentName(null);
-                log.setFormDepartmentId(null);
-
+                String rpName;
                 if (endDate == null)
-                    log.setReportPeriodName(String.format("С %s", SDF_YYYY.format(startDate)));
+                    rpName = String.format("С %s", SDF_YYYY.format(startDate));
                 else {
-                    log.setReportPeriodName(String.format("С %s по %s", SDF_YYYY.format(startDate), SDF_YYYY.format(endDate)));
+                    rpName = String.format("С %s по %s", SDF_YYYY.format(startDate), SDF_YYYY.format(endDate));
                 }
-                log.setDeclarationTypeName(declarationTemplateName);
-                log.setFormTypeName(formTemplateName);
-                log.setFormKindId(null);
-                log.setNote(note != null ? note.substring(0, Math.min(note.length(), 2000)) : null);
-                int userDepId = userInfo.getUser().getDepartmentId();
-                String userDepartmentName = userDepId == 0 ? departmentService.getDepartment(userDepId).getName() : departmentService.getParentsHierarchy(userDepId);
-                log.setUserDepartmentName(userDepartmentName.substring(0, Math.min(userDepartmentName.length(), 2000)));
-                log.setBlobDataId(blobDataId);
+                String mnote = note != null ? note.substring(0, Math.min(note.length(), 2000)) : null;
 
-                auditDao.add(log);
+                add(event, userInfo, null, null, rpName, declarationTemplateName, formTemplateName, null, mnote, blobDataId);
 				return null;
             }
         });
     }
 
     @Override
-    @Transactional(readOnly = false)
-    public void removeRecords(List<LogSearchResultItem> items, TAUserInfo userInfo) {
-        Date startDate = null;
-        Date endDate = null;
-        if (!items.isEmpty()){
-            List<Long> listIds = new ArrayList<Long>();
-            for (LogSearchResultItem item : items){
-                listIds.add(item.getId());
-                if (startDate == null || item.getLogDate().compareTo(startDate) == -1) {
-                    startDate = item.getLogDate();
+    public void add(final FormDataEvent event, final TAUserInfo userInfo, final DeclarationData declarationData, final FormData formData, final String note, final String blobDataId) {
+        tx.executeInNewTransaction(new TransactionLogic() {
+            @Override
+            public Object execute() {
+                int departmentId = declarationData != null ? declarationData.getDepartmentId() : formData.getDepartmentId();
+                Integer reportPeriodId = declarationData != null ? declarationData.getReportPeriodId() : formData.getReportPeriodId();
+                int departmentRPId = declarationData != null ? declarationData.getDepartmentReportPeriodId() : formData.getDepartmentReportPeriodId();
+                DepartmentReportPeriod departmentReportPeriod = departmentReportPeriodService.get(departmentRPId);
+                String corrStr = departmentReportPeriod.getCorrectionDate() != null ? " в корр.периоде " + SDF_DD_MM_YYYY.format(departmentReportPeriod.getCorrectionDate()) : "";
+
+
+                String departmentName = departmentId == 0 ?
+                        departmentService.getDepartment(departmentId).getName() :
+                        departmentService.getParentsHierarchy(departmentId);
+
+                ReportPeriod reportPeriod = periodService.getReportPeriod(reportPeriodId);
+                String rpName =  String.format(
+                        RP_NAME_WITH_CORR_PATTERN,
+                        reportPeriod.getTaxPeriod().getYear(),
+                        reportPeriod.getName(),
+                        corrStr);
+                String decTypeName = null, ftName = null;
+                Integer formKindId =null;
+                if (declarationData != null){
+                    decTypeName = declarationTemplateService.get(declarationData.getDeclarationTemplateId()).getType().getName();
+                } else {
+                    ftName = formData.getFormType().getName();
+                    formKindId = formData.getKind().getId();
                 }
-                if (endDate == null || item.getLogDate().compareTo(endDate) == 1) {
-                    endDate = item.getLogDate();
-                }
+
+                add(event, userInfo, departmentName, departmentId, rpName, decTypeName, ftName, formKindId, note != null ? note.substring(0, Math.min(note.length(), 2000)) : null, blobDataId);
+                return null;
             }
-            auditDao.removeRecords(listIds);
-        }
+        });
     }
 
     @Override
@@ -241,5 +217,37 @@ public class AuditServiceImpl implements AuditService {
             return auditDao.getCountForControlUnp(filter);
         }
         return auditDao.getCount(filter);
+    }
+
+    private void add(FormDataEvent event, TAUserInfo userInfo, String departmentName, Integer departmentId, String reportPeriodName,
+                     String declarationTypeName, String formTypeName, Integer formKindId, String note, String blobDataId){
+        LogSystem log = new LogSystem();
+        log.setIp(userInfo.getIp());
+        log.setEventId(event.getCode());
+        log.setUserLogin(userInfo.getUser().getLogin());
+
+        StringBuilder roles = new StringBuilder();
+        List<TARole> taRoles = userInfo.getUser().getRoles();
+        for (int i = 0; i < taRoles.size(); i++) {
+            roles.append(taRoles.get(i).getName());
+            if (i != taRoles.size() - 1) {
+                roles.append(", ");
+            }
+        }
+        log.setRoles(roles.toString());
+
+        log.setFormDepartmentName(departmentName != null ? departmentName.substring(0, Math.min(departmentName.length(), 2000)) : null);
+        log.setFormDepartmentId(departmentId);
+        log.setReportPeriodName(reportPeriodName);
+        log.setDeclarationTypeName(declarationTypeName);
+        log.setFormTypeName(formTypeName);
+        log.setFormKindId(formKindId);
+        log.setNote(note != null ? note.substring(0, Math.min(note.length(), 2000)) : null);
+        int userDepId = userInfo.getUser().getDepartmentId();
+        String userDepartmentName = userDepId == 0 ? departmentService.getDepartment(userDepId).getName() : departmentService.getParentsHierarchy(userDepId);
+        log.setUserDepartmentName(userDepartmentName != null ? userDepartmentName.substring(0, Math.min(userDepartmentName.length(), 2000)):null);
+        log.setBlobDataId(blobDataId);
+
+        auditDao.add(log);
     }
 }

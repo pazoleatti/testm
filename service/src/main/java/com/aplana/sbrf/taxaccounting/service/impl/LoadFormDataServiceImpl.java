@@ -586,8 +586,7 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
             } else {
                 if (!formWasCreated) {
                     logBusinessService.add(formData.getId(), null, userInfo, FormDataEvent.CREATE, null);
-                    auditService.add(FormDataEvent.CREATE, userInfo, formData.getDepartmentId(), formData.getReportPeriodId(),
-                            null, formData.getFormType().getName(), formData.getKind().getId(), "Форма создана", null);
+                    auditService.add(FormDataEvent.CREATE, userInfo, null, formData, "Форма создана", null);
                 }
             }
 
