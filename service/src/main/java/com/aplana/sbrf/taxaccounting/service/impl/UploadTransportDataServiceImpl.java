@@ -471,7 +471,7 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
                 }
             }
             auditService.add(FormDataEvent.UPLOAD_TRANSPORT_FILE, userInfo, departmentId, null,
-                    null, formTypeName, null, prefix + String.format(logData.getText(), args), null, formTypeId);
+                    null, formTypeName, null, prefix + String.format(logData.getText(), args), null);
         }
     }
 

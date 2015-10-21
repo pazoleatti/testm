@@ -202,10 +202,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         long id = declarationDataDao.saveNew(newDeclaration);
 
         logBusinessService.add(null, id, userInfo, FormDataEvent.CREATE, null);
-        auditService.add(FormDataEvent.CREATE , userInfo, newDeclaration.getDepartmentId(),
-                newDeclaration.getReportPeriodId(),
-                declarationTemplateService.get(newDeclaration.getDeclarationTemplateId()).getType().getName(),
-                null, null, "Декларация создана", null, null);
+        auditService.add(FormDataEvent.CREATE , userInfo, newDeclaration, null, "Декларация создана", null);
         return id;
     }
 
@@ -234,10 +231,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         sourceService.addDeclarationConsolidationInfo(id, formDataIds);
 
         logBusinessService.add(null, id, userInfo, FormDataEvent.SAVE, null);
-        auditService.add(FormDataEvent.CALCULATE , userInfo, declarationData.getDepartmentId(),
-                declarationData.getReportPeriodId(),
-                declarationTemplateService.get(declarationData.getDeclarationTemplateId()).getType().getName(),
-                null, null, "Декларация обновлена", null, null);
+        auditService.add(FormDataEvent.CALCULATE , userInfo, declarationData, null, "Декларация обновлена", null);
     }
 
     @Override
@@ -290,10 +284,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             deleteReport(id, userInfo.getUser().getId(), false);
             declarationDataDao.delete(id);
 
-            auditService.add(FormDataEvent.DELETE , userInfo, declarationData.getDepartmentId(),
-                    declarationData.getReportPeriodId(),
-                    declarationTemplateService.get(declarationData.getDeclarationTemplateId()).getType().getName(),
-                    null, null, "Декларация удалена", null, null);
+            auditService.add(FormDataEvent.DELETE , userInfo, declarationData, null, "Декларация удалена", null);
         } else {
             if (lockData == null) lockData = lockDataAccept;
             if (lockData == null) lockData = lockDataCheck;
@@ -325,8 +316,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
         String declarationTypeName = declarationTemplateService.get(declarationData.getDeclarationTemplateId()).getType().getName();
         logBusinessService.add(null, id, userInfo, FormDataEvent.MOVE_CREATED_TO_ACCEPTED, null);
-        auditService.add(FormDataEvent.MOVE_CREATED_TO_ACCEPTED, userInfo, declarationData.getDepartmentId(),
-                declarationData.getReportPeriodId(), declarationTypeName, null, null, FormDataEvent.MOVE_CREATED_TO_ACCEPTED.getTitle(), null, null);
+        auditService.add(FormDataEvent.MOVE_CREATED_TO_ACCEPTED, userInfo, declarationData, null, FormDataEvent.MOVE_CREATED_TO_ACCEPTED.getTitle(), null);
 
         lockStateLogger.updateState("Изменение состояния декларации");
         declarationDataDao.setAccepted(id, true);
@@ -356,10 +346,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             }
         }
 
-        String declarationTypeName = declarationTemplateService.get(declarationData.getDeclarationTemplateId()).getType().getName();
         logBusinessService.add(null, id, userInfo, FormDataEvent.MOVE_ACCEPTED_TO_CREATED, null);
-        auditService.add(FormDataEvent.MOVE_ACCEPTED_TO_CREATED, userInfo, declarationData.getDepartmentId(),
-                declarationData.getReportPeriodId(), declarationTypeName, null, null, FormDataEvent.MOVE_ACCEPTED_TO_CREATED.getTitle(), null, null);
+        auditService.add(FormDataEvent.MOVE_ACCEPTED_TO_CREATED, userInfo, declarationData, null, FormDataEvent.MOVE_ACCEPTED_TO_CREATED.getTitle(), null);
 
         declarationDataDao.setAccepted(id, false);
     }

@@ -64,13 +64,13 @@ public class SendQueryHandler extends AbstractActionHandler<SendQueryAction, Sen
         if (count == 0) {
             logger.info(SEND_LOGGER);
             auditService.add(FormDataEvent.SEND_EMAIL, principal.getUserInfo(), principal.getUserInfo().getUser().getDepartmentId(),
-                    null, null, null, null, SEND_LOGGER, null, null);
+                    null, null, null, null, SEND_LOGGER, null);
         } else {
             try {
                 emailService.send(emails, TITLE, getMessage(action.getMessage()));
                 logger.info(SEND_SUCCESS);
                 auditService.add(FormDataEvent.SEND_EMAIL, principal.getUserInfo(), 0, null, null, null, null,
-                        count == 1 ? String.format(SEND_MAIL, emails.get(0)) : String.format(SEND_MAILS, StringUtils.join(emails.toArray(), ',')), null, null);
+                        count == 1 ? String.format(SEND_MAIL, emails.get(0)) : String.format(SEND_MAILS, StringUtils.join(emails.toArray(), ',')), null);
                 result.setSuccess(true);
             } catch (Exception e) {
                 logger.error(e.getMessage());

@@ -3,7 +3,6 @@ package com.aplana.sbrf.taxaccounting.service;
 import com.aplana.sbrf.taxaccounting.model.*;
 
 import java.util.Date;
-import java.util.List;
 
 /**
  * Сервис для работы с журналом аудита
@@ -58,11 +57,10 @@ public interface AuditService {
      * Добавить информацию о логировании из версий макетов
      * @param event событие {@link FormDataEvent} (обязательное)
      * @param userInfo информация о пользователе, который совершает событие (обязательное)
-     * @param departmentId подразделение НФ/декларации (необязательное)
-     * @param reportPeriodId отчетный период (необязательное)
+     * @param startDate дата начала действия макета
+     * @param endDate дата окончания действия макета
      * @param declarationTemplateName наименование типа декларации (необязательное)
      * @param formTemplateName наименование типа НФ (необязательное) Хранится для информации о виде НФ, даже если она будет изменена
-     * @param formKindId вид НФ (необязательное)
      * @param note пояснение (необязательное)
      * @param blobDataId сыылка на сериализованные данные из лог панели, хранящие набор сообщений к данному событию (необязательное)
      */
@@ -70,10 +68,15 @@ public interface AuditService {
              String declarationTemplateName, String formTemplateName, String note, String blobDataId);
 
     /**
-     * Удаляем набор записей из журнала и сразу создаем запись в ЖА об архивировании.
-     * @param itemList архивированные записи
+     * Логгирование для НФ/деклараций(т.к. нужно еще инфо о корр. периоде добавлять)
+     * @param event
+     * @param userInfo
+     * @param declarationData
+     * @param formData
+     * @param note
+     * @param blobDataId
      */
-    void removeRecords(List<LogSearchResultItem> itemList, TAUserInfo userInfo);
+    void add(FormDataEvent event, TAUserInfo userInfo, DeclarationData declarationData, FormData formData, String note, String blobDataId);
 
     /**
      * Удаляем набор записей из журнала по фильтру

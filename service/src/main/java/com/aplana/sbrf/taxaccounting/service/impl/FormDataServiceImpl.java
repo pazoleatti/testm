@@ -267,8 +267,7 @@ public class FormDataServiceImpl implements FormDataService {
             formDataDao.updateEdited(fd.getId(), true);
 			dataRowDao.refreshRefBookLinks(fd);
             logBusinessService.add(formDataId, null, userInfo, formDataEvent, null);
-            auditService.add(formDataEvent, userInfo, fd.getDepartmentId(), fd.getReportPeriodId(),
-                    null, fd.getFormType().getName(), fd.getKind().getId(), fileName, null, fd.getFormType().getId());
+            auditService.add(formDataEvent, userInfo, null, fd, fileName, null);
         } catch (IOException e) {
             throw new ServiceException(e.getLocalizedMessage(), e);
         } finally {
@@ -343,8 +342,7 @@ public class FormDataServiceImpl implements FormDataService {
 
         if (!importFormData) {
             logBusinessService.add(formData.getId(), null, userInfo, FormDataEvent.CREATE, null);
-            auditService.add(FormDataEvent.CREATE, userInfo, formData.getDepartmentId(), formData.getReportPeriodId(),
-                    null, formData.getFormType().getName(), formData.getKind().getId(), "Форма создана", null);
+            auditService.add(FormDataEvent.CREATE, userInfo, null, formData, "Форма создана", null);
         }
 
 		dataRowDao.saveRows(formData, formTemplate.getRows());
@@ -641,8 +639,7 @@ public class FormDataServiceImpl implements FormDataService {
         deleteReport(formData.getId(), formData.isManual(), userInfo.getUser().getId());
         // ЖА и история изменений
 		logBusinessService.add(formData.getId(), null, userInfo, FormDataEvent.SAVE, null);
-		auditService.add(FormDataEvent.SAVE, userInfo, formData.getDepartmentId(), formData.getReportPeriodId(),
-				null, formData.getFormType().getName(), formData.getKind().getId(), "Форма сохранена", null, formData.getFormType().getId());
+		auditService.add(FormDataEvent.SAVE, userInfo, null, formData, "Форма сохранена", null);
 		return formData.getId();
 	}
 
@@ -704,8 +701,7 @@ public class FormDataServiceImpl implements FormDataService {
                     formDataDao.delete(formDataId);
                     formDataDao.deleteFormDataNnn(formData.getFormTemplateId(), formDataId);
                     interruptTask(formDataId, false, userInfo.getUser().getId(), reportType);
-                    auditService.add(FormDataEvent.DELETE, userInfo, formData.getDepartmentId(), formData.getReportPeriodId(),
-                            null, formData.getFormType().getName(), formData.getKind().getId(), "Форма удалена", null);
+                    auditService.add(FormDataEvent.DELETE, userInfo, null, formData, "Форма удалена", null);
                 }
             } finally {
                 lockService.unlock(keyTask, userInfo.getUser().getId());
@@ -1054,8 +1050,7 @@ public class FormDataServiceImpl implements FormDataService {
         dataRowDao.removeCheckPoint(formData);
 
         logBusinessService.add(formData.getId(), null, userInfo, workflowMove.getEvent(), note);
-        auditService.add(workflowMove.getEvent(), userInfo, formData.getDepartmentId(), formData.getReportPeriodId(),
-                null, formData.getFormType().getName(), formData.getKind().getId(), workflowMove.getEvent().getTitle(), null, formData.getFormType().getId());
+        auditService.add(workflowMove.getEvent(), userInfo, null, formData, workflowMove.getEvent().getTitle(), null);
 
         stateLogger.updateState("Обновление сквозной нумерации");
         updatePreviousRowNumberAttr(formData, workflowMove, logger, userInfo);

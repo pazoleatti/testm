@@ -57,7 +57,7 @@ public class AuthenticationUserDetailsServiceImpl implements AuthenticationUserD
 		info.setIp(
 				((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest().getRemoteAddr()
 		);
-		auditService.add(FormDataEvent.LOGIN, info, info.getUser().getDepartmentId(), null, null, null, null, null, null, null);
+		auditService.add(FormDataEvent.LOGIN, info, info.getUser().getDepartmentId(), null, null, null, null, null, null);
 
 		return new UserAuthenticationToken(info, grantedAuthorities);
 	}
