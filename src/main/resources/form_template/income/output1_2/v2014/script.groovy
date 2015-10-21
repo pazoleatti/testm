@@ -111,7 +111,7 @@ def editableColumns = allColumns
 def keyColumns = ['decisionNumber', 'decisionDate']
 // 7 графа источника (группировка при консолидации для нового алгоритма)
 @Field
-def keyColumnsNew = ['decisionNumber']
+def keyColumnsNew = ['inn', 'decisionNumber']
 
 @Field
 def sbStrings = [
@@ -298,7 +298,7 @@ void consolidation() {
                 def isNewFormType = (it.formTypeId == lastSourceFormType)
                 def rowMap = getRowMap(sourceHelper.allSaved, isNewFormType)
                 rowMap.each { key, sourceRows ->
-                    def newRow = formNewRow(sourceRows, dataRowsPrev, prevPeriodStartDate, prevPeriodEndDate, lastPeriodStartDate, lastPeriodEndDate, isNewFormType)
+                    def newRow = formNewRow(sourceRows, dataRowsPrev, prevPeriodStartDate, prevPeriodEndDate, lastPeriodStartDate, lastPeriodEndDate, isNewFormType, rows.size() + 1)
                     rows.add(newRow)
                 }
             }
@@ -321,7 +321,7 @@ def getRowMap(def rows, boolean isNewFormType) {
     return result
 }
 
-def formNewRow(def rowList, def dataRowsPrev, def prevPeriodStartDate, def prevPeriodEndDate, def lastPeriodStartDate, def lastPeriodEndDate, boolean isNewFormType) {
+def formNewRow(def rowList, def dataRowsPrev, def prevPeriodStartDate, def prevPeriodEndDate, def lastPeriodStartDate, def lastPeriodEndDate, boolean isNewFormType, int rowIndex) {
     def newRow = formData.createDataRow()
     editableColumns.each {
         newRow.getCell(it).editable = true
@@ -475,14 +475,24 @@ def formNewRow(def rowList, def dataRowsPrev, def prevPeriodStartDate, def prevP
         // Если «Графа 17» формы-источника = «1» и «Графа 16» формы-источника = «5» и «Графа 22» формы-источника заполнена и не равно «0»/«9», то «Графа 29» = (Сумма по «Графа 23» для каждого уникального сочетания «Графа 7» и «Графа 8» формы-источника)*13%) / «Графа 12» формы-источника * («Графа 4» формы-источника - «Графа 5» формы-источника).
         // Иначе «Графа 29» = Значение «0».
         // Иначе «Графа 29» = Сумма по «Графа 27» для каждого уникального сочетания «Графа 7» и «Графа 8» формы-источникапервичной формы
+        def value2 = rowList.sum { (it.withheldSum != null) ? it.withheldSum : 0 }
         if (row.emitentInn == graph3String) {
             if (row.allSum) {
-                newRow.taxSum = rowList.sum{ (it.status == 1 && it.type == 5 && it.rate != null && it.rate != 0 && it.rate != 9 && it.dividends) ? it.dividends : 0 } * 0.13 * (row.all - row.rateZero) / row.allSum
+                newRow.taxSum = rowList.sum {
+                    (it.status == 1 && it.type == 5 && it.rate != null && it.rate != 0 && it.rate != 9 && it.dividends) ? it.dividends : 0
+                } * 0.13 * (row.all - row.rateZero) / row.allSum
+            } else{
+                newRow.taxSum = 0
             }
         } else {
-            newRow.taxSum = rowList.sum{ (it.withheldSum != null) ? it.withheldSum : 0 }
+            newRow.taxSum = value2
         }
-
+        if (newRow.taxSum != value2) {
+            logger.warn("Строка ${rowIndex}: Графа «Исчисленная сумма налога, подлежащая уплате в бюджет» заполнена неверно! Не выполняется условие: " +
+                    "«Графа 29» = Сумма по «Графа 27» для строк формы-источника «Расчет налога на прибыль организаций " +
+                    "с доходов, удерживаемого налоговым агентом (источником выплаты доходов)», " +
+                    "в которых «Графа 3» = «${row.inn}» и «Графа 7» = «${row.decisionNumber}»")
+        }
         // Графа 30: Принимает значение:
         // «Графа 30» = (Сумма значений по «Графе 30» и «Графе 31») формы 03-А предыдущего периода (для начала года заходим в предыдущий) по строке, в которой:
         // «Графа 1» = Значение «1» (признак отнесения строки к строке ПАО Сбербанк);
@@ -514,7 +524,7 @@ def formNewRow(def rowList, def dataRowsPrev, def prevPeriodStartDate, def prevP
     newRow.dividendD1D2 =  (row.emitentInn == graph3String) ? ((row.allSum ?: 0) - ((row.all ?: 0) - (row.rateZero ?: 0))) : (row.distributionSum ?: 0)
 
     // Графа 31: Принимает значение: Если графа 17 = 1, графа 16 = 1 (ЮЛ) ∑ Граф 27 для одного Решения (графа 7-8) если дата по графе 28 принадлежит последнему кварталу отчетного периода
-    newRow.taxSumLast = rowList.sum{ (it.status == 1 && it.type == 1 && it.withheldDate != null && it.withheldDate.before(lastPeriodEndDate) && it.withheldDate.after(lastPeriodStartDate) && it.withheldSum != null) ? it.withheldSum : 0 }
+    newRow.taxSumLast = rowList.sum{ it.withheldSum ?: 0 }
 
     return newRow
 }
