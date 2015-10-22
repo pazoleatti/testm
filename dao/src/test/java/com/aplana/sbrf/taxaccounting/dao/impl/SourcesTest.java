@@ -8,6 +8,7 @@ import com.aplana.sbrf.taxaccounting.model.Relation;
 import com.aplana.sbrf.taxaccounting.model.VersionedObjectStatus;
 import com.aplana.sbrf.taxaccounting.model.WorkflowState;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +27,7 @@ import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 
+@Ignore("Включать только локально, со включенным тестом не коммитить!")
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration({ "SourcesTest.xml" })
 @Transactional
