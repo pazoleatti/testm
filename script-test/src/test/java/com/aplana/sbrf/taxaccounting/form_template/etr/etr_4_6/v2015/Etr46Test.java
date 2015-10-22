@@ -41,10 +41,9 @@ public class Etr46Test extends ScriptTestBase {
         formData.setState(WorkflowState.CREATED);
         formData.setDepartmentId(DEPARTMENT_ID);
         formData.setDepartmentReportPeriodId(DEPARTMENT_PERIOD_ID);
-        formData.setComparativPeriodId(COMP_DEP_PERIOD_ID);
+        formData.setComparativePeriodId(COMP_DEP_PERIOD_ID);
         formData.setReportPeriodId(REPORT_PERIOD_ID);
         formData.setPeriodOrder(1);
-        formData.setComparativPeriodId(1);
         return formData;
     }
 

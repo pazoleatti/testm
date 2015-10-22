@@ -137,8 +137,8 @@ def getEndDate(int reportPeriodId) {
 }
 
 def getComparativePeriodId() {
-    if (formData.comparativPeriodId != null && comparativePeriodId == null) {
-        comparativePeriodId = departmentReportPeriodService.get(formData.comparativPeriodId)?.reportPeriod?.id
+    if (formData.comparativePeriodId != null && comparativePeriodId == null) {
+        comparativePeriodId = departmentReportPeriodService.get(formData.comparativePeriodId)?.reportPeriod?.id
     }
     return comparativePeriodId
 }

@@ -124,13 +124,13 @@ void preCalcCheck() {
 }
 
 @Field
-def comparativPeriodId
+def comparativePeriodId
 
 def getComparativePeriodId() {
-    if (comparativPeriodId == null && formData.comparativPeriodId != null) {
-        comparativPeriodId = departmentReportPeriodService.get(formData.comparativPeriodId)?.reportPeriod?.id
+    if (comparativePeriodId == null && formData.comparativePeriodId != null) {
+        comparativePeriodId = departmentReportPeriodService.get(formData.comparativePeriodId)?.reportPeriod?.id
     }
-    return comparativPeriodId
+    return comparativePeriodId
 }
 
 void checkOpuCodes(def alias, def date, def opuCodes, def tmpRow) {
@@ -333,7 +333,7 @@ def getSourceValue(def periodId, def row, def alias, def isCalc) {
 }
 
 def getSourceForm(def formDataKind, def periodId) {
-    def source = formDataService.getLast(sourceFormTypeId, formDataKind, formData.departmentId, periodId, formData.periodOrder)
+    def source = formDataService.getLast(sourceFormTypeId, formDataKind, formData.departmentId, periodId, formData.periodOrder, formData.comparativePeriodId, formData.accruing)
     if (source != null && source.state == WorkflowState.ACCEPTED) {
         return formDataService.getDataRowHelper(source)
     }
@@ -514,7 +514,7 @@ void consolidation() {
     for (formDataSource in departmentFormTypeService.getFormSources(formData.departmentId, formData.formType.id, formData.kind,
             getStartDate(formData.reportPeriodId), getEndDate(formData.reportPeriodId))) {
         if (formDataSource.formTypeId == formData.formType.id) {
-            def source = formDataService.getLast(formDataSource.formTypeId, formDataSource.kind, formDataSource.departmentId, formData.reportPeriodId, formData.periodOrder)
+            def source = formDataService.getLast(formDataSource.formTypeId, formDataSource.kind, formDataSource.departmentId, formData.reportPeriodId, formData.periodOrder, formData.comparativePeriodId, formData.accruing)
             if (source != null && source.state == WorkflowState.ACCEPTED) {
                 sourceRows = formDataService.getDataRowHelper(source)?.allSaved
                 // суммируем 3, 4-ую графу из источников

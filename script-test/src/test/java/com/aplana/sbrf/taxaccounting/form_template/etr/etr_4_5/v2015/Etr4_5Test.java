@@ -47,7 +47,7 @@ public class Etr4_5Test extends ScriptTestBase {
         formData.setDepartmentReportPeriodId(DEPARTMENT_PERIOD_ID);
         formData.setReportPeriodId(REPORT_PERIOD_ID);
         formData.setPeriodOrder(1);
-        formData.setComparativPeriodId(1);
+        formData.setComparativePeriodId(1);
         return formData;
     }
 
@@ -172,7 +172,7 @@ public class Etr4_5Test extends ScriptTestBase {
         sourceFormData.setId(2L);
         sourceFormData.setState(WorkflowState.ACCEPTED);
         when(testHelper.getFormDataService().getLast(eq(departmentFormType.getFormTypeId()), eq(FormDataKind.PRIMARY), eq(DEPARTMENT_ID),
-                anyInt(), any(Integer.class))).thenReturn(sourceFormData);
+                anyInt(), anyInt(), anyInt(), anyBoolean())).thenReturn(sourceFormData);
 
         // DataRowHelper НФ-источника
         DataRowHelper sourceDataRowHelper = new DataRowHelperStub();
