@@ -482,7 +482,7 @@ def formNewRow(def rowList, def dataRowsPrev, def prevPeriodStartDate, def prevP
                     (it.status == 1 && it.type == 5 && it.rate != null && it.rate != 0 && it.rate != 9 && it.dividends) ? it.dividends : 0
                 } / row.allSum) * 0.13) / (row.allSum * ((row.all ?: 0) - (row.rateZero ?: 0)))
             } else{
-                newRow.taxSum = 0
+                newRow.taxSum = value2
             }
         } else {
             newRow.taxSum = value2
