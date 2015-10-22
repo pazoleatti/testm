@@ -3,6 +3,7 @@ package form_template.income.advanceDistribution.v2015
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.FormDataKind
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType
@@ -81,7 +82,10 @@ switch (formDataEvent) {
         formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.IMPORT:
-        noImport(logger)
+        importData()
+        if (!logger.containsLevel(LogLevel.ERROR)) {
+            formDataService.saveCachedDataRows(formData, logger)
+        }
         break
     case FormDataEvent.SORT_ROWS:
         sortFormDataRows()
@@ -179,6 +183,16 @@ def getRefBookRecord(def Long refBookId, def String alias, def String value, def
             day, rowIndex, cellName, logger, required)
 }
 
+// Поиск записи в справочнике по значению (для импорта)
+def getRecordIdImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
+                      def boolean required = true) {
+    if (value == null || value.trim().isEmpty()) {
+        return null
+    }
+    return formDataService.getRefBookRecordIdImport(refBookId, recordCache, providerCache, alias, value,
+            getReportPeriodEndDate(), rowIndex, colIndex, logger, required)
+}
+
 /**
  * Расчеты. Алгоритмы заполнения полей формы.
  */
@@ -265,12 +279,6 @@ void calc() {
         calc18_19(prevDataRows, dataRows, row, reportPeriod)
     }
 
-    def isOldCalc = reportPeriod.taxPeriod.year < 2015 || (reportPeriod.taxPeriod.year == 2015 && reportPeriod.order < 3)
-
-    if (!isOldCalc) { // для ЦА досчитать 18-ую графу, используя итог по 18-й графе
-        fixCA18_19(prevDataRows, dataRows, findCA(dataRows), reportPeriod)
-    }
-
     // добавить строку ЦА (скорректрированный) (графа 1..22)
     def caTotalRow = formData.createDataRow()
     caTotalRow.setAlias('ca')
@@ -292,17 +300,36 @@ void calc() {
     }.toString()
     dataRows.add(totalRow)
 
+    def isOldCalc = reportPeriod.taxPeriod.year < 2015 || (reportPeriod.taxPeriod.year == 2015 && reportPeriod.order < 3)
+
     // найти строку ЦА
     def caRow = findCA(dataRows)
     if (caRow != null) {
         // расчеты для строки ЦА (скорректированный)
         ['number', 'regionBankDivision', 'divisionName', 'kpp', 'propertyPrice', 'workersCount', 'subjectTaxCredit',
          'calcFlag', 'obligationPayTax', 'baseTaxOf', 'subjectTaxStavka', 'taxSum', 'taxSumToPay',
-         'taxSumToReduction', 'everyMontherPaymentAfterPeriod', 'everyMonthForKvartalNextPeriod',
+         'taxSumToReduction', 'everyMonthForKvartalNextPeriod',
          'everyMonthForSecondKvartalNextPeriod', 'everyMonthForThirdKvartalNextPeriod',
          'everyMonthForFourthKvartalNextPeriod'].each { alias ->
-            caTotalRow.getCell(alias).setValue(caRow.getCell(alias).getValue(), caTotalRow.getIndex())
+            caTotalRow[alias] = caRow[alias]
         }
+
+        def tempValue
+        if (isOldCalc) {
+            tempValue = caRow.everyMontherPaymentAfterPeriod
+        } else {
+            switch (reportPeriod.order) {
+                case 1: // Период формы «1 квартал»:
+                    // Принимает значение «графы 18» подразделения «Центральный аппарат»
+                    tempValue = caRow.everyMontherPaymentAfterPeriod
+                    break
+                default: // Период формы «полугодие / 9 месяцев / год»:
+                    // «Графа 18» = Значение «графы 18» подразделения «Центральный аппарат» + (Значение итоговой строки по «графе 18» - (Значение итоговой строки по «графе 14» - Значение итоговой строки по «графе 14» формы предыдущего периода))
+                    def prevTaxSum = prevDataRows?.find {it.getAlias() == 'total'}?.taxSum ?: 0
+                    tempValue = (caRow.everyMontherPaymentAfterPeriod ?: 0) + ((totalRow.everyMontherPaymentAfterPeriod ?: 0) - ((totalRow.taxSum ?: 0) - prevTaxSum))
+            }
+        }
+        caTotalRow.everyMontherPaymentAfterPeriod = tempValue
 
         if (formDataEvent != FormDataEvent.COMPOSE) {
             // графа 12
@@ -448,59 +475,27 @@ def calc14(def row) {
 
 def calc18_19 (def prevDataRows, def dataRows, def row, def reportPeriod) {
     def tmp
-    def isCA = row == findCA(dataRows)
-    // использовать старый расчет до сентября 2015
-    def isOldCalc = reportPeriod.taxPeriod.year < 2015 || (reportPeriod.taxPeriod.year == 2015 && reportPeriod.order < 3)
     // графа 18
     switch (reportPeriod.order) {
         case 1: //«графа 18» = «графа 14»
             tmp = row.taxSum
             break
         case 4:
-            if (!isCA || isOldCalc) { // использовать старый расчет до сентября 2015
-                tmp = null
-            } else {
-                tmp = calc18Parts(dataRows, prevDataRows, row)
-            }
+            tmp = null
             break
-        default: // для не ЦА расчет актуален, для ЦА требуется досчитать (в новом расчете)
-            tmp = calc18Parts(dataRows, prevDataRows, row)
+        default:
+            // (Сумма всех нефиксированных строк по «графе 14» - Сумма всех нефиксированных строк по «графе 14» из предыдущего периода) * («графа 14» / Сумма всех нефиксированных строк по «графе 14»)
+            def currentSum = dataRows?.sum { (it.getAlias() == null) ? (it.taxSum ?: 0) : 0 } ?: 0
+            def previousSum = prevDataRows?.sum { (it.getAlias() == null) ? (it.taxSum ?: 0) : 0 } ?: 0
+            // остальные
+            if (currentSum) {
+                tmp = (currentSum - previousSum) * row.taxSum / currentSum
+            }
     }
     row.everyMontherPaymentAfterPeriod = tmp
 
     // графа 19
     row.everyMonthForKvartalNextPeriod = ((reportPeriod.order == 3) ? row.everyMontherPaymentAfterPeriod : 0)
-}
-
-def calc18Parts(def dataRows, def prevDataRows, def row) {
-    // (Сумма всех нефиксированных строк по «графе 14» - Сумма всех нефиксированных строк по «графе 14» из предыдущего периода) * («графа 14» / Сумма всех нефиксированных строк по «графе 14»)
-    def currentSum = dataRows?.sum { (it.getAlias() == null) ? (it.taxSum ?: 0) : 0 } ?: 0
-    def previousSum = prevDataRows?.sum { (it.getAlias() == null) ? (it.taxSum ?: 0) : 0 } ?: 0
-    // остальные
-    if (currentSum) {
-        return (currentSum - previousSum) * row.taxSum / currentSum
-    }
-    return BigDecimal.ZERO
-}
-
-void fixCA18_19(def prevDataRows, def dataRows, def rowCA, def reportPeriod) {
-    if (rowCA == null) { // если строки ЦА нет, то ничего не делаем
-        return
-    }
-    def tmp = BigDecimal.ZERO
-    // «графа 18» = (Сумма всех нефиксированных строк по «графе 14» - Сумма всех нефиксированных строк по «графе 14» из предыдущего периода) * («графа 14» / Сумма всех нефиксированных строк по «графе 14»)
-    // + (значение итоговой строки «графы 18» - (значение итоговой строки «графы 14» текущего периода - значение итоговой строки графы «графа 14» предыдущего периода))
-    if (reportPeriod.order != 1) {
-        def current18Sum = dataRows?.sum { (it.getAlias() == null) ? (it.everyMontherPaymentAfterPeriod ?: 0) : 0 } ?: 0
-        def current14Sum = dataRows?.sum { (it.getAlias() == null) ? (it.taxSum ?: 0) : 0 } ?: 0
-        def previous14Sum = prevDataRows?.sum { (it.getAlias() == null) ? (it.taxSum ?: 0) : 0 } ?: 0
-        tmp = current18Sum - (current14Sum - previous14Sum)
-    }
-
-    rowCA.everyMontherPaymentAfterPeriod = (rowCA.everyMontherPaymentAfterPeriod ?: 0) + tmp // добавляем к предыдущей сумме разницу
-
-    // графа 19
-    rowCA.everyMonthForKvartalNextPeriod = ((reportPeriod.order == 3) ? rowCA.everyMontherPaymentAfterPeriod : 0)
 }
 
 /**
@@ -515,7 +510,6 @@ def logicalCheck() {
 
 void logicalCheckBeforeCalc() {
     def dataRows = formDataService.getDataRowHelper(formData).allCached
-    def departmentParam
     def fieldNumber = 0
 
     dataRows.eachWithIndex { row, i ->
@@ -525,11 +519,11 @@ void logicalCheckBeforeCalc() {
         fieldNumber++
         def index = row.getIndex()
         def errorMsg = "Строка ${index}: "
+        def departmentParam = null
         if (row.regionBankDivision != null) {
             departmentParam = getRefBookValue(30, row.regionBankDivision)
         }
         if (departmentParam == null || departmentParam.isEmpty()) {
-            logger.error(errorMsg + "Не найдено подразделение территориального банка!")
             return
         } else {
             long centralId = 113 // ID Центрального аппарата.
@@ -544,34 +538,37 @@ void logicalCheckBeforeCalc() {
 
         // Определение условий для проверок 2, 3, 4
         def depParam = getDepParam(departmentParam)
-        def depId = depParam.get(RefBook.RECORD_ID_ALIAS).numberValue as long ?: -1
+        def depId = (depParam?.get(RefBook.RECORD_ID_ALIAS)?.numberValue ?: -1) as long
         def departmentName = depParam?.NAME?.stringValue ?: "Не задано"
-        def incomeParam = getProvider(33).getRecords(getReportPeriodEndDate() - 1, null, "DEPARTMENT_ID = $depId", null)
+        def incomeParam
+        if (depId != -1) {
+            incomeParam = getProvider(33).getRecords(getReportPeriodEndDate() - 1, null, "DEPARTMENT_ID = $depId", null)
+        }
         def incomeParamTable = getIncomeParamTable(depParam)
 
         // 2. Проверка наличия формы настроек подразделения
         if (incomeParam == null || incomeParam.isEmpty()) {
-            rowServiceException(row, errorMsg + "Для подразделения «${departmentName}» не создана форма настроек подразделений!")
+            rowError(logger, row, errorMsg + "Для подразделения «${departmentName}» не создана форма настроек подразделений!")
         }
 
         // 3. Проверка наличия строки с «КПП» в табличной части формы настроек подразделения
         // 4. Проверка наличия значения «Наименование для Приложения №5» в форме настроек подразделения
-        for (int k = 0; k < incomeParamTable.size(); k++) {
+        for (int k = 0; k < incomeParamTable?.size(); k++) {
             if (row.kpp != null && row.kpp != '') {
                 if (incomeParamTable?.get(k)?.KPP?.stringValue == row.kpp) {
                     if (incomeParamTable?.get(k)?.ADDITIONAL_NAME?.stringValue == null) {
-                        rowServiceException(row, errorMsg + "Для подразделения «${departmentName}» на форме настроек подразделений по КПП «${row.kpp}» отсутствует значение атрибута «Наименование для «Приложения №5»!")
+                        rowError(logger, row, errorMsg + "Для подразделения «${departmentName}» на форме настроек подразделений по КПП «${row.kpp}» отсутствует значение атрибута «Наименование для «Приложения №5»!")
                     }
                     if (incomeParamTable?.get(k)?.TYPE?.referenceValue == null) {
-                        rowServiceException(row, errorMsg + "Для подразделения «${departmentName}» на форме настроек подразделений по КПП «${row.kpp}» отсутствует значение атрибута «Признак расчета»!")
+                        rowError(logger, row, errorMsg + "Для подразделения «${departmentName}» на форме настроек подразделений по КПП «${row.kpp}» отсутствует значение атрибута «Признак расчета»!")
                     }
                     if (incomeParamTable?.get(k)?.OBLIGATION?.referenceValue == null) {
-                        rowServiceException(row, errorMsg + "Для подразделения «${departmentName}» на форме настроек подразделений по КПП «${row.kpp}» отсутствует значение атрибута «Обязанность по уплате налога»!")
+                        rowError(logger, row, errorMsg + "Для подразделения «${departmentName}» на форме настроек подразделений по КПП «${row.kpp}» отсутствует значение атрибута «Обязанность по уплате налога»!")
                     }
                     break
                 }
                 if (k == incomeParamTable.size() - 1) {
-                    rowServiceException(row, errorMsg + "Для подразделения «${departmentName}» на форме настроек подразделений отсутствует строка с КПП «${row.kpp}»!")
+                    rowError(logger, row, errorMsg + "Для подразделения «${departmentName}» на форме настроек подразделений отсутствует строка с КПП «${row.kpp}»!")
                 }
             }
         }
@@ -700,6 +697,324 @@ void consolidation() {
 
     updateIndexes(dataRows)
     formDataService.getDataRowHelper(formData).allCached = dataRows
+}
+
+void importData() {
+    def tmpRow = formData.createDataRow()
+    int COLUMN_COUNT = 24
+    int HEADER_ROW_COUNT = 2
+    String TABLE_START_VALUE = getColumnName(tmpRow, 'number')
+    String TABLE_END_VALUE = null
+    int INDEX_FOR_SKIP = 1
+
+    def allValues = []      // значения формы
+    def headerValues = []   // значения шапки
+    def paramsMap = ['rowOffset' : 0, 'colOffset' : 0]  // мапа с параметрами (отступы сверху и слева)
+
+    checkAndReadFile(ImportInputStream, UploadFileName, allValues, headerValues, TABLE_START_VALUE, TABLE_END_VALUE, HEADER_ROW_COUNT, paramsMap)
+
+    // проверка шапки
+    checkHeaderXls(headerValues, COLUMN_COUNT, HEADER_ROW_COUNT, tmpRow)
+    if (logger.containsLevel(LogLevel.ERROR)) {
+        return;
+    }
+    // освобождение ресурсов для экономии памяти
+    headerValues.clear()
+    headerValues = null
+
+    def fileRowIndex = paramsMap.rowOffset
+    def colOffset = paramsMap.colOffset
+    paramsMap.clear()
+    paramsMap = null
+
+    def rowIndex = 0
+    def rows = []
+    def allValuesCount = allValues.size()
+
+    def caTotalRow
+    def totalRow
+
+    // формирвание строк нф
+    for (def i = 0; i < allValuesCount; i++) {
+        rowValues = allValues[0]
+        fileRowIndex++
+        // все строки пустые - выход
+        if (!rowValues) {
+            allValues.remove(rowValues)
+            rowValues.clear()
+            break
+        }
+        // Пропуск итоговых строк
+        if (rowValues[INDEX_FOR_SKIP] && (rowValues[INDEX_FOR_SKIP] == "Центральный аппарат (скорректированный)" || rowValues[INDEX_FOR_SKIP] =="Сбербанк России")) {
+            switch (rowValues[INDEX_FOR_SKIP]) {
+                case 'Центральный аппарат (скорректированный)' :
+                    caTotalRow = getTotalRowFromXls('ca', rowValues[INDEX_FOR_SKIP], 2, rowValues, colOffset, fileRowIndex, rowIndex, true)
+                    break
+                case 'Сбербанк России' :
+                    totalRow = getTotalRowFromXls('total', rowValues[INDEX_FOR_SKIP], 5, rowValues, colOffset, fileRowIndex, rowIndex, false)
+            }
+            allValues.remove(rowValues)
+            rowValues.clear()
+            continue
+        }
+        // простая строка
+        rowIndex++
+        def newRow = getNewRowFromXls(rowValues, colOffset, fileRowIndex, rowIndex)
+        rows.add(newRow)
+        // освободить ненужные данные - иначе не хватит памяти
+        allValues.remove(rowValues)
+        rowValues.clear()
+    }
+
+    showMessages(rows, logger)
+    if (!logger.containsLevel(LogLevel.ERROR)) {
+        updateIndexes(rows);
+        // добавить строку ЦА (скорректрированный)
+        if (caTotalRow == null) { // если итоговых строк нет, то создать
+            caTotalRow = formData.createDataRow()
+            caTotalRow.setAlias('ca')
+            caTotalRow.fix = 'Центральный аппарат (скорректированный)'
+            caTotalRow.getCell('fix').colSpan = 2
+            setTotalStyle(caTotalRow)
+        }
+        rows.add(caTotalRow)
+
+        // добавить итого
+        if (totalRow == null) { // если итоговых строк нет, то создать
+            totalRow = formData.createDataRow()
+            totalRow.setAlias('total')
+            totalRow.fix = 'Сбербанк России'
+            totalRow.getCell('fix').colSpan = 5
+            setTotalStyle(totalRow)
+            calcTotalSum(rows, totalRow, totalColumns)
+            totalRow.baseTaxOf = rows.sum{ row ->
+                String value = row.baseTaxOf
+                (row.getAlias() == null && value?.isBigDecimal()) ? new BigDecimal(value) : BigDecimal.ZERO
+            }.toString()
+        }
+        rows.add(totalRow)
+        formDataService.getDataRowHelper(formData).allCached = rows
+    }
+}
+
+/**
+ * Проверить шапку таблицы
+ *
+ * @param headerRows строки шапки
+ * @param colCount количество колонок в таблице
+ * @param rowCount количество строк в таблице
+ * @param tmpRow вспомогательная строка для получения названии графов
+ */
+void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
+    if (headerRows.isEmpty()) {
+        throw new ServiceException(WRONG_HEADER_ROW_SIZE)
+    }
+    checkHeaderSize(headerRows[0].size(), headerRows.size(), colCount, rowCount)
+
+    def headerMapping = [:]
+    def index = 0
+    for (alias in allColumns) {
+        if (alias == 'fix') continue
+        headerMapping.put((headerRows[0][index ? (index + 1) : 0]), getColumnName(tmpRow, alias))
+        headerMapping.put((headerRows[1][index == 0 ? 0 : (index + 1)]), (index + 1).toString())
+        index++
+    }
+    checkHeaderEquals(headerMapping, logger)
+}
+
+/**
+ * Получить новую строку нф по значениям из экселя.
+ *
+ * @param values список строк со значениями
+ * @param colOffset отступ в колонках
+ * @param fileRowIndex номер строки в тф
+ * @param rowIndex строка в нф
+ */
+def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) {
+    def newRow = getNewRow()
+    newRow.setIndex(rowIndex)
+    newRow.setImportIndex(fileRowIndex)
+
+    def required = true
+
+    // графа 1
+    def colIndex = 0
+    // fix
+    colIndex++
+    // графа 2
+    colIndex++
+    newRow.regionBank = getRecordIdImport(30L, 'NAME', values[colIndex], fileRowIndex, colIndex + colOffset, false)
+    // графа 3
+    colIndex++
+    newRow.regionBankDivision = getRecordIdImport(30L, 'NAME', values[colIndex], fileRowIndex, colIndex + colOffset, false)
+    // графа 4
+    colIndex++
+    newRow.divisionName = values[colIndex]
+    // графа 5
+    colIndex++
+    newRow.kpp = values[colIndex]
+    // графа 6
+    colIndex++
+    newRow.propertyPrice = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, required)
+    // графа 7
+    colIndex++
+    newRow.workersCount = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, required)
+    // графа 8
+    colIndex++
+    newRow.subjectTaxCredit = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, required)
+    // графа 9
+    colIndex++
+    newRow.calcFlag = getRecordIdImport(26L, 'CODE', values[colIndex], fileRowIndex, colIndex + colOffset, false)
+    // графа 10
+    colIndex++
+    newRow.obligationPayTax = getRecordIdImport(25L, 'CODE', values[colIndex], fileRowIndex, colIndex + colOffset, false)
+    // графа 11
+    colIndex++
+    newRow.baseTaxOf = values[colIndex]
+    // графа 12
+    colIndex++
+    newRow.baseTaxOfRub = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, required)
+    // графа 13
+    colIndex++
+    newRow.subjectTaxStavka = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, required)
+    // графа 14
+    colIndex++
+    newRow.taxSum = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, required)
+    // графа 15
+    colIndex++
+    newRow.taxSumOutside = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, required)
+    // графа 16
+    colIndex++
+    newRow.taxSumToPay = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, required)
+    // графа 17
+    colIndex++
+    newRow.taxSumToReduction = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, required)
+    // графа 18
+    colIndex++
+    newRow.everyMontherPaymentAfterPeriod = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, required)
+    // графа 19
+    colIndex++
+    newRow.everyMonthForKvartalNextPeriod = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, required)
+    // графа 20
+    colIndex++
+    newRow.everyMonthForSecondKvartalNextPeriod = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, required)
+    // графа 21
+    colIndex++
+    newRow.everyMonthForThirdKvartalNextPeriod = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, required)
+    // графа 22
+    colIndex++
+    newRow.everyMonthForFourthKvartalNextPeriod = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, required)
+    // графа 23
+    colIndex++
+    newRow.minimizeTaxSum = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, required)
+    // графа 24
+    colIndex++
+    newRow.amountTax = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, required)
+
+    return newRow
+}
+
+def getNewRow() {
+    def newRow = (formDataEvent in [FormDataEvent.IMPORT, FormDataEvent.IMPORT_TRANSPORT_FILE]) ? formData.createStoreMessagingDataRow() : formData.createDataRow()
+
+    editableColumns.each {
+        newRow.getCell(it).editable = true
+        newRow.getCell(it).setStyleAlias('Редактируемая')
+    }
+    autoFillColumns.each {
+        newRow.getCell(it).setStyleAlias('Автозаполняемая')
+    }
+    return newRow
+}
+
+def getTotalRowFromXls(def alias, def title, def colSpan, def values, def colOffset, def fileRowIndex, def rowIndex, boolean fillCA) {
+    def totalRow = formData.createStoreMessagingDataRow()
+    totalRow.setIndex(rowIndex)
+    totalRow.setImportIndex(fileRowIndex)
+    totalRow.setAlias(alias)
+    totalRow.fix = title
+    totalRow.getCell('fix').colSpan = colSpan
+    setTotalStyle(totalRow)
+
+    def required = true
+
+    // графа 1
+    def colIndex = 0
+
+    if (fillCA) {
+        // графа 2
+        colIndex = 2
+        totalRow.regionBank = getRecordIdImport(30L, 'NAME', values[colIndex], fileRowIndex, colIndex + colOffset, false)
+        // графа 3
+        colIndex = 3
+        totalRow.regionBankDivision = getRecordIdImport(30L, 'NAME', values[colIndex], fileRowIndex, colIndex + colOffset, false)
+        // графа 4
+        colIndex = 4
+        totalRow.divisionName = values[colIndex]
+        // графа 5
+        colIndex = 5
+        totalRow.kpp = values[colIndex]
+        // графа 9
+        colIndex = 9
+        totalRow.calcFlag = getRecordIdImport(26L, 'CODE', values[colIndex], fileRowIndex, colIndex + colOffset, false)
+        // графа 10
+        colIndex = 10
+        totalRow.obligationPayTax = getRecordIdImport(25L, 'CODE', values[colIndex], fileRowIndex, colIndex + colOffset, false)
+        // графа 11
+        colIndex = 11
+        totalRow.baseTaxOf = values[colIndex]
+        // графа 24
+        colIndex = 24
+        totalRow.amountTax = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, required)
+    }
+
+    // графа 6
+    colIndex = 6
+    totalRow.propertyPrice = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, required)
+    // графа 7
+    colIndex = 7
+    totalRow.workersCount = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, required)
+    // графа 8
+    colIndex = 8
+    totalRow.subjectTaxCredit = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, required)
+    // графа 12
+    colIndex = 12
+    totalRow.baseTaxOfRub = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, required)
+    // графа 13
+    colIndex = 13
+    totalRow.subjectTaxStavka = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, required)
+    // графа 14
+    colIndex = 14
+    totalRow.taxSum = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, required)
+    // графа 15
+    colIndex = 15
+    totalRow.taxSumOutside = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, required)
+    // графа 16
+    colIndex = 16
+    totalRow.taxSumToPay = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, required)
+    // графа 17
+    colIndex = 17
+    totalRow.taxSumToReduction = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, required)
+    // графа 18
+    colIndex = 18
+    totalRow.everyMontherPaymentAfterPeriod = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, required)
+    // графа 19
+    colIndex = 19
+    totalRow.everyMonthForKvartalNextPeriod = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, required)
+    // графа 20
+    colIndex = 20
+    totalRow.everyMonthForSecondKvartalNextPeriod = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, required)
+    // графа 21
+    colIndex = 21
+    totalRow.everyMonthForThirdKvartalNextPeriod = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, required)
+    // графа 22
+    colIndex = 22
+    totalRow.everyMonthForFourthKvartalNextPeriod = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, required)
+    // графа 23
+    colIndex = 23
+    totalRow.minimizeTaxSum = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, required)
+
+    return totalRow
 }
 
 /**
@@ -1404,10 +1719,14 @@ def getProvider(def long providerId) {
 def getDepParam(def departmentParam) {
     def departmentId = departmentParam.get(RefBook.RECORD_ID_ALIAS).numberValue as int
     def departmentType = departmentService.get(departmentId).getType()
+    def depParam
     if (departmentType.equals(departmentType.TERR_BANK)) {
         depParam = departmentParam
     } else {
         def tbCode = (Integer) departmentParam.get('PARENT_ID').getReferenceValue()
+        if (tbCode == null) {
+            return null
+        }
         def taxPlaningTypeCode = departmentService.get(tbCode).getType().MANAGEMENT.getCode()
         depParam = getProvider(30).getRecords(getReportPeriodEndDate(), null, "PARENT_ID = ${departmentParam.get('PARENT_ID').getReferenceValue()} and TYPE = $taxPlaningTypeCode", null).get(0)
     }
@@ -1416,8 +1735,11 @@ def getDepParam(def departmentParam) {
 
 // Получение параметров (справочник 330)
 def getIncomeParamTable(def depParam) {
-    def depId = depParam.get(RefBook.RECORD_ID_ALIAS).numberValue as long
-    def incomeParam = getProvider(33).getRecords(getReportPeriodEndDate() - 1, null, "DEPARTMENT_ID = $depId", null)
+    def depId = (depParam?.get(RefBook.RECORD_ID_ALIAS)?.numberValue ?: -1) as long
+    def incomeParam
+    if (depId != -1) {
+        incomeParam = getProvider(33).getRecords(getReportPeriodEndDate() - 1, null, "DEPARTMENT_ID = $depId", null)
+    }
     if (incomeParam != null && !incomeParam.isEmpty()) {
         def link = incomeParam.get(0).record_id.value
         def incomeParamTable = getProvider(330).getRecords(getReportPeriodEndDate() - 1, null, "LINK = $link", null)

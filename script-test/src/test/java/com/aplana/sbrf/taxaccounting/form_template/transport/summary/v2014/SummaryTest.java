@@ -94,6 +94,8 @@ public class SummaryTest extends ScriptTestBase {
                         return result;
                     }
                 });
+
+        when(testHelper.getFormDataService().getFormTemplate(anyInt(), anyInt())).thenReturn(testHelper.getFormTemplate());
     }
 
     @Test
@@ -230,7 +232,10 @@ public class SummaryTest extends ScriptTestBase {
     public void importExcelTest() {
         testHelper.setImportFileInputStream(getImportXlsInputStream());
         testHelper.execute(FormDataEvent.IMPORT);
-        Assert.assertTrue("Logger must contain error level messages.", testHelper.getLogger().containsLevel(LogLevel.ERROR));
+        int expected = 12; // в файле 12 строк
+        Assert.assertEquals(expected, testHelper.getDataRowHelper().getAll().size());
+        // TODO (Ramil Timerbaev) возможно надо будет добавить проверку загруженых значении
+        checkLogger();
     }
 
     /**

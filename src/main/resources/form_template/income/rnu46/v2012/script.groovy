@@ -595,8 +595,7 @@ void importTransportData() {
             totalRow.getCell(alias).setValue(BigDecimal.ZERO, null)
         }
         // подсчет итогов
-        def dataRows = dataRowHelper.allCached
-        for (def row : dataRows) {
+        for (def row : newRows) {
             if (row.getAlias()) {
                 continue
             }

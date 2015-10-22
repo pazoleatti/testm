@@ -8,6 +8,12 @@ import com.aplana.sbrf.taxaccounting.util.mock.ScriptTestMockHelper;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.math.BigDecimal;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.List;
+
 /**
  * Сведения о уплаченных суммах налога по операциям с ГЦБ.
  */
@@ -51,5 +57,58 @@ public class Output5Test extends ScriptTestBase {
     public void checkTest() {
         testHelper.execute(FormDataEvent.CHECK);
         Assert.assertTrue(testHelper.getLogger().containsLevel(LogLevel.ERROR));
+    }
+
+    @Test
+    public void importFileTest() {
+        int expected = testHelper.getDataRowHelper().getAll().size();
+        testHelper.setImportFileInputStream(getImportXlsInputStream());
+        testHelper.execute(FormDataEvent.IMPORT);
+        Assert.assertEquals(expected, testHelper.getDataRowHelper().getAll().size());
+        checkLoadData(testHelper.getDataRowHelper().getAll());
+        checkLogger();
+    }
+
+    @Test
+    public void importTransportFileTest() {
+        int expected = testHelper.getDataRowHelper().getAll().size();
+        testHelper.setImportFileInputStream(getImportRnuInputStream());
+        testHelper.execute(FormDataEvent.IMPORT_TRANSPORT_FILE);
+        Assert.assertEquals(expected, testHelper.getDataRowHelper().getAll().size());
+        checkLoadData(testHelper.getDataRowHelper().getAll());
+        checkLogger();
+    }
+
+    /** Проверить загруженные данные. */
+    void checkLoadData(List<DataRow<Cell>> dataRows) {
+        for (DataRow<Cell> row : dataRows) {
+            BigDecimal expectedNumber = null;
+            Date expectedDate = null;
+            if (!"R2".equals(row.getAlias())) {
+                expectedNumber = roundValue(15369L, 0);
+            }
+            if (!"R2".equals(row.getAlias()) && !"R1".equals(row.getAlias())) {
+                try {
+                    expectedDate = new SimpleDateFormat("dd.MM.yyyy").parse("01.01.2018");
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
+            }
+            // графа 3
+            Assert.assertEquals("row.date[" + row.getIndex() + "]", expectedDate, row.getCell("date").getDateValue());
+
+            // графа 4
+            Assert.assertEquals("row.sum[" + row.getIndex() + "]", expectedNumber, row.getCell("sum").getNumericValue());
+
+        }
+    }
+
+    // Округляет число до требуемой точности
+    BigDecimal roundValue(Long value, int precision) {
+        if (value != null) {
+            return (BigDecimal.valueOf(value)).setScale(precision, BigDecimal.ROUND_HALF_UP);
+        } else {
+            return null;
+        }
     }
 }

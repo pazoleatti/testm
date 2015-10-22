@@ -23,10 +23,13 @@ switch (formDataEvent) {
         checkDeclarationBank()
         break
     case FormDataEvent.CHECK : // проверить
-        checkDepartmentParams(LogLevel.ERROR)
+        def logLevel = declarationData.accepted ? LogLevel.WARNING : LogLevel.ERROR
+        checkDepartmentParams(logLevel)
+        logicCheck(logLevel)
         break
     case FormDataEvent.MOVE_CREATED_TO_ACCEPTED : // принять из создана
-        checkDepartmentParams(LogLevel.ERROR)
+        checkDepartmentParams(declarationData.accepted ? LogLevel.WARNING : LogLevel.ERROR)
+        logicCheck(LogLevel.ERROR)
         break
     case FormDataEvent.PRE_CALCULATION_CHECK:
         checkDepartmentParams(LogLevel.WARNING)
@@ -40,6 +43,13 @@ switch (formDataEvent) {
     default:
         return
 }
+
+@Field
+def version = '5.06'
+
+@Field
+def declarationOPTypeId = 19
+
 // Кэш провайдеров
 @Field
 def providerCache = [:]
@@ -80,16 +90,16 @@ void checkDepartmentParams(LogLevel logLevel) {
     // Проверки подразделения
     def List<String> errorList = getErrorTable(departmentParamIncomeRow)
     for (String error : errorList) {
-        logger.log(logLevel, String.format("Для данного подразделения на форме настроек подразделений отсутствует значение атрибута %s!", error))
+        logger.log(logLevel, String.format("На форме настроек подразделения текущего экземпляра декларации неверно указано значение атрибута %s!", error))
     }
     errorList = getErrorDepartment(departmentParam)
     for (String error : errorList) {
-        logger.log(logLevel, String.format("Для данного подразделения на форме настроек подразделений отсутствует значение атрибута %s!", error))
+        logger.log(logLevel, String.format("На форме настроек подразделения текущего экземпляра декларации неверно указано значение атрибута %s!", error))
     }
 
     errorList = getErrorVersion(departmentParam)
     for (String error : errorList) {
-        logger.log(logLevel, String.format("Неверно указано значение атрибута %s на форме настроек подразделений!", error))
+        logger.log(logLevel, String.format("На форме настроек подразделения текущего экземпляра декларации неверно указано значение атрибута %s", error))
     }
 }
 
@@ -130,75 +140,70 @@ def checkDeclarationBank(boolean onlyCheck = true) {
 }
 
 // Логические проверки.
-void logicCheck() {
+void logicCheck(LogLevel logLevel) {
     // получение данных из xml'ки
-    def reader = getXmlStreamReader(declarationData.reportPeriodId, declarationData.departmentId, false, false)
+    def reader = getStreamReader(declarationOPTypeId, declarationData.departmentId, declarationData.reportPeriodId, false)
     if(reader == null){
         return
     }
-    def empty = 0
     def elements = [:]
 
-    def nalVipl311, nalIschisl, nalVipl311FB, nalIschislFB, nalVipl311Sub, nalIschislSub, raschNalFound = false
-    def vneRealDohSt, vneRealDohBezv, vneRealDohIzl, vneRealDohVRash, vneRealDohRinCBDD, vneRealDohCor, vneRealDohVs, dohVnerealFound = false
-    def cosvRashVs, nalogi, rashCapVl10, rashCapVl30, rashZemUchVs, rashRealFound = false
-    def rashVnerealPrDO, ubitRealPravTr, rashLikvOS, rashShtraf, rashRinCBDD, rashVnerealVs, rashVneRealFound = false
-    def stoimRealPTDoSr, stoimRealPTPosSr, stoimRealPTFound = false
-    def viruchRealPTDoSr, viruchRealPTPosSr, viruchRealPTFound = false
-    def ubit1Prev269, ubit1Soot269, ubitRealPT1Found = false
-    def ubit2RealPT, ubitRealPT2Found = false
+    def kodNO, poMestu, documentFound = false
+    def naimOrg, innJulNpJul, kppJulNpJul, npJulFound = false
+    def prPodp, podpisantFound = false
+    def signatorySurname, signatoryFirstName, fioFound = false
+    def naimDok, svPredFound = false
+    def oktmoNalPUAv, nalPUAvFound = false
+    def oktmoNalPUMes, nalPUMesFound = false
+    def okved, svNPFound = false
+    def innJulSvReorgJul, kppSvReorgJul, formReorg, svReorgJulFound = false
+    def versForm, idFile, kodNOProm, fileFound = false
 
     try{
         while(reader.hasNext()) {
             if (reader.startElement) {
                 elements[reader.name.localPart] = true
-                if (!raschNalFound && isCurrentNode(['Документ', 'Прибыль', 'РасчНал'], elements)) {
-                    raschNalFound = true
-                    nalVipl311 = getXmlDecimal(reader, "НалВыпл311")
-                    nalIschisl = getXmlDecimal(reader, "НалИсчисл")
-                    nalVipl311FB = getXmlDecimal(reader, "НалВыпл311ФБ")
-                    nalIschislFB = getXmlDecimal(reader, "НалИсчислФБ")
-                    nalVipl311Sub = getXmlDecimal(reader, "НалВыпл311Суб")
-                    nalIschislSub = getXmlDecimal(reader, "НалИсчислСуб")
-                } else if (!dohVnerealFound && isCurrentNode(['Документ', 'Прибыль', 'РасчНал', 'ДохРеалВнеРеал', 'ДохВнеРеал'], elements)) {
-                    dohVnerealFound = true
-                    vneRealDohSt = getXmlDecimal(reader, "ВнеРеалДохСт")
-                    vneRealDohBezv = getXmlDecimal(reader, "ВнеРеалДохБезв")
-                    vneRealDohIzl = getXmlDecimal(reader, "ВнеРеалДохИзл")
-                    vneRealDohVRash = getXmlDecimal(reader, "ВнеРеалДохВРасх")
-                    vneRealDohRinCBDD = getXmlDecimal(reader, "ВнеРеалДохРынЦБДД")
-                    vneRealDohCor = getXmlDecimal(reader, "ВнеРеалДохКор")
-                    vneRealDohVs = getXmlDecimal(reader, "ВнеРеалДохВс")
-                } else if (!rashRealFound && isCurrentNode(['Документ', 'Прибыль', 'РасчНал', 'РасхРеалВнеРеал', 'РасхРеал'], elements)) {
-                    rashRealFound = true
-                    cosvRashVs = getXmlDecimal(reader, "КосвРасхВс")
-                    nalogi = getXmlDecimal(reader, "Налоги")
-                    rashCapVl10 = getXmlDecimal(reader, "РасхКапВл10")
-                    rashCapVl30 = getXmlDecimal(reader, "РасхКапВл30")
-                    rashZemUchVs = getXmlDecimal(reader, "РасхЗемУчВс")
-                } else if (!rashVneRealFound && isCurrentNode(['Документ', 'Прибыль', 'РасчНал', 'РасхРеалВнеРеал', 'РасхВнеРеал'], elements)) {
-                    rashVneRealFound = true
-                    rashVnerealPrDO = getXmlDecimal(reader, "РасхВнереалПрДО")
-                    ubitRealPravTr = getXmlDecimal(reader, "УбытРеалПравТр")
-                    rashLikvOS = getXmlDecimal(reader, "РасхЛиквОС")
-                    rashShtraf = getXmlDecimal(reader, "РасхШтраф")
-                    rashRinCBDD = getXmlDecimal(reader, "РасхРынЦБДД")
-                    rashVnerealVs = getXmlDecimal(reader, "РасхВнеРеалВс")
-                } else if (!stoimRealPTFound && isCurrentNode(['Документ', 'Прибыль', 'РасчНал', 'РасчРасхОпер', 'СтоимРеалПТ'], elements)) {
-                    stoimRealPTFound = true
-                    stoimRealPTDoSr = getXmlDecimal(reader, "СтоимРеалПТДоСр")
-                    stoimRealPTPosSr = getXmlDecimal(reader, "СтоимРеалПТПосСр")
-                } else if (!viruchRealPTFound && isCurrentNode(['Документ', 'Прибыль', 'РасчНал', 'РасчРасхОпер', 'ВыручРеалПТ'], elements)) {
-                    viruchRealPTFound = true
-                    viruchRealPTDoSr = getXmlDecimal(reader, "ВыручРеалПТДоСр")
-                    viruchRealPTPosSr = getXmlDecimal(reader, "ВыручРеалПТПосСр")
-                } else if (!ubitRealPT1Found && isCurrentNode(['Документ', 'Прибыль', 'РасчНал', 'РасчРасхОпер', 'УбытРеалПТ1'], elements)) {
-                    ubitRealPT1Found = true
-                    ubit1Prev269 = getXmlDecimal(reader, "Убыт1Прев269")
-                    ubit1Soot269 = getXmlDecimal(reader, "Убыт1Соот269")
-                } else if (!ubitRealPT2Found && isCurrentNode(['Документ', 'Прибыль', 'РасчНал', 'РасчРасхОпер', 'УбытРеалПТ2'], elements)) {
-                    ubitRealPT2Found = true
-                    ubit2RealPT = getXmlDecimal(reader, "Убыт2РеалПТ")
+                if (!documentFound && isCurrentNode(['Документ'], elements)) {
+                    documentFound = true
+                    kodNO = getXmlValue(reader, 'КодНО')
+                    poMestu = getXmlValue(reader, 'ПоМесту')
+                } else if (!svNPFound && isCurrentNode(['Документ', 'СвНП'], elements)) {
+                    svNPFound = true
+                    okved = getXmlValue(reader, 'ОКВЭД')
+                } else if (!podpisantFound && isCurrentNode(['Документ', 'Подписант'], elements)) {
+                    podpisantFound = true
+                    prPodp = getXmlValue(reader, 'ПрПодп')
+                } else if (!fioFound && isCurrentNode(['Документ', 'Подписант', 'ФИО'], elements)) {
+                    fioFound = true
+                    signatorySurname = getXmlValue(reader, 'Фамилия')
+                    signatoryFirstName = getXmlValue(reader, 'Имя')
+                } else if (!svPredFound && isCurrentNode(['Документ', 'Подписант', 'СвПред'], elements)) {
+                    svPredFound = true
+                    naimDok = getXmlValue(reader, 'НаимДок')
+                } else if (!npJulFound && isCurrentNode(['Документ', 'СвНП', 'НПЮЛ'], elements)) {
+                    npJulFound = true
+                    naimOrg = getXmlValue(reader, 'НаимОрг')
+                    innJulNpJul = getXmlValue(reader, 'ИННЮЛ')
+                    kppJulNpJul = getXmlValue(reader, 'КПП')
+                } else if (!svReorgJulFound && isCurrentNode(['Документ', 'СвНП', 'НПЮЛ', 'СвРеоргЮЛ'], elements)) {
+                    svReorgJulFound = true
+                    innJulSvReorgJul = getXmlValue(reader, 'ИННЮЛ')
+                    kppSvReorgJul = getXmlValue(reader, 'КПП')
+                    formReorg = getXmlValue(reader, 'ФормРеорг')
+                } else if (!nalPUAvFound && isCurrentNode(['Документ', 'Прибыль', 'НалПУ', 'НалПУАв'], elements)) {
+                    nalPUAvFound = true
+                    oktmoNalPUAv = getXmlValue(reader, 'ОКТМО')
+                } else if (!nalPUMesFound && isCurrentNode(['Документ', 'Прибыль', 'НалПУ', 'НалПУМес'], elements)) {
+                    nalPUMesFound = true
+                    oktmoNalPUMes = getXmlValue(reader, 'ОКТМО')
+                } else if (!fileFound && isCurrentNode([], elements)) {
+                    fileFound = true
+                    versForm = getXmlValue(reader, 'ВерсФорм')
+                    idFile = getXmlValue(reader, 'ИдФайл')
+                    def idFileParts = idFile?.split("_")
+                    if (idFileParts.size() >= 3) { // на всякий случай
+                        kodNOProm = idFileParts[2]
+                    }
                 }
             }
             if (reader.endElement) {
@@ -210,76 +215,78 @@ void logicCheck() {
         reader.close()
     }
 
-    // Проверки Листа 02 - Превышение суммы налога, выплаченного за пределами РФ (всего)
-    if (nalVipl311 != null && nalIschisl != null && nalVipl311 > nalIschisl) {
-        logger.error('Сумма налога, выплаченная за пределами РФ (всего) превышает сумму исчисленного налога на прибыль (всего)!')
+    if (naimOrg == null || naimOrg.trim().isEmpty()) {
+        logger.log(logLevel, getMessage("Титульный лист", "Наименование организации (обособленного подразделения)", "НПЮЛ.НаимОрг", "Наименование для титульного листа"))
     }
+    // is1_2 = если поле ОКТМО не заполнено в разделе 1.2
+    boolean is1_2 = nalPUMesFound && (oktmoNalPUMes == null || oktmoNalPUMes.trim().isEmpty())
+    if (oktmoNalPUAv == null || oktmoNalPUAv.trim().isEmpty() || is1_2) {
+        logger.log(logLevel, getMessage("Подраздел 1.1" + (is1_2 ? ", 1.2" : ""), "Код по ОКТМО", "НалПУАв.ОКТМО" + (is1_2 ? ", НалПУМес.ОКТМО" : ""), "ОКТМО"))
+    }
+    if (innJulNpJul == null || innJulNpJul.trim().isEmpty()) {
+        logger.log(logLevel, getMessage("Титульный лист", "ИНН налогоплательщика", "НПЮЛ.ИННЮЛ", "ИНН"))
+    }
+    if (kppJulNpJul == null || kppJulNpJul.trim().isEmpty()) {
+        logger.log(logLevel, getMessage("Титульный лист", "КПП налогоплательщика", "НПЮЛ.КПП", "КПП"))
+    }
+    if (kodNO == null || kodNO.trim().isEmpty()) {
+        logger.log(logLevel, getMessage("Наименование xml файла (кон. налоговый орган) и титульный лист", "Код налогового органа", "Документ.КодНО", "Код налогового органа (кон.)"))
+    }
+    if (kodNOProm == null || kodNOProm.trim().isEmpty() || "null".equals(kodNOProm)) {
+        logger.log(logLevel, getPromMessage("Код налогового органа (пром.)"))
+    }
+    if (okved == null || okved.trim().isEmpty()) {
+        logger.log(logLevel, getMessage("Титульный лист", "Код вида экономической деятельности и по классификатору ОКВЭД", "СвНП.ОКВЭД", "Код вида экономической деятельности и по классификатору ОКВЭД"))
+    }
+    if ((formReorg != null && formReorg != '0') && (innJulSvReorgJul == null || innJulSvReorgJul.trim().isEmpty())) {
+        logger.log(logLevel, getReorgMessage("Титульный лист", "ИНН реорганизованной организации (обособленного подразделения)", "СвРеоргЮЛ.ИННЮЛ", "ИНН реорганизованного обособленного подразделения"))
+    }
+    if ((formReorg != null && formReorg != '0') && (kppSvReorgJul == null || kppSvReorgJul.trim().isEmpty())) {
+        logger.log(logLevel, getReorgMessage("Титульный лист", "КПП реорганизованной организации (обособленного подразделения)", "СвРеоргЮЛ.КПП", "КПП реорганизованного обособленного подразделения"))
+    }
+    if (prPodp == null || prPodp.trim().isEmpty()) {
+        logger.log(logLevel, getMessage("Титульный лист", "Признак лица, подписавшего документ", "Подписант.ПрПодп", "Признак лица подписавшего документ"))
+    }
+    if (signatorySurname == null || signatorySurname.trim().isEmpty()) {
+        logger.log(logLevel, getMessage("Титульный лист", "Фамилия", "Подписант.Фамилия", "Фамилия подписанта"))
+    }
+    if (signatoryFirstName == null || signatoryFirstName.trim().isEmpty()) {
+        logger.log(logLevel, getMessage("Титульный лист", "Имя", "Подписант.Имя", "Имя подписанта"))
+    }
+    if (prPodp == '2' && (naimDok == null || naimDok.trim().isEmpty())) {
+        logger.log(logLevel, getDocumentMessage("Титульный лист", "Наименование документа, подтверждающего полномочия представителя", "СвПред.НаимДок", "Наименование документа, подтверждающего полномочия представителя"))
+    }
+    if (poMestu == null || poMestu.trim().isEmpty()) {
+        logger.log(logLevel, getMessage("Титульный лист", "Код места, по которому представляется документ", "Документ.ПоМесту", "Код места, по которому представляется документ"))
+    }
+    if (versForm == null || versForm.trim().isEmpty() || !version.equals(versForm)) {
+        logger.log(logLevel, getVersionMessage(versForm, "Файл.ВерсФорм", "Версия формата"))
+    }
+}
 
-    // Проверки Листа 02 - Превышение суммы налога, выплаченного за пределами РФ (в федеральный бюджет)
-    if (nalVipl311FB != null && nalIschislFB != null &&
-            nalVipl311FB > nalIschislFB) {
-        logger.error('Сумма налога, выплаченная за пределами РФ (в федеральный бюджет) превышает сумму исчисленного налога на прибыль (в федеральный бюджет)!')
-    }
+String getMessage(String place, String printName, String xmlName, String departmentName) {
+    return String.format("%s. Обязательный для заполнения атрибут «%s» (%s) не заполнен! На момент расчёта экземпляра декларации (формирование XML) на форме настроек подразделения отсутствовало значение атрибута «%s».",
+            place, printName, xmlName, departmentName)
+}
 
-    // Проверки Листа 02 - Превышение суммы налога, выплаченного за пределами РФ (в бюджет субъекта РФ)
-    if (nalVipl311Sub != null && nalIschislSub != null &&
-            nalVipl311Sub > nalIschislSub) {
-        logger.error('Сумма налога, выплаченная за пределами РФ (в бюджет субъекта РФ) превышает сумму исчисленного налога на прибыль (в бюджет субъекта РФ)!')
-    }
+String getPromMessage(String departmentName) {
+    return String.format("Обязательный для заполнения атрибут «%s» в наименовании xml файла не заполнен! На момент расчёта экземпляра декларации (формирование XML) на форме настроек подразделения отсутствовало значение атрибута «%s».",
+            departmentName, departmentName)
+}
 
-    // Проверки Приложения № 1 к Листу 02 - Превышение суммы составляющих над общим показателем («Внереализационные доходы (всего)»)
-    // (ВнеРеалДохПр + ВнеРеалДохСт + ВнеРеалДохБезв + ВнеРеалДохИзл + ВнеРеалДохВРасх + ВнеРеалДохРынЦБДД + ВнеРеалДохКор) < ВнеРеалДохВс
-    if (vneRealDohSt != null && vneRealDohBezv != null && vneRealDohIzl != null && vneRealDohVRash != null &&
-            vneRealDohRinCBDD != null && vneRealDohCor != null && vneRealDohVs != null &&
-            (empty + vneRealDohSt + vneRealDohBezv +
-                    vneRealDohIzl + vneRealDohVRash + vneRealDohRinCBDD +
-                    vneRealDohCor) > vneRealDohVs) {
-        logger.error('Показатель «Внереализационные доходы (всего)» меньше суммы его составляющих!')
-    }
+String getVersionMessage(String value, String xmlName, String departmentName) {
+    return String.format("Обязательный для заполнения атрибут «%s» (%s) заполнен неверно (%s)! Ожидаемое значение «$version». На момент расчёта экземпляра декларации (формирование XML) на форме настроек подразделения было указано неверное значение атрибута «%s».",
+            departmentName, xmlName, value?:'пустое значение', departmentName)
+}
 
-    // Проверки Приложения № 2 к Листу 02 - Превышение суммы составляющих над общим показателем («Косвенные расходы (всего)»)
-    // КосвРасхВс < (Налоги + РасхКапВл10 + РасхКапВл30 + РасхТрудИнв + РасхОргИнв + РасхЗемУчВс + НИОКР)
-    if (cosvRashVs != null && nalogi != null && rashCapVl10 != null && rashCapVl30 != null && rashZemUchVs != null &&
-            cosvRashVs < (nalogi + rashCapVl10 + rashCapVl30 +
-            empty + empty + rashZemUchVs + empty)) {
-        logger.error('Показатель «Косвенные расходы (всего)» меньше суммы его составляющих!')
-    }
+String getReorgMessage(String place, String printName, String xmlName, String departmentName) {
+    return String.format("%s. Условно обязательный для заполнения (заполнен код формы реорганизации) атрибут «%s» (%s) не заполнен! На момент расчёта экземпляра декларации (формирование XML) на форме настроек подразделения отсутствовало значение атрибута «%s».",
+            place, printName, xmlName, departmentName)
+}
 
-    // Проверки Приложения № 2 к Листу 02 - Превышение суммы составляющих над общим показателем («Внереализационные расходы (всего)»)
-    // (РасхВнереалПрДО + РасхВнереалРзрв + УбытРеалПравТр + РасхЛиквОС + РасхШтраф + РасхРынЦБДД) > РасхВнеРеалВс
-    if (rashVnerealPrDO != null && ubitRealPravTr != null && rashLikvOS != null &&
-            rashShtraf != null && rashRinCBDD != null && rashVnerealVs != null &&
-            (rashVnerealPrDO + empty + ubitRealPravTr + rashLikvOS + rashShtraf + rashRinCBDD) > rashVnerealVs) {
-        logger.error('Показатель «Внереализационные расходы (всего)» меньше суммы его составляющих!')
-    }
-
-    // Проверки Приложения № 3 к Листу 02 - Проверка отрицательной разницы (убыток) от реализации права требования
-    // долга до наступления срока платежа, определенной налогоплательщиком в соответствии с п. 1 статьи 279 НК
-    // строка 100 = ВыручРеалПТДоСр = viruchRealPTDoSr
-    // строка 120 = СтоимРеалПТДоСр = stoimRealPTDoSr
-    // строка 140 = Убыт1Соот269	= ubit1Soot269
-    // строка 150 = Убыт1Прев269	= ubit1Prev269
-    if (stoimRealPTDoSr != null && viruchRealPTDoSr != null && ubit1Prev269 != null && ubit1Soot269 != null &&
-            (stoimRealPTDoSr > viruchRealPTDoSr ?
-                    (ubit1Prev269 != stoimRealPTDoSr - viruchRealPTDoSr - ubit1Soot269)
-                    : (ubit1Prev269 != 0))) {
-        logger.warn('В Приложении 3 к Листу 02 строка 150 неверно указана сумма!')
-    }
-
-    // Проверки Приложения № 3 к Листу 02 - Проверка отрицательной разницы (убыток), полученной налогоплательщиком
-    // при уступке права требования долга после наступления срока платежа в соответствии с п. 2 статьи 279 НК
-    // строка 110 = ВыручРеалПТПосСр = viruchRealPTPosSr
-    // строка 130 = СтоимРеалПТПосСр = stoimRealPTPosSr
-    // строка 160 = Убыт2РеалПТ		 = ubit2RealPT
-    def reportPeriod = reportPeriodService.get(declarationData.reportPeriodId)
-    if (reportPeriod.order == 4 && reportPeriod.taxPeriod.year == 2014) {
-        if (stoimRealPTPosSr != null && viruchRealPTPosSr != null && ubit2RealPT != null &&
-                (stoimRealPTPosSr > viruchRealPTPosSr ?
-                        (ubit2RealPT != stoimRealPTPosSr - viruchRealPTPosSr)
-                        : (ubit2RealPT != 0))) {
-            logger.warn('В Приложении 3 к Листу 02 строка 160 неверно указана сумма!')
-        }
-    }
+String getDocumentMessage(String place, String printName, String xmlName, String departmentName) {
+    return String.format("%s. Условно обязательный для заполнения (Признак лица, подписавшего документ = 2) атрибут «%s» (%s) не заполнен! На момент расчёта экземпляра декларации (формирование XML) на форме настроек подразделения отсутствовало значение атрибута «%s».",
+            place, printName, xmlName, departmentName)
 }
 
 // Запуск генерации XML.
@@ -589,85 +596,6 @@ def getLong(def value) {
     return roundValue(value, 0)
 }
 
-/**
- * Получить сумму значении столбца по указанным строкам.
- *
- * @param dataRows строки нф
- * @param columnCode псевдоним столбца по которому отбирать данные для суммирования
- * @param columnSum псевдоним столбца значения которого надо суммировать
- * @param codes список значении, которые надо учитывать при суммировании
- */
-def getSumRowsByCol(def dataRows, def columnCode, def columnSum, def codes) {
-    def result = 0
-    if (!dataRows) {
-        return result
-    }
-    dataRows.each { row ->
-        def cell = row.getCell(columnSum)
-        if (row.getCell(columnCode).value in (String [])codes && !cell.hasValueOwner()) {
-            result += (cell.value ?: 0)
-        }
-    }
-    return result
-}
-
-/**
- * Получить сумму графы 9 формы доходы сложные.
- *
- * @param dataRows строки нф доходы сложные
- * @param codes коды которые надо учитывать при суммировании
- */
-def getComplexIncomeSumRows9(def dataRows, def codes) {
-    return getSumRowsByCol(dataRows, 'incomeTypeId', 'incomeTaxSumS', codes)
-}
-
-/**
- * Получить сумму графы 9 формы расходы сложные.
- *
- * @param dataRows строки нф расходы сложные
- * @param codes коды которые надо учитывать при суммировании
- */
-def getComplexConsumptionSumRows9(def dataRows, def codes) {
-    return getSumRowsByCol(dataRows, 'consumptionTypeId', 'consumptionTaxSumS', codes)
-}
-
-/**
- * Получить сумму графы 8 формы доходы простые.
- *
- * @param dataRows строки нф доходы простые
- * @param codes коды которые надо учитывать при суммировании
- */
-def getSimpleIncomeSumRows8(def dataRows, def codes) {
-    return getSumRowsByCol(dataRows, 'incomeTypeId', 'rnu4Field5Accepted', codes)
-}
-
-/**
- * Получить сумму графы 8 формы расходы простые.
- *
- * @param dataRows строки нф расходы простые
- * @param codes коды которые надо учитывать при суммировании
- */
-def getSimpleConsumptionSumRows8(def dataRows, def codes) {
-    return getSumRowsByCol(dataRows, 'consumptionTypeId', 'rnu5Field5Accepted', codes)
-}
-
-/** Подсчет простых расходов: сумма(графа 8 + графа 5 - графа 6). */
-def getCalculatedSimpleConsumption(def dataRowsSimple, def codes) {
-    def result = 0
-    if (dataRowsSimple == null) {
-        return result
-    }
-    dataRowsSimple.each { row ->
-        if (row.getCell('consumptionTypeId').value in (String [])codes) {
-            result +=
-                    (row.rnu5Field5Accepted ?: 0) +
-                            (row.rnu7Field10Sum ?: 0) -
-                            (row.rnu7Field12Accepted ?: 0)
-        }
-    }
-    return result
-}
-
 // Получить значения для АвПлат1 (220), АвПлат2 (230), АвПлат3 (240)
 def getAvPlats(def row, def reportPeriod) {
     def appl5List02Row120 = (row != null && row.everyMontherPaymentAfterPeriod != null ? row.everyMontherPaymentAfterPeriod : 0)
@@ -696,29 +624,6 @@ def getAvPlats(def row, def reportPeriod) {
     return [avPlat1, avPlat2, avPlat3]
 }
 
-/**
- * Получить xml декларации.
- *
- * @param reportPeriodId
- * @param departmentId
- */
-def getXmlStreamReader(def reportPeriodId, def departmentId, def acceptedOnly, def anyPrevDeclaration) {
-    if (reportPeriodId != null) {
-        // вид декларации 11 - декларация банка
-        def declarationTypeId = 11
-        def xml = getStreamReader(declarationTypeId, departmentId, reportPeriodId, acceptedOnly)
-        if (xml != null) {
-            return xml
-        }
-        // для новой декларации можно поискать в прошлом периоде другую декларацию (обычную Банка)
-        if (anyPrevDeclaration) {
-            declarationTypeId = 2
-            return getStreamReader(declarationTypeId, departmentId, reportPeriodId, acceptedOnly)
-        }
-    }
-    return null
-}
-
 def getStreamReader(def declarationTypeId, def departmentId, def reportPeriodId, def acceptedOnly) {
     def declarationData = declarationService.getLast(declarationTypeId, departmentId, reportPeriodId)
     if (declarationData != null && declarationData.id != null && (!acceptedOnly || declarationData.accepted)) {
@@ -741,13 +646,16 @@ def roundValue(def value, def precision) {
 List<String> getErrorTable(record) {
     List<String> errorList = new ArrayList<String>()
     if (record.NAME?.value == null || record.NAME.value.isEmpty()) {
-        errorList.add("«Наименование подразделения»")
+        errorList.add("«Наименование для титульного листа»")
     }
     if (record.OKTMO == null || record.OKTMO.value == null) {
-        errorList.add("«Код по ОКТМО»")
+        errorList.add("«ОКТМО»")
     }
     if (record.TAX_ORGAN_CODE?.value == null || record.TAX_ORGAN_CODE.value.isEmpty()) {
-        errorList.add("«Код налогового органа»")
+        errorList.add("«Код налогового органа (кон.)»")
+    }
+    if (useTaxOrganCodeProm() && (record.TAX_ORGAN_CODE_PROM?.value == null || record.TAX_ORGAN_CODE_PROM.value.isEmpty())) {
+        errorList.add("«Код налогового органа (пром.)»")
     }
     if (record.OKVED_CODE?.value == null) {
         errorList.add("«Код вида экономической деятельности и по классификатору ОКВЭД»")
@@ -771,8 +679,8 @@ List<String> getErrorTable(record) {
         errorList.add("«Имя подписанта»")
     }
     def signatoryId = getRefBookValue(35, record?.SIGNATORY_ID?.value)?.CODE?.value
-    if ((signatoryId != null && signatoryId != 1) && (record.APPROVE_DOC_NAME?.value == null || record.APPROVE_DOC_NAME.value.isEmpty())) {
-        errorList.add("«Наименование документа, подтверждающего полномочия представителя»")
+    if ((signatoryId != null && signatoryId == 2) && (record.APPROVE_DOC_NAME?.value == null || record.APPROVE_DOC_NAME.value.isEmpty())) {
+        errorList.add("«Наименование документа, подтверждающего полномочия представителя» (Признак лица, подписавшего документ = 2)")
     }
     if (record.TAX_PLACE_TYPE_CODE?.value == null) {
         errorList.add("«Код места, по которому представляется документ»")
@@ -786,16 +694,14 @@ List<String> getErrorDepartment(record) {
     if (record.INN?.stringValue == null || record.INN.stringValue.isEmpty()) {
         errorList.add("«ИНН»")
     }
-    if (record.TAX_RATE?.value == null) {
-        errorList.add("«Ставка налога»")
-    }
+    // Cтавка налога не проверяется в ОП
     errorList
 }
 
 List<String> getErrorVersion(record) {
     List<String> errorList = new ArrayList<String>()
-    if (record.FORMAT_VERSION == null || record.FORMAT_VERSION.value == null || !record.FORMAT_VERSION.value.equals('5.06')) {
-        errorList.add("«Версия формата»")
+    if (record.FORMAT_VERSION == null || record.FORMAT_VERSION.value == null || !record.FORMAT_VERSION.value.equals(version)) {
+        errorList.add("«Версия формата» (${record.FORMAT_VERSION.value?:'пустое значение'})! Ожидаемое значение «$version».")
     }
     errorList
 }
@@ -811,14 +717,6 @@ def getProvider(def long providerId) {
         providerCache.put(providerId, refBookFactory.getDataProvider(providerId))
     }
     return providerCache.get(providerId)
-}
-
-BigDecimal getXmlDecimal(def reader, String attrName) {
-    def value = reader?.getAttributeValue(null, attrName)
-    if (!value) {
-        return null
-    }
-    return new BigDecimal(value)
 }
 
 String getXmlValue(XMLStreamReader reader, String attrName) {
@@ -868,8 +766,10 @@ boolean useTaxOrganCodeProm() {
     if (declarationReportPeriod == null) {
         declarationReportPeriod = reportPeriodService.get(declarationData.reportPeriodId)
     }
-    return (declarationReportPeriod?.taxPeriod?.year > 2015 || declarationReportPeriod?.order > 2)
+    def year = declarationReportPeriod?.taxPeriod?.year
+    return (year > 2015 || (year == 2015 && declarationReportPeriod?.order > 2))
 }
+
 
 def generateXmlFileId(String taxOrganCodeProm, String taxOrganCode) {
     def departmentParam = getDepartmentParam()

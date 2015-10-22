@@ -351,21 +351,22 @@ void logicCheck() {
             checkCalc(row, arithmeticCheckAlias, needValue, logger, !isBalancePeriod())
         }
         // 18. Проверка итоговых значений по ГРН
-        if (row.regNumber != null && !totalGroupsName.contains(row.regNumber)) {
+        if (!totalGroupsName.contains(row.regNumber)) {
             totalGroupsName.add(row.regNumber)
         }
     }
 
+    def totalRow
     if (prevDataRows != null) {
-        def totalRow = getDataRow(dataRows, 'total')
+        totalRow = dataRows.find { 'total'.equals(it.getAlias()) }
         def totalRowOld = getDataRow(prevDataRows, 'total')
 
         // 13. Проверка корректности заполнения РНУ (графа 4, 5 (за предыдущий период))
-        if (totalRow.lotSizePrev != totalRowOld.lotSizeCurrent) {
+        if (totalRow?.lotSizePrev != null && totalRow.lotSizePrev != totalRowOld.lotSizeCurrent) {
             loggerError(totalRow, "РНУ сформирован некорректно! Не выполняется условие: «Общий итог» по графе 4 (${totalRow.lotSizePrev}) = «Общий итог» по графе 5 (${totalRowOld.lotSizeCurrent}) Формы РНУ-25 за предыдущий отчетный период.")
         }
         // 14. Проверка корректности заполнения РНУ (графа 6, 11 (за предыдущий период))
-        if (totalRow.reserve != totalRowOld.reserveCalcValue) {
+        if (totalRow?.reserve != null && totalRow.reserve != totalRowOld.reserveCalcValue) {
             loggerError(totalRow, "РНУ сформирован некорректно! Не выполняется условие: «Общий итог» по графе 6 (${totalRow.reserve})= «Общий итог» по графе 11 (${totalRowOld.reserveCalcValue}) формы РНУ-25 за предыдущий отчётный период")
         }
     }
@@ -377,24 +378,22 @@ void logicCheck() {
         // получить алиас для подитоговой строки по ГРН
         def totalRowAlias = 'total' + codeName
         // получить посчитанную строку с итогами по ГРН
-        def row
-        try {
-            row = getDataRow(dataRows, totalRowAlias)
-        } catch (IllegalArgumentException e) {
-            loggerError(null, "Итоговые значения по ГРН $codeName не рассчитаны! Необходимо рассчитать данные формы.")
-            continue
-        }
+        def row = dataRows.find { totalRowAlias.equals(it.getAlias()) }
         // сформировать подитоговую строку ГРН с суммами
         def tmpRow = getCalcSubtotalsRow(rows, codeName, totalRowAlias)
 
         // сравнить строки
-        if (isDiffRow(row, tmpRow, totalSumColumns)) {
-            loggerError(row, "Итоговые значения по ГРН $codeName рассчитаны неверно!")
+        if (row == null || isDiffRow(row, tmpRow, totalSumColumns)) {
+            loggerError(row, "Итоговые значения по ГРН ${((!codeName || 'null'.equals(codeName?.trim())) ? "\"ГРН не задан\"" : codeName?.trim())} рассчитаны неверно!")
         }
     }
 
     // 18. Проверка итогового значений по всей форме
-    checkTotalSum(dataRows, totalSumColumns, logger, !isBalancePeriod)
+    if (totalRow != null) {
+        checkTotalSum(dataRows, totalSumColumns, logger, !isBalancePeriod)
+    } else {
+        loggerError(null, "Итоговые значения рассчитаны неверно!")
+    }
 }
 
 // Группирует данные по графе tradeNumber и считает количество строк, в которых данное значение встречается
@@ -445,7 +444,7 @@ def getNewRow() {
  */
 def checkOld(def row, def curColumnName, def prevColumnName, def prevRowMap) {
     def prevRow = prevRowMap[row.tradeNumber]
-    if (prevRowMap != null && prevRow != null && row[curColumnName] != prevRow[prevColumnName]) {
+    if (prevRowMap != null && prevRow != null && row[curColumnName] != null && row[curColumnName] != prevRow[prevColumnName]) {
         return prevRow[prevColumnName]
     } else {
         return null
@@ -474,7 +473,7 @@ def getCalcTotalRow(def dataRows) {
  * @param totalRowAlias псевдоним сформированной строки
  */
 def getCalcSubtotalsRow(def dataRows, def regNumber, def totalRowAlias) {
-    return getTotalRow(dataRows, regNumber.trim() + ' итог', totalRowAlias)
+    return getTotalRow(dataRows, ((regNumber || 'null'.equals(regNumber?.trim())) ? "ГРН не задан" : regNumber?.trim()) + ' Итог', totalRowAlias)
 }
 
 /**

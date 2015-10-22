@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<formTemplateContent>
+    <fixedRows>false</fixedRows>
+    <name>Отчет о результатах исполнения мероприятий по контролю и управлению эффективной налоговой ставкой и налоговыми обязательствами</name>
+    <fullName>Отчет о результатах исполнения мероприятий по контролю и управлению эффективной налоговой ставкой и налоговыми обязательствами</fullName>
+    <header>Отчет о результатах исполнения</header>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="autoNumerationColumn">
+        <alias>rowNum</alias>
+        <checking>false</checking>
+        <columnType>AUTO</columnType>
+        <name>№ п/п</name>
+        <order>1</order>
+        <width>4</width>
+        <numerationType>SERIAL</numerationType>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
+        <alias>problemZone</alias>
+        <checking>false</checking>
+        <columnType>REFBOOK</columnType>
+        <name>Проблемные зоны/зоны потенциального риска/факторы, оказывающие влияние</name>
+        <order>2</order>
+        <width>10</width>
+        <hierarchical>false</hierarchical>
+        <nameAttributeId>5043</nameAttributeId>
+        <refBookAttributeId>5043</refBookAttributeId>
+        <searchEnabled>true</searchEnabled>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
+        <alias>measures</alias>
+        <checking>false</checking>
+        <columnType>STRING</columnType>
+        <name>Предложенные мероприятия/меры</name>
+        <order>3</order>
+        <width>30</width>
+        <maxLength>500</maxLength>
+        <prevLength>0</prevLength>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="dateColumn">
+        <alias>realizationDate</alias>
+        <checking>false</checking>
+        <columnType>DATE</columnType>
+        <name>Сроки реализации</name>
+        <order>4</order>
+        <width>5</width>
+        <formatId>0</formatId>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
+        <alias>performMark</alias>
+        <checking>false</checking>
+        <columnType>REFBOOK</columnType>
+        <name>Отметка о выполнении</name>
+        <order>5</order>
+        <width>10</width>
+        <hierarchical>false</hierarchical>
+        <nameAttributeId>5012</nameAttributeId>
+        <refBookAttributeId>5012</refBookAttributeId>
+        <searchEnabled>true</searchEnabled>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
+        <alias>comments</alias>
+        <checking>false</checking>
+        <columnType>STRING</columnType>
+        <name>Примечание/Комментарии</name>
+        <order>6</order>
+        <width>30</width>
+        <maxLength>500</maxLength>
+        <prevLength>0</prevLength>
+    </columns>
+    <styles>
+        <alias>Автозаполняемая</alias>
+        <backColor>WHITE</backColor>
+        <bold>true</bold>
+        <fontColor>DARK_GREEN</fontColor>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Редактируемая</alias>
+        <backColor>LIGHT_BLUE</backColor>
+        <bold>false</bold>
+        <fontColor>BLACK</fontColor>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Контрольные суммы</alias>
+        <backColor>LIGHT_BROWN</backColor>
+        <bold>true</bold>
+        <fontColor>BLACK</fontColor>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Корректировка-добавлено</alias>
+        <backColor>PALE_GREEN</backColor>
+        <bold>false</bold>
+        <fontColor>BLACK</fontColor>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Корректировка-удалено</alias>
+        <backColor>LIGHT_CORAL</backColor>
+        <bold>false</bold>
+        <fontColor>BLACK</fontColor>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Корректировка-без изменений</alias>
+        <backColor>GREY</backColor>
+        <bold>false</bold>
+        <fontColor>BLACK</fontColor>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Корректировка-изменено</alias>
+        <backColor>WHITE</backColor>
+        <bold>true</bold>
+        <fontColor>RED</fontColor>
+        <italic>false</italic>
+    </styles>
+</formTemplateContent>

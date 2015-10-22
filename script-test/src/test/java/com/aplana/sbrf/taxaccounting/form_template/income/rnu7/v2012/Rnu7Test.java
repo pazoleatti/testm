@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.form_template.income.rnu7.v2012;
 
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
@@ -16,12 +17,15 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
 import java.math.BigDecimal;
-import java.util.*;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
 import static org.mockito.Matchers.*;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.reset;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 /**
  * РНУ-7.
@@ -71,18 +75,20 @@ public class Rnu7Test extends ScriptTestBase {
             public Object answer(InvocationOnMock invocation) throws Throwable {
                 // ищет среди записей справочника запись соответствующую коду из фильтра
                 // в фильтре: LOWER(CODE) = LOWER('codeA') and LOWER(NUMBER) = LOWER('numberA')
+                // либо: LOWER(CODE) = LOWER('codeA')
                 String filter = (String) invocation.getArguments()[2];
-                String before = "LOWER(CODE) = LOWER('";
-                String after = "') and LOWER(NUMBER)";
-                int beforeIndex = filter.indexOf(before) + before.length();
-                int afterIndex = filter.indexOf(after);
-                String findValue = filter.substring(beforeIndex, afterIndex);
-                if (findValue == null) {
+                String codeValue = filter.substring(filter.indexOf("('") + 2, filter.indexOf("')"));
+                if (codeValue == null) {
                     return new PagingResult<Map<String, RefBookValue>>();
+                }
+                String numberValue = null;
+                if (filter.lastIndexOf("('") != filter.indexOf("('")) {
+                    numberValue = filter.substring(filter.lastIndexOf("('") + 2, filter.lastIndexOf("')"));
                 }
                 final Map<Long, Map<String, RefBookValue>> records = testHelper.getRefBookAllRecords(refbookId);
                 for (Map<String, RefBookValue> row : records.values()) {
-                    if (findValue.equals(row.get("CODE").getStringValue())) {
+                    if (codeValue.equals(row.get("CODE").getStringValue())
+                            && (numberValue == null || numberValue.equals(row.get("NUMBER").getStringValue()))) {
                         List<Map<String, RefBookValue>> tmpRecords = Arrays.asList(row);
                         return new PagingResult<Map<String, RefBookValue>>(tmpRecords);
                     }
@@ -131,6 +137,97 @@ public class Rnu7Test extends ScriptTestBase {
     @Test
     public void checkTest() {
         testHelper.execute(FormDataEvent.CHECK);
+        // ошибок быть не должно
+        checkLogger();
+    }
+
+    // Проверка со входом во все ЛП
+    @Test
+    public void check1Test() throws ParseException {
+        FormData formData = getFormData();
+        formData.initFormTemplateParams(testHelper.getTemplate("..//src/main//resources//form_template//income//rnu7//v2012//"));
+        List<DataRow<Cell>> dataRows = testHelper.getDataRowHelper().getAll();
+        SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
+
+        // для попадания в ЛП:
+        // 1. Проверка на заполнение поля
+        // 3. Проверка на нулевые значения
+        // 5. Проверка даты совершения операции и границ отчётного периода
+        DataRow<Cell> row1 = formData.createDataRow();
+        row1.setIndex(1);
+        row1.getCell("number").setValue(1, null);
+        row1.getCell("helper").setValue("строка1000", null);
+        // зависимая // row.getCell("kny").setValue(1, null); // Код налогового учёта
+        row1.getCell("date").setValue(sdf.parse("01.01.2015"), null);
+        row1.getCell("code").setValue(2, null); // Номер
+        row1.getCell("docNumber").setValue("строка15", null);
+        row1.getCell("docDate").setValue(new Date(), null);
+        row1.getCell("currencyCode").setValue(3, null);  // Код валюты. Цифровой
+        row1.getCell("rateOfTheBankOfRussia").setValue(null, null);
+        dataRows.add(row1);
+
+        // для попадания в ЛП:
+        // 4. Проверка, что не  отображаются данные одновременно по бухгалтерскому и по налоговому учету
+        // 6. Проверка на превышение суммы дохода по данным бухгалтерского учёта над суммой начисленного дохода
+        // 8. Арифметические проверки расчета неитоговых строк
+        // 11. Проверка наличия суммы дохода в налоговом учете, для первичного документа, указанного для суммы дохода в бухгалтерском учёте
+        DataRow<Cell> row2 = formData.createDataRow();
+        row2.setIndex(2);
+        row2.getCell("number").setValue(1, null);
+        row2.getCell("helper").setValue("строка1000", null);
+        // зависимая // row.getCell("kny").setValue(1, null); // Код налогового учёта
+        row2.getCell("date").setValue(sdf.parse("01.01.2014"), null);
+        row2.getCell("code").setValue(2, null); // Номер
+        row2.getCell("docNumber").setValue("строка15", null);
+        row2.getCell("docDate").setValue(sdf.parse("01.01.2014"), null);
+        row2.getCell("currencyCode").setValue(3, null);  // Код валюты. Цифровой
+        row2.getCell("rateOfTheBankOfRussia").setValue(19.4, null);
+        row2.getCell("taxAccountingCurrency").setValue(17.2, null);
+        row2.getCell("taxAccountingRuble").setValue(17.2, null);
+        row2.getCell("accountingCurrency").setValue(17.2, null);
+        row2.getCell("ruble").setValue(17.3, null);
+        dataRows.add(row2);
+
+        // для попадания в ЛП:
+        // 7. Проверка на уникальность записи по налоговому учету
+        // 8. Арифметические проверки расчета неитоговых строк
+        // 10. Арифметические проверки расчета строки общих итогов
+        DataRow<Cell> row3 = formData.createDataRow();
+        row3.setIndex(3);
+        row3.getCell("number").setValue(1, null);
+        row3.getCell("helper").setValue("строка1000", null);
+        // зависимая // row.getCell("kny").setValue(1, null); // Код налогового учёта
+        row3.getCell("date").setValue(sdf.parse("01.01.2014"), null);
+        row3.getCell("code").setValue(2, null); // Номер
+        row3.getCell("docNumber").setValue("строка15", null);
+        row3.getCell("docDate").setValue(sdf.parse("01.01.2014"), null);
+        row3.getCell("currencyCode").setValue(3, null);  // Код валюты. Цифровой
+        row3.getCell("rateOfTheBankOfRussia").setValue(19.4, null);
+        row3.getCell("taxAccountingCurrency").setValue(17.2, null);
+        row3.getCell("taxAccountingRuble").setValue(17.2, null);
+        row3.getCell("accountingCurrency").setValue(17.2, null);
+        row3.getCell("ruble").setValue(17.3, null);
+        dataRows.add(row3);
+
+        testHelper.execute(FormDataEvent.CHECK);
+
+        List<LogEntry> entries = testHelper.getLogger().getEntries();
+        int i = 0;
+        Assert.assertEquals("Строка 1: Графа «Курс Банка России» не заполнена!", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 1: Все суммы по операции нулевые!", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 1: Дата совершения операции вне границ отчётного периода!", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 2: Одновременно указаны данные по налоговому (графа 10) и бухгалтерскому (графа 12) учету.", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 2: Сумма данных бухгалтерского учёта превышает сумму начисленных платежей для документа строка15 от 01.01.2014!", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 2: Неверное значение граф: «Курс Банка России», «Сумма расхода, в налоговом учёте. Рубли», «Сумма расхода, в бухгалтерском учёте. Рубли»!", entries.get(i++).getMessage());
+        Assert.assertEquals("Операция, указанная в строке 2, в налоговом учете за последние 3 года не проходила!", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 3: Одновременно указаны данные по налоговому (графа 10) и бухгалтерскому (графа 12) учету.", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 3: Неверное значение граф: «Курс Банка России», «Сумма расхода, в налоговом учёте. Рубли», «Сумма расхода, в бухгалтерском учёте. Рубли»!", entries.get(i++).getMessage());
+        Assert.assertEquals("Операция, указанная в строке 3, в налоговом учете за последние 3 года не проходила!", entries.get(i++).getMessage());
+        Assert.assertEquals("Строки 2, 3 не уникальны в рамках текущей налоговой формы! По данным строкам значения следующих граф совпадают: «Балансовый счёт (номер)» (numberB), «Первичный документ. Номер» (строка15), «Первичный документ. Дата» (01.01.2014).", entries.get(i++).getMessage());
+        Assert.assertEquals("Итоговые значения рассчитаны неверно в графе «Сумма расхода, в налоговом учёте. Рубли»!", entries.get(i++).getMessage());
+        Assert.assertEquals("Итоговые значения рассчитаны неверно в графе «Сумма расхода, в бухгалтерском учёте. Рубли»!", entries.get(i++).getMessage());
+        Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
+
         // ошибок быть не должно
         checkLogger();
     }
@@ -207,22 +304,24 @@ public class Rnu7Test extends ScriptTestBase {
         checkLogger();
     }
 
-    /** Проверить загруженные данные. */
+    /**
+     * Проверить загруженные данные.
+     */
     void checkLoadData(List<DataRow<Cell>> dataRows) {
         long index = 1;
         int precision = 4;
 
         // графа 5
-        String [] strColumns = { "docNumber" };
+        String[] strColumns = {"docNumber"};
 
         // графа 8..12
-        String [] numColumns = { "rateOfTheBankOfRussia", "taxAccountingCurrency", "taxAccountingRuble", "accountingCurrency", "ruble" };
+        String[] numColumns = {"rateOfTheBankOfRussia", "taxAccountingCurrency", "taxAccountingRuble", "accountingCurrency", "ruble"};
 
         // графа 2, 7
-        String [] refbookColumns = { "code", "currencyCode" };
+        String[] refbookColumns = {"code", "currencyCode"};
 
         // графа 3, 6
-        String [] dateColumns = { "date", "docDate" };
+        String[] dateColumns = {"date", "docDate"};
 
         String MSG = "row.%s[%d]";
         for (DataRow<Cell> row : dataRows) {
