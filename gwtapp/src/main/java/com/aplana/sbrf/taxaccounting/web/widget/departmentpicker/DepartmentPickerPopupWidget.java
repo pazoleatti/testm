@@ -308,7 +308,7 @@ public class DepartmentPickerPopupWidget extends DoubleStateComposite implements
             valueDereference.add(item.getDepartmentName());
         }
         countItems.setText(String.valueOf(valueDereference.size()));
-        ok.setEnabled(valueDereference.size() > 0);
+        ok.setEnabled(!valueDereference.isEmpty());
     }
 
     /**

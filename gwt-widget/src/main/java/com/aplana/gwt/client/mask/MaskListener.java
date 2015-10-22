@@ -52,7 +52,7 @@ public class MaskListener {
                     String input = textbox.getText();
                     int cursor = textbox.getCursorPos();
 
-                    if (input.length() > 0 && textbox.getSelectionLength() > 0) {
+                    if (!input.isEmpty() && textbox.getSelectionLength() > 0) {
                         debug("KeyDown: textbox has selection");
 
                         applied = new StringBuffer();
@@ -97,7 +97,7 @@ public class MaskListener {
                     char mc = mask.charAt(cursor);  // символ в маске под текущей позицией курсора
 
                     //Заменяем введенный символ на прочерк если он попадает под маску
-                    if ((mc == '9' || mc == 'X') && input.length() > 0) {
+                    if ((mc == '9' || mc == 'X') && !input.isEmpty()) {
                         applied.append(input.substring(0, cursor));
                         applied.append("_");
                         applied.append(input.substring(cursor + 1));
@@ -144,7 +144,7 @@ public class MaskListener {
 
                 int cursor = textbox.getCursorPos();
 
-                if (textbox.getText().length() > 0 && textbox.getSelectionLength() > 0) {
+                if (!textbox.getText().isEmpty() && textbox.getSelectionLength() > 0) {
                     debug("KeyPress: textbox has selection");
                     applied = new StringBuffer();
 

@@ -562,7 +562,7 @@ public class FormDataServiceImpl implements FormDataService {
 
     private void checkPerformer(Logger logger, FormData formData) {
         boolean check = true;
-        if (formData.getPerformer() == null || formData.getPerformer().getPrintDepartmentId() == null || formData.getSigners().size() == 0 ||
+        if (formData.getPerformer() == null || formData.getPerformer().getPrintDepartmentId() == null || formData.getSigners().isEmpty() ||
                     formData.getPerformer().getReportDepartmentName() == null || formData.getPerformer().getName() == null || formData.getPerformer().getPhone() == null ||
                     formData.getPerformer().getReportDepartmentName().trim().isEmpty() || formData.getPerformer().getName().trim().isEmpty() || formData.getPerformer().getPhone().trim().isEmpty()) {
             check = false;
@@ -849,7 +849,7 @@ public class FormDataServiceImpl implements FormDataService {
         Map<Long, List<ReferenceInfo>> referenceInfoMap = new HashMap<Long, List<ReferenceInfo>>();
         List<DataRow<Cell>> rows;
 		rows = dataRowDao.getRows(formData, null);
-        if (rows.size() > 0) {
+        if (!rows.isEmpty()) {
             for (Column column : formData.getFormColumns()) {
                 if (ColumnType.REFBOOK.equals(column.getColumnType())) {
                     Long attributeId = ((RefBookColumn) column).getRefBookAttributeId();
@@ -1352,7 +1352,7 @@ public class FormDataServiceImpl implements FormDataService {
         List<FormData> formDataList = formDataDao.getPrevFormDataList(formData, taxPeriod);
 
         // Если экземпляр НФ является не первым экземпляром в сквозной нумерации
-        if (formDataList.size() > 0) {
+        if (!formDataList.isEmpty()) {
             for (FormData aFormData : formDataList) {
                 if (beInOnAutoNumeration(aFormData.getState(), departmentReportPeriod)) {
                     previousRowNumber += dataRowDao.getAutoNumerationRowCount(aFormData);

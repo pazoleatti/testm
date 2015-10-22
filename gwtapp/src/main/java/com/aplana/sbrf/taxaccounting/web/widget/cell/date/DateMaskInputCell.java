@@ -221,7 +221,7 @@ public class DateMaskInputCell extends
 			}
 		}
 
-		if (toRender != null && toRender.toString().trim().length() > 0) {
+		if (toRender != null && !toRender.toString().trim().isEmpty()) {
 			sb.append(renderer.render(getFormattedDate(toRender)));
 		}
     }
@@ -308,7 +308,7 @@ public class DateMaskInputCell extends
         String inputText = elem.getValue();
         int cursor = TextUtils.getCursorPos(elem);
 
-        if (elem.getValue().length() > 0 && TextUtils.getSelectionLength(elem) > 0) {
+        if (!elem.getValue().isEmpty() && TextUtils.getSelectionLength(elem) > 0) {
             String tmp = prepareTextWithSelection(elem, inputText, mask);
             cursor = TextUtils.getSelectionStart(elem);
             // Если получивщийся текст пустой то вставляем маску для пользователя
@@ -334,7 +334,7 @@ public class DateMaskInputCell extends
         char mc = mask.charAt(cursor);  // символ в маске под текущей позицией курсора
 
         //Заменяем введенный символ на прочерк если он попадает под маску
-        if ((mc == '9' || mc == 'X')  && inputText.length() > 0) {
+        if ((mc == '9' || mc == 'X')  && !inputText.isEmpty()) {
             applied.append(inputText.substring(0, cursor));
             applied.append("_");
             applied.append(inputText.substring(cursor + 1));
@@ -355,7 +355,7 @@ public class DateMaskInputCell extends
 
         int cursor = TextUtils.getCursorPos(elem);
 
-        if (elem.getValue().length() > 0 && TextUtils.getSelectionLength(elem) > 0) {
+        if (!elem.getValue().isEmpty() && TextUtils.getSelectionLength(elem) > 0) {
             inputText = prepareTextWithSelection(elem, inputText, mask);
             cursor = TextUtils.getSelectionStart(elem);
         }

@@ -164,7 +164,7 @@ public class GetBookerStatementsHandler extends AbstractActionHandler<GetBookerS
             result.setTotalCount(refBookPage.getTotalCount());
 
             List<Long> ids = provider.getUniqueRecordIds(version, filter);
-                if (ids.size() == 0) {
+			if (ids.isEmpty()) {
                 result.setNotBlank(false);
             }
 

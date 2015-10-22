@@ -119,20 +119,16 @@ public final class SqlUtils {
             if (c == size){
                 c = 0;
             }
-
-            if (c == 0 && list.size() > 0){
+            if (c == 0 && !list.isEmpty()){
                 result.add(list);
                 list = new ArrayList<T>();
             }
-
             list.add(iterator.next());
             c = c == size ? 0 : c + 1;
         }
-
-        if (list.size() > 0){
+        if (!list.isEmpty()){
             result.add(list);
         }
-
         return result;
     }
 

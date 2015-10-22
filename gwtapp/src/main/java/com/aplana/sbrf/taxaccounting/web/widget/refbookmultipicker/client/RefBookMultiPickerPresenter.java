@@ -96,7 +96,7 @@ public class RefBookMultiPickerPresenter extends PresenterWidget<RefBookMultiPic
     }
 
     private void trySelect(PickerState stateWithIds){
-        if (stateWithIds.getSetIds()!= null && stateWithIds.getSetIds().size() > 0) {
+        if (stateWithIds.getSetIds()!= null && !stateWithIds.getSetIds().isEmpty()) {
             if (getView().getSelectedIds().isEmpty() || !stateWithIds.getSetIds().containsAll(getView().getSelectedIds())){
                 loadingForSelection(stateWithIds.getSetIds(), null);
             }

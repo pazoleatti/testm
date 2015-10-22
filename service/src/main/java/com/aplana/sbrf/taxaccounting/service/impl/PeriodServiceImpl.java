@@ -672,7 +672,7 @@ public class PeriodServiceImpl implements PeriodService {
          *  если это первый отчетный период в данном налоговом периоде
          *  то возвращать последний отчетный период с предыдущего налогового периода
          */
-        if (thisReportPeriod.getOrder() == 1 && reportPeriodList.size() > 0 && reportPeriodList.get(0).getId() == reportPeriodId){
+        if (thisReportPeriod.getOrder() == 1 && !reportPeriodList.isEmpty() && reportPeriodList.get(0).getId() == reportPeriodId){
             List<TaxPeriod> taxPeriodList = taxPeriodDao.listByTaxType(thisTaxPeriod.getTaxType());
             for (int i = 0; i < taxPeriodList.size(); i++){
                 if (taxPeriodList.get(i).getId().equals(thisTaxPeriod.getId())){
@@ -687,7 +687,7 @@ public class PeriodServiceImpl implements PeriodService {
                     }
                     reportPeriodList = reportPeriodDao.listByTaxPeriod(prevTaxPeriod.getId());
                     // вернем последний отчетный период
-                    return reportPeriodList.size() > 0 ? reportPeriodList.get(reportPeriodList.size() - 1) : null;
+                    return !reportPeriodList.isEmpty() ? reportPeriodList.get(reportPeriodList.size() - 1) : null;
                 }
             }
         } else {

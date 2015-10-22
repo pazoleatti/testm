@@ -816,7 +816,7 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
             Element el = departmentPicker.getLabel().getElement();
             el.setInnerText(text);
             for (; el.getScrollHeight() > 32; ) {
-                if (text.length() > 0) {
+                if (!text.isEmpty()) {
                     text = text.substring(0, text.length() - 1);
                     el.setInnerText(text + "…");
                 } else {

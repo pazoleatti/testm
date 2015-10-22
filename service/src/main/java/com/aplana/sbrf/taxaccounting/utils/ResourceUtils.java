@@ -36,7 +36,7 @@ public final class ResourceUtils {
                 URI uri = null;
                 try {
                     uri = new URI(url.getProtocol(), url.getUserInfo(), url.getHost(), url.getPort(), url.getPath(), url.getQuery(), url.getRef());
-                    if(uri.getAuthority() != null && uri.getAuthority().length() > 0) {
+                    if(uri.getAuthority() != null && !uri.getAuthority().isEmpty()) {
                         // Hack for UNC Path
                         url = new URL("file://" + destinationUri.substring("file:".length()));
                         uri = new URI(url.getProtocol(), url.getUserInfo(), url.getHost(), url.getPort(), url.getPath(), url.getQuery(), url.getRef());
@@ -74,7 +74,7 @@ public final class ResourceUtils {
                 URI uri = null;
                 try {
                     uri = new URI(url.getProtocol(), url.getUserInfo(), url.getHost(), url.getPort(), url.getPath(), url.getQuery(), url.getRef());
-                    if(uri.getAuthority() != null && uri.getAuthority().length() > 0) {
+                    if(uri.getAuthority() != null && !uri.getAuthority().isEmpty()) {
                         // Hack for UNC Path
                         url = new URL("file://" + destinationUri.substring("file:".length()));
                         uri = new URI(url.getProtocol(), url.getUserInfo(), url.getHost(), url.getPort(), url.getPath(), url.getQuery(), url.getRef());

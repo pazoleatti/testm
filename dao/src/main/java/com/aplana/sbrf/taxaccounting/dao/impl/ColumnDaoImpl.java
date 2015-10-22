@@ -462,7 +462,7 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
     @Override
 	public Map<Long, List<Long>> getAttributeId2(List<RefBookAttribute> attributes) {
 		final Map<Long, List<Long>> result = new HashMap<Long, List<Long>>();
-		if (attributes.size() == 0) {
+		if (attributes.isEmpty()) {
 			return result;
 		}
 		// создаем пустые списки

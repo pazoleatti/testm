@@ -65,7 +65,7 @@ public class UpdateTaskHandler extends AbstractActionHandler<UpdateTaskAction, U
                 errors.add(" Значение атрибута «Расписание» не соответствует требованиям формата Cron!!");
             }
 
-            if (errors.size() > 0){
+            if (!errors.isEmpty()){
                 result.setErrorMessage(StringUtils.join(errors.toArray(), '.'));
                 result.setHasErrors(true);
 

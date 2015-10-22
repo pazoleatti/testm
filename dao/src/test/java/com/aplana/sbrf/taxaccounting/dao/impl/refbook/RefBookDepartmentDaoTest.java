@@ -54,7 +54,7 @@ public class RefBookDepartmentDaoTest {
         // Получим пустой результат (уйдем за пределы пагинации)
         data = refBookDepartmentDao.getRecords(new PagingParams(999999, 10), null, null);
         assertTrue(data.getTotalCount() == DEPARTMENTS_TOTAL_RECORDS);
-        assertTrue(data.size() == 0);
+        assertTrue(data.isEmpty());
 
         // Получим записи из бд с сортировкой (метод сейчаc падает из за отсутвия сортировки
 //        RefBookAttribute sortAttribute = new RefBookAttribute();

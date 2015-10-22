@@ -299,7 +299,7 @@ public class RefBookUniversal implements RefBookDataProvider {
     private void checkCorrectness(Logger logger, RefBook refBook, Long uniqueRecordId, Date versionFrom, List<RefBookAttribute> attributes, List<RefBookRecord> records) {
         //Проверка обязательности заполнения записей справочника
         List<String> errors = RefBookUtils.checkFillRequiredRefBookAtributes(attributes, records);
-        if (errors.size() > 0){
+        if (!errors.isEmpty()){
             throw new ServiceException("Поля " + errors.toString() + " являются обязательными для заполнения");
         }
 
@@ -339,7 +339,7 @@ public class RefBookUniversal implements RefBookDataProvider {
                     //Проверка на пересечение версий у записей справочника, в которых совпали уникальные атрибуты
                     List<Long> conflictedIds = refBookDao.checkConflictValuesVersions(matchedRecords, versionFrom, record.getVersionTo());
 
-                    if (conflictedIds.size() > 0) {
+                    if (!conflictedIds.isEmpty()) {
                         throw new ServiceException(String.format(UNIQ_ERROR_MSG, makeAttrNames(matchedRecords, conflictedIds)));
                     }
                 }
@@ -494,7 +494,7 @@ public class RefBookUniversal implements RefBookDataProvider {
                     }
                 }
                 //Ищем все ссылки на запись справочника в новом периоде
-                List<String> usagesResult = refBookDao.isVersionUsed(refBookId, Arrays.asList(result.getRecordId()), versionFrom, versionTo, true, null);
+                List<String> usagesResult = refBookDao.isVersionUsed(refBookId, Collections.singletonList(result.getRecordId()), versionFrom, versionTo, true, null);
                 if (usagesResult != null && !usagesResult.isEmpty()) {
                     for (String error: usagesResult) {
                         if (logger != null) {

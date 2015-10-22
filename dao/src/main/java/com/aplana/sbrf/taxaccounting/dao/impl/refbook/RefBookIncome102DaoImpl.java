@@ -105,7 +105,7 @@ public class RefBookIncome102DaoImpl extends AbstractDao implements RefBookIncom
         for (Map<String, RefBookValue> record : records) {
             // проверка обязательности заполнения записей справочника
             List<String> errors= RefBookUtils.checkFillRequiredRefBookAtributes(refBook.getAttributes(), record);
-            if (errors.size() > 0){
+            if (!errors.isEmpty()){
                 throw new DaoException("Поля " + errors.toString() + "являются обязательными для заполнения");
             }
 

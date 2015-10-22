@@ -147,14 +147,14 @@ public class CreateBookerStatementsView extends PopupViewWithUiHandlers<CreateBo
         if (accountPeriodIds.getValue() == null || accountPeriodIds.getValue().isEmpty()) {
             names.append("«Период», ");
         }
-        if (departmentPicker.getValue() == null || departmentPicker.getValue().size() == 0) {
+        if (departmentPicker.getValue() == null || departmentPicker.getValue().isEmpty()) {
             names.append("«Подразделение», ");
         }
         if (bookerReportType.getValue() == null) {
             names.append("«Вид бух. отчетности», ");
         }
         String retNames = names.toString();
-        if (retNames.length() > 0) {
+        if (!retNames.isEmpty()) {
             retNames = retNames.substring(0, retNames.length() - 2);
         }
         return retNames;

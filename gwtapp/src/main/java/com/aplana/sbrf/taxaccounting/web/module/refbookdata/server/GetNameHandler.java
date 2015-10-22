@@ -58,7 +58,7 @@ public class GetNameHandler extends AbstractActionHandler<GetNameAction, GetName
 
             StringBuilder uniqueValues = new StringBuilder();
 
-            if (attributeValues.size() > 0) {
+            if (!attributeValues.isEmpty()) {
                 for (Map.Entry<Integer, List<Pair<RefBookAttribute, RefBookValue>>> entry : attributeValues.entrySet()) {
                     List<Pair<RefBookAttribute, RefBookValue>> values = entry.getValue();
                     for (int i = 0; i < values.size(); i++) {

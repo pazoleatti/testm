@@ -123,17 +123,14 @@ public class ConfigurationDaoImpl extends AbstractDao implements ConfigurationDa
             }
         }
 
-        if (insertParams.size() > 0) {
-            getJdbcTemplate().batchUpdate("insert into configuration (value, code, department_id) values (?, ?, ?)",
-                    insertParams);
+        if (!insertParams.isEmpty()) {
+            getJdbcTemplate().batchUpdate("INSERT INTO configuration (value, code, department_id) VALUES (?, ?, ?)", insertParams);
         }
-        if (updateParams.size() > 0) {
-            getJdbcTemplate().batchUpdate("update configuration set value = ? where code = ? and department_id = ?",
-                    updateParams);
+        if (!updateParams.isEmpty()) {
+            getJdbcTemplate().batchUpdate("UPDATE configuration SET VALUE = ? WHERE code = ? AND department_id = ?", updateParams);
         }
-        if (deleteParams.size() > 0) {
-            getJdbcTemplate().batchUpdate("delete from configuration where code = ? and department_id = ?",
-                    deleteParams);
+        if (!deleteParams.isEmpty()) {
+            getJdbcTemplate().batchUpdate("DELETE FROM configuration WHERE code = ? AND department_id = ?", deleteParams);
         }
     }
 }

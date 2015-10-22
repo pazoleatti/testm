@@ -201,12 +201,12 @@ public class RefBookOktmoDaoImpl extends AbstractDao implements RefBookOktmoDao 
         if (filterPS.getQuery().length() > 0) {
             ps.appendQuery(" WHERE (");
             ps.appendQuery(filterPS.getQuery().toString());
-            if (filterPS.getParams().size() > 0) {
+            if (!filterPS.getParams().isEmpty()) {
                 ps.addParam(filterPS.getParams());
             }
             ps.appendQuery(") ");
         }
-        if (whereClause != null && whereClause.trim().length() > 0) {
+        if (whereClause != null && !whereClause.trim().isEmpty()) {
             if (filterPS.getQuery().length() > 0) {
                 ps.appendQuery(" AND ");
             } else {
@@ -216,7 +216,7 @@ public class RefBookOktmoDaoImpl extends AbstractDao implements RefBookOktmoDao 
         }
 
         if (filterPS.getQuery().length() > 0 ||
-                (whereClause != null && whereClause.trim().length() > 0 && filterPS.getQuery().length() == 0)) {
+                (whereClause != null && !whereClause.trim().isEmpty() && filterPS.getQuery().length() == 0)) {
             ps.appendQuery(" and ");
         } else {
             ps.appendQuery(" where ");
@@ -328,12 +328,12 @@ public class RefBookOktmoDaoImpl extends AbstractDao implements RefBookOktmoDao 
         if (filterPS.getQuery().length() > 0) {
             ps.appendQuery(" WHERE (");
             ps.appendQuery(filterPS.getQuery().toString());
-            if (filterPS.getParams().size() > 0) {
+            if (!filterPS.getParams().isEmpty()) {
                 ps.addParam(filterPS.getParams());
             }
             ps.appendQuery(") ");
         }
-        if (whereClause != null && whereClause.trim().length() > 0) {
+        if (whereClause != null && !whereClause.trim().isEmpty()) {
             if (filterPS.getQuery().length() > 0) {
                 ps.appendQuery(" AND ");
             } else {
@@ -343,7 +343,7 @@ public class RefBookOktmoDaoImpl extends AbstractDao implements RefBookOktmoDao 
         }
 
         if (filterPS.getQuery().length() > 0 ||
-                (whereClause != null && whereClause.trim().length() > 0 && filterPS.getQuery().length() == 0)) {
+                (whereClause != null && !whereClause.trim().isEmpty() && filterPS.getQuery().length() == 0)) {
             ps.appendQuery(" and ");
         } else {
             ps.appendQuery(" where ");
@@ -505,7 +505,7 @@ public class RefBookOktmoDaoImpl extends AbstractDao implements RefBookOktmoDao 
         String sql = String.format(CHECK_CONFLICT_VALUES_VERSIONS,
                 tableName, SqlUtils.transformToSqlInStatement("ID", recordIds), tableName);
         List<Long> conflictedIds = getJdbcTemplate().queryForList(sql, Long.class, versionFrom, versionFrom, versionFrom, versionTo, versionTo);
-        if (conflictedIds.size() > 0) {
+        if (!conflictedIds.isEmpty()) {
             StringBuilder attrNames = new StringBuilder();
             for (Long id : conflictedIds) {
                 for (Pair<Long,String> pair : recordPairs) {
@@ -911,7 +911,7 @@ public class RefBookOktmoDaoImpl extends AbstractDao implements RefBookOktmoDao 
         if (filterPS.getQuery().length() > 0) {
             ps.appendQuery(" WHERE ");
             ps.appendQuery(filterPS.getQuery().toString());
-            if (filterPS.getParams().size() > 0) {
+            if (!filterPS.getParams().isEmpty()) {
                 ps.addParam(filterPS.getParams());
             }
         }

@@ -855,7 +855,7 @@ public final class ScriptUtils {
                 }
             }
             // Последняя строка должна быть подитоговой
-            if (dataRows.size() > 0) {
+            if (!dataRows.isEmpty()) {
                 DataRow<Cell> lastRow = dataRows.get(dataRows.size() - 1);
                 if (lastRow.getAlias() == null) {
                     String groupCols = groupString.getString(lastRow);
@@ -1154,7 +1154,7 @@ public final class ScriptUtils {
             }
         }
 
-        if (subAliases.size() == 0)
+        if (subAliases.isEmpty())
             return;
 
         String subAlias;

@@ -300,7 +300,7 @@ public class RefBook implements Serializable {
 				defaultSort.add(attr);
 			}
 		}
-		if (defaultSort.size() > 0) {
+		if (!defaultSort.isEmpty()) {
 			Collections.sort(defaultSort, new Comparator<RefBookAttribute>() {
 				@Override
 				public int compare(RefBookAttribute o1, RefBookAttribute o2) {
@@ -316,7 +316,7 @@ public class RefBook implements Serializable {
 	 */
 	public RefBookAttribute getSortAttribute() {
 		List<RefBookAttribute> list = getSortAttributes();
-		return list.size() > 0 ? list.get(0) : null;
+		return !list.isEmpty() ? list.get(0) : null;
 	}
 
     public RefBookAttribute getRegionAttribute() {

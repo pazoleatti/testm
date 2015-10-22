@@ -240,7 +240,7 @@ public class KeyPressableTextInputCell extends
 			}
 		}
 
-		if (toRender != null && toRender.trim().length() > 0) {
+		if (toRender != null && !toRender.trim().isEmpty()) {
 			sb.append(renderer.render(toRender));
 		} else {
       /*

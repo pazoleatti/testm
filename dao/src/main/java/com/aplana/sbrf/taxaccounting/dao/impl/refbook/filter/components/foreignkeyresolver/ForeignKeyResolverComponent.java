@@ -191,7 +191,7 @@ public class ForeignKeyResolverComponent extends AbstractTreeListenerComponent i
      */
     @Override
     public void exitQuery(FilterTreeParser.QueryContext ctx) {
-        if (joinStatement.size() > 0) {
+        if (!joinStatement.isEmpty()) {
             ps.setJoinPartsOfQuery(StringUtils.join(joinStatement.toArray(), '\n'));
         } else {
             ps.setJoinPartsOfQuery("");

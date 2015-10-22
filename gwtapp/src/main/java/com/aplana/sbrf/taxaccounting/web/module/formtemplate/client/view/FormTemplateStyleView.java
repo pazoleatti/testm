@@ -103,7 +103,7 @@ public class FormTemplateStyleView extends ViewWithUiHandlers<FormTemplateStyleU
 			styleListBox.clear();
 			if (styleListBox.getSelectedIndex() >= 0 && !isFormChanged) {
 				setupStyles(styleListBox.getSelectedIndex());
-			} else if (styles.size() > 0){
+			} else if (!styles.isEmpty()){
 				setupStyles(0);
 			}
 		}

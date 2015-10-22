@@ -126,7 +126,7 @@ public class RefBookTreePickerPresenter extends PresenterWidget<RefBookTreePicke
      * @param stateWithIds объект в котором содержится списко идентификаторов которые нужно выделить
      */
     private void trySelect(PickerState stateWithIds) {
-        if (stateWithIds.getSetIds() != null && stateWithIds.getSetIds().size() > 0) {
+        if (stateWithIds.getSetIds() != null && !stateWithIds.getSetIds().isEmpty()) {
             if (getView().getSelectedIds().isEmpty() || !stateWithIds.getSetIds().containsAll(getView().getSelectedIds())) {
                 // TODO сделать проверку что эти итемы уже загружены в дерево.
                 // загрузим объекты которые должны быть подсвечены как выделенные

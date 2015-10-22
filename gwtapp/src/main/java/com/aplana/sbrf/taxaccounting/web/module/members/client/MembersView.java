@@ -177,7 +177,7 @@ public class MembersView extends ViewWithUiHandlers<MembersUiHandlers> implement
 		membersFilterData.setActive(isActiveBox.getValue());
 		membersFilterData.setUserName(userName.getText());
 		membersFilterData.setRoleIds(role.getValue()!= null && !role.getValue().isEmpty() ? role.getValue() : defaultRoleIds);
-        if (departmentPicker.getValue().size() == 0){
+        if (departmentPicker.getValue().isEmpty()){
             membersFilterData.setDepartmentIds(new HashSet<Integer>(departmentPicker.getAvalibleValues()));
         } else{
             membersFilterData.setDepartmentIds(new HashSet<Integer>(departmentPicker.getValue()));

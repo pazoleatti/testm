@@ -353,7 +353,7 @@ public interface RefBookDataProvider {
 	 * Разыменование набора ссылок
 	 * @param attributeId идентификатор атрибута-ссылки для отображения
 	 * @param recordIds перечень ссылок
-	 * @return ref_book_record.id - ref_book_value.value
+	 * @return ref_book_record.id - ref_book_value.value. Может вернуть null
 	 */
 	Map<Long, RefBookValue> dereferenceValues(Long attributeId, Collection<Long> recordIds);
 

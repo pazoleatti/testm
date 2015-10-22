@@ -15,9 +15,9 @@ import java.util.List;
  */
 public class Cell extends AbstractCell {
     private static final long serialVersionUID = -3684680064726678753L;
-	//todo надо задуматься о том, что происходит с датами на двух строчках ниже
-    public static final Date DATE_1900 = new Date(0,0,1);
-    public static final Date DATE_9999 = new Date(9999 - 1900, 11, 31);
+	//todo надо задуматься о том, что происходит с датами на двух строчках ниже. Написать тесты
+	public static final Date DATE_1900 = new Date(0,0,1);
+	public static final Date DATE_9999 = new Date(9999 - 1900, 11, 31);
 
     private String stringValue;
     private Date dateValue;
@@ -62,9 +62,9 @@ public class Cell extends AbstractCell {
 			case STRING: return stringValue;
 			case DATE: return dateValue;
 			case NUMBER: return numericValue;
-			case REFERENCE: return null;
+			case REFERENCE:
+			default: return null;
 		}
-		return null;
     }
 
     @Override
@@ -152,8 +152,10 @@ public class Cell extends AbstractCell {
 			case REFERENCE: {
 				return showError(msg + "Нельзя устанавливать значения в зависимую графу!");
 			}
+			default: {
+				return showError("Values of type " + value.getClass().getName() + " are not supported");
+			}
 		}
-		return showError("Values of type " + value.getClass().getName() + " are not supported");
     }
 
     /** Записывает сообщение об ошибке в ячейку или выбрасывает исключение */

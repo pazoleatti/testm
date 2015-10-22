@@ -115,9 +115,9 @@ public class BookerStatementsServiceImpl implements BookerStatementsService {
         Date date = getStartDate();
         List<Long> ids = rbFactory.getDataProvider(107L).getUniqueRecordIds(null,
                 " account_period_id = " + periodId + " and year = " + year + " and department_id = " + departmentId);
-        if (ids.size() > 0) {
+        if (!ids.isEmpty()) {
             List<Long> ids101 = provider.getUniqueRecordIds(null, " account_period_id = " + ids.get(0));
-            if (ids101.size() > 0) {
+            if (!ids101.isEmpty()) {
                 logger.error("Бухгалтерская отчётность с заданными параметрами уже существует");
             }
         } else {

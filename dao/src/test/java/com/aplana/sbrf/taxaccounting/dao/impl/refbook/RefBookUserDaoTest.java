@@ -42,7 +42,7 @@ public class RefBookUserDaoTest {
         // Получим пустой результат (уйдем за пределы пагинации)
         data = refBookUserDao.getRecords(new PagingParams(999999, 10), null, null);
         assertTrue(data.getTotalCount() == USER_TOTAL_RECORDS);
-        assertTrue(data.size() == 0);
+        assertTrue(data.isEmpty());
 
         // Проверка фильтрации
         data = refBookUserDao.getRecords(new PagingParams(), "NAME like '%ТБ%'", null);

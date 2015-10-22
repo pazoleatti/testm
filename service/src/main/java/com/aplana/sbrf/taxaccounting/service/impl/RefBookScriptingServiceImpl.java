@@ -182,7 +182,7 @@ public class RefBookScriptingServiceImpl extends TAAbstractScriptingServiceImpl 
     @Override
     public void saveScript(long refBookId, String script, Logger log) {
         RefBook refBook = refBookFactory.get(refBookId);
-        if (!script.isEmpty() && script.trim().length() > 0) {
+        if (script != null && !script.trim().isEmpty()) {
             InputStream inputStream;
             try {
                 inputStream = IOUtils.toInputStream(script, "UTF-8");
