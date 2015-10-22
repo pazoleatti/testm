@@ -25,32 +25,25 @@ import java.io.*;
 import java.net.URLEncoder;
 import java.util.Date;
 
-
 @Controller
 public class DeclarationTemplateController {
 
-	private static final Log logger = LogFactory.getLog(DeclarationTemplateController.class);
+	private static final Log LOG = LogFactory.getLog(DeclarationTemplateController.class);
     private static final String ENCODING = "UTF-8";
 
 	@Autowired
 	SecurityService securityService;
-
 	@Autowired
 	DeclarationTemplateService declarationTemplateService;
-
 	@Autowired
 	DeclarationTemplateImpexService declarationTemplateImpexService;
-
     @Autowired
     @Qualifier("declarationTemplateMainOperatingService")
     private MainOperatingService mainOperatingService;
-
     @Autowired
     BlobDataService blobDataService;
-
     @Autowired
     LogEntryService logEntryService;
-
 
     @RequestMapping(value = "declarationTemplate/downloadDect/{declarationTemplateId}",method = RequestMethod.GET)
 	public void downloadDect(@PathVariable int declarationTemplateId, HttpServletRequest req, HttpServletResponse resp)
@@ -65,7 +58,6 @@ public class DeclarationTemplateController {
         	IOUtils.closeQuietly(resp.getOutputStream());
 		}
 	}
-
 
 	@RequestMapping(value = "declarationTemplate/uploadDect/{declarationTemplateId}",method = RequestMethod.POST)
 	public void uploadDect(@RequestParam(value = "uploader", required = true) MultipartFile file,
@@ -124,7 +116,7 @@ public class DeclarationTemplateController {
             resultUuid.put(UuidEnum.SUCCESS_UUID.toString(), logEntryService.save(logger.getEntries()));
             resp.getWriter().printf(resultUuid.toString());
         } catch (JSONException e) {
-            logger.error(e);
+            LOG.error(e);
             throw new ServiceException("", e);
         } finally {
             declarationTemplateService.unlock(declarationTemplateId, userInfo);
@@ -193,7 +185,7 @@ public class DeclarationTemplateController {
                 resp.getWriter().printf(resultUuid.toString());
             }
         } catch (JSONException e) {
-            logger.error(e);
+            LOG.error(e);
             throw new ServiceException("", e);
         } finally {
             if (inputStream!= null){
@@ -235,7 +227,7 @@ public class DeclarationTemplateController {
             resultUuid.put(UuidEnum.SUCCESS_UUID.toString(), logEntryService.save(customLog.getEntries()));
             resp.getWriter().printf(resultUuid.toString());
         } catch (JSONException e) {
-            logger.error(e);
+            LOG.error(e);
             throw new ServiceException("", e);
         } finally {
             declarationTemplateService.unlock(declarationTemplateId, userInfo);
@@ -260,7 +252,7 @@ public class DeclarationTemplateController {
 	@ExceptionHandler(Exception.class)
 	public void exceptionHandler(Exception e, final HttpServletResponse response) throws JSONException {
 		response.setCharacterEncoding("UTF-8");
-		logger.error(e.getLocalizedMessage(), e);
+		LOG.error(e.getLocalizedMessage(), e);
         JSONObject errors = new JSONObject();
 		try {
             Logger log = new Logger();
@@ -268,7 +260,7 @@ public class DeclarationTemplateController {
             errors.put(UuidEnum.ERROR_UUID.toString(), logEntryService.save(log.getEntries()));
 			response.getWriter().printf(errors.toString());
 		} catch (IOException ioException) {
-			logger.error(ioException.getMessage(), ioException);
+			LOG.error(ioException.getMessage(), ioException);
 		}
 	}
 

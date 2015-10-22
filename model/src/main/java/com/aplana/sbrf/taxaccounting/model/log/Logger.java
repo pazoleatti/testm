@@ -15,12 +15,9 @@ import java.util.List;
  * Вся информация, записываемая в журал будет дублироваться в журнал сервера приложений средствами Commons.Logging
  */
 public class Logger {
-	private Log logger = LogFactory.getLog(getClass());
-	
+	private static final Log LOG = LogFactory.getLog(Logger.class);
 	private LogMessageDecorator messageDecorator;
-	
 	private List<LogEntry> entries = new ArrayList<LogEntry>();
-
     //Добавили пока на пробу, поскольку необходимо логгирование в справочнике Подразделений
     private TAUserInfo taUserInfo;
 
@@ -73,7 +70,7 @@ public class Logger {
             msg = msg.substring(0, MAX_EXCEPTION_LOG_MESSAGE_LENGTH - 1) + '…';
         }
         log(LogLevel.ERROR, "Ошибка: %s", msg);
-		logger.error("Unhandled exception: " + msg, e);
+		LOG.error("Unhandled exception: " + msg, e);
 	}
 
     /**

@@ -10,6 +10,14 @@ import java.util.List;
 public class FormTemplateContent {
 	@XmlElement
 	private boolean fixedRows;
+    @XmlElement
+    private boolean monthly;
+    @XmlElement
+    private boolean comparative;
+    @XmlElement
+    private boolean accruing;
+    @XmlElement
+    private boolean updating;
 	@XmlElement
 	private String name;
 	@XmlElement
@@ -34,10 +42,18 @@ public class FormTemplateContent {
 		header = formTemplate.getHeader();
 		columns = formTemplate.getColumns();
 		styles = formTemplate.getStyles();
+        monthly = formTemplate.isMonthly();
+        comparative = formTemplate.isComparative();
+        accruing = formTemplate.isAccruing();
+        updating = formTemplate.isUpdating();
 	}
 
 	public void fillFormTemplate(FormTemplate formTemplate) {
 		formTemplate.setFixedRows(fixedRows);
+        formTemplate.setMonthly(monthly);
+        formTemplate.setComparative(comparative);
+        formTemplate.setAccruing(accruing);
+        formTemplate.setUpdating(updating);
 		formTemplate.setName(name);
 		formTemplate.setFullName(fullName);
 		formTemplate.setHeader(header);
@@ -49,6 +65,10 @@ public class FormTemplateContent {
 
     public void fillFormTemplateWithoutRows(FormTemplate formTemplate) {
         formTemplate.setFixedRows(fixedRows);
+        formTemplate.setMonthly(monthly);
+        formTemplate.setComparative(comparative);
+        formTemplate.setAccruing(accruing);
+        formTemplate.setUpdating(updating);
         formTemplate.setName(name);
         formTemplate.setFullName(fullName);
         formTemplate.setHeader(header);

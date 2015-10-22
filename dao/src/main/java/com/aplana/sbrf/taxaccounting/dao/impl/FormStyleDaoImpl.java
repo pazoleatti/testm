@@ -6,6 +6,8 @@ import com.aplana.sbrf.taxaccounting.model.Color;
 import com.aplana.sbrf.taxaccounting.model.FormStyle;
 import com.aplana.sbrf.taxaccounting.model.FormTemplate;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -23,6 +25,8 @@ import java.util.*;
 @Repository
 @Transactional(readOnly = true)
 public class FormStyleDaoImpl extends AbstractDao implements FormStyleDao {
+
+	private static final Log LOG = LogFactory.getLog(FormStyleDaoImpl.class);
 
 	private final static class FormStyleMapper implements RowMapper<FormStyle> {
 		@Override
@@ -124,7 +128,7 @@ public class FormStyleDaoImpl extends AbstractDao implements FormStyleDao {
                         }
                 );
             } catch (DataIntegrityViolationException e){
-                logger.error("", e);
+				LOG.error("", e);
                 throw new DaoException("Обнаружено использование стиля с алиасом " + alias[0], e);
             }
 		}

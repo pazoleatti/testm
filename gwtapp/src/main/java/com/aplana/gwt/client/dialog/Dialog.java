@@ -46,10 +46,10 @@ public final class Dialog extends ModalWindow {
         ImageResource warningImage();
     }
 
-    public static Image infoImage = new Image(mwRes.infoImage());
-    public static Image errorImage = new Image(mwRes.errorImage());
-    public static Image questionImage = new Image(mwRes.questionImage());
-    public static Image warningImage = new Image(mwRes.warningImage());
+    public static final Image INFO_IMAGE = new Image(mwRes.infoImage());
+    public static final Image ERROR_IMAGE = new Image(mwRes.errorImage());
+    public static final Image QUESTION_IMAGE = new Image(mwRes.questionImage());
+    public static final Image WARNING_IMAGE = new Image(mwRes.warningImage());
 
     private boolean initDialog = false;
 
@@ -127,7 +127,7 @@ public final class Dialog extends ModalWindow {
     public static void warningMessage(String title, String text, DialogHandler handler) {
         INSTANCE.setGlassEnabled(true);
         dialogPanel.setPredefinedButtons(PredefinedButton.CLOSE);
-        dialogPanel.setImage(warningImage);
+        dialogPanel.setImage(WARNING_IMAGE);
         dialogPanel.setImageVisible(true);
         showDialog(title, text, handler);
     }
@@ -171,7 +171,7 @@ public final class Dialog extends ModalWindow {
     public static void errorMessage(String title, String text, DialogHandler handler) {
         INSTANCE.setGlassEnabled(true);
         dialogPanel.setPredefinedButtons(PredefinedButton.CLOSE);
-        dialogPanel.setImage(errorImage);
+        dialogPanel.setImage(ERROR_IMAGE);
         dialogPanel.setImageVisible(true);
         showDialog(title, text, handler);
     }
@@ -215,7 +215,7 @@ public final class Dialog extends ModalWindow {
     public static void infoMessage(String title, String text, DialogHandler handler) {
         INSTANCE.setGlassEnabled(false);
         dialogPanel.setPredefinedButtons(PredefinedButton.OK);
-        dialogPanel.setImage(infoImage);
+        dialogPanel.setImage(INFO_IMAGE);
         dialogPanel.setImageVisible(true);
         showDialog(title, text, handler);
     }
@@ -271,7 +271,7 @@ public final class Dialog extends ModalWindow {
     public static void confirmMessage(String title, String text, DialogHandler handler) {
         INSTANCE.setGlassEnabled(true);
         dialogPanel.setPredefinedButtons(PredefinedButton.YES, PredefinedButton.NO, PredefinedButton.CLOSE);
-        dialogPanel.setImage(questionImage);
+        dialogPanel.setImage(QUESTION_IMAGE);
         dialogPanel.setImageVisible(true);
         showDialog(title, text, handler);
     }
@@ -286,7 +286,7 @@ public final class Dialog extends ModalWindow {
     public static void confirmMessageYeClose(String title, String text, DialogHandler handler) {
         INSTANCE.setGlassEnabled(true);
         dialogPanel.setPredefinedButtons(PredefinedButton.YES, PredefinedButton.CLOSE);
-        dialogPanel.setImage(questionImage);
+        dialogPanel.setImage(QUESTION_IMAGE);
         dialogPanel.setImageVisible(true);
         showDialog(title, text, handler);
     }

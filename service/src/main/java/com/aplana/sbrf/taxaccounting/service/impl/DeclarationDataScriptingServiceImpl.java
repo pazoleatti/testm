@@ -11,6 +11,10 @@ import com.aplana.sbrf.taxaccounting.service.DeclarationDataScriptingService;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.service.shared.ScriptComponentContextHolder;
 import com.aplana.sbrf.taxaccounting.util.ScriptExposed;
+import com.aplana.sbrf.taxaccounting.util.TransactionHelper;
+import com.aplana.sbrf.taxaccounting.util.TransactionLogic;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.annotation.AnnotationUtils;
@@ -29,7 +33,8 @@ import java.util.Properties;
  */
 @Component
 public class DeclarationDataScriptingServiceImpl extends TAAbstractScriptingServiceImpl implements DeclarationDataScriptingService {
-	
+
+	private static final Log LOG = LogFactory.getLog(DeclarationDataScriptingServiceImpl.class);
 	private static final String DUPLICATING_ARGUMENTS_ERROR = "The key \"%s\" already exists in map. Can't override of them.";
 
 	@Autowired
@@ -39,6 +44,8 @@ public class DeclarationDataScriptingServiceImpl extends TAAbstractScriptingServ
     @Autowired
     @Qualifier("versionInfoProperties")
     private Properties versionInfoProperties;
+    @Autowired
+    private TransactionHelper tx;
 
 	/**
 	 * Возвращает спринг-бины доступные для использования в скрипте создания декларации.
@@ -74,19 +81,33 @@ public class DeclarationDataScriptingServiceImpl extends TAAbstractScriptingServ
 	@Override
 	public boolean executeScript(TAUserInfo userInfo, DeclarationData declarationData, FormDataEvent event, Logger logger,
 			Map<String, Object> exchangeParams) {
-		TAAbstractScriptingServiceImpl.logger.debug("Starting processing request to run create script");
+        LOG.debug("Starting processing request to run create script");
+        String script = declarationTemplateDao.getDeclarationTemplateScript(declarationData.getDeclarationTemplateId());
+        if (!canExecuteScript(script, event)) {
+            return false;
+        }
+        DeclarationTemplate declarationTemplate = declarationTemplateDao.get(declarationData.getDeclarationTemplateId());
+        declarationTemplate.setCreateScript(script);
+        return executeScript(userInfo, declarationTemplate, declarationData, event, logger, exchangeParams);
+    }
 
-		String script = declarationTemplateDao.getDeclarationTemplateScript(declarationData.getDeclarationTemplateId());
-		if (!canExecuteScript(script, event)) {
-			return false;
-		}
+    @Override
+    public boolean executeScriptInNewReadOnlyTransaction(final TAUserInfo userInfo, final DeclarationTemplate declarationTemplate, final DeclarationData declarationData, final FormDataEvent event,
+                                                         final Logger logger, final Map<String, Object> exchangeParams) {
+        return tx.executeInNewReadOnlyTransaction(new TransactionLogic<Boolean>() {
+            @Override
+            public Boolean execute() {
+                return executeScript(userInfo, declarationTemplate, declarationData, event, logger, exchangeParams);
+            }
+        });
+    }
 
-		DeclarationTemplate declarationTemplate = declarationTemplateDao.get(declarationData.getDeclarationTemplateId());
-
+    private boolean executeScript(TAUserInfo userInfo, DeclarationTemplate declarationTemplate, DeclarationData declarationData, FormDataEvent event, Logger logger,
+                          Map<String, Object> exchangeParams) {
 		// Биндим параметры для выполнения скрипта
 		Bindings b = scriptEngine.createBindings();
 		
-		Map<String, ?> scriptComponents =  getScriptExposedBeans(declarationTemplate.getType().getTaxType(), event);
+		Map<String, ?> scriptComponents = getScriptExposedBeans(declarationTemplate.getType().getTaxType(), event);
 		for (Object component : scriptComponents.values()) {
 			ScriptComponentContextImpl scriptComponentContext = new ScriptComponentContextImpl();
 			scriptComponentContext.setUserInfo(userInfo);
@@ -117,8 +138,8 @@ public class DeclarationDataScriptingServiceImpl extends TAAbstractScriptingServ
 
 		ScriptMessageDecorator d = new ScriptMessageDecorator(event.getTitle());
 		logger.setMessageDecorator(d);
-			
-		executeScript(b, script, logger, d);
+
+		executeScript(b, declarationTemplate.getCreateScript(), logger, d);
 			
 		logger.setMessageDecorator(null);
 

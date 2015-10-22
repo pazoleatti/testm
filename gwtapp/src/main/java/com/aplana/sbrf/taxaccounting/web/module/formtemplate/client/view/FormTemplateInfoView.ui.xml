@@ -6,7 +6,7 @@
         .formStyle {
             background-color: #949494;
             padding: 15px;
-            margin: 30px;
+            margin: 30px 30px 0px 30px;
             color: white;
             border-color: #828282;
         }
@@ -28,7 +28,7 @@
         }
     </ui:style>
 
-    <g:SimplePanel width="100%" height="100%">
+    <g:VerticalPanel width="100%">
 
         <g:FlowPanel styleName="{style.formStyle}">
 
@@ -41,16 +41,6 @@
                     <w:YearMaskBox ui:field="versionDateEnd" mayBeNull="true" width="32" addStyleNames="{style.margin5}, {style.fix}, {style.minWidth}" />
                     <g:Label wordWrap="false" text="года"/>
                 </g:HorizontalPanel>
-            </g:HorizontalPanel>
-
-            <g:HorizontalPanel verticalAlignment="middle" height="26px">
-                <g:Label text="Фиксированный набор строк:" width="250px"/>
-                <g:CheckBox ui:field="fixedRowsCheckBox"/>
-            </g:HorizontalPanel>
-
-            <g:HorizontalPanel verticalAlignment="middle" height="26px">
-                <g:Label text="Признак ежемесячной формы:" width="250px"/>
-                <g:CheckBox ui:field="monthlyCheckBox" />
             </g:HorizontalPanel>
 
 			<g:HorizontalPanel verticalAlignment="middle" height="26px">
@@ -69,7 +59,35 @@
             </g:HorizontalPanel>
 
         </g:FlowPanel>
-    </g:SimplePanel>
+
+        <g:FlowPanel styleName="{style.formStyle}">
+
+            <g:HorizontalPanel verticalAlignment="middle" height="26px">
+                <g:Label text="Фиксированный набор строк:" width="250px"/>
+                <g:CheckBox ui:field="fixedRowsCheckBox"/>
+            </g:HorizontalPanel>
+
+            <g:HorizontalPanel verticalAlignment="middle" height="26px">
+                <g:Label text="Ежемесячность:" width="250px"/>
+                <g:CheckBox ui:field="monthlyCheckBox" />
+            </g:HorizontalPanel>
+
+            <g:HorizontalPanel verticalAlignment="middle" height="26px">
+                <g:Label text="Период сравнения:" width="250px"/>
+                <g:CheckBox ui:field="comparativeCheckBox"/>
+            </g:HorizontalPanel>
+
+            <g:HorizontalPanel verticalAlignment="middle" height="26px">
+                <g:Label text="Расчет нарастающим итогом:" width="250px"/>
+                <g:CheckBox ui:field="accruingCheckBox" />
+            </g:HorizontalPanel>
+
+            <g:HorizontalPanel verticalAlignment="middle" height="26px">
+                <g:Label text='Отображать кнопку "Обновить":' width="250px"/>
+                <g:CheckBox ui:field="updatingCheckBox" />
+            </g:HorizontalPanel>
+        </g:FlowPanel>
+    </g:VerticalPanel>
 
 
 </ui:UiBinder>

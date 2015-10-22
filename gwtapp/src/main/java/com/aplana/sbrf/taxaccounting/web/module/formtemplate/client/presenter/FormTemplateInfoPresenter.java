@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.presenter;
 
 
 import com.aplana.sbrf.taxaccounting.model.FormTemplate;
+import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.AdminConstants;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.event.FormTemplateFlushEvent;
 import com.aplana.sbrf.taxaccounting.web.module.formtemplate.client.event.FormTemplateSetEvent;
@@ -33,7 +34,7 @@ public class FormTemplateInfoPresenter extends Presenter<FormTemplateInfoPresent
 	}
 
 	public interface MyView extends View, HasUiHandlers<FormTemplateInfoUiHandlers> {
-		void setViewData(Date versionBegin, Date versionEnd, boolean fixedRows, boolean monthlyForm, String name, String fullName, String header);
+		void setViewData(TaxType taxType, Date versionBegin, Date versionEnd, boolean fixedRows, boolean monthlyForm, boolean comparative, boolean accruing, boolean updating, String name, String fullName, String header);
 		void onFlush();
 	}
 
@@ -57,8 +58,10 @@ public class FormTemplateInfoPresenter extends Presenter<FormTemplateInfoPresent
 	public void onSet(FormTemplateSetEvent event) {
         formTemplateExt = event.getFormTemplateExt();
         formTemplate = formTemplateExt.getFormTemplate();
-		getView().setViewData(formTemplate.getVersion(), formTemplateExt.getActualEndVersionDate(), formTemplate.isFixedRows(),
-                formTemplate.isMonthly(), formTemplate.getName(), formTemplate.getFullName(), formTemplate.getHeader());
+		getView().setViewData(formTemplate != null ? formTemplate.getType().getTaxType(): null,
+                formTemplate.getVersion(), formTemplateExt.getActualEndVersionDate(), formTemplate.isFixedRows(),
+                formTemplate.isMonthly(), formTemplate.isComparative(), formTemplate.isAccruing(), formTemplate.isUpdating(),
+                formTemplate.getName(), formTemplate.getFullName(), formTemplate.getHeader());
 	}
 
 	@Override
@@ -82,7 +85,22 @@ public class FormTemplateInfoPresenter extends Presenter<FormTemplateInfoPresent
 		formTemplate.setMonthly(monthlyForm);
 	}
 
-	@Override
+    @Override
+    public void setAccruing(boolean accruing) {
+        formTemplate.setAccruing(accruing);
+    }
+
+    @Override
+    public void setComparative(boolean comparative) {
+        formTemplate.setComparative(comparative);
+    }
+
+    @Override
+    public void setUpdating(boolean updating) {
+        formTemplate.setUpdating(updating);
+    }
+
+    @Override
 	public void setName(String name) {
 		formTemplate.setName(name);
 	}

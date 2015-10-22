@@ -157,7 +157,8 @@ public class CustomTableBuilder<T> extends AbstractCellTableBuilder<T> {
 				}
 
 				String colWidth = cellTable.getColumnWidth(column);
-				if (colWidth.equals("0em") || colWidth.equals("0px") || colWidth.equals("0.0em")) {
+				if ((colWidth.equals("0em") || colWidth.equals("0px") || colWidth.equals("0.0em")  || colWidth.equals("0.0px"))
+                        && (currentCell.getColSpan() == 1)) {
 					td.style().borderStyle(Style.BorderStyle.NONE);
 				} else {
                     td.style().width(0, com.google.gwt.dom.client.Style.Unit.EM);

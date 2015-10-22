@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.form_template.income.output2_2.v2014;
 
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.refbook.impl.RefBookUniversal;
@@ -14,6 +15,8 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import java.math.BigDecimal;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 import static org.mockito.Matchers.*;
@@ -72,6 +75,83 @@ public class Output2_2Test extends ScriptTestBase {
         testHelper.execute(FormDataEvent.CHECK);
         // ошибок быть не должно
         checkLogger();
+    }
+
+    // Проверка со входом во все ЛП
+    @Test
+    public void check1Test() throws ParseException {
+        FormData formData = getFormData();
+        formData.initFormTemplateParams(testHelper.getTemplate("..//src/main//resources//form_template//income//output2_2//v2014//"));
+        List<DataRow<Cell>> dataRows = testHelper.getDataRowHelper().getAll();
+        SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
+
+        // для попадания в ЛП:
+        // Проверка заполнения ячеек
+        // Проверка допустимых значений «Графы 6» (диапазон 00...99)
+        // Проверка одновременного заполнения/не заполнения «Графы 17» и «Графы 18»
+        DataRow<Cell> row1 = formData.createDataRow();
+        row1.setIndex(1);
+        row1.getCell("name").setValue("name", null);
+        dataRows.add(row1);
+
+        // для попадания в ЛП:
+        // Проверка допустимых значений «Графы 6» (диапазон 00...99)
+        // Проверки паттернов
+        // Проверка формата дат
+        DataRow<Cell> row2 = formData.createDataRow();
+        row2.setIndex(2);
+        row2.getCell("emitent").setValue("emitent", null);
+        row2.getCell("decreeNumber").setValue("1", null);
+        row2.getCell("inn").setValue("123", null);
+        row2.getCell("kpp").setValue("123", null);
+        row2.getCell("recType").setValue("1ы", null);
+        row2.getCell("title").setValue("title", null);
+        row2.getCell("subdivisionRF").setValue(1, null);
+        row2.getCell("dividendDate").setValue(sdf.parse("01.01.2100"), null);
+        row2.getCell("sumDividend").setValue(0, null);
+        row2.getCell("sumTax").setValue(0, null);
+        dataRows.add(row2);
+
+        // успешное прохождение всех ЛП
+        DataRow<Cell> row3 = formData.createDataRow();
+        row3.setIndex(3);
+        row3.getCell("emitent").setValue("emitent", null);
+        row3.getCell("decreeNumber").setValue("1", null);
+        row3.getCell("inn").setValue("7702232171", null);
+        row3.getCell("kpp").setValue("770201001", null);
+        row3.getCell("recType").setValue("11", null);
+        row3.getCell("title").setValue("title", null);
+        row3.getCell("subdivisionRF").setValue(1, null);
+        row3.getCell("dividendDate").setValue(sdf.parse("31.12.2099"), null);
+        row3.getCell("sumDividend").setValue(0, null);
+        row3.getCell("sumTax").setValue(0, null);
+        dataRows.add(row3);
+
+        testHelper.execute(FormDataEvent.CHECK);
+
+        List<LogEntry> entries = testHelper.getLogger().getEntries();
+        int i = 0;
+
+        Assert.assertEquals("Строка 1: Графа «Эмитент» не заполнена!", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 1: Графа «Номер решения о выплате дивидендов» не заполнена!", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 1: Графа «Получатель. ИНН» не заполнена!", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 1: Графа «Получатель. КПП» не заполнена!", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 1: Графа «Получатель. Тип.» не заполнена!", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 1: Графа «Получатель. Наименование» не заполнена!", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 1: Графа «Место нахождения (адрес). Код региона» не заполнена!", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 1: Графа «Дата перечисления дивидендов» не заполнена!", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 1: Графа «Сумма дивидендов в рублях» не заполнена!", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 1: Графа «Сумма налога в рублях» не заполнена!", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 1: Графы «Фамилия» и «Имя» должны быть заполнены одновременно (либо обе графы не должны заполняться)!", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 1: Графа «Получатель. Тип» заполнена неверно!", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 2: Графа «Получатель. Тип» заполнена неверно!", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 2: Атрибут \"Получатель. ИНН\" заполнен неверно (123)! Ожидаемый паттерн: \"([0-9]{1}[1-9]{1}|[1-9]{1}[0-9]{1})[0-9]{8}\"", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 2: Расшифровка паттерна \"([0-9]{1}[1-9]{1}|[1-9]{1}[0-9]{1})[0-9]{8}\": Первые 2 символа: (0-9; 1-9 / 1-9; 0-9). Следующие 8 символов: (0-9)", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 2: Атрибут \"Получатель. КПП\" заполнен неверно (123)! Ожидаемый паттерн: \"([0-9]{1}[1-9]{1}|[1-9]{1}[0-9]{1})([0-9]{2})([0-9A-Z]{2})([0-9]{3})\"", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 2: Расшифровка паттерна \"([0-9]{1}[1-9]{1}|[1-9]{1}[0-9]{1})([0-9]{2})([0-9A-Z]{2})([0-9]{3})\": Первые 2 символа: (0-9; 1-9 / 1-9; 0-9). Следующие 2 символа: (0-9). Следующие 2 символа: (0-9 / A-Z). Последние 3 символа: (0-9)", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 2: Значение даты атрибута «Дата перечисления дивидендов» должно принимать значение из следующего диапазона: 01.01.1900 - 31.12.2099", entries.get(i++).getMessage());
+
+        Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
     }
 
     // Расчет пустой

@@ -4,6 +4,8 @@ import au.com.bytecode.opencsv.CSVWriter;
 import com.aplana.sbrf.taxaccounting.model.LogSearchResultItem;
 import com.aplana.sbrf.taxaccounting.service.impl.print.AbstractReportBuilder;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import java.io.*;
 import java.text.SimpleDateFormat;
@@ -16,6 +18,8 @@ import java.util.zip.ZipOutputStream;
  * User: avanteev
  */
 public class LogSystemCsvBuilder extends AbstractReportBuilder {
+
+	private static final Log LOG = LogFactory.getLog(LogSystemCsvBuilder.class);
 
     private static final SimpleDateFormat SDF_LOG_NAME = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
     private static final SimpleDateFormat SDF = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
@@ -86,7 +90,7 @@ public class LogSystemCsvBuilder extends AbstractReportBuilder {
             IOUtils.closeQuietly(fileWriter);
             IOUtils.closeQuietly(fileReader);
             if (!file.delete())
-                logger.warn(String.format("Временнный файл %s не был удален.", file.getName()));
+                LOG.warn(String.format("Временнный файл %s не был удален.", file.getName()));
         }
     }
     private String[] assemble(LogSearchResultItem item){

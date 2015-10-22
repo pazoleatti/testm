@@ -21,6 +21,8 @@ import com.aplana.sbrf.taxaccounting.utils.FileWrapper;
 import com.aplana.sbrf.taxaccounting.utils.ResourceUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -29,7 +31,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.io.BufferedInputStream;
 import java.io.InputStream;
 import java.util.*;
-import java.util.concurrent.ExecutionException;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -41,6 +42,7 @@ import static java.util.Arrays.asList;
 @Service
 public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService implements LoadRefBookDataService {
 
+	protected static final Log LOG = LogFactory.getLog(LoadRefBookDataServiceImpl.class);
     @Autowired
     private RefBookScriptingService refBookScriptingService;
     @Autowired
@@ -323,6 +325,8 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
                                             break;
                                         case SKIP:
                                             skip++;
+                                            localLoggerList.get(i).error("Импорт данных справочника \"%s\" из файла \"%s\".", refBook.getName(), fileName);
+                                            localLoggerList.get(i).error(scriptStatusHolder.getStatusMessage());
                                             break;
                                     }
                                 } finally {
@@ -341,7 +345,7 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
                             // Ошибка импорта отдельного справочника — откатываются изменения только по нему, импорт продолжается
                             log(userInfo, LogData.L21, logger, lockId, e.getMessage());
                             // Перемещение в каталог ошибок
-                            logger.getEntries().addAll(getEntries(localLoggerList));
+                            logger.getEntries().addAll(localLoggerList.get(i).getEntries());
                             if (move) {
                                 moveToErrorDirectory(userInfo, getRefBookErrorPath(userInfo, logger, lockId), currentFile,
                                         getEntries(localLoggerList), logger, lockId);
@@ -460,7 +464,7 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
         try {
             ResourceUtils.getSharedResource(path + "/");
         } catch (Exception e) {
-            e.printStackTrace();
+			LOG.error(e.getMessage(), e);
             return false;
         }
         return true;

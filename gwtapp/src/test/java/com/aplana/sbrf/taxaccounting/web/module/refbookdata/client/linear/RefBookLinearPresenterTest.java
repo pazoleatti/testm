@@ -24,7 +24,7 @@ public class RefBookLinearPresenterTest {
 
     @Test
     public void testOnAddRowClicked(RefBookLinearPresenter.MyView myView) {
-        refBookDataPresenter.prepareFromRequest(new PlaceRequest.Builder().nameToken(RefBookDataTokens.refBookHierData).with("id", "71").build());
+        refBookDataPresenter.prepareFromRequest(new PlaceRequest.Builder().nameToken(RefBookDataTokens.REFBOOK_HIER_DATA).with("id", "71").build());
         refBookDataPresenter.setInSlot(RefBookDataPresenter.TYPE_mainFormPresenter, refBookLinearPresenter);
         refBookDataPresenter.onAddRowClicked();
         verify(myView, times(1)).updateMode(FormMode.CREATE);
@@ -33,7 +33,7 @@ public class RefBookLinearPresenterTest {
 
     @Test
     public void testOnAllVersionsClickNonVersioned(EditFormPresenter.MyView editView) {
-        refBookDataPresenter.prepareFromRequest(new PlaceRequest.Builder().nameToken(RefBookDataTokens.refBookHierData).with("id", "71").build());
+        refBookDataPresenter.prepareFromRequest(new PlaceRequest.Builder().nameToken(RefBookDataTokens.REFBOOK_HIER_DATA).with("id", "71").build());
         refBookDataPresenter.setInSlot(RefBookDataPresenter.TYPE_mainFormPresenter, refBookLinearPresenter);
         refBookDataPresenter.setInSlot(RefBookDataPresenter.TYPE_editFormPresenter, editFormPresenter);
         editFormPresenter.setVersionMode(true);

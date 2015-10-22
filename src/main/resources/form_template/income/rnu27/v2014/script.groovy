@@ -298,7 +298,7 @@ def logicCheck() {
             // 13. Проверка корректности заполнения РНУ
             if (!isConsolidated && formPrev != null) {
                 for (DataRow rowPrev in dataPrevRows) {
-                    if (rowPrev.getAlias() == null && row.tradeNumber == rowPrev.tradeNumber && row.prev != rowPrev.current) {
+                    if (rowPrev.getAlias() == null && row.tradeNumber == rowPrev.tradeNumber && row.prev != null && row.prev != rowPrev.current) {
                         rowWarning(logger, row, errorMsg + "РНУ сформирован некорректно! Не выполняется условие: «Графа 6» (${row.prev}) текущей строки РНУ-27 за текущий период = «Графе 7» (${rowPrev.current}) строки РНУ-27 за предыдущий период, значение «Графы 4» которой соответствует значению «Графы 4» РНУ-27 за текущий период.")
                     }
                 }
@@ -306,8 +306,8 @@ def logicCheck() {
             // 14. Проверка корректности заполнения РНУ
             if (!isConsolidated && formPrev != null) {
                 for (DataRow rowPrev in dataPrevRows) {
-                    if (rowPrev.getAlias() == null && row.tradeNumber == rowPrev.tradeNumber && row.reserveCalcValuePrev != rowPrev.reserveCalcValue) {
-                        rowWarning(logger, row, errorMsg + "РНУ сформирован некорректно! Не выполняется условие: «Графа 8» (${rowPrev.reserveCalcValuePrev}) текущей строки РНУ-27 за текущий период= «Графе 15» (${row.reserveCalcValue}) строки РНУ-27 за предыдущий период, значение «Графы 4» которой соответствует значению «Графы 4» РНУ-27 за текущий период.")
+                    if (rowPrev.getAlias() == null && row.tradeNumber == rowPrev.tradeNumber && row.reserveCalcValuePrev != null && row.reserveCalcValuePrev != rowPrev.reserveCalcValue) {
+                        rowWarning(logger, row, errorMsg + "РНУ сформирован некорректно! Не выполняется условие: «Графа 8» (${row.reserveCalcValuePrev}) текущей строки РНУ-27 за текущий период= «Графе 15» (${rowPrev.reserveCalcValue}) строки РНУ-27 за предыдущий период, значение «Графы 4» которой соответствует значению «Графы 4» РНУ-27 за текущий период.")
                     }
                 }
             }
@@ -346,11 +346,11 @@ def logicCheck() {
 
         // LC 20
         if (row.getAlias() != null && row.getAlias().indexOf('itogoRegNumber') != -1) {
-            srow = calcItogRegNumber(dataRows.indexOf(row), dataRows)
+            srow = calcItogRegNumber(dataRows.indexOf(row) - 1, dataRows)
 
             for (column in totalColumns) {
                 if (row.get(column) != srow.get(column)) {
-                    def regNumber = getRegNumberOrIssuer(dataRows, row, 'regNumber')
+                    def regNumber = (getRegNumberOrIssuer(dataRows, row, 'regNumber') ?: "ГРН не задан")
                     loggerError(null, "Итоговые значения по «$regNumber» рассчитаны неверно в графе «${getColumnName(row, column)}»!")
                 }
             }
@@ -358,11 +358,11 @@ def logicCheck() {
 
         // LC 21
         if (row.getAlias() != null && row.getAlias().indexOf('itogoIssuer') != -1) {
-            srow = calcItogIssuer(dataRows.indexOf(row), dataRows)
+            srow = calcItogIssuer(dataRows.indexOf(row) - 1, dataRows)
 
             for (column in totalColumns) {
                 if (row.get(column) != srow.get(column)) {
-                    def issuer = getRegNumberOrIssuer(dataRows, row, 'issuer')
+                    def issuer = (getRegNumberOrIssuer(dataRows, row, 'issuer') ?: "Эмитент не задан")
                     loggerError(null, "Итоговые значения для «$issuer» рассчитаны неверно в графе «${getColumnName(row, column)}»!")
                 }
             }
@@ -510,7 +510,7 @@ def calcItogIssuer(int i, def dataRows) {
         }
     }
 
-    newRow.fix = tIssuer + ' Итог'
+    newRow.fix = (tIssuer != null ? tIssuer : 'Эмитент не задан') + ' Итог'
 
     for (column in totalColumns) {
         newRow.getCell(column).setValue(new BigDecimal(0), null)

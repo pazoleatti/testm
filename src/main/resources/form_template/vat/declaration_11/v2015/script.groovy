@@ -8,6 +8,8 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
 import groovy.transform.Field
 import groovy.xml.MarkupBuilder
 
+import javax.xml.stream.XMLStreamReader
+
 /**
  * Декларация по НДС (раздел 11)
  *
@@ -20,9 +22,11 @@ switch (formDataEvent) {
         break
     case FormDataEvent.CHECK:
         checkDepartmentParams(LogLevel.ERROR)
+        logicCheckXML(LogLevel.WARNING)
         break
     case FormDataEvent.MOVE_CREATED_TO_ACCEPTED:
-        checkDepartmentParams(LogLevel.ERROR)
+        checkDepartmentParams(LogLevel.WARNING)
+        logicCheckXML(LogLevel.ERROR)
         checkDeclarationFNS()
         break
     case FormDataEvent.MOVE_ACCEPTED_TO_CREATED:
@@ -42,6 +46,12 @@ switch (formDataEvent) {
 // Кэш провайдеров
 @Field
 def providerCache = [:]
+
+@Field
+def refBookMap = [:]
+
+@Field
+def version = '5.04'
 
 @Field
 def empty = 0
@@ -72,15 +82,19 @@ def getProvider(def long providerId) {
 void checkDepartmentParams(LogLevel logLevel) {
     // Параметры подразделения
     def departmentParam = getDepartmentParam()
+    def refBook = getRefBook(RefBook.DEPARTMENT_CONFIG_VAT)
 
     // Проверки подразделения
-    def List<String> errorList = getErrorDepartment(departmentParam)
+    def List<String> errorList = getErrorDepartment(departmentParam, refBook)
     for (String error : errorList) {
-        logger.log(logLevel, String.format("Для данного подразделения на форме настроек подразделений отсутствует значение атрибута %s!", error))
+        logger.log(logLevel, "На форме настроек подразделения текущего экземпляра декларации отсутствует значение атрибута «%s»!", error)
     }
-    errorList = getErrorVersion(departmentParam)
-    for (String error : errorList) {
-        logger.log(logLevel, String.format("Неверно указано значение атрибута %s на форме настроек подразделений", error))
+    def tmpVersion = departmentParam.FORMAT_VERSION?.stringValue
+    if (!version.equals(tmpVersion)) {
+        def message = "На форме настроек подразделения текущего экземпляра декларации неверно указано значение атрибута «%s» (%s)! Ожидаемое значение «%s»."
+        def attributeName = refBook.getAttribute('FORMAT_VERSION').name
+        def value = (tmpVersion != null && '' != tmpVersion ? tmpVersion : 'пустое значение')
+        logger.log(logLevel, message, attributeName, value, version)
     }
 }
 
@@ -97,13 +111,16 @@ def getDepartmentParam() {
     return departmentParam
 }
 
-List<String> getErrorDepartment(record) {
+List<String> getErrorDepartment(def record, def refBook) {
     List<String> errorList = new ArrayList<String>()
+    String attributeName
     if (record.INN?.stringValue == null || record.INN.stringValue.isEmpty()) {
-        errorList.add("«ИНН»")
+        attributeName = refBook.getAttribute('INN').name
+        errorList.add(attributeName)
     }
     if (record.KPP?.stringValue == null || record.KPP.stringValue.isEmpty()) {
-        errorList.add("«КПП»")
+        attributeName = refBook.getAttribute('KPP').name
+        errorList.add(attributeName)
     }
     errorList
 }
@@ -116,14 +133,6 @@ boolean useTaxOrganCodeProm() {
         declarationReportPeriod = reportPeriodService.get(declarationData.reportPeriodId)
     }
     return (declarationReportPeriod?.taxPeriod?.year > 2015 || declarationReportPeriod?.order > 2)
-}
-
-List<String> getErrorVersion(record) {
-    List<String> errorList = new ArrayList<String>()
-    if (record.FORMAT_VERSION.stringValue == null || !record.FORMAT_VERSION.stringValue.equals('5.04')) {
-        errorList.add("«Версия формата»")
-    }
-    errorList
 }
 
 void generateXML() {
@@ -323,4 +332,84 @@ def getCurrencyCode(String str) {
         }
     }
     return null
+}
+
+// Логические проверки (Проверки значений атрибутов формы настроек подразделения, атрибутов файла формата законодателя)
+void logicCheckXML(LogLevel logLevel) {
+    // получение данных из xml'ки
+    def reader = declarationService.getXmlStreamReader(declarationData.id)
+    if (reader == null) {
+        return
+    }
+    def elements = [:]
+
+    def idFile
+    def versForm
+    def fileFound = false
+
+    try{
+        while (reader.hasNext()) {
+            if (reader.startElement) {
+                elements[reader.name.localPart] = true
+                if (!fileFound && isCurrentNode([], elements)) {
+                    fileFound = true
+                    idFile = getXmlValue(reader, 'ИдФайл')
+                    versForm = getXmlValue(reader, 'ВерсФорм')
+                }
+            }
+            if (reader.endElement) {
+                elements[reader.name.localPart] = false
+            }
+            reader.next()
+        }
+    } finally {
+        reader.close()
+    }
+
+    def refBook = getRefBook(RefBook.DEPARTMENT_CONFIG_VAT)
+    if (!checkInnKpp(idFile)) {
+        ['INN', 'KPP'].each { attributeAlias ->
+            def attributeName = refBook.getAttribute(attributeAlias).name
+            def message = "Обязательный для заполнения атрибут «%s» в наименовании xml файла не заполнен! На момент расчёта экземпляра декларации (формирование XML) на форме настроек подразделения отсутствовало значение атрибута «%s»."
+            logger.log(logLevel, message, attributeName, attributeName)
+        }
+
+    }
+    if (versForm == null || !version.equals(versForm)) {
+        def message = "Обязательный для заполнения атрибут «%s» (%s) заполнен неверно (%s)! Ожидаемое значение «%s». На момент расчёта экземпляра декларации (формирование XML) на форме настроек подразделения было указано неверное значение атрибута «%s»."
+        def attributeName = refBook.getAttribute('FORMAT_VERSION').name
+        def value = (versForm == null || versForm.isEmpty() ? 'пустое значение' : versForm)
+        logger.log(logLevel, message, attributeName, "Файл.ВерсФорм", value, version, attributeName)
+    }
+}
+
+/**
+ * Проверить значение "ИНН" и "КПП" в составе атрибут xml "ИдФайл".
+ * ИдФайл имеет следующйю структуру:
+ *      NO_NDS_Код налогового органа (пром.)_Код налогового органа (кон.)_ИНН+КПП_ГГГГММДД_UUID.
+ *
+ * @param value значение ИдФайл
+ */
+def checkInnKpp(def value) {
+    if (!value) {
+        return false
+    }
+    def tmpValues = value.split('_')
+    // "ИНН" и "КПП" - 5ые по порядку в ИдФайл
+    def position = 5
+    if (tmpValues.size() < position || !tmpValues[position - 1] || 'nullnull' == tmpValues[position - 1]) {
+        return false
+    }
+    return true
+}
+
+String getXmlValue(XMLStreamReader reader, String attrName) {
+    return reader?.getAttributeValue(null, attrName)
+}
+
+def getRefBook(def id) {
+    if (refBookMap[id] == null) {
+        refBookMap[id] = refBookFactory.get(id)
+    }
+    return refBookMap[id]
 }

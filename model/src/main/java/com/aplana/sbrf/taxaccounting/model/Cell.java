@@ -80,8 +80,9 @@ public class Cell extends AbstractCell {
 			return null;
 		}
 		// Формируем заготовки сообщений. Используются при оформлении ошибок
-        String msg = "Графа «" + getColumn().getName() + "». ";
-        String msgValue = "Значение графы «" + getColumn().getName() + "» ";
+		String columnName = getColumn().getName() == null ? "Без названия" : getColumn().getName();
+        String msg = "Графа «" + columnName + "». ";
+        String msgValue = "Значение графы «" + columnName + "» ";
         if (rowNumber != null) {
             msg = "Строка " + rowNumber + ": " + msg;
             msgValue = "Строка " + rowNumber + ": " + msgValue;
@@ -114,10 +115,11 @@ public class Cell extends AbstractCell {
 				if (ColumnType.NUMBER.equals(columnType)) {
 					int precision = ((NumericColumn) getColumn()).getPrecision();
 					value = ((BigDecimal) value).setScale(precision, RoundingMode.HALF_UP);
-					if (!getColumn().getValidationStrategy().matches(((BigDecimal) value).toPlainString())) {
-						return showError(msgValue + "превышает допустимую разрядность (" +
-                                (((NumericColumn) getColumn()).getMaxLength() - ((NumericColumn) getColumn()).getPrecision()) +
-                                " знаков)!");
+					String stringValue = ((BigDecimal) value).toPlainString();
+					if (!getColumn().getValidationStrategy().matches(stringValue)) {
+						return showError(msgValue + "превышает допустимую разрядность. Должно быть не более " +
+								((NumericColumn) getColumn()).getMaxLength() + " знакомест и не более " + ((NumericColumn) getColumn()).getPrecision() +
+                                " знаков после запятой. Устанавливаемое значение: " + stringValue);
 					}
 				} else { // ColumnType.AUTO ColumnType.REFBOOK
 					value = ((BigDecimal) value).setScale(0, RoundingMode.HALF_UP);

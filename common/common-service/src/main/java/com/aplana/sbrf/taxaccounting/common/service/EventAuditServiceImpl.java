@@ -22,24 +22,23 @@ public class EventAuditServiceImpl implements EventAuditService {
 
     @Autowired
     private AuditService auditService;
-
     @Autowired
     private TAUserService userService;
 
-    private static final Log logger = LogFactory.getLog(EventAuditServiceImpl.class);
+    private static final Log LOG = LogFactory.getLog(EventAuditServiceImpl.class);
 
     @Override
     public void addAuditLog(EventType event, UserInfo userInfo, String note) throws CommonServiceException {
         try {
-            logger.info("Adding log event by Garants: event=" + event + ", userInfo=" + userInfo + ", userInfo='" + note+"'");
+            LOG.info("Adding log event by Garants: event=" + event + ", userInfo=" + userInfo + ", userInfo='" + note + "'");
             FormDataEvent taxEvent = EventRelationsContainer.get(event);
             TAUserInfo taUserInfo = getTaUserInfo(userInfo);
             auditService.add(taxEvent, taUserInfo, taUserInfo.getUser().getDepartmentId(), null, null, null, null, note, null, null);
         } catch (RuntimeException e) {
-            logger.info("Error add log event: " + e.getClass() + " - " + e. getMessage());
+            LOG.info("Error add log event: " + e.getClass() + " - " + e.getMessage());
             throw new CommonServiceException(e.getMessage(), e.getCause());
         } catch (Exception e) {
-            logger.info("Error add log event: " + e.getClass() + " - " + e. getMessage());
+            LOG.info("Error add log event: " + e.getClass() + " - " + e.getMessage());
             throw new CommonServiceException(e.getMessage(), e.getCause());
         }
     }
@@ -49,15 +48,15 @@ public class EventAuditServiceImpl implements EventAuditService {
                             String declarationType, String formType, Integer formKindId, String note, String blobDataId,
                             Integer formTypeId) throws CommonServiceException {
         try {
-            logger.info("Adding log event by Garants: event=" + event + ", userInfo=" + userInfo + ", userInfo='" + note+"'");
+            LOG.info("Adding log event by Garants: event=" + event + ", userInfo=" + userInfo + ", userInfo='" + note + "'");
             FormDataEvent taxEvent = EventRelationsContainer.get(event);
             auditService.add(taxEvent, getTaUserInfo(userInfo), departmentId, reportPeriodId, declarationType,
                     formType, formKindId, note, blobDataId, formTypeId);
         } catch (RuntimeException e) {
-            logger.info("Error add log event: " + e.getClass() + " - " + e. getMessage());
+            LOG.info("Error add log event: " + e.getClass() + " - " + e.getMessage());
             throw new CommonServiceException(e.getMessage(), e.getCause());
         } catch (Exception e) {
-            logger.info("Error add log event: " + e.getClass() + " - " + e. getMessage());
+            LOG.info("Error add log event: " + e.getClass() + " - " + e.getMessage());
             throw new CommonServiceException(e.getMessage(), e.getCause());
         }
     }

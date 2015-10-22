@@ -429,10 +429,17 @@ void logicCheck() {
     // 7. Проверка на уникальность записи по налоговому учету
     for (def map : uniq456.keySet()) {
         def rowList = uniq456.get(map)
+        def name4 = getColumnName(dataRows[0], 'code')
+        def name5 = getColumnName(dataRows[0], 'docNumber')
+        def name6 = getColumnName(dataRows[0], 'docDate')
         if (rowList.size() > 1) {
-            loggerError(null, String.format("Несколько строк " + rowList.join(", ") + " содержат записи в налоговом учете для балансового " +
-                    "счета=%s, документа № %s от %s.", refBookService.getStringValue(28, map.get(4), 'NUMBER').toString(),
-                    map.get(5).toString(), dateFormat.format(map.get(6))))
+            def rowIndexes = rowList.join(', ')
+            def value4 = getRefBookValue(28, map.get(4))?.NUMBER?.value
+            def value5 = map.get(5)
+            def value6 = dateFormat.format(map.get(6))
+            def message = "Строки $rowIndexes не уникальны в рамках текущей налоговой формы! По данным строкам значения следующих граф совпадают: «$name4» ($value4), «$name5» ($value5), «$name6» ($value6)."
+            logger.warn("%s", message)
+
         }
     }
 
@@ -650,7 +657,7 @@ def getNewRow(String[] rowCells, def columnCount, def fileRowIndex, def rowIndex
 
     // графа 4 - поиск записи идет по графе 2
     if (!isTotal) {
-        String filter = "LOWER(CODE) = LOWER('" + pure(rowCells[2]) + "') and LOWER(NUMBER) = LOWER('" + pure(rowCells[4]).replaceAll(/\./, "") + "')"
+        String filter = getFilter(pure(rowCells[2]),pure(rowCells[4]).replaceAll(/\./, ""))
         def records = refBookFactory.getDataProvider(28).getRecords(getReportPeriodEndDate(), null, filter, null)
         colIndex = 2
         if (checkImportRecordsCount(records, refBookFactory.get(28), 'CODE', pure(rowCells[colIndex]), getReportPeriodEndDate(), fileRowIndex, colIndex + colOffset, logger, false)) {
@@ -864,7 +871,7 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex, 
 
     // графа 4 - поиск записи идет по графе 2
     if (!isTotal) {
-        String filter = "LOWER(CODE) = LOWER('" + values[2] + "') and LOWER(NUMBER) = LOWER('" + values[4].replaceAll(/\./, "") + "')"
+        String filter = getFilter(values[2], values[4].replaceAll(/\./, ""))
         def records = refBookFactory.getDataProvider(28).getRecords(getReportPeriodEndDate(), null, filter, null)
         colIndex = 2
         if (checkImportRecordsCount(records, refBookFactory.get(28), 'CODE', values[colIndex], getReportPeriodEndDate(), fileRowIndex, colIndex + colOffset, logger, false)) {
@@ -923,4 +930,12 @@ def getNewSubTotalRowFromXls(def values, def colOffset, def fileRowIndex, def ro
     newRow.ruble = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
 
     return newRow
+}
+
+def String getFilter(def String code, def String number){
+    String filter = "LOWER(CODE) = LOWER('" + code + "')"
+    if (number != '') {
+        filter += " and LOWER(NUMBER) = LOWER('" + number + "')"
+    }
+    return filter
 }

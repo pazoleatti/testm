@@ -2,15 +2,7 @@ package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.ColumnDao;
 import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
-import com.aplana.sbrf.taxaccounting.dao.impl.cache.CacheConstants;
-import com.aplana.sbrf.taxaccounting.model.Cell;
-import com.aplana.sbrf.taxaccounting.model.DataRow;
-import com.aplana.sbrf.taxaccounting.model.FormTemplate;
-import com.aplana.sbrf.taxaccounting.model.FormType;
-import com.aplana.sbrf.taxaccounting.model.NumericColumn;
-import com.aplana.sbrf.taxaccounting.model.TaxType;
-import com.aplana.sbrf.taxaccounting.model.TemplateFilter;
-import com.aplana.sbrf.taxaccounting.model.VersionedObjectStatus;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.formdata.HeaderCell;
 import com.aplana.sbrf.taxaccounting.model.util.FormDataUtils;
@@ -26,12 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static org.junit.Assert.assertEquals;
 
@@ -89,10 +76,14 @@ public class FormTemplateDaoTest {
 		formTemplate.setFullName("fullname_3");
 		formTemplate.setHeader("header_3");
 		formTemplate.setScript("test_script");
+        formTemplate.setComparative(false);
+        formTemplate.setAccruing(false);
 		formTemplateDao.save(formTemplate);
 		formTemplate = formTemplateDao.get(1);
 		Assert.assertFalse(formTemplate.isFixedRows());
 		Assert.assertTrue(formTemplate.isMonthly());
+        Assert.assertFalse(formTemplate.isComparative());
+        Assert.assertFalse(formTemplate.isAccruing());
 		/*Assert.assertEquals("321", formTemplate.getVersion());*/
 		Assert.assertEquals("name_3", formTemplate.getName());
 		Assert.assertEquals("fullname_3", formTemplate.getFullName());
@@ -111,6 +102,8 @@ public class FormTemplateDaoTest {
         formTemplate.setFullName("fullname_3");
         formTemplate.setHeader("header_3");
         formTemplate.setScript("test_script");
+        formTemplate.setComparative(false);
+        formTemplate.setAccruing(false);
         NumericColumn colNum = new NumericColumn();
         colNum.setName("number");
         colNum.setAlias("number");
@@ -122,6 +115,8 @@ public class FormTemplateDaoTest {
         formTemplate = formTemplateDao.get(1);
         Assert.assertFalse(formTemplate.isFixedRows());
         Assert.assertTrue(formTemplate.isMonthly());
+        Assert.assertFalse(formTemplate.isComparative());
+        Assert.assertFalse(formTemplate.isAccruing());
 		/*Assert.assertEquals("321", formTemplate.getVersion());*/
         Assert.assertEquals("name_3", formTemplate.getName());
         Assert.assertEquals("fullname_3", formTemplate.getFullName());
@@ -148,9 +143,13 @@ public class FormTemplateDaoTest {
 		formTemplate.setFullName("fullname_3");
 		formTemplate.setHeader("header_3");
 		formTemplate.setScript("test_script");
+        formTemplate.setComparative(true);
+        formTemplate.setAccruing(false);
 		formTemplateDao.save(formTemplate);
 		formTemplate = formTemplateDao.get(1);
 		Assert.assertFalse(formTemplate.isFixedRows());
+        Assert.assertTrue(formTemplate.isAccruing());
+        Assert.assertFalse(formTemplate.isComparative());
 		/*Assert.assertEquals("321", formTemplate.getVersion());*/
 		Assert.assertEquals("name_3", formTemplate.getName());
 		Assert.assertEquals("fullname_3", formTemplate.getFullName());
@@ -198,6 +197,8 @@ public class FormTemplateDaoTest {
         formTemplate.setFullName("fullname_3");
         formTemplate.setHeader("header_3");
         formTemplate.setScript("test_script");
+        formTemplate.setComparative(false);
+        formTemplate.setAccruing(false);
 
         DataRow<HeaderCell> headers1 = new DataRow<HeaderCell>(FormDataUtils.createHeaderCells(formTemplate.getColumns()));
         DataRow<HeaderCell> headers2 = new DataRow<HeaderCell>(FormDataUtils.createHeaderCells(formTemplate.getColumns()));

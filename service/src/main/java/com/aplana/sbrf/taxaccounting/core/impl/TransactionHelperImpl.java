@@ -36,6 +36,7 @@ public class TransactionHelperImpl implements TransactionHelper {
 		return transactionTemplate.execute(new TransactionCallback<T>() {
 			@Override
 			public T doInTransaction(TransactionStatus status) {
+                status.setRollbackOnly();
 				return logic.execute();
 			}
 		});

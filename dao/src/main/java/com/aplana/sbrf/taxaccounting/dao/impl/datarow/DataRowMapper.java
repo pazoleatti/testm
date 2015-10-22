@@ -20,7 +20,7 @@ import java.util.Map;
  */
 class DataRowMapper implements RowMapper<DataRow<Cell>> {
 
-	//private static final Log log = LogFactory.getLog(DataRowMapper.class);
+	//private static final Log LOG = LogFactory.getLog(DataRowMapper.class);
 
 	/**
 	 * Признак участия фиксированной строки в автонумерации

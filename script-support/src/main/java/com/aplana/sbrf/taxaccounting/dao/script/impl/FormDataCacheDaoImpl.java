@@ -28,7 +28,7 @@ import java.util.Map;
 @Repository("formDataCacheDao")
 public class FormDataCacheDaoImpl extends AbstractDao implements FormDataCacheDao {
 
-	private static Log log = LogFactory.getLog(FormDataCacheDaoImpl.class);
+	private static final Log LOG = LogFactory.getLog(FormDataCacheDaoImpl.class);
 
     private static final String REF_BOOK_VALUE_FOR_FORM_DATA =
 			"SELECT v.record_id, v.number_value, v.string_value, v.date_value, v.reference_value, a.type, a.precision, a.alias, a.ref_book_id " +
@@ -106,7 +106,7 @@ public class FormDataCacheDaoImpl extends AbstractDao implements FormDataCacheDa
 		if (sql == null) {
 			return retVal; // нет ссылок - нет работы
 		}
-		log.debug(REF_BOOK_VALUE_FOR_FORM_DATA + sql);
+		LOG.debug(REF_BOOK_VALUE_FOR_FORM_DATA + sql);
 
 		Map<String, Object> params = new HashMap<String, Object>();
 		params.put("form_data_id", formData.getId());

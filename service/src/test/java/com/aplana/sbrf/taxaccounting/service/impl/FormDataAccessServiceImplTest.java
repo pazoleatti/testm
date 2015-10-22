@@ -47,7 +47,7 @@ public class FormDataAccessServiceImplTest {
 
     private static final Logger logger = new Logger();
 
-    private final static int ROOT_BANK_ID = 1;
+    private static final int ROOT_BANK_ID = 1;
     private static final int TB1_ID = 2;
     private static final int TB2_ID = 3;
     private static final int GOSB_TB1_ID = 4;
@@ -92,22 +92,22 @@ public class FormDataAccessServiceImplTest {
     private static final int REPORT_PERIOD_INACTIVE_ID = 2;
     private static final int REPORT_PERIOD_BALANCED_ID = 3;
 
-    private final static int BANK_ACTIVE_ID = 11;
-    private final static int BANK_INACTIVE_ID = 12;
-    private final static int BANK_BALANCED_ID = 13;
-    private final static int TB1_ACTIVE_ID = 21;
-    private final static int TB1_INACTIVE_ID = 22;
-    private final static int TB1_BALANCED_ID = 23;
-    private final static int TB2_ACTIVE_ID = 31;
-    private final static int TB2_INACTIVE_ID = 32;
-    private final static int TB2_BALANCED_ID = 33;
-    private final static int GOSB_TB1_ACTIVE_ID = 41;
-    private final static int GOSB_TB1_INACTIVE_ID = 42;
-    private final static int GOSB_TB1_BALANCED_ID = 43;
+    private static final int BANK_ACTIVE_ID = 11;
+    private static final int BANK_INACTIVE_ID = 12;
+    private static final int BANK_BALANCED_ID = 13;
+    private static final int TB1_ACTIVE_ID = 21;
+    private static final int TB1_INACTIVE_ID = 22;
+    private static final int TB1_BALANCED_ID = 23;
+    private static final int TB2_ACTIVE_ID = 31;
+    private static final int TB2_INACTIVE_ID = 32;
+    private static final int TB2_BALANCED_ID = 33;
+    private static final int GOSB_TB1_ACTIVE_ID = 41;
+    private static final int GOSB_TB1_INACTIVE_ID = 42;
+    private static final int GOSB_TB1_BALANCED_ID = 43;
 
     private static final int DECLARATION_TYPE_1_ID = 101;
 
-    private final static String LOCAL_IP = "127.0.0.1";
+    private static final String LOCAL_IP = "127.0.0.1";
 
     static DepartmentFormTypeDao departmentFormTypeDao;
     static FormDataService formDataService;
@@ -878,7 +878,6 @@ public class FormDataAccessServiceImplTest {
         try {
             service.canCreate(userInfo, formTemplateId, kind, departmentReportPeriodId, comparativeDepReportPeriod, accruing);
         } catch (ServiceException se) {
-            System.out.println(se.getMessage());
             return false;
         }
         return true;

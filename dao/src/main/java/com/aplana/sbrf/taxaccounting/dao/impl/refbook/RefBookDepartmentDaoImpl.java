@@ -16,6 +16,8 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookRecord;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -47,8 +49,9 @@ import java.util.Set;
 @Repository
 public class RefBookDepartmentDaoImpl extends AbstractDao implements RefBookDepartmentDao {
 
-	private static final String TABLE_NAME = "DEPARTMENT";
+	private static final Log LOG = LogFactory.getLog(RefBookDepartmentDaoImpl.class);
 
+	private static final String TABLE_NAME = "DEPARTMENT";
 
     @Autowired
     ReportPeriodDao reportPeriodDao;
@@ -201,7 +204,7 @@ public class RefBookDepartmentDaoImpl extends AbstractDao implements RefBookDepa
                     psc, keyHolder);
             return keyHolder.getKey().intValue();
         } catch (DataAccessException e){
-            logger.error("", e);
+			LOG.error("", e);
             throw new DaoException("", e);
         }
     }
@@ -213,7 +216,7 @@ public class RefBookDepartmentDaoImpl extends AbstractDao implements RefBookDepa
         } catch (DataIntegrityViolationException e){
             throw new DaoException("Нарушение ограничения целостности. Возможно обнаружена порожденная запись.", e);
         } catch (DataAccessException e){
-            logger.error("", e);
+			LOG.error("", e);
             throw new DaoException("", e);
         }
     }
@@ -364,7 +367,7 @@ public class RefBookDepartmentDaoImpl extends AbstractDao implements RefBookDepa
         } catch (EmptyResultDataAccessException e) {
             return new HashMap<Integer, Map<String, Object>>(0);
         } catch (DataAccessException e) {
-            logger.error("Проверка использования", e);
+			LOG.error("Проверка использования", e);
             throw new DaoException("Проверка использования", e);
         }
     }

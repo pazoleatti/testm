@@ -8,6 +8,8 @@ import com.aplana.sbrf.taxaccounting.util.mock.ScriptTestMockHelper;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 
 import java.util.List;
 
@@ -38,6 +40,7 @@ public class Etr41Test extends ScriptTestBase {
         formData.setDepartmentReportPeriodId(DEPARTMENT_PERIOD_ID);
         formData.setReportPeriodId(REPORT_PERIOD_ID);
         formData.setPeriodOrder(1);
+        formData.setComparativePeriodId(1);
         return formData;
     }
 
@@ -48,8 +51,29 @@ public class Etr41Test extends ScriptTestBase {
 
     @Before
     public void mockServices() {
+        // макет нф
         when(testHelper.getFormDataService().getFormTemplate(anyInt(), anyInt())).thenReturn(testHelper.getFormTemplate());
 
+        // подразделение-период
+        when(testHelper.getDepartmentReportPeriodService().get(any(Integer.class))).thenAnswer(
+                new Answer<DepartmentReportPeriod>() {
+                    @Override
+                    public DepartmentReportPeriod answer(InvocationOnMock invocation) throws Throwable {
+                        DepartmentReportPeriod result = new DepartmentReportPeriod();
+                        ReportPeriod reportPeriod = new ReportPeriod();
+                        reportPeriod.setId(REPORT_PERIOD_ID);
+                        result.setReportPeriod(reportPeriod);
+                        return result;
+                    }
+                });
+
+        // периоды
+        TaxPeriod taxPeriod = new TaxPeriod();
+        taxPeriod.setId(1);
+        ReportPeriod period = new ReportPeriod();
+        period.setId(1);
+        period.setTaxPeriod(taxPeriod);
+        when(testHelper.getReportPeriodService().get(anyInt())).thenReturn(period);
     }
 
     @Test

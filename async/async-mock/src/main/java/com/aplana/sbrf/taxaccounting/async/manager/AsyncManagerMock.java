@@ -26,7 +26,8 @@ import java.util.Map;
  */
 @Service
 public class AsyncManagerMock implements AsyncManager {
-    // private final Log log = LogFactory.getLog(getClass());
+
+    // private static final Log LOG = LogFactory.getLog(AsyncManagerMock.class);
 
     @Autowired
     private NamedParameterJdbcTemplate namedParameterJdbcTemplate;

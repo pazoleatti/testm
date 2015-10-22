@@ -47,7 +47,8 @@ import java.util.*;
 @Service("unlockFormData")
 @Transactional
 public class FormDataServiceImpl implements FormDataService {
-    protected static final Log log = LogFactory.getLog(FormDataServiceImpl.class);
+
+	private static final Log LOG = LogFactory.getLog(FormDataServiceImpl.class);
 
     private static final SimpleDateFormat SDF_DD_MM_YYYY = new SimpleDateFormat("dd.MM.yyyy");
 	private static final SimpleDateFormat SDF_HH_MM_DD_MM_YYYY = new SimpleDateFormat("HH:mm dd.MM.yyyy");
@@ -192,7 +193,7 @@ public class FormDataServiceImpl implements FormDataService {
 
         File dataFile = null;
         try {
-            log.info(String.format("Создание временного файла: %s", key));
+            LOG.info(String.format("Создание временного файла: %s", key));
             if (stateLogger != null) {
                 stateLogger.updateState("Создание временного файла");
             }
@@ -216,7 +217,7 @@ public class FormDataServiceImpl implements FormDataService {
                     List<String> paramList = configurationDao.getAll().get(ConfigurationParam.KEY_FILE, 0);
                     if (paramList != null) { // Необходимо проверить подпись
                         try {
-                            log.info(String.format("Проверка ЭЦП: %s", key));
+                            LOG.info(String.format("Проверка ЭЦП: %s", key));
                             check = signService.checkSign(dataFile.getAbsolutePath(), 0);
                         } catch (Exception e) {
                             logger.error("Ошибка при проверке ЭЦП: " + e.getMessage());
@@ -243,7 +244,7 @@ public class FormDataServiceImpl implements FormDataService {
 					if (stateLogger != null) {
 						stateLogger.updateState("Импорт XLSM-файла");
 					}
-					log.info(String.format("Выполнение скрипта: %s", key));
+					LOG.info(String.format("Выполнение скрипта: %s", key));
 					formDataScriptingService.executeScript(userInfo, fd, formDataEvent, logger, additionalParameters);
 				} finally {
 					IOUtils.closeQuietly(dataFileInputStream);
@@ -254,7 +255,7 @@ public class FormDataServiceImpl implements FormDataService {
                 if (stateLogger != null) {
                     stateLogger.updateState("Сохранение ошибок");
                 }
-                log.info(String.format("Сохранение ошибок: %s", key));
+                LOG.info(String.format("Сохранение ошибок: %s", key));
                 String uuid = logEntryService.save(logger.getEntries());
                 throw new ServiceLoggerException("Есть критические ошибки при выполнении скрипта", uuid);
             } else if (isInner) {
@@ -264,8 +265,7 @@ public class FormDataServiceImpl implements FormDataService {
             formDataDao.updateEdited(fd.getId(), true);
 			dataRowDao.refreshRefBookLinks(fd);
             logBusinessService.add(formDataId, null, userInfo, formDataEvent, null);
-            auditService.add(formDataEvent, userInfo, fd.getDepartmentId(), fd.getReportPeriodId(),
-                    null, fd.getFormType().getName(), fd.getKind().getId(), fileName, null, fd.getFormType().getId());
+            auditService.add(formDataEvent, userInfo, null, fd, fileName, null);
         } catch (IOException e) {
             throw new ServiceException(e.getLocalizedMessage(), e);
         } finally {
@@ -340,8 +340,7 @@ public class FormDataServiceImpl implements FormDataService {
 
         if (!importFormData) {
             logBusinessService.add(formData.getId(), null, userInfo, FormDataEvent.CREATE, null);
-            auditService.add(FormDataEvent.CREATE, userInfo, formData.getDepartmentId(), formData.getReportPeriodId(),
-                    null, formData.getFormType().getName(), formData.getKind().getId(), "Форма создана", null);
+            auditService.add(FormDataEvent.CREATE, userInfo, null, formData, "Форма создана", null);
         }
 
 		dataRowDao.saveRows(formData, formTemplate.getRows());
@@ -619,8 +618,7 @@ public class FormDataServiceImpl implements FormDataService {
         deleteReport(formData.getId(), formData.isManual(), userInfo.getUser().getId());
         // ЖА и история изменений
 		logBusinessService.add(formData.getId(), null, userInfo, FormDataEvent.SAVE, null);
-		auditService.add(FormDataEvent.SAVE, userInfo, formData.getDepartmentId(), formData.getReportPeriodId(),
-				null, formData.getFormType().getName(), formData.getKind().getId(), "Форма сохранена", null, formData.getFormType().getId());
+		auditService.add(FormDataEvent.SAVE, userInfo, null, formData, "Форма сохранена", null);
 		return formData.getId();
 	}
 
@@ -682,8 +680,7 @@ public class FormDataServiceImpl implements FormDataService {
                     formDataDao.delete(formDataId);
                     formDataDao.deleteFormDataNnn(formData.getFormTemplateId(), formDataId);
                     interruptTask(formDataId, false, userInfo.getUser().getId(), reportType);
-                    auditService.add(FormDataEvent.DELETE, userInfo, formData.getDepartmentId(), formData.getReportPeriodId(),
-                            null, formData.getFormType().getName(), formData.getKind().getId(), "Форма удалена", null);
+                    auditService.add(FormDataEvent.DELETE, userInfo, null, formData, "Форма удалена", null);
                 }
             } finally {
                 lockService.unlock(keyTask, userInfo.getUser().getId());
@@ -951,8 +948,7 @@ public class FormDataServiceImpl implements FormDataService {
         dataRowDao.removeCheckPoint(formData);
 
         logBusinessService.add(formData.getId(), null, userInfo, workflowMove.getEvent(), note);
-        auditService.add(workflowMove.getEvent(), userInfo, formData.getDepartmentId(), formData.getReportPeriodId(),
-                null, formData.getFormType().getName(), formData.getKind().getId(), workflowMove.getEvent().getTitle(), null, formData.getFormType().getId());
+        auditService.add(workflowMove.getEvent(), userInfo, null, formData, workflowMove.getEvent().getTitle(), null);
 
         stateLogger.updateState("Обновление сквозной нумерации");
         updatePreviousRowNumberAttr(formData, workflowMove, logger, userInfo);

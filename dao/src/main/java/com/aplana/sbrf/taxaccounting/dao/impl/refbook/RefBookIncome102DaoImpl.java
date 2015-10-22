@@ -12,6 +12,8 @@ import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -33,9 +35,10 @@ import java.util.*;
 @Repository
 public class RefBookIncome102DaoImpl extends AbstractDao implements RefBookIncome102Dao {
 
+	private static final Log LOG = LogFactory.getLog(RefBookIncome102DaoImpl.class);
+
     @Autowired
     private RefBookDao refBookDao;
-
 	@Autowired
 	private RefBookIncome101Dao income101Dao;
 
@@ -173,12 +176,20 @@ public class RefBookIncome102DaoImpl extends AbstractDao implements RefBookIncom
 	}
 
     private final static String INCOME_102_GET_SEPARATE_VALUE =
-            "select (select number_value nv from REF_BOOK_VALUE where attribute_id = 1071 and record_id = (select INCOME_101.ACCOUNT_PERIOD_ID from INCOME_101 where id = :incomeId)) || ' ' || v2.STRING_VALUE rp_name \n" +
-                    "from INCOME_101 res\n" +
-                    "join REF_BOOK_VALUE rbv on res.ACCOUNT_PERIOD_ID = rbv.RECORD_ID\n" +
-                    "join REF_BOOK_ATTRIBUTE rba on rbv.ATTRIBUTE_ID = rba.ID\n" +
-                    "join ref_book_value v2 on v2.record_id=rbv.reference_value\n" +
-                    "  where res.id = :incomeId and rba.REF_BOOK_ID = :refBookId and rbv.ATTRIBUTE_ID = 1072 and v2.ATTRIBUTE_ID = 1062";
+            "SELECT\n" +
+                    "  (SELECT\n" +
+                    "  number_value nv\n" +
+                    "   FROM REF_BOOK_VALUE\n" +
+                    "   WHERE attribute_id = 1071 AND record_id = (SELECT\n" +
+                    "                                                INCOME_102.ACCOUNT_PERIOD_ID\n" +
+                    "                                              FROM INCOME_102\n" +
+                    "                                              WHERE id = :incomeId)) || ' ' || v2.STRING_VALUE rp_name\n" +
+                    "FROM INCOME_102 res\n" +
+                    "  JOIN REF_BOOK_VALUE rbv ON res.ACCOUNT_PERIOD_ID = rbv.RECORD_ID\n" +
+                    "  JOIN REF_BOOK_ATTRIBUTE rba ON rbv.ATTRIBUTE_ID = rba.ID\n" +
+                    "  JOIN ref_book_value v2 ON v2.record_id = rbv.reference_value\n" +
+                    "WHERE res.id = :incomeId AND rba.REF_BOOK_ID = :refBookId AND rbv.ATTRIBUTE_ID = 1072 AND v2.ATTRIBUTE_ID = 1062";
+
     @Override
     public String getPeriodNameFromRefBook(final long recordId) {
         try {
@@ -188,7 +199,7 @@ public class RefBookIncome102DaoImpl extends AbstractDao implements RefBookIncom
         } catch (EmptyResultDataAccessException e){
             return "";
         } catch (DataAccessException e){
-            logger.error("", e);
+            LOG.error("", e);
             throw new DaoException("", e);
         }
     }

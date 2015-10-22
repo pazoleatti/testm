@@ -16,6 +16,8 @@ import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.service.RefBookScriptingService;
 import com.aplana.sbrf.taxaccounting.service.shared.ScriptComponentContextHolder;
 import com.aplana.sbrf.taxaccounting.util.ScriptExposed;
+import com.aplana.sbrf.taxaccounting.util.TransactionHelper;
+import com.aplana.sbrf.taxaccounting.util.TransactionLogic;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -53,6 +55,8 @@ public class RefBookScriptingServiceImpl extends TAAbstractScriptingServiceImpl 
     @Autowired
     @Qualifier("versionInfoProperties")
     private Properties versionInfoProperties;
+    @Autowired
+    private TransactionHelper tx;
 
     @Override
     public boolean executeScript(TAUserInfo userInfo, long refBookId, FormDataEvent event, Logger logger, Map<String, Object> additionalParameters) {
@@ -73,10 +77,35 @@ public class RefBookScriptingServiceImpl extends TAAbstractScriptingServiceImpl 
             return false;
         }
         String script = writer.toString();
-		if (!canExecuteScript(script, event)) {
-			return false;
-		}
+        if (!canExecuteScript(script, event)) {
+            return false;
+        }
+        return executeScript(userInfo, refBook, script, event, logger, additionalParameters);
+    }
 
+    @Override
+    public boolean executeScriptInNewReadOnlyTransaction(final TAUserInfo userInfo, final RefBook refBook, final String script, final FormDataEvent event, final Logger logger, final Map<String, Object> additionalParameters) {
+        return tx.executeInNewReadOnlyTransaction(new TransactionLogic<Boolean>() {
+            @Override
+            public Boolean execute() {
+                return executeScript(userInfo, refBook, script, event, logger, additionalParameters);
+            }
+        });
+    }
+
+    private void checkScript(RefBook refBook, String script, final Logger logger) {
+        Logger tempLogger = new Logger();
+        try {
+            executeScriptInNewReadOnlyTransaction(null, refBook, script, FormDataEvent.CHECK_SCRIPT, tempLogger, null);
+        } catch (Exception ex) {
+            tempLogger.error(ex);
+            logger.getEntries().addAll(tempLogger.getEntries());
+            throw new ServiceLoggerException("Обнаружены ошибки в скрипте!", logEntryService.save(logger.getEntries()));
+        }
+        logger.getEntries().addAll(tempLogger.getEntries());
+    }
+
+    private boolean executeScript(TAUserInfo userInfo, RefBook refBook, String script, FormDataEvent event, Logger logger, Map<String, Object> additionalParameters) {
         // Локальный логгер для импорта конкретного справочника
         Logger scriptLogger = new Logger();
         scriptLogger.setTaUserInfo(userInfo);
@@ -151,7 +180,7 @@ public class RefBookScriptingServiceImpl extends TAAbstractScriptingServiceImpl 
     }
 
     @Override
-    public void saveScript(long refBookId, String script) {
+    public void saveScript(long refBookId, String script, Logger log) {
         RefBook refBook = refBookFactory.get(refBookId);
         if (!script.isEmpty() && script.trim().length() > 0) {
             InputStream inputStream;
@@ -161,6 +190,7 @@ public class RefBookScriptingServiceImpl extends TAAbstractScriptingServiceImpl 
                 throw new ServiceException(ERROR_MSG, e);
             }
 
+            checkScript(refBook, script, log);
             if (refBook.getScriptId() == null) {
                 String uuid = blobDataService.create(inputStream, refBook.getName());
                 refBookDao.setScriptId(refBookId, uuid);

@@ -5,6 +5,8 @@ import com.aplana.sbrf.taxaccounting.dao.impl.util.DeclarationDataSearchResultIt
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
@@ -30,9 +32,9 @@ import static com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils.transformToSq
 @Transactional
 public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDataDao {
 
+	private static final Log LOG = LogFactory.getLog(DeclarationDataDaoImpl.class);
     private static final String DECLARATION_NOT_FOUND_MESSAGE = "Декларация с id = %d не найдена в БД";
-
-    private final static SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
+    private static final SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
 
     private static final class DeclarationDataRowMapper implements RowMapper<DeclarationData> {
         @Override
@@ -367,7 +369,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
         } catch (EmptyResultDataAccessException e) {
             return new ArrayList<Long>();
         } catch (DataAccessException e) {
-            logger.error(String.format("Ошибка поиска деклараций для заданного шаблона %d", templateId), e);
+			LOG.error(String.format("Ошибка поиска деклараций для заданного шаблона %d", templateId), e);
             throw new DaoException("Ошибка поиска деклараций для заданного шаблона %d", templateId);
         }
     }
@@ -395,7 +397,7 @@ public class DeclarationDataDaoImpl extends AbstractDao implements DeclarationDa
             return new ArrayList<Long>();
         } catch (DataAccessException e) {
             String errorMsg = String.format("Ошибка при поиске деклараций по заданному сочетанию параметров: declarationTypeId = %d, departmentId = %d", declarationTypeId, departmentId);
-            logger.error(errorMsg, e);
+			LOG.error(errorMsg, e);
             throw new DaoException(errorMsg);
         }
     }

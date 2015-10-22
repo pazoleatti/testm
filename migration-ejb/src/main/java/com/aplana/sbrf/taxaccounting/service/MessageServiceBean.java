@@ -43,61 +43,53 @@ import java.util.*;
 @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
 public class MessageServiceBean implements MessageService {
 
-    private final Log logger = LogFactory.getLog(getClass());
+	private static final Log LOG = LogFactory.getLog(MessageServiceBean.class);
     private static final String FILENAME_PROPERTY_NAME = "FILENAME";
     private static final String DATA_PROPERTY_NAME = "DATA";
 
     @Resource(name = "jms/transportConnectionFactory")
     private ConnectionFactory connectionFactory;
-
     @Resource(name = "jms/rateQueueConnectionFactory")
     private QueueConnectionFactory queueConnectionFactory;
-
     @Resource(name = "jms/transportQueue")
     private Queue queue;
-
     @Resource(name = "jms/rateQueue")
     private Queue rateQueue;
 
     // Формат РНУ
     private static final Set<Integer> RNU_SET = new HashSet<Integer>(Arrays.asList(25, 26, 27, 31));
-
     // Формат XML
     private static final Set<Integer> XML_SET = new HashSet<Integer>(Arrays.asList(51, 53, 54, 59, 60, 64));
 
-    @Autowired
-    private MigrationDao migrationDao;
-
-    private Session session;
-    private MessageProducer messageProducer;
-
-    private RnuMigrationGenerator rnuGenerator = new RnuMigrationGenerator();
-    private XmlMigrationGenerator xmlGenerator = new XmlMigrationGenerator();
-
     /** Параметры КСШ */
-    static final String ERROR_FORMAT = "Сообщение не соответствует заданному формату";
-    static final String ERROR_RATE = "Сообщение не соответствует передаче данных по курсам валют / драгоценным металлам";
-    static final String ERROR_PUBLIC = "Сообщение не содержит публичные курсы";
-    static final String ERROR_VALUE = "Сообщение не содержит значений";
-    static final String ERROR_CODE = "Значения сообщения установлены не по отношению к российскому рублю";
-    static final String SUCCESS_IMPORT = "Успешный обмен данными с КСШ. %s %d %s справочника «%s».";
-    static final String FAIL_IMPORT = "Неуспешная попытка обмена данными с КСШ. %s.";
-    static final String FAIL_IMPORT_DELIVERY_COUNT = "Неуспешная попытка обмена данными с КСШ. %s. Попытка № %s";
-    static final String ERROR_AUDIT = "Ошибка записи в журнал аудита.";
+	static final String ERROR_FORMAT = "Сообщение не соответствует заданному формату";
+	private static final String ERROR_RATE = "Сообщение не соответствует передаче данных по курсам валют / драгоценным металлам";
+	private static final String ERROR_PUBLIC = "Сообщение не содержит публичные курсы";
+	private static final String ERROR_VALUE = "Сообщение не содержит значений";
+	private static final String ERROR_CODE = "Значения сообщения установлены не по отношению к российскому рублю";
+	static final String SUCCESS_IMPORT = "Успешный обмен данными с КСШ. %s %d %s справочника «%s».";
+	static final String FAIL_IMPORT = "Неуспешная попытка обмена данными с КСШ. %s.";
+	private static final String FAIL_IMPORT_DELIVERY_COUNT = "Неуспешная попытка обмена данными с КСШ. %s. Попытка № %s";
+	private static final String ERROR_AUDIT = "Ошибка записи в журнал аудита.";
     // Максимальное число попыток загрузки одного сообщения
     private static final int MAX_DELIVERY_COUNT = 10;
-    static final String ERROR_COUNT = "Превышено максимальное число попыток загрузки сообщения (" + MAX_DELIVERY_COUNT + ").";
+	private static final String ERROR_COUNT = "Превышено максимальное число попыток загрузки сообщения (" + MAX_DELIVERY_COUNT + ").";
     private static final String RATE_ENCODING = "UTF-8";
 
-    @Autowired
-    private RefBookScriptingService refBookScriptingService;
+	private Session session;
+	private MessageProducer messageProducer;
 
+	private RnuMigrationGenerator rnuGenerator = new RnuMigrationGenerator();
+	private XmlMigrationGenerator xmlGenerator = new XmlMigrationGenerator();
+
+	@Autowired
+	private MigrationDao migrationDao;
+	@Autowired
+    private RefBookScriptingService refBookScriptingService;
     @Autowired
     private AuditService auditService;
-
     @Autowired
     private TAUserService taUserService;
-
     @Autowired
     private LogEntryService logEntryService;
 
@@ -137,11 +129,11 @@ public class MessageServiceBean implements MessageService {
 
         List<Exemplar> list = getExemplarsByRnuTypes(rnuIds, years);
 
-        logger.debug("Count of examples = " + list.size());
+		LOG.debug("Count of examples = " + list.size());
         int count = 0;
 
         for (Exemplar ex : list) {
-            logger.debug("Start forming file. ExemplarId = " + ex.getExemplarId());
+			LOG.debug("Start forming file. ExemplarId = " + ex.getExemplarId());
             try {
                 String filename = null;
                 byte[] fileBytes = null;
@@ -157,9 +149,9 @@ public class MessageServiceBean implements MessageService {
                     count++;
                 }
 
-                logger.debug("Stop forming file. ExemplarId = " + ex.getExemplarId() + ", Filename: " + filename);
+				LOG.debug("Stop forming file. ExemplarId = " + ex.getExemplarId() + ", Filename: " + filename);
             } catch (Exception e) {
-                logger.error("Ошибка подготовки файла (ExemplarId = " + ex.getExemplarId() + ", Ошибка: " + e.getMessage());
+				LOG.error("Ошибка подготовки файла (ExemplarId = " + ex.getExemplarId() + ", Ошибка: " + e.getMessage());
             }
         }
 
@@ -175,10 +167,10 @@ public class MessageServiceBean implements MessageService {
             map.setString(FILENAME_PROPERTY_NAME, name);
             map.setBytes(DATA_PROPERTY_NAME, fileBytes);
             messageProducer.send(map);
-            logger.debug("File [name=" + name + ", size=" + fileBytes.length + "] is sended.");
+			LOG.debug("File [name=" + name + ", size=" + fileBytes.length + "] is sended.");
             return true;
         } catch (JMSException e) {
-            logger.error("Ошибка отправки файла JMS-сообщением. " + e.getMessage(), e);
+			LOG.error("Ошибка отправки файла JMS-сообщением. " + e.getMessage(), e);
             return false;
         }
     }
@@ -247,7 +239,7 @@ public class MessageServiceBean implements MessageService {
 				connection.close();
 			}
         } catch (JMSException e) {
-            logger.error("Ошибка подготовки JMS. " + e.getMessage(), e);
+			LOG.error("Ошибка подготовки JMS. " + e.getMessage(), e);
             return result;
         }
         return result;
@@ -259,7 +251,7 @@ public class MessageServiceBean implements MessageService {
         TAUserInfo userInfo = getUser();
         try {
             /** Подключение к очереди */
-            logger.info("Подключение к КСШ");
+			LOG.info("Подключение к КСШ");
             queueConnection = queueConnectionFactory.createQueueConnection();
             QueueSession queueSession = queueConnection.createQueueSession(false, Session.AUTO_ACKNOWLEDGE);
             QueueReceiver queueReceiver = queueSession.createReceiver(rateQueue);
@@ -271,17 +263,14 @@ public class MessageServiceBean implements MessageService {
                 try {
                     processRateMessage(message);
                 } catch (Exception e) {
-                    logger.error("Произошла ошибка при обработке сообщения, оно будет пропущено", e);
+					LOG.error("Произошла ошибка при обработке сообщения, оно будет пропущено", e);
                 }
             }
             queueReceiver.close();
             queueSession.close();
-            logger.info("Данные КСШ обработаны");
+			LOG.info("Данные КСШ обработаны");
         } catch (Exception e) {
-            logger.error("Не удалось получить данные из КСШ", e);
-            Logger l = new Logger();
-            l.error("Не удалось получить данные из КСШ", e);
-            addLog(userInfo, "Не удалось получить данные из КСШ", logEntryService.save(l.getEntries()));
+			LOG.error(e.getMessage(), e);
         } finally {
             if (queueConnection != null) {
                 try {
@@ -295,7 +284,7 @@ public class MessageServiceBean implements MessageService {
         TAUserInfo userInfo = getUser();
 
         if (!(message instanceof TextMessage)) {
-            logger.error(ERROR_FORMAT);
+			LOG.error(ERROR_FORMAT);
             addLog(userInfo, String.format(FAIL_IMPORT, ERROR_FORMAT), null);
             return;
         }
@@ -305,19 +294,19 @@ public class MessageServiceBean implements MessageService {
         try {
             int deliveryCount = tm.getIntProperty("JMSXDeliveryCount");
             if (deliveryCount > MAX_DELIVERY_COUNT) {
-                logger.error(ERROR_COUNT);
+				LOG.error(ERROR_COUNT);
                 return;
             }
 
             String fileText = tm.getText();
             if (fileText == null) {
-                logger.error(ERROR_FORMAT);
+				LOG.error(ERROR_FORMAT);
                 addLog(userInfo, String.format(FAIL_IMPORT, ERROR_FORMAT), null);
                 return;
             }
             importRate(fileText, userInfo, deliveryCount);
         } catch (Exception ex) {
-            logger.error("Ошибка при получении сообщения: " + ex.getMessage(), ex);
+			LOG.error("Ошибка при получении сообщения: " + ex.getMessage(), ex);
             addLog(userInfo, String.format(FAIL_IMPORT, ERROR_FORMAT), null);
         }
     }
@@ -422,13 +411,13 @@ public class MessageServiceBean implements MessageService {
         try {
             saxParser.parse(new ByteArrayInputStream(fileText.getBytes(RATE_ENCODING)), handler);
             if (refBookId[0] == null) {
-                logger.error(ERROR_RATE);
+				LOG.error(ERROR_RATE);
                 addLog(userInfo, String.format(FAIL_IMPORT, ERROR_RATE), null);
                 return;
             }
             runScript(refBookId[0], fileText, userInfo, deliveryCount);
         } catch (Exception ex) {
-            logger.error(ERROR_FORMAT, ex);
+			LOG.error(ERROR_FORMAT, ex);
             addLog(userInfo, String.format(FAIL_IMPORT, ERROR_FORMAT), null);
         }
     }
@@ -473,10 +462,10 @@ public class MessageServiceBean implements MessageService {
         try {
             // Ошибка записи в журнал аудита не должна откатывать импорт
             if (auditService != null) {
-                auditService.add(FormDataEvent.IMPORT, userInfo, 0, null, null, null, null, msg, uuid, null);
+                auditService.add(FormDataEvent.IMPORT, userInfo, 0, null, null, null, null, msg, uuid);
             }
         } catch (Exception e) {
-            logger.error(ERROR_AUDIT, e);
+            LOG.error(ERROR_AUDIT, e);
         }
     }
 }

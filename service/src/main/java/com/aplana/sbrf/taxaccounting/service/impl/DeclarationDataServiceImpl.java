@@ -56,88 +56,86 @@ import java.util.zip.ZipOutputStream;
 @Transactional(readOnly = true)
 public class DeclarationDataServiceImpl implements DeclarationDataService {
 
-    protected static final Log log = LogFactory.getLog(DeclarationDataService.class);
-
+	private static final Log LOG = LogFactory.getLog(DeclarationDataService.class);
     private static final String XML_HEADER = "<?xml version=\"1.0\" encoding=\"windows-1251\"?>";
     private static final SimpleDateFormat SDF_DD_MM_YYYY = new SimpleDateFormat("dd.MM.yyyy");
     private static final SimpleDateFormat SDF_DD_MM_YYYY_HH_MM_SS = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
-
     private static final String FILE_NAME_IN_TEMP_PATTERN = System.getProperty("java.io.tmpdir")+ File.separator +"%s.%s";
-
     private static final String CALCULATION_NOT_TOPICAL = "Декларация / Уведомление содержит неактуальные консолидированные данные  " +
             "(расприняты формы-источники / удалены назначения по формам-источникам, на основе которых ранее выполнена " +
             "консолидация). Для коррекции консолидированных данных необходимо нажать на кнопку \"Рассчитать\"";
 
+	private static final String DD_NOT_IN_RANGE = "Найдена форма: \"%s\", \"%d\", \"%s\", \"%s\", состояние - \"%s\"";
+
+	private static final String TAG_FILE = "Файл";
+	private static final String TAG_DOCUMENT = "Документ";
+	private static final String ATTR_FILE_ID = "ИдФайл";
+	private static final String ATTR_DOC_DATE = "ДатаДок";
+	private static final SimpleDateFormat formatter = new SimpleDateFormat("dd.MM.yyyy");
+	private static final String VALIDATION_ERR_MSG = "Обнаружены фатальные ошибки!";
+	private static final String MSG_IS_EXIST_DECLARATION =
+			"Существует экземпляр \"%s\" в подразделении \"%s\" в периоде \"%s\"%s%s для макета!";
+	private static final String NOT_CONSOLIDATE_SOURCE_DECLARATION_WARNING =
+			"Не выполнена консолидация данных из формы \"%s\", \"%s\", \"%s\", \"%s\", \"%d%s\" в статусе \"%s\"";
+	private static final String NOT_EXIST_SOURCE_DECLARATION_WARNING =
+			"Не выполнена консолидация данных из формы \"%s\", \"%s\", \"%s\", \"%s\", \"%d%s\" - экземпляр формы не создан";
+	private static final String FILE_NOT_DELETE = "Временный файл %s не удален";
+
+	private static final Date MAX_DATE;
+	private static final Calendar CALENDAR = Calendar.getInstance();
+	static {
+		CALENDAR.clear();
+		CALENDAR.set(9999, Calendar.DECEMBER, 31);
+		MAX_DATE = CALENDAR.getTime();
+		CALENDAR.clear();
+	}
+
     @Autowired
     private DeclarationDataDao declarationDataDao;
-
     @Autowired
     private DeclarationDataAccessService declarationDataAccessService;
-
     @Autowired
     private DeclarationDataScriptingService declarationDataScriptingService;
-
     @Autowired
     private DeclarationTemplateService declarationTemplateService;
-
     @Autowired
     private DepartmentService departmentService;
-
     @Autowired
     private BlobDataService blobDataService;
-
     @Autowired
     private LogBusinessService logBusinessService;
-
     @Autowired
     private AuditService auditService;
-
     @Autowired
     private LogEntryService logEntryService;
-
     @Autowired
     private LockDataService lockDataService;
-
     @Autowired
     private TAUserService taUserService;
-
     @Autowired
     private ReportService reportService;
-
     @Autowired
     private IfrsDataService ifrsDataService;
-
     @Autowired
     private DepartmentReportPeriodService departmentReportPeriodService;
     @Autowired
     private PeriodService reportPeriodService;
-
     @Autowired
     private ValidateXMLService validateXMLService;
-
     @Autowired
     private SourceService sourceService;
-
     @Autowired
     private DepartmentFormTypeDao departmentFormTypeDao;
-
     @Autowired
     private FormDataService formDataService;
-
     @Autowired
     private FormTypeService formTypeService;
-
     @Autowired
     private DataRowDao dataRowDao;
-
     @Autowired
     private FormTemplateService formTemplateService;
-
     @Autowired
     private AsyncTaskTypeDao asyncTaskTypeDao;
-
-    @Autowired
-    private FormDataDao formDataDao;
 
     private static final String DD_NOT_IN_RANGE = "Найдена форма: \"%s\", \"%d\", \"%s\", \"%s\", состояние - \"%s\"";
 
@@ -231,10 +229,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         long id = declarationDataDao.saveNew(newDeclaration);
 
         logBusinessService.add(null, id, userInfo, FormDataEvent.CREATE, null);
-        auditService.add(FormDataEvent.CREATE , userInfo, newDeclaration.getDepartmentId(),
-                newDeclaration.getReportPeriodId(),
-                declarationTemplateService.get(newDeclaration.getDeclarationTemplateId()).getType().getName(),
-                null, null, "Декларация создана", null, null);
+        auditService.add(FormDataEvent.CREATE , userInfo, newDeclaration, null, "Декларация создана", null);
         return id;
     }
 
@@ -257,15 +252,12 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         sourceService.addDeclarationConsolidationInfo(id, formDataIds);
 
         logBusinessService.add(null, id, userInfo, FormDataEvent.SAVE, null);
-        auditService.add(FormDataEvent.CALCULATE , userInfo, declarationData.getDepartmentId(),
-                declarationData.getReportPeriodId(),
-                declarationTemplateService.get(declarationData.getDeclarationTemplateId()).getType().getName(),
-                null, null, "Декларация обновлена", null, null);
+        auditService.add(FormDataEvent.CALCULATE , userInfo, declarationData, null, "Декларация обновлена", null);
     }
 
     @Override
     public void check(Logger logger, long id, TAUserInfo userInfo, LockStateLogger lockStateLogger) {
-        log.info(String.format("Проверка данных декларации/уведомления %s", id));
+        LOG.info(String.format("Проверка данных декларации/уведомления %s", id));
         lockStateLogger.updateState("Проверка форм-источников");
         DeclarationData dd = declarationDataDao.get(id);
         checkSources(dd, logger, userInfo);
@@ -313,10 +305,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             deleteReport(id, userInfo.getUser().getId(), false);
             declarationDataDao.delete(id);
 
-            auditService.add(FormDataEvent.DELETE , userInfo, declarationData.getDepartmentId(),
-                    declarationData.getReportPeriodId(),
-                    declarationTemplateService.get(declarationData.getDeclarationTemplateId()).getType().getName(),
-                    null, null, "Декларация удалена", null, null);
+            auditService.add(FormDataEvent.DELETE , userInfo, declarationData, null, "Декларация удалена", null);
         } else {
             if (lockData == null) lockData = lockDataAccept;
             if (lockData == null) lockData = lockDataCheck;
@@ -348,8 +337,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
         String declarationTypeName = declarationTemplateService.get(declarationData.getDeclarationTemplateId()).getType().getName();
         logBusinessService.add(null, id, userInfo, FormDataEvent.MOVE_CREATED_TO_ACCEPTED, null);
-        auditService.add(FormDataEvent.MOVE_CREATED_TO_ACCEPTED, userInfo, declarationData.getDepartmentId(),
-                declarationData.getReportPeriodId(), declarationTypeName, null, null, FormDataEvent.MOVE_CREATED_TO_ACCEPTED.getTitle(), null, null);
+        auditService.add(FormDataEvent.MOVE_CREATED_TO_ACCEPTED, userInfo, declarationData, null, FormDataEvent.MOVE_CREATED_TO_ACCEPTED.getTitle(), null);
 
         lockStateLogger.updateState("Изменение состояния декларации");
         declarationDataDao.setAccepted(id, true);
@@ -379,10 +367,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             }
         }
 
-        String declarationTypeName = declarationTemplateService.get(declarationData.getDeclarationTemplateId()).getType().getName();
         logBusinessService.add(null, id, userInfo, FormDataEvent.MOVE_ACCEPTED_TO_CREATED, null);
-        auditService.add(FormDataEvent.MOVE_ACCEPTED_TO_CREATED, userInfo, declarationData.getDepartmentId(),
-                declarationData.getReportPeriodId(), declarationTypeName, null, null, FormDataEvent.MOVE_ACCEPTED_TO_CREATED.getTitle(), null, null);
+        auditService.add(FormDataEvent.MOVE_ACCEPTED_TO_CREATED, userInfo, declarationData, null, FormDataEvent.MOVE_ACCEPTED_TO_CREATED.getTitle(), null);
 
         declarationDataDao.setAccepted(id, false);
     }
@@ -407,7 +393,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             BlobData blobData = blobDataService.get(xmlUuid);
             return blobData.getName();
         } catch (Exception e) {
-            log.error(e.toString(), e);
+            LOG.error(e.toString(), e);
             return null;
         }
     }
@@ -421,7 +407,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             BlobData blobData = blobDataService.get(xmlUuid);
             return blobData.getCreationDate();
         } catch (Exception e) {
-            log.error(e.toString(), e);
+            LOG.error(e.toString(), e);
             return null;
         }
     }
@@ -443,12 +429,12 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 throw new ServiceException("Не удалось извлечь Jasper-отчет.", e);
             }
         } else {
-            log.info(String.format("Заполнение Jasper-макета декларации %s", declarationData.getId()));
+            LOG.info(String.format("Заполнение Jasper-макета декларации %s", declarationData.getId()));
             stateLogger.updateState("Заполнение Jasper-макета");
             jasperPrint = createJasperReport(declarationData, userInfo);
             // для XLSX-отчета не сохраняем Jasper-отчет из-за возмжных проблем с паралельным формированием PDF-отчета
         }
-        log.info(String.format("Заполнение XLSX-отчета декларации %s", declarationData.getId()));
+        LOG.info(String.format("Заполнение XLSX-отчета декларации %s", declarationData.getId()));
         stateLogger.updateState("Заполнение XLSX-отчета");
         return exportXLSX(jasperPrint);
     }
@@ -484,19 +470,19 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     @Override
     public void setPdfDataBlobs(Logger logger,
                                      DeclarationData declarationData, TAUserInfo userInfo, LockStateLogger stateLogger) {
-        log.info(String.format("Получение данных декларации %s", declarationData.getId()));
+        LOG.info(String.format("Получение данных декларации %s", declarationData.getId()));
         stateLogger.updateState("Получение данных декларации");
         String xmlUuid = reportService.getDec(userInfo, declarationData.getId(), ReportType.XML_DEC);
         if (xmlUuid != null) {            
             try {                
-                log.info(String.format("Заполнение Jasper-макета декларации %s", declarationData.getId()));
+                LOG.info(String.format("Заполнение Jasper-макета декларации %s", declarationData.getId()));
                 stateLogger.updateState("Заполнение Jasper-макета");
                 JasperPrint jasperPrint = createJasperReport(declarationData, userInfo);
                 
-                log.info(String.format("Сохранение PDF-файла в базе данных для декларации %s", declarationData.getId()));
+                LOG.info(String.format("Сохранение PDF-файла в базе данных для декларации %s", declarationData.getId()));
                 stateLogger.updateState("Сохранение PDF-файла в базе данных");
                 reportService.createDec(declarationData.getId(), blobDataService.create(new ByteArrayInputStream(exportPDF(jasperPrint)), ""), ReportType.PDF_DEC);
-                log.info(String.format("Сохранение Jasper-макета в базе данных для декларации %s", declarationData.getId()));
+                LOG.info(String.format("Сохранение Jasper-макета в базе данных для декларации %s", declarationData.getId()));
                 stateLogger.updateState("Сохранение Jasper-макета в базе данных");
                 reportService.createDec(declarationData.getId(), saveJPBlobData(jasperPrint), ReportType.JASPER_DEC);
             } catch (IOException e) {
@@ -511,11 +497,11 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     public void setXlsxDataBlobs(Logger logger, DeclarationData declarationData, TAUserInfo userInfo, LockStateLogger stateLogger) {
         try {
             byte[] xlsxData = getXlsxData(declarationData.getId(), userInfo, stateLogger);
-            log.info(String.format("Сохранение XLSX в базе данных для декларации %s", declarationData.getId()));
+            LOG.info(String.format("Сохранение XLSX в базе данных для декларации %s", declarationData.getId()));
             stateLogger.updateState("Сохранение XLSX в базе данных");
             reportService.createDec(declarationData.getId(), blobDataService.create(new ByteArrayInputStream(xlsxData), ""), ReportType.EXCEL_DEC);
         } catch (Exception e) {
-            log.error(e.getMessage(), e);
+            LOG.error(e.getMessage(), e);
             throw new ServiceException(e.getMessage());
         }
     }
@@ -534,7 +520,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
         try {
             try {
-                log.info(String.format("Создание временного файла для записи расчета для декларации %s", declarationData.getId()));
+                LOG.info(String.format("Создание временного файла для записи расчета для декларации %s", declarationData.getId()));
                 stateLogger.updateState("Создание временного файла для записи расчета");
                 try {
                     xmlFile = File.createTempFile("file_for_validate", ".xml");
@@ -544,14 +530,14 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                     throw new ServiceException("Ошибка при формировании временного файла для XML", e);
                 }
                 exchangeParams.put(DeclarationDataScriptParams.XML, fileWriter);
-                log.info(String.format("Формирование XML-файла декларации %s", declarationData.getId()));
+                LOG.info(String.format("Формирование XML-файла декларации %s", declarationData.getId()));
                 stateLogger.updateState("Формирование XML-файла");
                 declarationDataScriptingService.executeScript(userInfo, declarationData, FormDataEvent.CALCULATE, logger, exchangeParams);
             } finally {
                 try {
                     if (fileWriter != null) fileWriter.close();
                 } catch (IOException e) {
-                    log.warn("", e);
+                    LOG.warn("", e);
                 }
             }
 
@@ -591,33 +577,33 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                         IOUtils.closeQuietly(fileOutputStream);
                     }
 
-                    log.info(String.format("Сохранение XML-файла в базе данных для декларации %s", declarationData.getId()));
+                    LOG.info(String.format("Сохранение XML-файла в базе данных для декларации %s", declarationData.getId()));
                     stateLogger.updateState("Сохранение XML-файла в базе данных");
 
                     reportService.createDec(declarationData.getId(), blobDataService.create(zipOutFile, zipOutFile.getName(), decDate), ReportType.XML_DEC);
                 } finally {
                     if (zipOutFile != null && !zipOutFile.delete()) {
-                        log.warn(String.format(FILE_NOT_DELETE, zipOutFile.getAbsolutePath()));
+                        LOG.warn(String.format(FILE_NOT_DELETE, zipOutFile.getAbsolutePath()));
                     }
                     if (!renameToFile.delete()) {
-                        log.warn(String.format(FILE_NOT_DELETE, renameToFile.getAbsolutePath()));
+                        LOG.warn(String.format(FILE_NOT_DELETE, renameToFile.getAbsolutePath()));
                     }
                 }
             } else {
                 throw new IOException(String.format("Преименование из %s в %s не прошло.", xmlFile.getName(), renameToFile.getName()));
             }
         } catch (IOException e) {
-            log.error("", e);
+            LOG.error("", e);
             throw new ServiceException("", e);
         } catch (ParserConfigurationException e) {
-            log.error("Ошибка при парсинге xml", e);
+            LOG.error("Ошибка при парсинге xml", e);
             throw new ServiceException("", e);
         } catch (SAXException e) {
-            log.error("", e);
+            LOG.error("", e);
             throw new ServiceException("", e);
         } finally {
             if (xmlFile != null && !xmlFile.delete())
-                log.warn(String.format(FILE_NOT_DELETE, xmlFile.getName()));
+                LOG.warn(String.format(FILE_NOT_DELETE, xmlFile.getName()));
         }
     }
 
@@ -642,19 +628,19 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     private void validateDeclaration(TAUserInfo userInfo, DeclarationData declarationData, final Logger logger, final boolean isErrorFatal,
                                      FormDataEvent operation, File xmlFile, LockStateLogger stateLogger) {
         Locale oldLocale = Locale.getDefault();
-        log.info(String.format("Получение данных декларации %s", declarationData.getId()));
+        LOG.info(String.format("Получение данных декларации %s", declarationData.getId()));
         Locale.setDefault(new Locale("ru", "RU"));
         DeclarationTemplate declarationTemplate = declarationTemplateService.get(declarationData.getDeclarationTemplateId());
 
         if (declarationTemplate.getXsdId() != null && !declarationTemplate.getXsdId().isEmpty()) {
             try {
-                log.info(String.format("Выполнение проверок XSD-файла декларации %s", declarationData.getId()));
+                LOG.info(String.format("Выполнение проверок XSD-файла декларации %s", declarationData.getId()));
                 stateLogger.updateState("Выполнение проверок XSD-файла");
                 if (!validateXMLService.validate(declarationData, userInfo, logger, isErrorFatal, xmlFile) && logger.containsLevel(LogLevel.ERROR)){
                     throw new ServiceLoggerException(VALIDATION_ERR_MSG, logEntryService.save(logger.getEntries()));
                 }
             } catch (Exception e) {
-                log.error(VALIDATION_ERR_MSG, e);
+                LOG.error(VALIDATION_ERR_MSG, e);
                 if (!(e instanceof ServiceException))
                     logger.error(e);
                 throw new ServiceException(VALIDATION_ERR_MSG);

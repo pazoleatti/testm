@@ -6,6 +6,8 @@ import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.DepartmentType;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.RowMapper;
@@ -24,11 +26,14 @@ import java.util.Map;
 @Repository
 @Transactional(readOnly = true)
 public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
+
+	private static final Log LOG = LogFactory.getLog(DepartmentDaoImpl.class);
+
 	@Override
 	//@Cacheable(CacheConstants.DEPARTMENT)
 	public Department getDepartment(int id) {
-		if (logger.isDebugEnabled()) {
-			logger.debug("Fetching department with id = " + id  + " from database");
+		if (LOG.isDebugEnabled()) {
+			LOG.debug("Fetching department with id = " + id  + " from database");
 		}
         try {
             return getJdbcTemplate().queryForObject(
@@ -497,8 +502,8 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
     @Transactional(readOnly = false)
     //@CacheEvict(value = CacheConstants.DEPARTMENT,key = "#depId", beforeInvocation = true)
     public void setUsedByGarant(int depId, boolean used) {
-        if (logger.isDebugEnabled()) {
-            logger.debug("Updating usage department by Garant with id = " + depId + " to value = " + used);
+        if (LOG.isDebugEnabled()) {
+			LOG.debug("Updating usage department by Garant with id = " + depId + " to value = " + used);
         }
         try {
             int usedInt = used ? 1 : 0;

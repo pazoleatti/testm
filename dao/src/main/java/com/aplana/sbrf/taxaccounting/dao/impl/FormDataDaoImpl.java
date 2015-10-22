@@ -12,6 +12,8 @@ import com.aplana.sbrf.taxaccounting.dao.api.TaxPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -38,6 +40,8 @@ import java.util.Map;
 @Repository("formDataDao")
 @Transactional(readOnly = true)
 public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
+
+	private static final Log LOG = LogFactory.getLog(FormDataDaoImpl.class);
 
     public static final String MSG_FORM_NOT_FOUND = "Форма id=%s не найдена";
 
@@ -329,7 +333,7 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
         } catch (EmptyResultDataAccessException e) {
             return new ArrayList<Long>();
         } catch (DataAccessException e) {
-            logger.error("Ошибка при поиске используемых версий", e);
+			LOG.error("Ошибка при поиске используемых версий", e);
             throw new DaoException("Ошибка при поиске используемых версий", e);
         }
     }
@@ -358,7 +362,7 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
             return new ArrayList<Long>(0);
         } catch (DataAccessException e) {
             String errorMsg = String.format("Ошибка при поиске налоговых форм с заданными параметрами: formTypeId = %s, kind = %s, departmentId = %s", formTypeId, kind.getId(), departmentId);
-            logger.error(errorMsg, e);
+			LOG.error(errorMsg, e);
             throw new DaoException(errorMsg, e);
         }
     }
@@ -381,7 +385,7 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
         } catch (EmptyResultDataAccessException e) {
             return new ArrayList<Long>(0);
         } catch (DataAccessException e) {
-            logger.error("Ошибка при поиске налоговых форм с заданными параметрами: formTypeId = %s, kind = %s, departmentId = %s", e);
+			LOG.error("Ошибка при поиске налоговых форм с заданными параметрами: formTypeId = %s, kind = %s, departmentId = %s", e);
             throw new DaoException("Ошибка при поиске налоговых форм с заданными параметрами", e);
         }
     }
@@ -635,7 +639,7 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
             getNamedParameterJdbcTemplate().update(String.format(UPDATE_FORM_DATA_PERFORMER_TB2, dateTag, moveFromTB), values);
             getNamedParameterJdbcTemplate().update(String.format(UPDATE_FORM_DATA_PERFORMER_TB, dateTag), values);
         } catch (DataAccessException e) {
-            logger.error("Ошибка при обновлении значений.", e);
+			LOG.error("Ошибка при обновлении значений.", e);
             throw new DaoException("Ошибка при обновлении значений.", e);
         }
     }
@@ -664,7 +668,7 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
         try {
             getNamedParameterJdbcTemplate().update(String.format(UPDATE_FORM_DATA_PERFORMER_DEPARTMENT_NAME, dateTag), values);
         } catch (DataAccessException e) {
-            logger.error("", e);
+			LOG.error("", e);
             throw new DaoException("", e);
         }
     }

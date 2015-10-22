@@ -10,6 +10,8 @@ import com.aplana.sbrf.taxaccounting.utils.ResourceUtils;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.ByteArrayInputStream;
@@ -26,6 +28,8 @@ import java.util.List;
  */
 public abstract class AbstractLoadTransportDataService {
 
+	private static final Log LOG = LogFactory.getLog(AbstractLoadTransportDataService.class);
+
     @Autowired
     private AuditService auditService;
 
@@ -38,56 +42,56 @@ public abstract class AbstractLoadTransportDataService {
 
     // Сообщения при загрузке из каталогов http://conf.aplana.com/pages/viewpage.action?pageId=12324125
     protected static enum LogData {
-        L1("Номер загрузки: %s. Запущена процедура загрузки транспортных файлов, содержащих данные налоговых форм.", LogLevel.INFO, true, false),
-        L2("Номер загрузки: %s. Завершена процедура загрузки транспортных файлов, содержащих данные налоговых форм. Файлов загружено: %d. Файлов отклонено: %d.", LogLevel.INFO, true, false),
-        L3("Номер загрузки: %s. В каталоге загрузки для подразделения «%s» не найдены файлы!", LogLevel.ERROR, true, false),
-        L4("Номер загрузки: %s. Имя файла «%s» в каталоге «%s» не соответствует требованиям к имени транспортного файла. Файл не будет обработан.", LogLevel.ERROR, true, false),
-        L5("Номер загрузки: %s. Указанный в имени файла «%s» код подразделения не существует в Системе! Загрузка файла не выполнена.", LogLevel.ERROR, true, false),
-        L6("Номер загрузки: %s. Указанный в имени файла «%s» код налоговой формы не существует в Системе! Загрузка файла не выполнена.", LogLevel.ERROR, true, false),
-        L7("Номер загрузки: %s. Указанный в имени файла «%s» код отчетного периода не существует в Системе! Загрузка файла не выполнена.", LogLevel.ERROR, true, false),
-        L8("Номер загрузки: %s. Для налоговой формы «%s» открыт корректирующий период «%s»", LogLevel.INFO, false, true),
-        L9("Номер загрузки: %s. Для налоговой формы «%s» закрыт (либо еще не открыт) отчетный период «%s»! Загрузка файла не выполнена.", LogLevel.ERROR, true, true),
+        L1("Запущена процедура загрузки транспортных файлов, содержащих данные налоговых форм.", LogLevel.INFO, true, false),
+        L2("Завершена процедура загрузки транспортных файлов, содержащих данные налоговых форм. Файлов загружено: %d. Файлов отклонено: %d.", LogLevel.INFO, true, false),
+        L3("В каталоге загрузки для подразделения «%s» не найдены файлы!", LogLevel.ERROR, true, false),
+        L4("Имя файла «%s» в каталоге «%s» не соответствует требованиям к имени транспортного файла. Файл не будет обработан.", LogLevel.ERROR, true, false),
+        L5("Указанный в имени файла «%s» код подразделения не существует в Системе! Загрузка файла не выполнена.", LogLevel.ERROR, true, false),
+        L6("Указанный в имени файла «%s» код налоговой формы не существует в Системе! Загрузка файла не выполнена.", LogLevel.ERROR, true, false),
+        L7("Указанный в имени файла «%s» код отчетного периода не существует в Системе! Загрузка файла не выполнена.", LogLevel.ERROR, true, false),
+        L8("Для налоговой формы «%s» открыт корректирующий период «%s»", LogLevel.INFO, false, true),
+        L9("Для налоговой формы «%s» закрыт (либо еще не открыт) отчетный период «%s»! Загрузка файла не выполнена.", LogLevel.ERROR, true, true),
         // L10("ТФ с таким именем уже есть в архиве, текущий ТФ переименован в «%s».", LogLevel.INFO, false, false),
-        L11("Номер загрузки: %s. Перенос «%s» в каталог архива успешно выполнен.", LogLevel.INFO, false, false),
-        L12("Номер загрузки: %s. Ошибка при архивировании транспортного файла! Загрузка файла не выполнена. %s.", LogLevel.ERROR, true, false),
-        L13("Номер загрузки: %s. Налоговая форма существует и имеет статус «" + WorkflowState.CREATED.getTitle() + "».", LogLevel.INFO, false, true),
-        L14("Номер загрузки: %s. Назначение налоговой формы «%s» подразделению «%s» не выполнено! Загрузка файла не выполнена.", LogLevel.ERROR, true, true),
-        L15("Номер загрузки: %s. ЭЦП файла «%s» принята, начата загрузка данных файла.", LogLevel.INFO, true, true),
-        L15_FD("Номер загрузки: %s. Из наименования транспортного файла получены следующие данные:", LogLevel.INFO, true, true),
-        L15_RP("Номер загрузки: %s. Код вида НФ: %s, код подразделения: %s, код периода: %s, год: %s", LogLevel.INFO, true, true),
-        L15_M("Номер загрузки: %s. Код вида НФ: %s, код подразделения: %s, код периода: %s, год: %s, месяц: %s", LogLevel.INFO, true, true),
-        L15_1("Номер загрузки: %s. ЭЦП файла «%s» проверять не требуется, начата загрузка данных файла.", LogLevel.INFO, true, true),
-        L16("Номер загрузки: %s. ЭЦП файла «%s» не принята или отсутствует! Загрузка файла не выполнена.", LogLevel.ERROR, true, true),
-        L17("Номер загрузки: %s. Налоговая форма существует и находится в состоянии, отличном от «" + WorkflowState.CREATED.getTitle() + "»! Загрузка файла не выполнена.", LogLevel.ERROR, true, true),
-        L18("Номер загрузки: %s. Создана «%s» налоговая форма «%s» для подразделения «%s» в периоде «%s».", LogLevel.INFO, true, true),
-        L19("Номер загрузки: %s. «%s» налоговая форма «%s» для подразделения «%s» в периоде «%s» заполнена данными загруженного файла.", LogLevel.INFO, true, true),
-        L20("Номер загрузки: %s. Закончена загрузка данных файла «%s».", LogLevel.INFO, true, true),
-        L21("Номер загрузки: %s. Ошибка при обработке данных транспортного файла. Загрузка файла не выполнена. %s.", LogLevel.ERROR, true, true),
+        L11("Перенос «%s» в каталог архива успешно выполнен.", LogLevel.INFO, false, false),
+        L12("Ошибка при архивировании транспортного файла! Загрузка файла не выполнена. %s.", LogLevel.ERROR, true, false),
+        L13("Налоговая форма существует и имеет статус «" + WorkflowState.CREATED.getTitle() + "».", LogLevel.INFO, false, true),
+        L14("Назначение налоговой формы «%s» подразделению «%s» не выполнено! Загрузка файла не выполнена.", LogLevel.ERROR, true, true),
+        L15("ЭЦП файла «%s» принята, начата загрузка данных файла.", LogLevel.INFO, true, true),
+        L15_FD("Из наименования транспортного файла получены следующие данные:", LogLevel.INFO, true, true),
+        L15_RP("Код вида НФ: %s, код подразделения: %s, код периода: %s, год: %s", LogLevel.INFO, true, true),
+        L15_M("Код вида НФ: %s, код подразделения: %s, код периода: %s, год: %s, месяц: %s", LogLevel.INFO, true, true),
+        L15_1("ЭЦП файла «%s» проверять не требуется, начата загрузка данных файла.", LogLevel.INFO, true, true),
+        L16("ЭЦП файла «%s» не принята или отсутствует! Загрузка файла не выполнена.", LogLevel.ERROR, true, true),
+        L17("Налоговая форма существует и находится в состоянии, отличном от «" + WorkflowState.CREATED.getTitle() + "»! Загрузка файла не выполнена.", LogLevel.ERROR, true, true),
+        L18("Создана «%s» налоговая форма «%s» для подразделения «%s» в периоде «%s».", LogLevel.INFO, true, true),
+        L19("«%s» налоговая форма «%s» для подразделения «%s» в периоде «%s» заполнена данными загруженного файла.", LogLevel.INFO, true, true),
+        L20("Закончена загрузка данных файла «%s».", LogLevel.INFO, true, true),
+        L21("Ошибка при обработке данных транспортного файла. Загрузка файла не выполнена. %s.", LogLevel.ERROR, true, true),
         // L22("Итоговая сумма в графе «%s» строки %d в транспортном файле некорректна. Загрузка файла не выполнена.", LogLevel.ERROR, true, true),
-        L23("Номер загрузки: %s. Запущена процедура загрузки транспортных файлов, содержащих данные справочников.", LogLevel.INFO, true, false),
-        L24("Номер загрузки: %s. Завершена процедура загрузки транспортных файлов, содержащих данные справочников. Файлов загружено: %d. Файлов отклонено: %d.", LogLevel.INFO, true, false),
+        L23("Запущена процедура загрузки транспортных файлов, содержащих данные справочников.", LogLevel.INFO, true, false),
+        L24("Завершена процедура загрузки транспортных файлов, содержащих данные справочников. Файлов загружено: %d. Файлов отклонено: %d.", LogLevel.INFO, true, false),
         // L25("Не указан путь к корректному файлу ключей ЭЦП! Загрузка файла не выполнена.", LogLevel.ERROR, true, false),
-        L26("Номер загрузки: %s. Транспортный файл размещен в каталоге ошибок в составе архива «%s».", LogLevel.INFO, true, false),
-        L27("Номер загрузки: %s. Транспортный файл не записан в каталог ошибок! Загрузка файла не выполнена. %s.", LogLevel.ERROR, true, false),
-        L28("Номер загрузки: %s. Ошибка при удалении файла «%s» при перемещении в каталог ошибок! %s.", LogLevel.ERROR, true, false),
-        L29("Номер загрузки: %s. Ошибка при удалении файла «%s» при перемещении в каталог архива! %s.", LogLevel.ERROR, true, false),
-        L30("Номер загрузки: %s. К каталогу загрузки для подразделения «%s» не указан корректный путь!", LogLevel.ERROR, true, false),
-        L31("Номер загрузки: %s. В каталоге загрузки для %s не найдены файлы!", LogLevel.ERROR, true, false),
-        L36("Номер загрузки: %s. Обнаружена ошибка при использовании библиотеки для проверки ЭЦП! %s.", LogLevel.ERROR, true, false),
-        L37("Номер загрузки: %s. Не указан путь к каталогу загрузки для %s!", LogLevel.ERROR, true, false),
-        L38("Номер загрузки: %s. Не задан алгоритм загрузки для %s!", LogLevel.ERROR, true, false),
-        L40("Номер загрузки: %s. Обработка данных транспортного файла не выполнена, т.к. в данный момент выполняется операция \"%s\", инициированная пользователем \"%s\" в \"%s\".", LogLevel.ERROR, true, false),
-        L40_1("Номер загрузки: %s. Удалена блокировка \"%s\", инициированная пользователем %s в %s.", LogLevel.INFO, true, false),
-        L41("Номер загрузки: %s. Файл %s пропущен, т.к. он уже обрабатывается системой.", LogLevel.ERROR, true, false),
-        L42("Номер загрузки: %s. Нет доступа %s ТБ «%s»! Загрузка не выполнена.", LogLevel.ERROR, true, false),
-        L42_1("Номер загрузки: %s. Нет доступа %s справочников! Загрузка не выполнена.", LogLevel.ERROR, true, false),
-        L42_2("Номер загрузки: %s. Нет доступа к каталогу загрузки «%s» %s! Загрузка не выполнена.", LogLevel.ERROR, true, false),
+        L26("Транспортный файл размещен в каталоге ошибок в составе архива «%s».", LogLevel.INFO, true, false),
+        L27("Транспортный файл не записан в каталог ошибок! Загрузка файла не выполнена. %s.", LogLevel.ERROR, true, false),
+        L28("Ошибка при удалении файла «%s» при перемещении в каталог ошибок! %s.", LogLevel.ERROR, true, false),
+        L29("Ошибка при удалении файла «%s» при перемещении в каталог архива! %s.", LogLevel.ERROR, true, false),
+        L30("К каталогу загрузки для подразделения «%s» не указан корректный путь!", LogLevel.ERROR, true, false),
+        L31("В каталоге загрузки для %s не найдены файлы!", LogLevel.ERROR, true, false),
+        L36("Обнаружена ошибка при использовании библиотеки для проверки ЭЦП! %s.", LogLevel.ERROR, true, false),
+        L37("Не указан путь к каталогу загрузки для %s!", LogLevel.ERROR, true, false),
+        L38("Не задан алгоритм загрузки для %s!", LogLevel.ERROR, true, false),
+        L40("Обработка данных транспортного файла не выполнена, т.к. в данный момент выполняется операция \"%s\", инициированная пользователем \"%s\" в \"%s\".", LogLevel.ERROR, true, false),
+        L40_1("Удалена блокировка \"%s\", инициированная пользователем %s в %s.", LogLevel.INFO, true, false),
+        L41("Файл %s пропущен, т.к. он уже обрабатывается системой.", LogLevel.ERROR, true, false),
+        L42("Нет доступа %s ТБ «%s»! Загрузка не выполнена.", LogLevel.ERROR, true, false),
+        L42_1("Нет доступа %s справочников! Загрузка не выполнена.", LogLevel.ERROR, true, false),
+        L42_2("Нет доступа к каталогу загрузки «%s» %s! Загрузка не выполнена.", LogLevel.ERROR, true, false),
         // Сообщения которых нет в постановке
-        L_1("Номер загрузки: %s. Не указан каталог ошибок в конфигурационных параметрах АС «Учет налогов»!", LogLevel.ERROR, true, false),
-        L_2("Номер загрузки: %s. Не указан каталог архива в конфигурационных параметрах АС «Учет налогов»!", LogLevel.ERROR, true, false),
-        L43("Номер загрузки: %s. Не указан путь %s справочников в конфигурационных параметрах АС «Учет налогов»! Загрузка не выполнена.", LogLevel.ERROR, true, false),
-        L47("Номер загрузки: %s. Размер файла \"%s\" %s Кбайт (каталог загрузки \"%s\") превышает максимально допустимый (%s Кбайт)! Загрузка не выполнена.", LogLevel.ERROR, true, false),
-        L48("Номер загрузки: %s. Для налоговой формы загружаемого файла \"%s\" не предусмотрена обработка транспортного файла! Загрузка не выполнена.", LogLevel.ERROR, true, false);
+        L_1("Не указан каталог ошибок в конфигурационных параметрах АС «Учет налогов»!", LogLevel.ERROR, true, false),
+        L_2("Не указан каталог архива в конфигурационных параметрах АС «Учет налогов»!", LogLevel.ERROR, true, false),
+        L43("Не указан путь %s справочников в конфигурационных параметрах АС «Учет налогов»! Загрузка не выполнена.", LogLevel.ERROR, true, false),
+        L47("Размер файла \"%s\" %s Кбайт (каталог загрузки \"%s\") превышает максимально допустимый (%s Кбайт)! Загрузка не выполнена.", LogLevel.ERROR, true, false),
+        L48("Для налоговой формы загружаемого файла \"%s\" не предусмотрена обработка транспортного файла! Загрузка не выполнена.", LogLevel.ERROR, true, false);
 
         private LogLevel level;
         private String text;
@@ -121,7 +125,7 @@ public abstract class AbstractLoadTransportDataService {
     /**
      * Логгирование в области уведомлений и ЖА при импорте из ТФ
      */
-    protected final void log(TAUserInfo userInfo, LogData logData, Logger logger, Object... args) {
+    protected final void log(TAUserInfo userInfo, LogData logData, Logger logger, String lockId, Object... args) {
         // Область уведомлений
         switch (logData.getLevel()) {
             case INFO:
@@ -145,8 +149,9 @@ public abstract class AbstractLoadTransportDataService {
             if (userInfo.getUser().getId() == TAUser.SYSTEM_USER_ID) {
                 prefix = "Событие инициировано Системой. ";
             }
+            String lockInfo = String.format("Номер загрузки: %s. ", lockId);
             auditService.add(FormDataEvent.IMPORT_TRANSPORT_FILE, userInfo, departmentId, null,
-                    null, null, null, prefix + String.format(logData.getText(), args), null);
+                    null, null, null, prefix + lockInfo + String.format(logData.getText(), args), null);
         }
     }
 
@@ -231,14 +236,14 @@ public abstract class AbstractLoadTransportDataService {
             } catch (Exception e) {
                 success = false;
                 log(userInfo, deleteErrorLogData, logger, lock, file.getPath(), e.getMessage());
-                e.printStackTrace();
+				LOG.error(e.getMessage(), e);
             }
 
             log(userInfo, successLogData, logger, lock, fileDst.getName());
         } catch (Exception e) {
             success = false;
             log(userInfo, moveErrorLogData, logger, lock, e.getMessage());
-            e.printStackTrace();
+			LOG.error(e.getMessage(), e);
         }
         return success;
     }

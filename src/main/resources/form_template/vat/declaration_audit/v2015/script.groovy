@@ -26,11 +26,13 @@ switch (formDataEvent) {
         break
     case FormDataEvent.CHECK:
         checkDepartmentParams(LogLevel.ERROR)
-        logicCheck()
+        logicCheck1(LogLevel.WARNING)
+        logicCheck2()
         break
     case FormDataEvent.MOVE_CREATED_TO_ACCEPTED:
-        checkDepartmentParams(LogLevel.ERROR)
-        logicCheck()
+        checkDepartmentParams(LogLevel.WARNING)
+        logicCheck1(LogLevel.ERROR)
+        logicCheck2()
         break
     case FormDataEvent.PRE_CALCULATION_CHECK:
         checkDepartmentParams(LogLevel.WARNING)
@@ -49,6 +51,12 @@ def providerCache = [:]
 def refBookCache = [:]
 @Field
 def income102DataCache = [:]
+
+@Field
+def refBookMap = [:]
+
+@Field
+def version = '5.04'
 
 @Field
 def empty = 0
@@ -135,15 +143,26 @@ def Map<Long, Expando> declarationParts = null
 void checkDepartmentParams(LogLevel logLevel) {
     // Параметры подразделения
     def departmentParam = getDepartmentParam()
+    def refBook = getRefBook(RefBook.DEPARTMENT_CONFIG_VAT)
 
     // Проверки подразделения
-    def List<String> errorList = getErrorDepartment(departmentParam)
+    def List<String> errorList = getErrorDepartment(departmentParam, refBook)
     for (String error : errorList) {
-        logger.log(logLevel, String.format("Для данного подразделения на форме настроек подразделений отсутствует значение атрибута %s!", error))
+        logger.log(logLevel, "На форме настроек подразделения текущего экземпляра декларации отсутствует значение атрибута «%s»!", error)
     }
-    errorList = getErrorVersion(departmentParam)
-    for (String error : errorList) {
-        logger.log(logLevel, String.format("Неверно указано значение атрибута %s на форме настроек подразделений", error))
+    // вынесено отдельно, потому что для этой проверки сообщение немного отличается
+    if ((departmentParam.SIGNATORY_ID?.referenceValue != null && getRefBookValue(35, departmentParam.SIGNATORY_ID?.value)?.CODE?.value == 2)
+            && (departmentParam.APPROVE_DOC_NAME?.stringValue == null || departmentParam.APPROVE_DOC_NAME.stringValue.isEmpty())) {
+        def message = "На форме настроек подразделения текущего экземпляра декларации отсутствует значение атрибута «%s» (Признак лица, подписавшего документ = 2)!"
+        def attributeName = refBook.getAttribute('NAME').name
+        logger.log(logLevel, message, attributeName)
+    }
+    def tmpVersion = departmentParam.FORMAT_VERSION?.stringValue
+    if (!version.equals(tmpVersion)) {
+        def message = "На форме настроек подразделения текущего экземпляра декларации неверно указано значение атрибута «%s» (%s)! Ожидаемое значение «%s»."
+        def attributeName = refBook.getAttribute('FORMAT_VERSION').name
+        def value = (tmpVersion != null && '' != tmpVersion ? tmpVersion : 'пустое значение')
+        logger.log(logLevel, message, attributeName, value, version)
     }
 }
 
@@ -160,53 +179,62 @@ def getDepartmentParam() {
     return departmentParam
 }
 
-List<String> getErrorDepartment(record) {
+List<String> getErrorDepartment(def record, def refBook) {
     List<String> errorList = new ArrayList<String>()
+    String attributeName
     if (record.NAME?.stringValue == null || record.NAME.stringValue.isEmpty()) {
-        errorList.add("«Наименование подразделения»")
+        attributeName = refBook.getAttribute('NAME').name
+        errorList.add(attributeName)
     }
     if (record.OKTMO?.referenceValue == null) {
-        errorList.add("«ОКТМО»")
+        attributeName = refBook.getAttribute('OKTMO').name
+        errorList.add(attributeName)
     }
     if (record.INN?.stringValue == null || record.INN.stringValue.isEmpty()) {
-        errorList.add("«ИНН»")
+        attributeName = refBook.getAttribute('INN').name
+        errorList.add(attributeName)
     }
     if (record.KPP?.stringValue == null || record.KPP.stringValue.isEmpty()) {
-        errorList.add("«КПП»")
+        attributeName = refBook.getAttribute('KPP').name
+        errorList.add(attributeName)
     }
     if (record.TAX_ORGAN_CODE?.stringValue == null || record.TAX_ORGAN_CODE.stringValue.isEmpty()) {
-        errorList.add("«Код налогового органа (кон.)»")
+        attributeName = refBook.getAttribute('TAX_ORGAN_CODE').name
+        errorList.add(attributeName)
     }
     if (useTaxOrganCodeProm() && (record.TAX_ORGAN_CODE_PROM?.value == null || record.TAX_ORGAN_CODE_PROM.value.isEmpty())) {
-        errorList.add("«Код налогового органа (пром.)»")
+        attributeName = refBook.getAttribute('TAX_ORGAN_CODE_PROM').name
+        errorList.add(attributeName)
     }
     if (record.OKVED_CODE?.referenceValue == null) {
-        errorList.add("«Код вида экономической деятельности и по классификатору ОКВЭД»")
+        attributeName = refBook.getAttribute('OKVED_CODE').name
+        errorList.add(attributeName)
     }
     if (record.SIGNATORY_ID?.referenceValue == null) {
-        errorList.add("«Признак лица подписавшего документ»")
+        attributeName = refBook.getAttribute('SIGNATORY_ID').name
+        errorList.add(attributeName)
     }
     if (record.SIGNATORY_SURNAME?.stringValue == null || record.SIGNATORY_SURNAME.stringValue.isEmpty()) {
-        errorList.add("«Фамилия подписанта»")
+        attributeName = refBook.getAttribute('SIGNATORY_SURNAME').name
+        errorList.add(attributeName)
     }
     if (record.SIGNATORY_FIRSTNAME?.stringValue == null || record.SIGNATORY_FIRSTNAME.stringValue.isEmpty()) {
-        errorList.add("«Имя подписанта»")
-    }
-    //Если ПрПодп (не пусто или не 1) и значение атрибута на форме настроек подразделений не задано
-    if ((record.SIGNATORY_ID?.referenceValue != null && getRefBookValue(35, record.SIGNATORY_ID?.value)?.CODE?.value != 1)
-            && (record.APPROVE_DOC_NAME?.stringValue == null || record.APPROVE_DOC_NAME.stringValue.isEmpty())) {
-        errorList.add("«Наименование документа, подтверждающего полномочия представителя»")
+        attributeName = refBook.getAttribute('SIGNATORY_FIRSTNAME').name
+        errorList.add(attributeName)
     }
     if (record.TAX_PLACE_TYPE_CODE?.referenceValue == null) {
-        errorList.add("«Код места, по которому представляется документ»")
+        attributeName = refBook.getAttribute('TAX_PLACE_TYPE_CODE').name
+        errorList.add(attributeName)
     }
     def reorgFormCode = getRefBookValue(5, record?.REORG_FORM_CODE?.value)?.CODE?.value
     if (reorgFormCode != null && reorgFormCode != '0') {
         if (record.REORG_INN?.value == null || record.REORG_INN.value.isEmpty()) {
-            errorList.add("«ИНН реорганизованной организации»")
+            attributeName = refBook.getAttribute('REORG_INN').name
+            errorList.add(attributeName)
         }
         if (record.REORG_KPP?.value == null || record.REORG_KPP.value.isEmpty()) {
-            errorList.add("«КПП реорганизованной организации»")
+            attributeName = refBook.getAttribute('REORG_KPP').name
+            errorList.add(attributeName)
         }
     }
     errorList
@@ -220,14 +248,6 @@ boolean useTaxOrganCodeProm() {
         declarationReportPeriod = reportPeriodService.get(declarationData.reportPeriodId)
     }
     return (declarationReportPeriod?.taxPeriod?.year > 2015 || declarationReportPeriod?.order > 2)
-}
-
-List<String> getErrorVersion(record) {
-    List<String> errorList = new ArrayList<String>()
-    if (record.FORMAT_VERSION.stringValue == null || !record.FORMAT_VERSION.stringValue.equals('5.04')) {
-        errorList.add("«Версия формата»")
-    }
-    errorList
 }
 
 def getDataRowSum(def dataRows, def String rowAlias, def String cellAlias, def useRound = true) {
@@ -628,8 +648,8 @@ void generateXML() {
     }
 }
 
-// Логические проверки
-void logicCheck() {
+// Логические проверки (Проверки значений атрибутов признаков наличия разделов 8-11)
+void logicCheck2() {
     def reader = declarationService.getXmlStreamReader(declarationData.id)
     if (reader == null) {
         return
@@ -1207,6 +1227,207 @@ def getOkato(def id) {
         okato = getRefBookValue(96, id)?.CODE?.stringValue
     }
     return okato
+}
+
+// Логические проверки (Проверки значений атрибутов формы настроек подразделения, атрибутов файла формата законодателя)
+void logicCheck1(LogLevel logLevel) {
+    // получение данных из xml'ки
+    def reader = declarationService.getXmlStreamReader(declarationData.id)
+    if (reader == null) {
+        return
+    }
+    def elements = [:]
+
+    def kodNO
+    def poMestu
+    def documentFound = false
+
+    def naimOrg
+    def innJulNpJul
+    def kpp
+    def npJulFound = false
+
+    def prPodp
+    def podpisantFound = false
+
+    def signatorySurname
+    def signatoryFirstName
+    def fioFound = false
+
+    def naimDok
+    def svPredFound = false
+
+    def oktmoSumUplNP
+    def sumUplNPFound = false
+
+    def oktmoSumUplNA
+    def sumUplNAFound = false
+
+    def okved
+    def svNPFound = false
+
+    def innJulSvReorgJul
+    def kppSvReorgJul
+    def formReorg
+    def svReorgJulFound = false
+
+    def idFile
+    def versForm
+    def fileFound = false
+
+    try{
+        while (reader.hasNext()) {
+            if (reader.startElement) {
+                elements[reader.name.localPart] = true
+                if (!documentFound && isCurrentNode(['Документ'], elements)) {
+                    documentFound = true
+                    kodNO = getXmlValue(reader, 'КодНО')
+                    poMestu = getXmlValue(reader, 'ПоМесту')
+                } else if (!svNPFound && isCurrentNode(['Документ', 'СвНП'], elements)) {
+                    svNPFound = true
+                    okved = getXmlValue(reader, 'ОКВЭД')
+                } else if (!podpisantFound && isCurrentNode(['Документ', 'Подписант'], elements)) {
+                    podpisantFound = true
+                    prPodp = getXmlValue(reader, 'ПрПодп')
+                } else if (!fioFound && isCurrentNode(['Документ', 'Подписант', 'ФИО'], elements)) {
+                    fioFound = true
+                    signatorySurname = getXmlValue(reader, 'Фамилия')
+                    signatoryFirstName = getXmlValue(reader, 'Имя')
+                } else if (!svPredFound && isCurrentNode(['Документ', 'Подписант', 'СвПред'], elements)) {
+                    svPredFound = true
+                    naimDok = getXmlValue(reader, 'НаимДок')
+                } else if (!npJulFound && isCurrentNode(['Документ', 'СвНП', 'НПЮЛ'], elements)) {
+                    npJulFound = true
+                    naimOrg = getXmlValue(reader, 'НаимОрг')
+                    innJulNpJul = getXmlValue(reader, 'ИННЮЛ')
+                    kpp = getXmlValue(reader, 'КПП')
+                } else if (!svReorgJulFound && isCurrentNode(['Документ', 'СвНП', 'НПЮЛ', 'СвРеоргЮЛ'], elements)) {
+                    svReorgJulFound = true
+                    innJulSvReorgJul = getXmlValue(reader, 'ИННЮЛ')
+                    kppSvReorgJul = getXmlValue(reader, 'КПП')
+                    formReorg = getXmlValue(reader, 'ФормРеорг')
+                } else if (!sumUplNPFound && isCurrentNode(['Документ', 'НДС', 'СумУплНП'], elements)) {
+                    sumUplNPFound = true
+                    oktmoSumUplNP = getXmlValue(reader, 'ОКТМО')
+                } else if (!sumUplNAFound && isCurrentNode(['Документ', 'НДС', 'СумУплНА'], elements)) {
+                    sumUplNAFound = true
+                    oktmoSumUplNA = getXmlValue(reader, 'ОКТМО')
+                } else if (!fileFound && isCurrentNode([], elements)) {
+                    fileFound = true
+                    idFile = getXmlValue(reader, 'ИдФайл')
+                    versForm = getXmlValue(reader, 'ВерсФорм')
+                }
+            }
+            if (reader.endElement) {
+                elements[reader.name.localPart] = false
+            }
+            reader.next()
+        }
+    } finally {
+        reader.close()
+    }
+
+    def refBook = getRefBook(RefBook.DEPARTMENT_CONFIG_VAT)
+    if (naimOrg == null || naimOrg.trim().isEmpty()) {
+        logger.log(logLevel, getMessage("Титульный лист", "Наименование организации (обособленного подразделения)", "НПЮЛ.НаимОрг", refBook.getAttribute('NAME').name))
+    }
+    def section1HasError = (oktmoSumUplNP == null || oktmoSumUplNP.trim().isEmpty())
+    def section2HasError = (sumUplNAFound && (oktmoSumUplNA == null || oktmoSumUplNA.trim().isEmpty()))
+    if (section1HasError || section2HasError) {
+        def place = (section2HasError ? "Раздел 1, 2" : "Раздел 1")
+        def xmlNames = (section2HasError ? "СумУплНП.ОКТМО, СумУплНА.ОКТМО" : "СумУплНП.ОКТМО")
+        logger.log(logLevel, getOktmoMessage(place, "Код по ОКТМО", xmlNames, refBook.getAttribute('OKTMO').name))
+    }
+    if (innJulNpJul == null || innJulNpJul.trim().isEmpty()) {
+        logger.log(logLevel, getMessage("Титульный лист", "ИНН налогоплательщика", "НПЮЛ.ИННЮЛ", refBook.getAttribute('INN').name))
+    }
+    if (kpp == null || kpp.trim().isEmpty()) {
+        logger.log(logLevel, getMessage("Титульный лист", "КПП налогоплательщика", "НПЮЛ.КПП", refBook.getAttribute('KPP').name))
+    }
+    if (kodNO == null || kodNO.trim().isEmpty()) {
+        logger.log(logLevel, getMessage("Наименование xml файла (кон. налоговый орган) и титульный лист", "Код налогового органа", "Документ.КодНО", refBook.getAttribute('TAX_ORGAN_CODE').name))
+    }
+    if (!checkTaxOrganCodeProm(idFile)) {
+        def message = "Обязательный для заполнения атрибут «Код налогового органа (пром.)» в наименовании xml файла не заполнен! На момент расчёта экземпляра декларации (формирование XML) на форме настроек подразделения отсутствовало значение атрибута «%s»."
+        def attributeName = refBook.getAttribute('TAX_ORGAN_CODE_PROM').name
+        logger.log(logLevel, message, attributeName)
+    }
+    if (okved == null || okved.trim().isEmpty()) {
+        logger.log(logLevel, getMessage("Титульный лист", "Код вида экономической деятельности и по классификатору ОКВЭД", "СвНП.ОКВЭД", refBook.getAttribute('OKVED_CODE').name))
+    }
+    if (prPodp == null || prPodp.trim().isEmpty()) {
+        logger.log(logLevel, getMessage("Титульный лист", "Признак лица, подписавшего документ", "Подписант.ПрПодп", refBook.getAttribute('SIGNATORY_ID').name))
+    }
+    if (signatorySurname == null || signatorySurname.trim().isEmpty()) {
+        logger.log(logLevel, getMessage("Титульный лист", "Фамилия подписанта", "Подписант.Фамилия", refBook.getAttribute('SIGNATORY_SURNAME').name))
+    }
+    if (signatoryFirstName == null || signatoryFirstName.trim().isEmpty()) {
+        logger.log(logLevel, getMessage("Титульный лист", "Имя подписанта", "Подписант.Имя", refBook.getAttribute('SIGNATORY_FIRSTNAME').name))
+    }
+    if (prPodp == '2' && (naimDok == null || naimDok.trim().isEmpty())) {
+        def message = "Титульный лист. Условно обязательный для заполнения (Признак лица, подписавшего документ = 2) атрибут «%s» (%s) не заполнен! На момент расчёта экземпляра декларации (формирование XML) на форме настроек подразделения отсутствовало значение атрибута «%s»."
+        logger.log(logLevel, message, "Наименование документа, подтверждающего полномочия представителя", "СвПред.НаимДок", refBook.getAttribute('APPROVE_DOC_NAME').name)
+    }
+    if (poMestu == null || poMestu.trim().isEmpty()) {
+        logger.log(logLevel, getMessage("Титульный лист", "По месту нахождения (учета) (код)", "Документ.ПоМесту", refBook.getAttribute('TAX_PLACE_TYPE_CODE').name))
+    }
+    if ((formReorg != null && formReorg != '0') && (innJulSvReorgJul == null || innJulSvReorgJul.trim().isEmpty())) {
+        logger.log(logLevel, getReorgMessage("Титульный лист", "ИНН реорганизованной организации", "СвРеоргЮЛ.ИННЮЛ", refBook.getAttribute('REORG_INN').name))
+    }
+    if ((formReorg != null && formReorg != '0') && (kppSvReorgJul == null || kppSvReorgJul.trim().isEmpty())) {
+        logger.log(logLevel, getReorgMessage("Титульный лист", "КПП реорганизованной организации", "СвРеоргЮЛ.КПП", refBook.getAttribute('REORG_KPP').name))
+    }
+    if (versForm == null || !version.equals(versForm)) {
+        def message = "Обязательный для заполнения атрибут «%s» (%s) заполнен неверно (%s)! Ожидаемое значение «%s». На момент расчёта экземпляра декларации (формирование XML) на форме настроек подразделения было указано неверное значение атрибута «%s»."
+        def attributeName = refBook.getAttribute('FORMAT_VERSION').name
+        def value = (versForm == null || versForm.isEmpty() ? 'пустое значение' : versForm)
+        logger.log(logLevel, message, attributeName, "Файл.ВерсФорм", value, version, attributeName)
+    }
+}
+
+String getMessage(String place, String printName, String xmlName, String attributeName) {
+    return String.format("%s. Обязательный для заполнения атрибут «%s» (%s) не заполнен! На момент расчёта экземпляра декларации (формирование XML) на форме настроек подразделения отсутствовало значение атрибута «%s».",
+            place, printName, xmlName, attributeName)
+}
+
+String getOktmoMessage(String place, String printName, String xmlName, String attributeName) {
+    return String.format("%s. Атрибут «%s» (%s) не заполнен! На момент расчёта экземпляра декларации (формирование XML) на форме настроек подразделения отсутствовало значение атрибута «%s».",
+            place, printName, xmlName, attributeName)
+}
+
+String getReorgMessage(String place, String printName, String xmlName, String attributeName) {
+    return String.format("%s. Условно обязательный для заполнения (заполнен код формы реорганизации) атрибут «%s» (%s) не заполнен! На момент расчёта экземпляра декларации (формирование XML) на форме настроек подразделения отсутствовало значение атрибута «%s».",
+            place, printName, xmlName, attributeName)
+}
+
+/**
+ * Проверить значение "Код налогового органа (пром.)" в составе атрибут xml "ИдФайл".
+ * ИдФайл имеет следующйю структуру:
+ *      NO_NDS_Код налогового органа (пром.)_Код налогового органа (кон.)_ИНН+КПП_ГГГГММДД_UUID.
+ *
+ * @param value значение ИдФайл
+ */
+def checkTaxOrganCodeProm(def value) {
+    if (!value) {
+        return false
+    }
+    def tmpValues = value.split('_')
+    // "Код налогового органа (пром.)" - третий по порядку в ИдФайл
+    if (tmpValues.size() < 3 || !tmpValues[2] || 'null' == tmpValues[2]) {
+        return false
+    }
+    return true
+}
+
+String getXmlValue(XMLStreamReader reader, String attrName) {
+    return reader?.getAttributeValue(null, attrName)
+}
+
+def getRefBook(def id) {
+    if (refBookMap[id] == null) {
+        refBookMap[id] = refBookFactory.get(id)
+    }
+    return refBookMap[id]
 }
 
 def generateXmlFileId(String taxOrganCodeProm, String taxOrganCode) {

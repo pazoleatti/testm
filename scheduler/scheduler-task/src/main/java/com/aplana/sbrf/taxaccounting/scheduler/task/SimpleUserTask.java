@@ -9,6 +9,8 @@ import com.aplana.sbrf.taxaccounting.scheduler.api.entity.TaskParam;
 import com.aplana.sbrf.taxaccounting.scheduler.api.exception.TaskExecutionException;
 import com.aplana.sbrf.taxaccounting.scheduler.api.task.UserTaskLocal;
 import com.aplana.sbrf.taxaccounting.scheduler.api.task.UserTaskRemote;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import javax.ejb.Local;
 import javax.ejb.Remote;
@@ -24,14 +26,16 @@ import java.util.Map;
 @Interceptors(SchedulerInterceptor.class)
 public class SimpleUserTask extends AbstractUserTask {
 
+	private static final Log LOG = LogFactory.getLog(SimpleUserTask.class);
+
     @Override
     public void executeBusinessLogic(Map<String, TaskParam> params, int userId) throws TaskExecutionException {
         for (int i = 0; i<10; i++) {
-            log.info("SimpleUserTask started: " + i);
+			LOG.info("SimpleUserTask started: " + i);
             try {
-                Thread.sleep(60*1000);
+                Thread.sleep(60*1000); // 1 минута
             } catch (InterruptedException e) {
-                e.printStackTrace();
+				LOG.error(e.getMessage(), e);
             }
         }
     }

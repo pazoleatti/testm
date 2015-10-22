@@ -20,17 +20,25 @@ public class TAUsersReportBuilderTest {
     @Before
     public void setUp() {
         TAUserView userView = new TAUserView();
-
         userView.setName("Контролер");
-        userView.setActive(false);
+        userView.setActive(true);
         userView.setEmail("@sd");
         userView.setDepId(1);
         userView.setLogin("controlBank");
         userView.setRoles("Контролёр, Контролёр УНП");
         userView.setDepName("Департамент");
 
+        TAUserView userView2 = new TAUserView();
+        userView2.setName("Контролер2");
+        userView2.setActive(false);
+        userView2.setEmail("@gmail.com");
+        userView2.setDepId(1);
+        userView2.setLogin("controlBank");
+        userView2.setRoles("Контролёр, Контролёр УНП");
+        userView2.setDepName("Департамент");
+
         taUserList.add(userView);
-        taUserList.add(userView);
+        taUserList.add(userView2);
         taUserList.add(userView);
 
     }

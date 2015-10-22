@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.refbookdata.server;
 
+import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.RefBookScriptingService;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.SaveRefBookScriptAction;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.SaveRefBookScriptResult;
@@ -26,7 +27,7 @@ public class SaveRefBookScriptHandler extends AbstractActionHandler<SaveRefBookS
 
     @Override
     public SaveRefBookScriptResult execute(SaveRefBookScriptAction action, ExecutionContext context) throws ActionException {
-        refBookScriptingService.saveScript(action.getRefBookId(), action.getScript());
+        refBookScriptingService.saveScript(action.getRefBookId(), action.getScript(), new Logger());
         return null;
     }
 

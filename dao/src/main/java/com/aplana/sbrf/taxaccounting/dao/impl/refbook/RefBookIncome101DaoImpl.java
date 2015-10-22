@@ -11,6 +11,8 @@ import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -31,6 +33,8 @@ import java.util.*;
  */
 @Repository
 public class RefBookIncome101DaoImpl extends AbstractDao implements RefBookIncome101Dao {
+
+	private static final Log LOG = LogFactory.getLog(RefBookIncome101DaoImpl.class);
 
     @Autowired
     private RefBookDao refBookDao;
@@ -84,7 +88,7 @@ public class RefBookIncome101DaoImpl extends AbstractDao implements RefBookIncom
         } catch (EmptyResultDataAccessException e) {
             return new HashMap<String, RefBookValue>(0);
         } catch (DataAccessException e) {
-            logger.error("", e);
+			LOG.error("", e);
             throw new DaoException("", e);
         }
     }
@@ -249,7 +253,7 @@ public class RefBookIncome101DaoImpl extends AbstractDao implements RefBookIncom
         } catch (EmptyResultDataAccessException e){
             return "";
         } catch (DataAccessException e){
-            logger.error("", e);
+			LOG.error("", e);
             throw new DaoException("", e);
         }
     }

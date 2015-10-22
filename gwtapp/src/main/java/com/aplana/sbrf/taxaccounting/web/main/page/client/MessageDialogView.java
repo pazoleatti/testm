@@ -60,7 +60,7 @@ public class MessageDialogView extends PopupViewImpl implements
 	public MessageDialogView(Binder uiBinder, EventBus eventBus) {
 		super(eventBus);
 		widget = uiBinder.createAndBindUi(this);
-        image.setUrl(Dialog.infoImage.getUrl());
+        image.setUrl(Dialog.INFO_IMAGE.getUrl());
 	}
 
 	@Override
@@ -85,7 +85,7 @@ public class MessageDialogView extends PopupViewImpl implements
 
     @Override
     public void setErrorImage(boolean showErrorImage) {
-        image.setUrl(showErrorImage ? Dialog.errorImage.getUrl() : Dialog.infoImage.getUrl());
+        image.setUrl(showErrorImage ? Dialog.ERROR_IMAGE.getUrl() : Dialog.INFO_IMAGE.getUrl());
         dialogBox.setTitle(showErrorImage ? Dialog.ERROR_MESSAGE : Dialog.INFO_MESSAGE);
     }
 

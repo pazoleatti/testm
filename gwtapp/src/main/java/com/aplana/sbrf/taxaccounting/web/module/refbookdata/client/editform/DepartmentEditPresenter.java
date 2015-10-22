@@ -143,7 +143,7 @@ public class DepartmentEditPresenter extends AbstractEditPresenter<DepartmentEdi
                                                     }
                                                 }, DepartmentEditPresenter.this));
                                     } else if(modifiedFields.containsKey(DEPARTMENT_ATTRIBUTE_NAME)){
-                                        showRenameDialog(editingAction, map.get(DEPARTMENT_ATTRIBUTE_NAME).toString(), newDepType, recordChanges);
+                                        showRenameDialog(editingAction, map.get(DEPARTMENT_ATTRIBUTE_NAME).getStringValue(), newDepType, recordChanges);
                                     } else {
                                         dispatchAsync.execute(editingAction,
                                                 CallbackUtils.defaultCallback(

@@ -7,6 +7,8 @@ import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.util.FormDataUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -26,7 +28,9 @@ import java.util.*;
 @Repository
 @Transactional(readOnly = true)
 public class ReportPeriodDaoImpl extends AbstractDao implements ReportPeriodDao {
-	
+
+	private static final Log LOG = LogFactory.getLog(ReportPeriodDaoImpl.class);
+
 	@Autowired
 	private TaxPeriodDao taxPeriodDao;
 	
@@ -238,7 +242,7 @@ public class ReportPeriodDaoImpl extends AbstractDao implements ReportPeriodDao 
 			return result.get(0);
 		} catch (Exception e) {
 			// изменить форматирование для даты на "%td %<tm,%<tY" (31.12.2013) вместо "%tD" (12/31/13)(Marat Fayzullin 02.18.2014)
-            logger.error("Возникли ошибки во время поиска отчетного периода с типом = \"%s\" на дату \"%tD\"", e);
+			LOG.error("Возникли ошибки во время поиска отчетного периода с типом = \"%s\" на дату \"%tD\"", e);
 			throw new DaoException(String.format("Возникли ошибки во время поиска отчетного периода с типом = \"%s\" на дату \"%tD\"", taxType.getCode(), date));
 		}
 	}

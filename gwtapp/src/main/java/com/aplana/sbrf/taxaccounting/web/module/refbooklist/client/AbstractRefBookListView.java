@@ -102,7 +102,7 @@ public abstract class AbstractRefBookListView extends ViewWithUiHandlers<RefBook
                         sb.appendHtmlConstant("<a href=\"#" +
                                 (adminView ?
                                     RefBookDataTokens.REFBOOK_SCRIPT :
-                                    (RefBookType.LINEAR == model.getType() ? RefBookDataTokens.refBookData : RefBookDataTokens.refBookHierData)
+                                    (RefBookType.LINEAR == model.getType() ? RefBookDataTokens.REFBOOK_DATA : RefBookDataTokens.REFBOOK_HIER_DATA)
                                 ) +
                                 ";" + RefBookDataTokens.REFBOOK_DATA_ID + "=" + model.getId() + "\">" + model.getName() + "</a>");
                     }

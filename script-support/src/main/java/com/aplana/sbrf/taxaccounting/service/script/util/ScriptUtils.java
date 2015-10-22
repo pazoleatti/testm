@@ -331,8 +331,9 @@ public final class ScriptUtils {
         for (int i = 0; i < fromRect.getHeight(); i++) {
             for (int j = 0; j < fromRect.getWidth(); j++) {
                 Object value = fromRows.get(fromRect.y1 + i).get(fromCols.get(fromRect.x1 + j).getAlias());
-                Cell cell = toRows.get(toRect.y1 + i).getCell(toCols.get(toRect.x1 + j).getAlias());
-                cell.setValue(value, null);
+				DataRow<Cell> toRow = toRows.get(toRect.y1 + i);
+                Cell cell = toRow.getCell(toCols.get(toRect.x1 + j).getAlias());
+                cell.setValue(value, toRow.getIndex());
             }
         }
     }
@@ -1052,6 +1053,17 @@ public final class ScriptUtils {
      */
     @SuppressWarnings("unused")
     public static void calcTotalSum(List<DataRow<Cell>> dataRows, DataRow<Cell> totalRow, List<String> columns) {
+		if (dataRows == null || dataRows.isEmpty()) {
+			return; // нечего вычислять
+		}
+		Integer totalRowIndex = totalRow.getIndex(); // totalRowIndex необходим для вывода сообщений в Cell.setValue
+		if (totalRowIndex == null) {
+			DataRow<Cell> lastRow = dataRows.get(dataRows.size() - 1);
+			if(lastRow != null) {
+				totalRowIndex = lastRow.getIndex() == null ? 1 : lastRow.getIndex() + 1;
+			}
+		}
+
         for (String alias : columns) {
             BigDecimal sum = BigDecimal.valueOf(0);
             for (DataRow<Cell> row : dataRows) {
@@ -1062,7 +1074,7 @@ public final class ScriptUtils {
                     }
                 }
             }
-            totalRow.getCell(alias).setValue(sum, null);
+            totalRow.getCell(alias).setValue(sum, totalRowIndex);
         }
     }
 
@@ -2051,7 +2063,7 @@ public final class ScriptUtils {
         // задание значении итоговой строке нф из итоговой строки файла
         totalRow.setImportIndex(totalRowFromFile.getImportIndex());
         for (String column : columns) {
-            totalRow.getCell(column).setValue(totalRowFromFile.getCell(column).getValue(), null);
+            totalRow.getCell(column).setValue(totalRowFromFile.getCell(column).getValue(), totalRow.getIndex());
         }
         compareTotalValues(totalRow, totalRowTmp, columns, logger, required);
     }

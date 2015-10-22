@@ -31,7 +31,7 @@ import static com.aplana.sbrf.taxaccounting.async.task.AsyncTask.RequiredParams.
  */
 public abstract class AbstractAsyncTask implements AsyncTask {
 
-    protected static final Log log = LogFactory.getLog(AbstractAsyncTask.class);
+    private static final Log LOG = LogFactory.getLog(AbstractAsyncTask.class);
 
     protected static final String COMPLETE_FORM =
             "Сформирован %s отчет:";
@@ -108,14 +108,14 @@ public abstract class AbstractAsyncTask implements AsyncTask {
         final String lock = (String) params.get(LOCKED_OBJECT.name());
         final Date lockDate = (Date) params.get(LOCK_DATE.name());
         final Logger logger = new Logger();
-        log.info(String.format("Запущена асинхронная задача с ключом %s и датой начала %s (%s)", lock, sdf.format(lockDate), lockDate.getTime()));
+        LOG.info(String.format("Запущена асинхронная задача с ключом %s и датой начала %s (%s)", lock, sdf.format(lockDate), lockDate.getTime()));
         lockService.updateState(lock, lockDate, LockData.State.STARTED.getText());
         transactionHelper.executeInNewTransaction(new TransactionLogic() {
             @Override
             public Object execute() {
                 try {
                     if (lockService.isLockExists(lock, lockDate)) {
-                        log.info(String.format("Для задачи с ключом %s запущено выполнение бизнес-логики", lock));
+                        LOG.info(String.format("Для задачи с ключом %s запущено выполнение бизнес-логики", lock));
                         lockService.updateState(lock, lockDate, getBusinessLogicTitle());
                         //Если блокировка на объект задачи все еще существует, значит на нем можно выполнять бизнес-логику
                         executeBusinessLogic(params, logger);
@@ -129,16 +129,16 @@ public abstract class AbstractAsyncTask implements AsyncTask {
                             @Override
                             public Object execute() {
                                 try {
-                                    log.info(String.format("Для задачи с ключом %s выполняется сохранение сообщений", lock));
+                                    LOG.info(String.format("Для задачи с ключом %s выполняется сохранение сообщений", lock));
                                     lockService.updateState(lock, lockDate, LockData.State.SAVING_MSGS.getText());
                                     String msg = getNotificationMsg(params);
                                     logger.getEntries().add(0, new LogEntry(LogLevel.INFO, msg));
                                     String uuid = logEntryService.save(logger.getEntries());
-                                    log.info(String.format("Для задачи с ключом %s выполняется рассылка уведомлений", lock));
+                                    LOG.info(String.format("Для задачи с ключом %s выполняется рассылка уведомлений", lock));
                                     lockService.updateState(lock, lockDate, LockData.State.SENDING_MSGS.getText());
                                     sendNotifications(lock, msg, uuid);
                                 } catch (Exception e) {
-                                    log.error("Произошла ошибка при рассылке сообщений", e);
+                                    LOG.error("Произошла ошибка при рассылке сообщений", e);
                                 }
 								return null;
                             }
@@ -147,14 +147,14 @@ public abstract class AbstractAsyncTask implements AsyncTask {
                         throw new RuntimeException(String.format("Задача %s больше не актуальна.", lock));
                     }
                 } catch (final Exception e) {
-                    log.error(String.format("Произошла ошибка при выполнении асинхронной задачи с ключом %s и датой начала %s (%s)",
-                            lock, sdf.format(lockDate), lockDate.getTime()), e);
+                    LOG.error(String.format("Произошла ошибка при выполнении асинхронной задачи с ключом %s и датой начала %s (%s)",
+							lock, sdf.format(lockDate), lockDate.getTime()), e);
                     if (lockService.isLockExists(lock, lockDate)) {
                         try {
                             transactionHelper.executeInNewTransaction(new TransactionLogic() {
                                 @Override
                                 public Object execute() {
-                                    log.info(String.format("Для задачи с ключом %s выполняется рассылка уведомлений об ошибке", lock));
+                                    LOG.info(String.format("Для задачи с ключом %s выполняется рассылка уведомлений об ошибке", lock));
                                     if (ReportType.CHECK_DEC.equals(getReportType())
                                             || ReportType.CHECK_FD.equals(getReportType())) {
                                         lockService.updateState(lock, lockDate, LockData.State.SENDING_MSGS.getText());
@@ -176,11 +176,11 @@ public abstract class AbstractAsyncTask implements AsyncTask {
                                 }
                             });
                         } finally {
-                            log.info(String.format("Для задачи с ключом %s выполняется снятие блокировки", lock));
+                            LOG.info(String.format("Для задачи с ключом %s выполняется снятие блокировки", lock));
                             lockService.unlock(lock, (Integer) params.get(USER_ID.name()));
                         }
                     }
-                    log.info(String.format("Для задачи с ключом %s выполняется откат транзакции", lock));
+                    LOG.info(String.format("Для задачи с ключом %s выполняется откат транзакции", lock));
                     if (e instanceof ServiceLoggerException) {
                         throw new ServiceLoggerException("Не удалось выполнить асинхронную задачу", ((ServiceLoggerException) e).getUuid());
                     } else {
@@ -192,14 +192,14 @@ public abstract class AbstractAsyncTask implements AsyncTask {
         });
 
         try {
-            log.info(String.format("Для задачи с ключом %s выполняется пост-обработка", lock));
+            LOG.info(String.format("Для задачи с ключом %s выполняется пост-обработка", lock));
             lockService.updateState(lock, lockDate, LockData.State.POST_LOGIC.getText());
             executePostLogic(params);
         } finally {
-            log.info(String.format("Для задачи с ключом %s выполняется снятие блокировки после успешного завершения", lock));
+            LOG.info(String.format("Для задачи с ключом %s выполняется снятие блокировки после успешного завершения", lock));
             lockService.unlock(lock, (Integer) params.get(USER_ID.name()));
         }
-        log.info(String.format("Для задачи с ключом %s завершено выполнение", lock));
+        LOG.info(String.format("Для задачи с ключом %s завершено выполнение", lock));
     }
 
     @Override
@@ -236,7 +236,7 @@ public abstract class AbstractAsyncTask implements AsyncTask {
      * @param lock ключ блокировки
      */
     private void sendNotifications(String lock, String msg, String uuid) {
-        log.info(String.format("Для задачи с ключом %s выполняется рассылка уведомлений", lock));
+        LOG.info(String.format("Для задачи с ключом %s выполняется рассылка уведомлений", lock));
         if (msg != null && !msg.isEmpty()) {
             //Получаем список пользователей-подписчиков, для которых надо сформировать оповещение
             List<Integer> waitingUsers = lockService.getUsersWaitingForLock(lock);
@@ -254,6 +254,6 @@ public abstract class AbstractAsyncTask implements AsyncTask {
                 notificationService.saveList(notifications);
             }
         }
-        log.info(String.format("Для задачи с ключом %s закончена рассылка уведомлений", lock));
+        LOG.info(String.format("Для задачи с ключом %s закончена рассылка уведомлений", lock));
     }
 }

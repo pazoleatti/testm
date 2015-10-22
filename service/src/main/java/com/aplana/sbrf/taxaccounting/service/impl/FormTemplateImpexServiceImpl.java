@@ -67,7 +67,7 @@ public class FormTemplateImpexServiceImpl implements
 	private static final String ENCODING = "UTF-8";
     private static final String REG_EXP = "[^\\d\\sA-Za-z'-]";
 
-    private static final Log logger = LogFactory.getLog(FormTemplateImpexServiceImpl.class);
+    private static final Log LOG = LogFactory.getLog(FormTemplateImpexServiceImpl.class);
 
     private static final int MAX_NAME_OF_DIR = 50;
 
@@ -191,7 +191,7 @@ public class FormTemplateImpexServiceImpl implements
         try {
             zipOutputStream.finish();
         } catch (IOException e) {
-            logger.error("", e);
+            LOG.error("", e);
             throw new ServiceException("", e);
         }
     }
@@ -203,15 +203,15 @@ public class FormTemplateImpexServiceImpl implements
             if (file.isDirectory()){
                 dirTempDelete(file);
                 if (!file.delete())
-                    logger.warn("Faild to delete directory " + file);
+                    LOG.warn("Faild to delete directory " + file);
             } else {
                 if (!file.delete())
-                    logger.warn("Faild to delete file " + file);
+                    LOG.warn("Faild to delete file " + file);
             }
         }
         if (directory.listFiles() == null || directory.listFiles().length==0){
             if (!directory.delete())
-                logger.warn("Faild to delete directory " + directory);
+                LOG.warn("Faild to delete directory " + directory);
         }
     }
 
@@ -221,11 +221,11 @@ public class FormTemplateImpexServiceImpl implements
         try {
             temFolder = File.createTempFile(DEC_TEMPLATES_FOLDER, "");
             if (!temFolder.delete()){
-                logger.error(String.format("Can't delete file %s for declarations with goal to create dir .",
-                        temFolder.getPath()));
+                LOG.error(String.format("Can't delete file %s for declarations with goal to create dir .",
+						temFolder.getPath()));
             }
             if (!temFolder.mkdir())
-                logger.error("Can't create directory for declarations");
+                LOG.error("Can't create directory for declarations");
         } catch (IOException e) {
             throw new ServiceException("Ошибки при создании временной директории.");
         }
@@ -245,7 +245,7 @@ public class FormTemplateImpexServiceImpl implements
                 File folderTemplate = new File(temFolder.getAbsolutePath() + File.separator + folderTemplateName, "");
                 folderTemplate.delete();
                 if (!folderTemplate.mkdirs())
-                    logger.warn(String.format("Can't create temporary directory %s", folderTemplate.getAbsolutePath()));
+                    LOG.warn(String.format("Can't create temporary directory %s", folderTemplate.getAbsolutePath()));
                 //
                 FileOutputStream tempFile = new FileOutputStream(new File(folderTemplate.getAbsolutePath() + File.separator + VERSION_FILE));
                 tempFile.write("1.0".getBytes());
@@ -266,7 +266,7 @@ public class FormTemplateImpexServiceImpl implements
 
                 paths.add(folderTemplateName);
             } catch (IOException e) {
-                logger.error("Ошибки при создании временной директории. Шаблон " + template.getName(), e);
+                LOG.error("Ошибки при создании временной директории. Шаблон " + template.getName(), e);
                 throw new ServiceException("Ошибки при создании временной директории.");
             }
         }
@@ -309,7 +309,7 @@ public class FormTemplateImpexServiceImpl implements
 				}
             }
         } catch (IOException e){
-            logger.error("Error ", e);
+            LOG.error("Error ", e);
             throw new ServiceException("Error");
         } finally {
             dirTempDelete(temFolder);
@@ -322,12 +322,12 @@ public class FormTemplateImpexServiceImpl implements
         try {
             temFolder = File.createTempFile(FORM_TEMPLATES_FOLDER, "");
             if (!temFolder.delete()){
-                logger.error(String.format("Can't delete file %s for taxforms with goal to create dir .", temFolder.getPath()));
+                LOG.error(String.format("Can't delete file %s for taxforms with goal to create dir .", temFolder.getPath()));
             }
             if (!temFolder.mkdir())
-                logger.error("Can't create directory for taxforms.");
+                LOG.error("Can't create directory for taxforms.");
         } catch (IOException e) {
-            logger.error("Ошибки при создании временной директории.",e);
+            LOG.error("Ошибки при создании временной директории.", e);
             throw new ServiceException("Ошибки при создании временной директории.");
         }
 
@@ -347,7 +347,7 @@ public class FormTemplateImpexServiceImpl implements
                 File folderTemplate = new File(temFolder.getAbsolutePath() + File.separator + folderTemplateName, "");
                 folderTemplate.delete();
                 if (!folderTemplate.mkdirs()){
-                    logger.warn(String.format("Can't create temporary directory %s", folderTemplate.getAbsolutePath()));
+                    LOG.warn(String.format("Can't create temporary directory %s", folderTemplate.getAbsolutePath()));
                     continue;
                 }
                 //
@@ -388,7 +388,7 @@ public class FormTemplateImpexServiceImpl implements
                 paths.add(folderTemplateName);
 
             } catch (IOException e) {
-                logger.error("Ошибки при создании временной директории. Шаблон " + template.getName(), e);
+                LOG.error("Ошибки при создании временной директории. Шаблон " + template.getName(), e);
             } catch (JAXBException e) {
                 throw new ServiceException("Ошибка экспорта. Шаблон " + template.getName());
             }
@@ -408,7 +408,7 @@ public class FormTemplateImpexServiceImpl implements
                 }
             }
         } catch (IOException e){
-            logger.error("Error", e);
+            LOG.error("Error", e);
             throw new ServiceException("Error");
         } finally {
             dirTempDelete(temFolder);

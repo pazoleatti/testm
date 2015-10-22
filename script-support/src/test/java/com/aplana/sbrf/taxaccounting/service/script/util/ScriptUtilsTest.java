@@ -34,7 +34,7 @@ import static org.mockito.Mockito.mock;
  */
 public class ScriptUtilsTest {
 
-    private static final Log logger = LogFactory.getLog(ScriptUtilsTest.class);
+    private static final Log LOG = LogFactory.getLog(ScriptUtilsTest.class);
 
     private static final String STRING_NAME = "Строка";
     private static final String STRING_ALIAS = "string";
@@ -96,7 +96,7 @@ public class ScriptUtilsTest {
     @Test
     public void summTest() {
         FormData fd = getTestFormData().getFirst();
-        logger.info(fd);
+        LOG.info(fd);
         double r = ScriptUtils.summ(fd, getTestFormData().getSecond(), new ColumnRange(NUMBER_ALIAS, 0, 1));
         Assert.assertTrue(Math.abs(r) > Constants.EPS);
     }
@@ -423,22 +423,29 @@ public class ScriptUtilsTest {
         col1.setId(1);
         col1.setAlias("c1");
         col1.setNumerationType(NumerationType.SERIAL);
+		col1.setName(col1.getAlias());
 
         NumericColumn col2 = new NumericColumn();
         col2.setId(2);
         col2.setAlias("c2");
+		col2.setMaxLength(4);
+		col2.setPrecision(2);
+		col2.setName(col2.getAlias());
 
         StringColumn col3 = new StringColumn();
         col3.setId(3);
         col3.setAlias("c3");
+		col3.setName(col3.getAlias());
 
         RefBookColumn col4 = new RefBookColumn();
         col4.setId(4);
         col4.setAlias("c4");
+		col4.setName(col4.getAlias());
 
         ReferenceColumn col5 = new ReferenceColumn();
         col5.setId(5);
         col5.setAlias("c5");
+		col5.setName(col5.getAlias());
 
         FormTemplate formTemplate = new FormTemplate();
         formTemplate.setId(1);
@@ -735,5 +742,18 @@ public class ScriptUtilsTest {
         Assert.assertEquals(3, headerValues.size());
         Assert.assertEquals(8, headerValues.get(0).size());
     }
+
+	@Test
+	public void calcTotalSumTest() {
+		FormData formData = getSortTestFormData();
+
+		List<DataRow<Cell>> dataRows = getTestSimpleRows();
+		DataRow<Cell> totalRow = formData.createDataRow();
+		List<String> columns = Arrays.asList(new String[] {"c2"});
+
+		ScriptUtils.calcTotalSum(dataRows, totalRow, columns);
+		Assert.assertEquals(10, ((BigDecimal) totalRow.get("c2")).doubleValue(), 1e-2);
+		Assert.assertNull(totalRow.getIndex());
+	}
 
 }

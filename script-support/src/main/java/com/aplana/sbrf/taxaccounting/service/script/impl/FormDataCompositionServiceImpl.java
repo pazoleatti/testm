@@ -53,9 +53,7 @@ public class FormDataCompositionServiceImpl implements FormDataCompositionServic
 	@Override
 	public void compose(FormData formData, int departmentReportPeriodId, Integer periodOrder,  int formTypeId, FormDataKind kind) {
         if (formData.getState() != WorkflowState.ACCEPTED) {
-            auditService.add(FormDataEvent.COMPOSE, scriptComponentContext.getUserInfo(),
-					formData.getDepartmentId(), formData.getReportPeriodId(),
-					null, formData.getFormType().getName(), formData.getKind().getId(), "Событие инициировано Системой", null, formTypeId);
+            auditService.add(FormDataEvent.COMPOSE, scriptComponentContext.getUserInfo(), null, formData, "Событие инициировано Системой", null);
 			// Запускаем скрипт консолидации
 			formDataScriptingService.executeScript(scriptComponentContext.getUserInfo(), formData,
                     FormDataEvent.COMPOSE, scriptComponentContext.getLogger(), null);

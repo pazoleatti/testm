@@ -82,7 +82,8 @@ create table form_template (
   monthly number(1) default 0 not null,
   header varchar2(1000),
   comparative number(1),
-  accruing number(1) default 0
+  accruing number(1) default 0,
+  updating number(1) default 0
 );
 comment on table form_template IS 'Описания шаблонов налоговых форм';
 comment on column form_template.data_rows is 'Предопределённые строки формы в формате XML';
@@ -99,6 +100,7 @@ comment on column form_template.monthly is 'Признак ежемесячно�
 comment on column form_template.header is 'Верхний колонтитул печатной формы';
 comment on column form_template.comparative is '"Признак использования периода сравнения (0 - не используется, 1 - используется)';
 comment on column form_template.accruing is 'Признак расчета нарастающим итогом (0 - не используется, 1 - используется)';
+comment on column form_template.updating is 'Отображать кнопку "Обновить" (0 - нет, 1 - да)';
 
 create sequence seq_form_template start with 10000;
 ---------------------------------------------------------------------------------------------------
@@ -965,4 +967,14 @@ comment on column form_data_file.user_name is 'Полное имя пользо�
 comment on column form_data_file.user_department_name is 'Наименование подразделения пользователя, прикрепившего файл';
 comment on column form_data_file.note is 'Комментарий к файлу';
 
+--------------------------------------------------------------------------------------------------------
+create table color
+(
+id number(3) not null,
+name varchar2(100) not null,
+r number(3) not null,
+g number(3) not null,
+b number(3) not null, 
+hex varchar2(7) not null
+);
 --------------------------------------------------------------------------------------------------------

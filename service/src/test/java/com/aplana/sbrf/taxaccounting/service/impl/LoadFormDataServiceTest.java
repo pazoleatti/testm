@@ -226,8 +226,7 @@ public class LoadFormDataServiceTest {
     }
 
     private void mockAuditService() {
-        doNothing().when(auditService).add(any(FormDataEvent.class), any(TAUserInfo.class), anyInt(), anyInt(), anyString(),
-                anyString(), anyInt(), anyString(), anyString());
+        doNothing().when(auditService).add(any(FormDataEvent.class), any(TAUserInfo.class), any(DeclarationData.class), any(FormData.class), anyString(), anyString());
     }
 
     private void mockLogBusinessService() {

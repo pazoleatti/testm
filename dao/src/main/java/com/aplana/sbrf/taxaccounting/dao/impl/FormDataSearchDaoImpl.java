@@ -23,9 +23,8 @@ import static com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils.*;
 @Transactional(readOnly = true)
 public class FormDataSearchDaoImpl extends AbstractDao implements FormDataSearchDao {
 
-	private static final Log logger = LogFactory.getLog(FormDataSearchDaoImpl.class);
-
-    private final static SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
+	private static final Log LOG = LogFactory.getLog(FormDataSearchDaoImpl.class);
+    private static final SimpleDateFormat SDF = new SimpleDateFormat("dd.MM.yyyy");
 
     private void appendFromClause(StringBuilder sql){
         sql.append(" FROM form_data fd \n")
@@ -78,7 +77,7 @@ public class FormDataSearchDaoImpl extends AbstractDao implements FormDataSearch
 
         if (filter.getCorrectionTag() != null) {
             if (filter.getCorrectionDate() != null) {
-                sql.append(" and drp.correction_date = '" + sdf.format(filter.getCorrectionDate()) + "\'");
+                sql.append(" and drp.correction_date = '" + SDF.format(filter.getCorrectionDate()) + "\'");
             } else {
                 sql.append(" and drp.correction_date is " +
                         (Boolean.TRUE.equals(filter.getCorrectionTag()) ? "not " : "") + "null");
@@ -102,8 +101,8 @@ public class FormDataSearchDaoImpl extends AbstractDao implements FormDataSearch
         appendFromClause(sql);
 		appendWhereClause(sql, dataFilter);
 
-		if (logger.isTraceEnabled()) {
-			logger.trace(sql);
+		if (LOG.isTraceEnabled()) {
+			LOG.trace(sql);
 		}
 
 		sql.append(" order by fd.id desc");
@@ -117,8 +116,8 @@ public class FormDataSearchDaoImpl extends AbstractDao implements FormDataSearch
         appendSelectClause(sql);
         appendFromClause(sql);
         appendWhereClause(sql, filter);
-        if (logger.isTraceEnabled()) {
-            logger.trace(sql);
+        if (LOG.isTraceEnabled()) {
+            LOG.trace(sql);
         }
         sql.append(" order by fd.id desc");
 
@@ -205,7 +204,7 @@ public class FormDataSearchDaoImpl extends AbstractDao implements FormDataSearch
         }
     }
 
-    private final static String FIND_PAGE = "%s" +
+    private static final String FIND_PAGE = "%s" +
             "select ordDat.* from ( \n" +
             "select dat.*, count(*) over() cnt, rownum as rn from ( \n" +
             "SELECT fd.ID as form_data_id, fd.form_template_id, fd.return_sign, fd.KIND as form_data_kind_id, \n" +

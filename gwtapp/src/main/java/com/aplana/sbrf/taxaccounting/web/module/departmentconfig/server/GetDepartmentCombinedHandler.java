@@ -39,7 +39,7 @@ import java.util.*;
 public class GetDepartmentCombinedHandler extends AbstractActionHandler<GetDepartmentCombinedAction,
         GetDepartmentCombinedResult> {
 
-    private static final Log log = LogFactory.getLog(GetDepartmentCombinedHandler.class);
+    private static final Log LOG = LogFactory.getLog(GetDepartmentCombinedHandler.class);
 
     @Autowired
     private PeriodService reportService;
@@ -115,8 +115,8 @@ public class GetDepartmentCombinedHandler extends AbstractActionHandler<GetDepar
             Map<String, RefBookValue> paramsMap = params.get(0);
             if (params.size() != 1) {
                 String dt = new SimpleDateFormat("dd.MM.yyyy").format(calendarFrom.getTime());
-                log.debug(String.format("Found more than one record on version = %s ref_book_id = %s department_id = %s map = %s",
-                        dt, parentRefBookId, action.getDepartmentId(), params));
+                LOG.debug(String.format("Found more than one record on version = %s ref_book_id = %s department_id = %s map = %s",
+						dt, parentRefBookId, action.getDepartmentId(), params));
                 throw new ActionException("Найдено несколько записей для версии " + dt);
             }
 

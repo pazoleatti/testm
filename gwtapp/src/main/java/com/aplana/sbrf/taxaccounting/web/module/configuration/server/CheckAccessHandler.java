@@ -1,6 +1,5 @@
 package com.aplana.sbrf.taxaccounting.web.module.configuration.server;
 
-import com.aplana.sbrf.taxaccounting.model.ConfigurationParam;
 import com.aplana.sbrf.taxaccounting.model.ConfigurationParamGroup;
 import com.aplana.sbrf.taxaccounting.model.ConfigurationParamModel;
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
@@ -57,7 +56,7 @@ public class CheckAccessHandler extends AbstractActionHandler<CheckAccessAction,
                 UserAuthenticationToken principal = ((UserAuthenticationToken) (SecurityContextHolder.getContext()
                         .getAuthentication().getPrincipal()));
                 auditService.add(FormDataEvent.SEND_EMAIL, principal.getUserInfo(), 0, null, null, null, null,
-                        logger.getEntries().get(0).getMessage(), uuid, null);
+                        logger.getEntries().get(0).getMessage(), uuid);
             }
         } else if (group.equals(ConfigurationParamGroup.ASYNC)) {
             for (Map<String,String> param : action.getAsyncParams()) {

@@ -27,7 +27,7 @@ import static com.aplana.sbrf.taxaccounting.async.task.AsyncTask.RequiredParams.
 @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
 public class AsyncManagerBean implements AsyncManager {
 
-    private final Log log = LogFactory.getLog(getClass());
+    private static final Log LOG = LogFactory.getLog(AsyncManagerBean.class);
 
     @Resource(name = "jms/shortAsyncConnectionFactory")
     private ConnectionFactory shortAsyncConnectionFactory;
@@ -51,14 +51,14 @@ public class AsyncManagerBean implements AsyncManager {
             AsyncTask task = checkTaskData(taskTypeId);
             return task.checkTaskLimit(params);
         } catch (Exception e) {
-            log.error("Async task creation has been failed!", e);
+            LOG.error("Async task creation has been failed!", e);
             throw new AsyncTaskException(e);
         }
     }
 
     @Override
     public void executeAsync(long taskTypeId, Map<String, Object> params, BalancingVariants balancingVariant) throws AsyncTaskException, ServiceLoggerException {
-        log.debug("Async task creation has been started");
+        LOG.debug("Async task creation has been started");
         ConnectionFactory connectionFactory;
         Queue queue;
         Connection connection = null;
@@ -88,10 +88,10 @@ public class AsyncManagerBean implements AsyncManager {
             ObjectMessage objectMessage = session.createObjectMessage();
             objectMessage.setObject(asyncMdbObject);
             messageProducer.send(objectMessage);
-            log.info(String.format("Задача с ключом %s помещена в очередь %s", params.get(LOCKED_OBJECT.name()), balancingVariant.name()));
-            log.debug("Async task creation has been finished successfully");
+            LOG.info(String.format("Задача с ключом %s помещена в очередь %s", params.get(LOCKED_OBJECT.name()), balancingVariant.name()));
+            LOG.debug("Async task creation has been finished successfully");
         } catch (Exception e) {
-            log.error("Async task creation has been failed!", e);
+            LOG.error("Async task creation has been failed!", e);
             throw new AsyncTaskException(e);
         } finally {
             if (connection != null) {

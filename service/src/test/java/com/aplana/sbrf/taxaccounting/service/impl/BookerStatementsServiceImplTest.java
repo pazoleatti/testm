@@ -1,19 +1,22 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
-import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
-import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
-import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
-import com.aplana.sbrf.taxaccounting.service.*;
-import org.junit.BeforeClass;
+import com.aplana.sbrf.taxaccounting.service.AuditService;
+import com.aplana.sbrf.taxaccounting.service.BookerStatementsService;
+import com.aplana.sbrf.taxaccounting.service.DepartmentService;
+import com.aplana.sbrf.taxaccounting.service.PeriodService;
 import org.junit.Test;
-import org.springframework.test.util.ReflectionTestUtils;
+import org.junit.runner.RunWith;
+import org.mockito.Mockito;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import java.io.FileNotFoundException;
 import java.io.InputStream;
 
-import static org.mockito.Mockito.mock;
+import static org.mockito.Matchers.*;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /**
@@ -22,9 +25,9 @@ import static org.mockito.Mockito.when;
  *
  * @see com.aplana.sbrf.taxaccounting.service.BookerStatementsService
  */
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration("BookerStatementsSeviceImplTest.xml")
 public class BookerStatementsServiceImplTest {
-    private static final long REFBOOK_INCOME_101 = 50L;
-    private static final long REFBOOK_INCOME_102 = 52L;
     private static final Integer TYPE_INCOME_101 = 0;
     private static final Integer TYPE_INCOME_102 = 1;
     private static final Integer REPORT_PERIOD_ID_OPEN = 1;
@@ -32,56 +35,33 @@ public class BookerStatementsServiceImplTest {
     private static final Integer DEPARTMENT_ID = 1;
     private static final Integer DEPARTMENT_INVALID = null;
 
-    private static BookerStatementsService service;
-    private static RefBookFactory refBookFactory;
-    private static RefBookDataProvider provider102;
-    private static RefBookScriptingService refBookScriptingService;
-
-    @BeforeClass
-    public static void setUp() throws FileNotFoundException {
-        service = new BookerStatementsServiceImpl();
-
-        // По мокаем зависимости сервиса
-        PeriodService periodService = mock(PeriodService.class);
-        ReflectionTestUtils.setField(service, "reportPeriodService", periodService);
-//        when(periodService.isActivePeriod(REPORT_PERIOD_ID_OPEN, DEPARTMENT_ID)).thenReturn(true);
-//        when(periodService.isActivePeriod(REPORT_PERIOD_ID_CLOSED, DEPARTMENT_ID)).thenReturn(false);
-
-
-        refBookFactory = mock(RefBookFactory.class);
-        RefBookDataProvider provider101 = mock(RefBookDataProvider.class);
-        when(refBookFactory.getDataProvider(REFBOOK_INCOME_101)).thenReturn(provider101);
-        provider102 = mock(RefBookDataProvider.class);
-        when(refBookFactory.getDataProvider(REFBOOK_INCOME_102)).thenReturn(provider102);
-        ReflectionTestUtils.setField(service, "rbFactory", refBookFactory);
-        RefBook refBook = mock(RefBook.class);
-        when(refBookFactory.get(REFBOOK_INCOME_102)).thenReturn(refBook);
-
-        AuditService auditService = mock(AuditService.class);
-        ReflectionTestUtils.setField(service, "auditService", auditService);
-
-        refBookScriptingService = mock(RefBookScriptingService.class);
-        ReflectionTestUtils.setField(service, "refBookScriptingService", refBookScriptingService);
-    }
+    @Autowired
+    private BookerStatementsService bookerStatementsService;
+    @Autowired
+    private AuditService auditService;
+    @Autowired
+    private DepartmentService departmentService;
+    @Autowired
+    private PeriodService periodService;
 
     @Test(expected = ServiceException.class)
     public void nullReportPeriod() {
-        service.importData("test.xls", get101Stream(), null, TYPE_INCOME_101, DEPARTMENT_ID, new TAUserInfo());
+        bookerStatementsService.importData("test.xls", get101Stream(), null, TYPE_INCOME_101, DEPARTMENT_ID, new TAUserInfo());
     }
 
     @Test(expected = ServiceException.class)
     public void nullStream() {
-        service.importData("test.xls", null, REPORT_PERIOD_ID_OPEN, TYPE_INCOME_101, DEPARTMENT_ID, new TAUserInfo());
+        bookerStatementsService.importData("test.xls", null, REPORT_PERIOD_ID_OPEN, TYPE_INCOME_101, DEPARTMENT_ID, new TAUserInfo());
     }
 
     @Test(expected = ServiceException.class)
     public void invalidPeriod() {
-        service.importData("test.xls", get101Stream(), REPORT_PERIOD_ID_INVALID, TYPE_INCOME_101, DEPARTMENT_ID, new TAUserInfo());
+        bookerStatementsService.importData("test.xls", get101Stream(), REPORT_PERIOD_ID_INVALID, TYPE_INCOME_101, DEPARTMENT_ID, new TAUserInfo());
     }
 
     @Test(expected = ServiceException.class)
     public void invalidDepartment() {
-        service.importData("test.xls", get101Stream(), REPORT_PERIOD_ID_OPEN, TYPE_INCOME_101, DEPARTMENT_INVALID, new TAUserInfo());
+        bookerStatementsService.importData("test.xls", get101Stream(), REPORT_PERIOD_ID_OPEN, TYPE_INCOME_101, DEPARTMENT_INVALID, new TAUserInfo());
     }
 
     /**
@@ -89,8 +69,33 @@ public class BookerStatementsServiceImplTest {
      */
     @Test
     public void importValidData() {
-        service.importData("test.xls", get101Stream(), REPORT_PERIOD_ID_OPEN, TYPE_INCOME_101, DEPARTMENT_ID, new TAUserInfo());
-        service.importData("test.xls", get102Stream(), REPORT_PERIOD_ID_OPEN, TYPE_INCOME_102, DEPARTMENT_ID, new TAUserInfo());
+        TAUserInfo userInfo = new TAUserInfo();
+        TAUser user = new TAUser();
+        user.setDepartmentId(1);
+        user.setLogin("user1");
+
+        Department department = new Department();
+        department.setId(131);
+        department.setName("Цетнральный");
+        when(departmentService.getDepartment(department.getId())).thenReturn(department);
+
+        ReportPeriod reportPeriod = new ReportPeriod();
+        reportPeriod.setId(1);
+        TaxPeriod taxPeriod = new TaxPeriod();
+        taxPeriod.setYear(2015);
+        reportPeriod.setName("первый квартал");
+        reportPeriod.setTaxPeriod(taxPeriod);
+        when(periodService.getReportPeriod(reportPeriod.getId())).thenReturn(reportPeriod);
+
+        String account1 = "Вид бух. отчетности - " + BookerStatementsType.INCOME101.getName();
+        String account2 = "Вид бух. отчетности - " + BookerStatementsType.INCOME102.getName();
+        String note = "Импорт бухгалтерской отчётности: test.xls";
+
+        bookerStatementsService.importData("test.xls", get101Stream(), REPORT_PERIOD_ID_OPEN, TYPE_INCOME_101, department.getId(), new TAUserInfo());
+        verify(auditService, Mockito.atLeastOnce()).add(eq(FormDataEvent.IMPORT), any(TAUserInfo.class), eq(department.getId()), eq(reportPeriod.getId()), isNull(String.class), eq(account1), isNull(Integer.class), eq(note), isNull(String.class));
+
+        bookerStatementsService.importData("test.xls", get102Stream(), REPORT_PERIOD_ID_OPEN, TYPE_INCOME_102, department.getId(), new TAUserInfo());
+        verify(auditService, Mockito.atLeastOnce()).add(eq(FormDataEvent.IMPORT), any(TAUserInfo.class), eq(department.getId()), eq(reportPeriod.getId()), isNull(String.class), eq(account2), isNull(Integer.class), eq(note), isNull(String.class));
     }
 
     private static InputStream getEmptyStream() {

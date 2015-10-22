@@ -63,7 +63,7 @@ void importFromNSI() {
         lines.add(line)
     }
 
-    if (lines.isEmpty()) {
+    if (scriptStatusHolder.getScriptStatus().equals(ScriptStatus.SKIP) || lines.isEmpty()) {
         scriptStatusHolder.setScriptStatus(ScriptStatus.SKIP)
         scriptStatusHolder.setStatusMessage("Неверная структура файла «$fileName»!")
         return

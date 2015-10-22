@@ -10,6 +10,8 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
 import com.aplana.sbrf.taxaccounting.model.util.StringUtils
 import groovy.transform.Field
 
+import java.text.SimpleDateFormat
+
 /**
  * (РНУ-7) Справка бухгалтера для отражения расходов, учитываемых в РНУ-5,
  *                                  учёт которых требует применения метода начисления
@@ -275,6 +277,7 @@ void logicCheck() {
 
     List<Map<Integer, Object>> docs = new ArrayList<>()
     Map<Map<Integer, Object>, List<Integer>> uniq456 = [:]
+    SimpleDateFormat dateFormat = new SimpleDateFormat('dd.MM.yyyy')
 
     // алиасы графов для арифметической проверки
     def arithmeticCheckAlias = ['rateOfTheBankOfRussia', 'taxAccountingRuble', 'ruble']
@@ -420,10 +423,17 @@ void logicCheck() {
     // 7. Проверка на уникальность записи по налоговому учету
     for (def map : uniq456.keySet()) {
         def rowList = uniq456.get(map)
+        def name4 = getColumnName(dataRows[0], 'code')
+        def name5 = getColumnName(dataRows[0], 'docNumber')
+        def name6 = getColumnName(dataRows[0], 'docDate')
         if (rowList.size() > 1) {
-            loggerError(null, "Несколько строк " + rowList.join(", ") + " содержат записи в налоговом учете для балансового " +
-                    "счета=" + refBookService.getStringValue(27, map.get(4), 'NUMBER').toString() + ", документа № " +
-                    map.get(5).toString() +" от " + dateFormat.format(map.get(6)) + ".")
+            def rowIndexes = rowList.join(', ')
+            def value4 = getRefBookValue(27, map.get(4))?.NUMBER?.value
+            def value5 = map.get(5)
+            def value6 = dateFormat.format(map.get(6))
+            def message = "Строки $rowIndexes не уникальны в рамках текущей налоговой формы! По данным строкам значения следующих граф совпадают: «$name4» ($value4), «$name5» ($value5), «$name6» ($value6)."
+            logger.warn("%s", message)
+
         }
     }
 
@@ -605,7 +615,7 @@ def getNewRow(String[] rowCells, def columnCount, def fileRowIndex, def rowIndex
         // графа 3
         newRow.date = parseDate(pure(rowCells[3]), "dd.MM.yyyy", fileRowIndex, 3 + colOffset, logger, true)
         // графа 4
-        String filter = "LOWER(CODE) = LOWER('" + pure(rowCells[2]) + "') and LOWER(NUMBER) = LOWER('" + pure(rowCells[4]).replaceAll(/\./, "") + "')"
+        String filter = getFilter(pure(rowCells[2]), pure(rowCells[4]).replaceAll(/\./, ""))
         def records = refBookFactory.getDataProvider(27).getRecords(reportPeriodEndDate, null, filter, null)
         if (checkImportRecordsCount(records, refBookFactory.get(27), 'CODE', pure(rowCells[2]), reportPeriodEndDate, fileRowIndex, 2, logger, false)) {
             newRow.code = records.get(0).get(RefBook.RECORD_ID_ALIAS).numberValue
@@ -827,7 +837,7 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex, 
 
     // графа 4
     if (!isTotal) {
-        String filter = "LOWER(CODE) = LOWER('" + values[2] + "') and LOWER(NUMBER) = LOWER('" + values[4].replaceAll(/\./, "") + "')"
+        String filter =  getFilter(values[2], values[4].replaceAll(/\./, ""))
         def records = refBookFactory.getDataProvider(27).getRecords(reportPeriodEndDate, null, filter, null)
         colIndex = 2
         if (checkImportRecordsCount(records, refBookFactory.get(27), 'CODE', values[colIndex], reportPeriodEndDate, fileRowIndex, colIndex + colOffset, logger, false)) {
@@ -882,4 +892,12 @@ def getNewSubTotalRowFromXls(def values, def colOffset, def fileRowIndex, def ro
     newRow.ruble = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
 
     return newRow
+}
+
+def String getFilter(def String code, def String number){
+    String filter = "LOWER(CODE) = LOWER('" + code + "')"
+    if (number != '') {
+        filter += " and LOWER(NUMBER) = LOWER('" + number + "')"
+    }
+    return filter
 }

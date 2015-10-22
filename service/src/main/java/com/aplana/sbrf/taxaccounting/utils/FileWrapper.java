@@ -4,6 +4,8 @@ import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import jcifs.smb.SmbException;
 import jcifs.smb.SmbFile;
 import jcifs.smb.SmbFileOutputStream;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import java.io.*;
 
@@ -12,6 +14,9 @@ import java.io.*;
  * @author dloshkarev
  */
 public class FileWrapper {
+
+	private static final Log LOG = LogFactory.getLog(FileWrapper.class);
+
     private File file = null;
     private SmbFile smbFile = null;
 
@@ -252,7 +257,7 @@ public class FileWrapper {
                                 testFile.delete();
                                 return true;
                             } catch (Exception e) {
-                                e.printStackTrace();
+								LOG.error(e.getMessage(), e);
                                 return false;
                             }
                         }
@@ -269,7 +274,7 @@ public class FileWrapper {
                             writer.close();
                             return true;
                         } catch (Exception e) {
-                            e.printStackTrace();
+							LOG.error(e.getMessage(), e);
                             return false;
                         }
                     } else {
@@ -279,7 +284,7 @@ public class FileWrapper {
                                 reader.close();
                                 return true;
                             } catch (Exception e) {
-                                e.printStackTrace();
+								LOG.error(e.getMessage(), e);
                                 return false;
                             }
                         }
@@ -290,7 +295,7 @@ public class FileWrapper {
                 return false;
             }
         } catch (ServiceException e) {
-            e.printStackTrace();
+			LOG.error(e.getMessage(), e);
             return false;
         }
     }

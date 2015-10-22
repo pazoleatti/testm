@@ -32,7 +32,7 @@ import java.util.*;
  */
 public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
 
-    private final Log logger = LogFactory.getLog(getClass());
+    private static final Log LOG = LogFactory.getLog(FormDataXlsmReportBuilder.class);
 
     private int rowNumber = 9;
 
@@ -156,7 +156,7 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
         try {
             workBook = WorkbookFactory.create(templeteInputStream);
         } catch (InvalidFormatException e) {
-            logger.error(e.getMessage(), e);
+            LOG.error(e.getMessage(), e);
             throw new IOException("Wrong file format. Template must be in format of 2007 Excel!!!");
         }
         sheet = workBook.getSheetAt(0);
@@ -393,7 +393,7 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
                     cell.setCellType(Cell.CELL_TYPE_NUMERIC);
 
                     if (bd != null){
-                        cell.setCellValue(((NumericColumn)column).getPrecision() >0 ? Double.parseDouble(bd.toString()) : bd.intValue());
+                        cell.setCellValue(((NumericColumn)column).getPrecision() >0 ? Double.parseDouble(bd.toString()) : bd.longValue());
                     }
                 } else if (ColumnType.AUTO.equals(column.getColumnType())) {
                     Long bd = (Long) obj;
@@ -604,8 +604,8 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
     }
 
     private void createCellByRange(String rangeName, String cellValue, int shiftRows, int shiftColumns){
-        if (logger.isDebugEnabled())
-            logger.debug(workBook.getName(rangeName).getRefersToFormula());
+        if (LOG.isDebugEnabled())
+            LOG.debug(workBook.getName(rangeName).getRefersToFormula());
         XSSFRichTextString richTextString = new XSSFRichTextString();
         AreaReference ar = new AreaReference(workBook.getName(rangeName).getRefersToFormula());
         Row r = sheet.getRow(ar.getFirstCell().getRow() + shiftRows) != null ? sheet.getRow(ar.getFirstCell().getRow() + shiftRows)

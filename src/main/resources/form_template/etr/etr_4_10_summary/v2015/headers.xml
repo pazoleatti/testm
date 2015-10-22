@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rows>
+    <row alias="">
+        <cell alias="fix" colSpan="2" rowSpan="3" value="№ п/п"/>
+        <cell alias="rowNum" colSpan="1" rowSpan="1" value="№ п/п"/>
+        <cell alias="department" colSpan="1" rowSpan="3" value="Подразделение Банка"/>
+        <cell alias="sum1" colSpan="2" rowSpan="1" value="Сумма увеличения базы по налогу на прибыль, в том числе"/>
+        <cell alias="sum2" colSpan="1" rowSpan="1" value="Сумма увеличения базы по налогу на прибыль, в том числе"/>
+        <cell alias="taxBurden" colSpan="1" rowSpan="1" value="Налоговое бремя, тыс. руб."/>
+    </row>
+    <row alias="">
+        <cell alias="fix" colSpan="1" rowSpan="1" value="№ п/п"/>
+        <cell alias="rowNum" colSpan="1" rowSpan="1" value="№ п/п"/>
+        <cell alias="department" colSpan="1" rowSpan="1" value="Подразделение Банка"/>
+        <cell alias="sum1" colSpan="1" rowSpan="1" value="не учитываемые расходы, тыс. руб."/>
+        <cell alias="sum2" colSpan="1" rowSpan="1" value="доначисление доходов, тыс. руб."/>
+        <cell alias="taxBurden" colSpan="1" rowSpan="2" value="(гр.1+гр.2)*20%"/>
+    </row>
+    <row alias="">
+        <cell alias="fix" colSpan="1" rowSpan="1" value="№ п/п"/>
+        <cell alias="rowNum" colSpan="1" rowSpan="1" value="№ п/п"/>
+        <cell alias="department" colSpan="1" rowSpan="1" value="Подразделение Банка"/>
+        <cell alias="sum1" colSpan="1" rowSpan="1" value="(РНУ-108 гр.13+РНУ-115 гр.20+ РНУ-116 гр.20)"/>
+        <cell alias="sum2" colSpan="1" rowSpan="1"
+              value="(РНУ-107 гр.12+ РНУ-110 гр.11+ РНУ-111 гр.13+ РНУ-115 гр.19+ РНУ-116 гр.19+РНУ-114 гр.16)"/>
+        <cell alias="taxBurden" colSpan="1" rowSpan="1" value="(гр.1+гр.2)*20%"/>
+    </row>
+    <row alias="">
+        <cell alias="fix" colSpan="2" rowSpan="1" value="1"/>
+        <cell alias="rowNum" colSpan="1" rowSpan="1" value="1"/>
+        <cell alias="department" colSpan="1" rowSpan="1" value="2"/>
+        <cell alias="sum1" colSpan="1" rowSpan="1" value="3"/>
+        <cell alias="sum2" colSpan="1" rowSpan="1" value="4"/>
+        <cell alias="taxBurden" colSpan="1" rowSpan="1" value="5"/>
+    </row>
+</rows>

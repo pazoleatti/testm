@@ -8,6 +8,8 @@ import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.model.TemplateFilter;
 import com.aplana.sbrf.taxaccounting.model.VersionedObjectStatus;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.RowMapper;
@@ -24,6 +26,8 @@ import java.util.List;
  */
 @Repository
 public class DeclarationTypeDaoImpl extends AbstractDao implements DeclarationTypeDao {
+
+	private static final Log LOG = LogFactory.getLog(DeclarationTypeDaoImpl.class);
 	
 	private static final class DeclarationTypeRowMapper implements RowMapper<DeclarationType> {
 		@Override
@@ -37,7 +41,6 @@ public class DeclarationTypeDaoImpl extends AbstractDao implements DeclarationTy
             res.setIfrsName(rs.getString("ifrs_name"));
 			return res;
 		}
-		
 	}
 	
 	@Override
@@ -83,7 +86,7 @@ public class DeclarationTypeDaoImpl extends AbstractDao implements DeclarationTy
                     new int[]{Types.NUMERIC,  Types.VARCHAR, Types.VARCHAR, Types.NUMERIC});
             return typeId;
         } catch (DataAccessException e){
-            logger.error("Ошибка при создании макета", e);
+			LOG.error("Ошибка при создании макета", e);
             throw new DaoException("Ошибка при создании макета. %s", e.getMessage());
         }
     }
@@ -96,7 +99,7 @@ public class DeclarationTypeDaoImpl extends AbstractDao implements DeclarationTy
                     "update declaration_type set name = ?, is_ifrs = ?, ifrs_name = ? where id = ?",
                     type.getName(), type.getIsIfrs(), type.getIfrsName(), type.getId());
         } catch (DataAccessException e){
-            logger.error("", e);
+			LOG.error("", e);
             throw new DaoException("", e);
         }
     }
@@ -109,7 +112,7 @@ public class DeclarationTypeDaoImpl extends AbstractDao implements DeclarationTy
                     new Object[]{typeId},
                     new int[]{Types.INTEGER});
         } catch (DataAccessException e){
-            logger.error("Ошибка при удалении макета", e);
+			LOG.error("Ошибка при удалении макета", e);
             throw new DaoException("Ошибка при удалении макета", e);
         }
     }
@@ -146,7 +149,6 @@ public class DeclarationTypeDaoImpl extends AbstractDao implements DeclarationTy
 				new DeclarationTypeRowMapper()
 		);
 	}
-
 
     @Override
     public List<Integer> getIfrsDeclarationTypes() {

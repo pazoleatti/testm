@@ -319,7 +319,7 @@ public abstract class AbstractEditView extends ViewWithUiHandlers<EditFormUiHand
         } else {
             if (value.getValue() != null && !value.getValue().toString().trim().isEmpty()) {
                 String valStr = (String) value.getValue();
-                int val = Integer.valueOf(valStr);
+                double val = Double.valueOf(valStr);
                 if (val < 0){
                     throw new NumberFormatException();
                 }

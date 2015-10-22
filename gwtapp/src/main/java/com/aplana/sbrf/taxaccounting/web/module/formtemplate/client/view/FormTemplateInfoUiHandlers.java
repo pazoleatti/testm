@@ -8,7 +8,10 @@ public interface FormTemplateInfoUiHandlers extends UiHandlers {
 	void setRangeRelevanceVersion(Date versionBegin, Date versionEnd);
 	void setFixedRows(boolean fixedRows);
 	void setMonthlyForm(boolean monthlyForm);
-	void setName(String name);
+    void setComparative(boolean comparative);
+    void setAccruing(boolean accruing);
+    void setUpdating(boolean updating);
+    void setName(String name);
 	void setFullname(String fullName);
 	void setHeader(String header);
 }
