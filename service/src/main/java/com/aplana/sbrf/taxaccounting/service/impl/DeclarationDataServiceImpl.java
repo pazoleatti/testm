@@ -591,8 +591,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         String xmlUuid = reportService.getDec(userInfo, declarationData.getId(), ReportType.XML_DEC);
         if (xmlUuid == null) {
             TaxType taxType = declarationTemplateService.get(declarationData.getDeclarationTemplateId()).getType().getTaxType();
-            String declarationName = (taxType == TaxType.DEAL ? "уведомлении" : "декларации");
-            String operationName = (operation == FormDataEvent.MOVE_CREATED_TO_ACCEPTED ? "Принять" : operation.getTitle());
+            String declarationName = taxType == TaxType.DEAL ? "уведомлении" : "декларации";
+            String operationName = operation == FormDataEvent.MOVE_CREATED_TO_ACCEPTED ? "Принять" : operation.getTitle();
             String msg = String.format("В %s отсутствуют данные (не был выполнен расчет). Операция \"%s\" не может быть выполнена", declarationName, operationName);
             throw new ServiceException(msg);
         }
@@ -835,20 +835,20 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         DeclarationData declarationData = declarationDataDao.get(declarationDataId);
         DeclarationTemplate declarationTemplate = declarationTemplateService.get(declarationData.getDeclarationTemplateId());
         boolean exist = false;
-        for (ReportType reportType1: reportTypes) {
-            LockData lock = lockDataService.getLock(generateAsyncTaskKey(declarationDataId, reportType1));
+        for (ReportType type : reportTypes) {
+            LockData lock = lockDataService.getLock(generateAsyncTaskKey(declarationDataId, type));
             if (lock != null) {
                 exist = true;
                 if (LockData.State.IN_QUEUE.getText().equals(lock.getState())) {
                     logger.info(LockData.CANCEL_TASK_NOT_PROGRESS,
                             SDF_DD_MM_YYYY_HH_MM_SS.format(lock.getDateLock()),
                             taUserService.getUser(lock.getUserId()).getName(),
-                            String.format(reportType1.getDescription(), declarationTemplate.getType().getTaxType().getDeclarationShortName()));
+                            String.format(type.getDescription(), declarationTemplate.getType().getTaxType().getDeclarationShortName()));
                 } else {
                     logger.info(LockData.CANCEL_TASK_IN_PROGRESS,
                             SDF_DD_MM_YYYY_HH_MM_SS.format(lock.getDateLock()),
                             taUserService.getUser(lock.getUserId()).getName(),
-                            String.format(reportType1.getDescription(), declarationTemplate.getType().getTaxType().getDeclarationShortName()));
+                            String.format(type.getDescription(), declarationTemplate.getType().getTaxType().getDeclarationShortName()));
                 }
             }
         }
@@ -859,8 +859,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     public void interruptTask(long declarationDataId, int userId, ReportType reportType) {
         ReportType[] reportTypes = getCheckTaskList(reportType);
         if (reportTypes == null) return;
-        for (ReportType reportType1: reportTypes) {
-            LockData lock = lockDataService.getLock(generateAsyncTaskKey(declarationDataId, reportType1));
+        for (ReportType type : reportTypes) {
+            LockData lock = lockDataService.getLock(generateAsyncTaskKey(declarationDataId, type));
             if (lock != null) {
                 lockDataService.interruptTask(lock, userId, true);
             }
