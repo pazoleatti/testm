@@ -237,4 +237,25 @@ public class FilterFormDataView extends ViewWithUiHandlers<FilterFormDataUIHandl
         departmentPicker.setValue(null);
         correctionTag.setValue(null);
     }
+
+    @Override
+    public void setReportPeriodType(String type) {
+        reportPeriodIds.setType(type);
+    }
+
+    @Override
+    public void setDefaultReportPeriod(List<ReportPeriod> reportPeriods) {
+        Integer reportPeriodId = reportPeriodIds.getDefaultReportPeriod();
+        if (reportPeriodId != null && reportPeriodIds.getReportPeriodIds().contains(reportPeriodId)) {
+            reportPeriodIds.setValue(Arrays.asList(reportPeriodId));
+        } else if (reportPeriods != null && !reportPeriods.isEmpty()) {
+            ReportPeriod maxPeriod = reportPeriods.get(0);
+            for (ReportPeriod per : reportPeriods) {
+                if (per.getCalendarStartDate().after(maxPeriod.getCalendarStartDate())) {
+                    maxPeriod = per;
+                }
+            }
+            reportPeriodIds.setValue(Arrays.asList(maxPeriod.getId()));
+        }
+    }
 }

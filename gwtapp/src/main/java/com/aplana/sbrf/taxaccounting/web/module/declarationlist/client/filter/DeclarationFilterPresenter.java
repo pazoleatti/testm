@@ -46,6 +46,10 @@ public class DeclarationFilterPresenter extends PresenterWidget<DeclarationFilte
         void clean();
 
         void clearFilter();
+
+        void setReportPeriodType(String type);
+
+        void setDefaultReportPeriod(List<ReportPeriod> reportPeriods);
     }
 
 	private final DispatchAsync dispatchAsync;
@@ -73,6 +77,7 @@ public class DeclarationFilterPresenter extends PresenterWidget<DeclarationFilte
         DeclarationDataFilter defaultFilter = new DeclarationDataFilter();
         defaultFilter.setTaxType(taxType);
         getView().setDataFilter(defaultFilter);
+        getView().setReportPeriodType(taxType.name());
         dispatchAsync.execute(action, CallbackUtils
 				        .defaultCallback(new AbstractCallback<GetDeclarationFilterDataResult>() {
 						@Override
@@ -89,6 +94,7 @@ public class DeclarationFilterPresenter extends PresenterWidget<DeclarationFilte
                                 getView().setDataFilter(dataFilter);
                             } else {
                                 getView().setDataFilter(result.getDefaultDecFilterData());
+                                getView().setDefaultReportPeriod(result.getPeriods());
                             }
 							DeclarationFilterReadyEvent.fire(DeclarationFilterPresenter.this);
 						}

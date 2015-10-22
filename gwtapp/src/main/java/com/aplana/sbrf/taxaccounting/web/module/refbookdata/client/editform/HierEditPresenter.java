@@ -140,14 +140,30 @@ public class HierEditPresenter extends AbstractEditPresenter<HierEditPresenter.M
     }
 
     @Override
-    public void clean() {
-        currentUniqueRecordId = null;
-        getView().fillInputFields(null);
-        /*getView().setVersionFrom(null);
-        getView().setVersionTo(null);*/
-        getView().updateRefBookPickerPeriod();
-        getView().cleanFields();
-        setNeedToReload();
+    public void clean(Boolean isVersion) {
+        if (isVersion == true) {
+            GetRefBookRecordAction action = new GetRefBookRecordAction();
+            action.setRefBookId(currentRefBookId);
+            action.setUniqueRecordId(currentUniqueRecordId);
+            action.setCreate(true);
+            dispatchAsync.execute(action,
+                    CallbackUtils.defaultCallback(
+                            new AbstractCallback<GetRefBookRecordResult>() {
+                                @Override
+                                public void onSuccess(GetRefBookRecordResult result) {
+                                    currentUniqueRecordId = null;
+                                    getView().fillInputFields(result.getRecord());
+                                    getView().setVersionFrom(result.getVersionData().getVersionStart());
+                                    getView().setVersionTo(null);
+                                }
+                            }, HierEditPresenter.this));
+        } else {
+            currentUniqueRecordId = null;
+            getView().fillInputFields(null);
+            getView().updateRefBookPickerPeriod();
+            getView().cleanFields();
+            setNeedToReload();
+        }
     }
 
     @ProxyEvent

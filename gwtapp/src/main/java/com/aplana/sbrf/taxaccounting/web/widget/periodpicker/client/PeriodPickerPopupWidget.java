@@ -13,6 +13,7 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.storage.client.Storage;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiConstructor;
 import com.google.gwt.uibinder.client.UiField;
@@ -61,6 +62,8 @@ public class PeriodPickerPopupWidget extends DoubleStateComposite implements
     private Map<Integer, String> dereferenceValue;
     private Map<Integer, Pair<Date, Date>> reportPeriodDates;
     private Map<Integer, Integer> reportPeriodYears;
+    private Set<Integer> reportPeriodIds;
+    private String type;
 
     @UiConstructor
     public PeriodPickerPopupWidget(boolean multiselect) {
@@ -75,7 +78,9 @@ public class PeriodPickerPopupWidget extends DoubleStateComposite implements
         dereferenceValue = new HashMap<Integer, String>();
         reportPeriodDates = new HashMap<Integer, Pair<Date, Date>>();
         reportPeriodYears = new HashMap<Integer, Integer>();
+        reportPeriodIds = new HashSet<Integer>();
         for (ReportPeriod reportPeriod : periods) {
+            reportPeriodIds.add(reportPeriod.getId());
             dereferenceValue.put(reportPeriod.getId(), reportPeriod.getName());
             reportPeriodDates.put(reportPeriod.getId(), new Pair<Date, Date>(reportPeriod.getStartDate(), reportPeriod.getEndDate()));
             reportPeriodYears.put(reportPeriod.getId(), reportPeriod.getTaxPeriod().getYear());
@@ -104,6 +109,7 @@ public class PeriodPickerPopupWidget extends DoubleStateComposite implements
         this.value.clear();
         if (value != null) {
             this.value.addAll(value);
+            setDefaultReportPeriod(this.value);
         }
         dereference(this.value);
         if (fireEvents) {
@@ -181,5 +187,46 @@ public class PeriodPickerPopupWidget extends DoubleStateComposite implements
     @Override
     protected void updateLabelValue() {
         setLabelValue(TextUtils.joinListToString(valueDereference));
+    }
+
+    public Set<Integer> getReportPeriodIds() {
+        return reportPeriodIds;
+    }
+
+    public Integer getDefaultReportPeriod() {
+        Storage storage = Storage.getLocalStorageIfSupported();
+        if (storage != null) {
+            String value = storage.getItem("tax-reportPeriod_" + type);
+            if (value != null && !"".equals(value)) {
+                return Integer.valueOf(value);
+            }
+        }
+        return null;
+    }
+
+    private void setDefaultReportPeriod(List<Integer> values) {
+        if (type != null) {
+            Integer value = null;
+            if (values.size() > 0) {
+                value = values.get(0);
+                Date maxDate = reportPeriodDates.get(values.get(0)).getSecond();
+                for (Integer v : values) {
+                    if (reportPeriodDates.get(v).getSecond().after(maxDate)) {
+                        value = v;
+                        maxDate = reportPeriodDates.get(v).getSecond();
+                    }
+                }
+            }
+            if (value != null) {
+                Storage storage = Storage.getLocalStorageIfSupported();
+                if (storage != null) {
+                    storage.setItem("tax-reportPeriod_" + type, String.valueOf(value));
+                }
+            }
+        }
+    }
+
+    public void setType(String type) {
+        this.type = type;
     }
 }

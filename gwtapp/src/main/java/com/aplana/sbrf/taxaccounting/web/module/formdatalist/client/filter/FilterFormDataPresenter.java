@@ -46,6 +46,9 @@ public class FilterFormDataPresenter extends PresenterWidget<FilterFormDataPrese
         void setKindFilter(List<FormDataKind> dataKinds);
 
         void clean();
+
+        void setReportPeriodType(String type);
+        void setDefaultReportPeriod(List<ReportPeriod> reportPeriods);
 	}
 
 	private final DispatchAsync dispatchAsync;
@@ -62,6 +65,7 @@ public class FilterFormDataPresenter extends PresenterWidget<FilterFormDataPrese
 	}
 
 	public void initFilter(final TaxType taxType, final FormDataFilter filter, final GetKindListResult kindListResult) {
+        getView().setReportPeriodType(taxType.name());
 		GetFilterData action = new GetFilterData();
 		action.setTaxType(taxType);
 		dispatchAsync.execute(action, CallbackUtils
@@ -82,6 +86,7 @@ public class FilterFormDataPresenter extends PresenterWidget<FilterFormDataPrese
 							getView().setDataFilter(filter);
 						} else {
 							getView().setDataFilter(result.getDefaultFilter());
+                            getView().setDefaultReportPeriod(result.getReportPeriods());
 						}
 						FilterFormDataReadyEvent.fire(FilterFormDataPresenter.this, true);
 					}

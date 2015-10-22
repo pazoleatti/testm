@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.web.module.formdatalist.server;
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.FormDataKind;
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
+import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.shared.FillFormFieldsAction;
@@ -53,15 +54,37 @@ public class FillFormFieldsHandler extends AbstractActionHandler<FillFormFieldsA
     @Override
     public FillFormFieldsResult execute(FillFormFieldsAction action, ExecutionContext executionContext) throws ActionException {
         FillFormFieldsResult result = new FillFormFieldsResult();
+        TAUserInfo userInfo = securityService.currentUserInfo();
         switch (action.getFieldsNum()){
             case FIRST:
 	            List<ReportPeriod> periodList = new ArrayList<ReportPeriod>();
-	            periodList.addAll(periodService.getOpenForUser(securityService.currentUserInfo().getUser(), action.getTaxType()));
+	            periodList.addAll(periodService.getOpenForUser(userInfo.getUser(), action.getTaxType()));
                 result.setReportPeriods(periodList);
-                break;
+                if (action.getReportPeriodId() != null) {
+                    // проверяем доступность для пользователя
+                    for(ReportPeriod reportPeriod: periodList)
+                        if (reportPeriod.getId().equals(action.getReportPeriodId())) {
+                            result.setDefaultReportPeriod(reportPeriod);
+                        }
+                }
+                if (result.getDefaultReportPeriod() == null) {
+                    if (periodList != null && !periodList.isEmpty()) {
+                        ReportPeriod maxPeriod = periodList.get(0);
+                        for (ReportPeriod per : periodList) {
+                            if (per.getEndDate().after(maxPeriod.getEndDate())) {
+                                maxPeriod = per;
+                            }
+                        }
+                        result.setDefaultReportPeriod(maxPeriod);
+                    }
+                }
+                if (result.getDefaultReportPeriod() == null) {
+                    break;
+                }
+                action.setFieldId(result.getDefaultReportPeriod().getId());
             case SECOND:
                 List<Integer> departments =
-                        departmentService.getOpenPeriodDepartments(securityService.currentUserInfo().getUser(), asList(action.getTaxType()), action.getFieldId());
+                        departmentService.getOpenPeriodDepartments(userInfo.getUser(), asList(action.getTaxType()), action.getFieldId());
                 if (departments.isEmpty()){
                     result.setDepartments(new ArrayList<Department>());
                     result.setDepartmentIds(new HashSet<Integer>());
@@ -71,10 +94,12 @@ public class FillFormFieldsHandler extends AbstractActionHandler<FillFormFieldsA
                             departmentService.getRequiredForTreeDepartments(departmentIds).values()));
                     result.setDepartmentIds(departmentIds);
                 }
+                if (departments.contains(userInfo.getUser().getDepartmentId()))
+                    result.setDefaultDepartmentId(userInfo.getUser().getDepartmentId());
                 break;
             case THIRD:
                 List<FormDataKind> kinds = new ArrayList<FormDataKind>();
-                kinds.addAll(dataAccessService.getAvailableFormDataKind(securityService.currentUserInfo(), asList(action.getTaxType())));
+                kinds.addAll(dataAccessService.getAvailableFormDataKind(userInfo, asList(action.getTaxType())));
                 result.setDataKinds(kinds);
                 result.setCorrectionDate(departmentReportPeriodService.getLast(action.getDepartmentId().intValue(), action.getReportPeriodId()).getCorrectionDate());
                 break;

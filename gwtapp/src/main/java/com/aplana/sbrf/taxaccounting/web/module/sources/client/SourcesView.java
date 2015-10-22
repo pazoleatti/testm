@@ -180,6 +180,7 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers> implement
     private SourcesSearchOrdering sortByColumnDownTable;
 
     private Table table;
+    private Integer defaultDepartment;
 
     public enum Table {
         LEFT, RIGHT, DOWN
@@ -811,9 +812,14 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers> implement
     }
 
     @Override
-    public void setDepartments(List<Department> departments, Set<Integer> availableDepartments) {
+    public void setDepartments(List<Department> departments, Set<Integer> availableDepartments, Integer departmentId) {
         leftDepPicker.setAvalibleValues(departments, availableDepartments);
-        leftDepPicker.setValue(null);
+        defaultDepartment = departmentId;
+        if (defaultDepartment != null) {
+            leftDepPicker.setValue(Arrays.asList(defaultDepartment));
+        } else {
+            leftDepPicker.setValue(null);
+        }
         rightDepPicker.setAvalibleValues(departments, availableDepartments);
         rightDepPicker.setValue(null);
     }
@@ -884,6 +890,12 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers> implement
     public void changeView(ClickEvent event) {
         this.isForm = !this.isForm;
         appointmentTypePicker.setValue(AppointmentType.SOURCES);
+        if (defaultDepartment != null) {
+            leftDepPicker.setValue(Arrays.asList(defaultDepartment));
+        } else {
+            leftDepPicker.setValue(null);
+        }
+        rightDepPicker.setValue(null);
         setupView(isForm, isTaxTypeDeal, isTaxTypeETR, isSource());
     }
 

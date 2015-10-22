@@ -6,9 +6,12 @@ import com.gwtplatform.dispatch.shared.UnsecuredActionImpl;
 import java.util.Date;
 
 public class GetRefBookRecordAction extends UnsecuredActionImpl<GetRefBookRecordResult> implements ActionName {
-	Long refBookId;
-	Long refBookRecordId;
-    Date relevanceDate;
+	private Long refBookId;
+    private Long refBookRecordId;
+    private Date relevanceDate;
+    /* при пеообходимости получить данные по последней версии*/
+    private Long uniqueRecordId;
+    private boolean isCreate;
 
 	public Long getRefBookId() {
 		return refBookId;
@@ -32,6 +35,22 @@ public class GetRefBookRecordAction extends UnsecuredActionImpl<GetRefBookRecord
 
     public void setRelevanceDate(Date relevanceDate) {
         this.relevanceDate = relevanceDate;
+    }
+
+    public Long getUniqueRecordId() {
+        return uniqueRecordId;
+    }
+
+    public void setUniqueRecordId(Long uniqueRecordId) {
+        this.uniqueRecordId = uniqueRecordId;
+    }
+
+    public boolean isCreate() {
+        return isCreate;
+    }
+
+    public void setCreate(boolean isCreate) {
+        this.isCreate = isCreate;
     }
 
     @Override

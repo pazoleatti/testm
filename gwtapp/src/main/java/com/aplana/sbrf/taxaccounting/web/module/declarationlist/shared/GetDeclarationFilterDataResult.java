@@ -11,7 +11,6 @@ public class GetDeclarationFilterDataResult implements Result {
 	
 	private List<Department> departments;
 	private List<ReportPeriod> periods;
-	private List<ReportPeriod> periodsForCreation;
 	private DeclarationDataFilterAvailableValues filterValues;
     private DeclarationDataFilter defaultDecFilterData;
 
@@ -46,12 +45,4 @@ public class GetDeclarationFilterDataResult implements Result {
     public void setDefaultDecFilterData(DeclarationDataFilter defaultDecFilterData) {
         this.defaultDecFilterData = defaultDecFilterData;
     }
-
-	public List<ReportPeriod> getPeriodsForCreation() {
-		return periodsForCreation;
-	}
-
-	public void setPeriodsForCreation(List<ReportPeriod> periodsForCreation) {
-		this.periodsForCreation = periodsForCreation;
-	}
 }

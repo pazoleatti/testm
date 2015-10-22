@@ -470,6 +470,7 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
 
     @Override
     public void setTaxType(TaxType taxType) {
+        periodPickerPopup.setType(taxType.name());
         this.taxType = taxType;
         initTable(taxType);
         versionBlock.setVisible(false);
@@ -725,10 +726,28 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
     @Override
     public void setReportPeriods(List<ReportPeriod> reportPeriods) {
         periodPickerPopup.setPeriods(reportPeriods);
-        ReportPeriod maxPeriod = getMaxPeriod(reportPeriods);
-        periodPickerPopup.setValue(maxPeriod == null ? null : Arrays.asList(maxPeriod.getId()), true);
-        this.currentReportPeriodId = maxPeriod == null ? null : maxPeriod.getId();
-
+        periodPickerPopup.setPeriods(reportPeriods);
+        if (reportPeriods == null || reportPeriods.isEmpty()) {
+            return;
+        }
+        Integer defaultReportPeriodId = periodPickerPopup.getDefaultReportPeriod();
+        ReportPeriod maxPeriod = reportPeriods.get(0);
+        this.currentReportPeriodId = null;
+        for (ReportPeriod reportPeriod : reportPeriods) {
+            if (defaultReportPeriodId != null && reportPeriod.getId().equals(defaultReportPeriodId)) {
+                this.currentReportPeriodId = defaultReportPeriodId;
+                periodPickerPopup.setValue(Arrays.asList(defaultReportPeriodId));
+                maxPeriod = null;
+                break;
+            }
+            if (reportPeriod.getCalendarStartDate().after(maxPeriod.getCalendarStartDate())) {
+                maxPeriod = reportPeriod;
+            }
+        }
+        if (maxPeriod != null) {
+            this.currentReportPeriodId = maxPeriod.getId();
+            periodPickerPopup.setValue(Arrays.asList(maxPeriod.getId()));
+        }
     }
 
     private ReportPeriod getMaxPeriod(List<ReportPeriod> reportPeriods) {

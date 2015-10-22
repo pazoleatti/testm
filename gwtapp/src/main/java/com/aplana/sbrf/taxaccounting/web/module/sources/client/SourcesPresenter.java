@@ -77,7 +77,7 @@ public class SourcesPresenter extends Presenter<SourcesPresenter.MyView, Sources
          * @param departments список подразделений
          * @param availableDepartments доступные для выбора
          */
-        void setDepartments(List<Department> departments, Set<Integer> availableDepartments);
+        void setDepartments(List<Department> departments, Set<Integer> availableDepartments, Integer departmentId);
 
         /**
          * Обновляет на форме таблицу с доступными для выбора типами НФ (НФ назначениями) (левая)
@@ -197,7 +197,7 @@ public class SourcesPresenter extends Presenter<SourcesPresenter.MyView, Sources
                 .defaultCallback(new AbstractCallback<InitSourcesResult>() {
                     @Override
                     public void onSuccess(InitSourcesResult result) {
-                        getView().setDepartments(result.getDepartments(), result.getAvailableDepartments());
+                        getView().setDepartments(result.getDepartments(), result.getAvailableDepartments(), result.getDefaultDepartment());
                         getView().init(taxType, Arrays.asList(AppointmentType.values()), AppointmentType.SOURCES, result.getYear(),
                                 result.getPeriods(), isForm);
                         assignDialogPresenter.setAvailablePeriods(result.getPeriods());

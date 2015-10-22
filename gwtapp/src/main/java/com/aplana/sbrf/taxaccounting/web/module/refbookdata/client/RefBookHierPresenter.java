@@ -76,7 +76,7 @@ public class RefBookHierPresenter extends Presenter<RefBookHierPresenter.MyView,
 
     @Override
     public void onRelevanceDateChanged() {
-        commonEditPresenter.clean();
+        commonEditPresenter.clean(null);
         commonEditPresenter.setNeedToReload();
         SearchButtonEvent.fire(this, getView().getRelevanceDate(), getView().getSearchPattern());
     }
@@ -121,7 +121,11 @@ public class RefBookHierPresenter extends Presenter<RefBookHierPresenter.MyView,
         getView().updateView(FormMode.CREATE);
         commonEditPresenter.setMode(FormMode.CREATE);
         dataInterface.setMode(FormMode.CREATE);
-        AddItemEvent.fire(RefBookHierPresenter.this);
+        if (versionPresenter.isVisible()) {
+            commonEditPresenter.clean(true);
+        } else {
+            AddItemEvent.fire(RefBookHierPresenter.this);
+        }
     }
 
     @Override

@@ -1,37 +1,69 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationlist.server;
 
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.stereotype.Service;
-
+import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
+import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.service.PeriodService;
-import com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared.GetReportPeriods;
+import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
+import com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared.GetReportPeriodsAction;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared.GetReportPeriodsResult;
 import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
-@PreAuthorize("hasAnyRole('ROLE_OPER', 'ROLE_CONTROL', 'ROLE_CONTROL_UNP', 'ROLE_ADMIN', 'ROLE_CONTROL_NS')")
-public class GetReportPeriodsHandler extends AbstractActionHandler<GetReportPeriods, GetReportPeriodsResult> {
+@PreAuthorize("hasAnyRole('ROLE_CONTROL', 'ROLE_CONTROL_UNP', 'ROLE_CONTROL_NS')")
+public class GetReportPeriodsHandler extends AbstractActionHandler<GetReportPeriodsAction, GetReportPeriodsResult> {
 
 	public GetReportPeriodsHandler() {
-		super(GetReportPeriods.class);
+		super(GetReportPeriodsAction.class);
 	}
 
-	@Autowired
-	private PeriodService reportPeriodService;
+    @Autowired
+    private SecurityService securityService;
+
+    @Autowired
+    private PeriodService periodService;
 
 	@Override
-	public GetReportPeriodsResult execute(GetReportPeriods action, ExecutionContext executionContext) throws ActionException {
+	public GetReportPeriodsResult execute(GetReportPeriodsAction action, ExecutionContext executionContext) throws ActionException {
 		GetReportPeriodsResult result = new GetReportPeriodsResult();
-	    result.setReportPeriods(reportPeriodService.listByTaxPeriod(action.getTaxPeriod().getId()));
-		return result;
+        TAUserInfo userInfo = securityService.currentUserInfo();
+
+        List<ReportPeriod> reportPeriods = new ArrayList<ReportPeriod>();
+        reportPeriods.addAll(periodService.getOpenForUser(userInfo.getUser(), action.getTaxType()));
+        result.setReportPeriods(reportPeriods);
+
+        if (action.getReportPeriodId() != null) {
+            // проверяем доступность для пользователя
+            for(ReportPeriod reportPeriod: reportPeriods)
+                if (reportPeriod.getId().equals(action.getReportPeriodId())) {
+                    result.setDefaultReportPeriod(reportPeriod);
+                    break;
+                }
+        }
+        if (result.getDefaultReportPeriod() == null) {
+            if (reportPeriods != null && !reportPeriods.isEmpty()) {
+                ReportPeriod maxPeriod = reportPeriods.get(0);
+                for (ReportPeriod per : reportPeriods) {
+                    if (per.getEndDate().after(maxPeriod.getEndDate())) {
+                        maxPeriod = per;
+                    }
+                }
+                result.setDefaultReportPeriod(maxPeriod);
+            }
+        }
+        return result;
 	}
 
 	@Override
-	public void undo(GetReportPeriods getTaxPeriods, GetReportPeriodsResult getTaxPeriodsResult, ExecutionContext executionContext) throws ActionException {
+	public void undo(GetReportPeriodsAction getTaxPeriods, GetReportPeriodsResult getTaxPeriodsResult, ExecutionContext executionContext) throws ActionException {
 		//Do nothing
 	}
 }

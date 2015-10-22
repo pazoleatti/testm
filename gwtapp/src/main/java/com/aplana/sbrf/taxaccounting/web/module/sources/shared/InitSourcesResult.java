@@ -10,9 +10,9 @@ import java.util.Set;
 public class InitSourcesResult implements Result {
 	private static final long serialVersionUID = 6889603073251885676L;
 	
-	private Set<Integer> availableDepartments;
-	
 	private List<Department> departments;
+    private Set<Integer> availableDepartments;
+    private Integer defaultDepartment;
 
     private int year;
     private List<PeriodInfo> periods;
@@ -49,5 +49,11 @@ public class InitSourcesResult implements Result {
 		this.availableDepartments = availableDepartments;
 	}
 
+    public Integer getDefaultDepartment() {
+        return defaultDepartment;
+    }
 
+    public void setDefaultDepartment(Integer defaultDepartment) {
+        this.defaultDepartment = defaultDepartment;
+    }
 }

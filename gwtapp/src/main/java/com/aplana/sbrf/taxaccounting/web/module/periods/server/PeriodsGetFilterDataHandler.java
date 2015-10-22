@@ -71,18 +71,13 @@ public class PeriodsGetFilterDataHandler extends AbstractActionHandler<PeriodsGe
                         }
                     }
                     res.setAvalDepartments(ad);
-                    for (Department dep : departments) {
-                        if (dep.getType() == DepartmentType.TERR_BANK && dep.isActive()) {
-                            res.setSelectedDepartment(new DepartmentPair(dep.getId(), dep.getParentId(), dep.getName()));
-                            break;
-                        }
-                    }
-
+                    Department userDepartmentTB = departmentService.getTBUserDepartments(userInfo.getUser()).get(0);
+                    res.setSelectedDepartment(new DepartmentPair(userDepartmentTB.getId(), userDepartmentTB.getParentId(), userDepartmentTB.getName()));
                     break;
                 case INCOME:
                 case DEAL:
                 case VAT:
-                case ETR: //TODO
+                case ETR:
                     res.setCanChangeDepartment(false);
 	                res.setDepartments(Arrays.asList(departmentService.getBankDepartment()));
 	                res.setSelectedDepartment(

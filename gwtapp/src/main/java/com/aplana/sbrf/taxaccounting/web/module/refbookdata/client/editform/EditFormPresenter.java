@@ -17,10 +17,7 @@ import com.gwtplatform.dispatch.shared.DispatchAsync;
 import com.gwtplatform.mvp.client.annotations.ProxyEvent;
 import com.gwtplatform.mvp.client.proxy.PlaceManager;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class EditFormPresenter extends AbstractEditPresenter<EditFormPresenter.MyView>{
 
@@ -146,9 +143,26 @@ public class EditFormPresenter extends AbstractEditPresenter<EditFormPresenter.M
     }
 
     @Override
-    public void clean() {
-        currentUniqueRecordId = null;
-        getView().fillInputFields(null);
+    public void clean(Boolean isVersion) {
+        if (isVersion == true) {
+            GetRefBookRecordAction action = new GetRefBookRecordAction();
+            action.setRefBookId(currentRefBookId);
+            action.setUniqueRecordId(currentUniqueRecordId);
+            action.setCreate(true);
+            dispatchAsync.execute(action,
+                    CallbackUtils.defaultCallback(
+                            new AbstractCallback<GetRefBookRecordResult>() {
+                                @Override
+                                public void onSuccess(GetRefBookRecordResult result) {
+                                    currentUniqueRecordId = null;
+                                    getView().fillInputFields(result.getRecord());
+                                    getView().setVersionFrom(result.getVersionData().getVersionStart());
+                                    getView().setVersionTo(null);
+                                }
+                            }, EditFormPresenter.this));
+        } else {
+            currentUniqueRecordId = null;
+            getView().fillInputFields(null);
 
             /*if (!isVersionMode && mode == FormMode.EDIT) {
                 setMode(FormMode.CREATE);
@@ -157,8 +171,9 @@ public class EditFormPresenter extends AbstractEditPresenter<EditFormPresenter.M
             } else {
                 setMode(mode);
             } */
-        getView().setVersionFrom(null);
-        getView().setVersionTo(null);
+            getView().setVersionFrom(null);
+            getView().setVersionTo(null);
+        }
         //getView().updateRefBookPickerPeriod();
     }
 

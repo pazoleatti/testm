@@ -405,4 +405,25 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
         kppPicker.setValue("");
         taxOrganisationPicker.setValue("");
     }
+
+    @Override
+    public void setReportPeriodType(String type) {
+        reportPeriodPicker.setType(type);
+    }
+
+    @Override
+    public void setDefaultReportPeriod(List<ReportPeriod> reportPeriods) {
+        Integer reportPeriodId = reportPeriodPicker.getDefaultReportPeriod();
+        if (reportPeriodId != null && reportPeriodPicker.getReportPeriodIds().contains(reportPeriodId)) {
+            reportPeriodPicker.setValue(Arrays.asList(reportPeriodId));
+        } else if (reportPeriods != null && !reportPeriods.isEmpty()) {
+            ReportPeriod maxPeriod = reportPeriods.get(0);
+            for (ReportPeriod per : reportPeriods) {
+                if (per.getCalendarStartDate().after(maxPeriod.getCalendarStartDate())) {
+                    maxPeriod = per;
+                }
+            }
+            reportPeriodPicker.setValue(Arrays.asList(maxPeriod.getId()));
+        }
+    }
 }
