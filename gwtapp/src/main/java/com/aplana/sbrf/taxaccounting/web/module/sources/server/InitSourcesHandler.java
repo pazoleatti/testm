@@ -1,25 +1,27 @@
 package com.aplana.sbrf.taxaccounting.web.module.sources.server;
 
-import java.util.*;
-
-import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.Department;
+import com.aplana.sbrf.taxaccounting.model.PagingResult;
+import com.aplana.sbrf.taxaccounting.model.TARole;
+import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
+import com.aplana.sbrf.taxaccounting.service.DepartmentService;
+import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.sources.shared.InitSourcesAction;
 import com.aplana.sbrf.taxaccounting.web.module.sources.shared.InitSourcesResult;
 import com.aplana.sbrf.taxaccounting.web.module.sources.shared.model.PeriodInfo;
+import com.gwtplatform.dispatch.server.ExecutionContext;
+import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
+import com.gwtplatform.dispatch.shared.ActionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
-import com.aplana.sbrf.taxaccounting.service.DepartmentService;
-import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
-import com.gwtplatform.dispatch.server.ExecutionContext;
-import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
-import com.gwtplatform.dispatch.shared.ActionException;
+import java.util.*;
 
 @Service
 @PreAuthorize("hasAnyRole('ROLE_CONTROL_UNP', 'ROLE_CONTROL_NS')")
@@ -47,8 +49,12 @@ public class InitSourcesHandler extends AbstractActionHandler<InitSourcesAction,
         // http://conf.aplana.com/pages/viewpage.action?pageId=11380675
 		if (userInfo.getUser().hasRole(TARole.ROLE_CONTROL_UNP)) {
 			result.setDepartments(departmentService.listDepartments());
-			result.setAvailableDepartments(null);
-		} else if (userInfo.getUser().hasRole(TARole.ROLE_CONTROL_NS)) {
+            Set<Integer> availableDepartments = new HashSet<Integer>();
+            for (Department dep : result.getDepartments()) {
+                availableDepartments.add(dep.getId());
+            }
+            result.setAvailableDepartments(availableDepartments);
+        } else if (userInfo.getUser().hasRole(TARole.ROLE_CONTROL_NS)) {
 
 			Set<Integer> availableDepartments = new HashSet<Integer>();
             for (Department dep : departmentService.getBADepartments(userInfo.getUser())) {
@@ -59,6 +65,7 @@ public class InitSourcesHandler extends AbstractActionHandler<InitSourcesAction,
 					.values()));
 			result.setAvailableDepartments(availableDepartments);
 		}
+        result.setDefaultDepartment(userInfo.getUser().getDepartmentId());
 
         /** Получение информации по периодам из справочника Коды, определяющие налоговый (отчётный) период*/
         RefBook refBook = rbFactory.get(PERIOD_CODE_REFBOOK);

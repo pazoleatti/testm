@@ -1,14 +1,9 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdatalist.server;
 
-import java.util.ArrayList;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.stereotype.Service;
-
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.FormDataFilter;
 import com.aplana.sbrf.taxaccounting.model.FormDataFilterAvailableValues;
+import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.FormDataSearchService;
 import com.aplana.sbrf.taxaccounting.service.PeriodService;
@@ -18,6 +13,12 @@ import com.aplana.sbrf.taxaccounting.web.module.formdatalist.shared.GetFilterDat
 import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.Arrays;
 
 @Service
 @PreAuthorize("hasAnyRole('ROLE_OPER', 'ROLE_CONTROL', 'ROLE_CONTROL_UNP', 'ROLE_CONTROL_NS')")
@@ -42,9 +43,9 @@ public class GetFilterDataHandler  extends AbstractActionHandler<GetFilterData, 
     @Override
     public GetFilterDataResult execute(GetFilterData action, ExecutionContext executionContext) throws ActionException {
 	    GetFilterDataResult res = new GetFilterDataResult();
+        TAUserInfo userInfo = securityService.currentUserInfo();
 	    
-	    FormDataFilterAvailableValues filterValues = formDataSearchService.getAvailableFilterValues(securityService
-			    .currentUserInfo(), action.getTaxType());
+	    FormDataFilterAvailableValues filterValues = formDataSearchService.getAvailableFilterValues(userInfo, action.getTaxType());
         // Доступные подразделения
 		res.setDepartments(new ArrayList<Department>(
 				departmentService.getRequiredForTreeDepartments(filterValues.getDepartmentIds()).values()));
@@ -56,6 +57,7 @@ public class GetFilterDataHandler  extends AbstractActionHandler<GetFilterData, 
 
 	    FormDataFilter filter = new FormDataFilter();
 	    filter.setTaxType(action.getTaxType());
+        filter.setDepartmentIds(Arrays.asList(userInfo.getUser().getDepartmentId()));
 	    res.setDefaultFilter(filter);
 
         return res;

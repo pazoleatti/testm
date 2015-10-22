@@ -165,13 +165,17 @@ public class DeclarationCreationView extends PopupViewWithUiHandlers<Declaration
     }
 
     @Override
-    public void setAcceptableDepartments(List<Department> departments, Set<Integer> departmentsIds) {
+    public void setAcceptableDepartments(List<Department> departments, Set<Integer> departmentsIds, Integer departmentsId) {
         departmentPicker.setAvalibleValues(departments, departmentsIds);
+        if (departmentsId != null)
+            departmentPicker.setValue(Arrays.asList(departmentsId));
     }
 
     @Override
-    public void setAcceptableReportPeriods(List<ReportPeriod> reportPeriods) {
+    public void setAcceptableReportPeriods(List<ReportPeriod> reportPeriods, ReportPeriod reportPeriod) {
         periodPicker.setPeriods(reportPeriods);
+        if (reportPeriod != null)
+            periodPicker.setValue(Arrays.asList(reportPeriod.getId()));
     }
 
     @UiHandler("continueButton")
@@ -194,7 +198,7 @@ public class DeclarationCreationView extends PopupViewWithUiHandlers<Declaration
     public void onPeriodPickerChange(ValueChangeEvent<List<Integer>> event) {
         departmentPicker.setValue(null, true);
         if (getUiHandlers() != null) {
-            getUiHandlers().onReportPeriodChange();
+            getUiHandlers().onReportPeriodChange(false);
         }
         updateEnabled();
     }
@@ -260,6 +264,7 @@ public class DeclarationCreationView extends PopupViewWithUiHandlers<Declaration
 
     @Override
     public void setTaxType(TaxType taxType) {
+        periodPicker.setType(taxType.name());
         if (!taxType.equals(TaxType.DEAL)) {
             modalWindowTitle.setText(DECLARATION_TITLE);
             declarationTypeLabel.setText(DECLARATION_TYPE_TITLE);
@@ -284,5 +289,10 @@ public class DeclarationCreationView extends PopupViewWithUiHandlers<Declaration
     @Override
     public String getTaxOrganKpp() {
         return taxOrganKpp.getDereferenceValue().trim();
+    }
+
+    @Override
+    public Integer getDefaultReportPeriodId() {
+        return periodPicker.getDefaultReportPeriod();
     }
 }

@@ -150,7 +150,7 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
     public void onAddRowClicked() {
         getView().updateMode(FormMode.CREATE);
         editFormPresenter.setMode(FormMode.CREATE);
-        editFormPresenter.clean();
+        editFormPresenter.clean(versionPresenter.isVisible());
         dataInterface.setMode(FormMode.CREATE);
     }
 

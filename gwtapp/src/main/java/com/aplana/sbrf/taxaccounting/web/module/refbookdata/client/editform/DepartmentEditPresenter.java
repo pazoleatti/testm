@@ -216,7 +216,8 @@ public class DepartmentEditPresenter extends AbstractEditPresenter<DepartmentEdi
     }
 
     @Override
-    public void clean() {
+    public void clean(Boolean isVersion) {
+        //isVersion всегда должен быть null или false
         currentUniqueRecordId = null;
         getView().fillInputFields(null);
         getView().updateRefBookPickerPeriod();

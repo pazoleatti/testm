@@ -5,11 +5,11 @@ import com.gwtplatform.dispatch.shared.Result;
 
 import java.util.List;
 
-@Deprecated
 public class GetReportPeriodsResult implements Result {
 	private static final long serialVersionUID = -2594530589463049810L;
 	
-	List<ReportPeriod> reportPeriods;
+	private List<ReportPeriod> reportPeriods;
+    private ReportPeriod defaultReportPeriod;
 
 	public List<ReportPeriod> getReportPeriods() {
 		return reportPeriods;
@@ -18,4 +18,12 @@ public class GetReportPeriodsResult implements Result {
 	public void setReportPeriods(List<ReportPeriod> reportPeriods) {
 		this.reportPeriods = reportPeriods;
 	}
+
+    public ReportPeriod getDefaultReportPeriod() {
+        return defaultReportPeriod;
+    }
+
+    public void setDefaultReportPeriod(ReportPeriod defaultReportPeriod) {
+        this.defaultReportPeriod = defaultReportPeriod;
+    }
 }

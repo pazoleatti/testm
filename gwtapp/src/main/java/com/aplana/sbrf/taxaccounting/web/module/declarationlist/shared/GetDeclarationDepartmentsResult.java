@@ -10,7 +10,8 @@ public class GetDeclarationDepartmentsResult implements Result {
     private static final long serialVersionUID = -4125991367421388088L;
 
     private List<Department> departments;
-    Set<Integer> departmentIds;
+    private Set<Integer> departmentIds;
+    private Integer defaultDepartmentId;
 
     public List<Department> getDepartments() {
         return departments;
@@ -26,5 +27,13 @@ public class GetDeclarationDepartmentsResult implements Result {
 
     public void setDepartmentIds(Set<Integer> departmentIds) {
         this.departmentIds = departmentIds;
+    }
+
+    public Integer getDefaultDepartmentId() {
+        return defaultDepartmentId;
+    }
+
+    public void setDefaultDepartmentId(Integer defaultDepartmentId) {
+        this.defaultDepartmentId = defaultDepartmentId;
     }
 }

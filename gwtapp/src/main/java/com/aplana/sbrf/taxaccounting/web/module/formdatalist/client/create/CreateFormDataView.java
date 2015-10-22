@@ -261,12 +261,25 @@ public class CreateFormDataView extends PopupViewWithUiHandlers<CreateFormDataUi
     }
 
     @Override
-    public void setAcceptableReportPeriods(List<ReportPeriod> reportPeriods) {
+    public void setAcceptableReportPeriods(List<ReportPeriod> reportPeriods, ReportPeriod reportPeriod) {
         reportPeriodIds.setPeriods(reportPeriods);
+        if (reportPeriod != null)  {
+            reportPeriodIds.setValue(Arrays.asList(reportPeriod.getId()));
+        }
     }
 
     @Override
-    public void setAcceptableComparativPeriods(List<ReportPeriod> comparativPeriods) {
+    public Integer getDefaultReportPeriodId() {
+        return reportPeriodIds.getDefaultReportPeriod();
+    }
+
+    @Override
+    public void setReportPeriodType(String type) {
+        reportPeriodIds.setType(type);
+    }
+
+    @Override
+    public void setAcceptableComparativePeriods(List<ReportPeriod> comparativPeriods) {
         comparativePeriodId.setPeriods(comparativPeriods);
     }
 
@@ -315,8 +328,11 @@ public class CreateFormDataView extends PopupViewWithUiHandlers<CreateFormDataUi
     }
 
     @Override
-    public void setAcceptableDepartments(List<Department> list, Set<Integer> availableValues) {
+    public void setAcceptableDepartments(List<Department> list, Set<Integer> availableValues, Integer departmentId) {
         departmentPicker.setAvalibleValues(list, availableValues);
+        if (departmentId != null) {
+            departmentPicker.setValue(Arrays.asList(departmentId));
+        }
     }
 
     @Override

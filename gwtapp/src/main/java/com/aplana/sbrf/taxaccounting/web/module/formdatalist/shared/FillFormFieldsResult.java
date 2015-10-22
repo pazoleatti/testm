@@ -18,7 +18,9 @@ public class FillFormFieldsResult implements Result {
     List<FormDataKind> dataKinds;
     List<Department> departments;
     Set<Integer> departmentIds;
+    Integer defaultDepartmentId;
     List<ReportPeriod> reportPeriods;
+    ReportPeriod defaultReportPeriod;
     Date correctionDate;
 
     public Set<Integer> getDepartmentIds() {
@@ -37,6 +39,14 @@ public class FillFormFieldsResult implements Result {
         this.reportPeriods = reportPeriods;
     }
 
+    public ReportPeriod getDefaultReportPeriod() {
+        return defaultReportPeriod;
+    }
+
+    public void setDefaultReportPeriod(ReportPeriod defaultReportPeriod) {
+        this.defaultReportPeriod = defaultReportPeriod;
+    }
+
     public List<FormDataKind> getDataKinds() {
         return dataKinds;
     }
@@ -51,6 +61,14 @@ public class FillFormFieldsResult implements Result {
 
     public void setDepartments(List<Department> departments) {
         this.departments = departments;
+    }
+
+    public Integer getDefaultDepartmentId() {
+        return defaultDepartmentId;
+    }
+
+    public void setDefaultDepartmentId(Integer defaultDepartmentId) {
+        this.defaultDepartmentId = defaultDepartmentId;
     }
 
     public List<FormType> getFormTypes() {

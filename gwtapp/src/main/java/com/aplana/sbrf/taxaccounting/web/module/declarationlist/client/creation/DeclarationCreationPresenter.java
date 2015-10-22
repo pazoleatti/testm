@@ -32,8 +32,9 @@ public class DeclarationCreationPresenter extends PresenterWidget<DeclarationCre
     public interface MyView extends PopupView, HasUiHandlers<DeclarationCreationUiHandlers> {
 
         void setAcceptableDeclarationTypes(List<DeclarationType> declarationType);
-        void setAcceptableReportPeriods(List<ReportPeriod> reportPeriods);
-        void setAcceptableDepartments(List<Department> departments, Set<Integer> departmentsIds);
+        void setAcceptableReportPeriods(List<ReportPeriod> reportPeriods, ReportPeriod reportPeriod);
+        Integer getDefaultReportPeriodId();
+        void setAcceptableDepartments(List<Department> departments, Set<Integer> departmentsIds, Integer departmentsId);
 
         void setSelectedDeclarationType(Integer id);
         void setSelectedReportPeriod(List<Integer> periodIds);
@@ -165,18 +166,20 @@ public class DeclarationCreationPresenter extends PresenterWidget<DeclarationCre
     }
 
     public void initAndShowDialog(final DeclarationDataFilter dataFilter, final HasPopupSlot popupSlot){
-        GetDeclarationFilterData action = new GetDeclarationFilterData();
-        action.setTaxType(dataFilter.getTaxType());
         this.taxType = dataFilter.getTaxType();
         getView().setTaxType(this.taxType);
+        GetReportPeriodsAction action = new GetReportPeriodsAction();
+        action.setTaxType(dataFilter.getTaxType());
+        action.setReportPeriodId(getView().getDefaultReportPeriodId());
         getView().init();
-        dispatcher.execute(action, CallbackUtils.defaultCallback(new AbstractCallback<GetDeclarationFilterDataResult>() {
+        dispatcher.execute(action, CallbackUtils.defaultCallback(new AbstractCallback<GetReportPeriodsResult>() {
             @Override
-            public void onSuccess(GetDeclarationFilterDataResult result) {
-                getView().setAcceptableReportPeriods(result.getPeriodsForCreation());
+            public void onSuccess(GetReportPeriodsResult result) {
+                getView().setAcceptableReportPeriods(result.getReportPeriods(), result.getDefaultReportPeriod());
+                onReportPeriodChange(true);
                 popupSlot.addToPopupSlot(DeclarationCreationPresenter.this);
             }
-        }, this) );
+        }, this));
     }
 
     @Override
@@ -185,8 +188,9 @@ public class DeclarationCreationPresenter extends PresenterWidget<DeclarationCre
     }
 
     @Override
-    public void onReportPeriodChange() {
+    public void onReportPeriodChange(final boolean isInit) {
         if (getView().getSelectedReportPeriod().isEmpty()) {
+            if (isInit) getView().updateEnabled();
             return;
         }
         GetDeclarationDepartmentsAction action = new GetDeclarationDepartmentsAction();
@@ -195,7 +199,8 @@ public class DeclarationCreationPresenter extends PresenterWidget<DeclarationCre
         dispatcher.execute(action, CallbackUtils.defaultCallback(new AbstractCallback<GetDeclarationDepartmentsResult>() {
             @Override
             public void onSuccess(GetDeclarationDepartmentsResult result) {
-                getView().setAcceptableDepartments(result.getDepartments(), result.getDepartmentIds());
+                getView().setAcceptableDepartments(result.getDepartments(), result.getDepartmentIds(), result.getDefaultDepartmentId());
+                if (isInit) getView().updateEnabled();
             }
         }, this) );
     }

@@ -15,6 +15,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 @Service
@@ -59,9 +60,9 @@ public class GetDeclarationFilterDataHandler extends AbstractActionHandler<GetDe
 
 		List<ReportPeriod> reportPeriods = new ArrayList<ReportPeriod>();
 		reportPeriods.addAll(periodService.getOpenForUser(currentUser.getUser(), action.getTaxType()));
-		res.setPeriodsForCreation(reportPeriods);
         DeclarationDataFilter dataFilter = new DeclarationDataFilter();
         dataFilter.setTaxType(action.getTaxType());
+        dataFilter.setDepartmentIds(Arrays.asList(currentUser.getUser().getDepartmentId()));
         res.setDefaultDecFilterData(dataFilter);
 
 		return res;

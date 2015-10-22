@@ -1,5 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.refbookdata.server;
 
+import com.aplana.sbrf.taxaccounting.model.PagingParams;
+import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookRecordVersion;
@@ -17,6 +19,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
+import java.util.Calendar;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -34,20 +38,48 @@ public class GetRefBookRecordHandler extends AbstractActionHandler<GetRefBookRec
 	@Override
 	public GetRefBookRecordResult execute(GetRefBookRecordAction action, ExecutionContext executionContext) throws ActionException {
 		RefBookDataProvider refBookDataProvider = refBookFactory.getDataProvider(action.getRefBookId());
-		Map<String, RefBookValue> record = refBookDataProvider.getRecordData(action.getRefBookRecordId());
-		RefBook refBook = refBookFactory.get(action.getRefBookId());
+        RefBook refBook = refBookFactory.get(action.getRefBookId());
 		GetRefBookRecordResult result = new GetRefBookRecordResult();
-		result.setRecord(convert(refBook, record));
 
         RefBookRecordVersion recordVersion;
 
+        Long recordId;
+        if (action.isCreate()) {
+            PagingResult<Map<String, RefBookValue>> refBookPage = refBookDataProvider
+                    .getRecordVersionsById(action.getUniqueRecordId(), new PagingParams(0, 1000), null, refBook.getAttributes().get(0));
+            if (refBookPage.isEmpty()) {
+                recordId = null;
+            } else {
+                recordId = refBookPage.get(refBookPage.getTotalCount()-1).get(RefBook.RECORD_ID_ALIAS).getNumberValue().longValue();
+            }
+            refBook.getAttributes().add(RefBook.getVersionFromAttribute());
+            refBook.getAttributes().add(RefBook.getVersionToAttribute());
+        } else {
+            recordId = action.getRefBookRecordId();
+        }
+
+        Map<String, RefBookValue> record = refBookDataProvider.getRecordData(recordId);
+        result.setRecord(convert(refBook, record));
+
         //Получаем версию выбранной записи
-        recordVersion = refBookDataProvider.getRecordVersionInfo(action.getRefBookRecordId());
-        int versionCount = refBookDataProvider.getRecordVersionsCount(action.getRefBookRecordId());
+        recordVersion = refBookDataProvider.getRecordVersionInfo(recordId);
+        int versionCount = refBookDataProvider.getRecordVersionsCount(recordId);
 
         RefBookRecordVersionData fullVersionData = new RefBookRecordVersionData();
-        fullVersionData.setVersionStart(recordVersion.getVersionStart());
-        fullVersionData.setVersionEnd(recordVersion.getVersionEnd());
+        if (action.isCreate()) {
+            if (recordVersion.getVersionEnd() != null) {
+                Calendar calendar = new GregorianCalendar();
+                calendar.setTime(recordVersion.getVersionEnd());
+                calendar.add(Calendar.DATE, 1);
+                fullVersionData.setVersionStart(calendar.getTime());
+            } else {
+                fullVersionData.setVersionStart(null);
+            }
+            fullVersionData.setVersionEnd(null);
+        } else {
+            fullVersionData.setVersionStart(recordVersion.getVersionStart());
+            fullVersionData.setVersionEnd(recordVersion.getVersionEnd());
+        }
         fullVersionData.setVersionCount(versionCount);
         result.setVersionData(fullVersionData);
 		return result;

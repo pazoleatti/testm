@@ -27,11 +27,13 @@ public class CreateFormDataPresenter extends PresenterWidget<CreateFormDataPrese
 
     public interface MyView extends PopupView, HasUiHandlers<CreateFormDataUiHandlers> {
         void init();
-        void setAcceptableDepartments(List<Department> list, Set<Integer> availableValues);
-        void setAcceptableReportPeriods(List<ReportPeriod> reportPeriods);
+        void setAcceptableDepartments(List<Department> list, Set<Integer> availableValues, Integer departmentId);
+        void setAcceptableReportPeriods(List<ReportPeriod> reportPeriods, ReportPeriod reportPeriod);
+        Integer getDefaultReportPeriodId();
+
         void setAcceptableMonthList(List<Months> monthList);
 
-        void setAcceptableComparativPeriods(List<ReportPeriod> comparativPeriods);
+        void setAcceptableComparativePeriods(List<ReportPeriod> comparativPeriods);
 
         void setAcceptableKinds(List<FormDataKind> dataKinds);
         void setAcceptableTypes(List<FormType> types);
@@ -41,6 +43,7 @@ public class CreateFormDataPresenter extends PresenterWidget<CreateFormDataPrese
         void setFilter(String filter);
         void updateLabel();
 
+        void setReportPeriodType(String type);
         /**
          * Устанавливаем в enabled/disabled ежемесячность
          * @param isMonthly true - ежемесячный, false - неежемесячный
@@ -112,7 +115,8 @@ public class CreateFormDataPresenter extends PresenterWidget<CreateFormDataPrese
                 .wrongStateCallback(new AbstractCallback<FillFormFieldsResult>() {
                     @Override
                     public void onSuccess(FillFormFieldsResult result) {
-                        getView().setAcceptableDepartments(result.getDepartments(), result.getDepartmentIds());
+                        getView().setAcceptableDepartments(result.getDepartments(), result.getDepartmentIds(), result.getDefaultDepartmentId());
+                        getView().updateEnabled();
                     }
                 }, this));
     }
@@ -175,10 +179,12 @@ public class CreateFormDataPresenter extends PresenterWidget<CreateFormDataPrese
 
     public void initAndShowDialog(final FormDataFilter filter, final HasPopupSlot slotForMe, CreateFormDataSuccessHandler createFormDataSuccessHandler){
         taxType = filter.getTaxType();
+        getView().setReportPeriodType(taxType.name());
         this.createFormDataSuccessHandler = createFormDataSuccessHandler;
         FillFormFieldsAction action = new FillFormFieldsAction();
         action.setFieldsNum(FillFormFieldsAction.FieldsNum.FIRST);
         action.setTaxType(taxType);
+        action.setReportPeriodId(getView().getDefaultReportPeriodId());
         getView().updateLabel();
         dispatchAsync.execute(action, CallbackUtils
                 .wrongStateCallback(new AbstractCallback<FillFormFieldsResult>() {
@@ -188,7 +194,9 @@ public class CreateFormDataPresenter extends PresenterWidget<CreateFormDataPrese
                         getView().setFilterData(new FormDataFilter());
 
                         getView().init();
-                        getView().setAcceptableReportPeriods(result.getReportPeriods());
+                        getView().setAcceptableReportPeriods(result.getReportPeriods(), result.getDefaultReportPeriod());
+                        getView().setAcceptableDepartments(result.getDepartments(), result.getDepartmentIds(), result.getDefaultDepartmentId());
+                        getView().updateEnabled();
                         changeFilterElementNames(taxType);
 
                         slotForMe.addToPopupSlot(CreateFormDataPresenter.this);
@@ -228,7 +236,7 @@ public class CreateFormDataPresenter extends PresenterWidget<CreateFormDataPrese
                             getView().setAcceptableMonthList(result.getMonthsList());
                         }
                         if (result.isComparative() && comparativePeriodId == null) {
-                            getView().setAcceptableComparativPeriods(result.getComparativePeriods());
+                            getView().setAcceptableComparativePeriods(result.getComparativePeriods());
                             getView().setAccruing(result.isAccruing(), false);
                         } else {
                             getView().setAccruing(result.isAccruing(), !result.isFirstPeriod());

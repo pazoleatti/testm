@@ -9,7 +9,6 @@ import com.aplana.gwt.client.dialog.DialogHandler;
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
-import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.web.module.departmentconfig.shared.DepartmentCombined;
 import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPickerPopupWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.periodpicker.client.PeriodPickerPopupWidget;
@@ -453,6 +452,23 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
 	@Override
 	public void setReportPeriods(List<ReportPeriod> reportPeriods) {
 		periodPickerPopup.setPeriods(reportPeriods);
+        if (reportPeriods == null || reportPeriods.isEmpty()) {
+            return;
+        }
+        Integer defaultReportPeriodId = periodPickerPopup.getDefaultReportPeriod();
+        ReportPeriod maxPeriod = reportPeriods.get(0);
+        for (ReportPeriod reportPeriod : reportPeriods) {
+            if (defaultReportPeriodId != null && reportPeriod.getId().equals(defaultReportPeriodId)) {
+                periodPickerPopup.setValue(Arrays.asList(defaultReportPeriodId));
+                maxPeriod = null;
+                break;
+            }
+            if (reportPeriod.getEndDate().after(maxPeriod.getEndDate())) {
+                maxPeriod = reportPeriod;
+            }
+        }
+        if (maxPeriod != null)
+            periodPickerPopup.setValue(Arrays.asList(maxPeriod.getId()));
 	}
 
 	@Override
@@ -487,6 +503,7 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
 
 	@Override
 	public void setTaxType(TaxType taxType) {
+        periodPickerPopup.setType(taxType.name());
         currentTaxType = taxType;
         taxTypeLabel.setText(taxType.getName());
         if (TaxType.VAT.equals(taxType)) {

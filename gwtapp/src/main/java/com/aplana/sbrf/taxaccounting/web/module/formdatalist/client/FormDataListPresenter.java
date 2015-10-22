@@ -4,7 +4,6 @@ import com.aplana.sbrf.taxaccounting.model.FormDataFilter;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
-import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogShowEvent;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.client.FormDataPresenter;
@@ -29,9 +28,6 @@ import com.gwtplatform.mvp.client.proxy.PlaceRequest;
 import com.gwtplatform.mvp.client.proxy.PlaceRequest.Builder;
 import com.gwtplatform.mvp.client.proxy.ProxyPlace;
 
-import java.util.HashMap;
-import java.util.Map;
-
 public class FormDataListPresenter extends FormDataListPresenterBase<FormDataListPresenter.MyProxy> implements
 		FormDataListUiHandlers, FilterFormDataReadyEvent.MyHandler, FormDataListCreateEvent.FormDataCreateHandler,
 		FormDataListApplyEvent.FormDataApplyHandler {
@@ -55,7 +51,7 @@ public class FormDataListPresenter extends FormDataListPresenterBase<FormDataLis
 	 * Сетится в фильтр при открытии формы.
 	 * Используется при заполнении начальных значений фильтра поиска
 	 */
-	private Map<TaxType, FormDataFilter> filterStates = new HashMap<TaxType, FormDataFilter>();
+	private FormDataFilter filterState = null;
 
     // Ссылка, по которой перешли из данной формы. Если вернулись оттуда же, то фильтр не сбрасывается
     private String historyRef;
@@ -100,7 +96,7 @@ public class FormDataListPresenter extends FormDataListPresenterBase<FormDataLis
         filterPresenter.changeFilterElementNames(taxType);
         getView().updatePageSize(taxType);
         if (taxTypeOld == null || !taxType.equals(taxTypeOld)) {
-            filterStates.clear();
+            filterState = null;
             getView().updateFormDataTable(taxType);
             selectedItemId = null;
         } else {
@@ -111,7 +107,7 @@ public class FormDataListPresenter extends FormDataListPresenterBase<FormDataLis
             // Переход обратно из этой же формы
             if (historyRef == null || !historyRef.startsWith(url)) {
                 filterPresenter.getView().clean();
-                filterStates.clear();
+                filterState = null;
                 selectedItemId = null;
             }
         }
@@ -122,7 +118,7 @@ public class FormDataListPresenter extends FormDataListPresenterBase<FormDataLis
                 .defaultCallback(new AbstractCallback<GetKindListResult>() {
                     @Override
                     public void onSuccess(GetKindListResult kindListResult) {
-                        filterPresenter.initFilter(taxType, filterStates.get(taxType), kindListResult);
+                        filterPresenter.initFilter(taxType, filterState, kindListResult);
                     }
                 }, this));
         super.prepareFromRequest(request);
@@ -205,16 +201,16 @@ public class FormDataListPresenter extends FormDataListPresenterBase<FormDataLis
 		// Если мы захотим чтобы для каждого налога запоминались другие параметры поиска (сортировка...),
 		// то вместо создания нового мы должны будем получать фильтр из мапки и обновлять.
 
-		filterStates.put(taxType, cloneFilter);
+        filterState = cloneFilter;
 	}
 
-	private FormDataFilter getFilterState(TaxType taxType){
-		return filterStates.get(taxType);
+	private FormDataFilter getFilterState(){
+		return filterState;
 	}
 
 	@Override
 	public void onRangeChange(final int start, int length) {
-		FormDataFilter filter = getFilterState(taxType);
+		FormDataFilter filter = getFilterState();
         if (filter == null) {
             return;
         }

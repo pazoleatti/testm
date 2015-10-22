@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.declarationlist.server;
 
 import com.aplana.sbrf.taxaccounting.model.Department;
+import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.declarationlist.shared.GetDeclarationDepartmentsAction;
@@ -12,7 +13,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 import static java.util.Arrays.asList;
 
@@ -33,10 +37,11 @@ public class GetDeclarationDepartmentsHandler extends AbstractActionHandler<GetD
     @Override
     public GetDeclarationDepartmentsResult execute(GetDeclarationDepartmentsAction action, ExecutionContext context) throws ActionException {
         GetDeclarationDepartmentsResult result = new GetDeclarationDepartmentsResult();
+        TAUserInfo userInfo = securityService.currentUserInfo();
 
         // Доступные подразделения
         List<Integer> departments =
-                departmentService.getOpenPeriodDepartments(securityService.currentUserInfo().getUser(), asList(action.getTaxType()), action.getReportPeriodId());
+                departmentService.getOpenPeriodDepartments(userInfo.getUser(), asList(action.getTaxType()), action.getReportPeriodId());
         if (departments.isEmpty()){
             result.setDepartments(new ArrayList<Department>());
             result.setDepartmentIds(new HashSet<Integer>());
@@ -45,6 +50,9 @@ public class GetDeclarationDepartmentsHandler extends AbstractActionHandler<GetD
             result.setDepartments(new ArrayList<Department>(
                     departmentService.getRequiredForTreeDepartments(departmentIds).values()));
             result.setDepartmentIds(departmentIds);
+            if (result.getDepartmentIds().contains(userInfo.getUser().getDepartmentId())) {
+                result.setDefaultDepartmentId(userInfo.getUser().getDepartmentId());
+            }
         }
         return result;
     }
