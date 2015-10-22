@@ -2,11 +2,11 @@ package com.aplana.sbrf.taxaccounting.dao.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.api.TaxPeriodDao;
+import com.aplana.sbrf.taxaccounting.dao.impl.util.FormatUtils;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
-import com.aplana.sbrf.taxaccounting.model.util.FormDataUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,7 +48,7 @@ public class ReportPeriodDaoImpl extends AbstractDao implements ReportPeriodDao 
             Date calendarStartDate = rs.getDate("calendar_start_date");
 			reportPeriod.setCalendarStartDate(calendarStartDate);
             reportPeriod.setOrder(getReportOrder(calendarStartDate, id));
-            reportPeriod.setAccName(FormDataUtils.getAccName(reportPeriod.getName(), reportPeriod.getCalendarStartDate()));
+            reportPeriod.setAccName(FormatUtils.getAccName(reportPeriod.getName(), reportPeriod.getCalendarStartDate()));
             return reportPeriod;
         }
 

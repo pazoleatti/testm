@@ -5,13 +5,13 @@ import com.aplana.sbrf.taxaccounting.dao.SourceDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DeclarationTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.api.FormTypeDao;
+import com.aplana.sbrf.taxaccounting.dao.impl.util.FormatUtils;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.source.ConsolidatedInstance;
 import com.aplana.sbrf.taxaccounting.model.source.SourceObject;
 import com.aplana.sbrf.taxaccounting.model.source.SourcePair;
-import com.aplana.sbrf.taxaccounting.model.util.FormDataUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -1060,7 +1060,7 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
                 relation.setComparativePeriodStartDate(rs.getDate("compPeriodStartDate"));
                 String baseCompPeriodName = rs.getString("compPeriodName");
                 relation.setComparativePeriodName(relation.isAccruing() ?
-                        FormDataUtils.getAccName(baseCompPeriodName, relation.getComparativePeriodStartDate()) : baseCompPeriodName);
+                        FormatUtils.getAccName(baseCompPeriodName, relation.getComparativePeriodStartDate()) : baseCompPeriodName);
             }
             relation.setPerformerName(rs.getString("performerName"));
         } else {
