@@ -206,7 +206,7 @@ void logicCheck() {
             // графа 27..31
             ['dividendSumForTaxStavka9', 'dividendSumForTaxStavka0', 'taxSum', 'taxSumFromPeriod', 'taxSumLast'].each {
                 if (row[it] != 0) {
-                    errorMessage(row, it, errorMsg)
+                    logger.warn("Графа «%s» заполнена неверно!", getColumnName(row, it))
                 }
             }
         }
