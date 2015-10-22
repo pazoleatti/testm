@@ -309,4 +309,39 @@ public class Relation implements Serializable {
     public void setDepartmentId(int departmentId) {
         this.departmentId = departmentId;
     }
+
+    @Override
+    public String toString() {
+        return "Relation{" +
+                "department=" + department +
+                ", departmentReportPeriod=" + departmentReportPeriod +
+                ", state=" + state +
+                ", created=" + created +
+                ", source=" + source +
+                ", status=" + status +
+                ", formDataId=" + formDataId +
+                ", formType=" + formType +
+                ", formDataKind=" + formDataKind +
+                ", performer=" + performer +
+                ", comparativePeriod=" + comparativePeriod +
+                ", accruing=" + accruing +
+                ", month=" + month +
+                ", manual=" + manual +
+                ", declarationDataId=" + declarationDataId +
+                ", declarationType=" + declarationType +
+                ", taxOrganCode='" + taxOrganCode + '\'' +
+                ", kpp='" + kpp + '\'' +
+                ", departmentId=" + departmentId +
+                ", fullDepartmentName='" + fullDepartmentName + '\'' +
+                ", correctionDate=" + correctionDate +
+                ", formTypeName='" + formTypeName + '\'' +
+                ", declarationTypeName='" + declarationTypeName + '\'' +
+                ", year=" + year +
+                ", periodName='" + periodName + '\'' +
+                ", comparativePeriodName='" + comparativePeriodName + '\'' +
+                ", comparativePeriodStartDate=" + comparativePeriodStartDate +
+                ", comparativePeriodYear=" + comparativePeriodYear +
+                ", performerName='" + performerName + '\'' +
+                '}';
+    }
 }

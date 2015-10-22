@@ -660,7 +660,7 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
             "     case when (sfd.id is not null) then sctp.year when (sft.COMPARATIVE = 1) then ctp.year else null end as compPeriodYear,\n" +
             "     case when (sfd.id is not null) then scrp.CALENDAR_START_DATE when (sft.COMPARATIVE = 1) then crp.CALENDAR_START_DATE else null end as compPeriodStartDate,\n" +
             "     case when (sfd.id is not null) then scrp.name when (sft.COMPARATIVE = 1) then crp.name else null end as compPeriodName,\n" +
-            "     case when (sfd.id is not null) then sfd.ACCRUING when (sft.COMPARATIVE = 1) then fd.ACCRUING else null end as ACCRUING,\n" +
+            "     case when (sfd.id is not null) then sfd.ACCRUING when (sft.ACCRUING = 1) then fd.ACCRUING else null end as ACCRUING,\n" +
             "     case when sft.MONTHLY=1 then perversion.month else sfd.PERIOD_ORDER end as month, sdft.id as sdft_id\n" +
             "      from form_data fd \n" +
             "      join department_report_period drp on drp.id = fd.DEPARTMENT_REPORT_PERIOD_ID and fd.id = :destinationFormDataId\n" +
@@ -700,12 +700,11 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
             "                 from dual\n" +
             "                 connect by level <= 12\n" +
             "            ) lvl on ADD_MONTHS(t.d1, lvl.i - 1) <= t.d2 \n" +
-            "           ) perversion on perversion.record_id = rp.DICT_TAX_PERIOD_ID and perversion.lvl = case when sft.MONTHLY=1 then perversion.lvl else 1 end\n" +
+            "           ) perversion on perversion.record_id = rp.DICT_TAX_PERIOD_ID and perversion.lvl = case when (sft.MONTHLY=1 and ft.MONTHLY=0) then perversion.lvl else 1 end\n" +
             "      --отбираем экземпляры с учетом периода сравнения, признака нарастающего истога, списка месяцов     \n" +
             "      left join form_data sfd on (sfd.kind = sfk.id and sfd.FORM_TEMPLATE_ID = sft.id and sfd.DEPARTMENT_REPORT_PERIOD_ID = sdrp.id \n" +
             "        and (sft.COMPARATIVE = 0 or ft.COMPARATIVE = 0 or sfd.COMPARATIVE_DEP_REP_PER_ID = fd.COMPARATIVE_DEP_REP_PER_ID) and (sft.ACCRUING = 0 or ft.ACCRUING = 0 or sfd.ACCRUING = fd.ACCRUING)) \n" +
             "        and coalesce(sfd.PERIOD_ORDER, perversion.month) = perversion.month\n" +
-            "        and (:stateRestriction is null or sfd.state = :stateRestriction)\n" +
             "      left join form_data_performer fdp on fdp.form_data_id = sfd.id \n" +
             "      left join department fdpd on fdpd.id = fdp.PRINT_DEPARTMENT_ID      \n" +
             "      left join department_report_period scdrp on scdrp.id = sfd.COMPARATIVE_DEP_REP_PER_ID\n" +
@@ -723,8 +722,8 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
             "compPeriodId, compPeriodName, compPeriodYear, compPeriodStartDate, accruing, month, manual \n" +
             "       from insanity i\n" +
             "       left join aggregated_insanity i_agg on i.sdft_id = i_agg.sdft_id \n" +
-            "       where nvl(i.correction_date, to_date('01.01.0001', 'DD.MM.YYYY')) = nvl(i_agg.last_correction_date, to_date('01.01.0001', 'DD.MM.YYYY')) and (:excludeIfNotExist != 1 or id is not null)\n" +
-            "       order by formTypeName, state";
+            "       where nvl(i.correction_date, to_date('01.01.0001', 'DD.MM.YYYY')) = nvl(i_agg.last_correction_date, to_date('01.01.0001', 'DD.MM.YYYY')) and (:excludeIfNotExist != 1 or id is not null) and (id is null or :stateRestriction is null or state = :stateRestriction)\n" +
+            "       order by formTypeName, state, departmentName, id";
 
     @Override
     public List<Relation> getSourcesInfo(long destinationFormDataId, final boolean light, boolean excludeIfNotExist, WorkflowState stateRestriction) {
@@ -748,8 +747,8 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
 
     private static final String GET_DESTINATIONS_INFO = "with insanity as \n" +
             "     (\n" +
-            "     select tfd.id, td.id as departmentId, td.name as departmentName, tdrp.id as departmentReportPeriod, ttp.YEAR, trp.name as periodName, \n" +
-            "     tdrp.CORRECTION_DATE, tfd.state, tft.status as templateState, tfd.PERIOD_ORDER as month, tfd.manual,\n" +
+            "     select tfd.id, td.id as departmentId, td.name as departmentName, tdrp.id as departmentReportPeriod, ttp.YEAR, trp.id as reportperiodid, trp.name as periodName, \n" +
+            "     tdrp.CORRECTION_DATE, tfd.state, tft.status as templateState, tfd.manual,\n" +
             "     tt.id as formTypeId, tt.name as formTypeName, tfk.id as formDataKind, fdpd.id as performerId, fdpd.name as performerName, \n" +
             "     --Если искомый экземпляр создан, то берем его значения периода и признака. \n" +
             "     --Если не создан и в его макете есть признак сравнения, то период и признак такой же как у источника\n" +
@@ -758,7 +757,8 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
             "     case when (tfd.id is not null) then tctp.year when (tft.COMPARATIVE = 1) then ctp.year else null end as compPeriodYear,\n" +
             "     case when (tfd.id is not null) then tcrp.CALENDAR_START_DATE when (tft.COMPARATIVE = 1) then crp.CALENDAR_START_DATE else null end as compPeriodStartDate,\n" +
             "     case when (tfd.id is not null) then tcrp.name when (tft.COMPARATIVE = 1) then crp.name else null end as compPeriodName,\n" +
-            "     case when (tfd.id is not null) then tfd.ACCRUING when (tft.COMPARATIVE = 1) then fd.ACCRUING else null end as ACCRUING\n" +
+            "     case when (tfd.id is not null) then tfd.ACCRUING when (tft.ACCRUING = 1) then fd.ACCRUING else null end as ACCRUING,\n" +
+            "     case when tft.MONTHLY=1 then perversion.month else tfd.PERIOD_ORDER end as month\n" +
             "      from (\n" +
             "           select neighbours_fd.id, \n" +
             "                  neighbours_fd.form_template_id,\n" +
@@ -775,7 +775,7 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
             "            join form_data neighbours_fd on neighbours_fd.department_report_period_id = neighbours_drp.id and neighbours_fd.form_template_id = fd.form_template_id and neighbours_fd.kind = fd.kind     \n" +
             "            ) fd             \n" +
             "      join report_period rp on rp.id = fd.REPORT_PERIOD_ID\n" +
-            "\t  left join department_report_period cdrp on cdrp.id = fd.COMPARATIVE_DEP_REP_PER_ID\n" +
+            "      left join department_report_period cdrp on cdrp.id = fd.COMPARATIVE_DEP_REP_PER_ID\n" +
             "      left join report_period crp on crp.id = cdrp.REPORT_PERIOD_ID\n" +
             "      left join tax_period ctp on ctp.id = crp.TAX_PERIOD_ID\n" +
             "      join form_template ft on ft.id = fd.FORM_TEMPLATE_ID\n" +
@@ -791,24 +791,55 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
             "      join report_period trp on trp.id = tdrp.REPORT_PERIOD_ID\n" +
             "      join tax_period ttp on ttp.ID = trp.TAX_PERIOD_ID\n" +
             "      --отбираем макет действующий для приемника в периоде источника\n" +
-            "      join form_template tft on (tft.TYPE_ID = tt.ID and tft.status = 0 and tft.version = (select max(ft2.version) from form_template ft2 where ft2.TYPE_ID = tft.TYPE_ID and extract(year from ft2.version) <= ttp.year)) \n" +
+            "      join form_template tft on (tft.TYPE_ID = tt.ID and tft.status in (0,1) and tft.version = (select max(ft2.version) from form_template ft2 where ft2.TYPE_ID = tft.TYPE_ID and extract(year from ft2.version) <= ttp.year)) \n" +
+            "      --если макет приемника ежемесячный, то отбираем все возможные месяца для него из справочника\n" +
+            "      left join\n" +
+            "           (\n" +
+            "           select t.id as record_id, lvl.i as lvl, extract(month from ADD_MONTHS(t.d1, lvl.i - 1)) as month, t.d1, t.d2 from (      \n" +
+            "              select id, end_date as d2, calendar_start_date as d1, round(months_between(end_date, calendar_start_date)) as months_between_cnt from (\n" +
+            "                        select r.id, v.date_value, a.alias from ref_book_value v \n" +
+            "                        join ref_book_record r on r.id = v.record_id\n" +
+            "                        join ref_book_attribute a on a.id = v.ATTRIBUTE_ID and a.alias in ('CALENDAR_START_DATE', 'END_DATE')\n" +
+            "                        where r.ref_book_id = 8)\n" +
+            "                      pivot\n" +
+            "                      (\n" +
+            "                        max(date_value) for alias in ('END_DATE' END_DATE, 'CALENDAR_START_DATE' CALENDAR_START_DATE)\n" +
+            "                      )) t\n" +
+            "            join (\n" +
+            "                 select level i\n" +
+            "                 from dual\n" +
+            "                 connect by level <= 12\n" +
+            "            ) lvl on ADD_MONTHS(t.d1, lvl.i - 1) <= t.d2 \n" +
+            "           ) perversion on perversion.record_id = rp.DICT_TAX_PERIOD_ID and perversion.lvl = case when (tft.MONTHLY=1 and ft.MONTHLY=0) then perversion.lvl else 1 end\n" +
             "      --отбираем экземпляры с учетом периода сравнения, признака нарастающего истога, списка месяцов     \n" +
-            "      join form_data tfd on (tfd.kind = tfk.id and tfd.FORM_TEMPLATE_ID = tft.id and tfd.DEPARTMENT_REPORT_PERIOD_ID = tdrp.id\n" +
+            "      left join form_data tfd on (tfd.kind = tfk.id and tfd.FORM_TEMPLATE_ID = tft.id and tfd.DEPARTMENT_REPORT_PERIOD_ID = tdrp.id\n" +
             "        and (tft.COMPARATIVE = 0 or ft.COMPARATIVE = 0 or tfd.COMPARATIVE_DEP_REP_PER_ID = fd.COMPARATIVE_DEP_REP_PER_ID) and (tft.ACCRUING = 0 or ft.ACCRUING = 0 or tfd.ACCRUING = fd.ACCRUING)) \n" +
-            "        and (:stateRestriction is null or tfd.state = :stateRestriction)\n" +
+            "        and coalesce(tfd.PERIOD_ORDER, perversion.month) = perversion.month \n" +
             "      left join form_data_performer fdp on fdp.form_data_id = tfd.id \n" +
             "      left join department fdpd on fdpd.id = fdp.PRINT_DEPARTMENT_ID\n" +
             "      left join department_report_period tcdrp on tcdrp.id = tfd.COMPARATIVE_DEP_REP_PER_ID\n" +
             "      left join report_period tcrp on tcrp.id = tcdrp.REPORT_PERIOD_ID\n" +
             "      left join tax_period tctp on tctp.id = tcrp.TAX_PERIOD_ID\n" +
             "      where fd.id = :sourceFormDataId\n" +
-            "  )         \n" +
-            "select id, departmentId, departmentName, correction_date, departmentReportPeriod, periodName, year, state, " +
-            "templateState, formTypeId, formTypeName, formDataKind, performerId, performerName, " +
-            "compPeriodId, compPeriodName, compPeriodYear, compPeriodStartDate, accruing, month, manual \n" +
+            "  ),\n" +
+            "  aggregated_insanity as (\n" +
+            "      select departmentId, formtypeid, formdatakind, reportperiodid, month, isExemplarExistent, last_correction_date, global_last_correction_date from                 \n" +
+            "        (select case when i.id is null then '0' else '1' end as agg_type, departmentId, formtypeid, formdatakind, reportperiodid, month, max(correction_date) over(partition by departmentId, formtypeid, formdatakind, reportperiodid, month, case when i.id is null then 0 else 1 end) as last_correction_date, case when count(i.id) over(partition by departmentId, formtypeid, formdatakind, reportperiodid, month) > 0 then 1 else 0 end isExemplarExistent\n" +
+            "         from insanity i)  \n" +
+            "      --транспонирование и агрегирование среди множеств отдельно с сушествующими и несуществующими экземлярами \n" +
+            "      pivot \n" +
+            "      (\n" +
+            "          max(last_correction_date) for agg_type in ('1' as last_correction_date, '0' global_last_correction_date)\n" +
+            "      )\n" +
+            ")         \n" +
+            "select i.id, i.departmentId, i.departmentName, i.correction_date, ai.last_correction_date, ai.global_last_correction_date, i.reportperiodid, i.departmentReportPeriod, i.periodName, i.year, i.state, i.templateState, i.formTypeId, i.formTypeName, i.formDataKind, i.performerId, i.performerName, i.compPeriodId, i.compPeriodName, i.compPeriodYear, i.compPeriodStartDate, i.accruing, i.month, i.manual \n" +
             "       from insanity i\n" +
-            "       where (id is not null or correction_date is null) and (:excludeIfNotExist != 1 or id is not null)\n" +
-            "       order by formTypeName, state";
+            "       --обращение к аггрегированным данным для определения, какие существуют данные в связке по подразделению, типу, виду, периоду и месяцу экземпляры данных, их максимальную дату и дату последнего периода корректировки, если данные по экземлярам отсутствуют \n" +
+            "       left join aggregated_insanity ai on i.id is null and ai.departmentId = i.departmentId and ai.formtypeid = i.formtypeid and ai.formdatakind = i.formdatakind and ai.reportperiodid = i.reportperiodid  and nvl(i.month,-1) = nvl(ai.month,-1)\n" +
+            "       --отбираем либо записи, либо где идентификатор формы существует, либо если не существует, то берем запись с максимально доступной датой корректировки \n" +
+            "       where (id is not null or (ai.isExemplarExistent = 0 and nvl(i.correction_date, to_date('01.01.0001', 'DD.MM.YYYY')) = nvl(ai.global_last_correction_date, to_date('01.01.0001', 'DD.MM.YYYY'))))\n" +
+            "       and (:excludeIfNotExist != 1 or id is not null) and (id is null or :stateRestriction is null or state = :stateRestriction)\n" +
+            "       order by formTypeName, state, departmentName, id";
 
     @Override
     public List<Relation> getDestinationsInfo(long sourceFormDataId, final boolean light, boolean excludeIfNotExist, WorkflowState stateRestriction) {
@@ -832,8 +863,8 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
 
     private static final String GET_DECLARATION_DESTINATIONS_INFO = "with insanity as \n" +
             "     (\n" +
-            "     select tdd.id, td.id as departmentId, td.name as departmentName, tdrp.id as departmentReportPeriod, ttp.YEAR, trp.name as periodName, \n" +
-            "     tdrp.CORRECTION_DATE, tdd.IS_ACCEPTED, tdt.status as templateState, dt.id as declarationTypeId, dt.name as declarationTypeName\n" +
+            "     select tdd.id, td.id as departmentId, td.name as departmentName, tdrp.id as departmentReportPeriod, ttp.YEAR, trp.id as reportperiodid, trp.name as periodName, \n" +
+            "     tdrp.CORRECTION_DATE, tdd.IS_ACCEPTED, tdt.status as templateState, dt.id as declarationTypeId, dt.name as declarationTypeName, tdd.TAX_ORGAN_CODE as taxOrgan, tdd.kpp \n" +
             "      from (\n" +
             "           select neighbours_fd.id, \n" +
             "                  neighbours_fd.form_template_id,\n" +
@@ -860,22 +891,38 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
             "      join report_period trp on trp.id = tdrp.REPORT_PERIOD_ID\n" +
             "      join tax_period ttp on ttp.ID = trp.TAX_PERIOD_ID\n" +
             "      --отбираем макет действующий для приемника в периоде источника\n" +
-            "      join declaration_template tdt on (tdt.DECLARATION_TYPE_ID = dt.ID and tdt.status = 0 and tdt.version = (select max(dt2.version) from declaration_template dt2 where dt2.DECLARATION_TYPE_ID = tdt.DECLARATION_TYPE_ID and extract(year from dt2.version) <= ttp.year)) \n" +
+            "      join declaration_template tdt on (tdt.DECLARATION_TYPE_ID = dt.ID and tdt.status in (0,1) and tdt.version = (select max(dt2.version) from declaration_template dt2 where dt2.DECLARATION_TYPE_ID = tdt.DECLARATION_TYPE_ID and extract(year from dt2.version) <= ttp.year)) \n" +
             "      --отбираем экземпляры с учетом периода сравнения, признака нарастающего истога, списка месяцов     \n" +
-            "      left join declaration_data tdd on (tdd.DECLARATION_TEMPLATE_ID = tdt.id and tdd.DEPARTMENT_REPORT_PERIOD_ID = tdrp.id) and (:stateRestriction is null or tdd.IS_ACCEPTED = :stateRestriction)\n" +
+            "      left join declaration_data tdd on (tdd.DECLARATION_TEMPLATE_ID = tdt.id and tdd.DEPARTMENT_REPORT_PERIOD_ID = tdrp.id)\n" +
             "      where fd.id = :sourceFormDataId\n" +
-            "  )         \n" +
-            "select id, departmentId, departmentName, correction_date, departmentReportPeriod, periodName, year, IS_ACCEPTED, templateState, declarationTypeId, declarationTypeName\n" +
+            "  ),         \n" +
+            "  aggregated_insanity as (\n" +
+            "      select departmentId, declarationTypeId, reportperiodid, isExemplarExistent, last_correction_date, global_last_correction_date from                 \n" +
+            "        (select case when i.id is null then '0' else '1' end as agg_type, departmentId, declarationTypeId, reportperiodid, max(correction_date) over(partition by departmentId, declarationTypeId, reportperiodid, case when i.id is null then 0 else 1 end) as last_correction_date, case when count(i.id) over(partition by departmentId, declarationTypeId, reportperiodid) > 0 then 1 else 0 end isExemplarExistent\n" +
+            "         from insanity i)  \n" +
+            "      --транспонирование и агрегирование среди множеств отдельно с сушествующими и несуществующими экземлярами \n" +
+            "      pivot \n" +
+            "      (\n" +
+            "          max(last_correction_date) for agg_type in ('1' as last_correction_date, '0' global_last_correction_date)\n" +
+            "      )\n" +
+            ")         \n" +
+            "select i.id, i.departmentId, i.departmentName, i.correction_date, ai.last_correction_date, ai.global_last_correction_date, i.reportperiodid, i.departmentReportPeriod, i.periodName, i.year, i.IS_ACCEPTED, i.templateState, i.declarationTypeId, i.declarationTypeName, i.taxOrgan, i.kpp\n" +
             "       from insanity i\n" +
-            "       where (id is not null or correction_date is null) and (:excludeIfNotExist != 1 or id is not null)\n" +
-            "       order by declarationTypeName, IS_ACCEPTED";
+            "       --обращение к аггрегированным данным для определения, какие существуют данные в связке по подразделению, типу, виду, периоду и месяцу экземпляры данных, их максимальную дату и дату последнего периода корректировки, если данные по экземлярам отсутствуют \n" +
+            "       left join aggregated_insanity ai on i.id is null and ai.departmentId = i.departmentId and ai.declarationTypeId = i.declarationTypeId and ai.reportperiodid = i.reportperiodid \n" +
+            "       --отбираем либо записи, либо где идентификатор формы существует, либо если не существует, то берем запись с максимально доступной датой корректировки \n" +
+            "       where (id is not null or (ai.isExemplarExistent = 0 and nvl(i.correction_date, to_date('01.01.0001', 'DD.MM.YYYY')) = nvl(ai.global_last_correction_date, to_date('01.01.0001', 'DD.MM.YYYY')))) \n" +
+            "       and (:excludeIfNotExist != 1 or id is not null) and (id is null or :stateRestriction is null or IS_ACCEPTED = :stateRestriction)\n" +
+            "       order by declarationTypeName, IS_ACCEPTED, departmentName, id";
 
     @Override
     public List<Relation> getDeclarationDestinationsInfo(long sourceFormDataId, final boolean light, boolean excludeIfNotExist, WorkflowState stateRestriction) {
         Map<String, Object> params = new HashMap<String, Object>();
         params.put("sourceFormDataId", sourceFormDataId);
         params.put("excludeIfNotExist", excludeIfNotExist ? 1 : 0);
-        params.put("stateRestriction", stateRestriction != null ? stateRestriction.getId() : null);
+        params.put("stateRestriction", stateRestriction != null && (stateRestriction == WorkflowState.CREATED || stateRestriction ==WorkflowState.ACCEPTED) ?
+                stateRestriction == WorkflowState.ACCEPTED ? 1 : 0
+                : null);
         try {
             return getNamedParameterJdbcTemplate().query(GET_DECLARATION_DESTINATIONS_INFO, params, new RowMapper<Relation>() {
                 @Override
@@ -887,6 +934,8 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
                     relation.setState(relation.getDeclarationDataId() == null ? WorkflowState.NOT_EXIST :
                             SqlUtils.getInteger(rs, "IS_ACCEPTED") == 1 ? WorkflowState.ACCEPTED : WorkflowState.CREATED);
                     relation.setStatus(SqlUtils.getInteger(rs, "templateState") == 0);
+                    relation.setTaxOrganCode(rs.getString("taxOrgan"));
+                    relation.setKpp(rs.getString("kpp"));
                     if (light) {
                         relation.setDepartmentId(SqlUtils.getInteger(rs, "departmentId"));
                         relation.setFullDepartmentName(rs.getString("departmentName"));
@@ -951,7 +1000,6 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
             "           ) perversion on perversion.record_id = rp.DICT_TAX_PERIOD_ID and perversion.lvl = case when sft.MONTHLY=1 then perversion.lvl else 1 end\n" +
             "      --отбираем экземпляры с учетом списка месяцов     \n" +
             "      left join form_data sfd on (sfd.kind = sfk.id and sfd.FORM_TEMPLATE_ID = sft.id and sfd.DEPARTMENT_REPORT_PERIOD_ID = sdrp.id) and coalesce(sfd.PERIOD_ORDER, perversion.month) = perversion.month\n" +
-            "        and (:stateRestriction is null or sfd.state = :stateRestriction)\n" +
             "      left join form_data_performer fdp on fdp.form_data_id = sfd.id \n" +
             "      left join department fdpd on fdpd.id = fdp.PRINT_DEPARTMENT_ID  \n" +
             "           ),\n" +
@@ -965,8 +1013,8 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
             "templateState, formTypeId, formTypeName, formDataKind, performerId, performerName, month, manual \n" +
             "       from insanity i\n" +
             "       left join aggregated_insanity i_agg on i.sdft_id = i_agg.sdft_id \n" +
-            "       where nvl(i.correction_date, to_date('01.01.0001', 'DD.MM.YYYY')) = nvl(i_agg.last_correction_date, to_date('01.01.0001', 'DD.MM.YYYY')) and (:excludeIfNotExist != 1 or id is not null)\n" +
-            "       order by formTypeName, state";
+            "       where nvl(i.correction_date, to_date('01.01.0001', 'DD.MM.YYYY')) = nvl(i_agg.last_correction_date, to_date('01.01.0001', 'DD.MM.YYYY')) and (:excludeIfNotExist != 1 or id is not null) and (id is null or :stateRestriction is null or state = :stateRestriction)\n" +
+            "       order by formTypeName, state, departmentName, id";
 
     @Override
     public List<Relation> getDeclarationSourcesInfo(long declarationId, final boolean light, boolean excludeIfNotExist, WorkflowState stateRestriction) {
@@ -1018,9 +1066,15 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
         } else {
             relation.setDepartment(departmentDao.getDepartment(SqlUtils.getInteger(rs, "departmentId")));
             relation.setDepartmentReportPeriod(departmentReportPeriodDao.get(SqlUtils.getInteger(rs, "departmentReportPeriod")));
-            relation.setPerformer(departmentDao.getDepartment(SqlUtils.getInteger(rs, "performerId")));
+            Integer performerId = SqlUtils.getInteger(rs, "performerId");
+            if (performerId != null) {
+                relation.setPerformer(departmentDao.getDepartment(SqlUtils.getInteger(rs, "performerId")));
+            }
             if (!forDeclaration) {
-                relation.setComparativePeriod(departmentReportPeriodDao.get(SqlUtils.getInteger(rs, "compPeriodId")));
+                Integer comparativePeriodId  = SqlUtils.getInteger(rs, "compPeriodId");
+                if (comparativePeriodId != null) {
+                    relation.setComparativePeriod(departmentReportPeriodDao.get(comparativePeriodId));
+                }
             }
             relation.setFormType(formTypeDao.get(SqlUtils.getInteger(rs, "formTypeId")));
         }
