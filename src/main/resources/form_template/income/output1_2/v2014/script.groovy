@@ -475,12 +475,12 @@ def formNewRow(def rowList, def dataRowsPrev, def prevPeriodStartDate, def prevP
         // Если «Графа 17» формы-источника = «1» и «Графа 16» формы-источника = «5» и «Графа 22» формы-источника заполнена и не равно «0»/«9», то «Графа 29» = (Сумма по «Графа 23» для каждого уникального сочетания «Графа 7» и «Графа 8» формы-источника)*13%) / «Графа 12» формы-источника * («Графа 4» формы-источника - «Графа 5» формы-источника).
         // Иначе «Графа 29» = Значение «0».
         // Иначе «Графа 29» = Сумма по «Графа 27» для каждого уникального сочетания «Графа 7» и «Графа 8» формы-источникапервичной формы
-        def value2 = rowList.sum { (it.withheldSum != null) ? it.withheldSum : 0 }
+        def value2 = rowList.sum { (it.status == 1 && it.type != 2 && it.withheldSum != null) ? it.withheldSum : 0 }
         if (row.emitentInn == graph3String) {
             if (row.allSum) {
-                newRow.taxSum = rowList.sum {
+                newRow.taxSum = ( rowList.sum {
                     (it.status == 1 && it.type == 5 && it.rate != null && it.rate != 0 && it.rate != 9 && it.dividends) ? it.dividends : 0
-                } * 0.13 * (row.all - row.rateZero) / row.allSum
+                } / row.allSum * 0.13) / (row.allSum * (row.all - row.rateZero))
             } else{
                 newRow.taxSum = 0
             }
@@ -523,8 +523,8 @@ def formNewRow(def rowList, def dataRowsPrev, def prevPeriodStartDate, def prevP
     // Если «Графа 3» формы-источника = Значение атрибута «ИНН» формы настроек подразделения, то «Графа 26» = («Графа 12» первичной формы – («Графа 4» первичной формы – «Графа 5» первичной формы)) для каждого уникального сочетания «Графа 7» первичной формы и «Графа 8» первичной формы, иначе «Графа 26» = «Графа 6» первичной формы для каждого уникального сочетания «Графа 7» первичной формы и «Графа 8» первичной формы.
     newRow.dividendD1D2 =  (row.emitentInn == graph3String) ? ((row.allSum ?: 0) - ((row.all ?: 0) - (row.rateZero ?: 0))) : (row.distributionSum ?: 0)
 
-    // Графа 31: Принимает значение: Если графа 17 = 1, графа 16 = 1 (ЮЛ) ∑ Граф 27 для одного Решения (графа 7-8) если дата по графе 28 принадлежит последнему кварталу отчетного периода
-    newRow.taxSumLast = rowList.sum{ it.withheldSum ?: 0 }
+    // «Графа 31» = Сумма по «Графа 27» по всем строкам группы строк формы-источника, в которых «Графа 16» не равна «2» и «Графа 17» = «1»
+    newRow.taxSumLast = rowList.sum{ (it.status == 1 && it.type != 2 && it.withheldSum != null) ? it.withheldSum : 0 }
 
     return newRow
 }
