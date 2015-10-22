@@ -477,10 +477,10 @@ def formNewRow(def rowList, def dataRowsPrev, def prevPeriodStartDate, def prevP
         // Иначе «Графа 29» = Сумма по «Графа 27» для каждого уникального сочетания «Графа 7» и «Графа 8» формы-источникапервичной формы
         def value2 = rowList.sum { (it.status == 1 && it.type != 2 && it.withheldSum != null) ? it.withheldSum : 0 }
         if (row.emitentInn == graph3String) {
-            if (row.allSum) {
+            if (row.allSum && ((row.all ?: 0) - (row.rateZero ?: 0))) {
                 newRow.taxSum = (( rowList.sum {
                     (it.status == 1 && it.type == 5 && it.rate != null && it.rate != 0 && it.rate != 9 && it.dividends) ? it.dividends : 0
-                } / row.allSum) * 0.13) / (row.allSum * (row.all - row.rateZero))
+                } / row.allSum) * 0.13) / (row.allSum * ((row.all ?: 0) - (row.rateZero ?: 0)))
             } else{
                 newRow.taxSum = 0
             }
