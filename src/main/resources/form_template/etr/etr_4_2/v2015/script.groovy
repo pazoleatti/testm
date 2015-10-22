@@ -111,30 +111,19 @@ def getReportPeriod(int reportPeriodId) {
     return periodMap[reportPeriodId]
 }
 
-@Field
-def prevPeriodMap = [:]
-
-def getPrevReportPeriod(int reportPeriodId) {
-    if (prevPeriodMap[reportPeriodId] == null) {
-        prevPeriodMap[reportPeriodId] = reportPeriodService.getPrevReportPeriod(reportPeriodId)
-    }
-    return prevPeriodMap[reportPeriodId]
-}
-
 void preCalcCheck() {
     def tmpRow = formData.createDataRow()
     // собираем коды ОПУ
     def final opuCodes = opuMap.findAll { key, value -> !("R1".equals(key)) || isBank() }.values().sum()
     // находим записи для текущего периода и периода сравнения
-    ['comparePeriod': getComparativePeriodId(), 'currentPeriod':formData.reportPeriodId].each { key, value ->
-        if (value != null) {
-            def reportPeriod = getReportPeriod(value)
-            if (!formData.accruing && reportPeriod.order != 1) {
-                def prevPeriodId = value ? getPrevReportPeriod(value)?.id : null
-                checkOpuCodes(key, prevPeriodId, opuCodes, tmpRow)
-            }
+    ['comparePeriod' : getComparativePeriodId(), 'currentPeriod' : formData.reportPeriodId].each { key, value ->
+        def reportPeriod = getReportPeriod(value)
+        if (!formData.accruing && reportPeriod.order != 1) {
+            def date = getEndDate(reportPeriod?.taxPeriod?.year, reportPeriod?.order - 1)
+            checkOpuCodes(key, date, opuCodes, tmpRow)
         }
-        checkOpuCodes(key, value, opuCodes, tmpRow)
+        def date = getEndDate(reportPeriod?.taxPeriod?.year, reportPeriod?.order)
+        checkOpuCodes(key, date, opuCodes, tmpRow)
     }
 }
 
@@ -148,34 +137,40 @@ def getComparativePeriodId() {
     return comparativePeriodId
 }
 
-void checkOpuCodes(def alias, def periodId, def opuCodes, def tmpRow) {
-    if (periodId == null) {
-        logger.warn("Форма 102 бухгалтерской отчетности: Подразделение: \"%s\". Отсутствует отчетный период, соответствующий значениям НФ! При заполнении графы \"%s\" формы значения будут приняты за нулевые.",
+void checkOpuCodes(def alias, def date, def opuCodes, def tmpRow) {
+    // 3. Проверка наличия значений в ф.102 «Отчет о финансовых результатах» по символам
+    def accountPeriodId = bookerStatementService.getAccountPeriodId(formData.departmentId, date)
+    if (accountPeriodId == null) {
+        logger.warn('Форма 102 бухгалтерской отчетности: Подразделение: %s. Отсутствует отчетный период, соответствующий значениям НФ! При заполнении графы "%s" формы значения будут приняты за нулевые.',
                 formDataDepartment.name, getColumnName(tmpRow, alias))
         return
     }
+    // 2. Проверка наличия ф.102 «Отчет о финансовых результатах»
     boolean foundBO = true
-    def accountPeriodId = bookerStatementService.getAccountPeriodId(formData.departmentId, getEndDate(periodId))
     if (accountPeriodId == null) {
         foundBO = false
     } else {
-        def ids = formDataService.getRefBookProvider(refBookFactory, 52L, providerCache).getUniqueRecordIds(new Date(), "ACCOUNT_PERIOD_ID = " + bookerStatementService.getAccountPeriodId(formData.departmentId, getEndDate(periodId)))
+        def provider = formDataService.getRefBookProvider(refBookFactory, 52L, providerCache)
+        def ids = provider.getUniqueRecordIds(new Date(), "ACCOUNT_PERIOD_ID = $accountPeriodId")
         if (ids == null || ids.isEmpty()) {
             foundBO = false
         }
     }
-    def reportPeriod = getReportPeriod(periodId)
     if (!foundBO) {
-        logger.warn("Не найдена форма 102 бухгалтерской отчетности: Период: \"%s %s\", Подразделение: \"%s\". Ячейки по графе \"%s\", заполняемые из данной формы, будут заполнены нулевым значением.",
-                reportPeriod?.getName() ?: "Период не задан", reportPeriod?.getTaxPeriod()?.getYear() ?: "Год не задан", formDataDepartment.name, getColumnName(tmpRow, alias))
+        logger.warn('Не найдена форма 102 бухгалтерской отчетности: Период: %s %s, Подразделение: %s. ' +
+                'Ячейки по графе "%s", заполняемые из данной формы, будут заполнены нулевым значением.',
+                getPeriodNameBO(date), date.format('yyyy'), formDataDepartment.name, getColumnName(tmpRow, alias))
     } else {
+        // 3. Проверка наличия значений в ф.102 «Отчет о финансовых результатах» по символам
         // справочник "Отчет о прибылях и убытках (Форма 0409102-СБ)"
-        def records = bookerStatementService.getRecords(52L, formData.departmentId, getEndDate(periodId), "OPU_CODE = '${opuCodes.join("' OR OPU_CODE = '")}'")
+        def filter = "OPU_CODE = '${opuCodes.join("' OR OPU_CODE = '")}'"
+        def records = bookerStatementService.getRecords(52L, formData.departmentId, date, filter)
         def recordOpuCodes = records?.collect { it.OPU_CODE.stringValue }?.unique() ?: []
         def missedCodes = opuCodes.findAll { !recordOpuCodes.contains(it) }
         if (!missedCodes.isEmpty()) {
-            logger.warn("Форма 102 бухгалтерской отчетности: Период: \"%s %s\", Подразделение: \"%s\". Отсутствуют значения по следующим символам: '%s'! При заполнении графы \"%s\" формы значения по данным символам будут приняты за нулевые.",
-                    reportPeriod?.getName() ?: "Период не задан", reportPeriod?.getTaxPeriod()?.getYear() ?: "Год не задан", formDataDepartment.name, missedCodes.join("', '"), getColumnName(tmpRow, alias))
+            logger.warn('Форма 102 бухгалтерской отчетности: Период: %s %s, Подразделение: %s. ' +
+                    'Отсутствуют значения по следующим символам: %s! При заполнении графы "%s" формы значения по данным символам будут приняты за нулевые.',
+                    getPeriodNameBO(date), date.format('yyyy'), formDataDepartment.name, missedCodes.join(', '), getColumnName(tmpRow, alias))
         }
     }
 }
@@ -277,6 +272,7 @@ def getSourceValue(def periodId, def row, def alias, def isCalc) {
             } else {
                 notFound404 = true
                 if (isCalc) { // выводить только при расчете
+                    // 4. Проверка наличия принятой источника «Величины налоговых платежей, вводимые вручную» (предрасчетные проверки)
                     logger.warn("Не найдена форма-источник «Величины налоговых платежей, вводимые вручную» в статусе «Принята»: Тип: \"%s/%s\", Период: \"%s %s\", Подразделение: \"%s\". Ячейки по графе «%s», заполняемые из данной формы, будут заполнены нулевым значением.",
                             FormDataKind.CONSOLIDATED.name, FormDataKind.PRIMARY.name, period.getName(), period.getTaxPeriod().getYear(), departmentService.get(formData.departmentId)?.name, getColumnName(row, alias))
                 }
@@ -298,13 +294,14 @@ def getSourceForm(def formDataKind, def periodId) {
 def calcBO(def rowSource, def periodId) {
     def periodSum = 0
     if (periodId != null) {
-        def pair = get102Sum(rowSource, periodId)
+        def reportPeriod = getReportPeriod(periodId)
+        def date = getEndDate(reportPeriod?.taxPeriod?.year, reportPeriod?.order)
+        def pair = get102Sum(rowSource, date)
         boolean isCorrect = pair[1]
         periodSum = isCorrect ? pair[0] : 0
-        def reportPeriod = getReportPeriod(periodId)
         if (!formData.accruing && reportPeriod.order != 1 && isCorrect) {
-            def prevPeriodId = getPrevReportPeriod(periodId)?.id
-            pair = get102Sum(rowSource, prevPeriodId)
+            def prevDate = getEndDate(reportPeriod?.taxPeriod?.year, reportPeriod?.order - 1)
+            pair = get102Sum(rowSource, prevDate)
             isCorrect = pair[1]
             periodSum = isCorrect ? (periodSum - pair[0]) : 0
         }
@@ -313,11 +310,11 @@ def calcBO(def rowSource, def periodId) {
 }
 
 // Возвращает данные из Формы 102 БО за период + флаг корректности
-def get102Sum(def row, def periodId) {
-    if (opuMap[row.getAlias()] != null && periodId != null) {
+def get102Sum(def row, def date) {
+    if (opuMap[row.getAlias()] != null) {
         def opuCodes = opuMap[row.getAlias()].join("' OR OPU_CODE = '")
         // справочник "Отчет о прибылях и убытках (Форма 0409102-СБ)"
-        def records = bookerStatementService.getRecords(52L, formData.departmentId, getEndDate(periodId), "OPU_CODE = '${opuCodes}'")
+        def records = bookerStatementService.getRecords(52L, formData.departmentId, date, "OPU_CODE = '${opuCodes}'")
         if ((records == null || records.isEmpty())) {
             return [0, false]
         }
@@ -329,8 +326,6 @@ def get102Sum(def row, def periodId) {
                 def subtrahend = records.sum { '02000'.equals(it.OPU_CODE.stringValue) ? it.TOTAL_SUM.numberValue : BigDecimal.ZERO }
                 return [(minuend - subtrahend) / 1000, true]
         }
-    } else if (periodId == null) {
-        return [0, false]
     }
     return [0, true]
 }
@@ -497,4 +492,51 @@ void consolidation() {
             }
         }
     }
+}
+
+@Field
+def endDateBOMap = [:]
+
+def getEndDate(def year, def order) {
+    def key = year + "#" + order
+    if (endDateBOMap[key] == null) {
+        endDateBOMap[key] = getEndDateBO(year, order)
+    }
+    return endDateBOMap[key]
+}
+
+/**
+ * Получить последний день периода БО.
+ *
+ * @param year год
+ * @param order номер периода БО (1, 2, 3, 4)
+ */
+def getEndDateBO(def year, def order) {
+    def dateStr
+    switch (order) {
+        case 1:
+            dateStr = "31.03.$year"
+            break
+        case 2:
+            dateStr = "30.06.$year"
+            break
+        case 3:
+            dateStr = "30.09.$year"
+            break
+        default:
+            dateStr = "31.12.$year"
+            break
+    }
+    return Date.parse('dd.MM.yyyy', dateStr)
+}
+
+@Field
+def periodNameBOMap = [:]
+
+/* Получить название периода БО по дате. */
+def getPeriodNameBO(def date) {
+    if (periodNameBOMap[date] == null) {
+        periodNameBOMap[date] = bookerStatementService.getPeriodValue(date)?.NAME?.value
+    }
+    return periodNameBOMap[date]
 }

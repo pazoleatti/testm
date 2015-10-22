@@ -138,7 +138,7 @@ def buildXml(def departmentParamTransport, def departmentParamTransportRow, def 
     def builder = new MarkupBuilder(xml)
     if (!declarationData.isAccepted()) {
         def reportPeriod = reportPeriodService.get(declarationData.reportPeriodId)
-        Date yearStartDate = Date.parse(dateFormat,"01.01.${reportPeriod.taxPeriod.year}")
+        Date yearStartDate = Date.parse(dateFormat, "01.01.${reportPeriod.taxPeriod.year}")
         def reportPeriods = reportPeriodService.getReportPeriodsByDate(TaxType.TRANSPORT, yearStartDate, getReportPeriodEndDate())
         builder.Файл(
                 ИдФайл: generateXmlFileId(declarationData.taxOrganCode),
@@ -272,22 +272,23 @@ def buildXml(def departmentParamTransport, def departmentParamTransportRow, def 
                                     switch (order) {
                                         case 1:
                                             // АвПУКв1 = В т.ч. сумма авансовых платежей, исчисленная к уплате в бюджет за первый квартал //// Заполняется в 1, 2, 3, 4 отчетном периоде.
-                                            resultMap[row.okato].amountOfTheAdvancePayment1 += (obligation ? 0.25 * row.taxBase * taxRate : 0.0)
+                                            resultMap[row.okato].amountOfTheAdvancePayment1 += (obligation ? 0.25 * row.taxBase * taxRate * row.coef362 : 0.0)
                                             break;
                                         case 2:
                                             // АвПУКв2 = В т.ч. сумма авансовых платежей, исчисленная к уплате в бюджет за второй квартал //// Заполняется во 2, 3, 4 отчетном периоде.
-                                            resultMap[row.okato].amountOfTheAdvancePayment2 += (obligation ? 0.25 * row.taxBase * taxRate : 0.0)
+                                            resultMap[row.okato].amountOfTheAdvancePayment2 += (obligation ? 0.25 * row.taxBase * taxRate * row.coef362 : 0.0)
                                             break;
                                         case 3:
                                             // АвПУКв3 = В т.ч. сумма авансовых платежей, исчисленная к уплате в бюджет за третий квартал //// Заполняется во 3, 4 отчетном периоде.
-                                            resultMap[row.okato].amountOfTheAdvancePayment3 += (obligation ? 0.25 * row.taxBase * taxRate : 0.0)
+                                            resultMap[row.okato].amountOfTheAdvancePayment3 += (obligation ? 0.25 * row.taxBase * taxRate * row.coef362 : 0.0)
                                             break;
                                     }
 
                                     // НалПУ = НалИсчисл – (АвПУКв1+ АвПУКв2+ АвПУКв3)
-                                    resultMap[row.okato].amountOfTaxPayable = resultMap[row.okato].calculationOfTaxes - (
-                                            resultMap[row.okato].amountOfTheAdvancePayment1 + resultMap[row.okato].amountOfTheAdvancePayment2 + resultMap[row.okato].amountOfTheAdvancePayment3
-                                    )
+                                    resultMap[row.okato].amountOfTaxPayable = roundInt(resultMap[row.okato].calculationOfTaxes) -
+                                            (roundInt(resultMap[row.okato].amountOfTheAdvancePayment1) +
+                                                    roundInt(resultMap[row.okato].amountOfTheAdvancePayment2) +
+                                                    roundInt(resultMap[row.okato].amountOfTheAdvancePayment3))
                                     // В случае  если полученное значение отрицательно, - не заполняется
                                     // resultMap[row.okato].amountOfTaxPayable = resultMap[row.okato].amountOfTaxPayable < 0 ? 0:resultMap[row.okato].amountOfTaxPayable;
                                 }

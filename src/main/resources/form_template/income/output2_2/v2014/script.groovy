@@ -90,10 +90,13 @@ def editableColumns = ['emitent', 'decreeNumber', 'inn', 'kpp', 'recType', 'titl
 
 // Проверяемые на пустые значения атрибуты
 @Field
-def nonEmptyColumns = ['emitent', 'decreeNumber', 'inn', 'kpp', 'recType', 'title', 'dividendDate', 'sumDividend', 'sumTax']
+def nonEmptyColumns = ['emitent', 'decreeNumber', 'inn', 'kpp', 'recType', 'title', 'subdivisionRF', 'dividendDate', 'sumDividend', 'sumTax']
 
 @Field
-def sourceFormTypes = [419, 10070, 314]
+def lastSourceFormType = 314 // с 9 месяцев 2015
+
+@Field
+def sourceFormTypes = [419, 10070, lastSourceFormType]
 
 @Field
 def startDate = null
@@ -172,8 +175,11 @@ void consolidation() {
             if (sourceFormData != null && sourceFormData.state == WorkflowState.ACCEPTED) {
                 def sourceHelper = formDataService.getDataRowHelper(sourceFormData)
                 sourceHelper.allSaved.each { sourceRow ->
-                    // «Графа 17» = «RUS» и «Графа 16» = 1 и «Графа 22» = «0» или «9»
-                    if (sourceRow.status == 1 && sourceRow.type == 1 && (sourceRow.rate == 0 || sourceRow.rate == 9 || sourceRow.rate == 13)) {
+                    // До периода формы «9 месяцев 2015» «Графа 17» = 1 и «Графа 16» = 1 и «Графа 22» = «0» или «9» или «13»
+                    // Начиная с периода формы «9 месяцев 2015» «Графа 17» = 1 и «Графа 16» <> 2 и «Графа 22» = «0» или «9» или «13»
+                    if (sourceRow.status == 1 &&
+                            (it.formTypeId != lastSourceFormType && sourceRow.type == 1 || it.formTypeId == lastSourceFormType && sourceRow.type != 2) &&
+                            (sourceRow.rate == 0 || sourceRow.rate == 9 || sourceRow.rate == 13)) {
                         def newRow = formNewRow(sourceRow)
                         rows.add(newRow)
                     }

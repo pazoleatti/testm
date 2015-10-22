@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?><rows>
+  <row alias="R1">
+    <cell alias="rowNum" colSpan="1" numericValue="1" rowSpan="1"/>
+    <cell alias="taxName" colSpan="1" rowSpan="1" stringValue="Общая сумма уплаченных налогов (стр.1 Приложения 4-1)"/>
+    <cell alias="symbol102" colSpan="1" rowSpan="1"/>
+    <cell alias="comparePeriod" colSpan="1" rowSpan="1"/>
+    <cell alias="currentPeriod" colSpan="1" rowSpan="1"/>
+    <cell alias="deltaRub" colSpan="1" rowSpan="1"/>
+    <cell alias="deltaPercent" colSpan="1" rowSpan="1"/>
+  </row>
+  <row alias="R2">
+    <cell alias="rowNum" colSpan="1" numericValue="2" rowSpan="1"/>
+    <cell alias="taxName" colSpan="1" rowSpan="1" stringValue="Чистая прибыль банка"/>
+    <cell alias="symbol102" colSpan="1" rowSpan="1" stringValue="симв.310001/расчетная величина"/>
+    <cell alias="comparePeriod" colSpan="1" rowSpan="1"/>
+    <cell alias="currentPeriod" colSpan="1" rowSpan="1"/>
+    <cell alias="deltaRub" colSpan="1" rowSpan="1"/>
+    <cell alias="deltaPercent" colSpan="1" rowSpan="1"/>
+  </row>
+  <row alias="R3">
+    <cell alias="rowNum" colSpan="1" numericValue="3" rowSpan="1"/>
+    <cell alias="taxName" colSpan="1" rowSpan="1" stringValue="Отношение налоговых платежей к чистой прибыли, %"/>
+    <cell alias="symbol102" colSpan="1" rowSpan="1"/>
+    <cell alias="comparePeriod" colSpan="1" rowSpan="1"/>
+    <cell alias="currentPeriod" colSpan="1" rowSpan="1"/>
+    <cell alias="deltaRub" colSpan="1" rowSpan="1"/>
+    <cell alias="deltaPercent" colSpan="1" rowSpan="1"/>
+  </row>
+</rows>

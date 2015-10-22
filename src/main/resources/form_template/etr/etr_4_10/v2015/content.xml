@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<formTemplateContent>
+    <fixedRows>true</fixedRows>
+    <name>Приложение 4-10. Трансфертное ценообразование – сделки с взаимозависимыми лицами (ВЗЛ) и резидентами оффшорных зон (РОЗ)</name>
+    <fullName>Приложение 4-10. Трансфертное ценообразование – сделки с взаимозависимыми лицами (ВЗЛ) и резидентами оффшорных зон (РОЗ)</fullName>
+    <header>Приложение 4-10</header>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>sum1</alias>
+        <checking>false</checking>
+        <columnType>NUMBER</columnType>
+        <name>Сумма увеличения базы по налогу на прибыль, в том числе не учитываемые расходы, тыс. руб.</name>
+        <order>1</order>
+        <width>20</width>
+        <maxLength>22</maxLength>
+        <precision>2</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>sum2</alias>
+        <checking>false</checking>
+        <columnType>NUMBER</columnType>
+        <name>Сумма увеличения базы по налогу на прибыль, в том числе доначисление доходов, тыс. руб.</name>
+        <order>2</order>
+        <width>20</width>
+        <maxLength>22</maxLength>
+        <precision>2</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>taxBurden</alias>
+        <checking>false</checking>
+        <columnType>NUMBER</columnType>
+        <name>Налоговое бремя, тыс. руб.</name>
+        <order>3</order>
+        <width>10</width>
+        <maxLength>22</maxLength>
+        <precision>2</precision>
+    </columns>
+    <styles>
+        <alias>Автозаполняемая</alias>
+        <backColor>WHITE</backColor>
+        <bold>true</bold>
+        <fontColor>DARK_GREEN</fontColor>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Редактируемая</alias>
+        <backColor>LIGHT_BLUE</backColor>
+        <bold>false</bold>
+        <fontColor>BLACK</fontColor>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Контрольные суммы</alias>
+        <backColor>LIGHT_BROWN</backColor>
+        <bold>true</bold>
+        <fontColor>BLACK</fontColor>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Корректировка-добавлено</alias>
+        <backColor>PALE_GREEN</backColor>
+        <bold>false</bold>
+        <fontColor>BLACK</fontColor>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Корректировка-удалено</alias>
+        <backColor>LIGHT_CORAL</backColor>
+        <bold>false</bold>
+        <fontColor>BLACK</fontColor>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Корректировка-без изменений</alias>
+        <backColor>GREY</backColor>
+        <bold>false</bold>
+        <fontColor>BLACK</fontColor>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Корректировка-изменено</alias>
+        <backColor>WHITE</backColor>
+        <bold>true</bold>
+        <fontColor>RED</fontColor>
+        <italic>false</italic>
+    </styles>
+</formTemplateContent>

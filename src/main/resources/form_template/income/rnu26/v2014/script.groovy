@@ -320,11 +320,11 @@ void logicCheck() {
         if (!getBalancePeriod() && !isConsolidated) {
             prevRow = rowsMap[row.tradeNumber]
             // 13. Проверка корректности заполнения РНУ (графа 4, 4 (за предыдущий период), 6, 7 (за предыдущий период) )
-            if (prevRow != null && row.lotSizePrev != prevRow.lotSizeCurrent) {
+            if (prevRow != null && row.lotSizePrev != null && row.lotSizePrev != prevRow.lotSizeCurrent) {
                 rowWarning(logger, row, errorMsg + "РНУ сформирован некорректно! Не выполняется условие: «Графа 6» (${row.lotSizePrev}) текущей строки РНУ-26 за текущий период = «Графе 7» (${prevRow.lotSizeCurrent}) строки РНУ-26 за предыдущий период, значение «Графы 4» которой соответствует значению «Графы 4» РНУ-26 за текущий период.")
             }
             // 14. Проверка корректности заполнения РНУ (графа 4, 4 (за предыдущий период), 8, 15 (за предыдущий период) )
-            if (prevRow != null && row.reserveCalcValuePrev != prevRow.reserveCalcValue) {
+            if (prevRow != null && row.reserveCalcValuePrev != null && row.reserveCalcValuePrev != prevRow.reserveCalcValue) {
                 loggerError(row, errorMsg + "РНУ сформирован некорректно! Не выполняется условие: «Графа 8» (${row.reserveCalcValuePrev}) текущей строки РНУ-26 за текущий период = «Графе 15» (${prevRow.reserveCalcValue}) строки РНУ-26 за предыдущий период, значение «Графы 4» которой соответствует значению «Графы 4» РНУ-26 за текущий период.")
             }
         }
@@ -362,48 +362,37 @@ void logicCheck() {
         // получить строки группы
         def rows = getGroupRows(dataRows, group)
         // получить алиас для подитоговой строки
-        def totalRowAlias = 'total' + group.toString()
+        String totalRowAlias = 'total' + group.toString()
         // получить посчитанную строку с итогами
-        def subTotalRow
-        try {
-            subTotalRow = getDataRow(dataRows, totalRowAlias)
-        } catch (IllegalArgumentException e) {
-            def issuerName = getIssueName(group)
-            loggerError(null, "Итоговые значения по эмитенту $issuerName не рассчитаны! Необходимо рассчитать данные формы.")
-            continue
-        }
+        def subTotalRow = dataRows.find { totalRowAlias.equals(it.getAlias()) }
         // сформировать подитоговую строку ГРН с суммами
         def tmpRow = getCalcSubtotalsRow(rows, group, totalRowAlias)
-
         // сравнить строки
-        if (isDiffRow(subTotalRow, tmpRow, totalColumns)) {
+        if (subTotalRow == null || isDiffRow(subTotalRow, tmpRow, totalColumns)) {
             def issuerName = getIssueName(group)
             loggerError(subTotalRow, "Итоговые значения по эмитенту $issuerName рассчитаны неверно!")
         }
     }
     // получение итоговой строки
-    def totalRow = null
-    try {
-        totalRow = getDataRow(dataRows, 'total')
-    } catch (IllegalArgumentException e) {
-        loggerError(null, "Итоговые значения не рассчитаны! Необходимо рассчитать данные формы.")
-    }
+    def totalRow = dataRows.find { 'total'.equals(it.getAlias()) }
     if (totalRow != null && prevDataRows) {
         def totalRowOld = getDataRow(prevDataRows, 'total')
 
         // 15. Проверка корректности заполнения РНУ (графа 6, 7 (за предыдущий период))
-        if (totalRow.lotSizePrev != totalRowOld.lotSizeCurrent) {
+        if (totalRow.lotSizePrev != null && totalRow.lotSizePrev != totalRowOld.lotSizeCurrent) {
             loggerError(totalRow, "РНУ сформирован некорректно! Не выполняется условие: «Итого» по «Графе 6» (${totalRow.lotSizePrev}) = «Общий итог» по графе 7 (${totalRowOld.lotSizeCurrent}) формы РНУ-26 за предыдущий отчётный период")
         }
 
         // 16. Проверка корректности заполнения РНУ (графа 8, 15 (за предыдущий период))
-        if (totalRow.reserveCalcValuePrev != totalRowOld.reserveCalcValue) {
+        if (totalRow.reserveCalcValuePrev != null && totalRow.reserveCalcValuePrev != totalRowOld.reserveCalcValue) {
             loggerError(totalRow, "РНУ сформирован некорректно! Не выполняется условие: «Итого» по «Графе 8» (${totalRow.reserveCalcValuePrev}) = «Общий итог» по графе 15 (${totalRowOld.reserveCalcValue}) формы РНУ-26 за предыдущий отчётный период")
         }
     }
     // 19. Проверка итогового значений по всей форме
     if (totalRow != null) {
         checkTotalSum(dataRows, totalColumns, logger, !getBalancePeriod())
+    } else {
+        loggerError(null, "Итоговые значения рассчитаны неверно!")
     }
     // 3. Проверка на полноту отражения данных предыдущих отчетных периодов (графа 15) в текущем отчетном периоде
     if (prevDataRows) {
@@ -808,16 +797,18 @@ def getCalcTotalRow(def dataRows) {
  * @param totalRowAlias псевдоним сформированной строки
  */
 def getCalcSubtotalsRow(def dataRows, def Integer issuer, def totalRowAlias) {
-    def String title = getIssueName(issuer) + ' итог'
+    def String title = getIssueName(issuer) + ' Итог'
     return getTotalRow(dataRows, title, totalRowAlias)
 }
 
 def String getIssueName(def Integer issuer) {
-    def retStr = ""
-    mapIssuers.each { key, value ->
+    String retStr = ""
+    for (def entry : mapIssuers) {
+        def key = entry.key
+        def value = entry.value
         if (issuer.equals(value)) {
             retStr = key.substring(0, key.indexOf("|"))
-            return retStr
+            return (retStr.equals('null') ? '"Эмитент не задан"' : retStr)
         }
     }
     return retStr

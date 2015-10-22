@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <formTemplateContent>
-    <fixedRows>false</fixedRows>
+    <fixedRows>true</fixedRows>
     <name>Сведения о уплаченных суммах налога по операциям с ГЦБ</name>
     <fullName>Сведения о уплаченных суммах налога по операциям с ГЦБ</fullName>
     <header>ЗАГОЛОВОК</header>

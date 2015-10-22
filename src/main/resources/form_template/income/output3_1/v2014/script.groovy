@@ -175,7 +175,8 @@ void consolidation() {
     def rows = []
 
     // «Расчет налога на прибыль организаций с доходов, удерживаемого налоговым агентом (источником выплаты доходов)»
-    def sourceFormTypes03 = [419, 10070, 314]
+    def lastSourceFormType = 314 // с 9 месяцев 2015
+    def sourceFormTypes03 = [419, 10070, lastSourceFormType]
     // «Сведения о уплаченных суммах налога по операциям с ГЦБ»
     def sourceFormTypeGCB = 420
     // «Сведения о суммах налога на прибыль, уплаченного Банком за рубежом»
@@ -192,7 +193,7 @@ void consolidation() {
                 case sourceFormTypes03[0]:
                 case sourceFormTypes03[1]:
                 case sourceFormTypes03[2]:
-                    newDataRows = formNewRows03(sourceDataRows)
+                    newDataRows = formNewRows03(sourceDataRows, it.formTypeId == lastSourceFormType)
                     break
                 case sourceFormTypeGCB:
                     newDataRows = formNewRowsGCB(sourceDataRows)
@@ -214,12 +215,13 @@ void consolidation() {
     formDataService.getDataRowHelper(formData).allCached = rows
 }
 
-def formNewRows03(def rows) {
+def formNewRows03(def rows, boolean is9months2015) {
     def newRows = []
     def dataRowsMap = [:]
     rows.each { row ->
         sum = row.withheldSum
-        if (sum != null && sum != 0 && row.type == 1 && row.status == 1) {
+        if ((!is9months2015 && sum != null && sum != 0 && row.type == 1 && row.status == 1) ||
+                (is9months2015 && sum > 0 && row.type != 2 && row.status == 1)) {
             if (dataRowsMap.containsKey(row.withheldDate)) {
                 sum += dataRowsMap.get(row.withheldDate)
                 dataRowsMap.remove(row.withheldDate)

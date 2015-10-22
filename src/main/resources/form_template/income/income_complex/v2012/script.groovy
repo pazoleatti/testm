@@ -256,8 +256,13 @@ void logicCheck() {
     }
 
     for (def row : dataRows) {
-        // проверка заполнения обязательных полей
-        checkRequiredColumns(row, editableColumns)
+        def columns = []
+        editableColumns.each { alias ->
+            if (row.getCell(alias)?.style?.alias == editableStyle) {
+                columns.add(alias)
+            }
+        }
+        checkNonEmptyColumns(row, row.getIndex(), columns, logger, true)
     }
 
     checkTotalSum(getDataRow(dataRows, firstTotalRowAlias), getSum(dataRows, totalColumn, rowsAliasesForFirstControlSum))
@@ -535,23 +540,6 @@ void consolidationFromPrimary(def dataRows, def formSources) {
                 }
             }
         }
-    }
-}
-
-// Проверить заполненость обязательных полей
-// Нередактируемые не проверяются
-void checkRequiredColumns(def row, def columns) {
-    def colNames = []
-    columns.each { column ->
-        def cell = row.getCell(column)
-        if (cell?.style?.alias == editableStyle && (cell.getValue() == null || cell.getValue() == '')) {
-            def name = getColumnName(row, column)
-            colNames.add('«' + name + '»')
-        }
-    }
-    if (!colNames.isEmpty()) {
-        def errorMsg = colNames.join(', ')
-        logger.error("Строка ${row.getIndex()}: не заполнены графы : $errorMsg.")
     }
 }
 

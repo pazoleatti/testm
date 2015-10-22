@@ -3,7 +3,7 @@
 	<property name="net.sf.jasperreports.export.xls.one.page.per.sheet" value="true"/>
 	<property name="ireport.zoom" value="1.0"/>
 	<property name="ireport.x" value="0"/>
-	<property name="ireport.y" value="2629"/>
+	<property name="ireport.y" value="2552"/>
 	<style name="KL" mode="Transparent" pattern="">
 		<box>
 			<topPen lineWidth="0.5" lineStyle="Dashed" lineColor="#666666"/>
@@ -313,18 +313,18 @@
 			<variableExpression><![CDATA[$F{ДоляНалБаз} == null || $F{ДоляНалБаз}.equals("0")?
 "-----"
 :
-($F{ДоляНалБаз}.lastIndexOf(".")==-1?$F{ДоляНалБаз}.concat( "--" ):$F{ДоляНалБаз}.substring( 0, $F{ДоляНалБаз}.lastIndexOf(".")).concat( "--" ))]]></variableExpression>
+($F{ДоляНалБаз}.lastIndexOf(".")==-1?$F{ДоляНалБаз}.concat( "---" ):$F{ДоляНалБаз}.substring( 0, $F{ДоляНалБаз}.lastIndexOf(".")).concat( "---" ))]]></variableExpression>
 			<initialValueExpression><![CDATA[$F{ДоляНалБаз} == null || $F{ДоляНалБаз}.equals("0")?
 "-----"
 :
-($F{ДоляНалБаз}.lastIndexOf(".")==-1?$F{ДоляНалБаз}.concat( "--" ):$F{ДоляНалБаз}.substring( 0, $F{ДоляНалБаз}.lastIndexOf(".")).concat( "--" ))]]></initialValueExpression>
+($F{ДоляНалБаз}.lastIndexOf(".")==-1?$F{ДоляНалБаз}.concat( "---" ):$F{ДоляНалБаз}.substring( 0, $F{ДоляНалБаз}.lastIndexOf(".")).concat( "---" ))]]></initialValueExpression>
 		</variable>
 		<variable name="ДоляНалБазт" class="java.lang.String">
-			<variableExpression><![CDATA[$F{ДоляНалБаз} == null || $F{ДоляНалБаз}.equals("0")?
+			<variableExpression><![CDATA[$F{ДоляНалБаз} == null || $F{ДоляНалБаз}.equals("0") || $F{ДоляНалБаз}.equals("")?
 "---------------------"
 :
 ($F{ДоляНалБаз}.lastIndexOf(".")==-1?"0-----------":$F{ДоляНалБаз}.substring($F{ДоляНалБаз}.lastIndexOf(".")+1).concat( "--------------" ))]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{ДоляНалБаз} == null || $F{ДоляНалБаз}.equals("0")?
+			<initialValueExpression><![CDATA[$F{ДоляНалБаз} == null || $F{ДоляНалБаз}.equals("0") || $F{ДоляНалБаз}.equals("")?
 "---------------------"
 :
 ($F{ДоляНалБаз}.lastIndexOf(".")==-1?"0-----------":$F{ДоляНалБаз}.substring($F{ДоляНалБаз}.lastIndexOf(".")+1).concat( "--------------" ))]]></initialValueExpression>
@@ -440,18 +440,18 @@
 			<variableExpression><![CDATA[$F{СтавНалСубРФ} == null || $F{СтавНалСубРФ}.equals("0")?
 "-----"
 :
-($F{СтавНалСубРФ}.lastIndexOf(".")==-1?$F{СтавНалСубРФ}.concat( "-" ):$F{СтавНалСубРФ}.substring( 0, $F{СтавНалСубРФ}.lastIndexOf(".")).concat( "-" ))]]></variableExpression>
+($F{СтавНалСубРФ}.lastIndexOf(".")==-1?$F{СтавНалСубРФ}.concat( "--" ):$F{СтавНалСубРФ}.substring( 0, $F{СтавНалСубРФ}.lastIndexOf(".")).concat( "--" ))]]></variableExpression>
 			<initialValueExpression><![CDATA[$F{СтавНалСубРФ} == null || $F{СтавНалСубРФ}.equals("0")?
 "-----"
 :
-($F{СтавНалСубРФ}.lastIndexOf(".")==-1?$F{СтавНалСубРФ}.concat( "-" ):$F{СтавНалСубРФ}.substring( 0, $F{СтавНалСубРФ}.lastIndexOf(".")).concat( "-" ))]]></initialValueExpression>
+($F{СтавНалСубРФ}.lastIndexOf(".")==-1?$F{СтавНалСубРФ}.concat( "--" ):$F{СтавНалСубРФ}.substring( 0, $F{СтавНалСубРФ}.lastIndexOf(".")).concat( "--" ))]]></initialValueExpression>
 		</variable>
 		<variable name="СтавНалСубРФт" class="java.lang.String">
-			<variableExpression><![CDATA[$F{СтавНалСубРФ} == null || $F{СтавНалСубРФ}.equals("0")?
+			<variableExpression><![CDATA[$F{СтавНалСубРФ} == null || $F{СтавНалСубРФ}.equals("0") || $F{СтавНалСубРФ}.equals("")?
 "-----"
 :
 ($F{СтавНалСубРФ}.lastIndexOf(".")==-1?"0-":$F{СтавНалСубРФ}.substring($F{СтавНалСубРФ}.lastIndexOf(".")+1).concat( "-" ))]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{СтавНалСубРФ} == null || $F{СтавНалСубРФ}.equals("0")?
+			<initialValueExpression><![CDATA[$F{СтавНалСубРФ} == null || $F{СтавНалСубРФ}.equals("0") || $F{СтавНалСубРФ}.equals("")?
 "-----"
 :
 ($F{СтавНалСубРФ}.lastIndexOf(".")==-1?"0-":$F{СтавНалСубРФ}.substring($F{СтавНалСубРФ}.lastIndexOf(".")+1).concat( "-" ))]]></initialValueExpression>

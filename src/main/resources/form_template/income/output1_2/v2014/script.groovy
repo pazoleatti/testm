@@ -106,9 +106,12 @@ def nonEmptyColumns = allColumns - ['inn', 'dividendAgentAll', 'dividendAgentWit
 @Field
 def editableColumns = allColumns
 
-// 7, 8 графа источника
+// 7, 8 графа источника (группировка при консолидации для старого алгоритма)
 @Field
 def keyColumns = ['decisionNumber', 'decisionDate']
+// 3, 7 графа источника (группировка при консолидации для нового алгоритма)
+@Field
+def keyColumnsNew = ['emitentInn', 'decisionNumber']
 
 @Field
 def sbStrings = [
@@ -119,10 +122,13 @@ def sbStrings = [
 ]
 
 @Field
-def graph3String = "7707083893"
+String graph3String = null
 
 @Field
-def sourceFormTypes = [419, 10070, 314]
+def lastSourceFormType = 314 // с 9 месяцев 2015
+
+@Field
+def sourceFormTypes = [419, 10070, lastSourceFormType]
 
 @Field
 def startDate = null
@@ -207,18 +213,23 @@ void logicCheck() {
 
         // 8. Проверка правильности расчета «Графы 9»
         if (row.dividendSumRaspredPeriod != calc9(row)) {
-            warnMessage9or10(row, 'dividendSumRaspredPeriod', '«Графа 9» = «Графа 10» + «Графа 15» + «Графа 16» + «Графа 17» + «Графа 22»')
+            warnMessageCondition(row, 'dividendSumRaspredPeriod', '«Графа 9» = «Графа 10» + «Графа 15» + «Графа 16» + «Графа 17» + «Графа 22»')
         }
 
         // 9. Проверка правильности расчета «Графы 10»
         if (row.dividendRussianTotal != calc10(row)) {
-            warnMessage9or10(row, 'dividendRussianTotal', '«Графа 10» = «Графа 11» + «Графа 12» + «Графа 13» + «Графа 14»')
+            warnMessageCondition(row, 'dividendRussianTotal', '«Графа 10» = «Графа 11» + «Графа 12» + «Графа 13» + «Графа 14»')
         }
-        // 10. Проверка паттернов
+        // 10. Проверка паттернов + 11 проверка контрольной суммы
         if (row.inn && checkPattern(logger, row, 'inn', row.inn, INN_JUR_PATTERN, wasError ? null : INN_JUR_MEANING, true)) {
             checkControlSumInn(logger, row, 'inn', row.inn, true)
         } else if (row.inn){
             wasError = true
+        }
+        // 12 Проверка правильности заполнения «Графы 26»
+        // «Графа 26» = («Графа 8» + «Графа 25») ИЛИ («Графа 9» + «Графа 23» - «Графа 25»)
+        if ((row.dividendD1D2 ?: 0) != ((row.totalDividend ?: 0) + (row.dividendAgentWithStavka0 ?: 0)) && (row.dividendD1D2 ?: 0) != ((row.dividendSumRaspredPeriod ?: 0) + (row.dividendNonIncome ?: 0) - (row.dividendAgentWithStavka0 ?: 0))) {
+            warnMessageCondition(row, 'dividendD1D2', "«Графа 26» = («Графа 8» + «Графа 25») ИЛИ («Графа 9» + «Графа 23» - «Графа 25»)")
         }
     }
 }
@@ -245,7 +256,7 @@ void errorMessage(def row, def alias, def errorMsg) {
     rowError(logger, row, errorMsg + "Графа «${getColumnName(row, alias)}» заполнена неверно!")
 }
 
-void warnMessage9or10(def row, def alias, def condition) {
+void warnMessageCondition(def row, def alias, def condition) {
     def index = row.getIndex()
     def name = getColumnName(row, alias)
     logger.warn("Строка $index: Графа «$name» заполнена неверно! Не выполняется условие: $condition")
@@ -262,9 +273,20 @@ void consolidation() {
         prevPeriodEndDate = reportPeriodService.getEndDate(prevReportPeriod.id).time
     }
 
+    def formDataPrev = formDataService.getFormDataPrev(formData)
+    def dataRowsPrev
+    if (formDataPrev != null) {
+        dataRowsPrev = formDataService.getDataRowHelper(formDataPrev)?.allSaved
+    }
+
     def lastPeriod = getLastReportPeriod()
     def lastPeriodStartDate = reportPeriodService.getCalendarStartDate(lastPeriod.id).time
     def lastPeriodEndDate = reportPeriodService.getEndDate(lastPeriod.id).time
+
+    def departmentParams = refBookFactory.getDataProvider(33).getRecords(getReportPeriodEndDate() - 1, null, "DEPARTMENT_ID = 1", null)
+    if (departmentParams?.size() > 0) {
+        graph3String = departmentParams?.get(0)?.INN?.stringValue
+    }
 
     // получить формы-источники в текущем налоговом периоде
     departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind(),
@@ -273,9 +295,10 @@ void consolidation() {
             def sourceFormData = formDataService.getLast(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId, formData.periodOrder, formData.comparativePeriodId, formData.accruing)
             if (sourceFormData != null && sourceFormData.state == WorkflowState.ACCEPTED) {
                 def sourceHelper = formDataService.getDataRowHelper(sourceFormData)
-                def rowMap = getRowMap(sourceHelper.allSaved)
+                def isNewFormType = (it.formTypeId == lastSourceFormType)
+                def rowMap = getRowMap(sourceHelper.allSaved, isNewFormType)
                 rowMap.each { key, sourceRows ->
-                    def newRow = formNewRow(sourceRows, prevPeriodStartDate, prevPeriodEndDate, lastPeriodStartDate, lastPeriodEndDate)
+                    def newRow = formNewRow(sourceRows, dataRowsPrev, prevPeriodStartDate, prevPeriodEndDate, lastPeriodStartDate, lastPeriodEndDate, isNewFormType, rows.size() + 1)
                     rows.add(newRow)
                 }
             }
@@ -286,10 +309,10 @@ void consolidation() {
     formDataService.getDataRowHelper(formData).allCached = rows
 }
 
-def getRowMap(def rows) {
+def getRowMap(def rows, boolean isNewFormType) {
     def result = [:]
     rows.each{ row ->
-        def keyString = keyColumns.collect{ row[it] ?: 0 }.join("#")
+        def keyString = isNewFormType ? keyColumnsNew.collect{ row[it] ?: 0 }.join("#") : keyColumns.collect{ row[it] ?: 0 }.join("#")
         if(result[keyString] == null) {
             result[keyString] = []
         }
@@ -298,7 +321,7 @@ def getRowMap(def rows) {
     return result
 }
 
-def formNewRow(def rowList, def prevPeriodStartDate, def prevPeriodEndDate, def lastPeriodStartDate, def lastPeriodEndDate) {
+def formNewRow(def rowList, def dataRowsPrev, def prevPeriodStartDate, def prevPeriodEndDate, def lastPeriodStartDate, def lastPeriodEndDate, boolean isNewFormType, int rowIndex) {
     def newRow = formData.createDataRow()
     editableColumns.each {
         newRow.getCell(it).editable = true
@@ -307,14 +330,14 @@ def formNewRow(def rowList, def prevPeriodStartDate, def prevPeriodEndDate, def 
     // беру первую строку
     def row = rowList[0]
 
-    // Если «Графа 2» первичной формы = «ОАО Сбербанк России» И «Графа 3» первичной формы = «7707083893», то «Графа 1» = «1», иначе «Графа 1» = «2»
-    newRow.taCategory = (sbStrings.contains(row.emitentName as String) && row.emitentInn == graph3String) ? 1 : 2
+    // Если «Графа 3» формы-источника = Значение атрибута «ИНН» формы настроек подразделения, то «Графа 1» = «1», иначе «Графа 1» = «2»
+    newRow.taCategory = (row.emitentInn == graph3String) ? 1 : 2
 
     // «Графа 2» = «Графа 2» первичной формы
     newRow.emitent = row.emitentName
 
-    // Если «Графа 2» первичной формы = «ОАО Сбербанк России» И «Графа 3» первичной формы = «7707083893», то «Графа 3»  не заполняется, иначе «Графа 3» = «Графа 3» первичной формы
-    newRow.inn = (sbStrings.contains(row.emitentName as String) && row.emitentInn == graph3String) ? null : row.emitentInn
+    // Если «Графа 3» формы-источника = Значение атрибута «ИНН» формы настроек подразделения, то «Графа 3»  не заполняется, иначе «Графа 3» = «Графа 3» первичной формы
+    newRow.inn = (row.emitentInn == graph3String) ? null : row.emitentInn
 
     // «Графа 4» = «Графа 7» первичной формы
     newRow.decreeNumber = row.decisionNumber
@@ -334,84 +357,174 @@ def formNewRow(def rowList, def prevPeriodStartDate, def prevPeriodEndDate, def 
     // «Графа 9» = Сумма по «Графа 23» для каждого уникального сочетания «Графа 7» первичной формы и «Графа 8» первичной формы
     newRow.dividendSumRaspredPeriod = rowList.sum{ it.dividends ?: 0 }
 
-    // «Графа 10» = Сумма по «Графа 23» для каждого уникального сочетания «Графа 7» первичной формы и «Графа 8» первичной формы, если «Графа 17» первичной формы = «RUS»
+    // «Графа 10» = Сумма по «Графа 23» для каждого уникального сочетания «Графа 7» первичной формы и «Графа 8» первичной формы, если «Графа 17» первичной формы = 1
     newRow.dividendRussianTotal = rowList.sum{ (it.status == 1 && it.dividends != null) ? it.dividends : 0 }
 
-    // «Графа 11» = Сумма по «Графа 23» для каждого уникального сочетания «Графа 7» первичной формы и «Графа 8» первичной формы, если «Графа 17» первичной формы = «RUS» и «Графа 16» первичной формы = «1» и «Графа 22» первичной формы = «0»
-    newRow.dividendRussianStavka0 = rowList.sum{ (it.status == 1 && it.type == 1 && it.rate == 0 && it.dividends != null) ? it.dividends : 0 }
+    if (!isNewFormType) { // старый алгоритм
+        // «Графа 11» = Сумма по «Графа 23» для каждого уникального сочетания «Графа 7» первичной формы и «Графа 8» первичной формы, если «Графа 17» первичной формы = 1 и «Графа 16» первичной формы = «1» и «Графа 22» первичной формы = «0»
+        newRow.dividendRussianStavka0 = rowList.sum{ (it.status == 1 && it.type == 1 && it.rate == 0 && it.dividends != null) ? it.dividends : 0 }
 
-    // «Графа 12» = Сумма по «Графа 23» для каждого уникального сочетания «Графа 7» первичной формы и «Графа 8» первичной формы, если «Графа 17» первичной формы = «RUS» и «Графа 16» первичной формы = «1» и «Графа 22» первичной формы = «9»
-    // «Графа 15» = Сумма по «Графа 23» для каждого уникального сочетания «Графа 7» первичной формы и «Графа 8» первичной формы, если «Графа 17» первичной формы = «RUS» и «Графа 16» первичной формы = «1» и «Графа 22» первичной формы = «9»
-    newRow.dividendRussianStavka6 = rowList.sum{ (it.status == 1 && it.type == 1 && it.rate == 9 && it.dividends != null) ? it.dividends : 0 }
+        // «Графа 12» = Сумма по «Графа 23» для каждого уникального сочетания «Графа 7» первичной формы и «Графа 8» первичной формы, если «Графа 17» первичной формы = 1 и «Графа 16» первичной формы = «1» и «Графа 22» первичной формы = «9»
+        newRow.dividendRussianStavka6 = rowList.sum{ (it.status == 1 && it.type == 1 && it.rate == 9 && it.dividends != null) ? it.dividends : 0 }
 
-    // «Графа 13» = Сумма по «Графа 23» для каждого уникального сочетания «Графа 7» первичной формы и «Графа 8» первичной формы, если «Графа 17» первичной формы = «RUS» и «Графа 16» первичной формы = «1» и «Графа 22» первичной формы не равна «9» и «0»
-    newRow.dividendRussianStavka9 = rowList.sum{ (it.status == 1 && it.type == 1 && it.rate != 9 && it.rate != 0 && it.dividends != null) ? it.dividends : 0 }
+        // «Графа 13» = Сумма по «Графа 23» для каждого уникального сочетания «Графа 7» первичной формы и «Графа 8» первичной формы, если «Графа 17» первичной формы = 1 и «Графа 16» первичной формы = «1» и «Графа 22» первичной формы не равна «9» и «0»
+        newRow.dividendRussianStavka9 = rowList.sum{ (it.status == 1 && it.type == 1 && it.rate != 9 && it.rate != 0 && it.dividends != null) ? it.dividends : 0 }
 
-    // «Графа 14» = Сумма по «Графа 23» для каждого уникального сочетания «Графа 7» первичной формы и «Графа 8» первичной формы, если «Графа 17» первичной формы = «RUS» и «Графа 16» первичной формы = «1» и «Графа 22» первичной формы не заполенена
-    newRow.dividendRussianTaxFree = rowList.sum{ (it.status == 1 && it.type == 1 && it.rate == null && it.dividends != null) ? it.dividends : 0 }
+        // «Графа 14» = Сумма по «Графа 23» для каждого уникального сочетания «Графа 7» первичной формы и «Графа 8» первичной формы, если «Графа 17» первичной формы = 1 и «Графа 16» первичной формы = «1» и «Графа 22» первичной формы не заполенена
+        newRow.dividendRussianTaxFree = rowList.sum{ (it.status == 1 && it.type == 1 && it.rate == null && it.dividends != null) ? it.dividends : 0 }
 
-    // «Графа 15» = Сумма по «Графа 23» для каждого уникального сочетания «Графа 7» первичной формы и «Графа 8» первичной формы, если «Графа 17» первичной формы = «RUS» и «Графа 16» первичной формы = «2»
-    newRow.dividendRussianPersonal = rowList.sum{ (it.status == 1 && it.type == 2 && it.dividends != null) ? it.dividends : 0 }
+        // «Графа 15» = Сумма по «Графа 23» для каждого уникального сочетания «Графа 7» первичной формы и «Графа 8» первичной формы, если «Графа 17» первичной формы = 1 и «Графа 16» первичной формы = «2»
+        newRow.dividendRussianPersonal = rowList.sum{ (it.status == 1 && it.type == 2 && it.dividends != null) ? it.dividends : 0 }
 
-    // «Графа 16» = Сумма по «Графа 23» для каждого уникального сочетания «Графа 7» первичной формы и «Графа 8» первичной формы, если «Графа 16» первичной формы = «1» и «Графа 17» первичной формы не равна «RUS»
-    newRow.dividendForgeinOrgAll = rowList.sum{ (it.type == 1 && it.status != 1 && it.dividends != null) ? it.dividends : 0 }
+        // «Графа 16» = Сумма по «Графа 23» для каждого уникального сочетания «Графа 7» первичной формы и «Графа 8» первичной формы, если «Графа 16» первичной формы = «1» и «Графа 17» первичной формы не равна 1
+        newRow.dividendForgeinOrgAll = rowList.sum{ (it.type == 1 && it.status != 1 && it.dividends != null) ? it.dividends : 0 }
 
-    // «Графа 17» = Сумма по «Графа 23» для каждого уникального сочетания «Графа 7» первичной формы и «Графа 8» первичной формы, если «Графа 16» первичной формы = «2» и «Графа 17» первичной формы не равна «RUS»
-    newRow.dividendForgeinPersonalAll = rowList.sum{ (it.type == 2 && it.status != 1 && it.dividends != null) ? it.dividends : 0 }
+        // «Графа 17» = Сумма по «Графа 23» для каждого уникального сочетания «Графа 7» первичной формы и «Графа 8» первичной формы, если «Графа 16» первичной формы = «2» и «Графа 17» первичной формы не равна 1
+        newRow.dividendForgeinPersonalAll = rowList.sum{ (it.type == 2 && it.status != 1 && it.dividends != null) ? it.dividends : 0 }
 
-    // «Графа 18» = Сумма по «Графа 23» для каждого уникального сочетания «Графа 7» первичной формы и «Графа 8» первичной формы, если «Графа 22» первичной формы = «0» и «Графа 17» первичной формы не равна «RUS»
-    newRow.dividendStavka0 = rowList.sum{ (it.rate == 0 && it.status != 1 && it.dividends != null) ? it.dividends : 0 }
+        // «Графа 18» = Сумма по «Графа 23» для каждого уникального сочетания «Графа 7» первичной формы и «Графа 8» первичной формы, если «Графа 22» первичной формы = «0» и «Графа 17» первичной формы не равна 1
+        newRow.dividendStavka0 = rowList.sum{ (it.rate == 0 && it.status != 1 && it.dividends != null) ? it.dividends : 0 }
 
-    // «Графа 19» = Сумма по «Графа 23» для каждого уникального сочетания «Графа 7» первичной формы и «Графа 8» первичной формы, если «Графа 22» первичной формы <= «5» и «Графа 17» первичной формы не равна «RUS»
-    newRow.dividendStavkaLess5 = rowList.sum{ (!(it.rate > 5) && it.status != 1 && it.dividends != null) ? it.dividends : 0 }
+        // «Графа 19» = Сумма по «Графа 23» для каждого уникального сочетания «Графа 7» первичной формы и «Графа 8» первичной формы, если «Графа 22» первичной формы <= «5» и «Графа 17» первичной формы не равна 1
+        newRow.dividendStavkaLess5 = rowList.sum{ (!(it.rate > 5) && it.status != 1 && it.dividends != null) ? it.dividends : 0 }
 
-    // «Графа 20» = Сумма по «Графа 23» для каждого уникального сочетания «Графа 7» первичной формы и «Графа 8» первичной формы, если «Графа 22» первичной формы > «5» и <= «10»  и «Графа 17» первичной формы не равна «RUS»
-    newRow.dividendStavkaMore5 = rowList.sum{ ((it.rate > 5 && !(it.rate > 10)) && it.status != 1 && it.dividends != null) ? it.dividends : 0 }
+        // «Графа 20» = Сумма по «Графа 23» для каждого уникального сочетания «Графа 7» первичной формы и «Графа 8» первичной формы, если «Графа 22» первичной формы > «5» и <= «10»  и «Графа 17» первичной формы не равна 1
+        newRow.dividendStavkaMore5 = rowList.sum{ ((it.rate > 5 && !(it.rate > 10)) && it.status != 1 && it.dividends != null) ? it.dividends : 0 }
 
-    // «Графа 21» = Сумма по «Графа 23» для каждого уникального сочетания «Графа 7» первичной формы и «Графа 8» первичной формы, если «Графа 22» первичной формы > «10»  и «Графа 17» первичной формы не равна «RUS»
-    newRow.dividendStavkaMore10 = rowList.sum{ ((it.rate > 10) && it.status != 1 && it.dividends != null) ? it.dividends : 0 }
+        // «Графа 21» = Сумма по «Графа 23» для каждого уникального сочетания «Графа 7» первичной формы и «Графа 8» первичной формы, если «Графа 22» первичной формы > «10»  и «Графа 17» первичной формы не равна 1
+        newRow.dividendStavkaMore10 = rowList.sum{ ((it.rate > 10) && it.status != 1 && it.dividends != null) ? it.dividends : 0 }
 
-    // «Графа 22» = Сумма по «Графа 23» для каждого уникального сочетания «Графа 7» первичной формы и «Графа 8» первичной формы, если «Графа 17» = «3»
-    newRow.dividendTaxUnknown = rowList.sum{ (it.status == '3' && it.dividends != null) ? it.dividends : 0 }
+        // «Графа 23» = Сумма по «Графа 23» для каждого уникального сочетания «Графа 7» первичной формы и «Графа 8» первичной формы, если «Графа 17» = «4»
+        newRow.dividendNonIncome = rowList.sum{ (it.status == '4' && it.dividends != null) ? it.dividends : 0 }
 
-    // «Графа 23» = Сумма по «Графа 23» для каждого уникального сочетания «Графа 7» первичной формы и «Графа 8» первичной формы, если «Графа 17» = «4»
-    newRow.dividendNonIncome = rowList.sum{ (it.status == '4' && it.dividends != null) ? it.dividends : 0 }
-
-    // Если «Графа 2» первичной формы = «ОАО Сбербанк России» и «Графа 3» первичной формы = «7707083893», то «Графа 24» = «Графа 4» первичной формы для каждого уникального сочетания «Графа 7» первичной формы и «Графа 8» первичной формы, иначе не заполняется
-    newRow.dividendAgentAll = (sbStrings.contains(row.emitentName as String) && row.emitentInn == graph3String && row.all != null) ? row.all : null
-
-    // «Графа 25» = «ОАО Сбербанк России» и «Графа 3» первичной формы = «7707083893», то «Графа 25» =(«Графа 4» первичной формы - «Графа 5» первичной формы) для каждого уникального сочетания «Графа 7» первичной формы и «Графа 8» первичной формы, иначе не заполняется
-    newRow.dividendAgentWithStavka0 = (sbStrings.contains(row.emitentName as String) && row.emitentInn == graph3String) ? ((row.all ?: 0) - (row.rateZero ?: 0)) : null
-
-    // Если «Графа 2» первичной формы = «ОАО Сбербанк России» и «Графа 3» первичной формы = «7707083893», то «Графа 26» = («Графа 12» первичной формы – («Графа 4» первичной формы – «Графа 5» первичной формы)) для каждого уникального сочетания «Графа 7» первичной формы и «Графа 8» первичной формы, иначе «Графа 26» = «Графа 6» первичной формы для каждого уникального сочетания «Графа 7» первичной формы и «Графа 8» первичной формы.
-    newRow.dividendD1D2 =  (sbStrings.contains(row.emitentName as String) && row.emitentInn == graph3String) ? ((row.allSum ?: 0) - ((row.all ?: 0) - (row.rateZero ?: 0))) : (row.distributionSum ?: 0)
-
-    // Вычисляется для каждого уникального сочетания «Графа 7» первичной формы и «Графа 8» первичной формы:
-    // Если «Графа 17» первичной формы = «RUS»и «Графа 16» первичной формы = «1» и «Графа 22» первичной формы = «9», то «Графа 27» = (Сумма по «Графа 23» первичной формы / «Графа 12» первичной формы * «Графа 6» первичной формы)
-    newRow.dividendSumForTaxStavka9 = rowList.sum{ (it.status == 1 && it.type == 1 && it.rate == 9 && it.dividends && it.allSum && it.distributionSum) ? (it.dividends * it.distributionSum / it.allSum) : 0 }
-
-    // Вычисляется для каждого уникального сочетания «Графа 7» первичной формы и «Графа 8» первичной формы:
-    // Если «Графа 17» первичной формы = «RUS»и «Графа 16» первичной формы = «1» и «Графа 22» первичной формы = «0», то «Графа 28» = (Сумма по «Графа 23» первичной формы / «Графа 12» первичной формы * «Графа 6» первичной формы)
-    newRow.dividendSumForTaxStavka0 = rowList.sum{ (it.status == 1 && it.type == 1 && it.rate == 0 && it.dividends && it.allSum && it.distributionSum) ? (it.dividends * it.distributionSum / it.allSum) : 0 }
-
-    // Графа 29: Принимает значение: Если графа 17 = RUS, графа 16 = 1 (ЮЛ) ∑ Граф 27 для одного Решения (графа 7-8)
-    newRow.taxSum = rowList.sum{ (it.status == 1 && it.type == 1 && it.withheldSum != null) ? it.withheldSum : 0 }
-
-    // Графа 30: Принимает значение:
-    // Если дата по «Графе 28» первичной формы принадлежит предыдущему отчетному периоду, то
-    //       «Графа 30» = Сумма по «Графа 27» для каждого уникального сочетания «Графа 7» первичной формы и «Графа 8» первичной формы.
-    // Иначе
-    //       «Графа 30» = значение "0"
-    if (prevPeriodEndDate != null && prevPeriodStartDate != null) {
-        newRow.taxSumFromPeriod = rowList.sum {
-            (it.status == 1 && it.type == 1 && it.withheldDate != null && it.withheldDate.before(prevPeriodEndDate) && it.withheldDate.after(prevPeriodStartDate) && it.withheldSum != null) ? it.withheldSum : 0
+        // Вычисляется для каждого уникального сочетания «Графа 7» первичной формы и «Графа 8» первичной формы:
+        // Если «Графа 17» первичной формы = 1 и «Графа 16» первичной формы = «1» и «Графа 22» первичной формы = «9», то «Графа 27» = (Сумма по «Графа 23» первичной формы / «Графа 12» первичной формы * «Графа 6» первичной формы)
+        if (row.allSum) {
+            newRow.dividendSumForTaxStavka9 = rowList.sum{ (it.status == 1 && it.type == 1 && it.rate == 9 && it.dividends) ? (it.dividends) : 0 } * row.distributionSum / row.allSum
         }
-    } else {
-        newRow.taxSumFromPeriod = 0
+
+        // Вычисляется для каждого уникального сочетания «Графа 7» первичной формы и «Графа 8» первичной формы:
+        // Если «Графа 17» первичной формы = 1и «Графа 16» первичной формы = «1» и «Графа 22» первичной формы = «0», то «Графа 28» = (Сумма по «Графа 23» первичной формы / «Графа 12» первичной формы * «Графа 6» первичной формы)
+        if (row.allSum) {
+            newRow.dividendSumForTaxStavka0 = rowList.sum{ (it.status == 1 && it.type == 1 && it.rate == 0 && it.dividends) ? (it.dividends) : 0 } * row.distributionSum / row.allSum
+        }
+
+        // Графа 29: Принимает значение: Если графа 17 = 1, графа 16 = 1 (ЮЛ) ∑ Граф 27 для одного Решения (графа 7-8)
+        newRow.taxSum = rowList.sum{ (it.status == 1 && it.type == 1 && it.withheldSum != null) ? it.withheldSum : 0 }
+
+        // Графа 30: Принимает значение:
+        // Если дата по «Графе 28» первичной формы принадлежит предыдущему отчетному периоду, то
+        //       «Графа 30» = Сумма по «Графа 27» для каждого уникального сочетания «Графа 7» первичной формы и «Графа 8» первичной формы.
+        // Иначе
+        //       «Графа 30» = значение "0"
+        if (prevPeriodEndDate != null && prevPeriodStartDate != null) {
+            newRow.taxSumFromPeriod = rowList.sum {
+                (it.status == 1 && it.type == 1 && it.withheldDate != null && it.withheldDate.before(prevPeriodEndDate) && it.withheldDate.after(prevPeriodStartDate) && it.withheldSum != null) ? it.withheldSum : 0
+            }
+        } else {
+            newRow.taxSumFromPeriod = 0
+        }
+
+    } else { // обновленный алгоритм
+        // «Графа 11» = Сумма по «Графа 23» для каждого уникального сочетания «Графа 7» первичной формы и «Графа 8» первичной формы, если «Графа 17» первичной формы = 1 и «Графа 16» первичной формы = «3» и «Графа 22» первичной формы = «0»
+        newRow.dividendRussianStavka0 = rowList.sum{ (it.status == 1 && it.type == 3 && it.rate == 0 && it.dividends != null) ? it.dividends : 0 }
+
+        // «Графа 12» = Сумма по «Графа 23» для каждого уникального сочетания «Графа 7» первичной формы и «Графа 8» первичной формы, если «Графа 17» первичной формы = 1 и «Графа 16» первичной формы = «5» и «Графа 22» первичной формы = «9»
+        newRow.dividendRussianStavka6 = rowList.sum{ (it.status == 1 && it.type == 5 && it.rate == 9 && it.dividends != null) ? it.dividends : 0 }
+
+        // «Графа 13» = Сумма по «Графа 23» для каждого уникального сочетания «Графа 7» и «Графа 8» формы-источника, если «Графа 17» формы-источника = «1» и «Графа 16» формы-источника = «5» и «Графа 22» формы-источника заполнена и не равна «9» и «0»
+        newRow.dividendRussianStavka9 = rowList.sum{ (it.status == 1 && it.type == 5 && it.rate != null && it.rate != 9 && it.rate != 0 && it.dividends != null) ? it.dividends : 0 }
+
+        // «Графа 14» = Сумма по «Графа 23» для каждого уникального сочетания «Графа 7» и «Графа 8» формы-источника, если «Графа 17» формы-источника = «1» и «Графа 16» формы-источника = «4»
+        newRow.dividendRussianTaxFree = rowList.sum{ (it.status == 1 && it.type == 4 && it.dividends != null) ? it.dividends : 0 }
+
+        // «Графа 16» = Сумма по «Графа 23» для каждого уникального сочетания «Графа 7» и «Графа 8» формы-источника, если «Графа 16» формы-источника = «5» и «Графа 17» формы-источника равна «2»
+        newRow.dividendForgeinOrgAll = rowList.sum{ (it.type == 5 && it.status == 2 && it.dividends != null) ? it.dividends : 0 }
+
+        // «Графа 17» = Сумма по «Графа 23» для каждого уникального сочетания «Графа 7» и «Графа 8» формы-источника, если «Графа 16» формы-источника = «2» и «Графа 17» формы-источника = «2»
+        newRow.dividendForgeinPersonalAll = rowList.sum{ (it.type == 2 && it.status == 2 && it.dividends != null) ? it.dividends : 0 }
+
+        // «Графа 18» = Сумма по «Графа 23» для каждого уникального сочетания «Графа 7» и «Графа 8» формы-источника, если «Графа 22» формы-источника = «0» и «Графа 16» формы-источника = «2»/«5» и «Графа 17» формы-источника = «2»
+        newRow.dividendStavka0 = rowList.sum{ (it.rate == 0 && (it.type == 2 || it.type == 5) && it.status == 2 &&  it.dividends != null) ? it.dividends : 0 }
+
+        // «Графа 19» = Сумма по «Графа 23» для каждого уникального сочетания «Графа 7» и «Графа 8» формы-источника, если «Графа 22» формы-источника <= «5» и «Графа 16» формы-источника = «2»/«5» и «Графа 17» формы-источника = «2»
+        newRow.dividendStavkaLess5 = rowList.sum{ ((it.rate > 0 && !(it.rate > 5)) && (it.type == 2 || it.type == 5) && it.status == 2 && it.dividends != null) ? it.dividends : 0 }
+
+        // «Графа 20» = Сумма по «Графа 23» для каждого уникального сочетания «Графа 7» и «Графа 8» формы-источника, если «Графа 22» формы-источника > «5» и <= «10»  и «Графа 16» формы-источника = «2»/«5» и «Графа 17» формы-источника = «2»
+        newRow.dividendStavkaMore5 = rowList.sum{ ((it.rate > 5 && !(it.rate > 10)) && (it.type == 2 || it.type == 5) && it.status == 2 && it.dividends != null) ? it.dividends : 0 }
+
+        // «Графа 21» = Сумма по «Графа 23» для каждого уникального сочетания «Графа 7» и «Графа 8» формы-источника, если «Графа 22» формы-источника > «10»  и «Графа 16» формы-источника = «2»/«5» и «Графа 17» формы-источника = «2»
+        newRow.dividendStavkaMore10 = rowList.sum{ ((it.rate > 10) && (it.type == 2 || it.type == 5) && it.status == 2 && it.dividends != null) ? it.dividends : 0 }
+
+        // «Графа 23» = Сумма по «Графа 23» для каждого уникального сочетания «Графа 7» и «Графа 8» формы-источника, если «Графа 16» формы-источника = «1»
+        newRow.dividendNonIncome = rowList.sum{ (it.type == 1 && it.dividends != null) ? it.dividends : 0 }
+
+        // Вычисляется для каждого уникального сочетания «Графа 7» первичной формы и «Графа 8» первичной формы:
+        // Если «Графа 17» формы-источника = «1» и «Графа 16» формы-источника = «5» и «Графа 22» формы-источника = «13», то «Графа 27» = (Сумма по «Графа 23» формы-источника / «Графа 12» формы-источника * «Графа 6» формы-источника)
+        if (row.allSum) {
+            newRow.dividendSumForTaxStavka9 = rowList.sum{ (it.status == 1 && it.type == 5 && it.rate == 13 && it.dividends) ? (it.dividends) : 0 } * row.distributionSum / row.allSum
+        }
+
+        // Вычисляется для каждого уникального сочетания «Графа 7» первичной формы и «Графа 8» первичной формы:
+        // Если «Графа 17» формы-источника = «1» и «Графа 16» формы-источника = «3» и «Графа 22» формы-источника = «0», то «Графа 28» = (Сумма по «Графа 23» формы-источника / «Графа 12» формы-источника * «Графа 6» формы-источника)
+        if (row.allSum) {
+            newRow.dividendSumForTaxStavka0 = rowList.sum{ (it.status == 1 && it.type == 3 && it.rate == 0 && it.dividends) ? (it.dividends) : 0 } * row.distributionSum / row.allSum
+        }
+
+        // Если «Графа 3» формы-источника = Значение атрибута «ИНН» формы настроек подразделения, то
+        // Если «Графа 17» формы-источника = «1» и «Графа 16» формы-источника = «5» и «Графа 22» формы-источника заполнена и не равно «0»/«9», то «Графа 29» = (Сумма по «Графа 23» для каждого уникального сочетания «Графа 7» и «Графа 8» формы-источника)*13%) / «Графа 12» формы-источника * («Графа 4» формы-источника - «Графа 5» формы-источника).
+        // Иначе «Графа 29» = Значение «0».
+        // Иначе «Графа 29» = Сумма по «Графа 27» для каждого уникального сочетания «Графа 7» и «Графа 8» формы-источникапервичной формы
+        def value2 = rowList.sum { (it.withheldSum != null) ? it.withheldSum : 0 }
+        if (row.emitentInn == graph3String) {
+            if (row.allSum) {
+                newRow.taxSum = rowList.sum {
+                    (it.status == 1 && it.type == 5 && it.rate != null && it.rate != 0 && it.rate != 9 && it.dividends) ? it.dividends : 0
+                } * 0.13 * (row.all - row.rateZero) / row.allSum
+            } else{
+                newRow.taxSum = 0
+            }
+        } else {
+            newRow.taxSum = value2
+        }
+        if (newRow.taxSum != value2) {
+            logger.warn("Строка ${rowIndex}: Графа «Исчисленная сумма налога, подлежащая уплате в бюджет» заполнена неверно! Не выполняется условие: " +
+                    "«Графа 29» = Сумма по «Графа 27» для строк формы-источника «Расчет налога на прибыль организаций " +
+                    "с доходов, удерживаемого налоговым агентом (источником выплаты доходов)», " +
+                    "в которых «Графа 3» = «${row.inn}» и «Графа 7» = «${row.decisionNumber}»")
+        }
+        // Графа 30: Принимает значение:
+        // «Графа 30» = (Сумма значений по «Графе 30» и «Графе 31») формы 03-А предыдущего периода (для начала года заходим в предыдущий) по строке, в которой:
+        // «Графа 1» = Значение «1» (признак отнесения строки к строке ПАО Сбербанк);
+        // «Графа 4» (Номер решения о распределении доходов от долевого участия) = «Графа 4» текущей формы;
+        // «Графа 6» (Отчетный год) = «Графа 6» текущей формы.
+
+        if (dataRowsPrev != null) {
+            newRow.taxSumFromPeriod = dataRowsPrev.sum {
+                (it.taCategory == 1 && it.decreeNumber == newRow.decreeNumber && it.financialYear?.format("yyyy") == newRow.financialYear?.format("yyyy")) ? ((it.taxSumFromPeriod ?: 0) + (it.taxSumLast ?: 0)) : 0
+            }
+        } else {
+            newRow.taxSumFromPeriod = 0
+        }
     }
 
-    // Графа 31: Принимает значение: Если графа 17 = RUS, графа 16 = 1 (ЮЛ) ∑ Граф 27 для одного Решения (графа 7-8) если дата по графе 28 принадлежит последнему кварталу отчетного периода
-    newRow.taxSumLast = rowList.sum{ (it.status == 1 && it.type == 1 && it.withheldDate != null && it.withheldDate.before(lastPeriodEndDate) && it.withheldDate.after(lastPeriodStartDate) && it.withheldSum != null) ? it.withheldSum : 0 }
+    // «Графа 15» = Сумма по «Графа 23» для каждого уникального сочетания «Графа 7» первичной формы и «Графа 8» первичной формы, если «Графа 17» первичной формы = 1 и «Графа 16» первичной формы = «2»
+    newRow.dividendRussianPersonal = rowList.sum{ (it.status == 1 && it.type == 2 && it.dividends != null) ? it.dividends : 0 }
+
+    // «Графа 22» = Сумма по «Графа 23» для каждого уникального сочетания «Графа 7» первичной формы и «Графа 8» первичной формы, если «Графа 17» = «3»
+    newRow.dividendTaxUnknown = rowList.sum{ (it.status == 3 && it.dividends != null) ? it.dividends : 0 }
+
+    // Если «Графа 3» формы-источника = Значение атрибута «ИНН» формы настроек подразделения, то «Графа 24» = «Графа 4» первичной формы для каждого уникального сочетания «Графа 7» первичной формы и «Графа 8» первичной формы, иначе не заполняется
+    newRow.dividendAgentAll = (row.emitentInn == graph3String && row.all != null) ? row.all : null
+
+    // «Графа 25» = Если «Графа 3» формы-источника = Значение атрибута «ИНН» формы настроек подразделения, то «Графа 25» =(«Графа 4» первичной формы - «Графа 5» первичной формы) для каждого уникального сочетания «Графа 7» первичной формы и «Графа 8» первичной формы, иначе не заполняется
+    newRow.dividendAgentWithStavka0 = (row.emitentInn == graph3String) ? ((row.all ?: 0) - (row.rateZero ?: 0)) : null
+
+    // Если «Графа 3» формы-источника = Значение атрибута «ИНН» формы настроек подразделения, то «Графа 26» = («Графа 12» первичной формы – («Графа 4» первичной формы – «Графа 5» первичной формы)) для каждого уникального сочетания «Графа 7» первичной формы и «Графа 8» первичной формы, иначе «Графа 26» = «Графа 6» первичной формы для каждого уникального сочетания «Графа 7» первичной формы и «Графа 8» первичной формы.
+    newRow.dividendD1D2 =  (row.emitentInn == graph3String) ? ((row.allSum ?: 0) - ((row.all ?: 0) - (row.rateZero ?: 0))) : (row.distributionSum ?: 0)
+
+    // Графа 31: Принимает значение: Если графа 17 = 1, графа 16 = 1 (ЮЛ) ∑ Граф 27 для одного Решения (графа 7-8) если дата по графе 28 принадлежит последнему кварталу отчетного периода
+    newRow.taxSumLast = rowList.sum{ it.withheldSum ?: 0 }
 
     return newRow
 }
