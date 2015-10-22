@@ -1205,6 +1205,9 @@ public class SourceServiceImpl implements SourceService {
         sources.setSourceList(new ArrayList<Relation>());
         sources.setSourcesProcessedByScript(false);
         params.put("sources", sources);
+        params.put("light", light);
+        params.put("excludeIfNotExist", excludeIfNotExist);
+        params.put("stateRestriction", stateRestriction);
 
         formDataScriptingService.executeScript(userInfo, destinationFormData, FormDataEvent.GET_SOURCES, logger, params);
         if (sources.isSourcesProcessedByScript()) {
@@ -1229,6 +1232,9 @@ public class SourceServiceImpl implements SourceService {
         sources.setSourceList(new ArrayList<Relation>());
         sources.setSourcesProcessedByScript(false);
         params.put("sources", sources);
+        params.put("light", light);
+        params.put("excludeIfNotExist", excludeIfNotExist);
+        params.put("stateRestriction", stateRestriction);
 
         formDataScriptingService.executeScript(userInfo, sourceFormData, FormDataEvent.GET_SOURCES, logger, params);
         if (sources.isSourcesProcessedByScript()) {
@@ -1253,6 +1259,9 @@ public class SourceServiceImpl implements SourceService {
         sources.setSourceList(new ArrayList<Relation>());
         sources.setSourcesProcessedByScript(false);
         params.put("sources", sources);
+        params.put("light", light);
+        params.put("excludeIfNotExist", excludeIfNotExist);
+        params.put("stateRestriction", stateRestriction);
 
         formDataScriptingService.executeScript(userInfo, sourceFormData, FormDataEvent.GET_SOURCES, logger, params);
         if (sources.isSourcesProcessedByScript()) {
@@ -1277,6 +1286,9 @@ public class SourceServiceImpl implements SourceService {
         sources.setSourceList(new ArrayList<Relation>());
         sources.setSourcesProcessedByScript(false);
         params.put("sources", sources);
+        params.put("light", light);
+        params.put("excludeIfNotExist", excludeIfNotExist);
+        params.put("stateRestriction", stateRestriction);
 
         declarationDataScriptingService.executeScript(userInfo, declaration, FormDataEvent.GET_SOURCES, logger, params);
         if (sources.isSourcesProcessedByScript()) {
