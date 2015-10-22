@@ -65,31 +65,6 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             "(расприняты формы-источники / удалены назначения по формам-источникам, на основе которых ранее выполнена " +
             "консолидация). Для коррекции консолидированных данных необходимо нажать на кнопку \"Рассчитать\"";
 
-	private static final String DD_NOT_IN_RANGE = "Найдена форма: \"%s\", \"%d\", \"%s\", \"%s\", состояние - \"%s\"";
-
-	private static final String TAG_FILE = "Файл";
-	private static final String TAG_DOCUMENT = "Документ";
-	private static final String ATTR_FILE_ID = "ИдФайл";
-	private static final String ATTR_DOC_DATE = "ДатаДок";
-	private static final SimpleDateFormat formatter = new SimpleDateFormat("dd.MM.yyyy");
-	private static final String VALIDATION_ERR_MSG = "Обнаружены фатальные ошибки!";
-	private static final String MSG_IS_EXIST_DECLARATION =
-			"Существует экземпляр \"%s\" в подразделении \"%s\" в периоде \"%s\"%s%s для макета!";
-	private static final String NOT_CONSOLIDATE_SOURCE_DECLARATION_WARNING =
-			"Не выполнена консолидация данных из формы \"%s\", \"%s\", \"%s\", \"%s\", \"%d%s\" в статусе \"%s\"";
-	private static final String NOT_EXIST_SOURCE_DECLARATION_WARNING =
-			"Не выполнена консолидация данных из формы \"%s\", \"%s\", \"%s\", \"%s\", \"%d%s\" - экземпляр формы не создан";
-	private static final String FILE_NOT_DELETE = "Временный файл %s не удален";
-
-	private static final Date MAX_DATE;
-	private static final Calendar CALENDAR = Calendar.getInstance();
-	static {
-		CALENDAR.clear();
-		CALENDAR.set(9999, Calendar.DECEMBER, 31);
-		MAX_DATE = CALENDAR.getTime();
-		CALENDAR.clear();
-	}
-
     @Autowired
     private DeclarationDataDao declarationDataDao;
     @Autowired
@@ -125,11 +100,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     @Autowired
     private SourceService sourceService;
     @Autowired
-    private DepartmentFormTypeDao departmentFormTypeDao;
-    @Autowired
-    private FormDataService formDataService;
-    @Autowired
-    private FormTypeService formTypeService;
+    private FormDataDao formDataDao;
     @Autowired
     private DataRowDao dataRowDao;
     @Autowired
