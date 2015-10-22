@@ -140,14 +140,18 @@ public class GetRefBookDataRowHandler extends AbstractActionHandler<GetRefBookTa
 						recordIds.add(value.getReferenceValue());
 					}
 				}
-				// групповое разыменование
-				RefBookDataProvider provider = refBookFactory.getDataProvider(attribute.getRefBookId());
-				Map<Long, RefBookValue> values = provider.dereferenceValues(attribute.getRefBookAttributeId(), recordIds);
-				Map<Long, String> stringValues = new HashMap<Long, String>();
-				for (Map.Entry<Long, RefBookValue> entry : values.entrySet()) {
-					stringValues.put(entry.getKey(), String.valueOf(entry.getValue()));
+				// групповое разыменование, если есть что разыменовывать
+				if (!recordIds.isEmpty()) {
+					RefBookDataProvider provider = refBookFactory.getDataProvider(attribute.getRefBookId());
+					Map<Long, RefBookValue> values = provider.dereferenceValues(attribute.getRefBookAttributeId(), recordIds);
+					if (values != null && !values.isEmpty()) {
+						Map<Long, String> stringValues = new HashMap<Long, String>();
+						for (Map.Entry<Long, RefBookValue> entry : values.entrySet()) {
+							stringValues.put(entry.getKey(), String.valueOf(entry.getValue()));
+						}
+						derefenceValues.put(attribute.getId(), stringValues);
+					}
 				}
-				derefenceValues.put(attribute.getId(), stringValues);
 			}
 		}
 
