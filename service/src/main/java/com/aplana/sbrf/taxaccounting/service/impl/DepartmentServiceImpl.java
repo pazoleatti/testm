@@ -257,7 +257,7 @@ public class DepartmentServiceImpl implements DepartmentService {
         } else if (tAUser.hasRole(TARole.ROLE_CONTROL_NS) || tAUser.hasRole(TARole.ROLE_CONTROL)) {
             // подразделения, которым назначены формы, которые являются источниками данных для форм, назначенных подразделениям из 10 - Выборка для бизнес-администрирования.
             List<Integer> baDepartmentIds = getBADepartmentIds(tAUser);
-            if (baDepartmentIds.size() > 0) {
+            if (!baDepartmentIds.isEmpty()) {
                 retList.addAll(departmentDao.getDepartmentsByDestinationSource(baDepartmentIds, periodStart, periodEnd));
             }
         }
@@ -280,7 +280,7 @@ public class DepartmentServiceImpl implements DepartmentService {
         } else if (tAUser.hasRole(TARole.ROLE_CONTROL_NS) || tAUser.hasRole(TARole.ROLE_CONTROL)) {
             // подразделения, которым назначены формы, которые являются источниками данных для форм, назначенных подразделениям из 10 - Выборка для бизнес-администрирования.
             List<Integer> baDepartmentIds = getBADepartmentIds(tAUser);
-            if (baDepartmentIds.size() > 0) {
+            if (!baDepartmentIds.isEmpty()) {
                 retList.addAll(departmentDao.getDepartmentIdsByDestinationSource(baDepartmentIds, periodStart, periodEnd));
             }
         }

@@ -38,7 +38,7 @@ public class RefBookAuditFieldList extends AbstractPermanentRefBook {
     protected PagingResult<Map<String, RefBookValue>> getRecords(String filter) {
         PagingResult<Map<String, RefBookValue>> records = new PagingResult<Map<String, RefBookValue>>();
 
-        if (filter != null && filter.trim().length() > 0) {
+        if (filter != null && !filter.trim().isEmpty()) {
             for (String s : filter.trim().split(",")) {
                 Long id = Long.valueOf(s);
                 AuditFieldList item = AuditFieldList.fromId(id.intValue());

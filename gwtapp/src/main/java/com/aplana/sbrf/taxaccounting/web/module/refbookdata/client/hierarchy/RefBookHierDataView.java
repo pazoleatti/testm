@@ -82,7 +82,7 @@ public class RefBookHierDataView extends ViewWithUiHandlers<RefBookHierDataUiHan
 
     @Override
     public Long getSelectedId() {
-        if (refbookDataTree.getSelectedIds().size() > 0) {
+        if (!refbookDataTree.getSelectedIds().isEmpty()) {
             return refbookDataTree.getSelectedIds().iterator().next();
         } else {
             return null;

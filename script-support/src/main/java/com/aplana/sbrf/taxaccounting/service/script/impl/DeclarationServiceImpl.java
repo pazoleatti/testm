@@ -216,7 +216,7 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
         declarationFilter.setCountOfRecords(1);
 
         PagingResult<DeclarationDataSearchResultItem> result = declarationDataSearchService.search(declarationFilter);
-        return (result != null && result.size() > 0);
+        return (result != null && !result.isEmpty());
     }
 
     @Override

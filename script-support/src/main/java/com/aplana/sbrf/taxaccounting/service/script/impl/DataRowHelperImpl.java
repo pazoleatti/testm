@@ -154,7 +154,7 @@ public class DataRowHelperImpl implements DataRowHelper, ScriptComponentContextH
 				buffer.clear();
 			}
 			// обрабатываем окончание строк
-			if (i == dataRows.size() - 1 && buffer.size() > 0) {
+			if (i == dataRows.size() - 1 && !buffer.isEmpty()) {
 				insert(buffer, getAllCached().size() + 1);
 			}
 		}

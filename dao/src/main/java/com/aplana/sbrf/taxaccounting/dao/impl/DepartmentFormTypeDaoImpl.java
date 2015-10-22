@@ -722,7 +722,7 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
 
     @Override
     public boolean existAssignedForm(int departmentId, int typeId, FormDataKind kind){
-        return getJdbcTemplate().queryForList(
+        return !getJdbcTemplate().queryForList(
                     CHECK_EXIST,
                     new Object[]{
                         departmentId,
@@ -730,7 +730,7 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
                         kind.getId()
                     },
                     Integer.class
-                ).size() > 0;
+                ).isEmpty();
     }
 
     private static final String EXIST_ACCEPTED_DESTINATIONS = "select dtype.name as declarationType, d.name as departmentName from declaration_data dd\n" +

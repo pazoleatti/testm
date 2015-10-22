@@ -154,7 +154,7 @@ public class CreateBookerStatementsView extends PopupViewWithUiHandlers<CreateBo
             names.append("«Вид бух. отчетности», ");
         }
         String retNames = names.toString();
-        if (retNames.length() > 0) {
+        if (!retNames.isEmpty()) {
             retNames = retNames.substring(0, retNames.length() - 2);
         }
         return retNames;

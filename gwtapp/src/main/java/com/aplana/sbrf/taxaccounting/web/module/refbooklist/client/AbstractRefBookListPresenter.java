@@ -87,7 +87,7 @@ public abstract class AbstractRefBookListPresenter<V extends AbstractRefBookList
                             @Override
                             public void onSuccess(GetTableDataResult result) {
                                 List<TableModel> tableData = result.getTableData();
-                                if (tableData != null && tableData.size() > 0) {
+                                if (tableData != null && !tableData.isEmpty()) {
                                     getView().setTableData(tableData, getSelectedId());
                                 } else {
                                     getView().setTableData(new ArrayList<TableModel>(), null);

@@ -272,7 +272,7 @@ public class SaveDepartmentCombinedHandler extends AbstractActionHandler<SaveDep
                 }
             }
         }
-        if (references.size() > 0) {
+        if (!references.isEmpty()) {
             for (Map.Entry<RefBookDataProvider, List<Long>> entry : references.entrySet()) {
                 if (!entry.getKey().isRecordsExist(entry.getValue())) {
                     throw new ServiceException("Данные не могут быть сохранены, так как часть выбранных справочных значений была удалена. Отредактируйте таблицу и попытайтесь сохранить заново");

@@ -62,7 +62,7 @@ public class UploadController {
             JSONObject jsonObject = new JSONObject();
             jsonObject.put(UuidEnum.UUID.toString(), StringUtils.join(uuidList.toArray(), ','));
             response.getWriter().printf(jsonObject.toString());
-        } else if (uuidList.size() > 0) {
+        } else if (!uuidList.isEmpty()) {
             Logger log = new Logger();
             log.error("Часть выбранных файлов имеет размер более 5 МБайт, данные файлы не добавлены. Для добавления доступны файлы размером меньшим или равным 5 МБайт.");
             JSONObject jsonObject = new JSONObject();

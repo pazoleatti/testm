@@ -1114,7 +1114,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         List<RefBookAttribute> attributes = refBook.getAttributes();
         List<String> errors = RefBookUtils.checkFillRequiredRefBookAtributes(attributes, record);
 
-        if (errors.size() > 0) {
+        if (!errors.isEmpty()) {
             StringBuilder sb = new StringBuilder();
             sb.append("Поля ");
             for (int j = 0; j < errors.size(); j++) {
@@ -2279,7 +2279,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 
             // проверка обязательности заполнения записей справочника
             List<String> errors = RefBookUtils.checkFillRequiredRefBookAtributes(attributes, record);
-            if (errors.size() > 0) {
+            if (!errors.isEmpty()) {
                 throw new DaoException("Поля " + errors.toString() + "являются обязательными для заполнения");
             }
 
@@ -2464,10 +2464,10 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             }
         }
         JdbcTemplate jt = getJdbcTemplate();
-        if (insertValues.size() > 0) {
+        if (!insertValues.isEmpty()) {
             jt.batchUpdate(String.format(DELETE_REF_BOOK_RECORD_SQL_I_OLD, refBookId, sdf.format(version)), insertValues);
         }
-        if (deleteValues.size() > 0) {
+        if (!deleteValues.isEmpty()) {
             jt.batchUpdate(String.format(DELETE_REF_BOOK_RECORD_SQL_D_OLD, refBookId, sdf.format(version)), deleteValues);
         }
     }
@@ -2534,11 +2534,11 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         if (filterPS.getQuery().length() > 0) {
             ps.appendQuery(" WHERE ");
             ps.appendQuery(filterPS.getQuery().toString());
-            if (filterPS.getParams().size() > 0) {
+            if (!filterPS.getParams().isEmpty()) {
                 ps.addParam(filterPS.getParams());
             }
         }
-        if (whereClause != null && whereClause.trim().length() > 0) {
+        if (whereClause != null && !whereClause.trim().isEmpty()) {
             if (filterPS.getQuery().length() > 0) {
                 ps.appendQuery(" AND ");
             } else {
@@ -2631,7 +2631,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
                 ps.appendQuery("frb.PARENT_ID is null or (");
             }
             ps.appendQuery(filterPS.getQuery().toString());
-            if (filterPS.getParams().size() > 0) {
+            if (!filterPS.getParams().isEmpty()) {
                 ps.addParam(filterPS.getParams());
             }
             if (parentId == null) {
@@ -2708,7 +2708,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         if (filterPS.getQuery().length() > 0) {
             ps.appendQuery(" WHERE ");
             ps.appendQuery(filterPS.getQuery().toString());
-            if (filterPS.getParams().size() > 0) {
+            if (!filterPS.getParams().isEmpty()) {
                 ps.addParam(filterPS.getParams());
             }
         }
@@ -2785,7 +2785,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
      */
     @Override
     public List<Map<String, RefBookValue>> getRecordsData(PreparedStatementData ps, RefBook refBook) {
-        if (ps.getParams().size() > 0) {
+        if (!ps.getParams().isEmpty()) {
             return getJdbcTemplate().query(ps.getQuery().toString(), ps.getParams().toArray(), new RefBookValueMapper(refBook));
         } else {
             return getJdbcTemplate().query(ps.getQuery().toString(), new RefBookValueMapper(refBook));
@@ -2819,7 +2819,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 
     @Override
     public Integer getRecordsCount(PreparedStatementData ps) {
-        if (ps.getParams().size() > 0) {
+        if (!ps.getParams().isEmpty()) {
             return getJdbcTemplate().queryForInt("select count(*) from (" + ps.getQuery().toString() + ")", ps.getParams().toArray());
         } else {
             return getJdbcTemplate().queryForInt("select count(*) from (" + ps.getQuery().toString() + ")");
@@ -2842,7 +2842,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     @Override
     public void isReferenceValuesCorrect(final Logger logger, String tableName, @NotNull Date versionFrom,
                                          @NotNull List<RefBookAttribute> attributes, List<RefBookRecord> records, final boolean isConfig) {
-        if (attributes.size() > 0) {
+        if (!attributes.isEmpty()) {
             final Map<Long, String> attributeIds = new HashMap<Long, String>();
             List<Long> allIn = new ArrayList<Long>();
             for (RefBookRecord record : records) {

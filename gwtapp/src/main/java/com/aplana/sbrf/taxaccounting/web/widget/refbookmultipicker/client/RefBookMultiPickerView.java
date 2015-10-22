@@ -364,7 +364,7 @@ public class RefBookMultiPickerView extends ViewWithUiHandlers<RefBookMultiPicke
     public String getDereferenceValue() {
         Set<RefBookItem> selectedItems = getSelectedSet();
         StringBuilder sb = new StringBuilder();
-        if (selectedItems.size() > 0) {
+        if (!selectedItems.isEmpty()) {
             for (RefBookItem item : selectedItems) {
                 sb.append(item.getDereferenceValue());
                 sb.append("; ");

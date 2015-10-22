@@ -72,7 +72,7 @@ public class MigrationPresenter extends Presenter<MigrationPresenter.MyView,
 
         final String start = dateTimeFormat.format(new Date());
 
-        if (rnus.size() > 0 && years.size() > 0) {
+        if (!rnus.isEmpty() && !years.isEmpty()) {
             dispatcher.execute(new MigrationAction(toLongs(rnus), toLongs(years)), CallbackUtils
                     .defaultCallback(new AbstractCallback<MigrationResult>() {
                         @Override

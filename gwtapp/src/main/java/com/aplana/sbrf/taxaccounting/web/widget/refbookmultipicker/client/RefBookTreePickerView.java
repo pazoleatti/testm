@@ -428,7 +428,7 @@ public class RefBookTreePickerView extends ViewWithUiHandlers<RefBookTreePickerU
     public String getDereferenceValue() {
         Set<RefBookUiTreeItem> selectedItems = getSelectedSet();
         StringBuilder sb = new StringBuilder();
-        if (selectedItems.size() > 0) {
+        if (!selectedItems.isEmpty()) {
             for (RefBookUiTreeItem item : selectedItems) {
                 sb.append(item.getRefBookTreeItem().getDereferenceValue());
                 sb.append("; ");

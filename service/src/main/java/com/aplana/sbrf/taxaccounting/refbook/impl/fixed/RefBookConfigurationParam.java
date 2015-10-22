@@ -39,7 +39,7 @@ public class RefBookConfigurationParam extends AbstractPermanentRefBook {
     @Override
     protected PagingResult<Map<String, RefBookValue>> getRecords(String filter) {
         PagingResult<Map<String, RefBookValue>> records = new PagingResult<Map<String, RefBookValue>>();
-        if (filter != null && filter.trim().length() > 0) {
+        if (filter != null && !filter.trim().isEmpty()) {
             for (String s : filter.trim().split(",")) {
                 ConfigurationParam item = ConfigurationParam.valueOf(s.trim());
                 Map<String, RefBookValue> record = refBook.createRecord();
