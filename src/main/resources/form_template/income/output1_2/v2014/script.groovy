@@ -478,9 +478,9 @@ def formNewRow(def rowList, def dataRowsPrev, def prevPeriodStartDate, def prevP
         def value2 = rowList.sum { (it.status == 1 && it.type != 2 && it.withheldSum != null) ? it.withheldSum : 0 }
         if (row.emitentInn == graph3String) {
             if (row.allSum) {
-                newRow.taxSum = ( rowList.sum {
+                newRow.taxSum = (( rowList.sum {
                     (it.status == 1 && it.type == 5 && it.rate != null && it.rate != 0 && it.rate != 9 && it.dividends) ? it.dividends : 0
-                } / row.allSum * 0.13) / (row.allSum * (row.all - row.rateZero))
+                } / row.allSum) * 0.13) / (row.allSum * (row.all - row.rateZero))
             } else{
                 newRow.taxSum = 0
             }
