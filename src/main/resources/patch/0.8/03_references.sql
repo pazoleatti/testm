@@ -509,6 +509,9 @@ insert into ref_book_attribute(id, ref_book_id, name, alias, type, ord, referenc
 insert into ref_book_attribute(id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (5214,520,'Критерий взаимозависимости','DEP_CRITERION',4,14,512,5121,1,null,10,1,0,null,null,0,null);
 
 ----------------------------------------------------------------------------------------------------------------
+--http://jira.aplana.com/browse/SBRFACCTAX-13088
+--http://jira.aplana.com/browse/SBRFACCTAX-13084
+update ref_book set is_versioned = 0 where id in (510, 511);
 
 COMMIT;
 EXIT;

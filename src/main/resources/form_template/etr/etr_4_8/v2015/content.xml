@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<formTemplateContent>
+    <fixedRows>true</fixedRows>
+    <name>Приложение 4-8. Налоговая эффективность по уступке прав требования по проблемным активам</name>
+    <fullName>Приложение 4-8. Налоговая эффективность по уступке прав требования по проблемным активам</fullName>
+    <header>Приложение 4-8</header>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
+        <alias>rowNum</alias>
+        <checking>false</checking>
+        <columnType>STRING</columnType>
+        <name>№ строки</name>
+        <order>1</order>
+        <width>5</width>
+        <maxLength>256</maxLength>
+        <prevLength>0</prevLength>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
+        <alias>taxName</alias>
+        <checking>false</checking>
+        <columnType>STRING</columnType>
+        <name>Наименование показателя</name>
+        <order>2</order>
+        <width>20</width>
+        <maxLength>256</maxLength>
+        <prevLength>0</prevLength>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
+        <alias>symbol102</alias>
+        <checking>false</checking>
+        <columnType>STRING</columnType>
+        <name>символ формы 102/графа РНУ</name>
+        <order>3</order>
+        <width>20</width>
+        <maxLength>256</maxLength>
+        <prevLength>0</prevLength>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>comparePeriod</alias>
+        <checking>false</checking>
+        <columnType>NUMBER</columnType>
+        <name>Период сравнения, тыс. руб.</name>
+        <order>4</order>
+        <width>10</width>
+        <maxLength>22</maxLength>
+        <precision>2</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>currentPeriod</alias>
+        <checking>false</checking>
+        <columnType>NUMBER</columnType>
+        <name>Период, тыс. руб.</name>
+        <order>5</order>
+        <width>10</width>
+        <maxLength>22</maxLength>
+        <precision>2</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>deltaRub</alias>
+        <checking>false</checking>
+        <columnType>NUMBER</columnType>
+        <name>Изменение за период (гр.5-гр.4), тыс.руб.</name>
+        <order>6</order>
+        <width>10</width>
+        <maxLength>22</maxLength>
+        <precision>2</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>deltaPercent</alias>
+        <checking>false</checking>
+        <columnType>NUMBER</columnType>
+        <name>Изменение за период (гр.6/гр.4*100),%</name>
+        <order>7</order>
+        <width>10</width>
+        <maxLength>17</maxLength>
+        <precision>2</precision>
+    </columns>
+    <styles>
+        <alias>Автозаполняемая</alias>
+        <backColor>WHITE</backColor>
+        <bold>true</bold>
+        <fontColor>DARK_GREEN</fontColor>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Редактируемая</alias>
+        <backColor>LIGHT_BLUE</backColor>
+        <bold>false</bold>
+        <fontColor>BLACK</fontColor>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Контрольные суммы</alias>
+        <backColor>LIGHT_BROWN</backColor>
+        <bold>true</bold>
+        <fontColor>BLACK</fontColor>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Корректировка-добавлено</alias>
+        <backColor>PALE_GREEN</backColor>
+        <bold>false</bold>
+        <fontColor>BLACK</fontColor>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Корректировка-удалено</alias>
+        <backColor>LIGHT_CORAL</backColor>
+        <bold>false</bold>
+        <fontColor>BLACK</fontColor>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Корректировка-без изменений</alias>
+        <backColor>GREY</backColor>
+        <bold>false</bold>
+        <fontColor>BLACK</fontColor>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Корректировка-изменено</alias>
+        <backColor>WHITE</backColor>
+        <bold>true</bold>
+        <fontColor>RED</fontColor>
+        <italic>false</italic>
+    </styles>
+</formTemplateContent>

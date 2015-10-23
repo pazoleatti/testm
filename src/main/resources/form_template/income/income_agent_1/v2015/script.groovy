@@ -244,6 +244,12 @@ def logicCheck() {
             }
             yearRowMap[rowYear].add(row)
         }
+
+        // 11. Проверка на заполнение зависимых полей Код региона, Фамилия, Имя (графы 31, 39, 40) - Начиная с периода формы «9 месяцев 2015»
+        if (row.type != 2 && row.status == 1 && (!row.region || !row.surname || !row.name)) {
+            logger.error("Строка $index: В случае если графа «%s» не равна значению «2» и графа «%s» равна значению «1», должна быть заполнена графа «%s», «%s» и «%s»!",
+                    getColumnName(row, 'type'), getColumnName(row, 'status'), getColumnName(row, 'region'), getColumnName(row, 'surname'), getColumnName(row, 'name'))
+        }
     }
     // 10. Проверка уникальности значения графы 7 (номер решения)
     yearRowMap.each { yearValue, rows ->

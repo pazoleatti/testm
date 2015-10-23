@@ -279,26 +279,31 @@ void calc() {
         calc18_19(prevDataRows, dataRows, row, reportPeriod)
     }
 
+    def templateRows = formDataService.getFormTemplate(formData.formType.id, formData.reportPeriodId).getRows()
+
     // добавить строку ЦА (скорректрированный) (графа 1..22)
-    def caTotalRow = formData.createDataRow()
-    caTotalRow.setAlias('ca')
-    caTotalRow.fix = 'Центральный аппарат (скорректированный)'
-    caTotalRow.getCell('fix').colSpan = 2
-    setTotalStyle(caTotalRow)
+    def caTotalRow = getDataRow(templateRows, 'ca')
     dataRows.add(caTotalRow)
 
     // добавить итого (графа 5..7, 10, 11, 13..22)
-    def totalRow = formData.createDataRow()
-    totalRow.setAlias('total')
-    totalRow.fix = 'Сбербанк России'
-    totalRow.getCell('fix').colSpan = 5
-    setTotalStyle(totalRow)
+    def totalRow = getDataRow(templateRows, 'total')
+    calcTotalRow(dataRows, totalRow)
+    dataRows.add(totalRow)
+
+    // в строках должна быть итоговая
+    calcCaTotalRow(dataRows, caTotalRow, totalRow, taxBase, sumNal)
+}
+
+void calcTotalRow(def dataRows, def totalRow) {
     calcTotalSum(dataRows, totalRow, totalColumns)
-    totalRow.baseTaxOf = dataRows.sum{ row ->
+    totalRow.baseTaxOf = roundValue(dataRows.sum{ row ->
         String value = row.baseTaxOf
         (row.getAlias() == null && value?.isBigDecimal()) ? new BigDecimal(value) : BigDecimal.ZERO
-    }.toString()
-    dataRows.add(totalRow)
+    } ?: BigDecimal.ZERO, 15).toPlainString()
+}
+
+void calcCaTotalRow(def dataRows, def caTotalRow, def totalRow, def taxBase, def sumNal) {
+    def reportPeriod = reportPeriodService.get(formData.reportPeriodId)
 
     def isOldCalc = reportPeriod.taxPeriod.year < 2015 || (reportPeriod.taxPeriod.year == 2015 && reportPeriod.order < 3)
 
@@ -333,7 +338,7 @@ void calc() {
 
         if (formDataEvent != FormDataEvent.COMPOSE) {
             // графа 12
-            caTotalRow.baseTaxOfRub = taxBase - totalRow.baseTaxOfRub + caRow.baseTaxOfRub
+            caTotalRow.baseTaxOfRub = (taxBase ?: 0) - (totalRow.baseTaxOfRub ?: 0) + (caRow.baseTaxOfRub ?: 0)
         }
 
         // графа 14
@@ -422,7 +427,7 @@ def calc11(def row, def propertyPriceSumm, def workersCountSumm) {
     if (row.propertyPrice != null && row.workersCount != null && propertyPriceSumm > 0 && workersCountSumm > 0) {
         temp = (row.propertyPrice * 100 / propertyPriceSumm + row.workersCount * 100 / workersCountSumm) / 2
     }
-    return roundValue(temp, 15).toString()
+    return roundValue(temp, 15).toPlainString()
 }
 
 def calc12(def row, def taxBase) {
@@ -601,8 +606,16 @@ void logicalCheckAfterCalc() {
 
     boolean wasError = false
 
+    def caTotalRow
+    def totalRow
     for (def row : dataRows) {
         if (isFixedRow(row)) {
+            if ("ca".equals(row.getAlias())){
+                caTotalRow = row
+            }
+            if ("total".equals(row.getAlias())){
+                totalRow = row
+            }
             continue
         }
         def index = row.getIndex()
@@ -618,6 +631,49 @@ void logicalCheckAfterCalc() {
         if (row.kpp && !checkPattern(logger, row, 'kpp', row.kpp, KPP_PATTERN, wasError ? null : KPP_MEANING, true)) {
             wasError = true
         }
+    }
+    if (caTotalRow == null || totalRow == null) { // строк нет, в расчеты не зашел, проверять нечего
+        return
+    }
+
+    def templateRows = formDataService.getFormTemplate(formData.formType.id, formData.reportPeriodId).getRows()
+    def caTotalRowTemp = getDataRow(templateRows, 'ca')
+    def totalRowTemp = getDataRow(templateRows, 'total')
+
+    // Распределяемая налоговая база за отчетный период.
+    def taxBase
+    if (formDataEvent != FormDataEvent.COMPOSE) {
+        taxBase = roundValue(getTaxBaseAsDeclaration(), 0)
+    }
+
+    // Отчётный период.
+    def departmentParamsDate = getReportPeriodEndDate() - 1
+
+    // Получение строк формы "Сведения о суммах налога на прибыль, уплаченного Банком за рубежом"
+    def dataRowsSum = getDataRows(421, FormDataKind.ADDITIONAL)
+
+    // Сумма налога на прибыль, выплаченная за пределами Российской Федерации в отчётном периоде.
+    def sumNal = 0
+    def sumTaxRecords = getRefBookRecord(33, "DEPARTMENT_ID", "1", departmentParamsDate, -1, null, false)
+    if (sumTaxRecords != null && !sumTaxRecords.isEmpty()) {
+        sumNal = getAliasFromForm(dataRowsSum, 'taxSum', 'SUM_TAX')
+    }
+
+    calcTotalRow(dataRows, totalRowTemp)
+    calcCaTotalRow(dataRows, caTotalRowTemp, totalRow, taxBase, sumNal)
+
+    def errorColumns = (allColumns - 'number').findAll { alias ->
+        caTotalRowTemp[alias] != caTotalRow[alias]
+    }
+    errorColumns.each { alias ->
+        rowWarning(logger, caTotalRow, String.format("Строка %s: Итоговые значения рассчитаны неверно в графе «%s»!", caTotalRow.getIndex(), getColumnName(caTotalRow, alias)))
+    }
+
+    errorColumns = (totalColumns + 'baseTaxOf').findAll { alias ->
+        totalRowTemp[alias] != totalRow[alias]
+    }
+    errorColumns.each { alias ->
+        rowWarning(logger, totalRow, String.format("Строка %s: Итоговые значения рассчитаны неверно в графе «%s»!", totalRow.getIndex(), getColumnName(totalRow, alias)))
     }
 }
 
@@ -787,10 +843,10 @@ void importData() {
             totalRow.getCell('fix').colSpan = 5
             setTotalStyle(totalRow)
             calcTotalSum(rows, totalRow, totalColumns)
-            totalRow.baseTaxOf = rows.sum{ row ->
+            totalRow.baseTaxOf = roundValue(rows.sum { row ->
                 String value = row.baseTaxOf
                 (row.getAlias() == null && value?.isBigDecimal()) ? new BigDecimal(value) : BigDecimal.ZERO
-            }.toString()
+            } ?: BigDecimal.ZERO, 15).toPlainString()
         }
         rows.add(totalRow)
         formDataService.getDataRowHelper(formData).allCached = rows
