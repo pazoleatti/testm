@@ -122,7 +122,7 @@
         }
 
         .linkButtonPanel {
-            overflow-x: visible;
+            overflow-x: hidden;
         }
 
     </ui:style>
@@ -201,7 +201,7 @@
                                 <g:VerticalPanel spacing="2" horizontalAlignment="right" width="145px">
                                     <g:Label ui:field="formKindTitle" text="Тип налоговой формы:" addStyleNames="{style.headerAttrName}"/>
                                     <g:Label text="Период:" addStyleNames="{style.headerAttrName}"/>
-                                    <g:Label ui:field="comparativPeriodTitle" text="Период сравнения:" addStyleNames="{style.headerAttrName}"/>
+                                    <g:Label ui:field="comparativePeriodTitle" text="Период сравнения:" addStyleNames="{style.headerAttrName}"/>
                                     <g:Label text="Состояние:" addStyleNames="{style.headerAttrName}"/>
                                 </g:VerticalPanel>
                             </g:cell>
@@ -209,7 +209,7 @@
                                 <g:VerticalPanel spacing="2" addStyleNames="{style.infoValuesBlock}">
                                     <g:Label ui:field="formKindLabel" addStyleNames="{style.headerAttr}, {style.depAttr} "/>
                                     <g:Label ui:field="reportPeriodLabel" addStyleNames="{style.reportPeriodLabel}, {style.depAttr}"/>
-                                    <g:Label ui:field="comparativPeriodLabel" addStyleNames="{style.reportPeriodLabel}, {style.depAttr}"/>
+                                    <g:Label ui:field="comparativePeriodLabel" addStyleNames="{style.reportPeriodLabel}, {style.depAttr}"/>
                                     <g:Label ui:field="stateLabel" addStyleNames="{style.headerAttr}, {style.depAttr}"/>
                                 </g:VerticalPanel>
                             </g:cell>
@@ -221,7 +221,7 @@
                     <!--Правые кнопки ссылки-->
                     <g:cell horizontalAlignment="right">
                         <g:SimplePanel ui:field="linkButtonPanel" height="61px" addStyleNames="{style.linkButtonPanel}">
-                            <g:VerticalPanel width="180px" spacing="2">
+                            <g:VerticalPanel width="220px" spacing="2">
                                 <style:LinkButton ui:field="signersAnchor" text="Параметры печатной формы"
                                                   img="resources/img/businessperson-16.png"
                                                   title="Указать параметры печатной формы"/>

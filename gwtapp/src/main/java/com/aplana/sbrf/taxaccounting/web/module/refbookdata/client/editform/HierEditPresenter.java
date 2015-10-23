@@ -70,7 +70,6 @@ public class HierEditPresenter extends AbstractEditPresenter<HierEditPresenter.M
                                     return;
                                 }
                                 LogAddEvent.fire(HierEditPresenter.this, result.getUuid());
-                                UpdateForm.fire(HierEditPresenter.this, !result.isException(), recordChanges);
                                 if (result.isException()) {
                                     Dialog.errorMessage("Запись не сохранена", "Обнаружены фатальные ошибки!");
                                 } else {
@@ -78,6 +77,7 @@ public class HierEditPresenter extends AbstractEditPresenter<HierEditPresenter.M
                                     SetFormMode.fire(HierEditPresenter.this, FormMode.EDIT);
                                     getView().updateInputFields();
                                 }
+                                UpdateForm.fire(HierEditPresenter.this, !result.isException(), recordChanges);
                             }
                         }, this));
     }
