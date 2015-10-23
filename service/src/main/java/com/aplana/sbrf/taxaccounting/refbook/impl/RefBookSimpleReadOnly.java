@@ -86,7 +86,7 @@ public class RefBookSimpleReadOnly extends AbstractReadOnlyRefBook {
 
     @Override
     public Map<RefBookAttributePair, String> getAttributesValues(List<RefBookAttributePair> attributePairs) {
-        throw new UnsupportedOperationException();
+        return refBookDao.getAttributesValues(attributePairs);
     }
 
     @Override
