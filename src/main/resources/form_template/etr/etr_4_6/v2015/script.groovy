@@ -243,12 +243,22 @@ void calcValues(def dataRows, def sourceRows, boolean isCalc) {
         def rowSource = getDataRow(sourceRows, row.getAlias())
         switch (row.getAlias()) {
             case 'R1':
-                row.comparePeriod = calcBO(rowSource, getComparativePeriodId())
-                row.currentPeriod = calcBO(rowSource, formData.reportPeriodId)
+                if (formData.kind == FormDataKind.PRIMARY) {
+                    row.comparePeriod = calcBO(rowSource, getComparativePeriodId())
+                    row.currentPeriod = calcBO(rowSource, formData.reportPeriodId)
+                } else {
+                    row.comparePeriod = rowSource.comparePeriod
+                    row.currentPeriod = rowSource.currentPeriod
+                }
                 break
             case 'R2':
-                row.comparePeriod = calcBO(rowSource, getComparativePeriodId()) + getSourceValue(getComparativePeriodId(), row, 'comparePeriod', isCalc)
-                row.currentPeriod = calcBO(rowSource, formData.reportPeriodId) + getSourceValue(formData.reportPeriodId, row, 'currentPeriod', isCalc)
+                if (formData.kind == FormDataKind.PRIMARY) {
+                    row.comparePeriod = calcBO(rowSource, getComparativePeriodId()) + getSourceValue(getComparativePeriodId(), row, 'comparePeriod', isCalc)
+                    row.currentPeriod = calcBO(rowSource, formData.reportPeriodId) + getSourceValue(formData.reportPeriodId, row, 'currentPeriod', isCalc)
+                } else {
+                    row.comparePeriod = rowSource.comparePeriod
+                    row.currentPeriod = rowSource.currentPeriod
+                }
                 break
             case 'R3':
                 def row1Source = getDataRow(sourceRows, "R1")
