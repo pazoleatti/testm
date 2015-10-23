@@ -479,6 +479,7 @@ public class DeclarationTemplatePresenter extends Presenter<DeclarationTemplateP
                                         dispatcher.execute(action, CallbackUtils.defaultCallback(new AbstractCallback<ResidualSaveResult>() {
                                             @Override
                                             public void onSuccess(ResidualSaveResult result) {
+                                                declarationTemplateExt.getDeclarationTemplate().setJrxmlBlobId(event.getErrorUuid());
                                                 Dialog.infoMessage("Макет успешно обновлен");
                                                 LogCleanEvent.fire(DeclarationTemplatePresenter.this);
                                                 LogAddEvent.fire(DeclarationTemplatePresenter.this, result.getSuccessUuid(), true);
