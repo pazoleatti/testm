@@ -134,9 +134,9 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 	@UiField
 	Label reportPeriodLabel;
     @UiField
-    Label comparativPeriodTitle;
+    Label comparativePeriodTitle;
     @UiField
-    Label comparativPeriodLabel;
+    Label comparativePeriodLabel;
 	@UiField
 	Label stateLabel;
 	@UiField
@@ -628,13 +628,13 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
             formKindTitle.setText(FORM_DATA_KIND_TITLE_D);
         }
         if (comparativPeriod != null && !comparativPeriod.isEmpty()) {
-            comparativPeriodLabel.setVisible(true);
-            comparativPeriodTitle.setVisible(true);
-            comparativPeriodLabel.setText(comparativPeriod);
+            comparativePeriodLabel.setVisible(true);
+            comparativePeriodTitle.setVisible(true);
+            comparativePeriodLabel.setText(comparativPeriod);
             linkButtonPanel.getElement().getStyle().clearOverflowY();
         } else {
-            comparativPeriodLabel.setVisible(false);
-            comparativPeriodTitle.setVisible(false);
+            comparativePeriodLabel.setVisible(false);
+            comparativePeriodTitle.setVisible(false);
             linkButtonPanel.getElement().getStyle().setOverflowY(Style.Overflow.SCROLL);
         }
         factory.setFormDataId(formDataId);
