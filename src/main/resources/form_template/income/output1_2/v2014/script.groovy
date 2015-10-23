@@ -358,7 +358,7 @@ def formNewRow(def rowList, def dataRowsPrev, def prevPeriodStartDate, def prevP
     newRow.dividendSumRaspredPeriod = rowList.sum{ it.dividends ?: 0 }
 
     // «Графа 10» = Сумма по «Графа 23» для каждого уникального сочетания «Графа 7» первичной формы и «Графа 8» первичной формы, если «Графа 17» первичной формы = 1
-    newRow.dividendRussianTotal = rowList.sum{ (it.status == 1 && it.type in [3, 4, 5] && it.dividends != null) ? it.dividends : 0 }
+    newRow.dividendRussianTotal = rowList.sum{ (it.status == 1 && (it.type == 3 || it.type == 4 || it.type == 5) && it.dividends != null) ? it.dividends : 0 }
 
     if (!isNewFormType) { // старый алгоритм
         // «Графа 11» = Сумма по «Графа 23» для каждого уникального сочетания «Графа 7» первичной формы и «Графа 8» первичной формы, если «Графа 17» первичной формы = 1 и «Графа 16» первичной формы = «1» и «Графа 22» первичной формы = «0»
