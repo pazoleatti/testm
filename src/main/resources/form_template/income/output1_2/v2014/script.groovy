@@ -488,7 +488,7 @@ def formNewRow(def rowList, def dataRowsPrev, def prevPeriodStartDate, def prevP
                     newRow.taxSum = 0
                 }
             } else { // нет строк для которых «Графа 17» = «1» и «Графа 16» = «5» и «Графа 22» = «13»
-                newRow.taxSum = value2
+                newRow.taxSum = 0
             }
         } else { // Группа НЕ относится к сберу
             newRow.taxSum = value2
