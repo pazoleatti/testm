@@ -338,7 +338,7 @@ void calcCaTotalRow(def dataRows, def caTotalRow, def totalRow, def taxBase, def
 
         if (formDataEvent != FormDataEvent.COMPOSE) {
             // графа 12
-            caTotalRow.baseTaxOfRub = taxBase - totalRow.baseTaxOfRub + caRow.baseTaxOfRub
+            caTotalRow.baseTaxOfRub = (taxBase ?: 0) - (totalRow.baseTaxOfRub ?: 0) + (caRow.baseTaxOfRub ?: 0)
         }
 
         // графа 14
