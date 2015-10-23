@@ -68,7 +68,6 @@ public class EditFormPresenter extends AbstractEditPresenter<EditFormPresenter.M
                                     return;
                                 }
                                 LogAddEvent.fire(EditFormPresenter.this, result.getUuid());
-                                UpdateForm.fire(EditFormPresenter.this, !result.isException(), recordChanges);
                                 if (result.isException()) {
                                     Dialog.errorMessage("Запись не сохранена", "Обнаружены фатальные ошибки!");
                                 } else {
@@ -76,6 +75,8 @@ public class EditFormPresenter extends AbstractEditPresenter<EditFormPresenter.M
                                     SetFormMode.fire(EditFormPresenter.this, FormMode.EDIT);
                                     getView().updateInputFields();
                                 }
+                                //Обновление таблицы
+                                UpdateForm.fire(EditFormPresenter.this, !result.isException(), recordChanges);
                             }
                         }, this));
     }

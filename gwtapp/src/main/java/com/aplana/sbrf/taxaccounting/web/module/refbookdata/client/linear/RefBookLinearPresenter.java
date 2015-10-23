@@ -124,12 +124,8 @@ public class RefBookLinearPresenter extends PresenterWidget<RefBookLinearPresent
         RefBookDataRow row = new RefBookDataRow();
         row.setValues(event.getRecordChanges().getInfo());
         row.setRefBookRowId(event.getRecordChanges().getId());
-        if (event.getRecordChanges().isCreate()){
-            updateTable();
-        } else {
-            updateTable();
-        }
         getView().setSelected(row.getRefBookRowId());
+        updateTable();
     }
 
     public interface MyView extends View, HasUiHandlers<RefBookDataLinearUiHandlers> {
