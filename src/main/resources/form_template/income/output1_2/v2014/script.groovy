@@ -206,7 +206,7 @@ void logicCheck() {
             // графа 27..31
             ['dividendSumForTaxStavka9', 'dividendSumForTaxStavka0', 'taxSum', 'taxSumFromPeriod', 'taxSumLast'].each {
                 if (row[it] != 0) {
-                    errorMessage(row, it, errorMsg)
+                    logger.warn("Графа «%s» заполнена неверно!", getColumnName(row, it))
                 }
             }
         }
@@ -358,7 +358,7 @@ def formNewRow(def rowList, def dataRowsPrev, def prevPeriodStartDate, def prevP
     newRow.dividendSumRaspredPeriod = rowList.sum{ it.dividends ?: 0 }
 
     // «Графа 10» = Сумма по «Графа 23» для каждого уникального сочетания «Графа 7» первичной формы и «Графа 8» первичной формы, если «Графа 17» первичной формы = 1
-    newRow.dividendRussianTotal = rowList.sum{ (it.status == 1 && it.dividends != null) ? it.dividends : 0 }
+    newRow.dividendRussianTotal = rowList.sum{ (it.status == 1 && (it.type == 3 || it.type == 4 || it.type == 5) && it.dividends != null) ? it.dividends : 0 }
 
     if (!isNewFormType) { // старый алгоритм
         // «Графа 11» = Сумма по «Графа 23» для каждого уникального сочетания «Графа 7» первичной формы и «Графа 8» первичной формы, если «Графа 17» первичной формы = 1 и «Графа 16» первичной формы = «1» и «Графа 22» первичной формы = «0»
@@ -460,45 +460,51 @@ def formNewRow(def rowList, def dataRowsPrev, def prevPeriodStartDate, def prevP
         newRow.dividendNonIncome = rowList.sum{ (it.type == 1 && it.dividends != null) ? it.dividends : 0 }
 
         // Вычисляется для каждого уникального сочетания «Графа 7» первичной формы и «Графа 8» первичной формы:
-        // Если «Графа 17» формы-источника = «1» и «Графа 16» формы-источника = «5» и «Графа 22» формы-источника = «13», то «Графа 27» = (Сумма по «Графа 23» формы-источника / «Графа 12» формы-источника * «Графа 6» формы-источника)
+        // Если «Графа 17» формы-источника = «1» и «Графа 16» формы-источника = «5» и «Графа 22» формы-источника = «13», то
+        // «Графа 27» = (Сумма по «Графа 23» формы-источника / «Графа 12» формы-источника * «Графа 6» формы-источника)
         if (row.allSum) {
-            newRow.dividendSumForTaxStavka9 = rowList.sum{ (it.status == 1 && it.type == 5 && it.rate == 13 && it.dividends) ? (it.dividends) : 0 } * row.distributionSum / row.allSum
+            newRow.dividendSumForTaxStavka9 = ((rowList.sum{ (it.status == 1 && it.type == 5 && it.rate == 13 && it.dividends) ? (it.dividends) : 0 })/ row.allSum) * row.distributionSum
         }
 
         // Вычисляется для каждого уникального сочетания «Графа 7» первичной формы и «Графа 8» первичной формы:
-        // Если «Графа 17» формы-источника = «1» и «Графа 16» формы-источника = «3» и «Графа 22» формы-источника = «0», то «Графа 28» = (Сумма по «Графа 23» формы-источника / «Графа 12» формы-источника * «Графа 6» формы-источника)
+        // Если «Графа 17» формы-источника = «1» и «Графа 16» формы-источника = «3» и «Графа 22» формы-источника = «0», то
+        // «Графа 28» = (Сумма по «Графа 23» формы-источника / «Графа 12» формы-источника * «Графа 6» формы-источника)
         if (row.allSum) {
-            newRow.dividendSumForTaxStavka0 = rowList.sum{ (it.status == 1 && it.type == 3 && it.rate == 0 && it.dividends) ? (it.dividends) : 0 } * row.distributionSum / row.allSum
+            newRow.dividendSumForTaxStavka0 = ((rowList.sum{ (it.status == 1 && it.type == 3 && it.rate == 0 && it.dividends) ? (it.dividends) : 0 }) / row.allSum) * row.distributionSum
         }
 
-        // Если «Графа 3» формы-источника = Значение атрибута «ИНН» формы настроек подразделения, то
-        // Если «Графа 17» формы-источника = «1» и «Графа 16» формы-источника = «5» и «Графа 22» формы-источника заполнена и не равно «0»/«9», то «Графа 29» = (Сумма по «Графа 23» для каждого уникального сочетания «Графа 7» и «Графа 8» формы-источника)*13%) / «Графа 12» формы-источника * («Графа 4» формы-источника - «Графа 5» формы-источника).
-        // Иначе «Графа 29» = Значение «0».
-        // Иначе «Графа 29» = Сумма по «Графа 27» для каждого уникального сочетания «Графа 7» и «Графа 8» формы-источникапервичной формы
-        def value2 = rowList.sum { (it.withheldSum != null) ? it.withheldSum : 0 }
-        if (row.emitentInn == graph3String) {
-            if (row.allSum) {
-                newRow.taxSum = rowList.sum {
-                    (it.status == 1 && it.type == 5 && it.rate != null && it.rate != 0 && it.rate != 9 && it.dividends) ? it.dividends : 0
-                } * 0.13 * (row.all - row.rateZero) / row.allSum
-            } else{
+        // «Графа 29»
+        // Сумма по «Графа 27» по всем строкам группы строк формы-источника, в которых («Графа 16» не равна «2» И «Графа 17» = «1»)
+        def value2 = rowList.sum { (it.type != 2 && it.status == 1 && it.withheldSum != null) ? it.withheldSum : 0 }
+        if (row.emitentInn == graph3String) { // Группа относится к сберу
+            fuond = rowList.find { it.status == 1 && it.type == 5 && it.rate == 13 }
+            if (fuond) { // Есто строки для которых «Графа 17» = «1» и «Графа 16» = «5» и «Графа 22» = «13»
+                if (row.allSum) { // Деление не на ноль
+                    sourseSum = rowList.sum {
+                        (it.status == 1 && it.type == 5 && it.rate == 13 && it.dividends) ? it.dividends : 0
+                    }
+                    newRow.taxSum = ((sourseSum / row.allSum) * 0.13) * row.distributionSum
+                } else { // при делении на ноль «Графа 29» = 0
+                    newRow.taxSum = 0
+                }
+            } else { // нет строк для которых «Графа 17» = «1» и «Графа 16» = «5» и «Графа 22» = «13»
                 newRow.taxSum = 0
             }
-        } else {
+        } else { // Группа НЕ относится к сберу
             newRow.taxSum = value2
         }
-        if (newRow.taxSum != value2) {
+        if (newRow.taxSum != value2) { // проверка алгоритма
             logger.warn("Строка ${rowIndex}: Графа «Исчисленная сумма налога, подлежащая уплате в бюджет» заполнена неверно! Не выполняется условие: " +
                     "«Графа 29» = Сумма по «Графа 27» для строк формы-источника «Расчет налога на прибыль организаций " +
                     "с доходов, удерживаемого налоговым агентом (источником выплаты доходов)», " +
                     "в которых «Графа 3» = «${row.inn}» и «Графа 7» = «${row.decisionNumber}»")
         }
+
         // Графа 30: Принимает значение:
         // «Графа 30» = (Сумма значений по «Графе 30» и «Графе 31») формы 03-А предыдущего периода (для начала года заходим в предыдущий) по строке, в которой:
         // «Графа 1» = Значение «1» (признак отнесения строки к строке ПАО Сбербанк);
         // «Графа 4» (Номер решения о распределении доходов от долевого участия) = «Графа 4» текущей формы;
         // «Графа 6» (Отчетный год) = «Графа 6» текущей формы.
-
         if (dataRowsPrev != null) {
             newRow.taxSumFromPeriod = dataRowsPrev.sum {
                 (it.taCategory == 1 && it.decreeNumber == newRow.decreeNumber && it.financialYear?.format("yyyy") == newRow.financialYear?.format("yyyy")) ? ((it.taxSumFromPeriod ?: 0) + (it.taxSumLast ?: 0)) : 0
@@ -523,8 +529,8 @@ def formNewRow(def rowList, def dataRowsPrev, def prevPeriodStartDate, def prevP
     // Если «Графа 3» формы-источника = Значение атрибута «ИНН» формы настроек подразделения, то «Графа 26» = («Графа 12» первичной формы – («Графа 4» первичной формы – «Графа 5» первичной формы)) для каждого уникального сочетания «Графа 7» первичной формы и «Графа 8» первичной формы, иначе «Графа 26» = «Графа 6» первичной формы для каждого уникального сочетания «Графа 7» первичной формы и «Графа 8» первичной формы.
     newRow.dividendD1D2 =  (row.emitentInn == graph3String) ? ((row.allSum ?: 0) - ((row.all ?: 0) - (row.rateZero ?: 0))) : (row.distributionSum ?: 0)
 
-    // Графа 31: Принимает значение: Если графа 17 = 1, графа 16 = 1 (ЮЛ) ∑ Граф 27 для одного Решения (графа 7-8) если дата по графе 28 принадлежит последнему кварталу отчетного периода
-    newRow.taxSumLast = rowList.sum{ it.withheldSum ?: 0 }
+    // «Графа 31» =  «Графа 29»
+    newRow.taxSumLast = newRow.taxSum
 
     return newRow
 }

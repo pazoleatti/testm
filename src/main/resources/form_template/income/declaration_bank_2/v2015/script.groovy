@@ -1351,7 +1351,7 @@ void generateXML() {
                                                 // 0..1
                                                 ФИОРук(
                                                         [Фамилия : (rowAgent.surname ?: 'нет данных')] +
-                                                                (rowAgent.name ? [Имя : rowAgent.name] : [:]) +
+                                                                [Имя : (rowAgent.name ?: 'нет данных')] +
                                                                 (rowAgent.patronymic ? [Отчество : rowAgent.patronymic] : [:]))
                                             }
                                         }

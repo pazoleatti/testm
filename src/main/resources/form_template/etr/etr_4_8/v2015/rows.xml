@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?><rows>
+    <row alias="R1">
+        <cell alias="rowNum" colSpan="1" rowSpan="1" stringValue="1"/>
+        <cell alias="taxName" colSpan="1" rowSpan="1" stringValue="Убыток, учитываемый при расчете бухгалтерской прибыли (БУ)"/>
+        <cell alias="symbol102" colSpan="1" rowSpan="1" stringValue="симв. ф.102 (26307.02+22204)"/>
+        <cell alias="comparePeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="currentPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="deltaRub" colSpan="1" rowSpan="1"/>
+        <cell alias="deltaPercent" colSpan="1" rowSpan="1"/>
+    </row>
+    <row alias="R2">
+        <cell alias="rowNum" colSpan="1" rowSpan="1" stringValue="2"/>
+        <cell alias="taxName" colSpan="1" rowSpan="1" stringValue="Убыток от уступки права требования до наступления предусмотренного кредитным договором срока погашения основного долга (НУд)"/>
+        <cell alias="symbol102" colSpan="1" rowSpan="1" stringValue="КНУ 21490"/>
+        <cell alias="comparePeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="currentPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="deltaRub" colSpan="1" rowSpan="1"/>
+        <cell alias="deltaPercent" colSpan="1" rowSpan="1"/>
+    </row>
+    <row alias="R3">
+        <cell alias="rowNum" colSpan="1" rowSpan="1" stringValue="3"/>
+        <cell alias="taxName" colSpan="1" rowSpan="1" stringValue="Убыток от уступки права требования после предусмотренного кредитным договором срока погашения основного долга (НУп)"/>
+        <cell alias="symbol102" colSpan="1" rowSpan="1" stringValue="КНУ 21510"/>
+        <cell alias="comparePeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="currentPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="deltaRub" colSpan="1" rowSpan="1"/>
+        <cell alias="deltaPercent" colSpan="1" rowSpan="1"/>
+    </row>
+    <row alias="head">
+        <cell alias="rowNum" colSpan="7" rowSpan="1" stringValue="Налоговый эффект по налогу на прибыль:"/>
+        <cell alias="taxName" colSpan="1" rowSpan="1"/>
+        <cell alias="symbol102" colSpan="1" rowSpan="1"/>
+        <cell alias="comparePeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="currentPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="deltaRub" colSpan="1" rowSpan="1"/>
+        <cell alias="deltaPercent" colSpan="1" rowSpan="1"/>
+    </row>
+    <row alias="R4">
+        <cell alias="rowNum" colSpan="1" rowSpan="1" stringValue="4"/>
+        <cell alias="taxName" colSpan="1" rowSpan="1" stringValue="Налоговое бремя ((БУ – (НУд+НУп)*20%))"/>
+        <cell alias="symbol102" colSpan="1" rowSpan="1"/>
+        <cell alias="comparePeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="currentPeriod" colSpan="1" rowSpan="1"/>
+        <cell alias="deltaRub" colSpan="1" rowSpan="1"/>
+        <cell alias="deltaPercent" colSpan="1" rowSpan="1"/>
+    </row>
+</rows>
