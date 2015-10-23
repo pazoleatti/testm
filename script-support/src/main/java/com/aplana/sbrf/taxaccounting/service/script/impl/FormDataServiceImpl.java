@@ -169,7 +169,7 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
         List<DataRow<Cell>> rows = new LinkedList<DataRow<Cell>>();
         // периодичность приёмника "ежемесячно"
         boolean isFormDataMonthly = formData.getPeriodOrder() != null;
-        // получаем экземпляры-источники
+        // получаем принятые экземпляры-источники
         List<Relation> relations = sourceService.getSourcesInfo(formData, true, true, WorkflowState.ACCEPTED, userInfo, logger);
         for (Relation relation : relations) {
             FormData sourceFormData = dao.get(relation.getFormDataId(), null);

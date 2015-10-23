@@ -41,23 +41,8 @@ public class DeclarationSourcesHandler extends AbstractActionHandler<SourcesActi
         DeclarationData declaration = declarationDataService.get(action.getDeclarationId(), userInfo);
         List<Relation> relationList = new ArrayList<Relation>();
 
-        /** Проверяем в скрипте источники-приемники для особенных форм */
-        Map<String, Object> params = new HashMap<String, Object>();
-        FormSources sources = new FormSources();
-        sources.setSourceList(new ArrayList<Relation>());
-        sources.setSourcesProcessedByScript(false);
-        params.put("sources", sources);
-        scriptingService.executeScript(userInfo, declaration, FormDataEvent.GET_SOURCES, logger, params);
-
-        if (sources.isSourcesProcessedByScript()) {
-            //Скрипт возвращает все необходимые источники-приемники
-            if (sources.getSourceList() != null) {
-                relationList.addAll(sources.getSourceList());
-            }
-        } else {
-            //Получаем нф-источники
-            relationList.addAll(sourceService.getDeclarationSourcesInfo(declaration, true, false, null, userInfo, logger));
-        }
+        //Получаем нф-источники
+        relationList.addAll(sourceService.getDeclarationSourcesInfo(declaration, true, false, null, userInfo, logger));
         result.setData(relationList);
         return result;
     }
