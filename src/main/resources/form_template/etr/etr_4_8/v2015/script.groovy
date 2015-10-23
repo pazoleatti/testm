@@ -143,13 +143,13 @@ void preCalcCheck() {
 }
 
 @Field
-def comparativPeriodId
+def comparativePeriodId
 
 def getComparativePeriodId() {
-    if (comparativPeriodId == null && formData.comparativPeriodId != null) {
-        comparativPeriodId = departmentReportPeriodService.get(formData.comparativPeriodId)?.reportPeriod?.id
+    if (comparativePeriodId == null && formData.comparativePeriodId != null) {
+        comparativePeriodId = departmentReportPeriodService.get(formData.comparativePeriodId)?.reportPeriod?.id
     }
-    return comparativPeriodId
+    return comparativePeriodId
 }
 
 // Поиск записи в справочнике по значению (для расчетов)
@@ -247,7 +247,7 @@ FormData getIncomeFormData(def date) {
         if (periodList.size() == 1) {
             def period = periodList[0]
             // Проверка наличия принятой формы «Сводная форма начисленных расходов уровня обособленного подразделения»
-            def incomeFormData = formDataService.getLast(sourceFormTypeId, FormDataKind.SUMMARY, formData.departmentId,  period.id, null)
+            def incomeFormData = formDataService.getLast(sourceFormTypeId, FormDataKind.SUMMARY, formData.departmentId,  period.id, null, null, false)
             if (incomeFormData != null && incomeFormData.state == WorkflowState.ACCEPTED) {
                 formDataMap[dateKey] = incomeFormData
                 return incomeFormData
@@ -573,7 +573,7 @@ void consolidation() {
     for (formDataSource in departmentFormTypeService.getFormSources(formData.departmentId, formData.getFormType().getId(), formData.getKind(),
             getStartDate(formData.reportPeriodId), getEndDate(formData.reportPeriodId))) {
         if (formDataSource.formTypeId == formData.getFormType().getId()) {
-            def source = formDataService.getLast(formDataSource.formTypeId, formDataSource.kind, formDataSource.departmentId, formData.reportPeriodId, formData.periodOrder)
+            def source = formDataService.getLast(formDataSource.formTypeId, formDataSource.kind, formDataSource.departmentId, formData.reportPeriodId, formData.periodOrder, formData.comparativePeriodId, formData.accruing)
             if (source != null && source.state == WorkflowState.ACCEPTED) {
                 sourceRows = formDataService.getDataRowHelper(source)?.allSaved
                 // суммируем 4, 5-ую графу из источников для первых трех строк

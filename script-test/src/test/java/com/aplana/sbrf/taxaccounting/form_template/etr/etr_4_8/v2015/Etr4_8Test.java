@@ -48,7 +48,7 @@ public class Etr4_8Test extends ScriptTestBase {
         formData.setDepartmentReportPeriodId(DEPARTMENT_PERIOD_ID);
         formData.setReportPeriodId(REPORT_PERIOD_ID);
         formData.setPeriodOrder(1);
-        formData.setComparativPeriodId(1);
+        formData.setComparativePeriodId(1);
         formData.setAccruing(false);
         return formData;
     }
@@ -126,7 +126,7 @@ public class Etr4_8Test extends ScriptTestBase {
                     }
                 });
 
-        when(testHelper.getFormDataService().getLast(SOURCE_TYPE_ID, FormDataKind.SUMMARY, DEPARTMENT_ID, REPORT_PERIOD_ID, null)).thenReturn(formData);
+        when(testHelper.getFormDataService().getLast(SOURCE_TYPE_ID, FormDataKind.SUMMARY, DEPARTMENT_ID, REPORT_PERIOD_ID, null, null, false)).thenReturn(formData);
     }
 
     @Test
