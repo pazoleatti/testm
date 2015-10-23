@@ -262,4 +262,26 @@ public interface FormDataService {
      * @return возвращает страницу со списком пользователей
      */
     PagingResult<TAUserView> getUsersByFilter(MembersFilterData filter);
+
+    /**
+     * Возвращает список нф-источников для указанной нф (включая несозданные)
+     * @param destinationFormData нф-приемник
+     * @param light true - заполнятся только текстовые данные для GUI и сообщений
+     * @param excludeIfNotExist true - исключить несозданные источники
+     * @param stateRestriction ограничение по состоянию для созданных экземпляров
+     * @return список нф-источников
+     */
+    List<Relation> getSourcesInfo(FormData destinationFormData, boolean light, boolean excludeIfNotExist, WorkflowState stateRestriction,
+                                  TAUserInfo userInfo, Logger logger);
+
+    /**
+     * Возвращает список нф-приемников для указанной нф (включая несозданные)
+     * @param sourceFormData нф-источник
+     * @param light true - заполнятся только текстовые данные для GUI и сообщений
+     * @param excludeIfNotExist true - исключить несозданные приемники
+     * @param stateRestriction ограничение по состоянию для созданных экземпляров
+     * @return список нф-приемников
+     */
+    List<Relation> getDestinationsInfo(FormData sourceFormData, boolean light, boolean excludeIfNotExist, WorkflowState stateRestriction,
+                                       TAUserInfo userInfo, Logger logger);
 }

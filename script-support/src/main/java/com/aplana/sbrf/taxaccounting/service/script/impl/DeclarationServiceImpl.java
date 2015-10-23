@@ -201,4 +201,14 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
         }
         return null;
     }
+
+    @Override
+    public List<Relation> getDeclarationDestinationsInfo(FormData sourceFormData, boolean light, boolean excludeIfNotExist, WorkflowState stateRestriction, TAUserInfo userInfo, Logger logger) {
+        return sourceService.getDeclarationDestinationsInfo(sourceFormData, light, excludeIfNotExist, stateRestriction, userInfo, logger);
+    }
+
+    @Override
+    public List<Relation> getDeclarationSourcesInfo(DeclarationData declaration, boolean light, boolean excludeIfNotExist, WorkflowState stateRestriction, TAUserInfo userInfo, Logger logger) {
+        return sourceService.getDeclarationSourcesInfo(declaration, light, excludeIfNotExist, stateRestriction, userInfo, logger);
+    }
 }

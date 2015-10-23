@@ -1,8 +1,6 @@
 package com.aplana.sbrf.taxaccounting.service.script;
 
-import com.aplana.sbrf.taxaccounting.model.DeclarationData;
-import com.aplana.sbrf.taxaccounting.model.FormDataCollection;
-import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.util.ScriptExposed;
 
@@ -77,4 +75,26 @@ public interface DeclarationService {
      * @throws com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException - если у пользователя нет прав на просмотр данной декларации
      */
     String getXmlDataFileName(long declarationDataId);
+
+    /**
+     * Возвращает список нф-источников для указанной декларации (включая несозданные)
+     * @param sourceFormData нф-источник
+     * @param light true - заполнятся только текстовые данные для GUI и сообщений
+     * @param excludeIfNotExist true - исключить несозданные приемники
+     * @param stateRestriction ограничение по состоянию для созданных экземпляров
+     * @return список нф-источников
+     */
+    List<Relation> getDeclarationDestinationsInfo(FormData sourceFormData, boolean light, boolean excludeIfNotExist, WorkflowState stateRestriction,
+                                                  TAUserInfo userInfo, Logger logger);
+
+    /**
+     * Возвращает список нф-источников для указанной декларации (включая несозданные)
+     * @param declaration декларациz-приемник
+     * @param light true - заполнятся только текстовые данные для GUI и сообщений
+     * @param excludeIfNotExist true - исключить несозданные источники
+     * @param stateRestriction ограничение по состоянию для созданных экземпляров
+     * @return список нф-источников
+     */
+    List<Relation> getDeclarationSourcesInfo(DeclarationData declaration, boolean light, boolean excludeIfNotExist, WorkflowState stateRestriction,
+                                             TAUserInfo userInfo, Logger logger);
 }

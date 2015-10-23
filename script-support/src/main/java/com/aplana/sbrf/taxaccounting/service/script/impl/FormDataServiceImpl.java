@@ -667,4 +667,14 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
     public PagingResult<TAUserView> getUsersByFilter(MembersFilterData filter) {
         return userDao.getUsersByFilter(filter);
     }
+
+    @Override
+    public List<Relation> getSourcesInfo(FormData destinationFormData, boolean light, boolean excludeIfNotExist, WorkflowState stateRestriction, TAUserInfo userInfo, Logger logger) {
+        return sourceService.getSourcesInfo(destinationFormData, light, excludeIfNotExist, stateRestriction, userInfo, logger);
+    }
+
+    @Override
+    public List<Relation> getDestinationsInfo(FormData sourceFormData, boolean light, boolean excludeIfNotExist, WorkflowState stateRestriction, TAUserInfo userInfo, Logger logger) {
+        return sourceService.getDestinationsInfo(sourceFormData, light, excludeIfNotExist, stateRestriction, userInfo, logger);
+    }
 }
