@@ -62,8 +62,8 @@ public class GetDeclarationFilterDataHandler extends AbstractActionHandler<GetDe
 		reportPeriods.addAll(periodService.getOpenForUser(currentUser.getUser(), action.getTaxType()));
         DeclarationDataFilter dataFilter = new DeclarationDataFilter();
         dataFilter.setTaxType(action.getTaxType());
-        dataFilter.setDepartmentIds(Arrays.asList(currentUser.getUser().getDepartmentId()));
         res.setDefaultDecFilterData(dataFilter);
+        res.setUserDepartmentId(currentUser.getUser().getDepartmentId());
 
 		return res;
 	}

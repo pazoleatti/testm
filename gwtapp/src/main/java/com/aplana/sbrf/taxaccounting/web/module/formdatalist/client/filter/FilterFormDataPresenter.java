@@ -48,7 +48,7 @@ public class FilterFormDataPresenter extends PresenterWidget<FilterFormDataPrese
         void clean();
 
         void setReportPeriodType(String type);
-        void setDefaultReportPeriod(List<ReportPeriod> reportPeriods);
+        void setUserDepartmentId(Integer userDepartmentId);
 	}
 
 	private final DispatchAsync dispatchAsync;
@@ -86,7 +86,7 @@ public class FilterFormDataPresenter extends PresenterWidget<FilterFormDataPrese
 							getView().setDataFilter(filter);
 						} else {
 							getView().setDataFilter(result.getDefaultFilter());
-                            getView().setDefaultReportPeriod(result.getReportPeriods());
+                            getView().setUserDepartmentId(result.getUserDepartmentId());
 						}
 						FilterFormDataReadyEvent.fire(FilterFormDataPresenter.this, true);
 					}
