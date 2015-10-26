@@ -146,7 +146,7 @@ void consolidation() {
         }
     }
     // сортируем по наименованию подразделения
-    dataRows.sort { getDepartmentName(it.department as int) }
+    dataRows.sort { getDepartmentName(it.department as Integer) }
     dataRows.add(totalRow)
     updateIndexes(dataRows)
 
