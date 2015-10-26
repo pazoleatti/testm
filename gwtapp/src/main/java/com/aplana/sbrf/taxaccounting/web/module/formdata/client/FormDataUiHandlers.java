@@ -24,7 +24,7 @@ public interface FormDataUiHandlers extends UiHandlers{
 
     void onModeChangeClicked();
 
-	void onEditClicked(boolean readOnlyMode);
+	void onEditClicked(boolean readOnlyMode, boolean force);
 
 	void onInfoClicked();
 

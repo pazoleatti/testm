@@ -11,6 +11,7 @@ import com.gwtplatform.dispatch.shared.UnsecuredActionImpl;
 public class FormDataEditAction extends UnsecuredActionImpl<FormDataEditResult> implements ActionName {
 
     private FormData formData;
+    private boolean force;
 
     public FormData getFormData() {
         return formData;
@@ -18,6 +19,14 @@ public class FormDataEditAction extends UnsecuredActionImpl<FormDataEditResult> 
 
     public void setFormData(FormData formData) {
         this.formData = formData;
+    }
+
+    public boolean isForce() {
+        return force;
+    }
+
+    public void setForce(boolean force) {
+        this.force = force;
     }
 
     @Override

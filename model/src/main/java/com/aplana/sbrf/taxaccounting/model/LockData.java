@@ -132,6 +132,7 @@ public final class LockData {
     public static final String CHECK_TASK = "Выполнение операции \"%s\" невозможно, т.к. %s";
     public static final String CANCEL_TASK = "Пользователем \"%s\" отменена операция \"%s\"";
     public static final String RESTART_LINKED_TASKS_MSG = "Запуск операции приведет к отмене некоторых ранее запущенных операций (операции, уже выполняемые Системой выполнятся до конца, но результат их выполнения не будет сохранен). Продолжить?";
+    public static final String CANCEL_TASKS_MSG = "Выполнение операции \"%s\" приведет к отмене некоторых ранее запущенных операций (операции, уже выполняемые Системой выполнятся до конца, но результат их выполнения не будет сохранен). Продолжить?";
     public static final String LOCK_CURRENT = "\"%s\" пользователем \"%s\" запущена операция \"%s\"";
     public static final String CANCEL_TASK_IN_PROGRESS = "\"%s\" пользователем \"%s\" запущена операция \"%s\". Данная операция уже выполняется Системой.";
     public static final String CANCEL_TASK_NOT_PROGRESS = "\"%s\" пользователем \"%s\" запущена операция \"%s\". Данная операция находится в очереди на выполнение.";

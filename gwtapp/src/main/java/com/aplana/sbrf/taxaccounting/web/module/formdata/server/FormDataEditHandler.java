@@ -1,16 +1,14 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdata.server;
 
-import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
-import com.aplana.sbrf.taxaccounting.dao.api.DataRowDao;
 import com.aplana.sbrf.taxaccounting.model.FormData;
 import com.aplana.sbrf.taxaccounting.model.LockData;
 import com.aplana.sbrf.taxaccounting.model.ReportType;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
-import com.aplana.sbrf.taxaccounting.service.DataRowService;
 import com.aplana.sbrf.taxaccounting.service.FormDataAccessService;
 import com.aplana.sbrf.taxaccounting.service.FormDataService;
+import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.FormDataEditAction;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.FormDataEditResult;
@@ -27,12 +25,10 @@ public class FormDataEditHandler extends AbstractActionHandler<FormDataEditActio
     private FormDataAccessService accessService;
     @Autowired
     private SecurityService securityService;
-	@Autowired
-	private DataRowService dataRowService;
     @Autowired
     private FormDataService formDataService;
     @Autowired
-    private LockDataService lockDataService;
+    private LogEntryService logEntryService;
 
     public FormDataEditHandler() {
         super(FormDataEditAction.class);
@@ -40,24 +36,34 @@ public class FormDataEditHandler extends AbstractActionHandler<FormDataEditActio
 
     @Override
     public FormDataEditResult execute(FormDataEditAction action, ExecutionContext context) throws ActionException {
+        final ReportType reportType = ReportType.EDIT_FD;
 		TAUserInfo userInfo = securityService.currentUserInfo();
+        FormDataEditResult result = new FormDataEditResult();
 		FormData formData = action.getFormData();
         Logger logger = new Logger();
-        Pair<ReportType, LockData> lockType = formDataService.getLockTaskType(formData.getId());
-        if (lockType != null)
-            formDataService.locked(formData.getId(), ReportType.EDIT_FD, lockType, logger);
 
-        // http://conf.aplana.com/pages/viewpage.action?pageId=19664668 (2A.1)
-        LockData lockDataCheck = lockDataService.getLock(formDataService.generateTaskKey(action.getFormData().getId(), ReportType.CHECK_FD));
-        if(lockDataCheck != null) {
-            lockDataService.interruptTask(lockDataCheck, userInfo.getUser().getId(), true);
+        accessService.canEdit(userInfo, formData.getId(), formData.isManual());
+        if (formData.isManual()) {
+            accessService.canCreateManual(logger, userInfo, formData.getId());
         }
 
-		accessService.canEdit(userInfo, formData.getId(), formData.isManual());
-		if (formData.isManual()) {
-        	accessService.canCreateManual(logger, userInfo, formData.getId());
-		}
-        return new FormDataEditResult();
+        Pair<ReportType, LockData> lockType = formDataService.getLockTaskType(formData.getId());
+        if (lockType != null)
+            formDataService.locked(formData.getId(), reportType, lockType, logger);
+
+        // http://conf.aplana.com/pages/viewpage.action?pageId=19664668 (2A.1)
+        if (!action.isForce() && formDataService.checkExistTask(formData.getId(), formData.isManual(), reportType, logger, userInfo)) {
+            result.setUuid(logEntryService.save(logger.getEntries()));
+            result.setLockMsg(String.format(LockData.CANCEL_TASKS_MSG, formDataService.getTaskName(reportType, formData.getId(), userInfo)));
+            result.setLock(true);
+            return result;
+        } else {
+            formDataService.interruptTask(formData.getId(), formData.isManual(), userInfo.getUser().getId(), reportType);
+        }
+
+        //блокируем форму при переходе в режим редактирования
+        formDataService.lock(formData.getId(), formData.isManual(), userInfo);
+        return result;
     }
 
     @Override

@@ -1762,6 +1762,8 @@ public class FormDataServiceImpl implements FormDataService {
      */
     private ReportType[] getCheckTaskList(ReportType reportType) {
         switch (reportType) {
+            case EDIT_FD:
+                return new ReportType[]{ReportType.CHECK_FD, ReportType.EXCEL, ReportType.CSV};
             case CONSOLIDATE_FD:
                 return new ReportType[]{ReportType.MOVE_FD, ReportType.CHECK_FD, ReportType.CALCULATE_FD, ReportType.IMPORT_FD, ReportType.IMPORT_TF_FD, ReportType.EXCEL, ReportType.CSV};
             case CALCULATE_FD:
@@ -1837,7 +1839,10 @@ public class FormDataServiceImpl implements FormDataService {
             List<String> taskKeyList = new ArrayList<String>();
             if (ReportType.CSV.equals(reportType1) || ReportType.EXCEL.equals(reportType1)) {
                 taskKeyList.addAll(generateReportKeys(reportType1, formDataId, manualReport));
-                reportService.delete(formDataId, manual);
+                if (!ReportType.EDIT_FD.equals(reportType)) {
+                    // при входе в режим редактирования не удаляем отчеты
+                    reportService.delete(formDataId, manual);
+                }
             } else {
                 taskKeyList.add(generateTaskKey(formDataId, reportType1));
             }

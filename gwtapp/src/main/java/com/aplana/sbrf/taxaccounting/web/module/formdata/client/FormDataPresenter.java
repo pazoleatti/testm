@@ -103,6 +103,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
         free = Boolean.parseBoolean(request.getParameter(FREE, "false"));
         getView().startTimerReport(ReportType.EXCEL);
         getView().startTimerReport(ReportType.CSV);
+        formMode = null;
         getFormData(action);
 	}
 
@@ -255,14 +256,25 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
     }
 
 	@Override
-	public void onEditClicked(final boolean readOnlyMode) {
+	public void onEditClicked(final boolean readOnlyMode, final boolean force) {
 		FormDataEditAction action = new FormDataEditAction();
 		action.setFormData(formData);
+        action.setForce(force);
 		dispatcher.execute(action, CallbackUtils.defaultCallback(new AbstractCallback<FormDataEditResult>() {
                 @Override
 			public void onSuccess(FormDataEditResult result) {
-                    modifiedRows.clear();
-                    revealFormData(readOnlyMode, formData.isManual(), readOnlyMode && !absoluteView, null);
+                    if (result.isLock()) {
+                        LogAddEvent.fire(FormDataPresenter.this, result.getUuid());
+                        Dialog.confirmMessage(result.getLockMsg(), new DialogHandler() {
+                            @Override
+                            public void yes() {
+                                onEditClicked(readOnlyMode, true);
+                            }
+                        });
+                    } else {
+                        modifiedRows.clear();
+                        revealFormData(readOnlyMode, formData.isManual(), readOnlyMode && !absoluteView, null);
+                    }
                 }
             }, this));
 	}
@@ -972,6 +984,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                                 onTimerReport(ReportType.CSV, false);
                                 onTimer(true);
                                 timer.scheduleRepeating(5000);
+                                timer.run();
                             }
                         }, this).addCallback(
                         TaManualRevealCallback.create(this, placeManager)));
@@ -1120,10 +1133,6 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                             @Override
                             public void onSuccess(TimerTaskResult result) {
                                 timerType = result.getTaskType();
-                                edited = result.isEdited();
-                                taskName = result.getTaskName();
-                                formMode = result.getFormMode();
-								boolean lockEditMode = result.getLockInfo().isEditMode();
                                 boolean isUpdate = false;
                                 if (readOnlyMode) {
                                     if (timerType == null
@@ -1199,6 +1208,10 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                                             onTimerReport(ReportType.CSV, false);
                                             break;
                                     }
+                                edited = result.isEdited();
+                                taskName = result.getTaskName();
+                                lockEditMode = result.getLockInfo().isEditMode();
+                                formMode = result.getFormMode();
                             }
 
                             @Override

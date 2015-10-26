@@ -525,7 +525,7 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
     @UiHandler("editAnchor")
     void onEditButtonClicked(ClickEvent event) {
         if (getUiHandlers() != null) {
-            getUiHandlers().onEditClicked(false);
+            getUiHandlers().onEditClicked(false, false);
         }
     }
 

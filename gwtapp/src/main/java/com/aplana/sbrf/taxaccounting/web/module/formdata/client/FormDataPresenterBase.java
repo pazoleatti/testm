@@ -174,6 +174,7 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
     protected boolean edited;
     protected String taskName;
     protected TimerTaskResult.FormMode formMode;
+    protected boolean lockEditMode;
 
 	protected Set<DataRow<Cell>> modifiedRows = new HashSet<DataRow<Cell>>();
 
