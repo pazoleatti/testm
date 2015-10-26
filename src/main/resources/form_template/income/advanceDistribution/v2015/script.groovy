@@ -432,7 +432,7 @@ def calc11(def row, def propertyPriceSumm, def workersCountSumm) {
 
 def calc12(def row, def taxBase) {
     if (row.baseTaxOf != null && checkColumn11(row.baseTaxOf) && taxBase != null) {
-        return roundValue(18 * taxBase * new BigDecimal(row.baseTaxOf) / 2000, 0) // умножение на 18/20 и деление на 100
+        return roundValue(taxBase * new BigDecimal(row.baseTaxOf) / 100, 0) // умножение на 18/20 и деление на 100
     }
     return 0
 }
@@ -1484,9 +1484,9 @@ def getSimpleConsumptionSumRows8(def dataRows, def codes) {
 def getRashVnerealVs(def dataRows, def dataRowsSimple) {
     def result = 0.0
 
-    // Код вида расхода = 22492, 22500, 22505, 22585, 22590, 22595, 22660, 22664, 22668,
+    // Код вида расхода = 22500, 22505, 22585, 22590, 22595, 22660, 22664, 22668,
     // 22670, 22690, 22695, 22700, 23120, 23130, 23140, 23240 - графа 9
-    result += getComplexConsumptionSumRows9(dataRows, [22492, 22500, 22505, 22585, 22590, 22595, 22660, 22664, 22668,
+    result += getComplexConsumptionSumRows9(dataRows, [22500, 22505, 22585, 22590, 22595, 22660, 22664, 22668,
                                                        22670, 22690, 22695, 23120, 23130, 23140, 23240])
 
     // Код вида расхода = 22000, 22010, 22020, 22030, 22040, 22050, 22060, 22070, 22080, 22090, 22100, 22110,
@@ -1508,8 +1508,8 @@ def getRashVnerealVs(def dataRows, def dataRowsSimple) {
                 23220, 23230, 23250, 23260, 23270, 23280 ]
     result += getCalculatedSimpleConsumption(dataRowsSimple, knu)
 
-    // Код вида расхода = 23150, 23160, 23170 - графа 9
-    result -= getComplexConsumptionSumRows9(dataRows, [23150, 23160, 23170])
+    // Код вида расхода = 22492, 23150, 23160, 23170 - графа 9
+    result -= getComplexConsumptionSumRows9(dataRows, [22492, 23150, 23160, 23170])
 
     return getLong(result)
 }
