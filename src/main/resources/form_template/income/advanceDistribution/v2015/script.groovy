@@ -432,7 +432,7 @@ def calc11(def row, def propertyPriceSumm, def workersCountSumm) {
 
 def calc12(def row, def taxBase) {
     if (row.baseTaxOf != null && checkColumn11(row.baseTaxOf) && taxBase != null) {
-        return roundValue(taxBase * new BigDecimal(row.baseTaxOf) / 100, 0)
+        return roundValue(18 * taxBase * new BigDecimal(row.baseTaxOf) / 2000, 0) // умножение на 18/20 и деление на 100
     }
     return 0
 }
