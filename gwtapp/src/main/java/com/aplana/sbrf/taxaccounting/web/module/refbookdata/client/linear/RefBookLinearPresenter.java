@@ -239,10 +239,10 @@ public class RefBookLinearPresenter extends PresenterWidget<RefBookLinearPresent
                                         getView().setSelected(recordId);
                                     }
                                     // http://jira.aplana.com/browse/SBRFACCTAX-5759
-                                    /*if (recordId != null) {
+                                    if (recordId != null) {
                                         getView().setSelected(recordId);
                                     }
-                                    recordId = null;*/
+//                                    recordId = null;
                                     /*if (selectedRowIndex != null && result.getDataRows().size() > selectedRowIndex) {
                                         //сохраняем позицию после удаления записи
                                         getView().setSelected(result.getDataRows().get(selectedRowIndex).getRefBookRowId());
