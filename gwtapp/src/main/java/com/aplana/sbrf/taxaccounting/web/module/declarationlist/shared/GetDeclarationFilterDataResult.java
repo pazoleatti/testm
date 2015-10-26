@@ -13,6 +13,7 @@ public class GetDeclarationFilterDataResult implements Result {
 	private List<ReportPeriod> periods;
 	private DeclarationDataFilterAvailableValues filterValues;
     private DeclarationDataFilter defaultDecFilterData;
+    private Integer userDepartmentId;
 
 	public List<Department> getDepartments() {
 		return departments;
@@ -44,5 +45,13 @@ public class GetDeclarationFilterDataResult implements Result {
 
     public void setDefaultDecFilterData(DeclarationDataFilter defaultDecFilterData) {
         this.defaultDecFilterData = defaultDecFilterData;
+    }
+
+    public Integer getUserDepartmentId() {
+        return userDepartmentId;
+    }
+
+    public void setUserDepartmentId(Integer userDepartmentId) {
+        this.userDepartmentId = userDepartmentId;
     }
 }

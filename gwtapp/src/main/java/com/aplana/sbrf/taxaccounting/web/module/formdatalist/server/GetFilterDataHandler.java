@@ -57,8 +57,8 @@ public class GetFilterDataHandler  extends AbstractActionHandler<GetFilterData, 
 
 	    FormDataFilter filter = new FormDataFilter();
 	    filter.setTaxType(action.getTaxType());
-        filter.setDepartmentIds(Arrays.asList(userInfo.getUser().getDepartmentId()));
 	    res.setDefaultFilter(filter);
+        res.setUserDepartmentId(userInfo.getUser().getDepartmentId());
 
         return res;
     }

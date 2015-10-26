@@ -49,7 +49,7 @@ public class DeclarationFilterPresenter extends PresenterWidget<DeclarationFilte
 
         void setReportPeriodType(String type);
 
-        void setDefaultReportPeriod(List<ReportPeriod> reportPeriods);
+        void setUserDepartmentId(Integer userDepartmentId);
     }
 
 	private final DispatchAsync dispatchAsync;
@@ -94,7 +94,7 @@ public class DeclarationFilterPresenter extends PresenterWidget<DeclarationFilte
                                 getView().setDataFilter(dataFilter);
                             } else {
                                 getView().setDataFilter(result.getDefaultDecFilterData());
-                                getView().setDefaultReportPeriod(result.getPeriods());
+                                getView().setUserDepartmentId(result.getUserDepartmentId());
                             }
 							DeclarationFilterReadyEvent.fire(DeclarationFilterPresenter.this);
 						}

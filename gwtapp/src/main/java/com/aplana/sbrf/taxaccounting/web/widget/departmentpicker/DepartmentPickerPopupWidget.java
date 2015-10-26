@@ -72,6 +72,8 @@ public class DepartmentPickerPopupWidget extends DoubleStateComposite implements
     CheckBox showDisabled;
 
     private boolean multiSelect;
+    private boolean isSetDefaultValue = false;
+    private Integer userDepartmentId;
 
     /* Значения id  */
     private List<Integer> value = new LinkedList<Integer>();
@@ -134,7 +136,14 @@ public class DepartmentPickerPopupWidget extends DoubleStateComposite implements
     }
 
     private void open(){
-        tree.setValueById(value, false);
+        if (isSetDefaultValue && (value == null || value.isEmpty())) {
+            if (tree.getAvalibleValues().contains(userDepartmentId)) {
+                tree.setValueById(Arrays.asList(userDepartmentId), false);
+                ok.setEnabled(true);
+            }
+        } else {
+            tree.setValueById(value, false);
+        }
         countItems.setText(String.valueOf(tree.getValue().size()));
         popupPanel.center();
     }
@@ -325,5 +334,13 @@ public class DepartmentPickerPopupWidget extends DoubleStateComposite implements
 
     public boolean isMultiSelect() {
         return multiSelect;
+    }
+
+    public void setUserDepartmentId(Integer userDepartmentId) {
+        this.userDepartmentId = userDepartmentId;
+    }
+
+    public void setSetDefaultValue(boolean isSetDefaultValue) {
+        this.isSetDefaultValue = isSetDefaultValue;
     }
 }

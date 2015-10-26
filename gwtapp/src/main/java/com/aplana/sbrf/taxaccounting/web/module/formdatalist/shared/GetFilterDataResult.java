@@ -12,6 +12,7 @@ public class GetFilterDataResult implements Result {
 	private List<ReportPeriod> reportPeriods;
 	private FormDataFilterAvailableValues filterValues;
 	private FormDataFilter defaultFilter;
+    private Integer userDepartmentId;
 
     public GetFilterDataResult(){
 
@@ -48,4 +49,12 @@ public class GetFilterDataResult implements Result {
 	public void setDefaultFilter(FormDataFilter defaultFilter) {
 		this.defaultFilter = defaultFilter;
 	}
+
+    public Integer getUserDepartmentId() {
+        return userDepartmentId;
+    }
+
+    public void setUserDepartmentId(Integer userDepartmentId) {
+        this.userDepartmentId = userDepartmentId;
+    }
 }
