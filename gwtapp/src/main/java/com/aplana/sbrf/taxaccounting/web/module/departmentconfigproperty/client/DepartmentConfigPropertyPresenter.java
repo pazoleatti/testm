@@ -246,6 +246,10 @@ public class DepartmentConfigPropertyPresenter extends Presenter<DepartmentConfi
         action.setDepartment(getView().getDepartmentId());
         action.setTaxType(getView().getTaxType());
         action.setFatal(true);
+        if (recordId == null) {
+            Dialog.errorMessage("Удаление настроек не выполнено", "Удаление настроек выбранного подразделения и периода не может быть выполнено, т.к. данная версия настроек не создана");
+            return;
+        }
         dispatcher.execute(action,
                 CallbackUtils.defaultCallback(
                         new AbstractCallback<GetCheckDeclarationResult>() {

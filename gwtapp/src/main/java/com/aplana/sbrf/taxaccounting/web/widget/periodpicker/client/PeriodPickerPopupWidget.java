@@ -64,6 +64,7 @@ public class PeriodPickerPopupWidget extends DoubleStateComposite implements
     private Map<Integer, Integer> reportPeriodYears;
     private Set<Integer> reportPeriodIds;
     private String type;
+    private boolean isSetDefaultValue = false;
 
     @UiConstructor
     public PeriodPickerPopupWidget(boolean multiselect) {
@@ -140,7 +141,24 @@ public class PeriodPickerPopupWidget extends DoubleStateComposite implements
 
     @UiHandler("selectButton")
     public void onSelectClick(ClickEvent event) {
-        periodPicker.setValue(this.value);
+        if (isSetDefaultValue && (this.value == null || this.value.isEmpty())) {
+            Integer reportPeriodId = getDefaultReportPeriod();
+            if (reportPeriodId != null && reportPeriodIds.contains(reportPeriodId)) {
+                periodPicker.setValue(Arrays.asList(reportPeriodId));
+            } else if (reportPeriodDates != null && !reportPeriodDates.isEmpty()) {
+                Map.Entry<Integer, Pair<Date, Date>>[] rpDates = (Map.Entry<Integer, Pair<Date, Date>>[])reportPeriodDates.entrySet().toArray();
+                Date maxDate = rpDates[0].getValue().getSecond();
+                Integer rpId = rpDates[0].getKey();
+                for (Map.Entry<Integer, Pair<Date, Date>> per : rpDates) {
+                    if (per.getValue().getSecond().after(maxDate)) {
+                        rpId = per.getKey();
+                    }
+                }
+                setValue(Arrays.asList(rpId));
+            }
+        } else {
+            periodPicker.setValue(this.value);
+        }
         popupPanel.center();
     }
 
@@ -228,5 +246,9 @@ public class PeriodPickerPopupWidget extends DoubleStateComposite implements
 
     public void setType(String type) {
         this.type = type;
+    }
+
+    public void setSetDefaultValue(boolean isSetDefaultValue) {
+        this.isSetDefaultValue = isSetDefaultValue;
     }
 }

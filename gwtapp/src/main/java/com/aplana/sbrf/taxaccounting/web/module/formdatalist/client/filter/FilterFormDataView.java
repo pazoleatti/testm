@@ -5,6 +5,7 @@ import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.util.StringUtils;
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.shared.FormDataElementName;
 import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPicker;
+import com.aplana.sbrf.taxaccounting.web.widget.departmentpicker.DepartmentPickerPopupWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.periodpicker.client.PeriodPickerPopupWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client.RefBookPickerWidget;
 import com.google.gwt.editor.client.Editor;
@@ -53,7 +54,7 @@ public class FilterFormDataView extends ViewWithUiHandlers<FilterFormDataUIHandl
 
 	@UiField
     @Path("departmentIds")
-	DepartmentPicker departmentPicker;
+    DepartmentPickerPopupWidget departmentPicker;
 
 	@Ignore
 	@UiField
@@ -244,18 +245,7 @@ public class FilterFormDataView extends ViewWithUiHandlers<FilterFormDataUIHandl
     }
 
     @Override
-    public void setDefaultReportPeriod(List<ReportPeriod> reportPeriods) {
-        Integer reportPeriodId = reportPeriodIds.getDefaultReportPeriod();
-        if (reportPeriodId != null && reportPeriodIds.getReportPeriodIds().contains(reportPeriodId)) {
-            reportPeriodIds.setValue(Arrays.asList(reportPeriodId));
-        } else if (reportPeriods != null && !reportPeriods.isEmpty()) {
-            ReportPeriod maxPeriod = reportPeriods.get(0);
-            for (ReportPeriod per : reportPeriods) {
-                if (per.getCalendarStartDate().after(maxPeriod.getCalendarStartDate())) {
-                    maxPeriod = per;
-                }
-            }
-            reportPeriodIds.setValue(Arrays.asList(maxPeriod.getId()));
-        }
+    public void setUserDepartmentId(Integer userDepartmentId) {
+        departmentPicker.setUserDepartmentId(userDepartmentId);
     }
 }

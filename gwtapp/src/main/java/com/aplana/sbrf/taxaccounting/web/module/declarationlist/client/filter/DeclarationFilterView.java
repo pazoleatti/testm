@@ -53,8 +53,10 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
         super();
 
         reportPeriodPicker = new PeriodPickerPopupWidget(true);
+        reportPeriodPicker.setSetDefaultValue(true);
 
         departmentPicker = new DepartmentPickerPopupWidget(true);
+        departmentPicker.setSetDefaultValue(true);
 
         formStatePicker = new ValueListBox<WorkflowState>(new AbstractRenderer<WorkflowState>() {
             @Override
@@ -412,18 +414,7 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
     }
 
     @Override
-    public void setDefaultReportPeriod(List<ReportPeriod> reportPeriods) {
-        Integer reportPeriodId = reportPeriodPicker.getDefaultReportPeriod();
-        if (reportPeriodId != null && reportPeriodPicker.getReportPeriodIds().contains(reportPeriodId)) {
-            reportPeriodPicker.setValue(Arrays.asList(reportPeriodId));
-        } else if (reportPeriods != null && !reportPeriods.isEmpty()) {
-            ReportPeriod maxPeriod = reportPeriods.get(0);
-            for (ReportPeriod per : reportPeriods) {
-                if (per.getCalendarStartDate().after(maxPeriod.getCalendarStartDate())) {
-                    maxPeriod = per;
-                }
-            }
-            reportPeriodPicker.setValue(Arrays.asList(maxPeriod.getId()));
-        }
+    public void setUserDepartmentId(Integer userDepartmentId) {
+        departmentPicker.setUserDepartmentId(userDepartmentId);
     }
 }

@@ -32,8 +32,8 @@
                 </g:cell>
                 <g:cell width="50%">
                     <g:VerticalPanel width="100%">
-                        <per:PeriodPickerPopupWidget ui:field="reportPeriodIds" multiselect="true" width="100%"/>
-                        <dep:DepartmentPickerPopupWidget ui:field="departmentPicker" multiselection="true" width="100%"/>
+                        <per:PeriodPickerPopupWidget ui:field="reportPeriodIds" multiselect="true" setDefaultValue="true" width="100%"/>
+                        <dep:DepartmentPickerPopupWidget ui:field="departmentPicker" multiselection="true" setDefaultValue="true" width="100%"/>
                     </g:VerticalPanel>
                 </g:cell>
                 <g:cell>
