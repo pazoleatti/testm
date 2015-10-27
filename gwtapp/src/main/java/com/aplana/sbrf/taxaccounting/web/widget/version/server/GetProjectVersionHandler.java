@@ -39,7 +39,7 @@ public class GetProjectVersionHandler extends AbstractActionHandler<GetProjectVe
         }
 
 		GetProjectVersionResult result = new GetProjectVersionResult();
-		result.setProjectVersion(String.format("Версия: %s, Ревизия: %s, Сервер: %s", version, revision, serverName));
+		result.setProjectVersion(String.format("Версия: %s; Ревизия: %s; Сервер: %s", version, revision, serverName));
         return result;
 
 	}
