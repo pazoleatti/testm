@@ -212,7 +212,7 @@ void generateXML() {
                         СвКонтрСд(
                                 НомПорСд: ++rowCounter
                         ) {
-                            def String interdependenceSing = (row.interdependenceSing != null) ? getRefBookValue(69, row.interdependenceSing)?.CODE?.numberValue : null
+                            def String interdependenceSing = row.interdependenceSing != null ? getRefBookValue(69, row.interdependenceSing)?.CODE?.numberValue : null
                             ОснКонтрСд(
                                     ВзЗавис: interdependenceSing
                             ) {

@@ -165,6 +165,7 @@ public abstract class AbstractEditPresenter<V extends AbstractEditPresenter.MyVi
 
     public final void show(final Long refBookRecordId){
         if (refBookRecordId != null && refBookRecordId.equals(currentUniqueRecordId)) {
+            showRecord(refBookRecordId);
             return;
         }
         if (mode.equals(FormMode.EDIT) && currentUniqueRecordId != null && getView().checkChanges()) {
