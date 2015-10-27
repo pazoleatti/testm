@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rows>
+    <row alias="">
+        <cell alias="fix" colSpan="2" rowSpan="2" value="№ п/п"/>
+        <cell alias="rowNum" colSpan="1" rowSpan="1" value="№ п/п"/>
+        <cell alias="department" colSpan="1" rowSpan="2" value="Подразделение Банка"/>
+        <cell alias="sumBU" colSpan="1" rowSpan="1" value="БУ, тыс. руб."/>
+        <cell alias="sumNUD" colSpan="1" rowSpan="1" value="НУд, тыс. руб."/>
+        <cell alias="sumNUP" colSpan="1" rowSpan="1" value="НУп, тыс. руб."/>
+        <cell alias="taxBurden" colSpan="1" rowSpan="1" value="Налоговое бремя, тыс. руб."/>
+    </row>
+    <row alias="">
+        <cell alias="fix" colSpan="1" rowSpan="1" value="№ п/п"/>
+        <cell alias="rowNum" colSpan="1" rowSpan="1" value="№ п/п"/>
+        <cell alias="department" colSpan="1" rowSpan="1" value="Подразделение Банка"/>
+        <cell alias="sumBU" colSpan="1" rowSpan="1" value="симв. ф.102 (26307.02+22204)"/>
+        <cell alias="sumNUD" colSpan="1" rowSpan="1" value="КНУ 21490"/>
+        <cell alias="sumNUP" colSpan="1" rowSpan="1" value="КНУ 21510"/>
+        <cell alias="taxBurden" colSpan="1" rowSpan="1" value="(гр.3-(гр.4+гр.5))*20%"/>
+    </row>
+    <row alias="">
+        <cell alias="fix" colSpan="2" rowSpan="1" value="1"/>
+        <cell alias="rowNum" colSpan="1" rowSpan="1" value="1"/>
+        <cell alias="department" colSpan="1" rowSpan="1" value="2"/>
+        <cell alias="sumBU" colSpan="1" rowSpan="1" value="3"/>
+        <cell alias="sumNUD" colSpan="1" rowSpan="1" value="4"/>
+        <cell alias="sumNUP" colSpan="1" rowSpan="1" value="5"/>
+        <cell alias="taxBurden" colSpan="1" rowSpan="1" value="6"/>
+    </row>
+</rows>

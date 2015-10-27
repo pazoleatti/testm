@@ -1,4 +1,4 @@
-package form_template.etr.etr_4_10_summary.v2015
+package form_template.etr.etr_4_9_summary.v2015
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
@@ -7,15 +7,19 @@ import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import groovy.transform.Field
 
 /**
- * Приложение 4-10. Трансфертное ценообразование – сделки с взаимозависимыми лицами (ВЗЛ) и резидентами оффшорных зон (РОЗ) (сводная)
- * formTemplateId = 7100
+ * Приложение 4-9. Налоговая эффективность по уступке прав требования по проблемным активам в разрезе ТБ (сводная)
+ *
+ * formTemplateId = 7090
+ *
+ * @author Stanislav Yasinskiy
  *
  * графа   - fix
  * графа 1 - rowNum       - № п/п
  * графа 2 - department	  - Подразделение Банка
- * графа 3 - sum1         - Сумма увеличения базы по налогу на прибыль, в том числе не учитываемые расходы, тыс. руб.
- * графа 4 - sum2         - Сумма увеличения базы по налогу на прибыль, в том числе доначисление доходов, тыс. руб.
- * графа 5 - taxBurden    - Налоговое бремя, тыс. руб.
+ * графа 3 - sumBU        - БУ, тыс. руб
+ * графа 4 - sumNUD       - НУд, тыс. руб
+ * графа 5 - sumNUP       - НУп, тыс. руб
+ * графа 6 - taxBurden    - Налоговое бремя, тыс. руб.
  */
 
 switch (formDataEvent) {
@@ -59,19 +63,15 @@ def providerCache = [:]
 def recordCache = [:]
 
 @Field
-def allColumns = ['department', 'sum1', 'sum2', 'taxBurden']
+def allColumns = ['department', 'sumBU', 'sumNUD', 'sumNUP', 'taxBurden']
 
 // Проверяемые на пустые значения атрибуты
 @Field
 def nonEmptyColumns = allColumns
 
-// итоговые графы (графа 3, 4, 5)
+// итоговые графы (графа 3, 4, 5, 6)
 @Field
-def totalColumns = ['sum1', 'sum2', 'taxBurden']
-
-// общие графы у сводной и первичной/консолидированой 4-10 (графа 3, 4, 5)
-@Field
-def commonColumns = ['sum1', 'sum2', 'taxBurden']
+def totalColumns = ['sumBU', 'sumNUD', 'sumNUP', 'taxBurden']
 
 @Field
 def startDateMap = [:]
@@ -105,7 +105,6 @@ def getRecordIdImport(def Long refBookId, def String alias, def String value, de
 
 void calc() {
     def dataRows = formDataService.getDataRowHelper(formData).allCached
-
     // итоги
     def totalRow = getDataRow(dataRows, 'total')
     calcTotalSum(dataRows, totalRow, totalColumns)
@@ -126,21 +125,24 @@ void consolidation() {
     def dataRows = formDataService.getDataRowHelper(formData).allCached
     def totalRow = getDataRow(dataRows, 'total')
     dataRows = []
-    def sourceFormTypeId = 710
+    def sourceFormTypeId = 708
     departmentFormTypeService.getFormSources(formData.departmentId, formData.formType.id, formData.kind,
             getStartDate(formData.reportPeriodId), getEndDate(formData.reportPeriodId)).each {
         if (it.formTypeId == sourceFormTypeId) {
-            def source = formDataService.getLast(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId, formData.periodOrder, formData.comparativePeriodId, formData.accruing)
+            def source = formDataService.getLast(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId, formData.periodOrder)
             if (source != null && source.state == WorkflowState.ACCEPTED) {
                 def sourceRows = formDataService.getDataRowHelper(source)?.allSaved
-                def row = getDataRow(sourceRows, 'R1')
+                def row1 = getDataRow(sourceRows, 'R1')
+                def row2 = getDataRow(sourceRows, 'R2')
+                def row3 = getDataRow(sourceRows, 'R3')
+
                 def newRow = formData.createDataRow()
-                // графа 2
-                newRow.department = it.departmentId
-                // графа 3..5
-                commonColumns.each { column ->
-                    newRow[column] = row[column]
-                }
+                newRow.department = source.departmentId
+                newRow.sumBU = row1.currentPeriod ?: 0
+                newRow.sumNUD = row2.currentPeriod ?: 0
+                newRow.sumNUP = row3.currentPeriod ?: 0
+                // Графа 6 =(значение Графы 3 – (значение Графы 4 + значение Графы 5))*0.2
+                newRow.taxBurden = (newRow.sumBU - (newRow.sumNUD + newRow.sumNUP)) * 0.2
                 dataRows.add(newRow)
             }
         }
@@ -165,8 +167,8 @@ def getDepartmentName(Integer id) {
 
 void importData() {
     def tmpRow = formData.createDataRow()
-    int COLUMN_COUNT = 5
-    int HEADER_ROW_COUNT = 4
+    int COLUMN_COUNT = 7
+    int HEADER_ROW_COUNT = 3
     String TABLE_START_VALUE = getColumnName(tmpRow, 'rowNum')
     String TABLE_END_VALUE = null
     int INDEX_FOR_SKIP = 0
@@ -255,17 +257,17 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
     def headerMapping = [
             (headerRows[0][0]): getColumnName(tmpRow, 'rowNum'),
             (headerRows[0][2]): getColumnName(tmpRow, 'department'),
-            (headerRows[0][3]): 'Сумма увеличения базы по налогу на прибыль, в том числе',
-            (headerRows[0][5]): getColumnName(tmpRow, 'taxBurden'),
-            (headerRows[1][3]): 'не учитываемые расходы, тыс. руб.',
-            (headerRows[1][4]): 'доначисление доходов, тыс. руб.',
-            (headerRows[2][3]): '(РНУ-108 гр.13+РНУ-115 гр.20+ РНУ-116 гр.20)',
-            (headerRows[2][4]): '(РНУ-107 гр.12+ РНУ-110 гр.11+ РНУ-111 гр.13+ РНУ-115 гр.19+ РНУ-116 гр.19+РНУ-114 гр.16)',
-            (headerRows[2][5]): '(гр.1+гр.2)*20%',
-            (headerRows[3][0]): '1'
+            (headerRows[0][3]): getColumnName(tmpRow, 'sumBU'),
+            (headerRows[0][4]): getColumnName(tmpRow, 'sumNUD'),
+            (headerRows[0][5]): getColumnName(tmpRow, 'sumNUP'),
+            (headerRows[0][6]): getColumnName(tmpRow, 'taxBurden'),
+            (headerRows[1][3]): 'симв. ф.102 (26307.02+22204)',
+            (headerRows[1][4]): 'КНУ 21490',
+            (headerRows[1][5]): 'КНУ 21510',
+            (headerRows[1][6]): '(гр.3-(гр.4+гр.5))*20%'
     ]
-    (2..5).each {
-        headerMapping.put((headerRows[3][it]), it.toString())
+    (2..6).each {
+        headerMapping.put((headerRows[2][it]), it.toString())
     }
     checkHeaderEquals(headerMapping, logger)
 }
@@ -291,7 +293,7 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex, 
     }
 
     // графа 3..5
-    commonColumns.each { alias ->
+    ['sumBU', 'sumNUD', 'sumNUP', 'taxBurden'].each { alias ->
         colIndex++
         newRow[alias] = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
     }

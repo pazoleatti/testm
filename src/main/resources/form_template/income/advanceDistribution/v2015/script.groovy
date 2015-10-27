@@ -152,6 +152,9 @@ def summaryMap = [[301, 305] : "Доходы, учитываемые в прос
                   [303] : "Сводная форма начисленных расходов", [304, 310] : "Расходы, учитываемые в простых РНУ"]
 
 @Field
+long centralId = 113 // ID Центрального аппарата
+
+@Field
 def startDate = null
 
 @Field
@@ -292,10 +295,35 @@ void calc() {
 
     // в строках должна быть итоговая
     calcCaTotalRow(dataRows, caTotalRow, totalRow, taxBase, sumNal)
+
+    // После расчета фикс. строки "ЦА(скоррект)" необходимо пересчитать для граф 12, 14, 15, 17, 18, 19
+    // фиксированную строку итогов: сумма всех строк, кроме строки "ЦА" и строки итогов
+    reCalcTotalRow(dataRows, totalRow)
+}
+
+void reCalcTotalRow(def dataRows, def totalRow) {
+    totalRow.baseTaxOfRub = 0
+    totalRow.taxSum = 0
+    totalRow.taxSumOutside = 0
+    totalRow.taxSumToReduction = 0
+    totalRow.everyMontherPaymentAfterPeriod = 0
+    totalRow.everyMonthForKvartalNextPeriod = 0
+    for (row in dataRows) {
+        if (row.getAlias() == 'total' || row.regionBank == centralId) {
+            continue
+        }
+        totalRow.baseTaxOfRub += row.baseTaxOfRub ?: 0
+        totalRow.taxSum += row.taxSum ?: 0
+        totalRow.taxSumOutside += row.taxSumOutside ?: 0
+        totalRow.taxSumToReduction += row.taxSumToReduction ?: 0
+        totalRow.everyMontherPaymentAfterPeriod += row.everyMontherPaymentAfterPeriod ?: 0
+        totalRow.everyMonthForKvartalNextPeriod += row.everyMonthForKvartalNextPeriod ?: 0
+    }
 }
 
 void calcTotalRow(def dataRows, def totalRow) {
     calcTotalSum(dataRows, totalRow, totalColumns)
+    // графа 11
     totalRow.baseTaxOf = roundValue(dataRows.sum{ row ->
         String value = row.baseTaxOf
         (row.getAlias() == null && value?.isBigDecimal()) ? new BigDecimal(value) : BigDecimal.ZERO
@@ -312,8 +340,7 @@ void calcCaTotalRow(def dataRows, def caTotalRow, def totalRow, def taxBase, def
     if (caRow != null) {
         // расчеты для строки ЦА (скорректированный)
         ['number', 'regionBankDivision', 'divisionName', 'kpp', 'propertyPrice', 'workersCount', 'subjectTaxCredit',
-         'calcFlag', 'obligationPayTax', 'baseTaxOf', 'subjectTaxStavka', 'taxSum', 'taxSumToPay',
-         'taxSumToReduction', 'everyMonthForKvartalNextPeriod',
+         'calcFlag', 'obligationPayTax', 'baseTaxOf', 'subjectTaxStavka', 'taxSumToPay',
          'everyMonthForSecondKvartalNextPeriod', 'everyMonthForThirdKvartalNextPeriod',
          'everyMonthForFourthKvartalNextPeriod'].each { alias ->
             caTotalRow[alias] = caRow[alias]
@@ -342,7 +369,26 @@ void calcCaTotalRow(def dataRows, def caTotalRow, def totalRow, def taxBase, def
         }
 
         // графа 14
+        caTotalRow.taxSum = roundValue((caTotalRow.baseTaxOfRub ?: 0) * (caTotalRow.subjectTaxStavka ?: 0) / 100, 0)
+
+        // графа 15
         caTotalRow.taxSumOutside = 0.9 * sumNal - totalRow.taxSumOutside + caRow.taxSumOutside
+
+        // графа 17
+        if (caTotalRow.taxSum < ((caTotalRow.subjectTaxCredit ?: 0) + caTotalRow.taxSumOutside)) { // «графа 14» < («графа 8» + «графа 15» )
+            // («графа 8» + «графа 15») - «графа 14»
+            caTotalRow.taxSumToReduction = ((caTotalRow.subjectTaxCredit ?: 0) + caTotalRow.taxSumOutside) - caTotalRow.taxSum
+        } else {
+            caTotalRow.taxSumToReduction = 0
+        }
+
+        // графа 19
+        if (reportPeriod.order == 3) {
+            // «графа 19» = «графа 18» строки "ЦА (скорр.)"
+            caTotalRow.everyMonthForKvartalNextPeriod = caTotalRow.everyMontherPaymentAfterPeriod
+        } else {
+            caTotalRow.everyMonthForKvartalNextPeriod = 0
+        }
     }
 }
 
@@ -356,7 +402,6 @@ def calc2(def row) {
         return null
     }
 
-    long centralId = 113 // ID Центрального аппарата.
     // У Центрального аппарата родительским подразделением должен быть он сам
     if (centralId == row.regionBankDivision) {
         return centralId
@@ -432,7 +477,7 @@ def calc11(def row, def propertyPriceSumm, def workersCountSumm) {
 
 def calc12(def row, def taxBase) {
     if (row.baseTaxOf != null && checkColumn11(row.baseTaxOf) && taxBase != null) {
-        return roundValue(taxBase * new BigDecimal(row.baseTaxOf) / 100, 0)
+        return roundValue(taxBase * new BigDecimal(row.baseTaxOf) / 100, 0) // умножение на 18/20 и деление на 100
     }
     return 0
 }
@@ -531,7 +576,6 @@ void logicalCheckBeforeCalc() {
         if (departmentParam == null || departmentParam.isEmpty()) {
             return
         } else {
-            long centralId = 113 // ID Центрального аппарата.
             // У Центрального аппарата родительским подразделением должен быть он сам
             if (centralId != row.regionBankDivision) {
                 // графа 2 - название подразделения
@@ -1484,9 +1528,9 @@ def getSimpleConsumptionSumRows8(def dataRows, def codes) {
 def getRashVnerealVs(def dataRows, def dataRowsSimple) {
     def result = 0.0
 
-    // Код вида расхода = 22492, 22500, 22505, 22585, 22590, 22595, 22660, 22664, 22668,
+    // Код вида расхода = 22500, 22505, 22585, 22590, 22595, 22660, 22664, 22668,
     // 22670, 22690, 22695, 22700, 23120, 23130, 23140, 23240 - графа 9
-    result += getComplexConsumptionSumRows9(dataRows, [22492, 22500, 22505, 22585, 22590, 22595, 22660, 22664, 22668,
+    result += getComplexConsumptionSumRows9(dataRows, [22500, 22505, 22585, 22590, 22595, 22660, 22664, 22668,
                                                        22670, 22690, 22695, 23120, 23130, 23140, 23240])
 
     // Код вида расхода = 22000, 22010, 22020, 22030, 22040, 22050, 22060, 22070, 22080, 22090, 22100, 22110,
@@ -1508,8 +1552,8 @@ def getRashVnerealVs(def dataRows, def dataRowsSimple) {
                 23220, 23230, 23250, 23260, 23270, 23280 ]
     result += getCalculatedSimpleConsumption(dataRowsSimple, knu)
 
-    // Код вида расхода = 23150, 23160, 23170 - графа 9
-    result -= getComplexConsumptionSumRows9(dataRows, [23150, 23160, 23170])
+    // Код вида расхода = 22492, 23150, 23160, 23170 - графа 9
+    result -= getComplexConsumptionSumRows9(dataRows, [22492, 23150, 23160, 23170])
 
     return getLong(result)
 }
@@ -1663,7 +1707,6 @@ void calcColumnFrom14To21(def prevDataRows, def row, def sumNal, def reportPerio
  */
 def findCA(def dataRows) {
     def resultRow = null
-    long centralId = 113 // ID Центрального аппарата
     if (dataRows != null) {
         for (def row : dataRows) {
             if (row.regionBank == centralId) {

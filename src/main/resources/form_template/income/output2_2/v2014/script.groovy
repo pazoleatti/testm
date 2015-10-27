@@ -150,7 +150,7 @@ void logicCheck() {
         }
         // Проверки паттернов
         if (row.inn && checkPattern(logger, row, 'inn', row.inn, INN_JUR_PATTERN, wasError[1] ? null : INN_JUR_MEANING, true)) {
-            checkControlSumInn(logger, row, 'inn', row.inn, true)
+            checkControlSumInn(logger, row, 'inn', row.inn, false)
         } else if (row.inn){
             wasError[1] = true
         }

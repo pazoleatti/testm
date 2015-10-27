@@ -219,10 +219,20 @@ void consolidation() {
         }
     }
     // сортируем по наименованию подразделения
-    dataRows.sort { departmentService.get(it.department as Integer).name }
+    dataRows.sort { getDepartmentName(it.department as Integer) }
     dataRows.add(totalRow)
     updateIndexes(dataRows)
     formDataService.getDataRowHelper(formData).allCached = dataRows
+}
+
+@Field
+def departmentNameMap = [:]
+
+def getDepartmentName(Integer id) {
+    if (id != null && departmentNameMap[id] == null) {
+        departmentNameMap[id] = departmentService.get(id).name
+    }
+    return departmentNameMap[id]
 }
 
 void importData() {
