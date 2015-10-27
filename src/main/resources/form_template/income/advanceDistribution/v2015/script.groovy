@@ -342,8 +342,7 @@ void calcCaTotalRow(def dataRows, def caTotalRow, def totalRow, def taxBase, def
     if (caRow != null) {
         // расчеты для строки ЦА (скорректированный)
         ['number', 'regionBankDivision', 'divisionName', 'kpp', 'propertyPrice', 'workersCount', 'subjectTaxCredit',
-         'calcFlag', 'obligationPayTax', 'baseTaxOf', 'subjectTaxStavka', 'taxSum', 'taxSumToPay',
-         'taxSumToReduction', 'everyMonthForKvartalNextPeriod',
+         'calcFlag', 'obligationPayTax', 'baseTaxOf', 'subjectTaxStavka', 'taxSumToPay',
          'everyMonthForSecondKvartalNextPeriod', 'everyMonthForThirdKvartalNextPeriod',
          'everyMonthForFourthKvartalNextPeriod'].each { alias ->
             caTotalRow[alias] = caRow[alias]
@@ -383,6 +382,14 @@ void calcCaTotalRow(def dataRows, def caTotalRow, def totalRow, def taxBase, def
             caTotalRow.taxSumToReduction = ((caTotalRow.subjectTaxCredit ?: 0) + caTotalRow.taxSumOutside) - caTotalRow.taxSum
         } else {
             caTotalRow.taxSumToReduction = 0
+        }
+
+        // графа 19
+        if (reportPeriod.order == 3) {
+            // «графа 19» = «графа 18» строки "ЦА (скорр.)"
+            caTotalRow.everyMonthForKvartalNextPeriod = caTotalRow.everyMontherPaymentAfterPeriod
+        } else {
+            caTotalRow.everyMonthForKvartalNextPeriod = 0
         }
     }
 }
