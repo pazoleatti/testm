@@ -89,11 +89,11 @@ void checkDepartmentParams(LogLevel logLevel) {
     // Проверки подразделения
     def List<String> errorList = getErrorTable(departmentParamIncomeRow)
     for (String error : errorList) {
-        logger.log(logLevel, String.format("На форме настроек подразделения текущего экземпляра декларации неверно указано значение атрибута %s!", error))
+        logger.log(logLevel, String.format("На форме настроек подразделения текущего экземпляра декларации отсутствует значение атрибута %s!", error))
     }
     errorList = getErrorDepartment(departmentParam)
     for (String error : errorList) {
-        logger.log(logLevel, String.format("На форме настроек подразделения текущего экземпляра декларации неверно указано значение атрибута %s!", error))
+        logger.log(logLevel, String.format("На форме настроек подразделения текущего экземпляра декларации отсутствует значение атрибута %s!", error))
     }
 
     errorList = getErrorVersion(departmentParam)
@@ -310,7 +310,7 @@ void generateXML(XMLStreamReader readerBank) {
     def taxOrganCodeProm = useTaxOrganCodeProm() ? incomeParamsTable?.TAX_ORGAN_CODE_PROM?.value : taxOrganCode
     def okvedCode = getRefBookValue(34, incomeParamsTable?.OKVED_CODE?.value)?.CODE?.value
     def phone = incomeParamsTable?.PHONE?.value
-    def name = incomeParamsTable?.NAME?.value
+    def name = incomeParamsTable?.NAME?.value ?: ""
     def inn = incomeParams?.INN?.value
     def kpp = declarationData.kpp
     def reorgInn = incomeParamsTable?.REORG_INN?.value
@@ -416,7 +416,7 @@ void generateXML(XMLStreamReader readerBank) {
         readerBank.close()
     }
     if (!findCurrentDepo) {
-        logger.error("В декларации Банка отсутствуют данные для подразделения: $name (в приложении № 5 к Листу 02).")
+        logger.error("В приложении № 5 к Листу 02 декларации Банка отсутствует лист для текущего экземпляра декларации: КПП обособленного подразделения = $kpp!")
         return
     }
 
