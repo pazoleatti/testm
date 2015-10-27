@@ -129,7 +129,7 @@ public class RefBookLinearPresenter extends PresenterWidget<RefBookLinearPresent
 
     public interface MyView extends View, HasUiHandlers<RefBookDataLinearUiHandlers> {
         void setTableColumns(final List<RefBookColumn> columns);
-        void setTableData(int start, int totalCount, List<RefBookDataRow> dataRows);
+        void setTableData(int start, int totalCount, List<RefBookDataRow> dataRows, Long selectedItem);
         void setSelected(Long recordId);
         void assignDataProvider(int pageSize, AbstractDataProvider<RefBookDataRow> data);
         int getPageSize();
@@ -224,16 +224,16 @@ public class RefBookLinearPresenter extends PresenterWidget<RefBookLinearPresent
                                     }*/
 
                                     getView().setTableData(range.getStart(),
-                                            result.getTotalCount(), result.getDataRows());
+                                            result.getTotalCount(), result.getDataRows(), recordId);
                                     // http://jira.aplana.com/browse/SBRFACCTAX-5684 автофокус на первую строку
-                                    if (!result.getDataRows().isEmpty()) {
+                                    /*if (!result.getDataRows().isEmpty() && getView().getSelectedRow()==null) {
                                         getView().setSelected(result.getDataRows().get(0).getRefBookRowId());
-                                    } else {
+                                    }else {
                                         ShowItemEvent.fire(RefBookLinearPresenter.this, null, null);
-                                        /*editPresenter.cleanFields();
-                                        editPresenter.clean();*/
+                                        *//*editPresenter.cleanFields();
+                                        editPresenter.clean();*//*
                                         getView().setSelected(recordId);
-                                    }
+                                    }*/
                                     // http://jira.aplana.com/browse/SBRFACCTAX-5759
                                     /*if (recordId != null) {
                                         getView().setSelected(recordId);
