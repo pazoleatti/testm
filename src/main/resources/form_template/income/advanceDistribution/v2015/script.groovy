@@ -303,7 +303,6 @@ void calc() {
 
 void reCalcTotalRow(def dataRows, def totalRow) {
     totalRow.baseTaxOfRub = 0
-    totalRow.subjectTaxStavka = 0
     totalRow.taxSum = 0
     totalRow.taxSumOutside = 0
     totalRow.taxSumToReduction = 0
@@ -314,7 +313,6 @@ void reCalcTotalRow(def dataRows, def totalRow) {
             continue
         }
         totalRow.baseTaxOfRub += row.baseTaxOfRub ?: 0
-        totalRow.subjectTaxStavka += row.subjectTaxStavka ?: 0
         totalRow.taxSum += row.taxSum ?: 0
         totalRow.taxSumOutside += row.taxSumOutside ?: 0
         totalRow.taxSumToReduction += row.taxSumToReduction ?: 0
