@@ -47,7 +47,7 @@ public class Etr4_9_SummaryTest extends ScriptTestBase {
         formData.setDepartmentReportPeriodId(DEPARTMENT_PERIOD_ID);
         formData.setReportPeriodId(REPORT_PERIOD_ID);
         formData.setPeriodOrder(1);
-        formData.setComparativPeriodId(1);
+        formData.setComparativePeriodId(1);
         return formData;
     }
 
@@ -167,7 +167,7 @@ public class Etr4_9_SummaryTest extends ScriptTestBase {
             // форма источника
             FormData sourceFormData = getSourceFormData(i, sourceTemplateId);
             when(testHelper.getFormDataService().getLast(anyInt(), eq(kind), eq(i),
-                    anyInt(), any(Integer.class))).thenReturn(sourceFormData);
+                    anyInt(), any(Integer.class), any(Integer.class), any(Boolean.class))).thenReturn(sourceFormData);
 
             // строки и хелпер источника
             List<DataRow<Cell>> dataRows = getFillDataRows(sourceFormData, i);
