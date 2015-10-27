@@ -322,6 +322,11 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
         this.dialogPresenter.getView().hide();
     }
 
+    /**
+     * Событие нажатия на ссылку "Все версии элемента"
+     * Событие удаляется как только происходит нажатие на кнопку и добавляется обратно
+     * при переходе на страницу справоника
+     */
     private ClickHandler getClick(){
         return new ClickHandler() {
             @Override

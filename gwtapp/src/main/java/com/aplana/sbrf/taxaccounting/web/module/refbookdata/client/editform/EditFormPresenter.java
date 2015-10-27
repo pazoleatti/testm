@@ -145,7 +145,7 @@ public class EditFormPresenter extends AbstractEditPresenter<EditFormPresenter.M
 
     @Override
     public void clean(Boolean isVersion) {
-        if (isVersion == true) {
+        if (isVersion) {
             GetRefBookRecordAction action = new GetRefBookRecordAction();
             action.setRefBookId(currentRefBookId);
             action.setUniqueRecordId(currentUniqueRecordId);
@@ -155,14 +155,14 @@ public class EditFormPresenter extends AbstractEditPresenter<EditFormPresenter.M
                             new AbstractCallback<GetRefBookRecordResult>() {
                                 @Override
                                 public void onSuccess(GetRefBookRecordResult result) {
-                                    currentUniqueRecordId = null;
+                                    setCurrentUniqueRecordId(null);
                                     getView().fillInputFields(result.getRecord());
                                     getView().setVersionFrom(result.getVersionData().getVersionStart());
                                     getView().setVersionTo(null);
                                 }
                             }, EditFormPresenter.this));
         } else {
-            currentUniqueRecordId = null;
+            setCurrentUniqueRecordId(null);
             getView().fillInputFields(null);
 
             /*if (!isVersionMode && mode == FormMode.EDIT) {
@@ -181,7 +181,7 @@ public class EditFormPresenter extends AbstractEditPresenter<EditFormPresenter.M
     @Override
     void showRecord(final Long refBookRecordId) {
         if (refBookRecordId == null) {
-            currentUniqueRecordId = null;
+            setCurrentUniqueRecordId(null);
             getView().fillInputFields(null);
 
             /*if (!isVersionMode && mode == FormMode.EDIT) {

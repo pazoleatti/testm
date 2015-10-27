@@ -26,7 +26,6 @@ import com.gwtplatform.mvp.client.annotations.ProxyEvent;
 
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -199,8 +198,6 @@ public class RefBookLinearPresenter extends PresenterWidget<RefBookLinearPresent
         Date relevanceDate;
         String searchPattern;
 
-        private List<RefBookDataRow> visibleData = new LinkedList<RefBookDataRow>();
-
         @Override
         protected void onRangeChanged(HasData<RefBookDataRow> display) {
             if (refBookDataId == null) return;
@@ -225,8 +222,7 @@ public class RefBookLinearPresenter extends PresenterWidget<RefBookLinearPresent
                                             return;
                                         }
                                     }*/
-                                    visibleData.clear();
-                                    visibleData.addAll(result.getDataRows());
+
                                     getView().setTableData(range.getStart(),
                                             result.getTotalCount(), result.getDataRows());
                                     // http://jira.aplana.com/browse/SBRFACCTAX-5684 автофокус на первую строку
@@ -239,9 +235,9 @@ public class RefBookLinearPresenter extends PresenterWidget<RefBookLinearPresent
                                         getView().setSelected(recordId);
                                     }
                                     // http://jira.aplana.com/browse/SBRFACCTAX-5759
-                                    if (recordId != null) {
+                                    /*if (recordId != null) {
                                         getView().setSelected(recordId);
-                                    }
+                                    }*/
 //                                    recordId = null;
                                     /*if (selectedRowIndex != null && result.getDataRows().size() > selectedRowIndex) {
                                         //сохраняем позицию после удаления записи

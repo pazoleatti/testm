@@ -5,7 +5,7 @@ import com.google.gwt.event.shared.GwtEvent;
 import com.google.gwt.event.shared.HasHandlers;
 
 /**
- * Событие для возврата на предыдущую форму со саиском элементов
+ * Событие для возврата на предыдущую форму со списком элементов
  */
 public class BackEvent extends GwtEvent<BackEvent.BackHandler>{
     @Override
@@ -20,7 +20,7 @@ public class BackEvent extends GwtEvent<BackEvent.BackHandler>{
 
     public interface BackHandler extends EventHandler {
         /**
-         * Иминирует нажатие на ссылку со списком элементов
+         * Имитирует нажатие на ссылку со списком элементов
          */
         void onBack(BackEvent event);
     }
