@@ -937,6 +937,15 @@ public final class ScriptUtils {
     }
 
     /**
+     * Сравнение строки с эталонной (SBRFACCTAX-11930)
+     */
+    public static void checkHeaderEquals(ArrayList<Map<Object, String>> headerMapping, Logger logger) {
+        for (Map<Object, String> currentString : headerMapping) {
+            checkHeaderEquals(currentString, logger);
+        }
+    }
+
+    /**
      * Сравнение строки с эталонной для всего набора строк (если передан Logger)
      */
     public static void checkHeaderEquals(Map<Object, String> headerMapping, Logger logger) {
