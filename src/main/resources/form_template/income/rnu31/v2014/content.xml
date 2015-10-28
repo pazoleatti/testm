@@ -3,7 +3,7 @@
     <fixedRows>true</fixedRows>
     <name>(РНУ-31) Регистр налогового учёта процентного дохода по купонным облигациям</name>
     <fullName>(РНУ-31) Регистр налогового учёта процентного дохода по купонным облигациям</fullName>
-    <code>РНУ-31</code>
+    <header>1290-31</header>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>number</alias>
         <checking>false</checking>

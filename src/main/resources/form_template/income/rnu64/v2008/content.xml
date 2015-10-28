@@ -1,1 +1,102 @@
-<?xml version="1.0" encoding="UTF-8" standalone="yes"?><formTemplateContent><type><id>355</id><name>(РНУ-64) Регистр налогового учёта затрат, связанных с проведением сделок РЕПО </name><status>NORMAL</status><taxType>INCOME</taxType></type><fixedRows>false</fixedRows><name>(РНУ-64) Регистр налогового учёта затрат, связанных с проведением сделок РЕПО</name><fullName>(РНУ-64) Регистр налогового учёта затрат, связанных с проведением сделок РЕПО</fullName><code>РНУ-64</code><columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn"><alias>number</alias><checking>false</checking><id>17152</id><name>№ пп</name><order>1</order><width>5</width><maxLength>15</maxLength><precision>0</precision></columns><columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn"><alias>fix</alias><checking>false</checking><id>17462</id><name>fix</name><order>2</order><width>0</width><maxLength>255</maxLength></columns><columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="dateColumn"><alias>date</alias><checking>false</checking><id>17153</id><name>Дата сделки</name><order>3</order><width>8</width><formatId>0</formatId></columns><columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn"><alias>part</alias><checking>false</checking><id>17154</id><name>Часть сделки</name><order>4</order><width>10</width><refBookAttributeId>601</refBookAttributeId></columns><columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn"><alias>dealingNumber</alias><checking>false</checking><id>17155</id><name>Номер сделки</name><order>5</order><width>15</width><maxLength>20</maxLength></columns><columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn"><alias>bondKind</alias><checking>false</checking><id>19641</id><name>Вид ценных бумаг</name><order>6</order><width>10</width><maxLength>255</maxLength></columns><columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn"><alias>costs</alias><checking>false</checking><id>17157</id><name>Затраты (руб.коп.)</name><order>7</order><width>10</width><maxLength>17</maxLength><precision>2</precision></columns><styles><alias>Контрольные суммы</alias><backColor>LIGHT_BROWN</backColor><bold>true</bold><fontColor>BLACK</fontColor><id>10767</id><italic>false</italic></styles><styles><alias>Редактируемая</alias><backColor>LIGHT_BLUE</backColor><bold>false</bold><fontColor>BLACK</fontColor><id>10768</id><italic>false</italic></styles><styles><alias>Автозаполняемая</alias><backColor>WHITE</backColor><bold>true</bold><fontColor>DARK_GREEN</fontColor><id>11660</id><italic>false</italic></styles></formTemplateContent>
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<formTemplateContent>
+    <type>
+        <id>355</id>
+        <name>(РНУ-64) Регистр налогового учёта затрат, связанных с проведением сделок РЕПО</name>
+        <status>NORMAL</status>
+        <taxType>INCOME</taxType>
+    </type>
+    <fixedRows>false</fixedRows>
+    <name>(РНУ-64) Регистр налогового учёта затрат, связанных с проведением сделок РЕПО</name>
+    <fullName>(РНУ-64) Регистр налогового учёта затрат, связанных с проведением сделок РЕПО</fullName>
+    <code>1290-64</code>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>number</alias>
+        <checking>false</checking>
+        <id>17152</id>
+        <name>№ пп</name>
+        <order>1</order>
+        <width>5</width>
+        <maxLength>15</maxLength>
+        <precision>0</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
+        <alias>fix</alias>
+        <checking>false</checking>
+        <id>17462</id>
+        <name>fix</name>
+        <order>2</order>
+        <width>0</width>
+        <maxLength>255</maxLength>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="dateColumn">
+        <alias>date</alias>
+        <checking>false</checking>
+        <id>17153</id>
+        <name>Дата сделки</name>
+        <order>3</order>
+        <width>8</width>
+        <formatId>0</formatId>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
+        <alias>part</alias>
+        <checking>false</checking>
+        <id>17154</id>
+        <name>Часть сделки</name>
+        <order>4</order>
+        <width>10</width>
+        <refBookAttributeId>601</refBookAttributeId>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
+        <alias>dealingNumber</alias>
+        <checking>false</checking>
+        <id>17155</id>
+        <name>Номер сделки</name>
+        <order>5</order>
+        <width>15</width>
+        <maxLength>20</maxLength>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
+        <alias>bondKind</alias>
+        <checking>false</checking>
+        <id>19641</id>
+        <name>Вид ценных бумаг</name>
+        <order>6</order>
+        <width>10</width>
+        <maxLength>255</maxLength>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>costs</alias>
+        <checking>false</checking>
+        <id>17157</id>
+        <name>Затраты (руб.коп.)</name>
+        <order>7</order>
+        <width>10</width>
+        <maxLength>17</maxLength>
+        <precision>2</precision>
+    </columns>
+    <styles>
+        <alias>Контрольные суммы</alias>
+        <backColor>LIGHT_BROWN</backColor>
+        <bold>true</bold>
+        <fontColor>BLACK</fontColor>
+        <id>10767</id>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Редактируемая</alias>
+        <backColor>LIGHT_BLUE</backColor>
+        <bold>false</bold>
+        <fontColor>BLACK</fontColor>
+        <id>10768</id>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Автозаполняемая</alias>
+        <backColor>WHITE</backColor>
+        <bold>true</bold>
+        <fontColor>DARK_GREEN</fontColor>
+        <id>11660</id>
+        <italic>false</italic>
+    </styles>
+</formTemplateContent>

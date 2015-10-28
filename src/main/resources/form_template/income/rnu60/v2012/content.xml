@@ -3,7 +3,7 @@
     <fixedRows>false</fixedRows>
     <name>(РНУ-60) Регистр налогового учёта закрытых сделок РЕПО с обязательством покупки по 2-й части</name>
     <fullName>(РНУ-60) Регистр налогового учёта закрытых сделок РЕПО с обязательством покупки по 2-й части</fullName>
-    <code>РНУ-60</code>
+    <header>1290-60</header>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>tradeNumber</alias>
         <checking>false</checking>

@@ -3,7 +3,7 @@
     <fixedRows>false</fixedRows>
     <name>(РНУ-53) Регистр налогового учёта открытых сделок РЕПО с обязательством продажи по 2-й части</name>
     <fullName>(РНУ-53) Регистр налогового учёта открытых сделок РЕПО с обязательством продажи по 2-й части</fullName>
-    <code>РНУ-53</code>
+    <header>1290-53</header>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>tadeNumber</alias>
         <checking>false</checking>

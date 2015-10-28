@@ -1,1 +1,211 @@
-<?xml version="1.0" encoding="UTF-8" standalone="yes"?><formTemplateContent><type><id>326</id><name>(РНУ-27) Регистр налогового учёта расчёта резерва под возможное обеспечение субфедеральных и муниципальных облигаций, ОВГВЗ, Еврооблигаций РФ и прочих облигаций в целях налогообложения</name><status>NORMAL</status><taxType>INCOME</taxType></type><fixedRows>false</fixedRows><name>(РНУ-27) Регистр налогового учёта расчёта резерва под возможное обеспечение субфедеральных и муниципальных облигаций, ОВГВЗ, Еврооблигаций РФ и прочих облигаций в целях налогообложения</name><fullName>(РНУ-27) Регистр налогового учёта расчёта резерва под возможное обеспечение субфедеральных и муниципальных облигаций, ОВГВЗ, Еврооблигаций РФ и прочих облигаций в целях налогообложения</fullName><code>РНУ-27</code><columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn"><alias>number</alias><checking>false</checking><id>16691</id><name>№ пп</name><order>1</order><width>5</width><maxLength>15</maxLength><precision>0</precision></columns><columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn"><alias>fix</alias><checking>false</checking><id>19620</id><name>fix</name><order>2</order><width>0</width><maxLength>1000</maxLength></columns><columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn"><alias>issuer</alias><checking>false</checking><id>16692</id><name>Эмитент</name><order>3</order><width>20</width><maxLength>255</maxLength></columns><columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn"><alias>regNumber</alias><checking>false</checking><id>16693</id><name>Государственный регистрационный номер</name><order>4</order><width>6</width><maxLength>30</maxLength></columns><columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn"><alias>tradeNumber</alias><checking>false</checking><id>16694</id><name>Номер сделки</name><order>5</order><width>10</width><maxLength>20</maxLength></columns><columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn"><alias>currency</alias><checking>false</checking><id>16695</id><name>Валюта выпуска облигации</name><order>6</order><width>5</width><refBookAttributeId>65</refBookAttributeId></columns><columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn"><alias>prev</alias><checking>false</checking><id>16696</id><name>Предыдущую</name><order>7</order><width>6</width><maxLength>15</maxLength><precision>0</precision></columns><columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn"><alias>current</alias><checking>false</checking><id>16697</id><name>Текущую</name><order>8</order><width>6</width><maxLength>15</maxLength><precision>0</precision></columns><columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn"><alias>reserveCalcValuePrev</alias><checking>false</checking><id>16698</id><name>Расчётная величина резерва на предыдущую отчётную дату (руб.коп.)</name><order>9</order><width>7</width><maxLength>17</maxLength><precision>2</precision></columns><columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn"><alias>cost</alias><checking>false</checking><id>16699</id><name>Стоимость по цене приобретения (руб.коп.)</name><order>10</order><width>7</width><maxLength>17</maxLength><precision>2</precision></columns><columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn"><alias>signSecurity</alias><checking>false</checking><id>16700</id><name>Признак ценной бумаги на текущую отчётную дату</name><order>11</order><width>5</width><refBookAttributeId>621</refBookAttributeId></columns><columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn"><alias>marketQuotation</alias><checking>false</checking><id>16701</id><name>Рыночная котировка одной облигации в иностранной валюте</name><order>12</order><width>7</width><maxLength>21</maxLength><precision>6</precision></columns><columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn"><alias>rubCourse</alias><checking>false</checking><id>16702</id><name>Курс рубля к валюте рыночной котировки</name><order>13</order><width>7</width><maxLength>19</maxLength><precision>4</precision></columns><columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn"><alias>marketQuotationInRub</alias><checking>false</checking><id>16703</id><name>Рыночная котировка одной облигации в рублях</name><order>14</order><width>7</width><maxLength>21</maxLength><precision>6</precision></columns><columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn"><alias>costOnMarketQuotation</alias><checking>false</checking><id>16704</id><name>Стоимость по рыночной котировке (руб.коп.)</name><order>15</order><width>7</width><maxLength>17</maxLength><precision>2</precision></columns><columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn"><alias>reserveCalcValue</alias><checking>false</checking><id>16705</id><name>Расчетная величина резерва на текущую отчётную дату (руб.коп.)</name><order>16</order><width>7</width><maxLength>17</maxLength><precision>2</precision></columns><columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn"><alias>reserveCreation</alias><checking>false</checking><id>16706</id><name>Создание резерва (руб.коп.)</name><order>17</order><width>5</width><maxLength>17</maxLength><precision>2</precision></columns><columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn"><alias>recovery</alias><checking>false</checking><id>16707</id><name>Восстановление резерва (руб.коп.)</name><order>18</order><width>5</width><maxLength>17</maxLength><precision>2</precision></columns><styles><alias>Контрольные суммы</alias><backColor>LIGHT_BROWN</backColor><bold>true</bold><fontColor>BLACK</fontColor><id>10764</id><italic>false</italic></styles><styles><alias>Редактируемая</alias><backColor>LIGHT_BLUE</backColor><bold>false</bold><fontColor>BLACK</fontColor><id>10324</id><italic>false</italic></styles><styles><alias>Автозаполняемая</alias><backColor>WHITE</backColor><bold>true</bold><fontColor>DARK_GREEN</fontColor><id>11680</id><italic>false</italic></styles></formTemplateContent>
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<formTemplateContent>
+    <type>
+        <id>326</id>
+        <name>(РНУ-27) Регистр налогового учёта расчёта резерва под возможное обеспечение субфедеральных и муниципальных облигаций, ОВГВЗ, Еврооблигаций РФ и прочих облигаций в целях налогообложения</name>
+        <status>NORMAL</status>
+        <taxType>INCOME</taxType>
+    </type>
+    <fixedRows>false</fixedRows>
+    <name>(РНУ-27) Регистр налогового учёта расчёта резерва под возможное обеспечение субфедеральных и муниципальных облигаций, ОВГВЗ, Еврооблигаций РФ и прочих облигаций в целях налогообложения</name>
+    <fullName>(РНУ-27) Регистр налогового учёта расчёта резерва под возможное обеспечение субфедеральных и муниципальных облигаций, ОВГВЗ, Еврооблигаций РФ и прочих облигаций в целях налогообложения</fullName>
+    <code>1111-27</code>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>number</alias>
+        <checking>false</checking>
+        <id>16691</id>
+        <name>№ пп</name>
+        <order>1</order>
+        <width>5</width>
+        <maxLength>15</maxLength>
+        <precision>0</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
+        <alias>fix</alias>
+        <checking>false</checking>
+        <id>19620</id>
+        <name>fix</name>
+        <order>2</order>
+        <width>0</width>
+        <maxLength>1000</maxLength>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
+        <alias>issuer</alias>
+        <checking>false</checking>
+        <id>16692</id>
+        <name>Эмитент</name>
+        <order>3</order>
+        <width>20</width>
+        <maxLength>255</maxLength>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
+        <alias>regNumber</alias>
+        <checking>false</checking>
+        <id>16693</id>
+        <name>Государственный регистрационный номер</name>
+        <order>4</order>
+        <width>6</width>
+        <maxLength>30</maxLength>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
+        <alias>tradeNumber</alias>
+        <checking>false</checking>
+        <id>16694</id>
+        <name>Номер сделки</name>
+        <order>5</order>
+        <width>10</width>
+        <maxLength>20</maxLength>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
+        <alias>currency</alias>
+        <checking>false</checking>
+        <id>16695</id>
+        <name>Валюта выпуска облигации</name>
+        <order>6</order>
+        <width>5</width>
+        <refBookAttributeId>65</refBookAttributeId>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>prev</alias>
+        <checking>false</checking>
+        <id>16696</id>
+        <name>Предыдущую</name>
+        <order>7</order>
+        <width>6</width>
+        <maxLength>15</maxLength>
+        <precision>0</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>current</alias>
+        <checking>false</checking>
+        <id>16697</id>
+        <name>Текущую</name>
+        <order>8</order>
+        <width>6</width>
+        <maxLength>15</maxLength>
+        <precision>0</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>reserveCalcValuePrev</alias>
+        <checking>false</checking>
+        <id>16698</id>
+        <name>Расчётная величина резерва на предыдущую отчётную дату (руб.коп.)</name>
+        <order>9</order>
+        <width>7</width>
+        <maxLength>17</maxLength>
+        <precision>2</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>cost</alias>
+        <checking>false</checking>
+        <id>16699</id>
+        <name>Стоимость по цене приобретения (руб.коп.)</name>
+        <order>10</order>
+        <width>7</width>
+        <maxLength>17</maxLength>
+        <precision>2</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
+        <alias>signSecurity</alias>
+        <checking>false</checking>
+        <id>16700</id>
+        <name>Признак ценной бумаги на текущую отчётную дату</name>
+        <order>11</order>
+        <width>5</width>
+        <refBookAttributeId>621</refBookAttributeId>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>marketQuotation</alias>
+        <checking>false</checking>
+        <id>16701</id>
+        <name>Рыночная котировка одной облигации в иностранной валюте</name>
+        <order>12</order>
+        <width>7</width>
+        <maxLength>21</maxLength>
+        <precision>6</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>rubCourse</alias>
+        <checking>false</checking>
+        <id>16702</id>
+        <name>Курс рубля к валюте рыночной котировки</name>
+        <order>13</order>
+        <width>7</width>
+        <maxLength>19</maxLength>
+        <precision>4</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>marketQuotationInRub</alias>
+        <checking>false</checking>
+        <id>16703</id>
+        <name>Рыночная котировка одной облигации в рублях</name>
+        <order>14</order>
+        <width>7</width>
+        <maxLength>21</maxLength>
+        <precision>6</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>costOnMarketQuotation</alias>
+        <checking>false</checking>
+        <id>16704</id>
+        <name>Стоимость по рыночной котировке (руб.коп.)</name>
+        <order>15</order>
+        <width>7</width>
+        <maxLength>17</maxLength>
+        <precision>2</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>reserveCalcValue</alias>
+        <checking>false</checking>
+        <id>16705</id>
+        <name>Расчетная величина резерва на текущую отчётную дату (руб.коп.)</name>
+        <order>16</order>
+        <width>7</width>
+        <maxLength>17</maxLength>
+        <precision>2</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>reserveCreation</alias>
+        <checking>false</checking>
+        <id>16706</id>
+        <name>Создание резерва (руб.коп.)</name>
+        <order>17</order>
+        <width>5</width>
+        <maxLength>17</maxLength>
+        <precision>2</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>recovery</alias>
+        <checking>false</checking>
+        <id>16707</id>
+        <name>Восстановление резерва (руб.коп.)</name>
+        <order>18</order>
+        <width>5</width>
+        <maxLength>17</maxLength>
+        <precision>2</precision>
+    </columns>
+    <styles>
+        <alias>Контрольные суммы</alias>
+        <backColor>LIGHT_BROWN</backColor>
+        <bold>true</bold>
+        <fontColor>BLACK</fontColor>
+        <id>10764</id>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Редактируемая</alias>
+        <backColor>LIGHT_BLUE</backColor>
+        <bold>false</bold>
+        <fontColor>BLACK</fontColor>
+        <id>10324</id>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Автозаполняемая</alias>
+        <backColor>WHITE</backColor>
+        <bold>true</bold>
+        <fontColor>DARK_GREEN</fontColor>
+        <id>11680</id>
+        <italic>false</italic>
+    </styles>
+</formTemplateContent>

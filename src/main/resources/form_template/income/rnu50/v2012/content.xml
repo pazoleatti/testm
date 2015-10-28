@@ -5,7 +5,7 @@
     </name>
     <fullName>(РНУ-50) Регистр налогового учёта «ведомость понесённых убытков от реализации амортизируемого имущества»
     </fullName>
-    <code>РНУ-50</code>
+    <header>852-50</header>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>rowNumber</alias>
         <checking>false</checking>

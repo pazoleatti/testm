@@ -7,7 +7,7 @@
     <fullName>(РНУ-57) Регистр налогового учёта финансового результата от реализации (погашения) векселей сторонних
         эмитентов
     </fullName>
-    <code>РНУ-57</code>
+    <header>852-57</header>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>number</alias>
         <checking>false</checking>

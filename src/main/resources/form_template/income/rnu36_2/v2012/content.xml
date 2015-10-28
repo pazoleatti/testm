@@ -3,7 +3,7 @@
     <fixedRows>true</fixedRows>
     <name>(РНУ-36.2) Регистр налогового учёта начисленного процентного дохода по ГКО. Отчёт 2</name>
     <fullName>(РНУ-36.2) Регистр налогового учёта начисленного процентного дохода по ГКО. Отчёт 2</fullName>
-    <code>РНУ-36.2 (Отчет 2)</code>
+    <header>1290-36.2</header>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>fix</alias>
         <checking>false</checking>

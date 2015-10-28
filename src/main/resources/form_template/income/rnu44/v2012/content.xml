@@ -9,7 +9,7 @@
         ранее, чем по истечении 5 лет с даты ввода в эксплуатацию Взаимозависимым лицам и резидентам оффшорных зон
         основных средств введённых в эксплуатацию после 01.01.2013
     </fullName>
-    <code>РНУ-44</code>
+    <header>852-44</header>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>number</alias>
         <checking>false</checking>

@@ -3,7 +3,7 @@
     <fixedRows>false</fixedRows>
     <name>(РНУ-23) Регистр налогового учёта доходов по выданным гарантиям</name>
     <fullName>(РНУ-23) Регистр налогового учёта доходов по выданным гарантиям</fullName>
-    <code>РНУ-23</code>
+    <header>852-23</header>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>number</alias>
         <checking>false</checking>

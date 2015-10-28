@@ -3,7 +3,6 @@
     <fixedRows>true</fixedRows>
     <name>Остатки по начисленным авансовым платежам</name>
     <fullName>Остатки по начисленным авансовым платежам</fullName>
-    <code>не указан</code>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>sum1</alias>
         <checking>false</checking>

@@ -7,7 +7,7 @@
     <fullName>(РНУ-47) Регистр налогового учёта «ведомость начисленной амортизации по основным средствам, а также
         расходов в виде капитальных вложений»
     </fullName>
-    <code>РНУ-47</code>
+    <header>852-47</header>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>number</alias>
         <checking>false</checking>

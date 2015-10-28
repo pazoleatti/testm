@@ -3,7 +3,7 @@
     <fixedRows>true</fixedRows>
     <name>(РНУ-14) Регистр налогового учёта нормируемых расходов</name>
     <fullName>(РНУ-14) Регистр налогового учёта нормируемых расходов</fullName>
-    <code>РНУ-14</code>
+    <header>852-14</header>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>knu</alias>
         <checking>false</checking>
