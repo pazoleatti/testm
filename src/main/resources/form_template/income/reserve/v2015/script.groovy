@@ -2,6 +2,9 @@ package form_template.income.reserve.v2015
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
+import com.aplana.sbrf.taxaccounting.model.log.LogLevel
+import com.aplana.sbrf.taxaccounting.model.util.StringUtils
 import groovy.transform.Field
 
 /**
@@ -54,7 +57,8 @@ switch (formDataEvent) {
         formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.IMPORT:
-        noImport(logger)
+        importData()
+        formDataService.saveCachedDataRows(formData, logger)
         break
 }
 
@@ -495,4 +499,144 @@ def getPrevDataRows() {
         prevDataRows = (prevFormData != null ? formDataService.getDataRowHelper(prevFormData)?.allSaved : [])
     }
     return prevDataRows
+}
+
+void importData() {
+    def tmpRow = formData.createDataRow()
+    int HEADER_ROW_COUNT = 3
+    String TABLE_START_VALUE = getColumnName(tmpRow, 'rowNum')
+    String TABLE_END_VALUE = null
+
+    def allValues = []      // значения формы
+    def headerValues = []   // значения шапки
+    def paramsMap = ['rowOffset': 0, 'colOffset': 0]  // мапа с параметрами (отступы сверху и слева)
+
+    checkAndReadFile(ImportInputStream, UploadFileName, allValues, headerValues, TABLE_START_VALUE, TABLE_END_VALUE, HEADER_ROW_COUNT, paramsMap)
+
+    // проверка шапки
+    checkHeaderXls(headerValues)
+    if (logger.containsLevel(LogLevel.ERROR)) {
+        return
+    }
+    // освобождение ресурсов для экономии памяти
+    headerValues.clear()
+    headerValues = null
+
+    def fileRowIndex = paramsMap.rowOffset
+    def colOffset = paramsMap.colOffset
+    paramsMap.clear()
+    paramsMap = null
+
+    def rowIndex = 0
+    def allValuesCount = allValues.size()
+
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
+
+    // формирование строк нф
+    for (def i = 0; i < allValuesCount; i++) {
+        rowValues = allValues[i]
+        fileRowIndex++
+        rowIndex++
+        // все строки пустые - выход
+        if (!rowValues) {
+            break
+        }
+        // прервать по загрузке нужных строк
+        if (rowIndex > dataRows.size()) {
+            break
+        }
+        // найти нужную строку нф
+        def alias = "R" + rowIndex
+        def dataRow = dataRows.find { it.getAlias() == alias }
+        if (dataRow == null) {
+            continue
+        }
+        // заполнить строку нф значениями из эксель
+        fillRowFromXls(dataRow, rowValues, fileRowIndex, rowIndex, colOffset)
+    }
+    if (rowIndex < dataRows.size()) {
+        logger.error("Структура файла не соответствует макету налоговой формы.")
+    }
+    showMessages(dataRows, logger)
+    if (!logger.containsLevel(LogLevel.ERROR)) {
+        updateIndexes(dataRows)
+    }
+}
+
+/**
+ * Проверить шапку таблицы
+ *
+ * @param headerRows строки шапки
+ */
+void checkHeaderXls(def headerRows) {
+    if (headerRows.isEmpty()) {
+        throw new ServiceException(WRONG_HEADER_ROW_SIZE)
+    }
+    checkHeaderSize(headerRows[1].size(), headerRows.size(), 4, 2)
+    def headerMapping = [
+            (headerRows[0][0]) : '№ п/п',
+            (headerRows[0][1]) : 'Наименование банка',
+            (headerRows[0][2]) : 'Задолженность от 45 до 90 дней',
+            (headerRows[0][5]) : 'Задолженность свыше 90 дней',
+            (headerRows[0][8]) : 'Итого расчетный резерв гр.9=гр.5+гр.8',
+            (headerRows[0][9]) : 'Сумма доходов за отчетный период',
+            (headerRows[0][10]): 'Норматив отчислений от суммы доходов 10%',
+            (headerRows[0][11]): 'Величина созданного резерва в отчетном периоде',
+            (headerRows[0][12]): 'Резерв',
+            (headerRows[0][14]): 'Изменение фактического резерва',
+            (headerRows[1][0]) : '№ п/п',
+            (headerRows[1][1]) : 'Наименование банка',
+            (headerRows[1][2]) : 'Сумма долга',
+            (headerRows[1][3]) : 'Норматив отчислений 50%',
+            (headerRows[1][4]) : 'Расчетный резерв',
+            (headerRows[1][5]) : 'Сумма долга',
+            (headerRows[1][6]) : 'Норматив отчислений 100%',
+            (headerRows[1][7]) : 'Расчетный резерв',
+            (headerRows[1][8]) : 'Итого расчетный резерв гр.9=гр.5+гр.8',
+            (headerRows[1][9]) : 'Сумма доходов за отчетный период',
+            (headerRows[1][10]): 'Норматив отчислений от суммы доходов 10%',
+            (headerRows[1][11]): 'Величина созданного резерва в отчетном периоде',
+            (headerRows[1][12]): 'на предыдущую отчетную дату',
+            (headerRows[1][13]): 'на отчетную дату',
+            (headerRows[1][14]): 'доначисление резерва с отнесением на расходы код 22670',
+            (headerRows[1][15]): 'восстановление резерва на доходах код 13091',
+            (headerRows[1][16]): 'использование резерва на погашение процентов по безнадежным долгам в отчетном периоде'
+    ]
+    (0..16).each {
+        headerMapping.put((headerRows[2][it]), (it + 1).toString())
+    }
+    checkHeaderEquals(headerMapping, logger)
+}
+
+/**
+ * Заполняет заданную строку нф значениями из экселя.
+ *
+ * @param dataRow строка нф
+ * @param values список строк со значениями
+ * @param fileRowIndex номер строки в тф
+ * @param rowIndex номер строки в нф
+ * @param colOffset отступ по столбцам
+ */
+def fillRowFromXls(def dataRow, def values, int fileRowIndex, int rowIndex, int colOffset) {
+    dataRow.setImportIndex(fileRowIndex)
+    dataRow.setIndex(rowIndex)
+
+    def tmpValues = [:]
+
+    def colIndex = 0
+    tmpValues.rowNum = round(parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true), 0)
+
+    colIndex++
+    tmpValues.bankName = values[colIndex]
+
+    tmpValues.keySet().asList().each { alias ->
+        def value = StringUtils.cleanString(tmpValues[alias]?.toString())
+        def valueExpected = StringUtils.cleanString(dataRow.getCell(alias).value?.toString())
+        checkFixedValue(dataRow, value, valueExpected, dataRow.getIndex(), alias, logger, true)
+    }
+
+    ['sum45', 'norm45', 'reserve45', 'sum90', 'norm90', 'reserve90', 'totalReserve', 'sumIncome', 'normIncome',
+     'valueReserve', 'reservePrev', 'reserveCurrent', 'addChargeReserve', 'restoreReserve', 'usingReserve'].each {
+        dataRow[it] = parseNumber(values[++colIndex], fileRowIndex, colIndex + colOffset, logger, true)
+    }
 }
