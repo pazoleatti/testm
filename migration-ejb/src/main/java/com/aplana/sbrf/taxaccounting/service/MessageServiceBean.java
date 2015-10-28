@@ -62,14 +62,16 @@ public class MessageServiceBean implements MessageService {
     private static final Set<Integer> XML_SET = new HashSet<Integer>(Arrays.asList(51, 53, 54, 59, 60, 64));
 
     /** Параметры КСШ */
+    private static final String EMPTY_QUERY = "Обмен данными с КСШ завершен. Сообщения в КСШ отсутствуют";
 	static final String ERROR_FORMAT = "Сообщение не соответствует заданному формату";
 	private static final String ERROR_RATE = "Сообщение не соответствует передаче данных по курсам валют / драгоценным металлам";
 	private static final String ERROR_PUBLIC = "Сообщение не содержит публичные курсы";
 	private static final String ERROR_VALUE = "Сообщение не содержит значений";
 	private static final String ERROR_CODE = "Значения сообщения установлены не по отношению к российскому рублю";
-	static final String SUCCESS_IMPORT = "Успешный обмен данными с КСШ. %s %d %s справочника «%s».";
-	static final String FAIL_IMPORT = "Неуспешная попытка обмена данными с КСШ. %s.";
-	private static final String FAIL_IMPORT_DELIVERY_COUNT = "Неуспешная попытка обмена данными с КСШ. %s. Попытка № %s";
+    static final String EMPTY_IMPORT = "Обмен данными с КСШ завершен (справочник «%s»). Создано 0 записей справочника";
+	static final String SUCCESS_IMPORT = "Обмен данными с КСШ завершен (справочник «%s»). Создано %d записей справочника из %s записей справочника";
+	static final String FAIL_IMPORT = "При обмене данными с КСШ произошла ошибка. %s.";
+	private static final String FAIL_IMPORT_DELIVERY_COUNT = "При обмене данными с КСШ произошла ошибка. %s. Попытка № %s";
 	private static final String ERROR_AUDIT = "Ошибка записи в журнал аудита.";
     // Максимальное число попыток загрузки одного сообщения
     private static final int MAX_DELIVERY_COUNT = 10;
@@ -258,13 +260,18 @@ public class MessageServiceBean implements MessageService {
             queueConnection.start();
 
             /** Обработка сообщений */
+            boolean load = false;
             Message message;
             while ((message = queueReceiver.receive(1)) != null) {
+                load = true;
                 try {
                     processRateMessage(message);
                 } catch (Exception e) {
 					LOG.error("Произошла ошибка при обработке сообщения, оно будет пропущено", e);
                 }
+            }
+            if (!load) {
+                addLog(userInfo, EMPTY_QUERY, null);
             }
             queueReceiver.close();
             queueSession.close();
@@ -280,7 +287,7 @@ public class MessageServiceBean implements MessageService {
         }
     }
 
-    public void processRateMessage(Message message){
+        public void processRateMessage(Message message){
         TAUserInfo userInfo = getUser();
 
         if (!(message instanceof TextMessage)) {
@@ -416,8 +423,11 @@ public class MessageServiceBean implements MessageService {
                 return;
             }
             runScript(refBookId[0], fileText, userInfo, deliveryCount);
-        } catch (Exception ex) {
-			LOG.error(ERROR_FORMAT, ex);
+        } catch (ServiceException ex1) {
+            LOG.error(ERROR_FORMAT, ex1);
+            addLog(userInfo, String.format(FAIL_IMPORT, ex1.getMessage()), null);
+        } catch (Exception ex2) {
+			LOG.error(ERROR_FORMAT, ex2);
             addLog(userInfo, String.format(FAIL_IMPORT, ERROR_FORMAT), null);
         }
     }
@@ -429,10 +439,11 @@ public class MessageServiceBean implements MessageService {
         Logger logger = new Logger();
         Map<String, Object> additionalParameters = new HashMap<String, Object>();
         ScriptStatusHolder scriptStatusHolder = new ScriptStatusHolder();
+        Logger localLogger = new Logger();
         try {
             additionalParameters.put("inputStream", new ByteArrayInputStream(fileText.getBytes(RATE_ENCODING)));
             additionalParameters.put("scriptStatusHolder", scriptStatusHolder);
-            refBookScriptingService.executeScript(userInfo, refBookId, FormDataEvent.IMPORT, logger, additionalParameters);
+            refBookScriptingService.executeScript(userInfo, refBookId, FormDataEvent.IMPORT, localLogger, additionalParameters);
         } catch (ServiceLoggerException e) {
             logger.error(e);
             logger.info("uuid = " + e.getUuid());
@@ -444,11 +455,23 @@ public class MessageServiceBean implements MessageService {
             return;
         }
         int successCount = scriptStatusHolder.getSuccessCount();
-        addLog(userInfo, String.format(SUCCESS_IMPORT,
-                StringUtils.getNumberString(successCount, "Загружен", "Загружено", "Загружено"),
-                successCount,
-                StringUtils.getNumberString(successCount, "курс", "курса", "курсов"),
-                refBookNameMapping.get(refBookId)), logEntryService.save(logger.getEntries()));
+        int totalCount = scriptStatusHolder.getTotalCount();
+        if (totalCount == 0) {
+            String msg = String.format(EMPTY_IMPORT,
+                    refBookNameMapping.get(refBookId));
+            logger.info(msg);
+            logger.getEntries().addAll(localLogger.getEntries());
+            addLog(userInfo, msg, logEntryService.save(logger.getEntries()));
+        } else {
+            String msg = String.format(EMPTY_IMPORT,
+                    refBookNameMapping.get(refBookId));
+            logger.info(msg);
+            logger.getEntries().addAll(localLogger.getEntries());
+            addLog(userInfo, String.format(SUCCESS_IMPORT,
+                    refBookNameMapping.get(refBookId),
+                    successCount,
+                    totalCount), logEntryService.save(logger.getEntries()));
+        }
     }
 
     /**
