@@ -1251,8 +1251,13 @@ void generateXML() {
                     if (dataRowsAdvance != null && !dataRowsAdvance.isEmpty()) {
                         /** НалБазаОрг 030 = строка 120 Листа 02 */
                         def nalBazaOrg = nalBazaIsch
+                        def rowCA = getDataRow(dataRowsAdvance, 'ca')
                         dataRowsAdvance.each { row ->
                             if (row.getAlias() == null) {
+                                // подменяем строку "ЦА" строкой "ЦА скорректированное"
+                                if (rowCA.regionBankDivision == row.regionBankDivision) {
+                                    row = rowCA
+                                }
                                 // 0..n
                                 РаспрНалСубРФ(
                                         ТипНП: typeNP,
