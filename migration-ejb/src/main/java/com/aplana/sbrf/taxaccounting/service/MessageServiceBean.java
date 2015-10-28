@@ -69,7 +69,7 @@ public class MessageServiceBean implements MessageService {
 	private static final String ERROR_VALUE = "Сообщение не содержит значений";
 	private static final String ERROR_CODE = "Значения сообщения установлены не по отношению к российскому рублю";
     static final String EMPTY_IMPORT = "Обмен данными с КСШ завершен (справочник «%s»). Создано 0 записей справочника";
-	static final String SUCCESS_IMPORT = "Обмен данными с КСШ завершен (справочник «%s»). Создано %d записей справочника из %s записей справочника";
+	static final String SUCCESS_IMPORT = "Обмен данными с КСШ завершен (справочник «%s»). Создано %d из %s записей справочника";
 	static final String FAIL_IMPORT = "При обмене данными с КСШ произошла ошибка. %s.";
 	private static final String FAIL_IMPORT_DELIVERY_COUNT = "При обмене данными с КСШ произошла ошибка. %s. Попытка № %s";
 	private static final String ERROR_AUDIT = "Ошибка записи в журнал аудита.";

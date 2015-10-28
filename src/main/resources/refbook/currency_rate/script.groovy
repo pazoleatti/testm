@@ -5,7 +5,7 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue
 import com.aplana.sbrf.taxaccounting.model.util.Pair
-import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.model.log.Logger
 import groovy.transform.Field
 
 import javax.xml.namespace.QName
@@ -170,7 +170,7 @@ void importFromXML() {
                     } else {
                         rate = (rate / new BigDecimal(tmp)).setScale(refbook.getAttribute('RATE').getPrecision(), RoundingMode.HALF_UP)
                         def record = getRecord(15, "LOWER(CODE) = LOWER('$code')", version)
-                        if (record != null && tmp.matches("-?\\d+(\\.\\d+)?")) {
+                        if (record != null) {
                             curCode = record.record_id.numberValue
                             recordsMap = new HashMap<String, RefBookValue>()
                             recordsMap.put("CODE_NUMBER", new RefBookValue(RefBookAttributeType.REFERENCE, curCode))
