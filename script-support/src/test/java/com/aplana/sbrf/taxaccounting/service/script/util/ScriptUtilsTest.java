@@ -96,7 +96,6 @@ public class ScriptUtilsTest {
     @Test
     public void summTest() {
         FormData fd = getTestFormData().getFirst();
-        LOG.info(fd);
         double r = ScriptUtils.summ(fd, getTestFormData().getSecond(), new ColumnRange(NUMBER_ALIAS, 0, 1));
         Assert.assertTrue(Math.abs(r) > Constants.EPS);
     }
