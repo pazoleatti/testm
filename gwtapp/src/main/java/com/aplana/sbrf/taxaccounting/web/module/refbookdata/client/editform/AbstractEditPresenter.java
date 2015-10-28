@@ -9,6 +9,7 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallba
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
+import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.event.CancelEvent;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.event.RollbackTableRowSelection;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.event.SetFormMode;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.event.UpdateForm;
@@ -282,6 +283,7 @@ public abstract class AbstractEditPresenter<V extends AbstractEditPresenter.MyVi
             showRecord(previousURId);
             getView().cleanErrorFields();
             SetFormMode.fire(AbstractEditPresenter.this, FormMode.EDIT);
+            CancelEvent.fire(this, previousURId);
         }
     }
 

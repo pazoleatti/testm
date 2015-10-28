@@ -6,6 +6,7 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallba
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
+import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.event.CancelEvent;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.event.RollbackTableRowSelection;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.event.UpdateForm;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.event.AddItemEvent;
@@ -33,7 +34,7 @@ import java.util.Date;
  */
 public class RefBookHierDataPresenter extends PresenterWidget<RefBookHierDataPresenter.MyView> implements RefBookHierDataUiHandlers,
         RollbackTableRowSelection.RollbackTableRowSelectionHandler, IHierRefBookData,
-        AddItemEvent.AddItemHandler, DeleteItemEvent.DeleteItemHandler, SearchButtonEvent.SearchHandler, UpdateForm.UpdateFormHandler {
+        AddItemEvent.AddItemHandler, DeleteItemEvent.DeleteItemHandler, SearchButtonEvent.SearchHandler, UpdateForm.UpdateFormHandler, CancelEvent.CancelFormHandler {
 
     private Long recordId;
     boolean canVersion = true;
@@ -79,6 +80,12 @@ public class RefBookHierDataPresenter extends PresenterWidget<RefBookHierDataPre
             }
             /*getView().setSelected(rc.getId());*/
         }
+    }
+
+    @Override
+    public void onCancelForm(CancelEvent event) {
+        RefBookTreeItem item = getView().getItemById(event.getPreviousId());
+        getView().setSelection(item);
     }
 
     public interface MyView extends View, HasUiHandlers<RefBookHierDataUiHandlers> {
@@ -132,6 +139,7 @@ public class RefBookHierDataPresenter extends PresenterWidget<RefBookHierDataPre
         addVisibleHandler(DeleteItemEvent.getType(), this);
         addVisibleHandler(SearchButtonEvent.getType(), this);
         addVisibleHandler(RollbackTableRowSelection.getType(), this);
+        addVisibleHandler(CancelEvent.getType(), this);
     }
 
     @Override
