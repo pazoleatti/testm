@@ -8,5 +8,5 @@ public interface DeclarationCreationUiHandlers extends UiHandlers {
 	void onContinue();
 	void onDepartmentChange();
     TaxType getTaxType();
-    void onReportPeriodChange(boolean isInit);
+    void onReportPeriodChange();
 }
