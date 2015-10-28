@@ -171,7 +171,7 @@ void consolidation() {
     def formSources = departmentFormTypeService.getFormSources(formData.departmentId, formData.getFormType().getId(), formData.getKind(),
             getReportPeriodStartDate(), getReportPeriodEndDate())
     // сортируем по наименованию подразделения
-    formSources.sort { departmentService.get(it.departmentId).name }
+    formSources.sort { getDepartmentName(it.departmentId as Integer) }
     for (departmentFormType in formSources) {
         def final child = formDataService.getLast(departmentFormType.formTypeId, departmentFormType.kind, departmentFormType.departmentId, formData.reportPeriodId, formData.periodOrder, formData.comparativePeriodId, formData.accruing)
         if (child != null && child.state == WorkflowState.ACCEPTED && child.formType.id == formData.formType.id) {
@@ -192,6 +192,16 @@ void consolidation() {
 
     updateIndexes(rows)
     formDataService.getDataRowHelper(formData).allCached = rows
+}
+
+@Field
+def departmentNameMap = [:]
+
+def getDepartmentName(Integer id) {
+    if (id != null && departmentNameMap[id] == null) {
+        departmentNameMap[id] = departmentService.get(id).name
+    }
+    return departmentNameMap[id]
 }
 
 /** Получить произвольную фиксированную строку со стилями.

@@ -334,7 +334,7 @@ void consolidation() {
     def formSources = departmentFormTypeService.getFormSources(formDataDepartment.id, formData.formType.id, formData.kind,
             getReportPeriodStartDate(), getReportPeriodEndDate())
     // сортируем по наименованию подразделения
-    formSources.sort { departmentService.get(it.departmentId).name }
+    formSources.sort { getDepartmentName(it.departmentId as Integer) }
     formSources.each {
         if (it.formTypeId == formData.formType.id) {
             def final child = formDataService.getLast(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId, null, formData.comparativePeriodId, formData.accruing)
@@ -356,6 +356,16 @@ void consolidation() {
 
     updateIndexes(rows)
     formDataService.getDataRowHelper(formData).allCached = rows
+}
+
+@Field
+def departmentNameMap = [:]
+
+def getDepartmentName(Integer id) {
+    if (id != null && departmentNameMap[id] == null) {
+        departmentNameMap[id] = departmentService.get(id).name
+    }
+    return departmentNameMap[id]
 }
 
 /** Получить произвольную фиксированную строку со стилями. */
