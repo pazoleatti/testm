@@ -260,6 +260,17 @@ def getSourceValue(def periodId, def row, def alias, def isCalc) {
         // если нарастающий итог, то собираем формы с начала года
         int startOrder = formData.accruing ? 1 : reportPeriod.order
         def periods = reportPeriodService.listByTaxPeriod(reportPeriod.taxPeriod.id).findAll{ it.order <= reportPeriod.order && it.order >= startOrder}
+        // получить номера периодов, не заведенных в системе
+        List<Integer> allPeriodOrders = (startOrder..reportPeriod.order)
+        def existPeriodOrders = periods.collect { def period -> Integer.valueOf(period.order) }
+        (allPeriodOrders - existPeriodOrders).each { order ->
+                notFound404 = true
+                if (isCalc) { // выводить только при расчете
+                    // 4. Проверка наличия принятой источника «Величины налоговых платежей, вводимые вручную» (предрасчетные проверки)
+                    logger.warn("Не найдена форма-источник «Величины налоговых платежей, вводимые вручную» в статусе «Принята»: Тип: \"%s/%s\", Период: \"%s %s\", Подразделение: \"%s\". Ячейки по графе «%s», заполняемые из данной формы, будут заполнены нулевым значением.",
+                            FormDataKind.CONSOLIDATED.name, FormDataKind.PRIMARY.name, getPeriodName(order), reportPeriod.getTaxPeriod().getYear(), departmentService.get(formData.departmentId)?.name, getColumnName(row, alias))
+                }
+        }
         periods.each { period ->
             // берем консолидированную, если ее нет, то берем первичную (подразумевается, что форма одна, в 0.8 исправить на множество источников)
             def sourceForm = getSourceForm(FormDataKind.CONSOLIDATED, period.id)
@@ -273,12 +284,29 @@ def getSourceValue(def periodId, def row, def alias, def isCalc) {
                 if (isCalc) { // выводить только при расчете
                     // 4. Проверка наличия принятой источника «Величины налоговых платежей, вводимые вручную» (предрасчетные проверки)
                     logger.warn("Не найдена форма-источник «Величины налоговых платежей, вводимые вручную» в статусе «Принята»: Тип: \"%s/%s\", Период: \"%s %s\", Подразделение: \"%s\". Ячейки по графе «%s», заполняемые из данной формы, будут заполнены нулевым значением.",
-                            FormDataKind.CONSOLIDATED.name, FormDataKind.PRIMARY.name, period.getName(), period.getTaxPeriod().getYear(), departmentService.get(formData.departmentId)?.name, getColumnName(row, alias))
+                            FormDataKind.CONSOLIDATED.name, FormDataKind.PRIMARY.name, period.getName(), reportPeriod.getTaxPeriod().getYear(), departmentService.get(formData.departmentId)?.name, getColumnName(row, alias))
                 }
             }
         }
     }
     return notFound404 ? BigDecimal.ZERO : sum
+}
+
+def getPeriodName(def order) {
+    switch (order) {
+        case 1:
+            return "первый квартал"
+            break
+        case 2:
+            return "второй квартал"
+            break
+        case 3:
+            return "третий квартал"
+            break
+        case 4:
+            return "четвертый квартал"
+            break
+    }
 }
 
 def getSourceForm(def formDataKind, def periodId) {
