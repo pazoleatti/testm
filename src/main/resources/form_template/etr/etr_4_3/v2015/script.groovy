@@ -78,7 +78,7 @@ def checkCalcColumns = ['deltaRub', 'deltaPercent']
 def nonEmptyColumns = calcColumns
 
 @Field // используется только для предрасчетных проверок
-def opuMap = ['R2' : ['310001']]
+def opuMap = ['R1' : ['28101', '26411.01', '26411.02', '26411.03', '26102', '26410.09', '26411.12', '26411.13'], 'R2' : ['310001']]
 
 @Field
 def startDateMap = [:]
