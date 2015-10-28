@@ -120,6 +120,7 @@ class Main {
                     'notification'           : -6,
                     'precious_metals_deliver': 393, // Поставочные срочные сделки с драгоценными металлами
                     'precious_metals_trade'  : 394, // Купля-продажа драгоценных металлов
+                    'related_persons'        : 800, // Взаимозависимые лица
                     'rent_provision'         : 376, // Предоставление нежилых помещений в аренду
                     'repo'                   : 383, // Сделки РЕПО
                     'rights_acquisition'     : 404, // Приобретение прав требования
@@ -307,6 +308,10 @@ class Main {
             'declaration_params_transport' : 210,
             'department' : 30,
             'emitent' : 100,
+            'income101' : 50,
+            'income102' : 52,
+            'jur_persons' : 520,
+            'jur_persons_terms' : 515,
             'metal_rate' : 90,
             'okato' : 3,
             'okei' : 12,

@@ -284,8 +284,12 @@ class GitReport {
                                             result.checkRows = "Фикс.строки отличаются"
                                         }
                                     } else if (dbRows != null || gitRows != null) {
-                                        result.errorRows = true
-                                        result.checkRows = "Фикс.строк нет в БД"
+                                        if (dbRows == null && gitRows != null && rowsFile?.text?.contains('<rows/>')) {
+                                            result.checkRows = "Ok"
+                                        } else {
+                                            result.errorRows = true
+                                            result.checkRows = "Фикс.строк нет в БД"
+                                        }
                                     }
                                 }
                                 // Сравнение стилей
@@ -733,7 +737,7 @@ class GitReport {
     // REF_BOOK.ID → Скрипт справочника
     def static getRefBookScripts(def sql) {
         def refbooks = []
-        sql.eachRow("select rb.id, rb.name, (select data from blob_data where id = rb.script_id) as script from ref_book rb where rb.visible = 1 and rb.script_id is not null") {
+        sql.eachRow("select rb.id, rb.name, (select data from blob_data where id = rb.script_id) as script from ref_book rb where rb.script_id is not null") {
             def refbook = new Expando()
             refbook.id = it.id as Integer
             refbook.name = it.name
