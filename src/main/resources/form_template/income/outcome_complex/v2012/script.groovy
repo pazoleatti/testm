@@ -913,21 +913,21 @@ void checkHeaderXls(def headerRows) {
     }
     checkHeaderSize(headerRows[0].size(), headerRows.size(), 10, 3)
     def headerMapping = [
-            (headerRows[0][0]): 'КНУ',
-            (headerRows[0][1]): 'Группа расхода',
-            (headerRows[0][2]): 'Вид расхода по операции',
-            (headerRows[0][3]): 'Расход по данным бухгалтерского учёта',
-            (headerRows[0][7]): 'Расход по данным налогового учёта',
-            (headerRows[1][3]): 'номер счёта учёта',
-            (headerRows[1][4]): 'источник информации в РНУ',
-            (headerRows[1][5]): 'сумма',
-            (headerRows[1][6]): 'в т.ч. учтено в предыдущих налоговых периодах',
-            (headerRows[1][7]): 'источник информации в РНУ',
-            (headerRows[1][8]): 'сумма',
-            (headerRows[1][9]): 'форма РНУ'
+            ([(headerRows[0][0]): 'КНУ']),
+            ([(headerRows[0][1]): 'Группа расхода']),
+            ([(headerRows[0][2]): 'Вид расхода по операции']),
+            ([(headerRows[0][3]): 'Расход по данным бухгалтерского учёта']),
+            ([(headerRows[0][7]): 'Расход по данным налогового учёта']),
+            ([(headerRows[1][3]): 'номер счёта учёта']),
+            ([(headerRows[1][4]): 'источник информации в РНУ']),
+            ([(headerRows[1][5]): 'сумма']),
+            ([(headerRows[1][6]): 'в т.ч. учтено в предыдущих налоговых периодах']),
+            ([(headerRows[1][7]): 'источник информации в РНУ']),
+            ([(headerRows[1][8]): 'сумма']),
+            ([(headerRows[1][9]): 'форма РНУ'])
     ]
     (0..9).each { index ->
-        headerMapping.put((headerRows[2][index]), (index + 1).toString())
+        headerMapping.add(([(headerRows[2][index]): (index + 1).toString()]))
     }
     checkHeaderEquals(headerMapping, logger)
 }

@@ -691,18 +691,18 @@ void checkHeaderXls(def headerRows) {
     }
     checkHeaderSize(headerRows[0].size(), headerRows.size(), 8, 3)
     def headerMapping = [
-            (headerRows[0][0]): 'КНУ',
-            (headerRows[0][1]): 'Группа дохода',
-            (headerRows[0][2]): 'Вид дохода по операциям',
-            (headerRows[0][3]): 'Балансовый счёт по учёту дохода',
-            (headerRows[0][4]): 'РНУ-6 (графа 10) сумма',
-            (headerRows[0][5]): 'РНУ-6 (графа 12)',
-            (headerRows[0][7]): 'РНУ-4 (графа 5) сумма',
-            (headerRows[1][5]): 'сумма',
-            (headerRows[1][6]): 'в т.ч. учтено в предыдущих налоговых периодах по графе 10'
+            ([(headerRows[0][0]): 'КНУ']),
+            ([(headerRows[0][1]): 'Группа дохода']),
+            ([(headerRows[0][2]): 'Вид дохода по операциям']),
+            ([(headerRows[0][3]): 'Балансовый счёт по учёту дохода']),
+            ([(headerRows[0][4]): 'РНУ-6 (графа 10) сумма']),
+            ([(headerRows[0][5]): 'РНУ-6 (графа 12)']),
+            ([(headerRows[0][7]): 'РНУ-4 (графа 5) сумма']),
+            ([(headerRows[1][5]): 'сумма']),
+            ([(headerRows[1][6]): 'в т.ч. учтено в предыдущих налоговых периодах по графе 10'])
     ]
     (0..7).each { index ->
-        headerMapping.put((headerRows[2][index]), (index + 1).toString())
+        headerMapping.add(([(headerRows[2][index]): (index + 1).toString()]))
     }
     checkHeaderEquals(headerMapping, logger)
 }

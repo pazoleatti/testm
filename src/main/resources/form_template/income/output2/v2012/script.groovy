@@ -209,36 +209,36 @@ void checkHeaderXls(def headerRows, def colCount, rowCount) {
     }
     checkHeaderSize(headerRows[rowCount - 1].size(), headerRows.size(), colCount, rowCount)
     def headerMapping = [
-            (headerRows[0][0]) : '№ пп.',
-            (headerRows[0][1]) : 'Получатель',
-            (headerRows[0][2]) : 'Место нахождения (адрес)',
-            (headerRows[0][11]): 'Руководитель организации',
-            (headerRows[0][14]): 'Контактный телефон',
-            (headerRows[0][15]): 'Сумма начисленных дивидендов',
-            (headerRows[0][16]): 'Перечисление дивидендов',
-            (headerRows[0][19]): 'Перечисление налога',
-            (headerRows[0][22]): 'Отчётный год',
-            (headerRows[1][2]) : 'Индекс',
-            (headerRows[1][3]) : 'Код региона',
-            (headerRows[1][4]) : 'Район',
-            (headerRows[1][5]) : 'Город',
-            (headerRows[1][6]) : 'Населённый пункт (село, посёлок и т.п.)',
-            (headerRows[1][7]) : 'Улица (проспект, переулок и т.д.)',
-            (headerRows[1][8]) : 'Номер дома (владения)',
-            (headerRows[1][9]) : 'Номер корпуса (строения)',
-            (headerRows[1][10]): 'Номер офиса (квартиры)',
-            (headerRows[1][11]): 'Фамилия',
-            (headerRows[1][12]): 'Имя',
-            (headerRows[1][13]): 'Отчество',
-            (headerRows[1][16]): 'Дата',
-            (headerRows[1][17]): 'Номер платёжного поручения',
-            (headerRows[1][18]): 'Сумма',
-            (headerRows[1][19]): 'Дата',
-            (headerRows[1][20]): 'Номер платёжного поручения',
-            (headerRows[1][21]): 'Сумма'
+            ([(headerRows[0][0]): '№ пп.']),
+            ([(headerRows[0][1]): 'Получатель']),
+            ([(headerRows[0][2]): 'Место нахождения (адрес)']),
+            ([(headerRows[0][11]): 'Руководитель организации']),
+            ([(headerRows[0][14]): 'Контактный телефон']),
+            ([(headerRows[0][15]): 'Сумма начисленных дивидендов']),
+            ([(headerRows[0][16]): 'Перечисление дивидендов']),
+            ([(headerRows[0][19]): 'Перечисление налога']),
+            ([(headerRows[0][22]): 'Отчётный год']),
+            ([(headerRows[1][2]): 'Индекс']),
+            ([(headerRows[1][3]): 'Код региона']),
+            ([(headerRows[1][4]): 'Район']),
+            ([(headerRows[1][5]): 'Город']),
+            ([(headerRows[1][6]): 'Населённый пункт (село, посёлок и т.п.)']),
+            ([(headerRows[1][7]): 'Улица (проспект, переулок и т.д.)']),
+            ([(headerRows[1][8]): 'Номер дома (владения)']),
+            ([(headerRows[1][9]): 'Номер корпуса (строения)']),
+            ([(headerRows[1][10]): 'Номер офиса (квартиры)']),
+            ([(headerRows[1][11]): 'Фамилия']),
+            ([(headerRows[1][12]): 'Имя']),
+            ([(headerRows[1][13]): 'Отчество']),
+            ([(headerRows[1][16]): 'Дата']),
+            ([(headerRows[1][17]): 'Номер платёжного поручения']),
+            ([(headerRows[1][18]): 'Сумма']),
+            ([(headerRows[1][19]): 'Дата']),
+            ([(headerRows[1][20]): 'Номер платёжного поручения']),
+            ([(headerRows[1][21]): 'Сумма'])
     ]
     (0..22).each { index ->
-        headerMapping.put((headerRows[2][index]), (index + 1).toString())
+        headerMapping.add(([(headerRows[2][index]): (index + 1).toString()]))
     }
     checkHeaderEquals(headerMapping, logger)
 }
