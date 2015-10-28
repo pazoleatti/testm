@@ -937,23 +937,23 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
     }
     checkHeaderSize(headerRows[0].size(), headerRows.size(), colCount, rowCount)
     def headerMapping = [
-            (headerRows[0][0]) : getColumnName(tmpRow, 'rowNumber'),
-            (headerRows[0][2]) : getColumnName(tmpRow, 'regNumber'),
-            (headerRows[0][3]) : getColumnName(tmpRow, 'tradeNumber'),
-            (headerRows[0][4]) : getColumnName(tmpRow, 'lotSizePrev'),
-            (headerRows[0][5]) : getColumnName(tmpRow, 'lotSizeCurrent'),
-            (headerRows[0][6]) : getColumnName(tmpRow, 'reserve'),
-            (headerRows[0][7]) : getColumnName(tmpRow, 'cost'),
-            (headerRows[0][8]) : getColumnName(tmpRow, 'signSecurity'),
-            (headerRows[0][9]) : getColumnName(tmpRow, 'marketQuotation'),
-            (headerRows[0][10]): getColumnName(tmpRow, 'costOnMarketQuotation'),
-            (headerRows[0][11]): getColumnName(tmpRow, 'reserveCalcValue'),
-            (headerRows[0][12]): getColumnName(tmpRow, 'reserveCreation'),
-            (headerRows[0][13]): getColumnName(tmpRow, 'reserveRecovery'),
-            (headerRows[1][0]) : '1'
+            ([(headerRows[0][0]): getColumnName(tmpRow, 'rowNumber')]),
+            ([(headerRows[0][2]): getColumnName(tmpRow, 'regNumber')]),
+            ([(headerRows[0][3]): getColumnName(tmpRow, 'tradeNumber')]),
+            ([(headerRows[0][4]): getColumnName(tmpRow, 'lotSizePrev')]),
+            ([(headerRows[0][5]): getColumnName(tmpRow, 'lotSizeCurrent')]),
+            ([(headerRows[0][6]): getColumnName(tmpRow, 'reserve')]),
+            ([(headerRows[0][7]): getColumnName(tmpRow, 'cost')]),
+            ([(headerRows[0][8]): getColumnName(tmpRow, 'signSecurity')]),
+            ([(headerRows[0][9]): getColumnName(tmpRow, 'marketQuotation')]),
+            ([(headerRows[0][10]): getColumnName(tmpRow, 'costOnMarketQuotation')]),
+            ([(headerRows[0][11]): getColumnName(tmpRow, 'reserveCalcValue')]),
+            ([(headerRows[0][12]): getColumnName(tmpRow, 'reserveCreation')]),
+            ([(headerRows[0][13]): getColumnName(tmpRow, 'reserveRecovery')]),
+            ([(headerRows[1][0]): '1'])
     ]
     (2..13).each { index ->
-        headerMapping.put((headerRows[1][index]), index.toString())
+        headerMapping.add(([(headerRows[1][index]): index.toString()]))
     }
     checkHeaderEquals(headerMapping, logger)
 }

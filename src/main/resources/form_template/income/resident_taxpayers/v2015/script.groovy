@@ -249,21 +249,21 @@ void checkHeaderXls(def headerRows, def colCount, def rowCount, def tmpRow) {
     }
     checkHeaderSize(headerRows[1].size(), headerRows.size(), colCount, rowCount)
     def headerMapping = [
-            (headerRows[0][0]): getColumnName(tmpRow, 'shareKind'),
-            (headerRows[0][1]): getColumnName(tmpRow, 'shareHolder'),
-            (headerRows[0][2]): getColumnName(tmpRow, 'shareCount'),
-            (headerRows[0][3]): getColumnName(tmpRow, 'shareProfit'),
-            (headerRows[0][4]): getColumnName(tmpRow, 'd1'),
-            (headerRows[0][5]): getColumnName(tmpRow, 'd2'),
-            (headerRows[0][6]): getColumnName(tmpRow, 'taxRate'),
-            (headerRows[0][7]): getColumnName(tmpRow, 'kIndex'),
-            (headerRows[0][8]): getColumnName(tmpRow, 'taxPerShare'),
-            (headerRows[0][9]): 'Облагаемая сумма дивидендов, руб.',
-            (headerRows[1][9]): 'на 1 акцию физических лиц (гр.10=гр.3*гр.9/(гр.7/100)',
-            (headerRows[1][10]): 'на 1 акцию юридических лиц (гр.11=гр.8*(гр.5-гр.6))'
+            ([(headerRows[0][0]): getColumnName(tmpRow, 'shareKind')]),
+            ([(headerRows[0][1]): getColumnName(tmpRow, 'shareHolder')]),
+            ([(headerRows[0][2]): getColumnName(tmpRow, 'shareCount')]),
+            ([(headerRows[0][3]): getColumnName(tmpRow, 'shareProfit')]),
+            ([(headerRows[0][4]): getColumnName(tmpRow, 'd1')]),
+            ([(headerRows[0][5]): getColumnName(tmpRow, 'd2')]),
+            ([(headerRows[0][6]): getColumnName(tmpRow, 'taxRate')]),
+            ([(headerRows[0][7]): getColumnName(tmpRow, 'kIndex')]),
+            ([(headerRows[0][8]): getColumnName(tmpRow, 'taxPerShare')]),
+            ([(headerRows[0][9]): 'Облагаемая сумма дивидендов, руб.']),
+            ([(headerRows[1][9]): 'на 1 акцию физических лиц (гр.10=гр.3*гр.9/(гр.7/100)']),
+            ([(headerRows[1][10]): 'на 1 акцию юридических лиц (гр.11=гр.8*(гр.5-гр.6))'])
     ]
     (0..10).each { index ->
-        headerMapping.put((headerRows[2][index]), (index + 1).toString())
+        headerMapping.add(([(headerRows[2][index]): (index + 1).toString()]))
     }
     checkHeaderEquals(headerMapping, logger)
 }

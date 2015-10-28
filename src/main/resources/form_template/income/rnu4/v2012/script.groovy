@@ -592,17 +592,17 @@ void checkHeaderXls(def headerRows, def colCount, rowCount) {
     }
     checkHeaderSize(headerRows[0].size(), headerRows.size(), colCount, rowCount)
     def headerMapping = [
-            (headerRows[0][0]): '№ пп',
-            (headerRows[0][2]): 'Код налогового учета',
-            (headerRows[0][3]): 'Балансовый счёт',
-            (headerRows[0][5]): 'Сумма дохода за отчётный квартал',
-            (headerRows[1][3]): 'Номер',
-            (headerRows[1][4]): 'Наименование счёта',
-            (headerRows[2][0]): '1',
-            (headerRows[2][2]): '2',
-            (headerRows[2][3]): '3',
-            (headerRows[2][4]): '4',
-            (headerRows[2][5]): '5'
+            ([(headerRows[0][0]): '№ пп']),
+            ([(headerRows[0][2]): 'Код налогового учета']),
+            ([(headerRows[0][3]): 'Балансовый счёт']),
+            ([(headerRows[0][5]): 'Сумма дохода за отчётный квартал']),
+            ([(headerRows[1][3]): 'Номер']),
+            ([(headerRows[1][4]): 'Наименование счёта']),
+            ([(headerRows[2][0]): '1']),
+            ([(headerRows[2][2]): '2']),
+            ([(headerRows[2][3]): '3']),
+            ([(headerRows[2][4]): '4']),
+            ([(headerRows[2][5]): '5'])
     ]
     checkHeaderEquals(headerMapping, logger)
 }
