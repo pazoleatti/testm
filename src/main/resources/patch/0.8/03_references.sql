@@ -84,6 +84,25 @@ insert into ref_book_record (id, record_id, ref_book_id, version, status) values
 	insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 5052, 'Независимые лица');
 
 ----------------------------------------------------------------------------------------------------------------
+--http://jira.aplana.com/browse/SBRFACCTAX-13160: 0.8 Добавить справочник "Типы участников ТЦО"
+INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) VALUES (525, 'Типы участников ТЦО',1,0,0,null);
+
+INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (5251, 525, 'Код типа', 		'CODE', 1, 1, null, null, 1, null, 	5, 1, 1, 1, 	null, 0, 15);
+INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (5252, 525, 'Наименование', 	'NAME', 1, 2, null, null, 1, null, 20, 1, 0, null, 	null, 0, 256);
+
+insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 1, 525, to_date('01.01.2008', 'DD.MM.YYYY'), 0);	
+	insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 5251, 'ВЗЛ');	
+	insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 5252, 'Взаимозависимые лица');
+	
+insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 2, 525, to_date('01.01.2008', 'DD.MM.YYYY'), 0);	
+	insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 5251, 'РОЗ');	
+	insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 5252, 'Резиденты оффшорных зон');
+
+insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 3, 525, to_date('01.01.2008', 'DD.MM.YYYY'), 0);	
+	insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 5251, 'НЛ');	
+	insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 5252, 'Независимые лица');
+
+----------------------------------------------------------------------------------------------------------------
 --http://jira.aplana.com/browse/SBRFACCTAX-12997: Цвета
 INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id, table_name, is_versioned) VALUES (1,'Цвета',1,0,1,null, 'COLOR', 0);
 
