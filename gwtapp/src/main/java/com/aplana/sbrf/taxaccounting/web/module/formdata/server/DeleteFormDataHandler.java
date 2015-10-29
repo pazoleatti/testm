@@ -50,7 +50,7 @@ public class DeleteFormDataHandler extends AbstractActionHandler<DeleteFormDataA
         if (action.isManual()) {
             formDataService.deleteFormData(logger, securityService.currentUserInfo(), action.getFormDataId(), true);
             formDataService.unlock(action.getFormDataId(), userInfo);
-            formDataService.interruptTask(action.getFormDataId(), userInfo, Arrays.asList(ReportType.CALCULATE_FD, ReportType.IMPORT_FD, ReportType.CHECK_FD));
+            formDataService.interruptTask(action.getFormDataId(), userInfo, Arrays.asList(ReportType.REFRESH_FD, ReportType.CALCULATE_FD, ReportType.IMPORT_FD, ReportType.CHECK_FD));
             return result;
         }
 

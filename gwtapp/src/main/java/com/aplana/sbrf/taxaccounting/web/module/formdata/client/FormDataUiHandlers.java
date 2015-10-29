@@ -30,7 +30,9 @@ public interface FormDataUiHandlers extends UiHandlers{
 
 	void onOriginalVersionClicked();
 
-	void onRecalculateClicked(boolean force, boolean cancelTask);
+    void onRefreshClicked(boolean force, boolean cancelTask);
+
+    void onRecalculateClicked(boolean force, boolean cancelTask);
 
 	void onCheckClicked(boolean force);
 

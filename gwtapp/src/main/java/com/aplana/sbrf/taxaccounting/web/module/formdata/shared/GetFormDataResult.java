@@ -44,6 +44,7 @@ public class GetFormDataResult implements Result {
 	private String lockedByUser;
 	private FormMode formMode;
 	private boolean fixedRows;
+    private boolean updating;
 
     public boolean canCreatedManual() {
         return canCreatedManual;
@@ -181,11 +182,19 @@ public class GetFormDataResult implements Result {
         this.readOnly = readOnly;
     }
 
-    public DepartmentReportPeriod getComparativPeriod() {
+    public DepartmentReportPeriod getComparativePeriod() {
         return comparativePeriod;
     }
 
-    public void setComparativPeriod(DepartmentReportPeriod comparativPeriod) {
+    public void setComparativePeriod(DepartmentReportPeriod comparativPeriod) {
         this.comparativePeriod = comparativPeriod;
+    }
+
+    public boolean isUpdating() {
+        return updating;
+    }
+
+    public void setUpdating(boolean updating) {
+        this.updating = updating;
     }
 }

@@ -80,6 +80,14 @@ public interface FormDataService {
 	 */
 	void doCalc(Logger logger, TAUserInfo userInfo, FormData formData);
 
+    /**
+     * Выполнить обновление по налоговой форме
+     * @param logger логгер-объект для фиксации диагностических сообщений
+     * @param userInfo информация о пользователе, запросившего операцию
+     * @param formData объект с данными по налоговой форме
+     */
+    void doRefresh(Logger logger, TAUserInfo userInfo, FormData formData);
+
 	/**
 	 * Выполнить проверки по налоговой форме
 	 * @param logger логгер-объект для фиксации диагностических сообщений

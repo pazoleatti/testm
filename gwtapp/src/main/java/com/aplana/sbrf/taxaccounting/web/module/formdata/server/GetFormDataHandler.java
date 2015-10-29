@@ -255,7 +255,7 @@ public class GetFormDataHandler extends AbstractActionHandler<GetFormDataAction,
             departmentReportPeriod.getReportPeriod().setName(ReportPeriodSpecificName.fromId(code).getName());
         }
         result.setDepartmentReportPeriod(departmentReportPeriod);
-        result.setComparativPeriod(formData.getComparativePeriodId() != null ? departmentReportPeriodService.get(
+        result.setComparativePeriod(formData.getComparativePeriodId() != null ? departmentReportPeriodService.get(
                 formData.getComparativePeriodId()) : null);
 		result.setDepartmentName(departmentService.getDepartment(formData.getDepartmentId()).getName());
         result.setDepartmentFullName(departmentService.getParentsHierarchy(formData.getDepartmentId()));
@@ -267,6 +267,7 @@ public class GetFormDataHandler extends AbstractActionHandler<GetFormDataAction,
         result.setBankSummaryForm(true);
         result.setCorrectionDiff(action.isCorrectionDiff());
         result.setExistManual(formDataService.existManual(action.getFormDataId()));
+        result.setUpdating(formTemplate.isUpdating());
 
         // Если клиент запросил режим сравнения НФ, то нужно заполнить временный срез результатом сравнения
         if (action.isCorrectionDiff()) {

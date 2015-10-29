@@ -69,6 +69,8 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 
         void showAddRemoveRowsBlock(boolean show);
 
+        void showRefreshButton(boolean show);
+
         void showRecalculateButton(boolean show);
 
 		void showCheckButton(boolean show);
@@ -164,7 +166,9 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 
 	protected boolean readOnlyMode;
 
-	protected boolean forceEditMode = false;
+    protected boolean updating;
+
+    protected boolean forceEditMode = false;
     protected boolean free;
 	
 	protected boolean fixedRows;
@@ -238,6 +242,7 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
                 (FormDataKind.CONSOLIDATED == formData.getKind() || FormDataKind.SUMMARY == formData.getKind() || FormDataKind.CALCULATED == formData.getKind())
                 &&
                 readOnlyMode);
+        view.showRefreshButton(false);
 		view.showRecalculateButton(false);
 		view.showOriginalVersionButton(false);
 		view.showPrintAnchor(true);
@@ -281,6 +286,7 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
                 (FormDataKind.CONSOLIDATED == formData.getKind() || FormDataKind.SUMMARY == formData.getKind() || FormDataKind.CALCULATED == formData.getKind())
                 &&
                 readOnlyMode);
+        view.showRefreshButton(false);
         view.showRecalculateButton(false);
         view.showOriginalVersionButton(false);
         view.showPrintAnchor(true);
@@ -326,6 +332,7 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
         view.showSaveCancelPanel(true, readOnlyMode);
         view.showEditModeLabel(true);
         view.showConsolidation(false);
+        view.showRefreshButton(updating);
         view.showRecalculateButton(!formData.isManual());
         view.showAddRemoveRowsBlock(false);
 
@@ -362,6 +369,7 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
                 (FormDataKind.CONSOLIDATED == formData.getKind() || FormDataKind.SUMMARY == formData.getKind() || FormDataKind.CALCULATED == formData.getKind())
                 &&
                 readOnlyMode);
+        view.showRefreshButton(false);
 		view.showRecalculateButton(false);
 		view.showOriginalVersionButton(false);
 		view.showPrintAnchor(true);
@@ -399,6 +407,7 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 		view.showSaveCancelPanel(true, readOnlyMode);
         view.showEditModeLabel(true);
         view.showConsolidation(false);
+        view.showRefreshButton(updating);
 		view.showRecalculateButton(!formData.isManual());
         view.showAddRemoveRowsBlock(!fixedRows);
 

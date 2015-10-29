@@ -99,6 +99,8 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 	Button originalVersionButton, fillPreviousButton;
     @UiField
     Button consolidationButton;
+    @UiField
+    Button refreshButton;
 	@UiField
 	Button recalculateButton;
 	@UiField
@@ -557,6 +559,13 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 		}
 	}
 
+    @UiHandler("refreshButton")
+    void onUpdateButtonClicked(ClickEvent event) {
+        if (getUiHandlers() != null) {
+            getUiHandlers().onRefreshClicked(false, false);
+        }
+    }
+
 	@UiHandler("checkButton")
 	void onCheckButtonClicked(ClickEvent event) {
 		if (getUiHandlers() != null) {
@@ -713,6 +722,11 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 	public void showRecalculateButton(boolean show) {
 		recalculateButton.setVisible(show);
 	}
+
+    @Override
+    public void showRefreshButton(boolean show) {
+        refreshButton.setVisible(show);
+    }
 
 	@Override
 	public void showCheckButton(boolean show) {

@@ -519,7 +519,7 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
             Pair<ReportType, LockData> lockType = formDataService.getLockTaskType(formData.getId());
             if (lockType != null) {
                 ReportType reportType = lockType.getFirst();
-                List<ReportType> blockReportTypes = Arrays.asList(ReportType.EDIT_FD, ReportType.CALCULATE_FD, ReportType.IMPORT_FD, ReportType.MOVE_FD);
+                List<ReportType> blockReportTypes = Arrays.asList(ReportType.EDIT_FD, ReportType.REFRESH_FD, ReportType.CALCULATE_FD, ReportType.IMPORT_FD, ReportType.MOVE_FD);
                 if (blockReportTypes.contains(reportType)) {
                     log(userInfo, LogData.L40, localLogger,
                             lock, formDataService.getTaskName(reportType, formData.getId(), userInfo), userService.getUser(lockType.getSecond().getUserId()).getName(), SDF_HH_MM_DD_MM_YYYY.format(lockType.getSecond().getDateLock()));
