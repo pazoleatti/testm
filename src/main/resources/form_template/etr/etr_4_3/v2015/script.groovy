@@ -278,7 +278,7 @@ def getSourceValue(def periodId, def row, def alias, def isCalc) {
                 sourceForm = getSourceForm(FormDataKind.PRIMARY, period.id)
             }
             if (sourceForm != null) {
-                sum += (sourceForm?.allSaved?.get(2)?.sum ?: 0)
+                sum += (sourceForm?.allSaved?.get(1)?.sum ?: 0) // значение строки 2
             } else {
                 notFound404 = true
                 if (isCalc) { // выводить только при расчете
