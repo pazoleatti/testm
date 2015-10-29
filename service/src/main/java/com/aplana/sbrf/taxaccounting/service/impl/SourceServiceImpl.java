@@ -1220,7 +1220,7 @@ public class SourceServiceImpl implements SourceService {
             }
             return sources.getSourceList();
         } else {
-            return sourceDao.getSourcesInfo(destinationFormData.getId(), light, excludeIfNotExist, stateRestriction);
+            return sourceDao.getSourcesInfo(destinationFormData, light, excludeIfNotExist, stateRestriction);
         }
     }
 
@@ -1247,7 +1247,7 @@ public class SourceServiceImpl implements SourceService {
             }
             return sources.getSourceList();
         } else {
-            return sourceDao.getDestinationsInfo(sourceFormData.getId(), light, excludeIfNotExist, stateRestriction);
+            return sourceDao.getDestinationsInfo(sourceFormData, light, excludeIfNotExist, stateRestriction);
         }
     }
 
@@ -1274,7 +1274,7 @@ public class SourceServiceImpl implements SourceService {
             }
             return sources.getSourceList();
         } else {
-            return sourceDao.getDeclarationDestinationsInfo(sourceFormData.getId(), light, excludeIfNotExist, stateRestriction);
+            return sourceDao.getDeclarationDestinationsInfo(sourceFormData, light, excludeIfNotExist, stateRestriction);
         }
     }
 
@@ -1301,7 +1301,7 @@ public class SourceServiceImpl implements SourceService {
             }
             return sources.getSourceList();
         } else {
-            return sourceDao.getDeclarationSourcesInfo(declaration.getId(), light, excludeIfNotExist, stateRestriction);
+            return sourceDao.getDeclarationSourcesInfo(declaration, light, excludeIfNotExist, stateRestriction);
         }
     }
 }

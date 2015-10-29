@@ -523,6 +523,8 @@ class GitReport {
                                 } else if (xsdFiles.size() > 1 ) {
                                     result.xsdCheck = "Найдено более одного файла XSD в «${versionFolder.absolutePath}»"
                                     result.xsdError = true
+                                } else if (versions[version]?.xsd == null) {
+                                    result.xsdCheck = "Ok"
                                 } else {
                                     result.xsdCheck = "Файл XSD не найден в «${versionFolder.absolutePath}»"
                                     result.xsdError = true
