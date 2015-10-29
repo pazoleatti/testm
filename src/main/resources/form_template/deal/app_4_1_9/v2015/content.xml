@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <formTemplateContent>
-    <fixedRows>true</fixedRows>
+    <fixedRows>false</fixedRows>
     <monthly>false</monthly>
     <comparative>false</comparative>
     <accruing>false</accruing>
@@ -169,7 +169,6 @@
         <order>16</order>
         <width>10</width>
         <hierarchical>false</hierarchical>
-        <!-- TODO: уточнить id атрибута-->
         <nameAttributeId>5061</nameAttributeId>
         <refBookAttributeId>5061</refBookAttributeId>
         <searchEnabled>true</searchEnabled>
@@ -202,7 +201,6 @@
         <order>19</order>
         <width>10</width>
         <hierarchical>false</hierarchical>
-        <!-- TODO: уточнить id атрибута-->
         <nameAttributeId>5061</nameAttributeId>
         <refBookAttributeId>5061</refBookAttributeId>
         <searchEnabled>true</searchEnabled>
@@ -215,7 +213,6 @@
         <order>20</order>
         <width>10</width>
         <hierarchical>false</hierarchical>
-        <!-- TODO: уточнить id атрибута-->
         <nameAttributeId>5061</nameAttributeId>
         <refBookAttributeId>5061</refBookAttributeId>
         <searchEnabled>true</searchEnabled>
