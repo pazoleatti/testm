@@ -639,44 +639,44 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
     }
     checkHeaderSize(headerRows[0].size(), headerRows.size(), colCount, rowCount)
     def headerMapping = [
-            (headerRows[0][0])  : getColumnName(tmpRow, 'rowNumber'),
-            (headerRows[0][1])  : getColumnName(tmpRow, 'opTypeCode'),
-            (headerRows[0][2])  : getColumnName(tmpRow, 'invoiceNumDate'),
-            (headerRows[0][3])  : getColumnName(tmpRow, 'invoiceCorrNumDate'),
-            (headerRows[0][4])  : getColumnName(tmpRow, 'corrInvoiceNumDate'),
-            (headerRows[0][5])  : getColumnName(tmpRow, 'corrInvCorrNumDate'),
-            (headerRows[0][6])  : getColumnName(tmpRow, 'buyerName'),
-            (headerRows[0][7])  : getColumnName(tmpRow, 'buyerInnKpp'),
+            ([(headerRows[0][0]): getColumnName(tmpRow, 'rowNumber')]),
+            ([(headerRows[0][1]): getColumnName(tmpRow, 'opTypeCode')]),
+            ([(headerRows[0][2]): getColumnName(tmpRow, 'invoiceNumDate')]),
+            ([(headerRows[0][3]): getColumnName(tmpRow, 'invoiceCorrNumDate')]),
+            ([(headerRows[0][4]): getColumnName(tmpRow, 'corrInvoiceNumDate')]),
+            ([(headerRows[0][5]): getColumnName(tmpRow, 'corrInvCorrNumDate')]),
+            ([(headerRows[0][6]): getColumnName(tmpRow, 'buyerName')]),
+            ([(headerRows[0][7]): getColumnName(tmpRow, 'buyerInnKpp')]),
 
-            (headerRows[0][8])  : 'Сведения о посреднике (комиссионере, агенте)',
-            (headerRows[1][8])  : 'наименование посредника',
-            (headerRows[1][9])  : 'ИНН/КПП посредника',
+            ([(headerRows[0][8]): 'Сведения о посреднике (комиссионере, агенте)']),
+            ([(headerRows[1][8]): 'наименование посредника']),
+            ([(headerRows[1][9]): 'ИНН/КПП посредника']),
 
-            (headerRows[0][10]) : getColumnName(tmpRow, 'paymentDocNumDate'),
-            (headerRows[0][11]) : getColumnName(tmpRow, 'currNameCode'),
+            ([(headerRows[0][10]): getColumnName(tmpRow, 'paymentDocNumDate')]),
+            ([(headerRows[0][11]): getColumnName(tmpRow, 'currNameCode')]),
 
-            (headerRows[0][12]) : 'Стоимость продаж по счету-фактуре, разница стоимости по корректировочному счету-фактуре (включая НДС) в валюте счета-фактуры',
-            (headerRows[1][12]) : 'в валюте счета-фактуры',
-            (headerRows[1][13]) : 'в рублях и копейках',
+            ([(headerRows[0][12]): 'Стоимость продаж по счету-фактуре, разница стоимости по корректировочному счету-фактуре (включая НДС) в валюте счета-фактуры']),
+            ([(headerRows[1][12]): 'в валюте счета-фактуры']),
+            ([(headerRows[1][13]): 'в рублях и копейках']),
 
-            (headerRows[0][14]) : 'Стоимость продаж, облагаемых налогом, по счету-фактуре, разница стоимости по корректировочному счету-фактуре (без НДС) в рублях и копейках, по ставке',
-            (headerRows[1][14]) : '18 процентов',
-            (headerRows[1][15]) : '10 процентов',
-            (headerRows[1][16]) : '0 процентов',
+            ([(headerRows[0][14]): 'Стоимость продаж, облагаемых налогом, по счету-фактуре, разница стоимости по корректировочному счету-фактуре (без НДС) в рублях и копейках, по ставке']),
+            ([(headerRows[1][14]): '18 процентов']),
+            ([(headerRows[1][15]): '10 процентов']),
+            ([(headerRows[1][16]): '0 процентов']),
 
-            (headerRows[0][17]) : 'Сумма НДС по счету-фактуре, разница стоимости по корректировочному счету-фактуре в рублях и копейках, по ставке',
-            (headerRows[1][17]) : '18 процентов',
-            (headerRows[1][18]) : '10 процентов',
+            ([(headerRows[0][17]): 'Сумма НДС по счету-фактуре, разница стоимости по корректировочному счету-фактуре в рублях и копейках, по ставке']),
+            ([(headerRows[1][17]): '18 процентов']),
+            ([(headerRows[1][18]): '10 процентов']),
 
-            (headerRows[0][19]) : getColumnName(tmpRow, 'bonifSalesSum'),
-            (headerRows[2][12]) : '13а',
-            (headerRows[2][13]) : '13б'
+            ([(headerRows[0][19]): getColumnName(tmpRow, 'bonifSalesSum')]),
+            ([(headerRows[2][12]): '13а']),
+            ([(headerRows[2][13]): '13б'])
     ]
     (0..11).each { index ->
-        headerMapping.put((headerRows[2][index]), (index + 1).toString())
+        headerMapping.add(([(headerRows[2][index]): (index + 1).toString()]))
     }
     (14..19).each { index ->
-        headerMapping.put((headerRows[2][index]), index.toString())
+        headerMapping.add(([(headerRows[2][index]): index.toString()]))
     }
     checkHeaderEquals(headerMapping, logger)
 }

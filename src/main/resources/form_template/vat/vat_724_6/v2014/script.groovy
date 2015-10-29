@@ -541,22 +541,22 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
     }
     checkHeaderSize(headerRows[0].size(), headerRows.size(), colCount, rowCount)
     def headerMapping = [
-            (headerRows[0][0]): '№ пп',
-            (headerRows[0][2]): 'Дата операции',
-            (headerRows[0][3]): 'Контрагент',
-            (headerRows[0][4]): 'Доход контрагента',
-            (headerRows[0][6]): 'НДС',
-            (headerRows[0][8]): 'Счёт-фактура',
-            (headerRows[1][4]): 'Вид',
-            (headerRows[1][5]): 'Сумма',
-            (headerRows[1][6]): 'Номер мемориального ордера',
-            (headerRows[1][7]): 'Сумма',
-            (headerRows[1][8]): 'Дата',
-            (headerRows[1][9]): 'Номер',
-            (headerRows[2][0]): '1'
+            ([(headerRows[0][0]): '№ пп']),
+            ([(headerRows[0][2]): 'Дата операции']),
+            ([(headerRows[0][3]): 'Контрагент']),
+            ([(headerRows[0][4]): 'Доход контрагента']),
+            ([(headerRows[0][6]): 'НДС']),
+            ([(headerRows[0][8]): 'Счёт-фактура']),
+            ([(headerRows[1][4]): 'Вид']),
+            ([(headerRows[1][5]): 'Сумма']),
+            ([(headerRows[1][6]): 'Номер мемориального ордера']),
+            ([(headerRows[1][7]): 'Сумма']),
+            ([(headerRows[1][8]): 'Дата']),
+            ([(headerRows[1][9]): 'Номер']),
+            ([(headerRows[2][0]): '1'])
     ]
     (2..9).each { index ->
-        headerMapping.put((headerRows[2][index]), index.toString())
+        headerMapping.add(([(headerRows[2][index]): index.toString()]))
     }
 
     checkHeaderEquals(headerMapping, logger)

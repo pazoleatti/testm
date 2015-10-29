@@ -703,31 +703,31 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
     checkHeaderSize(headerRows[headerRows.size() - 1].size(), headerRows.size(), colCount, rowCount)
 
     def headerMapping = [
-            (headerRows[0][0]) : getColumnName(tmpRow, 'rowNumber'),
-            (headerRows[0][2]) : getColumnName(tmpRow, 'billNumber'),
-            (headerRows[0][3]) : getColumnName(tmpRow, 'creationDate'),
-            (headerRows[0][4]) : getColumnName(tmpRow, 'nominal'),
-            (headerRows[0][5]) : getColumnName(tmpRow, 'sellingPrice'),
-            (headerRows[0][6]) : getColumnName(tmpRow, 'currencyCode'),
-            (headerRows[0][7]) : 'Курс Банка России',
-            (headerRows[0][9]) : getColumnName(tmpRow, 'paymentTermStart'),
-            (headerRows[0][10]): getColumnName(tmpRow, 'paymentTermEnd'),
-            (headerRows[0][11]): getColumnName(tmpRow, 'interestRate'),
-            (headerRows[0][12]): getColumnName(tmpRow, 'operationDate'),
-            (headerRows[0][13]): getColumnName(tmpRow, 'rateWithDiscCoef'),
-            (headerRows[0][14]): 'Сумма дисконта начисленного на начало отчётного периода',
-            (headerRows[0][16]): 'Сумма дисконта начисленного на конец отчётного периода',
-            (headerRows[0][18]): getColumnName(tmpRow, 'sum'),
-            (headerRows[1][7]) : 'на дату составления векселя',
-            (headerRows[1][8]) : 'на дату совершения операции',
-            (headerRows[1][14]): 'в валюте',
-            (headerRows[1][15]): 'в рублях',
-            (headerRows[1][16]): 'в валюте',
-            (headerRows[1][17]): 'в рублях',
-            (headerRows[2][0]) : '1'
+            ([(headerRows[0][0]): getColumnName(tmpRow, 'rowNumber')]),
+            ([(headerRows[0][2]): getColumnName(tmpRow, 'billNumber')]),
+            ([(headerRows[0][3]): getColumnName(tmpRow, 'creationDate')]),
+            ([(headerRows[0][4]): getColumnName(tmpRow, 'nominal')]),
+            ([(headerRows[0][5]): getColumnName(tmpRow, 'sellingPrice')]),
+            ([(headerRows[0][6]): getColumnName(tmpRow, 'currencyCode')]),
+            ([(headerRows[0][7]): 'Курс Банка России']),
+            ([(headerRows[0][9]): getColumnName(tmpRow, 'paymentTermStart')]),
+            ([(headerRows[0][10]): getColumnName(tmpRow, 'paymentTermEnd')]),
+            ([(headerRows[0][11]): getColumnName(tmpRow, 'interestRate')]),
+            ([(headerRows[0][12]): getColumnName(tmpRow, 'operationDate')]),
+            ([(headerRows[0][13]): getColumnName(tmpRow, 'rateWithDiscCoef')]),
+            ([(headerRows[0][14]): 'Сумма дисконта начисленного на начало отчётного периода']),
+            ([(headerRows[0][16]): 'Сумма дисконта начисленного на конец отчётного периода']),
+            ([(headerRows[0][18]): getColumnName(tmpRow, 'sum')]),
+            ([(headerRows[1][7]): 'на дату составления векселя']),
+            ([(headerRows[1][8]): 'на дату совершения операции']),
+            ([(headerRows[1][14]): 'в валюте']),
+            ([(headerRows[1][15]): 'в рублях']),
+            ([(headerRows[1][16]): 'в валюте']),
+            ([(headerRows[1][17]): 'в рублях']),
+            ([(headerRows[2][0]): '1'])
     ]
     (2..18).each { index ->
-        headerMapping.put(headerRows[2][index], index.toString())
+        headerMapping.add(([headerRows[2][index]: index.toString()]))
     }
     checkHeaderEquals(headerMapping, logger)
 }

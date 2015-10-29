@@ -4,14 +4,14 @@
     <name>Оказание услуг (доходы)</name>
     <fullName>Оказание услуг (доходы)</fullName>
     <code>TODO</code>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="autoNumerationColumn">
         <alias>rowNum</alias>
         <checking>false</checking>
+        <columnType>AUTO</columnType>
         <name>№ п/п</name>
         <order>1</order>
         <width>4</width>
-        <maxLength>15</maxLength>
-        <precision>0</precision>
+        <numerationType>SERIAL</numerationType>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
         <alias>jurName</alias>

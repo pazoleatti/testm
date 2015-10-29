@@ -1323,37 +1323,37 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
     }
     checkHeaderSize(headerRows[headerRows.size() - 1].size(), headerRows.size(), colCount, rowCount)
 
-    def headerMapping = [
-            (headerRows[0][0]) : getColumnName(tmpRow, 'rowNumber'),
-            (headerRows[0][2]) : getColumnName(tmpRow, 'codeOKATO'),
-            (headerRows[0][3]) : getColumnName(tmpRow, 'regionName'),
-            (headerRows[0][4]) : getColumnName(tmpRow, 'tsTypeCode'),
-            (headerRows[0][5]) : getColumnName(tmpRow, 'tsType'),
-            (headerRows[0][6]) : getColumnName(tmpRow, 'model'),
-            (headerRows[0][7]) : getColumnName(tmpRow, 'ecoClass'),
-            (headerRows[0][8]) : getColumnName(tmpRow, 'identNumber'),
-            (headerRows[0][9]) : getColumnName(tmpRow, 'regNumber'),
-            (headerRows[0][10]): getColumnName(tmpRow, 'regDate'),
-            (headerRows[0][11]): getColumnName(tmpRow, 'regDateEnd'),
-            (headerRows[0][12]): getColumnName(tmpRow, 'taxBase'),
-            (headerRows[0][13]): getColumnName(tmpRow, 'baseUnit'),
-            (headerRows[0][14]): getColumnName(tmpRow, 'year'),
-            (headerRows[0][15]): getColumnName(tmpRow, 'pastYear'),
-            (headerRows[0][16]): 'Сведения об угоне',
-            (headerRows[1][16]): 'Дата начала розыска ТС',
-            (headerRows[1][17]): 'Дата возврата ТС',
-            (headerRows[0][18]): getColumnName(tmpRow, 'share'),
-            (headerRows[0][19]): getColumnName(tmpRow, 'costOnPeriodBegin'),
-            (headerRows[0][20]): getColumnName(tmpRow, 'costOnPeriodEnd'),
-            (headerRows[0][21]): getColumnName(tmpRow, 'benefitStartDate'),
-            (headerRows[0][22]): getColumnName(tmpRow, 'benefitEndDate'),
-            (headerRows[0][23]): getColumnName(tmpRow, 'taxBenefitCode'),
-            (headerRows[0][24]): getColumnName(tmpRow, 'base'),
-            (headerRows[0][25]): getColumnName(tmpRow, 'version'),
-            (headerRows[2][0]) : '1'
+   def headerMapping = [
+            ([(headerRows[0][0]) : getColumnName(tmpRow, 'rowNumber')]),
+            ([(headerRows[0][2]) : getColumnName(tmpRow, 'codeOKATO')]),
+            ([(headerRows[0][3]) : getColumnName(tmpRow, 'regionName')]),
+            ([(headerRows[0][4]) : getColumnName(tmpRow, 'tsTypeCode')]),
+            ([(headerRows[0][5]) : getColumnName(tmpRow, 'tsType')]),
+            ([(headerRows[0][6]) : getColumnName(tmpRow, 'model')]),
+            ([(headerRows[0][7]) : getColumnName(tmpRow, 'ecoClass')]),
+            ([(headerRows[0][8]) : getColumnName(tmpRow, 'identNumber')]),
+            ([(headerRows[0][9]) : getColumnName(tmpRow, 'regNumber')]),
+            ([(headerRows[0][10]): getColumnName(tmpRow, 'regDate')]),
+            ([(headerRows[0][11]): getColumnName(tmpRow, 'regDateEnd')]),
+            ([(headerRows[0][12]): getColumnName(tmpRow, 'taxBase')]),
+            ([(headerRows[0][13]): getColumnName(tmpRow, 'baseUnit')]),
+            ([(headerRows[0][14]): getColumnName(tmpRow, 'year')]),
+            ([(headerRows[0][15]): getColumnName(tmpRow, 'pastYear')]),
+            ([(headerRows[0][16]): 'Сведения об угоне']),
+            ([(headerRows[1][16]): 'Дата начала розыска ТС']),
+            ([(headerRows[1][17]): 'Дата возврата ТС']),
+            ([(headerRows[0][18]): getColumnName(tmpRow, 'share')]),
+            ([(headerRows[0][19]): getColumnName(tmpRow, 'costOnPeriodBegin')]),
+            ([(headerRows[0][20]): getColumnName(tmpRow, 'costOnPeriodEnd')]),
+            ([(headerRows[0][21]): getColumnName(tmpRow, 'benefitStartDate')]),
+            ([(headerRows[0][22]): getColumnName(tmpRow, 'benefitEndDate')]),
+            ([(headerRows[0][23]): getColumnName(tmpRow, 'taxBenefitCode')]),
+            ([(headerRows[0][24]): getColumnName(tmpRow, 'base')]),
+            ([(headerRows[0][25]): getColumnName(tmpRow, 'version')]),
+            ([(headerRows[2][0]) : '1'])
     ]
     (2..25).each { index ->
-        headerMapping.put((headerRows[2][index]), index.toString())
+        headerMapping.add(([(headerRows[2][index]): index.toString()]))
     }
     checkHeaderEquals(headerMapping, logger)
 }

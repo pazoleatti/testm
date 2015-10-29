@@ -7,7 +7,7 @@
     <fullName>(РНУ-6) Справка бухгалтера для отражения доходов, учитываемых в РНУ-4, учёт которых требует применения
         метода начисления
     </fullName>
-    <code>РНУ-6</code>
+    <header>852-6</header>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>number</alias>
         <checking>false</checking>

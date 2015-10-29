@@ -3,7 +3,7 @@
     <fixedRows>false</fixedRows>
     <name>(РНУ-12) Регистр налогового учёта расходов по хозяйственным операциям и оказанным Банку услугам</name>
     <fullName>(РНУ-12) Регистр налогового учёта расходов по хозяйственным операциям и оказанным Банку услугам</fullName>
-    <code>РНУ-12</code>
+    <header>852-12</header>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>rowNumber</alias>
         <checking>false</checking>

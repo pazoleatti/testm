@@ -36,8 +36,7 @@ public class MessageServiceBeanTest {
     private final String ERROR_MESSAGE = "Test error";
     private final String EXCEPTION_MESSAGE = "Test Exception";
     private final String LOGGER_EXCEPTION_MESSAGE = "Test ServiceLoggerException";
-    private final String SUCCESS_IMPORT = String.format(MessageServiceBean.SUCCESS_IMPORT, StringUtils.getNumberString(1, "Загружен", "Загружено", "Загружено"),
-            1, StringUtils.getNumberString(1, "курс", "курса", "курсов"), "%s");
+    private final String SUCCESS_IMPORT = String.format(MessageServiceBean.SUCCESS_IMPORT, "%s", 1, 1);
 
     private MessageServiceBean rmdb;
 
@@ -70,6 +69,7 @@ public class MessageServiceBeanTest {
                 }
                 Map<String, Object> map = (Map<String, Object>) invocation.getArguments()[4];
                 ((ScriptStatusHolder) map.get("scriptStatusHolder")).setSuccessCount(1);
+                ((ScriptStatusHolder) map.get("scriptStatusHolder")).setTotalCount(1);
                 return null;
             }
         }).when(refBookScriptingService).executeScript(any(TAUserInfo.class), anyLong(), any(FormDataEvent.class),

@@ -1,1 +1,192 @@
-<?xml version="1.0" encoding="UTF-8" standalone="yes"?><formTemplateContent><type><id>328</id><name>(РНУ-31) Регистр налогового учёта процентного дохода по купонным облигациям</name><taxType>INCOME</taxType></type><version>0.1</version><active>true</active><numberedColumns>false</numberedColumns><fixedRows>true</fixedRows><name>(РНУ-31) Регистр налогового учёта процентного дохода по купонным облигациям</name><fullName>(РНУ-31) Регистр налогового учёта процентного дохода по купонным облигациям</fullName><code>РНУ-31</code><columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn"><alias>number</alias><checking>false</checking><id>16740</id><name>№ пп</name><order>1</order><width>5</width><maxLength>15</maxLength><precision>0</precision></columns><columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn"><alias>securitiesType</alias><checking>false</checking><id>16741</id><name>Вид ценных бумаг</name><order>2</order><width>15</width><maxLength>255</maxLength></columns><columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn"><alias>ofz</alias><checking>false</checking><groupName>Ставка налога на прибыль. 15%.</groupName><id>16742</id><name>Ставка налога на прибыль. 15%. ОФЗ</name><order>3</order><width>10</width><maxLength>17</maxLength><precision>2</precision></columns><columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn"><alias>municipalBonds</alias><checking>false</checking><groupName>Ставка налога на прибыль. 15%.</groupName><id>16743</id><name>Ставка налога на прибыль. 15%. Субфедеральные и муниципальные облигации, за исключением муниципальных облигаций, выпущенных до 1 января 2007 года на срок не менее 3 лет</name><order>4</order><width>10</width><maxLength>17</maxLength><precision>2</precision></columns><columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn"><alias>governmentBonds</alias><checking>false</checking><groupName>Ставка налога на прибыль. 15%.</groupName><id>16744</id><name>Ставка налога на прибыль. 15%. Государственные облигации Республики Беларусь</name><order>5</order><width>10</width><maxLength>17</maxLength><precision>2</precision></columns><columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn"><alias>mortgageBonds</alias><checking>false</checking><groupName>Ставка налога на прибыль. 15%.</groupName><id>16745</id><name>Ставка налога на прибыль. 15%. Ипотечные облигации, выпущенные после 1 января 2007 года</name><order>6</order><width>10</width><maxLength>17</maxLength><precision>2</precision></columns><columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn"><alias>municipalBondsBefore</alias><checking>false</checking><groupName>Ставка налога на прибыль. 9%.</groupName><id>16746</id><name>Ставка налога на прибыль. 9%. Муниципальные облигации, выпущенные до 1 января 2007 года на срок не менее 3 лет</name><order>7</order><width>10</width><maxLength>17</maxLength><precision>2</precision></columns><columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn"><alias>rtgageBondsBefore</alias><checking>false</checking><groupName>Ставка налога на прибыль. 9%.</groupName><id>16747</id><name>Ставка налога на прибыль. 9%. Ипотечные облигации, выпущенные до 1 января 2007 года</name><order>8</order><width>10</width><maxLength>17</maxLength><precision>2</precision></columns><columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn"><alias>ovgvz</alias><checking>false</checking><groupName>Ставка налога на прибыль 0%.</groupName><id>16748</id><name>Ставка налога на прибыль 0%. ОВГВЗ</name><order>9</order><width>10</width><maxLength>17</maxLength><precision>2</precision></columns><columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn"><alias>eurobondsRF</alias><checking>false</checking><groupName>Ставка налога на прибыль 20%.</groupName><id>16749</id><name>Ставка налога на прибыль 20%. Еврооблигации РФ</name><order>10</order><width>8</width><maxLength>17</maxLength><precision>2</precision></columns><columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn"><alias>itherEurobonds</alias><checking>false</checking><groupName>Ставка налога на прибыль. 20%.</groupName><id>16750</id><name>Ставка налога на прибыль 20%. Прочие еврооблигации</name><order>11</order><width>8</width><maxLength>17</maxLength><precision>2</precision></columns><columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn"><alias>corporateBonds</alias><checking>false</checking><groupName>Ставка налога на прибыль. 20%.</groupName><id>16751</id><name>Ставка налога на прибыль 20%. Корпоративные облигации</name><order>12</order><width>8</width><maxLength>17</maxLength><precision>2</precision></columns><styles><alias>Контрольные суммы</alias><backColor>LIGHT_BROWN</backColor><bold>true</bold><fontColor>BLACK</fontColor><id>10363</id><italic>false</italic></styles><styles><alias>Редактируемая</alias><backColor>LIGHT_BLUE</backColor><bold>false</bold><fontColor>BLACK</fontColor><id>10364</id><italic>false</italic></styles></formTemplateContent>
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<formTemplateContent>
+    <type>
+        <id>328</id>
+        <name>(РНУ-31) Регистр налогового учёта процентного дохода по купонным облигациям</name>
+        <taxType>INCOME</taxType>
+    </type>
+    <version>0.1</version>
+    <active>true</active>
+    <numberedColumns>false</numberedColumns>
+    <fixedRows>true</fixedRows>
+    <name>(РНУ-31) Регистр налогового учёта процентного дохода по купонным облигациям</name>
+    <fullName>(РНУ-31) Регистр налогового учёта процентного дохода по купонным облигациям</fullName>
+    <code>1290-31</code>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>number</alias>
+        <checking>false</checking>
+        <id>16740</id>
+        <name>№ пп</name>
+        <order>1</order>
+        <width>5</width>
+        <maxLength>15</maxLength>
+        <precision>0</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
+        <alias>securitiesType</alias>
+        <checking>false</checking>
+        <id>16741</id>
+        <name>Вид ценных бумаг</name>
+        <order>2</order>
+        <width>15</width>
+        <maxLength>255</maxLength>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>ofz</alias>
+        <checking>false</checking>
+        <groupName>Ставка налога на прибыль. 15%.</groupName>
+        <id>16742</id>
+        <name>Ставка налога на прибыль. 15%. ОФЗ</name>
+        <order>3</order>
+        <width>10</width>
+        <maxLength>17</maxLength>
+        <precision>2</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>municipalBonds</alias>
+        <checking>false</checking>
+        <groupName>Ставка налога на прибыль. 15%.</groupName>
+        <id>16743</id>
+        <name>Ставка налога на прибыль. 15%. Субфедеральные и муниципальные облигации, за исключением муниципальных
+            облигаций, выпущенных до 1 января 2007 года на срок не менее 3 лет
+        </name>
+        <order>4</order>
+        <width>10</width>
+        <maxLength>17</maxLength>
+        <precision>2</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>governmentBonds</alias>
+        <checking>false</checking>
+        <groupName>Ставка налога на прибыль. 15%.</groupName>
+        <id>16744</id>
+        <name>Ставка налога на прибыль. 15%. Государственные облигации Республики Беларусь</name>
+        <order>5</order>
+        <width>10</width>
+        <maxLength>17</maxLength>
+        <precision>2</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>mortgageBonds</alias>
+        <checking>false</checking>
+        <groupName>Ставка налога на прибыль. 15%.</groupName>
+        <id>16745</id>
+        <name>Ставка налога на прибыль. 15%. Ипотечные облигации, выпущенные после 1 января 2007 года</name>
+        <order>6</order>
+        <width>10</width>
+        <maxLength>17</maxLength>
+        <precision>2</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>municipalBondsBefore</alias>
+        <checking>false</checking>
+        <groupName>Ставка налога на прибыль. 9%.</groupName>
+        <id>16746</id>
+        <name>Ставка налога на прибыль. 9%. Муниципальные облигации, выпущенные до 1 января 2007 года на срок не менее 3
+            лет
+        </name>
+        <order>7</order>
+        <width>10</width>
+        <maxLength>17</maxLength>
+        <precision>2</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>rtgageBondsBefore</alias>
+        <checking>false</checking>
+        <groupName>Ставка налога на прибыль. 9%.</groupName>
+        <id>16747</id>
+        <name>Ставка налога на прибыль. 9%. Ипотечные облигации, выпущенные до 1 января 2007 года</name>
+        <order>8</order>
+        <width>10</width>
+        <maxLength>17</maxLength>
+        <precision>2</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>ovgvz</alias>
+        <checking>false</checking>
+        <groupName>Ставка налога на прибыль 0%.</groupName>
+        <id>16748</id>
+        <name>Ставка налога на прибыль 0%. ОВГВЗ</name>
+        <order>9</order>
+        <width>10</width>
+        <maxLength>17</maxLength>
+        <precision>2</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>eurobondsRF</alias>
+        <checking>false</checking>
+        <groupName>Ставка налога на прибыль 20%.</groupName>
+        <id>16749</id>
+        <name>Ставка налога на прибыль 20%. Еврооблигации РФ</name>
+        <order>10</order>
+        <width>8</width>
+        <maxLength>17</maxLength>
+        <precision>2</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>itherEurobonds</alias>
+        <checking>false</checking>
+        <groupName>Ставка налога на прибыль. 20%.</groupName>
+        <id>16750</id>
+        <name>Ставка налога на прибыль 20%. Прочие еврооблигации</name>
+        <order>11</order>
+        <width>8</width>
+        <maxLength>17</maxLength>
+        <precision>2</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>corporateBonds</alias>
+        <checking>false</checking>
+        <groupName>Ставка налога на прибыль. 20%.</groupName>
+        <id>16751</id>
+        <name>Ставка налога на прибыль 20%. Корпоративные облигации</name>
+        <order>12</order>
+        <width>8</width>
+        <maxLength>17</maxLength>
+        <precision>2</precision>
+    </columns>
+    <styles>
+        <alias>Контрольные суммы</alias>
+        <backColor>LIGHT_BROWN</backColor>
+        <bold>true</bold>
+        <fontColor>BLACK</fontColor>
+        <id>10363</id>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Редактируемая</alias>
+        <backColor>LIGHT_BLUE</backColor>
+        <bold>false</bold>
+        <fontColor>BLACK</fontColor>
+        <id>10364</id>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Корректировка-изменено</alias>
+        <backColor>WHITE</backColor>
+        <bold>true</bold>
+        <fontColor>RED</fontColor>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Корректировка-без изменений</alias>
+        <backColor>GREY</backColor>
+        <bold>false</bold>
+        <fontColor>BLACK</fontColor>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Корректировка-добавлено</alias>
+        <backColor>PALE_GREEN</backColor>
+        <bold>false</bold>
+        <fontColor>BLACK</fontColor>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Корректировка-удалено</alias>
+        <backColor>LIGHT_CORAL</backColor>
+        <bold>false</bold>
+        <fontColor>BLACK</fontColor>
+        <italic>false</italic>
+    </styles>
+</formTemplateContent>

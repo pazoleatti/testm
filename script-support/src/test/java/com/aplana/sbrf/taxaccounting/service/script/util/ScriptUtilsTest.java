@@ -96,7 +96,6 @@ public class ScriptUtilsTest {
     @Test
     public void summTest() {
         FormData fd = getTestFormData().getFirst();
-        LOG.info(fd);
         double r = ScriptUtils.summ(fd, getTestFormData().getSecond(), new ColumnRange(NUMBER_ALIAS, 0, 1));
         Assert.assertTrue(Math.abs(r) > Constants.EPS);
     }
@@ -220,8 +219,16 @@ public class ScriptUtilsTest {
         ScriptUtils.checkHeaderEquals(headerMapping, logger);
         Assert.assertTrue(logger.getEntries().isEmpty());
 
+        ArrayList<Map<Object, String>> headerMappingList = new ArrayList<Map<Object, String>>();
+        headerMappingList.add(headerMapping);
+        ScriptUtils.checkHeaderEquals(headerMappingList, logger);
+        Assert.assertTrue(logger.getEntries().isEmpty());
+
         headerMapping.put("столбец 1", "столбец  2");
         ScriptUtils.checkHeaderEquals(headerMapping, logger);
+        Assert.assertTrue(logger.containsLevel(LogLevel.ERROR));
+
+        ScriptUtils.checkHeaderEquals(headerMappingList, logger);
         Assert.assertTrue(logger.containsLevel(LogLevel.ERROR));
     }
 

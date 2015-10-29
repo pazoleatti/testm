@@ -3,7 +3,7 @@
     <fixedRows>false</fixedRows>
     <name>(РНУ-39.2) Регистр налогового учёта процентного дохода по коротким позициям</name>
     <fullName>(РНУ-39.2) Регистр налогового учёта процентного дохода по коротким позициям</fullName>
-    <code>РНУ-39.2</code>
+    <header>1290-39.2</header>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>fix</alias>
         <checking>false</checking>

@@ -595,25 +595,25 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
     checkHeaderSize(headerRows[headerRows.size() - 1].size(), headerRows.size(), colCount, rowCount)
 
     def headerMapping = [
-            (headerRows[0][0]) : getColumnName(tmpRow, 'rowNumber'),
-            (headerRows[0][2]) : getColumnName(tmpRow, 'billNumber'),
-            (headerRows[0][3]) : getColumnName(tmpRow, 'creationDate'),
-            (headerRows[0][4]) : getColumnName(tmpRow, 'nominal'),
-            (headerRows[0][5]) : getColumnName(tmpRow, 'currencyCode'),
-            (headerRows[0][6]) : 'Курс Банка России',
-            (headerRows[1][6]) : 'на дату составления векселя',
-            (headerRows[1][7]) : 'на дату совершения операции',
-            (headerRows[0][8]) : getColumnName(tmpRow, 'paymentStart'),
-            (headerRows[0][9]) : getColumnName(tmpRow, 'paymentEnd'),
-            (headerRows[0][10]): getColumnName(tmpRow, 'interestRate'),
-            (headerRows[0][11]): getColumnName(tmpRow, 'operationDate'),
-            (headerRows[0][12]): getColumnName(tmpRow, 'sum70606'),
-            (headerRows[0][13]): getColumnName(tmpRow, 'sumLimit'),
-            (headerRows[0][14]): getColumnName(tmpRow, 'percAdjustment'),
-            (headerRows[2][0]) : '1'
+            ([(headerRows[0][0]): getColumnName(tmpRow, 'rowNumber')]),
+            ([(headerRows[0][2]): getColumnName(tmpRow, 'billNumber')]),
+            ([(headerRows[0][3]): getColumnName(tmpRow, 'creationDate')]),
+            ([(headerRows[0][4]): getColumnName(tmpRow, 'nominal')]),
+            ([(headerRows[0][5]): getColumnName(tmpRow, 'currencyCode')]),
+            ([(headerRows[0][6]): 'Курс Банка России']),
+            ([(headerRows[1][6]): 'на дату составления векселя']),
+            ([(headerRows[1][7]): 'на дату совершения операции']),
+            ([(headerRows[0][8]): getColumnName(tmpRow, 'paymentStart')]),
+            ([(headerRows[0][9]): getColumnName(tmpRow, 'paymentEnd')]),
+            ([(headerRows[0][10]): getColumnName(tmpRow, 'interestRate')]),
+            ([(headerRows[0][11]): getColumnName(tmpRow, 'operationDate')]),
+            ([(headerRows[0][12]): getColumnName(tmpRow, 'sum70606')]),
+            ([(headerRows[0][13]): getColumnName(tmpRow, 'sumLimit')]),
+            ([(headerRows[0][14]): getColumnName(tmpRow, 'percAdjustment')]),
+            ([(headerRows[2][0]): '1'])
     ]
     (2..14).each { index ->
-        headerMapping.put(headerRows[2][index], index.toString())
+        headerMapping.add(([(headerRows[2][index]): index.toString()]))
     }
     checkHeaderEquals(headerMapping, logger)
 }

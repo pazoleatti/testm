@@ -198,7 +198,7 @@ public class DeclarationCreationView extends PopupViewWithUiHandlers<Declaration
     public void onPeriodPickerChange(ValueChangeEvent<List<Integer>> event) {
         departmentPicker.setValue(null, true);
         if (getUiHandlers() != null) {
-            getUiHandlers().onReportPeriodChange(false);
+            getUiHandlers().onReportPeriodChange();
         }
         updateEnabled();
     }

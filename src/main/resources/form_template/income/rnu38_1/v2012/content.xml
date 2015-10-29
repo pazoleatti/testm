@@ -7,7 +7,7 @@
     <fullName>(РНУ-38.1) Регистр налогового учёта начисленного процентного дохода по ОФЗ, по которым открыта короткая
         позиция. Отчёт 1
     </fullName>
-    <code>РНУ-38.1 (Отчет 1)</code>
+    <header>1290-38.1</header>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>series</alias>
         <checking>false</checking>

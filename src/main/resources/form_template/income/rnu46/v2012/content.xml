@@ -7,7 +7,7 @@
     <fullName>(РНУ-46) Регистр налогового учёта «карточка по учёту основных средств и капитальных вложений в неотделимые
         улучшения арендованного и полученного по договору безвозмездного пользования имущества»
     </fullName>
-    <code>РНУ-46</code>
+    <header>852-46</header>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>rowNumber</alias>
         <checking>false</checking>

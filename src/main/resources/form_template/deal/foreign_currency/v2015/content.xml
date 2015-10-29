@@ -4,14 +4,14 @@
     <name>Купля-продажа иностранной валюты</name>
     <fullName>Отчет в отношении доходов и расходов ПАО Сбербанк по Контролируемым сделкам, связанным с операциями по купле-продаже иностранной валюты</fullName>
     <code>ПРИЛОЖЕНИЕ 1|к Распоряжению|от "__" апреля 2013 № ___</code>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="autoNumerationColumn">
         <alias>rowNumber</alias>
         <checking>false</checking>
+        <columnType>AUTO</columnType>
         <name>№ п/п</name>
         <order>1</order>
         <width>4</width>
-        <maxLength>15</maxLength>
-        <precision>0</precision>
+        <numerationType>SERIAL</numerationType>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>itog</alias>

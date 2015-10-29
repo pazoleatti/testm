@@ -3,7 +3,7 @@
     <fixedRows>false</fixedRows>
     <name>(РНУ-22) Регистр налогового учёта периодически взимаемых комиссий по операциям кредитования</name>
     <fullName>(РНУ-22) Регистр налогового учёта периодически взимаемых комиссий по операциям кредитования</fullName>
-    <code>РНУ-22</code>
+    <header>852-22</header>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>rowNumber</alias>
         <checking>false</checking>

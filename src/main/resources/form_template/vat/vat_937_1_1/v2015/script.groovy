@@ -614,27 +614,27 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
     }
     checkHeaderSize(headerRows[0].size(), headerRows.size(), colCount, rowCount)
     def headerMapping = [
-            (headerRows[0][0])  : getColumnName(tmpRow, 'rowNum'),
-            (headerRows[0][1])  : getColumnName(tmpRow, 'typeCode'),
-            (headerRows[0][2])  : getColumnName(tmpRow, 'invoice'),
-            (headerRows[0][3])  : getColumnName(tmpRow, 'invoiceCorrecting'),
-            (headerRows[0][4])  : getColumnName(tmpRow, 'invoiceCorrection'),
-            (headerRows[0][5])  : getColumnName(tmpRow, 'invoiceCorrectingCorrection'),
-            (headerRows[0][6])  : getColumnName(tmpRow, 'documentPay'),
-            (headerRows[0][7])  : getColumnName(tmpRow, 'dateRegistration'),
-            (headerRows[0][8])  : getColumnName(tmpRow, 'salesman'),
-            (headerRows[0][9])  : getColumnName(tmpRow, 'salesmanInnKpp'),
-            (headerRows[0][10]) : 'Сведения о посреднике (комиссионере, агенте)',
-            (headerRows[0][12]) : getColumnName(tmpRow, 'declarationNum'),
-            (headerRows[0][13]) : getColumnName(tmpRow, 'currency'),
-            (headerRows[0][14]) : getColumnName(tmpRow, 'cost'),
-            (headerRows[0][15]) : getColumnName(tmpRow, 'nds'),
+            ([(headerRows[0][0]): getColumnName(tmpRow, 'rowNum')]),
+            ([(headerRows[0][1]): getColumnName(tmpRow, 'typeCode')]),
+            ([(headerRows[0][2]): getColumnName(tmpRow, 'invoice')]),
+            ([(headerRows[0][3]): getColumnName(tmpRow, 'invoiceCorrecting')]),
+            ([(headerRows[0][4]): getColumnName(tmpRow, 'invoiceCorrection')]),
+            ([(headerRows[0][5]): getColumnName(tmpRow, 'invoiceCorrectingCorrection')]),
+            ([(headerRows[0][6]): getColumnName(tmpRow, 'documentPay')]),
+            ([(headerRows[0][7]): getColumnName(tmpRow, 'dateRegistration')]),
+            ([(headerRows[0][8]): getColumnName(tmpRow, 'salesman')]),
+            ([(headerRows[0][9]): getColumnName(tmpRow, 'salesmanInnKpp')]),
+            ([(headerRows[0][10]): 'Сведения о посреднике (комиссионере, агенте)']),
+            ([(headerRows[0][12]): getColumnName(tmpRow, 'declarationNum')]),
+            ([(headerRows[0][13]): getColumnName(tmpRow, 'currency')]),
+            ([(headerRows[0][14]): getColumnName(tmpRow, 'cost')]),
+            ([(headerRows[0][15]): getColumnName(tmpRow, 'nds')]),
 
-            (headerRows[1][10]) : 'Наименование посредника',
-            (headerRows[1][11]) : 'ИНН/КПП посредника',
+            ([(headerRows[1][10]): 'Наименование посредника']),
+            ([(headerRows[1][11]): 'ИНН/КПП посредника']),
     ]
     (0..15).each { index ->
-        headerMapping.put((headerRows[2][index]), (index + 1).toString())
+        headerMapping.add(([(headerRows[2][index]): (index + 1).toString()]))
     }
     checkHeaderEquals(headerMapping, logger)
 }

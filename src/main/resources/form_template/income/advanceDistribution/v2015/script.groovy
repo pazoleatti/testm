@@ -911,12 +911,14 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
     }
     checkHeaderSize(headerRows[0].size(), headerRows.size(), colCount, rowCount)
 
-    def headerMapping = [:]
+    def headerMapping = [[:]]
     def index = 0
     for (alias in allColumns) {
-        if (alias == 'fix') continue
-        headerMapping.put((headerRows[0][index ? (index + 1) : 0]), getColumnName(tmpRow, alias))
-        headerMapping.put((headerRows[1][index == 0 ? 0 : (index + 1)]), (index + 1).toString())
+        if (alias == 'fix') {
+            continue
+        }
+        headerMapping.add(([(headerRows[0][index ? (index + 1) : 0]): getColumnName(tmpRow, alias)]))
+        headerMapping.add(([(headerRows[1][index == 0 ? 0 : (index + 1)]): (index + 1).toString()]))
         index++
     }
     checkHeaderEquals(headerMapping, logger)

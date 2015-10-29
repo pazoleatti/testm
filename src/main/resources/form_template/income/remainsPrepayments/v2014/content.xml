@@ -3,7 +3,6 @@
     <fixedRows>true</fixedRows>
     <name>Остатки по начисленным авансовым платежам</name>
     <fullName>Остатки по начисленным авансовым платежам</fullName>
-    <code>не указан</code>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>sum1</alias>
         <checking>false</checking>
@@ -27,6 +26,34 @@
     <styles>
         <alias>Редактируемая</alias>
         <backColor>LIGHT_BLUE</backColor>
+        <bold>false</bold>
+        <fontColor>BLACK</fontColor>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Корректировка-изменено</alias>
+        <backColor>WHITE</backColor>
+        <bold>true</bold>
+        <fontColor>RED</fontColor>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Корректировка-без изменений</alias>
+        <backColor>GREY</backColor>
+        <bold>false</bold>
+        <fontColor>BLACK</fontColor>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Корректировка-добавлено</alias>
+        <backColor>PALE_GREEN</backColor>
+        <bold>false</bold>
+        <fontColor>BLACK</fontColor>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Корректировка-удалено</alias>
+        <backColor>LIGHT_CORAL</backColor>
         <bold>false</bold>
         <fontColor>BLACK</fontColor>
         <italic>false</italic>

@@ -327,35 +327,35 @@ void checkHeaderXls(def headerRows, def colCount, rowCount) {
     }
     checkHeaderSize(headerRows[rowCount - 1].size(), headerRows.size(), colCount, rowCount)
     def headerMapping = [
-            (headerRows[0][0]) : '№ пп.',
-            (headerRows[0][1]) : 'Эмитент',
-            (headerRows[0][2]) : 'Номер решения о выплате дивидендов',
-            (headerRows[0][3]) : 'Получатель',
-            (headerRows[0][7]) : 'Место нахождения (адрес)',
-            (headerRows[0][16]): 'Руководитель организации',
-            (headerRows[0][19]): 'Контактный телефон',
-            (headerRows[0][20]): 'Дата перечисления дивидендов',
-            (headerRows[0][21]): 'Сумма дивидендов в рублях',
-            (headerRows[0][22]): 'Сумма налога в рублях',
-            (headerRows[1][3]) : 'ИНН',
-            (headerRows[1][4]) : 'КПП',
-            (headerRows[1][5]) : 'Тип',
-            (headerRows[1][6]) : 'Наименование',
-            (headerRows[1][7]) : 'Индекс',
-            (headerRows[1][8]) : 'Код региона',
-            (headerRows[1][9]) : 'Район',
-            (headerRows[1][10]): 'Город',
-            (headerRows[1][11]): 'Населённый пункт',
-            (headerRows[1][12]): 'Улица',
-            (headerRows[1][13]): 'Номер дома (владения)',
-            (headerRows[1][14]): 'Номер корпуса (строения)',
-            (headerRows[1][15]): 'Номер квартиры (офиса)',
-            (headerRows[1][16]): 'Фамилия',
-            (headerRows[1][17]): 'Имя',
-            (headerRows[1][18]): 'Отчество'
+            ([(headerRows[0][0]): '№ пп.']),
+            ([(headerRows[0][1]): 'Эмитент']),
+            ([(headerRows[0][2]): 'Номер решения о выплате дивидендов']),
+            ([(headerRows[0][3]): 'Получатель']),
+            ([(headerRows[0][7]): 'Место нахождения (адрес)']),
+            ([(headerRows[0][16]): 'Руководитель организации']),
+            ([(headerRows[0][19]): 'Контактный телефон']),
+            ([(headerRows[0][20]): 'Дата перечисления дивидендов']),
+            ([(headerRows[0][21]): 'Сумма дивидендов в рублях']),
+            ([(headerRows[0][22]): 'Сумма налога в рублях']),
+            ([(headerRows[1][3]): 'ИНН']),
+            ([(headerRows[1][4]): 'КПП']),
+            ([(headerRows[1][5]): 'Тип']),
+            ([(headerRows[1][6]): 'Наименование']),
+            ([(headerRows[1][7]): 'Индекс']),
+            ([(headerRows[1][8]): 'Код региона']),
+            ([(headerRows[1][9]): 'Район']),
+            ([(headerRows[1][10]): 'Город']),
+            ([(headerRows[1][11]): 'Населённый пункт']),
+            ([(headerRows[1][12]): 'Улица']),
+            ([(headerRows[1][13]): 'Номер дома (владения)']),
+            ([(headerRows[1][14]): 'Номер корпуса (строения)']),
+            ([(headerRows[1][15]): 'Номер квартиры (офиса)']),
+            ([(headerRows[1][16]): 'Фамилия']),
+            ([(headerRows[1][17]): 'Имя']),
+            ([(headerRows[1][18]): 'Отчество'])
     ]
     (0..22).each { index ->
-        headerMapping.put((headerRows[2][index]), (index + 1).toString())
+        headerMapping.add(([(headerRows[2][index]): (index + 1).toString()]))
     }
     checkHeaderEquals(headerMapping, logger)
 }

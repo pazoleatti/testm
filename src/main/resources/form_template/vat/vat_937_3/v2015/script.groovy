@@ -968,38 +968,38 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
     }
     checkHeaderSize(headerRows[0].size(), headerRows.size(), colCount, rowCount)
     def headerMapping = [
-            (headerRows[0][0])  : getColumnName(tmpRow, 'rowNumber'),
+            ([(headerRows[0][0]): getColumnName(tmpRow, 'rowNumber')]),
             // вторая ячейка скрытая
-            (headerRows[0][2])  : getColumnName(tmpRow, 'date'),
-            (headerRows[0][3])  : getColumnName(tmpRow, 'opTypeCode'),
-            (headerRows[0][4])  : getColumnName(tmpRow, 'invoiceNumDate'),
-            (headerRows[0][5])  : getColumnName(tmpRow, 'invoiceCorrNumDate'),
-            (headerRows[0][6])  : getColumnName(tmpRow, 'corrInvoiceNumDate'),
-            (headerRows[0][7])  : getColumnName(tmpRow, 'corrInvCorrNumDate'),
-            (headerRows[0][8])  : getColumnName(tmpRow, 'buyerName'),
-            (headerRows[0][9])  : getColumnName(tmpRow, 'buyerInnKpp'),
+            ([(headerRows[0][2]): getColumnName(tmpRow, 'date')]),
+            ([(headerRows[0][3]): getColumnName(tmpRow, 'opTypeCode')]),
+            ([(headerRows[0][4]): getColumnName(tmpRow, 'invoiceNumDate')]),
+            ([(headerRows[0][5]): getColumnName(tmpRow, 'invoiceCorrNumDate')]),
+            ([(headerRows[0][6]): getColumnName(tmpRow, 'corrInvoiceNumDate')]),
+            ([(headerRows[0][7]): getColumnName(tmpRow, 'corrInvCorrNumDate')]),
+            ([(headerRows[0][8]): getColumnName(tmpRow, 'buyerName')]),
+            ([(headerRows[0][9]): getColumnName(tmpRow, 'buyerInnKpp')]),
 
-            (headerRows[0][10]) : 'Сведения о посреднической деятельности, указываемые комиссионером (агентом), застройщиком или техническим заказчиком',
-            (headerRows[1][10]) : 'наименование продавца (из графы 8 части 2)/ субкомиссионера (субагента)',
-            (headerRows[1][11]) : 'ИНН/КПП продавца (из графы 9 части 2)/ субкомиссионера (субагента)',
-            (headerRows[1][12]) : 'номер и дата счета-фактуры, полученного от продавца (из графы 4 части 2)/ код вида сделки',
+            ([(headerRows[0][10]): 'Сведения о посреднической деятельности, указываемые комиссионером (агентом), застройщиком или техническим заказчиком']),
+            ([(headerRows[1][10]): 'наименование продавца (из графы 8 части 2)/ субкомиссионера (субагента)']),
+            ([(headerRows[1][11]): 'ИНН/КПП продавца (из графы 9 части 2)/ субкомиссионера (субагента)']),
+            ([(headerRows[1][12]): 'номер и дата счета-фактуры, полученного от продавца (из графы 4 части 2)/ код вида сделки']),
 
-            (headerRows[0][13]) : getColumnName(tmpRow, 'currNameCode'),
-            (headerRows[0][14]) : getColumnName(tmpRow, 'cost'),
-            (headerRows[0][15]) : getColumnName(tmpRow, 'vatSum'),
+            ([(headerRows[0][13]): getColumnName(tmpRow, 'currNameCode')]),
+            ([(headerRows[0][14]): getColumnName(tmpRow, 'cost')]),
+            ([(headerRows[0][15]): getColumnName(tmpRow, 'vatSum')]),
 
-            (headerRows[0][16]) : 'Разница стоимости с учетом НДС по корректировочному счету-фактуре',
-            (headerRows[1][16]) : 'уменьшение',
-            (headerRows[1][17]) : 'увеличение',
+            ([(headerRows[0][16]): 'Разница стоимости с учетом НДС по корректировочному счету-фактуре']),
+            ([(headerRows[1][16]): 'уменьшение']),
+            ([(headerRows[1][17]): 'увеличение']),
 
-            (headerRows[0][18]) : 'Разница НДС по корректировочному счету-фактуре',
-            (headerRows[1][18]) : 'уменьшение',
-            (headerRows[1][19]) : 'увеличение',
+            ([(headerRows[0][18]): 'Разница НДС по корректировочному счету-фактуре']),
+            ([(headerRows[1][18]): 'уменьшение']),
+            ([(headerRows[1][19]): 'увеличение']),
 
-            (headerRows[2][0]) : '1',
+            ([(headerRows[2][0]): '1']),
     ]
     (2..19).each { index ->
-        headerMapping.put(headerRows[2][index], index.toString())
+        headerMapping.add(([(headerRows[2][index]): index.toString()]))
     }
     checkHeaderEquals(headerMapping, logger)
 }

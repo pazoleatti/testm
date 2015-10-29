@@ -941,11 +941,11 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
         throw new ServiceException(WRONG_HEADER_ROW_SIZE)
     }
     checkHeaderSize(headerRows[0].size(), headerRows.size(), colCount, rowCount)
-    def headerMapping = [:]
+    def headerMapping =[[:]]
     def index = 0
     allColumns.each { alias ->
-        headerMapping.put((headerRows[0][index]), getColumnName(tmpRow, alias))
-        headerMapping.put((headerRows[1][index]), (index + 1).toString())
+        headerMapping.add(([(headerRows[0][index]): getColumnName(tmpRow, alias)]))
+        headerMapping.add(([(headerRows[1][index]): (index + 1).toString()]))
         index++
     }
     checkHeaderEquals(headerMapping, logger)

@@ -3,7 +3,7 @@
     <fixedRows>false</fixedRows>
     <name>(РНУ-55) Регистр налогового учёта процентного дохода по процентным векселям сторонних эмитентов</name>
     <fullName>(РНУ-55) Регистр налогового учёта процентного дохода по процентным векселям сторонних эмитентов</fullName>
-    <code>РНУ-55</code>
+    <header>852-55</header>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>number</alias>
         <checking>false</checking>
