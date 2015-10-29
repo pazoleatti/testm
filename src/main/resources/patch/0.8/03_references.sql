@@ -238,7 +238,7 @@ insert into ref_book_record (id, record_id, ref_book_id, version, status) values
 
 INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) VALUES (514, 'Пороговые значения',1,0,0,null);
 
-INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (5141, 514, 'Тип юридического лица',       'CODE',   4, 1, 505, 5051, 1, null,   30, 1, 1, null,   null, 0, null);
+INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (5141, 514, 'Тип участника ТЦО',       'CODE',   4, 1, 505, 5051, 1, null,   30, 1, 1, null,   null, 0, null);
 INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (5142, 514, 'Пороговое значение (руб.)',     'VALUE',   2, 2, null, null, 1, 0, 20, 1, 0, null, 	null, 0, 12);
 
 insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 1, 514, to_date('01.01.2014', 'DD.MM.YYYY'), 0);
