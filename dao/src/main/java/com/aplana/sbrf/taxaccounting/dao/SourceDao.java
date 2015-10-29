@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.dao;
 
+import com.aplana.sbrf.taxaccounting.model.DeclarationData;
 import com.aplana.sbrf.taxaccounting.model.FormData;
 import com.aplana.sbrf.taxaccounting.model.Relation;
 import com.aplana.sbrf.taxaccounting.model.WorkflowState;
@@ -205,41 +206,41 @@ public interface SourceDao {
 
     /**
      * Возвращает список нф-источников для указанной нф (включая несозданные)
-     * @param destinationFormDataId идентификатор нф-приемника
+     * @param destinationFormData нф-приемник
      * @param light true - заполнятся только текстовые данные для GUI и сообщений
      * @param excludeIfNotExist true - исключить несозданные источники
      * @param stateRestriction ограничение по состоянию для созданных экземпляров
      * @return список нф-источников
      */
-    List<Relation> getSourcesInfo(long destinationFormDataId, boolean light, boolean excludeIfNotExist, WorkflowState stateRestriction);
+    List<Relation> getSourcesInfo(FormData destinationFormData, boolean light, boolean excludeIfNotExist, WorkflowState stateRestriction);
 
     /**
      * Возвращает список нф-приемников для указанной нф (включая несозданные)
-     * @param sourceFormDataId идентификатор нф-источника
+     * @param sourceFormData нф-источник
      * @param light true - заполнятся только текстовые данные для GUI и сообщений
      * @param excludeIfNotExist true - исключить несозданные приемники
      * @param stateRestriction ограничение по состоянию для созданных экземпляров
      * @return список нф-приемников
      */
-    List<Relation> getDestinationsInfo(long sourceFormDataId, boolean light, boolean excludeIfNotExist, WorkflowState stateRestriction);
+    List<Relation> getDestinationsInfo(FormData sourceFormData, boolean light, boolean excludeIfNotExist, WorkflowState stateRestriction);
 
     /**
      * Возвращает список нф-источников для указанной декларации (включая несозданные)
-     * @param sourceFormDataId идентификатор нф-источника
+     * @param sourceFormData нф-источник
      * @param light true - заполнятся только текстовые данные для GUI и сообщений
      * @param excludeIfNotExist true - исключить несозданные приемники
      * @param stateRestriction ограничение по состоянию для созданных экземпляров
      * @return список нф-источников
      */
-    List<Relation> getDeclarationDestinationsInfo(long sourceFormDataId, boolean light, boolean excludeIfNotExist, WorkflowState stateRestriction);
+    List<Relation> getDeclarationDestinationsInfo(FormData sourceFormData, boolean light, boolean excludeIfNotExist, WorkflowState stateRestriction);
 
     /**
      * Возвращает список нф-источников для указанной декларации (включая несозданные)
-     * @param declarationId идентификатор декларации-приемника
+     * @param declaration декларация-приемник
      * @param light true - заполнятся только текстовые данные для GUI и сообщений
      * @param excludeIfNotExist true - исключить несозданные источники
      * @param stateRestriction ограничение по состоянию для созданных экземпляров
      * @return список нф-источников
      */
-    List<Relation> getDeclarationSourcesInfo(long declarationId, boolean light, boolean excludeIfNotExist, WorkflowState stateRestriction);
+    List<Relation> getDeclarationSourcesInfo(DeclarationData declaration, boolean light, boolean excludeIfNotExist, WorkflowState stateRestriction);
 }
