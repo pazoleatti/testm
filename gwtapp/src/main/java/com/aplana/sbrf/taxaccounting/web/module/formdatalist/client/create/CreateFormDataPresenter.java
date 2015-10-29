@@ -117,6 +117,7 @@ public class CreateFormDataPresenter extends PresenterWidget<CreateFormDataPrese
                     public void onSuccess(FillFormFieldsResult result) {
                         getView().setAcceptableDepartments(result.getDepartments(), result.getDepartmentIds(), result.getDefaultDepartmentId());
                         getView().updateEnabled();
+                        onDepartmentChanged();
                     }
                 }, this));
     }
@@ -197,6 +198,7 @@ public class CreateFormDataPresenter extends PresenterWidget<CreateFormDataPrese
                         getView().setAcceptableReportPeriods(result.getReportPeriods(), result.getDefaultReportPeriod());
                         getView().setAcceptableDepartments(result.getDepartments(), result.getDepartmentIds(), result.getDefaultDepartmentId());
                         getView().updateEnabled();
+                        onDepartmentChanged();
                         changeFilterElementNames(taxType);
 
                         slotForMe.addToPopupSlot(CreateFormDataPresenter.this);
