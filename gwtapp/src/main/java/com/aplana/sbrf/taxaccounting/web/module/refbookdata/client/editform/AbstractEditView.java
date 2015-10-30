@@ -196,59 +196,44 @@ public abstract class AbstractEditView extends ViewWithUiHandlers<EditFormUiHand
     @SuppressWarnings("unchecked")
     public void fillInputFields(Map<String, RefBookValueSerializable> record) {
         inputRecord = record;
-        if (record == null) {
-            boolean textFieldFound = false;
-
-            for (Map.Entry<RefBookColumn, HasValue> entry : widgets.entrySet()) {
-                HasValue widget = entry.getValue();
-                RefBookColumn column = entry.getKey();
-                widget.setValue(null);
-                if (widget instanceof RefBookPickerWidget) {
-                    if (isNeedToReload) {
-                        isNeedToReload = false;
-                        ((RefBookPickerWidget) widget).reload();
-                    }
-                    ((RefBookPickerWidget) widget).setDereferenceValue("");
-                }
-                //Первый по порядку текстовый атрибут справочника принимает значение "Новая запись" (если текстовые атрибуты отсутствуют, то шаг не выполняется)
-                if (column.getAttributeType() == RefBookAttributeType.STRING && !textFieldFound){
-                    textFieldFound = true;
-                    ((com.aplana.gwt.client.TextBox) widget).setValue("Новая запись");
-                }
+        boolean textFieldFound = false;
+        for (Map.Entry<RefBookColumn, HasValue> w : widgets.entrySet()) {
+            //Первый по порядку текстовый атрибут справочника принимает значение "Новая запись" (если текстовые атрибуты отсутствуют, то шаг не выполняется)
+            if (w.getValue() instanceof HasText && !(w.getValue() instanceof CheckBox) && record.containsKey(NEW_RECORD_ALIAS) && !textFieldFound){
+                textFieldFound = true;
+                w.getValue().setValue(record.get(NEW_RECORD_ALIAS).getStringValue());
+                continue;
             }
-        } else {
-            for (Map.Entry<RefBookColumn, HasValue> w : widgets.entrySet()) {
-                RefBookValueSerializable recordValue = record.get(w.getKey().getAlias());
-                if (recordValue == null)
-                    continue;
-                if (w.getValue() instanceof RefBookPickerWidget) {
-                    RefBookPickerWidget rbw = (RefBookPickerWidget) w.getValue();
-                    if (isNeedToReload) {
-                        isNeedToReload = false;
-                        rbw.reload();
-                    }
-                    rbw.setDereferenceValue(recordValue.getDereferenceValue());
-                    rbw.setSingleValue(recordValue.getReferenceValue());
-                } else if(w.getValue() instanceof HasText) {
-                    if (w.getKey().getAttributeType() == RefBookAttributeType.NUMBER) {
-                        if (w.getValue() instanceof CheckBox) {
-                            if(recordValue.getValue() == null){
-                                w.getValue().setValue(false);
-                            } else if(BigDecimal.ZERO.equals(recordValue.getValue())){
-                                w.getValue().setValue(false);
-                            } else {
-                                w.getValue().setValue(true);
-                            }
+            RefBookValueSerializable recordValue = record.get(w.getKey().getAlias());
+            if (recordValue == null)
+                continue;
+            if (w.getValue() instanceof RefBookPickerWidget) {
+                RefBookPickerWidget rbw = (RefBookPickerWidget) w.getValue();
+                if (isNeedToReload) {
+                    isNeedToReload = false;
+                    rbw.reload();
+                }
+                rbw.setDereferenceValue(recordValue.getDereferenceValue());
+                rbw.setSingleValue(recordValue.getReferenceValue());
+            } else if(w.getValue() instanceof HasText) {
+                if (w.getKey().getAttributeType() == RefBookAttributeType.NUMBER) {
+                    if (w.getValue() instanceof CheckBox) {
+                        if(recordValue.getValue() == null){
+                            w.getValue().setValue(false);
+                        } else if(BigDecimal.ZERO.equals(recordValue.getValue())){
+                            w.getValue().setValue(false);
                         } else {
-                            w.getValue().setValue((recordValue.getValue()) == null ? ""
-                                    : ((BigDecimal) recordValue.getValue()).toPlainString());
+                            w.getValue().setValue(true);
                         }
                     } else {
-                        w.getValue().setValue(recordValue.getValue());
+                        w.getValue().setValue((recordValue.getValue()) == null ? ""
+                                : ((BigDecimal) recordValue.getValue()).toPlainString());
                     }
                 } else {
                     w.getValue().setValue(recordValue.getValue());
                 }
+            } else {
+                w.getValue().setValue(recordValue.getValue());
             }
         }
         updateRefBookPickerPeriod();

@@ -33,7 +33,7 @@ import java.util.Date;
  */
 public class RefBookHierDataPresenter extends PresenterWidget<RefBookHierDataPresenter.MyView> implements RefBookHierDataUiHandlers,
         RollbackTableRowSelection.RollbackTableRowSelectionHandler, IHierRefBookData,
-        AddItemEvent.AddItemHandler, DeleteItemEvent.DeleteItemHandler, SearchButtonEvent.SearchHandler, UpdateForm.UpdateFormHandler {
+        AddItemEvent.AddItemHandler, DeleteItemEvent.DeleteItemHandler, SearchButtonEvent.SearchHandler, UpdateForm.UpdateFormHandler{
 
     private Long recordId;
     boolean canVersion = true;
@@ -75,6 +75,7 @@ public class RefBookHierDataPresenter extends PresenterWidget<RefBookHierDataPre
                         refBookHierDataPresenter.deleteItem();*/
                 getView().deleteItem(rc.getId());
             } else {
+                getView().clearSelected();
                 updateTree();
             }
             /*getView().setSelected(rc.getId());*/
@@ -171,7 +172,7 @@ public class RefBookHierDataPresenter extends PresenterWidget<RefBookHierDataPre
         RefBookTreeItem item = getView().getSelectedItem();
         ShowItemEvent.fire(this, item.getDereferenceValue(), item.getId());
         //editPresenter.show(item.getDereferenceValue(), item.getId());
-        getView().clearSelected();
+        //getView().clearSelected();
     }
 
     private void onDeleteRowClicked() {

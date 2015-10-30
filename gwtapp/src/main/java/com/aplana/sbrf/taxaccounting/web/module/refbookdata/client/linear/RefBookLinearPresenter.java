@@ -120,10 +120,10 @@ public class RefBookLinearPresenter extends PresenterWidget<RefBookLinearPresent
     @ProxyEvent
     @Override
     public void onUpdateForm(UpdateForm event) {
-        RefBookDataRow row = new RefBookDataRow();
+        /*RefBookDataRow row = new RefBookDataRow();
         row.setValues(event.getRecordChanges().getInfo());
-        row.setRefBookRowId(event.getRecordChanges().getId());
-        getView().setSelected(row.getRefBookRowId());
+        row.setRefBookRowId(event.getRecordChanges().getId());*/
+        recordId = event.getRecordChanges().getId();
         updateTable();
     }
 
@@ -215,38 +215,8 @@ public class RefBookLinearPresenter extends PresenterWidget<RefBookLinearPresent
                             new AbstractCallback<GetRefBookTableDataResult>() {
                                 @Override
                                 public void onSuccess(GetRefBookTableDataResult result) {
-                                    /*if (result.getRowNum() != null) {
-                                        int page = (int) ((result.getRowNum() - 1) / range.getLength());
-                                        if (page != getView().getPage()) {
-                                            getView().setPage(page);
-                                            return;
-                                        }
-                                    }*/
-
                                     getView().setTableData(range.getStart(),
                                             result.getTotalCount(), result.getDataRows(), recordId);
-                                    // http://jira.aplana.com/browse/SBRFACCTAX-5684 автофокус на первую строку
-                                    /*if (!result.getDataRows().isEmpty() && getView().getSelectedRow()==null) {
-                                        getView().setSelected(result.getDataRows().get(0).getRefBookRowId());
-                                    }else {
-                                        ShowItemEvent.fire(RefBookLinearPresenter.this, null, null);
-                                        *//*editPresenter.cleanFields();
-                                        editPresenter.clean();*//*
-                                        getView().setSelected(recordId);
-                                    }*/
-                                    // http://jira.aplana.com/browse/SBRFACCTAX-5759
-                                    /*if (recordId != null) {
-                                        getView().setSelected(recordId);
-                                    }*/
-//                                    recordId = null;
-                                    /*if (selectedRowIndex != null && result.getDataRows().size() > selectedRowIndex) {
-                                        //сохраняем позицию после удаления записи
-                                        getView().setSelected(result.getDataRows().get(selectedRowIndex).getRefBookRowId());
-                                    }
-                                    selectedRowIndex = null;*/
-                                    /*if (result.getDataRows().isEmpty()) {
-                                        editPresenter.setCanVersion(false);
-                                    }*/
                                 }
                             }, RefBookLinearPresenter.this));
         }
@@ -260,7 +230,7 @@ public class RefBookLinearPresenter extends PresenterWidget<RefBookLinearPresent
     @Override
     protected void onBind() {
         super.onBind();
-        addRegisteredHandler(RollbackTableRowSelection.getType(), this);
+        addVisibleHandler(RollbackTableRowSelection.getType(), this);
         addVisibleHandler(DeleteItemEvent.getType(), this);
         addVisibleHandler(SearchButtonEvent.getType(), this);
         addVisibleHandler(UpdateForm.getType(), this);

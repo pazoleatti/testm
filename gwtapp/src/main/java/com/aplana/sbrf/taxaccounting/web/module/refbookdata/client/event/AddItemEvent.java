@@ -5,6 +5,8 @@ import com.google.gwt.event.shared.GwtEvent;
 import com.google.gwt.event.shared.HasHandlers;
 
 /**
+ * Доаавление новой записи.
+ * Используется в иерархическом спраоочнике
  * User: avanteev
  */
 public class AddItemEvent extends
