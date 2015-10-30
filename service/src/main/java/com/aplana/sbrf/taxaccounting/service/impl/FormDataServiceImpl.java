@@ -7,7 +7,6 @@ import com.aplana.sbrf.taxaccounting.dao.FormDataFileDao;
 import com.aplana.sbrf.taxaccounting.dao.FormPerformerDao;
 import com.aplana.sbrf.taxaccounting.dao.api.ConfigurationDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DataRowDao;
-import com.aplana.sbrf.taxaccounting.dao.api.DepartmentFormTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
@@ -478,7 +477,28 @@ public class FormDataServiceImpl implements FormDataService {
 			logger.info("Расчет завершен, фатальных ошибок не обнаружено");
 		}
 		dataRowDao.refreshRefBookLinks(formData);
-	}
+//        logBusinessService.add(formData.getId(), null, userInfo, FormDataEvent.CALCULATE, null);
+    }
+
+    /**
+     * Выполнить обновление по налоговой форме
+     *
+     * @param logger логгер-объект для фиксации диагностических сообщений
+     * @param userInfo информация о пользователе, запросившего операцию
+     * @param formData объект с данными по налоговой форме
+     */
+    @Override
+    public void doRefresh(Logger logger, TAUserInfo userInfo, FormData formData) {
+        formDataAccessService.canEdit(userInfo, formData.getId(), formData.isManual());
+        formDataDao.updateSorted(formData.getId(), false);
+        formDataDao.updateEdited(formData.getId(), true);
+        formDataScriptingService.executeScript(userInfo, formData, FormDataEvent.REFRESH, logger, null);
+        if (logger.containsLevel(LogLevel.ERROR)) {
+            throw new ServiceException("");
+        }
+        dataRowDao.refreshRefBookLinks(formData);
+        //logBusinessService.add(formData.getId(), null, userInfo, FormDataEvent.REFRESH, null);
+    }
 
 	@Override
     @Transactional
@@ -1178,6 +1198,7 @@ public class FormDataServiceImpl implements FormDataService {
                 case IMPORT_FD:
                 case IMPORT_TF_FD:
                 case CONSOLIDATE_FD:
+                case REFRESH_FD:
                 case CALCULATE_FD:
                 case CHECK_FD:
                 case EDIT_FD:
@@ -1628,7 +1649,7 @@ public class FormDataServiceImpl implements FormDataService {
 
     @Override
     public Pair<ReportType, LockData> getLockTaskType(long formDataId) {
-        ReportType[] reportTypes = {ReportType.MOVE_FD, ReportType.CONSOLIDATE_FD, ReportType.IMPORT_TF_FD, ReportType.CALCULATE_FD, ReportType.IMPORT_FD, ReportType.EDIT_FD};
+        ReportType[] reportTypes = {ReportType.MOVE_FD, ReportType.CONSOLIDATE_FD, ReportType.IMPORT_TF_FD, ReportType.REFRESH_FD, ReportType.CALCULATE_FD, ReportType.IMPORT_FD, ReportType.EDIT_FD};
         for (ReportType reportType: reportTypes) {
             LockData lockData = lockService.getLock(generateTaskKey(formDataId, reportType));
             if (lockData != null)
@@ -1683,20 +1704,36 @@ public class FormDataServiceImpl implements FormDataService {
                         MessageGenerator.mesSpeckSingleD(formData.getFormType().getTaxType())
                 );
                 break;
+            case REFRESH_FD:
+                msg = String.format("Выполнение операции \"%s\" невозможно, т.к. для текущего экземпляра %s запущена операция \"%s\". Обновление данных невозможно",
+                        getTaskName(reportType, formDataId, userInfo),
+                        MessageGenerator.mesSpeckSingleD(formData.getFormType().getTaxType()),
+                        getTaskName(lockType.getFirst(), formDataId, userInfo));
+                break;
             case CALCULATE_FD:
-                msg = String.format("Выполнение операции \"%s\" невозможно, т.к. для текущего экземпляра налоговой формы запущена операция \"%s\". Расчет данных невозможен", getTaskName(reportType, formDataId, userInfo), getTaskName(lockType.getFirst(), formDataId, userInfo));
+                msg = String.format("Выполнение операции \"%s\" невозможно, т.к. для текущего экземпляра %s запущена операция \"%s\". Расчет данных невозможен",
+                        getTaskName(reportType, formDataId, userInfo),
+                        MessageGenerator.mesSpeckSingleD(formData.getFormType().getTaxType()),
+                        getTaskName(lockType.getFirst(), formDataId, userInfo));
                 break;
             case IMPORT_FD:
-                msg = String.format("Выполнение операции \"%s\" невозможно, т.к. для текущего экземпляра налоговой формы запущена операция \"%s\". Загрузка данных из файла невозможна", getTaskName(reportType, formDataId, userInfo), getTaskName(lockType.getFirst(), formDataId, userInfo));
+                msg = String.format("Выполнение операции \"%s\" невозможно, т.к. для текущего экземпляра %s запущена операция \"%s\". Загрузка данных из файла невозможна",
+                        getTaskName(reportType, formDataId, userInfo),
+                        MessageGenerator.mesSpeckSingleD(formData.getFormType().getTaxType()),
+                        getTaskName(lockType.getFirst(), formDataId, userInfo));
                 break;
             case CONSOLIDATE_FD:
-                msg = "";
+                msg = "Операция не выполнена";
                 break;
             case DELETE_FD:
-                msg = String.format("Выполнение операции \"%s\" невозможно, т.к. для текущего экземпляра налоговой формы выполняется операция, блокирующая ее удаление", getTaskName(reportType, formDataId, userInfo));
+                msg = String.format("Выполнение операции \"%s\" невозможно, т.к. для текущего экземпляра %s выполняется операция, блокирующая ее удаление",
+                        getTaskName(reportType, formDataId, userInfo),
+                        MessageGenerator.mesSpeckSingleD(formData.getFormType().getTaxType()));
                 break;
             case EDIT_FD:
-                msg = String.format("Выполнение операции \"%s\" невозможно, т.к. для текущего экземпляра налоговой формы запущена операция изменения данных", getTaskName(reportType, formDataId, userInfo));
+                msg = String.format("Выполнение операции \"%s\" невозможно, т.к. для текущего экземпляра %s запущена операция изменения данных",
+                        getTaskName(reportType, formDataId, userInfo),
+                        MessageGenerator.mesSpeckSingleD(formData.getFormType().getTaxType()));
                 break;
         }
         throw new ServiceLoggerException(msg, logEntryService.save(logger.getEntries()));
@@ -1707,6 +1744,7 @@ public class FormDataServiceImpl implements FormDataService {
         switch (reportType) {
             case CHECK_FD:
             case MOVE_FD:
+            case REFRESH_FD:
             case CALCULATE_FD:
             case EXCEL:
             case CSV:
@@ -1738,6 +1776,7 @@ public class FormDataServiceImpl implements FormDataService {
         switch (reportType) {
             case DELETE_FD:
             case EDIT_FD:
+            case REFRESH_FD:
             case CALCULATE_FD:
             case CONSOLIDATE_FD:
             case CHECK_FD:
@@ -1765,7 +1804,9 @@ public class FormDataServiceImpl implements FormDataService {
             case EDIT_FD:
                 return new ReportType[]{ReportType.CHECK_FD, ReportType.EXCEL, ReportType.CSV};
             case CONSOLIDATE_FD:
-                return new ReportType[]{ReportType.MOVE_FD, ReportType.CHECK_FD, ReportType.CALCULATE_FD, ReportType.IMPORT_FD, ReportType.IMPORT_TF_FD, ReportType.EXCEL, ReportType.CSV};
+                return new ReportType[]{ReportType.MOVE_FD, ReportType.CHECK_FD, ReportType.REFRESH_FD, ReportType.CALCULATE_FD, ReportType.IMPORT_FD, ReportType.IMPORT_TF_FD, ReportType.EXCEL, ReportType.CSV};
+            case REFRESH_FD:
+                return new ReportType[]{ReportType.CHECK_FD, ReportType.EXCEL, ReportType.CSV};
             case CALCULATE_FD:
                 return new ReportType[]{ReportType.CHECK_FD, ReportType.EXCEL, ReportType.CSV};
             case IMPORT_FD:
@@ -1787,6 +1828,7 @@ public class FormDataServiceImpl implements FormDataService {
         boolean exist = false;
         Boolean manualReport;
         switch (reportType) {
+            case REFRESH_FD:
             case CALCULATE_FD:
             case IMPORT_FD:
                 manualReport = manual;
@@ -1828,6 +1870,7 @@ public class FormDataServiceImpl implements FormDataService {
         if (reportTypes == null) return;
         Boolean manualReport;
         switch (reportType) {
+            case REFRESH_FD:
             case CALCULATE_FD:
             case IMPORT_FD:
                 manualReport = manual;
@@ -1857,7 +1900,7 @@ public class FormDataServiceImpl implements FormDataService {
 
     @Override
     public void restoreCheckPoint(long formDataId, boolean manual, TAUserInfo userInfo) {
-        interruptTask(formDataId, userInfo, Arrays.asList(ReportType.CALCULATE_FD, ReportType.IMPORT_FD, ReportType.CHECK_FD));
+        interruptTask(formDataId, userInfo, Arrays.asList(ReportType.REFRESH_FD, ReportType.CALCULATE_FD, ReportType.IMPORT_FD, ReportType.CHECK_FD));
         if (formDataDao.isEdited(formDataId)) {
             dataRowDao.restoreCheckPoint(getFormData(userInfo, formDataId, manual, new Logger()));
             formDataDao.restoreSorted(formDataId);

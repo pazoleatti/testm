@@ -7,7 +7,7 @@
     <fullName>(РНУ-48.1) Регистр налогового учёта «ведомость ввода в эксплуатацию инвентаря и принадлежностей до 40 000
         руб.»
     </fullName>
-    <code>РНУ-48.1 (Отчет 1)</code>
+    <header>852-48.1</header>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>number</alias>
         <checking>false</checking>

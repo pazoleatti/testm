@@ -6,7 +6,7 @@
     <fullName>(РНУ-40.1) Регистр налогового учёта начисленного процентного дохода по прочим дисконтным облигациям. Отчёт
         1
     </fullName>
-    <code>РНУ-40.1 (Отчет 1)</code>
+    <header>1290-40.1</header>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>fix</alias>
         <checking>false</checking>

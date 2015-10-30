@@ -789,25 +789,25 @@ void checkHeaderXls(def headerRows, def colCount, rowCount) {
     }
     checkHeaderSize(headerRows[0].size(), headerRows.size(), colCount, rowCount)
     def headerMapping = [
-            (headerRows[0][0]) : '№ пп',
-            (headerRows[0][2]) : 'Код налогового учета',
-            (headerRows[0][3]) : 'Дата совершения операции',
-            (headerRows[0][4]) : 'Балансовый счёт (номер)',
-            (headerRows[0][5]) : 'Первичный документ',
-            (headerRows[0][7]) : 'Код валюты',
-            (headerRows[0][8]) : 'Курс Банка России',
-            (headerRows[0][9]) : 'Сумма расхода в налоговом учёте',
-            (headerRows[0][11]): 'Сумма расхода в бухгалтерском учёте',
-            (headerRows[1][5]) : 'Номер',
-            (headerRows[1][6]) : 'Дата',
-            (headerRows[1][9]) : 'Валюта',
-            (headerRows[1][10]): 'Рубли',
-            (headerRows[1][11]): 'Валюта',
-            (headerRows[1][12]): 'Рубли',
-            (headerRows[2][0]) : '1'
+            ([(headerRows[0][0]): '№ пп']),
+            ([(headerRows[0][2]): 'Код налогового учета']),
+            ([(headerRows[0][3]): 'Дата совершения операции']),
+            ([(headerRows[0][4]): 'Балансовый счёт (номер)']),
+            ([(headerRows[0][5]): 'Первичный документ']),
+            ([(headerRows[0][7]): 'Код валюты']),
+            ([(headerRows[0][8]): 'Курс Банка России']),
+            ([(headerRows[0][9]): 'Сумма расхода в налоговом учёте']),
+            ([(headerRows[0][11]): 'Сумма расхода в бухгалтерском учёте']),
+            ([(headerRows[1][5]): 'Номер']),
+            ([(headerRows[1][6]): 'Дата']),
+            ([(headerRows[1][9]): 'Валюта']),
+            ([(headerRows[1][10]): 'Рубли']),
+            ([(headerRows[1][11]): 'Валюта']),
+            ([(headerRows[1][12]): 'Рубли']),
+            ([(headerRows[2][0]): '1'])
     ]
     (2..12).each { index ->
-        headerMapping.put((headerRows[2][index]), index.toString())
+        headerMapping.add(([(headerRows[2][index]): index.toString()]))
     }
     checkHeaderEquals(headerMapping, logger)
 }

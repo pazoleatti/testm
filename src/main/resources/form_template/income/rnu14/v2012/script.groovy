@@ -371,19 +371,19 @@ void checkHeaderXls(def headerRows, def colCount, rowCount) {
     }
     checkHeaderSize(headerRows[2].size(), headerRows.size(), colCount, rowCount)
     def headerMapping = [
-            (headerRows[0][0]): 'КНУ',
-            (headerRows[0][1]): 'Вид нормируемых расходов',
-            (headerRows[0][2]): 'Сумма расходов по данным налогового учёта',
-            (headerRows[0][3]): 'Норматив, установленный законодателем',
-            (headerRows[0][5]): 'Предельная сумма расходов, учитываемая для целей налогообложения',
-            (headerRows[0][6]): 'Сумма расхода, рассчитанная по установленным нормам',
-            (headerRows[1][3]): 'База для расчёта нормы расходов',
-            (headerRows[1][4]): 'коэффициент',
-            (headerRows[1][6]): 'в пределах утверждённых норм',
-            (headerRows[1][7]): 'сверх утверждённых норм',
+            ([(headerRows[0][0]): 'КНУ']),
+            ([(headerRows[0][1]): 'Вид нормируемых расходов']),
+            ([(headerRows[0][2]): 'Сумма расходов по данным налогового учёта']),
+            ([(headerRows[0][3]): 'Норматив, установленный законодателем']),
+            ([(headerRows[0][5]): 'Предельная сумма расходов, учитываемая для целей налогообложения']),
+            ([(headerRows[0][6]): 'Сумма расхода, рассчитанная по установленным нормам']),
+            ([(headerRows[1][3]): 'База для расчёта нормы расходов']),
+            ([(headerRows[1][4]): 'коэффициент']),
+            ([(headerRows[1][6]): 'в пределах утверждённых норм']),
+            ([(headerRows[1][7]): 'сверх утверждённых норм'])
     ]
     (0..7).each { index ->
-        headerMapping.put((headerRows[2][index]), (index + 1).toString())
+        headerMapping.add(([(headerRows[2][index]): (index + 1).toString()]))
     }
     checkHeaderEquals(headerMapping, logger)
 }

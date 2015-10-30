@@ -4,7 +4,7 @@
     <name>(РНУ-49) Регистр налогового учёта «ведомость определения результатов от реализации (выбытия) имущества»</name>
     <fullName>(РНУ-49) Регистр налогового учёта «ведомость определения результатов от реализации (выбытия) имущества»
     </fullName>
-    <code>РНУ-49</code>
+    <header>852-49</header>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>rowNumber</alias>
         <checking>false</checking>

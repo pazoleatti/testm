@@ -3,7 +3,7 @@
     <fixedRows>false</fixedRows>
     <name>(РНУ-75) Регистр налогового учета доходов по операциям депозитария</name>
     <fullName>(РНУ-75) Регистр налогового учета доходов по операциям депозитария</fullName>
-    <code>РНУ-75</code>
+    <header>852-75</header>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>number</alias>
         <checking>false</checking>

@@ -9,7 +9,7 @@
         срока погашения основного долга в отношении сделок уступки прав требования в пользу Взаимозависимых лиц и
         резидентов оффшорных зон
     </fullName>
-    <code>РНУ-71.2 (Отчет 2)</code>
+    <header>852-71.2</header>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>rowNumber</alias>
         <checking>false</checking>

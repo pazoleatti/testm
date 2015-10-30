@@ -14,7 +14,7 @@ class DBReport {
     // Сравнение шаблонов в БД
     def static void compareDBFormTemplate(def prefix1, def prefix2) {
         // Запросы на получение макетов
-        def sqlTemplate1 = { boolean compExist ->
+        def sqlTemplate1 = { boolean compExist, accruingExist, updatingExist ->
             return "SELECT ft1.id " +
                     " ,ft1.type_id " +
                     " ,ft1.data_rows " +
@@ -28,6 +28,8 @@ class DBReport {
                     " ,ft1.STATUS " +
                     " ,ft1.script " +
                     " ,ft1.monthly " +
+                    (accruingExist ? " ,ft1.accruing " : "") +
+                    (updatingExist ? " ,ft1.updating " : "") +
                     (compExist ? " ,ft1.comparative " : "") +
                     "FROM form_template ft1 " +
                     "WHERE  " +
@@ -102,7 +104,7 @@ class DBReport {
                             th(rowspan: 2, 'Версия')
                             th(rowspan: 2, "$prefix1 id")
                             th(rowspan: 2, "$prefix2 id")
-                            th(colspan: 13, 'Результат сравнения')
+                            th(colspan: 15, 'Результат сравнения')
                         }
                         tr {
                             th 'name'
@@ -116,6 +118,8 @@ class DBReport {
                             th 'script'
                             th 'columns'
                             th 'monthly'
+                            th 'accruing'
+                            th 'updating'
                             th 'comparative'
                             th 'styles'
                         }
@@ -313,6 +317,8 @@ class DBReport {
                                     def columnsC = colDiff == null ? '+' : '—'
                                     def stylesC = styleDiff == null ? '+' : '—'
                                     def monthlyC = tmp1?.monthly == tmp2?.monthly ? '+' : '—'
+                                    def accruingC = tmp1?.accruing == tmp2?.accruing ? '+' : '—'
+                                    def updatingC = tmp1?.updating == tmp2?.updating ? '+' : '—'
                                     def comparativeC = tmp1?.comparative == tmp2?.comparative ? '+' : '—'
 
                                     tr(class: ((tmp1?.id != null && tmp2?.id != null) ? 'nr' : 'er')) {
@@ -396,6 +402,18 @@ class DBReport {
                                             td(class: 'td_error', title: "$prefix1 = ${tmp1?.monthly}, $prefix2 = ${tmp2?.monthly}", monthlyC)
                                         }
 
+                                        if (accruingC == '+') {
+                                            td(class: 'td_ok', accruingC)
+                                        } else {
+                                            td(class: 'td_error', title: "$prefix1 = ${tmp1?.accruing}, $prefix2 = ${tmp2?.accruing}", accruingC)
+                                        }
+
+                                        if (updatingC == '+') {
+                                            td(class: 'td_ok', updatingC)
+                                        } else {
+                                            td(class: 'td_error', title: "$prefix1 = ${tmp1?.updating}, $prefix2 = ${tmp2?.updating}", updatingC)
+                                        }
+
                                         if (comparativeC == '+') {
                                             td(class: 'td_ok', comparativeC)
                                         } else {
@@ -464,7 +482,11 @@ class DBReport {
 
         def map = sql.firstRow("SELECT count(column_name) as result FROM user_tab_cols where table_name = 'FORM_TEMPLATE' and column_name = 'COMPARATIVE'")
         boolean compExist = (map.result as Integer) == 1
-        sql.eachRow(sqlTemplate(compExist)) {
+        map = sql.firstRow("SELECT count(column_name) as result FROM user_tab_cols where table_name = 'FORM_TEMPLATE' and column_name = 'ACCRUING'")
+        boolean accruingExist = (map.result as Integer) == 1
+        map = sql.firstRow("SELECT count(column_name) as result FROM user_tab_cols where table_name = 'FORM_TEMPLATE' and column_name = 'UPDATING'")
+        boolean updatingExist = (map.result as Integer) == 1
+        sql.eachRow(sqlTemplate(compExist, accruingExist, updatingExist)) {
             def type_id = it.type_id as Integer
             if (templateMap[type_id] == null) {
                 templateMap.put((Integer) it.type_id, [:])
@@ -484,6 +506,8 @@ class DBReport {
             version.status = it.status
             version.script = it.script?.characterStream?.text?.trim()?.replaceAll("\r", "")
             version.monthly = it.monthly as Integer
+            version.accruing = accruingExist ? (it.accruing as Integer) : null
+            version.updating = updatingExist ? (it.updating as Integer) : null
             version.comparative = compExist ? (it.comparative as Integer) : null
             templateMap[type_id].put(it.version, version)
             if (!allVersions.containsKey(type_id)) {
@@ -823,7 +847,7 @@ class DBReport {
     // Сравнение скриптов справочников в БД
     def static void compareDBRefbookScript(def prefix1, def prefix2) {
         // Запросы на получение справочников
-        def sqlTemplate1 = "select rb.id, rb.name, (select data from blob_data where id = rb.script_id) as script from ref_book rb where rb.visible = 1"
+        def sqlTemplate1 = "select rb.id, rb.name, (select data from blob_data where id = rb.script_id) as script from ref_book rb"
         def sqlTemplate2 = sqlTemplate1
 
         def refbooks1 = getRefbooks(prefix1, sqlTemplate1)

@@ -252,6 +252,7 @@
                     </g:HorizontalPanel>
                     <g:HorizontalPanel>
                         <g:Button ui:field="checkButton" text="Проверить" addStyleNames="{style.btnMarginRight}" visible="false"/>
+                        <g:Button ui:field="refreshButton" text="Обновить" addStyleNames="{style.btnMarginRight}" visible="false"/>
                         <g:Button ui:field="recalculateButton" text="Рассчитать" addStyleNames="{style.btnMarginRight}" visible="false"/>
                         <g:HorizontalPanel ui:field="workflowButtons" visible="false"/>
                         <g:Button ui:field="deleteFormButton" text="Удалить" addStyleNames="{style.btnMarginRight}" visible="false"/>

@@ -902,28 +902,28 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
     checkHeaderSize(headerRows[headerRows.size() - 1].size(), headerRows.size(), colCount, rowCount)
 
     def headerMapping = [
-            (headerRows[0][0]) : getColumnName(tmpRow, 'number'),
-            (headerRows[0][2]) : getColumnName(tmpRow, 'numberAccount'),
-            (headerRows[0][3]) : 'Задолженность от 45 до 90 дней',
-            (headerRows[1][3]) : 'сумма долга',
-            (headerRows[1][4]) : 'норматив отчислений 50%',
-            (headerRows[1][5]) : 'расчётный резерв',
-            (headerRows[0][6]) : 'Задолженность более 90 дней',
-            (headerRows[1][6]) : 'сумма долга',
-            (headerRows[1][7]) : 'норматив отчислений 100%',
-            (headerRows[1][8]) : 'расчётный резерв',
-            (headerRows[0][9]) : getColumnName(tmpRow, 'totalReserve'),
-            (headerRows[0][10]): 'Резерв',
-            (headerRows[1][10]): 'на предыдущую отчётную дату',
-            (headerRows[1][11]): 'на отчетную дату',
-            (headerRows[0][12]): 'Изменение фактического резерва',
-            (headerRows[1][12]): 'Доначисление резерва с отнесением на расходы код 22670',
-            (headerRows[1][13]): 'Восстановление резерва на доходах код 13091',
-            (headerRows[1][14]): 'Использование резерва на погашение процентов по безнадежным долгам в отчетном периоде',
-            (headerRows[2][0]) : '1'
+            ([(headerRows[0][0]): getColumnName(tmpRow, 'number')]),
+            ([(headerRows[0][2]): getColumnName(tmpRow, 'numberAccount')]),
+            ([(headerRows[0][3]): 'Задолженность от 45 до 90 дней']),
+            ([(headerRows[1][3]): 'сумма долга']),
+            ([(headerRows[1][4]): 'норматив отчислений 50%']),
+            ([(headerRows[1][5]): 'расчётный резерв']),
+            ([(headerRows[0][6]): 'Задолженность более 90 дней']),
+            ([(headerRows[1][6]): 'сумма долга']),
+            ([(headerRows[1][7]): 'норматив отчислений 100%']),
+            ([(headerRows[1][8]): 'расчётный резерв']),
+            ([(headerRows[0][9]): getColumnName(tmpRow, 'totalReserve')]),
+            ([(headerRows[0][10]): 'Резерв']),
+            ([(headerRows[1][10]): 'на предыдущую отчётную дату']),
+            ([(headerRows[1][11]): 'на отчетную дату']),
+            ([(headerRows[0][12]): 'Изменение фактического резерва']),
+            ([(headerRows[1][12]): 'Доначисление резерва с отнесением на расходы код 22670']),
+            ([(headerRows[1][13]): 'Восстановление резерва на доходах код 13091']),
+            ([(headerRows[1][14]): 'Использование резерва на погашение процентов по безнадежным долгам в отчетном периоде']),
+            ([(headerRows[2][0]): '1'])
     ]
     (2..14).each { index ->
-        headerMapping.put(headerRows[2][index], index.toString())
+        headerMapping.add(([(headerRows[2][index]): index.toString()]))
     }
     checkHeaderEquals(headerMapping, logger)
 }

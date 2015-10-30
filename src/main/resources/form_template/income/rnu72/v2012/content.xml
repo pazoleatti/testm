@@ -7,7 +7,7 @@
     <fullName>(РНУ-72) Регистр налогового учёта уступки права требования как реализации финансовых услуг и операций с
         закладными
     </fullName>
-    <code>РНУ-72</code>
+    <header>852-72</header>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>number</alias>
         <checking>false</checking>

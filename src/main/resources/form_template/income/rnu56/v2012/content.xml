@@ -3,7 +3,7 @@
     <fixedRows>false</fixedRows>
     <name>(РНУ-56) Регистр налогового учёта процентного дохода по дисконтным векселям сторонних эмитентов</name>
     <fullName>(РНУ-56) Регистр налогового учёта процентного дохода по дисконтным векселям сторонних эмитентов</fullName>
-    <code>РНУ-56</code>
+    <header>852-56</header>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>number</alias>
         <checking>false</checking>

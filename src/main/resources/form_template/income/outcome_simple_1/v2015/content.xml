@@ -3,7 +3,7 @@
     <fixedRows>true</fixedRows>
     <name>Расходы, учитываемые в простых РНУ (расходы простые) (с полугодия 2015)</name>
     <fullName>Расходы, учитываемые в простых РНУ Сбербанка (расходы простые)</fullName>
-    <code>787/Р/1</code>
+    <header>787/Р/1</header>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>consumptionTypeId</alias>
         <checking>false</checking>

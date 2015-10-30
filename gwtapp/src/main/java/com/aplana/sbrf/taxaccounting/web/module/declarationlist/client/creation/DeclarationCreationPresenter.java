@@ -176,7 +176,7 @@ public class DeclarationCreationPresenter extends PresenterWidget<DeclarationCre
             @Override
             public void onSuccess(GetReportPeriodsResult result) {
                 getView().setAcceptableReportPeriods(result.getReportPeriods(), result.getDefaultReportPeriod());
-                onReportPeriodChange(true);
+                onReportPeriodChange();
                 popupSlot.addToPopupSlot(DeclarationCreationPresenter.this);
             }
         }, this));
@@ -188,9 +188,9 @@ public class DeclarationCreationPresenter extends PresenterWidget<DeclarationCre
     }
 
     @Override
-    public void onReportPeriodChange(final boolean isInit) {
+    public void onReportPeriodChange() {
         if (getView().getSelectedReportPeriod().isEmpty()) {
-            if (isInit) getView().updateEnabled();
+            getView().updateEnabled();
             return;
         }
         GetDeclarationDepartmentsAction action = new GetDeclarationDepartmentsAction();
@@ -200,7 +200,8 @@ public class DeclarationCreationPresenter extends PresenterWidget<DeclarationCre
             @Override
             public void onSuccess(GetDeclarationDepartmentsResult result) {
                 getView().setAcceptableDepartments(result.getDepartments(), result.getDepartmentIds(), result.getDefaultDepartmentId());
-                if (isInit) getView().updateEnabled();
+                getView().updateEnabled();
+                onDepartmentChange();
             }
         }, this) );
     }

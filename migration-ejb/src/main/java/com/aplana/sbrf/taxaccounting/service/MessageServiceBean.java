@@ -69,7 +69,7 @@ public class MessageServiceBean implements MessageService {
 	private static final String ERROR_VALUE = "Сообщение не содержит значений";
 	private static final String ERROR_CODE = "Значения сообщения установлены не по отношению к российскому рублю";
     static final String EMPTY_IMPORT = "Обмен данными с КСШ завершен (справочник «%s»). Создано 0 записей справочника";
-	static final String SUCCESS_IMPORT = "Обмен данными с КСШ завершен (справочник «%s»). Создано %d записей справочника из %s записей справочника";
+	static final String SUCCESS_IMPORT = "Обмен данными с КСШ завершен (справочник «%s»). Создано %d из %d записей справочника";
 	static final String FAIL_IMPORT = "При обмене данными с КСШ произошла ошибка. %s.";
 	private static final String FAIL_IMPORT_DELIVERY_COUNT = "При обмене данными с КСШ произошла ошибка. %s. Попытка № %s";
 	private static final String ERROR_AUDIT = "Ошибка записи в журнал аудита.";
@@ -463,14 +463,13 @@ public class MessageServiceBean implements MessageService {
             logger.getEntries().addAll(localLogger.getEntries());
             addLog(userInfo, msg, logEntryService.save(logger.getEntries()));
         } else {
-            String msg = String.format(EMPTY_IMPORT,
-                    refBookNameMapping.get(refBookId));
-            logger.info(msg);
-            logger.getEntries().addAll(localLogger.getEntries());
-            addLog(userInfo, String.format(SUCCESS_IMPORT,
+            String msg = String.format(SUCCESS_IMPORT,
                     refBookNameMapping.get(refBookId),
                     successCount,
-                    totalCount), logEntryService.save(logger.getEntries()));
+                    totalCount);
+            logger.info(msg);
+            logger.getEntries().addAll(localLogger.getEntries());
+            addLog(userInfo, msg, logEntryService.save(logger.getEntries()));
         }
     }
 

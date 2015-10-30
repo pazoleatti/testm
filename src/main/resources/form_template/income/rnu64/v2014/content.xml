@@ -3,7 +3,7 @@
     <fixedRows>false</fixedRows>
     <name>(РНУ-64) Регистр налогового учёта затрат, связанных с проведением сделок РЕПО</name>
     <fullName>(РНУ-64) Регистр налогового учёта затрат, связанных с проведением сделок РЕПО</fullName>
-    <code>РНУ-64</code>
+    <header>1290-64</header>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>number</alias>
         <checking>false</checking>

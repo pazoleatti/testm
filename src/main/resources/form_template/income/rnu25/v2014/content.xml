@@ -7,7 +7,7 @@
     <fullName>(РНУ-25) Регистр налогового учёта расчёта резерва под возможное обесценение ГКО, ОФЗ и ОБР в целях
         налогообложения
     </fullName>
-    <header>РНУ-25</header>
+    <header>1111-25</header>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="autoNumerationColumn">
         <alias>rowNumber</alias>
         <checking>false</checking>

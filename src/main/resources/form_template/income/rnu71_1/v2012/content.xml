@@ -7,7 +7,7 @@
     <fullName>(РНУ-71.1) Регистр налогового учёта уступки права требования после предусмотренного кредитным договором
         срока погашения основного долга
     </fullName>
-    <code>РНУ-71.1 (Отчет 1)</code>
+    <header>852-71.1</header>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>rowNumber</alias>
         <checking>false</checking>

@@ -97,7 +97,8 @@ public class FormTemplateImpexServiceImpl implements
 			ftc.fillFormTemplateContent(ft);
 			JAXBContext jaxbContext = JAXBContext.newInstance(FormTemplateContent.class);
 			Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
-			jaxbMarshaller.marshal(ftc, zos);
+            jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
+            jaxbMarshaller.marshal(ftc, zos);
 			zos.closeEntry();
 
 			// Script
