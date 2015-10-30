@@ -61,8 +61,6 @@ public class FormDataEditHandler extends AbstractActionHandler<FormDataEditActio
             formDataService.interruptTask(formData.getId(), formData.isManual(), userInfo.getUser().getId(), reportType);
         }
 
-        //блокируем форму при переходе в режим редактирования
-        formDataService.lock(formData.getId(), formData.isManual(), userInfo);
         return result;
     }
 
