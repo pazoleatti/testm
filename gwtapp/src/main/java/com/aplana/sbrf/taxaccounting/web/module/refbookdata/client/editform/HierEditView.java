@@ -86,6 +86,7 @@ public class HierEditView extends AbstractEditView implements HierEditPresenter.
 
     @Override
     public void showVersioned(boolean versioned) {
+        this.versioned = versioned;
         versionStart.setVisible(versioned);
         versionEnd.setVisible(versioned);
         allVersion.setVisible(versioned);
@@ -214,7 +215,7 @@ public class HierEditView extends AbstractEditView implements HierEditPresenter.
     @UiHandler("save")
     void saveButtonClicked(ClickEvent event) {
         if (getUiHandlers() != null) {
-            if (versionStart.getValue() == null) {
+            if (versioned && versionStart.getValue() == null) {
                 Dialog.warningMessage(getUiHandlers().getTitle(), "Не указана дата начала актуальности");
                 return;
             }

@@ -428,10 +428,9 @@ public class RefBookUniversal implements RefBookDataProvider {
     }
 
     private List<Long> createVersions(RefBook refBook, Date versionFrom, Date versionTo, List<RefBookRecord> records, long countIds, List<Long> excludedVersionEndRecords, Logger logger) {
+        //Генерим record_id для новых записей. Нужно для связи настоящей и фиктивной версий
+        List<Long> generatedIds = dbUtils.getNextIds(BDUtils.Sequence.REF_BOOK_RECORD_ROW, countIds);
         if (refBook.isVersioned()) {
-            //Генерим record_id для новых записей. Нужно для связи настоящей и фиктивной версий
-            List<Long> generatedIds = dbUtils.getNextIds(BDUtils.Sequence.REF_BOOK_RECORD_ROW, countIds);
-
             int counter = 0;
             for (RefBookRecord record : records) {
                 RefBookRecordVersion nextVersion = null;
@@ -461,6 +460,15 @@ public class RefBookUniversal implements RefBookDataProvider {
                         }
                     }
                 }
+            }
+        } else {
+            //Устанавливаем минимальную дату
+            versionFrom = new Date(0L);
+            //Для каждой записи своя группа, т.к версий нет
+            int counter = 0;
+            for (RefBookRecord record : records) {
+                record.setRecordId(generatedIds.get(counter));
+                counter++;
             }
         }
 
