@@ -16,6 +16,7 @@ public class GetTaskListResult implements Result {
      * Список задач планировщика
      */
     private List<TaskSearchResultItem> tasks;
+    private String uuid;
 
     public List<TaskSearchResultItem> getTasks() {
         return tasks;
@@ -23,5 +24,13 @@ public class GetTaskListResult implements Result {
 
     public void setTasks(List<TaskSearchResultItem> tasks) {
         this.tasks = tasks;
+    }
+
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
+    }
+
+    public String getUuid() {
+        return uuid;
     }
 }

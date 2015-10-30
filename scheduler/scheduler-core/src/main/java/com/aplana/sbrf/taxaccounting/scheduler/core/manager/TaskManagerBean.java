@@ -111,12 +111,20 @@ public class TaskManagerBean implements TaskManager {
     public void deleteTask(Long taskId) throws TaskSchedulingException {
         LOG.info(String.format("Task deleting has been started. Task id: %s", taskId));
         try {
-            scheduler.cancel(taskId.toString(), true);
+            //Удаляем наш контекст
             persistenceService.deleteContextByTaskId(taskId);
         } catch (Exception e) {
             checkRunningTask(e);
             LOG.error(e.getLocalizedMessage(), e);
             throw new TaskSchedulingException("Не удалось выполнить удаление задачи", e);
+        }
+
+        try {
+            //Удаляем задачу у планировщика если получится, т.к она все равно не будет работать без нашего контекста. Но планировщик иногда тупит и не дает удалить
+            scheduler.cancel(taskId.toString(), true);
+        } catch (Exception e) {
+            checkRunningTask(e);
+            LOG.error(e.getLocalizedMessage(), e);
         }
     }
 
@@ -154,9 +162,12 @@ public class TaskManagerBean implements TaskManager {
     public TaskData getTaskData(Long taskId) throws TaskSchedulingException {
         LOG.info(String.format("Obtaining task data. Task id: %s", taskId));
         try {
-            TaskInfo taskInfo = scheduler.getTask(taskId.toString());
             TaskContextEntity taskContextEntity = persistenceService.getContextByTaskId(taskId);
-            return getFullTaskData(taskInfo, taskContextEntity);
+            TaskData taskData = getBasicTaskData(taskContextEntity);
+            TaskInfo taskInfo = scheduler.getTask(taskId.toString());
+            fillIBMTaskData(taskData, taskInfo);
+            fillComplexTaskData(taskData, taskContextEntity);
+            return taskData;
         } catch (Exception e) {
             LOG.error(e.getLocalizedMessage(), e);
             throw new TaskSchedulingException(e);
@@ -169,14 +180,22 @@ public class TaskManagerBean implements TaskManager {
         List<TaskData> tasksData = new ArrayList<TaskData>();
         List<TaskContextEntity> contexts = persistenceService.getAllContexts();
 
-        try {
-            for (TaskContextEntity context : contexts) {
+        for (TaskContextEntity context : contexts) {
+            TaskData taskData = getBasicTaskData(context);
+            try {
                 TaskInfo taskInfo = scheduler.getTask(String.valueOf(context.getTaskId()));
-                tasksData.add(getFullTaskData(taskInfo, context));
+                fillIBMTaskData(taskData, taskInfo);
+                fillComplexTaskData(taskData, context);
+            } catch (Exception e) {
+                LOG.error(e.getLocalizedMessage(), e);
+                try {
+                    deleteTask(taskData.getTaskId());
+                } catch (TaskSchedulingException e1) {
+                    LOG.error(e1.getLocalizedMessage(), e1);
+                }
+                taskData.setOldAndDeleted(true);
             }
-        } catch (Exception e) {
-            LOG.error(e.getLocalizedMessage(), e);
-            throw new TaskSchedulingException("Не удалось получить список задач", e);
+            tasksData.add(taskData);
         }
         return tasksData;
     }
@@ -312,30 +331,45 @@ public class TaskManagerBean implements TaskManager {
         }
     }
 
-    private TaskData getFullTaskData(TaskInfo taskInfo, TaskContextEntity taskContextEntity) throws IOException,
-            ClassNotFoundException {
+    private TaskData getBasicTaskData(TaskContextEntity taskContextEntity) {
+        //Формирование ответа
+        TaskData taskData = new TaskData();
+        taskData.setTaskName(taskContextEntity.getTaskName());
+        taskData.setTaskId(taskContextEntity.getTaskId());
+        taskData.setUserTaskJndi(taskContextEntity.getUserTaskJndi());
+        taskData.setModificationDate(taskContextEntity.getModificationDate());
+        taskData.setContextId(taskContextEntity.getId());
+        return taskData;
+    }
 
+    /**
+     * Получение данных из планировщика IBM, во время которого может произойти ошибка. В этом случае, задача считается устаревшей
+     * @param taskData базовые данные задачи
+     * @param taskInfo данные из планировщика ibm
+     */
+    private void fillIBMTaskData(TaskData taskData, TaskInfo taskInfo) {
+        taskData.setTaskState(TaskState.getStateById(taskInfo.getStatus()));
+        taskData.setSchedule(taskInfo.getRepeatInterval());
+        taskData.setNumberOfRepeats(taskInfo.getNumberOfRepeats());
+        taskData.setRepeatsLeft(taskInfo.getRepeatsLeft());
+        taskData.setTimeCreated(taskInfo.getTimeCreated());
+        taskData.setNextFireTime(taskInfo.getNextFireTime());
+    }
+
+    /**
+     * Получение кастомных параметров задачи, при котором может произойти ошибка. В этом случае, задача считается устаревшей
+     * @param taskData базовые данные задачи
+     * @param taskContextEntity данные из бд с кастомными параметрами
+     * @throws IOException
+     * @throws ClassNotFoundException
+     */
+    private void fillComplexTaskData(TaskData taskData, TaskContextEntity taskContextEntity) throws IOException,
+            ClassNotFoundException {
         Map<String, TaskParam> params = null;
 
         if (taskContextEntity.isCustomParamsExist()) {
             params = TaskUtils.deserializeParams(taskContextEntity.getSerializedParams());
         }
-
-        //Формирование ответа
-        TaskData taskData = new TaskData();
-        taskData.setTaskId(taskContextEntity.getTaskId());
-        taskData.setTaskName(taskInfo.getName());
-        taskData.setTaskState(TaskState.getStateById(taskInfo.getStatus()));
-        taskData.setSchedule(taskInfo.getRepeatInterval());
-        taskData.setUserTaskJndi(taskContextEntity.getUserTaskJndi());
-        taskData.setNumberOfRepeats(taskInfo.getNumberOfRepeats());
-        taskData.setRepeatsLeft(taskInfo.getRepeatsLeft());
-        taskData.setTimeCreated(taskInfo.getTimeCreated());
-        taskData.setNextFireTime(taskInfo.getNextFireTime());
         taskData.setParams(params);
-        taskData.setModificationDate(taskContextEntity.getModificationDate());
-        taskData.setContextId(taskContextEntity.getId());
-
-        return taskData;
     }
 }

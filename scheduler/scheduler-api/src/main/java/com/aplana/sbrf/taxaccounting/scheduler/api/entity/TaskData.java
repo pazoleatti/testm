@@ -50,6 +50,9 @@ public class TaskData implements Serializable {
     /** Идентификатор контекста задачи */
     private Long contextId;
 
+    /** Задача была признана устаревшей и теперь удалена */
+    private boolean oldAndDeleted;
+
     public Long getTaskId() {
         return taskId;
     }
@@ -130,26 +133,12 @@ public class TaskData implements Serializable {
         this.params = params;
     }
 
-    @Override
-    public String toString() {
-        return "TaskData{" +
-                "taskId=" + taskId +
-                ", taskName='" + taskName + '\'' +
-                ", taskState=" + taskState +
-                ", schedule='" + schedule + '\'' +
-                ", userTaskJndi='" + userTaskJndi + '\'' +
-                ", numberOfRepeats=" + numberOfRepeats +
-                ", repeatsLeft=" + repeatsLeft +
-                ", modificationDate=" + modificationDate +
-                ", timeCreated=" + timeCreated +
-                ", nextFireTime=" + nextFireTime +
-                ", params=" + params +
-                ", contextId=" + contextId +
-                '}';
+    public boolean isOldAndDeleted() {
+        return oldAndDeleted;
     }
 
-    public Date getModificationDate() {
-        return modificationDate;
+    public void setOldAndDeleted(boolean oldAndDeleted) {
+        this.oldAndDeleted = oldAndDeleted;
     }
 
     @Override
@@ -160,6 +149,7 @@ public class TaskData implements Serializable {
         TaskData taskData = (TaskData) o;
 
         if (numberOfRepeats != taskData.numberOfRepeats) return false;
+        if (oldAndDeleted != taskData.oldAndDeleted) return false;
         if (contextId != null ? !contextId.equals(taskData.contextId) : taskData.contextId != null) return false;
         if (modificationDate != null ? !modificationDate.equals(taskData.modificationDate) : taskData.modificationDate != null)
             return false;
@@ -194,11 +184,35 @@ public class TaskData implements Serializable {
         result = 31 * result + (nextFireTime != null ? nextFireTime.hashCode() : 0);
         result = 31 * result + (params != null ? params.hashCode() : 0);
         result = 31 * result + (contextId != null ? contextId.hashCode() : 0);
+        result = 31 * result + (oldAndDeleted ? 1 : 0);
         return result;
+    }
+
+    @Override
+    public String toString() {
+        return "TaskData{" +
+                "taskId=" + taskId +
+                ", taskName='" + taskName + '\'' +
+                ", taskState=" + taskState +
+                ", schedule='" + schedule + '\'' +
+                ", userTaskJndi='" + userTaskJndi + '\'' +
+                ", numberOfRepeats=" + numberOfRepeats +
+                ", repeatsLeft=" + repeatsLeft +
+                ", modificationDate=" + modificationDate +
+                ", timeCreated=" + timeCreated +
+                ", nextFireTime=" + nextFireTime +
+                ", params=" + params +
+                ", contextId=" + contextId +
+                ", oldAndDeleted=" + oldAndDeleted +
+                '}';
     }
 
     public void setModificationDate(Date modificationDate) {
         this.modificationDate = modificationDate;
+    }
+
+    public Date getModificationDate() {
+        return modificationDate;
     }
 
     public void setContextId(Long contextId) {
