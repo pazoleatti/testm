@@ -2,7 +2,6 @@ package com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform;
 
 import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
-import com.aplana.sbrf.taxaccounting.model.util.StringUtils;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.FormMode;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.RefBookColumn;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.RefBookRecordVersionData;
@@ -33,14 +32,10 @@ public class HierEditView extends AbstractEditView implements HierEditPresenter.
     @UiField
     VerticalPanel editPanel;
     @UiField
-    Button save;
-    @UiField
-    Button cancel;
+    Button save, cancel;
 
     @UiField
-    DateMaskBoxPicker versionStart;
-    @UiField
-    DateMaskBoxPicker versionEnd;
+    DateMaskBoxPicker versionStart, versionEnd;
     @UiField
     LinkButton allVersion;
     @UiField

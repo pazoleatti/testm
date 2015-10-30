@@ -124,6 +124,7 @@ public class RefBookHierPresenter extends Presenter<RefBookHierPresenter.MyView,
         if (versionPresenter.isVisible()) {
             commonEditPresenter.clean(true);
         } else {
+            commonEditPresenter.clean(false);
             AddItemEvent.fire(RefBookHierPresenter.this);
         }
     }

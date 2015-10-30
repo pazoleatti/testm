@@ -201,6 +201,7 @@ public class DeclarationCreationPresenter extends PresenterWidget<DeclarationCre
             public void onSuccess(GetDeclarationDepartmentsResult result) {
                 getView().setAcceptableDepartments(result.getDepartments(), result.getDepartmentIds(), result.getDefaultDepartmentId());
                 getView().updateEnabled();
+                onDepartmentChange();
             }
         }, this) );
     }

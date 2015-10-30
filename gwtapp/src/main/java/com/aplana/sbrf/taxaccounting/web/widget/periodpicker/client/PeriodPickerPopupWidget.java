@@ -146,15 +146,18 @@ public class PeriodPickerPopupWidget extends DoubleStateComposite implements
             if (reportPeriodId != null && reportPeriodIds.contains(reportPeriodId)) {
                 periodPicker.setValue(Arrays.asList(reportPeriodId));
             } else if (reportPeriodDates != null && !reportPeriodDates.isEmpty()) {
-                Map.Entry<Integer, Pair<Date, Date>>[] rpDates = (Map.Entry<Integer, Pair<Date, Date>>[])reportPeriodDates.entrySet().toArray();
-                Date maxDate = rpDates[0].getValue().getSecond();
-                Integer rpId = rpDates[0].getKey();
-                for (Map.Entry<Integer, Pair<Date, Date>> per : rpDates) {
+                Iterator<Map.Entry<Integer, Pair<Date, Date>>> iterator = reportPeriodDates.entrySet().iterator();
+                Map.Entry<Integer, Pair<Date, Date>> per = iterator.next();
+                Date maxDate = per.getValue().getSecond();
+                Integer rpId = per.getKey();
+                while(iterator.hasNext()) {
+                    per = iterator.next();
                     if (per.getValue().getSecond().after(maxDate)) {
                         rpId = per.getKey();
+                        maxDate = per.getValue().getSecond();
                     }
                 }
-                setValue(Arrays.asList(rpId));
+                periodPicker.setValue(Arrays.asList(rpId));
             }
         } else {
             periodPicker.setValue(this.value);

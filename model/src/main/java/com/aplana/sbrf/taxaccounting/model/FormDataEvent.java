@@ -29,6 +29,7 @@ public enum FormDataEvent implements Serializable {
 	REPORT (15, "Формирование печатного представления"),
     PRE_CALCULATION_CHECK(16, "Расчетные проверки"),
     GET_HEADERS(17, "Получение заголовка таблицы"),
+    REFRESH(18, "Обновить"),
 
 	MOVE_CREATED_TO_APPROVED(101, "Утвердить из \"Создана\""),
 	MOVE_APPROVED_TO_CREATED(102, "Вернуть из \"Утверждена\" в \"Создана\""),

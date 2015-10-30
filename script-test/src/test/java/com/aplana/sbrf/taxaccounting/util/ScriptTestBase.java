@@ -1,5 +1,7 @@
 package com.aplana.sbrf.taxaccounting.util;
 
+import com.aplana.sbrf.taxaccounting.model.Cell;
+import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.FormData;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
@@ -11,6 +13,11 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 
 import java.io.InputStream;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
 
 /**
  * Базовый класс для тестов скриптов
@@ -110,5 +117,48 @@ public abstract class ScriptTestBase {
         } catch (Exception e) {
             throw new ServiceException("Read reference book error!", e);
         }
+    }
+
+    /**
+     * Универсальная проверка значений после импорта:
+     * в xls файле должно быть слева направо сверху вниз:
+     * 1. для строк : string1, string2, ..., stringN
+     * 2. для чисел : 1, 2, ..., N
+     * 3. для дат : 01.01.2015, 02.01.2015, ..., NN.NN.2015
+     * остальные типы не проверяются
+     *
+     * @param aliases  алиасы граф для проверки
+     * @param rowCount ожидаемое количесвто строк в НФ
+     * @throws java.text.ParseException
+     */
+    protected void defaultCheckLoadData(List<String> aliases, int rowCount) {
+        List<DataRow<Cell>> dataRows = testHelper.getDataRowHelper().getAll();
+        SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
+        Calendar calendar = Calendar.getInstance();
+        try {
+            calendar.setTime(sdf.parse("01.01.2015"));
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        int stringCount = 1;
+        int numberCount = 1;
+
+        for (int i = 0; i < rowCount; i++) {
+            for (String alias : aliases) {
+                Object value = dataRows.get(i).getCell(alias).getValue();
+                // все значения д.б. заполнены
+                Assert.assertNotNull(value);
+                String msg = alias + " at row " + (i + 1) + ":";
+                if (value instanceof String) {
+                    Assert.assertEquals(msg, "string" + stringCount++, value);
+                } else if (value instanceof Number) {
+                    Assert.assertEquals(msg, numberCount++, ((Number) value).doubleValue(), 0);
+                } else if (value instanceof Date) {
+                    Assert.assertEquals(msg, calendar.getTime(), value);
+                    calendar.add(Calendar.DAY_OF_YEAR, 1);
+                }
+            }
+        }
+        Assert.assertEquals(rowCount, dataRows.size());
     }
 }

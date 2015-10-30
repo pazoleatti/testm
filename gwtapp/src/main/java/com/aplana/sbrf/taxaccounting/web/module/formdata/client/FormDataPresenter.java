@@ -570,6 +570,16 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
         dispatcher.execute(action, createDataRowResultCallback(true, false));
     }
 
+    @Override
+    public void onRefreshClicked(final boolean force, final boolean cancelTask) {
+        RefreshDataRowsAction action = new RefreshDataRowsAction();
+        action.setFormData(formData);
+        action.setModifiedRows(new ArrayList<DataRow<Cell>>(modifiedRows));
+        action.setForce(force);
+        action.setCancelTask(cancelTask);
+        dispatcher.execute(action, createDataRowResultCallback(force, cancelTask, ReportType.REFRESH_FD));
+    }
+
     /* (non-Javadoc)
      * @see com.aplana.sbrf.taxaccounting.web.module.formdata.client.FormDataUiHandlers#onRecalculateClicked()
      */
@@ -594,6 +604,8 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                         public void yes() {
                             if (ReportType.CALCULATE_FD.equals(reportType)) {
                                 onRecalculateClicked(true, cancelTask);
+                            } else if (ReportType.REFRESH_FD.equals(reportType)) {
+                                onRefreshClicked(true, cancelTask);
                             } else if (ReportType.CHECK_FD.equals(reportType)) {
                                 onCheckClicked(true);
                             }
@@ -609,6 +621,8 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                         public void yes() {
                             if (ReportType.CALCULATE_FD.equals(reportType)) {
                                 onRecalculateClicked(force, true);
+                            } else if (ReportType.REFRESH_FD.equals(reportType)) {
+                                onRefreshClicked(force, true);
                             } else if (ReportType.CHECK_FD.equals(reportType)) {
                                 onCheckClicked(force);
                             }
@@ -891,6 +905,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
 
                     			formData = result.getFormData();
                                 existManual = result.existManual();
+                                updating = result.isUpdating();
                                 canCreatedManual = result.canCreatedManual();
                                 isBankSummaryForm = result.isBankSummaryForm();
                                 formSearchPresenter.setFormDataId(formData.getId());
@@ -938,7 +953,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                                 absoluteView = !result.isCorrectionDiff();
                                 correctionPeriod = result.getDepartmentReportPeriod().getCorrectionDate() != null;
                                 DepartmentReportPeriod drp = result.getDepartmentReportPeriod();
-                                DepartmentReportPeriod cdrp = result.getComparativPeriod();
+                                DepartmentReportPeriod cdrp = result.getComparativePeriod();
                                 getView().setAdditionalFormInfo(
                                         result.getTemplateFormName(),
                                         result.getFormData().getFormType().getTaxType(),
