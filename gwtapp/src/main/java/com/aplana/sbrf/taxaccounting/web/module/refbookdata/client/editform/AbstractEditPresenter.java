@@ -9,7 +9,6 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallba
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
-import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.event.CancelEvent;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.event.RollbackTableRowSelection;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.event.SetFormMode;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.event.UpdateForm;
@@ -64,6 +63,8 @@ public abstract class AbstractEditPresenter<V extends AbstractEditPresenter.MyVi
     }
 
     public interface MyView extends View, HasUiHandlers<EditFormUiHandlers> {
+        //Алиас для идентификации что мы новую запись добавляем
+        static final String NEW_RECORD_ALIAS = "NEW_RECORD";
 
         Map<RefBookColumn, HasValue> createInputFields(List<RefBookColumn> attributes);
         void fillInputFields(Map<String, RefBookValueSerializable> record);
@@ -203,18 +204,26 @@ public abstract class AbstractEditPresenter<V extends AbstractEditPresenter.MyVi
         }
     }
 
+    /**
+     * Используется только в случае если добавляем новый элемент
+     * @param dereferenceValue имя ссылки справочника
+     * @param recordId идентификатор записи
+     */
     public void show(final String dereferenceValue, final long recordId){
         if (isFormModified) {
             Dialog.confirmMessage(DIALOG_MESSAGE, new DialogHandler() {
                 @Override
                 public void yes() {
                     setIsFormModified(false);
-                    showRecord(null);
+                    //showRecord(null);
                     RefBookValueSerializable refBookParent = new RefBookValueSerializable();
                     refBookParent.setAttributeType(RefBookAttributeType.REFERENCE);
                     refBookParent.setDereferenceValue(dereferenceValue);
                     refBookParent.setReferenceValue(recordId);
-                    HashMap<String, RefBookValueSerializable> field = new HashMap<String, RefBookValueSerializable>(1);
+                    RefBookValueSerializable rbStringField = new RefBookValueSerializable();
+                    rbStringField.setAttributeType(RefBookAttributeType.STRING);
+                    rbStringField.setStringValue("Новая запись");
+                    HashMap<String, RefBookValueSerializable> field = new HashMap<String, RefBookValueSerializable>(2);
                     field.put("PARENT_ID", refBookParent);
                     getView().fillInputFields(field);
 
@@ -241,13 +250,18 @@ public abstract class AbstractEditPresenter<V extends AbstractEditPresenter.MyVi
 
             });
         } else {
-            showRecord(null);
+            //showRecord(null);
+            getView().cleanFields();
             RefBookValueSerializable refBookParent = new RefBookValueSerializable();
             refBookParent.setAttributeType(RefBookAttributeType.REFERENCE);
             refBookParent.setDereferenceValue(dereferenceValue);
             refBookParent.setReferenceValue(recordId);
-            HashMap<String, RefBookValueSerializable> field = new HashMap<String, RefBookValueSerializable>(1);
+            RefBookValueSerializable rbStringField = new RefBookValueSerializable();
+            rbStringField.setAttributeType(RefBookAttributeType.STRING);
+            rbStringField.setStringValue("Новая запись");
+            HashMap<String, RefBookValueSerializable> field = new HashMap<String, RefBookValueSerializable>(2);
             field.put("PARENT_ID", refBookParent);
+            field.put(MyView.NEW_RECORD_ALIAS, rbStringField);
             getView().fillInputFields(field);
         }
     }
@@ -267,6 +281,7 @@ public abstract class AbstractEditPresenter<V extends AbstractEditPresenter.MyVi
                     setIsFormModified(false);
                     onSaveClicked(false);
                     SetFormMode.fire(AbstractEditPresenter.this, FormMode.EDIT);
+                    RollbackTableRowSelection.fire(AbstractEditPresenter.this, previousURId);
                 }
 
                 @Override
@@ -275,6 +290,8 @@ public abstract class AbstractEditPresenter<V extends AbstractEditPresenter.MyVi
                     showRecord(previousURId);
                     getView().cleanErrorFields();
                     SetFormMode.fire(AbstractEditPresenter.this, FormMode.EDIT);
+                    //В иерархических справониках выбирается предыдущий элемент
+                    RollbackTableRowSelection.fire(AbstractEditPresenter.this, previousURId);
                 }
             });
         } else {
@@ -283,7 +300,7 @@ public abstract class AbstractEditPresenter<V extends AbstractEditPresenter.MyVi
             showRecord(previousURId);
             getView().cleanErrorFields();
             SetFormMode.fire(AbstractEditPresenter.this, FormMode.EDIT);
-            CancelEvent.fire(this, previousURId);
+            RollbackTableRowSelection.fire(this, previousURId);
         }
     }
 

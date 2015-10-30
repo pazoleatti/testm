@@ -108,14 +108,30 @@ public class RefBookVersionView extends ViewWithUiHandlers<RefBookVersionUiHandl
 	}
 
 	@Override
-	public void setTableData(int start, int totalCount, List<RefBookDataRow> dataRows) {
-		if (dataRows == null) {
-			refBookDataTable.setRowCount(0);
-			refBookDataTable.setRowData(new ArrayList<RefBookDataRow>());
-		} else {
-			refBookDataTable.setRowCount(totalCount);
-			refBookDataTable.setRowData(start, dataRows);
-		}
+	public void setTableData(int start, int totalCount, List<RefBookDataRow> dataRows, Long selectedItem) {
+        if (dataRows == null) {
+            refBookDataTable.setRowCount(0);
+            refBookDataTable.setRowData(new ArrayList<RefBookDataRow>());
+        } else {
+            if (totalCount == 0) {
+                start = 0;
+                pager.setPage(0);
+            }
+            refBookDataTable.setRowCount(totalCount);
+            refBookDataTable.setRowData(start, dataRows);
+            if (selectedItem != null) {
+                for(RefBookDataRow item: dataRows) {
+                    if (item.getRefBookRowId().equals(selectedItem)) {
+                        selectionModel.setSelected(item, true);
+                        break;
+                    }
+                }
+            }
+            //Если не было среди записей необходимой, то выставляем на первую
+            if (selectionModel.getSelectedObject()==null){
+                selectionModel.setSelected(dataRows.get(0), true);
+            }
+        }
 	}
 
 	@Override

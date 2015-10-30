@@ -18,10 +18,7 @@ import com.gwtplatform.dispatch.shared.DispatchAsync;
 import com.gwtplatform.mvp.client.annotations.ProxyEvent;
 import com.gwtplatform.mvp.client.proxy.PlaceManager;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 
 public class DepartmentEditPresenter extends AbstractEditPresenter<DepartmentEditPresenter.MyView> {
@@ -219,7 +216,7 @@ public class DepartmentEditPresenter extends AbstractEditPresenter<DepartmentEdi
     public void clean(Boolean isVersion) {
         //isVersion всегда должен быть null или false
         currentUniqueRecordId = null;
-        getView().fillInputFields(null);
+        getView().fillInputFields(new HashMap<String, RefBookValueSerializable>());
         getView().updateRefBookPickerPeriod();
     }
 
