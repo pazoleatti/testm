@@ -18,7 +18,7 @@ import java.util.List;
  * 6.2. Размещение средств на межбанковском рынке
  */
 public class App_6_2Test extends ScriptTestBase {
-    private static final int TYPE_ID = 802;
+    private static final int TYPE_ID = 804;
     private static final int DEPARTMENT_ID = 1;
     private static final int REPORT_PERIOD_ID = 1;
     private static final int DEPARTMENT_PERIOD_ID = 1;
@@ -75,9 +75,9 @@ public class App_6_2Test extends ScriptTestBase {
         // для попадания в ЛП:
         // 1. Проверка заполнения граф
         // 2. Проверка возможности заполнения цены и стоимости
-        DataRow<Cell> row1 = formData.createDataRow();
-        row1.setIndex(1);
-        dataRows.add(row1);
+        DataRow<Cell> row = formData.createDataRow();
+        row.setIndex(1);
+        dataRows.add(row);
 
         testHelper.execute(FormDataEvent.CHECK);
 
@@ -103,16 +103,16 @@ public class App_6_2Test extends ScriptTestBase {
         // 7. Корректность даты совершения сделки относительно даты заключения сделки
         // 8. Проверка года совершения сделки
         // 9. Проверка диапазона дат
-        row1.getCell("name").setValue(1L, null);
-        row1.getCell("docNumber").setValue("string", null);
-        row1.getCell("docDate").setValue(sdf.parse("02.01.2990"), null);
-        row1.getCell("dealNumber").setValue("string", null);
-        row1.getCell("dealDate").setValue(sdf.parse("01.01.2990"), null);
-        row1.getCell("count").setValue(2, null);
-        row1.getCell("sum").setValue(3, null);
-        row1.getCell("price").setValue(4, null);
-        row1.getCell("total").setValue(5, null);
-        row1.getCell("dealDoneDate").setValue(sdf.parse("01.01.2989"), null);
+        row.getCell("name").setValue(1L, null);
+        row.getCell("docNumber").setValue("string", null);
+        row.getCell("docDate").setValue(sdf.parse("02.01.2990"), null);
+        row.getCell("dealNumber").setValue("string", null);
+        row.getCell("dealDate").setValue(sdf.parse("01.01.2990"), null);
+        row.getCell("count").setValue(2, null);
+        row.getCell("sum").setValue(3, null);
+        row.getCell("price").setValue(4, null);
+        row.getCell("cost").setValue(5, null);
+        row.getCell("dealDoneDate").setValue(sdf.parse("01.01.2989"), null);
 
         testHelper.execute(FormDataEvent.CHECK);
         printLog();
@@ -130,16 +130,16 @@ public class App_6_2Test extends ScriptTestBase {
         testHelper.getLogger().clear();
 
         // для успешного прохождения всех ЛП:
-        row1.getCell("name").setValue(1L, null);
-        row1.getCell("docNumber").setValue("string", null);
-        row1.getCell("docDate").setValue(sdf.parse("01.01.2014"), null);
-        row1.getCell("dealNumber").setValue("string", null);
-        row1.getCell("dealDate").setValue(sdf.parse("02.01.2014"), null);
-        row1.getCell("count").setValue(1, null);
-        row1.getCell("sum").setValue(3, null);
-        row1.getCell("price").setValue(3, null);
-        row1.getCell("total").setValue(3, null);
-        row1.getCell("dealDoneDate").setValue(sdf.parse("03.01.2014"), null);
+        row.getCell("name").setValue(1L, null);
+        row.getCell("docNumber").setValue("string", null);
+        row.getCell("docDate").setValue(sdf.parse("01.01.2014"), null);
+        row.getCell("dealNumber").setValue("string", null);
+        row.getCell("dealDate").setValue(sdf.parse("02.01.2014"), null);
+        row.getCell("count").setValue(1, null);
+        row.getCell("sum").setValue(3, null);
+        row.getCell("price").setValue(3, null);
+        row.getCell("cost").setValue(3, null);
+        row.getCell("dealDoneDate").setValue(sdf.parse("03.01.2014"), null);
 
         testHelper.execute(FormDataEvent.CHECK);
 
@@ -157,7 +157,7 @@ public class App_6_2Test extends ScriptTestBase {
     public void importExcelTest() {
         testHelper.setImportFileInputStream(getImportXlsInputStream());
         testHelper.execute(FormDataEvent.IMPORT);
-        List<String> aliases = Arrays.asList("docNumber", "docDate", "dealNumber", "dealDate", "sum", "price", "total", "dealDoneDate");
+        List<String> aliases = Arrays.asList("docNumber", "docDate", "dealNumber", "dealDate", "sum", "price", "cost", "dealDoneDate");
         defaultCheckLoadData(aliases, 4);
         checkLogger();
         // "count", "name"
@@ -193,10 +193,10 @@ public class App_6_2Test extends ScriptTestBase {
         Assert.assertEquals(7, dataRows.get(2).getCell("price").getNumericValue().doubleValue(), 0);
         Assert.assertEquals(10, dataRows.get(3).getCell("price").getNumericValue().doubleValue(), 0);
 
-        Assert.assertEquals(1, dataRows.get(0).getCell("total").getNumericValue().doubleValue(), 0);
-        Assert.assertEquals(4, dataRows.get(1).getCell("total").getNumericValue().doubleValue(), 0);
-        Assert.assertEquals(7, dataRows.get(2).getCell("total").getNumericValue().doubleValue(), 0);
-        Assert.assertEquals(10, dataRows.get(3).getCell("total").getNumericValue().doubleValue(), 0);
+        Assert.assertEquals(1, dataRows.get(0).getCell("cost").getNumericValue().doubleValue(), 0);
+        Assert.assertEquals(4, dataRows.get(1).getCell("cost").getNumericValue().doubleValue(), 0);
+        Assert.assertEquals(7, dataRows.get(2).getCell("cost").getNumericValue().doubleValue(), 0);
+        Assert.assertEquals(10, dataRows.get(3).getCell("cost").getNumericValue().doubleValue(), 0);
     }
 }
 

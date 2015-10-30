@@ -25,7 +25,7 @@ import groovy.transform.Field
 // count        - Количество
 // sum          - Сумма доходов Банка по данным бухгалтерского учета, руб.
 // price        - Цена (тариф) за единицу измерения без учета НДС, акцизов и пошлины, руб.
-// total        - Итого стоимость без учета НДС, акцизов и пошлин, руб.
+// cost        - Итого стоимость без учета НДС, акцизов и пошлин, руб.
 // dealDoneDate - Дата совершения сделки
 
 switch (formDataEvent) {
@@ -47,10 +47,6 @@ switch (formDataEvent) {
         formDataService.getDataRowHelper(formData).delete(currentDataRow)
         break
     case FormDataEvent.MOVE_CREATED_TO_PREPARED:  // Подготовить из "Создана"
-        calc()
-        logicCheck()
-        formDataService.saveCachedDataRows(formData, logger)
-        break
     case FormDataEvent.MOVE_CREATED_TO_APPROVED:  // Утвердить из "Создана"
     case FormDataEvent.MOVE_PREPARED_TO_APPROVED: // Утвердить из "Подготовлена"
     case FormDataEvent.MOVE_CREATED_TO_ACCEPTED:  // Принять из "Создана"
@@ -87,7 +83,7 @@ def editableColumns = ['name', 'dealNumber', 'dealDate', 'sum', 'docNumber', 'do
 
 // Автозаполняемые атрибуты
 @Field
-def autoFillColumns = ['rowNumber', 'iksr', 'countryName', 'countryCode', 'count', 'price', 'total']
+def autoFillColumns = ['rowNumber', 'iksr', 'countryName', 'countryCode', 'count', 'price', 'cost']
 
 // Проверяемые на пустые значения атрибуты
 @Field
@@ -114,30 +110,6 @@ def getRefBookValue(def long refBookId, def Long recordId) {
     return formDataService.getRefBookValue(refBookId, recordId, refBookCache)
 }
 
-// Получение xml с общими проверками
-def getXML(def String startStr, def String endStr) {
-    def fileName = (UploadFileName ? UploadFileName.toLowerCase() : null)
-    if (fileName == null || fileName == '') {
-        throw new ServiceException('Имя файла не должно быть пустым')
-    }
-    def is = ImportInputStream
-    if (is == null) {
-        throw new ServiceException('Поток данных пуст')
-    }
-    if (!fileName.endsWith('.xls') && !fileName.endsWith('.xlsx') && !fileName.endsWith('.xlsm')) {
-        throw new ServiceException('Выбранный файл не соответствует формату xls/xlsx/xlsm!')
-    }
-    def xmlString = importService.getData(is, fileName, 'windows-1251', startStr, endStr)
-    if (xmlString == null) {
-        throw new ServiceException('Отсутствие значения после обработки потока данных')
-    }
-    def xml = new XmlSlurper().parseText(xmlString)
-    if (xml == null) {
-        throw new ServiceException('Отсутствие значения после обработки потока данных')
-    }
-    return xml
-}
-
 //// Кастомные методы
 
 // Логические проверки
@@ -162,7 +134,7 @@ void logicCheck() {
         // 2. Проверка возможности заполнения цены и стоимости
         if (!row.sum) {
             def msg1 = row.getCell('price').column.name
-            def msg2 = row.getCell('total').column.name
+            def msg2 = row.getCell('cost').column.name
             def msg3 = row.getCell('sum').column.name
             logger.error("Строка $rowNum: Графы «$msg1», «$msg2»: выполнение расчета невозможно, так как не заполнена " +
                     "используемая в расчете графа «$msg3»!")
@@ -176,8 +148,8 @@ void logicCheck() {
         }
 
         // 4. Проверка стоимости
-        if (row.sum && row.total != row.sum) {
-            def msg1 = row.getCell('total').column.name
+        if (row.sum && row.cost != row.sum) {
+            def msg1 = row.getCell('cost').column.name
             def msg2 = row.getCell('sum').column.name
             logger.error("Строка $rowNum: Значение графы «$msg1» должно быть равно значению графы «$msg2»!")
         }
@@ -235,7 +207,7 @@ void calc() {
         // Расчет поля "Цена"
         row.price = row.sum
         // Расчет поля "Итого"
-        row.total = row.sum
+        row.cost = row.sum
     }
 }
 
@@ -327,7 +299,7 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
             ([(headerRows[1][9]): getColumnName(tmpRow, 'count')]),
             ([(headerRows[1][10]): getColumnName(tmpRow, 'sum')]),
             ([(headerRows[1][11]): getColumnName(tmpRow, 'price')]),
-            ([(headerRows[1][12]): getColumnName(tmpRow, 'total')]),
+            ([(headerRows[1][12]): getColumnName(tmpRow, 'cost')]),
             ([(headerRows[1][13]): getColumnName(tmpRow, 'dealDoneDate')]),
             ([(headerRows[2][0]): 'гр. 1']),
             ([(headerRows[2][1]): 'гр. 2']),
@@ -420,7 +392,7 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
     colIndex++
 
     // графа 12
-    newRow.total = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
+    newRow.cost = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
     colIndex++
 
     // графа 13

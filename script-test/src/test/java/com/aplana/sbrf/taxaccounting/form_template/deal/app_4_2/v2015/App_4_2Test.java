@@ -12,7 +12,7 @@ import org.junit.Test;
  * Приложение 4.2. Отчет в отношении доходов и расходов Банка по сделкам с ВЗЛ, РОЗ, НЛ по итогам окончания Налогового периода
  */
 public class App_4_2Test extends ScriptTestBase {
-    private static final int TYPE_ID = 802;
+    private static final int TYPE_ID = 803;
     private static final int DEPARTMENT_ID = 1;
     private static final int REPORT_PERIOD_ID = 1;
     private static final int DEPARTMENT_PERIOD_ID = 1;

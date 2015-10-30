@@ -119,7 +119,7 @@
         <precision>2</precision>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
-        <alias>total</alias>
+        <alias>cost</alias>
         <checking>false</checking>
         <name>Итого стоимость без учета НДС, акцизов и пошлин, руб.</name>
         <order>13</order>
