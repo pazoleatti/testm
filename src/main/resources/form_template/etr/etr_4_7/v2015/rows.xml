@@ -12,14 +12,14 @@
     <cell alias="rowNum" colSpan="1" numericValue="2" rowSpan="1"/>
     <cell alias="taxName" colSpan="1" rowSpan="1" stringValue="Средняя (среднегодовая) остаточная стоимость основных средств (за исключением земельных участков)"/>
     <cell alias="symbol102" colSpan="1" rowSpan="1" stringValue="остатки бал.сч. (604-60404-606)/ соответствующее кол-во месяцев"/>
-    <cell alias="comparePeriod" colSpan="1" rowSpan="1" editable="true" styleAlias="Редактируемая"/>
-    <cell alias="currentPeriod" colSpan="1" rowSpan="1" editable="true" styleAlias="Редактируемая"/>
+    <cell alias="comparePeriod" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
+    <cell alias="currentPeriod" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактируемая"/>
     <cell alias="deltaRub" colSpan="1" rowSpan="1"/>
     <cell alias="deltaPercent" colSpan="1" rowSpan="1"/>
   </row>
   <row alias="R3">
     <cell alias="rowNum" colSpan="1" numericValue="3" rowSpan="1"/>
-    <cell alias="taxName" colSpan="1" rowSpan="1" stringValue="Отношение налога на имущество к остаточной стоимости, %"/>
+    <cell alias="taxName" colSpan="1" rowSpan="1" stringValue="Отношение налога на имущество к остаточной стоимости, %" styleAlias="Жирный"/>
     <cell alias="symbol102" colSpan="1" rowSpan="1"/>
     <cell alias="comparePeriod" colSpan="1" rowSpan="1"/>
     <cell alias="currentPeriod" colSpan="1" rowSpan="1"/>
@@ -28,10 +28,10 @@
   </row>
   <row alias="R4">
     <cell alias="rowNum" colSpan="1" numericValue="4" rowSpan="1"/>
-    <cell alias="taxName" colSpan="1" rowSpan="1" stringValue="Максимальная ставка по законодательству,%"/>
+    <cell alias="taxName" colSpan="1" rowSpan="1" stringValue="Максимальная ставка по законодательству,%" styleAlias="Жирный"/>
     <cell alias="symbol102" colSpan="1" rowSpan="1"/>
-    <cell alias="comparePeriod" colSpan="1" numericValue="2.2" rowSpan="1"/>
-    <cell alias="currentPeriod" colSpan="1" numericValue="2.2" rowSpan="1"/>
+    <cell alias="comparePeriod" colSpan="1" numericValue="2.2" rowSpan="1" styleAlias="Жирный"/>
+    <cell alias="currentPeriod" colSpan="1" numericValue="2.2" rowSpan="1" styleAlias="Жирный"/>
     <cell alias="deltaRub" colSpan="1" rowSpan="1"/>
     <cell alias="deltaPercent" colSpan="1" rowSpan="1"/>
   </row>

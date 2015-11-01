@@ -75,6 +75,13 @@
         <precision>2</precision>
     </columns>
     <styles>
+        <alias>Жирный</alias>
+        <backColor>WHITE</backColor>
+        <bold>true</bold>
+        <fontColor>BLACK</fontColor>
+        <italic>false</italic>
+    </styles>
+    <styles>
         <alias>Автозаполняемая</alias>
         <backColor>WHITE</backColor>
         <bold>true</bold>

@@ -123,4 +123,11 @@
         <fontColor>RED</fontColor>
         <italic>false</italic>
     </styles>
+    <styles>
+        <alias>Жирный</alias>
+        <backColor>WHITE</backColor>
+        <bold>true</bold>
+        <fontColor>BLACK</fontColor>
+        <italic>false</italic>
+    </styles>
 </formTemplateContent>
