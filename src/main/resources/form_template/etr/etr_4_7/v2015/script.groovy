@@ -336,7 +336,7 @@ void importData() {
         def dataRow = dataRows.get(rowIndex - 1)
         def templateRow = getDataRow(templateRows, dataRow.getAlias())
         // заполнить строку нф значениями из эксель
-        fillRowFromXls(templateRow, dataRow, rowValues, fileRowIndex, rowIndex, colOffset)
+        fillRowFromXls(templateRow, dataRow, rowValues, fileRowIndex, rowIndex, colOffset, rowIndex == dataRows.size())
 
         // освободить ненужные данные - иначе не хватит памяти
         allValues.remove(rowValues)
@@ -384,7 +384,7 @@ void checkHeaderXls(def headerRows, def colCount, def rowCount, def tmpRow) {
  * @param rowIndex номер строки в нф
  * @param colOffset отступ по столбцам
  */
-def fillRowFromXls(def templateRow, def dataRow, def values, int fileRowIndex, int rowIndex, int colOffset) {
+def fillRowFromXls(def templateRow, def dataRow, def values, int fileRowIndex, int rowIndex, int colOffset, boolean isFixed) {
     dataRow.setImportIndex(fileRowIndex)
     dataRow.setIndex(rowIndex)
     def tmpValues = [:]
@@ -401,6 +401,16 @@ def fillRowFromXls(def templateRow, def dataRow, def values, int fileRowIndex, i
     colIndex++
     tmpValues.symbol102 = values[colIndex]
 
+    // графа 4..7
+    calcColumns.each { alias ->
+        colIndex++
+        if (isFixed) {
+            tmpValues[alias] = round(parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true), 2)
+        } else {
+            dataRow[alias] = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
+        }
+    }
+
     // Проверить фиксированные значения
     tmpValues.keySet().toArray().each { alias ->
         def value = tmpValues[alias]?.toString()
@@ -408,11 +418,6 @@ def fillRowFromXls(def templateRow, def dataRow, def values, int fileRowIndex, i
         checkFixedValue(dataRow, value, valueExpected, dataRow.getIndex(), alias, logger, true)
     }
 
-    // графа 4..7
-    calcColumns.each { alias ->
-        colIndex++
-        dataRow[alias] = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
-    }
 }
 
 void consolidation() {
