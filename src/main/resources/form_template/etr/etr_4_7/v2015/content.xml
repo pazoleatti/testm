@@ -28,7 +28,7 @@
         <alias>symbol102</alias>
         <checking>false</checking>
         <columnType>STRING</columnType>
-        <name>символ формы 102</name>
+        <name>символ формы 101, 102</name>
         <order>3</order>
         <width>20</width>
         <maxLength>256</maxLength>
