@@ -144,6 +144,11 @@ public class TaskListPresenter extends Presenter<TaskListPresenter.MyView,
                 .defaultCallback(new AbstractCallback<GetTaskListResult>() {
                     @Override
                     public void onSuccess(GetTaskListResult result) {
+                        if (result.getUuid() != null) {
+                            Dialog.errorMessage("Произошла ошибка, задачи планировщика удалены");
+                            LogCleanEvent.fire(TaskListPresenter.this);
+                            LogAddEvent.fire(TaskListPresenter.this, result.getUuid());
+                        }
                         getView().setTableData(result.getTasks());
                     }
                 }, TaskListPresenter.this));

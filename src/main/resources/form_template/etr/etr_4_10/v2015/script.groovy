@@ -183,16 +183,16 @@ void checkHeaderXls(def headerRows, def colCount, rowCount) {
     checkHeaderSize(headerRows[2].size(), headerRows.size(), colCount, rowCount)
     def tmpRow = formData.createDataRow()
     def headerMapping = [
-            (headerRows[0][0]): 'Сумма увеличения базы по налогу на прибыль, в том числе',
-            (headerRows[0][2]): getColumnName(tmpRow, 'taxBurden'),
-            (headerRows[1][0]): 'не учитываемые расходы, тыс. руб.',
-            (headerRows[1][1]): 'доначисление доходов, тыс. руб.',
-            (headerRows[2][0]): '(РНУ-108 гр.13+РНУ-115 гр.20+ РНУ-116 гр.20)',
-            (headerRows[2][1]): '(РНУ-107 гр.12+ РНУ-110 гр.11+ РНУ-111 гр.13+ РНУ-115 гр.19+ РНУ-116 гр.19+РНУ-114 гр.16)',
-            (headerRows[2][3]): '(гр.1+гр.2)*20%'
+            ([(headerRows[0][0]): 'Сумма увеличения базы по налогу на прибыль, в том числе']),
+            ([(headerRows[0][2]): getColumnName(tmpRow, 'taxBurden')]),
+            ([(headerRows[1][0]): 'не учитываемые расходы, тыс. руб.']),
+            ([(headerRows[1][1]): 'доначисление доходов, тыс. руб.']),
+            ([(headerRows[2][0]): '(РНУ-108 гр.13+РНУ-115 гр.20+ РНУ-116 гр.20)']),
+            ([(headerRows[2][1]): '(РНУ-107 гр.12+ РНУ-110 гр.11+ РНУ-111 гр.13+ РНУ-115 гр.19+ РНУ-116 гр.19+РНУ-114 гр.16)']),
+            ([(headerRows[2][3]): '(гр.1+гр.2)*20%'])
     ]
     (0..2).each {
-        headerMapping.put((headerRows[3][it]), (it + 1).toString())
+        headerMapping.add(([(headerRows[3][it]): (it + 1).toString()]))
     }
     checkHeaderEquals(headerMapping, logger)
 }

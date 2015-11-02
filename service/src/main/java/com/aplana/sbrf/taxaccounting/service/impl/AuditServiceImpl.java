@@ -52,7 +52,20 @@ public class AuditServiceImpl implements AuditService {
 	}
 
     @Override
+    @Transactional(readOnly = false)
     public void add(final FormDataEvent event, final TAUserInfo userInfo, final Integer departmentId, final Integer reportPeriodId,
+                    final String declarationTypeName, final String formTypeName, final Integer formKindId, final String note, final String blobDataId) {
+        String rpName = null;
+        if (reportPeriodId != null) {
+            ReportPeriod reportPeriod = periodService.getReportPeriod(reportPeriodId);
+            rpName = String.format(RP_NAME_PATTERN, reportPeriod.getTaxPeriod().getYear(), reportPeriod.getName());
+        }
+        add(event, userInfo, rpName, departmentId, declarationTypeName, formTypeName, formKindId, note, blobDataId);
+    }
+
+    @Override
+    @Transactional(readOnly = false)
+    public void add(final FormDataEvent event, final TAUserInfo userInfo, final String reportPeriodName, final Integer departmentId,
                     final String declarationTypeName, final String formTypeName, final Integer formKindId, final String note, final String blobDataId) {
         tx.executeInNewTransaction(new TransactionLogic() {
             @Override
@@ -63,23 +76,18 @@ public class AuditServiceImpl implements AuditService {
                         :
                         (
                                 departmentId == 0 ? departmentService.getDepartment(departmentId).getName() :
-                                departmentService.getParentsHierarchy(departmentId)
+                                        departmentService.getParentsHierarchy(departmentId)
                         );
-
-                String rpName = null;
-                if (reportPeriodId != null) {
-                    ReportPeriod reportPeriod = periodService.getReportPeriod(reportPeriodId);
-                    rpName = String.format(RP_NAME_PATTERN, reportPeriod.getTaxPeriod().getYear(), reportPeriod.getName());
-                }
                 String mnote = note != null ? note.substring(0, Math.min(note.length(), 2000)) : null;
 
-                add(event, userInfo, departmentName, departmentId, rpName, declarationTypeName, formTypeName, formKindId, mnote, blobDataId);
-				return null;
+                add(event, userInfo, departmentName, departmentId, reportPeriodName, declarationTypeName, formTypeName, formKindId, mnote, blobDataId);
+                return null;
             }
         });
     }
 
     @Override
+    @Transactional(readOnly = false)
     public void add(final FormDataEvent event, final TAUserInfo userInfo, final Date startDate, final Date endDate,
                     final String declarationTemplateName, final String formTemplateName, final String note, final String blobDataId) {
         tx.executeInNewTransaction(new TransactionLogic() {

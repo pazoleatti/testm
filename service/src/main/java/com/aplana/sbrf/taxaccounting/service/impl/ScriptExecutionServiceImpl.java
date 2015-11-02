@@ -43,12 +43,6 @@ public class ScriptExecutionServiceImpl extends TAAbstractScriptingServiceImpl i
     @Autowired
     private LogEntryService logEntryService;
     @Autowired
-    private BlobDataService blobDataService;
-    @Autowired
-    private FormDataScriptingService formDataScriptingService;
-    @Autowired
-    private DeclarationDataScriptingService declarationDataScriptingService;
-    @Autowired
     private RefBookScriptingService refBookScriptingService;
     @Autowired
     private FormTemplateService formTemplateService;
@@ -138,8 +132,7 @@ public class ScriptExecutionServiceImpl extends TAAbstractScriptingServiceImpl i
                     String script = IOUtils.toString(zis);
                     /** Импорт скриптов нф */
                     if (folderName.equals(FOLDERS.form_template.name())) {
-                        int formTypeId = 0;
-                        int year = 0;
+                        int formTypeId, year;
                         try {
                             formTypeId = Integer.parseInt(scriptName.substring(0, scriptName.indexOf("-")));
                             year = Integer.parseInt(scriptName.substring(scriptName.indexOf("-") + 1));
@@ -165,8 +158,7 @@ public class ScriptExecutionServiceImpl extends TAAbstractScriptingServiceImpl i
 
                     /** Импорт скриптов деклараций */
                     if (folderName.equals(FOLDERS.declaration_template.name())) {
-                        int declarationTypeId = 0;
-                        int year = 0;
+                        int declarationTypeId, year;
                         try {
                             declarationTypeId = Integer.parseInt(scriptName.substring(0, scriptName.indexOf("-")));
                             year = Integer.parseInt(scriptName.substring(scriptName.indexOf("-") + 1));
@@ -191,7 +183,7 @@ public class ScriptExecutionServiceImpl extends TAAbstractScriptingServiceImpl i
 
                     /** Импорт скриптов справочников */
                     if (folderName.equals(FOLDERS.ref_book.name())) {
-                        long refBookId = 0;
+                        long refBookId;
                         try {
                             refBookId = Long.parseLong(scriptName);
                         } catch (NumberFormatException e) {
@@ -232,7 +224,7 @@ public class ScriptExecutionServiceImpl extends TAAbstractScriptingServiceImpl i
                     }
                 }
             }
-            auditService.add(FormDataEvent.SCRIPTS_IMPORT, userInfo, null, null, null, null, null, auditMsg.toString(), logEntryService.save(logger.getEntries()));
+            auditService.add(FormDataEvent.SCRIPTS_IMPORT, userInfo, "", null, null, null, null, auditMsg.toString(), logEntryService.save(logger.getEntries()));
             if (zis != null) {
                 try {
                     zis.close();

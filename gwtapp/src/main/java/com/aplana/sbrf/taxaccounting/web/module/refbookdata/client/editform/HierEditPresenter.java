@@ -34,8 +34,7 @@ public class HierEditPresenter extends AbstractEditPresenter<HierEditPresenter.M
     void showRecord(final Long refBookRecordId) {
         if (refBookRecordId == null) {
             currentUniqueRecordId = null;
-            getView().fillInputFields(null);
-
+//            getView().fillInputFields(null);
             getView().updateRefBookPickerPeriod();
             getView().cleanFields();
             setNeedToReload();
@@ -141,7 +140,7 @@ public class HierEditPresenter extends AbstractEditPresenter<HierEditPresenter.M
 
     @Override
     public void clean(Boolean isVersion) {
-        if (isVersion == true) {
+        if (isVersion) {
             GetRefBookRecordAction action = new GetRefBookRecordAction();
             action.setRefBookId(currentRefBookId);
             action.setUniqueRecordId(currentUniqueRecordId);
@@ -159,11 +158,13 @@ public class HierEditPresenter extends AbstractEditPresenter<HierEditPresenter.M
                             }, HierEditPresenter.this));
         } else {
             currentUniqueRecordId = null;
-            getView().fillInputFields(null);
-            getView().updateRefBookPickerPeriod();
+//            getView().fillInputFields(null);
             getView().cleanFields();
+            getView().updateRefBookPickerPeriod();
             setNeedToReload();
         }
+        getView().setVersionFrom(null);
+        getView().setVersionTo(null);
     }
 
     @ProxyEvent

@@ -1,0 +1,282 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<formTemplateContent>
+    <fixedRows>false</fixedRows>
+    <monthly>false</monthly>
+    <comparative>false</comparative>
+    <accruing>false</accruing>
+    <updating>true</updating>
+    <name>Приложение 4.2. Отчет в отношении доходов и расходов Банка по сделкам с ВЗЛ, РОЗ, НЛ по итогам окончания Налогового периода</name>
+    <fullName>Приложение 4.2. Отчет в отношении доходов и расходов Банка по сделкам с ВЗЛ, РОЗ, НЛ по итогам окончания Налогового периода</fullName>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="autoNumerationColumn">
+        <alias>rowNumber</alias>
+        <checking>false</checking>
+        <columnType>AUTO</columnType>
+        <name>№ п/п</name>
+        <order>1</order>
+        <width>4</width>
+        <numerationType>SERIAL</numerationType>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
+        <alias>name</alias>
+        <checking>false</checking>
+        <columnType>REFBOOK</columnType>
+        <name>Полное наименование и ОПФ юридического лица</name>
+        <order>2</order>
+        <width>15</width>
+        <hierarchical>false</hierarchical>
+        <!-- TODO: уточнить id атрибута-->
+        <nameAttributeId>5201</nameAttributeId>
+        <!-- TODO: уточнить id атрибута-->
+        <refBookAttributeId>5201</refBookAttributeId>
+        <searchEnabled>true</searchEnabled>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="referenceColumn">
+        <alias>ikksr</alias>
+        <checking>false</checking>
+        <columnType>REFERENCE</columnType>
+        <name>ИНН и КПП или его аналог (при наличии)</name>
+        <order>3</order>
+        <width>6</width>
+        <parentAlias>name</parentAlias>
+        <!-- TODO: уточнить id атрибута-->
+        <refBookAttributeId>5202</refBookAttributeId>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
+        <alias>group</alias>
+        <checking>false</checking>
+        <columnType>REFBOOK</columnType>
+        <name>Группа юридического лица</name>
+        <order>4</order>
+        <width>6</width>
+        <hierarchical>false</hierarchical>
+        <nameAttributeId>5051</nameAttributeId>
+        <refBookAttributeId>5051</refBookAttributeId>
+        <searchEnabled>true</searchEnabled>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>sum51</alias>
+        <checking>false</checking>
+        <columnType>NUMBER</columnType>
+        <name>Сделки с ценными бумагами</name>
+        <order>5</order>
+        <width>6</width>
+        <maxLength>15</maxLength>
+        <precision>0</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>sum52</alias>
+        <checking>false</checking>
+        <columnType>NUMBER</columnType>
+        <name>Сделки купли-продажи иностранной валюты</name>
+        <order>6</order>
+        <width>6</width>
+        <maxLength>15</maxLength>
+        <precision>0</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>sum53</alias>
+        <checking>false</checking>
+        <columnType>NUMBER</columnType>
+        <name>Сделки купли-продажи драгоценных металлов</name>
+        <order>7</order>
+        <width>6</width>
+        <maxLength>15</maxLength>
+        <precision>0</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>sum54</alias>
+        <checking>false</checking>
+        <columnType>NUMBER</columnType>
+        <name>Сделки, отраженные в Журнале взаиморасчетов</name>
+        <order>8</order>
+        <width>6</width>
+        <maxLength>15</maxLength>
+        <precision>0</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>sum55</alias>
+        <checking>false</checking>
+        <columnType>NUMBER</columnType>
+        <name>Сделки с лицами, информация о которых не  отражена в Журнале взаиморасчетов</name>
+        <order>9</order>
+        <width>6</width>
+        <maxLength>15</maxLength>
+        <precision>0</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>sum61</alias>
+        <checking>false</checking>
+        <columnType>NUMBER</columnType>
+        <name>Сделки с ценными бумагами</name>
+        <order>10</order>
+        <width>6</width>
+        <maxLength>15</maxLength>
+        <precision>0</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>sum62</alias>
+        <checking>false</checking>
+        <columnType>NUMBER</columnType>
+        <name>Сделки купли-продажи иностранной валюты</name>
+        <order>11</order>
+        <width>6</width>
+        <maxLength>15</maxLength>
+        <precision>0</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>sum63</alias>
+        <checking>false</checking>
+        <columnType>NUMBER</columnType>
+        <name>Сделки купли-продажи драгоценных металлов</name>
+        <order>12</order>
+        <width>6</width>
+        <maxLength>15</maxLength>
+        <precision>0</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>sum64</alias>
+        <checking>false</checking>
+        <columnType>NUMBER</columnType>
+        <name>Сделки, отраженные в Журнале взаиморасчетов</name>
+        <order>13</order>
+        <width>6</width>
+        <maxLength>15</maxLength>
+        <precision>0</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>sum65</alias>
+        <checking>false</checking>
+        <columnType>NUMBER</columnType>
+        <name>Сделки с лицами, информация о которых не  отражена в Журнале взаиморасчетов</name>
+        <order>14</order>
+        <width>6</width>
+        <maxLength>15</maxLength>
+        <precision>0</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>sum7</alias>
+        <checking>false</checking>
+        <columnType>NUMBER</columnType>
+        <name>Сумма дополнительно начисленных налогооблагаемых доходов, тыс. руб.</name>
+        <order>15</order>
+        <width>6</width>
+        <maxLength>15</maxLength>
+        <precision>0</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>sum8</alias>
+        <checking>false</checking>
+        <columnType>NUMBER</columnType>
+        <name>Итого объем доходов и расходов, тыс. руб.</name>
+        <order>16</order>
+        <width>6</width>
+        <maxLength>15</maxLength>
+        <precision>0</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
+        <alias>thresholdValue</alias>
+        <checking>false</checking>
+        <columnType>REFBOOK</columnType>
+        <name>Применимое Пороговое значение, тыс. руб</name>
+        <order>17</order>
+        <width>10</width>
+        <hierarchical>false</hierarchical>
+        <nameAttributeId>5142</nameAttributeId>
+        <refBookAttributeId>5142</refBookAttributeId>
+        <searchEnabled>true</searchEnabled>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
+        <alias>sign</alias>
+        <checking>false</checking>
+        <columnType>REFBOOK</columnType>
+        <name>Признак наличия Контролируемых сделок (Да / Нет)</name>
+        <order>18</order>
+        <width>10</width>
+        <hierarchical>false</hierarchical>
+        <nameAttributeId>250</nameAttributeId>
+        <refBookAttributeId>250</refBookAttributeId>
+        <searchEnabled>true</searchEnabled>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
+        <alias>categoryRevised</alias>
+        <checking>false</checking>
+        <columnType>REFBOOK</columnType>
+        <name>Пересмотренная Категория юридического лица по состоянию на 1 апреля</name>
+        <order>19</order>
+        <width>10</width>
+        <hierarchical>false</hierarchical>
+        <nameAttributeId>5061</nameAttributeId>
+        <refBookAttributeId>5061</refBookAttributeId>
+        <searchEnabled>true</searchEnabled>
+    </columns>
+    <styles>
+        <alias>Корректировка-изменено</alias>
+        <backColor>WHITE</backColor>
+        <bold>true</bold>
+        <fontColor>RED</fontColor>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Корректировка-без изменений</alias>
+        <backColor>GREY</backColor>
+        <bold>false</bold>
+        <fontColor>BLACK</fontColor>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Корректировка-добавлено</alias>
+        <backColor>PALE_GREEN</backColor>
+        <bold>false</bold>
+        <fontColor>BLACK</fontColor>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Корректировка-удалено</alias>
+        <backColor>LIGHT_CORAL</backColor>
+        <bold>false</bold>
+        <fontColor>BLACK</fontColor>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Редактируемая</alias>
+        <backColor>LIGHT_BLUE</backColor>
+        <bold>false</bold>
+        <fontColor>BLACK</fontColor>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Автозаполняемая</alias>
+        <backColor>WHITE</backColor>
+        <bold>true</bold>
+        <fontColor>DARK_GREEN</fontColor>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Контрольные суммы</alias>
+        <backColor>LIGHT_BROWN</backColor>
+        <bold>true</bold>
+        <fontColor>BLACK</fontColor>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Светло-красный</alias>
+        <backColor>LIGHT_CORAL</backColor>
+        <bold>false</bold>
+        <fontColor>WHITE</fontColor>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Светло-желтый</alias>
+        <backColor>LIGHT_YELLOW</backColor>
+        <bold>false</bold>
+        <fontColor>WHITE</fontColor>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Светло-зеленый</alias>
+        <backColor>PALE_GREEN</backColor>
+        <bold>false</bold>
+        <fontColor>WHITE</fontColor>
+        <italic>false</italic>
+    </styles>
+</formTemplateContent>

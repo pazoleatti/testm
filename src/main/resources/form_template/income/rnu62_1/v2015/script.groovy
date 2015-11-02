@@ -727,7 +727,7 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
             ([(headerRows[2][0]): '1'])
     ]
     (2..18).each { index ->
-        headerMapping.add(([headerRows[2][index]: index.toString()]))
+        headerMapping.add([(headerRows[2][index]): index.toString()])
     }
     checkHeaderEquals(headerMapping, logger)
 }

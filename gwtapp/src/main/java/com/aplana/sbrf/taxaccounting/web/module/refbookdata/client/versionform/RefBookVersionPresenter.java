@@ -37,7 +37,6 @@ public class RefBookVersionPresenter extends PresenterWidget<RefBookVersionPrese
     //Идентификатор записи
     private Long uniqueRecordId, recordId;
     private boolean isHierarchy = false;
-    private Integer selectedRowIndex;
 
     public void setHierarchy(boolean hierarchy) {
         isHierarchy = hierarchy;
@@ -75,12 +74,13 @@ public class RefBookVersionPresenter extends PresenterWidget<RefBookVersionPrese
     @ProxyEvent
     @Override
     public void onUpdateForm(UpdateForm event) {
+        uniqueRecordId = event.getRecordChanges().getId();
         getView().updateTable();
     }
 
     public interface MyView extends View, HasUiHandlers<RefBookVersionUiHandlers> {
 		void setTableColumns(final List<RefBookColumn> columns);
-		void setTableData(int start, int totalCount, List<RefBookDataRow> dataRows);
+		void setTableData(int start, int totalCount, List<RefBookDataRow> dataRows, Long selectedItem);
 		void setSelected(Long recordId);
 		void assignDataProvider(int pageSize, AbstractDataProvider<RefBookDataRow> data);
         int getPageSize();
@@ -169,7 +169,6 @@ public class RefBookVersionPresenter extends PresenterWidget<RefBookVersionPrese
 		rowsId.add(deletedVersion);
 		action.setRecordsId(rowsId);
         action.setDeleteVersion(true);
-        selectedRowIndex = getView().getSelectedRowIndex();
 		dispatcher.execute(action,
 				CallbackUtils.defaultCallback(
 						new AbstractCallback<DeleteRefBookRowResult>() {
@@ -237,19 +236,7 @@ public class RefBookVersionPresenter extends PresenterWidget<RefBookVersionPrese
 								@Override
 								public void onSuccess(GetRefBookRecordVersionResult result) {
 									getView().setTableData(range.getStart(),
-											result.getTotalCount(), result.getDataRows());
-                                    if (!result.getDataRows().isEmpty()) {
-                                        getView().setSelected(result.getDataRows().get(0).getRefBookRowId());
-                                        // recordCommonId = result.getRefBookRecordCommonId();
-                                    } /*else if (recordId != null){
-                                        getView().setSelected(recordId);
-                                    } */
-                                    //recordId = null;
-                                    if (selectedRowIndex != null && result.getDataRows().size() > selectedRowIndex) {
-                                        //сохраняем позицию после удаления записи
-                                        getView().setSelected(result.getDataRows().get(selectedRowIndex).getRefBookRowId());
-                                    }
-                                    selectedRowIndex = null;
+											result.getTotalCount(), result.getDataRows(), uniqueRecordId);
 								}
 							}, RefBookVersionPresenter.this));
 		}

@@ -19,7 +19,7 @@
   </row>
   <row alias="R3">
     <cell alias="rowNum" colSpan="1" numericValue="3" rowSpan="1"/>
-    <cell alias="taxName" colSpan="1" rowSpan="1" stringValue="Отношение страховых взносов, уплачиваемых во внебюджетные фонды к расходам на оплату труда, %"/>
+    <cell alias="taxName" colSpan="1" rowSpan="1" stringValue="Отношение страховых взносов, уплачиваемых во внебюджетные фонды к расходам на оплату труда, %" styleAlias="Жирный"/>
     <cell alias="symbol102" colSpan="1" rowSpan="1"/>
     <cell alias="comparePeriod" colSpan="1" rowSpan="1"/>
     <cell alias="currentPeriod" colSpan="1" rowSpan="1"/>

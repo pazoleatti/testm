@@ -556,21 +556,21 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
     checkHeaderSize(headerRows[headerRows.size() - 1].size(), headerRows.size(), colCount, rowCount)
 
     def headerMapping = [
-            (headerRows[0][0]): getColumnName(tmpRow, 'rowNum'),
-            (headerRows[0][1]): getColumnName(tmpRow, 'taxName'),
-            (headerRows[0][2]): getColumnName(tmpRow, 'symbol102'),
-            (headerRows[0][3]): 'Период сравнения',
-            (headerRows[0][5]): 'Период',
-            (headerRows[0][7]): 'Изменения за период',
-            (headerRows[1][3]): 'Сумма, тыс.руб.',
-            (headerRows[1][4]): 'Удельный вес в общей сумме за период, %',
-            (headerRows[1][5]): 'Сумма, тыс.руб.',
-            (headerRows[1][6]): 'Удельный вес в общей сумме за период, %',
-            (headerRows[1][7]): '(гр.6-гр.4), тыс.руб.',
-            (headerRows[1][8]): '(гр.8/гр.4*100), %',
+            ([(headerRows[0][0]): getColumnName(tmpRow, 'rowNum')]),
+            ([(headerRows[0][1]): getColumnName(tmpRow, 'taxName')]),
+            ([(headerRows[0][2]): getColumnName(tmpRow, 'symbol102')]),
+            ([(headerRows[0][3]): 'Период сравнения']),
+            ([(headerRows[0][5]): 'Период']),
+            ([(headerRows[0][7]): 'Изменения за период']),
+            ([(headerRows[1][3]): 'Сумма, тыс.руб.']),
+            ([(headerRows[1][4]): 'Удельный вес в общей сумме за период, %']),
+            ([(headerRows[1][5]): 'Сумма, тыс.руб.']),
+            ([(headerRows[1][6]): 'Удельный вес в общей сумме за период, %']),
+            ([(headerRows[1][7]): '(гр.6-гр.4), тыс.руб.']),
+            ([(headerRows[1][8]): '(гр.8/гр.4*100), %'])
     ]
     (1..9).each { index ->
-        headerMapping.put((headerRows[2][index - 1]), index.toString())
+        headerMapping.add(([(headerRows[2][index - 1]): index.toString()]))
     }
     checkHeaderEquals(headerMapping, logger)
 }

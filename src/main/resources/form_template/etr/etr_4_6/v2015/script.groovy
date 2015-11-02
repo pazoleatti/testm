@@ -237,6 +237,9 @@ void logicCheck() {
     }
 }
 
+@Field
+boolean allFoundFlag // флаг, показывающий что при рассчете найдены все нужные формы (БО и расходов). Если он false, то ячейка заполняется нулем.
+
 void calcValues(def dataRows, def sourceRows, boolean isCalc) {
     // при консолидации не подтягиваем данные при расчете
     for (def row in dataRows) {
@@ -244,6 +247,7 @@ void calcValues(def dataRows, def sourceRows, boolean isCalc) {
         switch (row.getAlias()) {
             case 'R1':
                 if (formData.kind == FormDataKind.PRIMARY) {
+                    allFoundFlag = true
                     row.comparePeriod = calcBO(rowSource, getComparativePeriodId())
                     row.currentPeriod = calcBO(rowSource, formData.reportPeriodId)
                 } else {
@@ -253,6 +257,7 @@ void calcValues(def dataRows, def sourceRows, boolean isCalc) {
                 break
             case 'R2':
                 if (formData.kind == FormDataKind.PRIMARY) {
+                    allFoundFlag = true
                     row.comparePeriod = calcBO(rowSource, getComparativePeriodId()) + getSourceValue(getComparativePeriodId(), row, 'comparePeriod', isCalc)
                     row.currentPeriod = calcBO(rowSource, formData.reportPeriodId) + getSourceValue(formData.reportPeriodId, row, 'currentPeriod', isCalc)
                 } else {
@@ -302,12 +307,22 @@ void calcValues(def dataRows, def sourceRows, boolean isCalc) {
 
 def getSourceValue(def periodId, def row, def alias, def isCalc) {
     def sum = BigDecimal.ZERO
-    boolean notFound404 = false
     if (periodId != null) {
         def reportPeriod = getReportPeriod(periodId)
         // если нарастающий итог, то собираем формы с начала года
         int startOrder = formData.accruing ? 1 : reportPeriod.order
         def periods = reportPeriodService.listByTaxPeriod(reportPeriod.taxPeriod.id).findAll{ it.order <= reportPeriod.order && it.order >= startOrder}
+        // получить номера периодов, не заведенных в системе
+        List<Integer> allPeriodOrders = (startOrder..reportPeriod.order)
+        def existPeriodOrders = periods.collect { def period -> Integer.valueOf(period.order) }
+        (allPeriodOrders - existPeriodOrders).each { order ->
+            allFoundFlag = false
+            if (isCalc) { // выводить только при расчете
+                // 4. Проверка наличия принятой источника «Величины налоговых платежей, вводимые вручную» (предрасчетные проверки)
+                logger.warn("Не найдена форма-источник «Величины налоговых платежей, вводимые вручную» в статусе «Принята»: Тип: \"%s/%s\", Период: \"%s %s\", Подразделение: \"%s\". Ячейки по графе «%s», заполняемые из данной формы, будут заполнены нулевым значением.",
+                        FormDataKind.CONSOLIDATED.name, FormDataKind.PRIMARY.name, getPeriodName(order), reportPeriod.getTaxPeriod().getYear(), departmentService.get(formData.departmentId)?.name, getColumnName(row, alias))
+            }
+        }
         periods.each { period ->
             // берем консолидированную, если ее нет, то берем первичную (подразумевается, что форма одна, в 0.8 исправить на множество источников)
             def sourceForm = getSourceForm(FormDataKind.CONSOLIDATED, period.id)
@@ -317,7 +332,7 @@ def getSourceValue(def periodId, def row, def alias, def isCalc) {
             if (sourceForm != null) { // значение строки 5 по графе 4
                 sum += (sourceForm?.allSaved?.get(4)?.sum ?: 0)
             } else {
-                notFound404 = true
+                allFoundFlag = false
                 if (isCalc) { // выводить только при расчете
                     // 4. Проверка наличия принятой источника «Величины налоговых платежей, вводимые вручную» (предрасчетные проверки)
                     logger.warn("Не найдена форма-источник «Величины налоговых платежей, вводимые вручную» в статусе «Принята»: Тип: \"%s/%s\", Период: \"%s %s\", Подразделение: \"%s\". Ячейки по графе «%s», заполняемые из данной формы, будут заполнены нулевым значением.",
@@ -326,7 +341,24 @@ def getSourceValue(def periodId, def row, def alias, def isCalc) {
             }
         }
     }
-    return notFound404 ? BigDecimal.ZERO : sum
+    return allFoundFlag ? sum : BigDecimal.ZERO
+}
+
+def getPeriodName(def order) {
+    switch (order) {
+        case 1:
+            return "первый квартал"
+            break
+        case 2:
+            return "второй квартал"
+            break
+        case 3:
+            return "третий квартал"
+            break
+        case 4:
+            return "четвертый квартал"
+            break
+    }
 }
 
 def getSourceForm(def formDataKind, def periodId) {
@@ -340,17 +372,18 @@ def getSourceForm(def formDataKind, def periodId) {
 // Расчет сумм из БО за определенный период
 def calcBO(def rowSource, def periodId) {
     def periodSum = 0
+    allFoundFlag = false
     if (periodId != null) {
         def reportPeriod = getReportPeriod(periodId)
         def date = getEndDate(reportPeriod?.taxPeriod?.year, reportPeriod?.order)
         def pair = get102Sum(rowSource, date)
-        boolean isCorrect = pair[1]
-        periodSum = isCorrect ? pair[0] : 0
-        if (!formData.accruing && reportPeriod.order != 1 && isCorrect) {
+        allFoundFlag = pair[1]
+        periodSum = allFoundFlag ? pair[0] : 0
+        if (!formData.accruing && reportPeriod.order != 1 && allFoundFlag) {
             def prevDate = getEndDate(reportPeriod?.taxPeriod?.year, reportPeriod?.order - 1)
             pair = get102Sum(rowSource, prevDate)
-            isCorrect = pair[1]
-            periodSum = isCorrect ? (periodSum - pair[0]) : 0
+            allFoundFlag = pair[1]
+            periodSum = allFoundFlag ? (periodSum - pair[0]) : 0
         }
     }
     return periodSum
@@ -358,14 +391,16 @@ def calcBO(def rowSource, def periodId) {
 
 // Возвращает данные из Формы 102 БО за период + флаг корректности
 def get102Sum(def row, def date) {
-    if (opuMap[row.getAlias()] != null) {
-        def opuCodes = opuMap[row.getAlias()].join("' OR OPU_CODE = '")
+    def plusList = opuMap[row.getAlias()]
+    def minusList = opuMapMinus[row.getAlias()]
+    if (plusList != null || minusList != null) {
+        def opuCodes = (plusList + minusList).join("' OR OPU_CODE = '")
         // справочник "Отчет о прибылях и убытках (Форма 0409102-СБ)"
         def records = bookerStatementService.getRecords(52L, formData.departmentId, date, "OPU_CODE = '${opuCodes}'")
         if (records == null || records.isEmpty()) {
             return [0, false]
         }
-        def result = records.sum { it.TOTAL_SUM.numberValue } / 1000
+        def result = records.sum { ((minusList != null && minusList.contains(it.OPU_CODE.stringValue)) ? -1 : 1) * it.TOTAL_SUM.numberValue } / 1000
         return [result, true]
     }
     return [0, true]
@@ -456,17 +491,17 @@ void checkHeaderXls(def headerRows, def colCount, def rowCount, def tmpRow) {
     }
     checkHeaderSize(headerRows[1].size(), headerRows.size(), colCount, rowCount)
     def headerMapping = [
-            (headerRows[0][0]): getColumnName(tmpRow, 'rowNum'),
-            (headerRows[0][1]): getColumnName(tmpRow, 'taxName'),
-            (headerRows[0][2]): getColumnName(tmpRow, 'symbol102'),
-            (headerRows[0][3]): getColumnName(tmpRow, 'comparePeriod'),
-            (headerRows[0][4]): getColumnName(tmpRow, 'currentPeriod'),
-            (headerRows[0][5]): 'Изменение за период',
-            (headerRows[1][5]): '(гр.5-гр.4), тыс.руб.',
-            (headerRows[1][6]): '(гр.6/гр.4*100),%'
+            ([(headerRows[0][0]): getColumnName(tmpRow, 'rowNum')]),
+            ([(headerRows[0][1]): getColumnName(tmpRow, 'taxName')]),
+            ([(headerRows[0][2]): getColumnName(tmpRow, 'symbol102')]),
+            ([(headerRows[0][3]): getColumnName(tmpRow, 'comparePeriod')]),
+            ([(headerRows[0][4]): getColumnName(tmpRow, 'currentPeriod')]),
+            ([(headerRows[0][5]): 'Изменение за период']),
+            ([(headerRows[1][5]): '(гр.5-гр.4), тыс.руб.']),
+            ([(headerRows[1][6]): '(гр.6/гр.4*100),%'])
     ]
     (0..6).each { index ->
-        headerMapping.put((headerRows[2][index]), (index + 1).toString())
+        headerMapping.add(([(headerRows[2][index]): (index + 1).toString()]))
     }
     checkHeaderEquals(headerMapping, logger)
 }

@@ -253,19 +253,19 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
     checkHeaderSize(headerRows[headerRows.size() - 1].size(), headerRows.size(), colCount, rowCount)
 
     def headerMapping = [
-            (headerRows[0][0]): getColumnName(tmpRow, 'rowNum'),
-            (headerRows[0][2]): getColumnName(tmpRow, 'department'),
-            (headerRows[0][3]): 'Сумма увеличения базы по налогу на прибыль, в том числе',
-            (headerRows[0][5]): getColumnName(tmpRow, 'taxBurden'),
-            (headerRows[1][3]): 'не учитываемые расходы, тыс. руб.',
-            (headerRows[1][4]): 'доначисление доходов, тыс. руб.',
-            (headerRows[2][3]): '(РНУ-108 гр.13+РНУ-115 гр.20+ РНУ-116 гр.20)',
-            (headerRows[2][4]): '(РНУ-107 гр.12+ РНУ-110 гр.11+ РНУ-111 гр.13+ РНУ-115 гр.19+ РНУ-116 гр.19+РНУ-114 гр.16)',
-            (headerRows[2][5]): '(гр.1+гр.2)*20%',
-            (headerRows[3][0]): '1'
+            ([(headerRows[0][0]): getColumnName(tmpRow, 'rowNum')]),
+            ([(headerRows[0][2]): getColumnName(tmpRow, 'department')]),
+            ([(headerRows[0][3]): 'Сумма увеличения базы по налогу на прибыль, в том числе']),
+            ([(headerRows[0][5]): getColumnName(tmpRow, 'taxBurden')]),
+            ([(headerRows[1][3]): 'не учитываемые расходы, тыс. руб.']),
+            ([(headerRows[1][4]): 'доначисление доходов, тыс. руб.']),
+            ([(headerRows[2][3]): '(РНУ-108 гр.13+РНУ-115 гр.20+ РНУ-116 гр.20)']),
+            ([(headerRows[2][4]): '(РНУ-107 гр.12+ РНУ-110 гр.11+ РНУ-111 гр.13+ РНУ-115 гр.19+ РНУ-116 гр.19+РНУ-114 гр.16)']),
+            ([(headerRows[2][5]): '(гр.1+гр.2)*20%']),
+            ([(headerRows[3][0]): '1'])
     ]
     (2..5).each {
-        headerMapping.put((headerRows[3][it]), it.toString())
+        headerMapping.add(([(headerRows[3][it]): it.toString()]))
     }
     checkHeaderEquals(headerMapping, logger)
 }

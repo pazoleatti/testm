@@ -78,7 +78,7 @@ def checkCalcColumns = ['deltaRub', 'deltaPercent']
 def nonEmptyColumns = calcColumns
 
 @Field // используется только для предрасчетных проверок
-def opuMap = ['R2' : ['310001']]
+def opuMap = ['R1' : ['28101', '26411.01', '26411.02', '26411.03', '26102', '26410.09', '26411.12', '26411.13'], 'R2' : ['310001']]
 
 @Field
 def startDateMap = [:]
@@ -260,6 +260,17 @@ def getSourceValue(def periodId, def row, def alias, def isCalc) {
         // если нарастающий итог, то собираем формы с начала года
         int startOrder = formData.accruing ? 1 : reportPeriod.order
         def periods = reportPeriodService.listByTaxPeriod(reportPeriod.taxPeriod.id).findAll{ it.order <= reportPeriod.order && it.order >= startOrder}
+        // получить номера периодов, не заведенных в системе
+        List<Integer> allPeriodOrders = (startOrder..reportPeriod.order)
+        def existPeriodOrders = periods.collect { def period -> Integer.valueOf(period.order) }
+        (allPeriodOrders - existPeriodOrders).each { order ->
+                notFound404 = true
+                if (isCalc) { // выводить только при расчете
+                    // 4. Проверка наличия принятой источника «Величины налоговых платежей, вводимые вручную» (предрасчетные проверки)
+                    logger.warn("Не найдена форма-источник «Величины налоговых платежей, вводимые вручную» в статусе «Принята»: Тип: \"%s/%s\", Период: \"%s %s\", Подразделение: \"%s\". Ячейки по графе «%s», заполняемые из данной формы, будут заполнены нулевым значением.",
+                            FormDataKind.CONSOLIDATED.name, FormDataKind.PRIMARY.name, getPeriodName(order), reportPeriod.getTaxPeriod().getYear(), departmentService.get(formData.departmentId)?.name, getColumnName(row, alias))
+                }
+        }
         periods.each { period ->
             // берем консолидированную, если ее нет, то берем первичную (подразумевается, что форма одна, в 0.8 исправить на множество источников)
             def sourceForm = getSourceForm(FormDataKind.CONSOLIDATED, period.id)
@@ -267,18 +278,35 @@ def getSourceValue(def periodId, def row, def alias, def isCalc) {
                 sourceForm = getSourceForm(FormDataKind.PRIMARY, period.id)
             }
             if (sourceForm != null) {
-                sum += (sourceForm?.allSaved?.get(2)?.sum ?: 0)
+                sum += (sourceForm?.allSaved?.get(1)?.sum ?: 0) // значение строки 2
             } else {
                 notFound404 = true
                 if (isCalc) { // выводить только при расчете
                     // 4. Проверка наличия принятой источника «Величины налоговых платежей, вводимые вручную» (предрасчетные проверки)
                     logger.warn("Не найдена форма-источник «Величины налоговых платежей, вводимые вручную» в статусе «Принята»: Тип: \"%s/%s\", Период: \"%s %s\", Подразделение: \"%s\". Ячейки по графе «%s», заполняемые из данной формы, будут заполнены нулевым значением.",
-                            FormDataKind.CONSOLIDATED.name, FormDataKind.PRIMARY.name, period.getName(), period.getTaxPeriod().getYear(), departmentService.get(formData.departmentId)?.name, getColumnName(row, alias))
+                            FormDataKind.CONSOLIDATED.name, FormDataKind.PRIMARY.name, period.getName(), reportPeriod.getTaxPeriod().getYear(), departmentService.get(formData.departmentId)?.name, getColumnName(row, alias))
                 }
             }
         }
     }
     return notFound404 ? BigDecimal.ZERO : sum
+}
+
+def getPeriodName(def order) {
+    switch (order) {
+        case 1:
+            return "первый квартал"
+            break
+        case 2:
+            return "второй квартал"
+            break
+        case 3:
+            return "третий квартал"
+            break
+        case 4:
+            return "четвертый квартал"
+            break
+    }
 }
 
 def getSourceForm(def formDataKind, def periodId) {
@@ -405,17 +433,17 @@ void checkHeaderXls(def headerRows, def colCount, def rowCount, def tmpRow) {
     }
     checkHeaderSize(headerRows[1].size(), headerRows.size(), colCount, rowCount)
     def headerMapping = [
-            (headerRows[0][0]): getColumnName(tmpRow, 'rowNum'),
-            (headerRows[0][1]): getColumnName(tmpRow, 'taxName'),
-            (headerRows[0][2]): getColumnName(tmpRow, 'symbol102'),
-            (headerRows[0][3]): getColumnName(tmpRow, 'comparePeriod'),
-            (headerRows[0][4]): getColumnName(tmpRow, 'currentPeriod'),
-            (headerRows[0][5]): 'Изменение за период',
-            (headerRows[1][5]): '(гр.5-гр.4), тыс.руб.',
-            (headerRows[1][6]): '(гр.6/гр.4*100),%'
+            ([(headerRows[0][0]): getColumnName(tmpRow, 'rowNum')]),
+            ([(headerRows[0][1]): getColumnName(tmpRow, 'taxName')]),
+            ([(headerRows[0][2]): getColumnName(tmpRow, 'symbol102')]),
+            ([(headerRows[0][3]): getColumnName(tmpRow, 'comparePeriod')]),
+            ([(headerRows[0][4]): getColumnName(tmpRow, 'currentPeriod')]),
+            ([(headerRows[0][5]): 'Изменение за период']),
+            ([(headerRows[1][5]): '(гр.5-гр.4), тыс.руб.']),
+            ([(headerRows[1][6]): '(гр.6/гр.4*100),%'])
     ]
     (0..6).each { index ->
-        headerMapping.put((headerRows[2][index]), (index + 1).toString())
+        headerMapping.add(([(headerRows[2][index]): (index + 1).toString()]))
     }
     checkHeaderEquals(headerMapping, logger)
 }

@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform;
 
 import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.gwt.client.dialog.DialogHandler;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
@@ -163,7 +164,13 @@ public class EditFormPresenter extends AbstractEditPresenter<EditFormPresenter.M
                             }, EditFormPresenter.this));
         } else {
             setCurrentUniqueRecordId(null);
-            getView().fillInputFields(null);
+            getView().cleanFields();
+            RefBookValueSerializable rbStringField = new RefBookValueSerializable();
+            rbStringField.setAttributeType(RefBookAttributeType.STRING);
+            rbStringField.setStringValue("Новая запись");
+            HashMap<String, RefBookValueSerializable> field = new HashMap<String, RefBookValueSerializable>(1);
+            field.put(MyView.NEW_RECORD_ALIAS, rbStringField);
+            getView().fillInputFields(field);
 
             /*if (!isVersionMode && mode == FormMode.EDIT) {
                 setMode(FormMode.CREATE);
@@ -182,7 +189,8 @@ public class EditFormPresenter extends AbstractEditPresenter<EditFormPresenter.M
     void showRecord(final Long refBookRecordId) {
         if (refBookRecordId == null) {
             setCurrentUniqueRecordId(null);
-            getView().fillInputFields(null);
+            getView().cleanFields();
+            //getView().fillInputFields(null);
 
             /*if (!isVersionMode && mode == FormMode.EDIT) {
                 setMode(FormMode.CREATE);
@@ -194,7 +202,6 @@ public class EditFormPresenter extends AbstractEditPresenter<EditFormPresenter.M
             /*getView().setVersionFrom(null);
             getView().setVersionTo(null);*/
             getView().updateRefBookPickerPeriod();
-            getView().cleanFields();
             return;
         }
 
@@ -203,7 +210,7 @@ public class EditFormPresenter extends AbstractEditPresenter<EditFormPresenter.M
                 @Override
                 public void yes() {
                     setIsFormModified(false);
-                    showRecord(refBookRecordId);
+                    EditFormPresenter.super.showRecord(refBookRecordId);
                     getView().cleanErrorFields();
                     SetFormMode.fire(EditFormPresenter.this, mode);
                 }
@@ -228,6 +235,34 @@ public class EditFormPresenter extends AbstractEditPresenter<EditFormPresenter.M
             });
         } else {
             super.showRecord(refBookRecordId);
+        }
+    }
+
+    @Override
+    public void onCancelClicked() {
+        if (isFormModified) {
+            Dialog.confirmMessage("Сохранение изменений", "Сохранить изменения?", new DialogHandler() {
+                @Override
+                public void yes() {
+                    setIsFormModified(false);
+                    onSaveClicked(false);
+                    SetFormMode.fire(EditFormPresenter.this, FormMode.EDIT);
+                }
+
+                @Override
+                public void no() {
+                    setIsFormModified(false);
+                    showRecord(previousURId);
+                    getView().cleanErrorFields();
+                    SetFormMode.fire(EditFormPresenter.this, FormMode.EDIT);
+                }
+            });
+        } else {
+            //Показать родительскую запись
+            //setMode(FormMode.EDIT);
+            showRecord(previousURId);
+            getView().cleanErrorFields();
+            SetFormMode.fire(EditFormPresenter.this, FormMode.EDIT);
         }
     }
 }

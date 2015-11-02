@@ -23,6 +23,12 @@
     <bean class="org.mockito.Mockito" factory-method="mock">
         <constructor-arg value="com.aplana.sbrf.taxaccounting.service.DepartmentService"/>
     </bean>
+    <bean id="refBookIncome101" class="org.mockito.Mockito" factory-method="mock">
+        <constructor-arg value="com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider"/>
+    </bean>
+    <bean id="refBookIncome102" class="org.mockito.Mockito" factory-method="mock">
+        <constructor-arg value="com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider"/>
+    </bean>
 
     <bean class="com.aplana.sbrf.taxaccounting.service.impl.BookerStatementsServiceImpl"/>
 

@@ -221,7 +221,7 @@
                     <!--Правые кнопки ссылки-->
                     <g:cell horizontalAlignment="right">
                         <g:SimplePanel ui:field="linkButtonPanel" height="61px" addStyleNames="{style.linkButtonPanel}">
-                            <g:VerticalPanel width="220px" spacing="2">
+                            <g:VerticalPanel width="220px" spacing="3">
                                 <style:LinkButton ui:field="signersAnchor" text="Параметры печатной формы"
                                                   img="resources/img/businessperson-16.png"
                                                   title="Указать параметры печатной формы"/>

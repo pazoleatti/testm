@@ -16,7 +16,7 @@ import groovy.transform.Field
  *
  * графа 1 - rowNum         - № строки
  * графа 2 - taxName        - Наименование налога
- * графа 3 - symbol102      - символ формы 102
+ * графа 3 - symbol102      - символ формы 101, 102
  * графа 4 - comparePeriod  - Период сравнения, тыс.руб.
  * графа 5 - currentPeriod  - Период, тыс.руб.
  * графа 6 - deltaRub       - Изменение за период (гр.5-гр.4), тыс.руб.
@@ -336,7 +336,7 @@ void importData() {
         def dataRow = dataRows.get(rowIndex - 1)
         def templateRow = getDataRow(templateRows, dataRow.getAlias())
         // заполнить строку нф значениями из эксель
-        fillRowFromXls(templateRow, dataRow, rowValues, fileRowIndex, rowIndex, colOffset)
+        fillRowFromXls(templateRow, dataRow, rowValues, fileRowIndex, rowIndex, colOffset, rowIndex == dataRows.size())
 
         // освободить ненужные данные - иначе не хватит памяти
         allValues.remove(rowValues)
@@ -359,17 +359,17 @@ void checkHeaderXls(def headerRows, def colCount, def rowCount, def tmpRow) {
     }
     checkHeaderSize(headerRows[1].size(), headerRows.size(), colCount, rowCount)
     def headerMapping = [
-            (headerRows[0][0]): getColumnName(tmpRow, 'rowNum'),
-            (headerRows[0][1]): getColumnName(tmpRow, 'taxName'),
-            (headerRows[0][2]): getColumnName(tmpRow, 'symbol102'),
-            (headerRows[0][3]): getColumnName(tmpRow, 'comparePeriod'),
-            (headerRows[0][4]): getColumnName(tmpRow, 'currentPeriod'),
-            (headerRows[0][5]): 'Изменение за период',
-            (headerRows[1][5]): '(гр.5-гр.4), тыс.руб.',
-            (headerRows[1][6]): '(гр.6/гр.4*100),%'
+            ([(headerRows[0][0]): getColumnName(tmpRow, 'rowNum')]),
+            ([(headerRows[0][1]): getColumnName(tmpRow, 'taxName')]),
+            ([(headerRows[0][2]): getColumnName(tmpRow, 'symbol102')]),
+            ([(headerRows[0][3]): getColumnName(tmpRow, 'comparePeriod')]),
+            ([(headerRows[0][4]): getColumnName(tmpRow, 'currentPeriod')]),
+            ([(headerRows[0][5]): 'Изменение за период']),
+            ([(headerRows[1][5]): '(гр.5-гр.4), тыс.руб.']),
+            ([(headerRows[1][6]): '(гр.6/гр.4*100),%'])
     ]
     (0..6).each { index ->
-        headerMapping.put((headerRows[2][index]), (index + 1).toString())
+        headerMapping.add(([(headerRows[2][index]): (index + 1).toString()]))
     }
     checkHeaderEquals(headerMapping, logger)
 }
@@ -384,7 +384,7 @@ void checkHeaderXls(def headerRows, def colCount, def rowCount, def tmpRow) {
  * @param rowIndex номер строки в нф
  * @param colOffset отступ по столбцам
  */
-def fillRowFromXls(def templateRow, def dataRow, def values, int fileRowIndex, int rowIndex, int colOffset) {
+def fillRowFromXls(def templateRow, def dataRow, def values, int fileRowIndex, int rowIndex, int colOffset, boolean isFixed) {
     dataRow.setImportIndex(fileRowIndex)
     dataRow.setIndex(rowIndex)
     def tmpValues = [:]
@@ -401,6 +401,16 @@ def fillRowFromXls(def templateRow, def dataRow, def values, int fileRowIndex, i
     colIndex++
     tmpValues.symbol102 = values[colIndex]
 
+    // графа 4..7
+    calcColumns.each { alias ->
+        colIndex++
+        if (isFixed) {
+            tmpValues[alias] = round(parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true), 2)
+        } else {
+            dataRow[alias] = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
+        }
+    }
+
     // Проверить фиксированные значения
     tmpValues.keySet().toArray().each { alias ->
         def value = tmpValues[alias]?.toString()
@@ -408,11 +418,6 @@ def fillRowFromXls(def templateRow, def dataRow, def values, int fileRowIndex, i
         checkFixedValue(dataRow, value, valueExpected, dataRow.getIndex(), alias, logger, true)
     }
 
-    // графа 4..7
-    calcColumns.each { alias ->
-        colIndex++
-        dataRow[alias] = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
-    }
 }
 
 void consolidation() {
