@@ -16,10 +16,7 @@ import com.google.gwt.user.client.ui.*;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
 import java.math.BigDecimal;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * User: avanteev
@@ -200,7 +197,8 @@ public abstract class AbstractEditView extends ViewWithUiHandlers<EditFormUiHand
         boolean textFieldFound = false;
         for (Map.Entry<RefBookColumn, HasValue> w : widgets.entrySet()) {
             //Первый по порядку текстовый атрибут справочника принимает значение "Новая запись" (если текстовые атрибуты отсутствуют, то шаг не выполняется)
-            if (w.getValue() instanceof HasText && !(w.getValue() instanceof CheckBox) && record.containsKey(NEW_RECORD_ALIAS) && !textFieldFound){
+            if (record.containsKey(NEW_RECORD_ALIAS) && w.getValue() instanceof HasText && !(w.getValue() instanceof CheckBox)
+                    && w.getKey().getAttributeType() == RefBookAttributeType.STRING && !textFieldFound) {
                 textFieldFound = true;
                 w.getValue().setValue(record.get(NEW_RECORD_ALIAS).getStringValue());
                 continue;
@@ -330,10 +328,7 @@ public abstract class AbstractEditView extends ViewWithUiHandlers<EditFormUiHand
 
             // пердпологается, что (maxLength - precision) <= 17
             if (fractionalPart > precision || integerPart > (maxLength - precision)) {
-                BadValueException badValueException = new BadValueException();
-                badValueException.setFieldName(key.getName());
-                badValueException.setDescription("значение не соответствует формату. Максимальное количество цифр = " + maxLength + ", максимальная точность = " + precision);
-                throw badValueException;
+                throw new BadValueException(Collections.singletonMap(key.getName(), "значение не соответствует формату. Максимальное количество цифр = " + maxLength + ", максимальная точность = " + precision));
             }
         }
         return number;

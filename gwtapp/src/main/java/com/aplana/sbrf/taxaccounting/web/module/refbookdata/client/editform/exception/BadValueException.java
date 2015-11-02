@@ -1,35 +1,24 @@
 package com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.exception;
 
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 
-public class BadValueException extends Exception {
-
-	private Map<String, String> descriptionMap;
+public class BadValueException extends Exception implements Iterable<String> {
+    private Set<String> strings = new HashSet<String>();
 
 	public BadValueException(Map<String, String> descriptionMap) {
-		this.descriptionMap = descriptionMap;
+        for (Map.Entry<String, String> entry : descriptionMap.entrySet()){
+            strings.add("Атрибут \"" + entry.getKey() + "\": " + entry.getValue());
+        }
 	}
 
-	public BadValueException() {
-	}
+    public BadValueException() {
+    }
 
-	public Map<String, String> getDescriptionMap() {
-		return descriptionMap;
-	}
-
-	String fieldName;
-	String description;
-
-	public void setFieldName(String fieldName) {
-		this.fieldName = fieldName;
-	}
-
-	public void setDescription(String description) {
-		this.description = description;
-	}
-
-	@Override
-	public String toString() {
-		return "Атрибут \"" + fieldName + "\": " + description;
-	}
+    @Override
+    public Iterator<String> iterator() {
+        return strings.iterator();
+    }
 }
