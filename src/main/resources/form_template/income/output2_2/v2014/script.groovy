@@ -1,5 +1,7 @@
 package form_template.income.output2_2.v2014
 
+import com.aplana.sbrf.taxaccounting.model.Cell
+import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
@@ -81,6 +83,11 @@ switch (formDataEvent) {
 def providerCache = [:]
 @Field
 def recordCache = [:]
+
+@Field
+def allColumns = ['emitent', 'decreeNumber', 'inn', 'kpp', 'recType', 'title', 'zipCode', 'subdivisionRF', 'area',
+                  'city', 'region', 'street', 'homeNumber', 'corpNumber', 'apartment', 'surname', 'name', 'patronymic',
+                  'phone', 'dividendDate', 'sumDividend', 'sumTax']
 
 // Редактируемые атрибуты 2-23
 @Field
@@ -167,6 +174,34 @@ void logicCheck() {
 void consolidation() {
     def rows = []
 
+    def departmentReportPeriod = departmentReportPeriodService.get(formData.departmentReportPeriodId)
+    // на дату корректировки по ключу строки (состоящему из граф строки) находит строку
+    Map<String, DataRow<Cell>> fullCorrMap = [:]
+    Map<String, DataRow<Cell>> tinyCorrMap = [:]
+
+    if (departmentReportPeriod.correctionDate != null) {
+        // получить список дат корректировок
+        Map<Integer, List<Date>> correctionDatesMap = departmentReportPeriodService.getCorrectionDateListByReportPeriod([formData.reportPeriodId] as List<Integer>)
+        List<Date> correctionDates = correctionDatesMap[formData.reportPeriodId].sort()
+        // добавить исходную форму
+        correctionDates.add(0, null)
+        // обратили список
+        correctionDates = correctionDates.reverse()
+        // получить последнюю форму по корректировкам
+        for (def correctionDate : correctionDates) {
+            def formDataCorrection = formDataService.getLastByDate(formData.formType.id, formData.kind, formData.departmentId, formData.reportPeriodId, formData.periodOrder, correctionDate, formData.comparativePeriodId, formData.accruing)
+            if (formDataCorrection != null && formDataCorrection.id != formData.id) {
+                def dataRowsCorr = formDataService.getDataRowHelper(formDataCorrection).allSaved
+                // карта строк по почти всем графам
+                fullCorrMap = getDataRowsMap(dataRowsCorr, true)
+                // карта строк по двум графам
+                tinyCorrMap = getDataRowsMap(dataRowsCorr, false)
+                break // нашли форму, прерываем
+            }
+        }
+
+    }
+
     // получить формы-источники в текущем налоговом периоде
     departmentFormTypeService.getFormSources(formDataDepartment.id, formData.getFormType().getId(), formData.getKind(),
             getReportPeriodStartDate(), getReportPeriodEndDate()).each {
@@ -180,7 +215,7 @@ void consolidation() {
                     if (sourceRow.status == 1 &&
                             (it.formTypeId != lastSourceFormType && sourceRow.type == 1 || it.formTypeId == lastSourceFormType && sourceRow.type != 2) &&
                             (sourceRow.rate == 0 || sourceRow.rate == 9 || sourceRow.rate == 13)) {
-                        def newRow = formNewRow(sourceRow)
+                        def newRow = formNewRow(sourceRow, departmentReportPeriod, fullCorrMap, tinyCorrMap, rows.size())
                         rows.add(newRow)
                     }
                 }
@@ -192,7 +227,28 @@ void consolidation() {
     formDataService.getDataRowHelper(formData).allCached = rows
 }
 
-def formNewRow(def row) {
+Map<String,DataRow<Cell>> getDataRowsMap(def dataRows, boolean isComplex) {
+    Map<String,DataRow<Cell>> map = [:]
+    if (dataRows == null)
+        return map
+    dataRows.each { row ->
+        String key = isComplex ? getComplexRowKey(row) : getSimpleRowKey(row)
+        map[key] = row
+    }
+    return map
+}
+
+// делаем сложный ключ по всем значениям строки кроме 6-й графы
+String getComplexRowKey(def row) {
+    return (allColumns - 'recType').collect { alias -> row[alias]?.toString()}.join("#")
+}
+
+// делаем простой ключ по ИНН и КПП
+String getSimpleRowKey(def row) {
+    return ['inn', 'kpp'].collect { alias -> row[alias]?.toString()}.join("#")
+}
+
+def formNewRow(def row, def departmentReportPeriod, def fullCorrectionMap, def tinyCorrectionMap, def rowSize) {
     def newRow = formData.createDataRow()
     editableColumns.each {
         newRow.getCell(it).editable = true
@@ -206,8 +262,6 @@ def formNewRow(def row) {
     newRow.inn = row.inn
     //«Графа 5» = «Графа 15» первичной формы
     newRow.kpp = row.kpp
-    //«Графа 6» = «00»
-    newRow.recType = '00'
     //«Графа 7» = «Графа 13» первичной формы
     newRow.title = row.addresseeName
     //«Графа 8» = «Графа 30» первичной формы
@@ -243,7 +297,45 @@ def formNewRow(def row) {
     //«Графа 23» = «Графа 27» первичной формы
     newRow.sumTax = row.withheldSum
 
+    //«Графа 6» - пользуем текущую строку, поэтому расчет после остальных граф
+    newRow.recType = calc6(newRow, departmentReportPeriod, fullCorrectionMap, tinyCorrectionMap, rowSize)
+
     return newRow
+}
+
+def calc6(def row, def departmentReportPeriod, def fullCorrectionMap, def tinyCorrectionMap, def rowSize) {
+    //если период формы не корректирующий
+    if (departmentReportPeriod?.correctionDate == null) {
+        return '00'
+    } else {
+        def dataRowCorrection = fullCorrectionMap[getComplexRowKey(row)]
+        // если предыдущая корректировка не корректировка
+        if (reportPeriodService.getCorrectionNumber(formData.departmentReportPeriodId) == 1) {
+            // если форма предыдущей корректировки содержит строку, идентичную текущей, кроме графы 6
+            if (dataRowCorrection != null) {
+                return "00"
+            } else {
+                return "01"
+            }
+        } else {
+            if (dataRowCorrection != null) {
+                // добавляем единичку к числу в строковом формате
+                return (Integer.parseInt(dataRowCorrection.recType) + 1).toString().padLeft(2,"0")
+            } else {
+                // Если в форме предыдущего периода найдена строка, в которой графы 4 и 5 (ИНН и КПП получателя) равны графам 4 и 5 заполняемой строки текущей формы
+                dataRowCorrection = tinyCorrectionMap[getSimpleRowKey(row)]
+                if (dataRowCorrection != null) {
+                    return dataRowCorrection.recType
+                } else {
+                    logger.warn("Строка %s: Графа «%s» заполнена Системой значением «00»! " +
+                            "В форме предыдущего периода не найдена строка, в которой графа «%s» = «%s» и графа «%s» = «%s»",
+                            rowSize + 1, getColumnName(row,'recType'), getColumnName(row,'inn'), row.inn, getColumnName(row,'kpp'), row.kpp
+                    )
+                    return "00"
+                }
+            }
+        }
+    }
 }
 
 void sortFormDataRows(def saveInDB = true) {

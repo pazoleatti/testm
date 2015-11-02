@@ -47,6 +47,11 @@ public interface FormDataService {
     FormData getLast(int formTypeId, FormDataKind kind, int departmentId, int reportPeriodId, Integer periodOrder, Integer comparativePeriodId, boolean accruing);
 
     /**
+     * НФ созданная в последнем отчетном периоде подразделения перед определенной датой корректировки
+     */
+    FormData getLastByDate(int formTypeId, FormDataKind kind, int departmentId, int reportPeriodId, Integer periodOrder, Date correctionDate, Integer comparativePeriodId, boolean accruing);
+
+    /**
      * Получить шаблон нф.
      * НФ созданная в последнем отчетном периоде подразделения.
      *

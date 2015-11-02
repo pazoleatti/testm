@@ -2,7 +2,6 @@ package com.aplana.sbrf.taxaccounting.service.script.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
 import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
-import com.aplana.sbrf.taxaccounting.dao.SourceDao;
 import com.aplana.sbrf.taxaccounting.dao.TAUserDao;
 import com.aplana.sbrf.taxaccounting.dao.api.FormTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.script.FormDataCacheDao;
@@ -115,6 +114,11 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
     @Override
     public FormData getLast(int formTypeId, FormDataKind kind, int departmentId, int reportPeriodId, Integer periodOrder, Integer comparativePeriodId, boolean accruing) {
         return dao.getLast(formTypeId, kind, departmentId, reportPeriodId, periodOrder, comparativePeriodId, accruing);
+    }
+
+    @Override
+    public FormData getLastByDate(int formTypeId, FormDataKind kind, int departmentId, int reportPeriodId, Integer periodOrder, Date correctionDate, Integer comparativePeriodId, boolean accruing) {
+        return dao.getLastByDate(formTypeId, kind, departmentId, reportPeriodId, periodOrder, correctionDate, comparativePeriodId, accruing);
     }
 
     @Override

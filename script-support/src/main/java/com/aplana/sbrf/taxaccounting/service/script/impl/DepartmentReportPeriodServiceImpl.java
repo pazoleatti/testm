@@ -9,6 +9,11 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collection;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+
 @Transactional(readOnly = true)
 @Component("departmentReportPeriodService")
 @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
@@ -20,5 +25,10 @@ public class DepartmentReportPeriodServiceImpl implements DepartmentReportPeriod
     @Override
     public DepartmentReportPeriod get(int id) {
         return departmentReportPeriodDao.get(id);
+    }
+
+    @Override
+    public Map<Integer, List<Date>> getCorrectionDateListByReportPeriod(Collection<Integer> reportPeriodIds) {
+        return departmentReportPeriodDao.getCorrectionDateListByReportPeriod(reportPeriodIds);
     }
 }
