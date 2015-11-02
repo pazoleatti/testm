@@ -3,7 +3,7 @@
     <row alias="">
         <cell alias="rowNumber" colSpan="1" rowSpan="3" value="№ п/п"/>
         <cell alias="name" colSpan="3" rowSpan="1" value="Информация о лице"/>
-        <cell alias="ikkrs" colSpan="1" rowSpan="1" value="Информация о лице"/>
+        <cell alias="ikksr" colSpan="1" rowSpan="1" value="Информация о лице"/>
         <cell alias="group" colSpan="1" rowSpan="1" value="Информация о лице"/>
         <cell alias="sum51" colSpan="10" rowSpan="1" value="Информация в отношении сделок"/>
         <cell alias="sum52" colSpan="1" rowSpan="1" value="Информация в отношении сделок"/>
@@ -24,7 +24,7 @@
     <row alias="">
         <cell alias="rowNumber" colSpan="1" rowSpan="1" value="№ п/п"/>
         <cell alias="name" colSpan="1" rowSpan="2" value="Полное наименование и ОПФ юридического лица"/>
-        <cell alias="ikkrs" colSpan="1" rowSpan="2" value="ИНН и КПП или его аналог (при наличии)"/>
+        <cell alias="ikksr" colSpan="1" rowSpan="2" value="ИНН и КПП или его аналог (при наличии)"/>
         <cell alias="group" colSpan="1" rowSpan="2" value="Группа юридического лица"/>
         <cell alias="sum51" colSpan="5" rowSpan="1" value="Сумма доходов, тыс. руб."/>
         <cell alias="sum52" colSpan="1" rowSpan="1" value="Сумма доходов, тыс. руб."/>
@@ -45,7 +45,7 @@
     <row alias="">
         <cell alias="rowNumber" colSpan="1" rowSpan="1" value="№ п/п"/>
         <cell alias="name" colSpan="1" rowSpan="1" value="Полное наименование и ОПФ юридического лица"/>
-        <cell alias="ikkrs" colSpan="1" rowSpan="1" value="ИНН и КПП или его аналог (при наличии)"/>
+        <cell alias="ikksr" colSpan="1" rowSpan="1" value="ИНН и КПП или его аналог (при наличии)"/>
         <cell alias="group" colSpan="1" rowSpan="1" value="Группа юридического лица"/>
         <cell alias="sum51" colSpan="1" rowSpan="1" value="Сделки с ценными бумагами"/>
         <cell alias="sum52" colSpan="1" rowSpan="1" value="Сделки купли-продажи иностранной валюты"/>
@@ -66,7 +66,7 @@
     <row alias="">
         <cell alias="rowNumber" colSpan="1" rowSpan="1" value="гр. 1"/>
         <cell alias="name" colSpan="1" rowSpan="1" value="гр. 2"/>
-        <cell alias="ikkrs" colSpan="1" rowSpan="1" value="гр. 3"/>
+        <cell alias="ikksr" colSpan="1" rowSpan="1" value="гр. 3"/>
         <cell alias="group" colSpan="1" rowSpan="1" value="гр. 4"/>
         <cell alias="sum51" colSpan="1" rowSpan="1" value="гр. 5.1"/>
         <cell alias="sum52" colSpan="1" rowSpan="1" value="гр. 5.2"/>

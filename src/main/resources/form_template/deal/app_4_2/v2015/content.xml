@@ -31,7 +31,7 @@
         <searchEnabled>true</searchEnabled>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="referenceColumn">
-        <alias>ikkrs</alias>
+        <alias>ikksr</alias>
         <checking>false</checking>
         <columnType>REFERENCE</columnType>
         <name>ИНН и КПП или его аналог (при наличии)</name>
@@ -60,7 +60,7 @@
         <name>Сделки с ценными бумагами</name>
         <order>5</order>
         <width>6</width>
-        <maxLength>12</maxLength>
+        <maxLength>15</maxLength>
         <precision>0</precision>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
@@ -70,7 +70,7 @@
         <name>Сделки купли-продажи иностранной валюты</name>
         <order>6</order>
         <width>6</width>
-        <maxLength>12</maxLength>
+        <maxLength>15</maxLength>
         <precision>0</precision>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
@@ -80,7 +80,7 @@
         <name>Сделки купли-продажи драгоценных металлов</name>
         <order>7</order>
         <width>6</width>
-        <maxLength>12</maxLength>
+        <maxLength>15</maxLength>
         <precision>0</precision>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
@@ -90,7 +90,7 @@
         <name>Сделки, отраженные в Журнале взаиморасчетов</name>
         <order>8</order>
         <width>6</width>
-        <maxLength>12</maxLength>
+        <maxLength>15</maxLength>
         <precision>0</precision>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
@@ -100,7 +100,7 @@
         <name>Сделки с лицами, информация о которых не  отражена в Журнале взаиморасчетов</name>
         <order>9</order>
         <width>6</width>
-        <maxLength>12</maxLength>
+        <maxLength>15</maxLength>
         <precision>0</precision>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
@@ -110,7 +110,7 @@
         <name>Сделки с ценными бумагами</name>
         <order>10</order>
         <width>6</width>
-        <maxLength>12</maxLength>
+        <maxLength>15</maxLength>
         <precision>0</precision>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
@@ -120,7 +120,7 @@
         <name>Сделки купли-продажи иностранной валюты</name>
         <order>11</order>
         <width>6</width>
-        <maxLength>12</maxLength>
+        <maxLength>15</maxLength>
         <precision>0</precision>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
@@ -130,7 +130,7 @@
         <name>Сделки купли-продажи драгоценных металлов</name>
         <order>12</order>
         <width>6</width>
-        <maxLength>12</maxLength>
+        <maxLength>15</maxLength>
         <precision>0</precision>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
@@ -140,7 +140,7 @@
         <name>Сделки, отраженные в Журнале взаиморасчетов</name>
         <order>13</order>
         <width>6</width>
-        <maxLength>12</maxLength>
+        <maxLength>15</maxLength>
         <precision>0</precision>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
@@ -150,7 +150,7 @@
         <name>Сделки с лицами, информация о которых не  отражена в Журнале взаиморасчетов</name>
         <order>14</order>
         <width>6</width>
-        <maxLength>12</maxLength>
+        <maxLength>15</maxLength>
         <precision>0</precision>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
@@ -160,7 +160,7 @@
         <name>Сумма дополнительно начисленных налогооблагаемых доходов, тыс. руб.</name>
         <order>15</order>
         <width>6</width>
-        <maxLength>12</maxLength>
+        <maxLength>15</maxLength>
         <precision>0</precision>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
@@ -170,7 +170,7 @@
         <name>Итого объем доходов и расходов, тыс. руб.</name>
         <order>16</order>
         <width>6</width>
-        <maxLength>12</maxLength>
+        <maxLength>15</maxLength>
         <precision>0</precision>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
