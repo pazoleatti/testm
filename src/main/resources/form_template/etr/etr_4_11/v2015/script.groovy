@@ -238,19 +238,19 @@ void checkHeaderXls(def headerRows, def tmpRow) {
     }
     checkHeaderSize(headerRows[1].size(), headerRows.size(), 6, 3)
     def headerMapping = [
-            (headerRows[0][0]): getColumnName(tmpRow, 'rowNum'),//'№ п/п',
-            (headerRows[0][1]): getColumnName(tmpRow, 'name'),//'Наименование сделки',
-            (headerRows[0][2]): getColumnName(tmpRow, 'sum1'),//'Сумма фактического дохода/расхода по нерыночным сделкам, тыс. руб. (налоговый учет)',
-            (headerRows[0][3]): getColumnName(tmpRow, 'sum2'),//'Сумма доначислений до рыночного уровня, тыс. руб.',
-            (headerRows[0][4]): getColumnName(tmpRow, 'level'),//'Уровень доначислений/ не учитываемых расходов (в % от факта)',
-            (headerRows[0][5]): getColumnName(tmpRow, 'taxBurden'),//'Налоговое бремя, тыс. руб.',
-            (headerRows[1][2]): 'данные из РНУ по соответствующему виду операций/сделок/продуктов',
-            (headerRows[1][3]): 'данные из РНУ по соответствующему виду операций/сделок/продуктов',
-            (headerRows[1][4]): '(гр.4/гр.3)*100',
-            (headerRows[1][5]): 'гр.4*20%'
+            ([(headerRows[0][0]): getColumnName(tmpRow, 'rowNum')]),//'№ п/п']),
+            ([(headerRows[0][1]): getColumnName(tmpRow, 'name')]),//'Наименование сделки']),
+            ([(headerRows[0][2]): getColumnName(tmpRow, 'sum1')]),//'Сумма фактического дохода/расхода по нерыночным сделкам, тыс. руб. (налоговый учет)']),
+            ([(headerRows[0][3]): getColumnName(tmpRow, 'sum2')]),//'Сумма доначислений до рыночного уровня, тыс. руб.']),
+            ([(headerRows[0][4]): getColumnName(tmpRow, 'level')]),//'Уровень доначислений/ не учитываемых расходов (в % от факта)']),
+            ([(headerRows[0][5]): getColumnName(tmpRow, 'taxBurden')]),//'Налоговое бремя, тыс. руб.']),
+            ([(headerRows[1][2]): 'данные из РНУ по соответствующему виду операций/сделок/продуктов']),
+            ([(headerRows[1][3]): 'данные из РНУ по соответствующему виду операций/сделок/продуктов']),
+            ([(headerRows[1][4]): '(гр.4/гр.3)*100']),
+            ([(headerRows[1][5]): 'гр.4*20%'])
     ]
     (0..5).each {
-        headerMapping.put((headerRows[2][it]), (it + 1).toString())
+        headerMapping.add(([(headerRows[2][it]): (it + 1).toString()]))
     }
     checkHeaderEquals(headerMapping, logger)
 }

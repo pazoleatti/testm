@@ -189,13 +189,13 @@ void checkHeaderXls(def headerRows) {
     }
     checkHeaderSize(headerRows[1].size(), headerRows.size(), 4, 2)
     def headerMapping = [
-            (headerRows[0][0]): '№ п/п',
-            (headerRows[0][1]): 'Наименование показателя',
-            (headerRows[0][2]): 'Графа 4 заполняется',
-            (headerRows[0][3]): 'Сумма, тыс. руб.'
+            ([(headerRows[0][0]): '№ п/п']),
+            ([(headerRows[0][1]): 'Наименование показателя']),
+            ([(headerRows[0][2]): 'Графа 4 заполняется']),
+            ([(headerRows[0][3]): 'Сумма, тыс. руб.'])
     ]
     (0..3).each {
-        headerMapping.put((headerRows[1][it]), (it + 1).toString())
+        headerMapping.add(([(headerRows[1][it]): (it + 1).toString()]))
     }
     checkHeaderEquals(headerMapping, logger)
 }

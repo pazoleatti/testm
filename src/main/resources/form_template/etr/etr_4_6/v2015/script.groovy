@@ -491,17 +491,17 @@ void checkHeaderXls(def headerRows, def colCount, def rowCount, def tmpRow) {
     }
     checkHeaderSize(headerRows[1].size(), headerRows.size(), colCount, rowCount)
     def headerMapping = [
-            (headerRows[0][0]): getColumnName(tmpRow, 'rowNum'),
-            (headerRows[0][1]): getColumnName(tmpRow, 'taxName'),
-            (headerRows[0][2]): getColumnName(tmpRow, 'symbol102'),
-            (headerRows[0][3]): getColumnName(tmpRow, 'comparePeriod'),
-            (headerRows[0][4]): getColumnName(tmpRow, 'currentPeriod'),
-            (headerRows[0][5]): 'Изменение за период',
-            (headerRows[1][5]): '(гр.5-гр.4), тыс.руб.',
-            (headerRows[1][6]): '(гр.6/гр.4*100),%'
+            ([(headerRows[0][0]): getColumnName(tmpRow, 'rowNum')]),
+            ([(headerRows[0][1]): getColumnName(tmpRow, 'taxName')]),
+            ([(headerRows[0][2]): getColumnName(tmpRow, 'symbol102')]),
+            ([(headerRows[0][3]): getColumnName(tmpRow, 'comparePeriod')]),
+            ([(headerRows[0][4]): getColumnName(tmpRow, 'currentPeriod')]),
+            ([(headerRows[0][5]): 'Изменение за период']),
+            ([(headerRows[1][5]): '(гр.5-гр.4), тыс.руб.']),
+            ([(headerRows[1][6]): '(гр.6/гр.4*100),%'])
     ]
     (0..6).each { index ->
-        headerMapping.put((headerRows[2][index]), (index + 1).toString())
+        headerMapping.add(([(headerRows[2][index]): (index + 1).toString()]))
     }
     checkHeaderEquals(headerMapping, logger)
 }

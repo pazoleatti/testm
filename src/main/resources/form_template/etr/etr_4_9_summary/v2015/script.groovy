@@ -255,19 +255,19 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
     checkHeaderSize(headerRows[headerRows.size() - 1].size(), headerRows.size(), colCount, rowCount)
 
     def headerMapping = [
-            (headerRows[0][0]): getColumnName(tmpRow, 'rowNum'),
-            (headerRows[0][2]): getColumnName(tmpRow, 'department'),
-            (headerRows[0][3]): getColumnName(tmpRow, 'sumBU'),
-            (headerRows[0][4]): getColumnName(tmpRow, 'sumNUD'),
-            (headerRows[0][5]): getColumnName(tmpRow, 'sumNUP'),
-            (headerRows[0][6]): getColumnName(tmpRow, 'taxBurden'),
-            (headerRows[1][3]): 'симв. ф.102 (26307.02+22204)',
-            (headerRows[1][4]): 'КНУ 21490',
-            (headerRows[1][5]): 'КНУ 21510',
-            (headerRows[1][6]): '(гр.3-(гр.4+гр.5))*20%'
+            ([(headerRows[0][0]): getColumnName(tmpRow, 'rowNum')]),
+            ([(headerRows[0][2]): getColumnName(tmpRow, 'department')]),
+            ([(headerRows[0][3]): getColumnName(tmpRow, 'sumBU')]),
+            ([(headerRows[0][4]): getColumnName(tmpRow, 'sumNUD')]),
+            ([(headerRows[0][5]): getColumnName(tmpRow, 'sumNUP')]),
+            ([(headerRows[0][6]): getColumnName(tmpRow, 'taxBurden')]),
+            ([(headerRows[1][3]): 'симв. ф.102 (26307.02+22204)']),
+            ([(headerRows[1][4]): 'КНУ 21490']),
+            ([(headerRows[1][5]): 'КНУ 21510']),
+            ([(headerRows[1][6]): '(гр.3-(гр.4+гр.5))*20%'])
     ]
     (2..6).each {
-        headerMapping.put((headerRows[2][it]), it.toString())
+        headerMapping.add(([(headerRows[2][it]): it.toString()]))
     }
     checkHeaderEquals(headerMapping, logger)
 }
