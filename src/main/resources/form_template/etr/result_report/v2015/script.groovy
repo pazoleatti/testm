@@ -177,15 +177,15 @@ void checkHeaderXls(def headerRows) {
     }
     checkHeaderSize(headerRows[1].size(), headerRows.size(), 6, 2)
     def headerMapping = [
-            (headerRows[0][0]): '№ п/п',
-            (headerRows[0][1]): 'Проблемные зоны/зоны потенциального риска/факторы, оказывающие влияние',
-            (headerRows[0][2]): 'Предложенные мероприятия/меры',
-            (headerRows[0][3]): 'Сроки реализации',
-            (headerRows[0][4]): 'Отметка о выполнении',
-            (headerRows[0][5]): 'Примечание/Комментарии'
+            ([(headerRows[0][0]): '№ п/п']),
+            ([(headerRows[0][1]): 'Проблемные зоны/зоны потенциального риска/факторы, оказывающие влияние']),
+            ([(headerRows[0][2]): 'Предложенные мероприятия/меры']),
+            ([(headerRows[0][3]): 'Сроки реализации']),
+            ([(headerRows[0][4]): 'Отметка о выполнении']),
+            ([(headerRows[0][5]): 'Примечание/Комментарии'])
     ]
     (0..5).each {
-        headerMapping.put((headerRows[1][it]), (it + 1).toString())
+        headerMapping.add(([(headerRows[1][it]): (it + 1).toString()]))
     }
     checkHeaderEquals(headerMapping, logger)
 }
