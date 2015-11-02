@@ -1,9 +1,12 @@
 package form_template.property.property_945_1.v2014
 
+import com.aplana.sbrf.taxaccounting.model.Department
+import com.aplana.sbrf.taxaccounting.model.DepartmentFormType
+import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod
 import com.aplana.sbrf.taxaccounting.model.FormData
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
+import com.aplana.sbrf.taxaccounting.model.FormType
 import com.aplana.sbrf.taxaccounting.model.Relation
-import com.aplana.sbrf.taxaccounting.model.Formats
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
@@ -103,6 +106,12 @@ def formTypeMap = [:]
 @Field
 def monthlyMap = [:]
 
+@Field
+def departmentReportPeriodMap = [:]
+
+@Field
+def formTemplateMap = [:]
+
 // Идентификатор типа формы приемника текущей формы
 @Field
 def destinationFormTypeId = 615
@@ -179,10 +188,17 @@ def isBalancePeriod
 // Признак периода ввода остатков для отчетного периода подразделения
 def isBalancePeriod() {
     if (isBalancePeriod == null) {
-        def departmentReportPeriod = departmentReportPeriodService.get(formData.departmentReportPeriodId)
+        def departmentReportPeriod = getDepartmentReportPeriodById(formData.departmentReportPeriodId)
         isBalancePeriod = departmentReportPeriod.isBalance()
     }
     return isBalancePeriod
+}
+
+def getDepartmentReportPeriodById(def id) {
+    if (id != null && departmentReportPeriodMap[id] == null) {
+        departmentReportPeriodMap[id] = departmentReportPeriodService.get(id)
+    }
+    return departmentReportPeriodMap[id]
 }
 
 def getReportPeriodEndDate() {
@@ -1046,8 +1062,10 @@ def getSources() {
         def periodName= periodNames[expectedPrevPeriodOrder]
         def periodYear = expectedPrevPeriodYear
 
-        Relation relation = getRelation(tmpFormData, departmentFormType, isSource, periodYear, periodName, null)
-        sources.sourceList.add(relation)
+        Relation relation = getRelation(tmpFormData, departmentFormType, isSource, null, periodYear, periodName, null)
+        if (relation) {
+            sources.sourceList.add(relation)
+        }
     }
 
     sources.sourcesProcessedByScript = true
@@ -1069,8 +1087,10 @@ def addToResult(def resultList, def periodDepartmentFormTypesMap, def isSource) 
             FormData tmpFormData = formDataService.getLast(departmentFormType.formTypeId, departmentFormType.kind,
                     departmentFormType.departmentId, period.id, monthOrder, null, false)
 
-            Relation relation = getRelation(tmpFormData, departmentFormType, isSource, period.taxPeriod.year, period.name, monthOrder)
-            resultList.add(relation)
+            Relation relation = getRelation(tmpFormData, departmentFormType, isSource, period.id, period.taxPeriod.year, period.name, monthOrder)
+            if (relation) {
+                resultList.add(relation)
+            }
         }
     }
 }
@@ -1085,10 +1105,7 @@ def getDepartmentFullName(def id) {
 
 /** Получить подразделение по id. */
 def getDepartmentById(def id) {
-    if (id == null) {
-        return null
-    }
-    if (departmentMap[id] == null) {
+    if (id != null && departmentMap[id] == null) {
         departmentMap[id] = departmentService.get(id)
     }
     return departmentMap[id]
@@ -1102,12 +1119,23 @@ def getFormTypeById(def id) {
     return formTypeMap[id]
 }
 
-def isMonthlyForm(def formTemplateId, def periodId) {
-    def key = formTemplateId?.toString() + periodId?.toString()
+def isMonthlyForm(def formTypeId, def periodId) {
+    def key = formTypeId?.toString() + "#" + periodId?.toString()
     if (monthlyMap[key] == null) {
-        monthlyMap[key] = formDataService.getFormTemplate(formTemplateId, periodId)?.monthly
+        monthlyMap[key] = getFormTemplateById(formTypeId, periodId)?.monthly
     }
     return monthlyMap[key]
+}
+
+def getFormTemplateById(def formTypeId, def periodId) {
+    if (formTypeId == null || periodId == null) {
+        return null
+    }
+    def key = formTypeId + '#' + periodId
+    if (formTemplateMap[key] == null) {
+        formTemplateMap[key] = formDataService.getFormTemplate(formTypeId, periodId)
+    }
+    return formTemplateMap[key]
 }
 
 /**
@@ -1116,28 +1144,87 @@ def isMonthlyForm(def formTemplateId, def periodId) {
  * @param tmpFormData нф
  * @param departmentFormType информация об источнике приемнике
  * @param isSource признак источника
+ * @param periodId id период нф
  * @param periodYear год периода
  * @param periodName название периода
+ * @param isSource признак источника
  * @param monthOrder номер месяца (для ежемесячной формы)
  */
-def getRelation(def tmpFormData, def departmentFormType, def isSource, def periodYear, def periodName, def monthOrder) {
+def getRelation(FormData tmpFormData, DepartmentFormType departmentFormType, boolean isSource,
+                Integer periodId, int periodYear, String periodName, Integer monthOrder) {
+    // boolean excludeIfNotExist - исключить несозданные источники
+    if (excludeIfNotExist && tmpFormData == null) {
+        return null
+    }
+    // WorkflowState stateRestriction - ограничение по состоянию для созданных экземпляров
+    if (stateRestriction && tmpFormData != null && stateRestriction != tmpFormData.state) {
+        return null
+    }
     Relation relation = new Relation()
-    relation.fullDepartmentName = getDepartmentFullName(departmentFormType.departmentId)
-    relation.performer = getDepartmentById(departmentFormType.performerId);
-    relation.formDataKind = departmentFormType.kind
+
+    DepartmentReportPeriod departmentReportPeriod = getDepartmentReportPeriodById(tmpFormData?.departmentReportPeriodId) as DepartmentReportPeriod
+    DepartmentReportPeriod comparativePeriod = getDepartmentReportPeriodById(tmpFormData?.comparativePeriodId) as DepartmentReportPeriod
+    FormType formType = getFormTypeById(departmentFormType.formTypeId) as FormType
+    Department performer = getDepartmentById(departmentFormType.performerId) as Department
+
+    // boolean light - заполняются только текстовые данные для GUI и сообщений
+    if (light) {
+        /**************  Параметры для легкой версии ***************/
+        /** Идентификатор подразделения */
+        relation.departmentId = departmentFormType.departmentId
+        /** полное название подразделения */
+        relation.fullDepartmentName = getDepartmentFullName(departmentFormType.departmentId)
+        /** Дата корректировки */
+        relation.correctionDate = departmentReportPeriod?.correctionDate
+        /** Вид нф */
+        relation.formTypeName = formType?.name
+        /** Год налогового периода */
+        relation.year = periodYear
+        /** Название периода */
+        relation.periodName = periodName
+        /** Название периода сравнения */
+        relation.comparativePeriodName = comparativePeriod?.reportPeriod?.name
+        /** Дата начала периода сравнения */
+        relation.comparativePeriodStartDate = comparativePeriod?.reportPeriod?.startDate
+        /** Год периода сравнения */
+        relation.comparativePeriodYear = comparativePeriod?.reportPeriod?.taxPeriod?.year
+        /** название подразделения-исполнителя */
+        relation.performerName = performer?.name
+    }
+    /**************  Общие параметры ***************/
+    /** подразделение */
+    relation.department = getDepartmentById(departmentFormType.departmentId) as Department
+    /** Период */
+    relation.departmentReportPeriod = departmentReportPeriod
+    /** Статус ЖЦ */
+    relation.state = tmpFormData?.state
+    /** форма/декларация создана/не создана */
+    relation.created = (tmpFormData != null)
+    /** является ли форма источников, в противном случае приемник*/
     relation.source = isSource
-    relation.year = periodYear
-    relation.periodName = periodName
-    if (tmpFormData != null) {
-        relation.created = true
-        relation.formType = tmpFormData.formType
-        relation.state = tmpFormData.state
-        relation.formDataId = tmpFormData.id
-        relation.correctionDate = departmentReportPeriodService.get(tmpFormData.departmentReportPeriodId)?.correctionDate
-        relation.month = tmpFormData.periodOrder
-    } else {
-        relation.formType = getFormTypeById(departmentFormType.formTypeId)
-        relation.created = false
+    /** Введена/выведена в/из действие(-ия) */
+    if (!light) {
+        relation.status = getFormTemplateById(departmentFormType.formTypeId, periodId)
+    }
+
+    /**************  Параметры НФ ***************/
+    /** Идентификатор созданной формы */
+    relation.formDataId = tmpFormData?.id
+    /** Вид НФ */
+    relation.formType = formType
+    /** Тип НФ */
+    relation.formDataKind = departmentFormType.kind
+    /** подразделение-исполнитель*/
+    relation.performer = performer
+    /** Период сравнения. Может быть null */
+    relation.comparativePeriod = comparativePeriod
+    /** Номер месяца */
+    relation.month = monthOrder
+    if (tmpFormData) {
+        /** Признак расчета значений нарастающим итогом (false - не нарастающим итогом, true - нарастающим итогом, пустое - форма без периода сравнения) */
+        relation.accruing = tmpFormData.accruing
+        /** Признак ручного ввода */
+        relation.manual = tmpFormData.manual
     }
     return relation
 }
