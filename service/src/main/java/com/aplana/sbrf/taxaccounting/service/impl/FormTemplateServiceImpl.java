@@ -40,6 +40,7 @@ public class FormTemplateServiceImpl implements FormTemplateService {
     private static final String CLOSE_PERIOD = "Следующие периоды %s данной версии макета закрыты: %s. " +
             "Для добавления в макет автонумеруемой графы с типом сквозной нумерации строк необходимо открыть перечисленные периоды!";
     private static final SimpleDateFormat SIMPLE_DATE_FORMAT = new SimpleDateFormat("dd.MM.yyyy");
+	private static final String GET_ERROR_MESSAGE = "Ошибка при получении версии макета НФ. %s";
 
 	private Set<String> checkSet = new HashSet<String>();
 
@@ -72,6 +73,7 @@ public class FormTemplateServiceImpl implements FormTemplateService {
         try {
             return formTemplateDao.get(formTemplateId);
         }catch (DaoException e){
+			LOG.error(String.format(GET_ERROR_MESSAGE, e.getMessage()), e);
             throw new ServiceException("Обновление статуса версии.", e);
         }
 	}
@@ -81,8 +83,8 @@ public class FormTemplateServiceImpl implements FormTemplateService {
 		try {
 			return formTemplateDao.get(formTemplateId);
 		} catch (DaoException e){
-			LOG.error("Ошибка при получении версии макета НФ.", e);
-			logger.error("Ошибка при получении версии макета НФ. %s", e.getMessage());
+			LOG.error(String.format(GET_ERROR_MESSAGE, e.getMessage()), e);
+			logger.error(GET_ERROR_MESSAGE, e.getMessage());
 		}
 		return null;
 	}
@@ -345,7 +347,6 @@ public class FormTemplateServiceImpl implements FormTemplateService {
             for (VersionedObjectStatus objectStatus : status)
                 statusList.add(objectStatus.getId());
         }
-
         return statusList;
     }
 
@@ -376,7 +377,7 @@ public class FormTemplateServiceImpl implements FormTemplateService {
 		if ((oldCross && newSerial) || (oldSerial && newCross)) { //9А
 			List<DepartmentReportPeriod> departmentReportPeriodList = departmentReportPeriodDao.getClosedForFormTemplate(formTemplateId);
 
-			if (departmentReportPeriodList.size() != 0) {
+			if (!departmentReportPeriodList.isEmpty()) {
 				//9А.1.А
 				StringBuilder stringBuilder = new StringBuilder();
 				for (int i = 0; i < departmentReportPeriodList.size(); i++) {
@@ -423,6 +424,11 @@ public class FormTemplateServiceImpl implements FormTemplateService {
         return formTemplateDao.get(formTypeId, year);
     }
 
+	/**
+	 * Проверка синтаксиса скрипта. Выполняется перед сохранением в БД
+	 * @param formTemplate
+	 * @param logger
+	 */
     private void checkScript(final FormTemplate formTemplate, final Logger logger) {
         if (formTemplate.getScript() == null || formTemplate.getScript().isEmpty())
             return;
@@ -448,7 +454,6 @@ public class FormTemplateServiceImpl implements FormTemplateService {
         if (!tempLogger.getEntries().isEmpty()) {
             throw new ServiceLoggerException("Обнаружены ошибки в скрипте!", logEntryService.save(logger.getEntries()));
         }
-
     }
 
 }

@@ -33,6 +33,8 @@ import java.util.Map;
 public class LockDataDaoImpl extends AbstractDao implements LockDataDao {
 
     private static final Log LOG = LogFactory.getLog(LockDataDaoImpl.class);
+	private static final String LOCK_DATA_DELETE_ERROR = "Ошибка при удалении блокировок. %s";
+	private static final String USER_LOCK_DATA_DELETE_ERROR = "Ошибка при удалении блокировок для пользователя с id = %d. %s";
 
     @Override
     public LockData get(String key, boolean like) {
@@ -77,7 +79,7 @@ public class LockDataDaoImpl extends AbstractDao implements LockDataDao {
     }
 
     @Override
-    public void createLock(String key, int userId, String description, String state, String serverNode) {
+    public void lock(String key, int userId, String description, String state, String serverNode) {
         try {
             getJdbcTemplate().update("INSERT INTO lock_data (key, user_id, description, state, state_date, server_node) VALUES (?, ?, ?, ?, sysdate, ?)",
                     new Object[] {key,
@@ -93,7 +95,7 @@ public class LockDataDaoImpl extends AbstractDao implements LockDataDao {
     }
 
     @Override
-    public void deleteLock(String key) {
+    public void unlock(String key) {
         try {
             int affectedCount = getJdbcTemplate().update("DELETE FROM lock_data WHERE key = ?",
                     new Object[] {key},
@@ -102,6 +104,7 @@ public class LockDataDaoImpl extends AbstractDao implements LockDataDao {
                 throw new LockException("Ошибка удаления. Блокировка с кодом \"%s\" не найдена в БД.", key);
             }
         } catch (DataAccessException e) {
+			LOG.error(String.format(LOCK_DATA_DELETE_ERROR, e.getMessage()), e);
             throw new LockException("Ошибка при удалении блокировки с кодом \"%s\". %s", key, e.getMessage());
         }
     }
@@ -109,37 +112,28 @@ public class LockDataDaoImpl extends AbstractDao implements LockDataDao {
     @Override
     public void unlockAllByUserId(int userId, boolean ignoreError) {
         try {
-            getJdbcTemplate().update("delete from lock_data ld where user_id = ? and (not exists (select 1 from lock_data_subscribers lds where lds.lock_key=ld.key))", userId);
-        } catch (DataAccessException e) {
-            if (ignoreError) {
-                LOG.error(e);
-                return;
-            }
-            throw new LockException("Ошибка при удалении блокировок для пользователя с id = %d. %s", userId, e.getMessage());
+            getJdbcTemplate().update("DELETE FROM lock_data ld WHERE user_id = ? AND (NOT EXISTS (SELECT 1 FROM lock_data_subscribers lds WHERE lds.lock_key=ld.key))", userId);
         } catch (Exception e) {
-            if (ignoreError) {
-                LOG.error(e);
+			LOG.error(String.format(USER_LOCK_DATA_DELETE_ERROR, userId, e.getMessage()), e);
+            if (!ignoreError) {
+				throw new LockException(USER_LOCK_DATA_DELETE_ERROR, userId, e.getMessage());
             }
         }
     }
 
     @Override
     public List<Integer> getUsersWaitingForLock(String key) {
-        try {
-            return getJdbcTemplate().query(
-                    "select user_id from lock_data_subscribers where lock_key = ?",
-                    new Object[]{key},
-                    new int[]{Types.VARCHAR},
-                    new RowMapper<Integer>() {
-                        @Override
-                        public Integer mapRow(ResultSet rs, int rowNum) throws SQLException {
-                            return rs.getInt("user_id");
-                        }
-                    }
-            );
-        } catch (EmptyResultDataAccessException e) {
-            return new ArrayList<Integer>();
-        }
+		return getJdbcTemplate().query(
+				"select user_id from lock_data_subscribers where lock_key = ?",
+				new Object[]{key},
+				new int[]{Types.VARCHAR},
+				new RowMapper<Integer>() {
+					@Override
+					public Integer mapRow(ResultSet rs, int rowNum) throws SQLException {
+						return rs.getInt("user_id");
+					}
+				}
+		);
     }
 
     @Override
@@ -149,31 +143,36 @@ public class LockDataDaoImpl extends AbstractDao implements LockDataDao {
                     new Object[] {key, userId},
                     new int[] {Types.VARCHAR, Types.NUMERIC});
         } catch (DataAccessException e) {
+			LOG.error("Ошибка при добавлении пользователя в список ожидающих объект блокировки", e);
             throw new LockException("Ошибка при добавлении пользователя в список ожидающих объект блокировки (%s, %s). %s", key, userId, e.getMessage());
         }
     }
 
     @Override
-    public PagingResult<LockData> getLocks(String filter,  LockData.LockQueues queues, PagingParams pagingParams) {
+    public PagingResult<LockData> getLocks(String filter, LockData.LockQueues queues, PagingParams pagingParams) {
         try {
             Map<String, Object> params = new HashMap<String, Object>();
             String queueSql = "1 = 1";
-            switch (queues) {
-                case SHORT:
-                    queueSql = "queue = :queue";
-                    params.put("queue", BalancingVariants.SHORT.getId());
-                    break;
-                case LONG:
-                    queueSql = "queue = :queue";
-                    params.put("queue", BalancingVariants.LONG.getId());
-                    break;
-                case NONE:
-                    queueSql = "queue = 0";
-                    break;
-            }
+			if (queues != null) {
+				switch (queues) {
+					case SHORT:
+						queueSql = "queue = :queue";
+						params.put("queue", BalancingVariants.SHORT.getId());
+						break;
+					case LONG:
+						queueSql = "queue = :queue";
+						params.put("queue", BalancingVariants.LONG.getId());
+						break;
+					case NONE:
+						queueSql = "queue = 0";
+						break;
+					default:
+				}
+			}
             params.put("start", pagingParams.getStartIndex() + 1);
             params.put("count", pagingParams.getStartIndex() + pagingParams.getCount());
-            params.put("filter", "%" + filter.toLowerCase() + "%");
+			String filterParam = filter == null ? "" : filter;
+            params.put("filter", "%" + filterParam.toLowerCase() + "%");
             String sql = " (SELECT ld.key, ld.user_id, ld.date_lock, ld.state, ld.state_date, ld.description, ld.queue, ld.server_node, u.login, \n" +
 					(isSupportOver() ? "ROW_NUMBER() OVER (partition BY queue ORDER BY date_lock)" : "ROWNUM") +
                     " AS queue_position, " +
@@ -182,7 +181,7 @@ public class LockDataDaoImpl extends AbstractDao implements LockDataDao {
                     "FROM lock_data ld \n"
                     + "join sec_user u on u.id = ld.user_id \n" +
                     "WHERE " + queueSql + " \n"
-                    + (filter != null && !filter.isEmpty() ?
+                    + (!filterParam.isEmpty() ?
                     "AND (LOWER(ld.key) LIKE :filter OR LOWER(ld.description) LIKE :filter OR LOWER(ld.state) LIKE :filter OR LOWER(u.login) LIKE :filter OR LOWER(u.name) LIKE :filter OR LOWER(ld.server_node) LIKE :filter) "
                     : "")
                     + "ORDER BY queue DESC, queue_position) \n";
@@ -196,6 +195,7 @@ public class LockDataDaoImpl extends AbstractDao implements LockDataDao {
             int count = getNamedParameterJdbcTemplate().queryForInt(countSql, params);
             return new PagingResult<LockData>(records, count);
         } catch (EmptyResultDataAccessException e) {
+			// недостижимое место из-за особенности запроса
             return new PagingResult<LockData>(new ArrayList<LockData>(), 0);
         }
     }
@@ -235,4 +235,16 @@ public class LockDataDaoImpl extends AbstractDao implements LockDataDao {
             return result;
         }
     }
+
+	@Override
+	public int unlockIfOlderThan(long seconds) {
+		try {
+			return getJdbcTemplate().update(
+					"DELETE FROM lock_data WHERE date_lock < (SYSDATE - INTERVAL '" + seconds + "' SECOND)");
+		} catch (DataAccessException e){
+			LOG.error(String.format(LOCK_DATA_DELETE_ERROR, e.getMessage()), e);
+			throw new LockException(LOCK_DATA_DELETE_ERROR, e.getMessage());
+		}
+	}
+
 }

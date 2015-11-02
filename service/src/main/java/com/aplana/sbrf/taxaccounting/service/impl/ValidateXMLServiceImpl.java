@@ -32,10 +32,10 @@ import java.util.zip.ZipInputStream;
 @Service
 public class ValidateXMLServiceImpl implements ValidateXMLService {
 
-    static final Log LOG = LogFactory.getLog(ValidateXMLServiceImpl.class);
+    private static final Log LOG = LogFactory.getLog(ValidateXMLServiceImpl.class);
 
     private static final String TEMPLATE = ClassUtils.classPackageAsResourcePath(ValidateXMLServiceImpl.class) + "/VSAX3.exe";
-	private static final long VALIDATION_TIMEOUT = 1000 * 60 * 60; //таймаут работы утилиты для валидации XML по XSD
+	private static final long VALIDATION_TIMEOUT = 1000 * 60 * 60L; //таймаут работы утилиты для валидации XML по XSD
 
     private static final String SUCCESS_FLAG = "SUCCESS";
     public static final String NOT_DELETE_WARN = "Файл %s не был удален";

@@ -42,7 +42,7 @@ import static java.util.Arrays.asList;
 @Service
 public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService implements LoadRefBookDataService {
 
-	protected static final Log LOG = LogFactory.getLog(LoadRefBookDataServiceImpl.class);
+	private static final Log LOG = LogFactory.getLog(LoadRefBookDataServiceImpl.class);
     @Autowired
     private RefBookScriptingService refBookScriptingService;
     @Autowired
