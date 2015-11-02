@@ -58,7 +58,7 @@ UPDATE REF_BOOK SET REGION_ATTRIBUTE_ID = 5041 WHERE ID = 504;
 ----------------------------------------------------------------------------------------------------------------
 --http://jira.aplana.com/browse/SBRFACCTAX-12860: Типы юридических лиц, сделки с которыми признаются контролируемыми
 
-INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) VALUES (505,'Типы юридических лиц, сделки с которыми признаются контролируемыми',1,0,0,null);
+INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) VALUES (505,'Типы участников ТЦО (расширенный)',1,0,0,null);
 
 INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (5051, 505, 'Код типа', 		'CODE', 1, 1, null, null, 1, null, 	5, 1, 1, 1, 	null, 0, 15);
 INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (5052, 505, 'Наименование', 	'NAME', 1, 2, null, null, 1, null, 20, 1, 0, null, 	null, 0, 256);
@@ -82,6 +82,25 @@ insert into ref_book_record (id, record_id, ref_book_id, version, status) values
 insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 5, 505, to_date('01.01.2008', 'DD.MM.YYYY'), 0);	
 	insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 5051, 'НЛ');	
 	insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 5052, 'Независимые лица');
+
+----------------------------------------------------------------------------------------------------------------
+--http://jira.aplana.com/browse/SBRFACCTAX-13160: 0.8 Добавить справочник "Типы участников ТЦО"
+INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) VALUES (525, 'Типы участников ТЦО',1,0,0,null);
+
+INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (5251, 525, 'Код типа', 		'CODE', 1, 1, null, null, 1, null, 	5, 1, 1, 1, 	null, 0, 15);
+INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (5252, 525, 'Наименование', 	'NAME', 1, 2, null, null, 1, null, 20, 1, 0, null, 	null, 0, 256);
+
+insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 1, 525, to_date('01.01.2008', 'DD.MM.YYYY'), 0);	
+	insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 5251, 'ВЗЛ');	
+	insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 5252, 'Взаимозависимые лица');
+	
+insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 2, 525, to_date('01.01.2008', 'DD.MM.YYYY'), 0);	
+	insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 5251, 'РОЗ');	
+	insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 5252, 'Резиденты оффшорных зон');
+
+insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 3, 525, to_date('01.01.2008', 'DD.MM.YYYY'), 0);	
+	insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 5251, 'НЛ');	
+	insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 5252, 'Независимые лица');
 
 ----------------------------------------------------------------------------------------------------------------
 --http://jira.aplana.com/browse/SBRFACCTAX-12997: Цвета
@@ -238,7 +257,7 @@ insert into ref_book_record (id, record_id, ref_book_id, version, status) values
 
 INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) VALUES (514, 'Пороговые значения',1,0,0,null);
 
-INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (5141, 514, 'Тип юридического лица',       'CODE',   4, 1, 505, 5051, 1, null,   30, 1, 1, null,   null, 0, null);
+INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (5141, 514, 'Тип участника ТЦО',       'CODE',   4, 1, 505, 5051, 1, null,   30, 1, 1, null,   null, 0, null);
 INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (5142, 514, 'Пороговое значение (руб.)',     'VALUE',   2, 2, null, null, 1, 0, 20, 1, 0, null, 	null, 0, 12);
 
 insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 1, 514, to_date('01.01.2014', 'DD.MM.YYYY'), 0);
@@ -266,7 +285,7 @@ insert into ref_book_record (id, record_id, ref_book_id, version, status) values
 
 INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) VALUES (515, 'Правила назначения категории юридическому лицу',1,0,0,null);
 
-INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (5151, 515, 'Тип юридического лица',       'CODE',   4, 1, 505, 5051, 1, null,   15, 1, 1, null,   null, 0, null);
+INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (5151, 515, 'Тип участника ТЦО',       'CODE',   4, 1, 505, 5051, 1, null,   15, 1, 1, null,   null, 0, null);
 INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (5152, 515, 'Категория',       'CATEGORY',   4, 2, 506, 5061, 1, null,   15, 1, 0, 1,   null, 0, null);
 INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (5153, 515, 'Минимальный объем доходов и расходов (руб.)',  'MIN_VALUE',   2, 3, null, null, 1, 0, 10, 1, 1, null,   null, 0, 12);
 INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (5154, 515, 'Максимальный объем доходов и расходов (руб.)', 'MAX_VALUE',   2, 4, null, null, 1, 0, 10, 0, 0, null, 	null, 0, 12);
@@ -488,26 +507,221 @@ insert into ref_book_record (id, record_id, ref_book_id, version, status) values
 	insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 5162, 'Подарки и денежные поощрения клиентов, партнеров Банка, прочих физических и юридических лиц');
 	insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 5163, '27308.25');
 	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5164, record_id from ref_book_value where attribute_id = 5162 and string_value = 'Иные расходы';
+	
+----------------------------------------------------------------------------------------------------------------
+--http://jira.aplana.com/browse/SBRFACCTAX-13159: Оффшорные зоны
+INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) VALUES (519, 'Оффшорные зоны',1,0,0,null);
+
+INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (5191, 519, 'Цифровой код',         'CODE',     4, 1, 10, 50, 1, null,     5, 0, 0, null,     null, 0, null);
+INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (5192, 519, 'Буквенный код альфа-2',  'CODE_2',   4, 2, 10, 51, 1, null,     5, 0, 0, 0,       null, 1, null);
+INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (5193, 519, 'Буквенный код альфа-3',  'CODE_3',   4, 3, 10, 52, 1, null,     5, 0, 0, 0,       null, 1, null);
+INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (5194, 519, 'Краткое наименование',    'SHORTNAME',   1,  4,  null,null,1,null,  15,  1,  1,null,    null, 0, 500);
+INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (5195, 519, 'Полное наименование',    'NAME',   1,  5,  null,null,1,null,  15,  1,  2,null,    null, 0, 500);
+INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (5196, 519, 'Цифровой код государства, в состав которого входит оффшорная зона',  'OFFSHORE_CODE',     4, 6, 10, 50, 1, null,  8, 0, 0, null,     null, 0, null);
+INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (5197, 519, 'Краткое наименование государства, в состав которого входит оффшорная зона',  'OFFSHORE_NAME', 4, 7, 10, 53, 1, null,  15, 0, 0, null,     null, 1, null);
+INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (5198, 519, 'Справочная информация',    'COMMENT',   1,  8,  null,null,1,null,  30,  0,  0,null,    null, 0, 256);
+
+insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 1, 519, to_date('01.01.2012', 'DD.MM.YYYY'), 0);
+	 insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5191, record_id from ref_book_value where attribute_id = 50 and string_value = '660';
+				
+insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 2, 519, to_date('01.01.2012', 'DD.MM.YYYY'), 0);
+	 insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5191, record_id from ref_book_value where attribute_id = 50 and string_value = '020';
+				
+insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 3, 519, to_date('01.01.2012', 'DD.MM.YYYY'), 0);
+	 insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5191, record_id from ref_book_value where attribute_id = 50 and string_value = '028';
+				
+insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 4, 519, to_date('01.01.2012', 'DD.MM.YYYY'), 0);
+	 insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5191, record_id from ref_book_value where attribute_id = 50 and string_value = '533';
+				
+insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 5, 519, to_date('01.01.2012', 'DD.MM.YYYY'), 0);
+	 insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5191, record_id from ref_book_value where attribute_id = 50 and string_value = '044';
+				
+insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 6, 519, to_date('01.01.2012', 'DD.MM.YYYY'), 0);
+	 insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5191, record_id from ref_book_value where attribute_id = 50 and string_value = '048';
+				
+insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 7, 519, to_date('01.01.2012', 'DD.MM.YYYY'), 0);
+	 insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5191, record_id from ref_book_value where attribute_id = 50 and string_value = '084';
+				
+insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 8, 519, to_date('01.01.2012', 'DD.MM.YYYY'), 0);
+	 insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5191, record_id from ref_book_value where attribute_id = 50 and string_value = '060';
+				
+insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 9, 519, to_date('01.01.2012', 'DD.MM.YYYY'), 0);
+	 insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5191, record_id from ref_book_value where attribute_id = 50 and string_value = '096';
+				
+insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 10, 519, to_date('01.01.2012', 'DD.MM.YYYY'), 0);
+	 insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5191, record_id from ref_book_value where attribute_id = 50 and string_value = '548';
+				
+insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 11, 519, to_date('01.01.2012', 'DD.MM.YYYY'), 0);
+	 insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5191, record_id from ref_book_value where attribute_id = 50 and string_value = '092';
+				
+insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 12, 519, to_date('01.01.2012', 'DD.MM.YYYY'), 0);
+	 insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5191, record_id from ref_book_value where attribute_id = 50 and string_value = '292';
+				
+insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 13, 519, to_date('01.01.2012', 'DD.MM.YYYY'), 0);
+	 insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5191, record_id from ref_book_value where attribute_id = 50 and string_value = '308';
+				
+insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 14, 519, to_date('01.01.2012', 'DD.MM.YYYY'), 0);
+	 insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5191, record_id from ref_book_value where attribute_id = 50 and string_value = '212';
+				
+insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 15, 519, to_date('01.01.2012', 'DD.MM.YYYY'), 0);
+	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5191, record_id from ref_book_value where attribute_id = 50 and string_value = '344';
+	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5196, record_id from ref_book_value where attribute_id = 50 and string_value = '156';
+	insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 5198, 'ОЗ, входит в состав гос-ва Китай');
+
+insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 16, 519, to_date('01.01.2012', 'DD.MM.YYYY'), 0);
+	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5191, record_id from ref_book_value where attribute_id = 50 and string_value = '446';
+	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5196, record_id from ref_book_value where attribute_id = 50 and string_value = '156';
+	insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 5198, 'ОЗ, входит в состав гос-ва Китай');
+
+insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 17, 519, to_date('01.01.2012', 'DD.MM.YYYY'), 0);
+	insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 5194, 'остров Анжуан');
+	insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 5195, 'остров Анжуан');
+	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5196, record_id from ref_book_value where attribute_id = 50 and string_value = '174';
+	insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 5198, 'ОЗ, входит в состав гос-ва Коморы, не имеет собственного кода');
+
+insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 18, 519, to_date('01.01.2012', 'DD.MM.YYYY'), 0);
+	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5191, record_id from ref_book_value where attribute_id = 50 and string_value = '430';
+			
+insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 19, 519, to_date('01.01.2012', 'DD.MM.YYYY'), 0);
+	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5191, record_id from ref_book_value where attribute_id = 50 and string_value = '438';
+			
+insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 20, 519, to_date('01.01.2012', 'DD.MM.YYYY'), 0);
+	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5191, record_id from ref_book_value where attribute_id = 50 and string_value = '480';
+			
+insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 21, 519, to_date('01.01.2012', 'DD.MM.YYYY'), 0);
+	insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 5194, 'остров Лабуан');
+	insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 5195, 'остров Лабуан');
+	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5196, record_id from ref_book_value where attribute_id = 50 and string_value = '458';
+	insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 5198, 'ОЗ, входит в состав гос-ва Малайзия, не имеет собственного кода ');
+
+insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 22, 519, to_date('01.01.2012', 'DD.MM.YYYY'), 0);
+	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5191, record_id from ref_book_value where attribute_id = 50 and string_value = '462';
+				
+insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 23, 519, to_date('01.01.2012', 'DD.MM.YYYY'), 0);
+	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5191, record_id from ref_book_value where attribute_id = 50 and string_value = '470';
+				
+insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 24, 519, to_date('01.01.2012', 'DD.MM.YYYY'), 0);
+	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5191, record_id from ref_book_value where attribute_id = 50 and string_value = '584';
+				
+insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 25, 519, to_date('01.01.2012', 'DD.MM.YYYY'), 0);
+	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5191, record_id from ref_book_value where attribute_id = 50 and string_value = '492';
+				
+insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 26, 519, to_date('01.01.2012', 'DD.MM.YYYY'), 0);
+	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5191, record_id from ref_book_value where attribute_id = 50 and string_value = '500';
+				
+insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 27, 519, to_date('01.01.2012', 'DD.MM.YYYY'), 0);
+	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5191, record_id from ref_book_value where attribute_id = 50 and string_value = '520';
+				
+insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 28, 519, to_date('01.01.2012', 'DD.MM.YYYY'), 0);
+	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5191, record_id from ref_book_value where attribute_id = 50 and string_value = '531';
+				
+insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 29, 519, to_date('01.01.2012', 'DD.MM.YYYY'), 0);
+	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5191, record_id from ref_book_value where attribute_id = 50 and string_value = '534';
+				
+insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 30, 519, to_date('01.01.2012', 'DD.MM.YYYY'), 0);
+	insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 5194, 'Бонэйр');
+	insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 5195, 'Бонэйр');
+	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5196, record_id from ref_book_value where attribute_id = 50 and string_value = '535';
+	insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 5198, 'ОЗ, входит в состав гос-ва Бонэйр, Синт-Эстатиус и Саба, не имеет собственного кода ');
+
+insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 31, 519, to_date('01.01.2012', 'DD.MM.YYYY'), 0);
+	insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 5194, 'Синт-Эстатиус');
+	insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 5195, 'Синт-Эстатиус');
+	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5196, record_id from ref_book_value where attribute_id = 50 and string_value = '535';
+	insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 5198, 'ОЗ, входит в состав гос-ва Бонэйр, Синт-Эстатиус и Саба, не имеет собственного кода ');
+
+insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 32, 519, to_date('01.01.2012', 'DD.MM.YYYY'), 0);
+	insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 5194, 'Саба');
+	insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 5195, 'Саба');
+	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5196, record_id from ref_book_value where attribute_id = 50 and string_value = '535';
+	insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 5198, 'ОЗ, входит в состав гос-ва Бонэйр, Синт-Эстатиус и Саба, не имеет собственного кода ');
+
+insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 33, 519, to_date('01.01.2012', 'DD.MM.YYYY'), 0);
+	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5191, record_id from ref_book_value where attribute_id = 50 and string_value = '570';
+				
+insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 34, 519, to_date('01.01.2012', 'DD.MM.YYYY'), 0);
+	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5191, record_id from ref_book_value where attribute_id = 50 and string_value = '784';
+				
+insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 35, 519, to_date('01.01.2012', 'DD.MM.YYYY'), 0);
+	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5191, record_id from ref_book_value where attribute_id = 50 and string_value = '136';
+				
+insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 36, 519, to_date('01.01.2012', 'DD.MM.YYYY'), 0);
+	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5191, record_id from ref_book_value where attribute_id = 50 and string_value = '184';
+				
+insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 37, 519, to_date('01.01.2012', 'DD.MM.YYYY'), 0);
+	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5191, record_id from ref_book_value where attribute_id = 50 and string_value = '796';
+				
+insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 38, 519, to_date('01.01.2012', 'DD.MM.YYYY'), 0);
+	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5191, record_id from ref_book_value where attribute_id = 50 and string_value = '585';
+				
+insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 39, 519, to_date('01.01.2012', 'DD.MM.YYYY'), 0);
+	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5191, record_id from ref_book_value where attribute_id = 50 and string_value = '591';
+				
+insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 40, 519, to_date('01.01.2012', 'DD.MM.YYYY'), 0);
+	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5191, record_id from ref_book_value where attribute_id = 50 and string_value = '882';
+				
+insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 41, 519, to_date('01.01.2012', 'DD.MM.YYYY'), 0);
+	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5191, record_id from ref_book_value where attribute_id = 50 and string_value = '674';
+				
+insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 42, 519, to_date('01.01.2012', 'DD.MM.YYYY'), 0);
+	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5191, record_id from ref_book_value where attribute_id = 50 and string_value = '670';
+				
+insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 43, 519, to_date('01.01.2012', 'DD.MM.YYYY'), 0);
+	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5191, record_id from ref_book_value where attribute_id = 50 and string_value = '659';
+				
+insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 44, 519, to_date('01.01.2012', 'DD.MM.YYYY'), 0);
+	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5191, record_id from ref_book_value where attribute_id = 50 and string_value = '662';
+				
+insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 45, 519, to_date('01.01.2012', 'DD.MM.YYYY'), 0);
+	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5191, record_id from ref_book_value where attribute_id = 50 and string_value = '831';
+			 insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5196, record_id from ref_book_value where attribute_id = 50 and string_value = '826';
+	
+insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 46, 519, to_date('01.01.2012', 'DD.MM.YYYY'), 0);
+	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5191, record_id from ref_book_value where attribute_id = 50 and string_value = '832';
+			 insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5196, record_id from ref_book_value where attribute_id = 50 and string_value = '826';
+	
+insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 47, 519, to_date('01.01.2012', 'DD.MM.YYYY'), 0);
+	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5191, record_id from ref_book_value where attribute_id = 50 and string_value = '833';
+			 insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5196, record_id from ref_book_value where attribute_id = 50 and string_value = '826';
+	
+insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 48, 519, to_date('01.01.2012', 'DD.MM.YYYY'), 0);
+	insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 5194, 'Сарк');
+	insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 5195, 'Сарк');
+	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5196, record_id from ref_book_value where attribute_id = 50 and string_value = '826';
+	insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 5198, 'ОЗ, входит в состав Соединенного королевства, не имеет собственного кода');
+
+insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 49, 519, to_date('01.01.2012', 'DD.MM.YYYY'), 0);
+	insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 5194, 'Олдерни');
+	insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 5195, 'Олдерни');
+	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5196, record_id from ref_book_value where attribute_id = 50 and string_value = '826';
+	insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 5198, 'ОЗ, входит в состав Соединенного королевства, не имеет собственного кода');
+
+insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 50, 519, to_date('01.01.2012', 'DD.MM.YYYY'), 0);
+	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5191, record_id from ref_book_value where attribute_id = 50 and string_value = '690';
 
 ----------------------------------------------------------------------------------------------------------------
---http://jira.aplana.com/browse/SBRFACCTAX-12861: Юридические лица
-INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) VALUES (520, 'Юридические лица',1,0,0,null);
+--http://jira.aplana.com/browse/SBRFACCTAX-12861: Юридические лица / Участники ТЦО
+INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) VALUES (520, 'Участники ТЦО',1,0,0,null);
 
+insert into ref_book_attribute(id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (5200,520,'Тип','TYPE',4,0,525,5251,1,null,10,1,0,null,null,0,null);
 insert into ref_book_attribute(id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (5201,520,'Полное наименование юридического лица с указанием ОПФ','NAME',1,1,null,null,1,null,30,1,1,null,null,0,256);
 insert into ref_book_attribute(id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (5202,520,'Место нахождения (юридический адрес) юридического лица (из устава)','ADDRESS',1,2,null,null,1,null,30,1,0,null,null,0,256);
-insert into ref_book_attribute(id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (5203,520,'Код организации ','ORG_CODE',4,3,513,5131,1,null,10,1,0,null,null,0,null);
+insert into ref_book_attribute(id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (5203,520,'Код организации','ORG_CODE',4,3,513,5131,1,null,10,1,0,null,null,0,null);
 insert into ref_book_attribute(id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (5204,520,'Код страны по ОКСМ','COUNTRY_CODE',4,4,10,50,1,null,10,1,0,null,null,0,null);
-insert into ref_book_attribute(id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (5205,520,'ИНН (заполняется для резидентов, некредитных организаций)','INN',1,5,null,null,1,null,10,0,0,null,null,0,10);
-insert into ref_book_attribute(id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (5206,520,'КПП (заполняется для резидентов, некредитных организаций)','KPP',1,6,null,null,1,null,10,0,0,null,null,0,9);
-insert into ref_book_attribute(id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (5207,520,'КИО(заполняется для нерезидентов)','KIO',1,7,null,null,1,null,10,0,0,null,null,0,10);
-insert into ref_book_attribute(id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (5208,520,'Код SWIFT (заполняется для кредитных организаций, резидентов и нерезидентов)','SWIFT',1,8,null,null,1,null,10,0,0,null,null,0,11);
-insert into ref_book_attribute(id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (5209,520,'Регистрационный номер в стране инкорпорации (заполняется для нерезидентов)','REG_NUM',1,9,null,null,1,null,10,0,0,null,null,0,60);
-insert into ref_book_attribute(id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (5210,520,'Дата наступления основания для включения в список','START_DATE',3,10,null,null,1,null,10,1,0,null,1,0,null);
-insert into ref_book_attribute(id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (5211,520,'Дата наступления основания для исключения из списка','END_DATE',3,11,null,null,1,null,10,0,0,null,1,0,null);
-insert into ref_book_attribute(id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (5212,520,'Статус по НДС','VAT_STATUS',4,12,510,5101,1,null,10,1,0,null,null,0,null);
-insert into ref_book_attribute(id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (5213,520,'Специальный налоговый статус','TAX_STATUS',4,13,511,5111,1,null,10,0,0,null,null,0,null);
-insert into ref_book_attribute(id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (5214,520,'Критерий взаимозависимости','DEP_CRITERION',4,14,512,5121,1,null,10,1,0,null,null,0,null);
-
+insert into ref_book_attribute(id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (5215,520,'Оффшорная зона','OFFSHORE_CODE',4,5,519,5194,1,null,10,0,0,null,null,0,null);
+insert into ref_book_attribute(id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (5205,520,'ИНН (заполняется для резидентов, некредитных организаций)','INN',1,6,null,null,1,null,10,0,0,null,null,0,10);
+insert into ref_book_attribute(id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (5206,520,'КПП (заполняется для резидентов, некредитных организаций)','KPP',1,7,null,null,1,null,10,0,0,null,null,0,9);
+insert into ref_book_attribute(id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (5207,520,'КИО(заполняется для нерезидентов)','KIO',1,8,null,null,1,null,10,0,0,null,null,0,10);
+insert into ref_book_attribute(id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (5208,520,'Код SWIFT (заполняется для кредитных организаций, резидентов и нерезидентов)','SWIFT',1,9,null,null,1,null,10,0,0,null,null,0,11);
+insert into ref_book_attribute(id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (5209,520,'Регистрационный номер в стране инкорпорации (заполняется для нерезидентов)','REG_NUM',1,10,null,null,1,null,10,0,0,null,null,0,60);
+insert into ref_book_attribute(id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (5210,520,'Дата наступления основания для включения в список','START_DATE',3,11,null,null,1,null,10,0,0,null,1,0,null);
+insert into ref_book_attribute(id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (5211,520,'Дата наступления основания для исключения из списка','END_DATE',3,12,null,null,1,null,10,0,0,null,1,0,null);
+insert into ref_book_attribute(id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (5212,520,'Статус по НДС','VAT_STATUS',4,13,510,5101,1,null,10,0,0,null,null,0,null);
+insert into ref_book_attribute(id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (5213,520,'Специальный налоговый статус','TAX_STATUS',4,14,511,5111,1,null,10,0,0,null,null,0,null);
+insert into ref_book_attribute(id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (5214,520,'Критерий взаимозависимости','DEP_CRITERION',4,15,512,5121,1,null,10,0,0,null,null,0,null);
+insert into ref_book_attribute(id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (5216,520,'ИД в АС «Статотчетность»','STATREPORT_ID',1,16,null,null,1,null,30,0,0,null,null,0,256);
+insert into ref_book_attribute(id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (5217,520,'IKKSR','IKKSR',1,17,null,null,0,null,30,0,2,null,null,0,50);
+insert into ref_book_attribute(id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (5218,520,'IKSR','IKSR',1,18,null,null,0,null,30,0,3,null,null,0,50);
 ----------------------------------------------------------------------------------------------------------------
 --http://jira.aplana.com/browse/SBRFACCTAX-13088
 --http://jira.aplana.com/browse/SBRFACCTAX-13084

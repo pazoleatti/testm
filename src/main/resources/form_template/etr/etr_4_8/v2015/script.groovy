@@ -126,19 +126,17 @@ void preCalcCheck() {
     def tmpRow = formData.createDataRow()
     // собираем коды ОПУ
     def final opuCodes = opuMap.values().sum()
-    // собираем КНУ
-    def final knus = knuMap.values().sum()
     // находим записи для текущего периода и периода сравнения
     ['comparePeriod' : getComparativePeriodId(), 'currentPeriod' : formData.reportPeriodId].each { alias, periodId ->
         def reportPeriod = getReportPeriod(periodId)
         if (!formData.accruing && reportPeriod.order != 1) {
             def date = getEndDate(reportPeriod?.taxPeriod?.year, reportPeriod?.order - 1)
             checkOpuCodes(alias, date, opuCodes, tmpRow)
-            checkOutcome(alias, date, tmpRow)
+            checkOutcome(alias, date, tmpRow, reportPeriod?.order - 1)
         }
         def date = getEndDate(reportPeriod?.taxPeriod?.year, reportPeriod?.order)
         checkOpuCodes(alias, date, opuCodes, tmpRow)
-        checkOutcome(alias, date, tmpRow)
+        checkOutcome(alias, date, tmpRow, reportPeriod?.order)
     }
 }
 
@@ -213,8 +211,8 @@ void checkOpuCodes(def alias, def date, def opuCodes, def tmpRow) {
 @Field
 def formDataMap = [:]
 
-void checkOutcome(def alias, def date, def tmpRow) {
-    def periodList = getPeriodList(date)
+void checkOutcome(def alias, def date, def tmpRow, def etrPeriodOrder) {
+    def periodList = getIncomePeriodList(date)
     if (periodList.size() == 1) {
         def reportPeriod = periodList[0]
         // Проверка наличия принятой формы «Сводная форма начисленных расходов уровня обособленного подразделения»
@@ -223,23 +221,9 @@ void checkOutcome(def alias, def date, def tmpRow) {
             logger.warn("Не найдена «Сводная форма начисленных расходов уровня обособленного подразделения в статусе «Принята»: Тип:%s, Период: %s %s, Подразделение: %s. Ячейки по графе «%s», заполняемые из данной формы, будут заполнены нулевым значением.",
                     FormDataKind.SUMMARY.name, reportPeriod.name, date.format('yyyy'), formDataDepartment.name, getColumnName(tmpRow, alias))
         }
-        // если нет накопления, то надо проверять и предыдущий период
-        if (!formData.accruing && reportPeriod.order != 1) {
-            def prevDate = getEndDate(reportPeriod?.taxPeriod?.year, reportPeriod?.order - 1)
-            periodList = getPeriodList(prevDate)
-            if (periodList.size() == 1) {
-                reportPeriod = periodList[0]
-                // Проверка наличия принятой формы «Сводная форма начисленных расходов уровня обособленного подразделения»
-                incomeFormData = getIncomeFormData(prevDate)
-                if (incomeFormData == null) {
-                    logger.warn("Не найдена «Сводная форма начисленных расходов уровня обособленного подразделения в статусе «Принята»: Тип:%s, Период: %s %s, Подразделение: %s. Ячейки по графе «%s», заполняемые из данной формы, будут заполнены нулевым значением.",
-                            FormDataKind.SUMMARY.name, reportPeriod.name, prevDate.format('yyyy'), formDataDepartment.name, getColumnName(tmpRow, alias))
-                }
-            } else if (periodList.size() == 0) {
-                logger.warn("Не найдена «Сводная форма начисленных расходов уровня обособленного подразделения в статусе «Принята»: Тип:%s, Период: %s %s, Подразделение: %s. Ячейки по графе «%s», заполняемые из данной формы, будут заполнены нулевым значением.",
-                        FormDataKind.SUMMARY.name, getPeriodName(reportPeriod?.order - 1), prevDate.format('yyyy'), formDataDepartment.name, getColumnName(tmpRow, alias))
-            }
-        }
+    } else if (periodList.size() == 0) {
+        logger.warn("Не найдена «Сводная форма начисленных расходов уровня обособленного подразделения в статусе «Принята»: Тип:%s, Период: %s %s, Подразделение: %s. Ячейки по графе «%s», заполняемые из данной формы, будут заполнены нулевым значением.",
+                FormDataKind.SUMMARY.name, getPeriodName(etrPeriodOrder), date.format('yyyy'), formDataDepartment.name, getColumnName(tmpRow, alias))
     }
 }
 
@@ -263,7 +247,7 @@ def getPeriodName(def order) {
 FormData getIncomeFormData(def date) {
     def dateKey = date?.format('dd.MM.yyyy')
     if (formDataMap[dateKey] == null && formDataMap[dateKey] != -1) {
-        def periodList = getPeriodList(date)
+        def periodList = getIncomePeriodList(date)
         if (periodList.size() == 1) {
             def period = periodList[0]
             // Проверка наличия принятой формы «Сводная форма начисленных расходов уровня обособленного подразделения»
@@ -285,7 +269,7 @@ FormData getIncomeFormData(def date) {
 @Field
 def periodListMap = [:]
 
-List<ReportPeriod> getPeriodList(def date) {
+List<ReportPeriod> getIncomePeriodList(def date) {
     def dateKey = date?.format('dd.MM.yyyy')
     if (periodListMap[dateKey] == null) {
         periodListMap[dateKey] = reportPeriodService.getReportPeriodsByDate(TaxType.INCOME, date, date)
@@ -389,7 +373,7 @@ def getSourceValue(def periodId, def row) {
         knuSum = isCorrect ? pair[0] : 0
         if (!formData.accruing && reportPeriod.order != 1 && isCorrect) {
             def prevDate = getEndDate(reportPeriod?.taxPeriod?.year, reportPeriod?.order - 1)
-            def periodList = getPeriodList(prevDate)
+            def periodList = getIncomePeriodList(prevDate)
             if (periodList.size() == 1) {
                 pair = getKnuSumPair(prevDate, row)
                 isCorrect = pair[1]

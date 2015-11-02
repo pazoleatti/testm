@@ -13,6 +13,8 @@ import com.aplana.sbrf.taxaccounting.util.mock.ScriptTestMockHelper;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Test;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 
 import java.math.BigDecimal;
 import java.text.ParseException;
@@ -240,6 +242,18 @@ public class Output2_2Test extends ScriptTestBase {
         period.setTaxPeriod(taxPeriod);
         when(testHelper.getReportPeriodService().get(anyInt())).thenReturn(period);
         when(testHelper.getReportPeriodService().listByTaxPeriod(anyInt())).thenReturn(Arrays.asList(period));
+
+        when(testHelper.getDepartmentReportPeriodService().get(anyInt())).thenAnswer(
+                new Answer<DepartmentReportPeriod>() {
+                    @Override
+                    public DepartmentReportPeriod answer(InvocationOnMock invocation) throws Throwable {
+                        DepartmentReportPeriod result = new DepartmentReportPeriod();
+                        ReportPeriod reportPeriod = new ReportPeriod();
+                        reportPeriod.setId(REPORT_PERIOD_ID);
+                        result.setReportPeriod(reportPeriod);
+                        return result;
+                    }
+                });
 
         // Назначен один тип формы
         DepartmentFormType departmentFormType = new DepartmentFormType();

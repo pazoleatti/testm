@@ -69,6 +69,9 @@ public class BookerStatementsServiceImpl implements BookerStatementsService {
     @Autowired
     private RefBookScriptingService refBookScriptingService;
 
+    @Autowired
+    private RefBookFactory refBookFactory;
+
     @Override
     public void importData(String realFileName, InputStream stream, Integer accountPeriodId, int typeId, Integer departmentId, TAUserInfo userInfo) {
 
@@ -98,8 +101,16 @@ public class BookerStatementsServiceImpl implements BookerStatementsService {
                 logger, additionalParameters);
         IOUtils.closeQuietly(stream);
 
+        //Получение имени отчетного периода
+        RefBookDataProvider dataProvider = refBookFactory.getDataProvider(107l);
+        Map<String, RefBookValue> refBookValueMap = dataProvider.getRecordData(accountPeriodId.longValue());
+        String date = String.valueOf(refBookValueMap.get("YEAR").getNumberValue());
+        dataProvider = refBookFactory.getDataProvider(106L);
+        refBookValueMap = dataProvider.getRecordData(refBookValueMap.get("ACCOUNT_PERIOD_ID").getReferenceValue());
+        String name = refBookValueMap.get("NAME").getStringValue();
+
         String msg = String.format("Импорт бухгалтерской отчётности: %s", realFileName);
-        auditService.add(FormDataEvent.IMPORT, userInfo, departmentId, accountPeriodId, null, formTypeName, null, msg, null);
+        auditService.add(FormDataEvent.IMPORT, userInfo, date + " " + name, departmentId, null, formTypeName, null, msg, null);
     }
 
     @Override
