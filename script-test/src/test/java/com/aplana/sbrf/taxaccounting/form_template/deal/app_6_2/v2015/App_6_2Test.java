@@ -116,7 +116,6 @@ public class App_6_2Test extends ScriptTestBase {
         row.getCell("dealDoneDate").setValue(sdf.parse("01.01.2989"), null);
 
         testHelper.execute(FormDataEvent.CHECK);
-        printLog();
 
         entries = testHelper.getLogger().getEntries();
         i = 0;
