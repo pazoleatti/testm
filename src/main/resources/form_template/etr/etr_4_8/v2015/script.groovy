@@ -235,8 +235,28 @@ void checkOutcome(def alias, def date, def tmpRow) {
                     logger.warn("Не найдена «Сводная форма начисленных расходов уровня обособленного подразделения в статусе «Принята»: Тип:%s, Период: %s %s, Подразделение: %s. Ячейки по графе «%s», заполняемые из данной формы, будут заполнены нулевым значением.",
                             FormDataKind.SUMMARY.name, reportPeriod.name, prevDate.format('yyyy'), formDataDepartment.name, getColumnName(tmpRow, alias))
                 }
+            } else if (periodList.size() == 0) {
+                logger.warn("Не найдена «Сводная форма начисленных расходов уровня обособленного подразделения в статусе «Принята»: Тип:%s, Период: %s %s, Подразделение: %s. Ячейки по графе «%s», заполняемые из данной формы, будут заполнены нулевым значением.",
+                        FormDataKind.SUMMARY.name, getPeriodName(reportPeriod?.order - 1), prevDate.format('yyyy'), formDataDepartment.name, getColumnName(tmpRow, alias))
             }
         }
+    }
+}
+
+def getPeriodName(def order) {
+    switch (order) {
+        case 1:
+            return "первый квартал"
+            break
+        case 2:
+            return "второй квартал"
+            break
+        case 3:
+            return "третий квартал"
+            break
+        case 4:
+            return "четвертый квартал"
+            break
     }
 }
 
