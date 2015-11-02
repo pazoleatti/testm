@@ -190,11 +190,11 @@ void logicCheck() {
             checkDateValid(logger, row, 'docDate', row.docDate, true)
         }
 
-        // TODO необходимость ЛП 10 уточняется у заказчика
-        //if (row.sum && row.sum < 0) {
-        //    def msg = row.getCell('sum').column.name
-        //    logger.error("Строка $rowNum: Значение графы «$msg» должно быть больше значения «0»!")
-        //}
+        // 10.Проверка положительной суммы доходов
+        if (row.sum && row.sum < 0) {
+            def msg = row.getCell('sum').column.name
+            logger.error("Строка $rowNum: Значение графы «$msg» должно быть больше значения «0»!")
+        }
     }
 }
 

@@ -103,13 +103,14 @@ public class App_6_2Test extends ScriptTestBase {
         // 7. Корректность даты совершения сделки относительно даты заключения сделки
         // 8. Проверка года совершения сделки
         // 9. Проверка диапазона дат
+        // 10.Проверка положительной суммы доходов
         row.getCell("name").setValue(1L, null);
         row.getCell("docNumber").setValue("string", null);
         row.getCell("docDate").setValue(sdf.parse("02.01.2990"), null);
         row.getCell("dealNumber").setValue("string", null);
         row.getCell("dealDate").setValue(sdf.parse("01.01.2990"), null);
         row.getCell("count").setValue(2, null);
-        row.getCell("sum").setValue(3, null);
+        row.getCell("sum").setValue(-3, null);
         row.getCell("price").setValue(4, null);
         row.getCell("cost").setValue(5, null);
         row.getCell("dealDoneDate").setValue(sdf.parse("01.01.2989"), null);
@@ -126,6 +127,7 @@ public class App_6_2Test extends ScriptTestBase {
         Assert.assertEquals("Строка 1: Значение графы «Дата совершения сделки» должно быть не меньше значения графы «Дата заключения сделки»!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Год, указанный по графе «Дата совершения сделки» (2989), должен относиться к календарному году текущей формы (2014)!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Значение даты атрибута «Дата договора» должно принимать значение из следующего диапазона: 01.01.1900 - 31.12.2099", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 1: Значение графы «Сумма доходов Банка по данным бухгалтерского учета, руб.» должно быть больше значения «0»!", entries.get(i++).getMessage());
         Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
         testHelper.getLogger().clear();
 
