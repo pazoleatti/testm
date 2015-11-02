@@ -156,7 +156,7 @@ void logicCheck() {
             logger.error("Строка $rowNum: Значение графы «$msg1» должно быть не меньше значения графы «$msg2»!")
         }
 
-        // 7. Проверка года совершения сделки
+        // 6. Проверка года совершения сделки
         if (row.dealDate) {
             def dealDoneYear = row.dealDate.format(dateFormat)
             if (dealDoneYear != formYear) {
@@ -166,16 +166,16 @@ void logicCheck() {
             }
         }
 
-        // 9. Проверка диапазона дат
+        // 7. Проверка диапазона дат
         if (row.docDate) {
             checkDateValid(logger, row, 'docDate', row.docDate, true)
         }
 
-        // TODO необходимость ЛП 10 уточняется у заказчика
-        //if (row.sum && row.sum < 0) {
-        //    def msg = row.getCell('sum').column.name
-        //    logger.error("Строка $rowNum: Значение графы «$msg» должно быть больше значения «0»!")
-        //}
+        // 8. Проверка положительной суммы доходов
+        if (row.sum && row.sum < 0) {
+            def msg = row.getCell('sum').column.name
+            logger.error("Строка $rowNum: Значение графы «$msg» должно быть больше значения «0»!")
+        }
     }
 }
 
