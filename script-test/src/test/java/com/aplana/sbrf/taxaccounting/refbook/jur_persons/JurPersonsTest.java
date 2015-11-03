@@ -22,6 +22,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -34,6 +35,8 @@ import static org.mockito.Mockito.when;
 public class JurPersonsTest extends RefBookScriptTestBase {
 
     private static final Long REF_BOOK_ID = 520L;
+    private static final Long REF_BOOK_ORG_CODE_ID = 513L;
+    private static final Long REF_BOOK_TYPE_TCO_ID = 525L;
 
     @Override
     protected ScriptTestMockHelper getMockHelper() {
@@ -42,9 +45,28 @@ public class JurPersonsTest extends RefBookScriptTestBase {
 
     @Before
     public void mockServices() {
+        RefBook refBook = mock(RefBook.class);
+        when(refBook.getAttribute(anyString())).thenAnswer(
+                new Answer<RefBookAttribute>() {
+                    @Override
+                    public RefBookAttribute answer(InvocationOnMock invocation) throws Throwable {
+                        final String alias = (String) invocation.getArguments()[0];
+                        return new RefBookAttribute(){{
+                            setName(alias);
+                        }};
+                    }
+                }
+        );
         RefBookUniversal provider = mock(RefBookUniversal.class);
         provider.setRefBookId(REF_BOOK_ID);
+        RefBookUniversal providerOrgCode = mock(RefBookUniversal.class);
+        provider.setRefBookId(REF_BOOK_ORG_CODE_ID);
+        RefBookUniversal providerTypeTco = mock(RefBookUniversal.class);
+        provider.setRefBookId(REF_BOOK_TYPE_TCO_ID);
+        when(testHelper.getRefBookFactory().get(REF_BOOK_ID)).thenReturn(refBook);
         when(testHelper.getRefBookFactory().getDataProvider(REF_BOOK_ID)).thenReturn(provider);
+        when(testHelper.getRefBookFactory().getDataProvider(REF_BOOK_ORG_CODE_ID)).thenReturn(providerOrgCode);
+        when(testHelper.getRefBookFactory().getDataProvider(REF_BOOK_TYPE_TCO_ID)).thenReturn(providerTypeTco);
 
         when(provider.getRecords(any(Date.class), any(PagingParams.class), anyString(),
                 any(RefBookAttribute.class))).thenAnswer(
@@ -61,6 +83,44 @@ public class JurPersonsTest extends RefBookScriptTestBase {
                         return result;
                     }
                 });
+
+        when(providerOrgCode.getRecordData(anyLong())).thenAnswer(
+                new Answer<Map<String, RefBookValue>>() {
+                    @Override
+                    public Map<String, RefBookValue> answer(InvocationOnMock invocation) throws Throwable {
+                        Map<String, RefBookValue> result = new HashMap<String, RefBookValue>();
+                        Long record_id = (Long) invocation.getArguments()[0];
+                        Long value = null;
+                        if (record_id.equals(262625899L)) {
+                            value = 1L;
+                        } else if (record_id.equals(262625999L)) {
+                            value = 2L;
+                        }
+                        result.put("CODE", new RefBookValue(RefBookAttributeType.NUMBER, value));
+                        return result;
+                    }
+                }
+        );
+
+        when(providerTypeTco.getRecordData(anyLong())).thenAnswer(
+                new Answer<Map<String, RefBookValue>>() {
+                    @Override
+                    public Map<String, RefBookValue> answer(InvocationOnMock invocation) throws Throwable {
+                        Map<String, RefBookValue> result = new HashMap<String, RefBookValue>();
+                        Long record_id = (Long) invocation.getArguments()[0];
+                        String value = null;
+                        if (record_id.equals(262680699L)) {
+                            value = "ВЗЛ";
+                        } else if (record_id.equals(262680899L)) {
+                            value = "НЛ";
+                        } else  if (record_id.equals(262625799L)) {
+                            value = "РОЗ";
+                        }
+                        result.put("CODE", new RefBookValue(RefBookAttributeType.STRING, value));
+                        return result;
+                    }
+                }
+        );
     }
 
     @Test
@@ -69,12 +129,18 @@ public class JurPersonsTest extends RefBookScriptTestBase {
         SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
 
         HashMap<String, RefBookValue> value1 = new HashMap<String, RefBookValue>();
+        // ORG_CODE = 1, TYPE = "НЛ"
+        value1.put("ORG_CODE", new RefBookValue(RefBookAttributeType.REFERENCE, 262625899L));
+        value1.put("TYPE", new RefBookValue(RefBookAttributeType.REFERENCE, 262680899L));
         value1.put("SWIFT", new RefBookValue(RefBookAttributeType.STRING, "12345678"));
         value1.put("KPP", new RefBookValue(RefBookAttributeType.STRING, "770708389"));
         value1.put("INN", new RefBookValue(RefBookAttributeType.STRING, "7707083893"));
         saveRecords.add(value1);
 
         HashMap<String, RefBookValue> value2 = new HashMap<String, RefBookValue>();
+        // ORG_CODE = 1, TYPE = "НЛ"
+        value2.put("ORG_CODE", new RefBookValue(RefBookAttributeType.REFERENCE, 262625899L));
+        value2.put("TYPE", new RefBookValue(RefBookAttributeType.REFERENCE, 262680899L));
         value2.put("SWIFT", new RefBookValue(RefBookAttributeType.STRING, "12345678901"));
         // заполнен только КПП (без ИНН)
         // неверный патерн КПП
@@ -82,6 +148,9 @@ public class JurPersonsTest extends RefBookScriptTestBase {
         saveRecords.add(value2);
 
         HashMap<String, RefBookValue> value3 = new HashMap<String, RefBookValue>();
+        // ORG_CODE = 1, TYPE = "НЛ"
+        value3.put("ORG_CODE", new RefBookValue(RefBookAttributeType.REFERENCE, 262625899L));
+        value3.put("TYPE", new RefBookValue(RefBookAttributeType.REFERENCE, 262680899L));
         // неверный формат свифт
         value3.put("SWIFT", new RefBookValue(RefBookAttributeType.STRING, "1"));
         // заполнен только ИНН (без КПП)
@@ -92,6 +161,9 @@ public class JurPersonsTest extends RefBookScriptTestBase {
         saveRecords.add(value3);
 
         HashMap<String, RefBookValue> value4 = new HashMap<String, RefBookValue>();
+        // ORG_CODE = 1, TYPE = "НЛ"
+        value4.put("ORG_CODE", new RefBookValue(RefBookAttributeType.REFERENCE, 262625899L));
+        value4.put("TYPE", new RefBookValue(RefBookAttributeType.REFERENCE, 262680899L));
         // заполнен только ИНН (без КПП)
         // дубль в спр. по ИНН
         // неверный патерн ИНН
@@ -101,11 +173,34 @@ public class JurPersonsTest extends RefBookScriptTestBase {
         saveRecords.add(value4);
 
         HashMap<String, RefBookValue> value5 = new HashMap<String, RefBookValue>();
+        // ORG_CODE = 1, TYPE = "ВЗЛ"
+        value5.put("ORG_CODE", new RefBookValue(RefBookAttributeType.REFERENCE, 262625899L));
+        value5.put("TYPE", new RefBookValue(RefBookAttributeType.REFERENCE, 262680699L));
         // не заполнен идентификационный код организации
         // дата искл. меньше даты вкл.
         value5.put("START_DATE", new RefBookValue(RefBookAttributeType.DATE, sdf.parse("02.01.2015")));
         value5.put("END_DATE", new RefBookValue(RefBookAttributeType.DATE, sdf.parse("01.01.2015")));
         saveRecords.add(value5);
+
+        HashMap<String, RefBookValue> value6 = new HashMap<String, RefBookValue>();
+        // ORG_CODE = 2, TYPE = "РОЗ"
+        value6.put("ORG_CODE", new RefBookValue(RefBookAttributeType.REFERENCE, 262625999L));
+        value6.put("TYPE", new RefBookValue(RefBookAttributeType.REFERENCE, 262625799L));
+        // не заполнены поля: КИО, Код SWIFT, Регистрационный номер в стране инкорпорации
+        // заполнено поле ИНН для иностранной организации
+        // не заполнена "Оффшорная зона" для "РОЗ"
+        value6.put("INN", new RefBookValue(RefBookAttributeType.STRING, "7707083894"));
+        saveRecords.add(value6);
+
+        HashMap<String, RefBookValue> value7 = new HashMap<String, RefBookValue>();
+        // ORG_CODE = 2, TYPE = "НЛ"
+        value7.put("ORG_CODE", new RefBookValue(RefBookAttributeType.REFERENCE, 262625999L));
+        value7.put("TYPE", new RefBookValue(RefBookAttributeType.REFERENCE, 262680899L));
+        value7.put("KIO", new RefBookValue(RefBookAttributeType.STRING, "7707083893"));
+        // заполнено поле ИНН, КПП для иностранной организации
+        value7.put("INN", new RefBookValue(RefBookAttributeType.STRING, "7707083894"));
+        value7.put("KPP", new RefBookValue(RefBookAttributeType.STRING, "7707083894"));
+        saveRecords.add(value7);
 
         testHelper.setSaveRecords(saveRecords);
 
@@ -123,8 +218,19 @@ public class JurPersonsTest extends RefBookScriptTestBase {
         Assert.assertEquals("В справочнике уже существует организация с данным ИНН!", entries.get(i++).getMessage());
         Assert.assertEquals("Атрибут \"ИНН\" заполнен неверно (11111)! Ожидаемый паттерн: \"([0-9]{1}[1-9]{1}|[1-9]{1}[0-9]{1})[0-9]{8}\"", entries.get(i++).getMessage());
         Assert.assertEquals("Расшифровка паттерна «([0-9]{1}[1-9]{1}|[1-9]{1}[0-9]{1})[0-9]{8}»: Первые 2 символа: (0-9; 1-9 / 1-9; 0-9). Следующие 8 символов: (0-9).", entries.get(i++).getMessage());
-        Assert.assertEquals("Обязательно должно быть заполнено одно из следующих полей: «ИНН», «КИО», «Код SWIFT», «Регистрационный номер в стране инкорпорации»!", entries.get(i++).getMessage());
+        Assert.assertEquals("Для российской организации обязательно должно быть заполнено одно из следующих полей: «ИНН», «Код SWIFT»!", entries.get(i++).getMessage());
         Assert.assertEquals("Поле «Дата наступления основания для включения в список» должно быть больше или равно полю «Дата наступления основания для исключении из списка»!", entries.get(i++).getMessage());
+        Assert.assertEquals("Для ВЗЛ обязательно должны быть заполнены поля «VAT_STATUS»,«DEP_CRITERION»!", entries.get(i++).getMessage());
+        //6
+        Assert.assertEquals("Для иностранной организации обязательно должно быть заполнено одно из следующих полей: «КИО», «Код SWIFT», «Регистрационный номер в стране инкорпорации»!", entries.get(i++).getMessage());
+        Assert.assertEquals("Для иностранной организации нельзя указать «INN»!", entries.get(i++).getMessage());
+        Assert.assertEquals("Для Резидента оффшорной зоны обязательно должно быть заполнено поле «OFFSHORE_CODE»!", entries.get(i++).getMessage());
+        Assert.assertEquals("Вычисленное контрольное число по полю \"ИНН\" некорректно (7707083894).", entries.get(i++).getMessage());
+        //7
+        Assert.assertEquals("Для иностранной организации нельзя указать «INN»,«KPP»!", entries.get(i++).getMessage());
+        Assert.assertEquals("Вычисленное контрольное число по полю \"ИНН\" некорректно (7707083894).", entries.get(i++).getMessage());
+        Assert.assertEquals("Атрибут \"КПП\" заполнен неверно (7707083894)! Ожидаемый паттерн: \"([0-9]{1}[1-9]{1}|[1-9]{1}[0-9]{1})([0-9]{2})([0-9A-Z]{2})([0-9]{3})\"", entries.get(i++).getMessage());
+        Assert.assertEquals("Расшифровка паттерна «([0-9]{1}[1-9]{1}|[1-9]{1}[0-9]{1})([0-9]{2})([0-9A-Z]{2})([0-9]{3})»: Первые 2 символа: (0-9; 1-9 / 1-9; 0-9). Следующие 2 символа: (0-9). Следующие 2 символа: (0-9 / A-Z). Последние 3 символа: (0-9).", entries.get(i++).getMessage());
         Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
     }
 }

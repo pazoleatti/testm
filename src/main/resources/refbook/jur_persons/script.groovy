@@ -5,6 +5,7 @@ package refbook.jur_persons
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
+import com.aplana.sbrf.taxaccounting.model.util.StringUtils
 import groovy.transform.Field
 
 /**
@@ -22,10 +23,37 @@ switch (formDataEvent) {
 def REF_BOOK_ID = 520
 
 @Field
+def REF_BOOK_ORG_CODE_ID = 513L
+
+@Field
+def REF_BOOK_TYPE_TCO_ID = 525L
+
+@Field
 def provider
 
+@Field
+def refBookCache = [:]
+
+def getRecord(def refBookId, def recordId) {
+    if (refBookCache[getRefBookCacheKey(refBookId, recordId)] != null) {
+        return refBookCache[getRefBookCacheKey(refBookId, recordId)]
+    } else {
+        def provider = refBookFactory.getDataProvider(refBookId)
+        def value = provider.getRecordData(recordId)
+        refBookCache.put(getRefBookCacheKey(refBookId, recordId), value)
+        return value
+    }
+}
+
+String getAttrName(String code) {
+    return refbook.getAttribute(code).getName()
+}
+
+
 void save() {
+    refbook = refBookFactory.get(REF_BOOK_ID)
     provider = refBookFactory.getDataProvider(REF_BOOK_ID)
+
     saveRecords.each {
         def String swift = it.SWIFT?.stringValue
         def String inn = it.INN?.stringValue
@@ -34,37 +62,102 @@ void save() {
         def String kpp = it.KPP?.stringValue
         def Date startDate = it.START_DATE?.dateValue
         def Date endDate = it.END_DATE?.dateValue
+        def Long orgCode = getRecord(REF_BOOK_ORG_CODE_ID, it?.ORG_CODE.referenceValue)?.CODE.numberValue.longValue()
+        def String type = getRecord(REF_BOOK_TYPE_TCO_ID, it?.TYPE.referenceValue)?.CODE.stringValue
+        def Long vatStatus = it.VAT_STATUS?.referenceValue
+        def Long depCriterion = it.DEP_CRITERION?.referenceValue
+        def Long offshoreCode = it.OFFSHORE_CODE?.referenceValue
 
         // 1. Проверка поля «Код SWIFT (заполняется для кредитных организаций, резидентов и нерезидентов)»
         if (swift && swift.length() != 8 && swift.length() != 11) {
             logger.error('Поле «Код Swift» должно содержать 8 или 11 символов!')
         }
 
-        // 2. Проверка на заполнения идентификационного кода организации
-        if (!inn && !kio && !swift && !regNum) {
-            logger.error('Обязательно должно быть заполнено одно из следующих полей: «ИНН», «КИО», «Код SWIFT», «Регистрационный номер в стране инкорпорации»!')
+        // 2. Обязательное заполнение идентификационного кода для иностранной организации
+        if (orgCode == 2 && !kio && !swift && !regNum) {
+            logger.error('Для иностранной организации обязательно должно быть заполнено одно из следующих полей: «КИО», «Код SWIFT», «Регистрационный номер в стране инкорпорации»!')
         }
 
-        // 3. Проверка на одновременное заполнение ИНН и КПП
-        if ((inn && !kpp) || (kpp && !inn)) {
+        // 3. Обязательное заполнение идентификационного кода для российской организации
+        if (orgCode == 1 && (!inn && !swift)) {
+            logger.error('Для российской организации обязательно должно быть заполнено одно из следующих полей: «ИНН», «Код SWIFT»!')
+        }
+
+        // 4. Проверка на корректное заполнение идентификационного кода для российской организации
+        if (orgCode == 1 && (regNum || kio)) {
+            List<String> attributeNames = new ArrayList<String>();
+            if (regNum) {
+                attributeNames.add("«${getAttrName('REG_NUM')}»")
+            }
+            if (kio) {
+                attributeNames.add("«${getAttrName('KIO')}»")
+            }
+
+            if (attributeNames.size() == 1) {
+                logger.error('Для российской организации нельзя указать поле %s!', attributeNames.get(0))
+            } else {
+                logger.error('Для российской организации нельзя указать поля %s и %s!', attributeNames.get(0), attributeNames.get(1))
+            }
+        }
+
+        // 5. Проверка на корректное заполнение идентификационного кода для иностранной организации
+        if (orgCode == 2 && (inn || kpp)) {
+            List<String> attributeNames = new ArrayList<String>();
+            if (inn) {
+                attributeNames.add("«${getAttrName('INN')}»")
+            }
+            if (kpp) {
+                attributeNames.add("«${getAttrName('KPP')}»")
+            }
+
+            logger.error('Для иностранной организации нельзя указать %s!', StringUtils.join(attributeNames.toArray(), ',' as char))
+        }
+
+        // 6. Проверка на одновременное заполнение ИНН и КПП
+        if (orgCode == 1 && ((inn && !kpp) || (kpp && !inn))) {
             logger.error('Обязательно должны быть указаны «ИНН» и «КПП»!')
         }
 
-        // 4. Уникальность поля ИНН
+        // 7. Уникальность поля ИНН
         checkUnique('INN', inn, "ИНН")
 
-        // 5. Уникальность поля КИО
+        // 8. Уникальность поля КИО
         checkUnique('KIO', kio, "КИО")
 
-        // 6. Уникальность поля Код SWIFT
+        // 9. Уникальность поля Код SWIFT
         checkUnique('SWIFT', swift, "кодом SWIFT")
 
-        // 7. Уникальность поля Регистрационный номер в стране инкорпорации
+        // 10. Уникальность поля Регистрационный номер в стране инкорпорации
         checkUnique('REG_NUM', regNum, "регистрационным номером в стране инкорпорации")
 
-        // 8. Проверка правильности заполнения полей «Дата наступления основания для включения в список» и «Дата наступления основания для исключении из списка»
-        if (startDate != null && endDate != null && startDate > endDate) {
+        // 11. Проверка правильности заполнения полей «Дата наступления основания для включения в список» и «Дата наступления основания для исключении из списка»
+        if (type == "ВЗЛ" && startDate != null && endDate != null && startDate > endDate) {
             logger.error("Поле «Дата наступления основания для включения в список» должно быть больше или равно полю «Дата наступления основания для исключении из списка»!")
+        }
+
+        // 12. Заполнение обязательных полей для ВЗЛ
+        if (type == "ВЗЛ" && (!startDate || !vatStatus || !depCriterion)) {
+            List<String> attributeNames = new ArrayList<String>();
+            if (!startDate) {
+                attributeNames.add("«${getAttrName('START_DATE')}»")
+            }
+            if (!vatStatus) {
+                attributeNames.add("«${getAttrName('VAT_STATUS')}»")
+            }
+            if (!depCriterion) {
+                attributeNames.add("«${getAttrName('DEP_CRITERION')}»")
+            }
+
+            if (attributeNames.size() == 1) {
+                logger.error('Для ВЗЛ обязательно должно быть заполнено поле %s!', attributeNames.get(0))
+            } else {
+                logger.error('Для ВЗЛ обязательно должны быть заполнены поля %s!', StringUtils.join(attributeNames.toArray(), ',' as char))
+            }
+        }
+
+        // 13. Заполнение обязательных полей для РОЗ
+        if (type == "РОЗ" && !offshoreCode) {
+            logger.error('Для Резидента оффшорной зоны обязательно должно быть заполнено поле «%s»!', getAttrName('OFFSHORE_CODE'))
         }
 
         // 3.2.3	Проверки атрибутов справочников на соответствие паттерну
@@ -93,6 +186,44 @@ void save() {
             logger.error("Атрибут \"%s\" заполнен неверно (%s)! Ожидаемый паттерн: \"%s\"", "КИО", kio, INN_JUR_PATTERN)
             logger.error("Расшифровка паттерна «%s»: %s.", INN_JUR_PATTERN, INN_JUR_MEANING)
         }
+
+        // Алгоритм заполнения поля «IKKSR»
+        def ikksr
+        if (orgCode == 1) {
+            if (inn && kpp) {
+                ikksr = inn + " / " + kpp
+            } else if (swift) {
+                ikksr = swift
+            }
+        } else if (orgCode == 2) {
+            if (kio) {
+                ikksr = kio
+            } else if (swift) {
+                ikksr = swift
+            } else if (regNum) {
+                ikksr = regNum
+            }
+        }
+        it.put("IKKSR", new RefBookValue(RefBookAttributeType.STRING, ikksr))
+
+        // Алгоритм заполнения поля «IKSR»:
+        def iksr
+        if (orgCode == 1) {
+            if (inn) {
+                iksr = inn
+            } else if (swift) {
+                iksr = swift
+            }
+        } else if (orgCode == 2) {
+            if (kio) {
+                iksr = kio
+            } else if (swift) {
+                iksr = swift
+            } else if (regNum) {
+                iksr = regNum
+            }
+        }
+        it.put("IKSR", new RefBookValue(RefBookAttributeType.STRING, iksr))
     }
 }
 
