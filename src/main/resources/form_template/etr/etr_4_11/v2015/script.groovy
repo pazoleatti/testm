@@ -103,9 +103,9 @@ void calc() {
 
 def BigDecimal calc5(def row) {
     if (row.sum2 != null && row.sum1 != null && row.sum1 != 0) {
-        return (row.sum2 / row.sum1) * 100
-    } else if (row.sum1 == 0) {
-        return 0
+        return (row.sum2 * 100 as BigDecimal).divide(row.sum1, 2, BigDecimal.ROUND_HALF_UP)
+    } else if (row.sum1 == BigDecimal.ZERO) {
+        return BigDecimal.ZERO
     }
     return null
 }
