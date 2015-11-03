@@ -356,7 +356,7 @@ public class DeclarationDataServiceImplTest {
                 public void updateState(String state) {
                 }
             });
-        } catch (ServiceLoggerException e){
+        } catch (ServiceException e){
             //Nothing
         }
 

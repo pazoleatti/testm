@@ -7,6 +7,7 @@ import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
+import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.util.TransactionHelper;
@@ -113,6 +114,9 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
             declaration.setAccepted(false);
 
             declarationDataScriptingService.executeScriptInNewReadOnlyTransaction(userService.getSystemUserInfo(), declarationTemplate, declaration, FormDataEvent.CHECK_SCRIPT, tempLogger, null);
+            if (tempLogger.containsLevel(LogLevel.ERROR)) {
+                throw new ServiceException("Обнаружены фатальные ошибки!");
+            }
         } catch (Exception ex) {
             tempLogger.error(ex);
             logger.getEntries().addAll(tempLogger.getEntries());

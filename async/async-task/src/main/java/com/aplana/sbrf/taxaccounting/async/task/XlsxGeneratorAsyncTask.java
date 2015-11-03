@@ -7,6 +7,7 @@ import com.aplana.sbrf.taxaccounting.core.api.LockStateLogger;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
+import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.service.*;
@@ -83,6 +84,9 @@ public abstract class XlsxGeneratorAsyncTask extends AbstractAsyncTask {
             scriptParams.put("needPdf", false);
             scriptParams.put("needXlsx", true);
             scriptingService.executeScript(userInfo, declarationData, FormDataEvent.REPORT, logger, scriptParams);
+            if (logger.containsLevel(LogLevel.ERROR)) {
+                throw new ServiceException();
+            }
             if (!scriptProcessedModel.isProcessedByScript()) {
                 declarationDataService.setXlsxDataBlobs(logger, declarationData, userInfo, new LockStateLogger() {
                     @Override
