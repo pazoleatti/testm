@@ -113,9 +113,7 @@ void calc() {
 void logicCheck() {
     def dataRows = formDataService.getDataRowHelper(formData).allCached
     for (def row : dataRows) {
-        if (row.getAlias()) {
-            continue
-        }
+        // итоги тоже проверяем
         // 1. Проверка заполнения граф
         checkNonEmptyColumns(row, row.getIndex(), nonEmptyColumns, logger, true)
     }
