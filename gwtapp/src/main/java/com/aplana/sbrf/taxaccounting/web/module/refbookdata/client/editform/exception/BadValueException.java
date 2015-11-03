@@ -1,35 +1,48 @@
 package com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.exception;
 
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 
-public class BadValueException extends Exception {
+public class BadValueException extends Exception implements Iterable<String> {
+    private Set<String> strings = new HashSet<String>();
 
-	private Map<String, String> descriptionMap;
+    private class BVIterator implements Iterator<String> {
+
+        private Iterator<String> iterator;
+
+        private BVIterator(Iterator<String> iterator) {
+            this.iterator = iterator;
+        }
+
+        @Override
+        public boolean hasNext() {
+            return iterator.hasNext();
+        }
+
+        @Override
+        public String next() {
+            return iterator.next();
+        }
+
+        @Override
+        public void remove() {
+            throw new UnsupportedOperationException();
+        }
+    }
 
 	public BadValueException(Map<String, String> descriptionMap) {
-		this.descriptionMap = descriptionMap;
+        for (Map.Entry<String, String> entry : descriptionMap.entrySet()){
+            strings.add("Атрибут \"" + entry.getKey() + "\": " + entry.getValue());
+        }
 	}
 
-	public BadValueException() {
-	}
+    public BadValueException() {
+    }
 
-	public Map<String, String> getDescriptionMap() {
-		return descriptionMap;
-	}
-
-	String fieldName;
-	String description;
-
-	public void setFieldName(String fieldName) {
-		this.fieldName = fieldName;
-	}
-
-	public void setDescription(String description) {
-		this.description = description;
-	}
-
-	@Override
-	public String toString() {
-		return "Атрибут \"" + fieldName + "\": " + description;
-	}
+    @Override
+    public Iterator<String> iterator() {
+        return new BVIterator(strings.iterator());
+    }
 }

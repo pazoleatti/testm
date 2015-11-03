@@ -1,11 +1,9 @@
 package com.aplana.sbrf.taxaccounting.dao;
 
-import com.aplana.sbrf.taxaccounting.model.BalancingVariants;
 import com.aplana.sbrf.taxaccounting.model.LockData;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 
-import javax.validation.constraints.NotNull;
 import java.util.Date;
 import java.util.List;
 
@@ -40,14 +38,14 @@ public interface LockDataDao {
      * @param state Статус асинхронной задачи, связанной с блокировкой
      * @param serverNode Наименование узла кластера, на котором выполняется связанная асинхронная задача
      */
-	void createLock(String key, int userId, String description, String state, String serverNode);
+	void lock(String key, int userId, String description, String state, String serverNode);
 
 	/**
 	 * Снимает блокировку
 	 * @param key код блокировки
 	 * @throws com.aplana.sbrf.taxaccounting.model.exception.LockException если блокировки нет в БД
 	 */
-	void deleteLock(String key);
+	void unlock(String key);
 
     /**
      * Убрать все блокировки пользователя.
@@ -74,9 +72,9 @@ public interface LockDataDao {
     /**
      * Получает список всех блокировок с учетом фильтра + пейджинг. Используется на форме просмотра блокировок.
      * @return все блокировки
-     * @param filter ограничение по имени пользователя или ключу
-     * @param queues тип очереди
-     * @param pagingParams параметры пэйджинга
+     * @param filter ограничение по имени пользователя или ключу. Необязательный параметр. Может быть null
+     * @param queues тип очереди. Необязательный параметр. По умолчанию LockQueues.ALL. Может быть null
+     * @param pagingParams параметры пэйджинга. Обязательный параметр
      */
     PagingResult<LockData> getLocks(String filter, LockData.LockQueues queues, PagingParams pagingParams);
 
@@ -102,4 +100,11 @@ public interface LockDataDao {
      * @param queue очередь
      */
     void updateQueue(String key, Date lockDate, LockData.LockQueues queue);
+
+	/**
+	 * Удаляет блокировки, созданные ранее "seconds" секунд назад
+	 * @param seconds "срок годности" блокировки в секундах
+	 * @return количество удаленных блокировок
+	 */
+	int unlockIfOlderThan(long seconds);
 }

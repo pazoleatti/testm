@@ -26,7 +26,6 @@ public enum FormDataEvent implements Serializable {
     AFTER_CREATE(12, "После создания"),
     SORT_ROWS (13, "Сортировка строк"),
     GET_SOURCES (14, "Получение источников-приемников"),
-	REPORT (15, "Формирование печатного представления"),
     PRE_CALCULATION_CHECK(16, "Расчетные проверки"),
     GET_HEADERS(17, "Получение заголовка таблицы"),
     REFRESH(18, "Обновить"),

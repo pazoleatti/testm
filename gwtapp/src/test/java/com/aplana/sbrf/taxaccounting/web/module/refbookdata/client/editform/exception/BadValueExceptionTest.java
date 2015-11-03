@@ -2,6 +2,8 @@ package com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.exc
 
 import org.junit.Test;
 
+import java.util.Collections;
+
 import static junit.framework.Assert.assertEquals;
 
 /**
@@ -13,9 +15,7 @@ public class BadValueExceptionTest {
 
 	@Test
 	public void test() {
-		BadValueException bve = new BadValueException();
-		bve.setFieldName("Василий Пупкин");
-		bve.setDescription("Александрович");
-		assertEquals("Атрибут \"Василий Пупкин\": Александрович", bve.toString());
+		BadValueException bve = new BadValueException(Collections.singletonMap("Василий Пупкин", "Александрович"));
+		assertEquals("Атрибут \"Василий Пупкин\": Александрович", bve.iterator().next());
 	}
 }

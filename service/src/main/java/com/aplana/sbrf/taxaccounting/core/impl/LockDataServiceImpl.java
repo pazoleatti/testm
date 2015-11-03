@@ -116,7 +116,7 @@ public class LockDataServiceImpl implements LockDataService {
                                 throw new ServiceException(String.format("Невозможно удалить блокировку, так как она установлена " +
                                         "пользователем \"%s\"(%s).", blocker.getLogin(), blocker.getId()));
                             }
-                            dao.deleteLock(key);
+                            dao.unlock(key);
                         } else if (!force) {
                             LOG.warn(String.format("Нельзя снять несуществующую блокировку. key = \"%s\"", key));
                             return false;
@@ -239,11 +239,16 @@ public class LockDataServiceImpl implements LockDataService {
         });
     }
 
+	@Override
+	public int unlockIfOlderThan(long seconds) {
+		return dao.unlockIfOlderThan(seconds);
+	}
+
 	/**
 	 * Блокировка без всяких проверок - позволяет сократить количество обращений к бд для вложенных вызовов методов
 	 */
 	private void internalLock(String key, int userId, String description, String state, String serverNode) {
-		dao.createLock(key, userId, description, state, serverNode);
+		dao.lock(key, userId, description, state, serverNode);
 	}
 
     @Override

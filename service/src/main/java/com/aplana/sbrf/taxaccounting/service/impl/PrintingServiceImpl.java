@@ -41,40 +41,29 @@ import java.util.Map;
 public class PrintingServiceImpl implements PrintingService {
 
 	private static final Log LOG = LogFactory.getLog(PrintingServiceImpl.class);
-
     private static final String FILE_NAME = "Налоговый_отчет_";
     private static final String POSTFIX = ".xlsm";
 
 	@Autowired
 	private FormDataDao formDataDao;
-
     @Autowired
 	private FormTemplateDao formTemplateDao;
-
 	@Autowired
 	private FormDataAccessService formDataAccessService;
-
     @Autowired
 	private ReportPeriodDao reportPeriodDao;
-
     @Autowired
 	private LogBusinessDao logBusinessDao;
-
     @Autowired
     private DataRowDao dataRowDao;
-
     @Autowired
     private RefBookHelper refBookHelper;
-
     @Autowired
     private RefBookFactory refBookFactory;
-
     @Autowired
     private BlobDataService blobDataService;
-
     @Autowired
     private DepartmentReportPeriodService departmentReportPeriodService;
-
     @Autowired
     private FormDataService formDataService;
 
@@ -125,11 +114,11 @@ public class PrintingServiceImpl implements PrintingService {
             LOG.error(e.getMessage(), e);
             throw new ServiceException("Ошибка при создании печатной формы.");
         } catch (DaoException ex) {
+			LOG.error(ex.getMessage(), ex);
             throw new ServiceException(ex.getMessage());
         }finally {
             cleanTmp(filePath);
         }
-
 	}
 
     @Override
@@ -168,6 +157,7 @@ public class PrintingServiceImpl implements PrintingService {
             LOG.error(e.getMessage(), e);
             throw new ServiceException("Ошибка при создании печатной формы.");
         } catch (DaoException ex) {
+			LOG.error(ex.getMessage(), ex);
             throw new ServiceException(ex.getMessage());
         } finally {
             cleanTmp(reportPath);

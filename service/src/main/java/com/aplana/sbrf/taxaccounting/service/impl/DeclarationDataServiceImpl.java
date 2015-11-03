@@ -234,12 +234,12 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         checkSources(dd, logger, userInfo);
         lockStateLogger.updateState("Проверка данных декларации/уведомления");
         declarationDataScriptingService.executeScript(userInfo, dd, FormDataEvent.CHECK, logger, null);
-        validateDeclaration(userInfo, dd, logger, true, FormDataEvent.CHECK, lockStateLogger);
-        // Проверяем ошибки при пересчете
         if (logger.containsLevel(LogLevel.ERROR)) {
-            throw new ServiceLoggerException(
-                    "Найдены ошибки при выполнении проверки декларации",
-                    logEntryService.save(logger.getEntries()));
+            throw new ServiceException();
+        }
+        validateDeclaration(userInfo, dd, logger, true, FormDataEvent.CHECK, lockStateLogger);
+        if (logger.containsLevel(LogLevel.ERROR)) {
+            throw new ServiceException();
         } else {
             logger.info("Проверка завершена, ошибок не обнаружено");
         }
@@ -290,20 +290,27 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     @Override
     @Transactional(readOnly = false)
     public void accept(Logger logger, long id, TAUserInfo userInfo, LockStateLogger lockStateLogger) {
+        declarationDataAccessService.checkEvents(userInfo, id, FormDataEvent.MOVE_CREATED_TO_ACCEPTED);
+
         DeclarationData declarationData = declarationDataDao.get(id);
         lockStateLogger.updateState("Проверка форм-источников");
         checkSources(declarationData, logger, userInfo);
+        if (logger.containsLevel(LogLevel.ERROR)) {
+            throw new ServiceException("Найдены ошибки при выполнении принятия декларации");
+        }
 
         lockStateLogger.updateState("Проверка данных декларации/уведомления");
         Map<String, Object> exchangeParams = new HashMap<String, Object>();
         declarationDataScriptingService.executeScript(userInfo, declarationData, FormDataEvent.MOVE_CREATED_TO_ACCEPTED, logger, exchangeParams);
+        if (logger.containsLevel(LogLevel.ERROR)) {
+            throw new ServiceException("Найдены ошибки при выполнении принятия декларации");
+        }
 
         validateDeclaration(userInfo, declarationDataDao.get(id), logger, true, FormDataEvent.MOVE_CREATED_TO_ACCEPTED, lockStateLogger);
-        declarationDataAccessService.checkEvents(userInfo, id, FormDataEvent.MOVE_CREATED_TO_ACCEPTED);
-
         if (logger.containsLevel(LogLevel.ERROR)){
-            throw new ServiceLoggerException("Найдены ошибки при выполнении принятия декларации", logEntryService.save(logger.getEntries()));
+            throw new ServiceException("Найдены ошибки при выполнении принятия декларации");
         }
+
         declarationData.setAccepted(true);
 
         logBusinessService.add(null, id, userInfo, FormDataEvent.MOVE_CREATED_TO_ACCEPTED, null);
@@ -325,7 +332,9 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
         Map<String, Object> exchangeParams = new HashMap<String, Object>();
         declarationDataScriptingService.executeScript(userInfo, declarationData, FormDataEvent.MOVE_ACCEPTED_TO_CREATED, logger, exchangeParams);
-
+        if (logger.containsLevel(LogLevel.ERROR)) {
+            throw new ServiceLoggerException("Обнаружены фатальные ошибки!", logEntryService.save(logger.getEntries()));
+        }
         DeclarationTemplate declarationTemplate = declarationTemplateService.get(declarationData.getDeclarationTemplateId());
         if (declarationTemplate.getType().getIsIfrs() &&
                 departmentReportPeriodService.get(declarationData.getDepartmentReportPeriodId()).getCorrectionDate() == null) {
@@ -503,6 +512,9 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 LOG.info(String.format("Формирование XML-файла декларации %s", declarationData.getId()));
                 stateLogger.updateState("Формирование XML-файла");
                 declarationDataScriptingService.executeScript(userInfo, declarationData, FormDataEvent.CALCULATE, logger, exchangeParams);
+                if (logger.containsLevel(LogLevel.ERROR)) {
+                    throw new ServiceException();
+                }
             } finally {
                 try {
                     if (fileWriter != null) fileWriter.close();
@@ -606,15 +618,17 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             try {
                 LOG.info(String.format("Выполнение проверок XSD-файла декларации %s", declarationData.getId()));
                 stateLogger.updateState("Выполнение проверок XSD-файла");
-                if (!validateXMLService.validate(declarationData, userInfo, logger, isErrorFatal, xmlFile) && logger.containsLevel(LogLevel.ERROR)){
+                boolean valid = validateXMLService.validate(declarationData, userInfo, logger, isErrorFatal, xmlFile);
+                if (logger.containsLevel(LogLevel.ERROR)){
+                    throw new ServiceException();
+                } else if (!valid) {
                     throw new ServiceLoggerException(VALIDATION_ERR_MSG, logEntryService.save(logger.getEntries()));
                 }
             } catch (Exception e) {
                 LOG.error(VALIDATION_ERR_MSG, e);
-                if (!(e instanceof ServiceException))
-                    logger.error(e);
-                throw new ServiceException(VALIDATION_ERR_MSG);
-            }finally {
+                if (e.getMessage() != null && !e.getMessage().isEmpty()) logger.error(e);
+                throw new ServiceException();
+            } finally {
                 Locale.setDefault(oldLocale);
             }
         }

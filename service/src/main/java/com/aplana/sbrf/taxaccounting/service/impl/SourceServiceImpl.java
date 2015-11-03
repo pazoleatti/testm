@@ -5,9 +5,9 @@ import com.aplana.sbrf.taxaccounting.dao.api.*;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
+import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.source.*;
-import com.aplana.sbrf.taxaccounting.model.util.DepartmentReportPeriodFilter;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.utils.SimpleDateUtils;
@@ -1291,6 +1291,9 @@ public class SourceServiceImpl implements SourceService {
         params.put("stateRestriction", stateRestriction);
 
         declarationDataScriptingService.executeScript(userInfo, declaration, FormDataEvent.GET_SOURCES, logger, params);
+        if (logger.containsLevel(LogLevel.ERROR)) {
+            throw new ServiceLoggerException("Обнаружены фатальные ошибки!", logEntryService.save(logger.getEntries()));
+        }
         if (sources.isSourcesProcessedByScript()) {
             for (Iterator<Relation> it = sources.getSourceList().iterator(); it.hasNext();) {
                 Relation relation = it.next();

@@ -132,7 +132,7 @@ public class DeclarationDataScriptingServiceImplTest {
 		assertFalse(logger.containsLevel(LogLevel.ERROR));
 	}
 	
-	@Test(expected = ServiceLoggerException.class)
+	@Test
 	public void executeScriptError() {
 		Logger logger = new Logger();
 		DeclarationData declarationData = mockDeclarationData(1l, DEPARTMENT_ID, false, REPORT_TEMPLATE_ID2, REPORT_PERIOD_ID);
@@ -143,9 +143,11 @@ public class DeclarationDataScriptingServiceImplTest {
 		exchangeParams.put(DeclarationDataScriptParams.XML, writer);
 
 		service.executeScript(null, declarationData, FormDataEvent.CREATE, logger, exchangeParams);
+
+        assertTrue(logger.containsLevel(LogLevel.ERROR));
 	}
 
-    @Test(expected = ServiceLoggerException.class)
+    @Test
     public void checkScript1() throws IOException {
         Logger logger = new Logger();
 
@@ -158,6 +160,8 @@ public class DeclarationDataScriptingServiceImplTest {
         template.setCreateScript(script);
 
         service.executeScriptInNewReadOnlyTransaction(null, template, null, FormDataEvent.CHECK_SCRIPT, logger, null);
+
+        assertTrue(logger.containsLevel(LogLevel.ERROR));
     }
 
     @Test
@@ -173,5 +177,7 @@ public class DeclarationDataScriptingServiceImplTest {
         template.setCreateScript(script);
 
         service.executeScriptInNewReadOnlyTransaction(null, template, null, FormDataEvent.CHECK_SCRIPT, logger, null);
+
+        assertFalse(logger.containsLevel(LogLevel.ERROR));
     }
 }

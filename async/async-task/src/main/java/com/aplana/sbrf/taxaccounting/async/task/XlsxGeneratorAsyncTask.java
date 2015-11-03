@@ -7,6 +7,7 @@ import com.aplana.sbrf.taxaccounting.core.api.LockStateLogger;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
+import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.service.*;
@@ -76,21 +77,12 @@ public abstract class XlsxGeneratorAsyncTask extends AbstractAsyncTask {
 
         DeclarationData declarationData = declarationDataService.get(declarationDataId, userInfo);
         if (declarationData != null) {
-            Map<String, Object> scriptParams = new HashMap<String, Object>();
-            ScriptProcessedModel scriptProcessedModel = new ScriptProcessedModel();
-            scriptProcessedModel.setProcessedByScript(false);
-            scriptParams.put("scriptProcessedModel", scriptProcessedModel);
-            scriptParams.put("needPdf", false);
-            scriptParams.put("needXlsx", true);
-            scriptingService.executeScript(userInfo, declarationData, FormDataEvent.REPORT, logger, scriptParams);
-            if (!scriptProcessedModel.isProcessedByScript()) {
-                declarationDataService.setXlsxDataBlobs(logger, declarationData, userInfo, new LockStateLogger() {
-                    @Override
-                    public void updateState(String state) {
-                        lockService.updateState(lock, lockDate, state);
-                    }
-                });
-            }
+            declarationDataService.setXlsxDataBlobs(logger, declarationData, userInfo, new LockStateLogger() {
+                @Override
+                public void updateState(String state) {
+                    lockService.updateState(lock, lockDate, state);
+                }
+            });
         }
     }
 
