@@ -1,45 +1,61 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <formTemplateContent>
     <fixedRows>false</fixedRows>
+    <monthly>false</monthly>
+    <comparative>false</comparative>
+    <accruing>false</accruing>
+    <updating>false</updating>
     <name>6.7. Предоставление права пользования товарным знаком</name>
     <fullName>6.7. Отчет в отношении доходов ПАО Сбербанк по Контролируемым сделкам, связанные с предоставлением права пользования товарным знаком</fullName>
-    <code></code>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
+        <alias>fix</alias>
+        <checking>false</checking>
+        <columnType>STRING</columnType>
+        <name>fix</name>
+        <order>1</order>
+        <width>0</width>
+        <maxLength>100</maxLength>
+        <prevLength>0</prevLength>
+    </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="autoNumerationColumn">
         <alias>rowNumber</alias>
         <checking>false</checking>
         <columnType>AUTO</columnType>
         <name>№ п/п</name>
-        <order>1</order>
+        <order>2</order>
         <width>4</width>
         <numerationType>SERIAL</numerationType>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
         <alias>name</alias>
         <checking>false</checking>
+        <columnType>REFBOOK</columnType>
         <name>Полное наименование юридического лица с указанием ОПФ</name>
-        <order>2</order>
+        <order>3</order>
         <width>10</width>
         <hierarchical>false</hierarchical>
         <!-- TODO: уточнить id атрибута SBRFACCTAX-12861-->
         <nameAttributeId>5201</nameAttributeId>
         <!-- TODO: уточнить id атрибута SBRFACCTAX-12861-->
         <refBookAttributeId>5201</refBookAttributeId>
+        <searchEnabled>true</searchEnabled>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="referenceColumn">
         <alias>iksr</alias>
         <checking>false</checking>
+        <columnType>REFERENCE</columnType>
         <name>ИНН/КИО</name>
-        <order>3</order>
+        <order>4</order>
         <width>7</width>
         <parentAlias>name</parentAlias>
-        <!-- TODO: уточнить id атрибута SBRFACCTAX-12861-->
-        <refBookAttributeId>5202</refBookAttributeId>
+        <refBookAttributeId>5218</refBookAttributeId>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="referenceColumn">
         <alias>countryCode</alias>
         <checking>false</checking>
+        <columnType>REFERENCE</columnType>
         <name>Код страны по классификатору ОКСМ</name>
-        <order>4</order>
+        <order>5</order>
         <width>5</width>
         <parentAlias>name</parentAlias>
         <!-- TODO: уточнить id атрибута SBRFACCTAX-12861-->
@@ -49,8 +65,9 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>sum</alias>
         <checking>false</checking>
+        <columnType>NUMBER</columnType>
         <name>Сумма доходов Банка, руб.</name>
-        <order>5</order>
+        <order>6</order>
         <width>8</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
@@ -58,8 +75,9 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>docNumber</alias>
         <checking>false</checking>
+        <columnType>STRING</columnType>
         <name>Номер договора</name>
-        <order>6</order>
+        <order>7</order>
         <width>5</width>
         <maxLength>128</maxLength>
         <prevLength>0</prevLength>
@@ -67,16 +85,18 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="dateColumn">
         <alias>docDate</alias>
         <checking>false</checking>
+        <columnType>DATE</columnType>
         <name>Дата договора</name>
-        <order>7</order>
+        <order>8</order>
         <width>7</width>
         <formatId>0</formatId>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>price</alias>
         <checking>false</checking>
+        <columnType>NUMBER</columnType>
         <name>Цена</name>
-        <order>8</order>
+        <order>9</order>
         <width>8</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
@@ -84,8 +104,9 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>cost</alias>
         <checking>false</checking>
+        <columnType>NUMBER</columnType>
         <name>Стоимость</name>
-        <order>9</order>
+        <order>10</order>
         <width>8</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
@@ -93,8 +114,9 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="dateColumn">
         <alias>dealDate</alias>
         <checking>false</checking>
+        <columnType>DATE</columnType>
         <name>Дата совершения сделки</name>
-        <order>10</order>
+        <order>11</order>
         <width>7</width>
         <formatId>1</formatId>
     </columns>
@@ -138,6 +160,13 @@
         <backColor>WHITE</backColor>
         <bold>true</bold>
         <fontColor>DARK_GREEN</fontColor>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Контрольные суммы</alias>
+        <backColor>LIGHT_BROWN</backColor>
+        <bold>true</bold>
+        <fontColor>BLACK</fontColor>
         <italic>false</italic>
     </styles>
 </formTemplateContent>
