@@ -8,6 +8,30 @@ import java.util.Set;
 public class BadValueException extends Exception implements Iterable<String> {
     private Set<String> strings = new HashSet<String>();
 
+    private class BVIterator implements Iterator<String> {
+
+        private Iterator<String> iterator;
+
+        private BVIterator(Iterator<String> iterator) {
+            this.iterator = iterator;
+        }
+
+        @Override
+        public boolean hasNext() {
+            return iterator.hasNext();
+        }
+
+        @Override
+        public String next() {
+            return iterator.next();
+        }
+
+        @Override
+        public void remove() {
+            throw new UnsupportedOperationException();
+        }
+    }
+
 	public BadValueException(Map<String, String> descriptionMap) {
         for (Map.Entry<String, String> entry : descriptionMap.entrySet()){
             strings.add("Атрибут \"" + entry.getKey() + "\": " + entry.getValue());
@@ -19,6 +43,6 @@ public class BadValueException extends Exception implements Iterable<String> {
 
     @Override
     public Iterator<String> iterator() {
-        return strings.iterator();
+        return new BVIterator(strings.iterator());
     }
 }
