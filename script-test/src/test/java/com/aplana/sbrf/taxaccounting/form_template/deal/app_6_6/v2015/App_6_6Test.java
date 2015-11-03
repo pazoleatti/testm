@@ -98,6 +98,7 @@ public class App_6_6Test extends ScriptTestBase {
         Assert.assertEquals("Строка 1: Выполнение расчета графы «Режим переговорных сделок» невозможно, так как не заполнена используемая в расчете графа «Код страны регистрации по классификатору ОКСМ»!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Выполнение расчета графы «Дата совершения сделки» невозможно, так как не заполнена используемая в расчете графа «Дата исполнения 2-ой части сделки»!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Графа «Сумма процентного расхода (руб.)» должна быть заполнена, если не заполнена графа «Сумма процентного дохода (руб.)»!", entries.get(i++).getMessage());
+        Assert.assertEquals("Группа строк «ЮЛ не задано» не имеет строки подитога!", entries.get(i++).getMessage());
         Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
         testHelper.getLogger().clear();
 
@@ -132,6 +133,7 @@ public class App_6_6Test extends ScriptTestBase {
         Assert.assertEquals("Строка 1: Значение графы «Дата исполнения 1-ой части сделки» не может быть больше даты окончания отчётного периода!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Значение графы «Дата совершения сделки» должно быть не меньше значения графы «Дата (заключения) сделки»!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Значение даты атрибута «Дата договора» должно принимать значение из следующего диапазона: 01.01.1900 - 31.12.2099", entries.get(i++).getMessage());
+        Assert.assertEquals("Группа строк «ЮЛ не задано» не имеет строки подитога!", entries.get(i++).getMessage());
         Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
         testHelper.getLogger().clear();
 
@@ -152,6 +154,15 @@ public class App_6_6Test extends ScriptTestBase {
         row.getCell("currencyCode").setValue(1L, null);
         row.getCell("courseCB").setValue(4, null);
         row.getCell("priceFirstRub").setValue(5, null);
+
+        DataRow<Cell> subTotalRow = formData.createDataRow();
+        dataRows.add(subTotalRow);
+        subTotalRow.setAlias("itg#1");
+        subTotalRow.setIndex(2);
+        subTotalRow.getCell("fix").setValue("Итого A", null);
+        subTotalRow.getCell("incomeSum").setValue(2, null);
+        subTotalRow.getCell("outcomeSum").setValue(2, null);
+
         testHelper.execute(FormDataEvent.CHECK);
 
         entries = testHelper.getLogger().getEntries();
@@ -168,6 +179,8 @@ public class App_6_6Test extends ScriptTestBase {
         row.getCell("incomeSum").setValue(0, null);
         row.getCell("outcomeSum").setValue(null, null);
         row.getCell("date1").setValue(sdf.parse("03.01.2014"), null);
+        subTotalRow.getCell("incomeSum").setValue(0, null);
+        subTotalRow.getCell("outcomeSum").setValue(0, null);
         testHelper.execute(FormDataEvent.CHECK);
 
         entries = testHelper.getLogger().getEntries();
@@ -192,9 +205,12 @@ public class App_6_6Test extends ScriptTestBase {
 
         // для успешного прохождения всех ЛП:
         row.getCell("outcomeSum").setValue(1, null);
+        subTotalRow.getCell("outcomeSum").setValue(1, null);
         testHelper.execute(FormDataEvent.CHECK);
 
         Assert.assertEquals(1, testHelper.getLogger().getEntries().size());
+
+        // TODO (Ramil Timerbaev) добавить тесты для логических проверок 11-14
     }
 
     // Расчет пустой (в импорте - растчет заполненной)
@@ -210,7 +226,9 @@ public class App_6_6Test extends ScriptTestBase {
         testHelper.execute(FormDataEvent.IMPORT);
         List<String> aliases = Arrays.asList("docNumber", "docDate", "dealNumber", "dealDate", "date1", "date2",
                 "incomeSum", "outcomeSum", "priceFirstCurrency", "courseCB", "priceFirstRub", "dealDoneDate");
-        defaultCheckLoadData(aliases, 4);
+        // ожидается 5 строк: 4 из файла + 1 итоговая строка
+        int expected = 4 + 1;
+        defaultCheckLoadData(aliases, expected);
         checkLogger();
         // "name" , "dealsMode", "currencyCode"
         checkLoadData(testHelper.getDataRowHelper().getAll());
@@ -242,14 +260,14 @@ public class App_6_6Test extends ScriptTestBase {
     void checkAfterCalc(List<DataRow<Cell>> dataRows) throws ParseException {
         Assert.assertEquals(null, dataRows.get(0).getCell("dealsMode").getStringValue());
         Assert.assertEquals(null, dataRows.get(1).getCell("dealsMode").getStringValue());
-        Assert.assertEquals(null, dataRows.get(2).getCell("dealsMode").getStringValue());
         Assert.assertEquals(null, dataRows.get(3).getCell("dealsMode").getStringValue());
+        Assert.assertEquals(null, dataRows.get(5).getCell("dealsMode").getStringValue());
 
         SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
         Assert.assertEquals(sdf.parse("31.12.2014"), dataRows.get(0).getCell("dealDoneDate").getDateValue());
         Assert.assertEquals(sdf.parse("31.12.2014"), dataRows.get(1).getCell("dealDoneDate").getDateValue());
-        Assert.assertEquals(sdf.parse("31.12.2014"), dataRows.get(2).getCell("dealDoneDate").getDateValue());
         Assert.assertEquals(sdf.parse("31.12.2014"), dataRows.get(3).getCell("dealDoneDate").getDateValue());
+        Assert.assertEquals(sdf.parse("31.12.2014"), dataRows.get(5).getCell("dealDoneDate").getDateValue());
     }
 }
 

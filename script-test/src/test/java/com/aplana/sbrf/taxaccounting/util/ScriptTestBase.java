@@ -144,6 +144,9 @@ public abstract class ScriptTestBase {
         int numberCount = 1;
 
         for (int i = 0; i < rowCount; i++) {
+            if (dataRows.get(i).getAlias() != null) {
+                continue;
+            }
             for (String alias : aliases) {
                 Object value = dataRows.get(i).getCell(alias).getValue();
                 // все значения д.б. заполнены
