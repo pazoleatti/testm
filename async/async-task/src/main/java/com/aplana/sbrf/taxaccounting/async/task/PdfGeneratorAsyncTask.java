@@ -80,24 +80,12 @@ public abstract class PdfGeneratorAsyncTask extends AbstractAsyncTask {
 
         DeclarationData declarationData = declarationDataService.get(declarationDataId, userInfo);
         if (declarationData != null) {
-            Map<String, Object> scriptParams = new HashMap<String, Object>();
-            ScriptProcessedModel scriptProcessedModel = new ScriptProcessedModel();
-            scriptProcessedModel.setProcessedByScript(false);
-            scriptParams.put("scriptProcessedModel", scriptProcessedModel);
-            scriptParams.put("needPdf", true);
-            scriptParams.put("needXlsx", false);
-            scriptingService.executeScript(userInfo, declarationData, FormDataEvent.REPORT, logger, scriptParams);
-            if (logger.containsLevel(LogLevel.ERROR)) {
-                throw new ServiceException();
-            }
-            if (!scriptProcessedModel.isProcessedByScript()) {
-                declarationDataService.setPdfDataBlobs(logger, declarationData, userInfo, new LockStateLogger() {
-                    @Override
-                    public void updateState(String state) {
-                        lockService.updateState(lock, lockDate, state);
-                    }
-                });
-            }
+            declarationDataService.setPdfDataBlobs(logger, declarationData, userInfo, new LockStateLogger() {
+                @Override
+                public void updateState(String state) {
+                    lockService.updateState(lock, lockDate, state);
+                }
+            });
         }
     }
 
