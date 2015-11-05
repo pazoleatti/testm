@@ -240,17 +240,20 @@ public class GetRefBookMultiValuesHandler extends AbstractActionHandler<GetRefBo
                     RefBookValue refBookValue = record.get(alias);
                     if (refBookValue != null) {
                         if (refBookValue.getAttributeType() == RefBookAttributeType.DATE) {
-                            Formats format = refBookAttribute.getFormat();
-                            if (format != null) {
-                                if (formatHashMap.containsKey(format)) {
-                                    value = formatHashMap.get(format).format(refBookValue.getDateValue());
+                            Date dValue = refBookValue.getDateValue();
+                            if (dValue != null) {
+                                Formats format = refBookAttribute.getFormat();
+                                if (format != null) {
+                                    if (formatHashMap.containsKey(format)) {
+                                        value = formatHashMap.get(format).format(refBookValue.getDateValue());
+                                    } else {
+                                        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(format.getFormat());
+                                        formatHashMap.put(format, simpleDateFormat);
+                                        value = simpleDateFormat.format(refBookValue.getDateValue());
+                                    }
                                 } else {
-                                    SimpleDateFormat simpleDateFormat = new SimpleDateFormat(format.getFormat());
-                                    formatHashMap.put(format, simpleDateFormat);
-                                    value = simpleDateFormat.format(refBookValue.getDateValue());
+                                    value = String.valueOf(refBookValue);
                                 }
-                            } else {
-                                value = String.valueOf(refBookValue);
                             }
                         } else {
                             value = String.valueOf(refBookValue);
