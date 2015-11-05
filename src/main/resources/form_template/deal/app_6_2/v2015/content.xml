@@ -34,9 +34,7 @@
         <order>3</order>
         <width>10</width>
         <hierarchical>false</hierarchical>
-        <!-- TODO: уточнить id атрибута SBRFACCTAX-12861-->
         <nameAttributeId>5201</nameAttributeId>
-        <!-- TODO: уточнить id атрибута SBRFACCTAX-12861-->
         <refBookAttributeId>5201</refBookAttributeId>
         <searchEnabled>true</searchEnabled>
     </columns>
@@ -58,7 +56,6 @@
         <order>5</order>
         <width>8</width>
         <parentAlias>name</parentAlias>
-        <!-- TODO: уточнить id атрибута SBRFACCTAX-12861-->
         <refBookAttributeId>5204</refBookAttributeId>
         <refBookAttributeId2>53</refBookAttributeId2>
     </columns>
@@ -70,7 +67,6 @@
         <order>6</order>
         <width>7</width>
         <parentAlias>name</parentAlias>
-        <!-- TODO: уточнить id атрибута SBRFACCTAX-12861-->
         <refBookAttributeId>5204</refBookAttributeId>
         <refBookAttributeId2>50</refBookAttributeId2>
     </columns>

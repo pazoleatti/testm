@@ -498,7 +498,6 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
 
     def int colIndex = 2
 
-    // TODO уточнить id и алиас в справочнике SBRFACCTAX-12861
     // графа 2
     newRow.name = getRecordIdImport(520, 'NAME', values[colIndex], fileRowIndex, colIndex + colOffset)
     def map = getRefBookValue(520, newRow.name)

@@ -614,13 +614,11 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
 
     def int colIndex = 2
 
-    // TODO уточнить id и алиас в справочнике SBRFACCTAX-12861
     // графа 2
     newRow.name = getRecordIdImport(520, 'NAME', values[colIndex], fileRowIndex, colIndex + colOffset, false)
     def map = getRefBookValue(520, newRow.name)
     colIndex++
 
-    // TODO уточнить id и алиас в справочнике SBRFACCTAX-12861
     // графа 3
     if (map != null) {
         formDataService.checkReferenceValue(520, values[colIndex], map.IKSR?.stringValue, fileRowIndex, colIndex + colOffset, logger, false)
