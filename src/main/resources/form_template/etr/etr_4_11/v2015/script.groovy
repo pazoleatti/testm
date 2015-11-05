@@ -74,6 +74,9 @@ def autoFillColumns = ['level', 'taxBurden']
 def nonEmptyColumns = ['name', 'sum1', 'sum2', 'level', 'taxBurden']
 
 @Field
+def calcColumns = ['level', 'taxBurden']
+
+@Field
 def startDateMap = [:]
 
 @Field
@@ -103,9 +106,9 @@ void calc() {
 
 def BigDecimal calc5(def row) {
     if (row.sum2 != null && row.sum1 != null && row.sum1 != 0) {
-        return (row.sum2 / row.sum1) * 100
-    } else if (row.sum1 == 0) {
-        return 0
+        return (row.sum2 * 100 as BigDecimal).divide(row.sum1, 2, BigDecimal.ROUND_HALF_UP)
+    } else if (row.sum1 == BigDecimal.ZERO) {
+        return BigDecimal.ZERO
     }
     return null
 }
@@ -125,10 +128,10 @@ void logicCheck() {
         checkNonEmptyColumns(row, rowNum, nonEmptyColumns, logger, true)
 
         // Проверка заполнения граф 5,6
-        def needValue = [:]
+        def needValue = formData.createDataRow()
         needValue['level'] = calc5(row)
         needValue['taxBurden'] = calc6(row)
-        checkCalc(row, needValue.keySet().asList(), needValue, logger, true)
+        checkCalc(row, calcColumns, needValue, logger, true)
 
         // Проверка графы 3 при расчете графы 5
         if (row.sum1 == null || row.sum1 == 0) {

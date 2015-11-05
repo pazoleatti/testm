@@ -65,9 +65,9 @@ def recordCache = [:]
 @Field
 def allColumns = ['department', 'sumBU', 'sumNUD', 'sumNUP', 'taxBurden']
 
-// Проверяемые на пустые значения атрибуты
+// Проверяемые на пустые значения атрибуты в итоговой строке
 @Field
-def nonEmptyColumns = allColumns
+def nonEmptyColumnsTotal = ['sumBU', 'sumNUD', 'sumNUP', 'taxBurden']
 
 // итоговые графы (графа 3, 4, 5, 6)
 @Field
@@ -113,11 +113,10 @@ void calc() {
 void logicCheck() {
     def dataRows = formDataService.getDataRowHelper(formData).allCached
     for (def row : dataRows) {
-        if (row.getAlias()) {
-            continue
-        }
+        // итоги тоже проверяем
+        def columns = (row.getAlias() == null) ? allColumns : nonEmptyColumnsTotal
         // 1. Проверка заполнения граф
-        checkNonEmptyColumns(row, row.getIndex(), nonEmptyColumns, logger, true)
+        checkNonEmptyColumns(row, row.getIndex(), columns, logger, true)
     }
 }
 
