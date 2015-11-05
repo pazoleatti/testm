@@ -8,7 +8,6 @@ import groovy.transform.Field
  *
  * formTemplateId=801
  *
- * TODO
  */
 
 // rowNumber        - № п/п
@@ -19,16 +18,17 @@ import groovy.transform.Field
 // sum43            - Сделки купли-продажи драгоценных металлов
 // sum44            - Сделки, отраженные в Журнале взаиморасчетов
 // sum45            - Сделки с лицами, информация о которых не  отражена в Журнале взаиморасчетов
+// sum46            - Сумма дополнительно начисленных налогооблагаемых расходов
 // sum51            - Сделки с ценными бумагами
 // sum52            - Сделки купли-продажи иностранной валюты
 // sum53            - Сделки купли-продажи драгоценных металлов
 // sum54            - Сделки, отраженные в Журнале взаиморасчетов
 // sum55            - Сделки с лицами, информация о которых не  отражена в Журнале взаиморасчетов
-// sum6             - Сумма дополнительно начисленных налогооблагаемых доходов, тыс. руб.
-// sum7             - Итого объем доходов и расходов, тыс. руб.
+// sum56            - Сумма дополнительно начисленных налогооблагаемых расходов
+// sum6             - Итого объем доходов и расходов, руб.
 // category         - Категория Взаимозависимого лица на начало Отчетного периода
-// sum9             - Ожидаемый объем доходов и расходов за отчетный Налоговый период, тыс. руб.
-// sum10            - Скорректированный ожидаемый объем доходов и расходов, тыс. руб.
+// sum8             - Ожидаемый объем доходов и расходов за отчетный Налоговый период, руб.
+// sum9             - Скорректированный ожидаемый объем доходов и расходов, руб.
 // categoryRevised  - Пересмотренная Категория по итогам Отчетного периода
 // categoryPrimary  - Первичная Категория юридического лица на следующий Налоговый период
 
@@ -45,10 +45,6 @@ switch (formDataEvent) {
         logicCheck()
         break
     case FormDataEvent.MOVE_CREATED_TO_PREPARED:  // Подготовить из "Создана"
-        calc()
-        logicCheck()
-        formDataService.saveCachedDataRows(formData, logger)
-        break
     case FormDataEvent.MOVE_CREATED_TO_APPROVED:  // Утвердить из "Создана"
     case FormDataEvent.MOVE_PREPARED_TO_APPROVED: // Утвердить из "Подготовлена"
     case FormDataEvent.MOVE_CREATED_TO_ACCEPTED:  // Принять из "Создана"
@@ -57,7 +53,7 @@ switch (formDataEvent) {
         logicCheck()
         break
     case FormDataEvent.COMPOSE:
-        formDataService.consolidationSimple(formData, logger)
+        consolidation()
         calc()
         logicCheck()
         formDataService.saveCachedDataRows(formData, logger)
@@ -81,11 +77,12 @@ def editableColumns = []
 
 // Автозаполняемые атрибуты
 @Field
-def autoFillColumns = []
+def autoFillColumns = ['sum4', 'sum42', 'sum43', 'sum44', 'sum45', 'sum46', 'sum5', 'sum52', 'sum53', 'sum54', 'sum55',
+                       'sum56', 'sum6', 'category', 'sum8', 'sum9', 'categoryRevised', 'categoryPrimary']
 
 // Проверяемые на пустые значения атрибуты
 @Field
-def nonEmptyColumns = []
+def nonEmptyColumns = ['name', 'sum44', 'sum46', 'sum54', 'sum56', 'sum6', 'category', 'sum8', 'sum9', 'categoryRevised']
 
 // Дата начала отчетного периода
 @Field
@@ -139,14 +136,58 @@ def getRefBookValue(def long refBookId, def Long recordId) {
 void calc() {
     def dataRows = formDataService.getDataRowHelper(formData).allCached
     for (def row : dataRows) {
+        row.sum56 = calc16(row)
+        row.sum8 = calc18(row)
+        row.sum9 = calc19(row)
+        row.categoryRevised = calc20(row)
+        row.categoryPrimary = null
     }
+}
+
+def BigDecimal calc16(def row) {
+    // Графа 16 = Графа 7 + Графа 9 + Графа 13 + Графа 15
+    return (row.sum44 ?: 0) + (row.sum46 ?: 0) + (row.sum54 ?: 0) + (row.sum56 ?: 0)
+}
+
+def BigDecimal calc18(def row) {
+    // Графа 18 = Графа 16 * 2
+    return (row.sum6 ?: 0) * 2
+}
+
+def BigDecimal calc19(def row) {
+    // Графа 19 = Графа 18 + Ожидаемый объем доходов и расходов» их формы «Прогноз крупных сделок» для организации, указанной в графе 2
+    // TODO Правило извлечения ожидаемого объема доходов и расходов будет добавлено после описания формы «Прогноз крупных сделок»
+    value = 0
+    return row.sum8 + value
+}
+
+def Long calc20(def row) {
+    // TODO
+    return 0
 }
 
 void logicCheck() {
     def dataRows = formDataService.getDataRowHelper(formData).allCached
     for (def row : dataRows) {
+        if (row.getAlias() != null) {
+            continue
+        }
+        def rowNum = row.getIndex()
+
         // 1. Проверка заполнения обязательных полей
         checkNonEmptyColumns(row, row.getIndex(), nonEmptyColumns, logger, true)
+
+        // 2. Отсутствие нулевых значений
+        if (!row.sum44 && !row.sum46 && !row.sum54 && !row.sum56) {
+            logger.error("Строка $rowNum: Объем доходов и расходов по всем сделкам не может быть нулевым!")
+        }
+
+        // TODO
+        // 3. Проверка на отсутствие в списке не ВЗЛ ОРН
+        // 4. Наличие правила назначения категории
+        // 5. Проверка соответствия категории пороговым значениям
+
+
     }
 }
 
@@ -154,7 +195,7 @@ void logicCheck() {
 void sortFormDataRows(def saveInDB = true) {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
-    sortRows(refBookService, logger, dataRows, getSubTotalRows(dataRows), null, true)
+    sortRows(refBookService, logger, dataRows, null, null, null)
     if (saveInDB) {
         dataRowHelper.saveSort()
     } else {
@@ -162,7 +203,6 @@ void sortFormDataRows(def saveInDB = true) {
     }
 }
 
-// Получение подитоговых строк
-def getSubTotalRows(def dataRows) {
-    return dataRows.findAll { it.getAlias() != null}
+def consolidation() {
+    // TODO
 }
