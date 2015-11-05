@@ -92,7 +92,7 @@ public class JurPersonsTermsTest extends RefBookScriptTestBase {
 
         List<LogEntry> entries = testHelper.getLogger().getEntries();
         int i = 0;
-        Assert.assertEquals("Поле «Максимальный объем доходов  и расходов» должно быть больше либо равно полю «Минимальный объем доходов и расходов»!", entries.get(i++).getMessage());
+        Assert.assertEquals("Поле «Максимальный объем доходов и расходов» должно быть больше либо равно полю «Минимальный объем доходов и расходов»!", entries.get(i++).getMessage());
         Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
     }
 }
