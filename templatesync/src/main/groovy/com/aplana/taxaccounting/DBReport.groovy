@@ -14,7 +14,7 @@ class DBReport {
     // Сравнение шаблонов в БД
     def static void compareDBFormTemplate(def prefix1, def prefix2) {
         // Запросы на получение макетов
-        def sqlTemplate1 = { boolean compExist, accruingExist, updatingExist ->
+        def sqlTemplate1 = { boolean comparativeExist, accruingExist, updatingExist ->
             return "SELECT ft1.id " +
                     " ,ft1.type_id " +
                     " ,ft1.data_rows " +
@@ -30,7 +30,7 @@ class DBReport {
                     " ,ft1.monthly " +
                     (accruingExist ? " ,ft1.accruing " : "") +
                     (updatingExist ? " ,ft1.updating " : "") +
-                    (compExist ? " ,ft1.comparative " : "") +
+                    (comparativeExist ? " ,ft1.comparative " : "") +
                     "FROM form_template ft1 " +
                     "WHERE  " +
                     " ft1.STATUS NOT IN (-1,2)"
@@ -316,10 +316,19 @@ class DBReport {
 
                                     def columnsC = colDiff == null ? '+' : '—'
                                     def stylesC = styleDiff == null ? '+' : '—'
-                                    def monthlyC = tmp1?.monthly == tmp2?.monthly ? '+' : '—'
-                                    def accruingC = tmp1?.accruing == tmp2?.accruing ? '+' : '—'
-                                    def updatingC = tmp1?.updating == tmp2?.updating ? '+' : '—'
-                                    def comparativeC = tmp1?.comparative == tmp2?.comparative ? '+' : '—'
+                                    def compareFunc = { flagA, flagB ->
+                                        if (flagA == flagB){
+                                            return '+'
+                                        } else if (flagA == null && !flagB || !flagA && flagB == null) {
+                                            return '?'
+                                        } else {
+                                            return '-'
+                                        }
+                                    }
+                                    def monthlyC = compareFunc(tmp1?.monthly, tmp2?.monthly)
+                                    def accruingC = compareFunc(tmp1?.accruing, tmp2?.accruing)
+                                    def updatingC = compareFunc(tmp1?.updating, tmp2?.updating)
+                                    def comparativeC = compareFunc(tmp1?.comparative, tmp2?.comparative)
 
                                     tr(class: ((tmp1?.id != null && tmp2?.id != null) ? 'nr' : 'er')) {
                                         td type_id
@@ -398,24 +407,32 @@ class DBReport {
 
                                         if (monthlyC == '+') {
                                             td(class: 'td_ok', monthlyC)
+                                        } else if (monthlyC == '?') {
+                                            td(class: 'td_ok', title: "$prefix1 = ${tmp1?.monthly}, $prefix2 = ${tmp2?.monthly}", monthlyC)
                                         } else {
                                             td(class: 'td_error', title: "$prefix1 = ${tmp1?.monthly}, $prefix2 = ${tmp2?.monthly}", monthlyC)
                                         }
 
                                         if (accruingC == '+') {
                                             td(class: 'td_ok', accruingC)
+                                        } else if (accruingC == '?') {
+                                            td(class: 'td_ok', title: "$prefix1 = ${tmp1?.accruing}, $prefix2 = ${tmp2?.accruing}", accruingC)
                                         } else {
                                             td(class: 'td_error', title: "$prefix1 = ${tmp1?.accruing}, $prefix2 = ${tmp2?.accruing}", accruingC)
                                         }
 
                                         if (updatingC == '+') {
                                             td(class: 'td_ok', updatingC)
+                                        } else if (updatingC == '?') {
+                                            td(class: 'td_ok', title: "$prefix1 = ${tmp1?.updating}, $prefix2 = ${tmp2?.updating}", updatingC)
                                         } else {
                                             td(class: 'td_error', title: "$prefix1 = ${tmp1?.updating}, $prefix2 = ${tmp2?.updating}", updatingC)
                                         }
 
                                         if (comparativeC == '+') {
                                             td(class: 'td_ok', comparativeC)
+                                        } else if (comparativeC == '?') {
+                                            td(class: 'td_ok', title: "$prefix1 = ${tmp1?.comparative}, $prefix2 = ${tmp2?.comparative}", comparativeC)
                                         } else {
                                             td(class: 'td_error', title: "$prefix1 = ${tmp1?.comparative}, $prefix2 = ${tmp2?.comparative}", comparativeC)
                                         }
@@ -481,12 +498,12 @@ class DBReport {
         def stylesMap = [:]
 
         def map = sql.firstRow("SELECT count(column_name) as result FROM user_tab_cols where table_name = 'FORM_TEMPLATE' and column_name = 'COMPARATIVE'")
-        boolean compExist = (map.result as Integer) == 1
+        boolean comparativeExist = (map.result as Integer) == 1
         map = sql.firstRow("SELECT count(column_name) as result FROM user_tab_cols where table_name = 'FORM_TEMPLATE' and column_name = 'ACCRUING'")
         boolean accruingExist = (map.result as Integer) == 1
         map = sql.firstRow("SELECT count(column_name) as result FROM user_tab_cols where table_name = 'FORM_TEMPLATE' and column_name = 'UPDATING'")
         boolean updatingExist = (map.result as Integer) == 1
-        sql.eachRow(sqlTemplate(compExist, accruingExist, updatingExist)) {
+        sql.eachRow(sqlTemplate(comparativeExist, accruingExist, updatingExist)) {
             def type_id = it.type_id as Integer
             if (templateMap[type_id] == null) {
                 templateMap.put((Integer) it.type_id, [:])
@@ -508,7 +525,7 @@ class DBReport {
             version.monthly = it.monthly as Integer
             version.accruing = accruingExist ? (it.accruing as Integer) : null
             version.updating = updatingExist ? (it.updating as Integer) : null
-            version.comparative = compExist ? (it.comparative as Integer) : null
+            version.comparative = comparativeExist ? (it.comparative as Integer) : null
             templateMap[type_id].put(it.version, version)
             if (!allVersions.containsKey(type_id)) {
                 allVersions.put(type_id, [] as Set)

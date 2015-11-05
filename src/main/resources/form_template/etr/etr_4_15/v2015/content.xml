@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <formTemplateContent>
     <fixedRows>true</fixedRows>
+    <monthly>false</monthly>
+    <comparative>true</comparative>
+    <accruing>true</accruing>
+    <updating>false</updating>
     <name>Приложение 4-15. Анализ структуры налога на добавленную стоимость (НДС)</name>
     <fullName>Приложение 4-15. Анализ структуры налога на добавленную стоимость (НДС)</fullName>
     <header>Приложение 4-15</header>

@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <formTemplateContent>
     <fixedRows>false</fixedRows>
+    <monthly>false</monthly>
+    <comparative>false</comparative>
+    <accruing>true</accruing>
+    <updating>false</updating>
     <name>Приложение 4-11. Статистика доначислений</name>
     <fullName>Приложение 4-11. Статистика доначислений</fullName>
     <header>Приложение 4-11</header>

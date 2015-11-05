@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <formTemplateContent>
     <fixedRows>true</fixedRows>
+    <monthly>false</monthly>
+    <comparative>true</comparative>
+    <accruing>true</accruing>
+    <updating>false</updating>
     <name>Приложение 4-5. Отношение налогов, относимых на расходы к операционным расходам</name>
     <fullName>Приложение 4-5. Отношение налогов, относимых на расходы к операционным расходам</fullName>
     <header>Приложение 4-5</header>
