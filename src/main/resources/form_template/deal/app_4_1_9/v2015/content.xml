@@ -5,7 +5,7 @@
     <comparative>false</comparative>
     <accruing>false</accruing>
     <updating>true</updating>
-    <name>Приложение 4.1. (9 месяцев) Отчет в отношении доходов и расходов Банка по сделкам с российскими ВЗЛ, применяющими Общий режим налогообложения</name>
+    <name>Приложение 4.1. (9 месяцев)</name>
     <fullName>Приложение 4.1. Отчет в отношении доходов и расходов Банка по сделкам с российскими ВЗЛ, применяющими Общий режим налогообложения за 9 месяцев</fullName>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="autoNumerationColumn">
         <alias>rowNumber</alias>
@@ -24,9 +24,7 @@
         <order>2</order>
         <width>15</width>
         <hierarchical>false</hierarchical>
-        <!-- TODO: уточнить id атрибута-->
         <nameAttributeId>5201</nameAttributeId>
-        <!-- TODO: уточнить id атрибута-->
         <refBookAttributeId>5201</refBookAttributeId>
         <searchEnabled>true</searchEnabled>
     </columns>
@@ -38,8 +36,7 @@
         <order>3</order>
         <width>15</width>
         <parentAlias>name</parentAlias>
-        <!-- TODO: уточнить id атрибута-->
-        <refBookAttributeId>5202</refBookAttributeId>
+        <refBookAttributeId>5217</refBookAttributeId>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>sum4</alias>
@@ -92,11 +89,21 @@
         <precision>0</precision>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>sum46</alias>
+        <checking>false</checking>
+        <columnType>NUMBER</columnType>
+        <name>Сумма дополнительно начисленных налогооблагаемых доходов</name>
+        <order>9</order>
+        <width>6</width>
+        <maxLength>15</maxLength>
+        <precision>0</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>sum51</alias>
         <checking>false</checking>
         <columnType>NUMBER</columnType>
         <name>Сделки с ценными бумагами</name>
-        <order>9</order>
+        <order>10</order>
         <width>6</width>
         <maxLength>15</maxLength>
         <precision>0</precision>
@@ -106,7 +113,7 @@
         <checking>false</checking>
         <columnType>NUMBER</columnType>
         <name>Сделки купли-продажи иностранной валюты</name>
-        <order>10</order>
+        <order>11</order>
         <width>6</width>
         <maxLength>15</maxLength>
         <precision>0</precision>
@@ -116,7 +123,7 @@
         <checking>false</checking>
         <columnType>NUMBER</columnType>
         <name>Сделки купли-продажи драгоценных металлов</name>
-        <order>11</order>
+        <order>12</order>
         <width>6</width>
         <maxLength>15</maxLength>
         <precision>0</precision>
@@ -126,7 +133,7 @@
         <checking>false</checking>
         <columnType>NUMBER</columnType>
         <name>Сделки, отраженные в Журнале взаиморасчетов</name>
-        <order>12</order>
+        <order>13</order>
         <width>6</width>
         <maxLength>15</maxLength>
         <precision>0</precision>
@@ -136,7 +143,17 @@
         <checking>false</checking>
         <columnType>NUMBER</columnType>
         <name>Сделки с лицами, информация о которых не  отражена в Журнале взаиморасчетов</name>
-        <order>13</order>
+        <order>14</order>
+        <width>6</width>
+        <maxLength>15</maxLength>
+        <precision>0</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>sum56</alias>
+        <checking>false</checking>
+        <columnType>NUMBER</columnType>
+        <name>Сумма дополнительно начисленных налогооблагаемых расходов</name>
+        <order>15</order>
         <width>6</width>
         <maxLength>15</maxLength>
         <precision>0</precision>
@@ -145,18 +162,8 @@
         <alias>sum6</alias>
         <checking>false</checking>
         <columnType>NUMBER</columnType>
-        <name>Сумма дополнительно начисленных налогооблагаемых доходов, тыс. руб.</name>
-        <order>14</order>
-        <width>6</width>
-        <maxLength>15</maxLength>
-        <precision>0</precision>
-    </columns>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
-        <alias>sum7</alias>
-        <checking>false</checking>
-        <columnType>NUMBER</columnType>
-        <name>Итого объем доходов и расходов, тыс. руб.</name>
-        <order>15</order>
+        <name>Итого объем доходов и расходов, руб.</name>
+        <order>16</order>
         <width>6</width>
         <maxLength>15</maxLength>
         <precision>0</precision>
@@ -166,7 +173,7 @@
         <checking>false</checking>
         <columnType>REFBOOK</columnType>
         <name>Категория Взаимозависимого лица на начало Отчетного периода</name>
-        <order>16</order>
+        <order>17</order>
         <width>10</width>
         <hierarchical>false</hierarchical>
         <nameAttributeId>5061</nameAttributeId>
@@ -174,21 +181,21 @@
         <searchEnabled>true</searchEnabled>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
-        <alias>sum9</alias>
+        <alias>sum8</alias>
         <checking>false</checking>
         <columnType>NUMBER</columnType>
-        <name>Ожидаемый объем доходов и расходов за отчетный Налоговый период, тыс. руб.</name>
-        <order>17</order>
+        <name>Ожидаемый объем доходов и расходов за отчетный Налоговый период, руб.</name>
+        <order>18</order>
         <width>6</width>
         <maxLength>15</maxLength>
         <precision>0</precision>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
-        <alias>sum10</alias>
+        <alias>sum9</alias>
         <checking>false</checking>
         <columnType>NUMBER</columnType>
-        <name>Скорректированный ожидаемый объем доходов и расходов, тыс. руб.</name>
-        <order>18</order>
+        <name>Скорректированный ожидаемый объем доходов и расходов, руб.</name>
+        <order>19</order>
         <width>6</width>
         <maxLength>15</maxLength>
         <precision>0</precision>
@@ -198,7 +205,7 @@
         <checking>false</checking>
         <columnType>REFBOOK</columnType>
         <name>Пересмотренная Категория по итогам Отчетного периода</name>
-        <order>19</order>
+        <order>20</order>
         <width>10</width>
         <hierarchical>false</hierarchical>
         <nameAttributeId>5061</nameAttributeId>
@@ -210,7 +217,7 @@
         <checking>false</checking>
         <columnType>REFBOOK</columnType>
         <name>Первичная Категория юридического лица на следующий Налоговый период</name>
-        <order>20</order>
+        <order>21</order>
         <width>10</width>
         <hierarchical>false</hierarchical>
         <nameAttributeId>5061</nameAttributeId>
