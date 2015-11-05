@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <formTemplateContent>
     <fixedRows>true</fixedRows>
+    <monthly>false</monthly>
+    <comparative>true</comparative>
+    <accruing>true</accruing>
+    <updating>false</updating>
     <name>Приложение 4-8. Налоговая эффективность по уступке прав требования по проблемным активам</name>
     <fullName>Приложение 4-8. Налоговая эффективность по уступке прав требования по проблемным активам</fullName>
     <header>Приложение 4-8</header>

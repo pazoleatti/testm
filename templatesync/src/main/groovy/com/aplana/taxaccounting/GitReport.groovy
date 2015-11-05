@@ -26,10 +26,15 @@ class GitReport {
                         def scanResult = scanSrcFolderAndUpdateDb(versionsMap, folderName, checkOnly ? null : sql)
                         if (!scanResult.isEmpty()) {
                             tr {
-                                td(colspan: 10, class: 'hdr', Main.TAX_FOLDERS[folderName])
+                                td(colspan: 15, class: 'hdr', Main.TAX_FOLDERS[folderName])
                             }
                             tr {
                                 th 'type_id'
+                                th 'fixed_rows'
+                                th 'monthly'
+                                th 'comparative'
+                                th 'accruing'
+                                th 'updating'
                                 th 'Папка'
                                 th 'Название'
                                 th 'Версия git'
@@ -43,6 +48,11 @@ class GitReport {
                             scanResult.each { result ->
                                 tr {
                                     td result.id
+                                    td(class: (result.errorFixedRows ? 'td_error' : 'td_ok'), result.checkFixedRows)
+                                    td(class: (result.errorMonthly ? 'td_error' : 'td_ok'), result.checkMonthly)
+                                    td(class: (result.errorComparative ? 'td_error' : 'td_ok'), result.checkComparative)
+                                    td(class: (result.errorAccruing ? 'td_error' : 'td_ok'), result.checkAccruing)
+                                    td(class: (result.errorUpdating ? 'td_error' : 'td_ok'), result.checkUpdating)
                                     td {
                                         a(href: result.folderFull, result.folder)
                                     }
@@ -215,6 +225,11 @@ class GitReport {
                                 scanResult.add(result)
 
                                 def codeDB = versions[version]?.code ?: ""
+                                def fixed_rowsDB = versions[version]?.fixed_rows
+                                def monthlyDB = versions[version]?.monthly
+                                def comparativeDB = versions[version]?.comparative
+                                def accruingDB = versions[version]?.accruing
+                                def updatingDB = versions[version]?.updating
 
                                 // Сравнение скриптов
                                 def scriptFile = new File("$versionFolder/script.groovy")
@@ -301,6 +316,11 @@ class GitReport {
                                     def Map mapStylesXml = [:]
                                     def xml = new XmlSlurper().parseText(contentFile.getText())
                                     def codeXml = xml.header?.text() ?: xml.code?.text()
+                                    def fixed_rowsXml = convertTextToBooleanInteger(xml.fixedRows?.text())
+                                    def monthlyXml = convertTextToBooleanInteger(xml.monthly?.text())
+                                    def comparativeXml = convertTextToBooleanInteger(xml.comparative?.text())
+                                    def accruingXml = convertTextToBooleanInteger(xml.accruing?.text())
+                                    def updatingXml = convertTextToBooleanInteger(xml.updating?.text())
                                     if (codeDB != codeXml) {
                                         result.checkCode = "Значение в БД \"$codeDB\" отличается от значения в GIT \"$codeXml\""
                                         result.errorCode = true
@@ -308,6 +328,11 @@ class GitReport {
                                         result.checkCode = "Ok"
                                         result.errorCode = false
                                     }
+                                    compareDbXml(result, fixed_rowsDB, fixed_rowsXml, "checkFixedRows", "errorFixedRows")
+                                    compareDbXml(result, monthlyDB, monthlyXml, "checkMonthly", "errorMonthly")
+                                    compareDbXml(result, comparativeDB, comparativeXml, "checkComparative", "errorComparative")
+                                    compareDbXml(result, accruingDB, accruingXml, "checkAccruing", "errorAccruing")
+                                    compareDbXml(result, updatingDB, updatingXml, "checkUpdating", "errorUpdating")
                                     def stylesDb = versions[version]?.styles
                                     // Собираем все стили из xml
                                     for (def styleXml : xml.styles) {
@@ -397,6 +422,25 @@ class GitReport {
             }
         })
         return scanResult
+    }
+
+    static Integer convertTextToBooleanInteger(String value) {
+        switch (value) {
+            case "true" : return 1
+            case "false" : return 0
+            case null : return null
+        }
+        return null
+    }
+
+    static compareDbXml(def result, def dbValue, def xmlValue, def checkAlias, def errorAlias) {
+        if (dbValue != xmlValue) {
+            result[checkAlias] = "Значение в БД \"$dbValue\" отличается от значения в GIT \"$xmlValue\""
+            result[errorAlias] = (dbValue || xmlValue)
+        } else {
+            result[checkAlias] = "Ok"
+            result[errorAlias] = false
+        }
     }
 
     // Сравнение git-версии декларации с версией в БД и загрузка в случае отличий
@@ -639,7 +683,30 @@ class GitReport {
         XMLUnit.setIgnoreDiffBetweenTextAndCDATA(true)
         XMLUnit.setNormalizeWhitespace(true)
 
-        sql.eachRow("select id, type_id, to_char(version, 'RRRR') as version, name, header, data_rows, data_headers, script, status from form_template where status not in (-1, 2)") {
+        def sqlTemplate = { boolean comparativeExist, accruingExist, updatingExist ->
+            return "select id " +
+                    " ,type_id " +
+                    " ,to_char(version, 'RRRR') as version " +
+                    " ,name " +
+                    " ,header " +
+                    " ,data_rows " +
+                    " ,data_headers " +
+                    " ,script " +
+                    " ,status " +
+                    " ,fixed_rows " +
+                    " ,monthly " +
+                    (comparativeExist ? " ,comparative " : "") +
+                    (accruingExist ? " ,accruing " : "") +
+                    (updatingExist ? " ,updating " : "") +
+                    " from form_template where status not in (-1, 2)"
+        }
+        def tempMap = sql.firstRow("SELECT count(column_name) as result FROM user_tab_cols where table_name = 'FORM_TEMPLATE' and column_name = 'COMPARATIVE'")
+        boolean comparativeExist = (tempMap.result as Integer) == 1
+        tempMap = sql.firstRow("SELECT count(column_name) as result FROM user_tab_cols where table_name = 'FORM_TEMPLATE' and column_name = 'ACCRUING'")
+        boolean accruingExist = (tempMap.result as Integer) == 1
+        tempMap = sql.firstRow("SELECT count(column_name) as result FROM user_tab_cols where table_name = 'FORM_TEMPLATE' and column_name = 'UPDATING'")
+        boolean updatingExist = (tempMap.result as Integer) == 1
+        sql.eachRow(sqlTemplate(comparativeExist, accruingExist, updatingExist)) {
             def type_id = it.type_id as Integer
             if (map[type_id] == null) {
                 map.put((Integer) it.type_id, [:])
@@ -652,6 +719,11 @@ class GitReport {
             version.name = it.name
             version.code = it.header
             version.status = it.status
+            version.fixed_rows = it.fixed_rows as Integer
+            version.monthly = it.monthly as Integer
+            version.comparative = comparativeExist ? (it.comparative as Integer) : null
+            version.accruing = accruingExist ? (it.accruing as Integer) : null
+            version.updating = updatingExist ? (it.updating as Integer) : null
             version.script = it.script?.characterStream?.text
             try {
                 version.data_rows = it.data_rows ? XMLUnit.buildControlDocument(it.data_rows?.stringValue()?.replaceAll('stringValue=""', '')) : null

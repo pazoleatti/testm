@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <formTemplateContent>
     <fixedRows>true</fixedRows>
+    <monthly>false</monthly>
+    <comparative>false</comparative>
+    <accruing>true</accruing>
+    <updating>false</updating>
     <name>Приложение 4-10. Трансфертное ценообразование – сделки с взаимозависимыми лицами (ВЗЛ) и резидентами оффшорных зон (РОЗ)</name>
     <fullName>Приложение 4-10. Трансфертное ценообразование – сделки с взаимозависимыми лицами (ВЗЛ) и резидентами оффшорных зон (РОЗ)</fullName>
     <header>Приложение 4-10</header>

@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <formTemplateContent>
     <fixedRows>false</fixedRows>
+    <monthly>false</monthly>
+    <comparative>false</comparative>
+    <accruing>false</accruing>
+    <updating>false</updating>
     <name>Отчет о результатах исполнения мероприятий по контролю и управлению эффективной налоговой ставкой и налоговыми обязательствами</name>
     <fullName>Отчет о результатах исполнения мероприятий по контролю и управлению эффективной налоговой ставкой и налоговыми обязательствами</fullName>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="autoNumerationColumn">
