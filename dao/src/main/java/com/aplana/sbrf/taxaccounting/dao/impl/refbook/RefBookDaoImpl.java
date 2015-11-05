@@ -278,6 +278,10 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
                                                               String filter, RefBookAttribute sortAttribute, boolean isSortAscending) {
         PreparedStatementData ps = getRefBookSql(refBookId, null, null, version, sortAttribute, filter, pagingParams, isSortAscending);
         RefBook refBook = get(refBookId);
+        if (version == null) {
+            refBook.getAttributes().add(RefBook.getVersionFromAttribute());
+            refBook.getAttributes().add(RefBook.getVersionToAttribute());
+        }
         List<Map<String, RefBookValue>> records = getJdbcTemplate().query(ps.getQuery().toString(), ps.getParams().toArray(), new RefBookValueMapper(refBook));
         PagingResult<Map<String, RefBookValue>> result = new PagingResult<Map<String, RefBookValue>>(records);
         // Получение количества данных в справочнике
@@ -707,10 +711,6 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         ps.addParam(refBookId);
         ps.appendQuery(" and\n  frb.status <> -1\n");
 
-        if (version == null) {
-            ps.appendQuery("order by t.version\n");
-        }
-
         // обработка параметров фильтра
         if (filterPS.getQuery().length() > 0
                 && !filterPS.getQuery().toString().trim().equals("()")) {
@@ -720,6 +720,10 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             ps.appendQuery(")");
             ps.appendQuery("\n");
             ps.addParam(filterPS.getParams());
+        }
+
+        if (version == null) {
+            ps.appendQuery("order by t.version\n");
         }
         ps.appendQuery(")");
 
