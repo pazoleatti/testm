@@ -7,7 +7,6 @@ import com.aplana.sbrf.taxaccounting.dao.FormPerformerDao;
 import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DataRowDao;
 import com.aplana.sbrf.taxaccounting.dao.api.FormTypeDao;
-import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.api.TaxPeriodDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.model.*;
@@ -117,7 +116,7 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
                             formDataId}, new int[]{Types.NUMERIC, Types.NUMERIC, Types.NUMERIC},
                     new FormDataRowMapper());
         } catch (EmptyResultDataAccessException e) {
-            throw new DaoException("Записи в таблице FORM_DATA с id = " + formDataId + " не найдено");
+            throw new DaoException("Записи в таблице FORM_DATA с id = " + formDataId + " не найдена", e);
         }
     }
 
@@ -152,7 +151,6 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
         } else {
             formDataId = formData.getId();
         }
-
         return formDataId;
     }
 
@@ -185,7 +183,7 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
                     Long.class
             );
         } catch (DataAccessException e) {
-            throw new DaoException("Ошибка поиска НФ для заданного шаблона %d", formTemplateId);
+            throw new DaoException(String.format("Ошибка поиска НФ для заданного шаблона %d", formTemplateId), e);
         }
     }
 
@@ -220,12 +218,14 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
         } catch (IncorrectResultSizeDataAccessException e) {
             TaxPeriod taxPeriod = taxPeriodDao.get(taxPeriodId);
             throw new DaoException(
+					String.format(
                     "Для заданного сочетания параметров найдено несколько налоговых форм: вид \"%s\", тип \"%s\", подразделение \"%s\", налоговый период \"%s\", месяц \"%s\"",
                     formTypeDao.get(formTypeId).getName(),
                     kind.getTitle(),
                     departmentDao.getDepartment(departmentId).getName(),
                     taxPeriod.getYear(),
-                    periodOrder <= 12 && periodOrder >= 1 ? Formats.months[periodOrder] : periodOrder
+                    periodOrder <= 12 && periodOrder >= 1 ? Formats.months[periodOrder] : periodOrder),
+					e
             );
         }
     }
@@ -370,8 +370,7 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
     @Override
     public List<Long> getFormDataIds(List<TaxType> taxTypes, final List<Integer> departmentIds) {
         try {
-            HashMap<String, Object> values = new HashMap<String, Object>() {{
-            }};
+            HashMap<String, Object> values = new HashMap<String, Object>();
             String sql = "select fd.id from FORM_DATA fd left join FORM_TEMPLATE ft on fd.FORM_TEMPLATE_ID = ft.id " +
                     "join FORM_TYPE ftype on ft.TYPE_ID = ftype.ID, department_report_period drp " +
                     "where drp.id = fd.department_report_period_id and " +
@@ -490,7 +489,7 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
                     new Object[]{formTemplateId},
                     new FormDataRowMapper());
         } catch (EmptyResultDataAccessException e) {
-            throw new DaoException("Записи в таблице FORM_DATA с form_template_id = " + formTemplateId + " не найдены");
+            throw new DaoException("Записи в таблице FORM_DATA с form_template_id = " + formTemplateId + " не найдены", e);
         }
     }
 
@@ -589,7 +588,7 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 
     @Override
     public void updateManual(FormData formData) {
-        int manual = (formData.isManual() ? DataRowType.MANUAL.getCode() : DataRowType.AUTO.getCode());
+        int manual = formData.isManual() ? DataRowType.MANUAL.getCode() : DataRowType.AUTO.getCode();
         getJdbcTemplate().update("UPDATE form_data SET manual = ? WHERE id = ?", manual, formData.getId());
     }
 
@@ -675,18 +674,18 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
 
     @Override
     public void updateSorted(long formDataId, boolean isSorted) {
-        int sorted = (isSorted ? 1 : 0);
+        int sorted = isSorted ? 1 : 0;
         HashMap<String, Object> values = new HashMap<String, Object>();
         values.put("formDataId", formDataId);
         values.put("sorted", sorted);
-        getNamedParameterJdbcTemplate().update("UPDATE form_data SET sorted = :sorted WHERE id = :formDataId and not (sorted = :sorted) ", values);
+        getNamedParameterJdbcTemplate().update("UPDATE form_data SET sorted = :sorted WHERE id = :formDataId AND NOT (sorted = :sorted) ", values);
     }
 
     @Override
     public void backupSorted(long formDataId) {
         HashMap<String, Object> values = new HashMap<String, Object>();
         values.put("formDataId", formDataId);
-        getNamedParameterJdbcTemplate().update("UPDATE form_data SET sorted_backup = sorted WHERE id = :formDataId and not (sorted_backup = sorted) ", values);
+        getNamedParameterJdbcTemplate().update("UPDATE form_data SET sorted_backup = sorted WHERE id = :formDataId AND NOT (sorted_backup = sorted) ", values);
     }
 
     @Override

@@ -317,8 +317,10 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
             }
 
             getJdbcTemplate().batchUpdate(
-                    "DELETE FROM form_column WHERE alias = ? and form_template_id = ?",
+                    "DELETE FROM form_column WHERE alias = ? AND form_template_id = ?",
                     new BatchPreparedStatementSetter() {
+
+						Iterator<String> iterator = removedColumns.iterator();
 
                         @Override
                         public void setValues(PreparedStatement ps, int index) throws SQLException {
@@ -331,11 +333,8 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
                         public int getBatchSize() {
                             return removedColumns.size();
                         }
-
-                        Iterator<String> iterator = removedColumns.iterator();
                     }
             );
-
             return setIds;
         } catch (DataIntegrityViolationException e){
 			LOG.error("", e);
@@ -456,7 +455,7 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
         return updatedColumns;
     }
 
-    private static final String getAttributeId2Query = "SELECT DISTINCT attribute_id, attribute_id2 " +
+    private static final String GET_ATTRIBUTE_ID_2_QUERY = "SELECT DISTINCT attribute_id, attribute_id2 " +
 			" FROM form_column WHERE %s AND attribute_id2 IS NOT NULL AND attribute_id2 <> 0";
 
     @Override
@@ -474,7 +473,7 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
 			result.put(attributeId, new ArrayList<Long>());
 		}
         getJdbcTemplate().query(
-			String.format(getAttributeId2Query, SqlUtils.transformToSqlInStatement("attribute_id", attributeIds)),
+			String.format(GET_ATTRIBUTE_ID_2_QUERY, SqlUtils.transformToSqlInStatement("attribute_id", attributeIds)),
 			new RowCallbackHandler() {
 				@Override
 				public void processRow(ResultSet rs) throws SQLException {

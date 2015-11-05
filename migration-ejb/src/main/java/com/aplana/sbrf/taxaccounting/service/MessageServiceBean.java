@@ -11,7 +11,6 @@ import com.aplana.sbrf.taxaccounting.model.migration.Exemplar;
 import com.aplana.sbrf.taxaccounting.model.migration.MigrationSendResult;
 import com.aplana.sbrf.taxaccounting.model.migration.enums.NalogFormType;
 import com.aplana.sbrf.taxaccounting.model.migration.row.AbstractRnuRow;
-import com.aplana.sbrf.taxaccounting.model.util.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +26,7 @@ import javax.ejb.TransactionAttributeType;
 import javax.interceptor.Interceptors;
 import javax.jms.*;
 import javax.jms.Queue;
+import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 import java.io.ByteArrayInputStream;
@@ -153,7 +153,7 @@ public class MessageServiceBean implements MessageService {
 
 				LOG.debug("Stop forming file. ExemplarId = " + ex.getExemplarId() + ", Filename: " + filename);
             } catch (Exception e) {
-				LOG.error("Ошибка подготовки файла (ExemplarId = " + ex.getExemplarId() + ", Ошибка: " + e.getMessage());
+				LOG.error("Ошибка подготовки файла (ExemplarId = " + ex.getExemplarId() + ", Ошибка: " + e.getMessage(), e);
             }
         }
 
@@ -331,7 +331,7 @@ public class MessageServiceBean implements MessageService {
      * @param fileText
      * @param userInfo
      */
-    private void importRate(final String fileText, final TAUserInfo userInfo, int deliveryCount) throws Exception {
+    private void importRate(final String fileText, final TAUserInfo userInfo, int deliveryCount) throws ParserConfigurationException, SAXException {
         SAXParserFactory factory = SAXParserFactory.newInstance();
         SAXParser saxParser = factory.newSAXParser();
 
@@ -351,21 +351,21 @@ public class MessageServiceBean implements MessageService {
 
             @Override
             public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
-                if (qName.equalsIgnoreCase("SendRateRq")) {
+                if ("SendRateRq".equalsIgnoreCase(qName)) {
                     bSendRateRq = true;
-                } else if (qName.equalsIgnoreCase("OperName")) {
+                } else if ("OperName".equalsIgnoreCase(qName)) {
                     bOperName = true;
-                } else if (qName.equalsIgnoreCase("ExRateBlock")) {
+                } else if ("ExRateBlock".equalsIgnoreCase(qName)) {
                     bExRateBlock = true;
-                } else if (qName.equalsIgnoreCase("ExRateType")) {
+                } else if ("ExRateType".equalsIgnoreCase(qName)) {
                     bExRateType = true;
-                } else if (qName.equalsIgnoreCase("ExRateDetails")) {
+                } else if ("ExRateDetails".equalsIgnoreCase(qName)) {
                     bExRateDetails = true;
-                } else if (qName.equalsIgnoreCase("RateParamType")) {
+                } else if ("RateParamType".equalsIgnoreCase(qName)) {
                     bRateParamType = true;
-                } else if (qName.equalsIgnoreCase("Ccy")) {
+                } else if ("Ccy".equalsIgnoreCase(qName)) {
                     bCcy = true;
-                } else if (qName.equalsIgnoreCase("Code")) {
+                } else if ("Code".equalsIgnoreCase(qName)) {
                     bCode = true;
                 }
             }
@@ -390,10 +390,10 @@ public class MessageServiceBean implements MessageService {
                             throw new ServiceException(ERROR_RATE);
                         }
                         if (operName != null && (
-                                operName.equalsIgnoreCase("Currency")
-                                        && !exRateType.equalsIgnoreCase("PUBLIC-1")
-                                        || operName.equalsIgnoreCase("Metal")
-                                        && !exRateType.equalsIgnoreCase("PUBLIC-5"))) {
+								"Currency".equalsIgnoreCase(operName)
+                                        && !"PUBLIC-1".equalsIgnoreCase(exRateType)
+                                        || "Metal".equalsIgnoreCase(operName)
+                                        && !"PUBLIC-5".equalsIgnoreCase(exRateType))) {
                             throw new ServiceException(ERROR_FORMAT);
                         }
                     } else if (bExRateDetails && bRateParamType) {

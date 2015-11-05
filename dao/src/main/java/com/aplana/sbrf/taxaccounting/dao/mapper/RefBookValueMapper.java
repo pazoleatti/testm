@@ -19,38 +19,48 @@ import java.util.Map;
  */
 public class RefBookValueMapper implements RowMapper<Map<String, RefBookValue>> {
 
-    private final RefBook refBook;
+	/**
+	 * Справочник для которого был создан маппер
+	 */
+	private final RefBook refBook;
 
+	/**
+	 * Маппер создается привязанным к конкретному справочнику
+	 * @param refBook
+	 */
     public RefBookValueMapper(RefBook refBook) {
-        this.refBook = refBook;
+		this.refBook = refBook;
     }
+
     @Override
     public Map<String, RefBookValue> mapRow(ResultSet rs, int index) throws SQLException {
         Map<String, RefBookValue> result = new HashMap<String, RefBookValue>();
         result.put(RefBook.RECORD_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, SqlUtils.getLong(rs, RefBook.RECORD_ID_ALIAS)));
         for (RefBookAttribute attribute: refBook.getAttributes()) {
             Object value = null;
-            if (rs.getObject(attribute.getAlias()) != null) {
+			String alias = attribute.getAlias();
+			if (rs.getObject(alias) != null) {
                 switch (attribute.getAttributeType()) {
                     case STRING: {
-                        value = rs.getString(attribute.getAlias());
+                        value = rs.getString(alias);
                     }
                     break;
                     case NUMBER: {
-                        value = rs.getBigDecimal(attribute.getAlias()).setScale(attribute.getPrecision(), BigDecimal.ROUND_HALF_UP);
+                        value = rs.getBigDecimal(alias).setScale(attribute.getPrecision(), BigDecimal.ROUND_HALF_UP);
                     }
                     break;
                     case DATE: {
-                        value = rs.getDate(attribute.getAlias());
+                        value = rs.getDate(alias);
                     }
                     break;
                     case REFERENCE: {
-                        value = SqlUtils.getLong(rs,attribute.getAlias());
+                        value = SqlUtils.getLong(rs, alias);
                     }
                     break;
+					default:
                 }
             }
-            result.put(attribute.getAlias(), new RefBookValue(attribute.getAttributeType(), value));
+            result.put(alias, new RefBookValue(attribute.getAttributeType(), value));
         }
         return result;
     }

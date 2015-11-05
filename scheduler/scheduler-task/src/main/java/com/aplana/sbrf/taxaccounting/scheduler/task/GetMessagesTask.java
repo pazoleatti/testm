@@ -19,7 +19,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Задача для очистки BLOB_DATA по расписанию
+ * Задача для получения данных из КСШ по расписанию
  * @author dloshkarev
  */
 @Local(UserTaskLocal.class)
