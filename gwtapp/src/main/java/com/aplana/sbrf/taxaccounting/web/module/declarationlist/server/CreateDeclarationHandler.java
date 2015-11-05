@@ -130,7 +130,7 @@ public class CreateDeclarationHandler extends AbstractActionHandler<CreateDeclar
                     throw new ActionException(e);
                 }
             } finally {
-                if (logger.getEntries().size() != 0){
+                if (!logger.getEntries().isEmpty()){
                     result.setUuid(logEntryService.save(logger.getEntries()));
                 }
             }

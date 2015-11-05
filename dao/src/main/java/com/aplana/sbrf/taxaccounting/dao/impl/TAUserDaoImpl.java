@@ -207,7 +207,7 @@ public class TAUserDaoImpl extends AbstractDao implements TAUserDao {
 			throw new DaoException("Не удалось обновить метаинформацию о пользователе с login = " + user.getLogin() + "."
             + e.getLocalizedMessage());
 		}
-		if(user.getRoles().size() != 0)
+		if(!user.getRoles().isEmpty())
 			updateUserRoles(user);
 		
 	}

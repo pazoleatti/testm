@@ -238,7 +238,7 @@ public class RefBookMultiPickerView extends ViewWithUiHandlers<RefBookMultiPicke
     @Override
     public void clearSelected(boolean fireChangeEvent) {
         longList.clear();
-        if (selectionModel.getSelectedSet().size() != 0) {
+        if (!selectionModel.getSelectedSet().isEmpty()) {
             isEnabledFireChangeEvent = fireChangeEvent;
             selectionModel.clear();
         }

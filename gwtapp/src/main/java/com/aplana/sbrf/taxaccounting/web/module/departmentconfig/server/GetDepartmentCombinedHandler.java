@@ -111,7 +111,7 @@ public class GetDepartmentCombinedHandler extends AbstractActionHandler<GetDepar
         PagingResult<Map<String, RefBookValue>> params = provider.getRecords(
                 addDayToDate(calendarFrom.getTime(), -1), null, filter, null);
 
-        if (params.size() != 0) {
+        if (!params.isEmpty()) {
             Map<String, RefBookValue> paramsMap = params.get(0);
             if (params.size() != 1) {
                 String dt = new SimpleDateFormat("dd.MM.yyyy").format(calendarFrom.getTime());

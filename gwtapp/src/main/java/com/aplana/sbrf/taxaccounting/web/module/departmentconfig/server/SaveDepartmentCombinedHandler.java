@@ -194,7 +194,7 @@ public class SaveDepartmentCombinedHandler extends AbstractActionHandler<SaveDep
             // Поиск версий настроек для указанного подразделения. Если они есть - создаем новую версию с существующим record_id, иначе создаем новый record_id (по сути элемент справочника)
             String filter = DepartmentParamAliases.DEPARTMENT_ID.name() + " = " + action.getDepartmentCombined().getDepartmentId().get(0);
             List<Pair<Long, Long>> recordPairs = provider.checkRecordExistence(null, filter);
-            if (recordPairs.size() != 0) {
+            if (!recordPairs.isEmpty()) {
                 //Проверяем, к одному ли элементу относятся версии
                 Set<Long> recordIdSet = new HashSet<Long>();
                 for (Pair<Long, Long> pair : recordPairs) {
@@ -211,7 +211,7 @@ public class SaveDepartmentCombinedHandler extends AbstractActionHandler<SaveDep
 
             // Проверяем, нужно ли обновление существующих настроек
             recordPairs = provider.checkRecordExistence(period.getCalendarStartDate(), filter);
-            if (recordPairs.size() != 0) {
+            if (!recordPairs.isEmpty()) {
                 needEdit = true;
                 // Запись нашлась
                 if (recordPairs.size() != 1) {

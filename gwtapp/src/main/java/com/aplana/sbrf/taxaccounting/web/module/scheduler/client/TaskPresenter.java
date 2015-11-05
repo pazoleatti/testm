@@ -86,7 +86,7 @@ public class TaskPresenter extends Presenter<TaskPresenter.MyView,
         super.prepareFromRequest(request);
         LogCleanEvent.fire(this);
         LogShowEvent.fire(this, false);
-        editMode = request.getParameterNames().size() != 0;
+        editMode = !request.getParameterNames().isEmpty();
         getView().setMode(editMode);
 
         GetAvailableTasksAction initAction = new GetAvailableTasksAction();

@@ -278,7 +278,7 @@ public class RefBookHelperImpl implements RefBookHelper {
 
         // Поиск версий настроек для указанного подразделения. Если они есть - создаем новую версию с существующим record_id, иначе создаем новый record_id (по сути элемент справочника)
         List<Pair<Long, Long>> recordPairsExistence = provider.checkRecordExistence(null, filter);
-        if (recordPairsExistence.size() != 0) {
+        if (!recordPairsExistence.isEmpty()) {
             //Проверяем, к одному ли элементу относятся версии
             Set<Long> recordIdSet = new HashSet<Long>();
             for (Pair<Long, Long> pair : recordPairsExistence) {
@@ -295,7 +295,7 @@ public class RefBookHelperImpl implements RefBookHelper {
 
         // Проверяем, нужно ли обновление существующих настроек
         List<Pair<Long, Long>> recordPairs = provider.checkRecordExistence(rp.getCalendarStartDate(), filter);
-        if (recordPairs.size() != 0) {
+        if (!recordPairs.isEmpty()) {
             needEdit = true;
             // Запись нашлась
             if (recordPairs.size() != 1) {

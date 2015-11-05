@@ -296,7 +296,7 @@ public class FormTemplateRowView extends ViewWithUiHandlers<FormTemplateRowUiHan
 	@Override
 	public void setRowsData(List<DataRow<Cell>> rowsData) {
 		rows = rowsData;
-		if (rowsData.size() != 0) {
+		if (!rowsData.isEmpty()) {
 			formDataTable.setRowData(rowsData);
 			int i = 1;
 			for (DataRow<Cell> row : rowsData) {

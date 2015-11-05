@@ -78,7 +78,7 @@ public class DeleteFormSoursesHandler extends AbstractActionHandler<DeleteFormsS
             // приемники - декларации, источников деклараций у нас не существует
             List<DepartmentDeclarationType> declarationDestinations = departmentFormTypeService.getDeclarationDestinations(data.getDepartment().getId(), data.getFormTypeId().intValue(), data.getKind(), null, null);
             // если есть источники или назначения выводим ошибку
-            if (formsSources.size() != 0){
+            if (!formsSources.isEmpty()){
                 StringBuilder stringBuffer = new StringBuilder();
                 for (DepartmentFormType form: formsSources){
                     stringBuffer.append(getTaxFormErrorTextPart(form));
@@ -88,7 +88,7 @@ public class DeleteFormSoursesHandler extends AbstractActionHandler<DeleteFormsS
                         SOURCE_CANCEL_ERR + stringBuffer.delete(stringBuffer.length()-2, stringBuffer.length()).toString(),
                         data.getDepartment().getName(), data.getKind().getTitle(), data.getName(), "приемником для"
                 );
-            } else if (formsDestinations.size() != 0){
+            } else if (!formsDestinations.isEmpty()){
                 StringBuilder stringBuffer = new StringBuilder();
                 for (DepartmentFormType form: formsDestinations){
                     stringBuffer.append(getTaxFormErrorTextPart(form));
@@ -98,7 +98,7 @@ public class DeleteFormSoursesHandler extends AbstractActionHandler<DeleteFormsS
                         SOURCE_CANCEL_ERR + stringBuffer.delete(stringBuffer.length()-2, stringBuffer.length()).toString(),
                         data.getDepartment().getName(), data.getKind().getTitle(), data.getName(), "источником для"
                 );
-            } else if (declarationDestinations.size() != 0){
+            } else if (!declarationDestinations.isEmpty()){
                 StringBuilder stringBuffer = new StringBuilder();
                 for (DepartmentDeclarationType form: declarationDestinations){
                     stringBuffer.append(getTaxDeclarationErrorTextPart(form));

@@ -156,7 +156,7 @@ public class CreateFormDataHandler extends AbstractActionHandler<CreateFormData,
                     throw new ActionException(e);
                 }
             } finally {
-                if (logger.getEntries().size() != 0){
+                if (!logger.getEntries().isEmpty()){
                     result.setUuid(logEntryService.save(logger.getEntries()));
                 }
             }

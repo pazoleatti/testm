@@ -272,7 +272,7 @@ public class RefBookIncome102 implements RefBookDataProvider {
                 }
             }
         }
-        if (matchedRecords.size() != 0) {
+        if (!matchedRecords.isEmpty()) {
             return new ArrayList<String>(matchedRecords);
         }
 		// проверяем что новые записи не пересекаются с теми, что хранятся в бд

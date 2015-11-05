@@ -106,7 +106,7 @@ public class GetCheckDeclarationHandler extends AbstractActionHandler<GetCheckDe
         String filter = DepartmentParamAliases.DEPARTMENT_ID.name() + " = " + action.getDepartment();
         List<Pair<Long, Long>> recordPairs = provider.checkRecordExistence(period.getCalendarStartDate(), filter);
         Date dateStart = period.getCalendarStartDate(), dateEnd;
-        if (recordPairs.size() != 0) {
+        if (!recordPairs.isEmpty()) {
             //RefBookRecordVersion recordVersion = provider.getRecordVersionInfo(recordPairs.get(0).getFirst());
             dateEnd = provider.getRecordVersionInfo(recordPairs.get(0).getFirst()).getVersionEnd();
             List<ReportPeriod> reportPeriodList = reportService.getReportPeriodsByDate(action.getTaxType(), dateStart, dateEnd);

@@ -2859,7 +2859,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
                 }
                 allIn.addAll(in);
 
-                if (in.size() != 0) {
+                if (!in.isEmpty()) {
                     /** Проверяем пересекаются ли периоды ссылочных атрибутов с периодом текущей записи справочника */
                     String sql = String.format(CHECK_REFERENCE_VERSIONS_IN_PERIOD, tableName, tableName, transformToSqlInStatement("id", in));
                     Map<String, Object> params = new HashMap<String, Object>();
@@ -2885,7 +2885,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
                 throw new ServiceException("Обнаружено некорректное значение атрибута");
             }
 
-            if (allIn.size() != 0) {
+            if (!allIn.isEmpty()) {
                 /** Проверяем не начинается ли период актуальности ссылочного атрибута раньше чем период актуальности текущей записи справочника */
                 String sql = String.format(CHECK_REFERENCE_VERSIONS_START, tableName, transformToSqlInStatement("id", allIn));
                 getJdbcTemplate().query(sql, new RowCallbackHandler() {
