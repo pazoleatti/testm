@@ -96,10 +96,16 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
         void updateSendQuery(boolean isAvailable);
 
         /**
-         * Устанавливает версионный вид справочника.
+         * Устанавливает вид справочника когда мы переходим на список версий.
          * @param isVersion true - если переходим в версионное представление
          */
         void setVersionView(boolean isVersion);
+
+        /**
+         * Устанавливает вид справочника версионируемый вид справочника.
+         * @param isVersion true - версионируемый
+         */
+        void setIsVersion(boolean isVersioned);
     }
 
     @Inject
@@ -194,6 +200,7 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
                                     @Override
                                     public void onSuccess(CheckRefBookResult result) {
                                         editFormPresenter.init(refBookId, result.isVersioned());
+                                        getView().setIsVersion(result.isVersioned());
                                         registrations[0] = editFormPresenter.addClickHandlerForAllVersions(getClick());
                                         if (result.isAvailable()) {
                                             getView().resetSearchInputBox();

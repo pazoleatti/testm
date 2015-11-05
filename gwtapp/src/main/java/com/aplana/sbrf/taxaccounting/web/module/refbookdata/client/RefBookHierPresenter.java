@@ -179,6 +179,11 @@ public class RefBookHierPresenter extends Presenter<RefBookHierPresenter.MyView,
          * @param isVersion true - если переходим в версионное представление
          */
         void setVersionView(boolean isVersion);
+        /**
+         * Устанавливает вид справочника версионируемый вид справочника.
+         * @param isVersion true - версионируемый
+         */
+        void setIsVersion(boolean isVersioned);
     }
 
     @Override
