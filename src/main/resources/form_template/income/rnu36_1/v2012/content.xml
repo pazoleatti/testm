@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <formTemplateContent>
     <fixedRows>false</fixedRows>
+    <monthly>true</monthly>
+    <comparative>false</comparative>
+    <accruing>false</accruing>
+    <updating>false</updating>
     <name>(РНУ-36.1) Регистр налогового учёта начисленного процентного дохода по ГКО. Отчёт 1</name>
     <fullName>(РНУ-36.1) Регистр налогового учёта начисленного процентного дохода по ГКО. Отчёт 1</fullName>
     <header>1290-36.1</header>

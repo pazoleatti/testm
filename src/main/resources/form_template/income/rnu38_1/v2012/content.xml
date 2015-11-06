@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <formTemplateContent>
     <fixedRows>false</fixedRows>
+    <monthly>true</monthly>
+    <comparative>false</comparative>
+    <accruing>false</accruing>
+    <updating>false</updating>
     <name>(РНУ-38.1) Регистр налогового учёта начисленного процентного дохода по ОФЗ, по которым открыта короткая
         позиция. Отчёт 1
     </name>

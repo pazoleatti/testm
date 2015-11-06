@@ -15,6 +15,8 @@
     </row>
     <row alias="">
         <cell alias="fix" colSpan="1" rowSpan="1" value=""/>
+        <cell alias="rowNum" colSpan="1" rowSpan="1"/>
+        <cell alias="department" colSpan="1" rowSpan="1"/>
         <cell alias="comparePeriod" colSpan="1" rowSpan="1" value="НДС всего, тыс. руб."/>
         <cell alias="comparePeriodIgnore" colSpan="1" rowSpan="1" value="В том числе НДС не учитываемый, тыс. руб."/>
         <cell alias="comparePeriodPercent" colSpan="1" rowSpan="1" value="Доля НДС не учитываемый, %"/>
@@ -27,6 +29,8 @@
     </row>
     <row alias="">
         <cell alias="fix" colSpan="1" rowSpan="1" value=""/>
+        <cell alias="rowNum" colSpan="1" rowSpan="1"/>
+        <cell alias="department" colSpan="1" rowSpan="1"/>
         <cell alias="comparePeriod" colSpan="1" rowSpan="1" value="символ формы 102 (26411.01+26411.02+26411.11+27203.01+27203.02)"/>
         <cell alias="comparePeriodIgnore" colSpan="1" rowSpan="1" value="символ формы 102 (26411.02+26411.11+27203.02)"/>
         <cell alias="comparePeriodPercent" colSpan="1" rowSpan="1" value="(гр.4/гр.3)*100"/>

@@ -1188,7 +1188,11 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                                         manualMenuPresenter.updateNotificationCount();
                                     }
                                 }
-                                if (isForce || isUpdate || !result.getFormMode().equals(formMode) || result.getLockInfo().isEditMode() != lockEditMode || (taskName != null && !taskName.equals(result.getTaskName()) || taskName == null && result.getTaskName() != null))
+                                if (isForce || isUpdate || !result.getFormMode().equals(formMode) || result.getLockInfo().isEditMode() != lockEditMode || (taskName != null && !taskName.equals(result.getTaskName()) || taskName == null && result.getTaskName() != null)) {
+                                    edited = result.isEdited();
+                                    taskName = result.getTaskName();
+                                    lockEditMode = result.getLockInfo().isEditMode();
+                                    formMode = result.getFormMode();
                                     switch (result.getFormMode()) {
                                         case EDIT:
                                             if (readOnlyMode) {
@@ -1223,10 +1227,12 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                                             onTimerReport(ReportType.CSV, false);
                                             break;
                                     }
-                                edited = result.isEdited();
-                                taskName = result.getTaskName();
-                                lockEditMode = result.getLockInfo().isEditMode();
-                                formMode = result.getFormMode();
+                                } else {
+                                    edited = result.isEdited();
+                                    taskName = result.getTaskName();
+                                    lockEditMode = result.getLockInfo().isEditMode();
+                                    formMode = result.getFormMode();
+                                }
                             }
 
                             @Override
