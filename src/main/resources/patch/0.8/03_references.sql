@@ -148,11 +148,11 @@ INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) V
 INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (5101, 510, 'Код статуса по НДС', 		'CODE', 2, 1, null, null, 1, 0, 	5, 1, 1, 1, 	null, 0, 1);
 INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (5102, 510, 'Описание', 					'NAME', 1, 2, null, null, 1, null, 	20, 1, 0, null, null, 0, 256);
 
-insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 1, 510, to_date('01.01.2008', 'DD.MM.YYYY'), 0);	
+insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 1, 510, to_date('01.01.1970', 'DD.MM.YYYY'), 0);	
 	insert into ref_book_value (record_id, attribute_id, number_value) values (seq_ref_book_record.currval, 5101, 1);	
 	insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 5102, 'Организация, не признаваемая не признаваемая налогоплательщиком по НДС, или организация, освобожденная от обязанностей налогоплательщика');
 	
-insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 2, 510, to_date('01.01.2008', 'DD.MM.YYYY'), 0);	
+insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 2, 510, to_date('01.01.1970', 'DD.MM.YYYY'), 0);	
 	insert into ref_book_value (record_id, attribute_id, number_value) values (seq_ref_book_record.currval, 5101, 2);	
 	insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 5102, 'Прочие организации');
 
