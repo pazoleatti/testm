@@ -506,6 +506,7 @@ void consolidation() {
             row[column] = null
         }
     }
+    // считаем сумму в тысячах для точности
     for (formDataSource in departmentFormTypeService.getFormSources(formData.departmentId, formData.getFormType().getId(), formData.getKind(),
             getStartDate(formData.reportPeriodId), getEndDate(formData.reportPeriodId))) {
         if (formDataSource.formTypeId == formData.getFormType().getId()) {
@@ -515,13 +516,23 @@ void consolidation() {
                 // суммируем 4, 5-ую графу из источников
                 dataRows.each { row ->
                     def sourceRow = getDataRow(sourceRows, row.getAlias())
-                    check102Columns.each { column ->
-                        row[column] = (row[column] ?: 0) + (sourceRow[column] ?: 0)
+                    check102Columns.each { column -> // суммируем в тысячах
+                        row[column] = (row[column] ?: BigDecimal.ZERO) + ((formDataSource.departmentId == 1) ? 1000 : 1) * (sourceRow[column] ?: BigDecimal.ZERO)
                     }
                 }
             }
         }
     }
+    if (isBank()) { // если уровень банка, то тысячи понижаем до миллионов
+        dataRows.each { row ->
+            check102Columns.each { column ->
+                if (row[column]) {
+                    row[column] = (row[column] as BigDecimal).divide(BigDecimal.valueOf(1000), BigDecimal.ROUND_HALF_UP)
+                }
+            }
+        }
+    }
+
 }
 
 @Field
