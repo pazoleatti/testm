@@ -727,5 +727,9 @@ insert into ref_book_attribute(id, ref_book_id, name, alias, type, ord, referenc
 --http://jira.aplana.com/browse/SBRFACCTAX-13084
 update ref_book set is_versioned = 0 where id in (510, 511);
 
+----------------------------------------------------------------------------------------------------------------
+--http://jira.aplana.com/browse/SBRFACCTAX-13264: Атрибут Код в неверсионируемый справочник Виды НФ
+INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (931,93,'Код','CODE',1,0,null,null,1,null,10,1,0,0,null,0,600);
+
 COMMIT;
 EXIT;

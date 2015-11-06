@@ -518,6 +518,7 @@ INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, referen
 INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (833,92,'Код конверсионной сделки','CODE',2,1,null,null,1,0,10,1,1,null,null,0,1);
 INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (834,92,'Название конверсионной сделки','NAME',1,2,null,null,1,null,50,0,2,null,null,0,255);
 
+INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (931,93,'Код','CODE',1,0,null,null,1,null,10,1,0,0,null,0,600);
 INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (835,93,'Наименование','NAME',1,1,null,null,1,null,50,1,0,0,null,0,2000);
 INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (836,93,'Вид налога','TAX_TYPE',1,2,null,null,1,null,10,1,0,null,null,0,2000);
 
