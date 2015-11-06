@@ -1,5 +1,5 @@
 --http://jira.aplana.com/browse/SBRFACCTAX-12614: 0.8 Добавить новые поля в FORM_DATA
-alter table form_data add sorted_backup number(1) default 0 not null, edited number(1) default 0 not null;
+alter table form_data add (sorted_backup number(1) default 0 not null, edited number(1) default 0 not null);
 comment on column form_data.sorted_backup is 'Статус актуальности сортировки НФ для резервного среза (0 - Сортировка неактуальна; 1 - Сортировка актуальна)';
 comment on column form_data.edited is 'Признак изменения данных НФ в режиме редактирования (0 - Нет изменений; 1 - Есть изменения)';
 
@@ -71,9 +71,6 @@ alter table color add constraint color_unq_rgb unique (r,g,b);
 alter table color add constraint color_unq_hex unique (hex);
 alter table color add constraint color_chk_rgb_limits check ((r between 0 and 255) and (g between 0 and 255) and (b between 0 and 255));
 
-alter table form_style add constraint form_style_fk_font_color foreign key(font_color) references color(id);
-alter table form_style add constraint form_style_fk_back_color foreign key(back_color) references color(id);
-
 insert all
 	into color values (0,  'Черный',          0,  0,  0,  '#000000')
 	into color values (4,  'Белый',          255, 255, 255, '#FFFFFF')
@@ -90,6 +87,9 @@ insert all
 	into color values (12,	'Светло-зеленый',			152, 251, 152,	'#98FB98')
 	into color values (13,	'Темно-зеленый',			0,	108, 0,	'#006C00')
 select * from dual;	
+
+alter table form_style add constraint form_style_fk_font_color foreign key(font_color) references color(id);
+alter table form_style add constraint form_style_fk_back_color foreign key(back_color) references color(id);
 
 INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id, table_name, is_versioned) VALUES (1,'Цвета',1,0,1,null, 'COLOR', 0);
 
