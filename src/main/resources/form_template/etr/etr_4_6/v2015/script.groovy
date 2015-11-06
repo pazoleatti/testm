@@ -229,7 +229,7 @@ void logicCheck() {
         def tempRow = tempRows[i]
         def checkColumns = []
         // делаем проверку для первичных НФ или расчетных ячеек
-        if ((formData.kind == FormDataKind.PRIMARY) || !opuMap.keySet().contains(row.getAlias())) {
+        if ((formData.kind != FormDataKind.CONSOLIDATED) || !opuMap.keySet().contains(row.getAlias())) {
             checkColumns += check102Columns
         }
         checkColumns += checkCalcColumns
@@ -246,7 +246,7 @@ void calcValues(def dataRows, def sourceRows, boolean isCalc) {
         def rowSource = getDataRow(sourceRows, row.getAlias())
         switch (row.getAlias()) {
             case 'R1':
-                if (formData.kind == FormDataKind.PRIMARY) {
+                if (formData.kind != FormDataKind.CONSOLIDATED) {
                     allFoundFlag = true
                     row.comparePeriod = calcBO(rowSource, getComparativePeriodId())
                     row.currentPeriod = calcBO(rowSource, formData.reportPeriodId)
@@ -256,7 +256,7 @@ void calcValues(def dataRows, def sourceRows, boolean isCalc) {
                 }
                 break
             case 'R2':
-                if (formData.kind == FormDataKind.PRIMARY) {
+                if (formData.kind != FormDataKind.CONSOLIDATED) {
                     allFoundFlag = true
                     row.comparePeriod = calcBO(rowSource, getComparativePeriodId()) + getSourceValue(getComparativePeriodId(), row, 'comparePeriod', isCalc)
                     row.currentPeriod = calcBO(rowSource, formData.reportPeriodId) + getSourceValue(formData.reportPeriodId, row, 'currentPeriod', isCalc)
@@ -320,7 +320,7 @@ def getSourceValue(def periodId, def row, def alias, def isCalc) {
             if (isCalc) { // выводить только при расчете
                 // 4. Проверка наличия принятой источника «Величины налоговых платежей, вводимые вручную» (предрасчетные проверки)
                 logger.warn("Не найдена форма-источник «Величины налоговых платежей, вводимые вручную» в статусе «Принята»: Тип: \"%s/%s\", Период: \"%s %s\", Подразделение: \"%s\". Ячейки по графе «%s», заполняемые из данной формы, будут заполнены нулевым значением.",
-                        FormDataKind.CONSOLIDATED.name, FormDataKind.PRIMARY.name, getPeriodName(order), reportPeriod.getTaxPeriod().getYear(), departmentService.get(formData.departmentId)?.name, getColumnName(row, alias))
+                        FormDataKind.CONSOLIDATED.title, FormDataKind.PRIMARY.title, getPeriodName(order), reportPeriod.getTaxPeriod().getYear(), departmentService.get(formData.departmentId)?.name, getColumnName(row, alias))
             }
         }
         periods.each { period ->
@@ -336,7 +336,7 @@ def getSourceValue(def periodId, def row, def alias, def isCalc) {
                 if (isCalc) { // выводить только при расчете
                     // 4. Проверка наличия принятой источника «Величины налоговых платежей, вводимые вручную» (предрасчетные проверки)
                     logger.warn("Не найдена форма-источник «Величины налоговых платежей, вводимые вручную» в статусе «Принята»: Тип: \"%s/%s\", Период: \"%s %s\", Подразделение: \"%s\". Ячейки по графе «%s», заполняемые из данной формы, будут заполнены нулевым значением.",
-                            FormDataKind.CONSOLIDATED.name, FormDataKind.PRIMARY.name, period.getName(), period.getTaxPeriod().getYear(), departmentService.get(formData.departmentId)?.name, getColumnName(row, alias))
+                            FormDataKind.CONSOLIDATED.title, FormDataKind.PRIMARY.title, period.getName(), period.getTaxPeriod().getYear(), departmentService.get(formData.departmentId)?.name, getColumnName(row, alias))
                 }
             }
         }

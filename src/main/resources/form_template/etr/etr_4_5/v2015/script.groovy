@@ -214,7 +214,7 @@ void calcValues(def dataRows, def sourceRows, boolean isCalc) {
     def row3Source = getDataRow(sourceRows, "R3")
 
     // графа 3, 4
-    if (formData.kind == FormDataKind.PRIMARY) {
+    if (formData.kind != FormDataKind.CONSOLIDATED) {
         // графа 3 строки 1
         row1.comparePeriod = calcBO(row1Source, getComparativePeriodId())
         // графа 4 строки 1
@@ -319,7 +319,7 @@ def getSourceValue(def periodId, def row, def alias, def isCalc) {
             if (isCalc) { // выводить только при расчете
                 // 4. Проверка наличия принятой источника «Величины налоговых платежей, вводимые вручную» (предрасчетные проверки)
                 logger.warn("Не найдена форма-источник «Величины налоговых платежей, вводимые вручную» в статусе «Принята»: Тип: \"%s/%s\", Период: \"%s %s\", Подразделение: \"%s\". Ячейки по графе «%s», заполняемые из данной формы, будут заполнены нулевым значением.",
-                        FormDataKind.CONSOLIDATED.name, FormDataKind.PRIMARY.name, getPeriodName(order), reportPeriod.getTaxPeriod().getYear(), departmentService.get(formData.departmentId)?.name, getColumnName(row, alias))
+                        FormDataKind.CONSOLIDATED.title, FormDataKind.PRIMARY.title, getPeriodName(order), reportPeriod.getTaxPeriod().getYear(), departmentService.get(formData.departmentId)?.name, getColumnName(row, alias))
             }
         }
         periods.each { period ->
@@ -335,7 +335,7 @@ def getSourceValue(def periodId, def row, def alias, def isCalc) {
                 if (isCalc) { // выводить только при расчете
                     // 4. Проверка наличия принятой источника «Величины налоговых платежей, вводимые вручную» (предрасчетные проверки)
                     logger.warn("Не найдена форма-источник «Величины налоговых платежей, вводимые вручную» в статусе «Принята»: Тип: \"%s/%s\", Период: \"%s %s\", Подразделение: \"%s\". Ячейки по графе «%s», заполняемые из данной формы, будут заполнены нулевым значением.",
-                            FormDataKind.CONSOLIDATED.name, FormDataKind.PRIMARY.name, period.getName(), period.getTaxPeriod().getYear(), departmentService.get(formData.departmentId)?.name, getColumnName(row, alias))
+                            FormDataKind.CONSOLIDATED.title, FormDataKind.PRIMARY.title, period.getName(), period.getTaxPeriod().getYear(), departmentService.get(formData.departmentId)?.name, getColumnName(row, alias))
                 }
             }
         }
