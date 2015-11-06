@@ -716,10 +716,11 @@ public class FormTemplateDaoImpl extends AbstractDao implements FormTemplateDao 
         }
     }*/
 
+    private static final String COUNT_EXIST_LARGE_STRING = "SELECT COUNT(*) FROM form_data_%d WHERE length(c%d) > ?";
 	@Override
 	public boolean checkExistLargeString(Integer formTemplateId, Integer columnId, int maxLength) {
         return getJdbcTemplate().queryForObject(
-                ("SELECT COUNT(*) FROM form_data_" + formTemplateId + " WHERE length(c" + columnId + ") > ?").intern(),
+                String.format(COUNT_EXIST_LARGE_STRING, formTemplateId, columnId),
                 new Object[]{maxLength},
                 new int[]{Types.INTEGER},
                 Integer.class) > 0;
