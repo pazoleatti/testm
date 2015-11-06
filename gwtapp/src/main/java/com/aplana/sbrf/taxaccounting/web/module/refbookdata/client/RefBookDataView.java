@@ -3,7 +3,6 @@ package com.aplana.sbrf.taxaccounting.web.module.refbookdata.client;
 import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.gwt.client.dialog.DialogHandler;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.FormMode;
-import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.HorizontalAlignment;
 import com.aplana.sbrf.taxaccounting.web.widget.datepicker.DateMaskBoxPicker;
 import com.aplana.sbrf.taxaccounting.web.widget.style.LinkAnchor;
 import com.aplana.sbrf.taxaccounting.web.widget.style.LinkButton;
@@ -44,7 +43,7 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
     @UiField
     LinkButton sendQuery;
 
-    private boolean isVersion;
+    private boolean isVersion, isVersioned;
 
 	@Inject
 	public RefBookDataView(final Binder uiBinder) {
@@ -227,12 +226,20 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
         backAnchor.setVisible(!isVersion);
         backToRefBookAnchor.setVisible(isVersion);
         backToRefBookAnchor.setText(titleDesc.getText());
-        relevanceDate.setVisible(!isVersion);
-        relevanceDateLabel.setVisible(!isVersion);
+        relevanceDate.setVisible(!isVersion&&isVersioned);
+        relevanceDateLabel.setVisible(!isVersion&&isVersioned);
         separator.setVisible(!isVersion);
         search.setVisible(!isVersion);
-        separator1.setVisible(!isVersion);
+        separator1.setVisible(!isVersion&&isVersioned);
         cancelEdit.setVisible(!isVersion);
+    }
+
+    @Override
+    public void setIsVersion(boolean isVersioned) {
+        this.isVersioned = isVersioned;
+        relevanceDate.setVisible(isVersioned);
+        relevanceDateLabel.setVisible(isVersioned);
+        separator1.setVisible(isVersioned);
     }
 
     @Override

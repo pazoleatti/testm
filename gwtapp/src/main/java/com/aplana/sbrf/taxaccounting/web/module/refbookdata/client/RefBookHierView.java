@@ -68,7 +68,7 @@ public class RefBookHierView extends ViewWithUiHandlers<RefBookHierUIHandlers> i
     @UiField
     LinkAnchor backAnchor;
 
-    private boolean isVersion;
+    private boolean isVersion, isVersioned;
 
     @Override
     public void clearFilterInputBox() {
@@ -275,12 +275,20 @@ public class RefBookHierView extends ViewWithUiHandlers<RefBookHierUIHandlers> i
         backAnchor.setVisible(!isVersion);
         backToRefBookAnchor.setVisible(isVersion);
         backToRefBookAnchor.setText(titleDesc.getText());
-        relevanceDate.setVisible(!isVersion);
-        relevanceDateLabel.setVisible(!isVersion);
+        relevanceDate.setVisible(!isVersion&&isVersioned);
+        relevanceDateLabel.setVisible(!isVersion&&isVersioned);
         separator.setVisible(!isVersion);
         search.setVisible(!isVersion);
-        separatorVersion.setVisible(!isVersion);
+        separatorVersion.setVisible(!isVersion&&isVersioned);
         cancelEdit.setVisible(!isVersion);
+    }
+
+    @Override
+    public void setIsVersion(boolean isVersioned) {
+        this.isVersioned = isVersioned;
+        relevanceDate.setVisible(isVersioned);
+        relevanceDateLabel.setVisible(isVersioned);
+        separatorVersion.setVisible(isVersioned);
     }
 
 }

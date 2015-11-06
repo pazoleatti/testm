@@ -278,6 +278,10 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
                                                               String filter, RefBookAttribute sortAttribute, boolean isSortAscending) {
         PreparedStatementData ps = getRefBookSql(refBookId, null, null, version, sortAttribute, filter, pagingParams, isSortAscending);
         RefBook refBook = get(refBookId);
+        if (version == null) {
+            refBook.getAttributes().add(RefBook.getVersionFromAttribute());
+            refBook.getAttributes().add(RefBook.getVersionToAttribute());
+        }
         List<Map<String, RefBookValue>> records = getJdbcTemplate().query(ps.getQuery().toString(), ps.getParams().toArray(), new RefBookValueMapper(refBook));
         PagingResult<Map<String, RefBookValue>> result = new PagingResult<Map<String, RefBookValue>>(records);
         // Получение количества данных в справочнике
@@ -564,6 +568,10 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
                     "group by\n" +
                     "  record_id)\n";
 
+    private static final String RECORD_VERSIONS_ALL =
+            "with recordsByVersion as (select r.ID, r.RECORD_ID, r.REF_BOOK_ID, r.VERSION, r.STATUS, row_number() over(partition by r.RECORD_ID order by r.version) rn from REF_BOOK_RECORD r where r.ref_book_id = %d), \n" +
+                    "t as (select rv.ID, rv.RECORD_ID RECORD_ID, rv.VERSION version, rv2.version - interval '1' day versionEnd from recordsByVersion rv left outer join recordsByVersion rv2 on rv.RECORD_ID = rv2.RECORD_ID and rv.rn+1 = rv2.rn where rv.status=?)\n";
+
     private static final String RECORD_VERSIONS_STATEMENT_BY_ID =
             "with currentRecord as (select id, record_id, version from REF_BOOK_RECORD where id=%d),\n" +
                     "recordsByVersion as (select r.ID, r.RECORD_ID, r.REF_BOOK_ID, r.VERSION, r.STATUS, row_number() over(partition by r.RECORD_ID order by r.version) rn from REF_BOOK_RECORD r, currentRecord cr where r.REF_BOOK_ID=%d and r.RECORD_ID=cr.RECORD_ID), \n" +
@@ -617,10 +625,13 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
                 //Ищем все версии по уникальному идентификатору
                 ps.appendQuery(String.format(RECORD_VERSIONS_STATEMENT_BY_ID, uniqueRecordId, refBookId));
                 ps.addParam(VersionedObjectStatus.NORMAL.getId());
-            }
-            if (recordId != null){
+            } else if (recordId != null){
                 //Ищем все версии в группе версий
                 ps.appendQuery(String.format(RECORD_VERSIONS_STATEMENT_BY_RECORD_ID, recordId, refBookId));
+                ps.addParam(VersionedObjectStatus.NORMAL.getId());
+            } else {
+                //Ищем вообще все версии
+                ps.appendQuery(String.format(RECORD_VERSIONS_ALL, refBookId));
                 ps.addParam(VersionedObjectStatus.NORMAL.getId());
             }
         }
@@ -700,10 +711,6 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         ps.addParam(refBookId);
         ps.appendQuery(" and\n  frb.status <> -1\n");
 
-        if (version == null) {
-            ps.appendQuery("order by t.version\n");
-        }
-
         // обработка параметров фильтра
         if (filterPS.getQuery().length() > 0
                 && !filterPS.getQuery().toString().trim().equals("()")) {
@@ -713,6 +720,10 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             ps.appendQuery(")");
             ps.appendQuery("\n");
             ps.addParam(filterPS.getParams());
+        }
+
+        if (version == null) {
+            ps.appendQuery("order by t.version\n");
         }
         ps.appendQuery(")");
 

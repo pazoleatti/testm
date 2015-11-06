@@ -35,15 +35,24 @@ void save() {
             } else {
                 filter += " or (MAX_VALUE is null or MAX_VALUE > $minValue or MAX_VALUE = $minValue))"
             }
-            def records = refDataProvider.getRecords(validDateFrom, null, filter, null)
-            if (records && records.size() > 0 && (records.get(0).get(RefBook.RECORD_ID_ALIAS).numberValue != uniqueRecordId || records.size() > 1)) {
-                logger.error("Для указанных условий в системе уже существует правило назначения  категории!")
+            def records = refDataProvider.getRecords(null, null, filter, null)
+            for(def record: records) {
+                if (record.get(RefBook.RECORD_ID_ALIAS).numberValue == uniqueRecordId)
+                    continue
+                Date fromDate = record.get(RefBook.RECORD_VERSION_FROM_ALIAS).getDateValue()
+                Date toDate = record.get(RefBook.RECORD_VERSION_TO_ALIAS)?.getDateValue()
+                if ((validDateTo == null || fromDate.compareTo(validDateTo) <= 0) &&
+                        (toDate == null || toDate.compareTo(validDateFrom) >= 0 )) {
+                    logger.error("Для указанных условий в системе уже существует правило назначения категории!")
+                    break
+                }
+
             }
         }
 
-        // 8. Проверка правильности заполнения полей «Дата наступления основания для включения в список» и «Дата наступления основания для исключении из списка»
+        // 2. Проверка правильности заполнения полей «Дата наступления основания для включения в список» и «Дата наступления основания для исключении из списка»
         if (minValue != null && maxValue != null && minValue > maxValue) {
-            logger.error("Поле «Максимальный объем доходов  и расходов» должно быть больше либо равно полю «Минимальный объем доходов и расходов»!")
+            logger.error("Поле «Максимальный объем доходов и расходов» должно быть больше либо равно полю «Минимальный объем доходов и расходов»!")
         }
     }
 }
