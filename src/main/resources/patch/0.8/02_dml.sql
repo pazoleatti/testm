@@ -1,6 +1,6 @@
 update ref_book_attribute set is_unique = 1 where id in (3305,3304);
 
---http://jira.aplana.com/browse/SBRFACCTAX-11881: Удаление всех текущих блокировок
+--http://jira.aplana.com/browse/SBRFACCTAX-13269: Удаление всех текущих блокировок
 delete from lock_data;
 
 --http://jira.aplana.com/browse/SBRFACCTAX-12605: 0.8 Реализовать возможность создания форм типа "Расчетная"
