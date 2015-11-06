@@ -80,7 +80,7 @@ public class App_6_2Test extends ScriptTestBase {
         dataRows.add(row);
 
         testHelper.execute(FormDataEvent.CHECK);
-
+        printLog();
         List<LogEntry> entries = testHelper.getLogger().getEntries();
         int i = 0;
         Assert.assertEquals("Строка 1: Графа «Полное наименование юридического лица с указанием ОПФ» не заполнена!", entries.get(i++).getMessage());
@@ -92,7 +92,7 @@ public class App_6_2Test extends ScriptTestBase {
         Assert.assertEquals("Строка 1: Графа «Сумма доходов Банка по данным бухгалтерского учета, руб.» не заполнена!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Графа «Дата совершения сделки» не заполнена!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Графы «Цена (тариф) за единицу измерения без учета НДС, акцизов и пошлины, руб.», «Итого стоимость без учета НДС, акцизов и пошлин, руб.»: выполнение расчета невозможно, так как не заполнена используемая в расчете графа «Сумма доходов Банка по данным бухгалтерского учета, руб.»!", entries.get(i++).getMessage());
-        Assert.assertEquals("Группа строк «ЮЛ не задано» не имеет строки подитога!", entries.get(i++).getMessage());
+        Assert.assertEquals("Группа «ЮЛ не задано» не имеет строки подитога!", entries.get(i++).getMessage());
         Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
         testHelper.getLogger().clear();
 
@@ -128,7 +128,7 @@ public class App_6_2Test extends ScriptTestBase {
         Assert.assertEquals("Строка 1: Год, указанный по графе «Дата совершения сделки» (2989), должен относиться к календарному году текущей формы (2014)!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Значение даты атрибута «Дата договора» должно принимать значение из следующего диапазона: 01.01.1900 - 31.12.2099", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Значение графы «Сумма доходов Банка по данным бухгалтерского учета, руб.» должно быть больше значения «0»!", entries.get(i++).getMessage());
-        Assert.assertEquals("Группа строк «A» не имеет строки подитога!", entries.get(i++).getMessage());
+        Assert.assertEquals("Группа «A» не имеет строки подитога!", entries.get(i++).getMessage());
         Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
         testHelper.getLogger().clear();
 
@@ -148,7 +148,7 @@ public class App_6_2Test extends ScriptTestBase {
         dataRows.add(subTotalRow);
         subTotalRow.setAlias("itg#1");
         subTotalRow.setIndex(2);
-        subTotalRow.getCell("fix").setValue("Итого A", null);
+        subTotalRow.getCell("fix").setValue("Итого по «A»", null);
         subTotalRow.getCell("sum").setValue(3, null);
 
         testHelper.execute(FormDataEvent.CHECK);
