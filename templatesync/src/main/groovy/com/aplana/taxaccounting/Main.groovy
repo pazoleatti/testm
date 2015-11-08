@@ -121,6 +121,7 @@ class Main {
                     'guarantees'             : 388, // Предоставление гарантий
                     'guarantees_involvement' : 401, // Привлечение гарантий
                     'interbank_credits'      : 389, // Предоставление межбанковских кредитов
+                    'journal_settlements'    : 807, // Журнал взаиморасчетов
                     'letter_of_credit'       : 386, // Предоставление инструментов торгового финансирования и непокрытых аккредитивов
                     'nondeliverable'         : 392, // Беспоставочные срочные сделки
                     'notification'           : -6,
@@ -319,6 +320,7 @@ class Main {
             'jur_persons' : 520,
             'jur_persons_terms' : 515,
             'metal_rate' : 90,
+            'offshore' : 519,
             'okato' : 3,
             'okei' : 12,
             'organization' : 9,
