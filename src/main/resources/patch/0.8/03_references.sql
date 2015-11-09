@@ -521,183 +521,368 @@ INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, referen
 INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (5197, 519, 'Краткое наименование государства, в состав которого входит оффшорная зона',  'OFFSHORE_NAME', 4, 7, 10, 53, 1, null,  15, 0, 0, null,     null, 1, null);
 INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (5198, 519, 'Справочная информация',    'COMMENT',   1,  8,  null,null,1,null,  30,  0,  0,null,    null, 0, 256);
 
-insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 1, 519, to_date('01.01.2012', 'DD.MM.YYYY'), 0);
-	 insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5191, record_id from ref_book_value where attribute_id = 50 and string_value = '660';
-				
-insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 2, 519, to_date('01.01.2012', 'DD.MM.YYYY'), 0);
-	 insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5191, record_id from ref_book_value where attribute_id = 50 and string_value = '020';
-				
-insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 3, 519, to_date('01.01.2012', 'DD.MM.YYYY'), 0);
-	 insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5191, record_id from ref_book_value where attribute_id = 50 and string_value = '028';
-				
-insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 4, 519, to_date('01.01.2012', 'DD.MM.YYYY'), 0);
-	 insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5191, record_id from ref_book_value where attribute_id = 50 and string_value = '533';
-				
-insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 5, 519, to_date('01.01.2012', 'DD.MM.YYYY'), 0);
-	 insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5191, record_id from ref_book_value where attribute_id = 50 and string_value = '044';
-				
-insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 6, 519, to_date('01.01.2012', 'DD.MM.YYYY'), 0);
-	 insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5191, record_id from ref_book_value where attribute_id = 50 and string_value = '048';
-				
-insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 7, 519, to_date('01.01.2012', 'DD.MM.YYYY'), 0);
-	 insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5191, record_id from ref_book_value where attribute_id = 50 and string_value = '084';
-				
-insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 8, 519, to_date('01.01.2012', 'DD.MM.YYYY'), 0);
-	 insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5191, record_id from ref_book_value where attribute_id = 50 and string_value = '060';
-				
-insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 9, 519, to_date('01.01.2012', 'DD.MM.YYYY'), 0);
-	 insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5191, record_id from ref_book_value where attribute_id = 50 and string_value = '096';
-				
-insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 10, 519, to_date('01.01.2012', 'DD.MM.YYYY'), 0);
-	 insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5191, record_id from ref_book_value where attribute_id = 50 and string_value = '548';
-				
-insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 11, 519, to_date('01.01.2012', 'DD.MM.YYYY'), 0);
-	 insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5191, record_id from ref_book_value where attribute_id = 50 and string_value = '092';
-				
-insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 12, 519, to_date('01.01.2012', 'DD.MM.YYYY'), 0);
-	 insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5191, record_id from ref_book_value where attribute_id = 50 and string_value = '292';
-				
-insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 13, 519, to_date('01.01.2012', 'DD.MM.YYYY'), 0);
-	 insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5191, record_id from ref_book_value where attribute_id = 50 and string_value = '308';
-				
-insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 14, 519, to_date('01.01.2012', 'DD.MM.YYYY'), 0);
-	 insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5191, record_id from ref_book_value where attribute_id = 50 and string_value = '212';
-				
-insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 15, 519, to_date('01.01.2012', 'DD.MM.YYYY'), 0);
+insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 1, 519, to_date('01.01.2008', 'DD.MM.YYYY'), 0);
+	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5191, record_id from ref_book_value where attribute_id = 50 and string_value = '660';
+	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5192, record_id from ref_book_value where attribute_id = 50 and string_value = '660';
+	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5193, record_id from ref_book_value where attribute_id = 50 and string_value = '660';
+	insert into ref_book_value (record_id, attribute_id, string_value)select seq_ref_book_record.currval, 5194, rbv_ref.string_value from ref_book_value rbv join ref_book_value rbv_ref on rbv.attribute_id = 50 and rbv_ref.attribute_id = 53 and rbv.record_id = rbv_ref.record_id where rbv.string_value = '660';
+	insert into ref_book_value (record_id, attribute_id, string_value)select seq_ref_book_record.currval, 5195, rbv_ref.string_value from ref_book_value rbv join ref_book_value rbv_ref on rbv.attribute_id = 50 and rbv_ref.attribute_id = 54 and rbv.record_id = rbv_ref.record_id where rbv.string_value = '660';
+			
+insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 2, 519, to_date('01.01.2008', 'DD.MM.YYYY'), 0);
+	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5191, record_id from ref_book_value where attribute_id = 50 and string_value = '020';
+	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5192, record_id from ref_book_value where attribute_id = 50 and string_value = '020';
+	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5193, record_id from ref_book_value where attribute_id = 50 and string_value = '020';
+	insert into ref_book_value (record_id, attribute_id, string_value)select seq_ref_book_record.currval, 5194, rbv_ref.string_value from ref_book_value rbv join ref_book_value rbv_ref on rbv.attribute_id = 50 and rbv_ref.attribute_id = 53 and rbv.record_id = rbv_ref.record_id where rbv.string_value = '020';
+	insert into ref_book_value (record_id, attribute_id, string_value)select seq_ref_book_record.currval, 5195, rbv_ref.string_value from ref_book_value rbv join ref_book_value rbv_ref on rbv.attribute_id = 50 and rbv_ref.attribute_id = 54 and rbv.record_id = rbv_ref.record_id where rbv.string_value = '020';
+			
+insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 3, 519, to_date('01.01.2008', 'DD.MM.YYYY'), 0);
+	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5191, record_id from ref_book_value where attribute_id = 50 and string_value = '028';
+	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5192, record_id from ref_book_value where attribute_id = 50 and string_value = '028';
+	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5193, record_id from ref_book_value where attribute_id = 50 and string_value = '028';
+	insert into ref_book_value (record_id, attribute_id, string_value)select seq_ref_book_record.currval, 5194, rbv_ref.string_value from ref_book_value rbv join ref_book_value rbv_ref on rbv.attribute_id = 50 and rbv_ref.attribute_id = 53 and rbv.record_id = rbv_ref.record_id where rbv.string_value = '028';
+	insert into ref_book_value (record_id, attribute_id, string_value)select seq_ref_book_record.currval, 5195, rbv_ref.string_value from ref_book_value rbv join ref_book_value rbv_ref on rbv.attribute_id = 50 and rbv_ref.attribute_id = 54 and rbv.record_id = rbv_ref.record_id where rbv.string_value = '028';
+			
+insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 4, 519, to_date('01.01.2008', 'DD.MM.YYYY'), 0);
+	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5191, record_id from ref_book_value where attribute_id = 50 and string_value = '533';
+	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5192, record_id from ref_book_value where attribute_id = 50 and string_value = '533';
+	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5193, record_id from ref_book_value where attribute_id = 50 and string_value = '533';
+	insert into ref_book_value (record_id, attribute_id, string_value)select seq_ref_book_record.currval, 5194, rbv_ref.string_value from ref_book_value rbv join ref_book_value rbv_ref on rbv.attribute_id = 50 and rbv_ref.attribute_id = 53 and rbv.record_id = rbv_ref.record_id where rbv.string_value = '533';
+	insert into ref_book_value (record_id, attribute_id, string_value)select seq_ref_book_record.currval, 5195, rbv_ref.string_value from ref_book_value rbv join ref_book_value rbv_ref on rbv.attribute_id = 50 and rbv_ref.attribute_id = 54 and rbv.record_id = rbv_ref.record_id where rbv.string_value = '533';
+			
+insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 5, 519, to_date('01.01.2008', 'DD.MM.YYYY'), 0);
+	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5191, record_id from ref_book_value where attribute_id = 50 and string_value = '044';
+	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5192, record_id from ref_book_value where attribute_id = 50 and string_value = '044';
+	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5193, record_id from ref_book_value where attribute_id = 50 and string_value = '044';
+	insert into ref_book_value (record_id, attribute_id, string_value)select seq_ref_book_record.currval, 5194, rbv_ref.string_value from ref_book_value rbv join ref_book_value rbv_ref on rbv.attribute_id = 50 and rbv_ref.attribute_id = 53 and rbv.record_id = rbv_ref.record_id where rbv.string_value = '044';
+	insert into ref_book_value (record_id, attribute_id, string_value)select seq_ref_book_record.currval, 5195, rbv_ref.string_value from ref_book_value rbv join ref_book_value rbv_ref on rbv.attribute_id = 50 and rbv_ref.attribute_id = 54 and rbv.record_id = rbv_ref.record_id where rbv.string_value = '044';
+			
+insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 6, 519, to_date('01.01.2008', 'DD.MM.YYYY'), 0);
+	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5191, record_id from ref_book_value where attribute_id = 50 and string_value = '048';
+	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5192, record_id from ref_book_value where attribute_id = 50 and string_value = '048';
+	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5193, record_id from ref_book_value where attribute_id = 50 and string_value = '048';
+	insert into ref_book_value (record_id, attribute_id, string_value)select seq_ref_book_record.currval, 5194, rbv_ref.string_value from ref_book_value rbv join ref_book_value rbv_ref on rbv.attribute_id = 50 and rbv_ref.attribute_id = 53 and rbv.record_id = rbv_ref.record_id where rbv.string_value = '048';
+	insert into ref_book_value (record_id, attribute_id, string_value)select seq_ref_book_record.currval, 5195, rbv_ref.string_value from ref_book_value rbv join ref_book_value rbv_ref on rbv.attribute_id = 50 and rbv_ref.attribute_id = 54 and rbv.record_id = rbv_ref.record_id where rbv.string_value = '048';
+			
+insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 7, 519, to_date('01.01.2008', 'DD.MM.YYYY'), 0);
+	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5191, record_id from ref_book_value where attribute_id = 50 and string_value = '084';
+	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5192, record_id from ref_book_value where attribute_id = 50 and string_value = '084';
+	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5193, record_id from ref_book_value where attribute_id = 50 and string_value = '084';
+	insert into ref_book_value (record_id, attribute_id, string_value)select seq_ref_book_record.currval, 5194, rbv_ref.string_value from ref_book_value rbv join ref_book_value rbv_ref on rbv.attribute_id = 50 and rbv_ref.attribute_id = 53 and rbv.record_id = rbv_ref.record_id where rbv.string_value = '084';
+	insert into ref_book_value (record_id, attribute_id, string_value)select seq_ref_book_record.currval, 5195, rbv_ref.string_value from ref_book_value rbv join ref_book_value rbv_ref on rbv.attribute_id = 50 and rbv_ref.attribute_id = 54 and rbv.record_id = rbv_ref.record_id where rbv.string_value = '084';
+			
+insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 8, 519, to_date('01.01.2008', 'DD.MM.YYYY'), 0);
+	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5191, record_id from ref_book_value where attribute_id = 50 and string_value = '060';
+	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5192, record_id from ref_book_value where attribute_id = 50 and string_value = '060';
+	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5193, record_id from ref_book_value where attribute_id = 50 and string_value = '060';
+	insert into ref_book_value (record_id, attribute_id, string_value)select seq_ref_book_record.currval, 5194, rbv_ref.string_value from ref_book_value rbv join ref_book_value rbv_ref on rbv.attribute_id = 50 and rbv_ref.attribute_id = 53 and rbv.record_id = rbv_ref.record_id where rbv.string_value = '060';
+	insert into ref_book_value (record_id, attribute_id, string_value)select seq_ref_book_record.currval, 5195, rbv_ref.string_value from ref_book_value rbv join ref_book_value rbv_ref on rbv.attribute_id = 50 and rbv_ref.attribute_id = 54 and rbv.record_id = rbv_ref.record_id where rbv.string_value = '060';
+			
+insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 9, 519, to_date('01.01.2008', 'DD.MM.YYYY'), 0);
+	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5191, record_id from ref_book_value where attribute_id = 50 and string_value = '096';
+	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5192, record_id from ref_book_value where attribute_id = 50 and string_value = '096';
+	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5193, record_id from ref_book_value where attribute_id = 50 and string_value = '096';
+	insert into ref_book_value (record_id, attribute_id, string_value)select seq_ref_book_record.currval, 5194, rbv_ref.string_value from ref_book_value rbv join ref_book_value rbv_ref on rbv.attribute_id = 50 and rbv_ref.attribute_id = 53 and rbv.record_id = rbv_ref.record_id where rbv.string_value = '096';
+	insert into ref_book_value (record_id, attribute_id, string_value)select seq_ref_book_record.currval, 5195, rbv_ref.string_value from ref_book_value rbv join ref_book_value rbv_ref on rbv.attribute_id = 50 and rbv_ref.attribute_id = 54 and rbv.record_id = rbv_ref.record_id where rbv.string_value = '096';
+			
+insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 10, 519, to_date('01.01.2008', 'DD.MM.YYYY'), 0);
+	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5191, record_id from ref_book_value where attribute_id = 50 and string_value = '548';
+	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5192, record_id from ref_book_value where attribute_id = 50 and string_value = '548';
+	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5193, record_id from ref_book_value where attribute_id = 50 and string_value = '548';
+	insert into ref_book_value (record_id, attribute_id, string_value)select seq_ref_book_record.currval, 5194, rbv_ref.string_value from ref_book_value rbv join ref_book_value rbv_ref on rbv.attribute_id = 50 and rbv_ref.attribute_id = 53 and rbv.record_id = rbv_ref.record_id where rbv.string_value = '548';
+	insert into ref_book_value (record_id, attribute_id, string_value)select seq_ref_book_record.currval, 5195, rbv_ref.string_value from ref_book_value rbv join ref_book_value rbv_ref on rbv.attribute_id = 50 and rbv_ref.attribute_id = 54 and rbv.record_id = rbv_ref.record_id where rbv.string_value = '548';
+			
+insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 11, 519, to_date('01.01.2008', 'DD.MM.YYYY'), 0);
+	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5191, record_id from ref_book_value where attribute_id = 50 and string_value = '092';
+	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5192, record_id from ref_book_value where attribute_id = 50 and string_value = '092';
+	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5193, record_id from ref_book_value where attribute_id = 50 and string_value = '092';
+	insert into ref_book_value (record_id, attribute_id, string_value)select seq_ref_book_record.currval, 5194, rbv_ref.string_value from ref_book_value rbv join ref_book_value rbv_ref on rbv.attribute_id = 50 and rbv_ref.attribute_id = 53 and rbv.record_id = rbv_ref.record_id where rbv.string_value = '092';
+	insert into ref_book_value (record_id, attribute_id, string_value)select seq_ref_book_record.currval, 5195, rbv_ref.string_value from ref_book_value rbv join ref_book_value rbv_ref on rbv.attribute_id = 50 and rbv_ref.attribute_id = 54 and rbv.record_id = rbv_ref.record_id where rbv.string_value = '092';
+			
+insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 12, 519, to_date('01.01.2008', 'DD.MM.YYYY'), 0);
+	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5191, record_id from ref_book_value where attribute_id = 50 and string_value = '292';
+	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5192, record_id from ref_book_value where attribute_id = 50 and string_value = '292';
+	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5193, record_id from ref_book_value where attribute_id = 50 and string_value = '292';
+	insert into ref_book_value (record_id, attribute_id, string_value)select seq_ref_book_record.currval, 5194, rbv_ref.string_value from ref_book_value rbv join ref_book_value rbv_ref on rbv.attribute_id = 50 and rbv_ref.attribute_id = 53 and rbv.record_id = rbv_ref.record_id where rbv.string_value = '292';
+	insert into ref_book_value (record_id, attribute_id, string_value)select seq_ref_book_record.currval, 5195, rbv_ref.string_value from ref_book_value rbv join ref_book_value rbv_ref on rbv.attribute_id = 50 and rbv_ref.attribute_id = 54 and rbv.record_id = rbv_ref.record_id where rbv.string_value = '292';
+			
+insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 13, 519, to_date('01.01.2008', 'DD.MM.YYYY'), 0);
+	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5191, record_id from ref_book_value where attribute_id = 50 and string_value = '308';
+	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5192, record_id from ref_book_value where attribute_id = 50 and string_value = '308';
+	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5193, record_id from ref_book_value where attribute_id = 50 and string_value = '308';
+	insert into ref_book_value (record_id, attribute_id, string_value)select seq_ref_book_record.currval, 5194, rbv_ref.string_value from ref_book_value rbv join ref_book_value rbv_ref on rbv.attribute_id = 50 and rbv_ref.attribute_id = 53 and rbv.record_id = rbv_ref.record_id where rbv.string_value = '308';
+	insert into ref_book_value (record_id, attribute_id, string_value)select seq_ref_book_record.currval, 5195, rbv_ref.string_value from ref_book_value rbv join ref_book_value rbv_ref on rbv.attribute_id = 50 and rbv_ref.attribute_id = 54 and rbv.record_id = rbv_ref.record_id where rbv.string_value = '308';
+			
+insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 14, 519, to_date('01.01.2008', 'DD.MM.YYYY'), 0);
+	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5191, record_id from ref_book_value where attribute_id = 50 and string_value = '212';
+	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5192, record_id from ref_book_value where attribute_id = 50 and string_value = '212';
+	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5193, record_id from ref_book_value where attribute_id = 50 and string_value = '212';
+	insert into ref_book_value (record_id, attribute_id, string_value)select seq_ref_book_record.currval, 5194, rbv_ref.string_value from ref_book_value rbv join ref_book_value rbv_ref on rbv.attribute_id = 50 and rbv_ref.attribute_id = 53 and rbv.record_id = rbv_ref.record_id where rbv.string_value = '212';
+	insert into ref_book_value (record_id, attribute_id, string_value)select seq_ref_book_record.currval, 5195, rbv_ref.string_value from ref_book_value rbv join ref_book_value rbv_ref on rbv.attribute_id = 50 and rbv_ref.attribute_id = 54 and rbv.record_id = rbv_ref.record_id where rbv.string_value = '212';
+			
+insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 15, 519, to_date('01.01.2008', 'DD.MM.YYYY'), 0);
 	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5191, record_id from ref_book_value where attribute_id = 50 and string_value = '344';
+	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5192, record_id from ref_book_value where attribute_id = 50 and string_value = '344';
+	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5193, record_id from ref_book_value where attribute_id = 50 and string_value = '344';
+	insert into ref_book_value (record_id, attribute_id, string_value)select seq_ref_book_record.currval, 5194, rbv_ref.string_value from ref_book_value rbv join ref_book_value rbv_ref on rbv.attribute_id = 50 and rbv_ref.attribute_id = 53 and rbv.record_id = rbv_ref.record_id where rbv.string_value = '344';
+	insert into ref_book_value (record_id, attribute_id, string_value)select seq_ref_book_record.currval, 5195, rbv_ref.string_value from ref_book_value rbv join ref_book_value rbv_ref on rbv.attribute_id = 50 and rbv_ref.attribute_id = 54 and rbv.record_id = rbv_ref.record_id where rbv.string_value = '344';
 	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5196, record_id from ref_book_value where attribute_id = 50 and string_value = '156';
+	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5197, record_id from ref_book_value where attribute_id = 50 and string_value = '156';
 	insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 5198, 'ОЗ, входит в состав гос-ва Китай');
 
-insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 16, 519, to_date('01.01.2012', 'DD.MM.YYYY'), 0);
+insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 16, 519, to_date('01.01.2008', 'DD.MM.YYYY'), 0);
 	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5191, record_id from ref_book_value where attribute_id = 50 and string_value = '446';
+	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5192, record_id from ref_book_value where attribute_id = 50 and string_value = '446';
+	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5193, record_id from ref_book_value where attribute_id = 50 and string_value = '446';
+	insert into ref_book_value (record_id, attribute_id, string_value)select seq_ref_book_record.currval, 5194, rbv_ref.string_value from ref_book_value rbv join ref_book_value rbv_ref on rbv.attribute_id = 50 and rbv_ref.attribute_id = 53 and rbv.record_id = rbv_ref.record_id where rbv.string_value = '446';
+	insert into ref_book_value (record_id, attribute_id, string_value)select seq_ref_book_record.currval, 5195, rbv_ref.string_value from ref_book_value rbv join ref_book_value rbv_ref on rbv.attribute_id = 50 and rbv_ref.attribute_id = 54 and rbv.record_id = rbv_ref.record_id where rbv.string_value = '446';
 	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5196, record_id from ref_book_value where attribute_id = 50 and string_value = '156';
+	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5197, record_id from ref_book_value where attribute_id = 50 and string_value = '156';
 	insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 5198, 'ОЗ, входит в состав гос-ва Китай');
 
-insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 17, 519, to_date('01.01.2012', 'DD.MM.YYYY'), 0);
+insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 17, 519, to_date('01.01.2008', 'DD.MM.YYYY'), 0);
 	insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 5194, 'остров Анжуан');
 	insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 5195, 'остров Анжуан');
 	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5196, record_id from ref_book_value where attribute_id = 50 and string_value = '174';
+	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5197, record_id from ref_book_value where attribute_id = 50 and string_value = '174';
 	insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 5198, 'ОЗ, входит в состав гос-ва Коморы, не имеет собственного кода');
 
-insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 18, 519, to_date('01.01.2012', 'DD.MM.YYYY'), 0);
+insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 18, 519, to_date('01.01.2008', 'DD.MM.YYYY'), 0);
 	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5191, record_id from ref_book_value where attribute_id = 50 and string_value = '430';
+	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5192, record_id from ref_book_value where attribute_id = 50 and string_value = '430';
+	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5193, record_id from ref_book_value where attribute_id = 50 and string_value = '430';
+	insert into ref_book_value (record_id, attribute_id, string_value)select seq_ref_book_record.currval, 5194, rbv_ref.string_value from ref_book_value rbv join ref_book_value rbv_ref on rbv.attribute_id = 50 and rbv_ref.attribute_id = 53 and rbv.record_id = rbv_ref.record_id where rbv.string_value = '430';
+	insert into ref_book_value (record_id, attribute_id, string_value)select seq_ref_book_record.currval, 5195, rbv_ref.string_value from ref_book_value rbv join ref_book_value rbv_ref on rbv.attribute_id = 50 and rbv_ref.attribute_id = 54 and rbv.record_id = rbv_ref.record_id where rbv.string_value = '430';
 			
-insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 19, 519, to_date('01.01.2012', 'DD.MM.YYYY'), 0);
+insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 19, 519, to_date('01.01.2008', 'DD.MM.YYYY'), 0);
 	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5191, record_id from ref_book_value where attribute_id = 50 and string_value = '438';
+	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5192, record_id from ref_book_value where attribute_id = 50 and string_value = '438';
+	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5193, record_id from ref_book_value where attribute_id = 50 and string_value = '438';
+	insert into ref_book_value (record_id, attribute_id, string_value)select seq_ref_book_record.currval, 5194, rbv_ref.string_value from ref_book_value rbv join ref_book_value rbv_ref on rbv.attribute_id = 50 and rbv_ref.attribute_id = 53 and rbv.record_id = rbv_ref.record_id where rbv.string_value = '438';
+	insert into ref_book_value (record_id, attribute_id, string_value)select seq_ref_book_record.currval, 5195, rbv_ref.string_value from ref_book_value rbv join ref_book_value rbv_ref on rbv.attribute_id = 50 and rbv_ref.attribute_id = 54 and rbv.record_id = rbv_ref.record_id where rbv.string_value = '438';
 			
-insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 20, 519, to_date('01.01.2012', 'DD.MM.YYYY'), 0);
+insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 20, 519, to_date('01.01.2008', 'DD.MM.YYYY'), 0);
 	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5191, record_id from ref_book_value where attribute_id = 50 and string_value = '480';
+	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5192, record_id from ref_book_value where attribute_id = 50 and string_value = '480';
+	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5193, record_id from ref_book_value where attribute_id = 50 and string_value = '480';
+	insert into ref_book_value (record_id, attribute_id, string_value)select seq_ref_book_record.currval, 5194, rbv_ref.string_value from ref_book_value rbv join ref_book_value rbv_ref on rbv.attribute_id = 50 and rbv_ref.attribute_id = 53 and rbv.record_id = rbv_ref.record_id where rbv.string_value = '480';
+	insert into ref_book_value (record_id, attribute_id, string_value)select seq_ref_book_record.currval, 5195, rbv_ref.string_value from ref_book_value rbv join ref_book_value rbv_ref on rbv.attribute_id = 50 and rbv_ref.attribute_id = 54 and rbv.record_id = rbv_ref.record_id where rbv.string_value = '480';
 			
-insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 21, 519, to_date('01.01.2012', 'DD.MM.YYYY'), 0);
+insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 21, 519, to_date('01.01.2008', 'DD.MM.YYYY'), 0);
 	insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 5194, 'остров Лабуан');
 	insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 5195, 'остров Лабуан');
 	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5196, record_id from ref_book_value where attribute_id = 50 and string_value = '458';
+	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5197, record_id from ref_book_value where attribute_id = 50 and string_value = '458';
 	insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 5198, 'ОЗ, входит в состав гос-ва Малайзия, не имеет собственного кода ');
 
-insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 22, 519, to_date('01.01.2012', 'DD.MM.YYYY'), 0);
+insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 22, 519, to_date('01.01.2008', 'DD.MM.YYYY'), 0);
 	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5191, record_id from ref_book_value where attribute_id = 50 and string_value = '462';
-				
-insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 23, 519, to_date('01.01.2012', 'DD.MM.YYYY'), 0);
+	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5192, record_id from ref_book_value where attribute_id = 50 and string_value = '462';
+	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5193, record_id from ref_book_value where attribute_id = 50 and string_value = '462';
+	insert into ref_book_value (record_id, attribute_id, string_value)select seq_ref_book_record.currval, 5194, rbv_ref.string_value from ref_book_value rbv join ref_book_value rbv_ref on rbv.attribute_id = 50 and rbv_ref.attribute_id = 53 and rbv.record_id = rbv_ref.record_id where rbv.string_value = '462';
+	insert into ref_book_value (record_id, attribute_id, string_value)select seq_ref_book_record.currval, 5195, rbv_ref.string_value from ref_book_value rbv join ref_book_value rbv_ref on rbv.attribute_id = 50 and rbv_ref.attribute_id = 54 and rbv.record_id = rbv_ref.record_id where rbv.string_value = '462';
+			
+insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 23, 519, to_date('01.01.2008', 'DD.MM.YYYY'), 0);
 	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5191, record_id from ref_book_value where attribute_id = 50 and string_value = '470';
-				
-insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 24, 519, to_date('01.01.2012', 'DD.MM.YYYY'), 0);
+	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5192, record_id from ref_book_value where attribute_id = 50 and string_value = '470';
+	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5193, record_id from ref_book_value where attribute_id = 50 and string_value = '470';
+	insert into ref_book_value (record_id, attribute_id, string_value)select seq_ref_book_record.currval, 5194, rbv_ref.string_value from ref_book_value rbv join ref_book_value rbv_ref on rbv.attribute_id = 50 and rbv_ref.attribute_id = 53 and rbv.record_id = rbv_ref.record_id where rbv.string_value = '470';
+	insert into ref_book_value (record_id, attribute_id, string_value)select seq_ref_book_record.currval, 5195, rbv_ref.string_value from ref_book_value rbv join ref_book_value rbv_ref on rbv.attribute_id = 50 and rbv_ref.attribute_id = 54 and rbv.record_id = rbv_ref.record_id where rbv.string_value = '470';
+			
+insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 24, 519, to_date('01.01.2008', 'DD.MM.YYYY'), 0);
 	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5191, record_id from ref_book_value where attribute_id = 50 and string_value = '584';
-				
-insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 25, 519, to_date('01.01.2012', 'DD.MM.YYYY'), 0);
+	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5192, record_id from ref_book_value where attribute_id = 50 and string_value = '584';
+	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5193, record_id from ref_book_value where attribute_id = 50 and string_value = '584';
+	insert into ref_book_value (record_id, attribute_id, string_value)select seq_ref_book_record.currval, 5194, rbv_ref.string_value from ref_book_value rbv join ref_book_value rbv_ref on rbv.attribute_id = 50 and rbv_ref.attribute_id = 53 and rbv.record_id = rbv_ref.record_id where rbv.string_value = '584';
+	insert into ref_book_value (record_id, attribute_id, string_value)select seq_ref_book_record.currval, 5195, rbv_ref.string_value from ref_book_value rbv join ref_book_value rbv_ref on rbv.attribute_id = 50 and rbv_ref.attribute_id = 54 and rbv.record_id = rbv_ref.record_id where rbv.string_value = '584';
+			
+insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 25, 519, to_date('01.01.2008', 'DD.MM.YYYY'), 0);
 	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5191, record_id from ref_book_value where attribute_id = 50 and string_value = '492';
-				
-insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 26, 519, to_date('01.01.2012', 'DD.MM.YYYY'), 0);
+	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5192, record_id from ref_book_value where attribute_id = 50 and string_value = '492';
+	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5193, record_id from ref_book_value where attribute_id = 50 and string_value = '492';
+	insert into ref_book_value (record_id, attribute_id, string_value)select seq_ref_book_record.currval, 5194, rbv_ref.string_value from ref_book_value rbv join ref_book_value rbv_ref on rbv.attribute_id = 50 and rbv_ref.attribute_id = 53 and rbv.record_id = rbv_ref.record_id where rbv.string_value = '492';
+	insert into ref_book_value (record_id, attribute_id, string_value)select seq_ref_book_record.currval, 5195, rbv_ref.string_value from ref_book_value rbv join ref_book_value rbv_ref on rbv.attribute_id = 50 and rbv_ref.attribute_id = 54 and rbv.record_id = rbv_ref.record_id where rbv.string_value = '492';
+			
+insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 26, 519, to_date('01.01.2008', 'DD.MM.YYYY'), 0);
 	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5191, record_id from ref_book_value where attribute_id = 50 and string_value = '500';
-				
-insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 27, 519, to_date('01.01.2012', 'DD.MM.YYYY'), 0);
+	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5192, record_id from ref_book_value where attribute_id = 50 and string_value = '500';
+	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5193, record_id from ref_book_value where attribute_id = 50 and string_value = '500';
+	insert into ref_book_value (record_id, attribute_id, string_value)select seq_ref_book_record.currval, 5194, rbv_ref.string_value from ref_book_value rbv join ref_book_value rbv_ref on rbv.attribute_id = 50 and rbv_ref.attribute_id = 53 and rbv.record_id = rbv_ref.record_id where rbv.string_value = '500';
+	insert into ref_book_value (record_id, attribute_id, string_value)select seq_ref_book_record.currval, 5195, rbv_ref.string_value from ref_book_value rbv join ref_book_value rbv_ref on rbv.attribute_id = 50 and rbv_ref.attribute_id = 54 and rbv.record_id = rbv_ref.record_id where rbv.string_value = '500';
+			
+insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 27, 519, to_date('01.01.2008', 'DD.MM.YYYY'), 0);
 	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5191, record_id from ref_book_value where attribute_id = 50 and string_value = '520';
-				
-insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 28, 519, to_date('01.01.2012', 'DD.MM.YYYY'), 0);
+	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5192, record_id from ref_book_value where attribute_id = 50 and string_value = '520';
+	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5193, record_id from ref_book_value where attribute_id = 50 and string_value = '520';
+	insert into ref_book_value (record_id, attribute_id, string_value)select seq_ref_book_record.currval, 5194, rbv_ref.string_value from ref_book_value rbv join ref_book_value rbv_ref on rbv.attribute_id = 50 and rbv_ref.attribute_id = 53 and rbv.record_id = rbv_ref.record_id where rbv.string_value = '520';
+	insert into ref_book_value (record_id, attribute_id, string_value)select seq_ref_book_record.currval, 5195, rbv_ref.string_value from ref_book_value rbv join ref_book_value rbv_ref on rbv.attribute_id = 50 and rbv_ref.attribute_id = 54 and rbv.record_id = rbv_ref.record_id where rbv.string_value = '520';
+			
+insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 28, 519, to_date('01.01.2008', 'DD.MM.YYYY'), 0);
 	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5191, record_id from ref_book_value where attribute_id = 50 and string_value = '531';
-				
-insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 29, 519, to_date('01.01.2012', 'DD.MM.YYYY'), 0);
+	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5192, record_id from ref_book_value where attribute_id = 50 and string_value = '531';
+	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5193, record_id from ref_book_value where attribute_id = 50 and string_value = '531';
+	insert into ref_book_value (record_id, attribute_id, string_value)select seq_ref_book_record.currval, 5194, rbv_ref.string_value from ref_book_value rbv join ref_book_value rbv_ref on rbv.attribute_id = 50 and rbv_ref.attribute_id = 53 and rbv.record_id = rbv_ref.record_id where rbv.string_value = '531';
+	insert into ref_book_value (record_id, attribute_id, string_value)select seq_ref_book_record.currval, 5195, rbv_ref.string_value from ref_book_value rbv join ref_book_value rbv_ref on rbv.attribute_id = 50 and rbv_ref.attribute_id = 54 and rbv.record_id = rbv_ref.record_id where rbv.string_value = '531';
+			
+insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 29, 519, to_date('01.01.2008', 'DD.MM.YYYY'), 0);
 	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5191, record_id from ref_book_value where attribute_id = 50 and string_value = '534';
-				
-insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 30, 519, to_date('01.01.2012', 'DD.MM.YYYY'), 0);
+	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5192, record_id from ref_book_value where attribute_id = 50 and string_value = '534';
+	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5193, record_id from ref_book_value where attribute_id = 50 and string_value = '534';
+	insert into ref_book_value (record_id, attribute_id, string_value)select seq_ref_book_record.currval, 5194, rbv_ref.string_value from ref_book_value rbv join ref_book_value rbv_ref on rbv.attribute_id = 50 and rbv_ref.attribute_id = 53 and rbv.record_id = rbv_ref.record_id where rbv.string_value = '534';
+	insert into ref_book_value (record_id, attribute_id, string_value)select seq_ref_book_record.currval, 5195, rbv_ref.string_value from ref_book_value rbv join ref_book_value rbv_ref on rbv.attribute_id = 50 and rbv_ref.attribute_id = 54 and rbv.record_id = rbv_ref.record_id where rbv.string_value = '534';
+			
+insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 30, 519, to_date('01.01.2008', 'DD.MM.YYYY'), 0);
 	insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 5194, 'Бонэйр');
 	insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 5195, 'Бонэйр');
 	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5196, record_id from ref_book_value where attribute_id = 50 and string_value = '535';
+	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5197, record_id from ref_book_value where attribute_id = 50 and string_value = '535';
 	insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 5198, 'ОЗ, входит в состав гос-ва Бонэйр, Синт-Эстатиус и Саба, не имеет собственного кода ');
 
-insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 31, 519, to_date('01.01.2012', 'DD.MM.YYYY'), 0);
+insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 31, 519, to_date('01.01.2008', 'DD.MM.YYYY'), 0);
 	insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 5194, 'Синт-Эстатиус');
 	insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 5195, 'Синт-Эстатиус');
 	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5196, record_id from ref_book_value where attribute_id = 50 and string_value = '535';
+	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5197, record_id from ref_book_value where attribute_id = 50 and string_value = '535';
 	insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 5198, 'ОЗ, входит в состав гос-ва Бонэйр, Синт-Эстатиус и Саба, не имеет собственного кода ');
 
-insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 32, 519, to_date('01.01.2012', 'DD.MM.YYYY'), 0);
+insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 32, 519, to_date('01.01.2008', 'DD.MM.YYYY'), 0);
 	insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 5194, 'Саба');
 	insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 5195, 'Саба');
 	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5196, record_id from ref_book_value where attribute_id = 50 and string_value = '535';
+	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5197, record_id from ref_book_value where attribute_id = 50 and string_value = '535';
 	insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 5198, 'ОЗ, входит в состав гос-ва Бонэйр, Синт-Эстатиус и Саба, не имеет собственного кода ');
 
-insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 33, 519, to_date('01.01.2012', 'DD.MM.YYYY'), 0);
+insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 33, 519, to_date('01.01.2008', 'DD.MM.YYYY'), 0);
 	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5191, record_id from ref_book_value where attribute_id = 50 and string_value = '570';
-				
-insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 34, 519, to_date('01.01.2012', 'DD.MM.YYYY'), 0);
+	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5192, record_id from ref_book_value where attribute_id = 50 and string_value = '570';
+	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5193, record_id from ref_book_value where attribute_id = 50 and string_value = '570';
+	insert into ref_book_value (record_id, attribute_id, string_value)select seq_ref_book_record.currval, 5194, rbv_ref.string_value from ref_book_value rbv join ref_book_value rbv_ref on rbv.attribute_id = 50 and rbv_ref.attribute_id = 53 and rbv.record_id = rbv_ref.record_id where rbv.string_value = '570';
+	insert into ref_book_value (record_id, attribute_id, string_value)select seq_ref_book_record.currval, 5195, rbv_ref.string_value from ref_book_value rbv join ref_book_value rbv_ref on rbv.attribute_id = 50 and rbv_ref.attribute_id = 54 and rbv.record_id = rbv_ref.record_id where rbv.string_value = '570';
+			
+insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 34, 519, to_date('01.01.2008', 'DD.MM.YYYY'), 0);
 	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5191, record_id from ref_book_value where attribute_id = 50 and string_value = '784';
-				
-insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 35, 519, to_date('01.01.2012', 'DD.MM.YYYY'), 0);
+	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5192, record_id from ref_book_value where attribute_id = 50 and string_value = '784';
+	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5193, record_id from ref_book_value where attribute_id = 50 and string_value = '784';
+	insert into ref_book_value (record_id, attribute_id, string_value)select seq_ref_book_record.currval, 5194, rbv_ref.string_value from ref_book_value rbv join ref_book_value rbv_ref on rbv.attribute_id = 50 and rbv_ref.attribute_id = 53 and rbv.record_id = rbv_ref.record_id where rbv.string_value = '784';
+	insert into ref_book_value (record_id, attribute_id, string_value)select seq_ref_book_record.currval, 5195, rbv_ref.string_value from ref_book_value rbv join ref_book_value rbv_ref on rbv.attribute_id = 50 and rbv_ref.attribute_id = 54 and rbv.record_id = rbv_ref.record_id where rbv.string_value = '784';
+			
+insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 35, 519, to_date('01.01.2008', 'DD.MM.YYYY'), 0);
 	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5191, record_id from ref_book_value where attribute_id = 50 and string_value = '136';
-				
-insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 36, 519, to_date('01.01.2012', 'DD.MM.YYYY'), 0);
+	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5192, record_id from ref_book_value where attribute_id = 50 and string_value = '136';
+	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5193, record_id from ref_book_value where attribute_id = 50 and string_value = '136';
+	insert into ref_book_value (record_id, attribute_id, string_value)select seq_ref_book_record.currval, 5194, rbv_ref.string_value from ref_book_value rbv join ref_book_value rbv_ref on rbv.attribute_id = 50 and rbv_ref.attribute_id = 53 and rbv.record_id = rbv_ref.record_id where rbv.string_value = '136';
+	insert into ref_book_value (record_id, attribute_id, string_value)select seq_ref_book_record.currval, 5195, rbv_ref.string_value from ref_book_value rbv join ref_book_value rbv_ref on rbv.attribute_id = 50 and rbv_ref.attribute_id = 54 and rbv.record_id = rbv_ref.record_id where rbv.string_value = '136';
+			
+insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 36, 519, to_date('01.01.2008', 'DD.MM.YYYY'), 0);
 	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5191, record_id from ref_book_value where attribute_id = 50 and string_value = '184';
-				
-insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 37, 519, to_date('01.01.2012', 'DD.MM.YYYY'), 0);
+	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5192, record_id from ref_book_value where attribute_id = 50 and string_value = '184';
+	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5193, record_id from ref_book_value where attribute_id = 50 and string_value = '184';
+	insert into ref_book_value (record_id, attribute_id, string_value)select seq_ref_book_record.currval, 5194, rbv_ref.string_value from ref_book_value rbv join ref_book_value rbv_ref on rbv.attribute_id = 50 and rbv_ref.attribute_id = 53 and rbv.record_id = rbv_ref.record_id where rbv.string_value = '184';
+	insert into ref_book_value (record_id, attribute_id, string_value)select seq_ref_book_record.currval, 5195, rbv_ref.string_value from ref_book_value rbv join ref_book_value rbv_ref on rbv.attribute_id = 50 and rbv_ref.attribute_id = 54 and rbv.record_id = rbv_ref.record_id where rbv.string_value = '184';
+			
+insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 37, 519, to_date('01.01.2008', 'DD.MM.YYYY'), 0);
 	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5191, record_id from ref_book_value where attribute_id = 50 and string_value = '796';
-				
-insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 38, 519, to_date('01.01.2012', 'DD.MM.YYYY'), 0);
+	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5192, record_id from ref_book_value where attribute_id = 50 and string_value = '796';
+	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5193, record_id from ref_book_value where attribute_id = 50 and string_value = '796';
+	insert into ref_book_value (record_id, attribute_id, string_value)select seq_ref_book_record.currval, 5194, rbv_ref.string_value from ref_book_value rbv join ref_book_value rbv_ref on rbv.attribute_id = 50 and rbv_ref.attribute_id = 53 and rbv.record_id = rbv_ref.record_id where rbv.string_value = '796';
+	insert into ref_book_value (record_id, attribute_id, string_value)select seq_ref_book_record.currval, 5195, rbv_ref.string_value from ref_book_value rbv join ref_book_value rbv_ref on rbv.attribute_id = 50 and rbv_ref.attribute_id = 54 and rbv.record_id = rbv_ref.record_id where rbv.string_value = '796';
+			
+insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 38, 519, to_date('01.01.2008', 'DD.MM.YYYY'), 0);
 	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5191, record_id from ref_book_value where attribute_id = 50 and string_value = '585';
-				
-insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 39, 519, to_date('01.01.2012', 'DD.MM.YYYY'), 0);
+	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5192, record_id from ref_book_value where attribute_id = 50 and string_value = '585';
+	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5193, record_id from ref_book_value where attribute_id = 50 and string_value = '585';
+	insert into ref_book_value (record_id, attribute_id, string_value)select seq_ref_book_record.currval, 5194, rbv_ref.string_value from ref_book_value rbv join ref_book_value rbv_ref on rbv.attribute_id = 50 and rbv_ref.attribute_id = 53 and rbv.record_id = rbv_ref.record_id where rbv.string_value = '585';
+	insert into ref_book_value (record_id, attribute_id, string_value)select seq_ref_book_record.currval, 5195, rbv_ref.string_value from ref_book_value rbv join ref_book_value rbv_ref on rbv.attribute_id = 50 and rbv_ref.attribute_id = 54 and rbv.record_id = rbv_ref.record_id where rbv.string_value = '585';
+			
+insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 39, 519, to_date('01.01.2008', 'DD.MM.YYYY'), 0);
 	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5191, record_id from ref_book_value where attribute_id = 50 and string_value = '591';
-				
-insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 40, 519, to_date('01.01.2012', 'DD.MM.YYYY'), 0);
+	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5192, record_id from ref_book_value where attribute_id = 50 and string_value = '591';
+	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5193, record_id from ref_book_value where attribute_id = 50 and string_value = '591';
+	insert into ref_book_value (record_id, attribute_id, string_value)select seq_ref_book_record.currval, 5194, rbv_ref.string_value from ref_book_value rbv join ref_book_value rbv_ref on rbv.attribute_id = 50 and rbv_ref.attribute_id = 53 and rbv.record_id = rbv_ref.record_id where rbv.string_value = '591';
+	insert into ref_book_value (record_id, attribute_id, string_value)select seq_ref_book_record.currval, 5195, rbv_ref.string_value from ref_book_value rbv join ref_book_value rbv_ref on rbv.attribute_id = 50 and rbv_ref.attribute_id = 54 and rbv.record_id = rbv_ref.record_id where rbv.string_value = '591';
+			
+insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 40, 519, to_date('01.01.2008', 'DD.MM.YYYY'), 0);
 	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5191, record_id from ref_book_value where attribute_id = 50 and string_value = '882';
-				
-insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 41, 519, to_date('01.01.2012', 'DD.MM.YYYY'), 0);
+	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5192, record_id from ref_book_value where attribute_id = 50 and string_value = '882';
+	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5193, record_id from ref_book_value where attribute_id = 50 and string_value = '882';
+	insert into ref_book_value (record_id, attribute_id, string_value)select seq_ref_book_record.currval, 5194, rbv_ref.string_value from ref_book_value rbv join ref_book_value rbv_ref on rbv.attribute_id = 50 and rbv_ref.attribute_id = 53 and rbv.record_id = rbv_ref.record_id where rbv.string_value = '882';
+	insert into ref_book_value (record_id, attribute_id, string_value)select seq_ref_book_record.currval, 5195, rbv_ref.string_value from ref_book_value rbv join ref_book_value rbv_ref on rbv.attribute_id = 50 and rbv_ref.attribute_id = 54 and rbv.record_id = rbv_ref.record_id where rbv.string_value = '882';
+			
+insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 41, 519, to_date('01.01.2008', 'DD.MM.YYYY'), 0);
 	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5191, record_id from ref_book_value where attribute_id = 50 and string_value = '674';
-				
-insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 42, 519, to_date('01.01.2012', 'DD.MM.YYYY'), 0);
+	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5192, record_id from ref_book_value where attribute_id = 50 and string_value = '674';
+	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5193, record_id from ref_book_value where attribute_id = 50 and string_value = '674';
+	insert into ref_book_value (record_id, attribute_id, string_value)select seq_ref_book_record.currval, 5194, rbv_ref.string_value from ref_book_value rbv join ref_book_value rbv_ref on rbv.attribute_id = 50 and rbv_ref.attribute_id = 53 and rbv.record_id = rbv_ref.record_id where rbv.string_value = '674';
+	insert into ref_book_value (record_id, attribute_id, string_value)select seq_ref_book_record.currval, 5195, rbv_ref.string_value from ref_book_value rbv join ref_book_value rbv_ref on rbv.attribute_id = 50 and rbv_ref.attribute_id = 54 and rbv.record_id = rbv_ref.record_id where rbv.string_value = '674';
+			
+insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 42, 519, to_date('01.01.2008', 'DD.MM.YYYY'), 0);
 	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5191, record_id from ref_book_value where attribute_id = 50 and string_value = '670';
-				
-insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 43, 519, to_date('01.01.2012', 'DD.MM.YYYY'), 0);
+	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5192, record_id from ref_book_value where attribute_id = 50 and string_value = '670';
+	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5193, record_id from ref_book_value where attribute_id = 50 and string_value = '670';
+	insert into ref_book_value (record_id, attribute_id, string_value)select seq_ref_book_record.currval, 5194, rbv_ref.string_value from ref_book_value rbv join ref_book_value rbv_ref on rbv.attribute_id = 50 and rbv_ref.attribute_id = 53 and rbv.record_id = rbv_ref.record_id where rbv.string_value = '670';
+	insert into ref_book_value (record_id, attribute_id, string_value)select seq_ref_book_record.currval, 5195, rbv_ref.string_value from ref_book_value rbv join ref_book_value rbv_ref on rbv.attribute_id = 50 and rbv_ref.attribute_id = 54 and rbv.record_id = rbv_ref.record_id where rbv.string_value = '670';
+			
+insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 43, 519, to_date('01.01.2008', 'DD.MM.YYYY'), 0);
 	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5191, record_id from ref_book_value where attribute_id = 50 and string_value = '659';
-				
-insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 44, 519, to_date('01.01.2012', 'DD.MM.YYYY'), 0);
+	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5192, record_id from ref_book_value where attribute_id = 50 and string_value = '659';
+	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5193, record_id from ref_book_value where attribute_id = 50 and string_value = '659';
+	insert into ref_book_value (record_id, attribute_id, string_value)select seq_ref_book_record.currval, 5194, rbv_ref.string_value from ref_book_value rbv join ref_book_value rbv_ref on rbv.attribute_id = 50 and rbv_ref.attribute_id = 53 and rbv.record_id = rbv_ref.record_id where rbv.string_value = '659';
+	insert into ref_book_value (record_id, attribute_id, string_value)select seq_ref_book_record.currval, 5195, rbv_ref.string_value from ref_book_value rbv join ref_book_value rbv_ref on rbv.attribute_id = 50 and rbv_ref.attribute_id = 54 and rbv.record_id = rbv_ref.record_id where rbv.string_value = '659';
+			
+insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 44, 519, to_date('01.01.2008', 'DD.MM.YYYY'), 0);
 	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5191, record_id from ref_book_value where attribute_id = 50 and string_value = '662';
-				
-insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 45, 519, to_date('01.01.2012', 'DD.MM.YYYY'), 0);
+	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5192, record_id from ref_book_value where attribute_id = 50 and string_value = '662';
+	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5193, record_id from ref_book_value where attribute_id = 50 and string_value = '662';
+	insert into ref_book_value (record_id, attribute_id, string_value)select seq_ref_book_record.currval, 5194, rbv_ref.string_value from ref_book_value rbv join ref_book_value rbv_ref on rbv.attribute_id = 50 and rbv_ref.attribute_id = 53 and rbv.record_id = rbv_ref.record_id where rbv.string_value = '662';
+	insert into ref_book_value (record_id, attribute_id, string_value)select seq_ref_book_record.currval, 5195, rbv_ref.string_value from ref_book_value rbv join ref_book_value rbv_ref on rbv.attribute_id = 50 and rbv_ref.attribute_id = 54 and rbv.record_id = rbv_ref.record_id where rbv.string_value = '662';
+			
+insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 45, 519, to_date('01.01.2008', 'DD.MM.YYYY'), 0);
 	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5191, record_id from ref_book_value where attribute_id = 50 and string_value = '831';
-			 insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5196, record_id from ref_book_value where attribute_id = 50 and string_value = '826';
+	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5192, record_id from ref_book_value where attribute_id = 50 and string_value = '831';
+	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5193, record_id from ref_book_value where attribute_id = 50 and string_value = '831';
+	insert into ref_book_value (record_id, attribute_id, string_value)select seq_ref_book_record.currval, 5194, rbv_ref.string_value from ref_book_value rbv join ref_book_value rbv_ref on rbv.attribute_id = 50 and rbv_ref.attribute_id = 53 and rbv.record_id = rbv_ref.record_id where rbv.string_value = '831';
+	insert into ref_book_value (record_id, attribute_id, string_value)select seq_ref_book_record.currval, 5195, rbv_ref.string_value from ref_book_value rbv join ref_book_value rbv_ref on rbv.attribute_id = 50 and rbv_ref.attribute_id = 54 and rbv.record_id = rbv_ref.record_id where rbv.string_value = '831';
+	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5196, record_id from ref_book_value where attribute_id = 50 and string_value = '826';
+	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5197, record_id from ref_book_value where attribute_id = 50 and string_value = '826';
 	
-insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 46, 519, to_date('01.01.2012', 'DD.MM.YYYY'), 0);
+insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 46, 519, to_date('01.01.2008', 'DD.MM.YYYY'), 0);
 	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5191, record_id from ref_book_value where attribute_id = 50 and string_value = '832';
-			 insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5196, record_id from ref_book_value where attribute_id = 50 and string_value = '826';
+	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5192, record_id from ref_book_value where attribute_id = 50 and string_value = '832';
+	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5193, record_id from ref_book_value where attribute_id = 50 and string_value = '832';
+	insert into ref_book_value (record_id, attribute_id, string_value)select seq_ref_book_record.currval, 5194, rbv_ref.string_value from ref_book_value rbv join ref_book_value rbv_ref on rbv.attribute_id = 50 and rbv_ref.attribute_id = 53 and rbv.record_id = rbv_ref.record_id where rbv.string_value = '832';
+	insert into ref_book_value (record_id, attribute_id, string_value)select seq_ref_book_record.currval, 5195, rbv_ref.string_value from ref_book_value rbv join ref_book_value rbv_ref on rbv.attribute_id = 50 and rbv_ref.attribute_id = 54 and rbv.record_id = rbv_ref.record_id where rbv.string_value = '832';
+	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5196, record_id from ref_book_value where attribute_id = 50 and string_value = '826';
+	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5197, record_id from ref_book_value where attribute_id = 50 and string_value = '826';
 	
-insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 47, 519, to_date('01.01.2012', 'DD.MM.YYYY'), 0);
+insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 47, 519, to_date('01.01.2008', 'DD.MM.YYYY'), 0);
 	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5191, record_id from ref_book_value where attribute_id = 50 and string_value = '833';
-			 insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5196, record_id from ref_book_value where attribute_id = 50 and string_value = '826';
+	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5192, record_id from ref_book_value where attribute_id = 50 and string_value = '833';
+	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5193, record_id from ref_book_value where attribute_id = 50 and string_value = '833';
+	insert into ref_book_value (record_id, attribute_id, string_value)select seq_ref_book_record.currval, 5194, rbv_ref.string_value from ref_book_value rbv join ref_book_value rbv_ref on rbv.attribute_id = 50 and rbv_ref.attribute_id = 53 and rbv.record_id = rbv_ref.record_id where rbv.string_value = '833';
+	insert into ref_book_value (record_id, attribute_id, string_value)select seq_ref_book_record.currval, 5195, rbv_ref.string_value from ref_book_value rbv join ref_book_value rbv_ref on rbv.attribute_id = 50 and rbv_ref.attribute_id = 54 and rbv.record_id = rbv_ref.record_id where rbv.string_value = '833';
+	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5196, record_id from ref_book_value where attribute_id = 50 and string_value = '826';
+	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5197, record_id from ref_book_value where attribute_id = 50 and string_value = '826';
 	
-insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 48, 519, to_date('01.01.2012', 'DD.MM.YYYY'), 0);
+insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 48, 519, to_date('01.01.2008', 'DD.MM.YYYY'), 0);
 	insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 5194, 'Сарк');
 	insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 5195, 'Сарк');
 	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5196, record_id from ref_book_value where attribute_id = 50 and string_value = '826';
+	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5197, record_id from ref_book_value where attribute_id = 50 and string_value = '826';
 	insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 5198, 'ОЗ, входит в состав Соединенного королевства, не имеет собственного кода');
 
-insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 49, 519, to_date('01.01.2012', 'DD.MM.YYYY'), 0);
+insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 49, 519, to_date('01.01.2008', 'DD.MM.YYYY'), 0);
 	insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 5194, 'Олдерни');
 	insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 5195, 'Олдерни');
 	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5196, record_id from ref_book_value where attribute_id = 50 and string_value = '826';
+	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5197, record_id from ref_book_value where attribute_id = 50 and string_value = '826';
 	insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 5198, 'ОЗ, входит в состав Соединенного королевства, не имеет собственного кода');
 
-insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 50, 519, to_date('01.01.2012', 'DD.MM.YYYY'), 0);
+insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 50, 519, to_date('01.01.2008', 'DD.MM.YYYY'), 0);
 	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5191, record_id from ref_book_value where attribute_id = 50 and string_value = '690';
+	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5192, record_id from ref_book_value where attribute_id = 50 and string_value = '690';
+	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5193, record_id from ref_book_value where attribute_id = 50 and string_value = '690';
+	insert into ref_book_value (record_id, attribute_id, string_value)select seq_ref_book_record.currval, 5194, rbv_ref.string_value from ref_book_value rbv join ref_book_value rbv_ref on rbv.attribute_id = 50 and rbv_ref.attribute_id = 53 and rbv.record_id = rbv_ref.record_id where rbv.string_value = '690';
+	insert into ref_book_value (record_id, attribute_id, string_value)select seq_ref_book_record.currval, 5195, rbv_ref.string_value from ref_book_value rbv join ref_book_value rbv_ref on rbv.attribute_id = 50 and rbv_ref.attribute_id = 54 and rbv.record_id = rbv_ref.record_id where rbv.string_value = '690';
+			
 
 ----------------------------------------------------------------------------------------------------------------
 --http://jira.aplana.com/browse/SBRFACCTAX-12861: Юридические лица / Участники ТЦО
