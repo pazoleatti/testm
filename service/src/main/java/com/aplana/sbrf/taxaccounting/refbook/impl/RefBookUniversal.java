@@ -237,6 +237,11 @@ public class RefBookUniversal implements RefBookDataProvider {
             List<RefBookAttribute> attributes = refBook.getAttributes();
             List<Long> excludedVersionEndRecords = new ArrayList<Long>();
 
+            if (!refBook.isVersioned()) {
+                //Устанавливаем минимальную дату
+                versionFrom = new Date(0L);
+            }
+
             long countIds = 0;
             for (RefBookRecord record : records) {
                 if (record.getRecordId() == null) {
@@ -462,8 +467,6 @@ public class RefBookUniversal implements RefBookDataProvider {
                 }
             }
         } else {
-            //Устанавливаем минимальную дату
-            versionFrom = new Date(0L);
             //Для каждой записи своя группа, т.к версий нет
             int counter = 0;
             for (RefBookRecord record : records) {

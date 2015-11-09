@@ -89,7 +89,7 @@ public class App_6_7Test extends ScriptTestBase {
         Assert.assertEquals("Строка 1: Графа «Дата договора» не заполнена!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Графа «Дата совершения сделки» не заполнена!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Графы «Цена», «Стоимость»: выполнение расчета невозможно, так как не заполнена используемая в расчете графа «Сумма доходов Банка, руб.»!", entries.get(i++).getMessage());
-        Assert.assertEquals("Группа строк «ЮЛ не задано» не имеет строки подитога!", entries.get(i++).getMessage());
+        Assert.assertEquals("Группа «ЮЛ не задано» не имеет строки подитога!", entries.get(i++).getMessage());
         Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
         testHelper.getLogger().clear();
 
@@ -112,7 +112,7 @@ public class App_6_7Test extends ScriptTestBase {
         dataRows.add(subTotalRow);
         subTotalRow.setAlias("itg#1");
         subTotalRow.setIndex(2);
-        subTotalRow.getCell("fix").setValue("Итого A", null);
+        subTotalRow.getCell("fix").setValue("Итого по «A»", null);
         subTotalRow.getCell("sum").setValue(-3, null);
 
         testHelper.execute(FormDataEvent.CHECK);
@@ -143,7 +143,7 @@ public class App_6_7Test extends ScriptTestBase {
 
         Assert.assertTrue(testHelper.getLogger().getEntries().isEmpty());
 
-        // TODO (Ramil Timerbaev) добавить тесты для логических проверок 11-14
+        // TODO (Ramil Timerbaev) добавить тесты для логических проверок 9-12
     }
 
     // Расчет пустой (в импорте - растчет заполненной)

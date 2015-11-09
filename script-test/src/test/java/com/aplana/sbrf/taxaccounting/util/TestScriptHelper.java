@@ -78,6 +78,8 @@ public class TestScriptHelper {
     private DataRow<Cell> currentDataRow;
     private final ScriptTestMockHelper mockHelper;
 
+    private String importFileName = null;
+
     /**
      * Сервис работы со скриптами НФ в тестовом режиме
      *
@@ -235,7 +237,13 @@ public class TestScriptHelper {
         if (formDataEvent == FormDataEvent.IMPORT || formDataEvent == FormDataEvent.IMPORT_TRANSPORT_FILE) {
             bindings.put("ImportInputStream", importFileInputStream);
             bindings.put("importService", mockHelper.mockImportService());
-            bindings.put("UploadFileName", "test-file-name." + (formDataEvent == FormDataEvent.IMPORT ? "xlsm" : "rnu"));
+            String name;
+            if (importFileName == null || importFileName.isEmpty()) {
+                name = "test-file-name." + (formDataEvent == FormDataEvent.IMPORT ? "xlsm" : "rnu");
+            } else {
+                name = importFileName;
+            }
+            bindings.put("UploadFileName", name);
         }
 
         try {
@@ -386,5 +394,13 @@ public class TestScriptHelper {
      */
     public Map<Long, Map<String, RefBookValue>> getRefBookAllRecords(Long refBookId) {
         return mockHelper.getRefBookAllRecords(refBookId);
+    }
+
+    public String getImportFileName() {
+        return importFileName;
+    }
+
+    public void setImportFileName(String importFileName) {
+        this.importFileName = importFileName;
     }
 }

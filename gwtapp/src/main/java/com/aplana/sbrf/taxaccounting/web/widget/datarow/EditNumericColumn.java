@@ -1,7 +1,5 @@
 package com.aplana.sbrf.taxaccounting.web.widget.datarow;
 
-import java.math.BigDecimal;
-
 import com.aplana.sbrf.taxaccounting.model.Cell;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.NumericColumn;
@@ -11,9 +9,11 @@ import com.aplana.sbrf.taxaccounting.web.widget.datarow.events.CellModifiedEvent
 import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.i18n.client.NumberFormat;
 
-/** 
- * @author Vitalii Samolovskikh 
- * Числовая колонка С возможностью редактирования 
+import java.math.BigDecimal;
+
+/**
+ * @author Vitalii Samolovskikh
+ * Числовая колонка С возможностью редактирования
  **/
 public class EditNumericColumn extends DataRowColumn<String> {
 
@@ -24,7 +24,7 @@ public class EditNumericColumn extends DataRowColumn<String> {
 		super(new ValidatedInputCell(columnContext, true), column);
 		this.setHorizontalAlignment(ALIGN_RIGHT);
 
-		StringBuffer mask = new StringBuffer("#");
+		StringBuilder mask = new StringBuilder("#");
 		int precision = column.getPrecision();
 		if (precision > 0) {
 			mask.append('.');
@@ -37,7 +37,7 @@ public class EditNumericColumn extends DataRowColumn<String> {
 			@Override
 			public void update(int i, DataRow<Cell> dataRow, String s) {
 				try {
-					dataRow.put(getAlias(), numberFormat.parse(s));
+                    dataRow.put(getAlias(), new BigDecimal(s));
 				} catch (NumberFormatException e) {
 					dataRow.put(getAlias(), null);
 				}
@@ -50,6 +50,6 @@ public class EditNumericColumn extends DataRowColumn<String> {
 	@Override
 	public String getValue(DataRow dataRow) {
 		BigDecimal val = (BigDecimal)dataRow.get(getAlias());
-		return val == null ? "" : numberFormat.format(val);
+        return val == null ? "" : numberFormat.format(val);
 	}
 }

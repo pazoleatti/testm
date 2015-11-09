@@ -219,11 +219,11 @@ void checkOutcome(def alias, def date, def tmpRow, def etrPeriodOrder) {
         def incomeFormData = getIncomeFormData(date)
         if (incomeFormData == null) {
             logger.warn("Не найдена «Сводная форма начисленных расходов уровня обособленного подразделения в статусе «Принята»: Тип:%s, Период: %s %s, Подразделение: %s. Ячейки по графе «%s», заполняемые из данной формы, будут заполнены нулевым значением.",
-                    FormDataKind.SUMMARY.name, reportPeriod.name, date.format('yyyy'), formDataDepartment.name, getColumnName(tmpRow, alias))
+                    FormDataKind.SUMMARY.title, reportPeriod.name, date.format('yyyy'), formDataDepartment.name, getColumnName(tmpRow, alias))
         }
     } else if (periodList.size() == 0) {
         logger.warn("Не найдена «Сводная форма начисленных расходов уровня обособленного подразделения в статусе «Принята»: Тип:%s, Период: %s %s, Подразделение: %s. Ячейки по графе «%s», заполняемые из данной формы, будут заполнены нулевым значением.",
-                FormDataKind.SUMMARY.name, getPeriodName(etrPeriodOrder), date.format('yyyy'), formDataDepartment.name, getColumnName(tmpRow, alias))
+                FormDataKind.SUMMARY.title, getPeriodName(etrPeriodOrder), date.format('yyyy'), formDataDepartment.name, getColumnName(tmpRow, alias))
     }
 }
 
@@ -303,7 +303,7 @@ void logicCheck() {
         def tempRow = tempRows[i]
         def checkColumns = []
         // делаем проверку для первичных НФ или расчетных ячеек
-        if ((formData.kind == FormDataKind.PRIMARY) || !(opuMap.keySet() + knuMap.keySet()).contains(row.getAlias())) {
+        if ((formData.kind != FormDataKind.CONSOLIDATED) || !(opuMap.keySet() + knuMap.keySet()).contains(row.getAlias())) {
             checkColumns += check102Columns
         }
         checkColumns += checkCalcColumns
@@ -317,7 +317,7 @@ void calcValues(def dataRows, def sourceRows, boolean isCalc) {
         def rowSource = getDataRow(sourceRows, row.getAlias())
         switch (row.getAlias()) {
             case 'R1':
-                if (formData.kind == FormDataKind.PRIMARY) {
+                if (formData.kind != FormDataKind.CONSOLIDATED) {
                     row.comparePeriod = calcBO(rowSource, getComparativePeriodId())
                     row.currentPeriod = calcBO(rowSource, formData.reportPeriodId)
                 } else {
@@ -327,7 +327,7 @@ void calcValues(def dataRows, def sourceRows, boolean isCalc) {
                 break
             case 'R2':
             case 'R3':
-                if (formData.kind == FormDataKind.PRIMARY) {
+                if (formData.kind != FormDataKind.CONSOLIDATED) {
                     row.comparePeriod = getSourceValue(getComparativePeriodId(), row)
                     row.currentPeriod = getSourceValue(formData.reportPeriodId, row)
                 } else {

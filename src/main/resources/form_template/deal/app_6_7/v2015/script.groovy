@@ -5,6 +5,7 @@ import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
+import com.aplana.sbrf.taxaccounting.service.script.util.ScriptUtils
 import groovy.transform.Field
 
 /**
@@ -191,51 +192,13 @@ void logicCheck() {
         }
     }
 
-    // 11. Проверка наличия всех фиксированных строк «Итого по ЮЛ»
-    def tmpSubTotalRows = calcSubTotalRows(dataRows)
-    def subTotalRows = getSubTotalRows(dataRows)
-    def map = [:]
-    subTotalRows.each { row ->
-        map[row.fix] = row
-    }
-    tmpSubTotalRows.each { row ->
-        if (map[row.fix] == null) {
-            def value = row.fix.substring('Итого '.size())
-            logger.error("Группа строк «%s» не имеет строки подитога!", value)
-        }
-    }
+    // 9. Проверка наличия всех фиксированных строк «Итого по ЮЛ»
+    // 10. Проверка отсутствия лишних фиксированных строк «Итого по ЮЛ»
+    // 11. Проверка итоговых значений по фиксированным строкам «Итого по ЮЛ»
+    checkItog(dataRows)
 
-    // 12. Проверка отсутствия лишних фиксированных строк «Итого по ЮЛ»
-    def tmpMap = [:]
-    tmpSubTotalRows.each { row ->
-        tmpMap[row.fix] = row
-    }
-    subTotalRows.each { row ->
-        if (tmpMap[row.fix] == null) {
-            def value = row.fix.substring('Итого '.size())
-            logger.error("Строка %s: Данная строка подитога «%s» не относится к какой-либо группе строк!",
-                    row.getIndex(), value)
-        }
-    }
-
-    // 13. Проверка итоговых значений по фиксированным строкам «Итого по ЮЛ»
-    subTotalRows.each { row ->
-        if (tmpMap[row.fix]) {
-            totalColumns.each { alias ->
-                if (isDiffRow(tmpMap[row.fix], row, [alias])) {
-                    def value = row.fix.substring('Итого '.size())
-                    logger.error("Строка %s: Итоговое значение по группе строк «%s» рассчитано неверно в графе «%s»!",
-                            row.getIndex(), value, getColumnName(row, alias))
-                }
-            }
-        }
-    }
-
-    // 14. Проверка итоговых значений пофиксированной строке «Итого»
-    // TODO (Ramil Timerbaev) по чтз используется необщее сообщение, пока заменил на общий метод сравнения
-    // logger.error("Строка %s: Итоговое значение рассчитано неверно в графе «%s»!", row.getIndex(), getColumnName(row, 'sum'))
-    def totalRow = dataRows.find { it.getAlias() == 'total' }
-    if (totalRow) {
+    // 12. Проверка итоговых значений пофиксированной строке «Итого»
+    if (dataRows.find { it.getAlias() == 'total' }) {
         checkTotalSum(dataRows, totalColumns, logger, true)
     }
 }
@@ -260,7 +223,7 @@ void calc() {
     }
 
     // Добавление подитогов
-    addAllAliased(dataRows, new CalcAliasRow() {
+    addAllAliased(dataRows, new ScriptUtils.CalcAliasRow() {
         @Override
         DataRow<Cell> calc(int i, List<DataRow<Cell>> rows) {
             return calcItog(i, dataRows)
@@ -301,9 +264,9 @@ DataRow<Cell> getSubTotalRow(def title, def value2, int i) {
     if (title) {
         newRow.fix = title
     } else if (value2) {
-        newRow.fix = 'Итого ' + value2
+        newRow.fix = 'Итого по «' + value2 + '»'
     } else {
-        newRow.fix = 'Итого ЮЛ не задано'
+        newRow.fix = 'Итого по «ЮЛ не задано»'
     }
     newRow.setAlias('itg#'.concat(i.toString()))
     newRow.getCell('fix').colSpan = 5
@@ -317,7 +280,7 @@ def calcTotalRow(def dataRows) {
     def totalRow = (formDataEvent in [FormDataEvent.IMPORT, FormDataEvent.IMPORT_TRANSPORT_FILE]) ? formData.createStoreMessagingDataRow() : formData.createDataRow()
     totalRow.setAlias('total')
     totalRow.fix = 'Итого'
-    totalRow.getCell('fix').colSpan = 2
+    totalRow.getCell('fix').colSpan = 5
     allColumns.each {
         totalRow.getCell(it).setStyleAlias('Контрольные суммы')
     }
@@ -379,7 +342,7 @@ void importData() {
             allValues.remove(rowValues)
             rowValues.clear()
             continue
-        } else if (rowValues[INDEX_FOR_SKIP].contains("Итого ")) {
+        } else if (rowValues[INDEX_FOR_SKIP].contains("Итого по ")) {
             def subTotalRow = getNewSubTotalRowFromXls(rowValues, colOffset, fileRowIndex, rowIndex)
             if (totalRowFromFileMap[subTotalRow.fix] == null) {
                 totalRowFromFileMap[subTotalRow.fix] = []
@@ -605,7 +568,7 @@ def getSubTotalRows(def dataRows) {
 def calcSubTotalRows(def dataRows) {
     def tmpRows = dataRows.findAll { !it.getAlias() }
     // Добавление подитогов
-    addAllAliased(tmpRows, new CalcAliasRow() {
+    addAllAliased(tmpRows, new ScriptUtils.CalcAliasRow() {
         @Override
         DataRow<Cell> calc(int i, List<DataRow<Cell>> rows) {
             return calcItog(i, rows)
@@ -613,4 +576,38 @@ def calcSubTotalRows(def dataRows) {
     }, groupColumns)
 
     return tmpRows.findAll { it.getAlias() }
+}
+
+// Проверки подитоговых сумм
+void checkItog(def dataRows) {
+    // Рассчитанные строки итогов
+    def testItogRows = calcSubTotalRows(dataRows)
+    // Имеющиеся строки итогов
+    def itogRows = dataRows.findAll { it.getAlias() != null && !'total'.equals(it.getAlias()) }
+    checkItogRows(dataRows, testItogRows, itogRows, groupColumns, logger, new ScriptUtils.GroupString() {
+        @Override
+        String getString(DataRow<Cell> row) {
+            return getValuesByGroupColumn(row)
+        }
+    }, new ScriptUtils.CheckGroupSum() {
+        @Override
+        String check(DataRow<Cell> row1, DataRow<Cell> row2) {
+            if (row1.sum != row2.sum) {
+                return getColumnName(row1, 'sum')
+            }
+            return null
+        }
+    })
+}
+
+// Возвращает строку со значениями полей строки по которым идет группировка
+String getValuesByGroupColumn(DataRow row) {
+    if (!row.name) {
+        return 'ЮЛ не задано'
+    }
+    def map = getRefBookValue(520, row.name)
+    if (map != null) {
+        return map.NAME?.stringValue
+    }
+    return null
 }

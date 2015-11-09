@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <formTemplateContent>
     <fixedRows>false</fixedRows>
+    <monthly>true</monthly>
+    <comparative>false</comparative>
+    <accruing>false</accruing>
+    <updating>false</updating>
     <name>(РНУ-46) Регистр налогового учёта «карточка по учёту основных средств и капитальных вложений в неотделимые
         улучшения арендованного и полученного по договору безвозмездного пользования имущества»
     </name>
