@@ -60,6 +60,7 @@ void save() {
         def String kio = it.KIO?.stringValue
         def String regNum = it.REG_NUM?.stringValue
         def String kpp = it.KPP?.stringValue
+        def String taxCodeIncorporation = it.TAX_CODE_INCORPORATION?.stringValue
         def Date startDate = it.START_DATE?.dateValue
         def Date endDate = it.END_DATE?.dateValue
         def Long orgCode = getRecord(REF_BOOK_ORG_CODE_ID, it?.ORG_CODE.referenceValue)?.CODE.numberValue.longValue()
@@ -79,11 +80,12 @@ void save() {
         }
 
         // 3. Обязательное заполнение идентификационного кода для российской организации
-        if (orgCode == 1 && (!inn && !swift)) {
-            logger.error('Для российской организации обязательно должно быть заполнено одно из следующих полей: «ИНН», «Код SWIFT»!')
+        if (orgCode == 1 && (!inn || !kpp)) {
+            logger.error('Для российской организации обязательно должно быть заполнено одно из следующих полей: «ИНН», «КПП»!')
         }
 
         // 4. Проверка на корректное заполнение идентификационного кода для российской организации
+        // todo добавили новый аттриуб
         if (orgCode == 1 && (regNum || kio)) {
             List<String> attributeNames = new ArrayList<String>();
             if (regNum) {
@@ -92,11 +94,14 @@ void save() {
             if (kio) {
                 attributeNames.add("«${getAttrName('KIO')}»")
             }
+            if (taxCodeIncorporation) {
+                attributeNames.add("«${getAttrName('TAX_CODE_INCORPORATION')}»")
+            }
 
             if (attributeNames.size() == 1) {
                 logger.error('Для российской организации нельзя указать поле %s!', attributeNames.get(0))
             } else {
-                logger.error('Для российской организации нельзя указать поля %s и %s!', attributeNames.get(0), attributeNames.get(1))
+                logger.error('Для российской организации нельзя указать поля %s!', StringUtils.join(attributeNames.toArray(), ',' as char))
             }
         }
 
@@ -113,22 +118,20 @@ void save() {
             logger.error('Для иностранной организации нельзя указать %s!', StringUtils.join(attributeNames.toArray(), ',' as char))
         }
 
-        // 6. Проверка на одновременное заполнение ИНН и КПП
-        if (orgCode == 1 && ((inn && !kpp) || (kpp && !inn))) {
-            logger.error('Обязательно должны быть указаны «ИНН» и «КПП»!')
-        }
-
-        // 7. Уникальность поля ИНН
+        // 6. Уникальность поля ИНН
         checkUnique('INN', inn, "ИНН")
 
-        // 8. Уникальность поля КИО
+        // 7. Уникальность поля КИО
         checkUnique('KIO', kio, "КИО")
 
-        // 9. Уникальность поля Код SWIFT
+        // 8. Уникальность поля Код SWIFT
         checkUnique('SWIFT', swift, "кодом SWIFT")
 
-        // 10. Уникальность поля Регистрационный номер в стране инкорпорации
+        // 9. Уникальность поля Регистрационный номер в стране инкорпорации
         checkUnique('REG_NUM', regNum, "регистрационным номером в стране инкорпорации")
+
+        // 10. Уникальность поля Код налогоплательщика в стране инкорпорации
+        //checkUnique('', regNum, "кодом налогоплательщика в стране инкорпорации")
 
         // 11. Проверка правильности заполнения полей «Дата наступления основания для включения в список» и «Дата наступления основания для исключении из списка»
         if (type == "ВЗЛ" && startDate != null && endDate != null && startDate > endDate) {
@@ -156,8 +159,19 @@ void save() {
         }
 
         // 13. Заполнение обязательных полей для РОЗ
-        if (type == "РОЗ" && !offshoreCode) {
-            logger.error('Для Резидента оффшорной зоны обязательно должно быть заполнено поле «%s»!', getAttrName('OFFSHORE_CODE'))
+        if (type == "РОЗ" && (!offshoreCode || !kio)) {
+            List<String> attributeNames = new ArrayList<String>();
+            if (!offshoreCode) {
+                attributeNames.add("«${getAttrName('OFFSHORE_CODE')}»")
+            }
+            if (!kio) {
+                attributeNames.add("«${getAttrName('KIO')}»")
+            }
+            if (attributeNames.size() == 1) {
+                logger.error('Для Резидента оффшорной зоны обязательно должно быть заполнено поле «%s»!', attributeNames.get(0))
+            } else {
+                logger.error('Для Резидента оффшорной зоны обязательно должны быть заполнены поля %s!', StringUtils.join(attributeNames.toArray(), ',' as char))
+            }
         }
 
         // 3.2.3	Проверки атрибутов справочников на соответствие паттерну
@@ -192,16 +206,16 @@ void save() {
         if (orgCode == 1) {
             if (inn && kpp) {
                 ikksr = inn + " / " + kpp
-            } else if (swift) {
-                ikksr = swift
             }
         } else if (orgCode == 2) {
-            if (kio) {
-                ikksr = kio
+            if (regNum) {
+                ikksr = regNum
+            } else if (taxCodeIncorporation) {
+                ikksr = taxCodeIncorporation
             } else if (swift) {
                 ikksr = swift
-            } else if (regNum) {
-                ikksr = regNum
+            } else if (kio) {
+                ikksr = kio
             }
         }
         it.put("IKKSR", new RefBookValue(RefBookAttributeType.STRING, ikksr))
@@ -211,16 +225,16 @@ void save() {
         if (orgCode == 1) {
             if (inn) {
                 iksr = inn
-            } else if (swift) {
-                iksr = swift
             }
         } else if (orgCode == 2) {
-            if (kio) {
-                iksr = kio
+            if (regNum) {
+                iksr = regNum
+            } else if (taxCodeIncorporation) {
+                iksr = taxCodeIncorporation
             } else if (swift) {
                 iksr = swift
-            } else if (regNum) {
-                iksr = regNum
+            } else if (kio) {
+                iksr = kio
             }
         }
         it.put("IKSR", new RefBookValue(RefBookAttributeType.STRING, iksr))
