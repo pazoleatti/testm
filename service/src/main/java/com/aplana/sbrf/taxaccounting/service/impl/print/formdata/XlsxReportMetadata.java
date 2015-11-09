@@ -12,7 +12,7 @@ public final class XlsxReportMetadata {
 	}
 	
 	public static final String DATE_CREATE = "« %s » %s 20%s г.";
-	public static final String REPORT_PERIOD = "за %s %d г./%s %d г. %s";
+	public static final String REPORT_PERIOD = "за %s %d г.%s %s %s";
 	public static final String MONTHLY = "за %s %d г.";
 
 	public static final String RANGE_DATE_CREATE = "date_create";
