@@ -54,6 +54,9 @@ public final class FormatUtils {
      * @return
      */
     public static String getAccName(String name, Date calendarStartDate) {
+        if (calendarStartDate == null) {
+            return "";
+        }
         Calendar sDate = Calendar.getInstance();
         sDate.setTime(calendarStartDate);
         int day = sDate.get(Calendar.DAY_OF_MONTH);
