@@ -883,7 +883,7 @@ insert into ref_book_record (id, record_id, ref_book_id, version, status) values
 	insert into ref_book_value (record_id, attribute_id, string_value)select seq_ref_book_record.currval, 5194, rbv_ref.string_value from ref_book_value rbv join ref_book_value rbv_ref on rbv.attribute_id = 50 and rbv_ref.attribute_id = 53 and rbv.record_id = rbv_ref.record_id where rbv.string_value = '690';
 	insert into ref_book_value (record_id, attribute_id, string_value)select seq_ref_book_record.currval, 5195, rbv_ref.string_value from ref_book_value rbv join ref_book_value rbv_ref on rbv.attribute_id = 50 and rbv_ref.attribute_id = 54 and rbv.record_id = rbv_ref.record_id where rbv.string_value = '690';
 			
-
+update ref_book_record set version = to_date('01.01.2012', 'DD.MM.YYYY') where ref_book_id = 519;
 ----------------------------------------------------------------------------------------------------------------
 --http://jira.aplana.com/browse/SBRFACCTAX-12861: Юридические лица / Участники ТЦО
 INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) VALUES (520, 'Участники ТЦО',1,0,0,null);
