@@ -930,6 +930,30 @@ using (
 on (tgt.record_id = src.record_id and tgt.attribute_id = src.attribute_id)      
 when matched then
      update set tgt.number_value = src.new_number_value;
+	 
+----------------------------------------------------------------------------------------------------------------
+--http://jira.aplana.com/browse/SBRFACCTAX-13335: Транспорт, Добавить поле "Код налогового органа (пром.)", прочие связанные изменения 
+update ref_book_attribute set name = 'Код налогового органа (кон.)' where id = 3102;
 
+update ref_book_attribute set ord = 19 where id = 3118;
+update ref_book_attribute set ord = 18 where id = 3117;
+update ref_book_attribute set ord = 17 where id = 3116;
+update ref_book_attribute set ord = 16 where id = 3115;
+update ref_book_attribute set ord = 15 where id = 3114;
+update ref_book_attribute set ord = 14 where id = 3113;
+update ref_book_attribute set ord = 13 where id = 3112;
+update ref_book_attribute set ord = 12 where id = 3111;
+update ref_book_attribute set ord = 11 where id = 3110;
+update ref_book_attribute set ord = 10 where id = 3109;
+update ref_book_attribute set ord = 9 where id = 3108;
+update ref_book_attribute set ord = 8 where id = 3107;
+update ref_book_attribute set ord = 7 where id = 3106;
+update ref_book_attribute set ord = 6 where id = 3105;
+update ref_book_attribute set ord = 5 where id = 3104;
+update ref_book_attribute set ord = 4 where id = 3103;
+
+INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (3119, 310, 'Код налогового органа (пром.)','TAX_ORGAN_CODE_PROM', 1, 3, null, null, 1, null, 5, 0, 0, null, null,0, 4);
+
+----------------------------------------------------------------------------------------------------------------
 COMMIT;
 EXIT;
