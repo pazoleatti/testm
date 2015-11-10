@@ -50,6 +50,8 @@ public class DeclarationCreationView extends PopupViewWithUiHandlers<Declaration
     @UiField
     RefBookPicker taxOrganKpp;
     @UiField
+    Label taxOrganCodeLabel;
+    @UiField
     HorizontalPanel codePanel;
     @UiField
     HorizontalPanel kppPanel;
@@ -119,8 +121,10 @@ public class DeclarationCreationView extends PopupViewWithUiHandlers<Declaration
 
         if (taxType == TaxType.TRANSPORT) {
             taxOrganCode.setTitle("Код налогового органа (кон.)");
+            taxOrganCodeLabel.setText("Код налогового органа (кон.)");
         } else {
             taxOrganCode.setTitle("Код налогового органа");
+            taxOrganCodeLabel.setText("Код налогового органа");
         }
         taxOrganCode.setSingleColumn("TAX_ORGAN_CODE");
         taxOrganKpp.setSingleColumn("KPP");
