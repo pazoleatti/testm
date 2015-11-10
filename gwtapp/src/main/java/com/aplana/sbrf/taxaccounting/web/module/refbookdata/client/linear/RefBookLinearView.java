@@ -221,7 +221,7 @@ public class RefBookLinearView extends ViewWithUiHandlers<RefBookDataLinearUiHan
                 }
             }
             //Если не было среди записей необходимой, то выставляем на первую
-            if (selectionModel.getSelectedObject()==null){
+            if (selectionModel.getSelectedObject()==null&&!dataRows.isEmpty()){
                 selectionModel.setSelected(dataRows.get(0), true);
             }
         }
