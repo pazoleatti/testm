@@ -80,6 +80,7 @@ public class DepartmentConfigPropertyView extends ViewWithUiHandlers<DepartmentC
 
     private TableHeader[] tableHeaderTransport = new TableHeader[]{
             new TableHeader("TAX_ORGAN_CODE"),
+            new TableHeader("TAX_ORGAN_CODE_PROM"),
             new TableHeader("KPP"),
             new TableHeader("TAX_PLACE_TYPE_CODE"),
             new TableHeader("NAME"),
