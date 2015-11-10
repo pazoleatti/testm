@@ -273,7 +273,7 @@ void logicCheck() {
 
         if (!hasError) {
             columns.each { alias ->
-                if (lastRow[alias] != tmpTotal[alias]) {
+                if ((lastRow[alias] ?: 0) != (tmpTotal[alias] ?: 0)) {
                     logger.error('Строка ' + lastRow.getIndex() + ': ' + WRONG_TOTAL, getColumnName(lastRow, alias))
                     hasError = true
                 }
