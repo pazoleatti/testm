@@ -59,6 +59,13 @@
         <precision>0</precision>
     </columns>
     <styles>
+        <alias>Корректировка-добавлено</alias>
+        <backColor>PALE_GREEN</backColor>
+        <bold>false</bold>
+        <fontColor>BLACK</fontColor>
+        <italic>false</italic>
+    </styles>
+    <styles>
         <alias>Редактируемая</alias>
         <backColor>LIGHT_BLUE</backColor>
         <bold>false</bold>
@@ -68,8 +75,29 @@
     <styles>
         <alias>Автозаполняемая</alias>
         <backColor>WHITE</backColor>
-        <bold>false</bold>
+        <bold>true</bold>
         <fontColor>DARK_GREEN</fontColor>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Корректировка-удалено</alias>
+        <backColor>LIGHT_CORAL</backColor>
+        <bold>false</bold>
+        <fontColor>BLACK</fontColor>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Корректировка-без изменений</alias>
+        <backColor>GREY</backColor>
+        <bold>false</bold>
+        <fontColor>BLACK</fontColor>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Корректировка-изменено</alias>
+        <backColor>WHITE</backColor>
+        <bold>true</bold>
+        <fontColor>RED</fontColor>
         <italic>false</italic>
     </styles>
 </formTemplateContent>
