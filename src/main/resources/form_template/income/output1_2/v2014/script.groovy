@@ -462,42 +462,54 @@ def formNewRow(def rowList, def dataRowsPrev, def prevPeriodStartDate, def prevP
         // Вычисляется для каждого уникального сочетания «Графа 7» первичной формы и «Графа 8» первичной формы:
         // Если «Графа 17» формы-источника = «1» и «Графа 16» формы-источника = «5» и «Графа 22» формы-источника = «13», то
         // «Графа 27» = (Сумма по «Графа 23» формы-источника / «Графа 12» формы-источника * «Графа 6» формы-источника)
-        if (row.allSum) {
-            newRow.dividendSumForTaxStavka9 = ((rowList.sum{ (it.status == 1 && it.type == 5 && it.rate == 13 && it.dividends) ? (it.dividends) : 0 })/ row.allSum) * row.distributionSum
+        if (newRow.dividendNonIncome < 0) {
+            newRow.dividendSumForTaxStavka9 = 0
+        } else {
+            if (row.allSum) {
+                newRow.dividendSumForTaxStavka9 = ((rowList.sum{ (it.status == 1 && it.type == 5 && it.rate == 13 && it.dividends) ? (it.dividends) : 0 })/ row.allSum) * row.distributionSum
+            }
         }
 
         // Вычисляется для каждого уникального сочетания «Графа 7» первичной формы и «Графа 8» первичной формы:
         // Если «Графа 17» формы-источника = «1» и «Графа 16» формы-источника = «3» и «Графа 22» формы-источника = «0», то
         // «Графа 28» = (Сумма по «Графа 23» формы-источника / «Графа 12» формы-источника * «Графа 6» формы-источника)
-        if (row.allSum) {
-            newRow.dividendSumForTaxStavka0 = ((rowList.sum{ (it.status == 1 && it.type == 3 && it.rate == 0 && it.dividends) ? (it.dividends) : 0 }) / row.allSum) * row.distributionSum
+        if (newRow.dividendNonIncome < 0) {
+            newRow.dividendSumForTaxStavka0 = 0
+        } else {
+            if (row.allSum) {
+                newRow.dividendSumForTaxStavka0 = ((rowList.sum{ (it.status == 1 && it.type == 3 && it.rate == 0 && it.dividends) ? (it.dividends) : 0 }) / row.allSum) * row.distributionSum
+            }
         }
 
         // «Графа 29»
         // Сумма по «Графа 27» по всем строкам группы строк формы-источника, в которых («Графа 16» не равна «2» И «Графа 17» = «1»)
-        def value2 = rowList.sum { (it.type != 2 && it.status == 1 && it.withheldSum != null) ? it.withheldSum : 0 }
-        if (row.emitentInn == graph3String) { // Группа относится к сберу
-            fuond = rowList.find { it.status == 1 && it.type == 5 && it.rate == 13 }
-            if (fuond) { // Есто строки для которых «Графа 17» = «1» и «Графа 16» = «5» и «Графа 22» = «13»
-                if (row.allSum) { // Деление не на ноль
-                    sourseSum = rowList.sum {
-                        (it.status == 1 && it.type == 5 && it.rate == 13 && it.dividends) ? it.dividends : 0
+        if (newRow.dividendNonIncome < 0) {
+            newRow.dividendSumForTaxStavka0 = 0
+        } else {
+            def value2 = rowList.sum { (it.type != 2 && it.status == 1 && it.withheldSum != null) ? it.withheldSum : 0 }
+            if (row.emitentInn == graph3String) { // Группа относится к сберу
+                fuond = rowList.find { it.status == 1 && it.type == 5 && it.rate == 13 }
+                if (fuond) { // Есто строки для которых «Графа 17» = «1» и «Графа 16» = «5» и «Графа 22» = «13»
+                    if (row.allSum) { // Деление не на ноль
+                        sourseSum = rowList.sum {
+                            (it.status == 1 && it.type == 5 && it.rate == 13 && it.dividends) ? it.dividends : 0
+                        }
+                        newRow.taxSum = ((sourseSum / row.allSum) * 0.13) * row.distributionSum
+                    } else { // при делении на ноль «Графа 29» = 0
+                        newRow.taxSum = 0
                     }
-                    newRow.taxSum = ((sourseSum / row.allSum) * 0.13) * row.distributionSum
-                } else { // при делении на ноль «Графа 29» = 0
+                } else { // нет строк для которых «Графа 17» = «1» и «Графа 16» = «5» и «Графа 22» = «13»
                     newRow.taxSum = 0
                 }
-            } else { // нет строк для которых «Графа 17» = «1» и «Графа 16» = «5» и «Графа 22» = «13»
-                newRow.taxSum = 0
+            } else { // Группа НЕ относится к сберу
+                newRow.taxSum = value2
             }
-        } else { // Группа НЕ относится к сберу
-            newRow.taxSum = value2
-        }
-        if (newRow.taxSum != value2) { // проверка алгоритма
-            logger.warn("Строка ${rowIndex}: Графа «Исчисленная сумма налога, подлежащая уплате в бюджет» заполнена неверно! Не выполняется условие: " +
-                    "«Графа 29» = Сумма по «Графа 27» для строк формы-источника «Расчет налога на прибыль организаций " +
-                    "с доходов, удерживаемого налоговым агентом (источником выплаты доходов)», " +
-                    "в которых «Графа 3» = «${row.inn}» и «Графа 7» = «${row.decisionNumber}»")
+            if (newRow.taxSum != value2) { // проверка алгоритма
+                logger.warn("Строка ${rowIndex}: Графа «Исчисленная сумма налога, подлежащая уплате в бюджет» заполнена неверно! Не выполняется условие: " +
+                        "«Графа 29» = Сумма по «Графа 27» для строк формы-источника «Расчет налога на прибыль организаций " +
+                        "с доходов, удерживаемого налоговым агентом (источником выплаты доходов)», " +
+                        "в которых «Графа 3» = «${row.inn}» и «Графа 7» = «${row.decisionNumber}»")
+            }
         }
 
         // Графа 30: Принимает значение:
