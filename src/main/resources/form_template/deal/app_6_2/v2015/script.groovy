@@ -577,10 +577,10 @@ def getRecordId(String name, String iksr, int fileRowIndex, int colIndex, String
     def ref_id = 520
     def RefBook refBook = refBookFactory.get(ref_id)
 
-    String filter = "(LOWER(INN) = LOWER('$iksr') || " +
-            "LOWER(REG_NUM) = LOWER('$iksr') || " +
-            "LOWER(TAX_CODE_INCORPORATION) = LOWER('$iksr') || " +
-            "LOWER(SWIFT) = LOWER('$iksr')" +
+    String filter = "(LOWER(INN) = LOWER('$iksr') or " +
+            "LOWER(REG_NUM) = LOWER('$iksr') or " +
+            "LOWER(TAX_CODE_INCORPORATION) = LOWER('$iksr') or " +
+            "LOWER(SWIFT) = LOWER('$iksr') or " +
             "LOWER(KIO) = LOWER('$iksr'))"
     if (recordCache[ref_id] != null) {
         if (recordCache[ref_id][filter] != null) {
