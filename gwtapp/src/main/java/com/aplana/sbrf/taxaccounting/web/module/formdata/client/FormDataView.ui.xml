@@ -225,7 +225,7 @@
                                 <style:LinkButton ui:field="signersAnchor" text="Параметры печатной формы"
                                                   img="resources/img/businessperson-16.png"
                                                   title="Указать параметры печатной формы"/>
-                                <style:LinkButton ui:field="filesComments" text="Файлы и комментарий" img="resources/img/exclamation_mark.png"
+                                <style:LinkButton ui:field="filesComments" text="Файлы и комментарии" img="resources/img/exclamation_mark.png"
                                                   title="Источники и приемники"/>
                                 <style:LinkButton ui:field="sources" text="Источники и приемники" img="resources/img/source-target.png"
                                                   title="Источники и приемники"/>
