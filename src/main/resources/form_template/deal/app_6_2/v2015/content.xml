@@ -7,6 +7,7 @@
     <updating>false</updating>
     <name>6.2. Размещение средств на межбанковском рынке</name>
     <fullName>6.2. Отчет в отношении доходов ПАО Сбербанк по Контролируемым сделкам, связанным с размещением средств (включая драгоценные металлы) на межбанковском рынке</fullName>
+    <header>6.2</header>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>fix</alias>
         <checking>false</checking>
@@ -42,7 +43,7 @@
         <alias>iksr</alias>
         <checking>false</checking>
         <columnType>REFERENCE</columnType>
-        <name>ИНН/КИО</name>
+        <name>ИНН/ КИО</name>
         <order>4</order>
         <width>7</width>
         <parentAlias>name</parentAlias>
@@ -142,7 +143,7 @@
         <alias>cost</alias>
         <checking>false</checking>
         <columnType>NUMBER</columnType>
-        <name>Итого стоимость без учета НДС, акцизов и пошлин, руб.</name>
+        <name>Итого стоимость без учета НДС, акцизов и пошлины, руб.</name>
         <order>14</order>
         <width>10</width>
         <maxLength>17</maxLength>

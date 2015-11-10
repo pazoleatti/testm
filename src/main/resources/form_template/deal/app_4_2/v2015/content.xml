@@ -4,7 +4,7 @@
     <monthly>false</monthly>
     <comparative>false</comparative>
     <accruing>false</accruing>
-    <updating>true</updating>
+    <updating>false</updating>
     <name>Приложение 4.2.</name>
     <fullName>Приложение 4.2. Отчет в отношении доходов и расходов Банка по сделкам с ВЗЛ, РОЗ, НЛ по итогам окончания Налогового периода</fullName>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="autoNumerationColumn">

@@ -194,6 +194,8 @@ public abstract class AbstractEditView extends ViewWithUiHandlers<EditFormUiHand
     @SuppressWarnings("unchecked")
     public void fillInputFields(Map<String, RefBookValueSerializable> record) {
         inputRecord = record;
+        if (record==null)
+            return;
         boolean textFieldFound = false;
         for (Map.Entry<RefBookColumn, HasValue> w : widgets.entrySet()) {
             //Первый по порядку текстовый атрибут справочника принимает значение "Новая запись" (если текстовые атрибуты отсутствуют, то шаг не выполняется)

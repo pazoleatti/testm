@@ -652,7 +652,7 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
     private static final String FORM_PART_WITHOUT_ID = "(select null as ID, :formTemplateId as FORM_TEMPLATE_ID, :kind as KIND, :departmentReportPeriodId as DEPARTMENT_REPORT_PERIOD_ID, :compPeriod as COMPARATIVE_DEP_REP_PER_ID, :accruing as ACCRUING from dual)";
     private static final String GET_SOURCES_INFO = "with insanity as \n" +
             "     (\n" +
-            "     select sfd.id, sd.id as departmentId, sd.name as departmentName, sdrp.id as departmentReportPeriod, stp.YEAR, srp.name as periodName, \n" +
+            "     select sfd.id, sd.id as departmentId, sd.name as departmentName, sdrp.id as departmentReportPeriod, stp.YEAR, srp.name as periodName, rp.CALENDAR_START_DATE as periodStartDate, \n" +
             "     sdrp.CORRECTION_DATE, sfd.state, sft.status as templateState, sfd.manual, \n" +
             "     st.id as formTypeId, st.name as formTypeName, sfk.id as formDataKind, fdpd.id as performerId, fdpd.name as performerName, \n" +
             "     --Если искомый экземпляр создан, то берем его значения периода и признака. \n" +
@@ -703,9 +703,18 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
             "                 connect by level <= 12\n" +
             "            ) lvl on ADD_MONTHS(t.d1, lvl.i - 1) <= t.d2 \n" +
             "           ) perversion on perversion.record_id = rp.DICT_TAX_PERIOD_ID and perversion.lvl = case when (sft.MONTHLY=1 and ft.MONTHLY=0) then perversion.lvl else 1 end\n" +
+            "      --данные об источнике сравнения для приемника     \n" +
+            "      left join department_report_period inn_cdrp on inn_cdrp.id = fd.COMPARATIVE_DEP_REP_PER_ID   \n" +
             "      --отбираем экземпляры с учетом периода сравнения, признака нарастающего истога, списка месяцов     \n" +
-            "      left join form_data sfd on (sfd.kind = sfk.id and sfd.FORM_TEMPLATE_ID = sft.id and sfd.DEPARTMENT_REPORT_PERIOD_ID = sdrp.id \n" +
-            "        and (sft.COMPARATIVE = 0 or ft.COMPARATIVE = 0 or sfd.COMPARATIVE_DEP_REP_PER_ID = fd.COMPARATIVE_DEP_REP_PER_ID) and (sft.ACCRUING = 0 or ft.ACCRUING = 0 or sfd.ACCRUING = fd.ACCRUING)) \n" +
+            "      left join (\n" +
+            "                select fd.*, drp.report_period_id as comparative_report_period_id\n" +
+            "                from form_data fd\n" +
+            "                --данные об источниках сравнения для потенциальных источников\n" +
+            "                left join department_report_period drp on fd.comparative_dep_rep_per_id = drp.id\n" +
+            "                ) sfd \n" +
+            "           on (sfd.kind = sfk.id and sfd.FORM_TEMPLATE_ID = sft.id and sfd.DEPARTMENT_REPORT_PERIOD_ID = sdrp.id \n" +
+            "        and (sft.COMPARATIVE = 0 or ft.COMPARATIVE = 0 or inn_cdrp.report_period_id  = sfd.comparative_report_period_id)\n" +
+            "        and (sft.ACCRUING = 0 or ft.ACCRUING = 0 or sfd.ACCRUING = fd.ACCRUING)) \n" +
             "        and coalesce(sfd.PERIOD_ORDER, perversion.month) = perversion.month\n" +
             "      left join form_data_performer fdp on fdp.form_data_id = sfd.id \n" +
             "      left join department fdpd on fdpd.id = fdp.PRINT_DEPARTMENT_ID      \n" +
@@ -720,7 +729,7 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
             "      group by sdft_id\n" +
             "  )         \n" +
             "select id, departmentId, departmentName, correction_date, departmentReportPeriod, periodName, year, state, " +
-            "templateState, formTypeId, formTypeName, formDataKind, performerId, performerName, " +
+            "templateState, formTypeId, formTypeName, formDataKind, performerId, performerName, periodStartDate, " +
             "compPeriodId, compPeriodName, compPeriodYear, compPeriodStartDate, accruing, month, manual \n" +
             "       from insanity i\n" +
             "       left join aggregated_insanity i_agg on i.sdft_id = i_agg.sdft_id \n" +
@@ -764,7 +773,7 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
             "     (\n" +
             "     select tfd.id, td.id as departmentId, td.name as departmentName, tdrp.id as departmentReportPeriod, ttp.YEAR, trp.id as reportperiodid, trp.name as periodName, \n" +
             "     tdrp.CORRECTION_DATE, tfd.state, tft.status as templateState, tfd.manual,\n" +
-            "     tt.id as formTypeId, tt.name as formTypeName, tfk.id as formDataKind, fdpd.id as performerId, fdpd.name as performerName, \n" +
+            "     tt.id as formTypeId, tt.name as formTypeName, tfk.id as formDataKind, fdpd.id as performerId, fdpd.name as performerName, rp.CALENDAR_START_DATE as periodStartDate, \n" +
             "     --Если искомый экземпляр создан, то берем его значения периода и признака. \n" +
             "     --Если не создан и в его макете есть признак сравнения, то период и признак такой же как у источника\n" +
             "     --Если не создан и в его макете нет признаков сравнения, то период и признак пустой\n" +
@@ -827,10 +836,19 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
             "                 connect by level <= 12\n" +
             "            ) lvl on ADD_MONTHS(t.d1, lvl.i - 1) <= t.d2 \n" +
             "           ) perversion on perversion.record_id = rp.DICT_TAX_PERIOD_ID and perversion.lvl = case when (tft.MONTHLY=1 and ft.MONTHLY=0) then perversion.lvl else 1 end\n" +
+            "      --данные об источнике сравнения для приемника     \n" +
+            "      left join department_report_period inn_cdrp on inn_cdrp.id = fd.COMPARATIVE_DEP_REP_PER_ID   \n" +
             "      --отбираем экземпляры с учетом периода сравнения, признака нарастающего истога, списка месяцов     \n" +
-            "      left join form_data tfd on (tfd.kind = tfk.id and tfd.FORM_TEMPLATE_ID = tft.id and tfd.DEPARTMENT_REPORT_PERIOD_ID = tdrp.id\n" +
-            "        and (tft.COMPARATIVE = 0 or ft.COMPARATIVE = 0 or tfd.COMPARATIVE_DEP_REP_PER_ID = fd.COMPARATIVE_DEP_REP_PER_ID) and (tft.ACCRUING = 0 or ft.ACCRUING = 0 or tfd.ACCRUING = fd.ACCRUING)) \n" +
-            "        and coalesce(tfd.PERIOD_ORDER, perversion.month) = perversion.month \n" +
+            "      left join (\n" +
+            "                select fd.*, drp.report_period_id as comparative_report_period_id\n" +
+            "                from form_data fd\n" +
+            "                --данные об источниках сравнения для потенциальных источников\n" +
+            "                left join department_report_period drp on fd.comparative_dep_rep_per_id = drp.id\n" +
+            "                ) tfd \n" +
+            "           on (tfd.kind = tfk.id and tfd.FORM_TEMPLATE_ID = tft.id and tfd.DEPARTMENT_REPORT_PERIOD_ID = tdrp.id \n" +
+            "        and (tft.COMPARATIVE = 0 or ft.COMPARATIVE = 0 or inn_cdrp.report_period_id  = tfd.comparative_report_period_id)\n" +
+            "        and (tft.ACCRUING = 0 or ft.ACCRUING = 0 or tfd.ACCRUING = fd.ACCRUING)) \n" +
+            "        and coalesce(tfd.PERIOD_ORDER, perversion.month) = perversion.month\n" +
             "      left join form_data_performer fdp on fdp.form_data_id = tfd.id \n" +
             "      left join department fdpd on fdpd.id = fdp.PRINT_DEPARTMENT_ID\n" +
             "      left join department_report_period tcdrp on tcdrp.id = tfd.COMPARATIVE_DEP_REP_PER_ID\n" +
@@ -848,7 +866,9 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
             "          max(last_correction_date) for agg_type in ('1' as last_correction_date, '0' global_last_correction_date)\n" +
             "      )\n" +
             ")         \n" +
-            "select i.id, i.departmentId, i.departmentName, i.correction_date, ai.last_correction_date, ai.global_last_correction_date, i.reportperiodid, i.departmentReportPeriod, i.periodName, i.year, i.state, i.templateState, i.formTypeId, i.formTypeName, i.formDataKind, i.performerId, i.performerName, i.compPeriodId, i.compPeriodName, i.compPeriodYear, i.compPeriodStartDate, i.accruing, i.month, i.manual \n" +
+            "select i.id, i.departmentId, i.departmentName, i.correction_date, ai.last_correction_date, ai.global_last_correction_date, i.reportperiodid, i.departmentReportPeriod, " +
+            "i.periodName, i.year, i.state, i.templateState, i.formTypeId, i.formTypeName, i.formDataKind, i.performerId, i.performerName, periodStartDate, " +
+            "i.compPeriodId, i.compPeriodName, i.compPeriodYear, i.compPeriodStartDate, i.accruing, i.month, i.manual \n" +
             "       from insanity i\n" +
             "       --обращение к аггрегированным данным для определения, какие существуют данные в связке по подразделению, типу, виду, периоду и месяцу экземпляры данных, их максимальную дату и дату последнего периода корректировки, если данные по экземлярам отсутствуют \n" +
             "       left join aggregated_insanity ai on i.id is null and ai.departmentId = i.departmentId and ai.formtypeid = i.formtypeid and ai.formdatakind = i.formdatakind and ai.reportperiodid = i.reportperiodid  and nvl(i.month,-1) = nvl(ai.month,-1)\n" +
@@ -997,7 +1017,7 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
             "     (\n" +
             "     select sfd.id, sd.id as departmentId, sd.name as departmentName, sdrp.id as departmentReportPeriod, stp.YEAR, srp.name as periodName, \n" +
             "     sdrp.CORRECTION_DATE, sfd.state, sft.status as templateState, sfd.manual, \n" +
-            "     st.id as formTypeId, st.name as formTypeName, sfk.id as formDataKind, fdpd.id as performerId, fdpd.name as performerName, \n" +
+            "     st.id as formTypeId, st.name as formTypeName, sfk.id as formDataKind, fdpd.id as performerId, fdpd.name as performerName, rp.CALENDAR_START_DATE as periodStartDate, \n" +
             "     case when sft.MONTHLY=1 then perversion.month else sfd.PERIOD_ORDER end as month, sdft.id as sdft_id\n" +
             "      from %s dd\n" +
             "      join department_report_period drp on drp.id = dd.DEPARTMENT_REPORT_PERIOD_ID and (:declarationId is null or dd.id = :declarationId)\n" +
@@ -1094,15 +1114,19 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
             relation.setDepartmentId(SqlUtils.getInteger(rs, "departmentId"));
             relation.setFullDepartmentName(rs.getString("departmentName"));
             relation.setCorrectionDate(rs.getDate("correction_date"));
-            relation.setPeriodName(rs.getString("periodName"));
             relation.setYear(SqlUtils.getInteger(rs, "year"));
             relation.setFormTypeName(rs.getString("formTypeName"));
             if (!forDeclaration) {
                 relation.setComparativePeriodYear(SqlUtils.getInteger(rs, "compPeriodYear"));
                 relation.setComparativePeriodStartDate(rs.getDate("compPeriodStartDate"));
+                String basePeriodName = rs.getString("periodName");
+                relation.setPeriodName(relation.isAccruing() ?
+                        FormatUtils.getAccName(basePeriodName, rs.getDate("periodStartDate")) : basePeriodName);
                 String baseCompPeriodName = rs.getString("compPeriodName");
                 relation.setComparativePeriodName(relation.isAccruing() ?
                         FormatUtils.getAccName(baseCompPeriodName, relation.getComparativePeriodStartDate()) : baseCompPeriodName);
+            } else {
+                relation.setPeriodName(rs.getString("periodName"));
             }
             relation.setPerformerName(rs.getString("performerName"));
         } else {

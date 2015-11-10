@@ -1,5 +1,5 @@
 --http://jira.aplana.com/browse/SBRFACCTAX-12614: 0.8 Добавить новые поля в FORM_DATA
-alter table form_data add sorted_backup number(1) default 0 not null, edited number(1) default 0 not null;
+alter table form_data add (sorted_backup number(1) default 0 not null, edited number(1) default 0 not null);
 comment on column form_data.sorted_backup is 'Статус актуальности сортировки НФ для резервного среза (0 - Сортировка неактуальна; 1 - Сортировка актуальна)';
 comment on column form_data.edited is 'Признак изменения данных НФ в режиме редактирования (0 - Нет изменений; 1 - Есть изменения)';
 
@@ -71,9 +71,6 @@ alter table color add constraint color_unq_rgb unique (r,g,b);
 alter table color add constraint color_unq_hex unique (hex);
 alter table color add constraint color_chk_rgb_limits check ((r between 0 and 255) and (g between 0 and 255) and (b between 0 and 255));
 
-alter table form_style add constraint form_style_fk_font_color foreign key(font_color) references color(id);
-alter table form_style add constraint form_style_fk_back_color foreign key(back_color) references color(id);
-
 insert all
 	into color values (0,  'Черный',          0,  0,  0,  '#000000')
 	into color values (4,  'Белый',          255, 255, 255, '#FFFFFF')
@@ -91,13 +88,8 @@ insert all
 	into color values (13,	'Темно-зеленый',			0,	108, 0,	'#006C00')
 select * from dual;	
 
-INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id, table_name, is_versioned) VALUES (1,'Цвета',1,0,1,null, 'COLOR', 0);
-
-INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (95, 1, 'Наименование цвета', 	'NAME', 1, 1, null, null, 1, null, 20, 1, 0, null, 	null, 0, 50);
-INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (96, 1, 'R', 'R', 	2, 2, null, null, 1, 0, 	5, 1, 0, 1, 	null, 0, 3);
-INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (97, 1, 'G', 'G', 	2, 3, null, null, 1, 0, 	5, 1, 0, 1, 	null, 0, 3);
-INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (98, 1, 'B', 'B', 	2, 4, null, null, 1, 0, 	5, 1, 0, 1, 	null, 0, 3);
-INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (99, 1, 'HEX', 'HEX', 1, 5, null, null, 1, null, 	5, 1, 1, 1, 	null, 0, 7);
+alter table form_style add constraint form_style_fk_font_color foreign key(font_color) references color(id);
+alter table form_style add constraint form_style_fk_back_color foreign key(back_color) references color(id);
 
 --http://jira.aplana.com/browse/SBRFACCTAX-12847: Новые поля в form_template
 alter table form_template add accruing number(1) default 0;
@@ -106,6 +98,30 @@ comment on column form_template.accruing is 'Признак расчета на�
 comment on column form_template.updating is 'Отображать кнопку "Обновить" (0 - нет, 1 - да)';
 alter table form_template add constraint form_template_chk_accruing check (accruing in (0, 1));
 alter table form_template add constraint form_template_chk_updating check (updating in (0, 1));
+
+--http://jira.aplana.com/browse/SBRFACCTAX-13269: Удаление временного среза
+set serveroutput on size 30000;
+declare ifTableExists varchar2(256);
+begin
+  for x in (select * from form_template ft where status <> 2 order by id) loop
+  
+       select coalesce(max(ifExists), 0) into ifTableExists from (
+          select 1 as ifExists
+            from dual
+            where exists (select 1 from user_tables where table_name = 'FORM_DATA_'||x.id));
+            
+       if ifTableExists = 1 then
+          execute immediate 'delete from form_data_'||x.id||' where temporary=1';
+				if sql%rowcount <> 0 then
+					dbms_output.put_line('Table form_data_'||x.id||': '||sql%rowcount||' rows deleted.');
+				end if;
+		   else
+			    dbms_output.put_line('Table form_data_'||x.id||' does not exist.');
+		end if;     
+  end loop;
+end;
+/
+commit;
 
 commit;
 exit;

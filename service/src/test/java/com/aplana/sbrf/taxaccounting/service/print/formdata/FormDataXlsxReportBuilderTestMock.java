@@ -14,10 +14,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 public class FormDataXlsxReportBuilderTestMock {
 	
@@ -231,6 +228,7 @@ public class FormDataXlsxReportBuilderTestMock {
         formData.setAccruing(true);
         formData.setComparativePeriodId(null);
         formData.setPeriodOrder(1);
+        formData.setHeaders(Collections.EMPTY_LIST);
 
 		data.setData(formData);
 		data.setReportPeriod(reportPeriod);

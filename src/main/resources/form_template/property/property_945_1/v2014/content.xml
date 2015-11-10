@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <formTemplateContent>
     <fixedRows>false</fixedRows>
+    <monthly>true</monthly>
+    <comparative>false</comparative>
+    <accruing>false</accruing>
+    <updating>false</updating>
     <name>Данные бухгалтерского учета для расчета налога на имущество</name>
     <fullName>Данные бухгалтерского учета для расчета налога на имущество</fullName>
     <header>945.1</header>

@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <formTemplateContent>
     <fixedRows>true</fixedRows>
+    <monthly>true</monthly>
+    <comparative>false</comparative>
+    <accruing>false</accruing>
+    <updating>false</updating>
     <name>(РНУ-31) Регистр налогового учёта процентного дохода по купонным облигациям</name>
     <fullName>(РНУ-31) Регистр налогового учёта процентного дохода по купонным облигациям</fullName>
     <header>1290-31</header>
