@@ -917,5 +917,19 @@ update ref_book set is_versioned = 0 where id in (510, 511);
 --http://jira.aplana.com/browse/SBRFACCTAX-13264: Атрибут Код в неверсионируемый справочник Виды НФ
 INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (931,93,'Код','CODE',1,0,null,null,1,null,10,1,0,0,null,0,600);
 
+----------------------------------------------------------------------------------------------------------------
+--http://jira.aplana.com/browse/SBRFACCTAX-13246: ТЦО Изменить перечень отчетных периодов для МУКС 
+merge into ref_book_value tgt
+using (
+  select rbr.id as record_id, rbv.attribute_id, code.string_value as code, rbv.number_value, 
+         case when code.string_value in ('21', '31', '33', '34') then 1 else 0 end as new_number_value
+  from ref_book_value rbv
+  join ref_book_record rbr on rbv.record_id = rbr.id and rbv.attribute_id = 31
+  join ref_book_value code on code.record_id = rbr.id and code.attribute_id = 25
+      ) src
+on (tgt.record_id = src.record_id and tgt.attribute_id = src.attribute_id)      
+when matched then
+     update set tgt.number_value = src.new_number_value;
+
 COMMIT;
 EXIT;
