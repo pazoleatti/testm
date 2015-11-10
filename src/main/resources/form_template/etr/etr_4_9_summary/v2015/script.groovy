@@ -23,6 +23,12 @@ import groovy.transform.Field
  */
 
 switch (formDataEvent) {
+    case FormDataEvent.GET_HEADERS:
+        headers.get(0).sumBU = 'БУ, ' + (isBank() ? 'млн. руб.' : 'тыс. руб.')
+        headers.get(0).sumNUD = 'НУд, ' + (isBank() ? 'млн. руб.' : 'тыс. руб.')
+        headers.get(0).sumNUP = 'НУп, ' + (isBank() ? 'млн. руб.' : 'тыс. руб.')
+        headers.get(0).taxBurden = 'Налоговое бремя, ' + (isBank() ? 'млн. руб.' : 'тыс. руб.')
+        break
     case FormDataEvent.CREATE:
         formDataService.checkUnique(formData, logger)
         break
@@ -164,6 +170,10 @@ def getDepartmentName(Integer id) {
     return departmentNameMap[id]
 }
 
+boolean isBank() {
+    return formData.departmentId == 1 // по ЧТЗ
+}
+
 void importData() {
     def tmpRow = formData.createDataRow()
     int COLUMN_COUNT = 7
@@ -256,10 +266,10 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
     def headerMapping = [
             ([(headerRows[0][0]): getColumnName(tmpRow, 'rowNum')]),
             ([(headerRows[0][2]): getColumnName(tmpRow, 'department')]),
-            ([(headerRows[0][3]): getColumnName(tmpRow, 'sumBU')]),
-            ([(headerRows[0][4]): getColumnName(tmpRow, 'sumNUD')]),
-            ([(headerRows[0][5]): getColumnName(tmpRow, 'sumNUP')]),
-            ([(headerRows[0][6]): getColumnName(tmpRow, 'taxBurden')]),
+            ([(headerRows[0][3]): ('БУ, ' + (isBank() ? 'млн. руб.' : 'тыс. руб.'))]),
+            ([(headerRows[0][4]): ('НУд, ' + (isBank() ? 'млн. руб.' : 'тыс. руб.'))]),
+            ([(headerRows[0][5]): ('НУп, ' + (isBank() ? 'млн. руб.' : 'тыс. руб.'))]),
+            ([(headerRows[0][6]): ('Налоговое бремя, ' + (isBank() ? 'млн. руб.' : 'тыс. руб.'))]),
             ([(headerRows[1][3]): 'симв. ф.102 (26307.02+22204)']),
             ([(headerRows[1][4]): 'КНУ 21490']),
             ([(headerRows[1][5]): 'КНУ 21510']),

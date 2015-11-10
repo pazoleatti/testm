@@ -24,6 +24,11 @@ import groovy.transform.Field
 // графа 9 - deltaPercent
 
 switch (formDataEvent) {
+    case FormDataEvent.GET_HEADERS:
+        headers.get(1).comparePeriod = 'Сумма, ' + (isBank() ? 'млн. руб.' : 'тыс. руб.')
+        headers.get(1).currentPeriod = 'Сумма, ' + (isBank() ? 'млн. руб.' : 'тыс. руб.')
+        headers.get(1).deltaRub = 'Сумма, ' + (isBank() ? 'млн. руб.' : 'тыс. руб.')
+        break
     case FormDataEvent.CREATE:
         formDataService.checkUnique(formData, logger)
         break
@@ -458,6 +463,10 @@ void consolidation() {
     }
 }
 
+boolean isBank() {
+    return formData.departmentId == 1 // по ЧТЗ
+}
+
 void importData() {
     def tmpRow = formData.createDataRow()
     int COLUMN_COUNT = 9
@@ -550,11 +559,11 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
             ([(headerRows[0][3]): 'Период сравнения']),
             ([(headerRows[0][5]): 'Период']),
             ([(headerRows[0][7]): 'Изменения за период']),
-            ([(headerRows[1][3]): 'Сумма, тыс.руб.']),
+            ([(headerRows[1][3]): ('Сумма, ' + (isBank() ? 'млн. руб.' : 'тыс. руб.'))]),
             ([(headerRows[1][4]): 'Доля в общей сумме расходов за период, %']),
-            ([(headerRows[1][5]): 'Сумма, тыс.руб.']),
+            ([(headerRows[1][5]): ('Сумма, ' + (isBank() ? 'млн. руб.' : 'тыс. руб.'))]),
             ([(headerRows[1][6]): 'Доля в общей сумме расходов за период, %']),
-            ([(headerRows[1][7]): 'Сумма, тыс.руб.']),
+            ([(headerRows[1][7]): ('Сумма, ' + (isBank() ? 'млн. руб.' : 'тыс. руб.'))]),
             ([(headerRows[1][8]): '%'])
     ]
     (1..9).each { index ->
