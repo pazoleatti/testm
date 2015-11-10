@@ -181,6 +181,17 @@ public class DepartmentReportPeriodServiceImpl implements DepartmentReportPeriod
     }
 
     @Override
+    public DepartmentReportPeriod getFirst(int departmentId, int reportPeriodId) {
+        try {
+            return departmentReportPeriodDao.getFirst(departmentId, reportPeriodId);
+        } catch (ServiceException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new ServiceException(COMMON_ERROR_MESSAGE, e);
+        }
+    }
+
+    @Override
     public boolean existLargeCorrection(int departmentId, int reportPeriodId, Date correctionDate) {
 		try {
 			return departmentReportPeriodDao.existLargeCorrection(departmentId, reportPeriodId, correctionDate);

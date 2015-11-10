@@ -70,6 +70,11 @@ public interface DepartmentReportPeriodService {
     DepartmentReportPeriod getLast(int departmentId, int reportPeriodId);
 
     /**
+     * Обычный отчетный период подразделения для комбинации отчетный период-подразделение (первый и без корректировки)
+     */
+    DepartmentReportPeriod getFirst(int departmentId, int reportPeriodId);
+
+    /**
      * Проверяет существует ли корректирующий период, атрибут "Период сдачи корректировки" которого содержит большее значение
      * @param departmentId пара определяющая период
      * @param reportPeriodId  пара определяющая период

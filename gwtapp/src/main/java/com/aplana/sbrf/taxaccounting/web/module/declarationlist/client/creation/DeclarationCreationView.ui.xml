@@ -56,7 +56,7 @@
             <g:HorizontalPanel ui:field="codePanel" spacing="6" verticalAlignment="middle"
                                addStyleNames="{style.content}">
                 <g:cell horizontalAlignment="right">
-                    <g:Label width="140px" wordWrap="false" text="Налоговый орган:" height="16px"/>
+                    <g:Label ui:field="taxOrganCodeLabel" width="140px" wordWrap="false" text="Налоговый орган:" height="16px"/>
                 </g:cell>
                 <g:cell width="100%">
                     <r:RefBookPickerWidget ui:field="taxOrganCode" title="Код налогового органа" width="100%" attributeIdInt="951" isHierarchical="false" multiSelect="false" searchEnabled="true" versionEnabled="false"/>
