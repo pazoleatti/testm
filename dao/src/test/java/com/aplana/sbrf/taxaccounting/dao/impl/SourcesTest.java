@@ -22,7 +22,7 @@ import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 
-@Ignore("Включать только локально, со включенным тестом не коммитить!")
+//@Ignore("Включать только локально, со включенным тестом не коммитить!")
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration({ "SourcesTest.xml" })
 @Transactional
@@ -464,6 +464,17 @@ public class SourcesTest {
         assertEquals(2, relations.size());
         assertEquals("null, Тип: \"Первичная\", Вид: \"РНУ-7\", Подразделение: \"Байкальский банк\", Период: \"третий квартал (9 месяцев) 2026\", Макет: \"true\", Статус: \"Не создана\", Период сравнения: \"третий квартал (9 месяцев) 2026\"", getShortFormInfo(relations.get(0)));
         assertEquals("null, Тип: \"Первичная\", Вид: \"РНУ-89\", Подразделение: \"Байкальский банк\", Период: \"третий квартал 2026\", Макет: \"true\", Статус: \"Не создана\"", getShortFormInfo(relations.get(1)));
+    }
+
+    @Test
+    public void test52() {
+        //2 источника из разных подразделений. Результат: оба источника
+        FormData formData = new FormData();
+        formData.setId(78L);
+        List<Relation> relations = sourceDao.getSourcesInfo(formData, true, false, null);
+        assertEquals(2, relations.size());
+        assertEquals("79, Тип: \"Первичная\", Вид: \"РНУ-100\", Подразделение: \"Байкальский банк\", Период: \"третий квартал 2026\", Макет: \"true\", Статус: \"Создана\", Период сравнения: \"третий квартал 2026\"", getShortFormInfo(relations.get(0)));
+        assertEquals("80, Тип: \"Первичная\", Вид: \"РНУ-100\", Подразделение: \"Волго-Вятский банк\", Период: \"третий квартал 2026\", Макет: \"true\", Статус: \"Создана\", Период сравнения: \"третий квартал 2026\"", getShortFormInfo(relations.get(1)));
     }
 
 
@@ -1124,6 +1135,16 @@ public class SourcesTest {
         assertEquals(2, relations.size());
         assertEquals("null, Тип: \"Консолидированная\", Вид: \"РНУ-20\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2008\", Макет: \"true\", Статус: \"Не создана\", Дата сдачи корректировки: \"15.01.2008\"", getShortFormInfo(relations.get(0)));
         assertEquals("null, Тип: \"Консолидированная\", Вид: \"РНУ-21\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2008\", Макет: \"true\", Статус: \"Не создана\", Дата сдачи корректировки: \"15.01.2008\"", getShortFormInfo(relations.get(1)));
+    }
+
+    @Test
+    public void test54() {
+        //2 источника из разных подразделений. Результат: оба источника
+        FormData formData = new FormData();
+        formData.setId(80L);
+        List<Relation> relations = sourceDao.getDestinationsInfo(formData, true, false, null);
+        assertEquals(1, relations.size());
+        assertEquals("78, Тип: \"Консолидированная\", Вид: \"РНУ-100\", Подразделение: \"Байкальский банк\", Период: \"третий квартал 2026\", Макет: \"true\", Статус: \"Создана\", Период сравнения: \"третий квартал 2026\"", getShortFormInfo(relations.get(0)));
     }
 
     /*****************************  Получение деклараций-приемников НФ ***************************/
