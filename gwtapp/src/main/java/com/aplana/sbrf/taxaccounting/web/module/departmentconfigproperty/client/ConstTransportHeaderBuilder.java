@@ -34,7 +34,7 @@ public class ConstTransportHeaderBuilder extends AbstractHeaderOrFooterBuilder i
             buildHeader(tr, checkBoxHeader, 0, 2, true);
         }
 
-        buildHeader(tr, new TextHeader("Параметры декларации"), 2, 0, true);
+        buildHeader(tr, new TextHeader("Параметры декларации"), 3, 0, true);
 
         buildHeader(tr, new TextHeader("Реквизиты подразделения"), 5, 0, true);
 
@@ -46,7 +46,9 @@ public class ConstTransportHeaderBuilder extends AbstractHeaderOrFooterBuilder i
 
         tr = startRow();
 
-        buildHeader(tr, new TextHeader("Код налогового органа"), 0, 0, true);
+        buildHeader(tr, new TextHeader("Код налогового органа (кон.)"), 0, 0, true);
+
+        buildHeader(tr, new TextHeader("Код налогового органа (пром.)"), 0, 0, true);
 
         buildHeader(tr, new TextHeader("КПП"), 0, 0, true);
 

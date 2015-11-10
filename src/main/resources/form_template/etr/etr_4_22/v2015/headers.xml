@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?><rows>
+    <row alias="">
+        <cell alias="rowNum" colSpan="1" rowSpan="1" value="№ п/п"/>
+        <cell alias="taxName" colSpan="1" rowSpan="1" value="Наименование показателей"/>
+        <cell alias="dynamics" colSpan="1" rowSpan="1" value="Динамика (+;-)"/>
+        <cell alias="factors" colSpan="1" rowSpan="1" value="Оценка факторов, оказавших влияние на уровень и динамику показателя"/>
+        <cell alias="areas" colSpan="1" rowSpan="1" value="Проблемные зоны и зоны потенциального риска"/>
+        <cell alias="offers" colSpan="1" rowSpan="1" value="Предложения по мерам"/>
+        <cell alias="offersCA" colSpan="1" rowSpan="1" value="Предложения на уровень ЦА Банка"/>
+        <cell alias="other" colSpan="1" rowSpan="1" value="Прочее"/>
+    </row>
+    <row alias="">
+        <cell alias="rowNum" colSpan="1" rowSpan="1" value="1"/>
+        <cell alias="taxName" colSpan="1" rowSpan="1" value="2"/>
+        <cell alias="dynamics" colSpan="1" rowSpan="1" value="3"/>
+        <cell alias="factors" colSpan="1" rowSpan="1" value="4"/>
+        <cell alias="areas" colSpan="1" rowSpan="1" value="5"/>
+        <cell alias="offers" colSpan="1" rowSpan="1" value="6"/>
+        <cell alias="offersCA" colSpan="1" rowSpan="1" value="7"/>
+        <cell alias="other" colSpan="1" rowSpan="1" value="8"/>
+    </row>
+</rows>

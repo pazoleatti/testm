@@ -703,9 +703,18 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
             "                 connect by level <= 12\n" +
             "            ) lvl on ADD_MONTHS(t.d1, lvl.i - 1) <= t.d2 \n" +
             "           ) perversion on perversion.record_id = rp.DICT_TAX_PERIOD_ID and perversion.lvl = case when (sft.MONTHLY=1 and ft.MONTHLY=0) then perversion.lvl else 1 end\n" +
+            "      --данные об источнике сравнения для приемника     \n" +
+            "      left join department_report_period inn_cdrp on inn_cdrp.id = fd.COMPARATIVE_DEP_REP_PER_ID   \n" +
             "      --отбираем экземпляры с учетом периода сравнения, признака нарастающего истога, списка месяцов     \n" +
-            "      left join form_data sfd on (sfd.kind = sfk.id and sfd.FORM_TEMPLATE_ID = sft.id and sfd.DEPARTMENT_REPORT_PERIOD_ID = sdrp.id \n" +
-            "        and (sft.COMPARATIVE = 0 or ft.COMPARATIVE = 0 or sfd.COMPARATIVE_DEP_REP_PER_ID = fd.COMPARATIVE_DEP_REP_PER_ID) and (sft.ACCRUING = 0 or ft.ACCRUING = 0 or sfd.ACCRUING = fd.ACCRUING)) \n" +
+            "      left join (\n" +
+            "                select fd.*, drp.report_period_id as comparative_report_period_id\n" +
+            "                from form_data fd\n" +
+            "                --данные об источниках сравнения для потенциальных источников\n" +
+            "                left join department_report_period drp on fd.comparative_dep_rep_per_id = drp.id\n" +
+            "                ) sfd \n" +
+            "           on (sfd.kind = sfk.id and sfd.FORM_TEMPLATE_ID = sft.id and sfd.DEPARTMENT_REPORT_PERIOD_ID = sdrp.id \n" +
+            "        and (sft.COMPARATIVE = 0 or ft.COMPARATIVE = 0 or inn_cdrp.report_period_id  = sfd.comparative_report_period_id)\n" +
+            "        and (sft.ACCRUING = 0 or ft.ACCRUING = 0 or sfd.ACCRUING = fd.ACCRUING)) \n" +
             "        and coalesce(sfd.PERIOD_ORDER, perversion.month) = perversion.month\n" +
             "      left join form_data_performer fdp on fdp.form_data_id = sfd.id \n" +
             "      left join department fdpd on fdpd.id = fdp.PRINT_DEPARTMENT_ID      \n" +
@@ -827,10 +836,19 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
             "                 connect by level <= 12\n" +
             "            ) lvl on ADD_MONTHS(t.d1, lvl.i - 1) <= t.d2 \n" +
             "           ) perversion on perversion.record_id = rp.DICT_TAX_PERIOD_ID and perversion.lvl = case when (tft.MONTHLY=1 and ft.MONTHLY=0) then perversion.lvl else 1 end\n" +
+            "      --данные об источнике сравнения для приемника     \n" +
+            "      left join department_report_period inn_cdrp on inn_cdrp.id = fd.COMPARATIVE_DEP_REP_PER_ID   \n" +
             "      --отбираем экземпляры с учетом периода сравнения, признака нарастающего истога, списка месяцов     \n" +
-            "      left join form_data tfd on (tfd.kind = tfk.id and tfd.FORM_TEMPLATE_ID = tft.id and tfd.DEPARTMENT_REPORT_PERIOD_ID = tdrp.id\n" +
-            "        and (tft.COMPARATIVE = 0 or ft.COMPARATIVE = 0 or tfd.COMPARATIVE_DEP_REP_PER_ID = fd.COMPARATIVE_DEP_REP_PER_ID) and (tft.ACCRUING = 0 or ft.ACCRUING = 0 or tfd.ACCRUING = fd.ACCRUING)) \n" +
-            "        and coalesce(tfd.PERIOD_ORDER, perversion.month) = perversion.month \n" +
+            "      left join (\n" +
+            "                select fd.*, drp.report_period_id as comparative_report_period_id\n" +
+            "                from form_data fd\n" +
+            "                --данные об источниках сравнения для потенциальных источников\n" +
+            "                left join department_report_period drp on fd.comparative_dep_rep_per_id = drp.id\n" +
+            "                ) tfd \n" +
+            "           on (tfd.kind = tfk.id and tfd.FORM_TEMPLATE_ID = tft.id and tfd.DEPARTMENT_REPORT_PERIOD_ID = tdrp.id \n" +
+            "        and (tft.COMPARATIVE = 0 or ft.COMPARATIVE = 0 or inn_cdrp.report_period_id  = tfd.comparative_report_period_id)\n" +
+            "        and (tft.ACCRUING = 0 or ft.ACCRUING = 0 or tfd.ACCRUING = fd.ACCRUING)) \n" +
+            "        and coalesce(tfd.PERIOD_ORDER, perversion.month) = perversion.month\n" +
             "      left join form_data_performer fdp on fdp.form_data_id = tfd.id \n" +
             "      left join department fdpd on fdpd.id = fdp.PRINT_DEPARTMENT_ID\n" +
             "      left join department_report_period tcdrp on tcdrp.id = tfd.COMPARATIVE_DEP_REP_PER_ID\n" +

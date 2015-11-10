@@ -17,6 +17,11 @@ import groovy.transform.Field
  */
 
 switch (formDataEvent) {
+    case FormDataEvent.GET_HEADERS:
+        headers.get(0).taxBurden = 'Налоговое бремя, ' + (isBank() ? 'млн. руб.' : 'тыс. руб.')
+        headers.get(1).sum1 = 'не учитываемые расходы, ' + (isBank() ? 'млн. руб.' : 'тыс. руб.')
+        headers.get(1).sum2 = 'доначисление доходов, ' + (isBank() ? 'млн. руб.' : 'тыс. руб.')
+        break
     case FormDataEvent.CREATE:
         formDataService.checkUnique(formData, logger)
         break
@@ -109,6 +114,10 @@ void logicCheck() {
     }
 }
 
+boolean isBank() {
+    return formData.departmentId == 1 // по ЧТЗ
+}
+
 void importData() {
     int COLUMN_COUNT = 3
     int HEADER_ROW_COUNT = 4
@@ -181,12 +190,11 @@ void checkHeaderXls(def headerRows, def colCount, rowCount) {
         throw new ServiceException(WRONG_HEADER_ROW_SIZE)
     }
     checkHeaderSize(headerRows[2].size(), headerRows.size(), colCount, rowCount)
-    def tmpRow = formData.createDataRow()
     def headerMapping = [
             ([(headerRows[0][0]): 'Сумма увеличения базы по налогу на прибыль, в том числе']),
-            ([(headerRows[0][2]): getColumnName(tmpRow, 'taxBurden')]),
-            ([(headerRows[1][0]): 'не учитываемые расходы, тыс. руб.']),
-            ([(headerRows[1][1]): 'доначисление доходов, тыс. руб.']),
+            ([(headerRows[0][2]): ('Налоговое бремя, ' + (isBank() ? 'млн. руб.' : 'тыс. руб.'))]),
+            ([(headerRows[1][0]): ('не учитываемые расходы, ' + (isBank() ? 'млн. руб.' : 'тыс. руб.'))]),
+            ([(headerRows[1][1]): ('доначисление доходов, ' + (isBank() ? 'млн. руб.' : 'тыс. руб.'))]),
             ([(headerRows[2][0]): '(РНУ-108 гр.13+РНУ-115 гр.20+ РНУ-116 гр.20)']),
             ([(headerRows[2][1]): '(РНУ-107 гр.12+ РНУ-110 гр.11+ РНУ-111 гр.13+ РНУ-115 гр.19+ РНУ-116 гр.19+РНУ-114 гр.16)']),
             ([(headerRows[2][3]): '(гр.1+гр.2)*20%'])

@@ -292,10 +292,18 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
                     XlsxReportMetadata.REPORT_PERIOD,
                     rpCompare.getName(),
                     rpCompare.getTaxPeriod().getYear(),
-                    reportPeriod.getName(),
-                    reportPeriod.getTaxPeriod().getYear(),
+                    "/" + reportPeriod.getName(),
+                    reportPeriod.getTaxPeriod().getYear() + " г. ",
                     data.isAccruing() ? "(нарастающим итогом)" : ""));
-        } else  if (data.getPeriodOrder() != null) {
+        } else if(data.isAccruing()){
+            sbPeriodName.append(String.format(
+                    XlsxReportMetadata.REPORT_PERIOD,
+                    rpCompare.getName(),
+                    rpCompare.getTaxPeriod().getYear(),
+                    "",
+                    "",
+                    "(нарастающим итогом)"));
+        } else if (data.getPeriodOrder() != null) {
             sbPeriodName.append(
                     String.format(XlsxReportMetadata.MONTHLY,
                             Months.fromId(data.getPeriodOrder()).getTitle().toLowerCase(new Locale("ru", "RU")),

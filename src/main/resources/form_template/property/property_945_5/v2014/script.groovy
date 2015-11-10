@@ -1489,9 +1489,7 @@ def getRelation(FormData tmpFormData, DepartmentFormType departmentFormType, boo
     /** является ли форма источников, в противном случае приемник*/
     relation.source = isSource
     /** Введена/выведена в/из действие(-ия) */
-    if (!light) {
-        relation.status = getFormTemplateById(departmentFormType.formTypeId, period.id)
-    }
+    relation.status = getFormTemplateById(departmentFormType.formTypeId, period.id)
 
     /**************  Параметры НФ ***************/
     /** Идентификатор созданной формы */
