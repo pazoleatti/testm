@@ -180,26 +180,17 @@ void consolidation() {
     Map<String, DataRow<Cell>> tinyCorrMap = [:]
 
     if (departmentReportPeriod.correctionDate != null) {
-        // получить список дат корректировок
-        Map<Integer, List<Date>> correctionDatesMap = departmentReportPeriodService.getCorrectionDateListByReportPeriod([formData.reportPeriodId] as List<Integer>)
-        List<Date> correctionDates = correctionDatesMap[formData.reportPeriodId].sort()
-        // добавить исходную форму
-        correctionDates.add(0, null)
-        // обратили список
-        correctionDates = correctionDates.reverse()
+        // получить дату корректировки
+        def correctionDate = departmentReportPeriod.correctionDate
         // получить последнюю форму по корректировкам
-        for (def correctionDate : correctionDates) {
-            def formDataCorrection = formDataService.getLastByDate(formData.formType.id, formData.kind, formData.departmentId, formData.reportPeriodId, formData.periodOrder, correctionDate, formData.comparativePeriodId, formData.accruing)
-            if (formDataCorrection != null && formDataCorrection.id != formData.id) {
-                def dataRowsCorr = formDataService.getDataRowHelper(formDataCorrection).allSaved
-                // карта строк по почти всем графам
-                fullCorrMap = getDataRowsMap(dataRowsCorr, true)
-                // карта строк по двум графам
-                tinyCorrMap = getDataRowsMap(dataRowsCorr, false)
-                break // нашли форму, прерываем
-            }
+        def formDataCorrection = formDataService.getLastByDate(formData.formType.id, formData.kind, formData.departmentId, formData.reportPeriodId, formData.periodOrder, correctionDate ? (correctionDate - 1) : null, formData.comparativePeriodId, formData.accruing)
+        if (formDataCorrection != null && formDataCorrection.id != formData.id) {
+            def dataRowsCorr = formDataService.getDataRowHelper(formDataCorrection).allSaved
+            // карта строк по почти всем графам
+            fullCorrMap = getDataRowsMap(dataRowsCorr, true)
+            // карта строк по двум графам
+            tinyCorrMap = getDataRowsMap(dataRowsCorr, false)
         }
-
     }
 
     // получить формы-источники в текущем налоговом периоде
