@@ -244,9 +244,17 @@ void save() {
 void checkUnique(def alias, def value, def msg) {
     if (value != null) {
         String filter = "LOWER($alias) = LOWER('$value')"
-        def records =  provider.getRecords(validDateFrom, null, filter, null)
-        if (records && records.size() > 0 && records.get(0).get(RefBook.RECORD_ID_ALIAS).numberValue != uniqueRecordId) {
-            logger.error("В справочнике уже существует организация с данным $msg!")
+        def records =  provider.getRecords(null, null, filter, null)
+        for(def record: records) {
+            if (record.get(RefBook.RECORD_ID_ALIAS).numberValue == uniqueRecordId)
+                continue
+            Date fromDate = record.get(RefBook.RECORD_VERSION_FROM_ALIAS).getDateValue()
+            Date toDate = record.get(RefBook.RECORD_VERSION_TO_ALIAS)?.getDateValue()
+            if ((validDateTo == null || fromDate.compareTo(validDateTo) <= 0) &&
+                    (toDate == null || toDate.compareTo(validDateFrom) >= 0 )) {
+                logger.error("В справочнике уже существует организация с данным $msg!")
+                break
+            }
         }
     }
 }
