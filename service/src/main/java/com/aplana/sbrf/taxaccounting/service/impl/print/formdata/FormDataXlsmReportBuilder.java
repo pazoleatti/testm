@@ -292,17 +292,8 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
                     XlsxReportMetadata.REPORT_PERIOD,
                     rpCompare.getName(),
                     rpCompare.getTaxPeriod().getYear(),
-                    "/" + reportPeriod.getName(),
-                    reportPeriod.getTaxPeriod().getYear() + " г. ",
-                    data.isAccruing() ? "(нарастающим итогом)" : ""));
-        } else if(data.isAccruing()){
-            sbPeriodName.append(String.format(
-                    XlsxReportMetadata.REPORT_PERIOD,
-                    rpCompare.getName(),
-                    rpCompare.getTaxPeriod().getYear(),
-                    "",
-                    "",
-                    "(нарастающим итогом)"));
+                    reportPeriod.getName(),
+                    reportPeriod.getTaxPeriod().getYear()));
         } else if (data.getPeriodOrder() != null) {
             sbPeriodName.append(
                     String.format(XlsxReportMetadata.MONTHLY,
@@ -318,6 +309,8 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
                     )
             );
         }
+        if (data.isAccruing())
+            sbPeriodName.append("(нарастающим итогом)");
         sb.append(sbPeriodName.toString());
         createCellByRange(XlsxReportMetadata.RANGE_REPORT_PERIOD, sb.toString(), 0, formTemplate.getColumns().size()/2);
     }
