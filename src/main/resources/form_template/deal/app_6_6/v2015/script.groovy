@@ -5,6 +5,7 @@ import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
 import com.aplana.sbrf.taxaccounting.service.script.util.ScriptUtils
 import groovy.transform.Field
 
@@ -114,7 +115,14 @@ def totalColumns = ['incomeSum', 'outcomeSum']
 
 // Дата окончания отчетного периода
 @Field
-def reportPeriodEndDate = null
+def endDate = null
+
+def getReportPeriodEndDate() {
+    if (endDate == null) {
+        endDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
+    }
+    return endDate
+}
 
 //// Обертки методов
 
@@ -125,7 +133,7 @@ def getRecordIdImport(def Long refBookId, def String alias, def String value, de
         return null
     }
     return formDataService.getRefBookRecordIdImport(refBookId, recordCache, providerCache, alias, value,
-            reportPeriodEndDate, rowIndex, colIndex, logger, required)
+            getReportPeriodEndDate(), rowIndex, colIndex, logger, required)
 }
 
 // Разыменование записи справочника
@@ -574,18 +582,26 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
     autoFillColumns.each {
         newRow.getCell(it).setStyleAlias('Автозаполняемая')
     }
+    def String iksrName = getColumnName(newRow, 'iksr')
 
     def int colIndex = 2
 
+    def recordId = getRecordId(values[2], values[3], fileRowIndex, colIndex, iksrName)
+    def map = getRefBookValue(520, recordId)
+    if (map && values[2] != map.NAME?.stringValue) {
+        // сообщение 4
+        logger.warn("Строка $fileRowIndex , столбец " + ScriptUtils.getXLSColumnName(colIndex) + ": " +
+                "Графа «$iksrName» формы заполнена записью справочника «Участники ТЦО», в которой атрибут " +
+                "«Полное наименование юридического лица с указанием ОПФ» = «" + map.NAME?.stringValue + "», " +
+                "атрибут «ИНН (заполняется для резидентов, некредитных организаций)» = «" + map.INN?.stringValue + "». " +
+                "В файле указано другое наименование юридического лица - «" + values[2] + "»!")
+    }
+
     // графа 2
-    newRow.name = getRecordIdImport(520, 'NAME', values[colIndex], fileRowIndex, colIndex + colOffset, false)
-    def map = getRefBookValue(520, newRow.name)
+    newRow.name = recordId
     colIndex++
 
     // графа 3
-    if (map != null) {
-        formDataService.checkReferenceValue(520, values[colIndex], map.IKSR?.stringValue, fileRowIndex, colIndex + colOffset, logger, false)
-    }
     colIndex++
 
     // графа 4.1
@@ -659,6 +675,95 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
     newRow.dealDoneDate = parseDate(values[colIndex], "dd.MM.yyyy", fileRowIndex, colIndex + colOffset, logger, true)
 
     return newRow
+}
+
+// Получение Id записи из справочника 520 с использованием кэширования
+def getRecordId(String name, String iksr, int fileRowIndex, int colIndex, String iksrName) {
+    if (!iksr) {
+        logger.warn("Строка $fileRowIndex , столбец " + ScriptUtils.getXLSColumnName(colIndex) + ": " +
+                "На форме не заполнены графы с общей информацией о юридическом лице, так как в файле отсутствует значение по графе «$iksrName»!")
+        return
+    }
+    def ref_id = 520
+    def RefBook refBook = refBookFactory.get(ref_id)
+
+    String filter = "(LOWER(INN) = LOWER('$iksr') or " +
+            "LOWER(REG_NUM) = LOWER('$iksr') or " +
+            "LOWER(TAX_CODE_INCORPORATION) = LOWER('$iksr') or " +
+            "LOWER(SWIFT) = LOWER('$iksr') or " +
+            "LOWER(KIO) = LOWER('$iksr'))"
+    if (recordCache[ref_id] != null) {
+        if (recordCache[ref_id][filter] != null) {
+            return recordCache[ref_id][filter]
+        }
+    } else {
+        recordCache[ref_id] = [:]
+    }
+
+    def provider = refBookFactory.getDataProvider(ref_id)
+    def records = provider.getRecords(getReportPeriodEndDate(), null, filter, null)
+    if (records.size() == 1) {
+        // 5
+        recordCache[ref_id][filter] = records.get(0).get(RefBook.RECORD_ID_ALIAS).numberValue
+        return recordCache[ref_id][filter]
+    } else if (records.empty) {
+        // 6
+        if(!name){
+            name = "наименование юридического лица в файле не заполнено"
+        }
+        // сообщение 1
+        logger.warn("Строка $fileRowIndex , столбец " + ScriptUtils.getXLSColumnName(colIndex) + ": " +
+                "Для заполнения графы «$iksrName» формы в справочнике «Участники ТЦО» " +
+                "не найдено значение «$iksr» ($name), актуальное на дату «" + getReportPeriodEndDate().format("dd.MM.yyyy") + "»!")
+        endMessage(iksrName)
+    } else {
+        // 7
+        def recordsByName
+        if (name) {
+            recordsByName = provider.getRecords(getReportPeriodEndDate(), null, "LOWER(NAME) = LOWER('$name') and " + filter, null)
+        }
+        if (recordsByName && recordsByName.size() == 1) {
+            recordCache[ref_id][filter] = recordsByName.get(0).get(RefBook.RECORD_ID_ALIAS).numberValue
+            return recordCache[ref_id][filter]
+        } else {
+            if (!name) {
+                name = "наименование юридического лица в файле не заполнено"
+            }
+            // сообщение 2
+            logger.warn("Строка $fileRowIndex , столбец " + ScriptUtils.getXLSColumnName(colIndex) + ": " +
+                    "Для заполнения графы «$iksrName» формы в справочнике «Участники ТЦО» " +
+                    "найдено несколько записей со значением «$iksr» ($name), актуальным на дату «" + getReportPeriodEndDate().format("dd.MM.yyyy") + "»! " +
+                    "Графа «$iksrName» формы заполнена первой найденной записью справочника:")
+            def record
+            records.each {
+                def refBookAttributeName
+                for(alias in ['INN', 'REG_NUM', 'TAX_CODE_INCORPORATION', 'SWIFT', 'KIO']){
+                    if(iksr.equals(it.get(alias)?.stringValue)){
+                        refBookAttributeName = refBook.attributes.find{ it.alias == alias}.name
+                        record = it
+                        break
+                    }
+                }
+                // сообщение 3
+                logger.warn("Атрибут «Полное наименование юридического лица с указанием ОПФ» = «" + it.get('NAME')?.stringValue + "», " +
+                        "атрибут «$refBookAttributeName» = «" + iksr + "»")
+            }
+            endMessage(iksrName)
+            return record.get(RefBook.RECORD_ID_ALIAS).numberValue
+        }
+    }
+    return null
+}
+
+def endMessage(String iksrName) {
+    // сообщение 5
+    logger.warn("Для заполнения на форме граф с общей информацией о юридическом лице выполнен поиск значения файла " +
+            "по графе «$iksrName» в следующих атрибутах справочника «Участники ТЦО»: " +
+            "«ИНН (заполняется для резидентов, некредитных организаций)», " +
+            "«Регистрационный номер в стране инкорпорации (заполняется для нерезидентов)», " +
+            "«Код налогоплательщика в стране инкорпорации», " +
+            "«Код SWIFT (заполняется для кредитных организаций, резидентов и нерезидентов)», " +
+            "«КИО (заполняется для нерезидентов)»")
 }
 
 // Сортировка групп и строк
