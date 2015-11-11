@@ -58,7 +58,7 @@
         <precision>2</precision>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
-        <alias>rate6</alias>
+        <alias>rate5</alias>
         <checking>false</checking>
         <columnType>NUMBER</columnType>
         <name>(гр.5/ИТОГО,гр.5)*100%</name>
@@ -138,7 +138,7 @@
         <precision>2</precision>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
-        <alias>rate14</alias>
+        <alias>rate13</alias>
         <checking>false</checking>
         <columnType>NUMBER</columnType>
         <name>(гр.13/ИТОГО,гр.13)*100%</name>

@@ -583,18 +583,24 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
         newRow.getCell(it).setStyleAlias('Автозаполняемая')
     }
     def String iksrName = getColumnName(newRow, 'iksr')
+    def nameFromFile = values[2]
 
     def int colIndex = 2
 
-    def recordId = getRecordId(values[2], values[3], fileRowIndex, colIndex, iksrName)
+    def recordId = getRecordId(nameFromFile, values[3], fileRowIndex, colIndex, iksrName)
     def map = getRefBookValue(520, recordId)
-    if (map && values[2] != map.NAME?.stringValue) {
-        // сообщение 4
-        logger.warn("Строка $fileRowIndex , столбец " + ScriptUtils.getXLSColumnName(colIndex) + ": " +
-                "Графа «$iksrName» формы заполнена записью справочника «Участники ТЦО», в которой атрибут " +
-                "«Полное наименование юридического лица с указанием ОПФ» = «" + map.NAME?.stringValue + "», " +
-                "атрибут «ИНН (заполняется для резидентов, некредитных организаций)» = «" + map.INN?.stringValue + "». " +
-                "В файле указано другое наименование юридического лица - «" + values[2] + "»!")
+    if (map && nameFromFile != map.NAME?.stringValue) {
+        if (map && nameFromFile != map.NAME?.stringValue) {
+            // сообщение 4
+            String msg = "Наименование юридического лица в файле не заполнено!"
+            if (nameFromFile) {
+                msg = "В файле указано другое наименование юридического лица - «$nameFromFile»!"
+            }
+            logger.warn("Строка $fileRowIndex , столбец " + ScriptUtils.getXLSColumnName(colIndex) + ": " +
+                    "На форме графы с общей информацией о юридическом лице заполнены данными записи справочника «Участники ТЦО», " +
+                    "в которой атрибут «Полное наименование юридического лица с указанием ОПФ» = «" + map.NAME?.stringValue + "», " +
+                    "атрибут «ИНН (заполняется для резидентов, некредитных организаций)» = «" + map.INN?.stringValue + "». $msg")
+        }
     }
 
     // графа 2
