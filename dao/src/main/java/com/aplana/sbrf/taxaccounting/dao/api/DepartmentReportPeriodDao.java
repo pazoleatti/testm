@@ -77,6 +77,11 @@ public interface DepartmentReportPeriodDao {
     DepartmentReportPeriod getLast(int departmentId, int reportPeriodId);
 
     /**
+     * Обычный отчетный период подразделения для комбинации отчетный период-подразделение (первый и без корректировки)
+     */
+    DepartmentReportPeriod getFirst(int departmentId, int reportPeriodId);
+
+    /**
      * Номер корректирующего периода
      */
     Integer getCorrectionNumber(int id);

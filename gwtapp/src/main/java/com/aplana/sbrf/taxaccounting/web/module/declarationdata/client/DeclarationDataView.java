@@ -227,11 +227,17 @@ public class DeclarationDataView extends ViewWithUiHandlers<DeclarationDataUiHan
     }
 
     @Override
-    public void setPropertyBlockVisible(boolean isVisibleTaxOrgan, boolean isVisibleKpp) {
+    public void setPropertyBlockVisible(boolean isVisibleTaxOrgan, boolean isVisibleKpp, TaxType taxType) {
         taxOrganCode.setVisible(isVisibleTaxOrgan);
         taxOrganCodeLabel.setVisible(isVisibleTaxOrgan);
         kpp.setVisible(isVisibleKpp);
         kppLabel.setVisible(isVisibleKpp);
+
+        if (taxType == TaxType.TRANSPORT) {
+            taxOrganCodeLabel.setText("Налоговый орган (кон.):");
+        } else {
+            taxOrganCodeLabel.setText("Налоговый орган:");
+        }
     }
 
     @Override

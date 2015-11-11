@@ -21,6 +21,11 @@ import groovy.transform.Field
  */
 
 switch (formDataEvent) {
+    case FormDataEvent.GET_HEADERS:
+        headers.get(0).sum1 = 'Сумма фактического дохода/расхода по нерыночным сделкам, ' + (isBank() ? 'млн. руб.' : 'тыс. руб.') + ' (налоговый учет)'
+        headers.get(0).sum2 = 'Сумма доначислений до рыночного уровня, ' + (isBank() ? 'млн. руб.' : 'тыс. руб.')
+        headers.get(0).taxBurden = 'Налоговое бремя, ' + (isBank() ? 'млн. руб.' : 'тыс. руб.')
+        break
     case FormDataEvent.CREATE:
         formDataService.checkUnique(formData, logger)
         break
@@ -173,6 +178,10 @@ void consolidation() {
     formDataService.getDataRowHelper(formData).allCached = dataRows
 }
 
+boolean isBank() {
+    return formData.departmentId == 1 // по ЧТЗ
+}
+
 void importData() {
     def tmpRow = formData.createDataRow()
     int HEADER_ROW_COUNT = 3
@@ -243,10 +252,10 @@ void checkHeaderXls(def headerRows, def tmpRow) {
     def headerMapping = [
             ([(headerRows[0][0]): getColumnName(tmpRow, 'rowNum')]),//'№ п/п']),
             ([(headerRows[0][1]): getColumnName(tmpRow, 'name')]),//'Наименование сделки']),
-            ([(headerRows[0][2]): getColumnName(tmpRow, 'sum1')]),//'Сумма фактического дохода/расхода по нерыночным сделкам, тыс. руб. (налоговый учет)']),
-            ([(headerRows[0][3]): getColumnName(tmpRow, 'sum2')]),//'Сумма доначислений до рыночного уровня, тыс. руб.']),
+            ([(headerRows[0][2]): ('Сумма фактического дохода/расхода по нерыночным сделкам, ' + (isBank() ? 'млн. руб.' : 'тыс. руб.') + ' (налоговый учет)')]),//'Сумма фактического дохода/расхода по нерыночным сделкам, тыс. руб. (налоговый учет)']),
+            ([(headerRows[0][3]): ('Сумма доначислений до рыночного уровня, ' + (isBank() ? 'млн. руб.' : 'тыс. руб.'))]),//'Сумма доначислений до рыночного уровня, тыс. руб.']),
             ([(headerRows[0][4]): getColumnName(tmpRow, 'level')]),//'Уровень доначислений/ не учитываемых расходов (в % от факта)']),
-            ([(headerRows[0][5]): getColumnName(tmpRow, 'taxBurden')]),//'Налоговое бремя, тыс. руб.']),
+            ([(headerRows[0][5]): ('Налоговое бремя, ' + (isBank() ? 'млн. руб.' : 'тыс. руб.'))]),//'Налоговое бремя, тыс. руб.']),
             ([(headerRows[1][2]): 'данные из РНУ по соответствующему виду операций/сделок/продуктов']),
             ([(headerRows[1][3]): 'данные из РНУ по соответствующему виду операций/сделок/продуктов']),
             ([(headerRows[1][4]): '(гр.4/гр.3)*100']),

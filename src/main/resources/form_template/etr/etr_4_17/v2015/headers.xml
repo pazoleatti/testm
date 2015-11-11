@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?><rows>
+  <row alias="">
+    <cell alias="rowNum" colSpan="1" rowSpan="3" value="№ п/п"/>
+    <cell alias="name" colSpan="1" rowSpan="3" value="Наименование"/>
+    <cell alias="tax26411_01" colSpan="4" rowSpan="1" value="Налог на добавленную стоимость (федеральный бюджет)"/>
+    <cell alias="tax26411_02" colSpan="1" rowSpan="1" value="Налог на добавленную стоимость (федеральный бюджет)"/>
+    <cell alias="sum34" colSpan="1" rowSpan="1" value="Налог на добавленную стоимость (федеральный бюджет)"/>
+    <cell alias="rate6" colSpan="1" rowSpan="1" value="Налог на добавленную стоимость (федеральный бюджет)"/>
+    <cell alias="tax26411_03" colSpan="2" rowSpan="1" value="Налог на имущество (бюджет субъекта РФ)"/>
+    <cell alias="rate7" colSpan="1" rowSpan="1" value="Налог на имущество (бюджет субъекта РФ)"/>
+    <cell alias="tax26411_13" colSpan="2" rowSpan="1" value="Транспортный налог (бюджет субъекта РФ)"/>
+    <cell alias="rate9" colSpan="1" rowSpan="1" value="Транспортный налог (бюджет субъекта РФ)"/>
+    <cell alias="tax26411_12" colSpan="2" rowSpan="1" value="Земельный налог (местный бюджет)"/>
+    <cell alias="rate11" colSpan="1" rowSpan="1" value="Земельный налог (местный бюджет)"/>
+    <cell alias="tax26412" colSpan="2" rowSpan="1" value="Страховые взносы в ПФ, ФСС, ФФОМС и ТФОМС 26102"/>
+    <cell alias="rate14" colSpan="1" rowSpan="1" value="Страховые взносы в ПФ, ФСС, ФФОМС и ТФОМС 26102"/>
+    <cell alias="tax26410_09" colSpan="2" rowSpan="1" value="Отчисления на обязательное социальное страхование от несчастных случаев на производстве и профессиональных заболеваний 26410.09"/>
+    <cell alias="rate15" colSpan="1" rowSpan="1" value="Отчисления на обязательное социальное страхование от несчастных случаев на производстве и профессиональных заболеваний 26410.09"/>
+    <cell alias="sum" colSpan="2" rowSpan="1" value="Всего"/>
+    <cell alias="rate" colSpan="1" rowSpan="1" value="Всего"/>
+  </row>
+  <row alias="">
+    <cell alias="rowNum" colSpan="1" rowSpan="1" value="№ п/п"/>
+    <cell alias="name" colSpan="1" rowSpan="1" value="Наименование"/>
+    <cell alias="tax26411_01" colSpan="1" rowSpan="1" value="сумма (тыс.руб.)"/>
+    <cell alias="tax26411_02" colSpan="1" rowSpan="1" value="сумма (тыс.руб.)"/>
+    <cell alias="sum34" colSpan="1" rowSpan="1" value="итого НДС "/>
+    <cell alias="rate6" colSpan="1" rowSpan="1" value="Доля в общей сумме налога (%)"/>
+    <cell alias="tax26411_03" colSpan="1" rowSpan="1" value="сумма (тыс.руб.)"/>
+    <cell alias="rate7" colSpan="1" rowSpan="1" value="Доля в общей сумме налога (%)"/>
+    <cell alias="tax26411_13" colSpan="1" rowSpan="1" value="сумма (тыс.руб.)"/>
+    <cell alias="rate9" colSpan="1" rowSpan="1" value="Доля в общей сумме налога (%)"/>
+    <cell alias="tax26411_12" colSpan="1" rowSpan="1" value="сумма (тыс.руб.)"/>
+    <cell alias="rate11" colSpan="1" rowSpan="1" value="Доля в общей сумме налога (%)"/>
+    <cell alias="tax26412" colSpan="1" rowSpan="1" value="сумма (тыс.руб.)"/>
+    <cell alias="rate14" colSpan="1" rowSpan="1" value="Доля в общей сумме налога (%)"/>
+    <cell alias="tax26410_09" colSpan="1" rowSpan="1" value="сумма (тыс.руб.)"/>
+    <cell alias="rate15" colSpan="1" rowSpan="1" value="Доля в общей сумме налога (%)"/>
+    <cell alias="sum" colSpan="1" rowSpan="1" value="сумма (тыс.руб.)"/>
+    <cell alias="rate" colSpan="1" rowSpan="1" value="Доля в общей сумме налога (%)"/>
+  </row>
+  <row alias="">
+    <cell alias="rowNum" colSpan="1" rowSpan="1" value="№ п/п"/>
+    <cell alias="name" colSpan="1" rowSpan="1" value="Наименование"/>
+    <cell alias="tax26411_01" colSpan="1" rowSpan="1" value="симвл. ф. 102:  26411.01"/>
+    <cell alias="tax26411_02" colSpan="1" rowSpan="1" value="симвл. ф. 102: 26411.02"/>
+    <cell alias="sum34" colSpan="1" rowSpan="1" value="гр.3+гр.4"/>
+    <cell alias="rate6" colSpan="1" rowSpan="1" value="(гр.5/ИТОГО,гр.5)*100%"/>
+    <cell alias="tax26411_03" colSpan="1" rowSpan="1" value="симвл. ф. 102: 26411.03"/>
+    <cell alias="rate7" colSpan="1" rowSpan="1" value="(гр.7/ИТОГО,гр.7)*100%"/>
+    <cell alias="tax26411_13" colSpan="1" rowSpan="1" value="симвл. ф. 102: 26411.13"/>
+    <cell alias="rate9" colSpan="1" rowSpan="1" value="(гр.9/ИТОГО,гр.9)*100%"/>
+    <cell alias="tax26411_12" colSpan="1" rowSpan="1" value="симвл. ф. 102: 26411.12"/>
+    <cell alias="rate11" colSpan="1" rowSpan="1" value="(гр.11/ИТОГО,гр.11)*100%"/>
+    <cell alias="tax26412" colSpan="1" rowSpan="1" value="симвл. ф. 102: 26102"/>
+    <cell alias="rate14" colSpan="1" rowSpan="1" value="(гр.13/ИТОГО,гр.13)*100%"/>
+    <cell alias="tax26410_09" colSpan="1" rowSpan="1" value="сивмл. ф. 102: 26410.09"/>
+    <cell alias="rate15" colSpan="1" rowSpan="1" value="(гр.15/ИТОГО,гр.15)*100%"/>
+    <cell alias="sum" colSpan="1" rowSpan="1" value="гр.5+гр.7+гр.9+гр.11+гр.13+гр.15"/>
+    <cell alias="rate" colSpan="1" rowSpan="1" value="(гр.17/ИТОГО,гр.17)*100%"/>
+  </row>
+  <row alias="">
+    <cell alias="rowNum" colSpan="1" rowSpan="1" value="1"/>
+    <cell alias="name" colSpan="1" rowSpan="1" value="2"/>
+    <cell alias="tax26411_01" colSpan="1" rowSpan="1" value="3"/>
+    <cell alias="tax26411_02" colSpan="1" rowSpan="1" value="4"/>
+    <cell alias="sum34" colSpan="1" rowSpan="1" value="5"/>
+    <cell alias="rate6" colSpan="1" rowSpan="1" value="6"/>
+    <cell alias="tax26411_03" colSpan="1" rowSpan="1" value="7"/>
+    <cell alias="rate7" colSpan="1" rowSpan="1" value="8"/>
+    <cell alias="tax26411_13" colSpan="1" rowSpan="1" value="9"/>
+    <cell alias="rate9" colSpan="1" rowSpan="1" value="10"/>
+    <cell alias="tax26411_12" colSpan="1" rowSpan="1" value="11"/>
+    <cell alias="rate11" colSpan="1" rowSpan="1" value="12"/>
+    <cell alias="tax26412" colSpan="1" rowSpan="1" value="13"/>
+    <cell alias="rate14" colSpan="1" rowSpan="1" value="14"/>
+    <cell alias="tax26410_09" colSpan="1" rowSpan="1" value="15"/>
+    <cell alias="rate15" colSpan="1" rowSpan="1" value="16"/>
+    <cell alias="sum" colSpan="1" rowSpan="1" value="17"/>
+    <cell alias="rate" colSpan="1" rowSpan="1" value="18"/>
+  </row>
+</rows>

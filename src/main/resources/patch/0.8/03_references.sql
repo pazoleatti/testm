@@ -917,5 +917,46 @@ update ref_book set is_versioned = 0 where id in (510, 511);
 --http://jira.aplana.com/browse/SBRFACCTAX-13264: Атрибут Код в неверсионируемый справочник Виды НФ
 INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (931,93,'Код','CODE',1,0,null,null,1,null,10,1,0,0,null,0,600);
 
+----------------------------------------------------------------------------------------------------------------
+--http://jira.aplana.com/browse/SBRFACCTAX-13246: ТЦО Изменить перечень отчетных периодов для МУКС 
+merge into ref_book_value tgt
+using (
+  select rbr.id as record_id, rbv.attribute_id, code.string_value as code, rbv.number_value, 
+         case when code.string_value in ('21', '31', '33', '34') then 1 else 0 end as new_number_value
+  from ref_book_value rbv
+  join ref_book_record rbr on rbv.record_id = rbr.id and rbv.attribute_id = 31
+  join ref_book_value code on code.record_id = rbr.id and code.attribute_id = 25
+      ) src
+on (tgt.record_id = src.record_id and tgt.attribute_id = src.attribute_id)      
+when matched then
+     update set tgt.number_value = src.new_number_value;
+	 
+----------------------------------------------------------------------------------------------------------------
+--http://jira.aplana.com/browse/SBRFACCTAX-13335: Транспорт, Добавить поле "Код налогового органа (пром.)", прочие связанные изменения 
+update ref_book_attribute set name = 'Код налогового органа (кон.)' where id = 3102;
+
+update ref_book_attribute set ord = 19 where id = 3118;
+update ref_book_attribute set ord = 18 where id = 3117;
+update ref_book_attribute set ord = 17 where id = 3116;
+update ref_book_attribute set ord = 16 where id = 3115;
+update ref_book_attribute set ord = 15 where id = 3114;
+update ref_book_attribute set ord = 14 where id = 3113;
+update ref_book_attribute set ord = 13 where id = 3112;
+update ref_book_attribute set ord = 12 where id = 3111;
+update ref_book_attribute set ord = 11 where id = 3110;
+update ref_book_attribute set ord = 10 where id = 3109;
+update ref_book_attribute set ord = 9 where id = 3108;
+update ref_book_attribute set ord = 8 where id = 3107;
+update ref_book_attribute set ord = 7 where id = 3106;
+update ref_book_attribute set ord = 6 where id = 3105;
+update ref_book_attribute set ord = 5 where id = 3104;
+update ref_book_attribute set ord = 4 where id = 3103;
+
+INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (3119, 310, 'Код налогового органа (пром.)','TAX_ORGAN_CODE_PROM', 1, 3, null, null, 1, null, 5, 0, 0, null, null,0, 4);
+
+----------------------------------------------------------------------------------------------------------------
+--http://jira.aplana.com/browse/SBRFACCTAX-13350: «Параметры представления деклараций по транспортному налогу» поле «Код налогового органа» переименовать в «Код налогового органа (кон.)»
+update ref_book_attribute set name = 'Код налогового органа (кон.)' where id = 2102;
+----------------------------------------------------------------------------------------------------------------
 COMMIT;
 EXIT;

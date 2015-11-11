@@ -81,7 +81,7 @@ void save() {
 
         // 3. Обязательное заполнение идентификационного кода для российской организации
         if (orgCode == 1 && (!inn || !kpp)) {
-            logger.error('Для российской организации обязательно должно быть заполнено одно из следующих полей: «ИНН», «КПП»!')
+            logger.error('Для российской организации обязательно должны быть заполнены поля: «ИНН», «КПП»!')
         }
 
         // 4. Проверка на корректное заполнение идентификационного кода для российской организации
@@ -131,7 +131,7 @@ void save() {
         checkUnique('REG_NUM', regNum, "регистрационным номером в стране инкорпорации")
 
         // 10. Уникальность поля Код налогоплательщика в стране инкорпорации
-        //checkUnique('', regNum, "кодом налогоплательщика в стране инкорпорации")
+        checkUnique('TAX_CODE_INCORPORATION', regNum, "кодом налогоплательщика в стране инкорпорации")
 
         // 11. Проверка правильности заполнения полей «Дата наступления основания для включения в список» и «Дата наступления основания для исключении из списка»
         if (type == "ВЗЛ" && startDate != null && endDate != null && startDate > endDate) {
@@ -244,9 +244,17 @@ void save() {
 void checkUnique(def alias, def value, def msg) {
     if (value != null) {
         String filter = "LOWER($alias) = LOWER('$value')"
-        def records =  provider.getRecords(validDateFrom, null, filter, null)
-        if (records && records.size() > 0 && records.get(0).get(RefBook.RECORD_ID_ALIAS).numberValue != uniqueRecordId) {
-            logger.error("В справочнике уже существует организация с данным $msg!")
+        def records =  provider.getRecords(null, null, filter, null)
+        for(def record: records) {
+            if (record.get(RefBook.RECORD_ID_ALIAS).numberValue == uniqueRecordId)
+                continue
+            Date fromDate = record.get(RefBook.RECORD_VERSION_FROM_ALIAS).getDateValue()
+            Date toDate = record.get(RefBook.RECORD_VERSION_TO_ALIAS)?.getDateValue()
+            if ((validDateTo == null || fromDate.compareTo(validDateTo) <= 0) &&
+                    (toDate == null || toDate.compareTo(validDateFrom) >= 0 )) {
+                logger.error("В справочнике уже существует организация с данным $msg!")
+                break
+            }
         }
     }
 }

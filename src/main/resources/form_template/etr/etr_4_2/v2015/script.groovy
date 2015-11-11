@@ -24,6 +24,11 @@ import groovy.transform.Field
  */
 
 switch (formDataEvent) {
+    case FormDataEvent.GET_HEADERS:
+        headers.get(0).comparePeriod = 'Период сравнения, ' + (isBank() ? 'млн. руб.' : 'тыс. руб.')
+        headers.get(0).currentPeriod = 'Период, ' + (isBank() ? 'млн. руб.' : 'тыс. руб.')
+        headers.get(1).deltaRub = '(гр.5-гр.4), ' + (isBank() ? 'млн. руб.' : 'тыс. руб.')
+        break
     case FormDataEvent.CREATE:
         formDataService.checkUnique(formData, logger)
         break
@@ -443,10 +448,10 @@ void checkHeaderXls(def headerRows, def colCount, def rowCount, def tmpRow) {
             ([(headerRows[0][0]): getColumnName(tmpRow, 'rowNum')]),
             ([(headerRows[0][1]): getColumnName(tmpRow, 'taxName')]),
             ([(headerRows[0][2]): getColumnName(tmpRow, 'symbol102')]),
-            ([(headerRows[0][3]): getColumnName(tmpRow, 'comparePeriod')]),
-            ([(headerRows[0][4]): getColumnName(tmpRow, 'currentPeriod')]),
+            ([(headerRows[0][3]): ('Период сравнения, ' + (isBank() ? 'млн. руб.' : 'тыс. руб.'))]),
+            ([(headerRows[0][4]): ('Период, ' + (isBank() ? 'млн. руб.' : 'тыс. руб.'))]),
             ([(headerRows[0][5]): 'Изменение за период']),
-            ([(headerRows[1][5]): '(гр.5-гр.4), тыс.руб.']),
+            ([(headerRows[1][5]): ('(гр.5-гр.4), ' + (isBank() ? 'млн. руб.' : 'тыс. руб.'))]),
             ([(headerRows[1][6]): '(гр.6/гр.4*100),%'])
     ]
     (0..6).each { index ->

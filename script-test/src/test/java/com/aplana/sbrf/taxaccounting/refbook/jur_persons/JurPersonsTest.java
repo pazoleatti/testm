@@ -78,6 +78,8 @@ public class JurPersonsTest extends RefBookScriptTestBase {
                         if (filter.contains("INN") && filter.contains("11111")) {
                             Map<String, RefBookValue> map = new HashMap<String, RefBookValue>();
                             map.put(RefBook.RECORD_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, 1L));
+                            map.put(RefBook.RECORD_VERSION_FROM_ALIAS, new RefBookValue(RefBookAttributeType.DATE, (new GregorianCalendar(2012, Calendar.JANUARY, 1, 0, 0, 0)).getTime()));
+                            map.put(RefBook.RECORD_VERSION_TO_ALIAS, new RefBookValue(RefBookAttributeType.DATE, null));
                             result.add(map);
                         }
                         return result;
@@ -220,6 +222,7 @@ public class JurPersonsTest extends RefBookScriptTestBase {
         value9.put("TAX_CODE_INCORPORATION", new RefBookValue(RefBookAttributeType.STRING, "1234567890123456"));
         saveRecords.add(value9);
 
+        testHelper.setValidDateFrom((new GregorianCalendar(2012, Calendar.JANUARY, 1, 0, 0, 0)).getTime());
         testHelper.setSaveRecords(saveRecords);
 
         testHelper.execute(FormDataEvent.SAVE);
@@ -230,32 +233,32 @@ public class JurPersonsTest extends RefBookScriptTestBase {
         Assert.assertEquals("7707083893 / 770708389", saveRecords.get(0).get("IKKSR").getStringValue());
         Assert.assertEquals("7707083893", saveRecords.get(0).get("IKSR").getStringValue());
         // 2
-        Assert.assertEquals("Для российской организации обязательно должно быть заполнено одно из следующих полей: «ИНН», «КПП»!", entries.get(i++).getMessage());
+        Assert.assertEquals("Для российской организации обязательно должны быть заполнены поля: «ИНН», «КПП»!", entries.get(i++).getMessage());
         Assert.assertEquals("Атрибут \"КПП\" заполнен неверно (7707083891)! Ожидаемый паттерн: \"([0-9]{1}[1-9]{1}|[1-9]{1}[0-9]{1})([0-9]{2})([0-9A-Z]{2})([0-9]{3})\"", entries.get(i++).getMessage());
         Assert.assertEquals("Расшифровка паттерна «([0-9]{1}[1-9]{1}|[1-9]{1}[0-9]{1})([0-9]{2})([0-9A-Z]{2})([0-9]{3})»: Первые 2 символа: (0-9; 1-9 / 1-9; 0-9). Следующие 2 символа: (0-9). Следующие 2 символа: (0-9 / A-Z). Последние 3 символа: (0-9).", entries.get(i++).getMessage());
         Assert.assertEquals("Поле «Код Swift» должно содержать 8 или 11 символов!", entries.get(i++).getMessage());
         Assert.assertNull(saveRecords.get(1).get("IKKSR").getStringValue());
         Assert.assertNull(saveRecords.get(1).get("IKSR").getStringValue());
         // 3
-        Assert.assertEquals("Для российской организации обязательно должно быть заполнено одно из следующих полей: «ИНН», «КПП»!", entries.get(i++).getMessage());
+        Assert.assertEquals("Для российской организации обязательно должны быть заполнены поля: «ИНН», «КПП»!", entries.get(i++).getMessage());
         Assert.assertEquals("Вычисленное контрольное число по полю \"ИНН\" некорректно (7707083894).", entries.get(i++).getMessage());
         Assert.assertNull(saveRecords.get(2).get("IKKSR").getStringValue());
         Assert.assertEquals("7707083894", saveRecords.get(2).get("IKSR").getStringValue());
         // 4
-        Assert.assertEquals("Для российской организации обязательно должно быть заполнено одно из следующих полей: «ИНН», «КПП»!", entries.get(i++).getMessage());
+        Assert.assertEquals("Для российской организации обязательно должны быть заполнены поля: «ИНН», «КПП»!", entries.get(i++).getMessage());
         Assert.assertEquals("В справочнике уже существует организация с данным ИНН!", entries.get(i++).getMessage());
         Assert.assertEquals("Атрибут \"ИНН\" заполнен неверно (11111)! Ожидаемый паттерн: \"([0-9]{1}[1-9]{1}|[1-9]{1}[0-9]{1})[0-9]{8}\"", entries.get(i++).getMessage());
         Assert.assertEquals("Расшифровка паттерна «([0-9]{1}[1-9]{1}|[1-9]{1}[0-9]{1})[0-9]{8}»: Первые 2 символа: (0-9; 1-9 / 1-9; 0-9). Следующие 8 символов: (0-9).", entries.get(i++).getMessage());
         Assert.assertNull(saveRecords.get(3).get("IKKSR").getStringValue());
         Assert.assertEquals("11111", saveRecords.get(3).get("IKSR").getStringValue());
         // 5
-        Assert.assertEquals("Для российской организации обязательно должно быть заполнено одно из следующих полей: «ИНН», «КПП»!", entries.get(i++).getMessage());
+        Assert.assertEquals("Для российской организации обязательно должны быть заполнены поля: «ИНН», «КПП»!", entries.get(i++).getMessage());
         Assert.assertEquals("Поле «Дата наступления основания для включения в список» должно быть больше или равно полю «Дата наступления основания для исключении из списка»!", entries.get(i++).getMessage());
         Assert.assertEquals("Для ВЗЛ обязательно должны быть заполнены поля «VAT_STATUS»,«DEP_CRITERION»!", entries.get(i++).getMessage());
         Assert.assertNull(saveRecords.get(4).get("IKKSR").getStringValue());
         Assert.assertNull(saveRecords.get(4).get("IKSR").getStringValue());
         // 6
-        Assert.assertEquals("Для российской организации обязательно должно быть заполнено одно из следующих полей: «ИНН», «КПП»!", entries.get(i++).getMessage());
+        Assert.assertEquals("Для российской организации обязательно должны быть заполнены поля: «ИНН», «КПП»!", entries.get(i++).getMessage());
         Assert.assertEquals("Для российской организации нельзя указать поля «REG_NUM»,«KIO»!", entries.get(i++).getMessage());
         Assert.assertEquals("Вычисленное контрольное число по полю \"КИО\" некорректно (7707083894).", entries.get(i++).getMessage());
         Assert.assertNull(saveRecords.get(5).get("IKKSR").getStringValue());

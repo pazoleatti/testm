@@ -74,7 +74,7 @@ public class CreateFormDataHandler extends AbstractActionHandler<CreateFormData,
         Integer comparativeDrpId = null;
         DepartmentReportPeriod comparativeDrp = null;
         if (action.getComparativePeriodId() != null) {
-            comparativeDrp = departmentReportPeriodService.getLast(action.getDepartmentId(),
+            comparativeDrp = departmentReportPeriodService.getFirst(action.getDepartmentId(),
                     action.getComparativePeriodId());
             comparativeDrpId = comparativeDrp.getId();
         }

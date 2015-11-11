@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<formTemplateContent>
+    <fixedRows>false</fixedRows>
+    <monthly>false</monthly>
+    <comparative>false</comparative>
+    <accruing>false</accruing>
+    <updating>false</updating>
+    <name>Прогноз крупных сделок</name>
+    <fullName>Прогноз крупных сделок</fullName>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="autoNumerationColumn">
+        <alias>rowNum</alias>
+        <checking>false</checking>
+        <columnType>AUTO</columnType>
+        <name>№ п/п</name>
+        <order>1</order>
+        <width>4</width>
+        <numerationType>SERIAL</numerationType>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
+        <alias>ikksr</alias>
+        <checking>false</checking>
+        <columnType>REFBOOK</columnType>
+        <name>ИНН и КПП или его аналог (при наличии)</name>
+        <order>2</order>
+        <width>15</width>
+        <hierarchical>false</hierarchical>
+        <nameAttributeId>5201</nameAttributeId>
+        <refBookAttributeId>5217</refBookAttributeId>
+        <searchEnabled>true</searchEnabled>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="referenceColumn">
+        <alias>name</alias>
+        <checking>false</checking>
+        <columnType>REFERENCE</columnType>
+        <name>Полное наименование и ОПФ юридического лица</name>
+        <order>3</order>
+        <width>15</width>
+        <parentAlias>ikksr</parentAlias>
+        <refBookAttributeId>5201</refBookAttributeId>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
+        <alias>transactionName</alias>
+        <checking>false</checking>
+        <columnType>STRING</columnType>
+        <name>Наименование сделки</name>
+        <order>4</order>
+        <width>15</width>
+        <maxLength>256</maxLength>
+        <prevLength>0</prevLength>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>sum</alias>
+        <checking>false</checking>
+        <columnType>NUMBER</columnType>
+        <name>Ожидаемый объем доходов и расходов за отчетный Налоговый период, руб.</name>
+        <order>5</order>
+        <width>15</width>
+        <maxLength>15</maxLength>
+        <precision>0</precision>
+    </columns>
+    <styles>
+        <alias>Корректировка-добавлено</alias>
+        <backColor>PALE_GREEN</backColor>
+        <bold>false</bold>
+        <fontColor>BLACK</fontColor>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Редактируемая</alias>
+        <backColor>LIGHT_BLUE</backColor>
+        <bold>false</bold>
+        <fontColor>BLACK</fontColor>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Автозаполняемая</alias>
+        <backColor>WHITE</backColor>
+        <bold>true</bold>
+        <fontColor>DARK_GREEN</fontColor>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Корректировка-удалено</alias>
+        <backColor>LIGHT_CORAL</backColor>
+        <bold>false</bold>
+        <fontColor>BLACK</fontColor>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Корректировка-без изменений</alias>
+        <backColor>GREY</backColor>
+        <bold>false</bold>
+        <fontColor>BLACK</fontColor>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Корректировка-изменено</alias>
+        <backColor>WHITE</backColor>
+        <bold>true</bold>
+        <fontColor>RED</fontColor>
+        <italic>false</italic>
+    </styles>
+</formTemplateContent>

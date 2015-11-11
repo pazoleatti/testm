@@ -46,9 +46,11 @@ public class DeclarationCreationView extends PopupViewWithUiHandlers<Declaration
     @UiField
     RefBookPickerWidget declarationTypeId;
     @UiField
-    RefBookPicker taxOrganCode;
+    RefBookPickerWidget taxOrganCode;
     @UiField
     RefBookPicker taxOrganKpp;
+    @UiField
+    Label taxOrganCodeLabel;
     @UiField
     HorizontalPanel codePanel;
     @UiField
@@ -115,6 +117,14 @@ public class DeclarationCreationView extends PopupViewWithUiHandlers<Declaration
             taxOrganCode.setFilter(filter);
             taxOrganKpp.setPeriodDates(version, version);
             taxOrganCode.setPeriodDates(version, version);
+        }
+
+        if (taxType == TaxType.TRANSPORT) {
+            taxOrganCode.setTitle("Код налогового органа (кон.)");
+            taxOrganCodeLabel.setText("Код налогового органа (кон.)");
+        } else {
+            taxOrganCode.setTitle("Код налогового органа");
+            taxOrganCodeLabel.setText("Код налогового органа");
         }
         taxOrganCode.setSingleColumn("TAX_ORGAN_CODE");
         taxOrganKpp.setSingleColumn("KPP");

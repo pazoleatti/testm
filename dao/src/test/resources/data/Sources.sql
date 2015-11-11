@@ -141,6 +141,10 @@ insert into form_template (id, type_id, version, monthly, fixed_rows, name, full
 insert into form_type (id, name, tax_type, status, code) values (21, 'РНУ-21', 'I', 0, 'code-21');
 insert into form_template (id, type_id, version, monthly, fixed_rows, name, fullname, status, comparative, accruing)
   values (21, 21, to_date('01.01.2000', 'DD.MM.YY'), 0, 0, 'РНУ-21', 'РНУ-21', 0, 0, 0);
+--Тип нф = рну-100
+insert into form_type (id, name, tax_type, status, code) values (100, 'РНУ-100', 'I', 0, 'code-100');
+insert into form_template (id, type_id, version, monthly, fixed_rows, name, fullname, status, comparative, accruing)
+  values (100, 100, to_date('01.01.2000', 'DD.MM.YY'), 0, 0, 'РНУ-100', 'РНУ-100', 0, 1, 0);
 
 
 --Тип декларации = Д-1
@@ -227,6 +231,12 @@ Insert into department_form_type (ID,DEPARTMENT_ID,FORM_TYPE_ID,KIND,PERFORMER_D
 Insert into department_form_type (ID,DEPARTMENT_ID,FORM_TYPE_ID,KIND,PERFORMER_DEP_ID) values (32,'4',20,'2',null);
 --Назначение консолидированная РНУ-21 для Байкальского банка
 Insert into department_form_type (ID,DEPARTMENT_ID,FORM_TYPE_ID,KIND,PERFORMER_DEP_ID) values (33,'4',21,'2',null);
+--Назначение консолидированная РНУ-100 для Байкальского банка
+Insert into department_form_type (ID,DEPARTMENT_ID,FORM_TYPE_ID,KIND,PERFORMER_DEP_ID) values (34,'4',100,'2',null);
+--Назначение первичная РНУ-100 для Байкальского банка
+Insert into department_form_type (ID,DEPARTMENT_ID,FORM_TYPE_ID,KIND,PERFORMER_DEP_ID) values (35,'4',100,'1',null);
+--Назначение первичная РНУ-100 для Волго-Вятского банка
+Insert into department_form_type (ID,DEPARTMENT_ID,FORM_TYPE_ID,KIND,PERFORMER_DEP_ID) values (36,'8',100,'1',null);
 
 --Назначение декларация Д-1 для Байкальского банка
 Insert into department_declaration_type (ID,DEPARTMENT_ID,DECLARATION_TYPE_ID) values (1,'4',1);
@@ -291,6 +301,10 @@ Insert into form_data_source (DEPARTMENT_FORM_TYPE_ID,SRC_DEPARTMENT_FORM_TYPE_I
 Insert into form_data_source (DEPARTMENT_FORM_TYPE_ID,SRC_DEPARTMENT_FORM_TYPE_ID,PERIOD_START,PERIOD_END) values (32,31,date '2000-01-01',null);
 --Связка источник->приемник "первичная РНУ-19 Байкальского банка -> консолидированная РНУ-21 Байкальского банка"
 Insert into form_data_source (DEPARTMENT_FORM_TYPE_ID,SRC_DEPARTMENT_FORM_TYPE_ID,PERIOD_START,PERIOD_END) values (33,31,date '2000-01-01',null);
+--Связка источник->приемник "первичная РНУ-100 Байкальского банка -> консолидированная РНУ-100 Байкальского банка"
+Insert into form_data_source (DEPARTMENT_FORM_TYPE_ID,SRC_DEPARTMENT_FORM_TYPE_ID,PERIOD_START,PERIOD_END) values (34,35,date '2000-01-01',null);
+--Связка источник->приемник "первичная РНУ-100 Волго-вятского банка -> консолидированная РНУ-100 Байкальского банка"
+Insert into form_data_source (DEPARTMENT_FORM_TYPE_ID,SRC_DEPARTMENT_FORM_TYPE_ID,PERIOD_START,PERIOD_END) values (34,36,date '2000-01-01',null);
 
 --Связка источник->приемник "консолидированная РНУ-1 Байкальского банка -> Декларация Д-1 Байкальского банка"
 Insert into declaration_source (DEPARTMENT_DECLARATION_TYPE_ID,SRC_DEPARTMENT_FORM_TYPE_ID,PERIOD_START,PERIOD_END) values (1,2,date '2000-01-01',null);
@@ -615,7 +629,7 @@ values (35,7,1,1,null,22,20,1,0,    0,0,0,0);
 
 ----------------test30------------
 
---Отчетный период 3 квартал 2012
+--Отчетный период 3 квартал 2026
 insert into tax_period(id, tax_type, year) values (114, 'I', 2026);
 insert into report_period (id, name, tax_period_id, dict_tax_period_id, start_date, end_date, calendar_start_date)
 values (114, 'третий квартал',  114, 1, date '2026-07-01', date '2026-09-30', date '2026-07-01');
@@ -636,6 +650,22 @@ values (134,89,1,1,null,123,null,0,0,    0,0,0,0);
 -- НФ первичная РНУ-7 в периоде 3 квартал 2026 для Байкальского банка и датой корректировки (15.01.2026)
 Insert into FORM_DATA (ID,FORM_TEMPLATE_ID,STATE,KIND,PERIOD_ORDER,DEPARTMENT_REPORT_PERIOD_ID,COMPARATIVE_DEP_REP_PER_ID,ACCRUING,MANUAL,  RETURN_SIGN,SORTED,EDITED,SORTED_BACKUP)
 values (135,89,1,1,null,124,null,0,0,    0,0,0,0);
+
+
+----------------test52------------
+
+--Связка подразделение Волго-вятский банк - период 3 квартал 2026
+Insert into department_report_period (DEPARTMENT_ID,REPORT_PERIOD_ID,IS_ACTIVE,IS_BALANCE_PERIOD,CORRECTION_DATE,ID) values ('8',114,'0','0',null,33);
+
+-- НФ консолидированная РНУ-100 в периоде 3 квартал 2026 для Байкальского банка и периодом сравнения 3 квартал 2026
+Insert into FORM_DATA (ID,FORM_TEMPLATE_ID,STATE,KIND,PERIOD_ORDER,DEPARTMENT_REPORT_PERIOD_ID,COMPARATIVE_DEP_REP_PER_ID,ACCRUING,MANUAL,  RETURN_SIGN,SORTED,EDITED,SORTED_BACKUP)
+values (78,100,1,2,null,122,122,0,0,    0,0,0,0);
+-- НФ первичная РНУ-100 в периоде 3 квартал 2026 для Байкальского банка и периодом сравнения 3 квартал 2026
+Insert into FORM_DATA (ID,FORM_TEMPLATE_ID,STATE,KIND,PERIOD_ORDER,DEPARTMENT_REPORT_PERIOD_ID,COMPARATIVE_DEP_REP_PER_ID,ACCRUING,MANUAL,  RETURN_SIGN,SORTED,EDITED,SORTED_BACKUP)
+values (79,100,1,1,null,122,122,0,0,    0,0,0,0);
+-- НФ первичная РНУ-100 в периоде 3 квартал 2026 для Волго-вятского банка и периодом сравнения 3 квартал 2026
+Insert into FORM_DATA (ID,FORM_TEMPLATE_ID,STATE,KIND,PERIOD_ORDER,DEPARTMENT_REPORT_PERIOD_ID,COMPARATIVE_DEP_REP_PER_ID,ACCRUING,MANUAL,  RETURN_SIGN,SORTED,EDITED,SORTED_BACKUP)
+values (80,100,1,1,null,33,33,0,0,    0,0,0,0);
 
 
 --------------------------- НФ-источники декларация ----------------------------
