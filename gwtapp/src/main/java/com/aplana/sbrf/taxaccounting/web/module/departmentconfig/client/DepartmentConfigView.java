@@ -206,6 +206,7 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
                     onReportPeriodsSelected(event.getValue().get(0));
                 } else {
                     clear();
+                    currentReportPeriodId = null;
                     isReportPeriodActive = false;
                 }
             }
@@ -461,14 +462,17 @@ public class DepartmentConfigView extends ViewWithUiHandlers<DepartmentConfigUiH
             if (defaultReportPeriodId != null && reportPeriod.getId().equals(defaultReportPeriodId)) {
                 periodPickerPopup.setValue(Arrays.asList(defaultReportPeriodId));
                 maxPeriod = null;
+                currentReportPeriodId = defaultReportPeriodId;
                 break;
             }
             if (reportPeriod.getEndDate().after(maxPeriod.getEndDate())) {
                 maxPeriod = reportPeriod;
             }
         }
-        if (maxPeriod != null)
+        if (maxPeriod != null) {
+            currentReportPeriodId = maxPeriod.getId();
             periodPickerPopup.setValue(Arrays.asList(maxPeriod.getId()));
+        }
 	}
 
 	@Override
