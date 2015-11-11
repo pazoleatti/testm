@@ -76,7 +76,7 @@ public class App_6_6Test extends ScriptTestBase {
     }
 
     // Проверка с данными
-    //@Test
+    @Test
     public void check1Test() throws ParseException {
         FormData formData = getFormData();
         formData.initFormTemplateParams(testHelper.getTemplate("..//src/main//resources//form_template//deal//app_6_6//v2015//"));
