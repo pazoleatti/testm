@@ -78,6 +78,8 @@ public class JurPersonsTest extends RefBookScriptTestBase {
                         if (filter.contains("INN") && filter.contains("11111")) {
                             Map<String, RefBookValue> map = new HashMap<String, RefBookValue>();
                             map.put(RefBook.RECORD_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, 1L));
+                            map.put(RefBook.RECORD_VERSION_FROM_ALIAS, new RefBookValue(RefBookAttributeType.DATE, (new GregorianCalendar(2012, Calendar.JANUARY, 1, 0, 0, 0)).getTime()));
+                            map.put(RefBook.RECORD_VERSION_TO_ALIAS, new RefBookValue(RefBookAttributeType.DATE, null));
                             result.add(map);
                         }
                         return result;
@@ -220,6 +222,7 @@ public class JurPersonsTest extends RefBookScriptTestBase {
         value9.put("TAX_CODE_INCORPORATION", new RefBookValue(RefBookAttributeType.STRING, "1234567890123456"));
         saveRecords.add(value9);
 
+        testHelper.setValidDateFrom((new GregorianCalendar(2012, Calendar.JANUARY, 1, 0, 0, 0)).getTime());
         testHelper.setSaveRecords(saveRecords);
 
         testHelper.execute(FormDataEvent.SAVE);
