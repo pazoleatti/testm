@@ -571,7 +571,9 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
 
 // Получение Id записи из справочника 28 с использованием кэширования
 def getRecordId(String name, String iksr, int fileRowIndex, int colIndex, String iksrName) {
-    if(!iksr){
+    if (!iksr) {
+        logger.warn("Строка $fileRowIndex , столбец " + ScriptUtils.getXLSColumnName(colIndex) + ": " +
+                "На форме не заполнены графы с общей информацией о юридическом лице, так как в файле отсутствует значение по графе «$iksrName»!")
         return
     }
     def ref_id = 520
