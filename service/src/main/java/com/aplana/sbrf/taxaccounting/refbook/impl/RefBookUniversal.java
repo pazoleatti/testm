@@ -338,9 +338,6 @@ public class RefBookUniversal implements RefBookDataProvider {
                 //Получаем записи у которых совпали значения уникальных атрибутов
                 List<Pair<Long,String>> matchedRecords = refBookDao.getMatchedRecordsByUniqueAttributes(refBookId, uniqueRecordId, attributes, Arrays.asList(record));
                 if (matchedRecords != null && !matchedRecords.isEmpty()) {
-                    if (refBook.isVersioned()) {
-                        throw new ServiceException(String.format(UNIQ_ERROR_MSG, makeAttrNames(matchedRecords, null)));
-                    }
                     //Проверка на пересечение версий у записей справочника, в которых совпали уникальные атрибуты
                     List<Long> conflictedIds = refBookDao.checkConflictValuesVersions(matchedRecords, versionFrom, record.getVersionTo());
 
