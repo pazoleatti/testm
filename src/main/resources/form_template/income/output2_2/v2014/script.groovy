@@ -311,12 +311,12 @@ def calc6(def row, def departmentReportPeriod, def fullCorrectionMap, def tinyCo
         } else {
             if (dataRowCorrection != null) {
                 // добавляем единичку к числу в строковом формате
-                return (Integer.parseInt(dataRowCorrection.recType) + 1).toString().padLeft(2,"0")
+                return dataRowCorrection.recType
             } else {
                 // Если в форме предыдущего периода найдена строка, в которой графы 4 и 5 (ИНН и КПП получателя) равны графам 4 и 5 заполняемой строки текущей формы
                 dataRowCorrection = tinyCorrectionMap[getSimpleRowKey(row)]
                 if (dataRowCorrection != null) {
-                    return dataRowCorrection.recType
+                    return (Integer.parseInt(dataRowCorrection.recType) + 1).toString().padLeft(2,"0")
                 } else {
                     logger.warn("Строка %s: Графа «%s» заполнена Системой значением «00»! " +
                             "В форме предыдущего периода не найдена строка, в которой графа «%s» = «%s» и графа «%s» = «%s»",
