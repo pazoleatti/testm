@@ -126,6 +126,11 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
             return;
         }
 
+        // Оператору доступны расчетные формы
+        if (userInfo.getUser().hasRole(TARole.ROLE_OPER) && formData.getKind() == FormDataKind.CALCULATED) {
+            return;
+        }
+
         // Непредусмотренное сочетание параметров состояния формы и пользователя - запрет доступа
         // Или подразделение недоступно
         LOG.error(String.format(FORM_DATA_KIND_STATE_ERROR_LOG, LOG_EVENT_READ, formData.getKind().getTitle(),
@@ -373,6 +378,10 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
         if (asList(FormDataKind.CONSOLIDATED, FormDataKind.SUMMARY, FormDataKind.CALCULATED).contains(formData.getKind())) {
             switch (formData.getState()) {
                 case CREATED:
+                    // Оператору доступны расчетные формы
+                    if (userInfo.getUser().hasRole(TARole.ROLE_OPER) && formData.getKind() == FormDataKind.CALCULATED) {
+                        return;
+                    }
                     // Созданные редактируют только контролеры, которые могут открыть форму для чтения
                     if (!userInfo.getUser().hasRole(TARole.ROLE_CONTROL)
                             && !userInfo.getUser().hasRole(TARole.ROLE_CONTROL_NS)
