@@ -53,6 +53,12 @@ public interface AuditDao {
     Date lastArchiveDate();
 
     /**
+     * Дата последней архивации
+     * @return дата
+     */
+    Date firstDateOfLog();
+
+    /**
      * Возвращает записи ЖА для определенной роли{@link com.aplana.sbrf.taxaccounting.model.TARole},
      * подразделение которых является источником/приемником для соответствующей роли выборке
      * http://conf.aplana.com/pages/viewpage.action?pageId=14813541
