@@ -3,7 +3,6 @@
     <fixedRows>true</fixedRows>
     <name>Сведения о уплаченных суммах налога по операциям с ГЦБ</name>
     <fullName>Сведения о уплаченных суммах налога по операциям с ГЦБ</fullName>
-    <header>ЗАГОЛОВОК</header>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>rowNum</alias>
         <checking>false</checking>
