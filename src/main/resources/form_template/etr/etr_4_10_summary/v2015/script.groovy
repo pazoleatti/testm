@@ -144,9 +144,18 @@ void consolidation() {
                 newRow.department = it.departmentId
                 // графа 3..5
                 commonColumns.each { column ->
-                    newRow[column] = row[column]
+                    newRow[column] = ((source.departmentId == 1) ? 1000 : 1) * row[column]
                 }
                 dataRows.add(newRow)
+            }
+        }
+    }
+    if (isBank()) { // если уровень банка, то тысячи понижаем до миллионов
+        dataRows.each { row ->
+            commonColumns.each { column ->
+                if (row[column]) {
+                    row[column] = (row[column] as BigDecimal).divide(BigDecimal.valueOf(1000), BigDecimal.ROUND_HALF_UP)
+                }
             }
         }
     }

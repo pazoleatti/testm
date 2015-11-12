@@ -27,7 +27,7 @@ import static org.mockito.Mockito.when;
  */
 public class Etr4_9_SummaryTest extends ScriptTestBase {
     private static final int TYPE_ID = 7090;
-    private static final int DEPARTMENT_ID = 2;
+    private static final int DEPARTMENT_ID = 1;
     private static final int REPORT_PERIOD_ID = 1;
     private static final int DEPARTMENT_PERIOD_ID = 1;
     private static final FormDataKind KIND = FormDataKind.CONSOLIDATED;
@@ -281,17 +281,17 @@ public class Etr4_9_SummaryTest extends ScriptTestBase {
 
         DataRow<Cell> row = sourceFormData.createDataRow();
         row.setAlias("R1");
-        row.getCell("currentPeriod").setValue(i, null);
+        row.getCell("currentPeriod").setValue(i * (i != 1 ? 1000 : 1), null);
         dataRows.add(row);
 
         DataRow<Cell> row2 = sourceFormData.createDataRow();
         row2.setAlias("R2");
-        row2.getCell("currentPeriod").setValue(i * 2, null);
+        row2.getCell("currentPeriod").setValue(i * 2 * (i != 1 ? 1000 : 1), null);
         dataRows.add(row2);
 
         DataRow<Cell> row3 = sourceFormData.createDataRow();
         row3.setAlias("R3");
-        row3.getCell("currentPeriod").setValue(i * 3, null);
+        row3.getCell("currentPeriod").setValue(i * 3 * (i != 1 ? 1000 : 1), null);
         dataRows.add(row3);
 
         return dataRows;
