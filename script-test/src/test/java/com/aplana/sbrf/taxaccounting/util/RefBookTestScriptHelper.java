@@ -107,6 +107,7 @@ public class RefBookTestScriptHelper {
         bindings.put("formDataEvent", formDataEvent);
         bindings.put("refBookFactory", refBookFactory);
         bindings.put("refBookService", refBookService);
+        bindings.put("formDataService", formDataService);
 
         bindings.put("uniqueRecordId", uniqueRecordId);
         bindings.put("saveRecords", saveRecords);
