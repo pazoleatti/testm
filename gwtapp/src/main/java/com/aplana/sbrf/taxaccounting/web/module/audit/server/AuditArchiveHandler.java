@@ -23,6 +23,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -90,8 +91,9 @@ public class AuditArchiveHandler extends AbstractActionHandler<AuditArchiveActio
         params.put(AsyncTask.RequiredParams.LOCKED_OBJECT.name(), key);
         params.put(AuditService.AsyncNames.LOG_FILTER.name(), action.getLogSystemFilter());
         params.put(AuditService.AsyncNames.LOG_COUNT.name(), recordsCount);
+        Date firstLogDate = auditService.getFirstDateOfLog();
         if ((lockData = lockDataService.lock(key, userInfo.getUser().getId(),
-                String.format(LockData.DescriptionTemplate.LOG_SYSTEM_BACKUP.getText(), SDF.format(action.getLogSystemFilter().getFromSearchDate()), SDF.format(action.getLogSystemFilter().getToSearchDate())),
+                String.format(LockData.DescriptionTemplate.LOG_SYSTEM_BACKUP.getText(), firstLogDate != null ? SDF.format(firstLogDate):"", SDF.format(action.getLogSystemFilter().getToSearchDate())),
                 LockData.State.IN_QUEUE.getText())) == null) {
             try {
                 lockData = lockDataService.getLock(key);
