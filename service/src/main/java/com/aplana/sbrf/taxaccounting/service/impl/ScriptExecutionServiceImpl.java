@@ -135,6 +135,11 @@ public class ScriptExecutionServiceImpl extends TAAbstractScriptingServiceImpl i
             ZipEntry entry;
             while((entry = zis.getNextEntry()) != null) {
                 if (!entry.isDirectory()) {
+                    if (!entry.getName().contains("/")) {
+                        logger.error("Структура архива некорректна! Импорт файла отменен.");
+                        hasFatalError = true;
+                        break;
+                    }
                     String folderName = entry.getName().substring(0, entry.getName().indexOf("/"));
                     String scriptName = entry.getName().substring(entry.getName().indexOf("/") + 1, entry.getName().indexOf("."));
 
@@ -249,11 +254,13 @@ public class ScriptExecutionServiceImpl extends TAAbstractScriptingServiceImpl i
                 }
             }
         } catch(Exception e) {
-            logger.error("Произошла непредвиденная ошибка при импорте скриптов");
+            logger.error("Произошла непредвиденная ошибка при импорте скриптов. Все изменения были отменены.");
             hasFatalError = true;
             throw new ServiceException(e.getMessage(), e);
         } finally {
-            logger.info("Импорт завершен");
+            if (!hasFatalError) {
+                logger.info("Импорт завершен");
+            }
             StringBuilder auditMsg = new StringBuilder()
                     .append(hasFatalError ? "Ошибка при импорте скриптов из файла \"" : "Выполнен импорт скриптов из файла \"")
                     .append(fileName).append("\". ");
