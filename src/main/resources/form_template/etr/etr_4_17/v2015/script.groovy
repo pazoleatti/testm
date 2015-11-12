@@ -39,6 +39,19 @@ switch (formDataEvent) {
 def totalColumns = ['tax26411_01', 'tax26411_02', 'sum34', 'tax26411_03', 'tax26411_13', 'tax26411_12', 'tax26412', 'tax26410_09', 'sum']
 
 @Field
+def nonEmptyColumns = ['tax26411_01', 'tax26411_02', 'sum34', 'rate5', 'tax26411_03', 'rate7', 'rate9', 'tax26411_13', 'rate11', 'tax26411_12', 'rate13', 'tax26412', 'rate15', 'tax26410_09', 'sum', 'rate']
+
+// alias -> opu code
+@Field
+def opuMap = [tax26411_01: '26411.01',
+              tax26411_02: '26411.02',
+              tax26411_03: '26411.03',
+              tax26411_13: '26411.13',
+              tax26411_12: '26411.12',
+              tax26412: '26102',
+              tax26410_09: '26410.09']
+
+@Field
 def rateMap = ['rate5': 'sum34',
                'rate7': 'tax26411_03',
                'rate9': 'tax26411_13',
@@ -69,9 +82,6 @@ def departmentMap = [R1: 4,
                      R16: 37,
                      R17: 113
                     ]
-
-@Field
-def opuMap = [tax26411_01: '26411.01', tax26411_02: '26411.02', tax26411_03: '26411.03', tax26411_13: '26411.13', tax26411_12: '26411.12', tax26412: '26102', tax26410_09: '26410.09']
 
 @Field
 def periodMap = [:]
@@ -197,22 +207,24 @@ void calc() {
     def dataRows = formDataService.getDataRowHelper(formData).allCached
     def reportPeriod = getReportPeriod(formData.reportPeriodId)
     def date = getEndDate(reportPeriod?.taxPeriod?.year, reportPeriod?.order)
+    // получение данных из БО
     for (def alias in departmentMap.keySet()) {
         def row = getDataRow(dataRows, alias)
         def records = get102(departmentMap.get(alias), date)
         opuMap.each{k,v ->
-            def value = records?records.get(v):0
+            def value = records?records[v]:0
             row[k] = value
         }
         row.sum34 = row.tax26411_01 + row.tax26411_02
         row.sum = row.sum34 + row.tax26411_01 + row.tax26411_02 + row.tax26411_03 + row.tax26411_13 + row.tax26411_12 +
-                row.tax26412 + row.tax26410_09
+                        row.tax26412 + row.tax26410_09
     }
+
     //расчет итоговой строки
     def totalRow = getDataRow(dataRows, 'total')
     totalColumns.each { alias ->
-        totalRow[alias] = summ(formData, dataRows, new ColumnRange(alias, 0, 16))
-        def rateAlias = rateMap.find{ it.value==alias}?.key
+        totalRow[alias] = summ(formData, dataRows, new ColumnRange(alias, getDataRow(dataRows, 'R1').getIndex() - 1, getDataRow(dataRows, 'R17').getIndex() - 1))
+        def rateAlias = rateMap.find{ it.value==alias }?.key
         if (rateAlias)
             totalRow[rateAlias] = totalRow[alias] > 0 ? 100 : 0
     }
@@ -243,4 +255,8 @@ def calcRate(def row, def totalRow, def alias, def resultAlias) {
 }
 
 void logicCheck() {
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
+    for(int i = 0; i < dataRows.size(); i++){
+        checkNonEmptyColumns(dataRows[i], dataRows[i].getIndex(), nonEmptyColumns, logger, true)
+    }
 }
