@@ -42,8 +42,11 @@ public class ScriptsImportHandler extends AbstractActionHandler<ScriptsImportAct
         ScriptsImportResult result = new ScriptsImportResult();
         Logger logger = new Logger();
         TAUserInfo userInfo = securityService.currentUserInfo();
-        scriptExecutionService.importScripts(logger, blobData.getInputStream(), blobData.getName(), userInfo);
-        result.setUuid(logEntryService.save(logger.getEntries()));
+        try {
+            scriptExecutionService.importScripts(logger, blobData.getInputStream(), blobData.getName(), userInfo);
+        } catch (Exception e) {} finally {
+            result.setUuid(logEntryService.save(logger.getEntries()));
+        }
         return result;
     }
 

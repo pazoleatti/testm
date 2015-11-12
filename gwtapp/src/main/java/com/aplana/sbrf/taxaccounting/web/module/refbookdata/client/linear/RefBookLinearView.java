@@ -242,7 +242,7 @@ public class RefBookLinearView extends ViewWithUiHandlers<RefBookDataLinearUiHan
         }
         //Значит, что в справочнике запись добавилась на другую страницу
         if (selectionModel.getSelectedObject()==null && !refBookDataTable.getVisibleItems().isEmpty()){
-            setSelected(refBookDataTable.getVisibleItems().get(0).getRefBookRowId());
+            selectionModel.setSelected(refBookDataTable.getVisibleItems().get(0), true);
         }
     }
 

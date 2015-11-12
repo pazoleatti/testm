@@ -26,7 +26,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="referenceColumn">
         <alias>code</alias>
         <checking>false</checking>
-        <name>Код налогового учета</name>
+        <name>Код налогового учёта</name>
         <order>3</order>
         <width>18</width>
         <parentAlias>balance</parentAlias>
@@ -45,7 +45,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="referenceColumn">
         <alias>name</alias>
         <checking>false</checking>
-        <name>Наименование счёта</name>
+        <name>Наименование</name>
         <order>5</order>
         <width>10</width>
         <parentAlias>balance</parentAlias>
