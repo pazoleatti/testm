@@ -1,10 +1,8 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
+import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
-import com.aplana.sbrf.taxaccounting.model.DeclarationTemplate;
-import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
-import com.aplana.sbrf.taxaccounting.model.FormTemplate;
-import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
@@ -40,6 +38,9 @@ public class ScriptExecutionServiceImpl extends TAAbstractScriptingServiceImpl i
 
 	private static final Log LOG = LogFactory.getLog(ScriptExecutionServiceImpl.class);
 
+
+    final static String LOCK_MESSAGE = "%s \"%s\" заблокирован пользователем с логином \"%s\". Макет был пропущен.";
+
     @Autowired
     private LogEntryService logEntryService;
     @Autowired
@@ -52,6 +53,10 @@ public class ScriptExecutionServiceImpl extends TAAbstractScriptingServiceImpl i
     private RefBookDao refBookDao;
     @Autowired
     private AuditService auditService;
+    @Autowired
+    private LockDataService lockDataService;
+    @Autowired
+    private TAUserService userService;
 
     @Override
     public void executeScript(TAUserInfo userInfo, String script, Logger logger) {
@@ -107,6 +112,19 @@ public class ScriptExecutionServiceImpl extends TAAbstractScriptingServiceImpl i
         return beans;
     }
 
+    /**
+     * Проверяе, возможен ли импорт в указаннный макет (нет ли на нем блокировки)
+     * @param lockKey ключ блокировки макета
+     * @return если блокировка существует, то возвращается логин пользователя (тевущий пользователь не учитывается)
+     */
+    private String canImportScript(String lockKey, TAUser user){
+        LockData lockData = lockDataService.getLock(lockKey);
+        if (lockData != null && lockData.getUserId() != user.getId()) {
+            return userService.getUser(lockData.getUserId()).getLogin();
+        }
+        return null;
+    }
+
     @Override
     public void importScripts(Logger logger, InputStream zipFile, String fileName, TAUserInfo userInfo) {
         Map<String, List<String>> files = new HashMap<String, List<String>>();
@@ -145,15 +163,22 @@ public class ScriptExecutionServiceImpl extends TAAbstractScriptingServiceImpl i
                             logger.error("Макет налоговой формы, указанный в файле \"%s\" не существует. Файл был пропущен.", scriptName);
                             continue;
                         }
+
+                        //Проверяем не заблокирован ли макет
                         FormTemplate formTemplate = formTemplateService.get(formTemplateId);
-                        formTemplate.setScript(script);
-                        try {
-                            formTemplateService.updateScript(formTemplate, logger);
-                        } catch (ServiceLoggerException e) {
-                            logger.info("Макет налоговой формы \"%s\", указанный в файле \"%s\" содержит ошибки. Файл был пропущен ", formTemplate.getName(), formTemplate.getName());
-                            continue;
+                        String lockUser = canImportScript(LockData.LockObjects.FORM_TEMPLATE.name() + "_" + formTemplateId, userInfo.getUser());
+                        if (lockUser == null){
+                            formTemplate.setScript(script);
+                            try {
+                                formTemplateService.updateScript(formTemplate, logger);
+                            } catch (ServiceLoggerException e) {
+                                logger.error("Макет налоговой формы \"%s\", указанный в файле \"%s\" содержит ошибки. Файл был пропущен ", formTemplate.getName(), formTemplate.getName());
+                                continue;
+                            }
+                            logger.info("Выполнен импорт скрипта для макета налоговой формы \"%s\"", formTemplate.getName());
+                        } else {
+                            logger.error(LOCK_MESSAGE, "Макет налоговой формы", formTemplate.getName(), lockUser);
                         }
-                        logger.info("Выполнен импорт скрипта для макета налоговой формы \"%s\"", formTemplate.getName());
                     }
 
                     /** Импорт скриптов деклараций */
@@ -168,17 +193,29 @@ public class ScriptExecutionServiceImpl extends TAAbstractScriptingServiceImpl i
                         }
                         Integer declarationTemplateId = declarationTemplateService.get(declarationTypeId, year);
                         if (declarationTemplateId == null) {
-                            logger.error("Макет декларации, указанный в файле \"%s\" не существует. Файл был пропущен.", scriptName);
+                            logger.error("Макет декларации/уведомления, указанный в файле \"%s\" не существует. Файл был пропущен.", scriptName);
                             continue;
                         }
+
+                        //Проверяем не заблокирован ли макет
                         DeclarationTemplate declarationTemplate = declarationTemplateService.get(declarationTemplateId);
-                        declarationTemplate.setCreateScript(script);
-                        try {
-                            declarationTemplateService.updateScript(declarationTemplate, logger);
-                        } catch (ServiceLoggerException e) {
-                            logger.error("Макет декларации \"%s\", указанный в файле \"%s\" содержит ошибки. Файл был пропущен.", declarationTemplate.getName(), scriptName);
+                        String lockUser = canImportScript(LockData.LockObjects.DECLARATION_TEMPLATE.name() + "_" + declarationTemplateId, userInfo.getUser());
+                        if (lockUser == null) {
+                            declarationTemplate.setCreateScript(script);
+                            try {
+                                declarationTemplateService.updateScript(declarationTemplate, logger);
+                            } catch (ServiceLoggerException e) {
+                                logger.error("Макет %s \"%s\", указанный в файле \"%s\" содержит ошибки. Файл был пропущен.",
+                                        declarationTemplate.getType().getTaxType() != TaxType.DEAL ? "Макет декларации" : "Макет уведомления",
+                                        declarationTemplate.getName(), scriptName);
+                            }
+                            logger.info("Выполнен импорт скрипта для макета декларации формы \"%s\"", declarationTemplate.getName());
+                        } else {
+                            logger.error(LOCK_MESSAGE,
+                                    declarationTemplate.getType().getTaxType() != TaxType.DEAL ? "декларации" : "уведомления",
+                                    declarationTemplate.getName(), lockUser);
                         }
-                        logger.info("Выполнен импорт скрипта для макета декларации формы \"%s\"", declarationTemplate.getName());
+
                     }
 
                     /** Импорт скриптов справочников */
@@ -194,13 +231,20 @@ public class ScriptExecutionServiceImpl extends TAAbstractScriptingServiceImpl i
                             logger.error("Справочник, указанный в файле \"%s\" не существует. Файл был пропущен.", scriptName);
                             continue;
                         }
+
+                        //Проверяем не заблокирован ли справочник
                         RefBook refBook = refBookDao.get(refBookId);
-                        try {
-                            refBookScriptingService.saveScript(refBookId, script, logger);
-                        } catch (ServiceLoggerException e) {
-                            logger.error("Справочник \"%s\", указанный в файле \"%s\" содержит ошибки. Файл был пропущен.", refBook.getName(), scriptName);
+                        String lockUser = canImportScript(LockData.LockObjects.REF_BOOK.name() + "_" + refBookId, userInfo.getUser());
+                        if (lockUser == null) {
+                            try {
+                                refBookScriptingService.saveScript(refBookId, script, logger);
+                            } catch (ServiceLoggerException e) {
+                                logger.error("Справочник \"%s\", указанный в файле \"%s\" содержит ошибки. Файл был пропущен.", refBook.getName(), scriptName);
+                            }
+                            logger.info("Выполнен импорт скрипта для справочника \"%s\"", refBook.getName());
+                        } else {
+                            logger.error(LOCK_MESSAGE, "Справочник", refBook.getName(), lockUser);
                         }
-                        logger.info("Выполнен импорт скрипта для справочника \"%s\"", refBook.getName());
                     }
                 }
             }
