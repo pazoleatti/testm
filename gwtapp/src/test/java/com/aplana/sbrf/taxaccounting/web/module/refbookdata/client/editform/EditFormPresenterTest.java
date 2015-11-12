@@ -9,6 +9,7 @@ import com.gwtplatform.dispatch.shared.DispatchAsync;
 import org.jukito.JukitoRunner;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mockito;
 
 import java.util.ArrayList;
 
@@ -18,19 +19,22 @@ import static org.mockito.Mockito.*;
 public class EditFormPresenterTest {
     @Inject
     private EditFormPresenter presenter;
+    @Inject
+    private DepartmentEditPresenter departmentEditPresenter;
 
     private static final long REF_BOOK_DEPARTMENTS_ID = 30L;
+    private static final long REF_BOOK_SOME_ID = 1L;
 
     @Test
     public void testOnCancelClickedWhenDepartments(EditFormPresenter.MyView myView) {
-        presenter.init(REF_BOOK_DEPARTMENTS_ID, false);
+        presenter.init(REF_BOOK_SOME_ID, false);
         presenter.onCancelClicked();
         verify(myView, never()).updateMode(FormMode.EDIT);
     }
 
     @Test
     public void testOnCancelClickedWhenNotDepartments(EditFormPresenter.MyView myView) {
-        presenter.init(REF_BOOK_DEPARTMENTS_ID, false);
+        presenter.init(REF_BOOK_SOME_ID, false);
         presenter.onCancelClicked();
         verify(myView, never()).updateMode(FormMode.EDIT);
     }
@@ -72,7 +76,7 @@ public class EditFormPresenterTest {
     @Test
     @SuppressWarnings("unchecked")
     public void testOnSaveClickedWhenCreateAndNotDepartments(DispatchAsync dispatchAsync, EditFormPresenter.MyView myView) throws ActionException {
-        presenter.init(REF_BOOK_DEPARTMENTS_ID, false);
+        presenter.init(REF_BOOK_SOME_ID, false);
         ArrayList<Long> ids = new ArrayList<Long>();
         ids.add(1000L);
 
@@ -99,9 +103,16 @@ public class EditFormPresenterTest {
     @Test
     @SuppressWarnings("unchecked")
     public void testOnSaveClickedWhenUpdate(DispatchAsync dispatchAsync) {
-        presenter.init(REF_BOOK_DEPARTMENTS_ID, false);
-        presenter.setCurrentUniqueRecordId(null);
+        presenter.init(REF_BOOK_SOME_ID, false);
         presenter.onSaveClicked(false);
         verify(dispatchAsync, atLeastOnce()).execute((SaveRefBookRowVersionAction) any(), (AsyncCallback<SaveRefBookRowVersionResult>) any());
+    }
+
+    @Test
+    public void depEditPresenterWithoutRepeatedTest(DispatchAsync dispatchAsync){
+        departmentEditPresenter.init(REF_BOOK_DEPARTMENTS_ID, false);
+        departmentEditPresenter.setPreviousURId(1l);
+        departmentEditPresenter.showRecord(1l);
+        verify(dispatchAsync, atMost(0)).execute((SaveRefBookRowVersionAction) any(), Mockito.<AsyncCallback<SaveRefBookRowVersionResult>>any());
     }
 }
