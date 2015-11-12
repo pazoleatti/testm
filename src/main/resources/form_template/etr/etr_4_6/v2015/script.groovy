@@ -575,8 +575,17 @@ void consolidation() {
                     def row = getDataRow(dataRows, alias)
                     def sourceRow = getDataRow(sourceRows, alias)
                     check102Columns.each { column ->
-                        row[column] = (row[column] ?: 0) + (sourceRow[column] ?: 0)
+                        row[column] = (row[column] ?: BigDecimal.ZERO) + ((formDataSource.departmentId == 1) ? 1000 : 1) * (sourceRow[column] ?: BigDecimal.ZERO)
                     }
+                }
+            }
+        }
+    }
+    if (isBank()) { // если уровень банка, то тысячи понижаем до миллионов
+        dataRows.each { row ->
+            check102Columns.each { column ->
+                if (row[column]) {
+                    row[column] = (row[column] as BigDecimal).divide(BigDecimal.valueOf(1000), BigDecimal.ROUND_HALF_UP)
                 }
             }
         }
