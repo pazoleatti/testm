@@ -12,6 +12,9 @@ update ref_book set IS_VERSIONED = 0 where id in (206, 310, 330);
 --http://jira.aplana.com/browse/SBRFACCTAX-13181: Асинхронная задача Обновление формы
 insert into async_task_type (id, name, handler_jndi, limit_kind) 
   values (21, 'Обновление формы', 'ejb/taxaccounting/async-task.jar/RefreshFormDataAsyncTaskImpl#com.aplana.sbrf.taxaccounting.async.task.AsyncTaskRemote', 'Количество ячеек таблицы формы = Количество строк * Количество граф');
+  
+--http://jira.aplana.com/browse/SBRFACCTAX-13378: Исправить настройки граф согласно ограничениям на размерность
+update form_column set max_length = 17 + precision where max_length - precision > 17 and type = 'N';
 
 COMMIT;
 EXIT;
