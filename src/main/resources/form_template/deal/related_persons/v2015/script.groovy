@@ -1,6 +1,9 @@
 package form_template.deal.related_persons.v2015
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
+import com.aplana.sbrf.taxaccounting.model.FormDataKind
+import com.aplana.sbrf.taxaccounting.model.ReportPeriod
+import com.aplana.sbrf.taxaccounting.model.WorkflowState
 import groovy.transform.Field
 
 /**
@@ -9,9 +12,8 @@ import groovy.transform.Field
  * formTemplateId=800
  *
  * TODO:
- *      - добавить обработку собития по кнопке "Обновить"
- *      - сделать заполнение формы по кнопке "Обновить"
- *      - сделать расчет графы 12
+ *      - проверить расчеты
+ *      - дописать тесты
  */
 
 // графа 1  - rowNumber
@@ -34,7 +36,16 @@ switch (formDataEvent) {
     case FormDataEvent.CREATE:
         formDataService.checkUnique(formData, logger)
         break
+    case FormDataEvent.AFTER_CREATE:
+        refresh()
+        formDataService.saveCachedDataRows(formData, logger)
+        break
+    case FormDataEvent.REFRESH:
+        refresh()
+        formDataService.saveCachedDataRows(formData, logger)
+        break
     case FormDataEvent.CALCULATE:
+        checkSourceForm()
         calc()
         logicCheck()
         formDataService.saveCachedDataRows(formData, logger)
@@ -43,10 +54,6 @@ switch (formDataEvent) {
         logicCheck()
         break
     case FormDataEvent.MOVE_CREATED_TO_PREPARED:  // Подготовить из "Создана"
-        calc()
-        logicCheck()
-        formDataService.saveCachedDataRows(formData, logger)
-        break
     case FormDataEvent.MOVE_CREATED_TO_APPROVED:  // Утвердить из "Создана"
     case FormDataEvent.MOVE_PREPARED_TO_APPROVED: // Утвердить из "Подготовлена"
     case FormDataEvent.MOVE_CREATED_TO_ACCEPTED:  // Принять из "Создана"
@@ -54,16 +61,8 @@ switch (formDataEvent) {
     case FormDataEvent.MOVE_APPROVED_TO_ACCEPTED: // Принять из "Утверждена"
         logicCheck()
         break
-    case FormDataEvent.COMPOSE:
-        // TODO (Ramil Timerbaev)
-        formDataService.consolidationSimple(formData, logger)
-        calc()
-        logicCheck()
-        formDataService.saveCachedDataRows(formData, logger)
-        break
-    case FormDataEvent.SORT_ROWS:
-        // TODO (Ramil Timerbaev)
-        sortFormDataRows()
+    case FormDataEvent.SAVE:
+        updateStylesAndSort()
         break
 }
 
@@ -75,17 +74,16 @@ def recordCache = [:]
 @Field
 def refBookCache = [:]
 
+@Field
+def allColumns = ['rowNumber', 'name', 'address', 'orgCode', 'countryCode', 'inn', 'kpp', 'swift', 'regNum', 'startData', 'endData', 'category', 'vatStatus', 'taxStatus', 'depCriterion']
+
 // Редактируемые атрибуты
 @Field
 def editableColumns = ['category']
 
-// Автозаполняемые атрибуты
-@Field
-def autoFillColumns = []
-
 // Проверяемые на пустые значения атрибуты (графа 2..5, 10, 12, 13, 15)
 @Field
-def nonEmptyColumns = ['name', 'address', 'orgCode', 'countryCode', 'startData', 'category', 'vatStatus', 'depCriterion']
+def nonEmptyColumns = ['name', /*'address', 'orgCode', 'countryCode', 'startData',*/ 'category', /*'vatStatus', 'depCriterion'*/]
 
 // Дата начала отчетного периода
 @Field
@@ -94,6 +92,15 @@ def startDate = null
 // Дата окончания отчетного периода
 @Field
 def endDate = null
+
+@Field
+def prevReportPeriod = null
+
+@Field
+ReportPeriod reportPeriod = null
+
+@Field
+def sourceDataRowsMap = [:]
 
 def getReportPeriodEndDate() {
     if (endDate == null) {
@@ -107,6 +114,20 @@ def getReportPeriodStartDate() {
         startDate = reportPeriodService.getStartDate(formData.reportPeriodId).time
     }
     return startDate
+}
+
+def getPrevReportPeriod() {
+    if (prevReportPeriod == null) {
+        prevReportPeriod = reportPeriodService.getPrevReportPeriod(formData.reportPeriodId)
+    }
+    return prevReportPeriod
+}
+
+ReportPeriod getReportPeriod() {
+    if (reportPeriod == null) {
+        reportPeriod = reportPeriodService.get(formData.reportPeriodId)
+    }
+    return reportPeriod
 }
 
 //// Обертки методов
@@ -136,22 +157,72 @@ def getRefBookValue(def long refBookId, def Long recordId) {
     return formDataService.getRefBookValue(refBookId, recordId, refBookCache)
 }
 
-void update() {
+// Обновление формы
+//  - берутся записи из справочника "Участники ТЦО", которые подходят для этой формы
+//  - если для какой-нибудь записи нет строки в форме, то добавляется новая строка, и если такая же строка есть в предыдущей форме то берется ее "цвет/категория", иначе цвет по умолчанию
+//  - если для какой-то строки формы нет уже записи в справочнике, то удалить эту строку из формы
+void refresh() {
+    if (formData.state != WorkflowState.CREATED) {
+        return
+    }
+
+    // 1. Проверка наличия формы предыдущего отчетного периода
+    def rows = getSourceDataRows(800, FormDataKind.PRIMARY, true)
+    if (!rows) {
+        def prevReportPeriod = getPrevReportPeriod()
+        def msg = "Категории ВЗЛ из предыдущего отчетного периода не были скопированы. " +
+                "В Системе не найдена форма «%s» в статусе «Принята»: Тип: %s, Период: %s %d, Подразделение: %s."
+        logger.warn(msg, formData.formType.name, formData.kind.title, prevReportPeriod.name, prevReportPeriod.taxPeriod.year, formDataDepartment.name)
+    }
+
+    // получить значения из предыдущей фомры
+    def prevDataRows = getSourceDataRows(800, FormDataKind.PRIMARY, true)
+    // мапа для хранения всех версии записи (строка нф - список всех версии записи "участников ТЦО")
+    def record520Map = getVersionRecords520Map(prevDataRows)
+
+    // получить значения из справочника "Юридические лица"
+    def relatedPersonRecords = getRecords520()
+
     def dataRows = formDataService.getDataRowHelper(formData).allCached
 
-    // TODO (Ramil Timerbaev) получить значения из справочника "Юридические лица"
-    // TODO (Ramil Timerbaev) получить форму за предыдущий период
-    // TODO (Ramil Timerbaev) получить форму "Прогноз крупных сделок"
-    // TODO (Ramil Timerbaev) в зависимости от отчетного периода:
-    //      - Отчетный период = 1 квартал: Форма «Приложение 4.2. Отчет в отношении доходов и расходов Банка по сделкам с ВЗЛ, РОЗ, НЛ по итогам окончания Налогового периода» за предыдущий налоговый период
-    //      - Отчетный период = 6 месяцев: Форма «Приложение 4.1. (6 месяцев) Отчет в отношении доходов и расходов Банка по сделкам с российскими ВЗЛ, применяющими Общий режим налогообложения» за отчетный период
-    //      - Отчетный период = 9 месяцев: Форма «Приложение 4.1. (9 месяцев) Отчет в отношении доходов и расходов Банка по сделкам с российскими ВЗЛ, применяющими Общий режим налогообложения» за отчетный период
-    //      - Отчетный период = год:       Форма «Приложение 4.1 (9 месяцев) Отчет в отношении доходов и расходов Банка по сделкам с российскими ВЗЛ, применяющими Общий режим налогообложения» за предыдущий отчетный период
-}
+    // сформировать новые строки
+    def newRows = []
+    for (def record : relatedPersonRecords) {
+        def recordId = record?.record_id?.value
+        def findRow = dataRows.find { it.name == recordId }
+        // поиск строки для записи справочника на форме
+        if (findRow && findRow.category) {
+            continue
+        }
+        // поиск строки для записи справочника в предыдущей форме (с соответствующей ссылкой в графе 12)
+        def prevFindRow = (prevDataRows ? findPrevRow(recordId, record520Map) : null)
+        if (findRow) {
+            // обновление существующей
+            findRow.category = prevFindRow?.category
+        } else {
+            // новая строка
+            def newRow = formData.createDataRow()
+            newRow.name = recordId
+            newRow.category = prevFindRow?.category
+            newRows.add(newRow)
+        }
+    }
 
-void calc() {
-    // TODO (Ramil Timerbaev)
-    def dataRows = formDataService.getDataRowHelper(formData).allCached
+    // найти лишние строки
+    def deleteRows = []
+    for (def row : dataRows) {
+        def findRecord = relatedPersonRecords.find { it?.record_id?.value == row.name }
+        if (!findRecord) {
+            deleteRows.add(row)
+        }
+    }
+
+    // удалить лишние
+    dataRows.removeAll(deleteRows)
+    // добавить новые
+    dataRows.addAll(newRows)
+
+    // задать категорию и цвет
     for (def row : dataRows) {
         // графа 12
         row.category = calc12(row)
@@ -159,18 +230,80 @@ void calc() {
     }
 }
 
-void logicCheck() {
+void calc() {
     def dataRows = formDataService.getDataRowHelper(formData).allCached
     for (def row : dataRows) {
-        // 1. Проверка заполнения обязательных полей
+        // графа 12
+        row.category = calc12(row, true)
+        // задать цвет
+        setRowStyles(row)
+    }
+}
+
+void updateStylesAndSort() {
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper.allCached
+    // обновление стилей
+    for (def row : dataRows) {
+        setRowStyles(row)
+    }
+
+    // обновление сортировки
+    // распределить строки по категориям
+    def categoryMap = [:]
+    dataRows.each { row ->
+        def categoryName = getRefBookValue(506L, row.category)?.CODE?.value
+        if (categoryMap[categoryName] == null) {
+            categoryMap[categoryName] = []
+        }
+        categoryMap[categoryName].add(row)
+    }
+    def sortedRows = []
+    // сортировка категории и строк внутри каждой категории
+    categoryMap.keySet().toArray().sort().each { categoryName ->
+        def categoryRows = categoryMap[categoryName]
+        if (categoryRows) {
+            sortRows(refBookService, logger, categoryRows, null, null, false)
+            sortedRows.addAll(categoryRows)
+        }
+    }
+    if (sortedRows) {
+        dataRowHelper.allCached = sortedRows
+    }
+
+    formDataService.saveCachedDataRows(formData, logger)
+}
+
+void logicCheck() {
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
+    // def nonEmptyColumnsMap = [
+    //         'address' : 'ADDRESS',
+    //         'orgCode' : 'ORG_CODE',
+    //         'countryCode' : 'COUNTRY_CODE',
+    //         'startData' : 'START_DATE',
+    //         'vatStatus' : 'VAT_STATUS',
+    //         'depCriterion' : 'DEP_CRITERION'
+    // ]
+    for (def row : dataRows) {
+        def record = getRefBookValue(520L, row.name)
+
+        // 1. Проверка заполнения обязательных полей (графа 2, 12)
         checkNonEmptyColumns(row, row.getIndex(), nonEmptyColumns, logger, true)
+       // // проверка ссылочных графов обязательных для заполнения (графа 3, 4, 5, 10, 13, 15)
+       // nonEmptyColumnsMap.each { alias, refAlias ->
+       //     def value = record?.get(refAlias)?.value
+       //     if (value == null || '' == value) {
+       //         String msg = String.format(WRONG_NON_EMPTY, row.getIndex(), getColumnName(row, alias));
+       //         rowError(logger, row, msg);
+       //     }
+       // }
 
         // 2. Проверка на отсутствие в списке не ВЗЛ
-        def record = getRefBookValue(520L, row.name)
         if (record && record?.START_DATE?.value) {
             def start = record?.START_DATE?.value
             def end = record?.END_DATE?.value
-            if ((start <= getReportPeriodEndDate() && end == null) || (getReportPeriodStartDate() <= end && end <= getReportPeriodEndDate())) {
+            def typeId = record?.TYPE?.value
+            if (!isVZL(start, end, typeId)) {
                 def index = row.getIndex()
                 def value2 = record?.NAME?.value
                 def msg = "Строка $index: организация «$value2» не является взаимозависимым лицом в данном отчетном периоде!"
@@ -180,9 +313,91 @@ void logicCheck() {
     }
 }
 
-def calc12(def row) {
-    // TODO (Ramil Timerbaev)
+def calc12(def row, def isCalc = false) {
+    if (!isCalc && row.category) {
+        return row.category
+    }
+    def record520 = getRefBookValue(520L, row.name)
+    def taxStatus = getRefBookValue(511L, record520?.TAX_STATUS?.value)?.CODE?.value
+    def orgCode = getRefBookValue(513L, record520?.ORG_CODE?.value)?.CODE?.value
+    def categoryCode = null
+    if (taxStatus == 1 && orgCode == 1) {
+        // ВЗЛ СРН - «Категория 1»
+        categoryCode = 'Категория 1'
+    } else if (taxStatus == 2 && orgCode == 1) {
+        // ВЗЛ ОРН - «Категория 4» (по умполчанию)
+        if (isCalc) {
+            def list = subCalc12(row)
+            if (list != null && list[1]) {
+                return list[1]
+            }
+            categoryCode = (list ? list[0] : null)
+        } else {
+            categoryCode = 'Категория 4'
+        }
+    } else if (orgCode == 2) {
+        // ИВЗЛ - «Категория 1»
+        categoryCode = 'Категория 1'
+    }
+    if (categoryCode) {
+        return getRecordId506ByCode(categoryCode)
+    }
     return null
+}
+
+/**
+ * Должен выполнятся только при расчете, а не при выставлении значения по умолчанию при обновлении/создании формы.
+ *
+ * @param row строка нф
+ * @return возвращает список: первый элемент - код категории, второй элемент - id записи (заполняется только один из элементов)
+ */
+def subCalc12(def row) {
+    // форма "Прогноз крупных сделок" - одинаково для всех периодов
+    def sourceRows = getSourceDataRows(810, FormDataKind.PRIMARY)
+    def findRow = sourceRows?.find { it.ikksr == row.name }
+    if (findRow) {
+        return ['Категория 2', null]
+    }
+
+    ReportPeriod reportPeriod = getReportPeriod()
+    if (reportPeriod.order == 1) {
+        // 1 квартал
+        // форма "Приложение 4.2" за предыдущий налоговый период
+        sourceRows = getSourceDataRows(803, FormDataKind.SUMMARY, true)
+        // отобрать записи в которых графа 4 == 'ВЗЛ ОРН'
+        def findRows = sourceRows.find { 'ВЗЛ ОРН' == getRefBookValue(505, it.group) }
+        // для подходящих строк получить все версии записей
+        def records520Map = getVersionRecords520Map(findRows)
+        findRow = findPrevRow(row.name, records520Map)
+        if (findRow) {
+            return [null, findRow.categoryRevised]
+        }
+    } else if (reportPeriod.order == 4) {
+        // полугодие / 9 месяцев / год
+        // форма "ВЗЛ" за предыдущий налоговый период
+        sourceRows = getSourceDataRows(800, FormDataKind.PRIMARY, true)
+        // для подходящих строк получить все версии записей
+        records520Map = getVersionRecords520Map(sourceRows)
+        def findPrevRow = findPrevRow(row.name, records520Map)
+        // если категория в предыдущем периода равна "Категория 2", то оставить ее, в других формах не ищется ничего
+        if (findPrevRow && 'Категория 2' == getRefBookValue(506L, findPrevRow.category)?.CODE?.value) {
+            return [null, findPrevRow.category]
+        }
+
+        // форма "Приложение 4.1. (6 месяцев)" / "Приложение 4.1. (9 месяцев)"
+        def formTypeId = (reportPeriod.order == 2 ? 801 : 802)
+        sourceRows = getSourceDataRows(formTypeId, FormDataKind.SUMMARY)
+        findRow = sourceRows?.find { it.name == row.name }
+        if (findRow) {
+            // для полугодия и 9 месяцев использовать графа 20, для периода год - графу 21
+            def resultId = (reportPeriod.order == 4 ? findRow.categoryPrimary : findRow.categoryRevised)
+            return [null, resultId]
+        } else if (findPrevRow) {
+            return [null, findPrevRow.category]
+        }
+    }
+    // значение по умолчанию для всех периодов
+    return ['Категория 4', null]
 }
 
 // Получить новую строку
@@ -195,32 +410,157 @@ def getNewRow() {
     return row
 }
 
-// TODO (Ramil Timerbaev) выставить цвет по категории
+// выставить цвет по категории
 void setRowStyles(def row) {
-//    def columns = (isSection7 ? editableColumns + ['ndsRate', 'ndsDealSum'] : editableColumns)
-//    columns.each {
-//        row.getCell(it).editable = true
-//        row.getCell(it).setStyleAlias('Редактируемая')
-//    }
-//    (allColumns - columns).each {
-//        row.getCell(it).setStyleAlias('Автозаполняемая')
-//    }
+    allColumns.each {
+        def colorId = getRefBookValue(506L, row.category)?.COLOR?.value
+        def styleName = getRefBookValue(1L, colorId)?.NAME?.value
+        row.getCell(it).setStyleAlias(styleName)
+    }
+    row.getCell('category').editable = true
 }
 
-// TODO (Ramil Timerbaev) нужна ли сортировка
-// Сортировка групп и строк
-void sortFormDataRows(def saveInDB = true) {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.allCached
-    sortRows(refBookService, logger, dataRows, getSubTotalRows(dataRows), null, true)
-    if (saveInDB) {
-        dataRowHelper.saveSort()
+void checkSourceForm() {
+    // 1. Проверка наличия принятой формы-источника
+    def sourceMap = [
+            800 : [ 'kind' : FormDataKind.PRIMARY, 'isPrevPeriod' : true ],  // форма "ВЗЛ" за предыдущий налоговый период
+            801 : [ 'kind' : FormDataKind.SUMMARY, 'isPrevPeriod' : false ], // форма "Приложение 4.1. (6 месяцев)"
+            802 : [ 'kind' : FormDataKind.SUMMARY, 'isPrevPeriod' : false ], // форма "Приложение 4.1. (9 месяцев)"
+            803 : [ 'kind' : FormDataKind.SUMMARY, 'isPrevPeriod' : true ],  // форма "Приложение 4.2" за предыдущий налоговый период
+            810 : [ 'kind' : FormDataKind.PRIMARY, 'isPrevPeriod' : false ]  // форма "Прогноз крупных сделок"
+    ]
+    ReportPeriod reportPeriod = getReportPeriod()
+    def sourceIds
+    if (reportPeriod.order == 1) {
+        sourceIds = [810, 800, 803]
+    } else if (reportPeriod.order == 2) {
+        sourceIds = [810, 800, 801]
     } else {
-        updateIndexes(dataRows)
+        sourceIds = [810, 800, 802]
+    }
+    sourceIds.each { id ->
+        def rows = getSourceDataRows(id, sourceMap[id].kind, sourceMap[id].isPrevPeriod)
+        if (!rows) {
+            def formTypeName = getFormTypeById(id)?.name
+            def kindName = sourceMap[id].kind.title
+            def period = (sourceMap[id].isPrevPeriod ? getPrevReportPeriod() : getReportPeriod())
+            def periodName = (period ? period?.name + ' ' + period?.taxPeriod?.year : 'не определен')
+            msg = "Не найдена форма «%s» в статусе «Принята»: Тип: %s, Период: %s, Подразделение: %s."
+            logger.error(msg, formTypeName, kindName, periodName, formDataDepartment.name)
+        }
     }
 }
 
-// Получение подитоговых строк
-def getSubTotalRows(def dataRows) {
-    return dataRows.findAll { it.getAlias() != null}
+/** Получить строки за предыдущий отчетный период. */
+def getSourceDataRows(int formTypeId, FormDataKind kind, boolean isPrevPeriod = false) {
+    def key = formTypeId.toString() + '#' + kind + '#' + isPrevPeriod
+    if (sourceDataRowsMap[key] != null) {
+        return sourceDataRowsMap[key]
+    }
+    // период - текущйи или предыдущий
+    def reportPeriod = (isPrevPeriod ? getPrevReportPeriod() : getReportPeriod())
+    def fd = formDataService.getLast(formTypeId, kind, formData.departmentId, reportPeriod?.id, null, null, false)
+    if (fd == null || fd.state != WorkflowState.ACCEPTED) {
+        sourceDataRowsMap[key] = []
+    } else {
+        sourceDataRowsMap[key] = formDataService.getDataRowHelper(fd)?.allSaved
+    }
+    return sourceDataRowsMap[key]
+}
+
+// Получить значения из справочника "Юридические лица" / "Участники ТЦО".
+def getRecords520() {
+    def provider = formDataService.getRefBookProvider(refBookFactory, 520L, providerCache)
+    // TODO (Ramil Timerbaev) возможно надо сделать фильтр
+    def filter = null
+    def records = provider.getRecords(getReportPeriodEndDate(), null, filter, null)
+    def relatedPersons = []
+    records.each { record ->
+        def start = record?.START_DATE?.value
+        def end = record?.END_DATE?.value
+        def typeId = record?.TYPE?.value
+        if (isVZL(start, end, typeId)) {
+            relatedPersons.add(record)
+        }
+    }
+    return relatedPersons
+}
+
+// проверка принадлежности организации к ВЗЛ в отчетном периоде
+def isVZL(def start, def end, typeId) {
+    if (start <= getReportPeriodEndDate() &&
+            (end == null || (end >= getReportPeriodStartDate() && end <= getReportPeriodEndDate())) &&
+            getRefBookValue(525L, typeId)?.CODE?.value == "ВЗЛ") {
+        return true
+    }
+    return false
+}
+
+@Field
+def record506Map = [:]
+
+// Получить id записи справочника "Категории юридического лица по системе "светофор"" по коду
+def getRecordId506ByCode(def categoryCode) {
+    if (record506Map[categoryCode] == null) {
+        def provider = formDataService.getRefBookProvider(refBookFactory, 506L, providerCache)
+        def filter = "CODE = '$categoryCode'"
+        def records = provider.getRecords(getReportPeriodEndDate(), null, filter, null)
+        if (records != null && !records.isEmpty() && records.size() == 1) {
+            record506Map[categoryCode] = records.get(0)?.record_id?.value
+        }
+    }
+    return record506Map[categoryCode]
+}
+
+/**
+ * Получить мапу со всеми версиями для каждой записи справочника (строка нф - список всех версии записи "участников ТЦО").
+ * Потом используется в методе findPrevRow().
+ *
+ * Необходимо потому что в предыдущем периоде у записи справочника могла быть другая версия записи,
+ * и id в ячейках форм будут отличаться, поэтому для нахождения соответствия между двумя версиями записи в разных периодах используются все версии записи.
+ *
+ * @param prevRows строки за предыдущий период
+ */
+def getVersionRecords520Map(def prevRows) {
+    def versionRecords520Map = [:]
+    prevRows.each { row ->
+        def provider = formDataService.getRefBookProvider(refBookFactory, 520L, providerCache)
+        def recordId = row.name
+        // все версии записи
+        def versionRecords = provider.getRecordVersionsById(recordId, null, null, null)
+        versionRecords520Map[row] = versionRecords
+    }
+    return versionRecords520Map
+}
+
+/**
+ * Найти запись из предыдущего периода, которая ссылается на версию одной записи справочника.
+ *
+ * @param recordId идентификатор на версию записи (простой record_id записи)
+ * @param versionRecords520Map мапа полученная из метода getVersionRecords520Map()
+ */
+def findPrevRow(def recordId, def versionRecords520Map) {
+    def prevFindRow = null
+    for (def prevRow : versionRecords520Map.keySet().toArray()) {
+        def records = versionRecords520Map[prevRow]
+        // если среди версии записи есть подходящая, то строка найдена
+        def find = records.find { it?.record_id?.value == recordId }
+        if (find) {
+            prevFindRow = prevRow
+            break
+        }
+    }
+    return prevFindRow
+}
+
+// Мапа для хранения типов форм (id типа формы -> тип формы)
+@Field
+def formTypeMap = [:]
+
+/** Получить тип фомры по id. */
+def getFormTypeById(def id) {
+    if (formTypeMap[id] == null) {
+        formTypeMap[id] = formTypeService.get(id)
+    }
+    return formTypeMap[id]
 }

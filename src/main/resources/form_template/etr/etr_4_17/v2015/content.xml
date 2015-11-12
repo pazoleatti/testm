@@ -7,6 +7,7 @@
     <updating>false</updating>
     <name>Сведения о начисленных и уплачиваемых налогах, сборах и взносах, отнесенных на расходы</name>
     <fullName>Аналитический отчет «Сведения о начисленных и уплачиваемых налогах, сборах и взносах, отнесенных на расходы»</fullName>
+    <header>Приложение 4-17</header>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>rowNum</alias>
         <checking>false</checking>
