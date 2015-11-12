@@ -59,7 +59,6 @@ public class RefBookTestScriptHelper {
     private Long recordCommonId;
     private List<Map<String, RefBookValue>> saveRecords;
     private boolean isNewRecords;
-    private boolean isVersion;
     private ScriptStatusHolder scriptStatusHolder;
     private InputStream importFileInputStream;
     private final ScriptTestMockHelper mockHelper;
@@ -116,7 +115,6 @@ public class RefBookTestScriptHelper {
         bindings.put("saveRecords", saveRecords);
         bindings.put("validDateFrom", validDateFrom);
         bindings.put("validDateTo", validDateTo);
-        bindings.put("isVersion", isVersion);
         bindings.put("isNewRecords", isNewRecords);
         bindings.put("scriptStatusHolder", scriptStatusHolder);
         bindings.put("logger", logger);
@@ -266,10 +264,6 @@ public class RefBookTestScriptHelper {
 
     public void setRecordCommonId(Long recordCommonId) {
         this.recordCommonId = recordCommonId;
-    }
-
-    public void setVersion(boolean isVersion) {
-        this.isVersion = isVersion;
     }
 
     public void setSaveRecords(List<Map<String, RefBookValue>> saveRecords) {

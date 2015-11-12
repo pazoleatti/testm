@@ -227,7 +227,6 @@ public class JurPersonsTest extends RefBookScriptTestBase {
         value9.put("TAX_CODE_INCORPORATION", new RefBookValue(RefBookAttributeType.STRING, "1234567890123456"));
         saveRecords.add(value9);
 
-        testHelper.setVersion(false);
         testHelper.setValidDateFrom((new GregorianCalendar(2012, Calendar.JANUARY, 1, 0, 0, 0)).getTime());
         testHelper.setSaveRecords(saveRecords);
 

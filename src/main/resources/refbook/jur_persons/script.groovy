@@ -246,10 +246,10 @@ void checkUnique(def alias, def value, def msg) {
         String filter = "LOWER($alias) = LOWER('$value')"
         def pairs = provider.getRecordIdPairs(REF_BOOK_ID, null, false, filter)
         for(def pair: pairs) {
-            if (isVersion && pair.second == recordCommonId) {
-                // проверка при создании новой версии
+            if (recordCommonId && pair.second == recordCommonId) {
+                // проверка при создании новой версии, пропускаем элементы версии
                 continue
-            } else if (!isVersion && pair.first == uniqueRecordId) {
+            } else if (!recordCommonId && pair.first == uniqueRecordId) {
                 // проверка при создания нового/сохранении существующего элемента
                 continue
             }
