@@ -3,7 +3,7 @@
     <fixedRows>false</fixedRows>
     <name>(Приложение 5) Сведения для расчета налога на прибыль</name>
     <fullName>(Приложение 5) Сведения для расчета налога на прибыль</fullName>
-    <header>787/2/1</header>
+    <header>app5</header>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="autoNumerationColumn">
         <alias>number</alias>
         <checking>false</checking>

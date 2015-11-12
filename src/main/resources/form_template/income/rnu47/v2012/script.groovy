@@ -472,10 +472,10 @@ void addTransportData(def xml) {
 void checkRNU() {
     if (!isMonthBalance() && formData.kind == FormDataKind.PRIMARY) {
         // проверить рну-47 за прошлый период
-        formDataService.checkMonthlyFormExistAndAccepted(formData.formType.id, FormDataKind.PRIMARY, formData.departmentId, formData.reportPeriodId, formData.periodOrder, true, logger, true)
+        formDataService.checkMonthlyFormExistAndAccepted(formData.formType.id, FormDataKind.PRIMARY, formData.departmentId, formData.reportPeriodId, formData.periodOrder, true, logger, true, formData.comparativePeriodId, formData.accruing)
 
         // проверить рну-46 за текущий период
-        formDataService.checkMonthlyFormExistAndAccepted(342, FormDataKind.PRIMARY, formData.departmentId, formData.reportPeriodId, formData.periodOrder, false, logger, true)
+        formDataService.checkMonthlyFormExistAndAccepted(342, FormDataKind.PRIMARY, formData.departmentId, formData.reportPeriodId, formData.periodOrder, false, logger, true, formData.comparativePeriodId, formData.accruing)
     }
 }
 
