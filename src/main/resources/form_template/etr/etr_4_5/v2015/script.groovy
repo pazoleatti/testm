@@ -366,7 +366,7 @@ def getPeriodName(def order) {
 }
 
 def getSourceForm(def formDataKind, def periodId) {
-    def source = formDataService.getLast(sourceFormTypeId, formDataKind, formData.departmentId, periodId, formData.periodOrder, formData.comparativePeriodId, formData.accruing)
+    def source = formDataService.getLast(sourceFormTypeId, formDataKind, formData.departmentId, periodId, formData.periodOrder, null, false)
     if (source != null && source.state == WorkflowState.ACCEPTED) {
         return formDataService.getDataRowHelper(source)
     }
