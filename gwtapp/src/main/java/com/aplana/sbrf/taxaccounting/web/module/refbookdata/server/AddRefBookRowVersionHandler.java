@@ -77,8 +77,8 @@ public class AddRefBookRowVersionHandler extends AbstractActionHandler<AddRefBoo
         logger.setTaUserInfo(securityService.currentUserInfo());
 
         // проверка новых значений по БЛ
-        loadRefBookDataService.saveRefBookRecords(action.getRefBookId(), null, saveRecords, action.getVersionFrom(),
-                action.getVersionTo(), true, securityService.currentUserInfo(), logger);
+        loadRefBookDataService.saveRefBookRecords(action.getRefBookId(), null, action.getRecordId(), saveRecords, action.getVersionFrom(),
+                action.getVersionTo(), true, true, securityService.currentUserInfo(), logger);
 
         RefBookDataProvider refBookDataProvider = refBookFactory.getDataProvider(action.getRefBookId());
 
