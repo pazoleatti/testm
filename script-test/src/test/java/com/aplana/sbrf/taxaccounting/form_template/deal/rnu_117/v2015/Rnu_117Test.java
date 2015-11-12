@@ -1,16 +1,27 @@
 package com.aplana.sbrf.taxaccounting.form_template.deal.rnu_117.v2015;
 
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
+import com.aplana.sbrf.taxaccounting.refbook.impl.RefBookUniversal;
 import com.aplana.sbrf.taxaccounting.util.ScriptTestBase;
 import com.aplana.sbrf.taxaccounting.util.TestScriptHelper;
 import com.aplana.sbrf.taxaccounting.util.mock.ScriptTestMockHelper;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 
 import java.text.ParseException;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
+
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 /**
  * РНУ 117. Регистр налогового учёта расходов, возникающих в связи с применением в сделках по операциям
@@ -78,6 +89,55 @@ public class Rnu_117Test extends ScriptTestBase {
 
     @Test
     public void importExcelTest() {
+        // TODO тесты для логики поиска по iksr
+        Long refbookId = 520L;
+
+        when(testHelper.getRefBookFactory().get(refbookId)).thenAnswer(
+                new Answer<RefBook>() {
+
+                    @Override
+                    public RefBook answer(InvocationOnMock invocation) throws Throwable {
+                        RefBook refBook = new RefBook();
+                        ArrayList<RefBookAttribute> attributes = new ArrayList<RefBookAttribute>();
+                        RefBookAttribute e = new RefBookAttribute();
+                        e.setAlias("INN");
+                        e.setName("ИНН/ КИО");
+                        attributes.add(e);
+                        refBook.setAttributes(attributes);
+                        return refBook;
+                    }
+                }
+        );
+
+        RefBookUniversal provider = mock(RefBookUniversal.class);
+        provider.setRefBookId(refbookId);
+        when(testHelper.getRefBookFactory().getDataProvider(refbookId)).thenReturn(provider);
+        when(provider.getRecords(any(Date.class), any(PagingParams.class), anyString(),
+                any(RefBookAttribute.class))).thenAnswer(
+                new Answer<PagingResult<Map<String, RefBookValue>>>() {
+                    @Override
+                    public PagingResult<Map<String, RefBookValue>> answer(InvocationOnMock invocation) throws Throwable {
+                        PagingResult<Map<String, RefBookValue>> result = new PagingResult<Map<String, RefBookValue>>();
+
+                        Map<String, RefBookValue> map = new HashMap<String, RefBookValue>();
+                        map.put(RefBook.RECORD_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, 1L));
+                        map.put("INN", new RefBookValue(RefBookAttributeType.STRING, "A"));
+                        result.add(map);
+
+                        map = new HashMap<String, RefBookValue>();
+                        map.put(RefBook.RECORD_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, 2L));
+                        map.put("INN", new RefBookValue(RefBookAttributeType.STRING, "B"));
+                        result.add(map);
+
+                        map = new HashMap<String, RefBookValue>();
+                        map.put(RefBook.RECORD_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, 3L));
+                        map.put("INN", new RefBookValue(RefBookAttributeType.STRING, "C"));
+                        result.add(map);
+
+                        return result;
+                    }
+                });
+
         testHelper.setImportFileInputStream(getImportXlsInputStream());
         testHelper.execute(FormDataEvent.IMPORT);
         List<String> aliases = Arrays.asList("reasonNumber", "reasonDate", "rate", "sum1", "rate1", "sum2", "rate2", "sum3");
