@@ -170,8 +170,7 @@ void logicCheck() {
             def msg3 = row.getCell('rate1').column.name
             rowError(logger, row, "Строка $rowNum: Графа «$msg1»: выполнение расчета невозможно, так как не заполнена " +
                     "используемая в расчете графа «$msg2», «$msg3»!")
-        }
-        if (!row.rate || !row.rate1) {
+        } else if (!row.rate || !row.rate1) {
             def msg1 = row.getCell('rate2').column.name
             def msg2 = (!row.rate) ? row.getCell('rate').column.name : row.getCell('rate1').column.name
             rowError(logger, row, "Строка $rowNum: Графа «$msg1»: выполнение расчета невозможно, так как не заполнена " +
@@ -185,8 +184,7 @@ void logicCheck() {
             def msg3 = row.getCell('sum2').column.name
             rowError(logger, row, "Строка $rowNum: Графа «$msg1»: выполнение расчета невозможно, так как не заполнена " +
                     "используемая в расчете графа «$msg2», «$msg3»!")
-        }
-        if (!row.sum1 || !row.sum2) {
+        } else if (!row.sum1 || !row.sum2) {
             def msg1 = row.getCell('sum3').column.name
             def msg2 = (!row.sum1) ? row.getCell('sum1').column.name : row.getCell('sum2').column.name
             rowError(logger, row, "Строка $rowNum: Графа «$msg1»: выполнение расчета невозможно, так как не заполнена " +
