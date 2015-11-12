@@ -16,5 +16,13 @@ insert into async_task_type (id, name, handler_jndi, limit_kind)
 --http://jira.aplana.com/browse/SBRFACCTAX-13378: Исправить настройки граф согласно ограничениям на размерность
 update form_column set max_length = 17 + precision where max_length - precision > 17 and type = 'N';
 
+--http://jira.aplana.com/browse/SBRFACCTAX-13356: Переименование событий в таблице событий
+update event set name = 'Архивация журнала аудита' where id = 601;
+update event set name = 'Версия макета создана' where id = 701;
+update event set name = 'Версия макета изменена' where id = 702;
+update event set name = 'Версия макета введена в действие' where id = 703;
+update event set name = 'Версия макета выведена из действия' where id = 704;
+update event set name = 'Версия макета удалена' where id = 705;
+
 COMMIT;
 EXIT;
