@@ -965,6 +965,20 @@ update ref_book_attribute set attribute_id = 2111 where id = 2090;
 --http://jira.aplana.com/browse/SBRFACCTAX-13388: 0.8 Доработать справочник «Параметры налоговых льгот транспортного налога»
 update ref_book_attribute set is_unique = 0 where id in (20, 21, 22);
 ----------------------------------------------------------------------------------------------------------------
+--http://jira.aplana.com/browse/SBRFACCTAX-13365: Средняя стоимость транспортных средств (2015)
+update ref_book set name = 'Средняя стоимость транспортных средств (2014)' where id = 208;
+
+INSERT INTO ref_book (id, name, visible, type, read_only, region_attribute_id) VALUES (218,'Средняя стоимость транспортных средств (2015)',1,0,0,null);
+
+INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (2181, 218, 'Средняя стоимость', 'AVG_COST', 4, 0, 211, 2111, 1, null, 10, 1, 0, null, null, 0, null);
+INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (2182, 218, 'Марка', 'BREND', 1, 1, null, null, 1, null, 10, 1, 1, null, null, 0, 120);
+INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (2183, 218, 'Модель (Версия)', 'MODEL', 1, 2, null, null, 1, null, 10, 1, 1, null, null, 0, 120);
+INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (2184, 218, 'Объем двигателя', 'ENGINE_VOLUME', 1, 3, null, null, 1, null, 10, 1, 1, null, null, 0, 120);
+INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (2185, 218, 'Тип двигателя', 'ENGINE_TYPE', 1, 4, null, null, 1, null, 10, 1, 1, null, null, 0, 120);
+INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (2186, 218, 'Количество лет, прошедших с года выпуска ТС (от)', 'YEAR_FROM', 2, 5, null, null, 1, 0, 10, 1, 0, null, null, 0, 3);
+INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) VALUES (2187, 218, 'Количество лет, прошедших с года выпуска ТС (до)', 'YEAR_TO', 2, 6, null, null, 1, 0, 10, 1, 0, null, null, 0, 3);
+
+
 ----------------------------------------------------------------------------------------------------------------
 COMMIT;
 EXIT;
