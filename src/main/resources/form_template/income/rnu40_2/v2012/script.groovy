@@ -415,7 +415,7 @@ def getFormDataSource() {
 
 void checkSourceAccepted() {
     if (!isConsolidated) {
-        formDataService.checkMonthlyFormExistAndAccepted(338, FormDataKind.PRIMARY, formData.departmentId, formData.reportPeriodId, formData.periodOrder, false, logger, true)
+        formDataService.checkMonthlyFormExistAndAccepted(338, FormDataKind.PRIMARY, formData.departmentId, formData.reportPeriodId, formData.periodOrder, false, logger, true, formData.comparativePeriodId, formData.accruing)
     }
 }
 

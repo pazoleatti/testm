@@ -739,8 +739,8 @@ void checkRNU() {
     if (formData.kind == FormDataKind.PRIMARY) {
         def end = getReportPeriodEndDate()
         def month = end[Calendar.MONTH] + 1
-        formDataService.checkMonthlyFormExistAndAccepted(341, FormDataKind.PRIMARY, formData.departmentId, formData.reportPeriodId, month, false, logger, true)
-        formDataService.checkMonthlyFormExistAndAccepted(342, FormDataKind.PRIMARY, formData.departmentId, formData.reportPeriodId, month, false, logger, true)
+        formDataService.checkMonthlyFormExistAndAccepted(341, FormDataKind.PRIMARY, formData.departmentId, formData.reportPeriodId, month, false, logger, true, formData.comparativePeriodId, formData.accruing)
+        formDataService.checkMonthlyFormExistAndAccepted(342, FormDataKind.PRIMARY, formData.departmentId, formData.reportPeriodId, month, false, logger, true, formData.comparativePeriodId, formData.accruing)
     }
 }
 
