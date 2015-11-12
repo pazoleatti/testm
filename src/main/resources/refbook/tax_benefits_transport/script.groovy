@@ -4,7 +4,7 @@ import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import groovy.transform.Field
 
 /**
- * Cкрипт справочника «Параметры налоговых льгот транспортного налога» (id = 7)
+ * Скрипт справочника «Параметры налоговых льгот транспортного налога» (id = 7)
  *
  * @author LHaziev
  */
