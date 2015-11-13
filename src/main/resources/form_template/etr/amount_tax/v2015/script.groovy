@@ -20,6 +20,9 @@ import groovy.transform.Field
  */
 
 switch (formDataEvent) {
+    case FormDataEvent.GET_HEADERS:
+        headers.get(0).sum = 'Сумма, ' + (isBank() ? 'млн. руб.' : 'тыс. руб.')
+        break
     case FormDataEvent.CREATE:
         formDataService.checkUnique(formData, logger)
         break
@@ -109,8 +112,15 @@ void consolidation() {
                 // суммируем графу 4 из источников
                 for (def row : dataRows) {
                     def sourceRow = getDataRow(sourceRows, row.getAlias())
-                    row.sum = (row.sum ?: 0) + (sourceRow.sum ?: 0)
+                    row.sum = (row.sum ?: BigDecimal.ZERO) + ((source.departmentId == 1) ? 1000 : 1) * (sourceRow.sum ?: BigDecimal.ZERO)
                 }
+            }
+        }
+    }
+    if (isBank()) { // если уровень банка, то тысячи понижаем до миллионов
+        dataRows.each { row ->
+            if (row.sum) {
+                row.sum = (row.sum as BigDecimal).divide(BigDecimal.valueOf(1000), BigDecimal.ROUND_HALF_UP)
             }
         }
     }
@@ -192,7 +202,7 @@ void checkHeaderXls(def headerRows) {
             ([(headerRows[0][0]): '№ п/п']),
             ([(headerRows[0][1]): 'Наименование показателя']),
             ([(headerRows[0][2]): 'Графа 4 заполняется']),
-            ([(headerRows[0][3]): 'Сумма, тыс. руб.'])
+            ([(headerRows[0][3]): ('Сумма, ' + (isBank() ? 'млн. руб.' : 'тыс. руб.'))])
     ]
     (0..3).each {
         headerMapping.add(([(headerRows[1][it]): (it + 1).toString()]))
