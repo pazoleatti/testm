@@ -400,7 +400,7 @@ def getKnuSumPair(def date, def row) {
     if (dataRow == null) {
         return [BigDecimal.ZERO, false]
     }
-    return [(dataRow.consumptionTaxSumS ?: BigDecimal.ZERO) / 1000, true]
+    return [(dataRow.consumptionTaxSumS ?: BigDecimal.ZERO) / (isBank() ? 1000000 : 1000), true]
 }
 
 // Расчет сумм из БО за определенный период
@@ -431,7 +431,7 @@ def get102Sum(def row, def date) {
         if (records == null || records.isEmpty()) {
             return [0, false]
         }
-        def result = records.sum { it.TOTAL_SUM.numberValue } / 1000
+        def result = records.sum { it.TOTAL_SUM.numberValue } / (isBank() ? 1000000 : 1000)
         return [result, true]
     }
     return [0, true]

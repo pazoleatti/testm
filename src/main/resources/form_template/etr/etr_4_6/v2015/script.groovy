@@ -405,7 +405,7 @@ def get102Sum(def row, def date) {
         if (records == null || records.isEmpty()) {
             return [0, false]
         }
-        def result = records.sum { ((minusList != null && minusList.contains(it.OPU_CODE.stringValue)) ? -1 : 1) * it.TOTAL_SUM.numberValue } / 1000
+        def result = records.sum { ((minusList != null && minusList.contains(it.OPU_CODE.stringValue)) ? -1 : 1) * it.TOTAL_SUM.numberValue } / (isBank() ? 1000000 : 1000)
         return [result, true]
     }
     return [0, true]

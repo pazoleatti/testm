@@ -198,7 +198,7 @@ def get102(def departmentId, def date) {
     }
     return records.collect{
         def record = [:]
-        record[it.OPU_CODE.stringValue] = it.TOTAL_SUM.numberValue / 1000
+        record[it.OPU_CODE.stringValue] = it.TOTAL_SUM.numberValue / (isBank() ? 1000000 : 1000)
         return record
     }.sum()
 }
