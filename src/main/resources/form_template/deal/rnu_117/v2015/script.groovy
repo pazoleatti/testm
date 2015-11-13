@@ -503,19 +503,6 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
 
     def recordId = getRecordId(nameFromFile, values[4], fileRowIndex, colIndex, iksrName)
     def map = getRefBookValue(520, recordId)
-    if (map && nameFromFile != map.NAME?.stringValue) {
-        if (map && nameFromFile != map.NAME?.stringValue) {
-            // сообщение 4
-            String msg = "Наименование ВЗЛ/РОЗ в файле не заполнено!"
-            if (nameFromFile) {
-                msg = "В файле указано другое наименование ВЗЛ/РОЗ - «$nameFromFile»!"
-            }
-            logger.warn("Строка $fileRowIndex , столбец " + ScriptUtils.getXLSColumnName(colIndex) + ": " +
-                    "На форме графы с общей информацией о ВЗЛ/РОЗ заполнены данными записи справочника «Участники ТЦО», " +
-                    "в которой атрибут «Полное наименование юридического лица с указанием ОПФ» = «" + map.NAME?.stringValue + "», " +
-                    "атрибут «ИНН (заполняется для резидентов, некредитных организаций)» = «" + map.INN?.stringValue + "». $msg")
-        }
-    }
 
     // графа 2
     newRow.name = recordId
@@ -561,7 +548,7 @@ def getRecordId(String name, String iksr, int fileRowIndex, int colIndex, String
         // сообщение 6
         logger.warn("Строка $fileRowIndex , столбец " + ScriptUtils.getXLSColumnName(colIndex) + ": " +
                 "На форме не заполнены графы с общей информацией о ВЗЛ/РОЗ, так как в файле отсутствует значение по графе «$iksrName»!")
-        return
+        return null
     }
     def ref_id = 520
     def RefBook refBook = refBookFactory.get(ref_id)
@@ -583,7 +570,25 @@ def getRecordId(String name, String iksr, int fileRowIndex, int colIndex, String
     def records = provider.getRecords(getReportPeriodEndDate(), null, filter, null)
     if (records.size() == 1) {
         // 5
-        recordCache[ref_id][filter] = records.get(0).get(RefBook.RECORD_ID_ALIAS).numberValue
+        def record = records.get(0)
+
+        if (name != record.get('NAME')?.stringValue) {
+            // сообщение 4
+            String msg = name ? "В файле указано другое наименование ВЗЛ/РОЗ - «$name»!" : "Наименование ВЗЛ/РОЗ в файле не заполнено!"
+            def refBookAttributeName
+            for (alias in ['INN', 'REG_NUM', 'TAX_CODE_INCORPORATION', 'SWIFT', 'KIO']) {
+                if (iksr.equals(record.get(alias)?.stringValue)) {
+                    refBookAttributeName = refBook.attributes.find { it.alias == alias }.name
+                    break
+                }
+            }
+            logger.warn("Строка $fileRowIndex , столбец " + ScriptUtils.getXLSColumnName(colIndex) + ": " +
+                    "На форме графы с общей информацией о ВЗЛ/РОЗ заполнены данными записи справочника «Участники ТЦО», " +
+                    "в которой атрибут «Полное наименование юридического лица с указанием ОПФ» = «" + record.get('NAME')?.stringValue + "», " +
+                    "атрибут «$refBookAttributeName» = «" + iksr + "». $msg")
+        }
+
+        recordCache[ref_id][filter] = record.get(RefBook.RECORD_ID_ALIAS).numberValue
         return recordCache[ref_id][filter]
     } else if (records.empty) {
         // 6

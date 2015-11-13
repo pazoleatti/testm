@@ -503,7 +503,7 @@ void importTransportData() {
         }
         // задать итоговой строке нф значения из итоговой строки тф
         totalColumns.each { alias ->
-            totalRow[alias] = totalRow[alias]
+            totalRow[alias] = totalTF[alias]
         }
     } else {
         logger.warn("В транспортном файле не найдена итоговая строка")
