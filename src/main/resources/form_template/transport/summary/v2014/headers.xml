@@ -1,142 +1,125 @@
-<?xml version="1.0" encoding="utf-8"?>
-<rows>
-    <row alias="">
-        <cell alias="fix" colSpan="1" rowSpan="1" value=""/>
-        <cell alias="rowNumber" colSpan="1" rowSpan="2" value="№ пп"/>
-        <cell alias="taxAuthority" colSpan="1" rowSpan="2" value="Код НО"/>
-        <cell alias="kpp" colSpan="1" rowSpan="2" value="КПП"/>
-        <cell alias="okato" colSpan="1" rowSpan="2" value="Код ОКТМО"/>
-        <cell alias="tsTypeCode" colSpan="1" rowSpan="2" value="Код вида ТС"/>
-        <cell alias="tsType" colSpan="1" rowSpan="2" value="Вид ТС"/>
-        <cell alias="model" colSpan="1" rowSpan="2" value="Марка ТС"/>
-        <cell alias="ecoClass" colSpan="1" rowSpan="2" value="Экологический класс"/>
-        <cell alias="vi" colSpan="1" rowSpan="2" value="Идентификационный номер ТС"/>
-        <cell alias="regNumber" colSpan="1" rowSpan="2" value="Регистрационный знак ТС"/>
-        <cell alias="regDate" colSpan="1" rowSpan="2" value="Дата регистрации ТС"/>
-        <cell alias="regDateEnd" colSpan="1" rowSpan="2" value="Дата снятия с регистрации ТС"/>
-        <cell alias="taxBase" colSpan="1" rowSpan="2" value="Налоговая база"/>
-        <cell alias="taxBaseOkeiUnit" colSpan="1" rowSpan="2" value="Единица измерения налоговой базы по ОКЕИ"/>
-        <cell alias="createYear" colSpan="1" rowSpan="2" value="Год изготовления ТС"/>
-        <cell alias="years" colSpan="1" rowSpan="2" value="Количество лет, прошедших с года выпуска ТС"/>
-        <cell alias="stealDateStart" colSpan="2" rowSpan="1" value="Сведения об угоне"/>
-        <cell alias="stealDateEnd" colSpan="1" rowSpan="1" value="Сведения об угоне"/>
-        <cell alias="periodStartCost" colSpan="1" rowSpan="2"
-              value="Балансовая стоимость ТС на начало отчетного периода (руб.)"/>
-        <cell alias="periodEndCost" colSpan="1" rowSpan="2"
-              value="Балансовая стоимость ТС на конец отчетного периода (руб.)"/>
-        <cell alias="ownMonths" colSpan="1" rowSpan="2" value="Количество полных месяцев владения"/>
-        <cell alias="partRight" colSpan="1" rowSpan="2" value="Доля налогоплательщика в праве на ТС"/>
-        <cell alias="coef362" colSpan="1" rowSpan="2"
-              value="Коэффициент, определяемый в соответствии с п.3 ст.362 НК РФ"/>
-        <cell alias="taxRate" colSpan="1" rowSpan="2" value="Ставка налога"/>
-        <cell alias="calculatedTaxSum" colSpan="1" rowSpan="2" value="Исчисленная сумма налога (руб.)"/>
-        <cell alias="benefitMonths" colSpan="1" rowSpan="2" value="Количество полных месяцев использования льготы"/>
-        <cell alias="benefitStartDate" colSpan="1" rowSpan="2" value="Дата начала использования льготы"/>
-        <cell alias="benefitEndDate" colSpan="1" rowSpan="2" value="Дата окончания использования льготы"/>
-        <cell alias="coefKl" colSpan="1" rowSpan="2"
-              value="Коэффициент, определяемый в соответствии с законами субъектов РФ"/>
-        <cell alias="taxBenefitCode" colSpan="1" rowSpan="2" value="Код налоговой льготы"/>
-        <cell alias="benefitSum" colSpan="1" rowSpan="2" value="Сумма налоговой льготы (руб.)"/>
-        <cell alias="taxBenefitCodeDecrease" colSpan="1" rowSpan="2"
-              value="Код налоговой льготы в виде уменьшения суммы налога в соответствии с законами субъектов РФ"/>
-        <cell alias="benefitSumDecrease" colSpan="1" rowSpan="2" value="Сумма налоговой льготы (руб.)"/>
-        <cell alias="benefitCodeReduction" colSpan="1" rowSpan="2"
-              value="Код налоговой льготы в виде снижения налоговой ставки в соответствии с законами субъектов РФ"/>
-        <cell alias="benefitSumReduction" colSpan="1" rowSpan="2" value="Сумма налоговой льготы (руб.)"/>
-        <cell alias="koefKp" colSpan="1" rowSpan="2"
-              value="Коэффициент, определяемый в соответствии с п.2 ст. 362 НК РФ"/>
-        <cell alias="taxSumToPay" colSpan="1" rowSpan="2"
-              value="Исчисленная сумма налога, подлежащая уплате в бюджет (руб.)"/>
-        <cell alias="benefitBase" colSpan="1" rowSpan="2" value="Основание льготы"/>
-    </row>
-    <row alias="">
-        <cell alias="fix" colSpan="1" rowSpan="1" value=""/>
-        <cell alias="rowNumber" colSpan="1" rowSpan="1" value="№ пп"/>
-        <cell alias="taxAuthority" colSpan="1" rowSpan="1" value="Код НО"/>
-        <cell alias="kpp" colSpan="1" rowSpan="1" value="КПП"/>
-        <cell alias="okato" colSpan="1" rowSpan="1" value="Код ОКТМО"/>
-        <cell alias="tsTypeCode" colSpan="1" rowSpan="1" value="Код вида ТС"/>
-        <cell alias="tsType" colSpan="1" rowSpan="1" value="Вид ТС"/>
-        <cell alias="model" colSpan="1" rowSpan="1" value="Марка ТС"/>
-        <cell alias="ecoClass" colSpan="1" rowSpan="1" value="Экологический класс"/>
-        <cell alias="vi" colSpan="1" rowSpan="1" value="Идентификационный номер ТС"/>
-        <cell alias="regNumber" colSpan="1" rowSpan="1" value="Регистрационный знак ТС"/>
-        <cell alias="regDate" colSpan="1" rowSpan="1" value="Дата регистрации ТС"/>
-        <cell alias="regDateEnd" colSpan="1" rowSpan="1" value="Дата снятия с регистрации ТС"/>
-        <cell alias="taxBase" colSpan="1" rowSpan="1" value="Налоговая база"/>
-        <cell alias="taxBaseOkeiUnit" colSpan="1" rowSpan="1" value="Единица измерения налоговой базы по ОКЕИ"/>
-        <cell alias="createYear" colSpan="1" rowSpan="1" value="Год изготовления ТС"/>
-        <cell alias="years" colSpan="1" rowSpan="1" value="Количество лет, прошедших с года выпуска ТС"/>
-        <cell alias="stealDateStart" colSpan="1" rowSpan="1" value="Дата начала розыска ТС"/>
-        <cell alias="stealDateEnd" colSpan="1" rowSpan="1" value="Дата возврата ТС"/>
-        <cell alias="periodStartCost" colSpan="1" rowSpan="1"
-              value="Балансовая стоимость ТС на начало отчетного периода (руб.)"/>
-        <cell alias="periodEndCost" colSpan="1" rowSpan="1"
-              value="Балансовая стоимость ТС на конец отчетного периода (руб.)"/>
-        <cell alias="ownMonths" colSpan="1" rowSpan="1" value="Количество полных месяцев владения"/>
-        <cell alias="partRight" colSpan="1" rowSpan="1" value="Доля налогоплательщика в праве на ТС"/>
-        <cell alias="coef362" colSpan="1" rowSpan="1"
-              value="Коэффициент, определяемый в соответствии с п.3 ст.362 НК РФ"/>
-        <cell alias="taxRate" colSpan="1" rowSpan="1" value="Ставка налога"/>
-        <cell alias="calculatedTaxSum" colSpan="1" rowSpan="1" value="Исчисленная сумма налога (руб.)"/>
-        <cell alias="benefitMonths" colSpan="1" rowSpan="1" value="Количество полных месяцев использования льготы"/>
-        <cell alias="benefitStartDate" colSpan="1" rowSpan="1" value="Дата начала использования льготы"/>
-        <cell alias="benefitEndDate" colSpan="1" rowSpan="1" value="Дата окончания использования льготы"/>
-        <cell alias="coefKl" colSpan="1" rowSpan="1"
-              value="Коэффициент, определяемый в соответствии с законами субъектов РФ"/>
-        <cell alias="taxBenefitCode" colSpan="1" rowSpan="1" value="Код налоговой льготы"/>
-        <cell alias="benefitSum" colSpan="1" rowSpan="1" value="Сумма налоговой льготы (руб.)"/>
-        <cell alias="taxBenefitCodeDecrease" colSpan="1" rowSpan="1"
-              value="Код налоговой льготы в виде уменьшения суммы налога в соответствии с законами субъектов РФ"/>
-        <cell alias="benefitSumDecrease" colSpan="1" rowSpan="1" value="Сумма налоговой льготы (руб.)"/>
-        <cell alias="benefitCodeReduction" colSpan="1" rowSpan="1"
-              value="Код налоговой льготы в виде снижения налоговой ставки в соответствии с законами субъектов РФ"/>
-        <cell alias="benefitSumReduction" colSpan="1" rowSpan="1" value="Сумма налоговой льготы (руб.)"/>
-        <cell alias="koefKp" colSpan="1" rowSpan="1"
-              value="Коэффициент, определяемый в соответствии с п.2 ст. 362 НК РФ"/>
-        <cell alias="taxSumToPay" colSpan="1" rowSpan="1"
-              value="Исчисленная сумма налога, подлежащая уплате в бюджет (руб.)"/>
-        <cell alias="benefitBase" colSpan="1" rowSpan="1" value="Основание льготы"/>
-    </row>
-    <row alias="">
-        <cell alias="fix" colSpan="1" rowSpan="1" value=""/>
-        <cell alias="rowNumber" colSpan="1" rowSpan="1" value="1"/>
-        <cell alias="taxAuthority" colSpan="1" rowSpan="1" value="2"/>
-        <cell alias="kpp" colSpan="1" rowSpan="1" value="3"/>
-        <cell alias="okato" colSpan="1" rowSpan="1" value="4"/>
-        <cell alias="tsTypeCode" colSpan="1" rowSpan="1" value="5"/>
-        <cell alias="tsType" colSpan="1" rowSpan="1" value="6"/>
-        <cell alias="model" colSpan="1" rowSpan="1" value="7"/>
-        <cell alias="ecoClass" colSpan="1" rowSpan="1" value="8"/>
-        <cell alias="vi" colSpan="1" rowSpan="1" value="9"/>
-        <cell alias="regNumber" colSpan="1" rowSpan="1" value="10"/>
-        <cell alias="regDate" colSpan="1" rowSpan="1" value="11"/>
-        <cell alias="regDateEnd" colSpan="1" rowSpan="1" value="12"/>
-        <cell alias="taxBase" colSpan="1" rowSpan="1" value="13"/>
-        <cell alias="taxBaseOkeiUnit" colSpan="1" rowSpan="1" value="14"/>
-        <cell alias="createYear" colSpan="1" rowSpan="1" value="15"/>
-        <cell alias="years" colSpan="1" rowSpan="1" value="16"/>
-        <cell alias="stealDateStart" colSpan="1" rowSpan="1" value="17"/>
-        <cell alias="stealDateEnd" colSpan="1" rowSpan="1" value="18"/>
-        <cell alias="periodStartCost" colSpan="1" rowSpan="1" value="19"/>
-        <cell alias="periodEndCost" colSpan="1" rowSpan="1" value="20"/>
-        <cell alias="ownMonths" colSpan="1" rowSpan="1" value="21"/>
-        <cell alias="partRight" colSpan="1" rowSpan="1" value="22"/>
-        <cell alias="coef362" colSpan="1" rowSpan="1" value="23"/>
-        <cell alias="taxRate" colSpan="1" rowSpan="1" value="24"/>
-        <cell alias="calculatedTaxSum" colSpan="1" rowSpan="1" value="25"/>
-        <cell alias="benefitMonths" colSpan="1" rowSpan="1" value="26"/>
-        <cell alias="benefitStartDate" colSpan="1" rowSpan="1" value="27"/>
-        <cell alias="benefitEndDate" colSpan="1" rowSpan="1" value="28"/>
-        <cell alias="coefKl" colSpan="1" rowSpan="1" value="29"/>
-        <cell alias="taxBenefitCode" colSpan="1" rowSpan="1" value="30"/>
-        <cell alias="benefitSum" colSpan="1" rowSpan="1" value="31"/>
-        <cell alias="taxBenefitCodeDecrease" colSpan="1" rowSpan="1" value="32"/>
-        <cell alias="benefitSumDecrease" colSpan="1" rowSpan="1" value="33"/>
-        <cell alias="benefitCodeReduction" colSpan="1" rowSpan="1" value="34"/>
-        <cell alias="benefitSumReduction" colSpan="1" rowSpan="1" value="35"/>
-        <cell alias="koefKp" colSpan="1" rowSpan="1" value="36"/>
-        <cell alias="taxSumToPay" colSpan="1" rowSpan="1" value="37"/>
-        <cell alias="benefitBase" colSpan="1" rowSpan="1" value="38"/>
-    </row>
+<?xml version="1.0" encoding="utf-8"?><rows>
+  <row alias="">
+    <cell alias="fix" colSpan="2" rowSpan="2" value="№ пп"/>
+    <cell alias="rowNumber" colSpan="1" rowSpan="1" value="№ пп"/>
+    <cell alias="taxAuthority" colSpan="1" rowSpan="2" value="Код НО"/>
+    <cell alias="kpp" colSpan="1" rowSpan="2" value="КПП"/>
+    <cell alias="okato" colSpan="1" rowSpan="2" value="Код ОКТМО"/>
+    <cell alias="tsTypeCode" colSpan="1" rowSpan="2" value="Код вида ТС"/>
+    <cell alias="tsType" colSpan="1" rowSpan="2" value="Вид ТС"/>
+    <cell alias="model" colSpan="1" rowSpan="2" value="Марка ТС"/>
+    <cell alias="ecoClass" colSpan="1" rowSpan="2" value="Экологический класс"/>
+    <cell alias="vi" colSpan="1" rowSpan="2" value="Идентификационный номер ТС"/>
+    <cell alias="regNumber" colSpan="1" rowSpan="2" value="Регистрационный знак ТС"/>
+    <cell alias="regDate" colSpan="1" rowSpan="2" value="Дата регистрации ТС"/>
+    <cell alias="regDateEnd" colSpan="1" rowSpan="2" value="Дата снятия с регистрации ТС"/>
+    <cell alias="taxBase" colSpan="1" rowSpan="2" value="Налоговая база"/>
+    <cell alias="taxBaseOkeiUnit" colSpan="1" rowSpan="2" value="Единица измерения налоговой базы по ОКЕИ"/>
+    <cell alias="createYear" colSpan="1" rowSpan="2" value="Год изготовления ТС"/>
+    <cell alias="years" colSpan="1" rowSpan="2" value="Количество лет, прошедших с года выпуска ТС"/>
+    <cell alias="stealDateStart" colSpan="2" rowSpan="1" value="Сведения об угоне"/>
+    <cell alias="stealDateEnd" colSpan="1" rowSpan="1" value="Сведения об угоне"/>
+    <cell alias="periodStartCost" colSpan="1" rowSpan="2" value="Балансовая стоимость ТС на начало отчетного периода (руб.)"/>
+    <cell alias="periodEndCost" colSpan="1" rowSpan="2" value="Балансовая стоимость ТС на конец отчетного периода (руб.)"/>
+    <cell alias="ownMonths" colSpan="1" rowSpan="2" value="Количество полных месяцев владения"/>
+    <cell alias="partRight" colSpan="1" rowSpan="2" value="Доля налогоплательщика в праве на ТС"/>
+    <cell alias="coef362" colSpan="1" rowSpan="2" value="Коэффициент, определяемый в соответствии с п.3 ст.362 НК РФ"/>
+    <cell alias="taxRate" colSpan="1" rowSpan="2" value="Ставка налога"/>
+    <cell alias="calculatedTaxSum" colSpan="1" rowSpan="2" value="Исчисленная сумма налога (руб.)"/>
+    <cell alias="benefitMonths" colSpan="1" rowSpan="2" value="Количество полных месяцев использования льготы"/>
+    <cell alias="benefitStartDate" colSpan="1" rowSpan="2" value="Дата начала использования льготы"/>
+    <cell alias="benefitEndDate" colSpan="1" rowSpan="2" value="Дата окончания использования льготы"/>
+    <cell alias="coefKl" colSpan="1" rowSpan="2" value="Коэффициент, определяемый в соответствии с законами субъектов РФ"/>
+    <cell alias="taxBenefitCode" colSpan="1" rowSpan="2" value="Код налоговой льготы"/>
+    <cell alias="benefitSum" colSpan="1" rowSpan="2" value="Сумма налоговой льготы (руб.)"/>
+    <cell alias="taxBenefitCodeDecrease" colSpan="1" rowSpan="2" value="Код налоговой льготы в виде уменьшения суммы налога в соответствии с законами субъектов РФ"/>
+    <cell alias="benefitSumDecrease" colSpan="1" rowSpan="2" value="Сумма налоговой льготы (руб.)"/>
+    <cell alias="benefitCodeReduction" colSpan="1" rowSpan="2" value="Код налоговой льготы в виде снижения налоговой ставки в соответствии с законами субъектов РФ"/>
+    <cell alias="benefitSumReduction" colSpan="1" rowSpan="2" value="Сумма налоговой льготы (руб.)"/>
+    <cell alias="koefKp" colSpan="1" rowSpan="2" value="Коэффициент, определяемый в соответствии с п.2 ст. 362 НК РФ"/>
+    <cell alias="taxSumToPay" colSpan="1" rowSpan="2" value="Исчисленная сумма налога, подлежащая уплате в бюджет (руб.)"/>
+    <cell alias="benefitBase" colSpan="1" rowSpan="2" value="Основание льготы"/>
+  </row>
+  <row alias="">
+    <cell alias="fix" colSpan="1" rowSpan="1" value="№ пп"/>
+    <cell alias="rowNumber" colSpan="1" rowSpan="1" value="№ пп"/>
+    <cell alias="taxAuthority" colSpan="1" rowSpan="1" value="Код НО"/>
+    <cell alias="kpp" colSpan="1" rowSpan="1" value="КПП"/>
+    <cell alias="okato" colSpan="1" rowSpan="1" value="Код ОКТМО"/>
+    <cell alias="tsTypeCode" colSpan="1" rowSpan="1" value="Код вида ТС"/>
+    <cell alias="tsType" colSpan="1" rowSpan="1" value="Вид ТС"/>
+    <cell alias="model" colSpan="1" rowSpan="1" value="Марка ТС"/>
+    <cell alias="ecoClass" colSpan="1" rowSpan="1" value="Экологический класс"/>
+    <cell alias="vi" colSpan="1" rowSpan="1" value="Идентификационный номер ТС"/>
+    <cell alias="regNumber" colSpan="1" rowSpan="1" value="Регистрационный знак ТС"/>
+    <cell alias="regDate" colSpan="1" rowSpan="1" value="Дата регистрации ТС"/>
+    <cell alias="regDateEnd" colSpan="1" rowSpan="1" value="Дата снятия с регистрации ТС"/>
+    <cell alias="taxBase" colSpan="1" rowSpan="1" value="Налоговая база"/>
+    <cell alias="taxBaseOkeiUnit" colSpan="1" rowSpan="1" value="Единица измерения налоговой базы по ОКЕИ"/>
+    <cell alias="createYear" colSpan="1" rowSpan="1" value="Год изготовления ТС"/>
+    <cell alias="years" colSpan="1" rowSpan="1" value="Количество лет, прошедших с года выпуска ТС"/>
+    <cell alias="stealDateStart" colSpan="1" rowSpan="1" value="Дата начала розыска ТС"/>
+    <cell alias="stealDateEnd" colSpan="1" rowSpan="1" value="Дата возврата ТС"/>
+    <cell alias="periodStartCost" colSpan="1" rowSpan="1" value="Балансовая стоимость ТС на начало отчетного периода (руб.)"/>
+    <cell alias="periodEndCost" colSpan="1" rowSpan="1" value="Балансовая стоимость ТС на конец отчетного периода (руб.)"/>
+    <cell alias="ownMonths" colSpan="1" rowSpan="1" value="Количество полных месяцев владения"/>
+    <cell alias="partRight" colSpan="1" rowSpan="1" value="Доля налогоплательщика в праве на ТС"/>
+    <cell alias="coef362" colSpan="1" rowSpan="1" value="Коэффициент, определяемый в соответствии с п.3 ст.362 НК РФ"/>
+    <cell alias="taxRate" colSpan="1" rowSpan="1" value="Ставка налога"/>
+    <cell alias="calculatedTaxSum" colSpan="1" rowSpan="1" value="Исчисленная сумма налога (руб.)"/>
+    <cell alias="benefitMonths" colSpan="1" rowSpan="1" value="Количество полных месяцев использования льготы"/>
+    <cell alias="benefitStartDate" colSpan="1" rowSpan="1" value="Дата начала использования льготы"/>
+    <cell alias="benefitEndDate" colSpan="1" rowSpan="1" value="Дата окончания использования льготы"/>
+    <cell alias="coefKl" colSpan="1" rowSpan="1" value="Коэффициент, определяемый в соответствии с законами субъектов РФ"/>
+    <cell alias="taxBenefitCode" colSpan="1" rowSpan="1" value="Код налоговой льготы"/>
+    <cell alias="benefitSum" colSpan="1" rowSpan="1" value="Сумма налоговой льготы (руб.)"/>
+    <cell alias="taxBenefitCodeDecrease" colSpan="1" rowSpan="1" value="Код налоговой льготы в виде уменьшения суммы налога в соответствии с законами субъектов РФ"/>
+    <cell alias="benefitSumDecrease" colSpan="1" rowSpan="1" value="Сумма налоговой льготы (руб.)"/>
+    <cell alias="benefitCodeReduction" colSpan="1" rowSpan="1" value="Код налоговой льготы в виде снижения налоговой ставки в соответствии с законами субъектов РФ"/>
+    <cell alias="benefitSumReduction" colSpan="1" rowSpan="1" value="Сумма налоговой льготы (руб.)"/>
+    <cell alias="koefKp" colSpan="1" rowSpan="1" value="Коэффициент, определяемый в соответствии с п.2 ст. 362 НК РФ"/>
+    <cell alias="taxSumToPay" colSpan="1" rowSpan="1" value="Исчисленная сумма налога, подлежащая уплате в бюджет (руб.)"/>
+    <cell alias="benefitBase" colSpan="1" rowSpan="1" value="Основание льготы"/>
+  </row>
+  <row alias="">
+    <cell alias="fix" colSpan="1" rowSpan="1" value=""/>
+    <cell alias="rowNumber" colSpan="1" rowSpan="1" value="1"/>
+    <cell alias="taxAuthority" colSpan="1" rowSpan="1" value="2"/>
+    <cell alias="kpp" colSpan="1" rowSpan="1" value="3"/>
+    <cell alias="okato" colSpan="1" rowSpan="1" value="4"/>
+    <cell alias="tsTypeCode" colSpan="1" rowSpan="1" value="5"/>
+    <cell alias="tsType" colSpan="1" rowSpan="1" value="6"/>
+    <cell alias="model" colSpan="1" rowSpan="1" value="7"/>
+    <cell alias="ecoClass" colSpan="1" rowSpan="1" value="8"/>
+    <cell alias="vi" colSpan="1" rowSpan="1" value="9"/>
+    <cell alias="regNumber" colSpan="1" rowSpan="1" value="10"/>
+    <cell alias="regDate" colSpan="1" rowSpan="1" value="11"/>
+    <cell alias="regDateEnd" colSpan="1" rowSpan="1" value="12"/>
+    <cell alias="taxBase" colSpan="1" rowSpan="1" value="13"/>
+    <cell alias="taxBaseOkeiUnit" colSpan="1" rowSpan="1" value="14"/>
+    <cell alias="createYear" colSpan="1" rowSpan="1" value="15"/>
+    <cell alias="years" colSpan="1" rowSpan="1" value="16"/>
+    <cell alias="stealDateStart" colSpan="1" rowSpan="1" value="17"/>
+    <cell alias="stealDateEnd" colSpan="1" rowSpan="1" value="18"/>
+    <cell alias="periodStartCost" colSpan="1" rowSpan="1" value="19"/>
+    <cell alias="periodEndCost" colSpan="1" rowSpan="1" value="20"/>
+    <cell alias="ownMonths" colSpan="1" rowSpan="1" value="21"/>
+    <cell alias="partRight" colSpan="1" rowSpan="1" value="22"/>
+    <cell alias="coef362" colSpan="1" rowSpan="1" value="23"/>
+    <cell alias="taxRate" colSpan="1" rowSpan="1" value="24"/>
+    <cell alias="calculatedTaxSum" colSpan="1" rowSpan="1" value="25"/>
+    <cell alias="benefitMonths" colSpan="1" rowSpan="1" value="26"/>
+    <cell alias="benefitStartDate" colSpan="1" rowSpan="1" value="27"/>
+    <cell alias="benefitEndDate" colSpan="1" rowSpan="1" value="28"/>
+    <cell alias="coefKl" colSpan="1" rowSpan="1" value="29"/>
+    <cell alias="taxBenefitCode" colSpan="1" rowSpan="1" value="30"/>
+    <cell alias="benefitSum" colSpan="1" rowSpan="1" value="31"/>
+    <cell alias="taxBenefitCodeDecrease" colSpan="1" rowSpan="1" value="32"/>
+    <cell alias="benefitSumDecrease" colSpan="1" rowSpan="1" value="33"/>
+    <cell alias="benefitCodeReduction" colSpan="1" rowSpan="1" value="34"/>
+    <cell alias="benefitSumReduction" colSpan="1" rowSpan="1" value="35"/>
+    <cell alias="koefKp" colSpan="1" rowSpan="1" value="36"/>
+    <cell alias="taxSumToPay" colSpan="1" rowSpan="1" value="37"/>
+    <cell alias="benefitBase" colSpan="1" rowSpan="1" value="38"/>
+  </row>
 </rows>
