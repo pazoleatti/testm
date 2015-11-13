@@ -5,7 +5,7 @@
     <fullName>Сведения о дивидендах (доходах от долевого участия в других организациях, созданных на территории
         Российской Федерации), выплаченных в отчетном квартале
     </fullName>
-    <header>03/B</header>
+    <header>03-В</header>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="autoNumerationColumn">
         <alias>rowNumber</alias>
         <checking>false</checking>

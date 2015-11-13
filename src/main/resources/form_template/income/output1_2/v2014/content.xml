@@ -3,6 +3,7 @@
     <fixedRows>false</fixedRows>
     <name>Сведения для расчёта налога с доходов в виде дивидендов (начиная с год 2014)</name>
     <fullName>Сведения для расчёта налога с доходов в виде дивидендов (начиная с год 2014)</fullName>
+    <header>03-А</header>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>taCategory</alias>
         <checking>false</checking>

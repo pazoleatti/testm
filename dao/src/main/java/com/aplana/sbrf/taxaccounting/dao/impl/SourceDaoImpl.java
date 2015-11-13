@@ -716,8 +716,7 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
             "        and (sft.COMPARATIVE = 0 or ft.COMPARATIVE = 0 or inn_cdrp.report_period_id  = sfd.comparative_report_period_id)\n" +
             "        and (sft.ACCRUING = 0 or ft.ACCRUING = 0 or sfd.ACCRUING = fd.ACCRUING)) \n" +
             "        and coalesce(sfd.PERIOD_ORDER, perversion.month) = perversion.month\n" +
-            "      left join form_data_performer fdp on fdp.form_data_id = sfd.id \n" +
-            "      left join department fdpd on fdpd.id = fdp.PRINT_DEPARTMENT_ID      \n" +
+            "      left join department fdpd on fdpd.id = sdft.PERFORMER_DEP_ID      \n" +
             "      left join department_report_period scdrp on scdrp.id = sfd.COMPARATIVE_DEP_REP_PER_ID\n" +
             "      left join report_period scrp on scrp.id = scdrp.REPORT_PERIOD_ID\n" +
             "      left join tax_period sctp on sctp.id = scrp.TAX_PERIOD_ID\n" +
@@ -849,8 +848,7 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
             "        and (tft.COMPARATIVE = 0 or ft.COMPARATIVE = 0 or inn_cdrp.report_period_id  = tfd.comparative_report_period_id)\n" +
             "        and (tft.ACCRUING = 0 or ft.ACCRUING = 0 or tfd.ACCRUING = fd.ACCRUING)) \n" +
             "        and coalesce(tfd.PERIOD_ORDER, perversion.month) = perversion.month\n" +
-            "      left join form_data_performer fdp on fdp.form_data_id = tfd.id \n" +
-            "      left join department fdpd on fdpd.id = fdp.PRINT_DEPARTMENT_ID\n" +
+            "      left join department fdpd on fdpd.id = tdft.PERFORMER_DEP_ID\n" +
             "      left join department_report_period tcdrp on tcdrp.id = tfd.COMPARATIVE_DEP_REP_PER_ID\n" +
             "      left join report_period tcrp on tcrp.id = tcdrp.REPORT_PERIOD_ID\n" +
             "      left join tax_period tctp on tctp.id = tcrp.TAX_PERIOD_ID\n" +
@@ -1057,8 +1055,7 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
             "           ) perversion on perversion.record_id = rp.DICT_TAX_PERIOD_ID and perversion.lvl = case when sft.MONTHLY=1 then perversion.lvl else 1 end\n" +
             "      --отбираем экземпляры с учетом списка месяцов     \n" +
             "      left join form_data sfd on (sfd.kind = sfk.id and sfd.FORM_TEMPLATE_ID = sft.id and sfd.DEPARTMENT_REPORT_PERIOD_ID = sdrp.id) and coalesce(sfd.PERIOD_ORDER, perversion.month) = perversion.month\n" +
-            "      left join form_data_performer fdp on fdp.form_data_id = sfd.id \n" +
-            "      left join department fdpd on fdpd.id = fdp.PRINT_DEPARTMENT_ID  \n" +
+            "      left join department fdpd on fdpd.id = sdft.PERFORMER_DEP_ID  \n" +
             "           ),\n" +
             "  aggregated_insanity as (\n" +
             "      select sdft_id, max(correction_date) as last_correction_date\n" +

@@ -262,7 +262,7 @@ public class SaveDepartmentCombinedHandler extends AbstractActionHandler<SaveDep
         Map<RefBookDataProvider, List<Long>> references = new HashMap<RefBookDataProvider, List<Long>>();
         RefBookDataProvider oktmoProvider = rbFactory.getDataProvider(96L);
         for (Map.Entry<String, RefBookValue> e : rows.entrySet()) {
-            if (e.getValue().getAttributeType() == RefBookAttributeType.REFERENCE) {
+            if (e.getValue().getAttributeType() == RefBookAttributeType.REFERENCE && !e.getKey().equals("DEPARTMENT_ID")) {
                 if (e.getValue().getReferenceValue() != null) {
                     RefBookDataProvider linkProvider = e.getKey().equals("OKTMO") ? oktmoProvider : provider;
                     List<Long> links = (references.containsKey(linkProvider)) ?

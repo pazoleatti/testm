@@ -315,7 +315,7 @@ def get102Sum(def row, def date) {
         if (records == null || records.isEmpty()) {
             return [0, false]
         }
-        def result = records.sum { it.TOTAL_SUM.numberValue } / 1000
+        def result = records.sum { it.TOTAL_SUM.numberValue } / (isBank() ? 1000000 : 1000)
         return [result, true]
     }
     return [0, true]
@@ -472,8 +472,17 @@ void consolidation() {
                 dataRows.each { row ->
                     def sourceRow = getDataRow(sourceRows, row.getAlias())
                     check102Columns.each { column ->
-                        row[column] = (row[column] ?: 0) + (sourceRow[column] ?: 0)
+                        row[column] = (row[column] ?: BigDecimal.ZERO) + ((source.departmentId == 1) ? 1000 : 1) * (sourceRow[column] ?: BigDecimal.ZERO)
                     }
+                }
+            }
+        }
+    }
+    if (isBank()) { // если уровень банка, то тысячи понижаем до миллионов
+        dataRows.each { row ->
+            ['comparePeriod', 'currentPeriod'].each { column ->
+                if (row[column]) {
+                    row[column] = (row[column] as BigDecimal).divide(BigDecimal.valueOf(1000), BigDecimal.ROUND_HALF_UP)
                 }
             }
         }

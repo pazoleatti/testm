@@ -540,6 +540,16 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
 
     }
 
+    @Override
+    public Date firstDateOfLog() {
+        try{
+            return getJdbcTemplate().queryForObject("select min(log_date) from log_system", Date.class);
+        } catch (EmptyResultDataAccessException e){
+            LOG.warn("Нет записей в журнале аудита.", e);
+            return null;
+        }
+    }
+
     private void appendSelectWhereClause(PreparedStatementData ps, LogSystemFilter filter, String wa) {
         String prefix = "";
         ps.appendQuery(wa);

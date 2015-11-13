@@ -260,4 +260,9 @@ public class AuditDaoTest {
         auditDao.removeRecords(filter);
     }
 
+    @Test
+    public void firstDateTest(){
+        assertEquals("2013-01-01 01:00:00.0", auditDao.firstDateOfLog().toString());
+    }
+
 }

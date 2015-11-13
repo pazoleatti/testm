@@ -4,10 +4,8 @@ import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
+import com.aplana.sbrf.taxaccounting.model.refbook.*;
+import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.refbook.impl.RefBookUniversal;
 import com.aplana.sbrf.taxaccounting.util.RefBookScriptTestBase;
 import com.aplana.sbrf.taxaccounting.util.mock.ScriptTestMockHelper;
@@ -21,9 +19,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyLong;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -68,20 +64,29 @@ public class JurPersonsTest extends RefBookScriptTestBase {
         when(testHelper.getRefBookFactory().getDataProvider(REF_BOOK_ORG_CODE_ID)).thenReturn(providerOrgCode);
         when(testHelper.getRefBookFactory().getDataProvider(REF_BOOK_TYPE_TCO_ID)).thenReturn(providerTypeTco);
 
-        when(provider.getRecords(any(Date.class), any(PagingParams.class), anyString(),
-                any(RefBookAttribute.class))).thenAnswer(
-                new Answer<PagingResult<Map<String, RefBookValue>>>() {
+        when(provider.getRecordIdPairs(anyLong(), any(Date.class), anyBoolean(), anyString())).thenAnswer(
+                new Answer<List<Pair<Long, Long>>>() {
                     @Override
-                    public PagingResult<Map<String, RefBookValue>> answer(InvocationOnMock invocation) throws Throwable {
-                        PagingResult<Map<String, RefBookValue>> result = new PagingResult<Map<String, RefBookValue>>();
-                        String filter = (String) invocation.getArguments()[2];
+                    public List<Pair<Long, Long>> answer(InvocationOnMock invocation) throws Throwable {
+                        String filter = (String) invocation.getArguments()[3];
+                        List<Pair<Long, Long>> pairs = new ArrayList<Pair<Long, Long>>();
                         if (filter.contains("INN") && filter.contains("11111")) {
+                            pairs.add(new Pair<Long, Long>(1001L, 1001L));
+
                             Map<String, RefBookValue> map = new HashMap<String, RefBookValue>();
-                            map.put(RefBook.RECORD_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, 1L));
                             map.put(RefBook.RECORD_VERSION_FROM_ALIAS, new RefBookValue(RefBookAttributeType.DATE, (new GregorianCalendar(2012, Calendar.JANUARY, 1, 0, 0, 0)).getTime()));
                             map.put(RefBook.RECORD_VERSION_TO_ALIAS, new RefBookValue(RefBookAttributeType.DATE, null));
-                            result.add(map);
                         }
+                        return pairs;
+                    }
+                });
+
+        when(provider.getRecordVersionInfo(anyLong())).thenAnswer(
+                new Answer<RefBookRecordVersion> () {
+                    @Override
+                    public RefBookRecordVersion answer(InvocationOnMock invocation) throws Throwable {
+                        RefBookRecordVersion result = new RefBookRecordVersion();
+                        result.setVersionStart((new GregorianCalendar(2012, Calendar.JANUARY, 1, 0, 0, 0)).getTime());
                         return result;
                     }
                 });

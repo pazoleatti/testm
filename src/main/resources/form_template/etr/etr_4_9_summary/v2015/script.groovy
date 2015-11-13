@@ -143,9 +143,16 @@ void consolidation() {
 
                 def newRow = formData.createDataRow()
                 newRow.department = source.departmentId
-                newRow.sumBU = row1.currentPeriod ?: 0
-                newRow.sumNUD = row2.currentPeriod ?: 0
-                newRow.sumNUP = row3.currentPeriod ?: 0
+                newRow.sumBU = ((source.departmentId == 1) ? 1000 : 1) * (row1.currentPeriod ?: 0)
+                newRow.sumNUD = ((source.departmentId == 1) ? 1000 : 1) * (row2.currentPeriod ?: 0)
+                newRow.sumNUP = ((source.departmentId == 1) ? 1000 : 1) * (row3.currentPeriod ?: 0)
+                if (isBank()) { // если уровень банка, то тысячи понижаем до миллионов
+                    ['sumBU', 'sumNUD', 'sumNUP'].each { column ->
+                        if (newRow[column]) {
+                            newRow[column] = (newRow[column] as BigDecimal).divide(BigDecimal.valueOf(1000), BigDecimal.ROUND_HALF_UP)
+                        }
+                    }
+                }
                 // Графа 6 =(значение Графы 3 – (значение Графы 4 + значение Графы 5))*0.2
                 newRow.taxBurden = (newRow.sumBU - (newRow.sumNUD + newRow.sumNUP)) * 0.2
                 dataRows.add(newRow)

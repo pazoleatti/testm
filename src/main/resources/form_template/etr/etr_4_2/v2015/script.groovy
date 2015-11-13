@@ -353,11 +353,11 @@ def get102Sum(def row, def date) {
         }
         switch (row.getAlias()) {
             case 'R1' :
-                return [records.sum { it.TOTAL_SUM.numberValue } / 1000, true]
+                return [records.sum { it.TOTAL_SUM.numberValue } / (isBank() ? 1000000 : 1000), true]
             case 'R2' :
                 def minuend = records.sum { '01000'.equals(it.OPU_CODE.stringValue) ? it.TOTAL_SUM.numberValue : BigDecimal.ZERO }
                 def subtrahend = records.sum { '02000'.equals(it.OPU_CODE.stringValue) ? it.TOTAL_SUM.numberValue : BigDecimal.ZERO }
-                return [(minuend - subtrahend) / 1000, true]
+                return [(minuend - subtrahend) / (isBank() ? 1000000 : 1000), true]
         }
     }
     return [0, true]
@@ -519,8 +519,17 @@ void consolidation() {
                 dataRows.each { row ->
                     def sourceRow = getDataRow(sourceRows, row.getAlias())
                     check102Columns.each { column ->
-                        row[column] = (row[column] ?: 0) + (sourceRow[column] ?: 0)
+                        row[column] = (row[column] ?: BigDecimal.ZERO) + ((formDataSource.departmentId == 1) ? 1000 : 1) * (sourceRow[column] ?: BigDecimal.ZERO)
                     }
+                }
+            }
+        }
+    }
+    if (isBank()) { // если уровень банка, то тысячи понижаем до миллионов
+        dataRows.each { row ->
+            check102Columns.each { column ->
+                if (row[column]) {
+                    row[column] = (row[column] as BigDecimal).divide(BigDecimal.valueOf(1000), BigDecimal.ROUND_HALF_UP)
                 }
             }
         }

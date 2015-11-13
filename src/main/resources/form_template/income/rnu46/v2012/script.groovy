@@ -753,7 +753,7 @@ def loggerError(def row, def msg) {
 
 void prevPeriodCheck() {
     if (!isMonthBalance() && formData.kind == FormDataKind.PRIMARY) {
-        formDataService.checkMonthlyFormExistAndAccepted(formData.formType.id, FormDataKind.PRIMARY, formData.departmentId, formData.reportPeriodId, formData.periodOrder, true, logger, true)
+        formDataService.checkMonthlyFormExistAndAccepted(formData.formType.id, FormDataKind.PRIMARY, formData.departmentId, formData.reportPeriodId, formData.periodOrder, true, logger, true, formData.comparativePeriodId, formData.accruing)
     }
 }
 

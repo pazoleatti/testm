@@ -5,7 +5,7 @@
     <fullName>Расчет налога на прибыль организаций с доходов, удерживаемого налоговым агентом (источником выплаты
         доходов)
     </fullName>
-    <header>лист 03</header>
+    <header>Лист 03</header>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="autoNumerationColumn">
         <alias>rowNum</alias>
         <checking>false</checking>

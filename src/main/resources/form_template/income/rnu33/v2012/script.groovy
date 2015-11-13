@@ -529,7 +529,7 @@ def isMonthBalance() {
 void prevPeriodCheck() {
     // Проверка наличия данных предыдущих месяцев
     if (formData.periodOrder > 1 && formData.kind == FormDataKind.PRIMARY && !isMonthBalance()) {
-        formDataService.checkMonthlyFormExistAndAccepted(formData.formType.id, FormDataKind.PRIMARY, formData.departmentId, formData.reportPeriodId, formData.periodOrder, true, logger, true)
+        formDataService.checkMonthlyFormExistAndAccepted(formData.formType.id, FormDataKind.PRIMARY, formData.departmentId, formData.reportPeriodId, formData.periodOrder, true, logger, true, formData.comparativePeriodId, formData.accruing)
     }
 }
 

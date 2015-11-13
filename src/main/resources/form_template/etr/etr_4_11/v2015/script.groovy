@@ -159,15 +159,25 @@ void consolidation() {
                 for (sourceRow in sourceRows) {
                     def dataRow = dataRows.find { itRow -> itRow.name == sourceRow.name }
                     if (dataRow) {
-                        dataRow.sum1 = (dataRow.sum1 ?: 0) + (sourceRow.sum1 ?: 0)
-                        dataRow.sum2 = (dataRow.sum2 ?: 0) + (sourceRow.sum2 ?: 0)
+                        dataRow.sum1 = (dataRow.sum1 ?: 0) + ((source.departmentId == 1) ? 1000 : 1) * (sourceRow.sum1 ?: 0)
+                        dataRow.sum2 = (dataRow.sum2 ?: 0) + ((source.departmentId == 1) ? 1000 : 1) * (sourceRow.sum2 ?: 0)
                     } else {
                         def newRow = formData.createDataRow()
-                        ['name', 'sum1', 'sum2'].each { column ->
-                            newRow[column] = sourceRow[column]
+                        newRow.name = sourceRow.name
+                        ['sum1', 'sum2'].each { column ->
+                            newRow[column] = ((source.departmentId == 1) ? 1000 : 1) * sourceRow[column]
                         }
                         dataRows.add(newRow)
                     }
+                }
+            }
+        }
+    }
+    if (isBank()) { // если уровень банка, то тысячи понижаем до миллионов
+        dataRows.each { row ->
+            ['sum1', 'sum2'].each { column ->
+                if (row[column]) {
+                    row[column] = (row[column] as BigDecimal).divide(BigDecimal.valueOf(1000), BigDecimal.ROUND_HALF_UP)
                 }
             }
         }
