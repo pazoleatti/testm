@@ -1,13 +1,13 @@
-package refbook.raising_rates_transport
+package refbook.vehicles_average_cost_2015
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 
 /**
- * blob_data.id = '23a1d39b-2814-4fb2-a321-781b69089561'
+ * blob_data.id = '54def165-b118-4d1e-a52c-be429ebd832e'
  *
- * Скрипт справочника «Повышающие коэффициенты транспортного налога» (id = 209)
+ * Скрипт справочника "Средняя стоимость транспортных средств (2015)" (id = 218)
  *
- * @author LHaziev
+ * @author Lhaziev
  */
 switch (formDataEvent) {
     case FormDataEvent.SAVE:
