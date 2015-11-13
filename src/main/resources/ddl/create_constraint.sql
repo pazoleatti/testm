@@ -69,7 +69,7 @@ alter table ref_book_attribute add constraint ref_book_attr_fk_attribute_id fore
 
 alter table ref_book_attribute add constraint ref_book_attribute_chk_format check (format in (0,1,2,3,4,5,6));
 alter table ref_book_attribute add constraint ref_book_attr_chk_read_only check (read_only in (0, 1));
-alter table ref_book_attribute add constraint ref_book_attr_chk_max_length check ((type=1 and max_length is not null and max_length between 1 and 2000) or (type=2 and max_length is not null and max_length between 1 and 38 and max_length - precision<=19) or (type in (3,4) and max_length is null));
+alter table ref_book_attribute add constraint ref_book_attr_chk_max_length check ((type=1 and max_length is not null and max_length between 1 and 2000) or (type=2 and max_length is not null and max_length between 1 and 38) or (type in (3,4) and max_length is null));
 
 alter table ref_book add constraint ref_book_fk_region foreign key (region_attribute_id) references ref_book_attribute(id);
 
@@ -87,7 +87,7 @@ alter table form_column add constraint form_column_fk_form_templ_id foreign key 
 alter table form_column add constraint form_column_uniq_alias unique(form_template_id, alias);
 alter table form_column add constraint form_column_chk_type check(type in ('N', 'S', 'D', 'R', 'A'));
 alter table form_column add constraint form_column_chk_precision check((type = 'N' and precision is not null and precision >=0 and precision <= 19) or (type <> 'N' and precision is null));
-alter table form_column add constraint form_column_chk_max_length check ((type = 'S' and max_length is not null and max_length > 0 and max_length <= 2000) or (type = 'N' and max_length is not null and max_length > 0 and max_length <= 38 and max_length - precision<=19) or ((type ='D' or type ='R' or type='A') and max_length is null));
+alter table form_column add constraint form_column_chk_max_length check ((type = 'S' and max_length is not null and max_length > 0 and max_length <= 2000) or (type = 'N' and max_length is not null and max_length > 0 and max_length <= 38) or ((type ='D' or type ='R' or type='A') and max_length is null));
 alter table form_column add constraint form_column_chk_checking check (checking in (0, 1));
 alter table form_column add constraint form_column_chk_attribute_id check ((type = 'R' and attribute_id is not null) or (type <> 'R' and attribute_id is null));
 alter table form_column add constraint form_column_chk_width check (not width is null);
