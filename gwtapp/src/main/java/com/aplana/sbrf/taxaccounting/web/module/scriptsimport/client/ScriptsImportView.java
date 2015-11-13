@@ -1,6 +1,9 @@
 package com.aplana.sbrf.taxaccounting.web.module.scriptsimport.client;
 
+import com.aplana.sbrf.taxaccounting.web.main.entry.client.ScreenLockEvent;
 import com.aplana.sbrf.taxaccounting.web.widget.fileupload.FileUploadWidget;
+import com.aplana.sbrf.taxaccounting.web.widget.fileupload.event.EndLoadFileEvent;
+import com.aplana.sbrf.taxaccounting.web.widget.fileupload.event.StartLoadFileEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -27,6 +30,14 @@ public class ScriptsImportView extends ViewWithUiHandlers<ScriptsImportUiHandler
 
     @Override
     public void addImportHandler(ValueChangeHandler<String> handler) {
+
+
+        fileUploader.addStartLoadHandler(new StartLoadFileEvent.StartLoadFileHandler() {
+            @Override
+            public void onStartLoad(StartLoadFileEvent event) {
+                getUiHandlers().onStartLoad();
+            }
+        });
         fileUploader.addValueChangeHandler(handler);
     }
 }
