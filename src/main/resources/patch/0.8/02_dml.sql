@@ -24,5 +24,29 @@ update event set name = 'Версия макета введена в дейст�
 update event set name = 'Версия макета выведена из действия' where id = 704;
 update event set name = 'Версия макета удалена' where id = 705;
 
+--Период Год для ТЦО 46->34
+set serveroutput on size 30000;
+begin
+merge into report_period tgt
+using (
+  select rp.id, rp.calendar_start_date, 
+                case when extract(month from calendar_start_date) = 1 then add_months(rp.calendar_start_date, 9) else rp.calendar_start_date end as shift_calendar_start_date,
+         r46_id, r34_id 
+  from report_period rp 
+  join tax_period tp on tp.ID = rp.TAX_PERIOD_ID and tp.tax_type = 'D'
+  join (select r.id as r46_id, v34.record_id as r34_id from ref_book b
+    join ref_book_record r on r.ref_book_id = b.ID
+    join ref_book_value v on v.RECORD_ID = r.id
+    join ref_book_attribute a on a.id = v.ATTRIBUTE_ID and b.id = 8 and a.ID = 25 and v.STRING_VALUE = '46'
+    join ref_book_value v34 on v34.attribute_id = 25 and v34.STRING_VALUE = '34'
+    ) dict on dict.r46_id = rp.DICT_TAX_PERIOD_ID 
+   where rp.name = 'год') src
+on (tgt.id = src.id)  
+when matched then 
+  update set tgt.calendar_start_date = src.shift_calendar_start_date, tgt.dict_tax_period_id = src.r34_id;
+  dbms_output.put_line(''||sql%rowcount||' rows merged.');
+end;
+/  
+
 COMMIT;
 EXIT;
