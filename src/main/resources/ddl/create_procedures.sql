@@ -164,8 +164,8 @@ is
 begin
 		--Получить идентификатор текущей сессии для логирования
 	    select seq_log_query_session.nextval into v_session_id from dual;
-       
-	   for t in (select id as form_template_id, fullname as table_template_fullname from form_template where id in (P_NNN) order by id) loop
+
+	   for t in (select id as form_template_id, translate(fullname, '''', ' ') as table_template_fullname from form_template where id in (P_NNN) order by id) loop
 
          v_table_name := 'FORM_DATA_'||t.form_template_id;
 
@@ -195,7 +195,7 @@ begin
 
                --Определить тип данных для значения (form_column.type)
               select DECODE(x.type, 'S', 'VARCHAR2(4000 BYTE)',
-                          'N', 'DECIMAL(27, 10)',
+                          'N', 'DECIMAL(38, 19)',
                           'R', 'DECIMAL(18)',
                           'D', 'DATE',
                           'A', 'DECIMAL(18)') into x_column_type from dual;
@@ -206,7 +206,7 @@ begin
               execute immediate query_str;
 
               -- Комментарий = form_column.alias + ' - ' + form_column.name
-              query_str := 'COMMENT ON COLUMN '||v_table_name ||'.c'||x.Id ||' is '''||x.column_comment||'''';
+              query_str := 'COMMENT ON COLUMN '||v_table_name ||'.c'||x.Id ||' is '''||translate(x.column_comment, '''', ' ') ||'''';
                         insert into log_clob_query (id, form_template_id, sql_mode, text_query, session_id) values(seq_log_query.nextval, t.form_template_id, 'DDL', query_str, v_session_id);
               execute immediate query_str;
 
@@ -228,12 +228,7 @@ begin
                insert into log_clob_query (id, form_template_id, sql_mode, text_query, session_id) values(seq_log_query.nextval, t.form_template_id, 'DDL', query_str, v_session_id);
           execute immediate query_str;
 
-		  lock table form_data in exclusive mode;
-          --Фиксированная ссылка на FORM_DATA + индекс ?
-          query_str := 'alter table '|| v_table_name ||' add constraint '||v_table_name||'_FK foreign key (FORM_DATA_ID) references FORM_DATA(ID) on delete cascade';
-               insert into log_clob_query (id, form_template_id, sql_mode, text_query, session_id) values(seq_log_query.nextval, t.form_template_id, 'DDL', query_str, v_session_id);
-          execute immediate query_str;
-
+          --Индекс на FORM_DATA
           query_str := 'create index i_'|| v_table_name||' on '|| v_table_name ||' (form_data_id)';
                insert into log_clob_query (id, form_template_id, sql_mode, text_query, session_id) values(seq_log_query.nextval, t.form_template_id, 'DDL', query_str, v_session_id);
           execute immediate query_str;
@@ -247,4 +242,5 @@ begin
          -------------------------------------------------------------------------------------
       end loop;
 end CREATE_FORM_DATA_NNN;
-/
+/ 
+
