@@ -82,7 +82,7 @@
         <alias>sum45</alias>
         <checking>false</checking>
         <columnType>NUMBER</columnType>
-        <name>Сделки с лицами, информация о которых не  отражена в Журнале взаиморасчетов</name>
+        <name>Сделки с лицами, информация о которых не отражена в Журнале взаиморасчетов</name>
         <order>8</order>
         <width>6</width>
         <maxLength>15</maxLength>
@@ -142,7 +142,7 @@
         <alias>sum55</alias>
         <checking>false</checking>
         <columnType>NUMBER</columnType>
-        <name>Сделки с лицами, информация о которых не  отражена в Журнале взаиморасчетов</name>
+        <name>Сделки с лицами, информация о которых не отражена в Журнале взаиморасчетов</name>
         <order>14</order>
         <width>6</width>
         <maxLength>15</maxLength>
