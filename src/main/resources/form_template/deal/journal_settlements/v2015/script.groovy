@@ -171,6 +171,8 @@ def addRow() {
             }
             index++
         }
+    } else if (currentDataRow.getAlias() in ['05', '06', '23', '24']) {
+        index = currentDataRow.getIndex() + 1
     } else {
         index = currentDataRow.getIndex()
     }
