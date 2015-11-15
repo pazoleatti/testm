@@ -14,7 +14,6 @@ import groovy.transform.Field
  *
  * TODO:
  *      - консолидация не полная, потому что не все макеты источников готовы
- *      - расчеты не доделаны
  *      - логические проверки не доделаны
  *      - дополнить тесты
  */
@@ -184,15 +183,56 @@ def BigDecimal calc18(def row) {
 }
 
 def BigDecimal calc19(def row) {
-    // Графа 19 = Графа 18 + Ожидаемый объем доходов и расходов» их формы «Прогноз крупных сделок» для организации, указанной в графе 2
-    // TODO Правило извлечения ожидаемого объема доходов и расходов будет добавлено после описания формы «Прогноз крупных сделок»
-    value = 0
+    // строки формы "Прогноз крупных сделок"
+    def sourceRows = getSourceDataRows(810, FormDataKind.PRIMARY)
+    def value = 0
+    sourceRows.each { sourceRow ->
+        if (sourceRow.ikksr == row.name) {
+            value += (sourceRow.sum ?: 0)
+        }
+    }
     return row.sum8 + value
 }
 
 def Long calc20(def row) {
-    // TODO
-    return 0
+    def records = getRecords515()
+    for (def record : records) {
+        def minValue = record?.MIN_VALUE?.value
+        if (minValue == null || minValue <= row.sum9 || minValue >= row.sum9) {
+            return record?.CATEGORY?.value
+        }
+    }
+    // Логическая проверка 4. Наличие правила назначения категории
+    logger.error("Строка ${row.getIndex()}: Для ожидаемого объема доходов и расходов не задано правило назначения категории в данном отчетном периоде!")
+    return null
+}
+
+@Field
+def records515 = null
+
+// Получить записи "ВЗЛ ОРН" из справочника "Правила назначения категории юридическому лицу"
+def getRecords515() {
+    if (records515 == null) {
+        // получить id записи "ВЗЛ ОРН" из справончика "Типы участников ТЦО (расширенный)"
+        def provider = formDataService.getRefBookProvider(refBookFactory, 505L, providerCache)
+        def filter = "CODE = 'ВЗЛ ОРН'"
+        def records = provider.getRecords(getReportPeriodEndDate(), null, filter, null)
+        def id
+        if (records && records.size() == 1) {
+            id = records.get(0)?.record_id?.value
+        } else {
+            return null
+        }
+
+        // получить записи из справончика "Правила назначения категории юридическому лицу"
+        provider = formDataService.getRefBookProvider(refBookFactory, 515L, providerCache)
+        filter = "CODE = $id"
+        records515 = provider.getRecords(getReportPeriodEndDate(), null, filter, null)
+        if (records515 == null) {
+            records515 = []
+        }
+    }
+    return records515
 }
 
 void logicCheck() {
