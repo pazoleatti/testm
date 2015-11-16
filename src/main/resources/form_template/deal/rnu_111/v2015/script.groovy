@@ -231,7 +231,7 @@ void logicCheck() {
         if(row.sum1 != null && row.sum2 != null && row.sum1 < row.sum2){
             def msg1 = row.getCell('sum1').column.name
             def msg2 = row.getCell('sum2').column.name
-            rowError(logger, row, "Строка $rowNum: Значение графы «$msg1» должно быть не меньше значения графы «$msg2»!")
+            rowWarning(logger, row, "Строка $rowNum: Значение графы «$msg1» должно быть не меньше значения графы «$msg2»!")
         }
 
         // 10. Проверка значения графы 11
