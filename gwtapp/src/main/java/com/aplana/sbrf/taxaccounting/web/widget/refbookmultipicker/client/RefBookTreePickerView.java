@@ -254,8 +254,8 @@ public class RefBookTreePickerView extends ViewWithUiHandlers<RefBookTreePickerU
     }
 
     @Override
-    public void load(PickerState pickerState) {
-        getUiHandlers().init(pickerState);
+    public void load(PickerState pickerState, boolean force) {
+        getUiHandlers().init(pickerState, force);
     }
 
     @Override
