@@ -703,7 +703,7 @@ def calc10or16(def record520, def sourceAllDataRowsMap, def isCalc10) {
  * @return
  */
 def checkRnuRow(def row, def name) {
-    def head = 'Итого по «'
+    def head = 'Итого по "'
     if (!row.getAlias() || !row.fix || !row.fix.contains(head)) {
         return false
     }

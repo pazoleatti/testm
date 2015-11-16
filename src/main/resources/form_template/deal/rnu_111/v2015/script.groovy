@@ -349,14 +349,14 @@ DataRow<Cell> calcItog(def int i, def List<DataRow<Cell>> dataRows) {
  * @param value2 значение графы 2 (если value2 не задан, то используется 'Итого «ВЗЛ/РОЗ не задано»')
  * @param i номер строки
  */
-DataRow<Cell> getSubTotalRow(def title, def value2, int i) {
+DataRow<Cell> getSubTotalRow(String title, String value2, int i) {
     def newRow = (formDataEvent in [FormDataEvent.IMPORT, FormDataEvent.IMPORT_TRANSPORT_FILE]) ? formData.createStoreMessagingDataRow() : formData.createDataRow()
     if (title) {
         newRow.fix = title
     } else if (value2) {
-        newRow.fix = 'Итого по «' + value2 + '»'
+        newRow.fix = 'Итого по "' + StringUtils.cleanString(value2) + '"'
     } else {
-        newRow.fix = 'Итого по «ВЗЛ/РОЗ не задано»'
+        newRow.fix = 'Итого по "ВЗЛ/РОЗ не задано"'
     }
     newRow.setAlias('itg#'.concat(i.toString()))
     newRow.getCell('fix').colSpan = 6
@@ -637,8 +637,7 @@ def getRecordId(String name, String iksr, int fileRowIndex, int colIndex, String
     if (records.size() == 1) {
         // 5
         def record = records.get(0)
-
-        if (name != record.get('NAME')?.stringValue) {
+        if (StringUtils.cleanString(name) != StringUtils.cleanString(record.get('NAME')?.stringValue)) {
             // сообщение 4
             String msg = name ? "В файле указано другое наименование ВЗЛ/РОЗ - «$name»!" : "Наименование ВЗЛ/РОЗ в файле не заполнено!"
             def refBookAttributeName
