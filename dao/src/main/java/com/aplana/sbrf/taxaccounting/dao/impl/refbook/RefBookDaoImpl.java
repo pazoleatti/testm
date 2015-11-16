@@ -83,7 +83,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 	private static final String DATE_VALUE_COLUMN_ALIAS = "date_value";
 	private static final String REFERENCE_VALUE_COLUMN_ALIAS = "reference_value";
 
-    private static final String FORM_LINK_MSG = "Существует экземпляр %sформы, который содержит ссылку на запись! Тип: \"%s\", Вид: \"%s\", Подразделение: \"%s\", Период: \"%s\"%s%s%s%s.";
+    private static final String FORM_LINK_MSG = "Существует экземпляр %sформы%s, который содержит ссылку на запись! Тип: \"%s\", Вид: \"%s\", Подразделение: \"%s\", Период: \"%s\"%s%s%s%s.";
     private static final String REF_BOOK_LINK_MSG = "Существует ссылка на запись справочника. Справочник \"%s\", запись: \"%s\"%s.";
 
 	@Autowired
@@ -1934,7 +1934,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             "join tax_period tp on tp.id = rp.tax_period_id";
 
     @Override
-    public List<FormLink> isVersionUsedInForms(Long refBookId, List<Long> uniqueRecordIds, Date versionFrom, Date versionTo,
+    public List<FormLink> isVersionUsedInForms(final Long refBookId, List<Long> uniqueRecordIds, Date versionFrom, Date versionTo,
                                                             Boolean restrictPeriod) {
         Set<FormLink> results = new HashSet<FormLink>();
         Map<String, Object> params = new HashMap<String, Object>();
@@ -1968,9 +1968,11 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
                     formLink.setFormDataId(SqlUtils.getLong(rs, "formDataId"));
                     formLink.setFormTypeId(SqlUtils.getInteger(rs, "formTypeId"));
                     formLink.setState(WorkflowState.fromId(SqlUtils.getInteger(rs, "state")));
+                    char taxType = rs.getString("tax_type").charAt(0);
                     formLink.setMsg(String.format(
                             FORM_LINK_MSG,
-                            rs.getString("tax_type").charAt(0) == TaxType.ETR.getCode() ? " " : "налоговой ",
+                            (taxType == TaxType.ETR.getCode() || taxType == TaxType.DEAL.getCode()) ? " " : "налоговой ",
+                            (refBookId == RefBook.TCO && formLink.getState() != WorkflowState.CREATED) ? " в статусе отличном от \"Создана\"" : "",
                             FormDataKind.fromId(SqlUtils.getInteger(rs, "formKind")).getTitle(),
                             rs.getString("formType"),
                             (SqlUtils.getInteger(rs, "departmentType") != 1) ?
