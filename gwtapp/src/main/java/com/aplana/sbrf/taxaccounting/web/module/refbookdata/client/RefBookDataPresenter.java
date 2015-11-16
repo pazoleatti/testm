@@ -175,7 +175,6 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
     @Override
     public void onBackClicked() {
         refBookId = null;
-        editFormPresenter.setPreviousURId(null);
         placeManager.revealPlace(new PlaceRequest.Builder().nameToken(RefBookListTokens.REFBOOK_LIST).build());
     }
 
