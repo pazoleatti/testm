@@ -162,6 +162,7 @@ public abstract class AbstractEditPresenter<V extends AbstractEditPresenter.MyVi
                         new AbstractCallback<GetRefBookRecordResult>() {
                             @Override
                             public void onSuccess(GetRefBookRecordResult result) {
+                                getView().cleanFields();
                                 currentUniqueRecordId = refBookRecordId;
                                 //recordId = refBookRecordId;
                                 updateView(result);
@@ -257,7 +258,6 @@ public abstract class AbstractEditPresenter<V extends AbstractEditPresenter.MyVi
             });
         } else {
             //showRecord(null);
-            getView().cleanFields();
             RefBookValueSerializable refBookParent = new RefBookValueSerializable();
             refBookParent.setAttributeType(RefBookAttributeType.REFERENCE);
             refBookParent.setDereferenceValue(dereferenceValue);
@@ -412,7 +412,7 @@ public abstract class AbstractEditPresenter<V extends AbstractEditPresenter.MyVi
         return previousURId;
     }
 
-    void setPreviousURId(Long previousURId) {
+    public void setPreviousURId(Long previousURId) {
         this.previousURId = previousURId;
     }
 
