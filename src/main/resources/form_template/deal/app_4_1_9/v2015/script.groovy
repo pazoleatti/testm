@@ -14,7 +14,6 @@ import groovy.transform.Field
  *
  * TODO:
  *      - консолидация не полная, потому что не все макеты источников готовы
- *      - логические проверки не доделаны
  *      - дополнить тесты
  */
 
@@ -202,8 +201,6 @@ def Long calc20(def row) {
             return record?.CATEGORY?.value
         }
     }
-    // Логическая проверка 4. Наличие правила назначения категории
-    logger.error("Строка ${row.getIndex()}: Для ожидаемого объема доходов и расходов не задано правило назначения категории в данном отчетном периоде!")
     return null
 }
 
@@ -237,6 +234,7 @@ def getRecords515() {
 
 void logicCheck() {
     def dataRows = formDataService.getDataRowHelper(formData).allCached
+    def records520 = getRecords520()
     for (def row : dataRows) {
         if (row.getAlias() != null) {
             continue
@@ -251,12 +249,24 @@ void logicCheck() {
             logger.error("Строка $rowNum: Объем доходов и расходов по всем сделкам не может быть нулевым!")
         }
 
-        // TODO
         // 3. Проверка на отсутствие в списке не ВЗЛ ОРН
+        def isVZL = records520?.find { it?.record_id?.value == row.name }
+        if (records520 && !isVZL) {
+            def value2 = getRefBookValue(520L, row.name)?.NAME?.value
+            logger.error("Строка %s: Организация «%s» не является взаимозависимым лицом с общим режимом налогообложения в данном отчетном периоде!", rowNum, value2)
+        }
+
         // 4. Наличие правила назначения категории
+        def tmp = calc20(row)
+        if (tmp == null) {
+            logger.error("Строка $rowNum: Для ожидаемого объема доходов и расходов не задано правило назначения категории в данном отчетном периоде!")
+        }
+
         // 5. Проверка соответствия категории пороговым значениям
-
-
+        if (tmp != row.categoryRevised) {
+            def value2 = getRefBookValue(520L, row.name)?.NAME?.value
+            logger.error("Строка %s: организация «%s» не является взаимозависимым лицом в данном отчетном периоде!", rowNum, value2)
+        }
     }
 }
 
@@ -325,6 +335,10 @@ def sourceRefbook520AliasMap = [
                         // 6.25
 ]
 
+// Консолидация очень похожа на 4.2, отличие в:
+//  - дополнительные условия при получении данных из справочника "Участники ТЦО"
+//  - дополнительном расчете (графы 17)
+//  - удаление нулевых строк в конце консолидации
 void consolidation() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
 
