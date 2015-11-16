@@ -43,7 +43,7 @@
         <alias>comparePeriod</alias>
         <checking>false</checking>
         <columnType>NUMBER</columnType>
-        <name>Период сравнения. НДС всего, тыс. руб.</name>
+        <name>Период сравнения. НДС всего, млн. руб.</name>
         <order>4</order>
         <width>15</width>
         <maxLength>22</maxLength>
@@ -53,7 +53,7 @@
         <alias>comparePeriodIgnore</alias>
         <checking>false</checking>
         <columnType>NUMBER</columnType>
-        <name>Период сравнения. В том числе НДС не учитываемый, тыс. руб.</name>
+        <name>Период сравнения. В том числе НДС не учитываемый, млн. руб.</name>
         <order>5</order>
         <width>15</width>
         <maxLength>22</maxLength>
@@ -73,7 +73,7 @@
         <alias>currentPeriod</alias>
         <checking>false</checking>
         <columnType>NUMBER</columnType>
-        <name>Период. НДС всего, тыс. руб.</name>
+        <name>Период. НДС всего, млн. руб.</name>
         <order>7</order>
         <width>15</width>
         <maxLength>22</maxLength>
@@ -83,7 +83,7 @@
         <alias>currentPeriodIgnore</alias>
         <checking>false</checking>
         <columnType>NUMBER</columnType>
-        <name>Период. В том числе НДС не учитываемый, тыс. руб.</name>
+        <name>Период. В том числе НДС не учитываемый, млн. руб.</name>
         <order>8</order>
         <width>15</width>
         <maxLength>22</maxLength>
@@ -103,7 +103,7 @@
         <alias>delta</alias>
         <checking>false</checking>
         <columnType>NUMBER</columnType>
-        <name>Изменения за период. НДС всего, тыс. руб.</name>
+        <name>Изменения за период. НДС всего, млн. руб.</name>
         <order>10</order>
         <width>10</width>
         <maxLength>22</maxLength>
@@ -113,7 +113,7 @@
         <alias>deltaIgnore</alias>
         <checking>false</checking>
         <columnType>NUMBER</columnType>
-        <name>Изменения за период. В том числе НДС не учитываемый, тыс. руб.</name>
+        <name>Изменения за период. В том числе НДС не учитываемый, млн. руб.</name>
         <order>11</order>
         <width>10</width>
         <maxLength>22</maxLength>
