@@ -276,7 +276,7 @@ public abstract class AbstractEditPresenter<V extends AbstractEditPresenter.MyVi
     //Создание новой версии
     abstract void create() throws BadValueException;
     abstract void updateView(GetRefBookRecordResult result);
-    public abstract void clean(Boolean isVersion);
+    public abstract void clean(boolean isVersion);
 
     @Override
     public void onCancelClicked() {

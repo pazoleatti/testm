@@ -139,7 +139,7 @@ public class HierEditPresenter extends AbstractEditPresenter<HierEditPresenter.M
     }
 
     @Override
-    public void clean(Boolean isVersion) {
+    public void clean(boolean isVersion) {
         if (isVersion) {
             GetRefBookRecordAction action = new GetRefBookRecordAction();
             action.setRefBookId(currentRefBookId);
