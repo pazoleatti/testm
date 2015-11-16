@@ -43,6 +43,9 @@ public class RefBook implements Serializable {
     public static final Long EMAIL_CONFIG = 400L;
     public static final Long ASYNC_CONFIG = 401L;
 
+    //Участники ТЦО
+    public static final long TCO = 520L;
+
     /**
      * Соотношение основной и табличной части настроек подразделений с типом налога
      */
