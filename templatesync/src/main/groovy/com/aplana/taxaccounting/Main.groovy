@@ -330,10 +330,12 @@ class Main {
             'okei' : 12,
             'organization' : 9,
             'problem_zones' : 504,
+            'raising_rates_transport' : 209,
             'region' : 4,
             'tax_benefits_property' : 203,
             'tax_benefits_transport' : 7,
-            'vehicles_average_cost' : 208
+            'vehicles_average_cost' : 208,
+            'vehicles_average_cost_2015' : 218
     ]
 
     static void main(String[] args) {

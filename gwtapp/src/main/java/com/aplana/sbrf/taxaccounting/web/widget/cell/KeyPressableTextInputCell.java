@@ -281,6 +281,7 @@ public class KeyPressableTextInputCell extends
         var that = this;
         var oldVal = input.value;
 
+        //Отслеживание изменений в графе, по формату ValidationStrategy
         if (input.addEventListener) {    // all browsers except IE before version 9
             input.addEventListener ("input", OnInput, true);
         } else {

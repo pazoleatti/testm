@@ -98,9 +98,11 @@ void create() {
                     "В Системе не найдена форма «%s» в статусе «Принята»: Период: «%s %d», Подразделение: «%s», Тип: «%s».",
                     formData.getFormType().getName(), prevPeriod.name, prevPeriod.taxPeriod.year, formDataDepartment.name, formData.getKind().getTitle())
         } else {
-            def prevDataRows = formDataService.getDataRowHelper(prevFormData)?.allSaved
-            if (prevDataRows != null)
+            def prevDataRows = formDataService.getDataRowHelper(formDataPrev)?.allSaved
+            if (prevDataRows != null) {
+                def dataRows = formDataService.getDataRowHelper(formData).allCached
                 dataRows.addAll(prevDataRows)
+            }
         }
     }
 }

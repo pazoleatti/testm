@@ -123,5 +123,160 @@ end;
 /
 commit;
 
+------------------------------------------------------------------------------------------------
+--http://jira.aplana.com/browse/SBRFACCTAX-13329: Увеличить кол-во значащих цифр для числовых граф до 38
+create or replace procedure CREATE_FORM_DATA_NNN (FT_ID number)
+is
+       v_table_name varchar2(512) := '';
+       query_str varchar2(1024);
+       x_column_type varchar2(64);
+       chk_table number(1) :=0;
+       p_nnn number(18) := FT_ID;
+     v_session_id number(18) := 0;
+begin
+		--Получить идентификатор текущей сессии для логирования
+	    select seq_log_query_session.nextval into v_session_id from dual;
+
+	   for t in (select id as form_template_id, translate(fullname, '''', ' ') as table_template_fullname from form_template where id in (P_NNN) order by id) loop
+
+         v_table_name := 'FORM_DATA_'||t.form_template_id;
+
+         --Если таблица уже существует, предварительно удалить ее
+         select count(*) into chk_table from user_tables ut where ut.table_name = v_table_name;
+         if chk_table <> 0 then
+            query_str := 'DROP TABLE '||v_table_name;
+                      insert into log_clob_query (id, form_template_id, sql_mode, text_query, session_id) values(seq_log_query.nextval, t.form_template_id, 'DDL', query_str, v_session_id);
+            EXECUTE IMMEDIATE query_str;
+         end if;
+
+         -- Фиксированная "шапка" создания таблицы
+         query_str := 'create table '||v_table_name||' ('
+         || 'ID    NUMBER(18) not null,'
+         || 'FORM_DATA_ID    NUMBER(18) not null,'
+         || 'TEMPORARY       NUMBER(1) not null,'
+         || 'MANUAL          NUMBER(1) not null,'
+         || 'ORD             NUMBER(14) not null,'
+         || 'ALIAS           VARCHAR2(20)'
+         || ')';
+
+         insert into log_clob_query (id, form_template_id, sql_mode, text_query, session_id) values(seq_log_query.nextval, t.form_template_id, 'DDL', query_str, v_session_id);
+         EXECUTE IMMEDIATE query_str;
+
+        --Цикл по form_column, относящимся к заданному form_template.id
+           for x in (select id, alias || ' - ' || name as column_comment, type, max_length, precision, attribute_id, ord from form_column where form_template_id = t.form_template_id order by ord) loop
+
+               --Определить тип данных для значения (form_column.type)
+              select DECODE(x.type, 'S', 'VARCHAR2(4000 BYTE)',
+                          'N', 'DECIMAL(38, 19)',
+                          'R', 'DECIMAL(18)',
+                          'D', 'DATE',
+                          'A', 'DECIMAL(18)') into x_column_type from dual;
+
+              -- Создать столбец, содержащий значение определенного типа
+              query_str := 'ALTER TABLE '||v_table_name||' ADD c'||x.Id ||' '|| x_column_type;
+                        insert into log_clob_query (id, form_template_id, sql_mode, text_query, session_id) values(seq_log_query.nextval, t.form_template_id, 'DDL', query_str, v_session_id);
+              execute immediate query_str;
+
+              -- Комментарий = form_column.alias + ' - ' + form_column.name
+              query_str := 'COMMENT ON COLUMN '||v_table_name ||'.c'||x.Id ||' is '''||translate(x.column_comment, '''', ' ') ||'''';
+                        insert into log_clob_query (id, form_template_id, sql_mode, text_query, session_id) values(seq_log_query.nextval, t.form_template_id, 'DDL', query_str, v_session_id);
+              execute immediate query_str;
+
+              -- Создание столбцов 'STYLE_ID', 'EDITABLE', 'COLSPAN', 'ROWSPAN' с фиксированными метаданными
+             query_str := 'ALTER TABLE '||v_table_name||' ADD (c'||x.Id||'_STYLE_ID NUMBER(9), c'
+                          || x.Id||'_EDITABLE NUMBER(1), c'
+                          || x.Id||'_COLSPAN NUMBER(3), c'
+                          || x.Id||'_ROWSPAN NUMBER(3))';
+                      insert into log_clob_query (id, form_template_id, sql_mode, text_query, session_id) values(seq_log_query.nextval, t.form_template_id, 'DDL', query_str, v_session_id);
+             execute immediate query_str;
+           end loop;
+
+         --Фиксированный первичный ключ + уникальный индекс
+          query_str := 'alter table '|| v_table_name ||' add constraint '||v_table_name||'_PK primary key (ID)';
+               insert into log_clob_query (id, form_template_id, sql_mode, text_query, session_id) values(seq_log_query.nextval, t.form_template_id, 'DDL', query_str, v_session_id);
+          execute immediate query_str;
+
+          query_str := 'create unique index i_'|| v_table_name ||'_unq on '||v_table_name||' (FORM_DATA_ID, TEMPORARY, MANUAL, ORD)';
+               insert into log_clob_query (id, form_template_id, sql_mode, text_query, session_id) values(seq_log_query.nextval, t.form_template_id, 'DDL', query_str, v_session_id);
+          execute immediate query_str;
+
+          --Индекс на FORM_DATA
+          query_str := 'create index i_'|| v_table_name||' on '|| v_table_name ||' (form_data_id)';
+               insert into log_clob_query (id, form_template_id, sql_mode, text_query, session_id) values(seq_log_query.nextval, t.form_template_id, 'DDL', query_str, v_session_id);
+          execute immediate query_str;
+
+
+          --Комментарий к таблице из названия шаблона
+           query_str := 'comment on table '|| v_table_name || ' is ''' || coalesce(t.table_template_fullname, '') ||'''' ;
+                insert into log_clob_query (id, form_template_id, sql_mode, text_query, session_id) values(seq_log_query.nextval, t.form_template_id, 'DDL', query_str, v_session_id);
+          execute immediate query_str;
+
+         -------------------------------------------------------------------------------------
+      end loop;
+end CREATE_FORM_DATA_NNN;
+/ 
+
+set serveroutput on size 100000;
+declare
+	v_query_str varchar2(1024);
+	v_session_id number(18) := 0;
+	v_log_id_shift number(9);
+begin
+	select seq_log_query_session.nextval into v_session_id from dual;
+	select seq_log_query.nextval into v_log_id_shift from dual;
+	
+	for x in (
+		select fc.form_template_id, fc.alias, fc.id, utc.DATA_SCALE, utc.DATA_PRECISION, 'ALTER TABLE '||'FORM_DATA_'||fc.form_template_id||' MODIFY C'||fc.id ||' /* '||fc.alias ||' ('||data_precision||','||data_scale||') */ NUMBER(38, 19)' as query_str
+		from form_column fc
+		join user_tab_columns utc on utc.TABLE_NAME = 'FORM_DATA_'||fc.form_template_id and utc.COLUMN_NAME = 'C'||fc.id
+		where type in ('N', 'A') 
+		order by fc.form_template_id, fc.ord) loop
+		
+	v_query_str := x.query_str;	
+	insert into log_clob_query (id, form_template_id, sql_mode, text_query, session_id) 
+		values(seq_log_query.nextval, x.form_template_id, 'DDL_ALTER', v_query_str, v_session_id);
+    execute immediate v_query_str;	
+		
+	end loop;	
+	EXCEPTION
+	WHEN OTHERS THEN
+		dbms_output.put_line('Sabotage detected! ('|| SQLCODE ||' - '||SQLERRM || ' ) Executed queries (LIFO): ');
+		for y in (select id, text_query from log_clob_query where session_id = v_session_id order by id desc) loop
+			dbms_output.put_line('['||(y.id - v_log_id_shift)||']: '||y.text_query);
+		end loop;	
+end;
+/
+
+-- Create/Recreate check constraints 
+alter table FORM_COLUMN drop constraint FORM_COLUMN_CHK_ATTRIBUTE_ID;
+alter table FORM_COLUMN drop constraint FORM_COLUMN_CHK_MAX_LENGTH;
+alter table FORM_COLUMN drop constraint FORM_COLUMN_CHK_PRECISION;
+alter table REF_BOOK_ATTRIBUTE drop constraint REF_BOOK_ATTR_CHK_MAX_LENGTH;
+alter table REF_BOOK_ATTRIBUTE drop constraint REF_BOOK_ATTR_CHK_PRECISION;
+
+alter table FORM_COLUMN
+  add constraint FORM_COLUMN_CHK_PRECISION
+  check ((type = 'N' and precision is not null and precision >=0 and precision <= 19) or (type <> 'N' and precision is null));
+
+alter table FORM_COLUMN
+  add constraint FORM_COLUMN_CHK_ATTRIBUTE_ID
+  check ((type = 'R' and attribute_id is not null) or (type <> 'R' and attribute_id is null));
+
+alter table FORM_COLUMN
+  add constraint FORM_COLUMN_CHK_MAX_LENGTH
+  check ((type = 'S' and max_length is not null and max_length > 0 and max_length <= 2000) or (type = 'N' and max_length is not null and max_length > 0 and max_length <= 38 and max_length - precision<=19) or ((type ='D' or type ='R' or type='A') and max_length is null));
+
+update ref_book_attribute set max_length = precision + 19 where max_length - precision > 19;
+
+alter table REF_BOOK_ATTRIBUTE
+  add constraint REF_BOOK_ATTR_CHK_MAX_LENGTH
+  check ((type=1 and max_length is not null and max_length between 1 and 2000) or (type=2 and max_length is not null and max_length between 1 and 38 and max_length - precision<=19) or (type in (3,4) and max_length IS null));
+
+alter table REF_BOOK_ATTRIBUTE
+  add constraint REF_BOOK_ATTR_CHK_PRECISION
+  check (precision >= 0 and precision <=19);
+  
+alter table REF_BOOK_VALUE modify NUMBER_VALUE NUMBER(38, 19);  
+
 commit;
 exit;

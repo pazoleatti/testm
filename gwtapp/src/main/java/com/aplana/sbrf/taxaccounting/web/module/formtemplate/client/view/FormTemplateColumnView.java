@@ -65,16 +65,7 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
     }
 
 	@UiField
-	Button upColumn;
-
-	@UiField
-	Button downColumn;
-
-	@UiField
-	Button addColumn;
-
-	@UiField
-	Button removeColumn;
+	Button upColumn, downColumn, addColumn, removeColumn;
 
 	@UiField
 	ColumnAttributeEditor columnAttributeEditor;
@@ -95,28 +86,8 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
 	Panel attrPanel;
 
 	@UiField
-	Panel stringMaxLengthPanel;
-
-	@UiField
-	Panel numericMaxLengthPanel;
-
-	@UiField
-	Panel dateFormatPanel;
-
-    @UiField
-    Panel refBookPanel;
-
-    @UiField
-    Panel refBookAttrPanel;
-
-    @UiField
-    Panel refBookAttrFilterPanel;
-
-    @UiField
-    Panel refBooktAttrParentPanel;
-
-    @UiField
-    Panel autoNumerationPanel;
+	Panel stringMaxLengthPanel, numericMaxLengthPanel, dateFormatPanel,
+            refBookPanel, refBookAttrPanel, refBookAttrFilterPanel, refBooktAttrParentPanel, autoNumerationPanel;
 
     @UiField
     ListBox columnListBox;
@@ -190,7 +161,10 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
 			@Override
 			public void onValueChange(ValueChangeEvent<Integer> event) {
 				precisionPanel.setVisible(true);
-				((NumericColumn)columns.get(columnListBox.getSelectedIndex())).setPrecision(precisionBox.getValue());
+                if (event.getValue()+numericMaxLengthBox.getValue()>NumericColumn.MAX_LENGTH){
+                    precisionBox.setValue(NumericColumn.MAX_LENGTH - numericMaxLengthBox.getValue(), false);
+                }
+				setNumValueRestrictions(numericMaxLengthBox.getValue(), precisionBox.getValue());
 			}
 		}, ValueChangeEvent.getType());
 
@@ -373,11 +347,14 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
 	}
 
 	@UiHandler("numericMaxLengthBox")
-	public void onNumericMaxLengthBox(KeyUpEvent event) {
-        if (numericMaxLengthBox.getValue().compareTo(NumericColumn.MAX_LENGTH) > 0){
+	public void onNumericMaxLengthBox(ValueChangeEvent<Integer> event) {
+        if (event.getValue().compareTo(NumericColumn.MAX_LENGTH) > 0){
             numericMaxLengthBox.setValue(NumericColumn.MAX_LENGTH);
         }
-		((NumericColumn) columns.get(columnListBox.getSelectedIndex())).setMaxLength(numericMaxLengthBox.getValue());
+        if(event.getValue()+precisionBox.getValue()>NumericColumn.MAX_LENGTH){
+            numericMaxLengthBox.setValue(NumericColumn.MAX_LENGTH-precisionBox.getValue());
+        }
+		setNumValueRestrictions(numericMaxLengthBox.getValue(), precisionBox.getValue());
 	}
 
     @UiHandler("refBookBox")
@@ -788,5 +765,10 @@ public class FormTemplateColumnView extends ViewWithUiHandlers<FormTemplateColum
                 ((ReferenceColumn)column).setRefBookAttributeId(refBook.getAttributes().get(0).getId());
             }
         }
+    }
+    
+    private void setNumValueRestrictions(int unscaledValue, int scale){
+        ((NumericColumn) columns.get(columnListBox.getSelectedIndex())).setMaxLength(unscaledValue);
+        ((NumericColumn)columns.get(columnListBox.getSelectedIndex())).setPrecision(scale);
     }
 }

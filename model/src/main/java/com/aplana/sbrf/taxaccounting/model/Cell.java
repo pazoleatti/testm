@@ -117,14 +117,15 @@ public class Cell extends AbstractCell {
 					value = ((BigDecimal) value).setScale(precision, RoundingMode.HALF_UP);
 					String stringValue = ((BigDecimal) value).toPlainString();
 					if (!getColumn().getValidationStrategy().matches(stringValue)) {
+                        NumericColumn numericColumn = ((NumericColumn) getColumn());
 						return showError(msgValue + "превышает допустимую разрядность. Должно быть не более " +
-								((NumericColumn) getColumn()).getMaxLength() + " знакомест и не более " + ((NumericColumn) getColumn()).getPrecision() +
+                                (numericColumn.getMaxLength()-numericColumn.getPrecision()) + " знакомест и не более " + numericColumn.getPrecision() +
                                 " знаков после запятой. Устанавливаемое значение: " + stringValue);
 					}
 				} else { // ColumnType.AUTO ColumnType.REFBOOK
 					value = ((BigDecimal) value).setScale(0, RoundingMode.HALF_UP);
 					if (!getColumn().getValidationStrategy().matches(((BigDecimal) value).toPlainString())) {
-						return showError(msgValue + "превышает допустимую разрядность (17 знаков)!");
+						return showError(msgValue + "превышает допустимую разрядность (19 знаков)!");
 					}
 				}
 				numericValue = (BigDecimal) value;

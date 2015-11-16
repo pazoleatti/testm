@@ -211,7 +211,7 @@ void logicCheck() {
         if(row.sum1 != null && row.sum2 != null && row.sum1 < row.sum2){
             def msg1 = row.getCell('sum1').column.name
             def msg2 = row.getCell('sum2').column.name
-            rowError(logger, row, "Строка $rowNum: Значение графы «$msg1» должно быть не меньше значения графы «$msg2»!")
+            rowWarning(logger, row, "Строка $rowNum: Значение графы «$msg1» должно быть не меньше значения графы «$msg2»!")
         }
     }
 
@@ -297,14 +297,14 @@ DataRow<Cell> calcItog(def int i, def List<DataRow<Cell>> dataRows) {
  * @param value2 значение графы 2 (если value2 не задан, то используется 'Итого «ВЗЛ/РОЗ не задано»')
  * @param i номер строки
  */
-DataRow<Cell> getSubTotalRow(def title, def value2, int i) {
+DataRow<Cell> getSubTotalRow(String title, String value2, int i) {
     def newRow = (formDataEvent in [FormDataEvent.IMPORT, FormDataEvent.IMPORT_TRANSPORT_FILE]) ? formData.createStoreMessagingDataRow() : formData.createDataRow()
     if (title) {
         newRow.fix = title
     } else if (value2) {
-        newRow.fix = 'Итого по «' + value2 + '»'
+        newRow.fix = 'Итого по "' + StringUtils.cleanString(value2) + '"'
     } else {
-        newRow.fix = 'Итого по «ВЗЛ/РОЗ не задано»'
+        newRow.fix = 'Итого по "ВЗЛ/РОЗ не задано"'
     }
     newRow.setAlias('itg#'.concat(i.toString()))
     newRow.getCell('fix').colSpan = 6
@@ -572,7 +572,7 @@ def getRecordId(String name, String iksr, int fileRowIndex, int colIndex, String
         // 5
         def record = records.get(0)
 
-        if (name != record.get('NAME')?.stringValue) {
+        if (StringUtils.cleanString(name) != StringUtils.cleanString(record.get('NAME')?.stringValue)) {
             // сообщение 4
             String msg = name ? "В файле указано другое наименование ВЗЛ/РОЗ - «$name»!" : "Наименование ВЗЛ/РОЗ в файле не заполнено!"
             def refBookAttributeName
