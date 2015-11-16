@@ -124,6 +124,9 @@ end;
 commit;
 
 ------------------------------------------------------------------------------------------------
+--http://jira.aplana.com/browse/SBRFACCTAX-13378: Исправить настройки граф согласно ограничениям на размерность
+update form_column set max_length = 17 + precision where max_length - precision > 17 and type = 'N';
+
 --http://jira.aplana.com/browse/SBRFACCTAX-13329: Увеличить кол-во значащих цифр для числовых граф до 38
 create or replace procedure CREATE_FORM_DATA_NNN (FT_ID number)
 is
@@ -277,6 +280,11 @@ alter table REF_BOOK_ATTRIBUTE
   check (precision >= 0 and precision <=19);
   
 alter table REF_BOOK_VALUE modify NUMBER_VALUE NUMBER(38, 19);  
+
+----------------------------------------------------------------------------------
+--http://jira.aplana.com/browse/SBRFACCTAX-13428 Каскадное удаление для FORM_DATA_FILE
+alter table form_data_file drop constraint form_data_file_fk_form_data;
+alter table form_data_file add constraint form_data_file_fk_form_data foreign key (form_data_id) references form_data(id) on delete cascade;
 
 commit;
 exit;

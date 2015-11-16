@@ -142,6 +142,12 @@ public class RefBookHierPresenter extends Presenter<RefBookHierPresenter.MyView,
     }
 
     @Override
+    public void onBackClicked() {
+        hierEditFormPresenter.setPreviousURId(null);
+        departmentEditPresenter.setPreviousURId(null);
+    }
+
+    @Override
     public void onSetFormMode(SetFormMode event) {
         dataInterface.setMode(event.getFormMode());
         getView().updateView(event.getFormMode());

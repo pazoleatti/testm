@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -136,8 +137,8 @@ public class RefBookHelperImpl implements RefBookHelper {
 			return;
 		}
 		// получение данных по ссылкам
-		Long refBookId = refBookFactory.getByAttribute(attributeId).getId();
-		RefBookDataProvider provider = refBookFactory.getDataProvider(refBookId);
+        RefBook refBook = refBookFactory.getByAttribute(attributeId);
+        RefBookDataProvider provider = refBookFactory.getDataProvider(refBook.getId());
 		Map<Long, RefBookValue> values = provider.dereferenceValues(attributeId, recordIds);
 		// псевдоним для получения значений ссылки
 		String valueAlias = parentColumn == null ? column.getAlias() : parentColumn.getAlias();
@@ -157,7 +158,14 @@ public class RefBookHelperImpl implements RefBookHelper {
 					refBookValue = values.get(Long.valueOf(reference));
 				}
 			}
-			cell.setRefBookDereference(refBookValue == null ? "" : String.valueOf(refBookValue));
+            if (refBookValue != null && RefBookAttributeType.DATE.equals(refBookValue.getAttributeType()) && refBookValue.getDateValue() != null) {
+                RefBookAttribute attribute = refBook.getAttribute(attributeId);
+                cell.setRefBookDereference(attribute.getFormat() != null ?
+                        (new SimpleDateFormat(attribute.getFormat().getFormat())).format(refBookValue.getDateValue()) :
+                        String.valueOf(refBookValue));
+            } else {
+                cell.setRefBookDereference(refBookValue == null ? "" : String.valueOf(refBookValue));
+            }
 		}
 	}
 

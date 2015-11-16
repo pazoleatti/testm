@@ -85,14 +85,14 @@ public class Etr4_15_SummaryTest extends ScriptTestBase {
         Assert.assertTrue(testHelper.getLogger().containsLevel(LogLevel.ERROR));
         int i = 0;
         String [] logMsgs = new String [] {
-                "Строка 1: Графа «Период сравнения. НДС всего, тыс. руб.» не заполнена!",
-                "Строка 1: Графа «Период сравнения. В том числе НДС не учитываемый, тыс. руб.» не заполнена!",
+                "Строка 1: Графа «Период сравнения. НДС всего, млн. руб.» не заполнена!",
+                "Строка 1: Графа «Период сравнения. В том числе НДС не учитываемый, млн. руб.» не заполнена!",
                 "Строка 1: Графа «Период сравнения. Доля НДС не учитываемый, %» не заполнена!",
-                "Строка 1: Графа «Период. НДС всего, тыс. руб.» не заполнена!",
-                "Строка 1: Графа «Период. В том числе НДС не учитываемый, тыс. руб.» не заполнена!",
+                "Строка 1: Графа «Период. НДС всего, млн. руб.» не заполнена!",
+                "Строка 1: Графа «Период. В том числе НДС не учитываемый, млн. руб.» не заполнена!",
                 "Строка 1: Графа «Период. Доля НДС не учитываемый, %» не заполнена!",
-                "Строка 1: Графа «Изменения за период. НДС всего, тыс. руб.» не заполнена!",
-                "Строка 1: Графа «Изменения за период. В том числе НДС не учитываемый, тыс. руб.» не заполнена!",
+                "Строка 1: Графа «Изменения за период. НДС всего, млн. руб.» не заполнена!",
+                "Строка 1: Графа «Изменения за период. В том числе НДС не учитываемый, млн. руб.» не заполнена!",
                 "Строка 1: Графа «Изменения за период. Доля НДС не учитываемый, %» не заполнена!"
         };
         for (String logMsg : logMsgs) {
@@ -238,7 +238,7 @@ public class Etr4_15_SummaryTest extends ScriptTestBase {
                     anyInt(), any(Integer.class), anyInt(), anyBoolean())).thenReturn(sourceFormData);
 
             // строки и хелпер источника
-            List<DataRow<Cell>> dataRows = getFillDataRows(sourceFormData, (long) i);
+            List<DataRow<Cell>> dataRows = getFillDataRows(sourceFormData, (long) i * 1000);
             DataRowHelper sourceDataRowHelper = new DataRowHelperStub();
             sourceDataRowHelper.save(dataRows);
             when(testHelper.getFormDataService().getDataRowHelper(sourceFormData)).thenReturn(sourceDataRowHelper);
