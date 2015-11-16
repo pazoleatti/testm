@@ -44,10 +44,10 @@ public abstract class CsvAuditArchiveGeneratorAsyncTask extends AbstractAsyncTas
 
     @Override
     protected void executeBusinessLogic(Map<String, Object> params, Logger logger) {
-        int userId = (Integer)params.get(USER_ID.name());
+        int userId = (Integer) params.get(USER_ID.name());
         TAUserInfo userInfo = new TAUserInfo();
         userInfo.setUser(userService.getUser(userId));
-        LogSystemFilter filter = (LogSystemFilter)params.get(AuditService.AsyncNames.LOG_FILTER.name());
+        LogSystemFilter filter = (LogSystemFilter) params.get(AuditService.AsyncNames.LOG_FILTER.name());
 
         PagingResult<LogSearchResultItem> records = auditService.getLogsByFilter(filter);
         if (records.isEmpty())
@@ -59,9 +59,10 @@ public abstract class CsvAuditArchiveGeneratorAsyncTask extends AbstractAsyncTas
         String uuid = printingService.generateAuditZip(records);
         reportService.createAudit(null, uuid, ReportType.ARCHIVE_AUDIT);
 
+        params.put(AuditService.AsyncNames.LOG_LAST_DATE.name(), records.get(0).getLogDate());
         auditService.removeRecords(
                 filter,
-                records.get(records.size()-1),
+                records.get(records.size() - 1),
                 records.get(0),
                 userInfo);
         /*result.setCountOfRemoveRecords(records.getTotalCount());*/
@@ -74,21 +75,36 @@ public abstract class CsvAuditArchiveGeneratorAsyncTask extends AbstractAsyncTas
 
     @Override
     protected String getNotificationMsg(Map<String, Object> params) {
-        LogSystemFilter filter = (LogSystemFilter)params.get(AuditService.AsyncNames.LOG_FILTER.name());
-        Long count = (Long)params.get(AuditService.AsyncNames.LOG_COUNT.name());
+        LogSystemFilter filter = (LogSystemFilter) params.get(AuditService.AsyncNames.LOG_FILTER.name());
+        Long count = (Long) params.get(AuditService.AsyncNames.LOG_COUNT.name());
 
         return String.format(SUCCESS_MSG,
-                SDF.format(filter.getFromSearchDate()),
-                SDF.format(filter.getToSearchDate()),
+                SDF.format(params.get(AuditService.AsyncNames.LOG_FIRST_DATE.name())),
+                SDF.format(
+                        params.containsKey(AuditService.AsyncNames.LOG_LAST_DATE.name())
+                                ?
+                                params.get(AuditService.AsyncNames.LOG_LAST_DATE.name())
+                                :
+                                SDF.format(filter.getToSearchDate())
+
+                ),
                 count);
     }
 
     @Override
     protected String getErrorMsg(Map<String, Object> params) {
-        LogSystemFilter filter = (LogSystemFilter)params.get(AuditService.AsyncNames.LOG_FILTER.name());
+        LogSystemFilter filter = (LogSystemFilter) params.get(AuditService.AsyncNames.LOG_FILTER.name());
 
         return String.format(ERROR_MSG,
-                SDF.format(filter.getFromSearchDate()) ,
-                SDF.format(filter.getToSearchDate()));
+                SDF.format(params.get(AuditService.AsyncNames.LOG_FIRST_DATE.name())),
+                SDF.format(
+                        params.containsKey(AuditService.AsyncNames.LOG_LAST_DATE.name())
+                                ?
+                                params.get(AuditService.AsyncNames.LOG_LAST_DATE.name())
+                                :
+                                SDF.format(filter.getToSearchDate())
+
+                )
+        );
     }
 }

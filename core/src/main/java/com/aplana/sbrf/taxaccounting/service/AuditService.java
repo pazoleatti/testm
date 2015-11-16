@@ -10,7 +10,9 @@ import java.util.Date;
 public interface AuditService {
     public enum AsyncNames{
         LOG_FILTER,
-        LOG_COUNT
+        LOG_COUNT,
+        LOG_FIRST_DATE,
+        LOG_LAST_DATE
     }
 
 	/**
