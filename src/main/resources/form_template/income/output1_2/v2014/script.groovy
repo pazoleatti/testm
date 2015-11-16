@@ -506,13 +506,13 @@ def formNewRow(def rowList, def dataRowsPrev, def prevPeriodStartDate, def prevP
         } else {
             def value2 = rowList.sum { (it.type != 2 && it.status == 1 && it.withheldSum != null) ? it.withheldSum : 0 }
             if (row.emitentInn == graph3String) { // Группа относится к сберу
-                fuond = rowList.find { it.status == 1 && it.type == 5 && it.rate == 13 }
-                if (fuond) { // Есто строки для которых «Графа 17» = «1» и «Графа 16» = «5» и «Графа 22» = «13»
+                boolean found = rowList.find { it.status == 1 && it.type == 5 && it.rate == 13 } != null
+                if (found) { // Есть строки для которых «Графа 17» = «1» и «Графа 16» = «5» и «Графа 22» = «13»
                     if (row.allSum) { // Деление не на ноль
-                        sourseSum = rowList.sum {
+                        def sourseSum = rowList.sum {
                             (it.status == 1 && it.type == 5 && it.rate == 13 && it.dividends) ? it.dividends : 0
                         }
-                        newRow.taxSum = ((sourseSum / row.allSum) * 0.13) * row.distributionSum
+                        newRow.taxSum = (sourseSum * 0.13 * row.distributionSum) / row.allSum
                     } else { // при делении на ноль «Графа 29» = 0
                         newRow.taxSum = 0
                     }
@@ -526,7 +526,7 @@ def formNewRow(def rowList, def dataRowsPrev, def prevPeriodStartDate, def prevP
                 logger.warn("Строка ${rowIndex}: Графа «Исчисленная сумма налога, подлежащая уплате в бюджет» заполнена неверно! Не выполняется условие: " +
                         "«Графа 29» = Сумма по «Графа 27» для строк формы-источника «Расчет налога на прибыль организаций " +
                         "с доходов, удерживаемого налоговым агентом (источником выплаты доходов)», " +
-                        "в которых «Графа 3» = «${row.inn}» и «Графа 7» = «${row.decisionNumber}»")
+                        "в которых «Графа 3» = «${row.inn}» и «Графа 7» = «${row.decisionNumber}», «Графа 16» не равна «2» и «Графа 17» = «1»!")
             }
         }
 
