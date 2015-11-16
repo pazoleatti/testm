@@ -173,7 +173,7 @@ void logicCheck() {
             if (map) {
                 map = getRefBookValue(10, map.COUNTRY_CODE?.referenceValue)
                 if (map) {
-                    countryCode = map.NAME?.stringValue
+                    countryCode = map.CODE?.stringValue
                 }
             }
         }
@@ -186,7 +186,7 @@ void logicCheck() {
 
         // 3. Проверка режима переговорных сделок
         if (countryCode) {
-            if (row.dealsMode != calc10(row.countryCode)) {
+            if (row.dealsMode != calc10(row.name)) {
                 String msg1 = row.getCell('dealsMode').column.name
                 String msg2 = row.getCell('countryCode').column.name
                 logger.error("Строка $rowNum: Значение графы «$msg1» должно быть равно значению «Да», " +
@@ -296,7 +296,7 @@ void calc() {
 
     for (row in dataRows) {
         // Расчет поля "Режим переговорных сделок"
-        row.dealsMode = calc10(row.countryCode)
+        row.dealsMode = calc10(row.name)
         // Расчет поля "Дата совершения сделки"
         row.dealDoneDate = calc19(row.date2, formYear, formDate, dateFormat)
     }
@@ -316,11 +316,16 @@ void calc() {
     sortFormDataRows(false)
 }
 
-def String calc10(def countryCode) {
-    if (countryCode != null) {
-        def country = refBookService.getStringValue(10, countryCode, 'CODE')
-        if (country == '643') {
-            return 'Да'
+def String calc10(def recordId) {
+    if (recordId) {
+        def map = getRefBookValue(520, recordId)
+        if (map) {
+            map = getRefBookValue(10, map.COUNTRY_CODE?.referenceValue)
+            if (map) {
+                if ('643'.equals(map.CODE?.stringValue)) {
+                    return 'Да'
+                }
+            }
         }
     }
     return null
