@@ -124,6 +124,9 @@ end;
 commit;
 
 ------------------------------------------------------------------------------------------------
+--http://jira.aplana.com/browse/SBRFACCTAX-13378: Исправить настройки граф согласно ограничениям на размерность
+update form_column set max_length = 17 + precision where max_length - precision > 17 and type = 'N';
+
 --http://jira.aplana.com/browse/SBRFACCTAX-13329: Увеличить кол-во значащих цифр для числовых граф до 38
 create or replace procedure CREATE_FORM_DATA_NNN (FT_ID number)
 is
