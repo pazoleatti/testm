@@ -261,11 +261,6 @@ public class RefBookHierView extends ViewWithUiHandlers<RefBookHierUIHandlers> i
         }
     }
 
-    @UiHandler("backAnchor")
-    public void onBackClicked(ClickEvent event){
-        getUiHandlers().onBackClicked();
-    }
-
     @Override
     public void setRefBookNameDesc(String desc) {
         titleDesc.setText(desc);

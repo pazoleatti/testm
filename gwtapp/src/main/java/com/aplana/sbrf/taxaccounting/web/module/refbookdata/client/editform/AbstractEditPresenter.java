@@ -150,9 +150,9 @@ public abstract class AbstractEditPresenter<V extends AbstractEditPresenter.MyVi
 
     void showRecord(final Long refBookRecordId){
         //Для случая когда мы нажимаем на кнопку отмены перехода на другую запись
-        if (previousURId != null&&previousURId.equals(refBookRecordId)){
+        /*if (previousURId != null&&previousURId.equals(refBookRecordId)){
             return;
-        }
+        }*/
         previousURId = refBookRecordId;
         GetRefBookRecordAction action = new GetRefBookRecordAction();
         action.setRefBookId(currentRefBookId);
@@ -162,7 +162,6 @@ public abstract class AbstractEditPresenter<V extends AbstractEditPresenter.MyVi
                         new AbstractCallback<GetRefBookRecordResult>() {
                             @Override
                             public void onSuccess(GetRefBookRecordResult result) {
-                                getView().cleanFields();
                                 currentUniqueRecordId = refBookRecordId;
                                 //recordId = refBookRecordId;
                                 updateView(result);
@@ -258,6 +257,7 @@ public abstract class AbstractEditPresenter<V extends AbstractEditPresenter.MyVi
             });
         } else {
             //showRecord(null);
+            getView().cleanFields();
             RefBookValueSerializable refBookParent = new RefBookValueSerializable();
             refBookParent.setAttributeType(RefBookAttributeType.REFERENCE);
             refBookParent.setDereferenceValue(dereferenceValue);
@@ -276,7 +276,7 @@ public abstract class AbstractEditPresenter<V extends AbstractEditPresenter.MyVi
     //Создание новой версии
     abstract void create() throws BadValueException;
     abstract void updateView(GetRefBookRecordResult result);
-    public abstract void clean(Boolean isVersion);
+    public abstract void clean(boolean isVersion);
 
     @Override
     public void onCancelClicked() {
