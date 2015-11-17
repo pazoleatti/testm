@@ -19,7 +19,7 @@ public interface RefBookTreePickerUiHandlers extends UiHandlers {
      * Инициализация дерева. Должна выполняться только один раз.
      * Тут происхлжит установка значений для поиска данных
      */
-    void init(PickerState pickerState);
+    void init(PickerState pickerState, boolean force);
 
     /**
      * Загрузка чилдов для выбранного итема

@@ -144,7 +144,7 @@ public class EditFormPresenter extends AbstractEditPresenter<EditFormPresenter.M
     }
 
     @Override
-    public void clean(Boolean isVersion) {
+    public void clean(boolean isVersion) {
         if (isVersion) {
             GetRefBookRecordAction action = new GetRefBookRecordAction();
             action.setRefBookId(currentRefBookId);

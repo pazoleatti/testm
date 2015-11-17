@@ -153,7 +153,7 @@ public class RefBookPickerWidget extends DoubleStateComposite implements RefBook
             @Override
             public void onOpen(OpenModalWindowEvent event) {
                 isEnabledFireChangeEvent = false;
-                refBookView.load(state);
+                refBookView.load(state, false);
             }
         });
 
@@ -234,7 +234,7 @@ public class RefBookPickerWidget extends DoubleStateComposite implements RefBook
         prevState.setValues(state);
 
         isEnabledFireChangeEvent = true;
-        refBookView.load(state);
+        refBookView.load(state, true);
     }
 
     @UiHandler("pickButton")
@@ -330,7 +330,7 @@ public class RefBookPickerWidget extends DoubleStateComposite implements RefBook
             clearSearchPattern();
             clearSelection();
             if (!isManualUpdate) {
-                refBookView.load(state);
+                refBookView.load(state, false);
                 updateUIState();
             }
             if (fireEvents) {
@@ -341,7 +341,7 @@ public class RefBookPickerWidget extends DoubleStateComposite implements RefBook
             clearAndSetValues(value);
             clearSearchPattern();
             if (!isManualUpdate) {
-                refBookView.load(state);
+                refBookView.load(state, false);
             }
         }
     }
@@ -356,12 +356,12 @@ public class RefBookPickerWidget extends DoubleStateComposite implements RefBook
         setAttributeId(attributeId);
         setFilter(filter);
         setPeriodDates(startDate, endDate);
-        refBookView.load(state);
+        refBookView.load(state, false);
     }
 
     @Override
     public void load() {
-        refBookView.load(state);
+        refBookView.load(state, false);
     }
 
     @Override

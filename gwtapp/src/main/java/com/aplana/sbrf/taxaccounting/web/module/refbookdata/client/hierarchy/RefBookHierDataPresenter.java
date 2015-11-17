@@ -176,6 +176,9 @@ public class RefBookHierDataPresenter extends PresenterWidget<RefBookHierDataPre
     }
 
     private void onDeleteRowClicked() {
+        if(getView().getSelectedItem()==null){
+            return;
+        }
         LogCleanEvent.fire(RefBookHierDataPresenter.this);
         //TODO: Подумать, может убрать совсем либо DeleteRefBookRowAction, либо DeleteNonVersionRefBookRowAction
         if (refBookId != 30){

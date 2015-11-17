@@ -49,7 +49,7 @@ public class RefBookHierDataView extends ViewWithUiHandlers<RefBookHierDataUiHan
 
     @Override
     public void load(){
-        refbookDataTree.load(pickerState);
+        refbookDataTree.load(pickerState, false);
     }
 
     @Override
