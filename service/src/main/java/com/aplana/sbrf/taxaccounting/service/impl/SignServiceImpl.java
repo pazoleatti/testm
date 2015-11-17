@@ -2,7 +2,9 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.api.ConfigurationDao;
 import com.aplana.sbrf.taxaccounting.model.ConfigurationParam;
+import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
+import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.SignService;
 import com.aplana.sbrf.taxaccounting.utils.FileWrapper;
 import com.aplana.sbrf.taxaccounting.utils.ResourceUtils;
@@ -18,37 +20,36 @@ import java.util.regex.Pattern;
 @Service
 public class SignServiceImpl implements SignService {
 
-    private static final Pattern DLL_PATTERN = Pattern.compile(".+\\.dll");
-
-    @Autowired
-    ConfigurationDao configurationDao;
-
-    private static final Log LOG = LogFactory.getLog(SignServiceImpl.class);
-
+	private static final Log LOG = LogFactory.getLog(SignServiceImpl.class);
+	private static final Pattern DLL_PATTERN = Pattern.compile(".+\\.dll");
     // 128 означает, что инициализации ДСЧ не будет
     private static final int FLAG_TM = 128;
-
     // не используем главный ключ и узел замены
     private static final String FILE_GK = "";
     private static final String FILE_UZ = "";
-
     private static final int COM_LEN = 0;
     private static final byte TM_NUMBER[] = new byte[32];
     private static final int TMN_BLEN[] = new int[1];
-
     static {
         TMN_BLEN[0] = 32;
     }
 
+	@Autowired
+	private ConfigurationDao configurationDao;
+	@Autowired
+	private DepartmentService departmentService;
+
     @Override
     public boolean checkSign(String pathToSignFile, int delFlag) {
-        List<String> ecryptParams = configurationDao.getAll().get(ConfigurationParam.ENCRYPT_DLL, 0);
+		int rootDepartmentId = departmentService.getBankDepartment().getId();
+        // инициализация библиотеки для проверки ЭП
+		List<String> ecryptParams = configurationDao.getAll().get(ConfigurationParam.ENCRYPT_DLL, rootDepartmentId);
         if (ecryptParams == null) {
-            LOG.warn("Не заполнен конфигурационный параметр " + ConfigurationParam.ENCRYPT_DLL.getCaption());
-            return false;
+			throw new ServiceException("Не заполнен конфигурационный параметр \"" + ConfigurationParam.ENCRYPT_DLL.getCaption() + '"');
         }
         initEncryptLibrary(ecryptParams.get(0));
-        List<String> keys = configurationDao.getAll().get(ConfigurationParam.KEY_FILE, 0);
+		// загрузка БОК (база открытых ключей)
+        List<String> keys = configurationDao.getAll().get(ConfigurationParam.KEY_FILE, rootDepartmentId);
         if (keys == null){
             throw new ServiceException("Ошибка доступа к файлу базы открытых ключей. БОК не заданы.");
         }
@@ -87,16 +88,17 @@ public class SignServiceImpl implements SignService {
                 for (String keyName : listFileNames){
                     int total = 0;
                     FileWrapper dbOfpk = ResourceUtils.getSharedResource(keyFolderPath + "/" + keyName);
-                    if (dbOfpk.isDirectory())
-                        continue;
+                    if (dbOfpk.isDirectory()) {
+						continue;
+					}
                     //-------------- загрузка базы БОК --------------------------------
                     result =  Bicr4.cr_pkbase_load(init, dbOfpk.getPath(), COM_LEN, 0, param); total += result;
                     if (result != 0){
                         LOG.error(String.format("cr_pkbase_load, ошибка загрузки БОК %s, код ошибки %s", dbOfpk.getPath(), result));
                         continue;
-                    }
-                    else
-                        LOG.info(String.format("cr_pkbase_load, БОК %s result = ", dbOfpk.getPath()) + result);
+                    } else {
+						LOG.info(String.format("cr_pkbase_load, БОК %s result = ", dbOfpk.getPath()) + result);
+					}
                     pkBase = param[0];
 
                     //-------------- проверка ЭЦП в файле --------------------------------
@@ -116,7 +118,6 @@ public class SignServiceImpl implements SignService {
             result = Bicr4.cr_uninit(init);
             LOG.info("cr_uninit, result = " + result);
         }
-
         return false;
     }
 

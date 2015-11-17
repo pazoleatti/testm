@@ -38,7 +38,7 @@ public class ConfigurationParamModelTest {
         String path1 = "http://google.com";
         String path2 = "C:\\temp";
 
-        String str1 = "\n\n" + path1 + "\n" + path2 + "\n\n";
+        String str1 = ";;" + path1 + ";" + path2 + ";;";
         String str2 = "<html><body>test</body></html>";
 
         model.setFullStringValue(KEY1, DEPARTMENT_ID1, str1);
