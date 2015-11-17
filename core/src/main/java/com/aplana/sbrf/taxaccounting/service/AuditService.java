@@ -10,7 +10,9 @@ import java.util.Date;
 public interface AuditService {
     public enum AsyncNames{
         LOG_FILTER,
-        LOG_COUNT
+        LOG_COUNT,
+        LOG_FIRST_DATE,
+        LOG_LAST_DATE
     }
 
 	/**
@@ -114,4 +116,10 @@ public interface AuditService {
     PagingResult<LogSearchResultItem> getLogsBusiness(LogSystemFilter filter, TAUserInfo userInfo);
 
     long getCountRecords(LogSystemFilter filter,  TAUserInfo userInfo);
+
+    /**
+     * Получение даты первой записи в журнале аудита
+     * @return дата первой записи
+     */
+    Date getFirstDateOfLog();
 }

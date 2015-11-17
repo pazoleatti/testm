@@ -27,6 +27,11 @@ import groovy.transform.Field
  */
 
 switch (formDataEvent) {
+    case FormDataEvent.GET_HEADERS:
+        headers.get(0).comparePeriod = 'Период сравнения, ' + (isBank() ? 'млн. руб.' : 'тыс. руб.')
+        headers.get(0).currentPeriod = 'Период, ' + (isBank() ? 'млн. руб.' : 'тыс. руб.')
+        headers.get(1).deltaRub = '(гр.5-гр.4), ' + (isBank() ? 'млн. руб.' : 'тыс. руб.')
+        break
     case FormDataEvent.CREATE:
         formDataService.checkUnique(formData, logger)
         break
@@ -219,11 +224,11 @@ void checkOutcome(def alias, def date, def tmpRow, def etrPeriodOrder) {
         def incomeFormData = getIncomeFormData(date)
         if (incomeFormData == null) {
             logger.warn("Не найдена «Сводная форма начисленных расходов уровня обособленного подразделения в статусе «Принята»: Тип:%s, Период: %s %s, Подразделение: %s. Ячейки по графе «%s», заполняемые из данной формы, будут заполнены нулевым значением.",
-                    FormDataKind.SUMMARY.name, reportPeriod.name, date.format('yyyy'), formDataDepartment.name, getColumnName(tmpRow, alias))
+                    FormDataKind.SUMMARY.title, reportPeriod.name, date.format('yyyy'), formDataDepartment.name, getColumnName(tmpRow, alias))
         }
     } else if (periodList.size() == 0) {
         logger.warn("Не найдена «Сводная форма начисленных расходов уровня обособленного подразделения в статусе «Принята»: Тип:%s, Период: %s %s, Подразделение: %s. Ячейки по графе «%s», заполняемые из данной формы, будут заполнены нулевым значением.",
-                FormDataKind.SUMMARY.name, getPeriodName(etrPeriodOrder), date.format('yyyy'), formDataDepartment.name, getColumnName(tmpRow, alias))
+                FormDataKind.SUMMARY.title, getPeriodName(etrPeriodOrder), date.format('yyyy'), formDataDepartment.name, getColumnName(tmpRow, alias))
     }
 }
 
@@ -303,7 +308,7 @@ void logicCheck() {
         def tempRow = tempRows[i]
         def checkColumns = []
         // делаем проверку для первичных НФ или расчетных ячеек
-        if ((formData.kind == FormDataKind.PRIMARY) || !(opuMap.keySet() + knuMap.keySet()).contains(row.getAlias())) {
+        if ((formData.kind != FormDataKind.CONSOLIDATED) || !(opuMap.keySet() + knuMap.keySet()).contains(row.getAlias())) {
             checkColumns += check102Columns
         }
         checkColumns += checkCalcColumns
@@ -317,7 +322,7 @@ void calcValues(def dataRows, def sourceRows, boolean isCalc) {
         def rowSource = getDataRow(sourceRows, row.getAlias())
         switch (row.getAlias()) {
             case 'R1':
-                if (formData.kind == FormDataKind.PRIMARY) {
+                if (formData.kind != FormDataKind.CONSOLIDATED) {
                     row.comparePeriod = calcBO(rowSource, getComparativePeriodId())
                     row.currentPeriod = calcBO(rowSource, formData.reportPeriodId)
                 } else {
@@ -327,7 +332,7 @@ void calcValues(def dataRows, def sourceRows, boolean isCalc) {
                 break
             case 'R2':
             case 'R3':
-                if (formData.kind == FormDataKind.PRIMARY) {
+                if (formData.kind != FormDataKind.CONSOLIDATED) {
                     row.comparePeriod = getSourceValue(getComparativePeriodId(), row)
                     row.currentPeriod = getSourceValue(formData.reportPeriodId, row)
                 } else {
@@ -395,7 +400,7 @@ def getKnuSumPair(def date, def row) {
     if (dataRow == null) {
         return [BigDecimal.ZERO, false]
     }
-    return [(dataRow.consumptionTaxSumS ?: BigDecimal.ZERO) / 1000, true]
+    return [(dataRow.consumptionTaxSumS ?: BigDecimal.ZERO) / (isBank() ? 1000000 : 1000), true]
 }
 
 // Расчет сумм из БО за определенный период
@@ -426,10 +431,14 @@ def get102Sum(def row, def date) {
         if (records == null || records.isEmpty()) {
             return [0, false]
         }
-        def result = records.sum { it.TOTAL_SUM.numberValue } / 1000
+        def result = records.sum { it.TOTAL_SUM.numberValue } / (isBank() ? 1000000 : 1000)
         return [result, true]
     }
     return [0, true]
+}
+
+boolean isBank() {
+    return formData.departmentId == 1 // по ЧТЗ
 }
 
 void importData() {
@@ -513,10 +522,10 @@ void checkHeaderXls(def headerRows, def colCount, def rowCount, def tmpRow) {
             ([(headerRows[0][0]): getColumnName(tmpRow, 'rowNum')]),
             ([(headerRows[0][1]): getColumnName(tmpRow, 'taxName')]),
             ([(headerRows[0][2]): getColumnName(tmpRow, 'symbol102')]),
-            ([(headerRows[0][3]): getColumnName(tmpRow, 'comparePeriod')]),
-            ([(headerRows[0][4]): getColumnName(tmpRow, 'currentPeriod')]),
+            ([(headerRows[0][3]): ('Период сравнения, ' + (isBank() ? 'млн. руб.' : 'тыс. руб.'))]),
+            ([(headerRows[0][4]): ('Период, ' + (isBank() ? 'млн. руб.' : 'тыс. руб.'))]),
             ([(headerRows[0][5]): 'Изменение за период']),
-            ([(headerRows[1][5]): '(гр.5-гр.4), тыс.руб.']),
+            ([(headerRows[1][5]): ('(гр.5-гр.4), ' + (isBank() ? 'млн. руб.' : 'тыс. руб.'))]),
             ([(headerRows[1][6]): '(гр.6/гр.4*100),%'])
     ]
     (0..6).each { index ->
@@ -585,8 +594,17 @@ void consolidation() {
                     def row = getDataRow(dataRows, alias)
                     def sourceRow = getDataRow(sourceRows, alias)
                     check102Columns.each { column ->
-                        row[column] = (row[column] ?: 0) + (sourceRow[column] ?: 0)
+                        row[column] = (row[column] ?: BigDecimal.ZERO) + ((formDataSource.departmentId == 1) ? 1000 : 1) * (sourceRow[column] ?: BigDecimal.ZERO)
                     }
+                }
+            }
+        }
+    }
+    if (isBank()) { // если уровень банка, то тысячи понижаем до миллионов
+        dataRows.each { row ->
+            check102Columns.each { column ->
+                if (row[column]) {
+                    row[column] = (row[column] as BigDecimal).divide(BigDecimal.valueOf(1000), BigDecimal.ROUND_HALF_UP)
                 }
             }
         }

@@ -6,7 +6,6 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
-import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.event.RollbackTableRowSelection;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.event.SetFormMode;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.event.UpdateForm;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.exception.BadValueException;
@@ -145,7 +144,7 @@ public class EditFormPresenter extends AbstractEditPresenter<EditFormPresenter.M
     }
 
     @Override
-    public void clean(Boolean isVersion) {
+    public void clean(boolean isVersion) {
         if (isVersion) {
             GetRefBookRecordAction action = new GetRefBookRecordAction();
             action.setRefBookId(currentRefBookId);
@@ -205,7 +204,7 @@ public class EditFormPresenter extends AbstractEditPresenter<EditFormPresenter.M
             return;
         }
 
-        if (isFormModified) {
+        /*if (isFormModified) {
             Dialog.confirmMessage(DIALOG_MESSAGE, new DialogHandler() {
                 @Override
                 public void yes() {
@@ -235,7 +234,8 @@ public class EditFormPresenter extends AbstractEditPresenter<EditFormPresenter.M
             });
         } else {
             super.showRecord(refBookRecordId);
-        }
+        }*/
+        super.showRecord(refBookRecordId);
     }
 
     @Override
@@ -252,7 +252,7 @@ public class EditFormPresenter extends AbstractEditPresenter<EditFormPresenter.M
                 @Override
                 public void no() {
                     setIsFormModified(false);
-                    showRecord(previousURId);
+                    showRecord(getPreviousURId());
                     getView().cleanErrorFields();
                     SetFormMode.fire(EditFormPresenter.this, FormMode.EDIT);
                 }
@@ -260,7 +260,7 @@ public class EditFormPresenter extends AbstractEditPresenter<EditFormPresenter.M
         } else {
             //Показать родительскую запись
             //setMode(FormMode.EDIT);
-            showRecord(previousURId);
+            showRecord(getPreviousURId());
             getView().cleanErrorFields();
             SetFormMode.fire(EditFormPresenter.this, FormMode.EDIT);
         }

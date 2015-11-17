@@ -12,7 +12,9 @@ import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.*;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
+import com.aplana.sbrf.taxaccounting.service.FormDataService;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
+import com.aplana.sbrf.taxaccounting.service.ReportService;
 import com.aplana.sbrf.taxaccounting.util.BDUtils;
 import com.aplana.sbrf.taxaccounting.utils.SimpleDateUtils;
 import org.apache.commons.lang3.ArrayUtils;
@@ -40,15 +42,16 @@ public class RefBookUniversal implements RefBookDataProvider {
 
 	@Autowired
 	private RefBookDao refBookDao;
-
     @Autowired
     private LogEntryService logEntryService;
-
     @Autowired
     private BDUtils dbUtils;
-
     @Autowired
     private LockDataService lockService;
+    @Autowired
+    private ReportService reportService;
+    @Autowired
+    private FormDataService formDataService;
 
 	protected Long refBookId;
 
@@ -237,6 +240,11 @@ public class RefBookUniversal implements RefBookDataProvider {
             List<RefBookAttribute> attributes = refBook.getAttributes();
             List<Long> excludedVersionEndRecords = new ArrayList<Long>();
 
+            if (!refBook.isVersioned()) {
+                //Устанавливаем минимальную дату
+                versionFrom = new Date(0L);
+            }
+
             long countIds = 0;
             for (RefBookRecord record : records) {
                 if (record.getRecordId() == null) {
@@ -333,9 +341,6 @@ public class RefBookUniversal implements RefBookDataProvider {
                 //Получаем записи у которых совпали значения уникальных атрибутов
                 List<Pair<Long,String>> matchedRecords = refBookDao.getMatchedRecordsByUniqueAttributes(refBookId, uniqueRecordId, attributes, Arrays.asList(record));
                 if (matchedRecords != null && !matchedRecords.isEmpty()) {
-                    if (refBook.isVersioned()) {
-                        throw new ServiceException(String.format(UNIQ_ERROR_MSG, makeAttrNames(matchedRecords, null)));
-                    }
                     //Проверка на пересечение версий у записей справочника, в которых совпали уникальные атрибуты
                     List<Long> conflictedIds = refBookDao.checkConflictValuesVersions(matchedRecords, versionFrom, record.getVersionTo());
 
@@ -462,8 +467,6 @@ public class RefBookUniversal implements RefBookDataProvider {
                 }
             }
         } else {
-            //Устанавливаем минимальную дату
-            versionFrom = new Date(0L);
             //Для каждой записи своя группа, т.к версий нет
             int counter = 0;
             for (RefBookRecord record : records) {
@@ -501,16 +504,9 @@ public class RefBookUniversal implements RefBookDataProvider {
                         throw new ServiceException(CROSS_ERROR_MSG);
                     }
                 }
+
                 //Ищем все ссылки на запись справочника в новом периоде
-                List<String> usagesResult = refBookDao.isVersionUsed(refBookId, Collections.singletonList(result.getRecordId()), versionFrom, versionTo, true, null);
-                if (usagesResult != null && !usagesResult.isEmpty()) {
-                    for (String error: usagesResult) {
-                        if (logger != null) {
-                            logger.error(error);
-                        }
-                    }
-                    throw new ServiceException(CROSS_ERROR_MSG);
-                }
+                checkUsages(refBook, Arrays.asList(result.getRecordId()), versionFrom, versionTo, true, logger, CROSS_ERROR_MSG);
                 if (logger != null) {
                     logger.info("Установлена дата окончания актуальности версии "+formatter.get().format(SimpleDateUtils.addDayToDate(versionFrom, -1))+" для предыдущей версии");
                 }
@@ -657,18 +653,18 @@ public class RefBookUniversal implements RefBookDataProvider {
             
             if (isValuesChanged) {
                 //Если значения атрибутов изменились, то проверяем все использования записи, без учета периода
-                checkUsages(refBook, uniqueRecordId, versionFrom, versionTo, null, logger);
+                checkUsages(refBook, Arrays.asList(uniqueRecordId), versionFrom, versionTo, null, logger, "Изменение невозможно, обнаружено использование элемента справочника!");
             }
 
             //Обновление периода актуальности
             if (isRelevancePeriodChanged) {
                 if (!refBook.isVersioned()) {
                     //Если справочник не версионный, то нет смысла проверять пересечения
-                    checkUsages(refBook, uniqueRecordId, versionFrom, versionTo, null, logger);
+                    checkUsages(refBook, Arrays.asList(uniqueRecordId), versionFrom, versionTo, null, logger, "Изменение невозможно, обнаружено использование элемента справочника!");
                 } else {
                     if (!isValuesChanged) {
                         //Если изменился только период актуальности, то ищем все ссылки не пересекающиеся с новым периодом, но которые действовали в старом
-                        checkUsages(refBook, uniqueRecordId, versionFrom, versionTo, false, logger);
+                        checkUsages(refBook, Arrays.asList(uniqueRecordId), versionFrom, versionTo, false, logger, "Изменение невозможно, обнаружено использование элемента справочника!");
                     }
 
                     List<Long> uniqueIdAsList = Arrays.asList(uniqueRecordId);
@@ -724,34 +720,78 @@ public class RefBookUniversal implements RefBookDataProvider {
         }
     }
     
-    private void checkUsages(RefBook refBook, Long uniqueRecordId, Date versionFrom, Date versionTo, Boolean restrictPeriod, Logger logger) {
+    private void checkUsages(RefBook refBook, List<Long> uniqueRecordIds, Date versionFrom, Date versionTo, Boolean restrictPeriod, Logger logger, String errorMsg) {
         //Проверка использования
         if (refBook.isHierarchic()) {
             //Поиск среди дочерних элементов
-            List<Pair<Date, Date>> childrenVersions = refBookDao.isVersionUsedLikeParent(refBookId, uniqueRecordId, versionFrom);
-            if (childrenVersions != null && !childrenVersions.isEmpty()) {
-                for (Pair<Date, Date> versions : childrenVersions) {
-                    if (logger != null) {
-                        String msg = "Существует дочерняя запись";
-                        if (refBook.isVersioned()) {
-                            msg = msg + ", действует с " + formatter.get().format(versions.getFirst()) +
-                                    (versions.getSecond() != null ? " по " + formatter.get().format(versions.getSecond()) : "-");
+            for (Long uniqueRecordId : uniqueRecordIds) {
+                List<Pair<Date, Date>> childrenVersions = refBookDao.isVersionUsedLikeParent(refBookId, uniqueRecordId, versionFrom);
+                if (childrenVersions != null && !childrenVersions.isEmpty()) {
+                    for (Pair<Date, Date> versions : childrenVersions) {
+                        if (logger != null) {
+                            String msg = "Существует дочерняя запись";
+                            if (refBook.isVersioned()) {
+                                msg = msg + ", действует с " + formatter.get().format(versions.getFirst()) +
+                                        (versions.getSecond() != null ? " по " + formatter.get().format(versions.getSecond()) : "-");
+                            }
+                            logger.error(msg);
                         }
-                        logger.error(msg);
                     }
+                    throw new ServiceException(errorMsg);
                 }
-                throw new ServiceException("Изменение невозможно, обнаружено использование элемента справочника!");
             }
         }
-        List<String> usagesResult = refBookDao.isVersionUsed(refBookId, Arrays.asList(uniqueRecordId), versionFrom, versionTo, restrictPeriod,
-                RefBookTableRef.getTablesIdByRefBook(refBookId) == null ?
-                        Collections.<Long>emptyList() :
-                        Arrays.asList(ArrayUtils.toObject(RefBookTableRef.getTablesIdByRefBook(refBookId))));
-        if (usagesResult != null && !usagesResult.isEmpty()) {
-            for (String error: usagesResult) {
-                logger.error(error);
+
+        boolean used = false;
+
+        //Проверка использования в справочниках
+        List<String> refBooks = refBookDao.isVersionUsedInRefBooks(refBookId, uniqueRecordIds, versionFrom, versionTo, restrictPeriod,
+                RefBookTableRef.getTablesIdByRefBook(refBookId) != null ?
+                        Arrays.asList(ArrayUtils.toObject(RefBookTableRef.getTablesIdByRefBook(refBookId))) : null);
+        for (String refBookMsg : refBooks) {
+            logger.error(refBookMsg);
+            used = true;
+        }
+
+        //Проверка использования в нф
+        List<FormLink> forms = refBookDao.isVersionUsedInForms(refBookId, uniqueRecordIds, versionFrom, versionTo, restrictPeriod);
+        for (FormLink form : forms) {
+            //Исключаем экземпляры в статусе "Создана" использующих справочник "Участники ТЦО"
+            if (refBookId == RefBook.TCO && form.getState() == WorkflowState.CREATED) {
+                //Для нф в статусе "Создана" удаляем сформированные печатные представления, отменяем задачи на их формирование и рассылаем уведомления
+                reportService.delete(form.getFormDataId(), null);
+                List<ReportType> interruptedReportTypes = Arrays.asList(ReportType.EXCEL, ReportType.CSV);
+                for (ReportType interruptedType : interruptedReportTypes) {
+                    List<String> taskKeyList = new ArrayList<String>();
+                    if (ReportType.CSV.equals(interruptedType) || ReportType.EXCEL.equals(interruptedType)) {
+                        taskKeyList.addAll(formDataService.generateReportKeys(interruptedType, form.getFormDataId(), null));
+                    } else {
+                        taskKeyList.add(formDataService.generateTaskKey(form.getFormDataId(), interruptedType));
+                    }
+                    for(String key: taskKeyList) {
+                        LockData lockData = lockService.getLock(key);
+                        if (lockData != null) {
+                            lockService.interruptTask(lockData, logger.getTaUserInfo().getUser().getId(), true);
+                        }
+                    }
+                }
+            } else {
+                logger.error(form.getMsg());
+                used = true;
             }
-            throw new ServiceException("Изменение невозможно, обнаружено использование элемента справочника!");
+        }
+
+        //Проверка использования в настройках подразделений
+        List<String> configs = refBookDao.isVersionUsedInDepartmentConfigs(refBookId, uniqueRecordIds, versionFrom, versionTo, restrictPeriod,
+                RefBookTableRef.getTablesIdByRefBook(refBookId) != null ?
+                        Arrays.asList(ArrayUtils.toObject(RefBookTableRef.getTablesIdByRefBook(refBookId))) : null);
+        for (String configMsg : configs) {
+            logger.error(configMsg);
+            used = true;
+        }
+
+        if (used) {
+            throw new ServiceException(errorMsg);
         }
     }
 
@@ -921,16 +961,7 @@ public class RefBookUniversal implements RefBookDataProvider {
                 checkChildren(uniqueRecordIds);
             }
             //Ищем все ссылки на запись справочника без учета периода
-            List<String> usagesResult = refBookDao.isVersionUsed(refBookId, uniqueRecordIds, null, null, null,
-                    RefBookTableRef.getTablesIdByRefBook(refBookId) == null ?
-                            Collections.<Long>emptyList() :
-                            Arrays.asList(ArrayUtils.toObject(RefBookTableRef.getTablesIdByRefBook(refBookId))));
-            if (usagesResult != null && !usagesResult.isEmpty()) {
-                for (String error: usagesResult) {
-                    logger.error(error);
-                }
-                throw new ServiceException("Удаление невозможно, обнаружено использование элемента справочника!");
-            }
+            checkUsages(refBook, uniqueRecordIds, null, null, null, logger, "Удаление невозможно, обнаружено использование элемента справочника!");
             refBookDao.deleteAllRecordVersions(refBookId, uniqueRecordIds);
         } catch (Exception e) {
             if (logger != null) {
@@ -1012,16 +1043,7 @@ public class RefBookUniversal implements RefBookDataProvider {
                 checkChildren(uniqueRecordIds);
             }
             //Ищем все ссылки на запись справочника без учета периода
-            List<String> usagesResult = refBookDao.isVersionUsed(refBookId, uniqueRecordIds, null, null, null,
-                    RefBookTableRef.getTablesIdByRefBook(refBookId) == null ?
-                            Collections.<Long>emptyList() :
-                            Arrays.asList(ArrayUtils.toObject(RefBookTableRef.getTablesIdByRefBook(refBookId))));
-            if (usagesResult != null && !usagesResult.isEmpty()) {
-                for (String error: usagesResult) {
-                    logger.error(error);
-                }
-                throw new ServiceException("Удаление невозможно, обнаружено использование элемента справочника!");
-            }
+            checkUsages(refBook, uniqueRecordIds, null, null, null, logger, "Удаление невозможно, обнаружено использование элемента справочника!");
             if (refBook.isVersioned()) {
                 List<Long> fakeVersionIds = refBookDao.getRelatedVersions(uniqueRecordIds);
                 uniqueRecordIds.addAll(fakeVersionIds);

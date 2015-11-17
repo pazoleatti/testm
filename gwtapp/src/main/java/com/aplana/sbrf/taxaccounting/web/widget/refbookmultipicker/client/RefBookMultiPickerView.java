@@ -207,7 +207,7 @@ public class RefBookMultiPickerView extends ViewWithUiHandlers<RefBookMultiPicke
     }
 
     @Override
-    public void load(PickerState pickerState) {
+    public void load(PickerState pickerState, boolean force) {
         filterText = pickerState.getSearchPattern();
         getUiHandlers().init(pickerState);
     }

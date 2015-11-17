@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<formTemplateContent>
+    <fixedRows>false</fixedRows>
+    <monthly>false</monthly>
+    <comparative>false</comparative>
+    <accruing>false</accruing>
+    <updating>false</updating>
+    <name>Журнал взаиморасчетов</name>
+    <fullName>Журнал взаиморасчетов</fullName>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
+        <alias>fix1</alias>
+        <checking>false</checking>
+        <columnType>STRING</columnType>
+        <name>fix1</name>
+        <order>1</order>
+        <width>0</width>
+        <maxLength>100</maxLength>
+        <prevLength>0</prevLength>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
+        <alias>sbrfCode1</alias>
+        <checking>false</checking>
+        <columnType>REFBOOK</columnType>
+        <name>№. Код подразделения</name>
+        <order>2</order>
+        <width>10</width>
+        <hierarchical>true</hierarchical>
+        <nameAttributeId>161</nameAttributeId>
+        <refBookAttributeId>166</refBookAttributeId>
+        <searchEnabled>true</searchEnabled>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
+        <alias>statReportId1</alias>
+        <checking>false</checking>
+        <columnType>REFBOOK</columnType>
+        <name>№. Код организации-участника</name>
+        <order>3</order>
+        <width>10</width>
+        <hierarchical>false</hierarchical>
+        <nameAttributeId>5201</nameAttributeId>
+        <refBookAttributeId>5216</refBookAttributeId>
+        <searchEnabled>true</searchEnabled>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
+        <alias>fix2</alias>
+        <checking>false</checking>
+        <columnType>STRING</columnType>
+        <name>fix2</name>
+        <order>4</order>
+        <width>0</width>
+        <maxLength>500</maxLength>
+        <prevLength>0</prevLength>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="referenceColumn">
+        <alias>depName1</alias>
+        <checking>false</checking>
+        <columnType>REFERENCE</columnType>
+        <name>Наименование статей. Наименование подразделения</name>
+        <order>5</order>
+        <width>15</width>
+        <parentAlias>sbrfCode1</parentAlias>
+        <refBookAttributeId>161</refBookAttributeId>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="referenceColumn">
+        <alias>orgName1</alias>
+        <checking>false</checking>
+        <columnType>REFERENCE</columnType>
+        <name>Наименование статей. Наименование организации-участника</name>
+        <order>6</order>
+        <width>15</width>
+        <parentAlias>statReportId1</parentAlias>
+        <refBookAttributeId>5201</refBookAttributeId>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
+        <alias>sbrfCode2</alias>
+        <checking>false</checking>
+        <columnType>REFBOOK</columnType>
+        <name>Код организации - участника группы (подразделения ПАО &quot;Сбербанк России&quot;), с которыми осуществляются взаиморасчеты. Код подразделения</name>
+        <order>7</order>
+        <width>10</width>
+        <hierarchical>true</hierarchical>
+        <nameAttributeId>161</nameAttributeId>
+        <refBookAttributeId>166</refBookAttributeId>
+        <searchEnabled>true</searchEnabled>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
+        <alias>statReportId2</alias>
+        <checking>false</checking>
+        <columnType>REFBOOK</columnType>
+        <name>Код организации - участника группы (подразделения ПАО &quot;Сбербанк России&quot;), с которыми осуществляются взаиморасчеты. Код организации-участника</name>
+        <order>8</order>
+        <width>10</width>
+        <hierarchical>false</hierarchical>
+        <nameAttributeId>5201</nameAttributeId>
+        <refBookAttributeId>5216</refBookAttributeId>
+        <searchEnabled>true</searchEnabled>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="referenceColumn">
+        <alias>depName2</alias>
+        <checking>false</checking>
+        <columnType>REFERENCE</columnType>
+        <name>Наименование организации – участника группы (подразделения ПАО &quot;Сбербанк России&quot;), с которым осуществляются взаиморасчеты. Наименование подразделения</name>
+        <order>9</order>
+        <width>15</width>
+        <parentAlias>sbrfCode2</parentAlias>
+        <refBookAttributeId>161</refBookAttributeId>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="referenceColumn">
+        <alias>orgName2</alias>
+        <checking>false</checking>
+        <columnType>REFERENCE</columnType>
+        <name>Наименование организации – участника группы (подразделения ПАО &quot;Сбербанк России&quot;), с которым осуществляются взаиморасчеты. Наименование организации-участника</name>
+        <order>10</order>
+        <width>15</width>
+        <parentAlias>statReportId2</parentAlias>
+        <refBookAttributeId>5201</refBookAttributeId>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>sum</alias>
+        <checking>false</checking>
+        <columnType>NUMBER</columnType>
+        <name>Сумма доходов / расходов с начала года (тыс. руб.)</name>
+        <order>11</order>
+        <width>8</width>
+        <maxLength>15</maxLength>
+        <precision>0</precision>
+    </columns>
+    <styles>
+        <alias>Корректировка-изменено</alias>
+        <backColor>WHITE</backColor>
+        <bold>true</bold>
+        <fontColor>RED</fontColor>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Корректировка-без изменений</alias>
+        <backColor>GREY</backColor>
+        <bold>false</bold>
+        <fontColor>BLACK</fontColor>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Корректировка-добавлено</alias>
+        <backColor>PALE_GREEN</backColor>
+        <bold>false</bold>
+        <fontColor>BLACK</fontColor>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Корректировка-удалено</alias>
+        <backColor>LIGHT_CORAL</backColor>
+        <bold>false</bold>
+        <fontColor>BLACK</fontColor>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Редактируемая</alias>
+        <backColor>LIGHT_BLUE</backColor>
+        <bold>false</bold>
+        <fontColor>BLACK</fontColor>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Автозаполняемая</alias>
+        <backColor>WHITE</backColor>
+        <bold>true</bold>
+        <fontColor>DARK_GREEN</fontColor>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Курсив</alias>
+        <backColor>WHITE</backColor>
+        <bold>false</bold>
+        <fontColor>BLACK</fontColor>
+        <italic>true</italic>
+    </styles>
+</formTemplateContent>

@@ -202,25 +202,6 @@ def getReportPeriodEndDate() {
     return endDate
 }
 
-// Получение Id записи с использованием кэширования
-def getRecordId(def ref_id, String alias, String value, Date date) {
-    String filter = "LOWER($alias) = LOWER('$value')"
-    if (value == '') filter = "$alias is null"
-    if (recordCache[ref_id] != null) {
-        if (recordCache[ref_id][filter] != null) {
-            return recordCache[ref_id][filter]
-        }
-    } else {
-        recordCache[ref_id] = [:]
-    }
-    def records = refBookFactory.getDataProvider(ref_id).getRecords(date, null, filter, null)
-    if (records.size() == 1) {
-        recordCache[ref_id][filter] = records.get(0).get(RefBook.RECORD_ID_ALIAS).numberValue
-        return recordCache[ref_id][filter]
-    }
-    return null
-}
-
 void calc() {
     def dataRows = formDataService.getDataRowHelper(formData).allCached
 
@@ -360,12 +341,21 @@ void consolidationFromPrimary(def dataRows, def formSources) {
     /** Отчётный период. */
     def reportPeriod = reportPeriodService.get(formData.reportPeriodId)
 
+    // Предыдущий отчётный период
+    def formDataOld = formDataService.getFormDataPrev(formData)
+    if (formDataOld != null && reportPeriod.order != 1) {
+        def dataRowsOld = formDataService.getDataRowHelper(formDataOld)?.allSaved
+        //графа 9
+        def prevList = (35..40)
+        addPrevValue(prevList, dataRows, 'incomeTaxSumS', dataRowsOld, 'incomeTaxSumS')
+    }
+
     // получить формы-источники в текущем налоговом периоде
     formSources.each {
         def prevReportPeriod = reportPeriodService.getPrevReportPeriod(formData.reportPeriodId)
         def isMonth = it.formTypeId in [formTypeId_RNU33, formTypeId_RNU31] //ежемесячная
         if (!isMonth && prevReportPeriod != null) {
-            def childOld = formDataService.getLast(it.formTypeId, it.kind, it.departmentId, prevReportPeriod.id, null, it.comparativePeriodId, it.accruing)
+            def childOld = formDataService.getLast(it.formTypeId, it.kind, it.departmentId, prevReportPeriod.id, null, formData.comparativePeriodId, formData.accruing)
             //(РНУ-75) Регистр налогового учета доходов по операциям депозитария
             if (childOld != null && childOld.formType.id == formTypeId_RNU75) {
                 def dataRowsChildOld = formDataService.getDataRowHelper(childOld)?.allSaved
@@ -377,7 +367,7 @@ void consolidationFromPrimary(def dataRows, def formSources) {
         def children = []
         if (isMonth) {
             for (def periodOrder = 3 * reportPeriod.order - 2; periodOrder < 3 * reportPeriod.order + 1; periodOrder++) {
-                def child = formDataService.getLast(it.formTypeId, it.kind, it.departmentId, reportPeriod.id, periodOrder, it.comparativePeriodId, it.accruing)
+                def child = formDataService.getLast(it.formTypeId, it.kind, it.departmentId, reportPeriod.id, periodOrder, formData.comparativePeriodId, formData.accruing)
                 children.add(child)
             }
         } else {
@@ -442,10 +432,13 @@ void consolidationFromPrimary(def dataRows, def formSources) {
                             // графа 9 = разность сумм граф 6 и 5 строк источника где КНУ и балансовый счет совпадают с текущей строкой
                             def row = getRow(dataRows, knu)
                             String filter = "LOWER(CODE) = LOWER('" + row.incomeTypeId + "') and LOWER(NUMBER) = LOWER('" + row.incomeBuhSumAccountNumber.replaceAll(/\./, "") + "')"
-                            def recordId = provider.getRecords(getReportPeriodEndDate(), null, filter, null)?.get(0)?.get(RefBook.RECORD_ID_ALIAS)?.value
-                            rows.each { rowChild ->
-                                if (recordId == rowChild.balance && isEqualNum(row.incomeBuhSumAccountNumber, rowChild.balance)) {
-                                    (row.incomeTaxSumS) ? (row.incomeTaxSumS += (rowChild.outcome - rowChild.income)) : (row.incomeTaxSumS = (rowChild.outcome - rowChild.income))
+                            def records = provider.getRecords(getReportPeriodEndDate(), null, filter, null)
+                            records.each { record ->
+                                def recordId = record?.get(RefBook.RECORD_ID_ALIAS)?.value
+                                rows.each { rowChild ->
+                                    if (recordId == rowChild.balance && isEqualNum(row.incomeBuhSumAccountNumber, rowChild.balance)) {
+                                        (row.incomeTaxSumS) ? (row.incomeTaxSumS += (rowChild.outcome - rowChild.income)) : (row.incomeTaxSumS = (rowChild.outcome - rowChild.income))
+                                    }
                                 }
                             }
                         }
@@ -540,6 +533,25 @@ void consolidationFromPrimary(def dataRows, def formSources) {
                 }
             }
         }
+    }
+}
+
+/**
+ * Добавить значение из формы предыдущего периода
+ * @param rowNumbers - номера строк
+ * @param dataRows - строки текущей сводной
+ * @param column - столбец текущей сводной
+ * @param dataRowsOld - строки прошлой сводной
+ * @param columnOld - столбец прошлой сводной
+ */
+void addPrevValue(Collection<Integer> rowNumbers, def dataRows, String column, def dataRowsOld, String columnOld) {
+    if (!(dataRows && dataRowsOld && column && columnOld)) {
+        return
+    }
+    rowNumbers.each { number ->
+        def row = getDataRow(dataRows, "R$number")
+        def rowOld = dataRowsOld.find { row.incomeTypeId == it.incomeTypeId && it.incomeBuhSumAccountNumber == row.incomeBuhSumAccountNumber }
+        row[column] ? (row[column] += rowOld[columnOld]) : (row[column] = rowOld[columnOld])
     }
 }
 

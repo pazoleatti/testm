@@ -62,14 +62,16 @@ public class RefBookTreePickerPresenter extends PresenterWidget<RefBookTreePicke
     }
 
     @Override
-    public void init(final PickerState newState) {
+    public void init(final PickerState newState, boolean force) {
         if (isNeedReloadHeaders(newState)) {
             // Установка новых значений после проверки на новость основных параметров
             ps.setValues(newState);
             load(null);
         } else {
             //иначе просто сеттим
-            //ps.setValues(newState);
+            if (force) {
+                ps.setValues(newState);
+            }
             trySelect(ps);
         }
     }
@@ -185,7 +187,7 @@ public class RefBookTreePickerPresenter extends PresenterWidget<RefBookTreePicke
 
     @Override
     public void reloadForDate(Date relevanceDate) {
-        init(new PickerState(ps.getRefBookAttrId(), ps.getFilter(), ps.getSearchPattern(), relevanceDate, ps.isMultiSelect()));
+        init(new PickerState(ps.getRefBookAttrId(), ps.getFilter(), ps.getSearchPattern(), relevanceDate, ps.isMultiSelect()), false);
     }
 
     @Override
@@ -217,7 +219,7 @@ public class RefBookTreePickerPresenter extends PresenterWidget<RefBookTreePicke
 
     @Override
     public void find(String searchPattern) {
-        init(new PickerState(ps.getRefBookAttrId(), ps.getFilter(), searchPattern, ps.getVersionDate(), ps.isMultiSelect()));
+        init(new PickerState(ps.getRefBookAttrId(), ps.getFilter(), searchPattern, ps.getVersionDate(), ps.isMultiSelect()), false);
     }
 
     @Override

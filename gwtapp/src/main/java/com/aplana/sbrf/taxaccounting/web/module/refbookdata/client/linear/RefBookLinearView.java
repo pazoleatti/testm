@@ -221,7 +221,7 @@ public class RefBookLinearView extends ViewWithUiHandlers<RefBookDataLinearUiHan
                 }
             }
             //Если не было среди записей необходимой, то выставляем на первую
-            if (selectionModel.getSelectedObject()==null){
+            if (selectionModel.getSelectedObject()==null&&!dataRows.isEmpty()){
                 selectionModel.setSelected(dataRows.get(0), true);
             }
         }
@@ -242,7 +242,7 @@ public class RefBookLinearView extends ViewWithUiHandlers<RefBookDataLinearUiHan
         }
         //Значит, что в справочнике запись добавилась на другую страницу
         if (selectionModel.getSelectedObject()==null && !refBookDataTable.getVisibleItems().isEmpty()){
-            setSelected(refBookDataTable.getVisibleItems().get(0).getRefBookRowId());
+            selectionModel.setSelected(refBookDataTable.getVisibleItems().get(0), true);
         }
     }
 

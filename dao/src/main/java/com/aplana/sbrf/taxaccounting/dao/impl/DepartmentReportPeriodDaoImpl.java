@@ -317,6 +317,22 @@ public class DepartmentReportPeriodDaoImpl extends AbstractDao implements Depart
     }
 
     @Override
+    public DepartmentReportPeriod getFirst(int departmentId, int reportPeriodId) {
+        try {
+            return getJdbcTemplate().queryForObject("select drp.id, drp.department_id, drp.report_period_id, " +
+                            "drp.is_active, drp.is_balance_period, drp.correction_date " +
+                            "from " +
+                            "department_report_period drp " +
+                            "where drp.department_id = ? " +
+                            "and drp.report_period_id = ? " +
+                            "and drp.correction_date is null",
+                    new Object[]{departmentId, reportPeriodId}, mapper);
+        } catch (EmptyResultDataAccessException e) {
+            return null;
+        }
+    }
+
+    @Override
     public Integer getCorrectionNumber(int id) {
         try {
             return getJdbcTemplate().queryForInt(

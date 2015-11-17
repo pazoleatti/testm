@@ -4,10 +4,8 @@ import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
+import com.aplana.sbrf.taxaccounting.model.refbook.*;
+import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.refbook.impl.RefBookUniversal;
 import com.aplana.sbrf.taxaccounting.util.RefBookScriptTestBase;
 import com.aplana.sbrf.taxaccounting.util.mock.ScriptTestMockHelper;
@@ -21,9 +19,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyLong;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -68,18 +64,29 @@ public class JurPersonsTest extends RefBookScriptTestBase {
         when(testHelper.getRefBookFactory().getDataProvider(REF_BOOK_ORG_CODE_ID)).thenReturn(providerOrgCode);
         when(testHelper.getRefBookFactory().getDataProvider(REF_BOOK_TYPE_TCO_ID)).thenReturn(providerTypeTco);
 
-        when(provider.getRecords(any(Date.class), any(PagingParams.class), anyString(),
-                any(RefBookAttribute.class))).thenAnswer(
-                new Answer<PagingResult<Map<String, RefBookValue>>>() {
+        when(provider.getRecordIdPairs(anyLong(), any(Date.class), anyBoolean(), anyString())).thenAnswer(
+                new Answer<List<Pair<Long, Long>>>() {
                     @Override
-                    public PagingResult<Map<String, RefBookValue>> answer(InvocationOnMock invocation) throws Throwable {
-                        PagingResult<Map<String, RefBookValue>> result = new PagingResult<Map<String, RefBookValue>>();
-                        String filter = (String) invocation.getArguments()[2];
+                    public List<Pair<Long, Long>> answer(InvocationOnMock invocation) throws Throwable {
+                        String filter = (String) invocation.getArguments()[3];
+                        List<Pair<Long, Long>> pairs = new ArrayList<Pair<Long, Long>>();
                         if (filter.contains("INN") && filter.contains("11111")) {
+                            pairs.add(new Pair<Long, Long>(1001L, 1001L));
+
                             Map<String, RefBookValue> map = new HashMap<String, RefBookValue>();
-                            map.put(RefBook.RECORD_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, 1L));
-                            result.add(map);
+                            map.put(RefBook.RECORD_VERSION_FROM_ALIAS, new RefBookValue(RefBookAttributeType.DATE, (new GregorianCalendar(2012, Calendar.JANUARY, 1, 0, 0, 0)).getTime()));
+                            map.put(RefBook.RECORD_VERSION_TO_ALIAS, new RefBookValue(RefBookAttributeType.DATE, null));
                         }
+                        return pairs;
+                    }
+                });
+
+        when(provider.getRecordVersionInfo(anyLong())).thenAnswer(
+                new Answer<RefBookRecordVersion> () {
+                    @Override
+                    public RefBookRecordVersion answer(InvocationOnMock invocation) throws Throwable {
+                        RefBookRecordVersion result = new RefBookRecordVersion();
+                        result.setVersionStart((new GregorianCalendar(2012, Calendar.JANUARY, 1, 0, 0, 0)).getTime());
                         return result;
                     }
                 });
@@ -212,6 +219,15 @@ public class JurPersonsTest extends RefBookScriptTestBase {
         value8.put("KPP", new RefBookValue(RefBookAttributeType.STRING, "7707083894"));
         saveRecords.add(value8);
 
+        HashMap<String, RefBookValue> value9 = new HashMap<String, RefBookValue>();
+        // ORG_CODE = 2, TYPE = "НЛ"
+        value9.put("ORG_CODE", new RefBookValue(RefBookAttributeType.REFERENCE, 262625999L));
+        value9.put("TYPE", new RefBookValue(RefBookAttributeType.REFERENCE, 262680899L));
+        value9.put("SWIFT", new RefBookValue(RefBookAttributeType.STRING, "12345678901"));
+        value9.put("TAX_CODE_INCORPORATION", new RefBookValue(RefBookAttributeType.STRING, "1234567890123456"));
+        saveRecords.add(value9);
+
+        testHelper.setValidDateFrom((new GregorianCalendar(2012, Calendar.JANUARY, 1, 0, 0, 0)).getTime());
         testHelper.setSaveRecords(saveRecords);
 
         testHelper.execute(FormDataEvent.SAVE);
@@ -222,39 +238,40 @@ public class JurPersonsTest extends RefBookScriptTestBase {
         Assert.assertEquals("7707083893 / 770708389", saveRecords.get(0).get("IKKSR").getStringValue());
         Assert.assertEquals("7707083893", saveRecords.get(0).get("IKSR").getStringValue());
         // 2
-        Assert.assertEquals("Обязательно должны быть указаны «ИНН» и «КПП»!", entries.get(i++).getMessage());
+        Assert.assertEquals("Для российской организации обязательно должны быть заполнены поля: «ИНН», «КПП»!", entries.get(i++).getMessage());
         Assert.assertEquals("Атрибут \"КПП\" заполнен неверно (7707083891)! Ожидаемый паттерн: \"([0-9]{1}[1-9]{1}|[1-9]{1}[0-9]{1})([0-9]{2})([0-9A-Z]{2})([0-9]{3})\"", entries.get(i++).getMessage());
         Assert.assertEquals("Расшифровка паттерна «([0-9]{1}[1-9]{1}|[1-9]{1}[0-9]{1})([0-9]{2})([0-9A-Z]{2})([0-9]{3})»: Первые 2 символа: (0-9; 1-9 / 1-9; 0-9). Следующие 2 символа: (0-9). Следующие 2 символа: (0-9 / A-Z). Последние 3 символа: (0-9).", entries.get(i++).getMessage());
         Assert.assertEquals("Поле «Код Swift» должно содержать 8 или 11 символов!", entries.get(i++).getMessage());
-        Assert.assertEquals("12345678901", saveRecords.get(1).get("IKKSR").getStringValue());
-        Assert.assertEquals("12345678901", saveRecords.get(1).get("IKSR").getStringValue());
+        Assert.assertNull(saveRecords.get(1).get("IKKSR").getStringValue());
+        Assert.assertNull(saveRecords.get(1).get("IKSR").getStringValue());
         // 3
-        Assert.assertEquals("Обязательно должны быть указаны «ИНН» и «КПП»!", entries.get(i++).getMessage());
+        Assert.assertEquals("Для российской организации обязательно должны быть заполнены поля: «ИНН», «КПП»!", entries.get(i++).getMessage());
         Assert.assertEquals("Вычисленное контрольное число по полю \"ИНН\" некорректно (7707083894).", entries.get(i++).getMessage());
-        Assert.assertEquals("1", saveRecords.get(2).get("IKKSR").getStringValue());
+        Assert.assertNull(saveRecords.get(2).get("IKKSR").getStringValue());
         Assert.assertEquals("7707083894", saveRecords.get(2).get("IKSR").getStringValue());
         // 4
-        Assert.assertEquals("Обязательно должны быть указаны «ИНН» и «КПП»!", entries.get(i++).getMessage());
+        Assert.assertEquals("Для российской организации обязательно должны быть заполнены поля: «ИНН», «КПП»!", entries.get(i++).getMessage());
         Assert.assertEquals("В справочнике уже существует организация с данным ИНН!", entries.get(i++).getMessage());
         Assert.assertEquals("Атрибут \"ИНН\" заполнен неверно (11111)! Ожидаемый паттерн: \"([0-9]{1}[1-9]{1}|[1-9]{1}[0-9]{1})[0-9]{8}\"", entries.get(i++).getMessage());
         Assert.assertEquals("Расшифровка паттерна «([0-9]{1}[1-9]{1}|[1-9]{1}[0-9]{1})[0-9]{8}»: Первые 2 символа: (0-9; 1-9 / 1-9; 0-9). Следующие 8 символов: (0-9).", entries.get(i++).getMessage());
         Assert.assertNull(saveRecords.get(3).get("IKKSR").getStringValue());
         Assert.assertEquals("11111", saveRecords.get(3).get("IKSR").getStringValue());
         // 5
-        Assert.assertEquals("Для российской организации обязательно должно быть заполнено одно из следующих полей: «ИНН», «Код SWIFT»!", entries.get(i++).getMessage());
+        Assert.assertEquals("Для российской организации обязательно должны быть заполнены поля: «ИНН», «КПП»!", entries.get(i++).getMessage());
         Assert.assertEquals("Поле «Дата наступления основания для включения в список» должно быть больше или равно полю «Дата наступления основания для исключении из списка»!", entries.get(i++).getMessage());
         Assert.assertEquals("Для ВЗЛ обязательно должны быть заполнены поля «VAT_STATUS»,«DEP_CRITERION»!", entries.get(i++).getMessage());
         Assert.assertNull(saveRecords.get(4).get("IKKSR").getStringValue());
         Assert.assertNull(saveRecords.get(4).get("IKSR").getStringValue());
         // 6
-        Assert.assertEquals("Для российской организации нельзя указать поля «REG_NUM» и «KIO»!", entries.get(i++).getMessage());
+        Assert.assertEquals("Для российской организации обязательно должны быть заполнены поля: «ИНН», «КПП»!", entries.get(i++).getMessage());
+        Assert.assertEquals("Для российской организации нельзя указать поля «REG_NUM»,«KIO»!", entries.get(i++).getMessage());
         Assert.assertEquals("Вычисленное контрольное число по полю \"КИО\" некорректно (7707083894).", entries.get(i++).getMessage());
-        Assert.assertEquals("12345678", saveRecords.get(5).get("IKKSR").getStringValue());
-        Assert.assertEquals("12345678", saveRecords.get(5).get("IKSR").getStringValue());
+        Assert.assertNull(saveRecords.get(5).get("IKKSR").getStringValue());
+        Assert.assertNull(saveRecords.get(5).get("IKSR").getStringValue());
         //7
         Assert.assertEquals("Для иностранной организации обязательно должно быть заполнено одно из следующих полей: «КИО», «Код SWIFT», «Регистрационный номер в стране инкорпорации»!", entries.get(i++).getMessage());
         Assert.assertEquals("Для иностранной организации нельзя указать «INN»!", entries.get(i++).getMessage());
-        Assert.assertEquals("Для Резидента оффшорной зоны обязательно должно быть заполнено поле «OFFSHORE_CODE»!", entries.get(i++).getMessage());
+        Assert.assertEquals("Для Резидента оффшорной зоны обязательно должны быть заполнены поля «OFFSHORE_CODE»,«KIO»!", entries.get(i++).getMessage());
         Assert.assertEquals("Вычисленное контрольное число по полю \"ИНН\" некорректно (7707083894).", entries.get(i++).getMessage());
         Assert.assertNull(saveRecords.get(6).get("IKKSR").getStringValue());
         Assert.assertNull(saveRecords.get(6).get("IKSR").getStringValue());
@@ -265,6 +282,9 @@ public class JurPersonsTest extends RefBookScriptTestBase {
         Assert.assertEquals("Расшифровка паттерна «([0-9]{1}[1-9]{1}|[1-9]{1}[0-9]{1})([0-9]{2})([0-9A-Z]{2})([0-9]{3})»: Первые 2 символа: (0-9; 1-9 / 1-9; 0-9). Следующие 2 символа: (0-9). Следующие 2 символа: (0-9 / A-Z). Последние 3 символа: (0-9).", entries.get(i++).getMessage());
         Assert.assertEquals("7707083893", saveRecords.get(7).get("IKKSR").getStringValue());
         Assert.assertEquals("7707083893", saveRecords.get(7).get("IKSR").getStringValue());
+        //9
+        Assert.assertEquals("1234567890123456", saveRecords.get(8).get("IKKSR").getStringValue());
+        Assert.assertEquals("1234567890123456", saveRecords.get(8).get("IKSR").getStringValue());
         Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
     }
 }

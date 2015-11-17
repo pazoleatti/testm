@@ -92,11 +92,20 @@ public class DeclarationServiceImpl implements DeclarationService, ScriptCompone
 
     @Override
     public FormDataCollection getAcceptedFormDataSources(DeclarationData declarationData, TAUserInfo userInfo, Logger logger) {
-        List<Relation> relations = sourceService.getDeclarationSourcesInfo(declarationData, true, true, WorkflowState.ACCEPTED, userInfo, logger);
+        List<Relation> relations = sourceService.getDeclarationSourcesInfo(declarationData, true, true, null, userInfo, logger);
         List<FormData> sources = new ArrayList<FormData>();
         for (Relation relation : relations){
-            FormData formData = formDataDao.get(relation.getFormDataId(), relation.isManual());
-            sources.add(formData);
+            if (relation.getState() == WorkflowState.ACCEPTED) {
+                FormData formData = formDataDao.get(relation.getFormDataId(), relation.isManual());
+                sources.add(formData);
+            } else {
+                context.getLogger().warn(
+                        "Форма-источник существует, но не может быть использована, так как еще не принята. Вид формы: \"%s\", тип формы: \"%s\", подразделение: \"%s\"",
+                        relation.getFormTypeName(),
+                        relation.getFormDataKind().getTitle(),
+                        relation.getFullDepartmentName()
+                );
+            }
         }
         FormDataCollection formDataCollection = new FormDataCollection();
         formDataCollection.setRecords(sources);

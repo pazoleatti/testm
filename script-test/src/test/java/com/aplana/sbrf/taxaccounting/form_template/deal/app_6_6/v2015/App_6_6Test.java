@@ -2,17 +2,28 @@ package com.aplana.sbrf.taxaccounting.form_template.deal.app_6_6.v2015;
 
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
+import com.aplana.sbrf.taxaccounting.refbook.impl.RefBookUniversal;
 import com.aplana.sbrf.taxaccounting.util.ScriptTestBase;
 import com.aplana.sbrf.taxaccounting.util.TestScriptHelper;
 import com.aplana.sbrf.taxaccounting.util.mock.ScriptTestMockHelper;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
+
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 /**
  * 6.2. Размещение средств на межбанковском рынке
@@ -98,7 +109,7 @@ public class App_6_6Test extends ScriptTestBase {
         Assert.assertEquals("Строка 1: Выполнение расчета графы «Режим переговорных сделок» невозможно, так как не заполнена используемая в расчете графа «Код страны регистрации по классификатору ОКСМ»!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Выполнение расчета графы «Дата совершения сделки» невозможно, так как не заполнена используемая в расчете графа «Дата исполнения 2-ой части сделки»!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Графа «Сумма процентного расхода (руб.)» должна быть заполнена, если не заполнена графа «Сумма процентного дохода (руб.)»!", entries.get(i++).getMessage());
-        Assert.assertEquals("Группа строк «ЮЛ не задано» не имеет строки подитога!", entries.get(i++).getMessage());
+        Assert.assertEquals("Группа «ЮЛ не задано» не имеет строки подитога!", entries.get(i++).getMessage());
         Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
         testHelper.getLogger().clear();
 
@@ -110,7 +121,7 @@ public class App_6_6Test extends ScriptTestBase {
         // 9. Корректность даты исполнения 1–ой части сделки (проверка даты окончания периода)
         // 11. Корректность даты совершения сделки
         // 12. Проверка диапазона дат
-        row.getCell("name").setValue(123L, null);
+        row.getCell("name").setValue(1L, null);
         row.getCell("docNumber").setValue("string", null);
         row.getCell("docDate").setValue(sdf.parse("02.01.2990"), null);
         row.getCell("dealNumber").setValue("string", null);
@@ -133,7 +144,7 @@ public class App_6_6Test extends ScriptTestBase {
         Assert.assertEquals("Строка 1: Значение графы «Дата исполнения 1-ой части сделки» не может быть больше даты окончания отчётного периода!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Значение графы «Дата совершения сделки» должно быть не меньше значения графы «Дата (заключения) сделки»!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Значение даты атрибута «Дата договора» должно принимать значение из следующего диапазона: 01.01.1900 - 31.12.2099", entries.get(i++).getMessage());
-        Assert.assertEquals("Группа строк «ЮЛ не задано» не имеет строки подитога!", entries.get(i++).getMessage());
+        Assert.assertEquals("Группа «A» не имеет строки подитога!", entries.get(i++).getMessage());
         Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
         testHelper.getLogger().clear();
 
@@ -159,7 +170,7 @@ public class App_6_6Test extends ScriptTestBase {
         dataRows.add(subTotalRow);
         subTotalRow.setAlias("itg#1");
         subTotalRow.setIndex(2);
-        subTotalRow.getCell("fix").setValue("Итого A", null);
+        subTotalRow.getCell("fix").setValue("Итого по «A»", null);
         subTotalRow.getCell("incomeSum").setValue(2, null);
         subTotalRow.getCell("outcomeSum").setValue(2, null);
 
@@ -210,7 +221,7 @@ public class App_6_6Test extends ScriptTestBase {
 
         Assert.assertEquals(1, testHelper.getLogger().getEntries().size());
 
-        // TODO (Ramil Timerbaev) добавить тесты для логических проверок 11-14
+        // TODO (Ramil Timerbaev) добавить тесты для логических проверок 13-16
     }
 
     // Расчет пустой (в импорте - растчет заполненной)
@@ -222,6 +233,55 @@ public class App_6_6Test extends ScriptTestBase {
 
     @Test
     public void importExcelTest() throws ParseException {
+        // TODO тесты для логики поиска по iksr
+        Long refbookId = 520L;
+
+        when(testHelper.getRefBookFactory().get(refbookId)).thenAnswer(
+                new Answer<RefBook>() {
+
+                    @Override
+                    public RefBook answer(InvocationOnMock invocation) throws Throwable {
+                        RefBook refBook = new RefBook();
+                        ArrayList<RefBookAttribute> attributes = new ArrayList<RefBookAttribute>();
+                        RefBookAttribute e = new RefBookAttribute();
+                        e.setAlias("INN");
+                        e.setName("ИНН/ КИО");
+                        attributes.add(e);
+                        refBook.setAttributes(attributes);
+                        return refBook;
+                    }
+                }
+        );
+
+        RefBookUniversal provider = mock(RefBookUniversal.class);
+        provider.setRefBookId(refbookId);
+        when(testHelper.getRefBookFactory().getDataProvider(refbookId)).thenReturn(provider);
+        when(provider.getRecords(any(Date.class), any(PagingParams.class), anyString(),
+                any(RefBookAttribute.class))).thenAnswer(
+                new Answer<PagingResult<Map<String, RefBookValue>>>() {
+                    @Override
+                    public PagingResult<Map<String, RefBookValue>> answer(InvocationOnMock invocation) throws Throwable {
+                        PagingResult<Map<String, RefBookValue>> result = new PagingResult<Map<String, RefBookValue>>();
+
+                        Map<String, RefBookValue> map = new HashMap<String, RefBookValue>();
+                        map.put(RefBook.RECORD_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, 1L));
+                        map.put("INN", new RefBookValue(RefBookAttributeType.STRING, "A"));
+                        result.add(map);
+
+                        map = new HashMap<String, RefBookValue>();
+                        map.put(RefBook.RECORD_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, 2L));
+                        map.put("INN", new RefBookValue(RefBookAttributeType.STRING, "B"));
+                        result.add(map);
+
+                        map = new HashMap<String, RefBookValue>();
+                        map.put(RefBook.RECORD_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, 3L));
+                        map.put("INN", new RefBookValue(RefBookAttributeType.STRING, "C"));
+                        result.add(map);
+
+                        return result;
+                    }
+                });
+
         testHelper.setImportFileInputStream(getImportXlsInputStream());
         testHelper.execute(FormDataEvent.IMPORT);
         List<String> aliases = Arrays.asList("docNumber", "docDate", "dealNumber", "dealDate", "date1", "date2",

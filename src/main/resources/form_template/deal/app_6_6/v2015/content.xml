@@ -7,6 +7,7 @@
     <updating>false</updating>
     <name>6.6. Заключение сделок РЕПО</name>
     <fullName>6.6. Отчет в отношении доходов и расходов ПАО Сбербанк по Контролируемым сделкам, связанным с заключением сделок РЕПО</fullName>
+    <header>6.6</header>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>fix</alias>
         <checking>false</checking>
@@ -42,7 +43,7 @@
         <alias>iksr</alias>
         <checking>false</checking>
         <columnType>REFERENCE</columnType>
-        <name>ИНН/КИО</name>
+        <name>ИНН/ КИО</name>
         <order>4</order>
         <width>7</width>
         <parentAlias>name</parentAlias>

@@ -225,6 +225,11 @@ public class AuditServiceImpl implements AuditService {
         return auditDao.getCount(filter);
     }
 
+    @Override
+    public Date getFirstDateOfLog() {
+        return auditDao.firstDateOfLog();
+    }
+
     private void add(FormDataEvent event, TAUserInfo userInfo, String departmentName, Integer departmentId, String reportPeriodName,
                      String declarationTypeName, String formTypeName, Integer formKindId, String note, String blobDataId){
         LogSystem log = new LogSystem();

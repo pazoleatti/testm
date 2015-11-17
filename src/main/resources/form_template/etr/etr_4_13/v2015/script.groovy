@@ -24,6 +24,11 @@ import groovy.transform.Field
 // графа 9 - deltaPercent
 
 switch (formDataEvent) {
+    case FormDataEvent.GET_HEADERS:
+        headers.get(1).comparePeriod = 'Сумма, ' + (isBank() ? 'млн. руб.' : 'тыс. руб.')
+        headers.get(1).currentPeriod = 'Сумма, ' + (isBank() ? 'млн. руб.' : 'тыс. руб.')
+        headers.get(1).deltaRub = '(гр.6-гр.4), ' + (isBank() ? 'млн. руб.' : 'тыс. руб.')
+        break
     case FormDataEvent.CREATE:
         formDataService.checkUnique(formData, logger)
         break
@@ -434,7 +439,7 @@ def get102Sum(def row, def date) {
         if (records == null || records.isEmpty()) {
             return [0, false]
         }
-        def result = records.sum { it.TOTAL_SUM.numberValue } / 1000
+        def result = records.sum { it.TOTAL_SUM.numberValue } / (isBank() ? 1000000 : 1000)
         return [result, true]
     }
     return [0, true]
@@ -462,12 +467,25 @@ void consolidation() {
                     }
                     def sourceRow = getDataRow(sourceRows, row.getAlias())
                     ['comparePeriod', 'currentPeriod'].each { column ->
-                        row[column] = (row[column] ?: 0) + (sourceRow[column] ?: 0)
+                        row[column] = (row[column] ?: BigDecimal.ZERO) + ((source.departmentId == 1) ? 1000 : 1) * (sourceRow[column] ?: BigDecimal.ZERO)
                     }
                 }
             }
         }
     }
+    if (isBank()) { // если уровень банка, то тысячи понижаем до миллионов
+        dataRows.each { row ->
+            ['comparePeriod', 'currentPeriod'].each { column ->
+                if (row[column]) {
+                    row[column] = (row[column] as BigDecimal).divide(BigDecimal.valueOf(1000), BigDecimal.ROUND_HALF_UP)
+                }
+            }
+        }
+    }
+}
+
+boolean isBank() {
+    return formData.departmentId == 1 // по ЧТЗ
 }
 
 void importData() {
@@ -562,11 +580,11 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
             ([(headerRows[0][3]): 'Период сравнения']),
             ([(headerRows[0][5]): 'Период']),
             ([(headerRows[0][7]): 'Изменения за период']),
-            ([(headerRows[1][3]): 'Сумма, тыс.руб.']),
+            ([(headerRows[1][3]): ('Сумма, ' + (isBank() ? 'млн. руб.' : 'тыс. руб.'))]),
             ([(headerRows[1][4]): 'Удельный вес в общей сумме за период, %']),
-            ([(headerRows[1][5]): 'Сумма, тыс.руб.']),
+            ([(headerRows[1][5]): ('Сумма, ' + (isBank() ? 'млн. руб.' : 'тыс. руб.'))]),
             ([(headerRows[1][6]): 'Удельный вес в общей сумме за период, %']),
-            ([(headerRows[1][7]): '(гр.6-гр.4), тыс.руб.']),
+            ([(headerRows[1][7]): ('(гр.6-гр.4), ' + (isBank() ? 'млн. руб.' : 'тыс. руб.'))]),
             ([(headerRows[1][8]): '(гр.8/гр.4*100), %'])
     ]
     (1..9).each { index ->

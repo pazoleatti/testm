@@ -294,11 +294,13 @@ void calc() {
     dataRows.add(totalRow)
 
     // в строках должна быть итоговая
-    calcCaTotalRow(dataRows, caTotalRow, totalRow, taxBase, sumNal)
+    calcCaTotalRow(dataRows, prevDataRows, caTotalRow, totalRow, taxBase, sumNal)
 
     // После расчета фикс. строки "ЦА(скоррект)" необходимо пересчитать для граф 12, 14, 15, 17, 18, 19
     // фиксированную строку итогов: сумма всех строк, кроме строки "ЦА" и строки итогов
     reCalcTotalRow(dataRows, totalRow)
+
+    updateIndexes(dataRows)
 }
 
 void reCalcTotalRow(def dataRows, def totalRow) {
@@ -330,7 +332,7 @@ void calcTotalRow(def dataRows, def totalRow) {
     } ?: BigDecimal.ZERO, 15).toPlainString()
 }
 
-void calcCaTotalRow(def dataRows, def caTotalRow, def totalRow, def taxBase, def sumNal) {
+void calcCaTotalRow(def dataRows, def prevDataRows, def caTotalRow, def totalRow, def taxBase, def sumNal) {
     def reportPeriod = reportPeriodService.get(formData.reportPeriodId)
 
     def isOldCalc = reportPeriod.taxPeriod.year < 2015 || (reportPeriod.taxPeriod.year == 2015 && reportPeriod.order < 3)
@@ -650,6 +652,8 @@ void logicalCheckAfterCalc() {
 
     boolean wasError = false
 
+    def prevDataRows = getPrevDataRows()
+
     def caTotalRow
     def totalRow
     for (def row : dataRows) {
@@ -704,7 +708,8 @@ void logicalCheckAfterCalc() {
     }
 
     calcTotalRow(dataRows, totalRowTemp)
-    calcCaTotalRow(dataRows, caTotalRowTemp, totalRow, taxBase, sumNal)
+    calcCaTotalRow(dataRows, prevDataRows, caTotalRowTemp, totalRowTemp, taxBase, sumNal)
+    reCalcTotalRow(dataRows, totalRowTemp)
 
     def errorColumns = (allColumns - 'number').findAll { alias ->
         caTotalRowTemp[alias] != caTotalRow[alias]

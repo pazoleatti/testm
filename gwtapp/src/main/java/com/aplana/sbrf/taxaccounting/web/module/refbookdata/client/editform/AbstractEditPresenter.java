@@ -11,7 +11,6 @@ import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.event.RollbackTableRowSelection;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.event.SetFormMode;
-import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.event.UpdateForm;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.exception.BadValueException;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.event.ShowItemEvent;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.*;
@@ -41,7 +40,8 @@ public abstract class AbstractEditPresenter<V extends AbstractEditPresenter.MyVi
     /** Идентификатор справочника */
     Long currentRefBookId;
     /** Уникальный идентификатор версии записи справочника */
-    Long currentUniqueRecordId, previousURId;
+    Long currentUniqueRecordId;
+    private Long previousURId;
     /** Идентификатор записи справочника без учета версий */
     Long recordId;
     /** Признак того, что форма используется для работы с версиями записей справочника */
@@ -149,6 +149,10 @@ public abstract class AbstractEditPresenter<V extends AbstractEditPresenter.MyVi
     }
 
     void showRecord(final Long refBookRecordId){
+        //Для случая когда мы нажимаем на кнопку отмены перехода на другую запись
+        /*if (previousURId != null&&previousURId.equals(refBookRecordId)){
+            return;
+        }*/
         previousURId = refBookRecordId;
         GetRefBookRecordAction action = new GetRefBookRecordAction();
         action.setRefBookId(currentRefBookId);
@@ -177,13 +181,15 @@ public abstract class AbstractEditPresenter<V extends AbstractEditPresenter.MyVi
             Dialog.confirmMessage(DIALOG_MESSAGE, new DialogHandler() {
                 @Override
                 public void yes() {
+                    getView().cleanErrorFields();
                     setIsFormModified(false);
                     showRecord(refBookRecordId);
                 }
 
                 @Override
                 public void no() {
-                    super.no();
+                    Dialog.hideMessage();
+                    setIsFormModified(false);
                     RollbackTableRowSelection.fire(AbstractEditPresenter.this, currentUniqueRecordId);
                     SetFormMode.fire(AbstractEditPresenter.this, FormMode.EDIT);
                 }
@@ -270,7 +276,7 @@ public abstract class AbstractEditPresenter<V extends AbstractEditPresenter.MyVi
     //Создание новой версии
     abstract void create() throws BadValueException;
     abstract void updateView(GetRefBookRecordResult result);
-    public abstract void clean(Boolean isVersion);
+    public abstract void clean(boolean isVersion);
 
     @Override
     public void onCancelClicked() {
@@ -358,7 +364,7 @@ public abstract class AbstractEditPresenter<V extends AbstractEditPresenter.MyVi
         return versioned;
     }
 
-    public void setCurrentUniqueRecordId(Long currentUniqueRecordId) {
+    void setCurrentUniqueRecordId(Long currentUniqueRecordId) {
         this.currentUniqueRecordId = currentUniqueRecordId;
     }
 
@@ -369,18 +375,6 @@ public abstract class AbstractEditPresenter<V extends AbstractEditPresenter.MyVi
     public HandlerRegistration addClickHandlerForAllVersions(ClickHandler clickHandler){
         if (versioned)
             return getView().getClickAllVersion().addClickHandler(clickHandler);
-        else
-            return new HandlerRegistration() {
-                @Override
-                public void removeHandler() {
-                    //Nothing
-                }
-            };
-    }
-
-    public final HandlerRegistration addUpdateFormHandler(UpdateForm.UpdateFormHandler handler){
-        if (versioned)
-            return addHandler(UpdateForm.getType(), handler);
         else
             return new HandlerRegistration() {
                 @Override
@@ -412,6 +406,14 @@ public abstract class AbstractEditPresenter<V extends AbstractEditPresenter.MyVi
     public void setVersionMode(boolean versionMode) {
         isVersionMode = versionMode;
         getView().setVersionMode(versionMode);
+    }
+
+    public Long getPreviousURId() {
+        return previousURId;
+    }
+
+    public void setPreviousURId(Long previousURId) {
+        this.previousURId = previousURId;
     }
 
     @Override

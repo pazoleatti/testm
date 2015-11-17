@@ -196,7 +196,7 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
                 break;
             case PROPERTY:
             case TRANSPORT:
-                fillTransportAndProperty();
+                fillTransportAndProperty(taxType);
                 break;
             case INCOME:
                 fillIncome();
@@ -249,7 +249,7 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
         panel.add(horizontalPanel);
     }
 
-    private void fillTransportAndProperty() {
+    private void fillTransportAndProperty(TaxType taxType) {
         HorizontalPanel horizontalPanel = new HorizontalPanel();
         horizontalPanel.setWidth("100%");
         VerticalPanel verticalPanel1 = new VerticalPanel();
@@ -296,7 +296,12 @@ public class DeclarationFilterView extends ViewWithUiHandlers<DeclarationFilterU
         verticalPanel5.add(declarationTypePicker);
         verticalPanel5.add(formStatePicker);
 
-        label = getLabel("Налоговый орган:");
+
+        if (taxType == TaxType.TRANSPORT) {
+            label = getLabel("Налоговый орган (кон.):");
+        } else {
+            label = getLabel("Налоговый орган:");
+        }
         verticalPanel6.add(label);
 
         label = getLabel("КПП:");

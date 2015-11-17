@@ -17,7 +17,7 @@ import java.util.Set;
  */
 public interface RefBookView extends HasValueChangeHandlers<Set<Long>>, IsWidget {
 
-    void load(PickerState pickerState);
+    void load(PickerState pickerState, boolean force);
 
     void reload();
 

@@ -36,7 +36,7 @@
             <g:cell>
                 <g:VerticalPanel addStyleNames="{style.content}">
                     <g:HorizontalPanel>
-                        <g:Label width="700px" text="Комментрарий:"/>
+                        <g:Label width="700px" text="Комментарий:"/>
                     </g:HorizontalPanel>
 
                     <g:HorizontalPanel>

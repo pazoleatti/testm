@@ -1290,8 +1290,10 @@ public class SourceServiceImpl implements SourceService {
         params.put("excludeIfNotExist", excludeIfNotExist);
         params.put("stateRestriction", stateRestriction);
 
-        declarationDataScriptingService.executeScript(userInfo, declaration, FormDataEvent.GET_SOURCES, logger, params);
-        if (logger.containsLevel(LogLevel.ERROR)) {
+        Logger scriptLogger = new Logger();
+        declarationDataScriptingService.executeScript(userInfo, declaration, FormDataEvent.GET_SOURCES, scriptLogger, params);
+        logger.getEntries().addAll(scriptLogger.getEntries());
+        if (scriptLogger.containsLevel(LogLevel.ERROR)) { // проверяем scriptLogger, т.к. в logger уже могут быть ошибки
             throw new ServiceLoggerException("Обнаружены фатальные ошибки!", logEntryService.save(logger.getEntries()));
         }
         if (sources.isSourcesProcessedByScript()) {

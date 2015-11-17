@@ -218,7 +218,7 @@ create table ref_book_value (
   record_id number(18) not null,
   attribute_id number(18) not null,
   string_value varchar2(4000),
-  number_value number(27,10),
+  number_value number(38,19),
   date_value date,
   reference_value number(18));
 comment on table ref_book_value is 'Значение записи справочника';

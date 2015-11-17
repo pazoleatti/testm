@@ -62,7 +62,7 @@
         <alias>deltaRub</alias>
         <checking>false</checking>
         <columnType>NUMBER</columnType>
-        <name>Изменение за период (гр.5-гр.4), тыс.руб.</name>
+        <name>Изменение за период (гр.5-гр.4), тыс. руб.</name>
         <order>6</order>
         <width>10</width>
         <maxLength>22</maxLength>

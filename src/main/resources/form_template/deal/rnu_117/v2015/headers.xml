@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rows>
+    <row alias="">
+        <cell alias="fix" colSpan="2" rowSpan="2" value="№ пп"/>
+        <cell alias="rowNumber" colSpan="1" rowSpan="2" value="№ пп"/>
+        <cell alias="name" colSpan="1" rowSpan="2" value="Наименование Взаимозависимого лица/резидента оффшорной зоны"/>
+        <cell alias="countryName" colSpan="1" rowSpan="2" value="Страна регистрации Взаимозависимого лица/резидента оффшорной зоны"/>
+        <cell alias="iksr" colSpan="1" rowSpan="2" value="ИНН / код налогоплательщика в стране регистрации (инкорпорации) или его аналог (при наличии)"/>
+        <cell alias="code" colSpan="1" rowSpan="2" value="Код классификации расхода"/>
+        <cell alias="reasonNumber" colSpan="2" rowSpan="1" value="Основание для совершения операции"/>
+        <cell alias="reasonDate" colSpan="1" rowSpan="1" value="Основание для совершения операции"/>
+        <cell alias="rate" colSpan="1" rowSpan="2" value="Процентная ставка, % годовых"/>
+        <cell alias="sum1" colSpan="1" rowSpan="2" value="Сумма фактически начисленного расхода, руб."/>
+        <cell alias="rate1" colSpan="1" rowSpan="2" value="Процентная ставка, признаваемая рыночной для целей налогообложения, % годовых"/>
+        <cell alias="sum2" colSpan="1" rowSpan="2" value="Сумма расхода, соответствующая рыночному уровню, руб."/>
+        <cell alias="rate2" colSpan="1" rowSpan="2" value="Отклонение (превышение) Процентной ставки от рыночного уровня, % годовых"/>
+        <cell alias="sum3" colSpan="1" rowSpan="2" value="Сумма отклонения (превышения) расхода фактического от соответствующего рыночному уровню, руб."/>
+    </row>
+    <row alias="">
+        <cell alias="fix" colSpan="2" rowSpan="1" value="№ пп"/>
+        <cell alias="rowNumber" colSpan="1" rowSpan="1" value="№ пп"/>
+        <cell alias="name" colSpan="1" rowSpan="1" value="Наименование Взаимозависимого лица/резидента оффшорной зоны"/>
+        <cell alias="countryName" colSpan="1" rowSpan="1" value="Страна регистрации Взаимозависимого лица/резидента оффшорной зоны"/>
+        <cell alias="iksr" colSpan="1" rowSpan="1" value="ИНН / код налогоплательщика в стране регистрации (инкорпорации) или его аналог (при наличии)"/>
+        <cell alias="code" colSpan="1" rowSpan="1" value="Код классификации расхода"/>
+        <cell alias="reasonNumber" colSpan="1" rowSpan="1" value="Номер"/>
+        <cell alias="reasonDate" colSpan="1" rowSpan="1" value="Дата"/>
+        <cell alias="rate" colSpan="1" rowSpan="1" value="Процентная ставка, % годовых"/>
+        <cell alias="sum1" colSpan="1" rowSpan="1" value="Сумма фактически начисленного расхода, руб."/>
+        <cell alias="rate1" colSpan="1" rowSpan="1" value="Процентная ставка, признаваемая рыночной для целей налогообложения, % годовых"/>
+        <cell alias="sum2" colSpan="1" rowSpan="1" value="Сумма расхода, соответствующая рыночному уровню, руб."/>
+        <cell alias="rate2" colSpan="1" rowSpan="1" value="Отклонение (превышение) Процентной ставки от рыночного уровня, % годовых"/>
+        <cell alias="sum3" colSpan="1" rowSpan="1" value="Сумма отклонения (превышения) расхода фактического от соответствующего рыночному уровню, руб."/>
+
+    </row>
+    <row alias="">
+        <cell alias="fix" colSpan="1" rowSpan="1" value=""/>
+        <cell alias="rowNumber" colSpan="1" rowSpan="1" value="1"/>
+        <cell alias="name" colSpan="1" rowSpan="1" value="2"/>
+        <cell alias="countryName" colSpan="1" rowSpan="1" value="3"/>
+        <cell alias="iksr" colSpan="1" rowSpan="1" value="4"/>
+        <cell alias="code" colSpan="1" rowSpan="1" value="5"/>
+        <cell alias="reasonNumber" colSpan="1" rowSpan="1" value="6"/>
+        <cell alias="reasonDate" colSpan="1" rowSpan="1" value="7"/>
+        <cell alias="rate" colSpan="1" rowSpan="1" value="8"/>
+        <cell alias="sum1" colSpan="1" rowSpan="1" value="9"/>
+        <cell alias="rate1" colSpan="1" rowSpan="1" value="10"/>
+        <cell alias="sum2" colSpan="1" rowSpan="1" value="11"/>
+        <cell alias="rate2" colSpan="1" rowSpan="1" value="12"/>
+        <cell alias="sum3" colSpan="1" rowSpan="1" value="13"/>
+    </row>
+</rows>

@@ -65,6 +65,9 @@ public class RefBookLinearPresenter extends PresenterWidget<RefBookLinearPresent
 
     @Override
     public void onDeleteRowClicked() {
+        if (getView().getSelectedRow()==null){
+            return;
+        }
         DeleteRefBookRowAction action = new DeleteRefBookRowAction();
         action.setRefBookId(refBookDataId);
         List<Long> rowsId = new ArrayList<Long>();

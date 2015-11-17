@@ -23,6 +23,11 @@ import groovy.transform.Field
  */
 
 switch (formDataEvent) {
+    case FormDataEvent.GET_HEADERS:
+        headers.get(0).comparePeriod = 'Период сравнения, ' + (isBank() ? 'млн. руб.' : 'тыс. руб.')
+        headers.get(0).currentPeriod = 'Период, ' + (isBank() ? 'млн. руб.' : 'тыс. руб.')
+        headers.get(1).deltaRub = '(гр.5-гр.4), ' + (isBank() ? 'млн. руб.' : 'тыс. руб.')
+        break
     case FormDataEvent.CREATE:
         formDataService.checkUnique(formData, logger)
         break
@@ -235,7 +240,7 @@ void logicCheck() {
         def tempRow = tempRows[i]
         def checkColumns = []
         // делаем проверку БО только для первичных НФ
-        if ((formData.kind == FormDataKind.PRIMARY) || !opuMap.keySet().contains(row.getAlias())) {
+        if ((formData.kind != FormDataKind.CONSOLIDATED) || !opuMap.keySet().contains(row.getAlias())) {
             checkColumns += check102Columns
         }
         checkColumns += checkCalcColumns
@@ -248,7 +253,7 @@ void calcValues(def dataRows, def sourceRows, boolean needShowMessage) {
     for (def alias in opuMap.keySet()) {
         def row = getDataRow(dataRows, alias)
         def rowSource = getDataRow(sourceRows, alias)
-        if (formData.kind == FormDataKind.PRIMARY) {
+        if (formData.kind != FormDataKind.CONSOLIDATED) {
             row.comparePeriod = calcBO(rowSource, getComparativePeriodId())
             row.currentPeriod = calcBO(rowSource, formData.reportPeriodId)
         } else {
@@ -310,10 +315,14 @@ def get102Sum(def row, def date) {
         if (records == null || records.isEmpty()) {
             return [0, false]
         }
-        def result = records.sum { it.TOTAL_SUM.numberValue } / 1000
+        def result = records.sum { it.TOTAL_SUM.numberValue } / (isBank() ? 1000000 : 1000)
         return [result, true]
     }
     return [0, true]
+}
+
+boolean isBank() {
+    return formData.departmentId == 1 // по ЧТЗ
 }
 
 void importData() {
@@ -396,10 +405,10 @@ void checkHeaderXls(def headerRows, def colCount, def rowCount, def tmpRow) {
     def headerMapping = [
             ([(headerRows[0][0]): getColumnName(tmpRow, 'rowNum')]),
             ([(headerRows[0][1]): getColumnName(tmpRow, 'indicatorName')]),
-            ([(headerRows[0][2]): getColumnName(tmpRow, 'comparePeriod')]),
-            ([(headerRows[0][3]): getColumnName(tmpRow, 'currentPeriod')]),
+            ([(headerRows[0][2]): ('Период сравнения, ' + (isBank() ? 'млн. руб.' : 'тыс. руб.'))]),
+            ([(headerRows[0][3]): ('Период, ' + (isBank() ? 'млн. руб.' : 'тыс. руб.'))]),
             ([(headerRows[0][4]): 'Изменение за период']),
-            ([(headerRows[1][4]): '(гр.4-гр.3), тыс.руб.']),
+            ([(headerRows[1][4]): ('(гр.4-гр.3), ' + (isBank() ? 'млн. руб.' : 'тыс. руб.'))]),
             ([(headerRows[1][5]): '(гр.5/гр.3*100),%'])
     ]
     (0..5).each { index ->
@@ -463,8 +472,17 @@ void consolidation() {
                 dataRows.each { row ->
                     def sourceRow = getDataRow(sourceRows, row.getAlias())
                     check102Columns.each { column ->
-                        row[column] = (row[column] ?: 0) + (sourceRow[column] ?: 0)
+                        row[column] = (row[column] ?: BigDecimal.ZERO) + ((source.departmentId == 1) ? 1000 : 1) * (sourceRow[column] ?: BigDecimal.ZERO)
                     }
+                }
+            }
+        }
+    }
+    if (isBank()) { // если уровень банка, то тысячи понижаем до миллионов
+        dataRows.each { row ->
+            ['comparePeriod', 'currentPeriod'].each { column ->
+                if (row[column]) {
+                    row[column] = (row[column] as BigDecimal).divide(BigDecimal.valueOf(1000), BigDecimal.ROUND_HALF_UP)
                 }
             }
         }

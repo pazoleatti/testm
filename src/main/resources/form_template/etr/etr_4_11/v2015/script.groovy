@@ -21,6 +21,11 @@ import groovy.transform.Field
  */
 
 switch (formDataEvent) {
+    case FormDataEvent.GET_HEADERS:
+        headers.get(0).sum1 = 'Сумма фактического дохода/расхода по нерыночным сделкам, ' + (isBank() ? 'млн. руб.' : 'тыс. руб.') + ' (налоговый учет)'
+        headers.get(0).sum2 = 'Сумма доначислений до рыночного уровня, ' + (isBank() ? 'млн. руб.' : 'тыс. руб.')
+        headers.get(0).taxBurden = 'Налоговое бремя, ' + (isBank() ? 'млн. руб.' : 'тыс. руб.')
+        break
     case FormDataEvent.CREATE:
         formDataService.checkUnique(formData, logger)
         break
@@ -154,15 +159,25 @@ void consolidation() {
                 for (sourceRow in sourceRows) {
                     def dataRow = dataRows.find { itRow -> itRow.name == sourceRow.name }
                     if (dataRow) {
-                        dataRow.sum1 = (dataRow.sum1 ?: 0) + (sourceRow.sum1 ?: 0)
-                        dataRow.sum2 = (dataRow.sum2 ?: 0) + (sourceRow.sum2 ?: 0)
+                        dataRow.sum1 = (dataRow.sum1 ?: 0) + ((source.departmentId == 1) ? 1000 : 1) * (sourceRow.sum1 ?: 0)
+                        dataRow.sum2 = (dataRow.sum2 ?: 0) + ((source.departmentId == 1) ? 1000 : 1) * (sourceRow.sum2 ?: 0)
                     } else {
                         def newRow = formData.createDataRow()
-                        ['name', 'sum1', 'sum2'].each { column ->
-                            newRow[column] = sourceRow[column]
+                        newRow.name = sourceRow.name
+                        ['sum1', 'sum2'].each { column ->
+                            newRow[column] = ((source.departmentId == 1) ? 1000 : 1) * sourceRow[column]
                         }
                         dataRows.add(newRow)
                     }
+                }
+            }
+        }
+    }
+    if (isBank()) { // если уровень банка, то тысячи понижаем до миллионов
+        dataRows.each { row ->
+            ['sum1', 'sum2'].each { column ->
+                if (row[column]) {
+                    row[column] = (row[column] as BigDecimal).divide(BigDecimal.valueOf(1000), BigDecimal.ROUND_HALF_UP)
                 }
             }
         }
@@ -171,6 +186,10 @@ void consolidation() {
     dataRows.sort { it.name }
     updateIndexes(dataRows)
     formDataService.getDataRowHelper(formData).allCached = dataRows
+}
+
+boolean isBank() {
+    return formData.departmentId == 1 // по ЧТЗ
 }
 
 void importData() {
@@ -243,10 +262,10 @@ void checkHeaderXls(def headerRows, def tmpRow) {
     def headerMapping = [
             ([(headerRows[0][0]): getColumnName(tmpRow, 'rowNum')]),//'№ п/п']),
             ([(headerRows[0][1]): getColumnName(tmpRow, 'name')]),//'Наименование сделки']),
-            ([(headerRows[0][2]): getColumnName(tmpRow, 'sum1')]),//'Сумма фактического дохода/расхода по нерыночным сделкам, тыс. руб. (налоговый учет)']),
-            ([(headerRows[0][3]): getColumnName(tmpRow, 'sum2')]),//'Сумма доначислений до рыночного уровня, тыс. руб.']),
+            ([(headerRows[0][2]): ('Сумма фактического дохода/расхода по нерыночным сделкам, ' + (isBank() ? 'млн. руб.' : 'тыс. руб.') + ' (налоговый учет)')]),//'Сумма фактического дохода/расхода по нерыночным сделкам, тыс. руб. (налоговый учет)']),
+            ([(headerRows[0][3]): ('Сумма доначислений до рыночного уровня, ' + (isBank() ? 'млн. руб.' : 'тыс. руб.'))]),//'Сумма доначислений до рыночного уровня, тыс. руб.']),
             ([(headerRows[0][4]): getColumnName(tmpRow, 'level')]),//'Уровень доначислений/ не учитываемых расходов (в % от факта)']),
-            ([(headerRows[0][5]): getColumnName(tmpRow, 'taxBurden')]),//'Налоговое бремя, тыс. руб.']),
+            ([(headerRows[0][5]): ('Налоговое бремя, ' + (isBank() ? 'млн. руб.' : 'тыс. руб.'))]),//'Налоговое бремя, тыс. руб.']),
             ([(headerRows[1][2]): 'данные из РНУ по соответствующему виду операций/сделок/продуктов']),
             ([(headerRows[1][3]): 'данные из РНУ по соответствующему виду операций/сделок/продуктов']),
             ([(headerRows[1][4]): '(гр.4/гр.3)*100']),

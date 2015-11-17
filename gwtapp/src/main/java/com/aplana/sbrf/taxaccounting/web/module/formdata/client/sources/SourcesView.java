@@ -310,8 +310,9 @@ public class SourcesView extends PopupViewWithUiHandlers<SourcesUiHandlers> impl
         if (isForm) {
             if (TaxType.ETR.equals(getUiHandlers().getTaxType())) {
                 table.addColumn(comparativePeriodColumn, "Период сравнения");
+            } else {
+                table.addColumn(monthColumn, "Месяц");
             }
-            table.addColumn(monthColumn, "Месяц");
             table.addColumn(performerColumn, "Исполнитель");
         } else {
             switch (getUiHandlers().getTaxType()) {

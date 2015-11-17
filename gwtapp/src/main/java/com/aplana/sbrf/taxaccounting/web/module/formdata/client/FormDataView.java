@@ -187,17 +187,12 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
     @UiField
     HorizontalPanel versionBlock;
     @UiField
-    LinkButton filesComments;
-    @UiField
-    LinkButton sources;
-    @UiField
-    LinkButton printToExcel;
-    @UiField
-    LinkButton printToCSV;
+    LinkButton filesComments, sources, printToExcel, printToCSV;
 
     private Timer timerExcel, timerCSV;
 
     public final static int DEFAULT_TABLE_TOP_POSITION = 104;
+    public final static int DEFAULT_RIGHT_BUTTONS_HEIGHT = 61;
     private final static int DEFAULT_REPORT_PERIOD_LABEL_WIDTH = 150;
     private final static int LOCK_INFO_BLOCK_HEIGHT = 25;
 
@@ -207,6 +202,11 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
     @Override
     public void updateTableTopPosition(int position) {
         tableTopPosition = position;
+    }
+
+    @Override
+    public void updateRightButtonsHeight(int height) {
+        linkButtonPanel.getElement().getStyle().setHeight(height, Style.Unit.PX);
     }
 
     @Inject

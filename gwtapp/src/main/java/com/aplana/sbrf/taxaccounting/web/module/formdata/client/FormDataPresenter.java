@@ -911,7 +911,13 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                                 formSearchPresenter.setFormDataId(formData.getId());
                                 formSearchPresenter.setFormTemplateId(formData.getFormTemplateId());
 
-                                getView().updateTableTopPosition(formData.getComparativePeriodId() != null ? FormDataView.DEFAULT_TABLE_TOP_POSITION + 20 : FormDataView.DEFAULT_TABLE_TOP_POSITION);
+                                if (formData.getComparativePeriodId() != null) {
+                                    getView().updateTableTopPosition(FormDataView.DEFAULT_TABLE_TOP_POSITION + 20);
+                                    getView().updateRightButtonsHeight(FormDataView.DEFAULT_RIGHT_BUTTONS_HEIGHT + 20);
+                                } else {
+                                    getView().updateTableTopPosition(FormDataView.DEFAULT_TABLE_TOP_POSITION);
+                                    getView().updateRightButtonsHeight(FormDataView.DEFAULT_RIGHT_BUTTONS_HEIGHT);
+                                }
 
                                 /**
                                  * Передаем призентору поиска по форме, данные о скрытых колонках
@@ -1188,7 +1194,11 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                                         manualMenuPresenter.updateNotificationCount();
                                     }
                                 }
-                                if (isForce || isUpdate || !result.getFormMode().equals(formMode) || result.getLockInfo().isEditMode() != lockEditMode || (taskName != null && !taskName.equals(result.getTaskName()) || taskName == null && result.getTaskName() != null))
+                                if (isForce || isUpdate || !result.getFormMode().equals(formMode) || result.getLockInfo().isEditMode() != lockEditMode || (taskName != null && !taskName.equals(result.getTaskName()) || taskName == null && result.getTaskName() != null)) {
+                                    edited = result.isEdited();
+                                    taskName = result.getTaskName();
+                                    lockEditMode = result.getLockInfo().isEditMode();
+                                    formMode = result.getFormMode();
                                     switch (result.getFormMode()) {
                                         case EDIT:
                                             if (readOnlyMode) {
@@ -1223,10 +1233,12 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                                             onTimerReport(ReportType.CSV, false);
                                             break;
                                     }
-                                edited = result.isEdited();
-                                taskName = result.getTaskName();
-                                lockEditMode = result.getLockInfo().isEditMode();
-                                formMode = result.getFormMode();
+                                } else {
+                                    edited = result.isEdited();
+                                    taskName = result.getTaskName();
+                                    lockEditMode = result.getLockInfo().isEditMode();
+                                    formMode = result.getFormMode();
+                                }
                             }
 
                             @Override

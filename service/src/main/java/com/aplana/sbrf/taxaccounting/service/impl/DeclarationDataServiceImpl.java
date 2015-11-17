@@ -215,7 +215,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
         //3. обновляет записи о консолидации
         ArrayList<Long> formDataIds = new ArrayList<Long>();
-        for (Relation relation : sourceService.getDeclarationSourcesInfo(declarationData, true, true, null, userInfo, logger)){
+        for (Relation relation : sourceService.getDeclarationSourcesInfo(declarationData, true, true, WorkflowState.ACCEPTED, userInfo, logger)){
             formDataIds.add(relation.getFormDataId());
         }
         //Обновление информации о консолидации.
@@ -229,15 +229,25 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     @Override
     public void check(Logger logger, long id, TAUserInfo userInfo, LockStateLogger lockStateLogger) {
         LOG.info(String.format("Проверка данных декларации/уведомления %s", id));
-        lockStateLogger.updateState("Проверка форм-источников");
         DeclarationData dd = declarationDataDao.get(id);
-        checkSources(dd, logger, userInfo);
-        lockStateLogger.updateState("Проверка данных декларации/уведомления");
-        declarationDataScriptingService.executeScript(userInfo, dd, FormDataEvent.CHECK, logger, null);
+        Logger scriptLogger = new Logger();
+        Logger validateLogger = new Logger();
+        try {
+            lockStateLogger.updateState("Проверка форм-источников");
+            checkSources(dd, logger, userInfo);
+            lockStateLogger.updateState("Проверка данных декларации/уведомления");
+            declarationDataScriptingService.executeScript(userInfo, dd, FormDataEvent.CHECK, scriptLogger, null);
+        } finally {
+            logger.getEntries().addAll(scriptLogger.getEntries());
+        }
         if (logger.containsLevel(LogLevel.ERROR)) {
             throw new ServiceException();
         }
-        validateDeclaration(userInfo, dd, logger, true, FormDataEvent.CHECK, lockStateLogger);
+        try {
+            validateDeclaration(userInfo, dd, validateLogger, true, FormDataEvent.CHECK, lockStateLogger);
+        } finally {
+            logger.getEntries().addAll(validateLogger.getEntries());
+        }
         if (logger.containsLevel(LogLevel.ERROR)) {
             throw new ServiceException();
         } else {
@@ -293,22 +303,27 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         declarationDataAccessService.checkEvents(userInfo, id, FormDataEvent.MOVE_CREATED_TO_ACCEPTED);
 
         DeclarationData declarationData = declarationDataDao.get(id);
-        lockStateLogger.updateState("Проверка форм-источников");
-        checkSources(declarationData, logger, userInfo);
-        if (logger.containsLevel(LogLevel.ERROR)) {
-            throw new ServiceException("Найдены ошибки при выполнении принятия декларации");
-        }
 
-        lockStateLogger.updateState("Проверка данных декларации/уведомления");
-        Map<String, Object> exchangeParams = new HashMap<String, Object>();
-        declarationDataScriptingService.executeScript(userInfo, declarationData, FormDataEvent.MOVE_CREATED_TO_ACCEPTED, logger, exchangeParams);
-        if (logger.containsLevel(LogLevel.ERROR)) {
-            throw new ServiceException("Найдены ошибки при выполнении принятия декларации");
+        Logger scriptLogger = new Logger();
+        Logger validateLogger = new Logger();
+        try {
+            lockStateLogger.updateState("Проверка форм-источников");
+            checkSources(declarationData, logger, userInfo);
+            lockStateLogger.updateState("Проверка данных декларации/уведомления");
+            declarationDataScriptingService.executeScript(userInfo, declarationData, FormDataEvent.CHECK, scriptLogger, null);
+        } finally {
+            logger.getEntries().addAll(scriptLogger.getEntries());
         }
-
-        validateDeclaration(userInfo, declarationDataDao.get(id), logger, true, FormDataEvent.MOVE_CREATED_TO_ACCEPTED, lockStateLogger);
+        if (logger.containsLevel(LogLevel.ERROR)) {
+            throw new ServiceException();
+        }
+        try {
+            validateDeclaration(userInfo, declarationData, validateLogger, true, FormDataEvent.CHECK, lockStateLogger);
+        } finally {
+            logger.getEntries().addAll(validateLogger.getEntries());
+        }
         if (logger.containsLevel(LogLevel.ERROR)){
-            throw new ServiceException("Найдены ошибки при выполнении принятия декларации");
+            throw new ServiceException();
         }
 
         declarationData.setAccepted(true);
@@ -596,10 +611,10 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             TaxType taxType = declarationTemplateService.get(declarationData.getDeclarationTemplateId()).getType().getTaxType();
             String declarationName = taxType == TaxType.DEAL ? "уведомлении" : "декларации";
             String operationName = operation == FormDataEvent.MOVE_CREATED_TO_ACCEPTED ? "Принять" : operation.getTitle();
-            String msg = String.format("В %s отсутствуют данные (не был выполнен расчет). Операция \"%s\" не может быть выполнена", declarationName, operationName);
-            throw new ServiceException(msg);
+            logger.error("В %s отсутствуют данные (не был выполнен расчет). Операция \"%s\" не может быть выполнена", declarationName, operationName);
+        } else {
+            validateDeclaration(userInfo, declarationData, logger, isErrorFatal, operation, null, lockStateLogger);
         }
-        validateDeclaration(userInfo, declarationData, logger, isErrorFatal, operation, null, lockStateLogger);
     }
 
     /**
@@ -619,15 +634,12 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 LOG.info(String.format("Выполнение проверок XSD-файла декларации %s", declarationData.getId()));
                 stateLogger.updateState("Выполнение проверок XSD-файла");
                 boolean valid = validateXMLService.validate(declarationData, userInfo, logger, isErrorFatal, xmlFile);
-                if (logger.containsLevel(LogLevel.ERROR)){
-                    throw new ServiceException();
-                } else if (!valid) {
-                    throw new ServiceLoggerException(VALIDATION_ERR_MSG, logEntryService.save(logger.getEntries()));
+                if (!logger.containsLevel(LogLevel.ERROR) && !valid) {
+                    logger.error(VALIDATION_ERR_MSG);
                 }
             } catch (Exception e) {
                 LOG.error(VALIDATION_ERR_MSG, e);
-                if (e.getMessage() != null && !e.getMessage().isEmpty()) logger.error(e);
-                throw new ServiceException();
+                logger.error(e);
             } finally {
                 Locale.setDefault(oldLocale);
             }

@@ -264,7 +264,7 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
     public List<FormData> find(List<Integer> departmentIds, int reportPeriodId) {
         HashMap<String, Object> paramMap = new HashMap<String, Object>();
         paramMap.put("rp", reportPeriodId);
-        return getNamedParameterJdbcTemplate().query("select fd.id, fd.form_template_id, fd.state, fd.kind, fd.form_template_id, " +
+        String sql = "select fd.id, fd.form_template_id, fd.state, fd.kind, fd.form_template_id, " +
                 "fd.return_sign, fd.period_order, fd.manual, fd.number_previous_row, fd.department_report_period_id, " +
                 "drp.report_period_id, drp.department_id, ft.type_id as type_id, fd.SORTED, fd.COMPARATIVE_DEP_REP_PER_ID, fd.ACCRUING " +
                 "from form_data fd \n" +
@@ -272,7 +272,8 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
                 "join form_template ft on ft.id = fd.form_template_id \n" +
                 "join form_type t on t.id = ft.type_id \n" +
                 "where " + (!departmentIds.isEmpty() ? SqlUtils.transformToSqlInStatement("drp.department_id", departmentIds) : "") +
-                "and drp.report_period_id = :rp order by drp.id", paramMap, new FormDataWithoutRowMapperWithType());
+                "and drp.report_period_id = :rp order by drp.id";
+        return getNamedParameterJdbcTemplate().query(sql, paramMap, new FormDataWithoutRowMapperWithType());
     }
 
 

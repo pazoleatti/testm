@@ -73,7 +73,7 @@ public final class MessageGenerator {
         return getFDMsg(mainStr, formTypeName, kindName, departmentName, periodOrder, manual, reportPeriodName, fullRpComparisonName, year, commpYear, correctionDate, false, true);
     }
 
-    public static String getFDMsg(String mainStr, String formTypeName, String kindName, String departmentName, Integer periodOrder, boolean manual, String reportPeriodName, String fullRpComparisonName, int year, Integer commpYear, Date correctionDate, boolean isShowChecked, boolean isAbsolute){
+    private static String getFDMsg(String mainStr, String formTypeName, String kindName, String departmentName, Integer periodOrder, boolean manual, String reportPeriodName, String fullRpComparisonName, int year, Integer commpYear, Date correctionDate, boolean isShowChecked, boolean isAbsolute){
         if (fullRpComparisonName == null) {
             return String.format(COMPLETE_FORM,
                     mainStr,
@@ -101,10 +101,10 @@ public final class MessageGenerator {
         }
     }
 
-    public static String getFDMsg(String mainStr, String formTypeName, String kindName, boolean isAccruing, String departmentName, Integer periodOrder, boolean manual, DepartmentReportPeriod reportPeriod, DepartmentReportPeriod rpComparison, boolean isShowChecked, boolean isAbsolute){
+    private static String getFDMsg(String mainStr, String formTypeName, String kindName, boolean isAccruing, String departmentName, Integer periodOrder, boolean manual, DepartmentReportPeriod reportPeriod, DepartmentReportPeriod rpComparison, boolean isShowChecked, boolean isAbsolute){
         return getFDMsg(mainStr, formTypeName, kindName, departmentName, periodOrder, manual,
                 isAccruing ? reportPeriod.getReportPeriod().getAccName() : reportPeriod.getReportPeriod().getName(),
-                rpComparison != null ? rpComparison.getReportPeriod().getName(): null,
+                rpComparison != null ? isAccruing ? rpComparison.getReportPeriod().getAccName() : rpComparison.getReportPeriod().getName() : null,
                 reportPeriod.getReportPeriod().getTaxPeriod().getYear(),
                 rpComparison != null ? rpComparison.getReportPeriod().getTaxPeriod().getYear() : null,
                 reportPeriod.getCorrectionDate(),

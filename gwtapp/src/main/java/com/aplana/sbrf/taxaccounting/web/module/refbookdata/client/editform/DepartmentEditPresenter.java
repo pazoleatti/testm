@@ -62,7 +62,10 @@ public class DepartmentEditPresenter extends AbstractEditPresenter<DepartmentEdi
             getView().updateRefBookPickerPeriod();
             return;
         }
-        previousURId = refBookRecordId;
+        if (getPreviousURId()!=null&&getPreviousURId().equals(refBookRecordId)){
+            return;
+        }
+        setPreviousURId(refBookRecordId);
         GetRefBookRecordAction action = new GetRefBookRecordAction();
         action.setRefBookId(currentRefBookId);
         action.setRefBookRecordId(refBookRecordId);
@@ -213,7 +216,7 @@ public class DepartmentEditPresenter extends AbstractEditPresenter<DepartmentEdi
     }
 
     @Override
-    public void clean(Boolean isVersion) {
+    public void clean(boolean isVersion) {
         //isVersion всегда должен быть null или false
         currentUniqueRecordId = null;
         getView().fillInputFields(new HashMap<String, RefBookValueSerializable>());

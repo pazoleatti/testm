@@ -281,17 +281,17 @@ public class Etr4_9_SummaryTest extends ScriptTestBase {
 
         DataRow<Cell> row = sourceFormData.createDataRow();
         row.setAlias("R1");
-        row.getCell("currentPeriod").setValue(i, null);
+        row.getCell("currentPeriod").setValue(i * (i != 1 ? 1000 : 1), null);
         dataRows.add(row);
 
         DataRow<Cell> row2 = sourceFormData.createDataRow();
         row2.setAlias("R2");
-        row2.getCell("currentPeriod").setValue(i * 2, null);
+        row2.getCell("currentPeriod").setValue(i * 2 * (i != 1 ? 1000 : 1), null);
         dataRows.add(row2);
 
         DataRow<Cell> row3 = sourceFormData.createDataRow();
         row3.setAlias("R3");
-        row3.getCell("currentPeriod").setValue(i * 3, null);
+        row3.getCell("currentPeriod").setValue(i * 3 * (i != 1 ? 1000 : 1), null);
         dataRows.add(row3);
 
         return dataRows;

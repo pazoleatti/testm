@@ -4,7 +4,7 @@
     <monthly>false</monthly>
     <comparative>false</comparative>
     <accruing>false</accruing>
-    <updating>true</updating>
+    <updating>false</updating>
     <name>Приложение 4.1. (9 месяцев)</name>
     <fullName>Приложение 4.1. Отчет в отношении доходов и расходов Банка по сделкам с российскими ВЗЛ, применяющими Общий режим налогообложения за 9 месяцев</fullName>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="autoNumerationColumn">
@@ -82,7 +82,7 @@
         <alias>sum45</alias>
         <checking>false</checking>
         <columnType>NUMBER</columnType>
-        <name>Сделки с лицами, информация о которых не  отражена в Журнале взаиморасчетов</name>
+        <name>Сделки с лицами, информация о которых не отражена в Журнале взаиморасчетов</name>
         <order>8</order>
         <width>6</width>
         <maxLength>15</maxLength>
@@ -142,7 +142,7 @@
         <alias>sum55</alias>
         <checking>false</checking>
         <columnType>NUMBER</columnType>
-        <name>Сделки с лицами, информация о которых не  отражена в Журнале взаиморасчетов</name>
+        <name>Сделки с лицами, информация о которых не отражена в Журнале взаиморасчетов</name>
         <order>14</order>
         <width>6</width>
         <maxLength>15</maxLength>

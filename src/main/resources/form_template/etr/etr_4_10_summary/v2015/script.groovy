@@ -19,6 +19,11 @@ import groovy.transform.Field
  */
 
 switch (formDataEvent) {
+    case FormDataEvent.GET_HEADERS:
+        headers.get(0).taxBurden = 'Налоговое бремя, ' + (isBank() ? 'млн. руб.' : 'тыс. руб.')
+        headers.get(1).sum1 = 'не учитываемые расходы, ' + (isBank() ? 'млн. руб.' : 'тыс. руб.')
+        headers.get(1).sum2 = 'доначисление доходов, ' + (isBank() ? 'млн. руб.' : 'тыс. руб.')
+        break
     case FormDataEvent.CREATE:
         formDataService.checkUnique(formData, logger)
         break
@@ -139,9 +144,18 @@ void consolidation() {
                 newRow.department = it.departmentId
                 // графа 3..5
                 commonColumns.each { column ->
-                    newRow[column] = row[column]
+                    newRow[column] = ((source.departmentId == 1) ? 1000 : 1) * row[column]
                 }
                 dataRows.add(newRow)
+            }
+        }
+    }
+    if (isBank()) { // если уровень банка, то тысячи понижаем до миллионов
+        dataRows.each { row ->
+            commonColumns.each { column ->
+                if (row[column]) {
+                    row[column] = (row[column] as BigDecimal).divide(BigDecimal.valueOf(1000), BigDecimal.ROUND_HALF_UP)
+                }
             }
         }
     }
@@ -161,6 +175,10 @@ def getDepartmentName(Integer id) {
         departmentNameMap[id] = departmentService.get(id).name
     }
     return departmentNameMap[id]
+}
+
+boolean isBank() {
+    return formData.departmentId == 1 // по ЧТЗ
 }
 
 void importData() {
@@ -256,9 +274,9 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
             ([(headerRows[0][0]): getColumnName(tmpRow, 'rowNum')]),
             ([(headerRows[0][2]): getColumnName(tmpRow, 'department')]),
             ([(headerRows[0][3]): 'Сумма увеличения базы по налогу на прибыль, в том числе']),
-            ([(headerRows[0][5]): getColumnName(tmpRow, 'taxBurden')]),
-            ([(headerRows[1][3]): 'не учитываемые расходы, тыс. руб.']),
-            ([(headerRows[1][4]): 'доначисление доходов, тыс. руб.']),
+            ([(headerRows[0][5]): ('Налоговое бремя, ' + (isBank() ? 'млн. руб.' : 'тыс. руб.'))]),
+            ([(headerRows[1][3]): ('не учитываемые расходы, ' + (isBank() ? 'млн. руб.' : 'тыс. руб.'))]),
+            ([(headerRows[1][4]): ('доначисление доходов, ' + (isBank() ? 'млн. руб.' : 'тыс. руб.'))]),
             ([(headerRows[2][3]): '(РНУ-108 гр.13+РНУ-115 гр.20+ РНУ-116 гр.20)']),
             ([(headerRows[2][4]): '(РНУ-107 гр.12+ РНУ-110 гр.11+ РНУ-111 гр.13+ РНУ-115 гр.19+ РНУ-116 гр.19+РНУ-114 гр.16)']),
             ([(headerRows[2][5]): '(гр.1+гр.2)*20%']),

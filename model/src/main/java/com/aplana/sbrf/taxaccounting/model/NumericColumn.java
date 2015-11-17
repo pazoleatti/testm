@@ -21,13 +21,13 @@ public class NumericColumn extends Column implements Serializable {
 	 * Максимально допустимое значение точности для числового столбца
 	 * (ограничение налагается возможностями БД и деталями описания таблицы NUMERIC_VALUE)
 	 */
-	public static final int MAX_PRECISION = 8;
+	public static final int MAX_PRECISION = 19;
 	
 	/**
 	 * Максимально допустимое колличество значений для числового столбца
 	 * (ограничение налагается возможностями БД и деталями описания таблицы NUMERIC_VALUE)
 	 */
-	public static final int MAX_LENGTH = 27;
+	public static final int MAX_LENGTH = 38;
 
 	private int precision = 0;
 	
@@ -55,7 +55,7 @@ public class NumericColumn extends Column implements Serializable {
 	 * @param precision желаемое значение точности
 	 */
 	public void setPrecision(int precision) {
-		if (precision < 0 || precision > MAX_LENGTH) {
+		if (precision < 0 || precision > MAX_PRECISION) {
 			throw new IllegalArgumentException("Value " + precision + " is not supported by 'precision' field");
 		}
 		this.precision = precision;
@@ -72,6 +72,9 @@ public class NumericColumn extends Column implements Serializable {
 	}
 
 	public void setMaxLength(int maxLength) {
+        if (maxLength<0||maxLength>MAX_LENGTH){
+            throw new IllegalArgumentException("Value " + precision + " is not supported by 'precision' field");
+        }
 		this.maxLength = maxLength;
 	}
 

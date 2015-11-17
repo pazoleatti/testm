@@ -8,7 +8,7 @@
             <fm:HeaderContainer>
                 <fm:resizable>
                     <fm:Resizable>
-                        <g:Label text="Импорт справочников"/>
+                        <g:Label text="Импорт скриптов"/>
                     </fm:Resizable>
                 </fm:resizable>
             </fm:HeaderContainer>

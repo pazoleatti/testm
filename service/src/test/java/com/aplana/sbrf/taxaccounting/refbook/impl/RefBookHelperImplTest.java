@@ -1,12 +1,8 @@
 package com.aplana.sbrf.taxaccounting.refbook.impl;
 
-import com.aplana.sbrf.taxaccounting.model.Cell;
-import com.aplana.sbrf.taxaccounting.model.Column;
-import com.aplana.sbrf.taxaccounting.model.DataRow;
-import com.aplana.sbrf.taxaccounting.model.RefBookColumn;
-import com.aplana.sbrf.taxaccounting.model.ReferenceColumn;
-import com.aplana.sbrf.taxaccounting.model.StringColumn;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.model.util.FormDataUtils;
@@ -17,13 +13,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
@@ -64,9 +54,17 @@ public class RefBookHelperImplTest {
 		refBook1.setId(1L);
 		when(refBookFactory.getByAttribute(1L)).thenReturn(refBook1);
 		RefBook refBook2 = new RefBook();
-		refBook2.setId(2L);
+        refBook2.setId(2L);
+        List<RefBookAttribute> attributes = new ArrayList<RefBookAttribute>();
+        RefBookAttribute attribute1 = new RefBookAttribute();
+        attribute1.setId(4L);
+        attribute1.setAttributeType(RefBookAttributeType.DATE);
+        attribute1.setFormat(Formats.DD_MM_YYYY);
+        attributes.add(attribute1);
+        refBook2.setAttributes(attributes);
 		when(refBookFactory.getByAttribute(2L)).thenReturn(refBook2);
-		when(refBookFactory.getByAttribute(3L)).thenReturn(refBook2);
+        when(refBookFactory.getByAttribute(3L)).thenReturn(refBook2);
+        when(refBookFactory.getByAttribute(4L)).thenReturn(refBook2);
 
 		Map<Long, RefBookValue> result1 = new HashMap<Long, RefBookValue>();
 		result1.put(1L, new RefBookValue(RefBookAttributeType.STRING, "Россия"));
@@ -83,6 +81,10 @@ public class RefBookHelperImplTest {
 		Map<Long, RefBookValue> result3 = new HashMap<Long, RefBookValue>();
 		result3.put(2L, new RefBookValue(RefBookAttributeType.REFERENCE, 1L));
 		when(provider2.dereferenceValues(3L, recordIds2)).thenReturn(result3);
+
+        Map<Long, RefBookValue> result4 = new HashMap<Long, RefBookValue>();
+        result4.put(2L, new RefBookValue(RefBookAttributeType.DATE, (new GregorianCalendar(2015, Calendar.FEBRUARY, 10)).getTime()));
+        when(provider2.dereferenceValues(4L, recordIds2)).thenReturn(result4);
 
 		when(refBookFactory.getDataProvider(1L)).thenReturn(provider1);
 		when(refBookFactory.getDataProvider(2L)).thenReturn(provider2);
@@ -116,8 +118,14 @@ public class RefBookHelperImplTest {
 		refColumn.setParentId(2);
 		refColumn.setRefBookAttributeId(3L);
 		refColumn.setRefBookAttributeId2(1L);
+        ReferenceColumn dateColumn = new ReferenceColumn();
+        dateColumn.setAlias("date");
+        dateColumn.setId(4);
+        dateColumn.setParentId(2);
+        dateColumn.setRefBookAttributeId(4L);
+        dateColumn.setRefBookAttributeId2(null);
 
-		List<Column> columns = Arrays.asList(new Column[] {sColumn, rbColumn, refColumn});
+		List<Column> columns = Arrays.asList(new Column[] {sColumn, rbColumn, refColumn, dateColumn});
 
 		List<DataRow<Cell>> dataRows = new ArrayList<DataRow<Cell>>();
 		DataRow<Cell> dataRow = createDataRow(columns);
@@ -138,7 +146,9 @@ public class RefBookHelperImplTest {
 		assertEquals("Договор №1", dataRow.getCell(sColumn.getAlias()).getStringValue());
 		assertEquals("435", dataRow.getCell(rbColumn.getAlias()).getRefBookDereference());
 		assertEquals("Россия", dataRow.getCell(refColumn.getAlias()).getRefBookDereference());
+        assertEquals("10.02.2015", dataRow.getCell(dateColumn.getAlias()).getRefBookDereference());
 
 		assertEquals("", dataRow2.getCell(rbColumn.getAlias()).getRefBookDereference());
-	}
+        assertEquals("", dataRow2.getCell(dateColumn.getAlias()).getRefBookDereference());
+    }
 }

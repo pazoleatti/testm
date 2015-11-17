@@ -24,6 +24,11 @@ import groovy.transform.Field
  */
 
 switch (formDataEvent) {
+    case FormDataEvent.GET_HEADERS:
+        headers.get(0).comparePeriod = 'Период сравнения, ' + (isBank() ? 'млн. руб.' : 'тыс. руб.')
+        headers.get(0).currentPeriod = 'Период, ' + (isBank() ? 'млн. руб.' : 'тыс. руб.')
+        headers.get(1).deltaRub = '(гр.5-гр.4), ' + (isBank() ? 'млн. руб.' : 'тыс. руб.')
+        break
     case FormDataEvent.CREATE:
         formDataService.checkUnique(formData, logger)
         break
@@ -195,7 +200,7 @@ void logicCheck() {
         def tempRow = tempRows[i]
         def checkColumns = []
         // делаем проверку для первичных НФ или расчетных ячеек
-        if ((formData.kind == FormDataKind.PRIMARY) || !opuMap.keySet().contains(row.getAlias())) {
+        if ((formData.kind != FormDataKind.CONSOLIDATED) || !opuMap.keySet().contains(row.getAlias())) {
             checkColumns += check102Columns
         }
         checkColumns += checkCalcColumns
@@ -208,7 +213,7 @@ void calcValues(def dataRows, def sourceRows, boolean isCalc) {
     for (def alias in opuMap.keySet()) {
         def row = getDataRow(dataRows, alias)
         def rowSource = getDataRow(sourceRows, alias)
-        if (formData.kind == FormDataKind.PRIMARY) {
+        if (formData.kind != FormDataKind.CONSOLIDATED) {
             if ("R1".equals(alias) && !isBank()) {
                 row.comparePeriod = getSourceValue(getComparativePeriodId(), row, 'comparePeriod', isCalc)
                 row.currentPeriod = getSourceValue(formData.reportPeriodId, row, 'currentPeriod', isCalc)
@@ -269,7 +274,7 @@ def getSourceValue(def periodId, def row, def alias, def isCalc) {
             if (isCalc) { // выводить только при расчете
                 // 4. Проверка наличия принятой источника «Величины налоговых платежей, вводимые вручную» (предрасчетные проверки)
                 logger.warn("Не найдена форма-источник «Величины налоговых платежей, вводимые вручную» в статусе «Принята»: Тип: \"%s/%s\", Период: \"%s %s\", Подразделение: \"%s\". Ячейки по графе «%s», заполняемые из данной формы, будут заполнены нулевым значением.",
-                        FormDataKind.CONSOLIDATED.name, FormDataKind.PRIMARY.name, getPeriodName(order), reportPeriod.getTaxPeriod().getYear(), departmentService.get(formData.departmentId)?.name, getColumnName(row, alias))
+                        FormDataKind.CONSOLIDATED.title, FormDataKind.PRIMARY.title, getPeriodName(order), reportPeriod.getTaxPeriod().getYear(), departmentService.get(formData.departmentId)?.name, getColumnName(row, alias))
             }
         }
         periods.each { period ->
@@ -285,7 +290,7 @@ def getSourceValue(def periodId, def row, def alias, def isCalc) {
                 if (isCalc) { // выводить только при расчете
                     // 4. Проверка наличия принятой источника «Величины налоговых платежей, вводимые вручную» (предрасчетные проверки)
                     logger.warn("Не найдена форма-источник «Величины налоговых платежей, вводимые вручную» в статусе «Принята»: Тип: \"%s/%s\", Период: \"%s %s\", Подразделение: \"%s\". Ячейки по графе «%s», заполняемые из данной формы, будут заполнены нулевым значением.",
-                            FormDataKind.CONSOLIDATED.name, FormDataKind.PRIMARY.name, period.getName(), period.getTaxPeriod().getYear(), departmentService.get(formData.departmentId)?.name, getColumnName(row, alias))
+                            FormDataKind.CONSOLIDATED.title, FormDataKind.PRIMARY.title, period.getName(), period.getTaxPeriod().getYear(), departmentService.get(formData.departmentId)?.name, getColumnName(row, alias))
                 }
             }
         }
@@ -311,7 +316,7 @@ def getPeriodName(def order) {
 }
 
 def getSourceForm(def formDataKind, def periodId) {
-    def source = formDataService.getLast(sourceFormTypeId, formDataKind, formData.departmentId, periodId, formData.periodOrder, formData.comparativePeriodId, formData.accruing)
+    def source = formDataService.getLast(sourceFormTypeId, formDataKind, formData.departmentId, periodId, formData.periodOrder, null, false)
     if (source != null && source.state == WorkflowState.ACCEPTED) {
         return formDataService.getDataRowHelper(source)
     }
@@ -348,11 +353,11 @@ def get102Sum(def row, def date) {
         }
         switch (row.getAlias()) {
             case 'R1' :
-                return [records.sum { it.TOTAL_SUM.numberValue } / 1000, true]
+                return [records.sum { it.TOTAL_SUM.numberValue } / (isBank() ? 1000000 : 1000), true]
             case 'R2' :
                 def minuend = records.sum { '01000'.equals(it.OPU_CODE.stringValue) ? it.TOTAL_SUM.numberValue : BigDecimal.ZERO }
                 def subtrahend = records.sum { '02000'.equals(it.OPU_CODE.stringValue) ? it.TOTAL_SUM.numberValue : BigDecimal.ZERO }
-                return [(minuend - subtrahend) / 1000, true]
+                return [(minuend - subtrahend) / (isBank() ? 1000000 : 1000), true]
         }
     }
     return [0, true]
@@ -443,10 +448,10 @@ void checkHeaderXls(def headerRows, def colCount, def rowCount, def tmpRow) {
             ([(headerRows[0][0]): getColumnName(tmpRow, 'rowNum')]),
             ([(headerRows[0][1]): getColumnName(tmpRow, 'taxName')]),
             ([(headerRows[0][2]): getColumnName(tmpRow, 'symbol102')]),
-            ([(headerRows[0][3]): getColumnName(tmpRow, 'comparePeriod')]),
-            ([(headerRows[0][4]): getColumnName(tmpRow, 'currentPeriod')]),
+            ([(headerRows[0][3]): ('Период сравнения, ' + (isBank() ? 'млн. руб.' : 'тыс. руб.'))]),
+            ([(headerRows[0][4]): ('Период, ' + (isBank() ? 'млн. руб.' : 'тыс. руб.'))]),
             ([(headerRows[0][5]): 'Изменение за период']),
-            ([(headerRows[1][5]): '(гр.5-гр.4), тыс.руб.']),
+            ([(headerRows[1][5]): ('(гр.5-гр.4), ' + (isBank() ? 'млн. руб.' : 'тыс. руб.'))]),
             ([(headerRows[1][6]): '(гр.6/гр.4*100),%'])
     ]
     (0..6).each { index ->
@@ -514,8 +519,17 @@ void consolidation() {
                 dataRows.each { row ->
                     def sourceRow = getDataRow(sourceRows, row.getAlias())
                     check102Columns.each { column ->
-                        row[column] = (row[column] ?: 0) + (sourceRow[column] ?: 0)
+                        row[column] = (row[column] ?: BigDecimal.ZERO) + ((formDataSource.departmentId == 1) ? 1000 : 1) * (sourceRow[column] ?: BigDecimal.ZERO)
                     }
+                }
+            }
+        }
+    }
+    if (isBank()) { // если уровень банка, то тысячи понижаем до миллионов
+        dataRows.each { row ->
+            check102Columns.each { column ->
+                if (row[column]) {
+                    row[column] = (row[column] as BigDecimal).divide(BigDecimal.valueOf(1000), BigDecimal.ROUND_HALF_UP)
                 }
             }
         }
