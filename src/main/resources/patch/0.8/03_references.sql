@@ -236,6 +236,10 @@ insert into ref_book_record (id, record_id, ref_book_id, version, status) values
 	insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 5121, '11');
 	insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 5122, 'Физическое лицо, его супруг (супруга), родители (в том числе усыновители), дети (в том числе усыновленные), полнородные и неполнородные братья и сестры, опекун (попечитель) и подопечный');
 
+insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 15, 512, to_date('01.01.2008', 'DD.MM.YYYY'), 0);
+	insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 5121, '12');
+	insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 5122, 'Иные основания');
+
 
 ----------------------------------------------------------------------------------------------------------------
 --http://jira.aplana.com/browse/SBRFACCTAX-12853: Код организации
