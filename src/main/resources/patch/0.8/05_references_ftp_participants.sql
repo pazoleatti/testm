@@ -4310,4 +4310,7 @@ insert into ref_book_record (id, record_id, ref_book_id, version, status) values
 	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5214, record_id from ref_book_value where attribute_id = 5121 and string_value = '9';
 	
 update ref_book_value set string_value = trim(string_value) where attribute_id in (select id from ref_book_attribute where ref_book_id = 520) and string_value <> trim(string_value);
+
+COMMIT;
+EXIT;
 	
