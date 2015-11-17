@@ -76,7 +76,7 @@ public class RefBookHierPresenter extends Presenter<RefBookHierPresenter.MyView,
 
     @Override
     public void onRelevanceDateChanged() {
-        commonEditPresenter.clean(null);
+        commonEditPresenter.clean(false);
         commonEditPresenter.setNeedToReload();
         SearchButtonEvent.fire(this, getView().getRelevanceDate(), getView().getSearchPattern());
     }
@@ -139,6 +139,12 @@ public class RefBookHierPresenter extends Presenter<RefBookHierPresenter.MyView,
         commonEditPresenter.setVersionMode(false);
         commonEditPresenter.show(uniqueRecordId);
         //registrations[1].removeHandler();
+    }
+
+    @Override
+    public void onBackClicked() {
+        hierEditFormPresenter.setPreviousURId(null);
+        departmentEditPresenter.setPreviousURId(null);
     }
 
     @Override

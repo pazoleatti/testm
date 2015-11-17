@@ -16,4 +16,5 @@ public interface RefBookHierUIHandlers extends UiHandlers {
     void searchButtonClicked();
     void onAddRowClicked();
     void onBackToRefBookAnchorClicked();
+    void onBackClicked();
 }

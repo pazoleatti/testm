@@ -83,7 +83,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 	private static final String DATE_VALUE_COLUMN_ALIAS = "date_value";
 	private static final String REFERENCE_VALUE_COLUMN_ALIAS = "reference_value";
 
-    private static final String FORM_LINK_MSG = "Существует экземпляр %sформы, который содержит ссылку на запись! Тип: \"%s\", Вид: \"%s\", Подразделение: \"%s\", Период: \"%s\"%s%s%s%s.";
+    private static final String FORM_LINK_MSG = "Существует экземпляр %sформы%s, который содержит ссылку на запись! Тип: \"%s\", Вид: \"%s\", Подразделение: \"%s\", Период: \"%s\"%s%s%s%s.";
     private static final String REF_BOOK_LINK_MSG = "Существует ссылка на запись справочника. Справочник \"%s\", запись: \"%s\"%s.";
 
 	@Autowired
@@ -1838,23 +1838,6 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
                 refBookId, versionFrom, recordId);
     }
 
-    private static final String CHECK_USAGES_IN_FORMS = "with forms as (\n" +
-            "  select fd.*, drp.report_period_id as report_period_id, drp.department_id as department_id, drp.correction_date as correctionDate  from form_data fd \n" +
-            "  join department_report_period drp on drp.id = fd.department_report_period_id \n" +
-            "  join form_data_ref_book fdrf on fdrf.form_data_id = fd.id \n" +
-            "  where %s\n" +
-            ")" +
-            "select distinct t.tax_type, f.kind as formKind, t.name as formType, d.path as departmentPath, d.type as departmentType, rp.name as reportPeriodName, tp.year as year, f.period_order as month, f.correctionDate as correctionDate from forms f \n" +
-            "join (select d.id, d.type, substr(sys_connect_by_path(name,'/'), 2) as path \n" +
-            "\t\tfrom department d \n" +
-            "\t\twhere d.id in (select department_id from forms) \n" +
-            "\t\tstart with d.id = 0 \n" +
-            "\t\tconnect by prior d.id = d.parent_id) d on d.id=f.department_id \n" +
-            "join form_template ft on ft.id = f.form_template_id \n" +
-            "join form_type t on t.id = ft.type_id \n" +
-            "join report_period rp on rp.id = f.report_period_id\n" +
-            "join tax_period tp on tp.id = rp.tax_period_id";
-
     private static final String CHECK_USAGES_IN_DEPARTMENT_CONFIG = "select * from (with checkRecords as (select * from ref_book_record r where %s),\n" +
             "periodCodes as (select a.alias, v.* from ref_book_value v, ref_book_attribute a where v.attribute_id=a.id and a.ref_book_id=8),\n" +
             "usages as (select r.* from ref_book_value v, ref_book_record r, checkRecords cr " +
@@ -1884,69 +1867,19 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             "where taxCode is not null and ((isI = 1 and taxCode = 'I') or (isT = 1 and taxCode = 'T') or (isD = 1 and taxCode = 'D') or (isV = 1 and taxCode = 'V') or (isP = 1 and taxCode = 'P'))";
 
     @Override
-    public List<String> isVersionUsed(Long refBookId, List<Long> uniqueRecordIds, Date versionFrom, Date versionTo,
-                                      Boolean restrictPeriod, List<Long> excludedRefBooks) {
+    public List<String> isVersionUsedInDepartmentConfigs(Long refBookId, List<Long> uniqueRecordIds, Date versionFrom, Date versionTo,
+                                                         Boolean restrictPeriod, List<Long> excludedRefBooks) {
         Set<String> results = new HashSet<String>();
-        String in;
-        String sql;
         Map<String, Object> params = new HashMap<String, Object>();
-        //Проверка использования в справочниках
-        results.addAll(isVersionUsedInRefBooks(refBookId, uniqueRecordIds, versionFrom, versionTo, restrictPeriod, excludedRefBooks));
-
-        try {
-            //Проверка использования в налоговых формах
-            in = transformToSqlInStatement("fdrf.record_id", uniqueRecordIds);
-            sql = String.format(CHECK_USAGES_IN_FORMS, in);
-            params.clear();
-            params.put("refBookId", refBookId);
-            if (restrictPeriod != null) {
-                if (restrictPeriod) {
-                    //Отбираем только ссылки пересекающиеся с указанным периодом
-                    sql  += " WHERE ((rp.calendar_start_date >= :versionFrom and (rp.end_date is null or :versionTo is null or rp.end_date <= :versionTo)) or " +
-                            "(rp.calendar_start_date <= :versionFrom and (rp.end_date is null or rp.end_date >= :versionFrom)))";
-                    params.put("versionFrom", versionFrom);
-                    params.put("versionTo", versionTo);
-                } else {
-                    //Отбираем только ссылки НЕ попадающие в указанный период
-                    sql  += " WHERE ((:versionTo is not null and :versionTo < rp.calendar_start_date) or " +
-                            "(rp.end_date is not null and rp.end_date < :versionFrom))";
-                    params.put("versionFrom", versionFrom);
-                    params.put("versionTo", versionTo);
-                }
-            }
-            results.addAll(getNamedParameterJdbcTemplate().query(sql, params, new RowMapper<String>() {
-                @Override
-                public String mapRow(ResultSet rs, int rowNum) throws SQLException {
-                    Integer month = SqlUtils.getInteger(rs, "month");
-                    Date correctionDate = rs.getDate("correctionDate");
-                    return String.format(
-                            FORM_LINK_MSG,
-                            rs.getString("tax_type").charAt(0) == TaxType.ETR.getCode() ? " " : "налоговой ",
-                            FormDataKind.fromId(SqlUtils.getInteger(rs, "formKind")).getTitle(),
-                            rs.getString("formType"),
-                            (SqlUtils.getInteger(rs, "departmentType") != 1) ?
-                                    rs.getString("departmentPath").substring(rs.getString("departmentPath").indexOf("/") + 1) :
-                                    rs.getString("departmentPath"),
-                            rs.getString("reportPeriodName") + " " + rs.getString("year"),
-                            "", //TODO: позже добавить информацию по формам ЭНС
-                            month != null ? "Месяц: \"" + Formats.getRussianMonthNameWithTier(month) + "\"" : "",
-                            correctionDate != null ? "Дата сдачи корректировки: \"" + SDF_DD_MM_YYYY.format(correctionDate) + "\"" : "",
-                            "" //TODO: позже добавить информацию по расчету нарастающим итогом
-                    );
-                }
-            }));
-        } catch (EmptyResultDataAccessException e) {
-            //do nothing
-        }
 
         try {
             //Проверка использования в настройках подразделений
-            in = transformToSqlInStatement("r.id", uniqueRecordIds);
+            String in = transformToSqlInStatement("r.id", uniqueRecordIds);
             String inExcludedRefBook = "";
             if (excludedRefBooks != null && !excludedRefBooks.isEmpty()) {
                 inExcludedRefBook = " and " + transformToSqlInStatement("ref_book_id not ", excludedRefBooks);
             }
-            sql = String.format(CHECK_USAGES_IN_DEPARTMENT_CONFIG, in, inExcludedRefBook);
+            String sql = String.format(CHECK_USAGES_IN_DEPARTMENT_CONFIG, in, inExcludedRefBook);
             params.clear();
             if (restrictPeriod != null) {
                 if (restrictPeriod) {
@@ -1974,10 +1907,93 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
                     return result.toString();
                 }
             }));
+            return new ArrayList<String>(results);
         } catch (EmptyResultDataAccessException e) {
-            //do nothing
+            return new ArrayList<String>(0);
+        } catch (DataAccessException e) {
+            LOG.error("Проверка использования в настройках подразделений", e);
+            throw new DaoException("Проверка использования в настройках подразделений", e);
         }
-        return new ArrayList<String>(results);
+    }
+
+    private static final String CHECK_USAGES_IN_FORMS = "with forms as (\n" +
+            "  select fd.*, drp.report_period_id as report_period_id, drp.department_id as department_id, drp.correction_date as correctionDate  from form_data fd \n" +
+            "  join department_report_period drp on drp.id = fd.department_report_period_id \n" +
+            "  join form_data_ref_book fdrf on fdrf.form_data_id = fd.id \n" +
+            "  where %s\n" +
+            ")" +
+            "select distinct f.id as formDataId, f.state, t.id as  formTypeId, t.tax_type, f.kind as formKind, t.name as formType, d.path as departmentPath, d.type as departmentType, rp.name as reportPeriodName, tp.year as year, f.period_order as month, f.correctionDate as correctionDate from forms f \n" +
+            "join (select d.id, d.type, substr(sys_connect_by_path(name,'/'), 2) as path \n" +
+            "\t\tfrom department d \n" +
+            "\t\twhere d.id in (select department_id from forms) \n" +
+            "\t\tstart with d.id = 0 \n" +
+            "\t\tconnect by prior d.id = d.parent_id) d on d.id=f.department_id \n" +
+            "join form_template ft on ft.id = f.form_template_id \n" +
+            "join form_type t on t.id = ft.type_id \n" +
+            "join report_period rp on rp.id = f.report_period_id\n" +
+            "join tax_period tp on tp.id = rp.tax_period_id";
+
+    @Override
+    public List<FormLink> isVersionUsedInForms(final Long refBookId, List<Long> uniqueRecordIds, Date versionFrom, Date versionTo,
+                                                            Boolean restrictPeriod) {
+        Set<FormLink> results = new HashSet<FormLink>();
+        Map<String, Object> params = new HashMap<String, Object>();
+
+        try {
+            String in = transformToSqlInStatement("fdrf.record_id", uniqueRecordIds);
+            String sql = String.format(CHECK_USAGES_IN_FORMS, in);
+            params.clear();
+            params.put("refBookId", refBookId);
+            if (restrictPeriod != null) {
+                if (restrictPeriod) {
+                    //Отбираем только ссылки пересекающиеся с указанным периодом
+                    sql  += " WHERE ((rp.calendar_start_date >= :versionFrom and (rp.end_date is null or :versionTo is null or rp.end_date <= :versionTo)) or " +
+                            "(rp.calendar_start_date <= :versionFrom and (rp.end_date is null or rp.end_date >= :versionFrom)))";
+                    params.put("versionFrom", versionFrom);
+                    params.put("versionTo", versionTo);
+                } else {
+                    //Отбираем только ссылки НЕ попадающие в указанный период
+                    sql  += " WHERE ((:versionTo is not null and :versionTo < rp.calendar_start_date) or " +
+                            "(rp.end_date is not null and rp.end_date < :versionFrom))";
+                    params.put("versionFrom", versionFrom);
+                    params.put("versionTo", versionTo);
+                }
+            }
+            results.addAll(getNamedParameterJdbcTemplate().query(sql, params, new RowMapper<FormLink>() {
+                @Override
+                public FormLink mapRow(ResultSet rs, int rowNum) throws SQLException {
+                    Integer month = SqlUtils.getInteger(rs, "month");
+                    Date correctionDate = rs.getDate("correctionDate");
+                    FormLink formLink = new FormLink();
+                    formLink.setFormDataId(SqlUtils.getLong(rs, "formDataId"));
+                    formLink.setFormTypeId(SqlUtils.getInteger(rs, "formTypeId"));
+                    formLink.setState(WorkflowState.fromId(SqlUtils.getInteger(rs, "state")));
+                    char taxType = rs.getString("tax_type").charAt(0);
+                    formLink.setMsg(String.format(
+                            FORM_LINK_MSG,
+                            (taxType == TaxType.ETR.getCode() || taxType == TaxType.DEAL.getCode()) ? " " : "налоговой ",
+                            (refBookId == RefBook.TCO && formLink.getState() != WorkflowState.CREATED) ? " в статусе отличном от \"Создана\"" : "",
+                            FormDataKind.fromId(SqlUtils.getInteger(rs, "formKind")).getTitle(),
+                            rs.getString("formType"),
+                            (SqlUtils.getInteger(rs, "departmentType") != 1) ?
+                                    rs.getString("departmentPath").substring(rs.getString("departmentPath").indexOf("/") + 1) :
+                                    rs.getString("departmentPath"),
+                            rs.getString("reportPeriodName") + " " + rs.getString("year"),
+                            "", //TODO: позже добавить информацию по формам ЭНС
+                            month != null ? "Месяц: \"" + Formats.getRussianMonthNameWithTier(month) + "\"" : "",
+                            correctionDate != null ? "Дата сдачи корректировки: \"" + SDF_DD_MM_YYYY.format(correctionDate) + "\"" : "",
+                            "" //TODO: позже добавить информацию по расчету нарастающим итогом
+                    ));
+                    return  formLink;
+                }
+            }));
+            return new ArrayList<FormLink>(results);
+        } catch (EmptyResultDataAccessException e) {
+            return new ArrayList<FormLink>(0);
+        } catch (DataAccessException e) {
+            LOG.error("Проверка использования в налоговых формах", e);
+            throw new DaoException("Проверка использования в налоовых формах", e);
+        }
     }
 
     private static final String CHECK_USAGES_IN_REFBOOK =
@@ -2065,9 +2081,9 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             });
 
             //Формируем сообщения для списка записей имеющих ссылку на указанную версию
-            List<String> msgs = new ArrayList<String>();
+            Set<String> results = new HashSet<String>();
             for (RecordTemp attributes : records.values()) {
-                msgs.add(String.format(REF_BOOK_LINK_MSG,
+                results.add(String.format(REF_BOOK_LINK_MSG,
                         attributes.getRefbookName(),
                         attributes.getUniqueAttributes(),
                         attributes.isRefbookVersioned() ?
@@ -2076,12 +2092,12 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
                                 : ""
                 ));
             }
-            return msgs;
+            return new ArrayList<String>(results);
         } catch (EmptyResultDataAccessException e) {
             return new ArrayList<String>(0);
         } catch (DataAccessException e) {
-            LOG.error("Проверка использования", e);
-            throw new DaoException("Проверка использования", e);
+            LOG.error("Проверка использования в справочниках", e);
+            throw new DaoException("Проверка использования в справочниках", e);
         }
     }
 

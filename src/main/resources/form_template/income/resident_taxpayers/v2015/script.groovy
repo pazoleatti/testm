@@ -86,31 +86,31 @@ void calcValues(def dataRows, def sourceRows) {
         // «Графа 8» = ОКРУГЛ («Графа 4»  / «Графа 5»; 16)
         if (rowSource.d1) {
             if (rowSource.shareProfit != null) {
-                row.kIndex = rowSource.shareProfit.divide(rowSource.d1, 16, BigDecimal.ROUND_HALF_UP).toPlainString()
+                row.kIndex = rowSource.shareProfit.divide(rowSource.d1, 16, BigDecimal.ROUND_HALF_UP)
             }
         } else {
-            row.kIndex = zeroString
+            row.kIndex = BigDecimal.ZERO
         }
         // «Графа 9» = ОКРУГЛ («Графа 8» * «Графа 7» / 100 * («Графа 5» - «Графа 6»); 16)
-        if (rowSource.kIndex && rowSource.taxRate != null && rowSource.d1 != null && rowSource.d2 != null) {
-            row.taxPerShare = (new BigDecimal(rowSource.kIndex) * rowSource.taxRate * (rowSource.d1 - rowSource.d2)).divide(new BigDecimal(100), 16, BigDecimal.ROUND_HALF_UP).toPlainString()
+        if (rowSource.kIndex != null && rowSource.taxRate != null && rowSource.d1 != null && rowSource.d2 != null) {
+            row.taxPerShare = (rowSource.kIndex * rowSource.taxRate * (rowSource.d1 - rowSource.d2)).divide(new BigDecimal(100), 16, BigDecimal.ROUND_HALF_UP)
         }
         // «Графа 10» = ОКРУГЛ («Графа 3» * «Графа 9» / («Графа 7» / 100); 16) для строк 1,2
         if ([0, 1].contains(i)) {
             if (rowSource.taxRate) {
-                if (rowSource.shareCount && rowSource.taxPerShare) {
-                    row.dividendPerShareIndividual = (new BigDecimal(rowSource.shareCount) * new BigDecimal(rowSource.taxPerShare) * 100).divide(rowSource.taxRate, 16, BigDecimal.ROUND_HALF_UP).toPlainString()
+                if (rowSource.shareCount != null && rowSource.taxPerShare != null) {
+                    row.dividendPerShareIndividual = (rowSource.shareCount * rowSource.taxPerShare * 100).divide(rowSource.taxRate, 16, BigDecimal.ROUND_HALF_UP)
                 }
             } else {
-                row.dividendPerShareIndividual = zeroString
+                row.dividendPerShareIndividual = BigDecimal.ZERO
             }
         } else {
             row.dividendPerShareIndividual = null
         }
         // «Графа 11» = ОКРУГЛ («Графа 8» * («Графа 5» - «Графа 6»); 16) для строк 3,4
         if ([2, 3].contains(i)) {
-            if (rowSource.kIndex && rowSource.d1 != null && rowSource.d2 != null) {
-                row.dividendPerShareLegal = (new BigDecimal(rowSource.kIndex) * (rowSource.d1 - rowSource.d2)).setScale(16, BigDecimal.ROUND_HALF_UP).toPlainString()
+            if (rowSource.kIndex != null && rowSource.d1 != null && rowSource.d2 != null) {
+                row.dividendPerShareLegal = (rowSource.kIndex * (rowSource.d1 - rowSource.d2)).setScale(16, BigDecimal.ROUND_HALF_UP)
             }
         } else {
             row.dividendPerShareLegal = null
@@ -318,6 +318,6 @@ def fillRowFromXls(def templateRow, def dataRow, def values, int fileRowIndex, i
     // графа 8..11
     ['kIndex', 'taxPerShare', 'dividendPerShareIndividual', 'dividendPerShareLegal'].each { alias ->
         colIndex++
-        dataRow[alias] = null
+        dataRow[alias] = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
     }
 }

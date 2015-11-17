@@ -119,11 +119,7 @@ public class EditFormPresenter extends AbstractEditPresenter<EditFormPresenter.M
                                 setIsFormModified(false);
                                 Long newId = result.getNewIds() != null && !result.getNewIds().isEmpty() ? result.getNewIds().get(0) : null;
                                 recordChanges.setId(newId);
-                                if (isVersionMode) {
-                                    setCurrentUniqueRecordId(newId);
-                                } else {
-                                    setRecordId(newId);
-                                }
+                                setCurrentUniqueRecordId(newId);
                                 RefBookRecordVersionData data = new RefBookRecordVersionData();
                                 data.setVersionStart(getView().getVersionFrom());
                                 data.setVersionEnd(getView().getVersionTo());
@@ -144,7 +140,7 @@ public class EditFormPresenter extends AbstractEditPresenter<EditFormPresenter.M
     }
 
     @Override
-    public void clean(Boolean isVersion) {
+    public void clean(boolean isVersion) {
         if (isVersion) {
             GetRefBookRecordAction action = new GetRefBookRecordAction();
             action.setRefBookId(currentRefBookId);

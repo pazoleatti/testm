@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.FormDataKind
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
+import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import groovy.transform.Field
 
 /**
@@ -12,7 +13,7 @@ import groovy.transform.Field
  * formTemplateId=800
  *
  * TODO:
- *      - проверить расчеты
+ *      - проверить расчеты для 1 квартала 4.2
  *      - дописать тесты
  */
 
@@ -63,6 +64,7 @@ switch (formDataEvent) {
         break
     case FormDataEvent.SAVE:
         updateStylesAndSort()
+        formDataService.saveCachedDataRows(formData, logger)
         break
 }
 
@@ -167,16 +169,15 @@ void refresh() {
     }
 
     // 1. Проверка наличия формы предыдущего отчетного периода
-    def rows = getSourceDataRows(800, FormDataKind.PRIMARY, true)
-    if (!rows) {
+    def prevDataRows = getSourceDataRows(800, FormDataKind.PRIMARY, true)
+    if (!prevDataRows) {
         def prevReportPeriod = getPrevReportPeriod()
+        def prevPeriodName = (prevReportPeriod ? prevReportPeriod.name + ' ' +  prevReportPeriod.taxPeriod.year : getPrevPeriodName())
         def msg = "Категории ВЗЛ из предыдущего отчетного периода не были скопированы. " +
-                "В Системе не найдена форма «%s» в статусе «Принята»: Тип: %s, Период: %s %d, Подразделение: %s."
-        logger.warn(msg, formData.formType.name, formData.kind.title, prevReportPeriod.name, prevReportPeriod.taxPeriod.year, formDataDepartment.name)
+                "В Системе не найдена форма «%s» в статусе «Принята»: Тип: %s, Период: %s, Подразделение: %s."
+        logger.warn(msg, formData.formType.name, formData.kind.title, prevPeriodName, formDataDepartment.name)
     }
 
-    // получить значения из предыдущей фомры
-    def prevDataRows = getSourceDataRows(800, FormDataKind.PRIMARY, true)
     // мапа для хранения всех версии записи (строка нф - список всех версии записи "участников ТЦО")
     def record520Map = getVersionRecords520Map(prevDataRows)
 
@@ -226,20 +227,23 @@ void refresh() {
     for (def row : dataRows) {
         // графа 12
         row.category = calc12(row)
-        setRowStyles(row)
     }
+    updateStylesAndSort()
 }
 
 void calc() {
+    if (logger.containsLevel(LogLevel.ERROR)) {
+        return
+    }
     def dataRows = formDataService.getDataRowHelper(formData).allCached
     for (def row : dataRows) {
         // графа 12
         row.category = calc12(row, true)
-        // задать цвет
-        setRowStyles(row)
     }
+    updateStylesAndSort()
 }
 
+// обновить цвета и сортировку
 void updateStylesAndSort() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
@@ -270,8 +274,6 @@ void updateStylesAndSort() {
     if (sortedRows) {
         dataRowHelper.allCached = sortedRows
     }
-
-    formDataService.saveCachedDataRows(formData, logger)
 }
 
 void logicCheck() {
@@ -365,9 +367,9 @@ def subCalc12(def row) {
         // форма "Приложение 4.2" за предыдущий налоговый период
         sourceRows = getSourceDataRows(803, FormDataKind.SUMMARY, true)
         // отобрать записи в которых графа 4 == 'ВЗЛ ОРН'
-        def findRows = sourceRows.find { 'ВЗЛ ОРН' == getRefBookValue(505, it.group) }
+        findRow = sourceRows.find { 'ВЗЛ ОРН' == getRefBookValue(505, it.group) }
         // для подходящих строк получить все версии записей
-        def records520Map = getVersionRecords520Map(findRows)
+        def records520Map = getVersionRecords520Map([findRow])
         findRow = findPrevRow(row.name, records520Map)
         if (findRow) {
             return [null, findRow.categoryRevised]
@@ -377,7 +379,7 @@ def subCalc12(def row) {
         // форма "ВЗЛ" за предыдущий налоговый период
         sourceRows = getSourceDataRows(800, FormDataKind.PRIMARY, true)
         // для подходящих строк получить все версии записей
-        records520Map = getVersionRecords520Map(sourceRows)
+        def records520Map = getVersionRecords520Map(sourceRows)
         def findPrevRow = findPrevRow(row.name, records520Map)
         // если категория в предыдущем периода равна "Категория 2", то оставить ее, в других формах не ищется ничего
         if (findPrevRow && 'Категория 2' == getRefBookValue(506L, findPrevRow.category)?.CODE?.value) {
@@ -444,11 +446,24 @@ void checkSourceForm() {
             def formTypeName = getFormTypeById(id)?.name
             def kindName = sourceMap[id].kind.title
             def period = (sourceMap[id].isPrevPeriod ? getPrevReportPeriod() : getReportPeriod())
-            def periodName = (period ? period?.name + ' ' + period?.taxPeriod?.year : 'не определен')
+            def periodName = (period ? period?.name + ' ' + period?.taxPeriod?.year : getPrevPeriodName())
             msg = "Не найдена форма «%s» в статусе «Принята»: Тип: %s, Период: %s, Подразделение: %s."
             logger.error(msg, formTypeName, kindName, periodName, formDataDepartment.name)
         }
     }
+}
+
+def getPrevPeriodName() {
+    def period = getReportPeriod()
+    def periodNameMap = [
+            0 : 'год',
+            1 : 'первый квартал',
+            2 : 'полугодие',
+            3 : 'девять месяцев'
+    ]
+    def name = periodNameMap[period.order - 1]
+    def year = period?.taxPeriod?.year - (period.order == 1 ? 1 : 0)
+    return "$name $year"
 }
 
 /** Получить строки за предыдущий отчетный период. */
@@ -459,7 +474,10 @@ def getSourceDataRows(int formTypeId, FormDataKind kind, boolean isPrevPeriod = 
     }
     // период - текущйи или предыдущий
     def reportPeriod = (isPrevPeriod ? getPrevReportPeriod() : getReportPeriod())
-    def fd = formDataService.getLast(formTypeId, kind, formData.departmentId, reportPeriod?.id, null, null, false)
+    def fd = null
+    if (reportPeriod?.id) {
+        fd = formDataService.getLast(formTypeId, kind, formData.departmentId, reportPeriod?.id, null, null, false)
+    }
     if (fd == null || fd.state != WorkflowState.ACCEPTED) {
         sourceDataRowsMap[key] = []
     } else {

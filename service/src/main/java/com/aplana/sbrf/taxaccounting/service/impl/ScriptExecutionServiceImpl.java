@@ -152,7 +152,7 @@ public class ScriptExecutionServiceImpl extends TAAbstractScriptingServiceImpl i
                         logger.error("Пропущен каталог \"%s\", так как его имя не поддерживается", folderName);
                         continue;
                     }
-                    String script = IOUtils.toString(zis);
+                    String script = IOUtils.toString(zis, "UTF-8");
                     /** Импорт скриптов нф */
                     if (folderName.equals(FOLDERS.form_template.name())) {
                         int formTypeId, year;

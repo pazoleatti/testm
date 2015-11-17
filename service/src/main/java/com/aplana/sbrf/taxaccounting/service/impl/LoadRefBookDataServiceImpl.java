@@ -550,10 +550,11 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
     }
 
     @Override
-    public void saveRefBookRecords(long refBookId, Long uniqueRecordId, List<Map<String, RefBookValue>> saveRecords, Date validDateFrom,
+    public void saveRefBookRecords(long refBookId, Long uniqueRecordId, Long recordId, List<Map<String, RefBookValue>> saveRecords, Date validDateFrom,
                                    Date validDateTo, boolean isNewRecords, TAUserInfo userInfo, Logger logger) {
         Map<String, Object> additionalParameters = new HashMap<String, Object>();
         additionalParameters.put("uniqueRecordId", uniqueRecordId);
+        additionalParameters.put("recordCommonId", recordId);
         additionalParameters.put("saveRecords", saveRecords);
         additionalParameters.put("validDateFrom", validDateFrom);
         additionalParameters.put("validDateTo", validDateTo);

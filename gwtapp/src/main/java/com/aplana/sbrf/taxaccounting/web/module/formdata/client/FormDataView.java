@@ -187,13 +187,7 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
     @UiField
     HorizontalPanel versionBlock;
     @UiField
-    LinkButton filesComments;
-    @UiField
-    LinkButton sources;
-    @UiField
-    LinkButton printToExcel;
-    @UiField
-    LinkButton printToCSV;
+    LinkButton filesComments, sources, printToExcel, printToCSV;
 
     private Timer timerExcel, timerCSV;
 

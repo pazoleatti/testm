@@ -56,6 +56,7 @@ public class RefBookTestScriptHelper {
     private Date validDateFrom;
     private Date validDateTo;
     private Long uniqueRecordId;
+    private Long recordCommonId;
     private List<Map<String, RefBookValue>> saveRecords;
     private boolean isNewRecords;
     private ScriptStatusHolder scriptStatusHolder;
@@ -110,6 +111,7 @@ public class RefBookTestScriptHelper {
         bindings.put("formDataService", formDataService);
 
         bindings.put("uniqueRecordId", uniqueRecordId);
+        bindings.put("recordCommonId", recordCommonId);
         bindings.put("saveRecords", saveRecords);
         bindings.put("validDateFrom", validDateFrom);
         bindings.put("validDateTo", validDateTo);
@@ -258,6 +260,10 @@ public class RefBookTestScriptHelper {
 
     public void setUniqueRecordId(Long uniqueRecordId) {
         this.uniqueRecordId = uniqueRecordId;
+    }
+
+    public void setRecordCommonId(Long recordCommonId) {
+        this.recordCommonId = recordCommonId;
     }
 
     public void setSaveRecords(List<Map<String, RefBookValue>> saveRecords) {

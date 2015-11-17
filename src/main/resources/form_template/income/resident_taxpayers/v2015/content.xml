@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <formTemplateContent>
     <fixedRows>true</fixedRows>
+    <monthly>false</monthly>
+    <comparative>false</comparative>
+    <accruing>false</accruing>
+    <updating>false</updating>
     <name>Расчет налога и облагаемой суммы дивидендов по акциям налогоплательщиков-резидентов</name>
     <fullName>Расчет налога и облагаемой суммы дивидендов по акциям налогоплательщиков-резидентов</fullName>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
@@ -73,45 +77,45 @@
         <maxLength>5</maxLength>
         <precision>2</precision>
     </columns>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>kIndex</alias>
         <checking>false</checking>
-        <columnType>STRING</columnType>
+        <columnType>NUMBER</columnType>
         <name>Показатель (К) в расчете на 1 акцию (гр.8 =гр.4/гр.5)</name>
         <order>8</order>
         <width>20</width>
-        <maxLength>29</maxLength>
-        <prevLength>0</prevLength>
+        <maxLength>33</maxLength>
+        <precision>16</precision>
     </columns>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>taxPerShare</alias>
         <checking>false</checking>
-        <columnType>STRING</columnType>
+        <columnType>NUMBER</columnType>
         <name>Сумма налога, подлежащая удержанию в расчете на 1 акцию (гр.9=гр.8*гр.7/100*(гр.5-гр.6), руб.</name>
         <order>9</order>
         <width>20</width>
-        <maxLength>29</maxLength>
-        <prevLength>0</prevLength>
+        <maxLength>33</maxLength>
+        <precision>16</precision>
     </columns>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>dividendPerShareIndividual</alias>
         <checking>false</checking>
-        <columnType>STRING</columnType>
+        <columnType>NUMBER</columnType>
         <name>Облагаемая сумма дивидендов, руб. на 1 акцию физических лиц (гр.10=гр.3*гр.9/(гр.7/100)</name>
         <order>10</order>
         <width>20</width>
-        <maxLength>29</maxLength>
-        <prevLength>0</prevLength>
+        <maxLength>33</maxLength>
+        <precision>16</precision>
     </columns>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>dividendPerShareLegal</alias>
         <checking>false</checking>
-        <columnType>STRING</columnType>
+        <columnType>NUMBER</columnType>
         <name>Облагаемая сумма дивидендов, руб. на 1 акцию юридических лиц (гр.11=гр.8*(гр.5-гр.6))</name>
         <order>11</order>
         <width>20</width>
-        <maxLength>29</maxLength>
-        <prevLength>0</prevLength>
+        <maxLength>33</maxLength>
+        <precision>16</precision>
     </columns>
     <styles>
         <alias>Автозаполняемая</alias>

@@ -211,7 +211,7 @@ void logicCheck() {
         if(row.sum1 != null && row.sum2 != null && row.sum1 < row.sum2){
             def msg1 = row.getCell('sum1').column.name
             def msg2 = row.getCell('sum2').column.name
-            rowError(logger, row, "Строка $rowNum: Значение графы «$msg1» должно быть не меньше значения графы «$msg2»!")
+            rowWarning(logger, row, "Строка $rowNum: Значение графы «$msg1» должно быть не меньше значения графы «$msg2»!")
         }
     }
 
@@ -297,14 +297,14 @@ DataRow<Cell> calcItog(def int i, def List<DataRow<Cell>> dataRows) {
  * @param value2 значение графы 2 (если value2 не задан, то используется 'Итого «ВЗЛ/РОЗ не задано»')
  * @param i номер строки
  */
-DataRow<Cell> getSubTotalRow(def title, def value2, int i) {
+DataRow<Cell> getSubTotalRow(String title, String value2, int i) {
     def newRow = (formDataEvent in [FormDataEvent.IMPORT, FormDataEvent.IMPORT_TRANSPORT_FILE]) ? formData.createStoreMessagingDataRow() : formData.createDataRow()
     if (title) {
         newRow.fix = title
     } else if (value2) {
-        newRow.fix = 'Итого по «' + value2 + '»'
+        newRow.fix = 'Итого по "' + StringUtils.cleanString(value2) + '"'
     } else {
-        newRow.fix = 'Итого по «ВЗЛ/РОЗ не задано»'
+        newRow.fix = 'Итого по "ВЗЛ/РОЗ не задано"'
     }
     newRow.setAlias('itg#'.concat(i.toString()))
     newRow.getCell('fix').colSpan = 6
@@ -503,19 +503,6 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
 
     def recordId = getRecordId(nameFromFile, values[4], fileRowIndex, colIndex, iksrName)
     def map = getRefBookValue(520, recordId)
-    if (map && nameFromFile != map.NAME?.stringValue) {
-        if (map && nameFromFile != map.NAME?.stringValue) {
-            // сообщение 4
-            String msg = "Наименование ВЗЛ/РОЗ в файле не заполнено!"
-            if (nameFromFile) {
-                msg = "В файле указано другое наименование ВЗЛ/РОЗ - «$nameFromFile»!"
-            }
-            logger.warn("Строка $fileRowIndex , столбец " + ScriptUtils.getXLSColumnName(colIndex) + ": " +
-                    "На форме графы с общей информацией о ВЗЛ/РОЗ заполнены данными записи справочника «Участники ТЦО», " +
-                    "в которой атрибут «Полное наименование юридического лица с указанием ОПФ» = «" + map.NAME?.stringValue + "», " +
-                    "атрибут «ИНН (заполняется для резидентов, некредитных организаций)» = «" + map.INN?.stringValue + "». $msg")
-        }
-    }
 
     // графа 2
     newRow.name = recordId
@@ -561,7 +548,7 @@ def getRecordId(String name, String iksr, int fileRowIndex, int colIndex, String
         // сообщение 6
         logger.warn("Строка $fileRowIndex , столбец " + ScriptUtils.getXLSColumnName(colIndex) + ": " +
                 "На форме не заполнены графы с общей информацией о ВЗЛ/РОЗ, так как в файле отсутствует значение по графе «$iksrName»!")
-        return
+        return null
     }
     def ref_id = 520
     def RefBook refBook = refBookFactory.get(ref_id)
@@ -583,7 +570,25 @@ def getRecordId(String name, String iksr, int fileRowIndex, int colIndex, String
     def records = provider.getRecords(getReportPeriodEndDate(), null, filter, null)
     if (records.size() == 1) {
         // 5
-        recordCache[ref_id][filter] = records.get(0).get(RefBook.RECORD_ID_ALIAS).numberValue
+        def record = records.get(0)
+
+        if (StringUtils.cleanString(name) != StringUtils.cleanString(record.get('NAME')?.stringValue)) {
+            // сообщение 4
+            String msg = name ? "В файле указано другое наименование ВЗЛ/РОЗ - «$name»!" : "Наименование ВЗЛ/РОЗ в файле не заполнено!"
+            def refBookAttributeName
+            for (alias in ['INN', 'REG_NUM', 'TAX_CODE_INCORPORATION', 'SWIFT', 'KIO']) {
+                if (iksr.equals(record.get(alias)?.stringValue)) {
+                    refBookAttributeName = refBook.attributes.find { it.alias == alias }.name
+                    break
+                }
+            }
+            logger.warn("Строка $fileRowIndex , столбец " + ScriptUtils.getXLSColumnName(colIndex) + ": " +
+                    "На форме графы с общей информацией о ВЗЛ/РОЗ заполнены данными записи справочника «Участники ТЦО», " +
+                    "в которой атрибут «Полное наименование юридического лица с указанием ОПФ» = «" + record.get('NAME')?.stringValue + "», " +
+                    "атрибут «$refBookAttributeName» = «" + iksr + "». $msg")
+        }
+
+        recordCache[ref_id][filter] = record.get(RefBook.RECORD_ID_ALIAS).numberValue
         return recordCache[ref_id][filter]
     } else if (records.empty) {
         // 6
@@ -672,14 +677,14 @@ def getNewTotalFromXls(def values, def colOffset, def fileRowIndex, def rowIndex
     newRow.setIndex(rowIndex)
     newRow.setImportIndex(fileRowIndex)
 
-    // графа 13
-    def colIndex = 13
+    // графа 9
+    def colIndex = 9
     newRow.sum1 = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
-    // графа 15
-    colIndex = 15
+    // графа 11
+    colIndex = 11
     newRow.sum2 = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
-    // графа 17
-    colIndex = 17
+    // графа 13
+    colIndex = 13
     newRow.sum3 = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
 
     return newRow
@@ -698,14 +703,14 @@ def getNewSubTotalRowFromXls(def values, def colOffset, def fileRowIndex, def ro
     newRow.setIndex(rowIndex)
     newRow.setImportIndex(fileRowIndex)
 
-    // графа 13
-    def colIndex = 13
+    // графа 9
+    def colIndex = 9
     newRow.sum1 = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
-    // графа 15
-    colIndex = 15
+    // графа 11
+    colIndex = 11
     newRow.sum2 = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
-    // графа 17
-    colIndex = 17
+    // графа 13
+    colIndex = 13
     newRow.sum3 = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
 
     return newRow

@@ -25,7 +25,7 @@ import static org.mockito.Mockito.when;
  */
 public class AmountTaxTest extends ScriptTestBase {
     private static final int TYPE_ID = 700;
-    private static final int DEPARTMENT_ID = 1;
+    private static final int DEPARTMENT_ID = 2;
     private static final int REPORT_PERIOD_ID = 1;
     private static final int DEPARTMENT_PERIOD_ID = 1;
     private static final FormDataKind KIND = FormDataKind.PRIMARY;
@@ -69,7 +69,7 @@ public class AmountTaxTest extends ScriptTestBase {
     @Test
     public void checkTest() {
         testHelper.execute(FormDataEvent.CHECK);
-        Assert.assertEquals(3,testHelper.getLogger().getEntries().size());
+        Assert.assertEquals(5,testHelper.getLogger().getEntries().size());
     }
 
     // Расчет пустой

@@ -1,9 +1,6 @@
 package com.aplana.sbrf.taxaccounting.dao.refbook;
 
-import com.aplana.sbrf.taxaccounting.model.PagingParams;
-import com.aplana.sbrf.taxaccounting.model.PagingResult;
-import com.aplana.sbrf.taxaccounting.model.PreparedStatementData;
-import com.aplana.sbrf.taxaccounting.model.VersionedObjectStatus;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.CheckCrossVersionsResult;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
@@ -16,10 +13,7 @@ import com.aplana.sbrf.taxaccounting.model.util.Pair;
 
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Дао для версионных справочников.
@@ -361,7 +355,22 @@ public interface RefBookDao {
      *      null - возвращает все ссылки на указанную запись справочника, без учета периода
      * @param excludeUseCheck идентификаторы справочников, которые игнорируются при проверке использования
      */
-    List<String> isVersionUsed(@NotNull Long refBookId, @NotNull List<Long> uniqueRecordIds, Date versionFrom, Date versionTo, Boolean restrictPeriod, List<Long> excludeUseCheck);
+    List<String> isVersionUsedInDepartmentConfigs(@NotNull Long refBookId, @NotNull List<Long> uniqueRecordIds, Date versionFrom, Date versionTo, Boolean restrictPeriod, List<Long> excludeUseCheck);
+
+    /**
+     * Проверка использования записи в налоовых формах
+     * @param refBookId идентификатор справочника
+     * @param uniqueRecordIds уникальные идентификаторы версий записей справочника
+     * @param versionFrom дата актуальности новой версии
+     * @param versionTo дата конца актуальности новой версии
+     * @param restrictPeriod
+     *      false - возвращает ссылки, период которых НЕ пересекается с указанным периодом
+     *      true - возвращает ссылки, период которых пересекается с указанным периодом
+     *      null - возвращает все ссылки на указанную запись справочника, без учета периода
+     * @return результаты проверки. Сообщения об ошибках
+     */
+    List<FormLink> isVersionUsedInForms(Long refBookId, List<Long> uniqueRecordIds, Date versionFrom, Date versionTo,
+                                                  Boolean restrictPeriod);
 
     /**
      * Проверка использования записи в справочниках
@@ -668,4 +677,5 @@ public interface RefBookDao {
      * @return все записи существуют?
      */
     boolean isRefBookExist(long refBookId);
+
 }

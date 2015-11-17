@@ -44,9 +44,10 @@
         <columnType>REFERENCE</columnType>
         <name>Код организации</name>
         <order>4</order>
-        <width>4</width>
+        <width>6</width>
         <parentAlias>name</parentAlias>
         <refBookAttributeId>5203</refBookAttributeId>
+        <refBookAttributeId2>5131</refBookAttributeId2>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="referenceColumn">
         <alias>countryCode</alias>
@@ -57,6 +58,7 @@
         <width>4</width>
         <parentAlias>name</parentAlias>
         <refBookAttributeId>5204</refBookAttributeId>
+        <refBookAttributeId2>50</refBookAttributeId2>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="referenceColumn">
         <alias>inn</alias>
@@ -139,6 +141,7 @@
         <width>5</width>
         <parentAlias>name</parentAlias>
         <refBookAttributeId>5212</refBookAttributeId>
+        <refBookAttributeId2>5101</refBookAttributeId2>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="referenceColumn">
         <alias>taxStatus</alias>
@@ -149,6 +152,7 @@
         <width>6</width>
         <parentAlias>name</parentAlias>
         <refBookAttributeId>5213</refBookAttributeId>
+        <refBookAttributeId2>5111</refBookAttributeId2>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="referenceColumn">
         <alias>depCriterion</alias>
@@ -159,6 +163,7 @@
         <width>8</width>
         <parentAlias>name</parentAlias>
         <refBookAttributeId>5214</refBookAttributeId>
+        <refBookAttributeId2>5121</refBookAttributeId2>
     </columns>
     <styles>
         <alias>Корректировка-изменено</alias>
@@ -213,21 +218,21 @@
         <alias>Светло-красный</alias>
         <backColor>LIGHT_CORAL</backColor>
         <bold>false</bold>
-        <fontColor>WHITE</fontColor>
+        <fontColor>BLACK</fontColor>
         <italic>false</italic>
     </styles>
     <styles>
         <alias>Светло-желтый</alias>
         <backColor>LIGHT_YELLOW</backColor>
         <bold>false</bold>
-        <fontColor>WHITE</fontColor>
+        <fontColor>BLACK</fontColor>
         <italic>false</italic>
     </styles>
     <styles>
         <alias>Светло-зеленый</alias>
         <backColor>PALE_GREEN</backColor>
         <bold>false</bold>
-        <fontColor>WHITE</fontColor>
+        <fontColor>BLACK</fontColor>
         <italic>false</italic>
     </styles>
 </formTemplateContent>

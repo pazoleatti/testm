@@ -3,6 +3,8 @@ package refbook.raising_rates_transport
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 
 /**
+ * blob_data.id = '23a1d39b-2814-4fb2-a321-781b69089561'
+ *
  * Скрипт справочника «Повышающие коэффициенты транспортного налога» (id = 209)
  *
  * @author LHaziev

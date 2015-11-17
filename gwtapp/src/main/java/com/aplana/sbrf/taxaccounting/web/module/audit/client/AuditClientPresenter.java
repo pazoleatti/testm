@@ -34,6 +34,7 @@ import com.gwtplatform.mvp.client.proxy.ProxyPlace;
 import com.gwtplatform.mvp.client.proxy.RevealContentEvent;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -230,6 +231,7 @@ public class AuditClientPresenter extends Presenter<AuditClientPresenter.MyView,
     public void onAuditArchiveClickEvent(AuditArchiveDialogEvent event) {
         LogSystemFilter logSystemFilter = new LogSystemFilter();
         logSystemFilter.setToSearchDate(event.getArchiveDate());
+        logSystemFilter.setFromSearchDate(new Date(0));
         AuditArchiveAction action = new AuditArchiveAction();
         action.setLogSystemFilter(logSystemFilter);
         dispatcher.execute(action, CallbackUtils.defaultCallbackNoLock(new AbstractCallback<AuditArchiveResult>() {

@@ -73,7 +73,7 @@
         <cell alias="rowNumber" colSpan="1" rowSpan="1" value="1"/>
         <cell alias="name" colSpan="1" rowSpan="1" value="2"/>
         <cell alias="ikksr" colSpan="1" rowSpan="1" value="3"/>
-        <cell alias="sum4" colSpan="1" rowSpan="1" value="4"/>
+        <cell alias="sum4" colSpan="1" rowSpan="1" value="4.1"/>
         <cell alias="sum42" colSpan="1" rowSpan="1" value="4.2"/>
         <cell alias="sum43" colSpan="1" rowSpan="1" value="4.3"/>
         <cell alias="sum44" colSpan="1" rowSpan="1" value="4.4"/>
@@ -84,7 +84,7 @@
         <cell alias="sum53" colSpan="1" rowSpan="1" value="5.3"/>
         <cell alias="sum54" colSpan="1" rowSpan="1" value="5.4"/>
         <cell alias="sum55" colSpan="1" rowSpan="1" value="5.5"/>
-        <cell alias="sum55" colSpan="1" rowSpan="1" value="5.6"/>
+        <cell alias="sum56" colSpan="1" rowSpan="1" value="5.6"/>
         <cell alias="sum6" colSpan="1" rowSpan="1" value="6"/>
         <cell alias="category" colSpan="1" rowSpan="1" value="7"/>
         <cell alias="sum8" colSpan="1" rowSpan="1" value="8"/>
