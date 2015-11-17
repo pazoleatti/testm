@@ -3,15 +3,14 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 import com.aplana.sbrf.taxaccounting.dao.api.ConfigurationDao;
 import com.aplana.sbrf.taxaccounting.model.ConfigurationParam;
 import com.aplana.sbrf.taxaccounting.model.ConfigurationParamModel;
+import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.service.SignService;
 import org.apache.commons.io.IOUtils;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.mockito.Mockito;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.util.ClassUtils;
 
 import java.io.File;
@@ -24,15 +23,10 @@ import java.util.ArrayList;
 
 import static org.mockito.Mockito.when;
 
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration("SignServiceImplTest.xml")
 public class SignServiceImplTest {
 
-    @Autowired
-    SignService signService;
-
-    @Autowired
-    ConfigurationDao configurationDao;
+    private SignService signService;
+	private ConfigurationDao configurationDao;
 
     private final String COMMON = ClassUtils.classPackageAsResourcePath(getClass()) + "/sign/";
     private final String DATA_FILE =  COMMON + "/dt/5101309D.rnu";
@@ -43,7 +37,7 @@ public class SignServiceImplTest {
 
     @Before
     public void init() throws IOException {
-        final URL bicrUrl = Thread.currentThread().getContextClassLoader().getResource(BICR4_DLL);
+		final URL bicrUrl = Thread.currentThread().getContextClassLoader().getResource(BICR4_DLL);
         assert bicrUrl != null;
 
         final URL signFile = Thread.currentThread().getContextClassLoader().getResource(COMMON+"sign.dat");
@@ -59,7 +53,18 @@ public class SignServiceImplTest {
         model.put(ConfigurationParam.KEY_FILE, 0, keys);
         ArrayList<String> dlls = new ArrayList<String>(){{add(bicrUrl.getProtocol() + "://" + bicrUrl.getPath().substring(1));}};
         model.put(ConfigurationParam.ENCRYPT_DLL, 0, dlls);
+
+		configurationDao = Mockito.mock(ConfigurationDao.class);
         when(configurationDao.getAll()).thenReturn(model);
+
+		signService = new SignServiceImpl();
+		ReflectionTestUtils.setField(signService, "configurationDao", configurationDao);
+
+		Department department = new Department();
+		department.setId(0);
+		DepartmentServiceImpl departmentService = Mockito.mock(DepartmentServiceImpl.class);
+		when(departmentService.getBankDepartment()).thenReturn(department);
+		ReflectionTestUtils.setField(signService, "departmentService", departmentService);
     }
 
     @Test

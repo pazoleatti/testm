@@ -22,7 +22,7 @@ public class ConfigurationParamModel implements Map<ConfigurationParam, Map<Inte
     public static final String ASYNC_LIMIT = "TASK_LIMIT";
     public static final String ASYNC_SHORT_LIMIT = "SHORT_QUEUE_LIMIT";
 
-    private static final String SPLITTER = ";";
+	static final String SPLITTER = ";";
 
     /**
      * Получение объединенных значений из списка
@@ -33,10 +33,14 @@ public class ConfigurationParamModel implements Map<ConfigurationParam, Map<Inte
             return null;
         }
         StringBuilder sb = new StringBuilder();
-        for (String str : listMap.get(departmentId)) {
-            sb.append(str).append(SPLITTER);
+		List<String> values = listMap.get(departmentId);
+        for (int i=0; i<values.size(); i++) {
+            sb.append(values.get(i));
+			if (i < values.size() - 1) {
+				sb.append(SPLITTER);
+			}
         }
-        return sb.toString().trim();
+        return sb.toString();
     }
 
     /**
@@ -47,7 +51,7 @@ public class ConfigurationParamModel implements Map<ConfigurationParam, Map<Inte
             put(key, null);
             return;
         }
-        String values[] = value.trim().split(SPLITTER);
+        String values[] = value.split(SPLITTER);
         List<String> resultList = new ArrayList<String>();
         for (String str : values) {
             String trimVal = str.trim();
