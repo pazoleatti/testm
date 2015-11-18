@@ -170,7 +170,7 @@ public class App_6_6Test extends ScriptTestBase {
         dataRows.add(subTotalRow);
         subTotalRow.setAlias("itg#1");
         subTotalRow.setIndex(2);
-        subTotalRow.getCell("fix").setValue("Итого по «A»", null);
+        subTotalRow.getCell("fix").setValue("Итого по \"A\"", null);
         subTotalRow.getCell("incomeSum").setValue(2, null);
         subTotalRow.getCell("outcomeSum").setValue(2, null);
 
