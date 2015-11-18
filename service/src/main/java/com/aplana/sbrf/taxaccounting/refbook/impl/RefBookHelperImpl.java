@@ -365,7 +365,7 @@ public class RefBookHelperImpl implements RefBookHelper {
         for (Map<String, RefBookValue> add : toAdd) {
             RefBookRecord slaveRecord = new RefBookRecord();
             slaveRecord.setValues(add);
-            slaveRecord.setRecordId(null);
+            slaveRecord.setRecordId(record.getRecordId());
             recordsToAdd.add(slaveRecord);
         }
 

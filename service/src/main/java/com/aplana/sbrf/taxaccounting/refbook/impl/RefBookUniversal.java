@@ -455,7 +455,7 @@ public class RefBookUniversal implements RefBookDataProvider {
                 }
                 if (versionTo == null) {
                     if (nextVersion != null && logger != null) {
-                        logger.info("Установлена дата окончания актуальности версии "+formatter.get().format(SimpleDateUtils.addDayToDate(nextVersion.getVersionStart(), -1))+" в связи с наличием следующей версии");
+                        logger.infoIfNotExist("Установлена дата окончания актуальности версии "+formatter.get().format(SimpleDateUtils.addDayToDate(nextVersion.getVersionStart(), -1))+" в связи с наличием следующей версии");
                     }
                 } else {
                     if (!excludedVersionEndRecords.contains(record.getRecordId())) {
