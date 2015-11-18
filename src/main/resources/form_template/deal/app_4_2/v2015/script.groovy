@@ -235,8 +235,7 @@ def Long calc4(def row) {
 def BigDecimal calc17(def row) {
     // Графа 17 = сумма значений в графах 5-16
     def value = 0
-    ['group', 'sum51', 'sum52', 'sum53', 'sum54', 'sum55', 'sum56', 'sum61', 'sum62', 'sum63', 'sum64', 'sum65', 'sum66',
-     'sum7', 'thresholdValue', 'sign', 'categoryRevised'].each {
+    ['sum51', 'sum52', 'sum53', 'sum54', 'sum55', 'sum56', 'sum61', 'sum62', 'sum63', 'sum64', 'sum65', 'sum66'].each {
         value += row[it] ?: 0
     }
     return value
@@ -250,7 +249,13 @@ def BigDecimal calc18(def row) {
 }
 
 def Long calc19(def row) {
-    if (row.sum7 >= row.thresholdValue) {
+    if (row.sum7 == null || row.thresholdValue == null) {
+        return null
+    }
+    // записи из справочника "Пороговые значения"
+    def records = getRecordsByRefbookId(514L)
+    def record = records?.find { it?.record_id?.value == row.thresholdValue }
+    if (row.sum7 >= record?.VALUE?.value) {
         return getRecYesId()
     }
     return getRecNoId()
