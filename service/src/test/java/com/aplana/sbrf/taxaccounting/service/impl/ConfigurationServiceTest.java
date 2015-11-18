@@ -4,13 +4,12 @@ import com.aplana.sbrf.taxaccounting.dao.DepartmentDao;
 import com.aplana.sbrf.taxaccounting.dao.api.ConfigurationDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException;
-import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
-import com.aplana.sbrf.taxaccounting.refbook.impl.RefBookEmailConfigProvider;
+import com.aplana.sbrf.taxaccounting.service.SignService;
 import com.aplana.sbrf.taxaccounting.service.api.ConfigurationService;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -119,7 +118,7 @@ public class ConfigurationServiceTest {
         //model.put(ConfigurationParam.EMAIL_PASSWORD, 0, asList("password"));
         List<Map<String, String>> params = new ArrayList<Map<String, String>>();
 
-        model.put(ConfigurationParam.SIGN_CHECK, 0, asList("1"));
+        model.put(ConfigurationParam.SIGN_CHECK, 0, asList(SignService.SIGN_CHECK));
 
         service.saveAllConfig(getUser(), model, params, new ArrayList<Map<String, String>>(), logger);
 
@@ -165,7 +164,7 @@ public class ConfigurationServiceTest {
         model.put(ConfigurationParam.FORM_UPLOAD_DIRECTORY, testDepartment1.getId(), asList("file://" + path + "/"));
         model.put(ConfigurationParam.FORM_ERROR_DIRECTORY, testDepartment1.getId(), asList("file://" + errorFolder.getRoot().getPath() + "/"));
 
-        model.put(ConfigurationParam.SIGN_CHECK, 0, asList("1"));
+        model.put(ConfigurationParam.SIGN_CHECK, 0, asList(SignService.SIGN_CHECK));
 
         service.saveAllConfig(getUser(), model, new ArrayList<Map<String, String>>(), new ArrayList<Map<String, String>>(), logger);
 
@@ -213,7 +212,7 @@ public class ConfigurationServiceTest {
         model.put(ConfigurationParam.FORM_ARCHIVE_DIRECTORY, testDepartment1.getId(),
                 asList("file://" + archiveFolder.getRoot().getPath() + "/"));
 
-        model.put(ConfigurationParam.SIGN_CHECK, 0, asList("1"));
+        model.put(ConfigurationParam.SIGN_CHECK, 0, asList(SignService.SIGN_CHECK));
 
         service.saveAllConfig(getUser(), model, new ArrayList<Map<String, String>>(), new ArrayList<Map<String, String>>(), logger);
 

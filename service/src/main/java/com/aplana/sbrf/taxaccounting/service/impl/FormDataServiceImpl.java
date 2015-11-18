@@ -206,25 +206,22 @@ public class FormDataServiceImpl implements FormDataService {
 
             String ext = getFileExtension(fileName);
 
-            // Проверка ЭЦП
+            // Проверка ЭП
             // Если флаг проверки отсутствует или не равен «1», то файл считается проверенным
             boolean check = false;
-            // исключить проверку ЭЦП для файлов эксель
+            // исключить проверку ЭП для файлов эксель
             if (!ext.equals(XLS_EXT) && !ext.equals(XLSX_EXT) && !ext.equals(XLSM_EXT)) {
                 List<String> signList = configurationDao.getByDepartment(0).get(ConfigurationParam.SIGN_CHECK, 0);
-                if (signList != null && !signList.isEmpty() && signList.get(0).equals("1")) {
-                    List<String> paramList = configurationDao.getAll().get(ConfigurationParam.KEY_FILE, 0);
-                    if (paramList != null) { // Необходимо проверить подпись
-                        try {
-                            LOG.info(String.format("Проверка ЭЦП: %s", key));
-                            check = signService.checkSign(dataFile.getAbsolutePath(), 0);
-                        } catch (Exception e) {
-                            logger.error("Ошибка при проверке ЭЦП: " + e.getMessage());
-                        }
-                        if (!check) {
-                            logger.error("Ошибка проверки цифровой подписи");
-                        }
-                    }
+                if (signList != null && !signList.isEmpty() && SignService.SIGN_CHECK.equals(signList.get(0))) {
+					try {
+						LOG.info(String.format("Проверка ЭП: %s", key));
+						check = signService.checkSign(dataFile.getAbsolutePath(), 0);
+					} catch (Exception e) {
+						logger.error("Ошибка при проверке ЭП: " + e.getMessage());
+					}
+					if (!check) {
+						logger.error("Ошибка проверки цифровой подписи");
+					}
                 } else {
                     check = true;
                 }

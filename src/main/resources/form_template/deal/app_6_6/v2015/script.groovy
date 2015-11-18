@@ -227,9 +227,9 @@ void logicCheck() {
         // 7. Проверка положительной суммы дохода/расхода
         if (!noOne && !both) {
             sum = (row.incomeSum != null) ? row.incomeSum : row.outcomeSum
-            if (sum <= 0) {
+            if (sum < 0) {
                 String msg = (row.incomeSum != null) ? row.getCell('incomeSum').column.name : row.getCell('outcomeSum').column.name
-                logger.error("Строка $rowNum: Значение графы «$msg» должно быть больше значения «0»!")
+                logger.error("Строка $rowNum: Значение графы «$msg» должно быть больше или равно «0»!")
             }
         }
 

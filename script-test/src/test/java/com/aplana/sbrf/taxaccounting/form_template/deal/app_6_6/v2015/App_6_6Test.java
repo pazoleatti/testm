@@ -187,30 +187,32 @@ public class App_6_6Test extends ScriptTestBase {
 
         // для попадания в ЛП:
         // 7. Проверка положительной суммы дохода/расхода
-        row.getCell("incomeSum").setValue(0, null);
+        row.getCell("incomeSum").setValue(-1, null);
         row.getCell("outcomeSum").setValue(null, null);
         row.getCell("date1").setValue(sdf.parse("03.01.2014"), null);
-        subTotalRow.getCell("incomeSum").setValue(0, null);
+        subTotalRow.getCell("incomeSum").setValue(-1, null);
         subTotalRow.getCell("outcomeSum").setValue(0, null);
         testHelper.execute(FormDataEvent.CHECK);
 
         entries = testHelper.getLogger().getEntries();
         i = 0;
         Assert.assertEquals("Строка 1: Выполнение расчета графы «Режим переговорных сделок» невозможно, так как не заполнена используемая в расчете графа «Код страны регистрации по классификатору ОКСМ»!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Значение графы «Сумма процентного дохода (руб.)» должно быть больше значения «0»!", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 1: Значение графы «Сумма процентного дохода (руб.)» должно быть больше или равно «0»!", entries.get(i++).getMessage());
         Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
         testHelper.getLogger().clear();
 
         // для попадания в ЛП:
         // 7. Проверка положительной суммы дохода/расхода
         row.getCell("incomeSum").setValue(null, null);
-        row.getCell("outcomeSum").setValue(0, null);
+        row.getCell("outcomeSum").setValue(-1, null);
+        subTotalRow.getCell("incomeSum").setValue(0, null);
+        subTotalRow.getCell("outcomeSum").setValue(-1, null);
         testHelper.execute(FormDataEvent.CHECK);
 
         entries = testHelper.getLogger().getEntries();
         i = 0;
         Assert.assertEquals("Строка 1: Выполнение расчета графы «Режим переговорных сделок» невозможно, так как не заполнена используемая в расчете графа «Код страны регистрации по классификатору ОКСМ»!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Значение графы «Сумма процентного расхода (руб.)» должно быть больше значения «0»!", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 1: Значение графы «Сумма процентного расхода (руб.)» должно быть больше или равно «0»!", entries.get(i++).getMessage());
         Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
         testHelper.getLogger().clear();
 

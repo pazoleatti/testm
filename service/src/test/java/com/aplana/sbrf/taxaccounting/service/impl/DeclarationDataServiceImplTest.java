@@ -79,7 +79,7 @@ public class DeclarationDataServiceImplTest {
 		try{
 			TAUserInfo userInfo = new TAUserInfo();
 			userInfo.setIp("192.168.72.16");
-			userInfo.setUser(mockUser(10,  Department.ROOT_BANK_ID, TARole.ROLE_CONTROL));
+			userInfo.setUser(mockUser(10,  0, TARole.ROLE_CONTROL));
 			declarationDataService.calculate(logger, 1l, userInfo, new Date(), new LockStateLogger() {
                 @Override
                 public void updateState(String state) {
