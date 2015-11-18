@@ -154,7 +154,7 @@ insert into ref_book_record (id, record_id, ref_book_id, version, status) values
 
 insert into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 12, 520, to_date('01.01.2008', 'DD.MM.YYYY'), 0);
 	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5200, record_id from ref_book_value where attribute_id = 5251 and string_value = 'ВЗЛ';
-	insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 5201, 'CR Erdberg Eins GmbH & Co KG');
+	insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 5201, 'CR Erdberg Eins GmbH &'||'Co KG');
 	insert into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 5202, 'Thomas-Klestil-Platz 1 1030 Vienna/ AUSTRIA');
 	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5203, record_id from ref_book_value where attribute_id = 5131 and number_value = 2;
 	insert into ref_book_value (record_id, attribute_id, reference_value) select seq_ref_book_record.currval, 5204, record_id from ref_book_value where attribute_id = 50 and string_value = '040';
