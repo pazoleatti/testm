@@ -120,7 +120,7 @@ public class NumericColumn extends Column implements Serializable {
 						|| valueToCheck.contains(" ")) {
 					return false;
 				}
-				if (valueToCheck.equals("-")) {
+				if ("-".equals(valueToCheck)) {
 					return true;
 				}
 				if (valueToCheck.startsWith("-")) {

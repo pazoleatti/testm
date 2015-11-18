@@ -412,7 +412,7 @@ public final class ScriptUtils {
         } catch (ParseException ex) {
             // костыль для обхода http://jira.aplana.com/browse/SBRFACCTAX-11560
             try {
-                if (format.equalsIgnoreCase("dd.mm.yyyy") && tmp.matches("\\d{1,2}/\\d{1,2}/\\d{1,2}")) {
+                if ("dd.mm.yyyy".equalsIgnoreCase(format) && tmp.matches("\\d{1,2}/\\d{1,2}/\\d{1,2}")) {
                     retVal = parseDate("M/d/yy", tmp);
                 }
             } catch (ParseException ex2) {

@@ -35,24 +35,18 @@ public class SaveDepartmentCombinedHandler extends AbstractActionHandler<SaveDep
         SaveDepartmentCombinedResult> {
 
     private static final String SUCCESS_INFO = "Настройки для \"%s\" в периоде с %s по %s успешно сохранены.";
-
-    private final static SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
+    private static final SimpleDateFormat SDF = new SimpleDateFormat("dd.MM.yyyy");
 
     @Autowired
     private PeriodService reportService;
-
     @Autowired
     private RefBookFactory rbFactory;
-
     @Autowired
     private LogEntryService logEntryService;
-
     @Autowired
     private DepartmentService departmentService;
-
     @Autowired
     private SecurityService securityService;
-
     @Autowired
     private DepartmentReportPeriodService departmentReportPeriodService;
 
@@ -232,9 +226,9 @@ public class SaveDepartmentCombinedHandler extends AbstractActionHandler<SaveDep
             String departmentName = departmentService.getDepartment(action.getDepartment()).getName();
             if (!logger.containsLevel(LogLevel.ERROR)) {
                 if (recordVersion.getVersionEnd() != null) {
-                    logger.info(String.format(SUCCESS_INFO, departmentName, sdf.format(recordVersion.getVersionStart()), sdf.format(recordVersion.getVersionEnd())));
+                    logger.info(String.format(SUCCESS_INFO, departmentName, SDF.format(recordVersion.getVersionStart()), SDF.format(recordVersion.getVersionEnd())));
                 } else {
-                    logger.info(String.format(SUCCESS_INFO, departmentName, sdf.format(recordVersion.getVersionStart()), "\"-\""));
+                    logger.info(String.format(SUCCESS_INFO, departmentName, SDF.format(recordVersion.getVersionStart()), "\"-\""));
                 }
             }
 
@@ -288,7 +282,7 @@ public class SaveDepartmentCombinedHandler extends AbstractActionHandler<SaveDep
     }
 
     private Long getFirstLong(List<Long> list) {
-        return (list != null && !list.isEmpty() ? list.get(0) : null);
+        return list != null && !list.isEmpty() ? list.get(0) : null;
     }
 
     private boolean checkPattern(Logger logger, String name, String value, Pattern pattern, String patternMeaning) {

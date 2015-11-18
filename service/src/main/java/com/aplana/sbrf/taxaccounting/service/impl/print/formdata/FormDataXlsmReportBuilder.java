@@ -97,7 +97,7 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
                 case DATE:
                     style.setAlignment(CellStyle.ALIGN_CENTER);
                     currColumn = formTemplate.getColumn(alias);
-                    if(Formats.getById(((DateColumn)currColumn).getFormatId()).getFormat().equals("")){
+                    if(Formats.getById(((DateColumn)currColumn).getFormatId()).getFormat().isEmpty()){
                         style.setDataFormat(dataFormat.getFormat(XlsxReportMetadata.sdf.toPattern()));
                     } else{
                         style.setDataFormat(dataFormat.getFormat(Formats.getById(((DateColumn)currColumn).getFormatId()).getFormat()));

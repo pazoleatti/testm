@@ -191,10 +191,10 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 
     private Timer timerExcel, timerCSV;
 
-    public final static int DEFAULT_TABLE_TOP_POSITION = 104;
-    public final static int DEFAULT_RIGHT_BUTTONS_HEIGHT = 61;
-    private final static int DEFAULT_REPORT_PERIOD_LABEL_WIDTH = 150;
-    private final static int LOCK_INFO_BLOCK_HEIGHT = 25;
+    public static final int DEFAULT_TABLE_TOP_POSITION = 104;
+    public static final int DEFAULT_RIGHT_BUTTONS_HEIGHT = 61;
+    private static final int DEFAULT_REPORT_PERIOD_LABEL_WIDTH = 150;
+    private static final int LOCK_INFO_BLOCK_HEIGHT = 25;
 
     /** Положение таблицы по высоте в данный момент времени */
     private int tableTopPosition = DEFAULT_TABLE_TOP_POSITION;
@@ -234,7 +234,7 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
                     EventTarget eventTarget = event.getNativeEvent().getEventTarget();
                     if (Element.is(eventTarget)) {
                         Element target = Element.as(eventTarget);
-                        if ("td".equals(target.getTagName().toLowerCase())) {
+                        if ("td".equalsIgnoreCase(target.getTagName())) {
                             TableCellElement cellElement = formDataTable.getRowElement(event.getIndex() - formDataTable.getPageStart()).getCells().getItem(event.getColumn());
                             if (cellElement.getInnerText().replace("\u00A0", "").trim().isEmpty()) {
                                 cellElement.removeAttribute("title");

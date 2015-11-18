@@ -16,8 +16,8 @@ import java.util.List;
 public class Cell extends AbstractCell {
     private static final long serialVersionUID = -3684680064726678753L;
 	//todo надо задуматься о том, что происходит с датами на двух строчках ниже. Написать тесты
-	public static final Date DATE_1900 = new Date(0,0,1);
-	public static final Date DATE_9999 = new Date(9999 - 1900, 11, 31);
+	protected static final Date DATE_1900 = new Date(0,0,1);
+	protected static final Date DATE_9999 = new Date(9999 - 1900, 11, 31);
 
     private String stringValue;
     private Date dateValue;
@@ -115,12 +115,12 @@ public class Cell extends AbstractCell {
 				if (ColumnType.NUMBER.equals(columnType)) {
 					int precision = ((NumericColumn) getColumn()).getPrecision();
 					value = ((BigDecimal) value).setScale(precision, RoundingMode.HALF_UP);
-					String stringValue = ((BigDecimal) value).toPlainString();
-					if (!getColumn().getValidationStrategy().matches(stringValue)) {
-                        NumericColumn numericColumn = ((NumericColumn) getColumn());
+					String str = ((BigDecimal) value).toPlainString();
+					if (!getColumn().getValidationStrategy().matches(str)) {
+                        NumericColumn numericColumn = (NumericColumn) getColumn();
 						return showError(msgValue + "превышает допустимую разрядность. Должно быть не более " +
                                 (numericColumn.getMaxLength()-numericColumn.getPrecision()) + " знакомест и не более " + numericColumn.getPrecision() +
-                                " знаков после запятой. Устанавливаемое значение: " + stringValue);
+                                " знаков после запятой. Устанавливаемое значение: " + str);
 					}
 				} else { // ColumnType.AUTO ColumnType.REFBOOK
 					value = ((BigDecimal) value).setScale(0, RoundingMode.HALF_UP);

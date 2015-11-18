@@ -38,14 +38,14 @@ public class EmailServiceImpl implements EmailService {
             String key = param.get(ConfigurationParamModel.EMAIL_NAME_ATTRIBUTE);
             String value = param.get(ConfigurationParamModel.EMAIL_VALUE_ATTRIBUTE);
             if (value != null && !value.isEmpty()) {
-                if (key.equals("mail.smtp.user")) {
+                if ("mail.smtp.user".equals(key)) {
                     login = value;
-                } else if (key.equals("mail.smtp.password")) {
+                } else if ("mail.smtp.password".equals(key)) {
                     password = value;
-                } else if (key.equals("mail.smtp.host")) {
+                } else if ("mail.smtp.host".equals(key)) {
                     host = value;
                     props.setProperty(key, value);
-                } else if (key.equals("mail.smtp.port")) {
+                } else if ("mail.smtp.port".equals(key)) {
                     port = value;
                     props.setProperty(key, value);
                 } else {
@@ -98,14 +98,14 @@ public class EmailServiceImpl implements EmailService {
                 String key = param.get(ConfigurationParamModel.EMAIL_NAME_ATTRIBUTE);
                 String value = param.get(ConfigurationParamModel.EMAIL_VALUE_ATTRIBUTE);
                 if (value != null && !value.isEmpty()) {
-                    if (key.equals("mail.smtp.user")) {
+                    if ("mail.smtp.user".equals(key)) {
                         login = value;
-                    } else if (key.equals("mail.smtp.password")) {
+                    } else if ("mail.smtp.password".equals("mail.smtp.password")) {
                         password = value;
-                    } else if (key.equals("mail.smtp.host")) {
+                    } else if ("mail.smtp.host".equals(key)) {
                         host = value;
                         props.setProperty(key, value);
-                    } else if (key.equals("mail.smtp.port")) {
+                    } else if ("mail.smtp.port".equals(key)) {
                         port = value;
                         props.setProperty(key, value);
                     } else {
