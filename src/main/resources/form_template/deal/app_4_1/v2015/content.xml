@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <formTemplateContent>
-    <fixedRows>false</fixedRows>
+    <fixedRows>true</fixedRows>
     <monthly>false</monthly>
     <comparative>false</comparative>
     <accruing>false</accruing>

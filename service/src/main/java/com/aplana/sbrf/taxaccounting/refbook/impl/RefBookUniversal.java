@@ -239,6 +239,8 @@ public class RefBookUniversal implements RefBookDataProvider {
             RefBook refBook = refBookDao.get(refBookId);
             List<RefBookAttribute> attributes = refBook.getAttributes();
             List<Long> excludedVersionEndRecords = new ArrayList<Long>();
+            //Признак того, что для проверок дата окончания была изменена (была использована дата начала следующей версии)
+            boolean dateToChangedForChecks = false;
 
             if (!refBook.isVersioned()) {
                 //Устанавливаем минимальную дату
@@ -254,14 +256,14 @@ public class RefBookUniversal implements RefBookDataProvider {
                     //Получение фактической даты окончания, которая может быть задана датой начала следующей версии
                     RefBookRecordVersion nextVersion = refBookDao.getNextVersion(refBookId, record.getRecordId(), versionFrom);
                     if (nextVersion != null) {
-                        Date versionEnd = nextVersion.getVersionStart();
+                        Date versionEnd = SimpleDateUtils.addDayToDate(nextVersion.getVersionStart(), -1);
                         if (versionEnd != null && versionFrom.after(versionEnd)) {
-                            throw new ServiceException("Дата окончания настроек подразделения получена некорректно");
+                            throw new ServiceException("Дата окончания получена некорректно");
                         }
                         record.setVersionTo(versionEnd);
+                        dateToChangedForChecks = true;
                     } else {
                         record.setVersionTo(versionTo);
-
                     }
                 }
             }
@@ -295,6 +297,12 @@ public class RefBookUniversal implements RefBookDataProvider {
             }
 
             //Создание настоящей и фиктивной версии
+            for (RefBookRecord record : records) {
+                if (dateToChangedForChecks) {
+                    //Возвращаем обратно пустую дату начала, т.к была установлена дата начала следующей версии для проверок
+                    record.setVersionTo(null);
+                }
+            }
             return createVersions(refBook, versionFrom, versionTo, records, countIds, excludedVersionEndRecords, logger);
         } catch (DataAccessException e) {
             throw new ServiceException("Запись не сохранена. Обнаружены фатальные ошибки!", e);
@@ -448,9 +456,6 @@ public class RefBookUniversal implements RefBookDataProvider {
                 if (versionTo == null) {
                     if (nextVersion != null && logger != null) {
                         logger.info("Установлена дата окончания актуальности версии "+formatter.get().format(SimpleDateUtils.addDayToDate(nextVersion.getVersionStart(), -1))+" в связи с наличием следующей версии");
-                        if (!record.getVersionTo().equals(nextVersion.getVersionStart())) {
-                            throw new ServiceException("Дата окончания получена некорректно!");
-                        }
                     }
                 } else {
                     if (!excludedVersionEndRecords.contains(record.getRecordId())) {
