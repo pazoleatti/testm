@@ -14,7 +14,7 @@ public class TaRootPresenter extends RootPresenter {
 	
 	private int lockCount;
 
-    /*static {
+    static {
         // Перехват ошибок, которые не были отловлены в клиентском коде
         GWT.setUncaughtExceptionHandler(new GWT.UncaughtExceptionHandler() {
             @Override
@@ -23,7 +23,7 @@ public class TaRootPresenter extends RootPresenter {
                 e.printStackTrace();
             }
         });
-    }*/
+    }
 
 	public static class OurView extends RootPresenter.RootView {
 		private Element glass;
