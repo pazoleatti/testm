@@ -2,6 +2,7 @@ package form_template.deal.app_4_2.v2015
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
+import com.aplana.sbrf.taxaccounting.model.util.StringUtils
 import groovy.transform.Field
 
 /**
@@ -665,7 +666,7 @@ def calc8or14(def record520Id, def sourceFormDatasMap, def sourceDataRowsMap, de
             }
         }
     }
-    return result
+    return result * 1000
 }
 
 def getNeedRowsForCalc8or14(def dataRows, def isCalc8) {
@@ -791,5 +792,5 @@ def checkRnuRow(def row, def name) {
     }
     def start = row.fix.indexOf(head) + head.size()
     def end = row.fix.size() - 1
-    return row.fix.substring(start, end).equals(name)
+    return row.fix.substring(start, end).equals(StringUtils.cleanString(name))
 }
