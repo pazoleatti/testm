@@ -305,7 +305,9 @@ void checkItog(def dataRows) {
     def testItogRows = calcSubTotalRows(dataRows)
     // Имеющиеся строки итогов
     def itogRows = dataRows.findAll { it.getAlias() != null && !'total'.equals(it.getAlias()) }
-    checkItogRows(dataRows, testItogRows, itogRows, new ScriptUtils.GroupString() {
+    // все строки, кроме общего итога
+    def groupRows = dataRows.findAll { !'total'.equals(it.getAlias()) }
+    checkItogRows(groupRows, testItogRows, itogRows, new ScriptUtils.GroupString() {
         @Override
         String getString(DataRow<Cell> row) {
             return getValuesByGroupColumn(row)
@@ -313,6 +315,9 @@ void checkItog(def dataRows) {
     }, new ScriptUtils.CheckGroupSum() {
         @Override
         String check(DataRow<Cell> row1, DataRow<Cell> row2) {
+            if (row1.fix != row2.fix) {
+                return getColumnName(row1, 'code')
+            }
             if (row1.income != row2.income) {
                 return getColumnName(row1, 'income')
             }
@@ -326,6 +331,16 @@ void checkItog(def dataRows) {
 
 // вынес метод в скрипт, т.к. надо группировать по зависимой графе
 void checkItogRows(def dataRows, def testItogRows, def itogRows, ScriptUtils.GroupString groupString, ScriptUtils.CheckGroupSum checkGroupSum) {
+    // Последняя строка должна быть подитоговой
+    if (!dataRows.isEmpty()) {
+        DataRow<Cell> lastRow = dataRows.get(dataRows.size() - 1);
+        if (lastRow.getAlias() == null) {
+            String groupCols = groupString.getString(lastRow);
+            if (groupCols != null) {
+                logger.error(GROUP_WRONG_ITOG, groupCols);
+            }
+        }
+    }
     if (testItogRows.size() > itogRows.size()) {
         // Итоговые строки были удалены
         for (int i = 0; i < dataRows.size() - 1; i++) {
@@ -337,16 +352,6 @@ void checkItogRows(def dataRows, def testItogRows, def itogRows, ScriptUtils.Gro
                     if (groupCols != null) {
                         logger.error(GROUP_WRONG_ITOG, groupCols);
                     }
-                }
-            }
-        }
-        // Последняя строка должна быть подитоговой
-        if (!dataRows.isEmpty()) {
-            DataRow<Cell> lastRow = dataRows.get(dataRows.size() - 1);
-            if (lastRow.getAlias() == null) {
-                String groupCols = groupString.getString(lastRow);
-                if (groupCols != null) {
-                    logger.error(GROUP_WRONG_ITOG, groupCols);
                 }
             }
         }
@@ -363,15 +368,17 @@ void checkItogRows(def dataRows, def testItogRows, def itogRows, ScriptUtils.Gro
         for (int i = 0; i < testItogRows.size(); i++) {
             DataRow<Cell> testItogRow = testItogRows.get(i);
             DataRow<Cell> realItogRow = itogRows.get(i);
-            int itg = Integer.valueOf(testItogRow.getAlias().replaceAll("itg#", ""));
-            if (dataRows.get(itg).getAlias() != null) {
-                logger.error(GROUP_WRONG_ITOG_ROW, dataRows.get(i).getIndex());
-            } else {
-                String groupCols = groupString.getString(dataRows.get(itg));
-                if (groupCols != null) {
-                    String checkStr = checkGroupSum.check(testItogRow, realItogRow);
-                    if (checkStr != null) {
-                        logger.error(String.format(GROUP_WRONG_ITOG_SUM, realItogRow.getIndex(), groupCols, checkStr));
+            int itg = Integer.valueOf(realItogRow.getAlias().replaceAll("itg#", ""));
+            if (dataRows.size() > itg) {
+                if (dataRows.get(itg).getAlias() != null) {
+                    logger.error(GROUP_WRONG_ITOG_ROW, realItogRow.getIndex());
+                } else {
+                    String groupCols = groupString.getString(dataRows.get(itg));
+                    if (groupCols != null) {
+                        String checkStr = checkGroupSum.check(testItogRow, realItogRow);
+                        if (checkStr != null) {
+                            logger.error(String.format(GROUP_WRONG_ITOG_SUM, realItogRow.getIndex(), groupCols, checkStr));
+                        }
                     }
                 }
             }
@@ -671,6 +678,8 @@ void importData() {
                     compareTotalValues(totalRow, subTotalRow, totalColumns, logger, false)
                 }
                 totalRowFromFileMap.remove(subTotalRow.fix)
+            } else {
+                rowWarning(logger, null, String.format(GROUP_WRONG_ITOG, subTotalRow.fix.replaceAll("Итого по КНУ ", "")))
             }
         }
         if (!totalRowFromFileMap.isEmpty()) {
@@ -788,7 +797,7 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex, 
  * @param rowIndex строка в нф
  */
 def getNewSubTotalRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) {
-    def newRow = getSubTotalRow(values[1], null, fileRowIndex)
+    def newRow = getSubTotalRow(values[1], null, rowIndex)
     newRow.setIndex(rowIndex)
     newRow.setImportIndex(fileRowIndex)
 
