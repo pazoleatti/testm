@@ -6,7 +6,12 @@ package com.aplana.sbrf.taxaccounting.service;
  * "grn/grn64", "bicr4/bicr4_64", "bicr_adm/bicr_adm_64".
  */
 public interface SignService {
+
+	/** Если установлено это значение, то проверку ЭП выполнять надо для всех ТФ */
+	String SIGN_CHECK = "1";
+
 	/**
+	 *
 	 * Проверить подписанный файл
 	 * @param pathToSignFile путь к файлу для проверки
      * @param delFlag если равен 1, то в случае, если подпись есть (контрольная сумма совпала), она будет удалена из файла
