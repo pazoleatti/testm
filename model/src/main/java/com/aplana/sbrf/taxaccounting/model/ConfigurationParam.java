@@ -8,8 +8,10 @@ package com.aplana.sbrf.taxaccounting.model;
  */
 public enum ConfigurationParam {
     // Общие
-    KEY_FILE("Путь к файлу ключей ЭЦП", ConfigurationParamGroup.COMMON, false, false, 1),
-    SIGN_CHECK("Проверять ЭЦП", ConfigurationParamGroup.COMMON, true, false, 0),
+	/** Путь к файлу/каталогу ключей ЭП */
+    KEY_FILE("Путь к файлу/каталогу ключей ЭП (БОК)", ConfigurationParamGroup.COMMON, false, false, 1),
+	/** Проверять ЭП */
+    SIGN_CHECK("Проверять ЭП (1 - проверять, 0 - не проверять)", ConfigurationParamGroup.COMMON, true, false, 0),
     ACCOUNT_PLAN_UPLOAD_DIRECTORY("Путь к каталогу загрузки транспортных файлов, содержащих данные справочника «План счетов»", ConfigurationParamGroup.COMMON, true, true, 1),
     OKATO_UPLOAD_DIRECTORY("Путь к каталогу загрузки транспортных файлов, содержащих данные справочника «ОКАТО»", ConfigurationParamGroup.COMMON, true, true, 1),
     REGION_UPLOAD_DIRECTORY("Путь к каталогу загрузки транспортных файлов, содержащих данные справочника «Субъекты РФ»", ConfigurationParamGroup.COMMON, true, true, 1),
@@ -17,6 +19,7 @@ public enum ConfigurationParam {
     AVG_COST_UPLOAD_DIRECTORY("Путь к каталогу справочника \"Средняя стоимость транспортных средств\"", ConfigurationParamGroup.COMMON, true, true, 2),
     REF_BOOK_ARCHIVE_DIRECTORY("Путь к каталогу архива справочников", ConfigurationParamGroup.COMMON, true, true, 2),
     REF_BOOK_ERROR_DIRECTORY("Путь к каталогу ошибок справочников", ConfigurationParamGroup.COMMON, true, true, 2),
+	/** Путь к библиотеке подписи */
     ENCRYPT_DLL("Путь к библиотеке подписи", ConfigurationParamGroup.COMMON, true, true, 1),
     // Загрузка НФ
     FORM_UPLOAD_DIRECTORY("Путь к каталогу загрузки", ConfigurationParamGroup.FORM, true, true, 2),

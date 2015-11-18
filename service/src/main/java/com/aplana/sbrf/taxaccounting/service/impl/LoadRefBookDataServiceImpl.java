@@ -207,7 +207,7 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
                 try {
                     // ЭЦП
                     List<String> signList = configurationDao.getByDepartment(0).get(ConfigurationParam.SIGN_CHECK, 0);
-                    if (signList != null && !signList.isEmpty() && signList.get(0).equals("1")) {
+                    if (signList != null && !signList.isEmpty() && SignService.SIGN_CHECK.equals(signList.get(0))) {
                         boolean check = false;
                         try {
                             check = signService.checkSign(currentFile.getPath(), 0);

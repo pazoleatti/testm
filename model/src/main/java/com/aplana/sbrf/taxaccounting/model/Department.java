@@ -13,14 +13,6 @@ import java.io.Serializable;
  */
 public class Department implements Serializable {
 	private static final long serialVersionUID = 2144891300700432727L;
-
-	/**
-	 * Идентификатор подразделения "Банк", представляющего весь СБРФ
-     * @deprecated Необходимо использовать метод DepartmentService#getBankDepartment
-	 */
-    @Deprecated
-	public static final int ROOT_BANK_ID = 1;
-
     public static final Long REF_BOOK_ID = 30L;
 
 	private int id;

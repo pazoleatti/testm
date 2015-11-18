@@ -196,8 +196,8 @@ def BigDecimal calc19(def row) {
 def Long calc20(def row) {
     def records = getRecords515()
     for (def record : records) {
-        def minValue = record?.MIN_VALUE?.value
-        if (minValue == null || minValue <= row.sum9 || minValue >= row.sum9) {
+        if (record?.MIN_VALUE?.value <= row.sum9 &&
+                (record?.MAX_VALUE?.value == null || row.sum9 <= record?.MAX_VALUE?.value)) {
             return record?.CATEGORY?.value
         }
     }
@@ -265,7 +265,7 @@ void logicCheck() {
         // 5. Проверка соответствия категории пороговым значениям
         if (tmp != row.categoryRevised) {
             def value2 = getRefBookValue(520L, row.name)?.NAME?.value
-            logger.error("Строка %s: организация «%s» не является взаимозависимым лицом в данном отчетном периоде!", rowNum, value2)
+            logger.error("Строка %s: Организация «%s» не является взаимозависимым лицом в данном отчетном периоде!", rowNum, value2)
         }
     }
 }
@@ -867,8 +867,14 @@ def findPrevRow(def recordId, def versionRecords520Map) {
     return prevFindRow
 }
 
+@Field
+def records520 = null
+
 // Получить значения из справочника "Участники ТЦО".
 def getRecords520() {
+    if (records520 != null) {
+        return records520
+    }
     // получить id записи с кодом "2" из справончика "Специальный налоговый статус"
     def provider = formDataService.getRefBookProvider(refBookFactory, 511L, providerCache)
     def filter = "CODE = 2"
@@ -877,23 +883,24 @@ def getRecords520() {
     if (records && records.size() == 1) {
         taxStatusId = records.get(0)?.record_id?.value
     } else {
-        return null
+        records520 =[]
+        return records520
     }
 
     // получить записи из справончика "Участники ТЦО"
     provider = formDataService.getRefBookProvider(refBookFactory, 520L, providerCache)
     filter = "TAX_STATUS = $taxStatusId"
     records = provider.getRecords(getReportPeriodEndDate(), null, filter, null)
-    def relatedPersons = []
+    records520 = []
     records.each { record ->
         def start = record?.START_DATE?.value
         def end = record?.END_DATE?.value
         def typeId = record?.TYPE?.value
         if (isVZL(start, end, typeId)) {
-            relatedPersons.add(record)
+            records520.add(record)
         }
     }
-    return relatedPersons
+    return records520
 }
 
 // проверка принадлежности организации к ВЗЛ в отчетном периоде

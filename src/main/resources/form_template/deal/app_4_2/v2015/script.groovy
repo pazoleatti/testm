@@ -11,8 +11,6 @@ import groovy.transform.Field
  *
  * TODO:
  *      - консолидация не полная, потому что не все макеты источников готовы
- *      - расчеты не доделаны
- *      - логические проверки не доделаны
  *      - дополнить тесты
  */
 
@@ -169,29 +167,68 @@ void calc() {
     def dataRows = formDataService.getDataRowHelper(formData).allCached
     for (def row : dataRows) {
         // графа 4
-        // TODO (Ramil Timerbaev) справочник 505
         row.group = calc4(row)
 
         // графа 17
         row.sum7 = calc17(row)
 
         // графа 18
-        // TODO (Ramil Timerbaev) справочник 514
         row.thresholdValue = calc18(row)
 
         // графа 19
-        // TODO (Ramil Timerbaev) справочник 38
         row.sign = calc19(row)
 
         // графа 20
-        // TODO (Ramil Timerbaev) справочник 506
         row.categoryRevised = calc20(row)
     }
 }
 
 def Long calc4(def row) {
-    // TODO
-    return 0
+    if (row.name == null) {
+        return null
+    }
+    // записи из справочника "Участники ТЦО"
+    def records520 = getRecordsByRefbookId(520L)
+    def record520 = records520?.find { it?.record_id?.value == row.name }
+    if (record520?.TYPE?.value == null) {
+        return null
+    }
+    def code = null
+
+    // записи из справочника "Типы участников ТЦО"
+    def records525 = getRecordsByRefbookId(525L)
+    def record525 =records525?.find { it?.record_id?.value == record520?.TYPE?.value }
+    if (record525?.CODE?.value && record525?.CODE?.value != 'ВЗЛ') {
+        // РОЗ и НЛ
+        code = record525?.CODE?.value
+    } else if (record520?.ORG_CODE?.value != null) {
+        // ВЗЛ ОРН, ВЗЛ СРН, ИВЗЛ
+        // записи из справочника "Код организации"
+        def records513 = getRecordsByRefbookId(513L)
+        def record513 = records513?.find { it?.record_id?.value == record520?.ORG_CODE?.value }
+        if (record513?.CODE?.value == 2) {
+            // ИВЗЛ
+            code = 'ИВЗЛ'
+        } else if (record520?.TAX_STATUS?.value && record513?.CODE?.value == 1) {
+            // записи из справочника "Специальный налоговый статус"
+            def records511 = getRecordsByRefbookId(511L)
+            def record511 = records511?.find { it?.record_id?.value == record520?.TAX_STATUS?.value }
+            if (record511?.CODE?.value == 1) {
+                // ВЗЛ СРН
+                code = 'ВЗЛ СРН'
+            } else if (record511?.CODE?.value == 2) {
+                // ВЗЛ ОРН
+                code = 'ВЗЛ ОРН'
+            }
+        }
+    }
+    if (code == null) {
+        return null
+    }
+    // записи из справочника "Типы участников ТЦО (расширенный)"
+    def records505 = getRecordsByRefbookId(505L)
+    def record505 = records505?.find { it?.CODE?.value == code }
+    return record505?.record_id?.value
 }
 
 def BigDecimal calc17(def row) {
@@ -205,8 +242,10 @@ def BigDecimal calc17(def row) {
 }
 
 def BigDecimal calc18(def row) {
-    // TODO
-    return 0
+    // записи из справочника "Пороговые значения"
+    def records = getRecordsByRefbookId(514L)
+    def record = records?.find { it?.CODE?.value == row.group }
+    return record?.record_id?.value
 }
 
 def Long calc19(def row) {
@@ -217,12 +256,36 @@ def Long calc19(def row) {
 }
 
 def Long calc20(def row) {
-    // TODO
-    return 0
+    // записи из справочника "Правила назначения категории юридическому лицу"
+    def records = getRecordsByRefbookId(515L)
+    for (def record : records) {
+        if (row.group == record?.CODE?.value && record?.MIN_VALUE?.value <= row.sum7 &&
+                (record?.MAX_VALUE?.value == null || row.sum7 <= record?.MAX_VALUE?.value)) {
+            return record?.CATEGORY?.value
+        }
+    }
+    return null
+}
+
+@Field
+def recordsMap = [:]
+
+def getRecordsByRefbookId(long id) {
+    if (recordsMap[id] == null) {
+        // получить записи из справончика
+        def provider = formDataService.getRefBookProvider(refBookFactory, id, providerCache)
+        recordsMap[id] = provider.getRecords(getReportPeriodEndDate(), null, null, null)
+        if (recordsMap[id] == null) {
+            recordsMap[id] = []
+        }
+    }
+    return recordsMap[id]
 }
 
 void logicCheck() {
     def dataRows = formDataService.getDataRowHelper(formData).allCached
+
+    def records520 = getRecordsByRefbookId(520L)
     for (def row : dataRows) {
         if (row.getAlias() != null) {
             continue
@@ -237,10 +300,27 @@ void logicCheck() {
             logger.error("Строка $rowNum: Объем доходов и расходов по всем сделкам не может быть нулевым!")
         }
 
-        // TODO
         // 3. Наличие порогового значения
+        if (calc18(row) == null) {
+            // записи из справочника "Типы участников ТЦО (расширенный)"
+            def records505 = getRecordsByRefbookId(505L)
+            def record505 = records505?.find { it?.record_id?.value == row.group }
+            def value4 = record505?.CODE?.value
+            logger.error("Строка %d: Для типа участника ТЦО «%s» не задано пороговое значение в данном Налоговом периоде!", rowNum, value4)
+        }
+
         // 4. Наличие правила назначения категории
+        def tmp = calc20(row)
+        if (tmp == null) {
+            logger.error("Строка $rowNum: Для ожидаемого объема доходов и расходов не задано правило назначения категории в данном Налоговом периоде!")
+        }
+
         // 5. Проверка соответствия категории пороговым значениям
+        if (tmp != row.categoryRevised) {
+            def record520 = records520?.find { it.record_id?.value == row.name }
+            def value2 = record520?.NAME?.value
+            logger.error("Строка %d: Организация «%s» не является взаимозависимым лицом в данном отчетном периоде!", rowNum, value2)
+        }
     }
 }
 
@@ -309,6 +389,9 @@ def sourceRefbook520AliasMap = [
                         // 6.25
 ]
 
+// Консолидация очень похожа на 4.1 9 месяцев, отличие в:
+//  - из справочника "Участники ТЦО" получаются все записи
+//  - нет удаления нулевых строк в конце консолидации
 void consolidation() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
 
@@ -352,8 +435,7 @@ void consolidation() {
     }
 
     // получить значения из справочника "Участники ТЦО"
-    def provider = formDataService.getRefBookProvider(refBookFactory, 520L, providerCache)
-    def records520 = provider.getRecords(getReportPeriodEndDate(), null, null, null)
+    def records520 = getRecordsByRefbookId(520L)
     def dataRows = []
     // найти среди строк источников используемые записи справочника "Участники ТЦО"
     def useIds = getUseRecord520IsFromSources(sourceAllDataRowsMap)
