@@ -733,7 +733,7 @@ def calc9or15(def record520, def sourceAllDataRowsMap, def isCalc9) {
                     }
                 } else if (809 == formTypeId) {
                     // рну 117
-                    if (isCalc9) {
+                    if (!isCalc9) {
                         result += (row.sum3 ?: 0)
                     }
                 } else {
