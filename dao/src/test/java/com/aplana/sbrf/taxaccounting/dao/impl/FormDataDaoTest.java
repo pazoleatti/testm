@@ -131,12 +131,12 @@ public class FormDataDaoTest {
 
     @Test
     public void deleteTest() {
-        formDataDao.delete(1);
+        formDataDao.delete(1, 1);
     }
 
     @Test(expected = DaoException.class)
     public void deleteFailTest() {
-        formDataDao.delete(1);
+        formDataDao.delete(1, 1);
         formDataDao.get(1, false);
     }
 
@@ -448,11 +448,6 @@ public class FormDataDaoTest {
     public void findFormDataIdsByIntersectionInReportPeriodTest() throws ParseException {
         assertEquals(7, formDataDao.findFormDataIdsByRangeInReportPeriod(2,
                 SIMPLE_DATE_FORMAT.parse("01.01.2012"), SIMPLE_DATE_FORMAT.parse("31.12.2012")).size());
-    }
-
-    @Test
-    public void deleteFDNnn(){
-        assertEquals(6, formDataDao.deleteFormDataNnn(329, 329));
     }
 
 	@Test
