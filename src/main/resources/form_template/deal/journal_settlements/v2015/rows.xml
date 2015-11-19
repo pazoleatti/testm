@@ -446,7 +446,7 @@
         <cell alias="fix1" colSpan="3" rowSpan="1"/>
         <cell alias="sbrfCode1" colSpan="1" rowSpan="1"/>
         <cell alias="statReportId1" colSpan="1" rowSpan="1"/>
-        <cell alias="fix2" colSpan="8" rowSpan="1" stringValue="Изменение резерва на возможные потери по:"/>
+        <cell alias="fix2" colSpan="8" rowSpan="1" stringValue="Изменение резерва на возможные потери ** по:"/>
         <cell alias="depName1" colSpan="1" rowSpan="1"/>
         <cell alias="orgName1" colSpan="1" rowSpan="1"/>
         <cell alias="sbrfCode2" colSpan="1" rowSpan="1"/>
