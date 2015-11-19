@@ -694,8 +694,7 @@ public class FormDataServiceImpl implements FormDataService {
                 } else {
                     formDataAccessService.canDelete(userInfo, formDataId);
                     sourceService.deleteFDConsolidationInfo(Arrays.asList(formDataId));
-                    formDataDao.delete(formDataId);
-                    formDataDao.deleteFormDataNnn(formData.getFormTemplateId(), formDataId);
+                    formDataDao.delete(formData.getFormTemplateId(), formDataId);
                     interruptTask(formDataId, false, userInfo.getUser().getId(), reportType);
                     auditService.add(FormDataEvent.DELETE, userInfo, null, formData, "Форма удалена", null);
                 }
