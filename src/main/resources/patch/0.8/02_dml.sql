@@ -7,7 +7,7 @@ delete from lock_data;
 INSERT INTO form_kind (id, name) VALUES (6, 'Расчетная');
 
 --http://jira.aplana.com/browse/SBRFACCTAX-12866: справочники для табличных частей настроек  - неверсионными
-update ref_book set IS_VERSIONED = 0 where id in (206, 310, 330);
+update ref_book set IS_VERSIONED = 1 where id in (206, 310, 330);
 
 --http://jira.aplana.com/browse/SBRFACCTAX-13181: Асинхронная задача Обновление формы
 insert into async_task_type (id, name, handler_jndi, limit_kind) 
