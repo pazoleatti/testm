@@ -2,13 +2,13 @@ INSERT INTO ref_book (id, name)
   VALUES (30, 'Подразделения');
 
 INSERT INTO ref_book_attribute (id, ref_book_id, ord, name, alias, type, reference_id, attribute_id, visible, precision, width, is_unique, max_length)
-  VALUES (101, 30, 1, 'код подразделения', 'code', 2, null, null, 1, 5, 10, 1, 27);
+  VALUES (101, 30, 1, 'код подразделения', 'code', 2, null, null, 1, 0, 10, 1, 9);
 INSERT INTO ref_book_attribute (id, ref_book_id, ord, name, alias, type, reference_id, attribute_id, visible, precision, width, is_unique, max_length)
   VALUES (162, 30, 2, 'Имя', 'name', 1, null, null, 1, null, 10, 1, 100);
 INSERT INTO ref_book_attribute (id, ref_book_id, ord, name, alias, type, reference_id, attribute_id, visible, precision, width, max_length)
   VALUES (2, 30, 3, 'СБРФ КОД', 'sbrf_code', 1, null, null, 1, null, 10, 100);
 INSERT INTO ref_book_attribute (id, ref_book_id, ord, name, alias, type, reference_id, attribute_id, visible, precision, width, max_length)
-  VALUES (103, 30, 4, 'тип', 'type', 2, null, null, 1, 5, 10, 27);
+  VALUES (103, 30, 4, 'тип', 'type', 2, null, null, 1, 0, 10, 9);
 
 INSERT INTO department_type (id, name) VALUES (1, 'Банк');
 INSERT INTO department_type (id, name) VALUES (2, 'Территориальный банк');

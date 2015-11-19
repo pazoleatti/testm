@@ -9,6 +9,7 @@
         <jdbc:script location="classpath:data/TaxType.sql" encoding="UTF-8"/>
     	<jdbc:script location="classpath:data/FormType.sql" encoding="UTF-8"/>
     	<jdbc:script location="classpath:data/FormTemplate.sql" encoding="UTF-8"/>
+        <jdbc:script location="classpath:data/FormTemplate1_4.sql" encoding="UTF-8"/>
     	<jdbc:script location="classpath:data/Department.sql" encoding="UTF-8"/>
     	<jdbc:script location="classpath:data/TaxPeriod.sql" encoding="UTF-8"/>
 		<jdbc:script location="classpath:data/ReportPeriod.sql" encoding="UTF-8"/>

@@ -6,7 +6,7 @@ INSERT INTO ref_book_attribute (id, ref_book_id, ord, name, alias, type, referen
 (162, 30, 1, 'Имя', 'name', 1, NULL, NULL, 1, NULL, 10, 100);
 
 INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, max_length) VALUES
-(651, 74, 'Код пользователя', 'ID', 2, 1, NULL, NULL, 1, 0, 9, 0, 27);
+(651, 74, 'Код пользователя', 'ID', 2, 1, NULL, NULL, 1, 0, 9, 0, 19);
 INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required) VALUES
 (653, 74, 'Код подразделения', 'DEPARTMENT_ID', 4, 3, 30, 162, 1, NULL, 10, 0);
 INSERT INTO ref_book_attribute (id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, max_length) VALUES

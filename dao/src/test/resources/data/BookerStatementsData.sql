@@ -26,24 +26,24 @@ INSERT INTO ref_book_attribute(id, ref_book_id, name, alias, type, ord, referenc
 INSERT INTO ref_book_attribute(id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, max_length) VALUES
 ( 510, 50,'Наименование счета','ACCOUNT_NAME', 1, 2, NULL, NULL, 1,NULL, 100, 100);
 INSERT INTO ref_book_attribute(id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, max_length) VALUES
-( 503, 50,'Входящие остатки по дебету','INCOME_DEBET_REMAINS', 2, 3, NULL, NULL, 1, 4, 10, 27);
+( 503, 50,'Входящие остатки по дебету','INCOME_DEBET_REMAINS', 2, 3, NULL, NULL, 1, 4, 10, 23);
 INSERT INTO ref_book_attribute(id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, max_length) VALUES
-( 504, 50,'Входящие остатки по кредиту','INCOME_CREDIT_REMAINS', 2, 4, NULL, NULL, 1, 4, 10, 27);
+( 504, 50,'Входящие остатки по кредиту','INCOME_CREDIT_REMAINS', 2, 4, NULL, NULL, 1, 4, 10, 23);
 INSERT INTO ref_book_attribute(id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, max_length) VALUES
-( 505, 50,'Обороты по дебету','DEBET_RATE', 2, 5, NULL, NULL, 1, 4, 10, 27);
+( 505, 50,'Обороты по дебету','DEBET_RATE', 2, 5, NULL, NULL, 1, 4, 10, 23);
 INSERT INTO ref_book_attribute(id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, max_length) VALUES
-( 506, 50,'Обороты по кредиту','CREDIT_RATE', 2, 6, NULL, NULL, 1, 4, 10, 27);
+( 506, 50,'Обороты по кредиту','CREDIT_RATE', 2, 6, NULL, NULL, 1, 4, 10, 23);
 INSERT INTO ref_book_attribute(id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, max_length) VALUES
-( 507, 50,'Исходящие остатки по дебету','OUTCOME_DEBET_REMAINS', 2, 7, NULL, NULL, 1, 4, 10, 27);
+( 507, 50,'Исходящие остатки по дебету','OUTCOME_DEBET_REMAINS', 2, 7, NULL, NULL, 1, 4, 10, 23);
 INSERT INTO ref_book_attribute(id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, max_length) VALUES
-( 508, 50,'Исходящие остатки по кредиту','OUTCOME_CREDIT_REMAINS', 2, 8, NULL, NULL, 1, 4, 10, 27);
+( 508, 50,'Исходящие остатки по кредиту','OUTCOME_CREDIT_REMAINS', 2, 8, NULL, NULL, 1, 4, 10, 23);
 INSERT INTO ref_book_attribute(id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, max_length) VALUES
 ( 511, 50,'Идентификатор периода и подразделения БО','ACCOUNT_PERIOD_ID', 4, 9, 107, 1071, 1, NULL, 10, NULL);
 
 INSERT INTO ref_book_attribute(id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, max_length) VALUES
 ( 521, 52,'Код ОПУ','OPU_CODE', 1, 1, NULL, NULL, 1,NULL, 10, 100);
 INSERT INTO ref_book_attribute(id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, max_length) VALUES
-( 522, 52,'Сумма','TOTAL_SUM', 2, 2, NULL, NULL, 1, 4, 10, 27);
+( 522, 52,'Сумма','TOTAL_SUM', 2, 2, NULL, NULL, 1, 4, 10, 23);
 INSERT INTO ref_book_attribute(id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, max_length) VALUES
 ( 524, 52,'Наименование статьи','ITEM_NAME', 1, 3, NULL, NULL, 1,NULL, 100, 100);
 INSERT INTO ref_book_attribute(id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, max_length) VALUES
