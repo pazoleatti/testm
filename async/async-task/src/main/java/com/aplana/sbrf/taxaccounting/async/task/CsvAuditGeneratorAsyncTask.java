@@ -91,21 +91,6 @@ public abstract class CsvAuditGeneratorAsyncTask extends AbstractAsyncTask {
      * @return текст сообещения
      */
     private String getMsg(Map<String, Object> params, boolean isError, boolean checkRecords, PagingResult<LogSearchResultItem> records) {
-        LogSystemFilter filter = (LogSystemFilter)params.get(AuditService.AsyncNames.LOG_FILTER.name());
-        StringBuilder builder = new StringBuilder();
-        for (Long aLong : filter.getAuditFieldList()) {
-            builder.append(AuditFieldList.fromId(aLong).getName()).append(", ");
-        }
-        String fields = builder.substring(0, builder.toString().length() - 2);
-
-        String searchCriteria = String.format(SEARCH_CRITERIA,
-                SDF.format(filter.getFromSearchDate()),
-                SDF.format(filter.getToSearchDate()),
-                filter.getFilter() != null ? filter.getFilter() : "Не задано",
-                filter.getOldLogSystemFilter() == null ? "Нет" : "Да",
-                fields
-        );
-
         String msg;
         if (checkRecords && (records == null || records.isEmpty())) {
             msg = EMPTY_DATA_ERROR_MSG;
@@ -113,6 +98,6 @@ public abstract class CsvAuditGeneratorAsyncTask extends AbstractAsyncTask {
             msg = (isError ? ERROR_MSG : SUCCESS_MSG);
         }
 
-        return String.format(msg, searchCriteria);
+        return String.format(msg, params.get(AuditService.AsyncNames.SEARCH_CRITERIA.name()));
     }
 }
