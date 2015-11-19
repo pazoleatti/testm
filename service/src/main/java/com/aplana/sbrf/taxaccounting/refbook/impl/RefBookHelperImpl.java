@@ -365,7 +365,7 @@ public class RefBookHelperImpl implements RefBookHelper {
         for (Map<String, RefBookValue> add : toAdd) {
             RefBookRecord slaveRecord = new RefBookRecord();
             slaveRecord.setValues(add);
-            slaveRecord.setRecordId(record.getRecordId());
+            slaveRecord.setRecordId(null);
             recordsToAdd.add(slaveRecord);
         }
 
@@ -391,11 +391,11 @@ public class RefBookHelperImpl implements RefBookHelper {
 
         if (!logger.containsLevel(LogLevel.ERROR)) {
             if (!recordsToAdd.isEmpty()) {
-                providerSlave.createRecordVersion(logger, rp.getCalendarStartDate(), null, recordsToAdd);
+                providerSlave.createRecordVersion(logger, rp.getCalendarStartDate(), recordVersion.getVersionEnd(), recordsToAdd);
             }
 
             for (Map<String, RefBookValue> up : toUpdate) {
-                providerSlave.updateRecordVersion(logger, up.get("record_id").getNumberValue().longValue(), rp.getCalendarStartDate(), null, up);
+                providerSlave.updateRecordVersion(logger, up.get("record_id").getNumberValue().longValue(), rp.getCalendarStartDate(), recordVersion.getVersionEnd(), up);
             }
 
             if (!deleteIds.isEmpty()) {
