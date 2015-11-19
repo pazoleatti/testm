@@ -170,7 +170,7 @@ void refresh() {
 
     // 1. Проверка наличия формы предыдущего отчетного периода
     def prevDataRows = getSourceDataRows(800, FormDataKind.PRIMARY, true)
-    if (!prevDataRows) {
+    if (prevDataRows == null) {
         def prevReportPeriod = getPrevReportPeriod()
         def prevPeriodName = (prevReportPeriod ? prevReportPeriod.name + ' ' +  prevReportPeriod.taxPeriod.year : getPrevPeriodName())
         def msg = "Категории ВЗЛ из предыдущего отчетного периода не были скопированы. " +
@@ -367,12 +367,14 @@ def subCalc12(def row) {
         // форма "Приложение 4.2" за предыдущий налоговый период
         sourceRows = getSourceDataRows(803, FormDataKind.SUMMARY, true)
         // отобрать записи в которых графа 4 == 'ВЗЛ ОРН'
-        findRow = sourceRows.find { 'ВЗЛ ОРН' == getRefBookValue(505, it.group) }
-        // для подходящих строк получить все версии записей
-        def records520Map = getVersionRecords520Map([findRow])
-        findRow = findPrevRow(row.name, records520Map)
+        findRow = sourceRows?.find { 'ВЗЛ ОРН' == getRefBookValue(505, it.group) }
         if (findRow) {
-            return [null, findRow.categoryRevised]
+            // для подходящих строк получить все версии записей
+            def records520Map = getVersionRecords520Map([findRow])
+            findRow = findPrevRow(row.name, records520Map)
+            if (findRow) {
+                return [null, findRow.categoryRevised]
+            }
         }
     } else if (reportPeriod.order == 4) {
         // полугодие / 9 месяцев / год
@@ -442,7 +444,7 @@ void checkSourceForm() {
     }
     sourceIds.each { id ->
         def rows = getSourceDataRows(id, sourceMap[id].kind, sourceMap[id].isPrevPeriod)
-        if (!rows) {
+        if (rows == null) {
             def formTypeName = getFormTypeById(id)?.name
             def kindName = sourceMap[id].kind.title
             def period = (sourceMap[id].isPrevPeriod ? getPrevReportPeriod() : getReportPeriod())
@@ -479,7 +481,7 @@ def getSourceDataRows(int formTypeId, FormDataKind kind, boolean isPrevPeriod = 
         fd = formDataService.getLast(formTypeId, kind, formData.departmentId, reportPeriod?.id, null, null, false)
     }
     if (fd == null || fd.state != WorkflowState.ACCEPTED) {
-        sourceDataRowsMap[key] = []
+        sourceDataRowsMap[key] = null
     } else {
         sourceDataRowsMap[key] = formDataService.getDataRowHelper(fd)?.allSaved
     }

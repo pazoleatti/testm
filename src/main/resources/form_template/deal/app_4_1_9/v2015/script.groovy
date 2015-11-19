@@ -765,7 +765,7 @@ def checkRnuRow(def row, def name) {
 def calc17(def record520Id) {
     // формы ВЗЛ за предыдущий период
     def rows = getSourceDataRows(800, FormDataKind.PRIMARY, true)
-    if (!rows) {
+    if (rows == null) {
         return getDefaultCategory()
     }
     // мапа для хранения всех версии записи (строка нф - список всех версии записи "участников ТЦО")
@@ -806,7 +806,7 @@ def getSourceDataRows(int formTypeId, FormDataKind kind, boolean isPrevPeriod = 
         fd = formDataService.getLast(formTypeId, kind, formData.departmentId, reportPeriod?.id, null, null, false)
     }
     if (fd == null || fd.state != WorkflowState.ACCEPTED) {
-        sourceDataRowsMap[key] = []
+        sourceDataRowsMap[key] = null
     } else {
         sourceDataRowsMap[key] = formDataService.getDataRowHelper(fd)?.allSaved
     }
