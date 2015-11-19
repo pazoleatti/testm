@@ -120,6 +120,7 @@ public class Logger {
         }
     }
 
+    // для скриптов
     public void log(LogLevel level, String message, Object...args) {
         log(level, message, false, args);
     }
