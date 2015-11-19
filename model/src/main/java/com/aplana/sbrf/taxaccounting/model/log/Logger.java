@@ -120,7 +120,11 @@ public class Logger {
         }
     }
 
-	private void log(LogLevel level, String message, boolean excludeIfNotExist, Object...args) {
+    public void log(LogLevel level, String message, Object...args) {
+        log(level, message, false, args);
+    }
+
+    private void log(LogLevel level, String message, boolean excludeIfNotExist, Object...args) {
         if (entries.size() == MAX_LOGS_COUNT) {
             entries.add(0, new LogEntry(LogLevel.INFO, "Выведены первые " + MAX_LOGS_COUNT + " сообщений:"));
         }
