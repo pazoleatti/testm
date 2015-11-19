@@ -909,13 +909,23 @@ insert into ref_book_attribute(id, ref_book_id, name, alias, type, ord, referenc
 insert into ref_book_attribute(id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (5212,520,'Статус по НДС','VAT_STATUS',4,14,510,5101,1,null,10,0,0,null,null,0,null);
 insert into ref_book_attribute(id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (5213,520,'Специальный налоговый статус','TAX_STATUS',4,15,511,5111,1,null,10,0,0,null,null,0,null);
 insert into ref_book_attribute(id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (5214,520,'Критерий взаимозависимости','DEP_CRITERION',4,16,512,5121,1,null,10,0,0,null,null,0,null);
-insert into ref_book_attribute(id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (5216,520,'ИД в АС "Cтатотчетность"','STATREPORT_ID',1,17,null,null,1,null,30,0,0,null,null,0,256);
+insert into ref_book_attribute(id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (5216,520,'ИД в АС "Статотчетность"','STATREPORT_ID',1,17,null,null,1,null,30,0,0,null,null,0,256);
 insert into ref_book_attribute(id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (5217,520,'IKKSR','IKKSR',1,18,null,null,0,null,30,0,2,null,null,0,50);
 insert into ref_book_attribute(id, ref_book_id, name, alias, type, ord, reference_id, attribute_id, visible, precision, width, required, is_unique, sort_order, format, read_only, max_length) values (5218,520,'IKSR','IKSR',1,19,null,null,0,null,30,0,3,null,null,0,50);
+
+update ref_book_attribute set name = 'ИД в АС "Статотчетность"' where id = 5216;
+update ref_book_attribute set name = 'Код организации' where id = 5203;
+
+--http://jira.aplana.com/browse/SBRFACCTAX-13086: 0.7.2 ЭНС. Справочник «Реестр проблемных зон/ зон потенциального риска» - изменить уникальность полей
+update ref_book_attribute set is_unique=0 where id = 5042;
+
 ----------------------------------------------------------------------------------------------------------------
 --http://jira.aplana.com/browse/SBRFACCTAX-13088
 --http://jira.aplana.com/browse/SBRFACCTAX-13084
 update ref_book set is_versioned = 0 where id in (510, 511);
+
+--http://jira.aplana.com/browse/SBRFACCTAX-13276: "Коды, определяющие период бухгалтерской отчетности"
+update ref_book set is_versioned = 0 where id in (106);
 
 ----------------------------------------------------------------------------------------------------------------
 --http://jira.aplana.com/browse/SBRFACCTAX-13264: Атрибут Код в неверсионируемый справочник Виды НФ

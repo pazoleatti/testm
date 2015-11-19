@@ -162,7 +162,7 @@ begin
 end;
 /
 
-set serveroutput on size 10485760;
+set serveroutput on size 1000000;
 
 --Удаление из FORM_DATA_NNN если нет записи в FORM_DATA
 declare 
