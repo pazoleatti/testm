@@ -218,9 +218,10 @@ public class App_6_6Test extends ScriptTestBase {
         // для успешного прохождения всех ЛП:
         row.getCell("outcomeSum").setValue(1, null);
         subTotalRow.getCell("outcomeSum").setValue(1, null);
+        subTotalRow.getCell("incomeSum").setValue(0, null);
         testHelper.execute(FormDataEvent.CHECK);
 
-//        Assert.assertEquals(1, testHelper.getLogger().getEntries().size()); - не проходит
+        Assert.assertEquals(1, testHelper.getLogger().getEntries().size());
 
         // TODO (Ramil Timerbaev) добавить тесты для логических проверок 13-16
     }
