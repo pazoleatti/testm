@@ -194,9 +194,9 @@ void logicCheck() {
         }
 
         // 8. Проверка положительной суммы доходов
-        if (row.sum && row.sum <= 0) {
+        if (row.sum && row.sum < 0) {
             def msg = row.getCell('sum').column.name
-            logger.error("Строка $rowNum: Значение графы «$msg» должно быть больше значения «0»!")
+            logger.error("Строка $rowNum: Значение графы «$msg» должно быть больше или равно «0»!")
         }
     }
 
