@@ -827,6 +827,9 @@ ReportPeriod getReportPeriod() {
     return reportPeriod
 }
 
+@Field
+def versionRecords520Maps = [:]
+
 /**
  * Получить мапу со всеми версиями для каждой записи справочника (строка нф - список всех версии записи "участников ТЦО").
  * Потом используется в методе findPrevRow().
@@ -837,15 +840,29 @@ ReportPeriod getReportPeriod() {
  * @param prevRows строки за предыдущий период
  */
 def getVersionRecords520Map(def prevRows) {
-    def versionRecords520Map = [:]
+    if (versionRecords520Maps[prevRows]) {
+        return versionRecords520Maps[prevRows]
+    }
+    def map = [:]
     prevRows.each { row ->
-        def provider = formDataService.getRefBookProvider(refBookFactory, 520L, providerCache)
         def recordId = row.name
         // все версии записи
-        def versionRecords = provider.getRecordVersionsById(recordId, null, null, null)
-        versionRecords520Map[row] = versionRecords
+        def versionRecords = getRecordVersionsById(recordId)
+        map[row] = versionRecords
     }
-    return versionRecords520Map
+    versionRecords520Maps[prevRows] = map
+    return versionRecords520Maps[prevRows]
+}
+
+@Field
+def versionRecords = [:]
+
+def getRecordVersionsById(def recordId) {
+    if (versionRecords[recordId] == null) {
+        def provider = formDataService.getRefBookProvider(refBookFactory, 520L, providerCache)
+        versionRecords[recordId] = provider.getRecordVersionsById(recordId, null, null, null)
+    }
+    return versionRecords[recordId]
 }
 
 /**
