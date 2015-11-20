@@ -141,7 +141,7 @@ def buildXml(def departmentParamTransport, def departmentParamTransportRow, def 
         Date yearStartDate = Date.parse(dateFormat, "01.01.${reportPeriod.taxPeriod.year}")
         def reportPeriods = reportPeriodService.getReportPeriodsByDate(TaxType.TRANSPORT, yearStartDate, getReportPeriodEndDate())
         builder.Файл(
-                ИдФайл: generateXmlFileId(declarationData.taxOrganCode),
+                ИдФайл: generateXmlFileId(),
                 ВерсПрог: applicationVersion,
                 ВерсФорм: departmentParamTransport.FORMAT_VERSION) {
             Документ(
@@ -516,6 +516,9 @@ List<String> getErrorDepartment(def record) {
             errorList.add("«Наименование документа, подтверждающего полномочия представителя»")
         }
     }
+    if (record.TAX_ORGAN_CODE_PROM?.value == null || record.TAX_ORGAN_CODE_PROM.value.isEmpty()) {
+        errorList.add("«Код налогового органа (пром.)»")
+    }
     errorList
 }
 
@@ -611,17 +614,23 @@ def getBenefitCode(def parentRecordId) {
     return getRefBookValue(6, recordId)?.CODE?.value
 }
 
-def generateXmlFileId(String taxOrganCode) {
+def generateXmlFileId() {
     def departmentParam = getDepartmentParam()
-    if (departmentParam) {
+    def departmentParamTransportRow = departmentParam ? getDepartmentParamTable(departmentParam?.record_id?.value) : null
+    if (departmentParam && departmentParamTransportRow) {
+        def r_t = TaxType.TRANSPORT.declarationPrefix
+        def a = departmentParamTransportRow?.TAX_ORGAN_CODE_PROM?.value
+        def k = departmentParamTransportRow?.TAX_ORGAN_CODE?.value
+        def o = departmentParam?.INN?.value + departmentParamTransportRow?.KPP?.value
         def date = Calendar.getInstance().getTime()?.format("yyyyMMdd")
-        def fileId = TaxType.TRANSPORT.declarationPrefix + '_' +
-                taxOrganCode + '_' +
-                taxOrganCode + '_' +
-                departmentParam.INN?.value +
-                declarationData.kpp + "_" +
-                date + "_" +
-                UUID.randomUUID().toString().toUpperCase()
+        def n = UUID.randomUUID().toString().toUpperCase()
+        // R_T_A_K_O_GGGGMMDD_N
+        def fileId = r_t + '_' +
+                a + '_' +
+                k + '_' +
+                o + '_' +
+                date + '_' +
+                n
         return fileId
     }
     return null
