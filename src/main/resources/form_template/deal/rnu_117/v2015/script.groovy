@@ -411,6 +411,8 @@ void importData() {
                     compareTotalValues(totalRow, subTotalRow, totalColumns, logger, false)
                 }
                 totalRowFromFileMap.remove(subTotalRow.fix)
+            } else {
+                rowWarning(logger, null, String.format(GROUP_WRONG_ITOG, subTotalRow.fix.replaceAll("Итого по \"(.*)\"", "\$1")))
             }
         }
         if (!totalRowFromFileMap.isEmpty()) {
@@ -699,7 +701,7 @@ def getNewTotalFromXls(def values, def colOffset, def fileRowIndex, def rowIndex
  * @param rowIndex строка в нф
  */
 def getNewSubTotalRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) {
-    def newRow = getSubTotalRow(values[0], null, fileRowIndex)
+    def newRow = getSubTotalRow(values[0], null, rowIndex)
     newRow.setIndex(rowIndex)
     newRow.setImportIndex(fileRowIndex)
 
@@ -741,7 +743,9 @@ void checkItog(def dataRows) {
     def testItogRows = calcSubTotalRows(dataRows)
     // Имеющиеся строки итогов
     def itogRows = dataRows.findAll { it.getAlias() != null && !'total'.equals(it.getAlias()) }
-    checkItogRows(dataRows, testItogRows, itogRows, groupColumns, logger, new ScriptUtils.GroupString() {
+    // все строки, кроме общего итога
+    def groupRows = dataRows.findAll { !'total'.equals(it.getAlias()) }
+    checkItogRows(groupRows, testItogRows, itogRows, groupColumns, logger, new ScriptUtils.GroupString() {
         @Override
         String getString(DataRow<Cell> row) {
             return getValuesByGroupColumn(row)
@@ -749,11 +753,14 @@ void checkItog(def dataRows) {
     }, new ScriptUtils.CheckGroupSum() {
         @Override
         String check(DataRow<Cell> row1, DataRow<Cell> row2) {
+            if (row1.fix != row2.fix) {
+                return getColumnName(row1, 'rowNumber')
+            }
             if (row1.sum1 != row2.sum1) {
                 return getColumnName(row1, 'sum1')
             }
             if (row1.sum2 != row2.sum2) {
-                return getColumnName(row1, 'su2')
+                return getColumnName(row1, 'sum2')
             }
             if (row1.sum3 != row2.sum3) {
                 return getColumnName(row1, 'sum3')

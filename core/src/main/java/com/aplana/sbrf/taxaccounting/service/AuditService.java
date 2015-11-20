@@ -12,7 +12,8 @@ public interface AuditService {
         LOG_FILTER,
         LOG_COUNT,
         LOG_FIRST_DATE,
-        LOG_LAST_DATE
+        LOG_LAST_DATE,
+        SEARCH_CRITERIA
     }
 
 	/**

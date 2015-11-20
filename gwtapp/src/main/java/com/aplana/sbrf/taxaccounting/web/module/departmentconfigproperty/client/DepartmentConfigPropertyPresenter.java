@@ -522,7 +522,9 @@ public class DepartmentConfigPropertyPresenter extends Presenter<DepartmentConfi
                                         ? new ArrayList<ReportPeriod>(0) : result.getReportPeriods());
                              //   createTableColumns();
                                 getData();
-
+                                if (getView().getReportPeriodId() != null && getView().getDepartmentId() != null) {
+                                    getRefBookPeriod(getView().getReportPeriodId(), getView().getDepartmentId());
+                                }
                             }
                         }, this).addCallback(new ManualRevealCallback<GetDepartmentTreeDataAction>(this)));
     }

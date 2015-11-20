@@ -60,13 +60,16 @@ public class PrintAuditDataHandler extends AbstractActionHandler<PrintAuditDataA
         for (Long aLong : filter.getAuditFieldList()) {
             builder.append(AuditFieldList.fromId(aLong).getName()).append(", ");
         }
-        String fields = builder.substring(0, builder.toString().length() - 2);
+        String fields = "";
+        if (builder.length()>1){
+            fields = builder.substring(0, builder.toString().length() - 2);
+        }
         final String searchCriteria = String.format(SEARCH_CRITERIA,
                 SDF.format(filter.getFromSearchDate()),
                 SDF.format(filter.getToSearchDate()),
                 filter.getFilter() != null ? filter.getFilter() : "Не задано",
                 filter.getOldLogSystemAuditFilter() == null ? "Нет" : "Да",
-                fields
+                fields.isEmpty()?"Все поля":fields
         );
         Logger logger = new Logger();
         String reportUuid = reportService.getAudit(userInfo, reportType);
@@ -92,6 +95,7 @@ public class PrintAuditDataHandler extends AbstractActionHandler<PrintAuditDataA
             Map<String, Object> params = new HashMap<String, Object>();
             params.put(AuditService.AsyncNames.LOG_FILTER.name(), action.getLogSystemFilter().convertTo());
             params.put(AuditService.AsyncNames.LOG_COUNT.name(), recordsCount);
+            params.put(AuditService.AsyncNames.SEARCH_CRITERIA.name(), searchCriteria);
             asyncTaskManagerService.createTask(keyTask, reportType, params, false, PropertyLoader.isProductionMode(), userInfo, logger, new AsyncTaskHandler() {
                 @Override
                 public LockData createLock(String keyTask, ReportType reportType, TAUserInfo userInfo) {

@@ -227,6 +227,11 @@ void logicCheck() {
                     row.getIndex(), getColumnName(row, 'sbrfCode2'), getColumnName(row, 'statReportId2'))
         }
 
+        // . Обязательность заполнения гр.2
+        if (row.statReportId1 && !getRefBookValue(520, row.statReportId1)?.STATREPORT_ID?.value) {
+            logger.error(WRONG_NON_EMPTY, row.getIndex(), getColumnName(row, 'statReportId1'))
+        }
+
         // 6. Обязательность заполнения гр.3
         if (row.sbrfCode1 && !getRefBookValue(30, row.sbrfCode1)?.NAME?.value) {
             logger.error(WRONG_NON_EMPTY, row.getIndex(), getColumnName(row, 'depName1'))
@@ -235,6 +240,11 @@ void logicCheck() {
         // 7. Обязательность заполнения гр.4
         if (row.statReportId1 && !getRefBookValue(520, row.statReportId1)?.NAME?.value) {
             logger.error(WRONG_NON_EMPTY, row.getIndex(), getColumnName(row, 'orgName1'))
+        }
+
+        // . Обязательность заполнения гр.6
+        if (row.statReportId2 && !getRefBookValue(520, row.statReportId2)?.STATREPORT_ID?.value) {
+            logger.error(WRONG_NON_EMPTY, row.getIndex(), getColumnName(row, 'statReportId2'))
         }
 
         // 8. Обязательность заполнения гр.7
@@ -369,6 +379,7 @@ void importData() {
     def allValuesCount = allValues.size()
     def sectionIndex = null
     def mapRows = [:]
+    def isSection51 = false
 
     def sectionRowMap = [:]
     templateRows.each { row ->
@@ -385,11 +396,24 @@ void importData() {
         if (!rowValues || !rowValues.find { it }) {
             allValues.remove(rowValues)
             rowValues.clear()
+            if (isSection51) {
+                // после раздела 51 прекратить загрузку если попалась пустая строка
+                break
+            } else {
+                // до раздела 51 пропускать пустые строки
+                continue
+            }
+        }
+
+        def sectionValue = rowValues[INDEX_FOR_SKIP]
+
+        // после раздела 51 прекращать загрузку если: пустая строка, если надпись начинается с "*"
+        if (isSection51 && sectionValue && (sectionValue[0] == '*')) {
             break
         }
-        rowIndex++
+
         // если новый раздел, то взять его сумму
-        def sectionValue = rowValues[INDEX_FOR_SKIP]
+        rowIndex++
         if (!sectionValue) {
             // фиксированная строка с надписью
             def row = templateRows.find { rowValues[1] == it.fix2 }
@@ -408,8 +432,8 @@ void importData() {
             sectionIndex = row?.fix1
             mapRows.put(sectionIndex, [])
 
-            // для раздела 24.3 почему то в экселе сделано объединение со следующей строкой
-            if (sectionValue == '24.3') {
+            // для раздела 6.3 и 24.3 почему то в экселе сделано объединение со следующей строкой
+            if (sectionValue == '06.3' || sectionValue == '24.3') {
                 // пропустить следующую строку
                 i++
                 fileRowIndex++
@@ -417,11 +441,15 @@ void importData() {
                 rowValues.clear()
                 rowValues = allValues[0]
             }
+            if (sectionValue == '51') {
+                isSection51 = true
+            }
 
             allValues.remove(rowValues)
             rowValues.clear()
             continue
         }
+
         // простая строка
         def newRow = getNewRowFromXls(rowValues, colOffset, fileRowIndex, rowIndex)
         mapRows[sectionIndex].add(newRow)
@@ -510,25 +538,11 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
     def record30 = getRecordImport(30L, 'SBRF_CODE', value, fileRowIndex, colIndex + colOffset)
     newRow.sbrfCode1 = record30?.record_id?.value
 
-    // графа 3 - зависит от графы 1 - атрибут 161 - NAME - «Наименование подразделения», справочник 30 «Подразделения»
-    if (record30) {
-        colIndex = 1
-        formDataService.checkReferenceValue(30L, values[colIndex], record30.NAME?.value, fileRowIndex, colIndex + colOffset, logger, false)
-    }
-
     // графа 2 - атрибут 5216 - STATREPORT_ID - «ИД в АС "Статотчетность"», справочник 520 «Участники ТЦО»
-    // графа 4 - зависит от графы 2 - атрибут 5201 - NAME - «Полное наименование юридического лица с указанием ОПФ», справочник 520 «Участники ТЦО»
-    // графа 2 заполняется через графу 4
     colIndex = 0
     value = getCodeOrganization(values[colIndex])
-    def tmpValue = (value ? values[1] : null)
-    def record520 = getRecordImport(520L, 'NAME', tmpValue, fileRowIndex, colIndex + colOffset)
+    def record520 = getRecordImport(520L, 'STATREPORT_ID', value, fileRowIndex, colIndex + colOffset)
     newRow.statReportId1 = record520?.record_id?.value
-    if (record520) {
-        // проверка надписи графы 2
-        colIndex = 1
-        formDataService.checkReferenceValue(520L, value, record520.STATREPORT_ID?.value, fileRowIndex, colIndex + colOffset, logger, false)
-    }
 
     // графа 5 - атрибут 166 - SBRF_CODE - «Код подразделения в нотации Сбербанка», справочник 30 «Подразделения»
     colIndex = 2
@@ -536,25 +550,11 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
     record30 = getRecordImport(30L, 'SBRF_CODE', value, fileRowIndex, colIndex + colOffset)
     newRow.sbrfCode2 = record30?.record_id?.value
 
-    // графа 7 - зависит от графы 1 - атрибут 161 - NAME - «Наименование подразделения», справочник 30 «Подразделения»
-    if (record30) {
-        colIndex = 3
-        formDataService.checkReferenceValue(30L, values[colIndex], record30.NAME?.value, fileRowIndex, colIndex + colOffset, logger, false)
-    }
-
     // графа 6 - атрибут 5216 - STATREPORT_ID - «ИД в АС "Статотчетность"», справочник 520 «Участники ТЦО»
-    // графа 8 - зависит от графы 2 - атрибут 5201 - NAME - «Полное наименование юридического лица с указанием ОПФ», справочник 520 «Участники ТЦО»
-    // графа 6 заполняется через графу 8
     colIndex = 2
     value = getCodeOrganization(values[colIndex])
-    tmpValue = (value ? values[1] : null)
-    record520 = getRecordImport(520L, 'NAME', tmpValue, fileRowIndex, colIndex + colOffset)
+    record520 = getRecordImport(520L, 'STATREPORT_ID', value, fileRowIndex, colIndex + colOffset)
     newRow.statReportId2 = record520?.record_id?.value
-    if (record520) {
-        // проверка надписи графы 6
-        colIndex = 3
-        formDataService.checkReferenceValue(520L, value, record520.STATREPORT_ID?.value, fileRowIndex, colIndex + colOffset, logger, false)
-    }
 
     // графа 9
     colIndex = 4
