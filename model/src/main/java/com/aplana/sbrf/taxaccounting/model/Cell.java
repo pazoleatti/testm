@@ -16,8 +16,8 @@ import java.util.List;
 public class Cell extends AbstractCell {
     private static final long serialVersionUID = -3684680064726678753L;
 	//todo надо задуматься о том, что происходит с датами на двух строчках ниже. Написать тесты
-	protected static final Date DATE_1900 = new Date(0,0,1);
-	protected static final Date DATE_9999 = new Date(9999 - 1900, 11, 31);
+	public static final Date DATE_1900 = new Date(0,0,1);
+	public static final Date DATE_9999 = new Date(9999 - 1900, 11, 31);
 
     private String stringValue;
     private Date dateValue;
