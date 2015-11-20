@@ -424,8 +424,8 @@ def formNewRow(def rowList, def dataRowsPrev, def prevPeriodStartDate, def prevP
             newRow.dividendSumForTaxStavka0 = rowList.sum{ (it.status == 1 && it.type == 1 && it.rate == 0 && it.dividends) ? (it.dividends) : 0 } * row.distributionSum / row.allSum
         }
 
-        // Графа 29: Принимает значение: Если графа 17 = 1, графа 16 = 1 (ЮЛ) ∑ Граф 27 для одного Решения (графа 7-8)
-        newRow.taxSum = rowList.sum{ (it.status == 1 && it.type == 1 && it.withheldSum != null) ? it.withheldSum : 0 }
+        // Графа 29: Принимает значение: ∑ Граф 27 для одного Решения (графа 7-8)
+        newRow.taxSum = rowList.sum{ (it.withheldSum != null) ? it.withheldSum : 0 }
 
         // Графа 30: Принимает значение:
         // Если дата по «Графе 28» первичной формы принадлежит предыдущему отчетному периоду, то
