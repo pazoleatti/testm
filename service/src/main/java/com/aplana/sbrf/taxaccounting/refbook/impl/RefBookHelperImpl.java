@@ -391,11 +391,11 @@ public class RefBookHelperImpl implements RefBookHelper {
 
         if (!logger.containsLevel(LogLevel.ERROR)) {
             if (!recordsToAdd.isEmpty()) {
-                providerSlave.createRecordVersion(logger, recordVersion.getVersionStart(), recordVersion.getVersionEnd(), recordsToAdd);
+                providerSlave.createRecordVersion(logger, rp.getCalendarStartDate(), recordVersion.getVersionEnd(), recordsToAdd);
             }
 
             for (Map<String, RefBookValue> up : toUpdate) {
-                providerSlave.updateRecordVersion(logger, up.get("record_id").getNumberValue().longValue(), recordVersion.getVersionStart(), recordVersion.getVersionEnd(), up);
+                providerSlave.updateRecordVersion(logger, up.get("record_id").getNumberValue().longValue(), rp.getCalendarStartDate(), recordVersion.getVersionEnd(), up);
             }
 
             if (!deleteIds.isEmpty()) {

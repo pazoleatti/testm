@@ -455,7 +455,7 @@ public class RefBookUniversal implements RefBookDataProvider {
                 }
                 if (versionTo == null) {
                     if (nextVersion != null && logger != null) {
-                        logger.info("Установлена дата окончания актуальности версии "+formatter.get().format(SimpleDateUtils.addDayToDate(nextVersion.getVersionStart(), -1))+" в связи с наличием следующей версии");
+                        logger.infoIfNotExist("Установлена дата окончания актуальности версии "+formatter.get().format(SimpleDateUtils.addDayToDate(nextVersion.getVersionStart(), -1))+" в связи с наличием следующей версии");
                     }
                 } else {
                     if (!excludedVersionEndRecords.contains(record.getRecordId())) {
@@ -603,7 +603,22 @@ public class RefBookUniversal implements RefBookDataProvider {
             RefBookRecord refBookRecord = new RefBookRecord();
             refBookRecord.setUniqueRecordId(uniqueRecordId);
             refBookRecord.setValues(records);
-            refBookRecord.setVersionTo(versionTo);
+            if (versionTo == null) {
+                //Получение фактической даты окончания, которая может быть задана датой начала следующей версии
+                RefBookRecordVersion nextVersion = refBookDao.getNextVersion(refBookId, recordId, versionFrom);
+                if (nextVersion != null) {
+                    Date versionEnd = SimpleDateUtils.addDayToDate(nextVersion.getVersionStart(), -1);
+                    assert versionFrom != null;
+                    if (versionEnd != null && versionFrom.after(versionEnd)) {
+                        throw new ServiceException("Дата окончания получена некорректно");
+                    }
+                    refBookRecord.setVersionTo(versionEnd);
+                } else {
+                    refBookRecord.setVersionTo(versionTo);
+                }
+            } else {
+                refBookRecord.setVersionTo(versionTo);
+            }
 
             //Проверка корректности
             checkCorrectness(logger, refBook, uniqueRecordId, versionFrom, attributes, Arrays.asList(refBookRecord));

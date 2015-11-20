@@ -40,7 +40,7 @@ public class Logger {
 	 * @param args набор объектов для подставновки в текст сообщения, может не задаваться
 	 */
 	public void info(String message, Object... args) {
-		log(LogLevel.INFO, message, args);
+		log(LogLevel.INFO, message, false, args);
 	}
 	/**
 	 * Добавить предупреждающее сообщение в журнал (работа системы на нарушена, но нужно обратить внимание пользователя на что-то) 
@@ -48,16 +48,41 @@ public class Logger {
 	 * @param args набор объектов для подставновки в текст сообщения, может не задаваться
 	 */
 	public void warn(String message, Object...args) {
-		log(LogLevel.WARNING, message, args);
+		log(LogLevel.WARNING, message, false, args);
 	}
 	/**
-	 * Добавить сообщение об ошибке в журнал (ошибка, требующая вмешательства пользователя для корректной работы системы) 
+	 * Добавить сообщение об ошибке в журнал (ошибка, требующая вмешательства пользователя для корректной работы системы)
 	 * @param message строка сообщения, может содержать плейсхолдеры, аналогичные используемым в методе {@link String#format(String, Object...)} 
 	 * @param args набор объектов для подставновки в текст сообщения, может не задаваться
 	 */
 	public void error(String message, Object...args) {
-		log(LogLevel.ERROR, message, args);
+		log(LogLevel.ERROR, message, false, args);
 	}
+
+    /**
+     * Добавить информационное сообщение в журнал (это сообщения, не требующие особой реакции пользователя). Сообщение не добавляется, если оно уже существует в списке сообщений
+     * @param message строка сообщения, может содержать плейсхолдеры, аналогичные используемым в методе {@link String#format(String, Object...)}
+     * @param args набор объектов для подставновки в текст сообщения, может не задаваться
+     */
+    public void infoIfNotExist(String message, Object... args) {
+        log(LogLevel.INFO, message, true, args);
+    }
+    /**
+     * Добавить предупреждающее сообщение в журнал (работа системы на нарушена, но нужно обратить внимание пользователя на что-то). Сообщение не добавляется, если оно уже существует в списке сообщений
+     * @param message строка сообщения, может содержать плейсхолдеры, аналогичные используемым в методе {@link String#format(String, Object...)}
+     * @param args набор объектов для подставновки в текст сообщения, может не задаваться
+     */
+    public void warnIfNotExist(String message, Object...args) {
+        log(LogLevel.WARNING, message, true, args);
+    }
+    /**
+     * Добавить сообщение об ошибке в журнал (ошибка, требующая вмешательства пользователя для корректной работы системы). Сообщение не добавляется, если оно уже существует в списке сообщений
+     * @param message строка сообщения, может содержать плейсхолдеры, аналогичные используемым в методе {@link String#format(String, Object...)}
+     * @param args набор объектов для подставновки в текст сообщения, может не задаваться
+     */
+    public void errorIfNotExist(String message, Object...args) {
+        log(LogLevel.ERROR, message, true, args);
+    }
 	
 	/**
 	 * Записать сообщение о неожиданном исключении в журнал
@@ -69,7 +94,7 @@ public class Logger {
         if (msg != null && msg.length() > MAX_EXCEPTION_LOG_MESSAGE_LENGTH) {
             msg = msg.substring(0, MAX_EXCEPTION_LOG_MESSAGE_LENGTH - 1) + '…';
         }
-        log(LogLevel.ERROR, "Ошибка: %s", msg);
+        log(LogLevel.ERROR, "Ошибка: %s", false, msg);
 		LOG.error("Unhandled exception: " + msg, e);
 	}
 
@@ -95,7 +120,12 @@ public class Logger {
         }
     }
 
-	private void log(LogLevel level, String message, Object...args) {
+    // для скриптов
+    public void log(LogLevel level, String message, Object...args) {
+        log(level, message, false, args);
+    }
+
+    private void log(LogLevel level, String message, boolean excludeIfNotExist, Object...args) {
         if (entries.size() == MAX_LOGS_COUNT) {
             entries.add(0, new LogEntry(LogLevel.INFO, "Выведены первые " + MAX_LOGS_COUNT + " сообщений:"));
         }
@@ -105,7 +135,9 @@ public class Logger {
                 extMessage = messageDecorator.getDecoratedMessage(extMessage);
             }
             LogEntry entry = new LogEntry(level, extMessage);
-            entries.add(entry);
+            if (!excludeIfNotExist || !entries.contains(entry)) {
+                entries.add(entry);
+            }
         }
 	}
 	

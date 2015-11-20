@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.FormDataKind
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
+import com.aplana.sbrf.taxaccounting.model.util.StringUtils
 import groovy.transform.Field
 
 /**
@@ -632,7 +633,7 @@ def calc7or13(def record520Id, def sourceFormDatasMap, def sourceDataRowsMap, de
             }
         }
     }
-    return result
+    return result * 1000
 }
 
 def getNeedRowsForCalc7or13(def dataRows, def isCalc7) {
@@ -732,7 +733,7 @@ def calc9or15(def record520, def sourceAllDataRowsMap, def isCalc9) {
                     }
                 } else if (809 == formTypeId) {
                     // рну 117
-                    if (isCalc9) {
+                    if (!isCalc9) {
                         result += (row.sum3 ?: 0)
                     }
                 } else {
@@ -758,13 +759,13 @@ def checkRnuRow(def row, def name) {
     }
     def start = row.fix.indexOf(head) + head.size()
     def end = row.fix.size() - 1
-    return row.fix.substring(start, end).equals(name)
+    return row.fix.substring(start, end).equals(StringUtils.cleanString(name))
 }
 
 def calc17(def record520Id) {
     // формы ВЗЛ за предыдущий период
     def rows = getSourceDataRows(800, FormDataKind.PRIMARY, true)
-    if (!rows) {
+    if (rows == null) {
         return getDefaultCategory()
     }
     // мапа для хранения всех версии записи (строка нф - список всех версии записи "участников ТЦО")
@@ -805,7 +806,7 @@ def getSourceDataRows(int formTypeId, FormDataKind kind, boolean isPrevPeriod = 
         fd = formDataService.getLast(formTypeId, kind, formData.departmentId, reportPeriod?.id, null, null, false)
     }
     if (fd == null || fd.state != WorkflowState.ACCEPTED) {
-        sourceDataRowsMap[key] = []
+        sourceDataRowsMap[key] = null
     } else {
         sourceDataRowsMap[key] = formDataService.getDataRowHelper(fd)?.allSaved
     }
@@ -826,6 +827,9 @@ ReportPeriod getReportPeriod() {
     return reportPeriod
 }
 
+@Field
+def versionRecords520Maps = [:]
+
 /**
  * Получить мапу со всеми версиями для каждой записи справочника (строка нф - список всех версии записи "участников ТЦО").
  * Потом используется в методе findPrevRow().
@@ -836,15 +840,29 @@ ReportPeriod getReportPeriod() {
  * @param prevRows строки за предыдущий период
  */
 def getVersionRecords520Map(def prevRows) {
-    def versionRecords520Map = [:]
+    if (versionRecords520Maps[prevRows]) {
+        return versionRecords520Maps[prevRows]
+    }
+    def map = [:]
     prevRows.each { row ->
-        def provider = formDataService.getRefBookProvider(refBookFactory, 520L, providerCache)
         def recordId = row.name
         // все версии записи
-        def versionRecords = provider.getRecordVersionsById(recordId, null, null, null)
-        versionRecords520Map[row] = versionRecords
+        def versionRecords = getRecordVersionsById(recordId)
+        map[row] = versionRecords
     }
-    return versionRecords520Map
+    versionRecords520Maps[prevRows] = map
+    return versionRecords520Maps[prevRows]
+}
+
+@Field
+def versionRecords = [:]
+
+def getRecordVersionsById(def recordId) {
+    if (versionRecords[recordId] == null) {
+        def provider = formDataService.getRefBookProvider(refBookFactory, 520L, providerCache)
+        versionRecords[recordId] = provider.getRecordVersionsById(recordId, null, null, null)
+    }
+    return versionRecords[recordId]
 }
 
 /**

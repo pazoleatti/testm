@@ -319,6 +319,7 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
         getView().setRefBookNameDesc(refBookName);
         setMode(mode);
         editFormPresenter.setVersionMode(false);
+        editFormPresenter.setRecordId(null);
         //ShowItemEvent.fire(RefBookDataPresenter.this, null, versionPresenter.getSelectedRow().getRefBookRowId());
         refBookLinearPresenter.updateTable();
         /*registrations[1].removeHandler();*/

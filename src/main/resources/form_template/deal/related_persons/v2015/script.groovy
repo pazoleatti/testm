@@ -170,7 +170,7 @@ void refresh() {
 
     // 1. Проверка наличия формы предыдущего отчетного периода
     def prevDataRows = getSourceDataRows(800, FormDataKind.PRIMARY, true)
-    if (!prevDataRows) {
+    if (prevDataRows == null) {
         def prevReportPeriod = getPrevReportPeriod()
         def prevPeriodName = (prevReportPeriod ? prevReportPeriod.name + ' ' +  prevReportPeriod.taxPeriod.year : getPrevPeriodName())
         def msg = "Категории ВЗЛ из предыдущего отчетного периода не были скопированы. " +
@@ -367,12 +367,14 @@ def subCalc12(def row) {
         // форма "Приложение 4.2" за предыдущий налоговый период
         sourceRows = getSourceDataRows(803, FormDataKind.SUMMARY, true)
         // отобрать записи в которых графа 4 == 'ВЗЛ ОРН'
-        findRow = sourceRows.find { 'ВЗЛ ОРН' == getRefBookValue(505, it.group) }
-        // для подходящих строк получить все версии записей
-        def records520Map = getVersionRecords520Map([findRow])
-        findRow = findPrevRow(row.name, records520Map)
+        findRow = sourceRows?.find { 'ВЗЛ ОРН' == getRefBookValue(505, it.group) }
         if (findRow) {
-            return [null, findRow.categoryRevised]
+            // для подходящих строк получить все версии записей
+            def records520Map = getVersionRecords520Map([findRow])
+            findRow = findPrevRow(row.name, records520Map)
+            if (findRow) {
+                return [null, findRow.categoryRevised]
+            }
         }
     } else if (reportPeriod.order == 4) {
         // полугодие / 9 месяцев / год
@@ -442,7 +444,7 @@ void checkSourceForm() {
     }
     sourceIds.each { id ->
         def rows = getSourceDataRows(id, sourceMap[id].kind, sourceMap[id].isPrevPeriod)
-        if (!rows) {
+        if (rows == null) {
             def formTypeName = getFormTypeById(id)?.name
             def kindName = sourceMap[id].kind.title
             def period = (sourceMap[id].isPrevPeriod ? getPrevReportPeriod() : getReportPeriod())
@@ -479,7 +481,7 @@ def getSourceDataRows(int formTypeId, FormDataKind kind, boolean isPrevPeriod = 
         fd = formDataService.getLast(formTypeId, kind, formData.departmentId, reportPeriod?.id, null, null, false)
     }
     if (fd == null || fd.state != WorkflowState.ACCEPTED) {
-        sourceDataRowsMap[key] = []
+        sourceDataRowsMap[key] = null
     } else {
         sourceDataRowsMap[key] = formDataService.getDataRowHelper(fd)?.allSaved
     }
@@ -530,6 +532,9 @@ def getRecordId506ByCode(def categoryCode) {
     return record506Map[categoryCode]
 }
 
+@Field
+def versionRecords520Maps = [:]
+
 /**
  * Получить мапу со всеми версиями для каждой записи справочника (строка нф - список всех версии записи "участников ТЦО").
  * Потом используется в методе findPrevRow().
@@ -540,15 +545,29 @@ def getRecordId506ByCode(def categoryCode) {
  * @param prevRows строки за предыдущий период
  */
 def getVersionRecords520Map(def prevRows) {
-    def versionRecords520Map = [:]
+    if (versionRecords520Maps[prevRows]) {
+        return versionRecords520Maps[prevRows]
+    }
+    def map = [:]
     prevRows.each { row ->
-        def provider = formDataService.getRefBookProvider(refBookFactory, 520L, providerCache)
         def recordId = row.name
         // все версии записи
-        def versionRecords = provider.getRecordVersionsById(recordId, null, null, null)
-        versionRecords520Map[row] = versionRecords
+        def versionRecords = getRecordVersionsById(recordId)
+        map[row] = versionRecords
     }
-    return versionRecords520Map
+    versionRecords520Maps[prevRows] = map
+    return versionRecords520Maps[prevRows]
+}
+
+@Field
+def versionRecords = [:]
+
+def getRecordVersionsById(def recordId) {
+    if (versionRecords[recordId] == null) {
+        def provider = formDataService.getRefBookProvider(refBookFactory, 520L, providerCache)
+        versionRecords[recordId] = provider.getRecordVersionsById(recordId, null, null, null)
+    }
+    return versionRecords[recordId]
 }
 
 /**

@@ -2,6 +2,7 @@ package form_template.deal.app_4_2.v2015
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
+import com.aplana.sbrf.taxaccounting.model.util.StringUtils
 import groovy.transform.Field
 
 /**
@@ -234,8 +235,7 @@ def Long calc4(def row) {
 def BigDecimal calc17(def row) {
     // Графа 17 = сумма значений в графах 5-16
     def value = 0
-    ['group', 'sum51', 'sum52', 'sum53', 'sum54', 'sum55', 'sum56', 'sum61', 'sum62', 'sum63', 'sum64', 'sum65', 'sum66',
-     'sum7', 'thresholdValue', 'sign', 'categoryRevised'].each {
+    ['sum51', 'sum52', 'sum53', 'sum54', 'sum55', 'sum56', 'sum61', 'sum62', 'sum63', 'sum64', 'sum65', 'sum66'].each {
         value += row[it] ?: 0
     }
     return value
@@ -249,7 +249,13 @@ def BigDecimal calc18(def row) {
 }
 
 def Long calc19(def row) {
-    if (row.sum7 >= row.thresholdValue) {
+    if (row.sum7 == null || row.thresholdValue == null) {
+        return null
+    }
+    // записи из справочника "Пороговые значения"
+    def records = getRecordsByRefbookId(514L)
+    def record = records?.find { it?.record_id?.value == row.thresholdValue }
+    if (row.sum7 >= record?.VALUE?.value) {
         return getRecYesId()
     }
     return getRecNoId()
@@ -665,7 +671,7 @@ def calc8or14(def record520Id, def sourceFormDatasMap, def sourceDataRowsMap, de
             }
         }
     }
-    return result
+    return result * 1000
 }
 
 def getNeedRowsForCalc8or14(def dataRows, def isCalc8) {
@@ -765,7 +771,7 @@ def calc10or16(def record520, def sourceAllDataRowsMap, def isCalc10) {
                     }
                 } else if (809 == formTypeId) {
                     // рну 117
-                    if (isCalc10) {
+                    if (!isCalc10) {
                         result += (row.sum3 ?: 0)
                     }
                 } else {
@@ -791,5 +797,5 @@ def checkRnuRow(def row, def name) {
     }
     def start = row.fix.indexOf(head) + head.size()
     def end = row.fix.size() - 1
-    return row.fix.substring(start, end).equals(name)
+    return row.fix.substring(start, end).equals(StringUtils.cleanString(name))
 }

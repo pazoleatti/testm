@@ -165,12 +165,15 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
         }
     }
 
+    private static final String DELETE_FROM_FD_NNN = "delete from form_data_%s where form_data_id=?";
+
     @Override
     @Transactional(readOnly = false)
-    public void delete(long formDataId) {
-        Object[] params = {formDataId};
+    public void delete(int ftId, long fdId) {
+        Object[] params = {fdId};
         int[] types = {Types.NUMERIC};
         getJdbcTemplate().update("delete from form_data where id = ?", params, types);
+        getJdbcTemplate().update(String.format(DELETE_FROM_FD_NNN, ftId), fdId);
     }
 
     @Override
@@ -591,12 +594,6 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
     public void updateManual(FormData formData) {
         int manual = formData.isManual() ? DataRowType.MANUAL.getCode() : DataRowType.AUTO.getCode();
         getJdbcTemplate().update("UPDATE form_data SET manual = ? WHERE id = ?", manual, formData.getId());
-    }
-
-    private static final String DELETE_FROM_FD_NNN = "delete from form_data_%s where form_data_id=?";
-    @Override
-    public int deleteFormDataNnn(int ftId, long fdId) {
-        return getJdbcTemplate().update(String.format(DELETE_FROM_FD_NNN, ftId), fdId);
     }
 
     private static final String UPDATE_FORM_DATA_PERFORMER_TB =
