@@ -1,39 +1,62 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <formTemplateContent>
-    <fixedRows>true</fixedRows>
+    <fixedRows>false</fixedRows>
     <monthly>false</monthly>
     <comparative>false</comparative>
     <accruing>true</accruing>
     <updating>false</updating>
-    <name>Сведения о начисленных и уплачиваемых налогах, сборах и взносах, отнесенных на расходы</name>
-    <fullName>Аналитический отчет «Сведения о начисленных и уплачиваемых налогах, сборах и взносах, отнесенных на расходы»</fullName>
-    <header>Приложение 4-17</header>
+    <name>Сведения о начисленных и уплачиваемых налогах, сборах и взносах, отнесенных на расходы (ЦА)</name>
+    <fullName>Аналитический отчет «Сведения о начисленных и уплачиваемых налогах, сборах и взносах, отнесенных на расходы» (ЦА)</fullName>
+    <header>Приложение 4-17 (ЦА)</header>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
-        <alias>rowNum</alias>
+        <alias>fix</alias>
         <checking>false</checking>
         <columnType>STRING</columnType>
-        <name>№ п/п</name>
+        <name>fix</name>
         <order>1</order>
-        <width>5</width>
-        <maxLength>10</maxLength>
+        <width>0</width>
+        <maxLength>20</maxLength>
         <prevLength>0</prevLength>
     </columns>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
-        <alias>name</alias>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="autoNumerationColumn">
+        <alias>rowNum</alias>
         <checking>false</checking>
-        <columnType>STRING</columnType>
-        <name>Наименование</name>
+        <columnType>AUTO</columnType>
+        <name>№ п/п</name>
         <order>2</order>
-        <width>10</width>
-        <maxLength>40</maxLength>
-        <prevLength>0</prevLength>
+        <width>5</width>
+        <numerationType>SERIAL</numerationType>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
+        <alias>parentTB</alias>
+        <checking>false</checking>
+        <columnType>REFBOOK</columnType>
+        <name>Территориальный банк</name>
+        <order>3</order>
+        <width>15</width>
+        <hierarchical>true</hierarchical>
+        <nameAttributeId>161</nameAttributeId>
+        <refBookAttributeId>161</refBookAttributeId>
+        <searchEnabled>true</searchEnabled>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
+        <alias>department</alias>
+        <checking>false</checking>
+        <columnType>REFBOOK</columnType>
+        <name>Подразделение территориального банка</name>
+        <order>4</order>
+        <width>15</width>
+        <hierarchical>true</hierarchical>
+        <nameAttributeId>161</nameAttributeId>
+        <refBookAttributeId>161</refBookAttributeId>
+        <searchEnabled>true</searchEnabled>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>tax26411_01</alias>
         <checking>false</checking>
         <columnType>NUMBER</columnType>
         <name>симвл. ф. 102: 26411.01</name>
-        <order>3</order>
+        <order>5</order>
         <width>10</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
@@ -43,7 +66,7 @@
         <checking>false</checking>
         <columnType>NUMBER</columnType>
         <name>симвл. ф. 102: 26411.02</name>
-        <order>4</order>
+        <order>6</order>
         <width>10</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
@@ -53,7 +76,7 @@
         <checking>false</checking>
         <columnType>NUMBER</columnType>
         <name>гр.3+гр.4</name>
-        <order>5</order>
+        <order>7</order>
         <width>10</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
@@ -63,7 +86,7 @@
         <checking>false</checking>
         <columnType>NUMBER</columnType>
         <name>(гр.5/ИТОГО,гр.5)*100%</name>
-        <order>6</order>
+        <order>8</order>
         <width>10</width>
         <maxLength>5</maxLength>
         <precision>2</precision>
@@ -73,7 +96,7 @@
         <checking>false</checking>
         <columnType>NUMBER</columnType>
         <name>симвл. ф. 102: 26411.03</name>
-        <order>7</order>
+        <order>9</order>
         <width>10</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
@@ -83,7 +106,7 @@
         <checking>false</checking>
         <columnType>NUMBER</columnType>
         <name>(гр.7/ИТОГО,гр.7)*100%</name>
-        <order>8</order>
+        <order>10</order>
         <width>10</width>
         <maxLength>5</maxLength>
         <precision>2</precision>
@@ -93,7 +116,7 @@
         <checking>false</checking>
         <columnType>NUMBER</columnType>
         <name>симвл. ф. 102: 26411.13</name>
-        <order>9</order>
+        <order>11</order>
         <width>10</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
@@ -103,7 +126,7 @@
         <checking>false</checking>
         <columnType>NUMBER</columnType>
         <name>(гр.9/ИТОГО,гр.9)*100%</name>
-        <order>10</order>
+        <order>12</order>
         <width>10</width>
         <maxLength>5</maxLength>
         <precision>2</precision>
@@ -113,7 +136,7 @@
         <checking>false</checking>
         <columnType>NUMBER</columnType>
         <name>симвл. ф. 102: 26411.12</name>
-        <order>11</order>
+        <order>13</order>
         <width>10</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
@@ -123,7 +146,7 @@
         <checking>false</checking>
         <columnType>NUMBER</columnType>
         <name>(гр.11/ИТОГО,гр.11)*100%</name>
-        <order>12</order>
+        <order>14</order>
         <width>10</width>
         <maxLength>5</maxLength>
         <precision>2</precision>
@@ -133,7 +156,7 @@
         <checking>false</checking>
         <columnType>NUMBER</columnType>
         <name>симвл. ф. 102: 26102</name>
-        <order>13</order>
+        <order>15</order>
         <width>10</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
@@ -143,7 +166,7 @@
         <checking>false</checking>
         <columnType>NUMBER</columnType>
         <name>(гр.13/ИТОГО,гр.13)*100%</name>
-        <order>14</order>
+        <order>16</order>
         <width>10</width>
         <maxLength>5</maxLength>
         <precision>2</precision>
@@ -153,7 +176,7 @@
         <checking>false</checking>
         <columnType>NUMBER</columnType>
         <name>сивмл. ф. 102: 26410.09</name>
-        <order>15</order>
+        <order>17</order>
         <width>10</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
@@ -163,7 +186,7 @@
         <checking>false</checking>
         <columnType>NUMBER</columnType>
         <name>(гр.15/ИТОГО,гр.15)*100%</name>
-        <order>16</order>
+        <order>18</order>
         <width>10</width>
         <maxLength>5</maxLength>
         <precision>2</precision>
@@ -173,7 +196,7 @@
         <checking>false</checking>
         <columnType>NUMBER</columnType>
         <name>гр.5+гр.7+гр.9+гр.11+гр.13+гр.15</name>
-        <order>17</order>
+        <order>19</order>
         <width>10</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
@@ -183,7 +206,7 @@
         <checking>false</checking>
         <columnType>NUMBER</columnType>
         <name>(гр.17/ИТОГО,гр.17)*100%</name>
-        <order>18</order>
+        <order>20</order>
         <width>10</width>
         <maxLength>5</maxLength>
         <precision>2</precision>
@@ -193,6 +216,13 @@
         <backColor>WHITE</backColor>
         <bold>true</bold>
         <fontColor>DARK_GREEN</fontColor>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Редактируемая</alias>
+        <backColor>LIGHT_BLUE</backColor>
+        <bold>false</bold>
+        <fontColor>BLACK</fontColor>
         <italic>false</italic>
     </styles>
     <styles>
@@ -221,6 +251,13 @@
         <backColor>WHITE</backColor>
         <bold>true</bold>
         <fontColor>RED</fontColor>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Контрольные суммы</alias>
+        <backColor>LIGHT_BROWN</backColor>
+        <bold>true</bold>
+        <fontColor>BLACK</fontColor>
         <italic>false</italic>
     </styles>
 </formTemplateContent>
