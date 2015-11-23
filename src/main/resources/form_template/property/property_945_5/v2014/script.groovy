@@ -12,6 +12,7 @@ import com.aplana.sbrf.taxaccounting.model.Formats
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod
 import com.aplana.sbrf.taxaccounting.model.TaxType
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
+import com.aplana.sbrf.taxaccounting.model.exception.DaoException
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import groovy.transform.Field
@@ -1346,6 +1347,7 @@ def getFormTypeById(def id) {
     return formTypeMap[id]
 }
 
+// TODO (Ramil Timerbaev) добавить получение деклараций-приемников
 /** Получить результат для события FormDataEvent.GET_SOURCES. */
 def getSources() {
     def currentPeriod = reportPeriodService.get(formData.reportPeriodId)
@@ -1489,7 +1491,11 @@ def getRelation(FormData tmpFormData, DepartmentFormType departmentFormType, boo
     /** является ли форма источников, в противном случае приемник*/
     relation.source = isSource
     /** Введена/выведена в/из действие(-ия) */
-    relation.status = getFormTemplateById(departmentFormType.formTypeId, period.id)
+    try {
+        relation.status = getFormTemplateById(departmentFormType.formTypeId, period.id) != null
+    } catch (DaoException e) {
+        relation.status = false
+    }
 
     /**************  Параметры НФ ***************/
     /** Идентификатор созданной формы */
