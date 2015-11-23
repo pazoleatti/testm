@@ -2,16 +2,28 @@ package com.aplana.sbrf.taxaccounting.form_template.etr.etr_4_22.v2015;
 
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
+import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
+import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
+import com.aplana.sbrf.taxaccounting.refbook.impl.RefBookUniversal;
 import com.aplana.sbrf.taxaccounting.util.ScriptTestBase;
 import com.aplana.sbrf.taxaccounting.util.TestScriptHelper;
 import com.aplana.sbrf.taxaccounting.util.mock.ScriptTestMockHelper;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 
-import java.util.List;
+import java.util.*;
 
-import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.*;
+import static org.mockito.Matchers.anyLong;
+import static org.mockito.Matchers.anyMapOf;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 /**
@@ -50,6 +62,43 @@ public class Etr4_22Test extends ScriptTestBase {
     public void mockServices() {
         // макет нф
         when(testHelper.getFormDataService().getFormTemplate(anyInt(), anyInt())).thenReturn(testHelper.getFormTemplate());
+        // имя справочника
+        RefBook rb = new RefBook();
+        rb.setName("Проблемные зоны (test refBook)");
+        when(testHelper.getRefBookFactory().get(anyLong())).thenReturn(rb);
+
+        // провайдер
+        when(testHelper.getFormDataService().getRefBookProvider(any(RefBookFactory.class), anyLong(),
+                anyMapOf(Long.class, RefBookDataProvider.class))).thenReturn(testHelper.getRefBookDataProvider());
+
+        // записи 504
+        Map<Long, Map<String, RefBookValue>> records = testHelper.getRefBookAllRecords(504L);
+        // возвращаются все строки из справочника, делать отбор по фильтру не стал, т.к. лишние записи не вызывают ошибок, а только предупреждения
+        final PagingResult<Map<String, RefBookValue>> result = new PagingResult<Map<String, RefBookValue>>(records.values());
+
+        // список id записей справочника 42
+        when(testHelper.getRefBookDataProvider().getRecords(any(Date.class),
+                any(PagingParams.class), anyString(), any(RefBookAttribute.class))).thenAnswer(new Answer<Object>() {
+            @Override
+            public Object answer(InvocationOnMock invocation) throws Throwable {
+                // фильтр - "REGION_ID = 1 and NAME like 'зона N'"
+                String filter = (String) invocation.getArguments()[2];
+                if (filter == null || filter.isEmpty()) {
+                    return null;
+                }
+                // получить значение "зона N"
+                int from = filter.indexOf("'") + 1;
+                int to = filter.length() - 1;
+                String name = filter.substring(from, to);
+
+                for (Map<String, RefBookValue> item : result) {
+                    if (item.get("NAME") != null && name.equals(item.get("NAME").getStringValue())) {
+                        return new PagingResult<Map<String, RefBookValue>>(Arrays.asList(item));
+                    }
+                }
+                return null;
+            }
+        });
     }
 
     @Test
