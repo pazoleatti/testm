@@ -77,7 +77,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     public static final String NOT_HIERARCHICAL_REF_BOOK_ERROR = "Справочник \"%s\" (id=%d) не является иерархичным";
     public static final String NOT_LINEAR_REF_BOOK_ERROR = "Справочник \"%s\" (id=%d) не является линейным";
 
-    private static final String DELETE_VERSION = "delete from %s where %s";
+    private static final String DELETE_VERSION = "update %s set status = -1 where %s";
 	private static final String STRING_VALUE_COLUMN_ALIAS = "string_value";
 	private static final String NUMBER_VALUE_COLUMN_ALIAS = "number_value";
 	private static final String DATE_VALUE_COLUMN_ALIAS = "date_value";
@@ -1090,7 +1090,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     }
 
     private static final String IS_RECORDS_ACTIVE_IN_PERIOD = "select id from (\n" +
-            "select input.id as input_id, rbr.id, rbr.record_id, rbr.version as start_version, rbr.status, lead (rbr.version) over (partition by rbr.recorD_id order by rbr.version) end_version \n" +
+            "select input.id as input_id, rbr.id, rbr.record_id, rbr.version as start_version, rbr.status, lead (rbr.version) over (partition by rbr.record_id order by rbr.version) end_version \n" +
             "from ref_book_record input\n" +
             "join ref_book_record rbr on input.record_id = rbr.record_id and input.ref_book_id = rbr.ref_book_id \n" +
             "where %s \n" +
@@ -1205,7 +1205,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     }
 
     private static final String GET_RECORD_VERSION = "with currentVersion as (select id, version, record_id, ref_book_id from ref_book_record where id = ?),\n" +
-            "minNextVersion as (select r.ref_book_id, r.record_id, min(r.version) version from ref_book_record r, currentVersion cv where r.version > cv.version and r.record_id= cv.record_id and r.ref_book_id= cv.ref_book_id group by r.ref_book_id, r.record_id),\n" +
+            "minNextVersion as (select r.ref_book_id, r.record_id, min(r.version) version from ref_book_record r, currentVersion cv where r.version > cv.version and r.record_id= cv.record_id and r.ref_book_id= cv.ref_book_id and status != -1 group by r.ref_book_id, r.record_id),\n" +
             "nextVersionEnd as (select mnv.ref_book_id, mnv.record_id, mnv.version, r.status from minNextVersion mnv, ref_book_record r where mnv.ref_book_id=r.ref_book_id and mnv.version=r.version and mnv.record_id=r.record_id)\n" +
             "select cv.id as %s, \n" +
             "cv.version as versionStart, \n" +
@@ -1269,7 +1269,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         }, refBookId, startDate, refBookId, startDate, endDate);
     }
 
-    private final static String GET_FIRST_RECORD_ID = "with allRecords as (select id, version from ref_book_record where record_id = (select record_id from ref_book_record where id = ?) and ref_book_id = ? and id != ? and status != 2)\n" +
+    private final static String GET_FIRST_RECORD_ID = "with allRecords as (select id, version from ref_book_record where record_id = (select record_id from ref_book_record where id = ?) and ref_book_id = ? and id != ? and status not in (-1, 2))\n" +
             "select id from allRecords where version = (select min(version) from allRecords)";
 
     @Override
@@ -1330,7 +1330,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     }
 
     private static final String CHECK_PARENT_CONFLICT = "with currentRecord as (select id, ref_book_id, record_id, version from ref_book_record where id = :parentId),\n" +
-            "nextVersion as (select min(r.version) as version from ref_book_record r, currentRecord cr where r.version > cr.version and r.record_id=cr.record_id and r.ref_book_id=cr.ref_book_id),\n" +
+            "nextVersion as (select min(r.version) as version from ref_book_record r, currentRecord cr where r.version > cr.version and r.record_id=cr.record_id and r.ref_book_id=cr.ref_book_id and r.status != -1),\n" +
             "allRecords as (select cr.id, cr.version as versionStart, nv.version - interval '1' day as versionEnd from currentRecord cr, nextVersion nv)\n" +
             "select distinct id,\n" +
             "case\n" +
@@ -1464,7 +1464,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         return groups;
     }
 
-    private static final String CHECK_CROSS_VERSIONS = "with allVersions as (select r.* from ref_book_record r where ref_book_id=:refBookId and record_id=:recordId and (:excludedRecordId is null or id != :excludedRecordId)),\n" +
+    private static final String CHECK_CROSS_VERSIONS = "with allVersions as (select r.* from ref_book_record r where status != -1 and ref_book_id=:refBookId and record_id=:recordId and (:excludedRecordId is null or id != :excludedRecordId)),\n" +
             "recordsByVersion as (select r.*, row_number() over(partition by r.record_id order by r.version) rn from ref_book_record r, allVersions av where r.id=av.id),\n" +
             "versionInfo as (select rv.rn NUM, rv.ID, rv.VERSION, rv.status, rv2.version - interval '1' day nextVersion,rv2.status nextStatus from recordsByVersion rv left outer join recordsByVersion rv2 on rv.RECORD_ID = rv2.RECORD_ID and rv.rn+1 = rv2.rn)\n" +
             "select num, id, version, status, nextversion, nextstatus, \n" +
@@ -2226,7 +2226,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         return getJdbcTemplate().queryForLong("select id from ref_book_record where ref_book_id = ? and record_id = ? and version = ?", refBookId, recordId, version);
     }
 
-    private static final String DELETE_ALL_VERSIONS = "delete from ref_book_record where ref_book_id=? and record_id in (select record_id from ref_book_record where %s)";
+    private static final String DELETE_ALL_VERSIONS = "update ref_book_record set status = -1 where ref_book_id=? and record_id in (select record_id from ref_book_record where %s)";
 
     @Override
     public void deleteAllRecordVersions(Long refBookId, List<Long> uniqueRecordIds) {
@@ -3009,11 +3009,6 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     public void deleteRecordVersions(String tableName, @NotNull List<Long> uniqueRecordIds) {
         String sql = String.format(DELETE_VERSION, tableName, transformToSqlInStatement("id", uniqueRecordIds));
         getJdbcTemplate().update(sql);
-    }
-
-    @Override
-    public void deleteVersion(String tableName, @NotNull Long uniqueRecordId) {
-        getJdbcTemplate().update(String.format("DELETE FROM %s WHERE id = ?", tableName), uniqueRecordId);
     }
 
 	private class DereferenceMapper implements RowCallbackHandler {

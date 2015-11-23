@@ -195,7 +195,7 @@ public class RefBookOktmoProvider implements RefBookDataProvider {
                 updateResults(results, result);
             }
             if (result.getResult() == CrossResult.NEED_DELETE) {
-                refBookDao.deleteVersion(getTableName(), result.getRecordId());
+                refBookDao.deleteRecordVersions(getTableName(), Arrays.asList(result.getRecordId()));
                 updateResults(results, result);
             }
         }

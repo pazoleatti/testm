@@ -640,13 +640,6 @@ public interface RefBookDao {
      */
     void deleteRecordVersions(String tableName, @NotNull List<Long> uniqueRecordIds);
 
-    /**
-     * Удаление версии
-     *
-     * @param uniqueRecordId уникальный идентификатор версии записи
-     */
-    void deleteVersion(String tableName, @NotNull Long uniqueRecordId);
-
 	/**
 	 * Разыменование набора ссылок для универсальных справочников
 	 * @param attributeId идентификатор атрибута-ссылки

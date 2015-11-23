@@ -521,7 +521,7 @@ public class RefBookUniversal implements RefBookDataProvider {
                 return false;
             }
             if (result.getResult() == CrossResult.NEED_DELETE) {
-                refBookDao.deleteVersion(REF_BOOK_RECORD_TABLE_NAME, result.getRecordId());
+                refBookDao.deleteRecordVersions(REF_BOOK_RECORD_TABLE_NAME, Arrays.asList(result.getRecordId()));
             }
         }
         return true;
@@ -777,7 +777,7 @@ public class RefBookUniversal implements RefBookDataProvider {
         List<FormLink> forms = refBookDao.isVersionUsedInForms(refBookId, uniqueRecordIds, versionFrom, versionTo, restrictPeriod);
         for (FormLink form : forms) {
             //Исключаем экземпляры в статусе "Создана" использующих справочник "Участники ТЦО"
-            if (refBookId == RefBook.TCO && form.getState() == WorkflowState.CREATED) {
+            if (true) {
                 //Для нф в статусе "Создана" удаляем сформированные печатные представления, отменяем задачи на их формирование и рассылаем уведомления
                 reportService.delete(form.getFormDataId(), null);
                 List<ReportType> interruptedReportTypes = Arrays.asList(ReportType.EXCEL, ReportType.CSV);
