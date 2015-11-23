@@ -1208,16 +1208,11 @@ public class SourceServiceImpl implements SourceService {
         params.put("light", light);
         params.put("excludeIfNotExist", excludeIfNotExist);
         params.put("stateRestriction", stateRestriction);
+        params.put("needSources", true);
+        params.put("form", true);
 
         formDataScriptingService.executeScript(userInfo, destinationFormData, FormDataEvent.GET_SOURCES, logger, params);
         if (sources.isSourcesProcessedByScript()) {
-            for (Iterator<Relation> it = sources.getSourceList().iterator(); it.hasNext();) {
-                Relation relation = it.next();
-                //Убираем ненужное, т.к скрипт возвращает сразу все источники и приемники
-                if (!relation.isSource() || relation.getDeclarationDataId() != null) {
-                    it.remove();
-                }
-            }
             return sources.getSourceList();
         } else {
             return sourceDao.getSourcesInfo(destinationFormData, light, excludeIfNotExist, stateRestriction);
@@ -1235,16 +1230,11 @@ public class SourceServiceImpl implements SourceService {
         params.put("light", light);
         params.put("excludeIfNotExist", excludeIfNotExist);
         params.put("stateRestriction", stateRestriction);
+        params.put("needSources", false);
+        params.put("form", true);
 
         formDataScriptingService.executeScript(userInfo, sourceFormData, FormDataEvent.GET_SOURCES, logger, params);
         if (sources.isSourcesProcessedByScript()) {
-            for (Iterator<Relation> it = sources.getSourceList().iterator(); it.hasNext();) {
-                Relation relation = it.next();
-                //Убираем ненужное, т.к скрипт возвращает сразу все источники и приемники
-                if (relation.isSource() || relation.getDeclarationDataId() != null) {
-                    it.remove();
-                }
-            }
             return sources.getSourceList();
         } else {
             return sourceDao.getDestinationsInfo(sourceFormData, light, excludeIfNotExist, stateRestriction);
@@ -1262,16 +1252,11 @@ public class SourceServiceImpl implements SourceService {
         params.put("light", light);
         params.put("excludeIfNotExist", excludeIfNotExist);
         params.put("stateRestriction", stateRestriction);
+        params.put("needSources", false);
+        params.put("form", false);
 
         formDataScriptingService.executeScript(userInfo, sourceFormData, FormDataEvent.GET_SOURCES, logger, params);
         if (sources.isSourcesProcessedByScript()) {
-            for (Iterator<Relation> it = sources.getSourceList().iterator(); it.hasNext();) {
-                Relation relation = it.next();
-                //Убираем ненужное, т.к скрипт возвращает сразу все источники и приемники
-                if (relation.isSource() || relation.getFormDataId() != null) {
-                    it.remove();
-                }
-            }
             return sources.getSourceList();
         } else {
             return sourceDao.getDeclarationDestinationsInfo(sourceFormData, light, excludeIfNotExist, stateRestriction);
@@ -1289,6 +1274,8 @@ public class SourceServiceImpl implements SourceService {
         params.put("light", light);
         params.put("excludeIfNotExist", excludeIfNotExist);
         params.put("stateRestriction", stateRestriction);
+        params.put("needSources", true);
+        params.put("form", true);
 
         Logger scriptLogger = new Logger();
         declarationDataScriptingService.executeScript(userInfo, declaration, FormDataEvent.GET_SOURCES, scriptLogger, params);
@@ -1297,13 +1284,6 @@ public class SourceServiceImpl implements SourceService {
             throw new ServiceLoggerException("Обнаружены фатальные ошибки!", logEntryService.save(logger.getEntries()));
         }
         if (sources.isSourcesProcessedByScript()) {
-            for (Iterator<Relation> it = sources.getSourceList().iterator(); it.hasNext();) {
-                Relation relation = it.next();
-                //Убираем ненужное, т.к скрипт возвращает сразу все источники и приемники
-                if (!relation.isSource() || relation.getDeclarationDataId() != null) {
-                    it.remove();
-                }
-            }
             return sources.getSourceList();
         } else {
             return sourceDao.getDeclarationSourcesInfo(declaration, light, excludeIfNotExist, stateRestriction);
