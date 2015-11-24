@@ -223,10 +223,10 @@ public class App_6_6Test extends ScriptTestBase {
         // проверка неотрицательности суммы доходов;
         row.getCell("incomeSum").setValue(0, null);
         row.getCell("outcomeSum").setValue(null, null);
+        subTotalRow.getCell("outcomeSum").setValue(0, null);
         testHelper.execute(FormDataEvent.CHECK);
         entries = testHelper.getLogger().getEntries();
         i = 0;
-        System.out.println(entries.toString());
         Assert.assertEquals("Строка 1: Выполнение расчета графы «Режим переговорных сделок» невозможно, так как не заполнена используемая в расчете графа «Код страны регистрации по классификатору ОКСМ»!", entries.get(i++).getMessage());
         Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
         testHelper.getLogger().clear();
@@ -235,11 +235,10 @@ public class App_6_6Test extends ScriptTestBase {
         row.getCell("outcomeSum").setValue(0, null);
         row.getCell("incomeSum").setValue(null, null);
         testHelper.execute(FormDataEvent.CALCULATE);
-        testHelper.execute(FormDataEvent.CHECK);
         entries = testHelper.getLogger().getEntries();
         i = 0;
-        Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
         Assert.assertEquals("Строка 1: Выполнение расчета графы «Режим переговорных сделок» невозможно, так как не заполнена используемая в расчете графа «Код страны регистрации по классификатору ОКСМ»!", entries.get(i++).getMessage());
+        Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
         testHelper.getLogger().clear();
 
         // TODO (Ramil Timerbaev) добавить тесты для логических проверок 13-16
