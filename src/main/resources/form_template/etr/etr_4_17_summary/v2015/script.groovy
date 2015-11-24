@@ -97,6 +97,9 @@ def rateMap = ['rate5': 'sum34',
 def providerCache = [:]
 
 @Field
+def recordCache = [:]
+
+@Field
 def periodMap = [:]
 
 def getReportPeriod(int reportPeriodId) {
@@ -283,7 +286,7 @@ def get102(def departmentId, def date) {
     }
     return [records.collect{
         def record = [:]
-        record[it.OPU_CODE.stringValue] = it.TOTAL_SUM.numberValue / 1000
+        record[it.OPU_CODE.stringValue] = it.TOTAL_SUM.numberValue / 1000000
         return record
     }.sum(), true]
 }
@@ -440,6 +443,15 @@ void logicCheck() {
     checkCalc(getDataRow(dataRows, 'total'), totalColumns, calcTotalRow, logger, true)
 }
 
+// Поиск записи в справочнике по значению (для импорта)
+def getRecordIdImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
+                      def boolean required = true) {
+    if (value == null || value.trim().isEmpty()) {
+        return null
+    }
+    return formDataService.getRefBookRecordIdImport(refBookId, recordCache, providerCache, alias, value,
+            getEndDate(formData.reportPeriodId), rowIndex, colIndex, logger, required)
+}
 
 void importData() {
     def tmpRow = formData.createDataRow()

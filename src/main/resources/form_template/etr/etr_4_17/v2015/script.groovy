@@ -93,6 +93,9 @@ def rateMap = ['rate5': 'sum34',
 def providerCache = [:]
 
 @Field
+def recordCache = [:]
+
+@Field
 def periodMap = [:]
 
 def getReportPeriod(int reportPeriodId) {
@@ -136,6 +139,16 @@ def getEndDate(def year, def order) {
         endDateBOMap[key] = getEndDateBO(year, order)
     }
     return endDateBOMap[key]
+}
+
+@Field
+def reportPeriodEndDate
+
+def getEndDate(int reportPeriodId) {
+    if (reportPeriodEndDate == null) {
+        reportPeriodEndDate = reportPeriodService.getEndDate(reportPeriodId)?.time
+    }
+    return reportPeriodEndDate
 }
 
 @Field
@@ -261,10 +274,6 @@ def calcBO(def departmentId) {
     opuMap.each { k, v ->
         result[k] = pair[1] ? (pair[0][v]?pair[0][v]:0) : 0
     }
-    logger.info("1: "+reportPeriod.order)
-    logger.info("2: "+!formData.accruing)
-    logger.info("3: "+pair[1])
-
     if (!formData.accruing && reportPeriod.order != 1 && pair[1]) {
         def prevDate = getEndDate(reportPeriod?.taxPeriod?.year, reportPeriod?.order - 1)
         pair = get102(departmentId, prevDate)
@@ -351,6 +360,16 @@ void logicCheck() {
         checkCalc(row, totalColumns, needValue, logger, true)
     }
     checkTotalSum(dataRows, totalColumns, logger, true)
+}
+
+// Поиск записи в справочнике по значению (для импорта)
+def getRecordIdImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
+                      def boolean required = true) {
+    if (value == null || value.trim().isEmpty()) {
+        return null
+    }
+    return formDataService.getRefBookRecordIdImport(refBookId, recordCache, providerCache, alias, value,
+            getEndDate(formData.reportPeriodId), rowIndex, colIndex, logger, required)
 }
 
 void importData() {
