@@ -7,6 +7,7 @@ import com.aplana.sbrf.taxaccounting.model.FormData
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.FormType
 import com.aplana.sbrf.taxaccounting.model.Relation
+import com.aplana.sbrf.taxaccounting.model.exception.DaoException
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
@@ -961,6 +962,7 @@ void checkRegionId() {
     }
 }
 
+// TODO (Ramil Timerbaev) добавить получение деклараций-приемников
 /** Получить результат для события FormDataEvent.GET_SOURCES. */
 def getSources() {
     def reportPeriods = []
@@ -979,23 +981,25 @@ def getSources() {
     def currentPeriod = reportPeriodService.get(formData.reportPeriodId)
     reportPeriods.add(currentPeriod)
 
+    // предыдущий период
+    def prevReportPeriod = null
+
     // получить предыдущий период
     // если первый месяц квартала (order = 1, 4, 7, 10) (так как для 945.1 период смещен на один месяц вперед, то это последний месяц в его смещенных периодах)
-    // тогда надо получить приемник для предыдущего месяца (3, 6, 9) (предыдущей месяц - будет последний месяц в нормальных кварталах)
+    // тогда надо получить приемник для предыдущего месяца (12, 3, 6, 9) (предыдущей месяц - будет последний месяц в нормальных кварталах)
     if (needPrevPeriod) {
+        // ожидаемый номер предыдущего периода
+        expectedPrevPeriodOrder = (currentPeriod.order == 1 ? 4 : currentPeriod.order - 1)
+        // ожидаемый год предыдущего периода
+        expectedPrevPeriodYear = (currentPeriod.order == 1 ? currentPeriod.taxPeriod.year - 1 : currentPeriod.taxPeriod.year)
+
         // получить предыдущий период
-        def prevReportPeriod = reportPeriodService.getPrevReportPeriod(currentPeriod.id)
-        if (prevReportPeriod != null) {
-            // ожидаемый номер предыдущего периода
-            expectedPrevPeriodOrder = (currentPeriod.order == 1 ? 4 : currentPeriod.order - 1)
-            // ожидаемый год предыдущего периода
-            expectedPrevPeriodYear = (currentPeriod.order == 1 ? currentPeriod.taxPeriod.year - 1 : currentPeriod.taxPeriod.year)
-            if (prevReportPeriod.order == expectedPrevPeriodOrder && expectedPrevPeriodYear == prevReportPeriod.taxPeriod.year) {
-                reportPeriods.add(prevReportPeriod)
-            } else {
-                // номер в налоговом периоде или год предыдущего периода отличается от ожидаемого (т.е. отсутстует ожидаемый предыдущий период)
-                hasPrevPeriod = false
-            }
+        prevReportPeriod = reportPeriodService.getPrevReportPeriod(currentPeriod.id)
+        if (prevReportPeriod != null && prevReportPeriod.order == expectedPrevPeriodOrder && expectedPrevPeriodYear == prevReportPeriod.taxPeriod.year) {
+            reportPeriods.add(prevReportPeriod)
+        } else {
+            // номер в налоговом периоде или год предыдущего периода отличается от ожидаемого (т.е. отсутстует ожидаемый предыдущий период)
+            hasPrevPeriod = false
         }
     }
 
@@ -1005,6 +1009,8 @@ def getSources() {
     def periodSourceMap = [:]
     // приемники отсутствующего предыдущего периода
     def missingDestinationDepartmentFormTypes = []
+    // источники 945.5 текущего периода - необходимы в случае если нужны источники 945.5 за передыдуший период, но они не указаны в механизме источников приемников
+    def sources945_5 = []
     reportPeriods.each { reportPeriod ->
         def start = reportPeriodService.getCalendarStartDate(reportPeriod.id).time
         def end = reportPeriodService.getEndDate(reportPeriod.id).time
@@ -1026,14 +1032,29 @@ def getSources() {
                         // если это текущий период и январь и приемник 945.5, то использовать приемник
                         formDestinations.add(destinationDepartmentFormType)
                     } else if (reportPeriod.id == currentPeriod.id && destinationDepartmentFormType.formTypeId != destinationFormTypeId) {
-                        // если это текущий период и не 945.5), то использовать приемник
+                        // если это текущий период и не 945.5, то использовать приемник
                         formDestinations.add(destinationDepartmentFormType)
                     }
-                    // если нужно было получить предыдущий период, но его не существует, то надо запонить приемники 945.5 текущего периода
+                    // если нужно было получить предыдущий период, но его не существует, то надо запомнить приемники 945.5 текущего периода
                     if (needPrevPeriod && !hasPrevPeriod && reportPeriod.id == currentPeriod.id && destinationDepartmentFormType.formTypeId == destinationFormTypeId) {
                         missingDestinationDepartmentFormTypes.add(destinationDepartmentFormType)
                     }
+                    // на случай если нужно было получить приемники за предыдущий период, но в нем нет назначения приемником 945.5 - запоминаем приемники 945.5 для текущего периода, потом на его основе создать информацию о назначениии за предыдущий период
+                    if (needPrevPeriod && hasPrevPeriod && reportPeriod.id == currentPeriod.id && destinationDepartmentFormType.formTypeId == destinationFormTypeId) {
+                        sources945_5.add(destinationDepartmentFormType)
+                    }
                 }
+            }
+        } else if (prevReportPeriod != null && prevReportPeriod == reportPeriod && !sources945_5.isEmpty()) {
+            // если в предыдущем периода нет назначения приемником 945.5, но есть такое назначнеие в текущем периоде, то добавить для предыдущего периода
+            sources945_5.each { departmentFormType945_5 ->
+                DepartmentFormType departmentFormType = new DepartmentFormType()
+                departmentFormType.formTypeId = departmentFormType945_5.formTypeId
+                departmentFormType.departmentId = departmentFormType945_5.departmentId
+                departmentFormType.kind = departmentFormType945_5.kind
+                departmentFormType.performerId = departmentFormType945_5.performerId
+
+                formDestinations.add(departmentFormType)
             }
         }
         periodDestinationMap[reportPeriod] = formDestinations
@@ -1203,7 +1224,11 @@ def getRelation(FormData tmpFormData, DepartmentFormType departmentFormType, boo
     /** является ли форма источников, в противном случае приемник*/
     relation.source = isSource
     /** Введена/выведена в/из действие(-ия) */
-    relation.status = getFormTemplateById(departmentFormType.formTypeId, periodId).status
+    try {
+        relation.status = (periodId != null && getFormTemplateById(departmentFormType.formTypeId, periodId) != null)
+    } catch (DaoException e) {
+        relation.status = false
+    }
 
     /**************  Параметры НФ ***************/
     /** Идентификатор созданной формы */

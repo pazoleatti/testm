@@ -149,11 +149,19 @@ public class App_6_7Test extends ScriptTestBase {
         row.getCell("cost").setValue(3, null);
         row.getCell("dealDate").setValue(sdf.parse("03.01.2014"), null);
         subTotalRow.getCell("sum").setValue(3, null);
-
         testHelper.execute(FormDataEvent.CHECK);
-
         Assert.assertTrue(testHelper.getLogger().getEntries().isEmpty());
 
+        // проверка суммы доходов;
+        row.getCell("sum").setValue(0, null);
+        row.getCell("price").setValue(0, null);
+        row.getCell("cost").setValue(0, null);
+        i = 0;
+        testHelper.execute(FormDataEvent.CALCULATE);
+        testHelper.execute(FormDataEvent.CHECK);
+        entries = testHelper.getLogger().getEntries();
+        Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
+        testHelper.getLogger().clear();
         // TODO (Ramil Timerbaev) добавить тесты для логических проверок 9-12
     }
 

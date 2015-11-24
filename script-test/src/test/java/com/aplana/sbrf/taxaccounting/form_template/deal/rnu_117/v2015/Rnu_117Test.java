@@ -93,7 +93,7 @@ public class Rnu_117Test extends ScriptTestBase {
         testHelper.execute(FormDataEvent.CHECK);
 
         List<LogEntry> entries = testHelper.getLogger().getEntries();
-        System.out.println( entries.toString());
+        System.out.println(entries.toString());
         int i = 0;
         Assert.assertEquals("Строка 1: Графа «Наименование Взаимозависимого лица/резидента оффшорной зоны» не заполнена!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Графа «Код классификации расхода» не заполнена!", entries.get(i++).getMessage());
@@ -140,7 +140,17 @@ public class Rnu_117Test extends ScriptTestBase {
         Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
         testHelper.getLogger().clear();
 
-        // 3. Проверка -  графа 9 должна быть >= графе 11
+        // 4. Проверка -  графа 9, 11 больше или равно 0
+        row.getCell("sum1").setValue(0, null);
+        row.getCell("sum2").setValue(0, null);
+        testHelper.execute(FormDataEvent.CALCULATE);//перерасчет sum3
+        testHelper.execute(FormDataEvent.CHECK);
+        entries = testHelper.getLogger().getEntries();
+        i = 0;
+        Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
+        testHelper.getLogger().clear();
+
+        // 5. Проверка -  графа 9 должна быть >= графе 11
         row.getCell("sum1").setValue(1, null);
         row.getCell("sum2").setValue(2, null);
         testHelper.execute(FormDataEvent.CALCULATE);//перерасчет sum3

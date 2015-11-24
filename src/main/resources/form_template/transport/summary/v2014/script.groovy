@@ -6,6 +6,7 @@ import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue
+import com.aplana.sbrf.taxaccounting.service.script.util.ScriptUtils
 import groovy.transform.Field
 
 /**
@@ -404,7 +405,7 @@ void fillTaKpp(def row, def errorMsg) {
     def records = getProvider(210L).getRecords(getReportPeriodEndDate(), null, filter, null)
     if (records.size() == 0) {
         logger.error(errorMsg + "Для кода ОКТМО «${getRefBookValue(96, row.okato)?.CODE?.value}» "
-                +  "нет данных в справочнике «Параметры представления деклараций по транспортному налогу»!")
+                + "нет данных в справочнике «Параметры представления деклараций по транспортному налогу»!")
     } else if (formDataEvent != FormDataEvent.CHECK && records.size() == 1) {
         row.taxAuthority = records[0].TAX_ORGAN_CODE?.value
         row.kpp = records[0].KPP?.value
@@ -421,7 +422,7 @@ def checkTaKpp(def row, def errorMsg) {
             " and LOWER(KPP) = LOWER('${row.kpp?.toString()}')")
     def records = getProvider(210L).getRecords(getReportPeriodEndDate(), null, filter, null)
     if (records.size() < 1) {
-        logger.error(errorMsg + "Для заданных параметров декларации («Код НО», «КПП», «Код ОКТМО» ) нет данных в справочнике «Параметры представления деклараций по транспортному налогу»!")
+        logger.error(errorMsg + "Для заданных параметров декларации («Код НО (кон.)», «КПП», «Код ОКТМО» ) нет данных в справочнике «Параметры представления деклараций по транспортному налогу»!")
     }
 }
 
@@ -684,7 +685,9 @@ def formNewRow(def sRow) {
         // "Средняя стоимость транспортных средст"
         def avgPriceRecord = getRefBookValue(208, sRow.version)
         // В справочнике «Повышающие коэффициенты транспортного налога» найти записи
-        def filter = "(YEAR_FROM < " + sRow.pastYear + " OR YEAR_FROM = " + sRow.pastYear + ") and (YEAR_TO > " + sRow.pastYear + " or YEAR_TO = " + sRow.pastYear + ") and AVG_COST = " + avgPriceRecord.AVG_COST.value
+        def filter = "(YEAR_FROM < " + sRow.pastYear + ") " +
+                "and (YEAR_TO > " + sRow.pastYear + " or YEAR_TO = " + sRow.pastYear + ") " +
+                "and AVG_COST = " + avgPriceRecord.AVG_COST.value
         def records = getProvider(209L).getRecords(getReportPeriodEndDate(), null, filter, null)
         if (records.size() == 0) {
             // "Категории средней стоимости транспортных средств"
@@ -1148,45 +1151,45 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
     checkHeaderSize(headerRows[0].size(), headerRows.size(), colCount, rowCount)
     def headerMapping = [
             // название первого столбца хранится в нулевой скрытой графе
-            ([(headerRows[0][0])  : getColumnName(tmpRow, 'rowNumber')]),
-            ([(headerRows[0][2])  : getColumnName(tmpRow, 'taxAuthority')]),
-            ([(headerRows[0][3])  : getColumnName(tmpRow, 'kpp')]),
-            ([(headerRows[0][4])  : getColumnName(tmpRow, 'okato')]),
-            ([(headerRows[0][5])  : getColumnName(tmpRow, 'tsTypeCode')]),
-            ([(headerRows[0][6])  : getColumnName(tmpRow, 'tsType')]),
-            ([(headerRows[0][7])  : getColumnName(tmpRow, 'model')]),
-            ([(headerRows[0][8])  : getColumnName(tmpRow, 'ecoClass')]),
-            ([(headerRows[0][9])  : getColumnName(tmpRow, 'vi')]),
-            ([(headerRows[0][10]) : getColumnName(tmpRow, 'regNumber')]),
-            ([(headerRows[0][11]) : getColumnName(tmpRow, 'regDate')]),
-            ([(headerRows[0][12]) : getColumnName(tmpRow, 'regDateEnd')]),
-            ([(headerRows[0][13]) : getColumnName(tmpRow, 'taxBase')]),
-            ([(headerRows[0][14]) : getColumnName(tmpRow, 'taxBaseOkeiUnit')]),
-            ([(headerRows[0][15]) : getColumnName(tmpRow, 'createYear')]),
-            ([(headerRows[0][16]) : getColumnName(tmpRow, 'years')]),
-            ([(headerRows[0][17]) : 'Сведения об угоне']),
-            ([(headerRows[1][17]) : 'Дата начала розыска ТС']),
-            ([(headerRows[1][18]) : 'Дата возврата ТС']),
-            ([(headerRows[0][19]) : getColumnName(tmpRow, 'periodStartCost')]),
-            ([(headerRows[0][20]) : getColumnName(tmpRow, 'periodEndCost')]),
-            ([(headerRows[0][21]) : getColumnName(tmpRow, 'ownMonths')]),
-            ([(headerRows[0][22]) : getColumnName(tmpRow, 'partRight')]),
-            ([(headerRows[0][23]) : getColumnName(tmpRow, 'coef362')]),
-            ([(headerRows[0][24]) : getColumnName(tmpRow, 'taxRate')]),
-            ([(headerRows[0][25]) : getColumnName(tmpRow, 'calculatedTaxSum')]),
-            ([(headerRows[0][26]) : getColumnName(tmpRow, 'benefitMonths')]),
-            ([(headerRows[0][27]) : getColumnName(tmpRow, 'benefitStartDate')]),
-            ([(headerRows[0][28]) : getColumnName(tmpRow, 'benefitEndDate')]),
-            ([(headerRows[0][29]) : getColumnName(tmpRow, 'coefKl')]),
-            ([(headerRows[0][30]) : getColumnName(tmpRow, 'taxBenefitCode')]),
-            ([(headerRows[0][31]) : getColumnName(tmpRow, 'benefitSum')]),
-            ([(headerRows[0][32]) : getColumnName(tmpRow, 'taxBenefitCodeDecrease')]),
-            ([(headerRows[0][33]) : getColumnName(tmpRow, 'benefitSumDecrease')]),
-            ([(headerRows[0][34]) : getColumnName(tmpRow, 'benefitCodeReduction')]),
-            ([(headerRows[0][35]) : getColumnName(tmpRow, 'benefitSumReduction')]),
-            ([(headerRows[0][36]) : getColumnName(tmpRow, 'koefKp')]),
-            ([(headerRows[0][37]) : getColumnName(tmpRow, 'taxSumToPay')]),
-            ([(headerRows[0][38]) : getColumnName(tmpRow, 'benefitBase')])
+            ([(headerRows[0][0]): getColumnName(tmpRow, 'rowNumber')]),
+            ([(headerRows[0][2]): getColumnName(tmpRow, 'taxAuthority')]),
+            ([(headerRows[0][3]): getColumnName(tmpRow, 'kpp')]),
+            ([(headerRows[0][4]): getColumnName(tmpRow, 'okato')]),
+            ([(headerRows[0][5]): getColumnName(tmpRow, 'tsTypeCode')]),
+            ([(headerRows[0][6]): getColumnName(tmpRow, 'tsType')]),
+            ([(headerRows[0][7]): getColumnName(tmpRow, 'model')]),
+            ([(headerRows[0][8]): getColumnName(tmpRow, 'ecoClass')]),
+            ([(headerRows[0][9]): getColumnName(tmpRow, 'vi')]),
+            ([(headerRows[0][10]): getColumnName(tmpRow, 'regNumber')]),
+            ([(headerRows[0][11]): getColumnName(tmpRow, 'regDate')]),
+            ([(headerRows[0][12]): getColumnName(tmpRow, 'regDateEnd')]),
+            ([(headerRows[0][13]): getColumnName(tmpRow, 'taxBase')]),
+            ([(headerRows[0][14]): getColumnName(tmpRow, 'taxBaseOkeiUnit')]),
+            ([(headerRows[0][15]): getColumnName(tmpRow, 'createYear')]),
+            ([(headerRows[0][16]): getColumnName(tmpRow, 'years')]),
+            ([(headerRows[0][17]): 'Сведения об угоне']),
+            ([(headerRows[1][17]): 'Дата начала розыска ТС']),
+            ([(headerRows[1][18]): 'Дата возврата ТС']),
+            ([(headerRows[0][19]): getColumnName(tmpRow, 'periodStartCost')]),
+            ([(headerRows[0][20]): getColumnName(tmpRow, 'periodEndCost')]),
+            ([(headerRows[0][21]): getColumnName(tmpRow, 'ownMonths')]),
+            ([(headerRows[0][22]): getColumnName(tmpRow, 'partRight')]),
+            ([(headerRows[0][23]): getColumnName(tmpRow, 'coef362')]),
+            ([(headerRows[0][24]): getColumnName(tmpRow, 'taxRate')]),
+            ([(headerRows[0][25]): getColumnName(tmpRow, 'calculatedTaxSum')]),
+            ([(headerRows[0][26]): getColumnName(tmpRow, 'benefitMonths')]),
+            ([(headerRows[0][27]): getColumnName(tmpRow, 'benefitStartDate')]),
+            ([(headerRows[0][28]): getColumnName(tmpRow, 'benefitEndDate')]),
+            ([(headerRows[0][29]): getColumnName(tmpRow, 'coefKl')]),
+            ([(headerRows[0][30]): getColumnName(tmpRow, 'taxBenefitCode')]),
+            ([(headerRows[0][31]): getColumnName(tmpRow, 'benefitSum')]),
+            ([(headerRows[0][32]): getColumnName(tmpRow, 'taxBenefitCodeDecrease')]),
+            ([(headerRows[0][33]): getColumnName(tmpRow, 'benefitSumDecrease')]),
+            ([(headerRows[0][34]): getColumnName(tmpRow, 'benefitCodeReduction')]),
+            ([(headerRows[0][35]): getColumnName(tmpRow, 'benefitSumReduction')]),
+            ([(headerRows[0][36]): getColumnName(tmpRow, 'koefKp')]),
+            ([(headerRows[0][37]): getColumnName(tmpRow, 'taxSumToPay')]),
+            ([(headerRows[0][38]): getColumnName(tmpRow, 'benefitBase')])
     ]
     (1..38).each { index ->
         headerMapping.add(([(headerRows[2][index]): index.toString()]))
@@ -1289,9 +1292,10 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
 
     // графа 24 - 41 416 VALUE
     colIndex++
-    // TODO (Ramil Timerbaev) все атрибуты данного справочника входят в уникальность
     // newRow.taxRate = calc24(newRow, region, errorMsg, false)
-    newRow.taxRate = getRecordIdImport(41L, 'VALUE', values[colIndex], fileRowIndex, colIndex + colOffset)
+    tmpRow = getTaxRateImport(values, fileRowIndex, colIndex + colOffset, newRow)
+    newRow.taxRate = tmpRow.taxRate
+    //newRow.taxRate = getRecordIdImport(41L, 'VALUE', values[colIndex], fileRowIndex, colIndex + colOffset)
     // графа 25
     colIndex++
     newRow.calculatedTaxSum = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
@@ -1309,22 +1313,19 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
     newRow.coefKl = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
     // графа 30 - 7 19 TAX_BENEFIT_ID 6 16 NAME
     colIndex++
-    // TODO (Ramil Timerbaev) несколько атрибутов данного справочника входят в уникальность
-    newRow.taxBenefitCode = getRecordIdImport(7L, 'TAX_BENEFIT_ID', values[colIndex], fileRowIndex, colIndex + colOffset)
+    newRow.taxBenefitCode = tmpRow.taxBenefitCode
     // графа 31
     colIndex++
     newRow.benefitSum = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
     // графа 32 - 7 19 TAX_BENEFIT_ID 6 16 NAME
     colIndex++
-    // TODO (Ramil Timerbaev) несколько атрибутов данного справочника входят в уникальность
-    newRow.taxBenefitCodeDecrease = getRecordIdImport(7L, 'TAX_BENEFIT_ID', values[colIndex], fileRowIndex, colIndex + colOffset)
+    newRow.taxBenefitCodeDecrease = tmpRow.taxBenefitCodeDecrease
     // графа 33
     colIndex++
     newRow.benefitSumDecrease = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
     // графа 34 - 7 19 TAX_BENEFIT_ID 6 16 NAME
     colIndex++
-    // TODO (Ramil Timerbaev) несколько атрибутов данного справочника входят в уникальность
-    newRow.benefitCodeReduction = getRecordIdImport(7L, 'TAX_BENEFIT_ID', values[colIndex], fileRowIndex, colIndex + colOffset)
+    newRow.benefitCodeReduction = tmpRow.benefitCodeReduction
     // графа 35
     colIndex++
     newRow.benefitSumReduction = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
@@ -1377,4 +1378,94 @@ def getTotalFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) {
     newRow.taxSumToPay = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
 
     return newRow
+}
+
+def getTaxRateImport(def values, def rowIndex, def colIndex, def row) {
+    def okatoId = row.okato
+    def taxRate = values[24]
+    def taxBenefitCode = values[30]
+    def taxBenefitCodeDecrease = values[32]
+    def benefitCodeReduction = values[34]
+
+    def regionId = formDataDepartment.regionId
+    if (!regionId && rowIndex == 1) {
+        logger.warn("На форме невозможно заполнить графы по ставке налога и кодам налоговых льгот, так как атрибут " +
+                "«Регион» подразделения текущей налоговой формы не заполнен (справочник «Подразделения»)!")
+    } else if (regionId) {
+        if (taxRate || taxBenefitCode || taxBenefitCodeDecrease || benefitCodeReduction) {
+            if (!okatoId) {
+                logger.warn("Строка $rowIndex файла: На форме невозможно заполнить графы по ставке налога и кодам " +
+                        "налоговых льгот, так как в файле не заполнена графа «" + getColumnName(row, 'okato') + "»!")
+            } else {
+                def okato = getOkato(getRefBookValue(96L, okatoId)?.CODE?.value)
+
+                row.taxBenefitCode = getTaxRate(okato, taxBenefitCode, 'taxBenefitCode', rowIndex, colIndex)
+                row.taxBenefitCodeDecrease = getTaxRate(okato, taxBenefitCodeDecrease, 'taxBenefitCodeDecrease', rowIndex, colIndex)
+                row.benefitCodeReduction = getTaxRate(okato, benefitCodeReduction, 'benefitCodeReduction', rowIndex, colIndex)
+
+                if (taxRate) {
+                    row.taxRate = calc24(row, regionId, null, false)
+                    if(!row.taxRate){
+                        logger.warn("Строка $rowIndex, столбец " + ScriptUtils.getXLSColumnName(colIndex) + ": " +
+                                "На форме не заполнена графа «" +getColumnName(tmpRow, 'taxRate')+"», " +
+                                "так как в справочнике «Ставки транспортного налога» не найдена запись, " +
+                                "актуальная на дату «" + getReportPeriodEndDate().format("dd.MM.yyyy") + "», соответствующая следующим параметрам: " +
+                                "«Код субъекта РФ представителя декларации» = «$regionId», " +
+                                "«Код субъекта РФ» = «$okato», " +
+                                "«Код вида ТС» = «${row.tsTypeCode}», " +
+                                "«Количество лет, прошедших с года выпуска ТС» = «${row.years}», " +
+                                "«Налоговая база» (мощность) = «${row.taxBase}», " +
+                                "«Единица измерения налоговой базы по ОКЕИ» = «${row.taxBaseOkeiUnit}»!")
+                    }
+                }
+            }
+        }
+    }
+    return row
+}
+
+def getTaxRate(def okato, def taxBenefitCode, def colname, def rowIndex, def colIndex) {
+    def ref_id = 7
+    def regionId = formDataDepartment.regionId
+    String filter = "DECLARATION_REGION_ID = $regionId and DICT_REGION_ID = $okato and TAX_BENEFIT_ID =$taxBenefitCode"
+    if (recordCache[ref_id] != null) {
+        if (recordCache[ref_id][filter] != null) {
+            return recordCache[ref_id][filter]
+        }
+    } else {
+        recordCache[ref_id] = [:]
+    }
+
+    def provider = refBookFactory.getDataProvider(ref_id)
+    def records = provider.getRecords(getReportPeriodEndDate(), null, filter, null)
+    if (records.size() > 0) {
+        recordCache[ref_id][filter] = records.get(0).get(RefBook.RECORD_ID_ALIAS).numberValue
+        return recordCache[ref_id][filter]
+    } else {
+        def tmpRow = formData.createDataRow()
+        logger.warn("Строка $rowIndex, столбец " + ScriptUtils.getXLSColumnName(colIndex) + ": " +
+                "На форме не заполнена графа «" + getColumnName(tmpRow, colname) + "», так как в справочнике " +
+                "«Параметры налоговых льгот транспортного налога» не найдена запись, " +
+                "актуальная на дату «" + getReportPeriodEndDate().format("dd.MM.yyyy") + "», " +
+                "в которой поле «Код субъекта РФ представителя декларации» = «$regionId», " +
+                "поле «Код субъекта РФ» = «$okato», поле «Код налоговой льготы» = «$taxRate»!")
+    }
+    return null
+}
+
+def getOkato(def codeOkato) {
+    switch (codeOkato) {
+        case '719':
+            codeOkato = '89'
+            break
+        case '718':
+            codeOkato = '86'
+            break
+        case '118':
+            codeOkato = '83'
+            break
+        default:
+            codeOkato = codeOkato.substring(0, 2)
+    }
+    return codeOkato
 }
