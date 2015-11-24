@@ -241,7 +241,7 @@ def fillRowFromXls(def templateRow, def dataRow, def values, int fileRowIndex, i
         def records = provider.getRecords(getEndDate(formData.reportPeriodId), null, filter, null)
         if (records) {
             dataRow.areas = records.get(0)?.record_id?.value
-        } else {
+        } else if(values[colIndex].equals("")){
             def columnIndex = getXLSColumnName(colIndex + colOffset)
             def dateStr = getEndDate(formData.reportPeriodId).format('dd.MM.yyyy')
             // наименование субъекта РФ для атрибута «Регион» подразделения формы
