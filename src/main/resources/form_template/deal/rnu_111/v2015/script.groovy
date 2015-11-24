@@ -838,7 +838,7 @@ void checkItog(def dataRows) {
                 return getColumnName(row1, 'sum1')
             }
             if (row1.sum2 != row2.sum2) {
-                return getColumnName(row1, 'su2')
+                return getColumnName(row1, 'sum2')
             }
             if (row1.sum3 != row2.sum3) {
                 return getColumnName(row1, 'sum3')
