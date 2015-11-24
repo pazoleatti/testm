@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.form_template.deal.rnu_117.v2015;
 
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
@@ -16,6 +17,7 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 import static org.mockito.Matchers.any;
@@ -77,7 +79,78 @@ public class Rnu_117Test extends ScriptTestBase {
     // Проверка с данными
     @Test
     public void check1Test() throws ParseException {
-        // TODO добавить тесты для ЛП
+        FormData formData = getFormData();
+        formData.initFormTemplateParams(testHelper.getTemplate("..//src/main//resources//form_template//deal//rnu_117//v2015//"));
+        List<DataRow<Cell>> dataRows = testHelper.getDataRowHelper().getAll();
+        SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
+
+        // для попадания в ЛП:
+        // 1. Проверка на заполнение необходимых граф
+        // + проверка на невозможность автозаполнения граф 8, 16,17
+        DataRow<Cell> row = formData.createDataRow();
+        row.setIndex(1);
+        dataRows.add(row);
+        testHelper.execute(FormDataEvent.CHECK);
+
+        List<LogEntry> entries = testHelper.getLogger().getEntries();
+        System.out.println( entries.toString());
+        int i = 0;
+        Assert.assertEquals("Строка 1: Графа «Наименование Взаимозависимого лица/резидента оффшорной зоны» не заполнена!", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 1: Графа «Код классификации расхода» не заполнена!", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 1: Графа «Основание для совершения операции. Номер» не заполнена!", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 1: Графа «Основание для совершения операции. Дата» не заполнена!", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 1: Графа «Процентная ставка, % годовых» не заполнена!", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 1: Графа «Сумма фактически начисленного расхода, руб.» не заполнена!", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 1: Графа «Процентная ставка, признаваемая рыночной для целей налогообложения, % годовых» не заполнена!", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 1: Графа «Сумма расхода, соответствующая рыночному уровню, руб.» не заполнена!", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 1: Графа «Отклонение (превышение) Процентной ставки от рыночного уровня, % годовых»: выполнение расчета невозможно, " +
+                "так как не заполнена используемая в расчете графа «Процентная ставка, % годовых», «Процентная ставка, признаваемая рыночной для целей налогообложения, % годовых»!", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 1: Графа «Сумма отклонения (превышения) расхода фактического от соответствующего рыночному уровню, руб.»: выполнение расчета невозможно, " +
+                "так как не заполнена используемая в расчете графа «Сумма фактически начисленного расхода, руб.», «Сумма расхода, соответствующая рыночному уровню, руб.»!", entries.get(i++).getMessage());
+        Assert.assertEquals("Группа «ВЗЛ/РОЗ не задано» не имеет строки подитога!", entries.get(i++).getMessage());
+        Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
+        testHelper.getLogger().clear();
+
+        //2. Для прохождения всех ЛП
+        i = 0;
+        row.getCell("name").setValue(1L, null);
+        row.getCell("code").setValue(1L, null);
+        row.getCell("reasonNumber").setValue("string", null);
+        row.getCell("reasonDate").setValue(sdf.parse("11.11.2016"), null);
+        row.getCell("rate").setValue(1L, null);
+        row.getCell("sum1").setValue(1L, null);
+        row.getCell("rate1").setValue(1L, null);
+        row.getCell("sum2").setValue(1L, null);
+        testHelper.execute(FormDataEvent.CALCULATE);
+        testHelper.execute(FormDataEvent.CHECK);
+        Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
+        testHelper.getLogger().clear();
+
+        // 3. Проверка -  графа 9, 11 больше или равно 0
+        row.getCell("sum1").setValue(-1, null);
+        row.getCell("sum2").setValue(-1, null);
+        testHelper.execute(FormDataEvent.CHECK);
+        entries = testHelper.getLogger().getEntries();
+        i = 0;
+        Assert.assertEquals("Строка 1: Значение графы «Сумма фактически начисленного расхода, руб.» должно быть больше или равно «0»!", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 1: Значение графы «Сумма расхода, соответствующая рыночному уровню, руб.» должно быть больше или равно «0»!", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 2: Неверное итоговое значение по группе «A» в графе «Сумма фактически начисленного расхода, руб.»", entries.get(i++).getMessage());
+        Assert.assertEquals("Итоговые значения рассчитаны неверно в графе «Сумма фактически начисленного расхода, руб.»!", entries.get(i++).getMessage());
+        Assert.assertEquals("Итоговые значения рассчитаны неверно в графе «Сумма расхода, соответствующая рыночному уровню, руб.»!", entries.get(i++).getMessage());
+        Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
+        testHelper.getLogger().clear();
+
+        // 3. Проверка -  графа 9 должна быть >= графе 11
+        row.getCell("sum1").setValue(1, null);
+        row.getCell("sum2").setValue(2, null);
+        testHelper.execute(FormDataEvent.CALCULATE);//перерасчет sum3
+        testHelper.execute(FormDataEvent.CHECK);
+        entries = testHelper.getLogger().getEntries();
+        i = 0;
+        Assert.assertEquals("Строка 1: Значение графы «Сумма фактически начисленного расхода, руб.» должно быть не меньше значения графы «Сумма расхода, соответствующая рыночному уровню, руб.»!", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 1: Значение графы «Сумма фактически начисленного расхода, руб.» должно быть не меньше значения графы «Сумма расхода, соответствующая рыночному уровню, руб.»!", entries.get(i++).getMessage());
+        Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
+        testHelper.getLogger().clear();
     }
 
     // Расчет пустой (в импорте - растчет заполненной)
