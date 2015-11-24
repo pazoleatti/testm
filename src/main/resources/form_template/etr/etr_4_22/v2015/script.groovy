@@ -59,6 +59,9 @@ def nonEmptyColumns = allColumns
 def editableColumns = ['dynamics', 'factors', 'areas', 'offers', 'offersCA', 'other']
 
 @Field
+def needShowRegionMsg = true
+
+@Field
 def reportPeriodEndDate
 
 def getEndDate(int reportPeriodId) {
