@@ -178,15 +178,15 @@ void logicCheck() {
         }
 
         // 4. Проверка возможности заполнения графы 13
-        if (!row.sum1 && !row.sum2) {
+        if (row.sum1==null && row.sum2==null) {
             def msg1 = row.getCell('sum3').column.name
             def msg2 = row.getCell('sum1').column.name
             def msg3 = row.getCell('sum2').column.name
             rowError(logger, row, "Строка $rowNum: Графа «$msg1»: выполнение расчета невозможно, так как не заполнена " +
                     "используемая в расчете графа «$msg2», «$msg3»!")
-        } else if (!row.sum1 || !row.sum2) {
+        } else if (row.sum1==null || row.sum2==null) {
             def msg1 = row.getCell('sum3').column.name
-            def msg2 = (!row.sum1) ? row.getCell('sum1').column.name : row.getCell('sum2').column.name
+            def msg2 = (row.sum1==null) ? row.getCell('sum1').column.name : row.getCell('sum2').column.name
             rowError(logger, row, "Строка $rowNum: Графа «$msg1»: выполнение расчета невозможно, так как не заполнена " +
                     "используемая в расчете графа «$msg2»!")
         }

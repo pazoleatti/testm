@@ -149,7 +149,7 @@ void logicCheck() {
         checkNonEmptyColumns(row, rowNum, nonEmptyColumns, logger, true)
 
         // 2. Проверка возможности заполнения цены и стоимости
-        if (!row.sum) {
+        if (row.sum==null) {
             def msg1 = row.getCell('price').column.name
             def msg2 = row.getCell('cost').column.name
             def msg3 = row.getCell('sum').column.name
@@ -158,14 +158,14 @@ void logicCheck() {
         }
 
         // 3. Проверка цены
-        if (row.sum && row.price != row.sum) {
+        if (row.sum!=null && row.price != row.sum) {
             def msg1 = row.getCell('price').column.name
             def msg2 = row.getCell('sum').column.name
             logger.error("Строка $rowNum: Значение графы «$msg1» должно быть равно значению графы «$msg2»!")
         }
 
         // 4. Проверка стоимости
-        if (row.sum && row.cost != row.sum) {
+        if (row.sum!=null && row.cost != row.sum) {
             def msg1 = row.getCell('cost').column.name
             def msg2 = row.getCell('sum').column.name
             logger.error("Строка $rowNum: Значение графы «$msg1» должно быть равно значению графы «$msg2»!")
@@ -194,7 +194,7 @@ void logicCheck() {
         }
 
         // 8. Проверка положительной суммы доходов
-        if (row.sum && row.sum < 0) {
+        if (row.sum!=null && row.sum < 0) {
             def msg = row.getCell('sum').column.name
             logger.error("Строка $rowNum: Значение графы «$msg» должно быть больше или равно «0»!")
         }
