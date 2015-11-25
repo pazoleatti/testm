@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.service.script;
 
+import com.aplana.sbrf.taxaccounting.model.DepartmentDeclarationType;
 import com.aplana.sbrf.taxaccounting.model.DepartmentFormType;
 import com.aplana.sbrf.taxaccounting.model.FormDataKind;
 import com.aplana.sbrf.taxaccounting.util.ScriptExposed;
@@ -26,4 +27,17 @@ public interface DepartmentFormTypeService {
      */
     List<DepartmentFormType> getFormDestinations(int sourceDepartmentId, int sourceFormTypeId, FormDataKind sourceKind,
                                                  Date periodStart, Date periodEnd);
+
+    /**
+     * Возвращает информацию о декларациях-потребителях, которые должны использовать
+     * информацию из данной налоговой формы в качестве источника
+     */
+    List<DepartmentDeclarationType> getDeclarationDestinations(int sourceDepartmentId, int sourceFormTypeId,
+                                                               FormDataKind sourceKind, Date periodStart, Date periodEnd);
+
+    /**
+     * Возвращает информацию о формах-источниках, которые должны использоваться
+     * при формировании декларации
+     */
+    List<DepartmentFormType> getDeclarationSources(int departmentId, int declarationTypeId, Date periodStart, Date periodEnd);
 }
