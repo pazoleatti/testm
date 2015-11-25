@@ -218,6 +218,7 @@ void logicCheck() {
         if (row.docDate) {
             checkDateValid(logger, row, 'docDate', row.docDate, true)
         }
+    }
 
         // 9. Проверка наличия всех фиксированных строк «Итого по ЮЛ»
         // 10. Проверка отсутствия лишних фиксированных строк «Итого по ЮЛ»
@@ -228,7 +229,7 @@ void logicCheck() {
         if (dataRows.find { it.getAlias() == 'total' }) {
             checkTotalSum(dataRows, totalColumns, logger, true)
         }
-    }
+
 }
 // Алгоритмы заполнения полей формы
 void calc() {
