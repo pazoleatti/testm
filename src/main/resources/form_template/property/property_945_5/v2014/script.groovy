@@ -1630,35 +1630,35 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
 
     // для проверки шапки
     def headerMapping = [
-            (headerRows[0][0])  : getColumnName(tmpRow, 'subject'),
-            (headerRows[0][1])  : getColumnName(tmpRow, 'taxAuthority'),
-            (headerRows[0][2])  : getColumnName(tmpRow, 'kpp'),
-            (headerRows[0][3])  : getColumnName(tmpRow, 'oktmo'),
-            (headerRows[0][4])  : '',
-            (headerRows[1][4])  : '',
-            (headerRows[2][4])  : '',
-            (headerRows[0][5])  : 'Остаточная стоимость основных средств',
-            (headerRows[1][5])  : getColumnName(tmpRow, 'cost1'),
-            (headerRows[0][6])  : getColumnName(tmpRow, 'cost2'),
-            (headerRows[0][7])  : getColumnName(tmpRow, 'cost3'),
-            (headerRows[0][8])  : getColumnName(tmpRow, 'cost4'),
-            (headerRows[0][9])  : getColumnName(tmpRow, 'cost5'),
-            (headerRows[0][10]) : getColumnName(tmpRow, 'cost6'),
-            (headerRows[0][11]) : getColumnName(tmpRow, 'cost7'),
-            (headerRows[0][12]) : getColumnName(tmpRow, 'cost8'),
-            (headerRows[0][13]) : getColumnName(tmpRow, 'cost9'),
-            (headerRows[0][14]) : getColumnName(tmpRow, 'cost10'),
-            (headerRows[0][15]) : getColumnName(tmpRow, 'cost11'),
-            (headerRows[0][16]) : getColumnName(tmpRow, 'cost12'),
-            (headerRows[0][17]) : getColumnName(tmpRow, 'cost13'),
-            (headerRows[0][18]) : getColumnName(tmpRow, 'cost31_12'),
-            (headerRows[2][0]) : '1',
-            (headerRows[2][1]) : '2',
-            (headerRows[2][2]) : '3',
-            (headerRows[2][3]) : '4'
+            ([(headerRows[0][0])  : getColumnName(tmpRow, 'subject')]),
+            ([(headerRows[0][1])  : getColumnName(tmpRow, 'taxAuthority')]),
+            ([(headerRows[0][2])  : getColumnName(tmpRow, 'kpp')]),
+            ([(headerRows[0][3])  : getColumnName(tmpRow, 'oktmo')]),
+            ([(headerRows[0][4])  : '']),
+            ([(headerRows[1][4])  : '']),
+            ([(headerRows[2][4])  : '']),
+            ([(headerRows[0][5])  : 'Остаточная стоимость основных средств']),
+            ([(headerRows[1][5])  : getColumnName(tmpRow, 'cost1')]),
+            ([(headerRows[0][6])  : getColumnName(tmpRow, 'cost2')]),
+            ([(headerRows[0][7])  : getColumnName(tmpRow, 'cost3')]),
+            ([(headerRows[0][8])  : getColumnName(tmpRow, 'cost4')]),
+            ([(headerRows[0][9])  : getColumnName(tmpRow, 'cost5')]),
+            ([(headerRows[0][10]) : getColumnName(tmpRow, 'cost6')]),
+            ([(headerRows[0][11]) : getColumnName(tmpRow, 'cost7')]),
+            ([(headerRows[0][12]) : getColumnName(tmpRow, 'cost8')]),
+            ([(headerRows[0][13]) : getColumnName(tmpRow, 'cost9')]),
+            ([(headerRows[0][14]) : getColumnName(tmpRow, 'cost10')]),
+            ([(headerRows[0][15]) : getColumnName(tmpRow, 'cost11')]),
+            ([(headerRows[0][16]) : getColumnName(tmpRow, 'cost12')]),
+            ([(headerRows[0][17]) : getColumnName(tmpRow, 'cost13')]),
+            ([(headerRows[0][18]) : getColumnName(tmpRow, 'cost31_12')]),
+            ([(headerRows[2][0]) : '1']),
+            ([(headerRows[2][1]) : '2']),
+            ([(headerRows[2][2]) : '3']),
+            ([(headerRows[2][3]) : '4'])
     ]
-    (5..18).each { index ->
-        headerMapping.put((headerRows[2][index]), index.toString())
+    (5..18).each {
+        headerMapping.add(([(headerRows[2][it]): it.toString()]))
     }
     checkHeaderEquals(headerMapping, logger)
 }

@@ -590,28 +590,28 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
     checkHeaderSize(headerRows[headerRows.size() - 1].size(), headerRows.size(), colCount, rowCount)
 
     def headerMapping = [
-            (headerRows[0][0]) : getColumnName(tmpRow, 'rowNum'),
-            (headerRows[0][2]) : getColumnName(tmpRow, 'subject'),
-            (headerRows[0][3]) : getColumnName(tmpRow, 'taxAuthority'),
-            (headerRows[0][4]) : getColumnName(tmpRow, 'kpp'),
-            (headerRows[0][5]) : getColumnName(tmpRow, 'oktmo'),
-            (headerRows[0][6]) : getColumnName(tmpRow, 'address'),
-            (headerRows[0][7]) : getColumnName(tmpRow, 'sign'),
-            (headerRows[0][8]) : 'Кадастровый номер',
-            (headerRows[0][10]): 'Кадастровая стоимость',
-            (headerRows[0][12]): 'Право собственности',
-            (headerRows[0][14]): getColumnName(tmpRow, 'taxBenefitCode'),
-            (headerRows[0][15]): getColumnName(tmpRow, 'benefitBasis'),
-            (headerRows[1][8]) : 'Здание',
-            (headerRows[1][9]) : 'Помещение',
-            (headerRows[1][10]): 'на 1 января',
-            (headerRows[1][11]): 'в т.ч. необлагаемая налогом',
-            (headerRows[1][12]): 'Дата возникновения',
-            (headerRows[1][13]): 'Дата прекращения',
-            (headerRows[2][0]) : '1'
+            ([(headerRows[0][0]) : getColumnName(tmpRow, 'rowNum')]),
+            ([(headerRows[0][2]) : getColumnName(tmpRow, 'subject')]),
+            ([(headerRows[0][3]) : getColumnName(tmpRow, 'taxAuthority')]),
+            ([(headerRows[0][4]) : getColumnName(tmpRow, 'kpp')]),
+            ([(headerRows[0][5]) : getColumnName(tmpRow, 'oktmo')]),
+            ([(headerRows[0][6]) : getColumnName(tmpRow, 'address')]),
+            ([(headerRows[0][7]) : getColumnName(tmpRow, 'sign')]),
+            ([(headerRows[0][8]) : 'Кадастровый номер']),
+            ([(headerRows[0][10]): 'Кадастровая стоимость']),
+            ([(headerRows[0][12]): 'Право собственности']),
+            ([(headerRows[0][14]): getColumnName(tmpRow, 'taxBenefitCode')]),
+            ([(headerRows[0][15]): getColumnName(tmpRow, 'benefitBasis')]),
+            ([(headerRows[1][8]) : 'Здание']),
+            ([(headerRows[1][9]) : 'Помещение']),
+            ([(headerRows[1][10]): 'на 1 января']),
+            ([(headerRows[1][11]): 'в т.ч. необлагаемая налогом']),
+            ([(headerRows[1][12]): 'Дата возникновения']),
+            ([(headerRows[1][13]): 'Дата прекращения']),
+            ([(headerRows[2][0]) : '1'])
     ]
-    (2..15).each { index ->
-        headerMapping.put((headerRows[2][index]), index.toString())
+    (2..15).each {
+        headerMapping.add(([(headerRows[2][it]): it.toString()]))
     }
     checkHeaderEquals(headerMapping, logger)
 }
