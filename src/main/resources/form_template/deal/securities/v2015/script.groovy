@@ -316,25 +316,25 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
     checkHeaderSize(headerRows[headerRows.size() - 1].size(), headerRows.size(), colCount, rowCount)
 
     def headerMapping = [
-            (headerRows[0][0]) : 'Общая информация',
-            (headerRows[0][5]) : 'Сведения о сделке',
-            (headerRows[1][0]) : getColumnName(tmpRow, 'rowNumber'),
-            (headerRows[1][1]) : getColumnName(tmpRow, 'fullNamePerson'),
-            (headerRows[1][2]) : getColumnName(tmpRow, 'inn'),
-            (headerRows[1][3]) : getColumnName(tmpRow, 'countryCode'),
-            (headerRows[1][4]) : getColumnName(tmpRow, 'dealSign'),
-            (headerRows[1][5]) : getColumnName(tmpRow, 'incomeSum'),
-            (headerRows[1][6]) : getColumnName(tmpRow, 'outcomeSum'),
-            (headerRows[1][7]) : getColumnName(tmpRow, 'docNumber'),
-            (headerRows[1][8]) : getColumnName(tmpRow, 'docDate'),
-            (headerRows[1][9]) : getColumnName(tmpRow, 'okeiCode'),
-            (headerRows[1][10]): getColumnName(tmpRow, 'count'),
-            (headerRows[1][11]): getColumnName(tmpRow, 'price'),
-            (headerRows[1][12]): getColumnName(tmpRow, 'cost'),
-            (headerRows[1][13]): getColumnName(tmpRow, 'dealDate')
+            ([(headerRows[0][0]) : 'Общая информация']),
+            ([(headerRows[0][5]) : 'Сведения о сделке']),
+            ([(headerRows[1][0]) : getColumnName(tmpRow, 'rowNumber')]),
+            ([(headerRows[1][1]) : getColumnName(tmpRow, 'fullNamePerson')]),
+            ([(headerRows[1][2]) : getColumnName(tmpRow, 'inn')]),
+            ([(headerRows[1][3]) : getColumnName(tmpRow, 'countryCode')]),
+            ([(headerRows[1][4]) : getColumnName(tmpRow, 'dealSign')]),
+            ([(headerRows[1][5]) : getColumnName(tmpRow, 'incomeSum')]),
+            ([(headerRows[1][6]) : getColumnName(tmpRow, 'outcomeSum')]),
+            ([(headerRows[1][7]) : getColumnName(tmpRow, 'docNumber')]),
+            ([(headerRows[1][8]) : getColumnName(tmpRow, 'docDate')]),
+            ([(headerRows[1][9]) : getColumnName(tmpRow, 'okeiCode')]),
+            ([(headerRows[1][10]): getColumnName(tmpRow, 'count')]),
+            ([(headerRows[1][11]): getColumnName(tmpRow, 'price')]),
+            ([(headerRows[1][12]): getColumnName(tmpRow, 'cost')]),
+            ([(headerRows[1][13]): getColumnName(tmpRow, 'dealDate')])
     ]
     (0..13).each{
-        headerMapping.put(headerRows[2][it], 'гр. ' + (it + 1))
+        headerMapping.add(([(headerRows[2][it]): 'гр. ' + (it + 1).toString()]))
     }
     checkHeaderEquals(headerMapping, logger)
 }

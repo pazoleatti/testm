@@ -481,19 +481,11 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
             ([(headerRows[2][2]) : 'гр. 2']),
             ([(headerRows[2][3]) : 'гр. 3']),
             ([(headerRows[2][4]) : 'гр. 4.1']),
-            ([(headerRows[2][5]) : 'гр. 4.2']),
-            ([(headerRows[2][6]) : 'гр. 5']),
-            ([(headerRows[2][7]) : 'гр. 6']),
-            ([(headerRows[2][8]) : 'гр. 7']),
-            ([(headerRows[2][9]) : 'гр. 8']),
-            ([(headerRows[2][10]): 'гр. 9']),
-            ([(headerRows[2][11]): 'гр. 10']),
-            ([(headerRows[2][12]): 'гр. 11']),
-            ([(headerRows[2][13]): 'гр. 12']),
-            ([(headerRows[2][14]): 'гр. 13']),
-            ([(headerRows[2][15]): 'гр. 14']),
-            ([(headerRows[2][16]): 'гр. 15']),
+            ([(headerRows[2][5]) : 'гр. 4.2'])
     ]
+    (6..16).each {
+        headerMapping.add(([(headerRows[2][it]): 'гр. '+(it - 1).toString()]))
+    }
     checkHeaderEquals(headerMapping, logger)
 }
 

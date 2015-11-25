@@ -281,22 +281,22 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
     checkHeaderSize(headerRows[headerRows.size() - 1].size(), headerRows.size(), colCount, rowCount)
 
     def headerMapping = [
-            (headerRows[0][0]) : 'Общая информация',
-            (headerRows[0][4]) : 'Сведения о сделке',
-            (headerRows[1][0]) : getColumnName(tmpRow, 'rowNumber'),
-            (headerRows[1][1]) : getColumnName(tmpRow, 'fullNamePerson'),
-            (headerRows[1][2]) : getColumnName(tmpRow, 'inn'),
-            (headerRows[1][3]) : getColumnName(tmpRow, 'countryName'),
-            (headerRows[1][4]) : getColumnName(tmpRow, 'sum'),
-            (headerRows[1][5]) : getColumnName(tmpRow, 'docNumber'),
-            (headerRows[1][6]) : getColumnName(tmpRow, 'docDate'),
-            (headerRows[1][7]) : getColumnName(tmpRow, 'count'),
-            (headerRows[1][8]) : getColumnName(tmpRow, 'price'),
-            (headerRows[1][9]) : getColumnName(tmpRow, 'cost'),
-            (headerRows[1][10]): getColumnName(tmpRow, 'dealDate')
+            ([(headerRows[0][0]) : 'Общая информация']),
+            ([(headerRows[0][4]) : 'Сведения о сделке']),
+            ([(headerRows[1][0]) : getColumnName(tmpRow, 'rowNumber')]),
+            ([(headerRows[1][1]) : getColumnName(tmpRow, 'fullNamePerson')]),
+            ([(headerRows[1][2]) : getColumnName(tmpRow, 'inn')]),
+            ([(headerRows[1][3]) : getColumnName(tmpRow, 'countryName')]),
+            ([(headerRows[1][4]) : getColumnName(tmpRow, 'sum')]),
+            ([(headerRows[1][5]) : getColumnName(tmpRow, 'docNumber')]),
+            ([(headerRows[1][6]) : getColumnName(tmpRow, 'docDate')]),
+            ([(headerRows[1][7]) : getColumnName(tmpRow, 'count')]),
+            ([(headerRows[1][8]) : getColumnName(tmpRow, 'price')]),
+            ([(headerRows[1][9]) : getColumnName(tmpRow, 'cost')]),
+            ([(headerRows[1][10]): getColumnName(tmpRow, 'dealDate')])
     ]
     (0..10).each{
-        headerMapping.put(headerRows[2][it], 'гр. ' + (it + 1))
+        headerMapping.add(([(headerRows[2][it]): 'гр. ' + (it + 1).toString()]))
     }
     checkHeaderEquals(headerMapping, logger)
 }
