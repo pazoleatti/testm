@@ -148,7 +148,17 @@ public class Rnu_111Test extends ScriptTestBase {
         Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
         testHelper.getLogger().clear();
 
-        // 3. Проверка -  графа 13 должна быть >= графе 15
+        // 4. Проверка -  графа 13, 15 больше или равно 0
+        row.getCell("sum1").setValue(0, null);
+        row.getCell("sum2").setValue(0, null);
+        testHelper.execute(FormDataEvent.CALCULATE);//перерасчет sum3
+        testHelper.execute(FormDataEvent.CHECK);
+        entries = testHelper.getLogger().getEntries();
+        i = 0;
+        Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
+        testHelper.getLogger().clear();
+
+        // 5. Проверка -  графа 13 должна быть >= графе 15
         row.getCell("sum1").setValue(1, null);
         row.getCell("sum2").setValue(2, null);
         testHelper.execute(FormDataEvent.CALCULATE);//перерасчет sum3
@@ -159,6 +169,7 @@ public class Rnu_111Test extends ScriptTestBase {
         Assert.assertEquals("Строка 1: Значение графы «Сумма фактически начисленного дохода (руб.)» должно быть не меньше значения графы «Сумма дохода, соответствующая рыночному уровню (руб.)»!", entries.get(i++).getMessage());
         Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
         testHelper.getLogger().clear();
+
     }
 
     // Расчет пустой (в импорте - растчет заполненной)

@@ -1,4 +1,4 @@
-package com.aplana.sbrf.taxaccounting.form_template.etr.etr_4_17.v2015;
+package com.aplana.sbrf.taxaccounting.form_template.etr.etr_4_17_summary.v2015;
 
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
@@ -21,19 +21,17 @@ import java.util.List;
 import java.util.Map;
 
 import static org.mockito.Matchers.*;
-import static org.mockito.Matchers.anyLong;
-import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.when;
 
 /**
  * Аналитический отчет «Сведения о начисленных и уплачиваемых налогах, сборах и взносах, отнесенных на расходы»
  */
-public class Etr4_17Test extends ScriptTestBase {
-    private static final int TYPE_ID = 717;
+public class Etr4_17_summaryTest extends ScriptTestBase {
+    private static final int TYPE_ID = 7170;
     private static final int DEPARTMENT_ID = 2;
     private static final int REPORT_PERIOD_ID = 1;
     private static final int DEPARTMENT_PERIOD_ID = 1;
-    private static final FormDataKind KIND = FormDataKind.CALCULATED;
+    private static final FormDataKind KIND = FormDataKind.SUMMARY;
 
     @Override
     protected FormData getFormData() {
@@ -54,7 +52,7 @@ public class Etr4_17Test extends ScriptTestBase {
 
     @Override
     protected ScriptTestMockHelper getMockHelper() {
-        return getDefaultScriptTestMockHelper(Etr4_17Test.class);
+        return getDefaultScriptTestMockHelper(Etr4_17_summaryTest.class);
     }
 
     @Before
@@ -90,11 +88,16 @@ public class Etr4_17Test extends ScriptTestBase {
         when(testHelper.getReportPeriodService().get(anyInt())).thenReturn(period);
 
         // Подразделение с id = 1
-        when(testHelper.getDepartmentService().getParentTBId(1)).thenReturn(113);
         Department department1 = new Department();
         department1.setId(1);
         department1.setName("Name1");
+        department1.setType(DepartmentType.TERR_BANK);
         when(testHelper.getDepartmentService().get(1)).thenReturn(department1);
+        Department management1 = new Department();
+        management1.setId(2);
+        management1.setName("management1");
+        management1.setType(DepartmentType.MANAGEMENT);
+        when(testHelper.getDepartmentService().getAllChildren(1)).thenReturn(Arrays.asList(management1));
 
         // период БО
         Long accountPeriodId = 1L;
@@ -125,7 +128,7 @@ public class Etr4_17Test extends ScriptTestBase {
     @Test
     public void checkTest() {
         testHelper.execute(FormDataEvent.CHECK);
-        Assert.assertFalse(testHelper.getLogger().containsLevel(LogLevel.ERROR));
+        Assert.assertTrue(testHelper.getLogger().containsLevel(LogLevel.ERROR));
     }
 
     @Test
@@ -139,7 +142,7 @@ public class Etr4_17Test extends ScriptTestBase {
         testHelper.execute(FormDataEvent.CALCULATE);
 
         List<DataRow<Cell>> dataRows = testHelper.getDataRowHelper().getAll();
-        Assert.assertEquals(dataRows.get(0).getCell("parentTB").getNumericValue(), new BigDecimal(113));
+        Assert.assertEquals(dataRows.get(0).getCell("department").getNumericValue(), new BigDecimal("1"));
         Assert.assertEquals(dataRows.get(0).getCell("tax26411_01").getNumericValue(), new BigDecimal("0.10"));
         Assert.assertEquals(dataRows.get(0).getCell("tax26411_02").getNumericValue(), new BigDecimal("0.00"));
         Assert.assertEquals(dataRows.get(0).getCell("sum34").getNumericValue(), new BigDecimal("0.10"));
@@ -157,55 +160,7 @@ public class Etr4_17Test extends ScriptTestBase {
         Assert.assertEquals(dataRows.get(0).getCell("sum").getNumericValue(), new BigDecimal("1.25"));
         Assert.assertEquals(dataRows.get(0).getCell("rate").getNumericValue(), new BigDecimal("100.00"));
 
-        Assert.assertEquals(dataRows.get(1).getCell("tax26411_01").getNumericValue(), new BigDecimal("0.10"));
-        Assert.assertEquals(dataRows.get(1).getCell("tax26411_02").getNumericValue(), new BigDecimal("0.00"));
-        Assert.assertEquals(dataRows.get(1).getCell("sum34").getNumericValue(), new BigDecimal("0.10"));
-        Assert.assertEquals(dataRows.get(1).getCell("rate5").getNumericValue(), new BigDecimal("100.00"));
-        Assert.assertEquals(dataRows.get(1).getCell("tax26411_03").getNumericValue(), new BigDecimal("0.01"));
-        Assert.assertEquals(dataRows.get(1).getCell("rate7").getNumericValue(), new BigDecimal("100.00"));
-        Assert.assertEquals(dataRows.get(1).getCell("tax26411_13").getNumericValue(), new BigDecimal("0.01"));
-        Assert.assertEquals(dataRows.get(1).getCell("rate9").getNumericValue(), new BigDecimal("100.00"));
-        Assert.assertEquals(dataRows.get(1).getCell("tax26411_12").getNumericValue(), new BigDecimal("0.01"));
-        Assert.assertEquals(dataRows.get(1).getCell("rate11").getNumericValue(), new BigDecimal("100.00"));
-        Assert.assertEquals(dataRows.get(1).getCell("tax26412").getNumericValue(), new BigDecimal("1.11"));
-        Assert.assertEquals(dataRows.get(1).getCell("rate13").getNumericValue(), new BigDecimal("100.00"));
-        Assert.assertEquals(dataRows.get(1).getCell("tax26410_09").getNumericValue(), new BigDecimal("0.01"));
-        Assert.assertEquals(dataRows.get(1).getCell("rate15").getNumericValue(), new BigDecimal("100.00"));
-        Assert.assertEquals(dataRows.get(1).getCell("sum").getNumericValue(), new BigDecimal("1.25"));
-        Assert.assertEquals(dataRows.get(1).getCell("rate").getNumericValue(), new BigDecimal("100.00"));
-
-        checkLogger();
-    }
-
-    @Test
-    public void checkCalc2() {
-        FormData formData = testHelper.getFormData();
-        formData.setAccruing(false);
-        DataRow<Cell> row1 = formData.createDataRow();
-        row1.setIndex(1);
-        row1.getCell("department").setValue(1L, 1);
-        testHelper.getDataRowHelper().getAll().add(0, row1);
-        testHelper.execute(FormDataEvent.CALCULATE);
-
-        List<DataRow<Cell>> dataRows = testHelper.getDataRowHelper().getAll();
-        Assert.assertEquals(dataRows.get(0).getCell("parentTB").getNumericValue(), new BigDecimal(113));
-        Assert.assertEquals(dataRows.get(0).getCell("tax26411_01").getNumericValue(), new BigDecimal("0.00"));
-        Assert.assertEquals(dataRows.get(0).getCell("tax26411_02").getNumericValue(), new BigDecimal("0.00"));
-        Assert.assertEquals(dataRows.get(0).getCell("sum34").getNumericValue(), new BigDecimal("0.00"));
-        Assert.assertEquals(dataRows.get(0).getCell("rate5").getNumericValue(), new BigDecimal("0.00"));
-        Assert.assertEquals(dataRows.get(0).getCell("tax26411_03").getNumericValue(), new BigDecimal("0.00"));
-        Assert.assertEquals(dataRows.get(0).getCell("rate7").getNumericValue(), new BigDecimal("0.00"));
-        Assert.assertEquals(dataRows.get(0).getCell("tax26411_13").getNumericValue(), new BigDecimal("0.00"));
-        Assert.assertEquals(dataRows.get(0).getCell("rate9").getNumericValue(), new BigDecimal("0.00"));
-        Assert.assertEquals(dataRows.get(0).getCell("tax26411_12").getNumericValue(), new BigDecimal("0.00"));
-        Assert.assertEquals(dataRows.get(0).getCell("rate11").getNumericValue(), new BigDecimal("0.00"));
-        Assert.assertEquals(dataRows.get(0).getCell("tax26412").getNumericValue(), new BigDecimal("0.00"));
-        Assert.assertEquals(dataRows.get(0).getCell("rate13").getNumericValue(), new BigDecimal("0.00"));
-        Assert.assertEquals(dataRows.get(0).getCell("tax26410_09").getNumericValue(), new BigDecimal("0.00"));
-        Assert.assertEquals(dataRows.get(0).getCell("rate15").getNumericValue(), new BigDecimal("0.00"));
-        Assert.assertEquals(dataRows.get(0).getCell("sum").getNumericValue(), new BigDecimal("0.00"));
-        Assert.assertEquals(dataRows.get(0).getCell("rate").getNumericValue(), new BigDecimal("0.00"));
-
+        Assert.assertEquals(dataRows.get(1).getCell("department").getNumericValue(), new BigDecimal("113"));
         Assert.assertEquals(dataRows.get(1).getCell("tax26411_01").getNumericValue(), new BigDecimal("0.00"));
         Assert.assertEquals(dataRows.get(1).getCell("tax26411_02").getNumericValue(), new BigDecimal("0.00"));
         Assert.assertEquals(dataRows.get(1).getCell("sum34").getNumericValue(), new BigDecimal("0.00"));
@@ -223,71 +178,103 @@ public class Etr4_17Test extends ScriptTestBase {
         Assert.assertEquals(dataRows.get(1).getCell("sum").getNumericValue(), new BigDecimal("0.00"));
         Assert.assertEquals(dataRows.get(1).getCell("rate").getNumericValue(), new BigDecimal("0.00"));
 
+        Assert.assertEquals(dataRows.get(2).getCell("tax26411_01").getNumericValue(), new BigDecimal("0.10"));
+        Assert.assertEquals(dataRows.get(2).getCell("tax26411_02").getNumericValue(), new BigDecimal("0.00"));
+        Assert.assertEquals(dataRows.get(2).getCell("sum34").getNumericValue(), new BigDecimal("0.10"));
+        Assert.assertEquals(dataRows.get(2).getCell("rate5").getNumericValue(), new BigDecimal("100.00"));
+        Assert.assertEquals(dataRows.get(2).getCell("tax26411_03").getNumericValue(), new BigDecimal("0.01"));
+        Assert.assertEquals(dataRows.get(2).getCell("rate7").getNumericValue(), new BigDecimal("100.00"));
+        Assert.assertEquals(dataRows.get(2).getCell("tax26411_13").getNumericValue(), new BigDecimal("0.01"));
+        Assert.assertEquals(dataRows.get(2).getCell("rate9").getNumericValue(), new BigDecimal("100.00"));
+        Assert.assertEquals(dataRows.get(2).getCell("tax26411_12").getNumericValue(), new BigDecimal("0.01"));
+        Assert.assertEquals(dataRows.get(2).getCell("rate11").getNumericValue(), new BigDecimal("100.00"));
+        Assert.assertEquals(dataRows.get(2).getCell("tax26412").getNumericValue(), new BigDecimal("1.11"));
+        Assert.assertEquals(dataRows.get(2).getCell("rate13").getNumericValue(), new BigDecimal("100.00"));
+        Assert.assertEquals(dataRows.get(2).getCell("tax26410_09").getNumericValue(), new BigDecimal("0.01"));
+        Assert.assertEquals(dataRows.get(2).getCell("rate15").getNumericValue(), new BigDecimal("100.00"));
+        Assert.assertEquals(dataRows.get(2).getCell("sum").getNumericValue(), new BigDecimal("1.25"));
+        Assert.assertEquals(dataRows.get(2).getCell("rate").getNumericValue(), new BigDecimal("100.00"));
+
         checkLogger();
     }
 
     @Test
     public void importExcelTest() {
-        int expected = 3; // в файле 3 строки
+        int expected = 4; // в файле 4 строки
         testHelper.setImportFileInputStream(getImportXlsInputStream());
         testHelper.execute(FormDataEvent.IMPORT);
         List<DataRow<Cell>> dataRows = testHelper.getDataRowHelper().getAll();
         Assert.assertEquals(expected, dataRows.size());
 
-        Assert.assertEquals(dataRows.get(0).getCell("parentTB").getNumericValue(), new BigDecimal(113));
-        Assert.assertEquals(dataRows.get(0).getCell("department").getNumericValue(), new BigDecimal(1));
+        Assert.assertEquals(dataRows.get(0).getCell("department").getNumericValue(), new BigDecimal(4));
         Assert.assertEquals(dataRows.get(0).getCell("tax26411_01").getNumericValue(), new BigDecimal("0.00"));
         Assert.assertEquals(dataRows.get(0).getCell("tax26411_02").getNumericValue(), new BigDecimal("0.00"));
         Assert.assertEquals(dataRows.get(0).getCell("sum34").getNumericValue(), new BigDecimal("0.00"));
         Assert.assertEquals(dataRows.get(0).getCell("rate5").getNumericValue(), new BigDecimal("0.00"));
         Assert.assertEquals(dataRows.get(0).getCell("tax26411_03").getNumericValue(), new BigDecimal("0.00"));
         Assert.assertEquals(dataRows.get(0).getCell("rate7").getNumericValue(), new BigDecimal("0.00"));
-        Assert.assertEquals(dataRows.get(0).getCell("tax26411_13").getNumericValue(), new BigDecimal("2.00"));
-        Assert.assertEquals(dataRows.get(0).getCell("rate9").getNumericValue(), new BigDecimal("50.00"));
+        Assert.assertEquals(dataRows.get(0).getCell("tax26411_13").getNumericValue(), new BigDecimal("0.00"));
+        Assert.assertEquals(dataRows.get(0).getCell("rate9").getNumericValue(), new BigDecimal("0.00"));
         Assert.assertEquals(dataRows.get(0).getCell("tax26411_12").getNumericValue(), new BigDecimal("0.00"));
         Assert.assertEquals(dataRows.get(0).getCell("rate11").getNumericValue(), new BigDecimal("0.00"));
-        Assert.assertEquals(dataRows.get(0).getCell("tax26412").getNumericValue(), new BigDecimal("4.00"));
-        Assert.assertEquals(dataRows.get(0).getCell("rate13").getNumericValue(), new BigDecimal("50.00"));
+        Assert.assertEquals(dataRows.get(0).getCell("tax26412").getNumericValue(), new BigDecimal("0.00"));
+        Assert.assertEquals(dataRows.get(0).getCell("rate13").getNumericValue(), new BigDecimal("0.00"));
         Assert.assertEquals(dataRows.get(0).getCell("tax26410_09").getNumericValue(), new BigDecimal("0.00"));
         Assert.assertEquals(dataRows.get(0).getCell("rate15").getNumericValue(), new BigDecimal("0.00"));
-        Assert.assertEquals(dataRows.get(0).getCell("sum").getNumericValue(), new BigDecimal("6.00"));
-        Assert.assertEquals(dataRows.get(0).getCell("rate").getNumericValue(), new BigDecimal("25.00"));
+        Assert.assertEquals(dataRows.get(0).getCell("sum").getNumericValue(), new BigDecimal("0.00"));
+        Assert.assertEquals(dataRows.get(0).getCell("rate").getNumericValue(), new BigDecimal("0.00"));
 
-        Assert.assertEquals(dataRows.get(1).getCell("parentTB").getNumericValue(), new BigDecimal(113));
-        Assert.assertEquals(dataRows.get(1).getCell("department").getNumericValue(), new BigDecimal(2));
-        Assert.assertEquals(dataRows.get(1).getCell("tax26411_01").getNumericValue(), new BigDecimal("1.00"));
-        Assert.assertEquals(dataRows.get(1).getCell("tax26411_02").getNumericValue(), new BigDecimal("2.00"));
-        Assert.assertEquals(dataRows.get(1).getCell("sum34").getNumericValue(), new BigDecimal("3.00"));
+        Assert.assertEquals(dataRows.get(1).getCell("department").getNumericValue(), new BigDecimal(113));
+        Assert.assertEquals(dataRows.get(1).getCell("tax26411_01").getNumericValue(), new BigDecimal("600000.00"));
+        Assert.assertEquals(dataRows.get(1).getCell("tax26411_02").getNumericValue(), new BigDecimal("600000.00"));
+        Assert.assertEquals(dataRows.get(1).getCell("sum34").getNumericValue(), new BigDecimal("1200000.00"));
         Assert.assertEquals(dataRows.get(1).getCell("rate5").getNumericValue(), new BigDecimal("100.00"));
-        Assert.assertEquals(dataRows.get(1).getCell("tax26411_03").getNumericValue(), new BigDecimal("1.00"));
+        Assert.assertEquals(dataRows.get(1).getCell("tax26411_03").getNumericValue(), new BigDecimal("600000.00"));
         Assert.assertEquals(dataRows.get(1).getCell("rate7").getNumericValue(), new BigDecimal("100.00"));
-        Assert.assertEquals(dataRows.get(1).getCell("tax26411_13").getNumericValue(), new BigDecimal("2.00"));
-        Assert.assertEquals(dataRows.get(1).getCell("rate9").getNumericValue(), new BigDecimal("50.00"));
-        Assert.assertEquals(dataRows.get(1).getCell("tax26411_12").getNumericValue(), new BigDecimal("3.00"));
+        Assert.assertEquals(dataRows.get(1).getCell("tax26411_13").getNumericValue(), new BigDecimal("600000.00"));
+        Assert.assertEquals(dataRows.get(1).getCell("rate9").getNumericValue(), new BigDecimal("100.00"));
+        Assert.assertEquals(dataRows.get(1).getCell("tax26411_12").getNumericValue(), new BigDecimal("600000.00"));
         Assert.assertEquals(dataRows.get(1).getCell("rate11").getNumericValue(), new BigDecimal("100.00"));
-        Assert.assertEquals(dataRows.get(1).getCell("tax26412").getNumericValue(), new BigDecimal("4.00"));
-        Assert.assertEquals(dataRows.get(1).getCell("rate13").getNumericValue(), new BigDecimal("50.00"));
-        Assert.assertEquals(dataRows.get(1).getCell("tax26410_09").getNumericValue(), new BigDecimal("5.00"));
+        Assert.assertEquals(dataRows.get(1).getCell("tax26412").getNumericValue(), new BigDecimal("600000.00"));
+        Assert.assertEquals(dataRows.get(1).getCell("rate13").getNumericValue(), new BigDecimal("100.00"));
+        Assert.assertEquals(dataRows.get(1).getCell("tax26410_09").getNumericValue(), new BigDecimal("600000.00"));
         Assert.assertEquals(dataRows.get(1).getCell("rate15").getNumericValue(), new BigDecimal("100.00"));
-        Assert.assertEquals(dataRows.get(1).getCell("sum").getNumericValue(), new BigDecimal("18.00"));
-        Assert.assertEquals(dataRows.get(1).getCell("rate").getNumericValue(), new BigDecimal("75.00"));
+        Assert.assertEquals(dataRows.get(1).getCell("sum").getNumericValue(), new BigDecimal("5400000.00"));
 
-        Assert.assertEquals(dataRows.get(2).getCell("tax26411_01").getNumericValue(), new BigDecimal("1.00"));
-        Assert.assertEquals(dataRows.get(2).getCell("tax26411_02").getNumericValue(), new BigDecimal("2.00"));
-        Assert.assertEquals(dataRows.get(2).getCell("sum34").getNumericValue(), new BigDecimal("3.00"));
-        Assert.assertEquals(dataRows.get(2).getCell("rate5").getNumericValue(), new BigDecimal("100.00"));
-        Assert.assertEquals(dataRows.get(2).getCell("tax26411_03").getNumericValue(), new BigDecimal("1.00"));
-        Assert.assertEquals(dataRows.get(2).getCell("rate7").getNumericValue(), new BigDecimal("100.00"));
-        Assert.assertEquals(dataRows.get(2).getCell("tax26411_13").getNumericValue(), new BigDecimal("4.00"));
-        Assert.assertEquals(dataRows.get(2).getCell("rate9").getNumericValue(), new BigDecimal("100.00"));
-        Assert.assertEquals(dataRows.get(2).getCell("tax26411_12").getNumericValue(), new BigDecimal("3.00"));
-        Assert.assertEquals(dataRows.get(2).getCell("rate11").getNumericValue(), new BigDecimal("100.00"));
-        Assert.assertEquals(dataRows.get(2).getCell("tax26412").getNumericValue(), new BigDecimal("8.00"));
-        Assert.assertEquals(dataRows.get(2).getCell("rate13").getNumericValue(), new BigDecimal("100.00"));
-        Assert.assertEquals(dataRows.get(2).getCell("tax26410_09").getNumericValue(), new BigDecimal("5.00"));
-        Assert.assertEquals(dataRows.get(2).getCell("rate15").getNumericValue(), new BigDecimal("100.00"));
-        Assert.assertEquals(dataRows.get(2).getCell("sum").getNumericValue(), new BigDecimal("24.00"));
-        Assert.assertEquals(dataRows.get(2).getCell("rate").getNumericValue(), new BigDecimal("100.00"));
+        Assert.assertEquals(dataRows.get(2).getCell("department").getNumericValue(), new BigDecimal(113));
+        Assert.assertEquals(dataRows.get(2).getCell("tax26411_01").getNumericValue(), new BigDecimal("0.00"));
+        Assert.assertEquals(dataRows.get(2).getCell("tax26411_02").getNumericValue(), new BigDecimal("0.00"));
+        Assert.assertEquals(dataRows.get(2).getCell("sum34").getNumericValue(), new BigDecimal("0.00"));
+        Assert.assertEquals(dataRows.get(2).getCell("rate5").getNumericValue(), new BigDecimal("0.00"));
+        Assert.assertEquals(dataRows.get(2).getCell("tax26411_03").getNumericValue(), new BigDecimal("0.00"));
+        Assert.assertEquals(dataRows.get(2).getCell("rate7").getNumericValue(), new BigDecimal("0.00"));
+        Assert.assertEquals(dataRows.get(2).getCell("tax26411_13").getNumericValue(), new BigDecimal("0.00"));
+        Assert.assertEquals(dataRows.get(2).getCell("rate9").getNumericValue(), new BigDecimal("0.00"));
+        Assert.assertEquals(dataRows.get(2).getCell("tax26411_12").getNumericValue(), new BigDecimal("0.00"));
+        Assert.assertEquals(dataRows.get(2).getCell("rate11").getNumericValue(), new BigDecimal("0.00"));
+        Assert.assertEquals(dataRows.get(2).getCell("tax26412").getNumericValue(), new BigDecimal("0.00"));
+        Assert.assertEquals(dataRows.get(2).getCell("rate13").getNumericValue(), new BigDecimal("0.00"));
+        Assert.assertEquals(dataRows.get(2).getCell("tax26410_09").getNumericValue(), new BigDecimal("0.00"));
+        Assert.assertEquals(dataRows.get(2).getCell("rate15").getNumericValue(), new BigDecimal("0.00"));
+        Assert.assertEquals(dataRows.get(2).getCell("sum").getNumericValue(), new BigDecimal("0.00"));
+        Assert.assertEquals(dataRows.get(2).getCell("rate").getNumericValue(), new BigDecimal("0.00"));
+
+        Assert.assertEquals(dataRows.get(3).getCell("tax26411_01").getNumericValue(), new BigDecimal("600000.00"));
+        Assert.assertEquals(dataRows.get(3).getCell("tax26411_02").getNumericValue(), new BigDecimal("600000.00"));
+        Assert.assertEquals(dataRows.get(3).getCell("sum34").getNumericValue(), new BigDecimal("1200000.00"));
+        Assert.assertEquals(dataRows.get(3).getCell("rate5").getNumericValue(), new BigDecimal("100.00"));
+        Assert.assertEquals(dataRows.get(3).getCell("tax26411_03").getNumericValue(), new BigDecimal("600000.00"));
+        Assert.assertEquals(dataRows.get(3).getCell("rate7").getNumericValue(), new BigDecimal("100.00"));
+        Assert.assertEquals(dataRows.get(3).getCell("tax26411_13").getNumericValue(), new BigDecimal("600000.00"));
+        Assert.assertEquals(dataRows.get(3).getCell("rate9").getNumericValue(), new BigDecimal("100.00"));
+        Assert.assertEquals(dataRows.get(3).getCell("tax26411_12").getNumericValue(), new BigDecimal("600000.00"));
+        Assert.assertEquals(dataRows.get(3).getCell("rate11").getNumericValue(), new BigDecimal("100.00"));
+        Assert.assertEquals(dataRows.get(3).getCell("tax26412").getNumericValue(), new BigDecimal("600000.00"));
+        Assert.assertEquals(dataRows.get(3).getCell("rate13").getNumericValue(), new BigDecimal("100.00"));
+        Assert.assertEquals(dataRows.get(3).getCell("tax26410_09").getNumericValue(), new BigDecimal("600000.00"));
+        Assert.assertEquals(dataRows.get(3).getCell("rate15").getNumericValue(), new BigDecimal("100.00"));
+        Assert.assertEquals(dataRows.get(3).getCell("sum").getNumericValue(), new BigDecimal("5400000.00"));
+        Assert.assertEquals(dataRows.get(3).getCell("rate").getNumericValue(), new BigDecimal("100.00"));
 
         checkLogger();
     }

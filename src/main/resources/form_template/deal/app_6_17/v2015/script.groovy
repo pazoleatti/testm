@@ -183,6 +183,7 @@ void logicCheck() {
             boolean comparePrice = row.price && row.price != sum
             boolean compareCost = row.cost && row.cost != sum
             if (comparePrice && compareCost) {
+                msg = (row.income != null) ? getColumnName(row, 'income') : getColumnName(row, 'outcome')
                 String msg1 = getColumnName(row, 'price')
                 String msg2 = getColumnName(row, 'cost')
                 logger.error("Строка $rowNum: Значение графы «$msg1» и графы «$msg2» должно быть равно значению графы «$msg»!")
@@ -217,6 +218,7 @@ void logicCheck() {
         if (row.docDate) {
             checkDateValid(logger, row, 'docDate', row.docDate, true)
         }
+    }
 
         // 9. Проверка наличия всех фиксированных строк «Итого по ЮЛ»
         // 10. Проверка отсутствия лишних фиксированных строк «Итого по ЮЛ»
@@ -227,7 +229,7 @@ void logicCheck() {
         if (dataRows.find { it.getAlias() == 'total' }) {
             checkTotalSum(dataRows, totalColumns, logger, true)
         }
-    }
+
 }
 // Алгоритмы заполнения полей формы
 void calc() {

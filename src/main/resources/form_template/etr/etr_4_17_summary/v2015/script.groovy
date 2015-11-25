@@ -1,14 +1,16 @@
-package form_template.etr.etr_4_17.v2015
+package form_template.etr.etr_4_17_summary.v2015
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
+import com.aplana.sbrf.taxaccounting.model.DepartmentType
+import com.aplana.sbrf.taxaccounting.model.WorkflowState
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
-import com.aplana.sbrf.taxaccounting.model.script.range.ColumnRange
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
+import com.aplana.sbrf.taxaccounting.model.script.range.ColumnRange
 import groovy.transform.Field
 
 /**
- * Аналитический отчет «Сведения о начисленных и уплачиваемых налогах, сборах и взносах, отнесенных на расходы» (ЦА)
- * formTemplateId = 717
+ * Аналитический отчет «Сведения о начисленных и уплачиваемых налогах, сборах и взносах, отнесенных на расходы» (Банк)
+ * formTemplateId = 7170
  *
  * @author LHaziev
  *
@@ -43,6 +45,8 @@ switch (formDataEvent) {
     case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED: // Принять из "Подготовлена"
     case FormDataEvent.MOVE_APPROVED_TO_ACCEPTED: // Принять из "Утверждена"
         preCalcCheck()
+        if (logger.containsLevel(LogLevel.ERROR))
+            return
         logicCheck()
         break
     case FormDataEvent.IMPORT:
@@ -57,7 +61,7 @@ def editableColumns = ['department']
 
 // Автозаполняемые атрибуты
 @Field
-def autoFillColumns = ['parentTB', 'tax26411_01', 'tax26411_02', 'sum34', 'rate5', 'tax26411_03', 'rate7', 'tax26411_13', 'rate9', 'tax26411_12', 'rate11', 'tax26412', 'rate13', 'tax26410_09', 'rate15', 'sum', 'rate']
+def autoFillColumns = ['tax26411_01', 'tax26411_02', 'sum34', 'rate5', 'tax26411_03', 'rate7', 'tax26411_13', 'rate9', 'tax26411_12', 'rate11', 'tax26412', 'rate13', 'tax26410_09', 'rate15', 'sum', 'rate']
 
 // Атрибуты по которым рассчитываются итоги(не включая проценты)
 @Field
@@ -104,6 +108,25 @@ def getReportPeriod(int reportPeriodId) {
     }
     return periodMap[reportPeriodId]
 }
+@Field
+def startDateMap = [:]
+
+@Field
+def endDateMap = [:]
+
+def getStartDate(int reportPeriodId) {
+    if (startDateMap[reportPeriodId] == null) {
+        startDateMap[reportPeriodId] = reportPeriodService.getStartDate(reportPeriodId)?.time
+    }
+    return startDateMap[reportPeriodId]
+}
+
+def getEndDate(int reportPeriodId) {
+    if (endDateMap[reportPeriodId] == null) {
+        endDateMap[reportPeriodId] = reportPeriodService.getEndDate(reportPeriodId)?.time
+    }
+    return endDateMap[reportPeriodId]
+}
 
 @Field
 def endDateBOMap = [:]
@@ -142,16 +165,6 @@ def getEndDate(def year, def order) {
 }
 
 @Field
-def reportPeriodEndDate
-
-def getEndDate(int reportPeriodId) {
-    if (reportPeriodEndDate == null) {
-        reportPeriodEndDate = reportPeriodService.getEndDate(reportPeriodId)?.time
-    }
-    return reportPeriodEndDate
-}
-
-@Field
 def periodNameBOMap = [:]
 
 /* Получить название периода БО по дате. */
@@ -163,23 +176,29 @@ def getPeriodNameBO(def date) {
 }
 
 @Field
-def parentTBMap = [:]
+def departmentManagementMap = [:]
+
+def getDepartmentManagement(def depId) {
+    if (depId != null && departmentManagementMap[depId] == null) {
+        def children = departmentService.getAllChildren(depId)
+        for(def child: children) {
+            if (child.type == DepartmentType.MANAGEMENT) {
+                departmentManagementMap[depId] = child
+                return child
+            }
+        }
+    }
+    return departmentManagementMap[depId]
+}
 
 @Field
 def departmentMap = [:]
 
-def getParentTBId(def id) {
-    if (id != null && parentTBMap[id] == null) {
-        parentTBMap[id] = departmentService.getParentTBId(id)
+def getDepartment(Integer depId) {
+    if (depId != null && departmentMap[depId] == null) {
+        departmentMap[depId] = departmentService.get(depId)
     }
-    return parentTBMap[id]
-}
-
-def getDepartment(Integer id) {
-    if (id != null && departmentMap[id] == null) {
-        departmentMap[id] = departmentService.get(id)
-    }
-    return departmentMap[id]
+    return departmentMap[depId]
 }
 
 void checkOpuCodes(def department, def date) {
@@ -235,14 +254,20 @@ void preCalcCheck() {
             continue
 
         if (row.department != null) {
-            def parentTB = getParentTBId(row.department.intValue())
-            if (parentTB == 113) {
-                if (!formData.accruing && reportPeriod.order != 1) {
-                    checkOpuCodes(getDepartment(row.department.intValue()), prevDate)
+            def department = getDepartment(row.department.intValue())
+            if (department.type == DepartmentType.TERR_BANK) {
+                def management = getDepartmentManagement(row.department.intValue())
+                if (management == null) {
+                    logger.error("Строка %s: Графа «%s»: для подразделения «%s» не найдено дочернее подразделение с типом «Управление».",
+                            row.getIndex(), getColumnName(row, 'department'), department.getName())
+                } else {
+                    if (!formData.accruing && reportPeriod.order != 1) {
+                        checkOpuCodes(management, prevDate)
+                    }
+                    checkOpuCodes(management, date)
                 }
-                checkOpuCodes(getDepartment(row.department.intValue()), date)
             } else {
-                logger.error("Строка %s: Графа «%s»: Выбранное подразделение не является дочерним подразделением для ЦА!",
+                logger.error("Строка %s: Графа «%s»: выполнение расчета невозможно, так как выбранный тип подразделения не соответствует значению «Территориальный банк». Необходимо выбрать подразделение с типом «Территориальный банк».",
                         row.getIndex(), getColumnName(row, 'department'))
             }
         } else {
@@ -261,7 +286,7 @@ def get102(def departmentId, def date) {
     }
     return [records.collect{
         def record = [:]
-        record[it.OPU_CODE.stringValue] = it.TOTAL_SUM.numberValue / 1000
+        record[it.OPU_CODE.stringValue] = it.TOTAL_SUM.numberValue / 1000000
         return record
     }.sum(), true]
 }
@@ -284,6 +309,40 @@ def calcBO(def departmentId) {
     return result
 }
 
+void calcCARow(def caRow) {
+    def sourceFormTypeId = 717
+    totalColumns.each { k ->
+        caRow[k] = 0
+    }
+    departmentFormTypeService.getFormSources(formData.departmentId, formData.formType.id, formData.kind,
+            getStartDate(formData.reportPeriodId), getEndDate(formData.reportPeriodId)).each {
+        if (it.formTypeId == sourceFormTypeId) {
+            def accruing = formData.accruing
+            // в первом квартале нельзя создать форму с признаком нарастающим итогом
+            if (getReportPeriod(formData.reportPeriodId).order == 1)
+                accruing = false
+
+            def source = formDataService.getLast(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId, formData.periodOrder, formData.comparativePeriodId, accruing)
+            if (source != null && source.state == WorkflowState.ACCEPTED) {
+                def dataRowsETR_17 = formDataService.getDataRowHelper(source).allCached
+                def totalRow_17 = getDataRow(dataRowsETR_17, 'total')
+                totalColumns.each { k ->
+                    caRow[k] = totalRow_17[k] / 1000
+                }
+            }
+        }
+    }
+}
+
+void calcTotal(def dataRows, def totalRow) {
+    totalColumns.each { alias ->
+        totalRow[alias] = dataRows.size() > 1 ? summ(formData, dataRows, new ColumnRange(alias, 0, dataRows.size() - 2)) : 0
+        def rateAlias = rateMap.find{ it.value==alias }?.key
+        if (rateAlias)
+            totalRow[rateAlias] = totalRow[alias] > 0 ? 100 : 0
+    }
+}
+
 void calc() {
     def dataRows = formDataService.getDataRowHelper(formData).allCached
     // получение данных из БО
@@ -291,28 +350,27 @@ void calc() {
         if (row.getAlias())
             continue
 
-        row.parentTB = row.department ? getParentTBId(row.department.intValue()) : null
-        def records = calcBO(row.department?.intValue())
+        def management = getDepartmentManagement(row.department?.intValue())
+        def records = calcBO(management?.getId())
         opuMap.each { k, v ->
-            row[k] = records[k]
+            row[k] = records[k] ? records[k] : 0
         }
         row.sum34 = row.tax26411_01 + row.tax26411_02
         row.sum = row.sum34 + row.tax26411_03 + row.tax26411_13 + row.tax26411_12 +
                 row.tax26412 + row.tax26410_09
     }
 
+    // расчет по ЦА
+    def caRow = getDataRow(dataRows, 'ca{wan}')
+    calcCARow(caRow)
+
     // расчет итоговой строки
     def totalRow = getDataRow(dataRows, 'total')
-    totalColumns.each { alias ->
-        totalRow[alias] = dataRows.size() > 1 ? summ(formData, dataRows, new ColumnRange(alias, 0, dataRows.size() - 2)) : 0
-        def rateAlias = rateMap.find{ it.value==alias }?.key
-        if (rateAlias)
-            totalRow[rateAlias] = totalRow[alias] > 0 ? 100 : 0
-    }
+    calcTotal(dataRows, getDataRow(dataRows, 'total'))
 
     // расчет процентов
     for(def row : dataRows) {
-        if (row.getAlias())
+        if (row.getAlias() && row.getAlias() != 'ca{wan}')
             continue
 
         rateMap.each { k, v ->
@@ -320,9 +378,13 @@ void calc() {
         }
     }
 
+    dataRows.remove(caRow)
     dataRows.remove(totalRow)
     dataRows.sort { getDepartment(it.department?.intValue())?.name }
+    dataRows.add(caRow)
     dataRows.add(totalRow)
+
+    updateIndexes(dataRows)
 }
 
 def calcRate(def row, def totalRow, def alias, def resultAlias) {
@@ -342,15 +404,24 @@ def calcRate(def row, def totalRow, def alias, def resultAlias) {
 
 void logicCheck() {
     def dataRows = formDataService.getDataRowHelper(formData).allCached
+    def calcTotalRow = formData.createDataRow()
+    totalColumns.each{
+        calcTotalRow[it] = 0
+    }
+
+    // проверка нефиксированных строк
     for(def row : dataRows) {
         if (row.getAlias())
             continue
         checkNonEmptyColumns(row, row.getIndex(), nonEmptyColumns, logger, true)
 
-        def needValue = formData.createDataRow()
-        needValue.parentTB = row.department ? getParentTBId(row.department.intValue()) : null
+        totalColumns.each{
+            calcTotalRow[it] += row[it]?:0
+        }
 
-        def records = calcBO(row.department?.intValue())
+        def needValue = formData.createDataRow()
+        def management = getDepartmentManagement(row.department?.intValue())
+        def records = calcBO(management?.getId())
         opuMap.each { k, v ->
             needValue[k] = records[k]
         }
@@ -359,7 +430,17 @@ void logicCheck() {
                 needValue.tax26412 + needValue.tax26410_09
         checkCalc(row, totalColumns, needValue, logger, true)
     }
-    checkTotalSum(dataRows, totalColumns, logger, true)
+
+    // проверка ЦА
+    def calcСАRow = formData.createDataRow()
+    calcCARow(calcСАRow)
+    totalColumns.each{
+        calcTotalRow[it] += calcСАRow[it]?:0
+    }
+    checkCalc(getDataRow(dataRows, 'ca{wan}'), totalColumns, calcСАRow, logger, true)
+
+    // проверка итоговой строки
+    checkCalc(getDataRow(dataRows, 'total'), totalColumns, calcTotalRow, logger, true)
 }
 
 // Поиск записи в справочнике по значению (для импорта)
@@ -374,7 +455,7 @@ def getRecordIdImport(def Long refBookId, def String alias, def String value, de
 
 void importData() {
     def tmpRow = formData.createDataRow()
-    int COLUMN_COUNT = 20
+    int COLUMN_COUNT = 19
     int HEADER_ROW_COUNT = 4
     String TABLE_START_VALUE = getColumnName(tmpRow, 'rowNum')
     String TABLE_END_VALUE = null
@@ -417,13 +498,28 @@ void importData() {
         }
         // Пропуск итоговых строк
         if (rowValues[INDEX_FOR_SKIP] == "ИТОГО") {
-            totalRowFromFile = getNewRowFromXls(rowValues, colOffset, fileRowIndex, rowIndex, true)
+            def newRow = formData.createStoreMessagingDataRow()
+            totalRowFromFile = getNewRowFromXls(rowValues, newRow, colOffset, fileRowIndex, rowIndex, true)
             allValues.remove(rowValues)
             rowValues.clear()
-            continue
+            // делаем предыдущую строку ЦА
+            if (i > 1) {
+                def caRow = rows[i - 1]
+                if (caRow.department == 113) {
+                    caRow.setAlias('ca{wan}')
+                    editableColumns.each {
+                        caRow.getCell(it).editable = false
+                        caRow.getCell(it).setStyleAlias(null)
+                    }
+                } else {
+                    throw new ServiceException("Нет строки «Центральный аппарат»")
+                }
+            } else {
+                throw new ServiceException("Нет строки «Центральный аппарат»")
+            }
+            break
         }
-        // простая строка
-        def newRow = getNewRowFromXls(rowValues, colOffset, fileRowIndex, rowIndex)
+        def newRow = getNewRowFromXls(rowValues, formData.createStoreMessagingDataRow(), colOffset, fileRowIndex, rowIndex)
         rows.add(newRow)
         // освободить ненужные данные - иначе не хватит памяти
         allValues.remove(rowValues)
@@ -438,8 +534,17 @@ void importData() {
     def totalRow = getDataRow(templateRows, 'total')
     rows.add(totalRow)
     updateIndexes(rows)
+
     // сравнение итогов
-    compareSimpleTotalValues(totalRow, totalRowFromFile, rows, allTotalColumns, formData, logger, false)
+    def totalRowTmp = formData.createStoreMessagingDataRow()
+    calcTotal(rows, totalRowTmp)
+    totalRow.setImportIndex(totalRowFromFile.getImportIndex());
+    for (String column : allTotalColumns) {
+        totalRow.getCell(column).setValue(totalRowFromFile.getCell(column).getValue(), totalRow.getIndex());
+    }
+    compareTotalValues(totalRow, totalRowTmp, allTotalColumns, logger, false);
+
+    //compareSimpleTotalValues(totalRow, totalRowFromFile, rows, allTotalColumns, formData, logger, false)
 
     showMessages(rows, logger)
     if (!logger.containsLevel(LogLevel.ERROR)) {
@@ -465,69 +570,67 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
     def headerMapping = []
     [
             [i: 0, j:0, alias: 'fix'],
-            [i: 0, j:2, alias: 'parentTB'],
-            [i: 0, j:3, alias: 'department'],
-            [i: 0, j:4, alias: 'tax26411_01'],
-            [i: 0, j:8, alias: 'tax26411_03'],
-            [i: 0, j:10, alias: 'tax26411_13'],
-            [i: 0, j:12, alias: 'tax26411_12'],
-            [i: 0, j:14, alias: 'tax26412'],
-            [i: 0, j:16, alias: 'tax26410_09'],
-            [i: 0, j:18, alias: 'sum'],
+            [i: 0, j:2, alias: 'department'],
+            [i: 0, j:3, alias: 'tax26411_01'],
+            [i: 0, j:7, alias: 'tax26411_03'],
+            [i: 0, j:9, alias: 'tax26411_13'],
+            [i: 0, j:11, alias: 'tax26411_12'],
+            [i: 0, j:13, alias: 'tax26412'],
+            [i: 0, j:15, alias: 'tax26410_09'],
+            [i: 0, j:17, alias: 'sum'],
 
-            [i: 1, j:4, alias: 'tax26411_01'],
-            [i: 1, j:5, alias: 'tax26411_02'],
-            [i: 1, j:6, alias: 'sum34'],
-            [i: 1, j:7, alias: 'rate5'],
-            [i: 1, j:8, alias: 'tax26411_03'],
-            [i: 1, j:9, alias: 'rate7'],
-            [i: 1, j:10, alias: 'tax26411_13'],
-            [i: 1, j:11, alias: 'rate9'],
-            [i: 1, j:12, alias: 'tax26411_12'],
-            [i: 1, j:13, alias: 'rate11'],
-            [i: 1, j:14, alias: 'tax26412'],
-            [i: 1, j:15, alias: 'rate13'],
-            [i: 1, j:16, alias: 'tax26410_09'],
-            [i: 1, j:17, alias: 'rate15'],
-            [i: 1, j:18, alias: 'sum'],
-            [i: 1, j:19, alias: 'rate'],
+            [i: 1, j:3, alias: 'tax26411_01'],
+            [i: 1, j:4, alias: 'tax26411_02'],
+            [i: 1, j:5, alias: 'sum34'],
+            [i: 1, j:6, alias: 'rate5'],
+            [i: 1, j:7, alias: 'tax26411_03'],
+            [i: 1, j:8, alias: 'rate7'],
+            [i: 1, j:9, alias: 'tax26411_13'],
+            [i: 1, j:10, alias: 'rate9'],
+            [i: 1, j:11, alias: 'tax26411_12'],
+            [i: 1, j:12, alias: 'rate11'],
+            [i: 1, j:13, alias: 'tax26412'],
+            [i: 1, j:14, alias: 'rate13'],
+            [i: 1, j:15, alias: 'tax26410_09'],
+            [i: 1, j:16, alias: 'rate15'],
+            [i: 1, j:17, alias: 'sum'],
+            [i: 1, j:18, alias: 'rate'],
 
-            [i: 2, j:4, alias: 'tax26411_01'],
-            [i: 2, j:5, alias: 'tax26411_02'],
-            [i: 2, j:6, alias: 'sum34'],
-            [i: 2, j:7, alias: 'rate5'],
-            [i: 2, j:8, alias: 'tax26411_03'],
-            [i: 2, j:9, alias: 'rate7'],
-            [i: 2, j:10, alias: 'tax26411_13'],
-            [i: 2, j:11, alias: 'rate9'],
-            [i: 2, j:12, alias: 'tax26411_12'],
-            [i: 2, j:13, alias: 'rate11'],
-            [i: 2, j:14, alias: 'tax26412'],
-            [i: 2, j:15, alias: 'rate13'],
-            [i: 2, j:16, alias: 'tax26410_09'],
-            [i: 2, j:17, alias: 'rate15'],
-            [i: 2, j:18, alias: 'sum'],
-            [i: 2, j:19, alias: 'rate'],
+            [i: 2, j:3, alias: 'tax26411_01'],
+            [i: 2, j:4, alias: 'tax26411_02'],
+            [i: 2, j:5, alias: 'sum34'],
+            [i: 2, j:6, alias: 'rate5'],
+            [i: 2, j:7, alias: 'tax26411_03'],
+            [i: 2, j:8, alias: 'rate7'],
+            [i: 2, j:9, alias: 'tax26411_13'],
+            [i: 2, j:10, alias: 'rate9'],
+            [i: 2, j:11, alias: 'tax26411_12'],
+            [i: 2, j:12, alias: 'rate11'],
+            [i: 2, j:13, alias: 'tax26412'],
+            [i: 2, j:14, alias: 'rate13'],
+            [i: 2, j:15, alias: 'tax26410_09'],
+            [i: 2, j:16, alias: 'rate15'],
+            [i: 2, j:17, alias: 'sum'],
+            [i: 2, j:18, alias: 'rate'],
 
             [i: 3, j:0, alias: 'fix'],
-            [i: 3, j:2, alias: 'parentTB'],
-            [i: 3, j:3, alias: 'department'],
-            [i: 3, j:4, alias: 'tax26411_01'],
-            [i: 3, j:5, alias: 'tax26411_02'],
-            [i: 3, j:6, alias: 'sum34'],
-            [i: 3, j:7, alias: 'rate5'],
-            [i: 3, j:8, alias: 'tax26411_03'],
-            [i: 3, j:9, alias: 'rate7'],
-            [i: 3, j:10, alias: 'tax26411_13'],
-            [i: 3, j:11, alias: 'rate9'],
-            [i: 3, j:12, alias: 'tax26411_12'],
-            [i: 3, j:13, alias: 'rate11'],
-            [i: 3, j:14, alias: 'tax26412'],
-            [i: 3, j:15, alias: 'rate13'],
-            [i: 3, j:16, alias: 'tax26410_09'],
-            [i: 3, j:17, alias: 'rate15'],
-            [i: 3, j:18, alias: 'sum'],
-            [i: 3, j:19, alias: 'rate']
+            [i: 3, j:2, alias: 'department'],
+            [i: 3, j:3, alias: 'tax26411_01'],
+            [i: 3, j:4, alias: 'tax26411_02'],
+            [i: 3, j:5, alias: 'sum34'],
+            [i: 3, j:6, alias: 'rate5'],
+            [i: 3, j:7, alias: 'tax26411_03'],
+            [i: 3, j:8, alias: 'rate7'],
+            [i: 3, j:9, alias: 'tax26411_13'],
+            [i: 3, j:10, alias: 'rate9'],
+            [i: 3, j:11, alias: 'tax26411_12'],
+            [i: 3, j:12, alias: 'rate11'],
+            [i: 3, j:13, alias: 'tax26412'],
+            [i: 3, j:14, alias: 'rate13'],
+            [i: 3, j:15, alias: 'tax26410_09'],
+            [i: 3, j:16, alias: 'rate15'],
+            [i: 3, j:17, alias: 'sum'],
+            [i: 3, j:18, alias: 'rate']
     ].each {
         headerMapping.add([(headerRows[it.i][it.j]): it.alias!=null?headers[it.i][it.alias]:it.value ])
     }
@@ -543,8 +646,7 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
  * @param rowIndex строка в нф
  * @param isTotal признак того что строка итоговая
  */
-def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex, def isTotal = false) {
-    def newRow = formData.createStoreMessagingDataRow()
+def getNewRowFromXls(def values, def newRow, def colOffset, def fileRowIndex, def rowIndex, def isTotal = false) {
     newRow.setIndex(rowIndex)
     newRow.setImportIndex(fileRowIndex)
 
@@ -558,14 +660,10 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex, 
         autoFillColumns.each {
             newRow.getCell(it).setStyleAlias('Автозаполняемая')
         }
-        newRow.parentTB = getRecordIdImport(30, 'NAME', values[colIndex], fileRowIndex, colIndex + colOffset, false)
-        colIndex++
         newRow.department = getRecordIdImport(30, 'NAME', values[colIndex], fileRowIndex, colIndex + colOffset, false)
-    } else {
-        colIndex++
     }
 
-    // графа 4..19
+    // графа 3..18
     allTotalColumns.each { alias ->
         colIndex++
         newRow[alias] = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)

@@ -87,13 +87,12 @@ public class App_6_17Test extends ScriptTestBase {
         SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
 
         // для попадания в ЛП:
-        // 1. Проверка на заполнение графы
-        // 2. Заполнение граф 13 и 14 (сумма дохода, расхода)
+        // 1. Проверка на заполнение граф
+        // 2. Заполнение граф 13 и 14 (сумма дохода, расхода) - оба не заполнены
         DataRow<Cell> row = formData.createDataRow();
         row.setIndex(1);
         dataRows.add(row);
         testHelper.execute(FormDataEvent.CHECK);
-
         List<LogEntry> entries = testHelper.getLogger().getEntries();
         int i = 0;
         Assert.assertEquals("Строка 1: Графа «Полное наименование юридического лица с указанием ОПФ» не заполнена!", entries.get(i++).getMessage());
@@ -111,7 +110,7 @@ public class App_6_17Test extends ScriptTestBase {
 
         // для попадания в ЛП:
         // 5. Проверка даты совершения сделки
-        // 6. Заполнение граф (сумма дохода, расхода)
+        // 6. Заполнение граф (сумма дохода, расхода) - оба заполнены
         // 8. Корректность даты (заключения) сделки
         // 11. Корректность даты совершения сделки
         // 12. Проверка диапазона дат
@@ -122,12 +121,13 @@ public class App_6_17Test extends ScriptTestBase {
         row.getCell("dealDate").setValue(sdf.parse("01.01.2990"), null);
         row.getCell("dealDoneDate").setValue(sdf.parse("01.01.2989"), null);
         row.getCell("currencyCode").setValue(1L, null);
+        row.getCell("income").setValue(1, null);
+        row.getCell("outcome").setValue(1, null);
         testHelper.execute(FormDataEvent.CHECK);
-
         entries = testHelper.getLogger().getEntries();
         i = 0;
         Assert.assertEquals("Строка 1: Графа «Код страны происхождения предмета сделки по классификатору ОКСМ» не заполнена!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Графа «Сумма расходов Банка по данным бухгалтерского учета, руб.» должна быть заполнена, если не заполнена графа «Сумма доходов Банка по данным бухгалтерского учета, руб.»!", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 1: Графа «Сумма расходов Банка по данным бухгалтерского учета, руб.» не может быть заполнена одновременно с графой «Сумма доходов Банка по данным бухгалтерского учета, руб.»!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Значение графы «Дата заключения сделки» должно быть не меньше значения графы «Дата договора»!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Значение графы «Дата совершения сделки» должно быть не меньше значения графы «Дата заключения сделки»!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Год, указанный по графе «Дата совершения сделки» (2989), должен относиться к календарному году текущей формы (2014)!", entries.get(i++).getMessage());
@@ -137,38 +137,30 @@ public class App_6_17Test extends ScriptTestBase {
         testHelper.getLogger().clear();
 
         // для попадания в ЛП:
-        // 6. Заполнение граф 13 и 14 (сумма дохода, расхода)
+        // 6. Заполнение граф 13 и 14 (сумма дохода, расхода) - валидная
+        // 8. Корректность даты (заключения) сделки - валидная
+        // 11. Корректность даты совершения сделки - валидная
+        // 12. Проверка диапазона дат - валидная
         row.getCell("name").setValue(1L, null);
         row.getCell("docNumber").setValue("string", null);
         row.getCell("docDate").setValue(sdf.parse("01.01.2014"), null);
         row.getCell("dealNumber").setValue("string", null);
         row.getCell("dealDate").setValue(sdf.parse("02.01.2014"), null);
         row.getCell("dealDoneDate").setValue(sdf.parse("04.01.2014"), null);
-        row.getCell("income").setValue(2, null);
-        row.getCell("outcome").setValue(2, null);
+        row.getCell("income").setValue(null, null);
+        row.getCell("outcome").setValue(0, null);
         row.getCell("currencyCode").setValue(1L, null);
-
-        DataRow<Cell> subTotalRow = formData.createDataRow();
-        dataRows.add(subTotalRow);
-        subTotalRow.setAlias("itg#1");
-        subTotalRow.setIndex(2);
-        subTotalRow.getCell("fix").setValue("Итого по «A»", null);
-        subTotalRow.getCell("income").setValue(2, null);
-        subTotalRow.getCell("outcome").setValue(2, null);
-
-        testHelper.execute(FormDataEvent.CHECK);
-
+        testHelper.execute(FormDataEvent.CALCULATE);
         entries = testHelper.getLogger().getEntries();
         i = 0;
         Assert.assertEquals("Строка 1: Графа «Код страны происхождения предмета сделки по классификатору ОКСМ» не заполнена!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Графа «Сумма расходов Банка по данным бухгалтерского учета, руб.» не может быть заполнена одновременно с графой «Сумма доходов Банка по данным бухгалтерского учета, руб.»!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 2: Неверное итоговое значение по группе «A» в графе «№ п/п»", entries.get(i++).getMessage());
         Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
         testHelper.getLogger().clear();
 
 
         // для попадания в ЛП:
-        // 7. Проверка положительной суммы дохода
+        // 7. Проверка положительной суммы дохода +
+        // Проверка на несоответствие строки подитога
         row.getCell("income").setValue(-1, null);
         row.getCell("outcome").setValue(null, null);
         testHelper.execute(FormDataEvent.CHECK);
@@ -176,7 +168,8 @@ public class App_6_17Test extends ScriptTestBase {
         i = 0;
         Assert.assertEquals("Строка 1: Графа «Код страны происхождения предмета сделки по классификатору ОКСМ» не заполнена!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Значение графы «Сумма доходов Банка по данным бухгалтерского учета, руб.» должно быть больше или равно «0»!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 2: Неверное итоговое значение по группе «A» в графе «№ п/п»", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 2: Неверное итоговое значение по группе «A» в графе «Сумма доходов Банка по данным бухгалтерского учета, руб.»", entries.get(i++).getMessage());
+        Assert.assertEquals("Итоговые значения рассчитаны неверно в графе «Сумма доходов Банка по данным бухгалтерского учета, руб.»!", entries.get(i++).getMessage());
         Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
         testHelper.getLogger().clear();
 
@@ -184,12 +177,11 @@ public class App_6_17Test extends ScriptTestBase {
         // 7. Проверка положительной суммы расхода
         row.getCell("income").setValue(null, null);
         row.getCell("outcome").setValue(-1, null);
-        testHelper.execute(FormDataEvent.CHECK);
+        testHelper.execute(FormDataEvent.CALCULATE);
         entries = testHelper.getLogger().getEntries();
         i = 0;
         Assert.assertEquals("Строка 1: Графа «Код страны происхождения предмета сделки по классификатору ОКСМ» не заполнена!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Значение графы «Сумма расходов Банка по данным бухгалтерского учета, руб.» должно быть больше или равно «0»!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 2: Неверное итоговое значение по группе «A» в графе «№ п/п»", entries.get(i++).getMessage());
         Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
         testHelper.getLogger().clear();
 
