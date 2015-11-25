@@ -47,7 +47,7 @@ import groovy.transform.Field
 // графа 23 - taxBenefitCode    - атрибут 19 - TAX_BENEFIT_ID - «Код налоговой льготы», справочник 7 «Параметры налоговых льгот транспортного налога»
 // графа 24 - base
 // графа 25 - version           - атрибут 2082 - MODEL - «Модель (версия)», справочник 208 «Средняя стоимость транспортных средств»
-// графа 25 - averageCost       - атрибут 2111 - NAME - «Наименование», справочник 211 «Категории средней стоимости транспортных средств»
+// графа 26 - averageCost       - атрибут 2111 - NAME - «Наименование», справочник 211 «Категории средней стоимости транспортных средств»
 
 switch (formDataEvent) {
     case FormDataEvent.CREATE:
@@ -1491,7 +1491,11 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
     return newRow
 }
 
-def getOkato(def codeOkato) {
+def getOkato(String codeOkato) {
+    if(codeOkato.length() < 3){
+        return codeOkato
+    }
+    codeOkato = codeOkato.substring(0, 3)
     switch (codeOkato) {
         case '719':
             codeOkato = '89'
