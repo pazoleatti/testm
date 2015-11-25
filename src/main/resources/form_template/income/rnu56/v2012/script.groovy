@@ -695,27 +695,27 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
     checkHeaderSize(headerRows[headerRows.size() - 1].size(), headerRows.size(), colCount, rowCount)
 
     def headerMapping = [
-            (headerRows[0][0]) : getColumnName(tmpRow, 'number'),
-            (headerRows[0][2]) : getColumnName(tmpRow, 'bill'),
-            (headerRows[0][3]) : getColumnName(tmpRow, 'buyDate'),
-            (headerRows[0][4]) : getColumnName(tmpRow, 'currency'),
-            (headerRows[0][5]) : getColumnName(tmpRow, 'nominal'),
-            (headerRows[0][6]) : getColumnName(tmpRow, 'price'),
-            (headerRows[0][7]) : getColumnName(tmpRow, 'maturity'),
-            (headerRows[0][8]) : getColumnName(tmpRow, 'termDealBill'),
-            (headerRows[0][9]) : getColumnName(tmpRow, 'percIncome'),
-            (headerRows[0][10]): getColumnName(tmpRow, 'implementationDate'),
-            (headerRows[0][11]): getColumnName(tmpRow, 'sum'),
-            (headerRows[0][12]): 'Фактически поступившая сумма дисконта',
-            (headerRows[0][14]): 'Сумма начисленного процентного дохода за отчётный период',
-            (headerRows[1][12]): 'в валюте',
-            (headerRows[1][13]): 'в рублях по курсу Банка России',
-            (headerRows[1][14]): 'в валюте',
-            (headerRows[1][15]): 'в рублях по курсу Банка России',
-            (headerRows[2][0]) : '1'
+            ([(headerRows[0][0]) : getColumnName(tmpRow, 'number')]),
+            ([(headerRows[0][2]) : getColumnName(tmpRow, 'bill')]),
+            ([(headerRows[0][3]) : getColumnName(tmpRow, 'buyDate')]),
+            ([(headerRows[0][4]) : getColumnName(tmpRow, 'currency')]),
+            ([(headerRows[0][5]) : getColumnName(tmpRow, 'nominal')]),
+            ([(headerRows[0][6]) : getColumnName(tmpRow, 'price')]),
+            ([(headerRows[0][7]) : getColumnName(tmpRow, 'maturity')]),
+            ([(headerRows[0][8]) : getColumnName(tmpRow, 'termDealBill')]),
+            ([(headerRows[0][9]) : getColumnName(tmpRow, 'percIncome')]),
+            ([(headerRows[0][10]): getColumnName(tmpRow, 'implementationDate')]),
+            ([(headerRows[0][11]): getColumnName(tmpRow, 'sum')]),
+            ([(headerRows[0][12]): 'Фактически поступившая сумма дисконта']),
+            ([(headerRows[0][14]): 'Сумма начисленного процентного дохода за отчётный период']),
+            ([(headerRows[1][12]): 'в валюте']),
+            ([(headerRows[1][13]): 'в рублях по курсу Банка России']),
+            ([(headerRows[1][14]): 'в валюте']),
+            ([(headerRows[1][15]): 'в рублях по курсу Банка России']),
+            ([(headerRows[2][0]) : '1'])
     ]
-    (2..15).each { index ->
-        headerMapping.put(headerRows[2][index], index.toString())
+    (2..15).each {
+        headerMapping.add(([(headerRows[2][it]): it.toString()]))
     }
     checkHeaderEquals(headerMapping, logger)
 }

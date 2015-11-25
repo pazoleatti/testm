@@ -748,26 +748,26 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
     checkHeaderSize(headerRows[headerRows.size() - 1].size(), headerRows.size(), colCount, rowCount)
 
     def headerMapping = [
-            (headerRows[0][0]) : getColumnName(tmpRow, 'rowNumber'),
-            (headerRows[0][2]) : getColumnName(tmpRow, 'name'),
-            (headerRows[0][3]) : getColumnName(tmpRow, 'inn'),
-            (headerRows[0][4]) : 'Договор цессии',
-            (headerRows[0][6]) : getColumnName(tmpRow, 'cost'),
-            (headerRows[0][7]) : getColumnName(tmpRow, 'repaymentDate'),
-            (headerRows[0][8]) : getColumnName(tmpRow, 'concessionsDate'),
-            (headerRows[0][9]) : getColumnName(tmpRow, 'income'),
-            (headerRows[0][10]): getColumnName(tmpRow, 'financialResult1'),
-            (headerRows[0][11]): getColumnName(tmpRow, 'currencyDebtObligation'),
-            (headerRows[0][12]): getColumnName(tmpRow, 'rateBR'),
-            (headerRows[0][13]): getColumnName(tmpRow, 'interestRate'),
-            (headerRows[0][14]): getColumnName(tmpRow, 'perc'),
-            (headerRows[0][15]): getColumnName(tmpRow, 'loss'),
-            (headerRows[1][4]) : 'Номер',
-            (headerRows[1][5]) : 'Дата',
-            (headerRows[2][0]) : '1'
+            ([(headerRows[0][0]) : getColumnName(tmpRow, 'rowNumber')]),
+            ([(headerRows[0][2]) : getColumnName(tmpRow, 'name')]),
+            ([(headerRows[0][3]) : getColumnName(tmpRow, 'inn')]),
+            ([(headerRows[0][4]) : 'Договор цессии']),
+            ([(headerRows[0][6]) : getColumnName(tmpRow, 'cost')]),
+            ([(headerRows[0][7]) : getColumnName(tmpRow, 'repaymentDate')]),
+            ([(headerRows[0][8]) : getColumnName(tmpRow, 'concessionsDate')]),
+            ([(headerRows[0][9]) : getColumnName(tmpRow, 'income')]),
+            ([(headerRows[0][10]): getColumnName(tmpRow, 'financialResult1')]),
+            ([(headerRows[0][11]): getColumnName(tmpRow, 'currencyDebtObligation')]),
+            ([(headerRows[0][12]): getColumnName(tmpRow, 'rateBR')]),
+            ([(headerRows[0][13]): getColumnName(tmpRow, 'interestRate')]),
+            ([(headerRows[0][14]): getColumnName(tmpRow, 'perc')]),
+            ([(headerRows[0][15]): getColumnName(tmpRow, 'loss')]),
+            ([(headerRows[1][4]) : 'Номер']),
+            ([(headerRows[1][5]) : 'Дата']),
+            ([(headerRows[2][0]) : '1'])
     ]
-    (2..15).each { index ->
-        headerMapping.put(headerRows[2][index], index.toString())
+    (2..15).each {
+        headerMapping.add(([(headerRows[2][it]): it.toString()]))
     }
     checkHeaderEquals(headerMapping, logger)
 }

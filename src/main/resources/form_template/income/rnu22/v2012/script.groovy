@@ -666,38 +666,38 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
     checkHeaderSize(headerRows[headerRows.size() - 1].size(), headerRows.size(), colCount, rowCount)
 
     def headerMapping = [
-            (headerRows[0][0]) : getColumnName(tmpRow, 'rowNumber'),
-            (headerRows[0][2]) : getColumnName(tmpRow, 'contractNumber'),
-            (headerRows[0][3]) : getColumnName(tmpRow, 'contractData'),
-            (headerRows[0][4]) : getColumnName(tmpRow, 'base'),
-            (headerRows[0][5]) : getColumnName(tmpRow, 'transactionDate'),
-            (headerRows[0][6]) : getColumnName(tmpRow, 'course'),
-            (headerRows[0][7]) : getColumnName(tmpRow, 'interestRate'),
-            (headerRows[0][8]) : getColumnName(tmpRow, 'basisForCalc'),
-            (headerRows[0][9]) : 'Расчётный период',
-            (headerRows[1][9]) : 'начисление',
-            (headerRows[1][11]): 'доначисление',
-            (headerRows[2][9]) : 'дата начала',
-            (headerRows[2][10]): 'дата окончания',
-            (headerRows[2][11]): 'дата начала',
-            (headerRows[2][12]): 'дата окончания',
-            (headerRows[0][13]): 'Сумма в налоговом учёте',
-            (headerRows[1][13]): 'валюта',
-            (headerRows[1][14]): 'рубли',
-            (headerRows[0][15]): 'Сумма в бухгалтерском учёте',
-            (headerRows[1][15]): 'валюта',
-            (headerRows[1][16]): 'рубли',
-            (headerRows[0][17]): 'Сумма доначисления',
-            (headerRows[1][17]): 'предыдущий квартал',
-            (headerRows[1][19]): 'отчётный квартал',
-            (headerRows[2][17]): 'валюта',
-            (headerRows[2][18]): 'рубли',
-            (headerRows[2][19]): 'валюта',
-            (headerRows[2][20]): 'рубли',
-            (headerRows[3][0]) : '1'
+            ([(headerRows[0][0]) : getColumnName(tmpRow, 'rowNumber')]),
+            ([(headerRows[0][2]) : getColumnName(tmpRow, 'contractNumber')]),
+            ([(headerRows[0][3]) : getColumnName(tmpRow, 'contractData')]),
+            ([(headerRows[0][4]) : getColumnName(tmpRow, 'base')]),
+            ([(headerRows[0][5]) : getColumnName(tmpRow, 'transactionDate')]),
+            ([(headerRows[0][6]) : getColumnName(tmpRow, 'course')]),
+            ([(headerRows[0][7]) : getColumnName(tmpRow, 'interestRate')]),
+            ([(headerRows[0][8]) : getColumnName(tmpRow, 'basisForCalc')]),
+            ([(headerRows[0][9]) : 'Расчётный период']),
+            ([(headerRows[1][9]) : 'начисление']),
+            ([(headerRows[1][11]): 'доначисление']),
+            ([(headerRows[2][9]) : 'дата начала']),
+            ([(headerRows[2][10]): 'дата окончания']),
+            ([(headerRows[2][11]): 'дата начала']),
+            ([(headerRows[2][12]): 'дата окончания']),
+            ([(headerRows[0][13]): 'Сумма в налоговом учёте']),
+            ([(headerRows[1][13]): 'валюта']),
+            ([(headerRows[1][14]): 'рубли']),
+            ([(headerRows[0][15]): 'Сумма в бухгалтерском учёте']),
+            ([(headerRows[1][15]): 'валюта']),
+            ([(headerRows[1][16]): 'рубли']),
+            ([(headerRows[0][17]): 'Сумма доначисления']),
+            ([(headerRows[1][17]): 'предыдущий квартал']),
+            ([(headerRows[1][19]): 'отчётный квартал']),
+            ([(headerRows[2][17]): 'валюта']),
+            ([(headerRows[2][18]): 'рубли']),
+            ([(headerRows[2][19]): 'валюта']),
+            ([(headerRows[2][20]): 'рубли']),
+            ([(headerRows[3][0]) : '1'])
     ]
-    (2..20).each { index ->
-        headerMapping.put((headerRows[3][index]), index.toString())
+    (2..20).each {
+        headerMapping.add(([(headerRows[3][it]): it.toString()]))
     }
     checkHeaderEquals(headerMapping, logger)
 }

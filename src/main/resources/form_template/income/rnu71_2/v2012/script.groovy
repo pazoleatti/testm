@@ -796,33 +796,33 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
     checkHeaderSize(headerRows[headerRows.size() - 1].size(), headerRows.size(), colCount, rowCount)
 
     def headerMapping = [
-            (headerRows[0][0]) : getColumnName(tmpRow, 'rowNumber'),
-            (headerRows[0][2]) : getColumnName(tmpRow, 'contragent'),
-            (headerRows[0][3]) : getColumnName(tmpRow, 'inn'),
-            (headerRows[0][4]) : 'Договор цессии',
-            (headerRows[0][6]) : getColumnName(tmpRow, 'amount'),
-            (headerRows[0][7]) : getColumnName(tmpRow, 'amountForReserve'),
-            (headerRows[0][8]) : getColumnName(tmpRow, 'repaymentDate'),
-            (headerRows[0][9]) : getColumnName(tmpRow, 'dateOfAssignment'),
-            (headerRows[0][10]): getColumnName(tmpRow, 'income'),
-            (headerRows[0][11]): getColumnName(tmpRow, 'result'),
-            (headerRows[0][12]): getColumnName(tmpRow, 'part2Date'),
-            (headerRows[0][13]): 'Убыток, относящийся к расходам',
-            (headerRows[0][16]): getColumnName(tmpRow, 'taxClaimPrice'),
-            (headerRows[0][17]): getColumnName(tmpRow, 'finResult'),
-            (headerRows[0][18]): 'Корректировка финансового результата в отношении убытка, относящегося',
-            (headerRows[1][4]) : 'Номер',
-            (headerRows[1][5]) : 'Дата',
-            (headerRows[1][13]): 'текущего квартала',
-            (headerRows[1][14]): 'следующего квартала',
-            (headerRows[1][15]): 'текущего отчётного (налогового) периода, но полученный в предыдущем квартале',
-            (headerRows[1][18]): 'к расходам текущего налогового периода, но полученного в предыдущем налоговом периоде',
-            (headerRows[1][19]): 'к расходам текущего налогового периода и полученного в текущем налоговом периоде (прибыли, полученной в текущем налоговом периоде)',
-            (headerRows[1][20]): 'полученного в текущем налоговом периоде, но относящегося к расходам следующего налогового периода',
-            (headerRows[2][0]): '1'
+            ([(headerRows[0][0]) : getColumnName(tmpRow, 'rowNumber')]),
+            ([(headerRows[0][2]) : getColumnName(tmpRow, 'contragent')]),
+            ([(headerRows[0][3]) : getColumnName(tmpRow, 'inn')]),
+            ([(headerRows[0][4]) : 'Договор цессии']),
+            ([(headerRows[0][6]) : getColumnName(tmpRow, 'amount')]),
+            ([(headerRows[0][7]) : getColumnName(tmpRow, 'amountForReserve')]),
+            ([(headerRows[0][8]) : getColumnName(tmpRow, 'repaymentDate')]),
+            ([(headerRows[0][9]) : getColumnName(tmpRow, 'dateOfAssignment')]),
+            ([(headerRows[0][10]): getColumnName(tmpRow, 'income')]),
+            ([(headerRows[0][11]): getColumnName(tmpRow, 'result')]),
+            ([(headerRows[0][12]): getColumnName(tmpRow, 'part2Date')]),
+            ([(headerRows[0][13]): 'Убыток, относящийся к расходам']),
+            ([(headerRows[0][16]): getColumnName(tmpRow, 'taxClaimPrice')]),
+            ([(headerRows[0][17]): getColumnName(tmpRow, 'finResult')]),
+            ([(headerRows[0][18]): 'Корректировка финансового результата в отношении убытка, относящегося']),
+            ([(headerRows[1][4]) : 'Номер']),
+            ([(headerRows[1][5]) : 'Дата']),
+            ([(headerRows[1][13]): 'текущего квартала']),
+            ([(headerRows[1][14]): 'следующего квартала']),
+            ([(headerRows[1][15]): 'текущего отчётного (налогового) периода, но полученный в предыдущем квартале']),
+            ([(headerRows[1][18]): 'к расходам текущего налогового периода, но полученного в предыдущем налоговом периоде']),
+            ([(headerRows[1][19]): 'к расходам текущего налогового периода и полученного в текущем налоговом периоде (прибыли, полученной в текущем налоговом периоде)']),
+            ([(headerRows[1][20]): 'полученного в текущем налоговом периоде, но относящегося к расходам следующего налогового периода']),
+            ([(headerRows[2][0]): '1'])
     ]
-    (2..20).each { index ->
-        headerMapping.put(headerRows[2][index], index.toString())
+    (2..20).each {
+        headerMapping.add(([(headerRows[2][it]): it.toString()]))
     }
 
     checkHeaderEquals(headerMapping, logger)

@@ -793,27 +793,27 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
 
     def headerMapping = [
             // название первого столбца хранится в нулевой скрытой графе
-            (headerRows[0][0]) : getColumnName(tmpRow, 'number'),
-            (headerRows[0][2]) : getColumnName(tmpRow, 'name'),
-            (headerRows[0][3]) : getColumnName(tmpRow, 'code'),
-            (headerRows[0][4]) : getColumnName(tmpRow, 'issuer'),
-            (headerRows[0][5]) : getColumnName(tmpRow, 'regNumber'),
-            (headerRows[0][6]) : getColumnName(tmpRow, 'shortPositionData'),
-            (headerRows[0][7]) : getColumnName(tmpRow, 'faceValue'),
-            (headerRows[0][8]) : getColumnName(tmpRow, 'countsBonds'),
-            (headerRows[0][9]) : getColumnName(tmpRow, 'averageWeightedPrice'),
-            (headerRows[0][10]): getColumnName(tmpRow, 'termBondsIssued'),
-            (headerRows[0][11]): getColumnName(tmpRow, 'maturityDate'),
-            (headerRows[0][12]): getColumnName(tmpRow, 'currentPeriod'),
-            (headerRows[0][13]): getColumnName(tmpRow, 'currentCouponRate'),
-            (headerRows[0][14]): getColumnName(tmpRow, 'incomeCurrentCoupon'),
-            (headerRows[0][15]): getColumnName(tmpRow, 'incomePrev'),
-            (headerRows[0][16]): getColumnName(tmpRow, 'incomeShortPosition'),
-            (headerRows[0][17]): getColumnName(tmpRow, 'percIncome'),
-            (headerRows[0][18]): getColumnName(tmpRow, 'totalPercIncome')
+            ([(headerRows[0][0]) : getColumnName(tmpRow, 'number')]),
+            ([(headerRows[0][2]) : getColumnName(tmpRow, 'name')]),
+            ([(headerRows[0][3]) : getColumnName(tmpRow, 'code')]),
+            ([(headerRows[0][4]) : getColumnName(tmpRow, 'issuer')]),
+            ([(headerRows[0][5]) : getColumnName(tmpRow, 'regNumber')]),
+            ([(headerRows[0][6]) : getColumnName(tmpRow, 'shortPositionData')]),
+            ([(headerRows[0][7]) : getColumnName(tmpRow, 'faceValue')]),
+            ([(headerRows[0][8]) : getColumnName(tmpRow, 'countsBonds')]),
+            ([(headerRows[0][9]) : getColumnName(tmpRow, 'averageWeightedPrice')]),
+            ([(headerRows[0][10]): getColumnName(tmpRow, 'termBondsIssued')]),
+            ([(headerRows[0][11]): getColumnName(tmpRow, 'maturityDate')]),
+            ([(headerRows[0][12]): getColumnName(tmpRow, 'currentPeriod')]),
+            ([(headerRows[0][13]): getColumnName(tmpRow, 'currentCouponRate')]),
+            ([(headerRows[0][14]): getColumnName(tmpRow, 'incomeCurrentCoupon')]),
+            ([(headerRows[0][15]): getColumnName(tmpRow, 'incomePrev')]),
+            ([(headerRows[0][16]): getColumnName(tmpRow, 'incomeShortPosition')]),
+            ([(headerRows[0][17]): getColumnName(tmpRow, 'percIncome')]),
+            ([(headerRows[0][18]): getColumnName(tmpRow, 'totalPercIncome')])
     ]
-    (1..18).each { index ->
-        headerMapping.put(headerRows[1][index], index.toString())
+    (1..18).each {
+        headerMapping.add(([(headerRows[1][it]): it.toString()]))
     }
     checkHeaderEquals(headerMapping, logger)
 }

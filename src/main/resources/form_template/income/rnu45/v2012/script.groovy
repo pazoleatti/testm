@@ -585,21 +585,21 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
     checkHeaderSize(headerRows[headerRows.size() - 1].size(), headerRows.size(), colCount, rowCount)
 
     def headerMapping = [
-            (headerRows[0][0]) : getColumnName(tmpRow, 'rowNumber'),
-            (headerRows[0][2]) : getColumnName(tmpRow, 'inventoryNumber'),
-            (headerRows[0][3]) : getColumnName(tmpRow, 'name'),
-            (headerRows[0][4]) : getColumnName(tmpRow, 'buyDate'),
-            (headerRows[0][5]) : getColumnName(tmpRow, 'usefulLife'),
-            (headerRows[0][6]) : getColumnName(tmpRow, 'expirationDate'),
-            (headerRows[0][7]) : getColumnName(tmpRow, 'startCost'),
-            (headerRows[0][8]) : getColumnName(tmpRow, 'depreciationRate'),
-            (headerRows[0][9]) : getColumnName(tmpRow, 'amortizationMonth'),
-            (headerRows[0][10]): getColumnName(tmpRow, 'amortizationSinceYear'),
-            (headerRows[0][11]): getColumnName(tmpRow, 'amortizationSinceUsed'),
-            (headerRows[1][0]) : '1'
+            ([(headerRows[0][0]) : getColumnName(tmpRow, 'rowNumber')]),
+            ([(headerRows[0][2]) : getColumnName(tmpRow, 'inventoryNumber')]),
+            ([(headerRows[0][3]) : getColumnName(tmpRow, 'name')]),
+            ([(headerRows[0][4]) : getColumnName(tmpRow, 'buyDate')]),
+            ([(headerRows[0][5]) : getColumnName(tmpRow, 'usefulLife')]),
+            ([(headerRows[0][6]) : getColumnName(tmpRow, 'expirationDate')]),
+            ([(headerRows[0][7]) : getColumnName(tmpRow, 'startCost')]),
+            ([(headerRows[0][8]) : getColumnName(tmpRow, 'depreciationRate')]),
+            ([(headerRows[0][9]) : getColumnName(tmpRow, 'amortizationMonth')]),
+            ([(headerRows[0][10]): getColumnName(tmpRow, 'amortizationSinceYear')]),
+            ([(headerRows[0][11]): getColumnName(tmpRow, 'amortizationSinceUsed')]),
+            ([(headerRows[1][0]) : '1'])
     ]
-    (2..11).each { index ->
-        headerMapping.put(headerRows[1][index], index.toString())
+    (2..11).each {
+        headerMapping.add(([(headerRows[1][it]): it.toString()]))
     }
     checkHeaderEquals(headerMapping, logger)
 }
