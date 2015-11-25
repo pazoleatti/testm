@@ -550,90 +550,91 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
         }
     }
 
-    private void appendSelectWhereClause(PreparedStatementData ps, LogSystemFilter filter, String wa) {
+    private void appendSelectWhereClause(PreparedStatementData ps, LogSystemFilter logSystemFilter, String wa) {
         String prefix = "";
         ps.appendQuery(wa);
         ps.appendQuery(" (? is null or (log_date BETWEEN ? AND (? + interval '1' day)))");
-        ps.addParam(filter.getFromSearchDate());
-        ps.addParam(filter.getFromSearchDate());
-        ps.addParam(filter.getToSearchDate());
+        ps.addParam(logSystemFilter.getFromSearchDate());
+        ps.addParam(logSystemFilter.getFromSearchDate());
+        ps.addParam(logSystemFilter.getToSearchDate());
 
-        if (filter.getFilter() != null && !filter.getFilter().equals("")) {
-            if (!filter.getAuditFieldList().isEmpty())
+        String filter = logSystemFilter.getFilter();
+        if (filter != null && !filter.equals("")) {
+            if (!logSystemFilter.getAuditFieldList().isEmpty())
                 ps.appendQuery(" AND (1<>1 ");
 
-            if (filter.getAuditFieldList().contains(AuditFieldList.ALL.getId())
-                    || filter.getAuditFieldList().contains(AuditFieldList.FORM_TYPE.getId()) ) {
+            if (logSystemFilter.getAuditFieldList().contains(AuditFieldList.ALL.getId())
+                    || logSystemFilter.getAuditFieldList().contains(AuditFieldList.FORM_TYPE.getId()) ) {
                 ps.appendQuery(String.format(" OR lower(%sform_type_name) LIKE lower(?)", prefix));
-                ps.addParam("%"+filter.getFilter()+"%");
+                ps.addParam("%"+filter+"%");
             }
 
-            if (filter.getAuditFieldList().contains(AuditFieldList.ALL.getId())
-                    || filter.getAuditFieldList().contains(AuditFieldList.DECLARATION_TYPE.getId()) ) {
+            if (logSystemFilter.getAuditFieldList().contains(AuditFieldList.ALL.getId())
+                    || logSystemFilter.getAuditFieldList().contains(AuditFieldList.DECLARATION_TYPE.getId()) ) {
                 ps.appendQuery(String.format(" OR lower(%sdeclaration_type_name) LIKE lower(?)", prefix));
-                ps.addParam("%"+filter.getFilter()+"%");
+                ps.addParam("%"+filter+"%");
             }
 
-            if (filter.getAuditFieldList().contains(AuditFieldList.ALL.getId())
-                    || filter.getAuditFieldList().contains(AuditFieldList.TYPE.getId())) {
+            if (logSystemFilter.getAuditFieldList().contains(AuditFieldList.ALL.getId())
+                    || logSystemFilter.getAuditFieldList().contains(AuditFieldList.TYPE.getId())) {
                 ps.appendQuery(String.format(" OR lower(case when ls.form_type_name is not null then '" +
                         AuditFormType.FORM_TYPE_TAX.getName() + "' when ls.declaration_type_name is not null then '" + AuditFormType.FORM_TYPE_DECLARATION.getName() + "' else '' end) LIKE lower(?)"));
-                ps.addParam("%" + filter.getFilter() + "%");
+                ps.addParam("%" + filter + "%");
             }
 
-            if (filter.getAuditFieldList().contains(AuditFieldList.ALL.getId())
-                    || filter.getAuditFieldList().contains(AuditFieldList.PERIOD.getId()) ) {
+            if (logSystemFilter.getAuditFieldList().contains(AuditFieldList.ALL.getId())
+                    || logSystemFilter.getAuditFieldList().contains(AuditFieldList.PERIOD.getId()) ) {
                 ps.appendQuery(String.format(" OR lower(%sreport_period_name) LIKE lower(?)", prefix));
-                ps.addParam("%"+filter.getFilter()+"%");
+                ps.addParam("%"+filter+"%");
             }
 
-            if (filter.getAuditFieldList().contains(AuditFieldList.ALL.getId())
-                    || filter.getAuditFieldList().contains(AuditFieldList.DEPARTMENT.getId()) ) {
+            if (logSystemFilter.getAuditFieldList().contains(AuditFieldList.ALL.getId())
+                    || logSystemFilter.getAuditFieldList().contains(AuditFieldList.DEPARTMENT.getId()) ) {
                 ps.appendQuery(String.format(" OR lower(%sdepartment_name) LIKE lower(?)", prefix));
-                ps.addParam("%"+filter.getFilter()+"%");
+                ps.addParam("%"+filter+"%");
             }
 
-            if (filter.getAuditFieldList().contains(AuditFieldList.ALL.getId())
-                    || filter.getAuditFieldList().contains(AuditFieldList.USER.getId()) ) {
+            if (logSystemFilter.getAuditFieldList().contains(AuditFieldList.ALL.getId())
+                    || logSystemFilter.getAuditFieldList().contains(AuditFieldList.USER.getId()) ) {
                 ps.appendQuery(" OR lower(ls.user_login) LIKE lower(?)");
-                ps.addParam("%"+filter.getFilter()+"%");
+                ps.addParam("%"+filter+"%");
             }
 
-            if (filter.getAuditFieldList().contains(AuditFieldList.ALL.getId())
-                    || filter.getAuditFieldList().contains(AuditFieldList.ROLE.getId()) ) {
+            if (logSystemFilter.getAuditFieldList().contains(AuditFieldList.ALL.getId())
+                    || logSystemFilter.getAuditFieldList().contains(AuditFieldList.ROLE.getId()) ) {
                 ps.appendQuery(String.format(" OR lower(%sroles) LIKE lower(?)", prefix));
-                ps.addParam("%"+filter.getFilter()+"%");
+                ps.addParam("%"+filter+"%");
             }
 
-            if (filter.getAuditFieldList().contains(AuditFieldList.ALL.getId())
-                    || filter.getAuditFieldList().contains(AuditFieldList.EVENT.getId()) ) {
+            if (logSystemFilter.getAuditFieldList().contains(AuditFieldList.ALL.getId())
+                    || logSystemFilter.getAuditFieldList().contains(AuditFieldList.EVENT.getId()) ) {
                 ps.appendQuery(" OR lower(ev.name) LIKE lower(?)");
-                ps.addParam("%"+filter.getFilter()+"%");
+                ps.addParam("%"+filter+"%");
             }
 
-            if (filter.getAuditFieldList().contains(AuditFieldList.ALL.getId())
-                    || filter.getAuditFieldList().contains(AuditFieldList.NOTE.getId()) ) {
+            if (logSystemFilter.getAuditFieldList().contains(AuditFieldList.ALL.getId())
+                    || logSystemFilter.getAuditFieldList().contains(AuditFieldList.NOTE.getId()) ) {
                 ps.appendQuery(String.format(" OR lower(%snote) LIKE lower(?)", prefix));
-                ps.addParam("%"+filter.getFilter()+"%");
+                ps.addParam("%"+filter+"%");
             }
 
-            if (filter.getAuditFieldList().contains(AuditFieldList.ALL.getId())
-                    || filter.getAuditFieldList().contains(AuditFieldList.FORM_KIND.getId()) ) {
+            if (logSystemFilter.getAuditFieldList().contains(AuditFieldList.ALL.getId())
+                    || logSystemFilter.getAuditFieldList().contains(AuditFieldList.FORM_KIND.getId()) ) {
                 ps.appendQuery(" OR lower(fk.name) LIKE lower(?)");
-                ps.addParam("%"+filter.getFilter()+"%");
+                ps.addParam("%"+filter+"%");
             }
 
-            if (filter.getAuditFieldList().contains(AuditFieldList.ALL.getId())
-                    || filter.getAuditFieldList().contains(AuditFieldList.IP.getId()) ) {
+            if (logSystemFilter.getAuditFieldList().contains(AuditFieldList.ALL.getId())
+                    || logSystemFilter.getAuditFieldList().contains(AuditFieldList.IP.getId()) ) {
                 ps.appendQuery(String.format(" OR lower(%sip) LIKE lower(?)", prefix));
-                ps.addParam("%"+filter.getFilter()+"%");
+                ps.addParam("%"+filter+"%");
             }
 
-            if (!filter.getAuditFieldList().isEmpty())
+            if (!logSystemFilter.getAuditFieldList().isEmpty())
                 ps.appendQuery(")");
         }
-        if (filter.getOldLogSystemFilter() != null) {
-            appendSelectWhereClause(ps, filter.getOldLogSystemFilter(), " AND");
+        if (logSystemFilter.getOldLogSystemFilter() != null) {
+            appendSelectWhereClause(ps, logSystemFilter.getOldLogSystemFilter(), " AND");
         }
     }
 
