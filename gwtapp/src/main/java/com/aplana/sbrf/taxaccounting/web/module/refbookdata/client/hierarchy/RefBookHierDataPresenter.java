@@ -59,7 +59,7 @@ public class RefBookHierDataPresenter extends PresenterWidget<RefBookHierDataPre
     @Override
     public void onSearch(SearchButtonEvent event) {
         getView().setPickerState(event.getRelevanceDate(), event.getSearchPattern());
-        searchButtonClicked();
+        searchButtonClicked(event.getRelevanceDate());
     }
 
     @ProxyEvent
@@ -115,7 +115,7 @@ public class RefBookHierDataPresenter extends PresenterWidget<RefBookHierDataPre
         /** Очистить */
         void clearFilterInputBox();
 
-        void searchButtonClicked();
+        void searchButtonClicked(Date relevanceDate);
     }
 
     @Inject
@@ -347,8 +347,8 @@ public class RefBookHierDataPresenter extends PresenterWidget<RefBookHierDataPre
         getView().loadAndSelect();
     }
 
-    private void searchButtonClicked(){
-        getView().searchButtonClicked();
+    private void searchButtonClicked(Date relevanceDate){
+        getView().searchButtonClicked(relevanceDate);
     }
 
     /*private void checkRecord() {

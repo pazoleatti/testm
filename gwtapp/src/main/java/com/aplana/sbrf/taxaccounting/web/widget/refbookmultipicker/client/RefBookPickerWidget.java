@@ -187,7 +187,7 @@ public class RefBookPickerWidget extends DoubleStateComposite implements RefBook
     void onSearchButtonClicked(ClickEvent event) {
         final String text = searchTextBox.getText();
         if (text != null && !text.trim().isEmpty()) {
-            refBookView.checkCount(text.trim(), new CheckValuesCountHandler() {
+            refBookView.checkCount(text.trim(), versionDateBox.getValue(), new CheckValuesCountHandler() {
                 @Override
                 public void onGetValuesCount(Integer count) {
                     if (count != null && count < (isHierarchical() ? 50 : 100)) {

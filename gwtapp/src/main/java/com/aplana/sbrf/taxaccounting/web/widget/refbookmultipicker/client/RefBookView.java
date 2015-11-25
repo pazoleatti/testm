@@ -86,7 +86,7 @@ public interface RefBookView extends HasValueChangeHandlers<Set<Long>>, IsWidget
      * @param text текст
      * @param checkValuesCountHandler хендлер который исполниться после получения количества попавщих под фильтр записей
      */
-    void checkCount(String text, CheckValuesCountHandler checkValuesCountHandler);
+    void checkCount(String text, Date relevanceDate, CheckValuesCountHandler checkValuesCountHandler);
 
     void cleanValues();
 }
