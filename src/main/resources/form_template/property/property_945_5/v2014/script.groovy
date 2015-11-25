@@ -1347,53 +1347,33 @@ def getFormTypeById(def id) {
     return formTypeMap[id]
 }
 
-// TODO (Ramil Timerbaev) добавить получение деклараций-приемников
 /** Получить результат для события FormDataEvent.GET_SOURCES. */
-def getSources() {
-    def currentPeriod = reportPeriodService.get(formData.reportPeriodId)
+void getSources() {
+    // нестандратны только формы-источники - 945.1, для них смещен месяц
+    if (!(form && needSources)) {
+        // формы-приемники, декларации-истчоники, декларации-приемники не переопределять
+        return
+    }
+    // формы-источники
+
     def start = getReportPeriodStartDate()
     def end = getReportPeriodEndDate()
 
-    // источники
     def sourceDepartmentFormTypes = departmentFormTypeService.getFormSources(formDataDepartment.id, formData.formType.id, formData.kind, start, end)
+    if (!sourceDepartmentFormTypes) {
+        return
+    }
 
-    // приемники
-    def destinationDepartmentFormTypes = departmentFormTypeService.getFormDestinations(formDataDepartment.id, formData.formType.id, formData.kind, start, end)
-
-    // найти все ежемесячные источники 945.1 за текущий периоде и за первый месяц следующего периода
-    // Мапа с периодами и номерами месяцев для источников 945.1 (период -> список номеров месяцев)
-    def source945_1periodsMap = getSourcesPeriodMap()
+    def currentPeriod = reportPeriodService.get(formData.reportPeriodId)
 
     // номера месяцев для остальных ежемесячных источников-приемников
     def otherMonthlyFormsPeriods = monthsInQuarterMap[currentPeriod.order]
     def otherMonthlyFormsPeriodsMap = [currentPeriod : otherMonthlyFormsPeriods]
 
-    // приемники
-    destinationDepartmentFormTypes.each { departmentFormType ->
-        def isMonthly = isMonthlyForm(departmentFormType.formTypeId, currentPeriod.id)
-        def isSource = false
-        if (isMonthly) {
-            // другая ежемесячная форма
-            otherMonthlyFormsPeriods.each { monthOrder ->
-                FormData tmpFormData = formDataService.getLast(departmentFormType.formTypeId, departmentFormType.kind,
-                        departmentFormType.departmentId, currentPeriod.id, monthOrder, null, false)
-                def relation = getRelation(tmpFormData, departmentFormType, isSource, currentPeriod, monthOrder)
-                if (relation) {
-                    sources.sourceList.add(relation)
-                }
-            }
-        } else {
-            // квартальная форма
-            FormData tmpFormData = formDataService.getLast(departmentFormType.formTypeId, departmentFormType.kind,
-                    departmentFormType.departmentId, currentPeriod.id, null, null, false)
-            def relation = getRelation(tmpFormData, departmentFormType, isSource, currentPeriod, null)
-            if (relation) {
-                sources.sourceList.add(relation)
-            }
-        }
-    }
+    // найти все ежемесячные источники 945.1 за текущий периоде и за первый месяц следующего периода
+    // Мапа с периодами и номерами месяцев для источников 945.1 (период -> список номеров месяцев)
+    def source945_1periodsMap = getSourcesPeriodMap()
 
-    // источники
     for (def departmentFormType : sourceDepartmentFormTypes) {
         def isSource = true
         def monthlyFormsPeriodsMap
@@ -1425,9 +1405,7 @@ def getSources() {
             }
         }
     }
-
     sources.sourcesProcessedByScript = true
-    return sources.sourceList
 }
 
 /**

@@ -962,9 +962,15 @@ void checkRegionId() {
     }
 }
 
-// TODO (Ramil Timerbaev) добавить получение деклараций-приемников
 /** Получить результат для события FormDataEvent.GET_SOURCES. */
 def getSources() {
+    // нестандратны только формы-приемники - 945.51
+    if (!(form && !needSources)) {
+        // формы-источники, декларации-истчоники, декларации-приемники не переопределять
+        return
+    }
+    // формы-приемники
+
     def reportPeriods = []
     def monthOrder = formData.periodOrder
     def monthInQuarter = 3
@@ -1005,11 +1011,9 @@ def getSources() {
 
     // мапа с периодами и приемниками (период -> список приемников)
     def periodDestinationMap = [:]
-    // мапа с периодами и источниками (период -> список источников)
-    def periodSourceMap = [:]
     // приемники отсутствующего предыдущего периода
     def missingDestinationDepartmentFormTypes = []
-    // источники 945.5 текущего периода - необходимы в случае если нужны источники 945.5 за передыдуший период, но они не указаны в механизме источников приемников
+    // приемники 945.5 текущего периода - необходимы в случае если нужны приемники 945.5 за передыдуший период, но они не указаны в механизме источников приемников
     def sources945_5 = []
     reportPeriods.each { reportPeriod ->
         def start = reportPeriodService.getCalendarStartDate(reportPeriod.id).time
@@ -1058,17 +1062,23 @@ def getSources() {
             }
         }
         periodDestinationMap[reportPeriod] = formDestinations
-
-        // источники
-        if (reportPeriod.id == currentPeriod.id) {
-            periodSourceMap[reportPeriod] = departmentFormTypeService.getFormSources(formDataDepartment.id,
-                    formData.formType.id, formData.kind, start, end)
-        }
     }
 
-    // проходим по периодам источников и приемников
-    addToResult(sources.sourceList, periodDestinationMap, false)
-    addToResult(sources.sourceList, periodSourceMap, true)
+    // добавить данные из мапы с периодами и источниками-приемниками в список.
+    periodDestinationMap.each { period, departmentFormTypes ->
+        // проходим по всем источникам-приемникам в каждом периоде
+        departmentFormTypes.each { departmentFormType ->
+            def tmpMonthOrder = (isMonthlyForm(departmentFormType.formTypeId, period.id) ? formData.periodOrder : null)
+            FormData tmpFormData = formDataService.getLast(departmentFormType.formTypeId, departmentFormType.kind,
+                    departmentFormType.departmentId, period.id, tmpMonthOrder, null, false)
+
+            def isSource = false
+            Relation relation = getRelation(tmpFormData, departmentFormType, isSource, period.id, period.taxPeriod.year, period.name, tmpMonthOrder)
+            if (relation) {
+                sources.sourceList.add(relation)
+            }
+        }
+    }
 
     def periodNames = [
             1 : "1 квартал",
@@ -1091,29 +1101,6 @@ def getSources() {
 
     sources.sourcesProcessedByScript = true
     return sources.sourceList
-}
-
-/**
- * Добавить данные из мапы с периодами и источниками-приемниками в список.
- *
- * @param resultList список с результатом
- * @param periodDepartmentFormTypesMap мапы с периодами и источниками-приемниками (период -> источник-применик)
- * @param isSource признак источника
- */
-def addToResult(def resultList, def periodDepartmentFormTypesMap, def isSource) {
-    periodDepartmentFormTypesMap.each { period, departmentFormTypes ->
-        // проходим по всем источникам-приемникам в каждом периоде
-        departmentFormTypes.each { departmentFormType ->
-            def monthOrder = (isMonthlyForm(departmentFormType.formTypeId, period.id) ? formData.periodOrder : null)
-            FormData tmpFormData = formDataService.getLast(departmentFormType.formTypeId, departmentFormType.kind,
-                    departmentFormType.departmentId, period.id, monthOrder, null, false)
-
-            Relation relation = getRelation(tmpFormData, departmentFormType, isSource, period.id, period.taxPeriod.year, period.name, monthOrder)
-            if (relation) {
-                resultList.add(relation)
-            }
-        }
-    }
 }
 
 /** Получить полное название подразделения по id подразделения. */
