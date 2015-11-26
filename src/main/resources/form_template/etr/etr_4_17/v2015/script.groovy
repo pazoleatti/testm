@@ -345,6 +345,13 @@ void logicCheck() {
             continue
         checkNonEmptyColumns(row, row.getIndex(), nonEmptyColumns, logger, true)
 
+        if (row.department != null) {
+            def parentTB = getParentTBId(row.department.intValue())
+            if (parentTB != 113) {
+                logger.error("Строка %s: Графа «%s»: Выбранное подразделение не является дочерним подразделением для ЦА!",
+                        row.getIndex(), getColumnName(row, 'department'))
+            }
+        }
         def needValue = formData.createDataRow()
         needValue.parentTB = row.department ? getParentTBId(row.department.intValue()) : null
 
