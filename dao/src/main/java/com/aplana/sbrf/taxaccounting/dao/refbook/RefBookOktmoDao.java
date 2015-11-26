@@ -5,6 +5,7 @@ import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.VersionedObjectStatus;
 import com.aplana.sbrf.taxaccounting.model.refbook.*;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
+import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 
 import javax.validation.constraints.NotNull;
 import java.util.Date;
@@ -262,9 +263,9 @@ public interface RefBookOktmoDao {
      * @param recordIds уникальные идентификаторы записей справочника
      * @param periodFrom начало периода
      * @param periodTo окончание периода
-     * @return все записи действуют в указанном периоде?
+     * @return список id записей при проверке которых были обнаружены ошибки + код ошибки
      */
-    List<Long> isRecordsActiveInPeriod(String tableName, @NotNull List<Long> recordIds, @NotNull Date periodFrom, Date periodTo);
+    Map<Long, CheckResult> getInactiveRecordsInPeriod(String tableName, @NotNull List<Long> recordIds, @NotNull Date periodFrom, Date periodTo);
 
     /**
      * Проверяет, существуют ли версии элемента справочника, удовлетворяющие указанному фильтру

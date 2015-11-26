@@ -15,8 +15,6 @@ import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.utils.SimpleDateUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.config.ConfigurableBeanFactory;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -326,8 +324,8 @@ public class RefBookOktmoProvider implements RefBookDataProvider {
     }
 
     @Override
-    public List<Long> getInactiveRecordsInPeriod(@NotNull List<Long> recordIds, @NotNull Date periodFrom, Date periodTo) {
-        return dao.isRecordsActiveInPeriod(getTableName(), recordIds, periodFrom, periodTo);
+    public Map<Long, CheckResult>  getInactiveRecordsInPeriod(@NotNull List<Long> recordIds, @NotNull Date periodFrom, Date periodTo) {
+        return dao.getInactiveRecordsInPeriod(getTableName(), recordIds, periodFrom, periodTo);
     }
 
     @Override

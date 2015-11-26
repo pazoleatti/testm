@@ -201,7 +201,7 @@ public class RefBookAsyncConfigProvider implements RefBookDataProvider {
     }
 
     @Override
-    public List<Long> getInactiveRecordsInPeriod(@NotNull List<Long> recordIds, @NotNull Date periodFrom, Date periodTo) {
+    public Map<Long, CheckResult>  getInactiveRecordsInPeriod(@NotNull List<Long> recordIds, @NotNull Date periodFrom, Date periodTo) {
         throw new UnsupportedOperationException();
     }
 

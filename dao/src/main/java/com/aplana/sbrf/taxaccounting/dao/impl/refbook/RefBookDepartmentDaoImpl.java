@@ -10,12 +10,9 @@ import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.PreparedStatementData;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributePair;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookRecord;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
+import com.aplana.sbrf.taxaccounting.model.refbook.*;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
+import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -269,20 +266,24 @@ public class RefBookDepartmentDaoImpl extends AbstractDao implements RefBookDepa
     }
 
     @Override
-    public List<Long> isRecordsActiveInPeriod(@NotNull List<Long> recordIds, @NotNull Date periodFrom, Date periodTo) {
-        String sql = "select id from "+ TABLE_NAME +" where %s";
-        Set<Long> result = new HashSet<Long>(recordIds);
+    public Map<Long, CheckResult> getInactiveRecordsInPeriod(@NotNull List<Long> recordIds, @NotNull Date periodFrom, Date periodTo) {
+        String sql = String.format("select id from "+ TABLE_NAME +" where %s", SqlUtils.transformToSqlInStatement("id", recordIds));
+        Map<Long, CheckResult> result = new HashMap<Long, CheckResult>();
         List<Long> existRecords = new ArrayList<Long>();
         try {
-            existRecords = getJdbcTemplate().query(String.format(sql, SqlUtils.transformToSqlInStatement("id", recordIds)), new RowMapper<Long>() {
+            existRecords = getJdbcTemplate().query(sql, new RowMapper<Long>() {
                 @Override
                 public Long mapRow(ResultSet rs, int rowNum) throws SQLException {
                     return rs.getLong("id");
                 }
             });
         } catch (EmptyResultDataAccessException ignored) {}
-        result.removeAll(existRecords);
-        return new ArrayList<Long>(result);
+        for (Long recordId : recordIds) {
+            if (!existRecords.contains(recordId)) {
+                result.put(recordId, CheckResult.NOT_EXISTS);
+            }
+        }
+        return result;
     }
 
     private static final String CHECK_USAGES_IN_REFBOOK =

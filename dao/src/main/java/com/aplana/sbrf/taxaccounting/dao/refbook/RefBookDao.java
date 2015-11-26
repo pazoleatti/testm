@@ -2,14 +2,9 @@ package com.aplana.sbrf.taxaccounting.dao.refbook;
 
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
-import com.aplana.sbrf.taxaccounting.model.refbook.CheckCrossVersionsResult;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributePair;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookRecord;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookRecordVersion;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
+import com.aplana.sbrf.taxaccounting.model.refbook.*;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
+import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
@@ -205,9 +200,9 @@ public interface RefBookDao {
      * @param recordIds уникальные идентификаторы записей справочника
      * @param periodFrom начало периода
      * @param periodTo окончание периода
-     * @return идентификаторы записей, которые не действуют в указанном периоде
+     * @return список id записей при проверке которых были обнаружены ошибки + код ошибки
      */
-    List<Long> isRecordsActiveInPeriod(@NotNull List<Long> recordIds, @NotNull Date periodFrom, Date periodTo);
+    Map<Long, CheckResult> getInactiveRecordsInPeriod(@NotNull List<Long> recordIds, @NotNull Date periodFrom, Date periodTo);
 
     /**
      * Проверка и поиск Id записи по:

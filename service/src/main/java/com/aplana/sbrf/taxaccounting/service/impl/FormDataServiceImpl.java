@@ -15,6 +15,7 @@ import com.aplana.sbrf.taxaccounting.model.formdata.HeaderCell;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.model.refbook.CheckResult;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
@@ -69,7 +70,7 @@ public class FormDataServiceImpl implements FormDataService {
     final static String LOCK_MESSAGE = "Форма заблокирована и не может быть изменена. Попробуйте выполнить операцию позже.";
     final static String LOCK_MESSAGE_TASK = "Выполнение операции \"%s\" невозможно, т.к. для текущего экземпляра налоговой формы запущена операция изменения данных";
     final static String LOCK_REFBOOK_MESSAGE = "Справочник \"%s\" заблокирован и не может быть использован для заполнения атрибутов формы. Попробуйте выполнить операцию позже.";
-    final static String REF_BOOK_RECORDS_ERROR =  "Строка %s, атрибут \"%s\": период актуальности значения не пересекается с отчетным периодом формы";
+    final static String REF_BOOK_LINK =  "Строка %s%s \"%s\"%s";
     final static String DEPARTMENT_REPORT_PERIOD_NOT_FOUND_ERROR = "Не найден отчетный период подразделения с id = %d.";
     private static final String SAVE_ERROR = "Найдены ошибки при сохранении формы!";
     private static final String SORT_ERROR = "Найдены ошибки при сортировке строк формы!";
@@ -567,6 +568,10 @@ public class FormDataServiceImpl implements FormDataService {
                         logger.info("Консолидация выполнена из всех форм-источников");
                     }
                 }
+
+                //Проверка справочных значений
+                checkReferenceValues(logger, formData, false);
+
                 if (logger.containsLevel(LogLevel.ERROR)){
                     throw new ServiceLoggerException("", logEntryService.save(logger.getEntries()));
                 }
@@ -873,11 +878,14 @@ public class FormDataServiceImpl implements FormDataService {
                         RefBook refBook = refBookDao.getByAttribute(attributeId);
                         for (DataRow<Cell> row : rows) {
                             if (row.getCell(column.getAlias()).getNumericValue() != null) {
-                                if (!recordsToCheck.containsKey(refBook.getId())) {
-                                    recordsToCheck.put(refBook.getId(), new ArrayList<Long>());
+                                //Если у справочника нет своей таблицы, значит он универсальный и провайдер для него один и тот же
+                                long refBookId = refBook.getTableName() != null
+                                        ? refBook.getId() : RefBook.UNIVERSAL_REF_BOOK_ID;
+                                if (!recordsToCheck.containsKey(refBookId)) {
+                                    recordsToCheck.put(refBookId, new ArrayList<Long>());
                                 }
-                                //Раскладываем значения ссылок по справочникам, на которые они ссылаются
-                                recordsToCheck.get(refBook.getId()).add(row.getCell(column.getAlias()).getNumericValue().longValue());
+                                //Раскладываем значения ссылок по справочникам, на которые они ссылаются. Делим на группы - универсальные и особенные (типа REF_BOOK_OKTMO)
+                                recordsToCheck.get(refBookId).add(row.getCell(column.getAlias()).getNumericValue().longValue());
 
                                 //Сохраняем информацию о местоположении ссылки
                                 long uniqueRecordId = row.getCell(column.getAlias()).getNumericValue().longValue();
@@ -895,11 +903,29 @@ public class FormDataServiceImpl implements FormDataService {
             boolean error = false;
             for (Map.Entry<Long, List<Long>> referencesToCheck : recordsToCheck.entrySet()) {
                 RefBookDataProvider provider = refBookFactory.getDataProvider(referencesToCheck.getKey());
-                List<Long> inactiveRecords = provider.getInactiveRecordsInPeriod(referencesToCheck.getValue(), reportPeriod.getCalendarStartDate(), reportPeriod.getEndDate());
+                Map<Long, CheckResult> inactiveRecords = provider.getInactiveRecordsInPeriod(referencesToCheck.getValue(), reportPeriod.getCalendarStartDate(), reportPeriod.getEndDate());
                 if (!inactiveRecords.isEmpty()) {
-                    for (Long inactiveRecord : inactiveRecords) {
-                        for (ReferenceInfo referenceInfo : referenceInfoMap.get(inactiveRecord)) {
-                            logger.error(String.format(REF_BOOK_RECORDS_ERROR, referenceInfo.getRownum(), referenceInfo.getColumnName()));
+                    for (Map.Entry<Long, CheckResult> inactiveRecord : inactiveRecords.entrySet()) {
+                        Long id = inactiveRecord.getKey();
+                        CheckResult checkResult = inactiveRecord.getValue();
+                        for (ReferenceInfo referenceInfo : referenceInfoMap.get(id)) {
+                            switch (checkResult) {
+                                case NOT_EXISTS:
+                                    logger.error(String.format(REF_BOOK_LINK, referenceInfo.getRownum(),
+                                            ": значение графы", referenceInfo.getColumnName(),
+                                            " ссылается на несуществующую версию записи справочника!"));
+                                    break;
+                                case NOT_CROSS:
+                                    logger.error(String.format(REF_BOOK_LINK, referenceInfo.getRownum(),
+                                            ", атрибут", referenceInfo.getColumnName(),
+                                            ": период актуальности значения не пересекается с отчетным периодом формы!"));
+                                    break;
+                                case NOT_LAST:
+                                    logger.error(String.format(REF_BOOK_LINK, referenceInfo.getRownum(),
+                                            ": значение графы", referenceInfo.getColumnName(),
+                                            " не является последним актуальным значением в отчетном периоде формы!"));
+                                    break;
+                            }
                         }
                     }
                     error = true;

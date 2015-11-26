@@ -2,8 +2,11 @@ package com.aplana.sbrf.taxaccounting.dao.refbook;
 
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
+import com.aplana.sbrf.taxaccounting.model.refbook.CheckResult;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
+import com.aplana.sbrf.taxaccounting.model.util.Pair;
+import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 
 import javax.validation.constraints.NotNull;
 import java.util.Date;
@@ -76,7 +79,7 @@ public interface RefBookUserDao {
     /**
      * Проверяет действуют ли записи справочника в указанном периоде
      * @param recordIds уникальные идентификаторы записей справочника
-     * @return все записи действуют в указанном периоде?
+     * @return список id записей при проверке которых были обнаружены ошибки + код ошибки
      */
-    List<Long> isRecordsActiveInPeriod(@NotNull List<Long> recordIds);
+    Map<Long, CheckResult> getInactiveRecordsInPeriod(@NotNull List<Long> recordIds);
 }

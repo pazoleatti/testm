@@ -33,6 +33,8 @@ import java.sql.SQLException;
 import java.sql.Types;
 import java.util.*;
 
+import static com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils.transformToSqlInStatement;
+
 /**
  *
  * @author dloshkarev
@@ -108,12 +110,12 @@ public class RefBookOktmoDaoImpl extends AbstractDao implements RefBookOktmoDao 
 
     private static final String WITH_STATEMENT =
             "with t as (select max(version) version, record_id from %s r where status = 0 and version <= ?  and\n" +
-                    "not exists (select 1 from %s r2 where r2.record_id=r.record_id and r2.version between r.version + interval '1' day and ?)\n" +
+                    "not exists (select 1 from %s r2 where r2.record_id=r.record_id and r2.status != -1 and r2.version between r.version + interval '1' day and ?)\n" +
                     "group by record_id)\n";
 
     private static final String RECORD_VERSIONS_STATEMENT =
             "with currentRecord as (select id, record_id, version from %s where id=?),\n" +
-                    "recordsByVersion as (select r.ID, r.RECORD_ID, r.VERSION, r.STATUS, row_number() over(partition by r.RECORD_ID order by r.version) rn from %s r, currentRecord cr where r.RECORD_ID=cr.RECORD_ID), \n" +
+                    "recordsByVersion as (select r.ID, r.RECORD_ID, r.VERSION, r.STATUS, row_number() over(partition by r.RECORD_ID order by r.version) rn from %s r, currentRecord cr where r.RECORD_ID=cr.RECORD_ID and r.status != -1), \n" +
                     "t as (select rv.rn as row_number_over, rv.ID, rv.RECORD_ID RECORD_ID, rv.VERSION version, rv2.version - interval '1' day versionEnd from recordsByVersion rv left outer join recordsByVersion rv2 on rv.RECORD_ID = rv2.RECORD_ID and rv.rn+1 = rv2.rn where rv.status=?)\n";
 
 
@@ -409,8 +411,8 @@ public class RefBookOktmoDaoImpl extends AbstractDao implements RefBookOktmoDao 
     }
 
     private static final String GET_RECORD_VERSION = "with currentVersion as (select id, version, record_id from %s where id = ?),\n" +
-            "minNextVersion as (select r.record_id, min(r.version) version from %s r, currentVersion cv where r.version > cv.version and r.record_id= cv.record_id group by r.record_id),\n" +
-            "nextVersionEnd as (select mnv.record_id, mnv.version, r.status from minNextVersion mnv, %s r where mnv.version=r.version and mnv.record_id=r.record_id)\n" +
+            "minNextVersion as (select r.record_id, min(r.version) version from %s r, currentVersion cv where r.version > cv.version and r.record_id= cv.record_id and r.status != -1 group by r.record_id),\n" +
+            "nextVersionEnd as (select mnv.record_id, mnv.version, r.status from minNextVersion mnv, %s r where mnv.version=r.version and mnv.record_id=r.record_id and mnv.status != -1)\n" +
             "select cv.id as %s, \n" +
             "cv.version as versionStart, \n" +
             "nve.version - interval '1' day as versionEnd, \n" +
@@ -486,7 +488,7 @@ public class RefBookOktmoDaoImpl extends AbstractDao implements RefBookOktmoDao 
     }
 
     private final static String CHECK_CONFLICT_VALUES_VERSIONS = "with conflictRecord as (select * from %s where %s),\n" +
-            "allRecordsInConflictGroup as (select r.* from %s r where exists (select 1 from conflictRecord cr where r.RECORD_ID=cr.RECORD_ID)),\n" +
+            "allRecordsInConflictGroup as (select r.* from %s r where exists (select 1 from conflictRecord cr where r.RECORD_ID=cr.RECORD_ID and r.status != -1)),\n" +
             "recordsByVersion as (select ar.*, row_number() over(partition by ar.RECORD_ID order by ar.version) rn from allRecordsInConflictGroup ar),\n" +
             "versionInfo as (select rv.ID, rv.VERSION versionFrom, rv2.version - interval '1' day versionTo from conflictRecord cr, recordsByVersion rv left outer join recordsByVersion rv2 on rv.RECORD_ID = rv2.RECORD_ID and rv.rn+1 = rv2.rn where rv.ID=cr.ID)" +
             "select ID from versionInfo where (\n" +
@@ -521,12 +523,12 @@ public class RefBookOktmoDaoImpl extends AbstractDao implements RefBookOktmoDao 
 
     @Override
     public boolean isVersionsExist(String tableName, List<Long> recordIds, Date version) {
-        String sql = String.format("select count(*) from %s where %s and version = trunc(?, 'DD')", tableName, SqlUtils.transformToSqlInStatement("record_id", recordIds));
+        String sql = String.format("select count(*) from %s where %s and version = trunc(?, 'DD') and status != -1", tableName, SqlUtils.transformToSqlInStatement("record_id", recordIds));
         return getJdbcTemplate().queryForInt(sql, version) != 0;
     }
 
     private static final String CHECK_CROSS_VERSIONS = "with allVersions as (select r.* from %s r where record_id=? and (? is null or id=?)),\n" +
-            "recordsByVersion as (select r.*, row_number() over(partition by r.record_id order by r.version) rn from %s r, allVersions av where r.id=av.id),\n" +
+            "recordsByVersion as (select r.*, row_number() over(partition by r.record_id order by r.version) rn from %s r, allVersions av where r.id=av.id and r.status != -1),\n" +
             "versionInfo as (select rv.rn NUM, rv.ID, rv.VERSION, rv.status, rv2.version - interval '1' day nextVersion,rv2.status nextStatus from recordsByVersion rv left outer join recordsByVersion rv2 on rv.RECORD_ID = rv2.RECORD_ID and rv.rn+1 = rv2.rn)\n" +
             "select num, id, version, status, nextversion, nextstatus, \n" +
             "case\n" +
@@ -596,10 +598,10 @@ public class RefBookOktmoDaoImpl extends AbstractDao implements RefBookOktmoDao 
         } else return true;
     }
 
-    private static final String GET_NEXT_RECORD_VERSION = "with nextVersion as (select r.* from %s r where r.record_id = ? and r.version  = \n" +
+    private static final String GET_NEXT_RECORD_VERSION = "with nextVersion as (select r.* from %s r where r.record_id = ? and r.status != -1 and r.version  = \n" +
             "\t(select min(version) from %s where record_id=r.record_id and status=0 and version > ?)),\n" +
-            "minNextVersion as (select r.record_id, min(r.version) version from %s r, nextVersion nv where r.version > nv.version and r.record_id= nv.record_id group by r.record_id),\n" +
-            "nextVersionEnd as (select mnv.record_id, mnv.version, r.status from minNextVersion mnv, %s r where mnv.version=r.version and mnv.record_id=r.record_id)\n" +
+            "minNextVersion as (select r.record_id, min(r.version) version from %s r, nextVersion nv where r.version > nv.version and r.record_id= nv.record_id and r.status != -1 group by r.record_id),\n" +
+            "nextVersionEnd as (select mnv.record_id, mnv.version, r.status from minNextVersion mnv, %s r where mnv.version=r.version and mnv.record_id=r.record_id and mnv.status != -1)\n" +
             "select nv.id as %s, nv.version as versionStart, nve.version - interval '1' day as versionEnd,\n" +
             "case when (nve.status = 2) then 1 else 0 end as endIsFake \n" +
             "from nextVersion nv \n" +
@@ -762,7 +764,7 @@ public class RefBookOktmoDaoImpl extends AbstractDao implements RefBookOktmoDao 
     }
 
     private static final String GET_RELATED_VERSIONS = "with currentRecord as (select id, record_id from %s where %s),\n" +
-            "recordsByVersion as (select r.ID, r.RECORD_ID, STATUS, VERSION, row_number() over(partition by r.RECORD_ID order by r.version) rn from %s r, currentRecord cr where r.record_id=cr.record_id) \n" +
+            "recordsByVersion as (select r.ID, r.RECORD_ID, STATUS, VERSION, row_number() over(partition by r.RECORD_ID order by r.version) rn from %s r, currentRecord cr where r.record_id=cr.record_id and r.status != -1) \n" +
             "select rv2.ID from currentRecord cr, recordsByVersion rv left outer join recordsByVersion rv2 on rv.RECORD_ID = rv2.RECORD_ID and rv.rn+1 = rv2.rn where cr.id=rv.id and rv2.status=?";
 
     @Override
@@ -860,33 +862,60 @@ public class RefBookOktmoDaoImpl extends AbstractDao implements RefBookOktmoDao 
         return refBookDao.getRecordsCount(ps);
     }
 
-    private static final String IS_RECORDS_ACTIVE_IN_PERIOD = "select id from (\n" +
-            "select input.id as input_id, rbr.id, rbr.record_id, rbr.version as start_version, rbr.status, lead (rbr.version) over (partition by rbr.recorD_id order by rbr.version) end_version \n" +
-            "from %s input\n" +
-            "join %s rbr on input.record_id = rbr.record_id \n" +
-            "where %s \n" +
-            ") a where input_id = id \n" +
-            "and (end_version - 1 >= :periodFrom or end_version is null) \n" +
-            "and (:periodTo is null or start_version <= :periodTo)";
+    private static final String GET_INACTIVE_RECORDS_IN_PERIOD = "select id, \n" +
+            "        case when status = -1 then 0\n" +
+            "             when nvl(next_version, to_date('31.12.9999', 'DD.MM.YYYY')) <= nvl(:periodTo, to_date('31.12.9999', 'DD.MM.YYYY')) then 2 --дата окончания ограничивающего периода\n" +
+            "             when not ((end_version - 1 >= :periodFrom or end_version is null) and (:periodTo is null or start_version <= :periodFrom)) then 1 end state                    \n" +
+            "from   (\n" +
+            "       select input.id as input_id, rbr.id, rbr.record_id, rbr.version as start_version, rbr.status, lead (rbr.version) over (partition by input.id order by rbr.version) end_version, case when input.status = 0 then lead (rbr.version) over (partition by input.id, rbr.status order by rbr.version) end next_version \n" +
+            "       from %s input\n" +
+            "       join %s rbr on input.record_id = rbr.record_id \n" +
+            "       where %s \n" +
+            "       ) a where input_id = id";
 
     @Override
-    public List<Long> isRecordsActiveInPeriod(String tableName, @NotNull List<Long> recordIds, @NotNull Date periodFrom, @NotNull Date periodTo) {
-        String sql = String.format(IS_RECORDS_ACTIVE_IN_PERIOD, tableName, tableName, SqlUtils.transformToSqlInStatement("input.id", recordIds));
-        Set<Long> result = new HashSet<Long>(recordIds);
+    public Map<Long, CheckResult> getInactiveRecordsInPeriod(String tableName, @NotNull List<Long> recordIds, @NotNull Date periodFrom, @NotNull Date periodTo) {
+        //Исключаем несуществующие записи
+        String sql = String.format("select id from %s where %s and status != -1", tableName, SqlUtils.transformToSqlInStatement("id", recordIds));
+        final Map<Long, CheckResult> result = new HashMap<Long, CheckResult>();
+        recordIds = new LinkedList<Long>(recordIds);
         List<Long> existRecords = new ArrayList<Long>();
-        Map<String, Object> params = new HashMap<String, Object>();
-        params.put("periodFrom", periodFrom);
-        params.put("periodTo", periodTo);
         try {
-            existRecords = getNamedParameterJdbcTemplate().query(sql, params, new RowMapper<Long>() {
+            //Получаем список существующих записей среди входного набора
+            existRecords = getJdbcTemplate().query(sql, new RowMapper<Long>() {
                 @Override
                 public Long mapRow(ResultSet rs, int rowNum) throws SQLException {
                     return rs.getLong("id");
                 }
             });
         } catch (EmptyResultDataAccessException ignored) {}
-        result.removeAll(existRecords);
-        return new ArrayList<Long>(result);
+        for (Iterator<Long> it = recordIds.iterator(); it.hasNext();) {
+            Long recordId = it.next();
+            //Если запись не найдена среди существующих, то проставляем статус и удаляем ее из списка для остальных проверок
+            if (!existRecords.contains(recordId)) {
+                result.put(recordId, CheckResult.NOT_EXISTS);
+                it.remove();
+            }
+        }
+        if (!recordIds.isEmpty()) {
+            //Проверяем оставшиеся записи
+            sql = String.format(GET_INACTIVE_RECORDS_IN_PERIOD, tableName, tableName, transformToSqlInStatement("input.id", recordIds));
+            Map<String, Object> params = new HashMap<String, Object>();
+            params.put("periodFrom", periodFrom);
+            params.put("periodTo", periodTo);
+            try {
+                getNamedParameterJdbcTemplate().query(sql, params, new RowCallbackHandler() {
+                    @Override
+                    public void processRow(ResultSet rs) throws SQLException {
+                        Integer resultCode = SqlUtils.getInteger(rs, "state");
+                        if (resultCode != null) {
+                            result.put(SqlUtils.getLong(rs, "id"), CheckResult.getByCode(resultCode));
+                        }
+                    }
+                });
+            } catch (EmptyResultDataAccessException ignored) {}
+        }
+        return result;
     }
 
     @Override

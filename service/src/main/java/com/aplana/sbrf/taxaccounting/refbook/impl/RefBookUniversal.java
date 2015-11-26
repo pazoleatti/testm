@@ -777,7 +777,7 @@ public class RefBookUniversal implements RefBookDataProvider {
         List<FormLink> forms = refBookDao.isVersionUsedInForms(refBookId, uniqueRecordIds, versionFrom, versionTo, restrictPeriod);
         for (FormLink form : forms) {
             //Исключаем экземпляры в статусе "Создана" использующих справочник "Участники ТЦО"
-            if (true) {
+            if (refBookId == RefBook.TCO && form.getState() == WorkflowState.CREATED) {
                 //Для нф в статусе "Создана" удаляем сформированные печатные представления, отменяем задачи на их формирование и рассылаем уведомления
                 reportService.delete(form.getFormDataId(), null);
                 List<ReportType> interruptedReportTypes = Arrays.asList(ReportType.EXCEL, ReportType.CSV);
@@ -1097,8 +1097,8 @@ public class RefBookUniversal implements RefBookDataProvider {
     }
 
     @Override
-    public List<Long> getInactiveRecordsInPeriod(@NotNull List<Long> recordIds, @NotNull Date periodFrom, Date periodTo) {
-        return refBookDao.isRecordsActiveInPeriod(recordIds, periodFrom, periodTo);
+    public Map<Long, CheckResult> getInactiveRecordsInPeriod(@NotNull List<Long> recordIds, @NotNull Date periodFrom, Date periodTo) {
+        return refBookDao.getInactiveRecordsInPeriod(recordIds, periodFrom, periodTo);
     }
 
     @Override

@@ -24,10 +24,10 @@ import static org.junit.Assert.assertEquals;
 
 @Ignore("Включать только локально, со включенным тестом не коммитить!")
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration({ "SourcesTest.xml" })
+@ContextConfiguration({"ForOracleTest.xml"})
 @Transactional
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
-public class SourcesTest {
+public class SourcesOracleTest {
 
     private static final SimpleDateFormat df = new SimpleDateFormat("dd.MM.yyyy");
 
@@ -54,7 +54,7 @@ public class SourcesTest {
 
     @Before
     public void init() {
-        String script = "classpath:data/Sources.sql";
+        String script = "classpath:data/SourcesOracle.sql";
         Resource resource = ctx.getResource(script);
         JdbcTestUtils.executeSqlScript((JdbcTemplate) namedParameterJdbcTemplate.getJdbcOperations(), resource, true);
     }

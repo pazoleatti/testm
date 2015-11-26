@@ -234,8 +234,8 @@ public class RefBookUser implements RefBookDataProvider {
     }
 
     @Override
-    public List<Long> getInactiveRecordsInPeriod(@NotNull List<Long> recordIds, @NotNull Date periodFrom, Date periodTo) {
-        return refBookUserDao.isRecordsActiveInPeriod(recordIds);
+    public Map<Long, CheckResult> getInactiveRecordsInPeriod(@NotNull List<Long> recordIds, @NotNull Date periodFrom, Date periodTo) {
+        return refBookUserDao.getInactiveRecordsInPeriod(recordIds);
     }
 
 	@Override

@@ -7,9 +7,12 @@ import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookUserDao;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
+import com.aplana.sbrf.taxaccounting.model.refbook.CheckResult;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
+import com.aplana.sbrf.taxaccounting.model.util.Pair;
+import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.RowMapper;
@@ -77,19 +80,23 @@ class RefBookUserDaoImpl extends AbstractDao implements RefBookUserDao {
     }
 
     @Override
-    public List<Long> isRecordsActiveInPeriod(@NotNull List<Long> recordIds) {
-        String sql = "select id from "+ TABLE_NAME +" where %s";
-        Set<Long> result = new HashSet<Long>(recordIds);
+    public Map<Long, CheckResult> getInactiveRecordsInPeriod(@NotNull List<Long> recordIds) {
+        String sql = String.format("select id from "+ TABLE_NAME +" where %s", SqlUtils.transformToSqlInStatement("id", recordIds));
+        Map<Long, CheckResult> result = new HashMap<Long, CheckResult>();
         List<Long> existRecords = new ArrayList<Long>();
         try {
-            existRecords = getJdbcTemplate().query(String.format(sql, SqlUtils.transformToSqlInStatement("id", recordIds)), new RowMapper<Long>() {
+            existRecords = getJdbcTemplate().query(sql, new RowMapper<Long>() {
                 @Override
                 public Long mapRow(ResultSet rs, int rowNum) throws SQLException {
                     return rs.getLong("id");
                 }
             });
         } catch (EmptyResultDataAccessException ignored) {}
-        result.removeAll(existRecords);
-        return new ArrayList<Long>(result);
+        for (Long recordId : recordIds) {
+            if (!existRecords.contains(recordId)) {
+                result.put(recordId, CheckResult.NOT_EXISTS);
+            }
+        }
+        return result;
     }
 }

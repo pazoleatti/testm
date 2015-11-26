@@ -12,15 +12,7 @@ import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
-import com.aplana.sbrf.taxaccounting.model.refbook.CheckCrossVersionsResult;
-import com.aplana.sbrf.taxaccounting.model.refbook.CrossResult;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributePair;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookRecord;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookRecordVersion;
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
+import com.aplana.sbrf.taxaccounting.model.refbook.*;
 import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.model.util.StringUtils;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
@@ -564,21 +556,21 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
                     "  ref_book_record r\n" +
                     "where\n" +
                     "  r.ref_book_id = ? and r.status = 0 and r.version <= ? and\n" +
-                    "  not exists (select 1 from ref_book_record r2 where r2.ref_book_id=r.ref_book_id and r2.record_id=r.record_id and r2.version between r.version + interval '1' day and ?)\n" +
+                    "  not exists (select 1 from ref_book_record r2 where r2.ref_book_id=r.ref_book_id and r2.record_id=r.record_id and r2.status != -1 and r2.version between r.version + interval '1' day and ?)\n" +
                     "group by\n" +
                     "  record_id)\n";
 
     private static final String RECORD_VERSIONS_ALL =
-            "with recordsByVersion as (select r.ID, r.RECORD_ID, r.REF_BOOK_ID, r.VERSION, r.STATUS, row_number() over(partition by r.RECORD_ID order by r.version) rn from REF_BOOK_RECORD r where r.ref_book_id = %d), \n" +
+            "with recordsByVersion as (select r.ID, r.RECORD_ID, r.REF_BOOK_ID, r.VERSION, r.STATUS, row_number() over(partition by r.RECORD_ID order by r.version) rn from REF_BOOK_RECORD r where r.ref_book_id = %d and r.status != -1), \n" +
                     "t as (select rv.ID, rv.RECORD_ID RECORD_ID, rv.VERSION version, rv2.version - interval '1' day versionEnd from recordsByVersion rv left outer join recordsByVersion rv2 on rv.RECORD_ID = rv2.RECORD_ID and rv.rn+1 = rv2.rn where rv.status=?)\n";
 
     private static final String RECORD_VERSIONS_STATEMENT_BY_ID =
             "with currentRecord as (select id, record_id, version from REF_BOOK_RECORD where id=%d),\n" +
-                    "recordsByVersion as (select r.ID, r.RECORD_ID, r.REF_BOOK_ID, r.VERSION, r.STATUS, row_number() over(partition by r.RECORD_ID order by r.version) rn from REF_BOOK_RECORD r, currentRecord cr where r.REF_BOOK_ID=%d and r.RECORD_ID=cr.RECORD_ID), \n" +
+                    "recordsByVersion as (select r.ID, r.RECORD_ID, r.REF_BOOK_ID, r.VERSION, r.STATUS, row_number() over(partition by r.RECORD_ID order by r.version) rn from REF_BOOK_RECORD r, currentRecord cr where r.REF_BOOK_ID=%d and r.RECORD_ID=cr.RECORD_ID and r.status != -1), \n" +
                     "t as (select rv.ID, rv.RECORD_ID RECORD_ID, rv.VERSION version, rv2.version - interval '1' day versionEnd from recordsByVersion rv left outer join recordsByVersion rv2 on rv.RECORD_ID = rv2.RECORD_ID and rv.rn+1 = rv2.rn where rv.status=?)\n";
 
     private static final String RECORD_VERSIONS_STATEMENT_BY_RECORD_ID =
-            "with recordsByVersion as (select r.ID, r.RECORD_ID, r.REF_BOOK_ID, r.VERSION, r.STATUS, row_number() over(partition by r.RECORD_ID order by r.version) rn from REF_BOOK_RECORD r where r.record_id=%d and r.ref_book_id = %d), \n" +
+            "with recordsByVersion as (select r.ID, r.RECORD_ID, r.REF_BOOK_ID, r.VERSION, r.STATUS, row_number() over(partition by r.RECORD_ID order by r.version) rn from REF_BOOK_RECORD r where r.record_id=%d and r.ref_book_id = %d and r.status != -1), \n" +
                     "t as (select rv.ID, rv.RECORD_ID RECORD_ID, rv.VERSION version, rv2.version - interval '1' day versionEnd from recordsByVersion rv left outer join recordsByVersion rv2 on rv.RECORD_ID = rv2.RECORD_ID and rv.rn+1 = rv2.rn where rv.status=?)\n";
 
     /**
@@ -1085,41 +1077,68 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 
     @Override
     public boolean isVersionsExist(Long refBookId, List<Long> recordIds, Date version) {
-        String sql = "select count(*) from ref_book_record where ref_book_id = ? and %s and version = trunc(?, 'DD')";
+        String sql = "select count(*) from ref_book_record where ref_book_id = ? and %s and version = trunc(?, 'DD') and status != -1";
         return getJdbcTemplate().queryForInt(String.format(sql, transformToSqlInStatement("record_id", recordIds)), refBookId, version) != 0;
     }
 
-    private static final String IS_RECORDS_ACTIVE_IN_PERIOD = "select id from (\n" +
-            "select input.id as input_id, rbr.id, rbr.record_id, rbr.version as start_version, rbr.status, lead (rbr.version) over (partition by rbr.record_id order by rbr.version) end_version \n" +
-            "from ref_book_record input\n" +
-            "join ref_book_record rbr on input.record_id = rbr.record_id and input.ref_book_id = rbr.ref_book_id \n" +
-            "where %s \n" +
-            ") a where input_id = id \n" +
-            "and (end_version - 1 >= :periodFrom or end_version is null) \n" +
-            "and (:periodTo is null or start_version <= :periodTo)";
+    private static final String GET_INACTIVE_RECORDS_IN_PERIOD = "select id, \n" +
+            "        case when status = -1 then 0\n" +
+            "             when nvl(next_version, to_date('31.12.9999', 'DD.MM.YYYY')) <= nvl(:periodTo, to_date('31.12.9999', 'DD.MM.YYYY')) then 2 --дата окончания ограничивающего периода\n" +
+            "             when not ((end_version - 1 >= :periodFrom or end_version is null) and (:periodTo is null or start_version <= :periodFrom)) then 1 end state                    \n" +
+            "from   (\n" +
+            "       select input.id as input_id, rbr.id, rbr.record_id, rbr.version as start_version, rbr.status, lead (rbr.version) over (partition by input.id order by rbr.version) end_version, case when input.status = 0 then lead (rbr.version) over (partition by input.id, rbr.status order by rbr.version) end next_version \n" +
+            "       from ref_book_record input\n" +
+            "       join ref_book_record rbr on input.record_id = rbr.record_id and input.ref_book_id = rbr.ref_book_id \n" +
+            "       where %s \n" +
+            "       ) a where input_id = id";
 
     @Override
-    public List<Long> isRecordsActiveInPeriod(@NotNull List<Long> recordIds, @NotNull Date periodFrom, @NotNull Date periodTo) {
-        String sql = String.format(IS_RECORDS_ACTIVE_IN_PERIOD, transformToSqlInStatement("input.id", recordIds));
-        Set<Long> result = new HashSet<Long>(recordIds);
+    public Map<Long, CheckResult> getInactiveRecordsInPeriod(@NotNull List<Long> recordIds, @NotNull Date periodFrom, @NotNull Date periodTo) {
+        //Исключаем несуществующие записи
+        String sql = String.format("select id from ref_book_record where %s and status != -1", SqlUtils.transformToSqlInStatement("id", recordIds));
+        final Map<Long, CheckResult> result = new HashMap<Long, CheckResult>();
+        recordIds = new LinkedList<Long>(recordIds);
         List<Long> existRecords = new ArrayList<Long>();
-        Map<String, Object> params = new HashMap<String, Object>();
-        params.put("periodFrom", periodFrom);
-        params.put("periodTo", periodTo);
         try {
-            existRecords = getNamedParameterJdbcTemplate().query(sql, params, new RowMapper<Long>() {
+            //Получаем список существующих записей среди входного набора
+            existRecords = getJdbcTemplate().query(sql, new RowMapper<Long>() {
                 @Override
                 public Long mapRow(ResultSet rs, int rowNum) throws SQLException {
                     return rs.getLong("id");
                 }
             });
         } catch (EmptyResultDataAccessException ignored) {}
-        result.removeAll(existRecords);
-        return new ArrayList<Long>(result);
+        for (Iterator<Long> it = recordIds.iterator(); it.hasNext();) {
+            Long recordId = it.next();
+            //Если запись не найдена среди существующих, то проставляем статус и удаляем ее из списка для остальных проверок
+            if (!existRecords.contains(recordId)) {
+                result.put(recordId, CheckResult.NOT_EXISTS);
+                it.remove();
+            }
+        }
+        if (!recordIds.isEmpty()) {
+            //Проверяем оставшиеся записи
+            sql = String.format(GET_INACTIVE_RECORDS_IN_PERIOD, transformToSqlInStatement("input.id", recordIds));
+            Map<String, Object> params = new HashMap<String, Object>();
+            params.put("periodFrom", periodFrom);
+            params.put("periodTo", periodTo);
+            try {
+                getNamedParameterJdbcTemplate().query(sql, params, new RowCallbackHandler() {
+                    @Override
+                    public void processRow(ResultSet rs) throws SQLException {
+                        Integer resultCode = SqlUtils.getInteger(rs, "state");
+                        if (resultCode != null) {
+                            result.put(SqlUtils.getLong(rs, "id"), CheckResult.getByCode(resultCode));
+                        }
+                    }
+                });
+            } catch (EmptyResultDataAccessException ignored) {}
+        }
+        return result;
     }
 
     private static final String CHECK_REF_BOOK_RECORD_UNIQUE_SQL = "select id from ref_book_record " +
-            "where ref_book_id = ? and version = trunc(?, 'DD') and record_id = ?";
+            "where ref_book_id = ? and version = trunc(?, 'DD') and record_id = ? and status != -1";
 
     private void checkFillRequiredFields(Map<String, RefBookValue> record, @NotNull RefBook refBook) {
         List<RefBookAttribute> attributes = refBook.getAttributes();
@@ -1206,7 +1225,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 
     private static final String GET_RECORD_VERSION = "with currentVersion as (select id, version, record_id, ref_book_id from ref_book_record where id = ?),\n" +
             "minNextVersion as (select r.ref_book_id, r.record_id, min(r.version) version from ref_book_record r, currentVersion cv where r.version > cv.version and r.record_id= cv.record_id and r.ref_book_id= cv.ref_book_id and status != -1 group by r.ref_book_id, r.record_id),\n" +
-            "nextVersionEnd as (select mnv.ref_book_id, mnv.record_id, mnv.version, r.status from minNextVersion mnv, ref_book_record r where mnv.ref_book_id=r.ref_book_id and mnv.version=r.version and mnv.record_id=r.record_id)\n" +
+            "nextVersionEnd as (select mnv.ref_book_id, mnv.record_id, mnv.version, r.status from minNextVersion mnv, ref_book_record r where mnv.ref_book_id=r.ref_book_id and mnv.version=r.version and mnv.record_id=r.record_id and r.status != -1)\n" +
             "select cv.id as %s, \n" +
             "cv.version as versionStart, \n" +
             "nve.version - interval '1' day as versionEnd, \n" +
@@ -1299,7 +1318,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 
     @Override
     public List<Date> hasChildren(Long refBookId, List<Long> uniqueRecordIds) {
-        String sql = String.format("select distinct r.version from ref_book_value v, ref_book_record r where v.attribute_id = (select id from ref_book_attribute where ref_book_id=? and alias='%s') and %s and r.id=v.reference_value",
+        String sql = String.format("select distinct r.version from ref_book_value v, ref_book_record r where v.attribute_id = (select id from ref_book_attribute where ref_book_id=? and alias='%s') and %s and r.id=v.reference_value and r.status != -1",
                 RefBook.RECORD_PARENT_ID_ALIAS, transformToSqlInStatement("v.reference_value", uniqueRecordIds));
         try {
             return getJdbcTemplate().query(sql, new RowMapper<Date>() {
@@ -1465,7 +1484,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     }
 
     private static final String CHECK_CROSS_VERSIONS = "with allVersions as (select r.* from ref_book_record r where status != -1 and ref_book_id=:refBookId and record_id=:recordId and (:excludedRecordId is null or id != :excludedRecordId)),\n" +
-            "recordsByVersion as (select r.*, row_number() over(partition by r.record_id order by r.version) rn from ref_book_record r, allVersions av where r.id=av.id),\n" +
+            "recordsByVersion as (select r.*, row_number() over(partition by r.record_id order by r.version) rn from ref_book_record r, allVersions av where r.id=av.id and r.status != -1),\n" +
             "versionInfo as (select rv.rn NUM, rv.ID, rv.VERSION, rv.status, rv2.version - interval '1' day nextVersion,rv2.status nextStatus from recordsByVersion rv left outer join recordsByVersion rv2 on rv.RECORD_ID = rv2.RECORD_ID and rv.rn+1 = rv2.rn)\n" +
             "select num, id, version, status, nextversion, nextstatus, \n" +
             "case\n" +
@@ -1791,7 +1810,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     }
 
     private final static String CHECK_CONFLICT_VALUES_VERSIONS = "with conflictRecord as (select * from REF_BOOK_RECORD where %s),\n" +
-            "allRecordsInConflictGroup as (select r.* from REF_BOOK_RECORD r where exists (select 1 from conflictRecord cr where r.REF_BOOK_ID=cr.REF_BOOK_ID and r.RECORD_ID=cr.RECORD_ID)),\n" +
+            "allRecordsInConflictGroup as (select r.* from REF_BOOK_RECORD r where exists (select 1 from conflictRecord cr where r.REF_BOOK_ID=cr.REF_BOOK_ID and r.RECORD_ID=cr.RECORD_ID and r.status != -1)),\n" +
             "recordsByVersion as (select ar.*, row_number() over(partition by ar.RECORD_ID order by ar.version) rn from allRecordsInConflictGroup ar),\n" +
             "versionInfo as (select rv.ID, rv.VERSION versionFrom, rv2.version - interval '1' day versionTo from conflictRecord cr, recordsByVersion rv left outer join recordsByVersion rv2 on rv.RECORD_ID = rv2.RECORD_ID and rv.rn+1 = rv2.rn where rv.ID=cr.ID)" +
             "select ID from versionInfo where (\n" +
@@ -1829,7 +1848,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
                         "  min(version) - interval '1' DAY FROM ref_book_record rn WHERE rn.ref_book_id = r.ref_book_id AND rn.record_id = r.record_id AND rn.version > r.version) AS versionEnd\n" +
                         "from ref_book_record r, ref_book_value v " +
                         "where r.id=v.record_id and v.attribute_id in (select id from ref_book_attribute where reference_id=?) " +
-                        "and r.version >= ? and v.REFERENCE_VALUE=?", new RowMapper<Pair<Date, Date>>() {
+                        "and r.version >= ? and v.REFERENCE_VALUE=? and r.status != -1", new RowMapper<Pair<Date, Date>>() {
                     @Override
                     public Pair<Date, Date> mapRow(ResultSet rs, int rowNum) throws SQLException {
                         return new Pair<Date, Date>(rs.getDate("version"), rs.getDate("versionEnd"));
@@ -1841,7 +1860,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     private static final String CHECK_USAGES_IN_DEPARTMENT_CONFIG = "select * from (with checkRecords as (select * from ref_book_record r where %s),\n" +
             "periodCodes as (select a.alias, v.* from ref_book_value v, ref_book_attribute a where v.attribute_id=a.id and a.ref_book_id=8),\n" +
             "usages as (select r.* from ref_book_value v, ref_book_record r, checkRecords cr " +
-            "where v.attribute_id in (select id from ref_book_attribute where ref_book_id in (37,310,31,98,330,33,206,99) %s and alias != 'DEPARTMENT_ID') and v.reference_value = cr.id and r.id=v.record_id)\n" +
+            "where v.attribute_id in (select id from ref_book_attribute where ref_book_id in (37,310,31,98,330,33,206,99) %s and alias != 'DEPARTMENT_ID') and v.reference_value = cr.id and r.id=v.record_id and r.status != -1)\n" +
             "select distinct d.name as departmentName, concat(pn.string_value, to_char(u.version,' yyyy')) as periodName, nt.number_value as isT, ni.number_value as isI, nd.number_value as isD, nv.number_value as isV, np.number_value as isP,\n" +
             "to_date(concat(to_char(ps.date_value,'dd.mm'), to_char(u.version,'.yyyy')), 'DD.MM.YYYY') as periodStart, to_date(concat(to_char(pe.date_value,'dd.mm'), to_char(u.version,'.yyyy')), 'DD.MM.YYYY') as periodEnd,\n" +
             "case\n" +
@@ -1999,14 +2018,14 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     private static final String CHECK_USAGES_IN_REFBOOK =
             "SELECT r.id, b.name AS refbookName, b.is_versioned as versioned, r.version AS versionStart, uv.string_value, uv.number_value, uv.date_value, uv.reference_value,\n" +
                     "  (SELECT\n" +
-                    "  min(version) - interval '1' DAY FROM ref_book_record rn WHERE rn.ref_book_id = r.ref_book_id AND rn.record_id = r.record_id AND rn.version > r.version) AS versionEnd\n" +
+                    "  min(version) - interval '1' DAY FROM ref_book_record rn WHERE rn.ref_book_id = r.ref_book_id AND rn.record_id = r.record_id AND rn.version > r.version and rn.status != -1) AS versionEnd\n" +
                     "FROM ref_book_record r\n" +
                     "  JOIN ref_book b on b.id = r.REF_BOOK_ID\n" +
                     "  JOIN ref_book_value v on v.RECORD_ID = r.id\n" +
                     "  JOIN ref_book_attribute a on a.id = v.ATTRIBUTE_ID\n" +
                     "  JOIN ref_book_value uv on uv.RECORD_ID = r.id \n" +
                     "  JOIN ref_book_attribute ua on (ua.id = uv.ATTRIBUTE_ID and ua.is_unique > 0)\n" +
-                    "WHERE %s and a.reference_id = :refBookId and b.id not in (37,310,31,98,330,33,206,99) %s";
+                    "WHERE %s and a.reference_id = :refBookId and r.status != -1 and b.id not in (37,310,31,98,330,33,206,99) %s";
 
     public List<String> isVersionUsedInRefBooks(Long refBookId, List<Long> uniqueRecordIds, Date versionFrom, Date versionTo,
                                                 Boolean restrictPeriod, List<Long> excludedRefBooks) {
@@ -2165,10 +2184,10 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
                         Arrays.asList(ArrayUtils.toObject(RefBookTableRef.getTablesIdByRefBook(refBookId))));
     }
 
-    private static final String GET_NEXT_RECORD_VERSION = "with nextVersion as (select r.* from ref_book_record r where r.ref_book_id = ? and r.record_id = ? and r.version  = \n" +
+    private static final String GET_NEXT_RECORD_VERSION = "with nextVersion as (select r.* from ref_book_record r where r.ref_book_id = ? and r.record_id = ? and r.status != -1 and r.version  = \n" +
             "\t(select min(version) from ref_book_record where ref_book_id=r.ref_book_id and record_id=r.record_id and status=0 and version > ?)),\n" +
-            "minNextVersion as (select r.ref_book_id, r.record_id, min(r.version) version from ref_book_record r, nextVersion nv where r.version > nv.version and r.record_id= nv.record_id and r.ref_book_id= nv.ref_book_id group by r.ref_book_id, r.record_id),\n" +
-            "nextVersionEnd as (select mnv.ref_book_id, mnv.record_id, mnv.version, r.status from minNextVersion mnv, ref_book_record r where mnv.ref_book_id=r.ref_book_id and mnv.version=r.version and mnv.record_id=r.record_id)\n" +
+            "minNextVersion as (select r.ref_book_id, r.record_id, min(r.version) version from ref_book_record r, nextVersion nv where r.version > nv.version and r.record_id= nv.record_id and r.ref_book_id= nv.ref_book_id and r.status != -1 group by r.ref_book_id, r.record_id),\n" +
+            "nextVersionEnd as (select mnv.ref_book_id, mnv.record_id, mnv.version, r.status from minNextVersion mnv, ref_book_record r where mnv.ref_book_id=r.ref_book_id and mnv.version=r.version and mnv.record_id=r.record_id and r.status != -1)\n" +
             "select nv.id as %s, nv.version as versionStart, nve.version - interval '1' day as versionEnd,\n" +
             "case when (nve.status = 2) then 1 else 0 end as endIsFake \n" +
             "from nextVersion nv \n" +
@@ -2190,8 +2209,8 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 
     private static final String GET_PREVIOUS_RECORD_VERSION = "with previousVersion as (select r.* from ref_book_record r where r.ref_book_id = ? and r.record_id = ? and r.version  = \n" +
             "\t(select max(version) from ref_book_record where ref_book_id=r.ref_book_id and record_id=r.record_id and status=0 and version < ?)),\n" +
-            "minNextVersion as (select r.ref_book_id, r.record_id, min(r.version) version from ref_book_record r, previousVersion pv where r.version > pv.version and r.record_id= pv.record_id and r.ref_book_id= pv.ref_book_id group by r.ref_book_id, r.record_id),\n" +
-            "nextVersionEnd as (select mnv.ref_book_id, mnv.record_id, mnv.version, r.status from minNextVersion mnv, ref_book_record r where mnv.ref_book_id=r.ref_book_id and mnv.version=r.version and mnv.record_id=r.record_id)\n" +
+            "minNextVersion as (select r.ref_book_id, r.record_id, min(r.version) version from ref_book_record r, previousVersion pv where r.version > pv.version and r.record_id= pv.record_id and r.ref_book_id= pv.ref_book_id and r.status != -1 group by r.ref_book_id, r.record_id),\n" +
+            "nextVersionEnd as (select mnv.ref_book_id, mnv.record_id, mnv.version, r.status from minNextVersion mnv, ref_book_record r where mnv.ref_book_id=r.ref_book_id and mnv.version=r.version and mnv.record_id=r.record_id and r.status != -1)\n" +
             "select pv.id as %s, pv.version as versionStart, nve.version - interval '1' day as versionEnd,\n" +
             "case when (nve.status = 2) then 1 else 0 end as endIsFake \n" +
             "from previousVersion pv \n" +
@@ -2223,7 +2242,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 
     @Override
     public Long findRecord(Long refBookId, Long recordId, Date version) {
-        return getJdbcTemplate().queryForLong("select id from ref_book_record where ref_book_id = ? and record_id = ? and version = ?", refBookId, recordId, version);
+        return getJdbcTemplate().queryForLong("select id from ref_book_record where ref_book_id = ? and record_id = ? and version = ? and status != -1", refBookId, recordId, version);
     }
 
     private static final String DELETE_ALL_VERSIONS = "update ref_book_record set status = -1 where ref_book_id=? and record_id in (select record_id from ref_book_record where %s)";
@@ -2235,7 +2254,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     }
 
     private static final String GET_RELATED_VERSIONS = "with currentRecord as (select id, record_id, ref_book_id from REF_BOOK_RECORD where %s),\n" +
-            "recordsByVersion as (select r.ID, r.RECORD_ID, STATUS, VERSION, row_number() over(partition by r.RECORD_ID order by r.version) rn from REF_BOOK_RECORD r, currentRecord cr where r.ref_book_id=cr.ref_book_id and r.record_id=cr.record_id) \n" +
+            "recordsByVersion as (select r.ID, r.RECORD_ID, STATUS, VERSION, row_number() over(partition by r.RECORD_ID order by r.version) rn from REF_BOOK_RECORD r, currentRecord cr where r.ref_book_id=cr.ref_book_id and r.record_id=cr.record_id and r.status != -1) \n" +
             "select rv2.ID from currentRecord cr, recordsByVersion rv left outer join recordsByVersion rv2 on rv.RECORD_ID = rv2.RECORD_ID and rv.rn+1 = rv2.rn where cr.id=rv.id and rv2.status=%d";
 
     @Override
