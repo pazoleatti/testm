@@ -30,7 +30,7 @@ public class RefBookTreePickerPresenter extends PresenterWidget<RefBookTreePicke
     private PickerState ps;
     private boolean isNeedSelectFirstItem = false;
 
-    interface MyView extends View, HasUiHandlers<RefBookTreePickerUiHandlers> {
+    public interface MyView extends View, HasUiHandlers<RefBookTreePickerUiHandlers> {
 
         void loadRoot(List<RefBookTreeItem> values, boolean openOnLoad);
 
@@ -201,13 +201,13 @@ public class RefBookTreePickerPresenter extends PresenterWidget<RefBookTreePicke
     }
 
     @Override
-    public void getValuesCount(String text, final CheckValuesCountHandler checkValuesCountHandler) {
+    public void getValuesCount(String text, Date versionDate, final CheckValuesCountHandler checkValuesCountHandler) {
         GetCountFilterValuesAction action = new GetCountFilterValuesAction();
         action.setHierarchy(true);
         action.setSearchPattern(text);
         action.setFilter(ps.getFilter());
         action.setRefBookAttrId(ps.getRefBookAttrId());
-        action.setVersion(ps.getVersionDate());
+        action.setVersion(versionDate);
         action.setContext(ps.getPickerContext());
         dispatcher.execute(action, CallbackUtils.defaultCallback(new AbstractCallback<GetCountFilterValuesResult>() {
             @Override
@@ -215,6 +215,12 @@ public class RefBookTreePickerPresenter extends PresenterWidget<RefBookTreePicke
                 checkValuesCountHandler.onGetValuesCount(result.getCount());
             }
         }, this));
+    }
+
+    @Override
+    public void updatePS(Date date, String searchPattern) {
+        ps.setVersionDate(date);
+        ps.setSearchPattern(searchPattern);
     }
 
     @Override

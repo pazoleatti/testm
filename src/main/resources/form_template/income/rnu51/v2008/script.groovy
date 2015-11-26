@@ -785,35 +785,35 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
     // размер заголовка проверяется по последней строке (нумерация столбцов) потому что в первых строках есть объединения
     checkHeaderSize(headerRows[rowCount - 1].size(), headerRows.size(), colCount, rowCount)
     def headerMapping = [
-            (headerRows[0][0]) : getColumnName(tmpRow, 'rowNumber'),
-            (headerRows[0][1]) : getColumnName(tmpRow, 'tradeNumber'),
-            (headerRows[0][2]) : getColumnName(tmpRow, 'singSecurirty'),
-            (headerRows[0][3]) : getColumnName(tmpRow, 'issue'),
-            (headerRows[0][4]) : getColumnName(tmpRow, 'acquisitionDate'),
-            (headerRows[0][5]) : getColumnName(tmpRow, 'saleDate'),
-            (headerRows[0][6]) : getColumnName(tmpRow, 'amountBonds'),
-            (headerRows[0][7]) : getColumnName(tmpRow, 'acquisitionPrice'),
-            (headerRows[0][8]) : getColumnName(tmpRow, 'costOfAcquisition'),
-            (headerRows[0][9]) : 'Рыночная цена на дату приобретения',
-            (headerRows[0][11]): getColumnName(tmpRow, 'acquisitionPriceTax'),
-            (headerRows[0][12]): getColumnName(tmpRow, 'redemptionValue'),
-            (headerRows[0][13]): 'Фактическая цена реализации',
-            (headerRows[0][15]): 'Рыночная цена на дату реализации',
-            (headerRows[0][17]): getColumnName(tmpRow, 'salePriceTax'),
-            (headerRows[0][18]): getColumnName(tmpRow, 'expensesOnSale'),
-            (headerRows[0][19]): getColumnName(tmpRow, 'expensesTotal'),
-            (headerRows[0][20]): getColumnName(tmpRow, 'profit'),
-            (headerRows[0][21]): getColumnName(tmpRow, 'excessSalePriceTax'),
+            ([(headerRows[0][0]) : getColumnName(tmpRow, 'rowNumber')]),
+            ([(headerRows[0][1]) : getColumnName(tmpRow, 'tradeNumber')]),
+            ([(headerRows[0][2]) : getColumnName(tmpRow, 'singSecurirty')]),
+            ([(headerRows[0][3]) : getColumnName(tmpRow, 'issue')]),
+            ([(headerRows[0][4]) : getColumnName(tmpRow, 'acquisitionDate')]),
+            ([(headerRows[0][5]) : getColumnName(tmpRow, 'saleDate')]),
+            ([(headerRows[0][6]) : getColumnName(tmpRow, 'amountBonds')]),
+            ([(headerRows[0][7]) : getColumnName(tmpRow, 'acquisitionPrice')]),
+            ([(headerRows[0][8]) : getColumnName(tmpRow, 'costOfAcquisition')]),
+            ([(headerRows[0][9]) : 'Рыночная цена на дату приобретения']),
+            ([(headerRows[0][11]): getColumnName(tmpRow, 'acquisitionPriceTax')]),
+            ([(headerRows[0][12]): getColumnName(tmpRow, 'redemptionValue')]),
+            ([(headerRows[0][13]): 'Фактическая цена реализации']),
+            ([(headerRows[0][15]): 'Рыночная цена на дату реализации']),
+            ([(headerRows[0][17]): getColumnName(tmpRow, 'salePriceTax')]),
+            ([(headerRows[0][18]): getColumnName(tmpRow, 'expensesOnSale')]),
+            ([(headerRows[0][19]): getColumnName(tmpRow, 'expensesTotal')]),
+            ([(headerRows[0][20]): getColumnName(tmpRow, 'profit')]),
+            ([(headerRows[0][21]): getColumnName(tmpRow, 'excessSalePriceTax')]),
 
-            (headerRows[1][9]) : '% к номиналу',
-            (headerRows[1][10]): 'руб.коп.',
-            (headerRows[1][13]): '% к номиналу',
-            (headerRows[1][14]): 'руб.коп.',
-            (headerRows[1][15]): '% к номиналу',
-            (headerRows[1][16]): 'руб.коп.'
+            ([(headerRows[1][9]) : '% к номиналу']),
+            ([(headerRows[1][10]): 'руб.коп.']),
+            ([(headerRows[1][13]): '% к номиналу']),
+            ([(headerRows[1][14]): 'руб.коп.']),
+            ([(headerRows[1][15]): '% к номиналу']),
+            ([(headerRows[1][16]): 'руб.коп.'])
     ]
-    (1..22).each { index ->
-        headerMapping.put((headerRows[2][index - 1]), index.toString())
+    (1..22).each {
+        headerMapping.add(([(headerRows[2][it - 1]): it.toString()]))
     }
     checkHeaderEquals(headerMapping, logger)
 }

@@ -664,22 +664,21 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
     }
     checkHeaderSize(headerRows[0].size(), headerRows.size(), colCount, rowCount)
     def headerMapping = [
-            (headerRows[0][0]) : getColumnName(tmpRow, 'number'),
-            (headerRows[0][2]) : getColumnName(tmpRow, 'regionBank'),
-            (headerRows[0][3]) : getColumnName(tmpRow, 'regionBankDivision'),
-            (headerRows[0][4]) : getColumnName(tmpRow, 'divisionName'),
-            (headerRows[0][5]) : getColumnName(tmpRow, 'kpp'),
-            (headerRows[0][6]) : getColumnName(tmpRow, 'avepropertyPricerageCost'),
-            (headerRows[0][7]) : getColumnName(tmpRow, 'workersCount'),
-            (headerRows[0][8]) : getColumnName(tmpRow, 'subjectTaxCredit'),
-            (headerRows[0][9]) : 'Льготы по налогу в бюджет субъекта (руб.)',
-            (headerRows[1][9]) : 'Уменьшение суммы налога (руб.)',
-            (headerRows[1][10]): 'Ставка налога (%)',
-
-            (headerRows[2][0]): '1'
+            ([(headerRows[0][0]) : getColumnName(tmpRow, 'number')]),
+            ([(headerRows[0][2]) : getColumnName(tmpRow, 'regionBank')]),
+            ([(headerRows[0][3]) : getColumnName(tmpRow, 'regionBankDivision')]),
+            ([(headerRows[0][4]) : getColumnName(tmpRow, 'divisionName')]),
+            ([(headerRows[0][5]) : getColumnName(tmpRow, 'kpp')]),
+            ([(headerRows[0][6]) : getColumnName(tmpRow, 'avepropertyPricerageCost')]),
+            ([(headerRows[0][7]) : getColumnName(tmpRow, 'workersCount')]),
+            ([(headerRows[0][8]) : getColumnName(tmpRow, 'subjectTaxCredit')]),
+            ([(headerRows[0][9]) : 'Льготы по налогу в бюджет субъекта (руб.)']),
+            ([(headerRows[1][9]) : 'Уменьшение суммы налога (руб.)']),
+            ([(headerRows[1][10]): 'Ставка налога (%)']),
+            ([(headerRows[2][0]): '1'])
     ]
-    (2..10).each { index ->
-        headerMapping.put((headerRows[2][index]), index.toString())
+    (2..10).each {
+        headerMapping.add(([(headerRows[2][it]): it.toString()]))
     }
     checkHeaderEquals(headerMapping, logger)
 }

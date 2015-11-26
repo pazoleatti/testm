@@ -608,24 +608,24 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
     checkHeaderSize(headerRows[headerRows.size() - 1].size(), headerRows.size(), colCount, rowCount)
 
     def headerMapping = [
-            (headerRows[0][0]) : getColumnName(tmpRow, 'number'),
-            (headerRows[0][2]) : getColumnName(tmpRow, 'bill'),
-            (headerRows[0][3]) : getColumnName(tmpRow, 'purchaseDate'),
-            (headerRows[0][4]) : getColumnName(tmpRow, 'purchasePrice'),
-            (headerRows[0][5]) : getColumnName(tmpRow, 'purchaseOutcome'),
-            (headerRows[0][6]) : getColumnName(tmpRow, 'implementationDate'),
-            (headerRows[0][7]) : getColumnName(tmpRow, 'implementationPrice'),
-            (headerRows[0][8]) : getColumnName(tmpRow, 'implementationOutcome'),
-            (headerRows[0][9]) : getColumnName(tmpRow, 'price'),
-            (headerRows[0][10]): getColumnName(tmpRow, 'percent'),
-            (headerRows[0][11]): getColumnName(tmpRow, 'implementationpPriceTax'),
-            (headerRows[0][12]): getColumnName(tmpRow, 'allIncome'),
-            (headerRows[0][13]): getColumnName(tmpRow, 'implementationPriceUp'),
-            (headerRows[0][14]): getColumnName(tmpRow, 'income'),
-            (headerRows[1][0]): '1'
+            ([(headerRows[0][0]) : getColumnName(tmpRow, 'number')]),
+            ([(headerRows[0][2]) : getColumnName(tmpRow, 'bill')]),
+            ([(headerRows[0][3]) : getColumnName(tmpRow, 'purchaseDate')]),
+            ([(headerRows[0][4]) : getColumnName(tmpRow, 'purchasePrice')]),
+            ([(headerRows[0][5]) : getColumnName(tmpRow, 'purchaseOutcome')]),
+            ([(headerRows[0][6]) : getColumnName(tmpRow, 'implementationDate')]),
+            ([(headerRows[0][7]) : getColumnName(tmpRow, 'implementationPrice')]),
+            ([(headerRows[0][8]) : getColumnName(tmpRow, 'implementationOutcome')]),
+            ([(headerRows[0][9]) : getColumnName(tmpRow, 'price')]),
+            ([(headerRows[0][10]): getColumnName(tmpRow, 'percent')]),
+            ([(headerRows[0][11]): getColumnName(tmpRow, 'implementationpPriceTax')]),
+            ([(headerRows[0][12]): getColumnName(tmpRow, 'allIncome')]),
+            ([(headerRows[0][13]): getColumnName(tmpRow, 'implementationPriceUp')]),
+            ([(headerRows[0][14]): getColumnName(tmpRow, 'income')]),
+            ([(headerRows[1][0]): '1'])
     ]
-    (2..14).each { index ->
-        headerMapping.put(headerRows[1][index], index.toString())
+    (2..14).each {
+        headerMapping.add(([(headerRows[1][it]): it.toString()]))
     }
     checkHeaderEquals(headerMapping, logger)
 }

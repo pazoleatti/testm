@@ -840,30 +840,30 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
     checkHeaderSize(headerRows[headerRows.size() - 1].size(), headerRows.size(), colCount, rowCount)
 
     def headerMapping = [
-            (headerRows[0][0]) : getColumnName(tmpRow, 'rowNumber'),
-            (headerRows[0][1]) : getColumnName(tmpRow, 'invNumber'),
-            (headerRows[0][2]) : getColumnName(tmpRow, 'name'),
-            (headerRows[0][3]) : getColumnName(tmpRow, 'cost'),
-            (headerRows[0][4]) : getColumnName(tmpRow, 'amortGroup'),
-            (headerRows[0][5]) : getColumnName(tmpRow, 'usefulLife'),
-            (headerRows[0][6]) : getColumnName(tmpRow, 'monthsUsed'),
-            (headerRows[0][7]) : getColumnName(tmpRow, 'usefulLifeWithUsed'),
-            (headerRows[0][8]) : getColumnName(tmpRow, 'specCoef'),
-            (headerRows[0][9]) : '10% (30%) от первоначальной стоимости, включаемые в расходы',
-            (headerRows[1][9]) : 'За месяц',
-            (headerRows[1][10]): 'с начала налогового периода',
-            (headerRows[1][11]): 'с даты ввода в эксплуатацию',
-            (headerRows[0][12]): getColumnName(tmpRow, 'amortNorm'),
-            (headerRows[0][13]): 'Сумма начисленной амортизации',
-            (headerRows[1][13]): 'за месяц',
-            (headerRows[1][14]): 'с начала налогового периода',
-            (headerRows[1][15]): 'с даты ввода в эксплуатацию',
-            (headerRows[0][16]): getColumnName(tmpRow, 'exploitationStart'),
-            (headerRows[0][17]): getColumnName(tmpRow, 'usefullLifeEnd'),
-            (headerRows[0][18]): getColumnName(tmpRow, 'rentEnd')
+            ([(headerRows[0][0]) : getColumnName(tmpRow, 'rowNumber')]),
+            ([(headerRows[0][1]) : getColumnName(tmpRow, 'invNumber')]),
+            ([(headerRows[0][2]) : getColumnName(tmpRow, 'name')]),
+            ([(headerRows[0][3]) : getColumnName(tmpRow, 'cost')]),
+            ([(headerRows[0][4]) : getColumnName(tmpRow, 'amortGroup')]),
+            ([(headerRows[0][5]) : getColumnName(tmpRow, 'usefulLife')]),
+            ([(headerRows[0][6]) : getColumnName(tmpRow, 'monthsUsed')]),
+            ([(headerRows[0][7]) : getColumnName(tmpRow, 'usefulLifeWithUsed')]),
+            ([(headerRows[0][8]) : getColumnName(tmpRow, 'specCoef')]),
+            ([(headerRows[0][9]) : '10% (30%) от первоначальной стоимости, включаемые в расходы']),
+            ([(headerRows[1][9]) : 'За месяц']),
+            ([(headerRows[1][10]): 'с начала налогового периода']),
+            ([(headerRows[1][11]): 'с даты ввода в эксплуатацию']),
+            ([(headerRows[0][12]): getColumnName(tmpRow, 'amortNorm')]),
+            ([(headerRows[0][13]): 'Сумма начисленной амортизации']),
+            ([(headerRows[1][13]): 'за месяц']),
+            ([(headerRows[1][14]): 'с начала налогового периода']),
+            ([(headerRows[1][15]): 'с даты ввода в эксплуатацию']),
+            ([(headerRows[0][16]): getColumnName(tmpRow, 'exploitationStart')]),
+            ([(headerRows[0][17]): getColumnName(tmpRow, 'usefullLifeEnd')]),
+            ([(headerRows[0][18]): getColumnName(tmpRow, 'rentEnd')])
     ]
-    (1..19).each { index ->
-        headerMapping.put(headerRows[2][index - 1], index.toString())
+    (1..19).each {
+        headerMapping.add(([(headerRows[2][it - 1]): it.toString()]))
     }
     checkHeaderEquals(headerMapping, logger)
 }

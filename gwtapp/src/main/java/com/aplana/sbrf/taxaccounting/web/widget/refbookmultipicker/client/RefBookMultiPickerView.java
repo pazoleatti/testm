@@ -439,7 +439,7 @@ public class RefBookMultiPickerView extends ViewWithUiHandlers<RefBookMultiPicke
     }
 
     @Override
-    public void checkCount(String text, CheckValuesCountHandler checkValuesCountHandler) {
+    public void checkCount(String text, Date date, CheckValuesCountHandler checkValuesCountHandler) {
         getUiHandlers().getValuesCount(text, checkValuesCountHandler);
     }
 

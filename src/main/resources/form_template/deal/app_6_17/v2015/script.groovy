@@ -183,6 +183,7 @@ void logicCheck() {
             boolean comparePrice = row.price && row.price != sum
             boolean compareCost = row.cost && row.cost != sum
             if (comparePrice && compareCost) {
+                msg = (row.income != null) ? getColumnName(row, 'income') : getColumnName(row, 'outcome')
                 String msg1 = getColumnName(row, 'price')
                 String msg2 = getColumnName(row, 'cost')
                 logger.error("Строка $rowNum: Значение графы «$msg1» и графы «$msg2» должно быть равно значению графы «$msg»!")
@@ -217,6 +218,7 @@ void logicCheck() {
         if (row.docDate) {
             checkDateValid(logger, row, 'docDate', row.docDate, true)
         }
+    }
 
         // 9. Проверка наличия всех фиксированных строк «Итого по ЮЛ»
         // 10. Проверка отсутствия лишних фиксированных строк «Итого по ЮЛ»
@@ -227,7 +229,7 @@ void logicCheck() {
         if (dataRows.find { it.getAlias() == 'total' }) {
             checkTotalSum(dataRows, totalColumns, logger, true)
         }
-    }
+
 }
 // Алгоритмы заполнения полей формы
 void calc() {
@@ -479,19 +481,11 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
             ([(headerRows[2][2]) : 'гр. 2']),
             ([(headerRows[2][3]) : 'гр. 3']),
             ([(headerRows[2][4]) : 'гр. 4.1']),
-            ([(headerRows[2][5]) : 'гр. 4.2']),
-            ([(headerRows[2][6]) : 'гр. 5']),
-            ([(headerRows[2][7]) : 'гр. 6']),
-            ([(headerRows[2][8]) : 'гр. 7']),
-            ([(headerRows[2][9]) : 'гр. 8']),
-            ([(headerRows[2][10]): 'гр. 9']),
-            ([(headerRows[2][11]): 'гр. 10']),
-            ([(headerRows[2][12]): 'гр. 11']),
-            ([(headerRows[2][13]): 'гр. 12']),
-            ([(headerRows[2][14]): 'гр. 13']),
-            ([(headerRows[2][15]): 'гр. 14']),
-            ([(headerRows[2][16]): 'гр. 15']),
+            ([(headerRows[2][5]) : 'гр. 4.2'])
     ]
+    (6..16).each {
+        headerMapping.add(([(headerRows[2][it]): 'гр. '+(it - 1).toString()]))
+    }
     checkHeaderEquals(headerMapping, logger)
 }
 

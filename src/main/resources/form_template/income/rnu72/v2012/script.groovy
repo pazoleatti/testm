@@ -376,19 +376,19 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
     checkHeaderSize(headerRows[headerRows.size() - 1].size(), headerRows.size(), colCount, rowCount)
 
     def headerMapping = [
-            (headerRows[0][0]): getColumnName(tmpRow, 'number'),
-            (headerRows[0][2]): getColumnName(tmpRow, 'date'),
-            (headerRows[0][3]): getColumnName(tmpRow, 'nominal'),
-            (headerRows[0][4]): getColumnName(tmpRow, 'price'),
-            (headerRows[0][5]): getColumnName(tmpRow, 'income'),
-            (headerRows[0][6]): getColumnName(tmpRow, 'cost279'),
-            (headerRows[0][7]): getColumnName(tmpRow, 'costReserve'),
-            (headerRows[0][8]): getColumnName(tmpRow, 'loss'),
-            (headerRows[0][9]): getColumnName(tmpRow, 'profit'),
-            (headerRows[1][0]): '1'
+            ([(headerRows[0][0]): getColumnName(tmpRow, 'number')]),
+            ([(headerRows[0][2]): getColumnName(tmpRow, 'date')]),
+            ([(headerRows[0][3]): getColumnName(tmpRow, 'nominal')]),
+            ([(headerRows[0][4]): getColumnName(tmpRow, 'price')]),
+            ([(headerRows[0][5]): getColumnName(tmpRow, 'income')]),
+            ([(headerRows[0][6]): getColumnName(tmpRow, 'cost279')]),
+            ([(headerRows[0][7]): getColumnName(tmpRow, 'costReserve')]),
+            ([(headerRows[0][8]): getColumnName(tmpRow, 'loss')]),
+            ([(headerRows[0][9]): getColumnName(tmpRow, 'profit')]),
+            ([(headerRows[1][0]): '1'])
     ]
-    (2..9).each { index ->
-        headerMapping.put(headerRows[1][index], index.toString())
+    (2..9).each {
+        headerMapping.add(([(headerRows[1][it]): it.toString()]))
     }
     checkHeaderEquals(headerMapping, logger)
 }

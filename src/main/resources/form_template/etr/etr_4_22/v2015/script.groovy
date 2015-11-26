@@ -3,6 +3,7 @@ package form_template.etr.etr_4_22.v2015
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
 import com.aplana.sbrf.taxaccounting.model.util.StringUtils
 import groovy.transform.Field
 
@@ -45,6 +46,8 @@ switch (formDataEvent) {
 def providerCache = [:]
 @Field
 def recordCache = [:]
+@Field
+def refBookCache = [:]
 
 @Field
 def allColumns = ['rowNum', 'taxName', 'dynamics', 'factors', 'areas', 'offers', 'offersCA', 'other']
@@ -56,6 +59,9 @@ def nonEmptyColumns = allColumns
 def editableColumns = ['dynamics', 'factors', 'areas', 'offers', 'offersCA', 'other']
 
 @Field
+def needShowRegionMsg = true
+
+@Field
 def reportPeriodEndDate
 
 def getEndDate(int reportPeriodId) {
@@ -63,6 +69,13 @@ def getEndDate(int reportPeriodId) {
         reportPeriodEndDate = reportPeriodService.getEndDate(reportPeriodId)?.time
     }
     return reportPeriodEndDate
+}
+// Разыменование записи справочника
+def getRefBookValue(def long refBookId, def Long recordId) {
+    if (recordId == null) {
+        return null
+    }
+    return formDataService.getRefBookValue(refBookId, recordId, refBookCache)
 }
 
 // Поиск записи в справочнике по значению (для импорта)
@@ -222,8 +235,27 @@ def fillRowFromXls(def templateRow, def dataRow, def values, int fileRowIndex, i
 
     // графа 5
     colIndex++
-    dataRow.areas = getRecordIdImport(504, 'NAME', values[colIndex], fileRowIndex, colIndex + colOffset, false)
-
+    if (formDataDepartment.regionId) {
+        def filter = "REGION_ID = $formDataDepartment.regionId and NAME like '${values[colIndex]}'"
+        def provider = formDataService.getRefBookProvider(refBookFactory, 504L, providerCache)
+        def records = provider.getRecords(getEndDate(formData.reportPeriodId), null, filter, null)
+        if (records) {
+            dataRow.areas = records.get(0)?.record_id?.value
+        } else if(values[colIndex].equals("")){
+            def columnIndex = getXLSColumnName(colIndex + colOffset)
+            def dateStr = getEndDate(formData.reportPeriodId).format('dd.MM.yyyy')
+            // наименование субъекта РФ для атрибута «Регион» подразделения формы
+            def regionName = getRefBookValue(4L, formDataDepartment.regionId)?.NAME?.value
+            logger.warn('Строка %s, столбец %s: В региональном справочнике «%s» не найдена запись, актуальная на дату %s: ' +
+                    'поле «Код субъекта РФ» = «%s», поле «Проблемная зона» = «%s»',
+                    fileRowIndex, columnIndex, getRefBook(504L).name, dateStr, regionName, values[colIndex])
+        }
+    } else if (needShowRegionMsg) {
+        needShowRegionMsg = false
+        logger.warn('Невозможно выполнить поиск записи в справочнике «%s» для заполнения графы «%s» формы! ' +
+                'Атрибут «Регион» подразделения текущей формы не заполнен (справочник «Подразделения»).',
+                getRefBook(504L).name, getColumnName(dataRow, 'areas'))
+    }
     // графа 6
     colIndex++
     dataRow.offers = values[colIndex]
@@ -235,4 +267,14 @@ def fillRowFromXls(def templateRow, def dataRow, def values, int fileRowIndex, i
     // графа 8
     colIndex++
     dataRow.other = values[colIndex]
+}
+// для хранения информации о справочниках
+@Field
+def refBooks = [:]
+
+def getRefBook(def id) {
+    if (refBooks[id] == null) {
+        refBooks[id] = refBookFactory.get(id)
+    }
+    return refBooks[id]
 }

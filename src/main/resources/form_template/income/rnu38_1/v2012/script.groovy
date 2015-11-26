@@ -437,19 +437,18 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
     checkHeaderSize(headerRows[headerRows.size() - 1].size(), headerRows.size(), colCount, rowCount)
 
     def headerMapping = [
-            (headerRows[0][0]): getColumnName(tmpRow, 'series'),
-            (headerRows[0][1]): getColumnName(tmpRow, 'amount'),
-            (headerRows[0][2]): getColumnName(tmpRow, 'shortPositionDate'),
-            (headerRows[0][3]): getColumnName(tmpRow, 'maturityDate'),
-            (headerRows[0][4]): getColumnName(tmpRow, 'incomeCurrentCoupon'),
-            (headerRows[0][5]): getColumnName(tmpRow, 'currentPeriod'),
-            (headerRows[0][6]): getColumnName(tmpRow, 'incomePrev'),
-            (headerRows[0][7]): getColumnName(tmpRow, 'incomeShortPosition'),
-            (headerRows[0][8]): getColumnName(tmpRow, 'totalPercIncome'),
+            ([(headerRows[0][0]): getColumnName(tmpRow, 'series')]),
+            ([(headerRows[0][1]): getColumnName(tmpRow, 'amount')]),
+            ([(headerRows[0][2]): getColumnName(tmpRow, 'shortPositionDate')]),
+            ([(headerRows[0][3]): getColumnName(tmpRow, 'maturityDate')]),
+            ([(headerRows[0][4]): getColumnName(tmpRow, 'incomeCurrentCoupon')]),
+            ([(headerRows[0][5]): getColumnName(tmpRow, 'currentPeriod')]),
+            ([(headerRows[0][6]): getColumnName(tmpRow, 'incomePrev')]),
+            ([(headerRows[0][7]): getColumnName(tmpRow, 'incomeShortPosition')]),
+            ([(headerRows[0][8]): getColumnName(tmpRow, 'totalPercIncome')])
     ]
-
-    (1..9).each { index ->
-        headerMapping.put(headerRows[1][index - 1], index.toString())
+    (1..9).each {
+        headerMapping.add(([(headerRows[1][it - 1]): it.toString()]))
     }
     checkHeaderEquals(headerMapping, logger)
 }

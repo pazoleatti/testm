@@ -403,4 +403,8 @@ public class TestScriptHelper {
     public void setImportFileName(String importFileName) {
         this.importFileName = importFileName;
     }
+
+    public FormData getFormData() {
+        return formData;
+    }
 }

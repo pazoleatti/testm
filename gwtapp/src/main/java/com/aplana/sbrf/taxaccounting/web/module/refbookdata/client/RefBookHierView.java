@@ -150,7 +150,7 @@ public class RefBookHierView extends ViewWithUiHandlers<RefBookHierUIHandlers> i
                     relevanceDate.setValue(new Date());
                 } else {
                     if (getUiHandlers() != null) {
-                        getUiHandlers().onRelevanceDateChanged();
+                        getUiHandlers().onRelevanceDateChanged(event.getValue());
                     }
                 }
             }

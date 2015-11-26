@@ -314,28 +314,28 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
     checkHeaderSize(headerRows[headerRows.size() - 1].size(), headerRows.size(), colCount, rowCount)
 
     def headerMapping = [
-            (headerRows[0][0]) : 'Общая информация',
-            (headerRows[0][4]) : 'Сведения о сделке',
-            (headerRows[1][0]) : getColumnName(tmpRow, 'rowNum'),
-            (headerRows[1][1]) : getColumnName(tmpRow, 'jurName'),
-            (headerRows[1][2]) : getColumnName(tmpRow, 'innKio'),
-            (headerRows[1][3]) : getColumnName(tmpRow, 'countryCode'),
-            (headerRows[1][4]) : getColumnName(tmpRow, 'bankSum'),
-            (headerRows[1][5]) : getColumnName(tmpRow, 'contractNum'),
-            (headerRows[1][6]) : getColumnName(tmpRow, 'contractDate'),
-            (headerRows[1][7]) : 'Адрес местонахождения объекта недвижимости',
-            (headerRows[1][11]): getColumnName(tmpRow, 'count'),
-            (headerRows[1][12]): getColumnName(tmpRow, 'price'),
-            (headerRows[1][13]): getColumnName(tmpRow, 'cost'),
-            (headerRows[1][14]): getColumnName(tmpRow, 'transactionDate'),
-            (headerRows[2][7]) : getColumnName(tmpRow, 'country'),
-            (headerRows[2][8]) : getColumnName(tmpRow, 'region'),
-            (headerRows[2][9]) : getColumnName(tmpRow, 'city'),
-            (headerRows[2][10]): getColumnName(tmpRow, 'settlement')
+            ([(headerRows[0][0]) : 'Общая информация']),
+            ([(headerRows[0][4]) : 'Сведения о сделке']),
+            ([(headerRows[1][0]) : getColumnName(tmpRow, 'rowNum')]),
+            ([(headerRows[1][1]) : getColumnName(tmpRow, 'jurName')]),
+            ([(headerRows[1][2]) : getColumnName(tmpRow, 'innKio')]),
+            ([(headerRows[1][3]) : getColumnName(tmpRow, 'countryCode')]),
+            ([(headerRows[1][4]) : getColumnName(tmpRow, 'bankSum')]),
+            ([(headerRows[1][5]) : getColumnName(tmpRow, 'contractNum')]),
+            ([(headerRows[1][6]) : getColumnName(tmpRow, 'contractDate')]),
+            ([(headerRows[1][7]) : 'Адрес местонахождения объекта недвижимости']),
+            ([(headerRows[1][11]): getColumnName(tmpRow, 'count')]),
+            ([(headerRows[1][12]): getColumnName(tmpRow, 'price')]),
+            ([(headerRows[1][13]): getColumnName(tmpRow, 'cost')]),
+            ([(headerRows[1][14]): getColumnName(tmpRow, 'transactionDate')]),
+            ([(headerRows[2][7]) : getColumnName(tmpRow, 'country')]),
+            ([(headerRows[2][8]) : getColumnName(tmpRow, 'region')]),
+            ([(headerRows[2][9]) : getColumnName(tmpRow, 'city')]),
+            ([(headerRows[2][10]): getColumnName(tmpRow, 'settlement')])
     ]
 
     (0..14).each{
-        headerMapping.put(headerRows[3][it], 'гр. ' + (it + 1))
+        headerMapping.add(([(headerRows[3][it]): 'гр. ' + (it + 1).toString()]))
     }
     checkHeaderEquals(headerMapping, logger)
 }

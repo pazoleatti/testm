@@ -661,21 +661,20 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
     checkHeaderSize(headerRows[headerRows.size() - 1].size(), headerRows.size(), colCount, rowCount)
 
     def headerMapping = [
-            (headerRows[0][0]) : getColumnName(tmpRow, 'number'),
-            (headerRows[0][2]) : getColumnName(tmpRow, 'name'),
-            (headerRows[0][3]) : getColumnName(tmpRow, 'issuer'),
-            (headerRows[0][4]) : getColumnName(tmpRow, 'registrationNumber'),
-            (headerRows[0][5]) : getColumnName(tmpRow, 'buyDate'),
-            (headerRows[0][6]) : getColumnName(tmpRow, 'cost'),
-            (headerRows[0][7]) : getColumnName(tmpRow, 'bondsCount'),
-            (headerRows[0][8]) : getColumnName(tmpRow, 'upCost'),
-            (headerRows[0][9]) : getColumnName(tmpRow, 'circulationTerm'),
-            (headerRows[0][10]): getColumnName(tmpRow, 'percent'),
-            (headerRows[0][11]): getColumnName(tmpRow, 'currencyCode')
+            ([(headerRows[0][0]) : getColumnName(tmpRow, 'number')]),
+            ([(headerRows[0][2]) : getColumnName(tmpRow, 'name')]),
+            ([(headerRows[0][3]) : getColumnName(tmpRow, 'issuer')]),
+            ([(headerRows[0][4]) : getColumnName(tmpRow, 'registrationNumber')]),
+            ([(headerRows[0][5]) : getColumnName(tmpRow, 'buyDate')]),
+            ([(headerRows[0][6]) : getColumnName(tmpRow, 'cost')]),
+            ([(headerRows[0][7]) : getColumnName(tmpRow, 'bondsCount')]),
+            ([(headerRows[0][8]) : getColumnName(tmpRow, 'upCost')]),
+            ([(headerRows[0][9]) : getColumnName(tmpRow, 'circulationTerm')]),
+            ([(headerRows[0][10]): getColumnName(tmpRow, 'percent')]),
+            ([(headerRows[0][11]): getColumnName(tmpRow, 'currencyCode')])
     ]
-
-    (1..11).each { index ->
-        headerMapping.put(headerRows[1][index], index.toString())
+    (1..11).each {
+        headerMapping.add(([(headerRows[1][it]): it.toString()]))
     }
     checkHeaderEquals(headerMapping, logger)
 }

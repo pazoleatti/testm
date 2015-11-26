@@ -891,33 +891,33 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
     checkHeaderSize(headerRows[headerRows.size() - 1].size(), headerRows.size(), colCount, rowCount)
 
     def headerMapping = [
-            (headerRows[0][0]) : getColumnName(tmpRow, 'rowNumber'),
-            (headerRows[0][2]) : getColumnName(tmpRow, 'firstRecordNumber'),
-            (headerRows[0][3]) : getColumnName(tmpRow, 'operationDate'),
-            (headerRows[0][4]) : 'Основание для совершения операции (первичный документ)',
-            (headerRows[0][6]) : getColumnName(tmpRow, 'invNumber'),
-            (headerRows[0][7]) : getColumnName(tmpRow, 'name'),
-            (headerRows[0][8]) : getColumnName(tmpRow, 'price'),
-            (headerRows[0][9]) : getColumnName(tmpRow, 'amort'),
-            (headerRows[0][10]): getColumnName(tmpRow, 'expensesOnSale'),
-            (headerRows[0][11]): getColumnName(tmpRow, 'sum'),
-            (headerRows[0][12]): getColumnName(tmpRow, 'sumInFact'),
-            (headerRows[0][13]): getColumnName(tmpRow, 'costProperty'),
-            (headerRows[0][14]): getColumnName(tmpRow, 'marketPrice'),
-            (headerRows[0][15]): getColumnName(tmpRow, 'sumIncProfit'),
-            (headerRows[0][16]): getColumnName(tmpRow, 'profit'),
-            (headerRows[0][17]): getColumnName(tmpRow, 'loss'),
-            (headerRows[0][18]): getColumnName(tmpRow, 'usefullLifeEnd'),
-            (headerRows[0][19]): getColumnName(tmpRow, 'monthsLoss'),
-            (headerRows[0][20]): getColumnName(tmpRow, 'expensesSum'),
-            (headerRows[0][21]): getColumnName(tmpRow, 'saledPropertyCode'),
-            (headerRows[0][22]): getColumnName(tmpRow, 'saleCode'),
-            (headerRows[1][4]) : 'номер',
-            (headerRows[1][5]) : 'дата',
-            (headerRows[2][0]) : '1'
+            ([(headerRows[0][0]) : getColumnName(tmpRow, 'rowNumber')]),
+            ([(headerRows[0][2]) : getColumnName(tmpRow, 'firstRecordNumber')]),
+            ([(headerRows[0][3]) : getColumnName(tmpRow, 'operationDate')]),
+            ([(headerRows[0][4]) : 'Основание для совершения операции (первичный документ)']),
+            ([(headerRows[0][6]) : getColumnName(tmpRow, 'invNumber')]),
+            ([(headerRows[0][7]) : getColumnName(tmpRow, 'name')]),
+            ([(headerRows[0][8]) : getColumnName(tmpRow, 'price')]),
+            ([(headerRows[0][9]) : getColumnName(tmpRow, 'amort')]),
+            ([(headerRows[0][10]): getColumnName(tmpRow, 'expensesOnSale')]),
+            ([(headerRows[0][11]): getColumnName(tmpRow, 'sum')]),
+            ([(headerRows[0][12]): getColumnName(tmpRow, 'sumInFact')]),
+            ([(headerRows[0][13]): getColumnName(tmpRow, 'costProperty')]),
+            ([(headerRows[0][14]): getColumnName(tmpRow, 'marketPrice')]),
+            ([(headerRows[0][15]): getColumnName(tmpRow, 'sumIncProfit')]),
+            ([(headerRows[0][16]): getColumnName(tmpRow, 'profit')]),
+            ([(headerRows[0][17]): getColumnName(tmpRow, 'loss')]),
+            ([(headerRows[0][18]): getColumnName(tmpRow, 'usefullLifeEnd')]),
+            ([(headerRows[0][19]): getColumnName(tmpRow, 'monthsLoss')]),
+            ([(headerRows[0][20]): getColumnName(tmpRow, 'expensesSum')]),
+            ([(headerRows[0][21]): getColumnName(tmpRow, 'saledPropertyCode')]),
+            ([(headerRows[0][22]): getColumnName(tmpRow, 'saleCode')]),
+            ([(headerRows[1][4]) : 'номер']),
+            ([(headerRows[1][5]) : 'дата']),
+            ([(headerRows[2][0]) : '1'])
     ]
-    (2..22).each { index ->
-        headerMapping.put(headerRows[2][index], index.toString())
+    (2..22).each {
+        headerMapping.add(([(headerRows[2][it]): it.toString()]))
     }
     checkHeaderEquals(headerMapping, logger)
 }

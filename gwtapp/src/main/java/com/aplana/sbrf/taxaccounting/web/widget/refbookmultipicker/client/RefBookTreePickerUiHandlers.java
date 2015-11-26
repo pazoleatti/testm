@@ -61,5 +61,7 @@ public interface RefBookTreePickerUiHandlers extends UiHandlers {
 
     void highLightItem(RefBookUiTreeItem uiTreeItem);
 
-    void getValuesCount(String text, CheckValuesCountHandler checkValuesCountHandler);
+    void getValuesCount(String text, Date versionDate, CheckValuesCountHandler checkValuesCountHandler);
+
+    void updatePS(Date date, String searchPattern);
 }

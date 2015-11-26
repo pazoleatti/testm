@@ -348,14 +348,14 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
     checkHeaderSize(headerRows[headerRows.size() - 1].size(), headerRows.size(), colCount, rowCount)
 
     def headerMapping = [
-            (headerRows[0][0]): getColumnName(tmpRow, 'rowNumber'),
-            (headerRows[0][2]): getColumnName(tmpRow, 'code'),
-            (headerRows[0][3]): getColumnName(tmpRow, 'incomeType'),
-            (headerRows[0][4]): getColumnName(tmpRow, 'sum'),
-            (headerRows[1][0]): '1',
-            (headerRows[1][2]): '2',
-            (headerRows[1][3]): '3',
-            (headerRows[1][4]): '4',
+            ([(headerRows[0][0]): getColumnName(tmpRow, 'rowNumber')]),
+            ([(headerRows[0][2]): getColumnName(tmpRow, 'code')]),
+            ([(headerRows[0][3]): getColumnName(tmpRow, 'incomeType')]),
+            ([(headerRows[0][4]): getColumnName(tmpRow, 'sum')]),
+            ([(headerRows[1][0]): '1']),
+            ([(headerRows[1][2]): '2']),
+            ([(headerRows[1][3]): '3']),
+            ([(headerRows[1][4]): '4'])
     ]
     checkHeaderEquals(headerMapping, logger)
 }

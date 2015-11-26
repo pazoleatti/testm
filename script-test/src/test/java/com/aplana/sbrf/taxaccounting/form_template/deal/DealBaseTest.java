@@ -101,6 +101,7 @@ public abstract class DealBaseTest extends ScriptTestBase {
         // Строк должно стать больше, чем было
         Assert.assertTrue(sizeBefore < sizeAfter);
         testHelper.execute(FormDataEvent.CALCULATE);
+        testHelper.execute(FormDataEvent.SORT_ROWS);
         calcCheckAfterImport(testHelper.getDataRowHelper().getAll());
         checkLogger();
     }

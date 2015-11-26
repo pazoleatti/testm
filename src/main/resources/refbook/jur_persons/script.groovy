@@ -4,7 +4,6 @@
 package refbook.jur_persons
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
 import com.aplana.sbrf.taxaccounting.model.util.StringUtils
 import groovy.transform.Field
 
@@ -68,6 +67,8 @@ void save() {
         def Long vatStatus = it.VAT_STATUS?.referenceValue
         def Long depCriterion = it.DEP_CRITERION?.referenceValue
         def Long offshoreCode = it.OFFSHORE_CODE?.referenceValue
+        def Long taxStatus = it.TAX_STATUS?.referenceValue
+        def String statreportId = it.STATREPORT_ID?.value
 
         // 1. Проверка поля «Код SWIFT (заполняется для кредитных организаций, резидентов и нерезидентов)»
         if (swift && swift.length() != 8 && swift.length() != 11) {
@@ -85,60 +86,29 @@ void save() {
         }
 
         // 4. Проверка на корректное заполнение идентификационного кода для российской организации
-        // todo добавили новый аттриуб
-        if (orgCode == 1 && (regNum || kio)) {
-            List<String> attributeNames = new ArrayList<String>();
-            if (regNum) {
-                attributeNames.add("«${getAttrName('REG_NUM')}»")
-            }
-            if (kio) {
-                attributeNames.add("«${getAttrName('KIO')}»")
-            }
-            if (taxCodeIncorporation) {
-                attributeNames.add("«${getAttrName('TAX_CODE_INCORPORATION')}»")
-            }
-
-            if (attributeNames.size() == 1) {
-                logger.error('Для российской организации нельзя указать поле %s!', attributeNames.get(0))
-            } else {
-                logger.error('Для российской организации нельзя указать поля %s!', StringUtils.join(attributeNames.toArray(), ',' as char))
+        if (orgCode == 1) {
+            ['REG_NUM', 'KIO', 'TAX_CODE_INCORPORATION', 'OFFSHORE_CODE'].each { alias ->
+                if (it[alias]?.value != null) {
+                    logger.error('Для российской организации нельзя указать поле «%s»!', getAttrName(alias))
+                }
             }
         }
 
         // 5. Проверка на корректное заполнение идентификационного кода для иностранной организации
-        if (orgCode == 2 && (inn || kpp)) {
-            List<String> attributeNames = new ArrayList<String>();
-            if (inn) {
-                attributeNames.add("«${getAttrName('INN')}»")
+        if (orgCode == 2) {
+            ['INN', 'KPP', 'TAX_STATUS'].each { alias ->
+                if (it[alias]?.value != null) {
+                    logger.error('Для иностранной организации нельзя указать «%s»!', getAttrName(alias))
+                }
             }
-            if (kpp) {
-                attributeNames.add("«${getAttrName('KPP')}»")
-            }
-
-            logger.error('Для иностранной организации нельзя указать %s!', StringUtils.join(attributeNames.toArray(), ',' as char))
         }
 
-        // 6. Уникальность поля ИНН
-        checkUnique('INN', inn, "ИНН")
-
-        // 7. Уникальность поля КИО
-        checkUnique('KIO', kio, "КИО")
-
-        // 8. Уникальность поля Код SWIFT
-        checkUnique('SWIFT', swift, "кодом SWIFT")
-
-        // 9. Уникальность поля Регистрационный номер в стране инкорпорации
-        checkUnique('REG_NUM', regNum, "регистрационным номером в стране инкорпорации")
-
-        // 10. Уникальность поля Код налогоплательщика в стране инкорпорации
-        checkUnique('TAX_CODE_INCORPORATION', regNum, "кодом налогоплательщика в стране инкорпорации")
-
-        // 11. Проверка правильности заполнения полей «Дата наступления основания для включения в список» и «Дата наступления основания для исключении из списка»
+        // 6. Проверка правильности заполнения полей «Дата наступления основания для включения в список» и «Дата наступления основания для исключении из списка»
         if (type == "ВЗЛ" && startDate != null && endDate != null && startDate > endDate) {
             logger.error("Поле «Дата наступления основания для включения в список» должно быть больше или равно полю «Дата наступления основания для исключении из списка»!")
         }
 
-        // 12. Заполнение обязательных полей для ВЗЛ
+        // 7. Заполнение обязательных полей для ВЗЛ
         if (type == "ВЗЛ" && (!startDate || !vatStatus || !depCriterion)) {
             List<String> attributeNames = new ArrayList<String>();
             if (!startDate) {
@@ -158,7 +128,7 @@ void save() {
             }
         }
 
-        // 13. Заполнение обязательных полей для РОЗ
+        // 8. Заполнение обязательных полей для РОЗ
         if (type == "РОЗ" && (!offshoreCode || !kio)) {
             List<String> attributeNames = new ArrayList<String>();
             if (!offshoreCode) {
@@ -173,6 +143,37 @@ void save() {
                 logger.error('Для Резидента оффшорной зоны обязательно должны быть заполнены поля %s!', StringUtils.join(attributeNames.toArray(), ',' as char))
             }
         }
+
+        // 9. Заполнение обязательных полей для российских ВЗЛ
+        if (orgCode == 1 && type == 'ВЗЛ' && taxStatus == null) {
+            logger.error('Для российских ВЗЛ обязательно должно быть заполнено поле «%s»!', getAttrName('TAX_STATUS'))
+        }
+
+        // 10. Отсутствие значений в полях для РОЗ и НЛ
+        if (type != 'ВЗЛ') {
+            ['START_DATE', 'END_DATE', 'VAT_STATUS', 'DEP_CRITERION', 'TAX_STATUS'].each { alias ->
+                if (it[alias]?.value != null) {
+                    logger.error('Для РОЗ и НЛ нельзя указать поле «%s»!', getAttrName(alias))
+                }
+            }
+        }
+
+        // 11. Уникальность идентификационного кода организации
+        def tmpColumns = ['INN', 'KIO', 'SWIFT', 'REG_NUM', 'TAX_CODE_INCORPORATION']
+        tmpColumns.each { alias ->
+            def value = it[alias]?.value
+            def filters = tmpColumns.collect { "LOWER($it) = LOWER('$value')" }
+            def filter = filters.join(' or ')
+            if (!checkUnique(alias, it[alias]?.value, filter)) {
+                logger.error('В справочнике уже существует организация, у которой значение ИНН, КИО, Код SWIFT, Регистрационный номер в стране инкорпорации или Код налогоплательщика в стране инкорпорации совпадает со значением в поле «%s»!', getAttrName(alias))
+            }
+        }
+
+        // 12. Уникальность поля «ИД в АС «Статотчетность»
+        if (!checkUnique('STATREPORT_ID', statreportId)) {
+            logger.error('В справочнике уже существует организация с данным значением поля «%s»!', getAttrName('STATREPORT_ID'))
+        }
+
 
         // 3.2.3	Проверки атрибутов справочников на соответствие паттерну
         // ИНН
@@ -241,9 +242,9 @@ void save() {
     }
 }
 
-void checkUnique(def alias, def value, def msg) {
+def checkUnique(String alias, String value, def defaultFilter = null) {
     if (value != null) {
-        String filter = "LOWER($alias) = LOWER('$value')"
+        String filter = (defaultFilter ?: "LOWER($alias) = LOWER('$value')")
         def pairs = provider.getRecordIdPairs(REF_BOOK_ID, null, false, filter)
         for(def pair: pairs) {
             if (recordCommonId && pair.second == recordCommonId) {
@@ -258,11 +259,11 @@ void checkUnique(def alias, def value, def msg) {
             Date toDate = record.versionEnd
             if ((validDateTo == null || fromDate.compareTo(validDateTo) <= 0) &&
                     (toDate == null || toDate.compareTo(validDateFrom) >= 0 )) {
-                logger.error("В справочнике уже существует организация с данным $msg!")
-                break
+                return false
             }
         }
     }
+    return true
 }
 
 boolean checkControlSumInn(String inn) {

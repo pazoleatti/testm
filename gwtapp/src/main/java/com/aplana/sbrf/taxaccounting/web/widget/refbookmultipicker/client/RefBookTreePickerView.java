@@ -69,6 +69,7 @@ public class RefBookTreePickerView extends ViewWithUiHandlers<RefBookTreePickerU
 
         initWidget(binder.createAndBindUi(this));
 
+        //TODO: подключение презентера на прямую, почему не инъкцией через модуль?
         // подключаем презентер
         new RefBookTreePickerPresenter(this);
 
@@ -494,8 +495,8 @@ public class RefBookTreePickerView extends ViewWithUiHandlers<RefBookTreePickerU
     }
 
     @Override
-    public void checkCount(String text, CheckValuesCountHandler checkValuesCountHandler) {
-        getUiHandlers().getValuesCount(text, checkValuesCountHandler);
+    public void checkCount(String text, Date relevanceDate, CheckValuesCountHandler checkValuesCountHandler) {
+        getUiHandlers().getValuesCount(text, relevanceDate, checkValuesCountHandler);
     }
 
     @Override

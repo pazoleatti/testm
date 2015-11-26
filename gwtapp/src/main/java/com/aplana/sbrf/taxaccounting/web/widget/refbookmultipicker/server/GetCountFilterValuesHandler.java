@@ -58,7 +58,7 @@ public class GetCountFilterValuesHandler extends AbstractActionHandler<GetCountF
 
         RefBook refBook = refBookFactory.getByAttribute(action.getRefBookAttrId());
 
-        String filter = null;
+        String filter;
         if (action.isHierarchy()) {
             filter = buildFilter.buildTreePickerFilter(action.getFilter(), action.getSearchPattern(), refBook);
         } else {

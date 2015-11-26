@@ -9,6 +9,9 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
 import com.aplana.sbrf.taxaccounting.service.script.util.ScriptUtils
 import groovy.transform.Field
 
+import static com.aplana.sbrf.taxaccounting.service.script.util.ScriptUtils.getColumnName
+import static com.aplana.sbrf.taxaccounting.service.script.util.ScriptUtils.getColumnName
+
 /**
  * 808 - РНУ 111. Регистр налогового учёта доходов, возникающих в связи с применением в сделках по предоставлению
  * межбанковских кредитов Взаимозависимым лицам и резидентам оффшорных зон процентных ставок, не соответствующих рыночному уровню
@@ -183,15 +186,15 @@ void logicCheck() {
         }
 
         // 4. Проверка возможности заполнения графы 17
-        if (!row.sum1 && !row.sum2) {
+        if (row.sum1==null && row.sum2==null) {
             def msg1 = row.getCell('sum3').column.name
             def msg2 = row.getCell('sum1').column.name
             def msg3 = row.getCell('sum2').column.name
             rowError(logger, row, "Строка $rowNum: Графа «$msg1»: выполнение расчета невозможно, так как не заполнена " +
                     "используемая в расчете графа «$msg2», «$msg3»!")
-        } else if (!row.sum1 || !row.sum2) {
+        } else if (row.sum1==null || row.sum2==null) {
             def msg1 = row.getCell('sum3').column.name
-            def msg2 = (!row.sum1) ? row.getCell('sum1').column.name : row.getCell('sum2').column.name
+            def msg2 = (row.sum1==null) ? row.getCell('sum1').column.name : row.getCell('sum2').column.name
             rowError(logger, row, "Строка $rowNum: Графа «$msg1»: выполнение расчета невозможно, так как не заполнена " +
                     "используемая в расчете графа «$msg2»!")
         }
@@ -234,7 +237,17 @@ void logicCheck() {
             rowWarning(logger, row, "Строка $rowNum: Значение графы «$msg1» должно быть не меньше значения графы «$msg2»!")
         }
 
-        // 10. Проверка значения графы 11
+        // 10. Проверка положительного значения графы 13, 15
+        if(row.sum1 != null  && row.sum1 < 0){
+            msg = row.getCell('sum1').column.name
+            rowError(logger, row, "Строка $rowNum: Значение графы «$msg» должно быть больше или равно «0»!")
+        }
+        if(row.sum2 != null  && row.sum2 < 0){
+            msg = row.getCell('sum2').column.name
+            rowError(logger, row, "Строка $rowNum: Значение графы «$msg» должно быть больше или равно «0»!")
+        }
+
+        // 11. Проверка значения графы 11
         if(row.reasonDate && row.time && (row.time > getDays(row.reasonDate))){
             def msg1 = row.getCell('time').column.name
             def msg2 = row.getCell('reasonDate').column.name
@@ -825,7 +838,7 @@ void checkItog(def dataRows) {
                 return getColumnName(row1, 'sum1')
             }
             if (row1.sum2 != row2.sum2) {
-                return getColumnName(row1, 'su2')
+                return getColumnName(row1, 'sum2')
             }
             if (row1.sum3 != row2.sum3) {
                 return getColumnName(row1, 'sum3')

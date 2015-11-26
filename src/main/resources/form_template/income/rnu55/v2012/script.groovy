@@ -629,23 +629,23 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
     checkHeaderSize(headerRows[headerRows.size() - 1].size(), headerRows.size(), colCount, rowCount)
 
     def headerMapping = [
-            (headerRows[0][0]) : getColumnName(tmpRow, 'number'),
-            (headerRows[0][2]) : getColumnName(tmpRow, 'bill'),
-            (headerRows[0][3]) : getColumnName(tmpRow, 'buyDate'),
-            (headerRows[0][4]) : getColumnName(tmpRow, 'currency'),
-            (headerRows[0][5]) : getColumnName(tmpRow, 'nominal'),
-            (headerRows[0][6]) : getColumnName(tmpRow, 'percent'),
-            (headerRows[0][7]) : getColumnName(tmpRow, 'implementationDate'),
-            (headerRows[0][8]) : 'Фактически поступившая сумма процентов',
-            (headerRows[0][10]): 'Сумма начисленного процентного дохода за отчётный период',
-            (headerRows[1][8]) : 'в валюте',
-            (headerRows[1][9]) : 'в рублях по курсу Банка России',
-            (headerRows[1][10]): 'в валюте',
-            (headerRows[1][11]): 'в рублях по курсу Банка России',
-            (headerRows[2][0]) : '1'
+            ([(headerRows[0][0]) : getColumnName(tmpRow, 'number')]),
+            ([(headerRows[0][2]) : getColumnName(tmpRow, 'bill')]),
+            ([(headerRows[0][3]) : getColumnName(tmpRow, 'buyDate')]),
+            ([(headerRows[0][4]) : getColumnName(tmpRow, 'currency')]),
+            ([(headerRows[0][5]) : getColumnName(tmpRow, 'nominal')]),
+            ([(headerRows[0][6]) : getColumnName(tmpRow, 'percent')]),
+            ([(headerRows[0][7]) : getColumnName(tmpRow, 'implementationDate')]),
+            ([(headerRows[0][8]) : 'Фактически поступившая сумма процентов']),
+            ([(headerRows[0][10]): 'Сумма начисленного процентного дохода за отчётный период']),
+            ([(headerRows[1][8]) : 'в валюте']),
+            ([(headerRows[1][9]) : 'в рублях по курсу Банка России']),
+            ([(headerRows[1][10]): 'в валюте']),
+            ([(headerRows[1][11]): 'в рублях по курсу Банка России']),
+            ([(headerRows[2][0]) : '1'])
     ]
-    (2..11).each { index ->
-        headerMapping.put(headerRows[2][index], index.toString())
+    (2..11).each {
+        headerMapping.add(([(headerRows[2][it]): it.toString()]))
     }
     checkHeaderEquals(headerMapping, logger)
 }

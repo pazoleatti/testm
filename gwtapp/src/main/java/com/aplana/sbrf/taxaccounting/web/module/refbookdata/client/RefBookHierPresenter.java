@@ -75,10 +75,10 @@ public class RefBookHierPresenter extends Presenter<RefBookHierPresenter.MyView,
     }
 
     @Override
-    public void onRelevanceDateChanged() {
+    public void onRelevanceDateChanged(Date relevanceDate) {
         commonEditPresenter.clean(false);
         commonEditPresenter.setNeedToReload();
-        SearchButtonEvent.fire(this, getView().getRelevanceDate(), getView().getSearchPattern());
+        SearchButtonEvent.fire(this, relevanceDate, getView().getSearchPattern());
     }
 
     @Override

@@ -125,11 +125,12 @@ public class RefBookHierDataView extends ViewWithUiHandlers<RefBookHierDataUiHan
         pickerState.setSearchPattern(searchPattern);
     }
 
-    public void searchButtonClicked() {
+    @Override
+    public void searchButtonClicked(Date relevanceDate) {
         if (getUiHandlers() != null) {
             if (pickerState.getSearchPattern()!= null && !pickerState.getSearchPattern().isEmpty()){
                 pickerState.setNeedReload(false);
-                refbookDataTree.checkCount(pickerState.getSearchPattern().trim(), new CheckValuesCountHandler() {
+                refbookDataTree.checkCount(pickerState.getSearchPattern().trim(), relevanceDate, new CheckValuesCountHandler() {
                     @Override
                     public void onGetValuesCount(Integer count) {
                         if (count != null && count < 100 && count>0) {

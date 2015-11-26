@@ -27,7 +27,7 @@
         <alias>taxAuthority</alias>
         <checking>false</checking>
         <columnType>STRING</columnType>
-        <name>Код НО</name>
+        <name>Код НО (кон.)</name>
         <order>3</order>
         <width>5</width>
         <maxLength>4</maxLength>

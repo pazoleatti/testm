@@ -12,6 +12,7 @@ import com.aplana.sbrf.taxaccounting.model.Formats
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod
 import com.aplana.sbrf.taxaccounting.model.TaxType
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
+import com.aplana.sbrf.taxaccounting.model.exception.DaoException
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import groovy.transform.Field
@@ -1347,51 +1348,32 @@ def getFormTypeById(def id) {
 }
 
 /** Получить результат для события FormDataEvent.GET_SOURCES. */
-def getSources() {
-    def currentPeriod = reportPeriodService.get(formData.reportPeriodId)
+void getSources() {
+    // нестандратны только формы-источники - 945.1, для них смещен месяц
+    if (!(form && needSources)) {
+        // формы-приемники, декларации-истчоники, декларации-приемники не переопределять
+        return
+    }
+    // формы-источники
+
     def start = getReportPeriodStartDate()
     def end = getReportPeriodEndDate()
 
-    // источники
     def sourceDepartmentFormTypes = departmentFormTypeService.getFormSources(formDataDepartment.id, formData.formType.id, formData.kind, start, end)
+    if (!sourceDepartmentFormTypes) {
+        return
+    }
 
-    // приемники
-    def destinationDepartmentFormTypes = departmentFormTypeService.getFormDestinations(formDataDepartment.id, formData.formType.id, formData.kind, start, end)
-
-    // найти все ежемесячные источники 945.1 за текущий периоде и за первый месяц следующего периода
-    // Мапа с периодами и номерами месяцев для источников 945.1 (период -> список номеров месяцев)
-    def source945_1periodsMap = getSourcesPeriodMap()
+    def currentPeriod = reportPeriodService.get(formData.reportPeriodId)
 
     // номера месяцев для остальных ежемесячных источников-приемников
     def otherMonthlyFormsPeriods = monthsInQuarterMap[currentPeriod.order]
     def otherMonthlyFormsPeriodsMap = [currentPeriod : otherMonthlyFormsPeriods]
 
-    // приемники
-    destinationDepartmentFormTypes.each { departmentFormType ->
-        def isMonthly = isMonthlyForm(departmentFormType.formTypeId, currentPeriod.id)
-        def isSource = false
-        if (isMonthly) {
-            // другая ежемесячная форма
-            otherMonthlyFormsPeriods.each { monthOrder ->
-                FormData tmpFormData = formDataService.getLast(departmentFormType.formTypeId, departmentFormType.kind,
-                        departmentFormType.departmentId, currentPeriod.id, monthOrder, null, false)
-                def relation = getRelation(tmpFormData, departmentFormType, isSource, currentPeriod, monthOrder)
-                if (relation) {
-                    sources.sourceList.add(relation)
-                }
-            }
-        } else {
-            // квартальная форма
-            FormData tmpFormData = formDataService.getLast(departmentFormType.formTypeId, departmentFormType.kind,
-                    departmentFormType.departmentId, currentPeriod.id, null, null, false)
-            def relation = getRelation(tmpFormData, departmentFormType, isSource, currentPeriod, null)
-            if (relation) {
-                sources.sourceList.add(relation)
-            }
-        }
-    }
+    // найти все ежемесячные источники 945.1 за текущий периоде и за первый месяц следующего периода
+    // Мапа с периодами и номерами месяцев для источников 945.1 (период -> список номеров месяцев)
+    def source945_1periodsMap = getSourcesPeriodMap()
 
-    // источники
     for (def departmentFormType : sourceDepartmentFormTypes) {
         def isSource = true
         def monthlyFormsPeriodsMap
@@ -1423,9 +1405,7 @@ def getSources() {
             }
         }
     }
-
     sources.sourcesProcessedByScript = true
-    return sources.sourceList
 }
 
 /**
@@ -1489,7 +1469,11 @@ def getRelation(FormData tmpFormData, DepartmentFormType departmentFormType, boo
     /** является ли форма источников, в противном случае приемник*/
     relation.source = isSource
     /** Введена/выведена в/из действие(-ия) */
-    relation.status = getFormTemplateById(departmentFormType.formTypeId, period.id)
+    try {
+        relation.status = getFormTemplateById(departmentFormType.formTypeId, period.id) != null
+    } catch (DaoException e) {
+        relation.status = false
+    }
 
     /**************  Параметры НФ ***************/
     /** Идентификатор созданной формы */
@@ -1624,35 +1608,35 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
 
     // для проверки шапки
     def headerMapping = [
-            (headerRows[0][0])  : getColumnName(tmpRow, 'subject'),
-            (headerRows[0][1])  : getColumnName(tmpRow, 'taxAuthority'),
-            (headerRows[0][2])  : getColumnName(tmpRow, 'kpp'),
-            (headerRows[0][3])  : getColumnName(tmpRow, 'oktmo'),
-            (headerRows[0][4])  : '',
-            (headerRows[1][4])  : '',
-            (headerRows[2][4])  : '',
-            (headerRows[0][5])  : 'Остаточная стоимость основных средств',
-            (headerRows[1][5])  : getColumnName(tmpRow, 'cost1'),
-            (headerRows[0][6])  : getColumnName(tmpRow, 'cost2'),
-            (headerRows[0][7])  : getColumnName(tmpRow, 'cost3'),
-            (headerRows[0][8])  : getColumnName(tmpRow, 'cost4'),
-            (headerRows[0][9])  : getColumnName(tmpRow, 'cost5'),
-            (headerRows[0][10]) : getColumnName(tmpRow, 'cost6'),
-            (headerRows[0][11]) : getColumnName(tmpRow, 'cost7'),
-            (headerRows[0][12]) : getColumnName(tmpRow, 'cost8'),
-            (headerRows[0][13]) : getColumnName(tmpRow, 'cost9'),
-            (headerRows[0][14]) : getColumnName(tmpRow, 'cost10'),
-            (headerRows[0][15]) : getColumnName(tmpRow, 'cost11'),
-            (headerRows[0][16]) : getColumnName(tmpRow, 'cost12'),
-            (headerRows[0][17]) : getColumnName(tmpRow, 'cost13'),
-            (headerRows[0][18]) : getColumnName(tmpRow, 'cost31_12'),
-            (headerRows[2][0]) : '1',
-            (headerRows[2][1]) : '2',
-            (headerRows[2][2]) : '3',
-            (headerRows[2][3]) : '4'
+            ([(headerRows[0][0])  : getColumnName(tmpRow, 'subject')]),
+            ([(headerRows[0][1])  : getColumnName(tmpRow, 'taxAuthority')]),
+            ([(headerRows[0][2])  : getColumnName(tmpRow, 'kpp')]),
+            ([(headerRows[0][3])  : getColumnName(tmpRow, 'oktmo')]),
+            ([(headerRows[0][4])  : '']),
+            ([(headerRows[1][4])  : '']),
+            ([(headerRows[2][4])  : '']),
+            ([(headerRows[0][5])  : 'Остаточная стоимость основных средств']),
+            ([(headerRows[1][5])  : getColumnName(tmpRow, 'cost1')]),
+            ([(headerRows[0][6])  : getColumnName(tmpRow, 'cost2')]),
+            ([(headerRows[0][7])  : getColumnName(tmpRow, 'cost3')]),
+            ([(headerRows[0][8])  : getColumnName(tmpRow, 'cost4')]),
+            ([(headerRows[0][9])  : getColumnName(tmpRow, 'cost5')]),
+            ([(headerRows[0][10]) : getColumnName(tmpRow, 'cost6')]),
+            ([(headerRows[0][11]) : getColumnName(tmpRow, 'cost7')]),
+            ([(headerRows[0][12]) : getColumnName(tmpRow, 'cost8')]),
+            ([(headerRows[0][13]) : getColumnName(tmpRow, 'cost9')]),
+            ([(headerRows[0][14]) : getColumnName(tmpRow, 'cost10')]),
+            ([(headerRows[0][15]) : getColumnName(tmpRow, 'cost11')]),
+            ([(headerRows[0][16]) : getColumnName(tmpRow, 'cost12')]),
+            ([(headerRows[0][17]) : getColumnName(tmpRow, 'cost13')]),
+            ([(headerRows[0][18]) : getColumnName(tmpRow, 'cost31_12')]),
+            ([(headerRows[2][0]) : '1']),
+            ([(headerRows[2][1]) : '2']),
+            ([(headerRows[2][2]) : '3']),
+            ([(headerRows[2][3]) : '4'])
     ]
-    (5..18).each { index ->
-        headerMapping.put((headerRows[2][index]), index.toString())
+    (5..18).each {
+        headerMapping.add(([(headerRows[2][it]): it.toString()]))
     }
     checkHeaderEquals(headerMapping, logger)
 }
