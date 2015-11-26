@@ -33,7 +33,6 @@ switch (formDataEvent) {
         formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.CHECK:
-        preCalcCheck()
         logicCheck()
         break
     case FormDataEvent.MOVE_CREATED_TO_PREPARED:  // Подготовить из "Создана"
@@ -42,7 +41,6 @@ switch (formDataEvent) {
     case FormDataEvent.MOVE_PREPARED_TO_APPROVED: // Утвердить из "Подготовлена"
     case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED: // Принять из "Подготовлена"
     case FormDataEvent.MOVE_APPROVED_TO_ACCEPTED: // Принять из "Утверждена"
-        preCalcCheck()
         logicCheck()
         break
     case FormDataEvent.IMPORT:
@@ -68,7 +66,7 @@ def totalColumns = ['tax26411_01', 'tax26411_02', 'sum34', 'tax26411_03', 'tax26
 def allTotalColumns = ['tax26411_01', 'tax26411_02', 'sum34', 'rate5', 'tax26411_03', 'rate7', 'tax26411_13', 'rate9', 'tax26411_12', 'rate11', 'tax26412', 'rate13', 'tax26410_09', 'rate15', 'sum', 'rate']
 
 @Field
-def nonEmptyColumns = ['department', 'tax26411_01', 'tax26411_02', 'sum34', 'rate5', 'tax26411_03', 'rate7', 'tax26411_13', 'rate9', 'tax26411_12', 'rate11', 'tax26412', 'rate13', 'tax26410_09', 'rate15', 'sum', 'rate']
+def nonEmptyColumns = ['parentTB', 'department']
 
 // alias -> opu code
 @Field
