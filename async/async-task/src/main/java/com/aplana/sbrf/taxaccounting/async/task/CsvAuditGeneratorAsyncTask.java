@@ -1,6 +1,5 @@
 package com.aplana.sbrf.taxaccounting.async.task;
 
-import com.aplana.sbrf.taxaccounting.model.BalancingVariants;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
@@ -10,21 +9,18 @@ import com.aplana.sbrf.taxaccounting.service.ReportService;
 import com.aplana.sbrf.taxaccounting.service.TAUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.text.SimpleDateFormat;
 import java.util.Map;
 
 import static com.aplana.sbrf.taxaccounting.async.task.AsyncTask.RequiredParams.USER_ID;
 
 public abstract class CsvAuditGeneratorAsyncTask extends AbstractAsyncTask {
 
-    private static final SimpleDateFormat SDF = new SimpleDateFormat("dd.MM.yyyy");
     private static final String SUCCESS_MSG =
             "Сформирован ZIP файл с данными журнала аудита по следующим параметрам поиска: %s.";
     private static final String ERROR_MSG =
             "Произошла непредвиденная ошибка при формировании ZIP файла с данными журнала аудита по следующим параметрам поиска: %s. " +
                     "Для запуска процедуры формирования необходимо повторно инициировать формирование данного файла.";
     private static final String EMPTY_DATA_ERROR_MSG = "ZIP файл с данными журнала аудита не сформирован. В журнале аудита отсутствуют данные по заданным параметрам поиска: %s.";
-    private static final String SEARCH_CRITERIA = "От даты: \"%s\", До даты: \"%s\", Критерий поиска: \"%s\", Искать в найденном: \"%s\", Искать по полям: \"%s\"";
 
     @Autowired
     TAUserService userService;
