@@ -75,7 +75,7 @@
         <alias>sum34</alias>
         <checking>false</checking>
         <columnType>NUMBER</columnType>
-        <name>гр.3+гр.4</name>
+        <name>гр.4+гр.5</name>
         <order>7</order>
         <width>10</width>
         <maxLength>17</maxLength>
@@ -85,7 +85,7 @@
         <alias>rate5</alias>
         <checking>false</checking>
         <columnType>NUMBER</columnType>
-        <name>(гр.5/ИТОГО,гр.5)*100%</name>
+        <name>(гр.6/ИТОГО,гр.6)*100%</name>
         <order>8</order>
         <width>10</width>
         <maxLength>5</maxLength>
@@ -105,7 +105,7 @@
         <alias>rate7</alias>
         <checking>false</checking>
         <columnType>NUMBER</columnType>
-        <name>(гр.7/ИТОГО,гр.7)*100%</name>
+        <name>(гр.8/ИТОГО,гр.8)*100%</name>
         <order>10</order>
         <width>10</width>
         <maxLength>5</maxLength>
@@ -125,7 +125,7 @@
         <alias>rate9</alias>
         <checking>false</checking>
         <columnType>NUMBER</columnType>
-        <name>(гр.9/ИТОГО,гр.9)*100%</name>
+        <name>(гр.10/ИТОГО,гр.10)*100%</name>
         <order>12</order>
         <width>10</width>
         <maxLength>5</maxLength>
@@ -145,7 +145,7 @@
         <alias>rate11</alias>
         <checking>false</checking>
         <columnType>NUMBER</columnType>
-        <name>(гр.11/ИТОГО,гр.11)*100%</name>
+        <name>(гр.12/ИТОГО,гр.12)*100%</name>
         <order>14</order>
         <width>10</width>
         <maxLength>5</maxLength>
@@ -165,7 +165,7 @@
         <alias>rate13</alias>
         <checking>false</checking>
         <columnType>NUMBER</columnType>
-        <name>(гр.13/ИТОГО,гр.13)*100%</name>
+        <name>(гр.14/ИТОГО,гр.14)*100%</name>
         <order>16</order>
         <width>10</width>
         <maxLength>5</maxLength>
@@ -185,7 +185,7 @@
         <alias>rate15</alias>
         <checking>false</checking>
         <columnType>NUMBER</columnType>
-        <name>(гр.15/ИТОГО,гр.15)*100%</name>
+        <name>(гр.16/ИТОГО,гр.16)*100%</name>
         <order>18</order>
         <width>10</width>
         <maxLength>5</maxLength>
@@ -195,7 +195,7 @@
         <alias>sum</alias>
         <checking>false</checking>
         <columnType>NUMBER</columnType>
-        <name>гр.5+гр.7+гр.9+гр.11+гр.13+гр.15</name>
+        <name>гр.6+гр.8+гр.10+гр.12+гр.14+гр.16</name>
         <order>19</order>
         <width>10</width>
         <maxLength>17</maxLength>
@@ -205,7 +205,7 @@
         <alias>rate</alias>
         <checking>false</checking>
         <columnType>NUMBER</columnType>
-        <name>(гр.17/ИТОГО,гр.17)*100%</name>
+        <name>(гр.18/ИТОГО,гр.18)*100%</name>
         <order>20</order>
         <width>10</width>
         <maxLength>5</maxLength>
