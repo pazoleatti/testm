@@ -22,7 +22,8 @@ switch (formDataEvent) {
         formDataService.addRow(formData, currentDataRow, editableColumns, autoFillColumns)
         break
     case FormDataEvent.DELETE_ROW:
-        formDataService.getDataRowHelper(formData).delete(currentDataRow)
+        if (currentDataRow != null && !currentDataRow.getAlias())
+            formDataService.getDataRowHelper(formData).delete(currentDataRow)
         break
     case FormDataEvent.CALCULATE:
         preCalcCheck()
@@ -33,7 +34,6 @@ switch (formDataEvent) {
         formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.CHECK:
-        preCalcCheck()
         logicCheck()
         break
     case FormDataEvent.MOVE_CREATED_TO_PREPARED:  // Подготовить из "Создана"
@@ -42,7 +42,6 @@ switch (formDataEvent) {
     case FormDataEvent.MOVE_PREPARED_TO_APPROVED: // Утвердить из "Подготовлена"
     case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED: // Принять из "Подготовлена"
     case FormDataEvent.MOVE_APPROVED_TO_ACCEPTED: // Принять из "Утверждена"
-        preCalcCheck()
         logicCheck()
         break
     case FormDataEvent.IMPORT:
@@ -68,7 +67,7 @@ def totalColumns = ['tax26411_01', 'tax26411_02', 'sum34', 'tax26411_03', 'tax26
 def allTotalColumns = ['tax26411_01', 'tax26411_02', 'sum34', 'rate5', 'tax26411_03', 'rate7', 'tax26411_13', 'rate9', 'tax26411_12', 'rate11', 'tax26412', 'rate13', 'tax26410_09', 'rate15', 'sum', 'rate']
 
 @Field
-def nonEmptyColumns = ['department', 'tax26411_01', 'tax26411_02', 'sum34', 'rate5', 'tax26411_03', 'rate7', 'tax26411_13', 'rate9', 'tax26411_12', 'rate11', 'tax26412', 'rate13', 'tax26410_09', 'rate15', 'sum', 'rate']
+def nonEmptyColumns = ['parentTB', 'department']
 
 // alias -> opu code
 @Field
@@ -347,6 +346,13 @@ void logicCheck() {
             continue
         checkNonEmptyColumns(row, row.getIndex(), nonEmptyColumns, logger, true)
 
+        if (row.department != null) {
+            def parentTB = getParentTBId(row.department.intValue())
+            if (parentTB != 113) {
+                logger.error("Строка %s: Графа «%s»: Выбранное подразделение не является дочерним подразделением для ЦА!",
+                        row.getIndex(), getColumnName(row, 'department'))
+            }
+        }
         def needValue = formData.createDataRow()
         needValue.parentTB = row.department ? getParentTBId(row.department.intValue()) : null
 

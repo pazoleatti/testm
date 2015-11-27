@@ -24,7 +24,8 @@ switch (formDataEvent) {
         formDataService.addRow(formData, currentDataRow, editableColumns, autoFillColumns)
         break
     case FormDataEvent.DELETE_ROW:
-        formDataService.getDataRowHelper(formData).delete(currentDataRow)
+        if (currentDataRow != null && !currentDataRow.getAlias())
+            formDataService.getDataRowHelper(formData).delete(currentDataRow)
         break
     case FormDataEvent.CALCULATE:
         preCalcCheck()
@@ -35,7 +36,6 @@ switch (formDataEvent) {
         formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.CHECK:
-        preCalcCheck()
         logicCheck()
         break
     case FormDataEvent.MOVE_CREATED_TO_PREPARED:  // Подготовить из "Создана"
@@ -44,9 +44,6 @@ switch (formDataEvent) {
     case FormDataEvent.MOVE_PREPARED_TO_APPROVED: // Утвердить из "Подготовлена"
     case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED: // Принять из "Подготовлена"
     case FormDataEvent.MOVE_APPROVED_TO_ACCEPTED: // Принять из "Утверждена"
-        preCalcCheck()
-        if (logger.containsLevel(LogLevel.ERROR))
-            return
         logicCheck()
         break
     case FormDataEvent.IMPORT:
@@ -72,7 +69,7 @@ def totalColumns = ['tax26411_01', 'tax26411_02', 'sum34', 'tax26411_03', 'tax26
 def allTotalColumns = ['tax26411_01', 'tax26411_02', 'sum34', 'rate5', 'tax26411_03', 'rate7', 'tax26411_13', 'rate9', 'tax26411_12', 'rate11', 'tax26412', 'rate13', 'tax26410_09', 'rate15', 'sum', 'rate']
 
 @Field
-def nonEmptyColumns = ['department', 'tax26411_01', 'tax26411_02', 'sum34', 'rate5', 'tax26411_03', 'rate7', 'tax26411_13', 'rate9', 'tax26411_12', 'rate11', 'tax26412', 'rate13', 'tax26410_09', 'rate15', 'sum', 'rate']
+def nonEmptyColumns = ['department']
 
 // alias -> opu code
 @Field
@@ -415,12 +412,24 @@ void logicCheck() {
             continue
         checkNonEmptyColumns(row, row.getIndex(), nonEmptyColumns, logger, true)
 
+        def needValue = formData.createDataRow()
+        def management = getDepartmentManagement(row.department?.intValue())
+        if (row.department != null) {
+            def department = getDepartment(row.department.intValue())
+            if (department.type == DepartmentType.TERR_BANK) {
+                if (management == null) {
+                    logger.error("Строка %s: Графа «%s»: для подразделения «%s» не найдено дочернее подразделение с типом «Управление».",
+                            row.getIndex(), getColumnName(row, 'department'), department.getName())
+                }
+            } else {
+                logger.error("Строка %s: Графа «%s»: выполнение расчета невозможно, так как выбранный тип подразделения не соответствует значению «Территориальный банк». Необходимо выбрать подразделение с типом «Территориальный банк».",
+                        row.getIndex(), getColumnName(row, 'department'))
+            }
+        }
         totalColumns.each{
             calcTotalRow[it] += row[it]?:0
         }
 
-        def needValue = formData.createDataRow()
-        def management = getDepartmentManagement(row.department?.intValue())
         def records = calcBO(management?.getId())
         opuMap.each { k, v ->
             needValue[k] = records[k]

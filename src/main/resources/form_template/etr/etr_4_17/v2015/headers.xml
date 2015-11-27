@@ -50,20 +50,20 @@
     <cell alias="department" colSpan="1" rowSpan="1" value="Подразделение территориального банка"/>
     <cell alias="tax26411_01" colSpan="1" rowSpan="1" value="симвл. ф. 102:  26411.01"/>
     <cell alias="tax26411_02" colSpan="1" rowSpan="1" value="симвл. ф. 102: 26411.02"/>
-    <cell alias="sum34" colSpan="1" rowSpan="1" value="гр.3+гр.4"/>
-    <cell alias="rate5" colSpan="1" rowSpan="1" value="(гр.5/ИТОГО,гр.5)*100%"/>
+    <cell alias="sum34" colSpan="1" rowSpan="1" value="гр.4+гр.5"/>
+    <cell alias="rate5" colSpan="1" rowSpan="1" value="(гр.6/ИТОГО,гр.6)*100%"/>
     <cell alias="tax26411_03" colSpan="1" rowSpan="1" value="симвл. ф. 102: 26411.03"/>
-    <cell alias="rate7" colSpan="1" rowSpan="1" value="(гр.7/ИТОГО,гр.7)*100%"/>
+    <cell alias="rate7" colSpan="1" rowSpan="1" value="(гр.8/ИТОГО,гр.8)*100%"/>
     <cell alias="tax26411_13" colSpan="1" rowSpan="1" value="симвл. ф. 102: 26411.13"/>
-    <cell alias="rate9" colSpan="1" rowSpan="1" value="(гр.9/ИТОГО,гр.9)*100%"/>
+    <cell alias="rate9" colSpan="1" rowSpan="1" value="(гр.10/ИТОГО,гр.10)*100%"/>
     <cell alias="tax26411_12" colSpan="1" rowSpan="1" value="симвл. ф. 102: 26411.12"/>
-    <cell alias="rate11" colSpan="1" rowSpan="1" value="(гр.11/ИТОГО,гр.11)*100%"/>
+    <cell alias="rate11" colSpan="1" rowSpan="1" value="(гр.12/ИТОГО,гр.12)*100%"/>
     <cell alias="tax26412" colSpan="1" rowSpan="1" value="симвл. ф. 102: 26102"/>
-    <cell alias="rate13" colSpan="1" rowSpan="1" value="(гр.13/ИТОГО,гр.13)*100%"/>
+    <cell alias="rate13" colSpan="1" rowSpan="1" value="(гр.14/ИТОГО,гр.14)*100%"/>
     <cell alias="tax26410_09" colSpan="1" rowSpan="1" value="сивмл. ф. 102: 26410.09"/>
-    <cell alias="rate15" colSpan="1" rowSpan="1" value="(гр.15/ИТОГО,гр.15)*100%"/>
-    <cell alias="sum" colSpan="1" rowSpan="1" value="гр.5+гр.7+гр.9+гр.11+гр.13+гр.15"/>
-    <cell alias="rate" colSpan="1" rowSpan="1" value="(гр.17/ИТОГО,гр.17)*100%"/>
+    <cell alias="rate15" colSpan="1" rowSpan="1" value="(гр.16/ИТОГО,гр.16)*100%"/>
+    <cell alias="sum" colSpan="1" rowSpan="1" value="гр.6+гр.8+гр.10+гр.12+гр.14+гр.16"/>
+    <cell alias="rate" colSpan="1" rowSpan="1" value="(гр.18/ИТОГО,гр.18)*100%"/>
   </row>
   <row alias="">
     <cell alias="fix" colSpan="2" rowSpan="1" value="1"/>
