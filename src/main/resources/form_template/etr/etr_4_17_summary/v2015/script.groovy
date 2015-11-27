@@ -28,7 +28,6 @@ switch (formDataEvent) {
             formDataService.getDataRowHelper(formData).delete(currentDataRow)
         break
     case FormDataEvent.CALCULATE:
-    case FormDataEvent.COMPOSE:
         preCalcCheck()
         if (logger.containsLevel(LogLevel.ERROR))
             return
