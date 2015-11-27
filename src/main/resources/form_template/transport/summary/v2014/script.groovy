@@ -280,7 +280,7 @@ def calc() {
         def errorMsg = "Строка $index: "
 
         // получение региона по ОКТМО
-        def region = getRegionByOKTMO(row.okato, errorMsg)
+        def region = getRegionByOKTMO(row.okato, index)
 
         // графа 2, 3
         fillTaKpp(row, errorMsg)
@@ -491,7 +491,7 @@ void logicCheck() {
         // В справочнике «Ставки транспортного налога» существует строка, удовлетворяющая условиям выборки,
         // приведённой в алгоритме расчёта «графы 24» Табл. 3
         // получение региона по ОКТМО
-        def region = getRegionByOKTMO(row.okato, errorMsg)
+        def region = getRegionByOKTMO(row.okato, index)
         calc24(row, region, errorMsg, true)
 
         // 9. Проверка на корректность заполнения кода НО и КПП согласно справочнику параметров представления деклараций
@@ -502,23 +502,23 @@ void logicCheck() {
 /**
  * Получение региона по коду ОКТМО
  */
-def getRegionByOKTMO(def oktmoCell, def errorMsg) {
+def getRegionByOKTMO(def oktmoCell, def index) {
     def reportDate = getReportDate()
 
     def oktmo3 = getRefBookValue(96, oktmoCell)?.CODE?.stringValue?.substring(0, 3)
     if ("719".equals(oktmo3)) {
-        return getRecord(4, 'CODE', '89', null, null, reportDate);
+        return getRecord(4, 'CODE', '89', index, null, reportDate);
     } else if ("718".equals(oktmo3)) {
-        return getRecord(4, 'CODE', '86', null, null, reportDate);
+        return getRecord(4, 'CODE', '86', index, null, reportDate);
     } else if ("118".equals(oktmo3)) {
-        return getRecord(4, 'CODE', '83', null, null, reportDate);
+        return getRecord(4, 'CODE', '83', index, null, reportDate);
     } else {
         def filter = "OKTMO_DEFINITION like '" + oktmo3?.substring(0, 2) + "%'"
         def record = getRecord(4, filter, reportDate)
         if (record != null) {
             return record
         } else {
-            logger.error(errorMsg + "Не удалось определить регион по коду ОКТМО")
+            logger.error("Строка $index: Не удалось определить регион по коду ОКТМО")
             return null
         }
     }
@@ -1286,9 +1286,9 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
     colIndex++
     newRow.coef362 = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
 
-    def errorMsg = "Строка $rowIndex: "
+    // def errorMsg = "Строка $rowIndex: "
     // получение региона по ОКТМО
-    def region = getRegionByOKTMO(newRow.okato, errorMsg)
+    // def region = getRegionByOKTMO(newRow.okato, rowIndex)
 
     // графа 24 - 41 416 VALUE
     colIndex++
