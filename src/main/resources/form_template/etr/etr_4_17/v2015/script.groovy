@@ -22,7 +22,8 @@ switch (formDataEvent) {
         formDataService.addRow(formData, currentDataRow, editableColumns, autoFillColumns)
         break
     case FormDataEvent.DELETE_ROW:
-        formDataService.getDataRowHelper(formData).delete(currentDataRow)
+        if (currentDataRow != null && !currentDataRow.getAlias())
+            formDataService.getDataRowHelper(formData).delete(currentDataRow)
         break
     case FormDataEvent.CALCULATE:
         preCalcCheck()
