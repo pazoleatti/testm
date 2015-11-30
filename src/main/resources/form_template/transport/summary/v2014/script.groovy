@@ -1404,7 +1404,8 @@ def getTaxRateImport(def values, def rowIndex, def colIndex, def row) {
                 row.benefitCodeReduction = getTaxRate(okato, benefitCodeReduction, 'benefitCodeReduction', rowIndex, colIndex)
 
                 if (taxRate) {
-                    row.taxRate = calc24(row, regionId, null, false)
+                    def region = getRefBookValue(4L, regionId)
+                    row.taxRate = calc24(row, region, null, false)
                     if(!row.taxRate){
                         logger.warn("Строка $rowIndex, столбец " + ScriptUtils.getXLSColumnName(colIndex) + ": " +
                                 "На форме не заполнена графа «" +getColumnName(tmpRow, 'taxRate')+"», " +
@@ -1427,7 +1428,12 @@ def getTaxRateImport(def values, def rowIndex, def colIndex, def row) {
 def getTaxRate(def okato, def taxBenefitCode, def colname, def rowIndex, def colIndex) {
     def ref_id = 7
     def regionId = formDataDepartment.regionId
-    String filter = "DECLARATION_REGION_ID = $regionId and DICT_REGION_ID = $okato and TAX_BENEFIT_ID =$taxBenefitCode"
+    String filter = "DECLARATION_REGION_ID = $regionId and DICT_REGION_ID = $okato and "
+    if (taxBenefitCode) {
+        filter = filter + "TAX_BENEFIT_ID = $taxBenefitCode"
+    } else {
+        filter = filter + "TAX_BENEFIT_ID is null"
+    }
     if (recordCache[ref_id] != null) {
         if (recordCache[ref_id][filter] != null) {
             return recordCache[ref_id][filter]
@@ -1448,7 +1454,7 @@ def getTaxRate(def okato, def taxBenefitCode, def colname, def rowIndex, def col
                 "«Параметры налоговых льгот транспортного налога» не найдена запись, " +
                 "актуальная на дату «" + getReportPeriodEndDate().format("dd.MM.yyyy") + "», " +
                 "в которой поле «Код субъекта РФ представителя декларации» = «$regionId», " +
-                "поле «Код субъекта РФ» = «$okato», поле «Код налоговой льготы» = «$taxRate»!")
+                "поле «Код субъекта РФ» = «$okato», поле «Код налоговой льготы» = «$taxBenefitCode»!")
     }
     return null
 }
