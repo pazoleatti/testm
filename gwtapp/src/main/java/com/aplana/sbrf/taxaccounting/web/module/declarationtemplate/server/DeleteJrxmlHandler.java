@@ -42,11 +42,11 @@ public class DeleteJrxmlHandler extends AbstractActionHandler<DeleteJrxmlAction,
                 Arrays.asList(ReportType.EXCEL_DEC, ReportType.PDF_DEC, ReportType.JASPER_DEC));
         for (Long id : declarationTemplateService.getLockDataIdsThatUseJrxml(action.getDtId())){
             String keyPDF = declarationDataService.generateAsyncTaskKey(id, ReportType.PDF_DEC);
-            String keyEXEL = declarationDataService.generateAsyncTaskKey(id, ReportType.EXCEL_DEC);
+            String keyEXCEL = declarationDataService.generateAsyncTaskKey(id, ReportType.EXCEL_DEC);
             LockData pdfLock = lockDataService.getLock(keyPDF);
-            LockData exelLock = lockDataService.getLock(keyEXEL);
-            lockDataService.interruptTask(pdfLock, securityService.currentUserInfo().getUser().getId(), false);
-            lockDataService.interruptTask(exelLock, securityService.currentUserInfo().getUser().getId(), false);
+            LockData excelLock = lockDataService.getLock(keyEXCEL);
+            lockDataService.interruptTask(pdfLock, securityService.currentUserInfo().getUser().getId(), false, "Выполнена замена jrxml файла макета декларации");
+            lockDataService.interruptTask(excelLock, securityService.currentUserInfo().getUser().getId(), false, "Выполнена замена jrxml файла макета декларации");
         }
         declarationTemplateService.deleteJrxml(action.getDtId());
         return new DeleteJrxmlResult();

@@ -14,6 +14,4 @@ public interface LockListUiHandlers extends AplanaUiHandlers {
     void onDeleteLock();
 
     void onFindClicked();
-
-    void onStopAsync();
 }

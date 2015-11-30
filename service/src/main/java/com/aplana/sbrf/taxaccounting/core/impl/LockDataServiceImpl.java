@@ -252,7 +252,7 @@ public class LockDataServiceImpl implements LockDataService {
 	}
 
     @Override
-    public void interruptTask(final LockData lockData, final int userId, final boolean force) {
+    public void interruptTask(final LockData lockData, final int userId, final boolean force, final String cause) {
         if (lockData != null) {
             LOG.info(String.format("Останавливается асинхронная задача с ключом %s", lockData.getKey()));
             tx.executeInNewTransaction(new TransactionLogic() {
@@ -263,7 +263,7 @@ public class LockDataServiceImpl implements LockDataService {
 						   List<Integer> waitingUsers = getUsersWaitingForLock(lockData.getKey());
 						   unlock(lockData.getKey(), userId, force);
 						   //asyncInterruptionManager.interruptAll(Arrays.asList(lockData.getKey()));
-						   String msg = String.format(LockData.CANCEL_TASK, user.getName(), lockData.getDescription());
+						   String msg = String.format(LockData.CANCEL_TASK, user.getName(), lockData.getDescription(), cause);
 						   List<Notification> notifications = new ArrayList<Notification>();
 						   //Создаем оповещение для каждого пользователя из списка
 						   if (!waitingUsers.isEmpty()) {
@@ -287,9 +287,9 @@ public class LockDataServiceImpl implements LockDataService {
     }
 
     @Override
-    public void interuptAllTasks(List<String> lockKeys, int userId) {
+    public void interruptAllTasks(List<String> lockKeys, int userId, String cause) {
         for (String key : lockKeys) {
-            interruptTask(getLock(key), userId, true);
+            interruptTask(getLock(key), userId, true, cause);
         }
     }
 

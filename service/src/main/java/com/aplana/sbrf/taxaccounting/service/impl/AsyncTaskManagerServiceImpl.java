@@ -45,7 +45,7 @@ public class AsyncTaskManagerServiceImpl implements AsyncTaskManagerService{
         if (lockDataTask != null && lockDataTask.getUserId() == userInfo.getUser().getId()) {
             if (force) {
                 // Удаляем старую задачу, оправляем оповещения подписавщимся пользователям
-                lockDataService.interruptTask(lockDataTask, userInfo.getUser().getId(), false);
+                lockDataService.interruptTask(lockDataTask, userInfo.getUser().getId(), false, "Выполнен перезапуск задачи");
             } else {
                 // вызов диалога
                 String restartMsg = LockData.State.IN_QUEUE.getText().equals(lockDataTask.getState()) ?
