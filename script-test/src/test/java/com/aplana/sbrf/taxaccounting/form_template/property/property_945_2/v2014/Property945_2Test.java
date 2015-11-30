@@ -15,6 +15,7 @@ import org.junit.Test;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
+import java.math.BigDecimal;
 import java.util.*;
 
 import static org.mockito.Matchers.*;
@@ -192,6 +193,33 @@ public class Property945_2Test extends ScriptTestBase {
         Assert.assertNull(dataRows.get(3).getCell("benefitBasis").getStringValue());
         Assert.assertEquals("", dataRows.get(4).getCell("benefitBasis").getStringValue());
         checkLogger();
+    }
+    @Test
+    public void importTransportFileTest() {
+        int expected = 1 + 1 + 1; // в источнике 1 строка (без итогов и подитогов) + по 1 подитогу на строку + 1 итоговая строка
+        testHelper.setImportFileInputStream(getImportRnuInputStream());
+        testHelper.execute(FormDataEvent.IMPORT_TRANSPORT_FILE);
+        Assert.assertEquals(expected, testHelper.getDataRowHelper().getAll().size());
+        checkLoadData(testHelper.getDataRowHelper().getAll());
+        checkLogger();
+    }
+    /**
+     * Проверить загруженные данные.
+     */
+    void checkLoadData(List<DataRow<Cell>> dataRows) {
+        // графа 12, 13
+        String[] dateColumns = {"propertyRightBeginDate", "propertyRightEndDate"};
+
+        String MSG = "row.%s[%d]";
+        for (DataRow<Cell> row : dataRows) {
+            if (row.getAlias() != null) {
+                continue;
+            }
+            for (String alias : dateColumns) {
+                String msg = String.format(MSG, alias, row.getIndex());
+                Assert.assertNotNull(msg, row.getCell(alias).getDateValue());
+            }
+        }
     }
 
 }

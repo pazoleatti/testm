@@ -5,6 +5,7 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
+import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.service.script.api.DataRowHelper;
 import com.aplana.sbrf.taxaccounting.util.DataRowHelperStub;
 import com.aplana.sbrf.taxaccounting.util.ScriptTestBase;
@@ -56,7 +57,68 @@ public class Property945_3Test extends ScriptTestBase {
 
     @Before
     public void mockRefBookDataProvider() {
+
         // Для работы проверок
+        when(testHelper.getRefBookFactory().get(203L)).thenAnswer(
+                new Answer<RefBook>() {
+
+                    @Override
+                    public RefBook answer(InvocationOnMock invocation) throws Throwable {
+                        RefBook refBook = new RefBook();
+                        refBook.setId(203L);
+                        refBook.setName("Параметры налоговых льгот налога на имущество");
+                        return refBook;
+                    }
+                }
+        );
+        when(testHelper.getDepartmentReportPeriodService().get(any(Integer.class))).thenAnswer(
+                new Answer<DepartmentReportPeriod>() {
+                    @Override
+                    public DepartmentReportPeriod answer(InvocationOnMock invocation) throws Throwable {
+                        DepartmentReportPeriod result = new DepartmentReportPeriod();
+                        result.setBalance(true);
+                        return result;
+                    }
+                });
+        when(testHelper.getRefBookFactory().getDataProvider(any(Long.class))).thenAnswer(
+                new Answer<RefBookDataProvider>() {
+                    @Override
+                    public RefBookDataProvider answer(InvocationOnMock invocation) throws Throwable {
+                        return testHelper.getRefBookDataProvider();
+                    }
+                });
+
+        when(testHelper.getRefBookFactory().getDataProvider(201L).getRecords(any(Date.class), any(PagingParams.class), anyString(),
+                any(RefBookAttribute.class))).thenAnswer(
+                new Answer<PagingResult<Map<String, RefBookValue>>>() {
+                    @Override
+                    public PagingResult<Map<String, RefBookValue>> answer(InvocationOnMock invocation) throws Throwable {
+                        PagingResult<Map<String, RefBookValue>> result = new PagingResult<Map<String, RefBookValue>>();
+
+                        Map<String, RefBookValue> map = new HashMap<String, RefBookValue>();
+                        map.put(RefBook.RECORD_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, 1L));
+                        map.put("REGION_ID", new RefBookValue(RefBookAttributeType.NUMBER, 1L));
+                        result.add(map);
+
+                        return result;
+                    }
+                });
+        when(testHelper.getRefBookFactory().getDataProvider(202L).getRecords(any(Date.class), any(PagingParams.class), anyString(),
+                any(RefBookAttribute.class))).thenAnswer(
+                new Answer<PagingResult<Map<String, RefBookValue>>>() {
+                    @Override
+                    public PagingResult<Map<String, RefBookValue>> answer(InvocationOnMock invocation) throws Throwable {
+                        PagingResult<Map<String, RefBookValue>> result = new PagingResult<Map<String, RefBookValue>>();
+
+                        Map<String, RefBookValue> map = new HashMap<String, RefBookValue>();
+                        map.put(RefBook.RECORD_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, 1L));
+                        map.put("REGION_ID", new RefBookValue(RefBookAttributeType.NUMBER, 1L));
+                        map.put("CODE", new RefBookValue(RefBookAttributeType.STRING, "2012400"));
+                        result.add(map);
+
+                        return result;
+                    }
+                });
         when(testHelper.getRefBookDataProvider().getRecords(any(Date.class), any(PagingParams.class), anyString(),
                 any(RefBookAttribute.class))).thenAnswer(
                 new Answer<PagingResult<Map<String, RefBookValue>>>() {
@@ -82,6 +144,30 @@ public class Property945_3Test extends ScriptTestBase {
                         return result;
                     }
                 });
+        when(testHelper.getRefBookFactory().getDataProvider(203L).getRecords(any(Date.class), any(PagingParams.class), anyString(),
+                any(RefBookAttribute.class))).thenAnswer(
+                new Answer<PagingResult<Map<String, RefBookValue>>>() {
+                    @Override
+                    public PagingResult<Map<String, RefBookValue>> answer(InvocationOnMock invocation) throws Throwable {
+                        PagingResult<Map<String, RefBookValue>> result = new PagingResult<Map<String, RefBookValue>>();
+
+                        Map<String, RefBookValue> map = new HashMap<String, RefBookValue>();
+                        map.put(RefBook.RECORD_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, 1L));
+                        map.put("TAX_BENEFIT_ID", new RefBookValue(RefBookAttributeType.REFERENCE, 1L));
+                        map.put("ITEM", new RefBookValue(RefBookAttributeType.STRING, "i1__"));
+                        map.put("SUBITEM", new RefBookValue(RefBookAttributeType.STRING, "si1_"));
+                        map.put("SECTION", new RefBookValue(RefBookAttributeType.STRING, "s1__"));
+                        map.put("DECLARATION_REGION_ID", new RefBookValue(RefBookAttributeType.REFERENCE, 1L));
+                        map.put("REGION_ID", new RefBookValue(RefBookAttributeType.REFERENCE, 1L));
+                        map.put("PARAM_DESTINATION", new RefBookValue(RefBookAttributeType.NUMBER, 2L));
+                        map.put("RATE", new RefBookValue(RefBookAttributeType.NUMBER, 1L));
+                        result.add(map);
+
+                        return result;
+                    }
+                });
+
+        when(testHelper.getFormDataService().getFormTemplate(anyInt(), anyInt())).thenReturn(testHelper.getFormTemplate());
     }
 
     @Test
@@ -183,4 +269,17 @@ public class Property945_3Test extends ScriptTestBase {
         checkLogger();
     }
 
+    @Test
+    public void importExcelTest() {
+        testHelper.setImportFileInputStream(getImportXlsInputStream());
+        testHelper.execute(FormDataEvent.IMPORT);
+        List<DataRow<Cell>> dataRows = testHelper.getDataRowHelper().getAll();
+        Assert.assertEquals("s1__i1__si1_", dataRows.get(0).getCell("benefitBasis").getStringValue());
+        Assert.assertNull(dataRows.get(4).getCell("benefitBasis").getStringValue());
+        testHelper.execute(FormDataEvent.CALCULATE);
+        // Проверка расчетных данных
+        Assert.assertEquals("s1__i1__si1_", dataRows.get(0).getCell("benefitBasis").getStringValue());
+        Assert.assertEquals(null, dataRows.get(4).getCell("benefitBasis").getStringValue());
+        checkLogger();
+    }
 }

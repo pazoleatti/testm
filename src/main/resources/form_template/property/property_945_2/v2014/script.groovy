@@ -1,5 +1,6 @@
 package form_template.property.property_945_2.v2014
 
+import au.com.bytecode.opencsv.CSVReader
 import com.aplana.sbrf.taxaccounting.model.Cell
 import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
@@ -70,6 +71,10 @@ switch (formDataEvent) {
     case FormDataEvent.IMPORT:
         checkRegionId()
         importData()
+        formDataService.saveCachedDataRows(formData, logger)
+        break
+    case FormDataEvent.IMPORT_TRANSPORT_FILE:
+        importTransportData()
         formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.SORT_ROWS:
@@ -465,7 +470,7 @@ def getSubTotalRows(def dataRows) {
     return dataRows.findAll { it.getAlias() != null && !it.getAlias().equals('total')}
 }
 
-// Получение подитоговых строк
+// Получение итоговых строк
 def getTotalRow(def dataRows) {
     return dataRows.find { it.getAlias() != null && it.getAlias().equals('total')}
 }
@@ -713,3 +718,237 @@ def getNewSubTotalRowFromXls(def values, def colOffset, def fileRowIndex, def ro
 
     return newRow
 }
+void importTransportData() {
+    checkBeforeGetXml(ImportInputStream, UploadFileName)
+    if (!UploadFileName.endsWith(".rnu")) {
+        logger.error(WRONG_RNU_FORMAT)
+    }
+    int COLUMN_COUNT = 15
+    def DEFAULT_CHARSET = "cp866"
+    char SEPARATOR = '|'
+    char QUOTE = '\0'
+
+    String[] rowCells
+    int fileRowIndex = 2    // номер строки в файле (1, 2..). Начинается с 2, потому что первые две строки - заголовок и пустая строка
+    int rowIndex = 0        // номер строки в НФ (1, 2, ..)
+    def totalTF = null      // итоговая строка со значениями из тф для добавления
+    def newRows = []
+
+    InputStreamReader isr = new InputStreamReader(ImportInputStream, DEFAULT_CHARSET)
+    CSVReader reader = new CSVReader(isr, SEPARATOR, QUOTE)
+    try {
+        // пропускаем заголовок
+        rowCells = reader.readNext()
+        if (isEmptyCells(rowCells)) {
+            logger.error('Первой строкой должен идти заголовок, а не пустая строка')
+        }
+        // пропускаем пустую строку
+        rowCells = reader.readNext()
+        if (!isEmptyCells(rowCells)) {
+            logger.error('Вторая строка должна быть пустой')
+        }
+        // грузим основные данные
+        while ((rowCells = reader.readNext()) != null) {
+            fileRowIndex++
+            rowIndex++
+            if (isEmptyCells(rowCells)) { // проверка окончания блока данных, пустая строка
+                // итоговая строка тф
+                rowCells = reader.readNext()
+                if (rowCells != null) {
+                    totalTF = getNewRow(rowCells, COLUMN_COUNT, ++fileRowIndex, rowIndex, true)
+                }
+                break
+            }
+            newRows.add(getNewRow(rowCells, COLUMN_COUNT, fileRowIndex, rowIndex))
+        }
+    } finally {
+        reader.close()
+    }
+
+    // посчитать "итого по коду"
+    def totalRows = calcSubTotalRows(newRows)
+    def i = 0
+    totalRows.each { index, row ->
+        newRows.add(index + i++, row)
+    }
+
+    def totalRow = calcTotalRow(newRows)
+    newRows.add(totalRow)
+
+    showMessages(newRows, logger)
+
+    // сравнение итогов
+    if (!logger.containsLevel(LogLevel.ERROR) && totalTF) {
+        // мапа с алиасами граф и номерами колонокв в xml (алиас -> номер колонки)
+        def totalColumnsIndexMap = ['cadastrePriceJanuary' : 10, 'cadastrePriceTaxFree' : 11]
+        def colOffset = 1
+        for (def alias : totalColumnsIndexMap.keySet().asList()) {
+            def v1 = totalTF.getCell(alias).value
+            def v2 = totalRow.getCell(alias).value
+            if (v1 == null && v2 == null) {
+                continue
+            }
+            if (v1 == null || v1 != null && v1 != v2) {
+                logger.warn(TRANSPORT_FILE_SUM_ERROR + " Из файла: $v1, рассчитано: $v2", totalColumnsIndexMap[alias] + colOffset, fileRowIndex)
+            }
+        }
+        // задать итоговой строке нф значения из итоговой строки тф
+        totalColumns.each { alias ->
+            totalRow[alias] = totalTF[alias]
+        }
+    } else {
+        logger.warn("В транспортном файле не найдена итоговая строка")
+        // очистить итоги
+        totalColumns.each { alias ->
+            totalRow[alias] = null
+        }
+    }
+
+    if (!logger.containsLevel(LogLevel.ERROR)) {
+        updateIndexes(newRows)
+        formDataService.getDataRowHelper(formData).allCached = newRows
+    }
+}
+boolean isEmptyCells(def rowCells) {
+    return rowCells.length == 1 && rowCells[0] == ''
+}
+/**
+ * Получить новую строку нф по строке из тф (*.rnu).
+ *
+ * @param rowCells список строк со значениями
+ * @param columnCount количество колонок
+ * @param fileRowIndex номер строки в тф
+ * @param rowIndex строка в нф
+ * @param isTotal признак итоговой строки
+ *
+ * @return вернет строку нф или null, если количество значений в строке тф меньше
+ */
+def getNewRow(String[] rowCells, def columnCount, def fileRowIndex, def rowIndex, def isTotal = false) {
+    def newRow = formData.createStoreMessagingDataRow()
+    newRow.setIndex(rowIndex)
+    newRow.setImportIndex(fileRowIndex)
+
+    if (rowCells.length != columnCount + 2) {
+        rowError(logger, newRow, String.format(ROW_FILE_WRONG + "Ошибка при подсчете количества граф '${rowCells.length}' вместо '${columnCount + 2}", fileRowIndex))
+        return newRow
+    }
+    if(isBalancePeriod()) {
+        editableColumns.each {
+            newRow.getCell(it).editable = true
+            newRow.getCell(it).setStyleAlias('Редактируемая')
+        }
+    }
+
+    def int colOffset = 1
+
+    // графа 1  rowCells[0]
+    // графа fix rowCells[1]
+    // графа 2 rowCells[2]
+    // newRow.subject - автозаполнение
+    // графа 3
+    newRow.taxAuthority = pure(rowCells[3])
+    // графа 4
+    newRow.kpp = pure(rowCells[4])
+    // графа 5
+    newRow.oktmo = getRecordIdImport(96, 'CODE',pure(rowCells[5]), fileRowIndex, 5 + colOffset)
+    // графа 6
+    newRow.address = pure(rowCells[6])
+    // графа 7
+    newRow.sign = parseNumber(pure(rowCells[7]), fileRowIndex, 7 + colOffset, logger, true)
+    // графа 8
+    newRow.cadastreNumBuilding = pure(rowCells[8])
+    // графа 9
+    newRow.cadastreNumRoom = pure(rowCells[9])
+    // графа 10
+    newRow.cadastrePriceJanuary = parseNumber(pure(rowCells[10]), fileRowIndex, 10 + colOffset, logger, true)
+    // графа 11
+    newRow.cadastrePriceTaxFree = parseNumber(pure(rowCells[11]), fileRowIndex, 11 + colOffset, logger, true)
+    // графа 12
+    newRow.propertyRightBeginDate = parseDate(pure(rowCells[12]), 'dd.MM.yyyy', fileRowIndex, 12 + colOffset, logger, true)
+    // графа 13
+    newRow.propertyRightEndDate = parseDate(pure(rowCells[13]), 'dd.MM.yyyy', fileRowIndex, 13 + colOffset, logger, true)
+
+    // графа 15
+    newRow.benefitBasis = pure(rowCells[15])
+    // графа 14
+    // TODO может как-то попроще
+    def record202Id = getRecordIdImport(202, 'CODE', pure(rowCells[15]), fileRowIndex, 15 + colOffset)
+    if (record202Id) {
+        def declarationRegionId = formDataDepartment.regionId?.toString()
+        def regionId = newRow.subject?.toString()
+        def taxBenefinId = record202Id
+        filter = "DECLARATION_REGION_ID = $declarationRegionId and REGION_ID = $regionId and TAX_BENEFIT_ID = $taxBenefinId and PARAM_DESTINATION = 2"
+        def provider = formDataService.getRefBookProvider(refBookFactory, 203, providerCache)
+        def records = provider.getRecords(getReportPeriodEndDate(), null, filter, null)
+        def taxRecordId = records?.find { calcBasis(it?.record_id?.value) == newRow.benefitBasis }?.record_id?.value
+        if (taxRecordId) {
+            newRow.taxBenefitCode = taxRecordId
+        } else {
+            RefBook rb = getRefBook(203)
+            logger.warn(REF_BOOK_NOT_FOUND_IMPORT_ERROR, fileRowIndex, "Код налоговой льготы", rb.getName(), rb.getAttribute('TAX_BENEFIT_ID').getName(), pure(rowCells[14]), getReportPeriodEndDate().format('dd.MM.yyyy'))
+        }
+    }
+
+    return newRow
+}
+def calcTotalRow(def dataRows) {
+    def totalRow = getTotalRow('total', 'Итого')
+    calcTotalSum(dataRows, totalRow, totalColumns)
+
+    return totalRow
+}
+def calcSubTotalRows(def dataRows) {
+    // посчитать "итого по "
+    def totalRows = [:]
+    def rows = dataRows.findAll { it.getAlias() == null }
+    rows.eachWithIndex { row, i ->
+        totalRows.put(i + 1, calcItog(i, dataRows))
+    }
+    return totalRows
+}
+static String pure(String cell) {
+    return StringUtils.cleanString(cell).intern()
+}
+//получение итоговых строк для работы с ТФ
+def getTotalRow(def alias, def title) {
+    def newRow = (formDataEvent in [FormDataEvent.IMPORT, FormDataEvent.IMPORT_TRANSPORT_FILE]) ? formData.createStoreMessagingDataRow() : formData.createDataRow()
+    newRow.setAlias(alias)
+    newRow.fix = title
+    newRow.getCell('fix').colSpan = 5
+    allColumns.each {
+        newRow.getCell(it).setStyleAlias('Контрольные суммы')
+    }
+    return newRow
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

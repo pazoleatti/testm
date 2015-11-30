@@ -1,13 +1,21 @@
 package com.aplana.sbrf.taxaccounting.form_template.property.property_945_4.v2014;
 
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
+import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.service.script.api.DataRowHelper;
 import com.aplana.sbrf.taxaccounting.util.DataRowHelperStub;
 import com.aplana.sbrf.taxaccounting.util.ScriptTestBase;
 import com.aplana.sbrf.taxaccounting.util.TestScriptHelper;
 import com.aplana.sbrf.taxaccounting.util.mock.ScriptTestMockHelper;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 
 import java.util.*;
 
@@ -41,10 +49,80 @@ public class Property945_4Test extends ScriptTestBase {
         formData.setReportPeriodId(REPORT_PERIOD_ID);
         return formData;
     }
-
     @Override
     protected ScriptTestMockHelper getMockHelper() {
         return getDefaultScriptTestMockHelper(Property945_4Test.class);
+    }
+    @Before
+    public void mock() {
+        when(testHelper.getDepartmentReportPeriodService().get(any(Integer.class))).thenAnswer(
+                new Answer<DepartmentReportPeriod>() {
+                    @Override
+                    public DepartmentReportPeriod answer(InvocationOnMock invocation) throws Throwable {
+                        DepartmentReportPeriod result = new DepartmentReportPeriod();
+                        result.setBalance(true);
+                        return result;
+                    }
+                });
+        when(testHelper.getRefBookFactory().getDataProvider(any(Long.class))).thenAnswer(
+                new Answer<RefBookDataProvider>() {
+                    @Override
+                    public RefBookDataProvider answer(InvocationOnMock invocation) throws Throwable {
+                        return testHelper.getRefBookDataProvider();
+                    }
+                });
+
+        when(testHelper.getRefBookFactory().getDataProvider(202L).getRecords(any(Date.class), any(PagingParams.class), anyString(),
+                any(RefBookAttribute.class))).thenAnswer(
+                new Answer<PagingResult<Map<String, RefBookValue>>>() {
+                    @Override
+                    public PagingResult<Map<String, RefBookValue>> answer(InvocationOnMock invocation) throws Throwable {
+                        PagingResult<Map<String, RefBookValue>> result = new PagingResult<Map<String, RefBookValue>>();
+
+                        Map<String, RefBookValue> map = new HashMap<String, RefBookValue>();
+                        map.put(RefBook.RECORD_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, 1L));
+                        map.put("REGION_ID", new RefBookValue(RefBookAttributeType.NUMBER, 1L));
+                        result.add(map);
+
+                        return result;
+                    }
+                });
+        when(testHelper.getRefBookFactory().getDataProvider(203L).getRecords(any(Date.class), any(PagingParams.class), anyString(),
+                any(RefBookAttribute.class))).thenAnswer(
+                new Answer<PagingResult<Map<String, RefBookValue>>>() {
+                    @Override
+                    public PagingResult<Map<String, RefBookValue>> answer(InvocationOnMock invocation) throws Throwable {
+                        PagingResult<Map<String, RefBookValue>> result = new PagingResult<Map<String, RefBookValue>>();
+
+                        Map<String, RefBookValue> map = new HashMap<String, RefBookValue>();
+                        map.put(RefBook.RECORD_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, 1L));
+                        map.put("TAX_BENEFIT_ID", new RefBookValue(RefBookAttributeType.REFERENCE, 1L));
+                        map.put("ITEM", new RefBookValue(RefBookAttributeType.STRING, "i1__"));
+                        map.put("SUBITEM", new RefBookValue(RefBookAttributeType.STRING, "si1_"));
+                        map.put("SECTION", new RefBookValue(RefBookAttributeType.STRING, "s1__"));
+                        map.put("DECLARATION_REGION_ID", new RefBookValue(RefBookAttributeType.REFERENCE, 1L));
+                        map.put("REGION_ID", new RefBookValue(RefBookAttributeType.REFERENCE, 1L));
+                        map.put("PARAM_DESTINATION", new RefBookValue(RefBookAttributeType.NUMBER, 2L));
+                        map.put("RATE", new RefBookValue(RefBookAttributeType.NUMBER, 1L));
+                        result.add(map);
+
+                        map = new HashMap<String, RefBookValue>();
+                        map.put(RefBook.RECORD_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, 2L));
+                        map.put("TAX_BENEFIT_ID", new RefBookValue(RefBookAttributeType.REFERENCE, 1L));
+                        map.put("ITEM", new RefBookValue(RefBookAttributeType.STRING, "i2__"));
+                        map.put("SUBITEM", new RefBookValue(RefBookAttributeType.STRING, "si2_"));
+                        map.put("SECTION", new RefBookValue(RefBookAttributeType.STRING, "s2__"));
+                        map.put("DECLARATION_REGION_ID", new RefBookValue(RefBookAttributeType.REFERENCE, 1L));
+                        map.put("REGION_ID", new RefBookValue(RefBookAttributeType.REFERENCE, 1L));
+                        map.put("PARAM_DESTINATION", new RefBookValue(RefBookAttributeType.NUMBER, 2L));
+                        map.put("RATE", new RefBookValue(RefBookAttributeType.NUMBER, 1L));
+                        result.add(map);
+
+                        return result;
+                    }
+                });
+
+        when(testHelper.getFormDataService().getFormTemplate(anyInt(), anyInt())).thenReturn(testHelper.getFormTemplate());
     }
 
     @Test
@@ -69,20 +147,30 @@ public class Property945_4Test extends ScriptTestBase {
     }
 
     @Test
+    public void importExcelTest() {
+        testHelper.setImportFileInputStream(getImportXlsInputStream());
+        testHelper.execute(FormDataEvent.IMPORT);
+        List<DataRow<Cell>> dataRows = testHelper.getDataRowHelper().getAll();
+        Assert.assertEquals("s1__i1__si1_", dataRows.get(0).getCell("benefitBasis").getStringValue());
+        testHelper.execute(FormDataEvent.CALCULATE);
+        checkLogger();
+    }
+
+    @Test
     public void composeTest() {
         // Назначен один тип формы
         DepartmentFormType departmentFormType = new DepartmentFormType();
         departmentFormType.setKind(KIND);
         departmentFormType.setDepartmentId(DEPARTMENT_ID);
         // идентификатор шаблона источника
-        int sourceTypeId = 611;
+        int sourceTypeId = 612;
         departmentFormType.setFormTypeId(sourceTypeId);
         departmentFormType.setId(1);
         when(testHelper.getDepartmentFormTypeService().getFormSources(anyInt(), anyInt(), any(FormDataKind.class),
                 any(Date.class), any(Date.class))).thenReturn(Arrays.asList(departmentFormType));
 
         // Макет источника
-        FormTemplate sourceTemplate = testHelper.getTemplate("..//src/main//resources//form_template//property//property_945_2//v2014//");
+        FormTemplate sourceTemplate = testHelper.getTemplate("..//src/main//resources//form_template//property//property_945_4//v2014//");
 
         // Один экземпляр-источник
         FormData sourceFormData = new FormData();
@@ -128,14 +216,21 @@ public class Property945_4Test extends ScriptTestBase {
             // графа 12
             row.getCell("cadastrePriceTaxFree").setValue(1L, null);
             // графа 13
-            row.getCell("propertyRightBeginDate").setValue(null, null);
+            row.getCell("tenure").setValue(1L, null);
             // графа 14
-            row.getCell("propertyRightEndDate").setValue(null, null);
-            // графа 15
             row.getCell("taxBenefitCode").setValue(1L, null);
-            // графа 16
+            // графа 15
             row.getCell("benefitBasis").setValue("testA", null);
-
+            // графа 16
+            row.getCell("taxBase").setValue(1L, null);
+            // графа 17
+            row.getCell("taxRate").setValue(1L, null);
+            // графа 18
+            row.getCell("sum").setValue(1L, null);
+            // графа 19
+            row.getCell("periodSum").setValue(1L, null);
+            // графа 20
+            row.getCell("reductionPaymentSum").setValue(1L, null);
             dataRows.add(row);
         }
 
@@ -144,6 +239,6 @@ public class Property945_4Test extends ScriptTestBase {
 
         // Консолидация
         testHelper.execute(FormDataEvent.COMPOSE);
-        Assert.assertEquals(3, testHelper.getDataRowHelper().getAll().size());
+        checkLogger();
     }
 }

@@ -136,6 +136,7 @@ public class Property945_5Test extends ScriptTestBase {
         int expected = 3; // в файле 3 строк
         Assert.assertEquals(expected, testHelper.getDataRowHelper().getAll().size());
         checkLoadData(testHelper.getDataRowHelper().getAll());
+        testHelper.execute(FormDataEvent.CALCULATE);
         checkLogger();
     }
 
