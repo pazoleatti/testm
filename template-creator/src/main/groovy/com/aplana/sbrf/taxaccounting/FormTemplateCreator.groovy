@@ -132,9 +132,10 @@ static void main(String[] args) {
                     sb.append("        formColumn.setFilter('${((RefBookColumn)column).filter ?: ''}' ?: null)\n")
                     break
                 case ReferenceColumn.class.simpleName :
-                    sb.append("        formColumn.setParentAlias('${((ReferenceColumn)column).parentAlias ?: ''}')\n")
+                    sb.append("        formColumn.setParentAlias('${((ReferenceColumn)column).alias ?: ''}')\n")
                     sb.append("        formColumn.setRefBookAttributeId(${((ReferenceColumn)column).refBookAttributeId})\n")
                     sb.append("        formColumn.setRefBookAttributeId2(${((ReferenceColumn)column).refBookAttributeId2})\n")
+                    sb.append("        referenceColumnMap['${((ReferenceColumn)column).alias ?: ''}'] = '${((ReferenceColumn)column).parentAlias ?: ''}'\n")
                     break
                 case StringColumn.class.simpleName :
                     sb.append("        formColumn.setMaxLength(${((StringColumn)column).maxLength})\n")
