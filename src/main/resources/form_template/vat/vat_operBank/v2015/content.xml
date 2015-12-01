@@ -1,10 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <formTemplateContent>
     <fixedRows>true</fixedRows>
-    <name>Разнарядка на безакцептное списание/зачисление по суммам НДС с территориальных банков, Московского банка и подразделений ЦА (по операциям банка)
-    </name>
-    <fullName>Разнарядка на безакцептное списание/зачисление по суммам НДС с территориальных банков, Московского банка и подразделений ЦА (по операциям банка)
-    </fullName>
+    <name>Разнарядка на безакцептное списание/зачисление по суммам НДС с территориальных банков, Московского банка и подразделений ЦА (по операциям банка, справочно)</name>
+    <fullName>Разнарядка на безакцептное списание/зачисление по суммам НДС с территориальных банков, Московского банка и подразделений ЦА (по операциям банка, справочно)</fullName>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>code</alias>
         <checking>false</checking>
@@ -25,24 +23,41 @@
         <maxLength>256</maxLength>
         <prevLength>0</prevLength>
     </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
+        <alias>fix1</alias>
+        <checking>false</checking>
+        <name>fix1</name>
+        <order>3</order>
+        <width>0</width>
+        <maxLength>500</maxLength>
+        <prevLength>0</prevLength>
+    </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>totalVAT</alias>
         <checking>false</checking>
         <columnType>NUMBER</columnType>
-        <name>Всего НДС по операциям, совершаемым Банком (&quot;+&quot; - к списанию, &quot;-&quot; - к зачислению)
+        <name>Всего НДС по операциям, совершаемым СБРФ (&quot;+&quot; - к списанию, &quot;-&quot; - к зачислению)
         </name>
-        <order>3</order>
+        <order>4</order>
         <width>10</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
+        <alias>fix2</alias>
+        <checking>false</checking>
+        <name>fix2</name>
+        <order>5</order>
+        <width>0</width>
+        <maxLength>500</maxLength>
+        <prevLength>0</prevLength>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>month1</alias>
         <checking>false</checking>
         <columnType>NUMBER</columnType>
-        <name>Первый месяц списания &quot;+&quot; / зачисления &quot;-&quot; с учётом корректировок не позднее______
-        </name>
-        <order>4</order>
+        <name>Первый месяц списания &quot;+&quot; / зачисления &quot;-&quot; с учётом корректировок не позднее 25.__.___</name>
+        <order>6</order>
         <width>10</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
@@ -51,8 +66,8 @@
         <alias>month2</alias>
         <checking>false</checking>
         <columnType>NUMBER</columnType>
-        <name>Второй месяц списания &quot;+&quot; / зачисления &quot;-&quot; не позднее_______</name>
-        <order>5</order>
+        <name>Второй месяц списания &quot;+&quot; / зачисления &quot;-&quot; не позднее 25.__.___</name>
+        <order>7</order>
         <width>10</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
@@ -61,8 +76,8 @@
         <alias>month3</alias>
         <checking>false</checking>
         <columnType>NUMBER</columnType>
-        <name>Третий месяц списания &quot;+&quot; / зачисления &quot;-&quot; не позднее______</name>
-        <order>6</order>
+        <name>Третий месяц списания &quot;+&quot; / зачисления &quot;-&quot; не позднее 25.__.___</name>
+        <order>8</order>
         <width>10</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
