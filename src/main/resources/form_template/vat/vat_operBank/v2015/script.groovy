@@ -1,23 +1,23 @@
 package form_template.vat.vat_operBank.v2015
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
+import com.aplana.sbrf.taxaccounting.model.FormDataKind
+import com.aplana.sbrf.taxaccounting.model.FormType
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
 import groovy.transform.Field
 
 /**
- * Разнарядка на безакцептное списание/зачисление по суммам НДС с территориальных банков, Московского банка и подразделений ЦА (по операциям банка).
+ * Разнарядка на безакцептное списание/зачисление по суммам НДС с территориальных банков, Московского банка и подразделений ЦА (по операциям банка, справочно)
  *
  * formTemplateId=620
  *
- * TODO:
- *      - общий метод для итогов/проверки итогов не походит, потому что у всех строк есть alias
- *      - консолидация не описана
- *      - загрузку из экселя сказали пока не делать
  */
 
 // графа 1  - code
 // графа 2  - name
+// графа    - fix1
 // графа 3  - totalVAT
+// графа    - fix2
 // графа 4  - month1
 // графа 5  - month2
 // графа 6  - month3
@@ -51,9 +51,6 @@ switch (formDataEvent) {
     case FormDataEvent.IMPORT:
         // TODO (Ramil Timerbaev) загрузку из экселя сказали пока не делать
         break
-    case FormDataEvent.SORT_ROWS:
-        // сортировки нет, строки формы фиксированные
-        break
 }
 
 // Проверяемые на пустые значения атрибуты (графа 2..6)
@@ -63,22 +60,24 @@ def nonEmptyColumns = ['name', 'totalVAT', 'month1', 'month2', 'month3']
 // Атрибуты итоговых строк для которых вычисляются суммы (графа 3..6)
 @Field
 def totalColumns = ['totalVAT', 'month1', 'month2', 'month3']
-
-// алиас строки "ВСЕГО ПО ТБ"
 @Field
-def totalTBAlias = 'R17'
+def totalNDSColumns = ['totalVAT', 'month1']
 
 // алиас строки "Всего по Сбербанку"
 @Field
-def totalSBAlias = 'R20'
+def totalAlias = 'R16'
 
-// строки для строки "ВСЕГО ПО ТБ" (строки 1..16)
+// алиас строки "Всего по Сбербанку (сумма НДС)"
 @Field
-def totalTBRows = ['R1', 'R2', 'R3', 'R4', 'R5', 'R6', 'R7', 'R8', 'R9', 'R10', 'R11', 'R12', 'R13', 'R14', 'R15', 'R16']
+def totalNDSAlias = 'R21'
 
-// строки для строки "Всего по Сбербанку" (строки 17..19)
+// строки для строки "Всего по Сбербанку" (строки 1..16)
 @Field
-def totalSBRows = ['R17', 'R18', 'R19']
+def totalRows = ['R1', 'R2', 'R3', 'R4', 'R5', 'R6', 'R7', 'R8', 'R9', 'R10', 'R11', 'R12', 'R13', 'R14', 'R15']
+
+// строки для строки "Всего по Сбербанку (сумма НДС)" (строки 18..20)
+@Field
+def totalNDSRows = ['R18', 'R19', 'R20']
 
 // Дата начала отчетного периода
 @Field
@@ -101,6 +100,29 @@ def getReportPeriodEndDate() {
     }
     return endDate
 }
+// Мапа для хранения номеров строк и id подразделений (номер строки -> идентификатор подразделения)
+@Field
+def departmentRowMap = [
+        R1  : 4,
+        R2  : 8,
+        R3  : 20,
+        R4  : 27,
+        R5  : 32,
+        R6  : 44,
+        R7  : 52,
+        R8  : 64,
+        R9  : 82,
+        R10 : 88,
+        R11 : 97,
+        R12 : 102,
+        R13 : 109,
+        R14 : 37,
+
+        18 : 212,
+        19 : 130,
+        20 : -1 // TODO
+]
+
 
 void logicCheck() {
     def dataRows = formDataService.getDataRowHelper(formData).allCached
@@ -123,34 +145,77 @@ void logicCheck() {
 
     // 2. Проверка итоговых значений
     // итоги по ТБ
-    checkTotal(dataRows, totalTBAlias, totalTBRows)
+    checkTotal(dataRows, totalTBAlias, totalRows)
     // итоги по СБ
-    checkTotal(dataRows, totalSBAlias, totalSBRows)
+    checkTotal(dataRows, totalSBAlias, totalNDSRows)
 }
 
 void calc() {
     def dataRows = formDataService.getDataRowHelper(formData).allCached
 
     for (def row : dataRows) {
-        // пропустить итоговые строки
-        if (row.getAlias() in [totalTBAlias, totalSBAlias]) {
+        if (row.getAlias() in ['R16', 'R17', 'R21']) {
             continue
         }
-        // графа 3
-        row.totalVAT = calc3(row)
+        if (row.getAlias() in totalRows) {
+            row.totalVAT = calc3(row)
+            row.month1 = calc4(row)
+            row.month2 = calc56(row)
+            row.month3 = calc56(row)
+        }
+        if (row.getAlias() in totalNDSRows) {
+            row.totalVAT = calc3NDS(row)
+            row.month1 = calc4NDS(row)
+        }
     }
 
-    // итоги по ТБ
-    calcTotal(dataRows, totalTBAlias, totalTBRows)
-    // итоги по СБ
-    calcTotal(dataRows, totalSBAlias, totalSBRows)
+    // итоги
+    calcTotal(dataRows, totalTBAlias, totalRows)
+    // итоги с НДС
+    calcTotal(dataRows, totalSBAlias, totalNDSRows)
 }
 
 def calc3(def row) {
-    if (row.month1 == null || row.month2 == null || row.month3 == null) {
-        return null
-    }
-    return roundValue(row.month1 + row.month2 + row.month3)
+    def departmentId = departmentRowMap.get(row.getAlias())
+    def dataRows724_1 = getDataRows(600, FormDataKind.PRIMARY, departmentId) ?: []
+    def dataRows724_4 = getDataRows(603, FormDataKind.PRIMARY, departmentId) ?: []
+    // TODO id фрмы 724_1_1
+    def dataRows724_1_1 = getDataRows(-1, FormDataKind.PRIMARY, departmentId) ?: []
+
+    def a = (getDataRow(dataRows724_1, 'total')?.ndsSum ?: 0) + (getDataRow(dataRows724_1, 'total_7')?.ndsBookSum ?: 0) - (getDataRow(dataRows724_1, 'total_7')?.ndsDealSum ?: 0)
+    def b = getDataRow(dataRows724_4, 'sum2')?.ndsSum ?: 0
+    // TODO алиасы строк и граф
+    def c = (getDataRow(dataRows724_1_1, 'todo')?.todo ?: 0) + (getDataRow(dataRows724_1_1, 'todo')?.todo ?: 0)
+
+    return a - b + c
+}
+
+def calc4(def row) {
+    return (row.totalVAT ?: 0) - (row.month2 ?: 0) - (row.month3 ?: 0)
+}
+
+def calc56(def row) {
+    return (row.totalVAT ?: 0)/3
+}
+def calc3NDS(def row) {
+    def departmentId = departmentRowMap.get(row.getAlias())
+    def dataRows724_1 = getDataRows(600, FormDataKind.PRIMARY, departmentId) ?: []
+    def dataRows724_4 = getDataRows(603, FormDataKind.PRIMARY, departmentId) ?: []
+    // TODO id фрмы 724_1_1
+    def dataRows724_1_1 = getDataRows(-1, FormDataKind.PRIMARY, departmentId) ?: []
+
+    def a = (getDataRow(dataRows724_1, 'total_1')?.ndsSum ?: 0) +
+            (getDataRow(dataRows724_1, 'total_7')?.ndsBookSum ?: 0) -
+            (getDataRow(dataRows724_1, 'total_7')?.ndsDealSum ?: 0)
+    def b = getDataRow(dataRows724_4, 'sum2')?.ndsSum ?: 0
+    // TODO алиасы строк и граф
+    def c = (getDataRow(dataRows724_1_1, 'todo')?.todo ?: 0) + (getDataRow(dataRows724_1_1, 'todo')?.todo ?: 0)
+
+    return a - b + c
+}
+
+def calc4NDS(def row) {
+    return (row.totalVAT ?: 0) - (row.month2 ?: 0) - (row.month3 ?: 0)
 }
 
 /**
@@ -204,4 +269,14 @@ def roundValue(def value, int precision = 2) {
     } else {
         return null
     }
+}
+
+// Получить строки формы
+def getDataRows(def formId, def kind, def departmentId) {
+    def reportPeriodId = formData.reportPeriodId
+    def periodOrder = formData.periodOrder
+    def sourceFormData = formDataService.getLast(formId, kind, departmentId, reportPeriodId, periodOrder, formData.comparativePeriodId, formData.accruing)
+    if (sourceFormData != null && sourceFormData.id != null)
+        return formDataService.getDataRowHelper(sourceFormData)?.allSaved
+    return null
 }

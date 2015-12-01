@@ -384,7 +384,7 @@ def sourceRefbook520AliasMap = [
                         // 6.14
                         // 6.15
                         // 6.16
-                        // 6.17
+        811 : ['name'], // 6.17
                         // 6.18
                         // 6.19
                         // 6.20
@@ -612,19 +612,26 @@ def calc5or11(def record520Id, def sourceAllDataRowsMap, def isCalc5) {
 def calc6or12(def record520Id, def sourceAllDataRowsMap, def isCalc6) {
     def result = 0
     def formTypeIds = [
-            // 6.14
-            // 6.16
-            // 6.17
+                 // 6.14
+                 // 6.16
+            811  // 6.17
     ]
     formTypeIds.each { formTypeId ->
         def rows = sourceAllDataRowsMap[formTypeId]
         for (def row : rows) {
             if (row.name == record520Id) {
                 // 6.14
-                // 6.14
                 // 6.16
-                // 6.17
                 // TODO (Ramil Timerbaev) пока не реализованы макеты
+
+                // 6.17
+                if (811 == formTypeId) {
+                    if (isCalc6) {
+                        result += (row.income >= row.outcome ? row.cost : 0)
+                    } else {
+                        result += (row.income < row.outcome ? row.cost : 0)
+                    }
+                }
             }
         }
     }

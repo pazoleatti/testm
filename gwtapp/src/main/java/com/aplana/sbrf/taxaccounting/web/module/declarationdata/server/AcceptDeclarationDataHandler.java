@@ -88,7 +88,7 @@ public class AcceptDeclarationDataHandler extends AbstractActionHandler<AcceptDe
 
                             @Override
                             public void interruptTask(ReportType reportType, TAUserInfo userInfo) {
-                                declarationDataService.interruptTask(action.getDeclarationId(), userInfo.getUser().getId(), reportType);
+                                declarationDataService.interruptTask(action.getDeclarationId(), userInfo.getUser().getId(), reportType, "Выполнено принятие экземпляра декларации");
                             }
 
                             @Override

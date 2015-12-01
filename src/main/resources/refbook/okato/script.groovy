@@ -24,6 +24,9 @@ switch (formDataEvent) {
     case FormDataEvent.IMPORT_TRANSPORT_FILE:
         importFromXML()
         break
+    case FormDataEvent.SAVE:
+        save()
+        break
 }
 
 // Получение строки для фильтрации записей по кодам ОКАТО
@@ -381,6 +384,15 @@ void importFromXML() {
     } else {
         if (!logger.containsLevel(LogLevel.ERROR)) {
             scriptStatusHolder.setScriptStatus(ScriptStatus.SUCCESS)
+        }
+    }
+}
+void save() {
+    saveRecords.each {
+        def okato = it.OKATO?.stringValue
+        def pattern = /[0-9]{11}/
+        if (okato && !(okato ==~ pattern)) {
+            logger.error("Атрибут \"%s\" заполнен неверно (%s)! Ожидаемый паттерн: \"%s\"", "OKATO", okato, pattern)
         }
     }
 }

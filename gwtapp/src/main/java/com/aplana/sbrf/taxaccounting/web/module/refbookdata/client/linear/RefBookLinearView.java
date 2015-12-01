@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.linear;
 import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.gwt.client.dialog.DialogHandler;
 import com.aplana.sbrf.taxaccounting.model.Formats;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.FormMode;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.HorizontalAlignment;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.RefBookColumn;
@@ -12,6 +13,7 @@ import com.aplana.sbrf.taxaccounting.web.widget.style.GenericDataGrid;
 import com.aplana.sbrf.taxaccounting.web.widget.utils.WidgetUtils;
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.dom.client.Style;
+import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiConstructor;
@@ -29,6 +31,7 @@ import com.google.gwt.view.client.SingleSelectionModel;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -40,6 +43,7 @@ public class RefBookLinearView extends ViewWithUiHandlers<RefBookDataLinearUiHan
     interface Binder extends UiBinder<Widget, RefBookLinearView> { }
 
     SingleSelectionModel<RefBookDataRow> selectionModel = new SingleSelectionModel<RefBookDataRow>();
+    private static final NumberFormat NUMBER_FORMAT = NumberFormat.getFormat("#,###.##");
 
     @UiField
     GenericDataGrid<RefBookDataRow> refBookDataTable;
@@ -184,7 +188,21 @@ public class RefBookLinearView extends ViewWithUiHandlers<RefBookDataLinearUiHan
                     }
                 };
                 column.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
-            } else {
+            } else if(header.getAttributeType() == RefBookAttributeType.NUMBER){
+                column = new TextColumn<RefBookDataRow>() {
+                    @Override
+                    public String getValue(RefBookDataRow object) {
+                        try{
+                            String s = object.getValues().get(header.getAlias());
+                            return NUMBER_FORMAT.format(new BigDecimal(s)).replace(',', ' ');
+                        } catch (NumberFormatException e){
+                            return object.getValues().get(header.getAlias());
+                        }
+                    }
+                };
+                column.setHorizontalAlignment(convertAlignment(header.getAlignment()));
+            }
+            else {
                 column = new TextColumn<RefBookDataRow>() {
                     @Override
                     public String getValue(RefBookDataRow object) {

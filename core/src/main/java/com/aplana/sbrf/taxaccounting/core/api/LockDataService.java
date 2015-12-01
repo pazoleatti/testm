@@ -178,7 +178,7 @@ public interface LockDataService {
      * @param userId идентификатор пользователя, отменяющего блокировку
      * @param force признак принудительного снятия блокировки
      */
-    void interruptTask(LockData lockData, int userId, boolean force);
+    void interruptTask(LockData lockData, int userId, boolean force, String cause);
 
     /**
      * Останавливает выполнение задач с указанными ключами блокировки, удаляет блокировку и
@@ -186,7 +186,7 @@ public interface LockDataService {
      * @param lockKeys ключи блокировок на удаление
      * @param userId идентификатор пользователя, отменяющего блокировку
      */
-    void interuptAllTasks(List<String> lockKeys, int userId);
+    void interruptAllTasks(List<String> lockKeys, int userId, String cause);
 
     /**
      * Выводит в logger информации о блокировке

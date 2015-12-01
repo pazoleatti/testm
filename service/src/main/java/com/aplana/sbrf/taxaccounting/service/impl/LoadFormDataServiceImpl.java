@@ -530,25 +530,9 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
                 }
             }
             // 17А.4.А.1 Система снимает обнаруженные блокировки с задачи на формирование XLSM/CSV отчета и/или проверки НФ
-            List<ReportType> interruptedReportTypes = Arrays.asList(ReportType.EXCEL, ReportType.CSV, ReportType.CHECK_FD);
-            for (ReportType interruptedType : interruptedReportTypes) {
-                List<String> taskKeyList = new ArrayList<String>();
-                if (ReportType.CSV.equals(interruptedType) || ReportType.EXCEL.equals(interruptedType)) {
-                    taskKeyList.addAll(formDataService.generateReportKeys(interruptedType, formData.getId(), null));
-                } else {
-                    taskKeyList.add(formDataService.generateTaskKey(formData.getId(), interruptedType));
-                }
-                for(String key: taskKeyList) {
-                    LockData lockData = lockDataService.getLock(key);
-                    if (lockData != null) {
-                        lockDataService.interruptTask(lockData, userInfo.getUser().getId(), true);
-                        log(userInfo, LogData.L40_1, localLogger,
-                                lock, formDataService.getTaskName(interruptedType, formData.getId(), userInfo), userService.getUser(lockData.getUserId()).getName(), SDF_HH_MM_DD_MM_YYYY.format(lockData.getDateLock()));
-                    }
-                }
-            }
             // 17А.5 Система инициирует выполнение сценария Удаление отчета НФ для экземпляра НФ, данные которой были перезаполнены.
-            formDataService.deleteReport(formData.getId(), null, userInfo.getUser().getId());
+            formDataService.interruptTask(formData.getId(), null, userInfo.getUser().getId(), ReportType.IMPORT_TF_FD, "Изменены данные налоговой формы путем загрузки транспортного файла");
+
             formData.initFormTemplateParams(formTemplate);
         }
 

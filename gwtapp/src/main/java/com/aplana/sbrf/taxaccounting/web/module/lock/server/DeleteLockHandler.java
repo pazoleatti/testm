@@ -9,7 +9,6 @@ import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 /**
@@ -32,7 +31,7 @@ public class DeleteLockHandler extends AbstractActionHandler<DeleteLockAction, D
     @Override
     public DeleteLockResult execute(DeleteLockAction action, ExecutionContext context) throws ActionException {
         TAUserInfo userInfo = securityService.currentUserInfo();
-        lockService.interuptAllTasks(action.getKeys(), userInfo.getUser().getId());
+        lockService.interruptAllTasks(action.getKeys(), userInfo.getUser().getId(), "Удалена блокировка задачи (форма \"Список блокировок\")");
         return new DeleteLockResult();
     }
 

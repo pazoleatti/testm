@@ -203,7 +203,7 @@ public interface DeclarationDataService {
      * Удаление отчетов и блокировок на задачи формирования отчетов связанных с декларациями
      * @param declarationDataId
      */
-    void deleteReport(long declarationDataId, int userId, boolean isCalc);
+    void deleteReport(long declarationDataId, int userId, boolean isCalc, String cause);
 
     void findDDIdsByRangeInReportPeriod(int decTemplateId, Date startDate, Date endDate, Logger logger);
 
@@ -234,7 +234,7 @@ public interface DeclarationDataService {
      * @param userId
      * @param reportType
      */
-    void interruptTask(long declarationDataId, int userId, ReportType reportType);
+    void interruptTask(long declarationDataId, int userId, ReportType reportType, String cause);
 
     /**
      * Метод для очитски blob-ов у деклараций.

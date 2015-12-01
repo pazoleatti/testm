@@ -7,7 +7,11 @@ import com.aplana.sbrf.taxaccounting.model.FormDataKind
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod
 import com.aplana.sbrf.taxaccounting.model.TaxType
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
+import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import groovy.transform.Field
+
 
 /**
  * Расчёт налога на имущество по средней/среднегодовой стоимости
@@ -75,7 +79,9 @@ switch (formDataEvent) {
         formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.IMPORT:
-        noImport(logger)
+        checkRegionId()
+        importData()
+        formDataService.saveCachedDataRows(formData, logger)
         break
 }
 
@@ -89,9 +95,9 @@ def refBookCache = [:]
 // все атрибуты
 @Field
 def allColumns = ["rowNum", "fix", "subject", "taxAuthority", "kpp", "oktmo", "priceAverage", "taxBenefitCode",
-                 "benefitBasis", "priceAverageTaxFree", "taxBase", "taxBenefitCodeReduction", "benefitReductionBasis",
-                 "taxRate", "taxSum", "sumPayment", "taxBenefitCodeDecrease", "benefitDecreaseBasis", "sumDecrease",
-                 "residualValue"]
+                  "benefitBasis", "priceAverageTaxFree", "taxBase", "taxBenefitCodeReduction", "benefitReductionBasis",
+                  "taxRate", "taxSum", "sumPayment", "taxBenefitCodeDecrease", "benefitDecreaseBasis", "sumDecrease",
+                  "residualValue"]
 
 // Редактируемые атрибуты
 @Field
@@ -122,6 +128,10 @@ String BENEFIT_PRICE = 'В т.ч. стоимость льготируемого 
 
 @Field
 String WITHOUT_CATEGORY = 'Без категории'
+
+// для хранения информации о справочниках
+@Field
+def refBooks = [:]
 
 // форма 945.5
 @Field
@@ -260,29 +270,6 @@ void addFixedRows(def dataRows, totalRow) {
     dataRows.add(totalRow)
 }
 
-// Расчет подитогового значения
-DataRow<Cell> calcItog(def int i, def List<DataRow<Cell>> dataRows) {
-    def newRow = formData.createDataRow()
-
-    newRow.getCell('fix').colSpan = 5
-    def row = dataRows.get(i)
-    newRow.fix = 'Итого по НО ' + row.taxAuthority + ' и КПП ' + row.kpp
-    newRow.setAlias('total#'.concat(i.toString()))
-    allColumns.each {
-        newRow.getCell(it).setStyleAlias('Контрольные суммы')
-    }
-
-    totalColumns.each {
-        newRow[it] = 0
-    }
-    for (int j = i; j >= 0 && dataRows.get(j).getAlias() == null; j--) {
-        row = dataRows.get(j)
-        totalColumns.each {
-            newRow[it] += (row[it] ?: 0)
-        }
-    }
-    return newRow
-}
 
 void sort(def dataRows) {
     dataRows.sort { def a, def b ->
@@ -660,4 +647,328 @@ def getPrevReportPeriods() {
         }
     }
     return prevReportPeriods
+}
+// Проверка заполнения атрибута «Регион» подразделения текущей формы (справочник «Подразделения»)
+void checkRegionId() {
+    if (formDataDepartment.regionId == null) {
+        throw new Exception("Атрибут «Регион» подразделения текущей налоговой формы не заполнен (справочник «Подразделения»)!")
+    }
+}
+void importData() {
+    def tmpRow = formData.createDataRow()
+    int COLUMN_COUNT = 19
+    int HEADER_ROW_COUNT = 2
+    String TABLE_START_VALUE = getColumnName(tmpRow, 'rowNum')
+    String TABLE_END_VALUE = null
+    int INDEX_FOR_SKIP = 1
+
+    def allValues = []      // значения формы
+    def headerValues = []   // значения шапки
+    def paramsMap = ['rowOffset' : 0, 'colOffset' : 0]  // мапа с параметрами (отступы сверху и слева)
+
+    checkAndReadFile(ImportInputStream, UploadFileName, allValues, headerValues, TABLE_START_VALUE, TABLE_END_VALUE, HEADER_ROW_COUNT, paramsMap)
+
+    // проверка шапки
+    checkHeaderXls(headerValues, COLUMN_COUNT, HEADER_ROW_COUNT, tmpRow)
+    if (logger.containsLevel(LogLevel.ERROR)) {
+        return
+    }
+    // освобождение ресурсов для экономии памяти
+    headerValues.clear()
+    headerValues = null
+
+    def fileRowIndex = paramsMap.rowOffset
+    def colOffset = paramsMap.colOffset
+    paramsMap.clear()
+    paramsMap = null
+
+    def rowIndex = 0
+    def rows = []
+    def allValuesCount = allValues.size()
+    def totalRowFromFile = null
+    def subTotalRows = [:]
+
+    // формирвание строк нф
+    for (def i = 0; i < allValuesCount; i++) {
+        rowValues = allValues[0]
+        fileRowIndex++
+        // все строки пустые - выход
+        if (!rowValues) {
+            allValues.remove(rowValues)
+            rowValues.clear()
+            break
+        }
+        // Пропуск итоговых строк
+        if (rowValues[INDEX_FOR_SKIP].contains("Итого по НО ")) {
+            rowIndex++
+            def subTotal = getNewSubTotalRowFromXls(rowValues, colOffset, fileRowIndex, rowIndex)
+            rows.add(subTotal)
+            subTotalRows[subTotal.fix] = subTotal
+
+            allValues.remove(rowValues)
+            rowValues.clear()
+            continue
+        } else if (rowValues[INDEX_FOR_SKIP] == "Общий итог") {
+            totalRowFromFile = getNewTotalFromXls(rowValues, colOffset, fileRowIndex, rowIndex)
+            allValues.remove(rowValues)
+            rowValues.clear()
+            continue
+        }
+        // простая строка
+        rowIndex++
+        def newRow = getNewRowFromXls(rowValues, colOffset, fileRowIndex, rowIndex)
+        rows.add(newRow)
+        // освободить ненужные данные - иначе не хватит памяти
+        allValues.remove(rowValues)
+        rowValues.clear()
+    }
+
+    // итоговая строка из макета//
+    def formTemplate = formDataService.getFormTemplate(formData.formType.id, formData.reportPeriodId)
+    def templateRows = formTemplate.rows
+    def totalRow = getDataRow(templateRows, 'total')
+
+    // сравнение подитогов
+    def onlySimpleRows = rows.findAll { it.getAlias() == null }
+    addFixedRows(onlySimpleRows, totalRow)
+    def onlySubTotalTmpRows = onlySimpleRows.findAll { it.getAlias() != null }
+    onlySubTotalTmpRows.each { subTotalTmpRow ->
+        def key = subTotalTmpRow.fix
+        def subTotalRow = subTotalRows[key]
+        compareTotalValues(subTotalRow, subTotalTmpRow, totalColumns, logger, false)
+    }
+
+    // сравнение итога
+    rows.add(totalRow)
+    updateIndexes(rows)
+    compareSimpleTotalValues(totalRow, totalRowFromFile, rows, totalColumns, formData, logger, false)
+
+    showMessages(rows, logger)
+    if (!logger.containsLevel(LogLevel.ERROR)) {
+        updateIndexes(rows)
+        formDataService.getDataRowHelper(formData).allCached = rows
+    }
+}
+/**
+ * Проверить шапку таблицы
+ *
+ * @param headerRows строки шапки
+ * @param colCount количество колонок в таблице
+ * @param rowCount количество строк в таблице
+ * @param tmpRow вспомогательная строка для получения названии графов
+ */
+void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
+    if (headerRows.isEmpty()) {
+        throw new ServiceException(WRONG_HEADER_ROW_SIZE)
+    }
+    checkHeaderSize(headerRows[headerRows.size() - 1].size(), headerRows.size(), colCount, rowCount)
+
+    def headerMapping = [
+            ([(headerRows[0][0]) : getColumnName(tmpRow, 'rowNum')]),
+            ([(headerRows[0][2]) : getColumnName(tmpRow, 'subject')]),
+            ([(headerRows[0][3]) : getColumnName(tmpRow, 'taxAuthority')]),
+            ([(headerRows[0][4]) : getColumnName(tmpRow, 'kpp')]),
+            ([(headerRows[0][5]) : getColumnName(tmpRow, 'oktmo')]),
+            ([(headerRows[0][6]) : getColumnName(tmpRow, 'priceAverage')]),
+            ([(headerRows[0][7]) : getColumnName(tmpRow, 'taxBenefitCode')]),
+            ([(headerRows[0][8]) : getColumnName(tmpRow, 'benefitBasis')]),
+            ([(headerRows[0][9]) : getColumnName(tmpRow, 'priceAverageTaxFree')]),
+            ([(headerRows[0][10]) : getColumnName(tmpRow, 'taxBase')]),
+            ([(headerRows[0][11]) : getColumnName(tmpRow, 'taxBenefitCodeReduction')]),
+            ([(headerRows[0][12]) : getColumnName(tmpRow, 'benefitReductionBasis')]),
+            ([(headerRows[0][13]) : getColumnName(tmpRow, 'taxRate')]),
+            ([(headerRows[0][14]) : getColumnName(tmpRow, 'taxSum')]),
+            ([(headerRows[0][15]) : getColumnName(tmpRow, 'sumPayment')]),
+            ([(headerRows[0][16]) : getColumnName(tmpRow, 'taxBenefitCodeDecrease')]),
+            ([(headerRows[0][17]) : getColumnName(tmpRow, 'benefitDecreaseBasis')]),
+            ([(headerRows[0][18]) : getColumnName(tmpRow, 'sumDecrease')]),
+            ([(headerRows[0][19]) : getColumnName(tmpRow, 'residualValue')])]
+    (2..19).each {
+        headerMapping.add(([(headerRows[1][it]): it.toString()]))
+    }
+    checkHeaderEquals(headerMapping, logger)
+}
+/**
+ * Получить новую подитоговую строку из файла.
+ *
+ * @param values список строк со значениями
+ * @param colOffset отступ в колонках
+ * @param fileRowIndex номер строки в тф
+ * @param rowIndex строка в нф
+ */
+def getNewSubTotalRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) {
+    // графа fix
+    def title = values[1]
+
+    def newRow = getSubTotal(rowIndex - 1, null, null, title)
+    newRow.setIndex(rowIndex)
+    newRow.setImportIndex(fileRowIndex)
+    // графа 6
+    newRow.priceAverage = parseNumber(values[6], fileRowIndex, 6 + colOffset, logger, true)
+    // графа 9
+    newRow.priceAverageTaxFree = parseNumber(values[9], fileRowIndex, 9 + colOffset, logger, true)
+    // графа 10
+        newRow.taxBase = parseNumber(values[10], fileRowIndex, 10 + colOffset, logger, true)
+    // графа 14
+    newRow.taxSum = parseNumber(values[14], fileRowIndex, 14 + colOffset, logger, true)
+    // графа 15
+    newRow.sumPayment = parseNumber(values[15], fileRowIndex, 15 + colOffset, logger, true)
+    // графа 18
+    newRow.sumDecrease = parseNumber(values[18], fileRowIndex, 18 + colOffset, logger, true)
+    // графа 19
+    newRow.residualValue = parseNumber(values[19], fileRowIndex, 19 + colOffset, logger, true)
+
+    return newRow
+}
+/**
+ * Получить итоговую строку нф по значениям из экселя.
+ *
+ * @param values список строк со значениями
+ * @param colOffset отступ в колонках
+ * @param fileRowIndex номер строки в тф
+ * @param rowIndex строка в нф
+ */
+def getNewTotalFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) {
+    def newRow = formData.createStoreMessagingDataRow()
+    newRow.setIndex(rowIndex)
+    newRow.setImportIndex(fileRowIndex)
+
+    // графа 6
+    newRow.priceAverage = parseNumber(values[6], fileRowIndex, 6 + colOffset, logger, true)
+    // графа 9
+    newRow.priceAverageTaxFree = parseNumber(values[9], fileRowIndex, 9 + colOffset, logger, true)
+    // графа 10
+    newRow.taxBase = parseNumber(values[10], fileRowIndex, 10 + colOffset, logger, true)
+    // графа 14
+    newRow.taxSum = parseNumber(values[14], fileRowIndex, 14 + colOffset, logger, true)
+    // графа 15
+    newRow.sumPayment = parseNumber(values[15], fileRowIndex, 15 + colOffset, logger, true)
+    // графа 18
+    newRow.sumDecrease = parseNumber(values[18], fileRowIndex, 18 + colOffset, logger, true)
+    // графа 19
+    newRow.residualValue = parseNumber(values[19], fileRowIndex, 19 + colOffset, logger, true)
+
+    return newRow
+}
+/**
+ * Получить новую строку нф по значениям из экселя.
+ *
+ * @param values список строк со значениями
+ * @param colOffset отступ в колонках
+ * @param fileRowIndex номер строки в тф
+ * @param rowIndex строка в нф
+ */
+def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) {
+    def newRow = formData.createStoreMessagingDataRow()
+    newRow.setIndex(rowIndex)
+    newRow.setImportIndex(fileRowIndex)
+    editableColumns.each {
+        newRow.getCell(it).editable = true
+        newRow.getCell(it).setStyleAlias('Редактируемая')
+    }
+    // графа 1
+    // графа fix
+    // графа 2
+    newRow.subject = getRecordIdImport(4, 'CODE', values[2], fileRowIndex, 2 + colOffset)
+    // графа 3
+    newRow.taxAuthority = values[3]
+    // графа 4
+    newRow.kpp = values[4]
+    // графа 5
+    newRow.oktmo = getRecordIdImport(96, 'CODE', values[5], fileRowIndex, 5 + colOffset)
+    // графа 6
+    newRow.priceAverage = parseNumber(values[6], fileRowIndex, 6 + colOffset, logger, true)
+    // графа 8
+    newRow.benefitBasis = values[8]
+    // графа 7
+    newRow.taxBenefitCode = getTaxCode(7, fileRowIndex, colOffset, newRow, values)
+    // графа 9
+    newRow.priceAverageTaxFree = parseNumber(values[9], fileRowIndex, 9 + colOffset, logger, true)
+    // графа 10
+    newRow.taxBase = parseNumber(values[10], fileRowIndex, 10 + colOffset, logger, true)
+    // графа 11
+    newRow.taxBenefitCodeReduction = getTaxCode(11, fileRowIndex, colOffset, newRow, values)
+    // графа 12
+    newRow.benefitReductionBasis = values[12]
+    // графа 13
+    newRow.taxRate = parseNumber(values[13], fileRowIndex, 13 + colOffset, logger, true)
+    // графа 14
+    newRow.taxSum = parseNumber(values[14], fileRowIndex, 14 + colOffset, logger, true)
+    // графа 15
+    newRow.sumPayment = parseNumber(values[15], fileRowIndex, 15 + colOffset, logger, true)
+    // графа 16
+    newRow.taxBenefitCodeDecrease = getTaxCode(16, fileRowIndex, colOffset, newRow, values)
+    // графа 17
+    newRow.benefitDecreaseBasis = values[17]
+    // графа 18
+    newRow.sumDecrease = parseNumber(values[18], fileRowIndex, 18 + colOffset, logger, true)
+    // графа 19
+    newRow.residualValue = parseNumber(values[19], fileRowIndex, 19 + colOffset, logger, true)
+
+   return newRow
+}
+def getTaxCode(def colIndex, def fileRowIndex, def colOffset, def newRow, def values) {
+    def record202Id1 = getRecordIdImport(202, 'CODE', values[colIndex], fileRowIndex, colIndex + colOffset)
+    if (record202Id1) {
+        def declarationRegionId = formDataDepartment.regionId?.toString()
+        def regionId = newRow.subject?.toString()
+        def taxBenefinId = record202Id1
+        filter = "DECLARATION_REGION_ID = $declarationRegionId and REGION_ID = $regionId and TAX_BENEFIT_ID = $taxBenefinId and PARAM_DESTINATION = 2"
+        def provider = formDataService.getRefBookProvider(refBookFactory, 203, providerCache)
+        def records = provider.getRecords(getReportPeriodEndDate(), null, filter, null)
+        def taxRecordId = records?.find { calcBasis(it?.record_id?.value) == newRow.benefitBasis }?.record_id?.value
+        if (taxRecordId) {
+            return taxRecordId
+        } else {
+            RefBook rb = getRefBook(203)
+            logger.warn(REF_BOOK_NOT_FOUND_IMPORT_ERROR, fileRowIndex, getXLSColumnName(colIndex + colOffset), rb.getName(), rb.getAttribute('TAX_BENEFIT_ID').getName(), values[colIndex], getReportPeriodEndDate().format('dd.MM.yyyy'))
+            return null
+        }
+    } else {
+        return null
+    }
+}
+def getRefBook(def id) {
+    if (refBooks[id] == null) {
+        refBooks[id] = refBookFactory.get(id)
+    }
+    return refBooks[id]
+}
+
+// Расчет подитогового значения
+DataRow<Cell> calcItog(def int i, def List<DataRow<Cell>> dataRows) {
+    def row = dataRows.get(i)
+    def newRow = getSubTotal(i, row.taxAuthority, row.kpp, null)
+
+    totalColumns.each {
+        newRow[it] = 0
+    }
+    for (int j = i; j >= 0 && dataRows.get(j).getAlias() == null; j--) {
+        row = dataRows.get(j)
+        totalColumns.each {
+            newRow[it] += (row[it] ?: 0)
+        }
+    }
+    return newRow
+}
+
+DataRow<Cell> getSubTotal(def int i, def taxAuthority, def kpp, String title) {
+    def newRow = (formDataEvent in [FormDataEvent.IMPORT, FormDataEvent.IMPORT_TRANSPORT_FILE]) ? formData.createStoreMessagingDataRow() : formData.createDataRow()
+    newRow.getCell('fix').colSpan = 5
+    newRow.fix = (title != null ? title : 'Итого по НО ' + taxAuthority + ' и КПП ' + kpp)
+    newRow.setAlias('total#'.concat(i.toString()))
+    allColumns.each {
+        newRow.getCell(it).setStyleAlias('Контрольные суммы')
+    }
+    return newRow
+}
+
+// Поиск записи в справочнике по значению (для импорта)
+def getRecordIdImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
+                      def boolean required = false) {
+    if (value == null || value.trim().isEmpty()) {
+        return null
+    }
+    return formDataService.getRefBookRecordIdImport(refBookId, recordCache, providerCache, alias, value,
+            getReportPeriodEndDate(), rowIndex, colIndex, logger, required)
 }
