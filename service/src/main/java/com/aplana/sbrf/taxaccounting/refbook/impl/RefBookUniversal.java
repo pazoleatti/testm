@@ -301,6 +301,7 @@ public class RefBookUniversal implements RefBookDataProvider {
                 if (dateToChangedForChecks) {
                     //Возвращаем обратно пустую дату начала, т.к была установлена дата начала следующей версии для проверок
                     record.setVersionTo(null);
+                    versionTo = null;
                 }
             }
             return createVersions(refBook, versionFrom, versionTo, records, countIds, excludedVersionEndRecords, logger);
