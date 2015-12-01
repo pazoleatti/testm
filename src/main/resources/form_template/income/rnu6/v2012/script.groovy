@@ -166,7 +166,7 @@ void calc() {
         dataRows.eachWithIndex { row, index ->
             row.setIndex(index + 1)
         }
-        if (!isBalancePeriod() && formDataEvent != FormDataEvent.IMPORT) {
+        if (!isBalancePeriod()) {
             for (row in dataRows) {
                 row.rateOfTheBankOfRussia = calc8(row)
                 row.taxAccountingRuble = calc10(row)
@@ -574,7 +574,7 @@ void importTransportData() {
     showMessages(newRows, logger)
 
     // сравнение итогов
-    if (!logger.containsLevel(LogLevel.ERROR) && totalTF) {
+    if (isBalancePeriod() && !logger.containsLevel(LogLevel.ERROR) && totalTF) {
         // мапа с алиасами граф и номерами колонокв в xml (алиас -> номер колонки)
         def totalColumnsIndexMap = ['taxAccountingRuble' : 10, 'ruble' : 12]
         def colOffset = 1
@@ -684,9 +684,11 @@ def getNewRow(String[] rowCells, def columnCount, def fileRowIndex, def rowIndex
     // графа 8..12
     ['rateOfTheBankOfRussia', 'taxAccountingCurrency', 'taxAccountingRuble', 'accountingCurrency', 'ruble'].each { alias ->
         colIndex++
-        def cell = pure(rowCells[colIndex])?.replaceAll(",", ".")
-        if (cell != null && cell != '') {
-            newRow[alias] = parseNumber(cell, fileRowIndex, colIndex + colOffset, logger, true)
+        if (isTotal || isBalancePeriod() || editableColumns.contains(alias)) {
+            def cell = pure(rowCells[colIndex])?.replaceAll(",", ".")
+            if (cell != null && cell != '') {
+                newRow[alias] = parseNumber(cell, fileRowIndex, colIndex + colOffset, logger, true)
+            }
         }
     }
 
@@ -773,7 +775,7 @@ void importData() {
     }
 
     // сравнение подитогов
-    if (!totalRowFromFileMap.isEmpty()) {
+    if (isBalancePeriod() && !totalRowFromFileMap.isEmpty()) {
         def totalRowsMap = calcSubTotalRows(rows)
         totalRowsMap.values().toArray().each { tmpRow ->
             def totalRows = totalRowFromFileMap[tmpRow.helper]
@@ -801,7 +803,7 @@ void importData() {
     def totalRow = calcTotalRow(rows)
     rows.add(totalRow)
     updateIndexes(rows)
-    if (totalRowFromFile) {
+    if (isBalancePeriod() && totalRowFromFile) {
         compareSimpleTotalValues(totalRow, totalRowFromFile, rows, totalColumns, formData, logger, false)
     }
 
@@ -898,7 +900,9 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex, 
     // графа 8..12
     ['rateOfTheBankOfRussia', 'taxAccountingCurrency', 'taxAccountingRuble', 'accountingCurrency', 'ruble'].each { alias ->
         colIndex++
-        newRow[alias] = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
+        if (isTotal || isBalancePeriod() || editableColumns.contains(alias)) {
+            newRow[alias] = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
+        }
     }
 
     return newRow

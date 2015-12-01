@@ -315,9 +315,11 @@ def fillRowFromXls(def templateRow, def dataRow, def values, int fileRowIndex, i
         dataRow[alias] = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
     }
 
-    // графа 8..11
-    ['kIndex', 'taxPerShare', 'dividendPerShareIndividual', 'dividendPerShareLegal'].each { alias ->
-        colIndex++
-        dataRow[alias] = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
+    if (isBalancePeriod()) {
+        // графа 8..11
+        ['kIndex', 'taxPerShare', 'dividendPerShareIndividual', 'dividendPerShareLegal'].each { alias ->
+            colIndex++
+            dataRow[alias] = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
+        }
     }
 }

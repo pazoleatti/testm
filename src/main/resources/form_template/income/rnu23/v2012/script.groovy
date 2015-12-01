@@ -461,6 +461,7 @@ void loggerError(def row, def msg) {
 void importTransportData() {
     def xml = getTransportXML(ImportInputStream, importService, UploadFileName, 20, 1)
     addTransportData(xml)
+    // если добавят проверки итогов, то пропустить 14-20-ые графы
 }
 
 void addTransportData(def xml) {
@@ -524,37 +525,39 @@ void addTransportData(def xml) {
         rnuIndexCol = 12
         newRow.preAccrualsEndDate = parseDate(row.cell[rnuIndexCol].text(), "dd.MM.yyyy", rnuIndexRow, rnuIndexCol + colOffset, logger, true)
 
-        // графа 13
-        rnuIndexCol = 13
-        newRow.incomeCurrency = parseNumber(row.cell[rnuIndexCol].text(), rnuIndexRow, rnuIndexCol + colOffset, logger, true)
+        if (isBalancePeriod()) {
+            // графа 13
+            rnuIndexCol = 13
+            newRow.incomeCurrency = parseNumber(row.cell[rnuIndexCol].text(), rnuIndexRow, rnuIndexCol + colOffset, logger, true)
 
-        // графа 14
-        rnuIndexCol = 14
-        newRow.incomeRuble = parseNumber(row.cell[rnuIndexCol].text(), rnuIndexRow, rnuIndexCol + colOffset, logger, true)
+            // графа 14
+            rnuIndexCol = 14
+            newRow.incomeRuble = parseNumber(row.cell[rnuIndexCol].text(), rnuIndexRow, rnuIndexCol + colOffset, logger, true)
 
-        // графа 15
-        rnuIndexCol = 15
-        newRow.accountingCurrency = parseNumber(row.cell[rnuIndexCol].text(), rnuIndexRow, rnuIndexCol + colOffset, logger, true)
+            // графа 15
+            rnuIndexCol = 15
+            newRow.accountingCurrency = parseNumber(row.cell[rnuIndexCol].text(), rnuIndexRow, rnuIndexCol + colOffset, logger, true)
 
-        // графа 16
-        rnuIndexCol = 16
-        newRow.accountingRuble = parseNumber(row.cell[rnuIndexCol].text(), rnuIndexRow, rnuIndexCol + colOffset, logger, true)
+            // графа 16
+            rnuIndexCol = 16
+            newRow.accountingRuble = parseNumber(row.cell[rnuIndexCol].text(), rnuIndexRow, rnuIndexCol + colOffset, logger, true)
 
-        // графа 17
-        rnuIndexCol = 17
-        newRow.preChargeCurrency = parseNumber(row.cell[rnuIndexCol].text(), rnuIndexRow, rnuIndexCol + colOffset, logger, true)
+            // графа 17
+            rnuIndexCol = 17
+            newRow.preChargeCurrency = parseNumber(row.cell[rnuIndexCol].text(), rnuIndexRow, rnuIndexCol + colOffset, logger, true)
 
-        // графа 18
-        rnuIndexCol = 18
-        newRow.preChargeRuble = parseNumber(row.cell[rnuIndexCol].text(), rnuIndexRow, rnuIndexCol + colOffset, logger, true)
+            // графа 18
+            rnuIndexCol = 18
+            newRow.preChargeRuble = parseNumber(row.cell[rnuIndexCol].text(), rnuIndexRow, rnuIndexCol + colOffset, logger, true)
 
-        // графа 19
-        rnuIndexCol = 19
-        newRow.taxPeriodCurrency = parseNumber(row.cell[rnuIndexCol].text(), rnuIndexRow, rnuIndexCol + colOffset, logger, true)
+            // графа 19
+            rnuIndexCol = 19
+            newRow.taxPeriodCurrency = parseNumber(row.cell[rnuIndexCol].text(), rnuIndexRow, rnuIndexCol + colOffset, logger, true)
 
-        // графа 20
-        rnuIndexCol = 20
-        newRow.taxPeriodRuble = parseNumber(row.cell[rnuIndexCol].text(), rnuIndexRow, rnuIndexCol + colOffset, logger, true)
+            // графа 20
+            rnuIndexCol = 20
+            newRow.taxPeriodRuble = parseNumber(row.cell[rnuIndexCol].text(), rnuIndexRow, rnuIndexCol + colOffset, logger, true)
+        }
 
         rows.add(newRow)
     }
@@ -606,17 +609,19 @@ void addTransportData(def xml) {
         rnuIndexCol = 20
         total.taxPeriodRuble = parseNumber(row.cell[rnuIndexCol].text(), rnuIndexRow, rnuIndexCol + colOffset, logger, true)
 
-        def colIndexMap = ['incomeCurrency'   : 13, 'incomeRuble': 14, 'accountingCurrency': 15,
-                           'accountingRuble'  : 16, 'preChargeCurrency': 17, 'preChargeRuble': 18,
-                           'taxPeriodCurrency': 19, 'taxPeriodRuble': 20]
-        for (def alias : totalColumns) {
-            def v1 = total.getCell(alias).value
-            def v2 = totalRow.getCell(alias).value
-            if (v1 == null && v2 == null) {
-                continue
-            }
-            if (v1 == null || v1 != null && v1 != v2) {
-                logger.warn(TRANSPORT_FILE_SUM_ERROR, colIndexMap[alias] + colOffset, rnuIndexRow)
+        if (isBalancePeriod()) {
+            def colIndexMap = ['incomeCurrency'   : 13, 'incomeRuble': 14, 'accountingCurrency': 15,
+                               'accountingRuble'  : 16, 'preChargeCurrency': 17, 'preChargeRuble': 18,
+                               'taxPeriodCurrency': 19, 'taxPeriodRuble': 20]
+            for (def alias : totalColumns) {
+                def v1 = total.getCell(alias).value
+                def v2 = totalRow.getCell(alias).value
+                if (v1 == null && v2 == null) {
+                    continue
+                }
+                if (v1 == null || v1 != null && v1 != v2) {
+                    logger.warn(TRANSPORT_FILE_SUM_ERROR, colIndexMap[alias] + colOffset, rnuIndexRow)
+                }
             }
         }
         // задать итоговой строке нф значения из итоговой строки тф
@@ -707,7 +712,7 @@ void importData() {
         }
         // Пропуск итоговых строк
         if (rowValues[INDEX_FOR_SKIP] == "Итого") {
-            totalRowFromFile = getNewRowFromXls(rowValues, colOffset, fileRowIndex, rowIndex)
+            totalRowFromFile = getNewRowFromXls(rowValues, colOffset, fileRowIndex, rowIndex, true)
 
             allValues.remove(rowValues)
             rowValues.clear()
@@ -728,8 +733,10 @@ void importData() {
     def totalRow = getDataRow(templateRows, 'total')
     rows.add(totalRow)
     updateIndexes(rows)
-    // сравнение итогов
-    compareSimpleTotalValues(totalRow, totalRowFromFile, rows, totalColumns, formData, logger, false)
+    // сравнение итогов (не производится дял граф 13-20, т.к. нередактируемые)
+    if (isBalancePeriod()) {
+        compareSimpleTotalValues(totalRow, totalRowFromFile, rows, totalColumns, formData, logger, false)
+    }
 
     showMessages(rows, logger)
     if (!logger.containsLevel(LogLevel.ERROR)) {
@@ -797,7 +804,7 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
  * @param fileRowIndex номер строки в тф
  * @param rowIndex строка в нф
  */
-def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) {
+def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex, boolean isTotal = false) {
     def newRow = getNewRow()
     newRow.setIndex(rowIndex)
     newRow.setImportIndex(fileRowIndex)
@@ -831,10 +838,12 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
     }
 
     // графа 13..20
-    ['incomeCurrency', 'incomeRuble', 'accountingCurrency', 'accountingRuble', 'preChargeCurrency',
-     'preChargeRuble', 'taxPeriodCurrency', 'taxPeriodRuble'].each { alias ->
-        colIndex++
-        newRow[alias] = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
+    if (isTotal || isBalancePeriod()) {
+        ['incomeCurrency', 'incomeRuble', 'accountingCurrency', 'accountingRuble', 'preChargeCurrency',
+         'preChargeRuble', 'taxPeriodCurrency', 'taxPeriodRuble'].each { alias ->
+            colIndex++
+            newRow[alias] = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
+        }
     }
 
     return newRow

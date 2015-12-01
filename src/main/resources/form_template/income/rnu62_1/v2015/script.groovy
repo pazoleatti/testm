@@ -269,10 +269,6 @@ void logicCheck() {
 void calc() {
     def dataRows = formDataService.getDataRowHelper(formData).allCached
 
-    if (formDataEvent != FormDataEvent.IMPORT) {
-        //sortRows(dataRows, sortColumns)
-    }
-
     // Удаление итогов
     deleteAllAliased(dataRows)
 
@@ -502,7 +498,7 @@ void importTransportData() {
     addTransportData(xml)
 
     // TODO (Ramil Timerbaev) возможно надо поменять на общее сообщение TRANSPORT_FILE_SUM_ERROR
-    if (!logger.containsLevel(LogLevel.ERROR)) {
+    if (isBalancePeriod() && !logger.containsLevel(LogLevel.ERROR)) {
         def dataRows = formDataService.getDataRowHelper(formData).allCached
         checkTotalSum(dataRows, totalColumns, logger, false)
     }
@@ -546,12 +542,14 @@ void addTransportData(def xml) {
         // графа 6
         xlsIndexCol = 6
         newRow.currencyCode = getRecordIdImport(15, 'CODE', row.cell[xlsIndexCol].text(), rnuIndexRow, xlsIndexCol + colOffset, false)
-        // графа 7
-        xlsIndexCol = 7
-        newRow.rateBRBillDate = parseNumber(row.cell[xlsIndexCol].text(), rnuIndexRow, xlsIndexCol + colOffset, logger, true)
-        // графа 8
-        xlsIndexCol = 8
-        newRow.rateBROperationDate = parseNumber(row.cell[xlsIndexCol].text(), rnuIndexRow, xlsIndexCol + colOffset, logger, true)
+        if (isBalancePeriod()) {
+            // графа 7
+            xlsIndexCol = 7
+            newRow.rateBRBillDate = parseNumber(row.cell[xlsIndexCol].text(), rnuIndexRow, xlsIndexCol + colOffset, logger, true)
+            // графа 8
+            xlsIndexCol = 8
+            newRow.rateBROperationDate = parseNumber(row.cell[xlsIndexCol].text(), rnuIndexRow, xlsIndexCol + colOffset, logger, true)
+        }
         // графа 9
         xlsIndexCol = 9
         newRow.paymentTermStart = parseDate(row.cell[xlsIndexCol].text(), "dd.MM.yyyy", rnuIndexRow, xlsIndexCol + colOffset, logger, true)
@@ -564,8 +562,8 @@ void addTransportData(def xml) {
         // графа 12
         xlsIndexCol = 12
         newRow.operationDate = parseDate(row.cell[xlsIndexCol].text(), "dd.MM.yyyy", rnuIndexRow, xlsIndexCol + colOffset, logger, true)
-        // графа 13..18
-        ['rateWithDiscCoef', 'sumStartInCurrency', 'sumStartInRub', 'sumEndInCurrency', 'sumEndInRub', 'sum'].each { alias ->
+        // графа 13 (было 13..18)
+        (isBalancePeriod() ? ['rateWithDiscCoef', 'sumStartInCurrency', 'sumStartInRub', 'sumEndInCurrency', 'sumEndInRub', 'sum'] : ['rateWithDiscCoef']).each { alias ->
             xlsIndexCol++
             newRow[alias] = parseNumber(row.cell[xlsIndexCol].text(), rnuIndexRow, xlsIndexCol + colOffset, logger, true)
         }
@@ -661,7 +659,7 @@ void importData() {
         rowIndex++
         // Пропуск итоговых строк
         if (rowValues[INDEX_FOR_SKIP] == "Итого") {
-            totalRowFromFile = getNewRowFromXls(rowValues, colOffset, fileRowIndex, rowIndex)
+            totalRowFromFile = getNewRowFromXls(rowValues, colOffset, fileRowIndex, rowIndex, true)
 
             allValues.remove(rowValues)
             rowValues.clear()
@@ -678,8 +676,11 @@ void importData() {
     def totalRow = getTotalRow(rows)
     rows.add(totalRow)
     updateIndexes(rows)
-    // сравнение итогов
-    compareSimpleTotalValues(totalRow, totalRowFromFile, rows, totalColumns, formData, logger, false)
+
+    // сравнение итогов (итоговое поле не загружается, т.к. нередактируемое)
+    if (isBalancePeriod()) {
+        compareSimpleTotalValues(totalRow, totalRowFromFile, rows, totalColumns, formData, logger, false)
+    }
 
     showMessages(rows, logger)
     if (!logger.containsLevel(LogLevel.ERROR)) {
@@ -740,7 +741,7 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
  * @param fileRowIndex номер строки в тф
  * @param rowIndex строка в нф
  */
-def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) {
+def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex, boolean isTotal = false) {
     def newRow = formData.createStoreMessagingDataRow()
     newRow.setIndex(rowIndex)
     newRow.setImportIndex(fileRowIndex)
@@ -775,11 +776,15 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
 
     // графа 7
     colIndex++
-    newRow.rateBRBillDate = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
+    if (isTotal || isBalancePeriod()) {
+        newRow.rateBRBillDate = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
+    }
 
     // графа 8
     colIndex++
-    newRow.rateBROperationDate = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
+    if (isTotal || isBalancePeriod()) {
+        newRow.rateBROperationDate = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
+    }
 
     // графа 9
     colIndex++
@@ -797,8 +802,8 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
     colIndex++
     newRow.operationDate = parseDate(values[colIndex], "dd.MM.yyyy", fileRowIndex, colIndex + colOffset, logger, true)
 
-    // графа 13..18
-    ['rateWithDiscCoef', 'sumStartInCurrency', 'sumStartInRub', 'sumEndInCurrency', 'sumEndInRub', 'sum'].each { alias ->
+    // графа 13 (для итогов 13..18)
+    ((isTotal || isBalancePeriod()) ? ['rateWithDiscCoef', 'sumStartInCurrency', 'sumStartInRub', 'sumEndInCurrency', 'sumEndInRub', 'sum'] :['rateWithDiscCoef']).each { alias ->
         colIndex++
         newRow[alias] = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
     }

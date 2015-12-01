@@ -150,7 +150,7 @@ void calc() {
             row.setIndex(index + 1)
         }
 
-        if (!isBalancePeriod() && formDataEvent != FormDataEvent.IMPORT) {
+        if (!isBalancePeriod()) {
             for (row in dataRows) {
                 row.rateOfTheBankOfRussia = calc8(row)
                 row.taxAccountingRuble = calc10(row)
@@ -551,7 +551,7 @@ void importTransportData() {
     showMessages(newRows, logger)
 
     // сравнение итогов
-    if (!logger.containsLevel(LogLevel.ERROR) && totalTF) {
+    if (isBalancePeriod() && !logger.containsLevel(LogLevel.ERROR) && totalTF) {
         // мапа с алиасами граф и номерами колонокв в xml (алиас -> номер колонки)
         def totalColumnsIndexMap = ['taxAccountingRuble' : 10, 'ruble' : 12]
         def colOffset = 1
@@ -627,16 +627,15 @@ def getNewRow(String[] rowCells, def columnCount, def fileRowIndex, def rowIndex
     }
     // графа 7
     newRow.currencyCode = getRecordIdImport(15, 'CODE', pure(rowCells[7]), fileRowIndex, 7 + colOffset, false)
-    // графа 8
-    newRow.rateOfTheBankOfRussia =  parseNumber(pure(rowCells[8]), fileRowIndex, 8 + colOffset, logger, true)
-    // графа 9
-    newRow.taxAccountingCurrency = parseNumber(pure(rowCells[9]), fileRowIndex, 9 + colOffset, logger, true)
-    // графа 10
-    newRow.taxAccountingRuble  =  parseNumber(pure(rowCells[10]), fileRowIndex, 10 + colOffset, logger, true)
-    // графа 11
-    newRow.accountingCurrency = parseNumber(pure(rowCells[11]), fileRowIndex, 11 + colOffset, logger, true)
-    // графа 12
-    newRow.ruble  =  parseNumber(pure(rowCells[12]), fileRowIndex, 12 + colOffset, logger, true)
+
+    def colIndex = 7
+    // графа 8..12
+    ['rateOfTheBankOfRussia', 'taxAccountingCurrency', 'taxAccountingRuble', 'accountingCurrency', 'ruble'].each { alias ->
+        colIndex++
+        if (isTotal || isBalancePeriod() || editableColumns.contains(alias)) {
+            newRow[alias] = parseNumber(pure(rowCells[colIndex]), fileRowIndex, colIndex + colOffset, logger, true)
+        }
+    }
 
     return newRow
 }
@@ -738,7 +737,7 @@ void importData() {
     }
 
     // сравнение подитогов
-    if (!totalRowFromFileMap.isEmpty()) {
+    if (isBalancePeriod() && !totalRowFromFileMap.isEmpty()) {
         def totalRowsMap = calcSubTotalRows(rows)
         totalRowsMap.values().toArray().each { tmpRow ->
             def totalRows = totalRowFromFileMap[tmpRow.helper]
@@ -766,7 +765,7 @@ void importData() {
     def totalRow = calcTotalRow(rows)
     rows.add(totalRow)
     updateIndexes(rows)
-    if (totalRowFromFile) {
+    if (isBalancePeriod() && totalRowFromFile) {
         compareSimpleTotalValues(totalRow, totalRowFromFile, rows, totalColumns, formData, logger, false)
     }
 
@@ -860,7 +859,9 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex, 
     // графа 8..12
     ['rateOfTheBankOfRussia', 'taxAccountingCurrency', 'taxAccountingRuble', 'accountingCurrency', 'ruble'].each { alias ->
         colIndex++
-        newRow[alias] =  parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
+        if (isTotal || isBalancePeriod() || editableColumns.contains(alias)) {
+            newRow[alias] =  parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
+        }
     }
 
     return newRow
