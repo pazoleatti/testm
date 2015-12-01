@@ -88,21 +88,36 @@ Calendar getCalendarStartDate() {
 }
 
 //// Кастомные методы
-
-void create() {
+def getFormDataPrevPeriod(boolean check) {
     if (getCalendarStartDate().get(Calendar.MONTH) != Calendar.JANUARY) {
         def formDataPrev = formDataService.getFormDataPrev(formData)
         if (formDataPrev == null || !formDataPrev.getState().equals(WorkflowState.ACCEPTED)) {
             def prevPeriod = reportPeriodService.getPrevReportPeriod(formData.getReportPeriodId())
-            logger.warn("Прогнозы крупных сделок не были скопированы из предыдущего отчетного периода. " +
-                    "В Системе не найдена форма «%s» в статусе «Принята»: Период: «%s %d», Подразделение: «%s», Тип: «%s».",
-                    formData.getFormType().getName(), prevPeriod.name, prevPeriod.taxPeriod.year, formDataDepartment.name, formData.getKind().getTitle())
-        } else {
-            def prevDataRows = formDataService.getDataRowHelper(formDataPrev)?.allSaved
-            if (prevDataRows != null) {
-                def dataRows = formDataService.getDataRowHelper(formData).allCached
-                dataRows.addAll(prevDataRows)
+            // предыдущего период может не найтись, потому что периода он не существует
+            String periodName = "предыдущий период";
+            if (prevPeriod != null) {
+                periodName = prevPeriod.getName() + " " + prevPeriod.getTaxPeriod().getYear();
             }
+            if (check) {
+                logger.warn("Прогнозы крупных сделок не были скопированы из предыдущего отчетного периода. " +
+                        "В Системе не найдена форма «%s» в статусе «Принята» за «%s», Подразделение: «%s», Тип: «%s».",
+                        formData.getFormType().getName(), periodName, formDataDepartment.name, formData.getKind().getTitle())
+            }
+            return null
+        }
+        return formDataPrev
+    } else {
+        return null
+    }
+}
+
+void create() {
+    def formDataPrev = getFormDataPrevPeriod(true);
+    if (formDataPrev != null) {
+        def prevDataRows = formDataService.getDataRowHelper(formDataPrev)?.allSaved
+        if (prevDataRows != null) {
+            def dataRows = formDataService.getDataRowHelper(formData).allCached
+            dataRows.addAll(prevDataRows)
         }
     }
 }
@@ -144,13 +159,5 @@ void logicCheck() {
     }
 
     // 4. Проверка наличия формы предыдущего периода
-    if (getCalendarStartDate().get(Calendar.MONTH) != Calendar.JANUARY) {
-        def formDataPrev = formDataService.getFormDataPrev(formData)
-        if (formDataPrev == null || !formDataPrev.getState().equals(WorkflowState.ACCEPTED)) {
-            def prevPeriod = reportPeriodService.getPrevReportPeriod(formData.getReportPeriodId())
-            logger.warn("Прогнозы крупных сделок не были скопированы из предыдущего отчетного периода. " +
-                    "В Системе не найдена форма «%s» в статусе «Принята»: Период: «%s %d», Подразделение: «%s», Тип: «%s».",
-                    formData.getFormType().getName(), prevPeriod.name, prevPeriod.taxPeriod.year, formDataDepartment.name, formData.getKind().getTitle())
-        }
-    }
+    getFormDataPrevPeriod(true)
 }
