@@ -27,6 +27,9 @@ switch (formDataEvent) {
     case FormDataEvent.IMPORT_TRANSPORT_FILE:
         importFromXML()
         break
+    case FormDataEvent.SAVE:
+        save()
+        break
 }
 
 @Field
@@ -329,5 +332,17 @@ void importFromXML() {
 
     if (!logger.containsLevel(LogLevel.ERROR)) {
         scriptStatusHolder.setScriptStatus(ScriptStatus.SUCCESS)
+    }
+}
+void save() {
+    saveRecords.each {
+        def okato = it.OKATO_DEFINITION?.stringValue
+        def oktmo = it.OKTMO_DEFINITION?.stringValue
+        if (okato!=null && okato!="" && !okato.isNumber()) {
+            logger.error("Атрибут \"%s\" заполнен неверно (%s)! Значение должно содержать только цифры!", "Определяющая часть кода ОКАТО", okato)
+        }
+        if (oktmo!=null && oktmo!="" && !oktmo.isNumber()) {
+            logger.error("Атрибут \"%s\" заполнен неверно (%s)! Значение должно содержать только цифры!", "Определяющая часть кода ОКТМО", oktmo)
+        }
     }
 }
