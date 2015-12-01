@@ -460,7 +460,7 @@ def consolidationFromPrimary(def dataRows, def formSources) {
                                                     if (rowPrimary.code != null && rowPrimary.code == rowRNU6.code &&
                                                             rowPrimary.docNumber != null && rowPrimary.docNumber == rowRNU6.docNumber &&
                                                             rowPrimary.docDate != null && rowPrimary.docDate == rowRNU6.docDate) {
-                                                        sum7 += rowPrimary.taxAccountingRuble
+                                                        sum7 += rowPrimary.taxAccountingRuble ?: 0
                                                     }
                                                 }
                                             }
