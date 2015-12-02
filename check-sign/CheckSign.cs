@@ -19,7 +19,7 @@ class CheckSign {
 	
 	/** Название библиотеки для проверки подписи*/	
 	private static string DLL_NAME = "bicr4_64.dll";
-		
+			
 	static void Main(string[] args) {
 		Stopwatch pSw = new Stopwatch();
 		pSw.Start();
@@ -68,6 +68,8 @@ class CheckSign {
 				long[] initStruct = new long[10];
 				crInit(FLAG_TM, FILE_GK, FILE_UZ, PSW, TM_NUMBER, TMN_BLEN, initMode, initStruct);
 				int errorCode = 0;
+				
+				StringBuilder userIdBuf = new StringBuilder(" ", 200); // буфер для информации о пользователе
 				try {
 					// загрузка БОК
 					IntPtr pСrPkBaseLoad = loadMethod(pDll, "cr_pkbase_load");
@@ -81,7 +83,6 @@ class CheckSign {
 						IntPtr pCrCheckFile = loadMethod(pDll, "cr_check_file");
 						CrCheckFile crCheckFile = (CrCheckFile) Marshal.GetDelegateForFunctionPointer(pCrCheckFile, typeof(CrCheckFile));
 						int n = 1; //проверим первую ЭЦП
-						StringBuilder userIdBuf = new StringBuilder("6"); // магическое число
 						errorCode = crCheckFile(initStruct[0], pkBaseStruct[0], checkFileName, n, delFlag == "0" ? 0 : 1, userIdBuf);
 						CheckError("cr_check_file", errorCode);
 					} finally {
@@ -99,6 +100,7 @@ class CheckSign {
 					CheckError("cr_uninit", errorCode);
 				}
 				Console.WriteLine("Result: SUCCESS");
+				Console.WriteLine("UserId: " + userIdBuf);
 			} finally {
 				// выгрузка библиотеки
 				if (pDll != IntPtr.Zero) {
