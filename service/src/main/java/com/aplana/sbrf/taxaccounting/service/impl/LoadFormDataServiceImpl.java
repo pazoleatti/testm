@@ -586,7 +586,7 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
             // 17 Перенос в архив
             if (moveToArchiveDirectory(userInfo, getFormDataArchivePath(userInfo, departmentId, localLogger, lock), currentFile, localLogger, lock)) {
                 // 18 Сохранение
-                formDataService.saveFormData(localLogger, userInfo, formData);
+                formDataService.saveFormData(localLogger, userInfo, formData, false);
 
                 success = true;
             } else {

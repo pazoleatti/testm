@@ -48,7 +48,7 @@ public interface FormDataService {
                         String fileName, FormDataEvent formDataEvent);
 
     /**
-     * Метод для импорта данных из xls-файлов
+     * Метод для импорта данных из xls-файлов(асинхронная задача)
      * 
      * @param logger
      * @param userInfo
@@ -103,10 +103,11 @@ public interface FormDataService {
 	 * 
 	 * @param userInfo информация о пользователея, выполняющего операцию
 	 * @param formData объект с данными налоговой формы
+     * @param editMode признак того, что операция вызвана для задачи из режима редактирования
 	 * @return идентификатор сохранённой записи
 	 * @throws com.aplana.sbrf.taxaccounting.model.exception.AccessDeniedException если у пользователя нет прав редактировать налоговую форму с такими параметрами
 	 */
-	long saveFormData(Logger logger, TAUserInfo userInfo, FormData formData);
+	long saveFormData(Logger logger, TAUserInfo userInfo, FormData formData, boolean editMode);
 
     /**
      * Сохранить данные исполнителей и подписантов для налоговой формы

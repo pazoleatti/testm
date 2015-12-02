@@ -42,7 +42,7 @@ public abstract class CsvAuditGeneratorAsyncTask extends AbstractAsyncTask {
     }
 
     @Override
-    protected void executeBusinessLogic(Map<String, Object> params, Logger logger) {
+    protected boolean executeBusinessLogic(Map<String, Object> params, Logger logger) {
         int userId = (Integer)params.get(USER_ID.name());
         TAUserInfo userInfo = new TAUserInfo();
         userInfo.setUser(userService.getUser(userId));
@@ -60,6 +60,7 @@ public abstract class CsvAuditGeneratorAsyncTask extends AbstractAsyncTask {
         String uuid = printingService.generateAuditZip(records);
         reportService.createAudit(userInfo.getUser().getId(), uuid, ReportType.CSV_AUDIT);
         records.clear();
+        return true;
     }
 
     @Override

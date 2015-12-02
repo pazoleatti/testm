@@ -67,7 +67,7 @@ public abstract class XlsxGeneratorAsyncTask extends AbstractAsyncTask {
     }
 
     @Override
-    protected void executeBusinessLogic(Map<String, Object> params, Logger logger) {
+    protected boolean executeBusinessLogic(Map<String, Object> params, Logger logger) {
         long declarationDataId = (Long)params.get("declarationDataId");
         int userId = (Integer)params.get(USER_ID.name());
         TAUserInfo userInfo = new TAUserInfo();
@@ -84,6 +84,7 @@ public abstract class XlsxGeneratorAsyncTask extends AbstractAsyncTask {
                 }
             });
         }
+        return true;
     }
 
     @Override

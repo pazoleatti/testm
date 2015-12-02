@@ -650,7 +650,7 @@ public class FormDataServiceTest extends Assert{
         when(departmentReportPeriodService.get(1)).thenReturn(departmentReportPeriod);
 
         FormDataServiceImpl dataService = spy(formDataService);
-        dataService.saveFormData(logger, userInfo, formData);
+        dataService.saveFormData(logger, userInfo, formData, false);
 
         InOrder inOrder = inOrder(dataService, formDataDao);
 

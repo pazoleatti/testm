@@ -2,6 +2,8 @@ package com.aplana.sbrf.taxaccounting.async.task;
 
 import com.aplana.sbrf.taxaccounting.async.exception.AsyncTaskException;
 import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
+import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.DepartmentReportPeriodService;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
@@ -54,7 +56,7 @@ public abstract class RefreshFormDataAsyncTask extends AbstractAsyncTask {
     }
 
     @Override
-    protected void executeBusinessLogic(Map<String, Object> params, Logger logger) {
+    protected boolean executeBusinessLogic(Map<String, Object> params, Logger logger) {
         int userId = (Integer)params.get(USER_ID.name());
         long formDataId = (Long)params.get("formDataId");
         boolean manual = (Boolean)params.get("manual");
@@ -68,7 +70,13 @@ public abstract class RefreshFormDataAsyncTask extends AbstractAsyncTask {
                 logger);
         formDataService.doRefresh(logger, userInfo, formData);
         // сохраняем данные в основном срезе
-        formDataService.saveFormData(logger, userInfo, formData);
+        Logger saveLogger = new Logger();
+        formDataService.saveFormData(saveLogger, userInfo, formData, true);
+        logger.getEntries().addAll(saveLogger.getEntries());
+        if (logger.containsLevel(LogLevel.ERROR)) {
+            return false;
+        }
+        return true;
     }
 
     @Override
