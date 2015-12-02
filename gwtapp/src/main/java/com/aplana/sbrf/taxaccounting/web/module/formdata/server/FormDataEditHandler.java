@@ -58,7 +58,7 @@ public class FormDataEditHandler extends AbstractActionHandler<FormDataEditActio
             result.setLock(true);
             return result;
         } else {
-            formDataService.interruptTask(formData.getId(), formData.isManual(), userInfo.getUser().getId(), reportType);
+            formDataService.interruptTask(formData.getId(), formData.isManual(), userInfo.getUser().getId(), reportType, "Выполняется редактирование НФ");
         }
 
         return result;

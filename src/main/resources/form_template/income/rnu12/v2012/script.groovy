@@ -99,7 +99,7 @@ def autoFillColumns = ['rowNumber', 'code']
 def nonEmptyColumns = ['numberFirstRecord', 'opy', 'operationDate', 'name', 'documentNumber',
                        'date', 'periodCounts', 'advancePayment', 'outcomeInBuh']
 
-// Сумируемые колонки в фиксированной с троке
+// Суммируемые колонки в фиксированной строке
 @Field
 def totalColumns = ['advancePayment', 'outcomeInNalog', 'outcomeInBuh']
 
@@ -308,6 +308,7 @@ def getReportPeriodEndDate() {
 void importTransportData() {
     def xml = getTransportXML(ImportInputStream, importService, UploadFileName, 12, 1)
     addTransportData(xml)
+    // если добавят проверки итогов, то пропустить 11-ую графу
 }
 
 void addTransportData(def xml) {
@@ -518,7 +519,7 @@ void importData() {
             def totalRows = totalRowFromFileMap[calcTotalRowTmp.fix]
             if (totalRows) {
                 totalRows.each { totalRow ->
-                    compareTotalValues(totalRow, calcTotalRowTmp, totalColumns, logger, false)
+                    compareTotalValues(totalRow, calcTotalRowTmp, totalColumns - 'outcomeInNalog', logger, false)
                 }
                 totalRowFromFileMap.remove(calcTotalRowTmp.fix)
             }
@@ -540,8 +541,8 @@ void importData() {
     def totalRow = calcTotalRow(rows)
     rows.add(totalRow)
     updateIndexes(rows)
-    if (totalRowFromFile) {
-        compareSimpleTotalValues(totalRow, totalRowFromFile, rows, totalColumns, formData, logger, false)
+    if (totalRowFromFile) { // пропускаем 11-ую графу
+        compareSimpleTotalValues(totalRow, totalRowFromFile, rows, totalColumns - 'outcomeInNalog', formData, logger, false)
     }
 
     showMessages(rows, logger)
@@ -641,7 +642,9 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex, 
     // графа 9..12
     ['periodCounts', 'advancePayment', 'outcomeInNalog', 'outcomeInBuh'].each { alias ->
         colIndex++
-        newRow[alias] = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
+        if (isTotal || ('outcomeInNalog' != alias)) { // пропускаем 11-ую графу для не итогов
+            newRow[alias] = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
+        }
     }
 
     return newRow

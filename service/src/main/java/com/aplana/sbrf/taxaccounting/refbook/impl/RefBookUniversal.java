@@ -301,6 +301,7 @@ public class RefBookUniversal implements RefBookDataProvider {
                 if (dateToChangedForChecks) {
                     //Возвращаем обратно пустую дату начала, т.к была установлена дата начала следующей версии для проверок
                     record.setVersionTo(null);
+                    versionTo = null;
                 }
             }
             return createVersions(refBook, versionFrom, versionTo, records, countIds, excludedVersionEndRecords, logger);
@@ -779,6 +780,9 @@ public class RefBookUniversal implements RefBookDataProvider {
             //Исключаем экземпляры в статусе "Создана" использующих справочник "Участники ТЦО"
             if (refBookId == RefBook.TCO && form.getState() == WorkflowState.CREATED) {
                 //Для нф в статусе "Создана" удаляем сформированные печатные представления, отменяем задачи на их формирование и рассылаем уведомления
+                formDataService.deleteReport(form.getFormDataId(), false, logger.getTaUserInfo().getUser().getId(),
+                        "Модифицирована запись справочника \"" + refBook.getName()+ "\", которая используется в данной форме");
+                /*
                 reportService.delete(form.getFormDataId(), null);
                 List<ReportType> interruptedReportTypes = Arrays.asList(ReportType.EXCEL, ReportType.CSV);
                 for (ReportType interruptedType : interruptedReportTypes) {
@@ -791,10 +795,10 @@ public class RefBookUniversal implements RefBookDataProvider {
                     for(String key: taskKeyList) {
                         LockData lockData = lockService.getLock(key);
                         if (lockData != null) {
-                            lockService.interruptTask(lockData, logger.getTaUserInfo().getUser().getId(), true);
+                            lockService.interruptTask(lockData, logger.getTaUserInfo().getUser().getId(), true, cause);
                         }
                     }
-                }
+                }*/
             } else {
                 logger.error(form.getMsg());
                 used = true;

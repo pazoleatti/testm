@@ -112,6 +112,14 @@ def totalColumnsAB = ['reservePrev', 'reserveCurrent', 'useReserve']
 @Field
 def totalColumns1 = ['debt45_90DaysSum', 'debt45_90DaysReserve', 'debtOver90DaysSum', 'debtOver90DaysReserve', 'totalReserve', 'reservePrev', 'reserveCurrent', 'calcReserve', 'reserveRecovery', 'useReserve']
 
+// графа 4, 5, 7, 8, 9, 11
+@Field
+def skipImportColumns1 = ['debt45_90DaysNormAllocation50per', 'debt45_90DaysReserve', 'debtOver90DaysNormAllocation100per', 'debtOver90DaysReserve', 'totalReserve', 'reserveCurrent']
+
+// графа 11
+@Field
+def skipImportColumnsAB = ['reserveCurrent']
+
 @Field
 def startDate = null
 
@@ -208,36 +216,34 @@ void calc() {
     def dataRows = dataRowHelper.allCached
 
     def totalRow = getDataRow(dataRows, 'total')
-    if(formDataEvent != FormDataEvent.IMPORT) {
-        dataRows.each { row ->
-            if (row.getAlias() == null) {
-                def isFirstSection = (row.getIndex() < totalRow.getIndex())
-                if (isFirstSection) {
-                    // графа 4
-                    row.debt45_90DaysNormAllocation50per = calc4()
-                    // графа 5
-                    row.debt45_90DaysReserve = calc5(row)
-                    // графа 7
-                    row.debtOver90DaysNormAllocation100per = calc7()
-                    // графа 8
-                    row.debtOver90DaysReserve = calc8(row)
-                    // графа 11
-                    row.totalReserve = calc9(row)
+    dataRows.each { row ->
+        if (row.getAlias() == null) {
+            def isFirstSection = (row.getIndex() < totalRow.getIndex())
+            if (isFirstSection) {
+                // графа 4
+                row.debt45_90DaysNormAllocation50per = calc4()
+                // графа 5
+                row.debt45_90DaysReserve = calc5(row)
+                // графа 7
+                row.debtOver90DaysNormAllocation100per = calc7()
+                // графа 8
+                row.debtOver90DaysReserve = calc8(row)
+                // графа 9
+                row.totalReserve = calc9(row)
 
-                    // TODO (Ramil Timerbaev) расчет графы 10 пока не делать
-                    // графа 10
-                    // row.reservePrev = null
+                // TODO (Ramil Timerbaev) расчет графы 10 пока не делать
+                // графа 10
+                // row.reservePrev = null
 
-                    // графа 11
-                    row.reserveCurrent = calc11(row)
-                } else {
-                    // TODO (Ramil Timerbaev) расчет графы 10 пока не делать
-                    // графа 10
-                    // row.reservePrev = null
+                // графа 11
+                row.reserveCurrent = calc11(row)
+            } else {
+                // TODO (Ramil Timerbaev) расчет графы 10 пока не делать
+                // графа 10
+                // row.reservePrev = null
 
-                    // графа 11
-                    row.reserveCurrent = calc11AB(row)
-                }
+                // графа 11
+                row.reserveCurrent = calc11AB(row)
             }
         }
     }
@@ -593,7 +599,7 @@ void importTransportData() {
                 // итоговая строка тф
                 rowCells = reader.readNext()
                 if (rowCells != null) {
-                    totalTF = getNewRow(rowCells, COLUMN_COUNT, ++fileRowIndex, rowIndex)
+                    totalTF = getNewRow(rowCells, COLUMN_COUNT, ++fileRowIndex, rowIndex, true)
                 }
                 break
             }
@@ -707,7 +713,7 @@ void importTransportData() {
  *
  * @return вернет строку нф или null, если количество значений в строке тф меньше
  */
-def getNewRow(String[] rowCells, def columnCount, def fileRowIndex, def rowIndex) {
+def getNewRow(String[] rowCells, def columnCount, def fileRowIndex, def rowIndex, boolean isTotal = false) {
     def newRow = formData.createStoreMessagingDataRow()
     newRow.setIndex(rowIndex)
     newRow.setImportIndex(fileRowIndex)
@@ -734,16 +740,20 @@ def getNewRow(String[] rowCells, def columnCount, def fileRowIndex, def rowIndex
                 'debtOver90DaysNormAllocation100per', 'debtOver90DaysReserve', 'totalReserve', 'reservePrev',
                 'reserveCurrent', 'calcReserve', 'reserveRecovery', 'useReserve'].each { alias ->
             colIndex++
-            newRow[alias] = parseNumber(pure(rowCells[colIndex]), fileRowIndex, colIndex + colOffset, logger, true)
+            if (isTotal || !skipImportColumns1.contains(alias)) {
+                newRow[alias] = parseNumber(pure(rowCells[colIndex]), fileRowIndex, colIndex + colOffset, logger, true)
+            }
         }
     } else {
         // графа 10
         colIndex = 10
         newRow.reservePrev = parseNumber(pure(rowCells[colIndex]), fileRowIndex, colIndex + colOffset, logger, true)
 
-        // графа 11
-        colIndex = 11
-        newRow.reserveCurrent = parseNumber(pure(rowCells[colIndex]), fileRowIndex, colIndex + colOffset, logger, true)
+        if (isTotal) {
+            // графа 11
+            colIndex = 11
+            newRow.reserveCurrent = parseNumber(pure(rowCells[colIndex]), fileRowIndex, colIndex + colOffset, logger, true)
+        }
 
         // графа 14
         colIndex = 14
@@ -831,7 +841,7 @@ void importData() {
             continue
         } else if (titleValue == 'ИТОГО') {
             isFirstRow = false
-            totalRowFromFileMap[section] = getNewRowFromXls(rowValues, colOffset, fileRowIndex, rowIndex, section)
+            totalRowFromFileMap[section] = getNewRowFromXls(rowValues, colOffset, fileRowIndex, rowIndex, section, true)
             allValues.remove(rowValues)
             rowValues.clear()
             continue
@@ -868,7 +878,7 @@ void importData() {
         // сравнение итогов ИТОГО
         updateIndexes(rows)
         def totalRowFromFile = totalRowFromFileMap[sectionKey]
-        def columns = (sectionKey ? totalColumns1 : totalColumnsAB)
+        def columns = (sectionKey ? (totalColumns1 - skipImportColumns1) : (totalColumnsAB - skipImportColumnsAB))
         compareSimpleTotalValues(totalRow, totalRowFromFile, copyRows, columns, formData, logger, false)
     }
     def totalAll = getDataRow(templateRows, 'totalAll')
@@ -878,7 +888,7 @@ void importData() {
     // сравнение итогов ВСЕГО
     if (totalRowFromFileMap['all']) {
         def tmpRows = mapRows.values().sum { it } ?: []
-        compareSimpleTotalValues(totalAll, totalRowFromFileMap['all'], tmpRows, totalColumnsAll, formData, logger, false)
+        compareSimpleTotalValues(totalAll, totalRowFromFileMap['all'], tmpRows, totalColumnsAll - skipImportColumns1, formData, logger, false)
     }
 
     showMessages(rows, logger)
@@ -937,7 +947,7 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
  * @param rowIndex строка в нф
  * @param section раздел (A, B или null/пустая строка)
  */
-def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex, def section) {
+def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex, def section, boolean isTotal = false) {
     def newRow = formData.createStoreMessagingDataRow()
     newRow.setIndex(rowIndex)
     newRow.setImportIndex(fileRowIndex)
@@ -956,16 +966,20 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex, 
                 'debtOver90DaysNormAllocation100per', 'debtOver90DaysReserve', 'totalReserve', 'reservePrev',
                 'reserveCurrent', 'calcReserve', 'reserveRecovery', 'useReserve'].each { alias ->
             colIndex++
-            newRow[alias] = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
+            if (isTotal || !skipImportColumns1.contains(alias)) {
+                newRow[alias] = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
+            }
         }
     } else {
         // графа 10
         colIndex = 10
         newRow.reservePrev = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
 
-        // графа 11
-        colIndex = 11
-        newRow.reserveCurrent = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
+        if (isTotal) {
+            // графа 11
+            colIndex = 11
+            newRow.reserveCurrent = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
+        }
 
         // графа 14
         colIndex = 14

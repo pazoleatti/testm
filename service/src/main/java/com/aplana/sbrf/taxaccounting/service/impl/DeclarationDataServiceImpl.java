@@ -283,7 +283,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             declarationDataAccessService.checkEvents(userInfo, id, FormDataEvent.DELETE);
             DeclarationData declarationData = declarationDataDao.get(id);
 
-            deleteReport(id, userInfo.getUser().getId(), false);
+            deleteReport(id, userInfo.getUser().getId(), false, "Удалена декларация");
             declarationDataDao.delete(id);
 
             auditService.add(FormDataEvent.DELETE , userInfo, declarationData, null, "Декларация удалена", null);
@@ -817,13 +817,13 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
      * Удаление отчетов и блокировок на задачи формирования отчетов связанных с декларациями
      */
     @Override
-    public void deleteReport(long declarationDataId, int userId, boolean isCalc) {
+    public void deleteReport(long declarationDataId, int userId, boolean isCalc, String cause) {
         ReportType[] reportTypes = {ReportType.XML_DEC, ReportType.PDF_DEC, ReportType.EXCEL_DEC, ReportType.CHECK_DEC, ReportType.ACCEPT_DEC};
         for (ReportType reportType : reportTypes) {
             if (!isCalc || !ReportType.XML_DEC.equals(reportType)) {
                 LockData lock = lockDataService.getLock(generateAsyncTaskKey(declarationDataId, reportType));
                 if (lock != null)
-                    lockDataService.interruptTask(lock, userId, true);
+                    lockDataService.interruptTask(lock, userId, true, cause);
             }
         }
         reportService.deleteDec(declarationDataId);
@@ -873,13 +873,13 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     }
 
     @Override
-    public void interruptTask(long declarationDataId, int userId, ReportType reportType) {
+    public void interruptTask(long declarationDataId, int userId, ReportType reportType, String cause) {
         ReportType[] reportTypes = getCheckTaskList(reportType);
         if (reportTypes == null) return;
         for (ReportType type : reportTypes) {
             LockData lock = lockDataService.getLock(generateAsyncTaskKey(declarationDataId, type));
             if (lock != null) {
-                lockDataService.interruptTask(lock, userId, true);
+                lockDataService.interruptTask(lock, userId, true, cause);
             }
         }
         if (ReportType.XML_DEC.equals(reportType)) {
