@@ -17,6 +17,9 @@ class CheckSign {
 	[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
 	private delegate int CrUninit(long var0);
 	
+	private static readonly Encoding enc1251 = Encoding.GetEncoding(1251); 
+	private static readonly Encoding enc866 = Encoding.GetEncoding(866); 
+	
 	/** Название библиотеки для проверки подписи*/	
 	private static string DLL_NAME = "bicr4_64.dll";
 			
@@ -100,7 +103,7 @@ class CheckSign {
 					CheckError("cr_uninit", errorCode);
 				}
 				Console.WriteLine("Result: SUCCESS");
-				Console.WriteLine("UserId: " + userIdBuf);
+				ShowUserId(userIdBuf);
 			} finally {
 				// выгрузка библиотеки
 				if (pDll != IntPtr.Zero) {
@@ -115,6 +118,13 @@ class CheckSign {
 		Console.WriteLine("Execution time: " + pSw.Elapsed.ToString());
 	}
 	
+	private static void ShowUserId(StringBuilder userIdBuf) {
+		string userId = userIdBuf == null ? "" : userIdBuf.ToString().Trim();
+		if (userId.Length != 0) {
+			byte[] sourceBytes = enc1251.GetBytes(userId); 
+			Console.WriteLine("UserId: " + enc866.GetString(sourceBytes));
+		}
+	}
 	/**
 		Проверка отсутствия ошибок при вызове библиотечного метода
 	*/
