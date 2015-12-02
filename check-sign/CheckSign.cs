@@ -17,7 +17,7 @@ class CheckSign {
 	[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
 	private delegate int CrUninit(long var0);
 	
-	/** Название библиотеки для проверки подписи*/	
+	/** РќР°Р·РІР°РЅРёРµ Р±РёР±Р»РёРѕС‚РµРєРё РґР»СЏ РїСЂРѕРІРµСЂРєРё РїРѕРґРїРёСЃРё*/	
 	private static string DLL_NAME = "bicr4_64.dll";
 		
 	static void Main(string[] args) {
@@ -30,7 +30,7 @@ class CheckSign {
 					"Usage syntax: CheckSign.exe \"PATH_TO_KEY_FILE\" \"PATH_TO_DLL_FOLDER\" \"DEL_FLAG(0/1)\" \"FILE_FOR_CHECK\"\n" +
 					"Result: FAIL or SUCCESS will be written in system out.");
 			}
-			// считывание и проверка аргументов
+			// СЃС‡РёС‚С‹РІР°РЅРёРµ Рё РїСЂРѕРІРµСЂРєР° Р°СЂРіСѓРјРµРЅС‚РѕРІ
 			string keyFleName = args[0];
 			if(!File.Exists(keyFleName)) {
 				throw new Exception ("ERROR: \"PATH_TO_KEY_FILE\" param must be a file: " + keyFleName);
@@ -47,14 +47,14 @@ class CheckSign {
 			if(!File.Exists(checkFileName)) {
 				throw new Exception ("ERROR: \"FILE_FOR_CHECK\" param must be a file: " + checkFileName);
 			}
-			// загружаем библиотеку
+			// Р·Р°РіСЂСѓР¶Р°РµРј Р±РёР±Р»РёРѕС‚РµРєСѓ
 			IntPtr pDll = IntPtr.Zero;
 			try {
 				pDll = NativeMethods.LoadLibrary(dllFolder + "/" + DLL_NAME);
 				if (pDll == IntPtr.Zero) {
 					throw new Exception ("Library \"" + DLL_NAME + "\" not found");
 				}
-				// инициализация
+				// РёРЅРёС†РёР°Р»РёР·Р°С†РёСЏ
 				IntPtr pCrInit = loadMethod(pDll, "cr_init");
 				CrInit crInit = (CrInit) Marshal.GetDelegateForFunctionPointer(pCrInit, typeof(CrInit));
 				int FLAG_TM = 128;
@@ -69,30 +69,30 @@ class CheckSign {
 				crInit(FLAG_TM, FILE_GK, FILE_UZ, PSW, TM_NUMBER, TMN_BLEN, initMode, initStruct);
 				int errorCode = 0;
 				try {
-					// загрузка БОК
-					IntPtr pСrPkBaseLoad = loadMethod(pDll, "cr_pkbase_load");
-					CrPkBaseLoad crPkBaseLoad = (CrPkBaseLoad) Marshal.GetDelegateForFunctionPointer(pСrPkBaseLoad, typeof(CrPkBaseLoad));
+					// Р·Р°РіСЂСѓР·РєР° Р‘РћРљ
+					IntPtr pРЎrPkBaseLoad = loadMethod(pDll, "cr_pkbase_load");
+					CrPkBaseLoad crPkBaseLoad = (CrPkBaseLoad) Marshal.GetDelegateForFunctionPointer(pРЎrPkBaseLoad, typeof(CrPkBaseLoad));
 					int COM_LEN = 0;
 					long[] pkBaseStruct  = new long[10];
 					errorCode =  crPkBaseLoad(initStruct[0], keyFleName, COM_LEN, 0, pkBaseStruct);
 					CheckError("cr_pkbase_load", errorCode);
 					try {
-						// проверка ЭЦП
+						// РїСЂРѕРІРµСЂРєР° Р­Р¦Рџ
 						IntPtr pCrCheckFile = loadMethod(pDll, "cr_check_file");
 						CrCheckFile crCheckFile = (CrCheckFile) Marshal.GetDelegateForFunctionPointer(pCrCheckFile, typeof(CrCheckFile));
-						int n = 1; //проверим первую ЭЦП
-						StringBuilder userIdBuf = new StringBuilder("6"); // магическое число
+						int n = 1; //РїСЂРѕРІРµСЂРёРј РїРµСЂРІСѓСЋ Р­Р¦Рџ
+						StringBuilder userIdBuf = new StringBuilder("6"); // РјР°РіРёС‡РµСЃРєРѕРµ С‡РёСЃР»Рѕ
 						errorCode = crCheckFile(initStruct[0], pkBaseStruct[0], checkFileName, n, delFlag == "0" ? 0 : 1, userIdBuf);
 						CheckError("cr_check_file", errorCode);
 					} finally {
-						// закрыть БОК
+						// Р·Р°РєСЂС‹С‚СЊ Р‘РћРљ
 						IntPtr pCrPkBaseClose = loadMethod(pDll, "cr_pkbase_close");
 						CrPkBaseClose crPkBaseClose = (CrPkBaseClose) Marshal.GetDelegateForFunctionPointer(pCrPkBaseClose, typeof(CrPkBaseClose));
 						errorCode = crPkBaseClose(pkBaseStruct[0]);
 						CheckError("cr_pkbase_close", errorCode);
 					}
 				} finally {
-					// деинициализация
+					// РґРµРёРЅРёС†РёР°Р»РёР·Р°С†РёСЏ
 					IntPtr pCrUninit = loadMethod(pDll, "cr_uninit");
 					CrUninit crUninit = (CrUninit) Marshal.GetDelegateForFunctionPointer(pCrUninit, typeof(CrUninit));
 					errorCode = crUninit(initStruct[0]);
@@ -100,7 +100,7 @@ class CheckSign {
 				}
 				Console.WriteLine("Result: SUCCESS");
 			} finally {
-				// выгрузка библиотеки
+				// РІС‹РіСЂСѓР·РєР° Р±РёР±Р»РёРѕС‚РµРєРё
 				if (pDll != IntPtr.Zero) {
 					NativeMethods.FreeLibrary(pDll);
 				}
@@ -114,7 +114,7 @@ class CheckSign {
 	}
 	
 	/**
-		Проверка отсутствия ошибок при вызове библиотечного метода
+		РџСЂРѕРІРµСЂРєР° РѕС‚СЃСѓС‚СЃС‚РІРёСЏ РѕС€РёР±РѕРє РїСЂРё РІС‹Р·РѕРІРµ Р±РёР±Р»РёРѕС‚РµС‡РЅРѕРіРѕ РјРµС‚РѕРґР°
 	*/
 	private static void CheckError(string methodName, int errorCode) {
 		if (errorCode != 0) {
@@ -124,7 +124,7 @@ class CheckSign {
 		}
 	}
 	/**
-		Поиск метода в библиотеке
+		РџРѕРёСЃРє РјРµС‚РѕРґР° РІ Р±РёР±Р»РёРѕС‚РµРєРµ
 	*/
 	private static IntPtr loadMethod(IntPtr pDll, string methodName) {
 		IntPtr procAddr = NativeMethods.GetProcAddress(pDll, methodName);
