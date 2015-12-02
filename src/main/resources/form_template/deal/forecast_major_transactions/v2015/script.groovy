@@ -66,6 +66,9 @@ def endDate = null
 @Field
 Calendar calendarStartDate = null
 
+@Field
+def refBookCache = [:]
+
 def getReportPeriodEndDate() {
     if (endDate == null) {
         endDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
@@ -85,6 +88,11 @@ Calendar getCalendarStartDate() {
         calendarStartDate = reportPeriodService.getCalendarStartDate(formData.reportPeriodId)
     }
     return calendarStartDate
+}
+
+// Разыменование записи справочника
+def getRefBookValue(def long refBookId, def Long recordId) {
+    return formDataService.getRefBookValue(refBookId, recordId, refBookCache)
 }
 
 //// Кастомные методы
