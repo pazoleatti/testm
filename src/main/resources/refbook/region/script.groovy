@@ -338,10 +338,11 @@ void save() {
     saveRecords.each {
         def okato = it.OKATO_DEFINITION?.stringValue
         def oktmo = it.OKTMO_DEFINITION?.stringValue
-        if (okato!=null && okato!="" && !okato.isNumber()) {
+        def pattern = /[0-9]{1,}/
+        if (okato!=null && okato!="" && !(okato ==~ pattern)) {
             logger.error("Атрибут \"%s\" заполнен неверно (%s)! Значение должно содержать только цифры!", "Определяющая часть кода ОКАТО", okato)
         }
-        if (oktmo!=null && oktmo!="" && !oktmo.isNumber()) {
+        if (oktmo!=null && oktmo!="" && !(oktmo ==~ pattern)) {
             logger.error("Атрибут \"%s\" заполнен неверно (%s)! Значение должно содержать только цифры!", "Определяющая часть кода ОКТМО", oktmo)
         }
     }
