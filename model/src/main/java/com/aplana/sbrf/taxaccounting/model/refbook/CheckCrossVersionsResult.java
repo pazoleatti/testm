@@ -31,6 +31,19 @@ public class CheckCrossVersionsResult implements Serializable {
     /** Результат проверки */
     private CrossResult result;
 
+    public CheckCrossVersionsResult() {
+    }
+
+    public CheckCrossVersionsResult(int num, Long recordId, Date version, VersionedObjectStatus status, Date nextVersion, VersionedObjectStatus nextStatus, CrossResult result) {
+        this.num = num;
+        this.recordId = recordId;
+        this.version = version;
+        this.status = status;
+        this.nextVersion = nextVersion;
+        this.nextStatus = nextStatus;
+        this.result = result;
+    }
+
     public Long getRecordId() {
         return recordId;
     }
