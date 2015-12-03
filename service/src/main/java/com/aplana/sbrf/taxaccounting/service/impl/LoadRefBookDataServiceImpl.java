@@ -210,7 +210,7 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
                     if (signList != null && !signList.isEmpty() && SignService.SIGN_CHECK.equals(signList.get(0))) {
                         boolean check = false;
                         try {
-                            check = signService.checkSign(currentFile.getPath(), 0);
+                            check = signService.checkSign(currentFile.getPath(), 0, logger);
                         } catch (Exception e) {
                             log(userInfo, LogData.L36, logger, lockId, e.getMessage());
                         }

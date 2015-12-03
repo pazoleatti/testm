@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.dao.api.ConfigurationDao;
 import com.aplana.sbrf.taxaccounting.model.ConfigurationParam;
 import com.aplana.sbrf.taxaccounting.model.ConfigurationParamModel;
 import com.aplana.sbrf.taxaccounting.model.Department;
+import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.SignService;
 import org.apache.commons.io.IOUtils;
 import org.junit.Assert;
@@ -91,7 +92,7 @@ public class SignServiceImplTest {
             throw new ServiceException("Failed to get field handle to set library path");
         }*/
 
-        Assert.assertTrue(signService.checkSign(copyTmp(DATA_FILE, "dataFile", ".data").getAbsolutePath(), 0));
+        Assert.assertTrue(signService.checkSign(copyTmp(DATA_FILE, "dataFile", ".data").getAbsolutePath(), 0, new Logger()));
 
     }
 
@@ -99,14 +100,14 @@ public class SignServiceImplTest {
     public void testXls() throws IOException {
         if (System.getProperty("os.name").toLowerCase().contains("linux"))
             return;
-        Assert.assertTrue(signService.checkSign(copyTmp(DATA_XLS_FILE, "dataXlsFile", ".data").getAbsolutePath(), 0));
+        Assert.assertTrue(signService.checkSign(copyTmp(DATA_XLS_FILE, "dataXlsFile", ".data").getAbsolutePath(), 0, new Logger()));
     }
 
     @Test
     public void testNonEncrypt() throws IOException {
         if (System.getProperty("os.name").toLowerCase().contains("linux"))
             return;
-        Assert.assertFalse(signService.checkSign(copyTmp(NON_ENC_FILE, "non_enc", ".data").getAbsolutePath(), 0));
+        Assert.assertFalse(signService.checkSign(copyTmp(NON_ENC_FILE, "non_enc", ".data").getAbsolutePath(), 0, new Logger()));
     }
 
     //Тест с новым подписанным архивом. False, нормальный результат, так как нет такой подписи в нашей БОК
@@ -114,7 +115,7 @@ public class SignServiceImplTest {
     public void testZip() throws IOException {
         if (System.getProperty("os.name").toLowerCase().contains("linux"))
             return;
-        Assert.assertFalse(signService.checkSign(copyTmp(ZIP_FILE, "zip", ".data").getAbsolutePath(), 0));
+        Assert.assertFalse(signService.checkSign(copyTmp(ZIP_FILE, "zip", ".data").getAbsolutePath(), 0, new Logger()));
     }
 
     private static File copyTmp(String dataFilePath, String prefix, String suffix) throws IOException {

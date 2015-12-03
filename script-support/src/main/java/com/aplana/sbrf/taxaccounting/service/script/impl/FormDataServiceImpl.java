@@ -661,10 +661,8 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
 
     @Override
     public void saveCachedDataRows(FormData formData, Logger logger) {
-        if (!logger.containsLevel(LogLevel.ERROR)) {
-            DataRowHelper dataRowHelper = getDataRowHelper(formData);
-            dataRowHelper.save(dataRowHelper.getAllCached());
-        }
+        DataRowHelper dataRowHelper = getDataRowHelper(formData);
+        dataRowHelper.save(dataRowHelper.getAllCached());
     }
 
     @Override
