@@ -253,13 +253,13 @@ public class FormDataServiceImpl implements FormDataService {
 				}
 			}
             if (logger.containsLevel(LogLevel.ERROR)) {
-                if (stateLogger != null) {
-                    stateLogger.updateState("Сохранение ошибок");
-                }
-                LOG.info(String.format("Сохранение ошибок: %s", key));
                 if (isInner) {
                     logger.error("Есть критические ошибки при выполнении скрипта");
                 } else {
+                    if (stateLogger != null) {
+                        stateLogger.updateState("Сохранение ошибок");
+                    }
+                    LOG.info(String.format("Сохранение ошибок: %s", key));
                     String uuid = logEntryService.save(logger.getEntries());
                     throw new ServiceLoggerException("Есть критические ошибки при выполнении скрипта", uuid);
 

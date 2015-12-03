@@ -4,13 +4,11 @@ import com.aplana.sbrf.taxaccounting.async.exception.AsyncTaskException;
 import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.core.api.LockStateLogger;
 import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.sql.rowset.serial.SerialException;
 import java.util.Date;
 import java.util.Map;
 
@@ -34,9 +32,6 @@ public abstract class UploadFormDataAsyncTask extends AbstractAsyncTask {
 
     @Autowired
     private BlobDataService blobDataService;
-
-    @Autowired
-    private DataRowService dataRowService;
 
     @Autowired
     private LockDataService lockService;

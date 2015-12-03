@@ -23,13 +23,13 @@ public abstract class CsvAuditGeneratorAsyncTask extends AbstractAsyncTask {
     private static final String EMPTY_DATA_ERROR_MSG = "ZIP файл с данными журнала аудита не сформирован. В журнале аудита отсутствуют данные по заданным параметрам поиска: %s.";
 
     @Autowired
-    TAUserService userService;
+    private TAUserService userService;
     @Autowired
-    ReportService reportService;
+    private ReportService reportService;
     @Autowired
-    AuditService auditService;
+    private AuditService auditService;
     @Autowired
-    PrintingService printingService;
+    private PrintingService printingService;
 
     @Override
     protected ReportType getReportType() {

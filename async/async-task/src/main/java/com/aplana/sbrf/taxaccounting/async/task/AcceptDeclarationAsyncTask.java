@@ -34,9 +34,6 @@ public abstract class AcceptDeclarationAsyncTask extends AbstractAsyncTask {
     private DeclarationTemplateService declarationTemplateService;
 
     @Autowired
-    private LogEntryService logEntryService;
-
-    @Autowired
     private LockDataService lockService;
 
     private static final SimpleDateFormat formatter = new SimpleDateFormat("dd.MM.yyyy");
