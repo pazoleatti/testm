@@ -1,10 +1,12 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <formTemplateContent>
     <fixedRows>true</fixedRows>
-    <name>Разнарядка на безакцептное списание/зачисление по суммам НДС с территориальных банков, Московского банка и подразделений ЦА (по операциям налогового агента)
-    </name>
-    <fullName>Разнарядка на безакцептное списание/зачисление по суммам НДС с территориальных банков, Московского банка и подразделений ЦА (по операциям налогового агента)
-    </fullName>
+    <monthly>false</monthly>
+    <comparative>false</comparative>
+    <accruing>false</accruing>
+    <updating>false</updating>
+    <name>Разнарядка на безакцептное списание/зачисление по суммам НДС с территориальных банков, Московского банка и подразделений ЦА (по операциям налогового агента)</name>
+    <fullName>Разнарядка на безакцептное списание/зачисление по суммам НДС с территориальных банков, Московского банка и подразделений ЦА (по операциям налогового агента)</fullName>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>code</alias>
         <checking>false</checking>
@@ -29,9 +31,7 @@
         <alias>totalVAT</alias>
         <checking>false</checking>
         <columnType>NUMBER</columnType>
-        <name>Всего НДС по операц. аренды федер./муниц. имущ-ва (&quot;+&quot; - к списанию, &quot;-&quot; - к
-            зачислению)
-        </name>
+        <name>Всего НДС по операц. аренды федер./муниц. имущества (&quot;+&quot; - к списанию, &quot;-&quot; - к зачислению)</name>
         <order>3</order>
         <width>10</width>
         <maxLength>17</maxLength>
@@ -41,8 +41,7 @@
         <alias>month1</alias>
         <checking>false</checking>
         <columnType>NUMBER</columnType>
-        <name>Первый месяц списания &quot;+&quot; / зачисления &quot;-&quot; с учётом корректировок не позднее______
-        </name>
+        <name>Первый месяц списания&quot;+&quot; / зачисления &quot;-&quot; с учётом корректировок не позднее 25.__.__</name>
         <order>4</order>
         <width>10</width>
         <maxLength>17</maxLength>
@@ -52,7 +51,7 @@
         <alias>month2</alias>
         <checking>false</checking>
         <columnType>NUMBER</columnType>
-        <name>Второй месяц списания &quot;+&quot; / зачисления &quot;-&quot; не позднее_______</name>
+        <name>Второй месяц списания&quot;+&quot; / зачисления &quot;-&quot; не позднее25.__.__</name>
         <order>5</order>
         <width>10</width>
         <maxLength>17</maxLength>
@@ -62,7 +61,7 @@
         <alias>month3</alias>
         <checking>false</checking>
         <columnType>NUMBER</columnType>
-        <name>Третий месяц списания &quot;+&quot; / зачисления &quot;-&quot; не позднее______</name>
+        <name>Третий месяц списания&quot;+&quot; / зачисления &quot;-&quot; не позднее25.__.__</name>
         <order>6</order>
         <width>10</width>
         <maxLength>17</maxLength>

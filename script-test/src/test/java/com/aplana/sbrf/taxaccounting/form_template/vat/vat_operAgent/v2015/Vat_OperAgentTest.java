@@ -106,6 +106,6 @@ public class Vat_OperAgentTest extends ScriptTestBase {
         testHelper.execute(FormDataEvent.COMPOSE);
         Assert.assertEquals(expected, testHelper.getDataRowHelper().getAll().size());
 
-        Assert.assertTrue(testHelper.getLogger().containsLevel(LogLevel.ERROR));
+        checkLogger();
     }
 }

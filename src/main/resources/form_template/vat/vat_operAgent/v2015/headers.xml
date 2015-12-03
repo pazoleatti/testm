@@ -4,13 +4,13 @@
         <cell alias="code" colSpan="1" rowSpan="1" value="Код"/>
         <cell alias="name" colSpan="1" rowSpan="1" value="Наименование подразделения"/>
         <cell alias="totalVAT" colSpan="1" rowSpan="1"
-              value="Всего НДС по операциям, совершаемым Банком (&quot;+&quot; - к списанию, &quot;-&quot; - к зачислению)"/>
+              value="Всего НДС по операц. аренды федер./муниц. имущества (&quot;+&quot; - к списанию, &quot;-&quot; - к зачислению)"/>
         <cell alias="month1" colSpan="1" rowSpan="1"
-              value="Первый месяц списания &quot;+&quot; / зачисления &quot;-&quot; с учётом корректировок не позднее______"/>
+              value="Первый месяц списания&quot;+&quot; / зачисления &quot;-&quot; с учётом корректировок не позднее 25.__.__"/>
         <cell alias="month2" colSpan="1" rowSpan="1"
-              value="Второй месяц списания &quot;+&quot; / зачисления &quot;-&quot; не позднее_______"/>
+              value="Второй месяц списания&quot;+&quot; / зачисления &quot;-&quot; не позднее25.__.__"/>
         <cell alias="month3" colSpan="1" rowSpan="1"
-              value="Третий месяц списания &quot;+&quot; / зачисления &quot;-&quot; не позднее______"/>
+              value="Третий месяц списания&quot;+&quot; / зачисления &quot;-&quot; не позднее25.__.__"/>
     </row>
     <row alias="">
         <cell alias="code" colSpan="1" rowSpan="1" value="1"/>
