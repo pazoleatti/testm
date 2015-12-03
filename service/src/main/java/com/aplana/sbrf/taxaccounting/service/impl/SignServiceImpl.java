@@ -31,7 +31,7 @@ public class SignServiceImpl implements SignService {
     private static final Pattern DLL_PATTERN = Pattern.compile(".+\\.dll");
     private static final String SUCCESS_FLAG = "SUCCESS";
     private static final String TEMPLATE = ClassUtils.classPackageAsResourcePath(SignServiceImpl.class) + "/check-sign.exe";
-    private static final long VALIDATION_TIMEOUT = 1000 * 60 * 60L; //таймаут работы утилиты для проверки ЭЦП
+    private static final long VALIDATION_TIMEOUT = 1000 * 60 * 10L; //таймаут работы утилиты для проверки ЭЦП
 
 	@Autowired
 	private ConfigurationDao configurationDao;
@@ -152,6 +152,7 @@ public class SignServiceImpl implements SignService {
                         keyFolderPath = keyFolderPath.replaceFirst(keyResourceFolder.getName() + "$", "");
                         listFileNames = new String[]{keyResourceFolder.getName()};
                     } else {
+                        keyResourceFolder = ResourceUtils.getSharedResource(keyFolderPath + "/", false);
                         listFileNames = keyResourceFolder.list();
                         if (listFileNames == null || listFileNames.length == 0) {
                             LOG.warn(String.format("Директории %s с ключами пустая", keyFolderPath));

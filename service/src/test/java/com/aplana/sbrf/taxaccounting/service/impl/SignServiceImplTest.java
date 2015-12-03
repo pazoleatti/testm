@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.dao.api.ConfigurationDao;
 import com.aplana.sbrf.taxaccounting.model.ConfigurationParam;
 import com.aplana.sbrf.taxaccounting.model.ConfigurationParamModel;
 import com.aplana.sbrf.taxaccounting.model.Department;
+import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.SignService;
 import org.apache.commons.io.IOUtils;
@@ -91,7 +92,10 @@ public class SignServiceImplTest {
         } catch (NoSuchFieldException e) {
             throw new ServiceException("Failed to get field handle to set library path");
         }*/
-
+        Logger logger = new Logger();
+        signService.checkSign(copyTmp(DATA_FILE, "dataFile", ".data").getAbsolutePath(), 0, logger);
+        for(LogEntry logEntry: logger.getEntries())
+            System.out.println("log "+logEntry.getMessage());
         Assert.assertTrue(signService.checkSign(copyTmp(DATA_FILE, "dataFile", ".data").getAbsolutePath(), 0, new Logger()));
 
     }

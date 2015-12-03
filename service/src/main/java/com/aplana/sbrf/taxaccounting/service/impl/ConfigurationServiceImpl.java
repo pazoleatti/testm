@@ -14,6 +14,7 @@ import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.api.ConfigurationService;
 import com.aplana.sbrf.taxaccounting.utils.FileWrapper;
+import com.aplana.sbrf.taxaccounting.utils.ResourceUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -246,21 +247,30 @@ public class ConfigurationServiceImpl implements ConfigurationService {
                 List<String> valuesList = model.get(configurationParam, 0);
                 if (valuesList != null)
                     for (String value : valuesList) {
+                        Boolean isFolder = configurationParam.isFolder();
                         // у папок smb в конце должен быть слеш (иначе возникенет ошибка при configurationParam.isFolder() == true и configurationParam.hasReadCheck() == true)
-                        if (configurationParam.isFolder()) {
+                        if (isFolder == null) {
+                            FileWrapper keyResourceFolder = ResourceUtils.getSharedResource(value, false);
+                            if (keyResourceFolder.isFile()) {
+                                isFolder = false;
+                            } else {
+                                isFolder = true;
+                                value = value + "/";
+                            }
+                        } else if (isFolder) {
                             value = value + "/";
                         }
                         // Проверка значения параметра "Проверять ЭЦП"
                         if (configurationParam.equals(configurationParam.SIGN_CHECK)) {
                             signCheck(value, logger);
                         }
-                        if (configurationParam.hasReadCheck() && (configurationParam.isFolder()
-                                && !FileWrapper.canReadFolder(value) || !configurationParam.isFolder()
+                        if (configurationParam.hasReadCheck() && (isFolder
+                                && !FileWrapper.canReadFolder(value) || !isFolder
                                 && !FileWrapper.canReadFile(value))) {
                             // Доступ на чтение
                             logger.error(READ_ERROR, value);
-                        } else if (configurationParam.hasWriteCheck() && (configurationParam.isFolder()
-                                && !FileWrapper.canWriteFolder(value) || !configurationParam.isFolder()
+                        } else if (configurationParam.hasWriteCheck() && (isFolder
+                                && !FileWrapper.canWriteFolder(value) || !isFolder
                                 && !FileWrapper.canWriteFile(value))) {
                             // Доступ на запись
                             logger.error(WRITE_ERROR, value);
