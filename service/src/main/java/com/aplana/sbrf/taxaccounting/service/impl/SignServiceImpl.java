@@ -1,18 +1,26 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.api.ConfigurationDao;
-import com.aplana.sbrf.taxaccounting.model.ConfigurationParam;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
+import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
+import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
+import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.SignService;
 import com.aplana.sbrf.taxaccounting.utils.FileWrapper;
 import com.aplana.sbrf.taxaccounting.utils.ResourceUtils;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import ru.infocrypt.bicrypt.Bicr4;
+import org.springframework.util.ClassUtils;
 
+import java.io.*;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -20,126 +28,247 @@ import java.util.regex.Pattern;
 public class SignServiceImpl implements SignService {
 
 	private static final Log LOG = LogFactory.getLog(SignServiceImpl.class);
-	private static final Pattern DLL_PATTERN = Pattern.compile(".+\\.dll");
-    // 128 означает, что инициализации ДСЧ не будет
-    private static final int FLAG_TM = 128;
-    // не используем главный ключ и узел замены
-    private static final String FILE_GK = "";
-    private static final String FILE_UZ = "";
-    private static final int COM_LEN = 0;
-    private static final byte TM_NUMBER[] = new byte[32];
-    private static final int TMN_BLEN[] = new int[1];
-    static {
-        TMN_BLEN[0] = 32;
-    }
+    private static final Pattern DLL_PATTERN = Pattern.compile(".+\\.dll");
+    private static final String SUCCESS_FLAG = "SUCCESS";
+    private static final String TEMPLATE = ClassUtils.classPackageAsResourcePath(SignServiceImpl.class) + "/check-sign.exe";
+    private static final long VALIDATION_TIMEOUT = 1000 * 60 * 60L; //таймаут работы утилиты для проверки ЭЦП
 
 	@Autowired
 	private ConfigurationDao configurationDao;
 	@Autowired
 	private DepartmentService departmentService;
 
-    @Override
-    public boolean checkSign(String pathToSignFile, int delFlag) {
-		int rootDepartmentId = departmentService.getBankDepartment().getId();
-        // инициализация библиотеки для проверки ЭП
-		List<String> ecryptParams = configurationDao.getAll().get(ConfigurationParam.ENCRYPT_DLL, rootDepartmentId);
-        if (ecryptParams == null) {
-			throw new ServiceException("Не заполнен конфигурационный параметр \"" + ConfigurationParam.ENCRYPT_DLL.getCaption() + '"');
+    private final class ProcessRunner implements Runnable{
+        private String[] params;
+        private Logger logger;
+
+        private ProcessRunner(String[] params, Logger logger) {
+            this.params = params;
+            this.logger = logger;
         }
-        initEncryptLibrary(ecryptParams.get(0));
-		// загрузка БОК (база открытых ключей)
+
+        @Override
+        public void run() {
+            Process process;
+            try {
+                LOG.info("Запускаем проверку ЭЦП.");
+                process = (new ProcessBuilder(params)).start();
+                BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream(), "Cp866"));
+                try {
+                    String s = reader.readLine();
+                    if (s != null && s.startsWith("Result: " + SUCCESS_FLAG)) {
+                        LOG.info("Проверка ЭЦП завершена успешно.");
+                    }
+                    do {
+                        if (s.startsWith("UserId: ")) {
+                            logger.info(s);
+                        } else if (!s.startsWith("Result:") && !s.startsWith("Execution time:")) {
+                            logger.errorIfNotExist(s);
+                        }
+                    } while ((s = reader.readLine()) != null);
+                } finally {
+                    process.destroy();
+                    reader.close();
+                }
+            } catch (UnsupportedEncodingException e) {
+                LOG.error("", e);
+                throw new ServiceException("", e);
+            } catch (IOException e) {
+                LOG.error("", e);
+                throw new ServiceException("", e);
+            }
+        }
+    }
+
+    boolean check(String[] params, Logger logger) {
+        ProcessRunner runner = new ProcessRunner(params, logger);
+        Thread threadRunner = new Thread(runner);
+        threadRunner.start();
+        long startTime = new Date().getTime();
+        while (true) {
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+            if (Math.abs(new Date().getTime() - startTime) > VALIDATION_TIMEOUT) {
+                threadRunner.interrupt();
+                LOG.warn(String.format("Истекло время выполнения проверки ЭЦП. Проверка ЭЦП длилась более %d мс.", VALIDATION_TIMEOUT));
+                logger.error("Истекло время выполнения проверки ЭЦП. Проверка ЭЦП длилась более %d мс.", VALIDATION_TIMEOUT);
+                return false;
+            }
+            if (!threadRunner.isAlive()) {
+                return !logger.containsLevel(LogLevel.ERROR);
+            }
+        }
+    }
+
+    @Override
+    public boolean checkSign(String pathToSignFile, int delFlag, Logger logger) {
+        String[] params = new String[5];
+        int rootDepartmentId = departmentService.getBankDepartment().getId();
+        // путь к библиотеке для проверки ЭП
+        List<String> encryptParams = configurationDao.getAll().get(ConfigurationParam.ENCRYPT_DLL, rootDepartmentId);
+        if (encryptParams == null) {
+            throw new ServiceException("Не заполнен конфигурационный параметр \"" + ConfigurationParam.ENCRYPT_DLL.getCaption() + '"');
+        }
+        // загрузка БОК (база открытых ключей)
         List<String> keys = configurationDao.getAll().get(ConfigurationParam.KEY_FILE, rootDepartmentId);
         if (keys == null){
             throw new ServiceException("Ошибка доступа к файлу базы открытых ключей. БОК не заданы.");
         }
 
-        long param[] = new long[10];
-        int intParam[] = new int[10];
-        long init;
-        long pkBase;
-        StringBuffer userIdBuf = new StringBuffer("1");
-        int result;
-
-        //-------------- инициализация --------------------------------
-        result = Bicr4.cr_init(FLAG_TM, FILE_GK, FILE_UZ, "", TM_NUMBER, TMN_BLEN, intParam, param);
-        LOG.info("cr_init, result = " + result);
-        init = param[0];
-
+        File checkSign = null;
+        File keyTempDir = null;
+        File encryptTempDir = null;
+        FileOutputStream outputStream;
+        InputStream inputStream;
+        File keyFile;
+        List<File> keyFiles = new ArrayList<File>();
         try {
-            for (String keyFolderPath : keys){
-                FileWrapper keyResourceFolder = ResourceUtils.getSharedResource(keyFolderPath, false);
-                if (!keyResourceFolder.exists()){
-                    LOG.warn(String.format("Директории %s с ключами не существует", keyFolderPath));
-                    break;
+            //Копируем необходимые файлы во временную директорию
+            try {
+                //
+                checkSign = File.createTempFile("check-sign",".exe");
+                outputStream = new FileOutputStream(checkSign);
+                inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(TEMPLATE);
+                try {
+                    LOG.info("check-sign.exe copy, total number of bytes " + IOUtils.copy(inputStream, outputStream));
+                } finally {
+                    inputStream.close();
+                    outputStream.close();
                 }
-                String[] listFileNames;
-                if (keyResourceFolder.isFile()){
-                    keyFolderPath = keyFolderPath.replaceFirst(keyResourceFolder.getName() + "$", "");
-                    listFileNames = new String[]{keyResourceFolder.getName()};
-                }else {
-                    listFileNames = keyResourceFolder.list();
-                    if (listFileNames == null || listFileNames.length == 0){
-                        LOG.warn(String.format("Директории %s с ключами пустая", keyFolderPath));
+
+                // база открытых ключей
+                keyTempDir = createTempDir("key_files_");
+                for (String keyFolderPath : keys) {
+                    FileWrapper keyResourceFolder = ResourceUtils.getSharedResource(keyFolderPath, false);
+                    if (!keyResourceFolder.exists()) {
+                        LOG.warn(String.format("Директории %s с ключами не существует", keyFolderPath));
                         break;
                     }
-                }
-                //Проверяем по всем возможным БОК
-                for (String keyName : listFileNames){
-                    int total = 0;
-                    FileWrapper dbOfpk = ResourceUtils.getSharedResource(keyFolderPath + "/" + keyName);
-                    if (dbOfpk.isDirectory()) {
-						continue;
-					}
-                    //-------------- загрузка базы БОК --------------------------------
-                    result =  Bicr4.cr_pkbase_load(init, dbOfpk.getPath(), COM_LEN, 0, param); total += result;
-                    if (result != 0){
-                        LOG.error(String.format("cr_pkbase_load, ошибка загрузки БОК %s, код ошибки %s", dbOfpk.getPath(), result));
-                        continue;
+                    String[] listFileNames;
+                    if (keyResourceFolder.isFile()) {
+                        keyFolderPath = keyFolderPath.replaceFirst(keyResourceFolder.getName() + "$", "");
+                        listFileNames = new String[]{keyResourceFolder.getName()};
                     } else {
-						LOG.info(String.format("cr_pkbase_load, БОК %s result = ", dbOfpk.getPath()) + result);
-					}
-                    pkBase = param[0];
+                        listFileNames = keyResourceFolder.list();
+                        if (listFileNames == null || listFileNames.length == 0) {
+                            LOG.warn(String.format("Директории %s с ключами пустая", keyFolderPath));
+                            break;
+                        }
+                    }
+                    //Проверяем по всем возможным БОК
+                    for (String keyName : listFileNames) {
+                        FileWrapper dbOfpk = ResourceUtils.getSharedResource(keyFolderPath + "/" + keyName);
+                        if (dbOfpk.isDirectory()) {
+                            continue;
+                        }
+                        keyFile = File.createTempFile("key_file_", ".dat", keyTempDir);
+                        inputStream = dbOfpk.getInputStream();
+                        outputStream = new FileOutputStream(keyFile);
+                        try {
+                            LOG.info("Key file copy, total number of bytes " + IOUtils.copy(inputStream, outputStream));
+                        } finally {
+                            inputStream.close();
+                            outputStream.close();
+                        }
+                        keyFiles.add(keyFile);
+                    }
+                }
 
-                    //-------------- проверка ЭЦП в файле --------------------------------
-                    int n = 1; //проверим первую ЭЦП
-                    result = Bicr4.cr_check_file(init, pkBase, pathToSignFile, n, delFlag, userIdBuf); total += result;
-                    LOG.info("cr_check_file, result = " + result);
+                // библиотеки ЭЦП
+                encryptTempDir = createTempDir("encrypt_dll_");
+                FileWrapper resourceDir = ResourceUtils.getSharedResource(encryptParams.get(0) + "/");
+                if (!resourceDir.isDirectory())
+                    throw new ServiceException("Необходимо указать директорию с библиотекой ЭЦП");
+                String[] listFiles = resourceDir.list();
+                assert listFiles != null;
+                for (String fileName : listFiles) {
+                    if (!DLL_PATTERN.matcher(fileName).matches())
+                        continue;
+                    File dllFile = new File(encryptTempDir.getPath()+ "/" + fileName);
+                    if (dllFile.createNewFile()) {
+                        FileWrapper resourceFile = ResourceUtils.getSharedResource(encryptParams.get(0) + "/" + fileName);
+                        inputStream = resourceFile.getInputStream();
+                        outputStream = new FileOutputStream(dllFile);
+                        try {
+                            LOG.info("Dll file copy, total number of bytes " + IOUtils.copy(inputStream, outputStream));
+                        } finally {
+                            inputStream.close();
+                            outputStream.close();
+                        }
+                    }
+                }
+            } catch (IOException e) {
+                LOG.error("", e);
+                throw new ServiceException(e.getMessage(), e);
+            }
 
-                    //-------------- деинициализация --------------------------------
-                    result = Bicr4.cr_pkbase_close(pkBase); total += result;
-                    LOG.info("cr_pkbase_close, result = " + result);
-                    if (total == 0){
-                        return true;
+            params[0] = checkSign.getAbsolutePath();
+            params[2] = encryptTempDir.getAbsolutePath();
+            params[3] = String.valueOf(delFlag);
+            params[4] = pathToSignFile;
+
+            String[] keyTempFiles = keyTempDir.list();
+            Logger localLogger = new Logger();
+            for (String fileName: keyTempFiles) {
+                params[1] = keyTempDir.getAbsolutePath()+ "\\" + fileName;
+                Logger checkLogger = new Logger();
+                if (check(params, checkLogger)) {
+                    logger.getEntries().addAll(checkLogger.getEntries());
+                    return true;
+                } else {
+                    for(LogEntry log: checkLogger.getEntries()) {
+                        if (!localLogger.getEntries().contains(log)) {
+                            localLogger.getEntries().add(log);
+                        }
                     }
                 }
             }
+            logger.error("Ошибки при проверке ЭЦП:");
+            logger.getEntries().addAll(localLogger.getEntries());
+            return false;
         } finally {
-            result = Bicr4.cr_uninit(init);
-            LOG.info("cr_uninit, result = " + result);
+            try {
+                if (checkSign != null) checkSign.delete();
+            } catch (Exception e) {
+                LOG.error("", e);
+            }
+            try {
+                if (keyTempDir != null) FileUtils.deleteDirectory(keyTempDir);
+            } catch (Exception e) {
+                LOG.error("", e);
+            }
+            try {
+                if (encryptTempDir != null) FileUtils.deleteDirectory(encryptTempDir);
+            } catch (Exception e) {
+                LOG.error("", e);
+            }
         }
-        return false;
     }
 
-    /**
-     * Метод загружает библиотеки для проверки подписи. Должен вызываться перед проверкой подписи.
-     * @param dir
-     */
-    private void initEncryptLibrary(String dir){
-        FileWrapper resourceDir = ResourceUtils.getSharedResource(dir + "/");
-        if (!resourceDir.isDirectory())
-            throw new ServiceException("Необходимо указать директорию с библиотекой ЭЦП");
-
-        String[] listFiles = resourceDir.list();
-        assert listFiles != null;
-        for (String fileName : listFiles) {
-            if (!DLL_PATTERN.matcher(fileName).matches())
-                continue;
-            FileWrapper resourceFile = ResourceUtils.getSharedResource(dir + "/" + fileName);
-            try {
-                System.load(resourceFile.getPath());
-            } catch (UnsatisfiedLinkError linkError){
-                LOG.error("Ошибка при загрузке библиотек подписи", linkError);
+    private static File createTempDir(String prefix) throws IOException {
+        final File sysTempDir = new File(System.getProperty("java.io.tmpdir"));
+        File newTempDir;
+        final int maxAttempts = 9;
+        int attemptCount = 0;
+        do {
+            attemptCount++;
+            if(attemptCount > maxAttempts) {
+                throw new IOException(
+                        "Не удалось создать уникальный временный каталог после " + maxAttempts + " попыток.");
             }
+            String dirName = prefix + System.nanoTime();
+            newTempDir = new File(sysTempDir, dirName);
+        } while(newTempDir.exists());
+
+        if (newTempDir.mkdirs()) {
+            return newTempDir;
+        } else {
+            throw new IOException(
+                    "Не удалось создать временный каталог с именем " +
+                            newTempDir.getAbsolutePath());
         }
     }
 }

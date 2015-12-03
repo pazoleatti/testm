@@ -175,6 +175,14 @@
                     <include>**/VSAX3.exe</include>
                 </includes>
             </resource>
+            <resource>
+                <directory>../check-sign</directory>
+                <targetPath>com/aplana/sbrf/taxaccounting/service/impl</targetPath>
+                <filtering>false</filtering>
+                <includes>
+                    <include>**/check-sign.exe</include>
+                </includes>
+            </resource>
         </resources>
         <plugins>
             <plugin>

@@ -78,8 +78,8 @@ class CheckSign {
 					IntPtr pСrPkBaseLoad = loadMethod(pDll, "cr_pkbase_load");
 					CrPkBaseLoad crPkBaseLoad = (CrPkBaseLoad) Marshal.GetDelegateForFunctionPointer(pСrPkBaseLoad, typeof(CrPkBaseLoad));
 					int COM_LEN = 0;
-					long[] pkBaseStruct  = new long[10];
-					errorCode =  crPkBaseLoad(initStruct[0], keyFleName, COM_LEN, 0, pkBaseStruct);
+					long[] pkBaseStruct = new long[10];
+					errorCode = crPkBaseLoad(initStruct[0], keyFleName, COM_LEN, 0, pkBaseStruct);
 					CheckError("cr_pkbase_load", errorCode);
 					try {
 						// проверка ЭЦП

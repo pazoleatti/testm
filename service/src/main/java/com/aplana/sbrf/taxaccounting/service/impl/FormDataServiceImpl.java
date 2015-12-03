@@ -216,7 +216,7 @@ public class FormDataServiceImpl implements FormDataService {
                 if (signList != null && !signList.isEmpty() && SignService.SIGN_CHECK.equals(signList.get(0))) {
 					try {
 						LOG.info(String.format("Проверка ЭП: %s", key));
-						check = signService.checkSign(dataFile.getAbsolutePath(), 0);
+						check = signService.checkSign(dataFile.getAbsolutePath(), 0, logger);
 					} catch (Exception e) {
 						logger.error("Ошибка при проверке ЭП: " + e.getMessage());
 					}

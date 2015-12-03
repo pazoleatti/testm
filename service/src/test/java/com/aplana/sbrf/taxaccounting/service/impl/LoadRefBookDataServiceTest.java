@@ -127,7 +127,7 @@ public class LoadRefBookDataServiceTest {
 
     private void mockSignService() {
         SignService signService = mock(SignService.class);
-        when(signService.checkSign(anyString(), anyInt())).thenReturn(true);
+        when(signService.checkSign(anyString(), anyInt(), any(Logger.class))).thenReturn(true);
         ReflectionTestUtils.setField(service, "signService", signService);
 
         LockDataService lockService = mock(LockDataService.class);
