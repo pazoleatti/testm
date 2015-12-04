@@ -259,7 +259,14 @@ public interface FormDataService {
      * Сохранение данных из кэша в бд при отстутствии критических ошибкок в логере
      */
     @SuppressWarnings("unused")
+    @Deprecated
     void saveCachedDataRows(FormData formData, Logger logger);
+
+    /**
+     * Сохранение данных из кэша в бд если вызов совершен из режима редактирования и/или при отстутствии критических ошибкок в логере
+     */
+    @SuppressWarnings("unused")
+    void saveCachedDataRows(FormData formData, Logger logger, FormDataEvent formDataEvent);
 
     /**
      * Получить выборку пользователей для представления "Список пользователей"

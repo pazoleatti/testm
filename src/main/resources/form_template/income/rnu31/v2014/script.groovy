@@ -40,7 +40,7 @@ switch (formDataEvent) {
         prevPeriodCheck()
         calc()
         logicCheck()
-        formDataService.saveCachedDataRows(formData, logger)
+        formDataService.saveCachedDataRows(formData, logger, formDataEvent)
         break
     case FormDataEvent.ADD_ROW:
         // Всего форма должна содержать одну строку
@@ -62,7 +62,7 @@ switch (formDataEvent) {
         consolidation()
         calc()
         logicCheck()
-        formDataService.saveCachedDataRows(formData, logger)
+        formDataService.saveCachedDataRows(formData, logger, formDataEvent)
         break
     case FormDataEvent.IMPORT:
         if (UploadFileName.endsWith(".rnu")) {
@@ -70,11 +70,11 @@ switch (formDataEvent) {
         } else {
             importData()
         }
-        formDataService.saveCachedDataRows(formData, logger)
+        formDataService.saveCachedDataRows(formData, logger, formDataEvent)
         break
     case FormDataEvent.IMPORT_TRANSPORT_FILE:
         importTransportData()
-        formDataService.saveCachedDataRows(formData, logger)
+        formDataService.saveCachedDataRows(formData, logger, formDataEvent)
         break
 }
 

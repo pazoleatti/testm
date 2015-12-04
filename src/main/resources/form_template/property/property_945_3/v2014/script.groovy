@@ -50,7 +50,7 @@ switch (formDataEvent) {
         checkPrevForm()
         calc()
         logicCheck()
-        formDataService.saveCachedDataRows(formData, logger)
+        formDataService.saveCachedDataRows(formData, logger, formDataEvent)
         break
     case FormDataEvent.CHECK:
         checkPrevForm()
@@ -76,12 +76,12 @@ switch (formDataEvent) {
     case FormDataEvent.COMPOSE:
         consolidation()
         calc()
-        formDataService.saveCachedDataRows(formData, logger)
+        formDataService.saveCachedDataRows(formData, logger, formDataEvent)
         break
     case FormDataEvent.IMPORT:
         checkRegionId()
         importData()
-        formDataService.saveCachedDataRows(formData, logger)
+        formDataService.saveCachedDataRows(formData, logger, formDataEvent)
         break
 }
 

@@ -29,7 +29,7 @@ switch (formDataEvent) {
     case FormDataEvent.CALCULATE:
         calc()
         logicCheck()
-        formDataService.saveCachedDataRows(formData, logger)
+        formDataService.saveCachedDataRows(formData, logger, formDataEvent)
         break
     case FormDataEvent.CHECK:
         logicCheck()
@@ -46,7 +46,7 @@ switch (formDataEvent) {
         consolidation()
         calc()
         logicCheck()
-        formDataService.saveCachedDataRows(formData, logger)
+        formDataService.saveCachedDataRows(formData, logger, formDataEvent)
         break
     case FormDataEvent.IMPORT:
         // TODO (Ramil Timerbaev) загрузку из экселя сказали пока не делать

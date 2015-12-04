@@ -33,11 +33,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /*
  * Реализация FormDataService
@@ -660,9 +656,19 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
     }
 
     @Override
+    @Deprecated
     public void saveCachedDataRows(FormData formData, Logger logger) {
         DataRowHelper dataRowHelper = getDataRowHelper(formData);
         dataRowHelper.save(dataRowHelper.getAllCached());
+    }
+
+    @Override
+    public void saveCachedDataRows(FormData formData, Logger logger, FormDataEvent formDataEvent) {
+        if (Arrays.asList(FormDataEvent.CALCULATE, FormDataEvent.REFRESH, FormDataEvent.IMPORT).contains(formDataEvent)
+                || !logger.containsLevel(LogLevel.ERROR)) {
+            DataRowHelper dataRowHelper = getDataRowHelper(formData);
+            dataRowHelper.save(dataRowHelper.getAllCached());
+        }
     }
 
     @Override

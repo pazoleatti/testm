@@ -43,7 +43,7 @@ switch (formDataEvent) {
     case FormDataEvent.CALCULATE:
         calc()
         logicCheck()
-        formDataService.saveCachedDataRows(formData, logger)
+        formDataService.saveCachedDataRows(formData, logger, formDataEvent)
         break
     case FormDataEvent.CHECK:
         logicCheck()
@@ -57,7 +57,7 @@ switch (formDataEvent) {
     case FormDataEvent.MOVE_CREATED_TO_PREPARED:  // Подготовить из "Создана"
         calc()
         logicCheck()
-        formDataService.saveCachedDataRows(formData, logger)
+        formDataService.saveCachedDataRows(formData, logger, formDataEvent)
         break
     case FormDataEvent.MOVE_CREATED_TO_APPROVED:  // Утвердить из "Создана"
     case FormDataEvent.MOVE_PREPARED_TO_APPROVED: // Утвердить из "Подготовлена"
@@ -70,11 +70,11 @@ switch (formDataEvent) {
         formDataService.consolidationSimple(formData, logger, userInfo)
         calc()
         logicCheck()
-        formDataService.saveCachedDataRows(formData, logger)
+        formDataService.saveCachedDataRows(formData, logger, formDataEvent)
         break
     case FormDataEvent.IMPORT:
         importData()
-        formDataService.saveCachedDataRows(formData, logger)
+        formDataService.saveCachedDataRows(formData, logger, formDataEvent)
         break
     case FormDataEvent.SORT_ROWS:
         sortFormDataRows()
