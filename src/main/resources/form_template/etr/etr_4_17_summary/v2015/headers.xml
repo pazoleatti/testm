@@ -2,7 +2,7 @@
   <row alias="">
     <cell alias="fix" colSpan="2" rowSpan="3" value="№ п/п"/>
     <cell alias="rowNum" colSpan="1" rowSpan="1" value="№ п/п"/>
-    <cell alias="department" colSpan="1" rowSpan="3" value="Подразделение территориального банка"/>
+    <cell alias="department" colSpan="1" rowSpan="3" value="Подразделение"/>
     <cell alias="tax26411_01" colSpan="4" rowSpan="1" value="Налог на добавленную стоимость (федеральный бюджет)"/>
     <cell alias="tax26411_02" colSpan="1" rowSpan="1" value="Налог на добавленную стоимость (федеральный бюджет)"/>
     <cell alias="sum34" colSpan="1" rowSpan="1" value="Налог на добавленную стоимость (федеральный бюджет)"/>
@@ -23,7 +23,7 @@
   <row alias="">
     <cell alias="fix" colSpan="1" rowSpan="1" value="№ п/п"/>
     <cell alias="rowNum" colSpan="1" rowSpan="1" value="№ п/п"/>
-    <cell alias="department" colSpan="1" rowSpan="1" value="Подразделение территориального банка"/>
+    <cell alias="department" colSpan="1" rowSpan="1" value="Подразделение"/>
     <cell alias="tax26411_01" colSpan="1" rowSpan="1" value="сумма (млн.руб.)"/>
     <cell alias="tax26411_02" colSpan="1" rowSpan="1" value="сумма (млн.руб.)"/>
     <cell alias="sum34" colSpan="1" rowSpan="1" value="итого НДС "/>
@@ -44,7 +44,7 @@
   <row alias="">
     <cell alias="fix" colSpan="1" rowSpan="1" value="№ п/п"/>
     <cell alias="rowNum" colSpan="1" rowSpan="1" value="№ п/п"/>
-    <cell alias="department" colSpan="1" rowSpan="1" value="Подразделение территориального банка"/>
+    <cell alias="department" colSpan="1" rowSpan="1" value="Подразделение"/>
     <cell alias="tax26411_01" colSpan="1" rowSpan="1" value="симвл. ф. 102:  26411.01"/>
     <cell alias="tax26411_02" colSpan="1" rowSpan="1" value="симвл. ф. 102: 26411.02"/>
     <cell alias="sum34" colSpan="1" rowSpan="1" value="гр.3+гр.4"/>

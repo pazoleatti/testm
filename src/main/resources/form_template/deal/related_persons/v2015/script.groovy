@@ -376,7 +376,7 @@ def subCalc12(def row) {
                 return [null, findRow.categoryRevised]
             }
         }
-    } else if (reportPeriod.order == 4) {
+    } else {
         // полугодие / 9 месяцев / год
         // форма "ВЗЛ" за предыдущий налоговый период
         sourceRows = getSourceDataRows(800, FormDataKind.PRIMARY, true)
@@ -390,7 +390,8 @@ def subCalc12(def row) {
 
         // форма "Приложение 4.1. (6 месяцев)" / "Приложение 4.1. (9 месяцев)"
         def formTypeId = (reportPeriod.order == 2 ? 801 : 802)
-        sourceRows = getSourceDataRows(formTypeId, FormDataKind.SUMMARY)
+        def isPrevPeriod = (reportPeriod.order == 4)
+        sourceRows = getSourceDataRows(formTypeId, FormDataKind.SUMMARY, isPrevPeriod)
         findRow = sourceRows?.find { it.name == row.name }
         if (findRow) {
             // для полугодия и 9 месяцев использовать графа 20, для периода год - графу 21

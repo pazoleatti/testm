@@ -1127,6 +1127,7 @@ void copyRows(def sourceDataRows, def destinationDataRows, def section) {
         return
     }
     def copyRows = sourceDataRows.subList(from, to)
+    from = getDataRow(destinationDataRows, section).getIndex()
     destinationDataRows.addAll(from, copyRows)
     // поправить индексы, потому что они после вставки не пересчитываются
     updateIndexes(destinationDataRows)
