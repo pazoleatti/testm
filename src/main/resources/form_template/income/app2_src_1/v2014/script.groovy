@@ -490,7 +490,7 @@ void importTransportData() {
                 // итоговая строка тф
                 rowCells = reader.readNext()
                 if (rowCells != null) {
-                    total = getNewRow(rowCells, COLUMN_COUNT, ++fileRowIndex, rowIndex, true)
+                    total = getNewRow(rowCells, COLUMN_COUNT, ++fileRowIndex, rowIndex)
                 }
                 break
             }
@@ -557,9 +557,6 @@ void importTransportData() {
 
         def colOffset = 1
         for (def alias : totalColumnsIndexMap.keySet().asList()) {
-            if (!editableColumns.contains(alias)) {
-                continue
-            }
             def v1 = total.getCell(alias).value
             def v2 = totalTmp.getCell(alias).value
             if (v1 == null && v2 == null) {
@@ -607,7 +604,7 @@ boolean addRow(def rows, String[] rowCells, def columnCount, def fileRowIndex, d
  *
  * @return вернет строку нф или null, если количество значений в строке тф меньше
  */
-def getNewRow(String[] rowCells, def columnCount, def fileRowIndex, def rowIndex, boolean isTotal = false) {
+def getNewRow(String[] rowCells, def columnCount, def fileRowIndex, def rowIndex) {
     def newRow = getNewRow()
     newRow.setIndex(rowIndex)
     newRow.setImportIndex(fileRowIndex)
@@ -668,9 +665,7 @@ def getNewRow(String[] rowCells, def columnCount, def fileRowIndex, def rowIndex
     // графа 22..30
     ['taxRate', 'income', 'deduction', 'taxBase', 'calculated', 'withheld', 'listed', 'withheldAgent', 'nonWithheldAgent'].each { alias ->
         colIndex++
-        if (isTotal || editableColumns.contains(alias)) {
-            newRow[alias] = parseNumber(pure(rowCells[colIndex]), fileRowIndex, colIndex + colOffset, logger, required)
-        }
+        newRow[alias] = parseNumber(pure(rowCells[colIndex]), fileRowIndex, colIndex + colOffset, logger, required)
     }
 
     // Графа 31 - атрибут 3701 - CODE - «Код», справочник 370 «Коды доходов»

@@ -289,12 +289,14 @@ void calc() {
     // Удаление подитогов
     deleteAllAliased(dataRows)
 
-    for (row in dataRows) {
-        // название подразделения
-        row.regionBank = calc2(row)
+    if(formDataEvent != FormDataEvent.IMPORT) {
+        for (row in dataRows) {
+            // название подразделения
+            row.regionBank = calc2(row)
 
-        // наименование подразделения в декларации
-        row.divisionName = calc4(row)
+            // наименование подразделения в декларации
+            row.divisionName = calc4(row)
+        }
     }
 
     dataRows.add(getTotalRow(dataRows))
@@ -551,17 +553,13 @@ def getNewRow(String[] rowCells, def columnCount, def fileRowIndex, def rowIndex
     // графа 2, 3
     ['regionBank', 'regionBankDivision'].each { alias ->
         colIndex++
-        if ('regionBank' != alias) { // пропускаем нередактируемые
-            newRow[alias] = getRecordIdImport(30, 'NAME', pure(rowCells[colIndex]), fileRowIndex, colIndex + colOffset, false)
-        }
+        newRow[alias] = getRecordIdImport(30, 'NAME', pure(rowCells[colIndex]), fileRowIndex, colIndex + colOffset, false)
     }
 
     // графа 4, 5
     ['divisionName', 'kpp'].each { alias ->
         colIndex++
-        if ('divisionName' != alias) { // пропускаем нередактируемые
-            newRow[alias] = pure(rowCells[colIndex])
-        }
+        newRow[alias] = pure(rowCells[colIndex])
     }
 
     // графа 6..10

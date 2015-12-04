@@ -161,9 +161,6 @@ def arithmeticCheckAlias = ['marketPriceInPerc', 'marketPriceInRub', 'costAcquis
         'interestIncomeCurrency', 'interestIncomeInRub', 'realizationResult', 'excessSellingPrice']
 
 @Field
-def skipImportColumns = arithmeticCheckAlias.findAll { !editableColumns.contains(it)}
-
-@Field
 def fixedDate = Date.parse('dd.MM.yyyy','01.01.2010')
 
 @Field
@@ -1064,7 +1061,6 @@ void importData() {
     // копирование данных по разделам
     updateIndexes(templateRows)
     def rows = []
-    def columns = totalColumns.findAll { !skipImportColumns.contains(it) }  // итоговые графы, кроме автозаполняемых
     groups.each { section ->
         def headRow = getDataRow(templateRows, section)
         def groupTotalRow = getDataRow(templateRows, section + '-total')
@@ -1078,7 +1074,7 @@ void importData() {
         // сравнение итогов
         updateIndexes(rows)
         def groupTotalRowFromFile = totalRowFromFileMap[section]
-        compareSimpleTotalValues(groupTotalRow, groupTotalRowFromFile, copyRows, columns, formData, logger, false)
+        compareSimpleTotalValues(groupTotalRow, groupTotalRowFromFile, copyRows, totalColumns, formData, logger, false)
     }
 
     // итоговая строка
@@ -1086,7 +1082,7 @@ void importData() {
     rows.add(totalMonthRow)
     totalMonthRow.setIndex(rows.size())
     // сравнение итогов
-    compareSimpleTotalValues(totalMonthRow, totalMonthRowFromFile, rows, columns, formData, logger, false)
+    compareSimpleTotalValues(totalMonthRow, totalMonthRowFromFile, rows, totalColumns, formData, logger, false)
 
     // итоговая строка
     def totalRow = getDataRow(templateRows, 'R11')
@@ -1095,7 +1091,7 @@ void importData() {
     if (totalRowFromFile) {
         calcOrCheckTotalForTaxPeriod(rows, false)
         // сравнение итогов
-        compareTotalValues(totalRow, totalRowFromFile, columns, logger, false)
+        compareTotalValues(totalRow, totalRowFromFile, totalColumns, logger, false)
         // задание значении итоговой строке нф из итоговой строки файла (потому что в строках из файла стили для простых строк)
         totalRow.setImportIndex(totalRowFromFile.getImportIndex())
         totalColumns.each { alias ->
@@ -1301,9 +1297,7 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex, 
     // графа 17..21
     ['costWithoutNKD', 'loss', 'marketPriceInPerc', 'marketPriceInRub', 'costAcquisition'].each { alias ->
         colIndex++
-        if (isTotal || !skipImportColumns.contains(alias)) {
-            newRow[alias] = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
-        }
+        newRow[alias] = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
     }
 
     // графа 22
@@ -1320,9 +1314,7 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex, 
             'lossRealization', 'totalLoss', 'averageWeightedPrice', 'termIssue', 'termHold',
             'interestIncomeCurrency', 'interestIncomeInRub', 'realizationResult', 'excessSellingPrice'].each { alias ->
         colIndex++
-        if (isTotal || !skipImportColumns.contains(alias)) {
-            newRow[alias] = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
-        }
+        newRow[alias] = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
     }
 
     return newRow

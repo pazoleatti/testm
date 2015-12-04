@@ -373,7 +373,6 @@ def isBalancePeriod() {
 void importTransportData() {
     def xml = getTransportXML(ImportInputStream, importService, UploadFileName, 20, 1)
     addTransportData(xml)
-    // если добавят проверки итогов, то пропустить 14-20-ые графы
 }
 
 void addTransportData(def xml) {
@@ -623,7 +622,7 @@ void importData() {
         }
         // Пропуск итоговых строк
         if (rowValues[INDEX_FOR_SKIP] == "Итого") {
-            totalRowFromFile = getNewRowFromXls(rowValues, colOffset, fileRowIndex, rowIndex, true)
+            totalRowFromFile = getNewRowFromXls(rowValues, colOffset, fileRowIndex, rowIndex)
 
             allValues.remove(rowValues)
             rowValues.clear()
@@ -642,10 +641,8 @@ void importData() {
     def totalRow = getTotalRow(rows)
     rows.add(totalRow)
     updateIndexes(rows)
-    // сравнение итогов (не производится дял граф 13-20, т.к. нередактируемые)
-    if (isBalancePeriod()) {
-        compareSimpleTotalValues(totalRow, totalRowFromFile, rows, totalColumns, formData, logger, false)
-    }
+    // сравнение итогов
+    compareSimpleTotalValues(totalRow, totalRowFromFile, rows, totalColumns, formData, logger, false)
 
     showMessages(rows, logger)
     if (!logger.containsLevel(LogLevel.ERROR)) {
@@ -713,7 +710,7 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
  * @param fileRowIndex номер строки в тф
  * @param rowIndex строка в нф
  */
-def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex, boolean isTotal = false) {
+def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) {
     def newRow = getNewRow()
     newRow.setIndex(rowIndex)
     newRow.setImportIndex(fileRowIndex)
@@ -751,12 +748,10 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex, 
     }
 
     // графа 13..20
-    if (isTotal || isBalancePeriod()) {
-        ['accruedCommisCurrency', 'accruedCommisRub', 'commisInAccountingCurrency', 'commisInAccountingRub',
-         'accrualPrevCurrency', 'accrualPrevRub', 'reportPeriodCurrency', 'reportPeriodRub'].each { alias ->
-            colIndex++
-            newRow[alias] = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
-        }
+    ['accruedCommisCurrency', 'accruedCommisRub', 'commisInAccountingCurrency', 'commisInAccountingRub',
+     'accrualPrevCurrency', 'accrualPrevRub', 'reportPeriodCurrency', 'reportPeriodRub'].each { alias ->
+        colIndex++
+        newRow[alias] = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
     }
 
     return newRow
