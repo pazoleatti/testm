@@ -444,7 +444,12 @@ void checkSourceForm() {
         sourceIds = [810, 800, 802]
     }
     sourceIds.each { id ->
-        def rows = getSourceDataRows(id, sourceMap[id].kind, sourceMap[id].isPrevPeriod)
+        // TODO (Ramil Timerbaev) возможно надо переделать задание источников по периодам для наглядности
+        def isPrevPeriod = sourceMap[id].isPrevPeriod
+        if (reportPeriod.order == 4 && id == 802) {
+            isPrevPeriod = true
+        }
+        def rows = getSourceDataRows(id, sourceMap[id].kind, isPrevPeriod)
         if (rows == null) {
             def formTypeName = getFormTypeById(id)?.name
             def kindName = sourceMap[id].kind.title
