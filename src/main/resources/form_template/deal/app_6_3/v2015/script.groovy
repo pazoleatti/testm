@@ -212,8 +212,6 @@ void logicCheck() {
 
         // Проверка стоимости по графе 5
         if (row.sum != null && !row.sum.toString().isEmpty() && row.cost != row.sum) {
-            logger.info("%s", row.sum)
-            logger.info("%s", row.cost)
             def income = row.getCell('sum').column.name
             def costName = row.getCell('cost').column.name
             rowError(logger, row, "Строка $rowNumber: Значение графы «$costName» должно быть равно значению графы «$income»!")
@@ -318,6 +316,7 @@ def calcTotalRow(def dataRows) {
 }
 // Получение импортируемых данных
 void importData() {
+    int INDEX_FOR_SKIP = 0
     def tmpRow = formData.createDataRow()
     int COLUMN_COUNT = 15
     int HEADER_ROW_COUNT = 4
@@ -348,6 +347,7 @@ void importData() {
     def rows = []
     def allValuesCount = allValues.size()
     reportPeriodEndDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
+    def totalRowFromFile = null
 
     // формирвание строк нф
     for (def i = 0; i < allValuesCount; i++) {
@@ -359,13 +359,29 @@ void importData() {
             rowValues.clear()
             break
         }
-        // простая строка
         rowIndex++
+        // Пропуск итоговых строк
+        if (rowValues[INDEX_FOR_SKIP] == "Итого") {
+            totalRowFromFile = getNewTotalFromXls(rowValues, colOffset, fileRowIndex, rowIndex)
+
+            allValues.remove(rowValues)
+            rowValues.clear()
+            continue
+        }
+        // простая строка
         def newRow = getNewRowFromXls(rowValues, colOffset, fileRowIndex, rowIndex)
         rows.add(newRow)
         // освободить ненужные данные - иначе не хватит памяти
         allValues.remove(rowValues)
         rowValues.clear()
+    }
+
+    // сравнение итогов
+    def totalRow = calcTotalRow(rows)
+    rows.add(totalRow)
+    updateIndexes(rows)
+    if (totalRowFromFile) {
+        compareSimpleTotalValues(totalRow, totalRowFromFile, rows, totalColumns, formData, logger, false)
     }
 
     showMessages(rows, logger)
