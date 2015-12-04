@@ -7,6 +7,8 @@ import com.aplana.sbrf.taxaccounting.model.WorkflowState
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue
 import com.aplana.sbrf.taxaccounting.model.util.StringUtils
 import com.aplana.sbrf.taxaccounting.service.script.util.ScriptUtils
 import groovy.transform.Field
@@ -174,6 +176,53 @@ def getRecordIdImport(def Long refBookId, def String alias, def String value, de
     }
     return formDataService.getRefBookRecordIdImport(refBookId, recordCache, providerCache, alias, value,
             getReportPeriodEndDate(), rowIndex, colIndex, logger, required)
+}
+
+// Поиск записи в справочнике по значению (для расчетов)
+def getRecord(def Long refBookId, def String alias, def String value, def int rowIndex, def String columnName,
+              def Date date, boolean required = true) {
+    return formDataService.getRefBookRecord(refBookId, recordCache, providerCache, refBookCache, alias, value, date,
+            rowIndex, columnName, logger, required)
+}
+
+/**
+ * Аналог FormDataServiceImpl.getRefBookRecord(...) но ожидающий получения из справочника больше одной записи.
+ * @return первая из найденных записей
+ */
+def getRecord(def refBookId, def filter, Date date) {
+    if (refBookId == null) {
+        return null
+    }
+    String dateStr = date?.format('dd.MM.yyyy')
+    if (recordCache.containsKey(refBookId)) {
+        Long recordId = recordCache.get(refBookId).get(dateStr + filter)
+        if (recordId != null) {
+            if (refBookCache != null) {
+                def key = getRefBookCacheKey(refBookId, recordId)
+                return refBookCache.get(key)
+            } else {
+                def retVal = new HashMap<String, RefBookValue>()
+                retVal.put(RefBook.RECORD_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, recordId))
+                return retVal
+            }
+        }
+    } else {
+        recordCache.put(refBookId, [:])
+    }
+
+    def records = getProvider(refBookId).getRecords(date, null, filter, null)
+    // отличие от FormDataServiceImpl.getRefBookRecord(...)
+    if (records.size() > 0) {
+        def retVal = records.get(0)
+        Long recordId = retVal.get(RefBook.RECORD_ID_ALIAS).getNumberValue().longValue()
+        recordCache.get(refBookId).put(dateStr + filter, recordId)
+        if (refBookCache != null) {
+            def key = getRefBookCacheKey(refBookId, recordId)
+            refBookCache.put(key, retVal)
+        }
+        return retVal
+    }
+    return null
 }
 
 // Разыменование записи справочника
@@ -944,8 +993,6 @@ def getNewRow(String[] rowCells, def columnCount, def fileRowIndex, def rowIndex
     def int colOffset = 1
     def int colIndex = 1
 
-    def regionId = formDataDepartment.regionId
-
     // графа 1
     colIndex++
 
@@ -1527,7 +1574,9 @@ def getTaxBenefitCodeImport(def taxBenefit, def rowIndex, def colIndex, def okat
                 def taxBenefitId = getRecordIdImport(6L, 'CODE', taxBenefit, rowIndex, colIndex)
                 def ref_id = 7
                 def okato = getOkato(getRefBookValue(96L, okatoId)?.CODE?.value)
-                String filter = "DECLARATION_REGION_ID = $regionId and DICT_REGION_ID = $okato and TAX_BENEFIT_ID =$taxBenefitId"
+                def region = getRegionByOKTMO(okatoId, rowIndex)
+                def dictRegionId = region?.record_id?.value
+                String filter = "DECLARATION_REGION_ID = $regionId and DICT_REGION_ID = $dictRegionId and TAX_BENEFIT_ID =$taxBenefitId"
                 if (recordCache[ref_id] != null) {
                     if (recordCache[ref_id][filter] != null) {
                         return recordCache[ref_id][filter]
@@ -1542,14 +1591,41 @@ def getTaxBenefitCodeImport(def taxBenefit, def rowIndex, def colIndex, def okat
                     recordCache[ref_id][filter] = records.get(0).get(RefBook.RECORD_ID_ALIAS).numberValue
                     return recordCache[ref_id][filter]
                 } else {
+                    // наименование субъекта РФ для атрибута «Регион» подразделения формы
+                    def regionName = getRefBookValue(4L, regionId)?.CODE?.value
                     logger.warn("Строка $rowIndex, столбец " + ScriptUtils.getXLSColumnName(colIndex) + ": " +
                             "На форме не заполнена графа «Код налоговой льготы», так как в справочнике " +
                             "«Параметры налоговых льгот транспортного налога» не найдена запись, " +
                             "актуальная на дату «" + getReportPeriodEndDate().format("dd.MM.yyyy") + "», " +
-                            "в которой поле «Код субъекта РФ представителя декларации» = «$regionId», " +
+                            "в которой поле «Код субъекта РФ представителя декларации» = «$regionName», " +
                             "поле «Код субъекта РФ» = «$okato», поле «Код налоговой льготы» = «$taxBenefit»!")
                 }
             }
+        }
+    }
+}
+
+/**
+ * Получение региона по коду ОКТМО
+ */
+def getRegionByOKTMO(def oktmoCell, def index) {
+    def endDate = getReportPeriodEndDate()
+
+    def oktmo3 = getRefBookValue(96, oktmoCell)?.CODE?.stringValue?.substring(0, 3)
+    if ("719".equals(oktmo3)) {
+        return getRecord(4, 'CODE', '89', index, null, endDate);
+    } else if ("718".equals(oktmo3)) {
+        return getRecord(4, 'CODE', '86', index, null, endDate);
+    } else if ("118".equals(oktmo3)) {
+        return getRecord(4, 'CODE', '83', index, null, endDate);
+    } else {
+        def filter = "CODE like '" + oktmo3?.substring(0, 2) + "%'" // код субъекта РФ
+        def record = getRecord(4, filter, endDate)
+        if (record != null) {
+            return record
+        } else {
+            logger.error("Строка $index: Не удалось определить регион по коду ОКТМО")
+            return null
         }
     }
 }

@@ -513,7 +513,7 @@ def getRegionByOKTMO(def oktmoCell, def index) {
     } else if ("118".equals(oktmo3)) {
         return getRecord(4, 'CODE', '83', index, null, reportDate);
     } else {
-        def filter = "OKTMO_DEFINITION like '" + oktmo3?.substring(0, 2) + "%'"
+        def filter = "CODE like '" + oktmo3?.substring(0, 2) + "%'"
         def record = getRecord(4, filter, reportDate)
         if (record != null) {
             return record
