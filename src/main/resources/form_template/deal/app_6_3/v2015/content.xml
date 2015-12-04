@@ -122,8 +122,8 @@
         <name>Количество</name>
         <order>13</order>
         <width>5</width>
-        <maxLength>15</maxLength>
-        <precision>0</precision>
+        <maxLength>9</maxLength>
+        <precision>2</precision>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>price</alias>
@@ -131,8 +131,8 @@
         <name>Цена</name>
         <order>14</order>
         <width>8</width>
-        <maxLength>15</maxLength>
-        <precision>0</precision>
+        <maxLength>17</maxLength>
+        <precision>2</precision>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>cost</alias>
@@ -140,8 +140,8 @@
         <name>Стоимость</name>
         <order>15</order>
         <width>8</width>
-        <maxLength>15</maxLength>
-        <precision>0</precision>
+        <maxLength>17</maxLength>
+        <precision>2</precision>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="dateColumn">
         <alias>dealDoneDate</alias>
