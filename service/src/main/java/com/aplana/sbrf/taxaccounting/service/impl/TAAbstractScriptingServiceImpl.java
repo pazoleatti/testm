@@ -46,24 +46,33 @@ public abstract class TAAbstractScriptingServiceImpl implements ApplicationConte
 	private static final String[] PREDEFINED_STATIC_IMPORTS = new String[]{
 			"com.aplana.sbrf.taxaccounting.service.script.util.ScriptUtils"
 	};
-	
+
 	protected GroovyScriptEngineImpl groovyScriptEngine;
+    private CompilerConfiguration config;
+    private GroovyClassLoader classLoader;
 
 	public TAAbstractScriptingServiceImpl() {
 		ScriptEngineManager factory = new ScriptEngineManager();
 		this.groovyScriptEngine = (GroovyScriptEngineImpl)factory.getEngineByName("groovy");
 
 		// Predefined imports
-		CompilerConfiguration config = new CompilerConfiguration();
+		config = new CompilerConfiguration();
 		ImportCustomizer ic = new ImportCustomizer();
 		ic.addStarImports(PREDEFINED_IMPORTS);
 		ic.addStaticStars(PREDEFINED_STATIC_IMPORTS);
 		config.addCompilationCustomizers(ic);
 
-		GroovyClassLoader classLoader = groovyScriptEngine.getClassLoader();
+		classLoader = groovyScriptEngine.getClassLoader();
 		classLoader = new GroovyClassLoader(classLoader, config, false);
 		groovyScriptEngine.setClassLoader(classLoader);
 	}
+
+    public GroovyScriptEngineImpl createGroovyScriptEngine() {
+        GroovyScriptEngineImpl gse = (GroovyScriptEngineImpl)groovyScriptEngine.getFactory().getScriptEngine();
+        gse.setClassLoader(classLoader);
+        classLoader.clearCache();
+        return gse;
+    }
 
 	@Override
 	public void setApplicationContext(ApplicationContext context) {

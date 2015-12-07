@@ -215,8 +215,7 @@ public class RefBookScriptingServiceImpl extends TAAbstractScriptingServiceImpl 
      */
     private boolean executeScript(Bindings bindings, String script, Logger logger) {
         try {
-            groovyScriptEngine.getClassLoader().clearCache();
-            groovyScriptEngine.eval(script, bindings);
+            createGroovyScriptEngine().eval(script, bindings);
             return true;
         } catch (ScriptException e) {
             logScriptException(e, logger);

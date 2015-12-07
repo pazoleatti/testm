@@ -89,8 +89,7 @@ public class ScriptExecutionServiceImpl extends TAAbstractScriptingServiceImpl i
 
     private void executeScript(Bindings bindings, String script, Logger logger) {
         try {
-            groovyScriptEngine.getClassLoader().clearCache();
-            groovyScriptEngine.eval(script, bindings);
+            createGroovyScriptEngine().eval(script, bindings);
         } catch (ScriptException e) {
             logScriptException(e, logger);
         } catch (Exception e) {

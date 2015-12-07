@@ -146,9 +146,8 @@ public class DeclarationDataScriptingServiceImpl extends TAAbstractScriptingServ
 
     private boolean executeScript(Bindings bindings, String script, Logger logger, ScriptMessageDecorator decorator) {
 		try {
-            groovyScriptEngine.getClassLoader().clearCache();
-            groovyScriptEngine.eval(script, bindings);
-			return true;
+            createGroovyScriptEngine().eval(script, bindings);
+            return true;
 		} catch (ScriptException e) {
 			logScriptException(e, logger);
 			return false;
