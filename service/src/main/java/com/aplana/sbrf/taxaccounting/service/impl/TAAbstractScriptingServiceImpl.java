@@ -12,7 +12,6 @@ import org.codehaus.groovy.jsr223.GroovyScriptEngineImpl;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 
-import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 import java.util.regex.Matcher;
@@ -48,11 +47,11 @@ public abstract class TAAbstractScriptingServiceImpl implements ApplicationConte
 			"com.aplana.sbrf.taxaccounting.service.script.util.ScriptUtils"
 	};
 	
-	protected ScriptEngine scriptEngine;	
+	protected GroovyScriptEngineImpl groovyScriptEngine;
 
 	public TAAbstractScriptingServiceImpl() {
 		ScriptEngineManager factory = new ScriptEngineManager();
-		this.scriptEngine = factory.getEngineByName("groovy");
+		this.groovyScriptEngine = (GroovyScriptEngineImpl)factory.getEngineByName("groovy");
 
 		// Predefined imports
 		CompilerConfiguration config = new CompilerConfiguration();
@@ -61,7 +60,6 @@ public abstract class TAAbstractScriptingServiceImpl implements ApplicationConte
 		ic.addStaticStars(PREDEFINED_STATIC_IMPORTS);
 		config.addCompilationCustomizers(ic);
 
-		GroovyScriptEngineImpl groovyScriptEngine = (GroovyScriptEngineImpl) this.scriptEngine;
 		GroovyClassLoader classLoader = groovyScriptEngine.getClassLoader();
 		classLoader = new GroovyClassLoader(classLoader, config, false);
 		groovyScriptEngine.setClassLoader(classLoader);

@@ -4,8 +4,6 @@ import com.aplana.sbrf.taxaccounting.dao.DeclarationTemplateDao;
 import com.aplana.sbrf.taxaccounting.log.impl.ScriptMessageDecorator;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
-import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.DeclarationDataScriptingService;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
@@ -105,7 +103,7 @@ public class DeclarationDataScriptingServiceImpl extends TAAbstractScriptingServ
     private boolean executeScript(TAUserInfo userInfo, DeclarationTemplate declarationTemplate, DeclarationData declarationData, FormDataEvent event, Logger logger,
                           Map<String, Object> exchangeParams) {
 		// Биндим параметры для выполнения скрипта
-		Bindings b = scriptEngine.createBindings();
+		Bindings b = groovyScriptEngine.createBindings();
 		
 		Map<String, ?> scriptComponents = getScriptExposedBeans(declarationTemplate.getType().getTaxType(), event);
 		for (Object component : scriptComponents.values()) {
@@ -148,7 +146,8 @@ public class DeclarationDataScriptingServiceImpl extends TAAbstractScriptingServ
 
     private boolean executeScript(Bindings bindings, String script, Logger logger, ScriptMessageDecorator decorator) {
 		try {
-			scriptEngine.eval(script, bindings);
+            groovyScriptEngine.getClassLoader().clearCache();
+            groovyScriptEngine.eval(script, bindings);
 			return true;
 		} catch (ScriptException e) {
 			logScriptException(e, logger);
