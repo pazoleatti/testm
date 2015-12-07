@@ -1,4 +1,4 @@
-package com.aplana.sbrf.taxaccounting.form_template.deal.rnu_117.v2015;
+package com.aplana.sbrf.taxaccounting.form_template.income.rnu_117.v2015;
 
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
@@ -80,7 +80,7 @@ public class Rnu_117Test extends ScriptTestBase {
     @Test
     public void check1Test() throws ParseException {
         FormData formData = getFormData();
-        formData.initFormTemplateParams(testHelper.getTemplate("..//src/main//resources//form_template//deal//rnu_117//v2015//"));
+        formData.initFormTemplateParams(testHelper.getTemplate("..//src/main//resources//form_template//income//rnu_117//v2015//"));
         List<DataRow<Cell>> dataRows = testHelper.getDataRowHelper().getAll();
         SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
 
