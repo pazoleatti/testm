@@ -2081,7 +2081,19 @@ public final class ScriptUtils {
         compareTotalValues(totalRow, totalRowTmp, columns, logger, required);
     }
 
-    // Получение Id записи из справочника 520 с использованием кэширования
+    /** Получение Id записи из справочника 520 с использованием кэширования
+     * @param nameFromFile наименование лица (юр или вз)
+     * @param iksr значение графы ИКСР
+     * @param iksrName название графы ИКСР
+     * @param fileRowIndex номер строки в файле
+     * @param colIndex индекс колонки
+     * @param endDate дата окончания периода
+     * @param isVzl флаг (true для РНУ, false для приложений 6-...)
+     * @param logger логгер
+     * @param refBookFactory фабрика справочников
+     * @param recordCache кэш записей
+     * @return
+     */
     public static Long getTcoRecordId(String nameFromFile, String iksr, String iksrName, int fileRowIndex, int colIndex, Date endDate, boolean isVzl, Logger logger, RefBookFactory refBookFactory, Map<Long, Map<String, Object>> recordCache) {
         if (iksr == null || iksr.isEmpty()) {
             logger.warn("Строка %s , столбец %s: На форме не заполнены графы с общей информацией о %s, так как в файле отсутствует значение по графе «%s»!",
