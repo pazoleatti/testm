@@ -1,4 +1,4 @@
-package com.aplana.sbrf.taxaccounting.form_template.deal.rnu_111.v2015;
+package com.aplana.sbrf.taxaccounting.form_template.income.rnu_111.v2015;
 
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
@@ -81,7 +81,7 @@ public class Rnu_111Test extends ScriptTestBase {
     @Test
     public void check1Test() throws ParseException {
         FormData formData = getFormData();
-        formData.initFormTemplateParams(testHelper.getTemplate("..//src/main//resources//form_template//deal//rnu_111//v2015//"));
+        formData.initFormTemplateParams(testHelper.getTemplate("..//src/main//resources//form_template//income//rnu_111//v2015//"));
         List<DataRow<Cell>> dataRows = testHelper.getDataRowHelper().getAll();
         SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
 
@@ -195,6 +195,10 @@ public class Rnu_111Test extends ScriptTestBase {
                         e.setAlias("INN");
                         e.setName("ИНН/ КИО");
                         attributes.add(e);
+                        e = new RefBookAttribute();
+                        e.setAlias("NAME");
+                        e.setName("Наименование");
+                        attributes.add(e);
                         refBook.setAttributes(attributes);
                         return refBook;
                     }
@@ -214,16 +218,19 @@ public class Rnu_111Test extends ScriptTestBase {
                         Map<String, RefBookValue> map = new HashMap<String, RefBookValue>();
                         map.put(RefBook.RECORD_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, 1L));
                         map.put("INN", new RefBookValue(RefBookAttributeType.STRING, "A"));
+                        map.put("NAME", new RefBookValue(RefBookAttributeType.STRING, "A"));
                         result.add(map);
 
                         map = new HashMap<String, RefBookValue>();
                         map.put(RefBook.RECORD_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, 2L));
                         map.put("INN", new RefBookValue(RefBookAttributeType.STRING, "B"));
+                        map.put("NAME", new RefBookValue(RefBookAttributeType.STRING, "B"));
                         result.add(map);
 
                         map = new HashMap<String, RefBookValue>();
                         map.put(RefBook.RECORD_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, 3L));
                         map.put("INN", new RefBookValue(RefBookAttributeType.STRING, "C"));
+                        map.put("NAME", new RefBookValue(RefBookAttributeType.STRING, "C"));
                         result.add(map);
 
                         return result;

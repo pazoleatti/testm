@@ -210,6 +210,10 @@ public class App_6_17Test extends ScriptTestBase {
                         e.setAlias("INN");
                         e.setName("ИНН/ КИО");
                         attributes.add(e);
+                        e = new RefBookAttribute();
+                        e.setAlias("NAME");
+                        e.setName("Наименование");
+                        attributes.add(e);
                         refBook.setAttributes(attributes);
                         return refBook;
                     }
@@ -229,16 +233,19 @@ public class App_6_17Test extends ScriptTestBase {
                         Map<String, RefBookValue> map = new HashMap<String, RefBookValue>();
                         map.put(RefBook.RECORD_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, 1L));
                         map.put("INN", new RefBookValue(RefBookAttributeType.STRING, "A"));
+                        map.put("NAME", new RefBookValue(RefBookAttributeType.STRING, "A"));
                         result.add(map);
 
                         map = new HashMap<String, RefBookValue>();
                         map.put(RefBook.RECORD_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, 2L));
                         map.put("INN", new RefBookValue(RefBookAttributeType.STRING, "B"));
+                        map.put("NAME", new RefBookValue(RefBookAttributeType.STRING, "B"));
                         result.add(map);
 
                         map = new HashMap<String, RefBookValue>();
                         map.put(RefBook.RECORD_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, 3L));
                         map.put("INN", new RefBookValue(RefBookAttributeType.STRING, "C"));
+                        map.put("NAME", new RefBookValue(RefBookAttributeType.STRING, "C"));
                         result.add(map);
                         return result;
                     }
