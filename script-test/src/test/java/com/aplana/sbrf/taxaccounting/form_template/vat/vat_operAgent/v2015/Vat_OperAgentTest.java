@@ -73,11 +73,14 @@ public class Vat_OperAgentTest extends ScriptTestBase {
     // Консолидация
     @Test
     public void composeTest() { //TODO
+        DepartmentReportPeriod departmentReportPeriod = new DepartmentReportPeriod();
+        when(testHelper.getDepartmentReportPeriodService().get(anyInt())).thenReturn(departmentReportPeriod);
+
         // Назначен один тип формы
         DepartmentFormType departmentFormType = new DepartmentFormType();
         departmentFormType.setKind(KIND);
-        departmentFormType.setDepartmentId(DEPARTMENT_ID);
-        departmentFormType.setFormTypeId(TYPE_ID);
+        departmentFormType.setDepartmentId(4);
+        departmentFormType.setFormTypeId(603);
         departmentFormType.setId(1);
         when(testHelper.getDepartmentFormTypeService().getFormSources(anyInt(), anyInt(), any(FormDataKind.class),
                 any(Date.class), any(Date.class))).thenReturn(Arrays.asList(departmentFormType));
