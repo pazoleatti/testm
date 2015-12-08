@@ -46,11 +46,7 @@ switch (formDataEvent) {
     case FormDataEvent.DELETE_ROW:
         formDataService.getDataRowHelper(formData).delete(currentDataRow)
         break
-    case FormDataEvent.MOVE_CREATED_TO_PREPARED:  // Подготовить из "Создана"
-        calc()
-        logicCheck()
-        formDataService.saveCachedDataRows(formData, logger, formDataEvent)
-        break
+    case FormDataEvent.MOVE_CREATED_TO_PREPARED:  // Подготовить из "Создана
     case FormDataEvent.MOVE_CREATED_TO_APPROVED:  // Утвердить из "Создана"
     case FormDataEvent.MOVE_PREPARED_TO_APPROVED: // Утвердить из "Подготовлена"
     case FormDataEvent.MOVE_CREATED_TO_ACCEPTED:  // Принять из "Создана"
@@ -105,8 +101,6 @@ def nonEmptyColumns = ['name', 'sum', 'docNumber', 'docDate', 'serviceType', 'pr
 def totalColumns = ['sum', 'price', 'cost']
 
 // Дата окончания отчетного периода
-@Field
-def reportPeriodEndDate = null
 @Field
 def endDate = null
 
@@ -318,13 +312,16 @@ def getNewTotalFromXls(def values, def colOffset, def fileRowIndex, def rowIndex
     newRow.setImportIndex(fileRowIndex)
 
     // графа 5
-    newRow.sum = parseNumber(values[5], fileRowIndex, 5 + colOffset, logger, true)
+    colIndex = 5
+    newRow.sum = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
 
     // графа 9
-    newRow.price = parseNumber(values[9], fileRowIndex, 9 + colOffset, logger, true)
+    colIndex = 9
+    newRow.price = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
 
     // графа 10
-    newRow.cost = parseNumber(values[10], fileRowIndex, 10 + colOffset, logger, true)
+    colIndex = 10
+    newRow.cost = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
 
     return newRow
 }
@@ -389,7 +386,7 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
 
     def int colIndex = 2
 
-    def recordId = getRecordId(nameFromFile, values[3], fileRowIndex, colIndex, iksrName)
+    def recordId = getTcoRecordId(nameFromFile, values[3], iksrName, fileRowIndex, colIndex, getReportPeriodEndDate(), false, logger, refBookFactory, recordCache)
     def map = getRefBookValue(520, recordId)
 
     // графа 2
@@ -398,13 +395,13 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
 
     // графа 3
     if (map != null) {
-        formDataService.checkReferenceValue(9, values[colIndex], map.IKSR?.stringValue, fileRowIndex, colIndex + colOffset, logger, false)
+        formDataService.checkReferenceValue(520, values[colIndex], map.IKSR?.stringValue, fileRowIndex, colIndex + colOffset, logger, false)
     }
     colIndex++
 
     // графа 4
     if (map != null) {
-        map = getRefBookValue(10, map.COUNTRY?.referenceValue)
+        map = getRefBookValue(10, map.COUNTRY_CODE?.referenceValue)
         if (map != null) {
             formDataService.checkReferenceValue(10, values[colIndex], map.COUNTRY_CODE?.stringValue, fileRowIndex, colIndex + colOffset, logger, false)
         }
@@ -559,20 +556,20 @@ def getNewRow(String[] rowCells, def columnCount, def fileRowIndex, def rowIndex
     if (!isTotal) {
         def String iksrName = getColumnName(newRow, 'iksr')
         def nameFromFile = pure(rowCells[2])
-        def recordId = getRecordId(nameFromFile,  pure(rowCells[3]), fileRowIndex, 2, iksrName)
+        def recordId = getTcoRecordId(nameFromFile,  pure(rowCells[3]), iksrName, fileRowIndex, 2, getReportPeriodEndDate(), false, logger, refBookFactory, recordCache)
 
         // графа 2
         newRow.name = recordId
-        // графа 5
-        newRow.serviceType = parseNumber(pure(rowCells[8]), fileRowIndex, 8 + colOffset, logger, true)
-        // графа 7
+        // графа 6
         newRow.docNumber = pure(rowCells[6])
-        // графа 8
+        // графа 7
         newRow.docDate = parseDate(pure(rowCells[7]), "dd.MM.yyyy", fileRowIndex, 7 + colOffset, logger, true)
+        // графа 8
+        newRow.serviceType = parseNumber(pure(rowCells[8]), fileRowIndex, 8 + colOffset, logger, true)
         // графа 11
         newRow.dealDoneDate = parseDate(pure(rowCells[11]), "dd.MM.yyyy", fileRowIndex, 11 + colOffset, logger, true)
     }
-    // графа 6
+    // графа 5
     newRow.sum = parseNumber(pure(rowCells[5]), fileRowIndex, 5 + colOffset, logger, true)
     // графа 9
     newRow.price = parseNumber(pure(rowCells[9]), fileRowIndex, 9 + colOffset, logger, true)
@@ -590,122 +587,16 @@ boolean isEmptyCells(def rowCells) {
     return rowCells.length == 1 && rowCells[0] == ''
 }
 
-
-
-// Получение Id записи из справочника 520 с использованием кэширования
-def getRecordId(String name, String iksr, int fileRowIndex, int colIndex, String iksrName) {
-    if (!iksr) {
-        logger.warn("Строка $fileRowIndex , столбец " + ScriptUtils.getXLSColumnName(colIndex) + ": " +
-                "На форме не заполнены графы с общей информацией о юридическом лице, так как в файле отсутствует значение по графе «$iksrName»!")
-        return null
-    }
-    def ref_id = 520
-    def RefBook refBook = refBookFactory.get(ref_id)
-
-    String filter = "(LOWER(INN) = LOWER('$iksr') or " +
-            "LOWER(REG_NUM) = LOWER('$iksr') or " +
-            "LOWER(TAX_CODE_INCORPORATION) = LOWER('$iksr') or " +
-            "LOWER(SWIFT) = LOWER('$iksr') or " +
-            "LOWER(KIO) = LOWER('$iksr'))"
-    if (recordCache[ref_id] != null) {
-        if (recordCache[ref_id][filter] != null) {
-            return recordCache[ref_id][filter]
-        }
-    } else {
-        recordCache[ref_id] = [:]
-    }
-
-    def provider = refBookFactory.getDataProvider(ref_id)
-    def records = provider.getRecords(getReportPeriodEndDate(), null, filter, null)
-    if (records.size() == 1) {
-        // 5
-        def record = records.get(0)
-
-        if (StringUtils.cleanString(name) != StringUtils.cleanString(record.get('NAME')?.stringValue)) {
-            // сообщение 4
-            String msg = name ? "В файле указано другое наименование юридического лица - «$name»!" : "Наименование юридического лица в файле не заполнено!"
-            def refBookAttributeName
-            for (alias in ['INN', 'REG_NUM', 'TAX_CODE_INCORPORATION', 'SWIFT', 'KIO']) {
-                if (iksr.equals(record.get(alias)?.stringValue)) {
-                    refBookAttributeName = refBook.attributes.find { it.alias == alias }.name
-                    break
-                }
-            }
-            logger.warn("Строка $fileRowIndex , столбец " + ScriptUtils.getXLSColumnName(colIndex) + ": " +
-                    "На форме графы с общей информацией о юридическом лице заполнены данными записи справочника «Участники ТЦО», " +
-                    "в которой атрибут «Полное наименование юридического лица с указанием ОПФ» = «" + record.get('NAME')?.stringValue + "», " +
-                    "атрибут «$refBookAttributeName» = «" + iksr + "». $msg")
-        }
-
-        recordCache[ref_id][filter] = record.get(RefBook.RECORD_ID_ALIAS).numberValue
-        return recordCache[ref_id][filter]
-    } else if (records.empty) {
-        // 6
-        if (!name) {
-            name = "наименование юридического лица в файле не заполнено"
-        }
-        // сообщение 1
-        logger.warn("Строка $fileRowIndex , столбец " + ScriptUtils.getXLSColumnName(colIndex) + ": " +
-                "Для заполнения графы «$iksrName» формы в справочнике «Участники ТЦО» " +
-                "не найдено значение «$iksr» ($name), актуальное на дату «" + getReportPeriodEndDate().format("dd.MM.yyyy") + "»!")
-        endMessage(iksrName)
-    } else {
-        // 7
-        def recordsByName
-        if (name) {
-            recordsByName = provider.getRecords(getReportPeriodEndDate(), null, "LOWER(NAME) = LOWER('$name') and " + filter, null)
-        }
-        if (recordsByName && recordsByName.size() == 1) {
-            recordCache[ref_id][filter] = recordsByName.get(0).get(RefBook.RECORD_ID_ALIAS).numberValue
-            return recordCache[ref_id][filter]
-        } else {
-            if (!name) {
-                name = "наименование юридического лица в файле не заполнено"
-            }
-            // сообщение 2
-            logger.warn("Строка $fileRowIndex , столбец " + ScriptUtils.getXLSColumnName(colIndex) + ": " +
-                    "Для заполнения графы «$iksrName» формы в справочнике «Участники ТЦО» " +
-                    "найдено несколько записей со значением «$iksr» ($name), актуальным на дату «" + getReportPeriodEndDate().format("dd.MM.yyyy") + "»! " +
-                    "Графа «$iksrName» формы заполнена первой найденной записью справочника:")
-            def record
-            records.each {
-                def refBookAttributeName
-                for (alias in ['INN', 'REG_NUM', 'TAX_CODE_INCORPORATION', 'SWIFT', 'KIO']) {
-                    if (iksr.equals(it.get(alias)?.stringValue)) {
-                        refBookAttributeName = refBook.attributes.find { it.alias == alias }.name
-                        record = it
-                        break
-                    }
-                }
-                // сообщение 3
-                logger.warn("Атрибут «Полное наименование юридического лица с указанием ОПФ» = «" + it.get('NAME')?.stringValue + "», " +
-                        "атрибут «$refBookAttributeName» = «" + iksr + "»")
-            }
-            endMessage(iksrName)
-            return record.get(RefBook.RECORD_ID_ALIAS).numberValue
-        }
-    }
-    return null
-}
-
-def endMessage(String iksrName) {
-    // сообщение 5
-    logger.warn("Для заполнения на форме граф с общей информацией о юридическом лице выполнен поиск значения файла " +
-            "по графе «$iksrName» в следующих атрибутах справочника «Участники ТЦО»: " +
-            "«ИНН (заполняется для резидентов, некредитных организаций)», " +
-            "«Регистрационный номер в стране инкорпорации (заполняется для нерезидентов)», " +
-            "«Код налогоплательщика в стране инкорпорации», " +
-            "«Код SWIFT (заполняется для кредитных организаций, резидентов и нерезидентов)», " +
-            "«КИО (заполняется для нерезидентов)»")
-}
 // Сортировка групп и строк
 void sortFormDataRows(def saveInDB = true) {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
-    sortRows(refBookService, logger, dataRows, dataRows.find{ it.getAlias() == 'total'}, null)
+    sortRows(refBookService, logger, dataRows, null, dataRows.find { it.getAlias() == 'total' }, null)
     if (saveInDB) {
         dataRowHelper.saveSort()
     } else {
         updateIndexes(dataRows)
     }
 }
+
+

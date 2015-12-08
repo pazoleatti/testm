@@ -213,7 +213,13 @@ public class App_6_3Test extends ScriptTestBase {
         testHelper.execute(FormDataEvent.CALCULATE);
         checkLogger();
         checkAfterCalc(testHelper.getDataRowHelper().getAll());
-
+    }
+    @Test
+    public void importTransportFileTest() {
+        mockBeforeImport();
+        testHelper.setImportFileInputStream(getImportRnuInputStream());
+        testHelper.execute(FormDataEvent.IMPORT_TRANSPORT_FILE);
+        checkLoadData(testHelper.getDataRowHelper().getAll());
     }
 
     // Проверить загруженные данные
