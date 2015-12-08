@@ -1,4 +1,4 @@
-package com.aplana.sbrf.taxaccounting.refbook.okato;
+package com.aplana.sbrf.taxaccounting.refbook.okei;
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
@@ -17,15 +17,15 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * "Коды ОКАТО" (id = 3)
+ * «Коды единиц измерения на основании ОКЕИ» (id = 12)
  *
  * @author Emamedova
  */
-public class OkatoTest extends RefBookScriptTestBase {
+public class OkeiTest extends RefBookScriptTestBase {
 
     @Override
     protected ScriptTestMockHelper getMockHelper() {
-        return getDefaultScriptTestMockHelper(OkatoTest.class);
+        return getDefaultScriptTestMockHelper(OkeiTest.class);
     }
 
     @Before
@@ -37,11 +37,11 @@ public class OkatoTest extends RefBookScriptTestBase {
         ArrayList<Map<String, RefBookValue>> saveRecords = new ArrayList<Map<String, RefBookValue>>();
 
         HashMap<String, RefBookValue> value1 = new HashMap<String, RefBookValue>();
-        value1.put("OKATO", new RefBookValue(RefBookAttributeType.STRING, "12345678910"));
+        value1.put("CODE", new RefBookValue(RefBookAttributeType.STRING, "123"));
         saveRecords.add(value1);
 
         HashMap<String, RefBookValue> value2 = new HashMap<String, RefBookValue>();
-        value2.put("OKATO", new RefBookValue(RefBookAttributeType.STRING, "1234567891"));
+        value2.put("CODE", new RefBookValue(RefBookAttributeType.STRING, "12.3"));
         saveRecords.add(value2);
 
         testHelper.setSaveRecords(saveRecords);
@@ -52,7 +52,7 @@ public class OkatoTest extends RefBookScriptTestBase {
         int i = 0;
         // value1
         // value2
-        Assert.assertEquals("Атрибут \"OKATO\" заполнен неверно (1234567891)! Ожидаемый паттерн: \"[0-9]{11}\"", entries.get(i++).getMessage());
+        Assert.assertEquals("Атрибут \"Код\" заполнен неверно (12.3)! Ожидаемый паттерн: \"[0-9]{3}\"", entries.get(i++).getMessage());
         Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
     }
 }

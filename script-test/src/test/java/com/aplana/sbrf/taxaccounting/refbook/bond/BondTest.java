@@ -1,4 +1,4 @@
-package com.aplana.sbrf.taxaccounting.refbook.okato;
+package com.aplana.sbrf.taxaccounting.refbook.bond;
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
@@ -10,22 +10,24 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.sql.Date;
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 /**
- * "Коды ОКАТО" (id = 3)
+ * «Ценные бумаги» (id = 84)
  *
  * @author Emamedova
  */
-public class OkatoTest extends RefBookScriptTestBase {
+public class BondTest extends RefBookScriptTestBase {
 
     @Override
     protected ScriptTestMockHelper getMockHelper() {
-        return getDefaultScriptTestMockHelper(OkatoTest.class);
+        return getDefaultScriptTestMockHelper(BondTest.class);
     }
 
     @Before
@@ -35,13 +37,16 @@ public class OkatoTest extends RefBookScriptTestBase {
     @Test
     public void save() throws ParseException {
         ArrayList<Map<String, RefBookValue>> saveRecords = new ArrayList<Map<String, RefBookValue>>();
+        SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
 
         HashMap<String, RefBookValue> value1 = new HashMap<String, RefBookValue>();
-        value1.put("OKATO", new RefBookValue(RefBookAttributeType.STRING, "12345678910"));
+        value1.put("START_DATE", new RefBookValue(RefBookAttributeType.DATE, sdf.parse("12.12.2015")));
+        value1.put("END_DATE", new RefBookValue(RefBookAttributeType.DATE, sdf.parse("13.12.2015")));
         saveRecords.add(value1);
 
         HashMap<String, RefBookValue> value2 = new HashMap<String, RefBookValue>();
-        value2.put("OKATO", new RefBookValue(RefBookAttributeType.STRING, "1234567891"));
+        value2.put("START_DATE", new RefBookValue(RefBookAttributeType.DATE, sdf.parse("12.12.2015")));
+        value2.put("END_DATE", new RefBookValue(RefBookAttributeType.DATE, sdf.parse("11.12.2015")));
         saveRecords.add(value2);
 
         testHelper.setSaveRecords(saveRecords);
@@ -52,7 +57,7 @@ public class OkatoTest extends RefBookScriptTestBase {
         int i = 0;
         // value1
         // value2
-        Assert.assertEquals("Атрибут \"OKATO\" заполнен неверно (1234567891)! Ожидаемый паттерн: \"[0-9]{11}\"", entries.get(i++).getMessage());
+        Assert.assertEquals("Поле «Дата окончания действия» должно быть больше или равно полю «Дата начала действия»!", entries.get(i++).getMessage());
         Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
     }
 }
