@@ -1927,7 +1927,7 @@ public final class ScriptUtils {
     }
 
     /**
-     * Проверка диапазона даты (от 1900 до 2099)
+     * Проверка диапазона даты (от 1991 до 2099)
      * @param logger логер для записи сообщения
      * @param row строка НФ
      * @param alias псевдоним столбца
@@ -1954,7 +1954,7 @@ public final class ScriptUtils {
         } catch (ParseException e) {
             rowLog(logger, row, (row != null ? ("Строка "+ row.getIndex()  + ": ") : "") + String.format("Ошибка при разборе значения даты атрибута «%s» (%s)", getColumnName(row, alias), value), fatal ? LogLevel.ERROR : LogLevel.WARNING);
         }
-        if (year == null || year < 1900 || year > 2099) {
+        if (year == null || year < 1991 || year > 2099) {
             rowLog(logger, row, (row != null ? ("Строка "+ row.getIndex()  + ": ") : "") + String.format("Значение даты атрибута «%s» должно принимать значение из следующего диапазона: 01.01.1900 - 31.12.2099", getColumnName(row, alias)), fatal ? LogLevel.ERROR : LogLevel.WARNING);
             return false;
         }
