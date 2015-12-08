@@ -428,7 +428,6 @@ def checkTaKpp(def row, def errorMsg) {
 
 void logicCheck() {
     def dataRows = formDataService.getDataRowHelper(formData).allCached
-    def int monthCountInPeriod = getMonthCount()
 
     for (def row : dataRows) {
         if (row.getAlias() != null) {
@@ -481,11 +480,6 @@ void logicCheck() {
         // 7. В справочнике «Параметры представления деклараций по транспортному налогу» существует хотя бы одна запись,
         // удовлетворяющая условиям выборки, приведённой в алгоритме расчёта «Графы 2 и 3»
         fillTaKpp(row, errorMsg)
-
-        // дополнительная проверка для 12 графы
-        if (row.ownMonths != null && row.ownMonths > monthCountInPeriod) {
-            logger.warn('Срок владение ТС не должен быть больше текущего налогового периода.')
-        }
 
         // 8. Проверка налоговой ставки ТС
         // В справочнике «Ставки транспортного налога» существует строка, удовлетворяющая условиям выборки,
