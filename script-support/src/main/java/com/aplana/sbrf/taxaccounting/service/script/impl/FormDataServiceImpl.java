@@ -559,6 +559,32 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
     }
 
     @Override
+    public void checkReferenceValue(Long refBookId, String referenceValue, List<String> expectedValues, int rowIndex, int colIndex,
+                                    Logger logger, boolean required) {
+        if (referenceValue == null && (expectedValues == null || expectedValues.isEmpty())) {
+            return;
+        }
+        if (expectedValues != null) {
+            for (String expectedValue : expectedValues) {
+                if ((referenceValue == null && expectedValue == null) ||
+                        (referenceValue == null && "".equals(expectedValue)) ||
+                        ("".equals(referenceValue) && expectedValue == null) ||
+                        (referenceValue != null && expectedValue != null && referenceValue.equals(expectedValue))) {
+                    return;
+                }
+            }
+        }
+
+        RefBook rb = refBookFactory.get(refBookId);
+        String msg = String.format(ScriptUtils.REF_BOOK_REFERENCE_NOT_FOUND_IMPORT_ERROR, rowIndex, ScriptUtils.getXLSColumnName(colIndex), referenceValue, rb.getName());
+        if (required) {
+            throw new ServiceException("%s", msg);
+        } else {
+            logger.warn("%s", msg);
+        }
+    }
+
+    @Override
     public void checkFormExistAndAccepted(int formTypeId, FormDataKind kind, int departmentId,
                                           int currentReportPeriodId, Boolean prevPeriod,
                                           Logger logger, boolean required, Integer comparativePeriodId, boolean accruing) {
