@@ -408,7 +408,7 @@ public class FormTemplate extends IdentityObject<Integer> implements Cloneable {
             DataRow<Cell> newRow = new DataRow<Cell>(row.getAlias(), cells);
 
 			Integer index = row.getIndex();
-            newRow.setAlias(row.getAlias());
+            newRow.setAlias(row.getAlias() != null && !"".equals(row.getAlias()) ? row.getAlias() : null);
             newRow.setIndex(index);
             newRow.setId(row.getId());
             newRow.setImportIndex(row.getImportIndex());
