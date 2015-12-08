@@ -87,7 +87,7 @@ def recordCache = [:]
 def refBookCache = [:]
 
 @Field
-def allColumns = ['name', 'iksr', 'countryCode', 'sum', 'docNumber', 'docDate', 'country',
+def allColumns = ['fix', 'name', 'iksr', 'countryCode', 'sum', 'docNumber', 'docDate', 'country',
                        'region', 'city', 'settlement', 'count', 'price', 'cost', 'dealDoneDate']
 // Редактируемые атрибуты
 @Field
@@ -252,7 +252,7 @@ void calc() {
 
     for (row in dataRows) {
         // Расчет поля "Цена"
-        row.price = calc1314(row)
+        row.price = calcNum(row)
         // Расчет поля "Стоимость"
         row.cost = row.sum
     }
@@ -262,9 +262,9 @@ void calc() {
     dataRows.add(total)
 }
 
-def BigDecimal calc1314(def row) {
+def BigDecimal calcNum(def row) {
     if (row.sum != null && row.count != null && row.count != 0) {
-        return (row.sum / row.count).setScale(0, RoundingMode.HALF_UP)
+        return ((BigDecimal) row.sum).divide((BigDecimal)  row.count, 2, BigDecimal.ROUND_HALF_UP)
     }
     return null
 }
