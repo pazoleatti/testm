@@ -426,13 +426,10 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
      * @return сти
      */
     private CellStyle getCellStyle(com.aplana.sbrf.taxaccounting.model.Cell dataRowCell, CellType type, String alias) {
-        if (!DiffService.STYLE_NO_CHANGE.equals(dataRowCell.getStyleAlias())
-                && !DiffService.STYLE_INSERT.equals(dataRowCell.getStyleAlias())
-                && !DiffService.STYLE_DELETE.equals(dataRowCell.getStyleAlias())
-                && !DiffService.STYLE_CHANGE.equals(dataRowCell.getStyleAlias())) {
-            // если стиль не относится к стилям дельт, то получить обычный стиль
+        if (dataRowCell.getStyleAlias() == null) {
             return cellStyleBuilder.createCellStyle(type, alias);
         }
+
         XSSFCellStyle cellStyle = (XSSFCellStyle) cellStyleBuilder.createCellStyle(type, alias, dataRowCell.getStyleAlias());
 
         // фон
