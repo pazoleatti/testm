@@ -112,7 +112,6 @@ public class Rnu_111Test extends ScriptTestBase {
                 "так как не заполнена используемая в расчете графа «Сумма фактически начисленного дохода (руб.)», «Сумма дохода, соответствующая рыночному уровню (руб.)»!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Графа «База для расчёта процентного дохода (дней в году)»: выполнение расчета невозможно, " +
                 "так как не заполнена используемая в расчете графа «Основание для совершения операции. дата»!", entries.get(i++).getMessage());
-        Assert.assertEquals("Группа «ВЗЛ/РОЗ не задано» не имеет строки подитога!", entries.get(i++).getMessage());
         Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
         testHelper.getLogger().clear();
 
@@ -142,7 +141,6 @@ public class Rnu_111Test extends ScriptTestBase {
         i = 0;
         Assert.assertEquals("Строка 1: Значение графы «Сумма фактически начисленного дохода (руб.)» должно быть больше или равно «0»!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Значение графы «Сумма дохода, соответствующая рыночному уровню (руб.)» должно быть больше или равно «0»!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 2: Неверное итоговое значение по группе «A» в графе «Сумма фактически начисленного дохода (руб.)»", entries.get(i++).getMessage());
         Assert.assertEquals("Итоговые значения рассчитаны неверно в графе «Сумма фактически начисленного дохода (руб.)»!", entries.get(i++).getMessage());
         Assert.assertEquals("Итоговые значения рассчитаны неверно в графе «Сумма дохода, соответствующая рыночному уровню (руб.)»!", entries.get(i++).getMessage());
         Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
@@ -153,7 +151,6 @@ public class Rnu_111Test extends ScriptTestBase {
         row.getCell("sum2").setValue(0, null);
         testHelper.execute(FormDataEvent.CALCULATE);//перерасчет sum3
         testHelper.execute(FormDataEvent.CHECK);
-        entries = testHelper.getLogger().getEntries();
         i = 0;
         Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
         testHelper.getLogger().clear();
@@ -248,7 +245,7 @@ public class Rnu_111Test extends ScriptTestBase {
         // проверка расчетов
         testHelper.execute(FormDataEvent.CALCULATE);
         checkAfterCalc(testHelper.getDataRowHelper().getAll());
-        Assert.assertEquals(5, testHelper.getDataRowHelper().getCount());
+        Assert.assertEquals(3, testHelper.getDataRowHelper().getCount());
     }
 
     // Проверить загруженные данные
@@ -264,23 +261,16 @@ public class Rnu_111Test extends ScriptTestBase {
     // Проверить расчеты
     void checkAfterCalc(List<DataRow<Cell>> dataRows) {
         Assert.assertEquals(365, dataRows.get(0).getCell("base").getNumericValue().intValue());
-        Assert.assertNull(dataRows.get(1).getCell("base").getNumericValue());
-        Assert.assertEquals(365, dataRows.get(2).getCell("base").getNumericValue().intValue());
-        Assert.assertNull(dataRows.get(3).getCell("base").getNumericValue());
-        Assert.assertNull(dataRows.get(4).getCell("base").getNumericValue());
+        Assert.assertEquals(365, dataRows.get(1).getCell("base").getNumericValue().intValue());
+        Assert.assertNull(dataRows.get(2).getCell("base").getNumericValue());
 
         Assert.assertEquals(2, dataRows.get(0).getCell("rate2").getNumericValue().doubleValue(), 0);
-        Assert.assertNull(dataRows.get(1).getCell("rate2").getNumericValue());
-        Assert.assertEquals(2, dataRows.get(2).getCell("rate2").getNumericValue().doubleValue(), 0);
-        Assert.assertNull(dataRows.get(3).getCell("rate2").getNumericValue());
-        Assert.assertNull(dataRows.get(4).getCell("rate2").getNumericValue());
+        Assert.assertEquals(2, dataRows.get(1).getCell("rate2").getNumericValue().doubleValue(), 0);
+        Assert.assertNull(dataRows.get(2).getCell("rate2").getNumericValue());
 
         Assert.assertEquals(2, dataRows.get(0).getCell("sum3").getNumericValue().doubleValue(), 0);
         Assert.assertEquals(2, dataRows.get(1).getCell("sum3").getNumericValue().doubleValue(), 0);
-        Assert.assertEquals(2, dataRows.get(2).getCell("sum3").getNumericValue().doubleValue(), 0);
-        Assert.assertEquals(2, dataRows.get(3).getCell("sum3").getNumericValue().doubleValue(), 0);
-        Assert.assertEquals(4, dataRows.get(4).getCell("sum3").getNumericValue().doubleValue(), 0);
+        Assert.assertEquals(4, dataRows.get(2).getCell("sum3").getNumericValue().doubleValue(), 0);
     }
-
 }
 
