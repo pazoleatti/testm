@@ -13,7 +13,7 @@ import javax.script.ScriptException;
  */
 public class ScriptingService extends TAAbstractScriptingServiceImpl {
     public ScriptEngine getEngine() {
-        return groovyScriptEngine;
+        return getScriptEngine();
     }
 
     public void logScriptException(ScriptException e, Logger logger) {

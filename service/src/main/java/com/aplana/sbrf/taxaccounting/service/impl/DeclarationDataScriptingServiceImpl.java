@@ -103,7 +103,7 @@ public class DeclarationDataScriptingServiceImpl extends TAAbstractScriptingServ
     private boolean executeScript(TAUserInfo userInfo, DeclarationTemplate declarationTemplate, DeclarationData declarationData, FormDataEvent event, Logger logger,
                           Map<String, Object> exchangeParams) {
 		// Биндим параметры для выполнения скрипта
-		Bindings b = groovyScriptEngine.createBindings();
+		Bindings b = getScriptEngine().createBindings();
 		
 		Map<String, ?> scriptComponents = getScriptExposedBeans(declarationTemplate.getType().getTaxType(), event);
 		for (Object component : scriptComponents.values()) {
@@ -146,7 +146,7 @@ public class DeclarationDataScriptingServiceImpl extends TAAbstractScriptingServ
 
     private boolean executeScript(Bindings bindings, String script, Logger logger, ScriptMessageDecorator decorator) {
 		try {
-            createGroovyScriptEngine().eval(script, bindings);
+            getScriptEngine().eval(script, bindings);
             return true;
 		} catch (ScriptException e) {
 			logScriptException(e, logger);

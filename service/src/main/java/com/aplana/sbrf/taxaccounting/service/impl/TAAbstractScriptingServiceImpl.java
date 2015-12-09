@@ -1,5 +1,7 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
+import com.aplana.sbrf.taxaccounting.groovy.jsr223.GroovyScriptEngine;
+import com.aplana.sbrf.taxaccounting.groovy.jsr223.GroovyScriptEngineFactory;
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import groovy.lang.GroovyClassLoader;
@@ -8,10 +10,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.codehaus.groovy.control.CompilerConfiguration;
 import org.codehaus.groovy.control.customizers.ImportCustomizer;
-import org.codehaus.groovy.jsr223.GroovyScriptEngineImpl;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 
+import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 import java.util.regex.Matcher;
@@ -47,31 +49,27 @@ public abstract class TAAbstractScriptingServiceImpl implements ApplicationConte
 			"com.aplana.sbrf.taxaccounting.service.script.util.ScriptUtils"
 	};
 
-	protected GroovyScriptEngineImpl groovyScriptEngine;
-    private CompilerConfiguration config;
-    private GroovyClassLoader classLoader;
+	private GroovyScriptEngine groovyScriptEngine;
 
 	public TAAbstractScriptingServiceImpl() {
 		ScriptEngineManager factory = new ScriptEngineManager();
-		this.groovyScriptEngine = (GroovyScriptEngineImpl)factory.getEngineByName("groovy");
+        factory.registerEngineName("groovy", new GroovyScriptEngineFactory());
+		groovyScriptEngine = (GroovyScriptEngine)factory.getEngineByName("groovy");
 
 		// Predefined imports
-		config = new CompilerConfiguration();
+        CompilerConfiguration config = new CompilerConfiguration();
 		ImportCustomizer ic = new ImportCustomizer();
 		ic.addStarImports(PREDEFINED_IMPORTS);
 		ic.addStaticStars(PREDEFINED_STATIC_IMPORTS);
 		config.addCompilationCustomizers(ic);
 
-		classLoader = groovyScriptEngine.getClassLoader();
+        GroovyClassLoader classLoader = groovyScriptEngine.getClassLoader();
 		classLoader = new GroovyClassLoader(classLoader, config, false);
 		groovyScriptEngine.setClassLoader(classLoader);
 	}
 
-    public GroovyScriptEngineImpl createGroovyScriptEngine() {
-        GroovyScriptEngineImpl gse = (GroovyScriptEngineImpl)groovyScriptEngine.getFactory().getScriptEngine();
-        gse.setClassLoader(classLoader);
-        classLoader.clearCache();
-        return gse;
+    protected ScriptEngine getScriptEngine() {
+        return groovyScriptEngine;
     }
 
 	@Override
