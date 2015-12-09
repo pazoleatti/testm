@@ -295,7 +295,7 @@ void importTransportData() {
                 // итоговая строка тф
                 rowCells = reader.readNext()
                 if (rowCells != null) {
-                    totalTF = getNewRow(rowCells, COLUMN_COUNT, ++fileRowIndex, rowIndex)
+                    totalTF = getNewRow(rowCells, COLUMN_COUNT, ++fileRowIndex, rowIndex, true)
                 }
                 break
             }
@@ -356,10 +356,11 @@ void importTransportData() {
  * @param columnCount количество колонок
  * @param fileRowIndex номер строки в тф
  * @param rowIndex строка в нф
+ * @param isTotal признак итоговой строки
  *
  * @return вернет строку нф или null, если количество значений в строке тф меньше
  */
-def getNewRow(String[] rowCells, def columnCount, def fileRowIndex, def rowIndex) {
+def getNewRow(String[] rowCells, def columnCount, def fileRowIndex, def rowIndex, def isTotal = false) {
     def newRow = formData.createStoreMessagingDataRow()
     newRow.setIndex(rowIndex)
     newRow.setImportIndex(fileRowIndex)
@@ -378,13 +379,15 @@ def getNewRow(String[] rowCells, def columnCount, def fileRowIndex, def rowIndex
     def int colIndex
 
     // графа 3
-    colIndex = 2
-    def map
-    String filter = getFilter(pure(rowCells[colIndex]), pure(rowCells[3]))
-    def records = refBookFactory.getDataProvider(28).getRecords(reportPeriodEndDate, null, filter, null)
-    if (checkImportRecordsCount(records, refBookFactory.get(28), 'CODE', pure(rowCells[colIndex]), getReportPeriodEndDate(), fileRowIndex, colIndex + colOffset, logger, false)) {
-        map = records.get(0)
-        newRow.balance = map.get(RefBook.RECORD_ID_ALIAS).numberValue
+    if (!isTotal) {
+        colIndex = 2
+        def map
+        String filter = getFilter(pure(rowCells[colIndex]), pure(rowCells[3]))
+        def records = refBookFactory.getDataProvider(28).getRecords(reportPeriodEndDate, null, filter, null)
+        if (checkImportRecordsCount(records, refBookFactory.get(28), 'CODE', pure(rowCells[colIndex]), getReportPeriodEndDate(), fileRowIndex, colIndex + colOffset, logger, false)) {
+            map = records.get(0)
+            newRow.balance = map.get(RefBook.RECORD_ID_ALIAS).numberValue
+        }
     }
 
     // графа 5
