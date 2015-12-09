@@ -5,16 +5,12 @@ import com.aplana.sbrf.taxaccounting.model.BalancingVariants;
 import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.core.api.LockStateLogger;
 import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
-import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
-import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Map;
 
 import static com.aplana.sbrf.taxaccounting.async.task.AsyncTask.RequiredParams.LOCKED_OBJECT;
@@ -37,12 +33,6 @@ public abstract class PdfGeneratorAsyncTask extends AbstractAsyncTask {
 
     @Autowired
     private DepartmentReportPeriodService departmentReportPeriodService;
-
-    @Autowired
-    private DeclarationDataScriptingService scriptingService;
-
-    @Autowired
-    private LogEntryService logEntryService;
 
     @Autowired
     private LockDataService lockService;
@@ -70,7 +60,7 @@ public abstract class PdfGeneratorAsyncTask extends AbstractAsyncTask {
     }
 
     @Override
-    protected void executeBusinessLogic(Map<String, Object> params, Logger logger) {
+    protected boolean executeBusinessLogic(Map<String, Object> params, Logger logger) {
         long declarationDataId = (Long)params.get("declarationDataId");
         int userId = (Integer)params.get(USER_ID.name());
         TAUserInfo userInfo = new TAUserInfo();
@@ -87,6 +77,7 @@ public abstract class PdfGeneratorAsyncTask extends AbstractAsyncTask {
                 }
             });
         }
+        return true;
     }
 
     @Override

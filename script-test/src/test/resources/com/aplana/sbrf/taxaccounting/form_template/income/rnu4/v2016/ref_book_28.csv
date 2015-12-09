@@ -1,0 +1,7 @@
+record_id(N);CODE(S);NUMBER(S);TYPE_INCOME(S)
+1;codeA;numberA;typeIncomeA
+2;codeB;numberB;typeIncomeB
+3;codeC;numberC;typeIncomeC
+4;codeA;numberAA;typeIncomeAA
+5;codeA;numberAAA;typeIncomeAAA
+6;codeD;;typeIncomeC

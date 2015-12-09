@@ -42,8 +42,8 @@ public class RegionTest extends RefBookScriptTestBase {
         saveRecords.add(value1);
 
         HashMap<String, RefBookValue> value2 = new HashMap<String, RefBookValue>();
-        value1.put("OKATO_DEFINITION", new RefBookValue(RefBookAttributeType.STRING, "qq"));
-        value1.put("OKTMO_DEFINITION", new RefBookValue(RefBookAttributeType.STRING, "ww"));
+        value2.put("OKATO_DEFINITION", new RefBookValue(RefBookAttributeType.STRING, "qq"));
+        value2.put("OKTMO_DEFINITION", new RefBookValue(RefBookAttributeType.STRING, "ww"));
         saveRecords.add(value2);
 
         testHelper.setSaveRecords(saveRecords);

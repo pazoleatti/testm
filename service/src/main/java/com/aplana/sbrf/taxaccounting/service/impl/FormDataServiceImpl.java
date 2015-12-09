@@ -216,7 +216,7 @@ public class FormDataServiceImpl implements FormDataService {
                 if (signList != null && !signList.isEmpty() && SignService.SIGN_CHECK.equals(signList.get(0))) {
 					try {
 						LOG.info(String.format("Проверка ЭП: %s", key));
-						check = signService.checkSign(dataFile.getAbsolutePath(), 0);
+						check = signService.checkSign(dataFile.getAbsolutePath(), 0, logger);
 					} catch (Exception e) {
 						logger.error("Ошибка при проверке ЭП: " + e.getMessage());
 					}
@@ -242,27 +242,31 @@ public class FormDataServiceImpl implements FormDataService {
 						stateLogger.updateState("Импорт XLSM-файла");
 					}
 					LOG.info(String.format("Выполнение скрипта: %s", key));
+                    formDataDao.updateSorted(fd.getId(), false);
+                    formDataDao.updateEdited(fd.getId(), true);
 					formDataScriptingService.executeScript(userInfo, fd, formDataEvent, logger, additionalParameters);
+                    dataRowDao.refreshRefBookLinks(fd);
+                    logBusinessService.add(formDataId, null, userInfo, formDataEvent, null);
+                    auditService.add(formDataEvent, userInfo, null, fd, fileName, null);
 				} finally {
 					IOUtils.closeQuietly(dataFileInputStream);
 				}
 			}
-
             if (logger.containsLevel(LogLevel.ERROR)) {
-                if (stateLogger != null) {
-                    stateLogger.updateState("Сохранение ошибок");
+                if (isInner) {
+                    logger.error("Есть критические ошибки при выполнении скрипта");
+                } else {
+                    if (stateLogger != null) {
+                        stateLogger.updateState("Сохранение ошибок");
+                    }
+                    LOG.info(String.format("Сохранение ошибок: %s", key));
+                    String uuid = logEntryService.save(logger.getEntries());
+                    throw new ServiceLoggerException("Есть критические ошибки при выполнении скрипта", uuid);
+
                 }
-                LOG.info(String.format("Сохранение ошибок: %s", key));
-                String uuid = logEntryService.save(logger.getEntries());
-                throw new ServiceLoggerException("Есть критические ошибки при выполнении скрипта", uuid);
             } else if (isInner) {
                 logger.info("Данные загружены");
             }
-            formDataDao.updateSorted(fd.getId(), false);
-            formDataDao.updateEdited(fd.getId(), true);
-			dataRowDao.refreshRefBookLinks(fd);
-            logBusinessService.add(formDataId, null, userInfo, formDataEvent, null);
-            auditService.add(formDataEvent, userInfo, null, fd, fileName, null);
         } catch (IOException e) {
             throw new ServiceException(e.getLocalizedMessage(), e);
         } finally {
@@ -469,12 +473,12 @@ public class FormDataServiceImpl implements FormDataService {
         formDataDao.updateSorted(formData.getId(), false);
         formDataDao.updateEdited(formData.getId(), true);
         formDataScriptingService.executeScript(userInfo, formData, FormDataEvent.CALCULATE, logger, null);
+        dataRowDao.refreshRefBookLinks(formData);
         if (logger.containsLevel(LogLevel.ERROR)) {
-			throw new ServiceException("Найдены ошибки при выполнении расчета формы");
-		} else {
-			logger.info("Расчет завершен, фатальных ошибок не обнаружено");
-		}
-		dataRowDao.refreshRefBookLinks(formData);
+            logger.error("Найдены ошибки при выполнении расчета формы");
+        } else {
+            logger.info("Расчет завершен, фатальных ошибок не обнаружено");
+        }
 //        logBusinessService.add(formData.getId(), null, userInfo, FormDataEvent.CALCULATE, null);
     }
 
@@ -491,9 +495,6 @@ public class FormDataServiceImpl implements FormDataService {
         formDataDao.updateSorted(formData.getId(), false);
         formDataDao.updateEdited(formData.getId(), true);
         formDataScriptingService.executeScript(userInfo, formData, FormDataEvent.REFRESH, logger, null);
-        if (logger.containsLevel(LogLevel.ERROR)) {
-            throw new ServiceException("");
-        }
         dataRowDao.refreshRefBookLinks(formData);
         //logBusinessService.add(formData.getId(), null, userInfo, FormDataEvent.REFRESH, null);
     }
@@ -625,12 +626,16 @@ public class FormDataServiceImpl implements FormDataService {
 	 */
 	@Override
 	@Transactional
-	public long saveFormData(Logger logger, TAUserInfo userInfo, FormData formData) {
+	public long saveFormData(Logger logger, TAUserInfo userInfo, FormData formData, boolean editMode) {
 		formDataAccessService.canEdit(userInfo, formData.getId(), formData.isManual());
         // Отработка скриптом события сохранения
 		formDataScriptingService.executeScript(userInfo, formData, FormDataEvent.SAVE, logger, null);
         if (logger.containsLevel(LogLevel.ERROR)) {
-            throw new ServiceLoggerException(SAVE_ERROR, logEntryService.save(logger.getEntries()));
+            if (editMode) {
+                logger.error(SAVE_ERROR);
+            } else {
+                throw new ServiceLoggerException(SAVE_ERROR, logEntryService.save(logger.getEntries()));
+            }
         }
         // Обновление для сквозной нумерации
         updateAutoNumeration(formData, logger, userInfo);
@@ -639,8 +644,10 @@ public class FormDataServiceImpl implements FormDataService {
 		dataRowDao.refreshRefBookLinks(formData);
         deleteReport(formData.getId(), formData.isManual(), userInfo.getUser().getId(), "Изменены данные налоговой формы");
         // ЖА и история изменений
-		logBusinessService.add(formData.getId(), null, userInfo, FormDataEvent.SAVE, null);
-		auditService.add(FormDataEvent.SAVE, userInfo, null, formData, "Форма сохранена", null);
+        if (!editMode) {
+            logBusinessService.add(formData.getId(), null, userInfo, FormDataEvent.SAVE, null);
+            auditService.add(FormDataEvent.SAVE, userInfo, null, formData, "Форма сохранена", null);
+        }
 		return formData.getId();
 	}
 

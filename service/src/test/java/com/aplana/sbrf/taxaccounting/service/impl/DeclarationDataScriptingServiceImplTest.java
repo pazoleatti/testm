@@ -5,6 +5,7 @@ import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentFormTypeDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
+import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
@@ -120,13 +121,15 @@ public class DeclarationDataScriptingServiceImplTest {
 		exchangeParams.put(DeclarationDataScriptParams.XML, writer);
 
 		service.executeScript(null, declarationData, FormDataEvent.CREATE, logger, exchangeParams);
-		
+
+        for(LogEntry logEntry: logger.getEntries())
+            System.out.println("log: "+logEntry.getMessage());
 		String xml = XML_HEADER.concat(writer.toString());
 
 		String correctXml = IOUtils.toString(getClass().getResourceAsStream("createDeclaration.xml"), "UTF-8");
 		XMLUnit.setIgnoreWhitespace(true);
 		Diff xmlDiff = new Diff(xml, correctXml);
-		assertTrue(xmlDiff.similar());		
+		assertTrue(xmlDiff.similar());
 		
 		assertFalse(logger.getEntries().isEmpty());
 		assertFalse(logger.containsLevel(LogLevel.ERROR));

@@ -9,7 +9,7 @@ package com.aplana.sbrf.taxaccounting.model;
 public enum ConfigurationParam {
     // Общие
 	/** Путь к файлу/каталогу ключей ЭП */
-    KEY_FILE("Путь к файлу/каталогу ключей ЭП (БОК)", ConfigurationParamGroup.COMMON, false, false, 1),
+    KEY_FILE("Путь к файлу/каталогу ключей ЭП (БОК)", ConfigurationParamGroup.COMMON, false, null, 1),
 	/** Проверять ЭП */
     SIGN_CHECK("Проверять ЭП (1 - проверять, 0 - не проверять)", ConfigurationParamGroup.COMMON, true, false, 0),
     ACCOUNT_PLAN_UPLOAD_DIRECTORY("Путь к каталогу загрузки транспортных файлов, содержащих данные справочника «План счетов»", ConfigurationParamGroup.COMMON, true, true, 1),
@@ -29,19 +29,19 @@ public enum ConfigurationParam {
     private String caption;
     private ConfigurationParamGroup group;
     private boolean unique;
-    private boolean folder;
+    private Boolean folder;
     private int checkAccess;
 
     /**
      * Параметр
      *
      * @param caption     Имя параметра
-     * @param group        Группа параметра
+     * @param group       Группа параметра
      * @param unique      Признак уникальности
-     * @param folder      Признак директории
+     * @param folder      Признак директории: false - файл, true - каталог, null - нет ограничения
      * @param checkAccess Признак проверки доступа на: 0 — нет проверки, 1 — чтение, 2 — запись.
      */
-    private ConfigurationParam(String caption, ConfigurationParamGroup group, boolean unique, boolean folder, int checkAccess) {
+    private ConfigurationParam(String caption, ConfigurationParamGroup group, boolean unique, Boolean folder, int checkAccess) {
         this.caption = caption;
         this.group = group;
         this.unique = unique;
@@ -87,7 +87,7 @@ public enum ConfigurationParam {
     /**
      * Признак того, что значеним параметра является путь к какому-либо каталогу
      */
-    public boolean isFolder() {
+    public Boolean isFolder() {
         return folder;
     }
 }

@@ -31,7 +31,7 @@ switch (formDataEvent) {
             return
         calc()
         logicCheck()
-        formDataService.saveCachedDataRows(formData, logger)
+        formDataService.saveCachedDataRows(formData, logger, formDataEvent)
         break
     case FormDataEvent.CHECK:
         logicCheck()
@@ -46,7 +46,7 @@ switch (formDataEvent) {
         break
     case FormDataEvent.IMPORT:
         importData()
-        formDataService.saveCachedDataRows(formData, logger)
+        formDataService.saveCachedDataRows(formData, logger, formDataEvent)
         break
 }
 
@@ -185,8 +185,9 @@ void checkOpuCodes(def department, def date) {
     def opuCodes = opuMap.values()
     def accountPeriodId = bookerStatementService.getAccountPeriodId(department.id, date)
     if (accountPeriodId == null) {
-        logger.warn('Форма 102 бухгалтерской отчетности: Подразделение: %s. Отсутствует отчетный период, соответствующий значениям НФ! При заполнении граф формы значения будут приняты за нулевые.',
-                department.name)
+        logger.warn('Не найдена форма 102 бухгалтерской отчетности: Период: %s %s, Подразделение: %s. ' +
+                'Ячейки по графам, заполняемые из данной формы, будут заполнены нулевым значением',
+                getPeriodNameBO(date), date.format('yyyy'), department.name)
         return
     }
 

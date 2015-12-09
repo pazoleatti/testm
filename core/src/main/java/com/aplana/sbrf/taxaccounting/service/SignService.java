@@ -1,5 +1,7 @@
 package com.aplana.sbrf.taxaccounting.service;
 
+import com.aplana.sbrf.taxaccounting.model.log.Logger;
+
 /**
  * Сервис для проверки ЭЦП
  * чтобы его использовать необходимо добавить в PATH путь до библиотек:
@@ -19,5 +21,5 @@ public interface SignService {
      * После удаления подписи и последующих вызовах функции для проверки одного и того же файла N необходимо снова устанавливать равным 1
      * @return успешность выполненной проверки
 	 * */
-	boolean checkSign(String pathToSignFile, int delFlag);
+	boolean checkSign(String pathToSignFile, int delFlag, Logger logger);
 }

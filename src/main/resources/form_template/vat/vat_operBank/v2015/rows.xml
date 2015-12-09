@@ -3,122 +3,152 @@
     <row alias="R1">
         <cell alias="code" colSpan="1" rowSpan="1" stringValue="018"/>
         <cell alias="name" colSpan="1" rowSpan="1" stringValue="Байкальский"/>
-        <cell alias="totalVAT" colSpan="1" rowSpan="1" styleAlias="Автозаполняемая"/>
-        <cell alias="month1" colSpan="1" editable="false" rowSpan="1" styleAlias="Автозаполняемая"/>
-        <cell alias="month2" colSpan="1" editable="false" rowSpan="1" styleAlias="Автозаполняемая"/>
-        <cell alias="month3" colSpan="1" editable="false" rowSpan="1" styleAlias="Автозаполняемая"/>
+        <cell alias="fix1" colSpan="1" rowSpan="1"/>
+        <cell alias="totalVAT" colSpan="1" rowSpan="1"/>
+        <cell alias="fix2" colSpan="1" rowSpan="1" stringValue=""/>
+        <cell alias="month1" colSpan="1" rowSpan="1"/>
+        <cell alias="month2" colSpan="1" rowSpan="1"/>
+        <cell alias="month3" colSpan="1" rowSpan="1"/>
     </row>
     <row alias="R2">
         <cell alias="code" colSpan="1" rowSpan="1" stringValue="042"/>
         <cell alias="name" colSpan="1" rowSpan="1" stringValue="Волго-Вятский"/>
-        <cell alias="totalVAT" colSpan="1" rowSpan="1" styleAlias="Автозаполняемая"/>
-        <cell alias="month1" colSpan="1" editable="false" rowSpan="1" styleAlias="Автозаполняемая"/>
-        <cell alias="month2" colSpan="1" editable="false" rowSpan="1" styleAlias="Автозаполняемая"/>
-        <cell alias="month3" colSpan="1" editable="false" rowSpan="1" styleAlias="Автозаполняемая"/>
+        <cell alias="fix1" colSpan="1" rowSpan="1"/>
+        <cell alias="totalVAT" colSpan="1" rowSpan="1"/>
+        <cell alias="fix2" colSpan="1" rowSpan="1"/>
+        <cell alias="month1" colSpan="1" rowSpan="1"/>
+        <cell alias="month2" colSpan="1" rowSpan="1"/>
+        <cell alias="month3" colSpan="1" rowSpan="1"/>
     </row>
     <row alias="R3">
         <cell alias="code" colSpan="1" rowSpan="1" stringValue="070"/>
         <cell alias="name" colSpan="1" rowSpan="1" stringValue="Дальневосточный"/>
-        <cell alias="totalVAT" colSpan="1" rowSpan="1" styleAlias="Автозаполняемая"/>
-        <cell alias="month1" colSpan="1" editable="false" rowSpan="1" styleAlias="Автозаполняемая"/>
-        <cell alias="month2" colSpan="1" editable="false" rowSpan="1" styleAlias="Автозаполняемая"/>
-        <cell alias="month3" colSpan="1" editable="false" rowSpan="1" styleAlias="Автозаполняемая"/>
+        <cell alias="fix1" colSpan="1" rowSpan="1"/>
+        <cell alias="totalVAT" colSpan="1" rowSpan="1"/>
+        <cell alias="fix2" colSpan="1" rowSpan="1"/>
+        <cell alias="month1" colSpan="1" rowSpan="1"/>
+        <cell alias="month2" colSpan="1" rowSpan="1"/>
+        <cell alias="month3" colSpan="1" rowSpan="1"/>
     </row>
     <row alias="R4">
         <cell alias="code" colSpan="1" rowSpan="1" stringValue="067"/>
         <cell alias="name" colSpan="1" rowSpan="1" stringValue="Западно-Сибирский"/>
-        <cell alias="totalVAT" colSpan="1" rowSpan="1" styleAlias="Автозаполняемая"/>
-        <cell alias="month1" colSpan="1" editable="false" rowSpan="1" styleAlias="Автозаполняемая"/>
-        <cell alias="month2" colSpan="1" editable="false" rowSpan="1" styleAlias="Автозаполняемая"/>
-        <cell alias="month3" colSpan="1" editable="false" rowSpan="1" styleAlias="Автозаполняемая"/>
+        <cell alias="fix1" colSpan="1" rowSpan="1"/>
+        <cell alias="totalVAT" colSpan="1" rowSpan="1"/>
+        <cell alias="fix2" colSpan="1" rowSpan="1"/>
+        <cell alias="month1" colSpan="1" rowSpan="1"/>
+        <cell alias="month2" colSpan="1" rowSpan="1"/>
+        <cell alias="month3" colSpan="1" rowSpan="1"/>
     </row>
     <row alias="R5">
         <cell alias="code" colSpan="1" rowSpan="1" stringValue="049"/>
         <cell alias="name" colSpan="1" rowSpan="1" stringValue="Западно-Уральский"/>
-        <cell alias="totalVAT" colSpan="1" rowSpan="1" styleAlias="Автозаполняемая"/>
-        <cell alias="month1" colSpan="1" editable="false" rowSpan="1" styleAlias="Автозаполняемая"/>
-        <cell alias="month2" colSpan="1" editable="false" rowSpan="1" styleAlias="Автозаполняемая"/>
-        <cell alias="month3" colSpan="1" editable="false" rowSpan="1" styleAlias="Автозаполняемая"/>
+        <cell alias="fix1" colSpan="1" rowSpan="1"/>
+        <cell alias="totalVAT" colSpan="1" rowSpan="1"/>
+        <cell alias="fix2" colSpan="1" rowSpan="1"/>
+        <cell alias="month1" colSpan="1" rowSpan="1"/>
+        <cell alias="month2" colSpan="1" rowSpan="1"/>
+        <cell alias="month3" colSpan="1" rowSpan="1"/>
     </row>
     <row alias="R6">
         <cell alias="code" colSpan="1" rowSpan="1" stringValue="054"/>
         <cell alias="name" colSpan="1" rowSpan="1" stringValue="Поволжский"/>
-        <cell alias="totalVAT" colSpan="1" rowSpan="1" styleAlias="Автозаполняемая"/>
-        <cell alias="month1" colSpan="1" editable="false" rowSpan="1" styleAlias="Автозаполняемая"/>
-        <cell alias="month2" colSpan="1" editable="false" rowSpan="1" styleAlias="Автозаполняемая"/>
-        <cell alias="month3" colSpan="1" editable="false" rowSpan="1" styleAlias="Автозаполняемая"/>
+        <cell alias="fix1" colSpan="1" rowSpan="1"/>
+        <cell alias="totalVAT" colSpan="1" rowSpan="1"/>
+        <cell alias="fix2" colSpan="1" rowSpan="1"/>
+        <cell alias="month1" colSpan="1" rowSpan="1"/>
+        <cell alias="month2" colSpan="1" rowSpan="1"/>
+        <cell alias="month3" colSpan="1" rowSpan="1"/>
     </row>
     <row alias="R7">
         <cell alias="code" colSpan="1" rowSpan="1" stringValue="077"/>
         <cell alias="name" colSpan="1" rowSpan="1" stringValue="Северный"/>
-        <cell alias="totalVAT" colSpan="1" rowSpan="1" styleAlias="Автозаполняемая"/>
-        <cell alias="month1" colSpan="1" editable="false" rowSpan="1" styleAlias="Автозаполняемая"/>
-        <cell alias="month2" colSpan="1" editable="false" rowSpan="1" styleAlias="Автозаполняемая"/>
-        <cell alias="month3" colSpan="1" editable="false" rowSpan="1" styleAlias="Автозаполняемая"/>
+        <cell alias="fix1" colSpan="1" rowSpan="1"/>
+        <cell alias="totalVAT" colSpan="1" rowSpan="1"/>
+        <cell alias="fix2" colSpan="1" rowSpan="1"/>
+        <cell alias="month1" colSpan="1" rowSpan="1"/>
+        <cell alias="month2" colSpan="1" rowSpan="1"/>
+        <cell alias="month3" colSpan="1" rowSpan="1"/>
     </row>
     <row alias="R8">
         <cell alias="code" colSpan="1" rowSpan="1" stringValue="055"/>
         <cell alias="name" colSpan="1" rowSpan="1" stringValue="Северо-Западный"/>
-        <cell alias="totalVAT" colSpan="1" rowSpan="1" styleAlias="Автозаполняемая"/>
-        <cell alias="month1" colSpan="1" editable="false" rowSpan="1" styleAlias="Автозаполняемая"/>
-        <cell alias="month2" colSpan="1" editable="false" rowSpan="1" styleAlias="Автозаполняемая"/>
-        <cell alias="month3" colSpan="1" editable="false" rowSpan="1" styleAlias="Автозаполняемая"/>
+        <cell alias="fix1" colSpan="1" rowSpan="1"/>
+        <cell alias="totalVAT" colSpan="1" rowSpan="1"/>
+        <cell alias="fix2" colSpan="1" rowSpan="1"/>
+        <cell alias="month1" colSpan="1" rowSpan="1"/>
+        <cell alias="month2" colSpan="1" rowSpan="1"/>
+        <cell alias="month3" colSpan="1" rowSpan="1"/>
     </row>
     <row alias="R9">
         <cell alias="code" colSpan="1" rowSpan="1" stringValue="044"/>
         <cell alias="name" colSpan="1" rowSpan="1" stringValue="Сибирский"/>
-        <cell alias="totalVAT" colSpan="1" rowSpan="1" styleAlias="Автозаполняемая"/>
-        <cell alias="month1" colSpan="1" editable="false" rowSpan="1" styleAlias="Автозаполняемая"/>
-        <cell alias="month2" colSpan="1" editable="false" rowSpan="1" styleAlias="Автозаполняемая"/>
-        <cell alias="month3" colSpan="1" editable="false" rowSpan="1" styleAlias="Автозаполняемая"/>
+        <cell alias="fix1" colSpan="1" rowSpan="1"/>
+        <cell alias="totalVAT" colSpan="1" rowSpan="1"/>
+        <cell alias="fix2" colSpan="1" rowSpan="1"/>
+        <cell alias="month1" colSpan="1" rowSpan="1"/>
+        <cell alias="month2" colSpan="1" rowSpan="1"/>
+        <cell alias="month3" colSpan="1" rowSpan="1"/>
     </row>
     <row alias="R10">
         <cell alias="code" colSpan="1" rowSpan="1" stringValue="040"/>
         <cell alias="name" colSpan="1" rowSpan="1" stringValue="Среднерусский"/>
-        <cell alias="totalVAT" colSpan="1" rowSpan="1" styleAlias="Автозаполняемая"/>
-        <cell alias="month1" colSpan="1" editable="false" rowSpan="1" styleAlias="Автозаполняемая"/>
-        <cell alias="month2" colSpan="1" editable="false" rowSpan="1" styleAlias="Автозаполняемая"/>
-        <cell alias="month3" colSpan="1" editable="false" rowSpan="1" styleAlias="Автозаполняемая"/>
+        <cell alias="fix1" colSpan="1" rowSpan="1"/>
+        <cell alias="totalVAT" colSpan="1" rowSpan="1"/>
+        <cell alias="fix2" colSpan="1" rowSpan="1"/>
+        <cell alias="month1" colSpan="1" rowSpan="1"/>
+        <cell alias="month2" colSpan="1" rowSpan="1"/>
+        <cell alias="month3" colSpan="1" rowSpan="1"/>
     </row>
     <row alias="R11">
         <cell alias="code" colSpan="1" rowSpan="1" stringValue="016"/>
         <cell alias="name" colSpan="1" rowSpan="1" stringValue="Уральский"/>
-        <cell alias="totalVAT" colSpan="1" rowSpan="1" styleAlias="Автозаполняемая"/>
-        <cell alias="month1" colSpan="1" editable="false" rowSpan="1" styleAlias="Автозаполняемая"/>
-        <cell alias="month2" colSpan="1" editable="false" rowSpan="1" styleAlias="Автозаполняемая"/>
-        <cell alias="month3" colSpan="1" editable="false" rowSpan="1" styleAlias="Автозаполняемая"/>
+        <cell alias="fix1" colSpan="1" rowSpan="1"/>
+        <cell alias="totalVAT" colSpan="1" rowSpan="1"/>
+        <cell alias="fix2" colSpan="1" rowSpan="1"/>
+        <cell alias="month1" colSpan="1" rowSpan="1"/>
+        <cell alias="month2" colSpan="1" rowSpan="1"/>
+        <cell alias="month3" colSpan="1" rowSpan="1"/>
     </row>
     <row alias="R12">
         <cell alias="code" colSpan="1" rowSpan="1" stringValue="013"/>
         <cell alias="name" colSpan="1" rowSpan="1" stringValue="Центрально-Черноземный"/>
-        <cell alias="totalVAT" colSpan="1" rowSpan="1" styleAlias="Автозаполняемая"/>
-        <cell alias="month1" colSpan="1" editable="false" rowSpan="1" styleAlias="Автозаполняемая"/>
-        <cell alias="month2" colSpan="1" editable="false" rowSpan="1" styleAlias="Автозаполняемая"/>
-        <cell alias="month3" colSpan="1" editable="false" rowSpan="1" styleAlias="Автозаполняемая"/>
+        <cell alias="fix1" colSpan="1" rowSpan="1"/>
+        <cell alias="totalVAT" colSpan="1" rowSpan="1"/>
+        <cell alias="fix2" colSpan="1" rowSpan="1"/>
+        <cell alias="month1" colSpan="1" rowSpan="1"/>
+        <cell alias="month2" colSpan="1" rowSpan="1"/>
+        <cell alias="month3" colSpan="1" rowSpan="1"/>
     </row>
     <row alias="R13">
         <cell alias="code" colSpan="1" rowSpan="1" stringValue="052"/>
         <cell alias="name" colSpan="1" rowSpan="1" stringValue="Юго-Западный"/>
-        <cell alias="totalVAT" colSpan="1" rowSpan="1" styleAlias="Автозаполняемая"/>
-        <cell alias="month1" colSpan="1" editable="false" rowSpan="1" styleAlias="Автозаполняемая"/>
-        <cell alias="month2" colSpan="1" editable="false" rowSpan="1" styleAlias="Автозаполняемая"/>
-        <cell alias="month3" colSpan="1" editable="false" rowSpan="1" styleAlias="Автозаполняемая"/>
+        <cell alias="fix1" colSpan="1" rowSpan="1"/>
+        <cell alias="totalVAT" colSpan="1" rowSpan="1"/>
+        <cell alias="fix2" colSpan="1" rowSpan="1"/>
+        <cell alias="month1" colSpan="1" rowSpan="1"/>
+        <cell alias="month2" colSpan="1" rowSpan="1"/>
+        <cell alias="month3" colSpan="1" rowSpan="1"/>
     </row>
     <row alias="R14">
         <cell alias="code" colSpan="1" rowSpan="1" stringValue="038"/>
         <cell alias="name" colSpan="1" rowSpan="1" stringValue="Московский банк СБРФ"/>
-        <cell alias="totalVAT" colSpan="1" rowSpan="1" styleAlias="Автозаполняемая"/>
-        <cell alias="month1" colSpan="1" editable="false" rowSpan="1" styleAlias="Автозаполняемая"/>
-        <cell alias="month2" colSpan="1" editable="false" rowSpan="1" styleAlias="Автозаполняемая"/>
-        <cell alias="month3" colSpan="1" editable="false" rowSpan="1" styleAlias="Автозаполняемая"/>
+        <cell alias="fix1" colSpan="1" rowSpan="1"/>
+        <cell alias="totalVAT" colSpan="1" rowSpan="1"/>
+        <cell alias="fix2" colSpan="1" rowSpan="1"/>
+        <cell alias="month1" colSpan="1" rowSpan="1"/>
+        <cell alias="month2" colSpan="1" rowSpan="1"/>
+        <cell alias="month3" colSpan="1" rowSpan="1"/>
     </row>
     <row alias="R15">
         <cell alias="code" colSpan="1" rowSpan="1" stringValue=""/>
         <cell alias="name" colSpan="1" rowSpan="1" stringValue="Отдел отчетности МСЦ &quot;Черноземье&quot;"/>
-        <cell alias="totalVAT" colSpan="1" rowSpan="1" styleAlias="Автозаполняемая"/>
-        <cell alias="month1" colSpan="1" editable="false" rowSpan="1" styleAlias="Автозаполняемая"/>
-        <cell alias="month2" colSpan="1" editable="false" rowSpan="1" styleAlias="Автозаполняемая"/>
-        <cell alias="month3" colSpan="1" editable="false" rowSpan="1" styleAlias="Автозаполняемая"/>
+        <cell alias="fix1" colSpan="1" rowSpan="1"/>
+        <cell alias="totalVAT" colSpan="1" rowSpan="1"/>
+        <cell alias="fix2" colSpan="1" rowSpan="1"/>
+        <cell alias="month1" colSpan="1" rowSpan="1"/>
+        <cell alias="month2" colSpan="1" rowSpan="1"/>
+        <cell alias="month3" colSpan="1" rowSpan="1"/>
     </row>
     <row alias="R16">
         <cell alias="code" colSpan="1" rowSpan="1" stringValue="" styleAlias="Контрольные суммы"/>
@@ -126,47 +156,56 @@
         <cell alias="fix1" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
         <cell alias="totalVAT" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
         <cell alias="fix2" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
-        <cell alias="month1" colSpan="1" editable="false" rowSpan="1" styleAlias="Контрольные суммы"/>
-        <cell alias="month2" colSpan="1" editable="false" rowSpan="1" styleAlias="Контрольные суммы"/>
-        <cell alias="month3" colSpan="1" editable="false" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="month1" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="month2" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="month3" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
     </row>
     <row alias="R17">
-        <cell alias="code" colSpan="1" rowSpan="1" stringValue="Справочно:"/>
-        <cell alias="name" colSpan="1" rowSpan="1" stringValue="Наименование подразделения"/>
-        <cell alias="fix1" colSpan="2" rowSpan="1" stringValue="Сумма НДС"/>
-        <cell alias="totalVAT" colSpan="1" rowSpan="1" styleAlias="Автозаполняемая"/>
-        <cell alias="fix2" colSpan="2" rowSpan="1" stringValue="Сумма корректировки по НДС"/>
-        <cell alias="month1" colSpan="1" editable="false" rowSpan="1"/>
-        <cell alias="month2" colSpan="1" editable="false" rowSpan="1"/>
-        <cell alias="month3" colSpan="1" editable="false" rowSpan="1"/>
+        <cell alias="code" colSpan="1" rowSpan="1" stringValue="Справочно:" styleAlias="Жирный"/>
+        <cell alias="name" colSpan="1" rowSpan="1" stringValue="Наименование подразделения" styleAlias="Жирный"/>
+        <cell alias="fix1" colSpan="2" rowSpan="1" stringValue="Сумма НДС" styleAlias="Жирный"/>
+        <cell alias="totalVAT" colSpan="1" rowSpan="1" styleAlias="Жирный"/>
+        <cell alias="fix2" colSpan="2" rowSpan="1" stringValue="Сумма корректировки по НДС" styleAlias="Жирный"/>
+        <cell alias="month1" colSpan="1" rowSpan="1" styleAlias="Жирный"/>
+        <cell alias="month2" colSpan="1" rowSpan="1" styleAlias="Жирный"/>
+        <cell alias="month3" colSpan="1" rowSpan="1" styleAlias="Жирный"/>
     </row>
     <row alias="R18">
         <cell alias="code" colSpan="1" rowSpan="1" stringValue=""/>
         <cell alias="name" colSpan="1" rowSpan="1" stringValue="Отдел отчетности МСЦ &quot;Ясная поляна&quot;"/>
-        <cell alias="totalVAT" colSpan="1" rowSpan="1" styleAlias="Автозаполняемая"/>
-        <cell alias="month1" colSpan="1" editable="false" rowSpan="1" styleAlias="Автозаполняемая"/>
-        <cell alias="month2" colSpan="1" editable="false" rowSpan="1" styleAlias="Автозаполняемая"/>
-        <cell alias="month3" colSpan="1" editable="false" rowSpan="1" styleAlias="Автозаполняемая"/>
+        <cell alias="fix1" colSpan="1" rowSpan="1"/>
+        <cell alias="totalVAT" colSpan="1" rowSpan="1"/>
+        <cell alias="fix2" colSpan="1" rowSpan="1"/>
+        <cell alias="month1" colSpan="1" rowSpan="1"/>
+        <cell alias="month2" colSpan="1" rowSpan="1"/>
+        <cell alias="month3" colSpan="1" rowSpan="1"/>
     </row>
     <row alias="R19">
         <cell alias="code" colSpan="1" rowSpan="1" stringValue=""/>
-        <cell alias="name" colSpan="1" rowSpan="1" stringValue="Управление учета внутрихозяйственных операций МСЦ &quot;Южный порт&quot;"/>
-        <cell alias="totalVAT" colSpan="1" rowSpan="1" styleAlias="Автозаполняемая"/>
-        <cell alias="month1" colSpan="1" editable="false" rowSpan="1" styleAlias="Автозаполняемая"/>
-        <cell alias="month2" colSpan="1" editable="false" rowSpan="1" styleAlias="Автозаполняемая"/>
-        <cell alias="month3" colSpan="1" editable="false" rowSpan="1" styleAlias="Автозаполняемая"/>
+        <cell alias="name" colSpan="1" rowSpan="1"
+              stringValue="Управление учета внутрихозяйственных операций МСЦ &quot;Южный порт&quot;"/>
+        <cell alias="fix1" colSpan="1" rowSpan="1" stringValue=""/>
+        <cell alias="totalVAT" colSpan="1" rowSpan="1"/>
+        <cell alias="fix2" colSpan="1" rowSpan="1"/>
+        <cell alias="month1" colSpan="1" rowSpan="1"/>
+        <cell alias="month2" colSpan="1" rowSpan="1"/>
+        <cell alias="month3" colSpan="1" rowSpan="1"/>
     </row>
     <row alias="R20">
         <cell alias="code" colSpan="1" rowSpan="1" stringValue=""/>
-        <cell alias="name" colSpan="1" rowSpan="1" stringValue="Управление учета операций на глобальных рынках и отчетности МСЦ &quot;Южный порт&quot;"/>
-        <cell alias="totalVAT" colSpan="1" rowSpan="1" styleAlias="Автозаполняемая"/>
-        <cell alias="month1" colSpan="1" editable="false" rowSpan="1" styleAlias="Автозаполняемая"/>
-        <cell alias="month2" colSpan="1" editable="false" rowSpan="1" styleAlias="Автозаполняемая"/>
-        <cell alias="month3" colSpan="1" editable="false" rowSpan="1" styleAlias="Автозаполняемая"/>
+        <cell alias="name" colSpan="1" rowSpan="1"
+              stringValue="Управление учета операций на глобальных рынках и отчетности МСЦ &quot;Южный порт&quot;"/>
+        <cell alias="fix1" colSpan="1" rowSpan="1"/>
+        <cell alias="totalVAT" colSpan="1" rowSpan="1"/>
+        <cell alias="fix2" colSpan="1" rowSpan="1"/>
+        <cell alias="month1" colSpan="1" rowSpan="1"/>
+        <cell alias="month2" colSpan="1" rowSpan="1"/>
+        <cell alias="month3" colSpan="1" rowSpan="1"/>
     </row>
     <row alias="R21">
         <cell alias="code" colSpan="1" rowSpan="1" stringValue="" styleAlias="Контрольные суммы"/>
-        <cell alias="name" colSpan="1" rowSpan="1" stringValue="Всего по Сбербанку (сумма НДС):" styleAlias="Контрольные суммы"/>
+        <cell alias="name" colSpan="1" rowSpan="1" stringValue="Всего по Сбербанку (сумма НДС):"
+              styleAlias="Контрольные суммы"/>
         <cell alias="fix1" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
         <cell alias="totalVAT" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
         <cell alias="fix2" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>

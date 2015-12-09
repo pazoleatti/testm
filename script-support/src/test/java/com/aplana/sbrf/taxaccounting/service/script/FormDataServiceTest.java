@@ -249,14 +249,33 @@ public class FormDataServiceTest {
         assertTrue(logger.getEntries().isEmpty());
     }
 
+    @Test
     public void checkReferenceValueTest() {
         Logger logger = new Logger();
         formDataService.checkReferenceValue(REF_BOOK_ID, "test", "test", ROW_INDEX, COL_INDEX, logger, true);
         assertTrue(logger.getEntries().isEmpty());
+        logger.clear();
+
         formDataService.checkReferenceValue(REF_BOOK_ID, "test", "test", ROW_INDEX, COL_INDEX, logger, false);
         assertTrue(logger.getEntries().isEmpty());
+        logger.clear();
+
+        formDataService.checkReferenceValue(REF_BOOK_ID, "test_1", Arrays.asList("test_1", "test_2"), ROW_INDEX, COL_INDEX, logger, false);
+        assertTrue(logger.getEntries().isEmpty());
+        logger.clear();
+
         formDataService.checkReferenceValue(REF_BOOK_ID, "test_1", "test_2", ROW_INDEX, COL_INDEX, logger, false);
         assertFalse(logger.getEntries().isEmpty());
+        logger.clear();
+
+        formDataService.checkReferenceValue(REF_BOOK_ID, "test", Arrays.asList("test_1", "test_2"), ROW_INDEX, COL_INDEX, logger, false);
+        assertFalse(logger.getEntries().isEmpty());
+        logger.clear();
+
+        List<String> list = null;
+        formDataService.checkReferenceValue(REF_BOOK_ID, "test_1", list, ROW_INDEX, COL_INDEX, logger, false);
+        assertFalse(logger.getEntries().isEmpty());
+        logger.clear();
     }
 
     @Test(expected = ServiceException.class)

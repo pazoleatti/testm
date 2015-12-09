@@ -47,7 +47,7 @@ public class ExitAndSaveFormDataHandler extends
             refBookHelper.dataRowsCheck(action.getModifiedRows(), formData.getFormColumns());
             dataRowService.update(userInfo, formData.getId(), action.getModifiedRows(), formData.isManual());
         }
-        formDataService.saveFormData(logger, securityService.currentUserInfo(), formData);
+        formDataService.saveFormData(logger, securityService.currentUserInfo(), formData, false);
         formDataService.unlock(formData.getId(), userInfo);
         dataRowService.removeCheckPoint(formData);
 		DataRowResult result = new DataRowResult();

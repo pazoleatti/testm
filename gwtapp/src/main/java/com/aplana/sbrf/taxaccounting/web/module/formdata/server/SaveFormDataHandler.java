@@ -45,7 +45,7 @@ public class SaveFormDataHandler extends
             refBookHelper.dataRowsCheck(action.getModifiedRows(), formData.getFormColumns());
 		    dataRowService.update(securityService.currentUserInfo(), formData.getId(), action.getModifiedRows(), formData.isManual());
 		}
-		formDataService.saveFormData(logger, securityService.currentUserInfo(), formData);
+		formDataService.saveFormData(logger, securityService.currentUserInfo(), formData, false);
 		// Создаем контрольную точку восстановления
 		dataRowService.createCheckPoint(formData);
 

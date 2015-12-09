@@ -44,7 +44,7 @@ public abstract class IfrsGeneratorAsyncTask extends AbstractAsyncTask {
     }
 
     @Override
-    protected void executeBusinessLogic(Map<String, Object> params, Logger logger) {
+    protected boolean executeBusinessLogic(Map<String, Object> params, Logger logger) {
         int userId = (Integer)params.get(USER_ID.name());
         Integer reportPeriod = (Integer)params.get("reportPeriodId");
         TAUserInfo userInfo = new TAUserInfo();
@@ -58,6 +58,7 @@ public abstract class IfrsGeneratorAsyncTask extends AbstractAsyncTask {
                 lockService.updateState(lock, lockDate, state);
             }
         });
+        return true;
     }
 
     @Override

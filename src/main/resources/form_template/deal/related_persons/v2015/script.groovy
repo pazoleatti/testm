@@ -39,17 +39,17 @@ switch (formDataEvent) {
         break
     case FormDataEvent.AFTER_CREATE:
         refresh()
-        formDataService.saveCachedDataRows(formData, logger)
+        formDataService.saveCachedDataRows(formData, logger, formDataEvent)
         break
     case FormDataEvent.REFRESH:
         refresh()
-        formDataService.saveCachedDataRows(formData, logger)
+        formDataService.saveCachedDataRows(formData, logger, formDataEvent)
         break
     case FormDataEvent.CALCULATE:
         checkSourceForm()
         calc()
         logicCheck()
-        formDataService.saveCachedDataRows(formData, logger)
+        formDataService.saveCachedDataRows(formData, logger, formDataEvent)
         break
     case FormDataEvent.CHECK:
         logicCheck()
@@ -64,7 +64,7 @@ switch (formDataEvent) {
         break
     case FormDataEvent.SAVE:
         updateStylesAndSort()
-        formDataService.saveCachedDataRows(formData, logger)
+        formDataService.saveCachedDataRows(formData, logger, formDataEvent)
         break
 }
 
@@ -376,7 +376,7 @@ def subCalc12(def row) {
                 return [null, findRow.categoryRevised]
             }
         }
-    } else if (reportPeriod.order == 4) {
+    } else {
         // полугодие / 9 месяцев / год
         // форма "ВЗЛ" за предыдущий налоговый период
         sourceRows = getSourceDataRows(800, FormDataKind.PRIMARY, true)
@@ -390,7 +390,8 @@ def subCalc12(def row) {
 
         // форма "Приложение 4.1. (6 месяцев)" / "Приложение 4.1. (9 месяцев)"
         def formTypeId = (reportPeriod.order == 2 ? 801 : 802)
-        sourceRows = getSourceDataRows(formTypeId, FormDataKind.SUMMARY)
+        def isPrevPeriod = (reportPeriod.order == 4)
+        sourceRows = getSourceDataRows(formTypeId, FormDataKind.SUMMARY, isPrevPeriod)
         findRow = sourceRows?.find { it.name == row.name }
         if (findRow) {
             // для полугодия и 9 месяцев использовать графа 20, для периода год - графу 21
@@ -443,7 +444,12 @@ void checkSourceForm() {
         sourceIds = [810, 800, 802]
     }
     sourceIds.each { id ->
-        def rows = getSourceDataRows(id, sourceMap[id].kind, sourceMap[id].isPrevPeriod)
+        // TODO (Ramil Timerbaev) возможно надо переделать задание источников по периодам для наглядности
+        def isPrevPeriod = sourceMap[id].isPrevPeriod
+        if (reportPeriod.order == 4 && id == 802) {
+            isPrevPeriod = true
+        }
+        def rows = getSourceDataRows(id, sourceMap[id].kind, isPrevPeriod)
         if (rows == null) {
             def formTypeName = getFormTypeById(id)?.name
             def kindName = sourceMap[id].kind.title

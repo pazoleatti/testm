@@ -71,7 +71,7 @@ public class FormDataScriptingServiceImpl extends TAAbstractScriptingServiceImpl
                           FormDataEvent event, Logger logger,
                           Map<String, Object> additionalParameters) {
         // Биндим параметры для выполнения скрипта
-        Bindings b = scriptEngine.createBindings();
+        Bindings b = getScriptEngine().createBindings();
 
         Map<String, ?> scriptComponents = getScriptExposedBeans(formData.getFormType().getTaxType(), event);
         for (Object component : scriptComponents.values()) {
@@ -172,7 +172,7 @@ public class FormDataScriptingServiceImpl extends TAAbstractScriptingServiceImpl
 
     private void executeScript(Bindings bindings, String script, Logger logger) {
         try {
-            scriptEngine.eval(script, bindings);
+            getScriptEngine().eval(script, bindings);
         } catch (ScriptException e) {
             logScriptException(e, logger);
         } catch (Exception e) {

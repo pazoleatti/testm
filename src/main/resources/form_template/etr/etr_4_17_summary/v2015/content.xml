@@ -31,7 +31,7 @@
         <alias>department</alias>
         <checking>false</checking>
         <columnType>REFBOOK</columnType>
-        <name>Подразделение территориального банка</name>
+        <name>Подразделение</name>
         <order>3</order>
         <width>15</width>
         <hierarchical>true</hierarchical>

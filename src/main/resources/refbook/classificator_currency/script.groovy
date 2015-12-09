@@ -16,7 +16,8 @@ switch (formDataEvent) {
 void save() {
     saveRecords.each {
         def code = it.CODE?.stringValue
-        if (code!=null && code!="" && !code.isNumber()) {
+        def pattern = /[0-9]{1,}/
+        if (code!=null && code!="" && !(code ==~ pattern)) {
             logger.error("Атрибут \"%s\" заполнен неверно (%s)! Значение должно содержать только цифры!", "Код", code)
         }
     }

@@ -39,13 +39,13 @@ switch (formDataEvent) {
         break
     case FormDataEvent.AFTER_CREATE:
         addPrevDataRows()
-        formDataService.saveCachedDataRows(formData, logger)
+        formDataService.saveCachedDataRows(formData, logger, formDataEvent)
         break
     case FormDataEvent.CALCULATE:
         checkRegionId()
         calc()
         logicCheck()
-        formDataService.saveCachedDataRows(formData, logger)
+        formDataService.saveCachedDataRows(formData, logger, formDataEvent)
         break
     case FormDataEvent.CHECK:
         checkRegionId()
@@ -71,11 +71,11 @@ switch (formDataEvent) {
     case FormDataEvent.IMPORT:
         checkRegionId()
         importData()
-        formDataService.saveCachedDataRows(formData, logger)
+        formDataService.saveCachedDataRows(formData, logger, formDataEvent)
         break
     case FormDataEvent.IMPORT_TRANSPORT_FILE:
         importTransportData()
-        formDataService.saveCachedDataRows(formData, logger)
+        formDataService.saveCachedDataRows(formData, logger, formDataEvent)
         break
     case FormDataEvent.SORT_ROWS:
         sortFormDataRows()

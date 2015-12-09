@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?><rows>
+  <row alias="total">
+    <cell alias="rowNumber" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+    <cell alias="fix" colSpan="4" rowSpan="1" stringValue="Итого" styleAlias="Контрольные суммы"/>
+    <cell alias="code" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+    <cell alias="balance" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+    <cell alias="name" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+    <cell alias="sum" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+  </row>
+</rows>

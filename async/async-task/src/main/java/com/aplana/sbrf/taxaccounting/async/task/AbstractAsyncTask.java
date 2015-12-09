@@ -56,7 +56,7 @@ public abstract class AbstractAsyncTask implements AsyncTask {
      * Выполнение бизнес логики задачи
      * @param params параметры
      */
-    protected abstract void executeBusinessLogic(Map<String, Object> params, Logger logger) throws InterruptedException;
+    protected abstract boolean executeBusinessLogic(Map<String, Object> params, Logger logger) throws InterruptedException;
 
     /**
      * Возвращает название задачи. Используется при выводе ошибок.
@@ -118,7 +118,7 @@ public abstract class AbstractAsyncTask implements AsyncTask {
                         LOG.info(String.format("Для задачи с ключом %s запущено выполнение бизнес-логики", lock));
                         lockService.updateState(lock, lockDate, getBusinessLogicTitle());
                         //Если блокировка на объект задачи все еще существует, значит на нем можно выполнять бизнес-логику
-                        executeBusinessLogic(params, logger);
+                        final boolean success = executeBusinessLogic(params, logger);
                         if (!lockService.isLockExists(lock, lockDate)) {
                             //Если после выполнения бизнес логики, оказывается, что блокировки уже нет
                             //Значит результаты нам уже не нужны - откатываем транзакцию и все изменения
@@ -131,8 +131,8 @@ public abstract class AbstractAsyncTask implements AsyncTask {
                                 try {
                                     LOG.info(String.format("Для задачи с ключом %s выполняется сохранение сообщений", lock));
                                     lockService.updateState(lock, lockDate, LockData.State.SAVING_MSGS.getText());
-                                    String msg = getNotificationMsg(params);
-                                    logger.getEntries().add(0, new LogEntry(LogLevel.INFO, msg));
+                                    String msg = success?getNotificationMsg(params):getErrorMsg(params);
+                                    logger.getEntries().add(0, new LogEntry(success?LogLevel.INFO:LogLevel.ERROR, msg));
                                     String uuid = logEntryService.save(logger.getEntries());
                                     LOG.info(String.format("Для задачи с ключом %s выполняется рассылка уведомлений", lock));
                                     lockService.updateState(lock, lockDate, LockData.State.SENDING_MSGS.getText());

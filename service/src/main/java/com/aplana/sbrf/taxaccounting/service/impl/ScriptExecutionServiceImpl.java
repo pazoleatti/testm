@@ -65,7 +65,7 @@ public class ScriptExecutionServiceImpl extends TAAbstractScriptingServiceImpl i
 			return;
 		}
         // Биндим параметры для выполнения скрипта
-        Bindings b = scriptEngine.createBindings();
+        Bindings b = getScriptEngine().createBindings();
         Map<String, ?> scriptComponents =  getScriptExposedBeans();
         for (Object component : scriptComponents.values()) {
             ScriptComponentContextImpl scriptComponentContext = new ScriptComponentContextImpl();
@@ -89,7 +89,7 @@ public class ScriptExecutionServiceImpl extends TAAbstractScriptingServiceImpl i
 
     private void executeScript(Bindings bindings, String script, Logger logger) {
         try {
-            scriptEngine.eval(script, bindings);
+            getScriptEngine().eval(script, bindings);
         } catch (ScriptException e) {
             logScriptException(e, logger);
         } catch (Exception e) {

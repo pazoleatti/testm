@@ -66,6 +66,7 @@ try {
     addTypeTemplate(formType, formTemplate, createType, createTemplate)
 
     List<Column> formColumns = new ArrayList<>()
+	def referenceColumnMap = [:]
 
     //Добавление колонок
     // NAME, ALIAS, TYPE, WIDTH, PRECISION, MAX_LENGTH, CHECKING, ATTRIBUTE_ID, FORMAT, FILTER, PARENT_COLUMN_ID, ATTRIBUTE_ID2, NUMERATION_ROW
@@ -73,6 +74,20 @@ try {
         %13%
         formTemplate.getColumns().addAll(formColumns)
         columnDaoImpl.createFormColumns(formColumns, formTemplate)
+
+	  	referenceColumnMap.each { alias, parentAlias ->
+			def column = formColumns.find{ it.alias == alias }
+			if (column != null) {
+				column.setParentAlias(parentAlias)
+			} else {
+				logger.error("Родительская колонка с псевдонимом $parentAlias не обнаружена!")
+			}
+		}
+
+        if (!referenceColumnMap.isEmpty()) {
+            columnDaoImpl.updateFormColumns(formColumns, formTemplate)
+        }
+
         logger.info("К версии макета добавлены колонки")
     }
 

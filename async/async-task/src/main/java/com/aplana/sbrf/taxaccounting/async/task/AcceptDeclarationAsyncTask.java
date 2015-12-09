@@ -34,9 +34,6 @@ public abstract class AcceptDeclarationAsyncTask extends AbstractAsyncTask {
     private DeclarationTemplateService declarationTemplateService;
 
     @Autowired
-    private LogEntryService logEntryService;
-
-    @Autowired
     private LockDataService lockService;
 
     private static final SimpleDateFormat formatter = new SimpleDateFormat("dd.MM.yyyy");
@@ -64,7 +61,7 @@ public abstract class AcceptDeclarationAsyncTask extends AbstractAsyncTask {
     }
 
     @Override
-    protected void executeBusinessLogic(Map<String, Object> params, Logger logger) {
+    protected boolean executeBusinessLogic(Map<String, Object> params, Logger logger) {
         long declarationDataId = (Long)params.get("declarationDataId");
         int userId = (Integer)params.get(USER_ID.name());
         TAUserInfo userInfo = new TAUserInfo();
@@ -81,6 +78,7 @@ public abstract class AcceptDeclarationAsyncTask extends AbstractAsyncTask {
                 }
             });
         }
+        return true;
     }
 
     @Override

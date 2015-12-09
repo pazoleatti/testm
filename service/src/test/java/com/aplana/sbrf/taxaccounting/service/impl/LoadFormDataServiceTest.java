@@ -234,7 +234,7 @@ public class LoadFormDataServiceTest {
     }
 
     private void mockSignService() {
-        when(signService.checkSign(anyString(), anyInt())).thenReturn(true);
+        when(signService.checkSign(anyString(), anyInt(), any(Logger.class))).thenReturn(true);
     }
 
     // Успешный импорт ТФ НФ

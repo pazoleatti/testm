@@ -111,7 +111,7 @@ public class RefBookScriptingServiceImpl extends TAAbstractScriptingServiceImpl 
         scriptLogger.setTaUserInfo(userInfo);
 
         // Биндиг параметров для выполнения скрипта
-        Bindings bindings = scriptEngine.createBindings();
+        Bindings bindings = getScriptEngine().createBindings();
         bindings.put("dataSource", applicationContext.getBean("dataSource"));
         // ScriptExposed
         Map<String, ?> scriptComponents = applicationContext.getBeansWithAnnotation(ScriptExposed.class);
@@ -215,7 +215,7 @@ public class RefBookScriptingServiceImpl extends TAAbstractScriptingServiceImpl 
      */
     private boolean executeScript(Bindings bindings, String script, Logger logger) {
         try {
-            scriptEngine.eval(script, bindings);
+            getScriptEngine().eval(script, bindings);
             return true;
         } catch (ScriptException e) {
             logScriptException(e, logger);

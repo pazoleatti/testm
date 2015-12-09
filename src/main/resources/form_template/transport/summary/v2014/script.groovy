@@ -61,7 +61,7 @@ switch (formDataEvent) {
         checkRegionId()
         calc()
         logicCheck()
-        formDataService.saveCachedDataRows(formData, logger)
+        formDataService.saveCachedDataRows(formData, logger, formDataEvent)
         break
     case FormDataEvent.CHECK:
         checkRegionId()
@@ -72,7 +72,7 @@ switch (formDataEvent) {
         consolidation()
         calc()
         logicCheck()
-        formDataService.saveCachedDataRows(formData, logger)
+        formDataService.saveCachedDataRows(formData, logger, formDataEvent)
         break
     case FormDataEvent.ADD_ROW:
         addNewRow()
@@ -93,7 +93,7 @@ switch (formDataEvent) {
         break
     case FormDataEvent.IMPORT:
         importData()
-        formDataService.saveCachedDataRows(formData, logger)
+        formDataService.saveCachedDataRows(formData, logger, formDataEvent)
         break
     case FormDataEvent.SORT_ROWS:
         sortFormDataRows()
@@ -280,7 +280,7 @@ def calc() {
         def errorMsg = "Строка $index: "
 
         // получение региона по ОКТМО
-        def region = getRegionByOKTMO(row.okato, errorMsg)
+        def region = getRegionByOKTMO(row.okato, index)
 
         // графа 2, 3
         fillTaKpp(row, errorMsg)
@@ -428,7 +428,6 @@ def checkTaKpp(def row, def errorMsg) {
 
 void logicCheck() {
     def dataRows = formDataService.getDataRowHelper(formData).allCached
-    def int monthCountInPeriod = getMonthCount()
 
     for (def row : dataRows) {
         if (row.getAlias() != null) {
@@ -482,16 +481,11 @@ void logicCheck() {
         // удовлетворяющая условиям выборки, приведённой в алгоритме расчёта «Графы 2 и 3»
         fillTaKpp(row, errorMsg)
 
-        // дополнительная проверка для 12 графы
-        if (row.ownMonths != null && row.ownMonths > monthCountInPeriod) {
-            logger.warn('Срок владение ТС не должен быть больше текущего налогового периода.')
-        }
-
         // 8. Проверка налоговой ставки ТС
         // В справочнике «Ставки транспортного налога» существует строка, удовлетворяющая условиям выборки,
         // приведённой в алгоритме расчёта «графы 24» Табл. 3
         // получение региона по ОКТМО
-        def region = getRegionByOKTMO(row.okato, errorMsg)
+        def region = getRegionByOKTMO(row.okato, index)
         calc24(row, region, errorMsg, true)
 
         // 9. Проверка на корректность заполнения кода НО и КПП согласно справочнику параметров представления деклараций
@@ -502,23 +496,23 @@ void logicCheck() {
 /**
  * Получение региона по коду ОКТМО
  */
-def getRegionByOKTMO(def oktmoCell, def errorMsg) {
+def getRegionByOKTMO(def oktmoCell, def index) {
     def reportDate = getReportDate()
 
     def oktmo3 = getRefBookValue(96, oktmoCell)?.CODE?.stringValue?.substring(0, 3)
     if ("719".equals(oktmo3)) {
-        return getRecord(4, 'CODE', '89', null, null, reportDate);
+        return getRecord(4, 'CODE', '89', index, null, reportDate);
     } else if ("718".equals(oktmo3)) {
-        return getRecord(4, 'CODE', '86', null, null, reportDate);
+        return getRecord(4, 'CODE', '86', index, null, reportDate);
     } else if ("118".equals(oktmo3)) {
-        return getRecord(4, 'CODE', '83', null, null, reportDate);
+        return getRecord(4, 'CODE', '83', index, null, reportDate);
     } else {
-        def filter = "OKTMO_DEFINITION like '" + oktmo3?.substring(0, 2) + "%'"
+        def filter = "CODE like '" + oktmo3?.substring(0, 2) + "%'"
         def record = getRecord(4, filter, reportDate)
         if (record != null) {
             return record
         } else {
-            logger.error(errorMsg + "Не удалось определить регион по коду ОКТМО")
+            logger.error("Строка $index: Не удалось определить регион по коду ОКТМО")
             return null
         }
     }
@@ -1017,7 +1011,7 @@ void addNewRow() {
         newRow.getCell(it).setStyleAlias("Редактируемое поле")
     }
     dataRows.add(index - 1, newRow)
-    formDataService.saveCachedDataRows(formData, logger)
+    formDataService.saveCachedDataRows(formData, logger, formDataEvent)
 }
 
 void importData() {
@@ -1286,9 +1280,9 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
     colIndex++
     newRow.coef362 = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
 
-    def errorMsg = "Строка $rowIndex: "
+    // def errorMsg = "Строка $rowIndex: "
     // получение региона по ОКТМО
-    def region = getRegionByOKTMO(newRow.okato, errorMsg)
+    // def region = getRegionByOKTMO(newRow.okato, rowIndex)
 
     // графа 24 - 41 416 VALUE
     colIndex++
@@ -1380,6 +1374,10 @@ def getTotalFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) {
     return newRow
 }
 
+// что бы восстановить значение графы 30 или 32 или 34, надо
+// 1. по надписи из эксельки найти запись для код льготы (из справочника 6)
+// 2. по окато из эксельки (графа 4) найти регион (из справочника 4)
+// 3. по найденым льготе и региону + по идентификатору региона формы найти нужную льготу (из справочника 7)
 def getTaxRateImport(def values, def rowIndex, def colIndex, def row) {
     def okatoId = row.okato
     def taxRate = values[24]
@@ -1387,30 +1385,34 @@ def getTaxRateImport(def values, def rowIndex, def colIndex, def row) {
     def taxBenefitCodeDecrease = values[32]
     def benefitCodeReduction = values[34]
 
-    def regionId = formDataDepartment.regionId
-    if (!regionId && rowIndex == 1) {
+    def declarationRegionId = formDataDepartment.regionId
+    if (!declarationRegionId && rowIndex == 1) {
         logger.warn("На форме невозможно заполнить графы по ставке налога и кодам налоговых льгот, так как атрибут " +
                 "«Регион» подразделения текущей налоговой формы не заполнен (справочник «Подразделения»)!")
-    } else if (regionId) {
+    } else if (declarationRegionId) {
         if (taxRate || taxBenefitCode || taxBenefitCodeDecrease || benefitCodeReduction) {
             if (!okatoId) {
                 logger.warn("Строка $rowIndex файла: На форме невозможно заполнить графы по ставке налога и кодам " +
                         "налоговых льгот, так как в файле не заполнена графа «" + getColumnName(row, 'okato') + "»!")
             } else {
                 def okato = getOkato(getRefBookValue(96L, okatoId)?.CODE?.value)
+                def region = getRegionByOKTMO(row.okato, row.getIndex())
+                def regionId = region?.record_id?.value
 
-                row.taxBenefitCode = getTaxRate(okato, taxBenefitCode, 'taxBenefitCode', rowIndex, colIndex)
-                row.taxBenefitCodeDecrease = getTaxRate(okato, taxBenefitCodeDecrease, 'taxBenefitCodeDecrease', rowIndex, colIndex)
-                row.benefitCodeReduction = getTaxRate(okato, benefitCodeReduction, 'benefitCodeReduction', rowIndex, colIndex)
+                row.taxBenefitCode = getTaxRate(regionId, okato, taxBenefitCode, 'taxBenefitCode', rowIndex, colIndex)
+                row.taxBenefitCodeDecrease = getTaxRate(regionId, okato, taxBenefitCodeDecrease, 'taxBenefitCodeDecrease', rowIndex, colIndex)
+                row.benefitCodeReduction = getTaxRate(regionId, okato, benefitCodeReduction, 'benefitCodeReduction', rowIndex, colIndex)
 
                 if (taxRate) {
-                    row.taxRate = calc24(row, regionId, null, false)
+                    row.taxRate = calc24(row, region, null, false)
                     if(!row.taxRate){
+                        def tmpRow = formData.createDataRow()
+                        def declarationRegionCode = getRefBookValue(4L, declarationRegionId)?.CODE?.value
                         logger.warn("Строка $rowIndex, столбец " + ScriptUtils.getXLSColumnName(colIndex) + ": " +
                                 "На форме не заполнена графа «" +getColumnName(tmpRow, 'taxRate')+"», " +
                                 "так как в справочнике «Ставки транспортного налога» не найдена запись, " +
                                 "актуальная на дату «" + getReportPeriodEndDate().format("dd.MM.yyyy") + "», соответствующая следующим параметрам: " +
-                                "«Код субъекта РФ представителя декларации» = «$regionId», " +
+                                "«Код субъекта РФ представителя декларации» = «$declarationRegionCode», " +
                                 "«Код субъекта РФ» = «$okato», " +
                                 "«Код вида ТС» = «${row.tsTypeCode}», " +
                                 "«Количество лет, прошедших с года выпуска ТС» = «${row.years}», " +
@@ -1424,10 +1426,17 @@ def getTaxRateImport(def values, def rowIndex, def colIndex, def row) {
     return row
 }
 
-def getTaxRate(def okato, def taxBenefitCode, def colname, def rowIndex, def colIndex) {
+def getTaxRate(def regionId, def okato, def taxBenefitCode, def colname, def rowIndex, def colIndex) {
+    if (!taxBenefitCode || !regionId) {
+        return null
+    }
     def ref_id = 7
-    def regionId = formDataDepartment.regionId
-    String filter = "DECLARATION_REGION_ID = $regionId and DICT_REGION_ID = $okato and TAX_BENEFIT_ID =$taxBenefitCode"
+    def declarationRegionId = formDataDepartment.regionId
+    def taxBenefitId = getRecordIdImport(6L, 'CODE', taxBenefitCode, rowIndex, colIndex)
+    if (taxBenefitId == null) {
+        return null
+    }
+    String filter = "DECLARATION_REGION_ID = $declarationRegionId and DICT_REGION_ID = $regionId and TAX_BENEFIT_ID = $taxBenefitId"
     if (recordCache[ref_id] != null) {
         if (recordCache[ref_id][filter] != null) {
             return recordCache[ref_id][filter]
@@ -1443,12 +1452,13 @@ def getTaxRate(def okato, def taxBenefitCode, def colname, def rowIndex, def col
         return recordCache[ref_id][filter]
     } else {
         def tmpRow = formData.createDataRow()
+        def region = getRefBookValue(4L, declarationRegionId)
         logger.warn("Строка $rowIndex, столбец " + ScriptUtils.getXLSColumnName(colIndex) + ": " +
                 "На форме не заполнена графа «" + getColumnName(tmpRow, colname) + "», так как в справочнике " +
                 "«Параметры налоговых льгот транспортного налога» не найдена запись, " +
                 "актуальная на дату «" + getReportPeriodEndDate().format("dd.MM.yyyy") + "», " +
-                "в которой поле «Код субъекта РФ представителя декларации» = «$regionId», " +
-                "поле «Код субъекта РФ» = «$okato», поле «Код налоговой льготы» = «$taxRate»!")
+                "в которой поле «Код субъекта РФ представителя декларации» = «${region?.CODE?.value}», " +
+                "поле «Код субъекта РФ» = «$okato», поле «Код налоговой льготы» = «$taxBenefitCode»!")
     }
     return null
 }

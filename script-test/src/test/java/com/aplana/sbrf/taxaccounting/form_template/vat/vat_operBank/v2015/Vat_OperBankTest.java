@@ -11,10 +11,8 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.List;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
@@ -49,6 +47,12 @@ public class Vat_OperBankTest extends ScriptTestBase {
         return formData;
     }
 
+    @Before
+    public void mockFormDataService() {
+        DepartmentReportPeriod departmentReportPeriod = new DepartmentReportPeriod();
+        when(testHelper.getDepartmentReportPeriodService().get(anyInt())).thenReturn(departmentReportPeriod);
+    }
+
     @Override
     protected ScriptTestMockHelper getMockHelper() {
         return getDefaultScriptTestMockHelper(Vat_OperBankTest.class);
@@ -81,8 +85,8 @@ public class Vat_OperBankTest extends ScriptTestBase {
         // Назначен один тип формы
         DepartmentFormType departmentFormType = new DepartmentFormType();
         departmentFormType.setKind(KIND);
-        departmentFormType.setDepartmentId(DEPARTMENT_ID);
-        departmentFormType.setFormTypeId(TYPE_ID);
+        departmentFormType.setDepartmentId(4);
+        departmentFormType.setFormTypeId(603);
         departmentFormType.setId(1);
         when(testHelper.getDepartmentFormTypeService().getFormSources(anyInt(), anyInt(), any(FormDataKind.class),
                 any(Date.class), any(Date.class))).thenReturn(Arrays.asList(departmentFormType));
@@ -111,6 +115,6 @@ public class Vat_OperBankTest extends ScriptTestBase {
         testHelper.execute(FormDataEvent.COMPOSE);
         Assert.assertEquals(expected, testHelper.getDataRowHelper().getAll().size());
 
-        Assert.assertTrue(testHelper.getLogger().containsLevel(LogLevel.ERROR));
+        checkLogger();
     }
 }

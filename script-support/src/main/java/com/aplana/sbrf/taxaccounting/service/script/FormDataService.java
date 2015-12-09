@@ -211,6 +211,19 @@ public interface FormDataService {
                              Logger logger, boolean required);
 
     /**
+     * Сравнить зависимое поле с ожидаемыми.
+     *
+     * @param referenceValue значение зависомого поля (ва загружаемом файле)
+     * @param expectedValues список ожидаемых значений (в БД)
+     * @param rowIndex номер строки в транспортном файле
+     * @param colIndex номер колонки в транспортном файле
+     * @param logger для вывода сообщений
+     * @param required фатальность/обязательность
+     */
+    void checkReferenceValue(Long refBookId, String referenceValue, List<String> expectedValues, int rowIndex, int colIndex,
+                             Logger logger, boolean required);
+
+    /**
      * Проверить существование и принятость квартальной формы, а также наличие данных в ней.
      *
      * @param formTypeId идентификатор типа формы
@@ -259,7 +272,14 @@ public interface FormDataService {
      * Сохранение данных из кэша в бд при отстутствии критических ошибкок в логере
      */
     @SuppressWarnings("unused")
+    @Deprecated
     void saveCachedDataRows(FormData formData, Logger logger);
+
+    /**
+     * Сохранение данных из кэша в бд если вызов совершен из режима редактирования и/или при отстутствии критических ошибкок в логере
+     */
+    @SuppressWarnings("unused")
+    void saveCachedDataRows(FormData formData, Logger logger, FormDataEvent formDataEvent);
 
     /**
      * Получить выборку пользователей для представления "Список пользователей"

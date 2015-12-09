@@ -57,7 +57,7 @@ public abstract class LoadAllTransportDataAsyncTask extends AbstractAsyncTask {
     }
 
     @Override
-    protected void executeBusinessLogic(Map<String, Object> params, Logger logger) {
+    protected boolean executeBusinessLogic(Map<String, Object> params, Logger logger) {
         int userId = (Integer)params.get(USER_ID.name());
         TAUserInfo userInfo = new TAUserInfo();
         userInfo.setUser(userService.getUser(userId));
@@ -77,6 +77,7 @@ public abstract class LoadAllTransportDataAsyncTask extends AbstractAsyncTask {
         } finally {
             lockDataService.unlock(key, userInfo.getUser().getId());
         }
+        return true;
     }
 
     @Override

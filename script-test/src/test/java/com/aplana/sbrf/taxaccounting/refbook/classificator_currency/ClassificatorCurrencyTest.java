@@ -37,13 +37,16 @@ public class ClassificatorCurrencyTest extends RefBookScriptTestBase {
         ArrayList<Map<String, RefBookValue>> saveRecords = new ArrayList<Map<String, RefBookValue>>();
 
         HashMap<String, RefBookValue> value1 = new HashMap<String, RefBookValue>();
-        value1.put("CODE", new RefBookValue(RefBookAttributeType.STRING, "01"));
+        value1.put("CODE", new RefBookValue(RefBookAttributeType.STRING, "11"));
         saveRecords.add(value1);
 
         HashMap<String, RefBookValue> value2 = new HashMap<String, RefBookValue>();
-        value1.put("CODE", new RefBookValue(RefBookAttributeType.STRING, "qq"));
-
+        value2.put("CODE", new RefBookValue(RefBookAttributeType.STRING, "1.1"));
         saveRecords.add(value2);
+
+        HashMap<String, RefBookValue> value3 = new HashMap<String, RefBookValue>();
+        value3.put("CODE", new RefBookValue(RefBookAttributeType.STRING, "-11"));
+        saveRecords.add(value3);
 
         testHelper.setSaveRecords(saveRecords);
 
@@ -54,7 +57,8 @@ public class ClassificatorCurrencyTest extends RefBookScriptTestBase {
         int i = 0;
         // value1
         // value2
-        Assert.assertEquals("Атрибут \"Код\" заполнен неверно (qq)! Значение должно содержать только цифры!", entries.get(i++).getMessage());
+        Assert.assertEquals("Атрибут \"Код\" заполнен неверно (1.1)! Значение должно содержать только цифры!", entries.get(i++).getMessage());
+        Assert.assertEquals("Атрибут \"Код\" заполнен неверно (-11)! Значение должно содержать только цифры!", entries.get(i++).getMessage());
         Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
     }
 }

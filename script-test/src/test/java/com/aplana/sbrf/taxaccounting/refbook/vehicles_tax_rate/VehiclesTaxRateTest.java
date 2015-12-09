@@ -41,7 +41,7 @@ public class VehiclesTaxRateTest extends RefBookScriptTestBase {
         saveRecords.add(value1);
 
         HashMap<String, RefBookValue> value2 = new HashMap<String, RefBookValue>();
-        value1.put("CODE", new RefBookValue(RefBookAttributeType.STRING, "012345"));
+        value2.put("CODE", new RefBookValue(RefBookAttributeType.STRING, "012345"));
         saveRecords.add(value2);
 
         testHelper.setSaveRecords(saveRecords);

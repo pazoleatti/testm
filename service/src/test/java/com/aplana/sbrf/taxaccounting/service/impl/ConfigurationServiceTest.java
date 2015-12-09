@@ -93,7 +93,7 @@ public class ConfigurationServiceTest {
         // Заполнение всех общих параметров
         for (ConfigurationParam param : ConfigurationParam.values()) {
             if (param.getGroup().equals(ConfigurationParamGroup.COMMON)) {
-                if (param.isFolder()) {
+                if (param.isFolder() != null && param.isFolder()) {
                     model.put(param, 0,
                             asList("file://" + path + "/"));
                 } else {
@@ -150,7 +150,7 @@ public class ConfigurationServiceTest {
         // Заполнение всех общих параметров
         for (ConfigurationParam param : ConfigurationParam.values()) {
             if (param.getGroup().equals(ConfigurationParamGroup.COMMON)) {
-                if (param.isFolder()) {
+                if (param.isFolder() != null && param.isFolder()) {
                     model.put(param, 0,
                             asList("file://" + path + "/"));
                 } else {
@@ -199,7 +199,7 @@ public class ConfigurationServiceTest {
         // Заполнение всех общих параметров
         for (ConfigurationParam param : ConfigurationParam.values()) {
             if (param.getGroup().equals(ConfigurationParamGroup.COMMON)) {
-                if (param.isFolder()) {
+                if (param.isFolder() != null && param.isFolder()) {
                     model.put(param, 0, asList("file://" + path + "/"));
                 } else {
                     model.put(param, 0, asList("file://" + path + "/" + file.getName()));
@@ -268,7 +268,7 @@ public class ConfigurationServiceTest {
         // Заполнение всех общих параметров
         for (ConfigurationParam param : ConfigurationParam.values()) {
             if (param.getGroup().equals(ConfigurationParamGroup.COMMON)) {
-                if (param.isFolder()) {
+                if (param.isFolder() != null && param.isFolder()) {
                     model.put(param, 0,
                             asList("file://" + path + "/"));
                 } else {
@@ -320,7 +320,7 @@ public class ConfigurationServiceTest {
         // Заполнение всех общих параметров
         for (ConfigurationParam param : ConfigurationParam.values()) {
             if (param.getGroup().equals(ConfigurationParamGroup.COMMON)) {
-                if (param.isFolder()) {
+                if (param.isFolder() != null && param.isFolder()) {
                     model.put(param, 0,
                             asList("file://" + path + "/"));
                 } else {

@@ -32,11 +32,12 @@ public abstract class TestAsyncTask extends AbstractAsyncTask {
     }
 
     @Override
-    protected void executeBusinessLogic(Map<String, Object> params, Logger logger) throws InterruptedException {
+    protected boolean executeBusinessLogic(Map<String, Object> params, Logger logger) throws InterruptedException {
         /*while (true) {
             System.out.println("TestAsyncTaskImpl started: " + new Date().getTime());
             Thread.sleep(1000);
         }*/
+        return true;
     }
 
     @Override

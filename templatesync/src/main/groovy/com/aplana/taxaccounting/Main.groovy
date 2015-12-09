@@ -18,14 +18,14 @@ import groovy.sql.Sql
 class Main {
     // Параметры подключения к БД
     def static DB_URL = 'jdbc:oracle:thin:@//172.16.127.16:1521/ORCL.APLANA.LOCAL'
-    def static DB_USER = 'TAX_0_8'
+    def static DB_USER = 'TAX_0_9'
     def static DB_PASSWORD = 'TAX'
     // checkOnly, true — только сравнение, false — сравнение и обновление Git → БД
     def static checkOnlyFD = true // для налоговых форм
     def static checkOnlyDD = true // для деклараций
 
     // Схема для сравнения макетов, null если сравнение не требуется
-    def static DB_USER_COMPARE = 'TAX_0_7'
+    def static DB_USER_COMPARE = 'TAX_0_8'
 
     // Путь к папке с шаблонами
     def static SRC_FOLDER_PATH = '../src/main/resources/form_template'

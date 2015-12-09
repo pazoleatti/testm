@@ -33,11 +33,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /*
  * Реализация FormDataService
@@ -547,12 +543,26 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
     @Override
     public void checkReferenceValue(Long refBookId, String referenceValue, String expectedValue, int rowIndex, int colIndex,
                                     Logger logger, boolean required) {
-        if ((referenceValue == null && expectedValue == null) ||
-                (referenceValue == null && "".equals(expectedValue)) ||
-                ("".equals(referenceValue) && expectedValue == null) ||
-                (referenceValue != null && expectedValue != null && referenceValue.equals(expectedValue))) {
+        checkReferenceValue(refBookId, referenceValue, Arrays.asList(expectedValue), rowIndex, colIndex, logger, required);
+    }
+
+    @Override
+    public void checkReferenceValue(Long refBookId, String referenceValue, List<String> expectedValues, int rowIndex, int colIndex,
+                                    Logger logger, boolean required) {
+        if (referenceValue == null && (expectedValues == null || expectedValues.isEmpty())) {
             return;
         }
+        if (expectedValues != null) {
+            for (String expectedValue : expectedValues) {
+                if ((referenceValue == null && expectedValue == null) ||
+                        (referenceValue == null && "".equals(expectedValue)) ||
+                        ("".equals(referenceValue) && expectedValue == null) ||
+                        (referenceValue != null && expectedValue != null && referenceValue.equals(expectedValue))) {
+                    return;
+                }
+            }
+        }
+
         RefBook rb = refBookFactory.get(refBookId);
         String msg = String.format(ScriptUtils.REF_BOOK_REFERENCE_NOT_FOUND_IMPORT_ERROR, rowIndex, ScriptUtils.getXLSColumnName(colIndex), referenceValue, rb.getName());
         if (required) {
@@ -660,8 +670,16 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
     }
 
     @Override
+    @Deprecated
     public void saveCachedDataRows(FormData formData, Logger logger) {
-        if (!logger.containsLevel(LogLevel.ERROR)) {
+        DataRowHelper dataRowHelper = getDataRowHelper(formData);
+        dataRowHelper.save(dataRowHelper.getAllCached());
+    }
+
+    @Override
+    public void saveCachedDataRows(FormData formData, Logger logger, FormDataEvent formDataEvent) {
+        if (Arrays.asList(FormDataEvent.CALCULATE, FormDataEvent.REFRESH, FormDataEvent.IMPORT).contains(formDataEvent)
+                || !logger.containsLevel(LogLevel.ERROR)) {
             DataRowHelper dataRowHelper = getDataRowHelper(formData);
             dataRowHelper.save(dataRowHelper.getAllCached());
         }

@@ -304,7 +304,7 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
                 if (signList != null && !signList.isEmpty() && SignService.SIGN_CHECK.equals(signList.get(0))) {
                     boolean check = false;
                     try {
-                        check = signService.checkSign(currentFile.getPath(), 0);
+                        check = signService.checkSign(currentFile.getPath(), 0, logger);
                     } catch (Exception e) {
                         log(userInfo, LogData.L36, logger, lockId, e.getMessage());
                     }
@@ -586,7 +586,7 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
             // 17 Перенос в архив
             if (moveToArchiveDirectory(userInfo, getFormDataArchivePath(userInfo, departmentId, localLogger, lock), currentFile, localLogger, lock)) {
                 // 18 Сохранение
-                formDataService.saveFormData(localLogger, userInfo, formData);
+                formDataService.saveFormData(localLogger, userInfo, formData, false);
 
                 success = true;
             } else {
