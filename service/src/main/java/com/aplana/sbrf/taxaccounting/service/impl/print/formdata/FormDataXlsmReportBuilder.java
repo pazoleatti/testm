@@ -108,7 +108,7 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
                     style.setAlignment(CellStyle.ALIGN_RIGHT);
                     style.setWrapText(true);
                     style.setAlignment(CellStyle.ALIGN_RIGHT);
-                    style.setDataFormat(dataFormat.getFormat(XlsxReportMetadata.Presision.getPresision(((NumericColumn)currColumn).getPrecision())));
+                    style.setDataFormat(dataFormat.getFormat(XlsxReportMetadata.getPrecision(((NumericColumn) currColumn).getPrecision())));
                     break;
                 case NUMERATION:
                     style.setAlignment(CellStyle.ALIGN_RIGHT);
