@@ -126,8 +126,6 @@ def getReportPeriodEndDate() {
     }
     return endDate
 }
-def formYear = (String) reportPeriodService.get(formData.reportPeriodId).getTaxPeriod().getYear()
-
 
 //// Обертки методов
 
@@ -155,7 +153,6 @@ void logicCheck() {
         return
     }
     String dateFormat = 'dd.MM.yyyy'
-    def formYear = (String) reportPeriodService.get(formData.reportPeriodId).getTaxPeriod().getYear()
 
     for (row in dataRows) {
         if (row.getAlias() != null) {
@@ -376,7 +373,6 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
     if (headerRows.isEmpty()) {
         throw new ServiceException(WRONG_HEADER_ROW_SIZE)
     }
-    //logger.info("%s", headerRows);
     checkHeaderSize(headerRows[headerRows.size() - 1].size(), headerRows.size(), colCount, rowCount)
     def headerMapping = [
             ([(headerRows[0][0]) : 'Общие сведения о контрагенте - юридическом лице']),
