@@ -100,9 +100,20 @@ def groupColumns = ['name']
 @Field
 def totalColumns = ['sum']
 
+// Дата начала отчетного периода
+@Field
+def startDate = null
+
 // Дата окончания отчетного периода
 @Field
 def endDate = null
+
+def getReportPeriodStartDate() {
+    if (startDate == null) {
+        startDate = reportPeriodService.getCalendarStartDate(formData.reportPeriodId).time
+    }
+    return startDate
+}
 
 def getReportPeriodEndDate() {
     if (endDate == null) {
@@ -136,8 +147,7 @@ void logicCheck() {
     if (dataRows.isEmpty()) {
         return
     }
-    String dateFormat = 'yyyy'
-    def formYear = (String) reportPeriodService.get(formData.reportPeriodId).getTaxPeriod().getYear()
+    String dateFormat = 'dd.MM.yyyy'
 
     for (row in dataRows) {
         if (row.getAlias() != null) {
@@ -178,13 +188,17 @@ void logicCheck() {
             logger.error("Строка $rowNum: Значение графы «$msg1» должно быть не меньше значения графы «$msg2»!")
         }
 
-        // 6. Проверка года совершения сделки
+        // 6. Проверка пересечения даты сделки с отчетным периодом
         if (row.dealDate) {
             def dealDoneYear = row.dealDate.format(dateFormat)
-            if (dealDoneYear != formYear) {
+            startDate = getReportPeriodStartDate()
+            endDate = getReportPeriodEndDate()
+            formatStartDate = startDate.format(dateFormat)
+            formatEndDate = endDate.format(dateFormat)
+            if (row.dealDate < startDate || row.dealDate > endDate) {
                 def msg = row.getCell('dealDate').column.name
-                logger.error("Строка $rowNum: Год, указанный по графе «$msg» ($dealDoneYear), должен относиться " +
-                        "к календарному году текущей формы ($formYear)!")
+                logger.error("Строка $rowNum: Дата, указанная в графе «$msg» ($dealDoneYear), должна относиться " +
+                        "к отчетному периоду текущей формы  ($formatStartDate - $formatEndDate)!")
             }
         }
 
