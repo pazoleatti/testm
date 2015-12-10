@@ -105,7 +105,7 @@ public class SignServiceImpl implements SignService {
 
     @Override
     public boolean checkSign(String pathToSignFile, int delFlag, Logger logger) {
-        String[] params = new String[5];
+        String[] params = new String[4];
         int rootDepartmentId = departmentService.getBankDepartment().getId();
         // путь к библиотеке для проверки ЭП
         List<String> encryptParams = configurationDao.getAll().get(ConfigurationParam.ENCRYPT_DLL, rootDepartmentId);
@@ -128,17 +128,6 @@ public class SignServiceImpl implements SignService {
         try {
             //Копируем необходимые файлы во временную директорию
             try {
-                //
-                checkSign = File.createTempFile("check-sign",".exe");
-                outputStream = new FileOutputStream(checkSign);
-                inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(TEMPLATE);
-                try {
-                    LOG.info("check-sign.exe copy, total number of bytes " + IOUtils.copy(inputStream, outputStream));
-                } finally {
-                    inputStream.close();
-                    outputStream.close();
-                }
-
                 // база открытых ключей
                 keyTempDir = createTempDir("key_files_");
                 for (String keyFolderPath : keys) {
@@ -201,15 +190,24 @@ public class SignServiceImpl implements SignService {
                         }
                     }
                 }
+                //
+                checkSign = new File(encryptTempDir.getPath()+ "\\check-sign.exe");
+                outputStream = new FileOutputStream(checkSign);
+                inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(TEMPLATE);
+                try {
+                    LOG.info("check-sign.exe copy, total number of bytes " + IOUtils.copy(inputStream, outputStream));
+                } finally {
+                    inputStream.close();
+                    outputStream.close();
+                }
             } catch (IOException e) {
                 LOG.error("", e);
                 throw new ServiceException(e.getMessage(), e);
             }
 
             params[0] = checkSign.getAbsolutePath();
-            params[2] = encryptTempDir.getAbsolutePath();
-            params[3] = String.valueOf(delFlag);
-            params[4] = pathToSignFile;
+            params[2] = String.valueOf(delFlag);
+            params[3] = pathToSignFile;
 
             String[] keyTempFiles = keyTempDir.list();
             Logger localLogger = new Logger();
@@ -232,7 +230,7 @@ public class SignServiceImpl implements SignService {
             return false;
         } finally {
             try {
-                if (checkSign != null) checkSign.delete();
+                //if (checkSign != null) checkSign.delete();
             } catch (Exception e) {
                 LOG.error("", e);
             }
