@@ -43,7 +43,6 @@ public class RefBookLinearView extends ViewWithUiHandlers<RefBookDataLinearUiHan
     interface Binder extends UiBinder<Widget, RefBookLinearView> { }
 
     SingleSelectionModel<RefBookDataRow> selectionModel = new SingleSelectionModel<RefBookDataRow>();
-    private static final NumberFormat NUMBER_FORMAT = NumberFormat.getFormat("#,###.##");
 
     @UiField
     GenericDataGrid<RefBookDataRow> refBookDataTable;
@@ -190,11 +189,23 @@ public class RefBookLinearView extends ViewWithUiHandlers<RefBookDataLinearUiHan
                 column.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
             } else if(header.getAttributeType() == RefBookAttributeType.NUMBER){
                 column = new TextColumn<RefBookDataRow>() {
+                    private NumberFormat numberFormat;
+                    {
+                        StringBuilder mask = new StringBuilder("#,##0");
+                        if (header.getPrecision() > 0) {
+                            mask.append('.');
+                            for(int i = 0; i < header.getPrecision(); ++i) {
+                                mask.append('0');
+                            }
+                        }
+                        numberFormat = NumberFormat.getFormat(mask.toString());
+                    }
+
                     @Override
                     public String getValue(RefBookDataRow object) {
                         try{
                             String s = object.getValues().get(header.getAlias());
-                            return NUMBER_FORMAT.format(new BigDecimal(s)).replace(',', ' ');
+                            return numberFormat.format(new BigDecimal(s)).replace(',', ' ');
                         } catch (NumberFormatException e){
                             return object.getValues().get(header.getAlias());
                         }
