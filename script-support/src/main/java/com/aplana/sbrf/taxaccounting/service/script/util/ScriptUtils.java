@@ -1955,7 +1955,7 @@ public final class ScriptUtils {
             rowLog(logger, row, (row != null ? ("Строка "+ row.getIndex()  + ": ") : "") + String.format("Ошибка при разборе значения даты атрибута «%s» (%s)", getColumnName(row, alias), value), fatal ? LogLevel.ERROR : LogLevel.WARNING);
         }
         if (year == null || year < 1991 || year > 2099) {
-            rowLog(logger, row, (row != null ? ("Строка "+ row.getIndex()  + ": ") : "") + String.format("Значение даты атрибута «%s» должно принимать значение из следующего диапазона: 01.01.1900 - 31.12.2099", getColumnName(row, alias)), fatal ? LogLevel.ERROR : LogLevel.WARNING);
+            rowLog(logger, row, (row != null ? ("Строка "+ row.getIndex()  + ": ") : "") + String.format("Значение даты атрибута «%s» должно принимать значение из следующего диапазона: 01.01.1991 - 31.12.2099", getColumnName(row, alias)), fatal ? LogLevel.ERROR : LogLevel.WARNING);
             return false;
         }
         return true;
