@@ -13,6 +13,7 @@ import com.aplana.sbrf.taxaccounting.model.source.SourceObject;
 import com.aplana.sbrf.taxaccounting.model.source.SourcePair;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
+import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.service.SourceService;
 import com.aplana.sbrf.taxaccounting.web.module.sources.shared.UpdateCurrentAssignsAction;
@@ -34,6 +35,8 @@ public class UpdateCurrentAssignsHandler extends AbstractActionHandler<UpdateCur
 
 	@Autowired
 	private SourceService sourceService;
+    @Autowired
+    private DepartmentService departmentService;
 
     @Autowired
     private LogEntryService logEntryService;
@@ -52,6 +55,7 @@ public class UpdateCurrentAssignsHandler extends AbstractActionHandler<UpdateCur
         UpdateCurrentAssignsResult result = new UpdateCurrentAssignsResult();
         PeriodsInterval period = action.getNewPeriodsInterval();
         Logger logger = new Logger();
+        String leftDepartmentName = departmentService.getDepartment(action.getLeftDepartmentId()).getName();
 
         List<SourceClientData> sourceClientDataList = new ArrayList<SourceClientData>();
         for (CurrentAssign currentAssign : action.getCurrentAssigns()) {
@@ -63,6 +67,8 @@ public class UpdateCurrentAssignsHandler extends AbstractActionHandler<UpdateCur
                 sourcePair = new SourcePair(currentAssign.getId(), action.getDepartmentAssign().getId());
                 sourcePair.setSourceKind(currentAssign.getFormKind().getTitle());
                 sourcePair.setSourceType(currentAssign.getFormType().getName());
+                sourcePair.setSourceDepartmentName(currentAssign.getDepartmentName());
+                sourcePair.setDestinationDepartmentName(leftDepartmentName);
                 if (action.isDeclaration()) {
                     sourcePair.setDestinationType(sourceService.getDeclarationType(action.getDepartmentAssign().getTypeId()).getName());
                 } else {
@@ -73,6 +79,8 @@ public class UpdateCurrentAssignsHandler extends AbstractActionHandler<UpdateCur
                 sourcePair = new SourcePair(action.getDepartmentAssign().getId(), currentAssign.getId());
                 sourcePair.setSourceType(sourceService.getFormType(action.getDepartmentAssign().getTypeId()).getName());
                 sourcePair.setDestinationKind(currentAssign.getFormKind().getTitle());
+                sourcePair.setSourceDepartmentName(leftDepartmentName);
+                sourcePair.setDestinationDepartmentName(currentAssign.getDepartmentName());
                 if (action.isDeclaration()) {
                     sourcePair.setDestinationType(currentAssign.getDeclarationType().getName());
                 } else {

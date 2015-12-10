@@ -261,15 +261,11 @@ public class SourceServiceImpl implements SourceService {
      * @param sourcePairs             входной набор пар источник-приемник
      * @param mode                    режим работы: назначение приемников или назначение источников
      * @param isDeclaration           признак того, что идет обработка в режиме "Декларации"
-     * @param sourceDepartmentName      подразделение-источник. Необходимо только для формирования уведомлений
-     * @param destinationDepartmentName подразделение-приемник. Необходимо только для формирования уведомлений
      * @return обрезанный входной список связок источников-приемников, которые все еще существуют
      */
     public List<SourcePair> checkExistence(Logger logger, List<SourcePair> sourcePairs,
                                            SourceMode mode,
-                                           final boolean isDeclaration,
-                                           final String sourceDepartmentName,
-                                           final String destinationDepartmentName) {
+                                           final boolean isDeclaration) {
         List<Long> rightPart = new ArrayList<Long>();
         if (isDeclaration) {
             if (mode == SourceMode.SOURCES) {
@@ -279,7 +275,7 @@ public class SourceServiceImpl implements SourceService {
                     logger.error(String.format(CHECK_EXISTENCE_MSG,
                             "Декларация",
                             sourcePairs.get(0).getDestinationType(),
-                            destinationDepartmentName));
+                            sourcePairs.get(0).getDestinationDepartmentName()));
                     throw new ServiceLoggerException(FATAL_SAVE_MSG,
                             logEntryService.save(logger.getEntries()));
                 }
@@ -293,7 +289,7 @@ public class SourceServiceImpl implements SourceService {
                     logger.error(String.format(CHECK_EXISTENCE_MSG,
                             "Форма",
                             sourcePairs.get(0).getSourceKind() + ": " + sourcePairs.get(0).getSourceType(),
-                            sourceDepartmentName));
+                            sourcePairs.get(0).getSourceDepartmentName()));
                     throw new ServiceLoggerException(FATAL_SAVE_MSG,
                             logEntryService.save(logger.getEntries()));
                 }
@@ -326,7 +322,7 @@ public class SourceServiceImpl implements SourceService {
                         return Arrays.asList(String.format(CHECK_EXISTENCE_MSG,
                                 (!isSource && isDeclaration) ? "Декларация" : "Форма",
                                 isSource ? (sourcePair.getSourceKind() + ": " + sourcePair.getSourceType()) : (sourcePair.getDestinationKind() + ": " + sourcePair.getDestinationType()),
-                                isSource ? sourceDepartmentName : destinationDepartmentName));
+                                isSource ? sourcePair.getSourceDepartmentName() : sourcePair.getDestinationDepartmentName()));
                     }
                 });
     }
@@ -536,17 +532,19 @@ public class SourceServiceImpl implements SourceService {
                     }
                     if (mode == SourceMode.SOURCES) {
                         msgsForPair.add(String.format(INTERSECTION_PART,
-                                isDeclaration ? intersection.getSourcePair().getDestinationType() : intersection.getSourcePair().getDestinationKind() + ": " + intersection.getSourcePair().getDestinationType(),
+                                intersection.getSourcePair().getDestinationDepartmentName() + ", " +
+                                        (isDeclaration ? intersection.getSourcePair().getDestinationType() : intersection.getSourcePair().getDestinationKind() + ": " + intersection.getSourcePair().getDestinationType()),
                                 "приемника",
-                                intersection.getSourcePair().getSourceKind() + ": " + intersection.getSourcePair().getSourceType(),
+                                intersection.getSourcePair().getSourceDepartmentName() + ", " + intersection.getSourcePair().getSourceKind() + ": " + intersection.getSourcePair().getSourceType(),
                                 formatter.get().format(intersection.getPeriodStart()) + " - " +
                                         (intersection.getPeriodEnd() != null ? formatter.get().format(intersection.getPeriodEnd()) : EMPTY_END_PERIOD_INFO)
                         ));
                     } else {
                         msgsForPair.add(String.format(INTERSECTION_PART,
-                                intersection.getSourcePair().getSourceKind() + ": " + intersection.getSourcePair().getSourceType(),
+                                intersection.getSourcePair().getSourceDepartmentName() + ", " + intersection.getSourcePair().getSourceKind() + ": " + intersection.getSourcePair().getSourceType(),
                                 "источника",
-                                isDeclaration ? intersection.getSourcePair().getDestinationType() : intersection.getSourcePair().getDestinationKind() + ": " + intersection.getSourcePair().getDestinationType(),
+                                intersection.getSourcePair().getDestinationDepartmentName() + ", " +
+                                        (isDeclaration ? intersection.getSourcePair().getDestinationType() : intersection.getSourcePair().getDestinationKind() + ": " + intersection.getSourcePair().getDestinationType()),
                                 formatter.get().format(intersection.getPeriodStart()) + " - " +
                                         (intersection.getPeriodEnd() != null ? formatter.get().format(intersection.getPeriodEnd()) : EMPTY_END_PERIOD_INFO)
                         ));
@@ -616,12 +614,9 @@ public class SourceServiceImpl implements SourceService {
     @Override
     public void createSources(Logger logger, SourceClientData sourceClientData) {
         if (sourceClientData.getSourcePairs() != null && !sourceClientData.getSourcePairs().isEmpty()) {
-            String sourceDepartmentName = departmentService.getDepartment(sourceClientData.getSourceDepartmentId()).getName();
-            String destinationDepartmentName = departmentService.getDepartment(sourceClientData.getDestinationDepartmentId()).getName();
             /** Проверка существования назначения подразделению */
             List<SourcePair> sourcePairs = checkExistence(logger, sourceClientData.getSourcePairs(),
-                    sourceClientData.getMode(), sourceClientData.isDeclaration(),
-                    sourceDepartmentName, destinationDepartmentName);
+                    sourceClientData.getMode(), sourceClientData.isDeclaration());
 
             /** Специфичные проверки */
             checkSpecifics(logger, sourceClientData.getSourcePairs(),
@@ -647,19 +642,21 @@ public class SourceServiceImpl implements SourceService {
                 for (SourceObject sourceObject : sourceObjects) {
                     if (sourceClientData.getMode() == SourceMode.DESTINATIONS) {
                         logger.info(SAVE_SUCCESS_MSG,
-                                sourceClientData.isDeclaration() ? sourceObject.getSourcePair().getDestinationType() :
-                                        sourceObject.getSourcePair().getDestinationKind() + ": " + sourceObject.getSourcePair().getDestinationType(),
+                                sourceObject.getSourcePair().getDestinationDepartmentName() + ", " +
+                                        (sourceClientData.isDeclaration() ? sourceObject.getSourcePair().getDestinationType() :
+                                        sourceObject.getSourcePair().getDestinationKind() + ": " + sourceObject.getSourcePair().getDestinationType()),
                                 "приемником",
-                                sourceObject.getSourcePair().getSourceKind() + ": " + sourceObject.getSourcePair().getSourceType(),
+                                sourceObject.getSourcePair().getSourceDepartmentName() + ", " + sourceObject.getSourcePair().getSourceKind() + ": " + sourceObject.getSourcePair().getSourceType(),
                                 formatter.get().format(sourceObject.getPeriodStart()) + " - " +
                                         (sourceObject.getPeriodEnd() != null ? formatter.get().format(sourceObject.getPeriodEnd()) : EMPTY_END_PERIOD_INFO)
                         );
                     } else {
                         logger.info(SAVE_SUCCESS_MSG,
-                                sourceObject.getSourcePair().getSourceKind() + ": " + sourceObject.getSourcePair().getSourceType(),
+                                sourceObject.getSourcePair().getSourceDepartmentName() + ", " + sourceObject.getSourcePair().getSourceKind() + ": " + sourceObject.getSourcePair().getSourceType(),
                                 "источником",
-                                sourceClientData.isDeclaration() ? sourceObject.getSourcePair().getDestinationType() :
-                                        sourceObject.getSourcePair().getDestinationKind() + ": " + sourceObject.getSourcePair().getDestinationType(),
+                                sourceObject.getSourcePair().getDestinationDepartmentName() + ", " +
+                                        (sourceClientData.isDeclaration() ? sourceObject.getSourcePair().getDestinationType() :
+                                        sourceObject.getSourcePair().getDestinationKind() + ": " + sourceObject.getSourcePair().getDestinationType()),
                                 formatter.get().format(sourceObject.getPeriodStart()) + " - " +
                                         (sourceObject.getPeriodEnd() != null ? formatter.get().format(sourceObject.getPeriodEnd()) : EMPTY_END_PERIOD_INFO)
                         );
@@ -730,11 +727,12 @@ public class SourceServiceImpl implements SourceService {
             if (sourceClientData.getMode() == SourceMode.DESTINATIONS) {
                 for (SourceObject sourceObject : sourceObjects) {
                     logger.info(DELETE_SUCCESS_MSG,
-                            sourceClientData.isDeclaration() ? sourceObject.getSourcePair().getDestinationType() :
-                                    sourceObject.getSourcePair().getDestinationKind() + ": " + sourceObject.getSourcePair().getDestinationType(),
+                            sourceObject.getSourcePair().getDestinationDepartmentName() + ", " + (
+                                    sourceClientData.isDeclaration() ? sourceObject.getSourcePair().getDestinationType() :
+                                    sourceObject.getSourcePair().getDestinationKind() + ": " + sourceObject.getSourcePair().getDestinationType()),
                             "приемника",
                             sourceClientData.isDeclaration() ? "декларации" : "формы",
-                            sourceObject.getSourcePair().getSourceKind() + ": " + sourceObject.getSourcePair().getSourceType(),
+                            sourceObject.getSourcePair().getSourceDepartmentName() + ", " + sourceObject.getSourcePair().getSourceKind() + ": " + sourceObject.getSourcePair().getSourceType(),
                             formatter.get().format(sourceObject.getPeriodStart()) + " - " +
                                     (sourceObject.getPeriodEnd() != null ? formatter.get().format(sourceObject.getPeriodEnd()) : EMPTY_END_PERIOD_INFO)
                     );
@@ -742,11 +740,12 @@ public class SourceServiceImpl implements SourceService {
             } else {
                 for (SourceObject sourceObject : sourceObjects) {
                     logger.info(DELETE_SUCCESS_MSG,
-                            sourceObject.getSourcePair().getSourceKind() + ": " + sourceObject.getSourcePair().getSourceType(),
+                            sourceObject.getSourcePair().getSourceDepartmentName() + ", " + sourceObject.getSourcePair().getSourceKind() + ": " + sourceObject.getSourcePair().getSourceType(),
                             "источника",
                             sourceClientData.isDeclaration() ? "декларации" : "формы",
-                            sourceClientData.isDeclaration() ? sourceObject.getSourcePair().getDestinationType() :
-                                    sourceObject.getSourcePair().getDestinationKind() + ": " + sourceObject.getSourcePair().getDestinationType(),
+                            sourceObject.getSourcePair().getDestinationDepartmentName() + ", " +
+                                    (sourceClientData.isDeclaration() ? sourceObject.getSourcePair().getDestinationType() :
+                                    sourceObject.getSourcePair().getDestinationKind() + ": " + sourceObject.getSourcePair().getDestinationType()),
                             formatter.get().format(sourceObject.getPeriodStart()) + " - " +
                                     (sourceObject.getPeriodEnd() != null ? formatter.get().format(sourceObject.getPeriodEnd()) : EMPTY_END_PERIOD_INFO)
                     );
@@ -912,10 +911,11 @@ public class SourceServiceImpl implements SourceService {
                         if (sourceClientData.getMode() == SourceMode.DESTINATIONS) {
                             for (SourceObject sourceObject : sourceObjects) {
                                 logger.info(UPDATE_SUCCESS_MSG,
-                                        sourceClientData.isDeclaration() ? sourceObject.getSourcePair().getDestinationType() :
-                                                sourceObject.getSourcePair().getDestinationKind() + ": " + sourceObject.getSourcePair().getDestinationType(),
+                                        sourceObject.getSourcePair().getDestinationDepartmentName() + ", " +
+                                                (sourceClientData.isDeclaration() ? sourceObject.getSourcePair().getDestinationType() :
+                                                sourceObject.getSourcePair().getDestinationKind() + ": " + sourceObject.getSourcePair().getDestinationType()),
                                         "приемником",
-                                        sourceObject.getSourcePair().getSourceKind() + ": " + sourceObject.getSourcePair().getSourceType(),
+                                        sourceObject.getSourcePair().getSourceDepartmentName() + ", " + sourceObject.getSourcePair().getSourceKind() + ": " + sourceObject.getSourcePair().getSourceType(),
                                         formatter.get().format(periodStart) + " - " +
                                                 (periodEnd != null ? formatter.get().format(periodEnd) : EMPTY_END_PERIOD_INFO)
                                 );
@@ -923,10 +923,11 @@ public class SourceServiceImpl implements SourceService {
                         } else {
                             for (SourceObject sourceObject : sourceObjects) {
                                 logger.info(UPDATE_SUCCESS_MSG,
-                                        sourceObject.getSourcePair().getSourceKind() + ": " + sourceObject.getSourcePair().getSourceType(),
+                                        sourceObject.getSourcePair().getSourceDepartmentName() + ", " + sourceObject.getSourcePair().getSourceKind() + ": " + sourceObject.getSourcePair().getSourceType(),
                                         "источником",
-                                        sourceClientData.isDeclaration() ? sourceObject.getSourcePair().getDestinationType() :
-                                                sourceObject.getSourcePair().getDestinationKind() + ": " + sourceObject.getSourcePair().getDestinationType(),
+                                        sourceObject.getSourcePair().getDestinationDepartmentName() + ", " +
+                                                (sourceClientData.isDeclaration() ? sourceObject.getSourcePair().getDestinationType() :
+                                                sourceObject.getSourcePair().getDestinationKind() + ": " + sourceObject.getSourcePair().getDestinationType()),
                                         formatter.get().format(periodStart) + " - " +
                                                 (periodEnd != null ? formatter.get().format(periodEnd) : EMPTY_END_PERIOD_INFO)
                                 );

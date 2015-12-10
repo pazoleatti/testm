@@ -6,6 +6,7 @@ import com.aplana.sbrf.taxaccounting.model.source.SourceClientData;
 import com.aplana.sbrf.taxaccounting.model.source.SourceMode;
 import com.aplana.sbrf.taxaccounting.model.source.SourceObject;
 import com.aplana.sbrf.taxaccounting.model.source.SourcePair;
+import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.service.SourceService;
 import com.aplana.sbrf.taxaccounting.web.module.sources.shared.DeleteCurrentAssignsAction;
@@ -28,6 +29,8 @@ public class DeleteCurrentAssignsHandler  extends AbstractActionHandler<DeleteCu
 
     @Autowired
     private SourceService sourceService;
+    @Autowired
+    private DepartmentService departmentService;
 
     @Autowired
     private LogEntryService logEntryService;
@@ -42,6 +45,7 @@ public class DeleteCurrentAssignsHandler  extends AbstractActionHandler<DeleteCu
         PeriodsInterval period = action.getPeriodsInterval();
         SourceClientData sourceClientData = new SourceClientData();
         Logger logger = new Logger();
+        String leftDepartmentName = departmentService.getDepartment(action.getDepartmentAssign().getDepartmentId()).getName();
 
         List<SourceObject> sourceObjects = new ArrayList<SourceObject>();
         List<SourcePair> sourcePairs = new ArrayList<SourcePair>();
@@ -51,6 +55,8 @@ public class DeleteCurrentAssignsHandler  extends AbstractActionHandler<DeleteCu
                 sourcePair = new SourcePair(assign.getId(), action.getDepartmentAssign().getId());
                 sourcePair.setSourceKind(assign.getFormKind().getTitle());
                 sourcePair.setSourceType(assign.getFormType().getName());
+                sourcePair.setSourceDepartmentName(assign.getDepartmentName());
+                sourcePair.setDestinationDepartmentName(leftDepartmentName);
                 if (action.isDeclaration()) {
                     sourcePair.setDestinationType(sourceService.getDeclarationType(action.getDepartmentAssign().getTypeId()).getName());
                 } else {
@@ -61,6 +67,8 @@ public class DeleteCurrentAssignsHandler  extends AbstractActionHandler<DeleteCu
                 sourcePair = new SourcePair(action.getDepartmentAssign().getId(), assign.getId());
                 sourcePair.setSourceKind(action.getDepartmentAssign().getKind().getTitle());
                 sourcePair.setSourceType(sourceService.getFormType(action.getDepartmentAssign().getTypeId()).getName());
+                sourcePair.setSourceDepartmentName(leftDepartmentName);
+                sourcePair.setDestinationDepartmentName(assign.getDepartmentName());
                 if (action.isDeclaration()) {
                     sourcePair.setDestinationType(assign.getDeclarationType().getName());
                 } else {

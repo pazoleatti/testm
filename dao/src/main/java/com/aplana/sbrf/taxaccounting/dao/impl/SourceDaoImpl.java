@@ -102,14 +102,16 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
         return in.toString();
     }
 
-    private final static String GET_FORM_INTERSECTIONS = "select distinct a.src_department_form_type_id as source, s_kind.name as s_kind, s_type.name as s_type, \n" +
-            "a.department_form_type_id as destination, d_kind.name as d_kind, d_type.name as d_type, \n" +
+    private final static String GET_FORM_INTERSECTIONS = "select distinct a.src_department_form_type_id as source, s_kind.name as s_kind, s_type.name as s_type, s_d.name as s_department, \n" +
+            "a.department_form_type_id as destination, d_kind.name as d_kind, d_type.name as d_type, d_d.name as d_department, \n" +
             "a.period_start, a.period_end \n" +
             "from form_data_source a \n" +
             "join department_form_type s_dft on s_dft.id = src_department_form_type_id\n" +
+            "join department s_d on s_d.id = s_dft.department_id\n" +
             "join form_kind s_kind on s_kind.id = s_dft.kind\n" +
             "join form_type s_type on s_type.id = s_dft.form_type_id\n" +
             "join department_form_type d_dft on d_dft.id = department_form_type_id\n" +
+            "join department d_d on d_d.id = d_dft.department_id\n" +
             "join form_kind d_kind on d_kind.id = d_dft.kind\n" +
             "join form_type d_type on d_type.id = d_dft.form_type_id\n" +
             "where \n" +
@@ -118,14 +120,16 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
             "and (:periodEnd is null or period_start <= :periodEnd) --дата окончания периода (может быть передана null)\n" +
             "and (:excludedPeriodStart is null or (period_start, period_end) not in ((:excludedPeriodStart, :excludedPeriodEnd))) --исключить этот период";
 
-    private final static String GET_DECLARATION_INTERSECTIONS = "select distinct a.src_department_form_type_id as source, s_kind.name as s_kind, s_type.name as s_type, \n" +
-            "a.department_declaration_type_id as destination, null as d_kind, d_type.name as d_type, \n" +
+    private final static String GET_DECLARATION_INTERSECTIONS = "select distinct a.src_department_form_type_id as source, s_kind.name as s_kind, s_type.name as s_type, s_d.name as s_department, \n" +
+            "a.department_declaration_type_id as destination, null as d_kind, d_type.name as d_type, d_d.name as d_department, \n" +
             "a.period_start, a.period_end\n" +
             "from declaration_source a\n" +
             "join department_form_type s_dft on s_dft.id = src_department_form_type_id\n" +
+            "join department s_d on s_d.id = s_dft.department_id\n" +
             "join form_kind s_kind on s_kind.id = s_dft.kind\n" +
             "join form_type s_type on s_type.id = s_dft.form_type_id\n" +
             "join department_declaration_type d_ddt on d_ddt.id = department_declaration_type_id\n" +
+            "join department d_d on d_d.id = d_ddt.department_id\n" +
             "join declaration_type d_type on d_type.id = d_ddt.declaration_type_id\n" +
             "where \n" +
             "%s --список пар\n" +
@@ -159,6 +163,8 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
                 pair.setSourceType(rs.getString("s_type"));
                 pair.setDestinationKind(rs.getString("d_kind"));
                 pair.setDestinationType(rs.getString("d_type"));
+                pair.setSourceDepartmentName(rs.getString("s_department"));
+                pair.setDestinationDepartmentName(rs.getString("d_department"));
 
                 if (result.containsKey(pair)) {
                     result.get(pair).add(new SourceObject(pair, rs.getDate("period_start"), rs.getDate("period_end")));
@@ -296,9 +302,10 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
         }
     }
 
-    private static final String GET_SOURCE_NAMES = "select dft.id, fk.name as form_kind, ft.name as form_type from department_form_type dft\n" +
+    private static final String GET_SOURCE_NAMES = "select dft.id, fk.name as form_kind, ft.name as form_type, d.name as department_name from department_form_type dft\n" +
             "join form_kind fk on fk.id = dft.kind\n" +
             "join form_type ft on ft.id = dft.form_type_id\n" +
+            "join department d on ft.id = dft.department_id\n" +
             "where ";
 
     @Override
@@ -311,7 +318,7 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
                 public void processRow(ResultSet rs) throws SQLException {
                     result.put(
                             rs.getLong("id"),
-                            rs.getString("form_kind") + " - " + rs.getString("form_type")
+                            rs.getString("department_name") + ", " + rs.getString("form_kind") + " - " + rs.getString("form_type")
                     );
                 }
             });

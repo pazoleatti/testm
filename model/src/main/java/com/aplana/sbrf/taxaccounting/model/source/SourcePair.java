@@ -26,6 +26,11 @@ public class SourcePair implements Serializable {
     private String sourceKind = null;
     /** Вид назначения-приемника */
     private String destinationKind = null;
+    /** Название подразделения-источника */
+    private String sourceDepartmentName;
+    /** Название подразделения-приемника */
+    private String destinationDepartmentName;
+
 
     public SourcePair() {}
 
@@ -80,6 +85,22 @@ public class SourcePair implements Serializable {
 
     public void setDestinationKind(String destinationKind) {
         this.destinationKind = destinationKind;
+    }
+
+    public String getSourceDepartmentName() {
+        return sourceDepartmentName;
+    }
+
+    public void setSourceDepartmentName(String sourceDepartmentName) {
+        this.sourceDepartmentName = sourceDepartmentName;
+    }
+
+    public String getDestinationDepartmentName() {
+        return destinationDepartmentName;
+    }
+
+    public void setDestinationDepartmentName(String destinationDepartmentName) {
+        this.destinationDepartmentName = destinationDepartmentName;
     }
 
     @Override
