@@ -198,7 +198,7 @@ void logicCheck() {
             if (row.dealDate < startDate || row.dealDate > endDate) {
                 def msg = row.getCell('dealDate').column.name
                 logger.error("Строка $rowNum: Дата, указанная в графе «$msg» ($dealDoneYear), должна относиться " +
-                        "к отчетному периоду текущей формы  ($formatStartDate - $formatEndDate)!")
+                        "к отчетному периоду текущей формы ($formatStartDate - $formatEndDate)!")
             }
         }
 
