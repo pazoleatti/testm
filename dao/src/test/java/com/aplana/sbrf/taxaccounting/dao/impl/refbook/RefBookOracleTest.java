@@ -48,7 +48,6 @@ public class RefBookOracleTest {
 
     @Before
     public void init() {
-        //TODO: для выполнения теста на тестовой бд должен быть заполнен справочник с кодами периодов, т.к каждый раз его заполнять слишком долго. Пример заполнения в data/RefBookOraclePeriodCodes.sql
         String script = "classpath:data/RefBookOracle.sql";
         Resource resource = ctx.getResource(script);
         JdbcTestUtils.executeSqlScript((JdbcTemplate) namedParameterJdbcTemplate.getJdbcOperations(), resource, true);

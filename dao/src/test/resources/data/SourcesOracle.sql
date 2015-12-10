@@ -36,10 +36,10 @@ Insert into ref_book_value (RECORD_ID,ATTRIBUTE_ID,STRING_VALUE,NUMBER_VALUE,DAT
 Insert into ref_book_value (RECORD_ID,ATTRIBUTE_ID,STRING_VALUE,NUMBER_VALUE,DATE_VALUE,REFERENCE_VALUE) values (1,'844',null,null,to_date('01.01.70','DD.MM.RR'),null);
 Insert into ref_book_value (RECORD_ID,ATTRIBUTE_ID,STRING_VALUE,NUMBER_VALUE,DATE_VALUE,REFERENCE_VALUE) values (1,'3000',null,'1',null,null);
 
-CREATE TABLE form_data_1 (
-  id NUMBER(18) NOT NULL,
-	form_data_id NUMBER(18) NOT NULL
-);
+--CREATE TABLE form_data_1 (
+--  id NUMBER(18) NOT NULL,
+--	form_data_id NUMBER(18) NOT NULL
+--);
 
 --СБ
 Insert into department (ID,NAME,PARENT_ID,TYPE,SHORTNAME,TB_INDEX,SBRF_CODE,REGION_ID,IS_ACTIVE,CODE,GARANT_USE) values ('0','Открытое акционерное общество "Сбербанк России"',null,'1','Банк','5','00__',null,'1','0','1');

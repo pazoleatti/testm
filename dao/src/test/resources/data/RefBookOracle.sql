@@ -1,3 +1,30 @@
+--Справочник со списком месяцом для периода. ref_book_record.id = report_period.DICT_TAX_PERIOD_ID. Получается январь, февраль, март.
+insert into ref_book(id, name) values (8, 'Коды, определяющие налоговый (отчётный) период');
+Insert into ref_book_attribute (ID,REF_BOOK_ID,NAME,ALIAS,TYPE,ORD,REFERENCE_ID,ATTRIBUTE_ID,VISIBLE,PRECISION,WIDTH,REQUIRED,IS_UNIQUE,SORT_ORDER,FORMAT,READ_ONLY,MAX_LENGTH) values ('25','8','Код','CODE','1','0',null,null,'1',null,'10','1','1',null,null,'0','2');
+Insert into ref_book_attribute (ID,REF_BOOK_ID,NAME,ALIAS,TYPE,ORD,REFERENCE_ID,ATTRIBUTE_ID,VISIBLE,PRECISION,WIDTH,REQUIRED,IS_UNIQUE,SORT_ORDER,FORMAT,READ_ONLY,MAX_LENGTH) values ('26','8','Наименование','NAME','1','1',null,null,'1',null,'30','1','0',null,null,'0','255');
+Insert into ref_book_attribute (ID,REF_BOOK_ID,NAME,ALIAS,TYPE,ORD,REFERENCE_ID,ATTRIBUTE_ID,VISIBLE,PRECISION,WIDTH,REQUIRED,IS_UNIQUE,SORT_ORDER,FORMAT,READ_ONLY,MAX_LENGTH) values ('27','8','Принадлежность к налогу на прибыль','I','2','2',null,null,'0','0','10','0','0',null,'6','0','1');
+Insert into ref_book_attribute (ID,REF_BOOK_ID,NAME,ALIAS,TYPE,ORD,REFERENCE_ID,ATTRIBUTE_ID,VISIBLE,PRECISION,WIDTH,REQUIRED,IS_UNIQUE,SORT_ORDER,FORMAT,READ_ONLY,MAX_LENGTH) values ('28','8','Принадлежность к транспортному налогу','T','2','3',null,null,'0','0','10','0','0',null,'6','0','1');
+Insert into ref_book_attribute (ID,REF_BOOK_ID,NAME,ALIAS,TYPE,ORD,REFERENCE_ID,ATTRIBUTE_ID,VISIBLE,PRECISION,WIDTH,REQUIRED,IS_UNIQUE,SORT_ORDER,FORMAT,READ_ONLY,MAX_LENGTH) values ('29','8','Принадлежность к налогу на имущество','P','2','4',null,null,'0','0','10','0','0',null,'6','0','1');
+Insert into ref_book_attribute (ID,REF_BOOK_ID,NAME,ALIAS,TYPE,ORD,REFERENCE_ID,ATTRIBUTE_ID,VISIBLE,PRECISION,WIDTH,REQUIRED,IS_UNIQUE,SORT_ORDER,FORMAT,READ_ONLY,MAX_LENGTH) values ('30','8','Принадлежность к налогу НДС','V','2','5',null,null,'0','0','10','0','0',null,'6','0','1');
+Insert into ref_book_attribute (ID,REF_BOOK_ID,NAME,ALIAS,TYPE,ORD,REFERENCE_ID,ATTRIBUTE_ID,VISIBLE,PRECISION,WIDTH,REQUIRED,IS_UNIQUE,SORT_ORDER,FORMAT,READ_ONLY,MAX_LENGTH) values ('31','8','Принадлежность к ТЦО','D','2','6',null,null,'0','0','10','0','0',null,'6','0','1');
+Insert into ref_book_attribute (ID,REF_BOOK_ID,NAME,ALIAS,TYPE,ORD,REFERENCE_ID,ATTRIBUTE_ID,VISIBLE,PRECISION,WIDTH,REQUIRED,IS_UNIQUE,SORT_ORDER,FORMAT,READ_ONLY,MAX_LENGTH) values ('3000','8','Принадлежность к ЭНС','E','2','7',null,null,'0','0','10','0','0',null,'6','0','1');
+Insert into ref_book_attribute (ID,REF_BOOK_ID,NAME,ALIAS,TYPE,ORD,REFERENCE_ID,ATTRIBUTE_ID,VISIBLE,PRECISION,WIDTH,REQUIRED,IS_UNIQUE,SORT_ORDER,FORMAT,READ_ONLY,MAX_LENGTH) values ('820','8','Дата начала периода','START_DATE','3','9',null,null,'1',null,'10','1','0',null,'5','0',null);
+Insert into ref_book_attribute (ID,REF_BOOK_ID,NAME,ALIAS,TYPE,ORD,REFERENCE_ID,ATTRIBUTE_ID,VISIBLE,PRECISION,WIDTH,REQUIRED,IS_UNIQUE,SORT_ORDER,FORMAT,READ_ONLY,MAX_LENGTH) values ('821','8','Дата окончания периода','END_DATE','3','10',null,null,'1',null,'10','1','0',null,'5','0',null);
+Insert into ref_book_attribute (ID,REF_BOOK_ID,NAME,ALIAS,TYPE,ORD,REFERENCE_ID,ATTRIBUTE_ID,VISIBLE,PRECISION,WIDTH,REQUIRED,IS_UNIQUE,SORT_ORDER,FORMAT,READ_ONLY,MAX_LENGTH) values ('844','8','Календарная дата начала периода','CALENDAR_START_DATE','3','11',null,null,'1',null,'10','1','0',null,'5','0',null);
+
+Insert into ref_book_record (ID,RECORD_ID,REF_BOOK_ID,VERSION,STATUS) values ('181220','16','8',to_date('01.01.12','DD.MM.RR'),'0');
+Insert into ref_book_value (RECORD_ID,ATTRIBUTE_ID,STRING_VALUE,NUMBER_VALUE,DATE_VALUE,REFERENCE_VALUE) values ('181220','25','21',null,null,null);
+Insert into ref_book_value (RECORD_ID,ATTRIBUTE_ID,STRING_VALUE,NUMBER_VALUE,DATE_VALUE,REFERENCE_VALUE) values ('181220','26','первый квартал',null,null,null);
+Insert into ref_book_value (RECORD_ID,ATTRIBUTE_ID,STRING_VALUE,NUMBER_VALUE,DATE_VALUE,REFERENCE_VALUE) values ('181220','27',null,'1',null,null);
+Insert into ref_book_value (RECORD_ID,ATTRIBUTE_ID,STRING_VALUE,NUMBER_VALUE,DATE_VALUE,REFERENCE_VALUE) values ('181220','28',null,'1',null,null);
+Insert into ref_book_value (RECORD_ID,ATTRIBUTE_ID,STRING_VALUE,NUMBER_VALUE,DATE_VALUE,REFERENCE_VALUE) values ('181220','29',null,'1',null,null);
+Insert into ref_book_value (RECORD_ID,ATTRIBUTE_ID,STRING_VALUE,NUMBER_VALUE,DATE_VALUE,REFERENCE_VALUE) values ('181220','30',null,'1',null,null);
+Insert into ref_book_value (RECORD_ID,ATTRIBUTE_ID,STRING_VALUE,NUMBER_VALUE,DATE_VALUE,REFERENCE_VALUE) values ('181220','31',null,'1',null,null);
+Insert into ref_book_value (RECORD_ID,ATTRIBUTE_ID,STRING_VALUE,NUMBER_VALUE,DATE_VALUE,REFERENCE_VALUE) values ('181220','820',null,null,to_date('01.01.70','DD.MM.RR'),null);
+Insert into ref_book_value (RECORD_ID,ATTRIBUTE_ID,STRING_VALUE,NUMBER_VALUE,DATE_VALUE,REFERENCE_VALUE) values ('181220','821',null,null,to_date('31.03.70','DD.MM.RR'),null);
+Insert into ref_book_value (RECORD_ID,ATTRIBUTE_ID,STRING_VALUE,NUMBER_VALUE,DATE_VALUE,REFERENCE_VALUE) values ('181220','844',null,null,to_date('01.01.70','DD.MM.RR'),null);
+Insert into ref_book_value (RECORD_ID,ATTRIBUTE_ID,STRING_VALUE,NUMBER_VALUE,DATE_VALUE,REFERENCE_VALUE) values ('181220','3000',null,'1',null,null);
+
 Insert into tax_type (ID,NAME) values ('D','ТЦО');
 
 Insert into form_kind (ID,NAME) values ('1','Первичная');
