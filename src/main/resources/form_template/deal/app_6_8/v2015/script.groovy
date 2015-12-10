@@ -403,7 +403,7 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
     if (map != null) {
         map = getRefBookValue(10, map.COUNTRY_CODE?.referenceValue)
         if (map != null) {
-            formDataService.checkReferenceValue(10, values[colIndex], map.COUNTRY_CODE?.stringValue, fileRowIndex, colIndex + colOffset, logger, false)
+            formDataService.checkReferenceValue(10, values[colIndex], map.CODE?.stringValue, fileRowIndex, colIndex + colOffset, logger, false)
         }
     }
     colIndex++
