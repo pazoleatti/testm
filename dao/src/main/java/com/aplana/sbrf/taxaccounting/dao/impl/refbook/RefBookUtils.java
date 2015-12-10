@@ -33,9 +33,6 @@ public class RefBookUtils extends AbstractDao {
     public static final String KPP_MEANING = "Первые 2 символа: (0-9; 1-9 / 1-9; 0-9). Следующие 2 символа: (0-9). Следующие 2 символа: (0-9 / A-Z). Последние 3 символа: (0-9)";
     public static final String TAX_ORGAN_PATTERN = "[0-9]{4}";
     public static final String TAX_ORGAN_MEANING = "Все 4 символа: (0-9)";
-    public static final String OKATO_PATTERN = "[0-9]{11}";
-    public static final String OKTMO_PATTERN = "[0-9]{11}|[0-9]{8}";
-    public static final String CODE_TS_PATTERN = "[0-9]{3}([0-9]{2}|[?]{2})";
 
     public static List<String> checkFillRequiredRefBookAtributes(List<RefBookAttribute> attributes, Map<String, RefBookValue> record) {
         List<String> errors = new ArrayList<String>();
@@ -57,33 +54,10 @@ public class RefBookUtils extends AbstractDao {
 
     public static List<String> checkRefBookAtributeValues(List<RefBookAttribute> attributes, List<RefBookRecord> records) {
         List<String> errors = new ArrayList<String>();
-        Pattern okatoPattern = Pattern.compile(OKATO_PATTERN);
-        Pattern oktmoPattern = Pattern.compile(OKTMO_PATTERN);
-        Pattern codeTSPattern = Pattern.compile(CODE_TS_PATTERN);
         for (RefBookRecord record : records) {
             Map<String, RefBookValue> values = record.getValues();
             for (RefBookAttribute a : attributes) {
                 RefBookValue value = values.get(a.getAlias());
-                //Должны содержать только цифры - Код валюты. Цифровой, Определяющая часть кода ОКАТО, Определяющая часть кода ОКТМО, Цифровой код валюты выпуска
-                if ((a.getId() == 64L || a.getId() == 12L || a.getId() == 5L) &&
-                        ((value != null && !value.isEmpty() && !NumberUtils.isNumber(value.getStringValue())) || (a.isRequired() && value == null))) {
-                    errors.add(String.format("Атрибут \"%s\" заполнен неверно (%s)! Значение должно содержать только цифры!", a.getName(), value != null ? value.getStringValue() : ""));
-                }
-
-                //Проверка формата для кода окато
-                if ((a.getId() == 7L) && !okatoPattern.matcher(value.getStringValue()).matches()) {
-                    errors.add(String.format("Атрибут \"%s\" заполнен неверно (%s)! Ожидаемый паттерн: \"%s\"", a.getName(), value.getStringValue(), "[0-9]{11}"));
-                }
-
-                //Проверка формата для кода октмо
-                if ((a.getId() == 840L) && !oktmoPattern.matcher(value.getStringValue()).matches()) {
-                    errors.add(String.format("Атрибут \"%s\" заполнен неверно (%s)! Ожидаемый паттерн: \"%s\"", a.getName(), value.getStringValue(), "[0-9]{11}\" / \"[0-9]{8}"));
-                }
-
-                //Проверка формата для кода ТС
-                if ((a.getId() == 411L) && !codeTSPattern.matcher(value.getStringValue()).matches()) {
-                    errors.add(String.format("Атрибут \"%s\" заполнен неверно (%s)! Ожидаемый паттерн: \"%s\"", a.getName(), value.getStringValue(), "[0-9]{5}\" / \"[0-9]{3}[?]{2}"));
-                }
 
                 //Проверка для иерархичных справочников
                 if (record.getUniqueRecordId() != null && a.getAlias().equals(RefBook.RECORD_PARENT_ID_ALIAS)) {
@@ -122,7 +96,7 @@ public class RefBookUtils extends AbstractDao {
                     Integer maxLength = a.getMaxLength();
                     Integer precision = a.getPrecision();
 
-                    // пердпологается, что (maxLength - precision) <= 17
+                    // предполагается, что (maxLength - precision) <= 17
                     if (fractionalPart > precision || integerPart > (maxLength - precision)) {
                         errors.add("\"" + a.getName() + "\": значение атрибута не соответствует формату: максимальное количество цифр " + maxLength + ", максимальная точность " + precision);
                     }

@@ -412,7 +412,7 @@ public class RefBookOktmoDaoImpl extends AbstractDao implements RefBookOktmoDao 
 
     private static final String GET_RECORD_VERSION = "with currentVersion as (select id, version, record_id from %s where id = ?),\n" +
             "minNextVersion as (select r.record_id, min(r.version) version from %s r, currentVersion cv where r.version > cv.version and r.record_id= cv.record_id and r.status != -1 group by r.record_id),\n" +
-            "nextVersionEnd as (select mnv.record_id, mnv.version, r.status from minNextVersion mnv, %s r where mnv.version=r.version and mnv.record_id=r.record_id and mnv.status != -1)\n" +
+            "nextVersionEnd as (select mnv.record_id, mnv.version, r.status from minNextVersion mnv, %s r where mnv.version=r.version and mnv.record_id=r.record_id and r.status != -1)\n" +
             "select cv.id as %s, \n" +
             "cv.version as versionStart, \n" +
             "nve.version - interval '1' day as versionEnd, \n" +
@@ -601,7 +601,7 @@ public class RefBookOktmoDaoImpl extends AbstractDao implements RefBookOktmoDao 
     private static final String GET_NEXT_RECORD_VERSION = "with nextVersion as (select r.* from %s r where r.record_id = ? and r.status != -1 and r.version  = \n" +
             "\t(select min(version) from %s where record_id=r.record_id and status=0 and version > ?)),\n" +
             "minNextVersion as (select r.record_id, min(r.version) version from %s r, nextVersion nv where r.version > nv.version and r.record_id= nv.record_id and r.status != -1 group by r.record_id),\n" +
-            "nextVersionEnd as (select mnv.record_id, mnv.version, r.status from minNextVersion mnv, %s r where mnv.version=r.version and mnv.record_id=r.record_id and mnv.status != -1)\n" +
+            "nextVersionEnd as (select mnv.record_id, mnv.version, r.status from minNextVersion mnv, %s r where mnv.version=r.version and mnv.record_id=r.record_id and r.status != -1)\n" +
             "select nv.id as %s, nv.version as versionStart, nve.version - interval '1' day as versionEnd,\n" +
             "case when (nve.status = 2) then 1 else 0 end as endIsFake \n" +
             "from nextVersion nv \n" +

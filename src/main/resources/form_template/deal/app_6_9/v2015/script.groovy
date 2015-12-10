@@ -1,20 +1,32 @@
-package form_template.deal.app_6_1.v2015
+package form_template.deal.app_6_9.v2015
 
 import au.com.bytecode.opencsv.CSVReader
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
-import com.aplana.sbrf.taxaccounting.service.script.util.ScriptUtils
 import groovy.transform.Field
 
 /**
- * 6.1. Предоставление корпоративных кредитов
+ * 6.9. Операции по уступкам прав требования по кредитным договорам
  *
- * formTemplateId=816
+ * formTemplateId=817
  *
  * @author Stanislav Yasinskiy
  */
+
+// fix
+// rowNumber    - № п/п
+// name         - Полное наименование с указанием ОПФ
+// iksr         - ИНН/ КИО
+// countryCode  - Страна регистрации
+// docNumber    - Номер договора
+// docDate      - Дата договора
+// okeiCode     - Код единицы измерения по ОКЕИ
+// count        - Количество
+// price        - Цена (тариф) за единицу измерения без учета НДС, акцизов и пошлины, руб.
+// cost         - Итого стоимость без учета НДС, акцизов и пошлин, руб.
+// dealDoneDate - Дата совершения сделки
+
 switch (formDataEvent) {
     case FormDataEvent.CREATE:
         formDataService.checkUnique(formData, logger)
@@ -69,27 +81,36 @@ def recordCache = [:]
 def refBookCache = [:]
 
 @Field
-def allColumns = ['fix', 'rowNumber', 'name', 'iksr', 'countryCode', 'sum', 'docNumber', 'docDate', 'count', 'price',
+def allColumns = ['fix', 'rowNumber', 'name', 'iksr', 'countryCode', 'docNumber', 'docDate', 'okeiCode', 'count', 'price',
                   'cost', 'dealDoneDate']
 
-// Редактируемые атрибуты
 @Field
-def editableColumns = ['name', 'sum', 'docNumber', 'docDate', 'dealDoneDate']
+def editableColumns = ['name', 'docNumber', 'docDate', 'okeiCode', 'count', 'price', 'cost', 'dealDoneDate']
 
-// Автозаполняемые атрибуты
 @Field
-def autoFillColumns = ['rowNumber', 'iksr', 'countryCode', 'count', 'price', 'cost']
+def autoFillColumns = ['rowNumber', 'iksr', 'countryCode', 'cost']
 
 // Проверяемые на пустые значения атрибуты
 @Field
-def nonEmptyColumns = ['name', 'sum', 'docDate', 'count', 'price', 'cost', 'dealDoneDate']
+def nonEmptyColumns = ['name', 'docNumber', 'docDate', 'okeiCode', 'count', 'price', 'cost', 'dealDoneDate']
 
 @Field
-def totalColumns = ['sum', 'count', 'price', 'cost']
+def totalColumns = ['count', 'cost']
+
+// Дата начала отчетного периода
+@Field
+def startDate = null
 
 // Дата окончания отчетного периода
 @Field
 def endDate = null
+
+def getReportPeriodStartDate() {
+    if (startDate == null) {
+        startDate = reportPeriodService.getCalendarStartDate(formData.reportPeriodId).time
+    }
+    return startDate
+}
 
 def getReportPeriodEndDate() {
     if (endDate == null) {
@@ -100,14 +121,11 @@ def getReportPeriodEndDate() {
 
 //// Обертки методов
 
-// Поиск записи в справочнике по значению (для импорта)
-def getRecordIdImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
-                      def boolean required = false) {
-    if (value == null || value.trim().isEmpty()) {
-        return null
-    }
-    return formDataService.getRefBookRecordIdImport(refBookId, recordCache, providerCache, alias, value,
-            getReportPeriodEndDate(), rowIndex, colIndex, logger, required)
+// Поиск записи в справочнике по значению (для расчетов)
+def getRecordId(def Long refBookId, def String alias, def String value, def int rowIndex, def String cellName,
+                boolean required = true) {
+    return formDataService.getRefBookRecordId(refBookId, recordCache, providerCache, alias, value,
+            getReportPeriodEndDate(), rowIndex, cellName, logger, required)
 }
 
 // Разыменование записи справочника
@@ -123,8 +141,7 @@ void logicCheck() {
     if (dataRows.isEmpty()) {
         return
     }
-    String dateFormat = 'yyyy'
-    def formYear = (String) reportPeriodService.get(formData.reportPeriodId).getTaxPeriod().getYear()
+    String dateFormat = 'dd.MM.yyyy'
 
     for (row in dataRows) {
         if (row.getAlias() != null) {
@@ -132,55 +149,54 @@ void logicCheck() {
         }
         def rowNum = row.getIndex()
 
-        // 1. Проверка на заполнение граф
+        // 1. Проверка заполнения обязательных полей
         checkNonEmptyColumns(row, rowNum, nonEmptyColumns, logger, true)
 
-        // 2. Проверка цены
-        if (row.sum != null && row.price != row.sum) {
-            def msg1 = row.getCell('price').column.name
-            def msg2 = row.getCell('sum').column.name
-            logger.error("Строка $rowNum: Значение графы «$msg1» должно быть равно значению графы «$msg2»!")
+        // 2. Проверка единицы измерения
+        if (row.okeiCode != null && row.okeiCode != 796) {
+            def msg = row.getCell('okeiCode').column.name
+            logger.error("Строка $rowNum: Значение графы «$msg» должно быть равно значению «796»!")
         }
 
-        // 3. Проверка стоимости
-        if (row.sum != null && row.cost != row.sum) {
-            def msg1 = row.getCell('cost').column.name
-            def msg2 = row.getCell('sum').column.name
-            logger.error("Строка $rowNum: Значение графы «$msg1» должно быть равно значению графы «$msg2»!")
-        }
-
-        // 4. Проверка количества
+        // 3. Проверка количества
         if (row.count != null && row.count != 1) {
             def msg = row.getCell('count').column.name
             logger.error("Строка $rowNum: Значение графы «$msg» должно быть равно значению «1»!")
         }
 
-        // 5. Корректность даты совершения сделки относительно даты договора
+        // 4. Проверка цены
+        if (row.price != null && row.price < 0) {
+            def msg = row.getCell('price').column.name
+            logger.error("Строка $rowNum: Значение графы «$msg» должно быть больше или равно «0»!")
+        }
+
+        // 5. Проверка стоимости
+        if (row.price != null && row.cost != row.price) {
+            def msg1 = row.getCell('cost').column.name
+            def msg2 = row.getCell('price').column.name
+            logger.error("Строка $rowNum: Значение графы «$msg1» должно быть равно значению графы «$msg2»!")
+        }
+
+        // 6. Корректность даты совершения сделки относительно даты договора
         if (row.docDate && row.dealDoneDate && row.docDate > row.dealDoneDate) {
             def msg1 = row.getCell('dealDoneDate').column.name
             def msg2 = row.getCell('docDate').column.name
             logger.error("Строка $rowNum: Значение графы «$msg1» должно быть не меньше значения графы «$msg2»!")
         }
 
-        // 6. Проверка года совершения сделки
-        if (row.dealDoneDate) {
+        // 7. Проверка даты совершения сделки
+        if (row.dealDoneDate && (row.dealDoneDate < getReportPeriodStartDate() || row.dealDoneDate > getReportPeriodEndDate())) {
+            def msg = row.getCell('dealDoneDate').column.name
             def dealDoneYear = row.dealDoneDate.format(dateFormat)
-            if (dealDoneYear != formYear) {
-                def msg = row.getCell('dealDoneDate').column.name
-                logger.error("Строка $rowNum: Год, указанный по графе «$msg» ($dealDoneYear), должен относиться " +
-                        "к календарному году текущей формы ($formYear)!")
-            }
+            def formatStartDate = getReportPeriodStartDate().format(dateFormat)
+            def formatEndDate = getReportPeriodEndDate().format(dateFormat)
+            logger.error("Строка $rowNum: Дата, указанная в графе «$msg» ($dealDoneYear), должна относиться " +
+                    "к отчетному периоду текущей формы ($formatStartDate - $formatEndDate)!")
         }
 
-        // 7. Проверка диапазона дат
+        // 8. Проверка диапазона дат
         if (row.docDate) {
             checkDateValid(logger, row, 'docDate', row.docDate, true)
-        }
-
-        // 8. Проверка суммы доходов
-        if (row.sum && row.sum < 0) {
-            def msg = row.getCell('sum').column.name
-            logger.error("Строка $rowNum: Значение графы «$msg» должно быть больше или равно «0»!")
         }
     }
 
@@ -200,9 +216,7 @@ void calc() {
     deleteAllAliased(dataRows)
 
     for (row in dataRows) {
-        row.count = 1
-        row.price = row.sum
-        row.cost = row.sum
+        row.cost = row.price
     }
 
     // Общий итог
@@ -225,15 +239,15 @@ def calcTotalRow(def dataRows) {
 // Получение импортируемых данных
 void importData() {
     def tmpRow = formData.createDataRow()
-    int COLUMN_COUNT = 12
+    int COLUMN_COUNT = 11
     int HEADER_ROW_COUNT = 3
-    String TABLE_START_VALUE = 'Общая информация'
+    String TABLE_START_VALUE = 'Общая информация о контрагенте - юридическом лице'
     String TABLE_END_VALUE = null
     int INDEX_FOR_SKIP = 0
 
     def allValues = []      // значения формы
     def headerValues = []   // значения шапки
-    def paramsMap = ['rowOffset': 0, 'colOffset': 0]  // мапа с параметрами (отступы сверху и слева)
+    def paramsMap = ['rowOffset' : 0, 'colOffset' : 0]  // мапа с параметрами (отступы сверху и слева)
 
     checkAndReadFile(ImportInputStream, UploadFileName, allValues, headerValues, TABLE_START_VALUE, TABLE_END_VALUE, HEADER_ROW_COUNT, paramsMap)
 
@@ -261,7 +275,7 @@ void importData() {
         rowValues = allValues[0]
         fileRowIndex++
         // все строки пустые - выход
-        if (!rowValues) {
+        if (!rowValues || rowValues.isEmpty() || !rowValues.find { it }) {
             allValues.remove(rowValues)
             rowValues.clear()
             break
@@ -313,21 +327,21 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
     checkHeaderSize(headerRows[headerRows.size() - 1].size(), headerRows.size(), colCount, rowCount)
 
     def headerMapping = [
-            ([(headerRows[0][0]): 'Общая информация']),
-            ([(headerRows[0][5]): 'Сведения о сделке']),
-            ([(headerRows[1][1]): getColumnName(tmpRow, 'rowNumber')]),
-            ([(headerRows[1][2]): getColumnName(tmpRow, 'name')]),
-            ([(headerRows[1][3]): getColumnName(tmpRow, 'iksr')]),
-            ([(headerRows[1][4]): getColumnName(tmpRow, 'countryCode')]),
-            ([(headerRows[1][5]): getColumnName(tmpRow, 'sum')]),
-            ([(headerRows[1][6]): getColumnName(tmpRow, 'docNumber')]),
-            ([(headerRows[1][7]): getColumnName(tmpRow, 'docDate')]),
-            ([(headerRows[1][8]): getColumnName(tmpRow, 'count')]),
-            ([(headerRows[1][9]): getColumnName(tmpRow, 'price')]),
-            ([(headerRows[1][10]): getColumnName(tmpRow, 'cost')]),
+            ([(headerRows[0][0]) : 'Общая информация о контрагенте - юридическом лице']),
+            ([(headerRows[0][5]) : 'Сведения о сделке']),
+            ([(headerRows[1][1]) : getColumnName(tmpRow, 'rowNumber')]),
+            ([(headerRows[1][2]) : getColumnName(tmpRow, 'name')]),
+            ([(headerRows[1][3]) : getColumnName(tmpRow, 'iksr')]),
+            ([(headerRows[1][4]) : getColumnName(tmpRow, 'countryCode')]),
+            ([(headerRows[1][5]) : getColumnName(tmpRow, 'docNumber')]),
+            ([(headerRows[1][6]) : getColumnName(tmpRow, 'docDate')]),
+            ([(headerRows[1][7]) : getColumnName(tmpRow, 'okeiCode')]),
+            ([(headerRows[1][8]) : getColumnName(tmpRow, 'count')]),
+            ([(headerRows[1][9]) : getColumnName(tmpRow, 'price')]),
+            ([(headerRows[1][10]) : getColumnName(tmpRow, 'cost')]),
             ([(headerRows[1][11]): getColumnName(tmpRow, 'dealDoneDate')])
     ]
-    (1..11).each {
+    (1..11).each{
         headerMapping.add(([(headerRows[2][it]): 'гр. ' + it]))
     }
     checkHeaderEquals(headerMapping, logger)
@@ -380,15 +394,15 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
     colIndex++
 
     // графа 5
-    newRow.sum = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
-    colIndex++
-
-    // графа 6
     newRow.docNumber = values[colIndex]
     colIndex++
 
-    // графа 7
+    // графа 6
     newRow.docDate = parseDate(values[colIndex], "dd.MM.yyyy", fileRowIndex, colIndex + colOffset, logger, true)
+    colIndex++
+
+    // графа 7
+    newRow.okeiCode = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
     colIndex++
 
     // графа 8
@@ -466,7 +480,7 @@ void importTransportData() {
     // сравнение итогов
     if (!logger.containsLevel(LogLevel.ERROR) && totalTF) {
         // мапа с алиасами граф и номерами колонокв в xml (алиас -> номер колонки)
-        def totalColumnsIndexMap = ['sum': 5, 'count': 8, 'price': 9, 'cost': 10]
+        def totalColumnsIndexMap = ['count': 8, 'cost': 10]
 
         // сравнение контрольных сумм
         def colOffset = 1
@@ -533,19 +547,19 @@ def getNewRow(String[] rowCells, def columnCount, def fileRowIndex, def rowIndex
 
         // графа 2
         newRow.name = recordId
+        // графа 5
+        newRow.docNumber = pure(rowCells[5])
         // графа 6
-        newRow.docNumber = pure(rowCells[6])
+        newRow.docDate = parseDate(pure(rowCells[6]), "dd.MM.yyyy", fileRowIndex, 6 + colOffset, logger, true)
         // графа 7
-        newRow.docDate = parseDate(pure(rowCells[7]), "dd.MM.yyyy", fileRowIndex, 7 + colOffset, logger, true)
+        newRow.okeiCode = parseNumber(pure(rowCells[7]), fileRowIndex, 7 + colOffset, logger, true)
         // графа 11
         newRow.dealDoneDate = parseDate(pure(rowCells[11]), "dd.MM.yyyy", fileRowIndex, 11 + colOffset, logger, true)
+        // графа 9
+        newRow.price =parseNumber(pure(rowCells[9]), fileRowIndex, 9 + colOffset, logger, true)
     }
-    // графа 5
-    newRow.sum = parseNumber(pure(rowCells[5]), fileRowIndex, 5 + colOffset, logger, true)
     // графа 8
     newRow.count = parseNumber(pure(rowCells[8]), fileRowIndex, 8 + colOffset, logger, true)
-    // графа 9
-    newRow.price =parseNumber(pure(rowCells[9]), fileRowIndex, 9 + colOffset, logger, true)
     // графа 10
     newRow.cost = parseNumber(pure(rowCells[10]), fileRowIndex, 10 + colOffset, logger, true)
 
@@ -573,15 +587,9 @@ def getNewTotalFromXls(def values, def colOffset, def fileRowIndex, def rowIndex
     newRow.setIndex(rowIndex)
     newRow.setImportIndex(fileRowIndex)
 
-    // графа 5
-    def colIndex = 5
-    newRow.sum = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
     // графа 8
     colIndex = 8
     newRow.count = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
-    // графа 9
-    colIndex = 9
-    newRow.price = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
     // графа 10
     colIndex = 10
     newRow.cost = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)

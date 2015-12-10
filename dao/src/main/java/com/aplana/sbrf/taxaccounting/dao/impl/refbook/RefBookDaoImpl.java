@@ -344,13 +344,13 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         }
 
         ps.appendQuery(fromSql.toString());
-        ps.appendQuery("where\n  r.ref_book_id = ?");
+        ps.appendQuery("\n where\n  r.ref_book_id = ?");
         ps.addParam(refBookId);
         if (version != null && needAccurateVersion) {
             ps.appendQuery(" and  r.version = ?");
             ps.addParam(version);
         }
-        ps.appendQuery(" and\n  status <> -1\n");
+        ps.appendQuery(" and\n  status = 0\n");
 
         // обработка параметров фильтра
         if (filterPS.getQuery().length() > 0) {
@@ -1224,7 +1224,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     }
 
     private static final String GET_RECORD_VERSION = "with currentVersion as (select id, version, record_id, ref_book_id from ref_book_record where id = ?),\n" +
-            "minNextVersion as (select r.ref_book_id, r.record_id, min(r.version) version from ref_book_record r, currentVersion cv where r.version > cv.version and r.record_id= cv.record_id and r.ref_book_id= cv.ref_book_id and status != -1 group by r.ref_book_id, r.record_id),\n" +
+            "minNextVersion as (select r.ref_book_id, r.record_id, min(r.version) version from ref_book_record r, currentVersion cv where r.version > cv.version and r.record_id= cv.record_id and r.ref_book_id= cv.ref_book_id and r.status != -1 group by r.ref_book_id, r.record_id),\n" +
             "nextVersionEnd as (select mnv.ref_book_id, mnv.record_id, mnv.version, r.status from minNextVersion mnv, ref_book_record r where mnv.ref_book_id=r.ref_book_id and mnv.version=r.version and mnv.record_id=r.record_id and r.status != -1)\n" +
             "select cv.id as %s, \n" +
             "cv.version as versionStart, \n" +
@@ -1860,9 +1860,12 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     private static final String CHECK_USAGES_IN_DEPARTMENT_CONFIG = "select * from (with checkRecords as (select * from ref_book_record r where %s),\n" +
             "periodCodes as (select a.alias, v.* from ref_book_value v, ref_book_attribute a where v.attribute_id=a.id and a.ref_book_id=8),\n" +
             "usages as (select r.* from ref_book_value v, ref_book_record r, checkRecords cr " +
-            "where v.attribute_id in (select id from ref_book_attribute where ref_book_id in (37,310,31,98,330,33,206,99) %s and alias != 'DEPARTMENT_ID') and v.reference_value = cr.id and r.id=v.record_id and r.status != -1)\n" +
+            "where v.attribute_id in (select id from ref_book_attribute where ref_book_id in (37,310,31,98,330,33,206,99) %s and alias != 'DEPARTMENT_ID') and v.reference_value = cr.id and r.id=v.record_id and r.status != -1),\n" +
+            "allVersions as (select distinct r.* from ref_book_record r, usages u where r.status != -1 and r.ref_book_id=u.ref_book_id and r.record_id=u.record_id),\n" +
+            "recordsByVersion as (select r.*, row_number() over(partition by r.record_id order by r.version) rn from ref_book_record r, allVersions av where r.id=av.id and r.status != -1),\n" +
+            "versionInfo as (select rv.rn NUM, rv.ID, rv.ref_book_id, rv.VERSION, rv.status, rv2.version - interval '1' day nextVersion,rv2.status nextStatus from recordsByVersion rv left outer join recordsByVersion rv2 on rv.RECORD_ID = rv2.RECORD_ID and rv.rn+1 = rv2.rn where rv.status = 0)\n" +
             "select distinct d.name as departmentName, concat(pn.string_value, to_char(u.version,' yyyy')) as periodName, nt.number_value as isT, ni.number_value as isI, nd.number_value as isD, nv.number_value as isV, np.number_value as isP,\n" +
-            "to_date(concat(to_char(ps.date_value,'dd.mm'), to_char(u.version,'.yyyy')), 'DD.MM.YYYY') as periodStart, to_date(concat(to_char(pe.date_value,'dd.mm'), to_char(u.version,'.yyyy')), 'DD.MM.YYYY') as periodEnd,\n" +
+            "trunc(u.version, 'DD') as periodStart, trunc(u.nextversion, 'DD') as periodEnd,\n" +
             "case\n" +
             "\twhen (u.ref_book_id = 31 or u.ref_book_id = 310) then 'T'\n" +           //Транспортный налог
             "\twhen (u.ref_book_id = 33 or u.ref_book_id = 330) then 'I'\n" +           //Налог на прибыль
@@ -1871,7 +1874,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             "\twhen (u.ref_book_id = 99 or u.ref_book_id = 206) then 'P'\n" +           //Налог на имущество
             "\telse null\n" +
             "end as taxCode\n" +
-            "from usages u\n" +
+            "from versionInfo u\n" +
             "join ref_book_value dv on dv.record_id = u.id\n" +
             "join ref_book_attribute da on (da.id = dv.attribute_id and da.alias='DEPARTMENT_ID')\n" +
             "join department d on d.id = dv.reference_value\n" +
@@ -1903,8 +1906,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             if (restrictPeriod != null) {
                 if (restrictPeriod) {
                     //Отбираем только ссылки пересекающиеся с указанным периодом
-                    sql  += " and ((periodStart >= :versionFrom and (periodEnd is null or :versionTo is null or periodEnd <= :versionTo)) or " +
-                            "(periodStart <= :versionFrom and (periodEnd is null or periodEnd >= :versionFrom)))";
+                    sql  += " and ((periodStart <= :versionFrom and (periodEnd is null or periodEnd > :versionFrom)) or (periodStart > :versionFrom and (:versionTo is null or periodStart <= :versionTo)))";
                     params.put("versionFrom", versionFrom);
                     params.put("versionTo", versionTo);
                 } else {
@@ -1966,8 +1968,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             if (restrictPeriod != null) {
                 if (restrictPeriod) {
                     //Отбираем только ссылки пересекающиеся с указанным периодом
-                    sql  += " WHERE ((rp.calendar_start_date >= :versionFrom and (rp.end_date is null or :versionTo is null or rp.end_date <= :versionTo)) or " +
-                            "(rp.calendar_start_date <= :versionFrom and (rp.end_date is null or rp.end_date >= :versionFrom)))";
+                    sql  += " WHERE ((rp.calendar_start_date <= :versionFrom and (rp.end_date is null or rp.end_date > :versionFrom)) or (rp.calendar_start_date > :versionFrom and (:versionTo is null or rp.calendar_start_date <= :versionTo)))";
                     params.put("versionFrom", versionFrom);
                     params.put("versionTo", versionTo);
                 } else {
@@ -2047,8 +2048,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
                 fullSql = sql;
             } else if (restrictPeriod) {
                 //Отбираем только ссылки пересекающиеся с указанным периодом
-                String restrictQuery = " where ((versionStart >= :versionFrom and (versionEnd is null or :versionTo is null or versionEnd <= :versionTo)) or " +
-                        "(versionStart <= :versionFrom and (versionEnd is null or versionEnd >= :versionFrom)))";
+                String restrictQuery = " where ((versionStart <= :versionFrom and (versionEnd is null or versionEnd > :versionFrom)) or (versionStart > :versionFrom and (:versionTo is null or versionStart <= :versionTo)))";
                 fullSql = "SELECT * FROM (\n" + sql + "\n ) " + restrictQuery;
                 params.put("refBookId", refBookId);
                 params.put("versionFrom", versionFrom);
@@ -2087,12 +2087,18 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
                 public String concatAttrs(ResultSet rs, String attrValues) throws SQLException {
                     // TODO возможно тут стоит предусмотреть объединение по группе уникальности
                     StringBuilder attr = new StringBuilder();
+                    boolean hasValue = rs.getString(STRING_VALUE_COLUMN_ALIAS) != null ||
+                            rs.getString(NUMBER_VALUE_COLUMN_ALIAS) != null ||
+                            rs.getDate(DATE_VALUE_COLUMN_ALIAS) != null;
                     if (attrValues != null) {
                         attr.append(attrValues);
+                        if (hasValue) {
+                            attr.append(", ");
+                        }
                     }
-                    attr.append(rs.getString(STRING_VALUE_COLUMN_ALIAS) != null ? rs.getString(STRING_VALUE_COLUMN_ALIAS) + ", " : "");
-                    attr.append(rs.getString(NUMBER_VALUE_COLUMN_ALIAS) != null ? rs.getLong(NUMBER_VALUE_COLUMN_ALIAS) + ", " : "");
-                    attr.append(rs.getDate(DATE_VALUE_COLUMN_ALIAS) != null ? rs.getDate(DATE_VALUE_COLUMN_ALIAS) + ", " : "");
+                    attr.append(rs.getString(STRING_VALUE_COLUMN_ALIAS) != null ? rs.getString(STRING_VALUE_COLUMN_ALIAS): "");
+                    attr.append(rs.getString(NUMBER_VALUE_COLUMN_ALIAS) != null ? rs.getLong(NUMBER_VALUE_COLUMN_ALIAS) : "");
+                    attr.append(rs.getDate(DATE_VALUE_COLUMN_ALIAS) != null ? rs.getDate(DATE_VALUE_COLUMN_ALIAS) : "");
                     // TODO - разыменовать и добавить значение аттрибута ссылки
                     attr.append(rs.getString(REFERENCE_VALUE_COLUMN_ALIAS) != null ? rs.getInt(REFERENCE_VALUE_COLUMN_ALIAS) + ", " : "");
                     return attr.toString();
@@ -2242,7 +2248,11 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 
     @Override
     public Long findRecord(Long refBookId, Long recordId, Date version) {
-        return getJdbcTemplate().queryForLong("select id from ref_book_record where ref_book_id = ? and record_id = ? and version = ? and status != -1", refBookId, recordId, version);
+        try {
+            return getJdbcTemplate().queryForLong("select id from ref_book_record where ref_book_id = ? and record_id = ? and version = ? and status != -1", refBookId, recordId, version);
+        } catch (EmptyResultDataAccessException e) {
+            return null;
+        }
     }
 
     private static final String DELETE_ALL_VERSIONS = "update ref_book_record set status = -1 where ref_book_id=? and record_id in (select record_id from ref_book_record where %s)";

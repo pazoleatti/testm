@@ -718,8 +718,8 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
     // Графа 2 - зависит от графы 3 - атрибут 901 - ACCOUNT_NAME - «Наименование балансового счета», справочник 101 «План счетов бухгалтерского учета»
     if (record != null) {
         colIndex = 2
-        def value1 = record?.ACCOUNT_NAME?.value?.toString()
-        def value2 = values[colIndex]
+        def value1 = values[colIndex]
+        def value2 = record?.ACCOUNT_NAME?.value?.toString()
         formDataService.checkReferenceValue(101, value1, value2, fileRowIndex, colIndex + colOffset, logger, false)
     }
 

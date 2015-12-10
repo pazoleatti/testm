@@ -105,9 +105,20 @@ def groupColumns = ['name']
 @Field
 def totalColumns = ['income', 'outcome']
 
+// Дата начала отчетного периода
+@Field
+def startDate = null
+
 // Дата окончания отчетного периода
 @Field
 def endDate = null
+
+def getReportPeriodStartDate() {
+    if (startDate == null) {
+        startDate = reportPeriodService.getCalendarStartDate(formData.reportPeriodId).time
+    }
+    return startDate
+}
 
 def getReportPeriodEndDate() {
     if (endDate == null) {
@@ -141,8 +152,7 @@ void logicCheck() {
     if (dataRows.isEmpty()) {
         return
     }
-    String dateFormat = 'yyyy'
-    def formYear = (String) reportPeriodService.get(formData.reportPeriodId).getTaxPeriod().getYear()
+    String dateFormat = 'dd.MM.yyyy'
 
     for (row in dataRows) {
         if (row.getAlias() != null) {
@@ -202,13 +212,17 @@ void logicCheck() {
             logger.error("Строка $rowNum: Значение графы «$msg2» должно быть не меньше значения графы «$msg1»!")
         }
 
-        // 7. Проверка года совершения сделки
+        // 7. Проверка пересечения даты сделки с отчетным периодом
         if (row.dealDoneDate) {
             def dealDoneYear = row.dealDoneDate.format(dateFormat)
-            if (dealDoneYear != formYear) {
-                def msg = getColumnName(row, 'dealDoneDate')
-                logger.error("Строка $rowNum: Год, указанный по графе «$msg» ($dealDoneYear), должен относиться " +
-                        "к календарному году текущей формы ($formYear)!")
+            startDate = getReportPeriodStartDate()
+            endDate = getReportPeriodEndDate()
+            formatStartDate = startDate.format(dateFormat)
+            formatEndDate = endDate.format(dateFormat)
+            if (row.dealDoneDate < startDate || row.dealDoneDate > endDate) {
+                def msg = row.getCell('dealDoneDate').column.name
+                logger.error("Строка $rowNum: Дата, указанная в графе «$msg» ($dealDoneYear), должна относиться " +
+                        "к отчетному периоду текущей формы ($formatStartDate - $formatEndDate)!")
             }
         }
 
@@ -359,7 +373,6 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
     if (headerRows.isEmpty()) {
         throw new ServiceException(WRONG_HEADER_ROW_SIZE)
     }
-    //logger.info("%s", headerRows);
     checkHeaderSize(headerRows[headerRows.size() - 1].size(), headerRows.size(), colCount, rowCount)
     def headerMapping = [
             ([(headerRows[0][0]) : 'Общие сведения о контрагенте - юридическом лице']),

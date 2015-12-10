@@ -1,6 +1,5 @@
-package com.aplana.sbrf.taxaccounting.form_template.deal.app_6_8.v2015;
+package com.aplana.sbrf.taxaccounting.form_template.deal.app_6_9.v2015;
 
-import com.aplana.sbrf.taxaccounting.form_template.deal.DealBaseTest;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
@@ -27,12 +26,10 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 /**
- * 6.8. Приобретение услуг по разработке, внедрению, поддержке и модификации программного обеспечения, приобретения лицензий
- *
- * @author Emamedova
+ * 6.9. Операции по уступкам прав требования по кредитным договорам
  */
-public class App_6_8Test extends ScriptTestBase {
-    private static final int TYPE_ID = 815;
+public class App_6_9Test extends ScriptTestBase {
+    private static final int TYPE_ID = 817;
     private static final int DEPARTMENT_ID = 1;
     private static final int REPORT_PERIOD_ID = 1;
     private static final int DEPARTMENT_PERIOD_ID = 1;
@@ -57,7 +54,7 @@ public class App_6_8Test extends ScriptTestBase {
 
     @Override
     protected ScriptTestMockHelper getMockHelper() {
-        return getDefaultScriptTestMockHelper(App_6_8Test.class);
+        return getDefaultScriptTestMockHelper(App_6_9Test.class);
     }
 
     @Before
@@ -77,104 +74,125 @@ public class App_6_8Test extends ScriptTestBase {
         testHelper.execute(FormDataEvent.CHECK);
         checkLogger();
     }
+
     // Проверка с данными
     @Test
     public void check1Test() throws ParseException {
         FormData formData = getFormData();
-        formData.initFormTemplateParams(testHelper.getTemplate("..//src/main//resources//form_template//deal//app_6_8//v2015//"));
+        formData.initFormTemplateParams(testHelper.getTemplate("..//src/main//resources//form_template//deal//app_6_9//v2015//"));
         List<DataRow<Cell>> dataRows = testHelper.getDataRowHelper().getAll();
         SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
 
         // для попадания в ЛП:
-        // Проверка на заполнение граф
+        // 1. Проверка заполнения граф
         DataRow<Cell> row = formData.createDataRow();
         row.setIndex(1);
         dataRows.add(row);
+
         testHelper.execute(FormDataEvent.CHECK);
+        printLog();
         List<LogEntry> entries = testHelper.getLogger().getEntries();
         int i = 0;
-        Assert.assertEquals("Строка 1: Графа «Полное наименование юридического лица с указанием ОПФ» не заполнена!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Графа «Сумма расходов Банка, руб.» не заполнена!", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 1: Графа «Полное наименование с указанием ОПФ» не заполнена!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Графа «Номер договора» не заполнена!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Графа «Дата договора» не заполнена!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Графа «Вид услуг» не заполнена!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Графа «Цена» не заполнена!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Графа «Стоимость» не заполнена!", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 1: Графа «Код единицы измерения по ОКЕИ» не заполнена!", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 1: Графа «Количество» не заполнена!", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 1: Графа «Цена (тариф) за единицу измерения без учета НДС, акцизов и пошлины, руб.» не заполнена!", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 1: Графа «Итого стоимость без учета НДС, акцизов и пошлины, руб.» не заполнена!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Графа «Дата совершения сделки» не заполнена!", entries.get(i++).getMessage());
         Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
         testHelper.getLogger().clear();
 
         // для попадания в ЛП:
-        // Проверка суммы
-        // Проверка количества
-        // Проверка стоимости
-        //  Проверка даты совершения сделки
-        //  Корректность даты (заключения) сделки
-        //  Корректность даты совершения сделки
-        //  Проверка диапазона дат
+        // 2. Проверка единицы измерения
+        // 3. Проверка количества
+        // 4. Проверка цены
+        // 5. Проверка стоимости
+        // 6. Корректность даты совершения сделки относительно даты договора
+        // 7. Проверка даты совершения сделки
+        // 8. Проверка диапазона дат
         row.getCell("name").setValue(1L, null);
-        row.getCell("sum").setValue(0, null);
-        row.getCell("serviceType").setValue(1L, null);
-        row.getCell("docNumber").setValue("1", null);
+        row.getCell("okeiCode").setValue(777, null);
+        row.getCell("docNumber").setValue("docNumber", null);
         row.getCell("docDate").setValue(sdf.parse("02.01.2990"), null);
-        row.getCell("price").setValue(1L, null);
-        row.getCell("cost").setValue(1L, null);
-        row.getCell("dealDoneDate").setValue(sdf.parse("01.01.2990"), null);
+        row.getCell("count").setValue(2, null);
+        row.getCell("price").setValue(-1, null);
+        row.getCell("cost").setValue(555, null);
+        row.getCell("dealDoneDate").setValue(sdf.parse("01.01.2989"), null);
+
         testHelper.execute(FormDataEvent.CHECK);
+
         entries = testHelper.getLogger().getEntries();
         i = 0;
-        Assert.assertEquals("Строка 1: Значение графы «Сумма расходов Банка, руб.» должно быть больше «0»!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Значение графы «Цена» должно быть равно значению графы «Сумма расходов Банка, руб.»!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Значение графы «Стоимость» должно быть равно значению графы «Сумма расходов Банка, руб.»!", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 1: Значение графы «Код единицы измерения по ОКЕИ» должно быть равно значению «796»!", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 1: Значение графы «Количество» должно быть равно значению «1»!", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 1: Значение графы «Цена (тариф) за единицу измерения без учета НДС, акцизов и пошлины, руб.» должно быть больше или равно «0»!", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 1: Значение графы «Итого стоимость без учета НДС, акцизов и пошлины, руб.» должно быть равно значению графы «Цена (тариф) за единицу измерения без учета НДС, акцизов и пошлины, руб.»!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Значение графы «Дата совершения сделки» должно быть не меньше значения графы «Дата договора»!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Год, указанный по графе «Дата совершения сделки» (2990), должен относиться к календарному году текущей формы (2014)!", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 1: Дата, указанная в графе «Дата совершения сделки» (01.01.2989), должна относиться к отчетному периоду текущей формы (01.01.2014 - 31.12.2014)!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Значение даты атрибута «Дата договора» должно принимать значение из следующего диапазона: 01.01.1991 - 31.12.2099", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Значение даты атрибута «Дата совершения сделки» должно принимать значение из следующего диапазона: 01.01.1991 - 31.12.2099", entries.get(i++).getMessage());
         Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
         testHelper.getLogger().clear();
 
-        // для прохождения всех ЛП:
+        // для успешного прохождения всех ЛП:
         row.getCell("name").setValue(1L, null);
-        row.getCell("sum").setValue(222L, null);
-        row.getCell("docNumber").setValue("1", null);
-        row.getCell("serviceType").setValue(1L, null);
+        row.getCell("okeiCode").setValue(796, null);
         row.getCell("docDate").setValue(sdf.parse("01.01.2014"), null);
-        row.getCell("price").setValue(222L, null);
-        row.getCell("cost").setValue(222L, null);
-        row.getCell("dealDoneDate").setValue(sdf.parse("02.01.2014"), null);
-        testHelper.execute(FormDataEvent.CHECK);
-        entries = testHelper.getLogger().getEntries();
+        row.getCell("count").setValue(1, null);
+        row.getCell("price").setValue(0, null);
+        row.getCell("cost").setValue(0, null);
+        row.getCell("dealDoneDate").setValue(sdf.parse("01.01.2014"), null);
+
+        // проверка суммы доходов;
+        row.getCell("price").setValue(0, null);
+        row.getCell("cost").setValue(0, null);
         i = 0;
+        testHelper.execute(FormDataEvent.CALCULATE);
+        testHelper.execute(FormDataEvent.CHECK);
         Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
         testHelper.getLogger().clear();
     }
 
-    // Расчет пустой (в импорте - расчет заполненной)
+    // Расчет пустой (в импорте - растчет заполненной)
     @Test
     public void calcTest() {
         testHelper.execute(FormDataEvent.CALCULATE);
         checkLogger();
     }
+
     @Test
     public void importExcelTest() {
         mockBeforeImport();
         testHelper.setImportFileInputStream(getImportXlsInputStream());
         testHelper.execute(FormDataEvent.IMPORT);
+        List<String> aliases = Arrays.asList("docNumber", "docDate", "price", "cost", "dealDoneDate");
+        // ожидается 5 строк: 4 из файла + 1 итоговая строка
+        int expected = 4 + 1;
+        defaultCheckLoadData(aliases, expected);
+
+        checkLogger();
+        // "count", "name"
         checkLoadData(testHelper.getDataRowHelper().getAll());
 
         // проверка расчетов
         testHelper.execute(FormDataEvent.CALCULATE);
         checkAfterCalc(testHelper.getDataRowHelper().getAll());
-        checkLogger();
-
     }
+
     @Test
     public void importTransportFileTest() {
         mockBeforeImport();
         testHelper.setImportFileInputStream(getImportRnuInputStream());
         testHelper.execute(FormDataEvent.IMPORT_TRANSPORT_FILE);
+        List<String> aliases = Arrays.asList("docNumber", "docDate", "price", "cost", "dealDoneDate");
+        // ожидается 5 строк
+        int expected = 5;
+        defaultCheckLoadData(aliases, expected);
+
         checkLoadData(testHelper.getDataRowHelper().getAll());
     }
+
     void mockBeforeImport(){
         Long refbookId = 520L;
 
@@ -235,24 +253,41 @@ public class App_6_8Test extends ScriptTestBase {
     // Проверить загруженные данные
     void checkLoadData(List<DataRow<Cell>> dataRows) {
         Assert.assertEquals(1L, dataRows.get(0).getCell("name").getNumericValue().longValue());
-        Assert.assertEquals(2L, dataRows.get(1).getCell("name").getNumericValue().longValue());
+        Assert.assertEquals(1L, dataRows.get(1).getCell("name").getNumericValue().longValue());
+        Assert.assertEquals(2L, dataRows.get(2).getCell("name").getNumericValue().longValue());
+        Assert.assertEquals(3L, dataRows.get(3).getCell("name").getNumericValue().longValue());
 
-        Assert.assertEquals(1, dataRows.get(0).getCell("serviceType").getNumericValue().intValue());
-        Assert.assertEquals(2, dataRows.get(1).getCell("serviceType").getNumericValue().intValue());
+        Assert.assertEquals(1, dataRows.get(0).getCell("count").getNumericValue().intValue());
+        Assert.assertEquals(1, dataRows.get(1).getCell("count").getNumericValue().intValue());
+        Assert.assertEquals(1, dataRows.get(2).getCell("count").getNumericValue().intValue());
+        Assert.assertEquals(1, dataRows.get(3).getCell("count").getNumericValue().intValue());
     }
 
     // Проверить расчеты
     void checkAfterCalc(List<DataRow<Cell>> dataRows) {
-        Assert.assertEquals(1, dataRows.get(0).getCell("price").getNumericValue().doubleValue(), 0);
-        Assert.assertEquals(1, dataRows.get(1).getCell("price").getNumericValue().doubleValue(), 0);
+        Assert.assertEquals(1, dataRows.get(0).getCell("count").getNumericValue().intValue());
+        Assert.assertEquals(1, dataRows.get(1).getCell("count").getNumericValue().intValue());
+        Assert.assertEquals(1, dataRows.get(2).getCell("count").getNumericValue().intValue());
+        Assert.assertEquals(1, dataRows.get(3).getCell("count").getNumericValue().intValue());
 
+        Assert.assertEquals(796, dataRows.get(0).getCell("okeiCode").getNumericValue().intValue());
+        Assert.assertEquals(796, dataRows.get(1).getCell("okeiCode").getNumericValue().intValue());
+        Assert.assertEquals(796, dataRows.get(2).getCell("okeiCode").getNumericValue().intValue());
+        Assert.assertEquals(796, dataRows.get(3).getCell("okeiCode").getNumericValue().intValue());
+
+        Assert.assertEquals(1, dataRows.get(0).getCell("price").getNumericValue().doubleValue(), 0);
+        Assert.assertEquals(3, dataRows.get(1).getCell("price").getNumericValue().doubleValue(), 0);
+        Assert.assertEquals(5, dataRows.get(2).getCell("price").getNumericValue().doubleValue(), 0);
+        Assert.assertEquals(7, dataRows.get(3).getCell("price").getNumericValue().doubleValue(), 0);
 
         Assert.assertEquals(1, dataRows.get(0).getCell("cost").getNumericValue().doubleValue(), 0);
-        Assert.assertEquals(1, dataRows.get(1).getCell("cost").getNumericValue().doubleValue(), 0);
+        Assert.assertEquals(3, dataRows.get(1).getCell("cost").getNumericValue().doubleValue(), 0);
+        Assert.assertEquals(5, dataRows.get(2).getCell("cost").getNumericValue().doubleValue(), 0);
+        Assert.assertEquals(7, dataRows.get(3).getCell("cost").getNumericValue().doubleValue(), 0);
 
-
-        Assert.assertEquals(2, dataRows.get(2).getCell("sum").getNumericValue().doubleValue(), 0);
-        Assert.assertEquals(2, dataRows.get(2).getCell("price").getNumericValue().doubleValue(), 0);
-        Assert.assertEquals(2, dataRows.get(2).getCell("cost").getNumericValue().doubleValue(), 0);
+        Assert.assertNull(dataRows.get(4).getCell("price").getValue());
+        Assert.assertEquals(4, dataRows.get(4).getCell("count").getNumericValue().doubleValue(), 0);
+        Assert.assertEquals(16, dataRows.get(4).getCell("cost").getNumericValue().doubleValue(), 0);
     }
 }
+
