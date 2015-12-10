@@ -1,16 +1,9 @@
 package form_template.income.rnu_111.v2015
 
-import com.aplana.sbrf.taxaccounting.model.Cell
-import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
-import com.aplana.sbrf.taxaccounting.service.script.util.ScriptUtils
 import groovy.transform.Field
-
-import static com.aplana.sbrf.taxaccounting.service.script.util.ScriptUtils.getColumnName
-import static com.aplana.sbrf.taxaccounting.service.script.util.ScriptUtils.getColumnName
 
 /**
  * 808 - РНУ 111. Регистр налогового учёта доходов, возникающих в связи с применением в сделках по предоставлению
@@ -105,10 +98,6 @@ def autoFillColumns = ['countryName', 'iksr', 'base', 'rate2', 'sum3']
 // Проверяемые на пустые значения атрибуты
 @Field
 def nonEmptyColumns = ['name', 'code', 'reasonNumber', 'reasonDate', 'sum', 'currency', 'time', 'rate', 'sum1', 'rate1', 'sum2']
-
-// Группируемые атрибуты
-@Field
-def groupColumns = ['name']
 
 @Field
 def totalColumns = ['sum1', 'sum2', 'sum3']
@@ -256,12 +245,7 @@ void logicCheck() {
         }
     }
 
-    // 11. Проверка наличия всех фиксированных строк «Итого по ЮЛ»
-    // 12. Проверка отсутствия лишних фиксированных строк «Итого по ЮЛ»
-    // 13. Проверка итоговых значений по фиксированным строкам «Итого по ЮЛ»
-    checkItog(dataRows)
-
-    // 14. Проверка итоговых значений пофиксированной строке «Итого»
+    // 12. Проверка итоговых значений пофиксированной строке «Итого»
     if (dataRows.find { it.getAlias() == 'total' }) {
         checkTotalSum(dataRows, totalColumns, logger, true)
     }
@@ -286,11 +270,8 @@ void calc() {
     if (dataRows.isEmpty()) {
         return
     }
-    // Удаление подитогов
+    // Удаление итогов
     deleteAllAliased(dataRows)
-
-    // Сортировка
-    sortRows(dataRows, groupColumns)
 
     for (row in dataRows) {
         if(row.getAlias() != null){
@@ -301,19 +282,9 @@ void calc() {
         row.sum3 = calc17(row)
     }
 
-    // Добавление подитогов
-    addAllAliased(dataRows, new ScriptUtils.CalcAliasRow() {
-        @Override
-        DataRow<Cell> calc(int i, List<DataRow<Cell>> rows) {
-            return calcItog(i, dataRows)
-        }
-    }, groupColumns)
-
     // Общий итог
     def total = calcTotalRow(dataRows)
     dataRows.add(total)
-
-    sortFormDataRows(false)
 }
 
 def BigDecimal calc8(def row) {
@@ -338,45 +309,6 @@ def BigDecimal calc17(def row) {
         return (row.sum2 - row.sum1).abs()
     }
     return null
-}
-
-// Расчет подитогового значения
-DataRow<Cell> calcItog(def int i, def List<DataRow<Cell>> dataRows) {
-    def value2 = getRefBookValue(520L, dataRows.get(i).name)?.NAME?.value
-    def newRow = getSubTotalRow(null, value2, i)
-
-    // Расчеты подитоговых значений
-    def rows = []
-    for (int j = i; j >= 0 && dataRows.get(j).getAlias() == null; j--) {
-        rows.add(dataRows.get(j))
-    }
-    calcTotalSum(rows, newRow, totalColumns)
-
-    return newRow
-}
-
-/**
- * Получить подитоговую строку с заданными стилями.
- *
- * @param title надпись подитога (если задана, то используется это значение)
- * @param value2 значение графы 2 (если value2 не задан, то используется 'Итого «ВЗЛ/РОЗ не задано»')
- * @param i номер строки
- */
-DataRow<Cell> getSubTotalRow(String title, String value2, int i) {
-    def newRow = (formDataEvent in [FormDataEvent.IMPORT, FormDataEvent.IMPORT_TRANSPORT_FILE]) ? formData.createStoreMessagingDataRow() : formData.createDataRow()
-    if (title) {
-        newRow.fix = title
-    } else if (value2) {
-        newRow.fix = 'Итого по "' + StringUtils.cleanString(value2) + '"'
-    } else {
-        newRow.fix = 'Итого по "ВЗЛ/РОЗ не задано"'
-    }
-    newRow.setAlias('itg#'.concat(i.toString()))
-    newRow.getCell('fix').colSpan = 6
-    allColumns.each {
-        newRow.getCell(it).setStyleAlias('Контрольные суммы')
-    }
-    return newRow
 }
 
 def calcTotalRow(def dataRows) {
@@ -424,7 +356,6 @@ void importData() {
     def rows = []
     def allValuesCount = allValues.size()
     def totalRowFromFile = null
-    def totalRowFromFileMap = [:]// мапа для хранения строк подитогов со значениями из файла (стили простых строк)
 
     // формирвание строк нф
     for (def i = 0; i < allValuesCount; i++) {
@@ -444,17 +375,6 @@ void importData() {
             allValues.remove(rowValues)
             rowValues.clear()
             continue
-        } else if (rowValues[INDEX_FOR_SKIP].contains("Итого по ")) {
-            def subTotalRow = getNewSubTotalRowFromXls(rowValues, colOffset, fileRowIndex, rowIndex)
-            if (totalRowFromFileMap[subTotalRow.fix] == null) {
-                totalRowFromFileMap[subTotalRow.fix] = []
-            }
-            totalRowFromFileMap[subTotalRow.fix].add(subTotalRow)
-            rows.add(subTotalRow)
-
-            allValues.remove(rowValues)
-            rowValues.clear()
-            continue
         }
         // простая строка
         def newRow = getNewRowFromXls(rowValues, colOffset, fileRowIndex, rowIndex)
@@ -462,35 +382,6 @@ void importData() {
         // освободить ненужные данные - иначе не хватит памяти
         allValues.remove(rowValues)
         rowValues.clear()
-    }
-
-    // сравнение подитогов
-    if (!totalRowFromFileMap.isEmpty()) {
-        def tmpRows = rows.findAll { !it.getAlias() }
-        // получить посчитанные подитоги
-        def tmpSubTotalRows = calcSubTotalRows(rows)
-        tmpSubTotalRows.each { subTotalRow ->
-            def totalRows = totalRowFromFileMap[subTotalRow.fix]
-            if (totalRows) {
-                totalRows.each { totalRow ->
-                    compareTotalValues(totalRow, subTotalRow, totalColumns, logger, false)
-                }
-                totalRowFromFileMap.remove(subTotalRow.fix)
-            } else {
-                rowWarning(logger, null, String.format(GROUP_WRONG_ITOG, subTotalRow.fix.replaceAll("Итого по \"(.*)\"", "\$1")))
-            }
-        }
-        if (!totalRowFromFileMap.isEmpty()) {
-            // для этих подитогов из файла нет групп
-            totalRowFromFileMap.each { key, totalRows ->
-                totalRows.each { totalRow ->
-                    totalColumns.each { alias ->
-                        def msg = String.format(COMPARE_TOTAL_VALUES, totalRow.getIndex(), getColumnName(totalRow, alias), totalRow[alias], BigDecimal.ZERO)
-                        rowWarning(logger, totalRow, msg)
-                    }
-                }
-            }
-        }
     }
 
     // сравнение итогов
@@ -570,7 +461,7 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
 
     def int colIndex = 2
 
-    def recordId = getRecordId(nameFromFile, values[4], fileRowIndex, colIndex, iksrName)
+    def recordId = getTcoRecordId(nameFromFile, values[4], iksrName, fileRowIndex, colIndex, getReportPeriodEndDate(), true, logger, refBookFactory, recordCache)
     def map = getRefBookValue(520, recordId)
 
     // графа 2
@@ -579,7 +470,7 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
 
     // графа 3
     if (map != null) {
-        map = getRefBookValue(10, map.COUNTRY?.referenceValue)
+        map = getRefBookValue(10, map.COUNTRY_CODE?.referenceValue)
         if (map != null) {
             formDataService.checkReferenceValue(10, values[colIndex], map.NAME?.stringValue, fileRowIndex, colIndex + colOffset, logger, false)
         }
@@ -589,7 +480,6 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
     // графа 4
     colIndex++
 
-    //
     // графа 5
     newRow.code = getRecordIdImport(28, 'CODE', values[colIndex], fileRowIndex, colIndex + colOffset, false)
     colIndex++
@@ -623,127 +513,6 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
     return newRow
 }
 
-// Получение Id записи из справочника 520 с использованием кэширования
-def getRecordId(String name, String iksr, int fileRowIndex, int colIndex, String iksrName) {
-    if (!iksr) {
-        // сообщение 6
-        logger.warn("Строка $fileRowIndex , столбец " + ScriptUtils.getXLSColumnName(colIndex) + ": " +
-                "На форме не заполнены графы с общей информацией о ВЗЛ/РОЗ, так как в файле отсутствует значение по графе «$iksrName»!")
-        return null
-    }
-    def ref_id = 520
-    def RefBook refBook = refBookFactory.get(ref_id)
-
-    String filter = "(LOWER(INN) = LOWER('$iksr') or " +
-            "LOWER(REG_NUM) = LOWER('$iksr') or " +
-            "LOWER(TAX_CODE_INCORPORATION) = LOWER('$iksr') or " +
-            "LOWER(SWIFT) = LOWER('$iksr') or " +
-            "LOWER(KIO) = LOWER('$iksr'))"
-    if (recordCache[ref_id] != null) {
-        if (recordCache[ref_id][filter] != null) {
-            return recordCache[ref_id][filter]
-        }
-    } else {
-        recordCache[ref_id] = [:]
-    }
-
-    def provider = refBookFactory.getDataProvider(ref_id)
-    def records = provider.getRecords(getReportPeriodEndDate(), null, filter, null)
-    if (records.size() == 1) {
-        // 5
-        def record = records.get(0)
-        if (StringUtils.cleanString(name) != StringUtils.cleanString(record.get('NAME')?.stringValue)) {
-            // сообщение 4
-            String msg = name ? "В файле указано другое наименование ВЗЛ/РОЗ - «$name»!" : "Наименование ВЗЛ/РОЗ в файле не заполнено!"
-            def refBookAttributeName
-            for (alias in ['INN', 'REG_NUM', 'TAX_CODE_INCORPORATION', 'SWIFT', 'KIO']) {
-                if (iksr.equals(record.get(alias)?.stringValue)) {
-                    refBookAttributeName = refBook.attributes.find { it.alias == alias }.name
-                    break
-                }
-            }
-            logger.warn("Строка $fileRowIndex , столбец " + ScriptUtils.getXLSColumnName(colIndex) + ": " +
-                    "На форме графы с общей информацией о ВЗЛ/РОЗ заполнены данными записи справочника «Участники ТЦО», " +
-                    "в которой атрибут «Полное наименование юридического лица с указанием ОПФ» = «" + record.get('NAME')?.stringValue + "», " +
-                    "атрибут «$refBookAttributeName» = «" + iksr + "». $msg")
-        }
-
-        recordCache[ref_id][filter] = record.get(RefBook.RECORD_ID_ALIAS).numberValue
-        return recordCache[ref_id][filter]
-    } else if (records.empty) {
-        // 6
-        if(!name){
-            name = "наименование ВЗЛ/РОЗ в файле не заполнено"
-        }
-        // сообщение 1
-        logger.warn("Строка $fileRowIndex , столбец " + ScriptUtils.getXLSColumnName(colIndex) + ": " +
-                "На форме не заполнены графы с общей информацией о ВЗЛ/РОЗ, так как в справочнике «Участники ТЦО» " +
-                "не найдено значение «$iksr» ($name), актуальное на дату «" + getReportPeriodEndDate().format("dd.MM.yyyy") + "»!")
-        endMessage(iksrName)
-    } else {
-        // 7
-        def recordsByName
-        if (name) {
-            recordsByName = provider.getRecords(getReportPeriodEndDate(), null, "LOWER(NAME) = LOWER('$name') and " + filter, null)
-        }
-        if (recordsByName && recordsByName.size() == 1) {
-            recordCache[ref_id][filter] = recordsByName.get(0).get(RefBook.RECORD_ID_ALIAS).numberValue
-            return recordCache[ref_id][filter]
-        } else {
-            if (!name) {
-                name = "наименование ВЗЛ/РОЗ в файле не заполнено"
-            }
-            // сообщение 2
-            logger.warn("Строка $fileRowIndex , столбец " + ScriptUtils.getXLSColumnName(colIndex) + ": " +
-                    "Для заполнения на форме граф с общей информацией о ВЗЛ/РОЗ в справочнике «Участники ТЦО» " +
-                    "найдено несколько записей со значением «$iksr» ($name), актуальным на дату «" + getReportPeriodEndDate().format("dd.MM.yyyy") + "»! " +
-                    "На форме графы с общей информацией о ВЗЛ/РОЗ заполнены данными первой найденной записью справочника:")
-            def record
-            records.each {
-                def refBookAttributeName
-                for(alias in ['INN', 'REG_NUM', 'TAX_CODE_INCORPORATION', 'SWIFT', 'KIO']){
-                    if(iksr.equals(it.get(alias)?.stringValue)){
-                        refBookAttributeName = refBook.attributes.find{ it.alias == alias}.name
-                        record = it
-                        break
-                    }
-                }
-                // сообщение 3
-                logger.warn("Атрибут «Полное наименование юридического лица с указанием ОПФ» = «" + it.get('NAME')?.stringValue + "», " +
-                        "атрибут «$refBookAttributeName» = «" + iksr + "»")
-            }
-            endMessage(iksrName)
-            return record.get(RefBook.RECORD_ID_ALIAS).numberValue
-        }
-    }
-    return null
-}
-
-def endMessage(String iksrName) {
-    // сообщение 5
-    logger.warn("Для заполнения на форме граф с общей информацией о ВЗЛ/РОЗ выполнен поиск значения файла " +
-            "по графе «$iksrName» в следующих атрибутах справочника «Участники ТЦО»: " +
-            "«ИНН (заполняется для резидентов, некредитных организаций)», " +
-            "«Регистрационный номер в стране инкорпорации (заполняется для нерезидентов)», " +
-            "«Код налогоплательщика в стране инкорпорации», " +
-            "«Код SWIFT (заполняется для кредитных организаций, резидентов и нерезидентов)», " +
-            "«КИО (заполняется для нерезидентов)»")
-}
-
-// Сортировка групп и строк
-void sortFormDataRows(def saveInDB = true) {
-    def dataRowHelper = formDataService.getDataRowHelper(formData)
-    def dataRows = dataRowHelper.allCached
-    sortRows(refBookService, logger, dataRows, getSubTotalRows(dataRows), dataRows.find {
-        it.getAlias() == 'total'
-    }, true)
-    if (saveInDB) {
-        dataRowHelper.saveSort()
-    } else {
-        updateIndexes(dataRows)
-    }
-}
-
 /**
  * Получить итоговую строку нф по значениям из экселя.
  *
@@ -770,92 +539,14 @@ def getNewTotalFromXls(def values, def colOffset, def fileRowIndex, def rowIndex
     return newRow
 }
 
-/**
- * Получить новую подитоговую строку нф по значениям из экселя.
- *
- * @param values список строк со значениями
- * @param colOffset отступ в колонках
- * @param fileRowIndex номер строки в тф
- * @param rowIndex строка в нф
- */
-def getNewSubTotalRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) {
-    def newRow = getSubTotalRow(values[0], null, rowIndex)
-    newRow.setIndex(rowIndex)
-    newRow.setImportIndex(fileRowIndex)
-
-    // графа 13
-    def colIndex = 13
-    newRow.sum1 = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
-    // графа 15
-    colIndex = 15
-    newRow.sum2 = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
-    // графа 17
-    colIndex = 17
-    newRow.sum3 = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
-
-    return newRow
-}
-
-// Получение подитоговых строк
-def getSubTotalRows(def dataRows) {
-    return dataRows.findAll { it.getAlias() != null && !'total'.equals(it.getAlias()) }
-}
-
-// Получить посчитанные подитоговые строки
-def calcSubTotalRows(def dataRows) {
-    def tmpRows = dataRows.findAll { !it.getAlias() }
-    // Добавление подитогов
-    addAllAliased(tmpRows, new ScriptUtils.CalcAliasRow() {
-        @Override
-        DataRow<Cell> calc(int i, List<DataRow<Cell>> rows) {
-            return calcItog(i, rows)
-        }
-    }, groupColumns)
-
-    return tmpRows.findAll { it.getAlias() }
-}
-
-// Проверки подитоговых сумм
-void checkItog(def dataRows) {
-    // Рассчитанные строки итогов
-    def testItogRows = calcSubTotalRows(dataRows)
-    // Имеющиеся строки итогов
-    def itogRows = dataRows.findAll { it.getAlias() != null && !'total'.equals(it.getAlias()) }
-    // все строки, кроме общего итога
-    def groupRows = dataRows.findAll { !'total'.equals(it.getAlias()) }
-    checkItogRows(groupRows, testItogRows, itogRows, groupColumns, logger, new ScriptUtils.GroupString() {
-        @Override
-        String getString(DataRow<Cell> row) {
-            return getValuesByGroupColumn(row)
-        }
-    }, new ScriptUtils.CheckGroupSum() {
-        @Override
-        String check(DataRow<Cell> row1, DataRow<Cell> row2) {
-            if (row1.fix != row2.fix) {
-                return getColumnName(row1, 'rowNumber')
-            }
-            if (row1.sum1 != row2.sum1) {
-                return getColumnName(row1, 'sum1')
-            }
-            if (row1.sum2 != row2.sum2) {
-                return getColumnName(row1, 'sum2')
-            }
-            if (row1.sum3 != row2.sum3) {
-                return getColumnName(row1, 'sum3')
-            }
-            return null
-        }
-    })
-}
-
-// Возвращает строку со значениями полей строки по которым идет группировка
-String getValuesByGroupColumn(DataRow row) {
-    if (!row.name) {
-        return 'ВЗЛ/РОЗ не задано'
+// Сортировка групп и строк
+void sortFormDataRows(def saveInDB = true) {
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper.allCached
+    sortRows(refBookService, logger, dataRows, null, dataRows.find { it.getAlias() == 'total' }, true)
+    if (saveInDB) {
+        dataRowHelper.saveSort()
+    } else {
+        updateIndexes(dataRows)
     }
-    def map = getRefBookValue(520, row.name)
-    if (map != null) {
-        return map.NAME?.stringValue
-    }
-    return null
 }

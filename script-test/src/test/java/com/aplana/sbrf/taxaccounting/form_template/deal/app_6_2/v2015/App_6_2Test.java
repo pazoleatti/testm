@@ -103,7 +103,6 @@ public class App_6_2Test extends ScriptTestBase {
         Assert.assertEquals("Строка 1: Графа «Сумма доходов Банка по данным бухгалтерского учета, руб.» не заполнена!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Графа «Дата совершения сделки» не заполнена!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Графы «Цена (тариф) за единицу измерения без учета НДС, акцизов и пошлины, руб.», «Итого стоимость без учета НДС, акцизов и пошлины, руб.»: выполнение расчета невозможно, так как не заполнена используемая в расчете графа «Сумма доходов Банка по данным бухгалтерского учета, руб.»!", entries.get(i++).getMessage());
-        Assert.assertEquals("Группа «ЮЛ не задано» не имеет строки подитога!", entries.get(i++).getMessage());
         Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
         testHelper.getLogger().clear();
 
@@ -136,10 +135,9 @@ public class App_6_2Test extends ScriptTestBase {
         Assert.assertEquals("Строка 1: Значение графы «Количество» должно быть равно значению «1»!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Значение графы «Дата заключения сделки» должно быть не меньше значения графы «Дата договора»!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Значение графы «Дата совершения сделки» должно быть не меньше значения графы «Дата заключения сделки»!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Год, указанный по графе «Дата совершения сделки» (2989), должен относиться к календарному году текущей формы (2014)!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Значение даты атрибута «Дата договора» должно принимать значение из следующего диапазона: 01.01.1900 - 31.12.2099", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 1: Дата, указанная в графе «Дата совершения сделки» (01.01.2989), должна относиться к отчетному периоду текущей формы (01.01.2014 - 31.12.2014)!", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 1: Значение даты атрибута «Дата договора» должно принимать значение из следующего диапазона: 01.01.1991 - 31.12.2099", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Значение графы «Сумма доходов Банка по данным бухгалтерского учета, руб.» должно быть больше или равно «0»!", entries.get(i++).getMessage());
-        Assert.assertEquals("Группа «A» не имеет строки подитога!", entries.get(i++).getMessage());
         Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
         testHelper.getLogger().clear();
 
@@ -155,12 +153,6 @@ public class App_6_2Test extends ScriptTestBase {
         row.getCell("cost").setValue(3, null);
         row.getCell("dealDoneDate").setValue(sdf.parse("03.01.2014"), null);
 
-        DataRow<Cell> subTotalRow = formData.createDataRow();
-        dataRows.add(subTotalRow);
-        subTotalRow.setAlias("itg#1");
-        subTotalRow.setIndex(2);
-        subTotalRow.getCell("fix").setValue("Итого по \"A\"", null);
-        subTotalRow.getCell("sum").setValue(3, null);
         testHelper.execute(FormDataEvent.CHECK);
         Assert.assertTrue(testHelper.getLogger().getEntries().isEmpty());
 
@@ -171,11 +163,10 @@ public class App_6_2Test extends ScriptTestBase {
         i = 0;
         testHelper.execute(FormDataEvent.CALCULATE);
         testHelper.execute(FormDataEvent.CHECK);
-        entries = testHelper.getLogger().getEntries();
         Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
         testHelper.getLogger().clear();
 
-        // TODO (Ramil Timerbaev) добавить тесты для логических проверок 11-14
+        // TODO (Ramil Timerbaev) добавить тесты для логических проверок 11
     }
 
     // Расчет пустой (в импорте - растчет заполненной)
@@ -201,6 +192,10 @@ public class App_6_2Test extends ScriptTestBase {
                         e.setAlias("INN");
                         e.setName("ИНН/ КИО");
                         attributes.add(e);
+                        e = new RefBookAttribute();
+                        e.setAlias("NAME");
+                        e.setName("Наименование");
+                        attributes.add(e);
                         refBook.setAttributes(attributes);
                         return refBook;
                     }
@@ -220,16 +215,19 @@ public class App_6_2Test extends ScriptTestBase {
                         Map<String, RefBookValue> map = new HashMap<String, RefBookValue>();
                         map.put(RefBook.RECORD_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, 1L));
                         map.put("INN", new RefBookValue(RefBookAttributeType.STRING, "A"));
+                        map.put("NAME", new RefBookValue(RefBookAttributeType.STRING, "A"));
                         result.add(map);
 
                         map = new HashMap<String, RefBookValue>();
                         map.put(RefBook.RECORD_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, 2L));
                         map.put("INN", new RefBookValue(RefBookAttributeType.STRING, "B"));
+                        map.put("NAME", new RefBookValue(RefBookAttributeType.STRING, "B"));
                         result.add(map);
 
                         map = new HashMap<String, RefBookValue>();
                         map.put(RefBook.RECORD_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, 3L));
                         map.put("INN", new RefBookValue(RefBookAttributeType.STRING, "C"));
+                        map.put("NAME", new RefBookValue(RefBookAttributeType.STRING, "C"));
                         result.add(map);
 
                         return result;
@@ -268,18 +266,20 @@ public class App_6_2Test extends ScriptTestBase {
     void checkAfterCalc(List<DataRow<Cell>> dataRows) {
         Assert.assertEquals(1, dataRows.get(0).getCell("count").getNumericValue().intValue());
         Assert.assertEquals(1, dataRows.get(1).getCell("count").getNumericValue().intValue());
+        Assert.assertEquals(1, dataRows.get(2).getCell("count").getNumericValue().intValue());
         Assert.assertEquals(1, dataRows.get(3).getCell("count").getNumericValue().intValue());
-        Assert.assertEquals(1, dataRows.get(5).getCell("count").getNumericValue().intValue());
 
         Assert.assertEquals(1, dataRows.get(0).getCell("price").getNumericValue().doubleValue(), 0);
         Assert.assertEquals(4, dataRows.get(1).getCell("price").getNumericValue().doubleValue(), 0);
-        Assert.assertEquals(7, dataRows.get(3).getCell("price").getNumericValue().doubleValue(), 0);
-        Assert.assertEquals(10, dataRows.get(5).getCell("price").getNumericValue().doubleValue(), 0);
+        Assert.assertEquals(7, dataRows.get(2).getCell("price").getNumericValue().doubleValue(), 0);
+        Assert.assertEquals(10, dataRows.get(3).getCell("price").getNumericValue().doubleValue(), 0);
 
         Assert.assertEquals(1, dataRows.get(0).getCell("cost").getNumericValue().doubleValue(), 0);
         Assert.assertEquals(4, dataRows.get(1).getCell("cost").getNumericValue().doubleValue(), 0);
-        Assert.assertEquals(7, dataRows.get(3).getCell("cost").getNumericValue().doubleValue(), 0);
-        Assert.assertEquals(10, dataRows.get(5).getCell("cost").getNumericValue().doubleValue(), 0);
+        Assert.assertEquals(7, dataRows.get(2).getCell("cost").getNumericValue().doubleValue(), 0);
+        Assert.assertEquals(10, dataRows.get(3).getCell("cost").getNumericValue().doubleValue(), 0);
+
+        Assert.assertEquals(22, dataRows.get(4).getCell("sum").getNumericValue().doubleValue(), 0);
     }
 }
 

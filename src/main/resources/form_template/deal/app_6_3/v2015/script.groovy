@@ -1,14 +1,11 @@
 package form_template.deal.app_6_3.v2015
 
+import au.com.bytecode.opencsv.CSVReader
 import com.aplana.sbrf.taxaccounting.model.Cell
 import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
-import com.aplana.sbrf.taxaccounting.model.util.StringUtils
-import com.aplana.sbrf.taxaccounting.service.script.util.ScriptUtils
-import static com.aplana.sbrf.taxaccounting.service.script.util.ScriptUtils.*
 import groovy.transform.Field
 
 import java.math.RoundingMode
@@ -55,10 +52,6 @@ switch (formDataEvent) {
         formDataService.getDataRowHelper(formData).delete(currentDataRow)
         break
     case FormDataEvent.MOVE_CREATED_TO_PREPARED:  // Подготовить из "Создана"
-        calc()
-        logicCheck()
-        formDataService.saveCachedDataRows(formData, logger, formDataEvent)
-        break
     case FormDataEvent.MOVE_CREATED_TO_APPROVED:  // Утвердить из "Создана"
     case FormDataEvent.MOVE_PREPARED_TO_APPROVED: // Утвердить из "Подготовлена"
     case FormDataEvent.MOVE_CREATED_TO_ACCEPTED:  // Принять из "Создана"
@@ -76,6 +69,10 @@ switch (formDataEvent) {
         importData()
         formDataService.saveCachedDataRows(formData, logger, formDataEvent)
         break
+    case FormDataEvent.IMPORT_TRANSPORT_FILE:
+        importTransportData()
+        formDataService.saveCachedDataRows(formData, logger, formDataEvent)
+        break
     case FormDataEvent.SORT_ROWS:
         sortFormDataRows()
         break
@@ -90,7 +87,7 @@ def recordCache = [:]
 def refBookCache = [:]
 
 @Field
-def allColumns = ['name', 'iksr', 'countryCode', 'sum', 'docNumber', 'docDate', 'country',
+def allColumns = ['fix', 'name', 'iksr', 'countryCode', 'sum', 'docNumber', 'docDate', 'country',
                        'region', 'city', 'settlement', 'count', 'price', 'cost', 'dealDoneDate']
 // Редактируемые атрибуты
 @Field
@@ -108,14 +105,10 @@ def nonEmptyColumns = ['name', 'sum', 'docNumber', 'docDate', 'country', 'count'
 def totalColumns = ['sum', 'count', 'price', 'cost']
 
 // Дата окончания отчетного периода
-@Field
-def reportPeriodEndDate = null
 
 // Дата окончания отчетного периода
 @Field
 def endDate = null
-
-
 
 def getReportPeriodEndDate() {
     if (endDate == null) {
@@ -131,7 +124,7 @@ def getRecordIdImport(def Long refBookId, def String alias, def String value, de
         return null
     }
     return formDataService.getRefBookRecordIdImport(refBookId, recordCache, providerCache, alias, value,
-            reportPeriodEndDate, rowIndex, colIndex, logger, required)
+            getReportPeriodEndDate(), rowIndex, colIndex, logger, required)
 }
 
 // Разыменование записи справочника
@@ -259,20 +252,19 @@ void calc() {
 
     for (row in dataRows) {
         // Расчет поля "Цена"
-        row.price = calc1314(row)
+        row.price = calcNum(row)
         // Расчет поля "Стоимость"
         row.cost = row.sum
     }
-
 
     // Общий итог
     def total = calcTotalRow(dataRows)
     dataRows.add(total)
 }
 
-def BigDecimal calc1314(def row) {
+def BigDecimal calcNum(def row) {
     if (row.sum != null && row.count != null && row.count != 0) {
-        return (row.sum / row.count).setScale(0, RoundingMode.HALF_UP)
+        return ((BigDecimal) row.sum).divide((BigDecimal)  row.count, 2, BigDecimal.ROUND_HALF_UP)
     }
     return null
 }
@@ -346,7 +338,6 @@ void importData() {
     def rowIndex = 0
     def rows = []
     def allValuesCount = allValues.size()
-    reportPeriodEndDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
     def totalRowFromFile = null
 
     // формирвание строк нф
@@ -455,7 +446,7 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
 
     def int colIndex = 2
 
-    def recordId = getRecordId(nameFromFile, values[3], fileRowIndex, colIndex, iksrName)
+    def recordId = getTcoRecordId(nameFromFile, values[3], iksrName, fileRowIndex, colIndex, getReportPeriodEndDate(), false, logger, refBookFactory, recordCache)
     def map = getRefBookValue(520, recordId)
 
     // графа 2
@@ -464,13 +455,13 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
 
     // графа 3
     if (map != null) {
-        formDataService.checkReferenceValue(9, values[colIndex], map.INN_KIO?.stringValue, fileRowIndex, colIndex + colOffset, logger, false)
+        formDataService.checkReferenceValue(520, values[colIndex], map.IKSR?.stringValue, fileRowIndex, colIndex + colOffset, logger, false)
     }
     colIndex++
 
     // графа 4
     if (map != null) {
-        map = getRefBookValue(10, map.COUNTRY?.referenceValue)
+        map = getRefBookValue(10, map.COUNTRY_CODE?.referenceValue)
         if (map != null) {
             formDataService.checkReferenceValue(10, values[colIndex], map.CODE?.stringValue, fileRowIndex, colIndex + colOffset, logger, false)
         }
@@ -522,117 +513,206 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
 
     return newRow
 }
-// Получение Id записи из справочника 520 с использованием кэширования
-def getRecordId(String name, String iksr, int fileRowIndex, int colIndex, String iksrName) {
-    if (!iksr) {
-        logger.warn("Строка $fileRowIndex , столбец " + ScriptUtils.getXLSColumnName(colIndex) + ": " +
-                "На форме не заполнены графы с общей информацией о юридическом лице, так как в файле отсутствует значение по графе «$iksrName»!")
+
+/**
+ * Получить итоговую строку нф по значениям из экселя.
+ *
+ * @param values список строк со значениями
+ * @param colOffset отступ в колонках
+ * @param fileRowIndex номер строки в тф
+ * @param rowIndex строка в нф
+ */
+def getNewTotalFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) {
+    def newRow = formData.createStoreMessagingDataRow()
+    newRow.setIndex(rowIndex)
+    newRow.setImportIndex(fileRowIndex)
+
+    // графа 5
+    def colIndex = 5
+    newRow.sum = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
+    // графа 12
+    colIndex = 12
+    newRow.count = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
+    // графа 13
+    colIndex = 13
+    newRow.price = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
+    // графа 14
+    colIndex = 14
+    newRow.cost = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
+
+    return newRow
+}
+void importTransportData() {
+    checkBeforeGetXml(ImportInputStream, UploadFileName)
+    if (!UploadFileName.endsWith(".rnu")) {
+        logger.error(WRONG_RNU_FORMAT)
+    }
+    int COLUMN_COUNT = 15
+    def DEFAULT_CHARSET = "cp866"
+    char SEPARATOR = '|'
+    char QUOTE = '\0'
+
+    String[] rowCells
+    int fileRowIndex = 2    // номер строки в файле (1, 2, ..)
+    int rowIndex = 0        // номер строки в НФ (1, 2, ..)
+    def totalTF = null      // итоговая строка со значениями из тф для добавления
+    def newRows = []
+
+    InputStreamReader isr = new InputStreamReader(ImportInputStream, DEFAULT_CHARSET)
+    CSVReader reader = new CSVReader(isr, SEPARATOR, QUOTE)
+    try {
+        // пропускаем заголовок
+        rowCells = reader.readNext()
+        if (isEmptyCells(rowCells)) {
+            logger.error('Первой строкой должен идти заголовок, а не пустая строка')
+        }
+        // пропускаем пустую строку
+        rowCells = reader.readNext()
+        if (!isEmptyCells(rowCells)) {
+            logger.error('Вторая строка должна быть пустой')
+        }
+        // грузим основные данные
+        while ((rowCells = reader.readNext()) != null) {
+            fileRowIndex++
+            rowIndex++
+            if (isEmptyCells(rowCells)) { // проверка окончания блока данных, пустая строка
+                // итоговая строка тф
+                rowCells = reader.readNext()
+                if (rowCells != null) {
+                    totalTF = getNewRow(rowCells, COLUMN_COUNT, ++fileRowIndex, rowIndex, true)
+                }
+                break
+            }
+            def newRow = getNewRow(rowCells, COLUMN_COUNT, fileRowIndex, rowIndex, false)
+            if (newRow) {
+                newRows.add(newRow)
+            }
+        }
+    } finally {
+        reader.close()
+    }
+
+    // итоговая строка
+    def totalRow = calcTotalRow(newRows)
+    newRows.add(totalRow)
+
+    // сравнение итогов
+    if (!logger.containsLevel(LogLevel.ERROR) && totalTF) {
+        // мапа с алиасами граф и номерами колонокв в xml (алиас -> номер колонки)
+        def totalColumnsIndexMap = ['sum': 5, 'count': 12, 'price': 13, 'cost': 14]
+
+        // сравнение контрольных сумм
+        def colOffset = 1
+        for (def alias : totalColumnsIndexMap.keySet().asList()) {
+            def v1 = totalTF.getCell(alias).value
+            def v2 = totalRow.getCell(alias).value
+            if (v1 == null && v2 == null) {
+                continue
+            }
+            if (v1 == null || v1 != null && v1 != v2) {
+                logger.warn(TRANSPORT_FILE_SUM_ERROR, totalColumnsIndexMap[alias] + colOffset, fileRowIndex)
+            }
+        }
+        // задать итоговой строке нф значения из итоговой строки тф
+        totalColumns.each { alias ->
+            totalRow[alias] = totalTF[alias]
+        }
+    } else {
+        logger.warn("В транспортном файле не найдена итоговая строка")
+        // очистить итоги
+        totalColumns.each { alias ->
+            totalRow[alias] = null
+        }
+    }
+
+    if (!logger.containsLevel(LogLevel.ERROR)) {
+        updateIndexes(newRows)
+        formDataService.getDataRowHelper(formData).allCached = newRows
+    }
+}
+/**
+ * Получить новую строку нф по строке из тф (*.rnu).
+ *
+ * @param rowCells список строк со значениями
+ * @param columnCount количество колонок
+ * @param fileRowIndex номер строки в тф
+ * @param rowIndex строка в нф
+ * @param isTotal признак итоговой строки
+ *
+ * @return вернет строку нф или null, если количество значений в строке тф меньше
+ */
+def getNewRow(String[] rowCells, def columnCount, def fileRowIndex, def rowIndex, def isTotal) {
+    def newRow = formData.createStoreMessagingDataRow()
+    newRow.setIndex(rowIndex)
+    newRow.setImportIndex(fileRowIndex)
+
+    if (rowCells.length != columnCount + 2) {
+        rowError(logger, newRow, String.format(ROW_FILE_WRONG, fileRowIndex))
         return null
     }
-    def ref_id = 520
-    def RefBook refBook = refBookFactory.get(ref_id)
 
-    String filter = "(LOWER(INN) = LOWER('$iksr') or " +
-            "LOWER(REG_NUM) = LOWER('$iksr') or " +
-            "LOWER(TAX_CODE_INCORPORATION) = LOWER('$iksr') or " +
-            "LOWER(SWIFT) = LOWER('$iksr') or " +
-            "LOWER(KIO) = LOWER('$iksr'))"
-    if (recordCache[ref_id] != null) {
-        if (recordCache[ref_id][filter] != null) {
-            return recordCache[ref_id][filter]
-        }
-    } else {
-        recordCache[ref_id] = [:]
+    editableColumns.each {
+        newRow.getCell(it).editable = true
+        newRow.getCell(it).setStyleAlias('Редактируемая')
     }
 
-    def provider = refBookFactory.getDataProvider(ref_id)
-    def records = provider.getRecords(getReportPeriodEndDate(), null, filter, null)
-    if (records.size() == 1) {
-        // 5
-        def record = records.get(0)
+    def int colOffset = 1
 
-        if (StringUtils.cleanString(name) != StringUtils.cleanString(record.get('NAME')?.stringValue)) {
-            // сообщение 4
-            String msg = name ? "В файле указано другое наименование юридического лица - «$name»!" : "Наименование юридического лица в файле не заполнено!"
-            def refBookAttributeName
-            for (alias in ['INN', 'REG_NUM', 'TAX_CODE_INCORPORATION', 'SWIFT', 'KIO']) {
-                if (iksr.equals(record.get(alias)?.stringValue)) {
-                    refBookAttributeName = refBook.attributes.find { it.alias == alias }.name
-                    break
-                }
-            }
-            logger.warn("Строка $fileRowIndex , столбец " + ScriptUtils.getXLSColumnName(colIndex) + ": " +
-                    "На форме графы с общей информацией о юридическом лице заполнены данными записи справочника «Участники ТЦО», " +
-                    "в которой атрибут «Полное наименование юридического лица с указанием ОПФ» = «" + record.get('NAME')?.stringValue + "», " +
-                    "атрибут «$refBookAttributeName» = «" + iksr + "». $msg")
-        }
+    if (!isTotal) {
+        def String iksrName = getColumnName(newRow, 'iksr')
+        def nameFromFile = pure(rowCells[2])
+        def recordId = getTcoRecordId(nameFromFile,  pure(rowCells[3]), iksrName, fileRowIndex, 2, getReportPeriodEndDate(), false, logger, refBookFactory, recordCache)
 
-        recordCache[ref_id][filter] = record.get(RefBook.RECORD_ID_ALIAS).numberValue
-        return recordCache[ref_id][filter]
-    } else if (records.empty) {
-        // 6
-        if (!name) {
-            name = "наименование юридического лица в файле не заполнено"
-        }
-        // сообщение 1
-        logger.warn("Строка $fileRowIndex , столбец " + ScriptUtils.getXLSColumnName(colIndex) + ": " +
-                "Для заполнения графы «$iksrName» формы в справочнике «Участники ТЦО» " +
-                "не найдено значение «$iksr» ($name), актуальное на дату «" + getReportPeriodEndDate().format("dd.MM.yyyy") + "»!")
-        endMessage(iksrName)
-    } else {
-        // 7
-        def recordsByName
-        if (name) {
-            recordsByName = provider.getRecords(getReportPeriodEndDate(), null, "LOWER(NAME) = LOWER('$name') and " + filter, null)
-        }
-        if (recordsByName && recordsByName.size() == 1) {
-            recordCache[ref_id][filter] = recordsByName.get(0).get(RefBook.RECORD_ID_ALIAS).numberValue
-            return recordCache[ref_id][filter]
-        } else {
-            if (!name) {
-                name = "наименование юридического лица в файле не заполнено"
-            }
-            // сообщение 2
-            logger.warn("Строка $fileRowIndex , столбец " + ScriptUtils.getXLSColumnName(colIndex) + ": " +
-                    "Для заполнения графы «$iksrName» формы в справочнике «Участники ТЦО» " +
-                    "найдено несколько записей со значением «$iksr» ($name), актуальным на дату «" + getReportPeriodEndDate().format("dd.MM.yyyy") + "»! " +
-                    "Графа «$iksrName» формы заполнена первой найденной записью справочника:")
-            def record
-            records.each {
-                def refBookAttributeName
-                for (alias in ['INN', 'REG_NUM', 'TAX_CODE_INCORPORATION', 'SWIFT', 'KIO']) {
-                    if (iksr.equals(it.get(alias)?.stringValue)) {
-                        refBookAttributeName = refBook.attributes.find { it.alias == alias }.name
-                        record = it
-                        break
-                    }
-                }
-                // сообщение 3
-                logger.warn("Атрибут «Полное наименование юридического лица с указанием ОПФ» = «" + it.get('NAME')?.stringValue + "», " +
-                        "атрибут «$refBookAttributeName» = «" + iksr + "»")
-            }
-            endMessage(iksrName)
-            return record.get(RefBook.RECORD_ID_ALIAS).numberValue
-        }
+        // графа 2
+        newRow.name = recordId
+
+        colIndex = 6
+        // графа 6
+        newRow.docNumber = pure(rowCells[colIndex])
+        colIndex++
+        // графа 7
+        newRow.docDate = parseDate(pure(rowCells[colIndex]), "dd.MM.yyyy", fileRowIndex, colIndex + colOffset, logger, true)
+        colIndex++
+        // графа 8
+        newRow.country = pure(rowCells[colIndex])
+        colIndex++
+        // графа 9
+        newRow.region = pure(rowCells[colIndex])
+        colIndex++
+        // графа 10
+        newRow.city = pure(rowCells[colIndex])
+        colIndex++
+        // графа 11
+        newRow.settlement = pure(rowCells[colIndex])
+        colIndex++
+        // графа 15
+        newRow.dealDoneDate = parseDate(pure(rowCells[15]), "dd.MM.yyyy", fileRowIndex, 15 + colOffset, logger, true)
     }
-    return null
+    // графа 5
+    newRow.sum = parseNumber(pure(rowCells[5]), fileRowIndex, 5 + colOffset, logger, true)
+    // графа 12
+    newRow.count = parseNumber(pure(rowCells[12]), fileRowIndex, 12 + colOffset, logger, true)
+    // графа 13
+    newRow.price = parseNumber(pure(rowCells[13]), fileRowIndex, 13 + colOffset, logger, true)
+    // графа 14
+    newRow.cost = parseNumber(pure(rowCells[14]), fileRowIndex, 14 + colOffset, logger, true)
+
+    return newRow
 }
 
-def endMessage(String iksrName) {
-    // сообщение 5
-    logger.warn("Для заполнения на форме граф с общей информацией о юридическом лице выполнен поиск значения файла " +
-            "по графе «$iksrName» в следующих атрибутах справочника «Участники ТЦО»: " +
-            "«ИНН (заполняется для резидентов, некредитных организаций)», " +
-            "«Регистрационный номер в стране инкорпорации (заполняется для нерезидентов)», " +
-            "«Код налогоплательщика в стране инкорпорации», " +
-            "«Код SWIFT (заполняется для кредитных организаций, резидентов и нерезидентов)», " +
-            "«КИО (заполняется для нерезидентов)»")
+String pure(String cell) {
+    return StringUtils.cleanString(cell)?.intern()
 }
+
+boolean isEmptyCells(def rowCells) {
+    return rowCells.length == 1 && rowCells[0] == ''
+}
+
 // Сортировка групп и строк
 void sortFormDataRows(def saveInDB = true) {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
-    sortRows(refBookService, logger, dataRows, null, null, null)
+    sortRows(refBookService, logger, dataRows, null, dataRows.find { it.getAlias() == 'total' }, null)
     if (saveInDB) {
         dataRowHelper.saveSort()
     } else {

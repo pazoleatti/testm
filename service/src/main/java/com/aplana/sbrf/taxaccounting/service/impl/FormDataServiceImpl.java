@@ -244,7 +244,9 @@ public class FormDataServiceImpl implements FormDataService {
 					LOG.info(String.format("Выполнение скрипта: %s", key));
                     formDataDao.updateSorted(fd.getId(), false);
                     formDataDao.updateEdited(fd.getId(), true);
-					formDataScriptingService.executeScript(userInfo, fd, formDataEvent, logger, additionalParameters);
+					if (!formDataScriptingService.executeScript(userInfo, fd, formDataEvent, logger, additionalParameters)) {
+                        throw new ServiceException("Импорт данных не предусмотрен");
+                    }
                     dataRowDao.refreshRefBookLinks(fd);
                     logBusinessService.add(formDataId, null, userInfo, formDataEvent, null);
                     auditService.add(formDataEvent, userInfo, null, fd, fileName, null);

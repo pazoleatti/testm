@@ -1,7 +1,7 @@
 package form_template.vat.vat_operAgent.v2015
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
-import com.aplana.sbrf.taxaccounting.model.ReportPeriod
+import com.aplana.sbrf.taxaccounting.model.FormDataKind
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
@@ -173,7 +173,7 @@ void calcTotal(def dataRows, def totalRow) {
 }
 
 void consolidation() {
-    // мапа для связи строк формы и подразделении (id подразделения - код строки формы)
+    // мапа для связи строк формы и подразделении (id подразделения - алиас строки)
     def departmentMap = [
             4   : '018',
             8   : '042',
@@ -191,51 +191,142 @@ void consolidation() {
             37  : '038'
     ]
     def dataRows = formDataService.getDataRowHelper(formData).allCached
+    // обнулить данные
     dataRows.each { row ->
         row.totalVAT = 0
     }
 
-    sourcesTypeIds = [
+    // источники
+    def sourcesTypeIds = [
             603, // 724.4
             605, // 724.7
     ]
-    // для периода "год" использовать еще форму 724.1.1
-    if (getReportPeriod().order == 4) {
+    // в корректирующем периоде использовать еще форму 724.1.1
+    if (isCorrectionPeriod()) {
         // TODO (Ramil Timerbaev) форму 724.1.1 еще не реализовали, потом добавить
         // sourcesTypeIds.add(0)
     }
-    // def needDepartmentIds = departmentMap.values().toArray()
+    def departmentFormTypeMap = [:] // departmentFormTypeMap
     departmentFormTypeService.getFormSources(formDataDepartment.id, formData.formType.id, formData.kind,
             getReportPeriodStartDate(), getReportPeriodEndDate()).each {
         if (it.formTypeId in sourcesTypeIds && departmentMap[it.departmentId]) {
-            def source = formDataService.getLast(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId, formData.periodOrder, formData.comparativePeriodId, formData.accruing)
-            if (source != null && source.state == WorkflowState.ACCEPTED) {
-                def sourceDataRows = formDataService.getDataRowHelper(source).allCached
-                def result
-                switch (it.formTypeId) {
-                    case 603 :
-                        // 724.4
-                        findRow = sourceDataRows?.find { it.getAlias() == 'total2'}
-                        result = (findRow ? findRow.sum2 : 0)
-                        break
-                    case 605 :
-                        // 724.7
-                        def findRow = sourceDataRows?.find { it.getAlias() == 'total'}
-                        result = (findRow ? findRow.ndsSum : 0)
-                        break
-                    default:
-                        // 724.1.1
-                        // TODO (Ramil Timerbaev) форму 724.1.1 еще не реализовали
-                        findRow = sourceDataRows?.find { it.getAlias() == 'total'}
-                        result = (findRow ? findRow.sum2 : 0)
-                }
-                def alias = departmentMap[it.departmentId]
-                def row = getDataRow(dataRows, alias)
-                // графа 3
-                row.totalVAT += result
+            def key = getKey(it.formTypeId, it.departmentId)
+            if (departmentFormTypeMap[key] == null) {
+                departmentFormTypeMap[key] = []
             }
+            departmentFormTypeMap[key].add(it)
         }
     }
+
+    def sourceDataRowsMap = [:]
+    // проверить источники и отобрать необходимые для консолидации
+    departmentMap.keySet().each { departmentId ->
+        def check2 = true
+        sourcesTypeIds.each { formTypeId ->
+            // 1. Проверка назначения только одной формы-источника по каждому виду формы и подразделению
+            def key = getKey(formTypeId, departmentId)
+            def departmentFormTypes = departmentFormTypeMap[key]
+            if (departmentFormTypes?.size() > 1) {
+                def alias = departmentMap[departmentId]
+                def row = getDataRow(dataRows, alias)
+                def kinds = departmentFormTypes.collect { it.kind.title }.join(', ')
+                def departmentName = getDepartment(departmentId as Integer)?.shortName
+                def formName = getFormTypeById(formTypeId)?.name
+                logger.warn("Строка %d, подразделение «%s»: Текущей форме назначено несколько форм-источников (тип %s) подразделения «%s», вида «%s». " +
+                        "При консолидации используется форма-источник типа «Консолидированная»", row.getIndex(), row.name, kinds, departmentName, formName)
+            }
+
+            // определить источник
+            def departmentFormType = null
+            if (departmentFormTypes?.size() == 1) {
+                // если источник один то использовать его
+                departmentFormType = departmentFormTypes.get(0)
+            } else if (departmentFormTypes?.size() > 1) {
+                // если для одного типа форм несколько источников в одном подразделении, тогда использовать консолидированную, иначе ничего не использовать
+                departmentFormType = departmentFormTypes.find { it.kind == FormDataKind.CONSOLIDATED }
+            }
+
+            // получить данные источника и обработать
+            def source = null
+            if (departmentFormType) {
+                source = formDataService.getLast(departmentFormType.formTypeId, departmentFormType.kind, departmentFormType.departmentId,
+                        formData.reportPeriodId, formData.periodOrder, formData.comparativePeriodId, formData.accruing)
+            }
+            if (source != null && source.state == WorkflowState.ACCEPTED) {
+                sourceDataRowsMap[key] = formDataService.getDataRowHelper(source).allCached
+                check2 = false
+            }
+        }
+        if (check2) {
+            // 2. Проверка наличия всех необходимых форм-источников
+            def alias = departmentMap[departmentId]
+            def row = getDataRow(dataRows, alias)
+            def columnName = getColumnName(row, 'totalVAT')
+            logger.warn("Строка %d, подразделение «%s»: Графа «%s» заполнена значением «0», " +
+                    "так как отсутствуют все требуемые принятые формы-источники", row.getIndex(), row.name, columnName)
+        }
+    }
+
+    // проверить источники и отобрать необходимые для консолидации
+    departmentMap.keySet().each { departmentId ->
+        def alias = departmentMap[departmentId]
+        def row = getDataRow(dataRows, alias)
+        // графа 3
+        row.totalVAT = calc3(sourceDataRowsMap, departmentId)
+    }
+}
+
+def getKey(def formTypeId, def departmentId) {
+    return formTypeId + '#' + departmentId
+}
+
+@Field
+def departmentMap = [:]
+
+def getDepartment(Integer id) {
+    if (id != null && departmentMap[id] == null) {
+        departmentMap[id] = departmentService.get(id)
+    }
+    return departmentMap[id]
+}
+
+// Мапа для хранения типов форм (id типа формы -> тип формы)
+@Field
+def formTypeMap = [:]
+
+/** Получить тип фомры по id. */
+def getFormTypeById(def id) {
+    if (formTypeMap[id] == null) {
+        formTypeMap[id] = formTypeService.get(id)
+    }
+    return formTypeMap[id]
+}
+
+/**
+ * графа 3 = A - B + C
+ * Получить значение для графы 3 из источника.
+ *
+ * @param sourceDataRowsMap мапа со строками источников
+ * @param departmentId подразделение
+ */
+def calc3(def sourceDataRowsMap, def departmentId) {
+    // 724.7 - A
+    def key = getKey(605, departmentId)
+    def sourceDataRows = sourceDataRowsMap[key]
+    def findRow = sourceDataRows?.find { it.getAlias() == 'total' }
+    def a = (findRow ? findRow.ndsSum : 0)
+
+    // 724.4 - B
+    key = getKey(603, departmentId)
+    sourceDataRows = sourceDataRowsMap[key]
+    findRow = sourceDataRows?.find { it.getAlias() == 'total2' }
+    def b = (findRow ? findRow.sum2 : 0)
+
+    // 724.1.1 - C
+    // TODO (Ramil Timerbaev) форму 724.1.1 еще не реализовали
+    def c = 0
+
+    return roundValue(a - b + c)
 }
 
 // Округляет число до требуемой точности
@@ -248,13 +339,14 @@ def roundValue(def value, int precision = 2) {
 }
 
 @Field
-ReportPeriod reportPeriod = null
+def isCorrectionPeriod = null
 
-ReportPeriod getReportPeriod() {
-    if (reportPeriod == null) {
-        reportPeriod = reportPeriodService.get(formData.reportPeriodId)
+def isCorrectionPeriod() {
+    if (isCorrectionPeriod == null) {
+        def departmentReportPeriod = departmentReportPeriodService.get(formData.departmentReportPeriodId)
+        isCorrectionPeriod = departmentReportPeriod.getCorrectionDate() != null
     }
-    return reportPeriod
+    return isCorrectionPeriod
 }
 
 void importData() {
@@ -364,15 +456,6 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
         headerMapping.add(([(headerRows[1][index - 1]): index.toString()]))
     }
     checkHeaderEquals(headerMapping, logger)
-}
-
-// заполняем временную карту или строку
-void fillTempOrRow(def tmpValues, def dataRow, String alias, def value) {
-    if (dataRow.getCell(alias)?.editable) {
-        dataRow[alias] = value
-    } else {
-        tmpValues[alias] = value
-    }
 }
 
 /**

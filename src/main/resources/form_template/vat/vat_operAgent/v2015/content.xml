@@ -51,7 +51,7 @@
         <alias>month2</alias>
         <checking>false</checking>
         <columnType>NUMBER</columnType>
-        <name>Второй месяц списания&quot;+&quot; / зачисления &quot;-&quot; не позднее25.__.__</name>
+        <name>Второй месяц списания&quot;+&quot; / зачисления &quot;-&quot; не позднее 25.__.__</name>
         <order>5</order>
         <width>10</width>
         <maxLength>17</maxLength>
@@ -61,7 +61,7 @@
         <alias>month3</alias>
         <checking>false</checking>
         <columnType>NUMBER</columnType>
-        <name>Третий месяц списания&quot;+&quot; / зачисления &quot;-&quot; не позднее25.__.__</name>
+        <name>Третий месяц списания&quot;+&quot; / зачисления &quot;-&quot; не позднее 25.__.__</name>
         <order>6</order>
         <width>10</width>
         <maxLength>17</maxLength>

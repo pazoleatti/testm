@@ -693,6 +693,13 @@ public class ScriptUtilsTest {
         Assert.assertEquals(5, logger.getEntries().size());
         //ScriptUtilsTest.logger.info(logger.getEntries().get(3).getMessage());
         //ScriptUtilsTest.logger.info(logger.getEntries().get(4).getMessage());
+
+        // проверка пограничного значения для минимальной даты
+        Assert.assertFalse(ScriptUtils.checkDateValid(logger, row, "c1", "31.12.1990", true));
+        Assert.assertTrue(ScriptUtils.checkDateValid(logger, row, "c1", "01.01.1991", true));
+        // проверка пограничного значения для максимальной даты
+        Assert.assertTrue(ScriptUtils.checkDateValid(logger, row, "c2", "31.12.2099", true));
+        Assert.assertFalse(ScriptUtils.checkDateValid(logger, row, "c2", "01.01.2100", true));
     }
 
     @Test

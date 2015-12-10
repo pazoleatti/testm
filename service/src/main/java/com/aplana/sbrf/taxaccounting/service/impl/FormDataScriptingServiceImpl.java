@@ -11,7 +11,6 @@ import com.aplana.sbrf.taxaccounting.service.shared.ScriptComponentContextHolder
 import com.aplana.sbrf.taxaccounting.util.ScriptExposed;
 import com.aplana.sbrf.taxaccounting.util.TransactionHelper;
 import com.aplana.sbrf.taxaccounting.util.TransactionLogic;
-import org.codehaus.groovy.jsr223.GroovyScriptEngineImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationContextAware;
@@ -72,7 +71,7 @@ public class FormDataScriptingServiceImpl extends TAAbstractScriptingServiceImpl
                           FormDataEvent event, Logger logger,
                           Map<String, Object> additionalParameters) {
         // Биндим параметры для выполнения скрипта
-        Bindings b = groovyScriptEngine.createBindings();
+        Bindings b = getScriptEngine().createBindings();
 
         Map<String, ?> scriptComponents = getScriptExposedBeans(formData.getFormType().getTaxType(), event);
         for (Object component : scriptComponents.values()) {
@@ -173,8 +172,7 @@ public class FormDataScriptingServiceImpl extends TAAbstractScriptingServiceImpl
 
     private void executeScript(Bindings bindings, String script, Logger logger) {
         try {
-            groovyScriptEngine.getClassLoader().clearCache();
-            groovyScriptEngine.eval(script, bindings);
+            getScriptEngine().eval(script, bindings);
         } catch (ScriptException e) {
             logScriptException(e, logger);
         } catch (Exception e) {

@@ -88,7 +88,7 @@ public abstract class AbstractEditView extends ViewWithUiHandlers<EditFormUiHand
                     if(Formats.BOOLEAN.equals(col.getFormat())){
                         widget = new CheckBox();
                     } else {
-                        widget = new com.aplana.gwt.client.TextBox();
+                        widget = new com.aplana.gwt.client.NumberBox(col.getPrecision());
                     }
                     break;
                 case STRING:

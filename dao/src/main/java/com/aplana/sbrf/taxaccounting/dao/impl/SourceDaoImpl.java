@@ -1120,8 +1120,10 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
                 relation.setPeriodName(relation.isAccruing() ?
                         FormatUtils.getAccName(basePeriodName, rs.getDate("periodStartDate")) : basePeriodName);
                 String baseCompPeriodName = rs.getString("compPeriodName");
-                relation.setComparativePeriodName(relation.isAccruing() ?
-                        FormatUtils.getAccName(baseCompPeriodName, relation.getComparativePeriodStartDate()) : baseCompPeriodName);
+                if (baseCompPeriodName != null) {
+                    relation.setComparativePeriodName(relation.isAccruing() ?
+                            FormatUtils.getAccName(baseCompPeriodName, relation.getComparativePeriodStartDate()) : baseCompPeriodName);
+                }
             } else {
                 relation.setPeriodName(rs.getString("periodName"));
             }

@@ -428,7 +428,6 @@ def checkTaKpp(def row, def errorMsg) {
 
 void logicCheck() {
     def dataRows = formDataService.getDataRowHelper(formData).allCached
-    def int monthCountInPeriod = getMonthCount()
 
     for (def row : dataRows) {
         if (row.getAlias() != null) {
@@ -481,11 +480,6 @@ void logicCheck() {
         // 7. В справочнике «Параметры представления деклараций по транспортному налогу» существует хотя бы одна запись,
         // удовлетворяющая условиям выборки, приведённой в алгоритме расчёта «Графы 2 и 3»
         fillTaKpp(row, errorMsg)
-
-        // дополнительная проверка для 12 графы
-        if (row.ownMonths != null && row.ownMonths > monthCountInPeriod) {
-            logger.warn('Срок владение ТС не должен быть больше текущего налогового периода.')
-        }
 
         // 8. Проверка налоговой ставки ТС
         // В справочнике «Ставки транспортного налога» существует строка, удовлетворяющая условиям выборки,
@@ -1412,6 +1406,7 @@ def getTaxRateImport(def values, def rowIndex, def colIndex, def row) {
                 if (taxRate) {
                     row.taxRate = calc24(row, region, null, false)
                     if(!row.taxRate){
+                        def tmpRow = formData.createDataRow()
                         def declarationRegionCode = getRefBookValue(4L, declarationRegionId)?.CODE?.value
                         logger.warn("Строка $rowIndex, столбец " + ScriptUtils.getXLSColumnName(colIndex) + ": " +
                                 "На форме не заполнена графа «" +getColumnName(tmpRow, 'taxRate')+"», " +

@@ -654,8 +654,9 @@ public class RefBookUniversal implements RefBookDataProvider {
                 if (isRelevancePeriodChanged) {
                     //Проверка пересечения версий
                     //Проверяем следующую версию после даты окочания
-                    RefBookRecordVersion nextVersion = refBookDao.getNextVersion(refBookId, recordId, oldVersionPeriod.getVersionStart());
-                    if (versionTo != null && nextVersion != null && (versionTo.equals(nextVersion.getVersionStart()) || versionTo.after(nextVersion.getVersionStart()))) {
+                    RefBookRecordVersion oldNextVersion = refBookDao.getNextVersion(refBookId, recordId, oldVersionPeriod.getVersionStart());
+                    if (versionTo != null && oldNextVersion != null && (versionTo.equals(oldNextVersion.getVersionStart()) || versionTo.after(oldNextVersion.getVersionStart()))) {
+                        //TODO: поведение отличается от поведения при создании записи, там исключения нет, просто изменяется дата окончания на дату начала след. версии
                         throw new ServiceException(CROSS_ERROR_MSG);
                     }
                     //Проверяем предыдущую версию до даты начала
@@ -702,6 +703,7 @@ public class RefBookUniversal implements RefBookDataProvider {
                         throw new ServiceException("Обнаружено несколько фиктивных версий");
                     }
                     if (versionTo != null) {
+                        //Существует другая версия, дата начала которой = нашей новой дате окончания?
                         boolean isVersionEndAlreadyExists = refBookDao.isVersionsExist(refBookId, Arrays.asList(recordId), SimpleDateUtils.addDayToDate(versionTo, 1));
                         if (relatedVersions.isEmpty() && !isVersionEndAlreadyExists) {
                             //Создаем новую фиктивную версию - дату окончания
@@ -714,8 +716,7 @@ public class RefBookUniversal implements RefBookDataProvider {
                                 refBookDao.updateVersionRelevancePeriod(REF_BOOK_RECORD_TABLE_NAME, relatedVersions.get(0), SimpleDateUtils.addDayToDate(versionTo, 1));
                             } else {
                                 //Удаляем дату окончания. Теперь дата окончания задается началом следующей версии
-                                Long currentVersionEnd = refBookDao.findRecord(refBookId, recordId, SimpleDateUtils.addDayToDate(oldVersionPeriod.getVersionEnd(), 1));
-                                refBookDao.deleteRecordVersions(REF_BOOK_RECORD_TABLE_NAME, Arrays.asList(currentVersionEnd));
+                                refBookDao.deleteRecordVersions(REF_BOOK_RECORD_TABLE_NAME, relatedVersions);
                             }
                         }
                     }
@@ -781,7 +782,7 @@ public class RefBookUniversal implements RefBookDataProvider {
             if (refBookId == RefBook.TCO && form.getState() == WorkflowState.CREATED) {
                 //Для нф в статусе "Создана" удаляем сформированные печатные представления, отменяем задачи на их формирование и рассылаем уведомления
                 formDataService.deleteReport(form.getFormDataId(), false, logger.getTaUserInfo().getUser().getId(),
-                        "Модифицирована запись справочника \"" + refBook.getName()+ "\", которая используется в данной форме");
+                        "Модифицирована запись справочника \"" + refBook.getName() + "\", которая используется в данной форме");
                 /*
                 reportService.delete(form.getFormDataId(), null);
                 List<ReportType> interruptedReportTypes = Arrays.asList(ReportType.EXCEL, ReportType.CSV);

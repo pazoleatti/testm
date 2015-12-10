@@ -8,9 +8,9 @@
         <cell alias="month1" colSpan="1" rowSpan="1"
               value="Первый месяц списания&quot;+&quot; / зачисления &quot;-&quot; с учётом корректировок не позднее 25.__.__"/>
         <cell alias="month2" colSpan="1" rowSpan="1"
-              value="Второй месяц списания&quot;+&quot; / зачисления &quot;-&quot; не позднее25.__.__"/>
+              value="Второй месяц списания&quot;+&quot; / зачисления &quot;-&quot; не позднее 25.__.__"/>
         <cell alias="month3" colSpan="1" rowSpan="1"
-              value="Третий месяц списания&quot;+&quot; / зачисления &quot;-&quot; не позднее25.__.__"/>
+              value="Третий месяц списания&quot;+&quot; / зачисления &quot;-&quot; не позднее 25.__.__"/>
     </row>
     <row alias="">
         <cell alias="code" colSpan="1" rowSpan="1" value="1"/>

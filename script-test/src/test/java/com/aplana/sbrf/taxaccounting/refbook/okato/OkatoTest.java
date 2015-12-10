@@ -37,11 +37,11 @@ public class OkatoTest extends RefBookScriptTestBase {
         ArrayList<Map<String, RefBookValue>> saveRecords = new ArrayList<Map<String, RefBookValue>>();
 
         HashMap<String, RefBookValue> value1 = new HashMap<String, RefBookValue>();
-        value1.put("OKATO", new RefBookValue(RefBookAttributeType.STRING, "46650100"));
+        value1.put("OKATO", new RefBookValue(RefBookAttributeType.STRING, "12345678910"));
         saveRecords.add(value1);
 
         HashMap<String, RefBookValue> value2 = new HashMap<String, RefBookValue>();
-        value1.put("OKATO", new RefBookValue(RefBookAttributeType.STRING, "00000000"));
+        value2.put("OKATO", new RefBookValue(RefBookAttributeType.STRING, "1234567891"));
         saveRecords.add(value2);
 
         testHelper.setSaveRecords(saveRecords);
@@ -52,7 +52,7 @@ public class OkatoTest extends RefBookScriptTestBase {
         int i = 0;
         // value1
         // value2
-        Assert.assertEquals("Атрибут \"OKATO\" заполнен неверно (00000000)! Ожидаемый паттерн: \"[0-9]{11}\"", entries.get(i++).getMessage());
+        Assert.assertEquals("Атрибут \"OKATO\" заполнен неверно (1234567891)! Ожидаемый паттерн: \"[0-9]{11}\"", entries.get(i++).getMessage());
         Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
     }
 }

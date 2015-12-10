@@ -125,8 +125,8 @@ public class App_6_3Test extends ScriptTestBase {
         i = 0;
         Assert.assertEquals("Строка 1: Значение графы «Дата совершения сделки» должно быть не меньше значения графы «Дата договора»!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Год, указанный по графе «Дата совершения сделки» (2990), должен относиться к календарному году текущей формы (2014)!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Значение даты атрибута «Дата договора» должно принимать значение из следующего диапазона: 01.01.1900 - 31.12.2099", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Значение даты атрибута «Дата совершения сделки» должно принимать значение из следующего диапазона: 01.01.1900 - 31.12.2099", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 1: Значение даты атрибута «Дата договора» должно принимать значение из следующего диапазона: 01.01.1991 - 31.12.2099", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 1: Значение даты атрибута «Дата совершения сделки» должно принимать значение из следующего диапазона: 01.01.1991 - 31.12.2099", entries.get(i++).getMessage());
         Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
         testHelper.getLogger().clear();
 
@@ -213,7 +213,13 @@ public class App_6_3Test extends ScriptTestBase {
         testHelper.execute(FormDataEvent.CALCULATE);
         checkLogger();
         checkAfterCalc(testHelper.getDataRowHelper().getAll());
-
+    }
+    @Test
+    public void importTransportFileTest() {
+        mockBeforeImport();
+        testHelper.setImportFileInputStream(getImportRnuInputStream());
+        testHelper.execute(FormDataEvent.IMPORT_TRANSPORT_FILE);
+        checkLoadData(testHelper.getDataRowHelper().getAll());
     }
 
     // Проверить загруженные данные
@@ -244,6 +250,10 @@ public class App_6_3Test extends ScriptTestBase {
                         e.setAlias("INN");
                         e.setName("ИНН/ КИО");
                         attributes.add(e);
+                        e = new RefBookAttribute();
+                        e.setAlias("NAME");
+                        e.setName("Наименование");
+                        attributes.add(e);
                         refBook.setAttributes(attributes);
                         return refBook;
                     }
@@ -263,16 +273,19 @@ public class App_6_3Test extends ScriptTestBase {
                         Map<String, RefBookValue> map = new HashMap<String, RefBookValue>();
                         map.put(RefBook.RECORD_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, 1L));
                         map.put("INN", new RefBookValue(RefBookAttributeType.STRING, "A"));
+                        map.put("NAME", new RefBookValue(RefBookAttributeType.STRING, "A"));
                         result.add(map);
 
                         map = new HashMap<String, RefBookValue>();
                         map.put(RefBook.RECORD_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, 2L));
                         map.put("INN", new RefBookValue(RefBookAttributeType.STRING, "B"));
+                        map.put("NAME", new RefBookValue(RefBookAttributeType.STRING, "B"));
                         result.add(map);
 
                         map = new HashMap<String, RefBookValue>();
                         map.put(RefBook.RECORD_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, 3L));
                         map.put("INN", new RefBookValue(RefBookAttributeType.STRING, "C"));
+                        map.put("NAME", new RefBookValue(RefBookAttributeType.STRING, "C"));
                         result.add(map);
 
                         return result;

@@ -543,12 +543,26 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
     @Override
     public void checkReferenceValue(Long refBookId, String referenceValue, String expectedValue, int rowIndex, int colIndex,
                                     Logger logger, boolean required) {
-        if ((referenceValue == null && expectedValue == null) ||
-                (referenceValue == null && "".equals(expectedValue)) ||
-                ("".equals(referenceValue) && expectedValue == null) ||
-                (referenceValue != null && expectedValue != null && referenceValue.equals(expectedValue))) {
+        checkReferenceValue(refBookId, referenceValue, Arrays.asList(expectedValue), rowIndex, colIndex, logger, required);
+    }
+
+    @Override
+    public void checkReferenceValue(Long refBookId, String referenceValue, List<String> expectedValues, int rowIndex, int colIndex,
+                                    Logger logger, boolean required) {
+        if (referenceValue == null && (expectedValues == null || expectedValues.isEmpty())) {
             return;
         }
+        if (expectedValues != null) {
+            for (String expectedValue : expectedValues) {
+                if ((referenceValue == null && expectedValue == null) ||
+                        (referenceValue == null && "".equals(expectedValue)) ||
+                        ("".equals(referenceValue) && expectedValue == null) ||
+                        (referenceValue != null && expectedValue != null && referenceValue.equals(expectedValue))) {
+                    return;
+                }
+            }
+        }
+
         RefBook rb = refBookFactory.get(refBookId);
         String msg = String.format(ScriptUtils.REF_BOOK_REFERENCE_NOT_FOUND_IMPORT_ERROR, rowIndex, ScriptUtils.getXLSColumnName(colIndex), referenceValue, rb.getName());
         if (required) {

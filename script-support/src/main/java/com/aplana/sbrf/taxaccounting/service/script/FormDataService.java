@@ -211,6 +211,19 @@ public interface FormDataService {
                              Logger logger, boolean required);
 
     /**
+     * Сравнить зависимое поле с ожидаемыми.
+     *
+     * @param referenceValue значение зависомого поля (ва загружаемом файле)
+     * @param expectedValues список ожидаемых значений (в БД)
+     * @param rowIndex номер строки в транспортном файле
+     * @param colIndex номер колонки в транспортном файле
+     * @param logger для вывода сообщений
+     * @param required фатальность/обязательность
+     */
+    void checkReferenceValue(Long refBookId, String referenceValue, List<String> expectedValues, int rowIndex, int colIndex,
+                             Logger logger, boolean required);
+
+    /**
      * Проверить существование и принятость квартальной формы, а также наличие данных в ней.
      *
      * @param formTypeId идентификатор типа формы

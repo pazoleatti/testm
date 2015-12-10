@@ -41,7 +41,7 @@ public class ClassificatorOktmoTest extends RefBookScriptTestBase {
         saveRecords.add(value1);
 
         HashMap<String, RefBookValue> value2 = new HashMap<String, RefBookValue>();
-        value1.put("CODE", new RefBookValue(RefBookAttributeType.STRING, "012345678"));
+        value2.put("CODE", new RefBookValue(RefBookAttributeType.STRING, "012345678"));
         saveRecords.add(value2);
 
         testHelper.setSaveRecords(saveRecords);

@@ -106,17 +106,17 @@ public interface RefBookDao {
      * @param version дата актуальности. Может быть null - тогда не учитывается
      * @param needAccurateVersion признак того, что нужно точное совпадение по дате начала действия записи
      * @param filter фильтр для отбора записей
-     * @return пары идентификатор версии элемента - идентификатор элемента справочника
+     * @return пары идентификатор версии элемента - идентификатор группы версий справочника
      */
     List<Pair<Long, Long>> getRecordIdPairs(Long refBookId, Date version, Boolean needAccurateVersion, String filter);
 
     /**
      * Возвращает дату начала версии следующей за указанной
      * @param version дата актуальности
-     * @param filter фильтр для отбора записей
+     * @param filter фильтр для отбора записей. Обязательное поле, т.к записи не фильтруются по RECORD_ID
      * @return дата начала следующей версии
      */
-    Date getNextVersion(Long refBookId, Date version, String filter);
+    Date getNextVersion(Long refBookId, Date version, @NotNull String filter);
 
     /**
      * Получает количество уникальных записей, удовлетворяющих условиям фильтра
@@ -290,7 +290,7 @@ public interface RefBookDao {
      * @param records новые значения полей элемента справочника
      * @return список пар идентификатор записи-имя атрибута, у которых совпали значения уникальных атрибутов
      */
-    List<Pair<Long,String>> getMatchedRecordsByUniqueAttributes(@NotNull Long refBookId, @NotNull Long uniqueRecordId,
+    List<Pair<Long,String>> getMatchedRecordsByUniqueAttributes(@NotNull Long refBookId, Long uniqueRecordId,
                                                                 @NotNull List<RefBookAttribute> attributes,
                                                                 @NotNull List<RefBookRecord> records);
 
@@ -338,30 +338,28 @@ public interface RefBookDao {
     List<Pair<Date, Date>> isVersionUsedLikeParent(@NotNull Long refBookId, @NotNull Long recordId, @NotNull Date versionFrom);
 
     /**
-     * Проверяет есть ли ссылки на версию в каких либо точках запроса
-     *
-     *
-     * @param uniqueRecordIds список идентификаторов версий записей
-     * @param versionFrom начало периода
-     * @param versionTo окончания периода
+     * Проверяет есть ли ссылки на запись справочника в настройках подразделений
+     * @param uniqueRecordIds список уникальных идентификаторов записей справочника
+     * @param versionFrom дата начала периода
+     * @param versionTo дата конца периода
      * @param restrictPeriod
-     *      false - возвращает ссылки, период которых НЕ пересекается с указанным периодом
-     *      true - возвращает ссылки, период которых пересекается с указанным периодом
-     *      null - возвращает все ссылки на указанную запись справочника, без учета периода
+     *      false - возвращает ссылки-использования, период которых НЕ пересекается с указанным периодом
+     *      true - возвращает ссылки-использования, период которых пересекается с указанным периодом
+     *      null - возвращает все ссылки-использования на указанную запись справочника, без учета периода
      * @param excludeUseCheck идентификаторы справочников, которые игнорируются при проверке использования
      */
     List<String> isVersionUsedInDepartmentConfigs(@NotNull Long refBookId, @NotNull List<Long> uniqueRecordIds, Date versionFrom, Date versionTo, Boolean restrictPeriod, List<Long> excludeUseCheck);
 
     /**
-     * Проверка использования записи в налоовых формах
+     * Проверка использования записи в налоговых формах
      * @param refBookId идентификатор справочника
-     * @param uniqueRecordIds уникальные идентификаторы версий записей справочника
-     * @param versionFrom дата актуальности новой версии
-     * @param versionTo дата конца актуальности новой версии
+     * @param uniqueRecordIds список уникальных идентификаторов записей справочника
+     * @param versionFrom дата начала периода
+     * @param versionTo дата конца периода
      * @param restrictPeriod
-     *      false - возвращает ссылки, период которых НЕ пересекается с указанным периодом
-     *      true - возвращает ссылки, период которых пересекается с указанным периодом
-     *      null - возвращает все ссылки на указанную запись справочника, без учета периода
+     *      false - возвращает ссылки-использования, период которых НЕ пересекается с указанным периодом
+     *      true - возвращает ссылки-использования, период которых пересекается с указанным периодом
+     *      null - возвращает все ссылки-использования на указанную запись справочника, без учета периода
      * @return результаты проверки. Сообщения об ошибках
      */
     List<FormLink> isVersionUsedInForms(Long refBookId, List<Long> uniqueRecordIds, Date versionFrom, Date versionTo,
@@ -370,13 +368,13 @@ public interface RefBookDao {
     /**
      * Проверка использования записи в справочниках
      * @param refBookId идентификатор справочника
-     * @param uniqueRecordIds уникальные идентификаторы версий записей справочника
-     * @param versionFrom дата актуальности новой версии
-     * @param versionTo дата конца актуальности новой версии
+     * @param uniqueRecordIds список уникальных идентификаторов записей справочника
+     * @param versionFrom дата начала периода
+     * @param versionTo дата конца периода
      * @param restrictPeriod
-     *      false - возвращает ссылки, период которых НЕ пересекается с указанным периодом
-     *      true - возвращает ссылки, период которых пересекается с указанным периодом
-     *      null - возвращает все ссылки на указанную запись справочника, без учета периода
+     *      false - возвращает ссылки-использования, период которых НЕ пересекается с указанным периодом
+     *      true - возвращает ссылки-использования, период которых пересекается с указанным периодом
+     *      null - возвращает все ссылки-использования на указанную запись справочника, без учета периода
      * @param excludeUseCheck идентификаторы справочников, которые игнорируются при проверке использования
      * @return результаты проверки. Сообщения об ошибках
      */
@@ -426,7 +424,8 @@ public interface RefBookDao {
     Long findRecord(Long refBookId, Long recordId, Date version);
 
     /**
-     * Возвращает идентификаторы фиктивных версии, являющихся окончанием указанных версии
+     * Возвращает идентификаторы фиктивных версии, являющихся окончанием указанных версии.
+     * Без привязки ко входным параметрам, т.к метод используется просто для удаления по id
      * @param uniqueRecordIds идентификаторы версии записи справочника
      * @return идентификаторы фиктивных версии
      */

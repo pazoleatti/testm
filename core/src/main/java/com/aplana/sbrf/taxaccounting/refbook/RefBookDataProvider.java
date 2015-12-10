@@ -66,10 +66,10 @@ public interface RefBookDataProvider {
     /**
      * Возвращает дату начала версии следующей за указанной
      * @param version дата актуальности
-     * @param filter фильтр для отбора записей
+     * @param filter фильтр для отбора записей. Обязательное поле, т.к записи не фильтруются по RECORD_ID
      * @return дата начала следующей версии
      */
-    Date getNextVersion(Date version, String filter);
+    Date getNextVersion(Date version, @NotNull String filter);
 
     /**
      * Получает уникальные идентификаторы записей, удовлетворяющих условиям фильтра

@@ -108,7 +108,7 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
                     style.setAlignment(CellStyle.ALIGN_RIGHT);
                     style.setWrapText(true);
                     style.setAlignment(CellStyle.ALIGN_RIGHT);
-                    style.setDataFormat(dataFormat.getFormat(XlsxReportMetadata.Presision.getPresision(((NumericColumn)currColumn).getPrecision())));
+                    style.setDataFormat(dataFormat.getFormat(XlsxReportMetadata.getPrecision(((NumericColumn) currColumn).getPrecision())));
                     break;
                 case NUMERATION:
                     style.setAlignment(CellStyle.ALIGN_RIGHT);
@@ -426,13 +426,10 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
      * @return сти
      */
     private CellStyle getCellStyle(com.aplana.sbrf.taxaccounting.model.Cell dataRowCell, CellType type, String alias) {
-        if (!DiffService.STYLE_NO_CHANGE.equals(dataRowCell.getStyleAlias())
-                && !DiffService.STYLE_INSERT.equals(dataRowCell.getStyleAlias())
-                && !DiffService.STYLE_DELETE.equals(dataRowCell.getStyleAlias())
-                && !DiffService.STYLE_CHANGE.equals(dataRowCell.getStyleAlias())) {
-            // если стиль не относится к стилям дельт, то получить обычный стиль
+        if (dataRowCell.getStyleAlias() == null) {
             return cellStyleBuilder.createCellStyle(type, alias);
         }
+
         XSSFCellStyle cellStyle = (XSSFCellStyle) cellStyleBuilder.createCellStyle(type, alias, dataRowCell.getStyleAlias());
 
         // фон
