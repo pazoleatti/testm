@@ -41,6 +41,8 @@ public class SourceServiceTest {
         pair.setDestinationType("Декларации");
         pair.setSourceType("Форма");
         pair.setSourceKind("Первичная");
+        pair.setDestinationDepartmentName("Банк-приемник");
+        pair.setSourceDepartmentName("Банк-источник");
         sourceClientData.setSourcePairs(new ArrayList<SourcePair>(){{add(pair);}});
         sourceClientData.setSourceObjects(new ArrayList<SourceObject>() {{
             add(new SourceObject(pair, SDF.parse("01.01.2014"), SDF.parse("31.12.2014")));
@@ -49,7 +51,7 @@ public class SourceServiceTest {
         Logger logger = new Logger();
         sourceService.deleteSources(logger, sourceClientData);
         assertEquals(1, logger.getEntries().size());
-        assertEquals("Удалено назначение \"Первичная: Форма\" в роли источника декларации \"Декларации\" в периоде 01.01.2014 - 31.12.2014.", logger.getEntries().get(0).getMessage());
+        assertEquals("Удалено назначение \"Банк-источник, Первичная: Форма\" в роли источника декларации \"Банк-приемник, Декларации\" в периоде 01.01.2014 - 31.12.2014.", logger.getEntries().get(0).getMessage());
     }
 
     @Test
