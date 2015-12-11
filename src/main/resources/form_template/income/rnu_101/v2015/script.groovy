@@ -1,4 +1,4 @@
-package form_template.income.rnu_101.v2016
+package form_template.income.rnu_101.v2015
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException

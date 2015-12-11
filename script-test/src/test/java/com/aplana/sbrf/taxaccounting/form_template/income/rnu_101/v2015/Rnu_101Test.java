@@ -1,4 +1,4 @@
-package com.aplana.sbrf.taxaccounting.form_template.income.rnu_101.v2016;
+package com.aplana.sbrf.taxaccounting.form_template.income.rnu_101.v2015;
 
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
@@ -79,7 +79,7 @@ public class Rnu_101Test extends ScriptTestBase {
     //@Test
     public void check1Test() throws ParseException {
         FormData formData = getFormData();
-        formData.initFormTemplateParams(testHelper.getTemplate("..//src/main//resources//form_template//income//rnu_101//v2016//"));
+        formData.initFormTemplateParams(testHelper.getTemplate("..//src/main//resources//form_template//income//rnu_101//v2015//"));
         List<DataRow<Cell>> dataRows = testHelper.getDataRowHelper().getAll();
         SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
 
@@ -118,7 +118,7 @@ public class Rnu_101Test extends ScriptTestBase {
         row.getCell("name").setValue(1L, null);
         row.getCell("code").setValue(1L, null);
         row.getCell("reasonNumber").setValue("string", null);
-        row.getCell("reasonDate").setValue(sdf.parse("11.11.2016"), null);
+        row.getCell("reasonDate").setValue(sdf.parse("11.11.2015"), null);
         row.getCell("sum").setValue(1L, null);
         row.getCell("currency").setValue(1L, null);
         row.getCell("time").setValue(1L, null);
