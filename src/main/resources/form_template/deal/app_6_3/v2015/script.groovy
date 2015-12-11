@@ -99,7 +99,7 @@ def autoFillColumns = ['rowNumber', 'iksr', 'countryCode', 'price', 'cost']
 
 // Проверяемые на пустые значения атрибуты
 @Field
-def nonEmptyColumns = ['name', 'sum', 'docNumber', 'docDate', 'country', 'count', 'price', 'cost', 'dealDoneDate']
+def nonEmptyColumns = ['name', 'sum', 'docDate', 'country', 'count', 'price', 'cost', 'dealDoneDate']
 
 @Field
 def totalColumns = ['sum', 'count', 'price', 'cost']
@@ -173,7 +173,7 @@ void logicCheck() {
         }
         def rowNumber = row.getIndex()
 
-        checkNonEmptyColumns(row, rowNumber, nonEmptyColumns, logger, false)
+        checkNonEmptyColumns(row, rowNumber, nonEmptyColumns, logger, true)
 
         // Проверка суммы доходов
         if (row.sum!=null && !row.sum.toString().isEmpty() && row.sum <= 0) {
