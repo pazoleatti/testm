@@ -178,7 +178,7 @@ void logicCheck() {
         // Проверка суммы доходов
         if (row.sum!=null && !row.sum.toString().isEmpty() && row.sum <= 0) {
             def income = row.getCell('sum').column.name
-            logger.error("Строка $rowNumber: Значение графы «$income» должно быть больше «0»!")
+            logger.warn("Строка $rowNumber: Значение графы «$income» должно быть больше «0»!")
         }
 
         // Проверка заполнения населенного пункта
