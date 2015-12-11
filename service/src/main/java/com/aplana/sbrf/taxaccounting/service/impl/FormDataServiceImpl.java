@@ -474,13 +474,29 @@ public class FormDataServiceImpl implements FormDataService {
 		formDataAccessService.canEdit(userInfo, formData.getId(), formData.isManual());
         formDataDao.updateSorted(formData.getId(), false);
         formDataDao.updateEdited(formData.getId(), true);
-        formDataScriptingService.executeScript(userInfo, formData, FormDataEvent.CALCULATE, logger, null);
-        dataRowDao.refreshRefBookLinks(formData);
-        if (logger.containsLevel(LogLevel.ERROR)) {
-            logger.error("Найдены ошибки при выполнении расчета формы");
+        Map<String, Object> params = new HashMap<String, Object>();
+        ScriptStatusHolder scriptStatusHolder = new ScriptStatusHolder();
+        params.put("scriptStatusHolder", scriptStatusHolder);
+        formDataScriptingService.executeScript(userInfo, formData, FormDataEvent.CALCULATE, logger, params);
+        if (ScriptStatus.DEFAULT.equals(scriptStatusHolder.getScriptStatus())) {
+            // стандартное поведение (при ошибках - откат)
+            if (logger.containsLevel(LogLevel.ERROR)) {
+                throw new ServiceException("Найдены ошибки при выполнении расчета формы");
+            } else {
+                logger.info("Расчет завершен, фатальных ошибок не обнаружено");
+            }
+        } else if (ScriptStatus.SUCCESS.equals(scriptStatusHolder.getScriptStatus())) {
+            // измененное поведение (без отката при ошибках)
+            if (logger.containsLevel(LogLevel.ERROR)) {
+                logger.warn("Найдены ошибки при выполнении расчета формы");
+            } else {
+                logger.info("Расчет завершен, фатальных ошибок не обнаружено");
+            }
         } else {
-            logger.info("Расчет завершен, фатальных ошибок не обнаружено");
+            throw new ServiceException("Найдены ошибки при выполнении расчета формы");
+            //logger.error("Найдены ошибки при выполнении расчета формы");
         }
+        dataRowDao.refreshRefBookLinks(formData);
 //        logBusinessService.add(formData.getId(), null, userInfo, FormDataEvent.CALCULATE, null);
     }
 
@@ -496,7 +512,17 @@ public class FormDataServiceImpl implements FormDataService {
         formDataAccessService.canEdit(userInfo, formData.getId(), formData.isManual());
         formDataDao.updateSorted(formData.getId(), false);
         formDataDao.updateEdited(formData.getId(), true);
-        formDataScriptingService.executeScript(userInfo, formData, FormDataEvent.REFRESH, logger, null);
+        Map<String, Object> params = new HashMap<String, Object>();
+        ScriptStatusHolder scriptStatusHolder = new ScriptStatusHolder();
+        params.put("scriptStatusHolder", scriptStatusHolder);
+        formDataScriptingService.executeScript(userInfo, formData, FormDataEvent.REFRESH, logger, params);
+        if (ScriptStatus.DEFAULT.equals(scriptStatusHolder.getScriptStatus())) {
+            if (logger.containsLevel(LogLevel.ERROR)) {
+                throw new ServiceException("");
+            }
+        } else if (ScriptStatus.SKIP.equals(scriptStatusHolder.getScriptStatus())) {
+            throw new ServiceException("");
+        }
         dataRowDao.refreshRefBookLinks(formData);
         //logBusinessService.add(formData.getId(), null, userInfo, FormDataEvent.REFRESH, null);
     }
@@ -630,14 +656,27 @@ public class FormDataServiceImpl implements FormDataService {
 	@Transactional
 	public long saveFormData(Logger logger, TAUserInfo userInfo, FormData formData, boolean editMode) {
 		formDataAccessService.canEdit(userInfo, formData.getId(), formData.isManual());
+        Map<String, Object> params = new HashMap<String, Object>();
+        ScriptStatusHolder scriptStatusHolder = new ScriptStatusHolder();
+        params.put("scriptStatusHolder", scriptStatusHolder);
         // Отработка скриптом события сохранения
-		formDataScriptingService.executeScript(userInfo, formData, FormDataEvent.SAVE, logger, null);
-        if (logger.containsLevel(LogLevel.ERROR)) {
-            if (editMode) {
-                logger.error(SAVE_ERROR);
-            } else {
+		formDataScriptingService.executeScript(userInfo, formData, FormDataEvent.SAVE, logger, params);
+        if (ScriptStatus.DEFAULT.equals(scriptStatusHolder.getScriptStatus())) {
+            // стандартное поведение (при ошибках - откат)
+            if (logger.containsLevel(LogLevel.ERROR)) {
                 throw new ServiceLoggerException(SAVE_ERROR, logEntryService.save(logger.getEntries()));
             }
+        } else if (ScriptStatus.SUCCESS.equals(scriptStatusHolder.getScriptStatus())) {
+            // измененное поведение (без отката при ошибках)
+            if (logger.containsLevel(LogLevel.ERROR)) {
+                if (editMode) {
+                    logger.error(SAVE_ERROR);
+                } else {
+                    throw new ServiceLoggerException(SAVE_ERROR, logEntryService.save(logger.getEntries()));
+                }
+            }
+        } else {
+            throw new ServiceLoggerException(SAVE_ERROR, logEntryService.save(logger.getEntries()));
         }
         // Обновление для сквозной нумерации
         updateAutoNumeration(formData, logger, userInfo);

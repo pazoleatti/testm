@@ -670,18 +670,26 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
     }
 
     @Override
-    @Deprecated
     public void saveCachedDataRows(FormData formData, Logger logger) {
-        DataRowHelper dataRowHelper = getDataRowHelper(formData);
-        dataRowHelper.save(dataRowHelper.getAllCached());
+        if (!logger.containsLevel(LogLevel.ERROR)) {
+            DataRowHelper dataRowHelper = getDataRowHelper(formData);
+            dataRowHelper.save(dataRowHelper.getAllCached());
+        }
     }
 
     @Override
-    public void saveCachedDataRows(FormData formData, Logger logger, FormDataEvent formDataEvent) {
+    public void saveCachedDataRows(FormData formData, Logger logger, FormDataEvent formDataEvent, ScriptStatusHolder scriptStatusHolder) {
         if (Arrays.asList(FormDataEvent.CALCULATE, FormDataEvent.REFRESH, FormDataEvent.IMPORT).contains(formDataEvent)
                 || !logger.containsLevel(LogLevel.ERROR)) {
             DataRowHelper dataRowHelper = getDataRowHelper(formData);
             dataRowHelper.save(dataRowHelper.getAllCached());
+            if (scriptStatusHolder != null) {
+                scriptStatusHolder.setScriptStatus(ScriptStatus.SUCCESS);
+            }
+        } else {
+            if (scriptStatusHolder != null) {
+                scriptStatusHolder.setScriptStatus(ScriptStatus.SKIP);
+            }
         }
     }
 

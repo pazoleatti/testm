@@ -61,7 +61,7 @@ switch (formDataEvent) {
         checkRegionId()
         calc()
         logicCheck()
-        formDataService.saveCachedDataRows(formData, logger, formDataEvent)
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.CHECK:
         checkRegionId()
@@ -72,7 +72,7 @@ switch (formDataEvent) {
         consolidation()
         calc()
         logicCheck()
-        formDataService.saveCachedDataRows(formData, logger, formDataEvent)
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.ADD_ROW:
         addNewRow()
@@ -93,7 +93,7 @@ switch (formDataEvent) {
         break
     case FormDataEvent.IMPORT:
         importData()
-        formDataService.saveCachedDataRows(formData, logger, formDataEvent)
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.SORT_ROWS:
         sortFormDataRows()
@@ -1011,7 +1011,7 @@ void addNewRow() {
         newRow.getCell(it).setStyleAlias("Редактируемое поле")
     }
     dataRows.add(index - 1, newRow)
-    formDataService.saveCachedDataRows(formData, logger, formDataEvent)
+    formDataService.saveCachedDataRows(formData, logger)
 }
 
 void importData() {

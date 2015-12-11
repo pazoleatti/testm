@@ -162,9 +162,7 @@ void calc() {
         // сортируем по кодам
         dataRows.sort { getKnu(it.balance) }
 
-        dataRows.eachWithIndex { row, index ->
-            row.setIndex(index + 1)
-        }
+        updateIndexes(dataRows)
 
         // Нельзя использовать стандартные методы, так как группируется по зависимой графе
         // добавить "итого по коду" в таблицу
@@ -172,6 +170,8 @@ void calc() {
     }
 
     dataRows.add(calcTotalRow(dataRows))
+
+    sortFormDataRows(false)
 }
 
 def addSubTotalRows(def dataRows) {
@@ -667,6 +667,7 @@ void importData() {
         allValues.remove(rowValues)
         rowValues.clear()
     }
+    updateIndexes(rows)
 
     // сравнение подитогов
     if (!totalRowFromFileMap.isEmpty()) {
@@ -686,10 +687,7 @@ void importData() {
             // для этих подитогов из файла нет групп
             totalRowFromFileMap.each { key, totalRows ->
                 totalRows.each { totalRow ->
-                    totalColumns.each { alias ->
-                        def msg = String.format(COMPARE_TOTAL_VALUES, totalRow.getIndex(), getColumnName(totalRow, alias), totalRow[alias], BigDecimal.ZERO)
-                        rowWarning(logger, totalRow, msg)
-                    }
+                    rowWarning(logger, totalRow, String.format(GROUP_WRONG_ITOG_ROW, totalRow.getIndex()))
                 }
             }
         }

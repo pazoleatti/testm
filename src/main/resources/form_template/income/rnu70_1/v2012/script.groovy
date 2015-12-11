@@ -692,6 +692,7 @@ void importData() {
         allValues.remove(rowValues)
         rowValues.clear()
     }
+    updateIndexes(rows)
 
     // сравнение подитогов
     if (!totalRowFromFileMap.isEmpty()) {
@@ -703,16 +704,15 @@ void importData() {
                     compareTotalValues(totalRow, tmpSubTotalRow, totalColumns, logger, false)
                 }
                 totalRowFromFileMap.remove(tmpSubTotalRow.fix)
+            } else {
+                rowWarning(logger, null, String.format(GROUP_WRONG_ITOG, tmpRow.helper.replaceAll("Итого по КНУ ", "")))
             }
         }
         if (!totalRowFromFileMap.isEmpty()) {
             // для этих подитогов из файла нет групп
             totalRowFromFileMap.each { key, totalRows ->
                 totalRows.each { totalRow ->
-                    totalColumns.each { alias ->
-                        def msg = String.format(COMPARE_TOTAL_VALUES, totalRow.getIndex(), getColumnName(totalRow, alias), totalRow[alias], BigDecimal.ZERO)
-                        rowWarning(logger, totalRow, msg)
-                    }
+                    rowWarning(logger, totalRow, String.format(GROUP_WRONG_ITOG_ROW, totalRow.getIndex()))
                 }
             }
         }

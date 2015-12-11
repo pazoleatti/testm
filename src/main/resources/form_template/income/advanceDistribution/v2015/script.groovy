@@ -53,7 +53,7 @@ switch (formDataEvent) {
     case FormDataEvent.CALCULATE:
         calc()
         logicalCheckAfterCalc()
-        formDataService.saveCachedDataRows(formData, logger, formDataEvent)
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.ADD_ROW:
         formDataService.addRow(formData, currentDataRow, editableColumns, autoFillColumns)
@@ -79,12 +79,12 @@ switch (formDataEvent) {
     case FormDataEvent.COMPOSE:
         consolidation()
         calc()
-        formDataService.saveCachedDataRows(formData, logger, formDataEvent)
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.IMPORT:
         importData()
         if (!logger.containsLevel(LogLevel.ERROR)) {
-            formDataService.saveCachedDataRows(formData, logger, formDataEvent)
+            formDataService.saveCachedDataRows(formData, logger)
         }
         break
     case FormDataEvent.SORT_ROWS:

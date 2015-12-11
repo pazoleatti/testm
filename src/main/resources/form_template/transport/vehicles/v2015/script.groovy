@@ -58,14 +58,14 @@ switch (formDataEvent) {
     case FormDataEvent.AFTER_CREATE:
         if (formData.kind == FormDataKind.PRIMARY) {
             copyData()
-            formDataService.saveCachedDataRows(formData, logger, formDataEvent)
+            formDataService.saveCachedDataRows(formData, logger)
         }
         break
     case FormDataEvent.CALCULATE:
         checkRegionId()
         calc()
         logicCheck()
-        formDataService.saveCachedDataRows(formData, logger, formDataEvent)
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.CHECK:
         checkRegionId()
@@ -93,17 +93,17 @@ switch (formDataEvent) {
         consolidation()
         calc()
         logicCheck()
-        formDataService.saveCachedDataRows(formData, logger, formDataEvent)
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.IMPORT:
         checkRegionId()
         importData()
-        formDataService.saveCachedDataRows(formData, logger, formDataEvent)
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.IMPORT_TRANSPORT_FILE:
         checkRegionId()
         importTransportData()
-        formDataService.saveCachedDataRows(formData, logger, formDataEvent)
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.SORT_ROWS:
         sortFormDataRows()
@@ -263,7 +263,7 @@ def addRow() {
         index = currentDataRow.getIndex() + 1
     }
     dataRows.add(index - 1, getNewRow())
-    formDataService.saveCachedDataRows(formData, logger, formDataEvent)
+    formDataService.saveCachedDataRows(formData, logger)
 }
 
 // Алгоритмы заполнения полей формы

@@ -55,7 +55,7 @@ switch (formDataEvent) {
         prevPeriodCheck()
         calc()
         logicCheck()
-        formDataService.saveCachedDataRows(formData, logger, formDataEvent)
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.ADD_ROW:
         def columns = (getBalancePeriod() ? allColumns - ['rowNumber'] : editableColumns)
@@ -79,7 +79,7 @@ switch (formDataEvent) {
         formDataService.consolidationSimple(formData, logger, userInfo)
         calc()
         logicCheck()
-        formDataService.saveCachedDataRows(formData, logger, formDataEvent)
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.IMPORT:
         if (UploadFileName.endsWith(".rnu")) {
@@ -87,11 +87,11 @@ switch (formDataEvent) {
         } else {
             importData()
         }
-        formDataService.saveCachedDataRows(formData, logger, formDataEvent)
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.IMPORT_TRANSPORT_FILE:
         importTransportData()
-        formDataService.saveCachedDataRows(formData, logger, formDataEvent)
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.SORT_ROWS:
         sortFormDataRows()
@@ -197,7 +197,6 @@ void calc() {
     deleteAllAliased(dataRows)
     // отсортировать/группировать
     dataRows = sort(dataRows)
-    def reportDate = getReportDate()
     // данные предыдущего отчетного периода
     def prevDataRows = getPrevDataRows()
     // список групп кодов классификации для которых надо будет посчитать суммы
@@ -246,7 +245,7 @@ void calc() {
         dataRows.add(lastRowIndex, subTotalRow)
         i++
     }
-    updateIndexes(dataRows)
+    sortFormDataRows(false)
 }
 
 // Логические проверки
@@ -563,11 +562,15 @@ def getBalancePeriod() {
 }
 
 // Сортировка групп и строк
-void sortFormDataRows() {
+void sortFormDataRows(def saveInDB = true) {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
     sortRows(refBookService, logger, dataRows, getSubTotalRows(dataRows), getDataRow(dataRows, 'total'), true)
-    dataRowHelper.saveSort()
+    if (saveInDB) {
+        dataRowHelper.saveSort()
+    } else {
+        updateIndexes(dataRows);
+    }
 }
 
 // Получение подитоговых строк
@@ -759,13 +762,6 @@ String pure(String cell) {
 
 boolean isEmptyCells(def rowCells) {
     return rowCells.length == 1 && rowCells[0] == ''
-}
-
-// обновить индексы строк
-def updateIndexes(def dataRows) {
-    dataRows.eachWithIndex { row, i ->
-        row.setIndex(i + 1)
-    }
 }
 
 /**

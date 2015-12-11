@@ -39,17 +39,17 @@ switch (formDataEvent) {
         break
     case FormDataEvent.AFTER_CREATE:
         refresh()
-        formDataService.saveCachedDataRows(formData, logger, formDataEvent)
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.REFRESH:
         refresh()
-        formDataService.saveCachedDataRows(formData, logger, formDataEvent)
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.CALCULATE:
         checkSourceForm()
         calc()
         logicCheck()
-        formDataService.saveCachedDataRows(formData, logger, formDataEvent)
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.CHECK:
         logicCheck()
@@ -64,7 +64,7 @@ switch (formDataEvent) {
         break
     case FormDataEvent.SAVE:
         updateStylesAndSort()
-        formDataService.saveCachedDataRows(formData, logger, formDataEvent)
+        formDataService.saveCachedDataRows(formData, logger)
         break
 }
 

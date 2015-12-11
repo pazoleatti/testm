@@ -41,7 +41,7 @@ switch (formDataEvent) {
     case FormDataEvent.CALCULATE:
         calc()
         logicCheck()
-        formDataService.saveCachedDataRows(formData, logger)
+        formDataService.saveCachedDataRows(formData, logger, formDataEvent, scriptStatusHolder)
         break
     case FormDataEvent.CHECK:
         logicCheck()
@@ -185,6 +185,8 @@ void calc() {
     }
 
     dataRows.add(calcTotalRow(dataRows))
+
+    sortFormDataRows(false)
 }
 
 def calcSubTotalRows(def dataRows) {
@@ -194,10 +196,11 @@ def calcSubTotalRows(def dataRows) {
     def sum = 0, sum2 = 0
     def rows = dataRows.findAll { it.getAlias() == null }
 
+    if (rows.size() > 0) {
+        code = getKnu(rows[0].code)
+    }
+
     rows.eachWithIndex { row, i ->
-        if (code == null) {
-            code = getKnu(row.code)
-        }
         // если код расходы поменялся то создать новую строку "итого по коду"
         if (code != getKnu(row.code)) {
             totalRows.put(i, getNewRow(code, sum, sum2))
@@ -267,7 +270,7 @@ def calcTotalRow(def dataRows) {
 
 // Получить новую строку подитога
 def getNewRow(def alias, def sum, def sum2) {
-    def newRow = getTotalRow('total' + alias, 'Итого по КНУ ' + alias)
+    def newRow = getTotalRow('total' + alias, 'Итого по КНУ ' + (alias ?: "\"КНУ не задано\""))
     newRow.taxAccountingRuble = sum
     newRow.ruble = sum2
     return newRow
@@ -771,6 +774,7 @@ void importData() {
         allValues.remove(rowValues)
         rowValues.clear()
     }
+    updateIndexes(rows)
 
     // сравнение подитогов
     if (!totalRowFromFileMap.isEmpty()) {
@@ -782,16 +786,15 @@ void importData() {
                     compareTotalValues(totalRow, tmpRow, totalColumns, logger, false)
                 }
                 totalRowFromFileMap.remove(tmpRow.helper)
+            } else {
+                rowWarning(logger, null, String.format(GROUP_WRONG_ITOG, tmpRow.helper.replaceAll("Итого по КНУ ", "")))
             }
         }
         if (!totalRowFromFileMap.isEmpty()) {
             // для этих подитогов из файла нет групп
             totalRowFromFileMap.each { key, totalRows ->
                 totalRows.each { totalRow ->
-                    totalColumns.each { alias ->
-                        def msg = String.format(COMPARE_TOTAL_VALUES, totalRow.getIndex(), getColumnName(totalRow, alias), totalRow[alias], BigDecimal.ZERO)
-                        rowWarning(logger, totalRow, msg)
-                    }
+                    rowWarning(logger, totalRow, String.format(GROUP_WRONG_ITOG_ROW, totalRow.getIndex()))
                 }
             }
         }

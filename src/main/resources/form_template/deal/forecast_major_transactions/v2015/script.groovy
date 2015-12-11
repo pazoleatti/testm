@@ -17,7 +17,7 @@ switch (formDataEvent) {
         break
     case FormDataEvent.AFTER_CREATE:
         create()
-        formDataService.saveCachedDataRows(formData, logger, formDataEvent)
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.CALCULATE:
         logicCheck()

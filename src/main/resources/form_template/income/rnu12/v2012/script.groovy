@@ -159,11 +159,12 @@ def calcSubTotalRows(def dataRows) {
     }
     def rows = dataRows.findAll { it.getAlias() == null }
 
+    if (rows.size() > 0) {
+        code = getKnu(rows[0].opy)
+    }
+
     rows.eachWithIndex { row, i ->
         def knu = getKnu(row.opy)
-        if (code == null) {
-            code = knu
-        }
         // если код расходы поменялся то создать новую строку "итого по коду"
         if (code != knu) {
             totalRows.put(i, getNewRow(code, sums))
@@ -202,7 +203,7 @@ def calcTotalRow(def dataRows) {
 
 // Получить новую строку.
 def getNewRow(def alias, def sums) {
-    def newRow = getTotalRow('total' + alias, 'Итого по КНУ ' + alias)
+    def newRow = getTotalRow('total' + alias, 'Итого по КНУ ' + (alias ?: "\"КНУ не задано\""))
     totalColumns.each {
         newRow.getCell(it).setValue(sums[it], null)
     }
@@ -510,6 +511,7 @@ void importData() {
         allValues.remove(rowValues)
         rowValues.clear()
     }
+    updateIndexes(rows)
 
     // сравнение подитогов
     if (!totalRowFromFileMap.isEmpty()) {
@@ -521,16 +523,15 @@ void importData() {
                     compareTotalValues(totalRow, calcTotalRowTmp, totalColumns, logger, false)
                 }
                 totalRowFromFileMap.remove(calcTotalRowTmp.fix)
+            } else {
+                rowWarning(logger, null, String.format(GROUP_WRONG_ITOG, calcTotalRowTmp.fix.replaceAll("Итого по КНУ ", "")))
             }
         }
         if (!totalRowFromFileMap.isEmpty()) {
             // для этих подитогов из файла нет групп
             totalRowFromFileMap.each { key, totalRows ->
                 totalRows.each { totalRow ->
-                    totalColumns.each { alias ->
-                        def msg = String.format(COMPARE_TOTAL_VALUES, totalRow.getIndex(), getColumnName(totalRow, alias), totalRow[alias], BigDecimal.ZERO)
-                        rowWarning(logger, totalRow, msg)
-                    }
+                    rowWarning(logger, totalRow, String.format(GROUP_WRONG_ITOG_ROW, totalRow.getIndex()))
                 }
             }
         }
