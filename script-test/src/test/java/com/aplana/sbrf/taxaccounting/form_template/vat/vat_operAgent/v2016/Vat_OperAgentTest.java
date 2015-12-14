@@ -1,4 +1,4 @@
-package com.aplana.sbrf.taxaccounting.form_template.vat.vat_operBank.v2015;
+package com.aplana.sbrf.taxaccounting.form_template.vat.vat_operAgent.v2016;
 
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
@@ -8,24 +8,21 @@ import com.aplana.sbrf.taxaccounting.util.ScriptTestBase;
 import com.aplana.sbrf.taxaccounting.util.TestScriptHelper;
 import com.aplana.sbrf.taxaccounting.util.mock.ScriptTestMockHelper;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Arrays;
 import java.util.Date;
 
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.eq;
+import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.when;
 
 /**
- * Разнарядка на безакцептное списание/зачисление по суммам НДС с территориальных банков, Московского банка и подразделений ЦА (по операциям банка).
+ * Разнарядка на безакцептное списание/зачисление по суммам НДС с территориальных банков, Московского банка и подразделений ЦА (по операциям налогового агента).
  * TODO импорт консолидация (когда опишут)
  * @author bkinzyabulatov
  */
-public class Vat_OperBankTest extends ScriptTestBase {
-    private static final int TYPE_ID = 620;
+public class Vat_OperAgentTest extends ScriptTestBase {
+    private static final int TYPE_ID = 621;
     private static final int DEPARTMENT_ID = 1;
     private static final int REPORT_PERIOD_ID = 1;
     private static final int DEPARTMENT_PERIOD_ID = 1;
@@ -47,15 +44,9 @@ public class Vat_OperBankTest extends ScriptTestBase {
         return formData;
     }
 
-    @Before
-    public void mockFormDataService() {
-        DepartmentReportPeriod departmentReportPeriod = new DepartmentReportPeriod();
-        when(testHelper.getDepartmentReportPeriodService().get(anyInt())).thenReturn(departmentReportPeriod);
-    }
-
     @Override
     protected ScriptTestMockHelper getMockHelper() {
-        return getDefaultScriptTestMockHelper(Vat_OperBankTest.class);
+        return getDefaultScriptTestMockHelper(Vat_OperAgentTest.class);
     }
 
     @Test
@@ -82,6 +73,9 @@ public class Vat_OperBankTest extends ScriptTestBase {
     // Консолидация
     @Test
     public void composeTest() { //TODO
+        DepartmentReportPeriod departmentReportPeriod = new DepartmentReportPeriod();
+        when(testHelper.getDepartmentReportPeriodService().get(anyInt())).thenReturn(departmentReportPeriod);
+
         // Назначен один тип формы
         DepartmentFormType departmentFormType = new DepartmentFormType();
         departmentFormType.setKind(KIND);
