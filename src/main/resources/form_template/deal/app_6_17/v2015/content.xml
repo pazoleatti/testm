@@ -6,7 +6,8 @@
     <accruing>false</accruing>
     <updating>false</updating>
     <name>6.17. Купля-продажа иностранной валюты</name>
-    <fullName>6.17. Отчет в отношении доходов и расходов ПАО Сбербанк по Контролируемым сделкам, связанным с операциями по купле-продаже иностранной валюты</fullName>
+    <fullName>6.17. Отчет в отношении доходов и расходов ПАО Сбербанк, связанных с операциями по купле-продаже иностранной валюты</fullName>
+    <header>КС_6-17</header>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>fix</alias>
         <checking>false</checking>

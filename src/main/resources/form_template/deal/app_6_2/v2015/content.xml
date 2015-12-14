@@ -6,8 +6,8 @@
     <accruing>false</accruing>
     <updating>false</updating>
     <name>6.2. Размещение средств на межбанковском рынке</name>
-    <fullName>6.2. Отчет в отношении доходов ПАО Сбербанк по Контролируемым сделкам, связанным с размещением средств (включая драгоценные металлы) на межбанковском рынке</fullName>
-    <header>6.2</header>
+    <fullName>6.2. Отчет в отношении доходов ПАО Сбербанк, связанных с размещением средств (включая драгоценные металлы) на межбанковском рынке</fullName>
+    <header>КС_6-2</header>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>fix</alias>
         <checking>false</checking>

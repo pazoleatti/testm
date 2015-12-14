@@ -96,7 +96,7 @@ def autoFillColumns = ['rowNumber', 'iksr', 'countryName', 'countryCode', 'count
 
 // Проверяемые на пустые значения атрибуты
 @Field
-def nonEmptyColumns = ['name', 'docNumber', 'docDate', 'dealNumber', 'dealDate', 'count', 'sum', 'dealDoneDate']
+def nonEmptyColumns = ['name', 'docNumber', 'docDate', 'dealDate', 'count', 'sum', 'dealDoneDate']
 
 @Field
 def totalColumns = ['sum']
