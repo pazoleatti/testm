@@ -1255,6 +1255,13 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
                 refBookId, uniqueRecordId);
     }
 
+    @Override
+    public int getRecordVersionsCountByRecordId(Long refBookId, Long recordId) {
+        return getJdbcTemplate().queryForInt("select count(*) as cnt from REF_BOOK_RECORD " +
+                        "where REF_BOOK_ID=? and STATUS=" + VersionedObjectStatus.NORMAL.getId() + " and RECORD_ID=?",
+                refBookId, recordId);
+    }
+
     private static final String RECORD_VERSION =
             "select\n" +
                     "  max(version) as version\n" +
@@ -1455,7 +1462,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         List<Map<String, RefBookValue>> records = getJdbcTemplate().query(ps.getQuery().toString(), ps.getParams().toArray(), new RefBookValueMapper(refBookClone));
         PagingResult<Map<String, RefBookValue>> result = new PagingResult<Map<String, RefBookValue>>(records);
         // Получение количества данных в справочнике
-        result.setTotalCount(getRecordVersionsCount(refBookId, recordId));
+        result.setTotalCount(getRecordVersionsCountByRecordId(refBookId, recordId));
         return result;
     }
 
