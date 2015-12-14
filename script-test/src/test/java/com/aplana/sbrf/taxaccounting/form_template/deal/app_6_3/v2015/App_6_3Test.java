@@ -183,12 +183,11 @@ public class App_6_3Test extends ScriptTestBase {
         row.getCell("country").setValue(1L, null);
         row.getCell("city").setValue(null, null);
         row.getCell("settlement").setValue("settlement", null);
-        row.getCell("price").setValue(0.86, null);
-        row.getCell("count").setValue(9, null);
+        row.getCell("price").setValue(3.88, null);
+        row.getCell("count").setValue(2, null);
         row.getCell("cost").setValue(7.77, null);
         row.getCell("dealDoneDate").setValue(sdf.parse("02.01.2014"), null);
-        testHelper.execute(FormDataEvent.CHECK);
-        entries = testHelper.getLogger().getEntries();
+        testHelper.execute(FormDataEvent.CALCULATE);
         i = 0;
         Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
         testHelper.getLogger().clear();
