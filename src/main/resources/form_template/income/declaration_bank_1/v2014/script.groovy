@@ -690,7 +690,7 @@ void generateXML() {
 
     def builder = new MarkupBuilder(xml)
     builder.Файл(
-            ИдФайл : declarationService.generateXmlFileId(newDeclaration ? 9 : 2, declarationData.departmentReportPeriodId, taxOrganCode, declarationData.kpp),
+            ИдФайл : generateXmlFileId(taxOrganCode),
             ВерсПрог : applicationVersion,
             ВерсФорм : formatVersion) {
 
@@ -1907,4 +1907,20 @@ def getDepartmentParamTable(def departmentParamId) {
         departmentParamTable = departmentParamTableList.get(0)
     }
     return departmentParamTable
+}
+
+def generateXmlFileId(String taxOrganCode) {
+    def departmentParam = getDepartmentParam()
+    if (departmentParam) {
+        def date = Calendar.getInstance().getTime()?.format("yyyyMMdd")
+        def fileId = TaxType.INCOME.declarationPrefix + '_' +
+                taxOrganCode + '_' +
+                taxOrganCode + '_' +
+                departmentParam.INN?.value +
+                declarationData.kpp + "_" +
+                date + "_" +
+                UUID.randomUUID().toString().toUpperCase()
+        return fileId
+    }
+    return null
 }
