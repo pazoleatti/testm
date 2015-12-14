@@ -55,7 +55,7 @@ switch (formDataEvent) {
         prevPeriodCheck()
         calc()
         logicCheck()
-        formDataService.saveCachedDataRows(formData, logger)
+        formDataService.saveCachedDataRows(formData, logger, formDataEvent, scriptStatusHolder)
         break
     case FormDataEvent.ADD_ROW:
         def columns = (getBalancePeriod() ? allColumns - ['rowNumber'] : editableColumns)
@@ -79,7 +79,7 @@ switch (formDataEvent) {
         formDataService.consolidationSimple(formData, logger, userInfo)
         calc()
         logicCheck()
-        formDataService.saveCachedDataRows(formData, logger)
+        formDataService.saveCachedDataRows(formData, logger, formDataEvent, scriptStatusHolder)
         break
     case FormDataEvent.IMPORT:
         if (UploadFileName.endsWith(".rnu")) {
@@ -87,11 +87,11 @@ switch (formDataEvent) {
         } else {
             importData()
         }
-        formDataService.saveCachedDataRows(formData, logger)
+        formDataService.saveCachedDataRows(formData, logger, formDataEvent, scriptStatusHolder)
         break
     case FormDataEvent.IMPORT_TRANSPORT_FILE:
         importTransportData()
-        formDataService.saveCachedDataRows(formData, logger)
+        formDataService.saveCachedDataRows(formData, logger, formDataEvent, scriptStatusHolder)
         break
     case FormDataEvent.SORT_ROWS:
         sortFormDataRows()

@@ -76,6 +76,7 @@ public class TestScriptHelper {
     private FormData formData;
     private FormTemplate formTemplate;
     private DataRow<Cell> currentDataRow;
+    private ScriptStatusHolder scriptStatusHolder;
     private final ScriptTestMockHelper mockHelper;
 
     private String importFileName = null;
@@ -233,6 +234,7 @@ public class TestScriptHelper {
         bindings.put("applicationVersion", "test-version");
         bindings.put("userDepartment", userDepartment);
         bindings.put("currentDataRow", currentDataRow);
+        bindings.put("scriptStatusHolder", scriptStatusHolder);
 
         if (formDataEvent == FormDataEvent.IMPORT || formDataEvent == FormDataEvent.IMPORT_TRANSPORT_FILE) {
             bindings.put("ImportInputStream", importFileInputStream);
@@ -406,5 +408,9 @@ public class TestScriptHelper {
 
     public FormData getFormData() {
         return formData;
+    }
+
+    public void setScriptStatusHolder(ScriptStatusHolder scriptStatusHolder) {
+        this.scriptStatusHolder = scriptStatusHolder;
     }
 }
