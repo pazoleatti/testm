@@ -94,8 +94,6 @@ public class SignServiceImplTest {
         }*/
         Logger logger = new Logger();
         signService.checkSign(copyTmp(DATA_FILE, "dataFile", ".data").getAbsolutePath(), 0, logger);
-        for(LogEntry logEntry: logger.getEntries())
-            System.out.println("log "+logEntry.getMessage());
         Assert.assertTrue(signService.checkSign(copyTmp(DATA_FILE, "dataFile", ".data").getAbsolutePath(), 0, new Logger()));
 
     }

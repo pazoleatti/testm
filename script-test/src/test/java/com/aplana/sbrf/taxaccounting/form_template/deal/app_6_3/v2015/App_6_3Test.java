@@ -177,15 +177,15 @@ public class App_6_3Test extends ScriptTestBase {
 
         // для прохождения всех ЛП:
         row.getCell("name").setValue(1L, null);
-        row.getCell("sum").setValue(222L, null);
+        row.getCell("sum").setValue(7.77, null);
         row.getCell("docNumber").setValue("1", null);
         row.getCell("docDate").setValue(sdf.parse("01.01.2014"), null);
         row.getCell("country").setValue(1L, null);
         row.getCell("city").setValue(null, null);
         row.getCell("settlement").setValue("settlement", null);
-        row.getCell("price").setValue(111L, null);
-        row.getCell("count").setValue(2L, null);
-        row.getCell("cost").setValue(222L, null);
+        row.getCell("price").setValue(0.86, null);
+        row.getCell("count").setValue(9, null);
+        row.getCell("cost").setValue(7.77, null);
         row.getCell("dealDoneDate").setValue(sdf.parse("02.01.2014"), null);
         testHelper.execute(FormDataEvent.CHECK);
         entries = testHelper.getLogger().getEntries();

@@ -8,8 +8,6 @@ import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import groovy.transform.Field
 
-import java.math.RoundingMode
-
 /**
  * Предоставление нежилых помещений в аренду
  *
@@ -40,7 +38,7 @@ switch (formDataEvent) {
     case FormDataEvent.CALCULATE:
         calc()
         logicCheck()
-        formDataService.saveCachedDataRows(formData, logger, formDataEvent, scriptStatusHolder)
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.CHECK:
         logicCheck()
@@ -63,15 +61,15 @@ switch (formDataEvent) {
         formDataService.consolidationSimple(formData, logger, userInfo)
         calc()
         logicCheck()
-        formDataService.saveCachedDataRows(formData, logger, formDataEvent, scriptStatusHolder)
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.IMPORT:
         importData()
-        formDataService.saveCachedDataRows(formData, logger, formDataEvent, scriptStatusHolder)
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.IMPORT_TRANSPORT_FILE:
         importTransportData()
-        formDataService.saveCachedDataRows(formData, logger, formDataEvent, scriptStatusHolder)
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.SORT_ROWS:
         sortFormDataRows()
@@ -88,7 +86,7 @@ def refBookCache = [:]
 
 @Field
 def allColumns = ['fix', 'name', 'iksr', 'countryCode', 'sum', 'docNumber', 'docDate', 'country',
-                       'region', 'city', 'settlement', 'count', 'price', 'cost', 'dealDoneDate']
+                  'region', 'city', 'settlement', 'count', 'price', 'cost', 'dealDoneDate']
 // Редактируемые атрибуты
 @Field
 def editableColumns = ['name', 'sum', 'docNumber', 'docDate', 'country',
@@ -103,8 +101,6 @@ def nonEmptyColumns = ['name', 'sum', 'docDate', 'country', 'count', 'price', 'c
 
 @Field
 def totalColumns = ['sum', 'count', 'price', 'cost']
-
-// Дата окончания отчетного периода
 
 // Дата окончания отчетного периода
 @Field
@@ -132,30 +128,6 @@ def getRefBookValue(def long refBookId, def Long recordId) {
     return formDataService.getRefBookValue(refBookId, recordId, refBookCache)
 }
 
-// Получение xml с общими проверками
-def getXML(def String startStr, def String endStr) {
-    def fileName = (UploadFileName ? UploadFileName.toLowerCase() : null)
-    if (fileName == null || fileName == '') {
-        throw new ServiceException('Имя файла не должно быть пустым')
-    }
-    def is = ImportInputStream
-    if (is == null) {
-        throw new ServiceException('Поток данных пуст')
-    }
-    if (!fileName.endsWith('.xls') && !fileName.endsWith('.xlsx') && !fileName.endsWith('.xlsm')) {
-        throw new ServiceException('Выбранный файл не соответствует формату xls/xlsx/xlsm!')
-    }
-    def xmlString = importService.getData(is, fileName, 'windows-1251', startStr, endStr)
-    if (xmlString == null) {
-        throw new ServiceException('Отсутствие значения после обработки потока данных')
-    }
-    def xml = new XmlSlurper().parseText(xmlString)
-    if (xml == null) {
-        throw new ServiceException('Отсутствие значения после обработки потока данных')
-    }
-    return xml
-}
-
 //// Кастомные методы
 
 // Логические проверки
@@ -176,45 +148,45 @@ void logicCheck() {
         checkNonEmptyColumns(row, rowNumber, nonEmptyColumns, logger, true)
 
         // Проверка суммы доходов
-        if (row.sum!=null && !row.sum.toString().isEmpty() && row.sum <= 0) {
+        if (row.sum != null && row.sum <= 0) {
             def income = row.getCell('sum').column.name
-            logger.warn("Строка $rowNumber: Значение графы «$income» должно быть больше «0»!")
+            logger.error("Строка $rowNumber: Значение графы «$income» должно быть больше «0»!")
         }
 
         // Проверка заполнения населенного пункта
-        if ((row.city == null || row.city.toString().isEmpty()) && (row.settlement == null || row.settlement.toString().isEmpty())) {
+        if (row.city == null && row.settlement == null) {
             def settleName = row.getCell('settlement').column.name
-            rowError(logger, row, "Строка $rowNumber: Графа «$settleName» не заполнена! Выполнение расчета невозможно!")
+            logger.error("Строка $rowNumber: Графа «$settleName» не заполнена! Выполнение расчета невозможно!")
         }
 
         // Проверка количества
-        if (row.count!=null && !row.count.toString().isEmpty() && row.count <= 0) {
+        if (row.count != null && row.count <= 0) {
             def countName = row.getCell('count').column.name
-            rowError(logger, row, "Строка $rowNumber: Значение графы «$countName» должно быть больше «0»!")
+            logger.error("Строка $rowNumber: Значение графы «$countName» должно быть больше «0»!")
         }
 
         // Проверка цены
-        if (row.sum != null && !row.sum.toString().isEmpty() && row.count > 0) {
-            if(row.price != (row.sum/row.count)){
+        if (row.sum != null && row.count > 0) {
+            if (row.price != round((BigDecimal) (row.sum / row.count), 2)) {
                 def income = row.getCell('sum').column.name
                 def countName = row.getCell('count').column.name
                 def priceName = row.getCell('price').column.name
-                rowError(logger, row, "Строка $rowNumber: Значение графы  «$priceName», должно быть равно отношению графы «$income» к графе «$countName»! Выполнение расчета невозможно!")
+                logger.error("Строка $rowNumber: Значение графы  «$priceName», должно быть равно отношению графы «$income» к графе «$countName»! Выполнение расчета невозможно!")
             }
         }
 
         // Проверка стоимости по графе 5
-        if (row.sum != null && !row.sum.toString().isEmpty() && row.cost != row.sum) {
+        if (row.sum != null && row.cost != row.sum) {
             def income = row.getCell('sum').column.name
             def costName = row.getCell('cost').column.name
-            rowError(logger, row, "Строка $rowNumber: Значение графы «$costName» должно быть равно значению графы «$income»!")
+            logger.error("Строка $rowNumber: Значение графы «$costName» должно быть равно значению графы «$income»!")
         }
 
         // Корректность даты совершения сделки относительно даты договора
         if (row.dealDoneDate < row.docDate) {
             def dealDoneDateName = row.getCell('dealDoneDate').column.name
             def docDateName = row.getCell('docDate').column.name
-            rowError(logger, row, "Строка $rowNumber: Значение графы «$dealDoneDateName» должно быть не меньше значения графы «$docDateName»!")
+            logger.error("Строка $rowNumber: Значение графы «$dealDoneDateName» должно быть не меньше значения графы «$docDateName»!")
         }
 
         //Проверка года совершения сделки
@@ -264,7 +236,7 @@ void calc() {
 
 def BigDecimal calcNum(def row) {
     if (row.sum != null && row.count != null && row.count != 0) {
-        return ((BigDecimal) row.sum).divide((BigDecimal)  row.count, 2, BigDecimal.ROUND_HALF_UP)
+        return ((BigDecimal) row.sum).divide((BigDecimal) row.count, 2, BigDecimal.ROUND_HALF_UP)
     }
     return null
 }
@@ -317,7 +289,7 @@ void importData() {
 
     def allValues = []      // значения формы
     def headerValues = []   // значения шапки
-    def paramsMap = ['rowOffset' : 0, 'colOffset' : 0]  // мапа с параметрами (отступы сверху и слева)
+    def paramsMap = ['rowOffset': 0, 'colOffset': 0]  // мапа с параметрами (отступы сверху и слева)
 
     checkAndReadFile(ImportInputStream, UploadFileName, allValues, headerValues, TABLE_START_VALUE, TABLE_END_VALUE, HEADER_ROW_COUNT, paramsMap)
 
@@ -397,24 +369,24 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
     checkHeaderSize(headerRows[headerRows.size() - 1].size(), headerRows.size(), colCount, rowCount)
 
     def headerMapping = [
-            ([(headerRows[0][0]) : 'Общая информация']),
-            ([(headerRows[0][5]) : 'Сведения о сделке']),
-            ([(headerRows[1][1]) : getColumnName(tmpRow, 'rowNumber')]),
-            ([(headerRows[1][2]) : getColumnName(tmpRow, 'name')]),
-            ([(headerRows[1][3]) : getColumnName(tmpRow, 'iksr')]),
-            ([(headerRows[1][4]) : getColumnName(tmpRow, 'countryCode')]),
-            ([(headerRows[1][5]) : getColumnName(tmpRow, 'sum')]),
-            ([(headerRows[1][6]) : getColumnName(tmpRow, 'docNumber')]),
-            ([(headerRows[1][7]) : getColumnName(tmpRow, 'docDate')]),
-            ([(headerRows[1][8]) : 'Адрес местонахождения объекта недвижимости']),
+            ([(headerRows[0][0]): 'Общая информация']),
+            ([(headerRows[0][5]): 'Сведения о сделке']),
+            ([(headerRows[1][1]): getColumnName(tmpRow, 'rowNumber')]),
+            ([(headerRows[1][2]): getColumnName(tmpRow, 'name')]),
+            ([(headerRows[1][3]): getColumnName(tmpRow, 'iksr')]),
+            ([(headerRows[1][4]): getColumnName(tmpRow, 'countryCode')]),
+            ([(headerRows[1][5]): getColumnName(tmpRow, 'sum')]),
+            ([(headerRows[1][6]): getColumnName(tmpRow, 'docNumber')]),
+            ([(headerRows[1][7]): getColumnName(tmpRow, 'docDate')]),
+            ([(headerRows[1][8]): 'Адрес местонахождения объекта недвижимости']),
             ([(headerRows[1][12]): getColumnName(tmpRow, 'count')]),
             ([(headerRows[1][13]): getColumnName(tmpRow, 'price')]),
             ([(headerRows[1][14]): getColumnName(tmpRow, 'cost')]),
             ([(headerRows[1][15]): getColumnName(tmpRow, 'dealDoneDate')]),
-            ([(headerRows[2][8]) : getColumnName(tmpRow, 'country')]),
-            ([(headerRows[2][9]) : getColumnName(tmpRow, 'region')]),
+            ([(headerRows[2][8]): getColumnName(tmpRow, 'country')]),
+            ([(headerRows[2][9]): getColumnName(tmpRow, 'region')]),
             ([(headerRows[2][10]): getColumnName(tmpRow, 'city')]),
-            ([(headerRows[2][11] ): getColumnName(tmpRow, 'settlement')])
+            ([(headerRows[2][11]): getColumnName(tmpRow, 'settlement')])
     ]
     (1..15).each {
         headerMapping.add(([(headerRows[3][it]): 'гр. ' + it.toString()]))
@@ -542,6 +514,7 @@ def getNewTotalFromXls(def values, def colOffset, def fileRowIndex, def rowIndex
 
     return newRow
 }
+
 void importTransportData() {
     checkBeforeGetXml(ImportInputStream, UploadFileName)
     if (!UploadFileName.endsWith(".rnu")) {
@@ -661,7 +634,7 @@ def getNewRow(String[] rowCells, def columnCount, def fileRowIndex, def rowIndex
     if (!isTotal) {
         def String iksrName = getColumnName(newRow, 'iksr')
         def nameFromFile = pure(rowCells[2])
-        def recordId = getTcoRecordId(nameFromFile,  pure(rowCells[3]), iksrName, fileRowIndex, 2, getReportPeriodEndDate(), false, logger, refBookFactory, recordCache)
+        def recordId = getTcoRecordId(nameFromFile, pure(rowCells[3]), iksrName, fileRowIndex, 2, getReportPeriodEndDate(), false, logger, refBookFactory, recordCache)
 
         // графа 2
         newRow.name = recordId
