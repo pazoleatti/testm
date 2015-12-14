@@ -1,4 +1,4 @@
-package form_template.vat.vat_operBank.v2015
+package form_template.vat.vat_operBank.v2016
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.FormDataKind

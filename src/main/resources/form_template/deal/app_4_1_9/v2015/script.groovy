@@ -246,28 +246,22 @@ void logicCheck() {
         // 1. Проверка заполнения обязательных полей
         checkNonEmptyColumns(row, row.getIndex(), nonEmptyColumns, logger, true)
 
-        // 2. Отсутствие нулевых значений
-        if (calc16(row) == 0) {
-            logger.error("Строка $rowNum: Объем доходов и расходов по всем сделкам не может быть нулевым!")
-        }
-
-        // 3. Проверка на отсутствие в списке не ВЗЛ ОРН
+        // 2. Проверка на отсутствие в списке не ВЗЛ ОРН
         def isVZL = records520?.find { it?.record_id?.value == row.name }
         if (records520 && !isVZL) {
             def value2 = getRefBookValue(520L, row.name)?.NAME?.value
             logger.error("Строка %s: Организация «%s» не является взаимозависимым лицом с общим режимом налогообложения в данном отчетном периоде!", rowNum, value2)
         }
 
-        // 4. Наличие правила назначения категории
+        // 3. Наличие правила назначения категории
         def tmp = calc20(row)
         if (tmp == null) {
             logger.error("Строка $rowNum: Для ожидаемого объема доходов и расходов не задано правило назначения категории в данном отчетном периоде!")
         }
 
-        // 5. Проверка соответствия категории пороговым значениям
+        // 4. Проверка соответствия категории пороговым значениям
         if (tmp != row.categoryRevised) {
-            def value2 = getRefBookValue(520L, row.name)?.NAME?.value
-            logger.error("Строка %s: Организация «%s» не является взаимозависимым лицом в данном отчетном периоде!", rowNum, value2)
+            logger.error("Строка $rowNum: Для ожидаемого объема доходов и расходов указана неверная категория!")
         }
     }
 }
@@ -284,63 +278,57 @@ void sortFormDataRows(def saveInDB = true) {
     }
 }
 
-// TODO (Ramil Timerbaev) мапа неполная, потому что не все макеты реализованы
-// мапа в которой хранится id формы - список алиасов ссылающихся на справочник "участники ТЦО"
+// TODO (Ramil Timerbaev) список неполный, потому что не все макеты реализованы
+// список id типов источников
 @Field
-def sourceRefbook520AliasMap = [
-        // Журнал взаиморасчетов
-        807 : ['statReportId1', 'statReportId2'],
-
-                        // формы РНУ
-                        // РНУ-101
-                        // РНУ-102
-                        // РНУ-107
-                        // РНУ-108
-                        // РНУ-110
-        808 : ['name'], // РНУ-111
-                        // РНУ-112
-                        // РНУ-114
-                        // РНУ-115
-                        // РНУ-116
-        809 : ['name'], // РНУ-117
-                        // РНУ-120
-                        // РНУ-122
-                        // РНУ-123
-                        // РНУ-171
-
-        // формы приложений 6
-                        // 6.1
-        804 : ['name'], // 6.2
-                        // 6.3
-                        // 6.4
-                        // 6.5
-        806 : ['name'], // 6.6
-        805 : ['name'], // 6.7
-                        // 6.8
-                        // 6.9
-                        // 6.10-1
-                        // 6.10-2
-                        // 6.11
-                        // 6.12
-                        // 6.13
-                        // 6.14
-                        // 6.15
-                        // 6.16
-        811 : ['name'], // 6.17
-                        // 6.18
-                        // 6.19
-                        // 6.20
-                        // 6.21
-                        // 6.22
-                        // 6.23
-                        // 6.24
-                        // 6.25
+def sourceFormTypeIds = [
+        807, // Журнал взаиморасчетов
+             // РНУ-101
+             // РНУ-102
+             // РНУ-107
+             // РНУ-108
+             // РНУ-110
+        808, // РНУ-111
+             // РНУ-112
+             // РНУ-114
+             // РНУ-115
+             // РНУ-116
+        809, // РНУ-117
+             // РНУ-120
+             // РНУ-122
+             // РНУ-123
+             // РНУ-171
+             // 6.1
+        804, // 6.2
+             // 6.3
+             // 6.4
+             // 6.5
+        806, // 6.6
+        805, // 6.7
+             // 6.8
+             // 6.9
+             // 6.10-1
+             // 6.10-2
+             // 6.11
+             // 6.12
+             // 6.13
+             // 6.14
+             // 6.15
+             // 6.16
+        811, // 6.17
+             // 6.18
+             // 6.19
+             // 6.20
+             // 6.21
+             // 6.22
+             // 6.23
+             // 6.24
+             // 6.25
 ]
 
 // Консолидация очень похожа на 4.2, отличие в:
 //  - дополнительные условия при получении данных из справочника "Участники ТЦО"
 //  - дополнительном расчете (графы 17)
-//  - удаление нулевых строк в конце консолидации
 void consolidation() {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
 
@@ -350,8 +338,6 @@ void consolidation() {
     def sourceFormDatasMap = [:]
     // мапа со строками источников (formData - список строк отдельной формы)
     def sourceDataRowsMap = [:]
-    // id типов источников
-    def sourceFormTypeIds = sourceRefbook520AliasMap.keySet().toArray()
 
     departmentFormTypeService.getFormSources(formDataDepartment.id, formData.formType.id, formData.kind,
             getReportPeriodStartDate(), getReportPeriodEndDate()).each {
@@ -386,58 +372,15 @@ void consolidation() {
     // получить значения из справочника "Участники ТЦО"
     def records520 = getRecords520()
     def dataRows = []
-    // найти среди строк источников используемые записи справочника "Участники ТЦО"
-    def useIds = getUseRecord520IsFromSources(sourceAllDataRowsMap)
     records520.each { record520 ->
-        // если запись используется хотя бы в одном источнике то сформироавть для нее строку в приемнике
-        if (record520?.record_id?.value in useIds) {
-            def newRow = getNewRow(record520, sourceAllDataRowsMap, sourceFormDatasMap, sourceDataRowsMap)
-            dataRows.add(newRow)
-        }
+        // для каждой записи сформировать строку в приемнике
+        def newRow = getNewRow(record520, sourceAllDataRowsMap, sourceFormDatasMap, sourceDataRowsMap)
+        dataRows.add(newRow)
     }
-
-    // удалить строки у которых в графе 4..15 все нули
-    def deleteRows = []
-    def checkColumns = ['sum4', 'sum42', 'sum43', 'sum44', 'sum45', 'sum46', 'sum51', 'sum52', 'sum53', 'sum54', 'sum55', 'sum56']
-    dataRows.each { row ->
-        def allZero = true
-        for (def alias : checkColumns) {
-            if (row[alias]) {
-                allZero = false
-                break
-            }
-        }
-        if (allZero) {
-            deleteRows.add(row)
-        }
-    }
-    dataRows.removeAll(deleteRows)
 
     sortRows(refBookService, logger, dataRows, null, null, null)
     updateIndexes(dataRows)
     dataRowHelper.allCached = dataRows
-}
-
-/**
- * Получить список идентификаторов записи справочника "Участники ТЦО" используемых в источниках.
- *
- * @param sourceAllDataRowsMap мапа со всеми строками источников одного типа
- */
-def getUseRecord520IsFromSources(def sourceAllDataRowsMap) {
-    def list = []
-    def formTypeIds = sourceAllDataRowsMap.keySet().toArray()
-    for (def formTypeId : formTypeIds) {
-        def rows = sourceAllDataRowsMap[formTypeId]
-        def aliases = sourceRefbook520AliasMap[formTypeId]
-        for (def row : rows) {
-            for (def alias : aliases) {
-                if (row[alias]) {
-                    list.add(row[alias])
-                }
-            }
-        }
-    }
-    return list.unique()
 }
 
 /**

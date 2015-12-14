@@ -103,7 +103,7 @@ def autoFillColumns = ['rowNumber', 'iksr', 'countryName', 'countryCode', 'deals
 
 // Проверяемые на пустые значения атрибуты
 @Field
-def nonEmptyColumns = ['name', 'docNumber', 'docDate', 'dealNumber', 'dealDate', 'date1', 'date2', 'priceFirstCurrency',
+def nonEmptyColumns = ['name', 'docNumber', 'docDate', 'dealDate', 'date1', 'date2', 'priceFirstCurrency',
                        'currencyCode', 'courseCB', 'priceFirstRub']
 
 @Field
