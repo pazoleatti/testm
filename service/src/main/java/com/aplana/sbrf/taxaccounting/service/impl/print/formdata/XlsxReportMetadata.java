@@ -37,7 +37,7 @@ public final class XlsxReportMetadata {
 	 * Patterns for printing in Exel. "###," shows that we must grouping by 3 characters
 	 */
     public static String getPrecision(int number){
-        StringBuffer str = new StringBuffer("# ##,0");
+        StringBuilder str = new StringBuilder("# ##,0");
         if(number>0) {
             str.append(".");
             for (int i = 0; i < number; i++)
