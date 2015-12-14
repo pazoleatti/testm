@@ -238,6 +238,14 @@ public interface RefBookDao {
     int getRecordVersionsCount(@NotNull Long refBookId, @NotNull Long uniqueRecordId);
 
     /**
+     * Возвращает количество существующих версий для элемента справочника
+     * @param refBookId идентификатор справочника
+     * @param recordId идентификатор группы версий справочника
+     * @return
+     */
+    int getRecordVersionsCountByRecordId(Long refBookId, Long recordId);
+
+    /**
      * Возвращает все версии указанной записи справочника
      * @param refBookId идентификатор справочника
      * @param uniqueRecordId уникальный идентификатор записи, все версии которой будут получены

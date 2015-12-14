@@ -20,7 +20,7 @@ import groovy.transform.Field
 // iksr					(3) -  Идентификационный номер
 // countryName  		(4) -  Страна регистрации
 // transDoneDate        (5) -  Дата совершения операции
-// course 				(6) -  Курс Банка России
+// course 				(6) -  Курс валюты Банка России
 // incomeCode 			(7) -  Код классификации дохода
 // reasonNumber 		(8) -  номер
 // reasonDate   		(9) -  дата

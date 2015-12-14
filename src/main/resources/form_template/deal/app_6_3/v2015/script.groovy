@@ -38,7 +38,7 @@ switch (formDataEvent) {
     case FormDataEvent.CALCULATE:
         calc()
         logicCheck()
-        formDataService.saveCachedDataRows(formData, logger, formDataEvent, scriptStatusHolder)
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.CHECK:
         logicCheck()
@@ -61,15 +61,15 @@ switch (formDataEvent) {
         formDataService.consolidationSimple(formData, logger, userInfo)
         calc()
         logicCheck()
-        formDataService.saveCachedDataRows(formData, logger, formDataEvent, scriptStatusHolder)
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.IMPORT:
         importData()
-        formDataService.saveCachedDataRows(formData, logger, formDataEvent, scriptStatusHolder)
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.IMPORT_TRANSPORT_FILE:
         importTransportData()
-        formDataService.saveCachedDataRows(formData, logger, formDataEvent, scriptStatusHolder)
+        formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.SORT_ROWS:
         sortFormDataRows()
@@ -236,7 +236,7 @@ void calc() {
 
 def BigDecimal calcNum(def row) {
     if (row.sum != null && row.count != null && row.count != 0) {
-        return ((BigDecimal) row.sum).divide((BigDecimal) row.count, 2, BigDecimal.ROUND_HALF_UP)
+        return round(row.sum / row.count, 2)
     }
     return null
 }

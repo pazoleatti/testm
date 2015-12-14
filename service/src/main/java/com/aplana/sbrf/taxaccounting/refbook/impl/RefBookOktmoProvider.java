@@ -142,7 +142,7 @@ public class RefBookOktmoProvider implements RefBookDataProvider {
 
     @Override
     public PagingResult<Map<String, RefBookValue>> getRecordVersionsByRecordId(Long recordId, PagingParams pagingParams, String filter, RefBookAttribute sortAttribute) {
-        throw new UnsupportedOperationException();
+        return dao.getRecordVersionsByRecordId(getTableName(), refBookId, recordId, pagingParams, filter, sortAttribute);
     }
 
     @Override

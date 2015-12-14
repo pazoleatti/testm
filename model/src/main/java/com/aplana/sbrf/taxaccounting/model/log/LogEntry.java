@@ -71,4 +71,14 @@ public class LogEntry implements Serializable {
         result = 31 * result + (message != null ? message.hashCode() : 0);
         return result;
     }
+
+	@Override
+	public String toString() {
+		final StringBuilder sb = new StringBuilder("LogEntry{");
+		sb.append("date=").append(date);
+		sb.append(", level=").append(level);
+		sb.append(", message='").append(message).append('\'');
+		sb.append('}');
+		return sb.toString();
+	}
 }

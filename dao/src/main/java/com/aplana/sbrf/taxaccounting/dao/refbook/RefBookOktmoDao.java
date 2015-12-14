@@ -277,4 +277,15 @@ public interface RefBookOktmoDao {
     List<Pair<Long, Long>> getRecordIdPairs(String tableName, @NotNull Long refBookId, Date version, Boolean needAccurateVersion, String filter);
 
     boolean isRecordsExist(List<Long> uniqueRecordIds);
+
+    /**
+     * Возвращает все версии из указанной группы версий записи справочника
+     * @param refBookId идентификатор справочника
+     * @param recordId идентификатор группы версий записи справочника
+     * @param pagingParams определяет параметры запрашиваемой страницы данных. Могут быть не заданы
+     * @param filter условие фильтрации строк. Может быть не задано
+     * @param sortAttribute сортируемый столбец. Может быть не задан
+     * @return
+     */
+    PagingResult<Map<String,RefBookValue>> getRecordVersionsByRecordId(String tableName, Long refBookId, Long recordId, PagingParams pagingParams, String filter, RefBookAttribute sortAttribute);
 }

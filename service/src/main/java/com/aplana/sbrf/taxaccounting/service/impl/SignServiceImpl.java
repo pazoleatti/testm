@@ -31,7 +31,10 @@ public class SignServiceImpl implements SignService {
     private static final Pattern DLL_PATTERN = Pattern.compile(".+\\.dll");
     private static final String SUCCESS_FLAG = "SUCCESS";
     private static final String TEMPLATE = ClassUtils.classPackageAsResourcePath(SignServiceImpl.class) + "/check-sign.exe";
-    private static final long VALIDATION_TIMEOUT = 1000 * 60 * 10L; //таймаут работы утилиты для проверки ЭЦП
+	/** Таймаут работы утилиты для проверки ЭЦП */
+    private static final long VALIDATION_TIMEOUT = 1000 * 60 * 10L;
+	/** Максимальное количество попыток создания временной директории */
+	private static final int TEMP_DIR_ATTEMPT_MAX_COUNT = 9;
 
 	@Autowired
 	private ConfigurationDao configurationDao;
@@ -245,13 +248,11 @@ public class SignServiceImpl implements SignService {
     private static File createTempDir(String prefix) throws IOException {
         final File sysTempDir = new File(System.getProperty("java.io.tmpdir"));
         File newTempDir;
-        final int maxAttempts = 9;
         int attemptCount = 0;
         do {
             attemptCount++;
-            if(attemptCount > maxAttempts) {
-                throw new IOException(
-                        "Не удалось создать уникальный временный каталог после " + maxAttempts + " попыток.");
+            if(attemptCount > TEMP_DIR_ATTEMPT_MAX_COUNT) {
+                throw new IOException("Не удалось создать уникальный временный каталог после " + TEMP_DIR_ATTEMPT_MAX_COUNT + " попыток.");
             }
             String dirName = prefix + System.nanoTime();
             newTempDir = new File(sysTempDir, dirName);
@@ -259,10 +260,7 @@ public class SignServiceImpl implements SignService {
 
         if (newTempDir.mkdirs()) {
             return newTempDir;
-        } else {
-            throw new IOException(
-                    "Не удалось создать временный каталог с именем " +
-                            newTempDir.getAbsolutePath());
         }
+        throw new IOException("Не удалось создать временный каталог с именем " + newTempDir.getAbsolutePath());
     }
 }
