@@ -230,11 +230,6 @@ public class SignServiceImpl implements SignService {
             return false;
         } finally {
             try {
-                //if (checkSign != null) checkSign.delete();
-            } catch (Exception e) {
-                LOG.error("", e);
-            }
-            try {
                 if (keyTempDir != null) FileUtils.deleteDirectory(keyTempDir);
             } catch (Exception e) {
                 LOG.error("", e);
