@@ -37,7 +37,7 @@ public class NumberBox extends TextBox {
 
     @Override
     protected void updateLabelValue() {
-        String val = (String) ((HasValue) this).getValue();
+        String val = (String) this.getValue();
         if (val != null && !val.isEmpty()) {
             try {
                 setLabelValue(numberFormat.format(new BigDecimal(val)).replace(',', ' '));

@@ -7,8 +7,8 @@ import javax.script.ScriptEngine;
  */
 public class GroovyScriptEngineFactory extends org.codehaus.groovy.jsr223.GroovyScriptEngineFactory {
 
+	@Override
     public ScriptEngine getScriptEngine() {
         return new GroovyScriptEngine();
     }
 }
-
