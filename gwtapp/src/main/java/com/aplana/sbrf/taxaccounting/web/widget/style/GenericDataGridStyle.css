@@ -137,12 +137,14 @@
 /*}*/
 
 .dataGridSelectedRow {
-	background-color: #FFFFCC;
-	border: none;
+    background-color: #FFFFCC;
+    border-top: 1px solid !important;
+    border-color: orange !important;
 }
 
 .dataGridSelectedRowCell {
-	background-color: #FFFFCC;
+    border-top: 1px solid !important;
+    border-color: inherit !important;
 }
 
 /**
@@ -150,5 +152,7 @@
  */
 .dataGridKeyboardSelectedCell {
 	background-color: #E4E4FF;
-	border-color: #373AD7;
+    border-left: 1px solid !important;
+    border-top: 1px solid !important;
+    border-color: #373AD7 !important;
 }
