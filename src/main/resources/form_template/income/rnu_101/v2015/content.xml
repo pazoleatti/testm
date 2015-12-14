@@ -72,7 +72,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>course</alias>
         <checking>false</checking>
-        <name>Курс Банка России</name>
+        <name>Курс валюты Банка России</name>
         <order>7</order>
         <width>5</width>
         <maxLength>19</maxLength>
