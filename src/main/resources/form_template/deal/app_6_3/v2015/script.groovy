@@ -236,7 +236,7 @@ void calc() {
 
 def BigDecimal calcNum(def row) {
     if (row.sum != null && row.count != null && row.count != 0) {
-        return ((BigDecimal) row.sum).divide((BigDecimal) row.count, 2, BigDecimal.ROUND_HALF_UP)
+        return round(row.sum / row.count, 2)
     }
     return null
 }

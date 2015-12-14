@@ -7,7 +7,7 @@
         <cell alias="iksr" colSpan="1" rowSpan="2" value="Идентификационный номер"/>
         <cell alias="countryName" colSpan="1" rowSpan="2" value="Страна регистрации"/>
         <cell alias="transDoneDate" colSpan="1" rowSpan="2" value="Дата совершения операции"/>
-        <cell alias="course" colSpan="1" rowSpan="2" value="Курс Банка России"/>
+        <cell alias="course" colSpan="1" rowSpan="2" value="Курс валюты Банка России"/>
         <cell alias="incomeCode" colSpan="1" rowSpan="2" value="Код классификации дохода"/>
         <cell alias="reasonNumber" colSpan="2" rowSpan="1" value="Основание для совершения операции"/>
         <cell alias="reasonDate" colSpan="1" rowSpan="1" value="Основание для совершения операции"/>
@@ -26,7 +26,7 @@
         <cell alias="iksr" colSpan="1" rowSpan="1" value="Идентификационный номер"/>
         <cell alias="countryName" colSpan="1" rowSpan="1" value="Страна регистрации"/>
         <cell alias="transDoneDate" colSpan="1" rowSpan="1" value="Дата совершения операции"/>
-        <cell alias="course" colSpan="1" rowSpan="1" value="Курс Банка России"/>
+        <cell alias="course" colSpan="1" rowSpan="1" value="Курс валюты Банка России"/>
         <cell alias="incomeCode" colSpan="1" rowSpan="1" value="Код классификации дохода"/>
         <cell alias="reasonNumber" colSpan="1" rowSpan="1" value="номер"/>
         <cell alias="reasonDate" colSpan="1" rowSpan="1" value="дата"/>
