@@ -69,7 +69,6 @@ switch (formDataEvent) {
     case FormDataEvent.MOVE_PREPARED_TO_APPROVED: // Утвердить из "Подготовлена"
         prevPeriodCheck()
         logicCheck()
-        formDataService.saveCachedDataRows(formData, logger, formDataEvent, scriptStatusHolder)
         break
     case FormDataEvent.COMPOSE:
         formDataService.consolidationSimple(formData, logger, userInfo)
