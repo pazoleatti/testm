@@ -155,8 +155,9 @@ public class App_6_5Test extends ScriptTestBase {
 
         // проверка суммы расходов:
         row.getCell("sum").setValue(1, null);
-        row.getCell("price").setValue(1, null);
-        row.getCell("cost").setValue(1, null);
+        row.getCell("price").setValue(7.77, null);
+        row.getCell("cost").setValue(0.86, null);
+        row.getCell("count").setValue(9, null);
         i = 0;
         testHelper.execute(FormDataEvent.CALCULATE);
         testHelper.execute(FormDataEvent.CHECK);

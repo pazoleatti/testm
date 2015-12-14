@@ -194,14 +194,14 @@ void logicCheck() {
         // 7. Проверка цены для ед. измерения «штуки»
         if (row.price != null && okei == '796' && row.count > 0 && row.count.doubleValue() % 1 == 0) {
             // 7.1
-            if (row.incomeSum && !row.outcomeSum && row.price != row.incomeSum / row.count) {
+            if (row.incomeSum && !row.outcomeSum && row.price != round((BigDecimal) (row.incomeSum / row.count), 2)) {
                 def msg1 = row.getCell('price').column.name
                 def msg2 = row.getCell('incomeSum').column.name
                 def msg3 = row.getCell('count').column.name
                 logger.error("Строка $rowNum: Значение графы «$msg1» должно быть равно отношению значений граф «$msg2» и «$msg3»!")
             }
             // 7.2
-            else if (!row.incomeSum && row.outcomeSum && row.price != row.outcomeSum / row.count) {
+            else if (!row.incomeSum && row.outcomeSum && row.price != round((BigDecimal) (row.outcomeSum / row.count), 2)) {
                 def msg1 = row.getCell('price').column.name
                 def msg2 = row.getCell('outcomeSum').column.name
                 def msg3 = row.getCell('count').column.name

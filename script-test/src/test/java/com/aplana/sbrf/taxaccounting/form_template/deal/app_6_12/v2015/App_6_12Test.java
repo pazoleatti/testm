@@ -198,7 +198,9 @@ public class App_6_12Test extends ScriptTestBase {
 
 
         // для успешного прохождения всех ЛП:
-        row.getCell("price").setValue(1, null);
+        row.getCell("count").setValue(9, null);
+        row.getCell("price").setValue(0.86, null);
+        row.getCell("incomeSum").setValue(7.77, null);
         i = 0;
         testHelper.execute(FormDataEvent.CALCULATE);
         testHelper.execute(FormDataEvent.CHECK);
