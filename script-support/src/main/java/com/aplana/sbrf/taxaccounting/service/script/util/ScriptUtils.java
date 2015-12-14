@@ -2142,11 +2142,12 @@ public final class ScriptUtils {
                                 "в которой атрибут «Полное наименование юридического лица с указанием ОПФ» = «%s», атрибут «%s» = «%s». %s",
                         fileRowIndex, getXLSColumnName(colIndex), isVzl ? "ВЗЛ/РОЗ" : "юридическом лице", record.get("NAME").getStringValue(), refBookAttributeName, iksr, msg);
             }
-            logger.warn(TCO_END_MESSAGE, isVzl ? "ВЗЛ/РОЗ" : "юридическом лице", iksrName);
+
             recordCache.get(ref_id).put(filter, record.get(RefBook.RECORD_ID_ALIAS).getNumberValue());
             return (Long) recordCache.get(ref_id).get(filter);
         } else {
             SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd.MM.yyyy");
+            if (records.isEmpty()) {
                 // 6
                 if (nameFromFile == null || nameFromFile.isEmpty()) {
                     nameFromFile = "наименование " + (isVzl ? "ВЗЛ/РОЗ" : "юридического лица") + " в файле не заполнено";
@@ -2155,6 +2156,44 @@ public final class ScriptUtils {
                 logger.warn("Строка %s , столбец %s: %s в справочнике «Участники ТЦО» не найдено значение «%s» (%s), актуальное на дату «%s»!",
                         fileRowIndex, getXLSColumnName(colIndex), isVzl ? "На форме не заполнены графы с общей информацией о ВЗЛ/РОЗ, так как" : ("Для заполнения графы «" + iksrName + "» формы"), iksr, nameFromFile, simpleDateFormat.format(endDate));
                 logger.warn(TCO_END_MESSAGE, isVzl ? "ВЗЛ/РОЗ" : "юридическом лице", iksrName);
+            } else {
+                // 7
+                PagingResult<Map<String, RefBookValue>> recordsByName = null;
+                if (nameFromFile != null && !nameFromFile.isEmpty()) {
+                    recordsByName = provider.getRecords(endDate, null, "LOWER(NAME) = LOWER('" + nameFromFile + "') and " + filter, null);
+                }
+                if (recordsByName != null && recordsByName.size() == 1) {
+                    recordCache.get(ref_id).put(filter, recordsByName.get(0).get(RefBook.RECORD_ID_ALIAS).getNumberValue());
+                    return (Long) recordCache.get(ref_id).get(filter);
+                } else {
+                    if (nameFromFile == null || nameFromFile.isEmpty()) {
+                        nameFromFile = "наименование " + (isVzl ? "ВЗЛ/РОЗ" : "юридического лица") + " в файле не заполнено";
+                    }
+                    // сообщение 2
+                    logger.warn("Строка %d , столбец %s: Для заполнения %s в справочнике «Участники ТЦО» найдено несколько записей со значением «%s» (%s), актуальным на дату «%s»! %s первой найденной записью справочника:",
+                            fileRowIndex, getXLSColumnName(colIndex),
+                            isVzl ? "на форме граф с общей информацией о ВЗЛ/РОЗ" : ("графы «" + iksrName + "» формы"), iksr, nameFromFile, simpleDateFormat.format(endDate),
+                            isVzl ? "На форме графы с общей информацией о ВЗЛ/РОЗ заполнены данными" : ("Графа «" + iksrName + "» формы заполнена"));
+                    Map<String, RefBookValue> record = null;
+                    for (Map<String, RefBookValue> item : records) {
+                        if (item == null) {
+                            continue;
+                        }
+                        String refBookAttributeName = "";
+                        for (String alias : aliases) {
+                            if (item.get(alias) != null && iksr.equals(item.get(alias).getStringValue())) {
+                                refBookAttributeName = refBook.getAttribute(alias).getName();
+                                record = item;
+                                break;
+                            }
+                        }
+                        // сообщение 3
+                        logger.warn("Атрибут «Полное наименование юридического лица с указанием ОПФ» = «%s», атрибут «%s» = «%s»", item.get("NAME").getStringValue(), refBookAttributeName, iksr);
+                    }
+                    logger.warn(TCO_END_MESSAGE, isVzl ? "ВЗЛ/РОЗ" : "юридическом лице", iksrName);
+                    return (record != null) ? (Long) record.get(RefBook.RECORD_ID_ALIAS).getNumberValue() : null;
+                }
+            }
         }
         return null;
     }
