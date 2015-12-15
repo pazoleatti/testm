@@ -1,4 +1,4 @@
-package com.aplana.sbrf.taxaccounting.form_template.income.rnu_102.v2015;
+package com.aplana.sbrf.taxaccounting.form_template.income.rnu_107.v2015;
 
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
@@ -26,10 +26,10 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 /**
- * РНУ 102
+ * РНУ 107
  */
-public class Rnu_102Test extends ScriptTestBase {
-    private static final int TYPE_ID = 820;
+public class Rnu_107Test extends ScriptTestBase {
+    private static final int TYPE_ID = 821;
     private static final int DEPARTMENT_ID = 1;
     private static final int REPORT_PERIOD_ID = 1;
     private static final int DEPARTMENT_PERIOD_ID = 1;
@@ -54,7 +54,7 @@ public class Rnu_102Test extends ScriptTestBase {
 
     @Override
     protected ScriptTestMockHelper getMockHelper() {
-        return getDefaultScriptTestMockHelper(Rnu_102Test.class);
+        return getDefaultScriptTestMockHelper(Rnu_107Test.class);
     }
 
     @Before
@@ -244,8 +244,8 @@ public class Rnu_102Test extends ScriptTestBase {
     // Проверить загруженные данные
     void checkLoadData(List<DataRow<Cell>> dataRows) {
         Assert.assertEquals(1L, dataRows.get(0).getCell("name").getNumericValue().longValue());
-        Assert.assertEquals(1L, dataRows.get(0).getCell("course").getNumericValue().longValue());
-        Assert.assertEquals(1L, dataRows.get(0).getCell("count").getNumericValue().longValue());
+        Assert.assertEquals(1L, dataRows.get(0).getCell("sum1").getNumericValue().longValue());
+        Assert.assertEquals(1L, dataRows.get(0).getCell("sum2").getNumericValue().longValue());
 
     }
 
