@@ -138,13 +138,12 @@
 
 .dataGridSelectedRow {
     background-color: #FFFFCC;
-    border-top: 1px solid !important;
-    border-color: orange !important;
+    background-image: url('resources/img/stripe.ico');
 }
 
 .dataGridSelectedRowCell {
-    border-top: 1px solid !important;
-    border-color: inherit !important;
+    background-color: #FFFFCC;
+    background-image: url('resources/img/stripe.ico');
 }
 
 /**
@@ -152,7 +151,4 @@
  */
 .dataGridKeyboardSelectedCell {
 	background-color: #E4E4FF;
-    border-left: 1px solid !important;
-    border-top: 1px solid !important;
-    border-color: #373AD7 !important;
 }
