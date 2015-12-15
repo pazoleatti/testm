@@ -125,11 +125,11 @@
 }
 
 .dataGridKeyboardSelectedRow {
-	background-color: #FFFFCC;
+    background-image: url('resources/img/stripe.png');
 }
 
 .dataGridKeyboardSelectedRowCell {
-	background-color: #FFFFCC;
+    background-image: url('resources/img/stripe.png');
 }
 
 /*.dataGridKeyboardSelectedRowCell .order {*/
@@ -137,18 +137,17 @@
 /*}*/
 
 .dataGridSelectedRow {
-    background-color: #FFFFCC;
-    background-image: url('resources/img/stripe.ico');
+    background-image: url('resources/img/stripe.png');
 }
 
 .dataGridSelectedRowCell {
-    background-color: #FFFFCC;
-    background-image: url('resources/img/stripe.ico');
+    background-image: url('resources/img/stripe.png');
 }
 
 /**
  * The keyboard selected cell is visible over selection.
  */
 .dataGridKeyboardSelectedCell {
-	background-color: #E4E4FF;
+    background-color: rgba(228, 228, 255, 0.6);
+    background-image: none;
 }

@@ -22,7 +22,7 @@ import java.util.*;
 public class CustomTableBuilder<T> extends AbstractCellTableBuilder<T> {
 
 	public static final String TD = "td";
-	private static final String STRIPE_ICON_PROPERTY = "url(resources/img/stripe.ico)";
+	private static final String STRIPE_ICON_PROPERTY = "url(resources/img/stripe.png)";
 
 	private final String evenRowStyle;
 	private final String oddRowStyle;
