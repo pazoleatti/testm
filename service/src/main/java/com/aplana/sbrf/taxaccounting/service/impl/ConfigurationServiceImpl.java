@@ -253,9 +253,11 @@ public class ConfigurationServiceImpl implements ConfigurationService {
                             FileWrapper keyResourceFolder = ResourceUtils.getSharedResource(value, false);
                             if (keyResourceFolder.isFile()) {
                                 isFolder = false;
-                            } else {
+                            } else if (keyResourceFolder.isDirectory()) {
                                 isFolder = true;
                                 value = value + "/";
+                            } else {
+                                isFolder = false;
                             }
                         } else if (isFolder) {
                             value = value + "/";

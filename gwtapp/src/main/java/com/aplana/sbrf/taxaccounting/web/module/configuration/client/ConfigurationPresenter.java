@@ -267,9 +267,9 @@ public class ConfigurationPresenter extends Presenter<ConfigurationPresenter.MyV
             commonMap.get(param).add(value);
         }
         for (Map.Entry<ConfigurationParam, List<String>> entry : commonMap.entrySet()) {
-            Map<Integer, List<String>> departmentMap = new HashMap<Integer, List<String>>();
-            departmentMap.put(0, entry.getValue());
-            model.put(entry.getKey(), departmentMap);
+            for (String value: entry.getValue()) {
+                model.setFullStringValue(entry.getKey(), 0, value);
+            }
         }
 
         // Параметры загрузки НФ
