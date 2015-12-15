@@ -125,19 +125,17 @@ public class ConfigurationPresenter extends Presenter<ConfigurationPresenter.MyV
                 continue;
             }
 
-            List<String> list = model.get(key, 0);
-            if (list == null) {
+            String value = model.getFullStringValue(key, 0);
+            if (value == null || value.isEmpty()) {
                 continue;
             }
 
-            for (String value : list) {
-                DataRow<Cell> dataRow = createDataRow(ConfigurationParamGroup.COMMON);
-                // Значения
-                dataRow.getCell(getView().getParamColumn().getAlias()).setNumericValue(BigDecimal.valueOf(key.ordinal()));
-                dataRow.getCell(getView().getParamColumn().getAlias()).setRefBookDereference(key.getCaption());
-                dataRow.getCell(getView().getValueColumn().getAlias()).setStringValue(value);
-                rowsData.add(dataRow);
-            }
+            DataRow<Cell> dataRow = createDataRow(ConfigurationParamGroup.COMMON);
+            // Значения
+            dataRow.getCell(getView().getParamColumn().getAlias()).setNumericValue(BigDecimal.valueOf(key.ordinal()));
+            dataRow.getCell(getView().getParamColumn().getAlias()).setRefBookDereference(key.getCaption());
+            dataRow.getCell(getView().getValueColumn().getAlias()).setStringValue(value);
+            rowsData.add(dataRow);
         }
         return rowsData;
     }
@@ -269,9 +267,9 @@ public class ConfigurationPresenter extends Presenter<ConfigurationPresenter.MyV
             commonMap.get(param).add(value);
         }
         for (Map.Entry<ConfigurationParam, List<String>> entry : commonMap.entrySet()) {
-            Map<Integer, List<String>> departmentMap = new HashMap<Integer, List<String>>();
-            departmentMap.put(0, entry.getValue());
-            model.put(entry.getKey(), departmentMap);
+            for (String value: entry.getValue()) {
+                model.setFullStringValue(entry.getKey(), 0, value);
+            }
         }
 
         // Параметры загрузки НФ
