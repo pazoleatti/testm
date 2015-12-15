@@ -41,14 +41,14 @@ create table form_type (
   name     varchar2(1000) not null,
   tax_type char(1) not null,
   status number(1) default 0 not null,
-  code varchar2(600),
+  code varchar2(9 char),
   is_ifrs number(1) default 0 not null,
   ifrs_name varchar2(200)
 );
 comment on table form_type is 'Типы налоговых форм (названия)';
 comment on column form_type.id is 'Идентификатор';
 comment on column form_type.name is 'Наименование';
-comment on column form_type.tax_type is 'Вид налога (I-на прибыль, P-на имущество, T-транспортный, V-НДС, D-ТЦО)';
+comment on column form_type.tax_type is 'Вид налога';
 comment on column form_type.status is 'Статус версии (0 - действующая версия; -1 - удаленная версия, 1 - черновик версии, 2 - фиктивная версия)';
 comment on column form_type.code is 'Номер формы';
 comment on column form_type.is_ifrs is 'Отчетность для МСФО" (0 - не отчетность МСФО, 1 - отчетность МСФО)';
@@ -63,7 +63,7 @@ create table tax_period (
 );
 comment on table tax_period is 'Налоговые периоды';
 comment on column tax_period.id is 'Идентификатор (первичный ключ)';
-comment on column tax_period.tax_type is 'Вид налога (I-на прибыль, P-на имущество, T-транспортный, V-НДС, D-ТЦО)';
+comment on column tax_period.tax_type is 'Вид налога';
 comment on column tax_period.year is 'Год';
 
 create sequence seq_tax_period start with 10000;
@@ -81,7 +81,7 @@ create table form_template (
   status number(1) default 0 not null,
   monthly number(1) default 0 not null,
   header varchar2(1000),
-  comparative number(1),
+  comparative number(1) DEFAULT 0,
   accruing number(1) default 0,
   updating number(1) default 0
 );
@@ -360,14 +360,14 @@ create sequence seq_income_102 start with 100;
 create table declaration_type (
   id       number(9) not null,
   tax_type    char(1) not null,
-  name      varchar2(80) not null,
+  name      varchar2(1000) not null,
   status number(1) default 0 not null,
   is_ifrs number(1) default 0 not null,
   ifrs_name varchar2(200)
 );
 comment on table declaration_type is ' Виды деклараций';
 comment on column declaration_type.id is 'Идентификатор (первичный ключ)';
-comment on column declaration_type.tax_type is 'Вид налога (I-на прибыль, P-на имущество, T-транспортный, V-НДС, D-ТЦО)';
+comment on column declaration_type.tax_type is 'Вид налога';
 comment on column declaration_type.name is 'Наименование';
 comment on column declaration_type.status is 'Статус версии (-1 -удаленная версия, 0 -действующая версия, 1 - черновик версии, 2 - фиктивная версия)';
 comment on column declaration_type.is_ifrs is 'Отчетность для МСФО" (0 - не отчетность МСФО, 1 - отчетность МСФО)';
@@ -622,7 +622,7 @@ comment on column log_system.ip is 'IP-адрес пользователя';
 comment on column log_system.event_id is 'Код события (1 - Создать,2 - Удалить,3 - Рассчитать,4 - Обобщить,5 - Проверить,6 - Сохранить,7 - Импорт данных,101 - Утвердить,102 - Вернуть из \Утверждена\ в \Создана\,103 - Принять из \Утверждена\,104 - Вернуть из \Принята\ в \Утверждена\,105 - Принять из \Создана\,106 - Вернуть из \Принята\ в \Создана\,107 - Подготовить,108 - Вернуть из \Подготовлена\ в \Создана\,109 - Принять из \Подготовлена\,110 - Вернуть из \Принята\ в \Подготовлена\,203 - После принять из \Утверждена\,204 - После вернуть из \Принята\ в \Утверждена\,205 - После принять из \Создана\,206 - После вернуть из \Принята\ в \Создана\,207 - После принять из \"Подготовлена\,301 - Добавить строку,303 - Удалить строку,302 - Загрузка)';
 comment on column log_system.user_login is 'Логин пользователя';
 comment on column log_system.roles is 'Список ролей пользователя';
-comment on column log_system.department_name is 'Наименование подразделения, к которому относится событие';
+comment on column log_system.department_name is 'Наименование подразделения НФ\декларации';
 comment on column log_system.report_period_name is 'Наименование отчетного периода';
 comment on column log_system.form_kind_id is 'Код типа налоговой формы (1,2,3,4,5)';
 comment on column log_system.note is 'Текст сообщения';
@@ -780,7 +780,7 @@ comment on column department_type.name is 'Наименование типа';
 create table async_task_type
 (
 id number(18) not null,
-name varchar2(100) not null,
+name varchar2(300) not null,
 handler_jndi varchar2(500) not null,
 short_queue_limit number(18),
 task_limit number(18),
@@ -977,6 +977,14 @@ g number(3) not null,
 b number(3) not null, 
 hex varchar2(7) not null
 );
+
+comment on table color is 'Справочник цветов';
+comment on column color.id is 'Идентификатор записи';
+comment on column color.name is 'Наименование цвета';
+comment on column color.r is 'R';
+comment on column color.g is 'G';
+comment on column color.b is 'B';
+comment on column color.hex is 'Hex';
 --------------------------------------------------------------------------------------------------------
 create table department_form_type_performer
 (

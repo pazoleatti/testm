@@ -19,8 +19,6 @@ alter table tax_period add constraint tax_period_uniq_taxtype_year unique (tax_t
 
 alter table form_template add constraint form_template_pk primary key (id);
 alter table form_template add constraint form_template_fk_type_id foreign key (type_id) references form_type(id);
---ограничение не работает, в таком виде оно бесполезно
---alter table form_template add constraint form_template_uniq_version unique(type_id, version);
 alter table form_template add constraint form_template_chk_fixed_rows check(fixed_rows in (0, 1));
 alter table form_template add constraint form_template_check_status check (status in (-1, 0, 1, 2));
 alter table form_template add constraint form_template_chk_monthly check (monthly in (0, 1));
@@ -76,7 +74,10 @@ alter table ref_book add constraint ref_book_fk_region foreign key (region_attri
 alter table ref_book_record add constraint ref_book_record_pk primary key (id);
 alter table ref_book_record add constraint ref_book_record_chk_status check (status in (0, -1, 1 , 2));
 alter table ref_book_record add constraint ref_book_record_fk_ref_book_id foreign key (ref_book_id) references ref_book(id);
-create unique index i_ref_book_record_refbookid on ref_book_record(ref_book_id, record_id, version);
+--create unique index i_ref_book_record_refbookid on ref_book_record (
+--       case when status <> -1 then ref_book_id else null end, 
+--       case when status <> -1 then record_id else null end, 
+--       case when status <> -1 then version else null end);
 
 alter table ref_book_value add constraint ref_book_value_pk primary key (record_id, attribute_id);
 alter table ref_book_value add constraint ref_book_value_fk_record_id foreign key (record_id) references ref_book_record(id) on delete cascade;

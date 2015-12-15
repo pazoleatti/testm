@@ -107,4 +107,7 @@ drop sequence seq_log_query_session;
 
 drop function blob_to_clob;
 drop procedure create_form_data_nnn;
-drop procedure create_form_data_nnn_archive;
+drop procedure delete_form_template;
+drop procedure rebuild_form_data_ref_book;
+drop package body form_data_nnn;
+drop package form_data_nnn;
