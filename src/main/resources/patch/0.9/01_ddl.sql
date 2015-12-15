@@ -7,6 +7,9 @@ comment on column color.g is 'G';
 comment on column color.b is 'B';
 comment on column color.hex is 'Hex';
 
+--Удаление ненужных объектов
+drop sequence seq_data_row;
+drop procedure create_form_data_nnn_archive;
 ---------------------------------------------------------------------------------------------------
 
 --http://jira.aplana.com/browse/SBRFACCTAX-13698: Отключить констрейнт ЖА->SEC_USER
