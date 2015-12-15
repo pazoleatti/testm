@@ -978,3 +978,13 @@ b number(3) not null,
 hex varchar2(7) not null
 );
 --------------------------------------------------------------------------------------------------------
+create table department_form_type_performer
+(
+  department_form_type_id number(9) not null,
+  performer_dep_id number(9) not null
+);
+
+comment on table department_form_type_performer is 'Назначения нескольких исполнителей для связки НФ-подразделение';
+comment on column department_form_type_performer.department_form_type_id is 'Идентификатор связи подразделения с формой';
+comment on column department_form_type_performer.performer_dep_id is 'Исполнитель'; 
+--------------------------------------------------------------------------------------------------------

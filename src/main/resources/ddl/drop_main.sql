@@ -32,6 +32,7 @@ drop table sec_user;
 drop table form_data_source;
 drop table declaration_source;
 drop sequence seq_department_form_type;
+drop table department_form_type_performer;
 drop table department_form_type;
 --drop table data_cell;
 --drop sequence seq_data_row;
@@ -45,7 +46,7 @@ drop table declaration_data_consolidation;
 drop table form_data_ref_book;
 
 begin
- for x in (select * from user_tables where table_name like 'FORM_DATA_%') loop
+ for x in (select * from user_tables where regexp_like (table_name, '^FORM_DATA_[0-9]+$')) loop
      execute immediate 'DROP TABLE '||x.table_name;     
  end loop;
 end;

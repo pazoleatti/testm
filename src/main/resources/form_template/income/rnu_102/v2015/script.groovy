@@ -1,4 +1,4 @@
-package form_template.income.rnu_101.v2015
+package form_template.income.rnu_102.v2015
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
@@ -91,7 +91,7 @@ def editableColumns = ['name', 'transDoneDate', 'course', 'outcomeCode','reasonN
 
 // Автозаполняемые атрибуты
 @Field
-def autoFillColumns = ['iksr', 'countryName', 'sum3']
+def autoFillColumns = ['iksr', 'countryName', 'sum2', 'sum3']
 
 // Проверяемые на пустые значения атрибуты
 @Field
@@ -301,7 +301,7 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
 
     def int colIndex = 2
 
-    def recordId = getTcoRecordId(nameFromFile, values[4], iksrName, fileRowIndex, colIndex, getReportPeriodEndDate(), true, logger, refBookFactory, recordCache)
+    def recordId = getTcoRecordId(nameFromFile, values[3], iksrName, fileRowIndex, colIndex, getReportPeriodEndDate(), true, logger, refBookFactory, recordCache)
     def map = getRefBookValue(520, recordId)
 
     // графа 2
