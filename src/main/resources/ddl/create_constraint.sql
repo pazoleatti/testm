@@ -183,6 +183,10 @@ alter table department_form_type add constraint dept_form_type_fk_kind foreign k
 alter table department_form_type add constraint dept_form_type_pk primary key (id);
 alter table department_form_type add constraint dept_form_type_uniq_form unique (department_id, form_type_id, kind);
 
+alter table department_form_type_performer add constraint department_form_type_perf_pk primary key (department_form_type_id, performer_dep_id);
+alter table department_form_type_performer add constraint dept_form_type_perf_fk_perf foreign key (performer_dep_id) references department (id);
+alter table department_form_type_performer add constraint dept_form_type_perf_fk_id foreign key (department_form_type_id) references department_form_type (id) on delete cascade; 
+
 alter table declaration_source add constraint declaration_source_pk primary key (department_declaration_type_id,src_department_form_type_id, period_start);
 alter table declaration_source add constraint decl_source_fk_dept_decltype foreign key (department_declaration_type_id) references department_declaration_type(id) on delete cascade;
 alter table declaration_source add constraint decl_source_fk_dept_formtype foreign key (src_department_form_type_id) references department_form_type (id) on delete cascade;
