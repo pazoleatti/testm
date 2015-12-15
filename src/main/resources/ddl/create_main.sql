@@ -41,7 +41,7 @@ create table form_type (
   name     varchar2(1000) not null,
   tax_type char(1) not null,
   status number(1) default 0 not null,
-  code varchar2(600),
+  code varchar2(9 char),
   is_ifrs number(1) default 0 not null,
   ifrs_name varchar2(200)
 );
