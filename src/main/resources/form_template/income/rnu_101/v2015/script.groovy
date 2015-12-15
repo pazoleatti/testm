@@ -139,11 +139,11 @@ void logicCheck() {
 void calc() {
 }
 
-def calcTotalRow(def dataRows) {
+def calcTotalRow(def dataRows, def name) {
     def totalRow = (formDataEvent in [FormDataEvent.IMPORT, FormDataEvent.IMPORT_TRANSPORT_FILE]) ? formData.createStoreMessagingDataRow() : formData.createDataRow()
     totalRow.setAlias('total')
-    totalRow.fix = 'Итого'
-    totalRow.getCell('fix').colSpan = 3
+    totalRow.fix = name
+    totalRow.getCell('fix').colSpan = 2
     allColumns.each {
         totalRow.getCell(it).setStyleAlias('Контрольные суммы')
     }
@@ -196,8 +196,16 @@ void importData() {
             break
         }
         rowIndex++
+
         // Пропуск итоговых строк
         if (rowValues[INDEX_FOR_SKIP] == "Итого") {
+            totalRowFromFile = getNewTotalFromXls(rowValues, colOffset, fileRowIndex, rowIndex)
+
+            allValues.remove(rowValues)
+            rowValues.clear()
+            continue
+        }
+        if (rowValues[INDEX_FOR_SKIP] == "Всего") {
             totalRowFromFile = getNewTotalFromXls(rowValues, colOffset, fileRowIndex, rowIndex)
 
             allValues.remove(rowValues)
@@ -213,11 +221,17 @@ void importData() {
     }
 
     // сравнение итогов
-    def totalRow = calcTotalRow(rows)
-    rows.add(totalRow)
+    def totalRow1 = calcTotalRow(rows, 'Итого')
+    rows.add(totalRow1)
     updateIndexes(rows)
     if (totalRowFromFile) {
-        compareSimpleTotalValues(totalRow, totalRowFromFile, rows, totalColumns, formData, logger, false)
+        compareSimpleTotalValues(totalRow1, totalRowFromFile, rows, totalColumns, formData, logger, false)
+    }
+    def totalRow2 = calcTotalRow(rows, 'Всего')
+    rows.add(totalRow2)
+    updateIndexes(rows)
+    if (totalRowFromFile) {
+        compareSimpleTotalValues(totalRow2, totalRowFromFile, rows, totalColumns, formData, logger, false)
     }
 
     showMessages(rows, logger)
