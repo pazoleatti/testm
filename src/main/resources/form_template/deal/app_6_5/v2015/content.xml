@@ -3,7 +3,6 @@
     <fixedRows>false</fixedRows>
     <name>6.5. Приобретение услуг по техническому обслуживанию нежилых помещений</name>
     <fullName>6.5. Отчет в отношении расходов ПАО Сбербанк, связанных с приобретением услуг по предоставлению нежилых помещений в аренду</fullName>
-    <code>КС_6-5</code>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>fix</alias>
         <checking>false</checking>

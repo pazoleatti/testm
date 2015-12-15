@@ -3,7 +3,6 @@
     <fixedRows>false</fixedRows>
     <name>6.4. Оказание банковских услуг</name>
     <fullName>6.4. Отчет в отношении доходов ПАО Сбербанк, связанных с оказанием банковских услуг</fullName>
-    <code>КС_6-4</code>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>fix</alias>
         <checking>false</checking>

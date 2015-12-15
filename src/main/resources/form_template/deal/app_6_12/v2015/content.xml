@@ -3,7 +3,6 @@
     <fixedRows>false</fixedRows>
     <name>6.12. Приобретение и реализация акций и долей в уставном капитале (участие)</name>
     <fullName>6.12. Отчет в отношении доходов и расходов ПАО Сбербанк, связанных с приобретением и реализацией акций и долей в уставном капитале (участие)</fullName>
-    <code>КС_6-12</code>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>fix</alias>
         <checking>false</checking>

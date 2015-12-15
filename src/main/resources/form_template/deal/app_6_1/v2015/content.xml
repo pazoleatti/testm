@@ -3,7 +3,6 @@
     <fixedRows>false</fixedRows>
     <name>6.1. Предоставление корпоративных кредитов</name>
     <fullName>6.1. Отчет в отношении доходов ПАО Сбербанк, связанных с предоставлением корпоративных кредитов</fullName>
-    <code>КС_6-1</code>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>fix</alias>
         <checking>false</checking>

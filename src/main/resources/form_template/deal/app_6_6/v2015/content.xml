@@ -7,7 +7,6 @@
     <updating>false</updating>
     <name>6.6. Заключение сделок РЕПО</name>
     <fullName>6.6. Отчет в отношении доходов и расходов ПАО Сбербанк, связанных с заключением сделок РЕПО</fullName>
-    <header>КС_6-6</header>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>fix</alias>
         <checking>false</checking>

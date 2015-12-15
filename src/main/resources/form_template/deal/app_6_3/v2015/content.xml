@@ -3,7 +3,6 @@
     <fixedRows>false</fixedRows>
     <name>6.3. Предоставление нежилых помещений в аренду</name>
     <fullName>6.3. Отчет в отношении доходов ПАО Сбербанк, связанных с оказанием услуг по предоставлению нежилых помещений в аренду</fullName>
-    <code>КС_6-3</code>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>fix</alias>
         <checking>false</checking>

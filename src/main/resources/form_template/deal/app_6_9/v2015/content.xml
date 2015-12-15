@@ -3,7 +3,6 @@
     <fixedRows>false</fixedRows>
     <name>6.9. Операции по уступкам прав требования по кредитным договорам</name>
     <fullName>6.9. Отчет в отношении доходов ПАО Сбербанк, связанных с операциями уступки прав требования по кредитным договорам</fullName>
-    <code>КС_6-9</code>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>fix</alias>
         <checking>false</checking>

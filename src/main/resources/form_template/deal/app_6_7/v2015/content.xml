@@ -7,7 +7,6 @@
     <updating>false</updating>
     <name>6.7. Предоставление права пользования товарным знаком</name>
     <fullName>6.7. Отчет в отношении доходов ПАО Сбербанк, связанных с предоставлением права пользования товарным знаком</fullName>
-    <header>КС_6-7</header>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>fix</alias>
         <checking>false</checking>
