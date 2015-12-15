@@ -1,10 +1,7 @@
 package com.aplana.sbrf.taxaccounting.dao;
 
-import com.aplana.sbrf.taxaccounting.model.AsyncTaskTypeData;
 import com.aplana.sbrf.taxaccounting.model.FormDataFile;
-
 import java.util.List;
-
 
 /**
  * DAO-Интерфейс для работы с типами асинхронных задач

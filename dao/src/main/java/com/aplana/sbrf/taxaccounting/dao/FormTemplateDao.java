@@ -5,7 +5,6 @@ import com.aplana.sbrf.taxaccounting.model.TemplateFilter;
 import com.aplana.sbrf.taxaccounting.model.VersionSegment;
 import com.aplana.sbrf.taxaccounting.model.VersionedObjectStatus;
 
-import java.io.InputStream;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
