@@ -2,7 +2,6 @@ package com.aplana.sbrf.taxaccounting.form_template.deal.app_6_17.v2015;
 
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
-import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
@@ -21,8 +20,6 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-import static com.aplana.sbrf.taxaccounting.service.script.util.ScriptUtils.checkAndReadFile;
-import static com.aplana.sbrf.taxaccounting.service.script.util.ScriptUtils.checkHeaderSize;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
@@ -226,23 +223,22 @@ public class App_6_17Test extends ScriptTestBase {
                     @Override
                     public PagingResult<Map<String, RefBookValue>> answer(InvocationOnMock invocation) throws Throwable {
                         PagingResult<Map<String, RefBookValue>> result = new PagingResult<Map<String, RefBookValue>>();
-
+                        String str = ((String) invocation.getArguments()[2]).split("\'")[1];
+                        char iksr = str.charAt(0);
+                        long id = 0;
+                        switch (iksr) {
+                            case 'A':  id = 1L;
+                                break;
+                            case 'B':  id = 2L;
+                                break;
+                            case 'C':  id = 3L;
+                                break;
+                            default: str = null;
+                        }
                         Map<String, RefBookValue> map = new HashMap<String, RefBookValue>();
-                        map.put(RefBook.RECORD_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, 1L));
-                        map.put("INN", new RefBookValue(RefBookAttributeType.STRING, "A"));
-                        map.put("NAME", new RefBookValue(RefBookAttributeType.STRING, "A"));
-                        result.add(map);
-
-                        map = new HashMap<String, RefBookValue>();
-                        map.put(RefBook.RECORD_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, 2L));
-                        map.put("INN", new RefBookValue(RefBookAttributeType.STRING, "B"));
-                        map.put("NAME", new RefBookValue(RefBookAttributeType.STRING, "B"));
-                        result.add(map);
-
-                        map = new HashMap<String, RefBookValue>();
-                        map.put(RefBook.RECORD_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, 3L));
-                        map.put("INN", new RefBookValue(RefBookAttributeType.STRING, "C"));
-                        map.put("NAME", new RefBookValue(RefBookAttributeType.STRING, "C"));
+                        map.put(RefBook.RECORD_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, id));
+                        map.put("INN", new RefBookValue(RefBookAttributeType.STRING, str));
+                        map.put("NAME", new RefBookValue(RefBookAttributeType.STRING, str));
                         result.add(map);
                         return result;
                     }

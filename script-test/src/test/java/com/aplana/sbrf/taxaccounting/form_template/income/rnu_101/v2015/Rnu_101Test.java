@@ -209,25 +209,23 @@ public class Rnu_101Test extends ScriptTestBase {
                     @Override
                     public PagingResult<Map<String, RefBookValue>> answer(InvocationOnMock invocation) throws Throwable {
                         PagingResult<Map<String, RefBookValue>> result = new PagingResult<Map<String, RefBookValue>>();
-
+                        String str = ((String) invocation.getArguments()[2]).split("\'")[1];
+                        char iksr = str.charAt(0);
+                        long id = 0;
+                        switch (iksr) {
+                            case 'A':  id = 1L;
+                                break;
+                            case 'B':  id = 2L;
+                                break;
+                            case 'C':  id = 3L;
+                                break;
+                            default: str = null;
+                        }
                         Map<String, RefBookValue> map = new HashMap<String, RefBookValue>();
-                        map.put(RefBook.RECORD_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, 1L));
-                        map.put("INN", new RefBookValue(RefBookAttributeType.STRING, "A"));
-                        map.put("NAME", new RefBookValue(RefBookAttributeType.STRING, "A"));
+                        map.put(RefBook.RECORD_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, id));
+                        map.put("INN", new RefBookValue(RefBookAttributeType.STRING, str));
+                        map.put("NAME", new RefBookValue(RefBookAttributeType.STRING, str));
                         result.add(map);
-
-                        map = new HashMap<String, RefBookValue>();
-                        map.put(RefBook.RECORD_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, 2L));
-                        map.put("INN", new RefBookValue(RefBookAttributeType.STRING, "B"));
-                        map.put("NAME", new RefBookValue(RefBookAttributeType.STRING, "B"));
-                        result.add(map);
-
-                        map = new HashMap<String, RefBookValue>();
-                        map.put(RefBook.RECORD_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, 3L));
-                        map.put("INN", new RefBookValue(RefBookAttributeType.STRING, "C"));
-                        map.put("NAME", new RefBookValue(RefBookAttributeType.STRING, "C"));
-                        result.add(map);
-
                         return result;
                     }
                 });
