@@ -1,4 +1,4 @@
-package form_template.income.rnu_101.v2015
+package form_template.income.rnu_107.v2015
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
@@ -6,10 +6,9 @@ import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import groovy.transform.Field
 
 /**
- * РНУ 101. Регистр налогового учёта сумм доначисления доходов по прочим операциям при применении в сделках с
- * Взаимозависимыми лицами и резидентами оффшорных зон цен, не соответствующих рыночному уровню
+ * РНУ 107. Регистр налогового учёта доходов, возникающих в связи с применением в сделках c Взаимозависимыми лицами и резидентами оффшорных зон тарифов, не соответствующих рыночному уровню
  *
- * formTemplateId=818
+ * formTemplateId=821
  *
  * @author Emamedova
  */
@@ -18,19 +17,16 @@ import groovy.transform.Field
 // rowNumber    		(1) -  № пп
 // name         		(2) -  Наименование Взаимозависимого лица (резидента оффшорной зоны)
 // iksr					(3) -  Идентификационный номер
-// countryName  		(4) -  Страна регистрации
-// transDoneDate        (5) -  Дата совершения операции
-// course 				(6) -  Курс валюты Банка России
-// incomeCode 			(7) -  Код классификации дохода
-// reasonNumber 		(8) -  номер
-// reasonDate   		(9) -  дата
-// count 				(10) - Количество услуг/работ (ед./шт.)
-// dealPrice			(11) - Цена за оказанные услуги согласно условиям договора
-// taxPrice				(12) - Цена, признаваемая рыночной для целей налогообложения
-// sum1					(13) - Сумма фактически начисленного дохода (руб.)
-// incomeRate			(14) - Коэффициент корректировки доходов
-// sum2					(15) - Сумма дохода, соответствующая рыночному уровню (руб.)
-// sum3					(16) - Сумма доначисления дохода до рыночного уровня процентной ставки (руб.)
+// transDoneDate  		(4) -  Дата совершения операции
+// code        			(5) -  Код налогового учёта
+// reasonNumber 		(6) -  номер
+// reasonDate 			(7) -  дата
+// sum1 				(8) -  Сумма операции (сумма оборота по операции) / количество операций
+// dealTariff   		(9) -  Тариф за оказание услуги
+// taxTariff 			(10) - Тариф, признаваемый рыночным для целей налогообложения
+// sum2					(11) - Сумма фактически начисленного дохода
+// sum3					(12) - Сумма дохода, соответствующая рыночному уровню тарифа
+// sum4					(13) - Сумма доначисления дохода до рыночного уровня тарифа
 
 switch (formDataEvent) {
     case FormDataEvent.CREATE:
@@ -82,25 +78,23 @@ def recordCache = [:]
 def refBookCache = [:]
 
 @Field
-def allColumns = ['fix', 'rowNumber', 'name', 'iksr', 'countryName', 'transDoneDate', 'course', 'incomeCode',
-                  'reasonNumber', 'reasonDate', 'count', 'dealPrice', 'taxPrice', 'sum1', 'incomeRate', 'sum2', 'sum3']
+def allColumns = ['fix', 'rowNumber', 'name', 'iksr', 'transDoneDate', 'code', 'reasonNumber', 'reasonDate',
+                  'sum1', 'dealTariff', 'taxTariff', 'sum2', 'sum3', 'sum4']
 
 // Редактируемые атрибуты
 @Field
-def editableColumns = ['name','transDoneDate', 'course', 'incomeCode', 'reasonNumber', 'reasonDate', 'count', 'dealPrice',
-                       'taxPrice', 'sum1', 'incomeRate', 'sum2']
+def editableColumns = ['name', 'transDoneDate', 'code', 'reasonNumber', 'reasonDate', 'sum1', 'dealTariff', 'taxTariff', 'sum2']
 
 // Автозаполняемые атрибуты
 @Field
-def autoFillColumns = ['iksr', 'countryName', 'sum3']
+def autoFillColumns = ['iksr', 'sum3', 'sum4']
 
 // Проверяемые на пустые значения атрибуты
 @Field
-def nonEmptyColumns = ['name', 'transDoneDate', 'course', 'incomeCode', 'reasonNumber', 'reasonDate', 'count', 'dealPrice',
-                       'taxPrice', 'sum1', 'incomeRate', 'sum2', 'sum3']
+def nonEmptyColumns = ['name', 'transDoneDate', 'code', 'reasonNumber', 'reasonDate', 'sum1', 'dealTariff', 'taxTariff', 'sum2', 'sum3', 'sum4']
 
 @Field
-def totalColumns = ['sum1', 'sum2', 'sum3']
+def totalColumns = ['sum1', 'sum2', 'sum3', 'sum4']
 
 // Дата окончания отчетного периода
 @Field
@@ -156,7 +150,7 @@ def calcTotalRow(def dataRows, def name) {
 // Получение импортируемых данных
 void importData() {
     def tmpRow = formData.createDataRow()
-    int COLUMN_COUNT = 16
+    int COLUMN_COUNT = 13
     int HEADER_ROW_COUNT = 3
     String TABLE_START_VALUE = '№ пп'
     String TABLE_END_VALUE = null
@@ -198,7 +192,6 @@ void importData() {
             break
         }
         rowIndex++
-
         // Пропуск итоговых строк
         if (rowValues[INDEX_FOR_SKIP] == "Итого") {
             totalRowFromFile = getNewTotalFromXls(rowValues, colOffset, fileRowIndex, rowIndex)
@@ -257,24 +250,21 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
     }
     checkHeaderSize(headerRows[headerRows.size() - 1].size(), headerRows.size(), colCount, rowCount)
     def headerMapping = [
-            ([(headerRows[0][8]): 'Основание для совершения операции']),
+            ([(headerRows[0][6]): 'Основание для совершения операции']),
             ([(headerRows[1][2]): getColumnName(tmpRow, 'name')]),
             ([(headerRows[1][3]): getColumnName(tmpRow, 'iksr')]),
-            ([(headerRows[1][4]): getColumnName(tmpRow, 'countryName')]),
-            ([(headerRows[1][5]): getColumnName(tmpRow, 'transDoneDate')]),
-            ([(headerRows[1][6]): getColumnName(tmpRow, 'course')]),
-            ([(headerRows[1][7]): getColumnName(tmpRow, 'incomeCode')]),
-            ([(headerRows[1][8]): 'номер']),
-            ([(headerRows[1][9]): 'дата']),
-            ([(headerRows[1][10]): getColumnName(tmpRow, 'count')]),
-            ([(headerRows[1][11]): getColumnName(tmpRow, 'dealPrice')]),
-            ([(headerRows[1][12]): getColumnName(tmpRow, 'taxPrice')]),
-            ([(headerRows[1][13]): getColumnName(tmpRow, 'sum1')]),
-            ([(headerRows[1][14]): getColumnName(tmpRow, 'incomeRate')]),
-            ([(headerRows[1][15]): getColumnName(tmpRow, 'sum2')]),
-            ([(headerRows[1][16]): getColumnName(tmpRow, 'sum3')])
+            ([(headerRows[1][4]): getColumnName(tmpRow, 'transDoneDate')]),
+            ([(headerRows[1][5]): getColumnName(tmpRow, 'code')]),
+            ([(headerRows[1][6]): 'номер']),
+            ([(headerRows[1][7]): 'дата']),
+            ([(headerRows[1][8]): getColumnName(tmpRow, 'sum1')]),
+            ([(headerRows[1][9]): getColumnName(tmpRow, 'dealTariff')]),
+            ([(headerRows[1][10]): getColumnName(tmpRow, 'taxTariff')]),
+            ([(headerRows[1][11]): getColumnName(tmpRow, 'sum2')]),
+            ([(headerRows[1][12]): getColumnName(tmpRow, 'sum3')]),
+            ([(headerRows[1][13]): getColumnName(tmpRow, 'sum4')]),
     ]
-    (1..16).each {
+    (1..13).each {
         headerMapping.add([(headerRows[2][it]): it.toString()])
     }
     checkHeaderEquals(headerMapping, logger)
@@ -318,37 +308,23 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
     colIndex++
 
     // графа 4
-    if (map != null) {
-        map = getRefBookValue(10, map.COUNTRY_CODE?.referenceValue)
-        if (map != null) {
-            def expectedValues = [map.NAME?.stringValue, map.FULLNAME?.stringValue]
-            formDataService.checkReferenceValue(10, values[colIndex], expectedValues, fileRowIndex, colIndex + colOffset, logger, false)
-        }
-    }
-    colIndex++
-
-    // графа 5
     newRow.transDoneDate = parseDate(values[colIndex], "dd.MM.yyyy", fileRowIndex, colIndex + colOffset, logger, true)
     colIndex++
 
+    // графа 5
+    newRow.code = getRecordIdImport(28, 'CODE', values[colIndex], fileRowIndex, colIndex + colOffset, false)
+    colIndex++
+
     // графа 6
-    newRow.course = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
-    colIndex++
-
-    // графа 7
-    newRow.incomeCode = values[colIndex]
-    colIndex++
-
-    // графа 8
     newRow.reasonNumber = values[colIndex]
     colIndex++
 
-    // графа 9
+    // графа 7
     newRow.reasonDate = parseDate(values[colIndex], "dd.MM.yyyy", fileRowIndex, colIndex + colOffset, logger, true)
     colIndex++
 
-    // графы 10-16
-    ['count', 'dealPrice', 'taxPrice', 'sum1', 'incomeRate', 'sum2','sum3'].each{
+    // графы 8-13
+    ['sum1', 'dealTariff', 'taxTariff', 'sum2', 'sum3', 'sum4'].each{
         newRow[it]= parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
         colIndex++
     }
@@ -369,15 +345,18 @@ def getNewTotalFromXls(def values, def colOffset, def fileRowIndex, def rowIndex
     newRow.setIndex(rowIndex)
     newRow.setImportIndex(fileRowIndex)
 
-    // графа 13
-    def colIndex = 13
+    // графа 8
+    def colIndex = 8
     newRow.sum1 = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
-    // графа 15
-    colIndex = 15
+    // графа 11
+    colIndex = 11
     newRow.sum2 = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
-    // графа 17
-    colIndex = 16
+    // графа 12
+    colIndex = 12
     newRow.sum3 = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
+    // графа 13
+    colIndex = 13
+    newRow.sum4 = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
 
     return newRow
 }
