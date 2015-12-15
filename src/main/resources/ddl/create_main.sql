@@ -977,6 +977,14 @@ g number(3) not null,
 b number(3) not null, 
 hex varchar2(7) not null
 );
+
+comment on table color is 'Справочник цветов';
+comment on column color.id is 'Идентификатор записи';
+comment on column color.name is 'Наименование цвета';
+comment on column color.r is 'R';
+comment on column color.g is 'G';
+comment on column color.b is 'B';
+comment on column color.hex is 'Hex';
 --------------------------------------------------------------------------------------------------------
 create table department_form_type_performer
 (

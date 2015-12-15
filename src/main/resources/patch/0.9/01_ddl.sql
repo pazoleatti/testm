@@ -1,3 +1,14 @@
+--http://jira.aplana.com/browse/SBRFACCTAX-12997: Комментарии к справочнику цветов (0.8!)
+comment on table color is 'Справочник цветов';
+comment on column color.id is 'Идентификатор записи';
+comment on column color.name is 'Наименование цвета';
+comment on column color.r is 'R';
+comment on column color.g is 'G';
+comment on column color.b is 'B';
+comment on column color.hex is 'Hex';
+
+---------------------------------------------------------------------------------------------------
+
 --http://jira.aplana.com/browse/SBRFACCTAX-13698: Отключить констрейнт ЖА->SEC_USER
 alter table log_system disable constraint log_system_fk_user_login;
 
