@@ -13,12 +13,12 @@ typedef int (__stdcall *cr_check_file) (H_INIT init_handle, H_PKBASE pkbase_hand
 typedef int (__stdcall *cr_pkbase_close) (H_PKBASE pkbase_handle);
 typedef int (__stdcall *cr_uninit) (H_INIT init_handle);
 
-const LPCWSTR DLL_NAME = L"bicr4.dll";
+const LPCSTR DLL_NAME = "bicr4.dll";
 HINSTANCE pDll = NULL;
 
 // проверяет наличие файла
 bool fileExists(const char *fname) {
-  return access(fname, 0) != -1;
+  return _access(fname, 0) != -1;
 }
 
 // возвращает текст ошибки по коду
@@ -112,6 +112,9 @@ int checkFile(H_INIT h_init, H_PKBASE h_pkbase, const char *fileForCheck, char *
 	int errorCode = crСheckFile(h_init, h_pkbase, fileForCheck, N, delFlag, user_ids, &len_ids);
 	if (errorCode != 0) {
 		printf("Result: FAIL\nERROR: cr_check_file, %d %s\n", errorCode, getErrorMsg(errorCode));
+	} else {
+		printf("Result: SUCCESS\n");
+		printf("UserId: %s\n", user_ids);
 	}
 	return errorCode;
 }
@@ -139,34 +142,31 @@ int uninit(H_INIT h_init) {
 int main(int argc, char **argv) {
 	try {
 		if (argc != 4) {
-			throw std::exception("ERROR: Incorrect argument count. Must be: BOK_FILE 0/1 CHECK_FILE");
+			throw std::exception("ERROR: Incorrect argument count. Must be: BOK_FILE 0/1 CHECK_FILE\n");
 		}
 		char *sBokFile = argv[1];
 		if (!fileExists(sBokFile)) {
-			throw std::exception("ERROR: BOK-file must be exists");
+			throw std::exception("ERROR: BOK-file must be exists\n");
 		}
 		char *sDelFlag = argv[2];
 		if (strcmp(sDelFlag, "0") * strcmp(sDelFlag, "1") != 0) {
-			throw std::exception("ERROR: Param \"del_flag\" must be \"0\" or \"1\"");
+			throw std::exception("ERROR: Param \"del_flag\" must be \"0\" or \"1\"\n");
 		}
 		char *sFileForCheck = argv[3];
 		if (!fileExists(sFileForCheck)) {
-			throw std::exception("ERROR: File for check must be exists");
+			throw std::exception("ERROR: File for check must be exists\n");
 		}
 
 		pDll = LoadLibrary(DLL_NAME); // загрузка библиотеки
 		if (pDll == NULL) {
-			throw std::exception("ERROR: Library not found");
+			throw std::exception("ERROR: Library not found\n");
 		}
 		int checkResult = 0;
 		H_INIT h_init = init();// инициализация
 		if (h_init != 0) {
 			H_PKBASE h_pkbase = loadBase(h_init, sBokFile); // загрузка БОК
 			if (h_pkbase != 0) {
-				int checkResult = checkFile(h_init, h_pkbase, sFileForCheck, sDelFlag); // проверка ЭЦП
-				if (checkResult == 0) {
-					printf("Result: SUCCESS\n");
-				}
+				checkFile(h_init, h_pkbase, sFileForCheck, sDelFlag); // проверка ЭЦП
 				closeBase(h_pkbase); // закрываем БОК
 			}
 			uninit(h_init); // деинициализация

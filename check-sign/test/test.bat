@@ -25,4 +25,8 @@ ECHO Test-6 No sign FAIL
 ECHO --------------------
 "%exe%" testfile 0 sign.dat
 ECHO --------------------
+ECHO Test-7 SUCCESS
+ECHO --------------------
+"%exe%" sign3.dat 0 testfile3
+ECHO --------------------
 @PAUSE
