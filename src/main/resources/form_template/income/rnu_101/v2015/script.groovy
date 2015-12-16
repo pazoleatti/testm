@@ -501,7 +501,7 @@ def getNewTotalFromXls(def values, def colOffset, def fileRowIndex, def rowIndex
     // графа 15
     colIndex = 15
     newRow.sum2 = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
-    // графа 17
+    // графа 16
     colIndex = 16
     newRow.sum3 = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
 

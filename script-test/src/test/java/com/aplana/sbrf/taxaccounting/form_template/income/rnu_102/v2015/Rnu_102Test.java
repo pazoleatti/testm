@@ -213,13 +213,17 @@ public class Rnu_102Test extends ScriptTestBase {
                         char iksr = str.charAt(0);
                         long id = 0;
                         switch (iksr) {
-                            case 'A':  id = 1L;
+                            case 'A':
+                                id = 1L;
                                 break;
-                            case 'B':  id = 2L;
+                            case 'B':
+                                id = 2L;
                                 break;
-                            case 'C':  id = 3L;
+                            case 'C':
+                                id = 3L;
                                 break;
-                            default: str = null;
+                            default:
+                                str = null;
                         }
                         Map<String, RefBookValue> map = new HashMap<String, RefBookValue>();
                         map.put(RefBook.RECORD_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, id));
@@ -232,13 +236,12 @@ public class Rnu_102Test extends ScriptTestBase {
 
         testHelper.setImportFileInputStream(getImportXlsInputStream());
         testHelper.execute(FormDataEvent.IMPORT);
-        checkLogger();
         checkLoadData(testHelper.getDataRowHelper().getAll());
 
         // проверка расчетов
-        //testHelper.execute(FormDataEvent.CALCULATE);
-        //checkAfterCalc(testHelper.getDataRowHelper().getAll());
-        //Assert.assertEquals(3, testHelper.getDataRowHelper().getCount());
+        testHelper.execute(FormDataEvent.CALCULATE);
+        checkAfterCalc(testHelper.getDataRowHelper().getAll());
+        checkLogger();
     }
 
     // Проверить загруженные данные
@@ -251,17 +254,8 @@ public class Rnu_102Test extends ScriptTestBase {
 
     // Проверить расчеты
     void checkAfterCalc(List<DataRow<Cell>> dataRows) {
-        Assert.assertEquals(365, dataRows.get(0).getCell("base").getNumericValue().intValue());
-        Assert.assertEquals(365, dataRows.get(1).getCell("base").getNumericValue().intValue());
-        Assert.assertNull(dataRows.get(2).getCell("base").getNumericValue());
+        Assert.assertEquals(2, dataRows.get(4).getCell("sum1").getNumericValue().intValue());
 
-        Assert.assertEquals(2, dataRows.get(0).getCell("rate2").getNumericValue().doubleValue(), 0);
-        Assert.assertEquals(2, dataRows.get(1).getCell("rate2").getNumericValue().doubleValue(), 0);
-        Assert.assertNull(dataRows.get(2).getCell("rate2").getNumericValue());
-
-        Assert.assertEquals(2, dataRows.get(0).getCell("sum3").getNumericValue().doubleValue(), 0);
-        Assert.assertEquals(2, dataRows.get(1).getCell("sum3").getNumericValue().doubleValue(), 0);
-        Assert.assertEquals(4, dataRows.get(2).getCell("sum3").getNumericValue().doubleValue(), 0);
     }
 }
 
