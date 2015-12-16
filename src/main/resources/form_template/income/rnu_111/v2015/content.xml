@@ -87,7 +87,7 @@
         <columnType>DATE</columnType>
         <name>Основание для совершения операции. дата</name>
         <order>8</order>
-        <width>7</width>
+        <width>10</width>
         <formatId>0</formatId>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">

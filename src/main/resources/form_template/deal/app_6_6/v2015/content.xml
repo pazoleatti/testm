@@ -86,7 +86,7 @@
         <columnType>DATE</columnType>
         <name>Дата договора</name>
         <order>8</order>
-        <width>7</width>
+        <width>6</width>
         <formatId>0</formatId>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
@@ -105,7 +105,7 @@
         <columnType>DATE</columnType>
         <name>Дата (заключения) сделки</name>
         <order>10</order>
-        <width>7</width>
+        <width>6</width>
         <formatId>0</formatId>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
@@ -124,7 +124,7 @@
         <columnType>DATE</columnType>
         <name>Дата исполнения 1-ой части сделки</name>
         <order>12</order>
-        <width>7</width>
+        <width>6</width>
         <formatId>0</formatId>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="dateColumn">
@@ -133,7 +133,7 @@
         <columnType>DATE</columnType>
         <name>Дата исполнения 2-ой части сделки</name>
         <order>13</order>
-        <width>7</width>
+        <width>6</width>
         <formatId>0</formatId>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
@@ -142,7 +142,7 @@
         <columnType>NUMBER</columnType>
         <name>Сумма процентного дохода (руб.)</name>
         <order>14</order>
-        <width>8</width>
+        <width>10</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>
@@ -152,7 +152,7 @@
         <columnType>NUMBER</columnType>
         <name>Сумма процентного расхода (руб.)</name>
         <order>15</order>
-        <width>8</width>
+        <width>10</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>
@@ -162,7 +162,7 @@
         <columnType>NUMBER</columnType>
         <name>Цена 1-ой части сделки, ед. валюты</name>
         <order>16</order>
-        <width>8</width>
+        <width>10</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>
@@ -194,7 +194,7 @@
         <columnType>NUMBER</columnType>
         <name>Цена 1-ой части сделки, руб.</name>
         <order>19</order>
-        <width>8</width>
+        <width>10</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>
@@ -204,7 +204,7 @@
         <columnType>DATE</columnType>
         <name>Дата совершения сделки</name>
         <order>20</order>
-        <width>7</width>
+        <width>6</width>
         <formatId>0</formatId>
     </columns>
     <styles>
