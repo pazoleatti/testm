@@ -152,7 +152,7 @@
         <columnType>NUMBER</columnType>
         <name>Коэффициент корректировки расходов</name>
         <order>15</order>
-        <width>7</width>
+        <width>10</width>
         <maxLength>38</maxLength>
         <precision>19</precision>
     </columns>
