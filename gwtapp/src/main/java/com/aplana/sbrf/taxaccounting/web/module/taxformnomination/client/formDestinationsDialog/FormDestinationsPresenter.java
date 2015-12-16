@@ -48,7 +48,7 @@ public class FormDestinationsPresenter extends PresenterWidget<FormDestinationsP
         // получить список поздазделений
         List<Integer> getDepartments();
          // получить список исполнителей
-        Integer getPerformer();
+        List<Integer> getPerformers();
         // получить тип формы
         List<Long> getFormDataKind();
         // получить вид формы
@@ -97,7 +97,7 @@ public class FormDestinationsPresenter extends PresenterWidget<FormDestinationsP
         action.setDepartments(getView().getDepartments());
         action.setFormDataKind(FormDataKind.fromId(getView().getFormDataKind().iterator().next().intValue()));
         action.setFormTypes(getView().getFormTypes());
-        action.setPerformer(getView().getPerformer());
+        action.setPerformers(getView().getPerformers());
 
         LogCleanEvent.fire(this);
         dispatchAsync.execute(action, CallbackUtils.defaultCallback(
@@ -128,7 +128,7 @@ public class FormDestinationsPresenter extends PresenterWidget<FormDestinationsP
         // Для каждого выбранного пользователем назначения, выполняется изменение / добавление исполнителя
         EditFormsAction action = new EditFormsAction();
         action.setFormTypeKinds(formTypeKinds);
-        action.setPerformer(getView().getPerformer());
+        action.setPerformers(getView().getPerformers());
 
         dispatchAsync.execute(action, CallbackUtils.defaultCallback(
                 new AbstractCallback<EditFormResult>() {

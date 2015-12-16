@@ -262,12 +262,19 @@ public interface DepartmentFormTypeDao {
     /**
      * Добавляет назначенные НФ
      */
-    void save(int departmentId, int typeId, int kindId, Integer performerId);
+    long save(int departmentId, int typeId, int kindId, Integer performerId);
 
     /**
-     * Обновление исполнителя для назначенной формы
+     * Сохраняет исполнителей для назначения
+     * @param dftId идентификатор назначения
+     * @param performerIds идентификаторы подразделений-исполнителей
      */
-    void updatePerformer(int id, Integer performerId);
+    void savePerformers(long dftId, List<Integer> performerIds);
+
+    /**
+     * Удаляет всех исполнителей для назначения
+     */
+    void deletePerformers(int dftId);
 
     /**
      * Удаляет назначение НФ

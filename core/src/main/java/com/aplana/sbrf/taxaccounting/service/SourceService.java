@@ -269,9 +269,9 @@ public interface SourceService {
      * @param departmentId id подразделения
      * @param typeId       id типа налоговой формы
      * @param formId       id вида налоговой формы
-     * @param performerId  id исполнителя
+     * @param performerIds  id исполнителей
      */
-    void saveDFT(Long departmentId, int typeId, int formId, Integer performerId);
+    void saveDFT(Long departmentId, int typeId, int formId, List<Integer> performerIds);
 
     /**
      * Удаляет налоговые формы, назначенные подразделению
@@ -377,7 +377,7 @@ public interface SourceService {
     /**
      * Обновление исполнителя для назначенной формы
      */
-    void updatePerformer(int id, Integer performerId);
+    void updatePerformers(int id, List<Integer> performerIds);
 
     /**
      * Находит назначенные виды налоговые форм, которые являются потребителями налоговой формы{@code typeId}

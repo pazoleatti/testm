@@ -44,7 +44,8 @@ INSERT INTO department_form_type (id, department_id, form_type_id, kind) VALUES 
 INSERT INTO department_form_type (id, department_id, form_type_id, kind) VALUES (4, 1, 4, 3);
 INSERT INTO department_form_type (id, department_id, form_type_id, kind) VALUES (5, 1, 11, 3);
 INSERT INTO department_form_type (id, department_id, form_type_id, kind) VALUES (6, 1, 12, 3);
-INSERT INTO department_form_type (id, department_id, form_type_id, kind, PERFORMER_DEP_ID) VALUES (7, 1, 21, 3, 1);
+INSERT INTO department_form_type (id, department_id, form_type_id, kind) VALUES (7, 1, 21, 3);
+insert into department_form_type_performer (DEPARTMENT_FORM_TYPE_ID, PERFORMER_DEP_ID) values (7, 1);
 
 -- В подразделении 2 есть формы 1 и 2
 INSERT INTO department_form_type (id, department_id, form_type_id, kind) VALUES (11, 2, 1, 3);

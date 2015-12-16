@@ -1082,8 +1082,19 @@ public class SourceServiceImpl implements SourceService {
     }
 
     @Override
-    public void saveDFT(Long departmentId, int typeId, int formId, Integer performerId) {
-        departmentFormTypeDao.save(departmentId.intValue(), typeId, formId, performerId);
+    public void saveDFT(Long departmentId, int typeId, int formId, List<Integer> performerIds) {
+        long dftId = departmentFormTypeDao.save(departmentId.intValue(), typeId, formId, null);
+        //Сохраняем исполнителей
+        departmentFormTypeDao.savePerformers(dftId, performerIds);
+    }
+
+    @Override
+    public void updatePerformers(int id, List<Integer> performerIds) {
+        //Удаляем всех исполнителей и назначаем новых
+        departmentFormTypeDao.deletePerformers(id);
+        if (performerIds != null && !performerIds.isEmpty()) {
+            departmentFormTypeDao.savePerformers(id, performerIds);
+        }
     }
 
     @Override
@@ -1151,11 +1162,6 @@ public class SourceServiceImpl implements SourceService {
     @Override
     public List<DeclarationType> allDeclarationTypeByTaxType(TaxType taxType) {
         return declarationTypeDao.listAllByTaxType(taxType);
-    }
-
-    @Override
-    public void updatePerformer(int id, Integer performerId) {
-        departmentFormTypeDao.updatePerformer(id, performerId);
     }
 
     @Override
