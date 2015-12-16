@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.model;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 
 /**
  * НФ назначения
@@ -22,7 +23,7 @@ public class DepartmentFormType implements Serializable {
     /** Период действия назначения. Может быть null */
     private Date periodStart;
     private Date periodEnd;
-    private Integer performerId;
+    private List<Integer> performers;
 
     /** Месяц. Не заполняется в дао */
     private Integer periodOrder;
@@ -107,14 +108,6 @@ public class DepartmentFormType implements Serializable {
         this.periodEnd = periodEnd;
     }
 
-    public Integer getPerformerId() {
-        return performerId;
-    }
-
-    public void setPerformerId(Integer performerId) {
-        this.performerId = performerId;
-    }
-
     public Integer getPeriodOrder() {
         return periodOrder;
     }
@@ -123,49 +116,56 @@ public class DepartmentFormType implements Serializable {
         this.periodOrder = periodOrder;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+	public List<Integer> getPerformers() {
+		return performers;
+	}
 
-        DepartmentFormType that = (DepartmentFormType) o;
+	public void setPerformers(List<Integer> performers) {
+		this.performers = performers;
+	}
 
-        if (departmentId != that.departmentId) return false;
-        if (formTypeId != that.formTypeId) return false;
-        if (id != null ? !id.equals(that.id) : that.id != null) return false;
-        if (kind != that.kind) return false;
-        if (performerId != null ? !performerId.equals(that.performerId) : that.performerId != null) return false;
-        if (periodEnd != null ? !periodEnd.equals(that.periodEnd) : that.periodEnd != null) return false;
-        if (periodOrder != null ? !periodOrder.equals(that.periodOrder) : that.periodOrder != null) return false;
-        if (periodStart != null ? !periodStart.equals(that.periodStart) : that.periodStart != null) return false;
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
 
-        return true;
-    }
+		DepartmentFormType that = (DepartmentFormType) o;
 
-    @Override
-    public int hashCode() {
-        int result = id != null ? id.hashCode() : 0;
-        result = 31 * result + departmentId;
-        result = 31 * result + formTypeId;
-        result = 31 * result + (kind != null ? kind.hashCode() : 0);
-        result = 31 * result + (periodStart != null ? periodStart.hashCode() : 0);
-        result = 31 * result + (periodEnd != null ? periodEnd.hashCode() : 0);
-        result = 31 * result + (performerId != null ? performerId.hashCode() : 0);
-        result = 31 * result + (periodOrder != null ? periodOrder.hashCode() : 0);
-        return result;
-    }
+		if (departmentId != that.departmentId) return false;
+		if (formTypeId != that.formTypeId) return false;
+		if (id != null ? !id.equals(that.id) : that.id != null) return false;
+		if (kind != that.kind) return false;
+		if (periodStart != null ? !periodStart.equals(that.periodStart) : that.periodStart != null) return false;
+		if (periodEnd != null ? !periodEnd.equals(that.periodEnd) : that.periodEnd != null) return false;
+		if (performers != null ? !performers.equals(that.performers) : that.performers != null) return false;
+		return periodOrder != null ? periodOrder.equals(that.periodOrder) : that.periodOrder == null;
 
-    @Override
-    public String toString() {
-        return "DepartmentFormType{" +
-                "id=" + id +
-                ", departmentId=" + departmentId +
-                ", formTypeId=" + formTypeId +
-                ", kind=" + kind +
-                ", periodStart=" + periodStart +
-                ", periodEnd=" + periodEnd +
-                ", performerId=" + performerId +
-                ", periodOrder=" + periodOrder +
-                '}';
-    }
+	}
+
+	@Override
+	public int hashCode() {
+		int result = id != null ? id.hashCode() : 0;
+		result = 31 * result + departmentId;
+		result = 31 * result + formTypeId;
+		result = 31 * result + (kind != null ? kind.hashCode() : 0);
+		result = 31 * result + (periodStart != null ? periodStart.hashCode() : 0);
+		result = 31 * result + (periodEnd != null ? periodEnd.hashCode() : 0);
+		result = 31 * result + (performers != null ? performers.hashCode() : 0);
+		result = 31 * result + (periodOrder != null ? periodOrder.hashCode() : 0);
+		return result;
+	}
+
+	@Override
+	public String toString() {
+		return "DepartmentFormType{" +
+				"id=" + id +
+				", departmentId=" + departmentId +
+				", formTypeId=" + formTypeId +
+				", kind=" + kind +
+				", periodStart=" + periodStart +
+				", periodEnd=" + periodEnd +
+				", performers=" + performers +
+				", periodOrder=" + periodOrder +
+				'}';
+	}
 }

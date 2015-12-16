@@ -56,7 +56,7 @@
         <checking>false</checking>
         <name>Сумма доходов Банка, руб.</name>
         <order>6</order>
-        <width>8</width>
+        <width>10</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>
@@ -74,7 +74,7 @@
         <checking>false</checking>
         <name>Дата договора</name>
         <order>8</order>
-        <width>7</width>
+        <width>6</width>
         <formatId>0</formatId>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
@@ -129,7 +129,7 @@
         <checking>false</checking>
         <name>Цена</name>
         <order>14</order>
-        <width>8</width>
+        <width>10</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>
@@ -138,7 +138,7 @@
         <checking>false</checking>
         <name>Стоимость</name>
         <order>15</order>
-        <width>8</width>
+        <width>10</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>
@@ -147,7 +147,7 @@
         <checking>false</checking>
         <name>Дата совершения сделки</name>
         <order>16</order>
-        <width>7</width>
+        <width>6</width>
         <formatId>0</formatId>
     </columns>
     <styles>

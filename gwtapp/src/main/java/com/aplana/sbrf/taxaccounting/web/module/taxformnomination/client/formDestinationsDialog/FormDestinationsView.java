@@ -281,9 +281,8 @@ public class FormDestinationsView extends PopupViewWithUiHandlers<FormDestinatio
     }
 
     @Override
-    public Integer getPerformer(){
-        // а больше одного и быть не может, так как мультиселект отключен
-        return performersPickerWidget.getValue().size() == 1 ? performersPickerWidget.getValue().get(0) : null;
+    public List<Integer> getPerformers(){
+        return performersPickerWidget.getValue();
     }
 
     @Override

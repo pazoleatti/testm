@@ -178,7 +178,6 @@ alter table form_data_performer add constraint formdata_performer_fk_formdata fo
 alter table form_data_performer add constraint formdata_performer_fk_dept foreign key (print_department_id) references department(id);
 
 alter table department_form_type add constraint dept_form_type_fk_dep_id foreign key (department_id) references department(id);
-alter table department_form_type add constraint dept_form_type_fk_perf_dep_id foreign key (performer_dep_id) references department(id);
 alter table department_form_type add constraint dept_form_type_fk_type_id foreign key (form_type_id) references form_type(id);
 alter table department_form_type add constraint dept_form_type_fk_kind foreign key (kind) references form_kind(id);
 alter table department_form_type add constraint dept_form_type_pk primary key (id);

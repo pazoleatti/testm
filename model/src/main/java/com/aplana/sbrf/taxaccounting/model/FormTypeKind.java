@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.model;
 
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * Моделька для представления "назначений НФ и деклараций"
@@ -15,14 +16,14 @@ public class FormTypeKind implements Serializable {
     private FormDataKind kind;
     private String name;
     private Department department;
-    private Department performer;
+    private List<Department> performers;
 
-    public Department getPerformer() {
-        return performer;
+    public List<Department> getPerformers() {
+        return performers;
     }
 
-    public void setPerformer(Department performer) {
-        this.performer = performer;
+    public void setPerformers(List<Department> performers) {
+        this.performers = performers;
     }
 
     public Department getDepartment() {
@@ -84,5 +85,21 @@ public class FormTypeKind implements Serializable {
 
     public void setFormTypeId(Long formTypeId) {
         this.formTypeId = formTypeId;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        FormTypeKind that = (FormTypeKind) o;
+
+        return id != null ? id.equals(that.id) : that.id == null;
+
+    }
+
+    @Override
+    public int hashCode() {
+        return id != null ? id.hashCode() : 0;
     }
 }

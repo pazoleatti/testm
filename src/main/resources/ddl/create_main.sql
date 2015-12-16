@@ -500,15 +500,13 @@ create table department_form_type (
   id      number(9) not null,
   department_id number(9) not null,
   form_type_id number(9) not null,
-  kind     number(9) not null,
-  performer_dep_id number(9)
+  kind     number(9) not null
 );
 comment on table department_form_type is 'Связь подразделения банка с формой';
 comment on column department_form_type.id is 'Первичный ключ';
 comment on column department_form_type.department_id is 'Идентификатор подразделения';
 comment on column department_form_type.form_type_id is 'Идентификатор вида налоговой формы';
 comment on column department_form_type.kind is 'Тип налоговой формы (1-Первичная, 2-Консолидированная, 3-Сводная, 4-Форма УНП, 5-Выходная)';
-comment on column department_form_type.performer_dep_id is 'Исполнитель';
 
 create sequence seq_department_form_type start with 10000;
 ---------------------------------------------------------------------------------------------------

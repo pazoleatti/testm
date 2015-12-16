@@ -28,7 +28,7 @@ public class EditFormHandler extends AbstractActionHandler<EditFormsAction, Edit
     @Override
     public EditFormResult execute(EditFormsAction action, ExecutionContext executionContext) throws ActionException {
         for (FormTypeKind f : action.getFormTypeKinds()){
-            departmentFormTypeService.updatePerformer(f.getId().intValue(), action.getPerformer());
+            departmentFormTypeService.updatePerformers(f.getId().intValue(), action.getPerformers());
         }
         return null;
     }

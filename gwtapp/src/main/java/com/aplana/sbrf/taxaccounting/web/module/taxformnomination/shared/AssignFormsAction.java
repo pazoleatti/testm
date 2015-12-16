@@ -15,7 +15,7 @@ public class AssignFormsAction extends UnsecuredActionImpl<AssignFormsResult> im
     private List<Integer> departments;
     private FormDataKind formDataKind;
     private List<Long> formTypes;
-    private Integer performer;
+    private List<Integer> performers;
 
     public List<Integer> getDepartments() {
         return departments;
@@ -41,12 +41,12 @@ public class AssignFormsAction extends UnsecuredActionImpl<AssignFormsResult> im
         this.formTypes = formTypes;
     }
 
-    public Integer getPerformer() {
-        return performer;
+    public List<Integer> getPerformers() {
+        return performers;
     }
 
-    public void setPerformer(Integer performer) {
-        this.performer = performer;
+    public void setPerformers(List<Integer> performers) {
+        this.performers = performers;
     }
 
     @Override

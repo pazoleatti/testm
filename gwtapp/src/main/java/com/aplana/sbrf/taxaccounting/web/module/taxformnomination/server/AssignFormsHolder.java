@@ -57,7 +57,7 @@ public class AssignFormsHolder extends AbstractActionHandler<AssignFormsAction, 
                     logger.warn("Для \""+department.getName()+"\" уже существует назначение \""+action.getFormDataKind().getTitle()+"\" - \""+formType.getName() + "\"");
                 } else {
                     // сохранение
-                    departmentFormTypeService.saveDFT(departmentId.longValue(), formTypeId.intValue(), action.getFormDataKind().getId(), action.getPerformer());
+                    departmentFormTypeService.saveDFT(departmentId.longValue(), formTypeId.intValue(), action.getFormDataKind().getId(), action.getPerformers());
                 }
             }
         }

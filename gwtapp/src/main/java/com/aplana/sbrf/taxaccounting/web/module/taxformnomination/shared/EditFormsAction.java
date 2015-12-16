@@ -11,7 +11,7 @@ import java.util.List;
  */
 public class EditFormsAction extends UnsecuredActionImpl<EditFormResult> implements ActionName {
     private List<FormTypeKind> formTypeKinds;
-    private Integer performer;
+    private List<Integer> performers;
 
     public List<FormTypeKind> getFormTypeKinds() {
         return formTypeKinds;
@@ -21,12 +21,12 @@ public class EditFormsAction extends UnsecuredActionImpl<EditFormResult> impleme
         this.formTypeKinds = formTypeKinds;
     }
 
-    public Integer getPerformer() {
-        return performer;
+    public List<Integer> getPerformers() {
+        return performers;
     }
 
-    public void setPerformer(Integer performer) {
-        this.performer = performer;
+    public void setPerformers(List<Integer> performers) {
+        this.performers = performers;
     }
 
     @Override

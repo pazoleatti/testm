@@ -115,6 +115,7 @@ public class FormDataDaoImpl extends AbstractDao implements FormDataDao {
                             manual == null ? null : manual ? 1 : 0,
                             formDataId}, new int[]{Types.NUMERIC, Types.NUMERIC, Types.NUMERIC},
                     new FormDataRowMapper());
+
         } catch (EmptyResultDataAccessException e) {
             throw new DaoException("Записи в таблице FORM_DATA с id = " + formDataId + " не найдена", e);
         }

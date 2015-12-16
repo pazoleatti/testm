@@ -65,7 +65,7 @@
         <columnType>NUMBER</columnType>
         <name>Сумма расходов Банка, руб.</name>
         <order>6</order>
-        <width>8</width>
+        <width>10</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>
@@ -85,7 +85,7 @@
         <columnType>DATE</columnType>
         <name>Дата договора</name>
         <order>8</order>
-        <width>7</width>
+        <width>6</width>
         <formatId>0</formatId>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
@@ -106,7 +106,7 @@
         <columnType>NUMBER</columnType>
         <name>Цена</name>
         <order>10</order>
-        <width>8</width>
+        <width>10</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>
@@ -116,7 +116,7 @@
         <columnType>NUMBER</columnType>
         <name>Стоимость</name>
         <order>11</order>
-        <width>8</width>
+        <width>10</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>
@@ -126,7 +126,7 @@
         <columnType>DATE</columnType>
         <name>Дата совершения сделки</name>
         <order>12</order>
-        <width>7</width>
+        <width>6</width>
         <formatId>0</formatId>
     </columns>
     <styles>

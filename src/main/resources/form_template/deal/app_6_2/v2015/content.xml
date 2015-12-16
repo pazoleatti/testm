@@ -86,7 +86,7 @@
         <columnType>DATE</columnType>
         <name>Дата договора</name>
         <order>8</order>
-        <width>7</width>
+        <width>6</width>
         <formatId>0</formatId>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
@@ -105,7 +105,7 @@
         <columnType>DATE</columnType>
         <name>Дата заключения сделки</name>
         <order>10</order>
-        <width>7</width>
+        <width>6</width>
         <formatId>0</formatId>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
@@ -124,7 +124,7 @@
         <columnType>NUMBER</columnType>
         <name>Сумма доходов Банка по данным бухгалтерского учета, руб.</name>
         <order>12</order>
-        <width>7</width>
+        <width>10</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>
@@ -154,7 +154,7 @@
         <columnType>DATE</columnType>
         <name>Дата совершения сделки</name>
         <order>15</order>
-        <width>7</width>
+        <width>6</width>
         <formatId>0</formatId>
     </columns>
     <styles>

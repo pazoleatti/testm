@@ -362,10 +362,11 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
 
     @Override
     public List<Integer> getPerformers(List<Integer> departments, int formType) {
-        String sql = String.format("SELECT performer_dep_id " +
-                "FROM department_form_type " +
-                "WHERE %s AND performer_dep_id IS NOT null  AND form_type_id = :formtype " +
-                "GROUP BY performer_dep_id", SqlUtils.transformToSqlInStatement("department_id", departments));
+        String sql = String.format("SELECT dftp.performer_dep_id " +
+                "FROM department_form_type dft " +
+                "left join department_form_type_performer dftp on dftp.DEPARTMENT_FORM_TYPE_ID = dft.id \n" +
+                "WHERE %s AND dftp.performer_dep_id IS NOT null AND dft.form_type_id = :formtype " +
+                "GROUP BY dftp.performer_dep_id", SqlUtils.transformToSqlInStatement("dft.department_id", departments));
 
         Map<String, Object> parameterMap = new HashMap<String, Object>();
         parameterMap.put("formtype", formType);
@@ -434,9 +435,10 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
     public List<Integer> getDepartmentIdsByExecutors(List<Integer> departments, List<TaxType> taxTypes) {
         String sql = String.format("select distinct department_id from department_form_type dft " +
                 "left join form_type ft on dft.form_type_id = ft.id " +
+                "left join department_form_type_performer dftp on dftp.DEPARTMENT_FORM_TYPE_ID = dft.id " +
                 "where " +
                 "ft.tax_type in (:tt) " +
-                "and %s ", SqlUtils.transformToSqlInStatement("performer_dep_id", departments));
+                "and %s ", SqlUtils.transformToSqlInStatement("dftp.PERFORMER_DEP_ID", departments));
 
         MapSqlParameterSource parameterMap = new MapSqlParameterSource();
         List<String> types = new ArrayList<String>();
@@ -451,7 +453,8 @@ public class DepartmentDaoImpl extends AbstractDao implements DepartmentDao {
     public List<Integer> getDepartmentIdsByExecutors(List<Integer> departments) {
         String sql = String.format("select distinct department_id from department_form_type dft " +
                 "left join form_type ft on dft.form_type_id = ft.id " +
-                "where %s ", SqlUtils.transformToSqlInStatement("performer_dep_id", departments));
+                "left join department_form_type_performer dftp on dftp.DEPARTMENT_FORM_TYPE_ID = ft.id \n" +
+                "where %s ", SqlUtils.transformToSqlInStatement("dftp.performer_dep_id", departments));
 
         return getJdbcTemplate().queryForList(sql, Integer.class);
     }

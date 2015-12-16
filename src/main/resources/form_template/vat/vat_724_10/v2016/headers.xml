@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rows>
+    <row alias="">
+        <cell alias="rowNum" colSpan="1" rowSpan="2" value="№ пп"/>
+        <cell alias="fix" colSpan="1" rowSpan="1" value=""/>
+        <cell alias="name" colSpan="1" rowSpan="2" value="Наименование взаимозависимого лица/резидента оффшорной зоны"/>
+        <cell alias="iksr" colSpan="1" rowSpan="2"
+              value="ИНН/код налогоплательщика в стране регистрации (инкорпорации) или его аналог"/>
+        <cell alias="date" colSpan="1" rowSpan="2" value="Дата совершения операции"/>
+        <cell alias="nameOf" colSpan="1" rowSpan="2" value="Наименование товара/услуги"/>
+        <cell alias="rnu" colSpan="3" rowSpan="1"
+              value="Данные налогового учета о доходе, доначисленном до рыночного уровня"/>
+        <cell alias="number" colSpan="1" rowSpan="1"
+              value="Данные налогового учета о доходе, доначисленном до рыночного уровня"/>
+        <cell alias="sum" colSpan="1" rowSpan="1"
+              value="Данные налогового учета о доходе, доначисленном до рыночного уровня"/>
+        <cell alias="ndsSum" colSpan="1" rowSpan="2" value="Сумма НДС (балансовый счет 60309.06)"/>
+    </row>
+    <row alias="">
+        <cell alias="rowNum" colSpan="1" rowSpan="1" value="№ пп"/>
+        <cell alias="fix" colSpan="1" rowSpan="1" value=""/>
+        <cell alias="name" colSpan="1" rowSpan="1" value="Наименование взаимозависимого лица/резидента оффшорной зоны"/>
+        <cell alias="iksr" colSpan="1" rowSpan="1"
+              value="ИНН/код налогоплательщика в стране регистрации (инкорпорации) или его аналог"/>
+        <cell alias="date" colSpan="1" rowSpan="1" value="Дата совершения операции"/>
+        <cell alias="nameOf" colSpan="1" rowSpan="1" value="Наименование товара/услуги"/>
+        <cell alias="rnu" colSpan="1" rowSpan="1" value="РНУ"/>
+        <cell alias="number" colSpan="1" rowSpan="1" value="Номер записи в РНУ"/>
+        <cell alias="sum" colSpan="1" rowSpan="1" value="Сумма"/>
+        <cell alias="ndsSum" colSpan="1" rowSpan="1" value="Сумма НДС (балансовый счет 60309.06)"/>
+    </row>
+    <row alias="">
+        <cell alias="rowNum" colSpan="1" rowSpan="1" value="1"/>
+        <cell alias="fix" colSpan="1" rowSpan="1" value=""/>
+        <cell alias="name" colSpan="1" rowSpan="1" value="2"/>
+        <cell alias="iksr" colSpan="1" rowSpan="1" value="3"/>
+        <cell alias="date" colSpan="1" rowSpan="1" value="4"/>
+        <cell alias="nameOf" colSpan="1" rowSpan="1" value="5"/>
+        <cell alias="rnu" colSpan="1" rowSpan="1" value="6"/>
+        <cell alias="number" colSpan="1" rowSpan="1" value="7"/>
+        <cell alias="sum" colSpan="1" rowSpan="1" value="8"/>
+        <cell alias="ndsSum" colSpan="1" rowSpan="1" value="9"/>
+    </row>
+</rows>

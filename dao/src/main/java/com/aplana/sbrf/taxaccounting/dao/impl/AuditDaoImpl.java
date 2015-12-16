@@ -78,6 +78,7 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
                     "                       FROM department_form_type src\n" +
                     "                         JOIN form_data_source fds ON src.id = fds.src_department_form_type_id\n" +
                     "                         JOIN department_form_type tgt ON fds.department_form_type_id = tgt.id\n" +
+                    "                         left join department_form_type_performer dftp on dftp.DEPARTMENT_FORM_TYPE_ID = src.id \n" +
                     "                       WHERE %s and %s) --10\n" +
                     "  ,\n" +
                     "    source_filter_4K AS (SELECT DISTINCT\n" +
@@ -163,9 +164,9 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
                 !s_45.isEmpty() ? SqlUtils.transformToSqlInStatement("src.DEPARTMENT_ID", s_45) : "1=3",
                 SqlUtils.transformToSqlInStatement("tgt.DEPARTMENT_ID", availableDepIds.get(SAMPLE_NUMBER.S_10)),
                 !s_55.isEmpty() ? SqlUtils.transformToSqlInStatement("tgt.DEPARTMENT_ID", s_55) : "1=3",
-                SqlUtils.transformToSqlInStatement("src.performer_dep_id", availableDepIds.get(SAMPLE_NUMBER.S_10)),
+                SqlUtils.transformToSqlInStatement("dftp.performer_dep_id", availableDepIds.get(SAMPLE_NUMBER.S_10)),
                 !s_55.isEmpty() ? SqlUtils.transformToSqlInStatement("src.DEPARTMENT_ID", s_55) : "1=3",
-                SqlUtils.transformToSqlInStatement("src.performer_dep_id", availableDepIds.get(SAMPLE_NUMBER.S_10)),
+                SqlUtils.transformToSqlInStatement("dftp.performer_dep_id", availableDepIds.get(SAMPLE_NUMBER.S_10)),
                 SqlUtils.transformToSqlInStatement("ls.EVENT_ID",
                         eventDao.getEventCodes(TARole.ROLE_CONTROL, null, "_", "10%", "40%")),
                 SqlUtils.transformToSqlInStatement("ls.EVENT_ID",
@@ -235,9 +236,9 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
                 !s_45.isEmpty() ? SqlUtils.transformToSqlInStatement("src.DEPARTMENT_ID", s_45) : "1=3",
                 SqlUtils.transformToSqlInStatement("tgt.DEPARTMENT_ID", availableDepIds.get(SAMPLE_NUMBER.S_10)),
                 !s_55.isEmpty() ? SqlUtils.transformToSqlInStatement("tgt.DEPARTMENT_ID", s_55) : "1=3",
-                SqlUtils.transformToSqlInStatement("src.performer_dep_id", availableDepIds.get(SAMPLE_NUMBER.S_10)),
+                SqlUtils.transformToSqlInStatement("dftp.performer_dep_id", availableDepIds.get(SAMPLE_NUMBER.S_10)),
                 !s_55.isEmpty() ? SqlUtils.transformToSqlInStatement("src.DEPARTMENT_ID", s_55) : "1=3",
-                SqlUtils.transformToSqlInStatement("src.performer_dep_id", availableDepIds.get(SAMPLE_NUMBER.S_10)),
+                SqlUtils.transformToSqlInStatement("dftp.performer_dep_id", availableDepIds.get(SAMPLE_NUMBER.S_10)),
                 SqlUtils.transformToSqlInStatement("ls.EVENT_ID",
                         eventDao.getEventCodes(TARole.ROLE_CONTROL, null, "_", "10%", "40%")),
                 SqlUtils.transformToSqlInStatement("ls.EVENT_ID",
@@ -313,7 +314,7 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
         String sql = String.format(
                 SQL_OPER,
                 !s_55.isEmpty() ? SqlUtils.transformToSqlInStatement("src.DEPARTMENT_ID", s_55) : "1=3",
-                SqlUtils.transformToSqlInStatement("src.performer_dep_id", availableDepIds.get(SAMPLE_NUMBER.S_10)),
+                SqlUtils.transformToSqlInStatement("dftp.performer_dep_id", availableDepIds.get(SAMPLE_NUMBER.S_10)),
                 SqlUtils.transformToSqlInStatement("ls.EVENT_ID",
                         eventDao.getEventCodes(TARole.ROLE_OPER, null, "_", "10%", "40%")),
                 SqlUtils.transformToSqlInStatement("ls.FORM_DEPARTMENT_ID", availableDepIds.get(SAMPLE_NUMBER.S_10)),
@@ -360,7 +361,7 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
         String sql = String.format(
                 LOG_SYSTEM_DATA_FOR_OPER_BY_FILTER_COUNT,
                 !s_55.isEmpty() ? SqlUtils.transformToSqlInStatement("src.DEPARTMENT_ID", s_55) : "1=3",
-                SqlUtils.transformToSqlInStatement("src.performer_dep_id", availableDepIds.get(SAMPLE_NUMBER.S_10)),
+                SqlUtils.transformToSqlInStatement("dftp.performer_dep_id", availableDepIds.get(SAMPLE_NUMBER.S_10)),
                 SqlUtils.transformToSqlInStatement("ls.EVENT_ID",
                         eventDao.getEventCodes(TARole.ROLE_OPER, null, "_", "10%", "40%")),
                 SqlUtils.transformToSqlInStatement("ls.FORM_DEPARTMENT_ID", availableDepIds.get(SAMPLE_NUMBER.S_10)),
