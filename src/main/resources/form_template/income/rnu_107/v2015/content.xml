@@ -48,7 +48,7 @@
         <parentAlias>name</parentAlias>
         <refBookAttributeId>5218</refBookAttributeId>
     </columns>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="dateColumn">ll
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="dateColumn">
         <alias>transDoneDate</alias>
         <checking>false</checking>
         <columnType>DATE</columnType>
@@ -144,7 +144,6 @@
         <columnType>NUMBER</columnType>
         <name>Сумма доначисления дохода до рыночного уровня тарифа</name>
         <order>14</order>
-        <width>10</width>
         <width>10</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
