@@ -14,8 +14,8 @@ import groovy.transform.Field
  * @author Stanislav Yasinskiy
  */
 
-// fix
 // rowNumber    (1) - № пп
+// fix
 // name         (2) - Наименование Взаимозависимого лица (резидента оффшорной зоны)
 // countryName  (3) - Страна местоположения Взаимозависимого лица (резидента оффшорной зоны)
 // iksr         (4) - Идентификационный номер
@@ -100,7 +100,10 @@ def autoFillColumns = ['countryName', 'iksr', 'base', 'rate2', 'sum3']
 def nonEmptyColumns = ['name', 'code', 'reasonNumber', 'reasonDate', 'sum', 'currency', 'time', 'rate', 'sum1', 'rate1', 'sum2']
 
 @Field
-def totalColumns = ['sum1', 'sum2', 'sum3']
+def totalColumns = ['sum3']
+
+@Field
+def groupColumns = ['name', 'reasonNumber', 'reasonDate']
 
 // Дата окончания отчетного периода
 @Field
@@ -243,6 +246,11 @@ void logicCheck() {
             rowError(logger, row, "Строка $rowNum: Значение графы «$msg1» должно быть не больше количества дней равному 15 лет " +
                     "начиная с дня даты, указанной по графе «$msg2»!")
         }
+
+        // 13. Проверка КНУ
+        if (row.code && !recordsExist(row.code)) {
+            rowError(logger, row, "Строка $rowNum: В справочнике «Классификатор доходов ПАО Сбербанк для целей налогового учёта» отсутствуют записи с КНУ равным значению графы «${getColumnName(row, 'code')}» (${row.code})!")
+        }
     }
 
     // 12. Проверка итоговых значений пофиксированной строке «Итого»
@@ -251,6 +259,16 @@ void logicCheck() {
     }
 }
 
+boolean recordsExist(String code) {
+    def refBookId = 28L
+    if (!providerCache.containsKey(refBookId)) {
+        providerCache.put(refBookId, refBookFactory.getDataProvider(refBookId))
+    }
+    def provider = providerCache.get(refBookId)
+
+    def records = provider.getRecords(getReportPeriodEndDate(), null, "LOWER(CODE) = LOWER('$code')", null)
+    return records != null && records.size() > 0
+}
 
 def getDays(def date) {
     def year = Integer.valueOf(date.format('yyyy'))
@@ -273,6 +291,7 @@ void calc() {
     // Удаление итогов
     deleteAllAliased(dataRows)
 
+    sortRows(dataRows)
     for (row in dataRows) {
         if(row.getAlias() != null){
             continue
@@ -285,6 +304,27 @@ void calc() {
     // Общий итог
     def total = calcTotalRow(dataRows)
     dataRows.add(total)
+}
+
+void sortRows(def dataRows) {
+    dataRows.sort{ def rowA, def rowB ->
+        def aValue = getRefBookValue(520, rowA.name).NAME?.value
+        def bValue = getRefBookValue(520, rowB.name).NAME?.value
+        if (aValue != bValue) {
+            return aValue <=> bValue
+        }
+        aValue = rowA.reasonNumber
+        bValue = rowB.reasonNumber
+        if (aValue != bValue) {
+            return aValue <=> bValue
+        }
+        aValue = rowA.reasonDate
+        bValue = rowB.reasonDate
+        if (aValue != bValue) {
+            return aValue <=> bValue
+        }
+        return 0
+    }
 }
 
 def BigDecimal calc8(def row) {
@@ -315,7 +355,7 @@ def calcTotalRow(def dataRows) {
     def totalRow = (formDataEvent in [FormDataEvent.IMPORT, FormDataEvent.IMPORT_TRANSPORT_FILE]) ? formData.createStoreMessagingDataRow() : formData.createDataRow()
     totalRow.setAlias('total')
     totalRow.fix = 'Итого'
-    totalRow.getCell('fix').colSpan = 6
+    totalRow.getCell('fix').colSpan = 2
     allColumns.each {
         totalRow.getCell(it).setStyleAlias('Контрольные суммы')
     }
@@ -330,7 +370,7 @@ void importData() {
     int HEADER_ROW_COUNT = 3
     String TABLE_START_VALUE = '№ пп'
     String TABLE_END_VALUE = null
-    int INDEX_FOR_SKIP = 0
+    int INDEX_FOR_SKIP = 1
 
     def allValues = []      // значения формы
     def headerValues = []   // значения шапки
@@ -429,9 +469,10 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
             ([(headerRows[1][14]): getColumnName(tmpRow, 'rate1')]),
             ([(headerRows[1][15]): getColumnName(tmpRow, 'sum2')]),
             ([(headerRows[1][16]): getColumnName(tmpRow, 'rate2')]),
-            ([(headerRows[1][17]): getColumnName(tmpRow, 'sum3')])
+            ([(headerRows[1][17]): getColumnName(tmpRow, 'sum3')]),
+            ([(headerRows[2][0]): '1'])
     ]
-    (1..16).each {
+    (2..16).each {
         headerMapping.add([(headerRows[2][it]): it.toString()])
     }
     checkHeaderEquals(headerMapping, logger)
@@ -482,7 +523,7 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
     colIndex++
 
     // графа 5
-    newRow.code = getRecordIdImport(28, 'CODE', values[colIndex], fileRowIndex, colIndex + colOffset, false)
+    newRow.code = values[colIndex]
     colIndex++
 
     // графа 6
@@ -502,7 +543,7 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
     colIndex++
 
     // графа 10
-    newRow.currency = getRecordIdImport(15, 'CODE_2', values[colIndex], fileRowIndex, colIndex + colOffset, false)
+    newRow.currency = getRecordIdImport(15, 'CODE', values[colIndex], fileRowIndex, colIndex + colOffset, false)
     colIndex++
 
     // графы 11-17
@@ -529,10 +570,10 @@ def getNewTotalFromXls(def values, def colOffset, def fileRowIndex, def rowIndex
 
     // графа 13
     def colIndex = 13
-    newRow.sum1 = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
+    //newRow.sum1 = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
     // графа 15
     colIndex = 15
-    newRow.sum2 = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
+    //newRow.sum2 = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
     // графа 17
     colIndex = 17
     newRow.sum3 = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
@@ -544,7 +585,7 @@ def getNewTotalFromXls(def values, def colOffset, def fileRowIndex, def rowIndex
 void sortFormDataRows(def saveInDB = true) {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
-    sortRows(refBookService, logger, dataRows, null, dataRows.find { it.getAlias() == 'total' }, true)
+    sortRows(dataRows)
     if (saveInDB) {
         dataRowHelper.saveSort()
     } else {
