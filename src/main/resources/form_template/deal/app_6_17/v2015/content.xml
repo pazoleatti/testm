@@ -176,7 +176,7 @@
         <columnType>DATE</columnType>
         <name>Дата совершения сделки</name>
         <order>17</order>
-        <width>7</width>
+        <width>6</width>
         <formatId>1</formatId>
     </columns>
     <styles>

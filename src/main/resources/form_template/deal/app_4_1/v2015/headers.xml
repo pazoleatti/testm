@@ -73,7 +73,7 @@
         <cell alias="rowNumber" colSpan="1" rowSpan="1" value="1"/>
         <cell alias="name" colSpan="1" rowSpan="1" value="2"/>
         <cell alias="ikksr" colSpan="1" rowSpan="1" value="3"/>
-        <cell alias="sum4" colSpan="1" rowSpan="1" value="4"/>
+        <cell alias="sum4" colSpan="1" rowSpan="1" value="4.1"/>
         <cell alias="sum42" colSpan="1" rowSpan="1" value="4.2"/>
         <cell alias="sum43" colSpan="1" rowSpan="1" value="4.3"/>
         <cell alias="sum44" colSpan="1" rowSpan="1" value="4.4"/>

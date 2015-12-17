@@ -1,4 +1,4 @@
-package form_template.deal.software_development.v2015
+package form_template.deal.app_6_8.v2015
 
 import au.com.bytecode.opencsv.CSVReader
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent

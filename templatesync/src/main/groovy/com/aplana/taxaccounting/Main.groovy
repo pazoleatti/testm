@@ -243,6 +243,8 @@ class Main {
                     'rnu72'                 : 358, // (РНУ-72) Регистр налогового учета уступки права требования как реализации финансовых услуг и операций с закладными
                     'rnu75'                 : 366, // (РНУ-75) Регистр налогового учета доходов по операциям депозитария
                     'rnu_101'               : 818, // РНУ 101
+                    'rnu_102'               : 820, // РНУ 102
+                    'rnu_107'               : 821, // РНУ 107
                     'rnu_111'               : 808, // РНУ 111
                     'rnu_117'               : 809  // РНУ 117
             ],
@@ -273,7 +275,8 @@ class Main {
                     'vat_937_3'            : 619, // Итоговые данные из журнала полученных и выставленных счетов-фактур по посреднической деятельности
                     'vat_grant_basis'      : 622, // Расшифровка операций по реализации товаров (работ, услуг) на безвозмездной основе
                     'vat_operAgent'        : 621, // Разнарядка на безакцептное списание/зачисление по суммам НДС с территориальных банков, Московского банка и подразделений ЦА (по операциям налогового агента)
-                    'vat_operBank'         : 620  // Разнарядка на безакцептное списание/зачисление по суммам НДС с территориальных банков, Московского банка и подразделений ЦА (по операциям банка)
+                    'vat_operBank'         : 620, // Разнарядка на безакцептное списание/зачисление по суммам НДС с территориальных банков, Московского банка и подразделений ЦА (по операциям банка)
+                    'vat_724_10'           : 623  // (724.10) Расчет суммы доначисления НДС в связи с применением тарифов и цен, не соответствующих рыночному уровню, по сделкам с Взаимозависимыми лицами и резидентами оффшорных зон
             ],
             'transport': [
                     'benefit_vehicles': 202, // Сведения о льготируемых транспортных средствах, по которым уплачивается транспортный налог
@@ -318,34 +321,37 @@ class Main {
 
     // Имя папки -> REF_BOOK.ID
     def static REFBOOK_FOLDER_NAME_TO_ID = [
-            'account_plan' : 101,
-            'bond' : 84,
-            'classificator_code_724_2_1' : 102,
-            'classificator_country' : 10,
+            'account_plan'                 : 101,
+            'bond'                         : 84,
+            'classificator_code_724_2_1'   : 102,
+            'classificator_country'        : 10,
+            'classificator_currency'       : 15,
             'classificator_eco_activities' : 34,
-            'classificator_income' : 28,
-            'classificator_outcome' : 27,
-            'currency_rate' : 22,
-            'declaration_params_property' : 200,
+            'classificator_income'         : 28,
+            'classificator_oktmo'          : 96,
+            'classificator_outcome'        : 27,
+            'currency_rate'                : 22,
+            'declaration_params_property'  : 200,
             'declaration_params_transport' : 210,
-            'department' : 30,
-            'emitent' : 100,
-            'income101' : 50,
-            'income102' : 52,
-            'jur_persons' : 520,
-            'jur_persons_terms' : 515,
-            'metal_rate' : 90,
-            'offshore' : 519,
-            'okato' : 3,
-            'okei' : 12,
-            'organization' : 9,
-            'problem_zones' : 504,
-            'raising_rates_transport' : 209,
-            'region' : 4,
-            'tax_benefits_property' : 203,
-            'tax_benefits_transport' : 7,
-            'vehicles_average_cost' : 208,
-            'vehicles_average_cost_2015' : 218
+            'department'                   : 30,
+            'emitent'                      : 100,
+            'income101'                    : 50,
+            'income102'                    : 52,
+            'jur_persons'                  : 520,
+            'jur_persons_terms'            : 515,
+            'metal_rate'                   : 90,
+            'offshore'                     : 519,
+            'okato'                        : 3,
+            'okei'                         : 12,
+            'organization'                 : 9,
+            'problem_zones'                : 504,
+            'raising_rates_transport'      : 209,
+            'region'                       : 4,
+            'tax_benefits_property'        : 203,
+            'tax_benefits_transport'       : 7,
+            'vehicles_average_cost'        : 208,
+            'vehicles_average_cost_2015'   : 218,
+            'vehicles_tax_rate'            : 41
     ]
 
     static void main(String[] args) {

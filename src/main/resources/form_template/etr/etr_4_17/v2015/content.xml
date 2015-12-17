@@ -6,7 +6,7 @@
     <accruing>true</accruing>
     <updating>false</updating>
     <name>Сведения о начисленных и уплачиваемых налогах, сборах и взносах, отнесенных на расходы (ЦА)</name>
-    <fullName>Аналитический отчет «Сведения о начисленных и уплачиваемых налогах, сборах и взносах, отнесенных на расходы» (ЦА)</fullName>
+    <fullName>Аналитический отчет &quot;Сведения о начисленных и уплачиваемых налогах, сборах и взносах, отнесенных на расходы&quot; (ЦА)</fullName>
     <header>Приложение 4-17 (ЦА)</header>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>fix</alias>

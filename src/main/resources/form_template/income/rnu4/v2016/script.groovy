@@ -11,7 +11,7 @@ import groovy.transform.Field
 
 /**
  * (РНУ-4) Простой регистр налогового учёта «доходы»
- * formTemplateId=316
+ * formTemplateId=1316
  *
  */
 
