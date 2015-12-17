@@ -1,4 +1,4 @@
-package form_template.vat.vat_724_10.v2016
+package form_template.vat.vat_724_10.v2015
 
 import au.com.bytecode.opencsv.CSVReader
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent

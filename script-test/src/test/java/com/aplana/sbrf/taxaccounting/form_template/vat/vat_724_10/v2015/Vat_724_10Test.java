@@ -1,4 +1,4 @@
-package com.aplana.sbrf.taxaccounting.form_template.vat.vat_724_10.v2016;
+package com.aplana.sbrf.taxaccounting.form_template.vat.vat_724_10.v2015;
 
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
