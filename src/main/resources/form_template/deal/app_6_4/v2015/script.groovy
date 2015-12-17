@@ -4,8 +4,6 @@ import au.com.bytecode.opencsv.CSVReader
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
-import com.aplana.sbrf.taxaccounting.service.script.util.ScriptUtils
 import groovy.transform.Field
 
 /**
@@ -87,9 +85,20 @@ def nonEmptyColumns = ['name', 'serviceName', 'sum', 'docDate', 'price', 'cost',
 @Field
 def totalColumns = ['sum', 'price', 'cost']
 
+// Дата начала отчетного периода
+@Field
+def startDate = null
+
 // Дата окончания отчетного периода
 @Field
 def endDate = null
+
+def getReportPeriodStartDate() {
+    if (startDate == null) {
+        startDate = reportPeriodService.getStartDate(formData.reportPeriodId).time
+    }
+    return startDate
+}
 
 def getReportPeriodEndDate() {
     if (endDate == null) {
@@ -123,8 +132,6 @@ void logicCheck() {
     if (dataRows.isEmpty()) {
         return
     }
-    String dateFormat = 'yyyy'
-    def formYear = (String) reportPeriodService.get(formData.reportPeriodId).getTaxPeriod().getYear()
 
     for (row in dataRows) {
         if (row.getAlias() != null) {
@@ -137,14 +144,15 @@ void logicCheck() {
 
         // 2. Проверка заполнения вида услуги
         if (row.serviceName != null && !(row.serviceName.intValue() in (1..8))) {
-            def msg = row.getCell('serviceName').column.name
-            logger.error("Строка $rowNum: Значение графы «$msg» должно принимать одно из следующих значений: «1, 2, 3, 4, 5, 6, 7, 8»!")
+            def msg1 = row.getCell('serviceName').column.name
+            def msg2 = row.serviceName
+            logger.error("Строка $rowNum: Графа «$msg1» заполнена неверно ($msg2)! Возможные значения: 1, 2, 3, 4, 5, 6, 7, 8")
         }
 
         // 3. Проверка суммы доходов
-        if (row.sum != null && row.sum <= 0) {
+        if (row.sum != null && row.sum < 0) {
             def msg = row.getCell('sum').column.name
-            logger.error("Строка $rowNum: Значение графы «$msg» должно быть больше «0»!")
+            logger.error("Строка $rowNum: Значение графы «$msg» должно быть больше или равно «0»!")
         }
 
         // 4. Проверка цены
@@ -168,15 +176,8 @@ void logicCheck() {
             logger.error("Строка $rowNum: Значение графы «$msg1» должно быть не меньше значения графы «$msg2»!")
         }
 
-        // 7. Проверка года совершения сделки
-        if (row.dealDoneDate) {
-            def dealDoneYear = row.dealDoneDate.format(dateFormat)
-            if (dealDoneYear != formYear) {
-                def msg = row.getCell('dealDoneDate').column.name
-                logger.error("Строка $rowNum: Год, указанный по графе «$msg» ($dealDoneYear), должен относиться " +
-                        "к календарному году текущей формы ($formYear)!")
-            }
-        }
+        // 7. Проверка даты совершения сделки
+        checkDealDoneDate(logger, row, 'dealDoneDate', getReportPeriodStartDate(), getReportPeriodEndDate(), true)
 
         // 8. Проверка диапазона дат
         if (row.docDate) {

@@ -4,8 +4,6 @@ import au.com.bytecode.opencsv.CSVReader
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
-import com.aplana.sbrf.taxaccounting.service.script.util.ScriptUtils
 import groovy.transform.Field
 
 /**
@@ -87,9 +85,20 @@ def nonEmptyColumns = ['name', 'sum', 'docDate', 'count', 'price', 'cost', 'deal
 @Field
 def totalColumns = ['sum', 'count', 'price', 'cost']
 
+// Дата начала отчетного периода
+@Field
+def startDate = null
+
 // Дата окончания отчетного периода
 @Field
 def endDate = null
+
+def getReportPeriodStartDate() {
+    if (startDate == null) {
+        startDate = reportPeriodService.getStartDate(formData.reportPeriodId).time
+    }
+    return startDate
+}
 
 def getReportPeriodEndDate() {
     if (endDate == null) {
@@ -123,8 +132,6 @@ void logicCheck() {
     if (dataRows.isEmpty()) {
         return
     }
-    String dateFormat = 'yyyy'
-    def formYear = (String) reportPeriodService.get(formData.reportPeriodId).getTaxPeriod().getYear()
 
     for (row in dataRows) {
         if (row.getAlias() != null) {
@@ -162,15 +169,8 @@ void logicCheck() {
             logger.error("Строка $rowNum: Значение графы «$msg1» должно быть не меньше значения графы «$msg2»!")
         }
 
-        // 6. Проверка года совершения сделки
-        if (row.dealDoneDate) {
-            def dealDoneYear = row.dealDoneDate.format(dateFormat)
-            if (dealDoneYear != formYear) {
-                def msg = row.getCell('dealDoneDate').column.name
-                logger.error("Строка $rowNum: Год, указанный по графе «$msg» ($dealDoneYear), должен относиться " +
-                        "к календарному году текущей формы ($formYear)!")
-            }
-        }
+        // 6. Проверка даты совершения сделки
+        checkDealDoneDate(logger, row, 'dealDoneDate', getReportPeriodStartDate(), getReportPeriodEndDate(), true)
 
         // 7. Проверка диапазона дат
         if (row.docDate) {

@@ -113,7 +113,7 @@ public class App_6_8Test extends ScriptTestBase {
         //  Корректность даты совершения сделки
         //  Проверка диапазона дат
         row.getCell("name").setValue(1L, null);
-        row.getCell("sum").setValue(0, null);
+        row.getCell("sum").setValue(-1, null);
         row.getCell("serviceType").setValue(1L, null);
         row.getCell("docNumber").setValue("1", null);
         row.getCell("docDate").setValue(sdf.parse("02.01.2990"), null);
@@ -123,11 +123,11 @@ public class App_6_8Test extends ScriptTestBase {
         testHelper.execute(FormDataEvent.CHECK);
         entries = testHelper.getLogger().getEntries();
         i = 0;
-        Assert.assertEquals("Строка 1: Значение графы «Сумма расходов Банка, руб.» должно быть больше «0»!", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 1: Значение графы «Сумма расходов Банка, руб.» должно быть больше или равно «0»!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Значение графы «Цена» должно быть равно значению графы «Сумма расходов Банка, руб.»!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Значение графы «Стоимость» должно быть равно значению графы «Сумма расходов Банка, руб.»!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Значение графы «Дата совершения сделки» должно быть не меньше значения графы «Дата договора»!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Год, указанный по графе «Дата совершения сделки» (2990), должен относиться к календарному году текущей формы (2014)!", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 1: Дата, указанная в графе «Дата совершения сделки» (01.01.2990), должна относиться к отчетному периоду текущей формы (01.01.2014 - 31.12.2014)!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Значение даты атрибута «Дата договора» должно принимать значение из следующего диапазона: 01.01.1991 - 31.12.2099", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Значение даты атрибута «Дата совершения сделки» должно принимать значение из следующего диапазона: 01.01.1991 - 31.12.2099", entries.get(i++).getMessage());
         Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
