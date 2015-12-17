@@ -147,7 +147,7 @@ public class LoadRefBookDataServiceImpl extends AbstractLoadTransportDataService
 
         long maxFileSize = 0;
         if (isAsync) {
-            maxFileSize = asyncTaskTypeDao.get(ReportType.LOAD_ALL_TF.getAsyncTaskTypeId(true)).getTaskLimit();
+            maxFileSize = asyncTaskTypeDao.get(ReportType.LOAD_ALL_TF.getAsyncTaskTypeId()).getTaskLimit();
         }
 
         ImportCounter wrongImportCounter = new ImportCounter();
