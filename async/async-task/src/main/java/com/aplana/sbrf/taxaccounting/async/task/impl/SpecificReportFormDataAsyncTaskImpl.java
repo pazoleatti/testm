@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.async.service.AsyncTaskInterceptor;
 import com.aplana.sbrf.taxaccounting.async.task.AsyncTaskLocal;
 import com.aplana.sbrf.taxaccounting.async.task.AsyncTaskRemote;
 import com.aplana.sbrf.taxaccounting.async.task.RefreshFormDataAsyncTask;
+import com.aplana.sbrf.taxaccounting.async.task.SpecificReportFormDataAsyncTask;
 
 import javax.ejb.*;
 import javax.interceptor.Interceptors;
@@ -14,5 +15,5 @@ import javax.interceptor.Interceptors;
 @Interceptors(AsyncTaskInterceptor.class)
 @TransactionManagement(TransactionManagementType.CONTAINER)
 @TransactionAttribute(TransactionAttributeType.REQUIRED)
-public class SpecificReportFormDataAsyncTaskImpl extends RefreshFormDataAsyncTask {
+public class SpecificReportFormDataAsyncTaskImpl extends SpecificReportFormDataAsyncTask {
 }
