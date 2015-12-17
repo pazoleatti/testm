@@ -115,7 +115,7 @@ def endDate = null
 
 def getReportPeriodStartDate() {
     if (startDate == null) {
-        startDate = reportPeriodService.getCalendarStartDate(formData.reportPeriodId).time
+        startDate = reportPeriodService.getStartDate(formData.reportPeriodId).time
     }
     return startDate
 }
@@ -213,18 +213,7 @@ void logicCheck() {
         }
 
         // 7. Проверка пересечения даты сделки с отчетным периодом
-        if (row.dealDoneDate) {
-            def dealDoneYear = row.dealDoneDate.format(dateFormat)
-            startDate = getReportPeriodStartDate()
-            endDate = getReportPeriodEndDate()
-            formatStartDate = startDate.format(dateFormat)
-            formatEndDate = endDate.format(dateFormat)
-            if (row.dealDoneDate < startDate || row.dealDoneDate > endDate) {
-                def msg = row.getCell('dealDoneDate').column.name
-                logger.error("Строка $rowNum: Дата, указанная в графе «$msg» ($dealDoneYear), должна относиться " +
-                        "к отчетному периоду текущей формы ($formatStartDate - $formatEndDate)!")
-            }
-        }
+        checkDealDoneDate(logger, row, 'dealDoneDate', getReportPeriodStartDate(), getReportPeriodEndDate(), true)
 
         // 8. Проверка диапазона дат
         if (row.docDate) {
