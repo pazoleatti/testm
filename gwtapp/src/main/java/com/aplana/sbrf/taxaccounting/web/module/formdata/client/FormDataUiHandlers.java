@@ -36,11 +36,9 @@ public interface FormDataUiHandlers extends UiHandlers{
 
 	void onCheckClicked(boolean force);
 
-	void onPrintExcelClicked(boolean force);
+    void onTimerReport(ReportType reportType, String specificReportType, boolean isTimer);
 
-    void onTimerReport(ReportType reportType, boolean isTimer);
-
-    void onPrintCSVClicked(boolean force);
+    void onPrintClicked(ReportType reportType, String specificReportType, boolean force);
 
 	void onSignersClicked();
 

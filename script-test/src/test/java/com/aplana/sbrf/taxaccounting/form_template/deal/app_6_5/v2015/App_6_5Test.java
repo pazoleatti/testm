@@ -101,7 +101,7 @@ public class App_6_5Test extends ScriptTestBase {
         Assert.assertEquals("Строка 1: Графа «Цена» не заполнена!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Графа «Стоимость» не заполнена!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Графа «Дата совершения сделки» не заполнена!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Графа «Населенный пункт» не заполнена! Выполнение расчета невозможно!", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 1: Графа «Населенный пункт» должна быть заполнена, если графа «Город» не заполнена!", entries.get(i++).getMessage());
         Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
         testHelper.getLogger().clear();
 
@@ -126,11 +126,11 @@ public class App_6_5Test extends ScriptTestBase {
 
         entries = testHelper.getLogger().getEntries();
         i = 0;
-        Assert.assertEquals("Строка 1: Значение графы «Сумма расходов Банка, руб.» должно быть больше «0»!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Значение графы «Цена» должно быть равно отношению графы «Сумма расходов Банка, руб.» к графе «Количество»! Выполнение расчета невозможно!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Значение графы «Сумма расходов Банка, руб.» должно быть равно значению графы «Стоимость»!", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 1: Значение графы «Сумма расходов Банка, руб.» должно быть больше или равно «0»!", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 1: Значение графы «Цена» должно быть равно отношению графы «Сумма расходов Банка, руб.» к графе «Количество», если графа «Количество» заполнена (значением > 0)!", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 1: Значение графы «Стоимость» должно быть равно значению графы «Сумма расходов Банка, руб.»!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Значение графы «Дата совершения сделки» должно быть не меньше значения графы «Дата договора»!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Год, указанный по графе «Дата совершения сделки» (2989), должен относиться к календарному году текущей формы (2014)!", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 1: Дата, указанная в графе «Дата совершения сделки» (01.01.2989), должна относиться к отчетному периоду текущей формы (01.01.2014 - 31.12.2014)!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Значение даты атрибута «Дата договора» должно принимать значение из следующего диапазона: 01.01.1991 - 31.12.2099", entries.get(i++).getMessage());
         Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
         testHelper.getLogger().clear();
@@ -146,7 +146,7 @@ public class App_6_5Test extends ScriptTestBase {
 
         entries = testHelper.getLogger().getEntries();
         i = 0;
-        Assert.assertEquals("Строка 1: Значение графы «Цена» должно быть равно значению графы «Сумма расходов Банка, руб.»! Выполнение расчета невозможно!", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 1: Значение графы «Цена» должно быть равно значению графы «Сумма расходов Банка, руб.», если графа «Количество» не заполнена!", entries.get(i++).getMessage());
         Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
         testHelper.getLogger().clear();
 

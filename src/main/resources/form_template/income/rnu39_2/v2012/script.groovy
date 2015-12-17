@@ -170,7 +170,7 @@ def addRow() {
     if (currentDataRow == null || currentDataRow.getIndex() == -1) {
         index = getDataRow(dataRows, 'totalA1').getIndex()
     } else if (currentDataRow.getAlias() == null) {
-        index = currentDataRow.getIndex() + 1
+        index = currentDataRow.getIndex()
     } else {
         def alias = currentDataRow.getAlias()
         if (alias == 'A') {
@@ -183,7 +183,7 @@ def addRow() {
             index = getDataRow(dataRows, 'total' + alias).getIndex()
         }
     }
-    dataRows.add(index + 1, getNewRow())
+    dataRows.add(index - 1, getNewRow())
     formDataService.saveCachedDataRows(formData, logger)
 }
 

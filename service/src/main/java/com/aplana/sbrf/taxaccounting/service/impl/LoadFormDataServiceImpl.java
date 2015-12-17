@@ -209,7 +209,7 @@ public class LoadFormDataServiceImpl extends AbstractLoadTransportDataService im
 
         long maxFileSize = 0;
         if (isAsync) {
-            maxFileSize = asyncTaskTypeDao.get(ReportType.LOAD_ALL_TF.getAsyncTaskTypeId(true)).getTaskLimit();
+            maxFileSize = asyncTaskTypeDao.get(ReportType.LOAD_ALL_TF.getAsyncTaskTypeId()).getTaskLimit();
         }
         // Обработка всех подходящих файлов, с получением списка на каждой итерации
         for (String fileName : workFilesList) {

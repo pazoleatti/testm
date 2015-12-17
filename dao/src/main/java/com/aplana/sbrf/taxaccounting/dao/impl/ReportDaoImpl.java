@@ -24,7 +24,7 @@ public class ReportDaoImpl extends AbstractDao implements ReportDao {
 	private static final Log LOG = LogFactory.getLog(ReportDaoImpl.class);
 
     @Override
-    public void create(final long formDataId, final String blobDataId, final ReportType type, final boolean checking, final boolean manual, final boolean absolute) {
+    public void create(final long formDataId, final String blobDataId, final String type, final boolean checking, final boolean manual, final boolean absolute) {
         try{
             PreparedStatementCreator psc = new PreparedStatementCreator() {
                 @Override
@@ -36,7 +36,7 @@ public class ReportDaoImpl extends AbstractDao implements ReportDao {
                                     "INSERT INTO FORM_DATA_REPORT (FORM_DATA_ID, BLOB_DATA_ID, TYPE, CHECKING, MANUAL, ABSOLUTE) VALUES (?,?,?,?,?,?)");
                     ps.setLong(1, formDataId);
                     ps.setString(2, blobDataId);
-                    ps.setInt(3, type.getId());
+                    ps.setString(3, type);
                     ps.setBoolean(4, checking);
                     ps.setBoolean(5, manual);
                     ps.setBoolean(6, absolute);
@@ -85,13 +85,13 @@ public class ReportDaoImpl extends AbstractDao implements ReportDao {
     }
 
     @Override
-    public String get(final long formDataId, final ReportType type, final boolean checking, final boolean manual, final boolean absolute) {
+    public String get(final long formDataId, final String type, final boolean checking, final boolean manual, final boolean absolute) {
         try{
             PreparedStatementData ps = new PreparedStatementData();
             ps.appendQuery("SELECT BLOB_DATA_ID FROM FORM_DATA_REPORT " +
                             "WHERE FORM_DATA_ID = ? AND TYPE = ? AND CHECKING = ? AND MANUAL = ? AND ABSOLUTE = ?");
             ps.addParam(formDataId);
-            ps.addParam(type.getId());
+            ps.addParam(type);
             ps.addParam(checking);
             ps.addParam(manual);
             ps.addParam(absolute);

@@ -164,10 +164,8 @@
                             <g:Label ui:field="editModeLabel" text="Режим редактирования"
                                      addStyleNames="{style.editMode}, {style.marginRight5}"/>
                             <fileuplod:FileUploadWidget ui:field="fileUploader" width="185px"/>
-                            <style:LinkButton text="Выгрузить в xlsm" ui:field="printToExcel" img="resources/img/download-xls-16.png"/>
-                            <style:LinkButton text="Выгрузить в CSV" ui:field="printToCSV" img="resources/img/printer-16.png"/>
-                            <!--style:DropdownButton ui:field="printAnchor" text="Печать" img="resources/img/printer-16.png"
-                                              title="Отобразить печатное представление документа"/-->
+                            <style:DropdownButton ui:field="printAnchor" text="Формирование отчетов" img="resources/img/printer-16.png"
+                                              title="Формирование отчето"/>
                         </style:LeftBar>
                     </fm:Right>
                 </fm:right>

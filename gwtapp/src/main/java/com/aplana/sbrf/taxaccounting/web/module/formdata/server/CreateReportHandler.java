@@ -44,8 +44,6 @@ public class CreateReportHandler extends AbstractActionHandler<CreateReportActio
     @Autowired
     private AsyncTaskManagerService asyncTaskManagerService;
 
-    private static final SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm z");
-
     public CreateReportHandler() {
         super(CreateReportAction.class);
     }
@@ -56,14 +54,19 @@ public class CreateReportHandler extends AbstractActionHandler<CreateReportActio
         CreateReportResult result = new CreateReportResult();
         TAUserInfo userInfo = securityService.currentUserInfo();
         Logger logger = new Logger();
-        String uuid = reportService.get(userInfo, action.getFormDataId(), reportType, action.isShowChecked(), action.isManual(), action.isSaved());
+        String uuid;
+        if (!reportType.equals(ReportType.SPECIFIC_REPORT)) {
+            uuid = reportService.get(userInfo, action.getFormDataId(), reportType, action.isShowChecked(), action.isManual(), action.isSaved());
+        } else {
+            uuid = reportService.get(userInfo, action.getFormDataId(), action.getSpecificReportType(), action.isShowChecked(), action.isManual(), action.isSaved());
+        }
         if (uuid != null) {
             result.setExistReport(true);
         } else {
             Pair<ReportType, LockData> lockType = formDataService.getLockTaskType(action.getFormDataId());
             if (lockType == null) {
-                String keyTask = LockData.LockObjects.FORM_DATA.name() + "_" + action.getFormDataId() + "_" + reportType.getName() + "_isShowChecked_" + action.isShowChecked() + "_manual_" + action.isManual() + "_saved_" + action.isSaved();
-                Pair<Boolean, String> restartStatus = asyncTaskManagerService.restartTask(keyTask, formDataService.getTaskName(reportType, action.getFormDataId(), userInfo), userInfo, action.isForce(), logger);
+                String keyTask = formDataService.generateReportKey(action.getFormDataId(), reportType, action.getSpecificReportType(), action.isShowChecked(), action.isManual(), action.isSaved());
+                Pair<Boolean, String> restartStatus = asyncTaskManagerService.restartTask(keyTask, formDataService.getTaskName(reportType, action.getFormDataId(), userInfo, action.getSpecificReportType()), userInfo, action.isForce(), logger);
                 if (restartStatus != null && restartStatus.getFirst()) {
                     result.setLock(true);
                     result.setRestartMsg(restartStatus.getSecond());
@@ -76,11 +79,13 @@ public class CreateReportHandler extends AbstractActionHandler<CreateReportActio
                     params.put("isShowChecked", action.isShowChecked());
                     params.put("manual", action.isManual());
                     params.put("saved", action.isSaved());
+                    if (reportType.equals(ReportType.SPECIFIC_REPORT))
+                    params.put("specificReportType", action.getSpecificReportType());
                     asyncTaskManagerService.createTask(keyTask, reportType, params, false, PropertyLoader.isProductionMode(), userInfo, logger, new AsyncTaskHandler() {
                         @Override
                         public LockData createLock(String keyTask, ReportType reportType, TAUserInfo userInfo) {
                             return lockDataService.lock(keyTask, userInfo.getUser().getId(),
-                                    formDataService.getFormDataFullName(action.getFormDataId(), action.isManual(), null, reportType),
+                                    formDataService.getFormDataFullName(action.getFormDataId(), action.isManual(), null, reportType, action.getSpecificReportType()),
                                     LockData.State.IN_QUEUE.getText());
                         }
 
@@ -99,7 +104,7 @@ public class CreateReportHandler extends AbstractActionHandler<CreateReportActio
 
                         @Override
                         public String getTaskName(ReportType reportType, TAUserInfo userInfo) {
-                            return formDataService.getTaskName(reportType, action.getFormDataId(), userInfo);
+                            return formDataService.getTaskName(reportType, action.getFormDataId(), userInfo, action.getSpecificReportType());
                         }
                     });
                 }

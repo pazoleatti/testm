@@ -72,6 +72,13 @@ public interface LockDataService {
      */
     LockData getLock(String key);
 
+    /**
+     * Возвращает информацию о всех блокировках, код которых начинающинается c key
+     * @param key
+     * @return
+     */
+    List<LockData> getLockStartsWith(String key);
+
 	/**
 	 * Снимает блокировку по ее идентификатору. Если блокировки не было, либо была установлена другим пользователем, то exception.
 	 *

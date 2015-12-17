@@ -6,7 +6,6 @@ import com.aplana.sbrf.taxaccounting.dao.AsyncTaskTypeDao;
 import com.aplana.sbrf.taxaccounting.dao.DeclarationDataDao;
 import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DataRowDao;
-import com.aplana.sbrf.taxaccounting.dao.api.DepartmentFormTypeDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
@@ -977,7 +976,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
     @Override
     public Long getTaskLimit(ReportType reportType) {
-        return asyncTaskTypeDao.get(reportType.getAsyncTaskTypeId(true)).getTaskLimit();
+        return asyncTaskTypeDao.get(reportType.getAsyncTaskTypeId()).getTaskLimit();
     }
 
     @Override

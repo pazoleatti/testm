@@ -127,11 +127,13 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 
         void updateTableTopPosition(int position);
 
-        void updatePrintReportButtonName(ReportType reportType, boolean isLoad);
+        void updatePrintReportButtonName(ReportType reportType, String specificReportType, boolean isLoad);
 
         void showConsolidation(boolean isShown);
 
         void updateRightButtonsHeight(int height);
+
+        void setSpecificReportTypes(List<String> specificReportTypes);
     }
 
 	public static final String NAME_TOKEN = "!formData";

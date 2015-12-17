@@ -9,6 +9,7 @@ public enum ReportType {
 
     EXCEL(0, "XLSM", "Формирование XLSM-файла %s", 3L, 103L),
     CSV(1, "CSV", "Формирование CSV-файла %s", 4L, 104L),
+    SPECIFIC_REPORT(3, "SPECIFIC", "Формирование отчета \"%s\" %s", 22L, 122L),
 
     EXCEL_DEC(0, "XLSX", "Формирование печатного представления %s", 5L, 105L),
     XML_DEC(1, "XML", "Расчет %s", 6L, 106L),
@@ -33,7 +34,7 @@ public enum ReportType {
     ZIP_IFRS(0, "Zip", "", 9L, 109L),
 
     ARCHIVE_AUDIT(0, "ARCHIVE_AUDIT", "", 10L, 110L),
-    CSV_AUDIT(1, "CSV_AUDIT", "Формирование zip-архива с csv-файлом журнала аудита по параметрам поиска", 11l, 111L),
+    CSV_AUDIT(1, "CSV_AUDIT", "Формирование zip-архива с csv-файлом журнала аудита по параметрам поиска", 11L, 111L),
 
     LOAD_ALL_TF(1, "LoadAllTF", "Импорт транспортного файла из каталога загрузки", 13L, 113L);
 
@@ -72,18 +73,19 @@ public enum ReportType {
         return description;
     }
 
-    public Long getAsyncTaskTypeId(boolean isProductionMode) {
-        if (isProductionMode)
-            return asyncTaskTypeId;
-        else
-            return devModeAsyncTaskTypeId;
-    }
+    public Long getAsyncTaskTypeId() {
+		return asyncTaskTypeId;
+	}
 
     public void setAsyncTaskTypeId(Long asyncTaskTypeId) {
         this.asyncTaskTypeId = asyncTaskTypeId;
     }
 
-    public void setDevModeAsyncTaskTypeId(Long devModeAsyncTaskTypeId) {
+	public Long getDevModeAsyncTaskTypeId() {
+		return devModeAsyncTaskTypeId;
+	}
+
+	public void setDevModeAsyncTaskTypeId(Long devModeAsyncTaskTypeId) {
         this.devModeAsyncTaskTypeId = devModeAsyncTaskTypeId;
     }
 }

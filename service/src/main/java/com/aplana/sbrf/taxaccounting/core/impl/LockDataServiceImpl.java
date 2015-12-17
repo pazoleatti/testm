@@ -97,7 +97,12 @@ public class LockDataServiceImpl implements LockDataService {
         }
     }
 
-	@Override
+    @Override
+    public List<LockData> getLockStartsWith(String key) {
+        return dao.getStartsWith(key);
+    }
+
+    @Override
 	public Boolean unlock(final String key, final int userId) {
         return unlock(key, userId, false);
     }

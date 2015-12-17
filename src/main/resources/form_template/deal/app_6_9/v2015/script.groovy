@@ -85,10 +85,10 @@ def allColumns = ['fix', 'rowNumber', 'name', 'iksr', 'countryCode', 'docNumber'
                   'cost', 'dealDoneDate']
 
 @Field
-def editableColumns = ['name', 'docNumber', 'docDate', 'okeiCode', 'count', 'price', 'cost', 'dealDoneDate']
+def editableColumns = ['name', 'docNumber', 'docDate', 'price', 'cost', 'dealDoneDate']
 
 @Field
-def autoFillColumns = ['rowNumber', 'iksr', 'countryCode', 'cost']
+def autoFillColumns = ['rowNumber', 'iksr', 'countryCode', 'okeiCode', 'count', 'cost']
 
 // Проверяемые на пустые значения атрибуты
 @Field
@@ -107,7 +107,7 @@ def endDate = null
 
 def getReportPeriodStartDate() {
     if (startDate == null) {
-        startDate = reportPeriodService.getCalendarStartDate(formData.reportPeriodId).time
+        startDate = reportPeriodService.getStartDate(formData.reportPeriodId).time
     }
     return startDate
 }
@@ -122,10 +122,19 @@ def getReportPeriodEndDate() {
 //// Обертки методов
 
 // Поиск записи в справочнике по значению (для расчетов)
-def getRecordId(def Long refBookId, def String alias, def String value, def int rowIndex, def String cellName,
-                boolean required = true) {
+def Long getRecordId(def Long refBookId, def String alias, def String value) {
     return formDataService.getRefBookRecordId(refBookId, recordCache, providerCache, alias, value,
-            getReportPeriodEndDate(), rowIndex, cellName, logger, required)
+            getReportPeriodEndDate(), -1, null, logger, true)
+}
+
+// Поиск записи в справочнике по значению (для импорта)
+def getRecordIdImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
+                      def boolean required = false) {
+    if (value == null || value.trim().isEmpty()) {
+        return null
+    }
+    return formDataService.getRefBookRecordIdImport(refBookId, recordCache, providerCache, alias, value,
+            getReportPeriodEndDate(), rowIndex, colIndex, logger, required)
 }
 
 // Разыменование записи справочника
@@ -153,9 +162,13 @@ void logicCheck() {
         checkNonEmptyColumns(row, rowNum, nonEmptyColumns, logger, true)
 
         // 2. Проверка единицы измерения
-        if (row.okeiCode != null && row.okeiCode != 796) {
-            def msg = row.getCell('okeiCode').column.name
-            logger.error("Строка $rowNum: Значение графы «$msg» должно быть равно значению «796»!")
+        def okei
+        if (row.okeiCode) {
+            okei = getRefBookValue(12, row.okeiCode)?.CODE?.stringValue
+            if (okei != '796') {
+                def msg = row.getCell('okeiCode').column.name
+                logger.error("Строка $rowNum: Значение графы «$msg» должно быть равно значению «796»!")
+            }
         }
 
         // 3. Проверка количества
@@ -185,14 +198,7 @@ void logicCheck() {
         }
 
         // 7. Проверка даты совершения сделки
-        if (row.dealDoneDate && (row.dealDoneDate < getReportPeriodStartDate() || row.dealDoneDate > getReportPeriodEndDate())) {
-            def msg = row.getCell('dealDoneDate').column.name
-            def dealDoneYear = row.dealDoneDate.format(dateFormat)
-            def formatStartDate = getReportPeriodStartDate().format(dateFormat)
-            def formatEndDate = getReportPeriodEndDate().format(dateFormat)
-            logger.error("Строка $rowNum: Дата, указанная в графе «$msg» ($dealDoneYear), должна относиться " +
-                    "к отчетному периоду текущей формы ($formatStartDate - $formatEndDate)!")
-        }
+        checkDealDoneDate(logger, row, 'dealDoneDate', getReportPeriodStartDate(), getReportPeriodEndDate(), true)
 
         // 8. Проверка диапазона дат
         if (row.docDate) {
@@ -216,6 +222,8 @@ void calc() {
     deleteAllAliased(dataRows)
 
     for (row in dataRows) {
+        row.okeiCode = getRecordId(12, 'CODE', '796')
+        row.count= 1
         row.cost = row.price
     }
 
@@ -402,7 +410,7 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
     colIndex++
 
     // графа 7
-    newRow.okeiCode = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
+    newRow.okeiCode = getRecordIdImport(12, 'CODE', values[colIndex], fileRowIndex, colIndex + colOffset, false)
     colIndex++
 
     // графа 8
@@ -552,7 +560,7 @@ def getNewRow(String[] rowCells, def columnCount, def fileRowIndex, def rowIndex
         // графа 6
         newRow.docDate = parseDate(pure(rowCells[6]), "dd.MM.yyyy", fileRowIndex, 6 + colOffset, logger, true)
         // графа 7
-        newRow.okeiCode = parseNumber(pure(rowCells[7]), fileRowIndex, 7 + colOffset, logger, true)
+        newRow.okeiCode = getRecordIdImport(12, 'CODE', pure(rowCells[10]), fileRowIndex, 10 + colOffset, false)
         // графа 11
         newRow.dealDoneDate = parseDate(pure(rowCells[11]), "dd.MM.yyyy", fileRowIndex, 11 + colOffset, logger, true)
         // графа 9

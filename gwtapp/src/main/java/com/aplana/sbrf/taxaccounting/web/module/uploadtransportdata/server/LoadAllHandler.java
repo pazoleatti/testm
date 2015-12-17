@@ -79,7 +79,7 @@ public class LoadAllHandler extends AbstractActionHandler<LoadAllAction, LoadAll
                 throw new ServiceLoggerException("Выполнение операции \"%s\" невозможно, т.к. нет файлов для обработки!", logEntryService.save(logger.getEntries()), reportType.getDescription());
             }
 
-            AsyncTaskTypeData taskTypeData = asyncTaskTypeDao.get(ReportType.LOAD_ALL_TF.getAsyncTaskTypeId(true));
+            AsyncTaskTypeData taskTypeData = asyncTaskTypeDao.get(ReportType.LOAD_ALL_TF.getAsyncTaskTypeId());
             if (taskTypeData.getTaskLimit() > 0) {
                 long maxFileSize = taskTypeData.getTaskLimit();
                 int skip = 0;
@@ -120,7 +120,9 @@ public class LoadAllHandler extends AbstractActionHandler<LoadAllAction, LoadAll
                 params.put(AsyncTask.RequiredParams.LOCK_DATE.name(), lockData.getDateLock());
                 try {
                     lockDataService.addUserWaitingForLock(key, userId);
-                    asyncManager.executeAsync(ReportType.LOAD_ALL_TF.getAsyncTaskTypeId(PropertyLoader.isProductionMode()), params, balancingVariant);
+                    asyncManager.executeAsync(
+							PropertyLoader.isProductionMode() ? ReportType.LOAD_ALL_TF.getAsyncTaskTypeId() : ReportType.LOAD_ALL_TF.getDevModeAsyncTaskTypeId(),
+							params, balancingVariant);
 					LockData.LockQueues queue = LockData.LockQueues.getById(balancingVariant.getId());
                     lockDataService.updateQueue(key, lockData.getDateLock(), queue);
                     logger.info("Задача загрузки ТФ запущена");
