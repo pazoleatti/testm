@@ -690,7 +690,7 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
             "      join report_period srp on srp.id = sdrp.REPORT_PERIOD_ID\n" +
             "      join tax_period stp on stp.ID = srp.TAX_PERIOD_ID\n" +
             "      --отбираем макет действующий для приемника в периоде приемника\n" +
-            "      join form_template sft on (sft.TYPE_ID = st.ID and sft.status in (0,1) and sft.version = (select max(ft2.version) from form_template ft2 where ft2.TYPE_ID = sft.TYPE_ID and extract(year from ft2.version) <= stp.year))\n" +
+            "      join form_template sft on (sft.TYPE_ID = st.ID and sft.status in (0,1) and sft.version = (select max(ft2.version) from form_template ft2 where ft2.TYPE_ID = sft.TYPE_ID and extract(year from ft2.version) <= stp.year and ft2.status in (0,1)))\n" +
             "      --если макет источника ежемесячный, то отбираем все возможные месяца для него из справочника\n" +
             "      left join\n" +
             "           (\n" +
@@ -823,7 +823,7 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
             "      join report_period trp on trp.id = tdrp.REPORT_PERIOD_ID\n" +
             "      join tax_period ttp on ttp.ID = trp.TAX_PERIOD_ID\n" +
             "      --отбираем макет действующий для приемника в периоде источника\n" +
-            "      join form_template tft on (tft.TYPE_ID = tt.ID and tft.status in (0,1) and tft.version = (select max(ft2.version) from form_template ft2 where ft2.TYPE_ID = tft.TYPE_ID and extract(year from ft2.version) <= ttp.year)) \n" +
+            "      join form_template tft on (tft.TYPE_ID = tt.ID and tft.status in (0,1) and tft.version = (select max(ft2.version) from form_template ft2 where ft2.TYPE_ID = tft.TYPE_ID and extract(year from ft2.version) <= ttp.year and ft2.status in (0,1))) \n" +
             "      --если макет приемника ежемесячный, то отбираем все возможные месяца для него из справочника\n" +
             "      left join\n" +
             "           (\n" +
@@ -945,7 +945,7 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
             "      join report_period trp on trp.id = tdrp.REPORT_PERIOD_ID\n" +
             "      join tax_period ttp on ttp.ID = trp.TAX_PERIOD_ID\n" +
             "      --отбираем макет действующий для приемника в периоде источника\n" +
-            "      join declaration_template tdt on (tdt.DECLARATION_TYPE_ID = dt.ID and tdt.status in (0,1) and tdt.version = (select max(dt2.version) from declaration_template dt2 where dt2.DECLARATION_TYPE_ID = tdt.DECLARATION_TYPE_ID and extract(year from dt2.version) <= ttp.year)) \n" +
+            "      join declaration_template tdt on (tdt.DECLARATION_TYPE_ID = dt.ID and tdt.status in (0,1) and tdt.version = (select max(dt2.version) from declaration_template dt2 where dt2.DECLARATION_TYPE_ID = tdt.DECLARATION_TYPE_ID and extract(year from dt2.version) <= ttp.year and dt2.status in (0,1))) \n" +
             "      --отбираем экземпляры с учетом периода сравнения, признака нарастающего истога, списка месяцов     \n" +
             "      left join declaration_data tdd on (tdd.DECLARATION_TEMPLATE_ID = tdt.id and tdd.DEPARTMENT_REPORT_PERIOD_ID = tdrp.id)\n" +
             "      where (:sourceFormDataId is null and (fd.id is null and fd.form_template_id = :formTemplateId and fd.DEPARTMENT_REPORT_PERIOD_ID = :departmentReportPeriodId and fd.kind = :kind and (:compPeriod is null and fd.COMPARATIVE_DEP_REP_PER_ID is null or fd.COMPARATIVE_DEP_REP_PER_ID = :compPeriod) and fd.ACCRUING = :accruing)) or fd.id = :sourceFormDataId\n" +
@@ -1042,7 +1042,7 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
             "      join report_period srp on srp.id = sdrp.REPORT_PERIOD_ID\n" +
             "      join tax_period stp on stp.ID = srp.TAX_PERIOD_ID\n" +
             "      --отбираем макет действующий для приемника в периоде приемника\n" +
-            "      join form_template sft on (sft.TYPE_ID = st.ID and sft.status in (0,1) and sft.version = (select max(ft2.version) from form_template ft2 where ft2.TYPE_ID = sft.TYPE_ID and extract(year from ft2.version) <= stp.year))\n" +
+            "      join form_template sft on (sft.TYPE_ID = st.ID and sft.status in (0,1) and sft.version = (select max(ft2.version) from form_template ft2 where ft2.TYPE_ID = sft.TYPE_ID and extract(year from ft2.version) <= stp.year and ft2.status in (0,1)))\n" +
             "      --если макет источника ежемесячный, то отбираем все возможные месяца для него из справочника\n" +
             "      left join\n" +
             "           (\n" +
