@@ -99,6 +99,9 @@ public class FormDataScriptingServiceImpl extends TAAbstractScriptingServiceImpl
             b.put("userDepartment", departmentService.getDepartment(userInfo.getUser().getDepartmentId()));
         }
         b.put("formDataDepartment", departmentService.getDepartment(formData.getDepartmentId()));
+        if (additionalParameters == null || !additionalParameters.containsKey("scriptStatusHolder")) {
+            b.put("scriptStatusHolder", null);
+        }
         if (additionalParameters != null) {
             for (Map.Entry<String, Object> entry : additionalParameters.entrySet()) {
                 if (b.containsKey(entry.getKey()))
