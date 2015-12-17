@@ -2160,4 +2160,26 @@ public final class ScriptUtils {
         }
         return null;
     }
+
+    /**
+     *
+     * @param logger логер для записи сообщения
+     * @param row строка НФ
+     * @param alias псевдоним столбца
+     * @param reportPeriodStartDate дата начала периода текущей формы
+     * @param reportPeriodEndDate дата окончания периода текущей формы
+     * @param fatal фатально ли сообщение
+     */
+    public static void checkDealDoneDate(Logger logger, DataRow<Cell> row, String alias, Date reportPeriodStartDate,
+                                         Date reportPeriodEndDate, boolean fatal) {
+        Date dealDoneDate = row.getCell(alias).getDateValue();
+        if (dealDoneDate != null && (dealDoneDate.before(reportPeriodStartDate) || dealDoneDate.after(reportPeriodEndDate))) {
+            rowLog(logger, row, (row != null ? ("Строка "+ row.getIndex()  + ": ") : "") +
+                    String.format("Дата, указанная в графе «%s» (%s), должна относиться к отчетному периоду текущей формы (%s - %s)!",
+                            getColumnName(row, alias), formatDate(dealDoneDate, "dd.MM.yyyy"),
+                            formatDate(reportPeriodStartDate, "dd.MM.yyyy"),
+                            formatDate(reportPeriodEndDate, "dd.MM.yyyy")
+                    ), fatal ? LogLevel.ERROR : LogLevel.WARNING);
+        }
+    }
 }

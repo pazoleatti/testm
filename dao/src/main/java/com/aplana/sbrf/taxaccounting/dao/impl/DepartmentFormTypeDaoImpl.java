@@ -780,27 +780,13 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
 
     @Override
     @Transactional(readOnly = false)
-    public void save(int departmentId, int formKindId, int formTypeId) {
-    	try {
-	        getJdbcTemplate().update(
-	                "insert into department_form_type (department_id, form_type_id, id, kind) " +
-	                        " values (?, ?, seq_department_form_type.nextval, ?)",
-                    departmentId, formTypeId, formKindId);
-    	} catch (DataIntegrityViolationException e){
-			LOG.error(e.getMessage(), e);
-    		throw new DaoException(DUPLICATE_ERROR, e);
-    	} 
-    }
-
-    @Override
-    @Transactional(readOnly = false)
-    public long save(int departmentId, int typeId, int kindId, Integer performerId) {
+    public long save(int departmentId, int typeId, int kindId) {
         try {
             long id = generateId("seq_department_form_type", Long.class);
             getJdbcTemplate().update(
-                    "insert into department_form_type (id, department_id, form_type_id, kind, performer_dep_id) " +
-                            " values (?, ?, ?, ?, ?)",
-                    id, departmentId, typeId, kindId, performerId);
+                    "insert into department_form_type (id, department_id, form_type_id, kind) " +
+                            " values (?, ?, ?, ?)",
+                    id, departmentId, typeId, kindId);
             return id;
         } catch (DataIntegrityViolationException e){
 			LOG.error(e.getMessage(), e);

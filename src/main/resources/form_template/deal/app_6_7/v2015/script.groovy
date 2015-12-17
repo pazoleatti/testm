@@ -27,7 +27,7 @@ import groovy.transform.Field
 // графа 7  - docDate      -  Дата договора
 // графа 8  - price        -  Цена
 // графа 9  - cost         -  Стоимость
-// графа 10 - dealDate     -  Дата совершения сделки
+// графа 10 - dealDoneDate     -  Дата совершения сделки
 
 switch (formDataEvent) {
     case FormDataEvent.CREATE:
@@ -79,11 +79,11 @@ def recordCache = [:]
 def refBookCache = [:]
 
 @Field
-def allColumns = ['fix', 'rowNumber', 'name', 'iksr', 'countryCode', 'sum', 'docNumber', 'docDate', 'price', 'cost', 'dealDate']
+def allColumns = ['fix', 'rowNumber', 'name', 'iksr', 'countryCode', 'sum', 'docNumber', 'docDate', 'price', 'cost', 'dealDoneDate']
 
 // Редактируемые атрибуты
 @Field
-def editableColumns = ['name', 'sum', 'docNumber', 'docDate', 'dealDate']
+def editableColumns = ['name', 'sum', 'docNumber', 'docDate', 'dealDoneDate']
 
 // Автозаполняемые атрибуты
 @Field
@@ -91,7 +91,7 @@ def autoFillColumns = ['rowNumber', 'iksr', 'countryCode', 'price', 'cost']
 
 // Проверяемые на пустые значения атрибуты
 @Field
-def nonEmptyColumns = ['name', 'sum', 'docNumber', 'docDate', 'dealDate']
+def nonEmptyColumns = ['name', 'sum', 'docNumber', 'docDate', 'dealDoneDate']
 
 // Группируемые атрибуты
 @Field
@@ -110,7 +110,7 @@ def endDate = null
 
 def getReportPeriodStartDate() {
     if (startDate == null) {
-        startDate = reportPeriodService.getCalendarStartDate(formData.reportPeriodId).time
+        startDate = reportPeriodService.getStartDate(formData.reportPeriodId).time
     }
     return startDate
 }
@@ -182,25 +182,14 @@ void logicCheck() {
         }
 
         // 5. Корректность даты совершения сделки
-        if (row.docDate && row.dealDate && row.docDate > row.dealDate) {
-            def msg1 = row.getCell('dealDate').column.name
+        if (row.docDate && row.dealDoneDate && row.docDate > row.dealDoneDate) {
+            def msg1 = row.getCell('dealDoneDate').column.name
             def msg2 = row.getCell('docDate').column.name
             logger.error("Строка $rowNum: Значение графы «$msg1» должно быть не меньше значения графы «$msg2»!")
         }
 
         // 6. Проверка пересечения даты сделки с отчетным периодом
-        if (row.dealDate) {
-            def dealDoneYear = row.dealDate.format(dateFormat)
-            startDate = getReportPeriodStartDate()
-            endDate = getReportPeriodEndDate()
-            formatStartDate = startDate.format(dateFormat)
-            formatEndDate = endDate.format(dateFormat)
-            if (row.dealDate < startDate || row.dealDate > endDate) {
-                def msg = row.getCell('dealDate').column.name
-                logger.error("Строка $rowNum: Дата, указанная в графе «$msg» ($dealDoneYear), должна относиться " +
-                        "к отчетному периоду текущей формы ($formatStartDate - $formatEndDate)!")
-            }
-        }
+        checkDealDoneDate(logger, row, 'dealDoneDate', getReportPeriodStartDate(), getReportPeriodEndDate(), true)
 
         // 7. Проверка диапазона дат
         if (row.docDate) {
@@ -356,7 +345,7 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
             ([(headerRows[1][7]) : getColumnName(tmpRow, 'docDate')]),
             ([(headerRows[1][8]) : getColumnName(tmpRow, 'price')]),
             ([(headerRows[1][9]) : getColumnName(tmpRow, 'cost')]),
-            ([(headerRows[1][10]): getColumnName(tmpRow, 'dealDate')])
+            ([(headerRows[1][10]): getColumnName(tmpRow, 'dealDoneDate')])
     ]
     (1..10).each {
         headerMapping.add([(headerRows[2][it]): 'гр. ' + it])
@@ -431,7 +420,7 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
     colIndex++
 
     // графа 10
-    newRow.dealDate = parseDate(values[colIndex], "dd.MM.yyyy", fileRowIndex, colIndex + colOffset, logger, true)
+    newRow.dealDoneDate = parseDate(values[colIndex], "dd.MM.yyyy", fileRowIndex, colIndex + colOffset, logger, true)
 
     return newRow
 }

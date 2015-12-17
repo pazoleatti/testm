@@ -116,7 +116,7 @@ public class App_6_7Test extends ScriptTestBase {
         row.getCell("docDate").setValue(sdf.parse("02.01.2989"), null);
         row.getCell("price").setValue(4, null);
         row.getCell("cost").setValue(5, null);
-        row.getCell("dealDate").setValue(sdf.parse("01.01.2989"), null);
+        row.getCell("dealDoneDate").setValue(sdf.parse("01.01.2989"), null);
 
         testHelper.execute(FormDataEvent.CHECK);
         printLog();
@@ -139,7 +139,7 @@ public class App_6_7Test extends ScriptTestBase {
         row.getCell("docDate").setValue(sdf.parse("01.01.2014"), null);
         row.getCell("price").setValue(3, null);
         row.getCell("cost").setValue(3, null);
-        row.getCell("dealDate").setValue(sdf.parse("03.01.2014"), null);
+        row.getCell("dealDoneDate").setValue(sdf.parse("03.01.2014"), null);
         testHelper.execute(FormDataEvent.CHECK);
         Assert.assertTrue(testHelper.getLogger().getEntries().isEmpty());
 
@@ -221,7 +221,7 @@ public class App_6_7Test extends ScriptTestBase {
 
         testHelper.setImportFileInputStream(getImportXlsInputStream());
         testHelper.execute(FormDataEvent.IMPORT);
-        List<String> aliases = Arrays.asList("sum", "docNumber", "docDate", "price", "cost", "dealDate");
+        List<String> aliases = Arrays.asList("sum", "docNumber", "docDate", "price", "cost", "dealDoneDate");
         // ожидается 5 строк: 4 из файла + 1 итоговая строка
         int expected = 4 + 1;
         defaultCheckLoadData(aliases, expected);

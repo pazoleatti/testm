@@ -206,7 +206,7 @@ def addRow() {
             index = getDataRow(dataRows, 'total' + alias).getIndex()
         }
     }
-    dataRows.add(index + 1, getNewRow())
+    dataRows.add(index - 1, getNewRow())
     formDataService.saveCachedDataRows(formData, logger)
 }
 

@@ -61,6 +61,29 @@ public class Rnu_111Test extends ScriptTestBase {
 
     @Before
     public void mockServices() {
+        final Long refbookId = 28L;
+        RefBookUniversal provider = mock(RefBookUniversal.class);
+        provider.setRefBookId(refbookId);
+        when(testHelper.getRefBookFactory().getDataProvider(refbookId)).thenReturn(provider);
+        when(provider.getRecords(any(Date.class), any(PagingParams.class), anyString(),
+                any(RefBookAttribute.class))).thenAnswer(new Answer<Object>() {
+            @Override
+            public Object answer(InvocationOnMock invocation) throws Throwable {
+                // вынимаем значение кода из фильтра LOWER(CODE) = LOWER('$code')
+                String filter = (String) invocation.getArguments()[2];
+                String codeValue = filter.substring(filter.indexOf("('") + 2, filter.indexOf("')"));
+                if (codeValue == null) {
+                    return new PagingResult<Map<String, RefBookValue>>();
+                }
+                final Map<Long, Map<String, RefBookValue>> records = testHelper.getRefBookAllRecords(refbookId);
+                for (Map<String, RefBookValue> row : records.values()) {
+                    if (codeValue.equals(row.get("CODE").getStringValue())) {
+                        List<Map<String, RefBookValue>> tmpRecords = Arrays.asList(row);
+                        return new PagingResult<Map<String, RefBookValue>>(tmpRecords);
+                    }
+                }
+                return new PagingResult<Map<String, RefBookValue>>();
+            }});
     }
 
     @Test
@@ -80,8 +103,9 @@ public class Rnu_111Test extends ScriptTestBase {
     // Проверка с данными
     @Test
     public void check1Test() throws ParseException {
+
         FormData formData = getFormData();
-        formData.initFormTemplateParams(testHelper.getTemplate("..//src/main//resources//form_template//income//rnu_111//v2015//"));
+        formData.initFormTemplateParams(testHelper.getFormTemplate());
         List<DataRow<Cell>> dataRows = testHelper.getDataRowHelper().getAll();
         SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
 
@@ -118,7 +142,7 @@ public class Rnu_111Test extends ScriptTestBase {
         //2. Для прохождения всех ЛП
         i = 0;
         row.getCell("name").setValue(1L, null);
-        row.getCell("code").setValue(1L, null);
+        row.getCell("code").setValue("A", null);
         row.getCell("reasonNumber").setValue("string", null);
         row.getCell("reasonDate").setValue(sdf.parse("11.11.2016"), null);
         row.getCell("sum").setValue(1L, null);
@@ -141,8 +165,6 @@ public class Rnu_111Test extends ScriptTestBase {
         i = 0;
         Assert.assertEquals("Строка 1: Значение графы «Сумма фактически начисленного дохода (руб.)» должно быть больше или равно «0»!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Значение графы «Сумма дохода, соответствующая рыночному уровню (руб.)» должно быть больше или равно «0»!", entries.get(i++).getMessage());
-        Assert.assertEquals("Итоговые значения рассчитаны неверно в графе «Сумма фактически начисленного дохода (руб.)»!", entries.get(i++).getMessage());
-        Assert.assertEquals("Итоговые значения рассчитаны неверно в графе «Сумма дохода, соответствующая рыночному уровню (руб.)»!", entries.get(i++).getMessage());
         Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
         testHelper.getLogger().clear();
 
@@ -250,8 +272,8 @@ public class Rnu_111Test extends ScriptTestBase {
     void checkLoadData(List<DataRow<Cell>> dataRows) {
         Assert.assertEquals(1L, dataRows.get(0).getCell("name").getNumericValue().longValue());
         Assert.assertEquals(2L, dataRows.get(1).getCell("name").getNumericValue().longValue());
-        Assert.assertEquals(1L, dataRows.get(0).getCell("code").getNumericValue().longValue());
-        Assert.assertEquals(2L, dataRows.get(1).getCell("code").getNumericValue().longValue());
+        Assert.assertEquals("string1", dataRows.get(0).getCell("code").getStringValue());
+        Assert.assertEquals("string2", dataRows.get(1).getCell("code").getStringValue());
         Assert.assertEquals(1L, dataRows.get(0).getCell("currency").getNumericValue().longValue());
         Assert.assertEquals(2L, dataRows.get(1).getCell("currency").getNumericValue().longValue());
     }

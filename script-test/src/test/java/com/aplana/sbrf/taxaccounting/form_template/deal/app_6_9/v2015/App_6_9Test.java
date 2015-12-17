@@ -268,10 +268,10 @@ public class App_6_9Test extends ScriptTestBase {
         Assert.assertEquals(1, dataRows.get(2).getCell("count").getNumericValue().intValue());
         Assert.assertEquals(1, dataRows.get(3).getCell("count").getNumericValue().intValue());
 
-        Assert.assertEquals(796, dataRows.get(0).getCell("okeiCode").getNumericValue().intValue());
-        Assert.assertEquals(796, dataRows.get(1).getCell("okeiCode").getNumericValue().intValue());
-        Assert.assertEquals(796, dataRows.get(2).getCell("okeiCode").getNumericValue().intValue());
-        Assert.assertEquals(796, dataRows.get(3).getCell("okeiCode").getNumericValue().intValue());
+        Assert.assertEquals(1, dataRows.get(0).getCell("okeiCode").getNumericValue().intValue());
+        Assert.assertEquals(1, dataRows.get(1).getCell("okeiCode").getNumericValue().intValue());
+        Assert.assertEquals(1, dataRows.get(2).getCell("okeiCode").getNumericValue().intValue());
+        Assert.assertEquals(1, dataRows.get(3).getCell("okeiCode").getNumericValue().intValue());
 
         Assert.assertEquals(1, dataRows.get(0).getCell("price").getNumericValue().doubleValue(), 0);
         Assert.assertEquals(3, dataRows.get(1).getCell("price").getNumericValue().doubleValue(), 0);
