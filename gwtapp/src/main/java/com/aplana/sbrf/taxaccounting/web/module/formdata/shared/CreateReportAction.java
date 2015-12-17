@@ -17,6 +17,7 @@ public class CreateReportAction extends UnsecuredActionImpl<CreateReportResult> 
     private boolean isShowChecked;
     private boolean manual;
     private boolean saved;
+    private String specificReportType;
 
     public boolean isForce() {
         return force;
@@ -64,6 +65,14 @@ public class CreateReportAction extends UnsecuredActionImpl<CreateReportResult> 
 
     public void setSaved(boolean saved) {
         this.saved = saved;
+    }
+
+    public String getSpecificReportType() {
+        return specificReportType;
+    }
+
+    public void setSpecificReportType(String specificReportType) {
+        this.specificReportType = specificReportType;
     }
 
     @Override

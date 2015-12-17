@@ -18,7 +18,7 @@ public interface ReportDao {
      * @param manual
      * @param absolute
      */
-    void create(long formDataId, String blobDataId, ReportType type, boolean checking, boolean manual, boolean absolute);
+    void create(long formDataId, String blobDataId, String type, boolean checking, boolean manual, boolean absolute);
 
     /**
      * Создание записи об отчете декларации
@@ -45,7 +45,7 @@ public interface ReportDao {
      * @param absolute
      * @return uuid
      */
-    String get(long formDataId, ReportType type, boolean checking, boolean manual, boolean absolute);
+    String get(long formDataId, String type, boolean checking, boolean manual, boolean absolute);
 
     /**
      * Получение записи об отчете декларации

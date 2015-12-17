@@ -54,7 +54,8 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
     private final LogAreaPresenter logAreaPresenter;
     private Timer timer;
     private ReportType timerType;
-    private Map<ReportType, TimerReportResult.StatusReport> reportTimerStatus;
+    private Map<String, TimerReportResult.StatusReport> reportTimerStatus;
+    private List<String> specificReportTypes = new ArrayList<String>();
 
     /**
 	 * {@link com.aplana.sbrf.taxaccounting.web.module.formdata.client.FormDataPresenterBase}
@@ -75,7 +76,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
         this.logAreaPresenter = logAreaPresenter;
         getView().setUiHandlers(this);
 		getView().assignDataProvider(getView().getPageSize());
-        reportTimerStatus = new HashMap<ReportType, TimerReportResult.StatusReport>();
+        reportTimerStatus = new HashMap<String, TimerReportResult.StatusReport>();
         timer = new Timer() {
             @Override
             public void run() {
@@ -226,8 +227,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
 	@Override
 	public void onShowCheckedColumns() {
 		getView().setColumnsData(formData.getFormColumns(), readOnlyMode, forceEditMode);
-        onTimerReport(ReportType.EXCEL, false);
-        onTimerReport(ReportType.CSV, false);
+        updateReportStatus();
 	}
 
     private void manageDeleteRowButtonEnabled() {
@@ -290,76 +290,43 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
         Dialog.warningMessage("В разработке");
 	}
 
-	@Override
-	public void onPrintExcelClicked(final boolean force) {
-        final ReportType reportType = ReportType.EXCEL;
-        CreateReportAction action = new CreateReportAction();
-        action.setFormDataId(formData.getId());
-        action.setType(reportType);
-        action.setShowChecked(getView().getCheckedColumnsClicked());
-        action.setManual(formData.isManual());
-        action.setSaved(absoluteView);
-        action.setForce(force);
-        dispatcher.execute(action, CallbackUtils
-                .defaultCallback(new AbstractCallback<CreateReportResult>() {
-                    @Override
-                    public void onSuccess(CreateReportResult result) {
-                        LogCleanEvent.fire(FormDataPresenter.this);
-                        LogAddEvent.fire(FormDataPresenter.this, result.getUuid());
-                        if (result.isExistReport()) {
-                            getView().updatePrintReportButtonName(reportType, true);
-                            DownloadUtils.openInIframe(
-                                    GWT.getHostPageBaseURL() + "download/downloadBlobController/"
-                                            + formData.getId() + "/"
-                                            + getView().getCheckedColumnsClicked() + "/"
-                                            + formData.isManual() + "/"
-                                            + absoluteView);
-                        } else if (result.isLock()) {
-                            Dialog.confirmMessage(result.getRestartMsg(), new DialogHandler() {
-                                @Override
-                                public void yes() {
-                                    onPrintExcelClicked(true);
-                                }
-                            });
-                        } else {
-                            //getView().updatePrintReportButtonName(reportType, false);
-                            onTimerReport(reportType, false);
-                        }
-                    }
-                }, this));
-	}
-
     @Override
-    public void onTimerReport(final ReportType reportType, final boolean isTimer) {
+    public void onTimerReport(final ReportType reportType, final String specificReportType, final boolean isTimer) {
         TimerReportAction action = new TimerReportAction();
         action.setFormDataId(formData.getId());
         action.setType(reportType);
         action.setShowChecked(getView().getCheckedColumnsClicked());
         action.setManual(formData.isManual());
         action.setSaved(absoluteView);
+        action.setSpecificReportType(specificReportType);
         dispatcher.execute(action, CallbackUtils
                 .simpleCallback(new AbstractCallback<TimerReportResult>() {
                     @Override
                     public void onSuccess(TimerReportResult result) {
-                        if (isTimer && result.getExistReport().equals(reportTimerStatus.get(reportType))) {
+                        String type;
+                        if (reportType.equals(ReportType.EXCEL) && reportType.equals(ReportType.CSV)) {
+                            type = reportType.getName();
+                        } else {
+                            type = specificReportType;
+                        }
+                        if (isTimer && result.getExistReport().equals(reportTimerStatus.get(type))) {
                             return;
                         }
                         if (result.getExistReport().equals(TimerReportResult.StatusReport.EXIST)) {
-                            getView().updatePrintReportButtonName(reportType, true);
+                            getView().updatePrintReportButtonName(reportType, specificReportType, true);
                             manualMenuPresenter.updateNotificationCount();
                         } else if (result.getExistReport().equals(TimerReportResult.StatusReport.NOT_EXIST)) { // если файл не существует и блокировки нет(т.е. задачу отменили или ошибка при формировании)
-                            getView().updatePrintReportButtonName(reportType, false);
+                            getView().updatePrintReportButtonName(reportType, specificReportType, false);
                         } else {
-                            getView().updatePrintReportButtonName(reportType, false);
+                            getView().updatePrintReportButtonName(reportType, specificReportType, false);
                         }
-                        reportTimerStatus.put(reportType, result.getExistReport());
+                        reportTimerStatus.put(type, result.getExistReport());
                     }
                 }));
     }
 
     @Override
-    public void onPrintCSVClicked(boolean force) {
-        final ReportType reportType = ReportType.CSV;
+    public void onPrintClicked(final ReportType reportType, final String specificReportType, boolean force) {
         CreateReportAction action = new CreateReportAction();
         action.setFormDataId(formData.getId());
         action.setType(reportType);
@@ -367,6 +334,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
         action.setManual(formData.isManual());
         action.setSaved(absoluteView);
         action.setForce(force);
+        action.setSpecificReportType(specificReportType);
         dispatcher.execute(action, CallbackUtils
                 .defaultCallback(new AbstractCallback<CreateReportResult>() {
                     @Override
@@ -374,9 +342,16 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                         LogCleanEvent.fire(FormDataPresenter.this);
                         LogAddEvent.fire(FormDataPresenter.this, result.getUuid());
                         if (result.isExistReport()) {
-                            getView().updatePrintReportButtonName(reportType, true);
+                            getView().updatePrintReportButtonName(reportType, null, true);
+                            String type;
+                            if (reportType.equals(ReportType.EXCEL) || reportType.equals(ReportType.CSV)) {
+                                type = reportType.getName();
+                            } else {
+                                type = specificReportType;
+                            }
                             DownloadUtils.openInIframe(
-                                    GWT.getHostPageBaseURL() + "download/downloadBlobController/CSV/"
+                                    GWT.getHostPageBaseURL() + "download/downloadBlobController/"
+                                            + type + "/"
                                             + formData.getId() + "/"
                                             + getView().getCheckedColumnsClicked() + "/"
                                             + formData.isManual() + "/"
@@ -385,12 +360,12 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                             Dialog.confirmMessage(result.getRestartMsg(), new DialogHandler() {
                                 @Override
                                 public void yes() {
-                                    onPrintCSVClicked(true);
+                                    onPrintClicked(reportType, specificReportType, true);
                                 }
                             });
                         } else {
 //                            getView().updatePrintReportButtonName(reportType, false);
-                            onTimerReport(reportType, false);
+                            onTimerReport(reportType, specificReportType, false);
                         }
                     }
                 }, this));
@@ -911,6 +886,8 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                                 formSearchPresenter.setFormDataId(formData.getId());
                                 formSearchPresenter.setFormTemplateId(formData.getFormTemplateId());
 
+                                specificReportTypes = result.getSpecificReportTypes();
+                                getView().setSpecificReportTypes(result.getSpecificReportTypes());
                                 if (formData.getComparativePeriodId() != null) {
                                     getView().updateTableTopPosition(FormDataView.DEFAULT_TABLE_TOP_POSITION + 20);
                                     getView().updateRightButtonsHeight(FormDataView.DEFAULT_RIGHT_BUTTONS_HEIGHT + 20);
@@ -1001,14 +978,21 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                                                 &&
                                                 readOnlyMode);
 
-                                onTimerReport(ReportType.EXCEL, false);
-                                onTimerReport(ReportType.CSV, false);
+                                updateReportStatus();
                                 onTimer(true);
                                 timer.scheduleRepeating(5000);
                                 timer.run();
                             }
                         }, this).addCallback(
                         TaManualRevealCallback.create(this, placeManager)));
+    }
+
+    private void updateReportStatus() {
+        onTimerReport(ReportType.EXCEL, null, false);
+        onTimerReport(ReportType.CSV, null, false);
+        for(String specificReportType: specificReportTypes)
+            onTimerReport(ReportType.SPECIFIC_REPORT, specificReportType, false);
+        //onTimer(true);
     }
 
     private String buildPeriodName(String reportPeriodName, int year, Integer periodOrder, Date correctionDate) {
@@ -1204,8 +1188,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                                             if (readOnlyMode) {
                                                 if (result.getLockInfo().isEditMode()) {
                                                     setLowReadLockedMode(result.getLockInfo());
-                                                    onTimerReport(ReportType.EXCEL, false);
-                                                    onTimerReport(ReportType.CSV, false);
+                                                    updateReportStatus();
                                                 } else {
                                                     setReadUnlockedMode();
                                                 }
@@ -1216,21 +1199,18 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                                         case LOCKED_EDIT:
                                             if (readOnlyMode) {
                                                 setLowReadLockedMode(result.getLockInfo());
-                                                onTimerReport(ReportType.EXCEL, false);
-                                                onTimerReport(ReportType.CSV, false);
+                                                updateReportStatus();
                                             } else {
                                                 setLowEditLockedMode(result.getLockInfo(), result.getTaskName());
                                             }
                                             break;
                                         case LOCKED:
                                             setReadLockedMode(true, result.getLockInfo());
-                                            onTimerReport(ReportType.EXCEL, false);
-                                            onTimerReport(ReportType.CSV, false);
+                                            updateReportStatus();
                                             break;
                                         case LOCKED_READ:
                                             setLowReadLockedMode(result.getLockInfo());
-                                            onTimerReport(ReportType.EXCEL, false);
-                                            onTimerReport(ReportType.CSV, false);
+                                            updateReportStatus();
                                             break;
                                     }
                                 } else {

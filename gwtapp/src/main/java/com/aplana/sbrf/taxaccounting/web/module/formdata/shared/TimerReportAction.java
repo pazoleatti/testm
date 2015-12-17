@@ -16,6 +16,7 @@ public class TimerReportAction extends UnsecuredActionImpl<TimerReportResult> im
     private boolean isShowChecked;
     private boolean manual;
     private boolean saved;
+    private String specificReportType;
 
     public long getFormDataId() {
         return formDataId;
@@ -55,6 +56,14 @@ public class TimerReportAction extends UnsecuredActionImpl<TimerReportResult> im
 
     public void setSaved(boolean saved) {
         this.saved = saved;
+    }
+
+    public String getSpecificReportType() {
+        return specificReportType;
+    }
+
+    public void setSpecificReportType(String specificReportType) {
+        this.specificReportType = specificReportType;
     }
 
     @Override
