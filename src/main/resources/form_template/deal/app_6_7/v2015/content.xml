@@ -109,7 +109,7 @@
         <precision>2</precision>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="dateColumn">
-        <alias>dealDate</alias>
+        <alias>dealDoneDate</alias>
         <checking>false</checking>
         <columnType>DATE</columnType>
         <name>Дата совершения сделки</name>
