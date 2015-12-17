@@ -74,7 +74,9 @@ public class AsyncTaskManagerServiceImpl implements AsyncTaskManagerService{
         // Шаги 1, 2, 5
         BalancingVariants balancingVariant;
         try {
-            balancingVariant = asyncManager.checkCreate(reportType.getAsyncTaskTypeId(isProductionMode), params);
+            balancingVariant = asyncManager.checkCreate(
+					isProductionMode ? reportType.getAsyncTaskTypeId() : reportType.getDevModeAsyncTaskTypeId(),
+					params);
         } catch (AsyncTaskException e) {
             int i = ExceptionUtils.indexOfThrowable(e, ServiceLoggerException.class);
             if (i != -1) {
@@ -98,7 +100,9 @@ public class AsyncTaskManagerServiceImpl implements AsyncTaskManagerService{
                     // Шаг 6
                     lockData = lockDataService.getLock(keyTask);
                     params.put(AsyncTask.RequiredParams.LOCK_DATE.name(), lockData.getDateLock());
-                    asyncManager.executeAsync(reportType.getAsyncTaskTypeId(isProductionMode), params, balancingVariant);
+                    asyncManager.executeAsync(
+							isProductionMode ? reportType.getAsyncTaskTypeId() : reportType.getDevModeAsyncTaskTypeId(),
+							params, balancingVariant);
 					LockData.LockQueues queue = LockData.LockQueues.getById(balancingVariant.getId());
                     lockDataService.updateQueue(keyTask, lockData.getDateLock(), queue);
 

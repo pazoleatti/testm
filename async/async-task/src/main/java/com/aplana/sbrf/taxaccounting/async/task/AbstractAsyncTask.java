@@ -86,7 +86,7 @@ public abstract class AbstractAsyncTask implements AsyncTask {
     protected abstract String getErrorMsg(Map<String, Object> params);
 
     protected BalancingVariants checkTask(ReportType reportType, Long value, String taskName, String msg) throws AsyncTaskException {
-        AsyncTaskTypeData taskTypeData = asyncTaskTypeDao.get(reportType.getAsyncTaskTypeId(true));
+        AsyncTaskTypeData taskTypeData = asyncTaskTypeDao.get(reportType.getAsyncTaskTypeId());
         if (taskTypeData == null) {
             throw new AsyncTaskException(String.format("Не найдены параметры задачи \"%s\"", taskName));
         }
