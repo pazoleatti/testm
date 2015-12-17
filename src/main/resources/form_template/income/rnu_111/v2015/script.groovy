@@ -304,6 +304,8 @@ void calc() {
     // Общий итог
     def total = calcTotalRow(dataRows)
     dataRows.add(total)
+
+    updateIndexes(dataRows)
 }
 
 void sortRows(def dataRows) {
@@ -585,7 +587,7 @@ def getNewTotalFromXls(def values, def colOffset, def fileRowIndex, def rowIndex
 void sortFormDataRows(def saveInDB = true) {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
-    sortRows(dataRows)
+    sortRows(dataRows.findAll{ it.getAlias() == null})
     if (saveInDB) {
         dataRowHelper.saveSort()
     } else {

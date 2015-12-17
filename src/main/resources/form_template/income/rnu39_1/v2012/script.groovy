@@ -244,14 +244,14 @@ void addRow() {
         def row = getDataRow(dataRows, 'totalA1')
         index = dataRows.indexOf(row)
     } else if (currentDataRow.getAlias() == null) {
-        index = currentDataRow.getIndex()
+        index = currentDataRow.getIndex() - 1
     } else {
         def alias = currentDataRow.getAlias()
         def totalAlias = alias.contains('total') ? alias : 'total' + ((alias in ['A', 'B']) ? (alias + '1') : alias)
         def row = getDataRow(dataRows, totalAlias)
         index = dataRows.indexOf(row)
     }
-    dataRows.add(index + 2, getNewRow())
+    dataRows.add(index, getNewRow())
     formDataService.saveCachedDataRows(formData, logger)
 }
 

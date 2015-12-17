@@ -1,16 +1,15 @@
-package form_template.income.rnu_101.v2015
+package form_template.income.rnu_110.v2015
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import groovy.transform.Field
-import com.aplana.sbrf.taxaccounting.service.script.util.ScriptUtils
-import com.aplana.sbrf.taxaccounting.model.util.StringUtils
+
 /**
- * РНУ 101. Регистр налогового учёта сумм доначисления доходов по прочим операциям при применении в сделках с
- * Взаимозависимыми лицами и резидентами оффшорных зон цен, не соответствующих рыночному уровню
+ * РНУ 110. Регистр налогового учёта доходов, возникающих в связи с применением в сделках по предоставлению имущества в аренду Взаимозависимым лицам
+ * и резидентам оффшорных зон цен, не соответствующих рыночному уровню
  *
- * formTemplateId=818
+ * formTemplateId=822
  *
  * @author Emamedova
  */
@@ -19,19 +18,15 @@ import com.aplana.sbrf.taxaccounting.model.util.StringUtils
 // rowNumber    		(1) -  № пп
 // name         		(2) -  Наименование Взаимозависимого лица (резидента оффшорной зоны)
 // iksr					(3) -  Идентификационный номер
-// countryName  		(4) -  Страна регистрации
-// transDoneDate        (5) -  Дата совершения операции
-// course 				(6) -  Курс валюты Банка России
-// incomeCode 			(7) -  Код классификации дохода
-// reasonNumber 		(8) -  номер
-// reasonDate   		(9) -  дата
-// count 				(10) - Количество услуг/работ (ед./шт.)
-// dealPrice			(11) - Цена за оказанные услуги согласно условиям договора
-// taxPrice				(12) - Цена, признаваемая рыночной для целей налогообложения
-// sum1					(13) - Сумма фактически начисленного дохода (руб.)
-// incomeRate			(14) - Коэффициент корректировки доходов
-// sum2					(15) - Сумма дохода, соответствующая рыночному уровню (руб.)
-// sum3					(16) - Сумма доначисления дохода до рыночного уровня процентной ставки (руб.)
+// transDoneDate  		(4) -  Дата совершения операции
+// code        			(5) -  Код налогового учёта
+// reasonNumber 		(6) -  номер
+// reasonDate 			(7) -  дата
+// rent 				(8) -  Арендная ставка
+// taxRent     		    (9) -  Арендная ставка, признаваемая рыночной для целей налогообложения
+// sum1 			    (10) - Сумма фактически начисленной арендной платы
+// sum2					(11) - Сумма арендной платы, соответствующая рыночному уровню
+// sum3					(12) - Сумма доначисления арендной платы до рыночного уровня арендной ставки
 
 switch (formDataEvent) {
     case FormDataEvent.CREATE:
@@ -83,30 +78,23 @@ def recordCache = [:]
 def refBookCache = [:]
 
 @Field
-def allColumns = ['fix', 'rowNumber', 'name', 'iksr', 'countryName', 'transDoneDate', 'course', 'incomeCode',
-                  'reasonNumber', 'reasonDate', 'count', 'dealPrice', 'taxPrice', 'sum1', 'incomeRate', 'sum2', 'sum3']
+def allColumns = ['fix', 'rowNumber', 'name', 'iksr', 'transDoneDate', 'code', 'reasonNumber', 'reasonDate',
+                  'rent', 'taxRent', 'sum1', 'sum2', 'sum3']
 
 // Редактируемые атрибуты
 @Field
-def editableColumns = ['name','transDoneDate', 'course', 'incomeCode', 'reasonNumber', 'reasonDate', 'count', 'dealPrice',
-                       'taxPrice', 'sum1', 'incomeRate', 'sum2']
+def editableColumns = ['name', 'transDoneDate', 'code', 'reasonNumber', 'reasonDate', 'rent', 'taxRent', 'sum1', 'sum2']
 
 // Автозаполняемые атрибуты
 @Field
-def autoFillColumns = ['iksr', 'countryName', 'sum3']
+def autoFillColumns = ['iksr', 'sum3']
 
 // Проверяемые на пустые значения атрибуты
 @Field
-def nonEmptyColumns = ['name', 'transDoneDate', 'course', 'incomeCode', 'reasonNumber', 'reasonDate', 'count', 'dealPrice',
-                       'taxPrice', 'sum1', 'incomeRate', 'sum2', 'sum3']
+def nonEmptyColumns = ['name', 'transDoneDate', 'code', 'reasonNumber', 'reasonDate', 'rent', 'taxRent', 'sum1', 'sum2', 'sum3']
 
 @Field
 def totalColumns = ['sum1', 'sum2', 'sum3']
-
-// Группируемые атрибуты
-@Field
-def groupColumns = ['incomeCode']
-
 
 // Дата окончания отчетного периода
 @Field
@@ -152,28 +140,15 @@ void calc() {
     // Удаление подитогов
     deleteAllAliased(dataRows)
 
-    // Сортировка
-    sortRows(dataRows, groupColumns)
-
-    // Добавление подитогов
-    addAllAliased(dataRows, new ScriptUtils.CalcAliasRow() {
-        @Override
-        DataRow<Cell> calc(int i, List<DataRow<Cell>> rows) {
-            return calcItog(i, dataRows)
-        }
-    }, groupColumns)
-
     // Общий итог
     def total = calcTotalRow(dataRows)
     dataRows.add(total)
-
-    sortFormDataRows(false)
 }
 
 def calcTotalRow(def dataRows) {
     def totalRow = (formDataEvent in [FormDataEvent.IMPORT, FormDataEvent.IMPORT_TRANSPORT_FILE]) ? formData.createStoreMessagingDataRow() : formData.createDataRow()
     totalRow.setAlias('total')
-    totalRow.fix = 'Всего'
+    totalRow.fix = 'Итого'
     totalRow.getCell('fix').colSpan = 2
     allColumns.each {
         totalRow.getCell(it).setStyleAlias('Контрольные суммы')
@@ -185,7 +160,7 @@ def calcTotalRow(def dataRows) {
 // Получение импортируемых данных
 void importData() {
     def tmpRow = formData.createDataRow()
-    int COLUMN_COUNT = 16
+    int COLUMN_COUNT = 12
     int HEADER_ROW_COUNT = 3
     String TABLE_START_VALUE = '№ пп'
     String TABLE_END_VALUE = null
@@ -215,7 +190,6 @@ void importData() {
     def rows = []
     def allValuesCount = allValues.size()
     def totalRowFromFile = null
-    def totalRowFromFileMap = [:]
 
     // формирвание строк нф
     for (def i = 0; i < allValuesCount; i++) {
@@ -228,58 +202,21 @@ void importData() {
             break
         }
         rowIndex++
-
         // Пропуск итоговых строк
-        if (rowValues[INDEX_FOR_SKIP] == "Всего") {
+        if (rowValues[INDEX_FOR_SKIP] == "Итого") {
             totalRowFromFile = getNewTotalFromXls(rowValues, colOffset, fileRowIndex, rowIndex)
 
             allValues.remove(rowValues)
             rowValues.clear()
             continue
-        } else if (rowValues[INDEX_FOR_SKIP].contains("Итого")) {
-            def subTotalRow = getNewSubTotalRowFromXls(rowValues, colOffset, fileRowIndex, rowIndex)
-            if (totalRowFromFileMap[subTotalRow.fix] == null) {
-                totalRowFromFileMap[subTotalRow.fix] = []
-            }
-            totalRowFromFileMap[subTotalRow.fix].add(subTotalRow)
-            rows.add(subTotalRow)
-
-            allValues.remove(rowValues)
-            rowValues.clear()
-            continue
         }
+
         // простая строка
         def newRow = getNewRowFromXls(rowValues, colOffset, fileRowIndex, rowIndex)
         rows.add(newRow)
         // освободить ненужные данные - иначе не хватит памяти
         allValues.remove(rowValues)
         rowValues.clear()
-    }
-
-    // сравнение подитогов
-    if (!totalRowFromFileMap.isEmpty()) {
-        // получить посчитанные подитоги
-        def tmpSubTotalRows = calcSubTotalRows(rows)
-        tmpSubTotalRows.each { subTotalRow ->
-            def totalRows = totalRowFromFileMap[subTotalRow.fix]
-            if (totalRows) {
-                totalRows.each { totalRow ->
-                    compareTotalValues(totalRow, subTotalRow, totalColumns, logger, false)
-                }
-                totalRowFromFileMap.remove(subTotalRow.fix)
-            }
-        }
-        if (!totalRowFromFileMap.isEmpty()) {
-            // для этих подитогов из файла нет групп
-            totalRowFromFileMap.each { key, totalRows ->
-                totalRows.each { totalRow ->
-                    totalColumns.each { alias ->
-                        def msg = String.format(COMPARE_TOTAL_VALUES, totalRow.getIndex(), getColumnName(totalRow, alias), totalRow[alias], BigDecimal.ZERO)
-                        rowWarning(logger, totalRow, msg)
-                    }
-                }
-            }
-        }
     }
 
     // сравнение итогов
@@ -311,24 +248,20 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
     }
     checkHeaderSize(headerRows[headerRows.size() - 1].size(), headerRows.size(), colCount, rowCount)
     def headerMapping = [
-            ([(headerRows[0][8]): 'Основание для совершения операции']),
+            ([(headerRows[0][6]): 'Основание для совершения операции']),
             ([(headerRows[1][2]): getColumnName(tmpRow, 'name')]),
             ([(headerRows[1][3]): getColumnName(tmpRow, 'iksr')]),
-            ([(headerRows[1][4]): getColumnName(tmpRow, 'countryName')]),
-            ([(headerRows[1][5]): getColumnName(tmpRow, 'transDoneDate')]),
-            ([(headerRows[1][6]): getColumnName(tmpRow, 'course')]),
-            ([(headerRows[1][7]): getColumnName(tmpRow, 'incomeCode')]),
-            ([(headerRows[1][8]): 'номер']),
-            ([(headerRows[1][9]): 'дата']),
-            ([(headerRows[1][10]): getColumnName(tmpRow, 'count')]),
-            ([(headerRows[1][11]): getColumnName(tmpRow, 'dealPrice')]),
-            ([(headerRows[1][12]): getColumnName(tmpRow, 'taxPrice')]),
-            ([(headerRows[1][13]): getColumnName(tmpRow, 'sum1')]),
-            ([(headerRows[1][14]): getColumnName(tmpRow, 'incomeRate')]),
-            ([(headerRows[1][15]): getColumnName(tmpRow, 'sum2')]),
-            ([(headerRows[1][16]): getColumnName(tmpRow, 'sum3')])
+            ([(headerRows[1][4]): getColumnName(tmpRow, 'transDoneDate')]),
+            ([(headerRows[1][5]): getColumnName(tmpRow, 'code')]),
+            ([(headerRows[1][6]): 'номер']),
+            ([(headerRows[1][7]): 'дата']),
+            ([(headerRows[1][8]): getColumnName(tmpRow, 'rent')]),
+            ([(headerRows[1][9]): getColumnName(tmpRow, 'taxRent')]),
+            ([(headerRows[1][10]): getColumnName(tmpRow, 'sum1')]),
+            ([(headerRows[1][11]): getColumnName(tmpRow, 'sum2')]),
+            ([(headerRows[1][12]): getColumnName(tmpRow, 'sum3')]),
     ]
-    (2..16).each {
+    (2..12).each {
         headerMapping.add([(headerRows[2][it]): it.toString()])
     }
     checkHeaderEquals(headerMapping, logger)
@@ -372,115 +305,30 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
     colIndex++
 
     // графа 4
-    if (map != null) {
-        map = getRefBookValue(10, map.COUNTRY_CODE?.referenceValue)
-        if (map != null) {
-            def expectedValues = [map.NAME?.stringValue, map.FULLNAME?.stringValue]
-            formDataService.checkReferenceValue(10, values[colIndex], expectedValues, fileRowIndex, colIndex + colOffset, logger, false)
-        }
-    }
-    colIndex++
-
-    // графа 5
     newRow.transDoneDate = parseDate(values[colIndex], "dd.MM.yyyy", fileRowIndex, colIndex + colOffset, logger, true)
     colIndex++
 
+    // графа 5
+    newRow.code = getRecordIdImport(28, 'CODE', values[colIndex], fileRowIndex, colIndex + colOffset, false)
+    colIndex++
+
     // графа 6
-    newRow.course = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
-    colIndex++
-
-    // графа 7
-    newRow.incomeCode = values[colIndex]
-    colIndex++
-
-    // графа 8
     newRow.reasonNumber = values[colIndex]
     colIndex++
 
-    // графа 9
+    // графа 7
     newRow.reasonDate = parseDate(values[colIndex], "dd.MM.yyyy", fileRowIndex, colIndex + colOffset, logger, true)
     colIndex++
 
-    // графы 10-16
-    ['count', 'dealPrice', 'taxPrice', 'sum1', 'incomeRate', 'sum2','sum3'].each{
+    // графы 8-12
+    ['rent', 'taxRent', 'sum1', 'sum2', 'sum3'].each{
         newRow[it]= parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
         colIndex++
     }
 
     return newRow
 }
-/**
- * Получить новую подитоговую строку нф по значениям из экселя.
- *
- * @param values список строк со значениями
- * @param colOffset отступ в колонках
- * @param fileRowIndex номер строки в тф
- * @param rowIndex строка в нф
- */
-def getNewSubTotalRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) {
-    def newRow = getSubTotalRow(null, null, fileRowIndex)
-    newRow.setIndex(rowIndex)
-    newRow.setImportIndex(fileRowIndex)
 
-    // графа 13
-    def colIndex = 13
-    newRow.sum1 = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
-    // графа 15
-    colIndex = 15
-    newRow.sum2 = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
-    // графа 17
-    colIndex = 16
-    newRow.sum3 = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
-
-    return newRow
-}
-/**
- * Получить подитоговую строку с заданными стилями.
- *
- * @param title надпись подитога (если задана, то используется это значение)
- * @param value2 значение графы 2 (отставлено на случай возврата к "Итого по")
- * @param i номер строки
- */
-DataRow<Cell> getSubTotalRow(String title, String value2, int i) {
-    def newRow = (formDataEvent in [FormDataEvent.IMPORT, FormDataEvent.IMPORT_TRANSPORT_FILE]) ? formData.createStoreMessagingDataRow() : formData.createDataRow()
-    newRow.fix = 'Итого'
-    newRow.setAlias('itg#'.concat(i.toString()))
-    newRow.getCell('fix').colSpan = 2
-    allColumns.each {
-        newRow.getCell(it).setStyleAlias('Контрольные суммы')
-    }
-    return newRow
-}
-// Получение подитоговых строк
-def getSubTotalRows(def dataRows) {
-    return dataRows.findAll { it.getAlias() != null && !'total'.equals(it.getAlias()) }
-}
-// Получить посчитанные подитоговые строки
-def calcSubTotalRows(def dataRows) {
-    def tmpRows = dataRows.findAll { !it.getAlias() }
-    // Добавление подитогов
-    addAllAliased(tmpRows, new ScriptUtils.CalcAliasRow() {
-        @Override
-        DataRow<Cell> calc(int i, List<DataRow<Cell>> rows) {
-            return calcItog(i, rows)
-        }
-    }, groupColumns)
-
-    return tmpRows.findAll { it.getAlias() }
-}
-// Расчет подитогового значения
-DataRow<Cell> calcItog(def int i, def List<DataRow<Cell>> dataRows) {
-    def newRow = getSubTotalRow(null, null, i)
-
-    // Расчеты подитоговых значений
-    def rows = []
-    for (int j = i; j >= 0 && dataRows.get(j).getAlias() == null; j--) {
-        rows.add(dataRows.get(j))
-    }
-    calcTotalSum(rows, newRow, totalColumns)
-
-    return newRow
-}
 /**
  * Получить итоговую строку нф по значениям из экселя.
  *
@@ -494,14 +342,14 @@ def getNewTotalFromXls(def values, def colOffset, def fileRowIndex, def rowIndex
     newRow.setIndex(rowIndex)
     newRow.setImportIndex(fileRowIndex)
 
-    // графа 13
-    def colIndex = 13
+    // графа 10
+    def colIndex = 10
     newRow.sum1 = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
-    // графа 15
-    colIndex = 15
+    // графа 11
+    colIndex = 11
     newRow.sum2 = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
-    // графа 16
-    colIndex = 16
+    // графа 12
+    colIndex = 12
     newRow.sum3 = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
 
     return newRow
@@ -511,9 +359,7 @@ def getNewTotalFromXls(def values, def colOffset, def fileRowIndex, def rowIndex
 void sortFormDataRows(def saveInDB = true) {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
-    sortRows(refBookService, logger, dataRows, getSubTotalRows(dataRows), dataRows.find {
-        it.getAlias() == 'total'
-    }, true)
+    sortRows(refBookService, logger, dataRows, null, dataRows.find { it.getAlias() == 'total' }, true)
     if (saveInDB) {
         dataRowHelper.saveSort()
     } else {

@@ -5,8 +5,8 @@
     <comparative>false</comparative>
     <accruing>false</accruing>
     <updating>false</updating>
-    <name>РНУ 117. Регистр налогового учёта расходов, возникающих в связи с применением в сделках по операциям Привлечения от Взаимозависимых лиц и резидентов оффшорных зон процентных ставок, не соответствующих рыночному уровню</name>
-    <fullName>РНУ 117. Регистр налогового учёта расходов, возникающих в связи с применением в сделках по операциям Привлечения от Взаимозависимых лиц и резидентов оффшорных зон процентных ставок, не соответствующих рыночному уровню</fullName>
+    <name>РНУ 110. Регистр налогового учёта доходов, возникающих в связи с применением в сделках по предоставлению имущества в аренду Взаимозависимым лицам и резидентам оффшорных зон цен, не соответствующих рыночному уровню</name>
+    <fullName>РНУ 110. Регистр налогового учёта доходов, возникающих в связи с применением в сделках по предоставлению имущества в аренду Взаимозависимым лицам и резидентам оффшорных зон цен, не соответствующих рыночному уровню</fullName>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="autoNumerationColumn">
         <alias>rowNumber</alias>
         <checking>false</checking>
@@ -30,7 +30,7 @@
         <alias>name</alias>
         <checking>false</checking>
         <columnType>REFBOOK</columnType>
-        <name>Наименование Взаимозависимого лица/резидента оффшорной зоны</name>
+        <name>Наименование Взаимозависимого лица (резидента оффшорной зоны)</name>
         <order>3</order>
         <width>10</width>
         <hierarchical>false</hierarchical>
@@ -39,41 +39,41 @@
         <searchEnabled>true</searchEnabled>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="referenceColumn">
-        <alias>countryName</alias>
-        <checking>false</checking>
-        <columnType>REFERENCE</columnType>
-        <name>Страна регистрации Взаимозависимого лица/резидента оффшорной зоны</name>
-        <order>4</order>
-        <width>8</width>
-        <parentAlias>name</parentAlias>
-        <refBookAttributeId>5204</refBookAttributeId>
-        <refBookAttributeId2>53</refBookAttributeId2>
-    </columns>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="referenceColumn">
         <alias>iksr</alias>
         <checking>false</checking>
         <columnType>REFERENCE</columnType>
-        <name>ИНН / код налогоплательщика в стране регистрации (инкорпорации) или его аналог (при наличии)</name>
-        <order>5</order>
+        <name>Идентификационный номер</name>
+        <order>4</order>
         <width>7</width>
         <parentAlias>name</parentAlias>
         <refBookAttributeId>5218</refBookAttributeId>
     </columns>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="dateColumn">ll
+        <alias>transDoneDate</alias>
+        <checking>false</checking>
+        <columnType>DATE</columnType>
+        <name>Дата совершения операции</name>
+        <order>5</order>
+        <width>6</width>
+        <formatId>0</formatId>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
         <alias>code</alias>
         <checking>false</checking>
-        <columnType>STRING</columnType>
-        <name>Код классификации расхода</name>
+        <columnType>REFBOOK</columnType>
+        <name>Код налогового учёта</name>
         <order>6</order>
         <width>10</width>
-        <maxLength>10</maxLength>
-        <prevLength>0</prevLength>
+        <hierarchical>false</hierarchical>
+        <nameAttributeId>140</nameAttributeId>
+        <refBookAttributeId>140</refBookAttributeId>
+        <searchEnabled>true</searchEnabled>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>reasonNumber</alias>
         <checking>false</checking>
         <columnType>STRING</columnType>
-        <name>Основание для совершения операции. Номер</name>
+        <name>Основание для совершения операции. номер</name>
         <order>7</order>
         <width>5</width>
         <maxLength>128</maxLength>
@@ -83,67 +83,57 @@
         <alias>reasonDate</alias>
         <checking>false</checking>
         <columnType>DATE</columnType>
-        <name>Основание для совершения операции. Дата</name>
+        <name>Основание для совершения операции. дата</name>
         <order>8</order>
         <width>6</width>
         <formatId>0</formatId>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
-        <alias>rate</alias>
+        <alias>rent</alias>
         <checking>false</checking>
         <columnType>NUMBER</columnType>
-        <name>Процентная ставка, % годовых</name>
+        <name>Арендная ставка</name>
         <order>9</order>
         <width>10</width>
-        <maxLength>5</maxLength>
+        <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
-        <alias>sum1</alias>
+        <alias>taxRent</alias>
         <checking>false</checking>
         <columnType>NUMBER</columnType>
-        <name>Сумма фактически начисленного расхода, руб.</name>
+        <name>Арендная ставка, признаваемая рыночной для целей налогообложения</name>
         <order>10</order>
         <width>10</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
-        <alias>rate1</alias>
+        <alias>sum1</alias>
         <checking>false</checking>
         <columnType>NUMBER</columnType>
-        <name>Процентная ставка, признаваемая рыночной для целей налогообложения, % годовых</name>
+        <name>Сумма фактически начисленной арендной платы</name>
         <order>11</order>
         <width>10</width>
-        <maxLength>5</maxLength>
+        <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>sum2</alias>
         <checking>false</checking>
         <columnType>NUMBER</columnType>
-        <name>Сумма расхода, соответствующая рыночному уровню, руб.</name>
+        <name>Сумма арендной платы, соответствующая рыночному уровню</name>
         <order>12</order>
         <width>10</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
-        <alias>rate2</alias>
-        <checking>false</checking>
-        <columnType>NUMBER</columnType>
-        <name>Отклонение (превышение) Процентной ставки от рыночного уровня, % годовых</name>
-        <order>13</order>
-        <width>10</width>
-        <maxLength>5</maxLength>
-        <precision>2</precision>
-    </columns>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>sum3</alias>
         <checking>false</checking>
         <columnType>NUMBER</columnType>
-        <name>Сумма отклонения (превышения) расхода фактического от соответствующего рыночному уровню, руб.</name>
-        <order>14</order>
+        <name>Сумма доначисления арендной платы до рыночного уровня арендной ставки</name>
+        <order>13</order>
         <width>10</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
