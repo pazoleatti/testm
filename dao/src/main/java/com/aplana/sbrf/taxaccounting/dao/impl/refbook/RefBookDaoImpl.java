@@ -1088,7 +1088,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             "from   (\n" +
             "       select input.id as input_id, rbr.id, rbr.record_id, rbr.version as start_version, rbr.status, lead (rbr.version) over (partition by input.id order by rbr.version) end_version, case when input.status = 0 then lead (rbr.version) over (partition by input.id, rbr.status order by rbr.version) end next_version \n" +
             "       from ref_book_record input\n" +
-            "       join ref_book_record rbr on input.record_id = rbr.record_id and input.ref_book_id = rbr.ref_book_id \n" +
+            "       join ref_book_record rbr on input.record_id = rbr.record_id and input.ref_book_id = rbr.ref_book_id and rbr.status != -1 \n" +
             "       where %s \n" +
             "       ) a where input_id = id";
 
