@@ -661,7 +661,7 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
             "     (\n" +
             "     select sfd.id, sd.id as departmentId, sd.name as departmentName, sdrp.id as departmentReportPeriod, stp.YEAR, srp.name as periodName, rp.CALENDAR_START_DATE as periodStartDate, \n" +
             "     sdrp.CORRECTION_DATE, sfd.state, sft.status as templateState, sfd.manual, \n" +
-            "     st.id as formTypeId, st.name as formTypeName, sfk.id as formDataKind, fdpd.id as performerId, fdpd.name as performerName, \n" +
+            "     st.id as formTypeId, st.name as formTypeName, sfk.id as formDataKind, fdpd.id as performerId, fdpd.name as performerName, st.tax_type, \n" +
             "     --Если искомый экземпляр создан, то берем его значения периода и признака. \n" +
             "     --Если не создан и в его макете есть признак сравнения, то период и признак такой же как у источника\n" +
             "     --Если не создан и в его макете нет признаков сравнения, то период и признак пустой\n" +
@@ -678,6 +678,7 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
             "      left join report_period crp on crp.id = cdrp.REPORT_PERIOD_ID\n" +
             "      left join tax_period ctp on ctp.id = crp.TAX_PERIOD_ID\n" +
             "      join form_template ft on ft.id = fd.FORM_TEMPLATE_ID\n" +
+            "      join form_type t on t.id = ft.type_id\n" +
             "      join department_form_type dft on (dft.DEPARTMENT_ID = drp.DEPARTMENT_ID and dft.kind = fd.KIND and dft.FORM_TYPE_ID = ft.TYPE_ID)\n" +
             "      --ограничиваем назначения по пересечению с периодом приемника\n" +
             "      join form_data_source fds on (fds.DEPARTMENT_FORM_TYPE_ID = dft.id and ((fds.period_end >= rp.CALENDAR_START_DATE or fds.period_end is null) and fds.period_start <= rp.END_DATE))\n" +
@@ -714,12 +715,16 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
             "      left join department_report_period inn_cdrp on inn_cdrp.id = fd.COMPARATIVE_DEP_REP_PER_ID   \n" +
             "      --отбираем экземпляры с учетом периода сравнения, признака нарастающего истога, списка месяцов     \n" +
             "      left join (\n" +
-            "                select fd.*, drp.report_period_id as comparative_report_period_id\n" +
+            "                select fd.*, drpc.report_period_id as comparative_report_period_id, rp.dict_tax_period_id\n" +
             "                from form_data fd\n" +
+            "                join department_report_period drp on drp.id = fd.department_report_period_id\n" +
+            "                join report_period rp on rp.id = drp.report_period_id\n" +
             "                --данные об источниках сравнения для потенциальных источников\n" +
-            "                left join department_report_period drp on fd.comparative_dep_rep_per_id = drp.id\n" +
+            "                left join department_report_period drpc on fd.comparative_dep_rep_per_id = drpc.id\n" +
             "                ) sfd \n" +
-            "           on (sfd.kind = sfk.id and sfd.FORM_TEMPLATE_ID = sft.id and sfd.DEPARTMENT_REPORT_PERIOD_ID = sdrp.id \n" +
+            "           on (sfd.kind = sfk.id and sfd.FORM_TEMPLATE_ID = sft.id and  \n" +
+            "           --если налог совпадает, то ищем точное совпадение по периоду, иначе совпадение по \n" +
+            "           ((st.tax_type = t.tax_type and sfd.DEPARTMENT_REPORT_PERIOD_ID = sdrp.id) or (st.tax_type != t.tax_type and rp.dict_tax_period_id = sfd.dict_tax_period_id))\n" +
             "        and (sft.COMPARATIVE = 0 or ft.COMPARATIVE = 0 or inn_cdrp.report_period_id  = sfd.comparative_report_period_id)\n" +
             "        and (sft.ACCRUING = 0 or ft.ACCRUING = 0 or sfd.ACCRUING = fd.ACCRUING)) \n" +
             "        and coalesce(sfd.PERIOD_ORDER, perversion.month) = perversion.month\n" +
@@ -737,7 +742,7 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
             "  )         \n" +
             "select id, departmentId, departmentName, correction_date, departmentReportPeriod, periodName, year, state, " +
             "templateState, formTypeId, formTypeName, formDataKind, performerId, performerName, periodStartDate, " +
-            "compPeriodId, compPeriodName, compPeriodYear, compPeriodStartDate, accruing, month, manual \n" +
+            "compPeriodId, compPeriodName, compPeriodYear, compPeriodStartDate, accruing, month, manual, tax_type \n" +
             "       from insanity i\n" +
             "       left join aggregated_insanity i_agg on i.sdft_id = i_agg.sdft_id \n" +
             "       where nvl(i.correction_date, to_date('01.01.0001', 'DD.MM.YYYY')) = nvl(i_agg.last_correction_date, to_date('01.01.0001', 'DD.MM.YYYY')) and (:excludeIfNotExist != 1 or id is not null) and (id is null or :stateRestriction is null or state = :stateRestriction)\n" +
@@ -780,7 +785,7 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
             "     (\n" +
             "     select tfd.id, td.id as departmentId, td.name as departmentName, tdrp.id as departmentReportPeriod, ttp.YEAR, trp.id as reportperiodid, trp.name as periodName, \n" +
             "     tdrp.CORRECTION_DATE, tfd.state, tft.status as templateState, tfd.manual,\n" +
-            "     tt.id as formTypeId, tt.name as formTypeName, tfk.id as formDataKind, fdpd.id as performerId, fdpd.name as performerName, rp.CALENDAR_START_DATE as periodStartDate, \n" +
+            "     tt.id as formTypeId, tt.name as formTypeName, tfk.id as formDataKind, fdpd.id as performerId, fdpd.name as performerName, rp.CALENDAR_START_DATE as periodStartDate, tt.tax_type, \n" +
             "     --Если искомый экземпляр создан, то берем его значения периода и признака. \n" +
             "     --Если не создан и в его макете есть признак сравнения, то период и признак такой же как у источника\n" +
             "     --Если не создан и в его макете нет признаков сравнения, то период и признак пустой\n" +
@@ -811,6 +816,7 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
             "      left join report_period crp on crp.id = cdrp.REPORT_PERIOD_ID\n" +
             "      left join tax_period ctp on ctp.id = crp.TAX_PERIOD_ID\n" +
             "      join form_template ft on ft.id = fd.FORM_TEMPLATE_ID\n" +
+            "      join form_type t on t.id = ft.type_id\n" +
             "      join department_form_type dft on (dft.DEPARTMENT_ID = fd.DEPARTMENT_ID and dft.kind = fd.KIND and dft.FORM_TYPE_ID = ft.TYPE_ID)\n" +
             "      --ограничиваем назначения по пересечению с периодом приемника\n" +
             "      join form_data_source fds on (fds.SRC_DEPARTMENT_FORM_TYPE_ID = dft.id and ((fds.period_end >= rp.CALENDAR_START_DATE or fds.period_end is null) and fds.period_start <= rp.END_DATE))\n" +
@@ -847,12 +853,16 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
             "      left join department_report_period inn_cdrp on inn_cdrp.id = fd.COMPARATIVE_DEP_REP_PER_ID   \n" +
             "      --отбираем экземпляры с учетом периода сравнения, признака нарастающего истога, списка месяцов     \n" +
             "      left join (\n" +
-            "                select fd.*, drp.report_period_id as comparative_report_period_id\n" +
+            "                select fd.*, drpc.report_period_id as comparative_report_period_id, rp.dict_tax_period_id\n" +
             "                from form_data fd\n" +
+            "                join department_report_period drp on drp.id = fd.department_report_period_id\n" +
+            "                join report_period rp on rp.id = drp.report_period_id\n" +
             "                --данные об источниках сравнения для потенциальных источников\n" +
-            "                left join department_report_period drp on fd.comparative_dep_rep_per_id = drp.id\n" +
+            "                left join department_report_period drpc on fd.comparative_dep_rep_per_id = drpc.id\n" +
             "                ) tfd \n" +
-            "           on (tfd.kind = tfk.id and tfd.FORM_TEMPLATE_ID = tft.id and tfd.DEPARTMENT_REPORT_PERIOD_ID = tdrp.id \n" +
+            "           on (tfd.kind = tfk.id and tfd.FORM_TEMPLATE_ID = tft.id and \n" +
+            "           --если налог совпадает, то ищем точное совпадение по периоду, иначе совпадение по \n" +
+            "           ((tt.tax_type = t.tax_type and tfd.DEPARTMENT_REPORT_PERIOD_ID = tdrp.id) or (tt.tax_type != t.tax_type and rp.dict_tax_period_id = tfd.dict_tax_period_id))\n" +
             "        and (tft.COMPARATIVE = 0 or ft.COMPARATIVE = 0 or inn_cdrp.report_period_id  = tfd.comparative_report_period_id)\n" +
             "        and (tft.ACCRUING = 0 or ft.ACCRUING = 0 or tfd.ACCRUING = fd.ACCRUING)) \n" +
             "        and coalesce(tfd.PERIOD_ORDER, perversion.month) = perversion.month\n" +
@@ -875,7 +885,7 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
             ")         \n" +
             "select i.id, i.departmentId, i.departmentName, i.correction_date, ai.last_correction_date, ai.global_last_correction_date, i.reportperiodid, i.departmentReportPeriod, " +
             "i.periodName, i.year, i.state, i.templateState, i.formTypeId, i.formTypeName, i.formDataKind, i.performerId, i.performerName, periodStartDate, " +
-            "i.compPeriodId, i.compPeriodName, i.compPeriodYear, i.compPeriodStartDate, i.accruing, i.month, i.manual \n" +
+            "i.compPeriodId, i.compPeriodName, i.compPeriodYear, i.compPeriodStartDate, i.accruing, i.month, i.manual, i.tax_type \n" +
             "       from insanity i\n" +
             "       --обращение к аггрегированным данным для определения, какие существуют данные в связке по подразделению, типу, виду, периоду и месяцу экземпляры данных, их максимальную дату и дату последнего периода корректировки, если данные по экземлярам отсутствуют \n" +
             "       left join aggregated_insanity ai on i.id is null and ai.departmentId = i.departmentId and ai.formtypeid = i.formtypeid and ai.formdatakind = i.formdatakind and ai.reportperiodid = i.reportperiodid  and nvl(i.month,-1) = nvl(ai.month,-1)\n" +
@@ -915,7 +925,7 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
     private static final String GET_DECLARATION_DESTINATIONS_INFO = "with insanity as \n" +
             "     (\n" +
             "     select tdd.id, td.id as departmentId, td.name as departmentName, tdrp.id as departmentReportPeriod, ttp.YEAR, trp.id as reportperiodid, trp.name as periodName, \n" +
-            "     tdrp.CORRECTION_DATE, tdd.IS_ACCEPTED, tdt.status as templateState, dt.id as declarationTypeId, dt.name as declarationTypeName, tdd.TAX_ORGAN_CODE as taxOrgan, tdd.kpp \n" +
+            "     tdrp.CORRECTION_DATE, tdd.IS_ACCEPTED, tdt.status as templateState, dt.id as declarationTypeId, dt.name as declarationTypeName, tdd.TAX_ORGAN_CODE as taxOrgan, tdd.kpp, dt.tax_type \n" +
             "      from (\n" +
             "           select neighbours_fd.id, \n" +
             "                  neighbours_fd.form_template_id,\n" +
@@ -934,6 +944,7 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
             "            ) fd             \n" +
             "      join report_period rp on rp.id = fd.REPORT_PERIOD_ID\n" +
             "      join form_template ft on ft.id = fd.FORM_TEMPLATE_ID\n" +
+            "      join form_type t on t.id = ft.type_id\n" +
             "      join department_form_type dft on (dft.DEPARTMENT_ID = fd.DEPARTMENT_ID and dft.kind = fd.KIND and dft.FORM_TYPE_ID = ft.TYPE_ID)\n" +
             "      --ограничиваем назначения по пересечению с периодом приемника\n" +
             "      join declaration_source ds on (ds.SRC_DEPARTMENT_FORM_TYPE_ID = dft.id and ((ds.period_end >= rp.CALENDAR_START_DATE or ds.period_end is null) and ds.period_start <= rp.END_DATE))\n" +
@@ -947,7 +958,15 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
             "      --отбираем макет действующий для приемника в периоде источника\n" +
             "      join declaration_template tdt on (tdt.DECLARATION_TYPE_ID = dt.ID and tdt.status in (0,1) and tdt.version = (select max(dt2.version) from declaration_template dt2 where dt2.DECLARATION_TYPE_ID = tdt.DECLARATION_TYPE_ID and extract(year from dt2.version) <= ttp.year and dt2.status in (0,1))) \n" +
             "      --отбираем экземпляры с учетом периода сравнения, признака нарастающего истога, списка месяцов     \n" +
-            "      left join declaration_data tdd on (tdd.DECLARATION_TEMPLATE_ID = tdt.id and tdd.DEPARTMENT_REPORT_PERIOD_ID = tdrp.id)\n" +
+            "      left join (\n" +
+            "                select dd.*, rp.dict_tax_period_id\n" +
+            "                from declaration_data dd\n" +
+            "                join department_report_period drp on drp.id = dd.department_report_period_id\n" +
+            "                join report_period rp on rp.id = drp.report_period_id\n" +
+            "                ) tdd \n" +
+            "           on (tdd.DECLARATION_TEMPLATE_ID = tdt.id and \n" +
+            "           --если налог совпадает, то ищем точное совпадение по периоду, иначе совпадение по \n" +
+            "           ((dt.tax_type = t.tax_type and tdd.DEPARTMENT_REPORT_PERIOD_ID = tdrp.id) or (dt.tax_type != t.tax_type and rp.dict_tax_period_id = tdd.dict_tax_period_id))) \n" +
             "      where (:sourceFormDataId is null and (fd.id is null and fd.form_template_id = :formTemplateId and fd.DEPARTMENT_REPORT_PERIOD_ID = :departmentReportPeriodId and fd.kind = :kind and (:compPeriod is null and fd.COMPARATIVE_DEP_REP_PER_ID is null or fd.COMPARATIVE_DEP_REP_PER_ID = :compPeriod) and fd.ACCRUING = :accruing)) or fd.id = :sourceFormDataId\n" +
             "  ),         \n" +
             "  aggregated_insanity as (\n" +
@@ -960,7 +979,7 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
             "          max(last_correction_date) for agg_type in ('1' as last_correction_date, '0' global_last_correction_date)\n" +
             "      )\n" +
             ")         \n" +
-            "select i.id, i.departmentId, i.departmentName, i.correction_date, ai.last_correction_date, ai.global_last_correction_date, i.reportperiodid, i.departmentReportPeriod, i.periodName, i.year, i.IS_ACCEPTED, i.templateState, i.declarationTypeId, i.declarationTypeName, i.taxOrgan, i.kpp\n" +
+            "select i.id, i.departmentId, i.departmentName, i.correction_date, ai.last_correction_date, ai.global_last_correction_date, i.reportperiodid, i.departmentReportPeriod, i.periodName, i.year, i.IS_ACCEPTED, i.templateState, i.declarationTypeId, i.declarationTypeName, i.taxOrgan, i.kpp, i.tax_type\n" +
             "       from insanity i\n" +
             "       --обращение к аггрегированным данным для определения, какие существуют данные в связке по подразделению, типу, виду, периоду и месяцу экземпляры данных, их максимальную дату и дату последнего периода корректировки, если данные по экземлярам отсутствуют \n" +
             "       left join aggregated_insanity ai on i.id is null and ai.departmentId = i.departmentId and ai.declarationTypeId = i.declarationTypeId and ai.reportperiodid = i.reportperiodid \n" +
@@ -998,6 +1017,7 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
                     relation.setStatus(SqlUtils.getInteger(rs, "templateState") == 0);
                     relation.setTaxOrganCode(rs.getString("taxOrgan"));
                     relation.setKpp(rs.getString("kpp"));
+                    relation.setTaxType(TaxType.fromCode(rs.getString("tax_type").charAt(0)));
                     if (light) {
                         relation.setDepartmentId(SqlUtils.getInteger(rs, "departmentId"));
                         relation.setFullDepartmentName(rs.getString("departmentName"));
@@ -1024,12 +1044,13 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
             "     (\n" +
             "     select sfd.id, sd.id as departmentId, sd.name as departmentName, sdrp.id as departmentReportPeriod, stp.YEAR, srp.name as periodName, \n" +
             "     sdrp.CORRECTION_DATE, sfd.state, sft.status as templateState, sfd.manual, \n" +
-            "     st.id as formTypeId, st.name as formTypeName, sfk.id as formDataKind, fdpd.id as performerId, fdpd.name as performerName, rp.CALENDAR_START_DATE as periodStartDate, \n" +
+            "     st.id as formTypeId, st.name as formTypeName, sfk.id as formDataKind, fdpd.id as performerId, fdpd.name as performerName, rp.CALENDAR_START_DATE as periodStartDate, st.tax_type, \n" +
             "     case when sft.MONTHLY=1 then perversion.month else sfd.PERIOD_ORDER end as month, sdft.id as sdft_id\n" +
             "      from %s dd\n" +
             "      join department_report_period drp on drp.id = dd.DEPARTMENT_REPORT_PERIOD_ID and (:declarationId is null or dd.id = :declarationId)\n" +
             "      join report_period rp on rp.id = drp.REPORT_PERIOD_ID\n" +
             "      join declaration_template dt on dt.id = dd.DECLARATION_TEMPLATE_ID\n" +
+            "      join declaration_type t on t.id = dt.declaration_type_id\n" +
             "      join department_declaration_type ddt on (ddt.DEPARTMENT_ID = drp.DEPARTMENT_ID and ddt.DECLARATION_TYPE_ID = dt.DECLARATION_TYPE_ID)\n" +
             "      --ограничиваем назначения по пересечению с периодом приемника\n" +
             "      join declaration_source ds on (ds.DEPARTMENT_DECLARATION_TYPE_ID = ddt.id and ((ds.period_end >= rp.CALENDAR_START_DATE or ds.period_end is null) and ds.period_start <= rp.END_DATE))\n" +
@@ -1063,7 +1084,16 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
             "            ) lvl on ADD_MONTHS(t.d1, lvl.i - 1) <= t.d2 \n" +
             "           ) perversion on perversion.record_id = rp.DICT_TAX_PERIOD_ID and perversion.lvl = case when sft.MONTHLY=1 then perversion.lvl else 1 end\n" +
             "      --отбираем экземпляры с учетом списка месяцов     \n" +
-            "      left join form_data sfd on (sfd.kind = sfk.id and sfd.FORM_TEMPLATE_ID = sft.id and sfd.DEPARTMENT_REPORT_PERIOD_ID = sdrp.id) and coalesce(sfd.PERIOD_ORDER, perversion.month) = perversion.month\n" +
+            "      left join (\n" +
+            "                select fd.*, rp.dict_tax_period_id\n" +
+            "                from form_data fd\n" +
+            "                join department_report_period drp on drp.id = fd.department_report_period_id\n" +
+            "                join report_period rp on rp.id = drp.report_period_id\n" +
+            "                ) sfd \n" +
+            "           on (sfd.kind = sfk.id and sfd.FORM_TEMPLATE_ID = sft.id and  \n" +
+            "           --если налог совпадает, то ищем точное совпадение по периоду, иначе совпадение по \n" +
+            "           ((st.tax_type = t.tax_type and sfd.DEPARTMENT_REPORT_PERIOD_ID = sdrp.id) or (st.tax_type != t.tax_type and rp.dict_tax_period_id = sfd.dict_tax_period_id))) \n" +
+            "           and coalesce(sfd.PERIOD_ORDER, perversion.month) = perversion.month\n" +
             "      left join department_form_type_performer dftp on dftp.DEPARTMENT_FORM_TYPE_ID = sdft.id \n" +
             "      left join department fdpd on fdpd.id = dftp.PERFORMER_DEP_ID  \n" +
             "           ),\n" +
@@ -1074,7 +1104,7 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
             "      group by sdft_id\n" +
             "  )         \n" +
             "select id, departmentId, departmentName, correction_date, departmentReportPeriod, periodName, year, state, " +
-            "templateState, formTypeId, formTypeName, formDataKind, performerId, performerName, month, manual \n" +
+            "templateState, formTypeId, formTypeName, formDataKind, performerId, performerName, month, manual, tax_type \n" +
             "       from insanity i\n" +
             "       left join aggregated_insanity i_agg on i.sdft_id = i_agg.sdft_id \n" +
             "       where nvl(i.correction_date, to_date('01.01.0001', 'DD.MM.YYYY')) = nvl(i_agg.last_correction_date, to_date('01.01.0001', 'DD.MM.YYYY')) and (:excludeIfNotExist != 1 or id is not null) and (id is null or :stateRestriction is null or state = :stateRestriction)\n" +
@@ -1113,6 +1143,7 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
         relation.setStatus(SqlUtils.getInteger(rs, "templateState") == 0);
         relation.setFormDataKind(FormDataKind.fromId(SqlUtils.getInteger(rs, "formDataKind")));
         relation.setManual(rs.getBoolean("manual"));
+        relation.setTaxType(TaxType.fromCode(rs.getString("tax_type").charAt(0)));
         if (!forDeclaration) {
             relation.setAccruing(rs.getBoolean("accruing"));
         }

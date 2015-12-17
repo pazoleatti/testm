@@ -12,6 +12,7 @@ public class DepartmentDeclarationType implements Serializable {
 	private static final long serialVersionUID = 1L;
 	
 	private int id;
+	private TaxType taxType;
 	private int departmentId;
 	private int declarationTypeId;
 
@@ -82,4 +83,12 @@ public class DepartmentDeclarationType implements Serializable {
     public void setPeriodEnd(Date periodEnd) {
         this.periodEnd = periodEnd;
     }
+
+	public TaxType getTaxType() {
+		return taxType;
+	}
+
+	public void setTaxType(TaxType taxType) {
+		this.taxType = taxType;
+	}
 }

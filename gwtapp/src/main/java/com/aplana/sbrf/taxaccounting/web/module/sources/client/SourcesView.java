@@ -23,6 +23,7 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.logical.shared.*;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
+import com.google.gwt.text.shared.AbstractRenderer;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiConstructor;
 import com.google.gwt.uibinder.client.UiField;
@@ -92,6 +93,10 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers> implement
     ValueListBox<PeriodInfo>
             periodFrom,
             periodTo;
+
+    @UiField(provided = true)
+    ValueListBox<TaxType> taxTypeList;
+
     @UiField
     Spinner yearFrom,
             yearTo;
@@ -163,6 +168,7 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers> implement
     private TextColumn<CurrentAssign> downNameTypeColumn;
     private Column<CurrentAssign, Date> downStartColumn;
     private Column<CurrentAssign, Date> downEndColumn;
+    private TextColumn<CurrentAssign> downTaxTypeColumn;
 
     private boolean isForm = true;
     private boolean isTaxTypeDeal = false;
@@ -206,6 +212,23 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers> implement
             @Override
             public Object getKey(PeriodInfo item) {
                 return item != null ? item.getCode() : null;
+            }
+        });
+        taxTypeList = new ValueListBox<TaxType>(new AbstractRenderer<TaxType>() {
+            @Override
+            public String render(TaxType item) {
+                return item.getName();
+            }
+        }, new ProvidesKey<TaxType>() {
+            @Override
+            public Object getKey(TaxType item) {
+                return item;
+            }
+        });
+        taxTypeList.addValueChangeHandler(new ValueChangeHandler<TaxType>() {
+            @Override
+            public void onValueChange(ValueChangeEvent<TaxType> event) {
+                loadRightData();
             }
         });
 
@@ -268,6 +291,11 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers> implement
     public void clearSelection() {
         downSM.clear();
         rightSM.clear();
+    }
+
+    @Override
+    public TaxType getSelectedTaxType() {
+        return taxTypeList.getValue();
     }
 
     /**
@@ -492,6 +520,13 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers> implement
         });
         downIndexColumn.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
 
+        downTaxTypeColumn = new TextColumn<CurrentAssign>() {
+            @Override
+            public String getValue(CurrentAssign object) {
+                return object.getTaxType().getName();
+            }
+        };
+
         downDepartmentColumn = new TextColumn<CurrentAssign>() {
             @Override
             public String getValue(CurrentAssign object) {
@@ -580,12 +615,14 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers> implement
         });
         downTable.setEmptyTableWidget(lab);
 
+        downTable.addResizableColumn(downTaxTypeColumn, "");
         downTable.addResizableColumn(downDepartmentColumn, "");
         downTable.addResizableColumn(downAssignKindColumn, "");
         downTable.addResizableColumn(downNameTypeColumn, "");
         downTable.addResizableColumn(downStartColumn, "");
         downTable.addResizableColumn(downEndColumn, "");
 
+        downTaxTypeColumn.setDataStoreName(SourcesSearchOrdering.TAX_TYPE.name());
         downDepartmentColumn.setDataStoreName(SourcesSearchOrdering.DEPARTMENT.name());
         downAssignKindColumn.setDataStoreName(SourcesSearchOrdering.KIND.name());
         downNameTypeColumn.setDataStoreName(SourcesSearchOrdering.TYPE.name());
@@ -644,6 +681,9 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers> implement
         periodTo.setAcceptableValues(periods);
         WidgetUtils.setupOptionTitle(periodTo);
         SourcesUtils.setupPeriodTitle(periodTo);
+
+        taxTypeList.setValue(taxType);
+        taxTypeList.setAcceptableValues(Arrays.asList(TaxType.values()));
 
         yearFrom.setValue(year);
         yearTo.setValue(null);
@@ -716,6 +756,7 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers> implement
 
         downTable.addColumn(downCheckBoxColumn, downCheckBoxHeader, 40, Style.Unit.PX);
         downTable.addColumn(downIndexColumn, "№ пп", 40, Style.Unit.PX);
+        downTable.addResizableColumn(downTaxTypeColumn, "Налог", 150, Style.Unit.PX);
         downTable.addResizableColumn(downDepartmentColumn, "Подразделение", 250, Style.Unit.PX);
         if (isNotFourState) {
             downTable.addColumn(downAssignKindColumn, downFormKindHeader, 250, Style.Unit.PX);

@@ -57,7 +57,10 @@ insert into form_template (id, type_id, version, monthly, fixed_rows, name, full
 --Тип нф = рну-2
 insert into form_type (id, name, tax_type, status, code) values (2, 'РНУ-2', 'I', 0, 'code_2');
 insert into form_template (id, type_id, version, monthly, fixed_rows, name, fullname, status, comparative, accruing)
-  values (2, 2, to_date('01.01.2000', 'DD.MM.YY'), 0, 0, 'РНУ-2', 'РНУ-2', 0, 0, 0);
+  values (2, 2, to_date('01.01.1990', 'DD.MM.YY'), 0, 0, 'РНУ-2', 'РНУ-2', 0, 0, 0);
+-- Удаленный РНУ-2
+insert into form_template (id, type_id, version, monthly, fixed_rows, name, fullname, status, comparative, accruing)
+  values (1122, 2, to_date('01.01.1995', 'DD.MM.YY'), 0, 0, 'РНУ-2-2', 'РНУ-2', 2, 0, 0);
 --Тип нф = рну-3
 insert into form_type (id, name, tax_type, status, code) values (3, 'РНУ-3', 'I', 0, 'code_3');
 insert into form_template (id, type_id, version, monthly, fixed_rows, name, fullname, status, comparative, accruing)

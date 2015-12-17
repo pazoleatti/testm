@@ -49,6 +49,7 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
         public void processRow(ResultSet rs) throws SQLException {
             DepartmentFormType departmentFormType = new DepartmentFormType();
             departmentFormType.setId(rs.getLong("id"));
+            departmentFormType.setTaxType(TaxType.fromCode(rs.getString("tax_type").charAt(0)));
             departmentFormType.setFormTypeId(rs.getInt("form_type_id"));
             departmentFormType.setDepartmentId(rs.getInt("department_id"));
             departmentFormType.setKind(FormDataKind.fromId(rs.getInt("kind")));
@@ -84,6 +85,7 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
             departmentFormType.setFormTypeId(SqlUtils.getInteger(rs,"form_type_id"));
             departmentFormType.setDepartmentId(SqlUtils.getInteger(rs,"department_id"));
             departmentFormType.setKind(FormDataKind.fromId(SqlUtils.getInteger(rs,"kind")));
+            departmentFormType.setTaxType(TaxType.fromCode(rs.getString("tax_type").charAt(0)));
             Pair<Date, Date> dates = new Pair<Date, Date>(rs.getDate("start_date"), rs.getDate("end_date"));
             return new Pair<DepartmentFormType, Pair<Date, Date>>(departmentFormType, dates);
         }
@@ -92,28 +94,30 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
     private static final RowMapper<DepartmentDeclarationType> DDT_MAPPER_WITH_PERIOD = new RowMapper<DepartmentDeclarationType>() {
         @Override
         public DepartmentDeclarationType mapRow(ResultSet rs, int rowNum) throws SQLException {
-            DepartmentDeclarationType departmentFormType = new DepartmentDeclarationType();
-            departmentFormType.setId(rs.getInt("id"));
-            departmentFormType.setDepartmentId(rs.getInt("department_id"));
-            departmentFormType.setDeclarationTypeId(rs.getInt("declaration_type_id"));
-            departmentFormType.setPeriodStart(rs.getDate("period_start"));
-            departmentFormType.setPeriodEnd(rs.getDate("period_end"));
-            return departmentFormType;
+            DepartmentDeclarationType departmentDeclarationType = new DepartmentDeclarationType();
+            departmentDeclarationType.setId(rs.getInt("id"));
+            departmentDeclarationType.setDepartmentId(rs.getInt("department_id"));
+            departmentDeclarationType.setDeclarationTypeId(rs.getInt("declaration_type_id"));
+            departmentDeclarationType.setPeriodStart(rs.getDate("period_start"));
+            departmentDeclarationType.setPeriodEnd(rs.getDate("period_end"));
+            departmentDeclarationType.setTaxType(TaxType.fromCode(rs.getString("tax_type").charAt(0)));
+            return departmentDeclarationType;
         }
     };
 
     private static final RowMapper<DepartmentDeclarationType> DDT_MAPPER = new RowMapper<DepartmentDeclarationType>() {
         @Override
         public DepartmentDeclarationType mapRow(ResultSet rs, int rowNum) throws SQLException {
-            DepartmentDeclarationType departmentFormType = new DepartmentDeclarationType();
-            departmentFormType.setId(SqlUtils.getInteger(rs,"id"));
-            departmentFormType.setDepartmentId(SqlUtils.getInteger(rs,"department_id"));
-            departmentFormType.setDeclarationTypeId(SqlUtils.getInteger(rs,"declaration_type_id"));
-            return departmentFormType;
+            DepartmentDeclarationType departmentDeclarationType = new DepartmentDeclarationType();
+            departmentDeclarationType.setId(SqlUtils.getInteger(rs,"id"));
+            departmentDeclarationType.setDepartmentId(SqlUtils.getInteger(rs,"department_id"));
+            departmentDeclarationType.setDeclarationTypeId(SqlUtils.getInteger(rs,"declaration_type_id"));
+            departmentDeclarationType.setTaxType(TaxType.fromCode(rs.getString("tax_type").charAt(0)));
+            return departmentDeclarationType;
         }
     };
 
-    private static final String GET_FORM_SOURCES_SQL = "select distinct src_dft.*, dftp.performer_dep_id, ds.period_start, ds.period_end, d.NAME, ft.NAME\n" +
+    private static final String GET_FORM_SOURCES_SQL = "select distinct src_dft.*, dftp.performer_dep_id, ds.period_start, ds.period_end, d.NAME, ft.NAME, ft.tax_type \n" +
             "from department_form_type src_dft \n" +
             "join form_data_source ds on ds.src_department_form_type_id=src_dft.id \n" +
             "join department_form_type dft on ds.department_form_type_id=dft.id \n" +
@@ -144,10 +148,11 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
         return result;
     }
 
-    private static final String GET_FORM_DESTINATIONS_SQL = "select distinct dest_dft.*, dftp.performer_dep_id, fds.period_start, fds.period_end from department_form_type dest_dft \n" +
+    private static final String GET_FORM_DESTINATIONS_SQL = "select distinct dest_dft.*, dftp.performer_dep_id, fds.period_start, fds.period_end, ft.tax_type from department_form_type dest_dft \n" +
             "join form_data_source fds on fds.department_form_type_id=dest_dft.id\n" +
             "join department_form_type dft on fds.src_department_form_type_id=dft.id\n" +
             "left join department_form_type_performer dftp on dftp.DEPARTMENT_FORM_TYPE_ID = dest_dft.id \n" +
+            "join form_type ft on ft.id = dest_dft.form_type_id \n" +
             "where dft.department_id=:sourceDepartmentId and (:sourceFormTypeId is null or dft.form_type_id=:sourceFormTypeId) and (:sourceKind is null or dft.kind=:sourceKind) \n" +
             "and (:periodStart is null or ((fds.period_end >= :periodStart or fds.period_end is null) and (:periodEnd is null or fds.period_start <= :periodEnd)))";
 
@@ -167,7 +172,9 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
     @Override
     public List<DepartmentFormType> getFormDestinations(int sourceDepartmentId,
                                                         int sourceFormTypeId, FormDataKind sourceKind) {
-        StringBuilder sb = new StringBuilder("select dest_dft.*, dftp.performer_dep_id from department_form_type dest_dft where exists "
+        StringBuilder sb = new StringBuilder("select dest_dft.*, dftp.performer_dep_id from department_form_type dest_dft "+
+                "join form_type ft on ft.id = dest_dft.form_type_id \n" +
+                "where exists "
                 + "(select 1 from department_form_type dft, form_data_source fds where "
                 + "fds.src_department_form_type_id=dft.id and fds.department_form_type_id=dest_dft.id "
                 + "and dft.department_id = ? ");
@@ -185,9 +192,10 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
     }
 
 
-    private static final String GET_DECLARATION_DESTINATIONS_SQL = "select distinct dest_ddt.*, ds.period_start, ds.period_end from department_declaration_type dest_ddt \n" +
+    private static final String GET_DECLARATION_DESTINATIONS_SQL = "select distinct dest_ddt.*, ds.period_start, ds.period_end, dt.tax_type from department_declaration_type dest_ddt \n" +
             "join declaration_source ds on ds.department_declaration_type_id=dest_ddt.id\n" +
             "join department_form_type dft on ds.src_department_form_type_id=dft.id  \n" +
+            "join declaration_type dt on dt.id = dest_ddt.declaration_type_id \n" +
             "where dft.department_id=:sourceDepartmentId and (:sourceFormTypeId is null or dft.form_type_id=:sourceFormTypeId) and (:sourceKind is null or dft.kind=:sourceKind) \n" +
             "and (:periodStart is null or ((ds.period_end >= :periodStart or ds.period_end is null) and (:periodEnd is null or ds.period_start <= :periodEnd)))";
 
@@ -203,7 +211,9 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
         return getNamedParameterJdbcTemplate().query(GET_DECLARATION_DESTINATIONS_SQL, params, DDT_MAPPER_WITH_PERIOD);
     }
 
-    private static final String GET_DECLARATION_DESTINATIONS_SQL_OLD = "select * from department_declaration_type dest_ddt where exists "
+    private static final String GET_DECLARATION_DESTINATIONS_SQL_OLD = "select * from department_declaration_type dest_ddt "+
+            "join declaration_type dt on dt.id = dest_ddt.declaration_type_id \n" +
+            "where exists "
             + "(select 1 from department_form_type dft, declaration_source ds where "
             + "ds.src_department_form_type_id=dft.id and ds.department_declaration_type_id=dest_ddt.id "
             + "and dft.department_id=? %s %s)";
@@ -229,7 +239,7 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
                params, DDT_MAPPER);
     }
 
-    private static final String GET_DECLARATION_SOURCES_SQL = "select distinct src_dft.*, dftp.performer_dep_id, ds.period_start, ds.period_end, d.NAME, ft.NAME, src_dft.kind as kind\n" +
+    private static final String GET_DECLARATION_SOURCES_SQL = "select distinct src_dft.*, dftp.performer_dep_id, ds.period_start, ds.period_end, d.NAME, ft.NAME, src_dft.kind as kind, ft.tax_type \n" +
             "from department_form_type src_dft \n" +
             "left join department_form_type_performer dftp on dftp.DEPARTMENT_FORM_TYPE_ID = src_dft.id \n" +
             "join declaration_source ds on ds.src_department_form_type_id=src_dft.id \n" +
@@ -564,8 +574,9 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
     }
 
     private static final String GET_ALL_DEPARTMENT_SOURCES_SQL = "select src_dft.id, src_dft.department_id, src_dft.form_type_id, "
-			+ "src_dft.kind, dftp.performer_dep_id from department_form_type src_dft " +
+			+ "src_dft.kind, dftp.performer_dep_id, ft.tax_type from department_form_type src_dft " +
             "left join department_form_type_performer dftp on dftp.DEPARTMENT_FORM_TYPE_ID = src_dft.id \n" +
+            "join form_type ft on ft.id = src_dft.form_type_id \n" +
             "where "
             + "exists (select 1 from department_form_type dft, form_data_source fds, form_type src_ft where "
             + "fds.department_form_type_id=dft.id and fds.src_department_form_type_id=src_dft.id and src_ft.id = src_dft.form_type_id "
@@ -593,16 +604,18 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
     }
 
 
-    private static final String GET_SQL = "SELECT dft.id, dft.department_id, dft.form_type_id, dft.kind, dftp.performer_dep_id FROM department_form_type dft " +
+    private static final String GET_SQL = "SELECT dft.id, dft.department_id, dft.form_type_id, dft.kind, dftp.performer_dep_id, ft.tax_type FROM department_form_type dft " +
             "left join department_form_type_performer dftp on dftp.DEPARTMENT_FORM_TYPE_ID = dft.id \n" +
+            "join form_type ft on ft.id = dft.form_type_id \n" +
             "WHERE dft.department_id=?";
 
     @Override
     public List<DepartmentFormType> getByListIds(List<Long> ids) {
         List<DepartmentFormType> result = new ArrayList<DepartmentFormType>();
         getJdbcTemplate().query(
-                "SELECT dft.id, dft.department_id, dft.form_type_id, dft.kind, dftp.performer_dep_id FROM department_form_type dft \n" +
+                "SELECT dft.id, dft.department_id, dft.form_type_id, dft.kind, dftp.performer_dep_id, ft.tax_type FROM department_form_type dft \n" +
                         "left join department_form_type_performer dftp on dftp.DEPARTMENT_FORM_TYPE_ID = dft.id \n" +
+                        "join form_type ft on ft.id = dft.form_type_id \n" +
                         "WHERE " +
                         SqlUtils.transformToSqlInStatement("dft.id", ids),
                 new DFTCallBackHandler(result, false));
@@ -622,7 +635,7 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
 
     private static final String GET_SQL_BY_TAX_TYPE_SQL = "select " +
 			"src_dft.id, src_dft.department_id, src_dft.form_type_id, src_dft.kind, dftp.performer_dep_id, " +
-			"ft.name from department_form_type src_dft\n" +
+			"ft.name, ft.tax_type from department_form_type src_dft\n" +
             "left join department_form_type_performer dftp on dftp.DEPARTMENT_FORM_TYPE_ID = src_dft.id \n" +
             "LEFT JOIN form_type ft ON src_dft.FORM_TYPE_ID = ft.ID\n" +
             "where department_id = :departmentId and exists (\n" +
@@ -656,8 +669,9 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
     }
 
     private static final String GET_SQL_BY_TAX_TYPE_SQL_OLD =
-			"SELECT dft.id, dft.department_id, dft.form_type_id, dft.kind, dftp.performer_dep_id FROM department_form_type dft " +
+			"SELECT dft.id, dft.department_id, dft.form_type_id, dft.kind, dftp.performer_dep_id, ft.tax_type FROM department_form_type dft " +
                     "left join department_form_type_performer dftp on dftp.DEPARTMENT_FORM_TYPE_ID = dft.id \n" +
+                    "join form_type ft on ft.id = dft.form_type_id \n" +
                     "WHERE dft.department_id = ?" +
             " AND EXISTS (SELECT 1 FROM form_type ft WHERE ft.id = dft.form_type_id ";
 
@@ -876,10 +890,12 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
                     "  tgt.FORM_TYPE_ID  form_type_id,\n" +
                     "  tgt.KIND          kind,\n" +
                     "  fds.PERIOD_START  start_date,\n" +
-                    "  fds.PERIOD_END    end_date\n" +
+                    "  fds.PERIOD_END    end_date,\n" +
+                    "  ft.tax_type       tax_type\n" +
                     "FROM department_form_type src\n" +
                     "  JOIN form_data_source fds ON src.id = fds.src_department_form_type_id\n" +
                     "  JOIN department_form_type tgt ON fds.department_form_type_id = tgt.id\n" +
+                    "  join form_type ft on ft.id = tgt.form_type_id \n" +
                     "WHERE src.form_type_id = :formTypeId AND\n" +
                     "      ((:dateTo IS NULL AND (fds.PERIOD_START >= :dateFrom OR fds.PERIOD_END >= :dateFrom))\n" +
                     "       OR (fds.PERIOD_START BETWEEN :dateFrom AND :dateTo OR fds.PERIOD_END BETWEEN :dateFrom AND :dateTo))";
@@ -908,10 +924,12 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
             "  src.FORM_TYPE_ID  form_type_id,\n" +
             "  src.KIND          kind,\n" +
             "  fds.PERIOD_START  start_date,\n" +
-            "  fds.PERIOD_END    end_date\n" +
+            "  fds.PERIOD_END    end_date,\n" +
+            "  ft.tax_type       tax_type\n" +
             "FROM department_form_type src\n" +
             "  JOIN form_data_source fds ON src.id = fds.src_department_form_type_id\n" +
             "  JOIN department_form_type tgt ON fds.department_form_type_id = tgt.id\n" +
+            "  join form_type ft on ft.id = src.form_type_id \n" +
             "WHERE tgt.form_type_id = :formTypeId AND ((:dateTo IS NULL and (fds.PERIOD_START >= :dateFrom OR fds.PERIOD_END >= :dateFrom))\n" +
             "       OR (fds.PERIOD_START BETWEEN :dateFrom AND :dateTo or fds.PERIOD_END BETWEEN :dateFrom AND :dateTo))";
     @Override
@@ -936,8 +954,9 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
     public List<DepartmentFormType> getDFTByFormType(Integer formTypeId) {
         try {
             List<DepartmentFormType> result = new ArrayList<DepartmentFormType>();
-            getJdbcTemplate().query("select dft.id, dft.department_id, dft.form_type_id, dft.kind, dftp.performer_dep_id from DEPARTMENT_FORM_TYPE dft " +
+            getJdbcTemplate().query("select dft.id, dft.department_id, dft.form_type_id, dft.kind, dftp.performer_dep_id, ft.tax_type from DEPARTMENT_FORM_TYPE dft " +
                             "left join department_form_type_performer dftp on dftp.DEPARTMENT_FORM_TYPE_ID = dft.id \n" +
+                            "join form_type ft on ft.id = dft.form_type_id \n" +
                     "where dft.FORM_TYPE_ID = ?",
                     new Object[]{formTypeId},
                     new DFTCallBackHandler(result, false));
@@ -971,6 +990,9 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
                 break;
             case KIND:
                 sorting.append("ORDER BY src_dft.kind\n");
+                break;
+            case TAX_TYPE:
+                sorting.append("ORDER BY tax_type\n");
                 break;
             case DEPARTMENT:
                 sorting.append("ORDER BY d.name\n");

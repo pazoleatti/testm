@@ -149,6 +149,13 @@ public class SourcesView extends PopupViewWithUiHandlers<SourcesUiHandlers> impl
             }
         };
 
+        TextColumn<Relation> taxTypeColumn = new TextColumn<Relation>() {
+            @Override
+            public String getValue(Relation object) {
+                return object.getTaxType().getName();
+            }
+        };
+
         TextColumn<Relation> sourceColumn = new TextColumn<Relation>() {
             @Override
             public String getValue(Relation object) {
@@ -287,31 +294,35 @@ public class SourcesView extends PopupViewWithUiHandlers<SourcesUiHandlers> impl
 
         table.addColumn(counterColumn, "№");
         table.setColumnWidth(counterColumn, 20, Style.Unit.PX);
+        table.addColumn(taxTypeColumn, "Налог");
+        table.setColumnWidth(taxTypeColumn, 110, Style.Unit.PX);
         table.addColumn(sourceColumn, "Источник / Приёмник");
-        table.setColumnWidth(sourceColumn, 80, Style.Unit.PX);
+        table.setColumnWidth(sourceColumn, 85, Style.Unit.PX);
         table.addColumn(departmentColumn, "Подразделение");
         table.addColumn(correctionDateColumn, "Дата сдачи корректировки");
         table.setColumnWidth(correctionDateColumn, 85, Style.Unit.PX);
         if (isForm) {
             table.addColumn(formKindColumn, "Тип формы");
-            table.setColumnWidth(formKindColumn, 100, Style.Unit.PX);
+            table.setColumnWidth(formKindColumn, 110, Style.Unit.PX);
             table.addColumn(formTypeColumn, "Вид формы");
-            table.setColumnWidth(formTypeColumn, 100, Style.Unit.PX);
+            table.setColumnWidth(formTypeColumn, 110, Style.Unit.PX);
         } else {
             if (!TaxType.DEAL.equals(getUiHandlers().getTaxType())) {
                 table.addColumn(formTypeColumn, "Вид декларации");
             } else {
                 table.addColumn(formTypeColumn, "Вид уведомления");
             }
-            table.setColumnWidth(formTypeColumn, 110, Style.Unit.PX);
         }
         table.addColumn(yearColumn, "Год");
+        table.setColumnWidth(yearColumn, 40, Style.Unit.PX);
         table.addColumn(periodColumn, "Период");
+        table.setColumnWidth(periodColumn, 70, Style.Unit.PX);
         if (isForm) {
             if (TaxType.ETR.equals(getUiHandlers().getTaxType())) {
                 table.addColumn(comparativePeriodColumn, "Период сравнения");
             } else {
                 table.addColumn(monthColumn, "Месяц");
+                table.setColumnWidth(monthColumn, 70, Style.Unit.PX);
             }
             table.addColumn(performerColumn, "Исполнитель");
         } else {
@@ -333,7 +344,7 @@ public class SourcesView extends PopupViewWithUiHandlers<SourcesUiHandlers> impl
                 table.addColumn(stateColumn, "Состояние уведомления");
             }
         }
-        table.setColumnWidth(stateColumn, 120, Style.Unit.PX);
+        table.setColumnWidth(stateColumn, 90, Style.Unit.PX);
     }
 
     private void initCheckboxes() {

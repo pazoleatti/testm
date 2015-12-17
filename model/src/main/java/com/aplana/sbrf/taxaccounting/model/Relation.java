@@ -22,6 +22,8 @@ public class Relation implements Serializable {
     private boolean source;
     /** Введена/выведена в/из действие(-ия) */
     private boolean status;
+    /** Налог */
+    private TaxType taxType;
 
     /**************  Параметры НФ ***************/
 
@@ -308,6 +310,14 @@ public class Relation implements Serializable {
 
     public void setDepartmentId(int departmentId) {
         this.departmentId = departmentId;
+    }
+
+    public TaxType getTaxType() {
+        return taxType;
+    }
+
+    public void setTaxType(TaxType taxType) {
+        this.taxType = taxType;
     }
 
     @Override

@@ -39,6 +39,7 @@ public class DepartmentDeclarationTypeDaoImpl extends AbstractDao implements Dep
 			departmentDeclarationType.setId(SqlUtils.getInteger(rs, "id"));
 			departmentDeclarationType.setDeclarationTypeId(SqlUtils.getInteger(rs,"declaration_type_id"));
 			departmentDeclarationType.setDepartmentId(SqlUtils.getInteger(rs,"department_id"));
+            departmentDeclarationType.setTaxType(TaxType.fromCode(rs.getString("tax_type").charAt(0)));
 			return departmentDeclarationType;
 		}
 	};
@@ -51,6 +52,7 @@ public class DepartmentDeclarationTypeDaoImpl extends AbstractDao implements Dep
             departmentFormType.setFormTypeId(SqlUtils.getInteger(rs,"form_type_id"));
             departmentFormType.setDepartmentId(SqlUtils.getInteger(rs,"department_id"));
             departmentFormType.setKind(FormDataKind.fromId(SqlUtils.getInteger(rs,"kind")));
+            departmentFormType.setTaxType(TaxType.fromCode(rs.getString("tax_type").charAt(0)));
             Pair<Date, Date> dates = new Pair<Date, Date>(rs.getDate("start_date"), rs.getDate("end_date"));
             return new Pair<DepartmentFormType, Pair<Date, Date>>(departmentFormType, dates);
         }
@@ -64,6 +66,7 @@ public class DepartmentDeclarationTypeDaoImpl extends AbstractDao implements Dep
             departmentDeclarationType.setId(rs.getInt("id"));
             departmentDeclarationType.setDeclarationTypeId(SqlUtils.getInteger(rs,"declaration_type_id"));
             departmentDeclarationType.setDepartmentId(SqlUtils.getInteger(rs,"department_id"));
+            departmentDeclarationType.setTaxType(TaxType.fromCode(rs.getString("tax_type").charAt(0)));
             Pair<Date, Date> dates = new Pair<Date, Date>(rs.getDate("start_date"), rs.getDate("end_date"));
             return new Pair<DepartmentDeclarationType, Pair<Date, Date>>(departmentDeclarationType, dates);
         }
@@ -113,7 +116,9 @@ public class DepartmentDeclarationTypeDaoImpl extends AbstractDao implements Dep
     @Override
     public List<DepartmentDeclarationType> getByTaxType(int departmentId, TaxType taxType) {
         return getJdbcTemplate().query(
-                "select * from department_declaration_type ddt where department_id = ?" +
+                "select * from department_declaration_type ddt "+
+                        "join declaration_type dt1 on dt1.id = ddt.declaration_type_id \n" +
+                        "where department_id = ?" +
                         " and exists (select 1 from declaration_type dt where dt.id = ddt.declaration_type_id " +
                         (taxType != null ? "and dt.tax_type in " +SqlUtils.transformTaxTypeToSqlInStatement(Arrays.asList(taxType)) : "") + ")",
                 new Object[] {
@@ -154,10 +159,12 @@ public class DepartmentDeclarationTypeDaoImpl extends AbstractDao implements Dep
                     "  tgt.DEPARTMENT_ID       department_id,\n" +
                     "  tgt.DECLARATION_TYPE_ID declaration_type_id,\n" +
                     "  ds.PERIOD_START         start_date,\n" +
-                    "  ds.PERIOD_END           end_date\n" +
+                    "  ds.PERIOD_END           end_date,\n" +
+                    "  dt.tax_type             tax_type\n" +
                     "FROM department_form_type src\n" +
                     "  JOIN declaration_source ds ON src.id = ds.src_department_form_type_id\n" +
                     "  JOIN department_declaration_type tgt ON ds.department_declaration_type_id = tgt.id\n" +
+                    "  join declaration_type dt on dt.id = tgt.declaration_type_id \n" +
                     "WHERE\n" +
                     "  src.form_type_id = :formTypeId\n" +
                     "  AND ((:dateTo IS NULL AND (ds.PERIOD_START >= :dateFrom OR ds.PERIOD_END >= :dateFrom))\n" +
@@ -188,10 +195,12 @@ public class DepartmentDeclarationTypeDaoImpl extends AbstractDao implements Dep
                     "  src.FORM_TYPE_ID  form_type_id,\n" +
                     "  src.KIND          kind,\n" +
                     "  ds.PERIOD_START   start_date,\n" +
-                    "  ds.PERIOD_END     end_date\n" +
+                    "  ds.PERIOD_END     end_date\n," +
+                    "  ft.tax_type     tax_type\n" +
                     "FROM department_form_type src\n" +
                     "  JOIN declaration_source ds ON src.id = ds.src_department_form_type_id\n" +
                     "  JOIN department_declaration_type tgt ON ds.department_declaration_type_id = tgt.id\n" +
+                    "  join form_type ft on ft.id = src.form_type_id \n" +
                     "WHERE\n" +
                     "  tgt.declaration_type_id = :formTypeId\n" +
                     "  AND ((:dateTo IS NULL AND (ds.PERIOD_START >= :dateFrom OR ds.PERIOD_END >= :dateFrom))\n" +
@@ -217,7 +226,9 @@ public class DepartmentDeclarationTypeDaoImpl extends AbstractDao implements Dep
     @Override
     public List<DepartmentDeclarationType> getDDTByDeclarationType(Integer declarationTypeId) {
         try {
-            return getJdbcTemplate().query("select id, department_id, DECLARATION_TYPE_ID from DEPARTMENT_DECLARATION_TYPE where DECLARATION_TYPE_ID = ?",
+            return getJdbcTemplate().query("select id, department_id, DECLARATION_TYPE_ID, tax_type from DEPARTMENT_DECLARATION_TYPE ddt "+
+                    "join declaration_type dt on dt.id = ddt.declaration_type_id \n" +
+                    "where ddt.DECLARATION_TYPE_ID = ?",
                     new Object[]{declarationTypeId},
                     DEPARTMENT_DECLARATION_TYPE_ROW_MAPPER);
         } catch (DataAccessException e){
