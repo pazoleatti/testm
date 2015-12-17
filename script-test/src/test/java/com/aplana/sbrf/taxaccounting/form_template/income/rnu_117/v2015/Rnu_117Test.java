@@ -60,6 +60,29 @@ public class Rnu_117Test extends ScriptTestBase {
 
     @Before
     public void mockServices() {
+        final Long refbookId = 27L;
+        RefBookUniversal provider = mock(RefBookUniversal.class);
+        provider.setRefBookId(refbookId);
+        when(testHelper.getRefBookFactory().getDataProvider(refbookId)).thenReturn(provider);
+        when(provider.getRecords(any(Date.class), any(PagingParams.class), anyString(),
+                any(RefBookAttribute.class))).thenAnswer(new Answer<Object>() {
+            @Override
+            public Object answer(InvocationOnMock invocation) throws Throwable {
+                // вынимаем значение кода из фильтра LOWER(CODE) = LOWER('$code')
+                String filter = (String) invocation.getArguments()[2];
+                String codeValue = filter.substring(filter.indexOf("('") + 2, filter.indexOf("')"));
+                if (codeValue == null) {
+                    return new PagingResult<Map<String, RefBookValue>>();
+                }
+                final Map<Long, Map<String, RefBookValue>> records = testHelper.getRefBookAllRecords(refbookId);
+                for (Map<String, RefBookValue> row : records.values()) {
+                    if (codeValue.equals(row.get("CODE").getStringValue())) {
+                        List<Map<String, RefBookValue>> tmpRecords = Arrays.asList(row);
+                        return new PagingResult<Map<String, RefBookValue>>(tmpRecords);
+                    }
+                }
+                return new PagingResult<Map<String, RefBookValue>>();
+            }});
     }
 
     @Test
@@ -80,7 +103,7 @@ public class Rnu_117Test extends ScriptTestBase {
     @Test
     public void check1Test() throws ParseException {
         FormData formData = getFormData();
-        formData.initFormTemplateParams(testHelper.getTemplate("..//src/main//resources//form_template//income//rnu_117//v2015//"));
+        formData.initFormTemplateParams(testHelper.getFormTemplate());
         List<DataRow<Cell>> dataRows = testHelper.getDataRowHelper().getAll();
         SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
 
@@ -93,7 +116,6 @@ public class Rnu_117Test extends ScriptTestBase {
         testHelper.execute(FormDataEvent.CHECK);
 
         List<LogEntry> entries = testHelper.getLogger().getEntries();
-        System.out.println(entries.toString());
         int i = 0;
         Assert.assertEquals("Строка 1: Графа «Наименование Взаимозависимого лица/резидента оффшорной зоны» не заполнена!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Графа «Код классификации расхода» не заполнена!", entries.get(i++).getMessage());
@@ -107,14 +129,13 @@ public class Rnu_117Test extends ScriptTestBase {
                 "так как не заполнена используемая в расчете графа «Процентная ставка, % годовых», «Процентная ставка, признаваемая рыночной для целей налогообложения, % годовых»!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Графа «Сумма отклонения (превышения) расхода фактического от соответствующего рыночному уровню, руб.»: выполнение расчета невозможно, " +
                 "так как не заполнена используемая в расчете графа «Сумма фактически начисленного расхода, руб.», «Сумма расхода, соответствующая рыночному уровню, руб.»!", entries.get(i++).getMessage());
-        Assert.assertEquals("Группа «ВЗЛ/РОЗ не задано» не имеет строки подитога!", entries.get(i++).getMessage());
         Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
         testHelper.getLogger().clear();
 
         //2. Для прохождения всех ЛП
         i = 0;
         row.getCell("name").setValue(1L, null);
-        row.getCell("code").setValue(1L, null);
+        row.getCell("code").setValue("A", null);
         row.getCell("reasonNumber").setValue("string", null);
         row.getCell("reasonDate").setValue(sdf.parse("11.11.2016"), null);
         row.getCell("rate").setValue(1L, null);
@@ -134,9 +155,6 @@ public class Rnu_117Test extends ScriptTestBase {
         i = 0;
         Assert.assertEquals("Строка 1: Значение графы «Сумма фактически начисленного расхода, руб.» должно быть больше или равно «0»!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Значение графы «Сумма расхода, соответствующая рыночному уровню, руб.» должно быть больше или равно «0»!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 2: Неверное итоговое значение по группе «A» в графе «Сумма фактически начисленного расхода, руб.»", entries.get(i++).getMessage());
-        Assert.assertEquals("Итоговые значения рассчитаны неверно в графе «Сумма фактически начисленного расхода, руб.»!", entries.get(i++).getMessage());
-        Assert.assertEquals("Итоговые значения рассчитаны неверно в графе «Сумма расхода, соответствующая рыночному уровню, руб.»!", entries.get(i++).getMessage());
         Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
         testHelper.getLogger().clear();
 
@@ -147,7 +165,7 @@ public class Rnu_117Test extends ScriptTestBase {
         testHelper.execute(FormDataEvent.CHECK);
         entries = testHelper.getLogger().getEntries();
         i = 0;
-        Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
+        Assert.assertEquals(i, entries.size());
         testHelper.getLogger().clear();
 
         // 5. Проверка -  графа 9 должна быть >= графе 11
@@ -236,30 +254,26 @@ public class Rnu_117Test extends ScriptTestBase {
         // проверка расчетов
         testHelper.execute(FormDataEvent.CALCULATE);
         checkAfterCalc(testHelper.getDataRowHelper().getAll());
-        Assert.assertEquals(5, testHelper.getDataRowHelper().getCount());
+        Assert.assertEquals(3, testHelper.getDataRowHelper().getCount());
     }
 
     // Проверить загруженные данные
     void checkLoadData(List<DataRow<Cell>> dataRows) {
         Assert.assertEquals(1L, dataRows.get(0).getCell("name").getNumericValue().longValue());
         Assert.assertEquals(2L, dataRows.get(1).getCell("name").getNumericValue().longValue());
-        Assert.assertEquals(1L, dataRows.get(0).getCell("code").getNumericValue().longValue());
-        Assert.assertEquals(2L, dataRows.get(1).getCell("code").getNumericValue().longValue());
+        Assert.assertEquals("string1", dataRows.get(0).getCell("code").getStringValue());
+        Assert.assertEquals("string2", dataRows.get(1).getCell("code").getStringValue());
     }
 
     // Проверить расчеты
     void checkAfterCalc(List<DataRow<Cell>> dataRows) {
         Assert.assertEquals(2, dataRows.get(0).getCell("rate2").getNumericValue().doubleValue(), 0);
-        Assert.assertNull(dataRows.get(1).getCell("rate2").getNumericValue());
-        Assert.assertEquals(2, dataRows.get(2).getCell("rate2").getNumericValue().doubleValue(), 0);
-        Assert.assertNull(dataRows.get(3).getCell("rate2").getNumericValue());
-        Assert.assertNull(dataRows.get(4).getCell("rate2").getNumericValue());
+        Assert.assertEquals(2, dataRows.get(1).getCell("rate2").getNumericValue().doubleValue(), 0);
+        Assert.assertNull(dataRows.get(2).getCell("rate2").getNumericValue());
 
         Assert.assertEquals(2, dataRows.get(0).getCell("sum3").getNumericValue().doubleValue(), 0);
         Assert.assertEquals(2, dataRows.get(1).getCell("sum3").getNumericValue().doubleValue(), 0);
-        Assert.assertEquals(2, dataRows.get(2).getCell("sum3").getNumericValue().doubleValue(), 0);
-        Assert.assertEquals(2, dataRows.get(3).getCell("sum3").getNumericValue().doubleValue(), 0);
-        Assert.assertEquals(4, dataRows.get(4).getCell("sum3").getNumericValue().doubleValue(), 0);
+        Assert.assertEquals(4, dataRows.get(2).getCell("sum3").getNumericValue().doubleValue(), 0);
     }
 }
 
