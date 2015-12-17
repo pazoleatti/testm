@@ -258,7 +258,6 @@ void importData() {
 
     // сравнение подитогов
     if (!totalRowFromFileMap.isEmpty()) {
-        def tmpRows = rows.findAll { !it.getAlias() }
         // получить посчитанные подитоги
         def tmpSubTotalRows = calcSubTotalRows(rows)
         tmpSubTotalRows.each { subTotalRow ->

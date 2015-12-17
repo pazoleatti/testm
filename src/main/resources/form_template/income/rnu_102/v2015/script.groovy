@@ -181,18 +181,6 @@ def calcTotalRow(def dataRows) {
     return totalRow
 }
 
-def calcTotalRow(def dataRows, def name) {
-    def totalRow = (formDataEvent in [FormDataEvent.IMPORT, FormDataEvent.IMPORT_TRANSPORT_FILE]) ? formData.createStoreMessagingDataRow() : formData.createDataRow()
-    totalRow.setAlias('total')
-    totalRow.fix = name
-    totalRow.getCell('fix').colSpan = 2
-    allColumns.each {
-        totalRow.getCell(it).setStyleAlias('Контрольные суммы')
-    }
-    calcTotalSum(dataRows, totalRow, totalColumns)
-    return totalRow
-}
-
 // Получение импортируемых данных
 void importData() {
     def tmpRow = formData.createDataRow()
@@ -269,7 +257,6 @@ void importData() {
 
     // сравнение подитогов
     if (!totalRowFromFileMap.isEmpty()) {
-        def tmpRows = rows.findAll { !it.getAlias() }
         // получить посчитанные подитоги
         def tmpSubTotalRows = calcSubTotalRows(rows)
         tmpSubTotalRows.each { subTotalRow ->
