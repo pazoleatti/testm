@@ -134,7 +134,15 @@ public class SourcesView extends PopupViewWithUiHandlers<SourcesUiHandlers> impl
         TextColumn<Relation> performerColumn = new TextColumn<Relation>() {
             @Override
             public String getValue(Relation object) {
-                return object.getPerformer() != null ? object.getPerformer().getName() : "";
+                if (object.getPerformerNames() != null) {
+                    StringBuilder performers = new StringBuilder();
+                    for (String performer : object.getPerformerNames()) {
+                        performers.append(performer).append("; ");
+                    }
+                    return performers.toString();
+                } else {
+                    return "";
+                }
             }
         };
 

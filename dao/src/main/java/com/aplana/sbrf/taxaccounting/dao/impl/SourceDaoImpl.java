@@ -763,14 +763,9 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
         params.put("excludeIfNotExist", excludeIfNotExist ? 1 : 0);
         params.put("stateRestriction", stateRestriction != null ? stateRestriction.getId() : null);
         try {
-            return getNamedParameterJdbcTemplate().query(sql, params, new RowMapper<Relation>() {
-                @Override
-                public Relation mapRow(ResultSet rs, int i) throws SQLException {
-                    Relation relation =  mapFormCommon(rs, light, false);
-                    relation.setSource(true);
-                    return relation;
-                }
-            });
+            List<Relation> result = new ArrayList<Relation>();
+            getNamedParameterJdbcTemplate().query(sql, params, new CommonSourcesCallBackHandler(result, light, false, true));
+            return result;
         } catch (EmptyResultDataAccessException e) {
             return new ArrayList<Relation>();
         }
@@ -909,14 +904,9 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
         params.put("excludeIfNotExist", excludeIfNotExist ? 1 : 0);
         params.put("stateRestriction", stateRestriction != null ? stateRestriction.getId() : null);
         try {
-            return getNamedParameterJdbcTemplate().query(sql, params, new RowMapper<Relation>() {
-                @Override
-                public Relation mapRow(ResultSet rs, int i) throws SQLException {
-                    Relation relation =  mapFormCommon(rs, light, false);
-                    relation.setSource(false);
-                    return relation;
-                }
-            });
+            List<Relation> result = new ArrayList<Relation>();
+            getNamedParameterJdbcTemplate().query(sql, params, new CommonSourcesCallBackHandler(result, light, false, false));
+            return result;
         } catch (EmptyResultDataAccessException e) {
             return new ArrayList<Relation>();
         }
@@ -1122,68 +1112,116 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
         params.put("excludeIfNotExist", excludeIfNotExist ? 1 : 0);
         params.put("stateRestriction", stateRestriction != null ? stateRestriction.getId() : null);
         try {
-            return getNamedParameterJdbcTemplate().query(sql, params, new RowMapper<Relation>() {
-                @Override
-                public Relation mapRow(ResultSet rs, int i) throws SQLException {
-                    Relation relation =  mapFormCommon(rs, light, true);
-                    relation.setSource(true);
-                    return relation;
-                }
-            });
+            List<Relation> result = new ArrayList<Relation>();
+            getNamedParameterJdbcTemplate().query(sql, params, new CommonSourcesCallBackHandler(result, light, true, true));
+            return result;
         } catch (EmptyResultDataAccessException e) {
             return new ArrayList<Relation>();
         }
     }
 
-    private Relation mapFormCommon(ResultSet rs, boolean light, boolean forDeclaration) throws SQLException {
-        Relation relation = new Relation();
-        relation.setFormDataId(SqlUtils.getLong(rs, "id"));
-        relation.setCreated(relation.getFormDataId() != null);
-        relation.setState(WorkflowState.fromId(SqlUtils.getInteger(rs, "state")));
-        relation.setStatus(SqlUtils.getInteger(rs, "templateState") == 0);
-        relation.setFormDataKind(FormDataKind.fromId(SqlUtils.getInteger(rs, "formDataKind")));
-        relation.setManual(rs.getBoolean("manual"));
-        relation.setTaxType(TaxType.fromCode(rs.getString("tax_type").charAt(0)));
-        if (!forDeclaration) {
-            relation.setAccruing(rs.getBoolean("accruing"));
-        }
-        relation.setMonth(SqlUtils.getInteger(rs, "month"));
+    private void fillPerformers(ResultSet rs, List<Relation> result, Map<Relation, List<String>> map, Map<Relation, List<Department>> mapFull,
+                                Relation relation, boolean light
+                                ) throws SQLException {
+        //Заполняем исполнителей так, потому что их может быть несколько
         if (light) {
-            relation.setDepartmentId(SqlUtils.getInteger(rs, "departmentId"));
-            relation.setFullDepartmentName(rs.getString("departmentName"));
-            relation.setCorrectionDate(rs.getDate("correction_date"));
-            relation.setYear(SqlUtils.getInteger(rs, "year"));
-            relation.setFormTypeName(rs.getString("formTypeName"));
-            if (!forDeclaration) {
-                relation.setComparativePeriodYear(SqlUtils.getInteger(rs, "compPeriodYear"));
-                relation.setComparativePeriodStartDate(rs.getDate("compPeriodStartDate"));
-                String basePeriodName = rs.getString("periodName");
-                relation.setPeriodName(relation.isAccruing() ?
-                        FormatUtils.getAccName(basePeriodName, rs.getDate("periodStartDate")) : basePeriodName);
-                String baseCompPeriodName = rs.getString("compPeriodName");
-                if (baseCompPeriodName != null) {
-                    relation.setComparativePeriodName(relation.isAccruing() ?
-                            FormatUtils.getAccName(baseCompPeriodName, relation.getComparativePeriodStartDate()) : baseCompPeriodName);
+            String performerName = rs.getString("performerName");
+            if (performerName != null) {
+                //Заполняет список исполнителей для назначения
+                if (map.containsKey(relation)) {
+                    map.get(relation).add(performerName);
+                } else {
+                    List<String> performerNames = new ArrayList<String>();
+                    performerNames.add(performerName);
+                    map.put(relation, performerNames);
+                    relation.setPerformerNames(performerNames);
+                    result.add(relation);
                 }
             } else {
-                relation.setPeriodName(rs.getString("periodName"));
+                result.add(relation);
             }
-            relation.setPerformerName(rs.getString("performerName"));
         } else {
-            relation.setDepartment(departmentDao.getDepartment(SqlUtils.getInteger(rs, "departmentId")));
-            relation.setDepartmentReportPeriod(departmentReportPeriodDao.get(SqlUtils.getInteger(rs, "departmentReportPeriod")));
             Integer performerId = SqlUtils.getInteger(rs, "performerId");
             if (performerId != null) {
-                relation.setPerformer(departmentDao.getDepartment(SqlUtils.getInteger(rs, "performerId")));
-            }
-            if (!forDeclaration) {
-                Integer comparativePeriodId  = SqlUtils.getInteger(rs, "compPeriodId");
-                if (comparativePeriodId != null) {
-                    relation.setComparativePeriod(departmentReportPeriodDao.get(comparativePeriodId));
+                Department performer = departmentDao.getDepartment(SqlUtils.getInteger(rs, "performerId"));
+                //Заполняет список исполнителей для назначения
+                if (mapFull.containsKey(relation)) {
+                    mapFull.get(relation).add(performer);
+                } else {
+                    List<Department> performers = new ArrayList<Department>();
+                    performers.add(performer);
+                    mapFull.put(relation, performers);
+                    relation.setPerformers(performers);
+                    result.add(relation);
                 }
+            } else {
+                result.add(relation);
             }
-            relation.setFormType(formTypeDao.get(SqlUtils.getInteger(rs, "formTypeId")));
         }
-        return relation;
+    }
+
+    private class CommonSourcesCallBackHandler implements RowCallbackHandler {
+        private List<Relation> result;
+        private boolean light, forDeclaration, source;
+        private Map<Relation, List<String>> map = new HashMap<Relation, List<String>>();
+        private Map<Relation, List<Department>> mapFull = new HashMap<Relation, List<Department>>();
+
+        public CommonSourcesCallBackHandler(List<Relation> result, boolean light, boolean forDeclaration, boolean source) {
+            this.result = result;
+            this.light = light;
+            this.forDeclaration = forDeclaration;
+            this.source = source;
+        }
+
+        @Override
+        public void processRow(ResultSet rs) throws SQLException {
+            Relation relation = new Relation();
+            relation.setSource(source);
+            relation.setFormDataId(SqlUtils.getLong(rs, "id"));
+            relation.setCreated(relation.getFormDataId() != null);
+            relation.setState(WorkflowState.fromId(SqlUtils.getInteger(rs, "state")));
+            relation.setStatus(SqlUtils.getInteger(rs, "templateState") == 0);
+            relation.setFormDataKind(FormDataKind.fromId(SqlUtils.getInteger(rs, "formDataKind")));
+            relation.setManual(rs.getBoolean("manual"));
+            relation.setTaxType(TaxType.fromCode(rs.getString("tax_type").charAt(0)));
+            if (!forDeclaration) {
+                relation.setAccruing(rs.getBoolean("accruing"));
+            }
+            relation.setMonth(SqlUtils.getInteger(rs, "month"));
+            if (light) {
+                relation.setDepartmentId(SqlUtils.getInteger(rs, "departmentId"));
+                relation.setFullDepartmentName(rs.getString("departmentName"));
+                relation.setCorrectionDate(rs.getDate("correction_date"));
+                relation.setYear(SqlUtils.getInteger(rs, "year"));
+                relation.setFormTypeName(rs.getString("formTypeName"));
+                if (!forDeclaration) {
+                    relation.setComparativePeriodYear(SqlUtils.getInteger(rs, "compPeriodYear"));
+                    relation.setComparativePeriodStartDate(rs.getDate("compPeriodStartDate"));
+                    String basePeriodName = rs.getString("periodName");
+                    relation.setPeriodName(relation.isAccruing() ?
+                            FormatUtils.getAccName(basePeriodName, rs.getDate("periodStartDate")) : basePeriodName);
+                    String baseCompPeriodName = rs.getString("compPeriodName");
+                    if (baseCompPeriodName != null) {
+                        relation.setComparativePeriodName(relation.isAccruing() ?
+                                FormatUtils.getAccName(baseCompPeriodName, relation.getComparativePeriodStartDate()) : baseCompPeriodName);
+                    }
+                } else {
+                    relation.setPeriodName(rs.getString("periodName"));
+                }
+            } else {
+                relation.setDepartment(departmentDao.getDepartment(SqlUtils.getInteger(rs, "departmentId")));
+                relation.setDepartmentReportPeriod(departmentReportPeriodDao.get(SqlUtils.getInteger(rs, "departmentReportPeriod")));
+                if (!forDeclaration) {
+                    Integer comparativePeriodId  = SqlUtils.getInteger(rs, "compPeriodId");
+                    if (comparativePeriodId != null) {
+                        relation.setComparativePeriod(departmentReportPeriodDao.get(comparativePeriodId));
+                    }
+                }
+                relation.setFormType(formTypeDao.get(SqlUtils.getInteger(rs, "formTypeId")));
+            }
+
+            //Заполняем исполнителей так, потому что их может быть несколько
+            fillPerformers(rs, result, map, mapFull, relation, light);
+        }
     }
 }
