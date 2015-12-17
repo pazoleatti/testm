@@ -123,12 +123,12 @@ public class App_6_4Test extends ScriptTestBase {
 
         entries = testHelper.getLogger().getEntries();
         i = 0;
-        Assert.assertEquals("Строка 1: Значение графы «Вид услуг» должно принимать одно из следующих значений: «1, 2, 3, 4, 5, 6, 7, 8»!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Значение графы «Сумма доходов Банка, руб.» должно быть больше «0»!", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 1: Графа «Вид услуг» заполнена неверно (9)! Возможные значения: 1, 2, 3, 4, 5, 6, 7, 8", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 1: Значение графы «Сумма доходов Банка, руб.» должно быть больше или равно «0»!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Значение графы «Цена, руб.» должно быть равно значению графы «Сумма доходов Банка, руб.»!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Значение графы «Стоимость, руб.» должно быть равно значению графы «Сумма доходов Банка, руб.»!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Значение графы «Дата совершения сделки» должно быть не меньше значения графы «Дата договора»!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Год, указанный по графе «Дата совершения сделки» (2989), должен относиться к календарному году текущей формы (2014)!", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 1: Дата, указанная в графе «Дата совершения сделки» (01.01.2989), должна относиться к отчетному периоду текущей формы (01.01.2014 - 31.12.2014)!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Значение даты атрибута «Дата договора» должно принимать значение из следующего диапазона: 01.01.1991 - 31.12.2099", entries.get(i++).getMessage());
         Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
         testHelper.getLogger().clear();

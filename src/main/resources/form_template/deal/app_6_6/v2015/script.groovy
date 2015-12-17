@@ -1,12 +1,8 @@
 package form_template.deal.app_6_6.v2015
 
-import com.aplana.sbrf.taxaccounting.model.Cell
-import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
-import com.aplana.sbrf.taxaccounting.service.script.util.ScriptUtils
 import groovy.transform.Field
 
 /**
@@ -109,9 +105,20 @@ def nonEmptyColumns = ['name', 'docNumber', 'docDate', 'dealDate', 'date1', 'dat
 @Field
 def totalColumns = ['incomeSum', 'outcomeSum']
 
+// Дата начала отчетного периода
+@Field
+def startDate = null
+
 // Дата окончания отчетного периода
 @Field
 def endDate = null
+
+def getReportPeriodStartDate() {
+    if (startDate == null) {
+        startDate = reportPeriodService.getStartDate(formData.reportPeriodId).time
+    }
+    return startDate
+}
 
 def getReportPeriodEndDate() {
     if (endDate == null) {
@@ -145,13 +152,6 @@ void logicCheck() {
     if (dataRows.isEmpty()) {
         return
     }
-
-    Date dFrom = reportPeriodService.getStartDate(formData.reportPeriodId).time
-    Date dTo = reportPeriodService.getEndDate(formData.reportPeriodId).time
-
-    String dateFormat = 'yyyy'
-    String formYear = (String) reportPeriodService.get(formData.reportPeriodId).getTaxPeriod().getYear()
-    Date formDate = Date.parse('dd.MM.yyyy', "31.12.$formYear")
 
     for (row in dataRows) {
         if (row.getAlias() != null) {
@@ -200,7 +200,7 @@ void logicCheck() {
 
         // 5. Проверка даты совершения сделки
         if (row.date2) {
-            if (row.dealDoneDate != calc19(row.date2, formYear, formDate, dateFormat)) {
+            if (row.dealDoneDate != calc19(row.date2)) {
                 String msg = row.getCell('dealDoneDate').column.name
                 logger.error("Строка $rowNum: Графа «$msg» заполнена неверно!")
             }
@@ -240,11 +240,11 @@ void logicCheck() {
         // 10. Корректность даты исполнения 1–ой части сделки (проверка даты начала периода)
         Date date1 = row.date1
         if (date1 != null) {
-            if (date1 > dTo) {
+            if (date1 > getReportPeriodEndDate()) {
                 String msg = row.getCell('date1').column.name
                 logger.error("Строка $rowNum: Значение графы «$msg» не может быть больше даты окончания отчётного периода!")
             }
-            if (date1 < dFrom) {
+            if (date1 < getReportPeriodStartDate()) {
                 String msg = row.getCell('date1').column.name
                 logger.error("Строка $rowNum: Значение графы «$msg» не может быть меньше даты начала отчётного периода!")
             }
@@ -278,15 +278,11 @@ void calc() {
     // Удаление подитогов
     deleteAllAliased(dataRows)
 
-    String dateFormat = 'yyyy'
-    def formYear = (String) reportPeriodService.get(formData.reportPeriodId).getTaxPeriod().getYear()
-    def formDate = Date.parse('dd.MM.yyyy', "31.12.$formYear")
-
     for (row in dataRows) {
         // Расчет поля "Режим переговорных сделок"
         row.dealsMode = calc10(row.name)
         // Расчет поля "Дата совершения сделки"
-        row.dealDoneDate = calc19(row.date2, formYear, formDate, dateFormat)
+        row.dealDoneDate = calc19(row.date2)
     }
 
     // Общий итог
@@ -309,13 +305,12 @@ def String calc10(def recordId) {
     return null
 }
 
-def Date calc19(Date date2, String formYear, Date formDate, String dateFormat) {
+def Date calc19(Date date2) {
     if (date2) {
-        String date2Year = date2.format(dateFormat)
-        if (date2Year == formYear) {
+        if (date2 >= getReportPeriodStartDate() && date2 <= getReportPeriodEndDate()) {
             return date2
         } else {
-            return formDate
+            return getReportPeriodEndDate()
         }
     }
     return null

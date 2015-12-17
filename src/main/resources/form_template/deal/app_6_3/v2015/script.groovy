@@ -102,9 +102,20 @@ def nonEmptyColumns = ['name', 'sum', 'docDate', 'country', 'count', 'price', 'c
 @Field
 def totalColumns = ['sum', 'count', 'price', 'cost']
 
+// Дата начала отчетного периода
+@Field
+def startDate = null
+
 // Дата окончания отчетного периода
 @Field
 def endDate = null
+
+def getReportPeriodStartDate() {
+    if (startDate == null) {
+        startDate = reportPeriodService.getStartDate(formData.reportPeriodId).time
+    }
+    return startDate
+}
 
 def getReportPeriodEndDate() {
     if (endDate == null) {
@@ -136,33 +147,32 @@ void logicCheck() {
     if (dataRows.isEmpty()) {
         return
     }
-    String dateFormat = 'yyyy'
-    def formYear = (String) reportPeriodService.get(formData.reportPeriodId).getTaxPeriod().getYear()
 
     for (row in dataRows) {
         if (row.getAlias() != null) {
             continue
         }
-        def rowNumber = row.getIndex()
+        def rowNum = row.getIndex()
 
-        checkNonEmptyColumns(row, rowNumber, nonEmptyColumns, logger, true)
+        checkNonEmptyColumns(row, rowNum, nonEmptyColumns, logger, true)
 
         // Проверка суммы доходов
-        if (row.sum != null && row.sum <= 0) {
+        if (row.sum != null && row.sum < 0) {
             def income = row.getCell('sum').column.name
-            logger.error("Строка $rowNumber: Значение графы «$income» должно быть больше «0»!")
+            logger.error("Строка $rowNum: Значение графы «$income» должно быть больше или равно «0»!")
         }
 
         // Проверка заполнения населенного пункта
-        if (row.city == null && row.settlement == null) {
-            def settleName = row.getCell('settlement').column.name
-            logger.error("Строка $rowNumber: Графа «$settleName» не заполнена! Выполнение расчета невозможно!")
+        if (!row.city && !row.settlement) {
+            def msg1 = row.getCell('settlement').column.name
+            def msg2 = row.getCell('city').column.name
+            logger.error("Строка $rowNum: Графа «$msg1» должна быть заполнена, если графа «$msg2» не заполнена!")
         }
 
         // Проверка количества
         if (row.count != null && row.count <= 0) {
             def countName = row.getCell('count').column.name
-            logger.error("Строка $rowNumber: Значение графы «$countName» должно быть больше «0»!")
+            logger.error("Строка $rowNum: Значение графы «$countName» должно быть больше «0»!")
         }
 
         // Проверка цены
@@ -171,7 +181,7 @@ void logicCheck() {
                 def income = row.getCell('sum').column.name
                 def countName = row.getCell('count').column.name
                 def priceName = row.getCell('price').column.name
-                logger.error("Строка $rowNumber: Значение графы  «$priceName», должно быть равно отношению графы «$income» к графе «$countName»! Выполнение расчета невозможно!")
+                logger.error("Строка $rowNum: Значение графы  «$priceName», должно быть равно отношению графы «$income» к графе «$countName»! Выполнение расчета невозможно!")
             }
         }
 
@@ -179,25 +189,18 @@ void logicCheck() {
         if (row.sum != null && row.cost != row.sum) {
             def income = row.getCell('sum').column.name
             def costName = row.getCell('cost').column.name
-            logger.error("Строка $rowNumber: Значение графы «$costName» должно быть равно значению графы «$income»!")
+            logger.error("Строка $rowNum: Значение графы «$costName» должно быть равно значению графы «$income»!")
         }
 
         // Корректность даты совершения сделки относительно даты договора
         if (row.dealDoneDate < row.docDate) {
             def dealDoneDateName = row.getCell('dealDoneDate').column.name
             def docDateName = row.getCell('docDate').column.name
-            logger.error("Строка $rowNumber: Значение графы «$dealDoneDateName» должно быть не меньше значения графы «$docDateName»!")
+            logger.error("Строка $rowNum: Значение графы «$dealDoneDateName» должно быть не меньше значения графы «$docDateName»!")
         }
 
-        //Проверка года совершения сделки
-        if (row.dealDoneDate) {
-            def dealDoneDate = row.dealDoneDate.format(dateFormat)
-            if (dealDoneDate != formYear) {
-                def dealDoneDateName = row.getCell('dealDoneDate').column.name
-                logger.error("Строка $rowNumber: Год, указанный по графе «$dealDoneDateName» ($dealDoneDate), должен относиться " +
-                        "к календарному году текущей формы ($formYear)!")
-            }
-        }
+        //Проверка даты совершения сделки
+        checkDealDoneDate(logger, row, 'dealDoneDate', getReportPeriodStartDate(), getReportPeriodEndDate(), true)
 
         // Проверка диапазона дат
         if (row.docDate) {
