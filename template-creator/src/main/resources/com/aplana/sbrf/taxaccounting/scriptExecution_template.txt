@@ -123,7 +123,7 @@ try {
     }
 
 } catch (Exception ex) {
-    logger.error("Error: ${ex.getLocalizedMessage()}. Все изменения откатаны")
+    logger.error("Error: ${ex.getLocalizedMessage()}. Все действия, выполненные скриптом, были отменены")
 }
 
 def void addTypeTemplate(FormType formType, FormTemplate formTemplate, boolean createType, boolean createTemplate) {
