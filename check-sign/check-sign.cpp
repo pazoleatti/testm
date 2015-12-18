@@ -83,7 +83,7 @@ H_INIT init() {
 	cr_init crInit = (cr_init) GetProcAddress(pDll, "cr_init");
 	crInit(USE_TM + 128, FILE_GK, FILE_UZ, "", NULL, NULL, &mode, &h_init);
 	if (h_init == 0) {
-		printf("Result: FAIL\nERROR: Not initialized\n");
+		printf("Result: FAIL\nERROR: Not initialized, Невозможно инициализировать библиотеку\n");
 	}
 	return h_init;
 }
@@ -134,7 +134,7 @@ int uninit(H_INIT h_init) {
 	cr_uninit crUninit = (cr_uninit) GetProcAddress(pDll, "cr_uninit");
 	int errorCode = crUninit(h_init);
 	if (errorCode != 0) {
-		printf("ERROR: cr_pkbase_close, %d %s\n", errorCode, getErrorMsg(errorCode));
+		printf("ERROR: uninit, %d %s\n", errorCode, getErrorMsg(errorCode));
 	}
 	return errorCode;
 }
@@ -146,7 +146,7 @@ int main(int argc, char **argv) {
 		}
 		char *sBokFile = argv[1];
 		if (!fileExists(sBokFile)) {
-			throw std::exception("ERROR: BOK-file must be exists\n");
+			throw std::exception("ERROR: BOK-file must be exists, Не найден указанный файл БОК\n");
 		}
 		char *sDelFlag = argv[2];
 		if (strcmp(sDelFlag, "0") * strcmp(sDelFlag, "1") != 0) {
@@ -154,12 +154,12 @@ int main(int argc, char **argv) {
 		}
 		char *sFileForCheck = argv[3];
 		if (!fileExists(sFileForCheck)) {
-			throw std::exception("ERROR: File for check must be exists\n");
+			throw std::exception("ERROR: File for check must be exists, Указанный проверяемый файл не найден\n");
 		}
 
 		pDll = LoadLibrary(DLL_NAME); // чруЁєчър сшсышюЄхъш
 		if (pDll == NULL) {
-			throw std::exception("ERROR: Library not found\n");
+			throw std::exception("ERROR: Library not found, Библиотека проверки ЭП не найдена\n");
 		}
 		int checkResult = 0;
 		H_INIT h_init = init();// шэшЎшрышчрЎш 

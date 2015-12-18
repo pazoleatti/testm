@@ -31,7 +31,7 @@ public class SignServiceImpl implements SignService {
     private static final Pattern DLL_PATTERN = Pattern.compile(".+\\.dll");
     private static final String SUCCESS_FLAG = "SUCCESS";
     private static final String TEMPLATE = ClassUtils.classPackageAsResourcePath(SignServiceImpl.class) + "/check-sign.exe";
-	/** Таймаут работы утилиты для проверки ЭЦП */
+	/** Таймаут работы утилиты для проверки ЭП */
     private static final long VALIDATION_TIMEOUT = 1000 * 60 * 10L;
 	/** Максимальное количество попыток создания временной директории */
 	private static final int TEMP_DIR_ATTEMPT_MAX_COUNT = 9;
@@ -54,13 +54,13 @@ public class SignServiceImpl implements SignService {
         public void run() {
             Process process;
             try {
-                LOG.info("Запускаем проверку ЭЦП.");
+                LOG.info("Запускаем проверку ЭП.");
                 process = (new ProcessBuilder(params)).start();
                 BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream(), "Cp866"));
                 try {
                     String s = reader.readLine();
                     if (s != null && s.startsWith("Result: " + SUCCESS_FLAG)) {
-                        LOG.info("Проверка ЭЦП завершена успешно.");
+                        LOG.info("Проверка ЭП завершена успешно.");
                     }
                     do {
                         if (s.startsWith("UserId: ")) {
@@ -96,8 +96,8 @@ public class SignServiceImpl implements SignService {
             }
             if (Math.abs(new Date().getTime() - startTime) > VALIDATION_TIMEOUT) {
                 threadRunner.interrupt();
-                LOG.warn(String.format("Истекло время выполнения проверки ЭЦП. Проверка ЭЦП длилась более %d мс.", VALIDATION_TIMEOUT));
-                logger.error("Истекло время выполнения проверки ЭЦП. Проверка ЭЦП длилась более %d мс.", VALIDATION_TIMEOUT);
+                LOG.warn(String.format("Истекло время выполнения проверки ЭП. Проверка ЭП длилась более %d мс.", VALIDATION_TIMEOUT));
+                logger.error("Истекло время выполнения проверки ЭП. Проверка ЭП длилась более %d мс.", VALIDATION_TIMEOUT);
                 return false;
             }
             if (!threadRunner.isAlive()) {
@@ -136,7 +136,7 @@ public class SignServiceImpl implements SignService {
                 for (String keyFolderPath : keys) {
                     FileWrapper keyResourceFolder = ResourceUtils.getSharedResource(keyFolderPath, false);
                     if (!keyResourceFolder.exists()) {
-                        LOG.warn(String.format("Директории %s с ключами не существует", keyFolderPath));
+                        LOG.warn(String.format("Директория %s с ключами не существует", keyFolderPath));
                         break;
                     }
                     String[] listFileNames;
@@ -147,7 +147,7 @@ public class SignServiceImpl implements SignService {
                         keyResourceFolder = ResourceUtils.getSharedResource(keyFolderPath + "/", false);
                         listFileNames = keyResourceFolder.list();
                         if (listFileNames == null || listFileNames.length == 0) {
-                            LOG.warn(String.format("Директории %s с ключами пустая", keyFolderPath));
+                            LOG.warn(String.format("Директория %s с ключами пустая", keyFolderPath));
                             break;
                         }
                     }
@@ -170,11 +170,11 @@ public class SignServiceImpl implements SignService {
                     }
                 }
 
-                // библиотеки ЭЦП
+                // библиотеки ЭП
                 encryptTempDir = createTempDir("encrypt_dll_");
                 FileWrapper resourceDir = ResourceUtils.getSharedResource(encryptParams.get(0) + "/");
                 if (!resourceDir.isDirectory())
-                    throw new ServiceException("Необходимо указать директорию с библиотекой ЭЦП");
+                    throw new ServiceException("Необходимо указать директорию с библиотекой ЭП");
                 String[] listFiles = resourceDir.list();
                 assert listFiles != null;
                 for (String fileName : listFiles) {
@@ -228,7 +228,7 @@ public class SignServiceImpl implements SignService {
                     }
                 }
             }
-            logger.error("Ошибки при проверке ЭЦП:");
+            logger.error("Обнаружена ошибка(и) при использовании библиотеки для проверки ЭП:");
             logger.getEntries().addAll(localLogger.getEntries());
             return false;
         } finally {
