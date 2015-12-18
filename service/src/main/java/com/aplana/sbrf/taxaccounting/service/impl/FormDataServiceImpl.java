@@ -231,6 +231,7 @@ public class FormDataServiceImpl implements FormDataService {
             }
 
             FormData fd = formDataDao.get(formDataId, isManual);
+            ScriptStatusHolder scriptStatusHolder = new ScriptStatusHolder();
 
             if (check) {
 				InputStream dataFileInputStream = new BufferedInputStream(new FileInputStream(dataFile));
@@ -238,6 +239,7 @@ public class FormDataServiceImpl implements FormDataService {
 					Map<String, Object> additionalParameters = new HashMap<String, Object>();
 					additionalParameters.put("ImportInputStream", dataFileInputStream);
 					additionalParameters.put("UploadFileName", fileName);
+					additionalParameters.put("scriptStatusHolder", scriptStatusHolder);
 					if (stateLogger != null) {
 						stateLogger.updateState("Импорт XLSM-файла");
 					}
@@ -256,7 +258,15 @@ public class FormDataServiceImpl implements FormDataService {
 			}
             if (logger.containsLevel(LogLevel.ERROR)) {
                 if (isInner) {
-                    logger.error("Есть критические ошибки при выполнении скрипта");
+                    if (ScriptStatus.DEFAULT.equals(scriptStatusHolder.getScriptStatus())) {
+                        // стандартное поведение (при ошибках - откат)
+                        throw new ServiceException("Есть критические ошибки при выполнении скрипта");
+                    } else if (ScriptStatus.SUCCESS.equals(scriptStatusHolder.getScriptStatus())) {
+                        // измененное поведение (без отката при ошибках)
+                        logger.warn("Найдены ошибки при выполнении скрипта");
+                    } else {
+                        throw new ServiceException("Есть критические ошибки при выполнении скрипта");
+                    }
                 } else {
                     if (stateLogger != null) {
                         stateLogger.updateState("Сохранение ошибок");

@@ -272,7 +272,6 @@ public interface FormDataService {
      * Сохранение данных из кэша в бд при отстутствии критических ошибкок в логере
      */
     @SuppressWarnings("unused")
-    @Deprecated
     void saveCachedDataRows(FormData formData, Logger logger);
 
     /**
