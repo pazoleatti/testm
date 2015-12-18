@@ -5,8 +5,6 @@ import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
-import com.aplana.sbrf.taxaccounting.model.util.StringUtils
-import com.aplana.sbrf.taxaccounting.service.script.util.ScriptUtils
 import groovy.transform.Field
 
 /**
@@ -41,7 +39,7 @@ switch (formDataEvent) {
     case FormDataEvent.CALCULATE:
         calc()
         logicCheck()
-        formDataService.saveCachedDataRows(formData, logger)
+        formDataService.saveCachedDataRows(formData, logger, formDataEvent, scriptStatusHolder)
         break
     case FormDataEvent.CHECK:
         logicCheck()
@@ -64,11 +62,11 @@ switch (formDataEvent) {
         formDataService.consolidationSimple(formData, logger, userInfo)
         calc()
         logicCheck()
-        formDataService.saveCachedDataRows(formData, logger)
+        formDataService.saveCachedDataRows(formData, logger, formDataEvent, scriptStatusHolder)
         break
     case FormDataEvent.IMPORT:
         importData()
-        formDataService.saveCachedDataRows(formData, logger)
+        formDataService.saveCachedDataRows(formData, logger, formDataEvent, scriptStatusHolder)
         break
     case FormDataEvent.SORT_ROWS:
         sortFormDataRows()
@@ -96,14 +94,14 @@ def autoFillColumns = ['rowNumber', 'iksr', 'countryName', 'regCountryCode', 'pr
 
 //Непустые атрибуты
 @Field
-def nonEmptyColumns = ['name', 'docNumber', 'docDate', 'dealNumber', 'dealDate', 'currencyCode', 'dealCountryCode', 'dealDoneDate']
+def nonEmptyColumns = ['name', 'docNumber', 'docDate', 'dealNumber', 'dealDate', 'currencyCode', 'dealCountryCode', 'price', 'cost', 'dealDoneDate']
 
-// Группируемые атрибуты
+// Группируемые атрибуты (графа 2, 6, 7, 10, 11)
 @Field
-def groupColumns = ['name']
+def groupColumns = ['name', 'docNumber', 'docDate', 'currencyCode', 'dealCountryCode']
 
 @Field
-def totalColumns = ['income', 'outcome']
+def totalColumns = ['income', 'outcome', 'price', 'cost']
 
 // Дата начала отчетного периода
 @Field
@@ -152,7 +150,6 @@ void logicCheck() {
     if (dataRows.isEmpty()) {
         return
     }
-    String dateFormat = 'dd.MM.yyyy'
 
     for (row in dataRows) {
         if (row.getAlias() != null) {
@@ -221,7 +218,12 @@ void logicCheck() {
         }
     }
 
-    // 9. Проверка итоговых значений пофиксированной строке «Итого»
+    // 9. Проверка наличия всех фиксированных строк «Подитог»
+    // 10. Проверка отсутствия лишних фиксированных строк «Подитог»
+    // 11. Проверка итоговых значений по фиксированной строке «Подитог»
+    checkItog(dataRows)
+
+    // 12. Проверка итоговых значений пофиксированной строке «Итого»
     if (dataRows.find { it.getAlias() == 'total' }) {
         checkTotalSum(dataRows, totalColumns, logger, true)
     }
@@ -236,6 +238,9 @@ void calc() {
     }
     // Удаление подитогов
     deleteAllAliased(dataRows)
+
+    // Сортировка
+    sortRows(dataRows, groupColumns)
 
     for (row in dataRows) {
         // Расчет поля "Цена", "Стоимость"
@@ -253,11 +258,48 @@ void calc() {
         }
     }
 
+    // Добавление подитогов
+    addAllAliased(dataRows, new CalcAliasRow() {
+        @Override
+        DataRow<Cell> calc(int i, List<DataRow<Cell>> rows) {
+            return calcItog(i, dataRows)
+        }
+    }, groupColumns)
+
     // Общий итог
     def total = calcTotalRow(dataRows)
     dataRows.add(total)
 
     sortFormDataRows(false)
+}
+
+// Расчет подитогового значения
+DataRow<Cell> calcItog(def int i, def List<DataRow<Cell>> dataRows) {
+    def newRow = getSubTotalRow(i)
+    // Расчеты подитоговых значений
+    def rows = []
+    for (int j = i; j >= 0 && dataRows.get(j).getAlias() == null; j--) {
+        rows.add(dataRows.get(j))
+    }
+    calcTotalSum(rows, newRow, totalColumns)
+
+    return newRow
+}
+
+/**
+ * Получить подитоговую строку с заданными стилями.
+ *
+ * @param i номер строки
+ */
+DataRow<Cell> getSubTotalRow(int i) {
+    def newRow = (formDataEvent in [FormDataEvent.IMPORT, FormDataEvent.IMPORT_TRANSPORT_FILE]) ? formData.createStoreMessagingDataRow() : formData.createDataRow()
+    newRow.fix = 'Подитог'
+    newRow.setAlias('itg#'.concat(i.toString()))
+    newRow.getCell('fix').colSpan = 6
+    allColumns.each {
+        newRow.getCell(it).setStyleAlias('Контрольные суммы')
+    }
+    return newRow
 }
 
 def calcTotalRow(def dataRows) {
@@ -306,6 +348,7 @@ void importData() {
     def allValuesCount = allValues.size()
     reportPeriodEndDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
     def totalRowFromFile = null
+    def totalRowFromFileMap = [:] // мапа для хранения строк подитогов со значениями из файла (стили простых строк)
 
     // формирвание строк нф
     for (def i = 0; i < allValuesCount; i++) {
@@ -325,6 +368,17 @@ void importData() {
             allValues.remove(rowValues)
             rowValues.clear()
             continue
+        } else if (rowValues[INDEX_FOR_SKIP].contains('Подитог')) {
+            def subTotalRow = getNewSubTotalRowFromXls(rowValues, colOffset, fileRowIndex, rowIndex)
+            if (totalRowFromFileMap[subTotalRow.getIndex()] == null) {
+                totalRowFromFileMap[subTotalRow.getIndex()] = []
+            }
+            totalRowFromFileMap[subTotalRow.getIndex()].add(subTotalRow)
+            rows.add(subTotalRow)
+
+            allValues.remove(rowValues)
+            rowValues.clear()
+            continue
         }
         // простая строка
         def newRow = getNewRowFromXls(rowValues, colOffset, fileRowIndex, rowIndex)
@@ -332,6 +386,36 @@ void importData() {
         // освободить ненужные данные - иначе не хватит памяти
         allValues.remove(rowValues)
         rowValues.clear()
+    }
+
+    // сравнение подитогов
+    if (!totalRowFromFileMap.isEmpty()) {
+        // получить посчитанные подитоги
+        def tmpSubTotalRows = calcSubTotalRows(rows)
+        tmpSubTotalRows.each { subTotalRow ->
+            def totalRows = totalRowFromFileMap[subTotalRow.getIndex()]
+            if (totalRows) {
+                totalRows.each { totalRow ->
+                    compareTotalValues(totalRow, subTotalRow, totalColumns, logger, false)
+                }
+                totalRowFromFileMap.remove(subTotalRow.getIndex())
+            } else {
+                row = rows[subTotalRow.getIndex() - 1]
+                def groupValue = getValuesByGroupColumn(row)
+                rowWarning(logger, null, String.format(GROUP_WRONG_ITOG, groupValue))
+            }
+        }
+        if (!totalRowFromFileMap.isEmpty()) {
+            // для этих подитогов из файла нет групп
+            totalRowFromFileMap.each { key, totalRows ->
+                totalRows.each { totalRow ->
+                    totalColumns.each { alias ->
+                        def msg = String.format(COMPARE_TOTAL_VALUES, totalRow.getIndex(), getColumnName(totalRow, alias), totalRow[alias], BigDecimal.ZERO)
+                        rowWarning(logger, totalRow, msg)
+                    }
+                }
+            }
+        }
     }
 
     // сравнение итогов
@@ -506,12 +590,12 @@ def getNewTotalFromXls(def values, def colOffset, def fileRowIndex, def rowIndex
     newRow.setIndex(rowIndex)
     newRow.setImportIndex(fileRowIndex)
 
-    // графа 13
-    def colIndex = 13
-    newRow.income = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
-    // графа 14
-    colIndex = 14
-    newRow.outcome = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
+    // графа 12..15
+    def colIndex = 12
+    totalColumns.each { alias ->
+        newRow[alias] = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
+        colIndex++
+    }
 
     return newRow
 }
@@ -520,10 +604,137 @@ def getNewTotalFromXls(def values, def colOffset, def fileRowIndex, def rowIndex
 void sortFormDataRows(def saveInDB = true) {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
-    sortRows(refBookService, logger, dataRows, null, dataRows.find { it.getAlias() == 'total' }, null)
+    def totalRow = dataRows.find { it.getAlias() == 'total'}
+    sortRows(refBookService, logger, dataRows, getSubTotalRows(dataRows), totalRow, true)
     if (saveInDB) {
         dataRowHelper.saveSort()
     } else {
         updateIndexes(dataRows)
     }
+}
+
+/**
+ * Получить новую подитоговую строку нф по значениям из экселя.
+ *
+ * @param values список строк со значениями
+ * @param colOffset отступ в колонках
+ * @param fileRowIndex номер строки в тф
+ * @param rowIndex строка в нф
+ */
+def getNewSubTotalRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) {
+    def newRow = getSubTotalRow(rowIndex)
+    newRow.setIndex(rowIndex)
+    newRow.setImportIndex(fileRowIndex)
+
+    // графа 12..15
+    def colIndex = 12
+    totalColumns.each { alias ->
+        newRow[alias] = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
+        colIndex++
+    }
+
+    return newRow
+}
+
+// Получение подитоговых строк
+def getSubTotalRows(def dataRows) {
+    return dataRows.findAll { it.getAlias() != null && !'total'.equals(it.getAlias()) }
+}
+
+// Получить посчитанные подитоговые строки
+def calcSubTotalRows(def dataRows) {
+    def tmpRows = dataRows.findAll { !it.getAlias() }
+    // Добавление подитогов
+    addAllAliased(tmpRows, new CalcAliasRow() {
+        @Override
+        DataRow<Cell> calc(int i, List<DataRow<Cell>> rows) {
+            return calcItog(i, rows)
+        }
+    }, groupColumns)
+
+    updateIndexes(tmpRows)
+    return tmpRows.findAll { it.getAlias() }
+}
+
+// Проверки подитоговых сумм
+void checkItog(def dataRows) {
+    // Рассчитанные строки итогов
+    def testItogRows = calcSubTotalRows(dataRows)
+    // Имеющиеся строки итогов
+    def itogRows = dataRows.findAll { it.getAlias() != null && !'total'.equals(it.getAlias()) }
+    // все строки, кроме общего итога
+    def groupRows = dataRows.findAll { !'total'.equals(it.getAlias()) }
+    checkItogRows(groupRows, testItogRows, itogRows, groupColumns, logger, new GroupString() {
+        @Override
+        String getString(DataRow<Cell> row) {
+            return getValuesByGroupColumn(row)
+        }
+    }, new CheckGroupSum() {
+        @Override
+        String check(DataRow<Cell> row1, DataRow<Cell> row2) {
+            for (def column : totalColumns) {
+                if (row1[column] != row2[column]) {
+                    return getColumnName(row1, column)
+                }
+            }
+            return null
+        }
+    })
+}
+
+// Возвращает строку со значениями полей строки по которым идет группировка
+String getValuesByGroupColumn(DataRow row) {
+    def values = []
+    // графа 2
+    if (row?.name) {
+        def map = getRefBookValue(520, row.name)
+        if (map != null) {
+            values.add(map.NAME?.stringValue)
+        }
+    }
+    if (values.isEmpty()) {
+        values.add('графа 2 не задана')
+    }
+
+    // графа 6
+    if (row?.docNumber) {
+        values.add(row.docNumber)
+    } else {
+        values.add('графа 5 не задана')
+    }
+
+    // графа 7
+    if (row?.docDate) {
+        values.add(row.docDate?.format('dd.MM.yyyy'))
+    } else {
+        values.add('графа 6 не задана')
+    }
+
+    // графа 10
+    def value = null
+    if (row?.currencyCode) {
+        def map = getRefBookValue(15, row.currencyCode)
+        if (map != null) {
+            value = map.CODE_2?.stringValue
+        }
+    }
+    if (!value) {
+        value = 'графа 9 не задана'
+    }
+    values.add(value)
+
+    // графа 11
+    value = null
+    if (row?.dealCountryCode) {
+        def map = getRefBookValue(10, row.dealCountryCode)
+        if (map != null) {
+            value = map.CODE_2?.stringValue
+        }
+    }
+    if (!value) {
+        value = 'графа 10 не задана'
+    }
+    values.add(value)
+
+    return values.join(', ')
 }
