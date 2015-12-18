@@ -16,6 +16,7 @@ public class DepartmentFormType implements Serializable {
 	private static final long serialVersionUID = 1L;
 	
 	private Long id;
+	private TaxType taxType;
 	private int departmentId;
 	private int formTypeId;
 	private FormDataKind kind;
@@ -124,6 +125,14 @@ public class DepartmentFormType implements Serializable {
 		this.performers = performers;
 	}
 
+	public TaxType getTaxType() {
+		return taxType;
+	}
+
+	public void setTaxType(TaxType taxType) {
+		this.taxType = taxType;
+	}
+
 	@Override
 	public boolean equals(Object o) {
 		if (this == o) return true;
@@ -134,6 +143,7 @@ public class DepartmentFormType implements Serializable {
 		if (departmentId != that.departmentId) return false;
 		if (formTypeId != that.formTypeId) return false;
 		if (id != null ? !id.equals(that.id) : that.id != null) return false;
+		if (taxType != that.taxType) return false;
 		if (kind != that.kind) return false;
 		if (periodStart != null ? !periodStart.equals(that.periodStart) : that.periodStart != null) return false;
 		if (periodEnd != null ? !periodEnd.equals(that.periodEnd) : that.periodEnd != null) return false;
@@ -145,6 +155,7 @@ public class DepartmentFormType implements Serializable {
 	@Override
 	public int hashCode() {
 		int result = id != null ? id.hashCode() : 0;
+		result = 31 * result + (taxType != null ? taxType.hashCode() : 0);
 		result = 31 * result + departmentId;
 		result = 31 * result + formTypeId;
 		result = 31 * result + (kind != null ? kind.hashCode() : 0);
@@ -153,19 +164,5 @@ public class DepartmentFormType implements Serializable {
 		result = 31 * result + (performers != null ? performers.hashCode() : 0);
 		result = 31 * result + (periodOrder != null ? periodOrder.hashCode() : 0);
 		return result;
-	}
-
-	@Override
-	public String toString() {
-		return "DepartmentFormType{" +
-				"id=" + id +
-				", departmentId=" + departmentId +
-				", formTypeId=" + formTypeId +
-				", kind=" + kind +
-				", periodStart=" + periodStart +
-				", periodEnd=" + periodEnd +
-				", performers=" + performers +
-				", periodOrder=" + periodOrder +
-				'}';
 	}
 }

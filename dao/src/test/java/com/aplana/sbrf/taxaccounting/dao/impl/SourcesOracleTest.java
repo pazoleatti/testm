@@ -71,6 +71,7 @@ public class SourcesOracleTest {
         assertEquals(2, relations.size());
         assertEquals("2, Тип: \"Первичная\", Вид: \"РНУ-1\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2000\", Макет: \"true\", Статус: \"Утверждена\"", getShortFormInfo(relations.get(0)));
         assertEquals("null, Тип: \"Первичная\", Вид: \"РНУ-2\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2000\", Макет: \"true\", Статус: \"Не создана\"", getShortFormInfo(relations.get(1)));
+        assertEquals('I', relations.get(0).getTaxType().getCode());
         //Исключаем несозданные
         relations = sourceDao.getSourcesInfo(formData, true, true, null);
         assertEquals(1, relations.size());

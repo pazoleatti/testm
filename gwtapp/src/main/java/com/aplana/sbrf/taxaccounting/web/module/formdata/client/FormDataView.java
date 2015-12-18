@@ -14,6 +14,7 @@ import com.aplana.sbrf.taxaccounting.web.widget.fileupload.FileUploadWidget;
 import com.aplana.sbrf.taxaccounting.web.widget.fileupload.event.EndLoadFileEvent;
 import com.aplana.sbrf.taxaccounting.web.widget.fileupload.event.StartLoadFileEvent;
 import com.aplana.sbrf.taxaccounting.web.widget.pager.FlexiblePager;
+import com.aplana.sbrf.taxaccounting.web.widget.style.DropdownButton;
 import com.aplana.sbrf.taxaccounting.web.widget.style.LinkButton;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.EventTarget;
@@ -187,8 +188,11 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
     @UiField
     HorizontalPanel versionBlock;
     @UiField
-    LinkButton filesComments, sources, printToExcel, printToCSV;
+    LinkButton filesComments, sources;
+    @UiField
+    DropdownButton printAnchor;
 
+    private LinkButton printToExcel, printToCSV;
     private Timer timerExcel, timerCSV;
 
     public static final int DEFAULT_TABLE_TOP_POSITION = 104;
@@ -261,23 +265,34 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
                 recalcReportPeriodLabelWidth();
             }
         });
-/*
-        printToCSV = new LinkButton("CSV");
+
+        printToExcel = new LinkButton("Выгрузить в xlsm");
+        printToExcel.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                if (getUiHandlers() != null) {
+                    getUiHandlers().onPrintClicked(ReportType.EXCEL, null, false);
+                }
+            }
+        });
+        printAnchor.addItem(ReportType.EXCEL.getName(), printToExcel);
+
+        printToCSV = new LinkButton("Выгрузить в CSV");
         printToCSV.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
                 if (getUiHandlers() != null) {
-                    getUiHandlers().onPrintCSVClicked();
+                    getUiHandlers().onPrintClicked(ReportType.CSV, null, false);
                 }
             }
         });
-        printAnchor.addItem(printToCSV);*/
+        printAnchor.addItem(ReportType.CSV.getName(), printToCSV);
 
         timerExcel = new Timer() {
             @Override
             public void run() {
                 try {
-                    getUiHandlers().onTimerReport(ReportType.EXCEL, true);
+                    getUiHandlers().onTimerReport(ReportType.EXCEL, null, true);
                 } catch (Exception e) {
                 }
             }
@@ -287,7 +302,7 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
             @Override
             public void run() {
                 try {
-                    getUiHandlers().onTimerReport(ReportType.CSV, true);
+                    getUiHandlers().onTimerReport(ReportType.CSV, null, true);
                 } catch (Exception e) {
                 }
             }
@@ -298,18 +313,25 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
     }
 
     @Override
-    public void updatePrintReportButtonName(ReportType reportType, boolean isLoad) {
+    public void updatePrintReportButtonName(ReportType reportType, String specificReportType, boolean isLoad) {
         if (ReportType.EXCEL.equals(reportType)) {
             if (isLoad) {
                 printToExcel.setText("Выгрузить в XLSM");
             } else {
                 printToExcel.setText("Сформировать XLSM");
             }
-        } else {
+        } else if (ReportType.CSV.equals(reportType)) {
             if (isLoad) {
                 printToCSV.setText("Выгрузить в CSV");
             } else {
                 printToCSV.setText("Сформировать CSV");
+            }
+        } else if (specificReportType != null && !specificReportType.isEmpty()) {
+            LinkButton linkButton = (LinkButton) printAnchor.getItem(specificReportType);
+            if (isLoad) {
+                linkButton.setText("Выгрузить в \"" + specificReportType + "\"");
+            } else {
+                linkButton.setText("Сформировать \"" + specificReportType + "\"");
             }
         }
     }
@@ -447,20 +469,6 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
     @UiHandler("correctionButton")
     void onCorrectionLinkButtonClicked(ClickEvent event) {
         getUiHandlers().onCorrectionSwitch();
-    }
-
-    @UiHandler("printToExcel")
-    void onPrintExcelClicked(ClickEvent event) {
-        if (getUiHandlers() != null) {
-            getUiHandlers().onPrintExcelClicked(false);
-        }
-    }
-
-    @UiHandler("printToCSV")
-    void onPrintCSVClicked(ClickEvent event) {
-        if (getUiHandlers() != null) {
-            getUiHandlers().onPrintCSVClicked(false);
-        }
     }
 
 	@UiHandler("cancelButton")
@@ -740,8 +748,7 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 
 	@Override
 	public void showPrintAnchor(boolean show) {
-        printToExcel.setVisible(show);
-        printToCSV.setVisible(show);
+        printAnchor.setVisible(show);
 	}
 
     @Override
@@ -1010,5 +1017,24 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 
     public void updateCorrectionButton(boolean correctionDiff) {
         correctionButton.setText(correctionDiff ? "Показать абсолютные значения" : "Показать изменения");
+    }
+
+    @Override
+    public void setSpecificReportTypes(List<String> specificReportTypes) {
+        printAnchor.clear();
+        printAnchor.addItem(ReportType.EXCEL.getName(), printToExcel);
+        printAnchor.addItem(ReportType.CSV.getName(), printToCSV);
+        for(final String specificReportType: specificReportTypes) {
+            LinkButton linkButton = new LinkButton("Сформировать \"" + specificReportType + "\"");
+            linkButton.addClickHandler(new ClickHandler() {
+                @Override
+                public void onClick(ClickEvent event) {
+                    if (getUiHandlers() != null) {
+                        getUiHandlers().onPrintClicked(ReportType.SPECIFIC_REPORT, specificReportType, false);
+                    }
+                }
+            });
+            printAnchor.addItem(specificReportType, linkButton);
+        }
     }
 }

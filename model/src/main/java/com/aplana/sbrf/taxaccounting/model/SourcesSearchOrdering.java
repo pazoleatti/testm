@@ -6,6 +6,7 @@ package com.aplana.sbrf.taxaccounting.model;
 public enum SourcesSearchOrdering {
     TYPE,
     KIND,
+    TAX_TYPE,
     DEPARTMENT,
     COUNT,
     START,

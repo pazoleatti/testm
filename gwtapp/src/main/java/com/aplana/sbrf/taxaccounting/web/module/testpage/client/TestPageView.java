@@ -152,7 +152,7 @@ public class TestPageView extends ViewWithUiHandlers<TestPageUiHandlers> impleme
 
         linkButtons();
 
-        dropdownButton.addItem(new LinkButton("item1"));
+        dropdownButton.addItem("item1", new LinkButton("item1"));
         Button btn = new Button("item2");
         btn.addClickHandler(new ClickHandler() {
             @Override
@@ -160,7 +160,7 @@ public class TestPageView extends ViewWithUiHandlers<TestPageUiHandlers> impleme
                 Dialog.confirmMessage("It's OK!");
             }
         });
-        dropdownButton.addItem(btn);
+        dropdownButton.addItem("item2", btn);
 
         initDepUsage();
         initEvents();

@@ -6,6 +6,7 @@ import java.util.Date;
 import com.aplana.sbrf.taxaccounting.model.DeclarationType;
 import com.aplana.sbrf.taxaccounting.model.FormDataKind;
 import com.aplana.sbrf.taxaccounting.model.FormType;
+import com.aplana.sbrf.taxaccounting.model.TaxType;
 
 /**
  * Общая модель для нижней таблицы
@@ -33,6 +34,7 @@ public class CurrentAssign implements Serializable{
 
     private FormType formType;
     private DeclarationType declarationType;
+    private TaxType taxType;
 
     public DeclarationType getDeclarationType() {
         return declarationType;
@@ -114,5 +116,13 @@ public class CurrentAssign implements Serializable{
 
     public void setDepartmentId(int departmentId) {
         this.departmentId = departmentId;
+    }
+
+    public TaxType getTaxType() {
+        return taxType;
+    }
+
+    public void setTaxType(TaxType taxType) {
+        this.taxType = taxType;
     }
 }

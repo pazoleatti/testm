@@ -79,6 +79,27 @@ public class LockDataDaoImpl extends AbstractDao implements LockDataDao {
     }
 
     @Override
+    public List<LockData> getStartsWith(String key) {
+        try {
+            String sql = "SELECT key, user_id, date_lock, description, state, state_date, queue, queue_position, server_node " +
+                    "FROM lock_data \n " +
+                    "JOIN (SELECT q_key, queue_position FROM (SELECT ld.key AS q_key, " +
+                    (isSupportOver() ? "ROW_NUMBER() OVER (PARTITION BY ld.queue ORDER BY ld.date_lock)" : "rownum") + " AS queue_position FROM lock_data ld)) q ON q.q_key = key \n" +
+                    "WHERE key = ?";
+            return getJdbcTemplate().query(sql,
+                    new Object[] {key+"%"},
+                    new int[] {Types.VARCHAR},
+                    new LockDataMapper()
+            );
+        } catch (EmptyResultDataAccessException e) {
+            return null;
+        } catch (Exception e) {
+            LOG.error(e.getMessage(), e);
+            throw new LockException("Ошибка при поиске блокировки с кодом = %s", key);
+        }
+    }
+
+    @Override
     public void lock(String key, int userId, String description, String state, String serverNode) {
         try {
             getJdbcTemplate().update("INSERT INTO lock_data (key, user_id, description, state, state_date, server_node) VALUES (?, ?, ?, ?, sysdate, ?)",

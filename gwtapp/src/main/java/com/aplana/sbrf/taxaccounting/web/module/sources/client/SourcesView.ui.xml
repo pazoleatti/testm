@@ -139,6 +139,12 @@
                         <style:RightBar>
                             <g:HorizontalPanel spacing="3" verticalAlignment="middle">
                                 <g:cell width="100%" horizontalAlignment="right">
+                                    <g:Label addStyleNames="{style.searchLabel}" text="Налог:"/>
+                                </g:cell>
+                                <g:cell horizontalAlignment="right">
+                                    <g:ValueListBox ui:field="taxTypeList" width="200px" addStyleNames="{style.marginRight5}"/>
+                                </g:cell>
+                                <g:cell width="100%" horizontalAlignment="right">
                                     <g:Label addStyleNames="{style.searchLabel}" text="Назначение:"/>
                                 </g:cell>
                                 <g:cell horizontalAlignment="right">

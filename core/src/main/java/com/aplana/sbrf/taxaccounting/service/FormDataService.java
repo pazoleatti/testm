@@ -353,8 +353,26 @@ public interface FormDataService {
     FormData getPreviousFormDataCorrection(FormData formData, List<DepartmentReportPeriod> departmentReportPeriodList,
                                           DepartmentReportPeriod departmentReportPeriod);
 
+    /**
+     * Получения списка всех возможных ключей для данного вида отчета
+     * @param reportType
+     * @param formDataId
+     * @param manual
+     * @return
+     */
     List<String> generateReportKeys(ReportType reportType, long formDataId, Boolean manual);
 
+    /**
+     * Генерация ключа блокировки для задачи формирования отчета
+     * @param formDataId
+     * @param reportType
+     * @param specificReportType
+     * @param showChecked
+     * @param manual
+     * @param saved
+     * @return
+     */
+    String generateReportKey(long formDataId, ReportType reportType, String specificReportType, boolean showChecked, boolean manual, boolean saved);
     /**
      * Удаление отчетов и блокировок на задачи формирования отчетов связанных с НФ
      * @param formDataId идентификатор налоговой формы
@@ -397,7 +415,7 @@ public interface FormDataService {
      * @param reportType тип отчета. Может быть null
      * @return название
      */
-    String getFormDataFullName(long formDataId, boolean manual, String str, ReportType reportType);
+    String getFormDataFullName(long formDataId, boolean manual, String str, ReportType reportType, String... args);
 
     /**
      * Генерация ключа блокировки для задачи c типом reportType
@@ -456,7 +474,7 @@ public interface FormDataService {
      * @param userInfo
      * @return
      */
-    String getTaskName(ReportType reportType, long formDataId, TAUserInfo userInfo);
+    String getTaskName(ReportType reportType, long formDataId, TAUserInfo userInfo, String... args);
 
     /**
      * Проверяет существование операции, по которым требуется удалить блокировку
@@ -511,4 +529,24 @@ public interface FormDataService {
      * Сохранение данных формы "Файлы и комментарии"
      */
     void saveFilesComments(long formDataId, String note, List<FormDataFile> files);
+
+    /**
+     * Формирование специфического отчета НФ(отчет формируется в скриптами)
+     * @param formData
+     * @param isShowChecked
+     * @param saved
+     * @param specificReportType
+     * @param userInfo
+     * @param logger
+     */
+    void createSpecificReport(FormData formData, boolean isShowChecked, boolean saved, String specificReportType, TAUserInfo userInfo, LockStateLogger stateLogger);
+
+    /**
+     * Получить список доступных отчётов
+     * @param formData
+     * @param userInfo
+     * @param logger
+     * @return
+     */
+    List<String> getSpecificReportTypes(FormData formData, TAUserInfo userInfo, Logger logger);
 }

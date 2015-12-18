@@ -24,11 +24,22 @@ public interface ReportService {
     void create(long formDataId, String blobDataId, ReportType type, boolean checking, boolean manual, boolean absolute);
 
     /**
-     * Создание записи об отчете декларации
-     * @param declarationDataId
+     * Создание записи о специфичном отчете НФ
+     * @param formDataId
      * @param blobDataId
-     * @param type
+     * @param specificReportType
+     * @param checking
+     * @param manual
+     * @param absolute
      */
+    void create(long formDataId, String blobDataId, String specificReportType, boolean checking, boolean manual, boolean absolute);
+
+        /**
+         * Создание записи об отчете декларации
+         * @param declarationDataId
+         * @param blobDataId
+         * @param type
+         */
     void createDec(long declarationDataId, String blobDataId, ReportType type);
 
     /**
@@ -51,12 +62,24 @@ public interface ReportService {
 	String get(TAUserInfo userInfo, long formDataId, ReportType type, boolean checking, boolean manual, boolean absolute);
 
     /**
-     * Получение записи об отчете декларации
+     * Получение записи о специфичном отчете НФ
      * @param userInfo
-     * @param declarationDataId
-     * @param type
-     * @return uuid
+     * @param formDataId
+     * @param specificReportType
+     * @param checking
+     * @param manual
+     * @param absolute
+     * @return
      */
+    String get(TAUserInfo userInfo, long formDataId, String specificReportType, boolean checking, boolean manual, boolean absolute);
+
+        /**
+         * Получение записи об отчете декларации
+         * @param userInfo
+         * @param declarationDataId
+         * @param type
+         * @return uuid
+         */
     String getDec(TAUserInfo userInfo, long declarationDataId, ReportType type);
 
     /**

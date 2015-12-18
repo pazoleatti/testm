@@ -195,6 +195,7 @@ public class GetFormDataHandler extends AbstractActionHandler<GetFormDataAction,
             }
 
             result.getFormData().initFormTemplateParams(formTemplate);
+            result.setSpecificReportTypes(formDataService.getSpecificReportTypes(formData, userInfo, logger));
             return result;
         } catch (Exception e) {
 			LOG.error(e.getMessage(), e);

@@ -30,6 +30,13 @@ public interface LockDataDao {
      */
     LockData get(String key, Date lockDate);
 
+    /**
+     * Возвращает информацию о всех блокировках, код которых начинающинается c key
+     * @param key
+     * @return
+     */
+    List<LockData> getStartsWith(String key);
+
 	/**
 	 * Создает новую блокировку
      * @param key код блокировки

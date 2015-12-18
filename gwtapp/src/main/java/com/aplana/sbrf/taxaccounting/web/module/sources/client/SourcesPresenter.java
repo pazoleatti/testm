@@ -145,6 +145,8 @@ public class SourcesPresenter extends Presenter<SourcesPresenter.MyView, Sources
         void setPanelWidth();
 
         void clearSelection();
+
+        TaxType getSelectedTaxType();
     }
 
 	private final DispatchAsync dispatcher;
@@ -220,7 +222,7 @@ public class SourcesPresenter extends Presenter<SourcesPresenter.MyView, Sources
 		GetDepartmentAssignsAction action = new GetDepartmentAssignsAction();
         action.setForm(true);
 		action.setDepartmentId(departmentId);
-		action.setTaxType(taxType);
+        action.setTaxType(getView().getSelectedTaxType());
         action.setPeriodsInterval(getView().getPeriodInterval());
         action.setSelectedLeft(selectedLeft);
         action.setMode(getView().isSource() ? SourceMode.SOURCES : SourceMode.DESTINATIONS);
@@ -291,7 +293,7 @@ public class SourcesPresenter extends Presenter<SourcesPresenter.MyView, Sources
         GetDepartmentAssignsAction action = new GetDepartmentAssignsAction();
         action.setForm(false);
         action.setDepartmentId(departmentId);
-        action.setTaxType(taxType);
+        action.setTaxType(getView().getSelectedTaxType());
         action.setPeriodsInterval(getView().getPeriodInterval());
         action.setSelectedLeft(selectedLeft);
         action.setMode(getView().isSource() ? SourceMode.SOURCES : SourceMode.DESTINATIONS);

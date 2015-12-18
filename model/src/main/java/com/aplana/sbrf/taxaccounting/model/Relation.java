@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.model;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 
 /**
  * Моделька для хранения данных по источникам/приемникам
@@ -22,6 +23,8 @@ public class Relation implements Serializable {
     private boolean source;
     /** Введена/выведена в/из действие(-ия) */
     private boolean status;
+    /** Налог */
+    private TaxType taxType;
 
     /**************  Параметры НФ ***************/
 
@@ -32,7 +35,7 @@ public class Relation implements Serializable {
     /** Тип НФ */
     private FormDataKind formDataKind;
     /** подразделение-исполнитель*/
-    private Department performer;
+    private List<Department> performers;
     /** Период сравнения. Может быть null */
     private DepartmentReportPeriod comparativePeriod;
     /** Признак расчета значений нарастающим итогом (false - не нарастающим итогом, true - нарастающим итогом, пустое - форма без периода сравнения) */
@@ -76,7 +79,7 @@ public class Relation implements Serializable {
     /** Год периода сравнения */
     private Integer comparativePeriodYear;
     /** название подразделения-исполнителя */
-    private String performerName;
+    private List<String> performerNames;
 
     public Department getDepartment() {
         return department;
@@ -150,15 +153,7 @@ public class Relation implements Serializable {
         this.formDataKind = formDataKind;
     }
 
-    public Department getPerformer() {
-        return performer;
-    }
-
-    public void setPerformer(Department performer) {
-        this.performer = performer;
-    }
-
-    public DepartmentReportPeriod getComparativePeriod() {
+        public DepartmentReportPeriod getComparativePeriod() {
         return comparativePeriod;
     }
 
@@ -270,14 +265,6 @@ public class Relation implements Serializable {
         this.comparativePeriodName = comparativePeriodName;
     }
 
-    public String getPerformerName() {
-        return performerName;
-    }
-
-    public void setPerformerName(String performerName) {
-        this.performerName = performerName;
-    }
-
     public Date getComparativePeriodStartDate() {
         return comparativePeriodStartDate;
     }
@@ -310,38 +297,109 @@ public class Relation implements Serializable {
         this.departmentId = departmentId;
     }
 
+    public TaxType getTaxType() {
+        return taxType;
+    }
+
+    public void setTaxType(TaxType taxType) {
+        this.taxType = taxType;
+    }
+
+    public List<Department> getPerformers() {
+        return performers;
+    }
+
+    public void setPerformers(List<Department> performers) {
+        this.performers = performers;
+    }
+
+    public List<String> getPerformerNames() {
+        return performerNames;
+    }
+
+    public void setPerformerNames(List<String> performerNames) {
+        this.performerNames = performerNames;
+    }
+
     @Override
-    public String toString() {
-        return "Relation{" +
-                "department=" + department +
-                ", departmentReportPeriod=" + departmentReportPeriod +
-                ", state=" + state +
-                ", created=" + created +
-                ", source=" + source +
-                ", status=" + status +
-                ", formDataId=" + formDataId +
-                ", formType=" + formType +
-                ", formDataKind=" + formDataKind +
-                ", performer=" + performer +
-                ", comparativePeriod=" + comparativePeriod +
-                ", accruing=" + accruing +
-                ", month=" + month +
-                ", manual=" + manual +
-                ", declarationDataId=" + declarationDataId +
-                ", declarationType=" + declarationType +
-                ", taxOrganCode='" + taxOrganCode + '\'' +
-                ", kpp='" + kpp + '\'' +
-                ", departmentId=" + departmentId +
-                ", fullDepartmentName='" + fullDepartmentName + '\'' +
-                ", correctionDate=" + correctionDate +
-                ", formTypeName='" + formTypeName + '\'' +
-                ", declarationTypeName='" + declarationTypeName + '\'' +
-                ", year=" + year +
-                ", periodName='" + periodName + '\'' +
-                ", comparativePeriodName='" + comparativePeriodName + '\'' +
-                ", comparativePeriodStartDate=" + comparativePeriodStartDate +
-                ", comparativePeriodYear=" + comparativePeriodYear +
-                ", performerName='" + performerName + '\'' +
-                '}';
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Relation relation = (Relation) o;
+
+        if (created != relation.created) return false;
+        if (source != relation.source) return false;
+        if (status != relation.status) return false;
+        if (accruing != relation.accruing) return false;
+        if (manual != relation.manual) return false;
+        if (departmentId != relation.departmentId) return false;
+        if (year != relation.year) return false;
+        if (department != null ? !department.equals(relation.department) : relation.department != null) return false;
+        if (departmentReportPeriod != null ? !departmentReportPeriod.equals(relation.departmentReportPeriod) : relation.departmentReportPeriod != null)
+            return false;
+        if (state != relation.state) return false;
+        if (taxType != relation.taxType) return false;
+        if (formDataId != null ? !formDataId.equals(relation.formDataId) : relation.formDataId != null) return false;
+        if (formType != null ? !formType.equals(relation.formType) : relation.formType != null) return false;
+        if (formDataKind != relation.formDataKind) return false;
+        if (comparativePeriod != null ? !comparativePeriod.equals(relation.comparativePeriod) : relation.comparativePeriod != null)
+            return false;
+        if (month != null ? !month.equals(relation.month) : relation.month != null) return false;
+        if (declarationDataId != null ? !declarationDataId.equals(relation.declarationDataId) : relation.declarationDataId != null)
+            return false;
+        if (declarationType != null ? !declarationType.equals(relation.declarationType) : relation.declarationType != null)
+            return false;
+        if (taxOrganCode != null ? !taxOrganCode.equals(relation.taxOrganCode) : relation.taxOrganCode != null)
+            return false;
+        if (kpp != null ? !kpp.equals(relation.kpp) : relation.kpp != null) return false;
+        if (fullDepartmentName != null ? !fullDepartmentName.equals(relation.fullDepartmentName) : relation.fullDepartmentName != null)
+            return false;
+        if (correctionDate != null ? !correctionDate.equals(relation.correctionDate) : relation.correctionDate != null)
+            return false;
+        if (formTypeName != null ? !formTypeName.equals(relation.formTypeName) : relation.formTypeName != null)
+            return false;
+        if (declarationTypeName != null ? !declarationTypeName.equals(relation.declarationTypeName) : relation.declarationTypeName != null)
+            return false;
+        if (periodName != null ? !periodName.equals(relation.periodName) : relation.periodName != null) return false;
+        if (comparativePeriodName != null ? !comparativePeriodName.equals(relation.comparativePeriodName) : relation.comparativePeriodName != null)
+            return false;
+        if (comparativePeriodStartDate != null ? !comparativePeriodStartDate.equals(relation.comparativePeriodStartDate) : relation.comparativePeriodStartDate != null)
+            return false;
+        return comparativePeriodYear != null ? comparativePeriodYear.equals(relation.comparativePeriodYear) : relation.comparativePeriodYear == null;
+
+    }
+
+    @Override
+    public int hashCode() {
+        int result = department != null ? department.hashCode() : 0;
+        result = 31 * result + (departmentReportPeriod != null ? departmentReportPeriod.hashCode() : 0);
+        result = 31 * result + (state != null ? state.hashCode() : 0);
+        result = 31 * result + (created ? 1 : 0);
+        result = 31 * result + (source ? 1 : 0);
+        result = 31 * result + (status ? 1 : 0);
+        result = 31 * result + (taxType != null ? taxType.hashCode() : 0);
+        result = 31 * result + (formDataId != null ? formDataId.hashCode() : 0);
+        result = 31 * result + (formType != null ? formType.hashCode() : 0);
+        result = 31 * result + (formDataKind != null ? formDataKind.hashCode() : 0);
+        result = 31 * result + (comparativePeriod != null ? comparativePeriod.hashCode() : 0);
+        result = 31 * result + (accruing ? 1 : 0);
+        result = 31 * result + (month != null ? month.hashCode() : 0);
+        result = 31 * result + (manual ? 1 : 0);
+        result = 31 * result + (declarationDataId != null ? declarationDataId.hashCode() : 0);
+        result = 31 * result + (declarationType != null ? declarationType.hashCode() : 0);
+        result = 31 * result + (taxOrganCode != null ? taxOrganCode.hashCode() : 0);
+        result = 31 * result + (kpp != null ? kpp.hashCode() : 0);
+        result = 31 * result + departmentId;
+        result = 31 * result + (fullDepartmentName != null ? fullDepartmentName.hashCode() : 0);
+        result = 31 * result + (correctionDate != null ? correctionDate.hashCode() : 0);
+        result = 31 * result + (formTypeName != null ? formTypeName.hashCode() : 0);
+        result = 31 * result + (declarationTypeName != null ? declarationTypeName.hashCode() : 0);
+        result = 31 * result + year;
+        result = 31 * result + (periodName != null ? periodName.hashCode() : 0);
+        result = 31 * result + (comparativePeriodName != null ? comparativePeriodName.hashCode() : 0);
+        result = 31 * result + (comparativePeriodStartDate != null ? comparativePeriodStartDate.hashCode() : 0);
+        result = 31 * result + (comparativePeriodYear != null ? comparativePeriodYear.hashCode() : 0);
+        return result;
     }
 }
