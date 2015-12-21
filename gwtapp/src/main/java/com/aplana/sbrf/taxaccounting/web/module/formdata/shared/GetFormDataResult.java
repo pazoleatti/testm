@@ -1,9 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdata.shared;
 
-import com.aplana.sbrf.taxaccounting.model.DepartmentReportPeriod;
-import com.aplana.sbrf.taxaccounting.model.FormData;
-import com.aplana.sbrf.taxaccounting.model.FormDataAccessParams;
-import com.aplana.sbrf.taxaccounting.model.FormStyle;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.gwtplatform.dispatch.shared.Result;
 
 import java.util.List;
@@ -15,7 +12,7 @@ import java.util.List;
  * 
  */
 public class GetFormDataResult implements Result {
-	private static final long serialVersionUID = 5032224706310298119L;
+	private static final long serialVersionUID = 1564846831548468989L;
 
     public static enum FormMode {
 		READ_UNLOCKED, // Открыта для чтения

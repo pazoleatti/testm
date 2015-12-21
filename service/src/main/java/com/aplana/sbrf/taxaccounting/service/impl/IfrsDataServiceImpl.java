@@ -94,7 +94,7 @@ public class IfrsDataServiceImpl implements IfrsDataService {
                 if (formTypeList.contains(formData.getFormType().getId())) {
                     formTypeList.remove(Integer.valueOf(formData.getFormType().getId()));
                 }
-                if (reportService.get(userService.getSystemUserInfo(), formData.getId(), ReportType.EXCEL, true, formData.isManual(), true) == null)
+                if (reportService.get(userService.getSystemUserInfo(), formData.getId(), FormDataReportType.EXCEL, true, formData.isManual(), true) == null)
                     notReportFormDataList.add(formData);
             }
         }
@@ -175,7 +175,7 @@ public class IfrsDataServiceImpl implements IfrsDataService {
 
             stateLogger.updateState("Добавление налоговых форм в архив");
             for(FormData formData: formDataList) {
-                String uuid = reportService.get(userService.getSystemUserInfo(), formData.getId(), ReportType.EXCEL, true, formData.isManual(), true);
+                String uuid = reportService.get(userService.getSystemUserInfo(), formData.getId(), FormDataReportType.EXCEL, true, formData.isManual(), true);
                 BlobData blobData = blobDataService.get(uuid);
                 FormTemplate formTemplate = formTemplateService.get(formData.getFormTemplateId());
                 Department department = departmentsMap.get(formData.getDepartmentId());

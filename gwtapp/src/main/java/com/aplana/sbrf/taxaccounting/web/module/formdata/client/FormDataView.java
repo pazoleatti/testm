@@ -31,7 +31,6 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.cellview.client.DataGrid;
 import com.google.gwt.user.cellview.client.HasKeyboardSelectionPolicy;
-import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.*;
 import com.google.gwt.view.client.*;
@@ -193,7 +192,6 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
     DropdownButton printAnchor;
 
     private LinkButton printToExcel, printToCSV;
-    private Timer timerExcel, timerCSV;
 
     public static final int DEFAULT_TABLE_TOP_POSITION = 104;
     public static final int DEFAULT_RIGHT_BUTTONS_HEIGHT = 61;
@@ -266,72 +264,49 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
             }
         });
 
-        printToExcel = new LinkButton("Выгрузить в xlsm");
+        printToExcel = new LinkButton("Выгрузить в XLSM");
         printToExcel.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
                 if (getUiHandlers() != null) {
-                    getUiHandlers().onPrintClicked(ReportType.EXCEL, null, false);
+                    getUiHandlers().onPrintClicked(ReportType.EXCEL.getName(), false);
                 }
             }
         });
-        printAnchor.addItem(ReportType.EXCEL.getName(), printToExcel);
 
         printToCSV = new LinkButton("Выгрузить в CSV");
         printToCSV.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
                 if (getUiHandlers() != null) {
-                    getUiHandlers().onPrintClicked(ReportType.CSV, null, false);
+                    getUiHandlers().onPrintClicked(ReportType.CSV.getName(), false);
                 }
             }
         });
-        printAnchor.addItem(ReportType.CSV.getName(), printToCSV);
-
-        timerExcel = new Timer() {
-            @Override
-            public void run() {
-                try {
-                    getUiHandlers().onTimerReport(ReportType.EXCEL, null, true);
-                } catch (Exception e) {
-                }
-            }
-        };
-
-        timerCSV = new Timer() {
-            @Override
-            public void run() {
-                try {
-                    getUiHandlers().onTimerReport(ReportType.CSV, null, true);
-                } catch (Exception e) {
-                }
-            }
-        };
-
-        timerExcel.cancel();
-        timerCSV.cancel();
     }
 
     @Override
-    public void updatePrintReportButtonName(ReportType reportType, String specificReportType, boolean isLoad) {
-        if (ReportType.EXCEL.equals(reportType)) {
+    public void updatePrintReportButtonName(String fdReportType, boolean isLoad) {
+        if (ReportType.EXCEL.getName().equals(fdReportType)) {
             if (isLoad) {
                 printToExcel.setText("Выгрузить в XLSM");
             } else {
                 printToExcel.setText("Сформировать XLSM");
             }
-        } else if (ReportType.CSV.equals(reportType)) {
+        } else if (ReportType.CSV.getName().equals(fdReportType)) {
             if (isLoad) {
                 printToCSV.setText("Выгрузить в CSV");
             } else {
                 printToCSV.setText("Сформировать CSV");
             }
-        } else if (specificReportType != null && !specificReportType.isEmpty()) {
-            LinkButton linkButton = (LinkButton) printAnchor.getItem(specificReportType);
-            if (isLoad) {
-                linkButton.setText("Выгрузить в \"" + specificReportType + "\"");
-            } else {
-                linkButton.setText("Сформировать \"" + specificReportType + "\"");
+        } else if (fdReportType != null && !fdReportType.isEmpty()) {
+            LinkButton linkButton = (LinkButton) printAnchor.getItem(fdReportType);
+            if (linkButton != null) {
+                if (isLoad) {
+                    linkButton.setText("Выгрузить в \"" + fdReportType + "\"");
+                } else {
+                    linkButton.setText("Сформировать \"" + fdReportType + "\"");
+                }
             }
         }
     }
@@ -339,26 +314,6 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
     @Override
     public void showConsolidation(boolean isCons) {
         consolidationButton.setVisible(isCons);
-    }
-
-    @Override
-    public void startTimerReport(ReportType reportType) {
-        if (ReportType.EXCEL.equals(reportType)) {
-            timerExcel.scheduleRepeating(3000);
-            timerExcel.run();
-        } else {
-            timerCSV.scheduleRepeating(3000);
-            timerCSV.run();
-        }
-    }
-
-    @Override
-    public void stopTimerReport(ReportType reportType) {
-        if (ReportType.EXCEL.equals(reportType)) {
-            timerExcel.cancel();
-        } else {
-            timerCSV.cancel();
-        }
     }
 
 	@Override
@@ -1030,7 +985,7 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
                 @Override
                 public void onClick(ClickEvent event) {
                     if (getUiHandlers() != null) {
-                        getUiHandlers().onPrintClicked(ReportType.SPECIFIC_REPORT, specificReportType, false);
+                        getUiHandlers().onPrintClicked(specificReportType, false);
                     }
                 }
             });

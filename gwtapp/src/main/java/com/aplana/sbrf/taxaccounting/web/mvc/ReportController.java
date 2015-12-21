@@ -2,7 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.mvc;
 
 import com.aplana.sbrf.taxaccounting.async.exception.AsyncTaskException;
 import com.aplana.sbrf.taxaccounting.model.BlobData;
-import com.aplana.sbrf.taxaccounting.model.ReportType;
+import com.aplana.sbrf.taxaccounting.model.FormDataReportType;
 import com.aplana.sbrf.taxaccounting.service.BlobDataService;
 import com.aplana.sbrf.taxaccounting.service.IfrsDataService;
 import com.aplana.sbrf.taxaccounting.service.ReportService;
@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
-import java.net.URLDecoder;
 import java.net.URLEncoder;
 
 /**
@@ -93,14 +92,7 @@ public class ReportController {
                                         @PathVariable boolean manual, @PathVariable boolean saved,
                                         HttpServletRequest request, HttpServletResponse response)
             throws IOException, AsyncTaskException {
-        String uuid;
-        if (reportType.equals(ReportType.EXCEL.getName())) {
-            uuid = reportService.get(securityService.currentUserInfo(), formDataId, ReportType.EXCEL, isShowChecked, manual, saved);
-        } else if (reportType.equals(ReportType.CSV.getName())) {
-            uuid = reportService.get(securityService.currentUserInfo(), formDataId, ReportType.CSV, isShowChecked, manual, saved);
-        } else {
-            uuid = reportService.get(securityService.currentUserInfo(), formDataId, reportType, isShowChecked, manual, saved);
-        }
+        String uuid = reportService.get(securityService.currentUserInfo(), formDataId, FormDataReportType.getFDReportTypeByName(reportType), isShowChecked, manual, saved);
         if (uuid != null) {
             BlobData blobData = blobDataService.get(uuid);
             createResponse(request, response, blobData);

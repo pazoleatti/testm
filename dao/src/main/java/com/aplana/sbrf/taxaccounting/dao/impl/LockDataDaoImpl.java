@@ -85,7 +85,7 @@ public class LockDataDaoImpl extends AbstractDao implements LockDataDao {
                     "FROM lock_data \n " +
                     "JOIN (SELECT q_key, queue_position FROM (SELECT ld.key AS q_key, " +
                     (isSupportOver() ? "ROW_NUMBER() OVER (PARTITION BY ld.queue ORDER BY ld.date_lock)" : "rownum") + " AS queue_position FROM lock_data ld)) q ON q.q_key = key \n" +
-                    "WHERE key = ?";
+                    "WHERE key LIKE ?";
             return getJdbcTemplate().query(sql,
                     new Object[] {key+"%"},
                     new int[] {Types.VARCHAR},

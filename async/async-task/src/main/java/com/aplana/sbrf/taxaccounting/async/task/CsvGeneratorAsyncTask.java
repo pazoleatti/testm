@@ -82,7 +82,7 @@ public abstract class CsvGeneratorAsyncTask extends AbstractAsyncTask {
                 lockService.updateState(lock, lockDate, state);
             }
         });
-        reportService.create(formDataId, uuid, ReportType.CSV, isShowChecked, manual, saved);
+        reportService.create(formDataId, uuid, FormDataReportType.CSV, isShowChecked, manual, saved);
         return true;
     }
 

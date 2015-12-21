@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.ReportDao;
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent;
+import com.aplana.sbrf.taxaccounting.model.FormDataReportType;
 import com.aplana.sbrf.taxaccounting.model.ReportType;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
@@ -29,42 +30,16 @@ public class ReportServiceImpl implements ReportService {
     private DeclarationDataAccessService declarationDataAccessService;
 
     @Override
-    public void create(long formDataId, String blobDataId, ReportType type, boolean checking, boolean manual, boolean absolute) {
-        checkFDReportType(type);
-        reportDao.create(formDataId, blobDataId, type.getName(), checking, manual, absolute);
+    public void create(long formDataId, String blobDataId, FormDataReportType type, boolean checking, boolean manual, boolean absolute) {
+        reportDao.create(formDataId, blobDataId, type.getReportName(), checking, manual, absolute);
     }
 
     @Override
-    public void create(long formDataId, String blobDataId, String specificReportType, boolean checking, boolean manual, boolean absolute) {
-        checkFDSpecificReportType(specificReportType);
-        reportDao.create(formDataId, blobDataId, specificReportType, checking, manual, absolute);
-    }
-
-    @Override
-    public String get(TAUserInfo userInfo, long formDataId, ReportType type, boolean checking, boolean manual, boolean absolute) {
-        checkFDReportType(type);
+    public String get(TAUserInfo userInfo, long formDataId, FormDataReportType type, boolean checking, boolean manual, boolean absolute) {
         formDataAccessService.canRead(userInfo, formDataId);
-        return reportDao.get(formDataId, type.getName(), checking, manual, absolute);
+        return reportDao.get(formDataId, type.getReportName(), checking, manual, absolute);
     }
 
-    @Override
-    public String get(TAUserInfo userInfo, long formDataId, String specificReportType, boolean checking, boolean manual, boolean absolute) {
-        checkFDSpecificReportType(specificReportType);
-        formDataAccessService.canRead(userInfo, formDataId);
-        return reportDao.get(formDataId, specificReportType, checking, manual, absolute);
-    }
-
-    private void checkFDReportType(ReportType reportType) {
-        if (!reportType.equals(ReportType.CSV) && !reportType.equals(ReportType.EXCEL)) {
-            throw new ServiceException("Указан некорректный тип стандартного отчета: %s", reportType.getName());
-        }
-    }
-
-    private void checkFDSpecificReportType(String specificReportType) {
-        if (specificReportType.equals(ReportType.CSV.getName()) || specificReportType.equals(ReportType.EXCEL.getName())) {
-            throw new ServiceException("Указано некорректное название специфичного отчета: %s", specificReportType);
-        }
-    }
 
     @Override
     public void delete(long formDataId, Boolean manual) {

@@ -1,22 +1,22 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdata.shared;
 
-import com.aplana.sbrf.taxaccounting.model.ReportType;
 import com.aplana.sbrf.taxaccounting.web.main.api.shared.dispatch.ActionName;
 import com.gwtplatform.dispatch.shared.UnsecuredActionImpl;
 
+import java.util.List;
+
 /**
- * Действие добавления строки.
+ * Получение статуса всех отчетов
  *
  * @author lhaziev
  */
 public class TimerReportAction extends UnsecuredActionImpl<TimerReportResult> implements ActionName {
 
     private long formDataId;
-    private ReportType type;
     private boolean isShowChecked;
     private boolean manual;
     private boolean saved;
-    private String specificReportType;
+    private List<String> formDataReportTypes;
 
     public long getFormDataId() {
         return formDataId;
@@ -24,14 +24,6 @@ public class TimerReportAction extends UnsecuredActionImpl<TimerReportResult> im
 
     public void setFormDataId(long formDataId) {
         this.formDataId = formDataId;
-    }
-
-    public ReportType getType() {
-        return type;
-    }
-
-    public void setType(ReportType type) {
-        this.type = type;
     }
 
     public boolean isShowChecked() {
@@ -58,12 +50,12 @@ public class TimerReportAction extends UnsecuredActionImpl<TimerReportResult> im
         this.saved = saved;
     }
 
-    public String getSpecificReportType() {
-        return specificReportType;
+    public List<String> getFormDataReportTypes() {
+        return formDataReportTypes;
     }
 
-    public void setSpecificReportType(String specificReportType) {
-        this.specificReportType = specificReportType;
+    public void setFormDataReportTypes(List<String> formDataReportTypes) {
+        this.formDataReportTypes = formDataReportTypes;
     }
 
     @Override

@@ -81,7 +81,7 @@ public abstract class XlsmGeneratorAsyncTask extends AbstractAsyncTask {
                 lockService.updateState(lock, lockDate, state);
             }
         });
-        reportService.create(formDataId, uuid, ReportType.EXCEL, isShowChecked, manual, saved);
+        reportService.create(formDataId, uuid, FormDataReportType.EXCEL, isShowChecked, manual, saved);
         return true;
     }
 
