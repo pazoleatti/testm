@@ -124,7 +124,7 @@
         <columnType>NUMBER</columnType>
         <name>Сумма доходов Банка по данным бухгалтерского учета, руб.</name>
         <order>12</order>
-        <width>10</width>
+        <width>11</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>
@@ -134,7 +134,7 @@
         <columnType>NUMBER</columnType>
         <name>Цена (тариф) за единицу измерения без учета НДС, акцизов и пошлины, руб.</name>
         <order>13</order>
-        <width>10</width>
+        <width>11</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>
@@ -144,7 +144,7 @@
         <columnType>NUMBER</columnType>
         <name>Итого стоимость без учета НДС, акцизов и пошлины, руб.</name>
         <order>14</order>
-        <width>10</width>
+        <width>11</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>

@@ -94,7 +94,7 @@
         <columnType>NUMBER</columnType>
         <name>Сумма операции (сумма оборота по операции) / количество операций</name>
         <order>9</order>
-        <width>10</width>
+        <width>11</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>
@@ -104,7 +104,7 @@
         <columnType>NUMBER</columnType>
         <name>Тариф за оказание услуги</name>
         <order>10</order>
-        <width>10</width>
+        <width>11</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>
@@ -114,7 +114,7 @@
         <columnType>NUMBER</columnType>
         <name>Тариф, признаваемый рыночным для целей налогообложения</name>
         <order>11</order>
-        <width>10</width>
+        <width>11</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>
@@ -124,7 +124,7 @@
         <columnType>NUMBER</columnType>
         <name>Сумма фактически начисленного дохода</name>
         <order>12</order>
-        <width>10</width>
+        <width>11</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>
@@ -134,7 +134,7 @@
         <columnType>NUMBER</columnType>
         <name>Сумма дохода, соответствующая рыночному уровню тарифа</name>
         <order>13</order>
-        <width>10</width>
+        <width>11</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>
@@ -144,7 +144,7 @@
         <columnType>NUMBER</columnType>
         <name>Сумма доначисления дохода до рыночного уровня тарифа</name>
         <order>14</order>
-        <width>10</width>
+        <width>11</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>

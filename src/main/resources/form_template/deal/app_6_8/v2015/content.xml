@@ -65,7 +65,7 @@
         <columnType>NUMBER</columnType>
         <name>Сумма расходов Банка, руб.</name>
         <order>6</order>
-        <width>10</width>
+        <width>11</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>
@@ -106,7 +106,7 @@
         <columnType>NUMBER</columnType>
         <name>Цена</name>
         <order>10</order>
-        <width>10</width>
+        <width>11</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>
@@ -116,7 +116,7 @@
         <columnType>NUMBER</columnType>
         <name>Стоимость</name>
         <order>11</order>
-        <width>10</width>
+        <width>11</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>
