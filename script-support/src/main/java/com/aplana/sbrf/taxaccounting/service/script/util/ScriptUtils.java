@@ -881,7 +881,8 @@ public final class ScriptUtils {
             for (int i = 0; i < testItogRows.size(); i++) {
                 DataRow<Cell> testItogRow = testItogRows.get(i);
                 DataRow<Cell> realItogRow = itogRows.get(i);
-                int itg = Integer.valueOf(testItogRow.getAlias().replaceAll("itg#", ""));
+                String str = (String) testItogRow.getAlias().split("#")[0];
+                int itg = Integer.valueOf(testItogRow.getAlias().replaceAll(str+'#', ""));
                 if (dataRows.get(itg).getAlias() != null) {
                     logger.error(GROUP_WRONG_ITOG_ROW, dataRows.get(i).getIndex());
                 } else {
