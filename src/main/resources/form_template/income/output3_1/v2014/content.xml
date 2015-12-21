@@ -3,7 +3,6 @@
     <fixedRows>false</fixedRows>
     <name>Сумма налога, подлежащая уплате в бюджет, по данным налогоплательщика</name>
     <fullName>Сумма налога, подлежащая уплате в бюджет, по данным налогоплательщика</fullName>
-    <header>1-1.13</header>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
         <alias>paymentType</alias>
         <checking>false</checking>

@@ -7,7 +7,6 @@
     <updating>false</updating>
     <name>Расходы, учитываемые в простых РНУ (расходы простые) – Уровень ГОСБ</name>
     <fullName>Расходы, учитываемые в простых РНУ Сбербанка (расходы простые)</fullName>
-    <code>Таблица "Р" к Приложению №3</code>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>consumptionTypeId</alias>
         <checking>false</checking>

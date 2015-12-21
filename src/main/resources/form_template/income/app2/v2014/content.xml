@@ -6,7 +6,6 @@
         операций с финансовыми инструментами срочных сделок, а также при осуществлении выплат по ценным бумагам
         российских эмитентов
     </fullName>
-    <header>app2</header>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="autoNumerationColumn">
         <alias>refNum</alias>
         <checking>false</checking>

@@ -578,7 +578,7 @@
     </row>
     <row alias="R37">
         <cell alias="consumptionTypeId" colSpan="1" rowSpan="1" stringValue="20490"/>
-        <cell alias="consumptionGroup" colSpan="1" rowSpan="2" stringValue="Расходы на оплату труда - начисления стимулирующего характера, в т.ч. премии за производственные результаты, надбавки к тарифным ставкам и окладам за профессиональное мастерство, высокие достижения в труде и иные подобные показатели"/>
+        <cell alias="consumptionGroup" colSpan="1" rowSpan="1"/>
         <cell alias="consumptionTypeByOperation" colSpan="1" rowSpan="1" stringValue="Начисленная премия списочного состава по итогам работы за месяц, квартал, учитываемая для целей налогообложения"/>
         <cell alias="consumptionAccountNumber" colSpan="1" rowSpan="1" stringValue="60348.04"/>
         <cell alias="rnu7Field10Sum" colSpan="1" editable="true" rowSpan="1" styleAlias="Редактирование (светло-голубой)"/>

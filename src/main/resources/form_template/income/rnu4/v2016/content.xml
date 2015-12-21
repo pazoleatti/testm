@@ -7,7 +7,6 @@
     <updating>false</updating>
     <name>(РНУ-4) Простой регистр налогового учета &quot;доходы&quot;</name>
     <fullName>(РНУ-4) Простой регистр налогового учета &quot;доходы&quot;</fullName>
-    <header>852-4</header>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="autoNumerationColumn">
         <alias>rowNumber</alias>
         <checking>false</checking>
