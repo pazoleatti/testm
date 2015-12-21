@@ -86,9 +86,20 @@ def nonEmptyColumns = ['name', 'docNumber', 'docDate', 'okeiCode', 'count', 'pri
 @Field
 def totalColumns = ['incomeSum', 'outcomeSum', 'price', 'cost']
 
+// Дата начала отчетного периода
+@Field
+def startDate = null
+
 // Дата окончания отчетного периода
 @Field
 def endDate = null
+
+def getReportPeriodStartDate() {
+    if (startDate == null) {
+        startDate = reportPeriodService.getStartDate(formData.reportPeriodId).time
+    }
+    return startDate
+}
 
 def getReportPeriodEndDate() {
     if (endDate == null) {
@@ -122,8 +133,6 @@ void logicCheck() {
     if (dataRows.isEmpty()) {
         return
     }
-    String dateFormat = 'yyyy'
-    def formYear = (String) reportPeriodService.get(formData.reportPeriodId).getTaxPeriod().getYear()
 
     for (row in dataRows) {
         if (row.getAlias() != null) {
@@ -253,14 +262,7 @@ void logicCheck() {
         }
 
         // 12. Проверка даты совершения сделки
-        if (row.dealDoneDate) {
-            def dealDoneYear = row.dealDoneDate.format(dateFormat)
-            if (dealDoneYear != formYear) {
-                def msg = row.getCell('dealDoneDate').column.name
-                logger.error("Строка $rowNum: Год, указанный по графе «$msg» ($dealDoneYear), должен относиться " +
-                        "к календарному году текущей формы ($formYear)!")
-            }
-        }
+        checkDealDoneDate(logger, row, 'dealDoneDate', getReportPeriodStartDate(), getReportPeriodEndDate(), true)
     }
 
     // 13. Проверка итоговых значений по фиксированной строке «Итого»
