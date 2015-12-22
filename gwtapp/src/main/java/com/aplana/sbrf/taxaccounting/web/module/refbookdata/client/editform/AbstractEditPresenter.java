@@ -150,9 +150,9 @@ public abstract class AbstractEditPresenter<V extends AbstractEditPresenter.MyVi
 
     void showRecord(final Long refBookRecordId){
         //Для случая когда мы нажимаем на кнопку отмены перехода на другую запись
-        /*if (previousURId != null&&previousURId.equals(refBookRecordId)){
+        if (previousURId != null && previousURId.equals(refBookRecordId)){
             return;
-        }*/
+        }
         previousURId = refBookRecordId;
         GetRefBookRecordAction action = new GetRefBookRecordAction();
         action.setRefBookId(currentRefBookId);
@@ -189,7 +189,6 @@ public abstract class AbstractEditPresenter<V extends AbstractEditPresenter.MyVi
                 @Override
                 public void no() {
                     Dialog.hideMessage();
-                    setIsFormModified(false);
                     RollbackTableRowSelection.fire(AbstractEditPresenter.this, currentUniqueRecordId);
                     SetFormMode.fire(AbstractEditPresenter.this, FormMode.EDIT);
                 }

@@ -1,4 +1,4 @@
-package form_template.deal.app_6_10_1.v2015
+package form_template.deal.app_6_10_2.v2015
 
 import com.aplana.sbrf.taxaccounting.model.Cell
 import com.aplana.sbrf.taxaccounting.model.DataRow
@@ -10,9 +10,9 @@ import com.aplana.sbrf.taxaccounting.service.script.util.ScriptUtils
 import groovy.transform.Field
 
 /**
- * 6.10-1. Отчет в отношении доходов ПАО Сбербанк, связанных с предоставлением гарантий
+ * 6.10-2. Предоставление инструментов торгового финансирования и непокрытых аккредитивов
  *
- * formTemplateId = 823
+ * formTemplateId = 825
  *
  * @author EMamedova
  */
@@ -427,7 +427,7 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
             ([(headerRows[1][9]) : getColumnName(tmpRow, 'sum')]),
             ([(headerRows[1][10]): getColumnName(tmpRow, 'price')]),
             ([(headerRows[1][11]): getColumnName(tmpRow, 'cost')]),
-            ([(headerRows[1][12]): getColumnName(tmpRow, 'dealDoneDate')])
+            ([(headerRows[1][12]): getColumnName(tmpRow, 'dealDoneDate')]),
     ]
     (1..12).each{
         headerMapping.add(([(headerRows[2][it]): 'гр. ' + it.toString()]))
