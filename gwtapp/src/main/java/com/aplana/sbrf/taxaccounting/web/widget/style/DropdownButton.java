@@ -43,6 +43,10 @@ public class DropdownButton extends LinkButton {
         pnl.add(item);
     }
 
+    public void setPanelStyleName(String style) {
+        dropDown.addStyleName(style);
+    }
+
     public IsWidget getItem(String key) {
         return items.get(key);
     }

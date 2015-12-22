@@ -265,6 +265,7 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
         });
 
         printToExcel = new LinkButton("Выгрузить в XLSM");
+        printToExcel.setHeight("20px");
         printToExcel.setDisableImage(true);
         printToExcel.addClickHandler(new ClickHandler() {
             @Override
@@ -276,6 +277,7 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
         });
 
         printToCSV = new LinkButton("Выгрузить в CSV");
+        printToCSV.setHeight("20px");
         printToCSV.setDisableImage(true);
         printToCSV.addClickHandler(new ClickHandler() {
             @Override
@@ -983,6 +985,7 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
         printAnchor.addItem(ReportType.CSV.getName(), printToCSV);
         for(final String specificReportType: specificReportTypes) {
             LinkButton linkButton = new LinkButton("Сформировать \"" + specificReportType + "\"");
+            linkButton.setHeight("20px");
             linkButton.setDisableImage(true);
             linkButton.addClickHandler(new ClickHandler() {
                 @Override
