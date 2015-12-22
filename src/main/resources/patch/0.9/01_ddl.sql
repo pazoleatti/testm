@@ -64,5 +64,12 @@ alter table form_data_report modify type not null;
 alter table form_data_report add constraint form_data_rep_pk primary key (form_data_id, type, manual, checking, absolute);
 alter table form_data_report drop column type_num;
 
+-----------------------------------------------------------------------------------------
+--http://jira.aplana.com/browse/SBRFACCTAX-14002: Новое поле NOTIFICATION.URL
+alter table notification add url varchar2(2000);
+comment on column notification.url is 'Ссылка';
+
+
+
 commit;
 exit;

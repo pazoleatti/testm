@@ -685,7 +685,8 @@ deadline date null,
 user_id number(9) null,
 role_id number(9) null,
 is_read number(1) default 0 not null,
-blob_data_id varchar2(36)
+blob_data_id varchar2(36),
+url varchar2(2000)
 );
 
 comment on table notification is 'Оповещения';
@@ -700,6 +701,7 @@ comment on column notification.user_id is 'Идентификатор польз
 comment on column notification.role_id is 'Идентификатор роли пользователя, который получит оповещение';
 comment on column notification.is_read is 'Признак прочтения';
 comment on column notification.blob_data_id is 'Ссылка на логи';
+comment on column notification.url is 'Ссылка';
 
 create sequence seq_notification start with 10000;
 
