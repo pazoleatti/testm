@@ -103,7 +103,7 @@ public class CreateReportHandler extends AbstractActionHandler<CreateReportActio
                     });
                 }
             } else {
-                formDataService.locked(action.getFormDataId(), fdReportType.getReportType(), lockType, logger);
+                formDataService.locked(action.getFormDataId(), fdReportType.getReportType(), lockType, logger, fdReportType.getName());
             }
         }
         result.setUuid(logEntryService.save(logger.getEntries()));

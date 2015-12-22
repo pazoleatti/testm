@@ -44,9 +44,9 @@ public class TimerReportHandler extends AbstractActionHandler<TimerReportAction,
         TimerReportResult result = new TimerReportResult();
         TAUserInfo userInfo = securityService.currentUserInfo();
         Map<String, TimerReportResult.StatusReport> mapExistReport = new HashMap<String, TimerReportResult.StatusReport>();
-        action.getFormDataReportTypes().add(FormDataReportType.EXCEL.getReportName());
-        action.getFormDataReportTypes().add(FormDataReportType.CSV.getReportName());
-        for(String type: action.getFormDataReportTypes()) {
+        action.getSpecificReportTypes().add(FormDataReportType.EXCEL.getReportName());
+        action.getSpecificReportTypes().add(FormDataReportType.CSV.getReportName());
+        for(String type: action.getSpecificReportTypes()) {
             TimerReportResult.StatusReport statusReport;
             final FormDataReportType fdReportType = FormDataReportType.getFDReportTypeByName(type);
             String key = formDataService.generateReportKey(action.getFormDataId(), fdReportType, action.isShowChecked(), action.isManual(), action.isSaved());

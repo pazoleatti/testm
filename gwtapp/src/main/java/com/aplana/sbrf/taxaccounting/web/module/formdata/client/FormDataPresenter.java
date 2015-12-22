@@ -295,7 +295,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
         action.setShowChecked(getView().getCheckedColumnsClicked());
         action.setManual(formData.isManual());
         action.setSaved(absoluteView);
-        action.setFormDataReportTypes(specificReportTypes);
+        action.setSpecificReportTypes(specificReportTypes);
         dispatcher.execute(action, CallbackUtils
                 .simpleCallback(new AbstractCallback<TimerReportResult>() {
                     @Override
@@ -319,10 +319,10 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
     }
 
     @Override
-    public void onPrintClicked(final String reportType, boolean force) {
+    public void onPrintClicked(final String fdReportType, boolean force) {
         CreateReportAction action = new CreateReportAction();
         action.setFormDataId(formData.getId());
-        action.setType(reportType);
+        action.setType(fdReportType);
         action.setShowChecked(getView().getCheckedColumnsClicked());
         action.setManual(formData.isManual());
         action.setSaved(absoluteView);
@@ -334,24 +334,24 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                         LogCleanEvent.fire(FormDataPresenter.this);
                         LogAddEvent.fire(FormDataPresenter.this, result.getUuid());
                         if (result.isExistReport()) {
-                            getView().updatePrintReportButtonName(reportType, true);
+                            getView().updatePrintReportButtonName(fdReportType, true);
                             DownloadUtils.openInIframe(
                                     GWT.getHostPageBaseURL() + "download/downloadBlobController/"
-                                            + reportType + "/"
+                                            + fdReportType + "/"
                                             + formData.getId() + "/"
                                             + getView().getCheckedColumnsClicked() + "/"
                                             + formData.isManual() + "/"
                                             + absoluteView);
                         } else if (result.isLock()) {
-                            getView().updatePrintReportButtonName(reportType, false);
+                            getView().updatePrintReportButtonName(fdReportType, false);
                             Dialog.confirmMessage(result.getRestartMsg(), new DialogHandler() {
                                 @Override
                                 public void yes() {
-                                    onPrintClicked(reportType, true);
+                                    onPrintClicked(fdReportType, true);
                                 }
                             });
                         } else {
-                            getView().updatePrintReportButtonName(reportType, false);
+                            getView().updatePrintReportButtonName(fdReportType, false);
                         }
                     }
                 }, this));

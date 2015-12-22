@@ -33,7 +33,7 @@ public interface FormDataUiHandlers extends UiHandlers{
 
 	void onCheckClicked(boolean force);
 
-    void onPrintClicked(String reportType, boolean force);
+    void onPrintClicked(String fdReportType, boolean force);
 
 	void onSignersClicked();
 

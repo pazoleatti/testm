@@ -444,7 +444,7 @@ public interface FormDataService {
      * @param logger
      * @param reportType тип текущей операции
      */
-    void locked(long formDataId, ReportType reportType, Pair<ReportType, LockData> lockType, Logger logger);
+    void locked(long formDataId, ReportType reportType, Pair<ReportType, LockData> lockType, Logger logger, String... args);
 
     /**
      * Проверка возможности изменения НФ

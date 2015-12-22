@@ -1741,7 +1741,7 @@ public class FormDataServiceImpl implements FormDataService {
     }
 
     @Override
-    public void locked(long formDataId, ReportType reportType, Pair<ReportType, LockData> lockType, Logger logger) {
+    public void locked(long formDataId, ReportType reportType, Pair<ReportType, LockData> lockType, Logger logger, String... args) {
         TAUser user = userService.getUser(lockType.getSecond().getUserId());
         TAUserInfo userInfo = new TAUserInfo();
         userInfo.setUser(user);
@@ -1763,7 +1763,7 @@ public class FormDataServiceImpl implements FormDataService {
                                 LockData.LOCK_CURRENT,
                                 SDF_HH_MM_DD_MM_YYYY.format(lockType.getSecond().getDateLock()),
                                 user.getName(),
-                                getTaskName(lockType.getFirst(), formDataId, userInfo))
+                                getTaskName(lockType.getFirst(), formDataId, userInfo, args))
                 );
         }
         switch (reportType) {
