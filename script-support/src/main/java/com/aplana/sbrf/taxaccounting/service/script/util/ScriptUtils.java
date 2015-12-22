@@ -46,7 +46,6 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 /**
  * Библиотека скриптовых функций
  *
@@ -56,81 +55,16 @@ import java.util.regex.Pattern;
 
 public final class ScriptUtils {
 
-    private static final String WRONG_COLUMN_TYPE = "В указанном диапазоне граф «%s» - «%s» должны " +
-            "быть только графы численного типа. Графа «%s» имеет неверный тип.";
-
-    private static final String NOT_SAME_RANGES = "Диапазоны имеют разную размерность";
-
-    private static final String CELL_NOT_FOUND = "Ячейка («%s», «%s») не найдена";
-
-    private static final String WRONG_NUMBER = "Проверка файла: Строка %d, столбец %s содержит нечисловое значение «%s»!";
-
-    private static final String WRONG_DATE = "Проверка файла: Строка %d, столбец %s содержит значение «%s», которое не " +
-            "соответствует дате в формате «%s»!";
-
-    private static final String WRONG_HEADER_EQUALS = "Заголовок таблицы не соответствует требуемой структуре. " +
-            "Ожидается «%s» вместо «%s»!";
-
-    private static final String WRONG_HEADER_COL_SIZE = "Заголовок таблицы не соответствует требуемой структуре. " +
-            "Количество граф менее ожидаемого!";
-
-    private static final String WRONG_HEADER_ROW_SIZE = "Заголовок таблицы не соответствует требуемой структуре. " +
-            "Количество строк в заголовке менее ожидаемого!";
-
-    private static final String GROUP_WRONG_ITOG = "Группа «%s» не имеет строки подитога!";
-
-    private static final String GROUP_WRONG_ITOG_ROW = "Строка %d: Строка подитога не относится к какой-либо группе!";
-
-    private static final String GROUP_WRONG_ITOG_SUM = "Строка %d: Неверное итоговое значение по группе «%s» в графе «%s»";
-
-    private static final String WRONG_NON_EMPTY = "Строка %d: Графа «%s» не заполнена!";
-
-    private static final String WRONG_CALC = "Строка %d: Неверное значение граф: %s!";
-
-    private static final String WRONG_TOTAL = "Итоговые значения рассчитаны неверно в графе «%s»!";
-
-    private static final String WRONG_SUBTOTAL = "Неверное итоговое значение по коду '%s' графы «%s»!";
-
-    private static final String IMPORT_IS_NOT_PROVIDED = "Импорт данных не предусмотрен!";
-
-    private static final String WRONG_DATA_PARSE = "Отсутствие значения после обработки потока данных!";
-
-    private static final String EMPTY_FILE_NAME = "Имя файла не должно быть пустым!";
-    private static final String EMPTY_INPUT_STREAM = "Поток данных пуст!";
-    private static final String WRONG_FORMAT_FILE = "Неверная структура загружаемого файла! ";
-
-    private static final String WRONG_XLS_FORMAT = "Выбранный файл не соответствует формату xls/xlsx/xlsm!";
-    private static final String WRONG_RNU_FORMAT = "Выбранный файл не соответствует формату rnu!";
-
-    private static final String WRONG_FIXED_VALUE = "Строка %d: Графа «%s» содержит значение «%s», не соответствующее значению «%s» данной графы в макете налоговой формы!";
-    private static final String EMPTY_VALUE = "Строка %d: Графа «%s» содержит пустое значение, не соответствующее значению «%s» данной графы в макете налоговой формы!";
-    private static final String EMPTY_EXPECTED_VALUE = "Строка %d: Графа «%s» содержит значение «%s», не соответствующее пустому значению данной графы в макете налоговой формы!";
-
-    private static final String IMPORT_ROW_PREFIX = "Строка файла %d: %s";
-
-    @SuppressWarnings("unused")
-    private static final String TRANSPORT_FILE_SUM_ERROR = "Итоговая сумма в графе %s строки %s в транспортном файле некорректна.";
-
-    private static final String ROW_FILE_WRONG = "Строка файла %s содержит некорректное значение.";
-
     // Ссылочный, независимая графа: Не найдена версия справочника, соответствующая значению в файле
     public static final String REF_BOOK_NOT_FOUND_IMPORT_ERROR = "Проверка файла: Строка %d, столбец %s: В справочнике «%s» в атрибуте «%s» не найдено значение «%s», актуальное на дату %s!";
     // Ссылочный, зависимая графа: Значение в файле отличается от того, которое должно быть в зависимой графе
     public static final String REF_BOOK_REFERENCE_NOT_FOUND_IMPORT_ERROR = "Проверка файла: Строка %d, столбец %s содержит значение «%s», отсутствующее в справочнике «%s»!";
     // Ссылочный: Найдено несколько записей справочника, соответствующих значению в файле
     public static final String REF_BOOK_TOO_MANY_FOUND_IMPORT_ERROR = "Проверка файла: Строка %d, столбец %s: В справочнике «%s» в атрибуте «%s» найдено более одного значения «%s», актуального на дату %s!";
-
-    private static final String WRONG_XLS_COLUMN_INDEX = "Номер столбца должен быть больше ноля!";
-
-    // разделитель между идентификаторами в ключе для кеширования записей справочника
-    private static final String SEPARATOR = "_";
     public static final String CHECK_OVERFLOW_MESSAGE = "Строка %d: Значение графы «%s» превышает допустимую разрядность (%d знаков). Графа «%s» рассчитывается как «%s»!";
-
     // для проверки итогов при загрузе экселя (посчитанные и ожижаемые значения как %s потому что %f теряет точность)
     public static final String COMPARE_TOTAL_VALUES = "Строка формы %d: Итоговая сумма по графе «%s» (%s) некорректна (ожидаемое значение %s).";
-
     public static final String TCO_END_MESSAGE = "Для заполнения на форме граф с общей информацией о %s выполнен поиск значения файла по графе «%s в следующих атрибутах справочника «Участники ТЦО»: «ИНН (заполняется для резидентов, некредитных организаций)», «Регистрационный номер в стране инкорпорации (заполняется для нерезидентов)», «Код налогоплательщика в стране инкорпорации», «Код SWIFT (заполняется для кредитных организаций, резидентов и нерезидентов)», «КИО (заполняется для нерезидентов)»";
-
     public static final String INN_JUR_PATTERN = RefBookUtils.INN_JUR_PATTERN;
     public static final String INN_JUR_MEANING = RefBookUtils.INN_JUR_MEANING;
     public static final String INN_IND_PATTERN = RefBookUtils.INN_IND_PATTERN;
@@ -139,27 +73,43 @@ public final class ScriptUtils {
     public static final String KPP_MEANING = RefBookUtils.KPP_MEANING;
     public static final String TAX_ORGAN_PATTERN = RefBookUtils.TAX_ORGAN_PATTERN;
     public static final String TAX_ORGAN_MEANING = RefBookUtils.TAX_ORGAN_MEANING;
-
-    /**
-     * Интерфейс для переопределения алгоритма расчета
-     */
-    public interface CalcAliasRow {
-        DataRow<Cell> calc(int index, List<DataRow<Cell>> dataRows);
-    }
-
-    /**
-     * Интерфейс для получения строки со значениями в группе
-     */
-    public interface GroupString {
-        String getString(DataRow<Cell> row);
-    }
-
-    /**
-     * Интерфейс для проверки сумм в итоговых строках
-     */
-    public interface CheckGroupSum {
-        String check(DataRow<Cell> row1, DataRow<Cell> row2);
-    }
+    private static final String WRONG_COLUMN_TYPE = "В указанном диапазоне граф «%s» - «%s» должны " +
+            "быть только графы численного типа. Графа «%s» имеет неверный тип.";
+    private static final String NOT_SAME_RANGES = "Диапазоны имеют разную размерность";
+    private static final String CELL_NOT_FOUND = "Ячейка («%s», «%s») не найдена";
+    private static final String WRONG_NUMBER = "Проверка файла: Строка %d, столбец %s содержит нечисловое значение «%s»!";
+    private static final String WRONG_DATE = "Проверка файла: Строка %d, столбец %s содержит значение «%s», которое не " +
+            "соответствует дате в формате «%s»!";
+    private static final String WRONG_HEADER_EQUALS = "Заголовок таблицы не соответствует требуемой структуре. " +
+            "Ожидается «%s» вместо «%s»!";
+    private static final String WRONG_HEADER_COL_SIZE = "Заголовок таблицы не соответствует требуемой структуре. " +
+            "Количество граф менее ожидаемого!";
+    private static final String WRONG_HEADER_ROW_SIZE = "Заголовок таблицы не соответствует требуемой структуре. " +
+            "Количество строк в заголовке менее ожидаемого!";
+    private static final String GROUP_WRONG_ITOG = "Группа «%s» не имеет строки подитога!";
+    private static final String GROUP_WRONG_ITOG_ROW = "Строка %d: Строка подитога не относится к какой-либо группе!";
+    private static final String GROUP_WRONG_ITOG_SUM = "Строка %d: Неверное итоговое значение по группе «%s» в графе «%s»";
+    private static final String WRONG_NON_EMPTY = "Строка %d: Графа «%s» не заполнена!";
+    private static final String WRONG_CALC = "Строка %d: Неверное значение граф: %s!";
+    private static final String WRONG_TOTAL = "Итоговые значения рассчитаны неверно в графе «%s»!";
+    private static final String WRONG_SUBTOTAL = "Неверное итоговое значение по коду '%s' графы «%s»!";
+    private static final String IMPORT_IS_NOT_PROVIDED = "Импорт данных не предусмотрен!";
+    private static final String WRONG_DATA_PARSE = "Отсутствие значения после обработки потока данных!";
+    private static final String EMPTY_FILE_NAME = "Имя файла не должно быть пустым!";
+    private static final String EMPTY_INPUT_STREAM = "Поток данных пуст!";
+    private static final String WRONG_FORMAT_FILE = "Неверная структура загружаемого файла! ";
+    private static final String WRONG_XLS_FORMAT = "Выбранный файл не соответствует формату xls/xlsx/xlsm!";
+    private static final String WRONG_RNU_FORMAT = "Выбранный файл не соответствует формату rnu!";
+    private static final String WRONG_FIXED_VALUE = "Строка %d: Графа «%s» содержит значение «%s», не соответствующее значению «%s» данной графы в макете налоговой формы!";
+    private static final String EMPTY_VALUE = "Строка %d: Графа «%s» содержит пустое значение, не соответствующее значению «%s» данной графы в макете налоговой формы!";
+    private static final String EMPTY_EXPECTED_VALUE = "Строка %d: Графа «%s» содержит значение «%s», не соответствующее пустому значению данной графы в макете налоговой формы!";
+    private static final String IMPORT_ROW_PREFIX = "Строка файла %d: %s";
+    @SuppressWarnings("unused")
+    private static final String TRANSPORT_FILE_SUM_ERROR = "Итоговая сумма в графе %s строки %s в транспортном файле некорректна.";
+    private static final String ROW_FILE_WRONG = "Строка файла %s содержит некорректное значение.";
+    private static final String WRONG_XLS_COLUMN_INDEX = "Номер столбца должен быть больше ноля!";
+    // разделитель между идентификаторами в ключе для кеширования записей справочника
+    private static final String SEPARATOR = "_";
 
     /**
      * Запрещаем создавать экземляры класса
@@ -881,7 +831,7 @@ public final class ScriptUtils {
             for (int i = 0; i < testItogRows.size(); i++) {
                 DataRow<Cell> testItogRow = testItogRows.get(i);
                 DataRow<Cell> realItogRow = itogRows.get(i);
-                String str = (String) testItogRow.getAlias().split("#")[0];
+                String str = testItogRow.getAlias().split("#")[0];
                 int itg = Integer.valueOf(testItogRow.getAlias().replaceAll(str+'#', ""));
                 if (dataRows.get(itg).getAlias() != null) {
                     logger.error(GROUP_WRONG_ITOG_ROW, dataRows.get(i).getIndex());
@@ -974,7 +924,6 @@ public final class ScriptUtils {
             logger.error(WRONG_HEADER_EQUALS, s2, s1);
         }
     }
-
 
     /**
      * Проверка пустых значений
@@ -1667,233 +1616,6 @@ public final class ScriptUtils {
         }
     }
 
-    static final class SheetHandler extends DefaultHandler {
-        private SharedStringsTable sst;     // таблица со строковыми значениями (Shared Strings Table)
-        private StylesTable stylesTable;    // таблица со стилями ячеек
-        private List<List<String>> allValues;     // список для хранения списков значении каждой строки данных
-        private List<List<String>> headerValues;  // список для хранения списков значении каждой строки шапки таблицы
-        private String tableStartValue;     // начальное значение, с которого начинается сбор данных
-        private String tableEndValue;       // конечное значение, с которого прекращается сбор данных
-        private int headerRowCount;         // количество строк в шапке таблицы
-        private Map<String, Object> paramsMap;  // мапа с параметрами
-
-        private StringBuffer lastValue;     // последнее считаное значение
-        private boolean nextIsString;       // признак того что следующее считаное значение хранится в виде строки в sst (Shared Strings Table)
-        private List<String> rowValues;     // список значении строки из файла
-
-        private boolean isData = false;     // признак того что считанные значения относятся к данным
-        private boolean isHeader = false;   // признак того что считанные значения относятся к шапке таблицы
-        private boolean endRead = false;    // признак того что встретилось значение окончания таблицы
-
-        private String position;            // позиция ячейки (A1, B2, C1 ... AB12)
-        private int maxColumnCount;         // максимальное количество значении в строке файла (определяется по шапке таблицы - строка с нумерацией столбцов)
-        private Integer rowOffset;          // отступ сверху (до данных)
-        private Integer colOffset;          // отступ слева
-        private int prevRowIndex = 0;       // номер предыдущей строки
-
-        private Map<String, XSSFCellStyle> styleMap = new HashMap<String, XSSFCellStyle>();// мапа со стилями
-        private Map<String, String> lastValuesMap = new HashMap<String, String>();  // мапа со считанными строковыми значениями из sst
-
-        private short formatIndex;          // идентификатор формата даты (дата хранится в виде числа)
-        private String formatString;        // формат даты
-        private final DataFormatter formatter;
-        private SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd.MM.yyyy"); // свой формат дат, что б исключить использование фомратов по умолчанию: н-р d/m/yyyy
-
-        /**
-         * Для обработки листа экселя.
-         *
-         * @param sst таблица со строковыми значениями (Shared Strings Table)
-         * @param stylesTable таблица со стилями ячеек
-         * @param allValues список для хранения списков значении каждой строки данных
-         * @param headerValues список для хранения списков значении каждой строки шапки таблицы
-         * @param tableStartValue начальное значение, с которого начинается сбор данных
-         * @param tableEndValue конечное значение, с которого прекращается сбор данных
-         * @param headerRowCount количество строк в шапке таблицы
-         * @param paramsMap мапа с параметрами (rowOffset отступ сверху, colOffset отступ слева)
-         */
-        private SheetHandler(SharedStringsTable sst, StylesTable stylesTable,
-                             List<List<String>> allValues, List<List<String>> headerValues,
-                             String tableStartValue, String tableEndValue, int headerRowCount, Map<String, Object> paramsMap) {
-            this.sst = sst;
-            this.stylesTable = stylesTable;
-            this.allValues = allValues;
-            this.headerValues = headerValues;
-            this.tableStartValue = tableStartValue;
-            this.tableEndValue = tableEndValue;
-            this.headerRowCount = headerRowCount;
-            this.paramsMap = paramsMap;
-
-            this.rowOffset = Integer.parseInt(String.valueOf(paramsMap.get("rowOffset")));
-            this.colOffset = Integer.parseInt(String.valueOf(paramsMap.get("colOffset")));
-
-            this.lastValue = new StringBuffer();
-            this.formatter = new DataFormatter();
-        }
-
-        public void startElement(String uri, String localName, String name, Attributes attributes) {
-            // attributes.getValue("r") - позиция ячейки: A1, B1, ... AC15
-            // attributes.getValue("t") - тип ячейки: "s" строка, "str" формула, "n" число
-            // attributes.getValue("s") - стиль ячейки
-            // name.equals("c")         - ячейка
-            // name.equals("row")       - строка
-            // name.equals("v")         - значение
-
-            if (endRead) {
-                return;
-            }
-            if (name.equals("c")) { // ячейка
-                this.formatIndex = -1;
-                this.formatString = null;
-
-                position = attributes.getValue("r");
-                String cellType = attributes.getValue("t");
-                if (cellType != null && cellType.equals("s")) {
-                    // строковое значение
-                    nextIsString = true;
-                } else if (cellType == null || "".equals(cellType) || cellType.equals("n")) {
-                    // число или дата
-                    String cellStyleStr = attributes.getValue("s");
-                    if (cellStyleStr != null) {
-                        XSSFCellStyle style = getStyle(cellStyleStr);
-                        this.formatIndex = style.getDataFormat();
-                        this.formatString = style.getDataFormatString();
-                        if (this.formatString == null) {
-                            this.formatString = BuiltinFormats.getBuiltinFormat(this.formatIndex);
-                        }
-                    }
-                }
-            } else if (name.equals("row")) { // новая строка
-                rowValues = new ArrayList<String>();
-            }
-            lastValue.setLength(0);
-        }
-
-        public void endElement(String uri, String localName, String name) {
-            if (endRead) {
-                return;
-            }
-            if (nextIsString) {
-                String v = getLastValue(lastValue.toString());
-                lastValue.setLength(0);
-                lastValue.append(v);
-                nextIsString = false;
-            }
-
-            if (name.equals("v")) { // конец значения
-                // добавить отступ: если первое значение таблицы нашлось не в первом столбце, то делается отступ - пропуск лишних столбцов слева
-                int columnIndex = getColumnIndex(position);
-                if (columnIndex < colOffset) {
-                    endRead = (tableEndValue != null && tableEndValue.equals(getValue()));
-                    return;
-                }
-                // добавить отсутствующие/пропущенные ячейки
-                if (rowValues.size() < columnIndex - colOffset) {
-                    int n = (columnIndex - rowValues.size() - colOffset);
-                    for (int i = 1; i <= n; i++) {
-                        rowValues.add("");
-                    }
-                }
-                // строка
-                rowValues.add(getValue());
-            } else if (name.equals("row")) { // конец строки
-                if (isData) {
-                    endRead = (rowValues != null && rowValues.contains(tableEndValue));
-                    if (!endRead) {
-                        // еще не конец таблицы - дополнить список значений недостоющеми значениями и добавить ко всем строкам
-                        if (rowValues != null && rowValues.size() < maxColumnCount) {
-                            int n = maxColumnCount - rowValues.size();
-                            for (int i = 1; i <= n; i++) {
-                                rowValues.add("");
-                            }
-                        }
-                        int rowIndex = getRowIndex(position);
-                        if (rowIndex > prevRowIndex + 1) {
-                            int n = rowIndex - prevRowIndex - 1;
-                            for (int i = 1; i <= n; i++) {
-                                allValues.add(new ArrayList<String>());
-                            }
-                        }
-                        allValues.add(rowValues);
-                        prevRowIndex = rowIndex;
-                    }
-                } else {
-                    if (headerValues.isEmpty() && rowValues != null && rowValues.contains(tableStartValue)) {
-                        // найдено начало таблицы
-                        int from = rowValues.indexOf(tableStartValue);
-                        colOffset = from; // отступ слева
-                        if (from > 0) {
-                            int to = rowValues.size();
-                            rowValues = rowValues.subList(from, to);
-                        }
-                        isHeader = true;
-                    }
-                    if (isHeader) {
-                        headerValues.add(rowValues);
-                        if (headerValues.size() == headerRowCount) {
-                            // дальше только данные
-                            isData = true;
-                            isHeader = false;
-                            maxColumnCount = (rowValues != null ? rowValues.size() : 0); // максимальное количество значении в строке
-                            rowOffset = getRowIndex(position); // отступ сверху
-                            prevRowIndex = getRowIndex(position);
-                        }
-                    }
-                }
-            } else if (name.equals("sheetData")) {
-                // конец данных - обновить значения переданных параметов для использования в дальнейшем
-                paramsMap.put("rowOffset", rowOffset);
-                paramsMap.put("colOffset", colOffset + 1);
-            }
-        }
-
-        public void characters(char[] ch, int start, int length) {
-            lastValue.append(ch, start, length);
-        }
-
-        /** Получить номер столбца по значению позиции (A1, B1 ... AB12). */
-        private int getColumnIndex(String position) {
-            String onlyColumnName = position.replaceAll("[\\d]+", "");
-            return CellReference.convertColStringToIndex(onlyColumnName);
-        }
-
-        /** Получить номер строки по значению позиции (A1, B1 ... AB12). */
-        private int getRowIndex(String position) {
-            return Integer.parseInt(position.replaceAll("[^\\d]+", ""));
-        }
-
-        private XSSFCellStyle getStyle(String cellStyleStr) {
-            if (styleMap.get(cellStyleStr) == null) {
-                int styleIndex = Integer.parseInt(cellStyleStr);
-                styleMap.put(cellStyleStr, stylesTable.getStyleAt(styleIndex));
-            }
-            return styleMap.get(cellStyleStr);
-        }
-
-        private String getLastValue(String value) {
-            if (lastValuesMap.get(value) == null) {
-                int idx = Integer.parseInt(value);
-                lastValuesMap.put(value, new XSSFRichTextString(sst.getEntryAt(idx)).toString());
-            }
-            return lastValuesMap.get(value);
-        }
-
-        /** Получить значение в виде строки. */
-        private String getValue() {
-            // строка
-            String value = lastValue.toString();
-            if (this.formatString != null) {
-                // дата/число
-                if (DateUtil.isADateFormat(this.formatIndex, this.formatString)) {
-                    Date date = DateUtil.getJavaDate(Double.parseDouble(value), false);
-                    value = simpleDateFormat.format(date);
-                } else {
-                    value = (new BigDecimal(value)).toPlainString();
-                }
-            }
-            return com.aplana.sbrf.taxaccounting.model.util.StringUtils.cleanString(value);
-        }
-    }
-
     /**
      * Проставление индексов у набора строк
      *
@@ -2181,6 +1903,249 @@ public final class ScriptUtils {
                             formatDate(reportPeriodStartDate, "dd.MM.yyyy"),
                             formatDate(reportPeriodEndDate, "dd.MM.yyyy")
                     ), fatal ? LogLevel.ERROR : LogLevel.WARNING);
+        }
+    }
+
+    /**
+     * Интерфейс для переопределения алгоритма расчета
+     */
+    public interface CalcAliasRow {
+        DataRow<Cell> calc(int index, List<DataRow<Cell>> dataRows);
+    }
+
+    /**
+     * Интерфейс для получения строки со значениями в группе
+     */
+    public interface GroupString {
+        String getString(DataRow<Cell> row);
+    }
+
+    /**
+     * Интерфейс для проверки сумм в итоговых строках
+     */
+    public interface CheckGroupSum {
+        String check(DataRow<Cell> row1, DataRow<Cell> row2);
+    }
+
+    static final class SheetHandler extends DefaultHandler {
+        private final DataFormatter formatter;
+        private SharedStringsTable sst;     // таблица со строковыми значениями (Shared Strings Table)
+        private StylesTable stylesTable;    // таблица со стилями ячеек
+        private List<List<String>> allValues;     // список для хранения списков значении каждой строки данных
+        private List<List<String>> headerValues;  // список для хранения списков значении каждой строки шапки таблицы
+        private String tableStartValue;     // начальное значение, с которого начинается сбор данных
+        private String tableEndValue;       // конечное значение, с которого прекращается сбор данных
+        private int headerRowCount;         // количество строк в шапке таблицы
+        private Map<String, Object> paramsMap;  // мапа с параметрами
+        private StringBuffer lastValue;     // последнее считаное значение
+        private boolean nextIsString;       // признак того что следующее считаное значение хранится в виде строки в sst (Shared Strings Table)
+        private List<String> rowValues;     // список значении строки из файла
+        private boolean isData = false;     // признак того что считанные значения относятся к данным
+        private boolean isHeader = false;   // признак того что считанные значения относятся к шапке таблицы
+        private boolean endRead = false;    // признак того что встретилось значение окончания таблицы
+        private String position;            // позиция ячейки (A1, B2, C1 ... AB12)
+        private int maxColumnCount;         // максимальное количество значении в строке файла (определяется по шапке таблицы - строка с нумерацией столбцов)
+        private Integer rowOffset;          // отступ сверху (до данных)
+        private Integer colOffset;          // отступ слева
+        private int prevRowIndex = 0;       // номер предыдущей строки
+        private Map<String, XSSFCellStyle> styleMap = new HashMap<String, XSSFCellStyle>();// мапа со стилями
+        private Map<String, String> lastValuesMap = new HashMap<String, String>();  // мапа со считанными строковыми значениями из sst
+        private short formatIndex;          // идентификатор формата даты (дата хранится в виде числа)
+        private String formatString;        // формат даты
+        private SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd.MM.yyyy"); // свой формат дат, что б исключить использование фомратов по умолчанию: н-р d/m/yyyy
+
+        /**
+         * Для обработки листа экселя.
+         *
+         * @param sst таблица со строковыми значениями (Shared Strings Table)
+         * @param stylesTable таблица со стилями ячеек
+         * @param allValues список для хранения списков значении каждой строки данных
+         * @param headerValues список для хранения списков значении каждой строки шапки таблицы
+         * @param tableStartValue начальное значение, с которого начинается сбор данных
+         * @param tableEndValue конечное значение, с которого прекращается сбор данных
+         * @param headerRowCount количество строк в шапке таблицы
+         * @param paramsMap мапа с параметрами (rowOffset отступ сверху, colOffset отступ слева)
+         */
+        private SheetHandler(SharedStringsTable sst, StylesTable stylesTable,
+                             List<List<String>> allValues, List<List<String>> headerValues,
+                             String tableStartValue, String tableEndValue, int headerRowCount, Map<String, Object> paramsMap) {
+            this.sst = sst;
+            this.stylesTable = stylesTable;
+            this.allValues = allValues;
+            this.headerValues = headerValues;
+            this.tableStartValue = tableStartValue;
+            this.tableEndValue = tableEndValue;
+            this.headerRowCount = headerRowCount;
+            this.paramsMap = paramsMap;
+
+            this.rowOffset = Integer.parseInt(String.valueOf(paramsMap.get("rowOffset")));
+            this.colOffset = Integer.parseInt(String.valueOf(paramsMap.get("colOffset")));
+
+            this.lastValue = new StringBuffer();
+            this.formatter = new DataFormatter();
+        }
+
+        public void startElement(String uri, String localName, String name, Attributes attributes) {
+            // attributes.getValue("r") - позиция ячейки: A1, B1, ... AC15
+            // attributes.getValue("t") - тип ячейки: "s" строка, "str" формула, "n" число
+            // attributes.getValue("s") - стиль ячейки
+            // name.equals("c")         - ячейка
+            // name.equals("row")       - строка
+            // name.equals("v")         - значение
+
+            if (endRead) {
+                return;
+            }
+            if (name.equals("c")) { // ячейка
+                this.formatIndex = -1;
+                this.formatString = null;
+
+                position = attributes.getValue("r");
+                String cellType = attributes.getValue("t");
+                if (cellType != null && cellType.equals("s")) {
+                    // строковое значение
+                    nextIsString = true;
+                } else if (cellType == null || "".equals(cellType) || cellType.equals("n")) {
+                    // число или дата
+                    String cellStyleStr = attributes.getValue("s");
+                    if (cellStyleStr != null) {
+                        XSSFCellStyle style = getStyle(cellStyleStr);
+                        this.formatIndex = style.getDataFormat();
+                        this.formatString = style.getDataFormatString();
+                        if (this.formatString == null) {
+                            this.formatString = BuiltinFormats.getBuiltinFormat(this.formatIndex);
+                        }
+                    }
+                }
+            } else if (name.equals("row")) { // новая строка
+                rowValues = new ArrayList<String>();
+            }
+            lastValue.setLength(0);
+        }
+
+        public void endElement(String uri, String localName, String name) {
+            if (endRead) {
+                return;
+            }
+            if (nextIsString) {
+                String v = getLastValue(lastValue.toString());
+                lastValue.setLength(0);
+                lastValue.append(v);
+                nextIsString = false;
+            }
+
+            if (name.equals("v")) { // конец значения
+                // добавить отступ: если первое значение таблицы нашлось не в первом столбце, то делается отступ - пропуск лишних столбцов слева
+                int columnIndex = getColumnIndex(position);
+                if (columnIndex < colOffset) {
+                    endRead = (tableEndValue != null && tableEndValue.equals(getValue()));
+                    return;
+                }
+                // добавить отсутствующие/пропущенные ячейки
+                if (rowValues.size() < columnIndex - colOffset) {
+                    int n = (columnIndex - rowValues.size() - colOffset);
+                    for (int i = 1; i <= n; i++) {
+                        rowValues.add("");
+                    }
+                }
+                // строка
+                rowValues.add(getValue());
+            } else if (name.equals("row")) { // конец строки
+                if (isData) {
+                    endRead = (rowValues != null && rowValues.contains(tableEndValue));
+                    if (!endRead) {
+                        // еще не конец таблицы - дополнить список значений недостоющеми значениями и добавить ко всем строкам
+                        if (rowValues != null && rowValues.size() < maxColumnCount) {
+                            int n = maxColumnCount - rowValues.size();
+                            for (int i = 1; i <= n; i++) {
+                                rowValues.add("");
+                            }
+                        }
+                        int rowIndex = getRowIndex(position);
+                        if (rowIndex > prevRowIndex + 1) {
+                            int n = rowIndex - prevRowIndex - 1;
+                            for (int i = 1; i <= n; i++) {
+                                allValues.add(new ArrayList<String>());
+                            }
+                        }
+                        allValues.add(rowValues);
+                        prevRowIndex = rowIndex;
+                    }
+                } else {
+                    if (headerValues.isEmpty() && rowValues != null && rowValues.contains(tableStartValue)) {
+                        // найдено начало таблицы
+                        int from = rowValues.indexOf(tableStartValue);
+                        colOffset = from; // отступ слева
+                        if (from > 0) {
+                            int to = rowValues.size();
+                            rowValues = rowValues.subList(from, to);
+                        }
+                        isHeader = true;
+                    }
+                    if (isHeader) {
+                        headerValues.add(rowValues);
+                        if (headerValues.size() == headerRowCount) {
+                            // дальше только данные
+                            isData = true;
+                            isHeader = false;
+                            maxColumnCount = (rowValues != null ? rowValues.size() : 0); // максимальное количество значении в строке
+                            rowOffset = getRowIndex(position); // отступ сверху
+                            prevRowIndex = getRowIndex(position);
+                        }
+                    }
+                }
+            } else if (name.equals("sheetData")) {
+                // конец данных - обновить значения переданных параметов для использования в дальнейшем
+                paramsMap.put("rowOffset", rowOffset);
+                paramsMap.put("colOffset", colOffset + 1);
+            }
+        }
+
+        public void characters(char[] ch, int start, int length) {
+            lastValue.append(ch, start, length);
+        }
+
+        /** Получить номер столбца по значению позиции (A1, B1 ... AB12). */
+        private int getColumnIndex(String position) {
+            String onlyColumnName = position.replaceAll("[\\d]+", "");
+            return CellReference.convertColStringToIndex(onlyColumnName);
+        }
+
+        /** Получить номер строки по значению позиции (A1, B1 ... AB12). */
+        private int getRowIndex(String position) {
+            return Integer.parseInt(position.replaceAll("[^\\d]+", ""));
+        }
+
+        private XSSFCellStyle getStyle(String cellStyleStr) {
+            if (styleMap.get(cellStyleStr) == null) {
+                int styleIndex = Integer.parseInt(cellStyleStr);
+                styleMap.put(cellStyleStr, stylesTable.getStyleAt(styleIndex));
+            }
+            return styleMap.get(cellStyleStr);
+        }
+
+        private String getLastValue(String value) {
+            if (lastValuesMap.get(value) == null) {
+                int idx = Integer.parseInt(value);
+                lastValuesMap.put(value, new XSSFRichTextString(sst.getEntryAt(idx)).toString());
+            }
+            return lastValuesMap.get(value);
+        }
+
+        /** Получить значение в виде строки. */
+        private String getValue() {
+            // строка
+            String value = lastValue.toString();
+            if (this.formatString != null) {
+                // дата/число
+                if (DateUtil.isADateFormat(this.formatIndex, this.formatString)) {
+                    Date date = DateUtil.getJavaDate(Double.parseDouble(value), false);
+                    value = simpleDateFormat.format(date);
+                } else {
+                    value = (new BigDecimal(value)).toPlainString();
+                }
+            }
+            return com.aplana.sbrf.taxaccounting.model.util.StringUtils.cleanString(value);
         }
     }
 }

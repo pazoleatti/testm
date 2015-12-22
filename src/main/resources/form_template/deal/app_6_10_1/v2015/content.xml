@@ -95,7 +95,7 @@
         <checking>false</checking>
         <name>Сумма доходов Банка по данным бухгалтерского учета, руб.</name>
         <order>10</order>
-        <width>10</width>
+        <width>11</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>
@@ -104,7 +104,7 @@
         <checking>false</checking>
         <name>Цена (тариф) за единицу измерения без учета НДС, акцизов и пошлины, руб.</name>
         <order>11</order>
-        <width>10</width>
+        <width>11</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>
@@ -113,7 +113,7 @@
         <checking>false</checking>
         <name>Итого стоимость без учета НДС, акцизов и пошлин, руб.</name>
         <order>12</order>
-        <width>10</width>
+        <width>11</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>

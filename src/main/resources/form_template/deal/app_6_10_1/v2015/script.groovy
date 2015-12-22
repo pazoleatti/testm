@@ -12,7 +12,7 @@ import groovy.transform.Field
 /**
  * 6.10-1. Отчет в отношении доходов ПАО Сбербанк, связанных с предоставлением гарантий
  *
- * formTemplateId=
+ * formTemplateId = 823
  *
  * @author EMamedova
  */
@@ -281,7 +281,6 @@ void calc() {
 
     sortFormDataRows(false)
 
-
 }
 // Получение импортируемых данных
 void importData() {
@@ -338,16 +337,15 @@ void importData() {
         } else if (rowValues[INDEX_FOR_SKIP] == "Подитог") {
             //для расчета уникального среди групп(groupColumns) ключа берем строку перед Подитоговой
             def tmpRowValue = rows.get(rows.size() - 1)
-            String dateFormat = 'dd.MM.yyyy'
-            str1 = (tmpRowValue.name!=null) ? tmpRowValue.name : ""
-            str2 = (tmpRowValue.docNumber!=null) ? tmpRowValue.docNumber : ""
-            str3 = (tmpRowValue.docDate!=null) ? tmpRowValue.docDate.format(dateFormat) : ""
-            key = str1 + str2 + str3
+            def str = ''
+            groupColumns.each{ def n -> str = str + ((tmpRowValue.get(n)!=null) ? tmpRowValue.get(n) : "").toString() }
+            key = str.hashCode()
             def subTotalRow = getNewSubTotalRowFromXls(key, rowValues, colOffset, fileRowIndex, rowIndex)
-            if (totalRowFromFileMap[subTotalRow.getAlias()] == null) {
-                totalRowFromFileMap[subTotalRow.getAlias()] = []
+            //наш ключ - row.getAlias() до решетки. так как индекс после решетки не равен у расчитанной и импортированной подитогововых строк
+            if (totalRowFromFileMap[subTotalRow.getAlias().split('#')[0]] == null) {
+                totalRowFromFileMap[subTotalRow.getAlias().split('#')[0]] = []
             }
-            totalRowFromFileMap[subTotalRow.getAlias()].add(subTotalRow)
+            totalRowFromFileMap[subTotalRow.getAlias().split('#')[0]].add(subTotalRow)
             rows.add(subTotalRow)
             allValues.remove(rowValues)
             rowValues.clear()
@@ -362,19 +360,18 @@ void importData() {
     }
 
     updateIndexes(rows)
-
     // сравнение подитогов
     if (!totalRowFromFileMap.isEmpty()) {
         def tmpSubTotalRows = calcSubTotalRows(rows)
         tmpSubTotalRows.each { subTotalRow ->
-            def totalRows = totalRowFromFileMap[subTotalRow.getAlias()]//ошибка.
+            def totalRows = totalRowFromFileMap[subTotalRow.getAlias().split('#')[0]]
             if (totalRows) {
                 totalRows.each { totalRow ->
                     compareTotalValues(totalRow, subTotalRow, totalColumns, logger, false)
                 }
-                totalRowFromFileMap.remove(subTotalRow.getAlias())
+                totalRowFromFileMap.remove(subTotalRow.getAlias().split('#')[0])
             } else {
-                rowWarning(logger, null, String.format(GROUP_WRONG_ITOG, subTotalRow.getAlias()))
+                rowWarning(logger, null, String.format(GROUP_WRONG_ITOG, getValuesByGroupColumn(subTotalRow)))
             }
         }
         if (!totalRowFromFileMap.isEmpty()) {
@@ -603,11 +600,9 @@ def calcSubTotalRows(def dataRows) {
 // Расчет подитогового значения
 DataRow<Cell> calcItog(def int i, def List<DataRow<Cell>> dataRows) {
     def tmpRow = dataRows.get(i)
-    String dateFormat = 'dd.MM.yyyy'
-    str1 = (tmpRow.name!=null) ? tmpRow.name : ""
-    str2 = (tmpRow.docNumber!=null) ? tmpRow.docNumber : ""
-    str3 = (tmpRow.docDate!=null) ? tmpRow.docDate.format(dateFormat) : ""
-    key = str1 + str2 + str3
+    def str = ''
+    groupColumns.each{ def n -> str = str + ((tmpRow.get(n)!=null) ? tmpRow.get(n) : "").toString() }
+    key = str.hashCode()
     def newRow = getSubTotalRow(i, key)
 
     // Расчеты подитоговых значений
