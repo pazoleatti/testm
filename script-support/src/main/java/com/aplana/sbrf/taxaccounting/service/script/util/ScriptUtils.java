@@ -2128,7 +2128,7 @@ public final class ScriptUtils {
                 // сообщение 4
                 String msg;
                 if (nameFromFile != null && !nameFromFile.isEmpty()) {
-                    msg = String.format("В файле указано другое наименование %s - «%s!", isVzl ? "ВЗЛ/РОЗ" : "юридического лица", nameFromFile);
+                    msg = String.format("В файле указано другое наименование %s - «%s»!", isVzl ? "ВЗЛ/РОЗ" : "юридического лица", nameFromFile);
                 } else {
                     msg = String.format("Наименование %s в файле не заполнено!, ", isVzl ? "ВЗЛ/РОЗ" : "юридического лица");
                 }

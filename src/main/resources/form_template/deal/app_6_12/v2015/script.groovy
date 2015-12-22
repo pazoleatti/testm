@@ -159,7 +159,7 @@ void logicCheck() {
 
         // 3. Проверка суммы дохода/расхода
         else {
-            def sum = row.incomeSum ?: row.outcomeSum
+            def sum = (row.incomeSum != null) ? row.incomeSum : row.outcomeSum
             if (sum < 0) {
                 def msg = (row.incomeSum != null) ? row.getCell('incomeSum').column.name : row.getCell('outcomeSum').column.name
                 logger.error("Строка $rowNum: Значение графы «$msg» должно быть больше или равно «0»!")
