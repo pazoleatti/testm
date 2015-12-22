@@ -1,6 +1,8 @@
 package com.aplana.gwt.client.dialog;
 
 import com.aplana.gwt.client.ModalWindow;
+import com.aplana.gwt.client.modal.CanHide;
+import com.aplana.gwt.client.modal.OnHideHandler;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.ImageResource;
@@ -65,7 +67,14 @@ public final class Dialog extends ModalWindow {
      * @param text    - текст сообщения
      * @param handler - обработчик
      */
-    private static void showDialog(String title, String text, DialogHandler handler) {
+    private static void showDialog(String title, String text, final DialogHandler handler) {
+        INSTANCE.setOnHideHandler(new OnHideHandler<CanHide>() {
+            @Override
+            public void onHide(CanHide modalWindow) {
+                handler.close();
+                modalWindow.hide();
+            }
+        });
         INSTANCE.setDialogPanel();
         dialogPanel.setDialogHandler(handler);
         dialogPanel.setText(text);
