@@ -184,7 +184,7 @@
         <columnType>NUMBER</columnType>
         <name>Курс ЦБ РФ</name>
         <order>18</order>
-        <width>5</width>
+        <width>11</width>
         <maxLength>19</maxLength>
         <precision>4</precision>
     </columns>

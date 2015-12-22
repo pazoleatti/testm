@@ -73,7 +73,7 @@
         <checking>false</checking>
         <name>Курс валюты Банка России</name>
         <order>7</order>
-        <width>5</width>
+        <width>11</width>
         <maxLength>19</maxLength>
         <precision>4</precision>
     </columns>
@@ -152,7 +152,7 @@
         <columnType>NUMBER</columnType>
         <name>Коэффициент корректировки доходов</name>
         <order>15</order>
-        <width>10</width>
+        <width>20</width>
         <maxLength>38</maxLength>
         <precision>19</precision>
     </columns>
