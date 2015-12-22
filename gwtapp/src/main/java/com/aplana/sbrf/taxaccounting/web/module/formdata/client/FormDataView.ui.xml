@@ -125,6 +125,11 @@
             overflow-x: hidden;
         }
 
+        .printAnchor {
+            padding-left: 14px;
+            padding-right: 6px;
+        }
+
     </ui:style>
 
     <ui:style field="lock">
@@ -165,7 +170,7 @@
                                      addStyleNames="{style.editMode}, {style.marginRight5}"/>
                             <fileuplod:FileUploadWidget ui:field="fileUploader" width="185px"/>
                             <style:DropdownButton ui:field="printAnchor" text="Формирование отчетов" img="resources/img/printer-16.png"
-                                              title="Формирование отчето"/>
+                                              title="Формирование отчето" panelStyleName="{style.printAnchor}"/>
                         </style:LeftBar>
                     </fm:Right>
                 </fm:right>
