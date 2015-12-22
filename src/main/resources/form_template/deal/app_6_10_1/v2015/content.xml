@@ -1,25 +1,25 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <formTemplateContent>
     <fixedRows>false</fixedRows>
-    <name>Предоставление гарантий</name>
-    <fullName>Отчет в отношении доходов ПАО Сбербанк по Контролируемым сделкам, связанным с предоставлением гарантий</fullName>
+    <name>6.10-1. Предоставление гарантий</name>
+    <fullName>6.10-1. Отчет в отношении доходов ПАО Сбербанк, связанных с предоставлением гарантий</fullName>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
+        <alias>fix</alias>
+        <checking>false</checking>
+        <name>fix</name>
+        <order>1</order>
+        <width>0</width>
+        <maxLength>100</maxLength>
+        <prevLength>0</prevLength>
+    </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="autoNumerationColumn">
         <alias>rowNumber</alias>
         <checking>false</checking>
         <columnType>AUTO</columnType>
         <name>№ п/п</name>
-        <order>1</order>
+        <order>2</order>
         <width>4</width>
         <numerationType>SERIAL</numerationType>
-    </columns>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
-        <alias>fix</alias>
-        <checking>false</checking>
-        <name>fix</name>
-        <order>2</order>
-        <width>0</width>
-        <maxLength>100</maxLength>
-        <prevLength>0</prevLength>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
         <alias>name</alias>

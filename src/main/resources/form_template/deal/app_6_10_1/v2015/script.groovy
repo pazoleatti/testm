@@ -289,7 +289,7 @@ void importData() {
     int HEADER_ROW_COUNT = 3
     String TABLE_START_VALUE = 'Общая информация о контрагенте - юридическом лице'
     String TABLE_END_VALUE = null
-    int INDEX_FOR_SKIP = 1
+    int INDEX_FOR_SKIP = 0
 
     def allValues = []      // значения формы
     def headerValues = []   // значения шапки
@@ -416,7 +416,7 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
    def headerMapping = [
             ([(headerRows[0][0]) : 'Общая информация о контрагенте - юридическом лице']),
             ([(headerRows[0][6]) : 'Сведения о сделке']),
-            ([(headerRows[1][0]) : getColumnName(tmpRow, 'rowNumber')]),
+            ([(headerRows[1][1]) : getColumnName(tmpRow, 'rowNumber')]),
             ([(headerRows[1][2]) : getColumnName(tmpRow, 'name')]),
             ([(headerRows[1][3]) : getColumnName(tmpRow, 'iksr')]),
             ([(headerRows[1][4]) : getColumnName(tmpRow, 'countryName')]),
@@ -427,11 +427,9 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
             ([(headerRows[1][9]) : getColumnName(tmpRow, 'sum')]),
             ([(headerRows[1][10]): getColumnName(tmpRow, 'price')]),
             ([(headerRows[1][11]): getColumnName(tmpRow, 'cost')]),
-            ([(headerRows[1][12]): getColumnName(tmpRow, 'dealDoneDate')]),
-            ([(headerRows[2][0]) : 'гр. 1']),
-            ([(headerRows[2][12]): 'гр. 12'])
+            ([(headerRows[1][12]): getColumnName(tmpRow, 'dealDoneDate')])
     ]
-    (2..11).each{
+    (1..12).each{
         headerMapping.add(([(headerRows[2][it]): 'гр. ' + it.toString()]))
     }
     checkHeaderEquals(headerMapping, logger)
