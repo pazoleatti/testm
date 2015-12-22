@@ -1664,10 +1664,10 @@ public class FormDataServiceImpl implements FormDataService {
         for (boolean showChecked : b) {
             for (boolean saved : b) {
                 if (manual != null) {
-                    lockKeys.add(generateReportKey(formDataId, reportType, null, showChecked, manual, saved));
+                    lockKeys.add(generateReportKey(formDataId, new FormDataReportType(reportType, null), showChecked, manual, saved));
                 } else {
                     for (boolean manual1 : b) {
-                        lockKeys.add(generateReportKey(formDataId, reportType, null, showChecked, manual1, saved));
+                        lockKeys.add(generateReportKey(formDataId, new FormDataReportType(reportType, null), showChecked, manual1, saved));
                     }
                 }
             }
@@ -1676,16 +1676,16 @@ public class FormDataServiceImpl implements FormDataService {
     }
 
     @Override
-    public String generateReportKey(long formDataId, ReportType reportType, String specificReportType, boolean showChecked, boolean manual, boolean saved) {
-        switch (reportType){
+    public String generateReportKey(long formDataId, FormDataReportType fdReportType, boolean showChecked, boolean manual, boolean saved) {
+        switch (fdReportType.getReportType()){
             case SPECIFIC_REPORT:
-                if (specificReportType != null && !specificReportType.isEmpty())
-                    return String.format("%s_%s_%s_isShowChecked_%s_manual_%s_saved_%s_%s", LockData.LockObjects.FORM_DATA.name(), formDataId, reportType.getName(), showChecked, manual, saved, specificReportType);
+                if (fdReportType.getName() != null && !fdReportType.getName().isEmpty())
+                    return String.format("%s_%s_%s_isShowChecked_%s_manual_%s_saved_%s_%s", LockData.LockObjects.FORM_DATA.name(), formDataId, fdReportType.getReportType().getName(), showChecked, manual, saved, fdReportType.getName());
             case EXCEL:
             case CSV:
-                return String.format("%s_%s_%s_isShowChecked_%s_manual_%s_saved_%s", LockData.LockObjects.FORM_DATA.name(), formDataId, reportType.getName(), showChecked, manual, saved);
+                return String.format("%s_%s_%s_isShowChecked_%s_manual_%s_saved_%s", LockData.LockObjects.FORM_DATA.name(), formDataId, fdReportType.getReportType().getName(), showChecked, manual, saved);
             default:
-                throw new ServiceException("Неверный тип отчета(%s)", reportType.getName());
+                throw new ServiceException("Неверный тип отчета(%s)", fdReportType.getName());
         }
     }
 
@@ -1741,7 +1741,7 @@ public class FormDataServiceImpl implements FormDataService {
     }
 
     @Override
-    public void locked(long formDataId, ReportType reportType, Pair<ReportType, LockData> lockType, Logger logger) {
+    public void locked(long formDataId, ReportType reportType, Pair<ReportType, LockData> lockType, Logger logger, String... args) {
         TAUser user = userService.getUser(lockType.getSecond().getUserId());
         TAUserInfo userInfo = new TAUserInfo();
         userInfo.setUser(user);
@@ -1763,7 +1763,7 @@ public class FormDataServiceImpl implements FormDataService {
                                 LockData.LOCK_CURRENT,
                                 SDF_HH_MM_DD_MM_YYYY.format(lockType.getSecond().getDateLock()),
                                 user.getName(),
-                                getTaskName(lockType.getFirst(), formDataId, userInfo))
+                                getTaskName(lockType.getFirst(), formDataId, userInfo, args))
                 );
         }
         switch (reportType) {
@@ -1970,6 +1970,7 @@ public class FormDataServiceImpl implements FormDataService {
             case REFRESH_FD:
             case CALCULATE_FD:
             case IMPORT_FD:
+            case EDIT_FD:
             case DELETE_REPORT_FD:
                 manualReport = manual;
                 break;
@@ -2052,6 +2053,7 @@ public class FormDataServiceImpl implements FormDataService {
         formDataFileDao.saveFiles(formDataId, files);
     }
 
+    @Override
     public List<String> getSpecificReportTypes(FormData formData, TAUserInfo userInfo, Logger logger) {
         Map<String, Object> params = new HashMap<String, Object>();
         List<String> specificReportTypes = new ArrayList<String>();
@@ -2060,9 +2062,19 @@ public class FormDataServiceImpl implements FormDataService {
         if (logger.containsLevel(LogLevel.ERROR)) {
             logger.warn("Возникли ошибки при получении списка отчетов");
         }
+        Iterator<String> iterator = specificReportTypes.iterator();
+        while (iterator.hasNext()) {
+            String specificReportType = iterator.next();
+            if (FormDataReportType.EXCEL.getReportName().equals(specificReportType) ||
+                    FormDataReportType.CSV.getReportName().equals(specificReportType)) {
+                iterator.remove();
+                LOG.error(String.format("Нельзя переопределить стандартный отчет: %s.", specificReportType));
+            }
+        }
         return specificReportTypes;
     }
 
+    @Override
     public void createSpecificReport(FormData formData, boolean isShowChecked, boolean saved, String specificReportType, TAUserInfo userInfo, LockStateLogger stateLogger) {
         Map<String, Object> params = new HashMap<String, Object>();
         ScriptSpecificReportHolder scriptSpecificReportHolder = new ScriptSpecificReportHolder();
@@ -2088,8 +2100,8 @@ public class FormDataServiceImpl implements FormDataService {
                 IOUtils.closeQuietly(outputStream);
             }
             stateLogger.updateState("Сохранение отчета в базе данных");
-            reportService.create(formData.getId(), blobDataService.create(new FileInputStream(reportFile), scriptSpecificReportHolder.getFileName()), specificReportType,
-                    isShowChecked, formData.isManual(), saved);
+            reportService.create(formData.getId(), blobDataService.create(new FileInputStream(reportFile), scriptSpecificReportHolder.getFileName()),
+                    new FormDataReportType(ReportType.SPECIFIC_REPORT, specificReportType), isShowChecked, formData.isManual(), saved);
 
         } catch (IOException e) {
             throw new ServiceException(e.getLocalizedMessage(), e);

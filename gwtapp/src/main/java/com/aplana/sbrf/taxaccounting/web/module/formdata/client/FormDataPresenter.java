@@ -81,6 +81,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
             @Override
             public void run() {
                 onTimer(false);
+                updateReportStatus(true);
             }
         };
         timer.cancel();
@@ -102,8 +103,6 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
         action.setUuid(request.getParameter(UUID, null));
         action.setCorrectionDiff(Boolean.parseBoolean(request.getParameter(CORRECTION, "false")));
         free = Boolean.parseBoolean(request.getParameter(FREE, "false"));
-        getView().startTimerReport(ReportType.EXCEL);
-        getView().startTimerReport(ReportType.CSV);
         formMode = null;
         getFormData(action);
 	}
@@ -227,7 +226,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
 	@Override
 	public void onShowCheckedColumns() {
 		getView().setColumnsData(formData.getFormColumns(), readOnlyMode, forceEditMode);
-        updateReportStatus();
+        updateReportStatus(false);
 	}
 
     private void manageDeleteRowButtonEnabled() {
@@ -290,51 +289,44 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
         Dialog.warningMessage("В разработке");
 	}
 
-    @Override
-    public void onTimerReport(final ReportType reportType, final String specificReportType, final boolean isTimer) {
+    private void updateReportStatus(final boolean isTimer) {
         TimerReportAction action = new TimerReportAction();
         action.setFormDataId(formData.getId());
-        action.setType(reportType);
         action.setShowChecked(getView().getCheckedColumnsClicked());
         action.setManual(formData.isManual());
         action.setSaved(absoluteView);
-        action.setSpecificReportType(specificReportType);
+        action.setSpecificReportTypes(specificReportTypes);
         dispatcher.execute(action, CallbackUtils
                 .simpleCallback(new AbstractCallback<TimerReportResult>() {
                     @Override
                     public void onSuccess(TimerReportResult result) {
-                        String type;
-                        if (reportType.equals(ReportType.EXCEL) && reportType.equals(ReportType.CSV)) {
-                            type = reportType.getName();
-                        } else {
-                            type = specificReportType;
+                        for(Map.Entry<String, TimerReportResult.StatusReport> entry: result.getMapExistReport().entrySet()) {
+                            if (isTimer && entry.getValue() != null && entry.getValue().equals(reportTimerStatus.get(entry.getKey()))) {
+                                continue;
+                            }
+                            if (entry.getValue().equals(TimerReportResult.StatusReport.EXIST)) {
+                                getView().updatePrintReportButtonName(entry.getKey(), true);
+                                manualMenuPresenter.updateNotificationCount();
+                            } else if (entry.getValue().equals(TimerReportResult.StatusReport.NOT_EXIST)) { // если файл не существует и блокировки нет(т.е. задачу отменили или ошибка при формировании)
+                                getView().updatePrintReportButtonName(entry.getKey(), false);
+                            } else {
+                                getView().updatePrintReportButtonName(entry.getKey(), false);
+                            }
+                            reportTimerStatus.put(entry.getKey(), entry.getValue());
                         }
-                        if (isTimer && result.getExistReport().equals(reportTimerStatus.get(type))) {
-                            return;
-                        }
-                        if (result.getExistReport().equals(TimerReportResult.StatusReport.EXIST)) {
-                            getView().updatePrintReportButtonName(reportType, specificReportType, true);
-                            manualMenuPresenter.updateNotificationCount();
-                        } else if (result.getExistReport().equals(TimerReportResult.StatusReport.NOT_EXIST)) { // если файл не существует и блокировки нет(т.е. задачу отменили или ошибка при формировании)
-                            getView().updatePrintReportButtonName(reportType, specificReportType, false);
-                        } else {
-                            getView().updatePrintReportButtonName(reportType, specificReportType, false);
-                        }
-                        reportTimerStatus.put(type, result.getExistReport());
                     }
                 }));
     }
 
     @Override
-    public void onPrintClicked(final ReportType reportType, final String specificReportType, boolean force) {
+    public void onPrintClicked(final String fdReportType, boolean force) {
         CreateReportAction action = new CreateReportAction();
         action.setFormDataId(formData.getId());
-        action.setType(reportType);
+        action.setType(fdReportType);
         action.setShowChecked(getView().getCheckedColumnsClicked());
         action.setManual(formData.isManual());
         action.setSaved(absoluteView);
         action.setForce(force);
-        action.setSpecificReportType(specificReportType);
         dispatcher.execute(action, CallbackUtils
                 .defaultCallback(new AbstractCallback<CreateReportResult>() {
                     @Override
@@ -342,30 +334,24 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                         LogCleanEvent.fire(FormDataPresenter.this);
                         LogAddEvent.fire(FormDataPresenter.this, result.getUuid());
                         if (result.isExistReport()) {
-                            getView().updatePrintReportButtonName(reportType, null, true);
-                            String type;
-                            if (reportType.equals(ReportType.EXCEL) || reportType.equals(ReportType.CSV)) {
-                                type = reportType.getName();
-                            } else {
-                                type = specificReportType;
-                            }
+                            getView().updatePrintReportButtonName(fdReportType, true);
                             DownloadUtils.openInIframe(
                                     GWT.getHostPageBaseURL() + "download/downloadBlobController/"
-                                            + type + "/"
+                                            + fdReportType + "/"
                                             + formData.getId() + "/"
                                             + getView().getCheckedColumnsClicked() + "/"
                                             + formData.isManual() + "/"
                                             + absoluteView);
                         } else if (result.isLock()) {
+                            getView().updatePrintReportButtonName(fdReportType, false);
                             Dialog.confirmMessage(result.getRestartMsg(), new DialogHandler() {
                                 @Override
                                 public void yes() {
-                                    onPrintClicked(reportType, specificReportType, true);
+                                    onPrintClicked(fdReportType, true);
                                 }
                             });
                         } else {
-//                            getView().updatePrintReportButtonName(reportType, false);
-                            onTimerReport(reportType, specificReportType, false);
+                            getView().updatePrintReportButtonName(fdReportType, false);
                         }
                     }
                 }, this));
@@ -397,7 +383,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
             msg = "Сохранить изменения, выйти из режима редактирования? \n\"Да\" - выйти с сохранением. \"Нет\" - выйти без сохранения.";
         } else {
             msg = "Выйти из режима редактирования (несохраненные изменения отсутствуют)?";
-            Dialog.confirmMessageYeClose("Подтверждение выхода из режима редактирования", msg, new DialogHandler() {
+            Dialog.confirmMessageYesClose("Подтверждение выхода из режима редактирования", msg, new DialogHandler() {
                 @Override
                 public void yes() {
                     ExitAndSaveFormDataAction action = new ExitAndSaveFormDataAction();
@@ -906,12 +892,12 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                                     }
                                 }
                                 formSearchPresenter.setHiddenColumns(hiddenColumns);
-                    			
+
                     			// Регистрируем хендлер на закрытие
                     			if (closeFormDataHandlerRegistration !=null ){
                     				closeFormDataHandlerRegistration.removeHandler();
                     			}
-                                
+
                                 formDataAccessParams = result
                                         .getFormDataAccessParams();
                                 fixedRows = result.isFixedRows();
@@ -978,21 +964,13 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                                                 &&
                                                 readOnlyMode);
 
-                                updateReportStatus();
-                                onTimer(true);
+                                updateReportStatus(false);
+                                onTimer(false);
                                 timer.scheduleRepeating(5000);
                                 timer.run();
                             }
                         }, this).addCallback(
                         TaManualRevealCallback.create(this, placeManager)));
-    }
-
-    private void updateReportStatus() {
-        onTimerReport(ReportType.EXCEL, null, false);
-        onTimerReport(ReportType.CSV, null, false);
-        for(String specificReportType: specificReportTypes)
-            onTimerReport(ReportType.SPECIFIC_REPORT, specificReportType, false);
-        //onTimer(true);
     }
 
     private String buildPeriodName(String reportPeriodName, int year, Integer periodOrder, Date correctionDate) {
@@ -1122,8 +1100,6 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
         super.onHide();
         removeFromPopupSlot(formSearchPresenter);
         formSearchPresenter.close();
-        getView().stopTimerReport(ReportType.CSV);
-        getView().stopTimerReport(ReportType.EXCEL);
         timer.cancel();
     }
 
@@ -1188,7 +1164,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                                             if (readOnlyMode) {
                                                 if (result.getLockInfo().isEditMode()) {
                                                     setLowReadLockedMode(result.getLockInfo());
-                                                    updateReportStatus();
+                                                    updateReportStatus(false);
                                                 } else {
                                                     setReadUnlockedMode();
                                                 }
@@ -1199,18 +1175,18 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                                         case LOCKED_EDIT:
                                             if (readOnlyMode) {
                                                 setLowReadLockedMode(result.getLockInfo());
-                                                updateReportStatus();
+                                                updateReportStatus(false);
                                             } else {
                                                 setLowEditLockedMode(result.getLockInfo(), result.getTaskName());
                                             }
                                             break;
                                         case LOCKED:
                                             setReadLockedMode(true, result.getLockInfo());
-                                            updateReportStatus();
+                                            updateReportStatus(false);
                                             break;
                                         case LOCKED_READ:
                                             setLowReadLockedMode(result.getLockInfo());
-                                            updateReportStatus();
+                                            updateReportStatus(false);
                                             break;
                                     }
                                 } else {

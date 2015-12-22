@@ -142,7 +142,7 @@
         <columnType>NUMBER</columnType>
         <name>Сумма процентного дохода (руб.)</name>
         <order>14</order>
-        <width>10</width>
+        <width>11</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>
@@ -152,7 +152,7 @@
         <columnType>NUMBER</columnType>
         <name>Сумма процентного расхода (руб.)</name>
         <order>15</order>
-        <width>10</width>
+        <width>11</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>
@@ -162,7 +162,7 @@
         <columnType>NUMBER</columnType>
         <name>Цена 1-ой части сделки, ед. валюты</name>
         <order>16</order>
-        <width>10</width>
+        <width>11</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>
@@ -184,7 +184,7 @@
         <columnType>NUMBER</columnType>
         <name>Курс ЦБ РФ</name>
         <order>18</order>
-        <width>5</width>
+        <width>11</width>
         <maxLength>19</maxLength>
         <precision>4</precision>
     </columns>
@@ -194,7 +194,7 @@
         <columnType>NUMBER</columnType>
         <name>Цена 1-ой части сделки, руб.</name>
         <order>19</order>
-        <width>10</width>
+        <width>11</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>

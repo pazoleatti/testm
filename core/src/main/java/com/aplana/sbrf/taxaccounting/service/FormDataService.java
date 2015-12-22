@@ -1,7 +1,6 @@
 package com.aplana.sbrf.taxaccounting.service;
 
 import com.aplana.sbrf.taxaccounting.core.api.LockStateLogger;
-import com.aplana.sbrf.taxaccounting.model.BalancingVariants;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.formdata.HeaderCell;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
@@ -366,13 +365,12 @@ public interface FormDataService {
      * Генерация ключа блокировки для задачи формирования отчета
      * @param formDataId
      * @param reportType
-     * @param specificReportType
      * @param showChecked
      * @param manual
      * @param saved
      * @return
      */
-    String generateReportKey(long formDataId, ReportType reportType, String specificReportType, boolean showChecked, boolean manual, boolean saved);
+    String generateReportKey(long formDataId, FormDataReportType reportType, boolean showChecked, boolean manual, boolean saved);
     /**
      * Удаление отчетов и блокировок на задачи формирования отчетов связанных с НФ
      * @param formDataId идентификатор налоговой формы
@@ -446,7 +444,7 @@ public interface FormDataService {
      * @param logger
      * @param reportType тип текущей операции
      */
-    void locked(long formDataId, ReportType reportType, Pair<ReportType, LockData> lockType, Logger logger);
+    void locked(long formDataId, ReportType reportType, Pair<ReportType, LockData> lockType, Logger logger, String... args);
 
     /**
      * Проверка возможности изменения НФ

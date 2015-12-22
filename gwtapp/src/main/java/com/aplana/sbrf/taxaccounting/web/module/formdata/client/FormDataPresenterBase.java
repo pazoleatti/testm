@@ -121,13 +121,9 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 
         void showCorrectionButton(boolean correctionPeriod);
 
-        void startTimerReport(ReportType reportType);
-
-        void stopTimerReport(ReportType reportType);
-
         void updateTableTopPosition(int position);
 
-        void updatePrintReportButtonName(ReportType reportType, String specificReportType, boolean isLoad);
+        void updatePrintReportButtonName(String fdReportType, boolean isLoad);
 
         void showConsolidation(boolean isShown);
 

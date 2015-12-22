@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.service.impl;
 import com.aplana.sbrf.taxaccounting.core.api.LockDataService;
 import com.aplana.sbrf.taxaccounting.core.api.LockStateLogger;
 import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
+import com.aplana.sbrf.taxaccounting.dao.FormTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DataRowDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentFormTypeDao;
 import com.aplana.sbrf.taxaccounting.model.*;
@@ -10,27 +11,26 @@ import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.*;
-import com.aplana.sbrf.taxaccounting.service.script.impl.FormDataCompositionServiceImpl;
-import com.aplana.sbrf.taxaccounting.service.shared.FormDataCompositionService;
+import com.aplana.sbrf.taxaccounting.util.ScriptExposed;
 import com.aplana.sbrf.taxaccounting.util.TransactionHelper;
 import com.aplana.sbrf.taxaccounting.util.TransactionLogic;
+import org.apache.commons.io.IOUtils;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import java.io.*;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 import static org.mockito.Mockito.*;
 
@@ -1280,5 +1280,151 @@ public class FormDataServiceTest extends Assert{
                 "Тип: \"Первичная\", Вид: \"РНУ\", Подразделение: \"Тестовое подразделение2\", Период: \"1 квартал 2015\", Дата сдачи корректировки: 01.01.1970, Версия: \"Абсолютные значения\"",
                 logger.getEntries().get(3).getMessage()
         );
+    }
+
+    @Test
+    public void getSpecificReportTypesTest() throws IOException {
+        TAUserInfo userInfo = new TAUserInfo();
+        TAUser user = new TAUser();
+        user.setId(1);
+        userInfo.setUser(user);
+        userInfo.setIp("127.0.0.1");
+        Logger logger = new Logger();
+
+        FormTemplate formTemplate = new FormTemplate();
+        formTemplate.setId(1);
+        FormType formType = new FormType();
+        formType.setName("Тестовый");
+        formType.setTaxType(TaxType.ETR);
+        formTemplate.setType(formType);
+        InputStream stream = FormTemplateServiceImplTest.class.getResourceAsStream("SpecificReport.groovy");
+        String script = IOUtils.toString(stream, "UTF-8");
+        formTemplate.setScript(script);
+
+        FormData formData = new FormData();
+        formData.setId(1L);
+        formData.setReportPeriodId(2);
+        formData.setDepartmentId(1);
+        formData.setFormTemplateId(formTemplate.getId());
+        formData.setFormType(formType);
+
+        FormDataScriptingServiceImpl scriptingService = new FormDataScriptingServiceImpl();
+
+        FormTemplateDao formTemplateDao = mock(FormTemplateDao.class);
+        when(formTemplateDao.get(anyInt())).thenReturn(formTemplate);
+        ReflectionTestUtils.setField(scriptingService, "formTemplateDao", formTemplateDao);
+
+        ApplicationContext ctx = mock(ApplicationContext.class);
+        when(ctx.getBeansWithAnnotation(ScriptExposed.class)).thenReturn(new HashMap<String, Object>());
+        scriptingService.setApplicationContext(ctx);
+
+        TransactionHelper tx = new TransactionHelper() {
+            @Override
+            public <T> T executeInNewTransaction(TransactionLogic<T> logic) {
+                return logic.execute();
+            }
+
+            @Override
+            public <T> T executeInNewReadOnlyTransaction(TransactionLogic<T> logic) {
+                return logic.execute();
+            }
+        };
+        ReflectionTestUtils.setField(scriptingService, "tx", tx);
+
+        DepartmentService departmentService = mock(DepartmentService.class);
+        ReflectionTestUtils.setField(scriptingService, "departmentService", departmentService);
+
+        ReflectionTestUtils.setField(formDataService, "formDataScriptingService", scriptingService);
+
+        List<String> specificReportTypes = formDataService.getSpecificReportTypes(formData, userInfo, logger);
+        assertTrue(specificReportTypes.contains("Type1"));
+        assertTrue(specificReportTypes.contains("Type2(CSV)"));
+        assertTrue(specificReportTypes.contains("Тип3 список"));
+        assertTrue(!specificReportTypes.contains("XLSM")); // Стандартные типы не переопределяются
+        assertEquals(specificReportTypes.size(), 3);
+    }
+
+
+    @Test
+    public void createSpecificReport() throws IOException {
+        TAUserInfo userInfo = new TAUserInfo();
+        TAUser user = new TAUser();
+        user.setId(1);
+        userInfo.setUser(user);
+        userInfo.setIp("127.0.0.1");
+        Logger logger = new Logger();
+
+        FormTemplate formTemplate = new FormTemplate();
+        formTemplate.setId(1);
+        FormType formType = new FormType();
+        formType.setName("Тестовый");
+        formType.setTaxType(TaxType.ETR);
+        formTemplate.setType(formType);
+        InputStream stream = FormTemplateServiceImplTest.class.getResourceAsStream("SpecificReport.groovy");
+        String script = IOUtils.toString(stream, "UTF-8");
+        formTemplate.setScript(script);
+
+        FormData formData = new FormData();
+        formData.setId(1L);
+        formData.setReportPeriodId(2);
+        formData.setDepartmentId(1);
+        formData.setFormTemplateId(formTemplate.getId());
+        formData.setFormType(formType);
+
+        FormDataScriptingServiceImpl scriptingService = new FormDataScriptingServiceImpl();
+
+        FormTemplateDao formTemplateDao = mock(FormTemplateDao.class);
+        when(formTemplateDao.get(anyInt())).thenReturn(formTemplate);
+        ReflectionTestUtils.setField(scriptingService, "formTemplateDao", formTemplateDao);
+
+        ApplicationContext ctx = mock(ApplicationContext.class);
+        when(ctx.getBeansWithAnnotation(ScriptExposed.class)).thenReturn(new HashMap<String, Object>());
+        scriptingService.setApplicationContext(ctx);
+
+        TransactionHelper tx = new TransactionHelper() {
+            @Override
+            public <T> T executeInNewTransaction(TransactionLogic<T> logic) {
+                return logic.execute();
+            }
+
+            @Override
+            public <T> T executeInNewReadOnlyTransaction(TransactionLogic<T> logic) {
+                return logic.execute();
+            }
+        };
+        ReflectionTestUtils.setField(scriptingService, "tx", tx);
+
+        DepartmentService departmentService = mock(DepartmentService.class);
+        ReflectionTestUtils.setField(scriptingService, "departmentService", departmentService);
+
+        ReflectionTestUtils.setField(formDataService, "formDataScriptingService", scriptingService);
+
+        ReportService reportService = mock(ReportService.class);
+        ReflectionTestUtils.setField(formDataService, "reportService", reportService);
+        BlobDataService blobDataService = mock(BlobDataService.class);
+        ReflectionTestUtils.setField(formDataService, "blobDataService", blobDataService);
+
+        String specificReportType = "Type1";
+        formDataService.createSpecificReport(formData, false, false, specificReportType, userInfo, new LockStateLogger() {
+            @Override
+            public void updateState(String state) {
+            }
+        });
+
+        ArgumentCaptor<InputStream> inputStreamArgumentCaptor = ArgumentCaptor.forClass(InputStream.class);
+        verify(blobDataService, times(1)).create(inputStreamArgumentCaptor.capture(), anyString());
+        BufferedReader in = new BufferedReader(new InputStreamReader(inputStreamArgumentCaptor.getAllValues().get(0)));
+        try {
+            String s;
+            int rowCount = 0;
+            while ((s = in.readLine()) != null) {
+                if (rowCount == 0)
+                    assertEquals(s, specificReportType); // первая строка совпадает с названием отчета для тестового макета
+                rowCount++;
+            }
+            assertEquals(rowCount, 1); // должна быть одна строка в файле
+        } finally {
+            in.close();
+        }
     }
 }

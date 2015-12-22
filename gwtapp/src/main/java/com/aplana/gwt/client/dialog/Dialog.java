@@ -283,7 +283,7 @@ public final class Dialog extends ModalWindow {
      * @param text    - Текст сообщения
      * @param handler - обработчик
      */
-    public static void confirmMessageYeClose(String title, String text, DialogHandler handler) {
+    public static void confirmMessageYesClose(String title, String text, DialogHandler handler) {
         INSTANCE.setGlassEnabled(true);
         dialogPanel.setPredefinedButtons(PredefinedButton.YES, PredefinedButton.CLOSE);
         dialogPanel.setImage(QUESTION_IMAGE);

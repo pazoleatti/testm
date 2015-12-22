@@ -46,7 +46,6 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 /**
  * Библиотека скриптовых функций
  *
@@ -56,81 +55,16 @@ import java.util.regex.Pattern;
 
 public final class ScriptUtils {
 
-    private static final String WRONG_COLUMN_TYPE = "В указанном диапазоне граф «%s» - «%s» должны " +
-            "быть только графы численного типа. Графа «%s» имеет неверный тип.";
-
-    private static final String NOT_SAME_RANGES = "Диапазоны имеют разную размерность";
-
-    private static final String CELL_NOT_FOUND = "Ячейка («%s», «%s») не найдена";
-
-    private static final String WRONG_NUMBER = "Проверка файла: Строка %d, столбец %s содержит нечисловое значение «%s»!";
-
-    private static final String WRONG_DATE = "Проверка файла: Строка %d, столбец %s содержит значение «%s», которое не " +
-            "соответствует дате в формате «%s»!";
-
-    private static final String WRONG_HEADER_EQUALS = "Заголовок таблицы не соответствует требуемой структуре. " +
-            "Ожидается «%s» вместо «%s»!";
-
-    private static final String WRONG_HEADER_COL_SIZE = "Заголовок таблицы не соответствует требуемой структуре. " +
-            "Количество граф менее ожидаемого!";
-
-    private static final String WRONG_HEADER_ROW_SIZE = "Заголовок таблицы не соответствует требуемой структуре. " +
-            "Количество строк в заголовке менее ожидаемого!";
-
-    private static final String GROUP_WRONG_ITOG = "Группа «%s» не имеет строки подитога!";
-
-    private static final String GROUP_WRONG_ITOG_ROW = "Строка %d: Строка подитога не относится к какой-либо группе!";
-
-    private static final String GROUP_WRONG_ITOG_SUM = "Строка %d: Неверное итоговое значение по группе «%s» в графе «%s»";
-
-    private static final String WRONG_NON_EMPTY = "Строка %d: Графа «%s» не заполнена!";
-
-    private static final String WRONG_CALC = "Строка %d: Неверное значение граф: %s!";
-
-    private static final String WRONG_TOTAL = "Итоговые значения рассчитаны неверно в графе «%s»!";
-
-    private static final String WRONG_SUBTOTAL = "Неверное итоговое значение по коду '%s' графы «%s»!";
-
-    private static final String IMPORT_IS_NOT_PROVIDED = "Импорт данных не предусмотрен!";
-
-    private static final String WRONG_DATA_PARSE = "Отсутствие значения после обработки потока данных!";
-
-    private static final String EMPTY_FILE_NAME = "Имя файла не должно быть пустым!";
-    private static final String EMPTY_INPUT_STREAM = "Поток данных пуст!";
-    private static final String WRONG_FORMAT_FILE = "Неверная структура загружаемого файла! ";
-
-    private static final String WRONG_XLS_FORMAT = "Выбранный файл не соответствует формату xls/xlsx/xlsm!";
-    private static final String WRONG_RNU_FORMAT = "Выбранный файл не соответствует формату rnu!";
-
-    private static final String WRONG_FIXED_VALUE = "Строка %d: Графа «%s» содержит значение «%s», не соответствующее значению «%s» данной графы в макете налоговой формы!";
-    private static final String EMPTY_VALUE = "Строка %d: Графа «%s» содержит пустое значение, не соответствующее значению «%s» данной графы в макете налоговой формы!";
-    private static final String EMPTY_EXPECTED_VALUE = "Строка %d: Графа «%s» содержит значение «%s», не соответствующее пустому значению данной графы в макете налоговой формы!";
-
-    private static final String IMPORT_ROW_PREFIX = "Строка файла %d: %s";
-
-    @SuppressWarnings("unused")
-    private static final String TRANSPORT_FILE_SUM_ERROR = "Итоговая сумма в графе %s строки %s в транспортном файле некорректна.";
-
-    private static final String ROW_FILE_WRONG = "Строка файла %s содержит некорректное значение.";
-
     // Ссылочный, независимая графа: Не найдена версия справочника, соответствующая значению в файле
     public static final String REF_BOOK_NOT_FOUND_IMPORT_ERROR = "Проверка файла: Строка %d, столбец %s: В справочнике «%s» в атрибуте «%s» не найдено значение «%s», актуальное на дату %s!";
     // Ссылочный, зависимая графа: Значение в файле отличается от того, которое должно быть в зависимой графе
     public static final String REF_BOOK_REFERENCE_NOT_FOUND_IMPORT_ERROR = "Проверка файла: Строка %d, столбец %s содержит значение «%s», отсутствующее в справочнике «%s»!";
     // Ссылочный: Найдено несколько записей справочника, соответствующих значению в файле
     public static final String REF_BOOK_TOO_MANY_FOUND_IMPORT_ERROR = "Проверка файла: Строка %d, столбец %s: В справочнике «%s» в атрибуте «%s» найдено более одного значения «%s», актуального на дату %s!";
-
-    private static final String WRONG_XLS_COLUMN_INDEX = "Номер столбца должен быть больше ноля!";
-
-    // разделитель между идентификаторами в ключе для кеширования записей справочника
-    private static final String SEPARATOR = "_";
     public static final String CHECK_OVERFLOW_MESSAGE = "Строка %d: Значение графы «%s» превышает допустимую разрядность (%d знаков). Графа «%s» рассчитывается как «%s»!";
-
     // для проверки итогов при загрузе экселя (посчитанные и ожижаемые значения как %s потому что %f теряет точность)
     public static final String COMPARE_TOTAL_VALUES = "Строка формы %d: Итоговая сумма по графе «%s» (%s) некорректна (ожидаемое значение %s).";
-
-    public static final String TCO_END_MESSAGE = "Для заполнения на форме граф с общей информацией о %s выполнен поиск значения файла по графе «%s в следующих атрибутах справочника «Участники ТЦО»: «ИНН (заполняется для резидентов, некредитных организаций)», «Регистрационный номер в стране инкорпорации (заполняется для нерезидентов)», «Код налогоплательщика в стране инкорпорации», «Код SWIFT (заполняется для кредитных организаций, резидентов и нерезидентов)», «КИО (заполняется для нерезидентов)»";
-
+    public static final String TCO_END_MESSAGE = "Для заполнения на форме граф с общей информацией о %s выполнен поиск значения файла по графе «%s» в следующих атрибутах справочника «Участники ТЦО»: «ИНН (заполняется для резидентов, некредитных организаций)», «Регистрационный номер в стране инкорпорации (заполняется для нерезидентов)», «Код налогоплательщика в стране инкорпорации», «Код SWIFT (заполняется для кредитных организаций, резидентов и нерезидентов)», «КИО (заполняется для нерезидентов)»";
     public static final String INN_JUR_PATTERN = RefBookUtils.INN_JUR_PATTERN;
     public static final String INN_JUR_MEANING = RefBookUtils.INN_JUR_MEANING;
     public static final String INN_IND_PATTERN = RefBookUtils.INN_IND_PATTERN;
@@ -139,27 +73,43 @@ public final class ScriptUtils {
     public static final String KPP_MEANING = RefBookUtils.KPP_MEANING;
     public static final String TAX_ORGAN_PATTERN = RefBookUtils.TAX_ORGAN_PATTERN;
     public static final String TAX_ORGAN_MEANING = RefBookUtils.TAX_ORGAN_MEANING;
-
-    /**
-     * Интерфейс для переопределения алгоритма расчета
-     */
-    public interface CalcAliasRow {
-        DataRow<Cell> calc(int index, List<DataRow<Cell>> dataRows);
-    }
-
-    /**
-     * Интерфейс для получения строки со значениями в группе
-     */
-    public interface GroupString {
-        String getString(DataRow<Cell> row);
-    }
-
-    /**
-     * Интерфейс для проверки сумм в итоговых строках
-     */
-    public interface CheckGroupSum {
-        String check(DataRow<Cell> row1, DataRow<Cell> row2);
-    }
+    private static final String WRONG_COLUMN_TYPE = "В указанном диапазоне граф «%s» - «%s» должны " +
+            "быть только графы численного типа. Графа «%s» имеет неверный тип.";
+    private static final String NOT_SAME_RANGES = "Диапазоны имеют разную размерность";
+    private static final String CELL_NOT_FOUND = "Ячейка («%s», «%s») не найдена";
+    private static final String WRONG_NUMBER = "Проверка файла: Строка %d, столбец %s содержит нечисловое значение «%s»!";
+    private static final String WRONG_DATE = "Проверка файла: Строка %d, столбец %s содержит значение «%s», которое не " +
+            "соответствует дате в формате «%s»!";
+    private static final String WRONG_HEADER_EQUALS = "Заголовок таблицы не соответствует требуемой структуре. " +
+            "Ожидается «%s» вместо «%s»!";
+    private static final String WRONG_HEADER_COL_SIZE = "Заголовок таблицы не соответствует требуемой структуре. " +
+            "Количество граф менее ожидаемого!";
+    private static final String WRONG_HEADER_ROW_SIZE = "Заголовок таблицы не соответствует требуемой структуре. " +
+            "Количество строк в заголовке менее ожидаемого!";
+    private static final String GROUP_WRONG_ITOG = "Группа «%s» не имеет строки подитога!";
+    private static final String GROUP_WRONG_ITOG_ROW = "Строка %d: Строка подитога не относится к какой-либо группе!";
+    private static final String GROUP_WRONG_ITOG_SUM = "Строка %d: Неверное итоговое значение по группе «%s» в графе «%s»";
+    private static final String WRONG_NON_EMPTY = "Строка %d: Графа «%s» не заполнена!";
+    private static final String WRONG_CALC = "Строка %d: Неверное значение граф: %s!";
+    private static final String WRONG_TOTAL = "Итоговые значения рассчитаны неверно в графе «%s»!";
+    private static final String WRONG_SUBTOTAL = "Неверное итоговое значение по коду '%s' графы «%s»!";
+    private static final String IMPORT_IS_NOT_PROVIDED = "Импорт данных не предусмотрен!";
+    private static final String WRONG_DATA_PARSE = "Отсутствие значения после обработки потока данных!";
+    private static final String EMPTY_FILE_NAME = "Имя файла не должно быть пустым!";
+    private static final String EMPTY_INPUT_STREAM = "Поток данных пуст!";
+    private static final String WRONG_FORMAT_FILE = "Неверная структура загружаемого файла! ";
+    private static final String WRONG_XLS_FORMAT = "Выбранный файл не соответствует формату xls/xlsx/xlsm!";
+    private static final String WRONG_RNU_FORMAT = "Выбранный файл не соответствует формату rnu!";
+    private static final String WRONG_FIXED_VALUE = "Строка %d: Графа «%s» содержит значение «%s», не соответствующее значению «%s» данной графы в макете налоговой формы!";
+    private static final String EMPTY_VALUE = "Строка %d: Графа «%s» содержит пустое значение, не соответствующее значению «%s» данной графы в макете налоговой формы!";
+    private static final String EMPTY_EXPECTED_VALUE = "Строка %d: Графа «%s» содержит значение «%s», не соответствующее пустому значению данной графы в макете налоговой формы!";
+    private static final String IMPORT_ROW_PREFIX = "Строка файла %d: %s";
+    @SuppressWarnings("unused")
+    private static final String TRANSPORT_FILE_SUM_ERROR = "Итоговая сумма в графе %s строки %s в транспортном файле некорректна.";
+    private static final String ROW_FILE_WRONG = "Строка файла %s содержит некорректное значение.";
+    private static final String WRONG_XLS_COLUMN_INDEX = "Номер столбца должен быть больше ноля!";
+    // разделитель между идентификаторами в ключе для кеширования записей справочника
+    private static final String SEPARATOR = "_";
 
     /**
      * Запрещаем создавать экземляры класса
@@ -881,7 +831,8 @@ public final class ScriptUtils {
             for (int i = 0; i < testItogRows.size(); i++) {
                 DataRow<Cell> testItogRow = testItogRows.get(i);
                 DataRow<Cell> realItogRow = itogRows.get(i);
-                int itg = Integer.valueOf(testItogRow.getAlias().replaceAll("itg#", ""));
+                String str = testItogRow.getAlias().split("#")[0];
+                int itg = Integer.valueOf(testItogRow.getAlias().replaceAll(str+'#', ""));
                 if (dataRows.get(itg).getAlias() != null) {
                     logger.error(GROUP_WRONG_ITOG_ROW, dataRows.get(i).getIndex());
                 } else {
@@ -973,7 +924,6 @@ public final class ScriptUtils {
             logger.error(WRONG_HEADER_EQUALS, s2, s1);
         }
     }
-
 
     /**
      * Проверка пустых значений
@@ -1666,7 +1616,319 @@ public final class ScriptUtils {
         }
     }
 
+    /**
+     * Проставление индексов у набора строк
+     *
+     * @param dataRows
+     */
+    @SuppressWarnings("unused")
+    public static void updateIndexes(List<DataRow<Cell>> dataRows) {
+        int index = 1;
+        for(DataRow<Cell> row: dataRows) {
+            row.setIndex(index++);
+        }
+    }
+
+    /**
+     * Проверка контрольной суммы ИНН
+     * @param logger логер для записи сообщения
+     * @param row строка НФ
+     * @param alias псевдоним столбца
+     * @param value значение ИНН
+     * @param fatal фатально ли сообщение
+     * @return
+     */
+    public static boolean checkControlSumInn(Logger logger, DataRow<Cell> row, String alias, String value, boolean fatal) {
+        if (value == null || value.isEmpty()) {
+            return false;
+        }
+        if (!RefBookUtils.checkControlSumInn(value)){
+            rowLog(logger, row, (row != null ? ("Строка "+ row.getIndex()  + ": ") : "") + String.format("Вычисленное контрольное число по полю \"%s\" некорректно (%s).", getColumnName(row, alias), value), fatal ? LogLevel.ERROR : LogLevel.WARNING);
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Проверка диапазона даты (от 1991 до 2099)
+     * @param logger логер для записи сообщения
+     * @param row строка НФ
+     * @param alias псевдоним столбца
+     * @param value проверяемое значение (строка или дата)
+     * @param fatal
+     */
+    public static boolean checkDateValid(Logger logger, DataRow<Cell> row, String alias, Object value, boolean fatal) {
+        if (value == null) {
+            return false;
+        }
+        Integer year = null;
+        Date date = null;
+        if (value instanceof Date){
+            date = (Date) value;
+        }
+        try {
+            if (value instanceof String) {
+                date = parseDate("dd.MM.yyyy", (String) value);
+            }
+            String yearString = formatDate(date, "yyyy");
+            if (yearString != null) {
+                year = Integer.valueOf(yearString);
+            }
+        } catch (ParseException e) {
+            rowLog(logger, row, (row != null ? ("Строка "+ row.getIndex()  + ": ") : "") + String.format("Ошибка при разборе значения даты атрибута «%s» (%s)", getColumnName(row, alias), value), fatal ? LogLevel.ERROR : LogLevel.WARNING);
+        }
+        if (year == null || year < 1991 || year > 2099) {
+            rowLog(logger, row, (row != null ? ("Строка "+ row.getIndex()  + ": ") : "") + String.format("Значение даты атрибута «%s» должно принимать значение из следующего диапазона: 01.01.1991 - 31.12.2099", getColumnName(row, alias)), fatal ? LogLevel.ERROR : LogLevel.WARNING);
+            return false;
+        }
+        return true;
+    }
+
+    public static boolean checkPattern(Logger logger, DataRow<Cell> row, String alias, String value, String pattern, String meaning, boolean fatal) {
+        return checkPattern(logger, row, alias, value, Arrays.asList(pattern), Arrays.asList(meaning), fatal);
+    }
+
+    /**
+     * Проверка текста на паттерны
+     * @param logger логер для записи сообщения
+     * @param row строка НФ
+     * @param alias псевдоним столбца
+     * @param value проверяемое значение (строка или дата)
+     * @param patterns regExp для проверки
+     * @param fatal
+     */
+    public static boolean checkPattern(Logger logger, DataRow<Cell> row, String alias, String value, List<String> patterns, List<String> meanings, boolean fatal) {
+        if (value == null || value.isEmpty()) {
+            return false;
+        }
+        StringBuilder sb = new StringBuilder();
+        boolean result = false;
+        for(String pattern : patterns){
+            if (!result){
+                result = checkFormat(value, pattern);
+            }
+            if (patterns.indexOf(pattern) != 0) {
+                sb.append("\" / \"");
+            }
+            sb.append(pattern);
+        }
+        if (!result) {
+            rowLog(logger, row, (row != null ? ("Строка "+ row.getIndex()  + ": ") : "") + String.format("Атрибут \"%s\" заполнен неверно (%s)! Ожидаемый паттерн: \"%s\"", getColumnName(row, alias), value, sb.toString()), fatal ? LogLevel.ERROR : LogLevel.WARNING);
+            if (meanings != null) {
+                for (String meaning : meanings) {
+                    if (meaning != null && !meaning.isEmpty()) {
+                        int index = meanings.indexOf(meaning);
+                        if (patterns.size() > index) {
+                            rowLog(logger, row, (row != null ? ("Строка "+ row.getIndex()  + ": ") : "") + String.format("Расшифровка паттерна \"%s\": %s", patterns.get(index), meaning), fatal ? LogLevel.ERROR : LogLevel.WARNING);
+                        }
+                    }
+                }
+            }
+        }
+        return result;
+    }
+
+    public static void compareTotalValues(DataRow<Cell> total, DataRow<Cell> totalTmp, List<String> columns, Logger logger, boolean required) {
+        compareTotalValues(total, totalTmp, columns, logger, 2, required);
+    }
+
+    /**
+     * Сравнить значения итоговых строк.
+     *
+     * @param totalRow итоговая строка нф
+     * @param totalRowTmp итоговая строка с посчитанными значениям
+     * @param columns список алиасов итоговых графов
+     * @param logger для вывода сообщении
+     * @param precision точность значении (для BigDecimal есть различия в точности после запятой, например 1.0 не равно 1.00)
+     * @param required фатальность
+     */
+    public static void compareTotalValues(DataRow<Cell> totalRow, DataRow<Cell> totalRowTmp, List<String> columns,
+                                          Logger logger, int precision, boolean required) {
+        if (totalRow == null || totalRowTmp == null || columns == null || columns.isEmpty()) {
+            return;
+        }
+        for (String alias : columns) {
+            BigDecimal value1 = totalRow.getCell(alias).getNumericValue();
+            BigDecimal value2 = totalRowTmp.getCell(alias).getNumericValue();
+            if (value1 == null) {
+                value1 = BigDecimal.ZERO;
+            }
+            if (value2 == null) {
+                value2 = BigDecimal.ZERO;
+            }
+            value1 = round(value1, precision);
+            value2 = round(value2, precision);
+            if (!value1.equals(value2)) {
+                String msg = String.format(COMPARE_TOTAL_VALUES, totalRow.getIndex(), getColumnName(totalRow, alias), value1, value2);
+                if (required) {
+                    rowError(logger, totalRow, msg);
+                } else {
+                    rowWarning(logger, totalRow, msg);
+                }
+            }
+        }
+    }
+
+    public static BigDecimal round(BigDecimal value, int precision) {
+        if (value == null) {
+            return null;
+        }
+        return (new BigDecimal(value.toString())).setScale(precision, BigDecimal.ROUND_HALF_UP);
+    }
+
+    /**
+     * Сравнить значения итоговых строк.
+     *
+     * @param totalRow итоговая строка нф (с правильными стилями)
+     * @param totalRowFromFile итоговая строка нф со значениями из файла
+     * @param rows строки формы
+     * @param columns список алиасов итоговых графов
+     * @param formData форма
+     * @param logger для вывода сообщении
+     * @param required фатальность
+     */
+    public static void compareSimpleTotalValues(DataRow<Cell> totalRow, DataRow<Cell> totalRowFromFile,
+                                          List<DataRow<Cell>> rows, List<String> columns,
+                                          FormData formData, Logger logger, boolean required) {
+        if (totalRow == null || totalRowFromFile == null || rows == null || columns == null || columns.isEmpty()) {
+            return;
+        }
+        // подсчитанная итоговая строка для сравнения
+        DataRow<Cell> totalRowTmp = formData.createStoreMessagingDataRow();
+        calcTotalSum(rows, totalRowTmp, columns);
+        // задание значении итоговой строке нф из итоговой строки файла
+        totalRow.setImportIndex(totalRowFromFile.getImportIndex());
+        for (String column : columns) {
+            totalRow.getCell(column).setValue(totalRowFromFile.getCell(column).getValue(), totalRow.getIndex());
+        }
+        compareTotalValues(totalRow, totalRowTmp, columns, logger, required);
+    }
+
+    /** Получение Id записи из справочника 520 с использованием кэширования
+     * @param nameFromFile наименование лица (юр или вз)
+     * @param iksr значение графы ИКСР
+     * @param iksrName название графы ИКСР
+     * @param fileRowIndex номер строки в файле
+     * @param colIndex индекс колонки
+     * @param endDate дата окончания периода
+     * @param isVzl флаг (true для РНУ, false для приложений 6-...)
+     * @param logger логгер
+     * @param refBookFactory фабрика справочников
+     * @param recordCache кэш записей
+     * @return
+     */
+    public static Long getTcoRecordId(String nameFromFile, String iksr, String iksrName, int fileRowIndex, int colIndex, Date endDate, boolean isVzl, Logger logger, RefBookFactory refBookFactory, Map<Long, Map<String, Object>> recordCache) {
+        if (iksr == null || iksr.isEmpty()) {
+            logger.warn("Строка %s , столбец %s: На форме не заполнены графы с общей информацией о %s, так как в файле отсутствует значение по графе «%s»!",
+                    fileRowIndex, isVzl ? "ВЗЛ/РОЗ" : "юридическом лице", getXLSColumnName(colIndex), iksrName);
+            return null;
+        }
+        long ref_id = 520;
+        RefBook refBook = refBookFactory.get(ref_id);
+
+        String filter = String.format("(LOWER(INN) = LOWER('%1$s') or " +
+                "LOWER(REG_NUM) = LOWER('%1$s') or " +
+                "LOWER(TAX_CODE_INCORPORATION) = LOWER('%1$s') or " +
+                "LOWER(SWIFT) = LOWER('%1$s') or " +
+                "LOWER(KIO) = LOWER('%1$s'))", iksr);
+        if (recordCache.get(ref_id) != null) {
+            if (recordCache.get(ref_id).get(filter) != null) {
+                return (Long) recordCache.get(ref_id).get(filter);
+            }
+        } else {
+            recordCache.put(ref_id, new HashMap<String, Object>());
+        }
+
+        RefBookDataProvider provider = refBookFactory.getDataProvider(ref_id);
+        PagingResult<Map<String, RefBookValue>> records = provider.getRecords(endDate, null, filter, null);
+        List<String> aliases = Arrays.asList("INN", "REG_NUM", "TAX_CODE_INCORPORATION", "SWIFT", "KIO");
+        if (records.size() == 1) {
+            // 5
+            Map<String, RefBookValue> record = records.get(0);
+
+            if (!com.aplana.sbrf.taxaccounting.model.util.StringUtils.cleanString(nameFromFile).equals(com.aplana.sbrf.taxaccounting.model.util.StringUtils.cleanString(record.get("NAME").getStringValue()))) {
+                // сообщение 4
+                String msg;
+                if (nameFromFile != null && !nameFromFile.isEmpty()) {
+                    msg = String.format("В файле указано другое наименование %s - «%s»!", isVzl ? "ВЗЛ/РОЗ" : "юридического лица", nameFromFile);
+                } else {
+                    msg = String.format("Наименование %s в файле не заполнено!, ", isVzl ? "ВЗЛ/РОЗ" : "юридического лица");
+                }
+                String refBookAttributeName = "Не задано";
+                for (String alias : aliases) {
+                    if (iksr.equals(record.get(alias).getStringValue())) {
+                        refBookAttributeName = refBook.getAttribute(alias).getName();
+                        break;
+                    }
+                }
+                logger.warn("Строка %s , столбец %s: На форме графы с общей информацией о %s заполнены данными записи справочника «Участники ТЦО», " +
+                                "в которой атрибут «Полное наименование юридического лица с указанием ОПФ» = «%s», атрибут «%s» = «%s». %s",
+                        fileRowIndex, getXLSColumnName(colIndex), isVzl ? "ВЗЛ/РОЗ" : "юридическом лице", record.get("NAME").getStringValue(), refBookAttributeName, iksr, msg);
+            }
+            logger.warn(TCO_END_MESSAGE, isVzl ? "ВЗЛ/РОЗ" : "юридическом лице", iksrName);
+            recordCache.get(ref_id).put(filter, record.get(RefBook.RECORD_ID_ALIAS).getNumberValue());
+            return (Long) recordCache.get(ref_id).get(filter);
+        } else {
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd.MM.yyyy");
+            if (records.isEmpty()) {
+                // 6
+                if (nameFromFile == null || nameFromFile.isEmpty()) {
+                    nameFromFile = "наименование " + (isVzl ? "ВЗЛ/РОЗ" : "юридического лица") + " в файле не заполнено";
+                }
+                // сообщение 1
+                logger.warn("Строка %s , столбец %s: %s в справочнике «Участники ТЦО» не найдено значение «%s» (%s), актуальное на дату «%s»!",
+                        fileRowIndex, getXLSColumnName(colIndex), isVzl ? "На форме не заполнены графы с общей информацией о ВЗЛ/РОЗ, так как" : ("Для заполнения графы «" + iksrName + "» формы"), iksr, nameFromFile, simpleDateFormat.format(endDate));
+                logger.warn(TCO_END_MESSAGE, isVzl ? "ВЗЛ/РОЗ" : "юридическом лице", iksrName);
+            }
+        }
+        return null;
+    }
+
+    /**
+     *
+     * @param logger логер для записи сообщения
+     * @param row строка НФ
+     * @param alias псевдоним столбца
+     * @param reportPeriodStartDate дата начала периода текущей формы
+     * @param reportPeriodEndDate дата окончания периода текущей формы
+     * @param fatal фатально ли сообщение
+     */
+    public static void checkDealDoneDate(Logger logger, DataRow<Cell> row, String alias, Date reportPeriodStartDate,
+                                         Date reportPeriodEndDate, boolean fatal) {
+        Date dealDoneDate = row.getCell(alias).getDateValue();
+        if (dealDoneDate != null && (dealDoneDate.before(reportPeriodStartDate) || dealDoneDate.after(reportPeriodEndDate))) {
+            rowLog(logger, row, (row != null ? ("Строка "+ row.getIndex()  + ": ") : "") +
+                    String.format("Дата, указанная в графе «%s» (%s), должна относиться к отчетному периоду текущей формы (%s - %s)!",
+                            getColumnName(row, alias), formatDate(dealDoneDate, "dd.MM.yyyy"),
+                            formatDate(reportPeriodStartDate, "dd.MM.yyyy"),
+                            formatDate(reportPeriodEndDate, "dd.MM.yyyy")
+                    ), fatal ? LogLevel.ERROR : LogLevel.WARNING);
+        }
+    }
+
+    /**
+     * Интерфейс для переопределения алгоритма расчета
+     */
+    public interface CalcAliasRow {
+        DataRow<Cell> calc(int index, List<DataRow<Cell>> dataRows);
+    }
+
+    /**
+     * Интерфейс для получения строки со значениями в группе
+     */
+    public interface GroupString {
+        String getString(DataRow<Cell> row);
+    }
+
+    /**
+     * Интерфейс для проверки сумм в итоговых строках
+     */
+    public interface CheckGroupSum {
+        String check(DataRow<Cell> row1, DataRow<Cell> row2);
+    }
+
     static final class SheetHandler extends DefaultHandler {
+        private final DataFormatter formatter;
         private SharedStringsTable sst;     // таблица со строковыми значениями (Shared Strings Table)
         private StylesTable stylesTable;    // таблица со стилями ячеек
         private List<List<String>> allValues;     // список для хранения списков значении каждой строки данных
@@ -1675,27 +1937,21 @@ public final class ScriptUtils {
         private String tableEndValue;       // конечное значение, с которого прекращается сбор данных
         private int headerRowCount;         // количество строк в шапке таблицы
         private Map<String, Object> paramsMap;  // мапа с параметрами
-
         private StringBuffer lastValue;     // последнее считаное значение
         private boolean nextIsString;       // признак того что следующее считаное значение хранится в виде строки в sst (Shared Strings Table)
         private List<String> rowValues;     // список значении строки из файла
-
         private boolean isData = false;     // признак того что считанные значения относятся к данным
         private boolean isHeader = false;   // признак того что считанные значения относятся к шапке таблицы
         private boolean endRead = false;    // признак того что встретилось значение окончания таблицы
-
         private String position;            // позиция ячейки (A1, B2, C1 ... AB12)
         private int maxColumnCount;         // максимальное количество значении в строке файла (определяется по шапке таблицы - строка с нумерацией столбцов)
         private Integer rowOffset;          // отступ сверху (до данных)
         private Integer colOffset;          // отступ слева
         private int prevRowIndex = 0;       // номер предыдущей строки
-
         private Map<String, XSSFCellStyle> styleMap = new HashMap<String, XSSFCellStyle>();// мапа со стилями
         private Map<String, String> lastValuesMap = new HashMap<String, String>();  // мапа со считанными строковыми значениями из sst
-
         private short formatIndex;          // идентификатор формата даты (дата хранится в виде числа)
         private String formatString;        // формат даты
-        private final DataFormatter formatter;
         private SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd.MM.yyyy"); // свой формат дат, что б исключить использование фомратов по умолчанию: н-р d/m/yyyy
 
         /**
@@ -1890,296 +2146,6 @@ public final class ScriptUtils {
                 }
             }
             return com.aplana.sbrf.taxaccounting.model.util.StringUtils.cleanString(value);
-        }
-    }
-
-    /**
-     * Проставление индексов у набора строк
-     *
-     * @param dataRows
-     */
-    @SuppressWarnings("unused")
-    public static void updateIndexes(List<DataRow<Cell>> dataRows) {
-        int index = 1;
-        for(DataRow<Cell> row: dataRows) {
-            row.setIndex(index++);
-        }
-    }
-
-    /**
-     * Проверка контрольной суммы ИНН
-     * @param logger логер для записи сообщения
-     * @param row строка НФ
-     * @param alias псевдоним столбца
-     * @param value значение ИНН
-     * @param fatal фатально ли сообщение
-     * @return
-     */
-    public static boolean checkControlSumInn(Logger logger, DataRow<Cell> row, String alias, String value, boolean fatal) {
-        if (value == null || value.isEmpty()) {
-            return false;
-        }
-        if (!RefBookUtils.checkControlSumInn(value)){
-            rowLog(logger, row, (row != null ? ("Строка "+ row.getIndex()  + ": ") : "") + String.format("Вычисленное контрольное число по полю \"%s\" некорректно (%s).", getColumnName(row, alias), value), fatal ? LogLevel.ERROR : LogLevel.WARNING);
-            return false;
-        }
-        return true;
-    }
-
-    /**
-     * Проверка диапазона даты (от 1991 до 2099)
-     * @param logger логер для записи сообщения
-     * @param row строка НФ
-     * @param alias псевдоним столбца
-     * @param value проверяемое значение (строка или дата)
-     * @param fatal
-     */
-    public static boolean checkDateValid(Logger logger, DataRow<Cell> row, String alias, Object value, boolean fatal) {
-        if (value == null) {
-            return false;
-        }
-        Integer year = null;
-        Date date = null;
-        if (value instanceof Date){
-            date = (Date) value;
-        }
-        try {
-            if (value instanceof String) {
-                date = parseDate("dd.MM.yyyy", (String) value);
-            }
-            String yearString = formatDate(date, "yyyy");
-            if (yearString != null) {
-                year = Integer.valueOf(yearString);
-            }
-        } catch (ParseException e) {
-            rowLog(logger, row, (row != null ? ("Строка "+ row.getIndex()  + ": ") : "") + String.format("Ошибка при разборе значения даты атрибута «%s» (%s)", getColumnName(row, alias), value), fatal ? LogLevel.ERROR : LogLevel.WARNING);
-        }
-        if (year == null || year < 1991 || year > 2099) {
-            rowLog(logger, row, (row != null ? ("Строка "+ row.getIndex()  + ": ") : "") + String.format("Значение даты атрибута «%s» должно принимать значение из следующего диапазона: 01.01.1991 - 31.12.2099", getColumnName(row, alias)), fatal ? LogLevel.ERROR : LogLevel.WARNING);
-            return false;
-        }
-        return true;
-    }
-
-    public static boolean checkPattern(Logger logger, DataRow<Cell> row, String alias, String value, String pattern, String meaning, boolean fatal) {
-        return checkPattern(logger, row, alias, value, Arrays.asList(pattern), Arrays.asList(meaning), fatal);
-    }
-
-    /**
-     * Проверка текста на паттерны
-     * @param logger логер для записи сообщения
-     * @param row строка НФ
-     * @param alias псевдоним столбца
-     * @param value проверяемое значение (строка или дата)
-     * @param patterns regExp для проверки
-     * @param fatal
-     */
-    public static boolean checkPattern(Logger logger, DataRow<Cell> row, String alias, String value, List<String> patterns, List<String> meanings, boolean fatal) {
-        if (value == null || value.isEmpty()) {
-            return false;
-        }
-        StringBuilder sb = new StringBuilder();
-        boolean result = false;
-        for(String pattern : patterns){
-            if (!result){
-                result = checkFormat(value, pattern);
-            }
-            if (patterns.indexOf(pattern) != 0) {
-                sb.append("\" / \"");
-            }
-            sb.append(pattern);
-        }
-        if (!result) {
-            rowLog(logger, row, (row != null ? ("Строка "+ row.getIndex()  + ": ") : "") + String.format("Атрибут \"%s\" заполнен неверно (%s)! Ожидаемый паттерн: \"%s\"", getColumnName(row, alias), value, sb.toString()), fatal ? LogLevel.ERROR : LogLevel.WARNING);
-            if (meanings != null) {
-                for (String meaning : meanings) {
-                    if (meaning != null && !meaning.isEmpty()) {
-                        int index = meanings.indexOf(meaning);
-                        if (patterns.size() > index) {
-                            rowLog(logger, row, (row != null ? ("Строка "+ row.getIndex()  + ": ") : "") + String.format("Расшифровка паттерна \"%s\": %s", patterns.get(index), meaning), fatal ? LogLevel.ERROR : LogLevel.WARNING);
-                        }
-                    }
-                }
-            }
-        }
-        return result;
-    }
-
-    public static void compareTotalValues(DataRow<Cell> total, DataRow<Cell> totalTmp, List<String> columns, Logger logger, boolean required) {
-        compareTotalValues(total, totalTmp, columns, logger, 2, required);
-    }
-
-    /**
-     * Сравнить значения итоговых строк.
-     *
-     * @param totalRow итоговая строка нф
-     * @param totalRowTmp итоговая строка с посчитанными значениям
-     * @param columns список алиасов итоговых графов
-     * @param logger для вывода сообщении
-     * @param precision точность значении (для BigDecimal есть различия в точности после запятой, например 1.0 не равно 1.00)
-     * @param required фатальность
-     */
-    public static void compareTotalValues(DataRow<Cell> totalRow, DataRow<Cell> totalRowTmp, List<String> columns,
-                                          Logger logger, int precision, boolean required) {
-        if (totalRow == null || totalRowTmp == null || columns == null || columns.isEmpty()) {
-            return;
-        }
-        for (String alias : columns) {
-            BigDecimal value1 = totalRow.getCell(alias).getNumericValue();
-            BigDecimal value2 = totalRowTmp.getCell(alias).getNumericValue();
-            if (value1 == null) {
-                value1 = BigDecimal.ZERO;
-            }
-            if (value2 == null) {
-                value2 = BigDecimal.ZERO;
-            }
-            value1 = round(value1, precision);
-            value2 = round(value2, precision);
-            if (!value1.equals(value2)) {
-                String msg = String.format(COMPARE_TOTAL_VALUES, totalRow.getIndex(), getColumnName(totalRow, alias), value1, value2);
-                if (required) {
-                    rowError(logger, totalRow, msg);
-                } else {
-                    rowWarning(logger, totalRow, msg);
-                }
-            }
-        }
-    }
-
-    public static BigDecimal round(BigDecimal value, int precision) {
-        if (value == null) {
-            return null;
-        }
-        return (new BigDecimal(value.doubleValue())).setScale(precision, BigDecimal.ROUND_HALF_UP);
-    }
-
-    /**
-     * Сравнить значения итоговых строк.
-     *
-     * @param totalRow итоговая строка нф (с правильными стилями)
-     * @param totalRowFromFile итоговая строка нф со значениями из файла
-     * @param rows строки формы
-     * @param columns список алиасов итоговых графов
-     * @param formData форма
-     * @param logger для вывода сообщении
-     * @param required фатальность
-     */
-    public static void compareSimpleTotalValues(DataRow<Cell> totalRow, DataRow<Cell> totalRowFromFile,
-                                          List<DataRow<Cell>> rows, List<String> columns,
-                                          FormData formData, Logger logger, boolean required) {
-        if (totalRow == null || totalRowFromFile == null || rows == null || columns == null || columns.isEmpty()) {
-            return;
-        }
-        // подсчитанная итоговая строка для сравнения
-        DataRow<Cell> totalRowTmp = formData.createStoreMessagingDataRow();
-        calcTotalSum(rows, totalRowTmp, columns);
-        // задание значении итоговой строке нф из итоговой строки файла
-        totalRow.setImportIndex(totalRowFromFile.getImportIndex());
-        for (String column : columns) {
-            totalRow.getCell(column).setValue(totalRowFromFile.getCell(column).getValue(), totalRow.getIndex());
-        }
-        compareTotalValues(totalRow, totalRowTmp, columns, logger, required);
-    }
-
-    /** Получение Id записи из справочника 520 с использованием кэширования
-     * @param nameFromFile наименование лица (юр или вз)
-     * @param iksr значение графы ИКСР
-     * @param iksrName название графы ИКСР
-     * @param fileRowIndex номер строки в файле
-     * @param colIndex индекс колонки
-     * @param endDate дата окончания периода
-     * @param isVzl флаг (true для РНУ, false для приложений 6-...)
-     * @param logger логгер
-     * @param refBookFactory фабрика справочников
-     * @param recordCache кэш записей
-     * @return
-     */
-    public static Long getTcoRecordId(String nameFromFile, String iksr, String iksrName, int fileRowIndex, int colIndex, Date endDate, boolean isVzl, Logger logger, RefBookFactory refBookFactory, Map<Long, Map<String, Object>> recordCache) {
-        if (iksr == null || iksr.isEmpty()) {
-            logger.warn("Строка %s , столбец %s: На форме не заполнены графы с общей информацией о %s, так как в файле отсутствует значение по графе «%s»!",
-                    fileRowIndex, isVzl ? "ВЗЛ/РОЗ" : "юридическом лице", getXLSColumnName(colIndex), iksrName);
-            return null;
-        }
-        long ref_id = 520;
-        RefBook refBook = refBookFactory.get(ref_id);
-
-        String filter = String.format("(LOWER(INN) = LOWER('%1$s') or " +
-                "LOWER(REG_NUM) = LOWER('%1$s') or " +
-                "LOWER(TAX_CODE_INCORPORATION) = LOWER('%1$s') or " +
-                "LOWER(SWIFT) = LOWER('%1$s') or " +
-                "LOWER(KIO) = LOWER('%1$s'))", iksr);
-        if (recordCache.get(ref_id) != null) {
-            if (recordCache.get(ref_id).get(filter) != null) {
-                return (Long) recordCache.get(ref_id).get(filter);
-            }
-        } else {
-            recordCache.put(ref_id, new HashMap<String, Object>());
-        }
-
-        RefBookDataProvider provider = refBookFactory.getDataProvider(ref_id);
-        PagingResult<Map<String, RefBookValue>> records = provider.getRecords(endDate, null, filter, null);
-        List<String> aliases = Arrays.asList("INN", "REG_NUM", "TAX_CODE_INCORPORATION", "SWIFT", "KIO");
-        if (records.size() == 1) {
-            // 5
-            Map<String, RefBookValue> record = records.get(0);
-
-            if (!com.aplana.sbrf.taxaccounting.model.util.StringUtils.cleanString(nameFromFile).equals(com.aplana.sbrf.taxaccounting.model.util.StringUtils.cleanString(record.get("NAME").getStringValue()))) {
-                // сообщение 4
-                String msg;
-                if (nameFromFile != null && !nameFromFile.isEmpty()) {
-                    msg = String.format("В файле указано другое наименование %s - «%s!", isVzl ? "ВЗЛ/РОЗ" : "юридического лица", nameFromFile);
-                } else {
-                    msg = String.format("Наименование %s в файле не заполнено!, ", isVzl ? "ВЗЛ/РОЗ" : "юридического лица");
-                }
-                String refBookAttributeName = "Не задано";
-                for (String alias : aliases) {
-                    if (iksr.equals(record.get(alias).getStringValue())) {
-                        refBookAttributeName = refBook.getAttribute(alias).getName();
-                        break;
-                    }
-                }
-                logger.warn("Строка %s , столбец %s: На форме графы с общей информацией о %s заполнены данными записи справочника «Участники ТЦО», " +
-                                "в которой атрибут «Полное наименование юридического лица с указанием ОПФ» = «%s», атрибут «%s» = «%s». %s",
-                        fileRowIndex, getXLSColumnName(colIndex), isVzl ? "ВЗЛ/РОЗ" : "юридическом лице", record.get("NAME").getStringValue(), refBookAttributeName, iksr, msg);
-            }
-            logger.warn(TCO_END_MESSAGE, isVzl ? "ВЗЛ/РОЗ" : "юридическом лице", iksrName);
-            recordCache.get(ref_id).put(filter, record.get(RefBook.RECORD_ID_ALIAS).getNumberValue());
-            return (Long) recordCache.get(ref_id).get(filter);
-        } else {
-            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd.MM.yyyy");
-            if (records.isEmpty()) {
-                // 6
-                if (nameFromFile == null || nameFromFile.isEmpty()) {
-                    nameFromFile = "наименование " + (isVzl ? "ВЗЛ/РОЗ" : "юридического лица") + " в файле не заполнено";
-                }
-                // сообщение 1
-                logger.warn("Строка %s , столбец %s: %s в справочнике «Участники ТЦО» не найдено значение «%s» (%s), актуальное на дату «%s»!",
-                        fileRowIndex, getXLSColumnName(colIndex), isVzl ? "На форме не заполнены графы с общей информацией о ВЗЛ/РОЗ, так как" : ("Для заполнения графы «" + iksrName + "» формы"), iksr, nameFromFile, simpleDateFormat.format(endDate));
-                logger.warn(TCO_END_MESSAGE, isVzl ? "ВЗЛ/РОЗ" : "юридическом лице", iksrName);
-            }
-        }
-        return null;
-    }
-
-    /**
-     *
-     * @param logger логер для записи сообщения
-     * @param row строка НФ
-     * @param alias псевдоним столбца
-     * @param reportPeriodStartDate дата начала периода текущей формы
-     * @param reportPeriodEndDate дата окончания периода текущей формы
-     * @param fatal фатально ли сообщение
-     */
-    public static void checkDealDoneDate(Logger logger, DataRow<Cell> row, String alias, Date reportPeriodStartDate,
-                                         Date reportPeriodEndDate, boolean fatal) {
-        Date dealDoneDate = row.getCell(alias).getDateValue();
-        if (dealDoneDate != null && (dealDoneDate.before(reportPeriodStartDate) || dealDoneDate.after(reportPeriodEndDate))) {
-            rowLog(logger, row, (row != null ? ("Строка "+ row.getIndex()  + ": ") : "") +
-                    String.format("Дата, указанная в графе «%s» (%s), должна относиться к отчетному периоду текущей формы (%s - %s)!",
-                            getColumnName(row, alias), formatDate(dealDoneDate, "dd.MM.yyyy"),
-                            formatDate(reportPeriodStartDate, "dd.MM.yyyy"),
-                            formatDate(reportPeriodEndDate, "dd.MM.yyyy")
-                    ), fatal ? LogLevel.ERROR : LogLevel.WARNING);
         }
     }
 }

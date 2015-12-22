@@ -69,7 +69,7 @@
         <checking>false</checking>
         <name>Сумма доходов (стоимость реализации) Банка, руб.</name>
         <order>7</order>
-        <width>10</width>
+        <width>11</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>
@@ -78,7 +78,7 @@
         <checking>false</checking>
         <name>Сумма расходов (стоимость приобретения) Банка, руб.</name>
         <order>8</order>
-        <width>10</width>
+        <width>11</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>
@@ -114,7 +114,7 @@
         <checking>false</checking>
         <name>Количество</name>
         <order>12</order>
-        <width>10</width>
+        <width>11</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>
@@ -123,7 +123,7 @@
         <checking>false</checking>
         <name>Цена</name>
         <order>13</order>
-        <width>10</width>
+        <width>11</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>

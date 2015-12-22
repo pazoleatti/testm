@@ -96,6 +96,7 @@ public class ConfigurationPresenter extends Presenter<ConfigurationPresenter.MyV
     public void prepareFromRequest(PlaceRequest request) {
         LogCleanEvent.fire(this);
         LogShowEvent.fire(this, false);
+        rowsDataMap.clear();
         getView().initView();
         initMaps();
         /*GetConfigurationAction action = new GetConfigurationAction();

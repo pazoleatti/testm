@@ -1,9 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdata.client;
 
-import com.aplana.sbrf.taxaccounting.model.Cell;
-import com.aplana.sbrf.taxaccounting.model.DataRow;
-import com.aplana.sbrf.taxaccounting.model.ReportType;
-import com.aplana.sbrf.taxaccounting.model.WorkflowMove;
+import com.aplana.sbrf.taxaccounting.model.*;
 import com.gwtplatform.mvp.client.UiHandlers;
 
 public interface FormDataUiHandlers extends UiHandlers{
@@ -36,9 +33,7 @@ public interface FormDataUiHandlers extends UiHandlers{
 
 	void onCheckClicked(boolean force);
 
-    void onTimerReport(ReportType reportType, String specificReportType, boolean isTimer);
-
-    void onPrintClicked(ReportType reportType, String specificReportType, boolean force);
+    void onPrintClicked(String fdReportType, boolean force);
 
 	void onSignersClicked();
 

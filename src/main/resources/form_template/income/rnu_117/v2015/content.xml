@@ -104,7 +104,7 @@
         <columnType>NUMBER</columnType>
         <name>Сумма фактически начисленного расхода, руб.</name>
         <order>10</order>
-        <width>10</width>
+        <width>11</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>
@@ -124,7 +124,7 @@
         <columnType>NUMBER</columnType>
         <name>Сумма расхода, соответствующая рыночному уровню, руб.</name>
         <order>12</order>
-        <width>10</width>
+        <width>11</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>
@@ -144,7 +144,7 @@
         <columnType>NUMBER</columnType>
         <name>Сумма отклонения (превышения) расхода фактического от соответствующего рыночному уровню, руб.</name>
         <order>14</order>
-        <width>10</width>
+        <width>11</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>

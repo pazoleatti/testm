@@ -45,7 +45,8 @@ public class TransportDataParam {
                 || name.length() != NAME_LENGTH_QUARTER && name.length() != NAME_LENGTH_MONTH) {
             throw new IllegalArgumentException(String.format(NAME_FORMAT_ERROR, name));
         }
-        String formCode = name.substring(0, 9).replaceAll("_", "").trim();
+        // убрать нижние черточки слева от кода
+        String formCode = name.substring(0, 9).replaceFirst("(_*)(^_*)", "").trim();
         String reportPeriodCode = name.substring(26, 28).replaceAll("_", "").trim();
         String departmentCode = name.substring(9, 26).replaceFirst("_*", "").trim();
         Integer year = null;
