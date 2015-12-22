@@ -1773,7 +1773,7 @@ public final class ScriptUtils {
         if (value == null) {
             return null;
         }
-        return (new BigDecimal(value.doubleValue())).setScale(precision, BigDecimal.ROUND_HALF_UP);
+        return (new BigDecimal(value.toString())).setScale(precision, BigDecimal.ROUND_HALF_UP);
     }
 
     /**
