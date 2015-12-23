@@ -16,13 +16,13 @@ import java.math.RoundingMode;
  */
 public class NumericColumn extends Column implements Serializable {
 	private static final long serialVersionUID = 1L;
-	
+
 	/**
 	 * Максимально допустимое значение точности для числового столбца
 	 * (ограничение налагается возможностями БД и деталями описания таблицы NUMERIC_VALUE)
 	 */
 	public static final int MAX_PRECISION = 19;
-	
+
 	/**
 	 * Максимально допустимое колличество значений для числового столбца
 	 * (ограничение налагается возможностями БД и деталями описания таблицы NUMERIC_VALUE)
@@ -30,7 +30,7 @@ public class NumericColumn extends Column implements Serializable {
 	public static final int MAX_LENGTH = 38;
 
 	private int precision = 0;
-	
+
 	private int maxLength = MAX_LENGTH;
 
 	private static Formatter formatter;
@@ -41,7 +41,7 @@ public class NumericColumn extends Column implements Serializable {
 
 	/**
 	 * Задает точность столбца, т.е. колличество знаков справа от запятой. Аналогично положительным {@link BigDecimal}
-	 * 
+	 *
 	 * @return возвращает точность
 	 */
 	public int getPrecision() {
@@ -93,20 +93,20 @@ public class NumericColumn extends Column implements Serializable {
 					if (hasSign) {
 						val = val.abs();
 					}
-					String intValue = String.valueOf(val.longValue());
-					StringBuilder stringBuilder = new StringBuilder(intValue);
+                    int intLength = val.precision() - val.scale();
+                    StringBuilder stringBuilder = new StringBuilder(val.toPlainString().substring(0, intLength));
 
-					for (int i=3; i<intValue.length(); i+=3) {
-						if (i<intValue.length()) {
-							stringBuilder.insert(intValue.length()-i, " ");
-						}
-					}
-					stringBuilder.append(val.toPlainString().substring(intValue.length(), val.toPlainString().length()));
-					if (hasSign) {
-						stringBuilder.insert(0, "-");
-					}
-					return stringBuilder.toString();
-				}
+                    for (int i = 3; i < intLength; i += 3) {
+                        if (i < intLength) {
+                            stringBuilder.insert(intLength - i, " ");
+                        }
+                    }
+                    stringBuilder.append(val.toPlainString().substring(intLength, val.toPlainString().length()));
+                    if (hasSign) {
+                        stringBuilder.insert(0, "-");
+                    }
+                    return stringBuilder.toString();
+                }
 			};
 	}
 
