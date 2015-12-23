@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rows>
+    <row alias="total">
+        <cell alias="fix" colSpan="5" rowSpan="1" stringValue="Итого" styleAlias="Контрольные суммы"/>
+        <cell alias="rowNumber" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="name" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="iksr" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="countryCode" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="outcomeSum" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="docNumber" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="docDate" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="count" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="price" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="cost" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+        <cell alias="dealDoneDate" colSpan="1" rowSpan="1" styleAlias="Контрольные суммы"/>
+    </row>
+</rows>

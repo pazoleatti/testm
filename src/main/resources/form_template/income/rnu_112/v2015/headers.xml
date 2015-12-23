@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?><rows>
+    <row alias="">
+        <cell alias="rowNumber" colSpan="1" rowSpan="2" value="№ пп"/>
+        <cell alias="fix" colSpan="1" rowSpan="1" value=""/>
+        <cell alias="dealNum" colSpan="1" rowSpan="2" value="Номер сделки"/>
+        <cell alias="name" colSpan="1" rowSpan="2" value="Наименование Взаимозависимого лица/резидента оффшорной зоны"/>
+        <cell alias="countryName" colSpan="1" rowSpan="2" value="Страна местонахождения контрагента"/>
+        <cell alias="currency" colSpan="1" rowSpan="2" value="Валюта расчетов"/>
+        <cell alias="date1Part" colSpan="1" rowSpan="2" value="Дата первой части сделки"/>
+        <cell alias="date2Part" colSpan="1" rowSpan="2" value="Дата второй части сделки"/>
+        <cell alias="dealRate" colSpan="1" rowSpan="2" value="Ставка сделки, % годовых"/>
+        <cell alias="dealLeftSum" colSpan="1" rowSpan="2" value="Сумма остаточных обязательств (требований) контрагента по сделке"/>
+        <cell alias="bondSum" colSpan="1" rowSpan="2" value="Сумма выплаты по ценным бумагам"/>
+        <cell alias="payDate" colSpan="1" rowSpan="2" value="Дата выплаты (гр. 10)"/>
+        <cell alias="accrStartDate" colSpan="2" rowSpan="1" value="Период начисления доходов на сумму остаточных обязательств контрагента (гр. 9)"/>
+        <cell alias="accrEndDate" colSpan="1" rowSpan="1" value="Период начисления доходов на сумму остаточных обязательств контрагента (гр. 9). Дата окончания начисления"/>
+        <cell alias="yearBase" colSpan="1" rowSpan="2" value="База (360/365/366)"/>
+        <cell alias="dealIncome" colSpan="1" rowSpan="2" value="Доходы по сделке"/>
+        <cell alias="rateDiff" colSpan="1" rowSpan="2" value="Отклонение от рыночной процентной ставки для целей налогообложения"/>
+        <cell alias="incomeCorrection" colSpan="1" rowSpan="2" value="Сумма корректировки доходов"/>
+    </row>
+    <row alias="">
+        <cell alias="rowNumber" colSpan="1" rowSpan="1" value="№ пп"/>
+        <cell alias="fix" colSpan="1" rowSpan="1" value=""/>
+        <cell alias="dealNum" colSpan="1" rowSpan="1" value="Номер сделки"/>
+        <cell alias="name" colSpan="1" rowSpan="1" value="Наименование Взаимозависимого лица/резидента оффшорной зоны"/>
+        <cell alias="countryName" colSpan="1" rowSpan="1" value="Страна местонахождения контрагента"/>
+        <cell alias="currency" colSpan="1" rowSpan="1" value="Валюта расчетов"/>
+        <cell alias="date1Part" colSpan="1" rowSpan="1" value="Дата первой части сделки"/>
+        <cell alias="date2Part" colSpan="1" rowSpan="1" value="Дата второй части сделки"/>
+        <cell alias="dealRate" colSpan="1" rowSpan="1" value="Ставка сделки, % годовых"/>
+        <cell alias="dealLeftSum" colSpan="1" rowSpan="1" value="Сумма остаточных обязательств (требований) контрагента по сделке"/>
+        <cell alias="bondSum" colSpan="1" rowSpan="1" value="Сумма выплаты по ценным бумагам"/>
+        <cell alias="payDate" colSpan="1" rowSpan="1" value="Дата выплаты (гр. 10)"/>
+        <cell alias="accrStartDate" colSpan="1" rowSpan="1" value="Дата начала начисления"/>
+        <cell alias="accrEndDate" colSpan="1" rowSpan="1" value="Дата окончания начисления"/>
+        <cell alias="yearBase" colSpan="1" rowSpan="1" value="База (360/365/366)"/>
+        <cell alias="dealIncome" colSpan="1" rowSpan="1" value="Доходы по сделке"/>
+        <cell alias="rateDiff" colSpan="1" rowSpan="1" value="Отклонение от рыночной процентной ставки для целей налогообложения"/>
+        <cell alias="incomeCorrection" colSpan="1" rowSpan="1" value="Сумма корректировки доходов"/>
+    </row>
+    <row alias="">
+        <cell alias="rowNumber" colSpan="1" rowSpan="1" value="1"/>
+        <cell alias="fix" colSpan="1" rowSpan="1" value=""/>
+        <cell alias="dealNum" colSpan="1" rowSpan="1" value="2"/>
+        <cell alias="name" colSpan="1" rowSpan="1" value="3"/>
+        <cell alias="countryName" colSpan="1" rowSpan="1" value="4"/>
+        <cell alias="currency" colSpan="1" rowSpan="1" value="5"/>
+        <cell alias="date1Part" colSpan="1" rowSpan="1" value="6"/>
+        <cell alias="date2Part" colSpan="1" rowSpan="1" value="7"/>
+        <cell alias="dealRate" colSpan="1" rowSpan="1" value="8"/>
+        <cell alias="dealLeftSum" colSpan="1" rowSpan="1" value="9"/>
+        <cell alias="bondSum" colSpan="1" rowSpan="1" value="10"/>
+        <cell alias="payDate" colSpan="1" rowSpan="1" value="11"/>
+        <cell alias="accrStartDate" colSpan="1" rowSpan="1" value="12"/>
+        <cell alias="accrEndDate" colSpan="1" rowSpan="1" value="13"/>
+        <cell alias="yearBase" colSpan="1" rowSpan="1" value="14"/>
+        <cell alias="dealIncome" colSpan="1" rowSpan="1" value="15"/>
+        <cell alias="rateDiff" colSpan="1" rowSpan="1" value="16"/>
+        <cell alias="incomeCorrection" colSpan="1" rowSpan="1" value="17"/>
+    </row>
+</rows>

@@ -629,7 +629,7 @@ def getNewTotalFromXls(def values, def colOffset, def fileRowIndex, def rowIndex
     newRow.sum = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
     // графа 12
     colIndex = 12
-    newRow.cost = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
+    newRow.count = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
     // графа 13
     colIndex = 13
     newRow.price = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)

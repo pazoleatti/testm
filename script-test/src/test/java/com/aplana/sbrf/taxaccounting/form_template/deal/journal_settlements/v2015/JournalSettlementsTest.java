@@ -11,7 +11,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.text.ParseException;
-import java.util.Arrays;
 import java.util.List;
 
 import static org.mockito.Matchers.anyInt;
@@ -119,7 +118,6 @@ public class JournalSettlementsTest extends ScriptTestBase {
         dataRows.get(17).getCell("sum").setValue(1L, null);
 
         testHelper.execute(FormDataEvent.CHECK);
-        printLog();
         List<LogEntry> entries = testHelper.getLogger().getEntries();
         int i = 0;
         Assert.assertEquals("Строка 4: Необходимо заполнить графу «№. Код подразделения» или графу «№. Код организации-участника»!", entries.get(i++).getMessage());
@@ -136,7 +134,6 @@ public class JournalSettlementsTest extends ScriptTestBase {
         row.getCell("statReportId2").setValue(1L, null);
 
         testHelper.execute(FormDataEvent.CHECK);
-        printLog();
         i = 0;
         Assert.assertEquals("Строка 4: Графа «№. Код подразделения» и графа «№. Код организации-участника» не могут быть одновременно заполнены!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 4: Графа «Код организации - участника группы (подразделения ПАО \"Сбербанк России\"), с которыми осуществляются взаиморасчеты. Код подразделения» и графа «Код организации - участника группы (подразделения ПАО \"Сбербанк России\"), с которыми осуществляются взаиморасчеты. Код организации-участника» не могут быть одновременно заполнены!", entries.get(i++).getMessage());
@@ -152,7 +149,6 @@ public class JournalSettlementsTest extends ScriptTestBase {
         row.getCell("statReportId2").setValue(null, null);
 
         testHelper.execute(FormDataEvent.CHECK);
-        printLog();
         i = 0;
         Assert.assertEquals("Строка 4: Графа «Наименование статей. Наименование подразделения» не заполнена!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 4: Графа «Наименование организации – участника группы (подразделения ПАО \"Сбербанк России\"), с которым осуществляются взаиморасчеты. Наименование подразделения» не заполнена!", entries.get(i++).getMessage());
@@ -168,7 +164,6 @@ public class JournalSettlementsTest extends ScriptTestBase {
         row.getCell("statReportId2").setValue(4L, null);
 
         testHelper.execute(FormDataEvent.CHECK);
-        printLog();
         i = 0;
         Assert.assertEquals("Строка 4: Графа «Наименование статей. Наименование организации-участника» не заполнена!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 4: Графа «Наименование организации – участника группы (подразделения ПАО \"Сбербанк России\"), с которым осуществляются взаиморасчеты. Наименование организации-участника» не заполнена!", entries.get(i++).getMessage());
@@ -184,7 +179,6 @@ public class JournalSettlementsTest extends ScriptTestBase {
         dataRows.get(17).getCell("sum").setValue(2L, null);
 
         testHelper.execute(FormDataEvent.CHECK);
-        printLog();
         i = 0;
         Assert.assertEquals("Строка 3: Итоговые значения рассчитаны неверно в графе «Сумма доходов / расходов с начала года (тыс. руб.)»!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 17: Итоговые значения рассчитаны неверно в графе «Сумма доходов / расходов с начала года (тыс. руб.)»!", entries.get(i++).getMessage());

@@ -233,7 +233,6 @@ public class SummaryTest extends ScriptTestBase {
         testHelper.setImportFileInputStream(getImportXlsInputStream());
         testHelper.execute(FormDataEvent.IMPORT);
         int expected = 12; // в файле 12 строк
-        printLog();
         Assert.assertEquals(expected, testHelper.getDataRowHelper().getAll().size());
         // TODO (Ramil Timerbaev) возможно надо будет добавить проверку загруженых значении
         checkLogger();
