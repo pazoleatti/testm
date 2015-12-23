@@ -91,7 +91,6 @@ public class App_6_2Test extends ScriptTestBase {
         dataRows.add(row);
 
         testHelper.execute(FormDataEvent.CHECK);
-        printLog();
         List<LogEntry> entries = testHelper.getLogger().getEntries();
         int i = 0;
         Assert.assertEquals("Строка 1: Графа «Полное наименование юридического лица с указанием ОПФ» не заполнена!", entries.get(i++).getMessage());
