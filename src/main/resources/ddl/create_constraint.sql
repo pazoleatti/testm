@@ -259,7 +259,6 @@ alter table async_task_type add constraint async_task_type_chk_dev_mode check (d
 alter table form_data_report add constraint form_data_rep_pk primary key (form_data_id,type, manual,checking,absolute);
 alter table form_data_report add constraint form_data_rep_fk_form_data_id foreign key (form_data_id) references form_data(id) on delete cascade;
 alter table form_data_report add constraint form_data_rep_fk_blob_data_id foreign key (blob_data_id) references blob_data(id);
-alter table form_data_report add constraint form_data_rep_chk_type check (type in (0,1,2,3));
 alter table form_data_report add constraint form_data_rep_chk_manual check (manual in (0,1));
 alter table form_data_report add constraint form_data_rep_chk_checking check (checking in (0,1));
 alter table form_data_report add constraint form_data_rep_chk_absolute check (absolute in (0,1));

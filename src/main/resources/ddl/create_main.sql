@@ -685,7 +685,8 @@ deadline date null,
 user_id number(9) null,
 role_id number(9) null,
 is_read number(1) default 0 not null,
-blob_data_id varchar2(36)
+blob_data_id varchar2(36),
+url varchar2(2000)
 );
 
 comment on table notification is 'Оповещения';
@@ -700,6 +701,7 @@ comment on column notification.user_id is 'Идентификатор польз
 comment on column notification.role_id is 'Идентификатор роли пользователя, который получит оповещение';
 comment on column notification.is_read is 'Признак прочтения';
 comment on column notification.blob_data_id is 'Ссылка на логи';
+comment on column notification.url is 'Ссылка';
 
 create sequence seq_notification start with 10000;
 
@@ -800,7 +802,7 @@ create table form_data_report
 (
 form_data_id number(18) not null, 
 blob_data_id varchar2(36) not null, 
-type number(1) not null, 
+type varchar2(50 char) not null, 
 checking number(1) not null, 
 manual number(1) not null, 
 absolute number(1) not null
@@ -809,7 +811,7 @@ absolute number(1) not null
 comment on table form_data_report is 'Отчет';
 comment on column form_data_report.form_data_id is 'Идентификатор налоговой формы';
 comment on column form_data_report.blob_data_id is 'Идентификатор отчета';
-comment on column form_data_report.type is 'Тип отчета (0 - Excel, 1 - CSV, 2 - PDF, 3 - Jasper)';
+comment on column form_data_report.type is 'Тип отчета (Excel/CSV/Специфичный отчет)';
 comment on column form_data_report.manual is 'Режим ввода данных (0 - обычная версия; 1 - версия ручного ввода)';
 comment on column form_data_report.checking is 'Типы столбцов (0 - только обычные, 1 - вместе с контрольными)';
 comment on column form_data_report.absolute is 'Режим вывода данных (0 - только дельты, 1 - абсолютные значения)';
