@@ -189,7 +189,6 @@ public class Vat_724_7Test extends ScriptTestBase {
         int expected = testHelper.getDataRowHelper().getAll().size() + 2 + 2; // 2 строки из одного источника и +подзаголовок и +подитог источника (подразделения)
         testHelper.execute(FormDataEvent.COMPOSE);
         Assert.assertEquals(expected, testHelper.getDataRowHelper().getAll().size());
-              printLog();
         checkLogger();
     }
 

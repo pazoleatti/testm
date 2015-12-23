@@ -91,7 +91,6 @@ public class App_6_5Test extends ScriptTestBase {
         dataRows.add(row);
 
         testHelper.execute(FormDataEvent.CHECK);
-        printLog();
         List<LogEntry> entries = testHelper.getLogger().getEntries();
         int i = 0;
         Assert.assertEquals("Строка 1: Графа «Полное наименование юридического лица с указанием ОПФ» не заполнена!", entries.get(i++).getMessage());
@@ -180,12 +179,7 @@ public class App_6_5Test extends ScriptTestBase {
         List<String> aliases = Arrays.asList("sum", "docNumber", "docDate", "city", "settlement", "count", "price", "cost", "dealDoneDate");
         // ожидается 5 строк: 4 из файла + 1 итоговая строка
         int expected = 4 + 1;
-        try {
-            defaultCheckLoadData(aliases, expected);
-        } catch (Exception e) {
-            printLog();
-            e.printStackTrace();
-        }
+        defaultCheckLoadData(aliases, expected);
 
         checkLogger();
         // "count", "name"

@@ -26,7 +26,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 /**
- * 6.2. Размещение средств на межбанковском рынке
+ * 6.7. Предоставление права пользования товарным знаком
  */
 public class App_6_7Test extends ScriptTestBase {
     private static final int TYPE_ID = 805;
@@ -119,7 +119,6 @@ public class App_6_7Test extends ScriptTestBase {
         row.getCell("dealDoneDate").setValue(sdf.parse("01.01.2989"), null);
 
         testHelper.execute(FormDataEvent.CHECK);
-        printLog();
 
         entries = testHelper.getLogger().getEntries();
         i = 0;

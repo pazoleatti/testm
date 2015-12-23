@@ -26,7 +26,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 /**
- * 6.1. Предоставление корпоративных кредитов
+ * 6.12. Приобретение и реализация акций и долей в уставном капитале (участие)
  */
 public class App_6_12Test extends ScriptTestBase {
     private static final int TYPE_ID = 819;
@@ -91,7 +91,6 @@ public class App_6_12Test extends ScriptTestBase {
         dataRows.add(row);
 
         testHelper.execute(FormDataEvent.CHECK);
-        printLog();
         List<LogEntry> entries = testHelper.getLogger().getEntries();
         int i = 0;
         Assert.assertEquals("Строка 1: Графа «Полное наименование юридического лица с указанием ОПФ» не заполнена!", entries.get(i++).getMessage());
