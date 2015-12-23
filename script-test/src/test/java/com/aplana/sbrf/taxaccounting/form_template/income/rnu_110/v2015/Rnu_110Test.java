@@ -79,7 +79,7 @@ public class Rnu_110Test extends ScriptTestBase {
     //@Test
     public void check1Test() throws ParseException {
         FormData formData = getFormData();
-        formData.initFormTemplateParams(testHelper.getTemplate("..//src/main//resources//form_template//income//rnu_101//v2015//"));
+        formData.initFormTemplateParams(testHelper.getTemplate("..//src/main//resources//form_template//income//rnu_110//v2015//"));
         List<DataRow<Cell>> dataRows = testHelper.getDataRowHelper().getAll();
         SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
 

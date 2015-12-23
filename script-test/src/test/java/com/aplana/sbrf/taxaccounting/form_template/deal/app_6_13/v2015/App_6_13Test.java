@@ -82,6 +82,7 @@ public class App_6_13Test extends ScriptTestBase {
         FormData formData = getFormData();
         formData.initFormTemplateParams(testHelper.getTemplate("..//src/main//resources//form_template//deal//app_6_13//v2015//"));
         List<DataRow<Cell>> dataRows = testHelper.getDataRowHelper().getAll();
+        dataRows.clear();
 
         // 1. Проверка заполнения обязательных полей
         DataRow<Cell> row = formData.createDataRow();
