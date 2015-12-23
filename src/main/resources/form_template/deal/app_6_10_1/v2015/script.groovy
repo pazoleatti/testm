@@ -3,7 +3,6 @@ package form_template.deal.app_6_10_1.v2015
 import com.aplana.sbrf.taxaccounting.model.Cell
 import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
-import com.aplana.sbrf.taxaccounting.model.FormDataKind
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.service.script.util.ScriptUtils
@@ -48,10 +47,6 @@ switch (formDataEvent) {
         formDataService.getDataRowHelper(formData).delete(currentDataRow)
         break
     case FormDataEvent.MOVE_CREATED_TO_PREPARED:  // Подготовить из "Создана"
-        calc()
-        logicCheck()
-        formDataService.saveCachedDataRows(formData, logger)
-        break
     case FormDataEvent.MOVE_CREATED_TO_APPROVED:  // Утвердить из "Создана"
     case FormDataEvent.MOVE_PREPARED_TO_APPROVED: // Утвердить из "Подготовлена"
     case FormDataEvent.MOVE_CREATED_TO_ACCEPTED:  // Принять из "Создана"
