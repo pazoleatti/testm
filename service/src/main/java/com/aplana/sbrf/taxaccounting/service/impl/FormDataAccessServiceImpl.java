@@ -286,7 +286,7 @@ public class FormDataAccessServiceImpl implements FormDataAccessService {
                 logger.error(String.format(ACCEPTED_DESTINATION_MSG,
                         destination.getFirst(), destination.getSecond(),
                         departmentReportPeriod.getReportPeriod().getName() + " " + departmentReportPeriod.getReportPeriod().getTaxPeriod().getYear(),
-                        formData.getPeriodOrder() != null ? ", Месяц: " + Months.fromId(formData.getPeriodOrder()).getTitle() : "",
+                        formData.getPeriodOrder() != null ? ", Месяц: \"" + Months.fromId(formData.getPeriodOrder()).getTitle() + "\"" : "",
                         departmentReportPeriod.getCorrectionDate() != null ? ", Дата сдачи корректировки: " + SDF.format(departmentReportPeriod.getCorrectionDate()) : ""
                 ));
             }
