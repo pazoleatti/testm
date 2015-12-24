@@ -650,10 +650,10 @@ def getNewRow(String[] rowCells, def columnCount, def fileRowIndex, def rowIndex
         newRow.docDate = parseDate(pure(rowCells[colIndex]), "dd.MM.yyyy", fileRowIndex, colIndex + colOffset, logger, true)
         colIndex++
         // графа 8
-        newRow.country = pure(rowCells[colIndex])
+        newRow.country = getRecordIdImport(10L, 'CODE', pure(rowCells[colIndex]), fileRowIndex, colIndex + colOffset, false)
         colIndex++
         // графа 9
-        newRow.region = pure(rowCells[colIndex])
+        newRow.region = getRecordIdImport(4L, 'CODE', pure(rowCells[colIndex]), fileRowIndex, colIndex + colOffset, false)
         colIndex++
         // графа 10
         newRow.city = pure(rowCells[colIndex])
