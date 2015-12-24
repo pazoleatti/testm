@@ -28,7 +28,9 @@ public abstract class TAAbstractScriptingServiceImpl implements ApplicationConte
 	private static final Log LOG = LogFactory.getLog(TAAbstractScriptingServiceImpl.class);
 	/** Регулярка для поиска номера строки ошибки в теле скрипта */
 	private static final Pattern REGEXP = Pattern.compile("^.*Script[0-9]+$");
-	
+	/** Регулярка для поиска комментариев в коде */
+	private static final Pattern COMMENT_REGEXP = Pattern.compile("(//.*)|(/\\*(.|\\n)*?\\*/)");
+
 	protected ApplicationContext applicationContext;
 	
 	/**
@@ -115,10 +117,9 @@ public abstract class TAAbstractScriptingServiceImpl implements ApplicationConte
 			return true;
 		}
 		// убираю комментарии из скрипта
-		Pattern pattern = Pattern.compile("(//.*)|(/\\*(.|\\n)*\\*/)");
-		Matcher matcher = pattern.matcher(script);
+		Matcher matcher = COMMENT_REGEXP.matcher(script);
 		String noCommentString = matcher.replaceAll("");
-		pattern = Pattern.compile("\\s*case\\s+FormDataEvent." + event.name() + "\\s*:");
+		Pattern pattern = Pattern.compile("\\s*case\\s+FormDataEvent." + event.name() + "\\s*:");
 		matcher = pattern.matcher(noCommentString);
 		return matcher.find();
 	}

@@ -12,7 +12,12 @@ import static org.junit.Assert.*;
 public class TAAbstractScriptingServiceImplTest extends TAAbstractScriptingServiceImpl {
 
 	private static final String SCRIPT1 = "// графа 71 - col_052_3_2\n" +
-			"switch (formDataEvent) {\n" +
+			" /*   case FormDataEvent.CHECK:\n" +
+			"        formDataService.checkUnique(formData, logger)*/\n" +
+			"        break" + "switch (formDataEvent) {\n" +
+			" /*   case FormDataEvent.CHECK:\n" +
+			"        formDataService.checkUnique(formData, logger)*/\n" +
+			"        break" + "switch (formDataEvent) {\n" +
 			"//    case FormDataEvent.CALCULATE:\n" +
 			"    case FormDataEvent.CREATE:\n" +
 			"        formDataService.checkUnique(formData, logger)\n" +
