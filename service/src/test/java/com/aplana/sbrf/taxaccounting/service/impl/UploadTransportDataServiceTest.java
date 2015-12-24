@@ -141,9 +141,9 @@ public class UploadTransportDataServiceTest {
         when(departmentFormTypeDao.existAssignedForm(TEST_DEPARTMENT_ID, formType101_1.getId(), FormDataKind.PRIMARY)).thenReturn(true);
 
         FormTemplate ft = new FormTemplate();
-        ft.setScript("FormDataEvent."+FormDataEvent.IMPORT_TRANSPORT_FILE.name());
+        ft.setScript("case FormDataEvent."+FormDataEvent.IMPORT_TRANSPORT_FILE.name() + ":");
         FormTemplate ft2 = new FormTemplate();
-        ft2.setScript("FormDataEvent."+FormDataEvent.CALCULATE.name());
+        ft2.setScript("case FormDataEvent."+FormDataEvent.CALCULATE.name() + ":");
 
         when(formTemplateService.existFormTemplate(any(Integer.class), any(Integer.class), any(Boolean.class))).thenReturn(true);
         when(formTemplateService.getActiveFormTemplateId(eq(1), any(Integer.class))).thenReturn(1);

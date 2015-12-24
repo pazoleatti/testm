@@ -4,7 +4,6 @@ import com.aplana.sbrf.taxaccounting.dao.DeclarationTemplateDao;
 import com.aplana.sbrf.taxaccounting.dao.FormDataDao;
 import com.aplana.sbrf.taxaccounting.dao.api.DepartmentFormTypeDao;
 import com.aplana.sbrf.taxaccounting.model.*;
-import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
@@ -145,8 +144,7 @@ public class DeclarationDataScriptingServiceImplTest {
 		StringWriter writer = new StringWriter();
 		exchangeParams.put(DeclarationDataScriptParams.XML, writer);
 
-		service.executeScript(null, declarationData, FormDataEvent.CREATE, logger, exchangeParams);
-
+		assertTrue(service.executeScript(null, declarationData, FormDataEvent.CREATE, logger, exchangeParams));
         assertTrue(logger.containsLevel(LogLevel.ERROR));
 	}
 

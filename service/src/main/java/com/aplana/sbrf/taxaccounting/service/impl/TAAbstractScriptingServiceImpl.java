@@ -111,6 +111,15 @@ public abstract class TAAbstractScriptingServiceImpl implements ApplicationConte
 		if (StringUtils.isBlank(script)) {
 			return false;
 		}
-		return event == null || script.contains("FormDataEvent." + event.name());
+		if (event == null) {
+			return true;
+		}
+		// убираю комментарии из скрипта
+		Pattern pattern = Pattern.compile("(//.*)|(/\\*(.|\\n)*\\*/)");
+		Matcher matcher = pattern.matcher(script);
+		String noCommentString = matcher.replaceAll("");
+		pattern = Pattern.compile("\\s*case\\s+FormDataEvent." + event.name() + "\\s*:");
+		matcher = pattern.matcher(noCommentString);
+		return matcher.find();
 	}
 }
