@@ -791,7 +791,7 @@ void importTransportData() {
         }
         // пропускаем пустую строку
         rowCells = reader.readNext()
-        if (!isEmptyCells(rowCells)) {
+        if (rowCells == null || !isEmptyCells(rowCells)) {
             logger.error('Вторая строка должна быть пустой')
         }
         // грузим основные данные
