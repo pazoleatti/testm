@@ -557,7 +557,7 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
                 if ((referenceValue == null && expectedValue == null) ||
                         (referenceValue == null && "".equals(expectedValue)) ||
                         ("".equals(referenceValue) && expectedValue == null) ||
-                        (referenceValue != null && expectedValue != null && referenceValue.equals(expectedValue))) {
+                        (referenceValue != null && expectedValue != null && referenceValue.toLowerCase().equals(expectedValue.toLowerCase()))) {
                     return;
                 }
             }
