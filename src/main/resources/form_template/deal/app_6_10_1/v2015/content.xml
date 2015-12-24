@@ -44,7 +44,7 @@
         <refBookAttributeId>5218</refBookAttributeId>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="referenceColumn">
-        <alias>countryName</alias>
+        <alias>countryCode</alias>
         <checking>false</checking>
         <columnType>REFERENCE</columnType>
         <name>Страна регистрации</name>

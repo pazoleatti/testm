@@ -19,7 +19,7 @@ import groovy.transform.Field
 // графа 1  - rowNumber    -  № п/п
 // графа 2  - name         -  Полное наименование с указанием ОПФ
 // графа 3  - iksr         -  ИНН/ КИО
-// графа 4  - countryName  -  Код страны по классификатору ОКСМ
+// графа 4  - countryCode  -  Страна регистрации
 // графа 5  - docNumber    -  Номер договора
 // графа 6  - docDate      -  Дата договора
 // графа 7  - dealNumber   -  Номер сделки
@@ -77,14 +77,14 @@ def recordCache = [:]
 @Field
 def refBookCache = [:]
 @Field
-def allColumns = ['rowNumber', 'fix', 'name', 'iksr', 'countryName', 'docNumber', 'docDate', 'dealNumber', 'dealDate', 'sum', 'price', 'cost', 'dealDoneDate']
+def allColumns = ['rowNumber', 'fix', 'name', 'iksr', 'countryCode', 'docNumber', 'docDate', 'dealNumber', 'dealDate', 'sum', 'price', 'cost', 'dealDoneDate']
 // Редактируемые атрибуты
 @Field
 def editableColumns = ['name', 'docNumber', 'docDate', 'dealNumber', 'dealDate', 'sum', 'price', 'cost', 'dealDoneDate']
 
 // Автозаполняемые атрибуты
 @Field
-def autoFillColumns = ['rowNumber', 'iksr', 'countryName']
+def autoFillColumns = ['rowNumber', 'iksr', 'countryCode']
 
 // Группируемые атрибуты
 @Field
@@ -414,7 +414,7 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
             ([(headerRows[1][1]) : getColumnName(tmpRow, 'rowNumber')]),
             ([(headerRows[1][2]) : getColumnName(tmpRow, 'name')]),
             ([(headerRows[1][3]) : getColumnName(tmpRow, 'iksr')]),
-            ([(headerRows[1][4]) : getColumnName(tmpRow, 'countryName')]),
+            ([(headerRows[1][4]) : getColumnName(tmpRow, 'countryCode')]),
             ([(headerRows[1][5]) : getColumnName(tmpRow, 'docNumber')]),
             ([(headerRows[1][6]) : getColumnName(tmpRow, 'docDate')]),
             ([(headerRows[1][7]) : getColumnName(tmpRow, 'dealNumber')]),
@@ -538,8 +538,7 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
     if (map != null) {
         map = getRefBookValue(10, map.COUNTRY_CODE?.referenceValue)
         if (map != null) {
-            def expectedValues = [map.NAME?.stringValue, map.FULLNAME?.stringValue]
-            formDataService.checkReferenceValue(10, values[colIndex], expectedValues, fileRowIndex, colIndex + colOffset, logger, false)
+            formDataService.checkReferenceValue(10, values[colIndex], map.CODE?.stringValue, fileRowIndex, colIndex + colOffset, logger, false)
         }
     }
     colIndex++

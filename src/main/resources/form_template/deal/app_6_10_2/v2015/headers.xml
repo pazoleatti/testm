@@ -5,7 +5,7 @@
         <cell alias="rowNumber" colSpan="1" rowSpan="1" value="Общая информация о контрагенте - юридическом лице"/>
         <cell alias="name" colSpan="1" rowSpan="1" value="Общая информация о контрагенте - юридическом лице"/>
         <cell alias="iksr" colSpan="1" rowSpan="1" value="Общая информация о контрагенте - юридическом лице"/>
-        <cell alias="countryName" colSpan="1" rowSpan="1" value="Общая информация о контрагенте - юридическом лице"/>
+        <cell alias="countryCode" colSpan="1" rowSpan="1" value="Общая информация о контрагенте - юридическом лице"/>
         <cell alias="docNumber" colSpan="8" rowSpan="1" value="Сведения о сделке"/>
         <cell alias="docDate" colSpan="1" rowSpan="1" value="Сведения о сделке"/>
         <cell alias="dealNumber" colSpan="1" rowSpan="1" value="Сведения о сделке"/>
@@ -20,7 +20,7 @@
         <cell alias="rowNumber" colSpan="1" rowSpan="1" value="№ п/п"/>
         <cell alias="name" colSpan="1" rowSpan="1" value="Полное наименование с указанием ОПФ"/>
         <cell alias="iksr" colSpan="1" rowSpan="1" value="ИНН/ КИО"/>
-        <cell alias="countryName" colSpan="1" rowSpan="1" value="Страна регистрации"/>
+        <cell alias="countryCode" colSpan="1" rowSpan="1" value="Страна регистрации"/>
         <cell alias="docNumber" colSpan="1" rowSpan="1" value="Номер договора"/>
         <cell alias="docDate" colSpan="1" rowSpan="1" value="Дата договора"/>
         <cell alias="dealNumber" colSpan="1" rowSpan="1" value="Номер сделки"/>
@@ -35,7 +35,7 @@
         <cell alias="rowNumber" colSpan="1" rowSpan="1" value="гр. 1"/>
         <cell alias="name" colSpan="1" rowSpan="1" value="гр. 2"/>
         <cell alias="iksr" colSpan="1" rowSpan="1" value="гр. 3"/>
-        <cell alias="countryName" colSpan="1" rowSpan="1" value="гр. 4"/>
+        <cell alias="countryCode" colSpan="1" rowSpan="1" value="гр. 4"/>
         <cell alias="docNumber" colSpan="1" rowSpan="1" value="гр. 5"/>
         <cell alias="docDate" colSpan="1" rowSpan="1" value="гр. 6"/>
         <cell alias="dealNumber" colSpan="1" rowSpan="1" value="гр. 7"/>
