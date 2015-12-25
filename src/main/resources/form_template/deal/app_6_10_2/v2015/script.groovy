@@ -236,7 +236,7 @@ String getValuesByGroupColumn(DataRow row) {
     if (row.docNumber != null)
         builder.append(row.docNumber).append(sep)
     if (row.docDate != null)
-        builder.append(formatDate(row.docDate, 'dd.MM.yyyy')).append(sep)
+        builder.append(row.docDate?.format('dd.MM.yyyy')).append(sep)
 
     def String retVal = builder.toString()
     if (retVal.length() < 2)

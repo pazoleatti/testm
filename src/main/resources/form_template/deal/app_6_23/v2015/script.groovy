@@ -1,4 +1,4 @@
-package form_template.deal.app_6_8.v2015
+package form_template.deal.app_6_23.v2015
 
 import au.com.bytecode.opencsv.CSVReader
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
@@ -7,10 +7,9 @@ import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import groovy.transform.Field
 
 /**
- * 6.8. Приобретение услуг по разработке, внедрению,
- * поддержке и модификации программного обеспечения, приобретением лицензий
+ * 6.23. Отчет в отношении прочих доходов ПАО Сбербанк, связанных с оказанием услуг
  *
- * formTemplateId = 815
+ * formTemplateId = 832
  *
  * @author EMamedova
  */
@@ -19,7 +18,7 @@ import groovy.transform.Field
 // графа 2  (2)   - name            - Полное наименование юридического лица с указанием ОПФ
 // графа 3  (3)   - iksr            - ИНН/ КИО
 // графа 4  (4)   - countryCode     - Код страны регистрации по классификатору ОКСМ
-// графа 5  (5)   - sum             - Сумма расходов Банка по данным бухгалтерского учета, руб.
+// графа 5  (5)   - sum             - Сумма доходов Банка по данным бухгалтерского учета, руб.
 // графа 6  (6)   - docNumber       - Номер договора
 // графа 7  (7)   - docDate         - Дата договора
 // графа 8  (8)   - serviceType     - Вид услуг
@@ -93,11 +92,11 @@ def autoFillColumns = ['rowNumber', 'iksr', 'countryCode', 'price', 'cost']
 
 // Проверяемые на пустые значения атрибуты
 @Field
-def nonEmptyColumns = ['name', 'sum', 'docNumber', 'docDate', 'serviceType', 'price', 'cost', 'dealDoneDate']
+def nonEmptyColumns = ['name', 'serviceType', 'sum', 'docNumber', 'docDate', 'price', 'cost', 'dealDoneDate']
 
 // Поля для рассчета "Итого"
 @Field
-def totalColumns = ['sum', 'price', 'cost']
+def totalColumns = ['sum', 'cost']
 
 // Дата начала отчетного периода
 @Field
@@ -146,16 +145,17 @@ void logicCheck() {
         // Проверка заполнения обязательных полей
         checkNonEmptyColumns(row, rowNum, nonEmptyColumns, logger, true)
 
-        // Проверка заполнения вида услуги
-        if (row.serviceType != null && !(row.serviceType.intValue() in (1..2))) {
-            def msg = row.getCell('serviceType').column.name
-            logger.error("Строка $rowNum: Значение графы «$msg» должно принимать одно из следующих значений: «1, 2»!")
-        }
-
         // Проверка суммы доходов
         if (row.sum != null && row.sum < 0) {
             def msg = row.getCell('sum').column.name
             logger.error("Строка $rowNum: Значение графы «$msg» должно быть больше или равно «0»!")
+        }
+
+        // Проверка корректности даты договора
+        if (row.docDate && (row.docDate < Date.parse('dd.MM.yyyy', '01.01.1991') || row.docDate > getReportPeriodEndDate())) {
+            def msg1 = row.getCell('docDate').column.name
+            def msg2 = getReportPeriodEndDate().format('dd.MM.yyyy')
+            logger.error("Строка $rowNum: Дата, указанная в графе «$msg1» должна принимать значение из следующего диапазона: 01.01.1991 - $msg2!")
         }
 
         // Проверка цены
@@ -172,22 +172,12 @@ void logicCheck() {
             logger.error("Строка $rowNum: Значение графы «$msg1» должно быть равно значению графы «$msg2»!")
         }
 
-        // Корректность даты совершения сделки относительно даты договора
-        if (row.docDate && row.dealDoneDate && row.docDate > row.dealDoneDate) {
+        // Проверка корректности даты совершения сделки
+        if (row.docDate && row.dealDoneDate && (row.docDate > row.dealDoneDate || row.dealDoneDate > getReportPeriodEndDate())) {
             def msg1 = row.getCell('dealDoneDate').column.name
             def msg2 = row.getCell('docDate').column.name
-            logger.error("Строка $rowNum: Значение графы «$msg1» должно быть не меньше значения графы «$msg2»!")
-        }
-
-        // Проверка даты совершения сделки
-        checkDealDoneDate(logger, row, 'dealDoneDate', getReportPeriodStartDate(), getReportPeriodEndDate(), true)
-
-        // Проверка диапазона дат
-        if (row.docDate) {
-            checkDateValid(logger, row, 'docDate', row.docDate, true)
-        }
-        if (row.dealDoneDate) {
-            checkDateValid(logger, row, 'dealDoneDate', row.dealDoneDate, true)
+            def msg3 = getReportPeriodEndDate().format('dd.MM.yyyy')
+            logger.error("Строка $rowNum: Значение графы «$msg1» должно быть не меньше значения графы «$msg2» и не больше $msg3!")
         }
     }
     // Проверка итоговых значений пофиксированной строке «Итого»
@@ -317,10 +307,6 @@ def getNewTotalFromXls(def values, def colOffset, def fileRowIndex, def rowIndex
     colIndex = 5
     newRow.sum = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
 
-    // графа 9
-    colIndex = 9
-    newRow.price = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
-
     // графа 10
     colIndex = 10
     newRow.cost = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
@@ -423,7 +409,7 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
     colIndex++
 
     // графа 8
-    newRow.serviceType = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
+    newRow.serviceType = values[colIndex]
     colIndex++
 
     // графа 9
@@ -496,7 +482,7 @@ void importTransportData() {
     // сравнение итогов
     if (!logger.containsLevel(LogLevel.ERROR) && totalTF) {
         // мапа с алиасами граф и номерами колонокв в xml (алиас -> номер колонки)
-        def totalColumnsIndexMap = ['sum': 5, 'price': 9, 'cost': 10]
+        def totalColumnsIndexMap = ['sum': 5, 'cost': 10]
 
         // сравнение контрольных сумм
         def colOffset = 1
@@ -567,14 +553,14 @@ def getNewRow(String[] rowCells, def columnCount, def fileRowIndex, def rowIndex
         // графа 7
         newRow.docDate = parseDate(pure(rowCells[7]), "dd.MM.yyyy", fileRowIndex, 7 + colOffset, logger, true)
         // графа 8
-        newRow.serviceType = parseNumber(pure(rowCells[8]), fileRowIndex, 8 + colOffset, logger, true)
+        newRow.serviceType = pure(rowCells[8])
         // графа 11
         newRow.dealDoneDate = parseDate(pure(rowCells[11]), "dd.MM.yyyy", fileRowIndex, 11 + colOffset, logger, true)
+        // графа 9
+        newRow.price = parseNumber(pure(rowCells[9]), fileRowIndex, 9 + colOffset, logger, true)
     }
     // графа 5
     newRow.sum = parseNumber(pure(rowCells[5]), fileRowIndex, 5 + colOffset, logger, true)
-    // графа 9
-    newRow.price = parseNumber(pure(rowCells[9]), fileRowIndex, 9 + colOffset, logger, true)
     // графа 10
     newRow.cost = parseNumber(pure(rowCells[10]), fileRowIndex, 10 + colOffset, logger, true)
 
