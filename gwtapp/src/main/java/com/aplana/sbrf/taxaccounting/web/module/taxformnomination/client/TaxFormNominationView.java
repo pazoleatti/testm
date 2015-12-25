@@ -188,10 +188,13 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
         TextColumn<FormTypeKind> performerColumn = new TextColumn<FormTypeKind>() {
             @Override
             public String getValue(FormTypeKind object) {
-				if (object.getPerformers() != null) {
+				if (object.getPerformers() != null && !object.getPerformers().isEmpty()) {
 					StringBuilder performers = new StringBuilder();
 					for (Department performer : object.getPerformers()) {
-						performers.append(performer.getFullName()).append("; ");
+						if (performers.length() > 0 ) {
+							performers.append("; ");
+						}
+						performers.append(performer.getFullName());
 					}
 					return performers.toString();
 				} else {

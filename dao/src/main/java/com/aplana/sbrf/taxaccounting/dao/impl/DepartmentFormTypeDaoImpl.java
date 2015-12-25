@@ -514,7 +514,7 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
                 performer.setName(rs.getString("performer_name"));
                 Integer performerParentId = SqlUtils.getInteger(rs, "performer_parent_id");
                 // В ResultSet есть особенность что если пришло значение нул то вернет значение по умолчанию - то есть для Integer'a вернет 0
-                // а так как у нас в базе 0 используется в качестве идентификатора то нужно null нужно првоерять через .wasNull()
+                // а так как у нас в базе 0 используется в качестве идентификатора то нужно null нужно проверять через .wasNull()
                 performer.setParentId(rs.wasNull() ? null : performerParentId);
                 performer.setType(DepartmentType.fromCode(SqlUtils.getInteger(rs, "performer_type")));
                 performer.setShortName(rs.getString("performer_short_name"));

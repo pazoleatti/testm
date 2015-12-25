@@ -74,7 +74,7 @@
             <g:HorizontalPanel spacing="0" height="22px" verticalAlignment="middle" addStyleNames="{style.checkboxes}">
                 <g:CheckBox ui:field="source" text="Источники"/>
                 <g:CheckBox ui:field="destination" text="Приемники"/>
-                <g:CheckBox ui:field="uncreated" text="Не созданные"/>
+                <g:CheckBox ui:field="uncreated" text="Несозданные"/>
             </g:HorizontalPanel>
 
             <g:ResizeLayoutPanel ui:field="tableWrapper" addStyleNames="{style.widgetWrapper}">
