@@ -102,15 +102,15 @@
         <nameAttributeId>66</nameAttributeId>
         <refBookAttributeId>64</refBookAttributeId>
     </columns>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>courseCB</alias>
         <checking>false</checking>
+        <columnType>NUMBER</columnType>
         <name>Курс ЦБ РФ</name>
         <order>11</order>
-        <width>5</width>
-        <hierarchical>false</hierarchical>
-        <nameAttributeId>80</nameAttributeId>
-        <refBookAttributeId>81</refBookAttributeId>
+        <width>11</width>
+        <maxLength>19</maxLength>
+        <precision>4</precision>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>sum</alias>
