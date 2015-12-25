@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rows>
+    <row alias="">
+        <cell alias="fix" colSpan="2" rowSpan="1" value="№ пп"/>
+        <cell alias="rowNumber" colSpan="1" rowSpan="1" value=""/>
+        <cell alias="name" colSpan="1" rowSpan="1" value="Наименование Взаимозависимого лица/резидента оффшорной зоны"/>
+        <cell alias="iksr" colSpan="1" rowSpan="1" value="Идентификационный номер"/>
+        <cell alias="countryName" colSpan="1" rowSpan="1" value="Страна регистрации"/>
+        <cell alias="code" colSpan="1" rowSpan="1" value="Код классификации дохода"/>
+        <cell alias="docNumber" colSpan="1" rowSpan="1" value="Номер кредитного договора"/>
+        <cell alias="docDate" colSpan="1" rowSpan="1" value="Дата кредитного договора"/>
+        <cell alias="residual" colSpan="1" rowSpan="1" value="Остаток задолженности"/>
+        <cell alias="currencyCode" colSpan="1" rowSpan="1" value="Валюта"/>
+        <cell alias="courseCB" colSpan="1" rowSpan="1" value="Курс валюты Банка России"/>
+        <cell alias="period" colSpan="1" rowSpan="1" value="Количество календарных дней в периоде"/>
+        <cell alias="base" colSpan="1" rowSpan="1" value="База года (360/365/366)"/>
+        <cell alias="rate1" colSpan="1" rowSpan="1" value="Совокупная процентная ставка"/>
+        <cell alias="rate2" colSpan="1" rowSpan="1" value="Рыночная ставка"/>
+        <cell alias="deviation" colSpan="1" rowSpan="1" value="Отклонение Совокупной процентной ставки от рыночного уровня"/>
+        <cell alias="sum1" colSpan="1" rowSpan="1" value="Сумма доначисления дохода до рыночного уровня"/>
+        <cell alias="sum2" colSpan="1" rowSpan="1" value="Сумма фактического процентного дохода"/>
+    </row>
+    <row alias="">
+        <cell alias="fix" colSpan="1" rowSpan="1" value=""/>
+        <cell alias="rowNumber" colSpan="1" rowSpan="1" value="1"/>
+        <cell alias="name" colSpan="1" rowSpan="1" value="2"/>
+        <cell alias="iksr" colSpan="1" rowSpan="1" value="3"/>
+        <cell alias="countryName" colSpan="1" rowSpan="1" value="4"/>
+        <cell alias="code" colSpan="1" rowSpan="1" value="5"/>
+        <cell alias="docNumber" colSpan="1" rowSpan="1" value="6"/>
+        <cell alias="docDate" colSpan="1" rowSpan="1" value="7"/>
+        <cell alias="residual" colSpan="1" rowSpan="1" value="8"/>
+        <cell alias="currencyCode" colSpan="1" rowSpan="1" value="9"/>
+        <cell alias="courseCB" colSpan="1" rowSpan="1" value="10"/>
+        <cell alias="period" colSpan="1" rowSpan="1" value="11"/>
+        <cell alias="base" colSpan="1" rowSpan="1" value="12"/>
+        <cell alias="rate1" colSpan="1" rowSpan="1" value="13"/>
+        <cell alias="rate2" colSpan="1" rowSpan="1" value="14"/>
+        <cell alias="deviation" colSpan="1" rowSpan="1" value="15"/>
+        <cell alias="sum1" colSpan="1" rowSpan="1" value="16"/>
+        <cell alias="sum2" colSpan="1" rowSpan="1" value="17"/>
+    </row>
+</rows>

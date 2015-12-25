@@ -186,6 +186,14 @@ public class ScriptUtilsTest {
     }
 
     @Test
+    public void parseDate4() {
+        Logger logger = new Logger();
+        Assert.assertNull(ScriptUtils.parseDate("01012009", "dd.MM.yyyy", 1, 1, logger, true));
+        Assert.assertNull(ScriptUtils.parseDate("01012009", "yyyy", 1, 1, logger, true));
+        Assert.assertTrue(logger.containsLevel(LogLevel.ERROR));
+    }
+
+    @Test
     public void normalizeTest() {
         String str1 = null;
         String str2 = "  ";

@@ -198,7 +198,7 @@ public class LoadFormDataServiceTest {
         FormType formType = new FormType();
         formType.setName("Тип формы");
         formTemplate.setType(formType);
-        formTemplate.setScript("FormDataEvent." + FormDataEvent.IMPORT_TRANSPORT_FILE.name());
+        formTemplate.setScript("case FormDataEvent." + FormDataEvent.IMPORT_TRANSPORT_FILE.name() + ":");
         when(formTemplateService.getActiveFormTemplateId(1, 1)).thenReturn(1);
         when(formTemplateService.get(1)).thenReturn(formTemplate);
     }

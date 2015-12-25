@@ -350,7 +350,7 @@ public final class ScriptUtils {
         }
 
         // формат строки и шаблона не совпадают (excel может подставить в ячейку "yyyy" значение "01.01.yyyy")
-        if (tmp.matches("\\d*") && format.contains(".")) {
+        if (tmp.matches("\\d*") && tmp.length() == 4 && format.contains(".")) {
             BigDecimal tmpNum = parseNumber(tmp, indexRow, indexColumn, logger, required);
             if (tmpNum != null && tmpNum.compareTo(BigDecimal.ZERO) != 0) {
                 return new GregorianCalendar(tmpNum.intValue(), Calendar.JANUARY, 1).getTime();

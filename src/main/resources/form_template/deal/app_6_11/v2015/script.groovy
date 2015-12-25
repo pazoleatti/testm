@@ -13,6 +13,28 @@ import groovy.transform.Field
  *
  * @author Stanislav Yasinskiy
  */
+
+// fix
+// rowNumber        - № п/п
+// dealDate         - Дата сделки (поставки)
+// dealDate         - Дата сделки (поставки)
+// name             - Наименование контрагента и ОПФ
+// dealMode         - Режим переговорных сделок
+// iksr             - ИНН/КИО контрагента
+// countryName      - Страна местонахождения контрагента
+// countryCode      - Код страны местонахождения контрагента
+// currencySum      - Сумма сделки (с учетом НКД), в валюте расчетов.
+// currencyCode     - Валюта расчетов по сделке
+// courseCB         - Курс ЦБ РФ
+// sum              - Сумма сделки (с учетом НКД), руб.
+// docNumber        - Номер договора
+// docDate          - Дата договора
+// dealDoneDate     - Дата (заключения) сделки
+// bondRegCode      - Регистрационный код ценной бумаги
+// count            - Количество бумаг по сделке, шт.
+// price            - Цена за 1 шт., руб.
+// transactionType  - Тип сделки
+
 switch (formDataEvent) {
     case FormDataEvent.CREATE:
         formDataService.checkUnique(formData, logger)
@@ -73,12 +95,12 @@ def allColumns = ['fix', 'rowNumber', 'dealDate', 'name', 'dealMode', 'iksr', 'c
 
 // Редактируемые атрибуты
 @Field
-def editableColumns = ['dealDate', 'name', 'dealMode', 'currencySum', 'currencyCode', 'sum', 'docNumber', 'docDate',
+def editableColumns = ['dealDate', 'name', 'dealMode', 'currencySum', 'currencyCode', 'courseCB', 'sum', 'docNumber', 'docDate',
                        'dealDoneDate', 'bondRegCode', 'count', 'transactionType']
 
 // Автозаполняемые атрибуты
 @Field
-def autoFillColumns = ['rowNumber', 'iksr', 'countryName', 'countryCode', 'courseCB', 'price']
+def autoFillColumns = ['rowNumber', 'iksr', 'countryName', 'countryCode', 'price']
 
 // Проверяемые на пустые значения атрибуты
 @Field
@@ -174,6 +196,12 @@ void logicCheck() {
             logger.error("Строка $rowNum: Значение графы «$msg1» должно быть не меньше значения графы «$msg2» и не больше $msg3!")
         }
 
+        // 5. Проверка количества бумаг
+        if (row.count != null && row.count <= 0) {
+            def msg = row.getCell('count').column.name
+            logger.error("Строка $rowNum: Значение графы «$msg» должно быть больше нуля!")
+        }
+
         // 5. Проверка цены сделки
         if (row.price != null && row.count && row.price != round((BigDecimal) (row.sum / row.count), 2)) {
             def msg1 = row.getCell('price').column.name
@@ -209,7 +237,6 @@ void calc() {
     deleteAllAliased(dataRows)
 
     for (row in dataRows) {
-        row.courseCB = calc10(row.currencyCode)
         row.price = calc17(row)
     }
 
@@ -228,13 +255,6 @@ def calcTotalRow(def dataRows) {
     }
     calcTotalSum(dataRows, totalRow, totalColumns)
     return totalRow
-}
-
-def BigDecimal calc10(def currencyCode) {
-    if (currencyCode) {
-            return getRecordId(22, 'CODE_NUMBER', "$currencyCode")
-    }
-    return null
 }
 
 def BigDecimal calc17(def row) {
@@ -450,7 +470,7 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
     colIndex++
 
     // графа 10
-    newRow.courseCB = getRecordIdImport(22, 'RATE', values[colIndex], fileRowIndex, colIndex + colOffset)
+    newRow.courseCB = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
     colIndex++
 
     // графа 11
@@ -513,7 +533,7 @@ void importTransportData() {
         }
         // пропускаем пустую строку
         rowCells = reader.readNext()
-        if (!isEmptyCells(rowCells)) {
+        if (rowCells == null || !isEmptyCells(rowCells)) {
             logger.error('Вторая строка должна быть пустой')
         }
         // грузим основные данные
@@ -607,7 +627,7 @@ def getNewRow(String[] rowCells, def columnCount, def fileRowIndex, def rowIndex
     if (!isTotal) {
         def String iksrName = getColumnName(newRow, 'iksr')
         def nameFromFile = pure(rowCells[3])
-        def recordId = getTcoRecordId(nameFromFile,  pure(rowCells[4]), iksrName, fileRowIndex, 3, getReportPeriodEndDate(), false, logger, refBookFactory, recordCache)
+        def recordId = getTcoRecordId(nameFromFile, pure(rowCells[4]), iksrName, fileRowIndex, 3, getReportPeriodEndDate(), false, logger, refBookFactory, recordCache)
         // графа 2
         newRow.dealDate = parseDate(pure(rowCells[2]), "dd.MM.yyyy", fileRowIndex, 2 + colOffset, logger, true)
         // графа 3
@@ -617,19 +637,19 @@ def getNewRow(String[] rowCells, def columnCount, def fileRowIndex, def rowIndex
         // графа 9
         newRow.currencyCode = getRecordIdImport(15, 'CODE', pure(rowCells[9]), fileRowIndex, 9 + colOffset, false)
         // графа 10
-        newRow.courseCB = getRecordIdImport(22, 'RATE',  pure(rowCells[10]), fileRowIndex, 10 + colOffset, false)
+        newRow.courseCB = parseNumber(pure(rowCells[10]), fileRowIndex, 10 + colOffset, logger, true)
         // графа 12
         newRow.docNumber = pure(rowCells[12])
         // графа 13
         newRow.docDate = parseDate(pure(rowCells[13]), "dd.MM.yyyy", fileRowIndex, 13 + colOffset, logger, true)
         // графа 14
-        newRow.dealDoneDate =parseDate(pure(rowCells[14]), "dd.MM.yyyy", fileRowIndex, 14 + colOffset, logger, true)
+        newRow.dealDoneDate = parseDate(pure(rowCells[14]), "dd.MM.yyyy", fileRowIndex, 14 + colOffset, logger, true)
         // графа 15
         newRow.bondRegCode = pure(rowCells[15])
         // графа 17
-        newRow.price =parseNumber(pure(rowCells[17]), fileRowIndex, 17 + colOffset, logger, true)
+        newRow.price = parseNumber(pure(rowCells[17]), fileRowIndex, 17 + colOffset, logger, true)
         // графа 18
-        newRow.transactionType = getRecordIdImport(16, 'CODE',  pure(rowCells[18]), fileRowIndex, 18 + colOffset, false)
+        newRow.transactionType = getRecordIdImport(16, 'CODE', pure(rowCells[18]), fileRowIndex, 18 + colOffset, false)
     }
     // графа 8
     newRow.currencySum = parseNumber(pure(rowCells[8]), fileRowIndex, 8 + colOffset, logger, true)

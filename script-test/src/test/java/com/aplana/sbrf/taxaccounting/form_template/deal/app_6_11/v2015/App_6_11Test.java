@@ -112,8 +112,8 @@ public class App_6_11Test extends ScriptTestBase {
         // 2. Проверка корректности даты сделки
         // 3. Проверка корректности даты договора
         // 4. Проверка корректности даты заключения сделки
-        // 5. Проверка цены сделки
-        // 6. Проверка положительной суммы
+        // 6. Проверка цены сделки
+        // 7. Проверка положительной суммы
         row.getCell("dealDate").setValue(sdf.parse("01.01.2014"), null);
         row.getCell("name").setValue(1L, null);
         row.getCell("currencySum").setValue(-1L, null);
@@ -141,14 +141,26 @@ public class App_6_11Test extends ScriptTestBase {
         Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
         testHelper.getLogger().clear();
 
-        // для успешного прохождения всех ЛП:
+        // для попадания в ЛП:
+        // 5. Проверка количества бумаг
         row.getCell("dealDate").setValue(sdf.parse("01.01.2014"), null);
         row.getCell("currencySum").setValue(0L, null);
         row.getCell("sum").setValue(7.77, null);
         row.getCell("docDate").setValue(sdf.parse("01.01.2014"), null);
         row.getCell("dealDoneDate").setValue(sdf.parse("01.01.2014"), null);
-        row.getCell("count").setValue(2, null);
+        row.getCell("count").setValue(0L, null);
         row.getCell("price").setValue(3.89, null);
+
+        testHelper.execute(FormDataEvent.CHECK);
+
+        entries = testHelper.getLogger().getEntries();
+        i = 0;
+        Assert.assertEquals("Строка 1: Значение графы «Количество бумаг по сделке, шт.» должно быть больше нуля!", entries.get(i++).getMessage());
+        Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
+        testHelper.getLogger().clear();
+
+        // для успешного прохождения всех ЛП:
+        row.getCell("count").setValue(2, null);
         testHelper.execute(FormDataEvent.CHECK);
         Assert.assertEquals(0, testHelper.getLogger().getEntries().size());
         testHelper.getLogger().clear();
@@ -170,7 +182,7 @@ public class App_6_11Test extends ScriptTestBase {
         mockBeforeImport();
         testHelper.setImportFileInputStream(getImportXlsInputStream());
         testHelper.execute(FormDataEvent.IMPORT);
-        List<String> aliases = Arrays.asList("dealDate", "currencySum", "sum", "docNumber", "docDate", "dealDoneDate", "bondRegCode", "count", "price");
+        List<String> aliases = Arrays.asList("dealDate", "currencySum", "courseCB", "sum",  "docNumber", "docDate", "dealDoneDate", "bondRegCode", "count", "price");
         // ожидается 4 строки: 3 из файла + 1 итоговая строка
         int expected = 3 + 1;
         defaultCheckLoadData(aliases, expected);
@@ -189,7 +201,7 @@ public class App_6_11Test extends ScriptTestBase {
         mockBeforeImport();
         testHelper.setImportFileInputStream(getImportRnuInputStream());
         testHelper.execute(FormDataEvent.IMPORT_TRANSPORT_FILE);
-        List<String> aliases = Arrays.asList("dealDate", "currencySum", "sum", "docNumber", "docDate", "dealDoneDate", "bondRegCode", "count", "price");
+        List<String> aliases = Arrays.asList("dealDate", "currencySum", "courseCB", "sum", "docNumber", "docDate", "dealDoneDate", "bondRegCode", "count", "price");
         // ожидается 4 строки
         int expected = 4;
         defaultCheckLoadData(aliases, expected);
@@ -277,18 +289,14 @@ public class App_6_11Test extends ScriptTestBase {
 
     // Проверить расчеты
     void checkAfterCalc(List<DataRow<Cell>> dataRows) {
-        Assert.assertEquals(1L, dataRows.get(0).getCell("courseCB").getNumericValue().longValue());
-        Assert.assertEquals(2L, dataRows.get(1).getCell("courseCB").getNumericValue().longValue());
-        Assert.assertEquals(3L, dataRows.get(2).getCell("courseCB").getNumericValue().longValue());
-
-        Assert.assertEquals(0.67, dataRows.get(0).getCell("price").getNumericValue().doubleValue(), 0);
-        Assert.assertEquals(0.86, dataRows.get(1).getCell("price").getNumericValue().doubleValue(), 0);
-        Assert.assertEquals(0.91, dataRows.get(2).getCell("price").getNumericValue().doubleValue(), 0);
+        Assert.assertEquals(0.75, dataRows.get(0).getCell("price").getNumericValue().doubleValue(), 0);
+        Assert.assertEquals(0.89, dataRows.get(1).getCell("price").getNumericValue().doubleValue(), 0);
+        Assert.assertEquals(0.93, dataRows.get(2).getCell("price").getNumericValue().doubleValue(), 0);
 
         Assert.assertNull(dataRows.get(3).getCell("price").getValue());
-        Assert.assertEquals(15, dataRows.get(3).getCell("currencySum").getNumericValue().intValue());
-        Assert.assertEquals(18, dataRows.get(3).getCell("sum").getNumericValue().doubleValue(), 0);
-        Assert.assertEquals(21, dataRows.get(3).getCell("count").getNumericValue().doubleValue(), 0);
+        Assert.assertEquals(18, dataRows.get(3).getCell("currencySum").getNumericValue().intValue());
+        Assert.assertEquals(24, dataRows.get(3).getCell("sum").getNumericValue().doubleValue(), 0);
+        Assert.assertEquals(27, dataRows.get(3).getCell("count").getNumericValue().doubleValue(), 0);
     }
 }
 

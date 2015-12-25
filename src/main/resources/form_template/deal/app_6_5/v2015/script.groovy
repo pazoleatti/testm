@@ -479,7 +479,7 @@ void importTransportData() {
         }
         // пропускаем пустую строку
         rowCells = reader.readNext()
-        if (!isEmptyCells(rowCells)) {
+        if (rowCells == null || !isEmptyCells(rowCells)) {
             logger.error('Вторая строка должна быть пустой')
         }
         // грузим основные данные
@@ -578,28 +578,28 @@ def getNewRow(String[] rowCells, def columnCount, def fileRowIndex, def rowIndex
         // графа 2
         newRow.name = recordId
         // графа 6
-        newRow.docNumber = pure(rowCells[7])
+        newRow.docNumber = pure(rowCells[6])
         // графа 7
-        newRow.docDate = parseDate(pure(rowCells[8]), "dd.MM.yyyy", fileRowIndex, 8 + colOffset, logger, true)
+        newRow.docDate = parseDate(pure(rowCells[7]), "dd.MM.yyyy", fileRowIndex, 7 + colOffset, logger, true)
         // графа 8
-        newRow.country = getRecordIdImport(10L, 'CODE', pure(rowCells[9]), fileRowIndex, 9 + colOffset, false)
+        newRow.country = getRecordIdImport(10L, 'CODE', pure(rowCells[8]), fileRowIndex, 8 + colOffset, false)
         // графа 9
-        newRow.region = getRecordIdImport(4L, 'CODE', pure(rowCells[10]), fileRowIndex, 10 + colOffset, false)
+        newRow.region = getRecordIdImport(4L, 'CODE', pure(rowCells[9]), fileRowIndex, 9 + colOffset, false)
         // графа 10
-        newRow.city = pure(rowCells[11])
+        newRow.city = pure(rowCells[10])
         // графа 11
-        newRow.settlement = pure(rowCells[12])
+        newRow.settlement = pure(rowCells[11])
         // графа 15
-        newRow.dealDoneDate = parseDate(pure(rowCells[16]), "dd.MM.yyyy", fileRowIndex, 16 + colOffset, logger, true)
+        newRow.dealDoneDate = parseDate(pure(rowCells[15]), "dd.MM.yyyy", fileRowIndex, 15 + colOffset, logger, true)
     }
     // графа 5
-    newRow.sum = parseNumber(pure(rowCells[6]), fileRowIndex, 6 + colOffset, logger, true)
+    newRow.sum = parseNumber(pure(rowCells[5]), fileRowIndex, 5 + colOffset, logger, true)
     // графа 12
-    newRow.count = parseNumber(pure(rowCells[13]), fileRowIndex, 13 + colOffset, logger, true)
+    newRow.count = parseNumber(pure(rowCells[12]), fileRowIndex, 12 + colOffset, logger, true)
     // графа 13
-    newRow.price = parseNumber(pure(rowCells[14]), fileRowIndex, 14 + colOffset, logger, true)
+    newRow.price = parseNumber(pure(rowCells[13]), fileRowIndex, 13 + colOffset, logger, true)
     // графа 14
-    newRow.cost = parseNumber(pure(rowCells[15]), fileRowIndex, 15 + colOffset, logger, true)
+    newRow.cost = parseNumber(pure(rowCells[14]), fileRowIndex, 14 + colOffset, logger, true)
 
     return newRow
 }

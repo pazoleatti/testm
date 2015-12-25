@@ -149,13 +149,13 @@ void calc() {
     if (dataRows.isEmpty()) {
         return
     }
-    // Удаление подитогов
+    // Удаление подВсегов
     deleteAllAliased(dataRows)
 
     // Сортировка
     sortRows(dataRows, groupColumns)
 
-    // Добавление подитогов
+    // Добавление подВсегов
     addAllAliased(dataRows, new ScriptUtils.CalcAliasRow() {
         @Override
         DataRow<Cell> calc(int i, List<DataRow<Cell>> rows) {
@@ -228,20 +228,20 @@ void importData() {
             break
         }
         rowIndex++
-        // Пропуск итоговых строк
-        if (rowValues[INDEX_FOR_SKIP] == "Итого") {
+        // Пропуск Всеговых строк
+        if (rowValues[INDEX_FOR_SKIP] == "Всего") {
             totalRowFromFile = getNewTotalFromXls(rowValues, colOffset, fileRowIndex, rowIndex)
             allValues.remove(rowValues)
             rowValues.clear()
             continue
-        } else if (rowValues[INDEX_FOR_SKIP] == "Подитог") {
-            //для расчета уникального среди групп(groupColumns) ключа берем строку перед Подитоговой
+        } else if (rowValues[INDEX_FOR_SKIP] == "Итого") {
+            //для расчета уникального среди групп(groupColumns) ключа берем строку перед ПодВсеговой
             def tmpRowValue = rows.get(rows.size() - 1)
             def str = ''
             groupColumns.each{ def n -> str = str + ((tmpRowValue.get(n)!=null) ? tmpRowValue.get(n) : "").toString() }
             key = str.hashCode()
             def subTotalRow = getNewSubTotalRowFromXls(key, rowValues, colOffset, fileRowIndex, rowIndex)
-            //наш ключ - row.getAlias() до решетки. так как индекс после решетки не равен у расчитанной и импортированной подитогововых строк
+            //наш ключ - row.getAlias() до решетки. так как индекс после решетки не равен у расчитанной и импортированной подВсегововых строк
             if (totalRowFromFileMap[subTotalRow.getAlias().split('#')[0]] == null) {
                 totalRowFromFileMap[subTotalRow.getAlias().split('#')[0]] = []
             }
@@ -261,7 +261,7 @@ void importData() {
 
     updateIndexes(rows)
 
-    // сравнение подитогов
+    // сравнение подВсегов
     if (!totalRowFromFileMap.isEmpty()) {
         def tmpSubTotalRows = calcSubTotalRows(rows)
         tmpSubTotalRows.each { subTotalRow ->
@@ -276,7 +276,7 @@ void importData() {
             }
         }
         if (!totalRowFromFileMap.isEmpty()) {
-            // для этих подитогов из файла нет групп
+            // для этих подВсегов из файла нет групп
             totalRowFromFileMap.each { key, totalRows ->
                 totalRows.each { totalRow ->
                     rowWarning(logger, totalRow, String.format(GROUP_WRONG_ITOG_ROW, totalRow.getIndex()))
@@ -285,7 +285,7 @@ void importData() {
         }
     }
 
-    // сравнение итогов
+    // сравнение Всегов
     def totalRow = calcTotalRow(rows)
     rows.add(totalRow)
     updateIndexes(rows)
@@ -302,7 +302,7 @@ void importData() {
 
 // Возвращает строку со значениями полей строки по которым идет группировка
 String getValuesByGroupColumn(DataRow row) {
-    return row.incomeCode != null ? row.incomeCode.stringValue  : "--"
+    return row.incomeCode != null ? row.incomeCode.stringValue  : ""
 }
 
 /**
@@ -418,9 +418,9 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
     return newRow
 }
 /**
- * Получить новую подитоговую строку нф по значениям из экселя.
+ * Получить новую подВсеговую строку нф по значениям из экселя.
  *
- * @param key ключ для сравнения подитоговых строк при импорте
+ * @param key ключ для сравнения подВсеговых строк при импорте
  * @param values список строк со значениями
  * @param colOffset отступ в колонках
  * @param fileRowIndex номер строки в тф
@@ -444,14 +444,14 @@ def getNewSubTotalRowFromXls(def key, def values, def colOffset, def fileRowInde
     return newRow
 }
 /**
- * Получить подитоговую строку с заданными стилями.
+ * Получить подВсеговую строку с заданными стилями.
  *
- * @param key ключ для сравнения подитоговых строк при импорте
+ * @param key ключ для сравнения подВсеговых строк при импорте
  * @param i номер строки
  */
 DataRow<Cell> getSubTotalRow(int i, def key) {
     def newRow = (formDataEvent in [FormDataEvent.IMPORT, FormDataEvent.IMPORT_TRANSPORT_FILE]) ? formData.createStoreMessagingDataRow() : formData.createDataRow()
-    newRow.fix = 'Подитог'
+    newRow.fix = 'Итого'
     newRow.setAlias('itg' + key.toString() + '#' + i)
     newRow.getCell('fix').colSpan = 2
     allColumns.each {
@@ -460,15 +460,15 @@ DataRow<Cell> getSubTotalRow(int i, def key) {
     return newRow
 }
 
-// Получение подитоговых строк
+// Получение подВсеговых строк
 def getSubTotalRows(def dataRows) {
     return dataRows.findAll { it.getAlias() != null && !'total'.equals(it.getAlias()) }
 }
 
-// Получить посчитанные подитоговые строки
+// Получить посчитанные подВсеговые строки
 def calcSubTotalRows(def dataRows) {
     def tmpRows = dataRows.findAll { !it.getAlias() }
-    // Добавление подитогов
+    // Добавление подВсегов
     addAllAliased(tmpRows, new ScriptUtils.CalcAliasRow() {
         @Override
         DataRow<Cell> calc(int i, List<DataRow<Cell>> rows) {
@@ -479,7 +479,7 @@ def calcSubTotalRows(def dataRows) {
     return tmpRows.findAll { it.getAlias() }
 }
 
-// Расчет подитогового значения
+// Расчет подВсегового значения
 DataRow<Cell> calcItog(def int i, def List<DataRow<Cell>> dataRows) {
     def tmpRow = dataRows.get(i)
     def str = ''
@@ -487,7 +487,7 @@ DataRow<Cell> calcItog(def int i, def List<DataRow<Cell>> dataRows) {
     key = str.hashCode()
     def newRow = getSubTotalRow(i, key)
 
-    // Расчеты подитоговых значений
+    // Расчеты подВсеговых значений
     def rows = []
     for (int j = i; j >= 0 && dataRows.get(j).getAlias() == null; j--) {
         rows.add(dataRows.get(j))
@@ -498,7 +498,7 @@ DataRow<Cell> calcItog(def int i, def List<DataRow<Cell>> dataRows) {
 }
 
 /**
- * Получить итоговую строку нф по значениям из экселя.
+ * Получить Всеговую строку нф по значениям из экселя.
  *
  * @param values список строк со значениями
  * @param colOffset отступ в колонках
