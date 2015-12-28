@@ -116,6 +116,9 @@ public abstract class TAAbstractScriptingServiceImpl implements ApplicationConte
 		if (event == null) {
 			return true;
 		}
+		if (!script.contains("FormDataEvent." + event.name())) {
+			return false;
+		}
 		// убираю комментарии из скрипта
 		Matcher matcher = COMMENT_REGEXP.matcher(script);
 		String noCommentString = matcher.replaceAll("");
