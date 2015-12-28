@@ -29,7 +29,7 @@ public abstract class TAAbstractScriptingServiceImpl implements ApplicationConte
 	/** Регулярка для поиска номера строки ошибки в теле скрипта */
 	private static final Pattern REGEXP = Pattern.compile("^.*Script[0-9]+$");
 	/** Регулярка для поиска комментариев в коде */
-	private static final Pattern COMMENT_REGEXP = Pattern.compile("(//.*)|(/\\*(.|\\n)*?\\*/)");
+	private static final Pattern COMMENT_REGEXP = Pattern.compile("(//.*)|((?s)/\\*.*?\\*/)");
 
 	protected ApplicationContext applicationContext;
 	
