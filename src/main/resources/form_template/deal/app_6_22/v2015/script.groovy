@@ -151,7 +151,7 @@ void logicCheck() {
             logger.error("Строка $rowNum: Графа  «$msg1» должна принимать значение из следующего диапазона: 01.01.1991 - $msg2!")
         }
 
-        // Проверка корректности даты совершения сделки
+        // Проверка корректности даты заключения сделки
         if (row.docDate && row.dealDate && (row.docDate > row.dealDate || row.dealDate > getReportPeriodEndDate())) {
             def msg1 = row.getCell('dealDate').column.name
             def msg2 = row.getCell('docDate').column.name

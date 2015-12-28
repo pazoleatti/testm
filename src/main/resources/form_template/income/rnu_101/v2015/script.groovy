@@ -149,13 +149,13 @@ void calc() {
     if (dataRows.isEmpty()) {
         return
     }
-    // Удаление подВсегов
+    // Удаление подитогов
     deleteAllAliased(dataRows)
 
     // Сортировка
     sortRows(dataRows, groupColumns)
 
-    // Добавление подВсегов
+    // Добавление подитогов
     addAllAliased(dataRows, new ScriptUtils.CalcAliasRow() {
         @Override
         DataRow<Cell> calc(int i, List<DataRow<Cell>> rows) {
@@ -235,13 +235,13 @@ void importData() {
             rowValues.clear()
             continue
         } else if (rowValues[INDEX_FOR_SKIP] == "Итого") {
-            //для расчета уникального среди групп(groupColumns) ключа берем строку перед ПодВсеговой
+            //для расчета уникального среди групп(groupColumns) ключа берем строку перед подитоговой
             def tmpRowValue = rows.get(rows.size() - 1)
             def str = ''
             groupColumns.each{ def n -> str = str + ((tmpRowValue.get(n)!=null) ? tmpRowValue.get(n) : "").toString() }
             key = str.hashCode()
             def subTotalRow = getNewSubTotalRowFromXls(key, rowValues, colOffset, fileRowIndex, rowIndex)
-            //наш ключ - row.getAlias() до решетки. так как индекс после решетки не равен у расчитанной и импортированной подВсегововых строк
+            //наш ключ - row.getAlias() до решетки. так как индекс после решетки не равен у расчитанной и импортированной подитогововых строк
             if (totalRowFromFileMap[subTotalRow.getAlias().split('#')[0]] == null) {
                 totalRowFromFileMap[subTotalRow.getAlias().split('#')[0]] = []
             }
@@ -258,10 +258,9 @@ void importData() {
         allValues.remove(rowValues)
         rowValues.clear()
     }
-
     updateIndexes(rows)
 
-    // сравнение подВсегов
+    // сравнение подитогов
     if (!totalRowFromFileMap.isEmpty()) {
         def tmpSubTotalRows = calcSubTotalRows(rows)
         tmpSubTotalRows.each { subTotalRow ->
@@ -276,7 +275,7 @@ void importData() {
             }
         }
         if (!totalRowFromFileMap.isEmpty()) {
-            // для этих подВсегов из файла нет групп
+            // для этих подитогов из файла нет групп
             totalRowFromFileMap.each { key, totalRows ->
                 totalRows.each { totalRow ->
                     rowWarning(logger, totalRow, String.format(GROUP_WRONG_ITOG_ROW, totalRow.getIndex()))
@@ -418,9 +417,9 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
     return newRow
 }
 /**
- * Получить новую подВсеговую строку нф по значениям из экселя.
+ * Получить новую подитоговую строку нф по значениям из экселя.
  *
- * @param key ключ для сравнения подВсеговых строк при импорте
+ * @param key ключ для сравнения подитоговых строк при импорте
  * @param values список строк со значениями
  * @param colOffset отступ в колонках
  * @param fileRowIndex номер строки в тф
@@ -444,9 +443,9 @@ def getNewSubTotalRowFromXls(def key, def values, def colOffset, def fileRowInde
     return newRow
 }
 /**
- * Получить подВсеговую строку с заданными стилями.
+ * Получить подитоговую строку с заданными стилями.
  *
- * @param key ключ для сравнения подВсеговых строк при импорте
+ * @param key ключ для сравнения подтоговых строк при импорте
  * @param i номер строки
  */
 DataRow<Cell> getSubTotalRow(int i, def key) {
@@ -460,15 +459,15 @@ DataRow<Cell> getSubTotalRow(int i, def key) {
     return newRow
 }
 
-// Получение подВсеговых строк
+// Получение подитоговых строк
 def getSubTotalRows(def dataRows) {
     return dataRows.findAll { it.getAlias() != null && !'total'.equals(it.getAlias()) }
 }
 
-// Получить посчитанные подВсеговые строки
+// Получить посчитанные подитоговые строки
 def calcSubTotalRows(def dataRows) {
     def tmpRows = dataRows.findAll { !it.getAlias() }
-    // Добавление подВсегов
+    // Добавление подитогов
     addAllAliased(tmpRows, new ScriptUtils.CalcAliasRow() {
         @Override
         DataRow<Cell> calc(int i, List<DataRow<Cell>> rows) {
@@ -479,7 +478,7 @@ def calcSubTotalRows(def dataRows) {
     return tmpRows.findAll { it.getAlias() }
 }
 
-// Расчет подВсегового значения
+// Расчет подтогового значения
 DataRow<Cell> calcItog(def int i, def List<DataRow<Cell>> dataRows) {
     def tmpRow = dataRows.get(i)
     def str = ''
@@ -487,7 +486,7 @@ DataRow<Cell> calcItog(def int i, def List<DataRow<Cell>> dataRows) {
     key = str.hashCode()
     def newRow = getSubTotalRow(i, key)
 
-    // Расчеты подВсеговых значений
+    // Расчеты подитоговых значений
     def rows = []
     for (int j = i; j >= 0 && dataRows.get(j).getAlias() == null; j--) {
         rows.add(dataRows.get(j))
