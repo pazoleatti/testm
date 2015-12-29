@@ -503,10 +503,7 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
         if (yearStr.contains(".")) {
             newRow.financialYear = parseDate(yearStr, "dd.MM.yyyy", fileRowIndex, colIndex + colOffset, logger, true)
         } else {
-            def yearNum = parseNumber(yearStr, fileRowIndex, colIndex + colOffset, logger, true)
-            if (yearNum != null && yearNum != 0) {
-                newRow.financialYear = new GregorianCalendar(yearNum as Integer, Calendar.JANUARY, 1).getTime()
-            }
+            newRow.financialYear = parseDate(yearStr, "yyyy", fileRowIndex, colIndex + colOffset, logger, true)
         }
     }
 

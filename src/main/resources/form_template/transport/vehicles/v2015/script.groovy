@@ -1485,10 +1485,7 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
         if (yearStr.contains(".")) {
             newRow.year = parseDate(yearStr, "dd.MM.yyyy", fileRowIndex, colIndex + colOffset, logger, true)
         } else {
-            def yearNum = parseNumber(yearStr, fileRowIndex, colIndex + colOffset, logger, true)
-            if (yearNum != null && yearNum != 0) {
-                newRow.year = new GregorianCalendar(yearNum as Integer, Calendar.JANUARY, 1).getTime()
-            }
+            newRow.year = parseDate(yearStr, "yyyy", fileRowIndex, colIndex + colOffset, logger, true)
         }
     }
 
