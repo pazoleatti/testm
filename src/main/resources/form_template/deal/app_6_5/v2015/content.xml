@@ -107,7 +107,7 @@
         <name>Город</name>
         <order>11</order>
         <width>5</width>
-        <maxLength>128</maxLength>
+        <maxLength>50</maxLength>
         <prevLength>0</prevLength>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
@@ -116,7 +116,7 @@
         <name>Населенный пункт</name>
         <order>12</order>
         <width>5</width>
-        <maxLength>128</maxLength>
+        <maxLength>50</maxLength>
         <prevLength>0</prevLength>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">

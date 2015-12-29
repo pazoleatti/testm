@@ -24,10 +24,10 @@
         <cell alias="dealDate" colSpan="1" rowSpan="1" value="Дата сделки (поставки)"/>
         <cell alias="name" colSpan="1" rowSpan="1" value="Наименование контрагента и ОПФ"/>
         <cell alias="dealMode" colSpan="1" rowSpan="1" value="Режим переговорных сделок"/>
-        <cell alias="iksr" colSpan="1" rowSpan="1" value="ИНН/КИО контрагента"/>
+        <cell alias="iksr" colSpan="1" rowSpan="1" value="ИНН/ КИО контрагента"/>
         <cell alias="countryName" colSpan="1" rowSpan="1" value="Страна местонахождения контрагента"/>
         <cell alias="countryCode" colSpan="1" rowSpan="1" value="Код страны местонахождения контрагента"/>
-        <cell alias="currencySum" colSpan="1" rowSpan="1" value="Сумма сделки (с учетом НКД), в валюте расчетов."/>
+        <cell alias="currencySum" colSpan="1" rowSpan="1" value="Сумма сделки (с учетом НКД), в валюте расчетов"/>
         <cell alias="currencyCode" colSpan="1" rowSpan="1" value="Валюта расчетов по сделке"/>
         <cell alias="courseCB" colSpan="1" rowSpan="1" value="Курс ЦБ РФ"/>
         <cell alias="sum" colSpan="1" rowSpan="1" value="Сумма сделки (с учетом НКД), руб."/>
