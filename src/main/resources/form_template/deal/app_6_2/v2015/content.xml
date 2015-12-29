@@ -114,7 +114,7 @@
         <columnType>NUMBER</columnType>
         <name>Количество</name>
         <order>11</order>
-        <width>5</width>
+        <width>9</width>
         <maxLength>15</maxLength>
         <precision>0</precision>
     </columns>
