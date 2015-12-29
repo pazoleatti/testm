@@ -61,6 +61,8 @@ public class FormDataCSVReportBuilder extends AbstractReportBuilder {
                 String alias = column.getAlias();
                 if (ColumnType.REFBOOK.equals(column.getColumnType()) || ColumnType.REFERENCE.equals(column.getColumnType())) {
                     oneRow.add(row.getCell(alias).getRefBookDereference());
+                } else if (ColumnType.NUMBER.equals(column.getColumnType())) {
+                    oneRow.add(row.getCell(alias).getValue() == null ? "" : row.getCell(alias).getNumericValue().toPlainString());
                 } else {
                     oneRow.add(row.getCell(alias).getValue() == null ? "" : row.getCell(alias).getValue().toString());
                 }
