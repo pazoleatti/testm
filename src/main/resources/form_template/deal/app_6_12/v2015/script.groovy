@@ -49,10 +49,10 @@ switch (formDataEvent) {
         importData()
         formDataService.saveCachedDataRows(formData, logger)
         break
-    case FormDataEvent.IMPORT_TRANSPORT_FILE:
+    /*case FormDataEvent.IMPORT_TRANSPORT_FILE:
         importTransportData()
         formDataService.saveCachedDataRows(formData, logger)
-        break
+        break*/
     case FormDataEvent.SORT_ROWS:
         sortFormDataRows()
         break

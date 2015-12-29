@@ -233,7 +233,7 @@ public class App_6_12Test extends ScriptTestBase {
         checkAfterCalc(testHelper.getDataRowHelper().getAll());
     }
 
-    @Test
+    //@Test
     public void importTransportFileTest() {
         mockBeforeImport();
         testHelper.setImportFileInputStream(getImportRnuInputStream());

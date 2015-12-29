@@ -179,7 +179,7 @@ public class App_6_9Test extends ScriptTestBase {
         checkAfterCalc(testHelper.getDataRowHelper().getAll());
     }
 
-    @Test
+    //@Test
     public void importTransportFileTest() {
         mockBeforeImport();
         testHelper.setImportFileInputStream(getImportRnuInputStream());
