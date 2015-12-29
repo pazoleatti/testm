@@ -185,7 +185,7 @@ void logicCheck() {
         checkNonEmptyColumns(row, rowNum, nonEmptyColumns, logger, true)
 
         // Проверка признака взаимозависимости
-        // dвсегда "Нет"
+        // всегда "Нет"
 
         // Проверка корректности даты договора
         if (row.docDate && (row.docDate < Date.parse('dd.MM.yyyy', '01.01.1991') || row.docDate > getReportPeriodEndDate())) {
@@ -202,8 +202,13 @@ void logicCheck() {
             logger.error("Строка $rowNum: Значение графы «$msg1» должно быть не меньше значения графы «$msg2» и не больше $msg3!")
         }
 
+        // графа 14 = элемент с кодом «1» ("ОМС")
+        def isOMS = (getRefBookValue(18, row.signPhis)?.CODE?.numberValue == 1)
+        // графа 14 = элемент с кодом «2» ("Физическая поставка")
+        def isPhysics = (getRefBookValue(18, row.signPhis)?.CODE?.numberValue == 2)
+
         // Проверка признака физической поставки
-        if(row.signPhis && row.signPhis != 'ОМС' && row.signPhis != 'Физическая поставка'){
+        if(row.signPhis && !isOMS && !isPhysics){
             def msg = row.getCell('signPhis').column.name
             logger.error("Строка $rowNum: Графа «$msg» может содержать только одно из значений: ОМС, Физическая поставка!")
         }
@@ -217,7 +222,7 @@ void logicCheck() {
         }
 
         // Проверка зависимости от признака физической поставки
-        if (row.signPhis && row.signPhis == 'ОМС') {
+        if (row.signPhis && isOMS) {
             // графы 16 – 24 должны быть не заполнены
             def isHaveNotEmptyField = false
             def checkField = ['countryCode2', 'region1', 'city1', 'settlement1', 'countryCode3', 'region2', 'city2', 'settlement2', 'conditionCode']
@@ -228,7 +233,7 @@ void logicCheck() {
             }
             def msg = row.getCell('signPhis').column.name
             logger.error("Строка $rowNum: Графы 12.1-12.4, 13.1-13.4, 14 не должны быть заполнены, т.к. в графе «$msg» указано значение «ОМС»!")
-        } else if(row.signPhis && row.signPhis == 'Физическая поставка') {
+        } else if(row.signPhis && isPhysics) {
             // i. Графы 16, 20 должны быть заполнены
             if (row.countryCode2 == null || row.countryCode3 == null) {
                 def msg1 = row.getCell('signPhis').column.name
