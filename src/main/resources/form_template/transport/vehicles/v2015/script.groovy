@@ -1480,14 +1480,7 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
 
     // графа 14
     colIndex++
-    def yearStr = values[colIndex]
-    if (yearStr != null) {
-        if (yearStr.contains(".")) {
-            newRow.year = parseDate(yearStr, "dd.MM.yyyy", fileRowIndex, colIndex + colOffset, logger, true)
-        } else {
-            newRow.year = parseDate(yearStr, "yyyy", fileRowIndex, colIndex + colOffset, logger, true)
-        }
-    }
+    newRow.year = parseDate(values[colIndex], "yyyy", fileRowIndex, colIndex + colOffset, logger, true)
 
     // графа 15
     colIndex++
