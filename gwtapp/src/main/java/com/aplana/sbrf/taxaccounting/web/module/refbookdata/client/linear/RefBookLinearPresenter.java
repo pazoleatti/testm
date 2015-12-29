@@ -238,4 +238,20 @@ public class RefBookLinearPresenter extends PresenterWidget<RefBookLinearPresent
         addVisibleHandler(SearchButtonEvent.getType(), this);
         addVisibleHandler(UpdateForm.getType(), this);
     }
+
+    public Date getRelevanceDate() {
+        return dataProvider.relevanceDate;
+    }
+
+    public String getSearchPattern() {
+        return dataProvider.searchPattern;
+    }
+
+    public int getSortColumnIndex() {
+        return getView().getSortColumnIndex();
+    }
+
+    public boolean isAscSorting() {
+        return getView().isAscSorting();
+    }
 }

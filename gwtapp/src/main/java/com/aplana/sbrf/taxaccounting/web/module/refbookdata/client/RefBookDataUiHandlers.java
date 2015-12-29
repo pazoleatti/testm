@@ -15,4 +15,5 @@ public interface RefBookDataUiHandlers extends UiHandlers {
     void sendQuery();
     void onSearchClick();
     void onBackToRefBookAnchorClicked();
+    void onPrintClicked(String reportName);
 }

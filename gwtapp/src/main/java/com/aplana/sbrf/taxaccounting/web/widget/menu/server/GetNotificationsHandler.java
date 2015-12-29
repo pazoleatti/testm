@@ -56,6 +56,8 @@ public class GetNotificationsHandler extends AbstractActionHandler<GetNotificati
 			row.setMsg(notification.getText());
             row.setBlobDataId(notification.getBlobDataId());
             row.setCanDelete(canDelete(notification, user));
+            row.setReportId(notification.getReportId());
+            row.setNotificationType(notification.getNotificationType());
 			rows.add(row);
 		}
 		PagingResult<NotificationTableRow> resultRows = new PagingResult<NotificationTableRow>(rows, result.getTotalCount());

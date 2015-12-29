@@ -63,7 +63,7 @@ public abstract class XlsmGeneratorAsyncTask extends AbstractAsyncTask {
     }
 
     @Override
-    protected boolean executeBusinessLogic(Map<String, Object> params, Logger logger) {
+    protected TaskStatus executeBusinessLogic(Map<String, Object> params, Logger logger) {
         int userId = (Integer)params.get(USER_ID.name());
         long formDataId = (Long)params.get("formDataId");
         boolean manual = (Boolean)params.get("manual");
@@ -82,7 +82,7 @@ public abstract class XlsmGeneratorAsyncTask extends AbstractAsyncTask {
             }
         });
         reportService.create(formDataId, uuid, FormDataReportType.EXCEL, isShowChecked, manual, saved);
-        return true;
+        return new TaskStatus(true, null);
     }
 
     @Override

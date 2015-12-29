@@ -1,5 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.widget.menu.shared;
 
+import com.aplana.sbrf.taxaccounting.model.NotificationType;
+
 import java.io.Serializable;
 import java.util.Date;
 
@@ -11,6 +13,8 @@ public class NotificationTableRow implements Serializable {
     private String msg;
     private Boolean canDelete;
     private String blobDataId;
+    private String reportId;
+    private NotificationType notificationType = NotificationType.DEFAULT;
 
 	public Date getDate() {
 		return date;
@@ -50,5 +54,21 @@ public class NotificationTableRow implements Serializable {
 
     public void setBlobDataId(String blobDataId) {
         this.blobDataId = blobDataId;
+    }
+
+    public String getReportId() {
+        return reportId;
+    }
+
+    public void setReportId(String reportId) {
+        this.reportId = reportId;
+    }
+
+    public NotificationType getNotificationType() {
+        return notificationType;
+    }
+
+    public void setNotificationType(NotificationType notificationType) {
+        this.notificationType = notificationType;
     }
 }

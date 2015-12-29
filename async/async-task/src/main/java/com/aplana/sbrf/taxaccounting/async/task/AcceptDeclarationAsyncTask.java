@@ -61,7 +61,7 @@ public abstract class AcceptDeclarationAsyncTask extends AbstractAsyncTask {
     }
 
     @Override
-    protected boolean executeBusinessLogic(Map<String, Object> params, Logger logger) {
+    protected TaskStatus executeBusinessLogic(Map<String, Object> params, Logger logger) {
         long declarationDataId = (Long)params.get("declarationDataId");
         int userId = (Integer)params.get(USER_ID.name());
         TAUserInfo userInfo = new TAUserInfo();
@@ -78,7 +78,7 @@ public abstract class AcceptDeclarationAsyncTask extends AbstractAsyncTask {
                 }
             });
         }
-        return true;
+        return new TaskStatus(true, null);
     }
 
     @Override

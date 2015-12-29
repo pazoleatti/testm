@@ -12,6 +12,13 @@ import java.util.Map;
 public interface NotificationService {
 
     /**
+     * Получить оповещение по его идентификатору
+     * @param id идентификатор оповещения
+     * @return оповещение
+     */
+    Notification get(long id);
+
+    /**
      * Создает новое оповещение
      * @param notification оповещение
      * @return идентификатор нового оповещения

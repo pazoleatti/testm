@@ -9,33 +9,34 @@ import com.aplana.sbrf.taxaccounting.dao.api.ReportPeriodDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
+import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
+import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookHelper;
-import com.aplana.sbrf.taxaccounting.service.BlobDataService;
-import com.aplana.sbrf.taxaccounting.service.DepartmentReportPeriodService;
-import com.aplana.sbrf.taxaccounting.service.FormDataAccessService;
-import com.aplana.sbrf.taxaccounting.service.PrintingService;
-import com.aplana.sbrf.taxaccounting.service.FormDataService;
+import com.aplana.sbrf.taxaccounting.service.*;
 import com.aplana.sbrf.taxaccounting.service.impl.print.formdata.FormDataCSVReportBuilder;
 import com.aplana.sbrf.taxaccounting.service.impl.print.formdata.FormDataXlsmReportBuilder;
 import com.aplana.sbrf.taxaccounting.service.impl.print.logentry.LogEntryReportBuilder;
 import com.aplana.sbrf.taxaccounting.service.impl.print.logsystem.LogSystemCsvBuilder;
 import com.aplana.sbrf.taxaccounting.service.impl.print.logsystem.LogSystemXlsxReportBuilder;
+import com.aplana.sbrf.taxaccounting.service.impl.print.refbook.RefBookCSVReportBuilder;
+import com.aplana.sbrf.taxaccounting.service.impl.print.refbook.RefBookExcelReportBuilder;
 import com.aplana.sbrf.taxaccounting.service.impl.print.tausers.TAUsersReportBuilder;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.util.List;
-import java.util.Map;
+import java.io.*;
+import java.util.*;
 
 @Service
 public class PrintingServiceImpl implements PrintingService {
@@ -66,6 +67,10 @@ public class PrintingServiceImpl implements PrintingService {
     private DepartmentReportPeriodService departmentReportPeriodService;
     @Autowired
     private FormDataService formDataService;
+    @Autowired
+    private RefBookScriptingService refBookScriptingService;
+    @Autowired
+    private LogEntryService logEntryService;
 
     private static final long REF_BOOK_ID = 8L;
     private static final String REF_BOOK_VALUE_NAME = "CODE";
@@ -231,6 +236,150 @@ public class PrintingServiceImpl implements PrintingService {
             if (file.delete()){
                 LOG.warn(String.format("Временный файл %s не был удален", filePath));
             }
+        }
+    }
+
+    @Override
+    public String generateRefBookSpecificReport(long refBookId, String specificReportType, Date version, String filter, String searchPattern, RefBookAttribute sortAttribute, boolean isSortAscending, TAUserInfo userInfo, LockStateLogger stateLogger) {
+        Map<String, Object> params = new HashMap<String, Object>();
+        ScriptSpecificRefBookReportHolder scriptSpecificReportHolder = new ScriptSpecificRefBookReportHolder();
+        File reportFile = null;
+        try {
+            reportFile = File.createTempFile("specific_report", ".dat");
+            OutputStream outputStream = new BufferedOutputStream(new FileOutputStream(reportFile));
+            try {
+                Logger logger = new Logger();
+                scriptSpecificReportHolder.setSpecificReportType(specificReportType);
+                scriptSpecificReportHolder.setFileOutputStream(outputStream);
+                scriptSpecificReportHolder.setFileName(specificReportType);
+                scriptSpecificReportHolder.setVersion(version);
+                scriptSpecificReportHolder.setFilter(filter);
+                scriptSpecificReportHolder.setSearchPattern(searchPattern);
+                scriptSpecificReportHolder.setSortAttribute(sortAttribute);
+                scriptSpecificReportHolder.setSortAscending(isSortAscending);
+                params.put("scriptSpecificReportHolder", scriptSpecificReportHolder);
+                stateLogger.updateState("Формирование отчета");
+                if (!refBookScriptingService.executeScript(userInfo, refBookId, FormDataEvent.CREATE_SPECIFIC_REPORT, logger, params)) {
+                    throw new ServiceException("Не предусмотрена возможность формирования отчета \"%s\"", specificReportType);
+                }
+                if (logger.containsLevel(LogLevel.ERROR)) {
+                    throw new ServiceLoggerException("Возникли ошибки при формировании отчета", logEntryService.save(logger.getEntries()));
+                }
+            } finally {
+                IOUtils.closeQuietly(outputStream);
+            }
+            stateLogger.updateState("Сохранение отчета в базе данных");
+            return blobDataService.create(new FileInputStream(reportFile), scriptSpecificReportHolder.getFileName());
+        } catch (IOException e) {
+            throw new ServiceException(e.getLocalizedMessage(), e);
+        } finally {
+            if (reportFile != null)
+                reportFile.delete();
+        }
+    }
+
+    @Override
+    public String generateRefBookCSV(long refBookId, Date version, String filter,
+                                     RefBookAttribute sortAttribute, boolean isSortAscending, LockStateLogger stateLogger) {
+
+        String reportPath = null;
+        try {
+            RefBookDataProvider refBookDataProvider = refBookFactory.getDataProvider(refBookId);
+            RefBook refBook = refBookFactory.get(refBookId);
+            List<Map<String, RefBookValue>> refBookPage = refBookDataProvider.getRecords(version,
+                    null, filter, sortAttribute,
+                    isSortAscending);
+            Map<Long, Map<Long, String>> dereferenceValues = refBookHelper.dereferenceValues(refBook, refBookPage);
+            RefBookCSVReportBuilder refBookCSVReportBuilder;
+            if (!refBook.isHierarchic()) {
+                refBookCSVReportBuilder = new RefBookCSVReportBuilder(refBook, refBookPage, dereferenceValues, sortAttribute);
+            } else {
+                Map<Long, Map<String, RefBookValue>> hierarchicRecords = new HashMap<Long, Map<String, RefBookValue>>();
+                Iterator<Map<String, RefBookValue>> iterator = refBookPage.iterator();
+                while(iterator.hasNext()) {
+                    Map<String, RefBookValue> record = iterator.next();
+                    hierarchicRecords.put(record.get(RefBook.RECORD_ID_ALIAS).getNumberValue().longValue(), record);
+                }
+                do {
+                    iterator = refBookPage.iterator();
+                    List<Map<String, RefBookValue>> parentRecords = new ArrayList<Map<String, RefBookValue>>();
+                    while (iterator.hasNext()) {
+                        Map<String, RefBookValue> record = iterator.next();
+                        Long parentId = record.get(RefBook.RECORD_PARENT_ID_ALIAS).getReferenceValue();
+                        if (parentId != null && !hierarchicRecords.containsKey(parentId)) {
+                            Map<String, RefBookValue> parentRecord = refBookDataProvider.getRecordData(parentId);
+                            hierarchicRecords.put(parentRecord.get(RefBook.RECORD_ID_ALIAS).getNumberValue().longValue(), parentRecord);
+                            parentRecords.add(parentRecord);
+                        }
+                    }
+                    Map<Long, Map<Long, String>> dereferenceParentValues = refBookHelper.dereferenceValues(refBook, parentRecords);
+                    dereferenceValues.putAll(dereferenceParentValues);
+                    refBookPage = parentRecords;
+                } while(!refBookPage.isEmpty());
+                refBookCSVReportBuilder = new RefBookCSVReportBuilder(refBook, new ArrayList<Map<String, RefBookValue>>(hierarchicRecords.values()), dereferenceValues, sortAttribute);
+            }
+            stateLogger.updateState("Формирование отчета");
+            reportPath = refBookCSVReportBuilder.createReport();
+            String fileName = reportPath.substring(reportPath.lastIndexOf("\\") + 1);
+            stateLogger.updateState("Сохранение отчета в базе данных");
+            return blobDataService.create(new FileInputStream(reportPath), fileName);
+        } catch (IOException e) {
+            LOG.error(e.getMessage(), e);
+            throw new ServiceException("Ошибка при формировании отчета по справочнику." + LogSystemXlsxReportBuilder.class);
+        } finally {
+            cleanTmp(reportPath);
+        }
+    }
+
+    @Override
+    public String generateRefBookExcel(long refBookId, Date version, String filter, String searchPattern,
+                                     RefBookAttribute sortAttribute, boolean isSortAscending, LockStateLogger stateLogger) {
+
+        String reportPath = null;
+        try {
+            RefBookDataProvider refBookDataProvider = refBookFactory.getDataProvider(refBookId);
+            RefBook refBook = refBookFactory.get(refBookId);
+            List<Map<String, RefBookValue>> refBookPage = refBookDataProvider.getRecords(version,
+                    null, filter, sortAttribute, isSortAscending);
+            Map<Long, Pair<RefBookAttribute, Map<Long, RefBookValue>>> dereferenceValues = refBookHelper.dereferenceValuesAttributes(refBook, refBookPage);
+            RefBookExcelReportBuilder refBookExcelReportBuilder;
+            if (!refBook.isHierarchic()) {
+                refBookExcelReportBuilder = new RefBookExcelReportBuilder(refBook, refBookPage, dereferenceValues, searchPattern, null);
+            } else {
+                Map<Long, Map<String, RefBookValue>> hierarchicRecords = new HashMap<Long, Map<String, RefBookValue>>();
+                Iterator<Map<String, RefBookValue>> iterator = refBookPage.iterator();
+                while(iterator.hasNext()) {
+                    Map<String, RefBookValue> record = iterator.next();
+                    hierarchicRecords.put(record.get(RefBook.RECORD_ID_ALIAS).getNumberValue().longValue(), record);
+                }
+                do {
+                    iterator = refBookPage.iterator();
+                    List<Map<String, RefBookValue>> parentRecords = new ArrayList<Map<String, RefBookValue>>();
+                    while (iterator.hasNext()) {
+                        Map<String, RefBookValue> record = iterator.next();
+                        Long parentId = record.get(RefBook.RECORD_PARENT_ID_ALIAS).getReferenceValue();
+                        if (parentId != null && !hierarchicRecords.containsKey(parentId)) {
+                            Map<String, RefBookValue> parentRecord = refBookDataProvider.getRecordData(parentId);
+                            hierarchicRecords.put(parentRecord.get(RefBook.RECORD_ID_ALIAS).getNumberValue().longValue(), parentRecord);
+                            parentRecords.add(parentRecord);
+                        }
+                    }
+                    Map<Long, Pair<RefBookAttribute, Map<Long, RefBookValue>>> dereferenceParentValues = refBookHelper.dereferenceValuesAttributes(refBook, parentRecords);
+                    dereferenceValues.putAll(dereferenceParentValues);
+                    refBookPage = parentRecords;
+                } while(!refBookPage.isEmpty());
+                refBookExcelReportBuilder = new RefBookExcelReportBuilder(refBook, new ArrayList<Map<String, RefBookValue>>(hierarchicRecords.values()), dereferenceValues, searchPattern, sortAttribute);
+            }
+            stateLogger.updateState("Формирование отчета");
+            reportPath = refBookExcelReportBuilder.createReport();
+            String fileName = reportPath.substring(reportPath.lastIndexOf("\\") + 1);
+            stateLogger.updateState("Сохранение отчета в базе данных");
+            return blobDataService.create(new FileInputStream(reportPath), fileName);
+        } catch (IOException e) {
+            LOG.error(e.getMessage(), e);
+            throw new ServiceException("Ошибка при формировании отчета по справочнику." + LogSystemXlsxReportBuilder.class);
+        } finally {
+            cleanTmp(reportPath);
         }
     }
 }

@@ -1,8 +1,14 @@
 package com.aplana.sbrf.taxaccounting.refbook;
 
+import com.aplana.sbrf.taxaccounting.core.api.LockStateLogger;
+import com.aplana.sbrf.taxaccounting.model.FormData;
+import com.aplana.sbrf.taxaccounting.model.ReportType;
+import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
+import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.util.ScriptExposed;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -52,4 +58,33 @@ public interface RefBookFactory {
      * @return строку фильтрации для поиска по справочнику
      */
     String getSearchQueryStatement(String query, Long refBookId);
+
+    /**
+     * Название задачи для справочника
+     * @param reportType
+     * @param refBookId
+     * @param specificReportType
+     * @return
+     */
+    String getTaskName(ReportType reportType, Long refBookId, String specificReportType);
+
+    /**
+     * Подробное описание задачи
+     * @param reportType
+     * @param refBookId
+     * @param version
+     * @param filter
+     * @param specificReportType
+     * @return
+     */
+    String getTaskFullName(ReportType reportType, Long refBookId, Date version, String filter, String specificReportType);
+
+    /**
+     * Получить список доступных отчётов
+     * @param refBookId
+     * @param userInfo
+     * @param logger
+     * @return
+     */
+    List<String> getSpecificReportTypes(long refBookId, TAUserInfo userInfo, Logger logger);
 }

@@ -16,11 +16,11 @@ public class FormDataCSVReportBuilder extends AbstractReportBuilder {
 
     public static final String FILE_NAME = "Налоговый_отчет_";
 
-    List<DataRow<Cell>> dataRows;
-    FormData data;
-    FormTemplate formTemplate;
-    boolean isShowChecked;
-    RefBookValue refBookValue;
+    private List<DataRow<Cell>> dataRows;
+    private FormData data;
+    private FormTemplate formTemplate;
+    private boolean isShowChecked;
+    private RefBookValue refBookValue;
 
 
     public FormDataCSVReportBuilder(FormDataReport data, boolean isShowChecked, List<DataRow<Cell>> dataRows, RefBookValue refBookValue) {

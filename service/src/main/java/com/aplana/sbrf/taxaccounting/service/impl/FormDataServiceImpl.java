@@ -2077,7 +2077,7 @@ public class FormDataServiceImpl implements FormDataService {
     @Override
     public void createSpecificReport(FormData formData, boolean isShowChecked, boolean saved, String specificReportType, TAUserInfo userInfo, LockStateLogger stateLogger) {
         Map<String, Object> params = new HashMap<String, Object>();
-        ScriptSpecificReportHolder scriptSpecificReportHolder = new ScriptSpecificReportHolder();
+        ScriptSpecificFormDataReportHolder scriptSpecificReportHolder = new ScriptSpecificFormDataReportHolder();
         File reportFile = null;
         try {
             reportFile = File.createTempFile("specific_report", ".dat");

@@ -405,4 +405,78 @@ public class RefBookHelperImpl implements RefBookHelper {
         return recordVersion;
     }
 
+    public Map<Long, Map<Long, String>> dereferenceValues(RefBook refBook, List<Map<String, RefBookValue>> refBookPage) {
+        Map<Long, Map<Long, String>> dereferenceValues = new HashMap<Long, Map<Long, String>>(); // Map<attrId, Map<referenceId, value>>
+        if (refBookPage.isEmpty()) {
+            return dereferenceValues;
+        }
+        List<RefBookAttribute> attributes = refBook.getAttributes();
+        // разыменовывание ссылок
+        for (RefBookAttribute attribute : attributes) {
+            if (RefBookAttributeType.REFERENCE.equals(attribute.getAttributeType())) {
+                // сбор всех ссылок
+                String alias = attribute.getAlias();
+                Set<Long> recordIds = new HashSet<Long>();
+                for (Map<String, RefBookValue> record : refBookPage) {
+                    RefBookValue value = record.get(alias);
+                    if (value != null && !value.isEmpty()) {
+                        recordIds.add(value.getReferenceValue());
+                    }
+                }
+                // групповое разыменование, если есть что разыменовывать
+                if (!recordIds.isEmpty()) {
+                    RefBookDataProvider provider = refBookFactory.getDataProvider(attribute.getRefBookId());
+                    Map<Long, RefBookValue> values = provider.dereferenceValues(attribute.getRefBookAttributeId(), recordIds);
+                    if (values != null && !values.isEmpty()) {
+                        Map<Long, String> stringValues = new HashMap<Long, String>();
+                        for (Map.Entry<Long, RefBookValue> entry : values.entrySet()) {
+                            stringValues.put(entry.getKey(), String.valueOf(entry.getValue()));
+                        }
+                        dereferenceValues.put(attribute.getId(), stringValues);
+                    }
+                }
+            }
+        }
+        return dereferenceValues;
+    }
+
+    @Override
+    public Map<Long, Pair<RefBookAttribute, Map<Long, RefBookValue>>> dereferenceValuesAttributes(RefBook refBook, List<Map<String, RefBookValue>> refBookPage) {
+        Map<Long, Pair<RefBookAttribute, Map<Long, RefBookValue>>> dereferenceValues = new HashMap<Long, Pair<RefBookAttribute,Map<Long, RefBookValue>>>(); // Map<attrId, Map<referenceId, value>>
+        if (refBookPage.isEmpty()) {
+            return dereferenceValues;
+        }
+        List<RefBookAttribute> attributes = refBook.getAttributes();
+        // разыменовывание ссылок
+        for (RefBookAttribute attribute : attributes) {
+            if (RefBookAttributeType.REFERENCE.equals(attribute.getAttributeType())) {
+                // сбор всех ссылок
+                String alias = attribute.getAlias();
+                Set<Long> recordIds = new HashSet<Long>();
+                for (Map<String, RefBookValue> record : refBookPage) {
+                    RefBookValue value = record.get(alias);
+                    if (value != null && !value.isEmpty()) {
+                        recordIds.add(value.getReferenceValue());
+                    }
+                }
+                // групповое разыменование, если есть что разыменовывать
+                if (!recordIds.isEmpty()) {
+                    RefBookDataProvider provider = refBookFactory.getDataProvider(attribute.getRefBookId());
+                    Map<Long, RefBookValue> values = provider.dereferenceValues(attribute.getRefBookAttributeId(), recordIds);
+                    Map<Long, RefBookValue> refBookValues = new HashMap<Long, RefBookValue>();
+                    RefBookAttribute referenceAttribute = refBookFactory.get(attribute.getRefBookId()).getAttribute(attribute.getRefBookAttributeId());
+                    if (values != null && !values.isEmpty()) {
+                        for (Map.Entry<Long, RefBookValue> entry : values.entrySet()) {
+                            refBookValues.put(entry.getKey(), entry.getValue());
+                        }
+                    }
+                    dereferenceValues.put(attribute.getId(), new Pair<RefBookAttribute, Map<Long, RefBookValue>>(referenceAttribute, refBookValues));
+                } else {
+                    RefBookAttribute referenceAttribute = refBookFactory.get(attribute.getRefBookId()).getAttribute(attribute.getRefBookAttributeId());
+                    dereferenceValues.put(attribute.getId(), new Pair<RefBookAttribute, Map<Long, RefBookValue>>(referenceAttribute, new HashMap<Long, RefBookValue>()));
+                }
+            }
+        }
+        return dereferenceValues;
+    }
 }

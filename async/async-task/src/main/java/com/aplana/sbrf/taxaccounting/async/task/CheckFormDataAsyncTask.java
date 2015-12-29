@@ -50,7 +50,7 @@ public abstract class CheckFormDataAsyncTask extends AbstractAsyncTask {
     }
 
     @Override
-    protected boolean executeBusinessLogic(Map<String, Object> params, final Logger logger) {
+    protected TaskStatus executeBusinessLogic(Map<String, Object> params, final Logger logger) {
         int userId = (Integer)params.get(USER_ID.name());
         long formDataId = (Long)params.get("formDataId");
         boolean manual = (Boolean)params.get("manual");
@@ -58,7 +58,7 @@ public abstract class CheckFormDataAsyncTask extends AbstractAsyncTask {
         userInfo.setUser(userService.getUser(userId));
         FormData formData = formDataService.getFormData(userInfo, formDataId, manual, logger);
 		formDataService.doCheck(logger, userInfo, formData, false);
-        return true;
+        return new TaskStatus(true, null);
 	}
 
     @Override

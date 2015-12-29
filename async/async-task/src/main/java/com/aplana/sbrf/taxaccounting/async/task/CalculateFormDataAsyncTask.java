@@ -53,7 +53,7 @@ public abstract class CalculateFormDataAsyncTask extends AbstractAsyncTask {
     }
 
     @Override
-    protected boolean executeBusinessLogic(Map<String, Object> params, Logger logger) {
+    protected TaskStatus executeBusinessLogic(Map<String, Object> params, Logger logger) {
         int userId = (Integer)params.get(USER_ID.name());
         long formDataId = (Long)params.get("formDataId");
         boolean manual = (Boolean)params.get("manual");
@@ -71,9 +71,9 @@ public abstract class CalculateFormDataAsyncTask extends AbstractAsyncTask {
         formDataService.saveFormData(saveLogger, userInfo, formData, true);
         logger.getEntries().addAll(saveLogger.getEntries());
         if (logger.containsLevel(LogLevel.ERROR)) {
-            return false;
+            return new TaskStatus(false, null);
         }
-        return true;
+        return new TaskStatus(true, null);
     }
 
     @Override

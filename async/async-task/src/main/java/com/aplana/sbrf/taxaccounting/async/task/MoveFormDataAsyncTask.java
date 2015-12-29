@@ -54,7 +54,7 @@ public abstract class MoveFormDataAsyncTask extends AbstractAsyncTask {
     }
 
     @Override
-    protected boolean executeBusinessLogic(Map<String, Object> params, final Logger logger) {
+    protected TaskStatus executeBusinessLogic(Map<String, Object> params, final Logger logger) {
         int userId = (Integer)params.get(USER_ID.name());
         long formDataId = (Long)params.get("formDataId");
         int workflowMoveId = (Integer)params.get("workflowMoveId");
@@ -70,7 +70,7 @@ public abstract class MoveFormDataAsyncTask extends AbstractAsyncTask {
                 lockService.updateState(lock, lockDate, state);
             }
         });
-        return true;
+        return new TaskStatus(true, null);
     }
 
     @Override

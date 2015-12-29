@@ -19,4 +19,5 @@ public interface RefBookHierUIHandlers extends UiHandlers {
     void onAddRowClicked();
     void onBackToRefBookAnchorClicked();
     void onBackClicked();
+    void onPrintClicked(String reportName);
 }

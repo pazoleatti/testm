@@ -72,7 +72,7 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
                     } catch (IllegalArgumentException e) {
                         refBookAttribute = null;
                     }
-                    ((RefBookColumn) result).setNameAttributeId(refBookAttribute != null ? refBook.getAttribute("NAME").getId() : attributeId);
+                    ((RefBookColumn) result).setNameAttributeId(refBookAttribute != null ? refBookAttribute.getId() : attributeId);
                 } else {
                     result = new ReferenceColumn();
                     ((ReferenceColumn) result).setRefBookAttributeId(attributeId);

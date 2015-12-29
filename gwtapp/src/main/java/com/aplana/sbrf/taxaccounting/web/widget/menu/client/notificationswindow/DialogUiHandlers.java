@@ -12,4 +12,6 @@ public interface DialogUiHandlers extends UiHandlers {
     void deleteNotifications(Set<NotificationTableRow> selectedSet);
 
     void onEventClick(String uuid);
+
+    void onUrlClick(Long id);
 }

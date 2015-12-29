@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.web.widget.menu.client.notificationswindow;
 
+import com.aplana.sbrf.taxaccounting.model.NotificationType;
 import com.aplana.sbrf.taxaccounting.model.NotificationsFilterData;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.web.widget.menu.shared.NotificationTableRow;
@@ -144,6 +145,36 @@ public class DialogView extends PopupViewWithUiHandlers<DialogUiHandlers> implem
 
         contentColumn.setSortable(true);
         contentColumn.setDataStoreName(NotificationsFilterData.SortColumn.TEXT.name());
+
+        Column<NotificationTableRow, NotificationTableRow> urlColumn = new Column<NotificationTableRow, NotificationTableRow>(
+                new AbstractCell<NotificationTableRow>() {
+                    @Override
+                    public void render(Context context,
+                                       NotificationTableRow notificationTableRow,
+                                       SafeHtmlBuilder sb) {
+                        if (notificationTableRow == null) {
+                            return;
+                        }
+                        if (NotificationType.REF_BOOK_REPORT.equals(notificationTableRow.getNotificationType())) {
+                            if (notificationTableRow.getReportId() != null) {
+                                sb.appendHtmlConstant("<div class=\"LinkDiv\">"
+                                        + "Скачать" + "</div>");
+                            } else {
+                                sb.appendHtmlConstant("Отчет удален");
+                            }
+                        } else {
+                            sb.appendHtmlConstant("");
+                        }
+                    }
+                }) {
+            @Override
+            public NotificationTableRow getValue(
+                    NotificationTableRow object) {
+                return object;
+            }
+        };
+        dateColumn.setDefaultSortAscending(false);
+        dateColumn.setSortable(false);
         dateColumn.setDefaultSortAscending(false);
         dateColumn.setSortable(true);
         dateColumn.setDataStoreName(NotificationsFilterData.SortColumn.DATE.name());
@@ -152,6 +183,8 @@ public class DialogView extends PopupViewWithUiHandlers<DialogUiHandlers> implem
 	    notificationTable.addColumn(dateColumn, "Дата оповещения");
 	    notificationTable.setColumnWidth(dateColumn, 115, Style.Unit.PX);
 	    notificationTable.addColumn(contentColumn, "Содержание");
+        notificationTable.addColumn(urlColumn, "Ссылка");
+        notificationTable.setColumnWidth(urlColumn, 50, Style.Unit.PX);
 
         notificationTable.getColumnSortList().setLimit(1);
 
@@ -170,7 +203,7 @@ public class DialogView extends PopupViewWithUiHandlers<DialogUiHandlers> implem
 
                     @Override
                     public DefaultSelectionEventManager.SelectAction translateSelectionEvent(CellPreviewEvent<NotificationTableRow> event) {
-                        if (event.getColumn() != 2)
+                        if (event.getColumn() != 2 && event.getColumn() != 3)
                             return DefaultSelectionEventManager.SelectAction.TOGGLE;
                         return DefaultSelectionEventManager.SelectAction.IGNORE;
                     }
@@ -183,6 +216,12 @@ public class DialogView extends PopupViewWithUiHandlers<DialogUiHandlers> implem
                     String blobDataId = event.getValue().getBlobDataId();
                     if (blobDataId != null){
                         getUiHandlers().onEventClick(blobDataId);
+                    }
+                } else if (event.getColumn() == 3 && Event.getTypeInt(event.getNativeEvent().getType()) == Event.ONCLICK) {
+                    Long id = event.getValue().getId();
+                    String reportId = event.getValue().getReportId();
+                    if (id != null && reportId != null) {
+                        getUiHandlers().onUrlClick(id);
                     }
                 }
             }
@@ -240,5 +279,16 @@ public class DialogView extends PopupViewWithUiHandlers<DialogUiHandlers> implem
     @Override
     public void clearSelected() {
         notificationTableSM.clear();
+    }
+
+    @Override
+    public void updateRow(Long id, String reportId) {
+        for(NotificationTableRow row: notificationTable.getVisibleItems()) {
+            if (row.getId().equals(id)) {
+                row.setReportId(reportId);
+                notificationTable.redraw();
+                break;
+            }
+        }
     }
 }

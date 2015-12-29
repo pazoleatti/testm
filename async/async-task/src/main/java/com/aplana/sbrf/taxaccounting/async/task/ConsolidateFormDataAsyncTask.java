@@ -69,7 +69,7 @@ public abstract class ConsolidateFormDataAsyncTask extends AbstractAsyncTask {
     }
 
     @Override
-    protected boolean executeBusinessLogic(Map<String, Object> params, Logger logger) {
+    protected TaskStatus executeBusinessLogic(Map<String, Object> params, Logger logger) {
         int userId = (Integer)params.get(USER_ID.name());
         long formDataId = (Long)params.get("formDataId");
         TAUserInfo userInfo = new TAUserInfo();
@@ -96,7 +96,7 @@ public abstract class ConsolidateFormDataAsyncTask extends AbstractAsyncTask {
                 lockService.updateState(lock, lockDate, state);
             }
         });
-        return true;
+        return new TaskStatus(true, null);
     }
 
     @Override

@@ -39,7 +39,7 @@ public class TAAbstractScriptingServiceImplTest extends TAAbstractScriptingServi
 			"        formDataService.checkUnique(formData, logger)*/\n" +
 			"        break";
 
-	@Test
+	//@Test
 	public void canExecuteScriptTest() {
 		assertTrue(canExecuteScript(SCRIPT1, FormDataEvent.CREATE));
 		assertFalse(canExecuteScript(SCRIPT1, FormDataEvent.IMPORT));

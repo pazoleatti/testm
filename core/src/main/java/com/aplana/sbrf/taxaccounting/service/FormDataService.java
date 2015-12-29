@@ -535,7 +535,7 @@ public interface FormDataService {
      * @param saved
      * @param specificReportType
      * @param userInfo
-     * @param logger
+     * @param stateLogger
      */
     void createSpecificReport(FormData formData, boolean isShowChecked, boolean saved, String specificReportType, TAUserInfo userInfo, LockStateLogger stateLogger);
 
