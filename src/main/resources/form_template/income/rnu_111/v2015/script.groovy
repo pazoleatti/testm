@@ -291,7 +291,6 @@ void calc() {
     // Удаление итогов
     deleteAllAliased(dataRows)
 
-    sortRows(dataRows)
     for (row in dataRows) {
         if(row.getAlias() != null){
             continue

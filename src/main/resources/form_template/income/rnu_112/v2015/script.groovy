@@ -187,11 +187,6 @@ void calc() {
     // Удаление подитогов
     deleteAllAliased(dataRows)
 
-    // Сортировка
-    sortRows(dataRows)
-
-    updateIndexes(dataRows)
-
     for (row in dataRows) {
         if(row.getAlias() != null){
             continue
