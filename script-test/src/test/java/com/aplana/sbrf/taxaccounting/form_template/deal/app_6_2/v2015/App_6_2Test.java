@@ -167,7 +167,7 @@ public class App_6_2Test extends ScriptTestBase {
         // TODO (Ramil Timerbaev) добавить тесты для логических проверок 11
     }
 
-    // Расчет пустой (в импорте - растчет заполненной)
+    // Расчет пустой (в импорте - расчет заполненной)
     @Test
     public void calcTest() {
         testHelper.execute(FormDataEvent.CALCULATE);

@@ -152,7 +152,7 @@ public class App_6_10_2Test extends ScriptTestBase {
         Assert.assertTrue(testHelper.getLogger().getEntries().isEmpty());
     }
 
-    // Расчет пустой (в импорте - растчет заполненной)
+    // Расчет пустой (в импорте - расчет заполненной)
     @Test
     public void calcTest() {
         testHelper.execute(FormDataEvent.CALCULATE);
