@@ -263,7 +263,7 @@ public class DepartmentServiceImpl implements DepartmentService {
         }
 
         // Результат выборки должен содержать только уникальные подразделения
-        Set setItems = new HashSet(retList);
+        Set<Department> setItems = new HashSet<Department>(retList);
         retList.clear();
         retList.addAll(setItems);
 
@@ -305,7 +305,7 @@ public class DepartmentServiceImpl implements DepartmentService {
         }
 
         // Результат выборки должен содержать только уникальные подразделения
-        Set setItems = new HashSet(retList);
+        Set<Department> setItems = new HashSet<Department>(retList);
         retList.clear();
         retList.addAll(setItems);
 
@@ -367,7 +367,7 @@ public class DepartmentServiceImpl implements DepartmentService {
             }
         }
 
-        Set setItems = new HashSet(retList);
+        Set<Integer> setItems = new HashSet<Integer>(retList);
         retList.clear();
         retList.addAll(setItems);
 
