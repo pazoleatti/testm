@@ -91,7 +91,7 @@ public class TAAbstractScriptingServiceImplTest extends TAAbstractScriptingServi
 			System.out.println("Average value : " + average);
 			System.out.println("Dispersion value : " + sqrDiff/index);
 			System.out.println("Min time : " + min + " milliseconds");
-			System.out.println("Max time : " + max + " milliseconds. Script first line : " + badScript.substring(0, badScript.indexOf(eol)));
+			//System.out.println("Max time : " + max + " milliseconds. Script first line : " + badScript.substring(0, badScript.indexOf(eol)));
 		} catch (IOException e) {
 			e.printStackTrace();
 			throw new ServiceException("Error scanning resource directory for groovy scripts.", e);

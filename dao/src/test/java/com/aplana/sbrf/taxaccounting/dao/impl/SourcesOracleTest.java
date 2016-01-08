@@ -22,7 +22,7 @@ import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 
-//@Ignore("Включать только локально, со включенным тестом не коммитить!")
+@Ignore("Включать только локально, со включенным тестом не коммитить!")
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration({"ForOracleTest.xml"})
 @Transactional
