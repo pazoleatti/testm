@@ -299,35 +299,32 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
 
     private static final String QUERY =
             "SELECT "+
-                    "id," +
-                    "kind," +
-                    "name," +
-                    "type_id," +
-                    "department_id, \n" +
-                    "department_name, \n" +
-                    "department_parent_id, \n" +
-                    "department_type, \n" +
-                    "department_short_name, \n" +
-                    "department_full_name, \n" +
-                    "department_tb_index, \n" +
-                    "department_sbrf_code, \n" +
-                    "department_region_id, \n" +
-                    "department_is_active, \n" +
-                    "department_code, \n" +
-                    "department_garant_use, \n" +
-                    "performer_id, \n" +
-                    "performer_name, \n" +
-                    "performer_parent_id, \n" +
-                    "performer_type, \n" +
-                    "performer_short_name, \n" +
-                    "performer_full_name, \n" +
-                    "performer_tb_index, \n" +
-                    "performer_sbrf_code, \n" +
-                    "performer_region_id, \n" +
-                    "performer_is_active, \n" +
-                    "performer_code \n" +
-                    // пейджинг
-                    "%s\n" +
+                    "dft.id,kind,dft.name,dft.type_id,dft.department_id, \n" +
+                    "dft.department_name, \n" +
+                    "dft.department_parent_id, \n" +
+                    "dft.department_type, \n" +
+                    "dft.department_short_name, \n" +
+                    "dft.department_full_name, \n" +
+                    "dft.department_tb_index, \n" +
+                    "dft.department_sbrf_code, \n" +
+                    "dft.department_region_id, \n" +
+                    "dft.department_is_active, \n" +
+                    "dft.department_code, \n" +
+                    "dft.department_garant_use,\n" +
+                    "-- Для исполнителя\n" +
+                    "dp.ID        AS performer_id,\n" +
+                    "dp.NAME      AS performer_name,\n" +
+                    "dp.PARENT_ID AS performer_parent_id,\n" +
+                    "dp.TYPE      AS performer_type,\n" +
+                    "dp.SHORTNAME AS performer_short_name,\n" +
+                    "dp.TB_INDEX  AS performer_tb_index,\n" +
+                    "dp.SBRF_CODE AS performer_sbrf_code,\n" +
+                    "dp.REGION_ID AS performer_region_id,\n" +
+                    "dp.IS_ACTIVE AS performer_is_active,\n" +
+                    "dp.CODE      AS performer_code,\n" +
+                    "-- Для сортировки\n" +
+                    "dp.NAME  AS performer, \n" +
+                    "p.FULL_NAME AS performer_full_name \n" +
                     "FROM (\n"+
                     "SELECT dft.ID as id,\n" +
                     "  dft.KIND,\n" +
@@ -345,40 +342,25 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
                     "  d.IS_ACTIVE  AS department_is_active,\n" +
                     "  d.CODE       AS department_code,\n" +
                     "  d.GARANT_USE AS department_garant_use,\n" +
-                    "  -- Для исполнителя\n" +
-                    "  dp.ID        AS performer_id,\n" +
-                    "  dp.NAME      AS performer_name,\n" +
-                    "  dp.PARENT_ID AS performer_parent_id,\n" +
-                    "  dp.TYPE      AS performer_type,\n" +
-                    "  dp.SHORTNAME AS performer_short_name,\n" +
-                    "  dp.TB_INDEX  AS performer_tb_index,\n" +
-                    "  dp.SBRF_CODE AS performer_sbrf_code,\n" +
-                    "  dp.REGION_ID AS performer_region_id,\n" +
-                    "  dp.IS_ACTIVE AS performer_is_active,\n" +
-                    "  dp.CODE      AS performer_code,\n" +
                     "  -- Для сортировки\n" +
                     "  ft.NAME  AS form_type,\n" +
                     "  dft.KIND AS form_kind,\n" +
                     "  d.NAME   AS department,\n" +
-                    "  dp.NAME  AS performer, \n"+
-                    "  d.FULL_NAME AS department_full_name, \n" +
-                    "  p.FULL_NAME AS performer_full_name \n" +
+                    "  d.FULL_NAME AS department_full_name \n" +
+                    // пейджинг
+                    "%s\n" +
                     "FROM department_form_type dft\n" +
-                    "left join department_form_type_performer dftp on dftp.DEPARTMENT_FORM_TYPE_ID = dft.id \n" +
-                    "JOIN form_type ft\n" +
-                    "ON ft.ID = dft.FORM_TYPE_ID\n" +
-                    "JOIN (SELECT d.*, LTRIM(SYS_CONNECT_BY_PATH(name, '/'), '/') as full_name FROM department d START with parent_id is null CONNECT BY PRIOR id = parent_id) d \n" +
-                    "ON d.ID = dft.DEPARTMENT_ID\n" +
-                    "LEFT OUTER JOIN department dp\n" +
-                    "ON dp.ID = dftp.PERFORMER_DEP_ID\n" +
-                    "LEFT OUTER JOIN (SELECT d.*, LTRIM(SYS_CONNECT_BY_PATH(name, '/'), '/') as full_name FROM department d START with parent_id is null CONNECT BY PRIOR id = parent_id) p \n" +
-                    "ON p.ID = dftp.PERFORMER_DEP_ID\n" +
+                    "JOIN form_type ft ON ft.ID = dft.FORM_TYPE_ID\n" +
+                    "JOIN (SELECT d.*, LTRIM(SYS_CONNECT_BY_PATH(name, '/'), '/') as full_name FROM department d START with parent_id is null CONNECT BY PRIOR id = parent_id) d ON d.ID = dft.DEPARTMENT_ID\n" +
                     "WHERE ft.tax_type = :taxType\n" +
                     "%s\n" +
                     "%s\n" +
-                    ")";
+                    ") dft \n" +
+                    "left join department_form_type_performer dftp on 0=:withoutPerformers and dftp.DEPARTMENT_FORM_TYPE_ID = dft.id \n" +
+                    "LEFT OUTER JOIN department dp ON dp.ID = dftp.PERFORMER_DEP_ID\n" +
+                    "LEFT OUTER JOIN (SELECT d.*, LTRIM(SYS_CONNECT_BY_PATH(name, '/'), '/') as full_name FROM department d START with parent_id is null CONNECT BY PRIOR id = parent_id) p ON p.ID = dftp.PERFORMER_DEP_ID\n";
 
-    private QueryData getAssignedFormsQueryData(List<Long> departmentIds, char taxType, QueryParams<TaxNominationColumnEnum> queryParams){
+    private QueryData getAssignedFormsQueryData(List<Long> departmentIds, char taxType, QueryParams<TaxNominationColumnEnum> queryParams, boolean withoutPerformers){
         boolean paging = queryParams != null && queryParams.getCount() != 0;
 
         MapSqlParameterSource parameters = new MapSqlParameterSource()
@@ -412,14 +394,15 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
             parameters.addValue("params", departmentIds);
         }
 
-        String query =String.format(QUERY, paging ? ", rownum as row_number_over \n":"", departmentClause, order.toString());
+        String query =String.format(QUERY, paging ? ", \n rownum as row_number_over \n":"", departmentClause, order.toString());
 
         // Limit
         if (paging){
-            query = "SELECT * FROM ( " + query + " ) WHERE row_number_over BETWEEN :from and :to";
+            query = query + " WHERE dft.row_number_over BETWEEN :from and :to";
             parameters.addValue("from", queryParams.getFrom()+1);
             parameters.addValue("to", queryParams.getFrom() + queryParams.getCount());
         }
+        parameters.addValue("withoutPerformers", withoutPerformers ? 1 : 0);
 
         QueryData queryData = new QueryData();
         queryData.setQuery(query);
@@ -537,7 +520,7 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
 
     @Override
     public List<FormTypeKind> getAllFormAssigned(List<Long> departmentIds, char taxType, QueryParams<TaxNominationColumnEnum> queryParams) {
-        QueryData assignedFormsQueryData = getAssignedFormsQueryData(departmentIds, taxType, queryParams);
+        QueryData assignedFormsQueryData = getAssignedFormsQueryData(departmentIds, taxType, queryParams, false);
         List<FormTypeKind> result = new ArrayList<FormTypeKind>();
         getNamedParameterJdbcTemplate().query(assignedFormsQueryData.getQuery(), assignedFormsQueryData.getParameterSource(), new AllAssignCallBackHandler(result));
         return result;
@@ -970,7 +953,7 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
     @Override
     public int getAssignedFormsCount(List<Long> departmentsIds, char taxType) {
 
-        QueryData assignedFormsQueryData = getAssignedFormsQueryData(departmentsIds, taxType, null);
+        QueryData assignedFormsQueryData = getAssignedFormsQueryData(departmentsIds, taxType, null, true);
 
         String query = "SELECT count(*) FROM ( " + assignedFormsQueryData.getQuery() + " )";
 
