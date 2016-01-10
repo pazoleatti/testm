@@ -81,9 +81,10 @@ public class DeclarationDataAccessServiceImpl implements DeclarationDataAccessSe
         // Контролёр или Контролёр НС
         if (userInfo.getUser().hasRole(TARole.ROLE_CONTROL_NS) || userInfo.getUser().hasRole(TARole.ROLE_CONTROL)) {
             ReportPeriod reportPeriod = departmentReportPeriod.getReportPeriod();
-			if (reportPeriod != null && departmentService.getTaxFormDepartments(userInfo.getUser(),
+			List<Integer> executors = departmentService.getTaxFormDepartments(userInfo.getUser(),
 					asList(reportPeriod.getTaxPeriod().getTaxType()), reportPeriod.getCalendarStartDate(),
-                    reportPeriod.getEndDate()).contains(declarationDepartment.getId())) {
+					reportPeriod.getEndDate());
+			if (reportPeriod != null && executors.contains(declarationDepartment.getId())) {
 				return;
 			}
         }

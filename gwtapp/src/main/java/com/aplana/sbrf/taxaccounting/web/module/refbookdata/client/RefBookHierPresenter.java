@@ -139,7 +139,7 @@ public class RefBookHierPresenter extends Presenter<RefBookHierPresenter.MyView,
         getView().setRefBookNameDesc(refBookName);
         setMode(mode);
         commonEditPresenter.setVersionMode(false);
-        commonEditPresenter.show(uniqueRecordId);
+        commonEditPresenter.show(null);
         //registrations[1].removeHandler();
     }
 
