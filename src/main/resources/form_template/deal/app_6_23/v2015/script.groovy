@@ -479,6 +479,9 @@ void importTransportData() {
     def totalRow = calcTotalRow(newRows)
     newRows.add(totalRow)
 
+    // отображать ошибки переполнения разряда
+    showMessages(newRows, logger)
+
     // сравнение итогов
     if (!logger.containsLevel(LogLevel.ERROR) && totalTF) {
         // мапа с алиасами граф и номерами колонокв в xml (алиас -> номер колонки)
