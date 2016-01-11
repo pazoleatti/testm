@@ -503,8 +503,11 @@ void importTransportData() {
         reader.close()
     }
 
+    // отображать ошибки переполнения разряда
+    showMessages(newRows, logger)
+
     // сравнение итогов
-    if (total) {
+    if (!logger.containsLevel(LogLevel.ERROR) && total) {
         // мапа с алиасами граф и номерами колонокв в xml (алиас -> номер колонки в xml)
         def totalColumnsIndexMap = [
                 'income'           : 23,
@@ -570,7 +573,6 @@ void importTransportData() {
         logger.warn("В транспортном файле не найдена итоговая строка")
     }
 
-    showMessages(newRows, logger)
     if (!logger.containsLevel(LogLevel.ERROR)) {
         updateIndexes(newRows)
         formDataService.getDataRowHelper(formData).save(newRows)

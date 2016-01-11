@@ -3,8 +3,7 @@ package com.aplana.sbrf.taxaccounting.async.task.impl;
 import com.aplana.sbrf.taxaccounting.async.service.AsyncTaskInterceptor;
 import com.aplana.sbrf.taxaccounting.async.task.AsyncTaskLocal;
 import com.aplana.sbrf.taxaccounting.async.task.AsyncTaskRemote;
-import com.aplana.sbrf.taxaccounting.async.task.CSVReportRefBookAsyncTask;
-import com.aplana.sbrf.taxaccounting.async.task.SpecificReportRefBookAsyncTask;
+import com.aplana.sbrf.taxaccounting.async.task.CsvReportRefBookAsyncTask;
 
 import javax.ejb.*;
 import javax.interceptor.Interceptors;
@@ -15,5 +14,5 @@ import javax.interceptor.Interceptors;
 @Interceptors(AsyncTaskInterceptor.class)
 @TransactionManagement(TransactionManagementType.CONTAINER)
 @TransactionAttribute(TransactionAttributeType.REQUIRED)
-public class CSVReportRefBookAsyncTaskImpl extends CSVReportRefBookAsyncTask {
+public class CsvReportRefBookAsyncTaskImpl extends CsvReportRefBookAsyncTask {
 }

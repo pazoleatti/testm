@@ -17,6 +17,8 @@ import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client.RefBoo
 import com.gwtplatform.dispatch.server.ExecutionContext;
 import com.gwtplatform.dispatch.server.actionhandler.AbstractActionHandler;
 import com.gwtplatform.dispatch.shared.ActionException;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -27,6 +29,8 @@ import java.util.*;
 @Service
 @PreAuthorize("isAuthenticated()")
 public class CreateRefBookReportHandler extends AbstractActionHandler<CreateReportAction, CreateReportResult> {
+
+    private static final Log LOG = LogFactory.getLog(CreateRefBookReportHandler.class);
 
     @Autowired
     private RefBookFactory refBookFactory;
@@ -121,7 +125,7 @@ public class CreateRefBookReportHandler extends AbstractActionHandler<CreateRepo
         String keyTask = String.format("%s_%s_refBookId_%d_version_%s_filter_%s_%s_%s_%s",
                 LockData.LockObjects.REF_BOOK.name(), reportType.getName(), action.getRefBookId(), SDF_DD_MM_YYYY.format(action.getVersion()) , action.getSearchPattern(),
                 (sortAttribute!=null?sortAttribute.getAlias():null), action.isAscSorting(), UUID.randomUUID());
-
+        LOG.info("Создание задачи CreateRefBookReportHandler");
         asyncTaskManagerService.createTask(keyTask, reportType, params, false, PropertyLoader.isProductionMode(), userInfo, logger, new AsyncTaskHandler() {
             @Override
             public LockData createLock(String keyTask, ReportType reportType, TAUserInfo userInfo) {

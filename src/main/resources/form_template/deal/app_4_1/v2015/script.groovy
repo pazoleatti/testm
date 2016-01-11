@@ -332,12 +332,6 @@ void consolidation() {
         }
     }
 
-    // если источников нет, то выход
-    if (sourceFormDatasMap.isEmpty()) {
-        dataRowHelper.allCached = []
-        return
-    }
-
     // получить значения из справочника "Участники ТЦО"
     def records520 = getRecords520()
     def dataRows = []

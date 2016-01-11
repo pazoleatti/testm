@@ -7,7 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
  * Спринговая реализация таска "Формирование CSV отчета справочника" для вызова из дев-мода
  * @author lhaziev
  */
-@Component("CSVReportRefBookAsyncTaskSpring")
+@Component("CsvReportRefBookAsyncTaskSpring")
 @Transactional
-public class CSVReportRefBookAsyncTaskSpring extends CSVReportRefBookAsyncTask {
+public class CsvReportRefBookAsyncTaskSpring extends CsvReportRefBookAsyncTask {
 }
