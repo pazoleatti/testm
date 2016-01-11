@@ -213,9 +213,11 @@ void logicCheck() {
             logger.error("Строка $rowNum: Графа «$msg» может содержать только одно из значений: ОМС, Физическая поставка!")
         }
 
+        def recYesId = getRecordId(38, 'CODE', '1', -1, null, true)
+        def recNoId = getRecordId(38, 'CODE', '0', -1, null, true)
         // Проверка признака внешнеторговой сделки
         if(row.signTransaction && row.countryCode2 && row.countryCode3){
-            if(row.countryCode2 != row.countryCode3 && row.signTransaction != 'Да' || row.countryCode2 == row.countryCode3 && row.signTransaction != 'Нет'){
+            if(row.countryCode2 != row.countryCode3 && row.signTransaction != recYesId || row.countryCode2 == row.countryCode3 && row.signTransaction != recNoId){
                 def msg = row.getCell('signTransaction').column.name
                 logger.error("Строка $rowNum: Значение графы «$msg» не соответствует сведениям о стране отправки и стране доставки драгоценных металлов!")
             }
@@ -598,7 +600,7 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
     def headerMapping = [
             ([(headerRows[0][0]) : 'Общие сведения о контрагенте - юридическом лице']),
             ([(headerRows[0][7]) : 'Сведения о сделке']),
-            ([(headerRows[1][0]) : getColumnName(tmpRow, 'rowNumber')]),
+            ([(headerRows[1][1]) : getColumnName(tmpRow, 'rowNumber')]),
             ([(headerRows[1][2]) : getColumnName(tmpRow, 'name')]),
             ([(headerRows[1][3]) : getColumnName(tmpRow, 'dependence')]),
             ([(headerRows[1][4]) : getColumnName(tmpRow, 'iksr')]),
@@ -627,8 +629,8 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
             ([(headerRows[1][27]): getColumnName(tmpRow, 'outcome')]),
             ([(headerRows[1][28]): getColumnName(tmpRow, 'price')]),
             ([(headerRows[1][29]): getColumnName(tmpRow, 'cost')]),
-            ([(headerRows[1][31]): getColumnName(tmpRow, 'dealDoneDate')]),
-            ([(headerRows[3][0]) : 'гр. 1']),
+            ([(headerRows[1][30]): getColumnName(tmpRow, 'dealDoneDate')]),
+            ([(headerRows[3][1]) : 'гр. 1']),
             ([(headerRows[3][2]) : 'гр. 2.1']),
             ([(headerRows[3][3]) : 'гр. 2.2']),
             ([(headerRows[3][4]) : 'гр. 3']),
@@ -657,7 +659,7 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
             ([(headerRows[3][27]): 'гр. 17']),
             ([(headerRows[3][28]): 'гр. 18']),
             ([(headerRows[3][29]): 'гр. 19']),
-            ([(headerRows[3][31]): 'гр. 20'])
+            ([(headerRows[3][30]): 'гр. 20'])
     ]
     checkHeaderEquals(headerMapping, logger)
 }
@@ -686,7 +688,7 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
 
     def int colIndex = 2
 
-    def recordId = getTcoRecordId(nameFromFile, values[3], iksrName, fileRowIndex, colIndex, getReportPeriodEndDate(), false, logger, refBookFactory, recordCache)
+    def recordId = getTcoRecordId(nameFromFile, values[4], iksrName, fileRowIndex, colIndex, getReportPeriodEndDate(), false, logger, refBookFactory, recordCache)
     def map = getRefBookValue(520, recordId)
 
     // графа 2.1

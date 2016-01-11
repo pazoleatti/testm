@@ -34,8 +34,8 @@
         <cell alias="dealDoneDate" colSpan="1" rowSpan="1" value="Сведения о сделке"/>
     </row>
     <row alias="">
-        <cell alias="fix" colSpan="1" rowSpan="2" value="№ п/п"/>
-        <cell alias="rowNumber" colSpan="1" rowSpan="2" value=""/>
+        <cell alias="fix" colSpan="1" rowSpan="2" value=""/>
+        <cell alias="rowNumber" colSpan="1" rowSpan="2" value="№ п/п"/>
         <cell alias="name" colSpan="1" rowSpan="2" value="Полное наименование с указанием ОПФ"/>
         <cell alias="dependence" colSpan="1" rowSpan="2" value="Признак взаимозависимости"/>
         <cell alias="iksr" colSpan="1" rowSpan="2" value="ИНН/ КИО"/>
@@ -77,8 +77,8 @@
         <cell alias="dealDoneDate" colSpan="1" rowSpan="2" value="Дата совершения сделки"/>
     </row>
     <row alias="">
-        <cell alias="fix" colSpan="1" rowSpan="2" value="№ п/п"/>
-        <cell alias="rowNumber" colSpan="1" rowSpan="2" value=""/>
+        <cell alias="fix" colSpan="1" rowSpan="2" value=""/>
+        <cell alias="rowNumber" colSpan="1" rowSpan="2" value="№ п/п"/>
         <cell alias="name" colSpan="1" rowSpan="2" value="Полное наименование с указанием ОПФ"/>
         <cell alias="dependence" colSpan="1" rowSpan="2" value="Признак взаимозависимости"/>
         <cell alias="iksr" colSpan="1" rowSpan="2" value="ИНН/ КИО"/>
