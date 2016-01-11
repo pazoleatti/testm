@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <formTemplateContent>
     <fixedRows>false</fixedRows>
-    <name>6.10-1. Предоставление гарантий</name>
-    <fullName>6.10-1. Отчет в отношении доходов ПАО Сбербанк, связанных с предоставлением гарантий</fullName>
+    <name>6.10-2. Предоставление инструментов торгового финансирования и непокрытых аккредитивов</name>
+    <fullName>6.10-2. Отчет в отношении доходов ПАО Сбербанк, связанных с предоставлением инструментов торгового финансирования и непокрытых аккредитивов</fullName>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>fix</alias>
         <checking>false</checking>
