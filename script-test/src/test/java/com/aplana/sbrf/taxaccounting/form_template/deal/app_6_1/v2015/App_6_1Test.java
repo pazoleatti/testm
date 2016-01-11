@@ -161,7 +161,7 @@ public class App_6_1Test extends ScriptTestBase {
         testHelper.getLogger().clear();
     }
 
-    // Расчет пустой (в импорте - растчет заполненной)
+    // Расчет пустой (в импорте - расчет заполненной)
     @Test
     public void calcTest() {
         testHelper.execute(FormDataEvent.CALCULATE);

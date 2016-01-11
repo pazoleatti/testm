@@ -60,7 +60,7 @@ public abstract class XmlGeneratorAsyncTask extends AbstractAsyncTask {
     }
 
     @Override
-    protected boolean executeBusinessLogic(Map<String, Object> params, Logger logger) {
+    protected TaskStatus executeBusinessLogic(Map<String, Object> params, Logger logger) {
         Date docDate = (Date)params.get("docDate");
         long declarationDataId = (Long)params.get("declarationDataId");
         int userId = (Integer)params.get(USER_ID.name());
@@ -75,7 +75,7 @@ public abstract class XmlGeneratorAsyncTask extends AbstractAsyncTask {
                 lockService.updateState(lock, lockDate, state);
             }
         });
-        return true;
+        return new TaskStatus(true, null);
     }
 
     @Override

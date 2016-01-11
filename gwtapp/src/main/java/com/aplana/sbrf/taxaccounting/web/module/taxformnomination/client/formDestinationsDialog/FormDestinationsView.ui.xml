@@ -75,7 +75,7 @@
                 <g:HorizontalPanel spacing="1" verticalAlignment="middle">
                     <g:Label text="Исполнитель" addStyleNames="{style.labels}"/>
                     <a:DepartmentPickerPopupWidget ui:field="performersPickerWidget" multiselection="true" width="300px"
-                                                   title="Выберите исполнителя" labelWordWrap="false"/>
+                                                   labelWordWrap="false"/>
                 </g:HorizontalPanel>
             </g:VerticalPanel>
 

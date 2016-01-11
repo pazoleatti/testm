@@ -160,7 +160,7 @@
         <checking>false</checking>
         <name>Количество бумаг по сделке, шт.</name>
         <order>17</order>
-        <width>5</width>
+        <width>10</width>
         <maxLength>15</maxLength>
         <precision>0</precision>
     </columns>

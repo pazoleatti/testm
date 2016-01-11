@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.dao.impl;
 import com.aplana.sbrf.taxaccounting.dao.api.NotificationDao;
 import com.aplana.sbrf.taxaccounting.model.DepartmentPair;
 import com.aplana.sbrf.taxaccounting.model.Notification;
+import com.aplana.sbrf.taxaccounting.model.NotificationType;
 import com.aplana.sbrf.taxaccounting.model.NotificationsFilterData;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -90,6 +91,9 @@ public class NotificationDaoTest {
         n.setSenderDepartmentId(2);
         n.setReportPeriodId(1);
         n.setCreateDate(new Date());
+        n.setBlobDataId("uuid_1");
+        n.setReportId("uuid_2");
+        n.setNotificationType(NotificationType.REF_BOOK_REPORT);
         Long id = notificationDao.save(n);
         notNull(id);
     }

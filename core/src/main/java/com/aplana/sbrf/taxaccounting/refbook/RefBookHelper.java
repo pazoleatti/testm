@@ -3,8 +3,10 @@ package com.aplana.sbrf.taxaccounting.refbook;
 import com.aplana.sbrf.taxaccounting.model.Cell;
 import com.aplana.sbrf.taxaccounting.model.Column;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
+import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.*;
+import com.aplana.sbrf.taxaccounting.model.util.Pair;
 
 import java.util.Collection;
 import java.util.List;
@@ -92,4 +94,27 @@ public interface RefBookHelper {
                                                       Map<String, RefBookValue> mainConfig,
                                                       List<Map<String, RefBookValue>> tablePart,
                                                       Logger logger);
+
+    /**
+     * Разыменовывание ссылок, возвращает мапу: attrId: Map<referenceId, value>
+     *     attrId - ид атрибута текущего спровочника
+     *     referenceId - ссылка(из текущего справочника)
+     *     value - значение
+     * @param refBook
+     * @param refBookPage
+     * @return
+     */
+    Map<Long, Map<Long, String>> dereferenceValues(RefBook refBook, List<Map<String, RefBookValue>> refBookPage);
+
+    /**
+     * Разыменовывание ссылок, возвращает мапу: attrId: Pair<refBookAttribute, Map<referenceId, refBookValue>>
+     *     attrId - ид атрибута текущего спровочника
+     *     refBookAttribute - атрибут справочника на который ссылаются
+     *     referenceId - ссылка(из текущего справочника)
+     *     refBookValue - значение
+     * @param refBook
+     * @param refBookPage
+     * @return
+     */
+    Map<Long, Pair<RefBookAttribute, Map<Long, RefBookValue>>> dereferenceValuesAttributes(RefBook refBook, List<Map<String, RefBookValue>> refBookPage);
 }

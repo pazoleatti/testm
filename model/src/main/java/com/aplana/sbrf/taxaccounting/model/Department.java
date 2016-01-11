@@ -200,4 +200,43 @@ public class Department implements Serializable {
     public void setGarantUse(boolean garantUse) {
         this.garantUse = garantUse;
     }
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
+
+		Department that = (Department) o;
+
+		if (id != that.id) return false;
+		if (isActive != that.isActive) return false;
+		if (garantUse != that.garantUse) return false;
+		if (name != null ? !name.equals(that.name) : that.name != null) return false;
+		if (shortName != null ? !shortName.equals(that.shortName) : that.shortName != null) return false;
+		if (parentId != null ? !parentId.equals(that.parentId) : that.parentId != null) return false;
+		if (type != that.type) return false;
+		if (tbIndex != null ? !tbIndex.equals(that.tbIndex) : that.tbIndex != null) return false;
+		if (sbrfCode != null ? !sbrfCode.equals(that.sbrfCode) : that.sbrfCode != null) return false;
+		if (regionId != null ? !regionId.equals(that.regionId) : that.regionId != null) return false;
+		if (code != null ? !code.equals(that.code) : that.code != null) return false;
+		return fullName != null ? fullName.equals(that.fullName) : that.fullName == null;
+
+	}
+
+	@Override
+	public int hashCode() {
+		int result = id;
+		result = 31 * result + (name != null ? name.hashCode() : 0);
+		result = 31 * result + (shortName != null ? shortName.hashCode() : 0);
+		result = 31 * result + (parentId != null ? parentId.hashCode() : 0);
+		result = 31 * result + (type != null ? type.hashCode() : 0);
+		result = 31 * result + (tbIndex != null ? tbIndex.hashCode() : 0);
+		result = 31 * result + (sbrfCode != null ? sbrfCode.hashCode() : 0);
+		result = 31 * result + (regionId != null ? regionId.hashCode() : 0);
+		result = 31 * result + (isActive ? 1 : 0);
+		result = 31 * result + (code != null ? code.hashCode() : 0);
+		result = 31 * result + (garantUse ? 1 : 0);
+		result = 31 * result + (fullName != null ? fullName.hashCode() : 0);
+		return result;
+	}
 }

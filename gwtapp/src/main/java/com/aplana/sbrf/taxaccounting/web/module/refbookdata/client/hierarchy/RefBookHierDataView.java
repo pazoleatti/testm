@@ -126,6 +126,11 @@ public class RefBookHierDataView extends ViewWithUiHandlers<RefBookHierDataUiHan
     }
 
     @Override
+    public PickerState getPickerState() {
+        return pickerState;
+    }
+
+    @Override
     public void searchButtonClicked(Date relevanceDate) {
         if (getUiHandlers() != null) {
             if (pickerState.getSearchPattern()!= null && !pickerState.getSearchPattern().isEmpty()){

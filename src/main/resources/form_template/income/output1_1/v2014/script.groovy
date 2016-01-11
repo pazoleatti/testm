@@ -498,17 +498,7 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
 
     // графа 2
     def colIndex = 0
-    def yearStr = values[colIndex]
-    if (yearStr != null) {
-        if (yearStr.contains(".")) {
-            newRow.financialYear = parseDate(yearStr, "dd.MM.yyyy", fileRowIndex, colIndex + colOffset, logger, true)
-        } else {
-            def yearNum = parseNumber(yearStr, fileRowIndex, colIndex + colOffset, logger, true)
-            if (yearNum != null && yearNum != 0) {
-                newRow.financialYear = new GregorianCalendar(yearNum as Integer, Calendar.JANUARY, 1).getTime()
-            }
-        }
-    }
+    newRow.financialYear = parseDate(values[colIndex], "yyyy", fileRowIndex, colIndex + colOffset, logger, true)
 
     // графа 2..4
     ['taxPeriod', 'emitent', 'decreeNumber', 'dividendType'].each { alias ->

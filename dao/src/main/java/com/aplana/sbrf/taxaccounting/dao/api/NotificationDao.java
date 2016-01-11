@@ -45,7 +45,7 @@ public interface NotificationDao {
 	 * @param id идентификатор оповещения
 	 * @return оповещение
 	 */
-	Notification get(int id);
+	Notification get(long id);
 
 	/**
 	 * Получить список оповещений по фильтру

@@ -9,6 +9,7 @@ public class GetRefBookAttributesResult implements Result {
     private boolean readOnly;
     private Integer refBookType;
     private boolean sendQuery;
+    private List<String> specificReportTypes;
 
     public boolean isReadOnly() {
         return readOnly;
@@ -42,4 +43,11 @@ public class GetRefBookAttributesResult implements Result {
         this.sendQuery = sendQuery;
     }
 
+    public List<String> getSpecificReportTypes() {
+        return specificReportTypes;
+    }
+
+    public void setSpecificReportTypes(List<String> specificReportTypes) {
+        this.specificReportTypes = specificReportTypes;
+    }
 }

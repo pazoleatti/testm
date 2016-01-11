@@ -5,6 +5,7 @@ import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.AbstractEditPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.DepartmentEditPresenter;
@@ -35,6 +36,7 @@ import com.gwtplatform.mvp.client.proxy.PlaceRequest;
 import com.gwtplatform.mvp.client.proxy.ProxyPlace;
 
 import java.util.Date;
+import java.util.List;
 
 /**
  * User: avanteev
@@ -137,7 +139,7 @@ public class RefBookHierPresenter extends Presenter<RefBookHierPresenter.MyView,
         getView().setRefBookNameDesc(refBookName);
         setMode(mode);
         commonEditPresenter.setVersionMode(false);
-        commonEditPresenter.show(uniqueRecordId);
+        commonEditPresenter.show(null);
         //registrations[1].removeHandler();
     }
 
@@ -187,9 +189,11 @@ public class RefBookHierPresenter extends Presenter<RefBookHierPresenter.MyView,
         void setVersionView(boolean isVersion);
         /**
          * Устанавливает вид справочника версионируемый вид справочника.
-         * @param isVersion true - версионируемый
+         * @param isVersioned true - версионируемый
          */
         void setIsVersion(boolean isVersioned);
+
+        void setSpecificReportTypes(List<String> specificReportTypes);
     }
 
     @Override
@@ -242,6 +246,7 @@ public class RefBookHierPresenter extends Presenter<RefBookHierPresenter.MyView,
                                             new AbstractCallback<GetRefBookAttributesResult>() {
                                                 @Override
                                                 public void onSuccess(GetRefBookAttributesResult result) {
+                                                    getView().setSpecificReportTypes(result.getSpecificReportTypes());
                                                     /*if (canVersion)checkRecord();*/
                                                     for (RefBookColumn refBookColumn : result.getColumns()) {
                                                         if (refBookColumn.getAlias().toLowerCase().equals("name")) {
@@ -379,4 +384,23 @@ public class RefBookHierPresenter extends Presenter<RefBookHierPresenter.MyView,
                     }
                 }, this));
     }*/
+
+
+    @Override
+    public void onPrintClicked(String reportName) {
+        CreateReportAction action = new CreateReportAction();
+        action.setReportName(reportName);
+        action.setRefBookId(refBookId);
+        action.setVersion(refBookHierDataPresenter.getRelevanceDate());
+        action.setSearchPattern(refBookHierDataPresenter.getSearchPattern());
+        action.setAscSorting(true);
+        dispatcher.execute(action,
+                CallbackUtils.defaultCallback(
+                        new AbstractCallback<CreateReportResult>() {
+                            @Override
+                            public void onSuccess(CreateReportResult result) {
+                                LogAddEvent.fire(RefBookHierPresenter.this, result.getUuid());
+                            }
+                        }, RefBookHierPresenter.this));
+    }
 }

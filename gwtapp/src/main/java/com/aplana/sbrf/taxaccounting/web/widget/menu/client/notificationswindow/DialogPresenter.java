@@ -2,12 +2,15 @@ package com.aplana.sbrf.taxaccounting.web.widget.menu.client.notificationswindow
 
 import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.gwt.client.dialog.DialogHandler;
+import com.aplana.sbrf.taxaccounting.model.NotificationType;
 import com.aplana.sbrf.taxaccounting.model.NotificationsFilterData;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.DownloadUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
 import com.aplana.sbrf.taxaccounting.web.widget.menu.shared.*;
+import com.google.gwt.core.client.GWT;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.dispatch.shared.DispatchAsync;
@@ -31,6 +34,7 @@ public class DialogPresenter extends PresenterWidget<DialogPresenter.MyView> imp
         boolean isAsc();
         NotificationsFilterData.SortColumn getSortColumn();
         void clearSelected();
+        void updateRow(Long id, String reportId);
     }
 
 	@Inject
@@ -109,4 +113,29 @@ public class DialogPresenter extends PresenterWidget<DialogPresenter.MyView> imp
     public void onEventClick(String uuid) {
         LogAddEvent.fire(DialogPresenter.this, uuid);
     }
+
+    @Override
+    public void onUrlClick(final Long id) {
+        CheckReportNotificationAction action = new CheckReportNotificationAction();
+        action.setId(id);
+        dispatchAsync.execute(action, CallbackUtils
+                .defaultCallback(new AbstractCallback<CheckReportNotificationResult>() {
+                    @Override
+                    public void onSuccess(CheckReportNotificationResult result) {
+                        if (NotificationType.REF_BOOK_REPORT.equals(result.getNotificationType())) {
+                            if (result.isExist()) {
+                                DownloadUtils.openInIframe(
+                                        GWT.getHostPageBaseURL() + "download/downloadBlobController/refBookReport/"
+                                                + result.getReportId());
+                            } else {
+                                Dialog.errorMessage(result.getMsg());
+                                getView().updateRow(id, result.getReportId());
+                            }
+                        } else if (NotificationType.DEFAULT.equals(result.getNotificationType())) {
+
+                        }
+                    }
+                }, DialogPresenter.this));
+    }
+
 }

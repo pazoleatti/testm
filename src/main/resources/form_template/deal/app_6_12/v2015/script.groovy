@@ -49,10 +49,10 @@ switch (formDataEvent) {
         importData()
         formDataService.saveCachedDataRows(formData, logger)
         break
-    case FormDataEvent.IMPORT_TRANSPORT_FILE:
+    /*case FormDataEvent.IMPORT_TRANSPORT_FILE:
         importTransportData()
         formDataService.saveCachedDataRows(formData, logger)
-        break
+        break*/
     case FormDataEvent.SORT_ROWS:
         sortFormDataRows()
         break
@@ -571,6 +571,9 @@ void importTransportData() {
     // итоговая строка
     def totalRow = calcTotalRow(newRows)
     newRows.add(totalRow)
+
+    // отображать ошибки переполнения разряда
+    showMessages(newRows, logger)
 
     // сравнение итогов
     if (!logger.containsLevel(LogLevel.ERROR) && totalTF) {

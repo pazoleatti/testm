@@ -2,8 +2,10 @@ package com.aplana.sbrf.taxaccounting.web.module.refbookdata.client;
 
 import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.gwt.client.dialog.DialogHandler;
+import com.aplana.sbrf.taxaccounting.model.ReportType;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.FormMode;
 import com.aplana.sbrf.taxaccounting.web.widget.datepicker.DateMaskBoxPicker;
+import com.aplana.sbrf.taxaccounting.web.widget.style.DropdownButton;
 import com.aplana.sbrf.taxaccounting.web.widget.style.LinkAnchor;
 import com.aplana.sbrf.taxaccounting.web.widget.style.LinkButton;
 import com.google.gwt.core.client.GWT;
@@ -21,6 +23,7 @@ import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
 import java.util.Date;
+import java.util.List;
 
 import static com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.FormMode.EDIT;
 import static com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.FormMode.VIEW;
@@ -67,8 +70,11 @@ public class RefBookHierView extends ViewWithUiHandlers<RefBookHierUIHandlers> i
     LinkButton backToRefBookAnchor;
     @UiField
     LinkAnchor backAnchor;
+    @UiField
+    DropdownButton printAnchor;
 
     private boolean isVersion, isVersioned;
+    private LinkButton printToExcel, printToCSV;
 
     @Override
     public void clearFilterInputBox() {
@@ -91,6 +97,7 @@ public class RefBookHierView extends ViewWithUiHandlers<RefBookHierUIHandlers> i
                 search.setEnabled(true);
                 filterText.setEnabled(true);
                 relevanceDate.setEnabled(true);
+                printAnchor.setVisible(false);
                 break;
             case READ:
                 addRow.setVisible(false);
@@ -100,6 +107,7 @@ public class RefBookHierView extends ViewWithUiHandlers<RefBookHierUIHandlers> i
                 search.setEnabled(true);
                 filterText.setEnabled(true);
                 relevanceDate.setEnabled(true);
+                printAnchor.setVisible(true);
                 break;
             case VIEW:
                 edit.setVisible(true);
@@ -109,6 +117,7 @@ public class RefBookHierView extends ViewWithUiHandlers<RefBookHierUIHandlers> i
                 search.setEnabled(true);
                 filterText.setEnabled(true);
                 relevanceDate.setEnabled(true);
+                printAnchor.setVisible(true);
                 break;
             case CREATE:
                 addRow.setVisible(false);
@@ -117,6 +126,7 @@ public class RefBookHierView extends ViewWithUiHandlers<RefBookHierUIHandlers> i
                 filterText.setEnabled(false);
                 separator.setVisible(false);
                 relevanceDate.setEnabled(false);
+                printAnchor.setVisible(false);
                 break;
         }
         cancelEdit.setVisible(!isVersion&&mode==FormMode.EDIT);
@@ -169,6 +179,30 @@ public class RefBookHierView extends ViewWithUiHandlers<RefBookHierUIHandlers> i
 
             @Override
             public void onKeyUp(KeyUpEvent event) {}
+        });
+
+        printToExcel = new LinkButton("Сформировать XLSM");
+        printToExcel.setHeight("20px");
+        printToExcel.setDisableImage(true);
+        printToExcel.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                if (getUiHandlers() != null) {
+                    getUiHandlers().onPrintClicked(ReportType.EXCEL.getName());
+                }
+            }
+        });
+
+        printToCSV = new LinkButton("Сформировать CSV");
+        printToCSV.setHeight("20px");
+        printToCSV.setDisableImage(true);
+        printToCSV.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                if (getUiHandlers() != null) {
+                    getUiHandlers().onPrintClicked(ReportType.CSV.getName());
+                }
+            }
         });
     }
 
@@ -281,6 +315,7 @@ public class RefBookHierView extends ViewWithUiHandlers<RefBookHierUIHandlers> i
         search.setVisible(!isVersion);
         separatorVersion.setVisible(!isVersion&&isVersioned);
         cancelEdit.setVisible(!isVersion);
+        printAnchor.setVisible(!isVersion);
     }
 
     @Override
@@ -291,4 +326,24 @@ public class RefBookHierView extends ViewWithUiHandlers<RefBookHierUIHandlers> i
         separatorVersion.setVisible(isVersioned);
     }
 
+    @Override
+    public void setSpecificReportTypes(List<String> specificReportTypes) {
+        printAnchor.clear();
+        printAnchor.addItem(ReportType.EXCEL.getName(), printToExcel);
+        printAnchor.addItem(ReportType.CSV.getName(), printToCSV);
+        for(final String specificReportType: specificReportTypes) {
+            LinkButton linkButton = new LinkButton("Сформировать \"" + specificReportType + "\"");
+            linkButton.setHeight("20px");
+            linkButton.setDisableImage(true);
+            linkButton.addClickHandler(new ClickHandler() {
+                @Override
+                public void onClick(ClickEvent event) {
+                    if (getUiHandlers() != null) {
+                        getUiHandlers().onPrintClicked(specificReportType);
+                    }
+                }
+            });
+            printAnchor.addItem(specificReportType, linkButton);
+        }
+    }
 }

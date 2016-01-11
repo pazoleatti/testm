@@ -2220,7 +2220,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
         }
     }
 
-    private static final String GET_PREVIOUS_RECORD_VERSION = "with previousVersion as (select r.* from ref_book_record r where r.ref_book_id = ? and r.record_id = ? and r.version  = \n" +
+    private static final String GET_PREVIOUS_RECORD_VERSION = "with previousVersion as (select r.* from ref_book_record r where r.ref_book_id = ? and r.record_id = ? and r.status = 0 and r.version  = \n" +
             "\t(select max(version) from ref_book_record where ref_book_id=r.ref_book_id and record_id=r.record_id and status=0 and version < ?)),\n" +
             "minNextVersion as (select r.ref_book_id, r.record_id, min(r.version) version from ref_book_record r, previousVersion pv where r.version > pv.version and r.record_id= pv.record_id and r.ref_book_id= pv.ref_book_id and r.status != -1 group by r.ref_book_id, r.record_id),\n" +
             "nextVersionEnd as (select mnv.ref_book_id, mnv.record_id, mnv.version, r.status from minNextVersion mnv, ref_book_record r where mnv.ref_book_id=r.ref_book_id and mnv.version=r.version and mnv.record_id=r.record_id and r.status != -1)\n" +

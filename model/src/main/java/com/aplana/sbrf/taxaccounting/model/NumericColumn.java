@@ -93,15 +93,19 @@ public class NumericColumn extends Column implements Serializable {
 					if (hasSign) {
 						val = val.abs();
 					}
-                    int intLength = val.precision() - val.scale();
-                    StringBuilder stringBuilder = new StringBuilder(val.toPlainString().substring(0, intLength));
+                    String integerPart = val.toBigInteger().toString();
+                    StringBuilder stringBuilder = new StringBuilder(integerPart);
+                    int intLength = integerPart.length();
 
                     for (int i = 3; i < intLength; i += 3) {
                         if (i < intLength) {
                             stringBuilder.insert(intLength - i, " ");
                         }
                     }
-                    stringBuilder.append(val.toPlainString().substring(intLength, val.toPlainString().length()));
+                    if (precision > 0) {
+                        String factorPart = val.add(new BigDecimal(integerPart).multiply(BigDecimal.valueOf(-1))).toPlainString();
+                        stringBuilder.append(factorPart.substring(1, factorPart.length()));
+                    }
                     if (hasSign) {
                         stringBuilder.insert(0, "-");
                     }

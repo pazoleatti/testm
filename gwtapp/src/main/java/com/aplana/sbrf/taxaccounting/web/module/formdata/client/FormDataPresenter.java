@@ -965,7 +965,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                                                 readOnlyMode);
 
                                 updateReportStatus(false);
-                                onTimer(false);
+                                onTimer(true);
                                 timer.scheduleRepeating(5000);
                                 timer.run();
                             }

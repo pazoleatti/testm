@@ -126,6 +126,11 @@ def getRefBookValue(def long refBookId, def Long recordId) {
     return formDataService.getRefBookValue(refBookId, recordId, refBookCache)
 }
 
+def Long getRecordId(def Long refBookId, def String alias, def String value) {
+    return formDataService.getRefBookRecordId(refBookId, recordCache, providerCache, alias, value,
+            getReportPeriodEndDate(), -1, null, logger, true)
+}
+
 //// Кастомные методы
 
 // Логические проверки
@@ -134,6 +139,7 @@ void logicCheck() {
     if (dataRows.isEmpty()) {
         return
     }
+    def country643 = getRecordId(10, 'CODE', '643')
 
     for (row in dataRows) {
         if (row.getAlias() != null) {
@@ -150,11 +156,21 @@ void logicCheck() {
             logger.error("Строка $rowNum: Значение графы «$msg» должно быть больше или равно «0»!")
         }
 
-        // 3. Проверка заполнения населенного пункта
+        // Проверка заполнения кода региона
+        if (row.country == country643 && !row.region) {
+            def msg = row.getCell('region').column.name
+            logger.error("Строка $rowNum: Графа «$msg» должна быть заполнена, т.к. указанная страна местонахождения объекта недвижимости Россия!")
+        }
+        if (row.country && row.country != country643 && row.region) {
+            def msg = row.getCell('region').column.name
+            logger.error("Строка $rowNum: Графа «$msg» не должна быть заполнена, т.к. указанная страна местонахождения объекта недвижимости не Россия!")
+        }
+
+        // Проверка заполнения населенного пункта
         if (!row.city && !row.settlement) {
-            def msg1 = row.getCell('settlement').column.name
-            def msg2 = row.getCell('city').column.name
-            logger.error("Строка $rowNum: Графа «$msg1» должна быть заполнена, если графа «$msg2» не заполнена!")
+            def msg1 = row.getCell('city').column.name
+            def msg2 = row.getCell('settlement').column.name
+            logger.error("Строка $rowNum: Должна быть заполнена графа «$msg1» или «$msg2»!")
         }
 
         // 4. Проверка цены с учетом количества
@@ -506,6 +522,9 @@ void importTransportData() {
     // итоговая строка
     def totalRow = calcTotalRow(newRows)
     newRows.add(totalRow)
+
+    // отображать ошибки переполнения разряда
+    showMessages(newRows, logger)
 
     // сравнение итогов
     if (!logger.containsLevel(LogLevel.ERROR) && totalTF) {

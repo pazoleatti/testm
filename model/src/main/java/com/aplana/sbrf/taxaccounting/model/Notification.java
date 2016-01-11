@@ -24,6 +24,10 @@ public class Notification implements Serializable {
     private Integer roleId;
     /** Признак прочтения */
     private boolean read;
+    /** Идентификатор отчета */
+    private String reportId;
+    /** Тип оповещения */
+    private NotificationType notificationType = NotificationType.DEFAULT;
 
     public Integer getRoleId() {
         return roleId;
@@ -111,5 +115,21 @@ public class Notification implements Serializable {
 
     public void setRead(boolean read) {
         this.read = read;
+    }
+
+    public String getReportId() {
+        return reportId;
+    }
+
+    public void setReportId(String reportId) {
+        this.reportId = reportId;
+    }
+
+    public NotificationType getNotificationType() {
+        return notificationType;
+    }
+
+    public void setNotificationType(NotificationType notificationType) {
+        this.notificationType = notificationType;
     }
 }

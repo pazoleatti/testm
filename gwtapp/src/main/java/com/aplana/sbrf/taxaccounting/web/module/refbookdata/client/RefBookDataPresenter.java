@@ -4,6 +4,7 @@ import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.AbstractCallback;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.dispatch.CallbackUtils;
+import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogAddEvent;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.event.log.LogCleanEvent;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.AbstractEditPresenter;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.editform.EditFormPresenter;
@@ -34,6 +35,7 @@ import com.gwtplatform.mvp.client.proxy.PlaceRequest;
 import com.gwtplatform.mvp.client.proxy.ProxyPlace;
 
 import java.util.Date;
+import java.util.List;
 
 public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
         RefBookDataPresenter.MyProxy> implements RefBookDataUiHandlers,
@@ -103,9 +105,11 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
 
         /**
          * Устанавливает вид справочника версионируемый вид справочника.
-         * @param isVersion true - версионируемый
+         * @param isVersioned true - версионируемый
          */
         void setIsVersion(boolean isVersioned);
+
+        void setSpecificReportTypes(List<String> specificReportTypes);
     }
 
     @Inject
@@ -214,6 +218,7 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
                                                             new AbstractCallback<GetRefBookAttributesResult>() {
                                                                 @Override
                                                                 public void onSuccess(GetRefBookAttributesResult result) {
+                                                                    getView().setSpecificReportTypes(result.getSpecificReportTypes());
                                                                     refBookLinearPresenter.setTableColumns(result.getColumns());
                                                                     getView().updateSendQuery(result.isSendQuery());
                                                                     editFormPresenter.createFields(result.getColumns());
@@ -411,5 +416,24 @@ public class RefBookDataPresenter extends Presenter<RefBookDataPresenter.MyView,
                 });*/
             }
         };
+    }
+
+    @Override
+    public void onPrintClicked(String reportName) {
+        CreateReportAction action = new CreateReportAction();
+        action.setReportName(reportName);
+        action.setRefBookId(refBookId);
+        action.setVersion(refBookLinearPresenter.getRelevanceDate());
+        action.setSearchPattern(refBookLinearPresenter.getSearchPattern());
+        action.setSortColumnIndex(refBookLinearPresenter.getSortColumnIndex());
+        action.setAscSorting(refBookLinearPresenter.isAscSorting());
+        dispatcher.execute(action,
+                CallbackUtils.defaultCallback(
+                        new AbstractCallback<CreateReportResult>() {
+                            @Override
+                            public void onSuccess(CreateReportResult result) {
+                                LogAddEvent.fire(RefBookDataPresenter.this, result.getUuid());
+                            }
+                        }, RefBookDataPresenter.this));
     }
 }

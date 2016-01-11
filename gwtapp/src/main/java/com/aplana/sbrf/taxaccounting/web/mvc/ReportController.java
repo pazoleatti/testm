@@ -96,6 +96,8 @@ public class ReportController {
         if (uuid != null) {
             BlobData blobData = blobDataService.get(uuid);
             createResponse(request, response, blobData);
+        } else {
+            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
         }
     }
 
@@ -113,6 +115,26 @@ public class ReportController {
         if (uuid != null) {
             BlobData blobData = blobDataService.get(uuid);
             createResponse(request, response, blobData);
+        }
+    }
+
+    /**
+     * Получает архив ЖА
+     * @param uuid
+     * @param request
+     * @param response
+     * @throws IOException
+     */
+    @RequestMapping(value = "/refBookReport/{uuid}", method = RequestMethod.GET)
+    public void processDownloadRefBookReport(@PathVariable String uuid, HttpServletRequest request, HttpServletResponse response) throws IOException {
+        BlobData blobData = blobDataService.get(uuid);
+        if (blobData != null) {
+            createResponse(request, response, blobData);
+        } else {
+            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+            response.setContentType("text/plain");
+            response.setCharacterEncoding("UTF-8");response.setStatus(HttpServletResponse.SC_NOT_FOUND, "Отчет не найден");
+            response.getWriter().printf("Отчет не найден");
         }
     }
 

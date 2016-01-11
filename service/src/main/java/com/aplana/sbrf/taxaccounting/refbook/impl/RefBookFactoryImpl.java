@@ -1,6 +1,10 @@
 package com.aplana.sbrf.taxaccounting.refbook.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
+import com.aplana.sbrf.taxaccounting.model.*;
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
+import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
+import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
@@ -8,12 +12,16 @@ import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.refbook.impl.fixed.RefBookAuditFieldList;
 import com.aplana.sbrf.taxaccounting.refbook.impl.fixed.RefBookConfigurationParam;
+import com.aplana.sbrf.taxaccounting.service.RefBookScriptingService;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 /**
  * Реализация фабрики провайдеров данных для справочников
@@ -25,11 +33,18 @@ import java.util.List;
 @Transactional
 public class RefBookFactoryImpl implements RefBookFactory {
 
+    private static final Log LOG = LogFactory.getLog(RefBookFactoryImpl.class);
+
     @Autowired
     private RefBookDao refBookDao;
 
     @Autowired
     private ApplicationContext applicationContext;
+
+    @Autowired
+    private RefBookScriptingService refBookScriptingService;
+
+    private static final SimpleDateFormat SDF_DD_MM_YYYY = new SimpleDateFormat("dd.MM.yyyy");
 
     @Override
     public RefBook get(Long refBookId) {
@@ -253,5 +268,53 @@ public class RefBookFactoryImpl implements RefBookFactory {
     private boolean isSimpleRefBool(Long refBookId){
         // TODO Левыкин: нереализованный метод?
         return true;
+    }
+
+    @Override
+    public String getTaskName(ReportType reportType, Long refBookId, String specificReportType) {
+        RefBook refBook = get(refBookId);
+        switch (reportType) {
+            case EXCEL_REF_BOOK:
+            case CSV_REF_BOOK:
+                return String.format(reportType.getDescription(), refBook.getName());
+            case SPECIFIC_REPORT_REF_BOOK:
+                return String.format(reportType.getDescription(), specificReportType, refBook.getName());
+            default:
+                throw new ServiceException("Неверный тип отчета(%s)", reportType.getName());
+        }
+    }
+
+    @Override
+    public String getTaskFullName(ReportType reportType, Long refBookId, Date version, String filter, String specificReportType) {
+        RefBook refBook = get(refBookId);
+        switch (reportType) {
+            case EXCEL_REF_BOOK:
+            case CSV_REF_BOOK:
+            case SPECIFIC_REPORT_REF_BOOK:
+                return String.format("\"%s\" отчет справочника \"%s\": Версия: %s, Фильтр: \"%s\"", specificReportType, refBook.getName(), SDF_DD_MM_YYYY.format(version), filter);
+            default:
+                throw new ServiceException("Неверный тип отчета(%s)", reportType.getName());
+        }
+    }
+
+    @Override
+    public List<String> getSpecificReportTypes(long refBookId, TAUserInfo userInfo, Logger logger) {
+        Map<String, Object> params = new HashMap<String, Object>();
+        List<String> specificReportTypes = new ArrayList<String>();
+        params.put("specificReportType", specificReportTypes);
+        refBookScriptingService.executeScript(userInfo, refBookId, FormDataEvent.GET_SPECIFIC_REPORT_TYPES, logger, params);
+        if (logger.containsLevel(LogLevel.ERROR)) {
+            logger.warn("Возникли ошибки при получении списка отчетов");
+        }
+        Iterator<String> iterator = specificReportTypes.iterator();
+        while (iterator.hasNext()) {
+            String specificReportType = iterator.next();
+            if (ReportType.EXCEL_REF_BOOK.getName().equals(specificReportType) ||
+                    ReportType.CSV_REF_BOOK.getName().equals(specificReportType)) {
+                iterator.remove();
+                LOG.error(String.format("Нельзя переопределить стандартный отчет: %s.", specificReportType));
+            }
+        }
+        return specificReportTypes;
     }
 }

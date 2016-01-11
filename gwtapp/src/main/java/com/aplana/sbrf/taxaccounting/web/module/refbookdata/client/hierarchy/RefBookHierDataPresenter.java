@@ -13,6 +13,7 @@ import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.event.DeleteI
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.event.SearchButtonEvent;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.client.event.ShowItemEvent;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.*;
+import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.model.PickerState;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.model.RefBookTreeItem;
 import com.aplana.sbrf.taxaccounting.web.widget.utils.WidgetUtils;
 import com.google.inject.Inject;
@@ -109,6 +110,8 @@ public class RefBookHierDataPresenter extends PresenterWidget<RefBookHierDataPre
         void setAttributeId(Long attrId);
 
         void setPickerState(Date relevanceDate, String searchPattern);
+
+        PickerState getPickerState();
 
         /** Обновление вьюшки для определенного состояния */
         void updateMode(FormMode mode);
@@ -374,4 +377,11 @@ public class RefBookHierDataPresenter extends PresenterWidget<RefBookHierDataPre
     }*/
 
 
+    public Date getRelevanceDate() {
+        return getView().getPickerState().getVersionDate();
+    }
+
+    public String getSearchPattern() {
+        return getView().getPickerState().getSearchPattern();
+    }
 }

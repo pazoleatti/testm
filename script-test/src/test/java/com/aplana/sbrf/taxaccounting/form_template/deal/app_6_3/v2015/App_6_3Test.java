@@ -100,20 +100,21 @@ public class App_6_3Test extends ScriptTestBase {
         Assert.assertEquals("Строка 1: Графа «Цена» не заполнена!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Графа «Стоимость» не заполнена!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Графа «Дата совершения сделки» не заполнена!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Графа «Населенный пункт» должна быть заполнена, если графа «Город» не заполнена!", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 1: Должна быть заполнена графа «Город» или «Населенный пункт»!", entries.get(i++).getMessage());
         Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
         testHelper.getLogger().clear();
 
         // для попадания в ЛП:
-        //  Проверка даты совершения сделки
-        //  Корректность даты (заключения) сделки
-        //  Корректность даты совершения сделки
-        //  Проверка диапазона дат
+        // Проверка заполнения кода региона
+        // Проверка даты совершения сделки
+        // Корректность даты (заключения) сделки
+        // Корректность даты совершения сделки
+        // Проверка диапазона дат
         row.getCell("name").setValue(1L, null);
         row.getCell("sum").setValue(1L, null);
         row.getCell("docNumber").setValue("1", null);
         row.getCell("docDate").setValue(sdf.parse("02.01.2990"), null);
-        row.getCell("country").setValue(1L, null);
+        row.getCell("country").setValue(4L, null);
         row.getCell("settlement").setValue("settlement", null);
         row.getCell("price").setValue(1L, null);
         row.getCell("count").setValue(1L, null);
@@ -122,6 +123,7 @@ public class App_6_3Test extends ScriptTestBase {
         testHelper.execute(FormDataEvent.CHECK);
         entries = testHelper.getLogger().getEntries();
         i = 0;
+        Assert.assertEquals("Строка 1: Графа «Регион (код)» должна быть заполнена, т.к. указанная страна местонахождения объекта недвижимости Россия!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Значение графы «Дата совершения сделки» должно быть не меньше значения графы «Дата договора»!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Дата, указанная в графе «Дата совершения сделки» (01.01.2990), должна относиться к отчетному периоду текущей формы (01.01.2014 - 31.12.2014)!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Значение даты атрибута «Дата договора» должно принимать значение из следующего диапазона: 01.01.1991 - 31.12.2099", entries.get(i++).getMessage());
@@ -130,6 +132,7 @@ public class App_6_3Test extends ScriptTestBase {
         testHelper.getLogger().clear();
 
         // для попадания в ЛП:
+        // Проверка заполнения кода региона
         // Проверка суммы доходов
         // Проверка заполнения населенного пункта
         // Проверка количества
@@ -139,6 +142,7 @@ public class App_6_3Test extends ScriptTestBase {
         row.getCell("docNumber").setValue("1", null);
         row.getCell("docDate").setValue(sdf.parse("01.01.2014"), null);
         row.getCell("country").setValue(1L, null);
+        row.getCell("region").setValue(1L, null);
         row.getCell("city").setValue("city", null);
         row.getCell("settlement").setValue(null, null);
         row.getCell("price").setValue(1L, null);
@@ -149,6 +153,7 @@ public class App_6_3Test extends ScriptTestBase {
         entries = testHelper.getLogger().getEntries();
         i = 0;
         Assert.assertEquals("Строка 1: Значение графы «Сумма доходов Банка, руб.» должно быть больше или равно «0»!", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 1: Графа «Регион (код)» не должна быть заполнена, т.к. указанная страна местонахождения объекта недвижимости не Россия!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Значение графы «Количество» должно быть больше «0»!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Значение графы «Стоимость» должно быть равно значению графы «Сумма доходов Банка, руб.»!", entries.get(i++).getMessage());
         Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
@@ -160,7 +165,7 @@ public class App_6_3Test extends ScriptTestBase {
         row.getCell("sum").setValue(222L, null);
         row.getCell("docNumber").setValue("1", null);
         row.getCell("docDate").setValue(sdf.parse("01.01.2014"), null);
-        row.getCell("country").setValue(1L, null);
+        row.getCell("country").setValue(4L, null);
         row.getCell("city").setValue(null, null);
         row.getCell("settlement").setValue("settlement", null);
         row.getCell("price").setValue(1L, null);
@@ -179,7 +184,7 @@ public class App_6_3Test extends ScriptTestBase {
         row.getCell("sum").setValue(7.77, null);
         row.getCell("docNumber").setValue("1", null);
         row.getCell("docDate").setValue(sdf.parse("01.01.2014"), null);
-        row.getCell("country").setValue(1L, null);
+        row.getCell("country").setValue(4L, null);
         row.getCell("city").setValue(null, null);
         row.getCell("settlement").setValue("settlement", null);
         row.getCell("price").setValue(3.88, null);

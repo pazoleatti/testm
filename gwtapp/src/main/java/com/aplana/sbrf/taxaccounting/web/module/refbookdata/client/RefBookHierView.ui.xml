@@ -46,6 +46,11 @@
             margin: 0 9px;
             border-right: 1px solid #aeaeac;
         }
+
+        .printAnchor {
+            padding-left: 14px;
+            padding-right: 6px;
+        }
     </ui:style>
 
     <fm:MainContainer>
@@ -68,6 +73,14 @@
                         <g:Label ui:field="titleDesc"/>
                     </fm:Resizable>
                 </fm:resizable>
+                <fm:right>
+                    <fm:Right>
+                        <style:LeftBar marginRight="10" childValign="middle" height="100%">
+                            <style:DropdownButton ui:field="printAnchor" text="Формирование отчетов" img="resources/img/printer-16.png"
+                                                  title="Формирование отчето" panelStyleName="{style.printAnchor}"/>
+                        </style:LeftBar>
+                    </fm:Right>
+                </fm:right>
             </fm:HeaderContainer>
         </fm:header>
         <fm:body>
@@ -90,7 +103,7 @@
                     <g:cell width="99%">
                         <g:HorizontalPanel verticalAlignment="middle" addStyleNames="{style.marginRight5}">
                             <g:HTML ui:field="separatorVersion" addStyleNames="{style.verSep}"/>
-                            <g:TextBox width="210px" ui:field="filterText" addStyleNames="{style.marginRight5}"/>
+                            <g:TextBox width="210px" ui:field="filterText" addStyleNames="{style.marginRight5}" maxLength="200"/>
                             <g:Button title="Поиск" width="70px" text="Поиск" ui:field="search"/>
                         </g:HorizontalPanel>
                     </g:cell>

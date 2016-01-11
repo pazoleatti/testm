@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.module.refbookdata.server;
 
 import com.aplana.sbrf.taxaccounting.model.TARole;
 import com.aplana.sbrf.taxaccounting.model.TAUser;
+import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
@@ -93,7 +94,9 @@ public class GetRefBookAttributesHandler extends AbstractActionHandler<GetRefBoo
                 (currentUser.hasRole(TARole.ROLE_CONTROL_NS) || currentUser.hasRole(TARole.ROLE_CONTROL)));
 
 		result.setColumns(columns);
-		return result;
+
+        result.setSpecificReportTypes(refBookFactory.getSpecificReportTypes(refBook.getId(), securityService.currentUserInfo(), new Logger()));
+        return result;
 	}
 
 	private HorizontalAlignment getHorizontalAlignment(RefBookAttribute attribute) {

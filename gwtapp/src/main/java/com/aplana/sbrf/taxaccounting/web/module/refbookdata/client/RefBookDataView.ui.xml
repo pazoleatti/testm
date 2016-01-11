@@ -47,6 +47,11 @@
             margin: 0 9px;
             border-right: 1px solid #aeaeac;
         }
+
+        .printAnchor {
+            padding-left: 14px;
+            padding-right: 6px;
+        }
     </ui:style>
 
 
@@ -73,6 +78,8 @@
                     <fm:Right>
                         <style:LeftBar marginRight="10" childValign="middle" height="100%">
                             <g:Label ui:field="editModeLabel" visible="false" text="Режим редактирования" addStyleNames="{style.editModeLabel}, {style.marginRight5}"/>
+                            <style:DropdownButton ui:field="printAnchor" text="Формирование отчетов" img="resources/img/printer-16.png"
+                                                  title="Формирование отчето" panelStyleName="{style.printAnchor}"/>
                         </style:LeftBar>
                     </fm:Right>
                 </fm:right>

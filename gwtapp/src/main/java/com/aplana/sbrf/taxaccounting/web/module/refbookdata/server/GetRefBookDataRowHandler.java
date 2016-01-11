@@ -9,6 +9,7 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
+import com.aplana.sbrf.taxaccounting.refbook.RefBookHelper;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.refbookdata.shared.GetRefBookTableDataAction;
@@ -31,6 +32,8 @@ public class GetRefBookDataRowHandler extends AbstractActionHandler<GetRefBookTa
 
     @Autowired
     private RefBookFactory refBookFactory;
+    @Autowired
+    private RefBookHelper refBookHelper;
     @Autowired
     private SecurityService securityService;
     @Autowired
@@ -128,32 +131,7 @@ public class GetRefBookDataRowHandler extends AbstractActionHandler<GetRefBookTa
 		}
 		List<RefBookAttribute> attributes = refBook.getAttributes();
 		// разыменовывание ссылок
-		Map<Long, Map<Long, String>> derefenceValues = new HashMap<Long, Map<Long, String>>(); // Map<attrId, Map<referenceId, value>>
-		for (RefBookAttribute attribute : attributes) {
-			if (RefBookAttributeType.REFERENCE.equals(attribute.getAttributeType())) {
-				// сбор всех ссылок
-				String alias = attribute.getAlias();
-				Set<Long> recordIds = new HashSet<Long>();
-				for (Map<String, RefBookValue> record : refBookPage) {
-					RefBookValue value = record.get(alias);
-					if (value != null && !value.isEmpty()) {
-						recordIds.add(value.getReferenceValue());
-					}
-				}
-				// групповое разыменование, если есть что разыменовывать
-				if (!recordIds.isEmpty()) {
-					RefBookDataProvider provider = refBookFactory.getDataProvider(attribute.getRefBookId());
-					Map<Long, RefBookValue> values = provider.dereferenceValues(attribute.getRefBookAttributeId(), recordIds);
-					if (values != null && !values.isEmpty()) {
-						Map<Long, String> stringValues = new HashMap<Long, String>();
-						for (Map.Entry<Long, RefBookValue> entry : values.entrySet()) {
-							stringValues.put(entry.getKey(), String.valueOf(entry.getValue()));
-						}
-						derefenceValues.put(attribute.getId(), stringValues);
-					}
-				}
-			}
-		}
+		Map<Long, Map<Long, String>> dereferenceValues = refBookHelper.dereferenceValues(refBook, refBookPage);
 
         for (Map<String, RefBookValue> record : refBookPage) {
             Map<String, String> tableRowData = new HashMap<String, String>();
@@ -187,7 +165,7 @@ public class GetRefBookDataRowHandler extends AbstractActionHandler<GetRefBookTa
                         case REFERENCE:
                             if (value.getReferenceValue() == null) tableCell = "";
                             else {
-								tableCell = derefenceValues.get(attribute.getId()).get(value.getReferenceValue());
+								tableCell = dereferenceValues.get(attribute.getId()).get(value.getReferenceValue());
                             }
                             break;
                         default:

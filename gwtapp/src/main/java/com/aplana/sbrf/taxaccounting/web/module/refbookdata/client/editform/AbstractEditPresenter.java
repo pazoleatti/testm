@@ -148,7 +148,7 @@ public abstract class AbstractEditPresenter<V extends AbstractEditPresenter.MyVi
         }
     }
 
-    void showRecord(final Long refBookRecordId){
+    void  showRecord(final Long refBookRecordId){
         //Для случая когда мы нажимаем на кнопку отмены перехода на другую запись
         if (previousURId != null && previousURId.equals(refBookRecordId)){
             return;

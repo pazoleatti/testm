@@ -9,7 +9,7 @@ import java.util.List;
  * Объект-хранилище данных для формирования специфичных отчетов в скрипте
  * @author lhaziev
  */
-public class ScriptSpecificReportHolder {
+public class ScriptSpecificFormDataReportHolder {
 
     /**
      * Тип специфичного отчета

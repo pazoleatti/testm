@@ -4,6 +4,7 @@ import com.aplana.sbrf.taxaccounting.dao.api.NotificationDao;
 import com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils;
 import com.aplana.sbrf.taxaccounting.model.DepartmentPair;
 import com.aplana.sbrf.taxaccounting.model.Notification;
+import com.aplana.sbrf.taxaccounting.model.NotificationType;
 import com.aplana.sbrf.taxaccounting.model.NotificationsFilterData;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
@@ -38,6 +39,8 @@ public class NotificationDaoImpl extends AbstractDao implements NotificationDao 
             notification.setDeadline(rs.getDate("DEADLINE"));
             notification.setUserId(rs.getInt("USER_ID"));
             notification.setRoleId(rs.getInt("ROLE_ID"));
+            notification.setReportId(rs.getString("REPORT_ID"));
+            notification.setNotificationType(NotificationType.fromId(rs.getInt("TYPE")));
             return notification;
         }
     }
@@ -53,8 +56,8 @@ public class NotificationDaoImpl extends AbstractDao implements NotificationDao 
 
         jt.update(
                 "insert into notification (ID, REPORT_PERIOD_ID, SENDER_DEPARTMENT_ID, RECEIVER_DEPARTMENT_ID, " +
-                        "IS_READ, TEXT, CREATE_DATE, DEADLINE, BLOB_DATA_ID)" +
-                        " values (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                        "IS_READ, TEXT, CREATE_DATE, DEADLINE, BLOB_DATA_ID, REPORT_ID, TYPE)" +
+                        " values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                 id,
                 notification.getReportPeriodId(),
                 notification.getSenderDepartmentId(),
@@ -63,7 +66,9 @@ public class NotificationDaoImpl extends AbstractDao implements NotificationDao 
                 notification.getText(),
                 notification.getCreateDate(),
                 notification.getDeadline(),
-                notification.getBlobDataId()
+                notification.getBlobDataId(),
+                notification.getReportId(),
+                notification.getNotificationType().getId()
         );
         notification.setId(id);
         return id;
@@ -92,8 +97,8 @@ public class NotificationDaoImpl extends AbstractDao implements NotificationDao 
     @Override
     public void saveList(final List<Notification> notifications) {
         getJdbcTemplate().batchUpdate("insert into notification (ID, REPORT_PERIOD_ID, SENDER_DEPARTMENT_ID, RECEIVER_DEPARTMENT_ID, " +
-                "IS_READ, TEXT, CREATE_DATE, DEADLINE, USER_ID, ROLE_ID, BLOB_DATA_ID)" +
-                " values (?, ?, ?, ?, ?, ?, sysdate ,?, ?, ?, ?)", new BatchPreparedStatementSetter() {
+                "IS_READ, TEXT, CREATE_DATE, DEADLINE, USER_ID, ROLE_ID, BLOB_DATA_ID, TYPE, REPORT_ID)" +
+                " values (?, ?, ?, ?, ?, ?, sysdate ,?, ?, ?, ?, ?, ?)", new BatchPreparedStatementSetter() {
 
             @Override
             public void setValues(PreparedStatement ps, int i) throws SQLException {
@@ -145,6 +150,14 @@ public class NotificationDaoImpl extends AbstractDao implements NotificationDao 
                 } else {
                     ps.setNull(10, Types.VARCHAR);
                 }
+
+                ps.setInt(11, new Integer(elem.getNotificationType().getId()));
+
+                if (elem.getReportId() != null) {
+                    ps.setString(12, elem.getReportId());
+                } else {
+                    ps.setNull(12, Types.VARCHAR);
+                }
             }
 
             @Override
@@ -174,7 +187,7 @@ public class NotificationDaoImpl extends AbstractDao implements NotificationDao 
     }
 
 	@Override
-	public Notification get(int id) {
+	public Notification get(long id) {
 		try {
 			String query = "select * from notification where id = :id";
 			MapSqlParameterSource params = new MapSqlParameterSource();
@@ -186,7 +199,7 @@ public class NotificationDaoImpl extends AbstractDao implements NotificationDao 
 	}
 
     private static final String GET_BY_FILTER = "select * from (\n" +
-            "  select ID, REPORT_PERIOD_ID, SENDER_DEPARTMENT_ID, RECEIVER_DEPARTMENT_ID, IS_READ, TEXT, BLOB_DATA_ID, CREATE_DATE, DEADLINE, USER_ID, ROLE_ID, \n" +
+            "  select ID, REPORT_PERIOD_ID, SENDER_DEPARTMENT_ID, RECEIVER_DEPARTMENT_ID, IS_READ, TEXT, BLOB_DATA_ID, CREATE_DATE, DEADLINE, USER_ID, ROLE_ID, REPORT_ID, TYPE, \n" +
             " row_number() %s as rn \n" +
             "  from notification \n" +
             "where (\n" +

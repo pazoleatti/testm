@@ -100,19 +100,20 @@ public class App_6_5Test extends ScriptTestBase {
         Assert.assertEquals("Строка 1: Графа «Цена» не заполнена!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Графа «Стоимость» не заполнена!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Графа «Дата совершения сделки» не заполнена!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Графа «Населенный пункт» должна быть заполнена, если графа «Город» не заполнена!", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 1: Должна быть заполнена графа «Город» или «Населенный пункт»!", entries.get(i++).getMessage());
         Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
         testHelper.getLogger().clear();
 
         // для попадания в ЛП:
         // 2. Проверка суммы расходов
+        // Проверка заполнения кода региона
         // 4. Проверка цены с учетом количества
         // 6. Проверка стоимости
         // 7. Корректность даты совершения сделки относительно даты договора
         // 8. Проверка года совершения сделки
         // 9. Проверка диапазона дат
         row.getCell("name").setValue(1L, null);
-        row.getCell("country").setValue(1L, null);
+        row.getCell("country").setValue(4L, null);
         row.getCell("settlement").setValue("string", null);
         row.getCell("sum").setValue(-5, null);
         row.getCell("docDate").setValue(sdf.parse("02.01.2990"), null);
@@ -126,6 +127,7 @@ public class App_6_5Test extends ScriptTestBase {
         entries = testHelper.getLogger().getEntries();
         i = 0;
         Assert.assertEquals("Строка 1: Значение графы «Сумма расходов Банка, руб.» должно быть больше или равно «0»!", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 1: Графа «Регион (код)» должна быть заполнена, т.к. указанная страна местонахождения объекта недвижимости Россия!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Значение графы «Цена» должно быть равно отношению графы «Сумма расходов Банка, руб.» к графе «Количество», если графа «Количество» заполнена (значением > 0)!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Значение графы «Стоимость» должно быть равно значению графы «Сумма расходов Банка, руб.»!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Значение графы «Дата совершения сделки» должно быть не меньше значения графы «Дата договора»!", entries.get(i++).getMessage());
@@ -135,6 +137,9 @@ public class App_6_5Test extends ScriptTestBase {
         testHelper.getLogger().clear();
 
         // 5. Проверка цены без учета количества
+        // Проверка заполнения кода региона
+        row.getCell("country").setValue(1L, null);
+        row.getCell("region").setValue(1L, null);
         row.getCell("count").setNumericValue(null);
         row.getCell("sum").setValue(1, null);
         row.getCell("name").setValue(1L, null);
@@ -145,11 +150,13 @@ public class App_6_5Test extends ScriptTestBase {
 
         entries = testHelper.getLogger().getEntries();
         i = 0;
+        Assert.assertEquals("Строка 1: Графа «Регион (код)» не должна быть заполнена, т.к. указанная страна местонахождения объекта недвижимости не Россия!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Значение графы «Цена» должно быть равно значению графы «Сумма расходов Банка, руб.», если графа «Количество» не заполнена!", entries.get(i++).getMessage());
         Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
         testHelper.getLogger().clear();
 
         // для успешного прохождения всех ЛП:
+        row.getCell("country").setValue(4L, null);
         row.getCell("price").setValue(1, null);
 
         // проверка суммы расходов:
@@ -164,7 +171,7 @@ public class App_6_5Test extends ScriptTestBase {
         testHelper.getLogger().clear();
     }
 
-    // Расчет пустой (в импорте - растчет заполненной)
+    // Расчет пустой (в импорте - расчет заполненной)
     @Test
     public void calcTest() {
         testHelper.execute(FormDataEvent.CALCULATE);
