@@ -160,8 +160,8 @@ void logicCheck() {
         }
 
         // 3. Проверка корректности даты заключения сделки
-        if (row.docDate && row.dealDoneDate && (row.dealDoneDate < row.docDate || row.dealDoneDate > getReportPeriodEndDate())) {
-            def msg1 = getColumnName(row, 'dealDoneDate')
+        if (row.docDate && row.dealDate && (row.dealDate < row.docDate || row.dealDate > getReportPeriodEndDate())) {
+            def msg1 = getColumnName(row, 'dealDate')
             def msg2 = getColumnName(row, 'docDate')
             def msg3 = getReportPeriodEndDate().format('dd.MM.yyyy')
             logger.error("Строка $rowNum: Значение графы «$msg1» должно быть не меньше значения графы «$msg2» и не больше $msg3!")
@@ -188,10 +188,10 @@ void logicCheck() {
             }
         }
 
-        // 8. Проверка корректности даты заключения сделки
-        if (row.docDate && row.dealDoneDate && (row.dealDoneDate < row.docDate || row.dealDoneDate > getReportPeriodEndDate())) {
+        // 8. Проверка корректности даты совершения сделки
+        if (row.dealDate && row.dealDoneDate && (row.dealDoneDate < row.dealDate || row.dealDoneDate > getReportPeriodEndDate())) {
             def msg1 = getColumnName(row, 'dealDoneDate')
-            def msg2 = getColumnName(row, 'docDate')
+            def msg2 = getColumnName(row, 'dealDate')
             def msg3 = getReportPeriodEndDate().format('dd.MM.yyyy')
             logger.error("Строка $rowNum: Значение графы «$msg1» должно быть не меньше значения графы «$msg2» и не больше $msg3!")
         }
