@@ -9,5 +9,5 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Component("CsvReportRefBookAsyncTaskSpring")
 @Transactional
-public class CsvReportRefBookAsyncTaskSpring1 extends CsvReportRefBookAsyncTask1 {
+public class CsvReportRefBookAsyncTaskSpring extends CsvReportRefBookAsyncTask {
 }

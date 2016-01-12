@@ -26,7 +26,7 @@ import static com.aplana.sbrf.taxaccounting.async.task.AsyncTask.RequiredParams.
 /**
  * @author lhaziev
  */
-public abstract class CsvReportRefBookAsyncTask1 extends AbstractAsyncTask  {
+public abstract class CsvReportRefBookAsyncTask extends AbstractAsyncTask  {
 
     private static final Log LOG = LogFactory.getLog(LoadAllTransportDataAsyncTask.class);
 
