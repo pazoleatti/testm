@@ -115,7 +115,7 @@
         <checking>false</checking>
         <name>Курс валюты Банка России</name>
         <order>11</order>
-        <width>10</width>
+        <width>11</width>
         <maxLength>19</maxLength>
         <precision>4</precision>
     </columns>
@@ -125,7 +125,7 @@
         <columnType>NUMBER</columnType>
         <name>Количество календарных дней в периоде</name>
         <order>12</order>
-        <width>5</width>
+        <width>6</width>
         <maxLength>3</maxLength>
         <precision>0</precision>
     </columns>
@@ -135,7 +135,7 @@
         <columnType>NUMBER</columnType>
         <name>База года (360/365/366)</name>
         <order>13</order>
-        <width>5</width>
+        <width>6</width>
         <maxLength>3</maxLength>
         <precision>0</precision>
     </columns>
