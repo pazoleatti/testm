@@ -1856,7 +1856,7 @@ public final class ScriptUtils {
                 if (nameFromFile != null && !nameFromFile.isEmpty()) {
                     msg = String.format("В файле указано другое наименование %s - «%s»!", isVzl ? "ВЗЛ/РОЗ" : "юридического лица", nameFromFile);
                 } else {
-                    msg = String.format("Наименование %s в файле не заполнено!, ", isVzl ? "ВЗЛ/РОЗ" : "юридического лица");
+                    msg = String.format("Наименование %s в файле не заполнено!", isVzl ? "ВЗЛ/РОЗ" : "юридического лица");
                 }
                 String refBookAttributeName = "Не задано";
                 for (String alias : aliases) {
