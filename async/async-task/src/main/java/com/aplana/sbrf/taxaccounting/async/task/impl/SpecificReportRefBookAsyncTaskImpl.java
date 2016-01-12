@@ -3,7 +3,6 @@ package com.aplana.sbrf.taxaccounting.async.task.impl;
 import com.aplana.sbrf.taxaccounting.async.service.AsyncTaskInterceptor;
 import com.aplana.sbrf.taxaccounting.async.task.AsyncTaskLocal;
 import com.aplana.sbrf.taxaccounting.async.task.AsyncTaskRemote;
-import com.aplana.sbrf.taxaccounting.async.task.SpecificReportFormDataAsyncTask;
 import com.aplana.sbrf.taxaccounting.async.task.SpecificReportRefBookAsyncTask;
 
 import javax.ejb.*;

@@ -12,6 +12,8 @@ import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import com.aplana.sbrf.taxaccounting.service.AsyncTaskManagerService;
 import com.aplana.sbrf.taxaccounting.service.TAUserService;
 import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -23,6 +25,7 @@ import java.util.Map;
  */
 @Service
 public class AsyncTaskManagerServiceImpl implements AsyncTaskManagerService{
+    private static final Log LOG = LogFactory.getLog(AsyncTaskManagerServiceImpl.class);
 
     @Autowired
     private LockDataService lockDataService;
@@ -74,6 +77,7 @@ public class AsyncTaskManagerServiceImpl implements AsyncTaskManagerService{
         // Шаги 1, 2, 5
         BalancingVariants balancingVariant;
         try {
+            LOG.info(String.format("Определение очереди для задачи с ключом %s", keyTask));
             balancingVariant = asyncManager.checkCreate(
 					isProductionMode ? reportType.getAsyncTaskTypeId() : reportType.getDevModeAsyncTaskTypeId(),
 					params);
@@ -85,9 +89,12 @@ public class AsyncTaskManagerServiceImpl implements AsyncTaskManagerService{
             throw new ServiceException(e.getMessage(), e);
         }
         // Шаг 3
+        LOG.info(String.format("Выполнение проверок перед запуском для задачи с ключом %s", keyTask));
         if (!cancelTask && handler.checkExistTask(reportType, userInfo, logger)) {
+            LOG.info(String.format("Найдены запущенные задач, по которым требуется удалить блокировку для задачи с ключом %s", keyTask));
             handler.executePostCheck();
         } else {
+            LOG.info(String.format("Создание блокировки для задачи с ключом %s", keyTask));
             LockData lockData = handler.createLock(keyTask, reportType, userInfo);
             if (lockData == null) {
                 try {
@@ -98,6 +105,7 @@ public class AsyncTaskManagerServiceImpl implements AsyncTaskManagerService{
                     lockDataService.addUserWaitingForLock(keyTask, userInfo.getUser().getId());
 
                     // Шаг 6
+                    LOG.info(String.format("Постановка в очередь задачи с ключом %s", keyTask));
                     lockData = lockDataService.getLock(keyTask);
                     params.put(AsyncTask.RequiredParams.LOCK_DATE.name(), lockData.getDateLock());
                     asyncManager.executeAsync(
@@ -117,6 +125,7 @@ public class AsyncTaskManagerServiceImpl implements AsyncTaskManagerService{
                     throw new ServiceException(e.getMessage(), e);
                 }
             } else {
+                LOG.info(String.format("Уже существует блокировка задачи с ключом %s", keyTask));
                 try {
                     lockDataService.addUserWaitingForLock(keyTask, userInfo.getUser().getId());
                     logger.info(String.format(LOCK_INFO_MSG,

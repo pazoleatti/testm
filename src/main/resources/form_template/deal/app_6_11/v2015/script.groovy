@@ -418,7 +418,7 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
         newRow.getCell(it).setStyleAlias('Автозаполняемая')
     }
     def String iksrName = getColumnName(newRow, 'iksr')
-    def nameFromFile = values[2]
+    def nameFromFile = values[3]
 
     def int colIndex = 2
 
@@ -426,7 +426,7 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
     newRow.dealDate = parseDate(values[colIndex], "dd.MM.yyyy", fileRowIndex, colIndex + colOffset, logger, true)
     colIndex++
 
-    def recordId = getTcoRecordId(nameFromFile, values[3], iksrName, fileRowIndex, colIndex, getReportPeriodEndDate(), false, logger, refBookFactory, recordCache)
+    def recordId = getTcoRecordId(nameFromFile, values[5], iksrName, fileRowIndex, colIndex, getReportPeriodEndDate(), false, logger, refBookFactory, recordCache)
     def map = getRefBookValue(520, recordId)
 
     // графа 3
@@ -630,7 +630,7 @@ def getNewRow(String[] rowCells, def columnCount, def fileRowIndex, def rowIndex
     if (!isTotal) {
         def String iksrName = getColumnName(newRow, 'iksr')
         def nameFromFile = pure(rowCells[3])
-        def recordId = getTcoRecordId(nameFromFile, pure(rowCells[4]), iksrName, fileRowIndex, 3, getReportPeriodEndDate(), false, logger, refBookFactory, recordCache)
+        def recordId = getTcoRecordId(nameFromFile, pure(rowCells[5]), iksrName, fileRowIndex, 3, getReportPeriodEndDate(), false, logger, refBookFactory, recordCache)
         // графа 2
         newRow.dealDate = parseDate(pure(rowCells[2]), "dd.MM.yyyy", fileRowIndex, 2 + colOffset, logger, true)
         // графа 3

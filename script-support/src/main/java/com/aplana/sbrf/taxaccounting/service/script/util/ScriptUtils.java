@@ -1911,6 +1911,49 @@ public final class ScriptUtils {
     }
 
     /**
+     * Проверка нахождения даты в диапазоне (вариант 1, с датами)
+     * @param logger логер для записи сообщения
+     * @param row строка НФ
+     * @param alias псевдоним столбца
+     * @param startDate дата окончания периода текущей формы
+     * @param endDate дата окончания периода текущей формы
+     * @param fatal фатально ли сообщение
+     */
+    public static void checkDatePeriod(Logger logger, DataRow<Cell> row, String alias, Date startDate, Date endDate, boolean fatal) {
+        Date docDate = row.getCell(alias).getDateValue();
+        if (docDate != null && (docDate.before(startDate) || docDate.after(endDate))) {
+            rowLog(logger, row, String.format("Строка %d: Графа «%s» должна принимать значение из следующего диапазона: %s - %s!",
+                    row.getIndex(),
+                    getColumnName(row, alias),
+                    formatDate(startDate, "dd.MM.yyyy"),
+                    formatDate(endDate, "dd.MM.yyyy")
+            ), fatal ? LogLevel.ERROR : LogLevel.WARNING);
+        }
+    }
+
+    /**
+     * Проверка нахождения даты в диапазоне (вариант 2, с названиями граф)
+     * @param logger логер для записи сообщения
+     * @param row строка НФ
+     * @param alias псевдоним столбца
+     * @param startAlias псевдоним графы даты начала периода
+     * @param endDate дата окончания периода текущей формы
+     * @param fatal фатально ли сообщение
+     */
+    public static void checkDatePeriod(Logger logger, DataRow<Cell> row, String alias, String startAlias, Date endDate, boolean fatal) {
+        Date docDate = row.getCell(alias).getDateValue();
+        Date startDate = row.getCell(startAlias).getDateValue();
+        if (docDate != null && startDate != null && (docDate.before(startDate) || docDate.after(endDate))) {
+            rowLog(logger, row, String.format("Строка %d: Значение графы «%s» должно быть не меньше значения графы «%s» и не больше %s!",
+                            row.getIndex(),
+                            getColumnName(row, alias),
+                            getColumnName(row, startAlias),
+                            formatDate(endDate, "dd.MM.yyyy")
+                    ), fatal ? LogLevel.ERROR : LogLevel.WARNING);
+        }
+    }
+
+    /**
      * Интерфейс для переопределения алгоритма расчета
      */
     public interface CalcAliasRow {

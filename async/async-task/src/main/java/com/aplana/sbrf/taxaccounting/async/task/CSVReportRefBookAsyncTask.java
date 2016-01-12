@@ -24,7 +24,7 @@ import static com.aplana.sbrf.taxaccounting.async.task.AsyncTask.RequiredParams.
 /**
  * @author lhaziev
  */
-public abstract class CSVReportRefBookAsyncTask extends AbstractAsyncTask  {
+public abstract class CsvReportRefBookAsyncTask extends AbstractAsyncTask  {
 
     @Autowired
     private TAUserService userService;
