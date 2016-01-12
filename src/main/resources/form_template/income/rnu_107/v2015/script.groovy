@@ -516,7 +516,7 @@ def getNewSubTotalRowFromXls(def values, def colOffset, def fileRowIndex, def ro
 
     // графа 5
     def colIndex = 5
-    newRow.code = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
+    newRow.code = getRecordIdImport(28, 'CODE', values[colIndex], fileRowIndex, colIndex + colOffset, false)
 
     // графа 13
     colIndex = 13
