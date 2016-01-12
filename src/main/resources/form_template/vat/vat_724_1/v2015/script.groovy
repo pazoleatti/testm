@@ -223,13 +223,16 @@ void calc() {
 void logicCheck() {
     def dataRows = formDataService.getDataRowHelper(formData).allCached
 
-    def isSection1or2or3 = false
+    def reportPeriod = reportPeriodService.get(formData.reportPeriodId)
+    // начиная с периода год 2015 - новый алгоритм проверки
+    // версия от 2015 года, поэтому на более ранние года не проверяем
+    boolean isNewCheck = reportPeriod?.taxPeriod?.year > 2015 || reportPeriod?.order > 2
+
     def isSection5or6 = false
     def isSection7 = false
     for (def row : dataRows) {
         if (row.getAlias() != null) {
             if (row.getAlias().matches("(head_.+|total(_.+)?)")) {
-                isSection1or2or3 = (row.getAlias() in ['head_1', 'head_2', 'head_3'])
                 isSection5or6 = (row.getAlias() == 'head_5' || row.getAlias() == 'head_6')
                 isSection7 = row.getAlias() == 'head_7'
             }
@@ -243,11 +246,8 @@ void logicCheck() {
         checkNonEmptyColumns(row, index, columns, logger, true)
 
         // 2. Проверка суммы НДС по данным бухгалтерского учета и книге продаж
-        if (row.ndsSum != row.ndsBookSum && (isSection1or2or3 && row.ndsNum == '60309.01' || isSection5or6)) {
-            rowWarning(logger, row, errorMsg + 'Сумма НДС по данным бухгалтерского учета не соответствует данным книги продаж!' +
-                    (isSection1or2or3 ?
-                            "Ожидаемое значение (разделы 1-3): «Графа 6» = «Графа 8» в строках, в которых «Графа 5» = «60309.01»." :
-                            "Ожидаемое значение (раздел 5 и 6): «Графа 6» = «Графа 8»."))
+        if (row.ndsSum != row.ndsBookSum) {
+            rowWarning(logger, row, errorMsg + 'Сумма НДС по данным бухгалтерского учета не соответствует данным книги продаж!')
         }
     }
 
@@ -288,18 +288,8 @@ void logicCheck() {
         totalColumns.each{
             superSums[it] = (superSums[it]?:0) + (lastRow[it]?:0)
         }
-        def values5 = calc5(section)
-        def endString = ''
-        switch (section) {
-            case '1':
-            case '2':
-            case '3':
-            case '4': endString = "(разделы 1-4): пустое значение или «60309.01»."
-                break
-            case '5': endString = "(раздел 5): «60309.04»."
-                break
-            case '6': endString = "(раздел 6): «60309.05»."
-        }
+        def values5 = calc5(section, isNewCheck)
+        def endString = calcEndString(section, isNewCheck)
         for (def row : sectionsRows) {
             if (row.getAlias() == null && !(row.ndsNum in values5)) {
                 rowError(logger, row, 'Строка ' + row.getIndex() + ': Графа «' + getColumnName(row, 'ndsNum') + '» заполнена неверно! Ожидаемое значение ' + endString)
@@ -421,23 +411,39 @@ def isBank() {
     return formData.departmentId == 1
 }
 
-def calc5(def section) {
+def calc5(def section, boolean isNewCheck) {
     def tmp = null
     switch (section) {
         case '1':
         case '2':
         case '3':
         case '4':
-            tmp = [null, '', '60309.01']
+            tmp = isNewCheck ? [null, '', '60309.01', '60309.07'] : [null, '', '60309.01']
             break
         case '5':
-            tmp = ['60309.04']
+            tmp = isNewCheck ? ['60309.04', '60309.08'] : ['60309.04']
             break
         case '6':
             tmp = ['60309.05']
             break
     }
     return tmp
+}
+
+String calcEndString(def section, boolean isNewCheck) {
+    switch (section) {
+        case '1':
+        case '2':
+        case '3':
+        case '4':
+            return isNewCheck ? "(разделы 1-4): пустое значение, «60309.01», «60309.07»." : "(разделы 1-4): пустое значение или «60309.01»."
+        case '5':
+            return isNewCheck ? "(раздел 5): «60309.04», «60309.08»." : "(раздел 5): «60309.04»."
+        case '6':
+            return "(раздел 6): «60309.05»."
+        default:
+            return null
+    }
 }
 
 def calc7(def row, def section) {
