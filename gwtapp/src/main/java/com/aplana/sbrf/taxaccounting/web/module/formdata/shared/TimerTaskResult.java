@@ -6,7 +6,7 @@ import com.gwtplatform.dispatch.shared.Result;
 public class TimerTaskResult implements Result {
     private static final long serialVersionUID = 7832261980997033051L;
 
-    public static enum FormMode {
+    public enum FormMode {
         LOCKED, // Открыта только для чтения
         LOCKED_READ, // Заблокирована в режиме просмотра текущим пользователем
         LOCKED_EDIT, // Заблокирована в режиме редактрирования текущим пользователем

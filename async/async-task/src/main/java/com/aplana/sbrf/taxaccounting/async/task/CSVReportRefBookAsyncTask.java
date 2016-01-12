@@ -14,6 +14,8 @@ import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.PrintingService;
 import com.aplana.sbrf.taxaccounting.service.TAUserService;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Date;
@@ -25,6 +27,8 @@ import static com.aplana.sbrf.taxaccounting.async.task.AsyncTask.RequiredParams.
  * @author lhaziev
  */
 public abstract class CsvReportRefBookAsyncTask extends AbstractAsyncTask  {
+
+    private static final Log LOG = LogFactory.getLog(LoadAllTransportDataAsyncTask.class);
 
     @Autowired
     private TAUserService userService;
@@ -48,11 +52,14 @@ public abstract class CsvReportRefBookAsyncTask extends AbstractAsyncTask  {
         long refBookId = (Long)params.get("refBookId");
         String filter = (String)params.get("filter");
         Date version = (Date)params.get("version");
+        LOG.info(String.format("Получение провайдера для справочника refBookId = %s", refBookId));
         RefBookDataProvider refBookDataProvider = refBookFactory.getDataProvider(refBookId);
         if (filter.isEmpty())
             filter = null;
+        LOG.info(String.format("Получение количества записей для справочника refBookId = %s", refBookId));
         Long value = Long.valueOf(refBookDataProvider.getRecordsCount(version, filter));
         String msg = String.format("количество записей справочника(%s) превышает максимально допустимое(%s)!", value, "%s");
+        LOG.info(String.format("Определение очереди refBookId = %s", refBookId));
         return checkTask(getReportType(), value, refBookFactory.getTaskName(getReportType(), refBookId, null), msg);
     }
 

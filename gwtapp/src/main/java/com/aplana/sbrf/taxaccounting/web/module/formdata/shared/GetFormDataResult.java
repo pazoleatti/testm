@@ -14,7 +14,7 @@ import java.util.List;
 public class GetFormDataResult implements Result {
 	private static final long serialVersionUID = 1564846831548468989L;
 
-    public static enum FormMode {
+    public enum FormMode {
 		READ_UNLOCKED, // Открыта для чтения
 		READ_LOCKED, // Открыта для чтения и заблокирована другим пользователем
 		EDIT // Открыта для редактирования

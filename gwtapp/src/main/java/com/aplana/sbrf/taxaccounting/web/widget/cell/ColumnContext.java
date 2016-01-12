@@ -9,7 +9,7 @@ import java.util.Date;
  *@author Eugene Stetsenko
  */
 public class ColumnContext {
-	public static enum Mode {
+	public enum Mode {
 		SUPER_EDIT_MODE,
 		READONLY_MODE,
 		NORMAL_EDIT_MODE

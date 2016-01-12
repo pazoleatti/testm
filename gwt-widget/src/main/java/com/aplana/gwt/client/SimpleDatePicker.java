@@ -195,7 +195,7 @@ public class SimpleDatePicker extends Composite
 	/**
 	 * Точность вводимого значения: день, месяц, год.
 	 */
-	public static enum Precision {
+	public enum Precision {
 		DATE, MONTH, YEAR
 	}
 

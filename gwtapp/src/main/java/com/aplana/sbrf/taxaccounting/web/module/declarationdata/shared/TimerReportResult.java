@@ -6,7 +6,7 @@ import com.gwtplatform.dispatch.shared.Result;
 public class TimerReportResult implements Result {
     private static final long serialVersionUID = 7859961980147513071L;
 
-    public static enum StatusReport {
+    public enum StatusReport {
         EXIST, //существует
         LOCKED, //есть блокировка
         NOT_EXIST, //не существует

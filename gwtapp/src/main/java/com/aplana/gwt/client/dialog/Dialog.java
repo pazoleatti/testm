@@ -16,7 +16,7 @@ import com.google.gwt.user.client.ui.Image;
  */
 public final class Dialog extends ModalWindow {
 
-    public static enum PredefinedButton {
+    public enum PredefinedButton {
         YES, NO, OK, CANCEL, CLOSE
     }
 
