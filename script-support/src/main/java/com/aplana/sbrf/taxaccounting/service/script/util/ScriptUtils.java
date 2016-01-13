@@ -62,6 +62,7 @@ public final class ScriptUtils {
     public static final String REF_BOOK_NOT_FOUND_IMPORT_ERROR = "Проверка файла: Строка %d, столбец %s: В справочнике «%s» в атрибуте «%s» не найдено значение «%s», актуальное на дату %s!";
     // Ссылочный, зависимая графа: Значение в файле отличается от того, которое должно быть в зависимой графе
     public static final String REF_BOOK_REFERENCE_NOT_FOUND_IMPORT_ERROR = "Проверка файла: Строка %d, столбец %s содержит значение «%s», отсутствующее в справочнике «%s»!";
+    public static final String REF_BOOK_REFERENCE_NOT_FOUND_IMPORT_ERROR_2 = "Проверка файла: Строка %d, столбец %s содержит значение «%s», которое не соответствует справочному значению «%s» графы «%s», найденному для «%s»!";
     // Ссылочный: Найдено несколько записей справочника, соответствующих значению в файле
     public static final String REF_BOOK_TOO_MANY_FOUND_IMPORT_ERROR = "Проверка файла: Строка %d, столбец %s: В справочнике «%s» в атрибуте «%s» найдено более одного значения «%s», актуального на дату %s!";
     public static final String CHECK_OVERFLOW_MESSAGE = "Строка %d: Значение графы «%s» превышает допустимую разрядность (%d знаков). Графа «%s» рассчитывается как «%s»!";
