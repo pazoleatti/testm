@@ -27,8 +27,7 @@ import static org.mockito.Mockito.when;
 
 /**
  * 6_10_2 Предоставление инструментов торгового финансирования и непокрытых аккредитивов
- *
- **/
+ */
 public class App_6_10_2Test extends ScriptTestBase {
     private static final int TYPE_ID = 825;
     private static final int DEPARTMENT_ID = 1;
@@ -159,7 +158,27 @@ public class App_6_10_2Test extends ScriptTestBase {
 
     @Test
     public void importExcelTest() {
-        // TODO тесты для логики поиска по iksr
+        mockBeforeImport();
+        testHelper.setImportFileInputStream(getImportXlsInputStream());
+        testHelper.execute(FormDataEvent.IMPORT);
+        checkLoadData(testHelper.getDataRowHelper().getAll());
+
+        // проверка расчетов
+        testHelper.execute(FormDataEvent.CALCULATE);
+        checkAfterCalc(testHelper.getDataRowHelper().getAll());
+        checkLogger();
+    }
+
+    @Test
+    public void importTransportFileTest() {
+        mockBeforeImport();
+        testHelper.setImportFileInputStream(getImportRnuInputStream());
+        testHelper.execute(FormDataEvent.IMPORT_TRANSPORT_FILE);
+
+        checkLoadDataRnu(testHelper.getDataRowHelper().getAll());
+    }
+
+    void mockBeforeImport() {
         Long refbookId = 520L;
 
         when(testHelper.getRefBookFactory().get(refbookId)).thenAnswer(
@@ -216,15 +235,6 @@ public class App_6_10_2Test extends ScriptTestBase {
                         return result;
                     }
                 });
-
-        testHelper.setImportFileInputStream(getImportXlsInputStream());
-        testHelper.execute(FormDataEvent.IMPORT);
-        checkLoadData(testHelper.getDataRowHelper().getAll());
-
-        // проверка расчетов
-        testHelper.execute(FormDataEvent.CALCULATE);
-        checkAfterCalc(testHelper.getDataRowHelper().getAll());
-        checkLogger();
     }
 
     // Проверить загруженные данные
@@ -233,6 +243,15 @@ public class App_6_10_2Test extends ScriptTestBase {
         Assert.assertEquals(2L, dataRows.get(2).getCell("name").getNumericValue().longValue());
         Assert.assertEquals(2L, dataRows.get(3).getCell("name").getNumericValue().longValue());
 
+        Assert.assertEquals(6, dataRows.size());
+    }
+
+    void checkLoadDataRnu(List<DataRow<Cell>> dataRows) {
+        Assert.assertEquals(1L, dataRows.get(0).getCell("name").getNumericValue().longValue());
+        Assert.assertEquals(2L, dataRows.get(1).getCell("name").getNumericValue().longValue());
+        Assert.assertEquals(2L, dataRows.get(2).getCell("name").getNumericValue().longValue());
+
+        Assert.assertEquals(4, dataRows.size());
     }
 
     // Проверить расчеты
@@ -249,6 +268,8 @@ public class App_6_10_2Test extends ScriptTestBase {
         Assert.assertEquals(1, dataRows.get(1).getCell("cost").getNumericValue().doubleValue(), 0);
         Assert.assertEquals(2, dataRows.get(4).getCell("cost").getNumericValue().doubleValue(), 0);
         Assert.assertEquals(3, dataRows.get(5).getCell("cost").getNumericValue().doubleValue(), 0);
+
+        Assert.assertEquals(6, dataRows.size());
     }
 }
 

@@ -1,5 +1,6 @@
 package form_template.deal.app_6_10_2.v2015
 
+import au.com.bytecode.opencsv.CSVReader
 import com.aplana.sbrf.taxaccounting.model.Cell
 import com.aplana.sbrf.taxaccounting.model.DataRow
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
@@ -62,6 +63,10 @@ switch (formDataEvent) {
         break
     case FormDataEvent.IMPORT:
         importData()
+        formDataService.saveCachedDataRows(formData, logger)
+        break
+    case FormDataEvent.IMPORT_TRANSPORT_FILE:
+        importTransportData()
         formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.SORT_ROWS:
@@ -145,20 +150,20 @@ void logicCheck() {
         checkNonEmptyColumns(row, rowNum, nonEmptyColumns, logger, true)
 
         // Проверка суммы доходов
-        if (row.sum!=null && row.sum < 0) {
+        if (row.sum != null && row.sum < 0) {
             def msg = row.getCell('sum').column.name
             logger.error("Строка $rowNum: Значение графы «$msg» должно быть больше или равно «0»!")
         }
 
         // Проверка цены
-        if (row.sum!=null && row.price != row.sum) {
+        if (row.sum != null && row.price != row.sum) {
             def msg1 = row.getCell('price').column.name
             def msg2 = row.getCell('sum').column.name
             logger.error("Строка $rowNum: Значение графы «$msg1» должно быть равно значению графы «$msg2»!")
         }
 
         // Проверка стоимости
-        if (row.sum!=null && row.cost != row.sum) {
+        if (row.sum != null && row.cost != row.sum) {
             def msg1 = row.getCell('cost').column.name
             def msg2 = row.getCell('sum').column.name
             logger.error("Строка $rowNum: Значение графы «$msg1» должно быть равно значению графы «$msg2»!")
@@ -264,6 +269,7 @@ void calc() {
     sortFormDataRows(false)
 
 }
+
 // Получение импортируемых данных
 void importData() {
     def tmpRow = formData.createDataRow()
@@ -297,7 +303,8 @@ void importData() {
     def rows = []
     def allValuesCount = allValues.size()
     def totalRowFromFile = null
-    def totalRowFromFileMap = [:]           // мапа для хранения строк подитогов со значениями из файла (стили простых строк)
+    def totalRowFromFileMap = [:]
+    // мапа для хранения строк подитогов со значениями из файла (стили простых строк)
 
     // формирвание строк нф
     for (def i = 0; i < allValuesCount; i++) {
@@ -320,7 +327,9 @@ void importData() {
             //для расчета уникального среди групп(groupColumns) ключа берем строку перед Подитоговой
             def tmpRowValue = rows.get(rows.size() - 1)
             def str = ''
-            groupColumns.each{ def n -> str = str + ((tmpRowValue.get(n)!=null) ? tmpRowValue.get(n) : "").toString() }
+            groupColumns.each {
+                def n -> str = str + ((tmpRowValue.get(n) != null) ? tmpRowValue.get(n) : "").toString()
+            }
             key = str.hashCode()
             def subTotalRow = getNewSubTotalRowFromXls(key, rowValues, colOffset, fileRowIndex, rowIndex)
             //наш ключ - row.getAlias() до решетки. так как индекс после решетки не равен у расчитанной и импортированной подитогововых строк
@@ -395,27 +404,28 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
     }
     checkHeaderSize(headerRows[headerRows.size() - 1].size(), headerRows.size(), colCount, rowCount)
 
-   def headerMapping = [
-            ([(headerRows[0][0]) : 'Общая информация о контрагенте - юридическом лице']),
-            ([(headerRows[0][6]) : 'Сведения о сделке']),
-            ([(headerRows[1][1]) : getColumnName(tmpRow, 'rowNumber')]),
-            ([(headerRows[1][2]) : getColumnName(tmpRow, 'name')]),
-            ([(headerRows[1][3]) : getColumnName(tmpRow, 'iksr')]),
-            ([(headerRows[1][4]) : getColumnName(tmpRow, 'countryCode')]),
-            ([(headerRows[1][5]) : getColumnName(tmpRow, 'docNumber')]),
-            ([(headerRows[1][6]) : getColumnName(tmpRow, 'docDate')]),
-            ([(headerRows[1][7]) : getColumnName(tmpRow, 'dealNumber')]),
-            ([(headerRows[1][8]) : getColumnName(tmpRow, 'dealDate')]),
-            ([(headerRows[1][9]) : getColumnName(tmpRow, 'sum')]),
+    def headerMapping = [
+            ([(headerRows[0][0]): 'Общая информация о контрагенте - юридическом лице']),
+            ([(headerRows[0][6]): 'Сведения о сделке']),
+            ([(headerRows[1][1]): getColumnName(tmpRow, 'rowNumber')]),
+            ([(headerRows[1][2]): getColumnName(tmpRow, 'name')]),
+            ([(headerRows[1][3]): getColumnName(tmpRow, 'iksr')]),
+            ([(headerRows[1][4]): getColumnName(tmpRow, 'countryCode')]),
+            ([(headerRows[1][5]): getColumnName(tmpRow, 'docNumber')]),
+            ([(headerRows[1][6]): getColumnName(tmpRow, 'docDate')]),
+            ([(headerRows[1][7]): getColumnName(tmpRow, 'dealNumber')]),
+            ([(headerRows[1][8]): getColumnName(tmpRow, 'dealDate')]),
+            ([(headerRows[1][9]): getColumnName(tmpRow, 'sum')]),
             ([(headerRows[1][10]): getColumnName(tmpRow, 'price')]),
             ([(headerRows[1][11]): getColumnName(tmpRow, 'cost')]),
             ([(headerRows[1][12]): getColumnName(tmpRow, 'dealDoneDate')]),
     ]
-    (1..12).each{
+    (1..12).each {
         headerMapping.add(([(headerRows[2][it]): 'гр. ' + it.toString()]))
     }
     checkHeaderEquals(headerMapping, logger)
 }
+
 /**
  * Получить итоговую строку нф по значениям из экселя.
  *
@@ -441,6 +451,7 @@ def getNewTotalFromXls(def values, def colOffset, def fileRowIndex, def rowIndex
 
     return newRow
 }
+
 /**
  * Получить новую подитоговую строку нф по значениям из экселя.
  *
@@ -467,6 +478,7 @@ def getNewSubTotalRowFromXls(def key, def values, def colOffset, def fileRowInde
 
     return newRow
 }
+
 /**
  * Получить подитоговую строку с заданными стилями.
  *
@@ -483,6 +495,7 @@ DataRow<Cell> getSubTotalRow(int i, def key) {
     }
     return newRow
 }
+
 /**
  * Получить новую строку нф по значениям из экселя.
  *
@@ -563,6 +576,163 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
 
     return newRow
 }
+
+void importTransportData() {
+    checkBeforeGetXml(ImportInputStream, UploadFileName)
+    if (!UploadFileName.endsWith(".rnu")) {
+        logger.error(WRONG_RNU_FORMAT)
+    }
+    int COLUMN_COUNT = 12
+    def DEFAULT_CHARSET = "cp866"
+    char SEPARATOR = '|'
+    char QUOTE = '\0'
+
+    String[] rowCells
+    int fileRowIndex = 2    // номер строки в файле (1, 2, ..)
+    int rowIndex = 0        // номер строки в НФ (1, 2, ..)
+    def totalTF = null      // итоговая строка со значениями из тф для добавления
+    def newRows = []
+
+    InputStreamReader isr = new InputStreamReader(ImportInputStream, DEFAULT_CHARSET)
+    CSVReader reader = new CSVReader(isr, SEPARATOR, QUOTE)
+    try {
+        // пропускаем заголовок
+        rowCells = reader.readNext()
+        if (isEmptyCells(rowCells)) {
+            logger.error('Первой строкой должен идти заголовок, а не пустая строка')
+        }
+        // пропускаем пустую строку
+        rowCells = reader.readNext()
+        if (rowCells == null || !isEmptyCells(rowCells)) {
+            logger.error('Вторая строка должна быть пустой')
+        }
+        // грузим основные данные
+        while ((rowCells = reader.readNext()) != null) {
+            fileRowIndex++
+            rowIndex++
+            if (isEmptyCells(rowCells)) { // проверка окончания блока данных, пустая строка
+                // итоговая строка тф
+                rowCells = reader.readNext()
+                if (rowCells != null) {
+                    totalTF = getNewRow(rowCells, COLUMN_COUNT, ++fileRowIndex, rowIndex, true)
+                }
+                break
+            }
+            def newRow = getNewRow(rowCells, COLUMN_COUNT, fileRowIndex, rowIndex, false)
+            if (newRow) {
+                newRows.add(newRow)
+            }
+        }
+    } finally {
+        reader.close()
+    }
+
+    // итоговая строка
+    def totalRow = calcTotalRow(newRows)
+    newRows.add(totalRow)
+
+    // отображать ошибки переполнения разряда
+    showMessages(newRows, logger)
+
+    // сравнение итогов
+    if (!logger.containsLevel(LogLevel.ERROR) && totalTF) {
+        // мапа с алиасами граф и номерами колонокв в xml (алиас -> номер колонки)
+        def totalColumnsIndexMap = ['sum': 5, 'price': 13, 'cost': 14]
+
+        // сравнение контрольных сумм
+        def colOffset = 1
+        for (def alias : totalColumnsIndexMap.keySet().asList()) {
+            def v1 = totalTF.getCell(alias).value
+            def v2 = totalRow.getCell(alias).value
+            if (v1 == null && v2 == null) {
+                continue
+            }
+            if (v1 == null || v1 != null && v1 != v2) {
+                logger.warn(TRANSPORT_FILE_SUM_ERROR, totalColumnsIndexMap[alias] + colOffset, fileRowIndex)
+            }
+        }
+        // задать итоговой строке нф значения из итоговой строки тф
+        totalColumns.each { alias ->
+            totalRow[alias] = totalTF[alias]
+        }
+    } else {
+        logger.warn("В транспортном файле не найдена итоговая строка")
+        // очистить итоги
+        totalColumns.each { alias ->
+            totalRow[alias] = null
+        }
+    }
+
+    if (!logger.containsLevel(LogLevel.ERROR)) {
+        updateIndexes(newRows)
+        formDataService.getDataRowHelper(formData).allCached = newRows
+    }
+}
+
+/**
+ * Получить новую строку нф по строке из тф (*.rnu).
+ *
+ * @param rowCells список строк со значениями
+ * @param columnCount количество колонок
+ * @param fileRowIndex номер строки в тф
+ * @param rowIndex строка в нф
+ * @param isTotal признак итоговой строки
+ *
+ * @return вернет строку нф или null, если количество значений в строке тф меньше
+ */
+def getNewRow(String[] rowCells, def columnCount, def fileRowIndex, def rowIndex, def isTotal) {
+    def newRow = formData.createStoreMessagingDataRow()
+    newRow.setIndex(rowIndex)
+    newRow.setImportIndex(fileRowIndex)
+
+    if (rowCells.length != columnCount + 2) {
+        rowError(logger, newRow, String.format(ROW_FILE_WRONG, fileRowIndex))
+        return null
+    }
+
+    editableColumns.each {
+        newRow.getCell(it).editable = true
+        newRow.getCell(it).setStyleAlias('Редактируемая')
+    }
+
+    def int colOffset = 1
+
+    if (!isTotal) {
+        def String iksrName = getColumnName(newRow, 'iksr')
+        def nameFromFile = pure(rowCells[2])
+        def recordId = getTcoRecordId(nameFromFile, pure(rowCells[3]), iksrName, fileRowIndex, 2, getReportPeriodEndDate(), false, logger, refBookFactory, recordCache)
+
+        // графа 2
+        newRow.name = recordId
+        // графа 5
+        newRow.docNumber = pure(rowCells[5])
+        // графа 6
+        newRow.docDate = parseDate(pure(rowCells[6]), "dd.MM.yyyy", fileRowIndex, 7 + colOffset, logger, true)
+        // графа 7
+        newRow.dealNumber = pure(rowCells[7])
+        // графа 8
+        newRow.dealDate =  parseDate(pure(rowCells[8]), "dd.MM.yyyy", fileRowIndex, 8 + colOffset, logger, true)
+        // графа 12
+        newRow.dealDoneDate = parseDate(pure(rowCells[12]), "dd.MM.yyyy", fileRowIndex, 12 + colOffset, logger, true)
+    }
+    // графа 9
+    newRow.sum = parseNumber(pure(rowCells[9]), fileRowIndex, 9 + colOffset, logger, true)
+    // графа 10
+    newRow.price = parseNumber(pure(rowCells[10]), fileRowIndex, 10 + colOffset, logger, true)
+    // графа 11
+    newRow.cost = parseNumber(pure(rowCells[11]), fileRowIndex, 11 + colOffset, logger, true)
+
+    return newRow
+}
+
+String pure(String cell) {
+    return StringUtils.cleanString(cell)?.intern()
+}
+
+boolean isEmptyCells(def rowCells) {
+    return rowCells.length == 1 && rowCells[0] == ''
+}
+
 // Получить посчитанные подитоговые строки
 def calcSubTotalRows(def dataRows) {
     def tmpRows = dataRows.findAll { !it.getAlias() }
@@ -576,11 +746,12 @@ def calcSubTotalRows(def dataRows) {
 
     return tmpRows.findAll { it.getAlias() }
 }
+
 // Расчет подитогового значения
 DataRow<Cell> calcItog(def int i, def List<DataRow<Cell>> dataRows) {
     def tmpRow = dataRows.get(i)
     def str = ''
-    groupColumns.each{ def n -> str = str + ((tmpRow.get(n)!=null) ? tmpRow.get(n) : "").toString() }
+    groupColumns.each { def n -> str = str + ((tmpRow.get(n) != null) ? tmpRow.get(n) : "").toString() }
     key = str.hashCode()
     def newRow = getSubTotalRow(i, key)
 
@@ -593,6 +764,7 @@ DataRow<Cell> calcItog(def int i, def List<DataRow<Cell>> dataRows) {
 
     return newRow
 }
+
 def calcTotalRow(def dataRows) {
     def totalRow = (formDataEvent in [FormDataEvent.IMPORT, FormDataEvent.IMPORT_TRANSPORT_FILE]) ? formData.createStoreMessagingDataRow() : formData.createDataRow()
     totalRow.setAlias('total')
@@ -604,6 +776,7 @@ def calcTotalRow(def dataRows) {
     calcTotalSum(dataRows, totalRow, totalColumns)
     return totalRow
 }
+
 // Сортировка групп и строк
 void sortFormDataRows(def saveInDB = true) {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
