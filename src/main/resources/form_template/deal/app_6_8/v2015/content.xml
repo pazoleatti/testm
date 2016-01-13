@@ -95,8 +95,9 @@
         <name>Вид услуг</name>
         <order>9</order>
         <width>5</width>
-        <maxLength>1</maxLength>
-        <precision>0</precision>
+        <hierarchical>false</hierarchical>
+        <nameAttributeId>55</nameAttributeId>
+        <refBookAttributeId>55</refBookAttributeId>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>price</alias>
