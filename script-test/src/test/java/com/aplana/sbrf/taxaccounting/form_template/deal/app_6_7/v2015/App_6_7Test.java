@@ -162,7 +162,36 @@ public class App_6_7Test extends ScriptTestBase {
 
     @Test
     public void importExcelTest() {
-        // TODO тесты для логики поиска по iksr
+        mockBeforeImport();
+        testHelper.setImportFileInputStream(getImportXlsInputStream());
+        testHelper.execute(FormDataEvent.IMPORT);
+        List<String> aliases = Arrays.asList("sum", "docNumber", "docDate", "price", "cost", "dealDoneDate");
+        // ожидается 5 строк: 4 из файла + 1 итоговая строка
+        int expected = 4 + 1;
+        defaultCheckLoadData(aliases, expected);
+        checkLogger();
+        // "name"
+        checkLoadData(testHelper.getDataRowHelper().getAll());
+
+        // проверка расчетов
+        testHelper.execute(FormDataEvent.CALCULATE);
+        checkAfterCalc(testHelper.getDataRowHelper().getAll());
+    }
+
+    @Test
+    public void importTransportFileTest() {
+        mockBeforeImport();
+        testHelper.setImportFileInputStream(getImportRnuInputStream());
+        testHelper.execute(FormDataEvent.IMPORT_TRANSPORT_FILE);
+        List<String> aliases = Arrays.asList("sum", "docNumber", "docDate", "price", "cost", "dealDoneDate");
+        // ожидается 5 строк
+        int expected = 5;
+        defaultCheckLoadData(aliases, expected);
+
+        checkLoadData(testHelper.getDataRowHelper().getAll());
+    }
+
+    void mockBeforeImport() {
         Long refbookId = 520L;
 
         when(testHelper.getRefBookFactory().get(refbookId)).thenAnswer(
@@ -215,20 +244,6 @@ public class App_6_7Test extends ScriptTestBase {
                         return result;
                     }
                 });
-
-        testHelper.setImportFileInputStream(getImportXlsInputStream());
-        testHelper.execute(FormDataEvent.IMPORT);
-        List<String> aliases = Arrays.asList("sum", "docNumber", "docDate", "price", "cost", "dealDoneDate");
-        // ожидается 5 строк: 4 из файла + 1 итоговая строка
-        int expected = 4 + 1;
-        defaultCheckLoadData(aliases, expected);
-        checkLogger();
-        // "name"
-        checkLoadData(testHelper.getDataRowHelper().getAll());
-
-        // проверка расчетов
-        testHelper.execute(FormDataEvent.CALCULATE);
-        checkAfterCalc(testHelper.getDataRowHelper().getAll());
     }
 
     // Проверить загруженные данные
