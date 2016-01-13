@@ -171,12 +171,11 @@ public class App_6_15Test extends ScriptTestBase {
         row.getCell("outcome").setValue(2, null);
         row.getCell("price").setValue(1, null);
         row.getCell("cost").setValue(1, null);
-        testHelper.execute(FormDataEvent.CHECK);
+        testHelper.execute(FormDataEvent.CALCULATE);
         entries = testHelper.getLogger().getEntries();
         i = 0;
-        Assert.assertEquals("Строка 1: Графа «Признак физической поставки драгоценного металла» может содержать только одно из значений: ОМС, Физическая поставка!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 2: Неверное итоговое значение по группе «A, string, 01.01.2014, 1, графа 11 не задана» в графе «Сумма расходов Банка по данным бухгалтерского учета, руб.»", entries.get(i++).getMessage());
         Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
+        Assert.assertEquals(1L, row.getCell("dependence").getValue());
         testHelper.getLogger().clear();
     }
 

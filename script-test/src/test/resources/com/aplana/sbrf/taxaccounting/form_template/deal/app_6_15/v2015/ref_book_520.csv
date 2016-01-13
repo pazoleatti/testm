@@ -1,4 +1,4 @@
-record_id(N);NAME(S);COUNTRY(R);IKSR(R)
-1;A;1;1
-2;B;2;2
-3;C;3;3
+record_id(N);NAME(S);COUNTRY(R);IKSR(R);TYPE(S)
+1;A;1;1;ВЗЛ
+2;B;2;2;ВЗЛ
+3;C;3;3;ВЗЛ

@@ -383,8 +383,10 @@ void calc() {
     for (row in dataRows) {
 
         // Признак взаимозависимости
-        // isVzl флаг (true для РНУ, false для приложений 6-...) в getTcoRecordId
-        row.dependence = recNoId
+        def type = getRefBookValue(520, row.name)?.TYPE?.stringValue
+        if (type) {
+            row.dependence = (type == "ВЗЛ") ? recYesId : recNoId
+        }
 
         // Признак внешнеторговой сделки
         row.signTransaction = (row.countryCode2 == row.countryCode3) ? recNoId : recYesId
