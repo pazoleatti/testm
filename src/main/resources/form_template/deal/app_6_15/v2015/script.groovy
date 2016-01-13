@@ -174,6 +174,8 @@ void logicCheck() {
     if (dataRows.isEmpty()) {
         return
     }
+    def recYesId = getRecordId(38, 'CODE', '1', -1, null, true)
+    def recNoId = getRecordId(38, 'CODE', '0', -1, null, true)
 
     for (row in dataRows) {
         if (row.getAlias() != null) {
@@ -213,8 +215,6 @@ void logicCheck() {
             logger.error("Строка $rowNum: Графа «$msg» может содержать только одно из значений: ОМС, Физическая поставка!")
         }
 
-        def recYesId = getRecordId(38, 'CODE', '1', -1, null, true)
-        def recNoId = getRecordId(38, 'CODE', '0', -1, null, true)
         // Проверка признака внешнеторговой сделки
         if(row.signTransaction && row.countryCode2 && row.countryCode3){
             if(row.countryCode2 != row.countryCode3 && row.signTransaction != recYesId || row.countryCode2 == row.countryCode3 && row.signTransaction != recNoId){
@@ -226,15 +226,14 @@ void logicCheck() {
         // Проверка зависимости от признака физической поставки
         if (row.signPhis && isOMS) {
             // графы 16 – 24 должны быть не заполнены
-            def isHaveNotEmptyField = false
             def checkField = ['countryCode2', 'region1', 'city1', 'settlement1', 'countryCode3', 'region2', 'city2', 'settlement2', 'conditionCode']
             for (it in checkField) {
-                isHaveNotEmptyField = row.getCell(it).value != null && !row.getCell(it).value.toString().isEmpty()
-                if (isHaveNotEmptyField)
+                if (row.getCell(it).value){
+                    def msg = row.getCell('signPhis').column.name
+                    logger.error("Строка $rowNum: Графы 12.1-12.4, 13.1-13.4, 14 не должны быть заполнены, т.к. в графе «$msg» указано значение «ОМС»!")
                     break
+                }
             }
-            def msg = row.getCell('signPhis').column.name
-            logger.error("Строка $rowNum: Графы 12.1-12.4, 13.1-13.4, 14 не должны быть заполнены, т.к. в графе «$msg» указано значение «ОМС»!")
         } else if(row.signPhis && isPhysics) {
             // i. Графы 16, 20 должны быть заполнены
             if (row.countryCode2 == null || row.countryCode3 == null) {
@@ -377,11 +376,11 @@ void calc() {
     // Сортировка
     sortRows(dataRows, groupColumns)
 
-    for (row in dataRows) {
+    // "Да" и "Нет"
+    def recYesId = getRecordId(38, 'CODE', '1', -1, null, true)
+    def recNoId = getRecordId(38, 'CODE', '0', -1, null, true)
 
-        // "Да" и "Нет"
-        def recYesId = getRecordId(38, 'CODE', '1', -1, null, true)
-        def recNoId = getRecordId(38, 'CODE', '0', -1, null, true)
+    for (row in dataRows) {
 
         // Признак взаимозависимости
         // isVzl флаг (true для РНУ, false для приложений 6-...) в getTcoRecordId
