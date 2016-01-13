@@ -825,7 +825,7 @@ public final class ScriptUtils {
             // Неитоговые строки были удалены
             for (int i = 0; i < dataRows.size(); i++) {
                 if (dataRows.get(i).getAlias() != null) {
-                    if (i < 1 || dataRows.get(i - 1).getAlias() != null) {
+                    if (i < 1 || (dataRows.get(i - 1).getAlias() != null && dataRows.get(i).getAlias() != "total")) {
                         logger.error(GROUP_WRONG_ITOG_ROW, dataRows.get(i).getIndex());
                     }
                 }
