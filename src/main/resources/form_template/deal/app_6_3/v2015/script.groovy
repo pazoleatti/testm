@@ -208,23 +208,11 @@ void logicCheck() {
             logger.error("Строка $rowNum: Значение графы «$costName» должно быть равно значению графы «$income»!")
         }
 
-        // Корректность даты совершения сделки относительно даты договора
-        if (row.dealDoneDate < row.docDate) {
-            def dealDoneDateName = row.getCell('dealDoneDate').column.name
-            def docDateName = row.getCell('docDate').column.name
-            logger.error("Строка $rowNum: Значение графы «$dealDoneDateName» должно быть не меньше значения графы «$docDateName»!")
-        }
+        // Проверка корректности даты договора
+        checkDatePeriod(logger, row, 'docDate', Date.parse('dd.MM.yyyy', '01.01.1991'), getReportPeriodEndDate(), true)
 
-        //Проверка даты совершения сделки
-        checkDealDoneDate(logger, row, 'dealDoneDate', getReportPeriodStartDate(), getReportPeriodEndDate(), true)
-
-        // Проверка диапазона дат
-        if (row.docDate) {
-            checkDateValid(logger, row, 'docDate', row.docDate, true)
-        }
-        if (row.dealDoneDate) {
-            checkDateValid(logger, row, 'dealDoneDate', row.dealDoneDate, true)
-        }
+        // Проверка корректности даты совершения сделки
+        checkDatePeriod(logger, row, 'dealDoneDate', 'docDate', getReportPeriodEndDate(), true)
     }
     //Проверка итоговых значений по фиксированной строке «Итого»
     if (dataRows.find { it.getAlias() == 'total' }) {

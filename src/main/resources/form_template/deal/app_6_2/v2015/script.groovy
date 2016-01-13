@@ -188,29 +188,16 @@ void logicCheck() {
             logger.error("Строка $rowNum: Значение графы «$msg» должно быть равно значению «1»!")
         }
 
-        // 6. Корректность даты заключения сделки относительно даты договора
-        if (row.docDate && row.dealDate && row.docDate > row.dealDate) {
-            def msg1 = row.getCell('dealDate').column.name
-            def msg2 = row.getCell('docDate').column.name
-            logger.error("Строка $rowNum: Значение графы «$msg1» должно быть не меньше значения графы «$msg2»!")
-        }
+        // 6. Проверка корректности даты договора
+        checkDatePeriod(logger, row, 'docDate', Date.parse('dd.MM.yyyy', '01.01.1991'), getReportPeriodEndDate(), true)
 
-        // 7. Корректность даты совершения сделки относительно даты заключения сделки
-        if (row.dealDate && row.dealDoneDate && row.dealDate > row.dealDoneDate) {
-            def msg1 = row.getCell('dealDoneDate').column.name
-            def msg2 = row.getCell('dealDate').column.name
-            logger.error("Строка $rowNum: Значение графы «$msg1» должно быть не меньше значения графы «$msg2»!")
-        }
+        // 7. Проверка корректности даты заключения сделки
+        checkDatePeriod(logger, row, 'dealDate', 'docDate', getReportPeriodEndDate(), true)
 
-        // 8. Проверка пересечения даты сделки с отчетным периодом
-        checkDealDoneDate(logger, row, 'dealDoneDate', getReportPeriodStartDate(), getReportPeriodEndDate(), true)
+        // 8. Проверка корректности даты совершения сделки
+        checkDatePeriod(logger, row, 'dealDoneDate', 'dealDate', getReportPeriodEndDate(), true)
 
-        // 9. Проверка диапазона дат
-        if (row.docDate) {
-            checkDateValid(logger, row, 'docDate', row.docDate, true)
-        }
-
-        // 10.Проверка положительной суммы доходов
+        // 9. Проверка положительной суммы доходов
         if (row.sum && row.sum < 0) {
             def msg = row.getCell('sum').column.name
             logger.error("Строка $rowNum: Значение графы «$msg» должно быть больше или равно «0»!")

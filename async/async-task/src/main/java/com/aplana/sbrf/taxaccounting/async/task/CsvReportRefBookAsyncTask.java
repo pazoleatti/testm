@@ -71,7 +71,7 @@ public abstract class CsvReportRefBookAsyncTask extends AbstractAsyncTask  {
         Date version = (Date)params.get("version");
         RefBookAttribute sortAttribute = null;
         if (params.containsKey("sortAttribute"))
-            sortAttribute = (RefBookAttribute)params.get("sortAttribute");
+            sortAttribute = refBookFactory.get(refBookId).getAttribute((Long)params.get("sortAttribute"));
         Boolean isSortAscending = (Boolean)params.get("isSortAscending");
         TAUserInfo userInfo = new TAUserInfo();
         userInfo.setUser(userService.getUser(userId));

@@ -3,9 +3,8 @@ package form_template.income.rnu_107.v2015
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
-import groovy.transform.Field
 import com.aplana.sbrf.taxaccounting.service.script.util.ScriptUtils
-import com.aplana.sbrf.taxaccounting.model.util.StringUtils
+import groovy.transform.Field
 
 /**
  * РНУ 107. Регистр налогового учёта доходов, возникающих в связи с применением в сделках c Взаимозависимыми лицами и резидентами оффшорных зон тарифов, не соответствующих рыночному уровню
@@ -96,16 +95,27 @@ def autoFillColumns = ['iksr', 'sum3', 'sum4']
 def nonEmptyColumns = ['name', 'transDoneDate', 'code', 'reasonNumber', 'reasonDate', 'sum1', 'dealTariff', 'taxTariff', 'sum2', 'sum3', 'sum4']
 
 @Field
-def totalColumns = ['sum1', 'sum2', 'sum3', 'sum4']
+def totalColumns = ['sum4']
 
 // Группируемые атрибуты
 @Field
 def groupColumns = ['code']
 
 
+// Дата начала отчетного периода
+@Field
+def startDate = null
+
 // Дата окончания отчетного периода
 @Field
 def endDate = null
+
+def getReportPeriodStartDate() {
+    if (startDate == null) {
+        startDate = reportPeriodService.getStartDate(formData.reportPeriodId).time
+    }
+    return startDate
+}
 
 def getReportPeriodEndDate() {
     if (endDate == null) {
@@ -135,8 +145,92 @@ def getRefBookValue(def long refBookId, def Long recordId) {
 
 // Логические проверки
 void logicCheck() {
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
+    if (dataRows.isEmpty()) {
+        return
+    }
+
+    for (row in dataRows) {
+        if (row.getAlias() != null) {
+            continue
+        }
+        def rowNum = row.getIndex()
+
+        // Проверка заполнения обязательных полей
+        checkNonEmptyColumns(row, rowNum, nonEmptyColumns, logger, true)
+
+        // Проверка даты совершения сделки
+        checkDealDoneDate(logger, row, 'transDoneDate', getReportPeriodStartDate(), getReportPeriodEndDate(), true)
+
+        // Проверка даты совершения операции
+        if (row.transDoneDate && row.reasonDate && row.reasonDate > row.transDoneDate) {
+            def msg1 = row.getCell('transDoneDate').column.name
+            def msg2 = row.getCell('reasonDate').column.name
+            logger.error("Строка $rowNum: Значение графы «$msg1» должно быть не меньше значения графы «$msg2»!")
+        }
+
+        // Проверка даты основания совершения операции
+        if (row.reasonDate && (row.reasonDate < Date.parse('dd.MM.yyyy', '01.01.1991') || getReportPeriodEndDate() < row.reasonDate)) {
+            def msg = row.getCell('reasonDate').column.name
+            logger.error("Строка $rowNum: Дата, указанная в графе «%s» должна принимать значение из следующего диапазона: 01.01.1991 - %s!", msg, getReportPeriodEndDate().format('dd.MM.yyyy'))
+        }
+
+        // Проверка положительного тарифа за оказание услуги
+        if (row.dealTariff != null && row.taxTariff != null && (row.dealTariff < 0 || row.taxTariff < 0)) {
+            def msg = row.getCell('dealTariff').column.name
+            def msg1 = row.getCell('taxTariff').column.name
+            logger.error("Строка $rowNum: Значение графы «$msg»/«$msg1» должно быть больше или равно «0»!")
+        }
+
+        // Проверка положительной  суммы доходов
+        if (row.sum2 != null && row.sum2 < 0) {
+            def msg = row.getCell('sum2').column.name
+            logger.error("Строка $rowNum: Значение графы «$msg» должно быть больше или равно «0»!")
+        }
+
+        // Проверка положительной  суммы доходов
+        if (row.sum3 != null && row.sum3 < 0) {
+            def msg = row.getCell('sum3').column.name
+            logger.error("Строка $rowNum: Значение графы «$msg» должно быть больше или равно «0»!")
+        }
+
+        // Проверка положительной суммы доначисления доходов
+        if (row.sum2 != null && row.sum3 != null && row.sum3 < row.sum2) {
+            def msg = row.getCell('sum2').column.name
+            def msg1 = row.getCell('sum3').column.name
+            logger.error("Строка $rowNum: Значение графы «$msg1» должно быть не меньше значению графы «$msg»!")
+        }
+
+        // Проверка суммы доначисления дохода
+        if (row.sum2 != null && row.sum3 != null && row.sum2 >= 0 && row.sum3 >= 0 && row.sum4 != row.sum3 - row.sum2) {
+            def msg = row.getCell('sum2').column.name
+            def msg1 = row.getCell('sum3').column.name
+            def msg2 = row.getCell('sum4').column.name
+            logger.error("Строка $rowNum: Значение графы «$msg2» ддолжно быть равно разности значений граф $msg2» и $msg2»! ")
+        }
+    }
+
+    //  Проверка наличия всех фиксированных строк
+    //  Проверка отсутствия лишних фиксированных строк
+    //  Проверка итоговых значений по фиксированным строкам
+    checkItog(dataRows)
+
+    // Проверка итоговых значений пофиксированной строке «Итого»
+    if (dataRows.find { it.getAlias() == 'total' }) {
+        checkTotalSum(dataRows, totalColumns, logger, true)
+    }
 }
 
+/**
+ * Округляет число до требуемой точности.
+ *
+ * @param value округляемое число
+ * @param precision точность округления, знаки после запятой
+ * @return округленное число
+ */
+def roundValue(BigDecimal value, def precision) {
+    value.setScale(precision, BigDecimal.ROUND_HALF_UP)
+}
 
 // Алгоритмы заполнения полей формы
 void calc() {
@@ -146,6 +240,11 @@ void calc() {
     }
     // Удаление подитогов
     deleteAllAliased(dataRows)
+
+    for (row in dataRows) {
+        row.sum3 = calc12(row)
+        row.sum4 = calc13(row)
+    }
 
     // Сортировка
     sortRows(dataRows, groupColumns)
@@ -163,6 +262,18 @@ void calc() {
     dataRows.add(total)
 
     sortFormDataRows(false)
+}
+def calc12(def row) {
+    if (row.sum1 != null && row.taxTariff != null) {
+        return roundValue(row.sum1 * row.taxTariff, 2)
+    }
+    return null
+}
+def calc13(def row) {
+    if (row.sum2 != null && row.sum3 != null) {
+        return row.sum3 - row.sum2
+    }
+    return null
 }
 
 def calcTotalRow(def dataRows) {
@@ -184,7 +295,7 @@ void importData() {
     int HEADER_ROW_COUNT = 3
     String TABLE_START_VALUE = '№ пп'
     String TABLE_END_VALUE = null
-    int INDEX_FOR_SKIP = 1
+    int INDEX_FOR_SKIP = 0
 
     def allValues = []      // значения формы
     def headerValues = []   // значения шапки
@@ -210,20 +321,19 @@ void importData() {
     def rows = []
     def allValuesCount = allValues.size()
     def totalRowFromFile = null
-    def totalRowFromFileMap = [:]
+    def totalRowFromFileMap = [:] // мапа для хранения строк подитогов со значениями из файла (стили простых строк)
 
     // формирвание строк нф
     for (def i = 0; i < allValuesCount; i++) {
         rowValues = allValues[0]
         fileRowIndex++
         // все строки пустые - выход
-        if (!rowValues) {
+        if (!rowValues || rowValues.isEmpty() || !rowValues.find { it }) {
             allValues.remove(rowValues)
             rowValues.clear()
             break
         }
         rowIndex++
-
         // Пропуск итоговых строк
         if (rowValues[INDEX_FOR_SKIP] == "Всего") {
             totalRowFromFile = getNewTotalFromXls(rowValues, colOffset, fileRowIndex, rowIndex)
@@ -231,12 +341,12 @@ void importData() {
             allValues.remove(rowValues)
             rowValues.clear()
             continue
-        } else if (rowValues[INDEX_FOR_SKIP].contains("Итого")) {
+        } else if (rowValues[INDEX_FOR_SKIP].contains('Итого')) {
             def subTotalRow = getNewSubTotalRowFromXls(rowValues, colOffset, fileRowIndex, rowIndex)
-            if (totalRowFromFileMap[subTotalRow.fix] == null) {
-                totalRowFromFileMap[subTotalRow.fix] = []
+            if (totalRowFromFileMap[subTotalRow.getIndex()] == null) {
+                totalRowFromFileMap[subTotalRow.getIndex()] = []
             }
-            totalRowFromFileMap[subTotalRow.fix].add(subTotalRow)
+            totalRowFromFileMap[subTotalRow.getIndex()].add(subTotalRow)
             rows.add(subTotalRow)
 
             allValues.remove(rowValues)
@@ -256,12 +366,16 @@ void importData() {
         // получить посчитанные подитоги
         def tmpSubTotalRows = calcSubTotalRows(rows)
         tmpSubTotalRows.each { subTotalRow ->
-            def totalRows = totalRowFromFileMap[subTotalRow.fix]
+            def totalRows = totalRowFromFileMap[subTotalRow.getIndex()]
             if (totalRows) {
                 totalRows.each { totalRow ->
                     compareTotalValues(totalRow, subTotalRow, totalColumns, logger, false)
                 }
-                totalRowFromFileMap.remove(subTotalRow.fix)
+                totalRowFromFileMap.remove(subTotalRow.getIndex())
+            } else {
+                row = rows[subTotalRow.getIndex() - 1]
+                def groupValue = getValuesByGroupColumn(row)
+                rowWarning(logger, null, String.format(GROUP_WRONG_ITOG, groupValue))
             }
         }
         if (!totalRowFromFileMap.isEmpty()) {
@@ -396,33 +510,25 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
  * @param rowIndex строка в нф
  */
 def getNewSubTotalRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) {
-    def newRow = getSubTotalRow(null, null, fileRowIndex)
+    def newRow = getSubTotalRow(fileRowIndex)
     newRow.setIndex(rowIndex)
     newRow.setImportIndex(fileRowIndex)
 
-    // графа 8
-    def colIndex = 8
-    newRow.sum1 = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
-    // графа 11
-    colIndex = 11
-    newRow.sum2 = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
-    // графа 12
-    colIndex = 12
-    newRow.sum3 = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
+    // графа 5
+    def colIndex = 5
+    newRow.code = getRecordIdImport(28, 'CODE', values[colIndex], fileRowIndex, colIndex + colOffset, false)
+
     // графа 13
     colIndex = 13
     newRow.sum4 = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
-
     return newRow
 }
 /**
  * Получить подитоговую строку с заданными стилями.
  *
- * @param title надпись подитога (если задана, то используется это значение)
- * @param value2 значение графы 2 (отставлено на случай возврата к "Итого по")
  * @param i номер строки
  */
-DataRow<Cell> getSubTotalRow(String title, String value2, int i) {
+DataRow<Cell> getSubTotalRow(int i) {
     def newRow = (formDataEvent in [FormDataEvent.IMPORT, FormDataEvent.IMPORT_TRANSPORT_FILE]) ? formData.createStoreMessagingDataRow() : formData.createDataRow()
     newRow.fix = 'Итого'
     newRow.setAlias('itg#'.concat(i.toString()))
@@ -439,20 +545,20 @@ def getSubTotalRows(def dataRows) {
 // Получить посчитанные подитоговые строки
 def calcSubTotalRows(def dataRows) {
     def tmpRows = dataRows.findAll { !it.getAlias() }
-    //1
     // Добавление подитогов
-    addAllAliased(tmpRows, new ScriptUtils.CalcAliasRow() {
+    addAllAliased(tmpRows, new CalcAliasRow() {
         @Override
         DataRow<Cell> calc(int i, List<DataRow<Cell>> rows) {
             return calcItog(i, rows)
         }
     }, groupColumns)
-    //2
+
+    updateIndexes(tmpRows)
     return tmpRows.findAll { it.getAlias() }
 }
 // Расчет подитогового значения
 DataRow<Cell> calcItog(def int i, def List<DataRow<Cell>> dataRows) {
-    def newRow = getSubTotalRow(null, null, i)
+    def newRow = getSubTotalRow(i)
 
     // Расчеты подитоговых значений
     def rows = []
@@ -460,6 +566,7 @@ DataRow<Cell> calcItog(def int i, def List<DataRow<Cell>> dataRows) {
         rows.add(dataRows.get(j))
     }
     calcTotalSum(rows, newRow, totalColumns)
+    newRow.code = dataRows.get(i).code
 
     return newRow
 }
@@ -476,15 +583,6 @@ def getNewTotalFromXls(def values, def colOffset, def fileRowIndex, def rowIndex
     newRow.setIndex(rowIndex)
     newRow.setImportIndex(fileRowIndex)
 
-    // графа 8
-    def colIndex = 8
-    newRow.sum1 = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
-    // графа 11
-    colIndex = 11
-    newRow.sum2 = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
-    // графа 12
-    colIndex = 12
-    newRow.sum3 = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
     // графа 13
     colIndex = 13
     newRow.sum4 = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
@@ -503,4 +601,43 @@ void sortFormDataRows(def saveInDB = true) {
     } else {
         updateIndexes(dataRows)
     }
+}
+
+// Проверки подитоговых сумм
+void checkItog(def dataRows) {
+    // Рассчитанные строки итогов
+    def testItogRows = calcSubTotalRows(dataRows)
+    // Имеющиеся строки итогов
+    def itogRows = dataRows.findAll { it.getAlias() != null && !'total'.equals(it.getAlias()) }
+    // все строки, кроме общего итога
+    def groupRows = dataRows.findAll { !'total'.equals(it.getAlias()) }
+    checkItogRows(groupRows, testItogRows, itogRows, groupColumns, logger, new GroupString() {
+        @Override
+        String getString(DataRow<Cell> row) {
+            return getValuesByGroupColumn(row)
+        }
+    }, new CheckGroupSum() {
+        @Override
+        String check(DataRow<Cell> row1, DataRow<Cell> row2) {
+            for (def column : totalColumns) {
+                if (row1[column] != row2[column]) {
+                    return getColumnName(row1, column)
+                }
+            }
+            return null
+        }
+    })
+}
+
+// Возвращает строку со значениями полей строки по которым идет группировка
+String getValuesByGroupColumn(DataRow row) {
+    def value
+    // графа 5
+    if (row?.code) {
+        def map = getRefBookValue(28, row.code)
+        if (map != null) {
+            value = map.CODE?.stringValue
+        }
+    }
+    return value
 }

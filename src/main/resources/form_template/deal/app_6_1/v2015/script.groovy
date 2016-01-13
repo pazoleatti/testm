@@ -142,19 +142,14 @@ void logicCheck() {
         // 1. Проверка на заполнение граф
         checkNonEmptyColumns(row, rowNum, nonEmptyColumns, logger, true)
 
-        // 2. Проверка цены
-        if (row.sum != null && row.price != row.sum) {
-            def msg1 = row.getCell('price').column.name
-            def msg2 = row.getCell('sum').column.name
-            logger.error("Строка $rowNum: Значение графы «$msg1» должно быть равно значению графы «$msg2»!")
+        // 2. Проверка суммы доходов
+        if (row.sum && row.sum < 0) {
+            def msg = row.getCell('sum').column.name
+            logger.error("Строка $rowNum: Значение графы «$msg» должно быть больше или равно «0»!")
         }
 
-        // 3. Проверка стоимости
-        if (row.sum != null && row.cost != row.sum) {
-            def msg1 = row.getCell('cost').column.name
-            def msg2 = row.getCell('sum').column.name
-            logger.error("Строка $rowNum: Значение графы «$msg1» должно быть равно значению графы «$msg2»!")
-        }
+        // 3. Проверка корректности даты договора
+        checkDatePeriod(logger, row, 'docDate', Date.parse('dd.MM.yyyy', '01.01.1991'), getReportPeriodEndDate(), true)
 
         // 4. Проверка количества
         if (row.count != null && row.count != 1) {
@@ -162,26 +157,22 @@ void logicCheck() {
             logger.error("Строка $rowNum: Значение графы «$msg» должно быть равно значению «1»!")
         }
 
-        // 5. Корректность даты совершения сделки относительно даты договора
-        if (row.docDate && row.dealDoneDate && row.docDate > row.dealDoneDate) {
-            def msg1 = row.getCell('dealDoneDate').column.name
-            def msg2 = row.getCell('docDate').column.name
-            logger.error("Строка $rowNum: Значение графы «$msg1» должно быть не меньше значения графы «$msg2»!")
+        // 5. Проверка цены
+        if (row.sum != null && row.price != row.sum) {
+            def msg1 = row.getCell('price').column.name
+            def msg2 = row.getCell('sum').column.name
+            logger.error("Строка $rowNum: Значение графы «$msg1» должно быть равно значению графы «$msg2»!")
         }
 
-        // 6. Проверка даты совершения сделки
-        checkDealDoneDate(logger, row, 'dealDoneDate', getReportPeriodStartDate(), getReportPeriodEndDate(), true)
-
-        // 7. Проверка диапазона дат
-        if (row.docDate) {
-            checkDateValid(logger, row, 'docDate', row.docDate, true)
+        // 6. Проверка стоимости
+        if (row.sum != null && row.cost != row.sum) {
+            def msg1 = row.getCell('cost').column.name
+            def msg2 = row.getCell('sum').column.name
+            logger.error("Строка $rowNum: Значение графы «$msg1» должно быть равно значению графы «$msg2»!")
         }
 
-        // 8. Проверка суммы доходов
-        if (row.sum && row.sum < 0) {
-            def msg = row.getCell('sum').column.name
-            logger.error("Строка $rowNum: Значение графы «$msg» должно быть больше или равно «0»!")
-        }
+        // 7. Проверка корректности даты совершения сделки
+        checkDatePeriod(logger, row, 'dealDoneDate', 'docDate', getReportPeriodEndDate(), true)
     }
 
     // 9. Проверка итоговых значений по фиксированной строке «Итого»
