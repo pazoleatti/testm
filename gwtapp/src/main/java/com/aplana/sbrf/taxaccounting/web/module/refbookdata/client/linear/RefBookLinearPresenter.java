@@ -54,10 +54,10 @@ public class RefBookLinearPresenter extends PresenterWidget<RefBookLinearPresent
     public void onSelectionChanged() {
         if (getView().getSelectedRow() != null) {
             recordId = getView().getSelectedRow().getRefBookRowId();
-            ShowItemEvent.fire(this, null, getView().getSelectedRow().getRefBookRowId());
+            ShowItemEvent.fire(this, null, recordId);
             /*editPresenter.setRecordId(recordId);
             editPresenter.show(recordId);*/
-        } else {
+        } else if (recordId == null) {
             ShowItemEvent.fire(this, null, null);
             //editPresenter.setRecordId(null);
         }
