@@ -96,6 +96,9 @@ public abstract class AbstractEditView extends ViewWithUiHandlers<EditFormUiHand
                     break;
                 case DATE:
                     widget = new DateMaskBoxPicker(col.getFormat());
+                    if (!col.isRequired()) {
+                        ((DateMaskBoxPicker) widget).setCanBeEmpty(true);
+                    }
                     break;
                 case REFERENCE:
                     RefBookPickerWidget refbookWidget = new RefBookPickerWidget(col.isHierarchical(), false);

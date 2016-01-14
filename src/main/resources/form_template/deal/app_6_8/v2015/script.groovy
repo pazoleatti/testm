@@ -122,7 +122,15 @@ def getReportPeriodEndDate() {
 }
 
 //// Обертки методов
-
+// Поиск записи в справочнике по значению (для импорта)
+def getRecordIdImport(def Long refBookId, def String alias, def String value, def int rowIndex, def int colIndex,
+                      def boolean required = false) {
+    if (value == null || value.trim().isEmpty()) {
+        return null
+    }
+    return formDataService.getRefBookRecordIdImport(refBookId, recordCache, providerCache, alias, value,
+            getReportPeriodEndDate(), rowIndex, colIndex, logger, required)
+}
 // Разыменование записи справочника
 def getRefBookValue(def long refBookId, def Long recordId) {
     return formDataService.getRefBookValue(refBookId, recordId, refBookCache)
@@ -145,12 +153,6 @@ void logicCheck() {
 
         // Проверка заполнения обязательных полей
         checkNonEmptyColumns(row, rowNum, nonEmptyColumns, logger, true)
-
-        // Проверка заполнения вида услуги
-        if (row.serviceType != null && !(row.serviceType.intValue() in (1..2))) {
-            def msg = row.getCell('serviceType').column.name
-            logger.error("Строка $rowNum: Значение графы «$msg» должно принимать одно из следующих значений: «1, 2»!")
-        }
 
         // Проверка суммы расходов
         if (row.sum != null && row.sum < 0) {
@@ -411,7 +413,7 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
     colIndex++
 
     // графа 8
-    newRow.serviceType = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
+    newRow.serviceType = getRecordIdImport(11, 'CODE', values[colIndex], fileRowIndex, colIndex + colOffset, false)
     colIndex++
 
     // графа 9
@@ -558,7 +560,7 @@ def getNewRow(String[] rowCells, def columnCount, def fileRowIndex, def rowIndex
         // графа 7
         newRow.docDate = parseDate(pure(rowCells[7]), "dd.MM.yyyy", fileRowIndex, 7 + colOffset, logger, true)
         // графа 8
-        newRow.serviceType = parseNumber(pure(rowCells[8]), fileRowIndex, 8 + colOffset, logger, true)
+        newRow.serviceType = getRecordIdImport(11, 'CODE', pure(rowCells[8]), fileRowIndex, 8 + colOffset, false)
         // графа 11
         newRow.dealDoneDate = parseDate(pure(rowCells[11]), "dd.MM.yyyy", fileRowIndex, 11 + colOffset, logger, true)
     }

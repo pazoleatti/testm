@@ -48,7 +48,7 @@ public abstract class SpecificReportRefBookAsyncTask extends AbstractAsyncTask  
         RefBookDataProvider refBookDataProvider = refBookFactory.getDataProvider(refBookId);
         if (filter.isEmpty())
             filter = null;
-        Long value = Long.valueOf(refBookDataProvider.getRecordsCount(version, filter));
+        Long value = Long.valueOf(refBookDataProvider.getRecordsCount(version, filter)) * refBookFactory.get(refBookId).getAttributes().size();
         String msg = String.format("количество записей справочника(%s) превышает максимально допустимое(%s)!", value, "%s");
         return checkTask(getReportType(), value, refBookFactory.getTaskName(getReportType(), refBookId, specificReportType), msg);
     }

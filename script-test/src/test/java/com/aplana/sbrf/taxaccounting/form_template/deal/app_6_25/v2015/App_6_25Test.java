@@ -97,6 +97,7 @@ public class App_6_25Test extends ScriptTestBase {
         Assert.assertEquals("Строка 1: Графа «Дата договора» не заполнена!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Графа «Код единицы измерения по ОКЕИ» не заполнена!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Графа «Количество» не заполнена!", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 1: Графа «Финансовый результат уступки прав требования, руб.» не заполнена!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Графа «Цена (тариф) за единицу измерения без учета НДС, акцизов и пошлины, руб.» не заполнена!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Графа «Итого стоимость без учета НДС, акцизов и пошлины, руб.» не заполнена!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Графа «Дата совершения сделки» не заполнена!", entries.get(i++).getMessage());
@@ -106,16 +107,18 @@ public class App_6_25Test extends ScriptTestBase {
         // для попадания в ЛП:
         // 2. Проверка единицы измерения
         // 3. Проверка количества
-        // 4. Проверка цены
-        // 5. Проверка стоимости
-        // 6. Корректность даты совершения сделки относительно даты договора
-        // 7. Проверка даты совершения сделки
-        // 8. Проверка диапазона дат
+        // 4. Проверка финансового результата
+        // 5. Проверка цены
+        // 6. Проверка стоимости
+        // 7. Корректность даты совершения сделки относительно даты договора
+        // 8. Проверка даты совершения сделки
+        // 9. Проверка диапазона дат
         row.getCell("name").setValue(1L, null);
         row.getCell("okeiCode").setValue(777, null);
         row.getCell("docNumber").setValue("docNumber", null);
         row.getCell("docDate").setValue(sdf.parse("02.01.2990"), null);
         row.getCell("count").setValue(2, null);
+        row.getCell("finResult").setValue(-1, null);
         row.getCell("price").setValue(-1, null);
         row.getCell("cost").setValue(555, null);
         row.getCell("dealDoneDate").setValue(sdf.parse("01.01.2989"), null);
@@ -127,6 +130,7 @@ public class App_6_25Test extends ScriptTestBase {
         Assert.assertEquals("Строка 1: Графа «Дата договора» должна принимать значение из следующего диапазона: 01.01.1991 - 31.12.2014!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Значение графы «Код единицы измерения по ОКЕИ» должно быть равно значению «796»!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Значение графы «Количество» должно быть равно значению «1»!", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 1: Значение графы «Финансовый результат уступки прав требования, руб.» должно быть больше или равно «0»!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Значение графы «Цена (тариф) за единицу измерения без учета НДС, акцизов и пошлины, руб.» должно быть больше или равно «0»!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Значение графы «Итого стоимость без учета НДС, акцизов и пошлины, руб.» должно быть равно значению графы «Цена (тариф) за единицу измерения без учета НДС, акцизов и пошлины, руб.»!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Значение графы «Дата совершения сделки» должно быть не меньше значения графы «Дата договора»!", entries.get(i++).getMessage());
@@ -139,6 +143,7 @@ public class App_6_25Test extends ScriptTestBase {
         row.getCell("okeiCode").setValue(796, null);
         row.getCell("docDate").setValue(sdf.parse("01.01.2014"), null);
         row.getCell("count").setValue(1, null);
+        row.getCell("finResult").setValue(0, null);
         row.getCell("price").setValue(0, null);
         row.getCell("cost").setValue(0, null);
         row.getCell("dealDoneDate").setValue(sdf.parse("01.01.2014"), null);
@@ -245,6 +250,11 @@ public class App_6_25Test extends ScriptTestBase {
         Assert.assertEquals(1, dataRows.get(1).getCell("count").getNumericValue().intValue());
         Assert.assertEquals(1, dataRows.get(2).getCell("count").getNumericValue().intValue());
         Assert.assertEquals(1, dataRows.get(3).getCell("count").getNumericValue().intValue());
+
+        Assert.assertEquals(1, dataRows.get(0).getCell("finResult").getNumericValue().intValue());
+        Assert.assertEquals(1, dataRows.get(1).getCell("finResult").getNumericValue().intValue());
+        Assert.assertEquals(1, dataRows.get(2).getCell("finResult").getNumericValue().intValue());
+        Assert.assertEquals(1, dataRows.get(3).getCell("finResult").getNumericValue().intValue());
     }
 
     // Проверить расчеты
@@ -253,6 +263,11 @@ public class App_6_25Test extends ScriptTestBase {
         Assert.assertEquals(1, dataRows.get(1).getCell("count").getNumericValue().intValue());
         Assert.assertEquals(1, dataRows.get(2).getCell("count").getNumericValue().intValue());
         Assert.assertEquals(1, dataRows.get(3).getCell("count").getNumericValue().intValue());
+
+        Assert.assertEquals(1, dataRows.get(0).getCell("finResult").getNumericValue().intValue());
+        Assert.assertEquals(1, dataRows.get(1).getCell("finResult").getNumericValue().intValue());
+        Assert.assertEquals(1, dataRows.get(2).getCell("finResult").getNumericValue().intValue());
+        Assert.assertEquals(1, dataRows.get(3).getCell("finResult").getNumericValue().intValue());
 
         Assert.assertEquals(1, dataRows.get(0).getCell("okeiCode").getNumericValue().intValue());
         Assert.assertEquals(1, dataRows.get(1).getCell("okeiCode").getNumericValue().intValue());
@@ -271,6 +286,7 @@ public class App_6_25Test extends ScriptTestBase {
 
         Assert.assertNull(dataRows.get(4).getCell("price").getValue());
         Assert.assertEquals(4, dataRows.get(4).getCell("count").getNumericValue().doubleValue(), 0);
+        Assert.assertEquals(4, dataRows.get(4).getCell("finResult").getNumericValue().doubleValue(), 0);
         Assert.assertEquals(16, dataRows.get(4).getCell("cost").getNumericValue().doubleValue(), 0);
     }
 }

@@ -91,10 +91,19 @@
         <precision>0</precision>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>finResult</alias>
+        <checking>false</checking>
+        <name>Финансовый результат уступки прав требования, руб.</name>
+        <order>10</order>
+        <width>11</width>
+        <maxLength>17</maxLength>
+        <precision>2</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>price</alias>
         <checking>false</checking>
         <name>Цена (тариф) за единицу измерения без учета НДС, акцизов и пошлины, руб.</name>
-        <order>10</order>
+        <order>11</order>
         <width>11</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
@@ -103,7 +112,7 @@
         <alias>cost</alias>
         <checking>false</checking>
         <name>Итого стоимость без учета НДС, акцизов и пошлины, руб.</name>
-        <order>11</order>
+        <order>12</order>
         <width>11</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
@@ -112,7 +121,7 @@
         <alias>dealDoneDate</alias>
         <checking>false</checking>
         <name>Дата совершения сделки</name>
-        <order>12</order>
+        <order>13</order>
         <width>6</width>
         <formatId>0</formatId>
     </columns>
