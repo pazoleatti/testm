@@ -2,7 +2,7 @@
 <rows>
     <row alias="">
         <cell alias="fix" colSpan="5" rowSpan="1" value="Общая информация о контрагенте - юридическом лице"/>
-        <cell alias="docNumber" colSpan="7" rowSpan="1" value="Сведения о сделке"/>
+        <cell alias="docNumber" colSpan="8" rowSpan="1" value="Сведения о сделке"/>
     </row>
     <row alias="">
         <cell alias="fix" colSpan="1" rowSpan="1" value=""/>
@@ -14,6 +14,7 @@
         <cell alias="docDate" colSpan="1" rowSpan="1" value="Дата договора"/>
         <cell alias="okeiCode" colSpan="1" rowSpan="1" value="Код единицы измерения по ОКЕИ"/>
         <cell alias="count" colSpan="1" rowSpan="1" value="Количество"/>
+        <cell alias="finResult" colSpan="1" rowSpan="1" value="Финансовый результат уступки прав требования, руб."/>
         <cell alias="price" colSpan="1" rowSpan="1"
               value="Цена (тариф) за единицу измерения без учета НДС, акцизов и пошлины, руб."/>
         <cell alias="cost" colSpan="1" rowSpan="1" value="Итого стоимость без учета НДС, акцизов и пошлины, руб."/>
@@ -29,8 +30,9 @@
         <cell alias="docDate" colSpan="1" rowSpan="1" value="гр. 6"/>
         <cell alias="okeiCode" colSpan="1" rowSpan="1" value="гр. 7"/>
         <cell alias="count" colSpan="1" rowSpan="1" value="гр. 8"/>
-        <cell alias="price" colSpan="1" rowSpan="1" value="гр. 9"/>
-        <cell alias="cost" colSpan="1" rowSpan="1" value="гр. 10"/>
-        <cell alias="dealDoneDate" colSpan="1" rowSpan="1" value="гр. 11"/>
+        <cell alias="finResult" colSpan="1" rowSpan="1" value="гр. 9"/>
+        <cell alias="price" colSpan="1" rowSpan="1" value="гр. 10"/>
+        <cell alias="cost" colSpan="1" rowSpan="1" value="гр. 11"/>
+        <cell alias="dealDoneDate" colSpan="1" rowSpan="1" value="гр. 12"/>
     </row>
 </rows>
