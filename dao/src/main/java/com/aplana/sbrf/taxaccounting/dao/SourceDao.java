@@ -225,7 +225,7 @@ public interface SourceDao {
     List<Relation> getDestinationsInfo(FormData sourceFormData, boolean light, boolean excludeIfNotExist, WorkflowState stateRestriction);
 
     /**
-     * Возвращает список нф-источников для указанной декларации (включая несозданные)
+     * Возвращает список декларация-приемников для указанной нф-источника (включая несозданные)
      * @param sourceFormData нф-источник
      * @param light true - заполнятся только текстовые данные для GUI и сообщений
      * @param excludeIfNotExist true - исключить несозданные приемники
