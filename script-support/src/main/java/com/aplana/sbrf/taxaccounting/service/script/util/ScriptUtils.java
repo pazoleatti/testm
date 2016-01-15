@@ -1851,7 +1851,7 @@ public final class ScriptUtils {
             // 5
             Map<String, RefBookValue> record = records.get(0);
 
-            if (!com.aplana.sbrf.taxaccounting.model.util.StringUtils.cleanString(nameFromFile).equals(com.aplana.sbrf.taxaccounting.model.util.StringUtils.cleanString(record.get("NAME").getStringValue()))) {
+            if (!com.aplana.sbrf.taxaccounting.model.util.StringUtils.cleanString(nameFromFile).equalsIgnoreCase(com.aplana.sbrf.taxaccounting.model.util.StringUtils.cleanString(record.get("NAME").getStringValue()))) {
                 // сообщение 4
                 String msg;
                 if (nameFromFile != null && !nameFromFile.isEmpty()) {
