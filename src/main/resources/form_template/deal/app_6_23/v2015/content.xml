@@ -104,7 +104,7 @@
         <columnType>NUMBER</columnType>
         <name>Цена</name>
         <order>10</order>
-        <width>10</width>
+        <width>11</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>
