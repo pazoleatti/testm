@@ -1,5 +1,11 @@
 --http://jira.aplana.com/browse/SBRFACCTAX-13954: Добавить новую асинхронную задачу "Формирование специфичного отчета НФ"
 INSERT INTO async_task_type (id, name, handler_jndi, limit_kind, dev_mode) values (22, 'Формирование специфичного отчета налоговой формы', 'ejb/taxaccounting/async-task.jar/SpecificReportFormDataAsyncTaskImpl#com.aplana.sbrf.taxaccounting.async.task.AsyncTaskRemote', 'Количество ячеек таблицы формы = Количество строк * Количество граф', 0);
+
+--http://jira.aplana.com/browse/SBRFACCTAX-14002: Асинхронные задачи для формирования отчетов
+INSERT INTO async_task_type (id, name, handler_jndi, limit_kind, dev_mode) values (23, 'Формирование XLSX-отчета справочника', 'ejb/taxaccounting/async-task.jar/ExcelReportRefBookAsyncTaskImpl#com.aplana.sbrf.taxaccounting.async.task.AsyncTaskRemote', 'Количество выгружаемых ячеек = Количество строк * Количество столбцов', 0);
+INSERT INTO async_task_type (id, name, handler_jndi, limit_kind, dev_mode) values (24, 'Формирование CSV-отчета справочника', 'ejb/taxaccounting/async-task.jar/CsvReportRefBookAsyncTaskImpl#com.aplana.sbrf.taxaccounting.async.task.AsyncTaskRemote', 'Количество выгружаемых ячеек = Количество строк * Количество столбцов', 0);
+INSERT INTO async_task_type (id, name, handler_jndi, limit_kind, dev_mode) values (25, 'Формирование специфичного отчета налоговой формы', 'ejb/taxaccounting/async-task.jar/SpecificReportRefBookAsyncTaskImpl#com.aplana.sbrf.taxaccounting.async.task.AsyncTaskRemote', 'Количество выгружаемых ячеек = Количество строк * Количество столбцов', 0);
+
 COMMIT;
 
 -----------------------------------------------------------------------------------------
@@ -23,5 +29,6 @@ END;
 COMMIT;
 
 -----------------------------------------------------------------------------------------
+
 COMMIT;
 EXIT;

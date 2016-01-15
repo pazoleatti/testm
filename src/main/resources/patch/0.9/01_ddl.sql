@@ -65,11 +65,18 @@ alter table form_data_report add constraint form_data_rep_pk primary key (form_d
 alter table form_data_report drop column type_num;
 
 -----------------------------------------------------------------------------------------
---http://jira.aplana.com/browse/SBRFACCTAX-14002: Новое поле NOTIFICATION.URL
-alter table notification add url varchar2(2000);
-comment on column notification.url is 'Ссылка';
+--http://jira.aplana.com/browse/SBRFACCTAX-14002: Новые поля в NOTIFICATION
+alter table notification add (  
+	type                   number(2) default 0 not null,
+	report_id              varchar2(36));
 
+comment on column notification.type is 'Тип оповещения (0 - обычное оповещение, 1 - содержит ссылку на отчет справочника)';
+comment on column notification.report_id is 'Идентификатор отчета';	
 
+create index i_notification_report_id on notification (report_id);
+alter table notification add constraint notification_chk_type check (type in (0, 1) and ((type = 0 and report_id is null) or type = 1));
+alter table notification add constraint notification_fk_report_id foreign key (report_id) references blob_data (id) on delete set null;
 
+-----------------------------------------------------------------------------------------
 commit;
 exit;
