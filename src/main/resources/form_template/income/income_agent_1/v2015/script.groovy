@@ -348,7 +348,7 @@ void importTransportData() {
         }
 
         // подсчет итогов
-        def dataRows = dataRowHelper.allCached
+        def dataRows = formDataService.getDataRowHelper(formData).allCached
         calcTotalSum(dataRows, totalTmp, totalColumns)
 
         // сравнение контрольных сумм

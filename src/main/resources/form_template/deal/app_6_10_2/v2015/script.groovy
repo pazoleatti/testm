@@ -36,7 +36,7 @@ switch (formDataEvent) {
     case FormDataEvent.CALCULATE:
         calc()
         logicCheck()
-        formDataService.saveCachedDataRows(formData, logger)
+        formDataService.saveCachedDataRows(formData, logger, formDataEvent, scriptStatusHolder)
         break
     case FormDataEvent.CHECK:
         logicCheck()
@@ -59,7 +59,7 @@ switch (formDataEvent) {
         formDataService.consolidationSimple(formData, logger, userInfo)
         calc()
         logicCheck()
-        formDataService.saveCachedDataRows(formData, logger)
+        formDataService.saveCachedDataRows(formData, logger, formDataEvent, scriptStatusHolder)
         break
     case FormDataEvent.IMPORT:
         importData()
@@ -67,7 +67,7 @@ switch (formDataEvent) {
         break
     case FormDataEvent.IMPORT_TRANSPORT_FILE:
         importTransportData()
-        formDataService.saveCachedDataRows(formData, logger)
+        formDataService.saveCachedDataRows(formData, logger, formDataEvent, scriptStatusHolder)
         break
     case FormDataEvent.SORT_ROWS:
         sortFormDataRows()
