@@ -293,7 +293,7 @@ public class App_6_5Test extends ScriptTestBase {
         Assert.assertEquals(13, dataRows.get(3).getCell("cost").getNumericValue().doubleValue(), 0);
 
         Assert.assertEquals(28, dataRows.get(4).getCell("sum").getNumericValue().doubleValue(), 0);
-        Assert.assertEquals(32, dataRows.get(4).getCell("count").getNumericValue().intValue());
+        Assert.assertNull(dataRows.get(4).getCell("count").getNumericValue());
         Assert.assertEquals(28, dataRows.get(4).getCell("cost").getNumericValue().doubleValue(), 0);
     }
 }
