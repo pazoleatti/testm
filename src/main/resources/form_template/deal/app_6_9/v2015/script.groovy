@@ -190,9 +190,9 @@ void logicCheck() {
         }
 
         // 6. Проверка стоимости
-        if (row.price != null && row.cost != row.price) {
+        if (row.finResult != null && row.cost != row.finResult) {
             def msg1 = row.getCell('cost').column.name
-            def msg2 = row.getCell('price').column.name
+            def msg2 = row.getCell('finResult').column.name
             logger.error("Строка $rowNum: Значение графы «$msg1» должно быть равно значению графы «$msg2»!")
         }
 
@@ -221,7 +221,7 @@ void calc() {
     for (row in dataRows) {
         row.okeiCode = getRecordId(12, 'CODE', '796')
         row.count= 1
-        row.cost = row.price
+        row.cost = row.finResult
     }
 
     // Общий итог
