@@ -5,8 +5,8 @@
     <comparative>false</comparative>
     <accruing>false</accruing>
     <updating>false</updating>
-    <name>6.23. Оказание услуг (прочие доходы)</name>
-    <fullName>6.23. Отчет в отношении прочих доходов ПАО Сбербанк, связанных с оказанием услуг</fullName>
+    <name>6.16. Поставочные срочные сделки, базисным активом которых является иностранная валюта</name>
+    <fullName>6.16. Отчет в отношении доходов и расходов ПАО Сбербанк по поставочным срочным сделкам, базисным активом которых является иностранная валюта</fullName>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>fix</alias>
         <checking>false</checking>
@@ -30,7 +30,7 @@
         <alias>name</alias>
         <checking>false</checking>
         <columnType>REFBOOK</columnType>
-        <name>Полное наименование юридического лица с указанием ОПФ</name>
+        <name>Полное наименование с указанием ОПФ</name>
         <order>3</order>
         <width>10</width>
         <hierarchical>false</hierarchical>
@@ -49,25 +49,26 @@
         <refBookAttributeId>5218</refBookAttributeId>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="referenceColumn">
+        <alias>countryName</alias>
+        <checking>false</checking>
+        <columnType>REFERENCE</columnType>
+        <name>Наименование страны регистрации</name>
+        <order>5</order>
+        <width>8</width>
+        <parentAlias>name</parentAlias>
+        <refBookAttributeId>5204</refBookAttributeId>
+        <refBookAttributeId2>53</refBookAttributeId2>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="referenceColumn">
         <alias>countryCode</alias>
         <checking>false</checking>
         <columnType>REFERENCE</columnType>
-        <name>Код страны по классификатору ОКСМ</name>
-        <order>5</order>
-        <width>10</width>
+        <name>Код страны регистрации по классификатору ОКСМ</name>
+        <order>6</order>
+        <width>5</width>
         <parentAlias>name</parentAlias>
         <refBookAttributeId>5204</refBookAttributeId>
         <refBookAttributeId2>50</refBookAttributeId2>
-    </columns>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
-        <alias>sum</alias>
-        <checking>false</checking>
-        <columnType>NUMBER</columnType>
-        <name>Сумма доходов Банка, руб.</name>
-        <order>6</order>
-        <width>11</width>
-        <maxLength>17</maxLength>
-        <precision>2</precision>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>docNumber</alias>
@@ -89,21 +90,80 @@
         <formatId>0</formatId>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
-        <alias>serviceType</alias>
+        <alias>dealNumber</alias>
         <checking>false</checking>
         <columnType>STRING</columnType>
-        <name>Вид услуг</name>
+        <name>Номер сделки</name>
         <order>9</order>
-        <width>10</width>
-        <maxLength>128</maxLength>
+        <width>5</width>
+        <maxLength>500</maxLength>
         <prevLength>0</prevLength>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="dateColumn">
+        <alias>dealDate</alias>
+        <checking>false</checking>
+        <columnType>DATE</columnType>
+        <name>Дата заключения сделки</name>
+        <order>10</order>
+        <width>6</width>
+        <formatId>0</formatId>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
+        <alias>dealType</alias>
+        <checking>false</checking>
+        <columnType>REFBOOK</columnType>
+        <name>Вид срочной сделки</name>
+        <order>11</order>
+        <width>10</width>
+        <hierarchical>false</hierarchical>
+        <nameAttributeId>831</nameAttributeId>
+        <refBookAttributeId>831</refBookAttributeId>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
+        <alias>currencyCode</alias>
+        <checking>false</checking>
+        <name>Код валюты по сделке</name>
+        <order>12</order>
+        <width>5</width>
+        <hierarchical>false</hierarchical>
+        <nameAttributeId>66</nameAttributeId>
+        <refBookAttributeId>65</refBookAttributeId>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
+        <alias>countryDealCode</alias>
+        <checking>false</checking>
+        <name>Код страны происхождения предмета сделки по классификатору ОКСМ</name>
+        <order>13</order>
+        <width>7</width>
+        <hierarchical>false</hierarchical>
+        <nameAttributeId>53</nameAttributeId>
+        <refBookAttributeId>51</refBookAttributeId>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>incomeSum</alias>
+        <checking>false</checking>
+        <columnType>NUMBER</columnType>
+        <name>Сумма доходов Банка по данным бухгалтерского учета, руб.</name>
+        <order>14</order>
+        <width>11</width>
+        <maxLength>17</maxLength>
+        <precision>2</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>outcomeSum</alias>
+        <checking>false</checking>
+        <columnType>NUMBER</columnType>
+        <name>Сумма расходов Банка по данным бухгалтерского учета, руб.</name>
+        <order>15</order>
+        <width>11</width>
+        <maxLength>17</maxLength>
+        <precision>2</precision>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>price</alias>
         <checking>false</checking>
-        <columnType>NUMBER</columnType>
-        <name>Цена</name>
-        <order>10</order>
+        <name>Цена (тариф) за единицу измерения, руб.</name>
+        <order>16</order>
         <width>11</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
@@ -112,8 +172,8 @@
         <alias>cost</alias>
         <checking>false</checking>
         <columnType>NUMBER</columnType>
-        <name>Стоимость</name>
-        <order>11</order>
+        <name>Итого стоимость, руб.</name>
+        <order>17</order>
         <width>11</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
@@ -121,10 +181,9 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="dateColumn">
         <alias>dealDoneDate</alias>
         <checking>false</checking>
-        <columnType>DATE</columnType>
         <name>Дата совершения сделки</name>
-        <order>12</order>
-        <width>6</width>
+        <order>18</order>
+        <width>7</width>
         <formatId>0</formatId>
     </columns>
     <styles>

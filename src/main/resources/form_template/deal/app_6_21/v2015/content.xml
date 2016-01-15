@@ -106,9 +106,9 @@
         <checking>false</checking>
         <name>Цена (тариф) за единицу измерения без учета НДС, акцизов и пошлины, руб.</name>
         <order>11</order>
-        <width>8</width>
-        <maxLength>15</maxLength>
-        <precision>0</precision>
+        <width>11</width>
+        <maxLength>17</maxLength>
+        <precision>2</precision>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>cost</alias>

@@ -724,7 +724,7 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
             "      left join department_report_period inn_cdrp on inn_cdrp.id = fd.COMPARATIVE_DEP_REP_PER_ID   \n" +
             "      --отбираем экземпляры с учетом периода сравнения, признака нарастающего истога, списка месяцов     \n" +
             "      left join (\n" +
-            "                select fd.*, drpc.report_period_id as comparative_report_period_id, rp.dict_tax_period_id, tp.year, drp.department_id as department_id\n" +
+            "                select fd.*, drpc.report_period_id as comparative_report_period_id, rp.dict_tax_period_id, tp.year, drp.department_id as department_id, drp.correction_date\n" +
             "                from form_data fd\n" +
             "                join department_report_period drp on drp.id = fd.department_report_period_id\n" +
             "                join report_period rp on rp.id = drp.report_period_id\n" +
@@ -734,7 +734,7 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
             "                ) sfd \n" +
             "           on (sfd.kind = sfk.id and sfd.FORM_TEMPLATE_ID = sft.id and sdft.department_id = sfd.department_id and  \n" +
             "           --если налог совпадает, то ищем точное совпадение по периоду, иначе совпадение по \n" +
-            "           ((st.tax_type = t.tax_type and sfd.DEPARTMENT_REPORT_PERIOD_ID = sdrp.id) or (st.tax_type != t.tax_type and tp.year = sfd.year and rp.dict_tax_period_id = sfd.dict_tax_period_id))\n" +
+            "           ((st.tax_type = t.tax_type and sfd.DEPARTMENT_REPORT_PERIOD_ID = sdrp.id) or (st.tax_type != t.tax_type and tp.year = sfd.year and rp.dict_tax_period_id = sfd.dict_tax_period_id and (sdrp.correction_date is null or sfd.correction_date = sdrp.correction_date)))\n" +
             "        and (sft.COMPARATIVE = 0 or ft.COMPARATIVE = 0 or inn_cdrp.report_period_id  = sfd.comparative_report_period_id)\n" +
             "        and (sft.ACCRUING = 0 or ft.ACCRUING = 0 or sfd.ACCRUING = fd.ACCRUING)) \n" +
             "        and coalesce(sfd.PERIOD_ORDER, perversion.month) = perversion.month\n" +
@@ -867,7 +867,7 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
             "      left join department_report_period inn_cdrp on inn_cdrp.id = fd.COMPARATIVE_DEP_REP_PER_ID   \n" +
             "      --отбираем экземпляры с учетом периода сравнения, признака нарастающего истога, списка месяцов     \n" +
             "      left join (\n" +
-            "                select fd.*, drpc.report_period_id as comparative_report_period_id, rp.dict_tax_period_id, tp.year, drp.department_id as department_id\n" +
+            "                select fd.*, drpc.report_period_id as comparative_report_period_id, rp.dict_tax_period_id, tp.year, drp.department_id as department_id, drp.correction_date\n" +
             "                from form_data fd\n" +
             "                join department_report_period drp on drp.id = fd.department_report_period_id\n" +
             "                join report_period rp on rp.id = drp.report_period_id\n" +
@@ -877,7 +877,7 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
             "                ) tfd \n" +
             "           on (tfd.kind = tfk.id and tfd.FORM_TEMPLATE_ID = tft.id and tdft.department_id = tfd.department_id and \n" +
             "           --если налог совпадает, то ищем точное совпадение по периоду, иначе совпадение по \n" +
-            "           ((tt.tax_type = t.tax_type and tfd.DEPARTMENT_REPORT_PERIOD_ID = tdrp.id) or (tt.tax_type != t.tax_type and tp.year = tfd.year and rp.dict_tax_period_id = tfd.dict_tax_period_id))\n" +
+            "           ((tt.tax_type = t.tax_type and tfd.DEPARTMENT_REPORT_PERIOD_ID = tdrp.id) or (tt.tax_type != t.tax_type and tp.year = tfd.year and rp.dict_tax_period_id = tfd.dict_tax_period_id and (tdrp.correction_date is null or tfd.correction_date = tdrp.correction_date)))\n" +
             "        and (tft.COMPARATIVE = 0 or ft.COMPARATIVE = 0 or inn_cdrp.report_period_id  = tfd.comparative_report_period_id)\n" +
             "        and (tft.ACCRUING = 0 or ft.ACCRUING = 0 or tfd.ACCRUING = fd.ACCRUING)) \n" +
             "        and coalesce(tfd.PERIOD_ORDER, perversion.month) = perversion.month\n" +
@@ -978,7 +978,7 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
             "      join declaration_template tdt on (tdt.DECLARATION_TYPE_ID = dt.ID and tdt.status in (0,1) and tdt.version = (select max(dt2.version) from declaration_template dt2 where dt2.DECLARATION_TYPE_ID = tdt.DECLARATION_TYPE_ID and extract(year from dt2.version) <= ttp.year and dt2.status in (0,1))) \n" +
             "      --отбираем экземпляры с учетом периода сравнения, признака нарастающего истога, списка месяцов     \n" +
             "      left join (\n" +
-            "                select dd.*, rp.dict_tax_period_id, tp.year, drp.department_id as department_id\n" +
+            "                select dd.*, rp.dict_tax_period_id, tp.year, drp.department_id as department_id, drp.correction_date\n" +
             "                from declaration_data dd\n" +
             "                join department_report_period drp on drp.id = dd.department_report_period_id\n" +
             "                join report_period rp on rp.id = drp.report_period_id\n" +
@@ -986,7 +986,7 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
             "                ) tdd \n" +
             "           on (tdd.DECLARATION_TEMPLATE_ID = tdt.id and tddt.department_id = tdd.department_id and \n" +
             "           --если налог совпадает, то ищем точное совпадение по периоду, иначе совпадение по \n" +
-            "           ((dt.tax_type = t.tax_type and tdd.DEPARTMENT_REPORT_PERIOD_ID = tdrp.id) or (dt.tax_type != t.tax_type and tp.year = tdd.year and rp.dict_tax_period_id = tdd.dict_tax_period_id))) \n" +
+            "           ((dt.tax_type = t.tax_type and tdd.DEPARTMENT_REPORT_PERIOD_ID = tdrp.id) or (dt.tax_type != t.tax_type and tp.year = tdd.year and rp.dict_tax_period_id = tdd.dict_tax_period_id and (tdrp.correction_date is null or tdd.correction_date = tdrp.correction_date)))) \n" +
             "      where (:sourceFormDataId is null and (fd.id is null and fd.form_template_id = :formTemplateId and fd.DEPARTMENT_REPORT_PERIOD_ID = :departmentReportPeriodId and fd.kind = :kind and (:compPeriod is null and fd.COMPARATIVE_DEP_REP_PER_ID is null or fd.COMPARATIVE_DEP_REP_PER_ID = :compPeriod) and fd.ACCRUING = :accruing)) or fd.id = :sourceFormDataId\n" +
             "  ),         \n" +
             "  aggregated_insanity as (\n" +
@@ -1114,7 +1114,7 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
             "           ) perversion on perversion.record_id = rp.DICT_TAX_PERIOD_ID and perversion.lvl = case when sft.MONTHLY=1 then perversion.lvl else 1 end\n" +
             "      --отбираем экземпляры с учетом списка месяцов     \n" +
             "      left join (\n" +
-            "                select fd.*, rp.dict_tax_period_id, tp.year, drp.department_id as department_id\n" +
+            "                select fd.*, rp.dict_tax_period_id, tp.year, drp.department_id as department_id, drp.correction_date\n" +
             "                from form_data fd\n" +
             "                join department_report_period drp on drp.id = fd.department_report_period_id\n" +
             "                join report_period rp on rp.id = drp.report_period_id\n" +
@@ -1122,7 +1122,7 @@ public class SourceDaoImpl extends AbstractDao implements SourceDao {
             "                ) sfd \n" +
             "           on (sfd.kind = sfk.id and sfd.FORM_TEMPLATE_ID = sft.id and sdft.department_id = sfd.department_id and  \n" +
             "           --если налог совпадает, то ищем точное совпадение по периоду, иначе совпадение по \n" +
-            "           ((st.tax_type = t.tax_type and sfd.DEPARTMENT_REPORT_PERIOD_ID = sdrp.id) or (st.tax_type != t.tax_type and tp.year = sfd.year and rp.dict_tax_period_id = sfd.dict_tax_period_id))) \n" +
+            "           ((st.tax_type = t.tax_type and sfd.DEPARTMENT_REPORT_PERIOD_ID = sdrp.id) or (st.tax_type != t.tax_type and tp.year = sfd.year and rp.dict_tax_period_id = sfd.dict_tax_period_id and (sdrp.correction_date is null or sfd.correction_date = sdrp.correction_date)))) \n" +
             "           and coalesce(sfd.PERIOD_ORDER, perversion.month) = perversion.month\n" +
             "      left join department_form_type_performer dftp on dftp.DEPARTMENT_FORM_TYPE_ID = sdft.id \n" +
             "      left join department fdpd on fdpd.id = dftp.PERFORMER_DEP_ID  \n" +

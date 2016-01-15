@@ -905,8 +905,9 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                                 formSearchPresenter.setHiddenColumns(hiddenColumns);
 
                     			// Регистрируем хендлер на закрытие
-                    			if (closeFormDataHandlerRegistration !=null ){
+                    			if (closeFormDataHandlerRegistration != null){
                     				closeFormDataHandlerRegistration.removeHandler();
+                                    closeFormDataHandlerRegistration = null;
                     			}
 
                                 formDataAccessParams = result

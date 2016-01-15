@@ -5,8 +5,8 @@
     <comparative>false</comparative>
     <accruing>false</accruing>
     <updating>false</updating>
-    <name>6.19 Привлечение ресурсов</name>
-    <fullName>6.19 Отчет в отношении расходов ПАО Сбербанк, связанных с привлечением ресурсов</fullName>
+    <name>6.19. Привлечение ресурсов</name>
+    <fullName>6.19. Отчет в отношении расходов ПАО Сбербанк, связанных с привлечением ресурсов</fullName>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>fix</alias>
         <checking>false</checking>
@@ -95,7 +95,7 @@
         <name>Количество</name>
         <order>9</order>
         <width>5</width>
-        <maxLength>1</maxLength>
+        <maxLength>9</maxLength>
         <precision>0</precision>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">

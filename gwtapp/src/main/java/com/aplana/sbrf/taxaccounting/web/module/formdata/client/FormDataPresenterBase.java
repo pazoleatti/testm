@@ -142,7 +142,7 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
     public static final String UUID = "uuid";
     public static final String FREE = "free";
 
-	protected HandlerRegistration closeFormDataHandlerRegistration;
+	protected HandlerRegistration closeFormDataHandlerRegistration = null;
 
 	protected final DispatchAsync dispatcher;
 	protected final TaPlaceManager placeManager;
@@ -504,6 +504,7 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
         placeManager.setOnLeaveConfirmation(msg);
         if (closeFormDataHandlerRegistration != null && msg == null) {
             closeFormDataHandlerRegistration.removeHandler();
+            closeFormDataHandlerRegistration = null;
         } else if (closeFormDataHandlerRegistration == null && msg != null) {
             closeFormDataHandlerRegistration = Window.addCloseHandler(new CloseHandler<Window>() {
                 @Override
@@ -543,7 +544,7 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 		UnlockFormData action = new UnlockFormData();
 		action.setFormId(formId);
         action.setManual(formData.isManual());
-        action.setReadOnlyMode(readOnlyMode && !editLock);
+        action.setReadOnlyMode(readOnlyMode || editLock);
 		dispatcher.execute(action, CallbackUtils.emptyCallback());
 	}
 
