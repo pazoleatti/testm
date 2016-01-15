@@ -686,7 +686,6 @@ user_id number(9) null,
 role_id number(9) null,
 is_read number(1) default 0 not null,
 blob_data_id varchar2(36),
-url varchar2(2000),
 type number(2,0) default 0 not null,
 report_id varchar2(36)
 );
