@@ -36,7 +36,7 @@ switch (formDataEvent) {
     case FormDataEvent.CALCULATE:
         calc()
         logicCheck()
-        formDataService.saveCachedDataRows(formData, logger)
+        formDataService.saveCachedDataRows(formData, logger, formDataEvent, scriptStatusHolder)
         break
     case FormDataEvent.CHECK:
         logicCheck()
@@ -59,11 +59,11 @@ switch (formDataEvent) {
         formDataService.consolidationSimple(formData, logger, userInfo)
         calc()
         logicCheck()
-        formDataService.saveCachedDataRows(formData, logger)
+        formDataService.saveCachedDataRows(formData, logger, formDataEvent, scriptStatusHolder)
         break
     case FormDataEvent.IMPORT:
         importData()
-        formDataService.saveCachedDataRows(formData, logger)
+        formDataService.saveCachedDataRows(formData, logger, formDataEvent, scriptStatusHolder)
         break
     case FormDataEvent.SORT_ROWS:
         sortFormDataRows()
@@ -88,7 +88,7 @@ def editableColumns = ['name', 'transDoneDate', 'code', 'reasonNumber', 'reasonD
 
 // Автозаполняемые атрибуты
 @Field
-def autoFillColumns = ['iksr', 'sum3', 'sum4']
+def autoFillColumns = ['rowNumber', 'iksr', 'sum3', 'sum4']
 
 // Проверяемые на пустые значения атрибуты
 @Field
@@ -100,7 +100,6 @@ def totalColumns = ['sum4']
 // Группируемые атрибуты
 @Field
 def groupColumns = ['code']
-
 
 // Дата начала отчетного периода
 @Field
@@ -263,12 +262,14 @@ void calc() {
 
     sortFormDataRows(false)
 }
+
 def calc12(def row) {
     if (row.sum1 != null && row.taxTariff != null) {
         return roundValue(row.sum1 * row.taxTariff, 2)
     }
     return null
 }
+
 def calc13(def row) {
     if (row.sum2 != null && row.sum3 != null) {
         return row.sum3 - row.sum2
@@ -482,7 +483,7 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
     colIndex++
 
     // графа 5
-    newRow.code = getRecordIdImport(28, 'CODE', values[colIndex], fileRowIndex, colIndex + colOffset, false)
+    newRow.code = values[colIndex]
     colIndex++
 
     // графа 6
@@ -494,8 +495,8 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
     colIndex++
 
     // графы 8-13
-    ['sum1', 'dealTariff', 'taxTariff', 'sum2', 'sum3', 'sum4'].each{
-        newRow[it]= parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
+    ['sum1', 'dealTariff', 'taxTariff', 'sum2', 'sum3', 'sum4'].each {
+        newRow[it] = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
         colIndex++
     }
 
@@ -516,7 +517,7 @@ def getNewSubTotalRowFromXls(def values, def colOffset, def fileRowIndex, def ro
 
     // графа 5
     def colIndex = 5
-    newRow.code = getRecordIdImport(28, 'CODE', values[colIndex], fileRowIndex, colIndex + colOffset, false)
+    newRow.code = values[colIndex]
 
     // графа 13
     colIndex = 13
@@ -634,10 +635,9 @@ String getValuesByGroupColumn(DataRow row) {
     def value
     // графа 5
     if (row?.code) {
-        def map = getRefBookValue(28, row.code)
-        if (map != null) {
-            value = map.CODE?.stringValue
-        }
+        value = row.code
+    } else {
+        value = 'графа 5 не задана'
     }
     return value
 }
