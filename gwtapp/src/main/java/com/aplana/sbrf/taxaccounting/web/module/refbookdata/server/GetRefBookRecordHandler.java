@@ -40,6 +40,8 @@ public class GetRefBookRecordHandler extends AbstractActionHandler<GetRefBookRec
 		RefBookDataProvider refBookDataProvider = refBookFactory.getDataProvider(action.getRefBookId());
         RefBook refBook = refBookFactory.get(action.getRefBookId());
 		GetRefBookRecordResult result = new GetRefBookRecordResult();
+		Map<String, RefBookValueSerializable> recordData = new HashMap<String, RefBookValueSerializable>();
+		RefBookRecordVersionData fullVersionData = new RefBookRecordVersionData();
 
         RefBookRecordVersion recordVersion;
 
@@ -59,29 +61,33 @@ public class GetRefBookRecordHandler extends AbstractActionHandler<GetRefBookRec
         }
 
         Map<String, RefBookValue> record = refBookDataProvider.getRecordData(recordId);
-        result.setRecord(convert(refBook, record));
 
-        //Получаем версию выбранной записи
-        recordVersion = refBookDataProvider.getRecordVersionInfo(recordId);
-        int versionCount = refBookDataProvider.getRecordVersionsCount(recordId);
+		if (record != null) {
+			recordData = convert(refBook, record);
 
-        RefBookRecordVersionData fullVersionData = new RefBookRecordVersionData();
-        if (action.isCreate()) {
-            if (recordVersion.getVersionEnd() != null) {
-                Calendar calendar = new GregorianCalendar();
-                calendar.setTime(recordVersion.getVersionEnd());
-                calendar.add(Calendar.DATE, 1);
-                fullVersionData.setVersionStart(calendar.getTime());
-            } else {
-                fullVersionData.setVersionStart(null);
-            }
-            fullVersionData.setVersionEnd(null);
-        } else {
-            fullVersionData.setVersionStart(recordVersion.getVersionStart());
-            fullVersionData.setVersionEnd(recordVersion.getVersionEnd());
-        }
-        fullVersionData.setVersionCount(versionCount);
-        result.setVersionData(fullVersionData);
+			//Получаем версию выбранной записи
+			recordVersion = refBookDataProvider.getRecordVersionInfo(recordId);
+			int versionCount = refBookDataProvider.getRecordVersionsCount(recordId);
+
+			if (action.isCreate()) {
+				if (recordVersion.getVersionEnd() != null) {
+					Calendar calendar = new GregorianCalendar();
+					calendar.setTime(recordVersion.getVersionEnd());
+					calendar.add(Calendar.DATE, 1);
+					fullVersionData.setVersionStart(calendar.getTime());
+				} else {
+					fullVersionData.setVersionStart(null);
+				}
+				fullVersionData.setVersionEnd(null);
+			} else {
+				fullVersionData.setVersionStart(recordVersion.getVersionStart());
+				fullVersionData.setVersionEnd(recordVersion.getVersionEnd());
+			}
+			fullVersionData.setVersionCount(versionCount);
+		}
+
+		result.setRecord(recordData);
+		result.setVersionData(fullVersionData);
 		return result;
 	}
 

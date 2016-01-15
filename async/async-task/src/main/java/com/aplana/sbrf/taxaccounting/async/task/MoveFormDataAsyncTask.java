@@ -97,7 +97,7 @@ public abstract class MoveFormDataAsyncTask extends AbstractAsyncTask {
 
         return MessageGenerator.getFDMsg(
                 String.format(SUCCESS, move.getFromState().getTitle(), move.getToState().getTitle(), formData.getFormType().getTaxType() == TaxType.ETR || formData.getFormType().getTaxType() == TaxType.DEAL ?
-                        "форму" : "налоговую форму"),
+                        "форма" : "налоговая форма"),
                 formData,
                 department.getName(),
                 false,

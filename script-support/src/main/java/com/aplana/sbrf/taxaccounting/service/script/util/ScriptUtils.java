@@ -62,12 +62,12 @@ public final class ScriptUtils {
     public static final String REF_BOOK_NOT_FOUND_IMPORT_ERROR = "Проверка файла: Строка %d, столбец %s: В справочнике «%s» в атрибуте «%s» не найдено значение «%s», актуальное на дату %s!";
     // Ссылочный, зависимая графа: Значение в файле отличается от того, которое должно быть в зависимой графе
     public static final String REF_BOOK_REFERENCE_NOT_FOUND_IMPORT_ERROR = "Проверка файла: Строка %d, столбец %s содержит значение «%s», отсутствующее в справочнике «%s»!";
+    public static final String REF_BOOK_REFERENCE_NOT_FOUND_IMPORT_ERROR_2 = "Проверка файла: Строка %d, столбец %s содержит значение «%s», которое не соответствует справочному значению «%s» графы «%s», найденному для «%s»!";
     // Ссылочный: Найдено несколько записей справочника, соответствующих значению в файле
     public static final String REF_BOOK_TOO_MANY_FOUND_IMPORT_ERROR = "Проверка файла: Строка %d, столбец %s: В справочнике «%s» в атрибуте «%s» найдено более одного значения «%s», актуального на дату %s!";
     public static final String CHECK_OVERFLOW_MESSAGE = "Строка %d: Значение графы «%s» превышает допустимую разрядность (%d знаков). Графа «%s» рассчитывается как «%s»!";
     // для проверки итогов при загрузе экселя (посчитанные и ожижаемые значения как %s потому что %f теряет точность)
     public static final String COMPARE_TOTAL_VALUES = "Строка формы %d: Итоговая сумма по графе «%s» (%s) некорректна (ожидаемое значение %s).";
-    public static final String TCO_END_MESSAGE = "Для заполнения на форме граф с общей информацией о %s выполнен поиск значения файла по графе «%s» в следующих атрибутах справочника «Участники ТЦО»: «ИНН (заполняется для резидентов, некредитных организаций)», «Регистрационный номер в стране инкорпорации (заполняется для нерезидентов)», «Код налогоплательщика в стране инкорпорации», «Код SWIFT (заполняется для кредитных организаций, резидентов и нерезидентов)», «КИО (заполняется для нерезидентов)»";
     public static final String INN_JUR_PATTERN = RefBookUtils.INN_JUR_PATTERN;
     public static final String INN_JUR_MEANING = RefBookUtils.INN_JUR_MEANING;
     public static final String INN_IND_PATTERN = RefBookUtils.INN_IND_PATTERN;
@@ -825,7 +825,7 @@ public final class ScriptUtils {
             // Неитоговые строки были удалены
             for (int i = 0; i < dataRows.size(); i++) {
                 if (dataRows.get(i).getAlias() != null) {
-                    if (i < 1 || dataRows.get(i - 1).getAlias() != null) {
+                    if (i < 1 || (dataRows.get(i - 1).getAlias() != null && dataRows.get(i).getAlias() != "total")) {
                         logger.error(GROUP_WRONG_ITOG_ROW, dataRows.get(i).getIndex());
                     }
                 }
@@ -1850,13 +1850,13 @@ public final class ScriptUtils {
             // 5
             Map<String, RefBookValue> record = records.get(0);
 
-            if (!com.aplana.sbrf.taxaccounting.model.util.StringUtils.cleanString(nameFromFile).equals(com.aplana.sbrf.taxaccounting.model.util.StringUtils.cleanString(record.get("NAME").getStringValue()))) {
+            if (!com.aplana.sbrf.taxaccounting.model.util.StringUtils.cleanString(nameFromFile).equalsIgnoreCase(com.aplana.sbrf.taxaccounting.model.util.StringUtils.cleanString(record.get("NAME").getStringValue()))) {
                 // сообщение 4
                 String msg;
                 if (nameFromFile != null && !nameFromFile.isEmpty()) {
                     msg = String.format("В файле указано другое наименование %s - «%s»!", isVzl ? "ВЗЛ/РОЗ" : "юридического лица", nameFromFile);
                 } else {
-                    msg = String.format("Наименование %s в файле не заполнено!, ", isVzl ? "ВЗЛ/РОЗ" : "юридического лица");
+                    msg = String.format("Наименование %s в файле не заполнено!", isVzl ? "ВЗЛ/РОЗ" : "юридического лица");
                 }
                 String refBookAttributeName = "Не задано";
                 for (String alias : aliases) {
@@ -1869,7 +1869,6 @@ public final class ScriptUtils {
                                 "в которой атрибут «Полное наименование юридического лица с указанием ОПФ» = «%s», атрибут «%s» = «%s». %s",
                         fileRowIndex, getXLSColumnName(colIndex), isVzl ? "ВЗЛ/РОЗ" : "юридическом лице", record.get("NAME").getStringValue(), refBookAttributeName, iksr, msg);
             }
-            logger.warn(TCO_END_MESSAGE, isVzl ? "ВЗЛ/РОЗ" : "юридическом лице", iksrName);
             recordCache.get(ref_id).put(filter, record.get(RefBook.RECORD_ID_ALIAS).getNumberValue());
             return (Long) recordCache.get(ref_id).get(filter);
         } else {
@@ -1882,7 +1881,6 @@ public final class ScriptUtils {
                 // сообщение 1
                 logger.warn("Строка %s , столбец %s: %s в справочнике «Участники ТЦО» не найдено значение «%s» (%s), актуальное на дату «%s»!",
                         fileRowIndex, getXLSColumnName(colIndex), isVzl ? "На форме не заполнены графы с общей информацией о ВЗЛ/РОЗ, так как" : ("Для заполнения графы «" + iksrName + "» формы"), iksr, nameFromFile, simpleDateFormat.format(endDate));
-                logger.warn(TCO_END_MESSAGE, isVzl ? "ВЗЛ/РОЗ" : "юридическом лице", iksrName);
             }
         }
         return null;
@@ -1906,6 +1904,49 @@ public final class ScriptUtils {
                             getColumnName(row, alias), formatDate(dealDoneDate, "dd.MM.yyyy"),
                             formatDate(reportPeriodStartDate, "dd.MM.yyyy"),
                             formatDate(reportPeriodEndDate, "dd.MM.yyyy")
+                    ), fatal ? LogLevel.ERROR : LogLevel.WARNING);
+        }
+    }
+
+    /**
+     * Проверка нахождения даты в диапазоне (вариант 1, с датами)
+     * @param logger логер для записи сообщения
+     * @param row строка НФ
+     * @param alias псевдоним столбца
+     * @param startDate дата окончания периода текущей формы
+     * @param endDate дата окончания периода текущей формы
+     * @param fatal фатально ли сообщение
+     */
+    public static void checkDatePeriod(Logger logger, DataRow<Cell> row, String alias, Date startDate, Date endDate, boolean fatal) {
+        Date docDate = row.getCell(alias).getDateValue();
+        if (docDate != null && (docDate.before(startDate) || docDate.after(endDate))) {
+            rowLog(logger, row, String.format("Строка %d: Графа «%s» должна принимать значение из следующего диапазона: %s - %s!",
+                    row.getIndex(),
+                    getColumnName(row, alias),
+                    formatDate(startDate, "dd.MM.yyyy"),
+                    formatDate(endDate, "dd.MM.yyyy")
+            ), fatal ? LogLevel.ERROR : LogLevel.WARNING);
+        }
+    }
+
+    /**
+     * Проверка нахождения даты в диапазоне (вариант 2, с названиями граф)
+     * @param logger логер для записи сообщения
+     * @param row строка НФ
+     * @param alias псевдоним столбца
+     * @param startAlias псевдоним графы даты начала периода
+     * @param endDate дата окончания периода текущей формы
+     * @param fatal фатально ли сообщение
+     */
+    public static void checkDatePeriod(Logger logger, DataRow<Cell> row, String alias, String startAlias, Date endDate, boolean fatal) {
+        Date docDate = row.getCell(alias).getDateValue();
+        Date startDate = row.getCell(startAlias).getDateValue();
+        if (docDate != null && startDate != null && (docDate.before(startDate) || docDate.after(endDate))) {
+            rowLog(logger, row, String.format("Строка %d: Значение графы «%s» должно быть не меньше значения графы «%s» и не больше %s!",
+                            row.getIndex(),
+                            getColumnName(row, alias),
+                            getColumnName(row, startAlias),
+                            formatDate(endDate, "dd.MM.yyyy")
                     ), fatal ? LogLevel.ERROR : LogLevel.WARNING);
         }
     }

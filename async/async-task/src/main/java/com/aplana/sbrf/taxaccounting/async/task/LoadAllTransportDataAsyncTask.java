@@ -6,7 +6,6 @@ import com.aplana.sbrf.taxaccounting.model.LockData;
 import com.aplana.sbrf.taxaccounting.model.ReportType;
 import com.aplana.sbrf.taxaccounting.model.TAUserInfo;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
-import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.LoadFormDataService;
 import com.aplana.sbrf.taxaccounting.service.LoadRefBookDataService;
 import com.aplana.sbrf.taxaccounting.service.TAUserService;
@@ -30,9 +29,6 @@ public abstract class LoadAllTransportDataAsyncTask extends AbstractAsyncTask {
 
     @Autowired
     TAUserService userService;
-
-    @Autowired
-    RefBookFactory refBookFactory;
 
     @Autowired
     private LockDataService lockDataService;

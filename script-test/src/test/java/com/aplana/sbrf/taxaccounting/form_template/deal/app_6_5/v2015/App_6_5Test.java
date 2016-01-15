@@ -109,9 +109,8 @@ public class App_6_5Test extends ScriptTestBase {
         // Проверка заполнения кода региона
         // 4. Проверка цены с учетом количества
         // 6. Проверка стоимости
-        // 7. Корректность даты совершения сделки относительно даты договора
-        // 8. Проверка года совершения сделки
-        // 9. Проверка диапазона дат
+        // 7. Проверка корректности даты договора
+        // 8. Проверка корректности даты совершения сделки
         row.getCell("name").setValue(1L, null);
         row.getCell("country").setValue(4L, null);
         row.getCell("settlement").setValue("string", null);
@@ -130,9 +129,8 @@ public class App_6_5Test extends ScriptTestBase {
         Assert.assertEquals("Строка 1: Графа «Регион (код)» должна быть заполнена, т.к. указанная страна местонахождения объекта недвижимости Россия!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Значение графы «Цена» должно быть равно отношению графы «Сумма расходов Банка, руб.» к графе «Количество», если графа «Количество» заполнена (значением > 0)!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Значение графы «Стоимость» должно быть равно значению графы «Сумма расходов Банка, руб.»!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Значение графы «Дата совершения сделки» должно быть не меньше значения графы «Дата договора»!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Дата, указанная в графе «Дата совершения сделки» (01.01.2989), должна относиться к отчетному периоду текущей формы (01.01.2014 - 31.12.2014)!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Значение даты атрибута «Дата договора» должно принимать значение из следующего диапазона: 01.01.1991 - 31.12.2099", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 1: Графа «Дата договора» должна принимать значение из следующего диапазона: 01.01.1991 - 31.12.2014!", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 1: Значение графы «Дата совершения сделки» должно быть не меньше значения графы «Дата договора» и не больше 31.12.2014!", entries.get(i++).getMessage());
         Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
         testHelper.getLogger().clear();
 
@@ -295,7 +293,7 @@ public class App_6_5Test extends ScriptTestBase {
         Assert.assertEquals(13, dataRows.get(3).getCell("cost").getNumericValue().doubleValue(), 0);
 
         Assert.assertEquals(28, dataRows.get(4).getCell("sum").getNumericValue().doubleValue(), 0);
-        Assert.assertEquals(32, dataRows.get(4).getCell("count").getNumericValue().intValue());
+        Assert.assertNull(dataRows.get(4).getCell("count").getNumericValue());
         Assert.assertEquals(28, dataRows.get(4).getCell("cost").getNumericValue().doubleValue(), 0);
     }
 }

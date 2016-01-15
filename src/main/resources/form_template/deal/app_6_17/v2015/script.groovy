@@ -195,32 +195,19 @@ void logicCheck() {
             }
         }
 
-        // 5. Корректность даты заключения сделки
-        if (row.docDate && row.dealDate && row.docDate > row.dealDate) {
-            def msg1 = getColumnName(row, 'docDate')
-            def msg2 = getColumnName(row, 'dealDate')
-            logger.error("Строка $rowNum: Значение графы «$msg2» должно быть не меньше значения графы «$msg1»!")
-        }
+        // 5. Проверка корректности даты договора
+        checkDatePeriod(logger, row, 'docDate', Date.parse('dd.MM.yyyy', '01.01.1991'), getReportPeriodEndDate(), true)
 
-        // 6. Корректность даты совершения сделки
-        if (row.dealDoneDate && row.dealDate && row.dealDate > row.dealDoneDate) {
-            def msg1 = getColumnName(row, 'dealDate')
-            def msg2 = getColumnName(row, 'dealDoneDate')
-            logger.error("Строка $rowNum: Значение графы «$msg2» должно быть не меньше значения графы «$msg1»!")
-        }
+        // 6. Проверка корректности даты заключения сделки
+        checkDatePeriod(logger, row, 'dealDate', 'docDate', getReportPeriodEndDate(), true)
 
-        // 7. Проверка пересечения даты сделки с отчетным периодом
-        checkDealDoneDate(logger, row, 'dealDoneDate', getReportPeriodStartDate(), getReportPeriodEndDate(), true)
-
-        // 8. Проверка диапазона дат
-        if (row.docDate) {
-            checkDateValid(logger, row, 'docDate', row.docDate, true)
-        }
+        // 7. Проверка корректности даты совершения сделки
+        checkDatePeriod(logger, row, 'dealDoneDate', 'dealDate', getReportPeriodEndDate(), true)
     }
 
-    // 9. Проверка наличия всех фиксированных строк «Подитог»
-    // 10. Проверка отсутствия лишних фиксированных строк «Подитог»
-    // 11. Проверка итоговых значений по фиксированной строке «Подитог»
+    // 8. Проверка наличия всех фиксированных строк «Подитог»
+    // 9. Проверка отсутствия лишних фиксированных строк «Подитог»
+    // 10. Проверка итоговых значений по фиксированной строке «Подитог»
     checkItog(dataRows)
 
     // 12. Проверка итоговых значений пофиксированной строке «Итого»
@@ -346,7 +333,6 @@ void importData() {
     def rowIndex = 0
     def rows = []
     def allValuesCount = allValues.size()
-    reportPeriodEndDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
     def totalRowFromFile = null
     def totalRowFromFileMap = [:] // мапа для хранения строк подитогов со значениями из файла (стили простых строк)
 

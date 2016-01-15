@@ -4,7 +4,7 @@ public class WSException extends ServiceException {
 
 	private static final long serialVersionUID = -1933146442508052101L;
 
-	public static enum SudirErrorCodes {
+	public enum SudirErrorCodes {
 		
 		SUDIR_000("SUDIR-000", "Unspecified error"),
 		SUDIR_001("SUDIR-001", "Internal error"),

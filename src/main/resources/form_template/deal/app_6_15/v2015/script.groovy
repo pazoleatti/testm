@@ -111,7 +111,8 @@ def autoFillColumns = ['rowNumber', 'dependence', 'iksr', 'countryName', 'countr
 
 //Непустые атрибуты
 @Field
-def nonEmptyColumns = ['name', 'docNumber', 'docDate', 'dealNumber', 'dealType', 'dealDate', 'innerCode', 'dealCountryCode', 'signPhis', 'dealDoneDate']
+def nonEmptyColumns = ['name', 'dependence', 'docNumber', 'docDate', 'dealNumber', 'dealType', 'dealDate', 'innerCode', 'dealCountryCode', 'signPhis',
+                       'signTransaction', 'count', 'price', 'cost', 'dealDoneDate']
 
 // Группируемые атрибуты (графа 2, 7, 8, 14, 15)
 @Field
@@ -174,6 +175,8 @@ void logicCheck() {
     if (dataRows.isEmpty()) {
         return
     }
+    def recYesId = getRecordId(38, 'CODE', '1', -1, null, true)
+    def recNoId = getRecordId(38, 'CODE', '0', -1, null, true)
 
     for (row in dataRows) {
         if (row.getAlias() != null) {
@@ -208,16 +211,14 @@ void logicCheck() {
         def isPhysics = (getRefBookValue(18, row.signPhis)?.CODE?.numberValue == 2)
 
         // Проверка признака физической поставки
-        if(row.signPhis && !isOMS && !isPhysics){
+        if (row.signPhis && !isOMS && !isPhysics) {
             def msg = row.getCell('signPhis').column.name
             logger.error("Строка $rowNum: Графа «$msg» может содержать только одно из значений: ОМС, Физическая поставка!")
         }
 
-        def recYesId = getRecordId(38, 'CODE', '1', -1, null, true)
-        def recNoId = getRecordId(38, 'CODE', '0', -1, null, true)
         // Проверка признака внешнеторговой сделки
-        if(row.signTransaction && row.countryCode2 && row.countryCode3){
-            if(row.countryCode2 != row.countryCode3 && row.signTransaction != recYesId || row.countryCode2 == row.countryCode3 && row.signTransaction != recNoId){
+        if (row.signTransaction && row.countryCode2 && row.countryCode3) {
+            if (row.countryCode2 != row.countryCode3 && row.signTransaction != recYesId || row.countryCode2 == row.countryCode3 && row.signTransaction != recNoId) {
                 def msg = row.getCell('signTransaction').column.name
                 logger.error("Строка $rowNum: Значение графы «$msg» не соответствует сведениям о стране отправки и стране доставки драгоценных металлов!")
             }
@@ -226,16 +227,15 @@ void logicCheck() {
         // Проверка зависимости от признака физической поставки
         if (row.signPhis && isOMS) {
             // графы 16 – 24 должны быть не заполнены
-            def isHaveNotEmptyField = false
             def checkField = ['countryCode2', 'region1', 'city1', 'settlement1', 'countryCode3', 'region2', 'city2', 'settlement2', 'conditionCode']
             for (it in checkField) {
-                isHaveNotEmptyField = row.getCell(it).value != null && !row.getCell(it).value.toString().isEmpty()
-                if (isHaveNotEmptyField)
+                if (row.getCell(it).value) {
+                    def msg = row.getCell('signPhis').column.name
+                    logger.error("Строка $rowNum: Графы 12.1-12.4, 13.1-13.4, 14 не должны быть заполнены, т.к. в графе «$msg» указано значение «ОМС»!")
                     break
+                }
             }
-            def msg = row.getCell('signPhis').column.name
-            logger.error("Строка $rowNum: Графы 12.1-12.4, 13.1-13.4, 14 не должны быть заполнены, т.к. в графе «$msg» указано значение «ОМС»!")
-        } else if(row.signPhis && isPhysics) {
+        } else if (row.signPhis && isPhysics) {
             // i. Графы 16, 20 должны быть заполнены
             if (row.countryCode2 == null || row.countryCode3 == null) {
                 def msg1 = row.getCell('signPhis').column.name
@@ -377,15 +377,18 @@ void calc() {
     // Сортировка
     sortRows(dataRows, groupColumns)
 
+    // "Да" и "Нет"
+    def recYesId = getRecordId(38, 'CODE', '1', -1, null, true)
+    def recNoId = getRecordId(38, 'CODE', '0', -1, null, true)
+
     for (row in dataRows) {
 
-        // "Да" и "Нет"
-        def recYesId = getRecordId(38, 'CODE', '1', -1, null, true)
-        def recNoId = getRecordId(38, 'CODE', '0', -1, null, true)
-
         // Признак взаимозависимости
-        // isVzl флаг (true для РНУ, false для приложений 6-...) в getTcoRecordId
-        row.dependence = recNoId
+        def type = getRefBookValue(520, row.name)?.TYPE?.value
+        def code = getRefBookValue(525, type)?.CODE?.value
+        if (code) {
+            row.dependence = (code == "ВЗЛ") ? recYesId : recNoId
+        }
 
         // Признак внешнеторговой сделки
         row.signTransaction = (row.countryCode2 == row.countryCode3) ? recNoId : recYesId
@@ -394,15 +397,14 @@ void calc() {
         row.count = 1
 
         // Расчет поля "Цена", "Стоимость"
-        if(row.income != null && row.outcome == null){
+        if (row.income != null && row.outcome == null) {
             row.price = row.income
             row.cost = row.income
-        }
-        else if(row.outcome != null && row.income == null){
+        } else if (row.outcome != null && row.income == null) {
             row.price = row.outcome
             row.cost = row.outcome
 
-        } else if(row.outcome != null && row.income != null){
+        } else if (row.outcome != null && row.income != null) {
             row.price = (row.income - row.outcome).abs()
             row.cost = (row.income - row.outcome).abs()
         }
@@ -496,7 +498,6 @@ void importData() {
     def rowIndex = 0
     def rows = []
     def allValuesCount = allValues.size()
-    reportPeriodEndDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
     def totalRowFromFile = null
     def totalRowFromFileMap = [:] // мапа для хранения строк подитогов со значениями из файла (стили простых строк)
 
@@ -583,7 +584,6 @@ void importData() {
     }
 }
 
-
 /**
  * Проверить шапку таблицы
  *
@@ -598,17 +598,17 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
     }
     checkHeaderSize(headerRows[headerRows.size() - 1].size(), headerRows.size(), colCount, rowCount)
     def headerMapping = [
-            ([(headerRows[0][0]) : 'Общие сведения о контрагенте - юридическом лице']),
-            ([(headerRows[0][7]) : 'Сведения о сделке']),
-            ([(headerRows[1][1]) : getColumnName(tmpRow, 'rowNumber')]),
-            ([(headerRows[1][2]) : getColumnName(tmpRow, 'name')]),
-            ([(headerRows[1][3]) : getColumnName(tmpRow, 'dependence')]),
-            ([(headerRows[1][4]) : getColumnName(tmpRow, 'iksr')]),
-            ([(headerRows[1][5]) : getColumnName(tmpRow, 'countryName')]),
-            ([(headerRows[1][6]) : getColumnName(tmpRow, 'countryCode')]),
-            ([(headerRows[1][7]) : getColumnName(tmpRow, 'docNumber')]),
-            ([(headerRows[1][8]) : getColumnName(tmpRow, 'docDate')]),
-            ([(headerRows[1][9]) : getColumnName(tmpRow, 'dealNumber')]),
+            ([(headerRows[0][0]): 'Общие сведения о контрагенте - юридическом лице']),
+            ([(headerRows[0][7]): 'Сведения о сделке']),
+            ([(headerRows[1][1]): getColumnName(tmpRow, 'rowNumber')]),
+            ([(headerRows[1][2]): getColumnName(tmpRow, 'name')]),
+            ([(headerRows[1][3]): getColumnName(tmpRow, 'dependence')]),
+            ([(headerRows[1][4]): getColumnName(tmpRow, 'iksr')]),
+            ([(headerRows[1][5]): getColumnName(tmpRow, 'countryName')]),
+            ([(headerRows[1][6]): getColumnName(tmpRow, 'countryCode')]),
+            ([(headerRows[1][7]): getColumnName(tmpRow, 'docNumber')]),
+            ([(headerRows[1][8]): getColumnName(tmpRow, 'docDate')]),
+            ([(headerRows[1][9]): getColumnName(tmpRow, 'dealNumber')]),
             ([(headerRows[1][10]): getColumnName(tmpRow, 'dealType')]),
             ([(headerRows[1][11]): getColumnName(tmpRow, 'dealDate')]),
             ([(headerRows[2][12]): getColumnName(tmpRow, 'innerCode')]),
@@ -630,15 +630,15 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
             ([(headerRows[1][28]): getColumnName(tmpRow, 'price')]),
             ([(headerRows[1][29]): getColumnName(tmpRow, 'cost')]),
             ([(headerRows[1][30]): getColumnName(tmpRow, 'dealDoneDate')]),
-            ([(headerRows[3][1]) : 'гр. 1']),
-            ([(headerRows[3][2]) : 'гр. 2.1']),
-            ([(headerRows[3][3]) : 'гр. 2.2']),
-            ([(headerRows[3][4]) : 'гр. 3']),
-            ([(headerRows[3][5]) : 'гр. 4.1']),
-            ([(headerRows[3][6]) : 'гр. 4.2']),
-            ([(headerRows[3][7]) : 'гр. 5']),
-            ([(headerRows[3][8]) : 'гр. 6']),
-            ([(headerRows[3][9]) : 'гр. 7.1']),
+            ([(headerRows[3][1]): 'гр. 1']),
+            ([(headerRows[3][2]): 'гр. 2.1']),
+            ([(headerRows[3][3]): 'гр. 2.2']),
+            ([(headerRows[3][4]): 'гр. 3']),
+            ([(headerRows[3][5]): 'гр. 4.1']),
+            ([(headerRows[3][6]): 'гр. 4.2']),
+            ([(headerRows[3][7]): 'гр. 5']),
+            ([(headerRows[3][8]): 'гр. 6']),
+            ([(headerRows[3][9]): 'гр. 7.1']),
             ([(headerRows[3][10]): 'гр. 7.2']),
             ([(headerRows[3][11]): 'гр. 8']),
             ([(headerRows[3][12]): 'гр. 9.1']),
@@ -838,7 +838,7 @@ def getNewTotalFromXls(def values, def colOffset, def fileRowIndex, def rowIndex
 void sortFormDataRows(def saveInDB = true) {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
-    def totalRow = dataRows.find { it.getAlias() == 'total'}
+    def totalRow = dataRows.find { it.getAlias() == 'total' }
     sortRows(refBookService, logger, dataRows, getSubTotalRows(dataRows), totalRow, true)
     if (saveInDB) {
         dataRowHelper.saveSort()
@@ -952,7 +952,7 @@ String getValuesByGroupColumn(DataRow row) {
 
     // графа 10
     def value = null
-    if (row?.signPhis){
+    if (row?.signPhis) {
         def map = getRefBookValue(18, row.signPhis)
         if (map != null) {
             value = map.SIGN?.stringValue
@@ -965,7 +965,7 @@ String getValuesByGroupColumn(DataRow row) {
 
     // графа 11
     value = null
-    if (row?.signTransaction){
+    if (row?.signTransaction) {
         def map = getRefBookValue(38, row.signTransaction)
         if (map != null) {
             value = map.VALUE?.stringValue

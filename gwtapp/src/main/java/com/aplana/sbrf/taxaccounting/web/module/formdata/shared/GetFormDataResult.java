@@ -14,7 +14,7 @@ import java.util.List;
 public class GetFormDataResult implements Result {
 	private static final long serialVersionUID = 1564846831548468989L;
 
-    public static enum FormMode {
+    public enum FormMode {
 		READ_UNLOCKED, // Открыта для чтения
 		READ_LOCKED, // Открыта для чтения и заблокирована другим пользователем
 		EDIT // Открыта для редактирования
@@ -43,6 +43,7 @@ public class GetFormDataResult implements Result {
 	private FormMode formMode;
 	private boolean fixedRows;
     private boolean updating;
+    private boolean editLock;
 
     public boolean canCreatedManual() {
         return canCreatedManual;
@@ -202,5 +203,13 @@ public class GetFormDataResult implements Result {
 
     public void setUpdating(boolean updating) {
         this.updating = updating;
+    }
+
+    public boolean isEditLock() {
+        return editLock;
+    }
+
+    public void setEditLock(boolean editLock) {
+        this.editLock = editLock;
     }
 }

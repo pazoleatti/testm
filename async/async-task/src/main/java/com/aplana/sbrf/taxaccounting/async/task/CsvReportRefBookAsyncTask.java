@@ -14,6 +14,8 @@ import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.PrintingService;
 import com.aplana.sbrf.taxaccounting.service.TAUserService;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Date;
@@ -25,6 +27,8 @@ import static com.aplana.sbrf.taxaccounting.async.task.AsyncTask.RequiredParams.
  * @author lhaziev
  */
 public abstract class CsvReportRefBookAsyncTask extends AbstractAsyncTask  {
+
+    private static final Log LOG = LogFactory.getLog(LoadAllTransportDataAsyncTask.class);
 
     @Autowired
     private TAUserService userService;
@@ -51,8 +55,8 @@ public abstract class CsvReportRefBookAsyncTask extends AbstractAsyncTask  {
         RefBookDataProvider refBookDataProvider = refBookFactory.getDataProvider(refBookId);
         if (filter.isEmpty())
             filter = null;
-        Long value = Long.valueOf(refBookDataProvider.getRecordsCount(version, filter));
-        String msg = String.format("количество записей справочника(%s) превышает максимально допустимое(%s)!", value, "%s");
+        Long value = Long.valueOf(refBookDataProvider.getRecordsCount(version, filter)) * refBookFactory.get(refBookId).getAttributes().size();
+        String msg = String.format("количество выгружаемых ячеек(%s) превышает максимально допустимое(%s)!", value, "%s");
         return checkTask(getReportType(), value, refBookFactory.getTaskName(getReportType(), refBookId, null), msg);
     }
 
@@ -64,7 +68,7 @@ public abstract class CsvReportRefBookAsyncTask extends AbstractAsyncTask  {
         Date version = (Date)params.get("version");
         RefBookAttribute sortAttribute = null;
         if (params.containsKey("sortAttribute"))
-            sortAttribute = (RefBookAttribute)params.get("sortAttribute");
+            sortAttribute = refBookFactory.get(refBookId).getAttribute((Long)params.get("sortAttribute"));
         Boolean isSortAscending = (Boolean)params.get("isSortAscending");
         TAUserInfo userInfo = new TAUserInfo();
         userInfo.setUser(userService.getUser(userId));

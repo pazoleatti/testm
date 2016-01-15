@@ -139,53 +139,37 @@ void logicCheck() {
         }
         def rowNum = row.getIndex()
 
-        // 1. Проверка заполнения обязательных полей
+        // Проверка заполнения обязательных полей
         checkNonEmptyColumns(row, rowNum, nonEmptyColumns, logger, true)
 
-        // 2. Проверка заполнения вида услуги
-        if (row.serviceName != null && !(row.serviceName.intValue() in (1..8))) {
-            def msg1 = row.getCell('serviceName').column.name
-            def msg2 = row.serviceName
-            logger.error("Строка $rowNum: Графа «$msg1» заполнена неверно ($msg2)! Возможные значения: 1, 2, 3, 4, 5, 6, 7, 8")
-        }
-
-        // 3. Проверка суммы доходов
+        // Проверка суммы доходов
         if (row.sum != null && row.sum < 0) {
             def msg = row.getCell('sum').column.name
             logger.error("Строка $rowNum: Значение графы «$msg» должно быть больше или равно «0»!")
         }
 
-        // 4. Проверка цены
+        // Проверка цены
         if (row.sum != null && row.price != row.sum) {
             def msg1 = row.getCell('price').column.name
             def msg2 = row.getCell('sum').column.name
             logger.error("Строка $rowNum: Значение графы «$msg1» должно быть равно значению графы «$msg2»!")
         }
 
-        // 5. Проверка стоимости
+        // Проверка стоимости
         if (row.sum != null && row.cost != row.sum) {
             def msg1 = row.getCell('cost').column.name
             def msg2 = row.getCell('sum').column.name
             logger.error("Строка $rowNum: Значение графы «$msg1» должно быть равно значению графы «$msg2»!")
         }
 
-        // 6. Корректность даты совершения сделки относительно даты договора
-        if (row.docDate && row.dealDoneDate && row.docDate > row.dealDoneDate) {
-            def msg1 = row.getCell('dealDoneDate').column.name
-            def msg2 = row.getCell('docDate').column.name
-            logger.error("Строка $rowNum: Значение графы «$msg1» должно быть не меньше значения графы «$msg2»!")
-        }
+        // Проверка корректности даты договора
+        checkDatePeriod(logger, row, 'docDate', Date.parse('dd.MM.yyyy', '01.01.1991'), getReportPeriodEndDate(), true)
 
-        // 7. Проверка даты совершения сделки
-        checkDealDoneDate(logger, row, 'dealDoneDate', getReportPeriodStartDate(), getReportPeriodEndDate(), true)
-
-        // 8. Проверка диапазона дат
-        if (row.docDate) {
-            checkDateValid(logger, row, 'docDate', row.docDate, true)
-        }
+        // Проверка корректности даты совершения сделки
+        checkDatePeriod(logger, row, 'dealDoneDate', 'docDate', getReportPeriodEndDate(), true)
     }
 
-    // 9. Проверка итоговых значений пофиксированной строке «Итого»
+    // Проверка итоговых значений пофиксированной строке «Итого»
     if (dataRows.find { it.getAlias() == 'total' }) {
         checkTotalSum(dataRows, totalColumns, logger, true)
     }
@@ -393,7 +377,7 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
     colIndex++
 
     // графа 5
-    newRow.serviceName = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
+    newRow.serviceName = getRecordIdImport(13, 'CODE', values[colIndex], fileRowIndex, colIndex + colOffset, false)
     colIndex++
 
     // графа 6
@@ -550,7 +534,7 @@ def getNewRow(String[] rowCells, def columnCount, def fileRowIndex, def rowIndex
         // графа 2
         newRow.name = recordId
         // графа 5
-        newRow.serviceName = parseNumber(pure(rowCells[6]), fileRowIndex, 6 + colOffset, logger, true)
+        newRow.serviceName = getRecordIdImport(13, 'CODE', pure(rowCells[6]), fileRowIndex, 6 + colOffset, false)
         // графа 7
         newRow.docNumber = pure(rowCells[8])
         // графа 8

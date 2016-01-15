@@ -80,7 +80,7 @@ public class UploadTransportDataServiceImpl implements UploadTransportDataServic
     static final String NO_FILE_NAME_ERROR = "Невозможно определить имя файла!";
     static final String EMPTY_INPUT_STREAM_ERROR = "Поток данных пуст!";
 
-    protected static enum LogData {
+    protected enum LogData {
         L32("Файл «%s» сохранен в каталоге загрузки «%s».", LogLevel.INFO, true),
         L33("Ошибка при сохранении файла «%s» в каталоге загрузки! %s.", LogLevel.ERROR, true),
         L34_1("Не указан путь к каталогу загрузки %s! Файл «%s» не сохранен.", LogLevel.ERROR, true),

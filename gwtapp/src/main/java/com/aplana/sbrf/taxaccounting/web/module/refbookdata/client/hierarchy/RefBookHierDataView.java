@@ -6,6 +6,7 @@ import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client.RefBoo
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.client.event.CheckValuesCountHandler;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.model.PickerState;
 import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.model.RefBookTreeItem;
+import com.aplana.sbrf.taxaccounting.web.widget.refbookmultipicker.shared.model.RefBookUiTreeItem;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -101,7 +102,11 @@ public class RefBookHierDataView extends ViewWithUiHandlers<RefBookHierDataUiHan
 
     @Override
     public RefBookTreeItem getItemById(Long recordId) {
-        return refbookDataTree.getUiTreeItem(recordId).getRefBookTreeItem();
+        RefBookUiTreeItem uiTreeItem = refbookDataTree.getUiTreeItem(recordId);
+        if (uiTreeItem != null) {
+            return uiTreeItem.getRefBookTreeItem();
+        }
+        return new RefBookTreeItem();
     }
 
     @Override

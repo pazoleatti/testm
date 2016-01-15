@@ -16,7 +16,7 @@ import java.util.Map;
 public interface AuditDao {
 
     //Номера выборок, списки которых передаем при выборе логов
-    public static enum SAMPLE_NUMBER {
+    public enum SAMPLE_NUMBER {
         S_10,
         S_45,
         S_55
