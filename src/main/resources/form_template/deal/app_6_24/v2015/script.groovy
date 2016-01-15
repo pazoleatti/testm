@@ -79,8 +79,8 @@ def recordCache = [:]
 @Field
 def refBookCache = [:]
 @Field
-def allColumns = ['fix', 'rowNumber', 'name', 'iksr', 'countryCode', 'serviceType', 'sum', 'docNumber',
-                  'docDate', 'price', 'cost', 'dealDoneDate']
+def allColumns = ['fix', 'rowNumber', 'name', 'iksr', 'countryCode', 'sum', 'docNumber', 'docDate',
+                  'serviceType', 'price', 'cost', 'dealDoneDate']
 
 // Редактируемые атрибуты
 @Field
@@ -92,7 +92,7 @@ def autoFillColumns = ['rowNumber', 'iksr', 'countryCode', 'price', 'cost']
 
 // Проверяемые на пустые значения атрибуты
 @Field
-def nonEmptyColumns = ['name', 'serviceType', 'sum', 'docNumber', 'docDate', 'price', 'cost', 'dealDoneDate']
+def nonEmptyColumns = ['name', 'sum', 'docNumber', 'docDate', 'serviceType', 'price', 'cost', 'dealDoneDate']
 
 // Поля для рассчета "Итого"
 @Field
