@@ -132,7 +132,7 @@
         <checking>false</checking>
         <name>Стоимость</name>
         <order>14</order>
-        <width>10</width>
+        <width>11</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>
