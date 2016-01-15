@@ -7,24 +7,24 @@
     <updating>false</updating>
     <name>РНУ 107. Регистр налогового учёта доходов, возникающих в связи с применением в сделках c Взаимозависимыми лицами и резидентами оффшорных зон тарифов, не соответствующих рыночному уровню</name>
     <fullName>РНУ 107. Регистр налогового учёта доходов, возникающих в связи с применением в сделках c Взаимозависимыми лицами и резидентами оффшорных зон тарифов, не соответствующих рыночному уровню</fullName>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="autoNumerationColumn">
-        <alias>rowNumber</alias>
-        <checking>false</checking>
-        <columnType>AUTO</columnType>
-        <name>№ пп</name>
-        <order>1</order>
-        <width>4</width>
-        <numerationType>SERIAL</numerationType>
-    </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>fix</alias>
         <checking>false</checking>
         <columnType>STRING</columnType>
         <name>fix</name>
-        <order>2</order>
+        <order>1</order>
         <width>0</width>
         <maxLength>100</maxLength>
         <prevLength>0</prevLength>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="autoNumerationColumn">
+        <alias>rowNumber</alias>
+        <checking>false</checking>
+        <columnType>AUTO</columnType>
+        <name>№ пп</name>
+        <order>2</order>
+        <width>4</width>
+        <numerationType>SERIAL</numerationType>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
         <alias>name</alias>
@@ -57,17 +57,15 @@
         <width>6</width>
         <formatId>0</formatId>
     </columns>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>code</alias>
         <checking>false</checking>
-        <columnType>REFBOOK</columnType>
+        <columnType>STRING</columnType>
         <name>Код налогового учёта</name>
         <order>6</order>
         <width>10</width>
-        <hierarchical>false</hierarchical>
-        <nameAttributeId>140</nameAttributeId>
-        <refBookAttributeId>140</refBookAttributeId>
-        <searchEnabled>true</searchEnabled>
+        <maxLength>10</maxLength>
+        <prevLength>0</prevLength>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>reasonNumber</alias>

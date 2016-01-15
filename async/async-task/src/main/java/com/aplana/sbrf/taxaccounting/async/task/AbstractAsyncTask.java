@@ -156,7 +156,7 @@ public abstract class AbstractAsyncTask implements AsyncTask {
                     } else {
                         throw new RuntimeException(String.format("Задача %s больше не актуальна.", lock));
                     }
-                } catch (final Exception e) {
+                } catch (final Throwable e) {
                     LOG.error(String.format("Произошла ошибка при выполнении асинхронной задачи с ключом %s и датой начала %s (%s)",
 							lock, sdf.format(lockDate), lockDate.getTime()), e);
                     if (lockService.isLockExists(lock, lockDate)) {

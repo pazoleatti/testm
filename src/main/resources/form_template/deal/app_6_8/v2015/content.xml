@@ -88,15 +88,17 @@
         <width>6</width>
         <formatId>0</formatId>
     </columns>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
         <alias>serviceType</alias>
         <checking>false</checking>
         <columnType>REFBOOK</columnType>
         <name>Вид услуг</name>
         <order>9</order>
         <width>5</width>
-        <maxLength>1</maxLength>
-        <precision>0</precision>
+        <hierarchical>false</hierarchical>
+        <nameAttributeId>56</nameAttributeId>
+        <refBookAttributeId>55</refBookAttributeId>
+        <searchEnabled>true</searchEnabled>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>price</alias>

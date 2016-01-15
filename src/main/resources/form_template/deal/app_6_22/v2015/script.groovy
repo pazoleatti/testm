@@ -206,7 +206,9 @@ void checkItog(def dataRows) {
     def testItogRows = calcSubTotalRows(dataRows)
     // Имеющиеся строки итогов
     def itogRows = dataRows.findAll { it.getAlias() != null && !'total'.equals(it.getAlias()) }
-    checkItogRows(dataRows, testItogRows, itogRows, groupColumns, logger, new ScriptUtils.GroupString() {
+    // все строки, кроме общего итога
+    def groupRows = dataRows.findAll { !'total'.equals(it.getAlias()) }
+    checkItogRows(groupRows, testItogRows, itogRows, groupColumns, logger, new ScriptUtils.GroupString() {
         @Override
         String getString(DataRow<Cell> row) {
             return getValuesByGroupColumn(row)
@@ -520,7 +522,7 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
 
     def int colIndex = 2
 
-    def recordId = getTcoRecordId(nameFromFile, values[3], iksrName, fileRowIndex, colIndex, getReportPeriodEndDate(), true, logger, refBookFactory, recordCache)
+    def recordId = getTcoRecordId(nameFromFile, values[3], iksrName, fileRowIndex, colIndex, getReportPeriodEndDate(), false, logger, refBookFactory, recordCache)
     def map = getRefBookValue(520, recordId)
 
     // графа 2

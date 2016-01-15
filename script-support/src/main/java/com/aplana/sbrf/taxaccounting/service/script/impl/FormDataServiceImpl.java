@@ -12,6 +12,7 @@ import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBook;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
+import com.aplana.sbrf.taxaccounting.model.util.StringUtils;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.SourceService;
@@ -549,20 +550,9 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
     @Override
     public void checkReferenceValue(Long refBookId, String referenceValue, List<String> expectedValues, int rowIndex, int colIndex,
                                     Logger logger, boolean required) {
-        if (referenceValue == null && (expectedValues == null || expectedValues.isEmpty())) {
+        if (checkReferenceValue(referenceValue, expectedValues)) {
             return;
         }
-        if (expectedValues != null) {
-            for (String expectedValue : expectedValues) {
-                if ((referenceValue == null && expectedValue == null) ||
-                        (referenceValue == null && "".equals(expectedValue)) ||
-                        ("".equals(referenceValue) && expectedValue == null) ||
-                        (referenceValue != null && expectedValue != null && referenceValue.toLowerCase().equals(expectedValue.toLowerCase()))) {
-                    return;
-                }
-            }
-        }
-
         RefBook rb = refBookFactory.get(refBookId);
         String msg = String.format(ScriptUtils.REF_BOOK_REFERENCE_NOT_FOUND_IMPORT_ERROR, rowIndex, ScriptUtils.getXLSColumnName(colIndex), referenceValue, rb.getName());
         if (required) {
@@ -570,6 +560,55 @@ public class FormDataServiceImpl implements FormDataService, ScriptComponentCont
         } else {
             logger.warn("%s", msg);
         }
+    }
+
+    @Override
+    public void checkReferenceValue(String referenceValue, List<String> expectedValues,
+                                    String parentColumnName, String parentColumnValue,
+                                    int rowIndex, int colIndex, Logger logger, boolean required) {
+        if (checkReferenceValue(referenceValue, expectedValues)) {
+            return;
+        }
+        // заменить пустые значения из базы на "значение не задано"
+        Object [] tmpArray = expectedValues.toArray();
+        for (int i = 0; i < tmpArray.length; i++) {
+            if (tmpArray[i] == null || "".equals(tmpArray[i])) {
+                tmpArray[i] = "значение не задано";
+            }
+        }
+        // обернуть значения из базы ковычками
+        String expectedValuesInStr = StringUtils.join(tmpArray, "», «", null);
+        String msg = String.format(ScriptUtils.REF_BOOK_REFERENCE_NOT_FOUND_IMPORT_ERROR_2, rowIndex, ScriptUtils.getXLSColumnName(colIndex),
+                referenceValue, expectedValuesInStr, parentColumnName, parentColumnValue);
+        if (required) {
+            throw new ServiceException("%s", msg);
+        } else {
+            logger.warn("%s", msg);
+        }
+    }
+
+    /**
+     * Проверить значение из файла и значения из базы.
+     *
+     * @param referenceValue значение из файла
+     * @param expectedValues значение из базы
+     */
+    private boolean checkReferenceValue(String referenceValue, List<String> expectedValues) {
+        if (expectedValues == null) {
+            throw new IllegalArgumentException("expectedValues cannot be null");
+        }
+        if (referenceValue == null && expectedValues.isEmpty()) {
+            return true;
+        }
+        for (String expectedValue : expectedValues) {
+            if ((referenceValue == null && expectedValue == null) ||
+                    (referenceValue == null && "".equals(expectedValue)) ||
+                    ("".equals(referenceValue) && expectedValue == null) ||
+                    (referenceValue != null && expectedValue != null && referenceValue.toLowerCase().equals(expectedValue.toLowerCase()))) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override

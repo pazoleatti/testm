@@ -29,14 +29,10 @@ public class RefBookHelperImpl implements RefBookHelper {
 
 	@Autowired
 	private RefBookFactory refBookFactory;
-
     @Autowired
 	private ColumnDao columnDao;
-
     @Autowired
     private PeriodService periodService;
-
-
 
     @Override
     public void dataRowsCheck(Collection<DataRow<Cell>> dataRows, List<Column> columns) {
@@ -255,18 +251,6 @@ public class RefBookHelperImpl implements RefBookHelper {
             }
         }
         return refProviders;
-    }
-
-    @Override
-    public Map<Long, RefBookDataProvider> getProviders(Set<Long> attributeIds) {
-        Map<Long, RefBookDataProvider> result = new HashMap<Long, RefBookDataProvider>();
-        for (Long attributeId : attributeIds) {
-            Long refBookId = refBookFactory.getByAttribute(attributeId).getId();
-            if (!result.containsKey(refBookId)) {
-                result.put(refBookId, refBookFactory.getDataProvider(refBookId));
-            }
-        }
-        return result;
     }
 
     @Override

@@ -27,8 +27,7 @@ import static org.mockito.Mockito.when;
 
 /**
  * 6_10_2 Предоставление инструментов торгового финансирования и непокрытых аккредитивов
- *
- **/
+ */
 public class App_6_10_2Test extends ScriptTestBase {
     private static final int TYPE_ID = 825;
     private static final int DEPARTMENT_ID = 1;
@@ -109,10 +108,9 @@ public class App_6_10_2Test extends ScriptTestBase {
         // Проверка суммы доходов
         // Проверка цены
         // Проверка стоимости
-        // Проверка даты сделки
-        // Корректность даты совершения сделки относительно даты сделки
-        // Проверка даты совершения сделки
-        // Проверка диапазона дат
+        // Проверка корректности даты договора
+        // Проверка корректности даты заключения сделки
+        // Проверка корректности даты совершения сделки
         row.getCell("name").setValue(1L, null);
         row.getCell("sum").setValue(-3, null);
         row.getCell("docNumber").setValue("string", null);
@@ -130,10 +128,9 @@ public class App_6_10_2Test extends ScriptTestBase {
         Assert.assertEquals("Строка 1: Значение графы «Сумма доходов Банка по данным бухгалтерского учета, руб.» должно быть больше или равно «0»!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Значение графы «Цена (тариф) за единицу измерения без учета НДС, акцизов и пошлины, руб.» должно быть равно значению графы «Сумма доходов Банка по данным бухгалтерского учета, руб.»!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Значение графы «Итого стоимость без учета НДС, акцизов и пошлин, руб.» должно быть равно значению графы «Сумма доходов Банка по данным бухгалтерского учета, руб.»!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Значение графы «Дата сделки» должно быть не меньше значения графы «Дата договора»!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Значение графы «Дата совершения сделки» должно быть не меньше значения графы «Дата сделки»!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Дата, указанная в графе «Дата совершения сделки» (01.01.2989), должна относиться к отчетному периоду текущей формы (01.01.2014 - 31.12.2014)!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Значение даты атрибута «Дата договора» должно принимать значение из следующего диапазона: 01.01.1991 - 31.12.2099", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 1: Графа «Дата договора» должна принимать значение из следующего диапазона: 01.01.1991 - 31.12.2014!", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 1: Значение графы «Дата сделки» должно быть не меньше значения графы «Дата договора» и не больше 31.12.2014!", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 1: Значение графы «Дата совершения сделки» должно быть не меньше значения графы «Дата сделки» и не больше 31.12.2014!", entries.get(i++).getMessage());
         Assert.assertEquals("Группа «A, string, 03.01.2989» не имеет строки подитога!", entries.get(i++).getMessage());
         Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
         testHelper.getLogger().clear();
@@ -161,7 +158,27 @@ public class App_6_10_2Test extends ScriptTestBase {
 
     @Test
     public void importExcelTest() {
-        // TODO тесты для логики поиска по iksr
+        mockBeforeImport();
+        testHelper.setImportFileInputStream(getImportXlsInputStream());
+        testHelper.execute(FormDataEvent.IMPORT);
+        checkLoadData(testHelper.getDataRowHelper().getAll());
+
+        // проверка расчетов
+        testHelper.execute(FormDataEvent.CALCULATE);
+        checkAfterCalc(testHelper.getDataRowHelper().getAll());
+        checkLogger();
+    }
+
+    @Test
+    public void importTransportFileTest() {
+        mockBeforeImport();
+        testHelper.setImportFileInputStream(getImportRnuInputStream());
+        testHelper.execute(FormDataEvent.IMPORT_TRANSPORT_FILE);
+
+        checkLoadDataRnu(testHelper.getDataRowHelper().getAll());
+    }
+
+    void mockBeforeImport() {
         Long refbookId = 520L;
 
         when(testHelper.getRefBookFactory().get(refbookId)).thenAnswer(
@@ -218,15 +235,6 @@ public class App_6_10_2Test extends ScriptTestBase {
                         return result;
                     }
                 });
-
-        testHelper.setImportFileInputStream(getImportXlsInputStream());
-        testHelper.execute(FormDataEvent.IMPORT);
-        checkLoadData(testHelper.getDataRowHelper().getAll());
-
-        // проверка расчетов
-        testHelper.execute(FormDataEvent.CALCULATE);
-        checkAfterCalc(testHelper.getDataRowHelper().getAll());
-        checkLogger();
     }
 
     // Проверить загруженные данные
@@ -235,6 +243,15 @@ public class App_6_10_2Test extends ScriptTestBase {
         Assert.assertEquals(2L, dataRows.get(2).getCell("name").getNumericValue().longValue());
         Assert.assertEquals(2L, dataRows.get(3).getCell("name").getNumericValue().longValue());
 
+        Assert.assertEquals(6, dataRows.size());
+    }
+
+    void checkLoadDataRnu(List<DataRow<Cell>> dataRows) {
+        Assert.assertEquals(1L, dataRows.get(0).getCell("name").getNumericValue().longValue());
+        Assert.assertEquals(2L, dataRows.get(1).getCell("name").getNumericValue().longValue());
+        Assert.assertEquals(2L, dataRows.get(2).getCell("name").getNumericValue().longValue());
+
+        Assert.assertEquals(4, dataRows.size());
     }
 
     // Проверить расчеты
@@ -251,6 +268,8 @@ public class App_6_10_2Test extends ScriptTestBase {
         Assert.assertEquals(1, dataRows.get(1).getCell("cost").getNumericValue().doubleValue(), 0);
         Assert.assertEquals(2, dataRows.get(4).getCell("cost").getNumericValue().doubleValue(), 0);
         Assert.assertEquals(3, dataRows.get(5).getCell("cost").getNumericValue().doubleValue(), 0);
+
+        Assert.assertEquals(6, dataRows.size());
     }
 }
 

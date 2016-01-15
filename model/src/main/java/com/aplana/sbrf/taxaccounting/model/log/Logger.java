@@ -89,7 +89,7 @@ public class Logger {
 	 * В журнал сервера приложений будет выведен стектрейс ошибки
 	 * @param e исключение
 	 */
-	public void error(Exception e) {
+	public void error(Throwable e) {
         String msg = e.getMessage();
         if (msg != null && msg.length() > MAX_EXCEPTION_LOG_MESSAGE_LENGTH) {
             msg = msg.substring(0, MAX_EXCEPTION_LOG_MESSAGE_LENGTH - 1) + '…';

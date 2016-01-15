@@ -58,7 +58,7 @@ public interface RefBookHelper {
     Map<Long, RefBookDataProvider> getHashedProviders(List<RefBookAttribute> attributes, Map<Long, List<Long>> attrToListAttrId2Map);
 
 //    /**
-//     * Получить список соотвествий идентификатора к разименованному значению записи справочника
+//     * Получить список соотвествий идентификатора к разыменованному значению записи справочника
 //     * В том же списке разименованные значения ссылочных атрибутов полученные по атрибуту второго уровня
 //     * @param refBook справоник
 //     * @param provider продайдер спраовчнка
@@ -68,13 +68,6 @@ public interface RefBookHelper {
 //     */
 //    Map<Long, String> singleRecordDereferenceWithAttrId2(RefBook refBook, RefBookDataProvider provider,
 //                                                         List<RefBookAttribute> attributes, Map<String, RefBookValue> record);
-
-	/**
-	 * Возвращает список провайдеров данных для указанного списка атрибутов
-	 * @param attributeIds
-	 * @return
-	 */
-    Map<Long, RefBookDataProvider> getProviders(Set<Long> attributeIds);
 
     /**
      * Сохраняет настройки подразделений с табличной частью

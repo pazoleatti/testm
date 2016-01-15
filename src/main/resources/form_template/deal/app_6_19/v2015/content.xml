@@ -42,7 +42,7 @@
         <alias>iksr</alias>
         <checking>false</checking>
         <columnType>REFERENCE</columnType>
-        <name>ИНН/КИО</name>
+        <name>ИНН/ КИО</name>
         <order>4</order>
         <width>7</width>
         <parentAlias>name</parentAlias>
@@ -95,7 +95,7 @@
         <name>Количество</name>
         <order>9</order>
         <width>5</width>
-        <maxLength>1</maxLength>
+        <maxLength>9</maxLength>
         <precision>0</precision>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">

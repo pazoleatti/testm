@@ -1,12 +1,9 @@
 package form_template.deal.app_6_7.v2015
 
-import com.aplana.sbrf.taxaccounting.model.Cell
-import com.aplana.sbrf.taxaccounting.model.DataRow
+import au.com.bytecode.opencsv.CSVReader
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
-import com.aplana.sbrf.taxaccounting.service.script.util.ScriptUtils
 import groovy.transform.Field
 
 /**
@@ -63,6 +60,10 @@ switch (formDataEvent) {
         break
     case FormDataEvent.IMPORT:
         importData()
+        formDataService.saveCachedDataRows(formData, logger)
+        break
+    case FormDataEvent.IMPORT_TRANSPORT_FILE:
+        importTransportData()
         formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.SORT_ROWS:
@@ -181,29 +182,20 @@ void logicCheck() {
             logger.error("Строка $rowNum: Значение графы «$msg1» должно быть равно значению графы «$msg2»!")
         }
 
-        // 5. Корректность даты совершения сделки
-        if (row.docDate && row.dealDoneDate && row.docDate > row.dealDoneDate) {
-            def msg1 = row.getCell('dealDoneDate').column.name
-            def msg2 = row.getCell('docDate').column.name
-            logger.error("Строка $rowNum: Значение графы «$msg1» должно быть не меньше значения графы «$msg2»!")
-        }
+        // 5. Проверка корректности даты договора
+        checkDatePeriod(logger, row, 'docDate', Date.parse('dd.MM.yyyy', '01.01.1991'), getReportPeriodEndDate(), true)
 
-        // 6. Проверка пересечения даты сделки с отчетным периодом
-        checkDealDoneDate(logger, row, 'dealDoneDate', getReportPeriodStartDate(), getReportPeriodEndDate(), true)
+        // 6. Проверка корректности даты совершения сделки
+        checkDatePeriod(logger, row, 'dealDoneDate', 'docDate', getReportPeriodEndDate(), true)
 
-        // 7. Проверка диапазона дат
-        if (row.docDate) {
-            checkDateValid(logger, row, 'docDate', row.docDate, true)
-        }
-
-        // 8. Проверка положительной суммы доходов
+        // 7. Проверка положительной суммы доходов
         if (row.sum!=null && row.sum < 0) {
             def msg = row.getCell('sum').column.name
             logger.error("Строка $rowNum: Значение графы «$msg» должно быть больше или равно «0»!")
         }
     }
 
-    // 9. Проверка итоговых значений пофиксированной строке «Итого»
+    // 8. Проверка итоговых значений пофиксированной строке «Итого»
     if (dataRows.find { it.getAlias() == 'total' }) {
         checkTotalSum(dataRows, totalColumns, logger, true)
     }
@@ -443,6 +435,158 @@ def getNewTotalFromXls(def values, def colOffset, def fileRowIndex, def rowIndex
     newRow.sum = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
 
     return newRow
+}
+
+void importTransportData() {
+    checkBeforeGetXml(ImportInputStream, UploadFileName)
+    if (!UploadFileName.endsWith(".rnu")) {
+        logger.error(WRONG_RNU_FORMAT)
+    }
+    int COLUMN_COUNT = 10
+    def DEFAULT_CHARSET = "cp866"
+    char SEPARATOR = '|'
+    char QUOTE = '\0'
+
+    String[] rowCells
+    int fileRowIndex = 2    // номер строки в файле (1, 2, ..)
+    int rowIndex = 0        // номер строки в НФ (1, 2, ..)
+    def totalTF = null      // итоговая строка со значениями из тф для добавления
+    def newRows = []
+
+    InputStreamReader isr = new InputStreamReader(ImportInputStream, DEFAULT_CHARSET)
+    CSVReader reader = new CSVReader(isr, SEPARATOR, QUOTE)
+    try {
+        // пропускаем заголовок
+        rowCells = reader.readNext()
+        if (isEmptyCells(rowCells)) {
+            logger.error('Первой строкой должен идти заголовок, а не пустая строка')
+        }
+        // пропускаем пустую строку
+        rowCells = reader.readNext()
+        if (rowCells == null || !isEmptyCells(rowCells)) {
+            logger.error('Вторая строка должна быть пустой')
+        }
+        // грузим основные данные
+        while ((rowCells = reader.readNext()) != null) {
+            fileRowIndex++
+            rowIndex++
+            if (isEmptyCells(rowCells)) { // проверка окончания блока данных, пустая строка
+                // итоговая строка тф
+                rowCells = reader.readNext()
+                if (rowCells != null) {
+                    totalTF = getNewRow(rowCells, COLUMN_COUNT, ++fileRowIndex, rowIndex, true)
+                }
+                break
+            }
+            def newRow = getNewRow(rowCells, COLUMN_COUNT, fileRowIndex, rowIndex, false)
+            if (newRow) {
+                newRows.add(newRow)
+            }
+        }
+    } finally {
+        reader.close()
+    }
+
+    // итоговая строка
+    def totalRow = calcTotalRow(newRows)
+    newRows.add(totalRow)
+
+    // отображать ошибки переполнения разряда
+    showMessages(newRows, logger)
+
+    // сравнение итогов
+    if (!logger.containsLevel(LogLevel.ERROR) && totalTF) {
+        // мапа с алиасами граф и номерами колонокв в xml (алиас -> номер колонки)
+        def totalColumnsIndexMap = ['sum': 5]
+
+        // сравнение контрольных сумм
+        def colOffset = 1
+        for (def alias : totalColumnsIndexMap.keySet().asList()) {
+            def v1 = totalTF.getCell(alias).value
+            def v2 = totalRow.getCell(alias).value
+            if (v1 == null && v2 == null) {
+                continue
+            }
+            if (v1 == null || v1 != null && v1 != v2) {
+                logger.warn(TRANSPORT_FILE_SUM_ERROR, totalColumnsIndexMap[alias] + colOffset, fileRowIndex)
+            }
+        }
+        // задать итоговой строке нф значения из итоговой строки тф
+        totalColumns.each { alias ->
+            totalRow[alias] = totalTF[alias]
+        }
+    } else {
+        logger.warn("В транспортном файле не найдена итоговая строка")
+        // очистить итоги
+        totalColumns.each { alias ->
+            totalRow[alias] = null
+        }
+    }
+
+    if (!logger.containsLevel(LogLevel.ERROR)) {
+        updateIndexes(newRows)
+        formDataService.getDataRowHelper(formData).allCached = newRows
+    }
+}
+
+/**
+ * Получить новую строку нф по строке из тф (*.rnu).
+ *
+ * @param rowCells список строк со значениями
+ * @param columnCount количество колонок
+ * @param fileRowIndex номер строки в тф
+ * @param rowIndex строка в нф
+ * @param isTotal признак итоговой строки
+ *
+ * @return вернет строку нф или null, если количество значений в строке тф меньше
+ */
+def getNewRow(String[] rowCells, def columnCount, def fileRowIndex, def rowIndex, def isTotal) {
+    def newRow = formData.createStoreMessagingDataRow()
+    newRow.setIndex(rowIndex)
+    newRow.setImportIndex(fileRowIndex)
+
+    if (rowCells.length != columnCount + 2) {
+        rowError(logger, newRow, String.format(ROW_FILE_WRONG, fileRowIndex))
+        return null
+    }
+
+    editableColumns.each {
+        newRow.getCell(it).editable = true
+        newRow.getCell(it).setStyleAlias('Редактируемая')
+    }
+
+    def int colOffset = 1
+
+    if (!isTotal) {
+        def String iksrName = getColumnName(newRow, 'iksr')
+        def nameFromFile = pure(rowCells[2])
+        def recordId = getTcoRecordId(nameFromFile, pure(rowCells[3]), iksrName, fileRowIndex, 2, getReportPeriodEndDate(), false, logger, refBookFactory, recordCache)
+
+        // графа 2
+        newRow.name = recordId
+        // графа 6
+        newRow.docNumber = pure(rowCells[6])
+        // графа 7
+        newRow.docDate = parseDate(pure(rowCells[7]), "dd.MM.yyyy", fileRowIndex, 7 + colOffset, logger, true)
+        // графа 8
+        newRow.price = parseNumber(pure(rowCells[8]), fileRowIndex, 8 + colOffset, logger, true)
+        // графа 9
+        newRow.cost = parseNumber(pure(rowCells[9]), fileRowIndex, 9 + colOffset, logger, true)
+        // графа 10
+        newRow.dealDoneDate = parseDate(pure(rowCells[10]), "dd.MM.yyyy", fileRowIndex, 10 + colOffset, logger, true)
+    }
+    // графа 5
+    newRow.sum = parseNumber(pure(rowCells[5]), fileRowIndex, 5 + colOffset, logger, true)
+
+    return newRow
+}
+
+String pure(String cell) {
+    return StringUtils.cleanString(cell)?.intern()
+}
+
+boolean isEmptyCells(def rowCells) {
+    return rowCells.length == 1 && rowCells[0] == ''
 }
 
 // Сортировка групп и строк

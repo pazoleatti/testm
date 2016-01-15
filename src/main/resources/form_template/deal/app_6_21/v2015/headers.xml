@@ -2,7 +2,18 @@
 <rows>
     <row alias="">
         <cell alias="fix" colSpan="5" rowSpan="1" value="Общая информация о контрагенте - юридическом лице"/>
+        <cell alias="rowNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="name" colSpan="1" rowSpan="1"/>
+        <cell alias="iksr" colSpan="1" rowSpan="1"/>
+        <cell alias="countryCode" colSpan="1" rowSpan="1"/>
         <cell alias="docNumber" colSpan="8" rowSpan="1" value="Сведения о сделке"/>
+        <cell alias="docDate" colSpan="1" rowSpan="1"/>
+        <cell alias="dealNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="dealDate" colSpan="1" rowSpan="1"/>
+        <cell alias="sum" colSpan="1" rowSpan="1"/>
+        <cell alias="price" colSpan="1" rowSpan="1"/>
+        <cell alias="cost" colSpan="1" rowSpan="1"/>
+        <cell alias="dealDoneDate" colSpan="1" rowSpan="1"/>
     </row>
     <row alias="">
         <cell alias="fix" colSpan="1" rowSpan="1" value=""/>

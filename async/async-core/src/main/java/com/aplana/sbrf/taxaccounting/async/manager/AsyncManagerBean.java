@@ -106,7 +106,6 @@ public class AsyncManagerBean implements AsyncManager {
     private AsyncTask checkTaskData(long taskTypeId) {
         String jndi = null;
         try {
-            LOG.info("checkTaskData.start taskTypeId = " + taskTypeId);
             AsyncTaskTypeEntity taskType = persistenceService.getTaskTypeById(taskTypeId);
             jndi = taskType.getHandlerJndi();
             InitialContext ic = new InitialContext();
@@ -115,8 +114,6 @@ public class AsyncManagerBean implements AsyncManager {
             throw new IllegalArgumentException("Параметры асинхронной задачи с идентификатором " + taskTypeId + " не найдены в таблице ASYNC_TASK_TYPE", e);
         } catch (NamingException e) {
             throw new IllegalArgumentException("Не найден класс-обработчик c JNDI-именем " + jndi + ", указанным в таблице ASYNC_TASK_TYPE для записи с id = " + taskTypeId, e);
-        } finally {
-            LOG.info("checkTaskData.end taskTypeId = " + taskTypeId);
         }
     }
 

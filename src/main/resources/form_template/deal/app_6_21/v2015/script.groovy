@@ -219,7 +219,9 @@ void checkItog(def dataRows) {
     def testItogRows = calcSubTotalRows(dataRows)
     // Имеющиеся строки итогов
     def itogRows = dataRows.findAll { it.getAlias() != null && !'total'.equals(it.getAlias()) }
-    checkItogRows(dataRows, testItogRows, itogRows, groupColumns, logger, new ScriptUtils.GroupString() {
+    // все строки, кроме общего итога
+    def groupRows = dataRows.findAll { !'total'.equals(it.getAlias()) }
+    checkItogRows(groupRows, testItogRows, itogRows, groupColumns, logger, new ScriptUtils.GroupString() {
         @Override
         String getString(DataRow<Cell> row) {
             return getValuesByGroupColumn(row)
@@ -342,7 +344,7 @@ void importData() {
     int HEADER_ROW_COUNT = 3
     String TABLE_START_VALUE = 'Общая информация о контрагенте - юридическом лице'
     String TABLE_END_VALUE = null
-    int INDEX_FOR_SKIP = 1
+    int INDEX_FOR_SKIP = 0
 
     def allValues = []      // значения формы
     def headerValues = []   // значения шапки
@@ -560,7 +562,7 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
 
     def int colIndex = 2
 
-    def recordId = getTcoRecordId(nameFromFile, values[3], iksrName, fileRowIndex, colIndex, getReportPeriodEndDate(), true, logger, refBookFactory, recordCache)
+    def recordId = getTcoRecordId(nameFromFile, values[3], iksrName, fileRowIndex, colIndex, getReportPeriodEndDate(), false, logger, refBookFactory, recordCache)
     def map = getRefBookValue(520, recordId)
 
     // графа 2
@@ -577,7 +579,7 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
     if (map != null) {
         map = getRefBookValue(10, map.COUNTRY_CODE?.referenceValue)
         if (map != null) {
-            formDataService.checkReferenceValue(10, map.CODE?.stringValue, expectedValues, fileRowIndex, colIndex + colOffset, logger, false)
+            formDataService.checkReferenceValue(10, values[colIndex], map.CODE?.stringValue, fileRowIndex, colIndex + colOffset, logger, false)
         }
     }
     colIndex++

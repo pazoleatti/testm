@@ -62,6 +62,7 @@ public final class ScriptUtils {
     public static final String REF_BOOK_NOT_FOUND_IMPORT_ERROR = "Проверка файла: Строка %d, столбец %s: В справочнике «%s» в атрибуте «%s» не найдено значение «%s», актуальное на дату %s!";
     // Ссылочный, зависимая графа: Значение в файле отличается от того, которое должно быть в зависимой графе
     public static final String REF_BOOK_REFERENCE_NOT_FOUND_IMPORT_ERROR = "Проверка файла: Строка %d, столбец %s содержит значение «%s», отсутствующее в справочнике «%s»!";
+    public static final String REF_BOOK_REFERENCE_NOT_FOUND_IMPORT_ERROR_2 = "Проверка файла: Строка %d, столбец %s содержит значение «%s», которое не соответствует справочному значению «%s» графы «%s», найденному для «%s»!";
     // Ссылочный: Найдено несколько записей справочника, соответствующих значению в файле
     public static final String REF_BOOK_TOO_MANY_FOUND_IMPORT_ERROR = "Проверка файла: Строка %d, столбец %s: В справочнике «%s» в атрибуте «%s» найдено более одного значения «%s», актуального на дату %s!";
     public static final String CHECK_OVERFLOW_MESSAGE = "Строка %d: Значение графы «%s» превышает допустимую разрядность (%d знаков). Графа «%s» рассчитывается как «%s»!";
@@ -825,7 +826,7 @@ public final class ScriptUtils {
             // Неитоговые строки были удалены
             for (int i = 0; i < dataRows.size(); i++) {
                 if (dataRows.get(i).getAlias() != null) {
-                    if (i < 1 || dataRows.get(i - 1).getAlias() != null) {
+                    if (i < 1 || (dataRows.get(i - 1).getAlias() != null && dataRows.get(i).getAlias() != "total")) {
                         logger.error(GROUP_WRONG_ITOG_ROW, dataRows.get(i).getIndex());
                     }
                 }
@@ -1850,13 +1851,13 @@ public final class ScriptUtils {
             // 5
             Map<String, RefBookValue> record = records.get(0);
 
-            if (!com.aplana.sbrf.taxaccounting.model.util.StringUtils.cleanString(nameFromFile).equals(com.aplana.sbrf.taxaccounting.model.util.StringUtils.cleanString(record.get("NAME").getStringValue()))) {
+            if (!com.aplana.sbrf.taxaccounting.model.util.StringUtils.cleanString(nameFromFile).equalsIgnoreCase(com.aplana.sbrf.taxaccounting.model.util.StringUtils.cleanString(record.get("NAME").getStringValue()))) {
                 // сообщение 4
                 String msg;
                 if (nameFromFile != null && !nameFromFile.isEmpty()) {
                     msg = String.format("В файле указано другое наименование %s - «%s»!", isVzl ? "ВЗЛ/РОЗ" : "юридического лица", nameFromFile);
                 } else {
-                    msg = String.format("Наименование %s в файле не заполнено!, ", isVzl ? "ВЗЛ/РОЗ" : "юридического лица");
+                    msg = String.format("Наименование %s в файле не заполнено!", isVzl ? "ВЗЛ/РОЗ" : "юридического лица");
                 }
                 String refBookAttributeName = "Не задано";
                 for (String alias : aliases) {
