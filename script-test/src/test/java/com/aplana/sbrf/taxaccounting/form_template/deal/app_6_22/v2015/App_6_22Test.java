@@ -21,6 +21,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -101,6 +102,7 @@ public class App_6_22Test extends ScriptTestBase {
         Assert.assertEquals("Строка 1: Графа «Цена (тариф) за единицу измерения без учета НДС, акцизов и пошлины, руб.» не заполнена!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Графа «Итого стоимость без учета НДС, акцизов и пошлин, руб.» не заполнена!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Графа «Дата совершения сделки» не заполнена!", entries.get(i++).getMessage());
+        //Assert.assertEquals("Группа «графа 2 не задана, графа 5 не задана, графа 6 не задана» не имеет строки подитога!", entries.get(i++).getMessage());
         Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
         testHelper.getLogger().clear();
 
@@ -216,6 +218,24 @@ public class App_6_22Test extends ScriptTestBase {
                         return result;
                     }
                 });
+        when(provider.getRecordData(anyLong())).thenAnswer(new Answer<Map<String, RefBookValue>>() {
+            @Override
+            public Map<String, RefBookValue> answer(InvocationOnMock invocationOnMock) throws Throwable {
+                Long id = (Long) invocationOnMock.getArguments()[0];
+                Map<String, RefBookValue> map = new HashMap<String, RefBookValue>();
+                String str;
+                switch (id.intValue()) {
+                    case 1 : str = "A"; break;
+                    case 2 : str = "B"; break;
+                    case 3 : str = "C"; break;
+                    default : str = "";
+                }
+                map.put(RefBook.RECORD_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, id));
+                map.put("INN", new RefBookValue(RefBookAttributeType.STRING, str));
+                map.put("NAME", new RefBookValue(RefBookAttributeType.STRING, str));
+                return map;
+            }
+        });
 
         testHelper.setImportFileInputStream(getImportXlsInputStream());
         testHelper.execute(FormDataEvent.IMPORT);

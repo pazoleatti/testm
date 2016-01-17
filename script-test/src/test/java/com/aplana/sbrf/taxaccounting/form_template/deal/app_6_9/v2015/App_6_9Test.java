@@ -21,6 +21,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -228,13 +229,17 @@ public class App_6_9Test extends ScriptTestBase {
                         char iksr = str.charAt(0);
                         long id = 0;
                         switch (iksr) {
-                            case 'A':  id = 1L;
+                            case 'A':
+                                id = 1L;
                                 break;
-                            case 'B':  id = 2L;
+                            case 'B':
+                                id = 2L;
                                 break;
-                            case 'C':  id = 3L;
+                            case 'C':
+                                id = 3L;
                                 break;
-                            default: str = null;
+                            default:
+                                str = null;
                         }
                         Map<String, RefBookValue> map = new HashMap<String, RefBookValue>();
                         map.put(RefBook.RECORD_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, id));
@@ -244,6 +249,24 @@ public class App_6_9Test extends ScriptTestBase {
                         return result;
                     }
                 });
+        when(provider.getRecordData(anyLong())).thenAnswer(new Answer<Map<String, RefBookValue>>() {
+            @Override
+            public Map<String, RefBookValue> answer(InvocationOnMock invocationOnMock) throws Throwable {
+                Long id = (Long) invocationOnMock.getArguments()[0];
+                Map<String, RefBookValue> map = new HashMap<String, RefBookValue>();
+                String str;
+                switch (id.intValue()) {
+                    case 1 : str = "A"; break;
+                    case 2 : str = "B"; break;
+                    case 3 : str = "C"; break;
+                    default : str = "";
+                }
+                map.put(RefBook.RECORD_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, id));
+                map.put("INN", new RefBookValue(RefBookAttributeType.STRING, str));
+                map.put("NAME", new RefBookValue(RefBookAttributeType.STRING, str));
+                return map;
+            }
+        });
     }
 
     // Проверить загруженные данные
