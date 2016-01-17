@@ -3,6 +3,7 @@ package form_template.deal.app_4_1.v2015
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.FormDataKind
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod
+import com.aplana.sbrf.taxaccounting.model.TaxType
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
 import com.aplana.sbrf.taxaccounting.model.util.StringUtils
 import groovy.transform.Field
@@ -276,14 +277,14 @@ void sortFormDataRows(def saveInDB = true) {
 @Field
 def sourceFormTypeIds = [
         807, // Журнал взаиморасчетов
-             // РНУ-101
-             // РНУ-102
-             // РНУ-107
+        818, // РНУ-101
+        820, // РНУ-102
+        821, // РНУ-107
              // РНУ-108
-             // РНУ-110
+        822, // РНУ-110
         808, // РНУ-111
-             // РНУ-112
-             // РНУ-114
+        824, // РНУ-112
+        829, // РНУ-114
              // РНУ-115
              // РНУ-116
         809, // РНУ-117
@@ -311,7 +312,8 @@ void consolidation() {
     departmentFormTypeService.getFormSources(formDataDepartment.id, formData.formType.id, formData.kind,
             getReportPeriodStartDate(), getReportPeriodEndDate()).each {
         if (it.formTypeId in sourceFormTypeIds) {
-            def source = formDataService.getLast(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId, formData.periodOrder, null, false)
+            def reportPeriodId = (it.taxType == TaxType.DEAL ? formData.reportPeriodId : getReportPeriodByTaxType(it.taxType))
+            def source = formDataService.getLast(it.formTypeId, it.kind, it.departmentId, reportPeriodId, formData.periodOrder, null, false)
             if (source != null && source.state == WorkflowState.ACCEPTED) {
                 // все строки источников одного типа
                 if (sourceAllDataRowsMap[it.formTypeId] == null) {
@@ -357,53 +359,52 @@ void consolidation() {
  */
 def getNewRow(def record520, def sourceAllDataRowsMap, def sourceFormDatasMap, def sourceDataRowsMap) {
     def newRow = formData.createDataRow()
-    def recordId = record520?.record_id?.value
 
     // графа 2
-    newRow.name = recordId
+    newRow.name = record520?.record_id?.value
 
     // графа 7
-    newRow.sum44 = calc7(recordId, sourceFormDatasMap, sourceDataRowsMap)
+    newRow.sum44 = calc7(record520, sourceFormDatasMap, sourceDataRowsMap)
 
     // графа 9
     newRow.sum46 = calc9(record520, sourceAllDataRowsMap)
 
     // графа 13
-    newRow.sum54 = calc13(recordId, sourceFormDatasMap, sourceDataRowsMap)
+    newRow.sum54 = calc13(record520, sourceFormDatasMap, sourceDataRowsMap)
 
     // графа 15
     newRow.sum56 = calc15(record520, sourceAllDataRowsMap)
 
     // графа 17
-    newRow.category = calc17(recordId)
+    newRow.category = calc17(record520)
 
     return newRow
 }
 
-def calc7(def record520Id, def sourceFormDatasMap, def sourceDataRowsMap) {
-    return calc7or13(record520Id, sourceFormDatasMap, sourceDataRowsMap, true)
+def calc7(def record520, def sourceFormDatasMap, def sourceDataRowsMap) {
+    return calc7or13(record520, sourceFormDatasMap, sourceDataRowsMap, true)
 }
 
 def calc9(def record520, def sourceAllDataRowsMap) {
     return calc9or15(record520, sourceAllDataRowsMap, true)
 }
 
-def calc13(def record520Id, def sourceFormDatasMap, def sourceDataRowsMap) {
-    return calc7or13(record520Id, sourceFormDatasMap, sourceDataRowsMap, false)
+def calc13(def record520, def sourceFormDatasMap, def sourceDataRowsMap) {
+    return calc7or13(record520, sourceFormDatasMap, sourceDataRowsMap, false)
 }
 
 def calc15(def record520, def sourceAllDataRowsMap) {
     return calc9or15(record520, sourceAllDataRowsMap, false)
 }
 
-def calc7or13(def record520Id, def sourceFormDatasMap, def sourceDataRowsMap, def isCalc7) {
+def calc7or13(def record520, def sourceFormDatasMap, def sourceDataRowsMap, def isCalc7) {
     def result = 0
     def formTypeId = 807
     sourceFormDatas = sourceFormDatasMap[formTypeId]
     sourceFormDatas.each { sourceFormData ->
         def rows = getNeedRowsForCalc7or13(sourceDataRowsMap[sourceFormData], isCalc7)
         for (def row : rows) {
-            if (row.sbrfCode1 && row.statReportId2 == record520Id) {
+            if (row.sbrfCode1 && row.statReportId2 == record520?.record_id?.value) {
                 result += (row.sum ?: 0)
             }
         }
@@ -442,14 +443,14 @@ def getNeedRowsForCalc7or13(def dataRows, def isCalc7) {
 def calc9or15(def record520, def sourceAllDataRowsMap, def isCalc9) {
     def result = 0
     def formTypeIds = [
-                 // РНУ-101
-                 // РНУ-102
-                 // РНУ-107
+            818, // РНУ-101
+            820, // РНУ-102
+            821, // РНУ-107
                  // РНУ-108
-                 // РНУ-110
+            822, // РНУ-110
             808, // РНУ-111
-                 // РНУ-112
-                 // РНУ-114
+            824, // РНУ-112
+            829, // РНУ-114
                  // РНУ-115
                  // РНУ-116
             809, // РНУ-117
@@ -461,19 +462,44 @@ def calc9or15(def record520, def sourceAllDataRowsMap, def isCalc9) {
     formTypeIds.each { formTypeId ->
         def rows = sourceAllDataRowsMap[formTypeId]
         for (def row : rows) {
-            if (checkRnuRow(row, record520?.NAME?.value)) {
-                if (808 == formTypeId) {
-                    // рну 111
-                    if (isCalc9) {
-                        result += (row.sum3 ?: 0)
-                    }
-                } else if (809 == formTypeId) {
-                    // рну 117
-                    if (!isCalc9) {
-                        result += (row.sum3 ?: 0)
-                    }
-                } else {
+            if (row.name == record520?.record_id?.value) {
+                switch (formTypeId) {
+                    case 818 : // РНУ-101
+                    case 822 : // РНУ-110
+                    case 808 : // РНУ-111
+                        if (isCalc9) {
+                            result += (row.sum3 ?: 0)
+                        }
+                        break
+                    case 820 : // РНУ-102
+                    case 809 : // РНУ-117
+                        if (!isCalc9) {
+                            result += (row.sum3 ?: 0)
+                        }
+                        break
+                    case 821 : // РНУ-107
+                        if (isCalc9) {
+                            result += (row.sum4 ?: 0)
+                        }
+                        break
+                    case 824 : // РНУ-112
+                        if (isCalc9) {
+                            result += (row.incomeCorrection ?: 0)
+                        }
+                        break
+                    case 829 : // РНУ-114
+                        if (!isCalc9) {
+                            result += (row.sum1 ?: 0)
+                        }
+                        break
                     // TODO (Ramil Timerbaev) пока не реализованы макеты
+                              // РНУ-108
+                              // РНУ-115
+                              // РНУ-116
+                              // РНУ-120
+                              // РНУ-122
+                              // РНУ-123
+                              // РНУ-171
                 }
             }
         }
@@ -481,6 +507,7 @@ def calc9or15(def record520, def sourceAllDataRowsMap, def isCalc9) {
     return result
 }
 
+// TODO (Ramil Timerbaev) уточнить про необходимость этого метода
 /**
  * Проверить является ли строка источника рну подитоговой и относится ли к указанному участнику.
  *
@@ -498,7 +525,7 @@ def checkRnuRow(def row, def name) {
     return row.fix.substring(start, end).equals(StringUtils.cleanString(name))
 }
 
-def calc17(def record520Id) {
+def calc17(def record520) {
     // формы ВЗЛ за предыдущий период
     def rows = getSourceDataRows(800, FormDataKind.PRIMARY, true)
     if (rows == null) {
@@ -506,7 +533,7 @@ def calc17(def record520Id) {
     }
     // мапа для хранения всех версии записи (строка нф - список всех версии записи "участников ТЦО")
     def record520Map = getVersionRecords520Map(rows)
-    def findRow = findPrevRow(record520Id, record520Map)
+    def findRow = findPrevRow(record520?.record_id?.value, record520Map)
     return (findRow ? findRow.category : getDefaultCategory())
 }
 
@@ -665,4 +692,17 @@ def isVZL(def start, def end, typeId) {
         return true
     }
     return false
+}
+
+@Field
+def reportPeriodIdsMap = [:]
+
+def getReportPeriodByTaxType(def taxType) {
+    if (reportPeriodIdsMap[taxType] == null) {
+        def periods = reportPeriodService.getReportPeriodsByDate(taxType, getReportPeriodEndDate(), getReportPeriodEndDate())
+        if (periods) {
+            reportPeriodIdsMap[taxType] = periods[periods.size() - 1].id
+        }
+    }
+    return reportPeriodIdsMap[taxType]
 }
