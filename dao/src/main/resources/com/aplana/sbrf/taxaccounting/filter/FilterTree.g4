@@ -24,14 +24,16 @@ simpleoperand : number
 	| alias
 	| string;
 	
-funcwrap : functype '(' strtype ')';
+funcwrap : functype '(' simpleoperand ')' | to_date;
 
-functype: LENGTH | LOWER;
+functype: LENGTH | LOWER | TO_CHAR | TRUNC;
+to_date	: TO_DATE '(' string ')';
 
 LOWER :  'LOWER';
 LENGTH 	: 'LENGTH';
-
-strtype: alias | string;
+TO_CHAR	: 'TO_CHAR';
+TRUNC	: 'TRUNC';
+TO_DATE	: 'TO_DATE';
 
 operand_type :	EQUAL
 	| NOTEQUAL

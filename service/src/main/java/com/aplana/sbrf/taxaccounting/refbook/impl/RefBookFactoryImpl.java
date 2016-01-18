@@ -173,7 +173,12 @@ public class RefBookFactoryImpl implements RefBookFactory {
                             .append(")");
                     break;
                 case DATE:
-                    resultSearch.append(attribute.getAlias());
+                    resultSearch
+                            .append("TRUNC(")
+                            .append(attribute.getAlias())
+                            .append(") = TO_DATE('")
+                            .append(q)
+                            .append("')");
                     break;
                 case REFERENCE:
                     if (isSimpleRefBool(refBookId)){
@@ -209,11 +214,13 @@ public class RefBookFactoryImpl implements RefBookFactory {
 
             }
 
-            resultSearch
-                    .append(" like ")
-                    .append("'%")
-                    .append(q)
-                    .append("%'");
+            if (attribute.getAttributeType() != RefBookAttributeType.DATE) {
+                resultSearch
+                        .append(" like ")
+                        .append("'%")
+                        .append(q)
+                        .append("%'");
+            }
         }
 
         return resultSearch.toString();
