@@ -253,6 +253,8 @@ Insert into department_form_type (ID,DEPARTMENT_ID,FORM_TYPE_ID,KIND) values (8,
 Insert into department_form_type (ID,DEPARTMENT_ID,FORM_TYPE_ID,KIND) values (9,'4',6,'2');
 --Назначение консолидированная РНУ-8 для Байкальского банка
 Insert into department_form_type (ID,DEPARTMENT_ID,FORM_TYPE_ID,KIND) values (10,'4',8,'2');
+--Назначение консолидированная РНУ-8 для Волго-вятского банка
+Insert into department_form_type (ID,DEPARTMENT_ID,FORM_TYPE_ID,KIND) values (1010,'8',8,'2');
 --Назначение первичная РНУ-7 для Байкальского банка
 Insert into department_form_type (ID,DEPARTMENT_ID,FORM_TYPE_ID,KIND) values (11,'4',7,'1');
 --Назначение консолидированная РНУ-1 для Волго-Вятского банка
@@ -411,6 +413,8 @@ Insert into form_data_source (DEPARTMENT_FORM_TYPE_ID,SRC_DEPARTMENT_FORM_TYPE_I
 Insert into form_data_source (DEPARTMENT_FORM_TYPE_ID,SRC_DEPARTMENT_FORM_TYPE_ID,PERIOD_START,PERIOD_END) values (10,205,date '2000-01-01',null);
 --Связка источник->приемник "первичная НДС-205 Волго-вятского банка (с периодом сравнения и признаком нарастающего итога) -> консолидированная РНУ-8 Байкальского банка"
 Insert into form_data_source (DEPARTMENT_FORM_TYPE_ID,SRC_DEPARTMENT_FORM_TYPE_ID,PERIOD_START,PERIOD_END) values (10,206,date '2000-01-01',null);
+--Связка источник->приемник "первичная НДС-205 Волго-вятского банка (с периодом сравнения и признаком нарастающего итога) -> консолидированная РНУ-8 Байкальского банка"
+Insert into form_data_source (DEPARTMENT_FORM_TYPE_ID,SRC_DEPARTMENT_FORM_TYPE_ID,PERIOD_START,PERIOD_END) values (1010,206,date '2000-01-01',null);
 --Связка источник->приемник "первичная РНУ-4 Байкальского банка -> первичная НДС-200 Байкальского банка"
 Insert into form_data_source (DEPARTMENT_FORM_TYPE_ID,SRC_DEPARTMENT_FORM_TYPE_ID,PERIOD_START,PERIOD_END) values (200,6,date '2000-01-01',null);
 
@@ -923,6 +927,8 @@ values (1017, 'третий квартал',  1017, 1, date '2010-01-01', date '
 --Связка подразделение Байкальский банк - период 3 квартал 2012
 Insert into department_report_period (DEPARTMENT_ID,REPORT_PERIOD_ID,IS_ACTIVE,IS_BALANCE_PERIOD,CORRECTION_DATE,ID) values ('4',14,'0','0',null,22);
 --Связка подразделение Волго-вятский банк - период 3 квартал 2012
+Insert into department_report_period (DEPARTMENT_ID,REPORT_PERIOD_ID,IS_ACTIVE,IS_BALANCE_PERIOD,CORRECTION_DATE,ID) values ('8',14,'1','0',null,1032);
+--Связка подразделение Волго-вятский банк - период 3 квартал 2012
 Insert into department_report_period (DEPARTMENT_ID,REPORT_PERIOD_ID,IS_ACTIVE,IS_BALANCE_PERIOD,CORRECTION_DATE,ID) values ('8',1016,'0','0',null,1024);
 --Связка подразделение Волго-вятский банк - период 3 квартал 2010 НДС
 Insert into department_report_period (DEPARTMENT_ID,REPORT_PERIOD_ID,IS_ACTIVE,IS_BALANCE_PERIOD,CORRECTION_DATE,ID) values ('8',1017,'0','0',null,1025);
@@ -930,6 +936,9 @@ Insert into department_report_period (DEPARTMENT_ID,REPORT_PERIOD_ID,IS_ACTIVE,I
 -- НФ консолидированная РНУ-8 в периоде 3 квартал 2012 для Байкальского банка  и периодом сравнения 3 квартал 2012 и признаком нарастающего итога
 Insert into FORM_DATA (ID,FORM_TEMPLATE_ID,STATE,KIND,PERIOD_ORDER,DEPARTMENT_REPORT_PERIOD_ID,COMPARATIVE_DEP_REP_PER_ID,ACCRUING,MANUAL,  RETURN_SIGN,SORTED,EDITED,SORTED_BACKUP)
 values (33,8,1,2,null,22,22,1,0,    0,0,0,0);
+-- НФ консолидированная РНУ-8 в периоде 3 квартал 2012 для Волго-вятского банка  и периодом сравнения 3 квартал 2012 и признаком нарастающего итога
+Insert into FORM_DATA (ID,FORM_TEMPLATE_ID,STATE,KIND,PERIOD_ORDER,DEPARTMENT_REPORT_PERIOD_ID,COMPARATIVE_DEP_REP_PER_ID,ACCRUING,MANUAL,  RETURN_SIGN,SORTED,EDITED,SORTED_BACKUP)
+values (1033,8,1,2,null,1032,1032,1,0,    0,0,0,0);
 -- НФ первичная РНУ-7 в периоде 3 квартал 2012 для Байкальского банка и периодом сравнения 3 квартал 2012 и признаком нарастающего итога
 Insert into FORM_DATA (ID,FORM_TEMPLATE_ID,STATE,KIND,PERIOD_ORDER,DEPARTMENT_REPORT_PERIOD_ID,COMPARATIVE_DEP_REP_PER_ID,ACCRUING,MANUAL,  RETURN_SIGN,SORTED,EDITED,SORTED_BACKUP)
 values (34,7,1,1,null,22,22,1,0,    0,0,0,0);
