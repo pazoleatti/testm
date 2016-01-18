@@ -152,9 +152,9 @@
         <columnType>NUMBER</columnType>
         <name>Коэффициент корректировки доходов</name>
         <order>15</order>
-        <width>20</width>
-        <maxLength>38</maxLength>
-        <precision>19</precision>
+        <width>6</width>
+        <maxLength>8</maxLength>
+        <precision>4</precision>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>sum2</alias>
