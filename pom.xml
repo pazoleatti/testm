@@ -6,7 +6,7 @@
 	<artifactId>taxaccounting</artifactId>
 
 	<description>АС "Учёт налогов"</description>
-	<version>0.9</version>
+	<version>1.0</version>
 	<packaging>pom</packaging>
 
 	<modules>
