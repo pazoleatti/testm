@@ -43,7 +43,6 @@ public class GetFormDataResult implements Result {
 	private FormMode formMode;
 	private boolean fixedRows;
     private boolean updating;
-    private boolean editLock;
 
     public boolean canCreatedManual() {
         return canCreatedManual;
@@ -203,13 +202,5 @@ public class GetFormDataResult implements Result {
 
     public void setUpdating(boolean updating) {
         this.updating = updating;
-    }
-
-    public boolean isEditLock() {
-        return editLock;
-    }
-
-    public void setEditLock(boolean editLock) {
-        this.editLock = editLock;
     }
 }

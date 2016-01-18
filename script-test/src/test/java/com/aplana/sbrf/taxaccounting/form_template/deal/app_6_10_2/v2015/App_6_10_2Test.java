@@ -102,7 +102,7 @@ public class App_6_10_2Test extends ScriptTestBase {
         Assert.assertEquals("Строка 1: Графа «Цена (тариф) за единицу измерения без учета НДС, акцизов и пошлины, руб.» не заполнена!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Графа «Итого стоимость без учета НДС, акцизов и пошлин, руб.» не заполнена!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Графа «Дата совершения сделки» не заполнена!", entries.get(i++).getMessage());
-        //Assert.assertEquals("Группа «графа 2 не задана, графа 5 не задана, графа 6 не задана» не имеет строки подитога!", entries.get(i++).getMessage());
+        Assert.assertEquals("Группа «графа 2 не задана, графа 5 не задана, графа 6 не задана» не имеет строки подитога!", entries.get(i++).getMessage());
         Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
         testHelper.getLogger().clear();
 

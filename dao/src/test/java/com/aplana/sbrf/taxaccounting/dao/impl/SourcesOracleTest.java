@@ -1609,16 +1609,18 @@ public class SourcesOracleTest {
         for (Relation relation : relations) {
             System.out.println(getShortFormInfo(relation));
         }
-        assertEquals(1, relations.size());
+        assertEquals(2, relations.size());
         assertEquals("33, Тип: \"Консолидированная\", Вид: \"РНУ-8\", Подразделение: \"Байкальский банк\", Период: \"третий квартал (9 месяцев) 2012\", Макет: \"true\", Статус: \"Создана\", Период сравнения: \"третий квартал (9 месяцев) 2012\"", getShortFormInfo(relations.get(0)));
+        assertEquals("1033, Тип: \"Консолидированная\", Вид: \"РНУ-8\", Подразделение: \"Волго-Вятский банк\", Период: \"третий квартал (9 месяцев) 2012\", Макет: \"true\", Статус: \"Создана\", Период сравнения: \"третий квартал (9 месяцев) 2012\"", getShortFormInfo(relations.get(1)));
 
         formData.setId(1036L);
         relations = sourceDao.getDestinationsInfo(formData, true, false, null);
         for (Relation relation : relations) {
             System.out.println(getShortFormInfo(relation));
         }
-        assertEquals(1, relations.size());
+        assertEquals(2, relations.size());
         assertEquals("null, Тип: \"Консолидированная\", Вид: \"РНУ-8\", Подразделение: \"Байкальский банк\", Период: \"третий квартал (9 месяцев) 2012\", Макет: \"true\", Статус: \"Не создана\", Период сравнения: \"третий квартал 2010\"", getShortFormInfo(relations.get(0)));
+        assertEquals("null, Тип: \"Консолидированная\", Вид: \"РНУ-8\", Подразделение: \"Волго-Вятский банк\", Период: \"третий квартал (9 месяцев) 2012\", Макет: \"true\", Статус: \"Не создана\", Период сравнения: \"третий квартал 2010\"", getShortFormInfo(relations.get(1)));
     }
 
     /*****************************  Получение деклараций-приемников НФ ***************************/
