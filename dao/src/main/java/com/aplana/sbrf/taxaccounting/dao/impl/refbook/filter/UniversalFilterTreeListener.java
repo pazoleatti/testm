@@ -360,4 +360,18 @@ public class UniversalFilterTreeListener implements FilterTreeListener {
             c.visitErrorNode(node);
         }
     }
+
+    @Override
+    public void enterTo_date(FilterTreeParser.To_dateContext ctx) {
+        for (AbstractTreeListenerComponent c : components) {
+            c.enterTo_date(ctx);
+        }
+    }
+
+    @Override
+    public void exitTo_date(FilterTreeParser.To_dateContext ctx) {
+        for (AbstractTreeListenerComponent c : components) {
+            c.exitTo_date(ctx);
+        }
+    }
 }

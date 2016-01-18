@@ -163,4 +163,10 @@ public abstract class AbstractTreeListenerComponent implements FilterTreeListene
 
     @Override
     public void visitErrorNode(ErrorNode node) { }
+
+    @Override
+    public void enterTo_date(FilterTreeParser.To_dateContext ctx) { }
+
+    @Override
+    public void exitTo_date(FilterTreeParser.To_dateContext ctx) { }
 }

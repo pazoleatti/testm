@@ -39,12 +39,14 @@ public class TypeVerifierComponent extends AbstractTreeListenerComponent {
         checkFunctionType(ctx);
 
         // установка типа
-        if (ctx.functype().LOWER() != null){
-            setType(OperandType.STRING);
-        } else if (ctx.functype().LENGTH() != null){
-            setType(OperandType.NUMBER);
-        } else if (ctx.functype().TO_CHAR() != null){
-            setType(OperandType.STRING);
+        if (ctx.functype() != null) {
+            if (ctx.functype().LOWER() != null){
+                setType(OperandType.STRING);
+            } else if (ctx.functype().LENGTH() != null){
+                setType(OperandType.NUMBER);
+            } else if (ctx.functype().TO_CHAR() != null){
+                setType(OperandType.STRING);
+            }
         }
     }
 
@@ -168,14 +170,16 @@ public class TypeVerifierComponent extends AbstractTreeListenerComponent {
         OperandType internalType = left ? letfType: rightType;
 
         // для LOWER и LENGTH мы должны передавать строку либо дату
-        if (ctx.functype().LOWER() != null || ctx.functype().LENGTH() != null){
-            if (internalType != OperandType.DATE && internalType != OperandType.STRING){
-                throw new RuntimeException("Function require a string or date param");
-            }
-        } else if (ctx.functype().TO_CHAR() != null){
-            // функция to_char
-            if (internalType != OperandType.NUMBER){
-                throw new RuntimeException("Function require a number type as param");
+        if (ctx.functype() != null) {
+            if (ctx.functype().LOWER() != null || ctx.functype().LENGTH() != null){
+                if (internalType != OperandType.DATE && internalType != OperandType.STRING){
+                    throw new RuntimeException("Function require a string or date param");
+                }
+            } else if (ctx.functype().TO_CHAR() != null){
+                // функция to_char
+                if (internalType != OperandType.NUMBER){
+                    throw new RuntimeException("Function require a number type as param");
+                }
             }
         }
     }
