@@ -129,7 +129,7 @@ public class App_6_25Test extends ScriptTestBase {
         entries = testHelper.getLogger().getEntries();
         i = 0;
         Assert.assertEquals("Строка 1: Графа «Дата договора» должна принимать значение из следующего диапазона: 01.01.1991 - 31.12.2014!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Значение графы «Код единицы измерения по ОКЕИ» должно быть равно значению «796»!", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 1: Графа «Код единицы измерения по ОКЕИ» должна быть заполнена значением «796»!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Графа «Количество» должна быть заполнена значением «1»!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Значение графы «Финансовый результат уступки прав требования, руб.» должно быть больше или равно «0»!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Значение графы «Цена (тариф) за единицу измерения без учета НДС, акцизов и пошлины, руб.» должно быть больше или равно «0»!", entries.get(i++).getMessage());

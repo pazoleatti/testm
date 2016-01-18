@@ -166,7 +166,7 @@ void logicCheck() {
             okei = getRefBookValue(12, row.okeiCode)?.CODE?.stringValue
             if (okei != '796') {
                 def msg = row.getCell('okeiCode').column.name
-                logger.error("Строка $rowNum: Значение графы «$msg» должно быть равно значению «796»!")
+                logger.error("Строка $rowNum: Графа «$msg» должна быть заполнена значением «796»!")
             }
         }
 
