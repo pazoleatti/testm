@@ -3,6 +3,7 @@ package form_template.deal.app_4_1_9.v2015
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.FormDataKind
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod
+import com.aplana.sbrf.taxaccounting.model.TaxType
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
 import com.aplana.sbrf.taxaccounting.model.util.StringUtils
 import groovy.transform.Field
@@ -283,14 +284,14 @@ void sortFormDataRows(def saveInDB = true) {
 @Field
 def sourceFormTypeIds = [
         807, // Журнал взаиморасчетов
-             // РНУ-101
-             // РНУ-102
-             // РНУ-107
+        818, // РНУ-101
+        820, // РНУ-102
+        821, // РНУ-107
              // РНУ-108
-             // РНУ-110
+        822, // РНУ-110
         808, // РНУ-111
-             // РНУ-112
-             // РНУ-114
+        824, // РНУ-112
+        829, // РНУ-114
              // РНУ-115
              // РНУ-116
         809, // РНУ-117
@@ -298,32 +299,32 @@ def sourceFormTypeIds = [
              // РНУ-122
              // РНУ-123
              // РНУ-171
-             // 6.1
+        816, // 6.1
         804, // 6.2
-             // 6.3
-             // 6.4
-             // 6.5
+        812, // 6.3
+        813, // 6.4
+        814, // 6.5
         806, // 6.6
         805, // 6.7
-             // 6.8
-             // 6.9
-             // 6.10-1
-             // 6.10-2
-             // 6.11
-             // 6.12
-             // 6.13
-             // 6.14
-             // 6.15
-             // 6.16
+        815, // 6.8
+        817, // 6.9
+        823, // 6.10-1
+        825, // 6.10-2
+        827, // 6.11
+        819, // 6.12
+        826, // 6.13
+        835, // 6.14
+        837, // 6.15
+        839, // 6.16
         811, // 6.17
-             // 6.18
-             // 6.19
-             // 6.20
-             // 6.21
-             // 6.22
-             // 6.23
-             // 6.24
-             // 6.25
+        838, // 6.18
+        828, // 6.19
+        831, // 6.20
+        830, // 6.21
+        834, // 6.22
+        832, // 6.23
+        833, // 6.24
+        836, // 6.25
 ]
 
 // Консолидация очень похожа на 4.2, отличие в:
@@ -342,7 +343,8 @@ void consolidation() {
     departmentFormTypeService.getFormSources(formDataDepartment.id, formData.formType.id, formData.kind,
             getReportPeriodStartDate(), getReportPeriodEndDate()).each {
         if (it.formTypeId in sourceFormTypeIds) {
-            def source = formDataService.getLast(it.formTypeId, it.kind, it.departmentId, formData.reportPeriodId, formData.periodOrder, null, false)
+            def reportPeriodId = (it.taxType == TaxType.DEAL ? formData.reportPeriodId : getReportPeriodByTaxType(it.taxType))
+            def source = formDataService.getLast(it.formTypeId, it.kind, it.departmentId, reportPeriodId, formData.periodOrder, null, false)
             if (source != null && source.state == WorkflowState.ACCEPTED) {
                 // все строки источников одного типа
                 if (sourceAllDataRowsMap[it.formTypeId] == null) {
@@ -387,121 +389,132 @@ void consolidation() {
  */
 def getNewRow(def record520, def sourceAllDataRowsMap, def sourceFormDatasMap, def sourceDataRowsMap) {
     def newRow = formData.createDataRow()
-    def recordId = record520?.record_id?.value
 
     // графа 2
-    newRow.name = recordId
+    newRow.name = record520?.record_id?.value
 
     // графа 4
-    newRow.sum4 = calc4(recordId, sourceAllDataRowsMap)
+    newRow.sum4 = calc4(record520, sourceAllDataRowsMap)
 
     // графа 5
-    newRow.sum42 = calc5(recordId, sourceAllDataRowsMap)
+    newRow.sum42 = calc5(record520, sourceAllDataRowsMap)
 
     // графа 6
-    newRow.sum43 = calc6(recordId, sourceAllDataRowsMap)
+    newRow.sum43 = calc6(record520, sourceAllDataRowsMap)
 
     // графа 7
-    newRow.sum44 = calc7(recordId, sourceFormDatasMap, sourceDataRowsMap)
+    newRow.sum44 = calc7(record520, sourceFormDatasMap, sourceDataRowsMap)
 
     // графа 8
-    newRow.sum45 = calc8(recordId, sourceAllDataRowsMap)
+    newRow.sum45 = calc8(record520, sourceAllDataRowsMap)
 
     // графа 9
     newRow.sum46 = calc9(record520, sourceAllDataRowsMap)
 
     // графа 10
-    newRow.sum51 = calc10(recordId, sourceAllDataRowsMap)
+    newRow.sum51 = calc10(record520, sourceAllDataRowsMap)
 
     // графа 11
-    newRow.sum52 = calc11(recordId, sourceAllDataRowsMap)
+    newRow.sum52 = calc11(record520, sourceAllDataRowsMap)
 
     // графа 12
-    newRow.sum53 = calc12(recordId, sourceAllDataRowsMap)
+    newRow.sum53 = calc12(record520, sourceAllDataRowsMap)
 
     // графа 13
-    newRow.sum54 = calc13(recordId, sourceFormDatasMap, sourceDataRowsMap)
+    newRow.sum54 = calc13(record520, sourceFormDatasMap, sourceDataRowsMap)
 
     // графа 14
-    newRow.sum55 = calc14(recordId, sourceAllDataRowsMap)
+    newRow.sum55 = calc14(record520, sourceAllDataRowsMap)
 
     // графа 15
     newRow.sum56 = calc15(record520, sourceAllDataRowsMap)
 
     // графа 17
-    newRow.category = calc17(recordId)
+    newRow.category = calc17(record520)
 
     return newRow
 }
 
-def calc4(def record520Id, def sourceAllDataRowsMap) {
-    return calc4or10(record520Id, sourceAllDataRowsMap, true)
+def calc4(def record520, def sourceAllDataRowsMap) {
+    return calc4or10(record520, sourceAllDataRowsMap, true)
 }
 
-def calc5(def record520Id, def sourceAllDataRowsMap) {
-    return calc5or11(record520Id, sourceAllDataRowsMap, true)
+def calc5(def record520, def sourceAllDataRowsMap) {
+    return calc5or11(record520, sourceAllDataRowsMap, true)
 }
 
-def calc6(def record520Id, def sourceAllDataRowsMap) {
-    return calc6or12(record520Id, sourceAllDataRowsMap, true)
+def calc6(def record520, def sourceAllDataRowsMap) {
+    return calc6or12(record520, sourceAllDataRowsMap, true)
 }
 
-def calc7(def record520Id, def sourceFormDatasMap, def sourceDataRowsMap) {
-    return calc7or13(record520Id, sourceFormDatasMap, sourceDataRowsMap, true)
+def calc7(def record520, def sourceFormDatasMap, def sourceDataRowsMap) {
+    return calc7or13(record520, sourceFormDatasMap, sourceDataRowsMap, true)
 }
 
-def calc8(def record520Id, def sourceAllDataRowsMap) {
-    return calc8or14(record520Id, sourceAllDataRowsMap, true)
+def calc8(def record520, def sourceAllDataRowsMap) {
+    return calc8or14(record520, sourceAllDataRowsMap, true)
 }
 
 def calc9(def record520, def sourceAllDataRowsMap) {
     return calc9or15(record520, sourceAllDataRowsMap, true)
 }
 
-def calc10(def record520Id, def sourceAllDataRowsMap) {
-    return calc4or10(record520Id, sourceAllDataRowsMap, false)
+def calc10(def record520, def sourceAllDataRowsMap) {
+    return calc4or10(record520, sourceAllDataRowsMap, false)
 }
 
-def calc11(def record520Id, def sourceAllDataRowsMap) {
-    return calc5or11(record520Id, sourceAllDataRowsMap, false)
+def calc11(def record520, def sourceAllDataRowsMap) {
+    return calc5or11(record520, sourceAllDataRowsMap, false)
 }
 
-def calc12(def record520Id, def sourceAllDataRowsMap) {
-    return calc6or12(record520Id, sourceAllDataRowsMap, false)
+def calc12(def record520, def sourceAllDataRowsMap) {
+    return calc6or12(record520, sourceAllDataRowsMap, false)
 }
 
-def calc13(def record520Id, def sourceFormDatasMap, def sourceDataRowsMap) {
-    return calc7or13(record520Id, sourceFormDatasMap, sourceDataRowsMap, false)
+def calc13(def record520, def sourceFormDatasMap, def sourceDataRowsMap) {
+    return calc7or13(record520, sourceFormDatasMap, sourceDataRowsMap, false)
 }
 
-def calc14(def record520Id, def sourceAllDataRowsMap) {
-    return calc8or14(record520Id, sourceAllDataRowsMap, false)
+def calc14(def record520, def sourceAllDataRowsMap) {
+    return calc8or14(record520, sourceAllDataRowsMap, false)
 }
 
 def calc15(def record520, def sourceAllDataRowsMap) {
     return calc9or15(record520, sourceAllDataRowsMap, false)
 }
 
-def calc4or10(def record520Id, def sourceAllDataRowsMap, def isCalc4) {
+def calc4or10(def record520, def sourceAllDataRowsMap, def isCalc4) {
     def result = 0
     def formTypeIds = [
             806, // 6.6
-                 // 6.11
+            827, // 6.11
+            819  // 6.12
     ]
     formTypeIds.each { formTypeId ->
         def rows = sourceAllDataRowsMap[formTypeId]
         for (def row : rows) {
-            if (row.name == record520Id) {
-                if (806 == formTypeId) {
-                    // 6.6
-                    if (row.incomeSum && row.outcomeSum) {
-                        result += (isCalc4 ? row.incomeSum - row.outcomeSum : row.outcomeSum - row.incomeSum)
-                    } else {
-                        result += ((isCalc4 ? row.incomeSum : row.outcomeSum) ?: 0)
-                    }
-                } else {
-                    // 6.11
-                    // TODO (Ramil Timerbaev) пока не реализован макет
+            if (row.name == record520?.record_id?.value) {
+                def date = formTypeId == 827 ? row.dealDate : row.dealDoneDate
+                if (!checkRow(date, record520)) {
+                    continue
+                }
+                switch (formTypeId) {
+                    case 806 : // 6.6
+                    case 819 : // 6.12
+                        if (row.incomeSum && row.outcomeSum) {
+                            result += (isCalc4 ? row.incomeSum - row.outcomeSum : row.outcomeSum - row.incomeSum)
+                        } else {
+                            result += ((isCalc4 ? row.incomeSum : row.outcomeSum) ?: 0)
+                        }
+                        break
+                    case 827 : // 6.11
+                        def transactionType = getRefBookValue(16L, row.transactionType)?.CODE?.value
+                        if (isCalc4) {
+                            result += (transactionType == 'S' ? row.sum : 0)
+                        } else {
+                            result += (transactionType == 'B' ? row.sum : 0)
+                        }
+                        break
                 }
             }
         }
@@ -509,28 +522,33 @@ def calc4or10(def record520Id, def sourceAllDataRowsMap, def isCalc4) {
     return result
 }
 
-def calc5or11(def record520Id, def sourceAllDataRowsMap, def isCalc5) {
+def calc5or11(def record520, def sourceAllDataRowsMap, def isCalc5) {
     def result = 0
     def formTypeIds = [
-                 // 6.14
-                 // 6.16
+            835, // 6.14
+            839, // 6.16
             811  // 6.17
     ]
     formTypeIds.each { formTypeId ->
         def rows = sourceAllDataRowsMap[formTypeId]
         for (def row : rows) {
-            if (row.name == record520Id) {
-                // 6.14
-                // 6.16
-                // TODO (Ramil Timerbaev) пока не реализованы макеты
-
-                // 6.17
-                if (811 == formTypeId) {
-                    if (isCalc5) {
-                        result += (row.income >= row.outcome ? row.cost : 0)
-                    } else {
-                        result += (row.income < row.outcome ? row.cost : 0)
-                    }
+            if (row.name == record520?.record_id?.value && checkRow(row.dealDoneDate, record520)) {
+                switch (formTypeId) {
+                    case 835 : // 6.14
+                    case 811 : // 6.17
+                        if (isCalc5) {
+                            result += (row.income >= row.outcome ? row.cost : 0)
+                        } else {
+                            result += (row.income < row.outcome ? row.cost : 0)
+                        }
+                        break
+                    case 839 : // 6.16
+                        if (isCalc5) {
+                            result += (row.incomeSum >= row.outcomeSum ? row.cost : 0)
+                        } else {
+                            result += (row.incomeSum < row.outcomeSum ? row.cost : 0)
+                        }
+                        break
                 }
             }
         }
@@ -538,27 +556,43 @@ def calc5or11(def record520Id, def sourceAllDataRowsMap, def isCalc5) {
     return result
 }
 
-def calc6or12(def record520Id, def sourceAllDataRowsMap, def isCalc6) {
+def calc6or12(def record520, def sourceAllDataRowsMap, def isCalc6) {
     def result = 0
     def formTypeIds = [
             804, // 6.2
-                 // 6.15
-                 // 6.18
-                 // 6.20
+            837, // 6.15
+            838, // 6.18
+            831  // 6.20
     ]
     formTypeIds.each { formTypeId ->
         def rows = sourceAllDataRowsMap[formTypeId]
         for (def row : rows) {
-            if (row.name == record520Id) {
-                if (804 == formTypeId) {
-                    // 6.2
-                    if (isCalc6) {
-                        result += (row.sum ?: 0)
-                    }
-                } else {
-                    // 6.15
-                    // 6.18
-                    // TODO (Ramil Timerbaev) пока не реализованы макеты
+            if (row.name == record520?.record_id?.value && checkRow(row.dealDoneDate, record520)) {
+                switch (formTypeId) {
+                    case 804 : // 6.2
+                        if (isCalc6) {
+                            result += (row.sum ?: 0)
+                        }
+                        break
+                    case 837 : // 6.15
+                        if (isCalc6) {
+                            result += (row.income >= row.outcome ? row.cost : 0)
+                        } else {
+                            result += (row.income < row.outcome ? row.cost : 0)
+                        }
+                        break
+                    case 838 : // 6.18
+                        if (isCalc6) {
+                            result += (row.incomeSum >= row.outcomeSum ? row.total : 0)
+                        } else {
+                            result += (row.incomeSum < row.outcomeSum ? row.total : 0)
+                        }
+                        break
+                    case 831 : // 6.20
+                        if (!isCalc6) {
+                            result += (row.outcome ?: 0)
+                        }
+                        break
                 }
             }
         }
@@ -566,14 +600,14 @@ def calc6or12(def record520Id, def sourceAllDataRowsMap, def isCalc6) {
     return result
 }
 
-def calc7or13(def record520Id, def sourceFormDatasMap, def sourceDataRowsMap, def isCalc7) {
+def calc7or13(def record520, def sourceFormDatasMap, def sourceDataRowsMap, def isCalc7) {
     def result = 0
     def formTypeId = 807
     sourceFormDatas = sourceFormDatasMap[formTypeId]
     sourceFormDatas.each { sourceFormData ->
         def rows = getNeedRowsForCalc7or13(sourceDataRowsMap[sourceFormData], isCalc7)
         for (def row : rows) {
-            if (row.sbrfCode1 && row.statReportId2 == record520Id) {
+            if (row.sbrfCode1 && row.statReportId2 == record520?.record_id?.value) {
                 result += (row.sum ?: 0)
             }
         }
@@ -609,38 +643,63 @@ def getNeedRowsForCalc7or13(def dataRows, def isCalc7) {
     return rows
 }
 
-def calc8or14(def record520Id, def sourceAllDataRowsMap, def isCalc8) {
+def calc8or14(def record520, def sourceAllDataRowsMap, def isCalc8) {
     def result = 0
     def formTypeIds = [
-                 // 6.1
-                 // 6.3
-                 // 6.4
-                 // 6.5
+            816, // 6.1
+            812, // 6.3
+            813, // 6.4
+            814, // 6.5
             805, // 6.7
-                 // 6.8
-                 // 6.9
-                 // 6.10-1
-                 // 6.10-2
-                 // 6.12
-                 // 6.13
-                 // 6.19
-                 // 6.21
-                 // 6.22
-                 // 6.23
-                 // 6.24
-                 // 6.25
+            815, // 6.8
+            817, // 6.9
+            823, // 6.10-1
+            825, // 6.10-2
+            826, // 6.13
+            828, // 6.19
+            830, // 6.21
+            834, // 6.22
+            832, // 6.23
+            833, // 6.24
+            836, // 6.25
     ]
     formTypeIds.each { formTypeId ->
         def rows = sourceAllDataRowsMap[formTypeId]
         for (def row : rows) {
-            if (row.name == record520Id) {
-                if (805 == formTypeId) {
-                    // 6.7
-                    if (isCalc8) {
-                        result += (row.sum ?: 0)
-                    }
-                } else {
-                    // TODO (Ramil Timerbaev) пока не реализованы макеты
+            if (row.name == record520?.record_id?.value && checkRow(row.dealDoneDate, record520)) {
+                switch (formTypeId) {
+                    case 816 : // 6.1
+                    case 812 : // 6.3
+                    case 813 : // 6.4
+                    case 805 : // 6.7
+                    case 823 : // 6.10-1
+                    case 825 : // 6.10-2
+                    case 832 : // 6.23
+                        if (isCalc8) {
+                            result += (row.sum ?: 0)
+                        }
+                        break
+                    case 814 : // 6.5
+                    case 815 : // 6.8
+                    case 828 : // 6.19
+                    case 830 : // 6.21
+                    case 834 : // 6.22
+                    case 833 : // 6.24
+                        if (!isCalc8) {
+                            result += (row.sum ?: 0)
+                        }
+                        break
+                    case 817 : // 6.9
+                    case 836 : // 6.25
+                        if (isCalc8) {
+                            result += (row.finResult ?: 0)
+                        }
+                        break
+                    case 826 : // 6.13
+                        if (!isCalc8) {
+                            result += (row.outcomeSum ?: 0)
+                        }
+                        break
                 }
             }
         }
@@ -651,14 +710,14 @@ def calc8or14(def record520Id, def sourceAllDataRowsMap, def isCalc8) {
 def calc9or15(def record520, def sourceAllDataRowsMap, def isCalc9) {
     def result = 0
     def formTypeIds = [
-                 // РНУ-101
-                 // РНУ-102
-                 // РНУ-107
+            818, // РНУ-101
+            820, // РНУ-102
+            821, // РНУ-107
                  // РНУ-108
-                 // РНУ-110
+            822, // РНУ-110
             808, // РНУ-111
-                 // РНУ-112
-                 // РНУ-114
+            824, // РНУ-112
+            829, // РНУ-114
                  // РНУ-115
                  // РНУ-116
             809, // РНУ-117
@@ -670,19 +729,44 @@ def calc9or15(def record520, def sourceAllDataRowsMap, def isCalc9) {
     formTypeIds.each { formTypeId ->
         def rows = sourceAllDataRowsMap[formTypeId]
         for (def row : rows) {
-            if (checkRnuRow(row, record520?.NAME?.value)) {
-                if (808 == formTypeId) {
-                    // рну 111
-                    if (isCalc9) {
-                        result += (row.sum3 ?: 0)
-                    }
-                } else if (809 == formTypeId) {
-                    // рну 117
-                    if (!isCalc9) {
-                        result += (row.sum3 ?: 0)
-                    }
-                } else {
+            if (row.name == record520?.record_id?.value) {
+                switch (formTypeId) {
+                    case 818 : // РНУ-101
+                    case 822 : // РНУ-110
+                    case 808 : // РНУ-111
+                        if (isCalc9) {
+                            result += (row.sum3 ?: 0)
+                        }
+                        break
+                    case 820 : // РНУ-102
+                    case 809 : // РНУ-117
+                        if (!isCalc9) {
+                            result += (row.sum3 ?: 0)
+                        }
+                        break
+                    case 821 : // РНУ-107
+                        if (isCalc9) {
+                            result += (row.sum4 ?: 0)
+                        }
+                        break
+                    case 824 : // РНУ-112
+                        if (isCalc9) {
+                            result += (row.incomeCorrection ?: 0)
+                        }
+                        break
+                    case 829 : // РНУ-114
+                        if (!isCalc9) {
+                            result += (row.sum1 ?: 0)
+                        }
+                        break
                     // TODO (Ramil Timerbaev) пока не реализованы макеты
+                              // РНУ-108
+                              // РНУ-115
+                              // РНУ-116
+                              // РНУ-120
+                              // РНУ-122
+                              // РНУ-123
+                              // РНУ-171
                 }
             }
         }
@@ -690,6 +774,7 @@ def calc9or15(def record520, def sourceAllDataRowsMap, def isCalc9) {
     return result
 }
 
+// TODO (Ramil Timerbaev) уточнить про необходимость этого метода
 /**
  * Проверить является ли строка источника рну подитоговой и относится ли к указанному участнику.
  *
@@ -707,7 +792,7 @@ def checkRnuRow(def row, def name) {
     return row.fix.substring(start, end).equals(StringUtils.cleanString(name))
 }
 
-def calc17(def record520Id) {
+def calc17(def record520) {
     // формы ВЗЛ за предыдущий период
     def rows = getSourceDataRows(800, FormDataKind.PRIMARY, true)
     if (rows == null) {
@@ -715,7 +800,7 @@ def calc17(def record520Id) {
     }
     // мапа для хранения всех версии записи (строка нф - список всех версии записи "участников ТЦО")
     def record520Map = getVersionRecords520Map(rows)
-    def findRow = findPrevRow(record520Id, record520Map)
+    def findRow = findPrevRow(record520?.record_id?.value, record520Map)
     return (findRow ? findRow.category : getDefaultCategory())
 }
 
@@ -874,4 +959,70 @@ def isVZL(def start, def end, typeId) {
         return true
     }
     return false
+}
+
+/**
+ * Проверить необходимость использования строки источника.
+ * Для строк с участником ТЦО дату совершения сделки.
+ *
+ * @param date дата совершения сделки
+ * @param record запись справочника "Участники ТЦО"
+ * @return true - если дата входит в период нахождения организации в списке ВЗЛ
+ */
+def checkRow(def date, def record) {
+    if (record == null) {
+        return false
+    }
+    // для организации с типом отличном от ВЗЛ - использовать все записи
+    if (getVZL() != record?.TYPE?.value) {
+        return true
+    }
+    // для организации с типом ВЗЛ - использовать записи подходящие по условиям
+    def start = record?.START_DATE?.value
+    def end = record?.END_DATE?.value
+    if (start <= date && (end == null || date <= end)) {
+        return true
+    }
+    return false
+}
+
+@Field
+def recordVZLId = null
+
+/** Получить id записи ВЗЛ справочника "Типы участников ТЦО" (525). */
+def getVZL() {
+    if (recordVZLId == null) {
+        def records = getRecordsByRefbookId(525L)
+        def recordVZL = records.find { it?.CODE?.value == 'ВЗЛ' }
+        recordVZLId = recordVZL?.record_id?.value
+    }
+    return recordVZLId
+}
+
+@Field
+def recordsMap = [:]
+
+def getRecordsByRefbookId(long id) {
+    if (recordsMap[id] == null) {
+        // получить записи из справончика
+        def provider = formDataService.getRefBookProvider(refBookFactory, id, providerCache)
+        recordsMap[id] = provider.getRecords(getReportPeriodEndDate(), null, null, null)
+        if (recordsMap[id] == null) {
+            recordsMap[id] = []
+        }
+    }
+    return recordsMap[id]
+}
+
+@Field
+def reportPeriodIdsMap = [:]
+
+def getReportPeriodByTaxType(def taxType) {
+    if (reportPeriodIdsMap[taxType] == null) {
+        def periods = reportPeriodService.getReportPeriodsByDate(taxType, getReportPeriodEndDate(), getReportPeriodEndDate())
+        if (periods) {
+            reportPeriodIdsMap[taxType] = periods[periods.size() - 1].id
+        }
+    }
+    return reportPeriodIdsMap[taxType]
 }

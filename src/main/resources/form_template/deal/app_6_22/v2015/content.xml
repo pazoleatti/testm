@@ -1,11 +1,16 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <formTemplateContent>
     <fixedRows>false</fixedRows>
+    <monthly>false</monthly>
+    <comparative>false</comparative>
+    <accruing>false</accruing>
+    <updating>false</updating>
     <name>6.22. Привлечение гарантий</name>
     <fullName>6.22. Отчет в отношении расходов ПАО Сбербанк, связанных с привлечением гарантий</fullName>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>fix</alias>
         <checking>false</checking>
+        <columnType>STRING</columnType>
         <name>fix</name>
         <order>1</order>
         <width>0</width>
@@ -52,11 +57,12 @@
         <width>8</width>
         <parentAlias>name</parentAlias>
         <refBookAttributeId>5204</refBookAttributeId>
-        <refBookAttributeId2>53</refBookAttributeId2>
+        <refBookAttributeId2>50</refBookAttributeId2>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>docNumber</alias>
         <checking>false</checking>
+        <columnType>STRING</columnType>
         <name>Номер договора</name>
         <order>6</order>
         <width>5</width>
@@ -75,6 +81,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>dealNumber</alias>
         <checking>false</checking>
+        <columnType>STRING</columnType>
         <name>Номер сделки</name>
         <order>8</order>
         <width>5</width>
@@ -93,6 +100,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>sum</alias>
         <checking>false</checking>
+        <columnType>NUMBER</columnType>
         <name>Сумма расходов Банка по данным бухгалтерского учета, руб.</name>
         <order>10</order>
         <width>11</width>
@@ -102,15 +110,17 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>price</alias>
         <checking>false</checking>
+        <columnType>NUMBER</columnType>
         <name>Цена (тариф) за единицу измерения без учета НДС, акцизов и пошлины, руб.</name>
         <order>11</order>
-        <width>10</width>
+        <width>11</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>cost</alias>
         <checking>false</checking>
+        <columnType>NUMBER</columnType>
         <name>Итого стоимость без учета НДС, акцизов и пошлин, руб.</name>
         <order>12</order>
         <width>11</width>

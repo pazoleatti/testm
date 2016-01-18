@@ -223,7 +223,7 @@ alter table notification add constraint notification_fk_notify_user foreign key 
 alter table notification add constraint notification_fk_notify_role foreign key (role_id) references sec_role(id);
 alter table notification add constraint notification_chk_isread check (is_read in (0, 1));
 alter table notification add constraint notification_fk_blob_data_id foreign key (blob_data_id) references blob_data(id);
-alter table notification add constraint notification_chk_type check (type in (0, 1) and (type = 0 and report_id is null or type = 1));
+alter table notification add constraint notification_chk_type check (type in (0, 1) and ((type = 0 and report_id is null) or type = 1));
 alter table notification add constraint notification_fk_report_id foreign key (report_id) references blob_data(id);
 
 alter table event add constraint event_pk primary key (id);

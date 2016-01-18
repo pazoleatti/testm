@@ -16,12 +16,12 @@ import org.junit.Test;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
-import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -85,7 +85,7 @@ public class Rnu_107Test extends ScriptTestBase {
         SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
 
         // для попадания в ЛП:
-        // 1. Проверка на заполнение необходимых граф
+        // Проверка на заполнение необходимых граф
         DataRow<Cell> row = formData.createDataRow();
         row.setIndex(1);
         dataRows.add(row);
@@ -104,14 +104,38 @@ public class Rnu_107Test extends ScriptTestBase {
         Assert.assertEquals("Строка 1: Графа «Сумма фактически начисленного дохода» не заполнена!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Графа «Сумма дохода, соответствующая рыночному уровню тарифа» не заполнена!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Графа «Сумма доначисления дохода до рыночного уровня тарифа» не заполнена!", entries.get(i++).getMessage());
+        Assert.assertEquals("Группа «графа 5 не задана» не имеет строки подитога!", entries.get(i++).getMessage());
         Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
         testHelper.getLogger().clear();
 
-        //2. Для прохождения всех ЛП
+        // Для попадания в ЛП
+        i = 0;
+        row.getCell("name").setValue(1L, null);
+        row.getCell("transDoneDate").setValue(sdf.parse("10.11.2015"), null);
+        row.getCell("code").setValue("1", null);
+        row.getCell("reasonNumber").setValue("string", null);
+        row.getCell("reasonDate").setValue(sdf.parse("11.11.2015"), null);
+        row.getCell("sum1").setValue(-1, null);
+        row.getCell("dealTariff").setValue(-1, null);
+        row.getCell("taxTariff").setValue(-1, null);
+        row.getCell("sum2").setValue(-1, null);
+        row.getCell("sum3").setValue(-1, null);
+        row.getCell("sum4").setValue(-1, null);
+        testHelper.execute(FormDataEvent.CHECK);
+        Assert.assertEquals("Строка 1: Дата, указанная в графе «Дата совершения операции» (10.11.2015), должна относиться к отчетному периоду текущей формы (01.01.2014 - 31.12.2014)!", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 1: Значение графы «Дата совершения операции» должно быть не меньше значения графы «Основание для совершения операции. дата»!", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 1: Дата, указанная в графе «Основание для совершения операции. дата» должна принимать значение из следующего диапазона: 01.01.1991 - 31.12.2014!", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 1: Значение графы «Тариф за оказание услуги»/«Тариф, признаваемый рыночным для целей налогообложения» должно быть больше или равно «0»!", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 1: Значение графы «Сумма фактически начисленного дохода» должно быть больше или равно «0»!", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 1: Значение графы «Сумма дохода, соответствующая рыночному уровню тарифа» должно быть больше или равно «0»!", entries.get(i++).getMessage());
+        Assert.assertEquals("Группа «1» не имеет строки подитога!", entries.get(i++).getMessage());
+        testHelper.getLogger().clear();
+
+        // Для прохождения всех ЛП
         i = 0;
         row.getCell("name").setValue(1L, null);
         row.getCell("transDoneDate").setValue(sdf.parse("11.11.2014"), null);
-        row.getCell("code").setValue(777L, null);
+        row.getCell("code").setValue("777", null);
         row.getCell("reasonNumber").setValue("string", null);
         row.getCell("reasonDate").setValue(sdf.parse("11.11.2014"), null);
         row.getCell("sum1").setValue(2L, null);
@@ -119,8 +143,6 @@ public class Rnu_107Test extends ScriptTestBase {
         row.getCell("taxTariff").setValue(2L, null);
         row.getCell("sum2").setValue(3L, null);
         testHelper.execute(FormDataEvent.CALCULATE);
-        Assert.assertEquals(new BigDecimal("4.00"), row.getCell("sum3").getNumericValue());
-        Assert.assertEquals(new BigDecimal("1.00"), row.getCell("sum4").getNumericValue());
         Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
         testHelper.getLogger().clear();
     }
@@ -191,6 +213,24 @@ public class Rnu_107Test extends ScriptTestBase {
                         return result;
                     }
                 });
+        when(provider.getRecordData(anyLong())).thenAnswer(new Answer<Map<String, RefBookValue>>() {
+            @Override
+            public Map<String, RefBookValue> answer(InvocationOnMock invocationOnMock) throws Throwable {
+                Long id = (Long) invocationOnMock.getArguments()[0];
+                Map<String, RefBookValue> map = new HashMap<String, RefBookValue>();
+                String str;
+                switch (id.intValue()) {
+                    case 1 : str = "A"; break;
+                    case 2 : str = "B"; break;
+                    case 3 : str = "C"; break;
+                    default : str = "";
+                }
+                map.put(RefBook.RECORD_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, id));
+                map.put("INN", new RefBookValue(RefBookAttributeType.STRING, str));
+                map.put("NAME", new RefBookValue(RefBookAttributeType.STRING, str));
+                return map;
+            }
+        });
 
         testHelper.setImportFileInputStream(getImportXlsInputStream());
         testHelper.execute(FormDataEvent.IMPORT);

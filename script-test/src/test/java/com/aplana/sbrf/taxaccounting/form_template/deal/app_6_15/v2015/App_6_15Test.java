@@ -11,7 +11,6 @@ import com.aplana.sbrf.taxaccounting.util.ScriptTestBase;
 import com.aplana.sbrf.taxaccounting.util.TestScriptHelper;
 import com.aplana.sbrf.taxaccounting.util.mock.ScriptTestMockHelper;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
@@ -21,6 +20,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -57,10 +57,6 @@ public class App_6_15Test extends ScriptTestBase {
         return getDefaultScriptTestMockHelper(App_6_15Test.class);
     }
 
-    @Before
-    public void mockServices() {
-    }
-
     @Test
     public void create() {
         testHelper.execute(FormDataEvent.CREATE);
@@ -94,6 +90,7 @@ public class App_6_15Test extends ScriptTestBase {
         List<LogEntry> entries = testHelper.getLogger().getEntries();
         int i = 0;
         Assert.assertEquals("Строка 1: Графа «Полное наименование с указанием ОПФ» не заполнена!", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 1: Графа «Признак взаимозависимости» не заполнена!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Графа «Номер договора» не заполнена!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Графа «Дата договора» не заполнена!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Графа «Номер сделки» не заполнена!", entries.get(i++).getMessage());
@@ -102,6 +99,10 @@ public class App_6_15Test extends ScriptTestBase {
         Assert.assertEquals("Строка 1: Графа «Внутренний код» не заполнена!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Графа «Код страны происхождения предмета сделки» не заполнена!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Графа «Признак физической поставки драгоценного металла» не заполнена!", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 1: Графа «Признак внешнеторговой сделки» не заполнена!", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 1: Графа «Количество» не заполнена!", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 1: Графа «Цена (тариф) за единицу измерения без учета НДС, руб.» не заполнена!", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 1: Графа «Итого стоимость без учета НДС, руб.» не заполнена!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Графа «Дата совершения сделки» не заполнена!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Должна быть заполнена хотя бы одна из граф «Сумма расходов Банка по данным бухгалтерского учета, руб.», «Сумма доходов Банка по данным бухгалтерского учета, руб.»!", entries.get(i++).getMessage());
         Assert.assertEquals("Группа «графа 2.1 не задана, графа 5 не задана, графа 6 не задана, графа 10 не задана, графа 11 не задана» не имеет строки подитога!", entries.get(i++).getMessage());
@@ -118,6 +119,7 @@ public class App_6_15Test extends ScriptTestBase {
         //  Проверка даты совершения сделки
         //  Проверка Подитоговой строки
         row.getCell("name").setValue(1L, null);
+        row.getCell("dependence").setValue(1L, null);
         row.getCell("docNumber").setValue("string", null);
         row.getCell("docDate").setValue(sdf.parse("02.01.2990"), null);
         row.getCell("dealNumber").setValue("string", null);
@@ -127,6 +129,7 @@ public class App_6_15Test extends ScriptTestBase {
         row.getCell("innerCode").setValue(1L, null);
         row.getCell("dealCountryCode").setValue(1L, null);
         row.getCell("signPhis").setValue(3L, null);
+        row.getCell("signTransaction").setValue(3L, null);
         row.getCell("count").setValue(0, null);
         row.getCell("income").setValue(0, null);
         row.getCell("outcome").setValue(0, null);
@@ -171,11 +174,10 @@ public class App_6_15Test extends ScriptTestBase {
         row.getCell("outcome").setValue(2, null);
         row.getCell("price").setValue(1, null);
         row.getCell("cost").setValue(1, null);
-        testHelper.execute(FormDataEvent.CALCULATE);
+        testHelper.execute(FormDataEvent.CHECK);
         entries = testHelper.getLogger().getEntries();
-        i = 0;
+        i = 1;//отсутсвует подитоговая строка
         Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
-        Assert.assertEquals(1L, row.getCell("dependence").getValue());
         testHelper.getLogger().clear();
     }
 
@@ -225,13 +227,17 @@ public class App_6_15Test extends ScriptTestBase {
                         char iksr = str.charAt(0);
                         long id = 0;
                         switch (iksr) {
-                            case 'A':  id = 1L;
+                            case 'A':
+                                id = 1L;
                                 break;
-                            case 'B':  id = 2L;
+                            case 'B':
+                                id = 2L;
                                 break;
-                            case 'C':  id = 3L;
+                            case 'C':
+                                id = 3L;
                                 break;
-                            default: str = null;
+                            default:
+                                str = null;
                         }
                         Map<String, RefBookValue> map = new HashMap<String, RefBookValue>();
                         map.put(RefBook.RECORD_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, id));
@@ -241,6 +247,24 @@ public class App_6_15Test extends ScriptTestBase {
                         return result;
                     }
                 });
+        when(provider.getRecordData(anyLong())).thenAnswer(new Answer<Map<String, RefBookValue>>() {
+            @Override
+            public Map<String, RefBookValue> answer(InvocationOnMock invocationOnMock) throws Throwable {
+                Long id = (Long) invocationOnMock.getArguments()[0];
+                Map<String, RefBookValue> map = new HashMap<String, RefBookValue>();
+                String str;
+                switch (id.intValue()) {
+                    case 1 : str = "A"; break;
+                    case 2 : str = "B"; break;
+                    case 3 : str = "C"; break;
+                    default : str = "";
+                }
+                map.put(RefBook.RECORD_ID_ALIAS, new RefBookValue(RefBookAttributeType.NUMBER, id));
+                map.put("INN", new RefBookValue(RefBookAttributeType.STRING, str));
+                map.put("NAME", new RefBookValue(RefBookAttributeType.STRING, str));
+                return map;
+            }
+        });
 
         testHelper.setImportFileInputStream(getImportXlsInputStream());
         testHelper.execute(FormDataEvent.IMPORT);

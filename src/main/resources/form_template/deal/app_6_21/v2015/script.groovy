@@ -36,7 +36,7 @@ switch (formDataEvent) {
     case FormDataEvent.CALCULATE:
         calc()
         logicCheck()
-        formDataService.saveCachedDataRows(formData, logger)
+        formDataService.saveCachedDataRows(formData, logger, formDataEvent, scriptStatusHolder)
         break
     case FormDataEvent.CHECK:
         logicCheck()
@@ -59,11 +59,11 @@ switch (formDataEvent) {
         formDataService.consolidationSimple(formData, logger, userInfo)
         calc()
         logicCheck()
-        formDataService.saveCachedDataRows(formData, logger)
+        formDataService.saveCachedDataRows(formData, logger, formDataEvent, scriptStatusHolder)
         break
     case FormDataEvent.IMPORT:
         importData()
-        formDataService.saveCachedDataRows(formData, logger)
+        formDataService.saveCachedDataRows(formData, logger, formDataEvent, scriptStatusHolder)
         break
     case FormDataEvent.SORT_ROWS:
         sortFormDataRows()
@@ -216,10 +216,12 @@ void logicCheck() {
 // Проверки подитоговых сумм
 void checkItog(def dataRows) {
     // Рассчитанные строки итогов
-    def testItogRows = calcSubTotalRows(dataRows)
+    def testItogRows = calcGroupRows(dataRows).findAll { it.getAlias() }
     // Имеющиеся строки итогов
     def itogRows = dataRows.findAll { it.getAlias() != null && !'total'.equals(it.getAlias()) }
-    checkItogRows(dataRows, testItogRows, itogRows, groupColumns, logger, new ScriptUtils.GroupString() {
+    // все строки, кроме общего итога
+    def groupRows = dataRows.findAll { !'total'.equals(it.getAlias()) }
+    checkItogRows(groupRows, testItogRows, itogRows, groupColumns, logger, new ScriptUtils.GroupString() {
         @Override
         String getString(DataRow<Cell> row) {
             return getValuesByGroupColumn(row)
@@ -320,19 +322,27 @@ DataRow<Cell> getSubTotalRow(int i, def key) {
 
 // Возвращает строку со значениями полей строки по которым идет группировка
 String getValuesByGroupColumn(DataRow row) {
-    def sep = ", "
-    def StringBuilder builder = new StringBuilder()
-    def map = getRefBookValue(520, row.name)
-    if (map != null)
-        builder.append(map.NAME?.stringValue).append(sep)
-    if (row.docNumber != null)
-        builder.append(row.docNumber).append(sep)
-    if (row.docDate != null)
-        builder.append(row.docDate?.format('dd.MM.yyyy')).append(sep)
-    def String retVal = builder.toString()
-    if (retVal.length() < 2)
-        return null
-    return retVal.substring(0, retVal.length() - 2)
+    def values = []
+    // 2
+    def name = getRefBookValue(520, row.name)?.NAME?.stringValue
+    if (name != null) {
+        values.add(name)
+    } else {
+        values.add('графа 2 не задана')
+    }
+    // 5
+    if (row.docNumber) {
+        values.add(row.docNumber)
+    } else {
+        values.add('графа 5 не задана')
+    }
+    // 6
+    if (row.docDate) {
+        values.add(row.docDate?.format('dd.MM.yyyy'))
+    } else {
+        values.add('графа 6 не задана')
+    }
+    return values.join(", ")
 }
 
 // Получение импортируемых данных
@@ -397,10 +407,11 @@ void importData() {
             key = str.hashCode()
             def subTotalRow = getNewSubTotalRowFromXls(key, rowValues, colOffset, fileRowIndex, rowIndex)
             //наш ключ - row.getAlias() до решетки. так как индекс после решетки не равен у расчитанной и импортированной подитогововых строк
-            if (totalRowFromFileMap[subTotalRow.getAlias().split('#')[0]] == null) {
-                totalRowFromFileMap[subTotalRow.getAlias().split('#')[0]] = []
+            def key = subTotalRow.getAlias().split('#')[0]
+            if (totalRowFromFileMap[key] == null) {
+                totalRowFromFileMap[key] = []
             }
-            totalRowFromFileMap[subTotalRow.getAlias().split('#')[0]].add(subTotalRow)
+            totalRowFromFileMap[key].add(subTotalRow)
             rows.add(subTotalRow)
             allValues.remove(rowValues)
             rowValues.clear()
@@ -417,7 +428,9 @@ void importData() {
     updateIndexes(rows)
     // сравнение подитогов
     if (!totalRowFromFileMap.isEmpty()) {
-        def tmpSubTotalRows = calcSubTotalRows(rows)
+        // рассчитать подитоги для строк
+        def tmpRows = calcGroupRows(rows)
+        def tmpSubTotalRows = tmpRows.findAll { it.getAlias() }
         tmpSubTotalRows.each { subTotalRow ->
             def totalRows = totalRowFromFileMap[subTotalRow.getAlias().split('#')[0]]
             if (totalRows) {
@@ -426,7 +439,8 @@ void importData() {
                 }
                 totalRowFromFileMap.remove(subTotalRow.getAlias().split('#')[0])
             } else {
-                rowWarning(logger, null, String.format(GROUP_WRONG_ITOG, getValuesByGroupColumn(subTotalRow)))
+                def row = tmpRows[Integer.valueOf(subTotalRow.getAlias().split('#')[1])]
+                rowWarning(logger, null, String.format(GROUP_WRONG_ITOG, getValuesByGroupColumn(row)))
             }
         }
         if (!totalRowFromFileMap.isEmpty()) {
@@ -616,8 +630,8 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
     return newRow
 }
 
-// Получить посчитанные подитоговые строки
-def calcSubTotalRows(def dataRows) {
+// Получить посчитанные подитоговые строки вместе со строками групп
+def calcGroupRows(def dataRows) {
     def tmpRows = dataRows.findAll { !it.getAlias() }
     // Добавление подитогов
     addAllAliased(tmpRows, new ScriptUtils.CalcAliasRow() {
@@ -627,7 +641,7 @@ def calcSubTotalRows(def dataRows) {
         }
     }, groupColumns)
 
-    return tmpRows.findAll { it.getAlias() }
+    return tmpRows
 }
 
 // Сортировка групп и строк

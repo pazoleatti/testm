@@ -68,7 +68,6 @@ public final class ScriptUtils {
     public static final String CHECK_OVERFLOW_MESSAGE = "Строка %d: Значение графы «%s» превышает допустимую разрядность (%d знаков). Графа «%s» рассчитывается как «%s»!";
     // для проверки итогов при загрузе экселя (посчитанные и ожижаемые значения как %s потому что %f теряет точность)
     public static final String COMPARE_TOTAL_VALUES = "Строка формы %d: Итоговая сумма по графе «%s» (%s) некорректна (ожидаемое значение %s).";
-    public static final String TCO_END_MESSAGE = "Для заполнения на форме граф с общей информацией о %s выполнен поиск значения файла по графе «%s» в следующих атрибутах справочника «Участники ТЦО»: «ИНН (заполняется для резидентов, некредитных организаций)», «Регистрационный номер в стране инкорпорации (заполняется для нерезидентов)», «Код налогоплательщика в стране инкорпорации», «Код SWIFT (заполняется для кредитных организаций, резидентов и нерезидентов)», «КИО (заполняется для нерезидентов)»";
     public static final String INN_JUR_PATTERN = RefBookUtils.INN_JUR_PATTERN;
     public static final String INN_JUR_MEANING = RefBookUtils.INN_JUR_MEANING;
     public static final String INN_IND_PATTERN = RefBookUtils.INN_IND_PATTERN;
@@ -1831,62 +1830,68 @@ public final class ScriptUtils {
         long ref_id = 520;
         RefBook refBook = refBookFactory.get(ref_id);
 
+        Long recordId = null;
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd.MM.yyyy");
+        String dateStr = simpleDateFormat.format(endDate);
         String filter = String.format("(LOWER(INN) = LOWER('%1$s') or " +
                 "LOWER(REG_NUM) = LOWER('%1$s') or " +
                 "LOWER(TAX_CODE_INCORPORATION) = LOWER('%1$s') or " +
                 "LOWER(SWIFT) = LOWER('%1$s') or " +
                 "LOWER(KIO) = LOWER('%1$s'))", iksr);
+        String keyString = dateStr + filter;
         if (recordCache.get(ref_id) != null) {
-            if (recordCache.get(ref_id).get(filter) != null) {
-                return (Long) recordCache.get(ref_id).get(filter);
+            if (recordCache.get(ref_id).get(keyString) != null) {
+                recordId = (Long) recordCache.get(ref_id).get(keyString);
             }
         } else {
             recordCache.put(ref_id, new HashMap<String, Object>());
         }
 
+        Map<String, RefBookValue> record = null;
         RefBookDataProvider provider = refBookFactory.getDataProvider(ref_id);
-        PagingResult<Map<String, RefBookValue>> records = provider.getRecords(endDate, null, filter, null);
         List<String> aliases = Arrays.asList("INN", "REG_NUM", "TAX_CODE_INCORPORATION", "SWIFT", "KIO");
-        if (records.size() == 1) {
-            // 5
-            Map<String, RefBookValue> record = records.get(0);
-
-            if (!com.aplana.sbrf.taxaccounting.model.util.StringUtils.cleanString(nameFromFile).equals(com.aplana.sbrf.taxaccounting.model.util.StringUtils.cleanString(record.get("NAME").getStringValue()))) {
-                // сообщение 4
-                String msg;
-                if (nameFromFile != null && !nameFromFile.isEmpty()) {
-                    msg = String.format("В файле указано другое наименование %s - «%s»!", isVzl ? "ВЗЛ/РОЗ" : "юридического лица", nameFromFile);
-                } else {
-                    msg = String.format("Наименование %s в файле не заполнено!", isVzl ? "ВЗЛ/РОЗ" : "юридического лица");
-                }
-                String refBookAttributeName = "Не задано";
-                for (String alias : aliases) {
-                    if (iksr.equals(record.get(alias).getStringValue())) {
-                        refBookAttributeName = refBook.getAttribute(alias).getName();
-                        break;
+        if (recordId == null) {
+            PagingResult<Map<String, RefBookValue>> records = provider.getRecords(endDate, null, filter, null);
+            if (records.size() == 1) {
+                // 5
+                record = records.get(0);
+            } else {
+                if (records.isEmpty()) {
+                    // 6
+                    if (nameFromFile == null || nameFromFile.isEmpty()) {
+                        nameFromFile = "наименование " + (isVzl ? "ВЗЛ/РОЗ" : "юридического лица") + " в файле не заполнено";
                     }
+                    // сообщение 1
+                    logger.warn("Строка %s , столбец %s: %s в справочнике «Участники ТЦО» не найдено значение «%s» (%s), актуальное на дату «%s»!",
+                            fileRowIndex, getXLSColumnName(colIndex), isVzl ? "На форме не заполнены графы с общей информацией о ВЗЛ/РОЗ, так как" : ("Для заполнения графы «" + iksrName + "» формы"), iksr, nameFromFile, simpleDateFormat.format(endDate));
                 }
-                logger.warn("Строка %s , столбец %s: На форме графы с общей информацией о %s заполнены данными записи справочника «Участники ТЦО», " +
-                                "в которой атрибут «Полное наименование юридического лица с указанием ОПФ» = «%s», атрибут «%s» = «%s». %s",
-                        fileRowIndex, getXLSColumnName(colIndex), isVzl ? "ВЗЛ/РОЗ" : "юридическом лице", record.get("NAME").getStringValue(), refBookAttributeName, iksr, msg);
+                return null;
             }
-            logger.warn(TCO_END_MESSAGE, isVzl ? "ВЗЛ/РОЗ" : "юридическом лице", iksrName);
-            recordCache.get(ref_id).put(filter, record.get(RefBook.RECORD_ID_ALIAS).getNumberValue());
-            return (Long) recordCache.get(ref_id).get(filter);
         } else {
-            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd.MM.yyyy");
-            if (records.isEmpty()) {
-                // 6
-                if (nameFromFile == null || nameFromFile.isEmpty()) {
-                    nameFromFile = "наименование " + (isVzl ? "ВЗЛ/РОЗ" : "юридического лица") + " в файле не заполнено";
-                }
-                // сообщение 1
-                logger.warn("Строка %s , столбец %s: %s в справочнике «Участники ТЦО» не найдено значение «%s» (%s), актуальное на дату «%s»!",
-                        fileRowIndex, getXLSColumnName(colIndex), isVzl ? "На форме не заполнены графы с общей информацией о ВЗЛ/РОЗ, так как" : ("Для заполнения графы «" + iksrName + "» формы"), iksr, nameFromFile, simpleDateFormat.format(endDate));
-                logger.warn(TCO_END_MESSAGE, isVzl ? "ВЗЛ/РОЗ" : "юридическом лице", iksrName);
-            }
+            record = provider.getRecordData(recordId);
         }
-        return null;
+
+        if (!com.aplana.sbrf.taxaccounting.model.util.StringUtils.cleanString(nameFromFile).equalsIgnoreCase(com.aplana.sbrf.taxaccounting.model.util.StringUtils.cleanString(record.get("NAME").getStringValue()))) {
+            // сообщение 4
+            String msg;
+            if (nameFromFile != null && !nameFromFile.isEmpty()) {
+                msg = String.format("В файле указано другое наименование %s - «%s»!", isVzl ? "ВЗЛ/РОЗ" : "юридического лица", nameFromFile);
+            } else {
+                msg = String.format("Наименование %s в файле не заполнено!", isVzl ? "ВЗЛ/РОЗ" : "юридического лица");
+            }
+            String refBookAttributeName = "Не задано";
+            for (String alias : aliases) {
+                if (iksr.equals(record.get(alias).getStringValue())) {
+                    refBookAttributeName = refBook.getAttribute(alias).getName();
+                    break;
+                }
+            }
+            logger.warn("Строка %s , столбец %s: На форме графы с общей информацией о %s заполнены данными записи справочника «Участники ТЦО», " +
+                            "в которой атрибут «Полное наименование юридического лица с указанием ОПФ» = «%s», атрибут «%s» = «%s». %s",
+                    fileRowIndex, getXLSColumnName(colIndex), isVzl ? "ВЗЛ/РОЗ" : "юридическом лице", record.get("NAME").getStringValue(), refBookAttributeName, iksr, msg);
+        }
+        recordCache.get(ref_id).put(keyString, record.get(RefBook.RECORD_ID_ALIAS).getNumberValue());
+        return (Long) recordCache.get(ref_id).get(keyString);
     }
 
     /**

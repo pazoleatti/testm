@@ -100,7 +100,7 @@ def autoFillColumns = ['rowNumber', 'iksr', 'countryCode', 'price', 'cost']
 def nonEmptyColumns = ['name', 'sum', 'docDate', 'country', 'count', 'price', 'cost', 'dealDoneDate']
 
 @Field
-def totalColumns = ['sum', 'count', 'price', 'cost']
+def totalColumns = ['sum', 'price', 'cost']
 
 // Дата начала отчетного периода
 @Field
@@ -582,7 +582,7 @@ void importTransportData() {
     // сравнение итогов
     if (!logger.containsLevel(LogLevel.ERROR) && totalTF) {
         // мапа с алиасами граф и номерами колонокв в xml (алиас -> номер колонки)
-        def totalColumnsIndexMap = ['sum': 5, 'count': 12, 'price': 13, 'cost': 14]
+        def totalColumnsIndexMap = ['sum': 5, 'price': 13, 'cost': 14]
 
         // сравнение контрольных сумм
         def colOffset = 1

@@ -64,10 +64,11 @@ public class RefBookExcelReportBuilder extends AbstractReportBuilder {
     private RefBook refBook;
     private List<RefBookAttribute> refBookAttributeList;
     private CellStyleBuilder cellStyleBuilder;
+    private Date version;
     private String filter;
     private RefBookAttribute sortAttribute;
 
-    public RefBookExcelReportBuilder(RefBook refBook, List<Map<String, RefBookValue>> records, Map<Long, Pair<RefBookAttribute, Map<Long, RefBookValue>>> dereferenceValues, String filter, final RefBookAttribute sortAttribute) {
+    public RefBookExcelReportBuilder(RefBook refBook, List<Map<String, RefBookValue>> records, Map<Long, Pair<RefBookAttribute, Map<Long, RefBookValue>>> dereferenceValues, Date version, String filter, final RefBookAttribute sortAttribute) {
         super(FILE_NAME, ".xlsx");
         this.workBook = new XSSFWorkbook();
         String sheetName = refBook.getName().replaceAll("[/\\[\\]\\*\\:\\?\\\\]", "_"); //Убираем недостимые символы в названии листа
@@ -77,6 +78,7 @@ public class RefBookExcelReportBuilder extends AbstractReportBuilder {
         this.refBook = refBook;
         this.records = records;
         this.dereferenceValues = dereferenceValues;
+        this.version = version;
         this.filter = filter;
         this.sortAttribute= sortAttribute;
         cellStyleBuilder = new CellStyleBuilder();
@@ -144,16 +146,16 @@ public class RefBookExcelReportBuilder extends AbstractReportBuilder {
 
         if (refBook.isVersioned()) {
             Row versionRow = sheet.createRow(1);
-            Cell version = versionRow.createCell(cellNumber);
-            version.setCellValue("Дата актуальности: " + new SimpleDateFormat(DATE_FORMAT).format(new Date()));
-            version.setCellStyle(cs);
+            Cell versionCell = versionRow.createCell(cellNumber);
+            versionCell.setCellValue("Дата актуальности: " + new SimpleDateFormat(DATE_FORMAT).format(version));
+            versionCell.setCellStyle(cs);
             cellNumber = 0;
         }
         if (filter != null && !filter.isEmpty()) {
             Row filterRow = sheet.createRow(1);
-            Cell version = filterRow.createCell(cellNumber);
-            version.setCellValue("Фильтр: " + filter);
-            version.setCellStyle(cs);
+            Cell filterCell = filterRow.createCell(cellNumber);
+            filterCell.setCellValue("Фильтр: " + filter);
+            filterCell.setCellStyle(cs);
             cellNumber = 0;
         }
 

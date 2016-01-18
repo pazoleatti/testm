@@ -87,18 +87,29 @@ def editableColumns = ['name', 'transDoneDate', 'code', 'reasonNumber', 'reasonD
 
 // Автозаполняемые атрибуты
 @Field
-def autoFillColumns = ['iksr', 'sum3']
+def autoFillColumns = ['rowNumber', 'iksr', 'sum3']
 
 // Проверяемые на пустые значения атрибуты
 @Field
 def nonEmptyColumns = ['name', 'transDoneDate', 'code', 'reasonNumber', 'reasonDate', 'rent', 'taxRent', 'sum1', 'sum2', 'sum3']
 
 @Field
-def totalColumns = ['sum1', 'sum2', 'sum3']
+def totalColumns = ['sum3']
+
+// Дата начала отчетного периода
+@Field
+def startDate = null
 
 // Дата окончания отчетного периода
 @Field
 def endDate = null
+
+def getReportPeriodStartDate() {
+    if (startDate == null) {
+        startDate = reportPeriodService.getStartDate(formData.reportPeriodId).time
+    }
+    return startDate
+}
 
 def getReportPeriodEndDate() {
     if (endDate == null) {
@@ -128,8 +139,78 @@ def getRefBookValue(def long refBookId, def Long recordId) {
 
 // Логические проверки
 void logicCheck() {
-}
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
+    if (dataRows.isEmpty()) {
+        return
+    }
 
+    for (row in dataRows) {
+        if (row.getAlias() != null) {
+            continue
+        }
+        def rowNum = row.getIndex()
+
+        // Проверка заполнения обязательных полей
+        checkNonEmptyColumns(row, rowNum, nonEmptyColumns, logger, true)
+
+        // Проверка даты совершения операции
+        if (row.transDoneDate && (row.transDoneDate < getReportPeriodStartDate() || row.transDoneDate > getReportPeriodEndDate())) {
+            def msg = row.getCell('transDoneDate').column.name
+            logger.error("Строка $rowNum: Значение графы «$msg» должно быть больше или равно " + getReportPeriodStartDate().format('dd.MM.yyyy') + " и" +
+                    " меньше или равно" + getReportPeriodEndDate().format('dd.MM.yyyy'))
+        }
+
+        // Проверка даты совершения операции
+        if (row.transDoneDate && row.reasonDate && (row.transDoneDate < row.reasonDate)) {
+            def msg = row.getCell('transDoneDate').column.name
+            def msg1 = row.getCell('reasonDate').column.name
+            logger.error("Строка $rowNum: Значение графы «$msg» должно быть не меньше значения графы «$msg1»!")
+        }
+
+        // Проверка даты основания совершения операции
+        checkDatePeriod(logger, row, 'reasonDate', Date.parse('dd.MM.yyyy', '01.01.1991'), getReportPeriodEndDate(), true)
+
+        // Проверка положительного значения арендной ставки
+        if (row.rent != null && row.rent < 0) {
+            def msg = row.getCell('rent').column.name
+            logger.error("Строка $rowNum: Значение графы «$msg» должно быть больше или равно «0»!")
+        }
+
+        // Проверка положительного значения арендной ставки
+        if (row.taxRent != null && row.taxRent < 0) {
+            def msg = row.getCell('taxRent').column.name
+            logger.error("Строка $rowNum: Значение графы «$msg» должно быть больше или равно «0»!")
+        }
+
+        boolean positive = true
+        // Проверка положительной суммы арендной платы
+        if (row.sum1 != null && row.sum1 < 0) {
+            def msg = row.getCell('sum1').column.name
+            logger.error("Строка $rowNum: Значение графы «$msg» должно быть больше или равно «0»!")
+            positive = false
+        }
+
+        // Проверка положительной суммы арендной платы
+        if (row.sum2 != null && row.sum2 < 0) {
+            def msg = row.getCell('sum2').column.name
+            logger.error("Строка $rowNum: Значение графы «$msg» должно быть больше или равно «0»!")
+            positive = false
+        }
+
+        // Проверка суммы доначисленной арендной платы
+        if (row.sum1 != null && row.sum2 != null && positive && (row.sum3 != row.sum2 - row.sum1)) {
+            def msg = row.getCell('sum1').column.name
+            def msg1 = row.getCell('sum2').column.name
+            def msg2 = row.getCell('sum3').column.name
+            logger.error("Строка $rowNum: Значение графы «$msg» должно быть равно разности значений граф «$msg2» и «$msg1»!")
+        }
+    }
+
+    // Проверка итоговых значений пофиксированной строке «Итого»
+    if (dataRows.find { it.getAlias() == 'total' }) {
+        checkTotalSum(dataRows, totalColumns, logger, true)
+    }
+}
 
 // Алгоритмы заполнения полей формы
 void calc() {
@@ -140,9 +221,20 @@ void calc() {
     // Удаление подитогов
     deleteAllAliased(dataRows)
 
+    for (row in dataRows) {
+        row.sum3 = calc12(row)
+    }
+
     // Общий итог
     def total = calcTotalRow(dataRows)
     dataRows.add(total)
+}
+
+def calc12(def row) {
+    if (row.sum2 != null && row.sum1 != null) {
+        return row.sum2 - row.sum1
+    }
+    return null
 }
 
 def calcTotalRow(def dataRows) {
@@ -309,7 +401,7 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
     colIndex++
 
     // графа 5
-    newRow.code = getRecordIdImport(28, 'CODE', values[colIndex], fileRowIndex, colIndex + colOffset, false)
+    newRow.code = values[colIndex]
     colIndex++
 
     // графа 6
@@ -321,8 +413,8 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
     colIndex++
 
     // графы 8-12
-    ['rent', 'taxRent', 'sum1', 'sum2', 'sum3'].each{
-        newRow[it]= parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
+    ['rent', 'taxRent', 'sum1', 'sum2', 'sum3'].each {
+        newRow[it] = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
         colIndex++
     }
 

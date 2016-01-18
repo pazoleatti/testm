@@ -183,6 +183,10 @@ insert into form_template (id, type_id, version, monthly, fixed_rows, name, full
 insert into form_type (id, name, tax_type, status, code) values (100, 'РНУ-100', 'I', 0, 'code-100');
 insert into form_template (id, type_id, version, monthly, fixed_rows, name, fullname, status, comparative, accruing)
   values (100, 100, to_date('01.01.2000', 'DD.MM.YY'), 0, 0, 'РНУ-100', 'РНУ-100', 0, 1, 0);
+--Тип нф = рну-77 (ежемесячная)
+insert into form_type (id, name, tax_type, status, code) values (77, 'РНУ-77', 'I', 0, 'code-77');
+insert into form_template (id, type_id, version, monthly, fixed_rows, name, fullname, status, comparative, accruing)
+  values (77, 77, to_date('01.01.2000', 'DD.MM.YY'), 1, 0, 'РНУ-77', 'РНУ-77', 0, 0, 0);
 
 --------------НДС--------
 --Тип нф = ндс-200
@@ -201,6 +205,14 @@ insert into form_template (id, type_id, version, monthly, fixed_rows, name, full
 insert into form_type (id, name, tax_type, status, code) values (203, 'НДС-203', 'V', 0, 'code-203');
 insert into form_template (id, type_id, version, monthly, fixed_rows, name, fullname, status, comparative, accruing)
   values (203, 203, to_date('01.01.2000', 'DD.MM.YY'), 1, 0, 'НДС-203', 'НДС-203', 0, 0, 0);
+--Тип нф = ндс-204 (с периодом сравнения)
+insert into form_type (id, name, tax_type, status, code) values (204, 'НДС-204', 'V', 0, 'code-204');
+insert into form_template (id, type_id, version, monthly, fixed_rows, name, fullname, status, comparative, accruing)
+  values (204, 204, to_date('01.01.2000', 'DD.MM.YY'), 0, 0, 'НДС-204', 'НДС-204', 0, 1, 0);
+--Тип нф = ндс-205 (с периодом сравнения и признаком нарастающего итога)
+insert into form_type (id, name, tax_type, status, code) values (205, 'НДС-205', 'V', 0, 'code-205');
+insert into form_template (id, type_id, version, monthly, fixed_rows, name, fullname, status, comparative, accruing)
+  values (205, 205, to_date('01.01.2000', 'DD.MM.YY'), 0, 0, 'НДС-205', 'НДС-205', 0, 1, 1);
 
 
 --Тип декларации = Д-1
@@ -293,6 +305,8 @@ Insert into department_form_type (ID,DEPARTMENT_ID,FORM_TYPE_ID,KIND) values (34
 Insert into department_form_type (ID,DEPARTMENT_ID,FORM_TYPE_ID,KIND) values (35,'4',100,'1');
 --Назначение первичная РНУ-100 для Волго-Вятского банка
 Insert into department_form_type (ID,DEPARTMENT_ID,FORM_TYPE_ID,KIND) values (36,'8',100,'1');
+--Назначение первичная РНУ-77 для Байкальского банка
+Insert into department_form_type (ID,DEPARTMENT_ID,FORM_TYPE_ID,KIND) values (37,'4',77,'1');
 
 ----------НДС-----------
 --Назначение первичная НДС-200 для Байкальского банка
@@ -305,6 +319,10 @@ Insert into department_form_type (ID,DEPARTMENT_ID,FORM_TYPE_ID,KIND) values (20
 Insert into department_form_type (ID,DEPARTMENT_ID,FORM_TYPE_ID,KIND) values (203,'4',203,'1');
 --Назначение первичная НДС-203 для Волго-вятского банка
 Insert into department_form_type (ID,DEPARTMENT_ID,FORM_TYPE_ID,KIND) values (204,'8',203,'1');
+--Назначение первичная НДС-204 для Волго-вятского банка (с периодом сравнения)
+Insert into department_form_type (ID,DEPARTMENT_ID,FORM_TYPE_ID,KIND) values (205,'8',204,'1');
+--Назначение первичная НДС-205 для Волго-вятского банка (с периодом сравнения и признаком нарастающего итога)
+Insert into department_form_type (ID,DEPARTMENT_ID,FORM_TYPE_ID,KIND) values (206,'8',205,'1');
 
 --Назначение декларация Д-1 для Байкальского банка
 Insert into department_declaration_type (ID,DEPARTMENT_ID,DECLARATION_TYPE_ID) values (1,'4',1);
@@ -373,6 +391,8 @@ Insert into form_data_source (DEPARTMENT_FORM_TYPE_ID,SRC_DEPARTMENT_FORM_TYPE_I
 Insert into form_data_source (DEPARTMENT_FORM_TYPE_ID,SRC_DEPARTMENT_FORM_TYPE_ID,PERIOD_START,PERIOD_END) values (34,35,date '2000-01-01',null);
 --Связка источник->приемник "первичная РНУ-100 Волго-вятского банка -> консолидированная РНУ-100 Байкальского банка"
 Insert into form_data_source (DEPARTMENT_FORM_TYPE_ID,SRC_DEPARTMENT_FORM_TYPE_ID,PERIOD_START,PERIOD_END) values (34,36,date '2000-01-01',null);
+--Связка источник->приемник "первичная РНУ-77 Байкальского банка -> консолидированная РНУ-1 Байкальского банка"
+Insert into form_data_source (DEPARTMENT_FORM_TYPE_ID,SRC_DEPARTMENT_FORM_TYPE_ID,PERIOD_START,PERIOD_END) values (2,37,date '2000-01-01',null);
 
 ---------------НДС------------
 --Связка источник->приемник "первичная НДС-200 Байкальского банка -> консолидированная РНУ-1 Байкальского банка"
@@ -387,6 +407,12 @@ Insert into form_data_source (DEPARTMENT_FORM_TYPE_ID,SRC_DEPARTMENT_FORM_TYPE_I
 Insert into form_data_source (DEPARTMENT_FORM_TYPE_ID,SRC_DEPARTMENT_FORM_TYPE_ID,PERIOD_START,PERIOD_END) values (7,203,date '2000-01-01',null);
 --Связка источник->приемник "первичная НДС-203 Волго-вятского банка -> консолидированная РНУ-5 Байкальского банка"
 Insert into form_data_source (DEPARTMENT_FORM_TYPE_ID,SRC_DEPARTMENT_FORM_TYPE_ID,PERIOD_START,PERIOD_END) values (7,204,date '2000-01-01',null);
+--Связка источник->приемник "первичная НДС-204 Волго-вятского банка (с периодом сравнения) -> консолидированная РНУ-8 Байкальского банка"
+Insert into form_data_source (DEPARTMENT_FORM_TYPE_ID,SRC_DEPARTMENT_FORM_TYPE_ID,PERIOD_START,PERIOD_END) values (10,205,date '2000-01-01',null);
+--Связка источник->приемник "первичная НДС-205 Волго-вятского банка (с периодом сравнения и признаком нарастающего итога) -> консолидированная РНУ-8 Байкальского банка"
+Insert into form_data_source (DEPARTMENT_FORM_TYPE_ID,SRC_DEPARTMENT_FORM_TYPE_ID,PERIOD_START,PERIOD_END) values (10,206,date '2000-01-01',null);
+--Связка источник->приемник "первичная РНУ-4 Байкальского банка -> первичная НДС-200 Байкальского банка"
+Insert into form_data_source (DEPARTMENT_FORM_TYPE_ID,SRC_DEPARTMENT_FORM_TYPE_ID,PERIOD_START,PERIOD_END) values (200,6,date '2000-01-01',null);
 
 --Связка источник->приемник "консолидированная РНУ-1 Байкальского банка -> Декларация Д-1 Байкальского банка"
 Insert into declaration_source (DEPARTMENT_DECLARATION_TYPE_ID,SRC_DEPARTMENT_FORM_TYPE_ID,PERIOD_START,PERIOD_END) values (1,2,date '2000-01-01',null);
@@ -606,9 +632,15 @@ values (12,1,1,1,null,6,null,0,0,    0,0,0,0);
 insert into tax_period(id, tax_type, year) values (6, 'I', 2025);
 insert into report_period (id, name, tax_period_id, dict_tax_period_id, start_date, end_date, calendar_start_date)
 values (6, 'первый квартал',  6, 1, date '2025-01-01', date '2025-03-31', date '2025-01-01');
+--Отчетный период 1 квартал 2025 НДС
+insert into tax_period(id, tax_type, year) values (1005, 'V', 2025);
+insert into report_period (id, name, tax_period_id, dict_tax_period_id, start_date, end_date, calendar_start_date)
+values (1005, 'первый квартал',  1005, 1, date '2025-01-01', date '2025-03-31', date '2025-01-01');
 
 --Связка подразделение Байкальский банк - период 1 квартал 2025
 Insert into department_report_period (DEPARTMENT_ID,REPORT_PERIOD_ID,IS_ACTIVE,IS_BALANCE_PERIOD,CORRECTION_DATE,ID) values ('4',6,'1','0',null,7);
+--Связка подразделение Байкальский банк - период 1 квартал 2024 НДС
+Insert into department_report_period (DEPARTMENT_ID,REPORT_PERIOD_ID,IS_ACTIVE,IS_BALANCE_PERIOD,CORRECTION_DATE,ID) values ('4',1005,'1','0',null,1006);
 
 -- НФ консолидированная РНУ-4 (январь) в периоде 1 квартал 2025 для Байкальского банка
 Insert into FORM_DATA (ID,FORM_TEMPLATE_ID,STATE,KIND,PERIOD_ORDER,DEPARTMENT_REPORT_PERIOD_ID,COMPARATIVE_DEP_REP_PER_ID,ACCRUING,MANUAL,  RETURN_SIGN,SORTED,EDITED,SORTED_BACKUP)
@@ -619,6 +651,9 @@ values (14,1,1,1,null,7,null,0,0,    0,0,0,0);
 -- НФ первичная РНУ-4 (январь) в периоде 1 квартал 2025 для Байкальского банка
 Insert into FORM_DATA (ID,FORM_TEMPLATE_ID,STATE,KIND,PERIOD_ORDER,DEPARTMENT_REPORT_PERIOD_ID,COMPARATIVE_DEP_REP_PER_ID,ACCRUING,MANUAL,  RETURN_SIGN,SORTED,EDITED,SORTED_BACKUP)
 values (15,4,1,1,1,7,null,0,0,    0,0,0,0);
+-- НФ первичная НДС-200 в периоде 1 квартал 2024 для Байкальского банка
+Insert into FORM_DATA (ID,FORM_TEMPLATE_ID,STATE,KIND,PERIOD_ORDER,DEPARTMENT_REPORT_PERIOD_ID,COMPARATIVE_DEP_REP_PER_ID,ACCRUING,MANUAL,  RETURN_SIGN,SORTED,EDITED,SORTED_BACKUP)
+values (1012,200,1,1,null,1006,null,0,0,    0,0,0,0);
 
 ----------------test8------------
 
@@ -637,9 +672,36 @@ Insert into department_report_period (DEPARTMENT_ID,REPORT_PERIOD_ID,IS_ACTIVE,I
 -- НФ консолидированная РНУ-1 в периоде 1 квартал 2005 (дата корректировки 10.01.2005) для Байкальского банка
 Insert into FORM_DATA (ID,FORM_TEMPLATE_ID,STATE,KIND,PERIOD_ORDER,DEPARTMENT_REPORT_PERIOD_ID,COMPARATIVE_DEP_REP_PER_ID,ACCRUING,MANUAL,  RETURN_SIGN,SORTED,EDITED,SORTED_BACKUP)
 values (16,1,1,2,null,10,null,0,0,    0,0,0,0);
--- НФ первичная РНУ-1 в периоде 1 квартал 2005 для Байкальского банка
+-- НФ первичная РНУ-1 в периоде 1 квартал 2005 для Байкальского банка (дата корректировки 08.01.2005)
 Insert into FORM_DATA (ID,FORM_TEMPLATE_ID,STATE,KIND,PERIOD_ORDER,DEPARTMENT_REPORT_PERIOD_ID,COMPARATIVE_DEP_REP_PER_ID,ACCRUING,MANUAL,  RETURN_SIGN,SORTED,EDITED,SORTED_BACKUP)
 values (17,1,1,1,null,9,null,0,0,    0,0,0,0);
+-- НФ первичная РНУ-77 в периоде 1 квартал 2005 для Байкальского банка (дата корректировки 08.01.2005) за январь
+Insert into FORM_DATA (ID,FORM_TEMPLATE_ID,STATE,KIND,PERIOD_ORDER,DEPARTMENT_REPORT_PERIOD_ID,COMPARATIVE_DEP_REP_PER_ID,ACCRUING,MANUAL,  RETURN_SIGN,SORTED,EDITED,SORTED_BACKUP)
+values (117,77,1,1,1,9,null,0,0,    0,0,0,0);
+
+----------------test8_2------------
+
+--Отчетный период 1 квартал 2005 НДС
+insert into tax_period(id, tax_type, year) values (1007, 'V', 2005);
+insert into report_period (id, name, tax_period_id, dict_tax_period_id, start_date, end_date, calendar_start_date)
+values (1007, 'первый квартал',  1007, 1, date '2005-01-01', date '2005-03-31', date '2005-01-01');
+
+--Связка подразделение Байкальский банк - период 1 квартал 2005
+Insert into department_report_period (DEPARTMENT_ID,REPORT_PERIOD_ID,IS_ACTIVE,IS_BALANCE_PERIOD,CORRECTION_DATE,ID) values ('4',1007,'0','0',null,1008);
+--Связка подразделение Байкальский банк - период 1 квартал 2005 (дата корректировки 08.01.2005)
+Insert into department_report_period (DEPARTMENT_ID,REPORT_PERIOD_ID,IS_ACTIVE,IS_BALANCE_PERIOD,CORRECTION_DATE,ID) values ('4',1007,'0','0',date '2005-01-08',1009);
+--Связка подразделение Байкальский банк - период 1 квартал 2005 (дата корректировки 10.01.2005)
+Insert into department_report_period (DEPARTMENT_ID,REPORT_PERIOD_ID,IS_ACTIVE,IS_BALANCE_PERIOD,CORRECTION_DATE,ID) values ('4',1007,'1','0',date '2005-01-10',1010);
+
+-- НФ консолидированная РНУ-5 в периоде 1 квартал 2005 (дата корректировки 10.01.2005) для Байкальского банка
+Insert into FORM_DATA (ID,FORM_TEMPLATE_ID,STATE,KIND,PERIOD_ORDER,DEPARTMENT_REPORT_PERIOD_ID,COMPARATIVE_DEP_REP_PER_ID,ACCRUING,MANUAL,  RETURN_SIGN,SORTED,EDITED,SORTED_BACKUP)
+values (1016,5,1,2,null,10,null,0,0,    0,0,0,0);
+-- НФ первичная НДС-200 в периоде 1 квартал 2005 для Байкальского банка (дата корректировки 08.01.2005)
+Insert into FORM_DATA (ID,FORM_TEMPLATE_ID,STATE,KIND,PERIOD_ORDER,DEPARTMENT_REPORT_PERIOD_ID,COMPARATIVE_DEP_REP_PER_ID,ACCRUING,MANUAL,  RETURN_SIGN,SORTED,EDITED,SORTED_BACKUP)
+values (1017,200,1,1,null,1009,null,0,0,    0,0,0,0);
+-- НФ первичная НДС-201 в периоде 1 квартал 2005 для Байкальского банка (дата корректировки 08.01.2005) за январь
+Insert into FORM_DATA (ID,FORM_TEMPLATE_ID,STATE,KIND,PERIOD_ORDER,DEPARTMENT_REPORT_PERIOD_ID,COMPARATIVE_DEP_REP_PER_ID,ACCRUING,MANUAL,  RETURN_SIGN,SORTED,EDITED,SORTED_BACKUP)
+values (1018,201,1,1,1,1009,null,0,0,    0,0,0,0);
 
 ----------------test9------------
 
@@ -661,6 +723,35 @@ values (18,1,1,2,null,12,null,0,0,    0,0,0,0);
 -- НФ первичная РНУ-1 в периоде 1 квартал 2006 (дата корректировки 15.01.2006) для Байкальского банка
 Insert into FORM_DATA (ID,FORM_TEMPLATE_ID,STATE,KIND,PERIOD_ORDER,DEPARTMENT_REPORT_PERIOD_ID,COMPARATIVE_DEP_REP_PER_ID,ACCRUING,MANUAL,  RETURN_SIGN,SORTED,EDITED,SORTED_BACKUP)
 values (19,1,1,1,null,13,null,0,0,    0,0,0,0);
+
+----------------test9_2------------
+
+--Отчетный период 1 квартал 2006 НДС
+insert into tax_period(id, tax_type, year) values (1008, 'V', 2006);
+insert into report_period (id, name, tax_period_id, dict_tax_period_id, start_date, end_date, calendar_start_date)
+values (1008, 'первый квартал',  1008, 1, date '2006-01-01', date '2006-03-31', date '2006-01-01');
+
+--Связка подразделение Байкальский банк - период 1 квартал 2006
+Insert into department_report_period (DEPARTMENT_ID,REPORT_PERIOD_ID,IS_ACTIVE,IS_BALANCE_PERIOD,CORRECTION_DATE,ID) values ('4',1008,'0','0',null,1011);
+--Связка подразделение Байкальский банк - период 1 квартал 2006 (дата корректировки 10.01.2006)
+Insert into department_report_period (DEPARTMENT_ID,REPORT_PERIOD_ID,IS_ACTIVE,IS_BALANCE_PERIOD,CORRECTION_DATE,ID) values ('4',1008,'0','0',date '2006-01-10',1012);
+--Связка подразделение Байкальский банк - период 1 квартал 2006 (дата корректировки 15.01.2006)
+Insert into department_report_period (DEPARTMENT_ID,REPORT_PERIOD_ID,IS_ACTIVE,IS_BALANCE_PERIOD,CORRECTION_DATE,ID) values ('4',1008,'1','0',date '2006-01-15',1013);
+--Связка подразделение Байкальский банк - период 1 квартал 2006 (дата корректировки 05.01.2006)
+Insert into department_report_period (DEPARTMENT_ID,REPORT_PERIOD_ID,IS_ACTIVE,IS_BALANCE_PERIOD,CORRECTION_DATE,ID) values ('4',1008,'0','0',date '2006-01-05',1014);
+
+-- НФ консолидированная РНУ-5 в периоде 1 квартал 2006 (дата корректировки 10.01.2005) для Байкальского банка
+Insert into FORM_DATA (ID,FORM_TEMPLATE_ID,STATE,KIND,PERIOD_ORDER,DEPARTMENT_REPORT_PERIOD_ID,COMPARATIVE_DEP_REP_PER_ID,ACCRUING,MANUAL,  RETURN_SIGN,SORTED,EDITED,SORTED_BACKUP)
+values (1019,5,1,2,null,12,null,0,0,    0,0,0,0);
+-- НФ первичная НДС-200 в периоде 1 квартал 2006 (дата корректировки 15.01.2006) для Байкальского банка
+Insert into FORM_DATA (ID,FORM_TEMPLATE_ID,STATE,KIND,PERIOD_ORDER,DEPARTMENT_REPORT_PERIOD_ID,COMPARATIVE_DEP_REP_PER_ID,ACCRUING,MANUAL,  RETURN_SIGN,SORTED,EDITED,SORTED_BACKUP)
+values (1020,200,1,1,null,1013,null,0,0,    0,0,0,0);
+-- НФ первичная НДС-201 в периоде 1 квартал 2006 (дата корректировки 05.01.2006) для Байкальского банка
+Insert into FORM_DATA (ID,FORM_TEMPLATE_ID,STATE,KIND,PERIOD_ORDER,DEPARTMENT_REPORT_PERIOD_ID,COMPARATIVE_DEP_REP_PER_ID,ACCRUING,MANUAL,  RETURN_SIGN,SORTED,EDITED,SORTED_BACKUP)
+values (1021,201,1,1,1,1014,null,0,0,    0,0,0,0);
+-- НФ первичная НДС-201 в периоде 1 квартал 2006 (дата корректировки 05.01.2006) для Байкальского банка
+Insert into FORM_DATA (ID,FORM_TEMPLATE_ID,STATE,KIND,PERIOD_ORDER,DEPARTMENT_REPORT_PERIOD_ID,COMPARATIVE_DEP_REP_PER_ID,ACCRUING,MANUAL,  RETURN_SIGN,SORTED,EDITED,SORTED_BACKUP)
+values (1022,201,1,1,1,1011,null,0,0,    0,0,0,0);
 
 ----------------test10------------
 
@@ -776,8 +867,27 @@ insert into tax_period(id, tax_type, year) values (13, 'I', 2011);
 insert into report_period (id, name, tax_period_id, dict_tax_period_id, start_date, end_date, calendar_start_date)
 values (13, 'третий квартал',  13, 1, date '2011-07-01', date '2011-09-30', date '2011-07-01');
 
+--Отчетный период 3 квартал 2011 НДС
+insert into tax_period(id, tax_type, year) values (1013, 'V', 2011);
+insert into report_period (id, name, tax_period_id, dict_tax_period_id, start_date, end_date, calendar_start_date)
+values (1013, 'третий квартал',  1013, 1, date '2011-07-01', date '2011-09-30', date '2011-07-01');
+--Отчетный период 1 квартал 2008 НДС
+insert into tax_period(id, tax_type, year) values (1014, 'V', 2008);
+insert into report_period (id, name, tax_period_id, dict_tax_period_id, start_date, end_date, calendar_start_date)
+values (1014, 'первый квартал',  1014, 1, date '2008-01-01', date '2008-03-31', date '2008-01-01');
+--Отчетный период 1 квартал 2009 НДС
+insert into tax_period(id, tax_type, year) values (1015, 'V', 2009);
+insert into report_period (id, name, tax_period_id, dict_tax_period_id, start_date, end_date, calendar_start_date)
+values (1015, 'первый квартал',  1015, 1, date '2009-01-01', date '2009-03-31', date '2009-01-01');
+
 --Связка подразделение Байкальский банк - период 3 квартал 2011
 Insert into department_report_period (DEPARTMENT_ID,REPORT_PERIOD_ID,IS_ACTIVE,IS_BALANCE_PERIOD,CORRECTION_DATE,ID) values ('4',13,'0','0',null,21);
+--Связка подразделение Волго-вятский банк - период 3 квартал 2011
+Insert into department_report_period (DEPARTMENT_ID,REPORT_PERIOD_ID,IS_ACTIVE,IS_BALANCE_PERIOD,CORRECTION_DATE,ID) values ('8',1013,'0','0',null,1021);
+--Связка подразделение Волго-вятский банк - период 1 квартал 2008 НДС
+Insert into department_report_period (DEPARTMENT_ID,REPORT_PERIOD_ID,IS_ACTIVE,IS_BALANCE_PERIOD,CORRECTION_DATE,ID) values ('8',1014,'0','0',null,1022);
+--Связка подразделение Волго-вятский банк - период 1 квартал 2009 НДС
+Insert into department_report_period (DEPARTMENT_ID,REPORT_PERIOD_ID,IS_ACTIVE,IS_BALANCE_PERIOD,CORRECTION_DATE,ID) values ('8',1015,'0','0',null,1023);
 
 -- НФ консолидированная РНУ-8 в периоде 1 квартал 2011 для Байкальского банка  и периодом сравнения 3 квартал 2010
 Insert into FORM_DATA (ID,FORM_TEMPLATE_ID,STATE,KIND,PERIOD_ORDER,DEPARTMENT_REPORT_PERIOD_ID,COMPARATIVE_DEP_REP_PER_ID,ACCRUING,MANUAL,  RETURN_SIGN,SORTED,EDITED,SORTED_BACKUP)
@@ -788,6 +898,12 @@ values (31,7,1,1,null,21,19,0,0,    0,0,0,0);
 -- НФ первичная РНУ-7 в периоде 3 квартал 2011 для Байкальского банка и периодом сравнения 1 квартал 2008
 Insert into FORM_DATA (ID,FORM_TEMPLATE_ID,STATE,KIND,PERIOD_ORDER,DEPARTMENT_REPORT_PERIOD_ID,COMPARATIVE_DEP_REP_PER_ID,ACCRUING,MANUAL,  RETURN_SIGN,SORTED,EDITED,SORTED_BACKUP)
 values (32,7,1,1,null,21,17,0,0,    0,0,0,0);
+-- НФ первичная НДС-204 в периоде 3 квартал 2011 для Волго-вятского банка и периодом сравнения 1 квартал 2009
+Insert into FORM_DATA (ID,FORM_TEMPLATE_ID,STATE,KIND,PERIOD_ORDER,DEPARTMENT_REPORT_PERIOD_ID,COMPARATIVE_DEP_REP_PER_ID,ACCRUING,MANUAL,  RETURN_SIGN,SORTED,EDITED,SORTED_BACKUP)
+values (1031,204,1,1,null,1021,1023,0,0,    0,0,0,0);
+-- НФ первичная НДС-204 в периоде 3 квартал 2011 для Волго-вятского банка и периодом сравнения 1 квартал 2008
+Insert into FORM_DATA (ID,FORM_TEMPLATE_ID,STATE,KIND,PERIOD_ORDER,DEPARTMENT_REPORT_PERIOD_ID,COMPARATIVE_DEP_REP_PER_ID,ACCRUING,MANUAL,  RETURN_SIGN,SORTED,EDITED,SORTED_BACKUP)
+values (1032,204,1,1,null,1021,1022,0,0,    0,0,0,0);
 
 ----------------test15------------
 
@@ -795,9 +911,21 @@ values (32,7,1,1,null,21,17,0,0,    0,0,0,0);
 insert into tax_period(id, tax_type, year) values (14, 'I', 2012);
 insert into report_period (id, name, tax_period_id, dict_tax_period_id, start_date, end_date, calendar_start_date)
 values (14, 'третий квартал',  14, 1, date '2012-07-01', date '2012-09-30', date '2012-07-01');
+--Отчетный период 3 квартал 2012 НДС
+insert into tax_period(id, tax_type, year) values (1016, 'V', 2012);
+insert into report_period (id, name, tax_period_id, dict_tax_period_id, start_date, end_date, calendar_start_date)
+values (1016, 'третий квартал',  1016, 1, date '2012-07-01', date '2012-09-30', date '2012-07-01');
+--Отчетный период 1 квартал 2010 НДС
+insert into tax_period(id, tax_type, year) values (1017, 'V', 2010);
+insert into report_period (id, name, tax_period_id, dict_tax_period_id, start_date, end_date, calendar_start_date)
+values (1017, 'третий квартал',  1017, 1, date '2010-01-01', date '2010-03-31', date '2010-01-01');
 
 --Связка подразделение Байкальский банк - период 3 квартал 2012
 Insert into department_report_period (DEPARTMENT_ID,REPORT_PERIOD_ID,IS_ACTIVE,IS_BALANCE_PERIOD,CORRECTION_DATE,ID) values ('4',14,'0','0',null,22);
+--Связка подразделение Волго-вятский банк - период 3 квартал 2012
+Insert into department_report_period (DEPARTMENT_ID,REPORT_PERIOD_ID,IS_ACTIVE,IS_BALANCE_PERIOD,CORRECTION_DATE,ID) values ('8',1016,'0','0',null,1024);
+--Связка подразделение Волго-вятский банк - период 3 квартал 2010 НДС
+Insert into department_report_period (DEPARTMENT_ID,REPORT_PERIOD_ID,IS_ACTIVE,IS_BALANCE_PERIOD,CORRECTION_DATE,ID) values ('8',1017,'0','0',null,1025);
 
 -- НФ консолидированная РНУ-8 в периоде 3 квартал 2012 для Байкальского банка  и периодом сравнения 3 квартал 2012 и признаком нарастающего итога
 Insert into FORM_DATA (ID,FORM_TEMPLATE_ID,STATE,KIND,PERIOD_ORDER,DEPARTMENT_REPORT_PERIOD_ID,COMPARATIVE_DEP_REP_PER_ID,ACCRUING,MANUAL,  RETURN_SIGN,SORTED,EDITED,SORTED_BACKUP)
@@ -808,6 +936,16 @@ values (34,7,1,1,null,22,22,1,0,    0,0,0,0);
 -- НФ первичная РНУ-7 в периоде 3 квартал 2012 для Байкальского банка и периодом сравнения 3 квартал 2010 и признаком нарастающего итога
 Insert into FORM_DATA (ID,FORM_TEMPLATE_ID,STATE,KIND,PERIOD_ORDER,DEPARTMENT_REPORT_PERIOD_ID,COMPARATIVE_DEP_REP_PER_ID,ACCRUING,MANUAL,  RETURN_SIGN,SORTED,EDITED,SORTED_BACKUP)
 values (35,7,1,1,null,22,20,1,0,    0,0,0,0);
+
+-- НФ первичная НДС-204 в периоде 3 квартал 2012 для Волго-вятского банка и периодом сравнения 3 квартал 2012
+Insert into FORM_DATA (ID,FORM_TEMPLATE_ID,STATE,KIND,PERIOD_ORDER,DEPARTMENT_REPORT_PERIOD_ID,COMPARATIVE_DEP_REP_PER_ID,ACCRUING,MANUAL,  RETURN_SIGN,SORTED,EDITED,SORTED_BACKUP)
+values (1034,204,1,1,null,1024,1024,0,0,    0,0,0,0);
+-- НФ первичная НДС-205 в периоде 3 квартал 2012 для Байкальского банка и периодом сравнения 3 квартал 2012 и признаком нарастающего итога
+Insert into FORM_DATA (ID,FORM_TEMPLATE_ID,STATE,KIND,PERIOD_ORDER,DEPARTMENT_REPORT_PERIOD_ID,COMPARATIVE_DEP_REP_PER_ID,ACCRUING,MANUAL,  RETURN_SIGN,SORTED,EDITED,SORTED_BACKUP)
+values (1035,205,1,1,null,1024,1024,1,0,    0,0,0,0);
+-- НФ первичная НДС-205 в периоде 3 квартал 2012 для Байкальского банка и периодом сравнения 3 квартал 2010 и признаком нарастающего итога
+Insert into FORM_DATA (ID,FORM_TEMPLATE_ID,STATE,KIND,PERIOD_ORDER,DEPARTMENT_REPORT_PERIOD_ID,COMPARATIVE_DEP_REP_PER_ID,ACCRUING,MANUAL,  RETURN_SIGN,SORTED,EDITED,SORTED_BACKUP)
+values (1036,205,1,1,null,1024,1025,1,0,    0,0,0,0);
 
 ----------------test30------------
 

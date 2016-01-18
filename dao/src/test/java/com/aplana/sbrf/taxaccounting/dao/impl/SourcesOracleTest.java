@@ -71,10 +71,13 @@ public class SourcesOracleTest {
         for (Relation relation : relations) {
             System.out.println(getShortFormInfo(relation));
         }
-        assertEquals(3, relations.size());
+        assertEquals(6, relations.size());
         assertEquals("null, Тип: \"Первичная\", Вид: \"НДС-200\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2000\", Макет: \"true\", Статус: \"Не создана\"", getShortFormInfo(relations.get(0)));
         assertEquals("2, Тип: \"Первичная\", Вид: \"РНУ-1\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2000\", Макет: \"true\", Статус: \"Утверждена\"", getShortFormInfo(relations.get(1)));
         assertEquals("null, Тип: \"Первичная\", Вид: \"РНУ-2\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2000\", Макет: \"true\", Статус: \"Не создана\"", getShortFormInfo(relations.get(2)));
+        assertEquals("null, Тип: \"Первичная\", Вид: \"РНУ-77\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2000\", Макет: \"true\", Статус: \"Не создана\", Месяц: \"Январь\"", getShortFormInfo(relations.get(3)));
+        assertEquals("null, Тип: \"Первичная\", Вид: \"РНУ-77\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2000\", Макет: \"true\", Статус: \"Не создана\", Месяц: \"Февраль\"", getShortFormInfo(relations.get(4)));
+        assertEquals("null, Тип: \"Первичная\", Вид: \"РНУ-77\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2000\", Макет: \"true\", Статус: \"Не создана\", Месяц: \"Март\"", getShortFormInfo(relations.get(5)));
         assertEquals('I', relations.get(1).getTaxType().getCode());
         //Исключаем несозданные
         relations = sourceDao.getSourcesInfo(formData, true, true, null);
@@ -82,9 +85,12 @@ public class SourcesOracleTest {
         assertEquals("2, Тип: \"Первичная\", Вид: \"РНУ-1\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2000\", Макет: \"true\", Статус: \"Утверждена\"", getShortFormInfo(relations.get(0)));
         //Исключаем принятые
         relations = sourceDao.getSourcesInfo(formData, true, false, WorkflowState.CREATED);
-        assertEquals(2, relations.size());
+        assertEquals(5, relations.size());
         assertEquals("null, Тип: \"Первичная\", Вид: \"НДС-200\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2000\", Макет: \"true\", Статус: \"Не создана\"", getShortFormInfo(relations.get(0)));
         assertEquals("null, Тип: \"Первичная\", Вид: \"РНУ-2\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2000\", Макет: \"true\", Статус: \"Не создана\"", getShortFormInfo(relations.get(1)));
+        assertEquals("null, Тип: \"Первичная\", Вид: \"РНУ-77\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2000\", Макет: \"true\", Статус: \"Не создана\", Месяц: \"Январь\"", getShortFormInfo(relations.get(2)));
+        assertEquals("null, Тип: \"Первичная\", Вид: \"РНУ-77\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2000\", Макет: \"true\", Статус: \"Не создана\", Месяц: \"Февраль\"", getShortFormInfo(relations.get(3)));
+        assertEquals("null, Тип: \"Первичная\", Вид: \"РНУ-77\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2000\", Макет: \"true\", Статус: \"Не создана\", Месяц: \"Март\"", getShortFormInfo(relations.get(4)));
         //Нф без источников
         formData.setId(2L);
         relations = sourceDao.getSourcesInfo(formData, true, false, null);
@@ -92,7 +98,7 @@ public class SourcesOracleTest {
         //Полное получение модели
         formData.setId(1L);
         relations = sourceDao.getSourcesInfo(formData, false, false, null);
-        assertEquals(3, relations.size());
+        assertEquals(6, relations.size());
 
         assertEquals("НДС-200", relations.get(0).getFormType().getName());
         assertEquals("Байкальский банк", relations.get(0).getDepartment().getName());
@@ -111,9 +117,15 @@ public class SourcesOracleTest {
         FormData formData = new FormData();
         formData.setId(200L);
         List<Relation> relations = sourceDao.getSourcesInfo(formData, true, false, null);
-        assertEquals(2, relations.size());
+        for (Relation relation : relations) {
+            System.out.println(getShortFormInfo(relation));
+        }
+        assertEquals(5, relations.size());
         assertEquals("201, Тип: \"Первичная\", Вид: \"РНУ-1\", Подразделение: \"Байкальский банк\", Период: \"полугодие 2000\", Макет: \"true\", Статус: \"Утверждена\"", getShortFormInfo(relations.get(0)));
         assertEquals("null, Тип: \"Первичная\", Вид: \"РНУ-2\", Подразделение: \"Байкальский банк\", Период: \"полугодие 2000\", Макет: \"true\", Статус: \"Не создана\"", getShortFormInfo(relations.get(1)));
+        assertEquals("null, Тип: \"Первичная\", Вид: \"РНУ-77\", Подразделение: \"Байкальский банк\", Период: \"полугодие 2000\", Макет: \"true\", Статус: \"Не создана\", Месяц: \"Апрель\"", getShortFormInfo(relations.get(2)));
+        assertEquals("null, Тип: \"Первичная\", Вид: \"РНУ-77\", Подразделение: \"Байкальский банк\", Период: \"полугодие 2000\", Макет: \"true\", Статус: \"Не создана\", Месяц: \"Май\"", getShortFormInfo(relations.get(3)));
+        assertEquals("null, Тип: \"Первичная\", Вид: \"РНУ-77\", Подразделение: \"Байкальский банк\", Период: \"полугодие 2000\", Макет: \"true\", Статус: \"Не создана\", Месяц: \"Июнь\"", getShortFormInfo(relations.get(4)));
     }
 
     @Test
@@ -126,10 +138,13 @@ public class SourcesOracleTest {
         for (Relation relation : relations) {
             System.out.println(getShortFormInfo(relation));
         }
-        assertEquals(3, relations.size());
+        assertEquals(6, relations.size());
         assertEquals("204, Тип: \"Первичная\", Вид: \"НДС-200\", Подразделение: \"Байкальский банк\", Период: \"1 квартал 2050\", Макет: \"true\", Статус: \"Создана\"", getShortFormInfo(relations.get(0)));
         assertEquals("203, Тип: \"Первичная\", Вид: \"РНУ-1\", Подразделение: \"Байкальский банк\", Период: \"1 квартал 2050\", Макет: \"true\", Статус: \"Утверждена\"", getShortFormInfo(relations.get(1)));
         assertEquals("null, Тип: \"Первичная\", Вид: \"РНУ-2\", Подразделение: \"Байкальский банк\", Период: \"1 квартал 2050\", Макет: \"true\", Статус: \"Не создана\"", getShortFormInfo(relations.get(2)));
+        assertEquals("null, Тип: \"Первичная\", Вид: \"РНУ-77\", Подразделение: \"Байкальский банк\", Период: \"1 квартал 2050\", Макет: \"true\", Статус: \"Не создана\", Месяц: \"Январь\"", getShortFormInfo(relations.get(3)));
+        assertEquals("null, Тип: \"Первичная\", Вид: \"РНУ-77\", Подразделение: \"Байкальский банк\", Период: \"1 квартал 2050\", Макет: \"true\", Статус: \"Не создана\", Месяц: \"Февраль\"", getShortFormInfo(relations.get(4)));
+        assertEquals("null, Тип: \"Первичная\", Вид: \"РНУ-77\", Подразделение: \"Байкальский банк\", Период: \"1 квартал 2050\", Макет: \"true\", Статус: \"Не создана\", Месяц: \"Март\"", getShortFormInfo(relations.get(5)));
     }
 
     @Test
@@ -138,9 +153,15 @@ public class SourcesOracleTest {
         FormData formData = new FormData();
         formData.setId(205L);
         List<Relation> relations = sourceDao.getSourcesInfo(formData, true, false, null);
-        assertEquals(2, relations.size());
+        for (Relation relation : relations) {
+            System.out.println(getShortFormInfo(relation));
+        }
+        assertEquals(5, relations.size());
         assertEquals("206, Тип: \"Первичная\", Вид: \"РНУ-1\", Подразделение: \"Байкальский банк\", Период: \"полугодие 2050\", Макет: \"true\", Статус: \"Утверждена\"", getShortFormInfo(relations.get(0)));
         assertEquals("null, Тип: \"Первичная\", Вид: \"РНУ-2\", Подразделение: \"Байкальский банк\", Период: \"полугодие 2050\", Макет: \"true\", Статус: \"Не создана\"", getShortFormInfo(relations.get(1)));
+        assertEquals("null, Тип: \"Первичная\", Вид: \"РНУ-77\", Подразделение: \"Байкальский банк\", Период: \"полугодие 2050\", Макет: \"true\", Статус: \"Не создана\", Месяц: \"Апрель\"", getShortFormInfo(relations.get(2)));
+        assertEquals("null, Тип: \"Первичная\", Вид: \"РНУ-77\", Подразделение: \"Байкальский банк\", Период: \"полугодие 2050\", Макет: \"true\", Статус: \"Не создана\", Месяц: \"Май\"", getShortFormInfo(relations.get(3)));
+        assertEquals("null, Тип: \"Первичная\", Вид: \"РНУ-77\", Подразделение: \"Байкальский банк\", Период: \"полугодие 2050\", Макет: \"true\", Статус: \"Не создана\", Месяц: \"Июнь\"", getShortFormInfo(relations.get(4)));
     }
 
     @Test
@@ -153,10 +174,13 @@ public class SourcesOracleTest {
         for (Relation relation : relations) {
             System.out.println(getShortFormInfo(relation));
         }
-        assertEquals(3, relations.size());
+        assertEquals(6, relations.size());
         assertEquals("null, Тип: \"Первичная\", Вид: \"НДС-200\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2000\", Макет: \"true\", Статус: \"Не создана\"", getShortFormInfo(relations.get(0)));
         assertEquals("2, Тип: \"Первичная\", Вид: \"РНУ-1\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2000\", Макет: \"false\", Статус: \"Утверждена\"", getShortFormInfo(relations.get(1)));
         assertEquals("null, Тип: \"Первичная\", Вид: \"РНУ-2\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2000\", Макет: \"true\", Статус: \"Не создана\"", getShortFormInfo(relations.get(2)));
+        assertEquals("null, Тип: \"Первичная\", Вид: \"РНУ-77\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2000\", Макет: \"true\", Статус: \"Не создана\", Месяц: \"Январь\"", getShortFormInfo(relations.get(3)));
+        assertEquals("null, Тип: \"Первичная\", Вид: \"РНУ-77\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2000\", Макет: \"true\", Статус: \"Не создана\", Месяц: \"Февраль\"", getShortFormInfo(relations.get(4)));
+        assertEquals("null, Тип: \"Первичная\", Вид: \"РНУ-77\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2000\", Макет: \"true\", Статус: \"Не создана\", Месяц: \"Март\"", getShortFormInfo(relations.get(5)));
 
         formDataDao.delete(1, 1L);
         formData.setId(null);
@@ -166,10 +190,13 @@ public class SourcesOracleTest {
         formData.setComparativePeriodId(null);
         formData.setAccruing(false);
         relations = sourceDao.getSourcesInfo(formData, true, false, null);
-        assertEquals(3, relations.size());
+        assertEquals(6, relations.size());
         assertEquals("null, Тип: \"Первичная\", Вид: \"НДС-200\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2000\", Макет: \"true\", Статус: \"Не создана\"", getShortFormInfo(relations.get(0)));
         assertEquals("2, Тип: \"Первичная\", Вид: \"РНУ-1\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2000\", Макет: \"false\", Статус: \"Утверждена\"", getShortFormInfo(relations.get(1)));
         assertEquals("null, Тип: \"Первичная\", Вид: \"РНУ-2\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2000\", Макет: \"true\", Статус: \"Не создана\"", getShortFormInfo(relations.get(2)));
+        assertEquals("null, Тип: \"Первичная\", Вид: \"РНУ-77\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2000\", Макет: \"true\", Статус: \"Не создана\", Месяц: \"Январь\"", getShortFormInfo(relations.get(3)));
+        assertEquals("null, Тип: \"Первичная\", Вид: \"РНУ-77\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2000\", Макет: \"true\", Статус: \"Не создана\", Месяц: \"Февраль\"", getShortFormInfo(relations.get(4)));
+        assertEquals("null, Тип: \"Первичная\", Вид: \"РНУ-77\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2000\", Макет: \"true\", Статус: \"Не создана\", Месяц: \"Март\"", getShortFormInfo(relations.get(5)));
     }
 
     @Test
@@ -181,10 +208,13 @@ public class SourcesOracleTest {
         for (Relation relation : relations) {
             System.out.println(getShortFormInfo(relation));
         }
-        assertEquals(3, relations.size());
+        assertEquals(6, relations.size());
         assertEquals("4, Тип: \"Первичная\", Вид: \"РНУ-1\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2002\", Макет: \"true\", Статус: \"Создана\"", getShortFormInfo(relations.get(0)));
         assertEquals("5, Тип: \"Первичная\", Вид: \"РНУ-1\", Подразделение: \"Волго-Вятский банк\", Период: \"первый квартал 2002\", Макет: \"true\", Статус: \"Создана\"", getShortFormInfo(relations.get(1)));
         assertEquals("null, Тип: \"Первичная\", Вид: \"РНУ-2\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2002\", Макет: \"true\", Статус: \"Не создана\"", getShortFormInfo(relations.get(2)));
+        assertEquals("null, Тип: \"Первичная\", Вид: \"РНУ-77\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2002\", Макет: \"true\", Статус: \"Не создана\", Месяц: \"Январь\"", getShortFormInfo(relations.get(3)));
+        assertEquals("null, Тип: \"Первичная\", Вид: \"РНУ-77\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2002\", Макет: \"true\", Статус: \"Не создана\", Месяц: \"Февраль\"", getShortFormInfo(relations.get(4)));
+        assertEquals("null, Тип: \"Первичная\", Вид: \"РНУ-77\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2002\", Макет: \"true\", Статус: \"Не создана\", Месяц: \"Март\"", getShortFormInfo(relations.get(5)));
 
         formDataDao.delete(1, 3L);
         formData.setId(null);
@@ -194,10 +224,13 @@ public class SourcesOracleTest {
         formData.setComparativePeriodId(null);
         formData.setAccruing(false);
         relations = sourceDao.getSourcesInfo(formData, true, false, null);
-        assertEquals(3, relations.size());
+        assertEquals(6, relations.size());
         assertEquals("4, Тип: \"Первичная\", Вид: \"РНУ-1\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2002\", Макет: \"true\", Статус: \"Создана\"", getShortFormInfo(relations.get(0)));
         assertEquals("5, Тип: \"Первичная\", Вид: \"РНУ-1\", Подразделение: \"Волго-Вятский банк\", Период: \"первый квартал 2002\", Макет: \"true\", Статус: \"Создана\"", getShortFormInfo(relations.get(1)));
         assertEquals("null, Тип: \"Первичная\", Вид: \"РНУ-2\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2002\", Макет: \"true\", Статус: \"Не создана\"", getShortFormInfo(relations.get(2)));
+        assertEquals("null, Тип: \"Первичная\", Вид: \"РНУ-77\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2002\", Макет: \"true\", Статус: \"Не создана\", Месяц: \"Январь\"", getShortFormInfo(relations.get(3)));
+        assertEquals("null, Тип: \"Первичная\", Вид: \"РНУ-77\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2002\", Макет: \"true\", Статус: \"Не создана\", Месяц: \"Февраль\"", getShortFormInfo(relations.get(4)));
+        assertEquals("null, Тип: \"Первичная\", Вид: \"РНУ-77\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2002\", Макет: \"true\", Статус: \"Не создана\", Месяц: \"Март\"", getShortFormInfo(relations.get(5)));
     }
 
     @Test
@@ -209,9 +242,12 @@ public class SourcesOracleTest {
         for (Relation relation : relations) {
             System.out.println(getShortFormInfo(relation));
         }
-        assertEquals(2, relations.size());
+        assertEquals(5, relations.size());
         assertEquals("null, Тип: \"Первичная\", Вид: \"РНУ-1\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2003\", Макет: \"true\", Статус: \"Не создана\"", getShortFormInfo(relations.get(0)));
         assertEquals("null, Тип: \"Первичная\", Вид: \"РНУ-2\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2003\", Макет: \"true\", Статус: \"Не создана\"", getShortFormInfo(relations.get(1)));
+        assertEquals("null, Тип: \"Первичная\", Вид: \"РНУ-77\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2003\", Макет: \"true\", Статус: \"Не создана\", Месяц: \"Январь\"", getShortFormInfo(relations.get(2)));
+        assertEquals("null, Тип: \"Первичная\", Вид: \"РНУ-77\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2003\", Макет: \"true\", Статус: \"Не создана\", Месяц: \"Февраль\"", getShortFormInfo(relations.get(3)));
+        assertEquals("null, Тип: \"Первичная\", Вид: \"РНУ-77\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2003\", Макет: \"true\", Статус: \"Не создана\", Месяц: \"Март\"", getShortFormInfo(relations.get(4)));
 
         formDataDao.delete(1, 6L);
         formData.setId(null);
@@ -221,9 +257,12 @@ public class SourcesOracleTest {
         formData.setComparativePeriodId(null);
         formData.setAccruing(false);
         relations = sourceDao.getSourcesInfo(formData, true, false, null);
-        assertEquals(2, relations.size());
+        assertEquals(5, relations.size());
         assertEquals("null, Тип: \"Первичная\", Вид: \"РНУ-1\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2003\", Макет: \"true\", Статус: \"Не создана\"", getShortFormInfo(relations.get(0)));
         assertEquals("null, Тип: \"Первичная\", Вид: \"РНУ-2\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2003\", Макет: \"true\", Статус: \"Не создана\"", getShortFormInfo(relations.get(1)));
+        assertEquals("null, Тип: \"Первичная\", Вид: \"РНУ-77\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2003\", Макет: \"true\", Статус: \"Не создана\", Месяц: \"Январь\"", getShortFormInfo(relations.get(2)));
+        assertEquals("null, Тип: \"Первичная\", Вид: \"РНУ-77\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2003\", Макет: \"true\", Статус: \"Не создана\", Месяц: \"Февраль\"", getShortFormInfo(relations.get(3)));
+        assertEquals("null, Тип: \"Первичная\", Вид: \"РНУ-77\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2003\", Макет: \"true\", Статус: \"Не создана\", Месяц: \"Март\"", getShortFormInfo(relations.get(4)));
     }
 
     @Test
@@ -342,9 +381,13 @@ public class SourcesOracleTest {
         for (Relation relation : relations) {
             System.out.println(getShortFormInfo(relation));
         }
-        assertEquals(2, relations.size());
-        assertEquals("17, Тип: \"Первичная\", Вид: \"РНУ-1\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2005\", Макет: \"true\", Статус: \"Создана\", Дата сдачи корректировки: \"08.01.2005\"", getShortFormInfo(relations.get(0)));
-        assertEquals("null, Тип: \"Первичная\", Вид: \"РНУ-2\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2005\", Макет: \"true\", Статус: \"Не создана\"", getShortFormInfo(relations.get(1)));
+        assertEquals(6, relations.size());
+        assertEquals("1017, Тип: \"Первичная\", Вид: \"НДС-200\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2005\", Макет: \"true\", Статус: \"Создана\", Дата сдачи корректировки: \"08.01.2005\"", getShortFormInfo(relations.get(0)));
+        assertEquals("17, Тип: \"Первичная\", Вид: \"РНУ-1\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2005\", Макет: \"true\", Статус: \"Создана\", Дата сдачи корректировки: \"08.01.2005\"", getShortFormInfo(relations.get(1)));
+        assertEquals("null, Тип: \"Первичная\", Вид: \"РНУ-2\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2005\", Макет: \"true\", Статус: \"Не создана\"", getShortFormInfo(relations.get(2)));
+        assertEquals("117, Тип: \"Первичная\", Вид: \"РНУ-77\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2005\", Макет: \"true\", Статус: \"Создана\", Месяц: \"Январь\", Дата сдачи корректировки: \"08.01.2005\"", getShortFormInfo(relations.get(3)));
+        assertEquals("null, Тип: \"Первичная\", Вид: \"РНУ-77\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2005\", Макет: \"true\", Статус: \"Не создана\", Месяц: \"Февраль\", Дата сдачи корректировки: \"08.01.2005\"", getShortFormInfo(relations.get(4)));
+        assertEquals("null, Тип: \"Первичная\", Вид: \"РНУ-77\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2005\", Макет: \"true\", Статус: \"Не создана\", Месяц: \"Март\", Дата сдачи корректировки: \"08.01.2005\"", getShortFormInfo(relations.get(5)));
 
         formDataDao.delete(1, 16L);
         formData.setId(null);
@@ -354,9 +397,57 @@ public class SourcesOracleTest {
         formData.setComparativePeriodId(null);
         formData.setAccruing(false);
         relations = sourceDao.getSourcesInfo(formData, true, false, null);
-        assertEquals(2, relations.size());
-        assertEquals("17, Тип: \"Первичная\", Вид: \"РНУ-1\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2005\", Макет: \"true\", Статус: \"Создана\", Дата сдачи корректировки: \"08.01.2005\"", getShortFormInfo(relations.get(0)));
-        assertEquals("null, Тип: \"Первичная\", Вид: \"РНУ-2\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2005\", Макет: \"true\", Статус: \"Не создана\"", getShortFormInfo(relations.get(1)));
+        assertEquals(6, relations.size());
+        assertEquals("1017, Тип: \"Первичная\", Вид: \"НДС-200\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2005\", Макет: \"true\", Статус: \"Создана\", Дата сдачи корректировки: \"08.01.2005\"", getShortFormInfo(relations.get(0)));
+        assertEquals("17, Тип: \"Первичная\", Вид: \"РНУ-1\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2005\", Макет: \"true\", Статус: \"Создана\", Дата сдачи корректировки: \"08.01.2005\"", getShortFormInfo(relations.get(1)));
+        assertEquals("null, Тип: \"Первичная\", Вид: \"РНУ-2\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2005\", Макет: \"true\", Статус: \"Не создана\"", getShortFormInfo(relations.get(2)));
+        assertEquals("117, Тип: \"Первичная\", Вид: \"РНУ-77\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2005\", Макет: \"true\", Статус: \"Создана\", Месяц: \"Январь\", Дата сдачи корректировки: \"08.01.2005\"", getShortFormInfo(relations.get(3)));
+        assertEquals("null, Тип: \"Первичная\", Вид: \"РНУ-77\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2005\", Макет: \"true\", Статус: \"Не создана\", Месяц: \"Февраль\", Дата сдачи корректировки: \"08.01.2005\"", getShortFormInfo(relations.get(4)));
+        assertEquals("null, Тип: \"Первичная\", Вид: \"РНУ-77\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2005\", Макет: \"true\", Статус: \"Не создана\", Месяц: \"Март\", Дата сдачи корректировки: \"08.01.2005\"", getShortFormInfo(relations.get(5)));
+    }
+
+    @Test
+    public void test8_2() {
+        //2 источника для консолидированной, один из них не создан. Исходная нф создана в корректирующем периоде. Результат: 2 записи (для созданной записи отображается корр. период - 08.01.2005, для несозданной корр.период пустой)
+        FormData formData = new FormData();
+        formData.setId(1016L);
+        List<Relation> relations = sourceDao.getSourcesInfo(formData, true, false, null);
+        for (Relation relation : relations) {
+            System.out.println(getShortFormInfo(relation));
+        }
+        assertEquals(11, relations.size());
+        assertEquals("1017, Тип: \"Первичная\", Вид: \"НДС-200\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2005\", Макет: \"true\", Статус: \"Создана\", Дата сдачи корректировки: \"08.01.2005\"", getShortFormInfo(relations.get(0)));
+        assertEquals("1018, Тип: \"Первичная\", Вид: \"НДС-201\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2005\", Макет: \"true\", Статус: \"Создана\", Месяц: \"Январь\", Дата сдачи корректировки: \"08.01.2005\"", getShortFormInfo(relations.get(1)));
+        assertEquals("null, Тип: \"Первичная\", Вид: \"НДС-201\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2005\", Макет: \"true\", Статус: \"Не создана\", Месяц: \"Февраль\", Дата сдачи корректировки: \"08.01.2005\"", getShortFormInfo(relations.get(2)));
+        assertEquals("null, Тип: \"Первичная\", Вид: \"НДС-201\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2005\", Макет: \"true\", Статус: \"Не создана\", Месяц: \"Март\", Дата сдачи корректировки: \"08.01.2005\"", getShortFormInfo(relations.get(3)));
+        assertEquals("null, Тип: \"Первичная\", Вид: \"НДС-203\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2005\", Макет: \"true\", Статус: \"Не создана\", Месяц: \"Январь\"", getShortFormInfo(relations.get(4)));
+        assertEquals("null, Тип: \"Первичная\", Вид: \"НДС-203\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2005\", Макет: \"true\", Статус: \"Не создана\", Месяц: \"Февраль\"", getShortFormInfo(relations.get(5)));
+        assertEquals("null, Тип: \"Первичная\", Вид: \"НДС-203\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2005\", Макет: \"true\", Статус: \"Не создана\", Месяц: \"Март\"", getShortFormInfo(relations.get(6)));
+        assertEquals("null, Тип: \"Первичная\", Вид: \"РНУ-2\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2005\", Макет: \"true\", Статус: \"Не создана\"", getShortFormInfo(relations.get(7)));
+        assertEquals("null, Тип: \"Первичная\", Вид: \"РНУ-4\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2005\", Макет: \"true\", Статус: \"Не создана\", Месяц: \"Январь\"", getShortFormInfo(relations.get(8)));
+        assertEquals("null, Тип: \"Первичная\", Вид: \"РНУ-4\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2005\", Макет: \"true\", Статус: \"Не создана\", Месяц: \"Февраль\"", getShortFormInfo(relations.get(9)));
+        assertEquals("null, Тип: \"Первичная\", Вид: \"РНУ-4\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2005\", Макет: \"true\", Статус: \"Не создана\", Месяц: \"Март\"", getShortFormInfo(relations.get(10)));
+
+        formDataDao.delete(1, 1016L);
+        formData.setId(null);
+        formData.setFormTemplateId(5);
+        formData.setDepartmentReportPeriodId(10);
+        formData.setKind(FormDataKind.CONSOLIDATED);
+        formData.setComparativePeriodId(null);
+        formData.setAccruing(false);
+        relations = sourceDao.getSourcesInfo(formData, true, false, null);
+        assertEquals(11, relations.size());
+        assertEquals("1017, Тип: \"Первичная\", Вид: \"НДС-200\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2005\", Макет: \"true\", Статус: \"Создана\", Дата сдачи корректировки: \"08.01.2005\"", getShortFormInfo(relations.get(0)));
+        assertEquals("1018, Тип: \"Первичная\", Вид: \"НДС-201\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2005\", Макет: \"true\", Статус: \"Создана\", Месяц: \"Январь\", Дата сдачи корректировки: \"08.01.2005\"", getShortFormInfo(relations.get(1)));
+        assertEquals("null, Тип: \"Первичная\", Вид: \"НДС-201\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2005\", Макет: \"true\", Статус: \"Не создана\", Месяц: \"Февраль\", Дата сдачи корректировки: \"08.01.2005\"", getShortFormInfo(relations.get(2)));
+        assertEquals("null, Тип: \"Первичная\", Вид: \"НДС-201\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2005\", Макет: \"true\", Статус: \"Не создана\", Месяц: \"Март\", Дата сдачи корректировки: \"08.01.2005\"", getShortFormInfo(relations.get(3)));
+        assertEquals("null, Тип: \"Первичная\", Вид: \"НДС-203\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2005\", Макет: \"true\", Статус: \"Не создана\", Месяц: \"Январь\"", getShortFormInfo(relations.get(4)));
+        assertEquals("null, Тип: \"Первичная\", Вид: \"НДС-203\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2005\", Макет: \"true\", Статус: \"Не создана\", Месяц: \"Февраль\"", getShortFormInfo(relations.get(5)));
+        assertEquals("null, Тип: \"Первичная\", Вид: \"НДС-203\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2005\", Макет: \"true\", Статус: \"Не создана\", Месяц: \"Март\"", getShortFormInfo(relations.get(6)));
+        assertEquals("null, Тип: \"Первичная\", Вид: \"РНУ-2\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2005\", Макет: \"true\", Статус: \"Не создана\"", getShortFormInfo(relations.get(7)));
+        assertEquals("null, Тип: \"Первичная\", Вид: \"РНУ-4\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2005\", Макет: \"true\", Статус: \"Не создана\", Месяц: \"Январь\"", getShortFormInfo(relations.get(8)));
+        assertEquals("null, Тип: \"Первичная\", Вид: \"РНУ-4\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2005\", Макет: \"true\", Статус: \"Не создана\", Месяц: \"Февраль\"", getShortFormInfo(relations.get(9)));
+        assertEquals("null, Тип: \"Первичная\", Вид: \"РНУ-4\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2005\", Макет: \"true\", Статус: \"Не создана\", Месяц: \"Март\"", getShortFormInfo(relations.get(10)));
     }
 
     @Test
@@ -368,9 +459,13 @@ public class SourcesOracleTest {
         for (Relation relation : relations) {
             System.out.println(getShortFormInfo(relation));
         }
-        assertEquals(2, relations.size());
-        assertEquals("null, Тип: \"Первичная\", Вид: \"РНУ-1\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2006\", Макет: \"true\", Статус: \"Не создана\"", getShortFormInfo(relations.get(0)));
-        assertEquals("null, Тип: \"Первичная\", Вид: \"РНУ-2\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2006\", Макет: \"true\", Статус: \"Не создана\"", getShortFormInfo(relations.get(1)));
+        assertEquals(6, relations.size());
+        assertEquals("null, Тип: \"Первичная\", Вид: \"НДС-200\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2006\", Макет: \"true\", Статус: \"Не создана\"", getShortFormInfo(relations.get(0)));
+        assertEquals("null, Тип: \"Первичная\", Вид: \"РНУ-1\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2006\", Макет: \"true\", Статус: \"Не создана\"", getShortFormInfo(relations.get(1)));
+        assertEquals("null, Тип: \"Первичная\", Вид: \"РНУ-2\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2006\", Макет: \"true\", Статус: \"Не создана\"", getShortFormInfo(relations.get(2)));
+        assertEquals("null, Тип: \"Первичная\", Вид: \"РНУ-77\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2006\", Макет: \"true\", Статус: \"Не создана\", Месяц: \"Январь\"", getShortFormInfo(relations.get(3)));
+        assertEquals("null, Тип: \"Первичная\", Вид: \"РНУ-77\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2006\", Макет: \"true\", Статус: \"Не создана\", Месяц: \"Февраль\"", getShortFormInfo(relations.get(4)));
+        assertEquals("null, Тип: \"Первичная\", Вид: \"РНУ-77\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2006\", Макет: \"true\", Статус: \"Не создана\", Месяц: \"Март\"", getShortFormInfo(relations.get(5)));
 
         formDataDao.delete(1, 18L);
         formData.setId(null);
@@ -380,9 +475,36 @@ public class SourcesOracleTest {
         formData.setComparativePeriodId(null);
         formData.setAccruing(false);
         relations = sourceDao.getSourcesInfo(formData, true, false, null);
-        assertEquals(2, relations.size());
-        assertEquals("null, Тип: \"Первичная\", Вид: \"РНУ-1\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2006\", Макет: \"true\", Статус: \"Не создана\"", getShortFormInfo(relations.get(0)));
-        assertEquals("null, Тип: \"Первичная\", Вид: \"РНУ-2\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2006\", Макет: \"true\", Статус: \"Не создана\"", getShortFormInfo(relations.get(1)));
+        assertEquals(6, relations.size());
+        assertEquals("null, Тип: \"Первичная\", Вид: \"НДС-200\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2006\", Макет: \"true\", Статус: \"Не создана\"", getShortFormInfo(relations.get(0)));
+        assertEquals("null, Тип: \"Первичная\", Вид: \"РНУ-1\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2006\", Макет: \"true\", Статус: \"Не создана\"", getShortFormInfo(relations.get(1)));
+        assertEquals("null, Тип: \"Первичная\", Вид: \"РНУ-2\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2006\", Макет: \"true\", Статус: \"Не создана\"", getShortFormInfo(relations.get(2)));
+        assertEquals("null, Тип: \"Первичная\", Вид: \"РНУ-77\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2006\", Макет: \"true\", Статус: \"Не создана\", Месяц: \"Январь\"", getShortFormInfo(relations.get(3)));
+        assertEquals("null, Тип: \"Первичная\", Вид: \"РНУ-77\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2006\", Макет: \"true\", Статус: \"Не создана\", Месяц: \"Февраль\"", getShortFormInfo(relations.get(4)));
+        assertEquals("null, Тип: \"Первичная\", Вид: \"РНУ-77\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2006\", Макет: \"true\", Статус: \"Не создана\", Месяц: \"Март\"", getShortFormInfo(relations.get(5)));
+    }
+
+    @Test
+    public void test9_2() {
+        //2 источника с разными датами корректировки. Результат: несозданная ндс-200 без даты корректировки; созданная ндс-201 с датой корректировки 05.01
+        FormData formData = new FormData();
+        formData.setId(1019L);
+        List<Relation> relations = sourceDao.getSourcesInfo(formData, true, false, null);
+        for (Relation relation : relations) {
+            System.out.println(getShortFormInfo(relation));
+        }
+        assertEquals(11, relations.size());
+        assertEquals("null, Тип: \"Первичная\", Вид: \"НДС-200\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2006\", Макет: \"true\", Статус: \"Не создана\"", getShortFormInfo(relations.get(0)));
+        assertEquals("1021, Тип: \"Первичная\", Вид: \"НДС-201\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2006\", Макет: \"true\", Статус: \"Создана\", Месяц: \"Январь\", Дата сдачи корректировки: \"05.01.2006\"", getShortFormInfo(relations.get(1)));
+        assertEquals("null, Тип: \"Первичная\", Вид: \"НДС-201\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2006\", Макет: \"true\", Статус: \"Не создана\", Месяц: \"Февраль\", Дата сдачи корректировки: \"05.01.2006\"", getShortFormInfo(relations.get(2)));
+        assertEquals("null, Тип: \"Первичная\", Вид: \"НДС-201\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2006\", Макет: \"true\", Статус: \"Не создана\", Месяц: \"Март\", Дата сдачи корректировки: \"05.01.2006\"", getShortFormInfo(relations.get(3)));
+        assertEquals("null, Тип: \"Первичная\", Вид: \"НДС-203\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2006\", Макет: \"true\", Статус: \"Не создана\", Месяц: \"Январь\"", getShortFormInfo(relations.get(4)));
+        assertEquals("null, Тип: \"Первичная\", Вид: \"НДС-203\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2006\", Макет: \"true\", Статус: \"Не создана\", Месяц: \"Февраль\"", getShortFormInfo(relations.get(5)));
+        assertEquals("null, Тип: \"Первичная\", Вид: \"НДС-203\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2006\", Макет: \"true\", Статус: \"Не создана\", Месяц: \"Март\"", getShortFormInfo(relations.get(6)));
+        assertEquals("null, Тип: \"Первичная\", Вид: \"РНУ-2\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2006\", Макет: \"true\", Статус: \"Не создана\"", getShortFormInfo(relations.get(7)));
+        assertEquals("null, Тип: \"Первичная\", Вид: \"РНУ-4\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2006\", Макет: \"true\", Статус: \"Не создана\", Месяц: \"Январь\"", getShortFormInfo(relations.get(8)));
+        assertEquals("null, Тип: \"Первичная\", Вид: \"РНУ-4\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2006\", Макет: \"true\", Статус: \"Не создана\", Месяц: \"Февраль\"", getShortFormInfo(relations.get(9)));
+        assertEquals("null, Тип: \"Первичная\", Вид: \"РНУ-4\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2006\", Макет: \"true\", Статус: \"Не создана\", Месяц: \"Март\"", getShortFormInfo(relations.get(10)));
     }
 
     @Test
@@ -394,9 +516,12 @@ public class SourcesOracleTest {
         for (Relation relation : relations) {
             System.out.println(getShortFormInfo(relation));
         }
-        assertEquals(2, relations.size());
+        assertEquals(5, relations.size());
         assertEquals("21, Тип: \"Первичная\", Вид: \"РНУ-1\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2007\", Макет: \"true\", Статус: \"Создана\", Дата сдачи корректировки: \"10.01.2007\"", getShortFormInfo(relations.get(0)));
         assertEquals("null, Тип: \"Первичная\", Вид: \"РНУ-2\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2007\", Макет: \"true\", Статус: \"Не создана\"", getShortFormInfo(relations.get(1)));
+        assertEquals("null, Тип: \"Первичная\", Вид: \"РНУ-77\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2007\", Макет: \"true\", Статус: \"Не создана\", Месяц: \"Январь\"", getShortFormInfo(relations.get(2)));
+        assertEquals("null, Тип: \"Первичная\", Вид: \"РНУ-77\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2007\", Макет: \"true\", Статус: \"Не создана\", Месяц: \"Февраль\"", getShortFormInfo(relations.get(3)));
+        assertEquals("null, Тип: \"Первичная\", Вид: \"РНУ-77\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2007\", Макет: \"true\", Статус: \"Не создана\", Месяц: \"Март\"", getShortFormInfo(relations.get(4)));
 
         formDataDao.delete(1, 20L);
         formData.setId(null);
@@ -406,9 +531,12 @@ public class SourcesOracleTest {
         formData.setComparativePeriodId(null);
         formData.setAccruing(false);
         relations = sourceDao.getSourcesInfo(formData, true, false, null);
-        assertEquals(2, relations.size());
+        assertEquals(5, relations.size());
         assertEquals("21, Тип: \"Первичная\", Вид: \"РНУ-1\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2007\", Макет: \"true\", Статус: \"Создана\", Дата сдачи корректировки: \"10.01.2007\"", getShortFormInfo(relations.get(0)));
         assertEquals("null, Тип: \"Первичная\", Вид: \"РНУ-2\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2007\", Макет: \"true\", Статус: \"Не создана\"", getShortFormInfo(relations.get(1)));
+        assertEquals("null, Тип: \"Первичная\", Вид: \"РНУ-77\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2007\", Макет: \"true\", Статус: \"Не создана\", Месяц: \"Январь\"", getShortFormInfo(relations.get(2)));
+        assertEquals("null, Тип: \"Первичная\", Вид: \"РНУ-77\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2007\", Макет: \"true\", Статус: \"Не создана\", Месяц: \"Февраль\"", getShortFormInfo(relations.get(3)));
+        assertEquals("null, Тип: \"Первичная\", Вид: \"РНУ-77\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2007\", Макет: \"true\", Статус: \"Не создана\", Месяц: \"Март\"", getShortFormInfo(relations.get(4)));
     }
 
     @Test
@@ -420,10 +548,13 @@ public class SourcesOracleTest {
         for (Relation relation : relations) {
             System.out.println(getShortFormInfo(relation));
         }
-        assertEquals(3, relations.size());
+        assertEquals(6, relations.size());
         assertEquals("24, Тип: \"Первичная\", Вид: \"РНУ-1\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2008\", Макет: \"true\", Статус: \"Создана\"", getShortFormInfo(relations.get(0)));
         assertEquals("null, Тип: \"Первичная\", Вид: \"РНУ-1\", Подразделение: \"Волго-Вятский банк\", Период: \"первый квартал 2008\", Макет: \"true\", Статус: \"Не создана\"", getShortFormInfo(relations.get(1)));
         assertEquals("null, Тип: \"Первичная\", Вид: \"РНУ-2\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2008\", Макет: \"true\", Статус: \"Не создана\"", getShortFormInfo(relations.get(2)));
+        assertEquals("null, Тип: \"Первичная\", Вид: \"РНУ-77\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2008\", Макет: \"true\", Статус: \"Не создана\", Месяц: \"Январь\"", getShortFormInfo(relations.get(3)));
+        assertEquals("null, Тип: \"Первичная\", Вид: \"РНУ-77\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2008\", Макет: \"true\", Статус: \"Не создана\", Месяц: \"Февраль\"", getShortFormInfo(relations.get(4)));
+        assertEquals("null, Тип: \"Первичная\", Вид: \"РНУ-77\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2008\", Макет: \"true\", Статус: \"Не создана\", Месяц: \"Март\"", getShortFormInfo(relations.get(5)));
 
         formDataDao.delete(1, 23L);
         formData.setId(null);
@@ -433,10 +564,13 @@ public class SourcesOracleTest {
         formData.setComparativePeriodId(null);
         formData.setAccruing(false);
         relations = sourceDao.getSourcesInfo(formData, true, false, null);
-        assertEquals(3, relations.size());
+        assertEquals(6, relations.size());
         assertEquals("24, Тип: \"Первичная\", Вид: \"РНУ-1\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2008\", Макет: \"true\", Статус: \"Создана\"", getShortFormInfo(relations.get(0)));
         assertEquals("null, Тип: \"Первичная\", Вид: \"РНУ-1\", Подразделение: \"Волго-Вятский банк\", Период: \"первый квартал 2008\", Макет: \"true\", Статус: \"Не создана\"", getShortFormInfo(relations.get(1)));
         assertEquals("null, Тип: \"Первичная\", Вид: \"РНУ-2\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2008\", Макет: \"true\", Статус: \"Не создана\"", getShortFormInfo(relations.get(2)));
+        assertEquals("null, Тип: \"Первичная\", Вид: \"РНУ-77\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2008\", Макет: \"true\", Статус: \"Не создана\", Месяц: \"Январь\"", getShortFormInfo(relations.get(3)));
+        assertEquals("null, Тип: \"Первичная\", Вид: \"РНУ-77\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2008\", Макет: \"true\", Статус: \"Не создана\", Месяц: \"Февраль\"", getShortFormInfo(relations.get(4)));
+        assertEquals("null, Тип: \"Первичная\", Вид: \"РНУ-77\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2008\", Макет: \"true\", Статус: \"Не создана\", Месяц: \"Март\"", getShortFormInfo(relations.get(5)));
     }
 
     @Test
@@ -445,9 +579,15 @@ public class SourcesOracleTest {
         FormData formData = new FormData();
         formData.setId(223L);
         List<Relation> relations = sourceDao.getSourcesInfo(formData, true, false, null);
-        assertEquals(2, relations.size());
+        for (Relation relation : relations) {
+            System.out.println(getShortFormInfo(relation));
+        }
+        assertEquals(5, relations.size());
         assertEquals("null, Тип: \"Первичная\", Вид: \"РНУ-1\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2088\", Макет: \"true\", Статус: \"Не создана\"", getShortFormInfo(relations.get(0)));
         assertEquals("null, Тип: \"Первичная\", Вид: \"РНУ-2\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2088\", Макет: \"true\", Статус: \"Не создана\"", getShortFormInfo(relations.get(1)));
+        assertEquals("null, Тип: \"Первичная\", Вид: \"РНУ-77\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2088\", Макет: \"true\", Статус: \"Не создана\", Месяц: \"Январь\"", getShortFormInfo(relations.get(2)));
+        assertEquals("null, Тип: \"Первичная\", Вид: \"РНУ-77\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2088\", Макет: \"true\", Статус: \"Не создана\", Месяц: \"Февраль\"", getShortFormInfo(relations.get(3)));
+        assertEquals("null, Тип: \"Первичная\", Вид: \"РНУ-77\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2088\", Макет: \"true\", Статус: \"Не создана\", Месяц: \"Март\"", getShortFormInfo(relations.get(4)));
 
         formDataDao.delete(1, 223L);
         formData.setId(null);
@@ -457,9 +597,12 @@ public class SourcesOracleTest {
         formData.setComparativePeriodId(null);
         formData.setAccruing(false);
         relations = sourceDao.getSourcesInfo(formData, true, false, null);
-        assertEquals(2, relations.size());
+        assertEquals(5, relations.size());
         assertEquals("null, Тип: \"Первичная\", Вид: \"РНУ-1\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2088\", Макет: \"true\", Статус: \"Не создана\"", getShortFormInfo(relations.get(0)));
         assertEquals("null, Тип: \"Первичная\", Вид: \"РНУ-2\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2088\", Макет: \"true\", Статус: \"Не создана\"", getShortFormInfo(relations.get(1)));
+        assertEquals("null, Тип: \"Первичная\", Вид: \"РНУ-77\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2088\", Макет: \"true\", Статус: \"Не создана\", Месяц: \"Январь\"", getShortFormInfo(relations.get(2)));
+        assertEquals("null, Тип: \"Первичная\", Вид: \"РНУ-77\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2088\", Макет: \"true\", Статус: \"Не создана\", Месяц: \"Февраль\"", getShortFormInfo(relations.get(3)));
+        assertEquals("null, Тип: \"Первичная\", Вид: \"РНУ-77\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2088\", Макет: \"true\", Статус: \"Не создана\", Месяц: \"Март\"", getShortFormInfo(relations.get(4)));
     }
 
     @Test
@@ -489,6 +632,9 @@ public class SourcesOracleTest {
         FormData formData = new FormData();
         formData.setId(28L);
         List<Relation> relations = sourceDao.getSourcesInfo(formData, true, false, null);
+        for (Relation relation : relations) {
+            System.out.println(getShortFormInfo(relation));
+        }
         assertEquals(1, relations.size());
         assertEquals("29, Тип: \"Первичная\", Вид: \"РНУ-7\", Подразделение: \"Байкальский банк\", Период: \"третий квартал (9 месяцев) 2010\", Макет: \"true\", Статус: \"Создана\", Период сравнения: \"третий квартал (9 месяцев) 2010\"", getShortFormInfo(relations.get(0)));
 
@@ -506,12 +652,17 @@ public class SourcesOracleTest {
 
     @Test
     public void test14() {
-        //2 источника для консолидированной с разными периодами сравнения. Результат: 1 запись (источник не создан, период сравнения - 3 квартал 2010)
+        //2 источника для консолидированной с разными периодами сравнения. Результат: 1 запись (источник не создан, период сравнения - 3 квартал 2010) + 2 несозданные формы из НДС с периодом сравнения 3 квартал 2010
         FormData formData = new FormData();
         formData.setId(30L);
         List<Relation> relations = sourceDao.getSourcesInfo(formData, true, false, null);
-        assertEquals(1, relations.size());
-        assertEquals("null, Тип: \"Первичная\", Вид: \"РНУ-7\", Подразделение: \"Байкальский банк\", Период: \"третий квартал 2011\", Макет: \"true\", Статус: \"Не создана\", Период сравнения: \"третий квартал 2010\"", getShortFormInfo(relations.get(0)));
+        for (Relation relation : relations) {
+            System.out.println(getShortFormInfo(relation));
+        }
+        assertEquals(3, relations.size());
+        assertEquals("null, Тип: \"Первичная\", Вид: \"НДС-204\", Подразделение: \"Волго-Вятский банк\", Период: \"третий квартал 2011\", Макет: \"true\", Статус: \"Не создана\", Период сравнения: \"третий квартал 2010\"", getShortFormInfo(relations.get(0)));
+        assertEquals("null, Тип: \"Первичная\", Вид: \"НДС-205\", Подразделение: \"Волго-Вятский банк\", Период: \"третий квартал 2011\", Макет: \"true\", Статус: \"Не создана\", Период сравнения: \"третий квартал 2010\"", getShortFormInfo(relations.get(1)));
+        assertEquals("null, Тип: \"Первичная\", Вид: \"РНУ-7\", Подразделение: \"Байкальский банк\", Период: \"третий квартал 2011\", Макет: \"true\", Статус: \"Не создана\", Период сравнения: \"третий квартал 2010\"", getShortFormInfo(relations.get(2)));
 
         formDataDao.delete(1, 30L);
         formData.setId(null);
@@ -521,18 +672,25 @@ public class SourcesOracleTest {
         formData.setComparativePeriodId(20);
         formData.setAccruing(false);
         relations = sourceDao.getSourcesInfo(formData, true, false, null);
-        assertEquals(1, relations.size());
-        assertEquals("null, Тип: \"Первичная\", Вид: \"РНУ-7\", Подразделение: \"Байкальский банк\", Период: \"третий квартал 2011\", Макет: \"true\", Статус: \"Не создана\", Период сравнения: \"третий квартал 2010\"", getShortFormInfo(relations.get(0)));
+        assertEquals(3, relations.size());
+        assertEquals("null, Тип: \"Первичная\", Вид: \"НДС-204\", Подразделение: \"Волго-Вятский банк\", Период: \"третий квартал 2011\", Макет: \"true\", Статус: \"Не создана\", Период сравнения: \"третий квартал 2010\"", getShortFormInfo(relations.get(0)));
+        assertEquals("null, Тип: \"Первичная\", Вид: \"НДС-205\", Подразделение: \"Волго-Вятский банк\", Период: \"третий квартал 2011\", Макет: \"true\", Статус: \"Не создана\", Период сравнения: \"третий квартал 2010\"", getShortFormInfo(relations.get(1)));
+        assertEquals("null, Тип: \"Первичная\", Вид: \"РНУ-7\", Подразделение: \"Байкальский банк\", Период: \"третий квартал 2011\", Макет: \"true\", Статус: \"Не создана\", Период сравнения: \"третий квартал 2010\"", getShortFormInfo(relations.get(2)));
     }
 
     @Test
     public void test15() {
-        //2 источника для консолидированной с разными периодами сравнения. Результат: 1 запись (3 квартал 2012)
+        //2 источника для консолидированной с разными периодами сравнения. Результат: 1 запись (3 квартал 2012) + несозданная ндс-204 с совпадающим периодом и признаком нарастающего итога и созданная ндс-205 с периодом сравнения 3 квартал 2012
         FormData formData = new FormData();
         formData.setId(33L);
         List<Relation> relations = sourceDao.getSourcesInfo(formData, true, false, null);
-        assertEquals(1, relations.size());
-        assertEquals("34, Тип: \"Первичная\", Вид: \"РНУ-7\", Подразделение: \"Байкальский банк\", Период: \"третий квартал (9 месяцев) 2012\", Макет: \"true\", Статус: \"Создана\", Период сравнения: \"третий квартал (9 месяцев) 2012\"", getShortFormInfo(relations.get(0)));
+        for (Relation relation : relations) {
+            System.out.println(getShortFormInfo(relation));
+        }
+        assertEquals(3, relations.size());
+        assertEquals("1034, Тип: \"Первичная\", Вид: \"НДС-204\", Подразделение: \"Волго-Вятский банк\", Период: \"третий квартал 2012\", Макет: \"true\", Статус: \"Создана\", Период сравнения: \"третий квартал 2012\"", getShortFormInfo(relations.get(0)));
+        assertEquals("1035, Тип: \"Первичная\", Вид: \"НДС-205\", Подразделение: \"Волго-Вятский банк\", Период: \"третий квартал (9 месяцев) 2012\", Макет: \"true\", Статус: \"Создана\", Период сравнения: \"третий квартал (9 месяцев) 2012\"", getShortFormInfo(relations.get(1)));
+        assertEquals("34, Тип: \"Первичная\", Вид: \"РНУ-7\", Подразделение: \"Байкальский банк\", Период: \"третий квартал (9 месяцев) 2012\", Макет: \"true\", Статус: \"Создана\", Период сравнения: \"третий квартал (9 месяцев) 2012\"", getShortFormInfo(relations.get(2)));
 
         formDataDao.delete(1, 33L);
         formData.setId(null);
@@ -542,8 +700,10 @@ public class SourcesOracleTest {
         formData.setComparativePeriodId(22);
         formData.setAccruing(true);
         relations = sourceDao.getSourcesInfo(formData, true, false, null);
-        assertEquals(1, relations.size());
-        assertEquals("34, Тип: \"Первичная\", Вид: \"РНУ-7\", Подразделение: \"Байкальский банк\", Период: \"третий квартал (9 месяцев) 2012\", Макет: \"true\", Статус: \"Создана\", Период сравнения: \"третий квартал (9 месяцев) 2012\"", getShortFormInfo(relations.get(0)));
+        assertEquals(3, relations.size());
+        assertEquals("1034, Тип: \"Первичная\", Вид: \"НДС-204\", Подразделение: \"Волго-Вятский банк\", Период: \"третий квартал 2012\", Макет: \"true\", Статус: \"Создана\", Период сравнения: \"третий квартал 2012\"", getShortFormInfo(relations.get(0)));
+        assertEquals("1035, Тип: \"Первичная\", Вид: \"НДС-205\", Подразделение: \"Волго-Вятский банк\", Период: \"третий квартал (9 месяцев) 2012\", Макет: \"true\", Статус: \"Создана\", Период сравнения: \"третий квартал (9 месяцев) 2012\"", getShortFormInfo(relations.get(1)));
+        assertEquals("34, Тип: \"Первичная\", Вид: \"РНУ-7\", Подразделение: \"Байкальский банк\", Период: \"третий квартал (9 месяцев) 2012\", Макет: \"true\", Статус: \"Создана\", Период сравнения: \"третий квартал (9 месяцев) 2012\"", getShortFormInfo(relations.get(2)));
     }
 
     @Test
@@ -552,6 +712,9 @@ public class SourcesOracleTest {
         FormData formData = new FormData();
         formData.setId(133L);
         List<Relation> relations = sourceDao.getSourcesInfo(formData, true, false, null);
+        for (Relation relation : relations) {
+            System.out.println(getShortFormInfo(relation));
+        }
         assertEquals(2, relations.size());
         assertEquals("null, Тип: \"Первичная\", Вид: \"РНУ-7\", Подразделение: \"Байкальский банк\", Период: \"третий квартал (9 месяцев) 2026\", Макет: \"true\", Статус: \"Не создана\", Период сравнения: \"третий квартал (9 месяцев) 2026\"", getShortFormInfo(relations.get(0)));
         assertEquals("null, Тип: \"Первичная\", Вид: \"РНУ-89\", Подразделение: \"Байкальский банк\", Период: \"третий квартал 2026\", Макет: \"true\", Статус: \"Не создана\"", getShortFormInfo(relations.get(1)));
@@ -575,6 +738,9 @@ public class SourcesOracleTest {
         FormData formData = new FormData();
         formData.setId(78L);
         List<Relation> relations = sourceDao.getSourcesInfo(formData, true, false, null);
+        for (Relation relation : relations) {
+            System.out.println(getShortFormInfo(relation));
+        }
         assertEquals(2, relations.size());
         assertEquals("79, Тип: \"Первичная\", Вид: \"РНУ-100\", Подразделение: \"Байкальский банк\", Период: \"третий квартал 2026\", Макет: \"true\", Статус: \"Создана\", Период сравнения: \"третий квартал 2026\"", getShortFormInfo(relations.get(0)));
         assertEquals("80, Тип: \"Первичная\", Вид: \"РНУ-100\", Подразделение: \"Волго-Вятский банк\", Период: \"третий квартал 2026\", Макет: \"true\", Статус: \"Создана\", Период сравнения: \"третий квартал 2026\"", getShortFormInfo(relations.get(1)));
@@ -589,6 +755,9 @@ public class SourcesOracleTest {
         declarationData.setId(1L);
         //2 источника для декларации с разными периодами сравнения. Результат: 1 запись (3 квартал 2012)
         List<Relation> relations = sourceDao.getDeclarationSourcesInfo(declarationData, true, false, null);
+        for (Relation relation : relations) {
+            System.out.println(getShortFormInfo(relation));
+        }
         assertEquals(3, relations.size());
         assertEquals("1, Тип: \"Консолидированная\", Вид: \"РНУ-1\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2000\", Макет: \"true\", Статус: \"Утверждена\"", getShortFormInfo(relations.get(0)));
         assertEquals("null, Тип: \"Консолидированная\", Вид: \"РНУ-18\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2000\", Макет: \"true\", Статус: \"Не создана\"", getShortFormInfo(relations.get(1)));
@@ -618,6 +787,9 @@ public class SourcesOracleTest {
         declarationData.setId(1L);
         formTemplateDao.updateVersionStatus(VersionedObjectStatus.DRAFT, 1);
         List<Relation> relations = sourceDao.getDeclarationSourcesInfo(declarationData, true, false, null);
+        for (Relation relation : relations) {
+            System.out.println(getShortFormInfo(relation));
+        }
         assertEquals(3, relations.size());
         assertEquals("1, Тип: \"Консолидированная\", Вид: \"РНУ-1\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2000\", Макет: \"false\", Статус: \"Утверждена\"", getShortFormInfo(relations.get(0)));
         assertEquals("null, Тип: \"Консолидированная\", Вид: \"РНУ-18\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2000\", Макет: \"true\", Статус: \"Не создана\"", getShortFormInfo(relations.get(1)));
@@ -660,6 +832,9 @@ public class SourcesOracleTest {
         DeclarationData declarationData = new DeclarationData();
         declarationData.setId(3L);
         List<Relation> relations = sourceDao.getDeclarationSourcesInfo(declarationData, true, false, null);
+        for (Relation relation : relations) {
+            System.out.println(getShortFormInfo(relation));
+        }
         assertEquals(3, relations.size());
         assertEquals("6, Тип: \"Консолидированная\", Вид: \"РНУ-1\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2003\", Макет: \"true\", Статус: \"Создана\"", getShortFormInfo(relations.get(0)));
         assertEquals("null, Тип: \"Консолидированная\", Вид: \"РНУ-18\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2003\", Макет: \"true\", Статус: \"Не создана\"", getShortFormInfo(relations.get(1)));
@@ -682,6 +857,9 @@ public class SourcesOracleTest {
         DeclarationData declarationData = new DeclarationData();
         declarationData.setId(4L);
         List<Relation> relations = sourceDao.getDeclarationSourcesInfo(declarationData, true, false, null);
+        for (Relation relation : relations) {
+            System.out.println(getShortFormInfo(relation));
+        }
         assertEquals(4, relations.size());
         assertEquals("9, Тип: \"Первичная\", Вид: \"РНУ-4\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2004\", Макет: \"true\", Статус: \"Создана\", Месяц: \"Январь\"", getShortFormInfo(relations.get(0)));
         assertEquals("10, Тип: \"Первичная\", Вид: \"РНУ-4\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2004\", Макет: \"true\", Статус: \"Создана\", Месяц: \"Февраль\"", getShortFormInfo(relations.get(1)));
@@ -706,11 +884,14 @@ public class SourcesOracleTest {
         DeclarationData declarationData = new DeclarationData();
         declarationData.setId(5L);
         List<Relation> relations = sourceDao.getDeclarationSourcesInfo(declarationData, true, false, null);
+        for (Relation relation : relations) {
+            System.out.println(getShortFormInfo(relation));
+        }
         assertEquals(4, relations.size());
         assertEquals("16, Тип: \"Консолидированная\", Вид: \"РНУ-1\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2005\", Макет: \"true\", Статус: \"Создана\", Дата сдачи корректировки: \"10.01.2005\"", getShortFormInfo(relations.get(0)));
         assertEquals("77, Тип: \"Консолидированная\", Вид: \"РНУ-1\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2005\", Макет: \"true\", Статус: \"Создана\", Дата сдачи корректировки: \"10.01.2005\"", getShortFormInfo(relations.get(1))); //запись из другого теста
         assertEquals("null, Тип: \"Консолидированная\", Вид: \"РНУ-18\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2005\", Макет: \"true\", Статус: \"Не создана\"", getShortFormInfo(relations.get(2)));
-        assertEquals("null, Тип: \"Консолидированная\", Вид: \"РНУ-5\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2005\", Макет: \"true\", Статус: \"Не создана\"", getShortFormInfo(relations.get(3)));
+        assertEquals("1016, Тип: \"Консолидированная\", Вид: \"РНУ-5\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2005\", Макет: \"true\", Статус: \"Создана\", Дата сдачи корректировки: \"10.01.2005\"", getShortFormInfo(relations.get(3)));
 
         declarationDataDao.delete(5L);
         declarationData.setId(null);
@@ -721,7 +902,7 @@ public class SourcesOracleTest {
         assertEquals("16, Тип: \"Консолидированная\", Вид: \"РНУ-1\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2005\", Макет: \"true\", Статус: \"Создана\", Дата сдачи корректировки: \"10.01.2005\"", getShortFormInfo(relations.get(0)));
         assertEquals("77, Тип: \"Консолидированная\", Вид: \"РНУ-1\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2005\", Макет: \"true\", Статус: \"Создана\", Дата сдачи корректировки: \"10.01.2005\"", getShortFormInfo(relations.get(1))); //запись из другого теста
         assertEquals("null, Тип: \"Консолидированная\", Вид: \"РНУ-18\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2005\", Макет: \"true\", Статус: \"Не создана\"", getShortFormInfo(relations.get(2)));
-        assertEquals("null, Тип: \"Консолидированная\", Вид: \"РНУ-5\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2005\", Макет: \"true\", Статус: \"Не создана\"", getShortFormInfo(relations.get(3)));
+        assertEquals("1016, Тип: \"Консолидированная\", Вид: \"РНУ-5\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2005\", Макет: \"true\", Статус: \"Создана\", Дата сдачи корректировки: \"10.01.2005\"", getShortFormInfo(relations.get(3)));
     }
 
     @Test
@@ -730,6 +911,9 @@ public class SourcesOracleTest {
         DeclarationData declarationData = new DeclarationData();
         declarationData.setId(6L);
         List<Relation> relations = sourceDao.getDeclarationSourcesInfo(declarationData, true, false, null);
+        for (Relation relation : relations) {
+            System.out.println(getShortFormInfo(relation));
+        }
         assertEquals(3, relations.size());
         assertEquals("null, Тип: \"Консолидированная\", Вид: \"РНУ-1\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2006\", Макет: \"true\", Статус: \"Не создана\"", getShortFormInfo(relations.get(0)));
         assertEquals("null, Тип: \"Консолидированная\", Вид: \"РНУ-18\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2006\", Макет: \"true\", Статус: \"Не создана\"", getShortFormInfo(relations.get(1)));
@@ -752,6 +936,9 @@ public class SourcesOracleTest {
         DeclarationData declarationData = new DeclarationData();
         declarationData.setId(7L);
         List<Relation> relations = sourceDao.getDeclarationSourcesInfo(declarationData, true, false, null);
+        for (Relation relation : relations) {
+            System.out.println(getShortFormInfo(relation));
+        }
         assertEquals(3, relations.size());
         assertEquals("20, Тип: \"Консолидированная\", Вид: \"РНУ-1\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2007\", Макет: \"true\", Статус: \"Создана\", Дата сдачи корректировки: \"10.01.2007\"", getShortFormInfo(relations.get(0)));
         assertEquals("null, Тип: \"Консолидированная\", Вид: \"РНУ-18\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2007\", Макет: \"true\", Статус: \"Не создана\"", getShortFormInfo(relations.get(1)));
@@ -774,6 +961,9 @@ public class SourcesOracleTest {
         DeclarationData declarationData = new DeclarationData();
         declarationData.setId(8L);
         List<Relation> relations = sourceDao.getDeclarationSourcesInfo(declarationData, true, false, null);
+        for (Relation relation : relations) {
+            System.out.println(getShortFormInfo(relation));
+        }
         assertEquals(3, relations.size());
         assertEquals("23, Тип: \"Консолидированная\", Вид: \"РНУ-1\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2008\", Макет: \"true\", Статус: \"Создана\"", getShortFormInfo(relations.get(0)));
         assertEquals("null, Тип: \"Консолидированная\", Вид: \"РНУ-18\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2008\", Макет: \"true\", Статус: \"Не создана\"", getShortFormInfo(relations.get(1)));
@@ -796,6 +986,9 @@ public class SourcesOracleTest {
         DeclarationData declarationData = new DeclarationData();
         declarationData.setId(9L);
         List<Relation> relations = sourceDao.getDeclarationSourcesInfo(declarationData, true, false, null);
+        for (Relation relation : relations) {
+            System.out.println(getShortFormInfo(relation));
+        }
         assertEquals(3, relations.size());
         assertEquals("null, Тип: \"Консолидированная\", Вид: \"РНУ-1\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2009\", Макет: \"true\", Статус: \"Не создана\"", getShortFormInfo(relations.get(0)));
         assertEquals("76, Тип: \"Консолидированная\", Вид: \"РНУ-18\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2009\", Макет: \"true\", Статус: \"Создана\"", getShortFormInfo(relations.get(1)));
@@ -820,6 +1013,9 @@ public class SourcesOracleTest {
         FormData formData = new FormData();
         formData.setId(2L);
         List<Relation> relations = sourceDao.getDestinationsInfo(formData, true, false, null);
+        for (Relation relation : relations) {
+            System.out.println(getShortFormInfo(relation));
+        }
         assertEquals(5, relations.size());
         assertEquals("1, Тип: \"Консолидированная\", Вид: \"РНУ-1\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2000\", Макет: \"true\", Статус: \"Утверждена\"", getShortFormInfo(relations.get(0)));
         assertEquals("null, Тип: \"Консолидированная\", Вид: \"РНУ-4\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2000\", Макет: \"true\", Статус: \"Не создана\", Месяц: \"Январь\"", getShortFormInfo(relations.get(1)));
@@ -853,6 +1049,9 @@ public class SourcesOracleTest {
         formData.setId(2L);
         formTemplateDao.updateVersionStatus(VersionedObjectStatus.DRAFT, 9);
         List<Relation> relations = sourceDao.getDestinationsInfo(formData, true, false, null);
+        for (Relation relation : relations) {
+            System.out.println(getShortFormInfo(relation));
+        }
         assertEquals(5, relations.size());
         assertEquals("1, Тип: \"Консолидированная\", Вид: \"РНУ-1\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2000\", Макет: \"true\", Статус: \"Утверждена\"", getShortFormInfo(relations.get(0)));
         assertEquals("null, Тип: \"Консолидированная\", Вид: \"РНУ-4\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2000\", Макет: \"true\", Статус: \"Не создана\", Месяц: \"Январь\"", getShortFormInfo(relations.get(1)));
@@ -882,6 +1081,9 @@ public class SourcesOracleTest {
         FormData formData = new FormData();
         formData.setId(41L);
         List<Relation> relations = sourceDao.getDestinationsInfo(formData, true, false, null);
+        for (Relation relation : relations) {
+            System.out.println(getShortFormInfo(relation));
+        }
         assertEquals(2, relations.size());
         assertEquals("42, Тип: \"Консолидированная\", Вид: \"РНУ-2\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2002\", Макет: \"true\", Статус: \"Создана\"", getShortFormInfo(relations.get(0)));
         assertEquals("43, Тип: \"Консолидированная\", Вид: \"РНУ-9\", Подразделение: \"Волго-Вятский банк\", Период: \"первый квартал 2002\", Макет: \"true\", Статус: \"Создана\"", getShortFormInfo(relations.get(1)));
@@ -905,6 +1107,9 @@ public class SourcesOracleTest {
         FormData formData = new FormData();
         formData.setId(7L);
         List<Relation> relations = sourceDao.getDestinationsInfo(formData, true, false, null);
+        for (Relation relation : relations) {
+            System.out.println(getShortFormInfo(relation));
+        }
         assertEquals(0, relations.size());
 
         formDataDao.delete(1, 7L);
@@ -947,13 +1152,17 @@ public class SourcesOracleTest {
 
     @Test
     public void test31() {
-        //4 приемника для первичной один из них не создан, а 3 ежемесячных (их них 1 не создан). Результат: 4 записи. У ежемесячных форм должен быть указан месяц (даже если не создана)
+        //2 приемника для первичной один из них ежемесячный,а другой не ежемесячный. Исходная нф создана как не ежемесячная. Результат: 2 созданные записи (рну-5 без месяца и несозданная рну-4 за январь) + НДС-200 без месяца
         FormData formData = new FormData();
         formData.setId(15L);
         List<Relation> relations = sourceDao.getDestinationsInfo(formData, true, false, null);
-        assertEquals(2, relations.size());
-        assertEquals("13, Тип: \"Консолидированная\", Вид: \"РНУ-4\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2025\", Макет: \"true\", Статус: \"Создана\", Месяц: \"Январь\"", getShortFormInfo(relations.get(0)));
-        assertEquals("48, Тип: \"Консолидированная\", Вид: \"РНУ-5\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2025\", Макет: \"true\", Статус: \"Создана\"", getShortFormInfo(relations.get(1)));
+        for (Relation relation : relations) {
+            System.out.println(getShortFormInfo(relation));
+        }
+        assertEquals(3, relations.size());
+        assertEquals("1012, Тип: \"Первичная\", Вид: \"НДС-200\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2025\", Макет: \"true\", Статус: \"Создана\"", getShortFormInfo(relations.get(0)));
+        assertEquals("13, Тип: \"Консолидированная\", Вид: \"РНУ-4\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2025\", Макет: \"true\", Статус: \"Создана\", Месяц: \"Январь\"", getShortFormInfo(relations.get(1)));
+        assertEquals("48, Тип: \"Консолидированная\", Вид: \"РНУ-5\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2025\", Макет: \"true\", Статус: \"Создана\"", getShortFormInfo(relations.get(2)));
 
         formDataDao.delete(1, 15L);
         formData.setId(null);
@@ -963,9 +1172,10 @@ public class SourcesOracleTest {
         formData.setComparativePeriodId(null);
         formData.setAccruing(false);
         relations = sourceDao.getDestinationsInfo(formData, true, false, null);
-        assertEquals(2, relations.size());
-        assertEquals("13, Тип: \"Консолидированная\", Вид: \"РНУ-4\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2025\", Макет: \"true\", Статус: \"Создана\", Месяц: \"Январь\"", getShortFormInfo(relations.get(0)));
-        assertEquals("48, Тип: \"Консолидированная\", Вид: \"РНУ-5\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2025\", Макет: \"true\", Статус: \"Создана\"", getShortFormInfo(relations.get(1)));
+        assertEquals(3, relations.size());
+        assertEquals("1012, Тип: \"Первичная\", Вид: \"НДС-200\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2025\", Макет: \"true\", Статус: \"Создана\"", getShortFormInfo(relations.get(0)));
+        assertEquals("13, Тип: \"Консолидированная\", Вид: \"РНУ-4\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2025\", Макет: \"true\", Статус: \"Создана\", Месяц: \"Январь\"", getShortFormInfo(relations.get(1)));
+        assertEquals("48, Тип: \"Консолидированная\", Вид: \"РНУ-5\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2025\", Макет: \"true\", Статус: \"Создана\"", getShortFormInfo(relations.get(2)));
     }
 
     @Test
@@ -974,6 +1184,9 @@ public class SourcesOracleTest {
         FormData formData = new FormData();
         formData.setId(49L);
         List<Relation> relations = sourceDao.getDestinationsInfo(formData, true, false, null);
+        for (Relation relation : relations) {
+            System.out.println(getShortFormInfo(relation));
+        }
         assertEquals(2, relations.size());
         assertEquals("50, Тип: \"Консолидированная\", Вид: \"РНУ-13\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2005\", Макет: \"true\", Статус: \"Создана\", Дата сдачи корректировки: \"10.01.2005\"", getShortFormInfo(relations.get(0)));
         assertEquals("null, Тип: \"Консолидированная\", Вид: \"РНУ-33\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2005\", Макет: \"true\", Статус: \"Не создана\", Дата сдачи корректировки: \"15.01.2005\"", getShortFormInfo(relations.get(1)));
@@ -1020,6 +1233,9 @@ public class SourcesOracleTest {
         FormData formData = new FormData();
         formData.setId(53L);
         List<Relation> relations = sourceDao.getDestinationsInfo(formData, true, false, null);
+        for (Relation relation : relations) {
+            System.out.println(getShortFormInfo(relation));
+        }
         assertEquals(2, relations.size());
         assertEquals("null, Тип: \"Консолидированная\", Вид: \"РНУ-13\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2007\", Макет: \"true\", Статус: \"Не создана\", Дата сдачи корректировки: \"10.01.2007\"", getShortFormInfo(relations.get(0)));
         assertEquals("null, Тип: \"Консолидированная\", Вид: \"РНУ-33\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2007\", Макет: \"true\", Статус: \"Не создана\", Дата сдачи корректировки: \"10.01.2007\"", getShortFormInfo(relations.get(1)));
@@ -1044,6 +1260,9 @@ public class SourcesOracleTest {
         FormData formData = new FormData();
         formData.setId(55L);
         List<Relation> relations = sourceDao.getDestinationsInfo(formData, true, false, null);
+        for (Relation relation : relations) {
+            System.out.println(getShortFormInfo(relation));
+        }
         assertEquals(4, relations.size());
         assertEquals("57, Тип: \"Консолидированная\", Вид: \"РНУ-13\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2008\", Макет: \"true\", Статус: \"Создана\", Дата сдачи корректировки: \"05.01.2008\"", getShortFormInfo(relations.get(0)));
         assertEquals("58, Тип: \"Консолидированная\", Вид: \"РНУ-13\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2008\", Макет: \"true\", Статус: \"Создана\", Дата сдачи корректировки: \"10.01.2008\"", getShortFormInfo(relations.get(1)));
@@ -1092,6 +1311,9 @@ public class SourcesOracleTest {
         FormData formData = new FormData();
         formData.setId(62L);
         List<Relation> relations = sourceDao.getDestinationsInfo(formData, true, false, null);
+        for (Relation relation : relations) {
+            System.out.println(getShortFormInfo(relation));
+        }
         assertEquals(1, relations.size());
         assertEquals("63, Тип: \"Консолидированная\", Вид: \"РНУ-15\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2009\", Макет: \"true\", Статус: \"Создана\", Период сравнения: \"первый квартал 2009\"", getShortFormInfo(relations.get(0)));
 
@@ -1113,6 +1335,9 @@ public class SourcesOracleTest {
         FormData formData = new FormData();
         formData.setId(64L);
         List<Relation> relations = sourceDao.getDestinationsInfo(formData, true, false, null);
+        for (Relation relation : relations) {
+            System.out.println(getShortFormInfo(relation));
+        }
         assertEquals(1, relations.size());
         assertEquals("65, Тип: \"Консолидированная\", Вид: \"РНУ-15\", Подразделение: \"Байкальский банк\", Период: \"третий квартал (9 месяцев) 2010\", Макет: \"true\", Статус: \"Создана\", Период сравнения: \"третий квартал (9 месяцев) 2010\"", getShortFormInfo(relations.get(0)));
 
@@ -1134,6 +1359,9 @@ public class SourcesOracleTest {
         FormData formData = new FormData();
         formData.setId(66L);
         List<Relation> relations = sourceDao.getDestinationsInfo(formData, true, false, null);
+        for (Relation relation : relations) {
+            System.out.println(getShortFormInfo(relation));
+        }
         assertEquals(1, relations.size());
         assertEquals("null, Тип: \"Консолидированная\", Вид: \"РНУ-15\", Подразделение: \"Байкальский банк\", Период: \"третий квартал 2011\", Макет: \"true\", Статус: \"Не создана\", Период сравнения: \"третий квартал 2010\"", getShortFormInfo(relations.get(0)));
 
@@ -1156,6 +1384,9 @@ public class SourcesOracleTest {
         FormData formData = new FormData();
         formData.setId(69L);
         List<Relation> relations = sourceDao.getDestinationsInfo(formData, true, false, null);
+        for (Relation relation : relations) {
+            System.out.println(getShortFormInfo(relation));
+        }
         assertEquals(1, relations.size());
         assertEquals("70, Тип: \"Консолидированная\", Вид: \"РНУ-15\", Подразделение: \"Байкальский банк\", Период: \"третий квартал (9 месяцев) 2012\", Макет: \"true\", Статус: \"Создана\", Период сравнения: \"третий квартал (9 месяцев) 2012\"", getShortFormInfo(relations.get(0)));
 
@@ -1202,6 +1433,9 @@ public class SourcesOracleTest {
         FormData formData = new FormData();
         formData.setId(124L);
         List<Relation> relations = sourceDao.getDestinationsInfo(formData, true, false, null);
+        for (Relation relation : relations) {
+            System.out.println(getShortFormInfo(relation));
+        }
         assertEquals(3, relations.size());
         assertEquals("126, Тип: \"Консолидированная\", Вид: \"РНУ-20\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2008\", Макет: \"true\", Статус: \"Создана\", Дата сдачи корректировки: \"05.01.2008\"", getShortFormInfo(relations.get(0)));
         assertEquals("127, Тип: \"Консолидированная\", Вид: \"РНУ-20\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2008\", Макет: \"true\", Статус: \"Создана\"", getShortFormInfo(relations.get(1)));
@@ -1246,8 +1480,145 @@ public class SourcesOracleTest {
         FormData formData = new FormData();
         formData.setId(80L);
         List<Relation> relations = sourceDao.getDestinationsInfo(formData, true, false, null);
+        for (Relation relation : relations) {
+            System.out.println(getShortFormInfo(relation));
+        }
         assertEquals(1, relations.size());
         assertEquals("78, Тип: \"Консолидированная\", Вид: \"РНУ-100\", Подразделение: \"Байкальский банк\", Период: \"третий квартал 2026\", Макет: \"true\", Статус: \"Создана\", Период сравнения: \"третий квартал 2026\"", getShortFormInfo(relations.get(0)));
+    }
+
+    @Test
+    public void test60() {
+        //2 приемника для первичной из другого налога, одна создана а другая нет
+        FormData formData = new FormData();
+        formData.setId(204L);
+        List<Relation> relations = sourceDao.getDestinationsInfo(formData, true, false, null);
+        for (Relation relation : relations) {
+            System.out.println(getShortFormInfo(relation));
+        }
+        assertEquals(2, relations.size());
+        assertEquals("202, Тип: \"Консолидированная\", Вид: \"РНУ-1\", Подразделение: \"Байкальский банк\", Период: \"1 квартал 2050\", Макет: \"true\", Статус: \"Утверждена\"", getShortFormInfo(relations.get(0)));
+        assertEquals("null, Тип: \"Консолидированная\", Вид: \"РНУ-5\", Подразделение: \"Байкальский банк\", Период: \"1 квартал 2050\", Макет: \"true\", Статус: \"Не создана\"", getShortFormInfo(relations.get(1)));
+    }
+
+    @Test
+    public void test61() {
+        //т.к периоды не совпадают то ничего не будет найдено, хотя созданы формы за полугодие
+        FormData formData = new FormData();
+        formData.setId(207L);
+        List<Relation> relations = sourceDao.getDestinationsInfo(formData, true, false, null);
+        for (Relation relation : relations) {
+            System.out.println(getShortFormInfo(relation));
+        }
+        assertEquals(0, relations.size());
+    }
+
+    @Test
+    public void test62() {
+        //найден 1 обычная форма для ежемесячного источника
+        FormData formData = new FormData();
+        formData.setId(209L);
+        List<Relation> relations = sourceDao.getDestinationsInfo(formData, true, false, null);
+        for (Relation relation : relations) {
+            System.out.println(getShortFormInfo(relation));
+        }
+        assertEquals(1, relations.size());
+        assertEquals("8, Тип: \"Консолидированная\", Вид: \"РНУ-5\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2004\", Макет: \"true\", Статус: \"Создана\"", getShortFormInfo(relations.get(0)));
+
+        formData.setId(210L);
+        relations = sourceDao.getDestinationsInfo(formData, true, false, null);
+        for (Relation relation : relations) {
+            System.out.println(getShortFormInfo(relation));
+        }
+        assertEquals(1, relations.size());
+        assertEquals("8, Тип: \"Консолидированная\", Вид: \"РНУ-5\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2004\", Макет: \"true\", Статус: \"Создана\"", getShortFormInfo(relations.get(0)));
+    }
+
+    @Test
+    public void test63() {
+        //для ндс-200 3 приемника
+        FormData formData = new FormData();
+        formData.setId(1017L);
+        List<Relation> relations = sourceDao.getDestinationsInfo(formData, true, false, null);
+        for (Relation relation : relations) {
+            System.out.println(getShortFormInfo(relation));
+        }
+        assertEquals(3, relations.size());
+        assertEquals("16, Тип: \"Консолидированная\", Вид: \"РНУ-1\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2005\", Макет: \"true\", Статус: \"Создана\", Дата сдачи корректировки: \"10.01.2005\"", getShortFormInfo(relations.get(0)));
+        assertEquals("77, Тип: \"Консолидированная\", Вид: \"РНУ-1\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2005\", Макет: \"true\", Статус: \"Создана\", Дата сдачи корректировки: \"10.01.2005\"", getShortFormInfo(relations.get(1)));
+        assertEquals("1016, Тип: \"Консолидированная\", Вид: \"РНУ-5\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2005\", Макет: \"true\", Статус: \"Создана\", Дата сдачи корректировки: \"10.01.2005\"", getShortFormInfo(relations.get(2)));
+
+        formData.setId(1018L);
+        relations = sourceDao.getDestinationsInfo(formData, true, false, null);
+        for (Relation relation : relations) {
+            System.out.println(getShortFormInfo(relation));
+        }
+        assertEquals(1, relations.size());
+        assertEquals("1016, Тип: \"Консолидированная\", Вид: \"РНУ-5\", Подразделение: \"Байкальский банк\", Период: \"первый квартал 2005\", Макет: \"true\", Статус: \"Создана\", Дата сдачи корректировки: \"10.01.2005\"", getShortFormInfo(relations.get(0)));
+    }
+
+    @Test
+    public void test64() {
+        FormData formData = new FormData();
+        formData.setId(1031L);
+        List<Relation> relations = sourceDao.getDestinationsInfo(formData, true, false, null);
+        for (Relation relation : relations) {
+            System.out.println(getShortFormInfo(relation));
+        }
+        assertEquals(1, relations.size());
+        assertEquals("null, Тип: \"Консолидированная\", Вид: \"РНУ-8\", Подразделение: \"Байкальский банк\", Период: \"третий квартал 2011\", Макет: \"true\", Статус: \"Не создана\", Период сравнения: \"первый квартал 2009\"", getShortFormInfo(relations.get(0)));
+
+        formData.setId(1032L);
+        relations = sourceDao.getDestinationsInfo(formData, true, false, null);
+        for (Relation relation : relations) {
+            System.out.println(getShortFormInfo(relation));
+        }
+        assertEquals(1, relations.size());
+        assertEquals("null, Тип: \"Консолидированная\", Вид: \"РНУ-8\", Подразделение: \"Байкальский банк\", Период: \"третий квартал 2011\", Макет: \"true\", Статус: \"Не создана\", Период сравнения: \"первый квартал 2008\"", getShortFormInfo(relations.get(0)));
+    }
+
+    @Test
+    public void test65() {
+        FormData formData = new FormData();
+        formData.setId(34L);
+        List<Relation> relations = sourceDao.getDestinationsInfo(formData, true, false, null);
+        for (Relation relation : relations) {
+            System.out.println(getShortFormInfo(relation));
+        }
+        assertEquals(3, relations.size());
+        assertEquals("null, Тип: \"Консолидированная\", Вид: \"РНУ-6\", Подразделение: \"Байкальский банк\", Период: \"третий квартал 2012\", Макет: \"true\", Статус: \"Не создана\"", getShortFormInfo(relations.get(0)));
+        assertEquals("33, Тип: \"Консолидированная\", Вид: \"РНУ-8\", Подразделение: \"Байкальский банк\", Период: \"третий квартал (9 месяцев) 2012\", Макет: \"true\", Статус: \"Создана\", Период сравнения: \"третий квартал (9 месяцев) 2012\"", getShortFormInfo(relations.get(1)));
+        assertEquals("null, Тип: \"Консолидированная\", Вид: \"РНУ-88\", Подразделение: \"Байкальский банк\", Период: \"третий квартал (9 месяцев) 2012\", Макет: \"true\", Статус: \"Не создана\", Период сравнения: \"третий квартал (9 месяцев) 2012\"", getShortFormInfo(relations.get(2)));
+
+        formData.setId(35L);
+        relations = sourceDao.getDestinationsInfo(formData, true, false, null);
+        for (Relation relation : relations) {
+            System.out.println(getShortFormInfo(relation));
+        }
+        assertEquals(3, relations.size());
+        assertEquals("null, Тип: \"Консолидированная\", Вид: \"РНУ-6\", Подразделение: \"Байкальский банк\", Период: \"третий квартал 2012\", Макет: \"true\", Статус: \"Не создана\"", getShortFormInfo(relations.get(0)));
+        assertEquals("null, Тип: \"Консолидированная\", Вид: \"РНУ-8\", Подразделение: \"Байкальский банк\", Период: \"третий квартал (9 месяцев) 2012\", Макет: \"true\", Статус: \"Не создана\", Период сравнения: \"третий квартал (9 месяцев) 2010\"", getShortFormInfo(relations.get(1)));
+        assertEquals("null, Тип: \"Консолидированная\", Вид: \"РНУ-88\", Подразделение: \"Байкальский банк\", Период: \"третий квартал (9 месяцев) 2012\", Макет: \"true\", Статус: \"Не создана\", Период сравнения: \"третий квартал (9 месяцев) 2010\"", getShortFormInfo(relations.get(2)));
+    }
+
+    @Test
+    public void test66() {
+        FormData formData = new FormData();
+        formData.setId(1035L);
+        List<Relation> relations = sourceDao.getDestinationsInfo(formData, true, false, null);
+        for (Relation relation : relations) {
+            System.out.println(getShortFormInfo(relation));
+        }
+        assertEquals(1, relations.size());
+        assertEquals("33, Тип: \"Консолидированная\", Вид: \"РНУ-8\", Подразделение: \"Байкальский банк\", Период: \"третий квартал (9 месяцев) 2012\", Макет: \"true\", Статус: \"Создана\", Период сравнения: \"третий квартал (9 месяцев) 2012\"", getShortFormInfo(relations.get(0)));
+
+        formData.setId(1036L);
+        relations = sourceDao.getDestinationsInfo(formData, true, false, null);
+        for (Relation relation : relations) {
+            System.out.println(getShortFormInfo(relation));
+        }
+        assertEquals(1, relations.size());
+        assertEquals("null, Тип: \"Консолидированная\", Вид: \"РНУ-8\", Подразделение: \"Байкальский банк\", Период: \"третий квартал (9 месяцев) 2012\", Макет: \"true\", Статус: \"Не создана\", Период сравнения: \"третий квартал 2010\"", getShortFormInfo(relations.get(0)));
     }
 
     /*****************************  Получение деклараций-приемников НФ ***************************/

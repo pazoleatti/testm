@@ -170,6 +170,7 @@ public class App_6_23Test extends ScriptTestBase {
         testHelper.execute(FormDataEvent.IMPORT_TRANSPORT_FILE);
         checkLoadData(testHelper.getDataRowHelper().getAll());
     }
+
     void mockBeforeImport(){
         Long refbookId = 520L;
 
