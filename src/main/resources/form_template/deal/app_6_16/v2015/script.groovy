@@ -344,22 +344,33 @@ def calcTotalRow(def dataRows) {
 
 // Возвращает строку со значениями полей строки по которым идет группировка
 String getValuesByGroupColumn(DataRow row) {
-    def sep = ", "
-    def StringBuilder builder = new StringBuilder()
-    def map = getRefBookValue(520, row.name)
-    if (map != null)
-        builder.append(map.NAME?.stringValue).append(sep)
-    if (row.docNumber != null)
-        builder.append(row.docNumber).append(sep)
-    if (row.docDate != null)
-        builder.append(formatDate(row.docDate, 'dd.MM.yyyy')).append(sep)
-    if (row.dealType != null)
-        builder.append(row.dealType).append(sep)
-
-    def String retVal = builder.toString()
-    if (retVal.length() < 2)
-        return null
-    return retVal.substring(0, retVal.length() - 2)
+    def values = []
+    // 2
+    def name = getRefBookValue(520, row.name)?.NAME?.stringValue
+    if (name != null) {
+        values.add(name)
+    } else {
+        values.add('графа 2 не задана')
+    }
+    // 5
+    if (row.docNumber) {
+        values.add(row.docNumber)
+    } else {
+        values.add('графа 5 не задана')
+    }
+    // 6
+    if (row.docDate) {
+        values.add(row.docDate?.format('dd.MM.yyyy'))
+    } else {
+        values.add('графа 6 не задана')
+    }
+    // 9
+    if (row.dealType) {
+        values.add(row.dealType)
+    } else {
+        values.add('графа 9 не задана')
+    }
+    return values.join(", ")
 }
 
 // Получение импортируемых данных
