@@ -166,8 +166,6 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
     protected boolean canCreatedManual;
 
 	protected boolean readOnlyMode;
-    /** */
-    protected boolean editLock;
 
     protected boolean updating;
 
@@ -449,41 +447,6 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
         setOnLeaveConfirmation();
     }
 
-    protected void setEditLockMode(LockInfo lockInfo) {
-        readOnlyMode = false;
-
-        MyView view = getView();
-        // сводная форма уровня Банка.
-        view.showOriginalVersionButton(false);
-
-        view.showSaveCancelPanel(false, false);
-        view.showEditModeLabel(true);
-        view.showConsolidation(false);
-        view.showRefreshButton(false);
-        view.showRecalculateButton(false);
-        view.showAddRemoveRowsBlock(false);
-
-        view.showPrintAnchor(false);
-        view.showDeleteFormButton(false);
-        view.setLockInformation(true, readOnlyMode, lockInfo, formData.getFormType().getTaxType());
-
-        view.setWorkflowButtons(null);
-        view.showCheckButton(false);
-        view.setSelectedRow(null, true);
-
-        view.showEditAnchor(false);
-        view.showModeAnchor(false, false);
-        view.showManualAnchor(false);
-        view.showDeleteManualAnchor(false);
-
-        view.showCorrectionButton(false);
-
-        view.setTableLockMode(true);
-        view.setColumnsData(formData.getFormColumns(), false, false);
-
-        setOnLeaveConfirmation(null);
-    }
-
     protected void setOnLeaveConfirmation() {
         if (taskName == null || TimerTaskResult.FormMode.EDIT.equals(formMode)) {
             if (edited || !modifiedRows.isEmpty()) {
@@ -504,7 +467,6 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
         placeManager.setOnLeaveConfirmation(msg);
         if (closeFormDataHandlerRegistration != null && msg == null) {
             closeFormDataHandlerRegistration.removeHandler();
-            closeFormDataHandlerRegistration = null;
         } else if (closeFormDataHandlerRegistration == null && msg != null) {
             closeFormDataHandlerRegistration = Window.addCloseHandler(new CloseHandler<Window>() {
                 @Override
@@ -544,7 +506,7 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 		UnlockFormData action = new UnlockFormData();
 		action.setFormId(formId);
         action.setManual(formData.isManual());
-        action.setReadOnlyMode(readOnlyMode || editLock);
+        action.setReadOnlyMode(readOnlyMode);
 		dispatcher.execute(action, CallbackUtils.emptyCallback());
 	}
 
