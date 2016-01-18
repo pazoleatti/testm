@@ -273,7 +273,7 @@ void logicCheck() {
                 }
             } else if (row.incomeRate == null && row.sum1 != null && row.sum1 > 0 && row.taxPrice != null) {
                 if (row.sum2 != calc15(row)) {
-                    logger.error("Строка $rowNum: Значение графы «$msg15» должно быть равно произведению значений граф «$msg6», «$msg10» и «$msg12»!")
+                    logger.error("Строка $rowNum: Значение графы «$msg15» должно быть равно произведению значений граф «$msg12», «$msg10» и «$msg6»!")
                 }
             } else if (row.sum1 != null && row.sum1 == 0 && row.taxPrice != null) {
                 if (row.sum2 != calc15(row)) {
@@ -374,7 +374,7 @@ def calcTotalRow(def dataRows) {
     def totalRow = (formDataEvent in [FormDataEvent.IMPORT, FormDataEvent.IMPORT_TRANSPORT_FILE]) ? formData.createStoreMessagingDataRow() : formData.createDataRow()
     totalRow.setAlias('total')
     totalRow.fix = 'Всего'
-    totalRow.getCell('fix').colSpan = 2
+    totalRow.getCell('fix').colSpan = 3
     allColumns.each {
         totalRow.getCell(it).setStyleAlias('Контрольные суммы')
     }
@@ -644,7 +644,7 @@ DataRow<Cell> getSubTotalRow(int i) {
     def newRow = (formDataEvent in [FormDataEvent.IMPORT, FormDataEvent.IMPORT_TRANSPORT_FILE]) ? formData.createStoreMessagingDataRow() : formData.createDataRow()
     newRow.fix = 'Итого'
     newRow.setAlias('itg#'.concat(i.toString()))
-    newRow.getCell('fix').colSpan = 2
+    newRow.getCell('fix').colSpan = 3
     allColumns.each {
         newRow.getCell(it).setStyleAlias('Контрольные суммы')
     }
