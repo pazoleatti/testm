@@ -173,7 +173,7 @@ void logicCheck() {
         // 4. Проверка количества
         if (row.count != null && row.count != 1) {
             def msg = row.getCell('count').column.name
-            logger.error("Строка $rowNum: Значение графы «$msg» должно быть равно значению «1»!")
+            logger.error("Строка $rowNum: Графа «$msg» должна быть заполнена значением «1»!")
         }
 
         // 5. Проверка финансового результата
