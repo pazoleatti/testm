@@ -221,11 +221,7 @@ void logicCheck() {
             if (!logicCheck3) {
                 def number2Name = getColumnName(row, 'number2')
                 def ndsName = getColumnName(row, 'nds')
-                def subMsg = "(«$number2Name» = «60309.01» и «$ndsName» = «10»/ «18»/ «10/110»/ «18/118») или («$number2Name» = «60309.04»/ «60309.05»  и «$ndsName» = «18/118»)"
-                if (isNewCheck) {
-                    subMsg = subMsg + " или («$number2Name» = «60309.07» и «$ndsName» = «18») или («$number2Name» = «60309.08» и «$ndsName» = «18/118»)"
-                }
-                def msg = "Строка $index: Графы «$number2Name», «$ndsName» заполнены неверно! Ожидаемое значение (раздел 1): $subMsg."
+                def msg = "Строка $index: Графы «$number2Name», «$ndsName» заполнены неверно!"
                 rowError(logger, row, msg)
             }
         }
@@ -235,7 +231,7 @@ void logicCheck() {
                 !(row.number2 in ['60309.02', '60309.03'] && row.nds == '18/118')) {
             def number2Name = getColumnName(row, 'number2')
             def ndsName = getColumnName(row, 'nds')
-            def msg = "Строка $index: Графы «$number2Name», «$ndsName» заполнены неверно! Ожидаемое значение (раздел 2): «$number2Name» = «60309.02»/ «60309.03» и «$ndsName» = «18/118»."
+            def msg = "Строка $index: Графы «$number2Name», «$ndsName» заполнены неверно!"
             rowError(logger, row, msg)
         }
     }
