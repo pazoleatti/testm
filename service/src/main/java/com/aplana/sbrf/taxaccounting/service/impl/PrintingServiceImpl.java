@@ -344,7 +344,7 @@ public class PrintingServiceImpl implements PrintingService {
             Map<Long, Pair<RefBookAttribute, Map<Long, RefBookValue>>> dereferenceValues = refBookHelper.dereferenceValuesAttributes(refBook, refBookPage);
             RefBookExcelReportBuilder refBookExcelReportBuilder;
             if (!refBook.isHierarchic()) {
-                refBookExcelReportBuilder = new RefBookExcelReportBuilder(refBook, refBookPage, dereferenceValues, searchPattern, null);
+                refBookExcelReportBuilder = new RefBookExcelReportBuilder(refBook, refBookPage, dereferenceValues, version, searchPattern, null);
             } else {
                 Map<Long, Map<String, RefBookValue>> hierarchicRecords = new HashMap<Long, Map<String, RefBookValue>>();
                 Iterator<Map<String, RefBookValue>> iterator = refBookPage.iterator();
@@ -368,7 +368,7 @@ public class PrintingServiceImpl implements PrintingService {
                     dereferenceValues.putAll(dereferenceParentValues);
                     refBookPage = parentRecords;
                 } while(!refBookPage.isEmpty());
-                refBookExcelReportBuilder = new RefBookExcelReportBuilder(refBook, new ArrayList<Map<String, RefBookValue>>(hierarchicRecords.values()), dereferenceValues, searchPattern, sortAttribute);
+                refBookExcelReportBuilder = new RefBookExcelReportBuilder(refBook, new ArrayList<Map<String, RefBookValue>>(hierarchicRecords.values()), dereferenceValues, version, searchPattern, sortAttribute);
             }
             stateLogger.updateState("Формирование отчета");
             reportPath = refBookExcelReportBuilder.createReport();
