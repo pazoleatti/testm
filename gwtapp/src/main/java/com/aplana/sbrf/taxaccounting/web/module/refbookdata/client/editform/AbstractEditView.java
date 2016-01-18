@@ -265,7 +265,7 @@ public abstract class AbstractEditView extends ViewWithUiHandlers<EditFormUiHand
             }
             if (mapValue == null) {
                 return true;
-            } else if (recordValue.getValue() != null) {
+            } else if (recordValue.getValue() != null && mapValue.getValue() != null) {
                 if (!(recordValue.getValue() instanceof String && equalsCleanStrings(recordValue.getValue().toString(), mapValue.getValue().toString()) ||
                         recordValue.getValue() instanceof BigDecimal && mapValue.getValue() != null && ((BigDecimal)recordValue.getValue()).compareTo((BigDecimal)mapValue.getValue()) == 0 ||
                         recordValue.getValue().equals(mapValue.getValue()))) {
