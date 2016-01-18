@@ -195,6 +195,11 @@ void calc() {
 void logicCheck() {
     def dataRows = formDataService.getDataRowHelper(formData).allCached
 
+    def reportPeriod = reportPeriodService.get(formData.reportPeriodId)
+    // начиная с периода год 2015 - новый добавилось два новых счета 60309.07 и 60309.08
+    // версия от 2015 года, поэтому на более ранние года не проверяем
+    boolean isNewCheck = (reportPeriod?.taxPeriod?.year > 2015 || reportPeriod?.order == 4)
+
     def isSection1 = false
     for (def row : dataRows) {
         if (row.getAlias() != null) {
@@ -202,26 +207,36 @@ void logicCheck() {
             continue
         }
         def index = row.getIndex()
-        def errorMsg = "Строка $index: "
 
         // 1. Проверка заполнения граф
         checkNonEmptyColumns(row, index, nonEmptyColumns, logger, true)
 
-        // 3..4. Проверка номера балансового счета (графа 5) по разделам
-        if (row.number2 != null && row.nds != null) {
-            def logicCheck5 = isSection1 &&
-                    ((row.number2 == '60309.01' && row.nds in ['10', '18', '10/110', '18/118']) ||
+        // 3. Проверка номера балансового счета (графа 5) по разделу 1
+        if (isSection1 && row.number2 != null && row.nds != null) {
+            def logicCheck3 = ((row.number2 == '60309.01' && row.nds in ['10', '18', '10/110', '18/118']) ||
                             (row.number2 in ['60309.04', '60309.05'] && row.nds == '18/118'))
-            def logicCheck6 = (!isSection1 && row.number2 in ['60309.02', '60309.03'] && row.nds == '18/118')
-            if (isSection1 ? !logicCheck5 : !logicCheck6) {
+            if (isNewCheck) {
+                logicCheck3 = (logicCheck3 || (row.number2 == '60309.07' && row.nds == '18') || (row.number2 == '60309.08' && row.nds == '18/118'))
+            }
+            if (!logicCheck3) {
                 def number2Name = getColumnName(row, 'number2')
                 def ndsName = getColumnName(row, 'nds')
-                def columns = "«$number2Name», «$ndsName»"
-                def endMessage = isSection1 ?
-                        " Ожидаемое значение (раздел 1): («$number2Name» = «60309.01» и «$ndsName» = «10»/ «18»/ «10/110»/ «18/118») или («$number2Name» = «60309.04»/ «60309.05»  и «$ndsName» = «18/118»)." :
-                        " Ожидаемое значение (раздел 2): «$number2Name» = «60309.02»/ «60309.03» и «$ndsName» = «18/118»."
-                rowError(logger, row, errorMsg + 'Графы ' + columns + ' заполнены неверно!' + endMessage)
+                def subMsg = "(«$number2Name» = «60309.01» и «$ndsName» = «10»/ «18»/ «10/110»/ «18/118») или («$number2Name» = «60309.04»/ «60309.05»  и «$ndsName» = «18/118»)"
+                if (isNewCheck) {
+                    subMsg = subMsg + " или («$number2Name» = «60309.07» и «$ndsName» = «18») или («$number2Name» = «60309.08» и «$ndsName» = «18/118»)"
+                }
+                def msg = "Строка $index: Графы «$number2Name», «$ndsName» заполнены неверно! Ожидаемое значение (раздел 1): $subMsg."
+                rowError(logger, row, msg)
             }
+        }
+
+        // 4. Проверка номера балансового счета (графа 5) по разделу 2
+        if (!isSection1 && row.number2 != null && row.nds != null &&
+                !(row.number2 in ['60309.02', '60309.03'] && row.nds == '18/118')) {
+            def number2Name = getColumnName(row, 'number2')
+            def ndsName = getColumnName(row, 'nds')
+            def msg = "Строка $index: Графы «$number2Name», «$ndsName» заполнены неверно! Ожидаемое значение (раздел 2): «$number2Name» = «60309.02»/ «60309.03» и «$ndsName» = «18/118»."
+            rowError(logger, row, msg)
         }
     }
 
