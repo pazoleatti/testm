@@ -272,6 +272,7 @@ public class AuditDaoImpl extends AbstractDao implements AuditDao {
                     "                            src.KIND          kind,\n" +
                     "                            src.DEPARTMENT_ID dep_id\n" +
                     "                          FROM department_form_type src\n" +
+                    "                         left join department_form_type_performer dftp on dftp.DEPARTMENT_FORM_TYPE_ID = src.id \n" +
                     "                          WHERE %s and %s)\n";
 
     private static final String SQL_OPER = SQL_FILTERS_FOR_OPER +
