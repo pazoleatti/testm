@@ -482,7 +482,7 @@ public final class ScriptUtils {
             if (v1 == null && v2 == null) {
                 continue;
             }
-            if (v1 == null || v1 != null && !v1.equals(v2)) {
+            if (v1 == null || (v1 instanceof String && !((String) v1).equalsIgnoreCase((String) v2)) || (!(v1 instanceof String) && !v1.equals(v2))) {
                 return true;
             }
         }
@@ -776,6 +776,14 @@ public final class ScriptUtils {
                     }
                     if (v1 != null && v2 == null) {
                         return -1;
+                    }
+                    if (v1 instanceof String) {
+                        int result = ((String) v1).compareToIgnoreCase((String) v2);
+                        if (result != 0) {
+                            return result;
+                        } else {
+                            continue;
+                        }
                     }
                     if (v1 instanceof Comparable) {
                         int result = ((Comparable) v1).compareTo(v2);

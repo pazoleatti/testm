@@ -408,7 +408,7 @@ void calc() {
 DataRow<Cell> calcGroupTotal(def int i, def List<DataRow<Cell>> dataRows) {
     def tmpRow = dataRows.get(i)
     def str = getValuesByGroupColumn(tmpRow)
-    def newRow = getSubTotalRow(i, str.hashCode())
+    def newRow = getSubTotalRow(i, str.toLowerCase().hashCode())
 
     // Расчеты подитоговых значений
     def rows = []
@@ -543,7 +543,7 @@ void importData() {
             //для расчета уникального среди групп(groupColumns) ключа берем строку перед Подитоговой
             def tmpRowValue = rows.get(rows.size() - 1)
             def str = getValuesByGroupColumn(tmpRowValue)
-            def subTotalRow = getNewTotalFromXls(str.hashCode(), rowValues, colOffset, fileRowIndex, rowIndex, true)
+            def subTotalRow = getNewTotalFromXls(str.toLowerCase().hashCode(), rowValues, colOffset, fileRowIndex, rowIndex, true)
             def key = subTotalRow.getAlias().split('#')[0]
             if (totalRowFromFileMap[key] == null) {
                 totalRowFromFileMap[key] = []

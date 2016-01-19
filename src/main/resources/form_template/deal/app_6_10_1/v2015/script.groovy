@@ -336,8 +336,7 @@ void importData() {
             def tmpRowValue = rows.get(rows.size() - 1)
             def str = ''
             groupColumns.each{ def n -> str = str + ((tmpRowValue.get(n)!=null) ? tmpRowValue.get(n) : "").toString() }
-            key = str.hashCode()
-            def subTotalRow = getNewSubTotalRowFromXls(key, rowValues, colOffset, fileRowIndex, rowIndex)
+            def subTotalRow = getNewSubTotalRowFromXls(str.toLowerCase().hashCode(), rowValues, colOffset, fileRowIndex, rowIndex)
             //наш ключ - row.getAlias() до решетки. так как индекс после решетки не равен у расчитанной и импортированной подитогововых строк
             if (totalRowFromFileMap[subTotalRow.getAlias().split('#')[0]] == null) {
                 totalRowFromFileMap[subTotalRow.getAlias().split('#')[0]] = []
@@ -597,8 +596,7 @@ DataRow<Cell> calcItog(def int i, def List<DataRow<Cell>> dataRows) {
     def tmpRow = dataRows.get(i)
     def str = ''
     groupColumns.each{ def n -> str = str + ((tmpRow.get(n)!=null) ? tmpRow.get(n) : "").toString() }
-    key = str.hashCode()
-    def newRow = getSubTotalRow(i, key)
+    def newRow = getSubTotalRow(i, str.toLowerCase().hashCode())
 
     // Расчеты подитоговых значений
     def rows = []
