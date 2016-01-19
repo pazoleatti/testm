@@ -286,9 +286,11 @@ public class PrintingServiceImpl implements PrintingService {
         try {
             RefBookDataProvider refBookDataProvider = refBookFactory.getDataProvider(refBookId);
             RefBook refBook = refBookFactory.get(refBookId);
+            PagingParams pagingParams = new PagingParams();
+            pagingParams.setStartIndex(1);
+            pagingParams.setCount(refBookDataProvider.getRecordsCount(version, filter));
             List<Map<String, RefBookValue>> refBookPage = refBookDataProvider.getRecords(version,
-                    null, filter, sortAttribute,
-                    isSortAscending);
+                    pagingParams, filter, sortAttribute, isSortAscending);
             Map<Long, Map<Long, String>> dereferenceValues = refBookHelper.dereferenceValues(refBook, refBookPage);
             RefBookCSVReportBuilder refBookCSVReportBuilder;
             if (!refBook.isHierarchic()) {
@@ -339,8 +341,11 @@ public class PrintingServiceImpl implements PrintingService {
         try {
             RefBookDataProvider refBookDataProvider = refBookFactory.getDataProvider(refBookId);
             RefBook refBook = refBookFactory.get(refBookId);
+            PagingParams pagingParams = new PagingParams();
+            pagingParams.setStartIndex(1);
+            pagingParams.setCount(refBookDataProvider.getRecordsCount(version, filter));
             List<Map<String, RefBookValue>> refBookPage = refBookDataProvider.getRecords(version,
-                    null, filter, sortAttribute, isSortAscending);
+                    pagingParams, filter, sortAttribute, isSortAscending);
             Map<Long, Pair<RefBookAttribute, Map<Long, RefBookValue>>> dereferenceValues = refBookHelper.dereferenceValuesAttributes(refBook, refBookPage);
             RefBookExcelReportBuilder refBookExcelReportBuilder;
             if (!refBook.isHierarchic()) {
