@@ -982,13 +982,17 @@ public class RefBookOktmoDaoImpl extends AbstractDao implements RefBookOktmoDao 
     @Override
     public PagingResult<Map<String, RefBookValue>> getRecordVersionsByRecordId(String tableName, Long refBookId, Long recordId, PagingParams pagingParams, String filter, RefBookAttribute sortAttribute) {
         RefBook refBook = refBookDao.get(refBookId);
+        // Получение количества данных в справочнике
         PreparedStatementData ps = getSimpleQuery(tableName, refBook, recordId, null, null, sortAttribute, filter, pagingParams, false, null, false);
+        Integer recordsCount = refBookDao.getRecordsCount(ps);
+
+        ps = getSimpleQuery(tableName, refBook, recordId, null, null, sortAttribute, filter, pagingParams, false, null, false);
+        refBook.addAttribute(RefBook.getVersionFromAttribute());
+        refBook.addAttribute(RefBook.getVersionToAttribute());
 
         List<Map<String, RefBookValue>> records = refBookDao.getRecordsData(ps, refBook);
         PagingResult<Map<String, RefBookValue>> result = new PagingResult<Map<String, RefBookValue>>(records);
-        // Получение количества данных в справочнике
-        ps = getSimpleQuery(tableName, refBook, recordId, null, null, sortAttribute, filter, pagingParams, false, null, false);
-        result.setTotalCount(refBookDao.getRecordsCount(ps));
+        result.setTotalCount(recordsCount);
         return result;
     }
 }

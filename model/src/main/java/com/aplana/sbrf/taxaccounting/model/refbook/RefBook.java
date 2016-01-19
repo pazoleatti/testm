@@ -365,4 +365,8 @@ public class RefBook implements Serializable {
     public boolean isSimple(){
         return tableName != null;
     }
+
+	public boolean addAttribute(RefBookAttribute attribute) {
+		return this.attributes.add(attribute);
+	}
 }
