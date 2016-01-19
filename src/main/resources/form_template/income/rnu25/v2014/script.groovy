@@ -205,7 +205,7 @@ void calc() {
             row.reserveRecovery = calc13(row)
         }
         // для итоговых значений по ГРН
-        if (row.regNumber != null && !totalGroupsName.contains(row.regNumber)) {
+        if (row.regNumber != null && !totalGroupsName.contains(row.regNumber?.toLowerCase())) {
             totalGroupsName.add(row.regNumber)
         }
     }
@@ -248,11 +248,12 @@ void logicCheck() {
         def severalContract = []
         prevDataRows.each { prevRow ->
             if (prevRow.getAlias() == null && prevRow.reserveCalcValue > 0) {
-                def count = countMap[prevRow.tradeNumber]
+                def key = prevRow.tradeNumber?.toLowerCase()
+                def count = countMap[key]
                 if (count == 0) {
-                    missContract.add(prevRow.tradeNumber)
+                    missContract.add(key)
                 } else if (count > 1) {
-                    severalContract.add(prevRow.tradeNumber)
+                    severalContract.add(key)
                 }
             }
         }
@@ -350,7 +351,7 @@ void logicCheck() {
             checkCalc(row, arithmeticCheckAlias, needValue, logger, !isBalancePeriod())
         }
         // 18. Проверка итоговых значений по ГРН
-        if (!totalGroupsName.contains(row.regNumber)) {
+        if (!totalGroupsName.contains(row.regNumber?.toLowerCase())) {
             totalGroupsName.add(row.regNumber)
         }
     }
@@ -375,7 +376,7 @@ void logicCheck() {
         // получить строки группы
         def rows = getGroupRows(dataRows, codeName)
         // получить алиас для подитоговой строки по ГРН
-        def totalRowAlias = 'total' + codeName
+        def totalRowAlias = 'total' + codeName?.toLowerCase()
         // получить посчитанную строку с итогами по ГРН
         def row = dataRows.find { totalRowAlias.equals(it.getAlias()) }
         // сформировать подитоговую строку ГРН с суммами
@@ -400,9 +401,9 @@ void logicCheck() {
 def getTradeNumberCountMap(def rows) {
     def result = [:]
     rows.each {
-        def tnum = it.tradeNumber
-        def count = result[tnum]
-        result[tnum] = count == null ? 1 : ++count
+        def key = it.tradeNumber?.toLowerCase()
+        def count = result[key]
+        result[key] = count == null ? 1 : ++count
     }
     return result
 }
@@ -412,8 +413,8 @@ def getTradeNumberCountMap(def rows) {
 def getTradeNumberObjectMap(def rows) {
     def result = [:]
     rows.each {
-        def tnum = it.tradeNumber
-        if (result[tnum] == null) result[tnum] = it
+        def key = it.tradeNumber?.toLowerCase()
+        if (result[key] == null) result[key] = it
     }
     return result
 }
@@ -442,7 +443,7 @@ def getNewRow() {
  * @param prevRowMap строки нф предыдущего периода в карте по tradeNumber
  */
 def checkOld(def row, def curColumnName, def prevColumnName, def prevRowMap) {
-    def prevRow = prevRowMap[row.tradeNumber]
+    def prevRow = prevRowMap[row.tradeNumber?.toLowerCase()]
     if (prevRowMap != null && prevRow != null && row[curColumnName] != null && row[curColumnName] != prevRow[prevColumnName]) {
         return prevRow[prevColumnName]
     } else {
@@ -502,7 +503,7 @@ def getTotalRow(def dataRows, def regNumberValue, def alias) {
  */
 def getGroupRows(def dataRows, def regNumber) {
     return dataRows.findAll {
-        it.getAlias() == null && it.regNumber == regNumber
+        it.getAlias() == null && it.regNumber?.toLowerCase() == regNumber?.toLowerCase()
     }
 }
 
@@ -513,7 +514,7 @@ def getGroupRows(def dataRows, def regNumber) {
  */
 def BigDecimal calc4(def rowMap, def row) {
     // Строка с совпадающим значением графы 3
-    def prevMatchRow = rowMap[row.tradeNumber]
+    def prevMatchRow = rowMap[row.tradeNumber?.toLowerCase()]
 
     if (prevMatchRow == null) {
         return 0
@@ -543,11 +544,12 @@ def BigDecimal calc6(def rowMap, def countMap, def row) {
     if (isConsolidated) {
         return row.reserve
     }
-    if (row.tradeNumber == null) {
+    def key = row.tradeNumber?.toLowerCase()
+    if (key == null) {
         return 0
     }
-    def count = countMap[row.tradeNumber]
-    def value = (rowMap[row.tradeNumber]?.reserveCalcValue)?:0
+    def count = countMap[key]
+    def value = (rowMap[key]?.reserveCalcValue)?:0
     // если count не равно 1, то или нет формы за предыдущий период,
     // или нет соответствующей записи в предыдущем периода или записей несколько
     return roundTo2((count == 1) ? value : 0)

@@ -67,7 +67,8 @@ public final class ScriptUtils {
     public static final String REF_BOOK_TOO_MANY_FOUND_IMPORT_ERROR = "Проверка файла: Строка %d, столбец %s: В справочнике «%s» в атрибуте «%s» найдено более одного значения «%s», актуального на дату %s!";
     public static final String CHECK_OVERFLOW_MESSAGE = "Строка %d: Значение графы «%s» превышает допустимую разрядность (%d знаков). Графа «%s» рассчитывается как «%s»!";
     // для проверки итогов при загрузе экселя (посчитанные и ожижаемые значения как %s потому что %f теряет точность)
-    public static final String COMPARE_TOTAL_VALUES = "Строка формы %d: Итоговая сумма по графе «%s» (%s) некорректна (ожидаемое значение %s).";
+    public static final String COMPARE_TOTAL_VALUES = "Итоговое значение по графе «%s» (%s) указано некорректно. Системой рассчитано значение \"%s\".";
+    public static final String COMPARE_TOTAL_VALUES_NULL = "Итоговое значение по графе «%s» не указано. Системой рассчитано значение \"%s\".";
     public static final String INN_JUR_PATTERN = RefBookUtils.INN_JUR_PATTERN;
     public static final String INN_JUR_MEANING = RefBookUtils.INN_JUR_MEANING;
     public static final String INN_IND_PATTERN = RefBookUtils.INN_IND_PATTERN;
@@ -1762,16 +1763,20 @@ public final class ScriptUtils {
         for (String alias : columns) {
             BigDecimal value1 = totalRow.getCell(alias).getNumericValue();
             BigDecimal value2 = totalRowTmp.getCell(alias).getNumericValue();
-            if (value1 == null) {
-                value1 = BigDecimal.ZERO;
-            }
             if (value2 == null) {
                 value2 = BigDecimal.ZERO;
             }
-            value1 = round(value1, precision);
+            if (value1 != null) {
+                value1 = round(value1, precision);
+            }
             value2 = round(value2, precision);
-            if (!value1.equals(value2)) {
-                String msg = String.format(COMPARE_TOTAL_VALUES, totalRow.getIndex(), getColumnName(totalRow, alias), value1, value2);
+            if (!value2.equals(value1)) {
+                String msg;
+                if (value1 == null) {
+                    msg = String.format(COMPARE_TOTAL_VALUES_NULL, getColumnName(totalRow, alias), value2);
+                } else {
+                    msg = String.format(COMPARE_TOTAL_VALUES, getColumnName(totalRow, alias), value1, value2);
+                }
                 if (required) {
                     rowError(logger, totalRow, msg);
                 } else {
