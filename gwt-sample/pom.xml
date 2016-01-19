@@ -6,7 +6,7 @@
 
 	<groupId>com.aplana.taxaccounting</groupId>
 	<artifactId>gwt-sample</artifactId>
-    <version>0.9</version>
+    <version>1.0</version>
 	<description>Демонстрационное приложение</description>
 	<packaging>war</packaging>
 
