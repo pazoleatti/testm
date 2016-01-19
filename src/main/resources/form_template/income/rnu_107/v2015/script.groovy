@@ -159,7 +159,7 @@ void logicCheck() {
         checkNonEmptyColumns(row, rowNum, nonEmptyColumns, logger, true)
 
         // Проверка даты совершения сделки
-        checkDealDoneDate(logger, row, 'transDoneDate', getReportPeriodStartDate(), getReportPeriodEndDate(), true)
+        checkDatePeriod(logger, row, 'transDoneDate', getReportPeriodStartDate(), getReportPeriodEndDate(), true)
 
         // Проверка даты совершения операции
         if (row.transDoneDate && row.reasonDate && row.reasonDate > row.transDoneDate) {
@@ -169,10 +169,7 @@ void logicCheck() {
         }
 
         // Проверка даты основания совершения операции
-        if (row.reasonDate && (row.reasonDate < Date.parse('dd.MM.yyyy', '01.01.1991') || getReportPeriodEndDate() < row.reasonDate)) {
-            def msg = row.getCell('reasonDate').column.name
-            logger.error("Строка $rowNum: Дата, указанная в графе «%s» должна принимать значение из следующего диапазона: 01.01.1991 - %s!", msg, getReportPeriodEndDate().format('dd.MM.yyyy'))
-        }
+        checkDatePeriod(logger, row, 'reasonDate', Date.parse('dd.MM.yyyy', '01.01.1991'), getReportPeriodEndDate(), true)
 
         // Проверка положительного тарифа за оказание услуги
         if (row.dealTariff != null && row.taxTariff != null && (row.dealTariff < 0 || row.taxTariff < 0)) {

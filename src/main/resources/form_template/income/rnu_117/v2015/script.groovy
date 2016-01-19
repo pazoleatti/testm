@@ -163,6 +163,9 @@ void logicCheck() {
             }
         }
 
+        // 3. Проверка даты основания совершения операции
+        checkDatePeriod(logger, row, 'reasonDate', Date.parse('dd.MM.yyyy', '01.01.1991'), getReportPeriodEndDate(), true)
+
         // 3. Проверка возможности заполнения графы 12
         if (!row.rate && !row.rate1) {
             def msg1 = row.getCell('rate2').column.name

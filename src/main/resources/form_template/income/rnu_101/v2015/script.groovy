@@ -1,5 +1,6 @@
 package form_template.income.rnu_101.v2015
 
+import com.aplana.sbrf.taxaccounting.model.Cell
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
@@ -172,11 +173,7 @@ void logicCheck() {
         }
 
         // Проверка даты совершения операции
-        if (row.transDoneDate && (row.transDoneDate < getReportPeriodStartDate() || row.transDoneDate > getReportPeriodEndDate())) {
-            def msg = row.getCell('transDoneDate').column.name
-            logger.error("Строка $rowNum: Значение графы «$msg» должно быть больше или равно " + getReportPeriodStartDate().format('dd.MM.yyyy') + " и" +
-                    " меньше или равно" + getReportPeriodEndDate().format('dd.MM.yyyy'))
-        }
+        checkDatePeriod(logger, row, 'transDoneDate', getReportPeriodStartDate(), getReportPeriodEndDate(), true)
 
         // Проверка курса валюты
         if (row.course != null && row.course < 0) {
@@ -185,10 +182,7 @@ void logicCheck() {
         }
 
         // Проверка даты основания совершения операции
-        if (row.reasonDate && (row.reasonDate < Date.parse('dd.MM.yyyy', '01.01.1991') || getReportPeriodEndDate() < row.reasonDate)) {
-            def msg = row.getCell('reasonDate').column.name
-            logger.error("Строка $rowNum: Дата, указанная в графе «%s» должна принимать значение из следующего диапазона: 01.01.1991 - %s!", msg, getReportPeriodEndDate().format('dd.MM.yyyy'))
-        }
+        checkDatePeriod(logger, row, 'reasonDate', Date.parse('dd.MM.yyyy', '01.01.1991'), getReportPeriodEndDate(), true)
 
         // Проверка количества
         if (row.count != null && row.count < 1) {

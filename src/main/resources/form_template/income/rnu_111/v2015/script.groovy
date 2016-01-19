@@ -163,7 +163,10 @@ void logicCheck() {
             }
         }
 
-        // 3. Проверка возможности заполнения графы 16
+        // 3. Проверка даты основания совершения операции
+        checkDatePeriod(logger, row, 'reasonDate', Date.parse('dd.MM.yyyy', '01.01.1991'), getReportPeriodEndDate(), true)
+
+        // 4. Проверка возможности заполнения графы 16
         if (!row.rate && !row.rate1) {
             def msg1 = row.getCell('rate2').column.name
             def msg2 = row.getCell('rate').column.name
@@ -177,7 +180,7 @@ void logicCheck() {
                     "используемая в расчете графа «$msg2»!")
         }
 
-        // 4. Проверка возможности заполнения графы 17
+        // 5. Проверка возможности заполнения графы 17
         if (row.sum1==null && row.sum2==null) {
             def msg1 = row.getCell('sum3').column.name
             def msg2 = row.getCell('sum1').column.name
@@ -191,7 +194,7 @@ void logicCheck() {
                     "используемая в расчете графа «$msg2»!")
         }
 
-        // 5. Проверка значения графы 16
+        // 6. Проверка значения графы 16
         if (row.rate1 && row.rate && row.rate2 != calc16(row)) {
             def msg1 = row.getCell('rate2').column.name
             def msg2 = row.getCell('rate1').column.name
@@ -199,7 +202,7 @@ void logicCheck() {
             rowError(logger, row, "Строка $rowNum: Значение графы «$msg1» должно быть равно разности значений графы «$msg2» и «$msg3»!")
         }
 
-        // 6. Проверка значения графы 17
+        // 7. Проверка значения графы 17
         if (row.sum2 && row.sum1 && row.sum3 != calc17(row)) {
             def msg1 = row.getCell('sum3').column.name
             def msg2 = row.getCell('sum2').column.name
@@ -207,7 +210,7 @@ void logicCheck() {
             rowError(logger, row, "Строка $rowNum: Значение графы «$msg1» должно быть равно разности по модулю значений графы «$msg2» и «$msg3»!")
         }
 
-        // 7. Проверка возможности заполнения графы 8
+        // 8. Проверка возможности заполнения графы 8
         if(!row.reasonDate){
             def msg1 = row.getCell('base').column.name
             def msg2 = row.getCell('reasonDate').column.name
@@ -215,21 +218,21 @@ void logicCheck() {
 
         }
 
-        // 8. Проверка значения графы 8
+        // 9. Проверка значения графы 8
         if (row.reasonDate  && row.base != calc8(row)) {
             def msg1 = row.getCell('rate2').column.name
             def msg2 = row.getCell('reasonDate').column.name
             rowError(logger, row, "Строка $rowNum: Значение графы «$msg1» должно быть равно количеству дней для даты, указанной по графе «$msg2»!")
         }
 
-        // 9. Проверка значения графы 13, 15
+        // 10. Проверка значения графы 13, 15
         if(row.sum1 != null && row.sum2 != null && row.sum1 < row.sum2){
             def msg1 = row.getCell('sum1').column.name
             def msg2 = row.getCell('sum2').column.name
             rowWarning(logger, row, "Строка $rowNum: Значение графы «$msg1» должно быть не меньше значения графы «$msg2»!")
         }
 
-        // 10. Проверка положительного значения графы 13, 15
+        // 11. Проверка положительного значения графы 13, 15
         if(row.sum1 != null  && row.sum1 < 0){
             msg = row.getCell('sum1').column.name
             rowError(logger, row, "Строка $rowNum: Значение графы «$msg» должно быть больше или равно «0»!")
@@ -239,7 +242,7 @@ void logicCheck() {
             rowError(logger, row, "Строка $rowNum: Значение графы «$msg» должно быть больше или равно «0»!")
         }
 
-        // 11. Проверка значения графы 11
+        // 12. Проверка значения графы 11
         if(row.reasonDate && row.time && (row.time > getDays(row.reasonDate))){
             def msg1 = row.getCell('time').column.name
             def msg2 = row.getCell('reasonDate').column.name
@@ -247,13 +250,13 @@ void logicCheck() {
                     "начиная с дня даты, указанной по графе «$msg2»!")
         }
 
-        // 13. Проверка КНУ
+        // 17. Проверка КНУ
         if (row.code && !recordsExist(row.code)) {
             rowError(logger, row, "Строка $rowNum: В справочнике «Классификатор доходов ПАО Сбербанк для целей налогового учёта» отсутствуют записи с КНУ равным значению графы «${getColumnName(row, 'code')}» (${row.code})!")
         }
     }
 
-    // 12. Проверка итоговых значений пофиксированной строке «Итого»
+    // 16. Проверка итоговых значений пофиксированной строке «Итого»
     if (dataRows.find { it.getAlias() == 'total' }) {
         checkTotalSum(dataRows, totalColumns, logger, true)
     }

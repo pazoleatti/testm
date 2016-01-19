@@ -182,11 +182,7 @@ void logicCheck() {
         }
 
         // 3. Проверка корректности даты договора
-        if (row.docDate && (row.docDate < Date.parse('dd.MM.yyyy', '01.01.1991') || row.docDate > getReportPeriodEndDate())) {
-            def msg1 = getColumnName(row, 'docDate')
-            def msg2 = getReportPeriodEndDate().format('dd.MM.yyyy')
-            logger.error("Строка $rowNum: Графа «$msg1» должна принимать значение из следующего диапазона: 01.01.1991 - $msg2!")
-        }
+        checkDatePeriod(logger, row, 'docDate', Date.parse('dd.MM.yyyy', '01.01.1991'), getReportPeriodEndDate(), true)
 
         // 4. Проверка корректности даты заключения сделки
         if (row.docDate && row.dealDoneDate && (row.dealDoneDate < row.docDate || row.dealDoneDate > getReportPeriodEndDate())) {

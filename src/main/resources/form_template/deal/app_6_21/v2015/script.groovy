@@ -159,11 +159,7 @@ void logicCheck() {
         checkNonEmptyColumns(row, rowNum, nonEmptyColumns, logger, true)
 
         // 2. Проверка корректности даты договора
-        if (row.docDate && (row.docDate < Date.parse('dd.MM.yyyy', '01.01.1991') || row.docDate > getReportPeriodEndDate())) {
-            def msg1 = getColumnName(row, 'docDate')
-            def msg2 = getReportPeriodEndDate().format('dd.MM.yyyy')
-            logger.error("Строка $rowNum: Графа «$msg1» должна принимать значение из следующего диапазона: 01.01.1991 - $msg2!")
-        }
+        checkDatePeriod(logger, row, 'docDate', Date.parse('dd.MM.yyyy', '01.01.1991'), getReportPeriodEndDate(), true)
 
         // 3. Проверка корректности даты сделки
         if (row.docDate && row.dealDate && (row.dealDate < row.docDate || row.dealDate > getReportPeriodEndDate())) {

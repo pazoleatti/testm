@@ -7,6 +7,7 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.refbook.impl.RefBookUniversal;
+import com.aplana.sbrf.taxaccounting.service.script.util.ScriptUtils;
 import com.aplana.sbrf.taxaccounting.util.ScriptTestBase;
 import com.aplana.sbrf.taxaccounting.util.TestScriptHelper;
 import com.aplana.sbrf.taxaccounting.util.mock.ScriptTestMockHelper;
@@ -150,7 +151,7 @@ public class Rnu_114Test extends ScriptTestBase {
         testHelper.execute(FormDataEvent.CHECK);
         entries = testHelper.getLogger().getEntries();
         i = 0;
-        Assert.assertEquals("Строка 1: Дата, указанная в графе «Дата кредитного договора» должна принимать значение из следующего диапазона: 01.01.1991 - 31.12.2014!", entries.get(i++).getMessage());
+        Assert.assertEquals(String.format(ScriptUtils.CHECK_DATE_PERIOD, 1, "Дата кредитного договора","01.01.1991", "31.12.2014"), entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Значение графы «Количество календарных дней в периоде» должно быть больше нуля!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Значение графы «База года (360/365/366)» должно быть равно «360» или «365» или «366»!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Значение графы «Совокупная процентная ставка» должно быть меньше или равно значению графы «Рыночная ставка»!", entries.get(i++).getMessage());

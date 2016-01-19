@@ -107,6 +107,7 @@ public final class ScriptUtils {
     private static final String EMPTY_VALUE = "Строка %d: Графа «%s» содержит пустое значение, не соответствующее значению «%s» данной графы в макете налоговой формы!";
     private static final String EMPTY_EXPECTED_VALUE = "Строка %d: Графа «%s» содержит значение «%s», не соответствующее пустому значению данной графы в макете налоговой формы!";
     private static final String IMPORT_ROW_PREFIX = "Строка файла %d: %s";
+    public static final String CHECK_DATE_PERIOD = "Строка %d: Дата по графе «%s» должна принимать значение из диапазона: %s - %s!";
     @SuppressWarnings("unused")
     private static final String TRANSPORT_FILE_SUM_ERROR = "Итоговая сумма в графе %s строки %s в транспортном файле некорректна.";
     private static final String ROW_FILE_WRONG = "Строка файла %s содержит некорректное значение.";
@@ -1928,7 +1929,7 @@ public final class ScriptUtils {
     public static void checkDatePeriod(Logger logger, DataRow<Cell> row, String alias, Date startDate, Date endDate, boolean fatal) {
         Date docDate = row.getCell(alias).getDateValue();
         if (docDate != null && (docDate.before(startDate) || docDate.after(endDate))) {
-            rowLog(logger, row, String.format("Строка %d: Графа «%s» должна принимать значение из следующего диапазона: %s - %s!",
+            rowLog(logger, row, String.format(CHECK_DATE_PERIOD,
                     row.getIndex(),
                     getColumnName(row, alias),
                     formatDate(startDate, "dd.MM.yyyy"),

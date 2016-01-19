@@ -142,7 +142,6 @@ void logicCheck() {
         return
     }
 
-    def date1991 = Date.parse('dd.MM.yyyy', '01.01.1991')
     def endDateInStr = getReportPeriodEndDate().format('dd.MM.yyyy')
 
     for (row in dataRows) {
@@ -161,10 +160,7 @@ void logicCheck() {
         }
 
         // 3. Проверка корректности даты договора
-        if (row.docDate && (row.docDate < date1991 || getReportPeriodEndDate() < row.docDate)) {
-            def name7 = row.getCell('docDate').column.name
-            logger.error("Строка $rowNum: Графа «%s» должна принимать значение из следующего диапазона: 01.01.1991 - %s!", name7, endDateInStr)
-        }
+        checkDatePeriod(logger, row, 'docDate', Date.parse('dd.MM.yyyy', '01.01.1991'), getReportPeriodEndDate(), true)
 
         // 4. Проверка цены
         if (row.price != null && row.price != calc9(row)) {

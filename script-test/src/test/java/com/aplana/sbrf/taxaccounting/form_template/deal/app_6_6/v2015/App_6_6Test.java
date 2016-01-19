@@ -7,6 +7,7 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.refbook.impl.RefBookUniversal;
+import com.aplana.sbrf.taxaccounting.service.script.util.ScriptUtils;
 import com.aplana.sbrf.taxaccounting.util.ScriptTestBase;
 import com.aplana.sbrf.taxaccounting.util.TestScriptHelper;
 import com.aplana.sbrf.taxaccounting.util.mock.ScriptTestMockHelper;
@@ -137,7 +138,7 @@ public class App_6_6Test extends ScriptTestBase {
         Assert.assertEquals("Строка 1: Выполнение расчета графы «Режим переговорных сделок» невозможно, так как не заполнена используемая в расчете графа «Код страны регистрации по классификатору ОКСМ»!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Значение графы «Дата совершения сделки» должно быть равно значению графы «Дата исполнения 2-ой части сделки», если дата исполнения 2-ой части сделки относится к отчетному периоду формы!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Графа «Сумма процентного расхода (руб.)» должна быть заполнена, если не заполнена графа «Сумма процентного дохода (руб.)»!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Графа «Дата договора» должна принимать значение из следующего диапазона: 01.01.1991 - 31.12.2014!", entries.get(i++).getMessage());
+        Assert.assertEquals(String.format(ScriptUtils.CHECK_DATE_PERIOD, 1, "Дата договора","01.01.1991", "31.12.2014"), entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Значение графы «Дата (заключения) сделки» должно быть не меньше значения графы «Дата договора» и не больше 31.12.2014!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Значение графы «Дата исполнения 1-ой части сделки» должно быть не меньше значения графы «Дата (заключения) сделки» и не больше 31.12.2014!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Значение графы «Дата исполнения 2-ой части сделки» должно быть не меньше значения графы «Дата исполнения 1-ой части сделки» и не больше 31.12.2099!", entries.get(i++).getMessage());
