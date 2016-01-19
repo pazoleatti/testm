@@ -413,8 +413,8 @@ create or replace package FORM_DATA_PCKG is
        departmentId number(9),                         --department.id
        departmentName varchar2(510),                   --department.name
        correction_date date,                           --department_report_period.correction_date
-       last_correction_date date,                      
-       global_last_correction_date date,    
+       last_correction_date date,
+       global_last_correction_date date,
        reportperiodid number(9),
        departmentReportPeriod number(9),               --department_report_period.id
        periodName varchar2(510),                       --report_period.name
@@ -437,8 +437,8 @@ create or replace package FORM_DATA_PCKG is
        tax_type char(1)                                --tax_type.id
        );
   TYPE t_destination IS TABLE OF t_destination_record;
-  
-  --Объявление методов  
+
+  --Объявление методов
   FUNCTION get_sources (
                          p_in_stateRestriction              number,
                          p_in_excludeIfNotExist             number,
@@ -449,7 +449,7 @@ create or replace package FORM_DATA_PCKG is
                          p_in_compPeriod                    number,
                          p_in_accruing                      number
                         ) RETURN t_source PIPELINED;
-                        
+
   FUNCTION get_destinations (
                          p_in_stateRestriction              number,
                          p_in_excludeIfNotExist             number,
@@ -459,7 +459,7 @@ create or replace package FORM_DATA_PCKG is
                          p_in_kind                          number,
                          p_in_compPeriod                    number,
                          p_in_accruing                      number
-                        ) RETURN t_destination PIPELINED;                      
+                        ) RETURN t_destination PIPELINED;
 
 end FORM_DATA_PCKG;
 /
@@ -531,7 +531,7 @@ BEGIN
             join report_period srp on srp.id = sdrp.REPORT_PERIOD_ID
             join tax_period stp on stp.ID = srp.TAX_PERIOD_ID
             --отбираем макет действующий для приемника в периоде приемника
-            join form_template sft on (sft.TYPE_ID = st.ID and sft.status in (0,1) and sft.version = (select max(ft2.version) from form_template ft2 where ft2.TYPE_ID = sft.TYPE_ID and extract(year from ft2.version) <= stp.year and ft2.status in (0,1)))
+            join form_template sft on (sft.TYPE_ID = st.ID and sft.status in (0,1))
             --если макет источника ежемесячный, то отбираем все возможные месяца для него из справочника
             left join
                  (
@@ -553,12 +553,12 @@ BEGIN
                  ) perversion on perversion.record_id = rp.DICT_TAX_PERIOD_ID and perversion.lvl = case when (sft.MONTHLY=1 and ft.MONTHLY=0) then perversion.lvl else 1 end
             --данные об источнике сравнения для приемника
             left join (
-                  select drp.*,rp.dict_tax_period_id, tp.tax_type, tp.year 
+                  select drp.*,rp.dict_tax_period_id, tp.tax_type, tp.year
                   from department_report_period drp
                   join report_period rp on rp.id = drp.report_period_id
                   join tax_period tp on tp.id = rp.tax_period_id
             ) inn_cdrp on (
-              (t.tax_type = st.tax_type and inn_cdrp.id = fd.COMPARATIVE_DEP_REP_PER_ID) or 
+              (t.tax_type = st.tax_type and inn_cdrp.id = fd.COMPARATIVE_DEP_REP_PER_ID) or
               (t.tax_type != st.tax_type and fd.COMPARATIVE_DEP_REP_PER_ID is not null and inn_cdrp.tax_type = st.tax_type and inn_cdrp.year = ctp.year and inn_cdrp.dict_tax_period_id = crp.dict_tax_period_id)
             )
             --отбираем экземпляры с учетом периода сравнения, признака нарастающего истога, списка месяцов
@@ -618,12 +618,12 @@ FUNCTION get_destinations (
     query_destination sys_refcursor;
 BEGIN
     open query_destination for
-         with insanity as 
+         with insanity as
      (
-     select tfd.id, td.id as departmentId, td.name as departmentName, tdrp.id as departmentReportPeriod, ttp.YEAR, trp.id as reportperiodid, trp.name as periodName, 
+     select tfd.id, td.id as departmentId, td.name as departmentName, tdrp.id as departmentReportPeriod, ttp.YEAR, trp.id as reportperiodid, trp.name as periodName,
      tdrp.CORRECTION_DATE, tfd.state, tft.status as templateState, tfd.manual,
-     tt.id as formTypeId, tt.name as formTypeName, tfk.id as formDataKind, fdpd.id as performerId, fdpd.name as performerName, rp.CALENDAR_START_DATE as periodStartDate, tt.tax_type, 
-     --Если искомый экземпляр создан, то берем его значения периода и признака. 
+     tt.id as formTypeId, tt.name as formTypeName, tfk.id as formDataKind, fdpd.id as performerId, fdpd.name as performerName, rp.CALENDAR_START_DATE as periodStartDate, tt.tax_type,
+     --Если искомый экземпляр создан, то берем его значения периода и признака.
      --Если не создан и в его макете есть признак сравнения, то период и признак такой же как у источника
      --Если не создан и в его макете нет признаков сравнения, то период и признак пустой
      case when (tfd.id is not null) then tcdrp.id when (tft.COMPARATIVE = 1) then cdrp.id else null end as compPeriodId,
@@ -633,21 +633,21 @@ BEGIN
      case when (tfd.id is not null) then tfd.ACCRUING when (tft.ACCRUING = 1) then fd.ACCRUING else null end as ACCRUING,
      case when tft.MONTHLY=1 then perversion.month else tfd.PERIOD_ORDER end as month
       from (
-           select neighbours_fd.id, 
+           select neighbours_fd.id,
                   neighbours_fd.form_template_id,
-                  neighbours_fd.kind, 
-                  neighbours_fd.DEPARTMENT_REPORT_PERIOD_ID, 
+                  neighbours_fd.kind,
+                  neighbours_fd.DEPARTMENT_REPORT_PERIOD_ID,
                   neighbours_fd.COMPARATIVE_DEP_REP_PER_ID,
-                  neighbours_fd.ACCRUING, 
-                  neighbours_drp.department_id, 
-                  neighbours_drp.correction_date, 
+                  neighbours_fd.ACCRUING,
+                  neighbours_drp.department_id,
+                  neighbours_drp.correction_date,
                   neighbours_drp.report_period_id,
                   coalesce(lag(neighbours_drp.correction_date) over (partition by neighbours_drp.department_id order by neighbours_drp.correction_date desc nulls last), to_date('31.12.9999', 'DD.MM.YYYY')) as next_correction_date
-            from 
+            from
 			(
-				select nvl(fd.id, dual_fd.id) as ID, 
-				nvl(dual_fd.form_template_id, fd.form_template_id) as form_template_id, 
-				nvl(dual_fd.kind, fd.kind) as kind,  
+				select nvl(fd.id, dual_fd.id) as ID,
+				nvl(dual_fd.form_template_id, fd.form_template_id) as form_template_id,
+				nvl(dual_fd.kind, fd.kind) as kind,
 				nvl(dual_fd.DEPARTMENT_REPORT_PERIOD_ID, fd.DEPARTMENT_REPORT_PERIOD_ID) as DEPARTMENT_REPORT_PERIOD_ID,
 				nvl(dual_fd.COMPARATIVE_DEP_REP_PER_ID, fd.COMPARATIVE_DEP_REP_PER_ID) as COMPARATIVE_DEP_REP_PER_ID,
 				nvl(dual_fd.ACCRUING, fd.ACCRUING) as ACCRUING
@@ -655,12 +655,12 @@ BEGIN
 					select p_in_sourceFormDataId as ID, p_in_formTemplateId as FORM_TEMPLATE_ID, p_in_kind as KIND, p_in_departmentReportPeriodId as DEPARTMENT_REPORT_PERIOD_ID, p_in_compPeriod as COMPARATIVE_DEP_REP_PER_ID, p_in_accruing as ACCRUING from dual) dual_fd
 					left join form_data fd on fd.id = dual_fd.id) fd
 					join department_report_period drp on drp.id = fd.DEPARTMENT_REPORT_PERIOD_ID and (p_in_sourceFormDataId is null or fd.id = p_in_sourceFormDataId)
-					join department_report_period neighbours_drp on neighbours_drp.report_period_id = drp.report_period_id      
+					join department_report_period neighbours_drp on neighbours_drp.report_period_id = drp.report_period_id
 					join (
-						  select id, form_template_id, kind, department_report_period_id, COMPARATIVE_DEP_REP_PER_ID, accruing from form_data 
+						  select id, form_template_id, kind, department_report_period_id, COMPARATIVE_DEP_REP_PER_ID, accruing from form_data
 						  union all (select null as ID, cast(p_in_formTemplateId as NUMBER(9,0)) as FORM_TEMPLATE_ID, cast(p_in_kind as NUMBER(9,0)) as KIND, cast(p_in_departmentReportPeriodId as NUMBER(18,0)) as DEPARTMENT_REPORT_PERIOD_ID, cast(p_in_compPeriod as NUMBER(18,0)) as COMPARATIVE_DEP_REP_PER_ID, cast(p_in_accruing as NUMBER(1,0)) as ACCRUING from dual)
-						) neighbours_fd on neighbours_fd.department_report_period_id = neighbours_drp.id and neighbours_fd.form_template_id = fd.form_template_id and neighbours_fd.kind = fd.kind     
-					) fd             
+						) neighbours_fd on neighbours_fd.department_report_period_id = neighbours_drp.id and neighbours_fd.form_template_id = fd.form_template_id and neighbours_fd.kind = fd.kind
+					) fd
       join report_period rp on rp.id = fd.REPORT_PERIOD_ID
       join tax_period tp on tp.id = rp.TAX_PERIOD_ID
       left join department_report_period cdrp on cdrp.id = fd.COMPARATIVE_DEP_REP_PER_ID
@@ -676,25 +676,25 @@ BEGIN
       join form_kind tfk on tfk.ID = tdft.KIND
       --отбираем источники у которых дата корректировки ближе всего
       join (
-            select drp.*,rp.dict_tax_period_id, tp.tax_type, tp.year 
+            select drp.*,rp.dict_tax_period_id, tp.tax_type, tp.year
             from department_report_period drp
             join report_period rp on rp.id = drp.report_period_id
             join tax_period tp on tp.id = rp.tax_period_id
-      ) tdrp on (tdrp.DEPARTMENT_ID = tdft.DEPARTMENT_ID and ((t.tax_type = tt.tax_type and tdrp.REPORT_PERIOD_ID = fd.REPORT_PERIOD_ID) 
+      ) tdrp on (tdrp.DEPARTMENT_ID = tdft.DEPARTMENT_ID and ((t.tax_type = tt.tax_type and tdrp.REPORT_PERIOD_ID = fd.REPORT_PERIOD_ID)
             --отбираем периоды для форм из других налогов
             or (t.tax_type != tt.tax_type and tdrp.tax_type = tt.tax_type and tdrp.year = tp.year and tdrp.dict_tax_period_id = rp.dict_tax_period_id)
-      ) and nvl(tdrp.CORRECTION_DATE, to_date('01.01.0001', 'DD.MM.YYYY')) between nvl(fd.CORRECTION_DATE, to_date('01.01.0001', 'DD.MM.YYYY')) and fd.NEXT_CORRECTION_DATE - 1) 
+      ) and nvl(tdrp.CORRECTION_DATE, to_date('01.01.0001', 'DD.MM.YYYY')) between nvl(fd.CORRECTION_DATE, to_date('01.01.0001', 'DD.MM.YYYY')) and fd.NEXT_CORRECTION_DATE - 1)
       join department td on td.id = tdrp.DEPARTMENT_ID
       join report_period trp on trp.id = tdrp.REPORT_PERIOD_ID
       join tax_period ttp on ttp.ID = trp.TAX_PERIOD_ID
       --отбираем макет действующий для приемника в периоде источника
-      join form_template tft on (tft.TYPE_ID = tt.ID and tft.status in (0,1) and tft.version = (select max(ft2.version) from form_template ft2 where ft2.TYPE_ID = tft.TYPE_ID and extract(year from ft2.version) <= ttp.year and ft2.status in (0,1))) 
+      join form_template tft on (tft.TYPE_ID = tt.ID and tft.status in (0,1))
       --если макет приемника ежемесячный, то отбираем все возможные месяца для него из справочника
       left join
            (
-           select t.id as record_id, lvl.i as lvl, extract(month from ADD_MONTHS(t.d1, lvl.i - 1)) as month, t.d1, t.d2 from (      
+           select t.id as record_id, lvl.i as lvl, extract(month from ADD_MONTHS(t.d1, lvl.i - 1)) as month, t.d1, t.d2 from (
               select id, end_date as d2, calendar_start_date as d1, round(months_between(end_date, calendar_start_date)) as months_between_cnt from (
-                        select r.id, v.date_value, a.alias from ref_book_value v 
+                        select r.id, v.date_value, a.alias from ref_book_value v
                         join ref_book_record r on r.id = v.record_id
                         join ref_book_attribute a on a.id = v.ATTRIBUTE_ID and a.alias in ('CALENDAR_START_DATE', 'END_DATE')
                         where r.ref_book_id = 8)
@@ -706,19 +706,19 @@ BEGIN
                  select level i
                  from dual
                  connect by level <= 12
-            ) lvl on ADD_MONTHS(t.d1, lvl.i - 1) <= t.d2 
+            ) lvl on ADD_MONTHS(t.d1, lvl.i - 1) <= t.d2
            ) perversion on perversion.record_id = rp.DICT_TAX_PERIOD_ID and perversion.lvl = case when (tft.MONTHLY=1 and ft.MONTHLY=0) then perversion.lvl else 1 end
-      --данные об источнике сравнения для приемника     
+      --данные об источнике сравнения для приемника
       left join (
-            select drp.*,rp.dict_tax_period_id, tp.tax_type, tp.year 
+            select drp.*,rp.dict_tax_period_id, tp.tax_type, tp.year
             from department_report_period drp
             join report_period rp on rp.id = drp.report_period_id
             join tax_period tp on tp.id = rp.tax_period_id
       ) inn_cdrp on (
-        (t.tax_type = tt.tax_type and inn_cdrp.id = fd.COMPARATIVE_DEP_REP_PER_ID) or 
+        (t.tax_type = tt.tax_type and inn_cdrp.id = fd.COMPARATIVE_DEP_REP_PER_ID) or
         (t.tax_type != tt.tax_type and fd.COMPARATIVE_DEP_REP_PER_ID is not null and inn_cdrp.tax_type = tt.tax_type and inn_cdrp.year = ctp.year and inn_cdrp.dict_tax_period_id = crp.dict_tax_period_id)
       )
-      --отбираем экземпляры с учетом периода сравнения, признака нарастающего итога, списка месяцев     
+      --отбираем экземпляры с учетом периода сравнения, признака нарастающего итога, списка месяцев
       left join (
                 select fd.*, drpc.report_period_id as comparative_report_period_id, rp.dict_tax_period_id, tp.year, drp.department_id as department_id, drp.correction_date
                 from form_data fd
@@ -727,15 +727,15 @@ BEGIN
                 join tax_period tp on tp.id = rp.TAX_PERIOD_ID
                 --данные об источниках сравнения для потенциальных источников
                 left join department_report_period drpc on fd.comparative_dep_rep_per_id = drpc.id
-                ) tfd 
-           on (tfd.kind = tfk.id and tfd.FORM_TEMPLATE_ID = tft.id and tdft.department_id = tfd.department_id and 
-           --если налог совпадает, то ищем точное совпадение по периоду, иначе совпадение по 
-           ((tt.tax_type = t.tax_type and tfd.DEPARTMENT_REPORT_PERIOD_ID = tdrp.id) or (tt.tax_type != t.tax_type and tp.year = tfd.year and rp.dict_tax_period_id = tfd.dict_tax_period_id and 
+                ) tfd
+           on (tfd.kind = tfk.id and tfd.FORM_TEMPLATE_ID = tft.id and tdft.department_id = tfd.department_id and
+           --если налог совпадает, то ищем точное совпадение по периоду, иначе совпадение по
+           ((tt.tax_type = t.tax_type and tfd.DEPARTMENT_REPORT_PERIOD_ID = tdrp.id) or (tt.tax_type != t.tax_type and tp.year = tfd.year and rp.dict_tax_period_id = tfd.dict_tax_period_id and
            (nvl(tfd.CORRECTION_DATE, to_date('01.01.0001', 'DD.MM.YYYY')) = nvl(tdrp.CORRECTION_DATE, to_date('01.01.0001', 'DD.MM.YYYY')))))
         and (tft.COMPARATIVE = 0 or ft.COMPARATIVE = 0 or inn_cdrp.report_period_id  = tfd.comparative_report_period_id)
-        and (tft.ACCRUING = 0 or ft.ACCRUING = 0 or tfd.ACCRUING = fd.ACCRUING)) 
+        and (tft.ACCRUING = 0 or ft.ACCRUING = 0 or tfd.ACCRUING = fd.ACCRUING))
         and coalesce(tfd.PERIOD_ORDER, perversion.month) = perversion.month
-      left join department_form_type_performer dftp on dftp.DEPARTMENT_FORM_TYPE_ID = tdft.id 
+      left join department_form_type_performer dftp on dftp.DEPARTMENT_FORM_TYPE_ID = tdft.id
       left join department fdpd on fdpd.id = dftp.PERFORMER_DEP_ID
       left join department_report_period tcdrp on tcdrp.id = tfd.COMPARATIVE_DEP_REP_PER_ID
       left join report_period tcrp on tcrp.id = tcdrp.REPORT_PERIOD_ID
@@ -743,20 +743,20 @@ BEGIN
       where (p_in_sourceFormDataId is null and (fd.id is null and fd.form_template_id = p_in_formTemplateId and fd.DEPARTMENT_REPORT_PERIOD_ID = p_in_departmentReportPeriodId and fd.kind = p_in_kind and (p_in_compPeriod is null and fd.COMPARATIVE_DEP_REP_PER_ID is null or fd.COMPARATIVE_DEP_REP_PER_ID = p_in_compPeriod) and fd.ACCRUING = p_in_accruing)) or fd.id = p_in_sourceFormDataId
   ),
   aggregated_insanity as (
-      select departmentId, formtypeid, formdatakind, reportperiodid, month, isExemplarExistent, last_correction_date, global_last_correction_date from                 
+      select departmentId, formtypeid, formdatakind, reportperiodid, month, isExemplarExistent, last_correction_date, global_last_correction_date from
         (select case when i.id is null then '0' else '1' end as agg_type, departmentId, formtypeid, formdatakind, reportperiodid, month, max(correction_date) over(partition by departmentId, formtypeid, formdatakind, reportperiodid, month, case when i.id is null then 0 else 1 end) as last_correction_date, case when count(i.id) over(partition by departmentId, formtypeid, formdatakind, reportperiodid, month) > 0 then 1 else 0 end isExemplarExistent
-         from insanity i)  
-      --транспонирование и агрегирование среди множеств отдельно с сушествующими и несуществующими экземлярами 
-      pivot 
+         from insanity i)
+      --транспонирование и агрегирование среди множеств отдельно с сушествующими и несуществующими экземлярами
+      pivot
       (
           max(last_correction_date) for agg_type in ('1' as last_correction_date, '0' global_last_correction_date)
       )
-)         
-select i.id, i.departmentId, i.departmentName, i.correction_date, ai.last_correction_date, ai.global_last_correction_date, i.reportperiodid, i.departmentReportPeriod, i.periodName, i.year, i.state, i.templateState, i.formTypeId, i.formTypeName, i.formDataKind, i.performerId, i.performerName, periodStartDate, i.compPeriodId, i.compPeriodName, i.compPeriodYear, i.compPeriodStartDate, i.accruing, i.month, i.manual, i.tax_type 
+)
+select i.id, i.departmentId, i.departmentName, i.correction_date, ai.last_correction_date, ai.global_last_correction_date, i.reportperiodid, i.departmentReportPeriod, i.periodName, i.year, i.state, i.templateState, i.formTypeId, i.formTypeName, i.formDataKind, i.performerId, i.performerName, periodStartDate, i.compPeriodId, i.compPeriodName, i.compPeriodYear, i.compPeriodStartDate, i.accruing, i.month, i.manual, i.tax_type
        from insanity i
-       --обращение к аггрегированным данным для определения, какие существуют данные в связке по подразделению, типу, виду, периоду и месяцу экземпляры данных, их максимальную дату и дату последнего периода корректировки, если данные по экземлярам отсутствуют 
+       --обращение к аггрегированным данным для определения, какие существуют данные в связке по подразделению, типу, виду, периоду и месяцу экземпляры данных, их максимальную дату и дату последнего периода корректировки, если данные по экземлярам отсутствуют
        left join aggregated_insanity ai on i.id is null and ai.departmentId = i.departmentId and ai.formtypeid = i.formtypeid and ai.formdatakind = i.formdatakind and ai.reportperiodid = i.reportperiodid  and nvl(i.month,-1) = nvl(ai.month,-1)
-       --отбираем либо записи, либо где идентификатор формы существует, либо если не существует, то берем запись с максимально доступной датой корректировки 
+       --отбираем либо записи, либо где идентификатор формы существует, либо если не существует, то берем запись с максимально доступной датой корректировки
        where (id is not null or (ai.isExemplarExistent = 0 and nvl(i.correction_date, to_date('01.01.0001', 'DD.MM.YYYY')) = nvl(ai.global_last_correction_date, to_date('01.01.0001', 'DD.MM.YYYY'))))
        and (p_in_excludeIfNotExist != 1 or id is not null) and (id is null or p_in_stateRestriction is null or state = p_in_stateRestriction)
        order by formTypeName, state, departmentName, month, id;
@@ -767,9 +767,9 @@ fetch query_destination bulk collect into l_destination;
       for i in 1..l_destination.count loop
           PIPE ROW(l_destination(i));
       end loop;
-      RETURN;       
-       
-END;         
+      RETURN;
+
+END;
 END FORM_DATA_PCKG;
 /
 
@@ -894,7 +894,7 @@ BEGIN
       join report_period srp on srp.id = sdrp.REPORT_PERIOD_ID
       join tax_period stp on stp.ID = srp.TAX_PERIOD_ID
       --отбираем макет действующий для приемника в периоде приемника
-      join form_template sft on (sft.TYPE_ID = st.ID and sft.status in (0,1) and sft.version = (select max(ft2.version) from form_template ft2 where ft2.TYPE_ID = sft.TYPE_ID and extract(year from ft2.version) <= stp.year and ft2.status in (0,1)))
+      join form_template sft on (sft.TYPE_ID = st.ID and sft.status in (0,1))
       --если макет источника ежемесячный, то отбираем все возможные месяца для него из справочника
       left join
            (
@@ -1019,7 +1019,7 @@ BEGIN
       join report_period trp on trp.id = tdrp.REPORT_PERIOD_ID
       join tax_period ttp on ttp.ID = trp.TAX_PERIOD_ID
       --отбираем макет действующий для приемника в периоде источника
-      join declaration_template tdt on (tdt.DECLARATION_TYPE_ID = dt.ID and tdt.status in (0,1) and tdt.version = (select max(dt2.version) from declaration_template dt2 where dt2.DECLARATION_TYPE_ID = tdt.DECLARATION_TYPE_ID and extract(year from dt2.version) <= ttp.year and dt2.status in (0,1)))
+      join declaration_template tdt on (tdt.DECLARATION_TYPE_ID = dt.ID and tdt.status in (0,1))
       --отбираем экземпляры с учетом периода сравнения, признака нарастающего истога, списка месяцов
       left join (
                 select dd.*, rp.dict_tax_period_id, tp.year, drp.department_id as department_id, drp.correction_date
