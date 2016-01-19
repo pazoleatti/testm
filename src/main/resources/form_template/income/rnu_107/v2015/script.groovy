@@ -278,7 +278,7 @@ def calcTotalRow(def dataRows) {
     def totalRow = (formDataEvent in [FormDataEvent.IMPORT, FormDataEvent.IMPORT_TRANSPORT_FILE]) ? formData.createStoreMessagingDataRow() : formData.createDataRow()
     totalRow.setAlias('total')
     totalRow.fix = 'Всего'
-    totalRow.getCell('fix').colSpan = 2
+    totalRow.getCell('fix').colSpan = 3
     allColumns.each {
         totalRow.getCell(it).setStyleAlias('Контрольные суммы')
     }
@@ -530,7 +530,7 @@ DataRow<Cell> getSubTotalRow(int i) {
     def newRow = (formDataEvent in [FormDataEvent.IMPORT, FormDataEvent.IMPORT_TRANSPORT_FILE]) ? formData.createStoreMessagingDataRow() : formData.createDataRow()
     newRow.fix = 'Итого'
     newRow.setAlias('itg#'.concat(i.toString()))
-    newRow.getCell('fix').colSpan = 2
+    newRow.getCell('fix').colSpan = 3
     allColumns.each {
         newRow.getCell(it).setStyleAlias('Контрольные суммы')
     }
