@@ -107,7 +107,7 @@ public class App_6_16Test extends ScriptTestBase {
         Assert.assertEquals("Строка 1: Графа «Итого стоимость, руб.» не заполнена!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Графа «Дата совершения сделки» не заполнена!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Должна быть заполнена хотя бы одна из граф «Сумма доходов Банка по данным бухгалтерского учета, руб.», «Сумма расходов Банка по данным бухгалтерского учета, руб.»!", entries.get(i++).getMessage());
-        Assert.assertEquals("Группа «графа 2 не задана, графа 5 не задана, графа 6 не задана, графа 9 не задана» не имеет строки подитога!", entries.get(i++).getMessage());
+        Assert.assertEquals("Группа «графа 2 не задана; графа 5 не задана; графа 6 не задана; графа 9 не задана» не имеет строки подитога!", entries.get(i++).getMessage());
         Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
         testHelper.getLogger().clear();
 
@@ -140,7 +140,7 @@ public class App_6_16Test extends ScriptTestBase {
         Assert.assertEquals("Строка 1: Значение графы «Цена (тариф) за единицу измерения, руб.» должно быть равно значению графы «Сумма доходов Банка по данным бухгалтерского учета, руб.»!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Значение графы «Итого стоимость, руб.» должно быть равно значению графы «Сумма доходов Банка по данным бухгалтерского учета, руб.»!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Значение графы «Дата совершения сделки» должно быть не меньше значения графы «Дата договора» и не больше 31.12.2014!", entries.get(i++).getMessage());
-        Assert.assertEquals("Группа «A, docNumber, 02.01.2990, 1» не имеет строки подитога!", entries.get(i++).getMessage());
+        Assert.assertEquals("Группа «A; docNumber; 02.01.2990; 1» не имеет строки подитога!", entries.get(i++).getMessage());
         Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
         testHelper.getLogger().clear();
 

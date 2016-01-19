@@ -974,5 +974,5 @@ String getValuesByGroupColumn(DataRow row) {
     }
     values.add(value)
 
-    return values.join(', ')
+    return values.join('; ')
 }

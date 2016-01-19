@@ -244,7 +244,7 @@ String getValuesByGroupColumn(DataRow row) {
     } else {
         values.add('графа 6 не задана')
     }
-    return values.join(", ")
+    return values.join("; ")
 }
 
 // Алгоритмы заполнения полей формы

@@ -483,7 +483,7 @@ String getValuesByGroupColumn(DataRow row) {
         values.add('графа 12 не задана')
     }
 
-    return values.join(', ')
+    return values.join('; ')
 }
 
 // Получение импортируемых данных

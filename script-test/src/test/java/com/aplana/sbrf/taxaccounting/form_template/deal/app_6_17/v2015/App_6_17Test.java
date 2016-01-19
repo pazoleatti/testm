@@ -237,7 +237,7 @@ public class App_6_17Test extends ScriptTestBase {
         testHelper.execute(FormDataEvent.CHECK);
         entries = testHelper.getLogger().getEntries();
         i = 0;
-        Assert.assertEquals("Группа «A, string, 01.01.2014, A, A» не имеет строки подитога!", entries.get(i++).getMessage());
+        Assert.assertEquals("Группа «A; string; 01.01.2014; A; A» не имеет строки подитога!", entries.get(i++).getMessage());
         Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
         testHelper.getLogger().clear();
 
@@ -257,7 +257,7 @@ public class App_6_17Test extends ScriptTestBase {
         testHelper.execute(FormDataEvent.CHECK);
         entries = testHelper.getLogger().getEntries();
         i = 0;
-        Assert.assertEquals("Строка 2: Неверное итоговое значение по группе «A, string, 01.01.2014, A, A» в графе «Сумма расходов Банка по данным бухгалтерского учета, руб.»", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 2: Неверное итоговое значение по группе «A; string; 01.01.2014; A; A» в графе «Сумма расходов Банка по данным бухгалтерского учета, руб.»", entries.get(i++).getMessage());
         Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
         testHelper.getLogger().clear();
     }

@@ -106,7 +106,7 @@ public class App_6_15Test extends ScriptTestBase {
         Assert.assertEquals("Строка 1: Графа «Итого стоимость без учета НДС, руб.» не заполнена!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Графа «Дата совершения сделки» не заполнена!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Должна быть заполнена хотя бы одна из граф «Сумма расходов Банка по данным бухгалтерского учета, руб.», «Сумма доходов Банка по данным бухгалтерского учета, руб.»!", entries.get(i++).getMessage());
-        Assert.assertEquals("Группа «графа 2.1 не задана, графа 5 не задана, графа 6 не задана, графа 10 не задана, графа 11 не задана» не имеет строки подитога!", entries.get(i++).getMessage());
+        Assert.assertEquals("Группа «графа 2.1 не задана; графа 5 не задана; графа 6 не задана; графа 10 не задана; графа 11 не задана» не имеет строки подитога!", entries.get(i++).getMessage());
         Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
         testHelper.getLogger().clear();
 
@@ -155,7 +155,7 @@ public class App_6_15Test extends ScriptTestBase {
         Assert.assertEquals("Строка 1: Значение графы «Цена (тариф) за единицу измерения без учета НДС, руб.» должно быть равно модулю разности значений граф «Сумма доходов Банка по данным бухгалтерского учета, руб.» и «Сумма расходов Банка по данным бухгалтерского учета, руб.»!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Значение графы «Итого стоимость без учета НДС, руб.» должно быть равно модулю разности значений граф «Сумма доходов Банка по данным бухгалтерского учета, руб.» и «Сумма расходов Банка по данным бухгалтерского учета, руб.»!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Значение графы «Дата совершения сделки» должно быть не меньше значения графы «Дата заключения сделки» и не больше 31.12.2014!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 2: Неверное итоговое значение по группе «A, string, 02.01.2990, графа 10 не задана, графа 11 не задана» в графе «Количество»", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 2: Неверное итоговое значение по группе «A; string; 02.01.2990; графа 10 не задана; графа 11 не задана» в графе «Количество»", entries.get(i++).getMessage());
         Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
         testHelper.getLogger().clear();
 
