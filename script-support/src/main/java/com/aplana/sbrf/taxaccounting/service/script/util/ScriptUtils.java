@@ -1823,7 +1823,7 @@ public final class ScriptUtils {
     public static Long getTcoRecordId(String nameFromFile, String iksr, String iksrName, int fileRowIndex, int colIndex, Date endDate, boolean isVzl, Logger logger, RefBookFactory refBookFactory, Map<Long, Map<String, Object>> recordCache) {
         colIndex = colIndex + 1;
         if (iksr == null || iksr.isEmpty()) {
-            logger.warn("Строка %s , столбец %s: На форме не заполнены графы с общей информацией о %s, так как в файле отсутствует значение по графе «%s»!",
+            logger.warn("Строка %s, столбец %s: На форме не заполнены графы с общей информацией о %s, так как в файле отсутствует значение по графе «%s»!",
                     fileRowIndex, getXLSColumnName(colIndex), isVzl ? "ВЗЛ/РОЗ" : "юридическом лице",  iksrName);
             return null;
         }
@@ -1862,8 +1862,8 @@ public final class ScriptUtils {
                         nameFromFile = "наименование " + (isVzl ? "ВЗЛ/РОЗ" : "юридического лица") + " в файле не заполнено";
                     }
                     // сообщение 1
-                    logger.warn("Строка %s , столбец %s: %s в справочнике «Участники ТЦО» не найдено значение «%s» (%s), актуальное на дату «%s»!",
-                            fileRowIndex, getXLSColumnName(colIndex), isVzl ? "На форме не заполнены графы с общей информацией о ВЗЛ/РОЗ, так как" : ("Для заполнения графы «" + iksrName + "» формы"), iksr, nameFromFile, simpleDateFormat.format(endDate));
+                    logger.warn("Строка %s, столбец %s: На форме не заполнены графы с общей информацией о %s, так как в справочнике «Участники ТЦО» не найдено значение «%s» (%s), актуальное на дату «%s»!",
+                            fileRowIndex, getXLSColumnName(colIndex), isVzl ? "ВЗЛ/РОЗ" : "юридическом лице", iksr, nameFromFile, simpleDateFormat.format(endDate));
                 }
                 return null;
             }
@@ -1886,7 +1886,7 @@ public final class ScriptUtils {
                     break;
                 }
             }
-            logger.warn("Строка %s , столбец %s: На форме графы с общей информацией о %s заполнены данными записи справочника «Участники ТЦО», " +
+            logger.warn("Строка %s, столбец %s: На форме графы с общей информацией о %s заполнены данными записи справочника «Участники ТЦО», " +
                             "в которой атрибут «Полное наименование юридического лица с указанием ОПФ» = «%s», атрибут «%s» = «%s». %s",
                     fileRowIndex, getXLSColumnName(colIndex), isVzl ? "ВЗЛ/РОЗ" : "юридическом лице", record.get("NAME").getStringValue(), refBookAttributeName, iksr, msg);
         }
