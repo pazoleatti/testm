@@ -532,7 +532,7 @@ BEGIN
             join report_period srp on srp.id = sdrp.REPORT_PERIOD_ID
             join tax_period stp on stp.ID = srp.TAX_PERIOD_ID
             --отбираем макет действующий для приемника в периоде приемника
-            join form_template sft on (sft.TYPE_ID = st.ID and sft.status in (0,1) and sft.version = (select max(ft2.version) from form_template ft2 where ft2.TYPE_ID = sft.TYPE_ID and extract(year from ft2.version) <= stp.year and ft2.status in (0,1)))
+            join form_template sft on (sft.TYPE_ID = st.ID and sft.status in (0,1))
             --если макет источника ежемесячный, то отбираем все возможные месяца для него из справочника
             left join
                  (
@@ -692,7 +692,7 @@ BEGIN
       join report_period trp on trp.id = tdrp.REPORT_PERIOD_ID
       join tax_period ttp on ttp.ID = trp.TAX_PERIOD_ID
       --отбираем макет действующий для приемника в периоде источника
-      join form_template tft on (tft.TYPE_ID = tt.ID and tft.status in (0,1) and tft.version = (select max(ft2.version) from form_template ft2 where ft2.TYPE_ID = tft.TYPE_ID and extract(year from ft2.version) <= ttp.year and ft2.status in (0,1)))
+      join form_template tft on (tft.TYPE_ID = tt.ID and tft.status in (0,1))
       --если макет приемника ежемесячный, то отбираем все возможные месяца для него из справочника
       left join
            (
@@ -899,7 +899,7 @@ BEGIN
       join report_period srp on srp.id = sdrp.REPORT_PERIOD_ID
       join tax_period stp on stp.ID = srp.TAX_PERIOD_ID
       --отбираем макет действующий для приемника в периоде приемника
-      join form_template sft on (sft.TYPE_ID = st.ID and sft.status in (0,1) and sft.version = (select max(ft2.version) from form_template ft2 where ft2.TYPE_ID = sft.TYPE_ID and extract(year from ft2.version) <= stp.year and ft2.status in (0,1)))
+      join form_template sft on (sft.TYPE_ID = st.ID and sft.status in (0,1))
       --если макет источника ежемесячный, то отбираем все возможные месяца для него из справочника
       left join
            (
@@ -1024,7 +1024,7 @@ BEGIN
       join report_period trp on trp.id = tdrp.REPORT_PERIOD_ID
       join tax_period ttp on ttp.ID = trp.TAX_PERIOD_ID
       --отбираем макет действующий для приемника в периоде источника
-      join declaration_template tdt on (tdt.DECLARATION_TYPE_ID = dt.ID and tdt.status in (0,1) and tdt.version = (select max(dt2.version) from declaration_template dt2 where dt2.DECLARATION_TYPE_ID = tdt.DECLARATION_TYPE_ID and extract(year from dt2.version) <= ttp.year and dt2.status in (0,1)))
+      join declaration_template tdt on (tdt.DECLARATION_TYPE_ID = dt.ID and tdt.status in (0,1))
       --отбираем экземпляры с учетом периода сравнения, признака нарастающего истога, списка месяцов
       left join (
                 select dd.*, rp.dict_tax_period_id, tp.year, drp.department_id as department_id, drp.correction_date
