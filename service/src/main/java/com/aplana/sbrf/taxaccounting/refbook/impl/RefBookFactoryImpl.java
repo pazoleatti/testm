@@ -298,7 +298,7 @@ public class RefBookFactoryImpl implements RefBookFactory {
             case EXCEL_REF_BOOK:
             case CSV_REF_BOOK:
             case SPECIFIC_REPORT_REF_BOOK:
-                return String.format("\"%s\" отчет справочника \"%s\": Версия: %s, Фильтр: \"%s\"", specificReportType, refBook.getName(), SDF_DD_MM_YYYY.format(version), filter);
+                return String.format("Формирование \"%s\" отчет справочника \"%s\": Версия: %s, Фильтр: \"%s\"", specificReportType, refBook.getName(), SDF_DD_MM_YYYY.format(version), filter);
             default:
                 throw new ServiceException("Неверный тип отчета(%s)", reportType.getName());
         }
