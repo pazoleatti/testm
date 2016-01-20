@@ -967,28 +967,43 @@ public class DepartmentFormTypeDaoImpl extends AbstractDao implements Department
         boolean isAscSorting = queryParams.isAscending();
         StringBuilder sorting = new StringBuilder();
 
+        List<String> columns = new ArrayList<String>();
+
         switch (ordering) {
             case TYPE:
-                sorting.append("ORDER BY ft.name\n");
+                columns.add("ft.name\n");
                 break;
             case KIND:
-                sorting.append("ORDER BY src_dft.kind\n");
+                columns.add("src_dft.kind\n");
+                columns.add("ft.name\n");
                 break;
             case TAX_TYPE:
-                sorting.append("ORDER BY tax_type\n");
+                columns.add("tax_type\n");
                 break;
             case DEPARTMENT:
-                sorting.append("ORDER BY d.name\n");
+                columns.add("d.name\n");
                 break;
             case START:
-                sorting.append("ORDER BY ds.period_start\n");
+                columns.add("ds.period_start\n");
                 break;
             case END:
-                sorting.append("ORDER BY ds.period_end\n");
+                columns.add("ds.period_end\n");
                 break;
         }
 
-        if (!isAscSorting) sorting.append("DESC\n");
+        if (!columns.isEmpty()) {
+            sorting.append(" ORDER BY ");
+            Iterator iterator = columns.iterator();
+            while (iterator.hasNext()) {
+                sorting.append(iterator.next());
+                if (!isAscSorting) {
+                    sorting.append("DESC\n");
+                }
+                if (iterator.hasNext()) {
+                    sorting.append(", ");
+                }
+            }
+        }
 
         return sorting.toString();
     }
