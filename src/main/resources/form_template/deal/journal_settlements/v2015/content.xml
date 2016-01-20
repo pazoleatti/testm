@@ -121,7 +121,7 @@
         <columnType>NUMBER</columnType>
         <name>Сумма доходов / расходов с начала года (тыс. руб.)</name>
         <order>11</order>
-        <width>8</width>
+        <width>9</width>
         <maxLength>15</maxLength>
         <precision>0</precision>
     </columns>
