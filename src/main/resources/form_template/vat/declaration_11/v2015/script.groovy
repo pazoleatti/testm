@@ -422,6 +422,6 @@ def getRefBook(def id) {
  */
 boolean isCurrentNode(List<String> nodeNames, Map<String, Boolean> elements) {
     nodeNames.add('Файл')
-    def List<String> enteredNodes = elements.findAll { it.value }.keySet() // узлы в которые вошли, но не вышли еще
+    def enteredNodes = elements.findAll { it.value }.keySet() // узлы в которые вошли, но не вышли еще
     return enteredNodes.containsAll(nodeNames) && enteredNodes.size() == nodeNames.size()
 }
