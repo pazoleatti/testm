@@ -6,6 +6,8 @@ import com.aplana.sbrf.taxaccounting.model.*;
 import org.springframework.stereotype.Repository;
 
 import java.sql.Types;
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import static com.aplana.sbrf.taxaccounting.dao.impl.util.SqlUtils.transformToSqlInStatement;
@@ -75,29 +77,36 @@ public class BookerStatementsSearchDaoImpl extends AbstractDao implements Booker
     }
 
     private void appendOrderByClause(StringBuilder sql, BookerStatementsSearchOrdering ordering, boolean ascSorting) {
-        String column = null;
+        List<String> columns = new ArrayList<String>();
         switch (ordering) {
             case ID:
                 break;
             case DEPARTMENT_NAME:
-                column = "dep.name";
+                columns.add("dep.name");
                 break;
             case YEAR:
-                column = "ap.number_value";
+                columns.add("ap.number_value");
+                columns.add("period.string_value");
                 break;
             case ACCOUNT_PERIOD_NAME:
-                column = "period.string_value";
+                columns.add("period.string_value");
                 break;
             case BOOKER_STATEMENTS_TYPE_NAME:
-                column = "bs.type";
+                columns.add("bs.type");
                 break;
         }
 
-        if (column != null) {
+        if (!columns.isEmpty()) {
             sql.append(" order by ");
-            sql.append(column);
-            if (!ascSorting) {
-                sql.append(" desc");
+            Iterator<String> iterator = columns.iterator();
+            while (iterator.hasNext()) {
+                sql.append(iterator.next());
+                if (!ascSorting) {
+                    sql.append(" desc ");
+                }
+                if (iterator.hasNext()) {
+                    sql.append(", ");
+                }
             }
         }
     }
