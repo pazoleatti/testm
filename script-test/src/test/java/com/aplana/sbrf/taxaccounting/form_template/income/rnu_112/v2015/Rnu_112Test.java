@@ -96,7 +96,6 @@ public class Rnu_112Test extends ScriptTestBase {
         int i = 0;
         Assert.assertEquals("Строка 1: Графа «Номер сделки» не заполнена!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Графа «Наименование Взаимозависимого лица/резидента оффшорной зоны» не заполнена!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Графа «Страна местонахождения контрагента» не заполнена!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Графа «Валюта расчетов» не заполнена!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Графа «Дата первой части сделки» не заполнена!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Графа «Дата второй части сделки» не заполнена!", entries.get(i++).getMessage());
