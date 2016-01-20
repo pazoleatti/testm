@@ -289,8 +289,8 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
     @Override
     public void setSpecificReportTypes(List<String> specificReportTypes) {
         printAnchor.clear();
-        printAnchor.addItem(ReportType.EXCEL.getName(), printToExcel);
-        printAnchor.addItem(ReportType.CSV.getName(), printToCSV);
+        printAnchor.addItem(ReportType.EXCEL_REF_BOOK.getName(), printToExcel);
+        printAnchor.addItem(ReportType.CSV_REF_BOOK.getName(), printToCSV);
         for(final String specificReportType: specificReportTypes) {
             LinkButton linkButton = new LinkButton("Сформировать \"" + specificReportType + "\"");
             linkButton.setHeight("20px");
