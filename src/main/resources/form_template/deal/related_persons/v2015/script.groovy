@@ -1,5 +1,6 @@
 package form_template.deal.related_persons.v2015
 
+import au.com.bytecode.opencsv.CSVWriter
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.FormDataKind
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod
@@ -65,6 +66,12 @@ switch (formDataEvent) {
     case FormDataEvent.SAVE:
         updateStylesAndSort()
         formDataService.saveCachedDataRows(formData, logger)
+        break
+    case FormDataEvent.GET_SPECIFIC_REPORT_TYPES:
+        specificReportType.add("Краткий список ВЗЛ (CSV)")
+        break
+    case FormDataEvent.CREATE_SPECIFIC_REPORT:
+        createSpecificReport()
         break
 }
 
@@ -606,4 +613,93 @@ def getFormTypeById(def id) {
         formTypeMap[id] = formTypeService.get(id)
     }
     return formTypeMap[id]
+}
+
+void createSpecificReport() {
+    switch (scriptSpecificReportHolder.getSpecificReportType()) {
+        case 'Краткий список ВЗЛ (CSV)' :
+            createSpecificReportShortListCSV()
+            break
+    }
+}
+
+// Краткий список ВЗЛ (CSV)
+def createSpecificReportShortListCSV() {
+    // записать в файл
+    PrintWriter printWriter = new PrintWriter(scriptSpecificReportHolder.getFileOutputStream())
+    BufferedWriter bufferedWriter = new BufferedWriter(printWriter)
+    CSVWriter csvWriter = new CSVWriter(bufferedWriter, (char) ';', CSVWriter.NO_QUOTE_CHARACTER, CSVWriter.NO_ESCAPE_CHARACTER)
+
+    // заголовок
+    def header = ['entityFullName', 'oksm', 'inn', 'kpp', 'swift', 'regno']
+    csvWriter.writeNext(header.toArray() as String[])
+
+    // данные
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper.allCached
+    def values = []
+    for (def row : dataRows) {
+        // 1. entityFullName
+        def record520 = getRefBookValue(520L, row.name)
+        values.add(record520?.NAME?.value)
+
+        // 2. oksm
+        def countryCode = getRefBookValue(10L, record520?.COUNTRY_CODE?.value)?.CODE?.value
+        values.add(countryCode)
+
+        // 3. inn
+        values.add(record520?.INN?.value)
+
+        // 4. kpp
+        values.add(record520?.KPP?.value)
+
+        // 5. swift
+        values.add(record520?.SWIFT?.value)
+
+        // 6. regno
+        def value = null
+        if (record520?.REG_NUM?.value) {
+            value = record520?.REG_NUM?.value
+        } else if (record520?.REG_NUM?.value && record520?.SWIFT?.value) {
+            value = record520?.KIO?.value
+        }
+        values.add(value)
+
+        csvWriter.writeNext(values.toArray() as String[])
+        values.clear()
+    }
+    csvWriter.close();
+
+    // название файла
+    def periodCode = getPeriodCode(getReportPeriodEndDate())
+    def year = getReportPeriod()?.taxPeriod?.year?.toString()
+    def fileName = "interDep" + periodCode + year + ".csv"
+    scriptSpecificReportHolder.setFileName(fileName)
+}
+
+/** Получить код периода по дате. */
+def getPeriodCode(def date) {
+    def provider8 = refBookFactory.getDataProvider(8L)
+    def record8s = provider8.getRecords(date, null, "D = 1", null)
+    def dayAndMonth = date.format('dd.MM')
+    def tmpDate = Date.parse('dd.MM.yyyy', dayAndMonth + '.1970')
+    def record8 = record8s.find { it?.CALENDAR_START_DATE?.value <= tmpDate && tmpDate <= it?.END_DATE?.value }
+    def periodCode = record8?.CODE?.value
+
+    // если не нашлось кода в справочике
+    if (!periodCode) {
+        Calendar c = Calendar.getInstance();
+        c.setTime(version)
+        def month = c.get(Calendar.MONTH)
+        if (month < 4) {
+            periodCode = '21'
+        } else if (month < 7) {
+            periodCode = '31'
+        } else if (month < 10) {
+            periodCode = '33'
+        } else {
+            periodCode = '34'
+        }
+    }
+    return periodCode
 }

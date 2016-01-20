@@ -62,6 +62,7 @@ void createSpecificReport() {
     }
 }
 
+// Краткий список ОЗ (CSV)
 def createSpecificReportShortListCSV() {
     // получить данные
     def version = scriptSpecificReportHolder.version
@@ -80,44 +81,44 @@ def createSpecificReportShortListCSV() {
     // записать в файл
     PrintWriter printWriter = new PrintWriter(scriptSpecificReportHolder.getFileOutputStream())
     BufferedWriter bufferedWriter = new BufferedWriter(printWriter)
-    CSVWriter csvWriter = new CSVWriter(bufferedWriter, (char) ';', CSVWriter.NO_QUOTE_CHARACTER)
+    CSVWriter csvWriter = new CSVWriter(bufferedWriter, (char) ';', CSVWriter.NO_QUOTE_CHARACTER, CSVWriter.NO_ESCAPE_CHARACTER)
 
     // заголовок
     def header = ['rowNumber', 'countryShortName', 'countryFullName', 'digitalCode', 'Alpha2', 'Alpha3', 'Comments']
     csvWriter.writeNext(header.toArray() as String[])
 
     // данные
-    def row = []
+    def values = []
     def index = 0
     records.each { record ->
         index++
 
         // rowNumber
-        row.add(index.toString())
+        values.add(index.toString())
 
         // countryShortName
-        row.add(record?.SHORTNAME?.value)
+        values.add(record?.SHORTNAME?.value)
 
         // countryFullName
-        row.add(record?.NAME?.value)
+        values.add(record?.NAME?.value)
 
         // digitalCode
         def record10 = getRecord10(version, record?.CODE?.value)
-        row.add(record10?.CODE?.value)
+        values.add(record10?.CODE?.value)
 
         // Alpha2
         record10 = getRecord10(version, record?.CODE_2?.value)
-        row.add(record10?.CODE_2?.value)
+        values.add(record10?.CODE_2?.value)
 
         // Alpha3
         record10 = getRecord10(version, record?.CODE_3?.value)
-        row.add(record10?.CODE_3?.value)
+        values.add(record10?.CODE_3?.value)
 
         // Comments
-        row.add(record?.COMMENT?.value)
+        values.add(record?.COMMENT?.value)
 
-        csvWriter.writeNext(row.toArray() as String[])
-        row.clear()
+        csvWriter.writeNext(values.toArray() as String[])
+        values.clear()
     }
     csvWriter.close();
 
