@@ -83,14 +83,14 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
             public void onKeyUp(KeyUpEvent event) {}
         });
 
-        printToExcel = new LinkButton("Сформировать XLSM");
+        printToExcel = new LinkButton("Сформировать XLSX");
         printToExcel.setHeight("20px");
         printToExcel.setDisableImage(true);
         printToExcel.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
                 if (getUiHandlers() != null) {
-                    getUiHandlers().onPrintClicked(ReportType.EXCEL.getName());
+                    getUiHandlers().onPrintClicked(ReportType.EXCEL_REF_BOOK.getName());
                 }
             }
         });
@@ -102,7 +102,7 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
             @Override
             public void onClick(ClickEvent event) {
                 if (getUiHandlers() != null) {
-                    getUiHandlers().onPrintClicked(ReportType.CSV.getName());
+                    getUiHandlers().onPrintClicked(ReportType.CSV_REF_BOOK.getName());
                 }
             }
         });
