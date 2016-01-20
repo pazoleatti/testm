@@ -392,19 +392,20 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
     }
     colIndex++
 
+    def countryMap
     // графа 4
     if (map != null) {
-        map = getRefBookValue(10, map.COUNTRY_CODE?.referenceValue)
-        if (map != null) {
-            def expectedValues = [map.NAME?.stringValue, map.FULLNAME?.stringValue]
-            formDataService.checkReferenceValue(10, values[colIndex], expectedValues, fileRowIndex, colIndex + colOffset, logger, false)
+        countryMap = getRefBookValue(10, map.COUNTRY_CODE?.referenceValue)
+        if (countryMap != null) {
+            def expectedValues = [countryMap.NAME?.stringValue, countryMap.FULLNAME?.stringValue]
+            formDataService.checkReferenceValue(values[colIndex], expectedValues, getColumnName(newRow, 'countryName'), map.NAME.value, fileRowIndex, colIndex + colOffset, logger, false)
         }
     }
     colIndex++
 
-    // графа 5
-    if (map != null) {
-        formDataService.checkReferenceValue(10, values[colIndex], map.CODE?.stringValue, fileRowIndex, colIndex + colOffset, logger, false)
+    // графа 5                               `
+    if (countryMap != null) {
+        formDataService.checkReferenceValue(values[colIndex], [countryMap.CODE?.stringValue], getColumnName(newRow, 'countryCode'), map.NAME.value, fileRowIndex, colIndex + colOffset, logger, false)
     }
     colIndex++
 
