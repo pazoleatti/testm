@@ -140,7 +140,7 @@ public class App_6_16Test extends ScriptTestBase {
         Assert.assertEquals("Строка 1: Значение графы «Цена (тариф) за единицу измерения, руб.» должно быть равно значению графы «Сумма доходов Банка по данным бухгалтерского учета, руб.»!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Значение графы «Итого стоимость, руб.» должно быть равно значению графы «Сумма доходов Банка по данным бухгалтерского учета, руб.»!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Значение графы «Дата совершения сделки» должно быть не меньше значения графы «Дата заключения сделки» и не больше 31.12.2014!", entries.get(i++).getMessage());
-        Assert.assertEquals("Группа «A; docNumber; 02.01.2990; 1» не имеет строки подитога!", entries.get(i++).getMessage());
+        Assert.assertEquals("Группа «A; docNumber; 02.01.2990; A» не имеет строки подитога!", entries.get(i++).getMessage());
         Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
         testHelper.getLogger().clear();
 

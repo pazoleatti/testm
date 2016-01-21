@@ -365,11 +365,18 @@ String getValuesByGroupColumn(DataRow row) {
         values.add('графа 6 не задана')
     }
     // 9
-    if (row.dealType) {
-        values.add(row.dealType)
-    } else {
-        values.add('графа 9 не задана')
+    def value = null
+    if (row?.dealType) {
+        def map = getRefBookValue(91, row.dealType)
+        if (map != null) {
+            value = map.KIND?.stringValue
+        }
     }
+    if (!value) {
+        value = 'графа 9 не задана'
+    }
+    values.add(value)
+
     return values.join("; ")
 }
 
