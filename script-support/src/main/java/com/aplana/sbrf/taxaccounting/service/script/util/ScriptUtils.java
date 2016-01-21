@@ -67,7 +67,7 @@ public final class ScriptUtils {
     public static final String REF_BOOK_TOO_MANY_FOUND_IMPORT_ERROR = "Проверка файла: Строка %d, столбец %s: В справочнике «%s» в атрибуте «%s» найдено более одного значения «%s», актуального на дату %s!";
     public static final String CHECK_OVERFLOW_MESSAGE = "Строка %d: Значение графы «%s» превышает допустимую разрядность (%d знаков). Графа «%s» рассчитывается как «%s»!";
     // для проверки итогов при загрузе экселя (посчитанные и ожижаемые значения как %s потому что %f теряет точность)
-    public static final String COMPARE_TOTAL_VALUES = "Строка %d файла: Итоговое значение по графе «%s» (%s) указано некорректно. Системой рассчитано значение «%s».";
+    public static final String COMPARE_TOTAL_VALUES = "Строка %d файла: Итоговое значение по графе «%s» (значение «%s») указано некорректно. Системой рассчитано значение «%s».";
     public static final String COMPARE_TOTAL_VALUES_NULL = "Строка %d файла: Итоговое значение по графе «%s» не указано. Системой рассчитано значение «%s».";
     public static final String INN_JUR_PATTERN = RefBookUtils.INN_JUR_PATTERN;
     public static final String INN_JUR_MEANING = RefBookUtils.INN_JUR_MEANING;
@@ -767,8 +767,9 @@ public final class ScriptUtils {
                 }
 
                 for (String alias : groupColumns) {
-                    Object v1 = o1.getCell(alias).getValue();
-                    Object v2 = o2.getCell(alias).getValue();
+                    boolean isRefBook = Arrays.asList(ColumnType.REFBOOK, ColumnType.REFERENCE).contains(o1.getCell(alias).getColumn().getColumnType());
+                    Object v1 = isRefBook ? o1.getCell(alias).getRefBookDereference() : o1.getCell(alias).getValue();
+                    Object v2 = isRefBook ? o2.getCell(alias).getRefBookDereference() : o2.getCell(alias).getValue();
                     if (v1 == null && v2 == null) {
                         continue;
                     }

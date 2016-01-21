@@ -219,8 +219,6 @@ void calc() {
     // Общий итог
     def total = calcTotalRow(dataRows)
     dataRows.add(total)
-
-    sortFormDataRows(false)
 }
 
 def calcTotalRow(def dataRows) {

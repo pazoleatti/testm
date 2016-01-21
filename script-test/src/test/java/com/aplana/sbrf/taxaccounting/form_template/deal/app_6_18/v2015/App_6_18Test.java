@@ -105,8 +105,8 @@ public class App_6_18Test extends ScriptTestBase {
         Assert.assertEquals("Строка 1: Графа «Наименование драгоценного металла» не заполнена!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Графа «Внешнеторговая сделка» не заполнена!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Графа «Количество» не заполнена!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Графа «Цена (тариф) за единицу измерения без учета НДС, акцизов и пошлин, руб.» не заполнена!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Графа «Итого стоимость без учета НДС, акцизов и пошлин, руб.» не заполнена!", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 1: Графа «Цена (тариф) за единицу измерения без учета НДС, акцизов и пошлины, руб.» не заполнена!", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 1: Графа «Итого стоимость без учета НДС, акцизов и пошлины, руб.» не заполнена!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Графа «Дата совершения сделки» не заполнена!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Графа «Количество» должна быть заполнена значением «1»!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Должна быть заполнена одна из граф «Сумма доходов Банка по данным бухгалтерского учета, руб.» или «Сумма расходов Банка по данным бухгалтерского учета, руб.»!", entries.get(i++).getMessage());

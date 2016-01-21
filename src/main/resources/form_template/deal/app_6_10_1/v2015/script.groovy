@@ -256,6 +256,7 @@ void calc() {
     deleteAllAliased(dataRows)
 
     // Сортировка
+    refBookService.dataRowsDereference(logger, dataRows, formData.getFormColumns().findAll { groupColumns.contains(it.getAlias())})
     sortRows(dataRows, groupColumns)
 
     for (row in dataRows) {

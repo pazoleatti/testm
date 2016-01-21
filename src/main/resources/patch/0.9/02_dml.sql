@@ -28,6 +28,39 @@ END;
 /	
 COMMIT;
 
+--http://jira.aplana.com/browse/SBRFACCTAX-14314: Переименовать названия асинхронных задач
+begin
+merge into async_task_type att
+using (
+  select 3 as id, 'Формирование отчета налоговой формы в XLSM-формате' as name, 'Ячейки = строки * графы' as limit_kind from dual union all 
+  select 4 as id, 'Формирование отчета налоговой формы в CSV-формате' as name, 'Ячейки = строки * графы' as limit_kind from dual union all 
+  select 5 as id, 'Формирование отчета декларации/уведомления в XLSX-формате ' as name, 'Размер XML-файла декларации/уведомления (Кбайт)' as limit_kind from dual union all 
+  select 6 as id, 'Расчет декларации/уведомления (формирование XML-файла)' as name, 'Сумма по всем формам-источникам. Ячейки = строки * графы' as limit_kind from dual union all 
+  select 7 as id, 'Создание формы предварительного просмотра декларации/уведомления' as name, 'Размер XML-файла декларации/уведомления (Кбайт)' as limit_kind from dual union all 
+  select 9 as id, 'Формирование отчетности для МСФО' as name, 'Общий размер файлов форм МСФО (налоговая форма - XLSM, декларация/уведомление - XLSX' as limit_kind from dual union all 
+  select 10 as id, 'Архивация ЖА' as name, '' as limit_kind from dual union all 
+  select 11 as id, 'Генерация отчета ЖА' as name, '' as limit_kind from dual union all 
+  select 13 as id, 'Обработка ТФ налоговой формы/справочника из каталога загрузки' as name, 'Размер файла (Кбайт)' as limit_kind from dual union all 
+  select 14 as id, 'Проверка декларации/уведомления' as name, 'Размер XML-файла декларации/уведомления (Кбайт)' as limit_kind from dual union all 
+  select 15 as id, 'Принятие декларации/уведомления' as name, 'Размер XML-файла декларации/уведомления (Кбайт)' as limit_kind from dual union all 
+  select 16 as id, 'Консолидация в налоговую форму' as name, 'Сумма по всем формам-источникам. Ячейки = строки * графы' as limit_kind from dual union all 
+  select 17 as id, 'Расчет налоговой формы' as name, 'Ячейки = строки * графы' as limit_kind from dual union all 
+  select 18 as id, 'Загрузка XLSM-файла с формы экземпляра налоговой формы' as name, 'Размер файла (Кбайт)' as limit_kind from dual union all 
+  select 19 as id, 'Проверка налоговой формы' as name, 'Ячейки = строки * графы' as limit_kind from dual union all 
+  select 20 as id, 'Подготовка/утверждение/принятие налоговой формы' as name, 'Ячейки = строки * графы' as limit_kind from dual union all 
+  select 21 as id, 'Обновление формы' as name, 'Ячейки = строки * графы' as limit_kind from dual union all 
+  select 22 as id, 'Формирование специфического отчета налоговой формы' as name, 'Ячейки = строки * графы' as limit_kind from dual union all 
+  select 23 as id, 'Формирование отчета справочника в XLSM-формате' as name, 'Ячейки = строки * столбцы' as limit_kind from dual union all 
+  select 24 as id, 'Формирование отчета справочника в CSV-формате ' as name, 'Ячейки = строки * столбцы' as limit_kind from dual union all 
+  select 25 as id, 'Формирование специфического отчета справочника' as name, 'Ячейки = строки * столбцы' as limit_kind from dual) t
+on (att.id = t.id)  
+when matched then
+     update set att.name = t.name, att.limit_kind = t.limit_kind where att.name <> t.name or att.limit_kind <> t.limit_kind;
+
+dbms_output.put_line('ASYNC_TASK_TYPE: '||sql%rowcount||' rows merged.');          
+end;
+/     
+commit;
 -----------------------------------------------------------------------------------------
 
 COMMIT;

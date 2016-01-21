@@ -104,13 +104,13 @@ def allColumns = ['fix', 'rowNumber', 'name', 'dependence', 'iksr', 'countryName
 
 // Редактируемые атрибуты
 @Field
-def editableColumns = ['name', 'dependence', 'docNumber', 'docDate', 'dealNumber', 'dealDate', 'dealFocus',
+def editableColumns = ['name', 'docNumber', 'docDate', 'dealNumber', 'dealDate', 'dealFocus',
                        'signPhis', 'metalName', 'countryCodeNumeric', 'regionCode', 'city', 'locality', 'countryCodeNumeric2',
                        'region2', 'city2', 'locality2', 'deliveryCode', 'incomeSum', 'outcomeSum', 'dealDoneDate']
 
 // Автозаполняемые атрибуты
 @Field
-def autoFillColumns = ['rowNumber', 'iksr', 'countryName', 'countryCode', 'foreignDeal', 'count', 'price', 'total']
+def autoFillColumns = ['rowNumber', 'dependence', 'iksr', 'countryName', 'countryCode', 'foreignDeal', 'count', 'price', 'total']
 
 // Группируемые атрибуты
 @Field
@@ -366,6 +366,7 @@ void calc() {
     deleteAllAliased(dataRows)
 
     // Сортировка
+    refBookService.dataRowsDereference(logger, dataRows, formData.getFormColumns().findAll { groupColumns.contains(it.getAlias())})
     sortRows(dataRows, groupColumns)
 
     for (row in dataRows) {
@@ -401,7 +402,7 @@ void calc() {
     def total = calcTotalRow(dataRows)
     dataRows.add(total)
 
-    sortFormDataRows(false)
+    updateIndexes(dataRows)
 }
 
 // Расчет подитогового значения
