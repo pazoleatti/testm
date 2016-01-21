@@ -446,28 +446,9 @@ public class DepartmentServiceImplTest {
 
         // Контролер НС
         taUser.getRoles().remove(0);
-
-        for (int aDepartmentID : departmentID) {
-            taUser.setDepartmentId(aDepartmentID);
-            result = departmentService.getDestinationDepartments(taUser);
-
-            switch (aDepartmentID) {
-                case 0:
-                    Assert.assertEquals(2, result.size());
-                    Assert.assertTrue(result.containsAll(asList(root, departmentGOSB31)));
-                    break;
-                case 2:
-                    Assert.assertEquals(2, result.size());
-                    Assert.assertTrue(result.containsAll(asList(departmentTB2, departmentGOSB31)));
-                    break;
-                case 3:
-                case 31:
-                case 311:
-                    Assert.assertEquals(3, result.size());
-                    Assert.assertTrue(result.containsAll(asList(departmentTB3, departmentGOSB31, departmentOSB311)));
-                    break;
-            }
-        }
+        result = departmentService.getDestinationDepartments(taUser);
+        Assert.assertEquals(5, result.size());
+        Assert.assertTrue(result.containsAll(asList(root, departmentTB2, departmentTB3, departmentGOSB31, departmentOSB311)));
 
         // Контролер
         taUser.getRoles().remove(0);

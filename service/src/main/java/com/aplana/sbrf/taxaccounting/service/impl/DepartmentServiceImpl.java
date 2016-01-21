@@ -291,17 +291,9 @@ public class DepartmentServiceImpl implements DepartmentService {
     @Override
     public List<Department> getDestinationDepartments(TAUser tAUser) {
         List<Department> retList = new ArrayList<Department>();
-        if (tAUser.hasRole(TARole.ROLE_CONTROL_UNP)) {
+        if (tAUser.hasRole(TARole.ROLE_CONTROL_UNP) || tAUser.hasRole(TARole.ROLE_CONTROL_NS)) {
             // все подразделения из справочника подразделений
             retList.addAll(departmentDao.listDepartments());
-        } else if (tAUser.hasRole(TARole.ROLE_CONTROL_NS)) {
-            retList.addAll(departmentDao.getDepartmentTBChildren(tAUser.getDepartmentId()));
-            if (retList.isEmpty()) {
-                // Если такого подразделения (с типом 2) не найдено, то включить в выборку только подразделение пользователя.
-                retList.add(departmentDao.getDepartment(tAUser.getDepartmentId()));
-            }
-            // подразделения с типом 3
-            retList.addAll(departmentDao.getDepartmentsByType(DepartmentType.CSKO_PCP.getCode()));
         }
 
         // Результат выборки должен содержать только уникальные подразделения
