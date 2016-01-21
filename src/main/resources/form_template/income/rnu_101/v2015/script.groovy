@@ -235,14 +235,16 @@ void logicCheck() {
 
         // Проверка наличия коэффициента
         if (row.sum1 != null && row.sum1 > 0 && row.incomeRate == null) {
-            def msg = row.getCell('incomeRate').column.name
-            logger.error("Строка $rowNum: Значение графы «$msg» должно быть заполнено!")
+            def msg1 = row.getCell('incomeRate').column.name
+            def msg2 = row.getCell('sum1').column.name
+            logger.error("Строка $rowNum: Значение графы «$msg1» должно быть заполнено (т.к. значение графы «$msg2» больше «0»)!")
         }
 
         // Проверка коэффициента
         if (row.sum1 != null && row.sum1 == 0 && row.incomeRate != null) {
-            def msg = row.getCell('incomeRate').column.name
-            logger.error("Строка $rowNum: Значение графы «$msg» должно быть не заполнено!")
+            def msg1 = row.getCell('incomeRate').column.name
+            def msg2 = row.getCell('sum1').column.name
+            logger.error("Строка $rowNum: Значение графы «$msg1» должно быть не заполнено (т.к. значение графы «$msg2» равно «0»)!")
         }
 
         // Проверка положительной суммы дохода
