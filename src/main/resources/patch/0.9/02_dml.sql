@@ -18,16 +18,39 @@ INSERT ALL
 	INTO ref_book_value (record_id, attribute_id, string_value) VALUES (seq_ref_book_record.currval, 44, 'Поставочная сделка')
 SELECT * FROM dual;
 
-dbms_output.put_line(SQL%ROWCOUNT || ' rows inserted (SBRFACCTAX-14070)');
+dbms_output.put_line('INFO: '||SQL%ROWCOUNT || ' rows inserted (SBRFACCTAX-14070)');
 
 EXCEPTION
 	WHEN OTHERS THEN
-		dbms_output.put_line('Insert failed (' || SQLERRM || ' ). Block will be rollbacked. (SBRFACCTAX-14070)');
+		dbms_output.put_line('ERROR: Rollback block due to '||SQLERRM||' (SBRFACCTAX-14070)');
 		ROLLBACK;
 END;
 /	
 COMMIT;
 
+-----------------------------------------------------------------------------------------
+--http://jira.aplana.com/browse/SBRFACCTAX-14216: 0.9 ТЦО. Добавить значения "Иные основания", "1б прямое" в спр. Критерии взаимозависимости
+BEGIN
+insert all
+	into ref_book_record (id, record_id, ref_book_id, version, status) values (seq_ref_book_record.nextval, 17, 512, to_date('01.01.2008', 'DD.MM.YYYY'), 0)
+	into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 5121, '1б прямое')
+	into ref_book_value (record_id, attribute_id, string_value) values (seq_ref_book_record.currval, 5122, 'Банк и организация в случае, если Банк прямо участвует в капитале данной организации, и доля такого участия составляет более 25%')
+select * from dual;	
+dbms_output.put_line('INFO: '||SQL%ROWCOUNT || ' rows inserted (SBRFACCTAX-14216)');
+
+update ref_book_value set string_value = 'Иные основания' where attribute_id = 5121 and string_value = '12';
+dbms_output.put_line('INFO: '||SQL%ROWCOUNT || ' rows updated (SBRFACCTAX-14216)');
+
+EXCEPTION
+	WHEN OTHERS THEN
+		dbms_output.put_line('ERROR: Rollback block due to '||SQLERRM||' (SBRFACCTAX-14216)');
+		ROLLBACK;
+END;
+/
+
+COMMIT;
+
+-----------------------------------------------------------------------------------------
 --http://jira.aplana.com/browse/SBRFACCTAX-14314: Переименовать названия асинхронных задач
 begin
 merge into async_task_type att
@@ -57,7 +80,7 @@ on (att.id = t.id)
 when matched then
      update set att.name = t.name, att.limit_kind = t.limit_kind where att.name <> t.name or att.limit_kind <> t.limit_kind;
 
-dbms_output.put_line('ASYNC_TASK_TYPE: '||sql%rowcount||' rows merged.');          
+dbms_output.put_line('INFO: Rename async_task_type''s description: '||sql%rowcount||' rows merged.');          
 end;
 /     
 commit;
