@@ -1,0 +1,303 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<formTemplateContent>
+    <fixedRows>false</fixedRows>
+    <monthly>false</monthly>
+    <comparative>false</comparative>
+    <accruing>false</accruing>
+    <updating>false</updating>
+    <name>РНУ 116. Регистр налогового учёта доходов и расходов, возникающих в связи с применением в конверсионных сделках с Взаимозависимыми лицами и резидентами оффшорных зон курса, не соответствующих рыночному уровню</name>
+    <fullName>РНУ 116. Регистр налогового учёта доходов и расходов, возникающих в связи с применением в конверсионных сделках с Взаимозависимыми лицами и резидентами оффшорных зон курса, не соответствующих рыночному уровню</fullName>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
+        <alias>fix</alias>
+        <checking>false</checking>
+        <columnType>STRING</columnType>
+        <name>fix</name>
+        <order>1</order>
+        <width>0</width>
+        <maxLength>100</maxLength>
+        <prevLength>0</prevLength>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="autoNumerationColumn">
+        <alias>rowNumber</alias>
+        <checking>false</checking>
+        <columnType>AUTO</columnType>
+        <name>№ пп</name>
+        <order>2</order>
+        <width>4</width>
+        <numerationType>SERIAL</numerationType>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
+        <alias>dealNum</alias>
+        <checking>false</checking>
+        <columnType>STRING</columnType>
+        <name>Номер сделки</name>
+        <order>3</order>
+        <width>10</width>
+        <maxLength>128</maxLength>
+        <prevLength>0</prevLength>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
+        <alias>dealType</alias>
+        <checking>false</checking>
+        <columnType>REFBOOK</columnType>
+        <name>Вид сделки</name>
+        <order>4</order>
+        <width>10</width>
+        <hierarchical>false</hierarchical>
+        <nameAttributeId>834</nameAttributeId>
+        <refBookAttributeId>834</refBookAttributeId>
+        <searchEnabled>true</searchEnabled>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="dateColumn">
+        <alias>dealDate</alias>
+        <checking>false</checking>
+        <columnType>DATE</columnType>
+        <name>Дата заключения сделки</name>
+        <order>5</order>
+        <width>6</width>
+        <formatId>0</formatId>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="dateColumn">
+        <alias>dealDoneDate</alias>
+        <checking>false</checking>
+        <columnType>DATE</columnType>
+        <name>Дата исполнения сделки</name>
+        <order>6</order>
+        <width>6</width>
+        <formatId>0</formatId>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="referenceColumn">
+        <alias>iksr</alias>
+        <checking>false</checking>
+        <columnType>REFERENCE</columnType>
+        <name>ИНН / код налогоплательщика в стране регистрации (инкорпорации) или его аналог</name>
+        <order>7</order>
+        <width>7</width>
+        <parentAlias>name</parentAlias>
+        <refBookAttributeId>5218</refBookAttributeId>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="referenceColumn">
+        <alias>countryName</alias>
+        <checking>false</checking>
+        <columnType>REFERENCE</columnType>
+        <name>Страна местоположения взаимозависимого лица (резидента оффшорной зоны)</name>
+        <order>8</order>
+        <width>8</width>
+        <parentAlias>name</parentAlias>
+        <refBookAttributeId>5204</refBookAttributeId>
+        <refBookAttributeId2>54</refBookAttributeId2>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
+        <alias>name</alias>
+        <checking>false</checking>
+        <columnType>REFBOOK</columnType>
+        <name>Контрагент</name>
+        <order>9</order>
+        <width>10</width>
+        <hierarchical>false</hierarchical>
+        <nameAttributeId>5201</nameAttributeId>
+        <refBookAttributeId>5201</refBookAttributeId>
+        <searchEnabled>true</searchEnabled>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
+        <alias>dealFocus</alias>
+        <checking>false</checking>
+        <columnType>REFBOOK</columnType>
+        <name>Тип сделки</name>
+        <order>10</order>
+        <width>10</width>
+        <hierarchical>false</hierarchical>
+        <nameAttributeId>46</nameAttributeId>
+        <refBookAttributeId>46</refBookAttributeId>
+        <searchEnabled>true</searchEnabled>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
+        <alias>reqCurCode</alias>
+        <checking>false</checking>
+        <columnType>REFBOOK</columnType>
+        <name>Код валюты по сделке приобретения (требования)</name>
+        <order>11</order>
+        <width>5</width>
+        <hierarchical>false</hierarchical>
+        <nameAttributeId>40</nameAttributeId>
+        <refBookAttributeId>40</refBookAttributeId>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>reqVolume</alias>
+        <checking>false</checking>
+        <columnType>NUMBER</columnType>
+        <name>Объем покупаемой валюты</name>
+        <order>12</order>
+        <width>11</width>
+        <maxLength>17</maxLength>
+        <precision>2</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
+        <alias>guarCurCode</alias>
+        <checking>false</checking>
+        <columnType>REFBOOK</columnType>
+        <name>Код валюты по сделке продажи (обязательства)</name>
+        <order>13</order>
+        <width>5</width>
+        <hierarchical>false</hierarchical>
+        <nameAttributeId>40</nameAttributeId>
+        <refBookAttributeId>40</refBookAttributeId>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>guarVolume</alias>
+        <checking>false</checking>
+        <columnType>NUMBER</columnType>
+        <name>Объем продаваемой валюты</name>
+        <order>14</order>
+        <width>11</width>
+        <maxLength>17</maxLength>
+        <precision>2</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>price</alias>
+        <checking>false</checking>
+        <columnType>NUMBER</columnType>
+        <name>Курс сделки</name>
+        <order>15</order>
+        <width>11</width>
+        <maxLength>19</maxLength>
+        <precision>5</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>reqCourse</alias>
+        <checking>false</checking>
+        <name>Курс Банка России на дату исполнения (досрочного исполнения) сделки, руб. В отношении требования</name>
+        <order>16</order>
+        <width>11</width>
+        <maxLength>19</maxLength>
+        <precision>4</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>guarCourse</alias>
+        <checking>false</checking>
+        <name>Курс Банка России на дату исполнения (досрочного исполнения) сделки, руб.. В отношении обязательства</name>
+        <order>17</order>
+        <width>11</width>
+        <maxLength>19</maxLength>
+        <precision>4</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>reqSum</alias>
+        <checking>false</checking>
+        <columnType>NUMBER</columnType>
+        <name>Требования (обязательства) по сделке, руб. Требования</name>
+        <order>18</order>
+        <width>11</width>
+        <maxLength>17</maxLength>
+        <precision>2</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>guarSum</alias>
+        <checking>false</checking>
+        <columnType>NUMBER</columnType>
+        <name>Требования (обязательства) по сделке, руб. Обязательства</name>
+        <order>19</order>
+        <width>11</width>
+        <maxLength>17</maxLength>
+        <precision>2</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>incomeSum</alias>
+        <checking>false</checking>
+        <columnType>NUMBER</columnType>
+        <name>Доходы (расходы) учитываемые в целях налога на прибыль по сделке, руб. Доходы</name>
+        <order>20</order>
+        <width>11</width>
+        <maxLength>17</maxLength>
+        <precision>2</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>outcomeSum</alias>
+        <checking>false</checking>
+        <columnType>NUMBER</columnType>
+        <name>Доходы (расходы) учитываемые в целях налога на прибыль по сделке, руб. Расходы</name>
+        <order>21</order>
+        <width>11</width>
+        <maxLength>17</maxLength>
+        <precision>2</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>marketPrice</alias>
+        <checking>false</checking>
+        <columnType>NUMBER</columnType>
+        <name>Рыночная цена сделки</name>
+        <order>22</order>
+        <width>11</width>
+        <maxLength>19</maxLength>
+        <precision>5</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>incomeDelta</alias>
+        <checking>false</checking>
+        <columnType>NUMBER</columnType>
+        <name>Отклонения по доходам, в руб.</name>
+        <order>23</order>
+        <width>11</width>
+        <maxLength>17</maxLength>
+        <precision>2</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>outcomeDelta</alias>
+        <checking>false</checking>
+        <columnType>NUMBER</columnType>
+        <name>Отклонения по расходам, в руб.</name>
+        <order>24</order>
+        <width>11</width>
+        <maxLength>17</maxLength>
+        <precision>2</precision>
+    </columns>
+    <styles>
+        <alias>Контрольные суммы</alias>
+        <backColor>LIGHT_BROWN</backColor>
+        <bold>true</bold>
+        <fontColor>BLACK</fontColor>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Корректировка-изменено</alias>
+        <backColor>WHITE</backColor>
+        <bold>true</bold>
+        <fontColor>RED</fontColor>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Корректировка-без изменений</alias>
+        <backColor>GREY</backColor>
+        <bold>false</bold>
+        <fontColor>BLACK</fontColor>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Корректировка-добавлено</alias>
+        <backColor>PALE_GREEN</backColor>
+        <bold>false</bold>
+        <fontColor>BLACK</fontColor>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Корректировка-удалено</alias>
+        <backColor>LIGHT_CORAL</backColor>
+        <bold>false</bold>
+        <fontColor>BLACK</fontColor>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Редактируемая</alias>
+        <backColor>LIGHT_BLUE</backColor>
+        <bold>false</bold>
+        <fontColor>BLACK</fontColor>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Автозаполняемая</alias>
+        <backColor>WHITE</backColor>
+        <bold>true</bold>
+        <fontColor>DARK_GREEN</fontColor>
+        <italic>false</italic>
+    </styles>
+</formTemplateContent>
