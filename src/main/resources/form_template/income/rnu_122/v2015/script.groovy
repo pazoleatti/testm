@@ -229,11 +229,11 @@ void logicCheck() {
             logger.error("Строка $rowNum: Значение графы «$msg2» должно быть равно значению графы «$msg1»!")
         }
         if (row.sum4 != null && calcFlag18(row) && row.sum4 != calc19(row)) {
-            def msg8 = row.getCell('tradePay').column.name
-            def msg12 = row.getCell('sum4').column.name
-            def msg13 = row.getCell('sum4').column.name
-            def msg14 = row.getCell('sum4').column.name
-            def msg18 = row.getCell('sum4').column.name
+            def msg8 = row.getCell('sum1').column.name
+            def msg12 = row.getCell('startDate').column.name
+            def msg13 = row.getCell('endDate').column.name
+            def msg14 = row.getCell('base').column.name
+            def msg18 = row.getCell('tradePay').column.name
             def msg19 = row.getCell('sum4').column.name
             logger.error("Строка $rowNum: Значение графы «$msg19» должно быть равно значению выражения «$msg8»*«$msg18»*(«$msg13»-«$msg12»+1)/«$msg14»")
         }
