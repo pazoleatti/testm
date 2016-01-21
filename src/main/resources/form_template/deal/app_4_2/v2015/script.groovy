@@ -595,7 +595,11 @@ def calc5or11(def record520, def sourceAllDataRowsMap, def isCalc5) {
                     case 806 : // 6.6
                     case 819 : // 6.12
                         if (row.incomeSum && row.outcomeSum) {
-                            result += (isCalc5 ? row.incomeSum - row.outcomeSum : row.outcomeSum - row.incomeSum)
+                            if (isCalc5 && row.incomeSum >= row.outcomeSum) {
+                                result += row.incomeSum - row.outcomeSum
+                            } else if (!isCalc5 && row.incomeSum <= row.outcomeSum) {
+                                result += row.outcomeSum - row.incomeSum
+                            }
                         } else {
                             result += ((isCalc5 ? row.incomeSum : row.outcomeSum) ?: 0)
                         }
