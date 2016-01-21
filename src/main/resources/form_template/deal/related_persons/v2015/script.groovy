@@ -686,10 +686,10 @@ def getPeriodCode(def date) {
     def record8 = record8s.find { it?.CALENDAR_START_DATE?.value <= tmpDate && tmpDate <= it?.END_DATE?.value }
     def periodCode = record8?.CODE?.value
 
-    // если не нашлось кода в справочике
+    // если не нашлось кода в справочнике
     if (!periodCode) {
         Calendar c = Calendar.getInstance();
-        c.setTime(version)
+        c.setTime(date)
         def month = c.get(Calendar.MONTH)
         if (month < 4) {
             periodCode = '21'

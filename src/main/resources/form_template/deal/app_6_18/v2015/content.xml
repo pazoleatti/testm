@@ -77,7 +77,7 @@
         <columnType>REFERENCE</columnType>
         <name>Код страны регистрации по классификатору ОКСМ</name>
         <order>7</order>
-        <width>5</width>
+        <width>7</width>
         <parentAlias>name</parentAlias>
         <refBookAttributeId>5204</refBookAttributeId>
         <refBookAttributeId2>50</refBookAttributeId2>
@@ -208,7 +208,7 @@
         <columnType>STRING</columnType>
         <name>Место отправки (погрузки) драгоценного металла в соответствии с товаросопроводительными документами. Населенный пункт (село, поселок и т.д.)</name>
         <order>19</order>
-        <width>5</width>
+        <width>6</width>
         <maxLength>50</maxLength>
         <prevLength>0</prevLength>
     </columns>
@@ -252,7 +252,7 @@
         <columnType>STRING</columnType>
         <name>Место совершения сделки (адрес места доставки /разгрузки драгоценного металла). Населенный пункт (село, поселок и т.д.)</name>
         <order>23</order>
-        <width>5</width>
+        <width>6</width>
         <maxLength>50</maxLength>
         <prevLength>0</prevLength>
     </columns>
@@ -294,7 +294,7 @@
         <columnType>NUMBER</columnType>
         <name>Сумма расходов Банка по данным бухгалтерского учета, руб.</name>
         <order>27</order>
-        <width>8</width>
+        <width>11</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>
@@ -302,9 +302,9 @@
         <alias>price</alias>
         <checking>false</checking>
         <columnType>NUMBER</columnType>
-        <name>Цена (тариф) за единицу измерения без учета НДС, акцизов и пошлин, руб.</name>
+        <name>Цена (тариф) за единицу измерения без учета НДС, акцизов и пошлины, руб.</name>
         <order>28</order>
-        <width>8</width>
+        <width>11</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>
@@ -312,9 +312,9 @@
         <alias>total</alias>
         <checking>false</checking>
         <columnType>NUMBER</columnType>
-        <name>Итого стоимость без учета НДС, акцизов и пошлин, руб.</name>
+        <name>Итого стоимость без учета НДС, акцизов и пошлины, руб.</name>
         <order>29</order>
-        <width>8</width>
+        <width>11</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>
