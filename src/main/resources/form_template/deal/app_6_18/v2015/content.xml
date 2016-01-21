@@ -294,7 +294,7 @@
         <columnType>NUMBER</columnType>
         <name>Сумма расходов Банка по данным бухгалтерского учета, руб.</name>
         <order>27</order>
-        <width>8</width>
+        <width>11</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>
@@ -304,7 +304,7 @@
         <columnType>NUMBER</columnType>
         <name>Цена (тариф) за единицу измерения без учета НДС, акцизов и пошлины, руб.</name>
         <order>28</order>
-        <width>8</width>
+        <width>11</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>
@@ -314,7 +314,7 @@
         <columnType>NUMBER</columnType>
         <name>Итого стоимость без учета НДС, акцизов и пошлины, руб.</name>
         <order>29</order>
-        <width>8</width>
+        <width>11</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
     </columns>
