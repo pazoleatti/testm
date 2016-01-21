@@ -264,7 +264,7 @@ void logicCheck() {
         }
 
         // 8. Проверка количества
-        if (row.count != 1) {
+        if (row.count != null && row.count != 1) {
             rowError(logger, row, "Строка $rowNum: Графа «${getColumnName(row, 'count')}» должна быть заполнена значением «1»!")
         }
 
@@ -292,7 +292,7 @@ void logicCheck() {
             // 10 Проверка цены и стоимости
             ['price', 'total'].each {
                 if (row[it] != sum) {
-                    rowError(logger, row, "Строка $rowNum: Значение графы «${getColumnName(row, it)}» должно быть равно значению графы ${getColumnName(row, alias)}!")
+                    rowError(logger, row, "Строка $rowNum: Значение графы «${getColumnName(row, it)}» должно быть равно значению графы «${getColumnName(row, alias)}»!")
                 }
             }
         }
