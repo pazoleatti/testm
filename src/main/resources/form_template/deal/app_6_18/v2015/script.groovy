@@ -274,7 +274,7 @@ void logicCheck() {
         // 9. Проверка суммы дохода/расхода
         // 9a.	Должна быть заполнена одна из граф 25 или 26.
         if ((row.incomeSum == null && row.outcomeSum == null) || (row.incomeSum != null && row.outcomeSum != null)) {
-            rowError(logger, row, "Строка $rowNum: Графа «$msgOut» должна быть заполнена, если не заполнена графа «$msgIn»!")
+            rowError(logger, row, "Строка $rowNum: Должна быть заполнена одна из граф «$msgIn» или «$msgOut»!")
         } else {
             // 9b.	Если заполнена одна из граф 25 или 26, то значение заполненной графы 25/26 должно быть больше или равно «0»
             def sum
