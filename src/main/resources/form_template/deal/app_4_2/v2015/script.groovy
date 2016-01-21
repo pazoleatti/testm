@@ -594,15 +594,7 @@ def calc5or11(def record520, def sourceAllDataRowsMap, def isCalc5) {
                 switch (formTypeId) {
                     case 806 : // 6.6
                     case 819 : // 6.12
-                        if (row.incomeSum && row.outcomeSum) {
-                            if (isCalc5 && row.incomeSum >= row.outcomeSum) {
-                                result += row.incomeSum - row.outcomeSum
-                            } else if (!isCalc5 && row.incomeSum <= row.outcomeSum) {
-                                result += row.outcomeSum - row.incomeSum
-                            }
-                        } else {
-                            result += ((isCalc5 ? row.incomeSum : row.outcomeSum) ?: 0)
-                        }
+                        result += ((isCalc5 ? row.incomeSum : row.outcomeSum) ?: 0)
                         break
                     case 827 : // 6.11
                         def transactionType = getRefBookValue(16L, row.transactionType)?.CODE?.value
@@ -852,7 +844,7 @@ def calc10or16(def record520, def sourceAllDataRowsMap, def isCalc10) {
                         }
                         break
                     case 829 : // РНУ-114
-                        if (!isCalc10) {
+                        if (isCalc10) {
                             result += (row.sum1 ?: 0)
                         }
                         break

@@ -488,7 +488,7 @@ def calc9or15(def record520, def sourceAllDataRowsMap, def isCalc9) {
                         }
                         break
                     case 829 : // РНУ-114
-                        if (!isCalc9) {
+                        if (isCalc9) {
                             result += (row.sum1 ?: 0)
                         }
                         break
