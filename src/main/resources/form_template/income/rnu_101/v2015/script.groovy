@@ -317,7 +317,7 @@ void calc() {
     }
 
     // Сортировка
-    refBookService.dataRowsDereference(logger, dataRows, formData.getFormColumns().findAll { groupColumns.contains(it.getName())})
+    refBookService.dataRowsDereference(logger, dataRows, formData.getFormColumns().findAll { groupColumns.contains(it.getAlias())})
     sortRows(dataRows, groupColumns)
 
     // Добавление подитогов
@@ -332,7 +332,7 @@ void calc() {
     def total = calcTotalRow(dataRows)
     dataRows.add(total)
 
-    sortFormDataRows(false)
+    updateIndexes(dataRows)
 }
 
 def calc15(def row) {

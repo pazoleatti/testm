@@ -246,7 +246,7 @@ void calc() {
     deleteAllAliased(dataRows)
 
     // Сортировка
-    refBookService.dataRowsDereference(logger, dataRows, formData.getFormColumns().findAll { groupColumns.contains(it.getName())})
+    refBookService.dataRowsDereference(logger, dataRows, formData.getFormColumns().findAll { groupColumns.contains(it.getAlias())})
     sortRows(dataRows, groupColumns)
 
     for (row in dataRows) {
@@ -267,7 +267,7 @@ void calc() {
     def total = calcTotalRow(dataRows)
     dataRows.add(total)
 
-    sortFormDataRows(false)
+    updateIndexes(dataRows)
 }
 
 def calcTotalRow(def dataRows) {
