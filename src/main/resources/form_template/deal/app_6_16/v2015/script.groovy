@@ -209,7 +209,7 @@ void logicCheck() {
         }
 
         // Проверка корректности даты совершения сделки
-        checkDatePeriod(logger, row, 'dealDoneDate', 'docDate', getReportPeriodEndDate(), true)
+        checkDatePeriod(logger, row, 'dealDoneDate', 'dealDate', getReportPeriodEndDate(), true)
 
     }
 
