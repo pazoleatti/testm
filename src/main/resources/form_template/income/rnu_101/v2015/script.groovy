@@ -317,6 +317,7 @@ void calc() {
     }
 
     // Сортировка
+    refBookService.dataRowsDereference(logger, dataRows, formData.getFormColumns().findAll { groupColumns.contains(it.getName())})
     sortRows(dataRows, groupColumns)
 
     // Добавление подитогов

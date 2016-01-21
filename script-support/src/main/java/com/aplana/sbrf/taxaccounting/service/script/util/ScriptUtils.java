@@ -767,8 +767,9 @@ public final class ScriptUtils {
                 }
 
                 for (String alias : groupColumns) {
-                    Object v1 = o1.getCell(alias).getValue();
-                    Object v2 = o2.getCell(alias).getValue();
+                    boolean isRefBook = Arrays.asList(ColumnType.REFBOOK, ColumnType.REFERENCE).contains(o1.getCell(alias).getColumn().getColumnType());
+                    Object v1 = isRefBook ? o1.getCell(alias).getRefBookDereference() : o1.getCell(alias).getValue();
+                    Object v2 = isRefBook ? o2.getCell(alias).getRefBookDereference() : o2.getCell(alias).getValue();
                     if (v1 == null && v2 == null) {
                         continue;
                     }
