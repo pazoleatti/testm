@@ -49,7 +49,7 @@ public class RefBookAuditFieldList extends AbstractPermanentRefBook {
                 records.add(record);
             }
         } else {
-            for (AuditFieldList item : AuditFieldList.values()) {
+            for (AuditFieldList item : AuditFieldList.getSortedValues()) {
                 Long id = Long.valueOf(item.getId());
 
                 Map<String, RefBookValue> record = refBook.createRecord();
