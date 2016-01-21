@@ -121,7 +121,7 @@
         <alias>cost</alias>
         <checking>false</checking>
         <columnType>NUMBER</columnType>
-        <name>Итого стоимость без учета НДС, акцизов и пошлин, руб.</name>
+        <name>Итого стоимость без учета НДС, акцизов и пошлины, руб.</name>
         <order>12</order>
         <width>11</width>
         <maxLength>17</maxLength>

@@ -27,7 +27,7 @@
         <cell alias="dealDate" colSpan="1" rowSpan="1" value="Дата сделки"/>
         <cell alias="sum" colSpan="1" rowSpan="1" value="Сумма расходов Банка по данным бухгалтерского учета, руб."/>
         <cell alias="price" colSpan="1" rowSpan="1" value="Цена (тариф) за единицу измерения без учета НДС, акцизов и пошлины, руб."/>
-        <cell alias="cost" colSpan="1" rowSpan="1" value="Итого стоимость без учета НДС, акцизов и пошлин, руб."/>
+        <cell alias="cost" colSpan="1" rowSpan="1" value="Итого стоимость без учета НДС, акцизов и пошлины, руб."/>
         <cell alias="dealDoneDate" colSpan="1" rowSpan="1" value="Дата совершения сделки"/>
     </row>
     <row alias="">

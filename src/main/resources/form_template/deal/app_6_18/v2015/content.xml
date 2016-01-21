@@ -302,7 +302,7 @@
         <alias>price</alias>
         <checking>false</checking>
         <columnType>NUMBER</columnType>
-        <name>Цена (тариф) за единицу измерения без учета НДС, акцизов и пошлин, руб.</name>
+        <name>Цена (тариф) за единицу измерения без учета НДС, акцизов и пошлины, руб.</name>
         <order>28</order>
         <width>8</width>
         <maxLength>17</maxLength>
@@ -312,7 +312,7 @@
         <alias>total</alias>
         <checking>false</checking>
         <columnType>NUMBER</columnType>
-        <name>Итого стоимость без учета НДС, акцизов и пошлин, руб.</name>
+        <name>Итого стоимость без учета НДС, акцизов и пошлины, руб.</name>
         <order>29</order>
         <width>8</width>
         <maxLength>17</maxLength>
