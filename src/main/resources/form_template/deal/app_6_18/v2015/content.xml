@@ -208,7 +208,7 @@
         <columnType>STRING</columnType>
         <name>Место отправки (погрузки) драгоценного металла в соответствии с товаросопроводительными документами. Населенный пункт (село, поселок и т.д.)</name>
         <order>19</order>
-        <width>5</width>
+        <width>6</width>
         <maxLength>50</maxLength>
         <prevLength>0</prevLength>
     </columns>
@@ -252,7 +252,7 @@
         <columnType>STRING</columnType>
         <name>Место совершения сделки (адрес места доставки /разгрузки драгоценного металла). Населенный пункт (село, поселок и т.д.)</name>
         <order>23</order>
-        <width>5</width>
+        <width>6</width>
         <maxLength>50</maxLength>
         <prevLength>0</prevLength>
     </columns>
