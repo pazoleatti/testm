@@ -7,22 +7,12 @@
     <updating>false</updating>
     <name>6.16. Поставочные срочные сделки, базисным активом которых является иностранная валюта</name>
     <fullName>6.16. Отчет в отношении доходов и расходов ПАО Сбербанк по поставочным срочным сделкам, базисным активом которых является иностранная валюта</fullName>
-    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
-        <alias>fix</alias>
-        <checking>false</checking>
-        <columnType>STRING</columnType>
-        <name>fix</name>
-        <order>1</order>
-        <width>0</width>
-        <maxLength>100</maxLength>
-        <prevLength>0</prevLength>
-    </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="autoNumerationColumn">
         <alias>rowNumber</alias>
         <checking>false</checking>
         <columnType>AUTO</columnType>
         <name>№ п/п</name>
-        <order>2</order>
+        <order>1</order>
         <width>4</width>
         <numerationType>SERIAL</numerationType>
     </columns>
@@ -31,7 +21,7 @@
         <checking>false</checking>
         <columnType>REFBOOK</columnType>
         <name>Полное наименование с указанием ОПФ</name>
-        <order>3</order>
+        <order>2</order>
         <width>10</width>
         <hierarchical>false</hierarchical>
         <nameAttributeId>5201</nameAttributeId>
@@ -43,7 +33,7 @@
         <checking>false</checking>
         <columnType>REFERENCE</columnType>
         <name>ИНН/ КИО</name>
-        <order>4</order>
+        <order>3</order>
         <width>7</width>
         <parentAlias>name</parentAlias>
         <refBookAttributeId>5218</refBookAttributeId>
@@ -53,7 +43,7 @@
         <checking>false</checking>
         <columnType>REFERENCE</columnType>
         <name>Наименование страны регистрации</name>
-        <order>5</order>
+        <order>4</order>
         <width>8</width>
         <parentAlias>name</parentAlias>
         <refBookAttributeId>5204</refBookAttributeId>
@@ -64,7 +54,7 @@
         <checking>false</checking>
         <columnType>REFERENCE</columnType>
         <name>Код страны регистрации по классификатору ОКСМ</name>
-        <order>6</order>
+        <order>5</order>
         <width>7</width>
         <parentAlias>name</parentAlias>
         <refBookAttributeId>5204</refBookAttributeId>
@@ -75,7 +65,7 @@
         <checking>false</checking>
         <columnType>STRING</columnType>
         <name>Номер договора</name>
-        <order>7</order>
+        <order>6</order>
         <width>5</width>
         <maxLength>128</maxLength>
         <prevLength>0</prevLength>
@@ -85,7 +75,7 @@
         <checking>false</checking>
         <columnType>DATE</columnType>
         <name>Дата договора</name>
-        <order>8</order>
+        <order>7</order>
         <width>6</width>
         <formatId>0</formatId>
     </columns>
@@ -94,7 +84,7 @@
         <checking>false</checking>
         <columnType>STRING</columnType>
         <name>Номер сделки</name>
-        <order>9</order>
+        <order>8</order>
         <width>5</width>
         <maxLength>500</maxLength>
         <prevLength>0</prevLength>
@@ -104,7 +94,7 @@
         <checking>false</checking>
         <columnType>DATE</columnType>
         <name>Дата заключения сделки</name>
-        <order>10</order>
+        <order>9</order>
         <width>6</width>
         <formatId>0</formatId>
     </columns>
@@ -113,7 +103,7 @@
         <checking>false</checking>
         <columnType>REFBOOK</columnType>
         <name>Вид срочной сделки</name>
-        <order>11</order>
+        <order>10</order>
         <width>10</width>
         <hierarchical>false</hierarchical>
         <nameAttributeId>831</nameAttributeId>
@@ -123,7 +113,7 @@
         <alias>currencyCode</alias>
         <checking>false</checking>
         <name>Код валюты по сделке</name>
-        <order>12</order>
+        <order>11</order>
         <width>5</width>
         <hierarchical>false</hierarchical>
         <nameAttributeId>66</nameAttributeId>
@@ -133,7 +123,7 @@
         <alias>countryDealCode</alias>
         <checking>false</checking>
         <name>Код страны происхождения предмета сделки по классификатору ОКСМ</name>
-        <order>13</order>
+        <order>12</order>
         <width>7</width>
         <hierarchical>false</hierarchical>
         <nameAttributeId>53</nameAttributeId>
@@ -144,7 +134,7 @@
         <checking>false</checking>
         <columnType>NUMBER</columnType>
         <name>Сумма доходов Банка по данным бухгалтерского учета, руб.</name>
-        <order>14</order>
+        <order>13</order>
         <width>11</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
@@ -154,7 +144,7 @@
         <checking>false</checking>
         <columnType>NUMBER</columnType>
         <name>Сумма расходов Банка по данным бухгалтерского учета, руб.</name>
-        <order>15</order>
+        <order>14</order>
         <width>11</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
@@ -163,7 +153,7 @@
         <alias>price</alias>
         <checking>false</checking>
         <name>Цена (тариф) за единицу измерения, руб.</name>
-        <order>16</order>
+        <order>15</order>
         <width>11</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
@@ -173,7 +163,7 @@
         <checking>false</checking>
         <columnType>NUMBER</columnType>
         <name>Итого стоимость, руб.</name>
-        <order>17</order>
+        <order>16</order>
         <width>11</width>
         <maxLength>17</maxLength>
         <precision>2</precision>
@@ -182,7 +172,7 @@
         <alias>dealDoneDate</alias>
         <checking>false</checking>
         <name>Дата совершения сделки</name>
-        <order>18</order>
+        <order>17</order>
         <width>7</width>
         <formatId>0</formatId>
     </columns>

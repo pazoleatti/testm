@@ -320,9 +320,7 @@ public class App_6_6Test extends ScriptTestBase {
         testHelper.execute(FormDataEvent.IMPORT);
         List<String> aliases = Arrays.asList("docNumber", "docDate", "dealNumber", "dealDate", "date1", "date2",
                 "incomeSum", "outcomeSum", "priceFirstCurrency", "courseCB", "priceFirstRub", "dealDoneDate");
-        // ожидается 5 строк: 4 из файла + 1 итоговая строка
-        int expected = 4 + 1;
-        defaultCheckLoadData(aliases, expected);
+        defaultCheckLoadData(aliases, 4);
         checkLogger();
         // "name" , "dealsMode", "currencyCode"
         checkLoadData(testHelper.getDataRowHelper().getAll());
@@ -352,6 +350,8 @@ public class App_6_6Test extends ScriptTestBase {
         Assert.assertEquals(sdf.parse("31.12.2014"), dataRows.get(1).getCell("dealDoneDate").getDateValue());
         Assert.assertEquals(sdf.parse("31.12.2014"), dataRows.get(2).getCell("dealDoneDate").getDateValue());
         Assert.assertEquals(sdf.parse("31.12.2014"), dataRows.get(3).getCell("dealDoneDate").getDateValue());
+
+        Assert.assertEquals(4, dataRows.size());
     }
 }
 

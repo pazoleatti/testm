@@ -13,7 +13,6 @@ import groovy.transform.Field
  * @author Stanislav Yasinskiy
  */
 
-// графа    ( )    - fix
 // графа 1  (1)    - rowNumber            - № п/п
 // графа 2  (2)    - name                 - Полное наименование с указанием ОПФ
 // графа 3  (3)    - iksr                 - ИНН/КИО
@@ -84,7 +83,7 @@ def recordCache = [:]
 def refBookCache = [:]
 
 @Field
-def allColumns = ['fix', 'rowNumber', 'name', 'iksr', 'countryName', 'countryCode', 'docNumber',
+def allColumns = ['rowNumber', 'name', 'iksr', 'countryName', 'countryCode', 'docNumber',
         'docDate', 'dealNumber', 'dealDate', 'dealsMode', 'date1', 'date2', 'incomeSum', 'outcomeSum',
         'priceFirstCurrency', 'currencyCode', 'courseCB', 'priceFirstRub', 'dealDoneDate']
 
@@ -255,32 +254,17 @@ void logicCheck() {
             logger.error("Строка $rowNum: Значение графы «%s» должно быть не меньше значения графы «%s» и не больше 31.12.2099!", name12, name11)
         }
     }
-
-    // 12. Проверка итоговых значений по фиксированной строке «Итого»
-    if (dataRows.find { it.getAlias() == 'total' }) {
-        checkTotalSum(dataRows, totalColumns, logger, true)
-    }
 }
 
 // Алгоритмы заполнения полей формы
 void calc() {
     def dataRows = formDataService.getDataRowHelper(formData).allCached
-    if (dataRows.isEmpty()) {
-        return
-    }
-    // Удаление подитогов
-    deleteAllAliased(dataRows)
-
     for (row in dataRows) {
         // Расчет поля "Режим переговорных сделок"
         row.dealsMode = calc10(row.name)
         // Расчет поля "Дата совершения сделки"
         row.dealDoneDate = calc19(row.date2)
     }
-
-    // Общий итог
-    def total = calcTotalRow(dataRows)
-    dataRows.add(total)
 }
 
 def String calc10(def recordId) {
@@ -309,26 +293,13 @@ def Date calc19(Date date2) {
     return null
 }
 
-def calcTotalRow(def dataRows) {
-    def totalRow = (formDataEvent in [FormDataEvent.IMPORT, FormDataEvent.IMPORT_TRANSPORT_FILE]) ? formData.createStoreMessagingDataRow() : formData.createDataRow()
-    totalRow.setAlias('total')
-    totalRow.fix = 'Итого'
-    totalRow.getCell('fix').colSpan = 6
-    allColumns.each {
-        totalRow.getCell(it).setStyleAlias('Контрольные суммы')
-    }
-    calcTotalSum(dataRows, totalRow, totalColumns)
-    return totalRow
-}
-
 // Получение импортируемых данных
 void importData() {
     def tmpRow = formData.createDataRow()
-    int COLUMN_COUNT = 20
+    int COLUMN_COUNT = 19
     int HEADER_ROW_COUNT = 3
     String TABLE_START_VALUE = 'Общая информация о контрагенте - юридическом лице'
     String TABLE_END_VALUE = null
-    int INDEX_FOR_SKIP = 0
 
     def allValues = []      // значения формы
     def headerValues = []   // значения шапки
@@ -353,7 +324,6 @@ void importData() {
     def rowIndex = 0
     def rows = []
     def allValuesCount = allValues.size()
-    def totalRowFromFile = null
 
     // формирвание строк нф
     for (def i = 0; i < allValuesCount; i++) {
@@ -366,28 +336,12 @@ void importData() {
             break
         }
         rowIndex++
-        // Пропуск итоговых строк
-        if (rowValues[INDEX_FOR_SKIP] == "Итого") {
-            totalRowFromFile = getNewTotalFromXls(rowValues, colOffset, fileRowIndex, rowIndex)
-
-            allValues.remove(rowValues)
-            rowValues.clear()
-            continue
-        }
         // простая строка
         def newRow = getNewRowFromXls(rowValues, colOffset, fileRowIndex, rowIndex)
         rows.add(newRow)
         // освободить ненужные данные - иначе не хватит памяти
         allValues.remove(rowValues)
         rowValues.clear()
-    }
-
-    // сравнение итогов
-    def totalRow = calcTotalRow(rows)
-    rows.add(totalRow)
-    updateIndexes(rows)
-    if (totalRowFromFile) {
-        compareSimpleTotalValues(totalRow, totalRowFromFile, rows, totalColumns, formData, logger, false)
     }
 
     showMessages(rows, logger)
@@ -412,45 +366,45 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
     checkHeaderSize(headerRows[headerRows.size() - 1].size(), headerRows.size(), colCount, rowCount)
     def headerMapping = [
             ([(headerRows[0][0]) : 'Общая информация о контрагенте - юридическом лице']),
-            ([(headerRows[0][6]) : 'Сведения о сделке']),
-            ([(headerRows[1][1]) : getColumnName(tmpRow, 'rowNumber')]),
-            ([(headerRows[1][2]) : getColumnName(tmpRow, 'name')]),
-            ([(headerRows[1][3]) : getColumnName(tmpRow, 'iksr')]),
-            ([(headerRows[1][4]) : getColumnName(tmpRow, 'countryName')]),
-            ([(headerRows[1][5]) : getColumnName(tmpRow, 'countryCode')]),
-            ([(headerRows[1][6]) : getColumnName(tmpRow, 'docNumber')]),
-            ([(headerRows[1][7]) : getColumnName(tmpRow, 'docDate')]),
-            ([(headerRows[1][8]) : getColumnName(tmpRow, 'dealNumber')]),
-            ([(headerRows[1][9]) : getColumnName(tmpRow, 'dealDate')]),
-            ([(headerRows[1][10]): getColumnName(tmpRow, 'dealsMode')]),
-            ([(headerRows[1][11]): getColumnName(tmpRow, 'date1')]),
-            ([(headerRows[1][12]): getColumnName(tmpRow, 'date2')]),
-            ([(headerRows[1][13]): getColumnName(tmpRow, 'incomeSum')]),
-            ([(headerRows[1][14]): getColumnName(tmpRow, 'outcomeSum')]),
-            ([(headerRows[1][15]): getColumnName(tmpRow, 'priceFirstCurrency')]),
-            ([(headerRows[1][16]): getColumnName(tmpRow, 'currencyCode')]),
-            ([(headerRows[1][17]): getColumnName(tmpRow, 'courseCB')]),
-            ([(headerRows[1][18]): getColumnName(tmpRow, 'priceFirstRub')]),
-            ([(headerRows[1][19]): getColumnName(tmpRow, 'dealDoneDate')]),
-            ([(headerRows[2][1]) : 'гр. 1']),
-            ([(headerRows[2][2]) : 'гр. 2']),
-            ([(headerRows[2][3]) : 'гр. 3']),
-            ([(headerRows[2][4]) : 'гр. 4.1']),
-            ([(headerRows[2][5]) : 'гр. 4.2']),
-            ([(headerRows[2][6]) : 'гр. 5']),
-            ([(headerRows[2][7]) : 'гр. 6']),
-            ([(headerRows[2][8]) : 'гр. 7']),
-            ([(headerRows[2][9]) : 'гр. 8']),
-            ([(headerRows[2][10]): 'гр. 9']),
-            ([(headerRows[2][11]): 'гр. 10.1']),
-            ([(headerRows[2][12]): 'гр. 10.2']),
-            ([(headerRows[2][13]): 'гр. 11.1']),
-            ([(headerRows[2][14]): 'гр. 11.2']),
-            ([(headerRows[2][15]): 'гр. 12']),
-            ([(headerRows[2][16]): 'гр. 13']),
-            ([(headerRows[2][17]): 'гр. 14']),
-            ([(headerRows[2][18]): 'гр. 15']),
-            ([(headerRows[2][19]): 'гр. 16'])
+            ([(headerRows[0][5]) : 'Сведения о сделке']),
+            ([(headerRows[1][0]) : getColumnName(tmpRow, 'rowNumber')]),
+            ([(headerRows[1][1]) : getColumnName(tmpRow, 'name')]),
+            ([(headerRows[1][2]) : getColumnName(tmpRow, 'iksr')]),
+            ([(headerRows[1][3]) : getColumnName(tmpRow, 'countryName')]),
+            ([(headerRows[1][4]) : getColumnName(tmpRow, 'countryCode')]),
+            ([(headerRows[1][5]) : getColumnName(tmpRow, 'docNumber')]),
+            ([(headerRows[1][6]) : getColumnName(tmpRow, 'docDate')]),
+            ([(headerRows[1][7]) : getColumnName(tmpRow, 'dealNumber')]),
+            ([(headerRows[1][8]) : getColumnName(tmpRow, 'dealDate')]),
+            ([(headerRows[1][9]): getColumnName(tmpRow, 'dealsMode')]),
+            ([(headerRows[1][10]): getColumnName(tmpRow, 'date1')]),
+            ([(headerRows[1][11]): getColumnName(tmpRow, 'date2')]),
+            ([(headerRows[1][12]): getColumnName(tmpRow, 'incomeSum')]),
+            ([(headerRows[1][13]): getColumnName(tmpRow, 'outcomeSum')]),
+            ([(headerRows[1][14]): getColumnName(tmpRow, 'priceFirstCurrency')]),
+            ([(headerRows[1][15]): getColumnName(tmpRow, 'currencyCode')]),
+            ([(headerRows[1][16]): getColumnName(tmpRow, 'courseCB')]),
+            ([(headerRows[1][17]): getColumnName(tmpRow, 'priceFirstRub')]),
+            ([(headerRows[1][18]): getColumnName(tmpRow, 'dealDoneDate')]),
+            ([(headerRows[2][0]) : 'гр. 1']),
+            ([(headerRows[2][1]) : 'гр. 2']),
+            ([(headerRows[2][2]) : 'гр. 3']),
+            ([(headerRows[2][3]) : 'гр. 4.1']),
+            ([(headerRows[2][4]) : 'гр. 4.2']),
+            ([(headerRows[2][5]) : 'гр. 5']),
+            ([(headerRows[2][6]) : 'гр. 6']),
+            ([(headerRows[2][7]) : 'гр. 7']),
+            ([(headerRows[2][8]) : 'гр. 8']),
+            ([(headerRows[2][9]): 'гр. 9']),
+            ([(headerRows[2][10]): 'гр. 10.1']),
+            ([(headerRows[2][11]): 'гр. 10.2']),
+            ([(headerRows[2][12]): 'гр. 11.1']),
+            ([(headerRows[2][13]): 'гр. 11.2']),
+            ([(headerRows[2][14]): 'гр. 12']),
+            ([(headerRows[2][15]): 'гр. 13']),
+            ([(headerRows[2][16]): 'гр. 14']),
+            ([(headerRows[2][17]): 'гр. 15']),
+            ([(headerRows[2][18]): 'гр. 16'])
     ]
     checkHeaderEquals(headerMapping, logger)
 }
@@ -475,11 +429,11 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
         newRow.getCell(it).setStyleAlias('Автозаполняемая')
     }
     def String iksrName = getColumnName(newRow, 'iksr')
-    def nameFromFile = values[2]
+    def nameFromFile = values[1]
 
-    def int colIndex = 2
+    def int colIndex = 1
 
-    def recordId = getTcoRecordId(nameFromFile, values[3], iksrName, fileRowIndex, colIndex, getReportPeriodEndDate(), false, logger, refBookFactory, recordCache)
+    def recordId = getTcoRecordId(nameFromFile, values[2], iksrName, fileRowIndex, colIndex, getReportPeriodEndDate(), false, logger, refBookFactory, recordCache)
     def map = getRefBookValue(520, recordId)
 
     // графа 2
@@ -567,35 +521,11 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
     return newRow
 }
 
-/**
- * Получить итоговую строку нф по значениям из экселя.
- *
- * @param values список строк со значениями
- * @param colOffset отступ в колонках
- * @param fileRowIndex номер строки в тф
- * @param rowIndex строка в нф
- */
-def getNewTotalFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) {
-    def newRow = formData.createStoreMessagingDataRow()
-    newRow.setIndex(rowIndex)
-    newRow.setImportIndex(fileRowIndex)
-
-    // графа 13
-    def colIndex = 13
-    newRow.incomeSum = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
-
-    // графа 14
-    colIndex = 14
-    newRow.outcomeSum = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
-
-    return newRow
-}
-
 // Сортировка групп и строк
 void sortFormDataRows(def saveInDB = true) {
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
-    sortRows(refBookService, logger, dataRows, null, dataRows.find { it.getAlias() == 'total' }, null)
+    sortRows(refBookService, logger, dataRows, null, null, null)
     if (saveInDB) {
         dataRowHelper.saveSort()
     } else {
