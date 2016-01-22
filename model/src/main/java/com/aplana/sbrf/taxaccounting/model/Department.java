@@ -227,16 +227,8 @@ public class Department implements Serializable {
 	public int hashCode() {
 		int result = id;
 		result = 31 * result + (name != null ? name.hashCode() : 0);
-		result = 31 * result + (shortName != null ? shortName.hashCode() : 0);
-		result = 31 * result + (parentId != null ? parentId.hashCode() : 0);
 		result = 31 * result + (type != null ? type.hashCode() : 0);
-		result = 31 * result + (tbIndex != null ? tbIndex.hashCode() : 0);
-		result = 31 * result + (sbrfCode != null ? sbrfCode.hashCode() : 0);
-		result = 31 * result + (regionId != null ? regionId.hashCode() : 0);
-		result = 31 * result + (isActive ? 1 : 0);
 		result = 31 * result + (code != null ? code.hashCode() : 0);
-		result = 31 * result + (garantUse ? 1 : 0);
-		result = 31 * result + (fullName != null ? fullName.hashCode() : 0);
 		return result;
 	}
 }
