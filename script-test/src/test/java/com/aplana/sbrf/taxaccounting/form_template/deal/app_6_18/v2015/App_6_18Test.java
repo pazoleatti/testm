@@ -109,7 +109,6 @@ public class App_6_18Test extends ScriptTestBase {
         Assert.assertEquals("Строка 1: Графа «Итого стоимость без учета НДС, акцизов и пошлины, руб.» не заполнена!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Графа «Дата совершения сделки» не заполнена!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Должна быть заполнена одна из граф «Сумма доходов Банка по данным бухгалтерского учета, руб.» или «Сумма расходов Банка по данным бухгалтерского учета, руб.»!", entries.get(i++).getMessage());
-        Assert.assertEquals("Группа «графа 2.1 не задана; графа 5 не задана; графа 6 не задана; графа 9 не задана; графа 12 не задана» не имеет строки подитога!", entries.get(i++).getMessage());
         Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
         testHelper.getLogger().clear();
 
@@ -121,7 +120,6 @@ public class App_6_18Test extends ScriptTestBase {
         //  9. Проверка суммы дохода/расхода - оба заполнены, оба = 0
         //  10 Проверка цены и стоимости
         //  11. Проверка корректности даты совершения сделки
-        //  Проверка Подитоговой строки
         row.getCell("name").setValue(1L, null);
         row.getCell("dependence").setValue(1L, null);
         row.getCell("docNumber").setValue("string", null);
@@ -138,14 +136,7 @@ public class App_6_18Test extends ScriptTestBase {
         row.getCell("price").setValue(1, null);
         row.getCell("total").setValue(1, null);
         row.getCell("dealDoneDate").setValue(sdf.parse("01.01.2989"), null);
-        DataRow<Cell> subTotalRow = formData.createDataRow();
-        subTotalRow.setAlias("itg1");
-        subTotalRow.setIndex(2);
-        subTotalRow.getCell("fix").setValue("Подитог", null);
-        for (String alias : Arrays.asList("count", "incomeSum", "outcomeSum", "total")) {
-            subTotalRow.getCell(alias).setValue(1, null);
-        }
-        dataRows.add(subTotalRow);
+
         testHelper.execute(FormDataEvent.CHECK);
         entries = testHelper.getLogger().getEntries();
         i = 0;
@@ -155,7 +146,6 @@ public class App_6_18Test extends ScriptTestBase {
         Assert.assertEquals("Строка 1: Графа «Количество» должна быть заполнена значением «1»!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Должна быть заполнена одна из граф «Сумма доходов Банка по данным бухгалтерского учета, руб.» или «Сумма расходов Банка по данным бухгалтерского учета, руб.»!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Значение графы «Дата совершения сделки» должно быть не меньше значения графы «Дата заключения сделки» и не больше 31.12.2014!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 2: Неверное итоговое значение по группе «A; string; 02.01.2990; A; Да» в графе «Количество»", entries.get(i++).getMessage());
         Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
         testHelper.getLogger().clear();
 
@@ -170,10 +160,6 @@ public class App_6_18Test extends ScriptTestBase {
         row.getCell("outcomeSum").setValue(null, null);
         row.getCell("price").setValue(2, null);
         row.getCell("total").setValue(-1, null);
-        subTotalRow.getCell("incomeSum").setValue(-1, null);
-        subTotalRow.getCell("outcomeSum").setValue(0, null);
-        subTotalRow.getCell("price").setValue(2, null);
-        subTotalRow.getCell("total").setValue(-1, null);
         testHelper.execute(FormDataEvent.CHECK);
         entries = testHelper.getLogger().getEntries();
         i = 0;
@@ -199,9 +185,6 @@ public class App_6_18Test extends ScriptTestBase {
         row.getCell("incomeSum").setValue(1, null);
         row.getCell("price").setValue(1, null);
         row.getCell("total").setValue(1, null);
-        subTotalRow.getCell("incomeSum").setValue(1, null);
-        subTotalRow.getCell("price").setValue(1, null);
-        subTotalRow.getCell("total").setValue(1, null);
         testHelper.execute(FormDataEvent.CALCULATE);
         entries = testHelper.getLogger().getEntries();
         i = 0;
@@ -283,6 +266,8 @@ public class App_6_18Test extends ScriptTestBase {
     void checkLoadData(List<DataRow<Cell>> dataRows) {
         Assert.assertEquals(1, dataRows.get(0).getCell("name").getNumericValue().longValue());
         Assert.assertEquals(1, dataRows.get(0).getCell("total").getNumericValue().doubleValue(), 0);
+
+        Assert.assertEquals(1, dataRows.size());
     }
 }
 
