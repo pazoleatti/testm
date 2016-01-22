@@ -194,7 +194,7 @@ void logicCheck() {
         if (row.sum2 != null && row.sum3 != null && row.sum3 < row.sum2) {
             def msg = row.getCell('sum2').column.name
             def msg1 = row.getCell('sum3').column.name
-            logger.error("Строка $rowNum: Значение графы «$msg1» должно быть не меньше значению графы «$msg»!")
+            logger.error("Строка $rowNum: Значение графы «$msg1» должно быть не меньше значения графы «$msg»!")
         }
 
         // Проверка суммы доначисления дохода

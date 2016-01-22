@@ -184,9 +184,7 @@ public class App_6_11Test extends ScriptTestBase {
         testHelper.setImportFileInputStream(getImportXlsInputStream());
         testHelper.execute(FormDataEvent.IMPORT);
         List<String> aliases = Arrays.asList("dealDate", "currencySum", "courseCB", "sum",  "docNumber", "docDate", "dealDoneDate", "bondRegCode", "count", "price");
-        // ожидается 4 строки: 3 из файла + 1 итоговая строка
-        int expected = 3 + 1;
-        defaultCheckLoadData(aliases, expected);
+        defaultCheckLoadData(aliases, 3);
 
         checkLogger();
         // "name", "dealMode", "currencyCode", "transactionType"
@@ -204,10 +202,44 @@ public class App_6_11Test extends ScriptTestBase {
         testHelper.execute(FormDataEvent.IMPORT_TRANSPORT_FILE);
         List<String> aliases = Arrays.asList("dealDate", "currencySum", "courseCB", "sum", "docNumber", "docDate", "dealDoneDate", "bondRegCode", "count", "price");
         // ожидается 4 строки
-        int expected = 4;
+        int expected = 3;
         defaultCheckLoadData(aliases, expected);
 
         checkLoadData(testHelper.getDataRowHelper().getAll());
+
+        // проверка расчетов
+        testHelper.execute(FormDataEvent.CALCULATE);
+        checkAfterCalc(testHelper.getDataRowHelper().getAll());
+    }
+
+    // Проверить загруженные данные
+    void checkLoadData(List<DataRow<Cell>> dataRows) {
+        Assert.assertEquals(1L, dataRows.get(0).getCell("name").getNumericValue().longValue());
+        Assert.assertEquals(2L, dataRows.get(1).getCell("name").getNumericValue().longValue());
+        Assert.assertEquals(3L, dataRows.get(2).getCell("name").getNumericValue().longValue());
+
+        Assert.assertEquals(1L, dataRows.get(0).getCell("dealMode").getNumericValue().longValue());
+        Assert.assertEquals(2L, dataRows.get(1).getCell("dealMode").getNumericValue().longValue());
+        Assert.assertEquals(3L, dataRows.get(2).getCell("dealMode").getNumericValue().longValue());
+
+        Assert.assertEquals(1L, dataRows.get(0).getCell("currencyCode").getNumericValue().longValue());
+        Assert.assertEquals(2L, dataRows.get(1).getCell("currencyCode").getNumericValue().longValue());
+        Assert.assertEquals(3L, dataRows.get(2).getCell("currencyCode").getNumericValue().longValue());
+
+        Assert.assertEquals(1L, dataRows.get(0).getCell("transactionType").getNumericValue().longValue());
+        Assert.assertEquals(2L, dataRows.get(1).getCell("transactionType").getNumericValue().longValue());
+        Assert.assertEquals(3L, dataRows.get(2).getCell("transactionType").getNumericValue().longValue());
+
+        Assert.assertEquals(3, dataRows.size());
+    }
+
+    // Проверить расчеты
+    void checkAfterCalc(List<DataRow<Cell>> dataRows) {
+        Assert.assertEquals(0.75, dataRows.get(0).getCell("price").getNumericValue().doubleValue(), 0);
+        Assert.assertEquals(0.89, dataRows.get(1).getCell("price").getNumericValue().doubleValue(), 0);
+        Assert.assertEquals(0.93, dataRows.get(2).getCell("price").getNumericValue().doubleValue(), 0);
+
+        Assert.assertEquals(3, dataRows.size());
     }
 
     void mockBeforeImport() {
@@ -267,37 +299,6 @@ public class App_6_11Test extends ScriptTestBase {
                         return result;
                     }
                 });
-    }
-
-    // Проверить загруженные данные
-    void checkLoadData(List<DataRow<Cell>> dataRows) {
-        Assert.assertEquals(1L, dataRows.get(0).getCell("name").getNumericValue().longValue());
-        Assert.assertEquals(2L, dataRows.get(1).getCell("name").getNumericValue().longValue());
-        Assert.assertEquals(3L, dataRows.get(2).getCell("name").getNumericValue().longValue());
-
-        Assert.assertEquals(1L, dataRows.get(0).getCell("dealMode").getNumericValue().longValue());
-        Assert.assertEquals(2L, dataRows.get(1).getCell("dealMode").getNumericValue().longValue());
-        Assert.assertEquals(3L, dataRows.get(2).getCell("dealMode").getNumericValue().longValue());
-
-        Assert.assertEquals(1L, dataRows.get(0).getCell("currencyCode").getNumericValue().longValue());
-        Assert.assertEquals(2L, dataRows.get(1).getCell("currencyCode").getNumericValue().longValue());
-        Assert.assertEquals(3L, dataRows.get(2).getCell("currencyCode").getNumericValue().longValue());
-
-        Assert.assertEquals(1L, dataRows.get(0).getCell("transactionType").getNumericValue().longValue());
-        Assert.assertEquals(2L, dataRows.get(1).getCell("transactionType").getNumericValue().longValue());
-        Assert.assertEquals(3L, dataRows.get(2).getCell("transactionType").getNumericValue().longValue());
-    }
-
-    // Проверить расчеты
-    void checkAfterCalc(List<DataRow<Cell>> dataRows) {
-        Assert.assertEquals(0.75, dataRows.get(0).getCell("price").getNumericValue().doubleValue(), 0);
-        Assert.assertEquals(0.89, dataRows.get(1).getCell("price").getNumericValue().doubleValue(), 0);
-        Assert.assertEquals(0.93, dataRows.get(2).getCell("price").getNumericValue().doubleValue(), 0);
-
-        Assert.assertNull(dataRows.get(3).getCell("price").getValue());
-        Assert.assertEquals(18, dataRows.get(3).getCell("currencySum").getNumericValue().intValue());
-        Assert.assertEquals(24, dataRows.get(3).getCell("sum").getNumericValue().doubleValue(), 0);
-        Assert.assertEquals(27, dataRows.get(3).getCell("count").getNumericValue().doubleValue(), 0);
     }
 }
 
