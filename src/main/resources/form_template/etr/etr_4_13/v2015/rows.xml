@@ -157,7 +157,7 @@
               stringValue="Техническое обслуживание и ремонт, стоимость инвентаря и принадлежностей, переданных в эксплуатацию"
               styleAlias="Жирный"/>
         <cell alias="symbol102" colSpan="1" rowSpan="1"
-              stringValue="символ формы 102 (26301.06+26301.08+26301.10+26301.12+26301.14+26301.16+26302.02+26302.04+26302.06+26302.08+26302.10+26302.12+26302.14+26302.16+26302.18+26302.20+26305.02+26305.05+26305.07+26305.09+26305.11+26305.13+27203.20+27203.22+27203.24+27203.26+27203.28+27203.30+27203.32+27203.34+27203.46)"/>
+              stringValue="символ формы 102 (26301.02+26301.06+26301.08+26301.10+26301.12+26301.14+26301.16+26302.02+26302.04+26302.06+26302.08+26302.10+26302.12+26302.14+26302.16+26302.18+26302.20+26305.02+26305.05+26305.07+26305.09+26305.11+26305.13+27203.20+27203.22+27203.24+27203.26+27203.28+27203.30+27203.32+27203.34+27203.46)"/>
         <cell alias="comparePeriod" colSpan="1" rowSpan="1"/>
         <cell alias="comparePeriodPercent" colSpan="1" rowSpan="1"/>
         <cell alias="currentPeriod" colSpan="1" rowSpan="1"/>
@@ -339,7 +339,7 @@
         <cell alias="taxName" colSpan="1" rowSpan="1"
               stringValue="Прочие расходы, относящиеся к организационным и управленческим расходам, не учитываемые для целей налогообложения"
               styleAlias="Жирный"/>
-        <cell alias="symbol102" colSpan="1" rowSpan="1" stringValue="симв. ф.102 (26412.99+27203.13)"/>
+        <cell alias="symbol102" colSpan="1" rowSpan="1" stringValue="симв. ф.102 (26412.99+27203.13+27203.48+26412.33+26412.34+26412.35+26412.36+26412.37)"/>
         <cell alias="comparePeriod" colSpan="1" rowSpan="1"/>
         <cell alias="comparePeriodPercent" colSpan="1" rowSpan="1"/>
         <cell alias="currentPeriod" colSpan="1" rowSpan="1"/>
@@ -364,7 +364,7 @@
         <cell alias="taxName" colSpan="1" rowSpan="1"
               stringValue="Переоценка и перевод имущества, временно не используемое; начисление амортизации"
               styleAlias="Жирный"/>
-        <cell alias="symbol102" colSpan="1" rowSpan="1" stringValue="симв. ф.102 (27203.09+27203.11)"/>
+        <cell alias="symbol102" colSpan="1" rowSpan="1" stringValue="симв. ф.102 (27203.09+27203.11+27308.22+27308.23)"/>
         <cell alias="comparePeriod" colSpan="1" rowSpan="1"/>
         <cell alias="comparePeriodPercent" colSpan="1" rowSpan="1"/>
         <cell alias="currentPeriod" colSpan="1" rowSpan="1"/>
@@ -389,7 +389,7 @@
         <cell alias="rowNum" colSpan="1" rowSpan="1" stringValue="19" styleAlias="Жирный"/>
         <cell alias="taxName" colSpan="1" rowSpan="1" stringValue="Прочие расходы" styleAlias="Жирный"/>
         <cell alias="symbol102" colSpan="1" rowSpan="1"
-              stringValue="симв. ф.102 (25203.03+25302.02+26401.02+26403.02+26410.06+26410.99+26412.10+26412.27+27201.97+27202.99+27203.38+27203.40+27203.42+27203.44+27203.97+27203.99+27302+27303+27304+27307+27308.98+27308.97)"/>
+              stringValue="симв. ф.102 (25203.03+25302.02+26401.02+26403.02+26410.06+26410.12+26410.98+27201.97+27202.99+27203.38+27203.40+27203.42+27203.44+27203.97+27203.99+27302+27303+27304+27307+27308.97+27308.98)"/>
         <cell alias="comparePeriod" colSpan="1" rowSpan="1"/>
         <cell alias="comparePeriodPercent" colSpan="1" rowSpan="1"/>
         <cell alias="currentPeriod" colSpan="1" rowSpan="1"/>
@@ -400,7 +400,7 @@
     <row alias="20">
         <cell alias="rowNum" colSpan="1" rowSpan="1" stringValue="20" styleAlias="Жирный"/>
         <cell alias="taxName" colSpan="1" rowSpan="1" stringValue="Иные расходы" styleAlias="Жирный"/>
-        <cell alias="symbol102" colSpan="1" rowSpan="1" stringValue="симв.ф.102 (27305+27306+27308.24)"/>
+        <cell alias="symbol102" colSpan="1" rowSpan="1" stringValue="симв.ф.102 (27305+27306+27308.25)"/>
         <cell alias="comparePeriod" colSpan="1" rowSpan="1"/>
         <cell alias="comparePeriodPercent" colSpan="1" rowSpan="1"/>
         <cell alias="currentPeriod" colSpan="1" rowSpan="1"/>
@@ -449,7 +449,7 @@
         <cell alias="taxName" colSpan="1" rowSpan="1"
               stringValue="Подарки и денежные поощрения клиентов, партнеров Банка, прочих физических и юридических лиц"
               styleAlias="Курсив"/>
-        <cell alias="symbol102" colSpan="1" rowSpan="1" stringValue="симв. ф.102 (27308.24)" styleAlias="Курсив"/>
+        <cell alias="symbol102" colSpan="1" rowSpan="1" stringValue="симв. ф.102 (27308.25)" styleAlias="Курсив"/>
         <cell alias="comparePeriod" colSpan="1" rowSpan="1"/>
         <cell alias="comparePeriodPercent" colSpan="1" rowSpan="1"/>
         <cell alias="currentPeriod" colSpan="1" rowSpan="1"/>
