@@ -133,8 +133,8 @@ public class Cell extends AbstractCell {
 			}
 			case STRING: {
 				if (!getColumn().getValidationStrategy().matches((String) value)) {
-					return showError(msg + "содержит значение '" +
-                            value + "' длиннее " + ((StringColumn) getColumn()).getMaxLength());
+					return showError(msgValue + "превышает допустимую разрядность (" +
+                            ((StringColumn) getColumn()).getMaxLength() + ")!");
 				}
 				stringValue = (String) value;
 				return getValue();
