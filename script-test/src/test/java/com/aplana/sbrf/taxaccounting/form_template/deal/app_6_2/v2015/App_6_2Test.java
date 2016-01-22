@@ -164,8 +164,6 @@ public class App_6_2Test extends ScriptTestBase {
         testHelper.execute(FormDataEvent.CHECK);
         Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
         testHelper.getLogger().clear();
-
-        // TODO (Ramil Timerbaev) добавить тесты для логических проверок 11
     }
 
     // Расчет пустой (в импорте - расчет заполненной)
@@ -257,9 +255,7 @@ public class App_6_2Test extends ScriptTestBase {
         testHelper.setImportFileInputStream(getImportXlsInputStream());
         testHelper.execute(FormDataEvent.IMPORT);
         List<String> aliases = Arrays.asList("docNumber", "docDate", "dealNumber", "dealDate", "sum", "price", "cost", "dealDoneDate");
-        // ожидается 5 строк: 4 из файла + 1 итоговая строка
-        int expected = 4 + 1;
-        defaultCheckLoadData(aliases, expected);
+        defaultCheckLoadData(aliases, 4);
         checkLogger();
         // "count", "name"
         checkLoadData(testHelper.getDataRowHelper().getAll());
@@ -299,7 +295,7 @@ public class App_6_2Test extends ScriptTestBase {
         Assert.assertEquals(7, dataRows.get(2).getCell("cost").getNumericValue().doubleValue(), 0);
         Assert.assertEquals(10, dataRows.get(3).getCell("cost").getNumericValue().doubleValue(), 0);
 
-        Assert.assertEquals(22, dataRows.get(4).getCell("sum").getNumericValue().doubleValue(), 0);
+        Assert.assertEquals(4, dataRows.size());
     }
 }
 
