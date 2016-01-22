@@ -202,18 +202,11 @@ void logicCheck() {
             logger.error("Строка $rowNum: Значение графы «$msg» должно быть больше или равно «0»!")
         }
     }
-
-    // 11. Проверка итоговых значений по фиксированной строке «Итого»
-    if (dataRows.find { it.getAlias() == 'total' }) {
-        checkTotalSum(dataRows, totalColumns, logger, true)
-    }
 }
 
 // Алгоритмы заполнения полей формы
 void calc() {
     def dataRows = formDataService.getDataRowHelper(formData).allCached
-    // Удаление подитогов (в Банк нф поставлена с итогами)
-    deleteAllAliased(dataRows)
     for (row in dataRows) {
         // Расчет поля " Количество"
         row.count = 1
