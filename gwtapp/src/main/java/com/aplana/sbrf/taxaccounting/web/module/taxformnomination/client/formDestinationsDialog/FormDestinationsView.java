@@ -316,8 +316,10 @@ public class FormDestinationsView extends PopupViewWithUiHandlers<FormDestinatio
             departmens.add(f.getDepartment().getId());
             kinds.add((long) f.getKind().getId());
             types.add(f.getFormTypeId());
-            for (Department performer : f.getPerformers()) {
-                performers.add(performer.getId());
+            if (f.getPerformers() != null && !f.getPerformers().isEmpty()) {
+                for (Department performer : f.getPerformers()) {
+                    performers.add(performer.getId());
+                }
             }
         }
         // кнопки "создать" и "изменить"
