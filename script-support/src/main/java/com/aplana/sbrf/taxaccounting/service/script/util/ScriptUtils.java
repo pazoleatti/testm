@@ -111,6 +111,8 @@ public final class ScriptUtils {
     public static final String CHECK_DATE_PERIOD = "Строка %d: Дата по графе «%s» должна принимать значение из диапазона: %s - %s!";
     @SuppressWarnings("unused")
     private static final String TRANSPORT_FILE_SUM_ERROR = "Итоговая сумма в графе %s строки %s в транспортном файле некорректна.";
+    public static final String TRANSPORT_FILE_SUM_ERROR_1 = "Строка %d файла: Итоговое значение по графе «%s» (значение «%s») указано некорректно. Системой рассчитано значение «%s»";
+    public static final String TRANSPORT_FILE_SUM_ERROR_2 = "Строка %d файла: Итоговое значение по графе «%s» не указано. Системой рассчитано значение «%s»";
     private static final String ROW_FILE_WRONG = "Строка файла %s содержит некорректное значение.";
     private static final String WRONG_XLS_COLUMN_INDEX = "Номер столбца должен быть больше ноля!";
     // разделитель между идентификаторами в ключе для кеширования записей справочника
@@ -1993,6 +1995,70 @@ public final class ScriptUtils {
      */
     public interface CheckGroupSum {
         String check(DataRow<Cell> row1, DataRow<Cell> row2);
+    }
+
+    /**
+     * Сравнить суммы из транспортного файла с посчитанными суммами и задать значения из строки тф в строку нф.
+     *
+     * @param totalRow строка с посчитанными суммами
+     * @param totalRowTF строка с суммами из транспортного файла
+     * @param columns список алиасов столбцов
+     * @param rowIndex номер строки файла
+     * @param logger логгер
+     * @param isFatal фатальность - ошибка / предупреждение
+     */
+    public static void checkAndSetTFSum(DataRow<Cell> totalRow, DataRow<Cell> totalRowTF, List<String> columns, int rowIndex, Logger logger, boolean isFatal) {
+        if (!logger.containsLevel(LogLevel.ERROR) && totalRowTF != null) {
+            // сравнение контрольных сумм
+            checkTFSum(totalRow, totalRowTF, columns, rowIndex, logger, isFatal);
+
+            // задать итоговой строке нф значения из итоговой строки тф
+            for (String alias : columns) {
+                BigDecimal value = totalRowTF.getCell(alias).getNumericValue();
+                totalRow.getCell(alias).setValue(value, null);
+            }
+        } else {
+            logger.warn("В транспортном файле не найдена итоговая строка");
+            // очистить итоги
+            for (String alias : columns) {
+                totalRow.getCell(alias).setValue(null, null);
+            }
+        }
+    }
+
+    /**
+     * Сравнить суммы из транспортного файла с посчитанными суммами.
+     *
+     * @param totalRow строка с посчитанными суммами
+     * @param totalRowTF строка с суммами из транспортного файла
+     * @param columns список алиасов столбцов
+     * @param rowIndex номер строки файла
+     * @param logger логгер
+     * @param isFatal фатальность - ошибка / предупреждение
+     */
+    public static void checkTFSum(DataRow<Cell> totalRow, DataRow<Cell> totalRowTF, List<String> columns, int rowIndex, Logger logger, boolean isFatal) {
+        for (String alias : columns) {
+            BigDecimal v1 = totalRowTF.getCell(alias).getNumericValue();
+            BigDecimal v2 = totalRow.getCell(alias).getNumericValue();
+            if (v1 == null && v2 == null) {
+                continue;
+            }
+            String msg = null;
+            if (v1 == null) {
+                // нет значения в тф
+                msg = String.format(TRANSPORT_FILE_SUM_ERROR_2, rowIndex, getColumnName(totalRow, alias), v2);
+            } else if (v1.compareTo(v2) != 0) {
+                // значения расходятся
+                msg = String.format(TRANSPORT_FILE_SUM_ERROR_1, rowIndex, getColumnName(totalRow, alias), v1, v2);
+            }
+            if (msg != null) {
+                if (isFatal) {
+                    logger.error("%s", msg);
+                } else {
+                    logger.warn("%s", msg);
+                }
+            }
+        }
     }
 
     static final class SheetHandler extends DefaultHandler {
