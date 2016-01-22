@@ -867,24 +867,6 @@ def calc10or16(def record520, def sourceAllDataRowsMap, def isCalc10) {
     return result
 }
 
-// TODO (Ramil Timerbaev) уточнить про необходимость этого метода
-/**
- * Проверить является ли строка источника рну подитоговой и относится ли к указанному участнику.
- *
- * @param row строка
- * @param name имя участника
- * @return
- */
-def checkRnuRow(def row, def name) {
-    def head = 'Итого по "'
-    if (!row.getAlias() || !row.fix || !row.fix.contains(head)) {
-        return false
-    }
-    def start = row.fix.indexOf(head) + head.size()
-    def end = row.fix.size() - 1
-    return row.fix.substring(start, end).equals(StringUtils.cleanString(name))
-}
-
 /**
  * Проверить необходимость использования строки источника.
  * Для строк с участником ТЦО дату совершения сделки.
