@@ -11,6 +11,10 @@
 
 	<script type="text/javascript" src="Main/Main.nocache.js"></script>
     <script type="text/javascript" src="resources/js/browserDetect.js"></script>
+	<!--[if IE 8]>
+	<script type="text/javascript" src="resources/js/fixLongRunningScript.js"></script>
+	<![endif]-->
+
 
     <!--script>
         window.onload = function(){
