@@ -686,8 +686,12 @@ def calc8or14(def record520, def sourceAllDataRowsMap, def isCalc8) {
                         }
                         break
                     case 817 : // 6.9
-                    case 836 : // 6.25
                         if (isCalc8) {
+                            result += (row.finResult ?: 0)
+                        }
+                        break
+                    case 836 : // 6.25
+                        if (!isCalc8) {
                             result += (row.finResult ?: 0)
                         }
                         break
