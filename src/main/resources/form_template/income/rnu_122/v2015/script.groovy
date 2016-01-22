@@ -312,6 +312,7 @@ def calcFlag18(def row) {
 }
 
 def calc19(def row) {
+    def rowNum = row.getIndex()
     def pattern = /[0-9]+([\.|\,][0-9]+)?\%?/
     if (row.tradePay != null && !(row.tradePay ==~ pattern)) {
         def msg = row.getCell('tradePay').column.name
