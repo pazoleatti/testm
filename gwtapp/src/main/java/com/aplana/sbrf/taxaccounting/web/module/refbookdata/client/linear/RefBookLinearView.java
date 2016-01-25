@@ -33,6 +33,7 @@ import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -157,6 +158,19 @@ public class RefBookLinearView extends ViewWithUiHandlers<RefBookDataLinearUiHan
     @Override
     public int getTotalCount() {
         return refBookDataTable.getRowCount();
+    }
+
+    @Override
+    public RefBookDataRow getNextToSelected() {
+        List<RefBookDataRow> visibleItems = refBookDataTable.getVisibleItems();
+        RefBookDataRow selectedItem = selectionModel.getSelectedObject();
+        Iterator<RefBookDataRow> iterator = visibleItems.iterator();
+        while (iterator.hasNext()) {
+            if (iterator.next() == selectedItem && iterator.hasNext()) {
+                return iterator.next();
+            }
+        }
+        return null;
     }
 
     @Override

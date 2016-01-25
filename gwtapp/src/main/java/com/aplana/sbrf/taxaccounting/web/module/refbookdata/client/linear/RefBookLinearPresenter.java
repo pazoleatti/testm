@@ -75,6 +75,10 @@ public class RefBookLinearPresenter extends PresenterWidget<RefBookLinearPresent
         action.setRecordsId(rowsId);
         action.setDeleteVersion(false);
         LogCleanEvent.fire(RefBookLinearPresenter.this);
+        RefBookDataRow nextToSelected = getView().getNextToSelected();
+        if (nextToSelected != null) {
+            recordId = nextToSelected.getRefBookRowId();
+        }
         dispatchAsync.execute(action,
                 CallbackUtils.defaultCallback(
                         new AbstractCallback<DeleteRefBookRowResult>() {
@@ -91,7 +95,7 @@ public class RefBookLinearPresenter extends PresenterWidget<RefBookLinearPresent
                                     Dialog.errorMessage("Удаление записи справочника", "Обнаружены фатальные ошибки!");
                                 }
                                 /*editPresenter.setMode(mode);*/
-                                ShowItemEvent.fire(RefBookLinearPresenter.this, null, null);
+                                ShowItemEvent.fire(RefBookLinearPresenter.this, null, recordId);
                                 getView().updateTable();
                                 /*dataProvider.remove(getSelectedRow());*/
                                 /*if (getSelectedRowIndex() != 0) {
@@ -154,6 +158,7 @@ public class RefBookLinearPresenter extends PresenterWidget<RefBookLinearPresent
         void setEnable(FormMode mode);
         void deleteRowButtonClicked();
         int getTotalCount();
+        RefBookDataRow getNextToSelected();
     }
 
     public void setMode(FormMode mode) {
