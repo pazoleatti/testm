@@ -57,8 +57,8 @@
         <cell alias="count" colSpan="1" rowSpan="2" value="Количество"/>
         <cell alias="incomeSum" colSpan="1" rowSpan="2" value="Сумма доходов Банка по данным бухгалтерского учета, руб."/>
         <cell alias="outcomeSum" colSpan="1" rowSpan="2" value="Сумма расходов Банка по данным бухгалтерского учета, руб."/>
-        <cell alias="price" colSpan="1" rowSpan="2" value="Цена (тариф) за единицу измерения без учета НДС, акцизов и пошлин, руб."/>
-        <cell alias="total" colSpan="1" rowSpan="2" value="Итого стоимость без учета НДС, акцизов и пошлин, руб."/>
+        <cell alias="price" colSpan="1" rowSpan="2" value="Цена (тариф) за единицу измерения без учета НДС, акцизов и пошлины, руб."/>
+        <cell alias="total" colSpan="1" rowSpan="2" value="Итого стоимость без учета НДС, акцизов и пошлины, руб."/>
         <cell alias="dealDoneDate" colSpan="1" rowSpan="2" value="Дата совершения сделки"/>
     </row>
     <row alias="">
@@ -88,8 +88,8 @@
         <cell alias="count" colSpan="1" rowSpan="1" value="Количество"/>
         <cell alias="incomeSum" colSpan="1" rowSpan="1" value="Сумма доходов Банка по данным бухгалтерского учета, руб."/>
         <cell alias="outcomeSum" colSpan="1" rowSpan="1" value="Сумма расходов Банка по данным бухгалтерского учета, руб."/>
-        <cell alias="price" colSpan="1" rowSpan="1" value="Цена (тариф) за единицу измерения без учета НДС, акцизов и пошлин, руб."/>
-        <cell alias="total" colSpan="1" rowSpan="1" value="Итого стоимость без учета НДС, акцизов и пошлин, руб."/>
+        <cell alias="price" colSpan="1" rowSpan="1" value="Цена (тариф) за единицу измерения без учета НДС, акцизов и пошлины, руб."/>
+        <cell alias="total" colSpan="1" rowSpan="1" value="Итого стоимость без учета НДС, акцизов и пошлины, руб."/>
         <cell alias="dealDoneDate" colSpan="1" rowSpan="1" value="Дата совершения сделки"/>
     </row>
     <row alias="">
