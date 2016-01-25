@@ -4,7 +4,6 @@ import com.aplana.gwt.client.dialog.Dialog;
 import com.aplana.gwt.client.dialog.DialogHandler;
 import com.aplana.sbrf.taxaccounting.model.Department;
 import com.aplana.sbrf.taxaccounting.model.DepartmentPair;
-import com.aplana.sbrf.taxaccounting.model.FormDataKind;
 import com.aplana.sbrf.taxaccounting.model.TaxType;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.RevealContentTypeHolder;
 import com.aplana.sbrf.taxaccounting.web.main.api.client.TaPlaceManager;
@@ -76,7 +75,9 @@ public class PeriodsPresenter extends Presenter<PeriodsPresenter.MyView, Periods
 		void setCanEdit(boolean canEdit);
         void setCanOpenCorrectPeriod(boolean canOpenCorrectPeriod);
         void clearSelection();
-	}
+        // Количество строк, без учета шапки таблицы
+        int getRowsCount();
+    }
 
 	private final TaPlaceManager placeManager;
 	private final DispatchAsync dispatcher;
@@ -298,6 +299,9 @@ public class PeriodsPresenter extends Presenter<PeriodsPresenter.MyView, Periods
                         if (result.isHasFatalErrors()) {
                             Dialog.errorMessage("Удаление периода", "Удаление периода невозможно!");
                         }
+                        if (getView().getRowsCount() == 0) {
+                            disableButtons();
+                        }
 					}
 				}, PeriodsPresenter.this));
 	}
@@ -306,10 +310,7 @@ public class PeriodsPresenter extends Presenter<PeriodsPresenter.MyView, Periods
 	public void selectionChanged() {
         TableRow selectedRow = getView().getSelectedRow();
         if (selectedRow == null) {
-            getView().setCanEditPeriod(false);
-            getView().setCanClosePeriod(false);
-            getView().setCanDeletePeriod(false);
-            getView().setCanChangeDeadline(false);
+            disableButtons();
             return;
         }
         getView().setCanChangeDeadline(canEditDeadLine(selectedRow));
@@ -326,6 +327,13 @@ public class PeriodsPresenter extends Presenter<PeriodsPresenter.MyView, Periods
             getView().setCanOpenCorrectPeriod(false);
         }
 	}
+
+    public void disableButtons() {
+        getView().setCanEditPeriod(false);
+        getView().setCanClosePeriod(false);
+        getView().setCanDeletePeriod(false);
+        getView().setCanChangeDeadline(false);
+    }
 
     @Override
     public void editPeriod() {

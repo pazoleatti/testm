@@ -321,4 +321,9 @@ public class PeriodsView extends ViewWithUiHandlers<PeriodsUiHandlers>
             selectionModel.clear();
         }
     }
+
+    @Override
+    public int getRowsCount() {
+        return periodsTable.getVisibleItemCount() - 2;
+    }
 }
