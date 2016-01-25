@@ -156,11 +156,7 @@ void logicCheck() {
         checkNonEmptyColumns(row, rowNum, nonEmptyColumns, logger, true)
 
         // Проверка даты кредитного договора
-        if (row.docDate && (row.docDate < Date.parse('dd.MM.yyyy', '01.01.1991') || row.docDate > getReportPeriodEndDate())) {
-            def msg1 = row.getCell('docDate').column.name
-            def msg2 = getReportPeriodEndDate().format('dd.MM.yyyy')
-            logger.error("Строка $rowNum: Дата, указанная в графе «$msg1» должна принимать значение из следующего диапазона: 01.01.1991 - $msg2!")
-        }
+        checkDatePeriod(logger, row, 'docDate', Date.parse('dd.MM.yyyy', '01.01.1991'), getReportPeriodEndDate(), true)
 
         // Проверка количества календарных дней
         if (row.period != null && row.period <= 0) {
@@ -410,10 +406,10 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
 
     // графа 4
     if (map != null) {
-        map = getRefBookValue(10, map.COUNTRY_CODE?.referenceValue)
-        if (map != null) {
-            def expectedValues = [map.NAME?.stringValue, map.FULLNAME?.stringValue]
-            formDataService.checkReferenceValue(10, values[colIndex], expectedValues, fileRowIndex, colIndex + colOffset, logger, false)
+        def countryMap = getRefBookValue(10, map.COUNTRY_CODE?.referenceValue)
+        if (countryMap != null) {
+            def expectedValues = [countryMap.NAME?.stringValue, countryMap.FULLNAME?.stringValue]
+            formDataService.checkReferenceValue(values[colIndex], expectedValues, getColumnName(newRow, 'countryName'), map.NAME.value, fileRowIndex, colIndex + colOffset, logger, false)
         }
     }
     colIndex++

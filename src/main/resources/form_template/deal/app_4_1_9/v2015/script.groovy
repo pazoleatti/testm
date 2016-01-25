@@ -501,11 +501,7 @@ def calc4or10(def record520, def sourceAllDataRowsMap, def isCalc4) {
                 switch (formTypeId) {
                     case 806 : // 6.6
                     case 819 : // 6.12
-                        if (row.incomeSum && row.outcomeSum) {
-                            result += (isCalc4 ? row.incomeSum - row.outcomeSum : row.outcomeSum - row.incomeSum)
-                        } else {
-                            result += ((isCalc4 ? row.incomeSum : row.outcomeSum) ?: 0)
-                        }
+                        result += ((isCalc4 ? row.incomeSum : row.outcomeSum) ?: 0)
                         break
                     case 827 : // 6.11
                         def transactionType = getRefBookValue(16L, row.transactionType)?.CODE?.value
@@ -690,8 +686,12 @@ def calc8or14(def record520, def sourceAllDataRowsMap, def isCalc8) {
                         }
                         break
                     case 817 : // 6.9
-                    case 836 : // 6.25
                         if (isCalc8) {
+                            result += (row.finResult ?: 0)
+                        }
+                        break
+                    case 836 : // 6.25
+                        if (!isCalc8) {
                             result += (row.finResult ?: 0)
                         }
                         break
@@ -755,7 +755,7 @@ def calc9or15(def record520, def sourceAllDataRowsMap, def isCalc9) {
                         }
                         break
                     case 829 : // РНУ-114
-                        if (!isCalc9) {
+                        if (isCalc9) {
                             result += (row.sum1 ?: 0)
                         }
                         break
@@ -772,24 +772,6 @@ def calc9or15(def record520, def sourceAllDataRowsMap, def isCalc9) {
         }
     }
     return result
-}
-
-// TODO (Ramil Timerbaev) уточнить про необходимость этого метода
-/**
- * Проверить является ли строка источника рну подитоговой и относится ли к указанному участнику.
- *
- * @param row строка
- * @param name имя участника
- * @return
- */
-def checkRnuRow(def row, def name) {
-    def head = 'Итого по "'
-    if (!row.getAlias() || !row.fix || !row.fix.contains(head)) {
-        return false
-    }
-    def start = row.fix.indexOf(head) + head.size()
-    def end = row.fix.size() - 1
-    return row.fix.substring(start, end).equals(StringUtils.cleanString(name))
 }
 
 def calc17(def record520) {

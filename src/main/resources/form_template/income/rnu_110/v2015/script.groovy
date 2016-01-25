@@ -154,11 +154,7 @@ void logicCheck() {
         checkNonEmptyColumns(row, rowNum, nonEmptyColumns, logger, true)
 
         // Проверка даты совершения операции
-        if (row.transDoneDate && (row.transDoneDate < getReportPeriodStartDate() || row.transDoneDate > getReportPeriodEndDate())) {
-            def msg = row.getCell('transDoneDate').column.name
-            logger.error("Строка $rowNum: Значение графы «$msg» должно быть больше или равно " + getReportPeriodStartDate().format('dd.MM.yyyy') + " и" +
-                    " меньше или равно" + getReportPeriodEndDate().format('dd.MM.yyyy'))
-        }
+        checkDatePeriod(logger, row, 'transDoneDate', getReportPeriodStartDate(), getReportPeriodEndDate(), true)
 
         // Проверка даты совершения операции
         if (row.transDoneDate && row.reasonDate && (row.transDoneDate < row.reasonDate)) {

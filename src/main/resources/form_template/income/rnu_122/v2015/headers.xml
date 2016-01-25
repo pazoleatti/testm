@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rows>
+    <row alias="">
+        <cell alias="rowNumber" colSpan="1" rowSpan="2" value="№ пп"/>
+        <cell alias="fix" colSpan="1" rowSpan="2" value=""/>
+        <cell alias="name" colSpan="1" rowSpan="2" value="Наименование Взаимозависимого лица/резидента оффшорной зоны"/>
+        <cell alias="iksr" colSpan="1" rowSpan="2" value="Идентификационный номер"/>
+        <cell alias="countryName" colSpan="1" rowSpan="2" value="Страна регистрации"/>
+        <cell alias="code" colSpan="1" rowSpan="2" value="Код классификации дохода / расхода"/>
+        <cell alias="docNumber" colSpan="2" rowSpan="1" value="Первичный документ"/>
+        <cell alias="docDate" colSpan="1" rowSpan="1" value="Первичный документ"/>
+        <cell alias="sum1" colSpan="1" rowSpan="2" value="Сумма кредита для расчёта (остаток задолженности, невыбранный лимит кредита), ед. вал."/>
+        <cell alias="course" colSpan="1" rowSpan="2" value="Валюта"/>
+        <cell alias="transDoneDate" colSpan="1" rowSpan="2" value="Дата фактического отражения операции"/>
+        <cell alias="course2" colSpan="1" rowSpan="2" value="Курс Банка России на дату фактического отражения в бухгалтерском учёте (руб.)"/>
+        <cell alias="startDate" colSpan="2" rowSpan="1" value="Расчетный период (согласно условиям сделки)"/>
+        <cell alias="endDate" colSpan="1" rowSpan="1" value="Расчетный период (согласно условиям сделки)"/>
+        <cell alias="base" colSpan="1" rowSpan="2" value="База для расчета, кол. дней"/>
+        <cell alias="dealPay" colSpan="1" rowSpan="2" value="Плата по условиям сделки,% год./ед. вал."/>
+        <cell alias="sum2" colSpan="2" rowSpan="1" value="Сумма фактического дохода / расхода, руб."/>
+        <cell alias="sum3" colSpan="1" rowSpan="1" value="Сумма фактического дохода / расхода, руб."/>
+        <cell alias="tradePay" colSpan="1" rowSpan="2" value="Рыночная Плата, % годовых / ед. вал."/>
+        <cell alias="sum4" colSpan="2" rowSpan="1" value="Рыночная сумма дохода (расхода), выраженная в:"/>
+        <cell alias="sum5" colSpan="1" rowSpan="1" value="Рыночная сумма дохода (расхода), выраженная в:"/>
+        <cell alias="sum6" colSpan="1" rowSpan="2" value="Сумма доначисления дохода (корректировки расхода) до рыночного уровня (руб.)"/>
+    </row>
+    <row alias="">
+        <cell alias="rowNumber" colSpan="1" rowSpan="1" value="№ пп"/>
+        <cell alias="fix" colSpan="1" rowSpan="1" value=""/>
+        <cell alias="name" colSpan="1" rowSpan="1" value="Наименование Взаимозависимого лица/резидента оффшорной зоны"/>
+        <cell alias="iksr" colSpan="1" rowSpan="1" value="Идентификационный номер"/>
+        <cell alias="countryName" colSpan="1" rowSpan="1" value="Страна регистрации"/>
+        <cell alias="code" colSpan="1" rowSpan="1" value="Код классификации дохода / расхода"/>
+        <cell alias="docNumber" colSpan="1" rowSpan="1" value="Номер"/>
+        <cell alias="docDate" colSpan="1" rowSpan="1" value="Дата"/>
+        <cell alias="sum1" colSpan="1" rowSpan="1" value="Сумма кредита для расчёта (остаток задолженности, невыбранный лимит кредита), ед. вал."/>
+        <cell alias="course" colSpan="1" rowSpan="1" value="Валюта"/>
+        <cell alias="transDoneDate" colSpan="1" rowSpan="1" value="Дата фактического отражения операции"/>
+        <cell alias="course2" colSpan="1" rowSpan="1" value="Курс Банка России на дату фактического отражения в бухгалтерском учёте (руб.)"/>
+        <cell alias="startDate" colSpan="1" rowSpan="1" value="дата начала"/>
+        <cell alias="endDate" colSpan="1" rowSpan="1" value="дата окончания"/>
+        <cell alias="base" colSpan="1" rowSpan="1" value="База для расчета, кол. дней"/>
+        <cell alias="dealPay" colSpan="1" rowSpan="1" value="Плата по условиям сделки,% год./ед. вал."/>
+        <cell alias="sum2" colSpan="1" rowSpan="1" value="Ед. вал."/>
+        <cell alias="sum3" colSpan="1" rowSpan="1" value="Руб."/>
+        <cell alias="tradePay" colSpan="1" rowSpan="1" value="Рыночная Плата, % годовых / ед. вал."/>
+        <cell alias="sum4" colSpan="1" rowSpan="1" value="Ед. вал."/>
+        <cell alias="sum5" colSpan="1" rowSpan="1" value="Руб."/>
+        <cell alias="sum6" colSpan="1" rowSpan="1" value="Сумма доначисления дохода (корректировки расхода) до рыночного уровня (руб.)"/>
+    </row>
+    <row alias="">
+        <cell alias="rowNumber" colSpan="1" rowSpan="1" value="1"/>
+        <cell alias="fix" colSpan="1" rowSpan="1" value=""/>
+        <cell alias="name" colSpan="1" rowSpan="1" value="2"/>
+        <cell alias="iksr" colSpan="1" rowSpan="1" value="3"/>
+        <cell alias="countryName" colSpan="1" rowSpan="1" value="4"/>
+        <cell alias="code" colSpan="1" rowSpan="1" value="5"/>
+        <cell alias="docNumber" colSpan="1" rowSpan="1" value="6"/>
+        <cell alias="docDate" colSpan="1" rowSpan="1" value="7"/>
+        <cell alias="sum1" colSpan="1" rowSpan="1" value="8"/>
+        <cell alias="course" colSpan="1" rowSpan="1" value="9"/>
+        <cell alias="transDoneDate" colSpan="1" rowSpan="1" value="10"/>
+        <cell alias="course2" colSpan="1" rowSpan="1" value="11"/>
+        <cell alias="startDate" colSpan="1" rowSpan="1" value="12"/>
+        <cell alias="endDate" colSpan="1" rowSpan="1" value="13"/>
+        <cell alias="base" colSpan="1" rowSpan="1" value="14"/>
+        <cell alias="dealPay" colSpan="1" rowSpan="1" value="15"/>
+        <cell alias="sum2" colSpan="1" rowSpan="1" value="16"/>
+        <cell alias="sum3" colSpan="1" rowSpan="1" value="17"/>
+        <cell alias="tradePay" colSpan="1" rowSpan="1" value="18"/>
+        <cell alias="sum4" colSpan="1" rowSpan="1" value="19"/>
+        <cell alias="sum5" colSpan="1" rowSpan="1" value="20"/>
+        <cell alias="sum6" colSpan="1" rowSpan="1" value="21"/>
+    </row>
+</rows>

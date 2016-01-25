@@ -44,7 +44,7 @@
         <columnType>NUMBER</columnType>
         <name>Сделки с ценными бумагами</name>
         <order>4</order>
-        <width>6</width>
+        <width>9</width>
         <maxLength>15</maxLength>
         <precision>0</precision>
     </columns>
@@ -54,7 +54,7 @@
         <columnType>NUMBER</columnType>
         <name>Сделки купли-продажи иностранной валюты</name>
         <order>5</order>
-        <width>6</width>
+        <width>9</width>
         <maxLength>15</maxLength>
         <precision>0</precision>
     </columns>
@@ -64,7 +64,7 @@
         <columnType>NUMBER</columnType>
         <name>Сделки купли-продажи драгоценных металлов</name>
         <order>6</order>
-        <width>6</width>
+        <width>9</width>
         <maxLength>15</maxLength>
         <precision>0</precision>
     </columns>
@@ -74,7 +74,7 @@
         <columnType>NUMBER</columnType>
         <name>Сделки, отраженные в Журнале взаиморасчетов</name>
         <order>7</order>
-        <width>6</width>
+        <width>9</width>
         <maxLength>15</maxLength>
         <precision>0</precision>
     </columns>
@@ -84,7 +84,7 @@
         <columnType>NUMBER</columnType>
         <name>Сделки с лицами, информация о которых не отражена в Журнале взаиморасчетов</name>
         <order>8</order>
-        <width>6</width>
+        <width>9</width>
         <maxLength>15</maxLength>
         <precision>0</precision>
     </columns>
@@ -94,7 +94,7 @@
         <columnType>NUMBER</columnType>
         <name>Сумма дополнительно начисленных налогооблагаемых доходов</name>
         <order>9</order>
-        <width>6</width>
+        <width>9</width>
         <maxLength>15</maxLength>
         <precision>0</precision>
     </columns>
@@ -104,7 +104,7 @@
         <columnType>NUMBER</columnType>
         <name>Сделки с ценными бумагами</name>
         <order>10</order>
-        <width>6</width>
+        <width>9</width>
         <maxLength>15</maxLength>
         <precision>0</precision>
     </columns>
@@ -114,7 +114,7 @@
         <columnType>NUMBER</columnType>
         <name>Сделки купли-продажи иностранной валюты</name>
         <order>11</order>
-        <width>6</width>
+        <width>9</width>
         <maxLength>15</maxLength>
         <precision>0</precision>
     </columns>
@@ -124,7 +124,7 @@
         <columnType>NUMBER</columnType>
         <name>Сделки купли-продажи драгоценных металлов</name>
         <order>12</order>
-        <width>6</width>
+        <width>9</width>
         <maxLength>15</maxLength>
         <precision>0</precision>
     </columns>
@@ -134,7 +134,7 @@
         <columnType>NUMBER</columnType>
         <name>Сделки, отраженные в Журнале взаиморасчетов</name>
         <order>13</order>
-        <width>6</width>
+        <width>9</width>
         <maxLength>15</maxLength>
         <precision>0</precision>
     </columns>
@@ -144,7 +144,7 @@
         <columnType>NUMBER</columnType>
         <name>Сделки с лицами, информация о которых не отражена в Журнале взаиморасчетов</name>
         <order>14</order>
-        <width>6</width>
+        <width>9</width>
         <maxLength>15</maxLength>
         <precision>0</precision>
     </columns>
@@ -154,7 +154,7 @@
         <columnType>NUMBER</columnType>
         <name>Сумма дополнительно начисленных налогооблагаемых расходов</name>
         <order>15</order>
-        <width>6</width>
+        <width>9</width>
         <maxLength>15</maxLength>
         <precision>0</precision>
     </columns>
@@ -164,7 +164,7 @@
         <columnType>NUMBER</columnType>
         <name>Итого объем доходов и расходов, руб.</name>
         <order>16</order>
-        <width>6</width>
+        <width>9</width>
         <maxLength>15</maxLength>
         <precision>0</precision>
     </columns>
@@ -186,7 +186,7 @@
         <columnType>NUMBER</columnType>
         <name>Ожидаемый объем доходов и расходов за отчетный Налоговый период, руб.</name>
         <order>18</order>
-        <width>6</width>
+        <width>9</width>
         <maxLength>15</maxLength>
         <precision>0</precision>
     </columns>
@@ -196,7 +196,7 @@
         <columnType>NUMBER</columnType>
         <name>Скорректированный ожидаемый объем доходов и расходов, руб.</name>
         <order>19</order>
-        <width>6</width>
+        <width>9</width>
         <maxLength>15</maxLength>
         <precision>0</precision>
     </columns>

@@ -98,7 +98,7 @@ def autoFillColumns = ['rowNumber', 'countryName', 'payDate', 'accrStartDate', '
 
 // Проверяемые на пустые значения атрибуты
 @Field
-def nonEmptyColumns = ['dealNum', 'name', 'countryName', 'currency', 'date1Part', 'date2Part', 'dealRate', 'dealLeftSum',
+def nonEmptyColumns = ['dealNum', 'name', 'currency', 'date1Part', 'date2Part', 'dealRate', 'dealLeftSum',
                        'bondSum', 'payDate', 'accrStartDate', 'accrEndDate', 'yearBase', 'dealIncome', 'rateDiff', 'incomeCorrection']
 
 // Группируемые атрибуты

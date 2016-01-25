@@ -778,4 +778,53 @@ public class ScriptUtilsTest {
 		Assert.assertNull(totalRow.getIndex());
 	}
 
+    @Test
+    public void checkAndSetTFSumTest() {
+        FormData formData = getSortTestFormData();
+
+        DataRow<Cell> totalRow = formData.createDataRow();
+        DataRow<Cell> totalRowTF = formData.createDataRow();
+        List<String> columns = Arrays.asList("c2");
+        int rowIndex = 1;
+        Logger logger = new Logger();
+        boolean isFatal = true;
+        int expected;
+
+        // суммы равны
+        totalRow.getCell("c2").setValue(1, 1);
+        totalRowTF.getCell("c2").setValue(1, 1);
+        ScriptUtils.checkAndSetTFSum(totalRow, totalRowTF, columns, rowIndex, logger, isFatal);
+        expected = 0;
+        Assert.assertEquals(expected, logger.getEntries().size());
+        logger.getEntries().clear();
+
+        // суммы отличаются
+        totalRow.getCell("c2").setValue(2, 1);
+        totalRowTF.getCell("c2").setValue(0, 1);
+        ScriptUtils.checkAndSetTFSum(totalRow, totalRowTF, columns, rowIndex, logger, isFatal);
+        expected = 1;
+        Assert.assertEquals(expected, logger.getEntries().size());
+        String expectedStr = "Строка 1 файла: Итоговое значение по графе «c2» (значение «0.00») указано некорректно. Системой рассчитано значение «2.00»";
+        Assert.assertEquals(expectedStr, logger.getEntries().get(0).getMessage());
+        logger.getEntries().clear();
+
+        // суммы отличаются - в тф нет значения
+        totalRow.getCell("c2").setValue(2, 1);
+        totalRowTF.getCell("c2").setValue(null, 1);
+        ScriptUtils.checkAndSetTFSum(totalRow, totalRowTF, columns, rowIndex, logger, isFatal);
+        expected = 1;
+        Assert.assertEquals(expected, logger.getEntries().size());
+        expectedStr = "Строка 1 файла: Итоговое значение по графе «c2» не указано. Системой рассчитано значение «2.00»";
+        Assert.assertEquals(expectedStr, logger.getEntries().get(0).getMessage());
+        logger.getEntries().clear();
+
+        // суммы отличаются - в тф нет значения
+        totalRow.getCell("c2").setValue(0, 1);
+        ScriptUtils.checkAndSetTFSum(totalRow, null, columns, rowIndex, logger, isFatal);
+        expected = 1;
+        Assert.assertEquals(expected, logger.getEntries().size());
+        expectedStr = "В транспортном файле не найдена итоговая строка";
+        Assert.assertEquals(expectedStr, logger.getEntries().get(0).getMessage());
+        logger.getEntries().clear();
+    }
 }

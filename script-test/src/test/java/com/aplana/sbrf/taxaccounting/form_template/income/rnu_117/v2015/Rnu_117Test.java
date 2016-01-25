@@ -137,7 +137,7 @@ public class Rnu_117Test extends ScriptTestBase {
         row.getCell("name").setValue(1L, null);
         row.getCell("code").setValue("A", null);
         row.getCell("reasonNumber").setValue("string", null);
-        row.getCell("reasonDate").setValue(sdf.parse("11.11.2016"), null);
+        row.getCell("reasonDate").setValue(sdf.parse("11.11.2014"), null);
         row.getCell("rate").setValue(1L, null);
         row.getCell("sum1").setValue(1L, null);
         row.getCell("rate1").setValue(1L, null);

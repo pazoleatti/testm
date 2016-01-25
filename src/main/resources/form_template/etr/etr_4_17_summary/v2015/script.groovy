@@ -513,7 +513,7 @@ void importData() {
             allValues.remove(rowValues)
             rowValues.clear()
             // делаем предыдущую строку ЦА
-            if (i > 1) {
+            if (i >= 1) {
                 def caRow = rows[i - 1]
                 if (caRow.department == 113) {
                     caRow.setAlias('ca{wan}')

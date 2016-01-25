@@ -45,12 +45,14 @@ public class GetTableDataHandler extends AbstractActionHandler<GetTableDataActio
 
         List<FormTypeKind> data = new ArrayList<FormTypeKind>();
         // загрузка данных
-        if (action.isForm()) {
-            data.addAll(departmentFormTypeService.getAllFormAssigned(departmentsIds, taxType, queryParams));
-            result.setTotalCount(departmentFormTypeService.getAssignedFormsCount(departmentsIds, taxType));
-        } else {
-            data.addAll(departmentFormTypeService.getAllDeclarationAssigned(departmentsIds, taxType, queryParams));
-            result.setTotalCount(departmentFormTypeService.getAssignedDeclarationsCount(departmentsIds, taxType));
+        if (!departmentsIds.isEmpty()) {
+            if (action.isForm()) {
+                data.addAll(departmentFormTypeService.getAllFormAssigned(departmentsIds, taxType, queryParams));
+                result.setTotalCount(departmentFormTypeService.getAssignedFormsCount(departmentsIds, taxType));
+            } else {
+                data.addAll(departmentFormTypeService.getAllDeclarationAssigned(departmentsIds, taxType, queryParams));
+                result.setTotalCount(departmentFormTypeService.getAssignedDeclarationsCount(departmentsIds, taxType));
+            }
         }
 
         result.setTableData(data);

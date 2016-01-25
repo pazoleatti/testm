@@ -1240,6 +1240,39 @@ values (126,20,1,2,null,25,null,0,0,    0,0,0,0);
 Insert into FORM_DATA (ID,FORM_TEMPLATE_ID,STATE,KIND,PERIOD_ORDER,DEPARTMENT_REPORT_PERIOD_ID,COMPARATIVE_DEP_REP_PER_ID,ACCRUING,MANUAL,  RETURN_SIGN,SORTED,EDITED,SORTED_BACKUP)
 values (127,20,1,2,null,17,null,0,0,    0,0,0,0);
 
+----------------test58-------------
+
+--Отчетный период 1 квартал 2060 прибыль
+insert into tax_period(id, tax_type, year) values (2004, 'I', 2060);
+insert into report_period (id, name, tax_period_id, dict_tax_period_id, start_date, end_date, calendar_start_date)
+values (2004, 'первый квартал',  2004, 1, date '2060-01-01', date '2060-03-31', date '2060-01-01');
+
+--Отчетный период 1 квартал 2060 НДС
+insert into tax_period(id, tax_type, year) values (2005, 'V', 2060);
+insert into report_period (id, name, tax_period_id, dict_tax_period_id, start_date, end_date, calendar_start_date)
+values (2005, 'первый квартал',  2005, 1, date '2060-01-01', date '2060-03-31', date '2060-01-01');
+
+--Связка подразделение Байкальский банк - период 1 квартал 2004 прибыль
+Insert into department_report_period (DEPARTMENT_ID,REPORT_PERIOD_ID,IS_ACTIVE,IS_BALANCE_PERIOD,CORRECTION_DATE,ID) values ('4',2004,'1','0',null,2005);
+--Связка подразделение Байкальский банк - период 1 квартал 2004 НДС
+Insert into department_report_period (DEPARTMENT_ID,REPORT_PERIOD_ID,IS_ACTIVE,IS_BALANCE_PERIOD,CORRECTION_DATE,ID) values ('4',2005,'1','0',null,2105);
+
+-- НФ первичная РНУ-4 в периоде 1 квартал 2060 для Байкальского банка за Февраль
+Insert into FORM_DATA (ID,FORM_TEMPLATE_ID,STATE,KIND,PERIOD_ORDER,DEPARTMENT_REPORT_PERIOD_ID,COMPARATIVE_DEP_REP_PER_ID,ACCRUING,MANUAL,  RETURN_SIGN,SORTED,EDITED,SORTED_BACKUP)
+values (2008,4,1,1,2,2005,null,0,0,    0,0,0,0);
+-- НФ консолидированная РНУ-4 в периоде 1 квартал 2060 для Байкальского банка за Январь
+Insert into FORM_DATA (ID,FORM_TEMPLATE_ID,STATE,KIND,PERIOD_ORDER,DEPARTMENT_REPORT_PERIOD_ID,COMPARATIVE_DEP_REP_PER_ID,ACCRUING,MANUAL,  RETURN_SIGN,SORTED,EDITED,SORTED_BACKUP)
+values (2009,4,1,2,1,2005,null,0,0,    0,0,0,0);
+-- НФ первичная РНУ-4 в периоде 1 квартал 2060 для Байкальского банка за Февраль
+Insert into FORM_DATA (ID,FORM_TEMPLATE_ID,STATE,KIND,PERIOD_ORDER,DEPARTMENT_REPORT_PERIOD_ID,COMPARATIVE_DEP_REP_PER_ID,ACCRUING,MANUAL,  RETURN_SIGN,SORTED,EDITED,SORTED_BACKUP)
+values (2010,4,1,2,2,2005,null,0,0,    0,0,0,0);
+-- НФ первичная НДС-200 в периоде 1 квартал 2060 для Байкальского банка за Январь
+Insert into FORM_DATA (ID,FORM_TEMPLATE_ID,STATE,KIND,PERIOD_ORDER,DEPARTMENT_REPORT_PERIOD_ID,COMPARATIVE_DEP_REP_PER_ID,ACCRUING,MANUAL,  RETURN_SIGN,SORTED,EDITED,SORTED_BACKUP)
+values (2011,200,1,1,1,2105,null,0,0,    0,0,0,0);
+-- НФ первичная НДС-200 в периоде 1 квартал 2060 для Байкальского банка за Февраль
+Insert into FORM_DATA (ID,FORM_TEMPLATE_ID,STATE,KIND,PERIOD_ORDER,DEPARTMENT_REPORT_PERIOD_ID,COMPARATIVE_DEP_REP_PER_ID,ACCRUING,MANUAL,  RETURN_SIGN,SORTED,EDITED,SORTED_BACKUP)
+values (2012,200,1,1,2,2105,null,0,0,    0,0,0,0);
+
 
 --------------------------- Декларации-приемники НФ ----------------------------
 

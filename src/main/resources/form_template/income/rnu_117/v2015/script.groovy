@@ -163,6 +163,9 @@ void logicCheck() {
             }
         }
 
+        // 3. Проверка даты основания совершения операции
+        checkDatePeriod(logger, row, 'reasonDate', Date.parse('dd.MM.yyyy', '01.01.1991'), getReportPeriodEndDate(), true)
+
         // 3. Проверка возможности заполнения графы 12
         if (!row.rate && !row.rate1) {
             def msg1 = row.getCell('rate2').column.name
@@ -462,10 +465,10 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
 
     // графа 3
     if (map != null) {
-        map = getRefBookValue(10, map.COUNTRY_CODE?.referenceValue)
-        if (map != null) {
-            def expectedValues = [map.NAME?.stringValue, map.FULLNAME?.stringValue]
-            formDataService.checkReferenceValue(10, values[colIndex], expectedValues, fileRowIndex, colIndex + colOffset, logger, false)
+        def countryMap = getRefBookValue(10, map.COUNTRY_CODE?.referenceValue)
+        if (countryMap != null) {
+            def expectedValues = [countryMap.NAME?.stringValue, countryMap.FULLNAME?.stringValue]
+            formDataService.checkReferenceValue(values[colIndex], expectedValues, getColumnName(newRow, 'countryName'), map.NAME.value, fileRowIndex, colIndex + colOffset, logger, false)
         }
     }
     colIndex++

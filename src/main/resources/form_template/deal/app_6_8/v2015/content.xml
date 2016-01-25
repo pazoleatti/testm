@@ -54,7 +54,7 @@
         <columnType>REFERENCE</columnType>
         <name>Код страны по классификатору ОКСМ</name>
         <order>5</order>
-        <width>10</width>
+        <width>7</width>
         <parentAlias>name</parentAlias>
         <refBookAttributeId>5204</refBookAttributeId>
         <refBookAttributeId2>50</refBookAttributeId2>

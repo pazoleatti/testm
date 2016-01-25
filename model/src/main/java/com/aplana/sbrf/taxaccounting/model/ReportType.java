@@ -38,7 +38,7 @@ public enum ReportType {
 
     LOAD_ALL_TF(1, "LoadAllTF", "Импорт транспортного файла из каталога загрузки", 13L, 113L),
 
-    EXCEL_REF_BOOK(0, "XLSM", "Формирование XLSM-отчета справочника \"%s\"", 23L, 123L),
+    EXCEL_REF_BOOK(0, "XLSX", "Формирование XLSX-отчета справочника \"%s\"", 23L, 123L),
     CSV_REF_BOOK(1, "CSV", "Формирование CSV-отчета справочника \"%s\"", 24L, 124L),
     SPECIFIC_REPORT_REF_BOOK(3, "SPECIFIC", "Формирование отчета \"%s\" справочника \"%s\"", 25L, 125L);
 

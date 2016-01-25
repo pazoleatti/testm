@@ -115,7 +115,7 @@
         <checking>false</checking>
         <name>Населенный пункт</name>
         <order>12</order>
-        <width>5</width>
+        <width>6</width>
         <maxLength>50</maxLength>
         <prevLength>0</prevLength>
     </columns>

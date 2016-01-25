@@ -83,14 +83,14 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
             public void onKeyUp(KeyUpEvent event) {}
         });
 
-        printToExcel = new LinkButton("Сформировать XLSM");
+        printToExcel = new LinkButton("Сформировать XLSX");
         printToExcel.setHeight("20px");
         printToExcel.setDisableImage(true);
         printToExcel.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
                 if (getUiHandlers() != null) {
-                    getUiHandlers().onPrintClicked(ReportType.EXCEL.getName());
+                    getUiHandlers().onPrintClicked(ReportType.EXCEL_REF_BOOK.getName());
                 }
             }
         });
@@ -102,7 +102,7 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
             @Override
             public void onClick(ClickEvent event) {
                 if (getUiHandlers() != null) {
-                    getUiHandlers().onPrintClicked(ReportType.CSV.getName());
+                    getUiHandlers().onPrintClicked(ReportType.CSV_REF_BOOK.getName());
                 }
             }
         });
@@ -289,8 +289,8 @@ public class RefBookDataView extends ViewWithUiHandlers<RefBookDataUiHandlers> i
     @Override
     public void setSpecificReportTypes(List<String> specificReportTypes) {
         printAnchor.clear();
-        printAnchor.addItem(ReportType.EXCEL.getName(), printToExcel);
-        printAnchor.addItem(ReportType.CSV.getName(), printToCSV);
+        printAnchor.addItem(ReportType.EXCEL_REF_BOOK.getName(), printToExcel);
+        printAnchor.addItem(ReportType.CSV_REF_BOOK.getName(), printToCSV);
         for(final String specificReportType: specificReportTypes) {
             LinkButton linkButton = new LinkButton("Сформировать \"" + specificReportType + "\"");
             linkButton.setHeight("20px");
