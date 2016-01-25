@@ -7,6 +7,7 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.refbook.impl.RefBookUniversal;
+import com.aplana.sbrf.taxaccounting.service.script.util.ScriptUtils;
 import com.aplana.sbrf.taxaccounting.util.ScriptTestBase;
 import com.aplana.sbrf.taxaccounting.util.TestScriptHelper;
 import com.aplana.sbrf.taxaccounting.util.mock.ScriptTestMockHelper;
@@ -105,7 +106,6 @@ public class App_6_15Test extends ScriptTestBase {
         Assert.assertEquals("Строка 1: Графа «Итого стоимость без учета НДС, руб.» не заполнена!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Графа «Дата совершения сделки» не заполнена!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Должна быть заполнена хотя бы одна из граф «Сумма расходов Банка по данным бухгалтерского учета, руб.», «Сумма доходов Банка по данным бухгалтерского учета, руб.»!", entries.get(i++).getMessage());
-        Assert.assertEquals("Группа «графа 2.1 не задана, графа 5 не задана, графа 6 не задана, графа 10 не задана, графа 11 не задана» не имеет строки подитога!", entries.get(i++).getMessage());
         Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
         testHelper.getLogger().clear();
 
@@ -117,7 +117,6 @@ public class App_6_15Test extends ScriptTestBase {
         //  Заполнение граф (сумма дохода, расхода) - оба заполнены, оба = 0
         //  Проверка цены и стоимости
         //  Проверка даты совершения сделки
-        //  Проверка Подитоговой строки
         row.getCell("name").setValue(1L, null);
         row.getCell("dependence").setValue(1L, null);
         row.getCell("docNumber").setValue("string", null);
@@ -135,18 +134,11 @@ public class App_6_15Test extends ScriptTestBase {
         row.getCell("outcome").setValue(0, null);
         row.getCell("price").setValue(1, null);
         row.getCell("cost").setValue(1, null);
-        DataRow<Cell> subTotalRow = formData.createDataRow();
-        subTotalRow.setAlias("itg1");
-        subTotalRow.setIndex(2);
-        subTotalRow.getCell("fix").setValue("Подитог", null);
-        for (String alias : Arrays.asList("count", "income", "outcome", "cost")) {
-            subTotalRow.getCell(alias).setValue(1, null);
-        }
-        dataRows.add(subTotalRow);
+
         testHelper.execute(FormDataEvent.CHECK);
         entries = testHelper.getLogger().getEntries();
         i = 0;
-        Assert.assertEquals("Строка 1: Графа  «Дата договора» должна принимать значение из следующего диапазона: 01.01.1991 - 31.12.2014!", entries.get(i++).getMessage());
+        Assert.assertEquals(String.format(ScriptUtils.CHECK_DATE_PERIOD, 1, "Дата договора","01.01.1991", "31.12.2014"), entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Значение графы «Дата заключения сделки» должно быть не меньше значения графы «Дата договора» и не больше 31.12.2014!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Графа «Признак физической поставки драгоценного металла» может содержать только одно из значений: ОМС, Физическая поставка!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Графа «Количество» должна быть заполнена значением «1»!", entries.get(i++).getMessage());
@@ -154,7 +146,6 @@ public class App_6_15Test extends ScriptTestBase {
         Assert.assertEquals("Строка 1: Значение графы «Цена (тариф) за единицу измерения без учета НДС, руб.» должно быть равно модулю разности значений граф «Сумма доходов Банка по данным бухгалтерского учета, руб.» и «Сумма расходов Банка по данным бухгалтерского учета, руб.»!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Значение графы «Итого стоимость без учета НДС, руб.» должно быть равно модулю разности значений граф «Сумма доходов Банка по данным бухгалтерского учета, руб.» и «Сумма расходов Банка по данным бухгалтерского учета, руб.»!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Значение графы «Дата совершения сделки» должно быть не меньше значения графы «Дата заключения сделки» и не больше 31.12.2014!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 2: Неверное итоговое значение по группе «A, string, 02.01.2990, графа 10 не задана, графа 11 не задана» в графе «Количество»", entries.get(i++).getMessage());
         Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
         testHelper.getLogger().clear();
 
@@ -175,8 +166,7 @@ public class App_6_15Test extends ScriptTestBase {
         row.getCell("price").setValue(1, null);
         row.getCell("cost").setValue(1, null);
         testHelper.execute(FormDataEvent.CHECK);
-        entries = testHelper.getLogger().getEntries();
-        i = 1;//отсутсвует подитоговая строка
+        i = 0;
         Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
         testHelper.getLogger().clear();
     }
@@ -275,6 +265,8 @@ public class App_6_15Test extends ScriptTestBase {
     // Проверить загруженные данные
     void checkLoadData(List<DataRow<Cell>> dataRows) {
         Assert.assertEquals(1, dataRows.get(0).getCell("name").getNumericValue().longValue());
+        Assert.assertEquals(1, dataRows.get(0).getCell("cost").getNumericValue().doubleValue(), 0);
+
         Assert.assertEquals(1, dataRows.get(0).getCell("cost").getNumericValue().doubleValue(), 0);
     }
 }

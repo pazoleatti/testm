@@ -159,11 +159,7 @@ void logicCheck() {
         checkNonEmptyColumns(row, rowNum, nonEmptyColumns, logger, true)
 
         // 2. Проверка корректности даты договора
-        if (row.docDate && (row.docDate < Date.parse('dd.MM.yyyy', '01.01.1991') || row.docDate > getReportPeriodEndDate())) {
-            def msg1 = getColumnName(row, 'docDate')
-            def msg2 = getReportPeriodEndDate().format('dd.MM.yyyy')
-            logger.error("Строка $rowNum: Графа «$msg1» должна принимать значение из следующего диапазона: 01.01.1991 - $msg2!")
-        }
+        checkDatePeriod(logger, row, 'docDate', Date.parse('dd.MM.yyyy', '01.01.1991'), getReportPeriodEndDate(), true)
 
         // 3. Проверка корректности даты сделки
         if (row.docDate && row.dealDate && (row.dealDate < row.docDate || row.dealDate > getReportPeriodEndDate())) {
@@ -250,6 +246,7 @@ void calc() {
     deleteAllAliased(dataRows)
 
     // Сортировка
+    refBookService.dataRowsDereference(logger, dataRows, formData.getFormColumns().findAll { groupColumns.contains(it.getAlias())})
     sortRows(dataRows, groupColumns)
 
     for (row in dataRows) {
@@ -270,7 +267,7 @@ void calc() {
     def total = calcTotalRow(dataRows)
     dataRows.add(total)
 
-    sortFormDataRows(false)
+    updateIndexes(dataRows)
 }
 
 def calcTotalRow(def dataRows) {
@@ -290,8 +287,7 @@ DataRow<Cell> calcItog(def int i, def List<DataRow<Cell>> dataRows) {
     def tmpRow = dataRows.get(i)
     def str = ''
     groupColumns.each { def n -> str = str + ((tmpRow.get(n) != null) ? tmpRow.get(n) : "").toString() }
-    key = str.hashCode()
-    def newRow = getSubTotalRow(i, key)
+    def newRow = getSubTotalRow(i, str.toLowerCase().hashCode())
 
     // Расчеты подитоговых значений
     def rows = []
@@ -342,7 +338,7 @@ String getValuesByGroupColumn(DataRow row) {
     } else {
         values.add('графа 6 не задана')
     }
-    return values.join(", ")
+    return values.join("; ")
 }
 
 // Получение импортируемых данных
@@ -404,8 +400,7 @@ void importData() {
             groupColumns.each {
                 def n -> str = str + ((tmpRowValue.get(n) != null) ? tmpRowValue.get(n) : "").toString()
             }
-            key = str.hashCode()
-            def subTotalRow = getNewSubTotalRowFromXls(key, rowValues, colOffset, fileRowIndex, rowIndex)
+            def subTotalRow = getNewSubTotalRowFromXls(str.toLowerCase().hashCode(), rowValues, colOffset, fileRowIndex, rowIndex)
             //наш ключ - row.getAlias() до решетки. так как индекс после решетки не равен у расчитанной и импортированной подитогововых строк
             def key = subTotalRow.getAlias().split('#')[0]
             if (totalRowFromFileMap[key] == null) {
@@ -589,9 +584,9 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
 
     // графа 4
     if (map != null) {
-        map = getRefBookValue(10, map.COUNTRY_CODE?.referenceValue)
-        if (map != null) {
-            formDataService.checkReferenceValue(10, values[colIndex], map.CODE?.stringValue, fileRowIndex, colIndex + colOffset, logger, false)
+        def countryMap = getRefBookValue(10, map.COUNTRY_CODE?.referenceValue)
+        if (countryMap != null) {
+            formDataService.checkReferenceValue(values[colIndex], [countryMap.CODE?.stringValue], getColumnName(newRow, 'countryCode'), map.NAME.value, fileRowIndex, colIndex + colOffset, logger, false)
         }
     }
     colIndex++

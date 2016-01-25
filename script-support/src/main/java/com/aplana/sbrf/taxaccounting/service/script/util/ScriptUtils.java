@@ -67,7 +67,8 @@ public final class ScriptUtils {
     public static final String REF_BOOK_TOO_MANY_FOUND_IMPORT_ERROR = "Проверка файла: Строка %d, столбец %s: В справочнике «%s» в атрибуте «%s» найдено более одного значения «%s», актуального на дату %s!";
     public static final String CHECK_OVERFLOW_MESSAGE = "Строка %d: Значение графы «%s» превышает допустимую разрядность (%d знаков). Графа «%s» рассчитывается как «%s»!";
     // для проверки итогов при загрузе экселя (посчитанные и ожижаемые значения как %s потому что %f теряет точность)
-    public static final String COMPARE_TOTAL_VALUES = "Строка формы %d: Итоговая сумма по графе «%s» (%s) некорректна (ожидаемое значение %s).";
+    public static final String COMPARE_TOTAL_VALUES = "Строка %d файла: Итоговое значение по графе «%s» (значение «%s») указано некорректно. Системой рассчитано значение «%s».";
+    public static final String COMPARE_TOTAL_VALUES_NULL = "Строка %d файла: Итоговое значение по графе «%s» не указано. Системой рассчитано значение «%s».";
     public static final String INN_JUR_PATTERN = RefBookUtils.INN_JUR_PATTERN;
     public static final String INN_JUR_MEANING = RefBookUtils.INN_JUR_MEANING;
     public static final String INN_IND_PATTERN = RefBookUtils.INN_IND_PATTERN;
@@ -107,8 +108,11 @@ public final class ScriptUtils {
     private static final String EMPTY_VALUE = "Строка %d: Графа «%s» содержит пустое значение, не соответствующее значению «%s» данной графы в макете налоговой формы!";
     private static final String EMPTY_EXPECTED_VALUE = "Строка %d: Графа «%s» содержит значение «%s», не соответствующее пустому значению данной графы в макете налоговой формы!";
     private static final String IMPORT_ROW_PREFIX = "Строка файла %d: %s";
+    public static final String CHECK_DATE_PERIOD = "Строка %d: Дата по графе «%s» должна принимать значение из диапазона: %s - %s!";
     @SuppressWarnings("unused")
     private static final String TRANSPORT_FILE_SUM_ERROR = "Итоговая сумма в графе %s строки %s в транспортном файле некорректна.";
+    public static final String TRANSPORT_FILE_SUM_ERROR_1 = "Строка %d файла: Итоговое значение по графе «%s» (значение «%s») указано некорректно. Системой рассчитано значение «%s»";
+    public static final String TRANSPORT_FILE_SUM_ERROR_2 = "Строка %d файла: Итоговое значение по графе «%s» не указано. Системой рассчитано значение «%s»";
     private static final String ROW_FILE_WRONG = "Строка файла %s содержит некорректное значение.";
     private static final String WRONG_XLS_COLUMN_INDEX = "Номер столбца должен быть больше ноля!";
     // разделитель между идентификаторами в ключе для кеширования записей справочника
@@ -481,7 +485,7 @@ public final class ScriptUtils {
             if (v1 == null && v2 == null) {
                 continue;
             }
-            if (v1 == null || v1 != null && !v1.equals(v2)) {
+            if (v1 == null || (v1 instanceof String && !((String) v1).equalsIgnoreCase((String) v2)) || (!(v1 instanceof String) && !v1.equals(v2))) {
                 return true;
             }
         }
@@ -765,8 +769,9 @@ public final class ScriptUtils {
                 }
 
                 for (String alias : groupColumns) {
-                    Object v1 = o1.getCell(alias).getValue();
-                    Object v2 = o2.getCell(alias).getValue();
+                    boolean isRefBook = Arrays.asList(ColumnType.REFBOOK, ColumnType.REFERENCE).contains(o1.getCell(alias).getColumn().getColumnType());
+                    Object v1 = isRefBook ? o1.getCell(alias).getRefBookDereference() : o1.getCell(alias).getValue();
+                    Object v2 = isRefBook ? o2.getCell(alias).getRefBookDereference() : o2.getCell(alias).getValue();
                     if (v1 == null && v2 == null) {
                         continue;
                     }
@@ -775,6 +780,14 @@ public final class ScriptUtils {
                     }
                     if (v1 != null && v2 == null) {
                         return -1;
+                    }
+                    if (v1 instanceof String) {
+                        int result = ((String) v1).compareToIgnoreCase((String) v2);
+                        if (result != 0) {
+                            return result;
+                        } else {
+                            continue;
+                        }
                     }
                     if (v1 instanceof Comparable) {
                         int result = ((Comparable) v1).compareTo(v2);
@@ -1753,20 +1766,24 @@ public final class ScriptUtils {
         for (String alias : columns) {
             BigDecimal value1 = totalRow.getCell(alias).getNumericValue();
             BigDecimal value2 = totalRowTmp.getCell(alias).getNumericValue();
-            if (value1 == null) {
-                value1 = BigDecimal.ZERO;
-            }
             if (value2 == null) {
                 value2 = BigDecimal.ZERO;
             }
-            value1 = round(value1, precision);
+            if (value1 != null) {
+                value1 = round(value1, precision);
+            }
             value2 = round(value2, precision);
-            if (!value1.equals(value2)) {
-                String msg = String.format(COMPARE_TOTAL_VALUES, totalRow.getIndex(), getColumnName(totalRow, alias), value1, value2);
-                if (required) {
-                    rowError(logger, totalRow, msg);
+            if (!value2.equals(value1)) {
+                String msg;
+                if (value1 == null) {
+                    msg = String.format(COMPARE_TOTAL_VALUES_NULL, totalRow.getImportIndex(), getColumnName(totalRow, alias).replace("%", "%%"), value2);
                 } else {
-                    rowWarning(logger, totalRow, msg);
+                    msg = String.format(COMPARE_TOTAL_VALUES, totalRow.getImportIndex(), getColumnName(totalRow, alias).replace("%", "%%"), value1, value2);
+                }
+                if (required) {
+                    logger.error(msg);
+                } else {
+                    logger.warn(msg);
                 }
             }
         }
@@ -1823,7 +1840,7 @@ public final class ScriptUtils {
     public static Long getTcoRecordId(String nameFromFile, String iksr, String iksrName, int fileRowIndex, int colIndex, Date endDate, boolean isVzl, Logger logger, RefBookFactory refBookFactory, Map<Long, Map<String, Object>> recordCache) {
         colIndex = colIndex + 1;
         if (iksr == null || iksr.isEmpty()) {
-            logger.warn("Строка %s , столбец %s: На форме не заполнены графы с общей информацией о %s, так как в файле отсутствует значение по графе «%s»!",
+            logger.warn("Строка %s, столбец %s: На форме не заполнены графы с общей информацией о %s, так как в файле отсутствует значение по графе «%s»!",
                     fileRowIndex, getXLSColumnName(colIndex), isVzl ? "ВЗЛ/РОЗ" : "юридическом лице",  iksrName);
             return null;
         }
@@ -1862,8 +1879,8 @@ public final class ScriptUtils {
                         nameFromFile = "наименование " + (isVzl ? "ВЗЛ/РОЗ" : "юридического лица") + " в файле не заполнено";
                     }
                     // сообщение 1
-                    logger.warn("Строка %s , столбец %s: %s в справочнике «Участники ТЦО» не найдено значение «%s» (%s), актуальное на дату «%s»!",
-                            fileRowIndex, getXLSColumnName(colIndex), isVzl ? "На форме не заполнены графы с общей информацией о ВЗЛ/РОЗ, так как" : ("Для заполнения графы «" + iksrName + "» формы"), iksr, nameFromFile, simpleDateFormat.format(endDate));
+                    logger.warn("Строка %s, столбец %s: На форме не заполнены графы с общей информацией о %s, так как в справочнике «Участники ТЦО» не найдено значение «%s» (%s), актуальное на дату «%s»!",
+                            fileRowIndex, getXLSColumnName(colIndex), isVzl ? "ВЗЛ/РОЗ" : "юридическом лице", iksr, nameFromFile, simpleDateFormat.format(endDate));
                 }
                 return null;
             }
@@ -1886,7 +1903,7 @@ public final class ScriptUtils {
                     break;
                 }
             }
-            logger.warn("Строка %s , столбец %s: На форме графы с общей информацией о %s заполнены данными записи справочника «Участники ТЦО», " +
+            logger.warn("Строка %s, столбец %s: На форме графы с общей информацией о %s заполнены данными записи справочника «Участники ТЦО», " +
                             "в которой атрибут «Полное наименование юридического лица с указанием ОПФ» = «%s», атрибут «%s» = «%s». %s",
                     fileRowIndex, getXLSColumnName(colIndex), isVzl ? "ВЗЛ/РОЗ" : "юридическом лице", record.get("NAME").getStringValue(), refBookAttributeName, iksr, msg);
         }
@@ -1928,7 +1945,7 @@ public final class ScriptUtils {
     public static void checkDatePeriod(Logger logger, DataRow<Cell> row, String alias, Date startDate, Date endDate, boolean fatal) {
         Date docDate = row.getCell(alias).getDateValue();
         if (docDate != null && (docDate.before(startDate) || docDate.after(endDate))) {
-            rowLog(logger, row, String.format("Строка %d: Графа «%s» должна принимать значение из следующего диапазона: %s - %s!",
+            rowLog(logger, row, String.format(CHECK_DATE_PERIOD,
                     row.getIndex(),
                     getColumnName(row, alias),
                     formatDate(startDate, "dd.MM.yyyy"),
@@ -1978,6 +1995,70 @@ public final class ScriptUtils {
      */
     public interface CheckGroupSum {
         String check(DataRow<Cell> row1, DataRow<Cell> row2);
+    }
+
+    /**
+     * Сравнить суммы из транспортного файла с посчитанными суммами и задать значения из строки тф в строку нф.
+     *
+     * @param totalRow строка с посчитанными суммами
+     * @param totalRowTF строка с суммами из транспортного файла
+     * @param columns список алиасов столбцов
+     * @param rowIndex номер строки файла
+     * @param logger логгер
+     * @param isFatal фатальность - ошибка / предупреждение
+     */
+    public static void checkAndSetTFSum(DataRow<Cell> totalRow, DataRow<Cell> totalRowTF, List<String> columns, int rowIndex, Logger logger, boolean isFatal) {
+        if (!logger.containsLevel(LogLevel.ERROR) && totalRowTF != null) {
+            // сравнение контрольных сумм
+            checkTFSum(totalRow, totalRowTF, columns, rowIndex, logger, isFatal);
+
+            // задать итоговой строке нф значения из итоговой строки тф
+            for (String alias : columns) {
+                BigDecimal value = totalRowTF.getCell(alias).getNumericValue();
+                totalRow.getCell(alias).setValue(value, null);
+            }
+        } else {
+            logger.warn("В транспортном файле не найдена итоговая строка");
+            // очистить итоги
+            for (String alias : columns) {
+                totalRow.getCell(alias).setValue(null, null);
+            }
+        }
+    }
+
+    /**
+     * Сравнить суммы из транспортного файла с посчитанными суммами.
+     *
+     * @param totalRow строка с посчитанными суммами
+     * @param totalRowTF строка с суммами из транспортного файла
+     * @param columns список алиасов столбцов
+     * @param rowIndex номер строки файла
+     * @param logger логгер
+     * @param isFatal фатальность - ошибка / предупреждение
+     */
+    public static void checkTFSum(DataRow<Cell> totalRow, DataRow<Cell> totalRowTF, List<String> columns, int rowIndex, Logger logger, boolean isFatal) {
+        for (String alias : columns) {
+            BigDecimal v1 = totalRowTF.getCell(alias).getNumericValue();
+            BigDecimal v2 = totalRow.getCell(alias).getNumericValue();
+            if (v1 == null && v2 == null) {
+                continue;
+            }
+            String msg = null;
+            if (v1 == null) {
+                // нет значения в тф
+                msg = String.format(TRANSPORT_FILE_SUM_ERROR_2, rowIndex, getColumnName(totalRow, alias), v2);
+            } else if (v1.compareTo(v2) != 0) {
+                // значения расходятся
+                msg = String.format(TRANSPORT_FILE_SUM_ERROR_1, rowIndex, getColumnName(totalRow, alias), v1, v2);
+            }
+            if (msg != null) {
+                if (isFatal) {
+                    logger.error("%s", msg);
+                } else {
+                    logger.warn("%s", msg);
+                }
+            }
+        }
     }
 
     static final class SheetHandler extends DefaultHandler {

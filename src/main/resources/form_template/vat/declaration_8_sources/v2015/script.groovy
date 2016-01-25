@@ -372,7 +372,7 @@ void logicCheck() {
         ReportPeriod reportPeriod =  reportPeriodService.get(formData.reportPeriodId)
         logger.info(String.format("Порядковый номер %s-%s текущего раздела декларации. Данные получены из налоговой формы: %s «%s» подразделения «%s» за %s %s.",
                 rowCountPrev, rowCount,
-                formData.kind.name, formData.formType.name,
+                formData.kind.title, formData.formType.name,
                 getRefBookValue(30, formData.departmentId)?.NAME?.value,
                 reportPeriod.name,
                 reportPeriod.taxPeriod?.year)

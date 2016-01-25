@@ -311,10 +311,16 @@ public class FormDestinationsView extends PopupViewWithUiHandlers<FormDestinatio
         List<Integer> departmens = new ArrayList<Integer>();
         Set<Long> kinds = new HashSet<Long>(formTypeKinds.size(), 1.1f);
         Set<Long> types = new HashSet<Long>(formTypeKinds.size(), 1.1f);
+        Set<Integer> performers = new HashSet<Integer>();
         for (FormTypeKind f: formTypeKinds){
             departmens.add(f.getDepartment().getId());
             kinds.add((long) f.getKind().getId());
             types.add(f.getFormTypeId());
+            if (f.getPerformers() != null && !f.getPerformers().isEmpty()) {
+                for (Department performer : f.getPerformers()) {
+                    performers.add(performer.getId());
+                }
+            }
         }
         // кнопки "создать" и "изменить"
         createButton.setVisible(false);
@@ -334,6 +340,8 @@ public class FormDestinationsView extends PopupViewWithUiHandlers<FormDestinatio
         formDataKind.setMultiSelect(true);
         formDataKind.setValue(new ArrayList<Long>(kinds), true);
         formDataKind.setEnabled(false);
+
+        performersPickerWidget.setValue(new ArrayList<Integer>(performers), true);
 
         updateSaveEditButtonsStatus();
     }

@@ -49,7 +49,7 @@
         <columnType>REFERENCE</columnType>
         <name>Страна регистрации</name>
         <order>5</order>
-        <width>8</width>
+        <width>7</width>
         <parentAlias>name</parentAlias>
         <refBookAttributeId>5204</refBookAttributeId>
         <refBookAttributeId2>50</refBookAttributeId2>
@@ -111,7 +111,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>cost</alias>
         <checking>false</checking>
-        <name>Итого стоимость без учета НДС, акцизов и пошлин, руб.</name>
+        <name>Итого стоимость без учета НДС, акцизов и пошлины, руб.</name>
         <order>12</order>
         <width>11</width>
         <maxLength>17</maxLength>

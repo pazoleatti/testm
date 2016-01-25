@@ -24,7 +24,7 @@ switch (formDataEvent) {
     case FormDataEvent.GET_HEADERS:
         headers.get(0).comparePeriod = 'Период сравнения, ' + (isBank() ? 'млн. руб.' : 'тыс. руб.')
         headers.get(0).currentPeriod = 'Период, ' + (isBank() ? 'млн. руб.' : 'тыс. руб.')
-        headers.get(1).deltaRub = '(гр.5-гр.4), ' + (isBank() ? 'млн. руб.' : 'тыс. руб.')
+        headers.get(1).deltaRub = '(гр.4-гр.3), ' + (isBank() ? 'млн. руб.' : 'тыс. руб.')
         break
     case FormDataEvent.CREATE:
         formDataService.checkUnique(formData, logger)

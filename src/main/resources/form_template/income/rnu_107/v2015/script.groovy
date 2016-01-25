@@ -159,7 +159,7 @@ void logicCheck() {
         checkNonEmptyColumns(row, rowNum, nonEmptyColumns, logger, true)
 
         // Проверка даты совершения сделки
-        checkDealDoneDate(logger, row, 'transDoneDate', getReportPeriodStartDate(), getReportPeriodEndDate(), true)
+        checkDatePeriod(logger, row, 'transDoneDate', getReportPeriodStartDate(), getReportPeriodEndDate(), true)
 
         // Проверка даты совершения операции
         if (row.transDoneDate && row.reasonDate && row.reasonDate > row.transDoneDate) {
@@ -169,10 +169,7 @@ void logicCheck() {
         }
 
         // Проверка даты основания совершения операции
-        if (row.reasonDate && (row.reasonDate < Date.parse('dd.MM.yyyy', '01.01.1991') || getReportPeriodEndDate() < row.reasonDate)) {
-            def msg = row.getCell('reasonDate').column.name
-            logger.error("Строка $rowNum: Дата, указанная в графе «%s» должна принимать значение из следующего диапазона: 01.01.1991 - %s!", msg, getReportPeriodEndDate().format('dd.MM.yyyy'))
-        }
+        checkDatePeriod(logger, row, 'reasonDate', Date.parse('dd.MM.yyyy', '01.01.1991'), getReportPeriodEndDate(), true)
 
         // Проверка положительного тарифа за оказание услуги
         if (row.dealTariff != null && row.taxTariff != null && (row.dealTariff < 0 || row.taxTariff < 0)) {
@@ -197,7 +194,7 @@ void logicCheck() {
         if (row.sum2 != null && row.sum3 != null && row.sum3 < row.sum2) {
             def msg = row.getCell('sum2').column.name
             def msg1 = row.getCell('sum3').column.name
-            logger.error("Строка $rowNum: Значение графы «$msg1» должно быть не меньше значению графы «$msg»!")
+            logger.error("Строка $rowNum: Значение графы «$msg1» должно быть не меньше значения графы «$msg»!")
         }
 
         // Проверка суммы доначисления дохода
@@ -246,6 +243,7 @@ void calc() {
     }
 
     // Сортировка
+    refBookService.dataRowsDereference(logger, dataRows, formData.getFormColumns().findAll { groupColumns.contains(it.getAlias())})
     sortRows(dataRows, groupColumns)
 
     // Добавление подитогов
@@ -260,7 +258,7 @@ void calc() {
     def total = calcTotalRow(dataRows)
     dataRows.add(total)
 
-    sortFormDataRows(false)
+    updateIndexes(dataRows)
 }
 
 def calc12(def row) {
@@ -281,7 +279,7 @@ def calcTotalRow(def dataRows) {
     def totalRow = (formDataEvent in [FormDataEvent.IMPORT, FormDataEvent.IMPORT_TRANSPORT_FILE]) ? formData.createStoreMessagingDataRow() : formData.createDataRow()
     totalRow.setAlias('total')
     totalRow.fix = 'Всего'
-    totalRow.getCell('fix').colSpan = 2
+    totalRow.getCell('fix').colSpan = 3
     allColumns.each {
         totalRow.getCell(it).setStyleAlias('Контрольные суммы')
     }
@@ -383,10 +381,7 @@ void importData() {
             // для этих подитогов из файла нет групп
             totalRowFromFileMap.each { key, totalRows ->
                 totalRows.each { totalRow ->
-                    totalColumns.each { alias ->
-                        def msg = String.format(COMPARE_TOTAL_VALUES, totalRow.getIndex(), getColumnName(totalRow, alias), totalRow[alias], BigDecimal.ZERO)
-                        rowWarning(logger, totalRow, msg)
-                    }
+                    rowWarning(logger, totalRow, String.format(GROUP_WRONG_ITOG_ROW, totalRow.getIndex()))
                 }
             }
         }
@@ -533,7 +528,7 @@ DataRow<Cell> getSubTotalRow(int i) {
     def newRow = (formDataEvent in [FormDataEvent.IMPORT, FormDataEvent.IMPORT_TRANSPORT_FILE]) ? formData.createStoreMessagingDataRow() : formData.createDataRow()
     newRow.fix = 'Итого'
     newRow.setAlias('itg#'.concat(i.toString()))
-    newRow.getCell('fix').colSpan = 2
+    newRow.getCell('fix').colSpan = 3
     allColumns.each {
         newRow.getCell(it).setStyleAlias('Контрольные суммы')
     }

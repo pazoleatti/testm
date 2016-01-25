@@ -66,7 +66,7 @@ ALIAS : ('a'..'z'|'A'..'Z'|'_')+  ('a'..'z'|'A'..'Z'|DIGIT|'_')*;
 FLOAT	: DIGIT+ '.' DIGIT+;
 
 string : STRING;
-STRING :  '\'' (~('\'') | '\\\'')* '\'';
+STRING :  '\'' (~('\'') | '\\\'' | ('\'')+('%'))* '\'';
 IS_NULL : ('I'|'i')('S'|'s') ' '+ ('N'|'n')('U'|'u')('L'|'l')('L'|'l');
 
 fragment

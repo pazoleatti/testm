@@ -7,6 +7,7 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.refbook.impl.RefBookUniversal;
+import com.aplana.sbrf.taxaccounting.service.script.util.ScriptUtils;
 import com.aplana.sbrf.taxaccounting.util.ScriptTestBase;
 import com.aplana.sbrf.taxaccounting.util.TestScriptHelper;
 import com.aplana.sbrf.taxaccounting.util.mock.ScriptTestMockHelper;
@@ -133,7 +134,7 @@ public class App_6_11Test extends ScriptTestBase {
         entries = testHelper.getLogger().getEntries();
         i = 0;
         Assert.assertEquals("Строка 1: Значение графы «Дата сделки (поставки)» должно быть не меньше значения графы «Дата (заключения) сделки» и не больше 31.12.2014!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Графа «Дата договора» должна принимать значение из следующего диапазона: 01.01.1991 - 31.12.2014!", entries.get(i++).getMessage());
+        Assert.assertEquals(String.format(ScriptUtils.CHECK_DATE_PERIOD, 1, "Дата договора","01.01.1991", "31.12.2014"), entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Значение графы «Дата (заключения) сделки» должно быть не меньше значения графы «Дата договора» и не больше 31.12.2014!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Значение графы «Цена за 1 шт., руб.» должно быть равно отношению значений граф «Сумма сделки (с учетом НКД), руб.» и «Количество бумаг по сделке, шт.»!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Значение графы «Сумма сделки (с учетом НКД), в валюте расчетов» должно быть больше или равно «0»!", entries.get(i++).getMessage());
@@ -183,9 +184,7 @@ public class App_6_11Test extends ScriptTestBase {
         testHelper.setImportFileInputStream(getImportXlsInputStream());
         testHelper.execute(FormDataEvent.IMPORT);
         List<String> aliases = Arrays.asList("dealDate", "currencySum", "courseCB", "sum",  "docNumber", "docDate", "dealDoneDate", "bondRegCode", "count", "price");
-        // ожидается 4 строки: 3 из файла + 1 итоговая строка
-        int expected = 3 + 1;
-        defaultCheckLoadData(aliases, expected);
+        defaultCheckLoadData(aliases, 3);
 
         checkLogger();
         // "name", "dealMode", "currencyCode", "transactionType"
@@ -203,10 +202,44 @@ public class App_6_11Test extends ScriptTestBase {
         testHelper.execute(FormDataEvent.IMPORT_TRANSPORT_FILE);
         List<String> aliases = Arrays.asList("dealDate", "currencySum", "courseCB", "sum", "docNumber", "docDate", "dealDoneDate", "bondRegCode", "count", "price");
         // ожидается 4 строки
-        int expected = 4;
+        int expected = 3;
         defaultCheckLoadData(aliases, expected);
 
         checkLoadData(testHelper.getDataRowHelper().getAll());
+
+        // проверка расчетов
+        testHelper.execute(FormDataEvent.CALCULATE);
+        checkAfterCalc(testHelper.getDataRowHelper().getAll());
+    }
+
+    // Проверить загруженные данные
+    void checkLoadData(List<DataRow<Cell>> dataRows) {
+        Assert.assertEquals(1L, dataRows.get(0).getCell("name").getNumericValue().longValue());
+        Assert.assertEquals(2L, dataRows.get(1).getCell("name").getNumericValue().longValue());
+        Assert.assertEquals(3L, dataRows.get(2).getCell("name").getNumericValue().longValue());
+
+        Assert.assertEquals(1L, dataRows.get(0).getCell("dealMode").getNumericValue().longValue());
+        Assert.assertEquals(2L, dataRows.get(1).getCell("dealMode").getNumericValue().longValue());
+        Assert.assertEquals(3L, dataRows.get(2).getCell("dealMode").getNumericValue().longValue());
+
+        Assert.assertEquals(1L, dataRows.get(0).getCell("currencyCode").getNumericValue().longValue());
+        Assert.assertEquals(2L, dataRows.get(1).getCell("currencyCode").getNumericValue().longValue());
+        Assert.assertEquals(3L, dataRows.get(2).getCell("currencyCode").getNumericValue().longValue());
+
+        Assert.assertEquals(1L, dataRows.get(0).getCell("transactionType").getNumericValue().longValue());
+        Assert.assertEquals(2L, dataRows.get(1).getCell("transactionType").getNumericValue().longValue());
+        Assert.assertEquals(3L, dataRows.get(2).getCell("transactionType").getNumericValue().longValue());
+
+        Assert.assertEquals(3, dataRows.size());
+    }
+
+    // Проверить расчеты
+    void checkAfterCalc(List<DataRow<Cell>> dataRows) {
+        Assert.assertEquals(0.75, dataRows.get(0).getCell("price").getNumericValue().doubleValue(), 0);
+        Assert.assertEquals(0.89, dataRows.get(1).getCell("price").getNumericValue().doubleValue(), 0);
+        Assert.assertEquals(0.93, dataRows.get(2).getCell("price").getNumericValue().doubleValue(), 0);
+
+        Assert.assertEquals(3, dataRows.size());
     }
 
     void mockBeforeImport() {
@@ -266,37 +299,6 @@ public class App_6_11Test extends ScriptTestBase {
                         return result;
                     }
                 });
-    }
-
-    // Проверить загруженные данные
-    void checkLoadData(List<DataRow<Cell>> dataRows) {
-        Assert.assertEquals(1L, dataRows.get(0).getCell("name").getNumericValue().longValue());
-        Assert.assertEquals(2L, dataRows.get(1).getCell("name").getNumericValue().longValue());
-        Assert.assertEquals(3L, dataRows.get(2).getCell("name").getNumericValue().longValue());
-
-        Assert.assertEquals(1L, dataRows.get(0).getCell("dealMode").getNumericValue().longValue());
-        Assert.assertEquals(2L, dataRows.get(1).getCell("dealMode").getNumericValue().longValue());
-        Assert.assertEquals(3L, dataRows.get(2).getCell("dealMode").getNumericValue().longValue());
-
-        Assert.assertEquals(1L, dataRows.get(0).getCell("currencyCode").getNumericValue().longValue());
-        Assert.assertEquals(2L, dataRows.get(1).getCell("currencyCode").getNumericValue().longValue());
-        Assert.assertEquals(3L, dataRows.get(2).getCell("currencyCode").getNumericValue().longValue());
-
-        Assert.assertEquals(1L, dataRows.get(0).getCell("transactionType").getNumericValue().longValue());
-        Assert.assertEquals(2L, dataRows.get(1).getCell("transactionType").getNumericValue().longValue());
-        Assert.assertEquals(3L, dataRows.get(2).getCell("transactionType").getNumericValue().longValue());
-    }
-
-    // Проверить расчеты
-    void checkAfterCalc(List<DataRow<Cell>> dataRows) {
-        Assert.assertEquals(0.75, dataRows.get(0).getCell("price").getNumericValue().doubleValue(), 0);
-        Assert.assertEquals(0.89, dataRows.get(1).getCell("price").getNumericValue().doubleValue(), 0);
-        Assert.assertEquals(0.93, dataRows.get(2).getCell("price").getNumericValue().doubleValue(), 0);
-
-        Assert.assertNull(dataRows.get(3).getCell("price").getValue());
-        Assert.assertEquals(18, dataRows.get(3).getCell("currencySum").getNumericValue().intValue());
-        Assert.assertEquals(24, dataRows.get(3).getCell("sum").getNumericValue().doubleValue(), 0);
-        Assert.assertEquals(27, dataRows.get(3).getCell("count").getNumericValue().doubleValue(), 0);
     }
 }
 

@@ -49,7 +49,7 @@
         <checking>false</checking>
         <name>Код страны по классификатору ОКСМ</name>
         <order>5</order>
-        <width>8</width>
+        <width>7</width>
         <parentAlias>name</parentAlias>
         <refBookAttributeId>5204</refBookAttributeId>
         <refBookAttributeId2>50</refBookAttributeId2>

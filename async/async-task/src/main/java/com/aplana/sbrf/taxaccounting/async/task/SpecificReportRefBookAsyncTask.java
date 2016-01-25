@@ -64,6 +64,8 @@ public abstract class SpecificReportRefBookAsyncTask extends AbstractAsyncTask  
         RefBookAttribute sortAttribute = null;
         if (params.containsKey("sortAttribute"))
             sortAttribute = refBookFactory.get(refBookId).getAttribute((Long)params.get("sortAttribute"));
+        if (filter.isEmpty())
+            filter = null;
         Boolean isSortAscending = (Boolean)params.get("isSortAscending");
         TAUserInfo userInfo = new TAUserInfo();
         userInfo.setUser(userService.getUser(userId));

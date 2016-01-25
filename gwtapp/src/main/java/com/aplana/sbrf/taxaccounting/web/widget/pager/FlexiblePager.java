@@ -151,7 +151,7 @@ public class FlexiblePager extends AbstractPager {
 	/**
 	 * The location of the text relative to the paging buttons.
 	 */
-	public enum TextLocation {
+	public static enum TextLocation {
 		CENTER, LEFT, RIGHT;
 	}
 

@@ -7,6 +7,7 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.refbook.impl.RefBookUniversal;
+import com.aplana.sbrf.taxaccounting.service.script.util.ScriptUtils;
 import com.aplana.sbrf.taxaccounting.util.ScriptTestBase;
 import com.aplana.sbrf.taxaccounting.util.TestScriptHelper;
 import com.aplana.sbrf.taxaccounting.util.mock.ScriptTestMockHelper;
@@ -91,14 +92,6 @@ public class App_6_14Test extends ScriptTestBase {
         DataRow<Cell> row = formData.createDataRow();
         row.setIndex(1);
         dataRows.add(row);
-        DataRow<Cell> subTotalRow = formData.createDataRow();
-        subTotalRow.setAlias("itg1");
-        subTotalRow.setIndex(2);
-        subTotalRow.getCell("fix").setValue("Подитог", null);
-        for (String alias : Arrays.asList("income", "outcome", "price", "cost")) {
-            subTotalRow.getCell(alias).setValue(0, null);
-        }
-        dataRows.add(subTotalRow);
         testHelper.execute(FormDataEvent.CHECK);
         List<LogEntry> entries = testHelper.getLogger().getEntries();
         int i = 0;
@@ -133,17 +126,15 @@ public class App_6_14Test extends ScriptTestBase {
         row.getCell("outcome").setValue(0, null);
         row.getCell("price").setValue(1, null);
         row.getCell("cost").setValue(1, null);
-        subTotalRow.getCell("income").setValue(1, null);
         testHelper.execute(FormDataEvent.CHECK);
         entries = testHelper.getLogger().getEntries();
         i = 0;
-        Assert.assertEquals("Строка 1: Графа  «Дата договора» должна принимать значение из следующего диапазона: 01.01.1991 - 31.12.2014!", entries.get(i++).getMessage());
+        Assert.assertEquals(String.format(ScriptUtils.CHECK_DATE_PERIOD, 1, "Дата договора","01.01.1991", "31.12.2014"), entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Значение графы «Дата заключения сделки» должно быть не меньше значения графы «Дата договора» и не больше 31.12.2014!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Значение обеих граф «Сумма расходов Банка по данным бухгалтерского учета, руб.», «Сумма доходов Банка по данным бухгалтерского учета, руб.» должно быть неотрицательным, значение хотя бы одной из данных граф должно быть строго больше «0»!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Значение графы «Цена (тариф) за единицу измерения, руб.» должно быть равно модулю разности значений граф «Сумма доходов Банка по данным бухгалтерского учета, руб.» и «Сумма расходов Банка по данным бухгалтерского учета, руб.»!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Значение графы «Итого стоимость, руб.» должно быть равно модулю разности значений граф «Сумма доходов Банка по данным бухгалтерского учета, руб.» и «Сумма расходов Банка по данным бухгалтерского учета, руб.»!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Значение графы «Дата совершения сделки» должно быть не меньше значения графы «Дата заключения сделки» и не больше 31.12.2014!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 2: Неверное итоговое значение по группе «A, string, 02.01.2990, A» в графе «Сумма доходов Банка по данным бухгалтерского учета, руб.»", entries.get(i++).getMessage());
         Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
         testHelper.getLogger().clear();
 
@@ -159,7 +150,6 @@ public class App_6_14Test extends ScriptTestBase {
         row.getCell("income").setValue(1L, null);
         row.getCell("outcome").setValue(1L, null);
         testHelper.execute(FormDataEvent.CALCULATE);
-        entries = testHelper.getLogger().getEntries();
         i = 0;
         Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
         testHelper.getLogger().clear();
@@ -265,15 +255,19 @@ public class App_6_14Test extends ScriptTestBase {
     // Проверить загруженные данные
     void checkLoadData(List<DataRow<Cell>> dataRows) {
         Assert.assertEquals(1L, dataRows.get(0).getCell("name").getNumericValue().longValue());
+        Assert.assertEquals(2L, dataRows.get(1).getCell("name").getNumericValue().longValue());
         Assert.assertEquals(2L, dataRows.get(2).getCell("name").getNumericValue().longValue());
-        Assert.assertEquals(2L, dataRows.get(3).getCell("name").getNumericValue().longValue());
+
+        Assert.assertEquals(3, dataRows.size());
     }
 
     // Проверить расчеты
     void checkAfterCalc(List<DataRow<Cell>> dataRows) {
         Assert.assertEquals(0, dataRows.get(0).getCell("price").getNumericValue().doubleValue(), 0);
         Assert.assertEquals(0, dataRows.get(1).getCell("price").getNumericValue().doubleValue(), 0);
-        Assert.assertEquals(0, dataRows.get(3).getCell("price").getNumericValue().doubleValue(), 0);
+        Assert.assertEquals(0, dataRows.get(2).getCell("price").getNumericValue().doubleValue(), 0);
+
+        Assert.assertEquals(3, dataRows.size());
     }
 }
 

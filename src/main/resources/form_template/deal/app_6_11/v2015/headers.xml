@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <rows>
     <row alias="">
-        <cell alias="fix" colSpan="19" rowSpan="1" value="Полная форма"/>
-        <cell alias="rowNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="rowNumber" colSpan="18" rowSpan="1" value="Полная форма"/>
         <cell alias="dealDate" colSpan="1" rowSpan="1"/>
         <cell alias="name" colSpan="1" rowSpan="1"/>
         <cell alias="dealMode" colSpan="1" rowSpan="1"/>
@@ -22,8 +21,7 @@
         <cell alias="transactionType" colSpan="1" rowSpan="1"/>
     </row>
     <row alias="">
-        <cell alias="fix" colSpan="19" rowSpan="1" value="Данные для заполнения Уведомления о сделках с ценными бумагами, признаваемых Контролируемыми сделками (заполняются по итогам года)"/>
-        <cell alias="rowNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="rowNumber" colSpan="18" rowSpan="1" value="Данные для заполнения Уведомления о сделках с ценными бумагами, признаваемых Контролируемыми сделками (заполняются по итогам года)"/>
         <cell alias="dealDate" colSpan="1" rowSpan="1"/>
         <cell alias="name" colSpan="1" rowSpan="1"/>
         <cell alias="dealMode" colSpan="1" rowSpan="1"/>
@@ -43,8 +41,7 @@
         <cell alias="transactionType" colSpan="1" rowSpan="1"/>
     </row>
     <row alias="">
-        <cell alias="fix" colSpan="2" rowSpan="3" value="№ п/п"/>
-        <cell alias="rowNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="rowNumber" colSpan="1" rowSpan="3" value="№ п/п"/>
         <cell alias="dealDate" colSpan="10" rowSpan="1" value="Сокращенная форма"/>
         <cell alias="name" colSpan="1" rowSpan="1"/>
         <cell alias="dealMode" colSpan="1" rowSpan="1"/>
@@ -64,7 +61,6 @@
         <cell alias="transactionType" colSpan="1" rowSpan="3" value="Тип сделки"/>
     </row>
     <row alias="">
-        <cell alias="fix" colSpan="1" rowSpan="1"/>
         <cell alias="rowNumber" colSpan="1" rowSpan="1"/>
         <cell alias="dealDate" colSpan="10" rowSpan="1" value="Данные для расчета сумм доходов по сделкам"/>
         <cell alias="name" colSpan="1" rowSpan="1"/>
@@ -85,7 +81,6 @@
         <cell alias="transactionType" colSpan="1" rowSpan="1"/>
     </row>
     <row alias="">
-        <cell alias="fix" colSpan="1" rowSpan="1"/>
         <cell alias="rowNumber" colSpan="1" rowSpan="1"/>
         <cell alias="dealDate" colSpan="1" rowSpan="1" value="Дата сделки (поставки)"/>
         <cell alias="name" colSpan="1" rowSpan="1" value="Наименование контрагента и ОПФ"/>
@@ -106,8 +101,7 @@
         <cell alias="transactionType" colSpan="1" rowSpan="1"/>
     </row>
     <row alias="">
-        <cell alias="fix" colSpan="2" rowSpan="1" value="гр. 1"/>
-        <cell alias="rowNumber" colSpan="1" rowSpan="1"/>
+        <cell alias="rowNumber" colSpan="1" rowSpan="1" value="гр. 1"/>
         <cell alias="dealDate" colSpan="1" rowSpan="1" value="гр. 2"/>
         <cell alias="name" colSpan="1" rowSpan="1" value="гр. 3"/>
         <cell alias="dealMode" colSpan="1" rowSpan="1" value="гр. 4"/>
