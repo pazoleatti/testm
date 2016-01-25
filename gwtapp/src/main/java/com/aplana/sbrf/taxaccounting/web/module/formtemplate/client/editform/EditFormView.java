@@ -138,6 +138,7 @@ public class EditFormView extends ViewWithUiHandlers<EditFormUiHandlers>
     @UiHandler("formTypeCode")
     public void onFormTypeCodeKeyUp(ChangeEvent event){
         if (formTypeCode.getValue().length() > 9){
+            Dialog.infoMessage("Длина кода формы должна быть от 0 до 9 символов.");
             formTypeCode.setValue(formTypeCode.getValue().substring(0, 9));
         }
     }
