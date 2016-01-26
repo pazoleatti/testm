@@ -100,7 +100,7 @@ public interface RefBookDataProvider {
      * @param uniqueRecordIds список уникальных идентификаторов версий записей справочника
      * @return все записи существуют?
      */
-    boolean isRecordsExist(List<Long> uniqueRecordIds);
+    List<Long> isRecordsExist(List<Long> uniqueRecordIds);
 
     /**
 	 * Загружает данные иерархического справочника на определенную дату актуальности

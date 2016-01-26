@@ -3105,12 +3105,33 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 	}
 
     @Override
-    public boolean isRecordsExist(List<Long> uniqueRecordIds) {
-        return getJdbcTemplate().queryForObject(String.format("select count (*) from ref_book_record where %s", SqlUtils.transformToSqlInStatement("id", uniqueRecordIds)), Integer.class) == uniqueRecordIds.size();
+    public List<Long> isRecordsExist(Set<Long> uniqueRecordIds) {
+        //Исключаем несуществующие записи
+        String sql = String.format("select id from ref_book_record where %s and status != -1", SqlUtils.transformToSqlInStatement("id", uniqueRecordIds));
+        List<Long> recordIds = new LinkedList<Long>(uniqueRecordIds);
+        List<Long> existRecords = new ArrayList<Long>();
+        try {
+            //Получаем список существующих записей среди входного набора
+            existRecords = getJdbcTemplate().query(sql, new RowMapper<Long>() {
+                @Override
+                public Long mapRow(ResultSet rs, int rowNum) throws SQLException {
+                    return rs.getLong("id");
+                }
+            });
+        } catch (EmptyResultDataAccessException ignored) {}
+
+        for (Iterator<Long> it = recordIds.iterator(); it.hasNext();) {
+            Long recordId = it.next();
+            //Если запись не найдена среди существующих, то проставляем статус и удаляем ее из списка для остальных проверок
+            if (existRecords.contains(recordId)) {
+                it.remove();
+            }
+        }
+        return recordIds;
     }
 
     @Override
     public boolean isRefBookExist(long refBookId) {
-        return getJdbcTemplate().queryForObject("select count(*) from ref_book where id = ?", new Object[]{refBookId}, Integer.class) > 0;
+        return getJdbcTemplate().queryForObject("select count(*) from ref_book where id = ? and status != -1", new Object[]{refBookId}, Integer.class) > 0;
     }
 }

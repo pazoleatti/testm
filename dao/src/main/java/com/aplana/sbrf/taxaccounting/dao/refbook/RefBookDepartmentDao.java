@@ -127,5 +127,5 @@ public interface RefBookDepartmentDao {
      */
     String getReportPeriodNameByDate(TaxType taxType, Date startDate);
 
-    boolean isRecordsExist(List<Long> uniqueRecordIds);
+    List<Long> isRecordsExist(List<Long> uniqueRecordIds);
 }

@@ -662,9 +662,9 @@ public interface RefBookDao {
     /**
      * Проверяет, существуют ли указанные версии элемента справочника
      * @param uniqueRecordIds список уникальных идентификаторов версий записей справочника
-     * @return все записи существуют?
+     * @return список записей, которые не существуют
      */
-    boolean isRecordsExist(List<Long> uniqueRecordIds);
+    List<Long> isRecordsExist(Set<Long> uniqueRecordIds);
 
     /**
      * Проверяет, существует ли указанный справочник
