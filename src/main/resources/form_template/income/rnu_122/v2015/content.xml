@@ -57,7 +57,7 @@
         <width>8</width>
         <parentAlias>name</parentAlias>
         <refBookAttributeId>5204</refBookAttributeId>
-        <refBookAttributeId2>53</refBookAttributeId2>
+        <refBookAttributeId2>54</refBookAttributeId2>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
         <alias>code</alias>
