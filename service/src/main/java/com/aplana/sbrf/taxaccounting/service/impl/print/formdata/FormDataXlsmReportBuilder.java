@@ -5,7 +5,6 @@ import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.formdata.AbstractCell;
 import com.aplana.sbrf.taxaccounting.model.formdata.HeaderCell;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
-import com.aplana.sbrf.taxaccounting.service.DiffService;
 import com.aplana.sbrf.taxaccounting.service.impl.print.AbstractReportBuilder;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -34,7 +33,9 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
 
     private static final Log LOG = LogFactory.getLog(FormDataXlsmReportBuilder.class);
 
-    private int rowNumber = 9;
+    private final int ROW_NUMBER = 9;
+
+    private int rowNumber = ROW_NUMBER;
 
     private boolean isShowChecked;
 
@@ -65,7 +66,7 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
         }
 
         /**
-         * Получить стриль для ячейки excel'я.
+         * Получить стиль для ячейки excel'я.
          *
          * @param value тип ячейки (дата, число, строка, ...)
          * @param alias алиас столбца
@@ -75,7 +76,7 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
         }
 
         /**
-         * Получить стриль для ячейки excel'я.
+         * Получить стиль для ячейки excel'я.
          *
          * @param value тип ячейки (дата, число, строка, ...)
          * @param alias алиас столбца
@@ -346,6 +347,7 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
             }
             rowNumber++;
         }
+        autoSizeHeaderRowsHeight();
     }
 
     @Override
@@ -627,5 +629,43 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
                 : r.createCell(ar.getFirstCell().getCol()).getCellStyle());
         }
         c.setCellValue(richTextString);
+    }
+
+    private void autoSizeHeaderRowsHeight() {
+        Map<Integer, Integer> map = new HashMap<Integer, Integer>();
+        for (int i = 0; i < sheet.getNumMergedRegions(); i++) {
+            CellRangeAddress mergedRegion = sheet.getMergedRegion(i);
+            if (mergedRegion.getFirstRow() >= ROW_NUMBER && mergedRegion.getLastRow() - mergedRegion.getFirstRow() == 1) {
+                Cell firstRowCell = sheet.getRow(mergedRegion.getFirstRow()).getCell(mergedRegion.getFirstColumn());
+
+                int columnWidth = (int) (formTemplate.getColumns().get(firstRowCell.getColumnIndex()).getWidth() * 1.7);
+                int firstRowCellLinesCount = getLinesCount(firstRowCell.getStringCellValue(), columnWidth) - 1;
+                int firstRowIndex = firstRowCell.getRowIndex();
+                if (map.get(firstRowIndex) == null) {
+                    map.put(firstRowIndex, firstRowCellLinesCount);
+                } else if (map.get(firstRowIndex) < firstRowCellLinesCount) {
+                    map.put(firstRowIndex, firstRowCellLinesCount);
+                }
+            }
+        }
+
+        for (Map.Entry<Integer, Integer> entry : map.entrySet()) {
+            sheet.getRow(entry.getKey()).setHeight((short) (sheet.getDefaultRowHeight() * entry.getValue()));
+        }
+    }
+
+    private int getLinesCount(String string, int width) {
+        if (string.length() > 0 && width > 0) {
+            char[] chars = string.toCharArray();
+            int linesCount = 0;
+            for (int i = 0; i < chars.length; ) {
+                linesCount++;
+                i += width;
+            }
+            return linesCount;
+        } else if (string.length() > 0 && width == 0) {
+            return 1;
+        }
+        return 0;
     }
 }
