@@ -92,6 +92,7 @@ public class Rnu_122Test extends ScriptTestBase {
 
         List<LogEntry> entries = testHelper.getLogger().getEntries();
         int i = 0;
+
         Assert.assertEquals("Строка 1: Графа «Наименование Взаимозависимого лица/резидента оффшорной зоны» не заполнена!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Графа «Код классификации дохода / расхода» не заполнена!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Графа «Номер» не заполнена!", entries.get(i++).getMessage());
@@ -104,10 +105,10 @@ public class Rnu_122Test extends ScriptTestBase {
         Assert.assertEquals("Строка 1: Графа «Дата окончания» не заполнена!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Графа «База для расчета, кол. дней» не заполнена!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Графа «Плата по условиям сделки,% год./ед. вал.» не заполнена!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Графа «Ед. вал.» не заполнена!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Графа «Руб.» не заполнена!", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 1: Графа «Сумма фактического дохода / расхода, Ед. вал.» не заполнена!", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 1: Графа «Сумма фактического дохода / расхода, Руб.» не заполнена!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Графа «Рыночная Плата, % годовых / ед. вал.» не заполнена!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Графа «Руб.» не заполнена!", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 1: Графа «Рыночная сумма дохода (расхода), выраженная в: Руб.» не заполнена!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Графа «Сумма доначисления дохода (корректировки расхода) до рыночного уровня (руб.)» не заполнена!", entries.get(i++).getMessage());
         Assert.assertEquals("Группа «графа 5 не задана» не имеет строки подитога!", entries.get(i++).getMessage());
 

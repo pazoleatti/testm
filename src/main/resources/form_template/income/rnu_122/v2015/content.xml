@@ -168,7 +168,7 @@
         <alias>sum2</alias>
         <checking>false</checking>
         <columnType>NUMBER</columnType>
-        <name>Ед. вал.</name>
+        <name>Сумма фактического дохода / расхода, Ед. вал.</name>
         <order>17</order>
         <width>11</width>
         <maxLength>17</maxLength>
@@ -178,7 +178,7 @@
         <alias>sum3</alias>
         <checking>false</checking>
         <columnType>NUMBER</columnType>
-        <name>Руб.</name>
+        <name>Сумма фактического дохода / расхода, Руб.</name>
         <order>18</order>
         <width>18</width>
         <maxLength>17</maxLength>
@@ -198,7 +198,7 @@
         <alias>sum4</alias>
         <checking>false</checking>
         <columnType>NUMBER</columnType>
-        <name>Ед. вал.</name>
+        <name>Рыночная сумма дохода (расхода), выраженная в: Ед. вал.</name>
         <order>20</order>
         <width>11</width>
         <maxLength>17</maxLength>
@@ -208,7 +208,7 @@
         <alias>sum5</alias>
         <checking>false</checking>
         <columnType>NUMBER</columnType>
-        <name>Руб.</name>
+        <name>Рыночная сумма дохода (расхода), выраженная в: Руб.</name>
         <order>21</order>
         <width>11</width>
         <maxLength>17</maxLength>

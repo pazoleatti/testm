@@ -466,7 +466,6 @@ void calc() {
     for (row in dataRows) {
         // графа 22
         row.sum4 = calc22(row)
-        logger.info("%s", calc22(row))
         // графа 24
         row.sum5 = calc24(row)
         // графа 25
