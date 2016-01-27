@@ -79,7 +79,7 @@
                         <style:LeftBar marginRight="10" childValign="middle" height="100%">
                             <g:Label ui:field="editModeLabel" visible="false" text="Режим редактирования" addStyleNames="{style.editModeLabel}, {style.marginRight5}"/>
                             <style:DropdownButton ui:field="printAnchor" text="Формирование отчетов" img="resources/img/printer-16.png"
-                                                  title="Формирование отчето" panelStyleName="{style.printAnchor}"/>
+                                                  title="Формирование отчетов" panelStyleName="{style.printAnchor}"/>
                         </style:LeftBar>
                     </fm:Right>
                 </fm:right>

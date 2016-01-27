@@ -260,12 +260,12 @@ public class FormDataServiceImpl implements FormDataService {
                 if (isInner) {
                     if (ScriptStatus.DEFAULT.equals(scriptStatusHolder.getScriptStatus())) {
                         // стандартное поведение (при ошибках - откат)
-                        throw new ServiceException("Есть критические ошибки при выполнении скрипта");
+                        throw new ServiceException();
                     } else if (ScriptStatus.SUCCESS.equals(scriptStatusHolder.getScriptStatus())) {
                         // измененное поведение (без отката при ошибках)
                         logger.warn("Найдены ошибки при выполнении скрипта");
                     } else {
-                        throw new ServiceException("Есть критические ошибки при выполнении скрипта");
+                        throw new ServiceException();
                     }
                 } else {
                     if (stateLogger != null) {
@@ -274,7 +274,6 @@ public class FormDataServiceImpl implements FormDataService {
                     LOG.info(String.format("Сохранение ошибок: %s", key));
                     String uuid = logEntryService.save(logger.getEntries());
                     throw new ServiceLoggerException("Есть критические ошибки при выполнении скрипта", uuid);
-
                 }
             } else if (isInner) {
                 logger.info("Данные загружены");
@@ -488,7 +487,7 @@ public class FormDataServiceImpl implements FormDataService {
         if (ScriptStatus.DEFAULT.equals(scriptStatusHolder.getScriptStatus())) {
             // стандартное поведение (при ошибках - откат)
             if (logger.containsLevel(LogLevel.ERROR)) {
-                throw new ServiceException("Найдены ошибки при выполнении расчета формы");
+                throw new ServiceException();
             } else {
                 logger.info("Расчет завершен, фатальных ошибок не обнаружено");
             }
@@ -500,8 +499,7 @@ public class FormDataServiceImpl implements FormDataService {
                 logger.info("Расчет завершен, фатальных ошибок не обнаружено");
             }
         } else {
-            throw new ServiceException("Найдены ошибки при выполнении расчета формы");
-            //logger.error("Найдены ошибки при выполнении расчета формы");
+            throw new ServiceException();
         }
         dataRowDao.refreshRefBookLinks(formData);
 //        logBusinessService.add(formData.getId(), null, userInfo, FormDataEvent.CALCULATE, null);
@@ -525,10 +523,10 @@ public class FormDataServiceImpl implements FormDataService {
         formDataScriptingService.executeScript(userInfo, formData, FormDataEvent.REFRESH, logger, params);
         if (ScriptStatus.DEFAULT.equals(scriptStatusHolder.getScriptStatus())) {
             if (logger.containsLevel(LogLevel.ERROR)) {
-                throw new ServiceException("");
+                throw new ServiceException();
             }
         } else if (ScriptStatus.SKIP.equals(scriptStatusHolder.getScriptStatus())) {
-            throw new ServiceException("");
+            throw new ServiceException();
         }
         dataRowDao.refreshRefBookLinks(formData);
         //logBusinessService.add(formData.getId(), null, userInfo, FormDataEvent.REFRESH, null);
@@ -670,19 +668,27 @@ public class FormDataServiceImpl implements FormDataService {
         if (ScriptStatus.DEFAULT.equals(scriptStatusHolder.getScriptStatus())) {
             // стандартное поведение (при ошибках - откат)
             if (logger.containsLevel(LogLevel.ERROR)) {
-                throw new ServiceLoggerException(SAVE_ERROR, logEntryService.save(logger.getEntries()));
+                if (editMode) {
+                    throw new ServiceException();
+                } else {
+                    throw new ServiceLoggerException(SAVE_ERROR, logEntryService.save(logger.getEntries()));
+                }
             }
         } else if (ScriptStatus.SUCCESS.equals(scriptStatusHolder.getScriptStatus())) {
             // измененное поведение (без отката при ошибках)
             if (logger.containsLevel(LogLevel.ERROR)) {
                 if (editMode) {
-                    logger.error(SAVE_ERROR);
+                    logger.warn(SAVE_ERROR);
                 } else {
                     throw new ServiceLoggerException(SAVE_ERROR, logEntryService.save(logger.getEntries()));
                 }
             }
         } else {
-            throw new ServiceLoggerException(SAVE_ERROR, logEntryService.save(logger.getEntries()));
+            if (editMode) {
+                throw new ServiceException();
+            } else {
+                throw new ServiceLoggerException(SAVE_ERROR, logEntryService.save(logger.getEntries()));
+            }
         }
         // Обновление для сквозной нумерации
         updateAutoNumeration(formData, logger, userInfo);
@@ -804,7 +810,7 @@ public class FormDataServiceImpl implements FormDataService {
                         // Отработка скриптом события сортировки
                         formDataScriptingService.executeScript(userInfo, formData, FormDataEvent.SORT_ROWS, logger, null);
                         if (logger.containsLevel(LogLevel.ERROR)) {
-                            throw new ServiceLoggerException(SORT_ERROR, logEntryService.save(logger.getEntries()));
+                            throw new ServiceLoggerException(isAsync?"":SORT_ERROR, logEntryService.save(logger.getEntries()));
                         }
                         // сортировка актуальна (событие сортировки отработало)
                         formDataDao.updateSorted(formData.getId(), true);
@@ -1024,7 +1030,7 @@ public class FormDataServiceImpl implements FormDataService {
             formDataScriptingService.executeScript(userInfo, formData, workflowMove.getAfterEvent(), logger, null);
             if (logger.containsLevel(LogLevel.ERROR)) {
                 throw new ServiceLoggerException(
-                        "Произошли ошибки в скрипте, который выполняется после перехода",
+                        isAsync?"":"Произошли ошибки в скрипте, который выполняется после перехода",
                         logEntryService.save(logger.getEntries()));
             }
         }

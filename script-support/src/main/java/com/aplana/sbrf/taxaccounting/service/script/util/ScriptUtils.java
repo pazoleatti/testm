@@ -586,7 +586,12 @@ public final class ScriptUtils {
                             return value1 == null ? 1 : -1;
                         }
 
-                        int compareResult = value1.compareTo(value2);
+                        int compareResult;
+                        if (value1 instanceof String) {
+                            compareResult = ((String) value1).compareToIgnoreCase((String) value2);
+                        } else {
+                            compareResult = value1.compareTo(value2);
+                        }
                         if (compareResult != 0) {
                             // Если значения совпадают, то сравнение должно пойти по остальным
                             return compareResult;
