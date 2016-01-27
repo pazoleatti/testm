@@ -311,7 +311,7 @@ void clearSheet() {
     }
 
     // очистить ячейки
-    def needAddRow = true
+    def addRowCount = 0
     int maxColumnNum = 0
     for (int i = sheet.getFirstRowNum(); i <= sheet.getLastRowNum(); i++) {
         Row row = sheet.getRow(i)
@@ -322,11 +322,11 @@ void clearSheet() {
             maxColumnNum = row.getLastCellNum()
         }
         sheet.removeRow(row)
-        // добавить новую строку что б не удалился макрос после удаления всех строк
-        if (needAddRow) {
+        // добавить новую строку что б не удалился макрос после удаления всех строк (две строки используются макросом)
+        if (addRowCount < 2) {
             Row tmp = sheet.createRow(i)
             tmp.createCell(2).setCellValue(' ')
-            needAddRow = false
+            addRowCount++
         }
     }
     // поправить ширину столбцов
