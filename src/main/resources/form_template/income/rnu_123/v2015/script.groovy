@@ -255,15 +255,15 @@ void logicCheck() {
         checkDatePeriod(logger, row, 'taxDoneDate', 'docDate', getReportPeriodEndDate(), true)
 
         // Проверка курса валюты
-        if (row.course2 != null && row.course2 < 0) {
+        if (row.course2 != null && row.course2 <= 0) {
             def msg = row.getCell('course2').column.name
-            logger.error("Строка $rowNum: Значение графы «$msg» должно быть больше или равно «0»!")
+            logger.error("Строка $rowNum: Значение графы «$msg» должно быть больше «0»!")
         }
 
         // Проверка курса валюты
-        if (row.course3 != null && row.course3 < 0) {
+        if (row.course3 != null && row.course3 <= 0) {
             def msg = row.getCell('course3').column.name
-            logger.error("Строка $rowNum: Значение графы «$msg» должно быть больше или равно «0»!")
+            logger.error("Строка $rowNum: Значение графы «$msg» должно быть больше «0»!")
         }
 
         // Проверка количества дней
