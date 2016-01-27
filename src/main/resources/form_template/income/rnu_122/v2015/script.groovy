@@ -226,7 +226,7 @@ void logicCheck() {
         if (row.sum4 != null && !calcFlag18(row) && row.sum4 != calc19(row)) {
             def msg1 = row.getCell('tradePay').column.name
             def msg2 = row.getCell('sum4').column.name
-            logger.error("Строка $rowNum: Значение графы «$msg2» должно быть равно значению графы «$msg1»!")
+            logger.error("Строка $rowNum: Значение графы «$msg2» должно быть равно значению графы «%s»!", msg1)
         }
         if (row.sum4 != null && calcFlag18(row) && row.sum4 != calc19(row)) {
             def msg8 = row.getCell('sum1').column.name
@@ -235,7 +235,7 @@ void logicCheck() {
             def msg14 = row.getCell('base').column.name
             def msg18 = row.getCell('tradePay').column.name
             def msg19 = row.getCell('sum4').column.name
-            logger.error("Строка $rowNum: Значение графы «$msg19» должно быть равно значению выражения «$msg8»*«$msg18»*(«$msg13»-«$msg12»+1)/«$msg14»")
+            logger.error("Строка $rowNum: Значение графы «$msg19» должно быть равно значению выражения «$msg8»*«%s»*(«$msg13»-«$msg12»+1)/«$msg14»", msg18)
         }
 
         // Проверка корректности суммы доначисления  дохода (корректировки расхода) до рыночного уровня
