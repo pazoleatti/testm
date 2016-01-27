@@ -331,6 +331,27 @@ void logicCheck() {
                 rowError(logger, row, msg)
             }
         }
+
+        // 3. Корректное указание категории для ИВЗЛ
+        def orgCode = getRefBookValue(513L, record?.ORG_CODE?.value)?.CODE?.value
+        def categoryName = getRefBookValue(506L, row.category)?.CODE?.value
+        if (row.category && orgCode == 2 && categoryName != 'Категория 1') {
+            String msg = String.format("Строка %d: Для иностранного ВЗЛ в графе «%s» можно указать только значение «Категория 1»!", row.getIndex(), getColumnName(row, 'category'))
+            rowError(logger, row, msg)
+        }
+
+        // 4. Корректное указание категории для ВЗЛ СРН
+        def taxStatus = getRefBookValue(511L, record?.TAX_STATUS?.value)?.CODE?.value
+        if (row.category && orgCode == 1 && taxStatus == 1 && categoryName != 'Категория 1') {
+            String msg = String.format("Строка %d: Для ВЗЛ со специальным режимом налогообложения в графе «%s» можно указать только значение «Категория 1»!", row.getIndex(), getColumnName(row, 'category'))
+            rowError(logger, row, msg)
+        }
+
+        // 5. Корректное указание категории для ВЗЛ ОРН
+        if (row.category && orgCode == 1 && taxStatus == 2 && !(categoryName in ['Категория 2', 'Категория 3', 'Категория 4'])) {
+            String msg = String.format("Строка %d: Для ВЗЛ с общим режимом налогообложения в графе «%s» можно указать только одно из следующих значений: Категория 2, Категория 3, Категория 4!", row.getIndex(), getColumnName(row, 'category'))
+            rowError(logger, row, msg)
+        }
     }
 }
 
