@@ -384,4 +384,19 @@ public class DeclarationDataServiceImplTest {
                 logger.getEntries().get(1).getMessage()
         );
     }
+
+    @Test
+    public void getTaskName() {
+        assertEquals(declarationDataService.getTaskName(ReportType.CHECK_DEC, TaxType.INCOME), "Проверка декларации");
+        assertEquals(declarationDataService.getTaskName(ReportType.ACCEPT_DEC, TaxType.INCOME), "Принятие декларации");
+        assertEquals(declarationDataService.getTaskName(ReportType.EXCEL_DEC, TaxType.INCOME), "Формирование отчета декларации в XLSX-формате");
+        assertEquals(declarationDataService.getTaskName(ReportType.XML_DEC, TaxType.INCOME), "Расчет декларации");
+        assertEquals(declarationDataService.getTaskName(ReportType.PDF_DEC, TaxType.INCOME), "Создание формы предварительного просмотра декларации");
+
+        assertEquals(declarationDataService.getTaskName(ReportType.CHECK_DEC, TaxType.DEAL), "Проверка уведомления");
+        assertEquals(declarationDataService.getTaskName(ReportType.ACCEPT_DEC, TaxType.DEAL), "Принятие уведомления");
+        assertEquals(declarationDataService.getTaskName(ReportType.EXCEL_DEC, TaxType.DEAL), "Формирование отчета уведомления в XLSX-формате");
+        assertEquals(declarationDataService.getTaskName(ReportType.XML_DEC, TaxType.DEAL), "Расчет уведомления");
+        assertEquals(declarationDataService.getTaskName(ReportType.PDF_DEC, TaxType.DEAL), "Создание формы предварительного просмотра уведомления");
+    }
 }

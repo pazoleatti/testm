@@ -56,7 +56,7 @@ public abstract class XmlGeneratorAsyncTask extends AbstractAsyncTask {
         DeclarationData declarationData = declarationDataService.get(declarationDataId, userInfo);
         DeclarationTemplate declarationTemplate = declarationTemplateService.get(declarationData.getDeclarationTemplateId());
         String msg = String.format("сумма количества ячеек таблицы формы по всем формам источникам (%s) превышает максимально допустимое (%s)!",  value, "%s");
-        return checkTask(getReportType(), value, String.format(getReportType().getDescription(), declarationTemplate.getType().getTaxType().getDeclarationShortName()), msg);
+        return checkTask(getReportType(), value, declarationDataService.getTaskName(getReportType(), declarationTemplate.getType().getTaxType()), msg);
     }
 
     @Override

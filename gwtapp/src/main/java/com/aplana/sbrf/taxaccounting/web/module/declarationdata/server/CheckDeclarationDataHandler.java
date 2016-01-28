@@ -63,7 +63,7 @@ public class CheckDeclarationDataHandler extends AbstractActionHandler<CheckDecl
             String uuidXml = reportService.getDec(userInfo, action.getDeclarationId(), ReportType.XML_DEC);
             if (uuidXml != null) {
                 String keyTask = declarationDataService.generateAsyncTaskKey(action.getDeclarationId(), reportType);
-                Pair<Boolean, String> restartStatus = asyncTaskManagerService.restartTask(keyTask, String.format(reportType.getDescription(), action.getTaxType().getDeclarationShortName()), userInfo, action.isForce(), logger);
+                Pair<Boolean, String> restartStatus = asyncTaskManagerService.restartTask(keyTask, declarationDataService.getTaskName(reportType, action.getTaxType()), userInfo, action.isForce(), logger);
                 if (restartStatus != null && restartStatus.getFirst()) {
                     result.setStatus(CreateAsyncTaskStatus.LOCKED);
                     result.setRestartMsg(restartStatus.getSecond());
@@ -96,7 +96,7 @@ public class CheckDeclarationDataHandler extends AbstractActionHandler<CheckDecl
 
                         @Override
                         public String getTaskName(ReportType reportType, TAUserInfo userInfo) {
-                            return String.format(reportType.getDescription(), action.getTaxType().getDeclarationShortName());
+                            return declarationDataService.getTaskName(reportType, action.getTaxType());
                         }
                     });
                 }
@@ -113,7 +113,7 @@ public class CheckDeclarationDataHandler extends AbstractActionHandler<CheckDecl
                             LockData.LOCK_CURRENT,
                             sdf.format(lockDataAccept.getDateLock()),
                             userService.getUser(lockDataAccept.getUserId()).getName(),
-                            String.format(ReportType.ACCEPT_DEC.getDescription(), action.getTaxType().getDeclarationShortName()))
+                            declarationDataService.getTaskName(ReportType.ACCEPT_DEC, action.getTaxType()))
             );
             throw new ServiceLoggerException("Для текущего экземпляра %s запущена операция, при которой ее проверка невозможна", logEntryService.save(logger.getEntries()), action.getTaxType().getDeclarationShortName());
         }

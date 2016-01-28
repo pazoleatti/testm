@@ -243,4 +243,12 @@ public interface DeclarationDataService {
      * @param reportTypes типы отчетов, которые надо удалить
      */
     void cleanBlobs(Collection<Long> ids, List<ReportType> reportTypes);
+
+    /**
+     * Формирует название операции
+     * @param reportType
+     * @param taxType
+     * @return
+     */
+    String getTaskName(ReportType reportType, TaxType taxType);
 }
