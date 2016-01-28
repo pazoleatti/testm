@@ -319,11 +319,10 @@ def calc19(def row) {
         logger.error("Строка $rowNum: Значение графы «%s» должно соответствовать следующему формату: первые символы: (0-9)," +
                 " следующие символы («.» или «,»), следующие символы (0-9), последний символ %s или пусто!", msg, "(%)")
     } else if (row.tradePay != null) {
-        String col18 = row.tradePay.trim()
+        String col18 = row.tradePay.trim().replaceAll(",", ".")
         def flag18 = calcFlag18(row)
-        def calcCol18 = flag18 ? new BigDecimal(col18[0..-2]).setScale(2, BigDecimal.ROUND_HALF_UP) :
-                new BigDecimal(col18).setScale(2, BigDecimal.ROUND_HALF_UP)
-
+        def calcCol18 = flag18 ? roundValue(new BigDecimal(col18[0..-2]) / 100, 2) :
+                roundValue(new BigDecimal(col18), 2)
 
         def flag = true
         ['sum1', 'startDate', 'endDate', 'base', 'tradePay'].each {
@@ -331,7 +330,7 @@ def calc19(def row) {
         }
 
         if (flag && flag18) {
-            return roundValue(row.sum1 * calcCol18 * (row.endDate - row.startDate) / row.base, 2)
+            return roundValue(row.sum1 * calcCol18 * (row.endDate - row.startDate + 1) / row.base, 2)
         } else if (flag && !flag18) {
             return calcCol18
         }
