@@ -1,4 +1,4 @@
-package com.aplana.sbrf.taxaccounting.form_template.income.rnu_122.v2015;
+package com.aplana.sbrf.taxaccounting.form_template.income.rnu_115.v2015;
 
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
@@ -26,10 +26,10 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 /**
- * РНУ 122
+ * РНУ 115
  */
-public class Rnu_122Test extends ScriptTestBase {
-    private static final int TYPE_ID = 840;
+public class Rnu_115Test extends ScriptTestBase {
+    private static final int TYPE_ID = 842;
     private static final int DEPARTMENT_ID = 1;
     private static final int REPORT_PERIOD_ID = 1;
     private static final int DEPARTMENT_PERIOD_ID = 1;
@@ -54,7 +54,7 @@ public class Rnu_122Test extends ScriptTestBase {
 
     @Override
     protected ScriptTestMockHelper getMockHelper() {
-        return getDefaultScriptTestMockHelper(Rnu_122Test.class);
+        return getDefaultScriptTestMockHelper(Rnu_115Test.class);
     }
 
     @Before
@@ -79,7 +79,7 @@ public class Rnu_122Test extends ScriptTestBase {
     @Test
     public void check1Test() throws ParseException {
         FormData formData = getFormData();
-        formData.initFormTemplateParams(testHelper.getTemplate("..//src/main//resources//form_template//income//rnu_122//v2015//"));
+        formData.initFormTemplateParams(testHelper.getTemplate("..//src/main//resources//form_template//income//rnu_115//v2015//"));
         List<DataRow<Cell>> dataRows = testHelper.getDataRowHelper().getAll();
         SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
 
@@ -93,48 +93,51 @@ public class Rnu_122Test extends ScriptTestBase {
         List<LogEntry> entries = testHelper.getLogger().getEntries();
         int i = 0;
 
-        Assert.assertEquals("Строка 1: Графа «Наименование Взаимозависимого лица/резидента оффшорной зоны» не заполнена!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Графа «Код классификации дохода / расхода» не заполнена!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Графа «Номер» не заполнена!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Графа «Дата» не заполнена!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Графа «Сумма кредита для расчёта (остаток задолженности, невыбранный лимит кредита), ед. вал.» не заполнена!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Графа «Валюта» не заполнена!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Графа «Дата фактического отражения операции» не заполнена!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Графа «Курс Банка России на дату фактического отражения в бухгалтерском учёте (руб.)» не заполнена!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Графа «Дата начала» не заполнена!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Графа «Дата окончания» не заполнена!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Графа «База для расчета, кол. дней» не заполнена!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Графа «Плата по условиям сделки,% год./ед. вал.» не заполнена!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Графа «Сумма фактического дохода / расхода, Ед. вал.» не заполнена!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Графа «Сумма фактического дохода / расхода, Руб.» не заполнена!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Графа «Рыночная Плата, % годовых / ед. вал.» не заполнена!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Графа «Рыночная сумма дохода (расхода), выраженная в: Руб.» не заполнена!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Графа «Сумма доначисления дохода (корректировки расхода) до рыночного уровня (руб.)» не заполнена!", entries.get(i++).getMessage());
-        Assert.assertEquals("Группа «графа 5 не задана» не имеет строки подитога!", entries.get(i++).getMessage());
-
-
+        Assert.assertEquals("Строка 1: Графа «Номер сделки» не заполнена!", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 1: Графа «Вид сделки» не заполнена!", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 1: Графа «Дата заключения сделки» не заполнена!", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 1: Графа «Дата окончания сделки» не заполнена!", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 1: Графа «Контрагент» не заполнена!", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 1: Графа «Тип сделки» не заполнена!", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 1: Графа «Код валюты (драгоценных металлов) по сделке приобретения (требования)» не заполнена!", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 1: Графа «Объем покупаемой валюты / драгоценных металлов (в граммах)» не заполнена!", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 1: Графа «Код валюты (драгоценных металлов) по сделке продажи (обязательства)» не заполнена!", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 1: Графа «Объем продаваемой валюты / драгоценных металлов (в граммах)» не заполнена!", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 1: Графа «Цена сделки» не заполнена!", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 1: Графа «Курс Банка России на дату исполнения (досрочного исполнения) сделки, руб. В отношении требования» не заполнена!", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 1: Графа «Курс Банка России на дату исполнения (досрочного исполнения) сделки, руб. В отношении обязательства» не заполнена!", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 1: Графа «Требования (обязательства) по сделке, руб. Требования» не заполнена!", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 1: Графа «Требования (обязательства) по сделке, руб. Обязательства» не заполнена!", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 1: Графа «Доходы (расходы) учитываемые в целях налога на прибыль по сделке, руб. Доходы» не заполнена!", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 1: Графа «Доходы (расходы) учитываемые в целях налога на прибыль по сделке, руб. Расходы» не заполнена!", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 1: Графа «Рыночная цена сделки» не заполнена!", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 1: Графа «Отклонения по доходам, в руб.» не заполнена!", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 1: Графа «Отклонения по расходам, в руб.» не заполнена!", entries.get(i++).getMessage());
         Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
         testHelper.getLogger().clear();
 
         //2. Для прохождения всех ЛП
         i = 0;
         row.getCell("name").setValue(1L, null);
-        row.getCell("code").setValue("10345", null);
-        row.getCell("docNumber").setValue("1", null);
-        row.getCell("docDate").setValue(sdf.parse("11.11.2014"), null);
-        row.getCell("sum1").setValue(1L, null);
-        row.getCell("course").setValue(1L, null);
-        row.getCell("transDoneDate").setValue(sdf.parse("11.11.2014"), null);
-        row.getCell("course2").setValue(1L, null);
-        row.getCell("startDate").setValue(sdf.parse("11.11.2014"), null);
-        row.getCell("endDate").setValue(sdf.parse("12.11.2014"), null);
-        row.getCell("base").setValue(1L, null);
-        row.getCell("dealPay").setValue("1", null);
-        row.getCell("sum2").setValue(1L, null);
-        row.getCell("sum3").setValue(1L, null);
-        row.getCell("tradePay").setValue("1%", null);
-        row.getCell("sum5").setValue(2L, null);
-        row.getCell("sum6").setValue(1L, null);
+        row.getCell("dealNum").setValue("1", null);
+        row.getCell("dealType").setValue(1, null);
+        row.getCell("dealDate").setValue(sdf.parse("11.11.2014"), null);
+        row.getCell("dealDoneDate").setValue(sdf.parse("11.11.2014"), null);
+        row.getCell("dealFocus").setValue(1, null);
+        row.getCell("reqCurCode").setValue(1L, null);
+        row.getCell("reqVolume").setValue(1L, null);
+        row.getCell("guarCurCode").setValue(1, null);
+        row.getCell("guarVolume").setValue(1L, null);
+        row.getCell("price").setValue(1L, null);
+        row.getCell("reqCourse").setValue(1, null);
+        row.getCell("guarCourse").setValue(1, null);
+        row.getCell("reqSum").setValue(1L, null);
+        row.getCell("guarSum").setValue(1L, null);
+        row.getCell("incomeSum").setValue(1L, null);
+        row.getCell("outcomeSum").setValue(1L, null);
+        row.getCell("marketPrice").setValue(1L, null);
+        row.getCell("incomeDelta").setValue(1L, null);
+        row.getCell("outcomeDelta").setValue(1L, null);
         testHelper.execute(FormDataEvent.CALCULATE);
         Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
         testHelper.getLogger().clear();
@@ -224,7 +227,8 @@ public class Rnu_122Test extends ScriptTestBase {
 
     // Проверить расчеты
     void checkAfterCalc(List<DataRow<Cell>> dataRows) {
-        Assert.assertEquals(0, dataRows.get(0).getCell("sum6").getNumericValue().doubleValue(), 0);
+        Assert.assertEquals(0, dataRows.get(0).getCell("incomeSum").getNumericValue().doubleValue(), 0);
+        Assert.assertEquals(0, dataRows.get(0).getCell("outcomeSum").getNumericValue().doubleValue(), 0);
     }
 }
 

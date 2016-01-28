@@ -139,7 +139,7 @@ public class RefBookDepartment implements RefBookDataProvider {
     }
 
     @Override
-    public boolean isRecordsExist(List<Long> uniqueRecordIds) {
+    public List<Long> isRecordsExist(List<Long> uniqueRecordIds) {
         return refBookDepartmentDao.isRecordsExist(uniqueRecordIds);
     }
 

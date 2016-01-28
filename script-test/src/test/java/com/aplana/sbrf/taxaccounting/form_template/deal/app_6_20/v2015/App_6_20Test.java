@@ -99,7 +99,7 @@ public class App_6_20Test extends ScriptTestBase {
         Assert.assertEquals("Строка 1: Графа «Дата заключения сделки» не заполнена!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Графа «Количество» не заполнена!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Графа «Сумма расходов Банка по данным бухгалтерского учета, руб.» не заполнена!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Графа «Цена(тариф) за единицу измерения без учета НДС, акцизов и пошлины, руб.» не заполнена!", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 1: Графа «Цена (тариф) за единицу измерения без учета НДС, акцизов и пошлины, руб.» не заполнена!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Графа «Итого стоимость без учета НДС, акцизов и пошлины, руб.» не заполнена!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Графа «Дата совершения сделки» не заполнена!", entries.get(i++).getMessage());
         Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
@@ -121,11 +121,11 @@ public class App_6_20Test extends ScriptTestBase {
         testHelper.execute(FormDataEvent.CHECK);
         entries = testHelper.getLogger().getEntries();
         i = 0;
-        Assert.assertEquals("Строка 1: Графа «Цена(тариф) за единицу измерения без учета НДС, акцизов и пошлины, руб.» не заполнена!", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 1: Графа «Цена (тариф) за единицу измерения без учета НДС, акцизов и пошлины, руб.» не заполнена!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Графа «Итого стоимость без учета НДС, акцизов и пошлины, руб.» не заполнена!", entries.get(i++).getMessage());
         Assert.assertEquals(String.format(ScriptUtils.CHECK_DATE_PERIOD, 1, "Дата договора","01.01.1991", "31.12.2014"), entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Значение графы «Дата заключения сделки» должно быть не меньше значения графы «Дата договора» и не больше 31.12.2014!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Значение графы «Цена(тариф) за единицу измерения без учета НДС, акцизов и пошлины, руб.» должно быть равно значению графы «Сумма расходов Банка по данным бухгалтерского учета, руб.»!", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 1: Значение графы «Цена (тариф) за единицу измерения без учета НДС, акцизов и пошлины, руб.» должно быть равно значению графы «Сумма расходов Банка по данным бухгалтерского учета, руб.»!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Значение графы «Итого стоимость без учета НДС, акцизов и пошлины, руб.» должно быть равно значению графы «Сумма расходов Банка по данным бухгалтерского учета, руб.»!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Значение графы «Дата совершения сделки» должно быть не меньше значения графы «Дата заключения сделки» и не больше 31.12.2014!", entries.get(i++).getMessage());
         Assert.assertEquals(i, testHelper.getLogger().getEntries().size());

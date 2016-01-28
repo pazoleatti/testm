@@ -35,7 +35,7 @@
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="referenceColumn">
         <alias>iksr</alias>
         <checking>false</checking>
-        <name>ИНН/КИО</name>
+        <name>ИНН/ КИО</name>
         <order>4</order>
         <width>7</width>
         <parentAlias>name</parentAlias>

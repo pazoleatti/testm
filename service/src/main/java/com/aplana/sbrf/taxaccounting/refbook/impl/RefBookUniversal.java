@@ -142,8 +142,8 @@ public class RefBookUniversal implements RefBookDataProvider {
     }
 
     @Override
-    public boolean isRecordsExist(List<Long> uniqueRecordIds) {
-        return refBookDao.isRecordsExist(uniqueRecordIds);
+    public List<Long> isRecordsExist(List<Long> uniqueRecordIds) {
+        return refBookDao.isRecordsExist(new HashSet<Long>(uniqueRecordIds));
     }
 
     @Override

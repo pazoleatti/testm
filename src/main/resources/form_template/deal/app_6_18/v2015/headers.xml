@@ -3,7 +3,7 @@
         <cell alias="rowNumber" colSpan="6" rowSpan="1" value="Общая информация о контрагенте - юридическом лице"/>
         <cell alias="name" colSpan="1" rowSpan="1" value="Полное наименование с указанием ОПФ"/>
         <cell alias="dependence" colSpan="1" rowSpan="1" value="Признак взаимозависимости"/>
-        <cell alias="iksr" colSpan="1" rowSpan="1" value="ИНН/КИО"/>
+        <cell alias="iksr" colSpan="1" rowSpan="1" value="ИНН/ КИО"/>
         <cell alias="countryName" colSpan="1" rowSpan="1" value="Наименование страны регистрации"/>
         <cell alias="countryCode" colSpan="1" rowSpan="1" value="Код страны регистрации по классификатору ОКСМ"/>
         <cell alias="docNumber" colSpan="23" rowSpan="1" value="Сведения о сделке"/>
@@ -65,7 +65,7 @@
         <cell alias="rowNumber" colSpan="1" rowSpan="1" value="№ п/п"/>
         <cell alias="name" colSpan="1" rowSpan="1" value="Полное наименование с указанием ОПФ"/>
         <cell alias="dependence" colSpan="1" rowSpan="1" value="Признак взаимозависимости"/>
-        <cell alias="iksr" colSpan="1" rowSpan="1" value="ИНН/КИО"/>
+        <cell alias="iksr" colSpan="1" rowSpan="1" value="ИНН/ КИО"/>
         <cell alias="countryName" colSpan="1" rowSpan="1" value="Наименование страны регистрации"/>
         <cell alias="countryCode" colSpan="1" rowSpan="1" value="Код страны регистрации по классификатору ОКСМ"/>
         <cell alias="docNumber" colSpan="1" rowSpan="1" value="Номер договора"/>

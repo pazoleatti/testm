@@ -2,6 +2,7 @@ package com.aplana.sbrf.taxaccounting.web.module.departmentconfigproperty.server
 
 import com.aplana.sbrf.taxaccounting.dao.impl.refbook.RefBookUtils;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.*;
@@ -63,7 +64,7 @@ public class SaveDepartmentRefBookValuesHandler extends AbstractActionHandler<Sa
         RefBook slaveRefBook = rbFactory.get(action.getSlaveRefBookId());
 
         /** Проверка существования справочных атрибутов */
-        checkReferenceValues(rbFactory.getDataProvider(slaveRefBook.getId()), action.getRows());
+        checkReferenceValues(slaveRefBook, action.getRows(), logger);
 
         /** Специфичные проверки для настроек подразделений */
         Pattern innPattern = Pattern.compile(RefBookUtils.INN_JUR_PATTERN);
@@ -161,6 +162,11 @@ public class SaveDepartmentRefBookValuesHandler extends AbstractActionHandler<Sa
             }
         }
 
+        prepareResult(result, logger, action);
+        return result;
+    }
+
+    private void prepareResult(SaveDepartmentRefBookValuesResult result, Logger logger, SaveDepartmentRefBookValuesAction action){
         if (result.isHasFatalError()) {
             logger.clear(LogLevel.INFO);
         }
@@ -169,7 +175,6 @@ public class SaveDepartmentRefBookValuesHandler extends AbstractActionHandler<Sa
         } else {
             result.setUuid(logEntryService.update(logger.getEntries(), action.getOldUUID()));
         }
-        return result;
     }
 
     @Override
@@ -180,34 +185,60 @@ public class SaveDepartmentRefBookValuesHandler extends AbstractActionHandler<Sa
     /**
      * Проверка существования записей справочника на которые ссылаются атрибуты.
      * Считаем что все справочные атрибуты хранятся в универсальной структуре как и сами настройки
-     * @param provider
+     * @param refBook
      * @param rows
+     * @return возвращает true, если проверка пройдена
      */
-    private void checkReferenceValues(RefBookDataProvider provider, List<Map<String, TableCell>> rows) {
+    private void checkReferenceValues(RefBook refBook, List<Map<String, TableCell>> rows, Logger logger) {
         Map<RefBookDataProvider, List<Long>> references = new HashMap<RefBookDataProvider, List<Long>>();
+        RefBookDataProvider provider = rbFactory.getDataProvider(refBook.getId());
         RefBookDataProvider oktmoProvider = rbFactory.getDataProvider(96L);
         for (Map<String, TableCell> row : rows) {
             for (Map.Entry<String, TableCell> e : row.entrySet()) {
-                if (e.getValue().getType() == null) {
+                TableCell cell = e.getValue();
+                if (cell.getType() == null) {
                     continue;
                 }
-                if (e.getValue().getType() == RefBookAttributeType.REFERENCE) {
-                    if (e.getValue().getRefValue() != null) {
+                if (cell.getType() == RefBookAttributeType.REFERENCE) {
+                    if (cell.getRefValue() != null) {
                         RefBookDataProvider linkProvider = e.getKey().equals("OKTMO") ? oktmoProvider : provider;
                         List<Long> links = (references.containsKey(linkProvider)) ?
                                 references.get(linkProvider) : new ArrayList<Long>();
-                        links.add(e.getValue().getRefValue());
+                        links.add(cell.getRefValue());
                         references.put(linkProvider, links);
                     }
                 }
             }
         }
+
+        boolean hasErrorLinks = false;
         if (!references.isEmpty()) {
+            //получаем названия колонок
+            Map<String, String> aliases = new HashMap<String, String>();
+            for (RefBookAttribute attribute : refBook.getAttributes()) {
+                aliases.put(attribute.getAlias(), attribute.getName());
+            }
+
             for (Map.Entry<RefBookDataProvider, List<Long>> entry : references.entrySet()) {
-                if (!entry.getKey().isRecordsExist(entry.getValue())) {
-                    throw new ServiceException("Данные не могут быть сохранены, так как часть выбранных справочных значений была удалена. Отредактируйте таблицу и попытайтесь сохранить заново");
+                List<Long> notExists = entry.getKey().isRecordsExist(entry.getValue());
+                if (!notExists.isEmpty()) {
+                    hasErrorLinks = true;
+                    int i = 1;
+                    for (Map<String, TableCell> row : rows) {
+                        for (Map.Entry<String, TableCell> cell : row.entrySet()) {
+                            if (cell.getValue().getRefValue() != null && notExists.contains(cell.getValue().getRefValue())) {
+                                logger.error("Строка %s, графа \"%s\": Обнаружена некорректная ссылка на запись справочника.", i, aliases.get(cell.getKey()));
+                            }
+                        }
+                        i++;
+                    }
                 }
             }
+        }
+
+        if (hasErrorLinks) {
+            throw new ServiceLoggerException("Данные не могут быть сохранены, так как часть выбранных справочных значений была удалена. Отредактируйте таблицу и попытайтесь сохранить заново",
+                    logEntryService.save(logger.getEntries()));
         }
     }
 

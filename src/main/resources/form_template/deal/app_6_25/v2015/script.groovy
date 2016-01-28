@@ -443,10 +443,15 @@ def getNewTotalFromXls(def values, def colOffset, def fileRowIndex, def rowIndex
     newRow.setImportIndex(fileRowIndex)
 
     // графа 8
-    colIndex = 8
+    def colIndex = 8
     newRow.count = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
-    // графа 10
-    colIndex = 10
+
+    // графа 9
+    colIndex = 9
+    newRow.finResult = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
+
+    // графа 11
+    colIndex = 11
     newRow.cost = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
 
     return newRow

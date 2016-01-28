@@ -61,7 +61,7 @@ public class RefBookAsyncConfigProvider implements RefBookDataProvider {
     }
 
     @Override
-    public boolean isRecordsExist(List<Long> uniqueRecordIds) {
+    public List<Long> isRecordsExist(List<Long> uniqueRecordIds) {
         throw new UnsupportedOperationException();
     }
 

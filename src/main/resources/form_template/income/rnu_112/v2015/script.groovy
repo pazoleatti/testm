@@ -3,11 +3,10 @@ package form_template.income.rnu_112.v2015
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
-import com.aplana.sbrf.taxaccounting.model.refbook.RefBook
 import groovy.transform.Field
 
 /**
- * 824 - РНУ 112. Регистр налогового учёта доходов по сделкам РЕПО, возникающих в связи с применением в
+ * 824 - РНУ-112. Регистр налогового учёта доходов по сделкам РЕПО, возникающих в связи с применением в
  * сделках c Взаимозависимыми лицами и резидентами оффшорных зон ставок, не соответствующих рыночному уровню
  *
  * formTemplateId=824
@@ -15,24 +14,26 @@ import groovy.transform.Field
  * @author Bulat Kinzyabulatov
  */
 
-// rowNumber        (1) - № пп
+// rowNumber        (1)  - № пп
 // fix
-// dealNum          (2) - Номер сделки
-// name             (3) - Наименование Взаимозависимого лица/резидента оффшорной зоны
-// countryName      (4) - Страна местонахождения контрагента
-// currency         (5) - Валюта расчетов
-// date1Part        (6) - Дата первой части сделки
-// date2Part        (7) - Дата второй части сделки
-// dealRate         (8) - Ставка сделки, % годовых
-// dealLeftSum      (9) - Сумма остаточных обязательств (требований) контрагента по сделке
-// bondSum          (10) - Сумма выплаты по ценным бумагам
-// payDate          (11) - Дата выплаты (гр. 10)
-// accrStartDate    (12) - Период начисления доходов на сумму остаточных обязательств контрагента (гр. 9). Дата начала начисления
-// accrEndDate      (13) - Период начисления доходов на сумму остаточных обязательств контрагента (гр. 9). Дата окончания начисления
-// yearBase         (14) - База (360/365/366)
-// dealIncome       (15) - Доходы по сделке
-// rateDiff         (16) - Отклонение от рыночной процентной ставки для целей налогообложения
-// incomeCorrection (17) - Сумма корректировки доходов
+// dealNum          (2)  - Номер сделки
+// name             (3)  - Наименование Взаимозависимого лица/резидента оффшорной зоны
+// iksr             (4)  - Идентификационный номер
+// countryName      (5)  - Страна местонахождения контрагента
+// code             (6)  - Код налогового учёта
+// currency         (7)  - Валюта расчетов
+// date1Part        (8)  - Дата первой части сделки
+// date2Part        (9)  - Дата второй части сделки
+// dealRate         (10) - Ставка сделки, % годовых
+// dealLeftSum      (11) - Сумма остаточных обязательств (требований) контрагента по сделке
+// bondSum          (12) - Сумма выплаты по ценным бумагам
+// payDate          (13) - Дата выплаты (гр. 12)
+// accrStartDate    (14) - Период начисления доходов на сумму остаточных обязательств контрагента (гр. 9). Дата начала начисления
+// accrEndDate      (15) - Период начисления доходов на сумму остаточных обязательств контрагента (гр. 9). Дата окончания начисления
+// yearBase         (16) - База (360/365/366)
+// dealIncome       (17) - Доходы по сделке
+// rateDiff         (18) - Отклонение от рыночной процентной ставки для целей налогообложения
+// incomeCorrection (19) - Сумма корректировки доходов
 
 switch (formDataEvent) {
     case FormDataEvent.CREATE:
@@ -89,16 +90,16 @@ def allColumns = ['rowNumber', 'fix', 'dealNum', 'name', 'countryName', 'currenc
 
 // Редактируемые атрибуты
 @Field
-def editableColumns = ['dealNum', 'name',  'currency', 'date1Part', 'date2Part', 'dealRate', 'dealLeftSum', 'bondSum', 'dealIncome',
-                       'rateDiff']
+def editableColumns = ['dealNum', 'name', 'code', 'currency', 'date1Part', 'date2Part', 'dealRate', 'dealLeftSum', 'bondSum', 'payDate',
+                       'accrStartDate', 'accrEndDate', 'yearBase', 'dealIncome', 'rateDiff']
 
 // Автозаполняемые атрибуты
 @Field
-def autoFillColumns = ['rowNumber', 'countryName', 'payDate', 'accrStartDate', 'accrEndDate', 'yearBase', 'incomeCorrection']
+def autoFillColumns = ['rowNumber', 'iksr', 'countryName', 'incomeCorrection']
 
 // Проверяемые на пустые значения атрибуты
 @Field
-def nonEmptyColumns = ['dealNum', 'name', 'currency', 'date1Part', 'date2Part', 'dealRate', 'dealLeftSum',
+def nonEmptyColumns = ['dealNum', 'name', 'code', 'currency', 'date1Part', 'date2Part', 'dealRate', 'dealLeftSum',
                        'bondSum', 'payDate', 'accrStartDate', 'accrEndDate', 'yearBase', 'dealIncome', 'rateDiff', 'incomeCorrection']
 
 // Группируемые атрибуты
@@ -108,9 +109,20 @@ def groupColumns = ['name', 'reasonNumber', 'reasonDate']
 @Field
 def totalColumns = ['incomeCorrection']
 
+// Дата начала отчетного периода
+@Field
+def startDate = null
+
 // Дата окончания отчетного периода
 @Field
 def endDate = null
+
+def getReportPeriodStartDate() {
+    if (startDate == null) {
+        startDate = reportPeriodService.getStartDate(formData.reportPeriodId).time
+    }
+    return startDate
+}
 
 def getReportPeriodEndDate() {
     if (endDate == null) {
@@ -154,25 +166,33 @@ void logicCheck() {
         // 1. Проверка на заполнение граф
         checkNonEmptyColumns(row, rowNum, nonEmptyColumns, logger, true)
 
-        // TODO возможно лишняя
-        // 2. Проверка заполнения графы 2 справочным значением по ВЗЛ/РОЗ
-        if (row.name) {
-            def typeId = getRefBookValue(520, row.name).TYPE?.referenceValue
-            if (typeId) {
-                def type = getRefBookValue(525, typeId).CODE?.stringValue
-                if (!['ВЗЛ', 'РОЗ'].contains(type)) {
-                    def msg1 = row.getCell('name').column.name
-                    rowError(logger, row, "Строка $rowNum: Значение графы «$msg1» должно быть заполнено наименованием Взаимозависимого лица/резидента оффшорной зоны!")
-                }
+        // 2. Проверка положительности сумм и отклонения
+        ['dealLeftSum', 'bondSum', 'dealIncome', 'rateDiff', 'incomeCorrection'].each { alias ->
+            if (row[alias] != null && row[alias] < 0) {
+                logger.error("Строка $rowNum: Значение графы «${getColumnName(row, alias)}» должно быть больше или равно «0»!")
             }
         }
 
-        if (row.yearBase != null && ![360, 365, 366].contains(row.yearBase)) { // TODO уточнить текст
-            rowError(logger, row, "Строка $rowNum: Неверное значение в графе «${getColumnName(row, 'yearBase')}». Допустимые значения: 360, 365, 366")
+        // 3. Проверка периодов начисления
+        if (row.accrStartDate && row.accrEndDate && row.accrStartDate >= row.accrEndDate) {
+            logger.error("Строка $rowNum: Значение графы «${getColumnName(row, 'accrEndDate')}» должно быть больше значения графы «${getColumnName(row, 'accrStartDate')}»!")
+        }
+
+        // 4. Проверка даты окончания начисления
+        checkDatePeriod(logger, row, 'accrEndDate', getReportPeriodStartDate(), getReportPeriodEndDate(), true)
+
+        // 5. Проверка суммы корректировки доходов
+        if (row.incomeCorrection != null && row.dealLeftSum != null && row.rateDiff != null && row.accrEndDate != null && row.accrStartDate != null && row.yearBase != null && row.incomeCorrection != calc19(row)) {
+            logger.error("Строка $rowNum: Значение графы «${getColumnName(row, 'incomeCorrection')}» должно равняться выражению: («${getColumnName(row, 'dealLeftSum')}» * «${getColumnName(row, 'rateDiff')}») * ((«${getColumnName(row, 'accrEndDate')}» - «${getColumnName(row, 'accrStartDate')}» + 1) / «${getColumnName(row, 'yearBase')}») / 100!")
+        }
+
+        // 6. Проверка базы
+        if (row.yearBase != null && ![360, 365, 366].contains(row.yearBase?.intValue())) {
+            rowError(logger, row, "Строка $rowNum: Графа «${getColumnName(row, 'yearBase')}» должна принимать значение из следующего списка: «360», «365», «366»!")
         }
     }
 
-    // 9. Проверка итоговых значений пофиксированной строке «Итого»
+    // 7. Проверка итоговых значений пофиксированной строке «Итого»
     if (dataRows.find { it.getAlias() == 'total' }) {
         checkTotalSum(dataRows, totalColumns, logger, true)
     }
@@ -190,7 +210,9 @@ void calc() {
     for (row in dataRows) {
         if(row.getAlias() != null){
             continue
-            // TODO добавить расчеты
+        }
+        if (row.dealLeftSum != null && row.rateDiff != null && row.accrEndDate != null && row.accrStartDate != null && row.yearBase != null) {
+            row.incomeCorrection = calc19 (row)
         }
     }
 
@@ -199,6 +221,12 @@ void calc() {
     dataRows.add(total)
 
     updateIndexes(dataRows)
+}
+
+def calc19 (def row) {
+    def a = ((BigDecimal) ((row.dealLeftSum * row.rateDiff) * (row.accrEndDate - row.accrStartDate + 1))).divide(100 * row.yearBase,
+            row.getCell('incomeCorrection').getColumn().precision, BigDecimal.ROUND_HALF_UP)
+    return a
 }
 
 void sortRows(def dataRows) {
@@ -232,7 +260,7 @@ def calcTotalRow(def dataRows) {
 // Получение импортируемых данных
 void importData() {
     def tmpRow = formData.createDataRow()
-    int COLUMN_COUNT = 17
+    int COLUMN_COUNT = 19
     int HEADER_ROW_COUNT = 3
     String TABLE_START_VALUE = '№ пп'
     String TABLE_END_VALUE = null
@@ -320,27 +348,29 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
     checkHeaderSize(headerRows[headerRows.size() - 1].size(), headerRows.size(), colCount, rowCount)
 
     def headerMapping = [
-            ([(headerRows[0][12]): 'Период начисления доходов на сумму остаточных обязательств контрагента (гр. 9)']),
             ([(headerRows[0][0]): getColumnName(tmpRow, 'rowNumber')]),
             ([(headerRows[0][2]): getColumnName(tmpRow, 'dealNum')]),
             ([(headerRows[0][3]): getColumnName(tmpRow, 'name')]),
-            ([(headerRows[0][4]): getColumnName(tmpRow, 'countryName')]),
-            ([(headerRows[0][5]): getColumnName(tmpRow, 'currency')]),
-            ([(headerRows[0][6]): getColumnName(tmpRow, 'date1Part')]),
-            ([(headerRows[0][7]): getColumnName(tmpRow, 'date2Part')]),
-            ([(headerRows[0][8]): getColumnName(tmpRow, 'dealRate')]),
-            ([(headerRows[0][9]): getColumnName(tmpRow, 'dealLeftSum')]),
-            ([(headerRows[0][10]): getColumnName(tmpRow, 'bondSum')]),
-            ([(headerRows[0][11]): getColumnName(tmpRow, 'payDate')]),
-            ([(headerRows[1][12]): 'Дата начала начисления']),
-            ([(headerRows[1][13]): 'Дата окончания начисления']),
-            ([(headerRows[0][14]): getColumnName(tmpRow, 'yearBase')]),
-            ([(headerRows[0][15]): getColumnName(tmpRow, 'dealIncome')]),
-            ([(headerRows[0][16]): getColumnName(tmpRow, 'rateDiff')]),
-            ([(headerRows[0][17]): getColumnName(tmpRow, 'incomeCorrection')]),
+            ([(headerRows[0][4]): getColumnName(tmpRow, 'iksr')]),
+            ([(headerRows[0][5]): getColumnName(tmpRow, 'countryName')]),
+            ([(headerRows[0][6]): getColumnName(tmpRow, 'code')]),
+            ([(headerRows[0][7]): getColumnName(tmpRow, 'currency')]),
+            ([(headerRows[0][8]): getColumnName(tmpRow, 'date1Part')]),
+            ([(headerRows[0][9]): getColumnName(tmpRow, 'date2Part')]),
+            ([(headerRows[0][10]): getColumnName(tmpRow, 'dealRate')]),
+            ([(headerRows[0][11]): getColumnName(tmpRow, 'dealLeftSum')]),
+            ([(headerRows[0][12]): getColumnName(tmpRow, 'bondSum')]),
+            ([(headerRows[0][13]): getColumnName(tmpRow, 'payDate')]),
+            ([(headerRows[0][14]): 'Период начисления доходов на сумму остаточных обязательств контрагента (гр. 11)']),
+            ([(headerRows[1][14]): 'Дата начала начисления']),
+            ([(headerRows[1][15]): 'Дата окончания начисления']),
+            ([(headerRows[0][16]): getColumnName(tmpRow, 'yearBase')]),
+            ([(headerRows[0][17]): getColumnName(tmpRow, 'dealIncome')]),
+            ([(headerRows[0][18]): getColumnName(tmpRow, 'rateDiff')]),
+            ([(headerRows[0][19]): getColumnName(tmpRow, 'incomeCorrection')]),
             ([(headerRows[2][0]): '1'])
     ]
-    (2..17).each {
+    (2..19).each {
         headerMapping.add([(headerRows[2][it]): it.toString()])
     }
     checkHeaderEquals(headerMapping, logger)
@@ -368,89 +398,67 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
     def int colIndex = 2
 
     // графа 2
-    newRow.dealNum = values[2]
+    newRow.dealNum = values[colIndex]
     colIndex++
 
+    def recordId = getTcoRecordId(values[3], values[4], getColumnName(newRow, 'iksr'), fileRowIndex, colIndex, getReportPeriodEndDate(), true, logger, refBookFactory, recordCache)
+    def map = getRefBookValue(520, recordId)
+
     // графа 3
-    newRow.name = getRefBookRecordIdImport(520L, getReportPeriodEndDate(), "LOWER(NAME) = LOWER('${values[3]}') AND COUNTRY_CODE = ${values[4]}", getColumnName(newRow, 'name'), fileRowIndex, colIndex)
+    newRow.name = recordId
     colIndex++
 
     // графа 4
+    if (map != null) {
+        formDataService.checkReferenceValue(520, values[colIndex], map.IKSR?.stringValue, fileRowIndex, colIndex + colOffset, logger, false)
+    }
     colIndex++
 
     // графа 5
-    newRow.currency = getRecordIdImport(15, 'CODE', values[colIndex], fileRowIndex, colIndex + colOffset, false)
+    if (map != null) {
+        def countryMap = getRefBookValue(10, map.COUNTRY_CODE?.referenceValue)
+        if (countryMap != null) {
+            def expectedValues = [countryMap.NAME?.stringValue, countryMap.FULLNAME?.stringValue]
+            formDataService.checkReferenceValue(values[colIndex], expectedValues, getColumnName(newRow, 'countryName'), map.NAME.value, fileRowIndex, colIndex + colOffset, logger, false)
+        }
+    }
     colIndex++
 
     // графа 6
-    newRow.date1Part = parseDate(values[colIndex], "dd.MM.yyyy", fileRowIndex, colIndex + colOffset, logger, true)
+    newRow.code = values[colIndex]
     colIndex++
 
     // графа 7
+    newRow.currency = getRecordIdImport(15, 'CODE', values[colIndex], fileRowIndex, colIndex + colOffset, false)
+    colIndex++
+
+    // графа 8
+    newRow.date1Part = parseDate(values[colIndex], "dd.MM.yyyy", fileRowIndex, colIndex + colOffset, logger, true)
+    colIndex++
+
+    // графа 9
     newRow.date2Part = parseDate(values[colIndex], "dd.MM.yyyy", fileRowIndex, colIndex + colOffset, logger, true)
     colIndex++
 
-    // графы 8-10
+    // графы 10-11
     ['dealRate', 'dealLeftSum', 'bondSum'].each{
         newRow[it]= parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
         colIndex++
     }
 
-    // графы 11-13
+    // графы 13-15
     ['payDate', 'accrStartDate', 'accrEndDate'].each{
         newRow[it]= parseDate(values[colIndex], "dd.MM.yyyy", fileRowIndex, colIndex + colOffset, logger, true)
         colIndex++
     }
 
-    // графы 14-17
+    // графы 16-19
     ['yearBase', 'dealIncome', 'rateDiff', 'incomeCorrection'].each{
         newRow[it]= parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
         colIndex++
     }
 
     return newRow
-}
-
-@Field
-String REF_BOOK_NOT_FOUND_IMPORT_ERROR_NEW = "Проверка файла: Строка %d, столбец %s: В справочнике «%s» не найдена запись для графы «%s» актуальная на дату %s!";
-
-@Field
-String REF_BOOK_TOO_MANY_FOUND_IMPORT_ERROR_NEW = "Проверка файла: Строка %d, столбец %s: В справочнике «%s» найдено более одной записи для графы «%s» актуальная на дату %s!";
-
-/**
- * Получить id записи из справочника по фильтру.
- * Не используется унифицированный метод formDataService.getRefBookRecordIdImport потому что в нем нет возможности
- * искать запись по фильтру.
- *
- * @param refBookId идентификатор справочника
- * @param date дата актуальности записи
- * @param filter фильтр для поиска
- * @param columnName название графы формы для которого ищется значение
- * @param rowIndex номер строки в файле
- * @param colIndex номер колонки в файле
- * @param required фатальность
- */
-Long getRefBookRecordIdImport(Long refBookId, Date date, String filter, String columnName,
-                              int rowIndex, int colIndex, boolean required = false) {
-    if (refBookId == null) {
-        return null
-    }
-    def records = refBookFactory.getDataProvider(refBookId).getRecords(date, null, filter, null)
-    if (records != null && records.size() == 1) {
-        return records.get(0).record_id.value
-    }
-
-    def tooManyValue = (records != null && records.size() > 1)
-    RefBook rb = refBookFactory.get(refBookId)
-
-    String msg = String.format(tooManyValue ? REF_BOOK_TOO_MANY_FOUND_IMPORT_ERROR_NEW : REF_BOOK_NOT_FOUND_IMPORT_ERROR_NEW,
-            rowIndex, getXLSColumnName(colIndex), rb.getName(), columnName, date.format('dd.MM.yyyy'))
-    if (required) {
-        throw new ServiceException("%s", msg)
-    } else {
-        logger.warn("%s", msg)
-    }
-    return null
 }
 
 // Сортировка групп и строк
@@ -478,8 +486,8 @@ def getNewTotalFromXls(def values, def colOffset, def fileRowIndex, def rowIndex
     newRow.setIndex(rowIndex)
     newRow.setImportIndex(fileRowIndex)
 
-    // графа 17
-    colIndex = 17
+    // графа 19
+    colIndex = 19
     newRow.incomeCorrection = parseNumber(values[colIndex], fileRowIndex, colIndex + colOffset, logger, true)
 
     return newRow

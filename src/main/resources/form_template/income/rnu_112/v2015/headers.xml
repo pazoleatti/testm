@@ -4,7 +4,9 @@
         <cell alias="fix" colSpan="1" rowSpan="1" value=""/>
         <cell alias="dealNum" colSpan="1" rowSpan="2" value="Номер сделки"/>
         <cell alias="name" colSpan="1" rowSpan="2" value="Наименование Взаимозависимого лица/резидента оффшорной зоны"/>
+        <cell alias="iksr" colSpan="1" rowSpan="2" value="Идентификационный номер"/>
         <cell alias="countryName" colSpan="1" rowSpan="2" value="Страна местонахождения контрагента"/>
+        <cell alias="code" colSpan="1" rowSpan="2" value="Код налогового учёта"/>
         <cell alias="currency" colSpan="1" rowSpan="2" value="Валюта расчетов"/>
         <cell alias="date1Part" colSpan="1" rowSpan="2" value="Дата первой части сделки"/>
         <cell alias="date2Part" colSpan="1" rowSpan="2" value="Дата второй части сделки"/>
@@ -24,7 +26,9 @@
         <cell alias="fix" colSpan="1" rowSpan="1" value=""/>
         <cell alias="dealNum" colSpan="1" rowSpan="1" value="Номер сделки"/>
         <cell alias="name" colSpan="1" rowSpan="1" value="Наименование Взаимозависимого лица/резидента оффшорной зоны"/>
+        <cell alias="iksr" colSpan="1" rowSpan="1" value="Идентификационный номер"/>
         <cell alias="countryName" colSpan="1" rowSpan="1" value="Страна местонахождения контрагента"/>
+        <cell alias="code" colSpan="1" rowSpan="1" value="Код налогового учёта"/>
         <cell alias="currency" colSpan="1" rowSpan="1" value="Валюта расчетов"/>
         <cell alias="date1Part" colSpan="1" rowSpan="1" value="Дата первой части сделки"/>
         <cell alias="date2Part" colSpan="1" rowSpan="1" value="Дата второй части сделки"/>
@@ -44,19 +48,21 @@
         <cell alias="fix" colSpan="1" rowSpan="1" value=""/>
         <cell alias="dealNum" colSpan="1" rowSpan="1" value="2"/>
         <cell alias="name" colSpan="1" rowSpan="1" value="3"/>
-        <cell alias="countryName" colSpan="1" rowSpan="1" value="4"/>
-        <cell alias="currency" colSpan="1" rowSpan="1" value="5"/>
-        <cell alias="date1Part" colSpan="1" rowSpan="1" value="6"/>
-        <cell alias="date2Part" colSpan="1" rowSpan="1" value="7"/>
-        <cell alias="dealRate" colSpan="1" rowSpan="1" value="8"/>
-        <cell alias="dealLeftSum" colSpan="1" rowSpan="1" value="9"/>
-        <cell alias="bondSum" colSpan="1" rowSpan="1" value="10"/>
-        <cell alias="payDate" colSpan="1" rowSpan="1" value="11"/>
-        <cell alias="accrStartDate" colSpan="1" rowSpan="1" value="12"/>
-        <cell alias="accrEndDate" colSpan="1" rowSpan="1" value="13"/>
-        <cell alias="yearBase" colSpan="1" rowSpan="1" value="14"/>
-        <cell alias="dealIncome" colSpan="1" rowSpan="1" value="15"/>
-        <cell alias="rateDiff" colSpan="1" rowSpan="1" value="16"/>
-        <cell alias="incomeCorrection" colSpan="1" rowSpan="1" value="17"/>
+        <cell alias="iksr" colSpan="1" rowSpan="1" value="4"/>
+        <cell alias="countryName" colSpan="1" rowSpan="1" value="5"/>
+        <cell alias="code" colSpan="1" rowSpan="1" value="6"/>
+        <cell alias="currency" colSpan="1" rowSpan="1" value="7"/>
+        <cell alias="date1Part" colSpan="1" rowSpan="1" value="8"/>
+        <cell alias="date2Part" colSpan="1" rowSpan="1" value="9"/>
+        <cell alias="dealRate" colSpan="1" rowSpan="1" value="10"/>
+        <cell alias="dealLeftSum" colSpan="1" rowSpan="1" value="11"/>
+        <cell alias="bondSum" colSpan="1" rowSpan="1" value="12"/>
+        <cell alias="payDate" colSpan="1" rowSpan="1" value="13"/>
+        <cell alias="accrStartDate" colSpan="1" rowSpan="1" value="14"/>
+        <cell alias="accrEndDate" colSpan="1" rowSpan="1" value="15"/>
+        <cell alias="yearBase" colSpan="1" rowSpan="1" value="16"/>
+        <cell alias="dealIncome" colSpan="1" rowSpan="1" value="17"/>
+        <cell alias="rateDiff" colSpan="1" rowSpan="1" value="18"/>
+        <cell alias="incomeCorrection" colSpan="1" rowSpan="1" value="19"/>
     </row>
 </rows>

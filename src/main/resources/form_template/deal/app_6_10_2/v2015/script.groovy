@@ -639,7 +639,7 @@ void importTransportData() {
     // сравнение итогов
     if (!logger.containsLevel(LogLevel.ERROR) && totalTF) {
         // мапа с алиасами граф и номерами колонокв в xml (алиас -> номер колонки)
-        def totalColumnsIndexMap = ['sum': 5, 'price': 13, 'cost': 14]
+        def totalColumnsIndexMap = ['sum': 9, 'price': 10, 'cost': 11]
 
         // сравнение контрольных сумм
         def colOffset = 1

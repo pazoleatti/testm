@@ -16,6 +16,7 @@ import org.junit.Test;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
+import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -96,19 +97,71 @@ public class Rnu_112Test extends ScriptTestBase {
         int i = 0;
         Assert.assertEquals("Строка 1: Графа «Номер сделки» не заполнена!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Графа «Наименование Взаимозависимого лица/резидента оффшорной зоны» не заполнена!", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 1: Графа «Код налогового учёта» не заполнена!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Графа «Валюта расчетов» не заполнена!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Графа «Дата первой части сделки» не заполнена!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Графа «Дата второй части сделки» не заполнена!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Графа «Ставка сделки, % годовых» не заполнена!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Графа «Сумма остаточных обязательств (требований) контрагента по сделке» не заполнена!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Графа «Сумма выплаты по ценным бумагам» не заполнена!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Графа «Дата выплаты (гр. 10)» не заполнена!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Графа «Период начисления доходов на сумму остаточных обязательств контрагента (гр. 9). Дата начала начисления» не заполнена!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Графа «Период начисления доходов на сумму остаточных обязательств контрагента (гр. 9). Дата окончания начисления» не заполнена!", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 1: Графа «Дата выплаты (гр. 12)» не заполнена!", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 1: Графа «Период начисления доходов на сумму остаточных обязательств контрагента (гр. 11). Дата начала начисления» не заполнена!", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 1: Графа «Период начисления доходов на сумму остаточных обязательств контрагента (гр. 11). Дата окончания начисления» не заполнена!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Графа «База (360/365/366)» не заполнена!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Графа «Доходы по сделке» не заполнена!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Графа «Отклонение от рыночной процентной ставки для целей налогообложения» не заполнена!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Графа «Сумма корректировки доходов» не заполнена!", entries.get(i++).getMessage());
+        Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
+        testHelper.getLogger().clear();
+
+        // 2. Проверка положительности сумм и отклонения
+        // Проверка периодов начисления
+        // Проверка даты окончания начисления
+        // Проверка суммы корректировки доходов
+        // Проверка базы
+        row.getCell("dealNum").setValue("string", null);
+        row.getCell("name").setValue(1L, null);
+        row.getCell("code").setValue("string", null);
+        row.getCell("currency").setValue(1L, null);
+        row.getCell("date1Part").setValue(sdf.parse("01.03.2014"), null);
+        row.getCell("date2Part").setValue(sdf.parse("01.03.2014"), null);
+        row.getCell("dealRate").setValue(1L, null);
+        row.getCell("payDate").setValue(sdf.parse("01.03.2014"), null);
+        row.getCell("dealLeftSum").setValue(-1L, null);
+        row.getCell("bondSum").setValue(-1L, null);
+        row.getCell("dealIncome").setValue(-1L, null);
+        row.getCell("rateDiff").setValue(-1L, null);
+        row.getCell("incomeCorrection").setValue(-1L, null);
+        row.getCell("accrStartDate").setValue(sdf.parse("02.03.2015"), null);
+        row.getCell("accrEndDate").setValue(sdf.parse("01.03.2015"), null);
+        row.getCell("yearBase").setValue(300L, null);
+        testHelper.execute(FormDataEvent.CHECK);
+
+        i = 0;
+        entries = testHelper.getLogger().getEntries();
+        Assert.assertEquals("Строка 1: Значение графы «Сумма остаточных обязательств (требований) контрагента по сделке» должно быть больше или равно «0»!", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 1: Значение графы «Сумма выплаты по ценным бумагам» должно быть больше или равно «0»!", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 1: Значение графы «Доходы по сделке» должно быть больше или равно «0»!", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 1: Значение графы «Отклонение от рыночной процентной ставки для целей налогообложения» должно быть больше или равно «0»!", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 1: Значение графы «Сумма корректировки доходов» должно быть больше или равно «0»!", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 1: Значение графы «Период начисления доходов на сумму остаточных обязательств контрагента (гр. 11). Дата окончания начисления» должно быть больше значения графы «Период начисления доходов на сумму остаточных обязательств контрагента (гр. 11). Дата начала начисления»!", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 1: Дата по графе «Период начисления доходов на сумму остаточных обязательств контрагента (гр. 11). Дата окончания начисления» должна принимать значение из диапазона: 01.01.2014 - 31.12.2014!", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 1: Значение графы «Сумма корректировки доходов» должно равняться выражению: («Сумма остаточных обязательств (требований) контрагента по сделке» * «Отклонение от рыночной процентной ставки для целей налогообложения») * ((«Период начисления доходов на сумму остаточных обязательств контрагента (гр. 11). Дата окончания начисления» - «Период начисления доходов на сумму остаточных обязательств контрагента (гр. 11). Дата начала начисления» + 1) / «База (360/365/366)») / 100!", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 1: Графа «База (360/365/366)» должна принимать значение из следующего списка: «360», «365», «366»!", entries.get(i++).getMessage());
+        Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
+        testHelper.getLogger().clear();
+
+        // 2. Для прохождения всех ЛП
+        i = 0;
+        row.getCell("dealLeftSum").setValue(360L, null);
+        row.getCell("bondSum").setValue(1L, null);
+        row.getCell("accrStartDate").setValue(sdf.parse("01.03.2014"), null);
+        row.getCell("accrEndDate").setValue(sdf.parse("02.03.2014"), null);
+        row.getCell("yearBase").setValue(360L, null);
+        row.getCell("dealIncome").setValue(1L, null);
+        row.getCell("rateDiff").setValue(1L, null);
+        row.getCell("incomeCorrection").setValue(BigDecimal.valueOf(0.02), null);
+        testHelper.execute(FormDataEvent.CHECK);
         Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
         testHelper.getLogger().clear();
     }

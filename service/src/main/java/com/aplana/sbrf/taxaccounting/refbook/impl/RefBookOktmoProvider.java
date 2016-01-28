@@ -92,7 +92,7 @@ public class RefBookOktmoProvider implements RefBookDataProvider {
     }
 
     @Override
-    public boolean isRecordsExist(List<Long> uniqueRecordIds) {
+    public List<Long> isRecordsExist(List<Long> uniqueRecordIds) {
         return dao.isRecordsExist(uniqueRecordIds);
     }
 
