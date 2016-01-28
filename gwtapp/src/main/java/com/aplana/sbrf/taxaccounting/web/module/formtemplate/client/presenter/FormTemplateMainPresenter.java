@@ -246,6 +246,7 @@ public class FormTemplateMainPresenter extends TabContainerPresenter<FormTemplat
 							formTemplate = formTemplateExt.getFormTemplate();
 							getView().setFormId(formTemplate.getId());
 							getView().setTitle(formTemplate.getName());
+                            getView().activateVersion(true);
                             getView().activateVersionName(formTemplate.getStatus().getId() == 0? "Вывести из действия" : "Ввести в действие");
 							TitleUpdateEvent.fire(FormTemplateMainPresenter.this, "Шаблон налоговой формы", formTemplate.getType().getName());
 							RevealContentEvent.fire(FormTemplateMainPresenter.this, RevealContentTypeHolder.getMainContent(), FormTemplateMainPresenter.this);
