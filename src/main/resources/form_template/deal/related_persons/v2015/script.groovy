@@ -673,36 +673,9 @@ def createSpecificReportShortListCSV() {
     // данные
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
-    def values = []
     for (def row : dataRows) {
-        // 1. entityFullName
-        def record520 = getRefBookValue(520L, row.name)
-        values.add(record520?.NAME?.value)
-
-        // 2. oksm
-        def countryCode = getRefBookValue(10L, record520?.COUNTRY_CODE?.value)?.CODE?.value
-        values.add(countryCode)
-
-        // 3. inn
-        values.add(record520?.INN?.value)
-
-        // 4. kpp
-        values.add(record520?.KPP?.value)
-
-        // 5. swift
-        values.add(record520?.SWIFT?.value)
-
-        // 6. regno
-        def value = null
-        if (record520?.REG_NUM?.value) {
-            value = record520?.REG_NUM?.value
-        } else if (record520?.REG_NUM?.value && record520?.SWIFT?.value) {
-            value = record520?.KIO?.value
-        }
-        values.add(value)
-
+        def values = getShortRow(row.name)
         csvWriter.writeNext(values.toArray() as String[])
-        values.clear()
     }
     csvWriter.close()
 
@@ -711,6 +684,39 @@ def createSpecificReportShortListCSV() {
     def year = getReportPeriod()?.taxPeriod?.year?.toString()
     def fileName = "interDep" + periodCode + year + ".csv"
     scriptSpecificReportHolder.setFileName(fileName)
+}
+
+/** Получить значения строки для краткого отчета. */
+def getShortRow(def recordId) {
+    def values = []
+
+    // 1. entityFullName / name
+    def record520 = getRefBookValue(520L, recordId)
+    values.add(record520?.NAME?.value)
+
+    // 2. oksm / countryCode
+    def countryCode = getRefBookValue(10L, record520?.COUNTRY_CODE?.value)?.CODE?.value
+    values.add(countryCode)
+
+    // 3. inn / inn
+    values.add(record520?.INN?.value)
+
+    // 4. kpp / kpp
+    values.add(record520?.KPP?.value)
+
+    // 5. swift / swift
+    values.add(record520?.SWIFT?.value)
+
+    // 6. regno / regNum
+    def value = null
+    if (record520?.REG_NUM?.value) {
+        value = record520?.REG_NUM?.value
+    } else if (!record520?.REG_NUM?.value && !record520?.SWIFT?.value) {
+        value = record520?.KIO?.value
+    }
+    values.add(value)
+
+    return values
 }
 
 /** Получить код периода по дате. */
@@ -811,36 +817,9 @@ void createSpecificReportShortListXLSM() {
     // данные
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
-    def values = []
     for (def row : dataRows) {
         rowIndex++
-
-        // 1. name
-        def record520 = getRefBookValue(520L, row.name)
-        values.add(record520?.NAME?.value)
-
-        // 2. countryCode
-        def countryCode = getRefBookValue(10L, record520?.COUNTRY_CODE?.value)?.CODE?.value
-        values.add(countryCode)
-
-        // 3. inn
-        values.add(record520?.INN?.value)
-
-        // 4. kpp
-        values.add(record520?.KPP?.value)
-
-        // 5. swift
-        values.add(record520?.SWIFT?.value)
-
-        // 6. regNum
-        def value = null
-        if (record520?.REG_NUM?.value) {
-            value = record520?.REG_NUM?.value
-        } else if (record520?.REG_NUM?.value && record520?.SWIFT?.value) {
-            value = record520?.KIO?.value
-        }
-        values.add(value)
-
+        def values = getShortRow(row.name)
         // добавить значения
         addNewRowInXlsm(rowIndex, values, StyleType.DATA)
         values.clear()
