@@ -130,7 +130,7 @@
         <order>12</order>
         <width>11</width>
         <maxLength>17</maxLength>
-        <precision>2</precision>
+        <precision>5</precision>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
         <alias>guarCurCode</alias>
@@ -151,7 +151,7 @@
         <order>14</order>
         <width>11</width>
         <maxLength>17</maxLength>
-        <precision>2</precision>
+        <precision>5</precision>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
         <alias>price</alias>
