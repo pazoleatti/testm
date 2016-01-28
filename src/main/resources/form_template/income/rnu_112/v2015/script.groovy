@@ -85,7 +85,7 @@ def recordCache = [:]
 def refBookCache = [:]
 
 @Field
-def allColumns = ['rowNumber', 'fix', 'dealNum', 'name', 'countryName', 'currency', 'date1Part', 'date2Part', 'dealRate', 'dealLeftSum',
+def allColumns = ['rowNumber', 'fix', 'dealNum', 'name', 'iksr', 'countryName', 'code', 'currency', 'date1Part', 'date2Part', 'dealRate', 'dealLeftSum',
                   'bondSum', 'payDate', 'accrStartDate', 'accrEndDate', 'yearBase', 'dealIncome', 'rateDiff', 'incomeCorrection']
 
 // Редактируемые атрибуты
