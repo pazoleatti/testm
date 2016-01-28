@@ -182,6 +182,7 @@ public class AssignDialogView extends ViewWithUiHandlers<AssignDialogUiHandlers>
         } else {
             periodTo.setValue(null);
             yearTo.setValue(null);
+            yearTo.setMinValue(pi.getYearFrom());
         }
     }
 
