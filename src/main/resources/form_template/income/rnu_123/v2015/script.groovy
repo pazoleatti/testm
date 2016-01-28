@@ -511,7 +511,7 @@ def calc24(def row) {
                 " следующие символы («.» или «,»), следующие символы (0-9), последний символ %s или пусто!", msg, "(%)")
     } else {
         course810 = getRecordId(15, 'CODE', '810')
-        String col23 = row.tradePay.trim()
+        String col23 = row.tradePay.trim().replaceAll(",", ".")
         def flag23 = calcFlag23(row)
         def calcCol23 = flag23 ? roundValue(new BigDecimal(col23[0..-2]) / 100, 2) :
                 roundValue(new BigDecimal(col23), 2)
@@ -582,7 +582,7 @@ def calc25(def row) {
                 " следующие символы («.» или «,»), следующие символы (0-9), последний символ %s или пусто!", msg, "(%)")
     } else {
         course810 = getRecordId(15, 'CODE', '810')
-        String col23 = row.tradePay.trim()
+        String col23 = row.tradePay.trim().replaceAll(",", ".")
         def flag23 = calcFlag23(row)
         def calcCol23 = flag23 ? roundValue(new BigDecimal(col23[0..-2]) / 100, 2) :
                 roundValue(new BigDecimal(col23), 2)
@@ -619,7 +619,7 @@ def calc26(def row) {
             logger.error("Строка $rowNum: Значение графы «%s» должно соответствовать следующему формату: первые символы: (0-9)," +
                     " следующие символы («.» или «,»), следующие символы (0-9), последний символ %s или пусто!", msg, "(%)")
         } else {
-            String col23 = row.tradePay.trim()
+            String col23 = row.tradePay.trim().replaceAll(",", ".")
             def flag23 = calcFlag23(row)
             def calcCol23 = flag23 ? roundValue(new BigDecimal(col23[0..-2]) / 100, 2) :
                     roundValue(new BigDecimal(col23), 2)
