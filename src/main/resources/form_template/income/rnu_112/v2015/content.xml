@@ -193,7 +193,7 @@
         <name>Отклонение от рыночной процентной ставки для целей налогообложения</name>
         <order>19</order>
         <width>10</width>
-        <maxLength>17</maxLength>
+        <maxLength>5</maxLength>
         <precision>2</precision>
     </columns>
     <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
