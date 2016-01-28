@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.formdata.server;
 
 import com.aplana.sbrf.taxaccounting.model.FormData;
+import com.aplana.sbrf.taxaccounting.model.MessageGenerator;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.refbook.RefBookHelper;
 import com.aplana.sbrf.taxaccounting.service.DataRowService;
@@ -40,7 +41,7 @@ public class SaveFormDataHandler extends
 	public DataRowResult execute(SaveFormDataAction action, ExecutionContext context) throws ActionException {
 		Logger logger = new Logger();
 		FormData formData = action.getFormData();
-        formDataService.checkLockedByTask(formData.getId(), logger, securityService.currentUserInfo(), String.format("Сохранение %sформы", action.getFormData().getFormType().getTaxType().getTaxText()), true);
+        formDataService.checkLockedByTask(formData.getId(), logger, securityService.currentUserInfo(), String.format("Сохранение %s", MessageGenerator.mesSpeckSingleD(action.getFormData().getFormType().getTaxType())), true);
 		if (!action.getModifiedRows().isEmpty()) {
             refBookHelper.dataRowsCheck(action.getModifiedRows(), formData.getFormColumns());
 		    dataRowService.update(securityService.currentUserInfo(), formData.getId(), action.getModifiedRows(), formData.isManual());

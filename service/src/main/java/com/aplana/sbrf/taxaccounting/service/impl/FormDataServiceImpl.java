@@ -1871,7 +1871,7 @@ public class FormDataServiceImpl implements FormDataService {
             case CONSOLIDATE_FD:
             case CHECK_FD:
             case MOVE_FD:
-                return String.format(reportType.getDescription(), formData.getFormType().getTaxType().getTaxText());
+                return String.format(reportType.getDescription(), MessageGenerator.mesSpeckSingleD(formData.getFormType().getTaxType()));
             case EXCEL:
             case CSV:
                 return String.format(reportType.getDescription(), MessageGenerator.mesSpeckSingleD(formData.getFormType().getTaxType()));

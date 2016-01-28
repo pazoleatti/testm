@@ -859,12 +859,12 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                     logger.info(LockData.CANCEL_TASK_NOT_PROGRESS,
                             SDF_DD_MM_YYYY_HH_MM_SS.format(lock.getDateLock()),
                             taUserService.getUser(lock.getUserId()).getName(),
-                            String.format(type.getDescription(), declarationTemplate.getType().getTaxType().getDeclarationShortName()));
+                            getTaskName(type, declarationTemplate.getType().getTaxType()));
                 } else {
                     logger.info(LockData.CANCEL_TASK_IN_PROGRESS,
                             SDF_DD_MM_YYYY_HH_MM_SS.format(lock.getDateLock()),
                             taUserService.getUser(lock.getUserId()).getName(),
-                            String.format(type.getDescription(), declarationTemplate.getType().getTaxType().getDeclarationShortName()));
+                            getTaskName(type, declarationTemplate.getType().getTaxType()));
                 }
             }
         }
@@ -943,7 +943,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             case CHECK_DEC:
             case ACCEPT_DEC:
                 return String.format(LockData.DescriptionTemplate.DECLARATION_TASK.getText(),
-                        String.format(reportType.getDescription(), declarationTemplate.getType().getTaxType().getDeclarationShortName()),
+                        getTaskName(reportType, declarationTemplate.getType().getTaxType()),
                         reportPeriod.getReportPeriod().getName() + " " + reportPeriod.getReportPeriod().getTaxPeriod().getYear(),
                         reportPeriod.getCorrectionDate() != null
                                 ? " с датой сдачи корректировки " + SDF_DD_MM_YYYY.format(reportPeriod.getCorrectionDate())
@@ -1053,6 +1053,20 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             if (!relations.isEmpty() && consolidationOk){
                 logger.info("Консолидация выполнена из всех форм-источников.");
             }
+        }
+    }
+
+    @Override
+    public String getTaskName(ReportType reportType, TaxType taxType) {
+        switch (reportType) {
+            case CHECK_DEC:
+            case ACCEPT_DEC:
+            case EXCEL_DEC:
+            case XML_DEC:
+            case PDF_DEC:
+                return String.format(reportType.getDescription(), taxType.getDeclarationShortName());
+            default:
+                throw new ServiceException("Неверный тип отчета(%s)", reportType.getName());
         }
     }
 }

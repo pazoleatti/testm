@@ -57,7 +57,7 @@ public abstract class CheckDeclarationAsyncTask extends AbstractAsyncTask {
         DeclarationData declarationData = declarationDataService.get(declarationDataId, userInfo);
         DeclarationTemplate declarationTemplate = declarationTemplateService.get(declarationData.getDeclarationTemplateId());
         String msg = String.format("xml файл %s имеет слишком большой размер(%s Кбайт)!",  declarationTemplate.getType().getTaxType().getDeclarationShortName(), value);
-        return checkTask(getReportType(), value, String.format(getReportType().getDescription(), declarationTemplate.getType().getTaxType().getDeclarationShortName()), msg);
+        return checkTask(getReportType(), value, declarationDataService.getTaskName(getReportType(), declarationTemplate.getType().getTaxType()), msg);
     }
 
     @Override
