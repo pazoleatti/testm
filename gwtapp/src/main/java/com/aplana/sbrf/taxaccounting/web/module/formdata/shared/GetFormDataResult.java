@@ -4,6 +4,8 @@ import com.aplana.sbrf.taxaccounting.model.*;
 import com.gwtplatform.dispatch.shared.Result;
 
 import java.util.List;
+import java.util.Map;
+
 /**
  * 
  * @author Eugene Stetsenko
@@ -43,6 +45,7 @@ public class GetFormDataResult implements Result {
 	private FormMode formMode;
 	private boolean fixedRows;
     private boolean updating;
+    private Map<FormDataEvent, Boolean> eventScriptStatus;
 
     public boolean canCreatedManual() {
         return canCreatedManual;
@@ -202,5 +205,13 @@ public class GetFormDataResult implements Result {
 
     public void setUpdating(boolean updating) {
         this.updating = updating;
+    }
+
+    public Map<FormDataEvent, Boolean> getEventScriptStatus() {
+        return eventScriptStatus;
+    }
+
+    public void setEventScriptStatus(Map<FormDataEvent, Boolean> eventScriptStatus) {
+        this.eventScriptStatus = eventScriptStatus;
     }
 }

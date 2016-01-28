@@ -9,6 +9,7 @@ import com.aplana.sbrf.taxaccounting.model.util.Pair;
 import java.io.InputStream;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Сервис для работы с {@link FormData данными по налоговым формам}
@@ -547,4 +548,11 @@ public interface FormDataService {
      * @return
      */
     List<String> getSpecificReportTypes(FormData formData, TAUserInfo userInfo, Logger logger);
+
+    /**
+     * Статус возможности обработки события FormDataEvent в скриптом макета
+     * @param formTemplate
+     * @return
+     */
+    Map<FormDataEvent, Boolean> getEventScriptStatus(FormTemplate formTemplate);
 }

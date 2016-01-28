@@ -23,6 +23,7 @@ import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.*;
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.FormDataListNameTokens;
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.shared.CreateManualFormData;
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.shared.CreateManualFormDataResult;
+import com.aplana.sbrf.taxaccounting.web.widget.fileupload.event.CheckHandler;
 import com.aplana.sbrf.taxaccounting.web.widget.history.client.HistoryPresenter;
 import com.aplana.sbrf.taxaccounting.web.widget.logarea.client.LogAreaPresenter;
 import com.aplana.sbrf.taxaccounting.web.widget.menu.client.ManualMenuPresenter;
@@ -49,6 +50,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
         FormDataUiHandlers, SetFocus.SetFocusHandler {
 
     private static final DateTimeFormat DATE_TIME_FORMAT = DateTimeFormat.getFormat("dd.MM.yyyy");
+    private static final String NOT_EXIST_EVENT_MSG = "Данное действие на форме недоступно";
 
     private final ManualMenuPresenter manualMenuPresenter;
     private final LogAreaPresenter logAreaPresenter;
@@ -501,6 +503,10 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
 	 */
 	@Override
 	public void onAddRowClicked() {
+        if (!eventScriptStatus.get(FormDataEvent.ADD_ROW)) {
+            Dialog.infoMessage(NOT_EXIST_EVENT_MSG);
+            return;
+        }
 		DataRow<Cell> dataRow = getView().getSelectedRow();
 		AddRowAction action = new AddRowAction();
 		action.setCurrentDataRow(dataRow);
@@ -514,6 +520,10 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
 	 */
 	@Override
 	public void onRemoveRowClicked() {
+        if (!eventScriptStatus.get(FormDataEvent.DELETE_ROW)) {
+            Dialog.infoMessage(NOT_EXIST_EVENT_MSG);
+            return;
+        }
 		DataRow<Cell> dataRow = getView().getSelectedRow();
 		DeleteRowAction action = new DeleteRowAction();
 		action.setCurrentDataRow(dataRow);
@@ -533,6 +543,10 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
 
     @Override
     public void onRefreshClicked(final boolean force, final boolean cancelTask) {
+        if (!eventScriptStatus.get(FormDataEvent.REFRESH)) {
+            Dialog.infoMessage(NOT_EXIST_EVENT_MSG);
+            return;
+        }
         RefreshDataRowsAction action = new RefreshDataRowsAction();
         action.setFormData(formData);
         action.setModifiedRows(new ArrayList<DataRow<Cell>>(modifiedRows));
@@ -546,7 +560,11 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
      */
 	@Override
 	public void onRecalculateClicked(final boolean force, final boolean cancelTask) {
-		RecalculateDataRowsAction action = new RecalculateDataRowsAction();
+        if (!eventScriptStatus.get(FormDataEvent.CALCULATE)) {
+            Dialog.infoMessage(NOT_EXIST_EVENT_MSG);
+            return;
+        }
+        RecalculateDataRowsAction action = new RecalculateDataRowsAction();
 		action.setFormData(formData);
 		action.setModifiedRows(new ArrayList<DataRow<Cell>>(modifiedRows));
         action.setForce(force);
@@ -713,6 +731,10 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
 
     @Override
     public void onConsolidate(final boolean force, final boolean cancelTask) {
+        if (!eventScriptStatus.get(FormDataEvent.COMPOSE)) {
+            Dialog.infoMessage(NOT_EXIST_EVENT_MSG);
+            return;
+        }
         ConsolidateAction action = new ConsolidateAction();
         action.setManual(formData.isManual());
         action.setFormDataId(formData.getId());
@@ -872,6 +894,7 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
                                 isBankSummaryForm = result.isBankSummaryForm();
                                 formSearchPresenter.setFormDataId(formData.getId());
                                 formSearchPresenter.setFormTemplateId(formData.getFormTemplateId());
+                                eventScriptStatus = result.getEventScriptStatus();
 
                                 specificReportTypes = result.getSpecificReportTypes();
                                 getView().setSpecificReportTypes(result.getSpecificReportTypes());
@@ -997,7 +1020,17 @@ public class FormDataPresenter extends FormDataPresenterBase<FormDataPresenter.M
             }
         };
 
-        getView().addFileUploadValueChangeHandler(valueChangeHandler);
+        CheckHandler checkHandler = new CheckHandler() {
+            @Override
+            public boolean onCheck() {
+                if (!eventScriptStatus.get(FormDataEvent.IMPORT)) {
+                    Dialog.infoMessage(NOT_EXIST_EVENT_MSG);
+                    return false;
+                }
+                return true;
+            }
+        };
+        getView().addFileUploadValueChangeHandler(valueChangeHandler, checkHandler);
         addRegisteredHandler(SetFocus.getType(), this);
     }
 
