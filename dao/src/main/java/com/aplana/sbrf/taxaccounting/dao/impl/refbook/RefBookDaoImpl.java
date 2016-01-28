@@ -1084,7 +1084,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
     private static final String GET_INACTIVE_RECORDS_IN_PERIOD = "select id, \n" +
             "        case when status = -1 then 0\n" +
             "             when nvl(next_version, to_date('31.12.9999', 'DD.MM.YYYY')) <= nvl(:periodTo, to_date('31.12.9999', 'DD.MM.YYYY')) then 2 --дата окончания ограничивающего периода\n" +
-            "             when not ((end_version - 1 >= :periodFrom or end_version is null) and (:periodTo is null or start_version <= :periodFrom)) then 1 end state                    \n" +
+            "             when ((end_version is not null and end_version < :periodFrom) or (:periodTo is not null and start_version > :periodTo)) then 1 end state                    \n" +
             "from   (\n" +
             "       select input.id as input_id, rbr.id, rbr.record_id, rbr.version as start_version, rbr.status, lead (rbr.version) over (partition by input.id order by rbr.version) end_version, case when input.status = 0 then lead (rbr.version) over (partition by input.id, rbr.status order by rbr.version) end next_version \n" +
             "       from ref_book_record input\n" +
