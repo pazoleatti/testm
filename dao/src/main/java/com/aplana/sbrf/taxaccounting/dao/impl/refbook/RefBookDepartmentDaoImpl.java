@@ -30,12 +30,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * User: ekuvshinov
@@ -407,7 +402,28 @@ public class RefBookDepartmentDaoImpl extends AbstractDao implements RefBookDepa
     }
 
     @Override
-    public boolean isRecordsExist(List<Long> uniqueRecordIds) {
-        return getJdbcTemplate().queryForObject(String.format("select count (*) from department where %s", SqlUtils.transformToSqlInStatement("id", uniqueRecordIds)), Integer.class) == uniqueRecordIds.size();
+    public List<Long> isRecordsExist(List<Long> uniqueRecordIds) {
+        //Исключаем несуществующие записи
+        String sql = String.format("select id from department where %s ", SqlUtils.transformToSqlInStatement("id", uniqueRecordIds));
+        List<Long> recordIds = new LinkedList<Long>(uniqueRecordIds);
+        List<Long> existRecords = new ArrayList<Long>();
+        try {
+            //Получаем список существующих записей среди входного набора
+            existRecords = getJdbcTemplate().query(sql, new RowMapper<Long>() {
+                @Override
+                public Long mapRow(ResultSet rs, int rowNum) throws SQLException {
+                    return rs.getLong("id");
+                }
+            });
+        } catch (EmptyResultDataAccessException ignored) {}
+
+        for (Iterator<Long> it = recordIds.iterator(); it.hasNext();) {
+            Long recordId = it.next();
+            //Если запись не найдена среди существующих, то проставляем статус и удаляем ее из списка для остальных проверок
+            if (existRecords.contains(recordId)) {
+                it.remove();
+            }
+        }
+        return recordIds;
     }
 }

@@ -276,7 +276,7 @@ public interface RefBookOktmoDao {
      */
     List<Pair<Long, Long>> getRecordIdPairs(String tableName, @NotNull Long refBookId, Date version, Boolean needAccurateVersion, String filter);
 
-    boolean isRecordsExist(List<Long> uniqueRecordIds);
+    List<Long> isRecordsExist(List<Long> uniqueRecordIds);
 
     /**
      * Возвращает все версии из указанной группы версий записи справочника

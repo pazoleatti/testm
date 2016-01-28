@@ -1870,7 +1870,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             "where v.attribute_id in (select id from ref_book_attribute where ref_book_id in (37,310,31,98,330,33,206,99) %s and alias != 'DEPARTMENT_ID') and v.reference_value = cr.id and r.id=v.record_id and r.status != -1),\n" +
             "allVersions as (select distinct r.* from ref_book_record r, usages u where r.status != -1 and r.ref_book_id=u.ref_book_id and r.record_id=u.record_id),\n" +
             "recordsByVersion as (select r.*, row_number() over(partition by r.record_id order by r.version) rn from ref_book_record r, allVersions av where r.id=av.id and r.status != -1),\n" +
-            "versionInfo as (select rv.rn NUM, rv.ID, rv.ref_book_id, rv.VERSION, rv.status, rv2.version - interval '1' day nextVersion,rv2.status nextStatus from recordsByVersion rv left outer join recordsByVersion rv2 on rv.RECORD_ID = rv2.RECORD_ID and rv.rn+1 = rv2.rn where rv.status = 0)\n" +
+            "versionInfo as (select rv.rn NUM, rv.ID, rv.ref_book_id, rv.VERSION, rv.status, rv2.version - interval '1' day nextVersion,rv2.status nextStatus from recordsByVersion rv left outer join recordsByVersion rv2 on rv.RECORD_ID = rv2.RECORD_ID and rv.rn+1 = rv2.rn join usages u on u.id = rv.id  where rv.status = 0)\n" +
             "select distinct d.name as departmentName, concat(pn.string_value, to_char(u.version,' yyyy')) as periodName, nt.number_value as isT, ni.number_value as isI, nd.number_value as isD, nv.number_value as isV, np.number_value as isP,\n" +
             "trunc(u.version, 'DD') as periodStart, trunc(u.nextversion, 'DD') as periodEnd,\n" +
             "case\n" +
@@ -3105,12 +3105,33 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 	}
 
     @Override
-    public boolean isRecordsExist(List<Long> uniqueRecordIds) {
-        return getJdbcTemplate().queryForObject(String.format("select count (*) from ref_book_record where %s", SqlUtils.transformToSqlInStatement("id", uniqueRecordIds)), Integer.class) == uniqueRecordIds.size();
+    public List<Long> isRecordsExist(Set<Long> uniqueRecordIds) {
+        //Исключаем несуществующие записи
+        String sql = String.format("select id from ref_book_record where %s and status != -1", SqlUtils.transformToSqlInStatement("id", uniqueRecordIds));
+        List<Long> recordIds = new LinkedList<Long>(uniqueRecordIds);
+        List<Long> existRecords = new ArrayList<Long>();
+        try {
+            //Получаем список существующих записей среди входного набора
+            existRecords = getJdbcTemplate().query(sql, new RowMapper<Long>() {
+                @Override
+                public Long mapRow(ResultSet rs, int rowNum) throws SQLException {
+                    return rs.getLong("id");
+                }
+            });
+        } catch (EmptyResultDataAccessException ignored) {}
+
+        for (Iterator<Long> it = recordIds.iterator(); it.hasNext();) {
+            Long recordId = it.next();
+            //Если запись не найдена среди существующих, то проставляем статус и удаляем ее из списка для остальных проверок
+            if (existRecords.contains(recordId)) {
+                it.remove();
+            }
+        }
+        return recordIds;
     }
 
     @Override
     public boolean isRefBookExist(long refBookId) {
-        return getJdbcTemplate().queryForObject("select count(*) from ref_book where id = ?", new Object[]{refBookId}, Integer.class) > 0;
+        return getJdbcTemplate().queryForObject("select count(*) from ref_book where id = ? and status != -1", new Object[]{refBookId}, Integer.class) > 0;
     }
 }

@@ -6,7 +6,18 @@ import com.aplana.sbrf.taxaccounting.model.FormDataKind
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
+import com.aplana.sbrf.taxaccounting.service.impl.print.formdata.FormDataXlsmReportBuilder
+import com.aplana.sbrf.taxaccounting.service.impl.print.formdata.XlsxReportMetadata
 import groovy.transform.Field
+import org.apache.poi.ss.usermodel.Cell
+import org.apache.poi.ss.usermodel.CellStyle
+import org.apache.poi.ss.usermodel.Font
+import org.apache.poi.ss.usermodel.Row
+import org.apache.poi.ss.usermodel.Sheet
+import org.apache.poi.ss.usermodel.Workbook
+import org.apache.poi.ss.usermodel.WorkbookFactory
+import org.apache.poi.ss.util.CellRangeAddress
+import org.springframework.util.ClassUtils
 
 /**
  * 800 - Взаимозависимые лица.
@@ -69,6 +80,7 @@ switch (formDataEvent) {
         break
     case FormDataEvent.GET_SPECIFIC_REPORT_TYPES:
         specificReportType.add("Краткий список ВЗЛ (CSV)")
+        specificReportType.add("Краткий список ВЗЛ (XLSM)")
         break
     case FormDataEvent.CREATE_SPECIFIC_REPORT:
         createSpecificReport()
@@ -318,6 +330,27 @@ void logicCheck() {
                 def msg = "Строка $index: организация «$value2» не является взаимозависимым лицом в данном отчетном периоде!"
                 rowError(logger, row, msg)
             }
+        }
+
+        // 3. Корректное указание категории для ИВЗЛ
+        def orgCode = getRefBookValue(513L, record?.ORG_CODE?.value)?.CODE?.value
+        def categoryName = getRefBookValue(506L, row.category)?.CODE?.value
+        if (row.category && orgCode == 2 && categoryName != 'Категория 1') {
+            String msg = String.format("Строка %d: Для иностранного ВЗЛ в графе «%s» можно указать только значение «Категория 1»!", row.getIndex(), getColumnName(row, 'category'))
+            rowError(logger, row, msg)
+        }
+
+        // 4. Корректное указание категории для ВЗЛ СРН
+        def taxStatus = getRefBookValue(511L, record?.TAX_STATUS?.value)?.CODE?.value
+        if (row.category && orgCode == 1 && taxStatus == 1 && categoryName != 'Категория 1') {
+            String msg = String.format("Строка %d: Для ВЗЛ со специальным режимом налогообложения в графе «%s» можно указать только значение «Категория 1»!", row.getIndex(), getColumnName(row, 'category'))
+            rowError(logger, row, msg)
+        }
+
+        // 5. Корректное указание категории для ВЗЛ ОРН
+        if (row.category && orgCode == 1 && taxStatus == 2 && !(categoryName in ['Категория 2', 'Категория 3', 'Категория 4'])) {
+            String msg = String.format("Строка %d: Для ВЗЛ с общим режимом налогообложения в графе «%s» можно указать только одно из следующих значений: Категория 2, Категория 3, Категория 4!", row.getIndex(), getColumnName(row, 'category'))
+            rowError(logger, row, msg)
         }
     }
 }
@@ -620,6 +653,9 @@ void createSpecificReport() {
         case 'Краткий список ВЗЛ (CSV)' :
             createSpecificReportShortListCSV()
             break
+        case 'Краткий список ВЗЛ (XLSM)' :
+            createSpecificReportShortListXLSM()
+            break
     }
 }
 
@@ -637,44 +673,50 @@ def createSpecificReportShortListCSV() {
     // данные
     def dataRowHelper = formDataService.getDataRowHelper(formData)
     def dataRows = dataRowHelper.allCached
-    def values = []
     for (def row : dataRows) {
-        // 1. entityFullName
-        def record520 = getRefBookValue(520L, row.name)
-        values.add(record520?.NAME?.value)
-
-        // 2. oksm
-        def countryCode = getRefBookValue(10L, record520?.COUNTRY_CODE?.value)?.CODE?.value
-        values.add(countryCode)
-
-        // 3. inn
-        values.add(record520?.INN?.value)
-
-        // 4. kpp
-        values.add(record520?.KPP?.value)
-
-        // 5. swift
-        values.add(record520?.SWIFT?.value)
-
-        // 6. regno
-        def value = null
-        if (record520?.REG_NUM?.value) {
-            value = record520?.REG_NUM?.value
-        } else if (record520?.REG_NUM?.value && record520?.SWIFT?.value) {
-            value = record520?.KIO?.value
-        }
-        values.add(value)
-
+        def values = getShortRow(row.name)
         csvWriter.writeNext(values.toArray() as String[])
-        values.clear()
     }
-    csvWriter.close();
+    csvWriter.close()
 
     // название файла
     def periodCode = getPeriodCode(getReportPeriodEndDate())
     def year = getReportPeriod()?.taxPeriod?.year?.toString()
     def fileName = "interDep" + periodCode + year + ".csv"
     scriptSpecificReportHolder.setFileName(fileName)
+}
+
+/** Получить значения строки для краткого отчета. */
+def getShortRow(def recordId) {
+    def values = []
+
+    // 1. entityFullName / name
+    def record520 = getRefBookValue(520L, recordId)
+    values.add(record520?.NAME?.value)
+
+    // 2. oksm / countryCode
+    def countryCode = getRefBookValue(10L, record520?.COUNTRY_CODE?.value)?.CODE?.value
+    values.add(countryCode)
+
+    // 3. inn / inn
+    values.add(record520?.INN?.value)
+
+    // 4. kpp / kpp
+    values.add(record520?.KPP?.value)
+
+    // 5. swift / swift
+    values.add(record520?.SWIFT?.value)
+
+    // 6. regno / regNum
+    def value = null
+    if (record520?.REG_NUM?.value) {
+        value = record520?.REG_NUM?.value
+    } else if (!record520?.REG_NUM?.value && !record520?.SWIFT?.value) {
+        value = record520?.KIO?.value
+    }
+    values.add(value)
+
+    return values
 }
 
 /** Получить код периода по дате. */
@@ -688,7 +730,7 @@ def getPeriodCode(def date) {
 
     // если не нашлось кода в справочнике
     if (!periodCode) {
-        Calendar c = Calendar.getInstance();
+        Calendar c = Calendar.getInstance()
         c.setTime(date)
         def month = c.get(Calendar.MONTH)
         if (month < 4) {
@@ -702,4 +744,243 @@ def getPeriodCode(def date) {
         }
     }
     return periodCode
+}
+
+@Field
+Workbook workBook = null
+@Field
+Sheet sheet = null
+
+void createSpecificReportShortListXLSM() {
+    // для работы с эксель
+    String TEMPLATE = ClassUtils.classPackageAsResourcePath(FormDataXlsmReportBuilder.class)+ "/acctax.xlsm"
+    InputStream templeteInputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(TEMPLATE)
+    workBook = WorkbookFactory.create(templeteInputStream)
+    sheet = workBook.getSheetAt(0)
+    Row tmpRow
+    Cell cell
+    CellRangeAddress region
+    def rowIndex = 0
+
+    // очистить шаблон
+    clearSheet()
+
+    // заголовок
+    tmpRow = sheet.createRow(rowIndex)
+    cell = tmpRow.createCell(0)
+    cell.setCellValue("ПАО Сбербанк")
+    cell.setCellStyle(getCellStyle(StyleType.ROW_1))
+    // объединение двух ячеек
+    region = new CellRangeAddress(rowIndex, rowIndex, 0, 1)
+    sheet.addMergedRegion(region)
+
+    def currentDateStr = new Date().format('dd.MM.yyyy')
+    rowIndex++
+    newRow = sheet.createRow(rowIndex)
+    cell = newRow.createCell(0)
+    cell.setCellValue("Список Взаимозависимых лиц Банка по состоянию на $currentDateStr")
+    cell.setCellStyle(getCellStyle(StyleType.ROW_2))
+    // объединение трех ячеек
+    region = new CellRangeAddress(rowIndex, rowIndex, 0, 2)
+    sheet.addMergedRegion(region)
+
+    // пустая строка
+    rowIndex++
+    sheet.createRow(rowIndex)
+
+    // шапка
+    rowIndex++
+    def tmpDataRow = formData.createDataRow()
+    def columnAliases = ['name', 'countryCode', 'inn', 'kpp', 'swift', 'regNum']
+    def columnNames = columnAliases.collect { getColumnName(tmpDataRow, it) }
+    addNewRowInXlsm(rowIndex, columnNames, StyleType.HEADER)
+
+    // нумерация
+    rowIndex++
+    def columnNum = (1..6).collect { it.toString() }
+    addNewRowInXlsm(rowIndex, columnNum, StyleType.NUMERATION)
+
+    // задать ширину столбцов (в символах)
+    def widths = [
+            43, // name
+            9,  // countryCode
+            20, // inn
+            15, // kpp
+            15, // swift
+            20, // regNum
+    ]
+    for (int i = 0; i < widths.size(); i++) {
+        int width = widths[i] * 256 // умножить на 256, т.к. 1 единица ширины в poi = 1/256 ширины символа
+        sheet.setColumnWidth(i, width)
+    }
+
+    // данные
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper.allCached
+    for (def row : dataRows) {
+        rowIndex++
+        def values = getShortRow(row.name)
+        // добавить значения
+        addNewRowInXlsm(rowIndex, values, StyleType.DATA)
+        values.clear()
+    }
+    workBook.write(scriptSpecificReportHolder.getFileOutputStream())
+
+    // название файла
+    def periodCode = getPeriodCode(getReportPeriodEndDate())
+    def year = getReportPeriod()?.taxPeriod?.year?.toString()
+    def fileName = "interDep" + periodCode + year + ".xlsm"
+    scriptSpecificReportHolder.setFileName(fileName)
+}
+
+/**
+ * Добавить новую строку в эксель и заполнить данными.
+ *
+ * @param sheet лист эксель
+ * @param rowIndex номер строк (0..n)
+ * @param values список строковых значении
+ */
+void addNewRowInXlsm(int rowIndex, def values, StyleType styleType) {
+    Row newRow = sheet.createRow(rowIndex)
+    def cellIndex = 0
+    for (String value : values) {
+        Cell cell = newRow.createCell(cellIndex)
+        cell.setCellValue(value)
+
+        // стили
+        CellStyle cellStyle = getCellStyle(styleType)
+        cell.setCellStyle(cellStyle)
+        cellIndex++
+    }
+}
+
+/** Очистить шаблон, т.к в нем есть значения, поименованные ячейки, стили и т.д. */
+void clearSheet() {
+    // убрать объединения
+    def count = sheet.getNumMergedRegions()
+    for (int i = count - 1; i >= 0; i--) {
+        sheet.removeMergedRegion(i)
+    }
+
+    // очистить ячейки
+    def addRowCount = 0
+    int maxColumnNum = 0
+    for (int i = sheet.getFirstRowNum(); i <= sheet.getLastRowNum(); i++) {
+        Row row = sheet.getRow(i)
+        if (!row) {
+            continue
+        }
+        if (row.getLastCellNum() > maxColumnNum) {
+            maxColumnNum = row.getLastCellNum()
+        }
+        sheet.removeRow(row)
+        // добавить новую строку что б не удалился макрос после удаления всех строк (две строки используются макросом)
+        if (addRowCount < 2) {
+            Row tmp = sheet.createRow(i)
+            tmp.createCell(2).setCellValue(' ')
+            addRowCount++
+        }
+    }
+    // поправить ширину столбцов
+    int width = (sheet.getDefaultColumnWidth() + 1) * 256
+    for (int i = 0; i <= maxColumnNum; i++) {
+        sheet.setColumnWidth(i, width)
+    }
+
+    // удалить именованные ячейки
+    def cellNames = [
+            XlsxReportMetadata.RANGE_DATE_CREATE,
+            XlsxReportMetadata.RANGE_REPORT_CODE,
+            XlsxReportMetadata.RANGE_REPORT_PERIOD,
+            XlsxReportMetadata.RANGE_REPORT_NAME,
+            XlsxReportMetadata.RANGE_SUBDIVISION,
+            // XlsxReportMetadata.RANGE_POSITION, // используется макросом
+            XlsxReportMetadata.RANGE_SUBDIVISION_SIGN,
+            XlsxReportMetadata.RANGE_FIO,
+    ]
+    cellNames.each { name ->
+        workBook.removeName(name)
+    }
+}
+
+@Field
+def cellStyleMap = [:]
+
+enum StyleType {
+    ROW_1,      // строка 1
+    ROW_2,      // строка 2
+    HEADER,     // шапка
+    NUMERATION, // нумерация
+    DATA        // данные
+}
+
+CellStyle getCellStyle(StyleType styleType) {
+    def alias = styleType.name()
+    if (cellStyleMap.containsKey(alias)) {
+        return cellStyleMap.get(alias)
+    }
+    CellStyle style = workBook.createCellStyle()
+    switch (styleType) {
+        case StyleType.ROW_1 :
+            style.setWrapText(true)
+
+            Font font = workBook.createFont()
+            font.setBoldweight(Font.BOLDWEIGHT_BOLD)
+            font.setFontHeightInPoints(8 as short)
+            font.setFontName('Arial')
+            style.setFont(font)
+            break
+        case StyleType.ROW_2 :
+            style.setWrapText(true)
+
+            Font font = workBook.createFont()
+            font.setBoldweight(Font.BOLDWEIGHT_BOLD)
+            font.setFontHeightInPoints(8 as short)
+            font.setFontName('Arial')
+            style.setFont(font)
+            break
+        case StyleType.HEADER :
+            style.setAlignment(CellStyle.ALIGN_CENTER)
+            style.setVerticalAlignment(CellStyle.VERTICAL_CENTER)
+            style.setBorderRight(CellStyle.BORDER_THIN)
+            style.setBorderLeft(CellStyle.BORDER_THIN)
+            style.setBorderBottom(CellStyle.BORDER_THIN)
+            style.setBorderTop(CellStyle.BORDER_THIN)
+            style.setWrapText(true)
+
+            Font font = workBook.createFont()
+            font.setBoldweight(Font.BOLDWEIGHT_BOLD)
+            font.setFontHeightInPoints(8 as short)
+            font.setFontName('Arial')
+            style.setFont(font)
+            break
+        case StyleType.NUMERATION :
+            style.setAlignment(CellStyle.ALIGN_CENTER)
+            style.setBorderRight(CellStyle.BORDER_THIN)
+            style.setBorderLeft(CellStyle.BORDER_THIN)
+            style.setBorderBottom(CellStyle.BORDER_THIN)
+            style.setBorderTop(CellStyle.BORDER_THIN)
+            style.setWrapText(true)
+
+            Font font = workBook.createFont()
+            font.setBoldweight(Font.BOLDWEIGHT_BOLD)
+            font.setFontHeightInPoints(8 as short)
+            font.setFontName('Arial')
+            font.setItalic(true)
+            style.setFont(font)
+            break
+        case StyleType.DATA :
+            style.setBorderRight(CellStyle.BORDER_THIN)
+            style.setBorderLeft(CellStyle.BORDER_THIN)
+            style.setBorderBottom(CellStyle.BORDER_THIN)
+            style.setBorderTop(CellStyle.BORDER_THIN)
+
+            Font font = workBook.createFont()
+            font.setFontHeightInPoints(8 as short)
+            font.setFontName('Arial')
+            style.setFont(font)
+            break
+    }
+    cellStyleMap.put(alias, style)
+    return style
 }

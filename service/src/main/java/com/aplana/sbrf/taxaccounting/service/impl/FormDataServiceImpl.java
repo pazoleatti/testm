@@ -2116,4 +2116,15 @@ public class FormDataServiceImpl implements FormDataService {
                 reportFile.delete();
         }
     }
+
+    @Override
+    public Map<FormDataEvent, Boolean> getEventScriptStatus(FormTemplate formTemplate) {
+        List<FormDataEvent> formDataEventList = Arrays.asList(FormDataEvent.ADD_ROW, FormDataEvent.DELETE_ROW,
+                FormDataEvent.COMPOSE, FormDataEvent.CALCULATE, FormDataEvent.REFRESH, FormDataEvent.IMPORT);
+        Map<FormDataEvent, Boolean> eventScriptStatus = new HashMap<FormDataEvent, Boolean>();
+        for(FormDataEvent event: formDataEventList) {
+            eventScriptStatus.put(event, TAAbstractScriptingServiceImpl.canExecuteScript(formTemplate.getScript(), event));
+        }
+        return eventScriptStatus;
+    }
 }

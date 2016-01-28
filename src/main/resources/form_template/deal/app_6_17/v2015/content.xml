@@ -32,7 +32,7 @@
         <alias>iksr</alias>
         <checking>false</checking>
         <columnType>REFERENCE</columnType>
-        <name>ИНН/КИО</name>
+        <name>ИНН/ КИО</name>
         <order>3</order>
         <width>7</width>
         <parentAlias>name</parentAlias>

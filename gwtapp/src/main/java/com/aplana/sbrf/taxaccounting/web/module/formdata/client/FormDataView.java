@@ -11,6 +11,7 @@ import com.aplana.sbrf.taxaccounting.web.widget.datarow.DataRowColumnFactory;
 import com.aplana.sbrf.taxaccounting.web.widget.datarow.events.CellModifiedEvent;
 import com.aplana.sbrf.taxaccounting.web.widget.datarow.events.CellModifiedEventHandler;
 import com.aplana.sbrf.taxaccounting.web.widget.fileupload.FileUploadWidget;
+import com.aplana.sbrf.taxaccounting.web.widget.fileupload.event.CheckHandler;
 import com.aplana.sbrf.taxaccounting.web.widget.fileupload.event.EndLoadFileEvent;
 import com.aplana.sbrf.taxaccounting.web.widget.fileupload.event.StartLoadFileEvent;
 import com.aplana.sbrf.taxaccounting.web.widget.pager.FlexiblePager;
@@ -858,8 +859,9 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
 	}
 
     @Override
-    public void addFileUploadValueChangeHandler(ValueChangeHandler<String> changeHandler) {
+    public void addFileUploadValueChangeHandler(ValueChangeHandler<String> changeHandler, CheckHandler checkHandler) {
         fileUploader.addValueChangeHandler(changeHandler);
+        fileUploader.setCheckHandler(checkHandler);
     }
 
     @Override

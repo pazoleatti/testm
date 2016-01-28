@@ -14,6 +14,7 @@ import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.LockInfo;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.TimerTaskResult;
 import com.aplana.sbrf.taxaccounting.web.module.formdata.shared.UnlockFormData;
 import com.aplana.sbrf.taxaccounting.web.module.formdatalist.client.FormDataListNameTokens;
+import com.aplana.sbrf.taxaccounting.web.widget.fileupload.event.CheckHandler;
 import com.aplana.sbrf.taxaccounting.web.widget.history.client.HistoryPresenter;
 import com.google.gwt.event.logical.shared.CloseEvent;
 import com.google.gwt.event.logical.shared.CloseHandler;
@@ -30,10 +31,7 @@ import com.gwtplatform.mvp.client.proxy.PlaceManager;
 import com.gwtplatform.mvp.client.proxy.PlaceRequest;
 import com.gwtplatform.mvp.client.proxy.ProxyPlace;
 
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.logging.Logger;
 
 public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
@@ -108,7 +106,7 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
 
 		void updateData();
 
-        void addFileUploadValueChangeHandler(ValueChangeHandler<String> changeHandler);
+        void addFileUploadValueChangeHandler(ValueChangeHandler<String> changeHandler, CheckHandler checkHandler);
 
         void isCanEditPage(boolean visible);
 
@@ -180,6 +178,7 @@ public class FormDataPresenterBase<Proxy_ extends ProxyPlace<?>> extends
     protected String taskName;
     protected TimerTaskResult.FormMode formMode;
     protected boolean lockEditMode;
+    protected Map<FormDataEvent, Boolean> eventScriptStatus;
 
     protected boolean timerEnabled;
     protected Timer timer;

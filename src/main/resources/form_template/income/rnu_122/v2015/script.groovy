@@ -190,9 +190,9 @@ void logicCheck() {
         checkDatePeriod(logger, row, 'transDoneDate', 'docDate', getReportPeriodEndDate(), true)
 
         // Проверка курса валюты
-        if (row.course2 != null && row.course2 < 0) {
+        if (row.course2 != null && row.course2 <= 0) {
             def msg = row.getCell('course2').column.name
-            logger.error("Строка $rowNum: Значение графы «$msg» должно быть больше или равно «0»!")
+            logger.error("Строка $rowNum: Значение графы «$msg» должно быть больше «0»!")
         }
 
         // Проверка количества дней
@@ -226,7 +226,7 @@ void logicCheck() {
         if (row.sum4 != null && !calcFlag18(row) && row.sum4 != calc19(row)) {
             def msg1 = row.getCell('tradePay').column.name
             def msg2 = row.getCell('sum4').column.name
-            logger.error("Строка $rowNum: Значение графы «$msg2» должно быть равно значению графы «$msg1»!")
+            logger.error("Строка $rowNum: Значение графы «$msg2» должно быть равно значению графы «%s»!", msg1)
         }
         if (row.sum4 != null && calcFlag18(row) && row.sum4 != calc19(row)) {
             def msg8 = row.getCell('sum1').column.name
@@ -235,7 +235,7 @@ void logicCheck() {
             def msg14 = row.getCell('base').column.name
             def msg18 = row.getCell('tradePay').column.name
             def msg19 = row.getCell('sum4').column.name
-            logger.error("Строка $rowNum: Значение графы «$msg19» должно быть равно значению выражения «$msg8»*«$msg18»*(«$msg13»-«$msg12»+1)/«$msg14»")
+            logger.error("Строка $rowNum: Значение графы «$msg19» должно быть равно значению выражения «$msg8»*«%s»*(«$msg13»-«$msg12»+1)/«$msg14»", msg18)
         }
 
         // Проверка корректности суммы доначисления  дохода (корректировки расхода) до рыночного уровня
@@ -319,11 +319,10 @@ def calc19(def row) {
         logger.error("Строка $rowNum: Значение графы «%s» должно соответствовать следующему формату: первые символы: (0-9)," +
                 " следующие символы («.» или «,»), следующие символы (0-9), последний символ %s или пусто!", msg, "(%)")
     } else if (row.tradePay != null) {
-        String col18 = row.tradePay.trim()
+        String col18 = row.tradePay.trim().replaceAll(",", ".")
         def flag18 = calcFlag18(row)
-        def calcCol18 = flag18 ? new BigDecimal(col18[0..-2]).setScale(2, BigDecimal.ROUND_HALF_UP) :
-                new BigDecimal(col18).setScale(2, BigDecimal.ROUND_HALF_UP)
-
+        def calcCol18 = flag18 ? roundValue(new BigDecimal(col18[0..-2]) / 100, 2) :
+                roundValue(new BigDecimal(col18), 2)
 
         def flag = true
         ['sum1', 'startDate', 'endDate', 'base', 'tradePay'].each {
@@ -331,7 +330,7 @@ def calc19(def row) {
         }
 
         if (flag && flag18) {
-            return roundValue(row.sum1 * calcCol18 * (row.endDate - row.startDate) / row.base, 2)
+            return roundValue(row.sum1 * calcCol18 * (row.endDate - row.startDate + 1) / row.base, 2)
         } else if (flag && !flag18) {
             return calcCol18
         }

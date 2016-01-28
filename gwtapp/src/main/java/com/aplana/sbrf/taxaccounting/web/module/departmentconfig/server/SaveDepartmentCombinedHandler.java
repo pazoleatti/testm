@@ -3,6 +3,7 @@ package com.aplana.sbrf.taxaccounting.web.module.departmentconfig.server;
 import com.aplana.sbrf.taxaccounting.dao.impl.refbook.RefBookUtils;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
+import com.aplana.sbrf.taxaccounting.model.exception.ServiceLoggerException;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.refbook.*;
@@ -94,6 +95,7 @@ public class SaveDepartmentCombinedHandler extends AbstractActionHandler<SaveDep
                     break;
             }
             RefBookDataProvider provider = rbFactory.getDataProvider(refBookId);
+            RefBook refBook = rbFactory.get(refBookId);
 
             ReportPeriod period = reportService.getReportPeriod(action.getReportPeriodId());
 
@@ -147,10 +149,10 @@ public class SaveDepartmentCombinedHandler extends AbstractActionHandler<SaveDep
                 paramsMap.put(DepartmentParamAliases.TAX_ORGAN_CODE_PROM.name(), new RefBookValue(RefBookAttributeType.STRING, depCombined.getTaxOrganCodeProm()));
             }
 
-            /** Проверка существования справочных атрибутов */
-            checkReferenceValues(provider, paramsMap);
-
             Logger logger = new Logger();
+            /** Проверка существования справочных атрибутов */
+            checkReferenceValues(provider, refBook, paramsMap, logger);
+
             logger.setTaUserInfo(securityService.currentUserInfo());
             RefBookRecord record = new RefBookRecord();
             record.setValues(paramsMap);
@@ -249,10 +251,10 @@ public class SaveDepartmentCombinedHandler extends AbstractActionHandler<SaveDep
     /**
      * Проверка существования записей справочника на которые ссылаются атрибуты.
      * Считаем что все справочные атрибуты хранятся в универсальной структуре как и сами настройки
-     * @param provider
+     * @param refBook
      * @param rows
      */
-    private void checkReferenceValues(RefBookDataProvider provider, Map<String, RefBookValue> rows) {
+    private void checkReferenceValues(RefBookDataProvider provider, RefBook refBook, Map<String, RefBookValue> rows, Logger logger) {
         Map<RefBookDataProvider, List<Long>> references = new HashMap<RefBookDataProvider, List<Long>>();
         RefBookDataProvider oktmoProvider = rbFactory.getDataProvider(96L);
         for (Map.Entry<String, RefBookValue> e : rows.entrySet()) {
@@ -266,12 +268,30 @@ public class SaveDepartmentCombinedHandler extends AbstractActionHandler<SaveDep
                 }
             }
         }
+
+        boolean hasErrorLinks = false;
         if (!references.isEmpty()) {
+            //получаем названия колонок
+            Map<String, String> aliases = new HashMap<String, String>();
+            for (RefBookAttribute attribute : refBook.getAttributes()) {
+                aliases.put(attribute.getAlias(), attribute.getName());
+            }
             for (Map.Entry<RefBookDataProvider, List<Long>> entry : references.entrySet()) {
-                if (!entry.getKey().isRecordsExist(entry.getValue())) {
-                    throw new ServiceException("Данные не могут быть сохранены, так как часть выбранных справочных значений была удалена. Отредактируйте таблицу и попытайтесь сохранить заново");
+                List<Long> notExists = entry.getKey().isRecordsExist(entry.getValue());
+                if (!notExists.isEmpty()) {
+                    hasErrorLinks = true;
+                    for (Map.Entry<String, RefBookValue> row : rows.entrySet()) {
+                        if (row.getValue().getReferenceValue() != null && notExists.contains(row.getValue().getReferenceValue())) {
+                            logger.error("Атрибут \"%s\": Обнаружена некорректная ссылка на запись справочника.", aliases.get(row.getKey()));
+                        }
+                    }
                 }
             }
+        }
+
+        if (hasErrorLinks) {
+            throw new ServiceLoggerException("Данные не могут быть сохранены, так как часть выбранных справочных значений была удалена. Отредактируйте таблицу и попытайтесь сохранить заново",
+                    logEntryService.save(logger.getEntries()));
         }
     }
 
