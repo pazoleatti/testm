@@ -230,26 +230,18 @@ void logicCheck() {
             def msg3 = row.getCell('guarCourse').column.name
             logger.error("Строка $rowNum: Значение графы «$msg1» должно равняться модулю произведения «$msg2» и «$msg3»!")
         }
-        def msg11 = row.getCell('reqVolume').column.name
-        def msg13 = row.getCell('guarVolume').column.name
-        def msg14 = row.getCell('price').column.name
-        def msg15 = row.getCell('reqCourse').column.name
-        def msg16 = row.getCell('guarCourse').column.name
-        def msg17 = row.getCell('reqSum').column.name
-        def msg18 = row.getCell('guarSum').column.name
-        def msg19 = row.getCell('incomeSum').column.name
-        def msg20 = row.getCell('outcomeSum').column.name
-        def msg21 = row.getCell('marketPrice').column.name
-        def msg22 = row.getCell('incomeDelta').column.name
-        def msg23 = row.getCell('outcomeDelta').column.name
 
         // Проверка доходов учитываемых в целях налога на прибыль по сделке
         if (row.reqSum != null && row.guarSum != null) {
+            def msg17 = row.getCell('reqSum').column.name
+            def msg18 = row.getCell('guarSum').column.name
+            def msg19 = row.getCell('incomeSum').column.name
+            def msg20 = row.getCell('outcomeSum').column.name
             def diff = row.reqSum - row.guarSum
             if (flag && diff > 0 && row.incomeSum != diff) {
                 flag2 = false
                 logger.error("Строка $rowNum: Значение графы «$msg19» должно быть равно разности значений граф «$msg17» и «$msg18»!")
-            } else if (flag && row.incomeSum != 0) {
+            } else if (flag && diff <= 0 && row.incomeSum != 0) {
                 flag2 = false
                 logger.error("Строка $rowNum: Значение графы «$msg19» должно быть равно нулю!")
             }
@@ -258,7 +250,7 @@ void logicCheck() {
             if (flag && diff < 0 && row.outcomeSum != diff) {
                 flag2 = false
                 logger.error("Строка $rowNum: Значение графы «$msg20» должно быть равно разности значений граф «$msg17» и «$msg18»!")
-            } else if (flag && row.outcomeSum != 0) {
+            } else if (flag && diff >= 0 && row.outcomeSum != 0) {
                 flag2 = false
                 logger.error("Строка $rowNum: Значение графы «$msg20» должно быть равно нулю!")
             }
@@ -270,8 +262,16 @@ void logicCheck() {
             }
         }
 
+        def msg11 = row.getCell('reqVolume').column.name
+        def msg13 = row.getCell('guarVolume').column.name
+        def msg14 = row.getCell('price').column.name
+        def msg15 = row.getCell('reqCourse').column.name
+        def msg16 = row.getCell('guarCourse').column.name
+        def msg21 = row.getCell('marketPrice').column.name
+
         // Проверка отклонений по доходам
         if (flag2 && row.incomeDelta != null) {
+            def msg22 = row.getCell('incomeDelta').column.name
             if (row.incomeSum == 0 && row.incomeDelta != calc22(row)) {
                 logger.error("Строка $rowNum: Значение графы «$msg22» должно быть равно нулю!")
             } else {
@@ -307,6 +307,7 @@ void logicCheck() {
 
         // Проверка отклонений по расходам
         if (flag2 && row.outcomeDelta != null) {
+            def msg23 = row.getCell('outcomeDelta').column.name
             if (row.outcomeSum == 0 && row.outcomeDelta != calc23(row)) {
                 logger.error("Строка $rowNum: Значение графы «$msg23» должно быть равно нулю!")
             } else {
