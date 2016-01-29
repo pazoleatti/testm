@@ -200,7 +200,7 @@ void logicCheck() {
         }
         boolean flag = true
         // Проверка суммы требований
-        if (row.reqSum && row.reqSum < 0) {
+        if (row.reqSum != null && row.reqSum < 0) {
             flag = false
             def msg = row.getCell('reqSum').column.name
             logger.error("Строка $rowNum: Значение графы «$msg» должно быть больше или равно «0»!")
@@ -216,7 +216,7 @@ void logicCheck() {
         }
 
         // Проверка суммы обязательств
-        if (row.guarSum && row.guarSum < 0) {
+        if (row.guarSum != null && row.guarSum < 0) {
             flag = false
             def msg = row.getCell('guarSum').column.name
             logger.error("Строка $rowNum: Значение графы «$msg» должно быть больше или равно «0»!")
@@ -372,14 +372,9 @@ void calc() {
             continue
         }
         // 19, 20
-        row.incomeSum = 0
-        row.outcomeSum = 0
         def diff = row.reqSum - row.guarSum
-        if (diff > 0) {
-            row.incomeSum = diff
-        } else {
-            row.outcomeSum = diff
-        }
+        row.incomeSum = diff > 0 ? diff : 0
+        row.outcomeSum = diff < 0 ? diff : 0
 
         // 22, 23
         row.incomeDelta = calc22(row)
