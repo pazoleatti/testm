@@ -471,9 +471,9 @@ public class DeclarationTemplateDaoImpl extends AbstractDao implements Declarati
         JdbcTemplate jt = getJdbcTemplate();
         ReportPeriod reportPeriod = reportPeriodDao.get(reportPeriodId);
         try {
-            return jt.queryForInt(getActiveVersionSql(),
+            return jt.queryForObject(getActiveVersionSql(),
                     new Object[]{declarationTypeId, reportPeriod.getStartDate(), reportPeriod.getEndDate(), reportPeriod.getStartDate()},
-                    new int[]{Types.NUMERIC, Types.DATE, Types.DATE, Types.DATE}) > 0;
+                    new int[]{Types.NUMERIC, Types.DATE, Types.DATE, Types.DATE}, Integer.class) > 0;
         } catch (EmptyResultDataAccessException e) {
             return false;
         }catch(IncorrectResultSizeDataAccessException e){
