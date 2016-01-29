@@ -397,7 +397,11 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
 	public void setDataToFormTable(int start, int totalCount, List<FormTypeKind> departmentFormTypes) {
         formSM.clear();
         if (departmentFormTypes.isEmpty()) {
-			formGrid.setRowCount(0);
+            if (start != 0) {
+                formGrid.setVisibleRange(0, formGrid.getPageSize());
+            } else {
+                formGrid.setRowCount(0);
+            }
 			return;
 		}
 		formGrid.setRowCount(totalCount);
@@ -420,7 +424,11 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
 	public void setDataToDeclarationTable(int start, int totalCount, List<FormTypeKind> departmentFormTypes) {
         decSM.clear();
         if (departmentFormTypes.isEmpty()) {
-			decGrid.setRowCount(0);
+            if (start != 0) {
+                decGrid.setVisibleRange(0, formGrid.getPageSize());
+            } else {
+                decGrid.setRowCount(0);
+            }
 			return;
 		}
 
