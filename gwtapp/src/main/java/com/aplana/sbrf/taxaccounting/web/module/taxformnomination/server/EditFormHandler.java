@@ -15,7 +15,7 @@ import org.springframework.stereotype.Service;
  * @author auldanov
  */
 @Service
-@PreAuthorize("hasAnyRole('ROLE_CONTROL', 'ROLE_CONTROL_UNP', 'ROLE_CONTROL_NS')")
+@PreAuthorize("hasAnyRole('ROLE_CONTROL_UNP', 'ROLE_CONTROL_NS')")
 public class EditFormHandler extends AbstractActionHandler<EditFormsAction, EditFormResult> {
 
     @Autowired

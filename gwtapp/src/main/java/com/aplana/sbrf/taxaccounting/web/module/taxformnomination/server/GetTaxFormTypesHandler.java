@@ -16,7 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
-@PreAuthorize("hasAnyRole('ROLE_CONTROL', 'ROLE_CONTROL_UNP', 'ROLE_CONTROL_NS')")
+@PreAuthorize("hasAnyRole('ROLE_CONTROL_UNP', 'ROLE_CONTROL_NS')")
 public class GetTaxFormTypesHandler extends AbstractActionHandler<GetTaxFormTypesAction, GetTaxFormTypesResult> {
 
     public GetTaxFormTypesHandler() {
