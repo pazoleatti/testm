@@ -116,7 +116,7 @@ public class GetDepartmentCombinedHandler extends AbstractActionHandler<GetDepar
             if (params.size() != 1) {
                 String dt = new SimpleDateFormat("dd.MM.yyyy").format(calendarFrom.getTime());
                 LOG.debug(String.format("Found more than one record on version = %s ref_book_id = %s department_id = %s map = %s",
-						dt, parentRefBookId, action.getDepartmentId(), params));
+						dt, action.getDepartmentId(), params));
                 throw new ActionException("Найдено несколько записей для версии " + dt);
             }
 
@@ -197,28 +197,28 @@ public class GetDepartmentCombinedHandler extends AbstractActionHandler<GetDepar
         Logger logger = new Logger();
 
         if (depCombined.getDictRegionId() != null && !depCombined.getDictRegionId().isEmpty()) {
-            getValueIgnoreEmptyResult(rbTextValues, parentRefBookId, 4L, 9L, depCombined.getDictRegionId().get(0), logger);
+            getValueIgnoreEmptyResult(rbTextValues, 4L, 9L, depCombined.getDictRegionId().get(0), logger);
         }
         if (depCombined.getOktmo() != null && !depCombined.getOktmo().isEmpty()) {
-            getValueIgnoreEmptyResult(rbTextValues, parentRefBookId, 96L, 840L, depCombined.getOktmo().get(0), logger);
+            getValueIgnoreEmptyResult(rbTextValues, 96L, 840L, depCombined.getOktmo().get(0), logger);
         }
         if (depCombined.getOkvedCode() != null && !depCombined.getOkvedCode().isEmpty()) {
-            getValueIgnoreEmptyResult(rbTextValues, parentRefBookId, 34L, 210L, depCombined.getOkvedCode().get(0), logger);
+            getValueIgnoreEmptyResult(rbTextValues, 34L, 210L, depCombined.getOkvedCode().get(0), logger);
         }
         if (depCombined.getReorgFormCode() != null && !depCombined.getReorgFormCode().isEmpty()) {
-            getValueIgnoreEmptyResult(rbTextValues, parentRefBookId, 5L, 13L, depCombined.getReorgFormCode().get(0), logger);
+            getValueIgnoreEmptyResult(rbTextValues, 5L, 13L, depCombined.getReorgFormCode().get(0), logger);
         }
         if (depCombined.getSignatoryId() != null && !depCombined.getSignatoryId().isEmpty()) {
-            getValueIgnoreEmptyResult(rbTextValues, parentRefBookId, 35L, 213L, depCombined.getSignatoryId().get(0), logger);
+            getValueIgnoreEmptyResult(rbTextValues, 35L, 213L, depCombined.getSignatoryId().get(0), logger);
         }
         if (depCombined.getTaxPlaceTypeCode() != null && !depCombined.getTaxPlaceTypeCode().isEmpty()) {
-            getValueIgnoreEmptyResult(rbTextValues, parentRefBookId, 2L, 3L, depCombined.getTaxPlaceTypeCode().get(0), logger);
+            getValueIgnoreEmptyResult(rbTextValues, 2L, 3L, depCombined.getTaxPlaceTypeCode().get(0), logger);
         }
         if (depCombined.getObligation() != null && !depCombined.getObligation().isEmpty()) {
-            getValueIgnoreEmptyResult(rbTextValues, parentRefBookId, 25L, 110L, depCombined.getObligation().get(0), logger);
+            getValueIgnoreEmptyResult(rbTextValues, 25L, 110L, depCombined.getObligation().get(0), logger);
         }
         if (depCombined.getType() != null && !depCombined.getType().isEmpty()) {
-            getValueIgnoreEmptyResult(rbTextValues, parentRefBookId, 26L, 120L, depCombined.getType().get(0), logger);
+            getValueIgnoreEmptyResult(rbTextValues, 26L, 120L, depCombined.getType().get(0), logger);
         }
 
         result.setRbTextValues(rbTextValues);
@@ -235,21 +235,17 @@ public class GetDepartmentCombinedHandler extends AbstractActionHandler<GetDepar
      * Разыменование значения справочника с обработкой исключения, возникающего при отсутствии записи
      *
      * @param map             Id атрибута -> Разыменованное значение
-     * @param parentRefBookId Id справочника формы настроек
      * @param refBookId       Id справочника
      * @param attributeId     Id атрибута
      * @param recordId        Id записи
      * @param logger          Логгер для передачи клиенту
      */
-    private void getValueIgnoreEmptyResult(Map<Long, String> map, long parentRefBookId, long refBookId, long attributeId, long recordId, Logger logger) {
-        RefBookValue value = rbFactory.getDataProvider(refBookId).getValue(recordId, attributeId);
-        if (value == null) {
-            logger.error(String.format("Ошибка получения значений для формы «%s»: " +
-                    "Обнаружена ссылка на несуществующую запись справочника «%s», id = %d",
-                    rbFactory.get(parentRefBookId).getName(), rbFactory.get(refBookId).getName(), recordId));
-            throw new ServiceLoggerException("Ошибка при получении настроек подразделения", logEntryService.save(logger.getEntries()));
+    private void getValueIgnoreEmptyResult(Map<Long, String> map, long refBookId, long attributeId, long recordId, Logger logger) {
+        RefBookDataProvider provider = rbFactory.getDataProvider(refBookId);
+        if (provider.isRecordsExist(Collections.singletonList(recordId)).isEmpty()){
+            RefBookValue value = provider.getValue(recordId, attributeId);
+            map.put(attributeId, getNumberValue(value));            
         }
-        map.put(attributeId, getNumberValue(value));
     }
 
     /**
