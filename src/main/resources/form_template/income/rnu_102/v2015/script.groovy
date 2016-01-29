@@ -336,7 +336,7 @@ def calc15(def row) {
     if (row.outcomeRate != null && row.sum1 != null && row.sum1 > 0 && row.taxPrice == null) {
         return roundValue(row.sum1 * row.outcomeRate, 2)
     }
-    if (row.outcomeRate == null && row.sum1 != null && row.sum1 > 0 && row.taxPrice != null) {
+    if (row.outcomeRate == null && row.taxPrice != null) {
         return roundValue(row.taxPrice * row.count * row.course, 2)
     }
     if (row.sum1 != null && row.sum1 == 0 && row.taxPrice != null) {

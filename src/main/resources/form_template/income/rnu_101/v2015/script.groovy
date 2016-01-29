@@ -339,7 +339,7 @@ def calc15(def row) {
     if (row.incomeRate != null && row.sum1 != null && row.sum1 > 0 && row.taxPrice == null) {
         return roundValue(row.sum1 * row.incomeRate, 2)
     }
-    if (row.incomeRate == null && row.sum1 != null && row.sum1 > 0 && row.taxPrice != null) {
+    if (row.incomeRate == null && row.taxPrice != null) {
         return roundValue(row.taxPrice * row.count * row.course, 2)
     }
     if (row.sum1 != null && row.sum1 == 0 && row.taxPrice != null) {
