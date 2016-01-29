@@ -429,7 +429,7 @@ def BigDecimal calc23(def row) {
     dealType3 = getRecordId(92, 'NAME', 'Премия по опциону')
     direction1 = getRecordId(20, 'DIRECTION', 'покупка')
     direction2 = getRecordId(20, 'DIRECTION', 'продажа')
-    if (row.incomeSum == 0) {
+    if (row.outcomeSum == 0) {
         return 0
     }
     if (row.dealType == dealType1 || row.dealType == dealType2) {
