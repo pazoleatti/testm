@@ -150,9 +150,9 @@ public class RefBookCell extends AbstractEditableCell<Long, String> {
             // Устанавливаем старое значение
             if (nvalue != null) {
                 if(refBookPiker.getValue()!= null && !refBookPiker.getValue().isEmpty()){
-                    if(!nvalue.equals(refBookPiker.getValue().get(0))){
+                    //if(!nvalue.equals(refBookPiker.getValue().get(0))){
                         refBookPiker.setValue(Arrays.asList(nvalue), false);
-                    }
+                    //}
                 } else {
                     refBookPiker.setSingleValue(nvalue, false);
                 }

@@ -341,7 +341,7 @@ public class RefBookPickerWidget extends DoubleStateComposite implements RefBook
             clearAndSetValues(value);
             clearSearchPattern();
             if (!isManualUpdate) {
-                refBookView.load(state, false);
+                refBookView.load(state, true);
             }
         }
     }
