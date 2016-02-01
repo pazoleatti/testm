@@ -1086,7 +1086,7 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             "             when nvl(next_version, to_date('31.12.9999', 'DD.MM.YYYY')) <= nvl(:periodTo, to_date('31.12.9999', 'DD.MM.YYYY')) then 2 --дата окончания ограничивающего периода\n" +
             "             when ((end_version is not null and end_version < :periodFrom) or (:periodTo is not null and start_version > :periodTo)) then 1 end state                    \n" +
             "from   (\n" +
-            "       select input.id as input_id, rbr.id, rbr.record_id, rbr.version as start_version, rbr.status, lead (rbr.version) over (partition by input.id order by rbr.version) end_version, case when input.status = 0 then lead (rbr.version) over (partition by input.id, rbr.status order by rbr.version) end next_version \n" +
+            "       select input.id as input_id, rbr.id, rbr.record_id, rbr.version as start_version, rbr.status, lead (rbr.version) over (partition by input.id order by rbr.version) - interval '1' DAY end_version, case when input.status = 0 then lead (rbr.version) over (partition by input.id, rbr.status order by rbr.version) end next_version \n" +
             "       from ref_book_record input\n" +
             "       join ref_book_record rbr on input.record_id = rbr.record_id and input.ref_book_id = rbr.ref_book_id and rbr.status != -1 \n" +
             "       where %s \n" +
