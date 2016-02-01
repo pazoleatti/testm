@@ -3,7 +3,9 @@ package com.aplana.sbrf.taxaccounting.web.module.taxformnomination.server;
 import com.aplana.sbrf.taxaccounting.model.FormTypeKind;
 import com.aplana.sbrf.taxaccounting.model.QueryParams;
 import com.aplana.sbrf.taxaccounting.model.TaxNominationColumnEnum;
+import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.SourceService;
+import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.taxformnomination.shared.GetTableDataAction;
 import com.aplana.sbrf.taxaccounting.web.module.taxformnomination.shared.GetTableDataResult;
 import com.gwtplatform.dispatch.server.ExecutionContext;
@@ -17,7 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
-@PreAuthorize("hasAnyRole('ROLE_CONTROL', 'ROLE_CONTROL_UNP', 'ROLE_CONTROL_NS')")
+@PreAuthorize("hasAnyRole('ROLE_CONTROL_UNP', 'ROLE_CONTROL_NS')")
 public class GetTableDataHandler extends AbstractActionHandler<GetTableDataAction, GetTableDataResult> {
 
     public GetTableDataHandler() {
@@ -27,14 +29,26 @@ public class GetTableDataHandler extends AbstractActionHandler<GetTableDataActio
     @Autowired
     private SourceService departmentFormTypeService;
 
+    @Autowired
+    private DepartmentService departmentService;
+
+    @Autowired
+    private SecurityService securityService;
+
     @Override
     public GetTableDataResult execute(GetTableDataAction action, ExecutionContext executionContext) throws ActionException {
         GetTableDataResult result = new GetTableDataResult();
 
         char taxType = action.getTaxType();
         List<Long> departmentsIds = new ArrayList<Long>();
-        for (Integer id : action.getDepartmentsIds()){
-            departmentsIds.add(Long.valueOf(id));
+        if (!action.getDepartmentsIds().isEmpty()) {
+            for (Integer id : action.getDepartmentsIds()) {
+                departmentsIds.add(Long.valueOf(id));
+            }
+        } else {
+            for (Integer id : departmentService.getBADepartmentIds(securityService.currentUserInfo().getUser())) {
+                departmentsIds.add(Long.valueOf(id));
+            }
         }
         // Фильтр для сортировки
         QueryParams<TaxNominationColumnEnum> queryParams = new QueryParams<TaxNominationColumnEnum>();

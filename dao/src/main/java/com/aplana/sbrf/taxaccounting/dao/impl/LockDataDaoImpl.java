@@ -160,9 +160,12 @@ public class LockDataDaoImpl extends AbstractDao implements LockDataDao {
     @Override
     public void addUserWaitingForLock(String key, int userId) {
         try {
-            getJdbcTemplate().update("INSERT INTO lock_data_subscribers (lock_key, user_id) VALUES (?, ?)",
-                    new Object[] {key, userId},
-                    new int[] {Types.VARCHAR, Types.NUMERIC});
+            Boolean exist = getJdbcTemplate().queryForObject("SELECT count(*) FROM lock_data_subscribers WHERE lock_key = ? AND user_id = ?", new Object[] {key, userId}, new int[] {Types.VARCHAR, Types.NUMERIC}, Boolean.class);
+            if (!exist) {
+                getJdbcTemplate().update("INSERT INTO lock_data_subscribers (lock_key, user_id) VALUES (?, ?)",
+                        new Object[]{key, userId},
+                        new int[]{Types.VARCHAR, Types.NUMERIC});
+            }
         } catch (DataAccessException e) {
 			LOG.error("Ошибка при добавлении пользователя в список ожидающих объект блокировки", e);
             throw new LockException("Ошибка при добавлении пользователя в список ожидающих объект блокировки (%s, %s). %s", key, userId, e.getMessage());

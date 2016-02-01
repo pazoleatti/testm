@@ -21,7 +21,7 @@ import org.springframework.stereotype.Service;
  */
 
 @Service
-@PreAuthorize("hasAnyRole('ROLE_CONTROL', 'ROLE_CONTROL_UNP', 'ROLE_CONTROL_NS')")
+@PreAuthorize("hasAnyRole('ROLE_CONTROL_UNP', 'ROLE_CONTROL_NS')")
 public class AssignFormsHolder extends AbstractActionHandler<AssignFormsAction, AssignFormsResult> {
     @Autowired
     private SourceService departmentFormTypeService;
