@@ -58,7 +58,7 @@ public class AcceptDeclarationDataHandler extends AbstractActionHandler<AcceptDe
                 DeclarationData declarationData = declarationDataService.get(action.getDeclarationId(), userInfo);
                 if (!declarationData.isAccepted()) {
                     String keyTask = declarationDataService.generateAsyncTaskKey(action.getDeclarationId(), reportType);
-                    Pair<Boolean, String> restartStatus = asyncTaskManagerService.restartTask(keyTask, String.format(reportType.getDescription(), action.getTaxType().getDeclarationShortName()), userInfo, action.isForce(), logger);
+                    Pair<Boolean, String> restartStatus = asyncTaskManagerService.restartTask(keyTask, declarationDataService.getTaskName(reportType, action.getTaxType()), userInfo, action.isForce(), logger);
                     if (restartStatus != null && restartStatus.getFirst()) {
                         result.setStatus(CreateAsyncTaskStatus.LOCKED);
                         result.setRestartMsg(restartStatus.getSecond());
@@ -93,7 +93,7 @@ public class AcceptDeclarationDataHandler extends AbstractActionHandler<AcceptDe
 
                             @Override
                             public String getTaskName(ReportType reportType, TAUserInfo userInfo) {
-                                return String.format(reportType.getDescription(), action.getTaxType().getDeclarationShortName());
+                                return declarationDataService.getTaskName(reportType, action.getTaxType());
                             }
                         });
                     }

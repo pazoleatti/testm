@@ -22,7 +22,7 @@ import java.util.Set;
  * @author auldanov
  */
 @Service
-@PreAuthorize("hasAnyRole('ROLE_CONTROL', 'ROLE_CONTROL_UNP', 'ROLE_CONTROL_NS')")
+@PreAuthorize("hasAnyRole('ROLE_CONTROL_UNP', 'ROLE_CONTROL_NS')")
 public class DeleteFormSoursesHandler extends AbstractActionHandler<DeleteFormsSourseAction, DeleteFormsSourceResult> {
 
     private static final String SOURCE_CANCEL_ERR =

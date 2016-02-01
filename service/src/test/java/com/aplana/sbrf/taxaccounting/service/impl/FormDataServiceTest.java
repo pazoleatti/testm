@@ -1427,4 +1427,45 @@ public class FormDataServiceTest extends Assert{
             in.close();
         }
     }
+
+    @Test
+    public void getTaskName() {
+        FormData formData101 = new FormData();
+        FormType formTypeI= new FormType();
+        formTypeI.setTaxType(TaxType.INCOME);
+        formData101.setFormType(formTypeI);
+        when(formDataDao.getWithoutRows(101)).thenReturn(formData101);
+        assertEquals(formDataService.getTaskName(ReportType.DELETE_FD, 101, null), "Удаление налоговой формы");
+        assertEquals(formDataService.getTaskName(ReportType.EDIT_FD, 101, null), "Редактирование налоговой формы");
+        assertEquals(formDataService.getTaskName(ReportType.REFRESH_FD, 101, null), "Обновление налоговой формы");
+        assertEquals(formDataService.getTaskName(ReportType.CALCULATE_FD, 101, null), "Расчет налоговой формы");
+        assertEquals(formDataService.getTaskName(ReportType.CONSOLIDATE_FD, 101, null), "Консолидация налоговой формы");
+        assertEquals(formDataService.getTaskName(ReportType.CHECK_FD, 101, null), "Проверка налоговой формы");
+        assertEquals(formDataService.getTaskName(ReportType.MOVE_FD, 101, null), "Изменение состояния налоговой формы");
+        assertEquals(formDataService.getTaskName(ReportType.EXCEL, 101, null), "Формирование отчета налоговой формы в XLSM-формате");
+        assertEquals(formDataService.getTaskName(ReportType.CSV, 101, null), "Формирование отчета налоговой формы в CSV-формате");
+        assertEquals(formDataService.getTaskName(ReportType.IMPORT_FD, 101, null), "Загрузка XLSM-файла с формы экземпляра налоговой формы");
+        assertEquals(formDataService.getTaskName(ReportType.IMPORT_TF_FD, 101, null), "Импорт ТФ из каталога загрузки");
+        assertEquals(formDataService.getTaskName(ReportType.EDIT_FILE_COMMENT, 101, null), "Прикрепление файлов формы и редактирование комментариев");
+        assertEquals(formDataService.getTaskName(ReportType.SPECIFIC_REPORT, 101, null, "Report"), "Формирование специфического отчета \"Report\" налоговой формы");
+
+        FormData formData102 = new FormData();
+        FormType formTypeD= new FormType();
+        formTypeD.setTaxType(TaxType.DEAL);
+        formData102.setFormType(formTypeD);
+        when(formDataDao.getWithoutRows(102)).thenReturn(formData102);
+        assertEquals(formDataService.getTaskName(ReportType.DELETE_FD, 102, null), "Удаление формы");
+        assertEquals(formDataService.getTaskName(ReportType.EDIT_FD, 102, null), "Редактирование формы");
+        assertEquals(formDataService.getTaskName(ReportType.REFRESH_FD, 102, null), "Обновление формы");
+        assertEquals(formDataService.getTaskName(ReportType.CALCULATE_FD, 102, null), "Расчет формы");
+        assertEquals(formDataService.getTaskName(ReportType.CONSOLIDATE_FD, 102, null), "Консолидация формы");
+        assertEquals(formDataService.getTaskName(ReportType.CHECK_FD, 102, null), "Проверка формы");
+        assertEquals(formDataService.getTaskName(ReportType.MOVE_FD, 102, null), "Изменение состояния формы");
+        assertEquals(formDataService.getTaskName(ReportType.EXCEL, 102, null), "Формирование отчета формы в XLSM-формате");
+        assertEquals(formDataService.getTaskName(ReportType.CSV, 102, null), "Формирование отчета формы в CSV-формате");
+        assertEquals(formDataService.getTaskName(ReportType.IMPORT_FD, 102, null), "Загрузка XLSM-файла с формы экземпляра налоговой формы");
+        assertEquals(formDataService.getTaskName(ReportType.IMPORT_TF_FD, 102, null), "Импорт ТФ из каталога загрузки");
+        assertEquals(formDataService.getTaskName(ReportType.EDIT_FILE_COMMENT, 102, null), "Прикрепление файлов формы и редактирование комментариев");
+        assertEquals(formDataService.getTaskName(ReportType.SPECIFIC_REPORT, 102, null, "Report"), "Формирование специфического отчета \"Report\" формы");
+    }
 }

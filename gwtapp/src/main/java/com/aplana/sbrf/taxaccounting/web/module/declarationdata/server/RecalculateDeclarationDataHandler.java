@@ -64,7 +64,7 @@ public class RecalculateDeclarationDataHandler extends AbstractActionHandler<Rec
             throw new ServiceLoggerException("%s. Обнаружены фатальные ошибки", uuid, !TaxType.DEAL.equals(action.getTaxType()) ? "Декларация не может быть сформирована" : "Уведомление не может быть сформировано");
         }
         String keyTask = declarationDataService.generateAsyncTaskKey(action.getDeclarationId(), reportType);
-        Pair<Boolean, String> restartStatus = asyncTaskManagerService.restartTask(keyTask, String.format(reportType.getDescription(), action.getTaxType().getDeclarationShortName()), userInfo, action.isForce(), logger);
+        Pair<Boolean, String> restartStatus = asyncTaskManagerService.restartTask(keyTask, declarationDataService.getTaskName(reportType, action.getTaxType()), userInfo, action.isForce(), logger);
         if (restartStatus != null && restartStatus.getFirst()) {
             result.setStatus(CreateAsyncTaskStatus.LOCKED);
             result.setRestartMsg(restartStatus.getSecond());
@@ -100,7 +100,7 @@ public class RecalculateDeclarationDataHandler extends AbstractActionHandler<Rec
 
                 @Override
                 public String getTaskName(ReportType reportType, TAUserInfo userInfo) {
-                    return String.format(reportType.getDescription(), action.getTaxType().getDeclarationShortName());
+                    return declarationDataService.getTaskName(reportType, action.getTaxType());
                 }
             });
         }

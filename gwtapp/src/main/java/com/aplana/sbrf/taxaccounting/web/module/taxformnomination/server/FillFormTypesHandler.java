@@ -22,7 +22,7 @@ import static java.util.Arrays.asList;
  */
 
 @Service
-@PreAuthorize("hasAnyRole('ROLE_OPER', 'ROLE_CONTROL', 'ROLE_CONTROL_UNP', 'ROLE_CONTROL_NS')")
+@PreAuthorize("hasAnyRole('ROLE_CONTROL_UNP', 'ROLE_CONTROL_NS')")
 public class FillFormTypesHandler extends AbstractActionHandler<FillFormTypesAction, FillFormTypesResult> {
 
     @Autowired

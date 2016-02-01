@@ -109,7 +109,7 @@ public class LockDataDaoTest extends Assert {
 		assertEquals(3, uids.size());
 	}
 
-	@Test(expected = LockException.class)
+	@Test
 	public void addUserWaitingForLock2() {
 		dao.addUserWaitingForLock("a", 1);
 	}
