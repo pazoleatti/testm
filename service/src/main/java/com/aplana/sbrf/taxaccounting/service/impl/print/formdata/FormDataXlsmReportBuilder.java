@@ -638,7 +638,7 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
             if (mergedRegion.getFirstRow() >= ROW_NUMBER && mergedRegion.getLastRow() - mergedRegion.getFirstRow() == 1) {
                 Cell firstRowCell = sheet.getRow(mergedRegion.getFirstRow()).getCell(mergedRegion.getFirstColumn());
 
-                int columnWidth = (int) (formTemplate.getColumns().get(firstRowCell.getColumnIndex()).getWidth() * 1.7);
+                int columnWidth = (int) (formTemplate.getColumns().get(firstRowCell.getColumnIndex()).getWidth() * 1.5);
                 int firstRowCellLinesCount = getLinesCount(firstRowCell.getStringCellValue(), columnWidth) - 1;
                 int firstRowIndex = firstRowCell.getRowIndex();
                 if (map.get(firstRowIndex) == null) {

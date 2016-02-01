@@ -16,7 +16,6 @@ public class CreateReportAction extends UnsecuredActionImpl<CreateReportResult> 
     private String searchPattern;
     private int sortColumnIndex;
     private boolean ascSorting;
-    private boolean cancelTask;
 
     public long getRefBookId() {
         return refBookId;

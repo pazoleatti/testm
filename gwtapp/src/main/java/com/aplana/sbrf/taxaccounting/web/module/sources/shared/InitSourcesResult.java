@@ -17,6 +17,8 @@ public class InitSourcesResult implements Result {
     private int year;
     private List<PeriodInfo> periods;
 
+    private boolean isControlUNP;
+
     public List<PeriodInfo> getPeriods() {
         return periods;
     }
@@ -55,5 +57,13 @@ public class InitSourcesResult implements Result {
 
     public void setDefaultDepartment(Integer defaultDepartment) {
         this.defaultDepartment = defaultDepartment;
+    }
+
+    public boolean isControlUNP() {
+        return isControlUNP;
+    }
+
+    public void setControlUNP(boolean isControlUNP) {
+        this.isControlUNP = isControlUNP;
     }
 }

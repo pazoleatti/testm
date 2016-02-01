@@ -182,7 +182,15 @@ public class EditFormView extends AbstractEditView implements EditFormPresenter.
                 //allVersion.setVisible(true && !isVersionMode);
                 break;
             case READ:
+                save.setVisible(false);
+                cancel.setVisible(false);
+                versionStart.setEnabled(false);
+                versionEnd.setEnabled(false);
+                updateWidgetsVisibility(false);
+                break;
             case VIEW:
+                save.setVisible(true);
+                cancel.setVisible(true);
                 save.setEnabled(false);
                 cancel.setEnabled(false);
                 versionStart.setEnabled(false);
