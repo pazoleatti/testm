@@ -1,5 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.sources.server;
 
+import com.aplana.sbrf.taxaccounting.model.FormType;
+import com.aplana.sbrf.taxaccounting.model.TARole;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.model.source.SourceClientData;
@@ -8,6 +10,7 @@ import com.aplana.sbrf.taxaccounting.model.source.SourcePair;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.service.SourceService;
+import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.sources.shared.CreateAssignAction;
 import com.aplana.sbrf.taxaccounting.web.module.sources.shared.CreateAssignResult;
 import com.aplana.sbrf.taxaccounting.web.module.sources.shared.model.DepartmentAssign;
@@ -30,10 +33,10 @@ public class CreateAssignHandler extends AbstractActionHandler<CreateAssignActio
     private SourceService sourceService;
     @Autowired
     private DepartmentService departmentService;
-
     @Autowired
     private LogEntryService logEntryService;
-
+    @Autowired
+    private SecurityService securityService;
     public CreateAssignHandler() {
         super(CreateAssignAction.class);
     }
@@ -43,8 +46,17 @@ public class CreateAssignHandler extends AbstractActionHandler<CreateAssignActio
         CreateAssignResult result = new CreateAssignResult();
         SourceClientData sourceClientData = new SourceClientData();
         Logger logger = new Logger();
-        String leftDepartmentName = departmentService.getDepartment(action.getLeftDepartmentId()).getName();
 
+        if (!securityService.currentUserInfo().getUser().hasRole(TARole.ROLE_CONTROL_UNP)) {
+            for (DepartmentAssign right : action.getRightSelectedObjects()) {
+                FormType rightFormType = sourceService.getFormType(right.getTypeId());
+                if (rightFormType.getTaxType() != action.getTaxType()) {
+                    throw new ActionException("Недостаточно прав на создание назначения: форма-источник и форма-приемник должны относится к одному и тому же налогу!");
+                }
+            }
+        }
+
+        String leftDepartmentName = departmentService.getDepartment(action.getLeftDepartmentId()).getName();
         List<SourcePair> sourcePairs = new ArrayList<SourcePair>();
         for (DepartmentAssign right : action.getRightSelectedObjects()) {
             SourcePair sourcePair;

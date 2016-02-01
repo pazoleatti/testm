@@ -35,6 +35,8 @@ public class CurrentAssign implements Serializable{
     private FormType formType;
     private DeclarationType declarationType;
     private TaxType taxType;
+    private Boolean isForm;
+    private boolean enabled = true;
 
     public DeclarationType getDeclarationType() {
         return declarationType;
@@ -44,7 +46,6 @@ public class CurrentAssign implements Serializable{
         this.declarationType = declarationType;
     }
 
-    private Boolean isForm;
 
     public FormType getFormType() {
         return formType;
@@ -124,5 +125,13 @@ public class CurrentAssign implements Serializable{
 
     public void setTaxType(TaxType taxType) {
         this.taxType = taxType;
+    }
+
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
     }
 }
