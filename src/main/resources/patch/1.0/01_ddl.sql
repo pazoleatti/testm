@@ -1,3 +1,7 @@
+--http://jira.aplana.com/browse/SBRFACCTAX-13720: 1.0 Добавить в ЖА поле "Сервер" по аналогии с блокировками
+alter table log_system add server varchar2(200);
+comment on column log_system.server is 'Сервер'; 
+
 ----------------------------------------------------------------------------------------------------------------
 create or replace package FORM_DATA_PCKG is
   -- Запросы получения источников-приемников для налоговых форм
