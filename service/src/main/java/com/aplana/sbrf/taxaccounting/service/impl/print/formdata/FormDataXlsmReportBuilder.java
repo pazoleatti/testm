@@ -500,12 +500,29 @@ public class FormDataXlsmReportBuilder extends AbstractReportBuilder {
         rowNumber = r.getRowNum();
         c = r.getCell(ar.getFirstCell().getCol());
         CellStyle cs = c.getCellStyle();
+        cs.setWrapText(true);
 
         int cellSignPosition = formTemplate.getColumns().size() / 2;
-        for (int i = 0;i < data.getSigners().size(); i++) {
+
+        int columnWidth = 0;
+        for (int i = 1; i < cellSignPosition; i++) {
+            columnWidth += sheet.getColumnWidth(i) / 256;
+        }
+
+        for (int i = 0; i < data.getSigners().size(); i++) {
             Row rs = sheet.createRow(rowNumber);
+            // Объединяем ячейки должности
+            CellRangeAddress region = new CellRangeAddress(rowNumber, rowNumber, XlsxReportMetadata.CELL_POS + 1, cellSignPosition - 1);
+            sheet.addMergedRegion(region);
+
             Cell crsP = createNotHiddenCell(XlsxReportMetadata.CELL_POS, rs);
-            crsP.setCellValue(data.getSigners().get(i).getPosition());
+
+            String position = data.getSigners().get(i).getPosition();
+            crsP.setCellValue(position);
+            // Вычисляем количество строк
+            int linesCount = getLinesCount(position, columnWidth);
+            rs.setHeight((short) (sheet.getDefaultRowHeight() * linesCount));
+
             Cell crsS = createNotHiddenCell(cellSignPosition, rs);
             crsS.setCellValue("_______");
             Cell crsFio = createNotHiddenCell(cellSignPosition + 2, rs);
