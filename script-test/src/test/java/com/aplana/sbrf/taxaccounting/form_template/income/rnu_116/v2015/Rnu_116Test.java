@@ -21,6 +21,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -59,6 +60,10 @@ public class Rnu_116Test extends ScriptTestBase {
 
     @Before
     public void mockServices() {
+        // предыдущий период
+        ReportPeriod prevReportPeriod = new ReportPeriod();
+        prevReportPeriod.setId(0);
+        when(testHelper.getReportPeriodService().getPrevReportPeriod(anyInt())).thenReturn(prevReportPeriod);
     }
 
     @Test
