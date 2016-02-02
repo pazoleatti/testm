@@ -260,7 +260,7 @@ void logicCheck() {
 
         // Проверка корректности суммы обязательств
         if (row.dealType != null && row.guarVolume != null && row.guarCourse != null && row.guarSum != null) {
-            if ((row.dealType == dealType2 || row.dealType == dealType3) && row.reqSum != calc18(row)) {
+            if ((row.dealType == dealType2 || row.dealType == dealType3) && row.guarSum != calc18(row)) {
                 flag = false
                 def msg = row.getCell('guarSum').column.name
                 def msg1 = row.getCell('guarVolume').column.name
