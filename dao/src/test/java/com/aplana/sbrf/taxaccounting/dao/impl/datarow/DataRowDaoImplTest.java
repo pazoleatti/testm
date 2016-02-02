@@ -6,10 +6,8 @@ import com.aplana.sbrf.taxaccounting.dao.api.DataRowDao;
 import com.aplana.sbrf.taxaccounting.model.Cell;
 import com.aplana.sbrf.taxaccounting.model.DataRow;
 import com.aplana.sbrf.taxaccounting.model.DataRowType;
-import static com.aplana.sbrf.taxaccounting.model.DataRowType.*;
 import com.aplana.sbrf.taxaccounting.model.FormData;
 import com.aplana.sbrf.taxaccounting.model.datarow.DataRowRange;
-import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -26,6 +24,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static com.aplana.sbrf.taxaccounting.model.DataRowType.AUTO;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration({ "DataRowDaoImplTest.xml" })

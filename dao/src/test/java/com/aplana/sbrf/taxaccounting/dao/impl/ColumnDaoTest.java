@@ -85,6 +85,7 @@ public class ColumnDaoTest {
         newColumn.setAlias("newColumn");
         newColumn.setName("Новый столбец");
         newColumn.setOrder(5);
+		newColumn.setDataOrder(newColumn.getOrder() - 1);
         newColumn.setMaxLength(100);
         newColumn.setChecking(false);
         columnList.add(newColumn);
@@ -119,6 +120,7 @@ public class ColumnDaoTest {
         newColumn.setAlias("newColumn");
         newColumn.setName("Новый столбец");
         newColumn.setOrder(5);
+		newColumn.setDataOrder(newColumn.getOrder() - 1);
         newColumn.setMaxLength(100);
         newColumn.setChecking(false);
         columnList.add(newColumn);
@@ -145,6 +147,7 @@ public class ColumnDaoTest {
         refBookColumn.setAlias("refBookColumn");
         refBookColumn.setName("Справочная графа");
         refBookColumn.setOrder(4);
+		refBookColumn.setDataOrder(refBookColumn.getOrder() - 1);
         refBookColumn.setChecking(false);
         columnList.add(refBookColumn);
 
@@ -154,6 +157,7 @@ public class ColumnDaoTest {
         referenceColumn.setAlias("referenceColumn");
         referenceColumn.setName("Зависимая графа");
         referenceColumn.setOrder(5);
+		referenceColumn.setDataOrder(referenceColumn.getOrder() - 1);
         referenceColumn.setChecking(false);
         columnList.add(referenceColumn);
 

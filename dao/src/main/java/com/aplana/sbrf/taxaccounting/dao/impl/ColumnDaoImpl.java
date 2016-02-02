@@ -90,6 +90,7 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
 			result.setName(rs.getString("name"));
 			result.setWidth(SqlUtils.getInteger(rs, "width"));
 			result.setOrder(SqlUtils.getInteger(rs, "ord"));
+			result.setDataOrder(SqlUtils.getInteger(rs, "data_ord"));
 			result.setChecking(rs.getBoolean("checking"));
 			return result;
 		}
@@ -156,7 +157,7 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
 	}
 
     private List<Long> createFormColumns(final List<Column> newColumns, final FormTemplate formTemplate) {
-        // Сгенерированый ключ -> реальный ключ в БД
+        // Сгенерированый порядок сортировки -> реальный порядок сортировки в БД
         OrderUtils.reorder(newColumns);
 
         List<Long> genKeys = bdUtils.getNextIds(BDUtils.Sequence.FORM_COLUMN, (long) newColumns.size());
