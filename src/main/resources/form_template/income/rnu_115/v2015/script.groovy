@@ -372,7 +372,7 @@ void calc() {
             continue
         }
         // 19, 20
-        def diff = row.reqSum - row.guarSum
+        def diff = (row.reqSum ?: 0) - (row.guarSum ?: 0)
         row.incomeSum = diff > 0 ? diff : 0
         row.outcomeSum = diff < 0 ? diff : 0
 
@@ -437,13 +437,13 @@ def BigDecimal calc23(def row) {
             return 0
         }
         if (row.dealFocus == direction1 && row.price > row.marketPrice) {
-            return roundValue(row.reqVolume * (row.price - row.marketPrice) * row.guarCourse, 2)
+            return roundValue(-1 * row.reqVolume * (row.price - row.marketPrice) * row.guarCourse, 2)
         }
         if (row.dealFocus == direction2 && row.price >= row.marketPrice) {
             return 0
         }
         if (row.dealFocus == direction2 && row.price < row.marketPrice) {
-            return roundValue(row.guarVolume * (row.marketPrice - row.price) * row.reqCourse, 2)
+            return roundValue(-1 * row.guarVolume * (row.marketPrice - row.price) * row.reqCourse, 2)
         }
     } else {
         if (row.outcomeSum < 0 && row.price < row.marketPrice) {

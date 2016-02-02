@@ -1,4 +1,4 @@
-package form_template.income.rnu_115.v2015
+package form_template.income.rnu_116.v2015
 
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException
@@ -428,7 +428,7 @@ void calc() {
             continue
         }
         // 19, 20
-        def diff = row.reqSum - row.guarSum
+        def diff = (row.reqSum ?: 0) - (row.guarSum ?: 0)
         row.incomeSum = diff > 0 ? diff : 0
         row.outcomeSum = diff < 0 ? diff : 0
 
@@ -473,13 +473,13 @@ def BigDecimal calc22(def row) {
             return 0
         }
         if (row.dealFocus == direction2 && row.price < row.marketPrice) {
-            return roundValue(row.guarVolume * (row.marketPrice - row.price) * row.reqCourse, 2)
+            return roundValue(-1 * row.guarVolume * (row.marketPrice - row.price) * row.reqCourse, 2)
         }
         if (row.dealFocus == direction1 && row.price <= row.marketPrice) {
             return 0
         }
         if (row.dealFocus == direction1 && row.price > row.marketPrice) {
-            return roundValue(row.reqVolume * (row.price - row.marketPrice) * row.guarCourse, 2)
+            return roundValue(-1 * row.reqVolume * (row.price - row.marketPrice) * row.guarCourse, 2)
         }
     }
     if (row.dealType == dealType3) {
@@ -487,7 +487,7 @@ def BigDecimal calc22(def row) {
             return 0
         }
         if (row.price < row.marketPrice) {
-            return roundValue((row.marketPrice - row.price) * row.reqCourse, 2)
+            return roundValue(-1 * (row.marketPrice - row.price) * row.reqCourse, 2)
         }
         if (row.incomeSum == 0) {
             return 0
