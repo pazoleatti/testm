@@ -194,7 +194,6 @@ void logicCheck() {
 
         // Проверка уникальности строк
         def msg2 = row.getCell('name').column.name
-        def val2 = row['name']
         def map = getRefBookValue(520, row.name)
         if (map != null) {
             val2 = map.NAME?.stringValue
@@ -316,100 +315,132 @@ void logicCheck() {
 
         // Проверка корректности суммы фактического дохода по данным налогового учета
         if (row.sum4 != null) {
-            if (row.sum3 == null && row.sum4 != calc22(row)) {
+            if (row.sum2 != null && row.sum3 == null && row.sum4 != calc22(row)) {
                 logger.error("Строка $rowNum: Значение графы «$msg22» должно быть равно значению графы «$msg20»!")
-            } else if (getPeriodName() == "1 квартал" && row.sum4 != calc22(row)) {
+            } else if (getPeriodName() == "1 квартал" && row.sum2 != null && row.sum3 != null && row.sum4 != calc22(row)) {
                 logger.error("Строка $rowNum: Значение графы «$msg22» должно быть равно разности значений графы «$msg20» и «$msg21»!")
-            } else if (getPeriodName() == "год" && row.sum4 != calc22(row)) {
+            } else if (getPeriodName() == "год" && row.sum2 != null && row.sum3 != null && row.sum4 != calc22(row)) {
                 logger.error("Строка $rowNum: Значение графы «$msg22» должно быть равно сумме значений графы «$msg20» и «$msg21»!")
-            } else {
-                logger.error("Строка $rowNum: Значение графы «$msg22» заполнена значением «0», т.к. не выполнены условия расчета графы!")
+            } else if (getPeriodName() != "год" && row.sum3 != null && row.sum4 != 0) {
+                logger.error("Строка $rowNum: Значение графы «$msg22» должно быть равно «0»!")
             }
         }
 
         // Проверка корректности суммы рыночного дохода по данным налогового учета согласно условиям сделки
         if (row.sum3 == null && row.sum5 != null) {
             logger.error("Строка $rowNum: Значение графы «$msg24» должно быть не заполнено!")
-        } else if (!calcFlag23(row)) {
-            if (row.course == course810 && row.sum5 != calc24(row)) {
-                logger.error("Строка $rowNum: Значение графы «$msg24» должно быть равно значению графы «%s»!", msg23)
-            } else if (row.course != course810 && row.sum5 != calc24(row)) {
-                logger.error("Строка $rowNum: Значение графы «$msg24» должно быть равно значению выражения  «%s»*«$msg12»!", msg23)
+        } else if (row.sum5 != null) {
+            if (row.sum3 != null && row.tradePay != null && !calcFlag23(row)) {
+                if (row.course == course810 && row.sum5 != calc24(row)) {
+                    logger.error("Строка $rowNum: Значение графы «$msg24» должно быть равно значению графы «%s»!", msg23)
+                } else if (row.course != course810 && row.course2 != null && row.sum5 != calc24(row)) {
+                    logger.error("Строка $rowNum: Значение графы «$msg24» должно быть равно значению выражения  «%s»*«$msg12»!", msg23)
+                }
+            } else if (calcFlag23(row)) {
+                boolean flag = true
+                ['sum1', 'startDate1', 'endDate1', 'base', 'tradePay'].each {
+                    if (row[it] == null) {
+                        flag = false
+                    }
+                }
+                if (flag && row.course == course810 && row.sum5 != calc24(row)) {
+                    logger.error("Строка $rowNum: Значение графы «$msg24» должно быть равно значению выражения  " +
+                            "«%s»*«$msg8»*(«$msg15»-«$msg14»+1)/«$msg18»!", msg23)
+                } else if (flag && row.course2 != null && row.course != course810 && row.sum5 != calc24(row)) {
+                    logger.error("Строка $rowNum: Значение графы «$msg24» должно быть равно значению выражения  " +
+                            "«%s»*«$msg8»*(«$msg15»-«$msg14»+1)/«$msg18»*«$msg12»!", msg23)
+                }
+            } else if (calcFlag23(row) == null && row.sum3 != null && row.sum5 != 0) {
+                logger.error("Строка $rowNum: Значение графы «$msg24» должно быть равно «0»!")
             }
-        } else if (calcFlag23(row)) {
-            if (row.course == course810 && row.sum5 != calc24(row)) {
-                logger.error("Строка $rowNum: Значение графы «$msg24» должно быть равно значению выражения  " +
-                        "«%s»*«$msg8»*(«$msg15»-«$msg14»+1)/«$msg18»!", msg23)
-            } else if (row.course != course810 && row.sum5 != calc24(row)) {
-                logger.error("Строка $rowNum: Значение графы «$msg24» должно быть равно значению выражения  " +
-                        "«%s»*«$msg8»*(«$msg15»-«$msg14»+1)/«$msg18»*«$msg12»!", msg23)
-            }
-        } else {
-            logger.error("Строка $rowNum: Значение графы «$msg24» заполнена значением «0», т.к. не выполнены условия расчета графы!")
         }
 
         // Проверка корректности суммы рыночного дохода по доначисленному  доходу для целей налогового учета
+        boolean flag = true
+        ['startDate2', 'endDate2', 'base', 'tradePay'].each {
+            if (row[it] == null) {
+                flag = false
+            }
+        }
+        boolean flag2 = true
+        ['name', 'iksr', 'code', 'docNumber', 'docDate', 'course'].each {
+            if (row[it] == null) {
+                flag = false
+            }
+        }
         if (row.sum3 == null && row.sum6 != null) {
             logger.error("Строка $rowNum: Значение графы «$msg25» должно быть не заполнено!")
-        } else if (!calcFlag23(row)) {
-            if (row.course == course810 && getPeriodName() == "год" && row.sum6 != calc25(row)) {
-                logger.error("Строка $rowNum: Значение графы «$msg25» должно быть равно значению выражения  " +
-                        "«%s»*(«$msg17»-«$msg16»+1)/«$msg18»!", msg23)
-            } else if (row.course != course810 && getPeriodName() == "год" && row.sum6 != calc25(row)) {
-                logger.error("Строка $rowNum: Значение графы «$msg25» должно быть равно значению выражения  " +
-                        "«%s»*(«$msg17»-«$msg16»+1)/«$msg18»*«$msg13»!", msg23)
+        } else if (row.sum6 != null) {
+            if (flag && !calcFlag23(row)) {
+                if (row.course == course810 && getPeriodName() == "год" && row.sum6 != calc25(row)) {
+                    logger.error("Строка $rowNum: Значение графы «$msg25» должно быть равно значению выражения  " +
+                            "«%s»*(«$msg17»-«$msg16»+1)/«$msg18»!", msg23)
+                } else if (flag && row.course3 != null && row.course != course810 && getPeriodName() == "год" && row.sum6 != calc25(row)) {
+                    logger.error("Строка $rowNum: Значение графы «$msg25» должно быть равно значению выражения  " +
+                            "«%s»*(«$msg17»-«$msg16»+1)/«$msg18»*«$msg13»!", msg23)
+                }
+            } else if (calcFlag23(row)) {
+                if (flag && row.sum1 != null && row.course == course810 && getPeriodName() == "год" && row.sum6 != calc25(row)) {
+                    logger.error("Строка $rowNum: Значение графы «$msg25» должно быть равно значению выражения  " +
+                            "«%s»*«$msg8»*(«$msg17»-«$msg16»+1)/«$msg18»!", msg23)
+                } else if (flag && row.sum1 != null && row.course3 != null && row.course != course810 && getPeriodName() == "год" && row.sum6 != calc25(row)) {
+                    logger.error("Строка $rowNum: Значение графы «$msg25» должно быть равно значению выражения  " +
+                            "«%s»*«$msg8»*(«$msg17»-«$msg16»+1)/«$msg18»*«$msg13»!", msg23)
+                }
+            } else if (getPeriodName() == "1 квартал") {
+                if (flag2 && getPrevForm(formData) != null && findMatch(row) == 1 && row.sum6 != calc25(row)) {
+                    logger.error("Строка $rowNum: Значение графы «$msg25» должно быть равно значению графы «$msg25» предыдущего налогового периода!")
+                } else if (flag2 && getPrevForm(formData) != null && findMatch(row) == 0 && row.sum6 != 0) {
+                    logger.error("Строка $rowNum: Значение графы «$msg25» должно быть равно «0»!")
+                } else if (flag2 && getPrevForm(formData) != null && findMatch(row) > 1 && row.sum6 != 0) {
+                    logger.error("Строка $rowNum: Значение графы «$msg25» должно быть равно «0»!")
+                } else if (getPrevForm(formData) == null && row.sum6 != 0) {
+                    logger.error("Строка $rowNum: Значение графы «$msg25» должно быть равно «0»!")
+                }
+            } else if (calcFlag23(row) == null && getPeriodName() != "1 квартал" && row.sum3 != null) {
+                logger.error("Строка $rowNum: Значение графы «$msg25» должно быть равно «0»!")
             }
-        } else if (calcFlag23(row)) {
-            if (row.course == course810 && getPeriodName() == "год" && row.sum6 != calc25(row)) {
-                logger.error("Строка $rowNum: Значение графы «$msg25» должно быть равно значению выражения  " +
-                        "«%s»*«$msg8»*(«$msg17»-«$msg16»+1)/«$msg18»!", msg23)
-            } else if (row.course != course810 && getPeriodName() == "год" && row.sum6 != calc25(row)) {
-                logger.error("Строка $rowNum: Значение графы «$msg25» должно быть равно значению выражения  " +
-                        "«%s»*«$msg8»*(«$msg17»-«$msg16»+1)/«$msg18»*«$msg13»!", msg23)
-            }
-        } else if (calcFlag23(getPeriodName() == "1 квартал")) {
-            if (getPrevForm(formData) != null && findMatch(row) == 1 && row.sum6 != calc25(row)) {
-                logger.error("Строка $rowNum: Значение графы «$msg25» должно быть равно значению графы «$msg25» предыдущего налогового периода!")
-            } else if (getPrevForm(formData) != null && findMatch(row) == 0 && row.sum6 == calc25(row)) {
-                logger.error("Строка $rowNum: Значение графы «$msg25» заполнено значением «0», т.к. не существует ни одной строки формы РНУ-123 за предыдущий налоговый период, соответствующей уникальным атрибутам проверяемой строки!")
-            } else if (getPrevForm(formData) != null && findMatch(row) > 1 && row.sum6 == calc25(row)) {
-                logger.error("Строка $rowNum: Значение графы «$msg25» заполнено значением «0», т.к. существует более одной строки формы РНУ-123 за предыдущий налоговый период, соответствующей уникальным атрибутам проверяемой строки!")
-            } else if (getPrevForm(formData) == null && row.sum6 == calc25(row)) {
-                logger.error("Строка $rowNum: Значение графы «$msg25» заполнено значением «0», т.к. не существует формы РНУ-123 за предыдущий налоговый период!")
-            }
-        } else {
-            logger.error("Строка $rowNum: Значение графы «$msg25» заполнена значением «0», т.к. не выполнены условия расчета графы!")
         }
 
         // Проверка корректности суммы рыночного дохода по данным налогового учета
-        if (row.sum5 == null && row.sum6 == null) {
-            if (!calcFlag23(row)) {
-                if (row.course == course810 && row.sum7 != calc26(row)) {
-                    logger.error("Строка $rowNum: Значение графы «$msg26» должно быть равно значению графы «%s»!", msg23)
-                } else if (row.course != course810 && row.sum7 != calc26(row)) {
-                    logger.error("Строка $rowNum: Значение графы «$msg26» должно быть равно значению выражения «%s»*«$msg12»!", msg23)
+        if (row.sum7 != null) {
+            if (row.sum5 == null && row.sum6 == null) {
+                if (row.tradePay != null && !calcFlag23(row)) {
+                    if (row.course == course810 && row.sum7 != calc26(row)) {
+                        logger.error("Строка $rowNum: Значение графы «$msg26» должно быть равно значению графы «%s»!", msg23)
+                    } else if (row.course2 != null && row.course != course810 && row.sum7 != calc26(row)) {
+                        logger.error("Строка $rowNum: Значение графы «$msg26» должно быть равно значению выражения «%s»*«$msg12»!", msg23)
+                    }
+                } else if (row.tradePay != null && calcFlag23(row)) {
+                    boolean flag3 = true
+                    ['sum1', 'startDate1', 'endDate1', 'base'].each {
+                        if (row[it] == null) {
+                            flag3 = false
+                        }
+                    }
+                    if (flag3 && row.course == course810 && row.sum7 != calc26(row)) {
+                        logger.error("Строка $rowNum: Значение графы «$msg26» должно быть равно значению выражения  " +
+                                "«%s»*«$msg8»*(«$msg15»-«$msg14»+1)/«$msg18»!", msg23)
+                    } else if (flag3 && row.course2 != null && row.course != course810 && row.sum7 != calc26(row)) {
+                        logger.error("Строка $rowNum: Значение графы «$msg26» должно быть равно значению выражения  " +
+                                "«%s»*«$msg8»*(«$msg15»-«$msg14»+1)/«$msg18»*«$msg12»!", msg23)
+                    }
                 }
-            } else if (calcFlag23(row)) {
-                if (row.course == course810 && row.sum7 != calc26(row)) {
-                    logger.error("Строка $rowNum: Значение графы «$msg26» должно быть равно значению выражения  " +
-                            "«%s»*«$msg8»*(«$msg15»-«$msg14»+1)/«$msg18»!", msg23)
-                } else if (row.course != course810 && row.sum7 != calc26(row)) {
-                    logger.error("Строка $rowNum: Значение графы «$msg26» должно быть равно значению выражения  " +
-                            "«%s»*«$msg8»*(«$msg15»-«$msg14»+1)/«$msg18»*«$msg12»!", msg23)
+            } else if (row.sum5 != null && row.sum6 != null) {
+                if (getPeriodName() == "1 квартал") {
+                    logger.error("Строка $rowNum: Значение графы «$msg26» должно быть равно разности значений графы «$msg24» и «$msg25»!")
+                } else if (getPeriodName() == "год") {
+                    logger.error("Строка $rowNum: Значение графы «$msg26» должно быть равно сумме значений графы «$msg24» и «$msg25»!")
+                } else if (getPeriodName() != "1 квартал" && getPeriodName() != "год" && row.sum7 != 0) {
+                    logger.error("Строка $rowNum: Значение графы «$msg26» должно быть равно «0»!")
                 }
             }
-        } else if (getPeriodName() == "1 квартал") {
-            logger.error("Строка $rowNum: Значение графы «$msg26» должно быть равно разности значений графы «$msg24» и «$msg25»!")
-        } else if (getPeriodName() == "год") {
-            logger.error("Строка $rowNum: Значение графы «$msg26» должно быть равно сумме значений графы «$msg24» и «$msg25»!")
-        } else {
-            logger.error("Строка $rowNum: Значение графы «$msg26» заполнена значением «0», т.к. не выполнены условия расчета графы!")
         }
 
         // Проверка корректности суммы доначисления  дохода до рыночного уровня по данным налогового учета согласно условиям сделки
         if (row.sum5 == null && row.sum8 != null) {
             logger.error("Строка $rowNum: Значение графы «$msg27» должно быть не заполнено!")
-        } else if (row.sum8 != calc27(row)) {
+        } else if (row.sum2 != null && row.sum5 != null && row.sum8 != calc27(row)) {
             logger.error("Строка $rowNum: Значение графы «$msg27» должно быть равно разности значений графы «$msg24» и «$msg20»!")
         }
 
@@ -417,7 +448,10 @@ void logicCheck() {
         if (row.sum3 != null && row.sum6 != null && row.sum9 != null) {
             if (getPeriodName() == "год" && row.sum9 != row.sum6 - row.sum3) {
                 logger.error("Строка $rowNum: Значение графы «$msg28» должно быть равно разности графы «$msg25» и «$msg21»")
-            } else if (getPrevForm(formData) != null && (row.sum9 != row.sum6 - row.sum3 || row.sum9 != calcPrev28(row))) {
+            } else if (getPeriodName() != "год" && getPrevForm(formData) != null && (row.sum9 != row.sum6 - row.sum3 && row.sum9 != calcPrev28(row))) {
+                logger.error("Строка $rowNum: Значение графы «$msg28» должно быть равно разности графы «$msg25» и «$msg21»" +
+                        " или значению графы «$msg28» за предыдущий налоговый период!")
+            } else if (getPeriodName() != "год" && getPrevForm(formData) == null && row.sum9 != 0) {
                 logger.error("Строка $rowNum: Значение графы «$msg28» должно быть равно разности графы «$msg25» и «$msg21»" +
                         " или значению графы «$msg28» за предыдущий налоговый период!")
             }
@@ -425,17 +459,18 @@ void logicCheck() {
 
         // Проверка корректности суммы доначисления  дохода до рыночного уровня по данным налогового учета
         if (row.sum6 != null && row.sum10 != null) {
-            if (row.sum8 == null && row.sum9 == null && row.sum10 != row.sum7 - row.sum4) {
-                logger.error("Строка $rowNum: Значение графы «$msg28» должно быть равно разности графы «$msg26» и «$msg22»")
-            } else if (getPeriodName() == "1 квартал" && (row.sum10 != row.sum7 - row.sum4 || row.sum10 != row.sum8 - row.sum9)) {
-                logger.error("Строка $rowNum: Значение графы «$msg28» должно быть равно разности графы «$msg25» и «$msg21»" +
-                        " или разности значений графы  «$msg27» и «$msg28»!")
-            } else if (getPeriodName() == "год" && (row.sum10 != row.sum7 - row.sum4 || row.sum10 != row.sum8 + row.sum9)) {
-                logger.error("Строка $rowNum: Значение графы «$msg28» должно быть равно разности графы «$msg25» и «$msg21»" +
-                        " или сумме значений графы  «$msg27» и «$msg28»!")
-            } else {
-                logger.error("Строка $rowNum: Значение графы «$msg29» заполнено значением «0», т.к. не выполнен порядок заполнения графы!")
-            }
+            if (row.sum7 != null && row.sum4 != null) {
+                if (row.sum8 == null && row.sum9 == null && row.sum10 != row.sum7 - row.sum4) {
+                    logger.error("Строка $rowNum: Значение графы «$msg29» должно быть равно разности графы «$msg26» и «$msg22»")
+                } else if (getPeriodName() == "1 квартал" && row.sum8 != null && row.sum9 != null && (row.sum10 != row.sum7 - row.sum4 && row.sum10 != row.sum8 - row.sum9)) {
+                    logger.error("Строка $rowNum: Значение графы «$msg29» должно быть равно разности графы «$msg25» и «$msg21»" +
+                            " или разности значений графы  «$msg27» и «$msg29»!")
+                } else if (getPeriodName() == "год" && row.sum8 != null && row.sum9 != null && (row.sum10 != row.sum7 - row.sum4 && row.sum10 != row.sum8 + row.sum9)) {
+                    logger.error("Строка $rowNum: Значение графы «$msg29» должно быть равно разности графы «$msg25» и «$msg21»" +
+                            " или сумме значений графы  «$msg27» и «$msg29»!")
+                }
+            } else if (row.sum8 != null && row.sum9 != null && getPeriodName() != "год" && getPeriodName() != "1 квартал") {
+                logger.error("Строка $rowNum: Значение графы «$msg29» должно быть равно «0»!")            }
         }
     }
 
@@ -640,7 +675,7 @@ def calc26(def row) {
                 return 0
             }
         }
-    } else {
+    } else if (row.sum5 != null && row.sum6 != null) {
         if (getPeriodName() == "1 квартал") {
             return row.sum5 - row.sim6
         } else if (getPeriodName() == "год") {

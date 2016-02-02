@@ -109,8 +109,6 @@ public class Rnu_123Test extends ScriptTestBase {
         Assert.assertEquals("Строка 1: Графа «Всего по данным налогового учета» не заполнена!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Графа «Рыночная Плата, % годовых / ед. вал.» не заполнена!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Графа «Всей сумме дохода, начисленного по данным налогового учета» не заполнена!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Значение графы «Рыночная Плата, % годовых / ед. вал.» должно соответствовать следующему формату: первые символы: (0-9), следующие символы («.» или «,»), следующие символы (0-9), последний символ (%) или пусто!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Значение графы «Рыночная Плата, % годовых / ед. вал.» должно соответствовать следующему формату: первые символы: (0-9), следующие символы («.» или «,»), следующие символы (0-9), последний символ (%) или пусто!", entries.get(i++).getMessage());
         Assert.assertEquals(i, testHelper.getLogger().getEntries().size());
         testHelper.getLogger().clear();
     }
