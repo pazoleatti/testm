@@ -26,6 +26,7 @@ public class LogSearchResultItem implements Serializable {
     private String blobDataId;
     private Integer formTypeId;
     private Integer cnt;
+    private String server;
 
     public Integer getCnt() {
         return cnt;
@@ -156,6 +157,14 @@ public class LogSearchResultItem implements Serializable {
 
     public void setBlobDataId(String blobDataId) {
         this.blobDataId = blobDataId;
+    }
+
+    public String getServer() {
+        return server;
+    }
+
+    public void setServer(String server) {
+        this.server = server;
     }
 
     @Override

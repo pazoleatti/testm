@@ -45,6 +45,7 @@ public class AuditDaoTest {
         logSystem.setNote("the best note");
         logSystem.setUserDepartmentName("Подразделение");
         logSystem.setFormTypeId(null);
+        logSystem.setServer("server");
 
         auditDao.add(logSystem);
     }

@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
+import com.aplana.sbrf.taxaccounting.core.api.ServerInfo;
 import com.aplana.sbrf.taxaccounting.dao.AuditDao;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
@@ -33,6 +34,8 @@ public class AuditServiceImpl implements AuditService {
     private DepartmentReportPeriodService departmentReportPeriodService;
     @Autowired
     private DeclarationTemplateService declarationTemplateService;
+    @Autowired
+    private ServerInfo serverInfo;
 
     private static final String RP_NAME_PATTERN = "%s %s";
     private static final String RP_NAME_WITH_CORR_PATTERN = "%s %s%s";
@@ -258,6 +261,7 @@ public class AuditServiceImpl implements AuditService {
         String userDepartmentName = userDepId == 0 ? departmentService.getDepartment(userDepId).getName() : departmentService.getParentsHierarchy(userDepId);
         log.setUserDepartmentName(userDepartmentName != null ? userDepartmentName.substring(0, Math.min(userDepartmentName.length(), 2000)):null);
         log.setBlobDataId(blobDataId);
+        log.setServer(serverInfo.getServerName());
 
         auditDao.add(log);
     }

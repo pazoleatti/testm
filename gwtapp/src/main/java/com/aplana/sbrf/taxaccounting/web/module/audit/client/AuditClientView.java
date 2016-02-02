@@ -55,6 +55,7 @@ public class AuditClientView extends ViewWithUiHandlers<AuditClientUIHandler>
     private static final String USER_ROLES_COLUMN_HEADER = "Роль пользователя";
     private static final String USER_DEPARTMENT_COLUMN_HEADER = "Подразделение пользователя";
     private static final String USER_IP_COLUMN_HEADER = "IP пользователя";
+    private static final String SERVER = "Сервер";
     @UiField
     GenericDataGrid<LogSearchResultItem> table;
     @UiField
@@ -363,6 +364,13 @@ public class AuditClientView extends ViewWithUiHandlers<AuditClientUIHandler>
             }
         };
 
+        TextColumn<LogSearchResultItem> serverColumn = new TextColumn<LogSearchResultItem>() {
+            @Override
+            public String getValue(LogSearchResultItem object) {
+                return object.getServer();
+            }
+        };
+
         table.addColumn(dateColumn, DATE_COLUMN_HEADER);
         table.setColumnWidth(dateColumn, 8.5, Style.Unit.EM);
         table.addColumn(eventColumn, EVENT_COLUMN_HEADER);
@@ -381,6 +389,7 @@ public class AuditClientView extends ViewWithUiHandlers<AuditClientUIHandler>
         table.setColumnWidth(userRolesColumn, 7, Style.Unit.EM);
         table.addColumn(userDepartmentColumn, USER_DEPARTMENT_COLUMN_HEADER);
         table.addColumn(userIpColumn, USER_IP_COLUMN_HEADER);
+        table.addColumn(serverColumn, SERVER);
         table.setColumnWidth(userIpColumn, 7.5, Style.Unit.EM);
         table.addCellPreviewHandler(new CellPreviewEvent.Handler<LogSearchResultItem>() {
             @Override
@@ -412,6 +421,7 @@ public class AuditClientView extends ViewWithUiHandlers<AuditClientUIHandler>
         userRolesColumn.setDataStoreName(HistoryBusinessSearchOrdering.USER_ROLE.name());
         userDepartmentColumn.setDataStoreName(HistoryBusinessSearchOrdering.USER_DEPARTMENT.name());
         userIpColumn.setDataStoreName(HistoryBusinessSearchOrdering.IP_ADDRESS.name());
+        serverColumn.setDataStoreName(HistoryBusinessSearchOrdering.SERVER.name());
 
         table.addCellPreviewHandler(new CellPreviewEvent.Handler<LogSearchResultItem>(){
             @Override
