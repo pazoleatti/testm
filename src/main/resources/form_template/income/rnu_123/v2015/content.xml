@@ -138,7 +138,7 @@
         <checking>false</checking>
         <name>На дату фактического отражения в бухгалтерском учете</name>
         <order>13</order>
-        <width>10</width>
+        <width>11</width>
         <maxLength>19</maxLength>
         <precision>4</precision>
     </columns>
@@ -147,7 +147,7 @@
         <checking>false</checking>
         <name>Для целей доначисления дохода в налоговом учете</name>
         <order>14</order>
-        <width>10</width>
+        <width>11</width>
         <maxLength>19</maxLength>
         <precision>4</precision>
     </columns>

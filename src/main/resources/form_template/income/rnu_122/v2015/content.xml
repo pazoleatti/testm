@@ -123,7 +123,7 @@
         <checking>false</checking>
         <name>Курс Банка России на дату фактического отражения в бухгалтерском учёте (руб.)</name>
         <order>12</order>
-        <width>10</width>
+        <width>11</width>
         <maxLength>19</maxLength>
         <precision>4</precision>
     </columns>
