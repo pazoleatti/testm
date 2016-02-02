@@ -183,7 +183,11 @@ void logicCheck() {
         checkDatePeriod(logger, row, 'dealDate', getReportPeriodStartDate(), getReportPeriodEndDate(), true)
 
         // Проверка даты исполнения сделки
-        checkDatePeriod(logger, row, 'dealDoneDate', 'dealDate', getReportPeriodEndDate(), true)
+        if (row.dealDate && row.dealDoneDate && row.dealDate > row.dealDoneDate) {
+            def msg1 = row.getCell('dealDate').column.name
+            def msg2 = row.getCell('dealDoneDate').column.name
+            logger.error("Строка $rowNum: Значение графы «$msg2» должно быть не меньше значения графы «$msg1»!")
+        }
 
         // Проверка даты исполнения сделки
         checkDatePeriod(logger, row, 'dealDoneDate', getReportPeriodStartDate(), getReportPeriodEndDate(), true)
