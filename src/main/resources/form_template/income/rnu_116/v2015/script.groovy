@@ -220,7 +220,7 @@ void logicCheck() {
 
         boolean flag = true
         // Проверка суммы требований
-        if (row.reqSum != null && row.reqSum <= 0) {
+        if (row.reqSum != null && row.reqSum < 0) {
             flag = false
             def msg = row.getCell('reqSum').column.name
             logger.error("Строка $rowNum: Значение графы «$msg» должно быть больше или равно «0»!")
