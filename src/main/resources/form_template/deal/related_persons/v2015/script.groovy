@@ -6,16 +6,21 @@ import com.aplana.sbrf.taxaccounting.model.FormDataKind
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType
+import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue
 import com.aplana.sbrf.taxaccounting.service.impl.print.formdata.FormDataXlsmReportBuilder
 import com.aplana.sbrf.taxaccounting.service.impl.print.formdata.XlsxReportMetadata
 import groovy.transform.Field
 import org.apache.poi.ss.usermodel.Cell
 import org.apache.poi.ss.usermodel.CellStyle
+
 import org.apache.poi.ss.usermodel.Font
 import org.apache.poi.ss.usermodel.Row
 import org.apache.poi.ss.usermodel.Sheet
 import org.apache.poi.ss.usermodel.Workbook
 import org.apache.poi.ss.usermodel.WorkbookFactory
+import org.apache.poi.ss.util.AreaReference
 import org.apache.poi.ss.util.CellRangeAddress
 import org.springframework.util.ClassUtils
 
@@ -29,25 +34,28 @@ import org.springframework.util.ClassUtils
  *      - дописать тесты
  */
 
-// графа 1  - rowNumber
-// графа 2  - name			- атрибут 5201 - NAME - «Полное наименование юридического лица с указанием ОПФ», справочник 520 «Юридические лица»
-// графа 3  - address		- зависит от графы 2 - атрибут 5202 - ADDRESS - «Место нахождения (юридический адрес) юридического лица (из устава)», справочник 520 «Юридические лица»
-// графа 4  - orgCode		- зависит от графы 2 - атрибут 5203 - ORG_CODE - «Код организации», справочник 520 «Юридические лица»
-// графа 5  - countryCode	- зависит от графы 2 - атрибут 5204 - COUNTRY_CODE - «Код страны по ОКСМ», справочник 520 «Юридические лица»
-// графа 6  - inn			- зависит от графы 2 - атрибут 5205 - INN - «ИНН (заполняется для резидентов, некредитных организаций)», справочник 520 «Юридические лица»
-// графа 7  - kpp			- зависит от графы 2 - атрибут 5206 - KPP - «КПП (заполняется для резидентов, некредитных организаций)», справочник 520 «Юридические лица»
-// графа 8  - swift			- зависит от графы 2 - атрибут 5208 - SWIFT - «Код SWIFT (заполняется для кредитных организаций, резидентов и нерезидентов)», справочник 520 «Юридические лица»
-// графа 9  - regNum		- зависит от графы 2 - атрибут 5209 - REG_NUM - «Регистрационный номер в стране инкорпорации (заполняется для нерезидентов)», справочник 520 «Юридические лица»
-// графа 10 - startData		- зависит от графы 2 - атрибут 5210 - START_DATE - «Дата наступления основания для включения в список», справочник 520 «Юридические лица»
-// графа 11 - endData		- зависит от графы 2 - атрибут 5211 - END_DATE - «Дата наступления основания для исключения из списка», справочник 520 «Юридические лица»
-// графа 12 - category		- атрибут 5061 - CODE - «Код категории», справочник 506 «Категории юридического лица по системе «светофор»»
-// графа 13 - vatStatus		- зависит от графы 2 - атрибут 5212 - VAT_STATUS - «Статус по НДС», справочник 520 «Юридические лица»
-// графа 14 - taxStatus		- зависит от графы 2 - атрибут 5213 - TAX_STATUS - «Специальный налоговый статус», справочник 520 «Юридические лица»
-// графа 15 - depCriterion	- зависит от графы 2 - атрибут 5214 - DEP_CRITERION - «Критерий взаимозависимости», справочник 520 «Юридические лица»
+// графа 1  (1)   - rowNumber
+// графа 2  (2)   - name			- атрибут 5201 - NAME - «Полное наименование юридического лица с указанием ОПФ», справочник 520 «Юридические лица»
+// графа 3  (3)   - address		    - зависит от графы 2 - атрибут 5202 - ADDRESS - «Место нахождения (юридический адрес) юридического лица (из устава)», справочник 520 «Юридические лица»
+// графа 4  (4)   - orgCode		    - зависит от графы 2 - атрибут 5203 - ORG_CODE - «Код организации», справочник 520 «Юридические лица»
+// графа 5  (5)   - countryCode	    - зависит от графы 2 - атрибут 5204 - COUNTRY_CODE - «Код страны по ОКСМ», справочник 520 «Юридические лица»
+// графа 6  (6,1) - inn			    - зависит от графы 2 - атрибут 5205 - INN - «ИНН (заполняется для резидентов, некредитных организаций)», справочник 520 «Юридические лица»
+// графа 7  (6,2) - kpp			    - зависит от графы 2 - атрибут 5206 - KPP - «КПП (заполняется для резидентов, некредитных организаций)», справочник 520 «Юридические лица»
+// графа 8  (6,3) - swift			- зависит от графы 2 - атрибут 5208 - SWIFT - «Код SWIFT (заполняется для кредитных организаций, резидентов и нерезидентов)», справочник 520 «Юридические лица»
+// графа 9  (6,4) - regNum		    - зависит от графы 2 - атрибут 5209 - REG_NUM - «Регистрационный номер в стране инкорпорации (заполняется для нерезидентов)», справочник 520 «Юридические лица»
+// графа 10 (7)   - startData		- зависит от графы 2 - атрибут 5210 - START_DATE - «Дата наступления основания для включения в список», справочник 520 «Юридические лица»
+// графа 11 (8)   - endData		    - зависит от графы 2 - атрибут 5211 - END_DATE - «Дата наступления основания для исключения из списка», справочник 520 «Юридические лица»
+// графа 12 (9)   - category		- атрибут 5061 - CODE - «Код категории», справочник 506 «Категории юридического лица по системе «светофор»»
+// графа 13 (10)  - vatStatus		- зависит от графы 2 - атрибут 5212 - VAT_STATUS - «Статус по НДС», справочник 520 «Юридические лица»
+// графа 14 (11)  - taxStatus		- зависит от графы 2 - атрибут 5213 - TAX_STATUS - «Специальный налоговый статус», справочник 520 «Юридические лица»
+// графа 15 (12)  - depCriterion	- зависит от графы 2 - атрибут 5214 - DEP_CRITERION - «Критерий взаимозависимости», справочник 520 «Юридические лица»
 
 switch (formDataEvent) {
     case FormDataEvent.CREATE:
         formDataService.checkUnique(formData, logger)
+        break
+    case FormDataEvent.DELETE:
+        deleteHistory(formDataService.getDataRowHelper(formData).allCached)
         break
     case FormDataEvent.AFTER_CREATE:
         refresh()
@@ -61,6 +69,7 @@ switch (formDataEvent) {
         checkSourceForm()
         calc()
         logicCheck()
+        updateHistoryOnCalcOrSave()
         formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.CHECK:
@@ -69,13 +78,17 @@ switch (formDataEvent) {
     case FormDataEvent.MOVE_CREATED_TO_PREPARED:  // Подготовить из "Создана"
     case FormDataEvent.MOVE_CREATED_TO_APPROVED:  // Утвердить из "Создана"
     case FormDataEvent.MOVE_PREPARED_TO_APPROVED: // Утвердить из "Подготовлена"
+        logicCheck()
+        break
     case FormDataEvent.MOVE_CREATED_TO_ACCEPTED:  // Принять из "Создана"
     case FormDataEvent.MOVE_PREPARED_TO_ACCEPTED: // Принять из "Подготовлена"
     case FormDataEvent.MOVE_APPROVED_TO_ACCEPTED: // Принять из "Утверждена"
         logicCheck()
+        updateHistoryOnAccept()
         break
     case FormDataEvent.SAVE:
         updateStylesAndSort()
+        updateHistoryOnCalcOrSave()
         formDataService.saveCachedDataRows(formData, logger)
         break
     case FormDataEvent.GET_SPECIFIC_REPORT_TYPES:
@@ -248,6 +261,11 @@ void refresh() {
         row.category = calc12(row)
     }
     updateStylesAndSort()
+
+    // добавить записи в историю (0) для строк newRows
+    insertHistory(newRows, 0)
+    // удалить записи из истории для строк deleteRows
+    deleteHistory(deleteRows)
 }
 
 void calc() {
@@ -822,15 +840,15 @@ void createSpecificReportShortListXLSM() {
         def values = getShortRow(row.name)
         // добавить значения
         addNewRowInXlsm(rowIndex, values, StyleType.DATA)
-        values.clear()
     }
+
+    // область печати
+    setPrintSetup(rowIndex, widths.size())
+
     workBook.write(scriptSpecificReportHolder.getFileOutputStream())
 
     // название файла
-    def periodCode = getPeriodCode(getReportPeriodEndDate())
-    def year = getReportPeriod()?.taxPeriod?.year?.toString()
-    def fileName = "interDep" + periodCode + year + ".xlsm"
-    scriptSpecificReportHolder.setFileName(fileName)
+    scriptSpecificReportHolder.setFileName("Краткий список ВЗЛ.xlsm")
 }
 
 /**
@@ -840,18 +858,21 @@ void createSpecificReportShortListXLSM() {
  * @param rowIndex номер строк (0..n)
  * @param values список строковых значении
  */
-void addNewRowInXlsm(int rowIndex, def values, StyleType styleType) {
+Row addNewRowInXlsm(int rowIndex, def values, StyleType styleType = null) {
     Row newRow = sheet.createRow(rowIndex)
     def cellIndex = 0
-    for (String value : values) {
+    for (def value : values) {
         Cell cell = newRow.createCell(cellIndex)
         cell.setCellValue(value)
 
         // стили
-        CellStyle cellStyle = getCellStyle(styleType)
-        cell.setCellStyle(cellStyle)
-        cellIndex++
+        if (styleType) {
+            CellStyle cellStyle = getCellStyle(styleType)
+            cell.setCellStyle(cellStyle)
+        }
+       cellIndex++
     }
+    return newRow
 }
 
 /** Очистить шаблон, т.к в нем есть значения, поименованные ячейки, стили и т.д. */
@@ -901,6 +922,26 @@ void clearSheet() {
     cellNames.each { name ->
         workBook.removeName(name)
     }
+
+    // сместить XlsxReportMetadata.RANGE_POSITION в начало листа, что бы макрос не смещал границы страницы в конце таблицы
+    AreaReference ar = new AreaReference(workBook.getName(XlsxReportMetadata.RANGE_POSITION).getRefersToFormula())
+    def startRow = ar.getFirstCell().getRow()
+    sheet.shiftRows(startRow, startRow + 1, -startRow)
+}
+
+/**
+ * Задать область печати.
+ * Взято отсюда FormDataXlsmReportBuilder.setPrintSetup(...)
+ *
+ * @param rowCount количество строк для области печти (количество используемых строк)
+ * @param columnCount количество столбцов для области печти (количество используемых столбцов)
+ */
+void setPrintSetup(def rowCount, def columnCount) {
+    workBook.setPrintArea(0, 0, columnCount, 0, rowCount)
+    sheet.setFitToPage(true)
+    sheet.setAutobreaks(true)
+    sheet.getPrintSetup().setFitHeight((short) 0)
+    sheet.getPrintSetup().setFitWidth((short) 1)
 }
 
 @Field
@@ -914,8 +955,9 @@ enum StyleType {
     DATA        // данные
 }
 
-CellStyle getCellStyle(StyleType styleType) {
-    def alias = styleType.name()
+CellStyle getCellStyle(StyleType styleType, def rowNF = null) {
+    def subAlias = (rowNF ? rowNF.getCell('name').getStyle().getAlias() : '')
+    def alias = styleType.name() + subAlias
     if (cellStyleMap.containsKey(alias)) {
         return cellStyleMap.get(alias)
     }
@@ -974,6 +1016,7 @@ CellStyle getCellStyle(StyleType styleType) {
             style.setBorderLeft(CellStyle.BORDER_THIN)
             style.setBorderBottom(CellStyle.BORDER_THIN)
             style.setBorderTop(CellStyle.BORDER_THIN)
+            style.setWrapText(true)
 
             Font font = workBook.createFont()
             font.setFontHeightInPoints(8 as short)
@@ -983,4 +1026,116 @@ CellStyle getCellStyle(StyleType styleType) {
     }
     cellStyleMap.put(alias, style)
     return style
+}
+
+/** Ведение истории изменения категории ВЗЛ - удалить записи из истории для указанных строк нф. */
+void deleteHistory(def deleteRows) {
+    def records = getHistoryRecord(deleteRows)
+    if (!records) {
+        return
+    }
+    def uniqueRecordIds = records?.collect { it?.record_id?.value }
+
+    logger.setTaUserInfo(userInfo)
+    def provider = formDataService.getRefBookProvider(refBookFactory, 521L, providerCache)
+    provider.deleteRecordVersions(logger, uniqueRecordIds)
+}
+
+/** Ведение истории изменения категории ВЗЛ - для всех строк нф добавить записи в историю со значением атрибута «Режим» = 2. */
+void updateHistoryOnAccept() {
+    if (logger.containsLevel(LogLevel.ERROR)) {
+        return
+    }
+    def dataRows = formDataService.getDataRowHelper(formData).allCached
+    insertHistory(dataRows, 2)
+}
+
+/** Ведение истории изменения категории ВЗЛ - для измененных строк нф добавить записи в историю со значением атрибута «Режим» = 1. */
+void updateHistoryOnCalcOrSave() {
+    if (logger.containsLevel(LogLevel.ERROR)) {
+        return
+    }
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper.allCached
+
+    // найти последние записи в истории для каждой строки
+    def records = getHistoryRecord(dataRows)
+    if (!records) {
+        return
+    }
+    def recordsMap = [:]
+    for (def row : dataRows) {
+        for (def record : records) {
+            if (row.name == record?.JUR_PERSON?.value &&
+                    (recordsMap[row] == null || recordsMap[row]?.CHANGE_DATE?.value >= record?.CHANGE_DATE?.value)) {
+                recordsMap[row] = record
+            }
+        }
+    }
+
+    // среди найденых последних записях отобрать изменившиеся
+    def changeRows = []
+    for (def row : dataRows) {
+        def record = recordsMap[row]
+        if (record && record?.CATEGORY?.value != row.category) {
+            changeRows.add(row)
+        }
+    }
+    // добавить в историю новые записи
+    insertHistory(changeRows, 1)
+}
+
+/** Получить все записи из истории для указанных строк. */
+def getHistoryRecord(def dataRows) {
+    if (!dataRows) {
+        return null
+    }
+    def ids = dataRows.collect { it.name }
+    def subFilter = 'JUR_PERSON = ' + ids.join(' or JUR_PERSON = ')
+
+    def filter = "FORM_DATA_ID = ${formData.id} and ($subFilter)"
+    def date = new Date()
+    // необходимо отсорировать записи по атрибуту "дата изменения", т.к. из справочника значния приходят без времени
+    RefBookAttribute sortAttribute = refBookFactory.get(521L).getAttribute('CHANGE_DATE')
+
+    def provider = formDataService.getRefBookProvider(refBookFactory, 521L, providerCache)
+    return provider.getRecords(date, null, filter, sortAttribute, true)
+}
+
+/**
+ * Ведение истории изменения категории ВЗЛ - для указанных строк нф добавить записи в историю с заданным значением.
+ *
+ * @param dataRows строки нф
+ * @param state значение атрибута «Режим»
+ */
+void insertHistory(def dataRows, def state) {
+    // оставить только строки с заданным значением "Категория"
+    def rows = dataRows.findAll { it.category }
+    if (!rows) {
+        return
+    }
+    def date = new Date()
+    def records = []
+    for (def row : rows) {
+        def record = [:]
+
+        // ИД НФ
+        record.FORM_DATA_ID = new RefBookValue(RefBookAttributeType.NUMBER, formData.id)
+
+        // ИД версии ВЗЛ
+        record.JUR_PERSON = new RefBookValue(RefBookAttributeType.REFERENCE, row.name)
+
+        // Значение категории
+        record.CATEGORY = new RefBookValue(RefBookAttributeType.REFERENCE, row.category)
+
+        // Дата изменения
+        record.CHANGE_DATE = new RefBookValue(RefBookAttributeType.DATE, date)
+
+        // Режим
+        record.STATE = new RefBookValue(RefBookAttributeType.NUMBER, state)
+
+        records.add(record)
+    }
+    def provider = formDataService.getRefBookProvider(refBookFactory, 521L, providerCache)
+    provider.insertRecords(userInfo, date, records)
 }
