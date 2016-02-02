@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<formTemplateContent>
+    <fixedRows>false</fixedRows>
+    <monthly>false</monthly>
+    <comparative>false</comparative>
+    <accruing>false</accruing>
+    <updating>false</updating>
+    <name>Участники группы ПАО Сбербанк</name>
+    <fullName>Перечень участников группы ПАО Сбербанк</fullName>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="autoNumerationColumn">
+        <alias>rowNumber</alias>
+        <checking>false</checking>
+        <columnType>AUTO</columnType>
+        <name>№ пп</name>
+        <order>1</order>
+        <width>4</width>
+        <numerationType>SERIAL</numerationType>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
+        <alias>name</alias>
+        <checking>false</checking>
+        <columnType>REFBOOK</columnType>
+        <name>Полное наименование юридического лица – участника группы</name>
+        <order>3</order>
+        <width>10</width>
+        <hierarchical>false</hierarchical>
+        <nameAttributeId>5201</nameAttributeId>
+        <refBookAttributeId>5201</refBookAttributeId>
+        <searchEnabled>true</searchEnabled>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
+        <alias>pseudoName</alias>
+        <checking>false</checking>
+        <columnType>STRING</columnType>
+        <name>Полное наименование юридического лица – участника группы (в случае изменения названия)</name>
+        <order>3</order>
+        <width>10</width>
+        <maxLength>256</maxLength>
+        <prevLength>0</prevLength>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="refBookColumn">
+        <alias>statReportId</alias>
+        <checking>false</checking>
+        <columnType>REFBOOK</columnType>
+        <name>Код участника в соответствие с классификатором АС «Статотчетность»</name>
+        <order>4</order>
+        <width>10</width>
+        <hierarchical>false</hierarchical>
+        <nameAttributeId>5201</nameAttributeId>
+        <refBookAttributeId>5216</refBookAttributeId>
+        <searchEnabled>true</searchEnabled>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
+        <alias>code</alias>
+        <checking>false</checking>
+        <columnType>STRING</columnType>
+        <name>Номер (код) юридического лица (заполняется в порядке, установленном /3/ для формы 0409801)</name>
+        <order>5</order>
+        <width>10</width>
+        <maxLength>128</maxLength>
+        <prevLength>0</prevLength>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="stringColumn">
+        <alias>depName</alias>
+        <checking>false</checking>
+        <columnType>STRING</columnType>
+        <name>Наименование подразделения, ответственного за взаимодействие</name>
+        <order>6</order>
+        <width>10</width>
+        <maxLength>128</maxLength>
+        <prevLength>0</prevLength>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>consoType</alias>
+        <checking>false</checking>
+        <columnType>NUMBER</columnType>
+        <name>Метод консолидации (1-полная консолидация, 2 - пропорционально доле участия)</name>
+        <order>7</order>
+        <width>9</width>
+        <maxLength>1</maxLength>
+        <precision>0</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>controlPart</alias>
+        <checking>false</checking>
+        <columnType>NUMBER</columnType>
+        <name>Доля контроля Группы в уставном капитале участника, %</name>
+        <order>8</order>
+        <width>9</width>
+        <maxLength>7</maxLength>
+        <precision>4</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>sharePart</alias>
+        <checking>false</checking>
+        <columnType>NUMBER</columnType>
+        <name>Доля участия Группы в уставном капитале участника, %</name>
+        <order>9</order>
+        <width>9</width>
+        <maxLength>7</maxLength>
+        <precision>4</precision>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="referenceColumn">
+        <alias>iksr</alias>
+        <checking>false</checking>
+        <columnType>REFERENCE</columnType>
+        <name>ИНН юридического лица</name>
+        <order>10</order>
+        <width>7</width>
+        <parentAlias>name</parentAlias>
+        <refBookAttributeId>5218</refBookAttributeId>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="dateColumn">
+        <alias>date</alias>
+        <checking>false</checking>
+        <columnType>DATE</columnType>
+        <name>Дата включения участника в состав группы</name>
+        <order>11</order>
+        <width>6</width>
+        <formatId>0</formatId>
+    </columns>
+    <columns xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="numericColumn">
+        <alias>sign</alias>
+        <checking>false</checking>
+        <columnType>NUMBER</columnType>
+        <name>Является группой компаний (0 - нет, 1 - да)</name>
+        <order>12</order>
+        <width>9</width>
+        <maxLength>1</maxLength>
+        <precision>0</precision>
+    </columns>
+    <styles>
+        <alias>Корректировка-изменено</alias>
+        <backColor>WHITE</backColor>
+        <bold>true</bold>
+        <fontColor>RED</fontColor>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Корректировка-без изменений</alias>
+        <backColor>GREY</backColor>
+        <bold>false</bold>
+        <fontColor>BLACK</fontColor>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Корректировка-добавлено</alias>
+        <backColor>PALE_GREEN</backColor>
+        <bold>false</bold>
+        <fontColor>BLACK</fontColor>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Корректировка-удалено</alias>
+        <backColor>LIGHT_CORAL</backColor>
+        <bold>false</bold>
+        <fontColor>BLACK</fontColor>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Редактируемая</alias>
+        <backColor>LIGHT_BLUE</backColor>
+        <bold>false</bold>
+        <fontColor>BLACK</fontColor>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Автозаполняемая</alias>
+        <backColor>WHITE</backColor>
+        <bold>true</bold>
+        <fontColor>DARK_GREEN</fontColor>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Курсив</alias>
+        <backColor>WHITE</backColor>
+        <bold>false</bold>
+        <fontColor>BLACK</fontColor>
+        <italic>true</italic>
+    </styles>
+</formTemplateContent>
