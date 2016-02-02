@@ -352,13 +352,13 @@ def sourceRefbook520AliasMap = [
         808 : ['name'], // РНУ-111
         824 : ['name'], // РНУ-112
         829 : ['name'], // РНУ-114
-                        // РНУ-115
-                        // РНУ-116
+        842 : ['name'], // РНУ-115
+        844 : ['name'], // РНУ-116
         809 : ['name'], // РНУ-117
                         // РНУ-120
-                        // РНУ-122
-                        // РНУ-123
-                        // РНУ-171
+        840 : ['name'], // РНУ-122
+        841 : ['name'], // РНУ-123
+        843 : ['name'], // РНУ-171
 
         // формы приложений 6
         816 : ['name'], // 6.1
@@ -811,13 +811,13 @@ def calc10or16(def record520, def sourceAllDataRowsMap, def isCalc10) {
             808, // РНУ-111
             824, // РНУ-112
             829, // РНУ-114
-                 // РНУ-115
-                 // РНУ-116
+            842, // РНУ-115
+            844, // РНУ-116
             809, // РНУ-117
                  // РНУ-120
-                 // РНУ-122
-                 // РНУ-123
-                 // РНУ-171
+            840, // РНУ-122
+            841, // РНУ-123
+            843  // РНУ-171
     ]
     formTypeIds.each { formTypeId ->
         def rows = sourceAllDataRowsMap[formTypeId]
@@ -852,14 +852,34 @@ def calc10or16(def record520, def sourceAllDataRowsMap, def isCalc10) {
                             result += (row.sum1 ?: 0)
                         }
                         break
-                    // TODO (Ramil Timerbaev) пока не реализованы макеты
+                    case 842 : // РНУ-115
+                    case 844 : // РНУ-116
+                        if (isCalc10) {
+                            result += (row.incomeDelta?.abs() ?: 0)
+                        } else {
+                            result += (row.outcomeDelta?.abs() ?: 0)
+                        }
+                        break
+                    case 840 : // РНУ-122
+                        if ((isCalc10 && "10345".equals(row.code)) ||
+                                (!isCalc10 && "10355".equals(row.code))) {
+                            result += (row.sum6 ?: 0)
+                        }
+                        break
+                    case 841 : // РНУ-123
+                        if (isCalc10) {
+                            result += (row.sum10 ?: 0)
+                        }
+                        break
+                    case 845 : // РНУ-171
+                        if ((isCalc10 && "10360".equals(row.code)) ||
+                                (!isCalc10 && "10361".equals(row.code))) {
+                            result += (row.incomeCorrection ?: 0)
+                        }
+                        break
+                // TODO (Timerbaev/Kinzyabulatov) пока не реализованы макеты
                                // РНУ-108
-                               // РНУ-115
-                               // РНУ-116
                                // РНУ-120
-                               // РНУ-122
-                               // РНУ-123
-                               // РНУ-171
                 }
             }
         }
