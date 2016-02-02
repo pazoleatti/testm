@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.web.module.sources.server;
 
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
+import com.aplana.sbrf.taxaccounting.model.TARole;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
@@ -16,6 +17,7 @@ import com.aplana.sbrf.taxaccounting.refbook.RefBookFactory;
 import com.aplana.sbrf.taxaccounting.service.DepartmentService;
 import com.aplana.sbrf.taxaccounting.service.LogEntryService;
 import com.aplana.sbrf.taxaccounting.service.SourceService;
+import com.aplana.sbrf.taxaccounting.web.main.api.server.SecurityService;
 import com.aplana.sbrf.taxaccounting.web.module.sources.shared.UpdateCurrentAssignsAction;
 import com.aplana.sbrf.taxaccounting.web.module.sources.shared.UpdateCurrentAssignsResult;
 import com.aplana.sbrf.taxaccounting.web.module.sources.shared.model.CurrentAssign;
@@ -44,6 +46,9 @@ public class UpdateCurrentAssignsHandler extends AbstractActionHandler<UpdateCur
     @Autowired
     private RefBookFactory rbFactory;
 
+    @Autowired
+    private SecurityService securityService;
+
     private static final Long PERIOD_CODE_REFBOOK = 8L;
 
     public UpdateCurrentAssignsHandler() {
@@ -51,12 +56,20 @@ public class UpdateCurrentAssignsHandler extends AbstractActionHandler<UpdateCur
     }
 
     @Override
-    public UpdateCurrentAssignsResult execute(UpdateCurrentAssignsAction action, ExecutionContext context) {
+    public UpdateCurrentAssignsResult execute(UpdateCurrentAssignsAction action, ExecutionContext context) throws ActionException {
         UpdateCurrentAssignsResult result = new UpdateCurrentAssignsResult();
         PeriodsInterval period = action.getNewPeriodsInterval();
         Logger logger = new Logger();
-        String leftDepartmentName = departmentService.getDepartment(action.getLeftDepartmentId()).getName();
 
+        if (!securityService.currentUserInfo().getUser().hasRole(TARole.ROLE_CONTROL_UNP)) {
+            for (CurrentAssign assign : action.getCurrentAssigns()) {
+                if (action.getTaxType() != assign.getTaxType()) {
+                    throw new ActionException("Недостаточно прав на редактирование назначений: назначенные формы должны относится к текущему налогу!");
+                }
+            }
+        }
+
+        String leftDepartmentName = departmentService.getDepartment(action.getLeftDepartmentId()).getName();
         List<SourceClientData> sourceClientDataList = new ArrayList<SourceClientData>();
         for (CurrentAssign currentAssign : action.getCurrentAssigns()) {
             List<SourceObject> sourceObjects = new ArrayList<SourceObject>();

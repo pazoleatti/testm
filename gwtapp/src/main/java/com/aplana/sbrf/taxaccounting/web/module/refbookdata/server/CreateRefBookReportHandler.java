@@ -148,7 +148,7 @@ public class CreateRefBookReportHandler extends AbstractActionHandler<CreateRepo
 
             @Override
             public String getTaskName(ReportType reportType, TAUserInfo userInfo) {
-                return refBookFactory.getTaskName(reportType, action.getRefBookId(), action.getName());
+                return refBookFactory.getTaskName(reportType, action.getRefBookId(), action.getReportName());
             }
         });
         result.setUuid(logEntryService.save(logger.getEntries()));

@@ -54,7 +54,7 @@ public class SourcesPresenter extends Presenter<SourcesPresenter.MyView, Sources
          * @param isForm форма или декларация
          */
         void init(TaxType taxType, List<AppointmentType> types, AppointmentType type, int year, List<PeriodInfo> periods,
-                  boolean isForm);
+                  boolean isForm, boolean isControlUNP);
 
         /**
          * Полуыить выбранный интервал периодов
@@ -201,7 +201,7 @@ public class SourcesPresenter extends Presenter<SourcesPresenter.MyView, Sources
                     public void onSuccess(InitSourcesResult result) {
                         getView().setDepartments(result.getDepartments(), result.getAvailableDepartments(), result.getDefaultDepartment());
                         getView().init(taxType, Arrays.asList(AppointmentType.values()), AppointmentType.SOURCES, result.getYear(),
-                                result.getPeriods(), isForm);
+                                result.getPeriods(), isForm, result.isControlUNP());
                         assignDialogPresenter.setAvailablePeriods(result.getPeriods());
                     }
                 }, this).addCallback(new ManualRevealCallback<InitSourcesResult>(SourcesPresenter.this)));
