@@ -753,7 +753,7 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
     colIndex++
 
     // графа 10
-    newRow.reqCurCode = getRecordIdImport(17, 'INNER_CODE', values[colIndex], fileRowIndex, colIndex + colOffset, false)
+    newRow.reqCurCode = getRecordIdImport(15, 'CODE', values[colIndex], fileRowIndex, colIndex + colOffset, false)
     colIndex++
 
     // графа 11
@@ -761,7 +761,7 @@ def getNewRowFromXls(def values, def colOffset, def fileRowIndex, def rowIndex) 
     colIndex++
 
     // графа 12
-    newRow.guarCurCode = getRecordIdImport(17, 'INNER_CODE', values[colIndex], fileRowIndex, colIndex + colOffset, false)
+    newRow.guarCurCode = getRecordIdImport(15, 'CODE', values[colIndex], fileRowIndex, colIndex + colOffset, false)
     colIndex++
 
     // графа 13
