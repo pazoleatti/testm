@@ -148,7 +148,7 @@ def getPeriodName() {
     return periodName
 }
 
-def getPrevForm(def form) {
+def getPrevForm() {
     return formDataService.getFormDataPrev(formData)
 }
 
@@ -388,13 +388,13 @@ void logicCheck() {
                             "«%s»*«$msg8»*(«$msg17»-«$msg16»+1)/«$msg18»*«$msg13»!", msg23)
                 }
             } else if (getPeriodName() == "1 квартал") {
-                if (flag2 && getPrevForm(formData) != null && findMatch(row) == 1 && row.sum6 != calc25(row)) {
+                if (flag2 && getPrevForm() != null && findMatch(row) == 1 && row.sum6 != calc25(row)) {
                     logger.error("Строка $rowNum: Значение графы «$msg25» должно быть равно значению графы «$msg25» предыдущего налогового периода!")
-                } else if (flag2 && getPrevForm(formData) != null && findMatch(row) == 0 && row.sum6 != 0) {
+                } else if (flag2 && getPrevForm() != null && findMatch(row) == 0 && row.sum6 != 0) {
                     logger.error("Строка $rowNum: Значение графы «$msg25» должно быть равно «0»!")
-                } else if (flag2 && getPrevForm(formData) != null && findMatch(row) > 1 && row.sum6 != 0) {
+                } else if (flag2 && getPrevForm() != null && findMatch(row) > 1 && row.sum6 != 0) {
                     logger.error("Строка $rowNum: Значение графы «$msg25» должно быть равно «0»!")
-                } else if (getPrevForm(formData) == null && row.sum6 != 0) {
+                } else if (getPrevForm() == null && row.sum6 != 0) {
                     logger.error("Строка $rowNum: Значение графы «$msg25» должно быть равно «0»!")
                 }
             } else if (calcFlag23(row) == null && getPeriodName() != "1 квартал" && row.sum3 != null) {
@@ -448,10 +448,10 @@ void logicCheck() {
         if (row.sum3 != null && row.sum6 != null && row.sum9 != null) {
             if (getPeriodName() == "год" && row.sum9 != row.sum6 - row.sum3) {
                 logger.error("Строка $rowNum: Значение графы «$msg28» должно быть равно разности графы «$msg25» и «$msg21»")
-            } else if (getPeriodName() != "год" && getPrevForm(formData) != null && (row.sum9 != row.sum6 - row.sum3 && row.sum9 != calcPrev28(row))) {
+            } else if (getPeriodName() != "год" && getPrevForm() != null && (row.sum9 != row.sum6 - row.sum3 && row.sum9 != calcPrev28(row))) {
                 logger.error("Строка $rowNum: Значение графы «$msg28» должно быть равно разности графы «$msg25» и «$msg21»" +
                         " или значению графы «$msg28» за предыдущий налоговый период!")
-            } else if (getPeriodName() != "год" && getPrevForm(formData) == null && row.sum9 != 0) {
+            } else if (getPeriodName() != "год" && getPrevForm() == null && row.sum9 != 0) {
                 logger.error("Строка $rowNum: Значение графы «$msg28» должно быть равно разности графы «$msg25» и «$msg21»" +
                         " или значению графы «$msg28» за предыдущий налоговый период!")
             }
@@ -573,7 +573,7 @@ def calc24(def row) {
 
 // метод для применения в ЛП
 def findMatch(def row) {
-    def form = getPrevForm(formData)
+    def form = getPrevForm()
     def dataRows = formDataService.getDataRowHelper(form).allCached
     int cnt = 0
     for (dataRow in dataRows) {
@@ -589,7 +589,7 @@ def findMatch(def row) {
 }
 
 def calcPrev25(def row) {
-    def form = getPrevForm(formData)
+    def form = getPrevForm()
     if (form != null) {
         def dataRows = formDataService.getDataRowHelper(form).allCached
         int cnt = 0
@@ -695,7 +695,7 @@ def calc27(def row) {
 }
 
 def calcPrev28(def row) {
-    def form = getPrevForm(formData)
+    def form = getPrevForm()
     if (form != null) {
         def dataRows = formDataService.getDataRowHelper(form).allCached
         int cnt = 0
