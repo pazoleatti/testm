@@ -118,6 +118,16 @@ def startDate = null
 @Field
 def endDate = null
 
+@Field
+def prevReportPeriodStartDate = null
+
+def getPrevReportPeriodStartDate() {
+    if (prevReportPeriodStartDate == null) {
+        prevReportPeriodStartDate =  reportPeriodService.getStartDate(reportPeriodService.getPrevReportPeriod(formData.reportPeriodId)?.id).time
+    }
+    return prevReportPeriodStartDate
+}
+
 def getReportPeriodStartDate() {
     if (startDate == null) {
         startDate = reportPeriodService.getStartDate(formData.reportPeriodId).time
@@ -180,7 +190,7 @@ void logicCheck() {
         checkNonEmptyColumns(row, rowNum, nonEmptyColumns, logger, true)
 
         // Проверка даты заключения сделки
-        checkDatePeriod(logger, row, 'dealDate', getReportPeriodStartDate(), getReportPeriodEndDate(), true)
+        checkDatePeriod(logger, row, 'dealDate', getPrevReportPeriodStartDate(), getReportPeriodEndDate(), true)
 
         // Проверка даты исполнения сделки
         if (row.dealDate && row.dealDoneDate && row.dealDate > row.dealDoneDate) {
