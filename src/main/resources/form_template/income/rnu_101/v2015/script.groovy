@@ -177,9 +177,9 @@ void logicCheck() {
         checkDatePeriod(logger, row, 'transDoneDate', getReportPeriodStartDate(), getReportPeriodEndDate(), true)
 
         // Проверка курса валюты
-        if (row.course != null && row.course < 0) {
+        if (row.course != null && row.course <= 0) {
             def msg = row.getCell('course').column.name
-            logger.error("Строка $rowNum: Значение графы «$msg» должно быть больше или равно «0»!")
+            logger.error("Строка $rowNum: Значение графы «$msg» должно быть больше «0»!")
         }
 
         // Проверка даты основания совершения операции
