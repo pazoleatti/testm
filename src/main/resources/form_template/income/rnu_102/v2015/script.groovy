@@ -234,12 +234,6 @@ void logicCheck() {
             logger.error("Строка $rowNum: Значение графы «$msg» должно быть больше или равно «0»!")
         }
 
-        // Проверка наличия коэффициента
-        if (row.sum1 != null && row.sum1 > 0 && row.outcomeRate == null) {
-            def msg = row.getCell('outcomeRate').column.name
-            logger.error("Строка $rowNum: Значение графы «$msg» должно быть заполнено!")
-        }
-
         // Проверка коэффициента
         if (row.sum1 != null && row.sum1 == 0 && row.outcomeRate != null) {
             def msg1 = row.getCell('outcomeRate').column.name
@@ -262,6 +256,7 @@ void logicCheck() {
         String msg14 = row.getCell('outcomeRate').column.name
         String msg15 = row.getCell('sum2').column.name
         String msg16 = row.getCell('sum3').column.name
+
         if (row.sum2 != null) {
             if (row.outcomeRate != null && row.sum1 != null && row.sum1 > 0 && row.taxPrice == null) {
                 if (row.sum2 != calc15(row)) {
@@ -275,7 +270,7 @@ void logicCheck() {
                 if (row.sum2 != calc15(row)) {
                     logger.error("Строка $rowNum: Значение графы «$msg15» должно быть равно значению графы «$msg12»!")
                 }
-            } else if (row.sum2 != 0) {
+            } else if (row.sum2 != calc15(row)) {
                 logger.error("Строка $rowNum: Значение графы «$msg15» заполнено значением «0», т.к. не выполнен порядок заполнения графы!")
             }
         }
@@ -285,7 +280,7 @@ void logicCheck() {
             if (row.sum3 != calc16(row)) {
                 logger.error("Строка $rowNum: Значение графы «$msg16» должно быть равно значению графы «$msg12»!")
             }
-        } else if (row.sum3 != calc16(row)) {
+        } else if (row.sum1 != null && row.sum2 != null && row.sum3 != calc16(row)) {
             logger.error("Строка $rowNum: Значение графы «$msg16» должно быть равно разности значений граф «$msg15» и «$msg13»!")
         }
 
@@ -317,7 +312,9 @@ void calc() {
     }
 
     // Сортировка
-    refBookService.dataRowsDereference(logger, dataRows, formData.getFormColumns().findAll { groupColumns.contains(it.getAlias())})
+    refBookService.dataRowsDereference(logger, dataRows, formData.getFormColumns().findAll {
+        groupColumns.contains(it.getAlias())
+    })
     sortRows(dataRows, groupColumns)
 
     // Добавление подитогов
@@ -336,25 +333,23 @@ void calc() {
 }
 
 def calc15(def row) {
-    if (row.outcomeRate != null && row.sum1 != null && row.sum1 > 0 && row.taxPrice == null) {
+    if (row.outcomeRate != null && row.sum1 > 0 && row.taxPrice == null) {
         return roundValue(row.sum1 * row.outcomeRate, 2)
     }
     if (row.outcomeRate == null && row.taxPrice != null) {
         return roundValue(row.taxPrice * row.count * row.course, 2)
     }
-    if (row.sum1 != null && row.sum1 == 0 && row.taxPrice != null) {
+    if (row.sum1 == 0 && row.taxPrice != null) {
         return row.taxPrice
     }
     return 0
 }
 
 def calc16(def row) {
-    if (row.sum1 != null && row.sum1 == 0 && row.taxPrice != null) {
+    if (row.sum1 == 0 && row.taxPrice != null) {
         return row.taxPrice
-    } else if (row.sum1 != null && row.sum2 != null) {
-        return row.sum2 - row.sum1
     }
-    return null
+    return (row.sum2 ?: 0) - (row.sum1 ?: 0)
 }
 /**
  * Округляет число до требуемой точности.
