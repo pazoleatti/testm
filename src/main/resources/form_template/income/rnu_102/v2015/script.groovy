@@ -242,8 +242,9 @@ void logicCheck() {
 
         // Проверка коэффициента
         if (row.sum1 != null && row.sum1 == 0 && row.outcomeRate != null) {
-            def msg = row.getCell('outcomeRate').column.name
-            logger.error("Строка $rowNum: Значение графы «$msg» должно быть не заполнено!")
+            def msg1 = row.getCell('outcomeRate').column.name
+            def msg2 = row.getCell('sum1').column.name
+            logger.error("Строка $rowNum: Значение графы «$msg1» должно быть не заполнено (т.к. значение графы «$msg2» равно «0»)!")
         }
 
         // Проверка положительной суммы дохода
