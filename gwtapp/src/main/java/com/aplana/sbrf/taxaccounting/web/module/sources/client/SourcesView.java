@@ -95,7 +95,7 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers> implement
             periodTo;
 
     @UiField(provided = true)
-    ValueListBox<TaxType> taxTypeList;
+    com.aplana.gwt.client.ValueListBox<TaxType> taxTypeList;
 
     @UiField
     Spinner yearFrom,
@@ -214,17 +214,17 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers> implement
                 return item != null ? item.getCode() : null;
             }
         });
-        taxTypeList = new ValueListBox<TaxType>(new AbstractRenderer<TaxType>() {
+        taxTypeList = new com.aplana.gwt.client.ValueListBox<TaxType>(new AbstractRenderer<TaxType>() {
             @Override
             public String render(TaxType item) {
                 return item.getName();
             }
-        }, new ProvidesKey<TaxType>() {
+        }) {
             @Override
-            public Object getKey(TaxType item) {
-                return item;
+            protected void updateLabelValue() {
+                setLabelValue(((TaxType)((HasValue) this).getValue()).getName());
             }
-        });
+        };
         taxTypeList.addValueChangeHandler(new ValueChangeHandler<TaxType>() {
             @Override
             public void onValueChange(ValueChangeEvent<TaxType> event) {
@@ -749,8 +749,10 @@ public class SourcesView extends ViewWithUiHandlers<SourcesUiHandlers> implement
         taxTypeList.setValue(taxType);
         if (isControlUNP) {
             taxTypeList.setAcceptableValues(Arrays.asList(TaxType.values()));
+            taxTypeList.setEnabled(true);
         } else {
             taxTypeList.setAcceptableValues(Arrays.asList(taxType));
+            taxTypeList.setEnabled(false);
         }
 
         yearFrom.setValue(year);
