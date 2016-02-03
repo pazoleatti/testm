@@ -24,8 +24,8 @@ import groovy.transform.Field
 // transDoneDate        (5) -  Дата совершения операции
 // course 				(6) -  Курс валюты Банка России
 // incomeCode 			(7) -  Код классификации дохода
-// reasonNumber 		(8) -  номер
-// reasonDate   		(9) -  дата
+// reasonNumber 		(8) -  Номер
+// reasonDate   		(9) -  Дата
 // count 				(10) - Количество услуг/работ (ед./шт.)
 // dealPrice			(11) - Цена за оказанные услуги согласно условиям договора
 // taxPrice				(12) - Цена, признаваемая рыночной для целей налогообложения
@@ -515,8 +515,8 @@ void checkHeaderXls(def headerRows, def colCount, rowCount, def tmpRow) {
             ([(headerRows[1][5]): getColumnName(tmpRow, 'transDoneDate')]),
             ([(headerRows[1][6]): getColumnName(tmpRow, 'course')]),
             ([(headerRows[1][7]): getColumnName(tmpRow, 'incomeCode')]),
-            ([(headerRows[1][8]): 'номер']),
-            ([(headerRows[1][9]): 'дата']),
+            ([(headerRows[1][8]): 'Номер']),
+            ([(headerRows[1][9]): 'Дата']),
             ([(headerRows[1][10]): getColumnName(tmpRow, 'count')]),
             ([(headerRows[1][11]): getColumnName(tmpRow, 'dealPrice')]),
             ([(headerRows[1][12]): getColumnName(tmpRow, 'taxPrice')]),

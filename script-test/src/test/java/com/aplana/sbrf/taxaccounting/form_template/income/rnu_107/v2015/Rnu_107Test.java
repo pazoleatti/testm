@@ -97,8 +97,8 @@ public class Rnu_107Test extends ScriptTestBase {
         Assert.assertEquals("Строка 1: Графа «Наименование Взаимозависимого лица (резидента оффшорной зоны)» не заполнена!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Графа «Дата совершения операции» не заполнена!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Графа «Код налогового учёта» не заполнена!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Графа «Основание для совершения операции. номер» не заполнена!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Графа «Основание для совершения операции. дата» не заполнена!", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 1: Графа «Основание для совершения операции. Номер» не заполнена!", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 1: Графа «Основание для совершения операции. Дата» не заполнена!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Графа «Сумма операции (сумма оборота по операции) / количество операций» не заполнена!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Графа «Тариф за оказание услуги» не заполнена!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Графа «Тариф, признаваемый рыночным для целей налогообложения» не заполнена!", entries.get(i++).getMessage());
@@ -124,8 +124,8 @@ public class Rnu_107Test extends ScriptTestBase {
         row.getCell("sum4").setValue(-1, null);
         testHelper.execute(FormDataEvent.CHECK);
         Assert.assertEquals(String.format(ScriptUtils.CHECK_DATE_PERIOD, 1, "Дата совершения операции","01.01.2014", "31.12.2014"), entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Значение графы «Дата совершения операции» должно быть не меньше значения графы «Основание для совершения операции. дата»!", entries.get(i++).getMessage());
-        Assert.assertEquals(String.format(ScriptUtils.CHECK_DATE_PERIOD, 1, "Основание для совершения операции. дата","01.01.1991", "31.12.2014"), entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 1: Значение графы «Дата совершения операции» должно быть не меньше значения графы «Основание для совершения операции. Дата»!", entries.get(i++).getMessage());
+        Assert.assertEquals(String.format(ScriptUtils.CHECK_DATE_PERIOD, 1, "Основание для совершения операции. Дата","01.01.1991", "31.12.2014"), entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Значение графы «Тариф за оказание услуги»/«Тариф, признаваемый рыночным для целей налогообложения» должно быть больше или равно «0»!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Значение графы «Сумма фактически начисленного дохода» должно быть больше или равно «0»!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Значение графы «Сумма дохода, соответствующая рыночному уровню тарифа» должно быть больше или равно «0»!", entries.get(i++).getMessage());
