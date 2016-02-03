@@ -279,7 +279,6 @@ void logicCheck() {
 
         // Проверка доходов учитываемых в целях налога на прибыль по сделке
         if (flag && row.reqSum != null && row.guarSum != null && row.incomeSum != null) {
-            flag2 = false
             def diff = row.reqSum - row.guarSum
             def msg = row.getCell('reqSum').column.name
             def msg1 = row.getCell('guarSum').column.name
@@ -295,7 +294,6 @@ void logicCheck() {
 
         // Проверка расходов учитываемых в целях налога на прибыль по сделке
         if (flag && row.reqSum != null && row.guarSum != null && row.outcomeSum != null) {
-            flag2 = false
             def diff = row.reqSum - row.guarSum
             def msg = row.getCell('reqSum').column.name
             def msg1 = row.getCell('guarSum').column.name
@@ -329,7 +327,6 @@ void logicCheck() {
         def msg16 = row.getCell('guarCourse').column.name
         def msg19 = row.getCell('incomeSum').column.name
         def msg21 = row.getCell('marketPrice').column.name
-
         // Проверка отклонений по доходам
         if (flag2 && row.incomeDelta != null && row.incomeSum != null) {
             def msg22 = row.getCell('incomeDelta').column.name
