@@ -262,7 +262,7 @@ void logicCheck() {
                 if (row.sum2 != calc15(row)) {
                     logger.error("Строка $rowNum: Значение графы «$msg15» должно быть равно произведению значений граф «$msg13» и «$msg14»!")
                 }
-            } else if (row.outcomeRate == null && row.sum1 != null && row.sum1 > 0 && row.taxPrice != null) {
+            } else if (row.outcomeRate == null && row.taxPrice != null && row.count != null && row.course != null) {
                 if (row.sum2 != calc15(row)) {
                     logger.error("Строка $rowNum: Значение графы «$msg15» должно быть равно произведению значений граф «$msg12», «$msg10» и «$msg6»!")
                 }
@@ -334,10 +334,10 @@ void calc() {
 
 def calc15(def row) {
     if (row.outcomeRate != null && row.sum1 > 0 && row.taxPrice == null) {
-        return roundValue(row.sum1 * row.outcomeRate, 2)
+        return roundValue((row.sum1 ?: 0) * (row.outcomeRate ?: 0), 2)
     }
     if (row.outcomeRate == null && row.taxPrice != null) {
-        return roundValue(row.taxPrice * row.count * row.course, 2)
+        return roundValue((row.taxPrice ?: 0) * (row.count ?: 0) * (row.course ?: 0), 2)
     }
     if (row.sum1 == 0 && row.taxPrice != null) {
         return row.taxPrice
