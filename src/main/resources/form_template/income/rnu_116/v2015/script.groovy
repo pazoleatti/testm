@@ -286,7 +286,7 @@ void logicCheck() {
             def msg2 = row.getCell('incomeSum').column.name
             if (diff > 0 && row.incomeSum != diff) {
                 logger.error("Строка $rowNum: Значение графы «$msg2» должно быть равно разнице значений граф «$msg» и «$msg1»!")
-            } else if (diff >= 0 && row.incomeSum != 0) {
+            } else if (diff <= 0 && row.incomeSum != 0) {
                 logger.error("Строка $rowNum: Значение графы «$msg2» должно быть равно нулю!")
             }
         }
