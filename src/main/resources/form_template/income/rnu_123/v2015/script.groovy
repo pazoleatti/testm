@@ -6,7 +6,7 @@ import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import groovy.transform.Field
 
 /**
- РНУ 123. Регистр налогового учёта доходов по гарантиям и аккредитивам и иным гарантийным продуктам,
+ РНУ-123. Регистр налогового учёта доходов по гарантиям и аккредитивам и иным гарантийным продуктам,
  * включая инструменты торгового финансирования, предоставляемым Взаимозависимым лицам и резидентам оффшорных зон по ценам, не соответствующим рыночному уровню
  *
  * formTemplateId=841
@@ -311,7 +311,7 @@ void logicCheck() {
         def msg27 = row.getCell('sum8').column.name
         def msg28 = row.getCell('sum9').column.name
         def msg29 = row.getCell('sum10').column.name
-        course810 = getRecordId(15, 'CODE', '810')
+        def course810 = getRecordId(15, 'CODE', '810')
 
         // Проверка корректности суммы фактического дохода по данным налогового учета
         if (row.sum4 != null) {
@@ -427,12 +427,14 @@ void logicCheck() {
                     }
                 }
             } else if (row.sum5 != null && row.sum6 != null) {
-                if (getPeriodName() == "1 квартал") {
-                    logger.error("Строка $rowNum: Значение графы «$msg26» должно быть равно разности значений графы «$msg24» и «$msg25»!")
-                } else if (getPeriodName() == "год") {
-                    logger.error("Строка $rowNum: Значение графы «$msg26» должно быть равно сумме значений графы «$msg24» и «$msg25»!")
-                } else if (getPeriodName() != "1 квартал" && getPeriodName() != "год" && row.sum7 != 0) {
-                    logger.error("Строка $rowNum: Значение графы «$msg26» должно быть равно «0»!")
+                if (row.sum7 != calc26(row)) {
+                    if (getPeriodName() == "1 квартал") {
+                        logger.error("Строка $rowNum: Значение графы «$msg26» должно быть равно разности значений графы «$msg24» и «$msg25»!")
+                    } else if (getPeriodName() == "год") {
+                        logger.error("Строка $rowNum: Значение графы «$msg26» должно быть равно сумме значений графы «$msg24» и «$msg25»!")
+                    } else if (getPeriodName() != "1 квартал" && getPeriodName() != "год") {
+                        logger.error("Строка $rowNum: Значение графы «$msg26» должно быть равно «0»!")
+                    }
                 }
             }
         }
@@ -498,7 +500,7 @@ void calc() {
     // Удаление итогов
     deleteAllAliased(dataRows)
 
-    for (row in dataRows) {
+    for (def row in dataRows) {
         // графа 22
         row.sum4 = calc22(row)
         // графа 24
@@ -545,7 +547,7 @@ def calc24(def row) {
         logger.error("Строка $rowNum: Значение графы «%s» должно соответствовать следующему формату: первые символы: (0-9)," +
                 " следующие символы («.» или «,»), следующие символы (0-9), последний символ %s или пусто!", msg, "(%)")
     } else {
-        course810 = getRecordId(15, 'CODE', '810')
+        def course810 = getRecordId(15, 'CODE', '810')
         String col23 = row.tradePay.trim().replaceAll(",", ".")
         def flag23 = calcFlag23(row)
         def calcCol23 = flag23 ? roundValue(new BigDecimal(col23[0..-2]) / 100, 2) :
@@ -616,7 +618,7 @@ def calc25(def row) {
         logger.error("Строка $rowNum: Значение графы «%s» должно соответствовать следующему формату: первые символы: (0-9)," +
                 " следующие символы («.» или «,»), следующие символы (0-9), последний символ %s или пусто!", msg, "(%)")
     } else {
-        course810 = getRecordId(15, 'CODE', '810')
+        def course810 = getRecordId(15, 'CODE', '810')
         String col23 = row.tradePay.trim().replaceAll(",", ".")
         def flag23 = calcFlag23(row)
         def calcCol23 = flag23 ? roundValue(new BigDecimal(col23[0..-2]) / 100, 2) :
@@ -654,6 +656,7 @@ def calc26(def row) {
             logger.error("Строка $rowNum: Значение графы «%s» должно соответствовать следующему формату: первые символы: (0-9)," +
                     " следующие символы («.» или «,»), следующие символы (0-9), последний символ %s или пусто!", msg, "(%)")
         } else {
+            def course810 = getRecordId(15, 'CODE', '810')
             String col23 = row.tradePay.trim().replaceAll(",", ".")
             def flag23 = calcFlag23(row)
             def calcCol23 = flag23 ? roundValue(new BigDecimal(col23[0..-2]) / 100, 2) :
@@ -717,7 +720,7 @@ def calcPrev28(def row) {
 def calcTotalRow(def dataRows) {
     def totalRow = (formDataEvent in [FormDataEvent.IMPORT, FormDataEvent.IMPORT_TRANSPORT_FILE]) ? formData.createStoreMessagingDataRow() : formData.createDataRow()
     totalRow.setAlias('total')
-    totalRow.fix = 'Всего'
+    totalRow.fix = 'Итого'
     totalRow.getCell('fix').colSpan = 2
     allColumns.each {
         totalRow.getCell(it).setStyleAlias('Контрольные суммы')
