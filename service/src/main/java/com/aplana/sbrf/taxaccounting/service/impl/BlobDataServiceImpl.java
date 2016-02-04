@@ -5,6 +5,7 @@ import com.aplana.sbrf.taxaccounting.model.BlobData;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
 import com.aplana.sbrf.taxaccounting.service.BlobDataService;
+import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,12 +33,15 @@ public class BlobDataServiceImpl implements BlobDataService {
 
     @Override
     public String create(File file, String name, Date createDate) {
+        FileInputStream fileInputStream = null;
         try {
-            FileInputStream fileInputStream = new FileInputStream(file);
+            fileInputStream = new FileInputStream(file);
             BlobData data = initBlob("", fileInputStream, name, createDate);
             return blobDataDao.createWithDate(data);
         } catch (FileNotFoundException e) {
             throw new ServiceException("", e);
+        } finally {
+            IOUtils.closeQuietly(fileInputStream);
         }
     }
 

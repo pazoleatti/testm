@@ -13,13 +13,16 @@ import com.aplana.sbrf.taxaccounting.model.log.LogEntry;
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel;
 import com.aplana.sbrf.taxaccounting.model.log.Logger;
 import com.aplana.sbrf.taxaccounting.service.*;
+import net.sf.jasperreports.engine.JRParameter;
 import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.export.JRPdfExporter;
 import net.sf.jasperreports.engine.export.JRPdfExporterParameter;
 import net.sf.jasperreports.engine.export.JRXlsExporterParameter;
 import net.sf.jasperreports.engine.export.ooxml.JRXlsxExporter;
+import net.sf.jasperreports.engine.fill.JRSwapFileVirtualizer;
 import net.sf.jasperreports.engine.query.JRXPathQueryExecuterFactory;
+import net.sf.jasperreports.engine.util.JRSwapFile;
 import net.sf.jasperreports.engine.util.JRXmlUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
@@ -405,31 +408,45 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         }
     }
 
-    @Override
-    public byte[] getXlsxData(long id, TAUserInfo userInfo, LockStateLogger stateLogger) {
+    public void getXlsxData(long id, File xlsxFile, TAUserInfo userInfo, LockStateLogger stateLogger) {
         declarationDataAccessService.checkEvents(userInfo, id, FormDataEvent.GET_LEVEL0);
         DeclarationData declarationData = declarationDataDao.get(id);
         String uuid = reportService.getDec(userInfo, declarationData.getId(), ReportType.JASPER_DEC);
         JasperPrint jasperPrint;
-        if (uuid != null) {
-            ObjectInputStream objectInputStream = null;
-            try {
-                objectInputStream = new ObjectInputStream(blobDataService.get(uuid).getInputStream());
-                jasperPrint = (JasperPrint) objectInputStream.readObject();
-            } catch (IOException e) {
-                throw new ServiceException("Не удалось извлечь Jasper-отчет.", e);
-            } catch (ClassNotFoundException e) {
-                throw new ServiceException("Не удалось извлечь Jasper-отчет.", e);
+        JRSwapFile jrSwapFile = null;
+        try {
+            if (uuid != null) {
+                ObjectInputStream objectInputStream = null;
+                try {
+                    objectInputStream = new ObjectInputStream(blobDataService.get(uuid).getInputStream());
+                    jasperPrint = (JasperPrint) objectInputStream.readObject();
+                } catch (IOException e) {
+                    throw new ServiceException("Не удалось извлечь Jasper-отчет.", e);
+                } catch (ClassNotFoundException e) {
+                    throw new ServiceException("Не удалось извлечь Jasper-отчет.", e);
+                }
+            } else {
+                LOG.info(String.format("Заполнение Jasper-макета декларации %s", declarationData.getId()));
+                stateLogger.updateState("Заполнение Jasper-макета");
+                jrSwapFile = new JRSwapFile(System.getProperty("java.io.tmpdir"), 1024, 100);
+                jasperPrint = createJasperReport(declarationData, jrSwapFile, userInfo);
+                // для XLSX-отчета не сохраняем Jasper-отчет из-за возмжных проблем с паралельным формированием PDF-отчета
             }
-        } else {
-            LOG.info(String.format("Заполнение Jasper-макета декларации %s", declarationData.getId()));
-            stateLogger.updateState("Заполнение Jasper-макета");
-            jasperPrint = createJasperReport(declarationData, userInfo);
-            // для XLSX-отчета не сохраняем Jasper-отчет из-за возмжных проблем с паралельным формированием PDF-отчета
+            LOG.info(String.format("Заполнение XLSX-отчета декларации %s", declarationData.getId()));
+            stateLogger.updateState("Заполнение XLSX-отчета");
+            OutputStream outputStream = null;
+            try {
+                outputStream = new FileOutputStream(xlsxFile);
+                exportXLSX(jasperPrint, outputStream);
+            } catch (FileNotFoundException e) {
+                throw new ServiceException("Ошибка при работе с временным файлом для XLSX", e);
+            } finally {
+                IOUtils.closeQuietly(outputStream);
+            }
+        } finally {
+            if (jrSwapFile != null)
+                jrSwapFile.dispose();
         }
-        LOG.info(String.format("Заполнение XLSX-отчета декларации %s", declarationData.getId()));
-        stateLogger.updateState("Заполнение XLSX-отчета");
-        return exportXLSX(jasperPrint);
     }
 
 	@Override
@@ -438,7 +455,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         return getBytesFromInputstream(reportService.getDec(userInfo, id, ReportType.PDF_DEC));
 	}
 
-    private JasperPrint createJasperReport(DeclarationData declarationData, TAUserInfo userInfo) {
+    private JasperPrint createJasperReport(DeclarationData declarationData, JRSwapFile jrSwapFile, TAUserInfo userInfo) {
         String xmlUuid = reportService.getDec(userInfo, declarationData.getId(), ReportType.XML_DEC);
         InputStream zipXml = blobDataService.get(xmlUuid).getInputStream();
         if (zipXml != null) {
@@ -447,7 +464,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 zipXmlIn.getNextEntry();
                 try {
                     return fillReport(zipXmlIn,
-                            declarationTemplateService.getJasper(declarationData.getDeclarationTemplateId()));
+                            declarationTemplateService.getJasper(declarationData.getDeclarationTemplateId()), jrSwapFile);
                 } finally {
                     IOUtils.closeQuietly(zipXml);
                     IOUtils.closeQuietly(zipXmlIn);
@@ -466,20 +483,34 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         LOG.info(String.format("Получение данных декларации %s", declarationData.getId()));
         stateLogger.updateState("Получение данных декларации");
         String xmlUuid = reportService.getDec(userInfo, declarationData.getId(), ReportType.XML_DEC);
-        if (xmlUuid != null) {            
+        if (xmlUuid != null) {
+            File pdfFile = null;
+            FileInputStream fileInputStream = null;
+            JRSwapFile jrSwapFile = new JRSwapFile(System.getProperty("java.io.tmpdir"), 1024, 100);
             try {                
                 LOG.info(String.format("Заполнение Jasper-макета декларации %s", declarationData.getId()));
                 stateLogger.updateState("Заполнение Jasper-макета");
-                JasperPrint jasperPrint = createJasperReport(declarationData, userInfo);
+                JasperPrint jasperPrint = createJasperReport(declarationData, jrSwapFile, userInfo);
                 
                 LOG.info(String.format("Сохранение PDF-файла в базе данных для декларации %s", declarationData.getId()));
                 stateLogger.updateState("Сохранение PDF-файла в базе данных");
-                reportService.createDec(declarationData.getId(), blobDataService.create(new ByteArrayInputStream(exportPDF(jasperPrint)), ""), ReportType.PDF_DEC);
+
+                pdfFile = File.createTempFile("report", ".pdf");
+                exportPDF(jasperPrint, pdfFile);
+
+                fileInputStream = new FileInputStream(pdfFile);
+                reportService.createDec(declarationData.getId(), blobDataService.create(fileInputStream, ""), ReportType.PDF_DEC);
                 LOG.info(String.format("Сохранение Jasper-макета в базе данных для декларации %s", declarationData.getId()));
                 stateLogger.updateState("Сохранение Jasper-макета в базе данных");
                 reportService.createDec(declarationData.getId(), saveJPBlobData(jasperPrint), ReportType.JASPER_DEC);
             } catch (IOException e) {
                 throw new ServiceException(e.getLocalizedMessage(), e);
+            } finally {
+                IOUtils.closeQuietly(fileInputStream);
+                if (pdfFile != null)
+                    pdfFile.delete();
+                if (jrSwapFile != null)
+                    jrSwapFile.dispose();
             }
         } else {
             throw new ServiceException("Декларация не сформирована");
@@ -488,14 +519,26 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
 
     @Override
     public void setXlsxDataBlobs(Logger logger, DeclarationData declarationData, TAUserInfo userInfo, LockStateLogger stateLogger) {
+        File xlsxFile = null;
+        FileInputStream fileInputStream = null;
         try {
-            byte[] xlsxData = getXlsxData(declarationData.getId(), userInfo, stateLogger);
+            xlsxFile = File.createTempFile("report", ".xlsx");
+            getXlsxData(declarationData.getId(), xlsxFile, userInfo, stateLogger);
+
             LOG.info(String.format("Сохранение XLSX в базе данных для декларации %s", declarationData.getId()));
             stateLogger.updateState("Сохранение XLSX в базе данных");
-            reportService.createDec(declarationData.getId(), blobDataService.create(new ByteArrayInputStream(xlsxData), ""), ReportType.EXCEL_DEC);
+
+            fileInputStream = new FileInputStream(xlsxFile);
+            reportService.createDec(declarationData.getId(), blobDataService.create(fileInputStream, ""), ReportType.EXCEL_DEC);
+        } catch (IOException e) {
+            throw new ServiceException("Ошибка при формировании временного файла для XLSX", e);
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);
             throw new ServiceException(e.getMessage());
+        } finally {
+            IOUtils.closeQuietly(fileInputStream);
+            if (xlsxFile != null)
+                xlsxFile.delete();
         }
     }
 
@@ -645,26 +688,23 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         }
     }
 
-    private static JasperPrint fillReport(InputStream xml, InputStream jasperTemplate) {
+    private static JasperPrint fillReport(InputStream xml, InputStream jasperTemplate, JRSwapFile jrSwapFile) {
         try {
-            InputSource inputSource = new InputSource(xml);
-            Document document = JRXmlUtils.parse(inputSource);
-
             Map<String, Object> params = new HashMap<String, Object>();
-            params.put(JRXPathQueryExecuterFactory.PARAMETER_XML_DATA_DOCUMENT,
-                    document);
+            params.put(JRXPathQueryExecuterFactory.XML_INPUT_STREAM, xml);
+            JRSwapFileVirtualizer virtualizer = new JRSwapFileVirtualizer(100, jrSwapFile);
+            virtualizer.setReadOnly(false);
+            params.put(JRParameter.REPORT_VIRTUALIZER, virtualizer);
 
             return JasperFillManager.fillReport(jasperTemplate, params);
-
         } catch (Exception e) {
             throw new ServiceException("Невозможно заполнить отчет", e);
         }
     }
 
-    private static byte[] exportXLSX(JasperPrint jasperPrint) {
+    private static void exportXLSX(JasperPrint jasperPrint, OutputStream data) {
         try {
             JRXlsxExporter exporter = new JRXlsxExporter();
-            ByteArrayOutputStream data = new ByteArrayOutputStream();
             exporter.setParameter(JRXlsExporterParameter.JASPER_PRINT,
                     jasperPrint);
             exporter.setParameter(JRXlsExporterParameter.OUTPUT_STREAM, data);
@@ -683,27 +723,26 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                     Boolean.FALSE);
 
             exporter.exportReport();
-            return data.toByteArray();
         } catch (Exception e) {
             throw new ServiceException(
                     "Невозможно экспортировать отчет в XLSX", e);
         }
     }
 
-    private static byte[] exportPDF(JasperPrint jasperPrint) {
+    private static void exportPDF(JasperPrint jasperPrint, File pdfFile) {
+        OutputStream data = null;
         try {
+            data = new FileOutputStream(pdfFile);
             JRPdfExporter exporter = new JRPdfExporter();
-            ByteArrayOutputStream data = new ByteArrayOutputStream();
-            exporter.setParameter(JRPdfExporterParameter.JASPER_PRINT,
-                    jasperPrint);
+            exporter.setParameter(JRPdfExporterParameter.JASPER_PRINT, jasperPrint);
             exporter.setParameter(JRPdfExporterParameter.OUTPUT_STREAM, data);
             exporter.getPropertiesUtil().setProperty(JRPdfExporterParameter.PROPERTY_SIZE_PAGE_TO_CONTENT, "true");
 
             exporter.exportReport();
-            return data.toByteArray();
         } catch (Exception e) {
-            throw new ServiceException("Невозможно экспортировать отчет в PDF",
-                    e);
+            throw new ServiceException("Невозможно экспортировать отчет в PDF", e);
+        } finally {
+            IOUtils.closeQuietly(data);
         }
     }
 
@@ -719,12 +758,26 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     }
 
     private String saveJPBlobData(JasperPrint jasperPrint) throws IOException {
-        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-        ObjectOutputStream objectOutputStream = new ObjectOutputStream(byteArrayOutputStream);
-        objectOutputStream.writeObject(jasperPrint);
-        InputStream inputStream = new ByteArrayInputStream(byteArrayOutputStream.toByteArray());
+        File jasperPrintFile = null;
+        FileInputStream fileInputStream = null;
+        try {
+            jasperPrintFile = File.createTempFile("jasperPrint",".dat");
+            FileOutputStream fileOutputStream = null;
+            try {
+                fileOutputStream = new FileOutputStream(jasperPrintFile);
+                ObjectOutputStream objectOutputStream = new ObjectOutputStream(fileOutputStream);
+                objectOutputStream.writeObject(jasperPrint);
+            } finally {
+                IOUtils.closeQuietly(fileOutputStream);
+            }
+            fileInputStream = new FileInputStream(jasperPrintFile);
+            return blobDataService.create(fileInputStream, "");
+        } finally {
+            IOUtils.closeQuietly(fileInputStream);
+            if (jasperPrintFile != null)
+                jasperPrintFile.delete();
+        }
 
-        return blobDataService.create(inputStream, "");
     }
 
     @Override
