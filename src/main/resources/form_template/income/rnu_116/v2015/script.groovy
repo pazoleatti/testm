@@ -326,6 +326,7 @@ void logicCheck() {
         def msg15 = row.getCell('reqCourse').column.name
         def msg16 = row.getCell('guarCourse').column.name
         def msg19 = row.getCell('incomeSum').column.name
+        def msg20 = row.getCell('outcomeSum').column.name
         def msg21 = row.getCell('marketPrice').column.name
         // Проверка отклонений по доходам
         if (flag2 && row.incomeDelta != null && row.incomeSum != null) {
