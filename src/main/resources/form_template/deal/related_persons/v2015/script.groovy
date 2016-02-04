@@ -1,10 +1,15 @@
 package form_template.deal.related_persons.v2015
 
 import au.com.bytecode.opencsv.CSVWriter
+import com.aplana.sbrf.taxaccounting.model.Color
+import com.aplana.sbrf.taxaccounting.model.DataRow
+import com.aplana.sbrf.taxaccounting.model.FormData
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.FormDataKind
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod
+import com.aplana.sbrf.taxaccounting.model.TaxType
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
+import com.aplana.sbrf.taxaccounting.model.formdata.HeaderCell
 import com.aplana.sbrf.taxaccounting.model.log.LogLevel
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttribute
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookAttributeType
@@ -14,7 +19,7 @@ import com.aplana.sbrf.taxaccounting.service.impl.print.formdata.XlsxReportMetad
 import groovy.transform.Field
 import org.apache.poi.ss.usermodel.Cell
 import org.apache.poi.ss.usermodel.CellStyle
-
+import org.apache.poi.ss.usermodel.DataFormat
 import org.apache.poi.ss.usermodel.Font
 import org.apache.poi.ss.usermodel.Row
 import org.apache.poi.ss.usermodel.Sheet
@@ -22,7 +27,13 @@ import org.apache.poi.ss.usermodel.Workbook
 import org.apache.poi.ss.usermodel.WorkbookFactory
 import org.apache.poi.ss.util.AreaReference
 import org.apache.poi.ss.util.CellRangeAddress
+import org.apache.poi.ss.util.RegionUtil
+import org.apache.poi.xssf.usermodel.XSSFCellStyle
+import org.apache.poi.xssf.usermodel.XSSFColor
 import org.springframework.util.ClassUtils
+
+import java.text.DateFormatSymbols
+import java.text.SimpleDateFormat
 
 /**
  * 800 - Взаимозависимые лица.
@@ -94,6 +105,7 @@ switch (formDataEvent) {
     case FormDataEvent.GET_SPECIFIC_REPORT_TYPES:
         specificReportType.add("Краткий список ВЗЛ (CSV)")
         specificReportType.add("Краткий список ВЗЛ (XLSM)")
+        specificReportType.add("История изменения ВЗЛ")
         break
     case FormDataEvent.CREATE_SPECIFIC_REPORT:
         createSpecificReport()
@@ -674,6 +686,9 @@ void createSpecificReport() {
         case 'Краткий список ВЗЛ (XLSM)' :
             createSpecificReportShortListXLSM()
             break
+        case 'История изменения ВЗЛ' :
+            createSpecificReportHistory()
+            break
     }
 }
 
@@ -948,11 +963,15 @@ void setPrintSetup(def rowCount, def columnCount) {
 def cellStyleMap = [:]
 
 enum StyleType {
-    ROW_1,      // строка 1
-    ROW_2,      // строка 2
-    HEADER,     // шапка
-    NUMERATION, // нумерация
-    DATA        // данные
+    ROW_1,        // строка 1
+    ROW_2,        // строка 2
+    HEADER,       // шапка
+    NUMERATION,   // нумерация
+    DATA,         // данные
+    DATA_CENTER,  // данные (по центру)
+    BOLT,         // жирный
+    DATE,         // дата
+    GROUP_HEADER, // заголовок
 }
 
 CellStyle getCellStyle(StyleType styleType, def rowNF = null) {
@@ -1011,6 +1030,8 @@ CellStyle getCellStyle(StyleType styleType, def rowNF = null) {
             font.setItalic(true)
             style.setFont(font)
             break
+        case StyleType.DATA_CENTER :
+            style.setAlignment(CellStyle.ALIGN_CENTER)
         case StyleType.DATA :
             style.setBorderRight(CellStyle.BORDER_THIN)
             style.setBorderLeft(CellStyle.BORDER_THIN)
@@ -1023,6 +1044,49 @@ CellStyle getCellStyle(StyleType styleType, def rowNF = null) {
             font.setFontName('Arial')
             style.setFont(font)
             break
+        case StyleType.BOLT :
+            Font font = workBook.createFont()
+            font.setBoldweight(Font.BOLDWEIGHT_BOLD)
+            font.setFontHeightInPoints(8 as short)
+            font.setFontName('Arial')
+            style.setFont(font)
+            break
+        case StyleType.DATE :
+            style.setAlignment(CellStyle.ALIGN_CENTER)
+            style.setBorderRight(CellStyle.BORDER_THIN)
+            style.setBorderLeft(CellStyle.BORDER_THIN)
+            style.setBorderBottom(CellStyle.BORDER_THIN)
+            style.setBorderTop(CellStyle.BORDER_THIN)
+            style.setWrapText(true)
+
+            Font font = workBook.createFont()
+            font.setFontHeightInPoints(8 as short)
+            font.setFontName('Arial')
+            style.setFont(font)
+
+            DataFormat dataFormat = workBook.createDataFormat()
+            style.setDataFormat(dataFormat.getFormat(XlsxReportMetadata.sdf.toPattern()))
+            break
+        case StyleType.GROUP_HEADER :
+            style.setAlignment(CellStyle.ALIGN_CENTER)
+            style.setVerticalAlignment(CellStyle.VERTICAL_CENTER)
+            style.setWrapText(true)
+
+            Font font = workBook.createFont()
+            font.setBoldweight(Font.BOLDWEIGHT_BOLD)
+            font.setFontHeightInPoints(11 as short)
+            font.setFontName('Arial')
+            font.setItalic(true)
+            style.setFont(font)
+            break
+    }
+    // заливка для данных и дат
+    if (rowNF && styleType in [StyleType.DATE, StyleType.DATA, StyleType.DATA_CENTER]) {
+        XSSFCellStyle tmpStyle = (XSSFCellStyle) style
+        XSSFColor color = getColor(rowNF.getCell('name').getStyle().getBackColor())
+        tmpStyle.setFillForegroundColor(color)
+        tmpStyle.setFillBackgroundColor(color)
+        tmpStyle.setFillPattern(CellStyle.SOLID_FOREGROUND)
     }
     cellStyleMap.put(alias, style)
     return style
@@ -1092,7 +1156,6 @@ def getHistoryRecord(def dataRows) {
     }
     def ids = dataRows.collect { it.name }
     def subFilter = 'JUR_PERSON = ' + ids.join(' or JUR_PERSON = ')
-
     def filter = "FORM_DATA_ID = ${formData.id} and ($subFilter)"
     def date = new Date()
     // необходимо отсорировать записи по атрибуту "дата изменения", т.к. из справочника значния приходят без времени
@@ -1138,4 +1201,639 @@ void insertHistory(def dataRows, def state) {
     }
     def provider = formDataService.getRefBookProvider(refBookFactory, 521L, providerCache)
     provider.insertRecords(userInfo, date, records)
+}
+
+/** История изменения ВЗЛ. */
+def createSpecificReportHistory() {
+    // для работы с эксель
+    String TEMPLATE = ClassUtils.classPackageAsResourcePath(FormDataXlsmReportBuilder.class)+ "/acctax.xlsm"
+    InputStream templeteInputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(TEMPLATE)
+    workBook = WorkbookFactory.create(templeteInputStream)
+    sheet = workBook.getSheetAt(0)
+    Row tmpRow
+    Cell cell
+    CellRangeAddress region
+    def rowIndex = 0
+
+    // очистить шаблон
+    clearSheet()
+
+    // заголовок
+    tmpRow = sheet.createRow(rowIndex)
+    cell = tmpRow.createCell(0)
+    cell.setCellValue("ПАО Сбербанк")
+    cell.setCellStyle(getCellStyle(StyleType.ROW_1))
+    // объединение двух ячеек
+    region = new CellRangeAddress(rowIndex, rowIndex, 0, 1)
+    sheet.addMergedRegion(region)
+
+    def currDate = new Date()
+    def date = (getReportPeriodEndDate() < currDate ? getReportPeriodEndDate() : currDate)
+    def dateStr = getDateStr(date)
+    rowIndex++
+    tmpRow = sheet.createRow(rowIndex)
+    cell = tmpRow.createCell(0)
+    cell.setCellValue("Список Взаимозависимых лиц Банка по состоянию на $dateStr")
+    cell.setCellStyle(getCellStyle(StyleType.ROW_2))
+
+    // объединение трех ячеек
+    region = new CellRangeAddress(rowIndex, rowIndex, 0, 2)
+    sheet.addMergedRegion(region)
+
+    // пустые строки
+    (1..4).each {
+        rowIndex++
+        sheet.createRow(rowIndex)
+    }
+
+    // раздел 1 - начало --------------------------------------------------------------------------------------------
+    rowIndex++
+    tmpRow = sheet.createRow(rowIndex)
+    cell = tmpRow.createCell(0)
+    cell.setCellStyle(getCellStyle(StyleType.BOLT))
+    cell.setCellValue('Раздел I "Состав Взаимозависимых лиц Банка"')
+
+    // пустая строка
+    rowIndex++
+    sheet.createRow(rowIndex)
+
+    // шапка и нумерация
+    addHeader(rowIndex)
+    rowIndex += scriptSpecificReportHolder.getHeaders().size()
+
+    // задать ширину столбцов (в символах)
+    def widths = [
+            6,  // 1
+            43, // 2
+            37, // 3
+            8,  // 4
+            9,  // 5
+            20, // 6,1
+            15, // 6,2
+            15, // 6,3
+            20, // 6,4
+            13, // 7
+            13, // 8
+            11, // 9
+            9,  // 10
+            8,  // 11
+            16, // 12
+    ]
+    for (int i = 0; i < widths.size(); i++) {
+        int width = widths[i] * 256 // умножить на 256, т.к. 1 единица ширины в poi = 1/256 ширины символа
+        sheet.setColumnWidth(i, width)
+    }
+
+    // данные раздела 1
+    def dataRowHelper = formDataService.getDataRowHelper(formData)
+    def dataRows = dataRowHelper.allCached
+    for (def row : dataRows) {
+        rowIndex++
+        def record520 = getRefBookValue(520L, row.name)
+        def values = getValues520(record520, row.category, row.getIndex())
+
+        // добавить значения
+        Row newRow = addNewRowInXlsm(rowIndex, values)
+
+        // задать стиль и заливку
+        (0..14).each { cellIndex ->
+            cell = newRow.getCell(cellIndex)
+            StyleType styleType = getColumnStyleType(cellIndex)
+            cell.setCellStyle(getCellStyle(styleType, row))
+        }
+    }
+    // раздел 1 - конец ---------------------------------------------------------------------------------------------
+
+    // раздел 2 - начало --------------------------------------------------------------------------------------------
+    // пустые строки
+    (1..2).each {
+        rowIndex++
+        sheet.createRow(rowIndex)
+    }
+    // надпись
+    rowIndex++
+    tmpRow = sheet.createRow(rowIndex)
+    cell = tmpRow.createCell(0)
+    cell.setCellStyle(getCellStyle(StyleType.BOLT))
+    def periodYear = getReportPeriod().taxPeriod.year
+    cell.setCellValue("Раздел II \"Изменения, произошедшие в Списке Взаимозависимых лиц Банка за период с 1 января $periodYear года\"")
+
+    // пустая строка
+    rowIndex++
+    sheet.createRow(rowIndex)
+
+    // шапка и нумерация
+    addHeader(rowIndex)
+    rowIndex += scriptSpecificReportHolder.getHeaders().size()
+
+    // данные раздела 2
+    rowIndex = fillSection2(rowIndex, widths.size())
+    // раздел 2 - конец ---------------------------------------------------------------------------------------------
+
+    // область печати
+    setPrintSetup(rowIndex, widths.size())
+
+    workBook.write(scriptSpecificReportHolder.getFileOutputStream())
+
+    // название файла
+    scriptSpecificReportHolder.setFileName("История изменения ВЗЛ.xlsm")
+}
+
+/** Получить значения по id записи справочника "Участники ТЦО" для записи в спец отчет история ВЗЛ. */
+def getValues520(def record520, def recordId506, def rowIndex = null) {
+    def values = []
+
+    // графа 1  (1)
+    values.add(rowIndex ?: '')
+
+    // графа 2  (2)
+    values.add((String) record520?.NAME?.value)
+
+    // графа 3  (3)
+    values.add(record520?.ADDRESS?.value)
+
+    // графа 4  (4)
+    def orgCode = getRefBookValue(513L, record520?.ORG_CODE?.value)?.CODE?.value
+    values.add(orgCode)
+
+    // графа 5  (5)
+    def countryCode = getRefBookValue(10L, record520?.COUNTRY_CODE?.value)?.CODE?.value
+    values.add(countryCode)
+
+    // графа 6  (6,1)
+    values.add(record520?.INN?.value)
+
+    // графа 7  (6,2)
+    values.add(record520?.KPP?.value)
+
+    // графа 8  (6,3)
+    values.add(record520?.SWIFT?.value)
+
+    // графа 9  (6,4)
+    values.add(record520?.REG_NUM?.value)
+
+    // графа 10 (7)
+    values.add(record520?.START_DATE?.value)
+
+    // графа 11 (8)
+    values.add(record520?.END_DATE?.value)
+
+    // графа 12 (9)
+    def category = getRefBookValue(506L, recordId506)?.CODE?.value
+    values.add(category)
+
+    // графа 13 (10)
+    def vatStatus = getRefBookValue(510L, record520?.VAT_STATUS?.value)?.CODE?.value
+    values.add(vatStatus)
+
+    // графа 14 (11)
+    def taxStatus = getRefBookValue(511L, record520?.TAX_STATUS?.value)?.CODE?.value
+    values.add(taxStatus)
+
+    // графа 15 (12)
+    def depCriterion = getRefBookValue(512L, record520?.DEP_CRITERION?.value)?.CODE?.value
+    values.add(depCriterion)
+
+    return values
+}
+
+/**
+ * Заполнить второй раздел историии ВЗЛ.
+ *
+ * @param rowIndex строка в эксель
+ * @param columnIndex столбцов в эксель
+ * @return номер последней добавленой строки
+ */
+def fillSection2(def rowIndex, def columnIndex) {
+    def from = getReportPeriodStartDate()
+    def to = getReportPeriodEndDate()
+
+    // получить список изменении
+    def changeList = []
+    changeList.addAll(getHistoryChangeList(from, to))
+    changeList.addAll(getJurPersonChangeList(from, to))
+
+    // сгруппировать/отсортировать изменения
+    def resultList = changeList.sort { ChangeItem x, ChangeItem y ->
+        if (x.date == y.date) {
+            return x.type.priority <=> y.type.priority
+        }
+        return x.date <=> y.date
+    }
+    // поправить нумерацию
+    def index = 0
+    resultList.each { ChangeItem item ->
+        index++
+        item.values[0] = index
+    }
+
+    Row tmpRow
+    Cell cell
+    CellRangeAddress region
+
+    // записать в файл изменения
+    def groupDate = null
+    for (ChangeItem item : resultList) {
+        if (groupDate == null || groupDate != item.date) {
+            // заголовок группы
+            groupDate = item.date
+            rowIndex++
+            tmpRow = sheet.createRow(rowIndex)
+            cell = tmpRow.createCell(0)
+            def dateStr = groupDate.format('dd.MM.yyyy')
+            cell.setCellValue("Изменения, внесенные $dateStr")
+            cell.setCellStyle(getCellStyle(StyleType.GROUP_HEADER))
+            region = new CellRangeAddress(rowIndex, rowIndex, 0, columnIndex - 1)
+            // объединение всех ячеек строки
+            sheet.addMergedRegion(region)
+
+            RegionUtil.setBorderBottom(CellStyle.BORDER_MEDIUM, region, sheet, workBook)
+            RegionUtil.setBorderTop(CellStyle.BORDER_MEDIUM, region, sheet, workBook)
+            RegionUtil.setBorderRight(CellStyle.BORDER_MEDIUM, region, sheet, workBook)
+            RegionUtil.setBorderLeft(CellStyle.BORDER_MEDIUM, region, sheet, workBook)
+        }
+
+        // первая строка - заголовок изменения
+        def title
+        if (item.type == ChangeType.UPDATE) {
+            title = String.format(item.type.title, item.columnNames ?: '', item.columnNums ?: '')
+        } else {
+            title = item.type.title
+        }
+        rowIndex++
+        tmpRow = sheet.createRow(rowIndex)
+        cell = tmpRow.createCell(0)
+        cell.setCellValue(title)
+        cell.setCellStyle(getCellStyle(StyleType.HEADER)) // используется стиль шапки
+        // объединение всех ячеек строки
+        region = new CellRangeAddress(rowIndex, rowIndex, 0, columnIndex - 1)
+        sheet.addMergedRegion(region)
+        RegionUtil.setBorderBottom(CellStyle.BORDER_THIN, region, sheet, workBook)
+        RegionUtil.setBorderTop(CellStyle.BORDER_THIN, region, sheet, workBook)
+        RegionUtil.setBorderRight(CellStyle.BORDER_THIN, region, sheet, workBook)
+        RegionUtil.setBorderLeft(CellStyle.BORDER_THIN, region, sheet, workBook)
+
+        // вторая строка - данные (в скобках старые значения)
+        rowIndex++
+        Row newRow = addNewRowInXlsm(rowIndex, item.values)
+        // задать стиль и заливку
+        (0..14).each { cellIndex ->
+            cell = newRow.getCell(cellIndex)
+            StyleType styleType = getColumnStyleType(cellIndex)
+            cell.setCellStyle(getCellStyle(styleType))
+        }
+    }
+    return rowIndex
+}
+
+/** Получить дату в строковом виде, месяц в родительном падеже. */
+def getDateStr(def date) {
+    if (date == null) {
+        return null
+    }
+    DateFormatSymbols dateFormatSymbols = new DateFormatSymbols() {
+        @Override
+        public String[] getMonths() {
+            return ["января", "февраля", "марта", "апреля", "мая", "июня", "июля", "августа", "сентября", "октября", "ноября", "декабря"]
+        }
+    }
+    SimpleDateFormat sdf = new SimpleDateFormat('dd MMMMM yyyy г.', dateFormatSymbols)
+    return sdf.format(date)
+}
+
+/**
+ * Добавить шапку и нумерацию в эксель.
+ *
+ * @param rowIndex номер строки начала таблицы
+ */
+void addHeader(def rowIndex) {
+    def isNumeration = false
+    // первая строка - названия заголовков, вторая строка - нумерация
+    for (DataRow<HeaderCell> headerRow : scriptSpecificReportHolder.getHeaders()) {
+        rowIndex++
+        def values = []
+        for (def headerValue : headerRow.values()) {
+            values.add((String) headerValue)
+        }
+        StyleType styleType = (isNumeration ? StyleType.NUMERATION : StyleType.HEADER)
+        addNewRowInXlsm(rowIndex, values, styleType)
+        isNumeration = true
+    }
+}
+
+/**
+ * Получить цвет по rgb.
+ * Взято отсюда FormDataXlsmReportBuilder.getColor(...)
+ */
+XSSFColor getColor(Color color) {
+    // TODO (Ramil Timerbaev) если rgb = 0 0 0, то в excel'е цвет почему то задается белый (при 255 255 255 - черный)
+    if (!(color.getRed() == 0 && color.getGreen() == 0 && color.getBlue() == 0)) {
+        return new XSSFColor(new java.awt.Color(color.getRed(), color.getGreen(), color.getBlue()))
+    }
+    return null
+}
+
+enum ChangeType {
+    INSESRT(1, 'Лицо включено в список'),
+    UPDATE(2, 'В отношении лица были внесены изменения в части %s (%s)'),
+    DELETE(3, 'Лицо исключено из списка')
+
+    private int priority
+    private String title
+
+    private ChangeType(int priority, String title) {
+        this.priority = priority
+        this.title = title
+    }
+
+    public int getPriority() {
+        priority
+    }
+
+    String getTitle() {
+        return title
+    }
+}
+
+/** Информация об изменениях. */
+class ChangeItem {
+    // тип изменения
+    ChangeType type
+    // дата именения
+    Date date
+    // список значении изменении
+    def values
+    // список названиии граф с изменениями
+    def columnNames
+    // список номеров граф с изменениями
+    def columnNums
+}
+
+/** Получить изменения из справочника "История изменения категории ВЗЛ". */
+def getHistoryChangeList(def from, def to) {
+    def changeList = []
+
+    // получить формы ВЗЛ с 1ого января до конца текущего отчетного периода
+    def formDataIds = []
+    def periods = reportPeriodService.getReportPeriodsByDate(TaxType.DEAL, from, to)
+    for (ReportPeriod period : periods) {
+        FormData fd = formDataService.getLast(formData.formType.id, formData.kind, formDataDepartment.id, period.id, null, null, false)
+        if (!fd) {
+            continue
+        }
+        formDataIds.add(fd.id)
+    }
+
+    // записи справочника "История изменения категории ВЗЛ" (521)
+    if (formDataIds) {
+        def date = new Date()
+        def filter = 'FORM_DATA_ID = ' + formDataIds.join(' or FORM_DATA_ID = ')
+        // необходимо отсорировать записи по атрибуту "дата изменения", т.к. из справочника значния приходят без времени
+        RefBookAttribute sortAttribute = refBookFactory.get(521L).getAttribute('CHANGE_DATE')
+        def provider = formDataService.getRefBookProvider(refBookFactory, 521L, providerCache)
+        // получить все записи из истории для форм с 1 января
+        def records521 = provider.getRecords(date, null, filter, sortAttribute, true)
+
+        // сгруппировать записи истории по значению "Участник ТЦО" / "ВЗЛ"
+        // мапа с записями справочника "История ВЗЛ" (id записи справочника "Участники ТЦО" -> список записей справочника "История ВЗЛ")
+        def recordsMap = [:]
+        records521.each { record521 ->
+            def recordId520 = record521?.JUR_PERSON?.value
+            if (recordsMap[recordId520] == null) {
+                recordsMap[recordId520] = []
+            }
+            recordsMap[recordId520].add(record521)
+        }
+
+        // оставить в группе записи с наибольшей датой за один день
+        for (def recordId520 : recordsMap.keySet().toArray()) {
+            def records = recordsMap[recordId520]
+            def deleteList = []
+            for (int i = 1; i < records.size(); i++) {
+                def dateStr = records[i]?.CHANGE_DATE?.value?.format('dd.MM.yyyy')
+                def prevDateStr = records[i - 1]?.CHANGE_DATE?.value?.format('dd.MM.yyyy')
+                if (prevDateStr == dateStr) {
+                    deleteList.add(records[i - 1])
+                }
+            }
+            recordsMap[recordId520].removeAll(deleteList)
+        }
+
+        // сформировать изменения для групп где больше 1 записи
+        def tmpRow = formData.createDataRow()
+        def columnName = '"' + getColumnName(tmpRow, 'category') + '"'
+        for (def recordId520 : recordsMap.keySet().toArray()) {
+            def records = recordsMap[recordId520]
+            if (!records || records.size() < 2) {
+                continue
+            }
+            for (int i = 1; i < records.size(); i++) {
+                def record521 = records[i]
+                def prevRecord521 = records[i - 1]
+                if (record521?.CATEGORY?.value == prevRecord521?.CATEGORY?.value) {
+                    // изменении нет
+                    continue
+                }
+                // добавить изменения
+                def record520 = getRefBookValue(520L, record521?.JUR_PERSON?.value)
+                def values = getValues520(record520, record521?.CATEGORY?.value)
+                def categoryName = getRefBookValue(506L, prevRecord521?.CATEGORY?.value)?.CODE?.value
+                values[11] = values[11] + " ($categoryName)"
+
+                ChangeItem item = new ChangeItem()
+                item.date = record521?.CHANGE_DATE?.value
+                item.type = ChangeType.UPDATE
+                item.columnNames = columnName
+                item.columnNums = '"гр. 9"'
+                item.values = values
+                changeList.add(item)
+            }
+        }
+    }
+    return changeList
+}
+
+def getJurPersonChangeList(def dateFrom, def dateTo) {
+    def changeList = []
+
+    // найти тип ВЗЛ
+    def filter = "CODE = 'ВЗЛ'"
+    def provider = formDataService.getRefBookProvider(refBookFactory, 525L, providerCache)
+    def records525 = provider.getRecords(null, null, filter, null)
+    def vzl = (records525 ? records525.get(0)?.record_id?.value : null)
+    if (!vzl) {
+        return changeList
+    }
+
+    // получить все записи из справочника "Участники ТЦО" с типом ВЗЛ
+    filter = "TYPE = $vzl"
+    provider = formDataService.getRefBookProvider(refBookFactory, 520L, providerCache)
+    def records = provider.getRecords(null, null, filter, null)
+
+    def needRecords = []
+    // мапа с информацией о версиях участников ТЦО (версия -> информация версии)
+    def versionInfoMap = [:]
+    // получить информацию о версиях и отобрать подходяшие
+    records.each { record ->
+        def id = record?.record_id?.value
+        def info = provider.getRecordVersionInfo(id)
+        if (dateFrom <= info.versionStart && info.versionStart <= dateTo) {
+            needRecords.add(record)
+            versionInfoMap[record] = info
+        }
+    }
+
+    // мапа с записями и версиями каждой записи (id записи - список версии записи)
+    def recordVersionMap = [:]
+    // получить общий id записи для каждой версии, сгруппировать версии по записям
+    needRecords.each { record ->
+        def id = record?.record_id?.value
+        def commonId = provider.getRecordId(id)
+        if (recordVersionMap[commonId] == null) {
+            recordVersionMap[commonId] = []
+        }
+        recordVersionMap[commonId].add(record)
+    }
+
+    // мапа с номерами графов (алиса графы нф -> cписок из двух элементов: номер графы и строковое значение в шапке)
+    def aliasNumsMap = [
+            'name'         : [  2, 'гр. 2',   ], // графа 2  (2)
+            'address'      : [  3, 'гр. 3',   ], // графа 3  (3)
+            'orgCode'      : [  4, 'гр. 4',   ], // графа 4  (4)
+            'countryCode'  : [  5, 'гр. 5',   ], // графа 5  (5)
+            'inn'          : [  6, 'гр. 6.1', ], // графа 6  (6,1)
+            'kpp'          : [  7, 'гр. 6.2', ], // графа 7  (6,2)
+            'swift'        : [  8, 'гр. 6.3', ], // графа 8  (6,3)
+            'regNum'       : [  9, 'гр. 6.4', ], // графа 9  (6,4)
+            'startData'    : [ 10, 'гр. 7',   ], // графа 10 (7)
+            'endData'      : [ 11, 'гр. 8',   ], // графа 11 (8)
+            'vatStatus'    : [ 13, 'гр. 10',  ], // графа 13 (10)
+            'taxStatus'    : [ 14, 'гр. 11',  ], // графа 14 (11)
+            'depCriterion' : [ 15, 'гр. 12',  ]  // графа 15 (12)
+    ]
+    def tmpRow = formData.createDataRow()
+    for (def commonId : recordVersionMap.keySet().asList()) {
+        def versions = recordVersionMap[commonId]
+
+        // одна версия
+        if (versions.size() == 1) {
+            // добавить изменения - «Исключение лица из списка ВЗЛ» или «Включение лица в список ВЗЛ»
+            def record520 = versions[0]
+            def actualDate = versionInfoMap[record520]?.versionStart
+            def values = getValues520(record520, null)
+            ChangeType changeType = (record520?.END_DATE?.value ? ChangeType.DELETE : ChangeType.INSESRT)
+
+            ChangeItem item = new ChangeItem()
+            item.date = actualDate
+            item.type = changeType
+            item.values = values
+            changeList.add(item)
+
+            continue
+        }
+
+        // несколько версий
+        for (int i = 1; i < versions.size(); i++) {
+            def version = versions[i]
+            def prevVersion = versions[i - 1]
+
+            // сравнить значения, если есть расхождения, то добавить изменение
+            def equalsResult = equalsRecords(version, prevVersion)
+            if (equalsResult && equalsResult.contains('endData')) {
+                // добавить изменение - «Исключение лица из списка ВЗЛ»
+                def record520 = version
+                def actualDate = versionInfoMap[record520]?.versionStart
+                def values = getValues520(record520, null)
+
+                ChangeItem item = new ChangeItem()
+                item.date = actualDate
+                item.type = ChangeType.DELETE
+                item.values = values
+                changeList.add(item)
+            } else if (equalsResult) {
+                // добавить изменение - «Изменение существующего ВЗЛ»
+                def record520 = version
+                def actualDate = versionInfoMap[record520]?.versionStart
+                def values = getValues520(record520, null)
+                ChangeType changeType = ChangeType.UPDATE
+
+                // названия и номера измененных графов
+                def columnNames = '"' + equalsResult.collect { getColumnName(tmpRow, it) }.join('", "') + '"'
+                def columnNums = equalsResult.collect { aliasNumsMap[it][1] }.join(', ')
+                // добавление предыдущих значении в скобках
+                equalsResult.each { alias ->
+                    def columnIndex = aliasNumsMap[alias][0] - 1
+                    def prevValues = getValues520(prevVersion, null)
+
+                    def value = (columnIndex in [9, 10] ? values[columnIndex]?.format('dd.MM.yyyy') : values[columnIndex])
+                    value = (value ?: 'не задано')
+                    def prevValue = (columnIndex in [9, 10] ? prevValues[columnIndex]?.format('dd.MM.yyyy') : prevValues[columnIndex])
+                    prevValue = (prevValue ?: 'не задано')
+
+                    values[columnIndex] = "$value ($prevValue)"
+                }
+
+                ChangeItem item = new ChangeItem()
+                item.date = actualDate
+                item.type = changeType
+                item.values = values
+                item.columnNums = columnNums
+                item.columnNames = columnNames
+                changeList.add(item)
+            }
+        }
+    }
+
+    return changeList
+}
+
+/**
+ * Сравнить две записи справочника "Участники ТЦО".
+ *
+ * @return список алиасов НФ (не алиасы справочника)
+ */
+def equalsRecords(def recordA, def recordB) {
+    def aliasMap = [
+            'NAME'          : 'name',        // графа 2  (2)
+            'ADDRESS'       : 'address',     // графа 3  (3)
+            'ORG_CODE'      : 'orgCode',     // графа 4  (4)
+            'COUNTRY_CODE'  : 'countryCode', // графа 5  (5)
+            'INN'           : 'inn',         // графа 6  (6,1)
+            'KPP'           : 'kpp',         // графа 7  (6,2)
+            'SWIFT'         : 'swift',       // графа 8  (6,3)
+            'REG_NUM'       : 'regNum',      // графа 9  (6,4)
+            'START_DATE'    : 'startData',   // графа 10 (7)
+            'END_DATE'      : 'endData',     // графа 11 (8)
+            'VAT_STATUS'    : 'vatStatus',   // графа 13 (10)
+            'TAX_STATUS'    : 'taxStatus',   // графа 14 (11)
+            'DEP_CRITERION' : 'depCriterion' // графа 15 (12)
+    ]
+    def diffAliases = []
+    aliasMap.keySet().asList().each { alias ->
+        def value = recordA[alias]?.value
+        def prevValue = recordB[alias]?.value
+        if (value != prevValue) {
+            diffAliases.add(alias)
+        }
+    }
+    return diffAliases.collect { aliasMap[it] }
+}
+
+/** Получить стиль для ячеек данных (данные, дата, данные по центру). */
+def getColumnStyleType(def cellIndex) {
+    StyleType styleType
+    switch (cellIndex) {
+        case 1 :
+        case 2 :
+            styleType = StyleType.DATA
+            break
+        case 9 :
+        case 10 :
+            styleType = StyleType.DATE
+            break
+        default:
+            styleType = StyleType.DATA_CENTER
+            break
+    }
+    return styleType
 }
