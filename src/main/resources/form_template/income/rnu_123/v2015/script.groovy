@@ -618,19 +618,22 @@ def calc25(def row) {
 
         if (row.sum3 == null) {
             return null
-        } else if (!flag23) {
+        }
+        if (!flag23) {
             if (row.course == course810 && getPeriodName() == "год") {
                 return roundValue(calcCol23 * (row.endDate2 - row.startDate2 + 1) / row.base, 2)
             } else if (row.course != course810 && getPeriodName() == "год") {
                 return roundValue(calcCol23 * (row.endDate2 - row.startDate2 + 1) / (row.base * row.course3), 2)
             }
-        } else if (flag23) {
+        }
+        if (flag23) {
             if (row.course == course810 && getPeriodName() == "год") {
                 return roundValue(calcCol23 * row.sum1 * (row.endDate2 - row.startDate2 + 1) / row.base, 2)
             } else if (row.course != course810 && getPeriodName() == "год") {
                 return roundValue(calcCol23 * row.sum1 * (row.endDate2 - row.startDate2 + 1) / (row.base * row.course3), 2)
             }
-        } else if (getPeriodName() == "1 квартал") {
+        }
+        if (getPeriodName() == "1 квартал") {
             // в calcPrev25 вся логика, связанная с формой предыдущего отчетного периода
             return calcPrev25(row, prevForm)
         } else {
@@ -640,7 +643,6 @@ def calc25(def row) {
 }
 
 def calc26(def row) {
-    def rowNum = row.getIndex()
     if (row.sum5 == null && row.sum6 == null) {
         def pattern = /[0-9]+([\.|\,][0-9]+)?\%?/
         if (row.tradePay ==~ pattern) {
