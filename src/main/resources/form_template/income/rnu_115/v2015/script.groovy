@@ -207,7 +207,8 @@ void logicCheck() {
         }
 
         // Проверка корректности суммы требований
-        if (row.reqVolume != null && row.reqCourse != null && (row.dealType == dealType1 || row.dealType == dealType2) && row.reqSum != (row.reqVolume * row.reqCourse).abs()) {
+        if (row.reqVolume != null && row.reqCourse != null && (row.dealType == dealType1 || row.dealType == dealType2) &&
+                row.reqSum != roundValue(row.reqVolume * row.reqCourse, row.getCell('reqSum').getColumn().precision).abs()) {
             flag = false
             def msg1 = row.getCell('reqSum').column.name
             def msg2 = row.getCell('reqVolume').column.name
@@ -223,7 +224,8 @@ void logicCheck() {
         }
 
         // Проверка корректности суммы обязательств
-        if (row.reqVolume != null && row.reqCourse != null && (row.dealType == dealType1 || row.dealType == dealType2) && row.guarSum != (row.guarVolume * row.guarCourse).abs()) {
+        if (row.reqVolume != null && row.reqCourse != null && (row.dealType == dealType1 || row.dealType == dealType2) &&
+                row.guarSum != roundValue(row.guarVolume * row.guarCourse, row.getCell('guarSum').getColumn().precision).abs()) {
             flag = false
             def msg1 = row.getCell('guarSum').column.name
             def msg2 = row.getCell('guarVolume').column.name
