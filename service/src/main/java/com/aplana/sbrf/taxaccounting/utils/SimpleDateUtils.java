@@ -19,7 +19,7 @@ public final class SimpleDateUtils {
     }
 
     public static int daysBetween(Date d1, Date d2){
-        return (int)( (d2.getTime() - d1.getTime()) / (1000 * 60 * 60 * 24));
+        return (int)( (toStartOfDay(d2).getTime() - toStartOfDay(d1).getTime()) / (1000 * 60 * 60 * 24));
     }
 
     public static java.sql.Date getSqlDate(Date date) {
@@ -40,5 +40,21 @@ public final class SimpleDateUtils {
         } else {
             return second;
         }
+    }
+
+    /**
+     * Сбросить время на начало суток
+     *
+     * @param date дата со временем
+     * @return дату со временем, установленым на начало суток
+     */
+    public static Date toStartOfDay(Date date) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
+        return calendar.getTime();
     }
 }

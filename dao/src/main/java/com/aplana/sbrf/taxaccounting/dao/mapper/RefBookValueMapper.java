@@ -50,7 +50,7 @@ public class RefBookValueMapper implements RowMapper<Map<String, RefBookValue>> 
                     }
                     break;
                     case DATE: {
-                        value = rs.getDate(alias);
+                        value = rs.getTimestamp(alias);
                     }
                     break;
                     case REFERENCE: {

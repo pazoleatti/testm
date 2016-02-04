@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.dao.impl.refbook;
 
 import com.aplana.sbrf.taxaccounting.dao.refbook.RefBookDao;
+import com.aplana.sbrf.taxaccounting.model.Formats;
 import com.aplana.sbrf.taxaccounting.model.PagingParams;
 import com.aplana.sbrf.taxaccounting.model.PagingResult;
 import com.aplana.sbrf.taxaccounting.model.VersionedObjectStatus;
@@ -41,8 +42,9 @@ public class RefBookDaoTest {
     public static final String ATTRIBUTE_WEIGHT = "weight";
 	public static final String ATTRIBUTE_NULL = "null";
     private static final String REF_BOOK_RECORD_TABLE_NAME = "REF_BOOK_RECORD";
+    private static final String ATTRIBUTE_DATETIME = "DATETIME";
 
-    private static final SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
+    private static final SimpleDateFormat sdf = new SimpleDateFormat(Formats.DD_MM_YYYY.getFormat());
 
 	@Autowired
     RefBookDao refBookDao;
@@ -142,6 +144,22 @@ public class RefBookDaoTest {
 		assertEquals(1, data.size());
 	}
 
+    /**
+     * Проверяем получение даты и времени для атрибутов-дат справочников
+     */
+    @Test
+    public void testGetDateTime() {
+        PagingResult<Map<String, RefBookValue>> data = refBookDao.getRecords(5L, getDate(1, 1, 2013), null, null, null);
+        assertEquals(1, data.size());
+        Map<String, RefBookValue> record1 = data.get(0);
+        Calendar c = Calendar.getInstance();
+        c.set(2013, Calendar.JANUARY, 1, 13, 12, 12);
+        SimpleDateFormat formatter = new SimpleDateFormat(Formats.DD_MM_YYYY_HH_MM_SS.getFormat());
+        String expected = formatter.format(c.getTime());
+        String actual = formatter.format(record1.get(ATTRIBUTE_DATETIME).getDateValue());
+        assertEquals(expected, actual);
+    }
+
 	/**
 	 * Сортирует записи по коду
 	 * @param data данные для сортировки
@@ -160,18 +178,18 @@ public class RefBookDaoTest {
 	@Test
 	public void testGetAll() {
 		List<RefBook> refBooks = refBookDao.getAll(RefBookType.LINEAR.getId());
-		assertEquals(4, refBooks.size());
+		assertEquals(5, refBooks.size());
 		refBooks = refBookDao.getAll(RefBookType.HIERARCHICAL.getId());
 		assertEquals(1, refBooks.size());
 		refBooks = refBookDao.getAll(null);
-		assertEquals(5, refBooks.size());
+		assertEquals(6, refBooks.size());
 	}
 
 	@Test
 	public void testGetAllVisible() {
-		assertEquals(3, refBookDao.getAllVisible(RefBookType.LINEAR.getId()).size());
+		assertEquals(4, refBookDao.getAllVisible(RefBookType.LINEAR.getId()).size());
 		assertEquals(1, refBookDao.getAllVisible(RefBookType.HIERARCHICAL.getId()).size());
-		assertEquals(4, refBookDao.getAllVisible(null).size());
+		assertEquals(5, refBookDao.getAllVisible(null).size());
 	}
 
 	@Test
@@ -428,7 +446,7 @@ public class RefBookDaoTest {
         count = refBookDao.getRecordVersionsCount(1L, 4L);
         assertTrue(count == 1);
 
-        count = refBookDao.getRecordVersionsCount(5L, 1L);
+        count = refBookDao.getRecordVersionsCount(6L, 1L);
         assertTrue(count == 0);
     }
 
