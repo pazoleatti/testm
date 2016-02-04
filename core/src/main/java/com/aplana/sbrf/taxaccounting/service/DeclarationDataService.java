@@ -118,15 +118,6 @@ public interface DeclarationDataService {
      */
     InputStream getXmlDataAsStream(long declarationDataId, TAUserInfo userInfo);
 	/**
-	 * Получить печатное представление данные декларации.
-	 * Получается путём подстановки данных декларации в формате xml в Jasper-reports отчёт, шаблона декларации
-	 * @param declarationDataId идентификатор декларации
-	 * @param userInfo информация о пользователе, выполняющего действие
-	 * @return файл Xlsx в виде байтового массива
-	 * @throws AccessDeniedException - если у пользователя нет прав на просмотр данной декларации
-	 */
-	byte[] getXlsxData(long declarationDataId, TAUserInfo userInfo, LockStateLogger stateLogger);
-	/**
 	 * Получить печатное представление данных декларации в PDF формате
 	 * @param declarationId идентификатор декларации
 	 * @param userInfo информация о пользователе, выполняющего действие
