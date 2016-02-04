@@ -2947,19 +2947,6 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
             if (logger.containsLevel(LogLevel.ERROR)) {
                 throw new ServiceException("Обнаружено некорректное значение атрибута");
             }
-
-            if (!allIn.isEmpty()) {
-                /** Проверяем не начинается ли период актуальности ссылочного атрибута раньше чем период актуальности текущей записи справочника */
-                String sql = String.format(CHECK_REFERENCE_VERSIONS_START, tableName, transformToSqlInStatement("id", allIn));
-                getJdbcTemplate().query(sql, new RowCallbackHandler() {
-                    @Override
-                    public void processRow(ResultSet rs) throws SQLException {
-                        Long id = rs.getLong("id");
-                        logger.info(attributeIds.get(id) + ": Период актуальности выбранного значения меньше периода актуальности версии!");
-
-                    }
-                }, versionFrom);
-            }
         }
     }
 
