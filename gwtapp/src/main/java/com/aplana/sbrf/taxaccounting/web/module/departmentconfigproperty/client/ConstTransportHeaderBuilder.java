@@ -31,8 +31,14 @@ public class ConstTransportHeaderBuilder extends AbstractHeaderOrFooterBuilder i
 
         TableRowBuilder tr = startRow();
         if (needCheckedRow) {
-            buildHeader(tr, checkBoxHeader, 0, 2, true);
+            buildHeader(tr, checkBoxHeader, 0, 3, true);
         }
+
+        buildHeader(tr, new TextHeader("№"), 0, 3, true);
+
+        tr.endTR();
+
+        tr = startRow();
 
         buildHeader(tr, new TextHeader("Параметры декларации"), 3, 0, true);
 
