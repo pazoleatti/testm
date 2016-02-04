@@ -583,7 +583,7 @@ def BigDecimal calc23(def row) {
             return 0
         }
         if (row.price > row.marketPrice) {
-            return roundValue(-1 * (row.outcomeSum.abs() - row.outcomeSum / row.price) * row.marketPrice, 2)
+            return roundValue(-1 * (row.outcomeSum.abs() - ((row.outcomeSum / row.price) * row.marketPrice)), 2)
         }
         if (row.outcomeSum == 0) {
             return 0
