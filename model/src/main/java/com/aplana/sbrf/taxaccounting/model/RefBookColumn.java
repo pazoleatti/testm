@@ -22,13 +22,6 @@ public class RefBookColumn extends Column {
 
     private boolean isHierarchical = false;
 
-	private static Formatter formatter = new Formatter() {
-		@Override
-		public String format(String valueToFormat) {
-			return String.valueOf(valueToFormat);
-		}
-	};
-
 	private static ValidationStrategy validationStrategy = new ValidationStrategy() {
 		@Override
 		public boolean matches(String valueToCheck) {
@@ -73,9 +66,29 @@ public class RefBookColumn extends Column {
         this.nameAttributeId = nameAttributeId;
     }
 
-    @Override
+	@Override
 	public Formatter getFormatter() {
-		return formatter;
+		return new Formatter() {
+			@Override
+			public String format(String valueToFormat) {
+				try {
+					Long val = Long.parseLong(valueToFormat);
+					String plainString = val.toString();
+
+					int length = plainString.length();
+					StringBuilder stringBuilder = new StringBuilder(plainString.substring(0, length));
+					for (int i = 3; i < length; i += 3) {
+						if (i < length) {
+							stringBuilder.insert(length - i, " ");
+						}
+					}
+					return stringBuilder.toString();
+				} catch (NumberFormatException e) {
+					return String.valueOf(valueToFormat);
+				}
+
+			}
+		};
 	}
 
 	@Override

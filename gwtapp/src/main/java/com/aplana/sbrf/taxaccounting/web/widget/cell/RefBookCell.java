@@ -175,6 +175,8 @@ public class RefBookCell extends AbstractEditableCell<Long, String> {
 
 		if (rendValue == null) {
 			rendValue = "";
+		} else {
+			rendValue = columnContext.getColumn().getFormatter().format(rendValue);
 		}
 
 		sb.append(renderer.render(rendValue));
