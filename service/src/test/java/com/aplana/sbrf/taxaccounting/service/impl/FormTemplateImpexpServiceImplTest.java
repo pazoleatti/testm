@@ -74,8 +74,8 @@ public class FormTemplateImpexpServiceImplTest {
         for (int i = 0; i < 10; i++)
             files.add(File.createTempFile(tempFolder.getName() + File.separator + "name", ".xml").getName());
 
-        FileOutputStream fileOutputStream = new FileOutputStream(File.createTempFile(zipName, ".zip"));
-        //ZipOutputStream zipOutputStream = new ZipOutputStream(fileOutputStream);
+        File tmpZipFile = File.createTempFile(zipName, ".zip");
+        FileOutputStream fileOutputStream = new FileOutputStream(tmpZipFile);
         ZipArchiveOutputStream zipOutputStream = new ZipArchiveOutputStream(fileOutputStream);
         zipOutputStream.setEncoding("UTF8");
         zipOutputStream.setUseLanguageEncodingFlag(true);
@@ -95,6 +95,7 @@ public class FormTemplateImpexpServiceImplTest {
         zipOutputStream.finish();
         fileOutputStream.close();
         dirDelete(tempFolder);
+        tmpZipFile.delete();
     }
 
     @Test
