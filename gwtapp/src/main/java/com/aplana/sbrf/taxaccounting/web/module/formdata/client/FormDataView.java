@@ -308,7 +308,7 @@ public class FormDataView extends ViewWithUiHandlers<FormDataUiHandlers>
             LinkButton linkButton = (LinkButton) printAnchor.getItem(fdReportType);
             if (linkButton != null) {
                 if (isLoad) {
-                    linkButton.setText("Выгрузить \"" + fdReportType + "\"");
+                    linkButton.setText("Выгрузить в \"" + fdReportType + "\"");
                 } else {
                     linkButton.setText("Сформировать \"" + fdReportType + "\"");
                 }
