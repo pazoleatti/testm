@@ -191,21 +191,25 @@ def getRecords520(boolean useCode) {
     if (records520 != null) {
         return records520
     }
-    // получить id записи с кодом "2" из справончика "Специальный налоговый статус"
-    def provider = formDataService.getRefBookProvider(refBookFactory, 511L, providerCache)
-    def filter = useCode ? "CODE = 2" : ""
-    def records = provider.getRecords(getReportPeriodEndDate(), null, filter, null)
-    def taxStatusId
-    if (records && records.size() == 1) {
-        taxStatusId = records.get(0)?.record_id?.value
-    } else {
-        records520 =[]
-        return records520
+    // получить id записи с кодом "2" из справочника "Специальный налоговый статус"
+    def provider
+    def records
+    def filter = ""
+    if (useCode) {
+        provider = formDataService.getRefBookProvider(refBookFactory, 511L, providerCache)
+        filter = "CODE = 2"
+        records = provider.getRecords(getReportPeriodEndDate(), null, filter, null)
+        def taxStatusId
+        if (records && records.size() == 1) {
+            taxStatusId = records.get(0)?.record_id?.value
+        } else {
+            records520 =[]
+            return records520
+        }
+        filter = "TAX_STATUS = $taxStatusId"
     }
-
-    // получить записи из справончика "Участники ТЦО"
+    // получить записи из справочника "Участники ТЦО"
     provider = formDataService.getRefBookProvider(refBookFactory, 520L, providerCache)
-    filter = "TAX_STATUS = $taxStatusId"
     records = provider.getRecords(getReportPeriodEndDate(), null, filter, null)
     records520 = []
     records.each { record ->
@@ -220,7 +224,7 @@ def getRecords520(boolean useCode) {
 }
 
 // проверка принадлежности организации к ВЗЛ в отчетном периоде
-def isVZL(def start, def end, typeId) {
+def isVZL(def start, def end, def typeId) {
     if (start <= getReportPeriodEndDate() && (end == null || end >= getReportPeriodStartDate()) &&
             getRefBookValue(525L, typeId)?.CODE?.value == "ВЗЛ") {
         return true
