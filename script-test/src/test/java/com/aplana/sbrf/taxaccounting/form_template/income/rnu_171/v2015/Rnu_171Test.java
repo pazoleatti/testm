@@ -129,7 +129,7 @@ public class Rnu_171Test extends ScriptTestBase {
         row.getCell("marketPrice").setValue(-1L, null);
         row.getCell("finResult").setValue(2L, null);
         row.getCell("finResultTax").setValue(1L, null);
-        row.getCell("code").setValue("wrong", null);
+        row.getCell("code").setValue("10345", null);
         row.getCell("incomeCorrection").setValue(0L, null);
         testHelper.execute(FormDataEvent.CHECK);
 
@@ -142,9 +142,9 @@ public class Rnu_171Test extends ScriptTestBase {
         Assert.assertEquals("Строка 1: Значение графы «Доход (выручка) от уступки права требования (руб. коп.)» должно быть больше или равно «0»!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Графа «Корректировка финансового результата (руб. коп.)» заполнена значением «0», т.к. не выполнен порядок заполнения графы!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Значение графы «Финансовый результат уступки права требования (руб. коп.)» должно равняться выражению: «Доход (выручка) от уступки права требования (руб. коп.)» - («Стоимость права требования (руб. коп.)» - «Стоимость права требования, списанного за счёт резервов (руб. коп.)»)!", entries.get(i++).getMessage());
-        Assert.assertEquals("Строка 1: Графа «Код налогового учета» должна принимать значение из следующего списка: «10345» или «10355»!", entries.get(i++).getMessage());
+        Assert.assertEquals("Строка 1: Графа «Код налогового учета» должна принимать значение из следующего списка: «10360» или «10361»!", entries.get(i++).getMessage());
         Assert.assertEquals("Строка 1: Значение графы «Финансовый результат, рассчитанный исходя из рыночной цены для целей налогообложения (руб. коп.)» должно равняться выражению: «Рыночная цена прав требования для целей налогообложения (руб. коп.)» - («Стоимость права требования (руб. коп.)» - «Стоимость права требования, списанного за счёт резервов (руб. коп.)»)!", entries.get(i++).getMessage());
-        Assert.assertEquals("Группа «wrong» не имеет строки подитога!", entries.get(i++).getMessage());
+        Assert.assertEquals("Группа «10345» не имеет строки подитога!", entries.get(i++).getMessage());
         Assert.assertEquals(i, entries.size());
         testHelper.getLogger().clear();
 
@@ -155,7 +155,7 @@ public class Rnu_171Test extends ScriptTestBase {
         row.getCell("repaymentDate").setValue(sdf.parse("01.03.2014"), null);
         row.getCell("concessionsDate").setValue(sdf.parse("02.03.2014"), null);
         row.getCell("income").setValue(1L, null);
-        row.getCell("code").setValue("10345", null);
+        row.getCell("code").setValue("10360", null);
         row.getCell("marketPrice").setValue(2L, null);
         row.getCell("finResult").setValue(1L, null);
         row.getCell("finResultTax").setValue(2L, null);
@@ -189,6 +189,7 @@ public class Rnu_171Test extends ScriptTestBase {
         row.getCell("finResultTax").setValue(2L, null);
         row.getCell("incomeCorrection").setValue(1L, null);
         subTotal.getCell("incomeCorrection").setValue(1L, null);
+        row.getCell("code").setValue("10361", null);
         testHelper.execute(FormDataEvent.CHECK);
         i = 0;
         Assert.assertEquals(i, entries.size());
