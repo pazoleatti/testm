@@ -127,6 +127,12 @@ def endDate = null
 @Field
 def periodName = null
 
+@Field
+final String FIRST_PERIOD = "первый квартал"
+
+@Field
+final String YEAR_PERIOD = "год"
+
 def getReportPeriodStartDate() {
     if (startDate == null) {
         startDate = reportPeriodService.getStartDate(formData.reportPeriodId).time
@@ -317,11 +323,14 @@ void logicCheck() {
         if (row.sum4 != null) {
             if (row.sum2 != null && row.sum3 == null && row.sum4 != calc22(row)) {
                 logger.error("Строка $rowNum: Значение графы «$msg22» должно быть равно значению графы «$msg20»!")
-            } else if (getPeriodName() == "1 квартал" && row.sum2 != null && row.sum3 != null && row.sum4 != calc22(row)) {
+            }
+            if (getPeriodName() == FIRST_PERIOD && row.sum2 != null && row.sum3 != null && row.sum4 != calc22(row)) {
                 logger.error("Строка $rowNum: Значение графы «$msg22» должно быть равно разности значений графы «$msg20» и «$msg21»!")
-            } else if (getPeriodName() == "год" && row.sum2 != null && row.sum3 != null && row.sum4 != calc22(row)) {
+            }
+            if (getPeriodName() == YEAR_PERIOD && row.sum2 != null && row.sum3 != null && row.sum4 != calc22(row)) {
                 logger.error("Строка $rowNum: Значение графы «$msg22» должно быть равно сумме значений графы «$msg20» и «$msg21»!")
-            } else if (getPeriodName() != "год" && row.sum3 != null && row.sum4 != 0) {
+            }
+            if (getPeriodName() != YEAR_PERIOD && getPeriodName() != FIRST_PERIOD && row.sum2 != null && row.sum3 != null && row.sum4 != 0) {
                 logger.error("Строка $rowNum: Значение графы «$msg22» должно быть равно «0»!")
             }
         }
@@ -374,22 +383,22 @@ void logicCheck() {
             logger.error("Строка $rowNum: Значение графы «$msg25» должно быть не заполнено!")
         } else if (row.sum6 != null) {
             if (flag && !calcFlag23(row)) {
-                if (row.course == course810 && getPeriodName() == "год" && row.sum6 != calc25(row)) {
+                if (row.course == course810 && getPeriodName() == YEAR_PERIOD && row.sum6 != calc25(row)) {
                     logger.error("Строка $rowNum: Значение графы «$msg25» должно быть равно значению выражения  " +
                             "«%s»*(«$msg17»-«$msg16»+1)/«$msg18»!", msg23)
-                } else if (flag && row.course3 != null && row.course != course810 && getPeriodName() == "год" && row.sum6 != calc25(row)) {
+                } else if (flag && row.course3 != null && row.course != course810 && getPeriodName() == YEAR_PERIOD && row.sum6 != calc25(row)) {
                     logger.error("Строка $rowNum: Значение графы «$msg25» должно быть равно значению выражения  " +
                             "«%s»*(«$msg17»-«$msg16»+1)/«$msg18»*«$msg13»!", msg23)
                 }
             } else if (calcFlag23(row)) {
-                if (flag && row.sum1 != null && row.course == course810 && getPeriodName() == "год" && row.sum6 != calc25(row)) {
+                if (flag && row.sum1 != null && row.course == course810 && getPeriodName() == YEAR_PERIOD && row.sum6 != calc25(row)) {
                     logger.error("Строка $rowNum: Значение графы «$msg25» должно быть равно значению выражения  " +
                             "«%s»*«$msg8»*(«$msg17»-«$msg16»+1)/«$msg18»!", msg23)
-                } else if (flag && row.sum1 != null && row.course3 != null && row.course != course810 && getPeriodName() == "год" && row.sum6 != calc25(row)) {
+                } else if (flag && row.sum1 != null && row.course3 != null && row.course != course810 && getPeriodName() == YEAR_PERIOD && row.sum6 != calc25(row)) {
                     logger.error("Строка $rowNum: Значение графы «$msg25» должно быть равно значению выражения  " +
                             "«%s»*«$msg8»*(«$msg17»-«$msg16»+1)/«$msg18»*«$msg13»!", msg23)
                 }
-            } else if (getPeriodName() == "1 квартал") {
+            } else if (getPeriodName() == FIRST_PERIOD) {
                 if (flag2 && prevForm != null && findMatch(row, prevForm) == 1 && row.sum6 != calc25(row)) {
                     logger.error("Строка $rowNum: Значение графы «$msg25» должно быть равно значению графы «$msg25» предыдущего налогового периода!")
                 } else if (flag2 && prevForm != null && findMatch(row, prevForm) == 0 && row.sum6 != 0) {
@@ -399,15 +408,14 @@ void logicCheck() {
                 } else if (prevForm == null && row.sum6 != 0) {
                     logger.error("Строка $rowNum: Значение графы «$msg25» должно быть равно «0»!")
                 }
-            } else if (calcFlag23(row) == null && getPeriodName() != "1 квартал" && row.sum3 != null) {
+            } else if (calcFlag23(row) == null && getPeriodName() != FIRST_PERIOD && row.sum3 != null) {
                 logger.error("Строка $rowNum: Значение графы «$msg25» должно быть равно «0»!")
             }
         }
 
         // Проверка корректности суммы рыночного дохода по данным налогового учета
         if (row.sum7 != null) {
-            def temp = calc26(row)
-            if (row.sum7 != temp) {
+            if (row.sum7 != calc26(row)) {
                 if (row.sum5 == null && row.sum6 == null) {
                     if (row.tradePay != null && !calcFlag23(row)) {
                         if (row.course == course810) {
@@ -431,11 +439,11 @@ void logicCheck() {
                         }
                     }
                 } else if (row.sum5 != null && row.sum6 != null) {
-                    if (getPeriodName() == "1 квартал") {
+                    if (getPeriodName() == FIRST_PERIOD) {
                         logger.error("Строка $rowNum: Значение графы «$msg26» должно быть равно разности значений графы «$msg24» и «$msg25»!")
-                    } else if (getPeriodName() == "год") {
+                    } else if (getPeriodName() == YEAR_PERIOD) {
                         logger.error("Строка $rowNum: Значение графы «$msg26» должно быть равно сумме значений графы «$msg24» и «$msg25»!")
-                    } else if (getPeriodName() != "1 квартал" && getPeriodName() != "год") {
+                    } else if (getPeriodName() != FIRST_PERIOD && getPeriodName() != YEAR_PERIOD) {
                         logger.error("Строка $rowNum: Значение графы «$msg26» должно быть равно «0»!")
                     }
                 }
@@ -451,12 +459,12 @@ void logicCheck() {
 
         // Проверка корректности суммы доначисления  дохода до рыночного уровня по доначисленному доходу для целей налогового учета
         if (row.sum3 != null && row.sum6 != null && row.sum9 != null) {
-            if (getPeriodName() == "год" && row.sum9 != row.sum6 - row.sum3) {
+            if (getPeriodName() == YEAR_PERIOD && row.sum9 != row.sum6 - row.sum3) {
                 logger.error("Строка $rowNum: Значение графы «$msg28» должно быть равно разности графы «$msg25» и «$msg21»")
-            } else if (getPeriodName() != "год" && prevForm != null && (row.sum9 != row.sum6 - row.sum3 && row.sum9 != calcPrev28(row, prevForm))) {
+            } else if (getPeriodName() != YEAR_PERIOD && prevForm != null && (row.sum9 != row.sum6 - row.sum3 && row.sum9 != calcPrev28(row, prevForm))) {
                 logger.error("Строка $rowNum: Значение графы «$msg28» должно быть равно разности графы «$msg25» и «$msg21»" +
                         " или значению графы «$msg28» за предыдущий налоговый период!")
-            } else if (getPeriodName() != "год" && prevForm == null && row.sum9 != 0) {
+            } else if (getPeriodName() != YEAR_PERIOD && prevForm == null && row.sum9 != 0) {
                 logger.error("Строка $rowNum: Значение графы «$msg28» должно быть равно разности графы «$msg25» и «$msg21»" +
                         " или значению графы «$msg28» за предыдущий налоговый период!")
             }
@@ -467,14 +475,14 @@ void logicCheck() {
             if (row.sum7 != null && row.sum4 != null) {
                 if (row.sum8 == null && row.sum9 == null && row.sum10 != row.sum7 - row.sum4) {
                     logger.error("Строка $rowNum: Значение графы «$msg29» должно быть равно разности графы «$msg26» и «$msg22»")
-                } else if (getPeriodName() == "1 квартал" && row.sum8 != null && row.sum9 != null && (row.sum10 != row.sum7 - row.sum4 && row.sum10 != row.sum8 - row.sum9)) {
+                } else if (getPeriodName() == FIRST_PERIOD && row.sum8 != null && row.sum9 != null && (row.sum10 != row.sum7 - row.sum4 && row.sum10 != row.sum8 - row.sum9)) {
                     logger.error("Строка $rowNum: Значение графы «$msg29» должно быть равно разности графы «$msg25» и «$msg21»" +
                             " или разности значений графы  «$msg27» и «$msg29»!")
-                } else if (getPeriodName() == "год" && row.sum8 != null && row.sum9 != null && (row.sum10 != row.sum7 - row.sum4 && row.sum10 != row.sum8 + row.sum9)) {
+                } else if (getPeriodName() == YEAR_PERIOD && row.sum8 != null && row.sum9 != null && (row.sum10 != row.sum7 - row.sum4 && row.sum10 != row.sum8 + row.sum9)) {
                     logger.error("Строка $rowNum: Значение графы «$msg29» должно быть равно разности графы «$msg25» и «$msg21»" +
                             " или сумме значений графы  «$msg27» и «$msg29»!")
                 }
-            } else if (row.sum8 != null && row.sum9 != null && getPeriodName() != "год" && getPeriodName() != "1 квартал") {
+            } else if (row.sum8 != null && row.sum9 != null && getPeriodName() != YEAR_PERIOD && getPeriodName() != FIRST_PERIOD) {
                 logger.error("Строка $rowNum: Значение графы «$msg29» должно быть равно «0»!")            }
         }
     }
@@ -526,9 +534,9 @@ void calc() {
 def calc22(def row) {
     if (row.sum3 == null) {
         return row.sum2
-    } else if (getPeriodName() == "1 квартал") {
+    } else if (getPeriodName() == FIRST_PERIOD) {
         return row.sum2 - row.sum3
-    } else if (getPeriodName() == "год") {
+    } else if (getPeriodName() == YEAR_PERIOD) {
         return row.sum2 + row.sum3
     } else {
         return 0
@@ -620,20 +628,20 @@ def calc25(def row) {
             return null
         }
         if (!flag23) {
-            if (row.course == course810 && getPeriodName() == "год") {
+            if (row.course == course810 && getPeriodName() == YEAR_PERIOD) {
                 return ((BigDecimal) (calcCol23 * (row.endDate2 - row.startDate2 + 1))).divide(row.base, 2, BigDecimal.ROUND_HALF_UP)
-            } else if (row.course != course810 && getPeriodName() == "год") {
+            } else if (row.course != course810 && getPeriodName() == YEAR_PERIOD) {
                 return ((BigDecimal) (calcCol23 * (row.endDate2 - row.startDate2 + 1) * row.course3)).divide(row.base, 2, BigDecimal.ROUND_HALF_UP)
             }
         }
         if (flag23) {
-            if (row.course == course810 && getPeriodName() == "год") {
+            if (row.course == course810 && getPeriodName() == YEAR_PERIOD) {
                 return ((BigDecimal) (calcCol23 * row.sum1 * (row.endDate2 - row.startDate2 + 1))).divide(row.base, 2, BigDecimal.ROUND_HALF_UP)
-            } else if (row.course != course810 && getPeriodName() == "год") {
+            } else if (row.course != course810 && getPeriodName() == YEAR_PERIOD) {
                 return ((BigDecimal) (calcCol23 * row.sum1 * (row.endDate2 - row.startDate2 + 1) * row.course3)).divide(row.base, 2, BigDecimal.ROUND_HALF_UP)
             }
         }
-        if (getPeriodName() == "1 квартал") {
+        if (getPeriodName() == FIRST_PERIOD) {
             // в calcPrev25 вся логика, связанная с формой предыдущего отчетного периода
             return calcPrev25(row, prevForm)
         } else {
@@ -669,9 +677,9 @@ def calc26(def row) {
             }
         }
     } else if (row.sum5 != null && row.sum6 != null) {
-        if (getPeriodName() == "1 квартал") {
-            return row.sum5 - row.sim6
-        } else if (getPeriodName() == "год") {
+        if (getPeriodName() == FIRST_PERIOD) {
+            return row.sum5 - row.sum6
+        } else if (getPeriodName() == YEAR_PERIOD) {
             return row.sum5 + row.sum6
         } else {
             return 0
