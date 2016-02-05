@@ -424,6 +424,8 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                     throw new ServiceException("Не удалось извлечь Jasper-отчет.", e);
                 } catch (ClassNotFoundException e) {
                     throw new ServiceException("Не удалось извлечь Jasper-отчет.", e);
+                } finally {
+                    IOUtils.closeQuietly(objectInputStream);
                 }
             } else {
                 LOG.info(String.format("Заполнение Jasper-макета декларации %s", declarationData.getId()));
@@ -458,22 +460,25 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     private JasperPrint createJasperReport(DeclarationData declarationData, JRSwapFile jrSwapFile, TAUserInfo userInfo) {
         String xmlUuid = reportService.getDec(userInfo, declarationData.getId(), ReportType.XML_DEC);
         InputStream zipXml = blobDataService.get(xmlUuid).getInputStream();
-        if (zipXml != null) {
-            try {
+        try {
+            if (zipXml != null) {
+                InputStream jasperTemplate = null;
                 ZipInputStream zipXmlIn = new ZipInputStream(zipXml);
-                zipXmlIn.getNextEntry();
                 try {
-                    return fillReport(zipXmlIn,
-                            declarationTemplateService.getJasper(declarationData.getDeclarationTemplateId()), jrSwapFile);
+                    zipXmlIn.getNextEntry();
+                    jasperTemplate = declarationTemplateService.getJasper(declarationData.getDeclarationTemplateId());
+                    return fillReport(zipXmlIn, jasperTemplate, jrSwapFile);
+                } catch (IOException e) {
+                    throw new ServiceException(e.getLocalizedMessage(), e);
                 } finally {
-                    IOUtils.closeQuietly(zipXml);
                     IOUtils.closeQuietly(zipXmlIn);
+                    IOUtils.closeQuietly(jasperTemplate);
                 }
-            } catch (IOException e) {
-                throw new ServiceException(e.getLocalizedMessage(), e);
+            } else {
+                throw new ServiceException("Декларация не сформирована");
             }
-        } else {
-            throw new ServiceException("Декларация не сформирована");
+        } finally {
+            IOUtils.closeQuietly(zipXml);
         }
     }
     
@@ -686,7 +691,13 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         try {
             Map<String, Object> params = new HashMap<String, Object>();
             params.put(JRXPathQueryExecuterFactory.XML_INPUT_STREAM, xml);
-            JRSwapFileVirtualizer virtualizer = new JRSwapFileVirtualizer(200, jrSwapFile);
+            final JRSwapFileVirtualizer virtualizer = new JRSwapFileVirtualizer(100, jrSwapFile);
+            Runtime.getRuntime().addShutdownHook(new Thread() {
+                @Override
+                public void run() {
+                    virtualizer.cleanup();
+                }
+            });
             virtualizer.setReadOnly(false);
             params.put(JRParameter.REPORT_VIRTUALIZER, virtualizer);
 
@@ -717,6 +728,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                     Boolean.FALSE);
 
             exporter.exportReport();
+            exporter.reset();
         } catch (Exception e) {
             throw new ServiceException(
                     "Невозможно экспортировать отчет в XLSX", e);

@@ -4,6 +4,7 @@ import au.com.bytecode.opencsv.CSVWriter;
 import com.aplana.sbrf.taxaccounting.model.*;
 import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue;
 import com.aplana.sbrf.taxaccounting.service.impl.print.AbstractReportBuilder;
+import org.apache.commons.io.IOUtils;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -47,7 +48,9 @@ public class FormDataCSVReportBuilder extends AbstractReportBuilder {
     @Override
     protected String flush() throws IOException {
         File file = File.createTempFile(FILE_NAME, ".csv");
-        CSVWriter csvWriter = new CSVWriter(new BufferedWriter(new FileWriter(file)), ';');
+        FileWriter fileWriter = new FileWriter(file);
+        BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
+        CSVWriter csvWriter = new CSVWriter(bufferedWriter, ';');
 
         List<String> headersNames = new ArrayList<String>();
         for (Column column : data.getFormColumns()) {
@@ -71,6 +74,8 @@ public class FormDataCSVReportBuilder extends AbstractReportBuilder {
         }
 
         csvWriter.close();
+        IOUtils.closeQuietly(bufferedWriter);
+        IOUtils.closeQuietly(fileWriter);
 
         return file.getAbsolutePath();
     }

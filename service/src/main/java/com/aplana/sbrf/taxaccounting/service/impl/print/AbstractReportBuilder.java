@@ -1,5 +1,6 @@
 package com.aplana.sbrf.taxaccounting.service.impl.print;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 
@@ -88,8 +89,11 @@ public abstract class AbstractReportBuilder {
     protected String flush() throws IOException {
         File file = File.createTempFile(prefix, postfix);
         OutputStream out = new FileOutputStream(file);
-        workBook.write(out);
-
+        try {
+            workBook.write(out);
+        } finally {
+            IOUtils.closeQuietly(out);
+        }
         return file.getAbsolutePath();
     }
 

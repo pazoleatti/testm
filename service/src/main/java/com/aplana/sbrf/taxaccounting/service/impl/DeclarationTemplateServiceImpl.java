@@ -151,36 +151,45 @@ public class DeclarationTemplateServiceImpl implements DeclarationTemplateServic
         if (jrxmlBlobData == null) {
             return null;
         }
+        StringWriter writer = new StringWriter();
         try {
-            //TODO: Лучше все через потоки делать
-            StringWriter writer = new StringWriter();
             IOUtils.copy(jrxmlBlobData.getInputStream(), writer, ENCODING);
+            IOUtils.closeQuietly(jrxmlBlobData.getInputStream());
             return writer.toString();
         } catch (IOException e) {
             LOG.error(e.getMessage(), e);
             throw new ServiceException(JRXML_NOT_FOUND);
+        } finally {
+            IOUtils.closeQuietly(writer);
         }
-	}
+    }
 
     @Override
 	public InputStream getJasper(int declarationTemplateId) {
-        ByteArrayOutputStream  compiledReport = new ByteArrayOutputStream();
-        String jrxml = getJrxml(declarationTemplateId);
-        if (jrxml == null) {
-            throw new ServiceException(JRXML_NOT_FOUND);
-        }
+        ByteArrayOutputStream compiledReport = new ByteArrayOutputStream();
+        ByteArrayInputStream byteArrayInputStream = null;
         try {
-            JasperDesign jasperDesign = JRXmlLoader.load(new ByteArrayInputStream(jrxml.getBytes(ENCODING)));
-            JasperCompileManager.compileReportToStream(jasperDesign, compiledReport);
-        } catch (JRException e) {
-            LOG.error(e.getMessage(), e);
-            throw new ServiceException("Произошли ошибки во время формирования отчета!");
-        } catch (UnsupportedEncodingException e2) {
-            LOG.error(e2.getMessage(), e2);
-            throw new ServiceException("Шаблон отчета имеет неправильную кодировку!");
+            String jrxml = getJrxml(declarationTemplateId);
+            if (jrxml == null) {
+                throw new ServiceException(JRXML_NOT_FOUND);
+            }
+            try {
+                byteArrayInputStream = new ByteArrayInputStream(jrxml.getBytes(ENCODING));
+                JasperDesign jasperDesign = JRXmlLoader.load(byteArrayInputStream);
+                JasperCompileManager.compileReportToStream(jasperDesign, compiledReport);
+            } catch (JRException e) {
+                LOG.error(e.getMessage(), e);
+                throw new ServiceException("Произошли ошибки во время формирования отчета!");
+            } catch (UnsupportedEncodingException e2) {
+                LOG.error(e2.getMessage(), e2);
+                throw new ServiceException("Шаблон отчета имеет неправильную кодировку!");
+            }
+            return new ByteArrayInputStream(compiledReport.toByteArray());
+        } finally {
+            IOUtils.closeQuietly(byteArrayInputStream);
+            IOUtils.closeQuietly(compiledReport);
         }
-        return new ByteArrayInputStream(compiledReport.toByteArray());
-	}
+    }
 
 	@Override
 	public void checkLockedByAnotherUser(Integer declarationTemplateId, TAUserInfo userInfo){
