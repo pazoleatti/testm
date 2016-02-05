@@ -572,11 +572,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                     throw new ServiceException();
                 }
             } finally {
-                try {
-                    if (fileWriter != null) fileWriter.close();
-                } catch (IOException e) {
-                    LOG.warn("", e);
-                }
+                IOUtils.closeQuietly(fileWriter);
             }
 
             //Получение имени файла записанного в xml
@@ -592,43 +588,34 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             if (decDate == null)
                 decDate = docDate;
 
-            //Переименоввываем
-            File renameToFile = new File(String.format(FILE_NAME_IN_TEMP_PATTERN, decName, "xml"));
-            if (xmlFile.renameTo(renameToFile)){
-                //validateDeclaration(userInfo, declarationData, logger, false, FormDataEvent.CALCULATE, renameToFile, stateLogger);
+            //Архивирование перед сохраннеием в базу
+            File zipOutFile = null;
+            try {
+                zipOutFile = File.createTempFile("xml", ".zip");
+                FileOutputStream fileOutputStream = new FileOutputStream(zipOutFile);
+                ZipOutputStream zos = new ZipOutputStream(fileOutputStream);
+                ZipEntry zipEntry = new ZipEntry(decName+".xml");
+                zos.putNextEntry(zipEntry);
+                FileInputStream fi = new FileInputStream(xmlFile);
 
-                //Архивирование перед сохраннеием в базу
-                File zipOutFile = null;
                 try {
-                    zipOutFile = new File(String.format(FILE_NAME_IN_TEMP_PATTERN, decName, "zip"));
-					FileOutputStream fileOutputStream = new FileOutputStream(zipOutFile);
-					ZipOutputStream zos = new ZipOutputStream(fileOutputStream);
-					ZipEntry zipEntry = new ZipEntry(decName+".xml");
-					zos.putNextEntry(zipEntry);
-                    FileInputStream fi = new FileInputStream(renameToFile);
-
-                    try {
-                        IOUtils.copy(fi, zos);
-                    } finally {
-                        IOUtils.closeQuietly(fi);
-                        IOUtils.closeQuietly(zos);
-                        IOUtils.closeQuietly(fileOutputStream);
-                    }
-
-                    LOG.info(String.format("Сохранение XML-файла в базе данных для декларации %s", declarationData.getId()));
-                    stateLogger.updateState("Сохранение XML-файла в базе данных");
-
-                    reportService.createDec(declarationData.getId(), blobDataService.create(zipOutFile, zipOutFile.getName(), decDate), ReportType.XML_DEC);
+                    IOUtils.copy(fi, zos);
                 } finally {
-                    if (zipOutFile != null && !zipOutFile.delete()) {
-                        LOG.warn(String.format(FILE_NOT_DELETE, zipOutFile.getAbsolutePath()));
-                    }
-                    if (!renameToFile.delete()) {
-                        LOG.warn(String.format(FILE_NOT_DELETE, renameToFile.getAbsolutePath()));
-                    }
+                    IOUtils.closeQuietly(fi);
+                    IOUtils.closeQuietly(zos);
+                    IOUtils.closeQuietly(fileOutputStream);
                 }
-            } else {
-                throw new IOException(String.format("Преименование из %s в %s не прошло.", xmlFile.getName(), renameToFile.getName()));
+
+                LOG.info(String.format("Сохранение XML-файла в базе данных для декларации %s", declarationData.getId()));
+                stateLogger.updateState("Сохранение XML-файла в базе данных");
+
+                reportService.createDec(declarationData.getId(),
+                        blobDataService.create(zipOutFile, String.format(FILE_NAME_IN_TEMP_PATTERN, decName, "zip"), decDate),
+                        ReportType.XML_DEC);
+            } finally {
+                if (zipOutFile != null && !zipOutFile.delete()) {
+                    LOG.warn(String.format(FILE_NOT_DELETE, zipOutFile.getAbsolutePath()));
+                }
             }
         } catch (IOException e) {
             LOG.error("", e);
