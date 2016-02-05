@@ -548,7 +548,7 @@ def calc24(def row) {
         def course810 = getRecordId(15, 'CODE', '810')
         String col23 = row.tradePay.trim().replaceAll(",", ".")
         def flag23 = calcFlag23(row)
-        def calcCol23 = flag23 ? roundValue(new BigDecimal(col23[0..-2]) / 100, 2) :
+        BigDecimal calcCol23 = flag23 ? roundValue(new BigDecimal(col23[0..-2]) / 100, 2) :
                 roundValue(new BigDecimal(col23), 2)
 
         if (row.sum3 == null) {
@@ -561,9 +561,9 @@ def calc24(def row) {
             }
         } else if (flag23) {
             if (row.course == course810) {
-                return roundValue(calcCol23 * row.sum1 * (row.endDate1 - row.startDate1 + 1) / row.base, 2)
+                return ((BigDecimal) (calcCol23 * row.sum1 * (row.endDate1 - row.startDate1 + 1))).divide(row.base, 2, BigDecimal.ROUND_HALF_UP)
             } else {
-                return roundValue(calcCol23 * row.sum1 * (row.endDate1 - row.startDate1 + 1) / (row.base * row.course2), 2)
+                return ((BigDecimal) (calcCol23 * row.sum1 * (row.endDate1 - row.startDate1 + 1) * row.course2)).divide(row.base, 2, BigDecimal.ROUND_HALF_UP)
             }
         } else {
             return 0
@@ -621,16 +621,16 @@ def calc25(def row) {
         }
         if (!flag23) {
             if (row.course == course810 && getPeriodName() == "год") {
-                return roundValue(calcCol23 * (row.endDate2 - row.startDate2 + 1) / row.base, 2)
+                return ((BigDecimal) (calcCol23 * (row.endDate2 - row.startDate2 + 1))).divide(row.base, 2, BigDecimal.ROUND_HALF_UP)
             } else if (row.course != course810 && getPeriodName() == "год") {
-                return roundValue(calcCol23 * (row.endDate2 - row.startDate2 + 1) / (row.base * row.course3), 2)
+                return ((BigDecimal) (calcCol23 * (row.endDate2 - row.startDate2 + 1) * row.course3)).divide(row.base, 2, BigDecimal.ROUND_HALF_UP)
             }
         }
         if (flag23) {
             if (row.course == course810 && getPeriodName() == "год") {
-                return roundValue(calcCol23 * row.sum1 * (row.endDate2 - row.startDate2 + 1) / row.base, 2)
+                return ((BigDecimal) (calcCol23 * row.sum1 * (row.endDate2 - row.startDate2 + 1))).divide(row.base, 2, BigDecimal.ROUND_HALF_UP)
             } else if (row.course != course810 && getPeriodName() == "год") {
-                return roundValue(calcCol23 * row.sum1 * (row.endDate2 - row.startDate2 + 1) / (row.base * row.course3), 2)
+                return ((BigDecimal) (calcCol23 * row.sum1 * (row.endDate2 - row.startDate2 + 1) * row.course3)).divide(row.base, 2, BigDecimal.ROUND_HALF_UP)
             }
         }
         if (getPeriodName() == "1 квартал") {
@@ -660,9 +660,9 @@ def calc26(def row) {
                 }
             } else if (flag23) {
                 if (row.course == course810) {
-                    return roundValue(calcCol23 * row.sum1 * (row.endDate1 - row.startDate1 + 1) / row.base, 2)
+                    return ((BigDecimal) (calcCol23 * row.sum1 * (row.endDate1 - row.startDate1 + 1))).divide(row.base, 2, BigDecimal.ROUND_HALF_UP)
                 } else {
-                    return roundValue(calcCol23 * row.sum1 * (row.endDate1 - row.startDate1 + 1) / (row.base * row.course2), 2)
+                    return ((BigDecimal) (calcCol23 * row.sum1 * (row.endDate1 - row.startDate1 + 1) * row.course2)).divide(row.base, 2, BigDecimal.ROUND_HALF_UP)
                 }
             } else {
                 return 0
