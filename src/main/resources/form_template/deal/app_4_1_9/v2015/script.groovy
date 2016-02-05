@@ -5,7 +5,6 @@ import com.aplana.sbrf.taxaccounting.model.FormDataKind
 import com.aplana.sbrf.taxaccounting.model.ReportPeriod
 import com.aplana.sbrf.taxaccounting.model.TaxType
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
-import com.aplana.sbrf.taxaccounting.model.util.StringUtils
 import groovy.transform.Field
 
 /**
@@ -15,7 +14,6 @@ import groovy.transform.Field
  * formTemplateId=802
  *
  * TODO:
- *      - консолидация не полная, потому что не все макеты источников готовы
  *      - дополнить тесты
  */
 
@@ -279,7 +277,6 @@ void sortFormDataRows(def saveInDB = true) {
     }
 }
 
-// TODO (Ramil Timerbaev) список неполный, потому что не все макеты реализованы
 // список id типов источников
 @Field
 def sourceFormTypeIds = [
@@ -287,7 +284,6 @@ def sourceFormTypeIds = [
         818, // РНУ-101
         820, // РНУ-102
         821, // РНУ-107
-             // РНУ-108
         822, // РНУ-110
         808, // РНУ-111
         824, // РНУ-112
@@ -295,7 +291,6 @@ def sourceFormTypeIds = [
         842, // РНУ-115
         844, // РНУ-116
         809, // РНУ-117
-             // РНУ-120
         840, // РНУ-122
         841, // РНУ-123
         843, // РНУ-171
@@ -713,7 +708,6 @@ def calc9or15(def record520, def sourceAllDataRowsMap, def isCalc9) {
             818, // РНУ-101
             820, // РНУ-102
             821, // РНУ-107
-                 // РНУ-108
             822, // РНУ-110
             808, // РНУ-111
             824, // РНУ-112
@@ -721,7 +715,6 @@ def calc9or15(def record520, def sourceAllDataRowsMap, def isCalc9) {
             842, // РНУ-115
             844, // РНУ-116
             809, // РНУ-117
-                 // РНУ-120
             840, // РНУ-122
             841, // РНУ-123
             843  // РНУ-171
@@ -778,15 +771,12 @@ def calc9or15(def record520, def sourceAllDataRowsMap, def isCalc9) {
                             result += (row.sum10 ?: 0)
                         }
                         break
-                    case 845 : // РНУ-171
+                    case 843 : // РНУ-171
                         if ((isCalc9 && "10360".equals(row.code)) ||
                                 (!isCalc9 && "10361".equals(row.code))) {
                             result += (row.incomeCorrection ?: 0)
                         }
                         break
-                // TODO (Timerbaev/Kinzyabulatov) пока не реализованы макеты
-                              // РНУ-108
-                              // РНУ-120
                 }
             }
         }

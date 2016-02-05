@@ -3,7 +3,6 @@ package form_template.deal.app_4_2.v2015
 import com.aplana.sbrf.taxaccounting.model.FormDataEvent
 import com.aplana.sbrf.taxaccounting.model.TaxType
 import com.aplana.sbrf.taxaccounting.model.WorkflowState
-import com.aplana.sbrf.taxaccounting.model.util.StringUtils
 import groovy.transform.Field
 
 /**
@@ -12,7 +11,6 @@ import groovy.transform.Field
  * formTemplateId=803
  *
  * TODO:
- *      - консолидация не полная, потому что не все макеты источников готовы
  *      - дополнить тесты
  */
 
@@ -336,7 +334,6 @@ void sortFormDataRows(def saveInDB = true) {
     }
 }
 
-// TODO (Ramil Timerbaev) мапа неполная, потому что не все макеты реализованы
 // мапа в которой хранится id формы - список алиасов ссылающихся на справочник "участники ТЦО"
 @Field
 def sourceRefbook520AliasMap = [
@@ -347,7 +344,6 @@ def sourceRefbook520AliasMap = [
         818 : ['name'], // РНУ-101
         820 : ['name'], // РНУ-102
         821 : ['name'], // РНУ-107
-                        // РНУ-108
         822 : ['name'], // РНУ-110
         808 : ['name'], // РНУ-111
         824 : ['name'], // РНУ-112
@@ -355,7 +351,6 @@ def sourceRefbook520AliasMap = [
         842 : ['name'], // РНУ-115
         844 : ['name'], // РНУ-116
         809 : ['name'], // РНУ-117
-                        // РНУ-120
         840 : ['name'], // РНУ-122
         841 : ['name'], // РНУ-123
         843 : ['name'], // РНУ-171
@@ -806,7 +801,6 @@ def calc10or16(def record520, def sourceAllDataRowsMap, def isCalc10) {
             818, // РНУ-101
             820, // РНУ-102
             821, // РНУ-107
-                 // РНУ-108
             822, // РНУ-110
             808, // РНУ-111
             824, // РНУ-112
@@ -814,7 +808,6 @@ def calc10or16(def record520, def sourceAllDataRowsMap, def isCalc10) {
             842, // РНУ-115
             844, // РНУ-116
             809, // РНУ-117
-                 // РНУ-120
             840, // РНУ-122
             841, // РНУ-123
             843  // РНУ-171
@@ -871,15 +864,12 @@ def calc10or16(def record520, def sourceAllDataRowsMap, def isCalc10) {
                             result += (row.sum10 ?: 0)
                         }
                         break
-                    case 845 : // РНУ-171
+                    case 843 : // РНУ-171
                         if ((isCalc10 && "10360".equals(row.code)) ||
                                 (!isCalc10 && "10361".equals(row.code))) {
                             result += (row.incomeCorrection ?: 0)
                         }
                         break
-                // TODO (Timerbaev/Kinzyabulatov) пока не реализованы макеты
-                               // РНУ-108
-                               // РНУ-120
                 }
             }
         }
