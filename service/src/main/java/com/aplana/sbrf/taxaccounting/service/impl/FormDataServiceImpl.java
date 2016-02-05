@@ -2106,7 +2106,7 @@ public class FormDataServiceImpl implements FormDataService {
                 IOUtils.closeQuietly(outputStream);
             }
             stateLogger.updateState("Сохранение отчета в базе данных");
-            reportService.create(formData.getId(), blobDataService.create(new FileInputStream(reportFile), scriptSpecificReportHolder.getFileName()),
+            reportService.create(formData.getId(), blobDataService.create(reportFile.getPath(), scriptSpecificReportHolder.getFileName()),
                     new FormDataReportType(ReportType.SPECIFIC_REPORT, specificReportType), isShowChecked, formData.isManual(), saved);
 
         } catch (IOException e) {

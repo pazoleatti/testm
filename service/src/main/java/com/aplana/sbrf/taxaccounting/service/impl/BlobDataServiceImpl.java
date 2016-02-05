@@ -32,6 +32,19 @@ public class BlobDataServiceImpl implements BlobDataService {
     }
 
     @Override
+    public String create(String path, String name) {
+        FileInputStream fileInputStream = null;
+        try {
+            fileInputStream = new FileInputStream(path);
+            return create(fileInputStream, name);
+        } catch (FileNotFoundException e) {
+            throw new ServiceException("", e);
+        } finally {
+            IOUtils.closeQuietly(fileInputStream);
+        }
+    }
+
+    @Override
     public String create(File file, String name, Date createDate) {
         FileInputStream fileInputStream = null;
         try {
