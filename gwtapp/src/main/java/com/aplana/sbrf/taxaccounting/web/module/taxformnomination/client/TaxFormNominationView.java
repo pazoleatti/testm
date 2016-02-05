@@ -76,6 +76,8 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
 	/* признак формы: true - налоговые формы, false - декларации  */
 	private Boolean isForm;
 	private TaxType taxType;
+	// Количество записей по умолчанию на страницу
+	private final static int PAGE_SIZE = 100;
 
 	// изменяемые колонки в таблице
 	private GenericDataGrid.DataGridResizableHeader receiverSourcesKindTitle, receiverSourcesTypeTitle, declarationTypeHeader;
@@ -353,6 +355,7 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
 			formGrid.setRowCount(0);
 			formPager.setDisplay(formGrid);
 			formPager.setVisible(true);
+			formPager.setPageSize(PAGE_SIZE);
 			declarationPager.setVisible(false);
 		} else {
 			this.isForm = false;
@@ -369,6 +372,7 @@ public class TaxFormNominationView extends ViewWithUiHandlers<TaxFormNominationU
 			formPager.setVisible(false);
 			declarationPager.setVisible(true);
 			declarationPager.setDisplay(decGrid);
+			declarationPager.setPageSize(PAGE_SIZE);
 		}
 	}
 
