@@ -211,7 +211,7 @@ void logicCheck() {
         def msg6 = row.getCell('docNumber').column.name
         def val6 = row.docNumber != null ? row.docNumber : 'графа 6 не задана'
         def msg7 = row.getCell('docDate').column.name
-        def val7 = row.docDate != null ? row.docDate : 'графа 7 не задана'
+        def val7 = row.docDate != null ? row.docDate.format('dd.MM.yyyy') : 'графа 7 не задана'
         def msg9 = row.getCell('course').column.name
         def val9 = getRefBookValue(15, row.course) != null ? getRefBookValue(15, row.course).CODE?.value : 'графа 9 не задана'
         def matchRowNum = []
