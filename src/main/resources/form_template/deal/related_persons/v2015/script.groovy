@@ -1677,10 +1677,19 @@ def getJurPersonChangeList(def dateFrom, def dateTo) {
     records.each { record ->
         def id = record?.record_id?.value
         def info = provider.getRecordVersionInfo(id)
+        versionInfoMap[record] = info
         if (dateFrom <= info.versionStart && info.versionStart <= dateTo) {
             needRecords.add(record)
-            versionInfoMap[record] = info
         }
+    }
+
+    // мапа с общим id записей для версии (id версии - id общей записи)
+    def allRecordCommonIdMap = [:]
+    // получить общий id записи для каждой версии
+    records.each { record ->
+        def id = record?.record_id?.value
+        def commonId = provider.getRecordId(id)
+        allRecordCommonIdMap[id] = commonId
     }
 
     // мапа с записями и версиями каждой записи (id записи - список версии записи)
@@ -1688,11 +1697,24 @@ def getJurPersonChangeList(def dateFrom, def dateTo) {
     // получить общий id записи для каждой версии, сгруппировать версии по записям
     needRecords.each { record ->
         def id = record?.record_id?.value
-        def commonId = provider.getRecordId(id)
+        def commonId = allRecordCommonIdMap[id]
         if (recordVersionMap[commonId] == null) {
             recordVersionMap[commonId] = []
         }
         recordVersionMap[commonId].add(record)
+    }
+
+    // добавить предыдущую версию невходящую в период для сравнения изменении в первой входящей
+    recordVersionMap.each { commonId, versions ->
+        def firstVersion = versions[0]
+        def index = records.indexOf(firstVersion) - 1
+        for (int i = index; i >= 0; i--) {
+            def record = records[i]
+            if (allRecordCommonIdMap[record?.record_id?.value] == commonId) {
+                versions.add(0, record)
+                break
+            }
+        }
     }
 
     // мапа с номерами графов (алиса графы нф -> cписок из двух элементов: номер графы и строковое значение в шапке)
