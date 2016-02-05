@@ -85,6 +85,10 @@ def startDate = null
 @Field
 def endDate = null
 
+// Номер отчетного периода
+@Field
+def periodOrder = null
+
 def getReportPeriodEndDate() {
     if (endDate == null) {
         endDate = reportPeriodService.getEndDate(formData.reportPeriodId).time
@@ -97,6 +101,13 @@ def getReportPeriodStartDate() {
         startDate = reportPeriodService.getStartDate(formData.reportPeriodId).time
     }
     return startDate
+}
+
+def getPeriodOrder() {
+    if (periodOrder == null) {
+        periodOrder = reportPeriodService.get(formData.reportPeriodId).getOrder()
+    }
+    return periodOrder
 }
 
 //// Обертки методов
@@ -128,7 +139,8 @@ def getRefBookValue(def long refBookId, def Long recordId) {
 
 void logicCheck() {
     def dataRows = formDataService.getDataRowHelper(formData).allCached
-    def records520 = getRecords520()
+    def useCode = getPeriodOrder() == 3
+    def records520 = getRecords520(useCode)
     for (def row : dataRows) {
         def rowNum = row.getIndex()
 
@@ -162,7 +174,7 @@ void logicCheck() {
         def isVZL = records520?.find { it?.record_id?.value == row.name }
         if (records520 && !isVZL) {
             def value2 = getRefBookValue(520L, row.name)?.NAME?.value
-            logger.error("Строка %s: Организация «%s» не является взаимозависимым лицом с общим режимом налогообложения в данном отчетном периоде!", rowNum, value2)
+            logger.error(useCode ? "Строка %s: Организация «%s» не является взаимозависимым лицом с общим режимом налогообложения в данном отчетном периоде!" : "Строка %s: Организация «%s» не является взаимозависимым лицом в данном отчетном периоде!", rowNum, value2)
         }
     }
 }
@@ -170,14 +182,18 @@ void logicCheck() {
 @Field
 def records520 = null
 
-// Получить значения из справочника "Участники ТЦО".
-def getRecords520() {
+/**
+ * Получить значения из справочника "Участники ТЦО".
+ * @param useCode true для 9 месяцев, false для года
+ * @return
+ */
+def getRecords520(boolean useCode) {
     if (records520 != null) {
         return records520
     }
     // получить id записи с кодом "2" из справончика "Специальный налоговый статус"
     def provider = formDataService.getRefBookProvider(refBookFactory, 511L, providerCache)
-    def filter = "CODE = 2"
+    def filter = useCode ? "CODE = 2" : ""
     def records = provider.getRecords(getReportPeriodEndDate(), null, filter, null)
     def taxStatusId
     if (records && records.size() == 1) {
@@ -205,8 +221,7 @@ def getRecords520() {
 
 // проверка принадлежности организации к ВЗЛ в отчетном периоде
 def isVZL(def start, def end, typeId) {
-    if (start <= getReportPeriodEndDate() &&
-            (end == null || (end >= getReportPeriodStartDate() && end <= getReportPeriodEndDate())) &&
+    if (start <= getReportPeriodEndDate() && (end == null || end >= getReportPeriodStartDate()) &&
             getRefBookValue(525L, typeId)?.CODE?.value == "ВЗЛ") {
         return true
     }
