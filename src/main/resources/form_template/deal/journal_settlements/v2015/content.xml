@@ -174,4 +174,18 @@
         <fontColor>BLACK</fontColor>
         <italic>true</italic>
     </styles>
+    <styles>
+        <alias>Контрольные суммы</alias>
+        <backColor>LIGHT_BROWN</backColor>
+        <bold>true</bold>
+        <fontColor>BLACK</fontColor>
+        <italic>false</italic>
+    </styles>
+    <styles>
+        <alias>Заголовок</alias>
+        <backColor>DARK_GREY</backColor>
+        <bold>true</bold>
+        <fontColor>BLACK</fontColor>
+        <italic>false</italic>
+    </styles>
 </formTemplateContent>
