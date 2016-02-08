@@ -417,14 +417,23 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
         try {
             if (uuid != null) {
                 ObjectInputStream objectInputStream = null;
+                InputStream zipJasper = null;
                 try {
-                    objectInputStream = new ObjectInputStream(blobDataService.get(uuid).getInputStream());
-                    jasperPrint = (JasperPrint) objectInputStream.readObject();
+                    zipJasper =  blobDataService.get(uuid).getInputStream();
+                    ZipInputStream zipJasperIn = new ZipInputStream(zipJasper);
+                    try {
+                        zipJasperIn.getNextEntry();
+                        objectInputStream = new ObjectInputStream(zipJasperIn);
+                        jasperPrint = (JasperPrint) objectInputStream.readObject();
+                    } finally {
+                        IOUtils.closeQuietly(zipJasperIn);
+                    }
                 } catch (IOException e) {
                     throw new ServiceException("Не удалось извлечь Jasper-отчет.", e);
                 } catch (ClassNotFoundException e) {
                     throw new ServiceException("Не удалось извлечь Jasper-отчет.", e);
                 } finally {
+                    IOUtils.closeQuietly(zipJasper);
                     IOUtils.closeQuietly(objectInputStream);
                 }
             } else {
@@ -509,9 +518,12 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 stateLogger.updateState("Сохранение PDF-файла в базе данных");
                 reportService.createDec(declarationData.getId(), blobDataService.create(pdfFile.getPath(), ""), ReportType.PDF_DEC);
 
-                LOG.info(String.format("Сохранение Jasper-макета в базе данных для декларации %s", declarationData.getId()));
-                stateLogger.updateState("Сохранение Jasper-макета в базе данных");
-                reportService.createDec(declarationData.getId(), saveJPBlobData(jasperPrint), ReportType.JASPER_DEC);
+                // не сохраняем jasper-отчет, если есть XLSX-отчет
+                if (reportService.getDec(userInfo, declarationData.getId(), ReportType.EXCEL_DEC) == null) {
+                    LOG.info(String.format("Сохранение Jasper-макета в базе данных для декларации %s", declarationData.getId()));
+                    stateLogger.updateState("Сохранение Jasper-макета в базе данных");
+                    reportService.createDec(declarationData.getId(), saveJPBlobData(jasperPrint), ReportType.JASPER_DEC);
+                }
             } catch (IOException e) {
                 throw new ServiceException(e.getLocalizedMessage(), e);
             } finally {
@@ -536,6 +548,9 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             stateLogger.updateState("Сохранение XLSX в базе данных");
 
             reportService.createDec(declarationData.getId(), blobDataService.create(xlsxFile.getPath(), ""), ReportType.EXCEL_DEC);
+            String uuidJasper = reportService.getDec(userInfo, declarationData.getId(), ReportType.JASPER_DEC);
+            if (uuidJasper != null)
+                reportService.deleteDec(uuidJasper);
         } catch (IOException e) {
             throw new ServiceException("Ошибка при формировании временного файла для XLSX", e);
         } catch (Exception e) {
@@ -768,12 +783,35 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             } finally {
                 IOUtils.closeQuietly(fileOutputStream);
             }
-            return blobDataService.create(jasperPrintFile.getPath(), "");
+
+            //Архивирование перед сохраннеием в базу
+            File zipOutFile = null;
+            try {
+                zipOutFile = File.createTempFile("jasperPrint", ".zip");
+                fileOutputStream = new FileOutputStream(zipOutFile);
+                ZipOutputStream zos = new ZipOutputStream(fileOutputStream);
+                ZipEntry zipEntry = new ZipEntry("jasperPrint.dat");
+                zos.putNextEntry(zipEntry);
+                FileInputStream fi = new FileInputStream(jasperPrintFile);
+
+                try {
+                    IOUtils.copy(fi, zos);
+                } finally {
+                    IOUtils.closeQuietly(fi);
+                    IOUtils.closeQuietly(zos);
+                    IOUtils.closeQuietly(fileOutputStream);
+                }
+
+                return blobDataService.create(zipOutFile.getPath(), "");
+            } finally {
+                if (zipOutFile != null && !zipOutFile.delete()) {
+                    LOG.warn(String.format(FILE_NOT_DELETE, zipOutFile.getAbsolutePath()));
+                }
+            }
         } finally {
             if (jasperPrintFile != null)
                 jasperPrintFile.delete();
         }
-
     }
 
     @Override
