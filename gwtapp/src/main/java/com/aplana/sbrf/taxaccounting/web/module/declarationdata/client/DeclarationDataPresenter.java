@@ -223,7 +223,8 @@ public class DeclarationDataPresenter
                                 onTimerReport(ReportType.PDF_DEC, false);
                                 onTimerReport(ReportType.EXCEL_DEC, false);
                             } else if (ReportType.PDF_DEC.equals(reportType)) {
-                                getView().setPdf(result.getPdf());
+                                getView().showNoPdf("Загрузка формы предварительного просмотра");
+                                getPdf();
                             }
                         } else if (result.getExistReport().equals(TimerReportResult.StatusReport.NOT_EXIST)) { // если файл не существует и нет блокировки(т.е. задачу отменили или ошибка при формировании)
                             getView().stopTimerReport(reportType);
@@ -500,6 +501,18 @@ public class DeclarationDataPresenter
                     public void onFailure(Throwable caught) {
                         super.onFailure(caught);
                         onTimerReport(reportType, false);
+                    }
+                }, this));
+    }
+
+    private void getPdf() {
+        GetPdfAction action = new GetPdfAction();
+        action.setDeclarationDataId(declarationId);
+        dispatcher.execute(action, CallbackUtils
+                .defaultCallbackNoLock(new AbstractCallback<GetPdfResult>() {
+                    @Override
+                    public void onSuccess(GetPdfResult result) {
+                        getView().setPdf(result.getPdf());
                     }
                 }, this));
     }

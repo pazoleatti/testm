@@ -121,7 +121,7 @@ public class PrintingServiceImpl implements PrintingService {
         } catch (DaoException ex) {
 			LOG.error(ex.getMessage(), ex);
             throw new ServiceException(ex.getMessage());
-        }finally {
+        } finally {
             cleanTmp(filePath);
         }
 	}
