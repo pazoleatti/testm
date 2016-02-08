@@ -1708,12 +1708,17 @@ def getJurPersonChangeList(def dateFrom, def dateTo) {
     recordVersionMap.each { commonId, versions ->
         def firstVersion = versions[0]
         def index = records.indexOf(firstVersion) - 1
+        def isFind = false
         for (int i = index; i >= 0; i--) {
             def record = records[i]
             if (allRecordCommonIdMap[record?.record_id?.value] == commonId) {
                 versions.add(0, record)
+                isFind = true
                 break
             }
+        }
+        if (!isFind) {
+            versions.add(0, null)
         }
     }
 
@@ -1738,9 +1743,9 @@ def getJurPersonChangeList(def dateFrom, def dateTo) {
         def versions = recordVersionMap[commonId]
 
         // одна версия
-        if (versions.size() == 1) {
+        if (versions.size() == 2 && versions[0] == null) {
             // добавить изменения - «Исключение лица из списка ВЗЛ» или «Включение лица в список ВЗЛ»
-            def record520 = versions[0]
+            def record520 = versions[1]
             def actualDate = versionInfoMap[record520]?.versionStart
             def values = getValues520(record520, null)
             ChangeType changeType = (record520?.END_DATE?.value ? ChangeType.DELETE : ChangeType.INSESRT)
@@ -1802,6 +1807,18 @@ def getJurPersonChangeList(def dateFrom, def dateTo) {
                 item.columnNums = columnNums
                 item.columnNames = columnNames
                 changeList.add(item)
+            } else if (equalsResult == null) {
+                // добавить изменения - «Включение лица в список ВЗЛ»
+                def record520 = version
+                def actualDate = versionInfoMap[record520]?.versionStart
+                def values = getValues520(record520, null)
+                ChangeType changeType = ChangeType.INSESRT
+
+                ChangeItem item = new ChangeItem()
+                item.date = actualDate
+                item.type = changeType
+                item.values = values
+                changeList.add(item)
             }
         }
     }
@@ -1812,9 +1829,17 @@ def getJurPersonChangeList(def dateFrom, def dateTo) {
 /**
  * Сравнить две записи справочника "Участники ТЦО".
  *
- * @return список алиасов НФ (не алиасы справочника)
+ * @param recordA текущая версия
+ * @param recordB предыдущая версия (может быть null)
+ * @return
+ *      список алиасов НФ (не алиасы справочника) - если разница есть
+ *      пустой список - если разницы нет
+ *      null - если предыдущей версии нет (равну null)
  */
 def equalsRecords(def recordA, def recordB) {
+    if (recordB == null) {
+        return null
+    }
     def aliasMap = [
             'NAME'          : 'name',        // графа 2  (2)
             'ADDRESS'       : 'address',     // графа 3  (3)
