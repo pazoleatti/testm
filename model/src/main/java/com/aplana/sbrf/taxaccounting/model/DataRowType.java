@@ -8,9 +8,9 @@ package com.aplana.sbrf.taxaccounting.model;
  */
 
 public enum DataRowType {
-	/** Временный срез */
+	/** Резервный срез */
 	TEMP (1),
-	/** Постоянный срез */
+	/** Основной срез */
 	SAVED (0),
 	/** Версия ручного ввода */
 	MANUAL (1),

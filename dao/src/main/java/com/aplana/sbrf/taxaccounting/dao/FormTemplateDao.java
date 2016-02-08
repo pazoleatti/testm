@@ -170,14 +170,6 @@ public interface FormTemplateDao {
 	boolean checkExistLargeString(Integer formTemplateId, Integer columnId, int maxLength);
 
     /**
-     * Метод для создания таблиц НФ в новой структуре.
-     * НЕ ИСПОЛЬЗОВАТЬ нигде больше.
-     * http://jira.aplana.com/browse/SBRFACCTAX-11384
-     * @param ftId идентификатор макета НФ
-     */
-    void createFDTable(int ftId);
-
-    /**
      * Метод для удаления таблиц НФ в новой структуре.
      * НЕ ИСПОЛЬЗОВАТЬ нигде больше.
      * @param ftId идентификатор версии макета НФ

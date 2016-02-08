@@ -101,7 +101,7 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
 		return getJdbcTemplate().query(
 				"SELECT " +
 				"  id, name, form_template_id, alias, type, width, precision, ord, max_length, " +
-				"  checking, format, attribute_id, filter, parent_column_id, attribute_id2, numeration_row " +
+				"  checking, format, attribute_id, filter, parent_column_id, attribute_id2, numeration_row, data_ord " +
 				"FROM form_column " +
 				"WHERE form_template_id = ? " +
 				"ORDER BY ord",
@@ -502,9 +502,9 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
     @Override
     public int getColumnIdByAlias(int formTemplateId, String columnAlias){
         try {
-            return getJdbcTemplate().queryForInt(
+            return getJdbcTemplate().queryForObject(
                     "SELECT id FROM form_column WHERE form_template_id = ? and alias = ?",
-                    formTemplateId, columnAlias);
+                    new Object[]{formTemplateId, columnAlias}, Integer.class);
         } catch (DataAccessException e){
 			LOG.error("", e);
             throw new DaoException("", e);

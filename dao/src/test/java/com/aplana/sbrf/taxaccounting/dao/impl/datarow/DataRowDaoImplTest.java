@@ -54,7 +54,7 @@ public class DataRowDaoImplTest extends Assert {
 		params.put("temporary", DataRowType.TEMP.getCode());
 		params.put("manual", manual.getCode());
 
-		return jdbc.queryForObject("SELECT COUNT(*) FROM form_data_329 WHERE temporary = :temporary AND " +
+		return jdbc.queryForObject("SELECT COUNT(*) FROM form_data_row WHERE temporary = :temporary AND " +
 				"form_data_id = :form_data_id AND manual = :manual", params, Integer.class);
 	}
 
@@ -369,6 +369,12 @@ public class DataRowDaoImplTest extends Assert {
 	}
 
 	@Test
+	public void refreshRefBookLinks3() {
+		FormData formData = formDataDao.get(330, false);
+		dataRowDao.refreshRefBookLinks(formData);
+	}
+
+	@Test
 	public void updateRows() {
 		FormData formData = formDataDao.get(329, false);
 		List<DataRow<Cell>> rows = dataRowDao.getRows(formData, null);
@@ -378,6 +384,13 @@ public class DataRowDaoImplTest extends Assert {
 		dataRowDao.updateRows(formData, updateRows);
 		rows = dataRowDao.getRows(formData, null);
 		assertEquals("new value", rows.get(1).getCell("stringColumn").getStringValue());
+	}
+
+	@Test
+	public void saveTempRows() {
+		FormData formData = formDataDao.get(330, false);
+		List<DataRow<Cell>> dataRows = new ArrayList<DataRow<Cell>>();
+		dataRowDao.saveTempRows(formData, dataRows);
 	}
 
 }

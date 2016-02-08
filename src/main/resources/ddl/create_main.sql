@@ -931,9 +931,6 @@ comment on column form_data_ref_book.record_id is 'Идентификатор з
 
 alter table form_data_ref_book add constraint form_data_ref_book_pk primary key (form_data_id, ref_book_id, record_id);
 --------------------------------------------------------------------------------------------------------
-create sequence seq_form_data_nnn start with 10000;
-
---------------------------------------------------------------------------------------------------------
 create table log_clob_query 
 (
 id number(9) not null primary key, 
@@ -1108,5 +1105,7 @@ CREATE TABLE form_data_row (
   c98 VARCHAR2(2000 char), c98_style VARCHAR2(50 char),
   c99 VARCHAR2(2000 char), c99_style VARCHAR2(50 char)
 );
-CREATE SEQUENCE seq_form_data_row START WITH 1;
+CREATE SEQUENCE seq_form_data_row START WITH 10000;
+ALTER TABLE form_data_row ADD CONSTRAINT form_data_row_pk PRIMARY KEY (id);
+CREATE UNIQUE INDEX i_form_data_row_id ON form_data_row (form_data_id, temporary, manual, ord);
 --------------------------------------------------------------------------------------------------------

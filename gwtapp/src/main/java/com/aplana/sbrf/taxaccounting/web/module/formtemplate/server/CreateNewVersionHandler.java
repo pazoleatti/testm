@@ -51,15 +51,6 @@ public class CreateNewVersionHandler extends AbstractActionHandler<CreateNewVers
         Logger logger = new Logger();
         makeDates(action);
         int formTemplateId = mainOperatingService.createNewTemplateVersion(action.getForm(), action.getVersionEndDate(), logger, securityService.currentUserInfo());
-        try {
-            formTemplateDao.createFDTable(formTemplateId);
-        } catch (Exception e){
-            if (formTemplateDao.isFDTableExist(formTemplateId)){
-                formTemplateDao.dropFDTable(formTemplateId);
-            }
-            formTemplateService.delete(formTemplateId);
-            throw new ServiceException("Не удалось создать версию макета. Попробуйте позже.", e);
-        }
         result.setFormTemplateId(formTemplateId);
         result.setColumns(formTemplateService.get(formTemplateId).getColumns());
         if (!logger.getEntries().isEmpty())

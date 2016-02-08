@@ -62,6 +62,10 @@ class DataRowMapper implements RowMapper<DataRow<Cell>> {
 		this.formData = formData;
 	}
 
+	static boolean checkNew(long id) {
+		return id == 20500 || id == 329 || id == 3291 || id == 3292 || id == 330;
+	}
+
 	/**
 	 * Формирует sql-запрос для извлечения данных НФ
 	 *
@@ -69,7 +73,7 @@ class DataRowMapper implements RowMapper<DataRow<Cell>> {
 	 * @return пара "sql-запрос"-"параметры" для извлечения данных НФ
 	 */
 	public Pair<String, Map<String, Object>> createSql(DataRowRange range, DataRowType dataRowType) {
-		if (formData.getId() != 20500) return createSqlOld(range, dataRowType);
+		if (!checkNew(formData.getId())) return createSqlOld(range, dataRowType);
 
 		DataRowType isManual = formData.isManual() ? DataRowType.MANUAL : DataRowType.AUTO;
 		Map<String, Object> params = new HashMap<String, Object>();
@@ -84,7 +88,7 @@ class DataRowMapper implements RowMapper<DataRow<Cell>> {
 			.append(ALIASED_WITH_AUTO_NUMERATION_AFFIX).append("%') THEN 1 ELSE 0 END ORDER BY ord)\n")
 			.append("ELSE NULL END ");
         if (range != null) {
-            sql.append("+ (SELECT count(*) from form_data_").append(formData.getFormTemplateId())
+            sql.append("+ (SELECT count(*) from form_data_row")
                 .append(" WHERE (alias IS NULL OR alias LIKE '%").append(ALIASED_WITH_AUTO_NUMERATION_AFFIX).append("%') AND")
                 .append(" form_data_id = :formDataId AND temporary = :temporary AND manual = :manual")
                 .append(" AND ord < :from)");
@@ -125,7 +129,7 @@ class DataRowMapper implements RowMapper<DataRow<Cell>> {
 	 * @return Map<columnId, [cNN, cNN_style]>
 	 */
 	static Map<Integer, String[]> getColumnNames(FormData formData) {
-		if (formData.getId() != 20500) return getColumnNamesOld(formData);
+		if (!checkNew(formData.getId())) return getColumnNamesOld(formData);
 
 		Map<Integer, String[]> columnNames = new HashMap<Integer, String[]>();
 		for (Column column : formData.getFormColumns()){
@@ -139,7 +143,7 @@ class DataRowMapper implements RowMapper<DataRow<Cell>> {
 
 	@Override
 	public DataRow<Cell> mapRow(ResultSet rs, int rowNum) throws SQLException {
-		if (formData.getId() != 20500) return mapRow(rs, rowNum);
+		if (!checkNew(formData.getId())) return mapRow(rs, rowNum);
 
 		List<Cell> cells = FormDataUtils.createCells(formData.getFormColumns(), formData.getFormStyles());
 		Integer previousRowNumber = formData.getPreviousRowNumber() != null ? formData.getPreviousRowNumber() : 0;
@@ -268,6 +272,10 @@ class DataRowMapper implements RowMapper<DataRow<Cell>> {
 				throw new IllegalArgumentException(String.format("Значение \"%s\" не является типом %s", value, columnType.name()));
 			}
 		}
+	}
+
+	public static String formatCellValue(Cell cell) {
+		return formatCellValue(cell.getColumn().getColumnType(), cell.getValue());
 	}
 
 	/**
