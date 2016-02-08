@@ -547,14 +547,18 @@ def calcFlag23(def row) {
     }
 }
 
+BigDecimal calc23(def flag23, def row) {
+    String col23 = row.tradePay.trim().replaceAll(",", ".")
+    return flag23 ? roundValue(new BigDecimal(col23[0..-2]) / 100, 8) : // взяли с запасом
+            roundValue(new BigDecimal(col23), 6)
+}
+
 def calc24(def row) {
     def pattern = /[0-9]+([\.|\,][0-9]+)?\%?/
     if (row.tradePay ==~ pattern) {
         def course810 = getRecordId(15, 'CODE', '810')
-        String col23 = row.tradePay.trim().replaceAll(",", ".")
         def flag23 = calcFlag23(row)
-        BigDecimal calcCol23 = flag23 ? roundValue(new BigDecimal(col23[0..-2]) / 100, 2) :
-                roundValue(new BigDecimal(col23), 2)
+        BigDecimal calcCol23 = calc23(flag23, row)
 
         if (row.sum3 == null) {
             return null
@@ -616,10 +620,8 @@ def calc25(def row) {
     def pattern = /[0-9]+([\.|\,][0-9]+)?\%?/
     if (row.tradePay ==~ pattern) {
         def course810 = getRecordId(15, 'CODE', '810')
-        String col23 = row.tradePay.trim().replaceAll(",", ".")
         def flag23 = calcFlag23(row)
-        def calcCol23 = flag23 ? roundValue(new BigDecimal(col23[0..-2]) / 100, 2) :
-                roundValue(new BigDecimal(col23), 2)
+        BigDecimal calcCol23 = calc23(flag23, row)
 
         if (row.sum3 == null) {
             return null
@@ -652,10 +654,8 @@ def calc26(def row) {
         def pattern = /[0-9]+([\.|\,][0-9]+)?\%?/
         if (row.tradePay ==~ pattern) {
             def course810 = getRecordId(15, 'CODE', '810')
-            String col23 = row.tradePay.trim().replaceAll(",", ".")
             def flag23 = calcFlag23(row)
-            def calcCol23 = flag23 ? roundValue(new BigDecimal(col23[0..-2]) / 100, 2) :
-                    roundValue(new BigDecimal(col23), 2)
+            BigDecimal calcCol23 = calc23(flag23, row)
 
             if (!flag23) {
                 if (row.course == course810) {
