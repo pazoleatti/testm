@@ -1605,22 +1605,15 @@ def getHistoryChangeList(def from, def to) {
             recordsMap[recordId520].add(record521)
         }
 
-        // оставить в группе записи с наибольшей датой за один день по одинаковым режимам
+        // оставить в группе записи с наибольшей датой за один день
         for (def recordId520 : recordsMap.keySet().toArray()) {
             def records = recordsMap[recordId520]
             def deleteList = []
-            for (int i = records.size() - 1; i >= 0; i--) {
-                if (deleteList.contains(records[i])) {
-                    continue
-                }
+            for (int i = 1; i < records.size(); i++) {
                 def dateStr = records[i]?.CHANGE_DATE?.value?.format('dd.MM.yyyy')
-                def state = records[i]?.STATE?.value
-                for (int j = i - 1; j >= 0; j--) {
-                    def prevDateStr = records[j]?.CHANGE_DATE?.value?.format('dd.MM.yyyy')
-                    def prevState = records[j]?.STATE?.value
-                    if (prevDateStr == dateStr && prevState == state) {
-                        deleteList.add(records[j])
-                    }
+                def prevDateStr = records[i - 1]?.CHANGE_DATE?.value?.format('dd.MM.yyyy')
+                if (prevDateStr == dateStr) {
+                    deleteList.add(records[i - 1])
                 }
             }
             recordsMap[recordId520].removeAll(deleteList)
