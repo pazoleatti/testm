@@ -51,6 +51,7 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
 			} else if ("S".equals(type)) {
 				result = new StringColumn();
 				((StringColumn) result).setMaxLength(SqlUtils.getInteger(rs, "max_length"));
+                ((StringColumn) result).setFilter(rs.getString("filter"));
 			} else if ("R".equals(type)) {
                 Long attributeId = SqlUtils.getLong(rs, "attribute_id");
                 Long attributeId2 = SqlUtils.getLong(rs, "attribute_id2");
@@ -375,7 +376,7 @@ public class ColumnDaoImpl extends AbstractDao implements ColumnDao {
                             ps.setInt(7, ((StringColumn) col).getMaxLength());
                             ps.setNull(9, Types.INTEGER);
                             ps.setNull(10, Types.NUMERIC);
-                            ps.setNull(11, Types.CHAR);
+                            ps.setString(11, ((StringColumn) col).getFilter());
                             ps.setNull(12, Types.NUMERIC);
                             ps.setNull(13, Types.NUMERIC);
                             ps.setNull(14, Types.NUMERIC);

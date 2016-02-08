@@ -7,7 +7,7 @@ package com.aplana.sbrf.taxaccounting.model;
  * 
  * @author sgoryachkin
  */
-public class RefBookColumn extends Column {
+public class RefBookColumn extends FilterColumn {
 	private static final long serialVersionUID = -6969365681036598158L;
 
 	private Long refBookAttributeId;
@@ -15,8 +15,6 @@ public class RefBookColumn extends Column {
     private Long refBookAttributeId2;
 
     private long nameAttributeId;
-
-	private String filter;
 
     private boolean searchEnabled;
 
@@ -40,14 +38,6 @@ public class RefBookColumn extends Column {
 
 	public void setRefBookAttributeId(Long refBookAttributeId) {
 		this.refBookAttributeId = refBookAttributeId;
-	}
-
-	public String getFilter() {
-		return filter;
-	}
-
-	public void setFilter(String filter) {
-		this.filter = filter;
 	}
 
     public boolean isHierarchical() {
