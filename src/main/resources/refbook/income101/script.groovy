@@ -8,6 +8,8 @@ import com.aplana.sbrf.taxaccounting.model.refbook.RefBookValue
 import com.aplana.sbrf.taxaccounting.refbook.RefBookDataProvider
 import groovy.transform.Field
 import org.apache.poi.hssf.usermodel.HSSFWorkbook
+import org.apache.poi.xssf.usermodel.XSSFWorkbook
+import org.apache.poi.ss.usermodel.Workbook
 import org.apache.poi.ss.usermodel.Cell
 import org.apache.poi.ss.usermodel.Row
 import org.apache.poi.ss.usermodel.Sheet
@@ -29,7 +31,7 @@ def REF_BOOK_ID = 50L
 @Field
 def BAD_FILE_MSG = 'Формат файла не соответствуют ожидаемому формату. Файл не может быть загружен.'
 @Field
-def INCORRECT_NAME_MSG = 'Выбранный файл не соответствует формату xls. Файл не может быть загружен.'
+def INCORRECT_NAME_MSG = 'Выбранный файл не соответствует формату xls/xlsx. Файл не может быть загружен.'
 
 @Field
 def ATTRIBUTE_ACCOUNT_NO = 'Номер счета'
@@ -60,7 +62,7 @@ def ATTRIBUTE_OUTCOME_REMAINS_ON_CREDIT = 'Исходящие остатки п�
 
 // импорт записей из экселя.
 void importData() {
-    if (fileName == null || !fileName.endsWith('xls')) {
+    if (fileName == null || (!fileName.endsWith('xls')  && !fileName.endsWith('xlsx'))) {
         throw new ServiceException(INCORRECT_NAME_MSG)
     }
     List<Income101> list = importIncome101(inputStream)
@@ -89,9 +91,13 @@ void importData() {
 List<Income101> importIncome101(InputStream stream) {
     // выходной лист с моделями для записи в бд
     def result = []
-    HSSFWorkbook workbook
+    Workbook workbook
     try {
-        workbook = new HSSFWorkbook(stream)
+        if (fileName.endsWith('xls')) {
+            workbook = new HSSFWorkbook(stream)
+        } else if (fileName.endsWith('xlsx')) {
+            workbook = new XSSFWorkbook(stream)
+        }
     } catch (IOException e) {
         throw new ServiceException(BAD_FILE_MSG)
     }
