@@ -63,7 +63,7 @@
         <alias>code</alias>
         <checking>false</checking>
         <columnType>STRING</columnType>
-        <name>Код классификации дохода / расхода</name>
+        <name>Код классификации дохода</name>
         <order>6</order>
         <width>10</width>
         <maxLength>10</maxLength>
@@ -238,7 +238,7 @@
         <alias>tradePay</alias>
         <checking>false</checking>
         <columnType>STRING</columnType>
-        <name>Рыночная Плата, % годовых / ед. вал.</name>
+        <name>Рыночная Плата, % годовых/ед. вал.</name>
         <order>24</order>
         <width>10</width>
         <maxLength>18</maxLength>

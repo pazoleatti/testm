@@ -5,7 +5,7 @@
         <cell alias="name" colSpan="1" rowSpan="3" value="Наименование Взаимозависимого лица/резидента оффшорной зоны"/>
         <cell alias="iksr" colSpan="1" rowSpan="3" value="Идентификационный номер"/>
         <cell alias="countryName" colSpan="1" rowSpan="3" value="Страна регистрации"/>
-        <cell alias="code" colSpan="1" rowSpan="3" value="Код классификации дохода / расхода"/>
+        <cell alias="code" colSpan="1" rowSpan="3" value="Код классификации дохода"/>
         <cell alias="docNumber" colSpan="2" rowSpan="2" value="Первичный документ"/>
         <cell alias="docDate" colSpan="1" rowSpan="2" value="Первичный документ"/>
         <cell alias="sum1" colSpan="1" rowSpan="3" value="Сумма гарантии / аккредитива, (вал.)"/>
@@ -20,10 +20,10 @@
         <cell alias="endDate2" colSpan="1" rowSpan="1" value="Расчетный период"/>
         <cell alias="base" colSpan="1" rowSpan="3" value="База для расчета, кол. дней"/>
         <cell alias="dealPay" colSpan="1" rowSpan="3" value="Плата по условиям сделки,% год./ед. вал."/>
-        <cell alias="sum2" colSpan="3" rowSpan="2" value="Сумма фактического дохода, "/>
-        <cell alias="sum3" colSpan="1" rowSpan="2" value="Сумма фактического дохода, "/>
-        <cell alias="sum4" colSpan="1" rowSpan="2" value="Сумма фактического дохода, "/>
-        <cell alias="tradePay" colSpan="1" rowSpan="3" value="Рыночная Плата, % годовых / ед. вал."/>
+        <cell alias="sum2" colSpan="3" rowSpan="2" value="Сумма фактического дохода, руб."/>
+        <cell alias="sum3" colSpan="1" rowSpan="2" value="Сумма фактического дохода, руб."/>
+        <cell alias="sum4" colSpan="1" rowSpan="2" value="Сумма фактического дохода, руб."/>
+        <cell alias="tradePay" colSpan="1" rowSpan="3" value="Рыночная Плата, % годовых/ед. вал."/>
         <cell alias="sum5" colSpan="3" rowSpan="2" value="Рыночная сумма дохода (руб.), соответствующая: "/>
         <cell alias="sum6" colSpan="1" rowSpan="2" value="Рыночная сумма дохода (руб.), соответствующая: "/>
         <cell alias="sum7" colSpan="1" rowSpan="2" value="Рыночная сумма дохода (руб.), соответствующая: "/>
@@ -37,7 +37,7 @@
         <cell alias="name" colSpan="1" rowSpan="1" value="Наименование Взаимозависимого лица/резидента оффшорной зоны"/>
         <cell alias="iksr" colSpan="1" rowSpan="1" value="Идентификационный номер"/>
         <cell alias="countryName" colSpan="1" rowSpan="1" value="Страна регистрации"/>
-        <cell alias="code" colSpan="1" rowSpan="1" value="Код классификации дохода / расхода"/>
+        <cell alias="code" colSpan="1" rowSpan="1" value="Код классификации дохода"/>
         <cell alias="docNumber" colSpan="2" rowSpan="1" value="Первичный документ"/>
         <cell alias="docDate" colSpan="1" rowSpan="1" value="Первичный документ"/>
         <cell alias="sum1" colSpan="1" rowSpan="1" value="Сумма гарантии / аккредитива, (вал.)"/>
@@ -52,10 +52,10 @@
         <cell alias="endDate2" colSpan="1" rowSpan="1" value="для целей доначисления в налоговом учете"/>
         <cell alias="base" colSpan="1" rowSpan="1" value="База для расчета, кол. дней"/>
         <cell alias="dealPay" colSpan="1" rowSpan="1" value="Плата по условиям сделки,% год./ед. вал."/>
-        <cell alias="sum2" colSpan="3" rowSpan="1" value="Сумма фактического дохода, "/>
-        <cell alias="sum3" colSpan="1" rowSpan="1" value="Сумма фактического дохода, "/>
-        <cell alias="sum4" colSpan="1" rowSpan="1" value="Сумма фактического дохода, "/>
-        <cell alias="tradePay" colSpan="1" rowSpan="1" value="Рыночная Плата, % годовых / ед. вал."/>
+        <cell alias="sum2" colSpan="3" rowSpan="1" value="Сумма фактического дохода, руб."/>
+        <cell alias="sum3" colSpan="1" rowSpan="1" value="Сумма фактического дохода, руб."/>
+        <cell alias="sum4" colSpan="1" rowSpan="1" value="Сумма фактического дохода, руб."/>
+        <cell alias="tradePay" colSpan="1" rowSpan="1" value="Рыночная Плата, % годовых/ед. вал."/>
         <cell alias="sum5" colSpan="3" rowSpan="1" value="Рыночная сумма дохода (руб.), соответствующая: "/>
         <cell alias="sum6" colSpan="1" rowSpan="1" value="Рыночная сумма дохода (руб.), соответствующая: "/>
         <cell alias="sum7" colSpan="1" rowSpan="1" value="Рыночная сумма дохода (руб.), соответствующая: "/>
@@ -69,7 +69,7 @@
         <cell alias="name" colSpan="1" rowSpan="1" value="Наименование Взаимозависимого лица/резидента оффшорной зоны"/>
         <cell alias="iksr" colSpan="1" rowSpan="1" value="Идентификационный номер"/>
         <cell alias="countryName" colSpan="1" rowSpan="1" value="Страна регистрации"/>
-        <cell alias="code" colSpan="1" rowSpan="1" value="Код классификации дохода / расхода"/>
+        <cell alias="code" colSpan="1" rowSpan="1" value="Код классификации дохода"/>
         <cell alias="docNumber" colSpan="1" rowSpan="1" value="Номер"/>
         <cell alias="docDate" colSpan="1" rowSpan="1" value="Дата"/>
         <cell alias="sum1" colSpan="1" rowSpan="1" value="Сумма гарантии / аккредитива, (вал.)"/>
@@ -87,7 +87,7 @@
         <cell alias="sum2" colSpan="1" rowSpan="1" value="По данным бухгалтерского учета"/>
         <cell alias="sum3" colSpan="1" rowSpan="1" value="Доначисление для целей налогового учета"/>
         <cell alias="sum4" colSpan="1" rowSpan="1" value="Всего по данным налогового учета"/>
-        <cell alias="tradePay" colSpan="1" rowSpan="1" value="Рыночная Плата, % годовых / ед. вал."/>
+        <cell alias="tradePay" colSpan="1" rowSpan="1" value="Рыночная Плата, % годовых/ед. вал."/>
         <cell alias="sum5" colSpan="1" rowSpan="1" value="Доходу начисленному по данным налогового учета согласно условиям сделки"/>
         <cell alias="sum6" colSpan="1" rowSpan="1" value="Доначисленному доходу для целей налогового учета"/>
         <cell alias="sum7" colSpan="1" rowSpan="1" value="Всей сумме дохода, начисленного по данным налогового учета"/>
