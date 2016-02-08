@@ -232,7 +232,7 @@ void logicCheck() {
         }
         def str = matchRowNum.join(", ")
         if (matchRowNum.size() > 0) {
-            logger.warn("Строки $str: Неуникальное значение граф «$msg2»= $val2 , «$msg3»= $val3 , «$msg5»= $val5 , «$msg6»= $val6 , «$msg7»= $val7 , «$msg9»= $val9!")
+            logger.warn("Строки $str: Неуникальное значение граф «$msg2»= «$val2» , «$msg3»= «$val3» , «$msg5»= «$val5» , «$msg6»= «$val6» , «$msg7»= «$val7» , «$msg9»= «$val9»!")
         }
 
         // Проверка корректности даты первичного документа
