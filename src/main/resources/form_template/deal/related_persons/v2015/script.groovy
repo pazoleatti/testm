@@ -523,7 +523,7 @@ void checkSourceForm() {
         if (rows == null) {
             def formTypeName = getFormTypeById(id)?.name
             def kindName = sourceMap[id].kind.title
-            def period = (sourceMap[id].isPrevPeriod ? getPrevReportPeriod() : getReportPeriod())
+            def period = (isPrevPeriod ? getPrevReportPeriod() : getReportPeriod())
             def periodName = (period ? period?.name + ' ' + period?.taxPeriod?.year : getPrevPeriodName())
             msg = "Не найдена форма «%s» в статусе «Принята»: Тип: %s, Период: %s, Подразделение: %s."
             logger.error(msg, formTypeName, kindName, periodName, formDataDepartment.name)
