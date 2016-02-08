@@ -452,10 +452,14 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
     }
 
 	@Override
-	public byte[] getPdfData(long id, TAUserInfo userInfo) {
-		declarationDataAccessService.checkEvents(userInfo, id, FormDataEvent.GET_LEVEL0);
-        return getBytesFromInputstream(reportService.getDec(userInfo, id, ReportType.PDF_DEC));
-	}
+    public InputStream getPdfDataAsStream(long declarationId, TAUserInfo userInfo) {
+		declarationDataAccessService.checkEvents(userInfo, declarationId, FormDataEvent.GET_LEVEL0);
+        String pdfUuid = reportService.getDec(userInfo, declarationId, ReportType.PDF_DEC);
+        if (pdfUuid == null) {
+            return null;
+        }
+        return blobDataService.get(pdfUuid).getInputStream();
+    }
 
     private JasperPrint createJasperReport(DeclarationData declarationData, JRSwapFile jrSwapFile, TAUserInfo userInfo) {
         String xmlUuid = reportService.getDec(userInfo, declarationData.getId(), ReportType.XML_DEC);
@@ -495,14 +499,16 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
                 LOG.info(String.format("Заполнение Jasper-макета декларации %s", declarationData.getId()));
                 stateLogger.updateState("Заполнение Jasper-макета");
                 JasperPrint jasperPrint = createJasperReport(declarationData, jrSwapFile, userInfo);
-                
-                LOG.info(String.format("Сохранение PDF-файла в базе данных для декларации %s", declarationData.getId()));
-                stateLogger.updateState("Сохранение PDF-файла в базе данных");
 
+                LOG.info(String.format("Заполнение PDF-файла декларации %s", declarationData.getId()));
+                stateLogger.updateState("Заполнение PDF-файла");
                 pdfFile = File.createTempFile("report", ".pdf");
                 exportPDF(jasperPrint, pdfFile);
 
+                LOG.info(String.format("Сохранение PDF-файла в базе данных для декларации %s", declarationData.getId()));
+                stateLogger.updateState("Сохранение PDF-файла в базе данных");
                 reportService.createDec(declarationData.getId(), blobDataService.create(pdfFile.getPath(), ""), ReportType.PDF_DEC);
+
                 LOG.info(String.format("Сохранение Jasper-макета в базе данных для декларации %s", declarationData.getId()));
                 stateLogger.updateState("Сохранение Jasper-макета в базе данных");
                 reportService.createDec(declarationData.getId(), saveJPBlobData(jasperPrint), ReportType.JASPER_DEC);
@@ -805,18 +811,6 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             }
         }
         return !declarationIds.isEmpty();
-    }
-
-    private byte[] getBytesFromInputstream(String blobId){
-        if (blobId == null) return null;
-        BlobData blobData = blobDataService.get(blobId);
-        ByteArrayOutputStream arrayOutputStream = new ByteArrayOutputStream();
-        try {
-            IOUtils.copy(blobData.getInputStream(), arrayOutputStream);
-        } catch (IOException e) {
-            throw new ServiceException("Не удалось извлечь отчет.", e);
-        }
-        return arrayOutputStream.toByteArray();
     }
 
     @Override

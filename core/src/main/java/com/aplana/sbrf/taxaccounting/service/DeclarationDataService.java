@@ -124,7 +124,7 @@ public interface DeclarationDataService {
 	 * @return файл Pdf в виде байтового массива
 	 * @throws AccessDeniedException - если у пользователя нет прав на просмотр данной декларации
 	 */
-	byte[] getPdfData(long declarationId, TAUserInfo userInfo);
+    InputStream getPdfDataAsStream(long declarationId, TAUserInfo userInfo);
 	/**
 	 * Получить имя файла в формате законодателя
 	 * @param declarationDataId идентификатор декларации

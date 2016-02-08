@@ -74,8 +74,7 @@ public class DeclarationDataController {
     public void pageImage(@PathVariable int id, @PathVariable int pageId,
                           HttpServletResponse response) throws IOException {
 
-        InputStream pdfData = new ByteArrayInputStream(
-                declarationService.getPdfData(id, securityService.currentUserInfo()));
+        InputStream pdfData = declarationService.getPdfDataAsStream(id, securityService.currentUserInfo());
         PDFImageUtils.pDFPageToImage(pdfData, response.getOutputStream(),
                 pageId, "png", GetDeclarationDataHandler.DEFAULT_IMAGE_RESOLUTION);
         response.setContentType("image/png");
