@@ -1644,7 +1644,7 @@ def getHistoryChangeList(def from, def to) {
                 item.date = record521?.CHANGE_DATE?.value
                 item.type = ChangeType.UPDATE
                 item.columnNames = columnName
-                item.columnNums = '"гр. 9"'
+                item.columnNums = 'гр. 9'
                 item.values = values
                 changeList.add(item)
             }
