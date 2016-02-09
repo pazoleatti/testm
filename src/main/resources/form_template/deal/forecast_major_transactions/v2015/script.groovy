@@ -153,7 +153,7 @@ void logicCheck() {
             def start = record?.START_DATE?.value
             def end = record?.END_DATE?.value
             if (record.TYPE?.referenceValue && record.TAX_STATUS?.referenceValue &&
-                    start <= getReportPeriodEndDate() && (end == null || getReportPeriodStartDate() <= end && end <= getReportPeriodEndDate())) {
+                    start <= getReportPeriodEndDate() && (end == null || getReportPeriodStartDate() <= end)) {
                 def recordType = getRefBookValue(525, record.TYPE.referenceValue)
                 def recordStatus = getRefBookValue(511, record.TAX_STATUS.referenceValue)
                 if (recordType?.CODE.stringValue == "ВЗЛ" && recordStatus?.CODE.numberValue.longValue() == 2)

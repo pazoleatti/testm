@@ -946,7 +946,7 @@ def getRecords520() {
 // проверка принадлежности организации к ВЗЛ в отчетном периоде
 def isVZL(def start, def end, typeId) {
     if (start <= getReportPeriodEndDate() &&
-            (end == null || (end >= getReportPeriodStartDate() && end <= getReportPeriodEndDate())) &&
+            (end == null || end >= getReportPeriodStartDate()) &&
             getRefBookValue(525L, typeId)?.CODE?.value == "ВЗЛ") {
         return true
     }
