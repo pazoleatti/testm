@@ -568,7 +568,7 @@ def calc24(def row) {
             } else {
                 return roundValue(calcCol23 * row.course2, 2)
             }
-        } else if (flag23) {
+        } else if (flag23 && !(row.base < 1)) {
             if (row.course == course810) {
                 return ((BigDecimal) (calcCol23 * row.sum1 * (row.endDate1 - row.startDate1 + 1))).divide(row.base, 2, BigDecimal.ROUND_HALF_UP)
             } else {
@@ -626,14 +626,14 @@ def calc25(def row) {
         if (row.sum3 == null) {
             return null
         }
-        if (!flag23) {
+        if (!flag23 && !(row.base < 1)) {
             if (row.course == course810 && getPeriodOrder() == 4) {
                 return ((BigDecimal) (calcCol23 * (row.endDate2 - row.startDate2 + 1))).divide(row.base, 2, BigDecimal.ROUND_HALF_UP)
             } else if (row.course != course810 && getPeriodOrder() == 4) {
                 return ((BigDecimal) (calcCol23 * (row.endDate2 - row.startDate2 + 1) * row.course3)).divide(row.base, 2, BigDecimal.ROUND_HALF_UP)
             }
         }
-        if (flag23) {
+        if (flag23 && !(row.base < 1)) {
             if (row.course == course810 && getPeriodOrder() == 4) {
                 return ((BigDecimal) (calcCol23 * row.sum1 * (row.endDate2 - row.startDate2 + 1))).divide(row.base, 2, BigDecimal.ROUND_HALF_UP)
             } else if (row.course != course810 && getPeriodOrder() == 4) {
@@ -663,15 +663,15 @@ def calc26(def row) {
                 } else {
                     return roundValue(calcCol23 * row.course2, 2)
                 }
-            } else if (flag23) {
+            }
+            if (flag23 && !(row.base < 1)) {
                 if (row.course == course810) {
                     return ((BigDecimal) (calcCol23 * row.sum1 * (row.endDate1 - row.startDate1 + 1))).divide(row.base, 2, BigDecimal.ROUND_HALF_UP)
                 } else {
                     return ((BigDecimal) (calcCol23 * row.sum1 * (row.endDate1 - row.startDate1 + 1) * row.course2)).divide(row.base, 2, BigDecimal.ROUND_HALF_UP)
                 }
-            } else {
-                return 0
             }
+            return 0
         }
     } else if (row.sum5 != null && row.sum6 != null) {
         if (getPeriodOrder() == 1) {
