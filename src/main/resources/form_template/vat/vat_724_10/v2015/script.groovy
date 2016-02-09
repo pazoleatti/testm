@@ -52,6 +52,11 @@ switch (formDataEvent) {
     case FormDataEvent.MOVE_APPROVED_TO_ACCEPTED: // Принять из "Утверждена"
         logicCheck()
         break
+    case FormDataEvent.MOVE_ACCEPTED_TO_APPROVED: // из "Принята" в "Утверждена"
+    case FormDataEvent.MOVE_ACCEPTED_TO_CREATED:  // из "Принята" в "Создана"
+    case FormDataEvent.MOVE_ACCEPTED_TO_PREPARED: // из "Принята" в "Подготовлена"
+        checkDeclarations()
+        break
     case FormDataEvent.COMPOSE:
         consolidation()
         calc()
@@ -610,4 +615,53 @@ def endMessage(String iksrName) {
             "«Код налогоплательщика в стране инкорпорации», " +
             "«Код SWIFT (заполняется для кредитных организаций, резидентов и нерезидентов)», " +
             "«КИО (заполняется для нерезидентов)»")
+}
+
+/** Проверить принятость всех декларации в этом году. */
+void checkDeclarations() {
+    def periodResult = []
+
+    // список отчетных периодов
+    def report = reportPeriodService.get(formData.reportPeriodId)
+    def periods = reportPeriodService.listByTaxPeriod(report.taxPeriod.id)
+
+    // список id типов декларации
+    def declarationTypeIds = [
+            4,	// Декларация по НДС (раздел 1-7)
+            7,	// Декларация по НДС (аудит, раздел 1-7)
+            21,	// Декларация по НДС (раздел 9 без консолид. формы)
+            20,	// Декларация по НДС (короткая, раздел 1-7)
+            13,	// Декларация по НДС (раздел 8.1)
+            14,	// Декларация по НДС (раздел 9)
+            12,	// Декларация по НДС (раздел 8)
+            15,	// Декларация по НДС (раздел 9.1)
+            16,	// Декларация по НДС (раздел 10)
+            17,	// Декларация по НДС (раздел 11)
+            18,	// Декларация по НДС (раздел 8 без консолид. формы)
+    ]
+    // подразделение банка
+    def departmentId = 1
+
+    // получение декларации и проверка принятости
+    declarationTypeIds.each { declarationTypeId ->
+        periods.each { def period ->
+            def declarationData = declarationService.getLast(declarationTypeId, departmentId, period.id)
+            if (declarationData?.accepted) {
+                periodResult.add(period)
+            }
+        }
+    }
+
+    // вывод результатов проверки
+    if (periodResult) {
+        def msg
+        if (periodResult.size() == 1) {
+            msg = "Форма 724.10 не может быть переведена из статуса «Принята», т.к. существует декларация в статусе «Принята» за следующий период: %s."
+        } else {
+            msg = "Форма 724.10 не может быть переведена из статуса «Принята», т.к. существуют декларации в статусе «Принята» за следующие периоды: %s."
+        }
+        def sortPeriods = periodResult.unique().sort { a, b -> a.order <=> b.order }
+        def periodNames = sortPeriods.collect { it.name }.join(', ')
+        logger.error(msg, periodNames)
+    }
 }
