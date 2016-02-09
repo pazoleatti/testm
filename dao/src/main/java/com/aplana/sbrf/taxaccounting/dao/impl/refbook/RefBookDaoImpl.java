@@ -3119,6 +3119,6 @@ public class RefBookDaoImpl extends AbstractDao implements RefBookDao {
 
     @Override
     public boolean isRefBookExist(long refBookId) {
-        return getJdbcTemplate().queryForObject("select count(*) from ref_book where id = ? and status != -1", new Object[]{refBookId}, Integer.class) > 0;
+        return getJdbcTemplate().queryForObject("select count(*) from ref_book where id = ?", new Object[]{refBookId}, Integer.class) > 0;
     }
 }
