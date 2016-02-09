@@ -1,6 +1,7 @@
 package com.aplana.sbrf.taxaccounting.service.impl;
 
 import com.aplana.sbrf.taxaccounting.dao.BlobDataDao;
+import com.aplana.sbrf.taxaccounting.dao.ReportDao;
 import com.aplana.sbrf.taxaccounting.model.BlobData;
 import com.aplana.sbrf.taxaccounting.model.exception.DaoException;
 import com.aplana.sbrf.taxaccounting.model.exception.ServiceException;
@@ -24,6 +25,9 @@ public class BlobDataServiceImpl implements BlobDataService {
 
     @Autowired
     BlobDataDao blobDataDao;
+
+    @Autowired
+    private ReportDao reportDao;
 
     @Override
     public String create(InputStream is, String name) {
@@ -112,6 +116,7 @@ public class BlobDataServiceImpl implements BlobDataService {
 
     @Override
     public int clean() {
+        reportDao.clean();
         return blobDataDao.clean();
     }
 }
