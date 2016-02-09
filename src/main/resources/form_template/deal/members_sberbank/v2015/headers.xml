@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?><rows>
     <row alias="">
-        <cell alias="rowNumber" colSpan="1" rowSpan="1" value="№ пп"/>
+        <cell alias="rowNumber" colSpan="1" rowSpan="1" value="№ п/п"/>
         <cell alias="name" colSpan="1" rowSpan="1" value="Полное наименование юридического лица – участника группы"/>
         <cell alias="pseudoName" colSpan="1" rowSpan="1" value="Полное наименование юридического лица – участника группы (в случае изменения названия)"/>
         <cell alias="statReportId" colSpan="1" rowSpan="1" value="Код участника в соответствие с классификатором АС «Статотчетность»"/>
