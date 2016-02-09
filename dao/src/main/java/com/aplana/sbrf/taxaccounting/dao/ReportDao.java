@@ -90,4 +90,10 @@ public interface ReportDao {
     void deleteAudit(int userId, ReportType reportType);
 
     void deleteAudit(String blobDataId);
+
+    /**
+     * Удаление ненужных/устаревших отчетов
+     * @return Количество удаленных запсией
+     */
+    int clean();
 }

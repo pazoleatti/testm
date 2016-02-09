@@ -220,4 +220,18 @@ public class ReportDaoImpl extends AbstractDao implements ReportDao {
             throw new DaoException("Не удалось удалить записи ЖА", e);
         }
     }
+
+    @Override
+    public int clean() {
+        try {
+            //Удаление Jasper-отчетов декларации, если есть сформированный XLSX-отчет
+            return getJdbcTemplate().update("delete from declaration_report dr\n" +
+                    "where type = 3 and exists ( \n" +
+                    "select declaration_data_id\n" +
+                    "from declaration_report dr1\n" +
+                    "where dr.declaration_data_id=dr1.declaration_data_id and type = 0)");
+        } catch (DataAccessException e){
+            throw new DaoException(String.format("Ошибка при удалении ненужных записей таблицы DECLARATION_REPORT. %s.", e.getMessage()), e);
+        }
+    }
 }
