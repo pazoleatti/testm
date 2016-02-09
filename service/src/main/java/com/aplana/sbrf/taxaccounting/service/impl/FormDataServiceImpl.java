@@ -1851,7 +1851,7 @@ public class FormDataServiceImpl implements FormDataService {
                 }
                 return cellCountSource;
             case IMPORT_FD:
-                return blobDataService.getLength(uuid) / 1024;
+                return (long)Math.ceil(blobDataService.getLength(uuid) / 1024.);
             default:
                 throw new ServiceException("Неверный тип отчета(%s)", reportType.getName());
         }

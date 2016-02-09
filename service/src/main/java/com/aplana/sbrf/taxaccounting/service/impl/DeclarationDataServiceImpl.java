@@ -1061,7 +1061,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             case EXCEL_DEC:
                 String uuidXmlReport = reportService.getDec(userInfo, declarationDataId, ReportType.XML_DEC);
                 if (uuidXmlReport != null) {
-                    return blobDataService.getLength(uuidXmlReport)/1024;
+                    return (long)Math.ceil(blobDataService.getLength(uuidXmlReport) / 1024.);
                 } else {
                     return null;
                 }
@@ -1069,7 +1069,7 @@ public class DeclarationDataServiceImpl implements DeclarationDataService {
             case CHECK_DEC:
                 String uuidXml = reportService.getDec(userInfo, declarationDataId, ReportType.XML_DEC);
                 if (uuidXml != null) {
-                    return blobDataService.getLength(uuidXml)/1024;
+                    return (long)Math.ceil(blobDataService.getLength(uuidXml) / 1024.);
                 } else {
                     return null;
                 }
