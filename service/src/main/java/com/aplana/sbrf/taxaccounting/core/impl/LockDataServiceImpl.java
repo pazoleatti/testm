@@ -266,6 +266,8 @@ public class LockDataServiceImpl implements LockDataService {
 					   try {
 						   TAUser user = userDao.getUser(userId);
 						   List<Integer> waitingUsers = getUsersWaitingForLock(lockData.getKey());
+                           if (!waitingUsers.contains(userId))
+                               waitingUsers.add(userId);
 						   unlock(lockData.getKey(), userId, force);
 						   //asyncInterruptionManager.interruptAll(Arrays.asList(lockData.getKey()));
 						   String msg = String.format(LockData.CANCEL_TASK, user.getName(), lockData.getDescription(), cause);
