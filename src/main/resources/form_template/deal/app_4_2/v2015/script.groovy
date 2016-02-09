@@ -821,28 +821,28 @@ def calc10or16(def record520, def sourceAllDataRowsMap, def isCalc10) {
                     case 822 : // РНУ-110
                     case 808 : // РНУ-111
                         if (isCalc10) {
-                            result += (row.sum3 ?: 0)
+                            result += (row.sum3?.abs() ?: 0)
                         }
                         break
                     case 820 : // РНУ-102
                     case 809 : // РНУ-117
                         if (!isCalc10) {
-                            result += (row.sum3 ?: 0)
+                            result += (row.sum3?.abs() ?: 0)
                         }
                         break
                     case 821 : // РНУ-107
                         if (isCalc10) {
-                            result += (row.sum4 ?: 0)
+                            result += (row.sum4?.abs() ?: 0)
                         }
                         break
                     case 824 : // РНУ-112
                         if (isCalc10) {
-                            result += (row.incomeCorrection ?: 0)
+                            result += (row.incomeCorrection?.abs() ?: 0)
                         }
                         break
                     case 829 : // РНУ-114
                         if (isCalc10) {
-                            result += (row.sum1 ?: 0)
+                            result += (row.sum1?.abs() ?: 0)
                         }
                         break
                     case 842 : // РНУ-115
@@ -856,18 +856,18 @@ def calc10or16(def record520, def sourceAllDataRowsMap, def isCalc10) {
                     case 840 : // РНУ-122
                         if ((isCalc10 && "10345".equals(row.code)) ||
                                 (!isCalc10 && "10355".equals(row.code))) {
-                            result += (row.sum6 ?: 0)
+                            result += (row.sum6?.abs() ?: 0)
                         }
                         break
                     case 841 : // РНУ-123
                         if (isCalc10) {
-                            result += (row.sum10 ?: 0)
+                            result += (row.sum10?.abs() ?: 0)
                         }
                         break
                     case 843 : // РНУ-171
                         if ((isCalc10 && "10360".equals(row.code)) ||
                                 (!isCalc10 && "10361".equals(row.code))) {
-                            result += (row.incomeCorrection ?: 0)
+                            result += (row.incomeCorrection?.abs() ?: 0)
                         }
                         break
                 }
